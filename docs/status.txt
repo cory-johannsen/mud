@@ -1,0 +1,84 @@
+  Continue Phase 1 Implementation — Gunchete MUD
+
+  Context
+
+  I'm implementing Phase 1 (Foundation & Connectivity) of a Go MUD server. The full implementation plan is at the end of this prompt. The project rules are in .claude/rules/AGENTS.md.
+
+  What's Already Done
+
+  All source files for Phase 1 have been written. The following files exist and are complete:
+
+  Scaffold:
+  - go.mod (initialized, but go mod tidy has NOT been run yet)
+  - .mise.toml, .gitignore, Makefile
+  - Full directory tree created
+
+  Config:
+  - internal/config/config.go — Viper-based config with validation
+  - internal/config/config_test.go — Unit + property-based tests (rapid)
+  - configs/dev.yaml
+
+  PostgreSQL:
+  - internal/storage/postgres/postgres.go — pgx v5 connection pool
+  - internal/storage/postgres/account.go — Account repository (create, authenticate, bcrypt)
+  - internal/storage/postgres/account_test.go — Password hashing property tests
+  - migrations/001_accounts.up.sql and 001_accounts.down.sql
+  - cmd/migrate/main.go — Migration runner CLI
+
+  Server Lifecycle:
+  - internal/server/lifecycle.go — Service interface, lifecycle manager with signal handling
+  - internal/server/lifecycle_test.go
+
+  Telnet:
+  - internal/frontend/telnet/ansi.go — ANSI color utilities
+  - internal/frontend/telnet/ansi_test.go — Property tests for StripANSI/Colorize roundtrip
+  - internal/frontend/telnet/conn.go — Telnet connection wrapper with IAC filtering (RFC 854)
+  - internal/frontend/telnet/conn_test.go — FilterIAC property tests
+  - internal/frontend/telnet/acceptor.go — TCP listener with session dispatch
+  - internal/frontend/telnet/acceptor_test.go — Start/stop, multi-client tests
+
+  Handlers:
+  - internal/frontend/handlers/auth.go — Auth handler (login, register, quit, game loop)
+  - internal/frontend/handlers/auth_test.go — Banner content test
+
+  Observability:
+  - internal/observability/logging.go — zap logger factory
+  - internal/observability/logging_test.go
+
+  Devserver:
+  - cmd/devserver/main.go — Wires config → PostgreSQL → Telnet → handlers → lifecycle
+
+  Docker:
+  - deployments/docker/Dockerfile.devserver — Multi-stage (builder + distroless)
+  - deployments/docker/docker-compose.yml — PostgreSQL 16 + migrate + devserver
+  - deployments/docker/.env.example
+
+  Test Infrastructure:
+  - internal/testutil/postgres.go — testcontainers-go helpers
+  - internal/testutil/telnet.go — Telnet test client
+
+  What Remains (in order)
+
+  1. Run go mod tidy — Dependencies haven't been fetched yet. This is the critical next step.
+  2. Fix any compilation errors — First compile pass will likely have import issues or API mismatches.
+  3. Run make test — Get all unit tests passing.
+  4. Run make build — Verify both devserver and migrate binaries compile.
+  5. Verify Docker — docker compose up with PostgreSQL should work.
+  6. Integration test — Connect via telnet localhost 4000, register, login, quit.
+  7. Check test coverage — Target >80% with make test-cover.
+
+  Key Architecture Decision
+
+  Pitaya v3's acceptor interface uses a binary packet protocol incompatible with Telnet's line-based text protocol. The Telnet server was built as a custom TCP server instead. Pitaya remains a planned dependency for WebSocket/gRPC transports in Phase 9. The server lifecycle uses our
+   own server.Lifecycle manager with Service interface.
+
+  Acceptance Criteria
+
+  - make test passes with >80% coverage
+  - make build produces bin/devserver and bin/migrate
+  - docker compose up starts PostgreSQL + devserver
+  - Telnet client connects to port 4000, sees welcome banner
+  - Player can register, login, look, quit
+  - Structured JSON logs on stdout
+
+  Read all existing source files before making changes. Start with go mod tidy, then iterate on compilation and test failures.

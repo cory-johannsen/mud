@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mud}
+      POSTGRES_DB: ${POSTGRES_DB:-mud}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mud}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  migrate:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.devserver
+    entrypoint: ["/bin/migrate"]
+    command: ["-config", "/configs/dev.yaml"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MUD_DATABASE_HOST: postgres
+      MUD_DATABASE_PORT: "5432"
+      MUD_DATABASE_USER: ${POSTGRES_USER:-mud}
+      MUD_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-mud}
+      MUD_DATABASE_NAME: ${POSTGRES_DB:-mud}
+
+  devserver:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.devserver
+    ports:
+      - "${TELNET_PORT:-4000}:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      MUD_DATABASE_HOST: postgres
+      MUD_DATABASE_PORT: "5432"
+      MUD_DATABASE_USER: ${POSTGRES_USER:-mud}
+      MUD_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-mud}
+      MUD_DATABASE_NAME: ${POSTGRES_DB:-mud}
+      MUD_LOGGING_LEVEL: ${LOG_LEVEL:-info}
+      MUD_LOGGING_FORMAT: json
+
+volumes:
+  pgdata:
