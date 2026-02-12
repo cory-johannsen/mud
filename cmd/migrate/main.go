@@ -11,7 +11,6 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/spf13/viper"
 
 	"github.com/cory-johannsen/mud/internal/config"
 )
@@ -24,19 +23,13 @@ func main() {
 	steps := flag.Int("steps", 0, "number of steps (0 = all)")
 	flag.Parse()
 
-	v := viper.New()
-	v.SetConfigFile(*configPath)
-	if err := v.ReadInConfig(); err != nil {
-		log.Fatalf("reading config: %v", err)
+	cfg, err := config.Load(*configPath)
+	if err != nil {
+		log.Fatalf("loading config: %v", err)
 	}
 
-	var dbCfg config.DatabaseConfig
-	if err := v.Sub("database").Unmarshal(&dbCfg); err != nil {
-		log.Fatalf("parsing database config: %v", err)
-	}
-
-	dsn := dbCfg.DSN()
-	m, err := migrate.New("file://migrations", dsn)
+	dsn := cfg.Database.DSN()
+	m, err := migrate.New("file:///migrations", dsn)
 	if err != nil {
 		log.Fatalf("creating migrator: %v", err)
 	}

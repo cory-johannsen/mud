@@ -14,6 +14,12 @@ import (
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
+// AccountStore defines the account persistence operations required by AuthHandler.
+type AccountStore interface {
+	Create(ctx context.Context, username, password string) (postgres.Account, error)
+	Authenticate(ctx context.Context, username, password string) (postgres.Account, error)
+}
+
 const welcomeBanner = `
 ` + telnet.Bold + telnet.BrightCyan + `
   ██████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗███████╗████████╗███████╗
@@ -30,20 +36,17 @@ const welcomeBanner = `
   Type ` + telnet.Green + `quit` + telnet.Reset + ` to disconnect.
 `
 
-// errQuit signals that the client requested disconnection.
-var errQuit = errors.New("client quit")
-
 // AuthHandler implements telnet.SessionHandler and processes the
 // authentication loop for a connected client.
 type AuthHandler struct {
-	accounts *postgres.AccountRepository
+	accounts AccountStore
 	logger   *zap.Logger
 }
 
-// NewAuthHandler creates an AuthHandler backed by the given account repository.
+// NewAuthHandler creates an AuthHandler backed by the given account store.
 //
 // Precondition: accounts and logger must be non-nil.
-func NewAuthHandler(accounts *postgres.AccountRepository, logger *zap.Logger) *AuthHandler {
+func NewAuthHandler(accounts AccountStore, logger *zap.Logger) *AuthHandler {
 	return &AuthHandler{
 		accounts: accounts,
 		logger:   logger,
@@ -98,19 +101,19 @@ func (h *AuthHandler) HandleSession(ctx context.Context, conn *telnet.Conn) erro
 			return nil
 
 		case "login":
-			if err := h.handleLogin(ctx, conn, args); err != nil {
-				if errors.Is(err, errQuit) {
-					return nil
-				}
+			username, err := h.handleLogin(ctx, conn, args)
+			if err != nil {
 				return err
+			}
+			if username == "" {
+				continue
 			}
 			h.logger.Info("player logged in",
 				zap.String("remote_addr", addr),
-				zap.String("username", args[0]),
+				zap.String("username", username),
 				zap.Duration("login_time", time.Since(start)),
 			)
-			// After successful login, enter the game loop
-			if err := h.gameLoop(ctx, conn, args[0]); err != nil {
+			if err := h.gameLoop(ctx, conn, username); err != nil {
 				return err
 			}
 			return nil
@@ -129,9 +132,14 @@ func (h *AuthHandler) HandleSession(ctx context.Context, conn *telnet.Conn) erro
 	}
 }
 
-func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args []string) error {
+// handleLogin authenticates a player.
+//
+// Postcondition: Returns (username, nil) on success, ("", nil) if the error was
+// shown to the user and the auth loop should continue, or ("", error) on fatal errors.
+func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args []string) (string, error) {
 	if len(args) < 2 {
-		return conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: login <username> <password>"))
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: login <username> <password>"))
+		return "", nil
 	}
 
 	username := args[0]
@@ -145,14 +153,14 @@ func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args [
 		switch {
 		case errors.Is(err, postgres.ErrAccountNotFound):
 			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Account not found. Use 'register' to create one."))
-			return nil
+			return "", nil
 		case errors.Is(err, postgres.ErrInvalidCredentials):
 			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid password."))
-			return nil
+			return "", nil
 		default:
 			h.logger.Error("authentication error", zap.Error(err), zap.Duration("elapsed", elapsed))
 			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "An internal error occurred. Please try again."))
-			return nil
+			return "", nil
 		}
 	}
 
@@ -160,7 +168,7 @@ func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args [
 		"Welcome back, %s! (account #%d) [%s]",
 		acct.Username, acct.ID, elapsed,
 	))
-	return nil
+	return acct.Username, nil
 }
 
 func (h *AuthHandler) handleRegister(ctx context.Context, conn *telnet.Conn, args []string) error {
