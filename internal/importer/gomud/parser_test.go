@@ -1,11 +1,13 @@
 package gomud_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/importer/gomud"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 )
 
 const zoneYAML = `
@@ -95,4 +97,34 @@ func TestParseRoom_ObjectsDropped(t *testing.T) {
 	// objects field is silently ignored; exits still parsed
 	require.Contains(t, r.Exits, "South")
 	assert.Equal(t, "Room A", r.Exits["South"].Target)
+}
+
+func TestParseZone_NamePassthrough(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		name := rapid.StringMatching(`[A-Za-z][A-Za-z0-9 '_-]{0,30}`).Draw(t, "name")
+		yaml := fmt.Sprintf("name: %q\ndescription: d\nrooms: []\nareas: []\n", name)
+		z, err := gomud.ParseZone([]byte(yaml))
+		require.NoError(t, err)
+		assert.Equal(t, name, z.Name)
+	})
+}
+
+func TestParseArea_NamePassthrough(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		name := rapid.StringMatching(`[A-Za-z][A-Za-z0-9 '_-]{0,30}`).Draw(t, "name")
+		yaml := fmt.Sprintf("name: %q\ndescription: d\nrooms: []\n", name)
+		a, err := gomud.ParseArea([]byte(yaml))
+		require.NoError(t, err)
+		assert.Equal(t, name, a.Name)
+	})
+}
+
+func TestParseRoom_NamePassthrough(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		name := rapid.StringMatching(`[A-Za-z][A-Za-z0-9 '_-]{0,30}`).Draw(t, "name")
+		yaml := fmt.Sprintf("name: %q\ndescription: d\nexits:\n", name)
+		r, err := gomud.ParseRoom([]byte(yaml))
+		require.NoError(t, err)
+		assert.Equal(t, name, r.Name)
+	})
 }
