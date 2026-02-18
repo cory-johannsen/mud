@@ -11,9 +11,10 @@ import (
 // ZoneData ready for serialisation and validation.
 //
 // Precondition: zone must be non-nil; rooms is the full map of known room
-// display names to GomudRoom; roomArea maps room display names to area display
-// names (may be nil); startRoom is an optional display-name override for the
-// zone's start room.
+// display names to GomudRoom (may be nil, treated as empty — all rooms will
+// produce missing-room warnings); roomArea maps room display names to area
+// display names (may be nil); startRoom is an optional display-name override
+// for the zone's start room.
 //
 // Postcondition: returns a non-nil ZoneData and a (possibly empty) slice of
 // warning strings for recoverable issues (missing rooms, unknown exit targets).
@@ -41,6 +42,24 @@ func ConvertZone(
 		startRoomID = importer.NameToID(strings.TrimSpace(zone.Rooms[0]))
 	}
 
+	// Warn if startRoom override names a room not listed in zone.Rooms.
+	if startRoom != "" {
+		overrideID := importer.NameToID(startRoom)
+		found := false
+		for _, name := range zone.Rooms {
+			if importer.NameToID(strings.TrimSpace(name)) == overrideID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			warnings = append(warnings, fmt.Sprintf(
+				"zone %q: start room override %q not found in room list",
+				zone.Name, startRoom,
+			))
+		}
+	}
+
 	var roomSpecs []importer.RoomSpec
 	for _, rawName := range zone.Rooms {
 		name := strings.TrimSpace(rawName)
@@ -50,10 +69,10 @@ func ConvertZone(
 			continue
 		}
 
-		props := make(map[string]string)
+		var props map[string]string
 		if roomArea != nil {
 			if area, found := roomArea[name]; found {
-				props["area"] = importer.NameToID(area)
+				props = map[string]string{"area": importer.NameToID(area)}
 			}
 		}
 

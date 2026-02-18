@@ -128,6 +128,20 @@ func TestConvertZone_DirectionLowercased(t *testing.T) {
 	assert.Equal(t, "northeast", zd.Zone.Rooms[0].Exits[0].Direction)
 }
 
+func TestConvertZone_StartRoomOverride_NotInList_Warns(t *testing.T) {
+	zone := &igomud.GomudZone{
+		Name:  "Test Zone",
+		Rooms: []string{"Room A"},
+	}
+	rooms := map[string]*igomud.GomudRoom{
+		"Room A": {Name: "Room A", Description: "desc"},
+	}
+
+	_, warnings := igomud.ConvertZone(zone, rooms, nil, "Room Z")
+	require.Len(t, warnings, 1)
+	assert.Contains(t, warnings[0], "Room Z")
+}
+
 // TestConvertZone_Deterministic ensures output is stable across multiple calls (no ordering issues).
 func TestConvertZone_Deterministic(t *testing.T) {
 	zone := &igomud.GomudZone{
