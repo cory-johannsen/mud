@@ -140,6 +140,7 @@ func TestConvertZone_StartRoomOverride_NotInList_Warns(t *testing.T) {
 	_, warnings := igomud.ConvertZone(zone, rooms, nil, "Room Z")
 	require.Len(t, warnings, 1)
 	assert.Contains(t, warnings[0], "Room Z")
+	assert.Contains(t, warnings[0], "not found in room list")
 }
 
 // TestConvertZone_Deterministic ensures output is stable across multiple calls (no ordering issues).
