@@ -1,0 +1,181 @@
+zone:
+  id: downtown
+  name: "Downtown Portland"
+  description: "The shattered remains of Portland's urban core, where rain-slicked rubble and rusting infrastructure form the bones of a dead civilization."
+  start_room: pioneer_square
+  rooms:
+    - id: pioneer_square
+      title: "Pioneer Courthouse Square"
+      description: |
+        You stand in the ruins of what was once Pioneer Courthouse Square.
+        The iconic brick amphitheater is cracked and overgrown with black moss.
+        The sky is a permanent grey. Rain falls sideways.
+        A weathered sign reads "Portland's Living Room" — the irony is not lost.
+      exits:
+        - direction: north
+          target: morrison_bridge
+        - direction: east
+          target: broadway_ruins
+        - direction: south
+          target: market_district
+        - direction: west
+          target: transit_mall
+      properties:
+        lighting: dim
+        atmosphere: rain
+
+    - id: morrison_bridge
+      title: "Morrison Bridge Approach"
+      description: |
+        The western approach to the Morrison Bridge stretches before you.
+        Twisted rebar juts from crumbling concrete. The Willamette churns below,
+        dark and swollen with decades of unfiltered runoff.
+        Abandoned vehicles form a rusted barricade across the bridge deck.
+      exits:
+        - direction: south
+          target: pioneer_square
+        - direction: east
+          target: burnside_crossing
+        - direction: west
+          target: waterfront_trail
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: broadway_ruins
+      title: "Broadway Ruins"
+      description: |
+        The shells of old theaters and department stores line what was once Broadway.
+        Faded marquees hang at broken angles. A colony of crows watches from
+        the gutted upper floors. Glass crunches under every step.
+      exits:
+        - direction: west
+          target: pioneer_square
+        - direction: north
+          target: burnside_crossing
+        - direction: south
+          target: courthouse_steps
+      properties:
+        lighting: dim
+        atmosphere: quiet
+
+    - id: market_district
+      title: "Market District"
+      description: |
+        Makeshift stalls cobbled from salvage line the broken street.
+        The smell of wood smoke and something cooking drifts between
+        tarps strung between lampposts. This is the closest thing
+        to civilization left in the core.
+      exits:
+        - direction: north
+          target: pioneer_square
+        - direction: east
+          target: courthouse_steps
+        - direction: west
+          target: director_park
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: waterfront_trail
+      title: "Waterfront Trail"
+      description: |
+        A cracked pathway follows the river's edge. The Willamette laps
+        against collapsed seawalls. Rusted sculptures from the old waterfront
+        park lean at impossible angles. Upstream, the skeletal remains
+        of the Steel Bridge disappear into the fog.
+      exits:
+        - direction: east
+          target: morrison_bridge
+        - direction: south
+          target: director_park
+      properties:
+        lighting: overcast
+        atmosphere: fog
+
+    - id: transit_mall
+      title: "Transit Mall"
+      description: |
+        The once-bustling transit corridor is silent. Overhead wires hang
+        in tangled loops. A MAX light rail car sits derailed and gutted,
+        its windows long since shattered. Weeds push through every crack
+        in the concrete platform.
+      exits:
+        - direction: east
+          target: pioneer_square
+        - direction: north
+          target: burnside_crossing
+        - direction: south
+          target: director_park
+        - direction: down
+          target: underground_max
+          hidden: false
+      properties:
+        lighting: dim
+        atmosphere: desolate
+
+    - id: director_park
+      title: "Director Park Wasteland"
+      description: |
+        The geometric water feature is dry and filled with debris.
+        The glass canopy overhead is miraculously intact, though stained
+        with years of grime. It offers rare shelter from the endless rain.
+        Scorch marks on the concrete hint at past conflicts.
+      exits:
+        - direction: north
+          target: transit_mall
+        - direction: east
+          target: market_district
+        - direction: northeast
+          target: waterfront_trail
+      properties:
+        lighting: sheltered
+        atmosphere: dry
+
+    - id: burnside_crossing
+      title: "Burnside Crossing"
+      description: |
+        The intersection of Burnside and the old Broadway is a no-man's land.
+        The street is wide and exposed. Burnt-out storefronts stare with
+        empty window-eyes. Graffiti in fading neon paint marks territorial
+        boundaries of factions long since scattered.
+      exits:
+        - direction: south
+          target: broadway_ruins
+        - direction: west
+          target: morrison_bridge
+        - direction: southwest
+          target: transit_mall
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: underground_max
+      title: "Underground MAX Station"
+      description: |
+        You descend into the subterranean transit station via crumbling stairs.
+        Emergency lighting flickers in sickly yellow. The platform is flooded
+        ankle-deep. Somewhere in the dark tunnels, water drips in an
+        irregular rhythm that sounds almost like breathing.
+      exits:
+        - direction: up
+          target: transit_mall
+      properties:
+        lighting: emergency
+        atmosphere: flooded
+
+    - id: courthouse_steps
+      title: "Courthouse Steps"
+      description: |
+        The old federal courthouse looms above, its neoclassical columns
+        chipped and stained. The broad stone steps serve as a gathering
+        point for scavengers trading rumors and salvage.
+        Someone has carved "NO LAW" into the granite above the entrance.
+      exits:
+        - direction: west
+          target: market_district
+        - direction: north
+          target: broadway_ruins
+      properties:
+        lighting: overcast
+        atmosphere: open

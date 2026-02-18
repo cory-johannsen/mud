@@ -10,9 +10,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+	"google.golang.org/grpc"
 
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/world"
+	"github.com/cory-johannsen/mud/internal/gameserver"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
@@ -52,6 +58,63 @@ func (m *mockAccountStore) Authenticate(_ context.Context, username, password st
 		return postgres.Account{}, postgres.ErrInvalidCredentials
 	}
 	return acct, nil
+}
+
+// testGameServer starts an in-process gRPC game server with a minimal 2-room world
+// and returns its listen address. The server is stopped on test cleanup.
+func testGameServer(t *testing.T) string {
+	t.Helper()
+
+	zone := &world.Zone{
+		ID:          "test",
+		Name:        "Test",
+		Description: "Test zone",
+		StartRoom:   "room_a",
+		Rooms: map[string]*world.Room{
+			"room_a": {
+				ID:          "room_a",
+				ZoneID:      "test",
+				Title:       "Room A",
+				Description: "The first room.",
+				Exits: []world.Exit{
+					{Direction: world.North, TargetRoom: "room_b"},
+				},
+				Properties: map[string]string{},
+			},
+			"room_b": {
+				ID:          "room_b",
+				ZoneID:      "test",
+				Title:       "Room B",
+				Description: "The second room.",
+				Exits: []world.Exit{
+					{Direction: world.South, TargetRoom: "room_a"},
+				},
+				Properties: map[string]string{},
+			},
+		},
+	}
+
+	worldMgr, err := world.NewManager([]*world.Zone{zone})
+	require.NoError(t, err)
+
+	sessMgr := session.NewManager()
+	cmdRegistry := command.DefaultRegistry()
+	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr)
+	chatHandler := gameserver.NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+
+	svc := gameserver.NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	grpcServer := grpc.NewServer()
+	gamev1.RegisterGameServiceServer(grpcServer, svc)
+
+	go func() { _ = grpcServer.Serve(lis) }()
+	t.Cleanup(func() { grpcServer.Stop() })
+
+	return lis.Addr().String()
 }
 
 // testServer starts a Telnet acceptor with the given handler on a random port
@@ -157,7 +220,7 @@ func TestWelcomeBannerContainsKeyElements(t *testing.T) {
 func TestHandleSession_Quit(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -169,7 +232,7 @@ func TestHandleSession_Quit(t *testing.T) {
 func TestHandleSession_Exit(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -181,7 +244,7 @@ func TestHandleSession_Exit(t *testing.T) {
 func TestHandleSession_Help(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -197,7 +260,7 @@ func TestHandleSession_Help(t *testing.T) {
 func TestHandleSession_UnknownCommand(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -210,7 +273,7 @@ func TestHandleSession_UnknownCommand(t *testing.T) {
 func TestHandleSession_Register(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -224,7 +287,7 @@ func TestHandleSession_RegisterDuplicate(t *testing.T) {
 	store := newMockAccountStore()
 	store.accounts["testuser"] = postgres.Account{ID: 1, Username: "testuser"}
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -236,7 +299,7 @@ func TestHandleSession_RegisterDuplicate(t *testing.T) {
 func TestHandleSession_RegisterShortUsername(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -248,7 +311,7 @@ func TestHandleSession_RegisterShortUsername(t *testing.T) {
 func TestHandleSession_RegisterShortPassword(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -260,7 +323,7 @@ func TestHandleSession_RegisterShortPassword(t *testing.T) {
 func TestHandleSession_RegisterMissingArgs(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -272,7 +335,7 @@ func TestHandleSession_RegisterMissingArgs(t *testing.T) {
 func TestHandleSession_LoginNotFound(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -286,7 +349,7 @@ func TestHandleSession_LoginWrongPassword(t *testing.T) {
 	store.accounts["testuser"] = postgres.Account{ID: 1, Username: "testuser"}
 	store.passwords["testuser"] = "correctpass"
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -298,7 +361,7 @@ func TestHandleSession_LoginWrongPassword(t *testing.T) {
 func TestHandleSession_LoginMissingArgs(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -307,12 +370,14 @@ func TestHandleSession_LoginMissingArgs(t *testing.T) {
 	c.readUntil("Usage:", 2*time.Second)
 }
 
-func TestHandleSession_LoginSuccess_GameLoop(t *testing.T) {
+func TestHandleSession_LoginSuccess_GameBridge(t *testing.T) {
+	gsAddr := testGameServer(t)
+
 	store := newMockAccountStore()
 	store.accounts["hero"] = postgres.Account{ID: 1, Username: "hero"}
 	store.passwords["hero"] = "secret123"
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, gsAddr)
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
@@ -320,31 +385,121 @@ func TestHandleSession_LoginSuccess_GameLoop(t *testing.T) {
 	c.send("login hero secret123")
 	c.readUntil("Welcome back", 2*time.Second)
 
-	// Game loop - look
+	// After login, should receive initial room view + prompt
+	c.readUntil("Room A", 5*time.Second)
 	c.readUntil("]> ", 3*time.Second)
+
+	// Game bridge - look: response comes back with room view + prompt
 	c.send("look")
-	c.readUntil("Pioneer Courthouse", 2*time.Second)
-
-	// Game loop - help
+	c.readUntil("Room A", 3*time.Second)
 	c.readUntil("]> ", 3*time.Second)
+
+	// Game bridge - move north
+	c.send("north")
+	c.readUntil("Room B", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Game bridge - exits
+	c.send("exits")
+	c.readUntil("south", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Game bridge - help (handled locally, prompt re-displayed)
 	c.send("help")
-	c.readUntil("Disconnect", 2*time.Second)
-
-	// Game loop - unknown command
+	c.readUntil("Movement", 3*time.Second)
 	c.readUntil("]> ", 3*time.Second)
-	c.send("dance")
-	c.readUntil("don't know", 2*time.Second)
 
-	// Game loop - quit
-	c.readUntil("]> ", 3*time.Second)
+	// Game bridge - quit
 	c.send("quit")
-	c.readUntil("Goodbye", 2*time.Second)
+	c.readUntil("Goodbye", 3*time.Second)
+}
+
+func TestHandleSession_GameBridge_SayAndEmote(t *testing.T) {
+	gsAddr := testGameServer(t)
+
+	store := newMockAccountStore()
+	store.accounts["hero"] = postgres.Account{ID: 1, Username: "hero"}
+	store.passwords["hero"] = "secret123"
+	logger := zaptest.NewLogger(t)
+	handler := NewAuthHandler(store, logger, gsAddr)
+	addr := testServer(t, handler)
+	c := newTestClient(t, addr)
+
+	c.waitForPrompt()
+	c.send("login hero secret123")
+	c.readUntil("Welcome back", 2*time.Second)
+	c.readUntil("Room A", 5*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Say command
+	c.send("say hello world")
+	c.readUntil("hero says: hello world", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Emote command
+	c.send("emote waves")
+	c.readUntil("hero waves", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Who command
+	c.send("who")
+	c.readUntil("hero", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Say with no args
+	c.send("say")
+	c.readUntil("Say what?", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Emote with no args
+	c.send("emote")
+	c.readUntil("Emote what?", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Unknown command (treated as move, returns error)
+	c.send("dance")
+	c.readUntil("no exit", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	c.send("quit")
+	c.readUntil("Goodbye", 3*time.Second)
+}
+
+func TestHandleSession_GameBridge_MoveAlias(t *testing.T) {
+	gsAddr := testGameServer(t)
+
+	store := newMockAccountStore()
+	store.accounts["hero"] = postgres.Account{ID: 1, Username: "hero"}
+	store.passwords["hero"] = "secret123"
+	logger := zaptest.NewLogger(t)
+	handler := NewAuthHandler(store, logger, gsAddr)
+	addr := testServer(t, handler)
+	c := newTestClient(t, addr)
+
+	c.waitForPrompt()
+	c.send("login hero secret123")
+	c.readUntil("Welcome back", 2*time.Second)
+	c.readUntil("Room A", 5*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Move using alias 'n' for north
+	c.send("n")
+	c.readUntil("Room B", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	// Move back using alias 's' for south
+	c.send("s")
+	c.readUntil("Room A", 3*time.Second)
+	c.readUntil("]> ", 3*time.Second)
+
+	c.send("quit")
+	c.readUntil("Goodbye", 3*time.Second)
 }
 
 func TestHandleSession_ServerShutdown(t *testing.T) {
 	store := newMockAccountStore()
 	logger := zaptest.NewLogger(t)
-	handler := NewAuthHandler(store, logger)
+	handler := NewAuthHandler(store, logger, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 

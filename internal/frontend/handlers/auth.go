@@ -39,17 +39,20 @@ const welcomeBanner = `
 // AuthHandler implements telnet.SessionHandler and processes the
 // authentication loop for a connected client.
 type AuthHandler struct {
-	accounts AccountStore
-	logger   *zap.Logger
+	accounts       AccountStore
+	logger         *zap.Logger
+	gameServerAddr string
 }
 
 // NewAuthHandler creates an AuthHandler backed by the given account store.
 //
-// Precondition: accounts and logger must be non-nil.
-func NewAuthHandler(accounts AccountStore, logger *zap.Logger) *AuthHandler {
+// Precondition: accounts and logger must be non-nil. gameServerAddr must be a valid "host:port" address.
+// Postcondition: Returns an AuthHandler ready to handle sessions.
+func NewAuthHandler(accounts AccountStore, logger *zap.Logger, gameServerAddr string) *AuthHandler {
 	return &AuthHandler{
-		accounts: accounts,
-		logger:   logger,
+		accounts:       accounts,
+		logger:         logger,
+		gameServerAddr: gameServerAddr,
 	}
 }
 
@@ -113,7 +116,7 @@ func (h *AuthHandler) HandleSession(ctx context.Context, conn *telnet.Conn) erro
 				zap.String("username", username),
 				zap.Duration("login_time", time.Since(start)),
 			)
-			if err := h.gameLoop(ctx, conn, username); err != nil {
+			if err := h.gameBridge(ctx, conn, username); err != nil {
 				return err
 			}
 			return nil
@@ -216,55 +219,3 @@ func (h *AuthHandler) showHelp(conn *telnet.Conn) {
 	_ = conn.Write([]byte(help))
 }
 
-// gameLoop is a placeholder game loop for Phase 1. Once authenticated,
-// the player can type commands. For Phase 1, only 'quit' and 'who' are supported.
-func (h *AuthHandler) gameLoop(ctx context.Context, conn *telnet.Conn, username string) error {
-	_ = conn.WriteLine("")
-	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "You stand in the ruins of what was once Pioneer Courthouse Square."))
-	_ = conn.WriteLine(telnet.Colorize(telnet.Dim, "The sky is a permanent grey. Rain falls sideways."))
-	_ = conn.WriteLine("")
-
-	for {
-		select {
-		case <-ctx.Done():
-			_ = conn.WriteLine(telnet.Colorize(telnet.Yellow, "Server shutting down. Goodbye!"))
-			return ctx.Err()
-		default:
-		}
-
-		prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", username)
-		if err := conn.WritePrompt(prompt); err != nil {
-			return fmt.Errorf("writing prompt: %w", err)
-		}
-
-		line, err := conn.ReadLine()
-		if err != nil {
-			return fmt.Errorf("reading input: %w", err)
-		}
-
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-
-		parts := strings.Fields(line)
-		cmd := strings.ToLower(parts[0])
-
-		switch cmd {
-		case "quit", "exit":
-			_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "The rain swallows your footsteps. Goodbye."))
-			return nil
-		case "look":
-			_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "You stand in the ruins of what was once Pioneer Courthouse Square."))
-			_ = conn.WriteLine(telnet.Colorize(telnet.Dim, "The sky is a permanent grey. Rain falls sideways."))
-			_ = conn.WriteLine(telnet.Colorize(telnet.Dim, "Broken concrete and rusted rebar stretch in every direction."))
-		case "help":
-			_ = conn.WriteLine(telnet.Colorize(telnet.BrightWhite, "Available commands:"))
-			_ = conn.WriteLine(telnet.Colorize(telnet.Green, "  look") + "  — Look around")
-			_ = conn.WriteLine(telnet.Colorize(telnet.Green, "  help") + "  — Show this help")
-			_ = conn.WriteLine(telnet.Colorize(telnet.Green, "  quit") + "  — Disconnect")
-		default:
-			_ = conn.WriteLine(telnet.Colorf(telnet.Dim, "You don't know how to '%s'.", cmd))
-		}
-	}
-}

@@ -18,7 +18,7 @@ services:
   migrate:
     build:
       context: ../..
-      dockerfile: deployments/docker/Dockerfile.devserver
+      dockerfile: deployments/docker/Dockerfile.frontend
     entrypoint: ["/bin/migrate"]
     command: ["-config", "/configs/dev.yaml"]
     depends_on:
@@ -31,10 +31,30 @@ services:
       MUD_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-mud}
       MUD_DATABASE_NAME: ${POSTGRES_DB:-mud}
 
-  devserver:
+  gameserver:
     build:
       context: ../..
-      dockerfile: deployments/docker/Dockerfile.devserver
+      dockerfile: deployments/docker/Dockerfile.gameserver
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      MUD_GAMESERVER_GRPC_HOST: "0.0.0.0"
+      MUD_GAMESERVER_GRPC_PORT: "${GRPC_PORT:-50051}"
+      MUD_DATABASE_HOST: postgres
+      MUD_DATABASE_PORT: "5432"
+      MUD_DATABASE_USER: ${POSTGRES_USER:-mud}
+      MUD_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-mud}
+      MUD_DATABASE_NAME: ${POSTGRES_DB:-mud}
+      MUD_LOGGING_LEVEL: ${LOG_LEVEL:-info}
+      MUD_LOGGING_FORMAT: json
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile.frontend
     ports:
       - "${TELNET_PORT:-4000}:4000"
     depends_on:
@@ -42,7 +62,11 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+      gameserver:
+        condition: service_started
     environment:
+      MUD_GAMESERVER_GRPC_HOST: gameserver
+      MUD_GAMESERVER_GRPC_PORT: "${GRPC_PORT:-50051}"
       MUD_DATABASE_HOST: postgres
       MUD_DATABASE_PORT: "5432"
       MUD_DATABASE_USER: ${POSTGRES_USER:-mud}

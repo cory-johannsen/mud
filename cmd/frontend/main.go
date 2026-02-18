@@ -1,5 +1,5 @@
-// Package main provides the all-in-one development server for the MUD.
-// It wires together configuration, database, Telnet acceptor, and handlers.
+// Package main provides the Telnet frontend server for the MUD.
+// It handles client connections, authentication, and bridges to the game server via gRPC.
 package main
 
 import (
@@ -25,22 +25,20 @@ func main() {
 	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
 	flag.Parse()
 
-	// Load configuration
 	cfg, err := config.Load(*configPath)
 	if err != nil {
 		log.Fatalf("loading config: %v", err)
 	}
 
-	// Initialize logger
 	logger, err := observability.NewLogger(cfg.Logging)
 	if err != nil {
 		log.Fatalf("initializing logger: %v", err)
 	}
 	defer logger.Sync()
 
-	logger.Info("starting Gunchete MUD server",
-		zap.String("mode", cfg.Server.Mode),
-		zap.String("type", cfg.Server.Type),
+	logger.Info("starting Gunchete frontend",
+		zap.String("telnet_addr", cfg.Telnet.Addr()),
+		zap.String("gameserver_addr", cfg.GameServer.Addr()),
 	)
 
 	// Connect to PostgreSQL
@@ -67,7 +65,6 @@ func main() {
 
 	lifecycle.Add("postgres", &server.FuncService{
 		StartFn: func() error {
-			// Pool is already connected; just keep it alive
 			for {
 				time.Sleep(30 * time.Second)
 				if err := pool.Health(ctx, 5*time.Second); err != nil {
@@ -89,9 +86,10 @@ func main() {
 		},
 	})
 
-	logger.Info("server initialized",
+	logger.Info("frontend initialized",
 		zap.Duration("startup", time.Since(start)),
 		zap.String("telnet_addr", fmt.Sprintf("%s:%d", cfg.Telnet.Host, cfg.Telnet.Port)),
+		zap.String("gameserver_addr", cfg.GameServer.Addr()),
 	)
 
 	if err := lifecycle.Run(ctx); err != nil {

@@ -1,0 +1,26 @@
+FROM golang:1.26-alpine AS builder
+
+RUN apk add --no-cache git ca-certificates
+
+WORKDIR /build
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -o /bin/frontend ./cmd/frontend
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -o /bin/migrate ./cmd/migrate
+
+FROM gcr.io/distroless/static-debian12:nonroot
+
+COPY --from=builder /bin/frontend /bin/frontend
+COPY --from=builder /bin/migrate /bin/migrate
+COPY --from=builder /build/configs /configs
+COPY --from=builder /build/migrations /migrations
+COPY --from=builder /build/content /content
+
+EXPOSE 4000
+
+ENTRYPOINT ["/bin/frontend"]
+CMD ["-config", "/configs/dev.yaml"]

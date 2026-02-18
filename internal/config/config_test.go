@@ -38,6 +38,10 @@ func validConfig() Config {
 			Level:  "info",
 			Format: "json",
 		},
+		GameServer: GameServerConfig{
+			GRPCHost: "127.0.0.1",
+			GRPCPort: 50051,
+		},
 	}
 }
 
@@ -164,6 +168,27 @@ func TestValidateDatabaseMinConnsExceedsMax(t *testing.T) {
 func TestValidateTelnetPort(t *testing.T) {
 	cfg := validConfig()
 	cfg.Telnet.Port = 0
+	assert.Error(t, cfg.Validate())
+}
+
+func TestGameServerAddr(t *testing.T) {
+	cfg := validConfig()
+	assert.Equal(t, "127.0.0.1:50051", cfg.GameServer.Addr())
+}
+
+func TestValidateGameServerPort(t *testing.T) {
+	cfg := validConfig()
+	cfg.GameServer.GRPCPort = 0
+	assert.Error(t, cfg.Validate())
+
+	cfg = validConfig()
+	cfg.GameServer.GRPCPort = 65536
+	assert.Error(t, cfg.Validate())
+}
+
+func TestValidateGameServerHostEmpty(t *testing.T) {
+	cfg := validConfig()
+	cfg.GameServer.GRPCHost = ""
 	assert.Error(t, cfg.Validate())
 }
 

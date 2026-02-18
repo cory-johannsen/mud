@@ -22,3 +22,7 @@ telnet:
 logging:
   level: debug
   format: console
+
+gameserver:
+  grpc_host: 127.0.0.1
+  grpc_port: 50051

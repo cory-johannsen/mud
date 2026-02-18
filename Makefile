@@ -1,17 +1,32 @@
-.PHONY: build test migrate run-dev docker-up docker-down clean lint
+.PHONY: build test migrate run-dev docker-up docker-down clean lint proto
 
 GO := go
 GOFLAGS := -trimpath
 BIN_DIR := bin
 
-# Build targets
-build: build-devserver build-migrate
+PROTOC := protoc
+PROTO_DIR := api/proto
+PROTO_GO_OUT := .
+PROTO_MODULE := github.com/cory-johannsen/mud
 
-build-devserver:
-	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/devserver ./cmd/devserver
+# Build targets
+build: build-frontend build-gameserver build-migrate
+
+build-frontend:
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/frontend ./cmd/frontend
+
+build-gameserver:
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/gameserver ./cmd/gameserver
 
 build-migrate:
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/migrate ./cmd/migrate
+
+# Protobuf code generation
+proto:
+	$(PROTOC) --proto_path=$(PROTO_DIR) \
+		--go_out=$(PROTO_GO_OUT) --go_opt=module=$(PROTO_MODULE) \
+		--go-grpc_out=$(PROTO_GO_OUT) --go-grpc_opt=module=$(PROTO_MODULE) \
+		$(PROTO_DIR)/game/v1/game.proto
 
 # Test targets
 test:
@@ -26,8 +41,11 @@ migrate:
 	$(BIN_DIR)/migrate -config configs/dev.yaml
 
 # Run
-run-dev:
-	$(GO) run ./cmd/devserver -config configs/dev.yaml
+run-frontend:
+	$(GO) run ./cmd/frontend -config configs/dev.yaml
+
+run-gameserver:
+	$(GO) run ./cmd/gameserver -config configs/dev.yaml
 
 # Docker
 docker-up:

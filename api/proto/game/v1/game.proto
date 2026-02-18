@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package game.v1;
+
+option go_package = "github.com/cory-johannsen/mud/internal/gameserver/gamev1";
+
+// GameService provides bidirectional streaming between the Telnet frontend
+// and the Pitaya-powered game backend.
+service GameService {
+  // Session establishes a bidirectional stream for a single player session.
+  // The client sends commands; the server sends events.
+  rpc Session(stream ClientMessage) returns (stream ServerEvent);
+}
+
+// ClientMessage wraps all client-to-server commands.
+message ClientMessage {
+  string request_id = 1;
+  oneof payload {
+    JoinWorldRequest join_world = 2;
+    MoveRequest move = 3;
+    LookRequest look = 4;
+    SayRequest say = 5;
+    EmoteRequest emote = 6;
+    WhoRequest who = 7;
+    ExitsRequest exits = 8;
+    QuitRequest quit = 9;
+  }
+}
+
+// ServerEvent wraps all server-to-client events.
+message ServerEvent {
+  string request_id = 1;
+  oneof payload {
+    RoomView room_view = 2;
+    MessageEvent message = 3;
+    RoomEvent room_event = 4;
+    PlayerList player_list = 5;
+    ExitList exit_list = 6;
+    ErrorEvent error = 7;
+    Disconnected disconnected = 8;
+  }
+}
+
+// JoinWorldRequest is sent by the client to enter the game world after authentication.
+message JoinWorldRequest {
+  string uid = 1;
+  string username = 2;
+}
+
+// MoveRequest asks the server to move the player in the given direction.
+message MoveRequest {
+  string direction = 1;
+}
+
+// LookRequest asks the server for the current room description.
+message LookRequest {}
+
+// SayRequest sends a chat message to all players in the same room.
+message SayRequest {
+  string message = 1;
+}
+
+// EmoteRequest sends an emote action to all players in the same room.
+message EmoteRequest {
+  string action = 1;
+}
+
+// WhoRequest asks for the list of players in the current room.
+message WhoRequest {}
+
+// ExitsRequest asks for the list of exits from the current room.
+message ExitsRequest {}
+
+// QuitRequest signals the client wants to disconnect.
+message QuitRequest {}
+
+// RoomView describes the player's current room.
+message RoomView {
+  string room_id = 1;
+  string title = 2;
+  string description = 3;
+  repeated ExitInfo exits = 4;
+  repeated string players = 5;
+}
+
+// ExitInfo describes a single exit from a room.
+message ExitInfo {
+  string direction = 1;
+  string target_room_id = 2;
+  bool locked = 3;
+  bool hidden = 4;
+}
+
+// MessageEvent delivers a chat message or emote from another player.
+message MessageEvent {
+  string sender = 1;
+  string content = 2;
+  MessageType type = 3;
+}
+
+// MessageType distinguishes between say and emote messages.
+enum MessageType {
+  MESSAGE_TYPE_UNSPECIFIED = 0;
+  MESSAGE_TYPE_SAY = 1;
+  MESSAGE_TYPE_EMOTE = 2;
+}
+
+// RoomEvent notifies about player arrivals and departures.
+message RoomEvent {
+  string player = 1;
+  RoomEventType type = 2;
+  string direction = 3;
+}
+
+// RoomEventType distinguishes arrival from departure.
+enum RoomEventType {
+  ROOM_EVENT_TYPE_UNSPECIFIED = 0;
+  ROOM_EVENT_TYPE_ARRIVE = 1;
+  ROOM_EVENT_TYPE_DEPART = 2;
+}
+
+// PlayerList contains the players in the current room.
+message PlayerList {
+  string room_title = 1;
+  repeated string players = 2;
+}
+
+// ExitList contains the exits from the current room.
+message ExitList {
+  repeated ExitInfo exits = 1;
+}
+
+// ErrorEvent delivers an error message to the client.
+message ErrorEvent {
+  string message = 1;
+}
+
+// Disconnected signals the server is closing the session.
+message Disconnected {
+  string reason = 1;
+}

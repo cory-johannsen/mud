@@ -69,12 +69,28 @@ type LoggingConfig struct {
 	Format string `mapstructure:"format"`
 }
 
+// GameServerConfig holds game server gRPC connection settings.
+type GameServerConfig struct {
+	// GRPCHost is the bind/connect address for the game server gRPC service.
+	GRPCHost string `mapstructure:"grpc_host"`
+	// GRPCPort is the TCP port for the game server gRPC service.
+	GRPCPort int `mapstructure:"grpc_port"`
+}
+
+// Addr returns the "host:port" gRPC address.
+//
+// Postcondition: Returns a non-empty string in "host:port" format.
+func (g GameServerConfig) Addr() string {
+	return fmt.Sprintf("%s:%d", g.GRPCHost, g.GRPCPort)
+}
+
 // Config is the top-level application configuration.
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`
-	Telnet   TelnetConfig   `mapstructure:"telnet"`
-	Logging  LoggingConfig  `mapstructure:"logging"`
+	Server     ServerConfig     `mapstructure:"server"`
+	Database   DatabaseConfig   `mapstructure:"database"`
+	Telnet     TelnetConfig     `mapstructure:"telnet"`
+	Logging    LoggingConfig    `mapstructure:"logging"`
+	GameServer GameServerConfig `mapstructure:"gameserver"`
 }
 
 // Validate checks all configuration invariants.
@@ -93,6 +109,10 @@ func (c Config) Validate() error {
 		errs = append(errs, err.Error())
 	}
 	if err := validateLogging(c.Logging); err != nil {
+		errs = append(errs, err.Error())
+	}
+
+	if err := validateGameServer(c.GameServer); err != nil {
 		errs = append(errs, err.Error())
 	}
 
@@ -156,6 +176,20 @@ func validateTelnet(t TelnetConfig) error {
 	}
 	if t.WriteTimeout < 0 {
 		errs = append(errs, "telnet.write_timeout must not be negative")
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("%s", strings.Join(errs, "; "))
+	}
+	return nil
+}
+
+func validateGameServer(g GameServerConfig) error {
+	var errs []string
+	if g.GRPCHost == "" {
+		errs = append(errs, "gameserver.grpc_host must not be empty")
+	}
+	if g.GRPCPort < 1 || g.GRPCPort > 65535 {
+		errs = append(errs, fmt.Sprintf("gameserver.grpc_port must be 1-65535, got %d", g.GRPCPort))
 	}
 	if len(errs) > 0 {
 		return fmt.Errorf("%s", strings.Join(errs, "; "))
@@ -244,4 +278,7 @@ func setDefaults(v *viper.Viper) {
 
 	v.SetDefault("logging.level", "info")
 	v.SetDefault("logging.format", "json")
+
+	v.SetDefault("gameserver.grpc_host", "127.0.0.1")
+	v.SetDefault("gameserver.grpc_port", 50051)
 }
