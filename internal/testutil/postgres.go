@@ -104,7 +104,7 @@ func NewPostgresContainer(t *testing.T) *PostgresContainer {
 // This avoids requiring the migrate tool in the test environment.
 //
 // Precondition: Pool must be connected.
-// Postcondition: The accounts table exists in the test database.
+// Postcondition: The accounts and characters tables exist in the test database.
 func (pc *PostgresContainer) ApplyMigrations(t *testing.T) {
 	t.Helper()
 	ctx := context.Background()
@@ -118,6 +118,29 @@ func (pc *PostgresContainer) ApplyMigrations(t *testing.T) {
 			created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 		);
 		CREATE INDEX IF NOT EXISTS idx_accounts_username ON accounts (username);
+
+		CREATE TABLE IF NOT EXISTS characters (
+			id              BIGSERIAL    PRIMARY KEY,
+			account_id      BIGINT       NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+			name            VARCHAR(64)  NOT NULL,
+			region          TEXT         NOT NULL,
+			class           TEXT         NOT NULL,
+			level           INT          NOT NULL DEFAULT 1,
+			experience      INT          NOT NULL DEFAULT 0,
+			location        TEXT         NOT NULL DEFAULT 'grinders_row',
+			strength        INT          NOT NULL DEFAULT 10,
+			dexterity       INT          NOT NULL DEFAULT 10,
+			constitution    INT          NOT NULL DEFAULT 10,
+			intelligence    INT          NOT NULL DEFAULT 10,
+			wisdom          INT          NOT NULL DEFAULT 10,
+			charisma        INT          NOT NULL DEFAULT 10,
+			max_hp          INT          NOT NULL DEFAULT 8,
+			current_hp      INT          NOT NULL DEFAULT 8,
+			created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+			updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+			CONSTRAINT uq_characters_account_name UNIQUE (account_id, name)
+		);
+		CREATE INDEX IF NOT EXISTS idx_characters_account_id ON characters (account_id);
 	`
 
 	_, err := pc.RawPool.Exec(ctx, schema)
@@ -125,6 +148,18 @@ func (pc *PostgresContainer) ApplyMigrations(t *testing.T) {
 		t.Fatalf("applying migrations: %v", err)
 	}
 	t.Logf("migrations applied [%s]", time.Since(start))
+}
+
+// NewPool starts a PostgreSQL test container, applies all migrations, and returns
+// the raw *pgxpool.Pool for use in repository tests.
+//
+// Precondition: Docker must be available.
+// Postcondition: Returns a connected pool with schema applied, or fails the test.
+func NewPool(t *testing.T) *pgxpool.Pool {
+	t.Helper()
+	pc := NewPostgresContainer(t)
+	pc.ApplyMigrations(t)
+	return pc.RawPool
 }
 
 // DSN returns the connection string for the test database.
