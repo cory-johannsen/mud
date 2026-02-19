@@ -197,3 +197,17 @@ areas: []
 			"number of zones returned must equal number of .yaml files in zones/")
 	})
 }
+
+func TestGomudSource_SkipsTemplateFiles(t *testing.T) {
+	root := buildTestAssets(t)
+	// Add a .tmpl.yaml file to the zones directory — it contains non-YAML
+	// placeholder syntax and must not be parsed.
+	tmplPath := filepath.Join(root, "zones", "zone.tmpl.yaml")
+	require.NoError(t, os.WriteFile(tmplPath, []byte(`{% range .rooms %}{{ .name }}{% end %}`), 0644))
+
+	src := igomud.NewSource()
+	zones, err := src.Load(root, "")
+	require.NoError(t, err, "template file must not cause a parse error")
+	// Only the real zone file should be loaded; the template is skipped.
+	assert.Len(t, zones, 1)
+}
