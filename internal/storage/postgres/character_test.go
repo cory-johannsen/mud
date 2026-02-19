@@ -11,6 +11,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 )
 
 func uniqueName(prefix string) string {
@@ -140,4 +141,125 @@ func TestCharacterRepository_SaveState_NotFound(t *testing.T) {
 	err := repo.SaveState(context.Background(), 99999999, "grinders_row", 10)
 	require.Error(t, err)
 	assert.ErrorIs(t, err, postgres.ErrCharacterNotFound)
+}
+
+// setupCharReposShared creates a single pool and account repository for use across
+// multiple rapid iterations within one property test. Each iteration creates a fresh
+// account to ensure isolation without spawning a new container per iteration.
+func setupCharReposShared(t *testing.T) (*postgres.CharacterRepository, *postgres.AccountRepository) {
+	t.Helper()
+	pool := testutil.NewPool(t)
+	return postgres.NewCharacterRepository(pool), postgres.NewAccountRepository(pool)
+}
+
+// TestCharacterRepository_Property_CreateThenGetByID verifies that for any valid
+// character fields, Create followed by GetByID returns a character equal to the one created.
+func TestCharacterRepository_Property_CreateThenGetByID(t *testing.T) {
+	charRepo, acctRepo := setupCharReposShared(t)
+	ctx := context.Background()
+
+	rapid.Check(t, func(rt *rapid.T) {
+		acct, err := acctRepo.Create(ctx, uniqueName("user"), "pass")
+		require.NoError(t, err)
+
+		name := rapid.StringMatching(`[A-Za-z][A-Za-z0-9]{1,10}`).Draw(rt, "name")
+		hp := rapid.IntRange(1, 100).Draw(rt, "hp")
+		c := &character.Character{
+			AccountID: acct.ID,
+			Name:      name,
+			Region:    "old_town",
+			Class:     "ganger",
+			Level:     1,
+			Location:  "grinders_row",
+			Abilities: character.AbilityScores{
+				Strength: 10, Dexterity: 10, Constitution: 10,
+				Intelligence: 10, Wisdom: 10, Charisma: 10,
+			},
+			MaxHP:     hp,
+			CurrentHP: hp,
+		}
+
+		created, err := charRepo.Create(ctx, c)
+		require.NoError(t, err)
+
+		fetched, err := charRepo.GetByID(ctx, created.ID)
+		require.NoError(t, err)
+
+		assert.Equal(t, created.ID, fetched.ID)
+		assert.Equal(t, name, fetched.Name)
+		assert.Equal(t, hp, fetched.MaxHP)
+		assert.Equal(t, hp, fetched.CurrentHP)
+		assert.Equal(t, "grinders_row", fetched.Location)
+	})
+}
+
+// TestCharacterRepository_Property_ListCountMatchesCreates verifies that ListByAccount
+// returns exactly as many characters as were created for a given account.
+func TestCharacterRepository_Property_ListCountMatchesCreates(t *testing.T) {
+	charRepo, acctRepo := setupCharReposShared(t)
+	ctx := context.Background()
+
+	rapid.Check(t, func(rt *rapid.T) {
+		acct, err := acctRepo.Create(ctx, uniqueName("user"), "pass")
+		require.NoError(t, err)
+
+		n := rapid.IntRange(1, 5).Draw(rt, "n")
+		for i := 0; i < n; i++ {
+			name := fmt.Sprintf("char_%d_%d", i, time.Now().UnixNano())
+			_, err := charRepo.Create(ctx, makeTestCharacter(acct.ID, name))
+			require.NoError(t, err)
+		}
+
+		chars, err := charRepo.ListByAccount(ctx, acct.ID)
+		require.NoError(t, err)
+		assert.Len(t, chars, n)
+	})
+}
+
+// TestCharacterRepository_Property_DuplicateNameAlwaysErrors verifies that creating
+// two characters with the same account+name always returns ErrCharacterNameTaken.
+func TestCharacterRepository_Property_DuplicateNameAlwaysErrors(t *testing.T) {
+	charRepo, acctRepo := setupCharReposShared(t)
+	ctx := context.Background()
+
+	rapid.Check(t, func(rt *rapid.T) {
+		acct, err := acctRepo.Create(ctx, uniqueName("user"), "pass")
+		require.NoError(t, err)
+
+		name := rapid.StringMatching(`[A-Za-z][A-Za-z0-9]{1,10}`).Draw(rt, "name")
+		c := makeTestCharacter(acct.ID, name)
+
+		_, err = charRepo.Create(ctx, c)
+		require.NoError(t, err)
+
+		_, err = charRepo.Create(ctx, c)
+		require.Error(t, err)
+		assert.ErrorIs(t, err, postgres.ErrCharacterNameTaken)
+	})
+}
+
+// TestCharacterRepository_Property_SaveStatePersists verifies that SaveState followed by
+// GetByID always reflects the new location and currentHP values.
+func TestCharacterRepository_Property_SaveStatePersists(t *testing.T) {
+	charRepo, acctRepo := setupCharReposShared(t)
+	ctx := context.Background()
+
+	rapid.Check(t, func(rt *rapid.T) {
+		acct, err := acctRepo.Create(ctx, uniqueName("user"), "pass")
+		require.NoError(t, err)
+
+		created, err := charRepo.Create(ctx, makeTestCharacter(acct.ID, "Prop"))
+		require.NoError(t, err)
+
+		newHP := rapid.IntRange(0, created.MaxHP).Draw(rt, "hp")
+		newLoc := rapid.StringMatching(`[a-z_]{3,20}`).Draw(rt, "loc")
+
+		err = charRepo.SaveState(ctx, created.ID, newLoc, newHP)
+		require.NoError(t, err)
+
+		fetched, err := charRepo.GetByID(ctx, created.ID)
+		require.NoError(t, err)
+		assert.Equal(t, newLoc, fetched.Location)
+		assert.Equal(t, newHP, fetched.CurrentHP)
+	})
 }

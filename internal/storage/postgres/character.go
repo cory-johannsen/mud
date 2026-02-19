@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -133,9 +132,9 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 // Postcondition: Returns nil on success, ErrCharacterNotFound if no row updated.
 func (r *CharacterRepository) SaveState(ctx context.Context, id int64, location string, currentHP int) error {
 	tag, err := r.db.Exec(ctx, `
-		UPDATE characters SET location = $2, current_hp = $3, updated_at = $4
+		UPDATE characters SET location = $2, current_hp = $3, updated_at = NOW()
 		WHERE id = $1`,
-		id, location, currentHP, time.Now(),
+		id, location, currentHP,
 	)
 	if err != nil {
 		return fmt.Errorf("saving character state: %w", err)
