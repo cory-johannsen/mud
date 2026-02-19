@@ -82,7 +82,7 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 	}
 	defer rows.Close()
 
-	var chars []*character.Character
+	chars := make([]*character.Character, 0)
 	for rows.Next() {
 		var c character.Character
 		if err := rows.Scan(

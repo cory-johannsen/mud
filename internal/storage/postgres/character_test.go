@@ -94,6 +94,7 @@ func TestCharacterRepository_ListByAccount_Empty(t *testing.T) {
 	repo, accountID := setupCharRepos(t)
 	chars, err := repo.ListByAccount(context.Background(), accountID)
 	require.NoError(t, err)
+	assert.NotNil(t, chars)
 	assert.Empty(t, chars)
 }
 
