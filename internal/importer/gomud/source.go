@@ -9,6 +9,8 @@ import (
 	"github.com/cory-johannsen/mud/internal/importer"
 )
 
+var _ importer.Source = (*GomudSource)(nil)
+
 // GomudSource implements importer.Source for the gomud asset layout:
 //
 //	sourceDir/
@@ -34,7 +36,7 @@ func (s *GomudSource) Load(sourceDir, startRoom string) ([]*importer.ZoneData, e
 
 	for _, dir := range []string{zonesDir, areasDir, roomsDir} {
 		if _, err := os.Stat(dir); err != nil {
-			return nil, fmt.Errorf("required subdirectory %q not found in source: %w", filepath.Base(dir), err)
+			return nil, fmt.Errorf("required subdirectory %q not accessible in source: %w", filepath.Base(dir), err)
 		}
 	}
 
