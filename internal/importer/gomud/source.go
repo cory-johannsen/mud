@@ -130,8 +130,14 @@ func yamlFiles(dir string) ([]string, error) {
 		if e.IsDir() {
 			continue
 		}
-		if strings.HasSuffix(e.Name(), ".yaml") || strings.HasSuffix(e.Name(), ".yml") {
-			paths = append(paths, filepath.Join(dir, e.Name()))
+		name := e.Name()
+		// Skip template files (e.g. zone.tmpl.yaml) — they contain non-YAML
+		// placeholder syntax and are not parseable as YAML.
+		if strings.HasSuffix(name, ".tmpl.yaml") || strings.HasSuffix(name, ".tmpl.yml") {
+			continue
+		}
+		if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") {
+			paths = append(paths, filepath.Join(dir, name))
 		}
 	}
 	return paths, nil
