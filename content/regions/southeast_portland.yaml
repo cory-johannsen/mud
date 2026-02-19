@@ -1,0 +1,13 @@
+id: southeast_portland
+name: "Southeast Portland"
+description: |
+  The sprawling flatlands of SE are patchwork survival — community gardens
+  between burnt-out condos, mutual aid networks that outlasted every government.
+  You learned to endure and adapt before anything else.
+modifiers:
+  constitution: 2
+  dexterity: 2
+  intelligence: -2
+traits:
+  - survivor
+  - community_ties

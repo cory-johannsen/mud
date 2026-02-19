@@ -1,0 +1,13 @@
+id: old_town
+name: "Old Town"
+description: |
+  You grew up in the neon-stained ruins of Portland's oldest district, where
+  every alley hides a deal and every face hides an angle. You learned to read
+  people before you learned to read anything else.
+modifiers:
+  charisma: 2
+  dexterity: 2
+  strength: -2
+traits:
+  - street_smart
+  - networked

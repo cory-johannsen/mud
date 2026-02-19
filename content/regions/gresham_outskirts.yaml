@@ -1,0 +1,13 @@
+id: gresham_outskirts
+name: "Gresham Outskirts"
+description: |
+  Beyond the city limits, the Gresham sprawl is a patchwork of salvage yards,
+  grow operations, and old-faith communities. Out here you learned patience,
+  and how to read the land and the sky for signs of what's coming.
+modifiers:
+  wisdom: 2
+  constitution: 2
+  charisma: -2
+traits:
+  - forager
+  - self_reliant

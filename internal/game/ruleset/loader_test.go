@@ -134,6 +134,32 @@ traits: []
 	})
 }
 
+func TestLoadRegions_ActualContent(t *testing.T) {
+	regions, err := ruleset.LoadRegions("../../../content/regions")
+	require.NoError(t, err)
+	assert.Len(t, regions, 5, "expected 5 home regions")
+	ids := make(map[string]bool)
+	for _, r := range regions {
+		assert.NotEmpty(t, r.ID)
+		assert.NotEmpty(t, r.Name)
+		assert.NotEmpty(t, r.Description)
+		assert.False(t, ids[r.ID], "duplicate region ID: %s", r.ID)
+		ids[r.ID] = true
+	}
+}
+
+func TestLoadClasses_ActualContent(t *testing.T) {
+	classes, err := ruleset.LoadClasses("../../../content/classes")
+	require.NoError(t, err)
+	assert.Len(t, classes, 5, "expected 5 classes")
+	for _, c := range classes {
+		assert.NotEmpty(t, c.ID)
+		assert.NotEmpty(t, c.Name)
+		assert.NotEmpty(t, c.KeyAbility)
+		assert.Greater(t, c.HitPointsPerLevel, 0)
+	}
+}
+
 // Property: every loaded class has a non-empty ID, Name, and positive HitPointsPerLevel.
 func TestLoadClasses_AllHaveRequiredFields(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

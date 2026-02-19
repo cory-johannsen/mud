@@ -1,0 +1,18 @@
+id: techie
+name: "Techie"
+description: |
+  Electronics hacker and device specialist. Pre-collapse technology still
+  works if you know how to talk to it, and you speak its language fluently.
+key_ability: intelligence
+hit_points_per_level: 6
+proficiencies:
+  weapons: simple
+  armor: none
+  hacking: expert
+features:
+  - name: "Jury Rig"
+    level: 1
+    description: "Given 10 minutes and salvage parts, you can repair or improvise a simple device."
+  - name: "System Probe"
+    level: 1
+    description: "You can attempt to interface with any electronic system you can physically touch."

@@ -1,0 +1,18 @@
+id: ganger
+name: "Ganger"
+description: |
+  Street-hardened melee combatant. You've fought your way through Portland's
+  worst, and you know how to take a hit as well as dish one out.
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  weapons: trained
+  armor: trained
+  unarmed: expert
+features:
+  - name: "Gang Tactics"
+    level: 1
+    description: "When adjacent to an ally, you gain +1 to attack rolls."
+  - name: "Toughened"
+    level: 1
+    description: "You gain 2 additional HP per level."

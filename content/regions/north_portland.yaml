@@ -1,0 +1,13 @@
+id: north_portland
+name: "North Portland"
+description: |
+  The industrial riverfront district where the mills still run, grinding out
+  whatever the gangs and cooperatives need. You grew up moving heavy things
+  and taking hard hits, and you know your own strength.
+modifiers:
+  strength: 2
+  constitution: 2
+  charisma: -2
+traits:
+  - labor_hardened
+  - intimidating

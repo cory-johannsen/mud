@@ -1,0 +1,13 @@
+id: pearl_district
+name: "Pearl District"
+description: |
+  What was once Portland's artsy enclave is now a fortified enclave for those
+  who still believe in pre-collapse ideals. You grew up among archives,
+  workshops, and fading murals of a world that no longer exists.
+modifiers:
+  intelligence: 2
+  wisdom: 2
+  constitution: -2
+traits:
+  - educated
+  - archivalist
