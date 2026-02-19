@@ -321,6 +321,7 @@ type ServerEvent struct {
 	//	*ServerEvent_ExitList
 	//	*ServerEvent_Error
 	//	*ServerEvent_Disconnected
+	//	*ServerEvent_CharacterInfo
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -433,6 +434,15 @@ func (x *ServerEvent) GetDisconnected() *Disconnected {
 	return nil
 }
 
+func (x *ServerEvent) GetCharacterInfo() *CharacterInfo {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_CharacterInfo); ok {
+			return x.CharacterInfo
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -465,6 +475,10 @@ type ServerEvent_Disconnected struct {
 	Disconnected *Disconnected `protobuf:"bytes,8,opt,name=disconnected,proto3,oneof"`
 }
 
+type ServerEvent_CharacterInfo struct {
+	CharacterInfo *CharacterInfo `protobuf:"bytes,9,opt,name=character_info,json=characterInfo,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -479,11 +493,15 @@ func (*ServerEvent_Error) isServerEvent_Payload() {}
 
 func (*ServerEvent_Disconnected) isServerEvent_Payload() {}
 
+func (*ServerEvent_CharacterInfo) isServerEvent_Payload() {}
+
 // JoinWorldRequest is sent by the client to enter the game world after authentication.
 type JoinWorldRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Uid           string                 `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	CharacterId   int64                  `protobuf:"varint,3,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	CharacterName string                 `protobuf:"bytes,4,opt,name=character_name,json=characterName,proto3" json:"character_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -528,6 +546,20 @@ func (x *JoinWorldRequest) GetUid() string {
 func (x *JoinWorldRequest) GetUsername() string {
 	if x != nil {
 		return x.Username
+	}
+	return ""
+}
+
+func (x *JoinWorldRequest) GetCharacterId() int64 {
+	if x != nil {
+		return x.CharacterId
+	}
+	return 0
+}
+
+func (x *JoinWorldRequest) GetCharacterName() string {
+	if x != nil {
+		return x.CharacterName
 	}
 	return ""
 }
@@ -1271,6 +1303,155 @@ func (x *Disconnected) GetReason() string {
 	return ""
 }
 
+// CharacterInfo is sent to the client on session join to display character stats.
+type CharacterInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CharacterId   int64                  `protobuf:"varint,1,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Region        string                 `protobuf:"bytes,3,opt,name=region,proto3" json:"region,omitempty"`
+	Class         string                 `protobuf:"bytes,4,opt,name=class,proto3" json:"class,omitempty"`
+	Level         int32                  `protobuf:"varint,5,opt,name=level,proto3" json:"level,omitempty"`
+	Experience    int32                  `protobuf:"varint,6,opt,name=experience,proto3" json:"experience,omitempty"`
+	MaxHp         int32                  `protobuf:"varint,7,opt,name=max_hp,json=maxHp,proto3" json:"max_hp,omitempty"`
+	CurrentHp     int32                  `protobuf:"varint,8,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
+	Strength      int32                  `protobuf:"varint,9,opt,name=strength,proto3" json:"strength,omitempty"`
+	Dexterity     int32                  `protobuf:"varint,10,opt,name=dexterity,proto3" json:"dexterity,omitempty"`
+	Constitution  int32                  `protobuf:"varint,11,opt,name=constitution,proto3" json:"constitution,omitempty"`
+	Intelligence  int32                  `protobuf:"varint,12,opt,name=intelligence,proto3" json:"intelligence,omitempty"`
+	Wisdom        int32                  `protobuf:"varint,13,opt,name=wisdom,proto3" json:"wisdom,omitempty"`
+	Charisma      int32                  `protobuf:"varint,14,opt,name=charisma,proto3" json:"charisma,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CharacterInfo) Reset() {
+	*x = CharacterInfo{}
+	mi := &file_game_v1_game_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CharacterInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CharacterInfo) ProtoMessage() {}
+
+func (x *CharacterInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CharacterInfo.ProtoReflect.Descriptor instead.
+func (*CharacterInfo) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *CharacterInfo) GetCharacterId() int64 {
+	if x != nil {
+		return x.CharacterId
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CharacterInfo) GetRegion() string {
+	if x != nil {
+		return x.Region
+	}
+	return ""
+}
+
+func (x *CharacterInfo) GetClass() string {
+	if x != nil {
+		return x.Class
+	}
+	return ""
+}
+
+func (x *CharacterInfo) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetExperience() int32 {
+	if x != nil {
+		return x.Experience
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetMaxHp() int32 {
+	if x != nil {
+		return x.MaxHp
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetCurrentHp() int32 {
+	if x != nil {
+		return x.CurrentHp
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetStrength() int32 {
+	if x != nil {
+		return x.Strength
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetDexterity() int32 {
+	if x != nil {
+		return x.Dexterity
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetConstitution() int32 {
+	if x != nil {
+		return x.Constitution
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetIntelligence() int32 {
+	if x != nil {
+		return x.Intelligence
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetWisdom() int32 {
+	if x != nil {
+		return x.Wisdom
+	}
+	return 0
+}
+
+func (x *CharacterInfo) GetCharisma() int32 {
+	if x != nil {
+		return x.Charisma
+	}
+	return 0
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
@@ -1288,7 +1469,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x03who\x18\a \x01(\v2\x13.game.v1.WhoRequestH\x00R\x03who\x12-\n" +
 	"\x05exits\x18\b \x01(\v2\x15.game.v1.ExitsRequestH\x00R\x05exits\x12*\n" +
 	"\x04quit\x18\t \x01(\v2\x14.game.v1.QuitRequestH\x00R\x04quitB\t\n" +
-	"\apayload\"\xa5\x03\n" +
+	"\apayload\"\xe6\x03\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -1300,11 +1481,14 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"playerList\x120\n" +
 	"\texit_list\x18\x06 \x01(\v2\x11.game.v1.ExitListH\x00R\bexitList\x12+\n" +
 	"\x05error\x18\a \x01(\v2\x13.game.v1.ErrorEventH\x00R\x05error\x12;\n" +
-	"\fdisconnected\x18\b \x01(\v2\x15.game.v1.DisconnectedH\x00R\fdisconnectedB\t\n" +
-	"\apayload\"@\n" +
+	"\fdisconnected\x18\b \x01(\v2\x15.game.v1.DisconnectedH\x00R\fdisconnected\x12?\n" +
+	"\x0echaracter_info\x18\t \x01(\v2\x16.game.v1.CharacterInfoH\x00R\rcharacterInfoB\t\n" +
+	"\apayload\"\x8a\x01\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername\"+\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
+	"\fcharacter_id\x18\x03 \x01(\x03R\vcharacterId\x12%\n" +
+	"\x0echaracter_name\x18\x04 \x01(\tR\rcharacterName\"+\n" +
 	"\vMoveRequest\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\"\r\n" +
 	"\vLookRequest\"&\n" +
@@ -1347,7 +1531,26 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"ErrorEvent\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"&\n" +
 	"\fDisconnected\x12\x16\n" +
-	"\x06reason\x18\x01 \x01(\tR\x06reason*Y\n" +
+	"\x06reason\x18\x01 \x01(\tR\x06reason\"\x96\x03\n" +
+	"\rCharacterInfo\x12!\n" +
+	"\fcharacter_id\x18\x01 \x01(\x03R\vcharacterId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
+	"\x06region\x18\x03 \x01(\tR\x06region\x12\x14\n" +
+	"\x05class\x18\x04 \x01(\tR\x05class\x12\x14\n" +
+	"\x05level\x18\x05 \x01(\x05R\x05level\x12\x1e\n" +
+	"\n" +
+	"experience\x18\x06 \x01(\x05R\n" +
+	"experience\x12\x15\n" +
+	"\x06max_hp\x18\a \x01(\x05R\x05maxHp\x12\x1d\n" +
+	"\n" +
+	"current_hp\x18\b \x01(\x05R\tcurrentHp\x12\x1a\n" +
+	"\bstrength\x18\t \x01(\x05R\bstrength\x12\x1c\n" +
+	"\tdexterity\x18\n" +
+	" \x01(\x05R\tdexterity\x12\"\n" +
+	"\fconstitution\x18\v \x01(\x05R\fconstitution\x12\"\n" +
+	"\fintelligence\x18\f \x01(\x05R\fintelligence\x12\x16\n" +
+	"\x06wisdom\x18\r \x01(\x05R\x06wisdom\x12\x1a\n" +
+	"\bcharisma\x18\x0e \x01(\x05R\bcharisma*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -1372,7 +1575,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),         // 0: game.v1.MessageType
 	(RoomEventType)(0),       // 1: game.v1.RoomEventType
@@ -1394,6 +1597,7 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*ExitList)(nil),         // 17: game.v1.ExitList
 	(*ErrorEvent)(nil),       // 18: game.v1.ErrorEvent
 	(*Disconnected)(nil),     // 19: game.v1.Disconnected
+	(*CharacterInfo)(nil),    // 20: game.v1.CharacterInfo
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	4,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -1411,17 +1615,18 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	17, // 12: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
 	18, // 13: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
 	19, // 14: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	13, // 15: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	0,  // 16: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,  // 17: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	13, // 18: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	2,  // 19: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	3,  // 20: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	20, // [20:21] is the sub-list for method output_type
-	19, // [19:20] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	20, // 15: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	13, // 16: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	0,  // 17: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,  // 18: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	13, // 19: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	2,  // 20: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	3,  // 21: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	21, // [21:22] is the sub-list for method output_type
+	20, // [20:21] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -1447,6 +1652,7 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_ExitList)(nil),
 		(*ServerEvent_Error)(nil),
 		(*ServerEvent_Disconnected)(nil),
+		(*ServerEvent_CharacterInfo)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1454,7 +1660,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   18,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
