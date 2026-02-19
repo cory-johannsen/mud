@@ -1,4 +1,4 @@
-.PHONY: build test migrate run-dev docker-up docker-down clean lint proto
+.PHONY: build test migrate run-dev docker-up docker-down clean lint proto build-import-content
 
 GO := go
 GOFLAGS := -trimpath
@@ -10,7 +10,7 @@ PROTO_GO_OUT := .
 PROTO_MODULE := github.com/cory-johannsen/mud
 
 # Build targets
-build: build-frontend build-gameserver build-migrate
+build: build-frontend build-gameserver build-migrate build-import-content
 
 build-frontend:
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/frontend ./cmd/frontend
@@ -20,6 +20,9 @@ build-gameserver:
 
 build-migrate:
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/migrate ./cmd/migrate
+
+build-import-content:
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/import-content ./cmd/import-content
 
 # Protobuf code generation
 proto:
