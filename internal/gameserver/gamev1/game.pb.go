@@ -502,6 +502,7 @@ type JoinWorldRequest struct {
 	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	CharacterId   int64                  `protobuf:"varint,3,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
 	CharacterName string                 `protobuf:"bytes,4,opt,name=character_name,json=characterName,proto3" json:"character_name,omitempty"`
+	CurrentHp     int32                  `protobuf:"varint,5,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -562,6 +563,13 @@ func (x *JoinWorldRequest) GetCharacterName() string {
 		return x.CharacterName
 	}
 	return ""
+}
+
+func (x *JoinWorldRequest) GetCurrentHp() int32 {
+	if x != nil {
+		return x.CurrentHp
+	}
+	return 0
 }
 
 // MoveRequest asks the server to move the player in the given direction.
@@ -1483,12 +1491,14 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x05error\x18\a \x01(\v2\x13.game.v1.ErrorEventH\x00R\x05error\x12;\n" +
 	"\fdisconnected\x18\b \x01(\v2\x15.game.v1.DisconnectedH\x00R\fdisconnected\x12?\n" +
 	"\x0echaracter_info\x18\t \x01(\v2\x16.game.v1.CharacterInfoH\x00R\rcharacterInfoB\t\n" +
-	"\apayload\"\x8a\x01\n" +
+	"\apayload\"\xa9\x01\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
 	"\fcharacter_id\x18\x03 \x01(\x03R\vcharacterId\x12%\n" +
-	"\x0echaracter_name\x18\x04 \x01(\tR\rcharacterName\"+\n" +
+	"\x0echaracter_name\x18\x04 \x01(\tR\rcharacterName\x12\x1d\n" +
+	"\n" +
+	"current_hp\x18\x05 \x01(\x05R\tcurrentHp\"+\n" +
 	"\vMoveRequest\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\"\r\n" +
 	"\vLookRequest\"&\n" +

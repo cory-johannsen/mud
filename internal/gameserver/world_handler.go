@@ -133,11 +133,11 @@ func (h *WorldHandler) Exits(uid string) (*gamev1.ExitList, error) {
 // from the players list.
 func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomView {
 	players := h.sessions.PlayersInRoom(room.ID)
-	// Get the current player's username to filter from list
+	// Get the current player's char name to filter from list
 	sess, _ := h.sessions.GetPlayer(uid)
 	var otherPlayers []string
 	for _, p := range players {
-		if sess != nil && p == sess.Username {
+		if sess != nil && p == sess.CharName {
 			continue
 		}
 		otherPlayers = append(otherPlayers, p)

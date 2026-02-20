@@ -48,6 +48,7 @@ message JoinWorldRequest {
   string username = 2;
   int64  character_id   = 3;
   string character_name = 4;
+  int32  current_hp     = 5;
 }
 
 // MoveRequest asks the server to move the player in the given direction.

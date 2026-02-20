@@ -33,7 +33,7 @@ func (h *ChatHandler) Say(uid string, message string) (*gamev1.MessageEvent, err
 	}
 
 	return &gamev1.MessageEvent{
-		Sender:  sess.Username,
+		Sender:  sess.CharName,
 		Content: message,
 		Type:    gamev1.MessageType_MESSAGE_TYPE_SAY,
 	}, nil
@@ -50,7 +50,7 @@ func (h *ChatHandler) Emote(uid string, action string) (*gamev1.MessageEvent, er
 	}
 
 	return &gamev1.MessageEvent{
-		Sender:  sess.Username,
+		Sender:  sess.CharName,
 		Content: action,
 		Type:    gamev1.MessageType_MESSAGE_TYPE_EMOTE,
 	}, nil

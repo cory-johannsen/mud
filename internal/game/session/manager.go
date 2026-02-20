@@ -132,9 +132,9 @@ func (m *Manager) MovePlayer(uid, newRoomID string) (string, error) {
 	return oldRoomID, nil
 }
 
-// PlayersInRoom returns the usernames of all players in the given room.
+// PlayersInRoom returns the character display names of all players in the given room.
 //
-// Postcondition: Returns a slice of usernames (may be empty).
+// Postcondition: Returns a slice of character names (may be empty).
 func (m *Manager) PlayersInRoom(roomID string) []string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -147,7 +147,7 @@ func (m *Manager) PlayersInRoom(roomID string) []string {
 	names := make([]string, 0, len(uids))
 	for uid := range uids {
 		if sess, ok := m.players[uid]; ok {
-			names = append(names, sess.Username)
+			names = append(names, sess.CharName)
 		}
 	}
 	return names

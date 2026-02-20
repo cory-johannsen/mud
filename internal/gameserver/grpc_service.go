@@ -87,7 +87,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		charName = username // fallback for backward compat
 	}
 	characterID := joinReq.CharacterId
-	currentHP := 0 // populated from character repository on first load; persisted on disconnect
+	currentHP := int(joinReq.CurrentHp)
 
 	s.logger.Info("player joining world",
 		zap.String("uid", uid),
