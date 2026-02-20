@@ -16,6 +16,9 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// errQuit is returned by handleQuit to signal the command loop to stop cleanly.
+var errQuit = fmt.Errorf("quit")
+
 // CharacterSaver persists character state after a session ends.
 //
 // Precondition: id must be > 0; location must be a valid room ID.
@@ -165,6 +168,14 @@ func (s *GameServiceServer) commandLoop(ctx context.Context, uid string, stream 
 		}
 
 		resp, err := s.dispatch(uid, msg)
+		if err == errQuit {
+			// Send Disconnected event then exit cleanly.
+			if resp != nil {
+				resp.RequestId = msg.RequestId
+				_ = stream.Send(resp)
+			}
+			return nil
+		}
 		if err != nil {
 			// Send error event
 			errEvt := &gamev1.ServerEvent{
@@ -218,7 +229,10 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		return nil, err
 	}
 
-	sess, _ := s.sessions.GetPlayer(uid)
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q session not found after move", uid)
+	}
 
 	// Broadcast departure from old room
 	s.broadcastRoomEvent(result.OldRoomID, uid, &gamev1.RoomEvent{
@@ -265,7 +279,10 @@ func (s *GameServiceServer) handleSay(uid string, req *gamev1.SayRequest) (*game
 		return nil, err
 	}
 
-	sess, _ := s.sessions.GetPlayer(uid)
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q session not found", uid)
+	}
 	s.broadcastMessage(sess.RoomID, uid, msgEvt)
 
 	return &gamev1.ServerEvent{
@@ -279,7 +296,10 @@ func (s *GameServiceServer) handleEmote(uid string, req *gamev1.EmoteRequest) (*
 		return nil, err
 	}
 
-	sess, _ := s.sessions.GetPlayer(uid)
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q session not found", uid)
+	}
 	s.broadcastMessage(sess.RoomID, uid, msgEvt)
 
 	return &gamev1.ServerEvent{
@@ -307,7 +327,7 @@ func (s *GameServiceServer) handleQuit(uid string) (*gamev1.ServerEvent, error) 
 		Payload: &gamev1.ServerEvent_Disconnected{
 			Disconnected: &gamev1.Disconnected{Reason: reason},
 		},
-	}, nil
+	}, errQuit
 }
 
 // broadcastRoomEvent sends a RoomEvent to all players in a room except the excluded UID.

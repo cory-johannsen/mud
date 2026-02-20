@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
@@ -183,6 +185,7 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	start := time.Now()
 	created, err := h.characters.Create(ctx, newChar)
 	if err != nil {
+		h.logger.Error("creating character", zap.String("name", newChar.Name), zap.Error(err))
 		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Failed to create character: %v", err))
 		return nil, nil
 	}
