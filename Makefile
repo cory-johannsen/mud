@@ -32,11 +32,13 @@ proto:
 		$(PROTO_DIR)/game/v1/game.proto
 
 # Test targets
+# NOTE: postgres package uses bcrypt property tests which are slow under -race.
+# Use a 10-minute timeout to accommodate the full suite.
 test:
-	$(GO) test -race -count=1 ./...
+	$(GO) test -race -count=1 -timeout=600s ./...
 
 test-cover:
-	$(GO) test -race -count=1 -coverprofile=coverage.out ./...
+	$(GO) test -race -count=1 -timeout=600s -coverprofile=coverage.out ./...
 	$(GO) tool cover -html=coverage.out -o coverage.html
 
 # Database
