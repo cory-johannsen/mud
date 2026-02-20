@@ -1,0 +1,219 @@
+package handlers
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/storage/postgres"
+)
+
+// characterFlow runs the character selection/creation UI after login.
+// It exits by calling gameBridge with the selected or newly created character.
+//
+// Precondition: acct.ID must be > 0; conn must be open.
+// Postcondition: Calls gameBridge on success; returns non-nil error on fatal failure.
+func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct postgres.Account) error {
+	for {
+		chars, err := h.characters.ListByAccount(ctx, acct.ID)
+		if err != nil {
+			return fmt.Errorf("listing characters: %w", err)
+		}
+
+		if len(chars) == 0 {
+			_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow,
+				"\r\nYou have no characters. Let's create one."))
+			c, err := h.characterCreationFlow(ctx, conn, acct.ID)
+			if err != nil {
+				return err
+			}
+			if c == nil {
+				continue // user cancelled — loop again
+			}
+			return h.gameBridge(ctx, conn, acct.Username, c)
+		}
+
+		// Show character list
+		_ = conn.WriteLine(telnet.Colorize(telnet.BrightWhite, "\r\nYour characters:"))
+		for i, c := range chars {
+			_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s",
+				telnet.Green, i+1, telnet.Reset,
+				FormatCharacterSummary(c)))
+		}
+		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. Create a new character",
+			telnet.Green, len(chars)+1, telnet.Reset))
+		_ = conn.WriteLine(fmt.Sprintf("  %squit%s. Disconnect",
+			telnet.Green, telnet.Reset))
+
+		_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select [1-%d]: ", len(chars)+1))
+		line, err := conn.ReadLine()
+		if err != nil {
+			return fmt.Errorf("reading character selection: %w", err)
+		}
+		line = strings.TrimSpace(line)
+
+		if strings.ToLower(line) == "quit" || strings.ToLower(line) == "exit" {
+			_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "Goodbye."))
+			return nil
+		}
+
+		choice := 0
+		if _, err := fmt.Sscanf(line, "%d", &choice); err != nil || choice < 1 || choice > len(chars)+1 {
+			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
+			continue
+		}
+
+		if choice == len(chars)+1 {
+			c, err := h.characterCreationFlow(ctx, conn, acct.ID)
+			if err != nil {
+				return err
+			}
+			if c != nil {
+				return h.gameBridge(ctx, conn, acct.Username, c)
+			}
+			continue
+		}
+
+		selected := chars[choice-1]
+		return h.gameBridge(ctx, conn, acct.Username, selected)
+	}
+}
+
+// characterCreationFlow guides the player through the interactive character builder.
+// Returns (nil, nil) if the player cancels at any step.
+//
+// Precondition: accountID must be > 0; h.regions and h.classes must be non-empty.
+// Postcondition: Returns a persisted *character.Character or (nil, nil) on cancel.
+func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Conn, accountID int64) (*character.Character, error) {
+	_ = conn.WriteLine(telnet.Colorize(telnet.BrightCyan, "\r\n=== Character Creation ==="))
+	_ = conn.WriteLine("Type 'cancel' at any prompt to return to the character screen.\r\n")
+
+	// Step 1: Character name
+	_ = conn.WritePrompt(telnet.Colorize(telnet.BrightWhite, "Enter your character's name: "))
+	nameLine, err := conn.ReadLine()
+	if err != nil {
+		return nil, fmt.Errorf("reading character name: %w", err)
+	}
+	nameLine = strings.TrimSpace(nameLine)
+	if strings.ToLower(nameLine) == "cancel" {
+		return nil, nil
+	}
+	if len(nameLine) < 2 || len(nameLine) > 32 {
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Name must be 2-32 characters."))
+		return nil, nil
+	}
+	charName := nameLine
+
+	// Step 2: Home region
+	regions := h.regions
+	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "\r\nChoose your home region:"))
+	for i, r := range regions {
+		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s\r\n     %s",
+			telnet.Green, i+1, telnet.Reset,
+			telnet.BrightWhite, r.Name, telnet.Reset,
+			r.Description))
+	}
+	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select region [1-%d]: ", len(regions)))
+	regionLine, err := conn.ReadLine()
+	if err != nil {
+		return nil, fmt.Errorf("reading region selection: %w", err)
+	}
+	regionLine = strings.TrimSpace(regionLine)
+	if strings.ToLower(regionLine) == "cancel" {
+		return nil, nil
+	}
+	regionChoice := 0
+	if _, err := fmt.Sscanf(regionLine, "%d", &regionChoice); err != nil || regionChoice < 1 || regionChoice > len(regions) {
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
+		return nil, nil
+	}
+	selectedRegion := regions[regionChoice-1]
+
+	// Step 3: Class
+	classes := h.classes
+	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "\r\nChoose your class:"))
+	for i, c := range classes {
+		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s (HP/lvl: %d, Key: %s)\r\n     %s",
+			telnet.Green, i+1, telnet.Reset,
+			telnet.BrightWhite, c.Name, telnet.Reset,
+			c.HitPointsPerLevel, c.KeyAbility,
+			c.Description))
+	}
+	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select class [1-%d]: ", len(classes)))
+	classLine, err := conn.ReadLine()
+	if err != nil {
+		return nil, fmt.Errorf("reading class selection: %w", err)
+	}
+	classLine = strings.TrimSpace(classLine)
+	if strings.ToLower(classLine) == "cancel" {
+		return nil, nil
+	}
+	classChoice := 0
+	if _, err := fmt.Sscanf(classLine, "%d", &classChoice); err != nil || classChoice < 1 || classChoice > len(classes) {
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
+		return nil, nil
+	}
+	selectedClass := classes[classChoice-1]
+
+	// Step 4: Preview + confirm
+	newChar, err := character.Build(charName, selectedRegion, selectedClass)
+	if err != nil {
+		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error building character: %v", err))
+		return nil, nil
+	}
+
+	_ = conn.WriteLine(telnet.Colorize(telnet.BrightCyan, "\r\n--- Character Preview ---"))
+	_ = conn.WriteLine(FormatCharacterStats(newChar))
+	_ = conn.WritePrompt(telnet.Colorize(telnet.BrightWhite, "Create this character? [y/N]: "))
+
+	confirm, err := conn.ReadLine()
+	if err != nil {
+		return nil, fmt.Errorf("reading confirmation: %w", err)
+	}
+	if strings.ToLower(strings.TrimSpace(confirm)) != "y" {
+		_ = conn.WriteLine(telnet.Colorize(telnet.Yellow, "Character creation cancelled."))
+		return nil, nil
+	}
+
+	// Step 5: Persist
+	newChar.AccountID = accountID
+	start := time.Now()
+	created, err := h.characters.Create(ctx, newChar)
+	if err != nil {
+		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Failed to create character: %v", err))
+		return nil, nil
+	}
+	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
+		"Character %s created! [%s]", created.Name, time.Since(start)))
+	return created, nil
+}
+
+// FormatCharacterSummary returns a one-line summary of a character for the selection list.
+// Exported for testing.
+//
+// Precondition: c must be non-nil.
+// Postcondition: Returns a non-empty human-readable string.
+func FormatCharacterSummary(c *character.Character) string {
+	return fmt.Sprintf("%s%s%s — Lvl %d %s from %s",
+		telnet.BrightWhite, c.Name, telnet.Reset,
+		c.Level, c.Class, c.Region)
+}
+
+// FormatCharacterStats returns a multi-line stats block for the character preview.
+// Exported for testing.
+//
+// Precondition: c must be non-nil.
+// Postcondition: Returns a formatted multi-line string with HP and all six ability scores.
+func FormatCharacterStats(c *character.Character) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("  Name:   %s%s%s\r\n", telnet.BrightWhite, c.Name, telnet.Reset))
+	sb.WriteString(fmt.Sprintf("  Region: %s   Class: %s   Level: %d\r\n", c.Region, c.Class, c.Level))
+	sb.WriteString(fmt.Sprintf("  HP:     %d/%d\r\n", c.CurrentHP, c.MaxHP))
+	sb.WriteString(fmt.Sprintf("  STR:%2d  DEX:%2d  CON:%2d  INT:%2d  WIS:%2d  CHA:%2d\r\n",
+		c.Abilities.Strength, c.Abilities.Dexterity, c.Abilities.Constitution,
+		c.Abilities.Intelligence, c.Abilities.Wisdom, c.Abilities.Charisma))
+	return sb.String()
+}

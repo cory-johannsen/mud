@@ -21,6 +21,7 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/server"
+	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
 func main() {
@@ -29,6 +30,8 @@ func main() {
 	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
 	zonesDir := flag.String("zones", "content/zones", "path to zone YAML files directory")
 	flag.Parse()
+
+	ctx := context.Background()
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {
@@ -61,6 +64,18 @@ func main() {
 		zap.Duration("elapsed", time.Since(zoneStart)),
 	)
 
+	// Connect to PostgreSQL for character persistence
+	dbStart := time.Now()
+	pool, err := postgres.NewPool(ctx, cfg.Database)
+	if err != nil {
+		logger.Fatal("connecting to database", zap.Error(err))
+	}
+	logger.Info("database connected",
+		zap.String("host", cfg.Database.Host),
+		zap.Duration("elapsed", time.Since(dbStart)),
+	)
+	charRepo := postgres.NewCharacterRepository(pool.DB())
+
 	// Create managers
 	sessMgr := session.NewManager()
 	cmdRegistry := command.DefaultRegistry()
@@ -72,7 +87,7 @@ func main() {
 	// Create gRPC service
 	grpcService := gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger,
+		worldHandler, chatHandler, logger, charRepo,
 	)
 
 	// Create gRPC server
@@ -103,7 +118,21 @@ func main() {
 		zap.String("grpc_addr", cfg.GameServer.Addr()),
 	)
 
-	if err := lifecycle.Run(context.Background()); err != nil {
+	lifecycle.Add("postgres", &server.FuncService{
+		StartFn: func() error {
+			for {
+				time.Sleep(30 * time.Second)
+				if err := pool.Health(ctx, 5*time.Second); err != nil {
+					logger.Warn("database health check failed", zap.Error(err))
+				}
+			}
+		},
+		StopFn: func() {
+			pool.Close()
+		},
+	})
+
+	if err := lifecycle.Run(ctx); err != nil {
 		logger.Fatal("server error", zap.Error(err))
 	}
 }

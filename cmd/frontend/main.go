@@ -14,6 +14,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/frontend/handlers"
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/server"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
@@ -23,6 +24,8 @@ func main() {
 	start := time.Now()
 
 	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
+	regionsDir := flag.String("regions", "content/regions", "path to region YAML files directory")
+	classesDir := flag.String("classes", "content/classes", "path to class YAML files directory")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -55,9 +58,24 @@ func main() {
 		zap.Duration("elapsed", time.Since(dbStart)),
 	)
 
+	// Load ruleset data
+	regions, err := ruleset.LoadRegions(*regionsDir)
+	if err != nil {
+		logger.Fatal("loading regions", zap.Error(err))
+	}
+	classes, err := ruleset.LoadClasses(*classesDir)
+	if err != nil {
+		logger.Fatal("loading classes", zap.Error(err))
+	}
+	logger.Info("ruleset loaded",
+		zap.Int("regions", len(regions)),
+		zap.Int("classes", len(classes)),
+	)
+
 	// Build services
 	accounts := postgres.NewAccountRepository(pool.DB())
-	authHandler := handlers.NewAuthHandler(accounts, logger, cfg.GameServer.Addr())
+	characters := postgres.NewCharacterRepository(pool.DB())
+	authHandler := handlers.NewAuthHandler(accounts, characters, regions, classes, logger, cfg.GameServer.Addr())
 	telnetAcceptor := telnet.NewAcceptor(cfg.Telnet, authHandler, logger)
 
 	// Wire lifecycle

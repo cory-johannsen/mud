@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"time"
 
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
@@ -15,20 +16,31 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// CharacterSaver persists character state after a session ends.
+//
+// Precondition: id must be > 0; location must be a valid room ID.
+// Postcondition: Returns nil on success or a non-nil error on failure.
+type CharacterSaver interface {
+	SaveState(ctx context.Context, id int64, location string, currentHP int) error
+}
+
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
 type GameServiceServer struct {
 	gamev1.UnimplementedGameServiceServer
-	world    *world.Manager
-	sessions *session.Manager
-	commands *command.Registry
-	worldH   *WorldHandler
-	chatH    *ChatHandler
-	logger   *zap.Logger
+	world      *world.Manager
+	sessions   *session.Manager
+	commands   *command.Registry
+	worldH     *WorldHandler
+	chatH      *ChatHandler
+	charSaver  CharacterSaver
+	logger     *zap.Logger
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
 //
-// Precondition: All parameters must be non-nil.
+// Precondition: worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, and logger must be non-nil.
+// charSaver may be nil (character state will not be persisted on disconnect).
+// Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
 	sessMgr *session.Manager,
@@ -36,14 +48,16 @@ func NewGameServiceServer(
 	worldHandler *WorldHandler,
 	chatHandler *ChatHandler,
 	logger *zap.Logger,
+	charSaver CharacterSaver,
 ) *GameServiceServer {
 	return &GameServiceServer{
-		world:    worldMgr,
-		sessions: sessMgr,
-		commands: cmdRegistry,
-		worldH:   worldHandler,
-		chatH:    chatHandler,
-		logger:   logger,
+		world:     worldMgr,
+		sessions:  sessMgr,
+		commands:  cmdRegistry,
+		worldH:    worldHandler,
+		chatH:     chatHandler,
+		charSaver: charSaver,
+		logger:    logger,
 	}
 }
 
@@ -68,10 +82,18 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 
 	uid := joinReq.Uid
 	username := joinReq.Username
+	charName := joinReq.CharacterName
+	if charName == "" {
+		charName = username // fallback for backward compat
+	}
+	characterID := joinReq.CharacterId
+	currentHP := 0 // populated from character repository on first load; persisted on disconnect
 
 	s.logger.Info("player joining world",
 		zap.String("uid", uid),
 		zap.String("username", username),
+		zap.String("char_name", charName),
+		zap.Int64("character_id", characterID),
 	)
 
 	// Step 2: Create player session in start room
@@ -80,7 +102,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		return fmt.Errorf("no start room configured")
 	}
 
-	sess, err := s.sessions.AddPlayer(uid, username, startRoom.ID)
+	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, startRoom.ID, currentHP)
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
 	}
@@ -88,7 +110,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(startRoom.ID, uid, &gamev1.RoomEvent{
-		Player: username,
+		Player: charName,
 		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
 	})
 
@@ -200,14 +222,14 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 
 	// Broadcast departure from old room
 	s.broadcastRoomEvent(result.OldRoomID, uid, &gamev1.RoomEvent{
-		Player:    sess.Username,
+		Player:    sess.CharName,
 		Type:      gamev1.RoomEventType_ROOM_EVENT_TYPE_DEPART,
 		Direction: string(dir),
 	})
 
 	// Broadcast arrival in new room
 	s.broadcastRoomEvent(result.View.RoomId, uid, &gamev1.RoomEvent{
-		Player:    sess.Username,
+		Player:    sess.CharName,
 		Type:      gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
 		Direction: string(dir.Opposite()),
 	})
@@ -279,7 +301,7 @@ func (s *GameServiceServer) handleQuit(uid string) (*gamev1.ServerEvent, error) 
 	sess, _ := s.sessions.GetPlayer(uid)
 	reason := "Goodbye"
 	if sess != nil {
-		reason = fmt.Sprintf("%s has quit", sess.Username)
+		reason = fmt.Sprintf("%s has quit", sess.CharName)
 	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Disconnected{
@@ -355,25 +377,50 @@ func (s *GameServiceServer) forwardEvents(ctx context.Context, entity *session.B
 	}
 }
 
-// cleanupPlayer removes a player from the session manager and broadcasts departure.
+// cleanupPlayer removes a player from the session manager, persists character state, and broadcasts departure.
+//
+// Precondition: uid must be non-empty.
+// Postcondition: Player is removed from all tracking; character state is saved if charSaver is configured.
 func (s *GameServiceServer) cleanupPlayer(uid, username string) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return
 	}
 	roomID := sess.RoomID
+	characterID := sess.CharacterID
+	currentHP := sess.CurrentHP
+	charName := sess.CharName
 
 	if err := s.sessions.RemovePlayer(uid); err != nil {
 		s.logger.Warn("removing player on cleanup", zap.String("uid", uid), zap.Error(err))
 	}
 
+	// Persist character state on disconnect.
+	if characterID > 0 && s.charSaver != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := s.charSaver.SaveState(ctx, characterID, roomID, currentHP); err != nil {
+			s.logger.Warn("saving character state on disconnect",
+				zap.String("uid", uid),
+				zap.Int64("character_id", characterID),
+				zap.Error(err),
+			)
+		} else {
+			s.logger.Info("character state saved",
+				zap.Int64("character_id", characterID),
+				zap.String("room", roomID),
+			)
+		}
+	}
+
 	s.broadcastRoomEvent(roomID, uid, &gamev1.RoomEvent{
-		Player: username,
+		Player: charName,
 		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_DEPART,
 	})
 
 	s.logger.Info("player disconnected",
 		zap.String("uid", uid),
 		zap.String("username", username),
+		zap.Int64("character_id", characterID),
 	)
 }

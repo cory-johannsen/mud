@@ -51,7 +51,7 @@ func TestWorldHandler_Look(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "room_a")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")
@@ -73,7 +73,7 @@ func TestWorldHandler_Move(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "room_a")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
 	require.NoError(t, err)
 
 	view, err := h.Move("u1", world.North)
@@ -86,7 +86,7 @@ func TestWorldHandler_Move_NoExit(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "room_a")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
 	require.NoError(t, err)
 
 	_, err = h.Move("u1", world.West)
@@ -98,7 +98,7 @@ func TestWorldHandler_MoveWithContext(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "room_a")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
 	require.NoError(t, err)
 
 	result, err := h.MoveWithContext("u1", world.North)
@@ -111,7 +111,7 @@ func TestWorldHandler_Exits(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "room_a")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
 	require.NoError(t, err)
 
 	exitList, err := h.Exits("u1")
@@ -125,9 +125,9 @@ func TestWorldHandler_RoomViewExcludesSelf(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "room_a")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
 	require.NoError(t, err)
-	_, err = sessMgr.AddPlayer("u2", "Bob", "room_a")
+	_, err = sessMgr.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")

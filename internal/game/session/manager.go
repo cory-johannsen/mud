@@ -7,12 +7,18 @@ import (
 
 // PlayerSession tracks a connected player's state.
 type PlayerSession struct {
-	// UID is the unique player identifier (account ID or username).
+	// UID is the unique player identifier (character ID as string).
 	UID string
-	// Username is the display name.
+	// Username is the account username (for logging).
 	Username string
+	// CharName is the character display name shown in-game.
+	CharName string
+	// CharacterID is the database ID of the character for persistence.
+	CharacterID int64
 	// RoomID is the current room the player occupies.
 	RoomID string
+	// CurrentHP is the character's current hit points.
+	CurrentHP int
 	// Entity is the bridge entity for pushing events to the player.
 	Entity *BridgeEntity
 }
@@ -35,9 +41,9 @@ func NewManager() *Manager {
 
 // AddPlayer registers a new player session in the given room.
 //
-// Precondition: uid, username, and roomID must be non-empty.
+// Precondition: uid, username, charName, and roomID must be non-empty; characterID must be >= 0; currentHP must be >= 0.
 // Postcondition: Returns the created PlayerSession, or an error if the UID is already registered.
-func (m *Manager) AddPlayer(uid, username, roomID string) (*PlayerSession, error) {
+func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, roomID string, currentHP int) (*PlayerSession, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -47,10 +53,13 @@ func (m *Manager) AddPlayer(uid, username, roomID string) (*PlayerSession, error
 
 	entity := NewBridgeEntity(uid, 64)
 	sess := &PlayerSession{
-		UID:      uid,
-		Username: username,
-		RoomID:   roomID,
-		Entity:   entity,
+		UID:         uid,
+		Username:    username,
+		CharName:    charName,
+		CharacterID: characterID,
+		RoomID:      roomID,
+		CurrentHP:   currentHP,
+		Entity:      entity,
 	}
 
 	m.players[uid] = sess

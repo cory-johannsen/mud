@@ -37,3 +37,4 @@ deployments/docker/.env
 # Environment
 .env
 .env.local
+/gameserver

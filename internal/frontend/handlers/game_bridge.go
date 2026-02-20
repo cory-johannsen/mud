@@ -12,12 +12,16 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // gameBridge manages the gRPC session between a Telnet client and the game server.
-func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, username string) error {
+//
+// Precondition: conn must be open; char must be non-nil with a valid ID.
+// Postcondition: Returns nil on clean disconnect, or a non-nil error on fatal failure.
+func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, username string, char *character.Character) error {
 	// Connect to gameserver
 	grpcConn, err := grpc.NewClient(h.gameServerAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -42,13 +46,15 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, usernam
 	}
 
 	// Send JoinWorldRequest
-	uid := username // Use username as UID for now
+	uid := fmt.Sprintf("%d", char.ID)
 	if err := stream.Send(&gamev1.ClientMessage{
 		RequestId: "join",
 		Payload: &gamev1.ClientMessage_JoinWorld{
 			JoinWorld: &gamev1.JoinWorldRequest{
-				Uid:      uid,
-				Username: username,
+				Uid:           uid,
+				Username:      username,
+				CharacterId:   char.ID,
+				CharacterName: char.Name,
 			},
 		},
 	}); err != nil {
@@ -65,7 +71,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, usernam
 	}
 
 	// Write initial prompt
-	prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", username)
+	prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", char.Name)
 	if err := conn.WritePrompt(prompt); err != nil {
 		return fmt.Errorf("writing initial prompt: %w", err)
 	}
@@ -76,11 +82,11 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, usernam
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, username)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, username)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name)
 
 	cancel()
 	wg.Wait()
@@ -90,7 +96,10 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, usernam
 
 // commandLoop reads lines from the Telnet connection, parses commands,
 // and sends them as gRPC ClientMessages.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, username string) error {
+//
+// Precondition: stream must be open; charName must be non-empty.
+// Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -108,7 +117,7 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 
 		line = strings.TrimSpace(line)
 		if line == "" {
-			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", username))
+			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
 			continue
 		}
 
@@ -148,7 +157,7 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		case command.HandlerSay:
 			if parsed.RawArgs == "" {
 				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Say what?"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", username))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
 				continue
 			}
 			msg = &gamev1.ClientMessage{
@@ -161,7 +170,7 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		case command.HandlerEmote:
 			if parsed.RawArgs == "" {
 				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Emote what?"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", username))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
 				continue
 			}
 			msg = &gamev1.ClientMessage{
@@ -188,12 +197,12 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 
 		case command.HandlerHelp:
 			h.showGameHelp(conn, registry)
-			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", username))
+			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
 			continue
 
 		default:
 			_ = conn.WriteLine(telnet.Colorf(telnet.Dim, "You don't know how to '%s'.", parsed.Command))
-			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", username))
+			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
 			continue
 		}
 
@@ -216,7 +225,10 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 
 // forwardServerEvents reads ServerEvents from the gRPC stream and writes
 // rendered text to the Telnet connection.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, username string) {
+//
+// Precondition: stream must be open; charName must be non-empty.
+// Postcondition: Returns when ctx is done, stream closes, or a disconnect event is received.
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -254,7 +266,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		if text != "" {
 			_ = conn.WriteLine(text)
 			// Re-display prompt after each server event
-			prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", username)
+			prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName)
 			_ = conn.WritePrompt(prompt)
 		}
 	}
