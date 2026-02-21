@@ -30,6 +30,18 @@ func Roll(expr Expression, src Source) (RollResult, error) {
 	}, nil
 }
 
+// RollExpr parses expr and rolls it using src in a single call.
+//
+// Precondition: expr must be a valid dice expression string; src must be non-nil.
+// Postcondition: Returns a RollResult or a parse/roll error.
+func RollExpr(expr string, src Source) (RollResult, error) {
+	e, err := Parse(expr)
+	if err != nil {
+		return RollResult{}, err
+	}
+	return Roll(e, src)
+}
+
 // MustParse parses expr and panics on error. Useful for package-level constants.
 //
 // Precondition: expr must be a valid dice expression.

@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zaptest"
 	"pgregory.net/rapid"
 )
 
@@ -312,6 +313,41 @@ func TestRoll_Property_KeepHighest_Postconditions(t *testing.T) {
 			}
 		}
 	})
+}
+
+// TestLoggedRoller_LogsResult verifies Roller.RollExpr returns correct result and logs at debug.
+func TestLoggedRoller_LogsResult(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := newDetSource(9) // Intn(20)=9 → die=10
+	roller := dice.NewLoggedRoller(src, logger)
+
+	result, err := roller.RollExpr("d20")
+	require.NoError(t, err)
+	assert.Equal(t, 10, result.Total())
+}
+
+// TestLoggedRoller_InvalidExprReturnsError verifies Roller.RollExpr returns an error for invalid input.
+func TestLoggedRoller_InvalidExprReturnsError(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := newDetSource(0)
+	roller := dice.NewLoggedRoller(src, logger)
+	_, err := roller.RollExpr("bad")
+	assert.Error(t, err)
+}
+
+// TestRollExpr_Convenience verifies RollExpr parses and rolls a valid expression in one call.
+func TestRollExpr_Convenience(t *testing.T) {
+	src := newDetSource(9) // Intn(20)=9 → die=10
+	result, err := dice.RollExpr("d20", src)
+	require.NoError(t, err)
+	assert.Equal(t, 10, result.Total())
+}
+
+// TestRollExpr_InvalidExpr verifies RollExpr returns an error for an invalid expression.
+func TestRollExpr_InvalidExpr(t *testing.T) {
+	src := newDetSource(0)
+	_, err := dice.RollExpr("not-dice", src)
+	assert.Error(t, err)
 }
 
 // TestParse_Property_ValidExpressionsHaveCorrectFields verifies that for any
