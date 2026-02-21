@@ -1,6 +1,7 @@
 package dice_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -76,5 +77,14 @@ func TestRollResult_String_Property(t *testing.T) {
 			"String() must contain the expression %q", expr)
 		assert.True(rt, strings.Contains(s, "\u2192"),
 			"String() must contain the unicode arrow \u2192")
+		assert.Contains(rt, s, fmt.Sprintf("%d", r.Total()),
+			"String() must contain the computed total")
 	})
+}
+
+// TestRollResult_String_PanicsOnEmptyExpression verifies that String() enforces
+// its precondition and panics when Expression is empty.
+func TestRollResult_String_PanicsOnEmptyExpression(t *testing.T) {
+	r := dice.RollResult{Dice: []int{4}, Modifier: 0}
+	assert.Panics(t, func() { _ = r.String() })
 }

@@ -30,6 +30,9 @@ func (r RollResult) Total() int {
 //
 // Precondition: r.Expression is non-empty.
 func (r RollResult) String() string {
+	if r.Expression == "" {
+		panic("dice: RollResult.String() precondition violated: Expression must be non-empty")
+	}
 	diceStr := fmt.Sprintf("%v", r.Dice)
 	modStr := fmt.Sprintf("%+d", r.Modifier)
 	return fmt.Sprintf("%s \u2192 %s %s = %d", r.Expression, diceStr, modStr, r.Total())
