@@ -128,18 +128,22 @@ func TestParse_BasicForms(t *testing.T) {
 		wantN     int
 		wantSides int
 		wantMod   int
+		wantKH    int
 		wantErr   bool
 	}{
-		{"d20", 1, 20, 0, false},
-		{"2d6", 2, 6, 0, false},
-		{"2d6+3", 2, 6, 3, false},
-		{"4d8-2", 4, 8, -2, false},
-		{"1d4+0", 1, 4, 0, false},
-		{"d100", 1, 100, 0, false},
-		{"", 0, 0, 0, true},
-		{"abc", 0, 0, 0, true},
-		{"2d0", 0, 0, 0, true},  // sides < 2
-		{"0d6", 0, 0, 0, true},  // count = 0
+		{"d20", 1, 20, 0, 0, false},
+		{"2d6", 2, 6, 0, 0, false},
+		{"2d6+3", 2, 6, 3, 0, false},
+		{"4d8-2", 4, 8, -2, 0, false},
+		{"1d4+0", 1, 4, 0, 0, false},
+		{"d100", 1, 100, 0, 0, false},
+		{"4d6kh3", 4, 6, 0, 3, false}, // keep-highest success
+		{"", 0, 0, 0, 0, true},
+		{"abc", 0, 0, 0, 0, true},
+		{"2d0", 0, 0, 0, 0, true},   // sides < 2
+		{"0d6", 0, 0, 0, 0, true},   // count = 0
+		{"3d6kh3", 0, 0, 0, 0, true}, // kh == count
+		{"4d6kh0", 0, 0, 0, 0, true}, // kh == 0
 	}
 	for _, tt := range tests {
 		t.Run(tt.expr, func(t *testing.T) {
@@ -152,6 +156,7 @@ func TestParse_BasicForms(t *testing.T) {
 			assert.Equal(t, tt.wantN, expr.Count)
 			assert.Equal(t, tt.wantSides, expr.Sides)
 			assert.Equal(t, tt.wantMod, expr.Modifier)
+			assert.Equal(t, tt.wantKH, expr.KeepHighest)
 		})
 	}
 }
@@ -183,6 +188,9 @@ func TestParse_Property_ValidExpressionsHaveCorrectFields(t *testing.T) {
 		}
 		if expr.Modifier != modifier {
 			rt.Fatalf("Modifier: got %d want %d for %q", expr.Modifier, modifier, exprStr)
+		}
+		if expr.Raw != exprStr {
+			rt.Fatalf("Raw: got %q want %q", expr.Raw, exprStr)
 		}
 	})
 }
