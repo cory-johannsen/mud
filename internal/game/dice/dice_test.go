@@ -88,3 +88,21 @@ func TestRollResult_String_PanicsOnEmptyExpression(t *testing.T) {
 	r := dice.RollResult{Dice: []int{4}, Modifier: 0}
 	assert.Panics(t, func() { _ = r.String() })
 }
+
+// TestCryptoSource_Intn_InRange verifies the postcondition:
+// every value returned by Intn(6) is in [0, 6).
+func TestCryptoSource_Intn_InRange(t *testing.T) {
+	src := dice.NewCryptoSource()
+	for i := 0; i < 1000; i++ {
+		v := src.Intn(6)
+		assert.GreaterOrEqual(t, v, 0)
+		assert.Less(t, v, 6)
+	}
+}
+
+// TestCryptoSource_Intn_PanicsOnZero verifies the precondition:
+// Intn panics when called with n <= 0.
+func TestCryptoSource_Intn_PanicsOnZero(t *testing.T) {
+	src := dice.NewCryptoSource()
+	assert.Panics(t, func() { src.Intn(0) })
+}
