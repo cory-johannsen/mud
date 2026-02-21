@@ -8,7 +8,10 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest"
+	"go.uber.org/zap/zaptest/observer"
 	"pgregory.net/rapid"
 )
 
@@ -317,13 +320,37 @@ func TestRoll_Property_KeepHighest_Postconditions(t *testing.T) {
 
 // TestLoggedRoller_LogsResult verifies Roller.RollExpr returns correct result and logs at debug.
 func TestLoggedRoller_LogsResult(t *testing.T) {
-	logger := zaptest.NewLogger(t)
+	core, logs := observer.New(zap.DebugLevel)
+	logger := zap.New(core)
 	src := newDetSource(9) // Intn(20)=9 → die=10
 	roller := dice.NewLoggedRoller(src, logger)
 
 	result, err := roller.RollExpr("d20")
 	require.NoError(t, err)
 	assert.Equal(t, 10, result.Total())
+
+	// Assert the debug log entry was emitted with correct fields (COMBAT-29)
+	require.Equal(t, 1, logs.Len(), "expected exactly one log entry")
+	entry := logs.All()[0]
+	assert.Equal(t, zap.DebugLevel, entry.Level)
+	assert.Equal(t, "dice roll", entry.Message)
+
+	fieldMap := make(map[string]interface{})
+	for _, f := range entry.Context {
+		switch f.Type {
+		case zapcore.StringType:
+			fieldMap[f.Key] = f.String
+		case zapcore.Int64Type:
+			fieldMap[f.Key] = int(f.Integer)
+		case zapcore.ArrayMarshalerType:
+			// zap.Ints produces an ArrayMarshalerType; just verify the key exists
+			fieldMap[f.Key] = f.Key
+		}
+	}
+	assert.Equal(t, "d20", fieldMap["expression"])
+	assert.Equal(t, 10, fieldMap["total"])
+	assert.Contains(t, fieldMap, "dice")
+	assert.Equal(t, 0, fieldMap["modifier"])
 }
 
 // TestLoggedRoller_InvalidExprReturnsError verifies Roller.RollExpr returns an error for invalid input.
