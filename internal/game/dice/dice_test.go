@@ -162,6 +162,84 @@ func TestParse_BasicForms(t *testing.T) {
 	}
 }
 
+// deterministicSource cycles through fixed values to enable reproducible tests.
+//
+// Precondition: values must be non-empty.
+type deterministicSource struct {
+	values []int
+	idx    int
+}
+
+func (d *deterministicSource) Intn(n int) int {
+	v := d.values[d.idx%len(d.values)] % n
+	d.idx++
+	return v
+}
+
+func newDetSource(vals ...int) dice.Source {
+	return &deterministicSource{values: vals}
+}
+
+// TestRoll_BasicResult verifies Roll produces correct dice, modifier, total, and expression
+// for a basic NdX+M expression using a deterministic source.
+func TestRoll_BasicResult(t *testing.T) {
+	// Intn(6) returns 3,4 → die values 4,5
+	src := newDetSource(3, 4)
+	expr, err := dice.Parse("2d6+3")
+	require.NoError(t, err)
+	result, err := dice.Roll(expr, src)
+	require.NoError(t, err)
+	assert.Equal(t, []int{4, 5}, result.Dice)
+	assert.Equal(t, 3, result.Modifier)
+	assert.Equal(t, 12, result.Total()) // 4+5+3
+	assert.Equal(t, "2d6+3", result.Expression)
+}
+
+// TestRoll_D20NoModifier verifies Roll with a single d20 and no modifier.
+func TestRoll_D20NoModifier(t *testing.T) {
+	src := newDetSource(14) // Intn(20)=14 → die=15
+	expr, _ := dice.Parse("d20")
+	result, err := dice.Roll(expr, src)
+	require.NoError(t, err)
+	assert.Equal(t, []int{15}, result.Dice)
+	assert.Equal(t, 0, result.Modifier)
+	assert.Equal(t, 15, result.Total())
+}
+
+// TestRoll_KeepHighest verifies that Roll with kh suffix keeps only the N highest dice.
+func TestRoll_KeepHighest(t *testing.T) {
+	// 4d6kh3: Intn(6) returns 0,1,2,3 → die values 1,2,3,4 → keep 3 highest: [4,3,2] → sum=9
+	src := newDetSource(0, 1, 2, 3)
+	expr, err := dice.Parse("4d6kh3")
+	require.NoError(t, err)
+	result, err := dice.Roll(expr, src)
+	require.NoError(t, err)
+	assert.Equal(t, 3, len(result.Dice))
+	assert.Equal(t, 9, result.Total())
+}
+
+// TestRoll_NegativeModifier verifies Roll applies a negative modifier correctly.
+func TestRoll_NegativeModifier(t *testing.T) {
+	src := newDetSource(5) // Intn(8)=5 → die=6
+	expr, _ := dice.Parse("1d8-2")
+	result, err := dice.Roll(expr, src)
+	require.NoError(t, err)
+	assert.Equal(t, 4, result.Total()) // 6-2
+}
+
+// TestMustParse_ValidExpr verifies MustParse returns a correct Expression for valid input.
+func TestMustParse_ValidExpr(t *testing.T) {
+	expr := dice.MustParse("2d6+3")
+	assert.Equal(t, 2, expr.Count)
+	assert.Equal(t, 6, expr.Sides)
+	assert.Equal(t, 3, expr.Modifier)
+}
+
+// TestMustParse_InvalidPanics verifies MustParse panics on invalid input.
+func TestMustParse_InvalidPanics(t *testing.T) {
+	assert.Panics(t, func() { dice.MustParse("bad") })
+}
+
 // TestParse_Property_ValidExpressionsHaveCorrectFields verifies that for any
 // valid NdX+M expression, Parse produces Count=N, Sides=X, Modifier=M.
 func TestParse_Property_ValidExpressionsHaveCorrectFields(t *testing.T) {
