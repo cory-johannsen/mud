@@ -1,0 +1,14 @@
+id: thief
+name: Thief
+archetype: criminal
+description: "A Thief pursues their goals through acquisition, preferably without anyone noticing. Portland's ruins are full of unguarded treasures."
+key_ability: dexterity
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Nimble Fingers
+    level: 1
+    description: "You can pick locks, pick pockets, and palm objects without a roll in normal conditions. In difficult conditions, gain advantage on Dexterity checks involving theft or sleight of hand."

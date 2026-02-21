@@ -1,0 +1,5 @@
+id: nerd
+name: Nerd
+description: "Ummm, ACTUALLY. Nerds possess deep specialized knowledge that most survivors consider useless — until it isn't."
+key_ability: intelligence
+hit_points_per_level: 6

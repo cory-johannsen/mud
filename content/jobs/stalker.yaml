@@ -1,0 +1,14 @@
+id: stalker
+name: Stalker
+archetype: drifter
+description: "Specialize in obsessively tracking down and capturing or killing their prey. Portland's ruins are excellent hunting grounds."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: For A Few Shillings More
+    level: 1
+    description: "Once you mark a target, you always find them. You can track your quarry through any terrain and always know their general direction as long as you've seen them in the last 24 hours."

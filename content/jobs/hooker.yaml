@@ -1,0 +1,14 @@
+id: hooker
+name: Hooker
+archetype: criminal
+description: "Make their money the hard way. Some are really good, and make a lot of money. All of them know where the bodies are buried."
+key_ability: dexterity
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  martial_melee: trained
+  light_armor: trained
+features:
+  - name: The Full Monty
+    level: 1
+    description: "You've seen it all and nothing surprises you. You are immune to seduction, blackmail, and social manipulation attempts. You also know how to run them."

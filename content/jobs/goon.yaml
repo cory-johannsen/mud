@@ -1,0 +1,14 @@
+id: goon
+name: Goon
+archetype: influencer
+description: "Beat down artists who punch people in the face for a living and somehow end up in charge of things they shouldn't be in charge of."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Jack Of All Trades
+    level: 1
+    description: "You've picked up enough skills through brute necessity that you can attempt any task without penalty, even those requiring specialized training."

@@ -1,0 +1,14 @@
+id: muscle
+name: Muscle
+archetype: criminal
+description: "Sometimes the only way to solve a problem is to beat the crap out of somebody. The Muscle is the one to do it."
+key_ability: dexterity
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  martial_melee: trained
+  light_armor: trained
+features:
+  - name: Sneak Attack
+    level: 1
+    description: "You deal an additional 2d6 damage when attacking an enemy who is unaware of you or flanked by an ally."

@@ -1,0 +1,13 @@
+id: hired_help
+name: Hired Help
+archetype: normie
+description: "The invisible hands that keep the world turning. Hired Help are often privy to their employers' most sensitive secrets."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Town Gossip
+    level: 1
+    description: "You hear everything. Once per day in a settlement, learn one piece of local gossip or a secret about a resident of your choice."

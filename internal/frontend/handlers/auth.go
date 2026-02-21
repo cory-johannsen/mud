@@ -51,7 +51,8 @@ type AuthHandler struct {
 	accounts       AccountStore
 	characters     CharacterStore
 	regions        []*ruleset.Region
-	classes        []*ruleset.Class
+	teams          []*ruleset.Team
+	jobs           []*ruleset.Job
 	logger         *zap.Logger
 	gameServerAddr string
 }
@@ -64,7 +65,8 @@ func NewAuthHandler(
 	accounts AccountStore,
 	characters CharacterStore,
 	regions []*ruleset.Region,
-	classes []*ruleset.Class,
+	teams []*ruleset.Team,
+	jobs []*ruleset.Job,
 	logger *zap.Logger,
 	gameServerAddr string,
 ) *AuthHandler {
@@ -72,7 +74,8 @@ func NewAuthHandler(
 		accounts:       accounts,
 		characters:     characters,
 		regions:        regions,
-		classes:        classes,
+		teams:          teams,
+		jobs:           jobs,
 		logger:         logger,
 		gameServerAddr: gameServerAddr,
 	}

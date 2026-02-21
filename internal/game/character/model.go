@@ -27,7 +27,8 @@ type Character struct {
 
 	Name       string
 	Region     string // home region ID
-	Class      string // class ID
+	Class      string // job ID (replaces class for Gunchete)
+	Team       string // team ID: "gun" or "machete"
 	Level      int
 	Experience int
 

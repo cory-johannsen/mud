@@ -1,0 +1,14 @@
+id: laborer
+name: Laborer
+archetype: aggressor
+description: "Despicable, backbreaking and often thankless work is the lot in life for Laborers. Portland's ruins need constant rebuilding."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Backbreaker
+    level: 1
+    description: "Years of brutal work have made you extraordinarily tough. You may carry twice the normal load without penalty, and ignore the first point of Exhaustion each day."

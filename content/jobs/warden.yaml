@@ -1,0 +1,14 @@
+id: warden
+name: Warden
+archetype: drifter
+description: "Loners who prefer the company of animals to people. People also prefer this because they tend to smell like the animals they keep."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Warden of the Wild
+    level: 1
+    description: "The living things of Portland's ruins answer to you. Wild animals will not attack you unless you attack them first, and will warn you of nearby danger."

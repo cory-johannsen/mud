@@ -1,0 +1,17 @@
+id: psychopath
+name: Psychopath
+archetype: drifter
+description: "Cold, calculating, and manipulative. Often charming. Devoid of empathy. This makes them efficient killers in post-collapse Portland."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_melee: trained
+  light_armor: trained
+features:
+  - name: The Slayers Path
+    level: 1
+    description: "Violence comes naturally to you. You never suffer psychological trauma from killing, and may add your Constitution modifier to the first attack roll in any combat."
+drawbacks:
+  - name: Death Wish
+    description: "You are drawn to danger. When presented with a safer and a more dangerous route to the same goal, make a Resolve test (DN 3) or choose the dangerous one."

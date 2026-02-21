@@ -1,0 +1,15 @@
+id: guard
+name: Guard
+archetype: aggressor
+description: "Specializes in keeping other people in cages. Post-collapse Portland has many cages and always needs more guards."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_weapons: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Tortuous Inquisition
+    level: 1
+    description: "You know how to break someone down. In an interrogation, targets must succeed on a Resolve test (DN 3) each hour or reveal one piece of information."

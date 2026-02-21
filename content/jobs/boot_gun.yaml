@@ -1,0 +1,19 @@
+id: boot_gun
+name: Boot (Gun)
+archetype: aggressor
+team: gun
+description: "Grunt soldiers of the Gun team. Boots believe that firearms are the most elegant solution to every problem life presents."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_weapons: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Guns Are Tools
+    level: 1
+    description: "Your constant companions, guns are incredible tools for solving problems. When firing a weapon you may flip the results to succeed. Success is always a Critical Success; failure is always a Critical Failure."
+drawbacks:
+  - name: Bullet Lust
+    description: "You have a deep and abiding love for firearms. You can't resist picking up any gun you see, and you have a tendency to shoot first and ask questions later."

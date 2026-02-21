@@ -1,0 +1,14 @@
+id: tracker
+name: Tracker
+archetype: drifter
+description: "Specialize in locating and apprehending targets — bounty hunters, assassins, or those searching for missing persons. Portland's ruins don't hide things well from them."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: "It's a Trap!"
+    level: 1
+    description: "You recognize ambushes before they spring. Whenever you enter a room or location, you may ask the GM if an ambush or trap is present. If yes, you act in the surprise round."

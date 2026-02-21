@@ -1,0 +1,14 @@
+id: karen
+name: Karen
+archetype: influencer
+description: "Karens have made everyone around them OK with their nonstop chatter. They solve problems by yelling louder. Somehow this works in Portland's ruins."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Banter and Jibe
+    level: 1
+    description: "Your verbal aggression is exhausting and effective. Targets who fail a Resolve test (DN 2) against your complaints and demands comply with your requests simply to make you stop."

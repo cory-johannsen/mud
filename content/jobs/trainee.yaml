@@ -1,0 +1,16 @@
+id: trainee
+name: Trainee
+archetype: aggressor
+description: "Long hours of training to develop both martial and scholarly skills. Strict discipline instilled through rote tasks. The foundation of any serious fighting force."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_weapons: trained
+  martial_ranged: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: "Mettle & Steel"
+    level: 1
+    description: "Discipline is your armor. When you follow explicit orders from a commanding officer or superior, gain +2 to all attack and damage rolls for the duration of that mission."

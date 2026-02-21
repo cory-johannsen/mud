@@ -1,0 +1,14 @@
+id: driver
+name: Driver
+archetype: normie
+description: "The best some can achieve is to operate a vehicle. The Driver is that person — and they're very, very good at it."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Four-in-Hand
+    level: 1
+    description: "You can drive or pilot any vehicle without penalty, including improvised ones. In a vehicle chase, you always act first."

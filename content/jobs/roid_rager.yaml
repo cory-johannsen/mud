@@ -1,0 +1,16 @@
+id: roid_rager
+name: Roid Rager
+archetype: aggressor
+description: "The fury of a Roid Rager is not learned — it's an extension of something raging within. Portland's chemical supply chains have interesting side effects."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_melee: trained
+  simple_ranged: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Warp Spasm
+    level: 1
+    description: "Once per day, enter a berserker rage for 1 minute: gain +4 Strength, +2 HP per level, and ignore all non-lethal damage. After, suffer 1 level of Exhaustion."

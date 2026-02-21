@@ -1,0 +1,14 @@
+id: car_jacker
+name: Car Jacker
+archetype: criminal
+description: "The bane of Portland's streets, car jackers keep the city's black market vehicle trade running. Fast hands, faster feet."
+key_ability: dexterity
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  martial_ranged: trained
+  light_armor: trained
+features:
+  - name: Stand And Deliver
+    level: 1
+    description: "Your ability to project menace makes targets freeze. When you demand surrender with a weapon drawn, targets must make a Resolve test (DN 3) or comply immediately."

@@ -1,0 +1,13 @@
+id: bureaucrat
+name: Bureaucrat
+archetype: influencer
+description: "Even in ruins, someone has to manage the paperwork. Bureaucrats navigate the complex web of regulations that somehow survived the collapse."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Don't Kill the Messenger
+    level: 1
+    description: "You are just following orders and everyone knows it. Enemies must succeed on a Resolve test (DN 3) before targeting you while others are present."

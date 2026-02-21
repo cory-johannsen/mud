@@ -1,0 +1,15 @@
+id: smuggler
+name: Smuggler
+archetype: criminal
+description: "Specialists in getting illegal things into places they shouldn't go. Great to know, great at their jobs, and great at disappearing when things go wrong."
+key_ability: dexterity
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  martial_ranged: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Hans Shot First
+    level: 1
+    description: "You always draw first. When combat begins, you may take one free action before initiative is rolled — attack, run, or hide."

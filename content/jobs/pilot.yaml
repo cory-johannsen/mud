@@ -1,0 +1,14 @@
+id: pilot
+name: Pilot
+archetype: normie
+description: "Specializes in operating non-road vehicles: boats, aircraft, whatever still flies in post-collapse Portland."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  martial_ranged: trained
+  light_armor: trained
+features:
+  - name: Batten Down the Hatches
+    level: 1
+    description: "You can prepare any vehicle for extreme conditions in one minute. Passengers gain +2 to all checks while you pilot through hazardous conditions."

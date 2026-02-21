@@ -1,0 +1,18 @@
+id: vigilante
+name: Vigilante
+archetype: criminal
+description: "Somebody has to do something about all the problems. The Vigilante has decided it will be them. Portland doesn't know whether to thank them or arrest them."
+key_ability: dexterity
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  martial_melee: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Mortality Work
+    level: 1
+    description: "You strike from shadow with purpose. When attacking an enemy who has committed a crime you've witnessed, deal +2d6 damage and leave no evidence of your involvement."
+drawbacks:
+  - name: Alter Ego
+    description: "You maintain a secret identity. If your true identity is ever revealed, you lose all social standing and become hunted by the factions you've opposed."

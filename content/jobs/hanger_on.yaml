@@ -1,0 +1,14 @@
+id: hanger_on
+name: Hanger-On
+archetype: normie
+description: "Surrounds themselves with famous people to benefit from their status. Portland's celebrity ecosystem is bizarre but persistent."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  martial_ranged: trained
+  light_armor: trained
+features:
+  - name: Feast or Famine
+    level: 1
+    description: "When in the company of a famous or powerful person, you share their social privileges. You can invoke your famous companion's name to open doors — until they find out."

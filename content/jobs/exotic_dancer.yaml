@@ -1,0 +1,13 @@
+id: exotic_dancer
+name: Exotic Dancer
+archetype: influencer
+description: "Make their money using what they've got. Experts at getting customers to reveal information. Portland's best-paid intelligence operatives."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Alfred Pfennigworth
+    level: 1
+    description: "While performing or socializing, targets reveal sensitive information freely. After 10 minutes of interaction, learn one secret the target holds."

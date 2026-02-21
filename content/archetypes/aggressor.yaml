@@ -1,0 +1,5 @@
+id: aggressor
+name: Aggressor
+description: "Violence solves everything. Aggressors are the frontline combatants of post-collapse Portland, relying on raw strength and brutal efficiency to survive."
+key_ability: strength
+hit_points_per_level: 10

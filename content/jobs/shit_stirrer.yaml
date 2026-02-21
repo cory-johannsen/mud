@@ -1,0 +1,14 @@
+id: shit_stirrer
+name: Shit-Stirrer
+archetype: influencer
+description: "Exceptionally good at creating problems and inciting chaos. Everybody needs to know one, but you never hang out with them outside work."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Shaken Not Stirred
+    level: 1
+    description: "You can instigate conflict between any two parties with a well-placed rumor or incident. Once per day, start a fight, argument, or diplomatic crisis between NPCs without implicating yourself."

@@ -1,0 +1,13 @@
+id: extortionist
+name: Extortionist
+archetype: influencer
+description: "Shake-down masters. They use implied or actual violence to coerce others into giving them what they want."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Mastermind
+    level: 1
+    description: "You see three moves ahead. Once per scene, declare that a situation is playing out exactly as you planned — adding your Intelligence modifier to any one roll."

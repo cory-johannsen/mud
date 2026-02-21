@@ -1,0 +1,13 @@
+id: salesman
+name: Salesman
+archetype: normie
+description: "The lowest of lows. Peddles whatever they can for more than it's worth. Truly awful people who are also somehow essential to Portland's survival."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Grease the Wheels
+    level: 1
+    description: "You know what everyone wants. Once per scene, learn what a person needs most — their price, weakness, or desire — with a successful Insight check."

@@ -1,0 +1,14 @@
+id: entertainer
+name: Entertainer
+archetype: influencer
+description: "Creative professionals who bring excitement and wonder through performance arts. Morale is a resource, and Entertainers produce it."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: The Show Must Go On
+    level: 1
+    description: "Your performance cannot be stopped by minor inconveniences like combat. While performing, allies within earshot gain +1 to all checks."

@@ -1,0 +1,15 @@
+id: pirate
+name: Pirate
+archetype: aggressor
+description: "Pirates take what they need and what they want. The Willamette still flows, and so does opportunity."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_ranged: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Salty Dog
+    level: 1
+    description: "You're at home on any body of water. You never suffer seasickness, can navigate by stars, and gain +2 to all checks aboard watercraft."

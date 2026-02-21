@@ -1,0 +1,13 @@
+id: journalist
+name: Journalist
+archetype: nerd
+description: "Uses the power of the printed word to influence the masses. Post-collapse Portland still has a press — barely."
+key_ability: intelligence
+hit_points_per_level: 6
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: "Scrivener's Speed"
+    level: 1
+    description: "You can record, recall, and disseminate information faster than anyone. Once per day, your published account of an event becomes the accepted version of what happened."

@@ -1,0 +1,13 @@
+id: hippie
+name: Hippie
+archetype: nerd
+description: "A spiritual seeker, a free spirit, and a lover of all things natural. Portland's collapse only confirmed what they already knew."
+key_ability: intelligence
+hit_points_per_level: 6
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Sacred Mantra
+    level: 1
+    description: "Your meditative practice steels your mind. Once per day, enter a state of calm that grants immunity to fear and advantage on all Resolve tests for one hour."

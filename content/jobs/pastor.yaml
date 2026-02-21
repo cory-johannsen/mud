@@ -1,0 +1,16 @@
+id: pastor
+name: Pastor
+archetype: nerd
+description: "The Pastor leads others through shared beliefs, wielding influence over their perspectives. Post-collapse Portland needs something to believe in."
+key_ability: intelligence
+hit_points_per_level: 6
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Fire and Brimstone
+    level: 1
+    description: "Your sermon terrifies the wicked and heartens the faithful. Once per day, your speech causes enemies to make a Resolve test (DN 3) or flee, and grants allies +2 to Resolve tests."
+drawbacks:
+  - name: Lure Of Power
+    description: "The temptation to use your abilities for personal gain is ever-present. When offered power or wealth, make a Resolve test (DN 3) to refuse."

@@ -1,0 +1,13 @@
+id: tomb_raider
+name: Tomb Raider
+archetype: criminal
+description: "Figured out that dead people tend to have stuff worth stealing. They have no friends and never will, but their collections are remarkable."
+key_ability: dexterity
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: I Sell the Dead
+    level: 1
+    description: "You know where the bodies are and what they're worth. Once per day in an urban area, locate a cache of salvage from the dead — equipment, currency, or information."

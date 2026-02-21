@@ -1,0 +1,13 @@
+id: maker
+name: Maker
+archetype: normie
+description: "Makers build the things that everybody needs. Their level of skill and the reliability of the manufactured goods varies wildly."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Guild Privilege
+    level: 1
+    description: "You belong to one of Portland's surviving craft networks. Invoke your guild connections to obtain materials, shelter, or introductions at favorable rates."

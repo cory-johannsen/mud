@@ -1,0 +1,5 @@
+id: drifter
+name: Drifter
+description: "A rolling stone gathers no moss. Drifters are survivors who thrive on the margins, outlasting every hardship the ruins of Portland can throw at them."
+key_ability: constitution
+hit_points_per_level: 10

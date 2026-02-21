@@ -1,0 +1,16 @@
+id: dealer
+name: Dealer
+archetype: drifter
+description: "Blends folk medicine, traditional healing practices, and heavy drugs to solve problems. Portland's underground pharmacists."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: White Witchery
+    level: 1
+    description: "Your knowledge of substances is unparalleled. You can identify any drug, toxin, or medicinal compound on sight, and know its effects and antidote."
+drawbacks:
+  - name: Abstain From Violence
+    description: "Your healer's ethic makes violence repugnant. When initiating (not defending) violence, make a Resolve test (DN 2) or hesitate, losing your first action."

@@ -1,0 +1,13 @@
+id: politician
+name: Politician
+archetype: influencer
+description: "Operates through cunning and influence. Portland's collapse didn't kill politics — it just made the stakes more obvious."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Machiavellian Intrigue
+    level: 1
+    description: "You can turn any social situation to your advantage. Once per scene, reframe a setback as an opportunity — gain +2 to your next social roll after suffering a social failure."

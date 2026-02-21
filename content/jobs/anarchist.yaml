@@ -1,0 +1,13 @@
+id: anarchist
+name: Anarchist
+archetype: influencer
+description: "Anarchists live to tear down power structures and rally the dispossessed. They're incredibly persuasive — to everyone except authority figures."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Rabble-Rousing
+    level: 1
+    description: "You can inspire a crowd to action with nothing but words and fury. Once per scene, rally nearby NPCs to your cause with a Charisma check (DN 2)."

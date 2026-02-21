@@ -1,0 +1,17 @@
+id: soldier
+name: Soldier
+archetype: aggressor
+description: "Professional fighters, trained to fight in a specific way. Focus on solving problems with overwhelming force."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_weapons: trained
+  simple_ranged: trained
+  martial_ranged: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Guerilla Warfare
+    level: 1
+    description: "You excel at hit-and-run tactics in urban terrain. When attacking from cover and then moving at least 10 feet, enemies suffer -2 to attacks against you until your next turn."

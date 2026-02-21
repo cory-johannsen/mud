@@ -1,0 +1,13 @@
+id: medic
+name: Medic
+archetype: normie
+description: "Has attained some skill in healing others. In post-collapse Portland, some skill is better than none."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: "Pliers... Scalpel... Bonesaw"
+    level: 1
+    description: "You can treat injuries with improvised tools. Once per day, restore 1d6+Constitution modifier HP to a patient through a 10-minute field treatment."

@@ -1,0 +1,15 @@
+id: thug
+name: Thug
+archetype: aggressor
+description: "Employed by others to do their dirty work. Under the employ of a specific faction, they generally adhere to that faction's beliefs — at least while they're watching."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_weapons: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Shield Wall
+    level: 1
+    description: "When fighting alongside faction allies, you form a unified front. When adjacent to at least one ally, you and that ally each gain +2 to AC."

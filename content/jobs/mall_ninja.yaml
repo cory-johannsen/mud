@@ -1,0 +1,14 @@
+id: mall_ninja
+name: Mall Ninja
+archetype: aggressor
+description: "Mall Ninjas believe the fastest way to solve any problem is cutting it into smaller problems, preferably with the stupidest looking sword ever seen."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_melee: trained
+  light_armor: trained
+features:
+  - name: Vim & Vigor
+    level: 1
+    description: "Your ridiculous weapon choices actually work. Exotic or improvised melee weapons deal an additional 1d4 damage in your hands, and enemies are often too confused to react."

@@ -1,0 +1,13 @@
+id: schmoozer
+name: Schmoozer
+archetype: influencer
+description: "Seeks to get what they want by leeching onto others. Leaves you feeling dirty just talking to them, but they always know the right people."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Fame & Fortune
+    level: 1
+    description: "You are always at the right party. In any settlement, immediately identify the most powerful or useful person present and secure an introduction within the hour."

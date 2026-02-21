@@ -1,0 +1,17 @@
+id: gangster
+name: Gangster
+archetype: aggressor
+description: "The muscle, the enforcers, the ones who get their hands dirty. Portland's criminal organizations run on gangsters."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_weapons: trained
+  simple_ranged: trained
+  martial_ranged: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Hue & Cry
+    level: 1
+    description: "You can call for backup. Once per day, summon 1d4 allied gang members who arrive within 10 minutes and follow your orders for the scene."

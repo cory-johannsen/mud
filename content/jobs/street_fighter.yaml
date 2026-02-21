@@ -1,0 +1,15 @@
+id: street_fighter
+name: Street Fighter
+archetype: aggressor
+description: "Paid to beat the living hell out of each other for the enjoyment of others. Portland's underground fight circuits are brutal and profitable."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_melee: trained
+  unarmed: trained
+  light_armor: trained
+features:
+  - name: Blood & Sand
+    level: 1
+    description: "The crowd feeds you. In front of witnesses, you deal +2 damage on all melee attacks. The more witnesses, the harder you fight."

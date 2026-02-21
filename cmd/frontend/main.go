@@ -25,7 +25,8 @@ func main() {
 
 	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
 	regionsDir := flag.String("regions", "content/regions", "path to region YAML files directory")
-	classesDir := flag.String("classes", "content/classes", "path to class YAML files directory")
+	teamsDir := flag.String("teams", "content/teams", "path to team YAML files directory")
+	jobsDir := flag.String("jobs", "content/jobs", "path to job YAML files directory")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -63,19 +64,24 @@ func main() {
 	if err != nil {
 		logger.Fatal("loading regions", zap.Error(err))
 	}
-	classes, err := ruleset.LoadClasses(*classesDir)
+	teams, err := ruleset.LoadTeams(*teamsDir)
 	if err != nil {
-		logger.Fatal("loading classes", zap.Error(err))
+		logger.Fatal("loading teams", zap.Error(err))
+	}
+	jobs, err := ruleset.LoadJobs(*jobsDir)
+	if err != nil {
+		logger.Fatal("loading jobs", zap.Error(err))
 	}
 	logger.Info("ruleset loaded",
 		zap.Int("regions", len(regions)),
-		zap.Int("classes", len(classes)),
+		zap.Int("teams", len(teams)),
+		zap.Int("jobs", len(jobs)),
 	)
 
 	// Build services
 	accounts := postgres.NewAccountRepository(pool.DB())
 	characters := postgres.NewCharacterRepository(pool.DB())
-	authHandler := handlers.NewAuthHandler(accounts, characters, regions, classes, logger, cfg.GameServer.Addr())
+	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, logger, cfg.GameServer.Addr())
 	telnetAcceptor := telnet.NewAcceptor(cfg.Telnet, authHandler, logger)
 
 	// Wire lifecycle

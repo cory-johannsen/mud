@@ -125,6 +125,7 @@ func (pc *PostgresContainer) ApplyMigrations(t *testing.T) {
 			name            VARCHAR(64)  NOT NULL,
 			region          TEXT         NOT NULL,
 			class           TEXT         NOT NULL,
+			team            TEXT         NOT NULL DEFAULT '',
 			level           INT          NOT NULL DEFAULT 1,
 			experience      INT          NOT NULL DEFAULT 0,
 			location        TEXT         NOT NULL DEFAULT 'grinders_row',

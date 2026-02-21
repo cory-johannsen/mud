@@ -1,0 +1,15 @@
+id: scout
+name: Scout
+archetype: drifter
+description: "The expendable masses deployed into the streets to collect information before anyone risks their more valuable assets. Scouts know this and do it anyway."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_ranged: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Situational Awareness
+    level: 1
+    description: "You are never surprised. You cannot be ambushed, and always act in the first round of combat regardless of initiative."

@@ -1,0 +1,10 @@
+id: machete
+name: Machete
+description: "The Machete team fights for collective liberation through direct action. They believe that solidarity and sharp edges will dismantle the power structures that have left Portland in ruins."
+traits:
+  - name: Solidarity Forever
+    description: "You fight harder when your comrades are in danger. The collective is stronger than the individual."
+    effect: "When an ally within sight is reduced to 0 HP, you gain advantage on your next attack or skill check."
+team_jobs:
+  - antifa
+  - boot_machete

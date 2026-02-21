@@ -1,0 +1,5 @@
+id: influencer
+name: Influencer
+description: "Pay attention to me. Influencers shape the world through personality, persuasion, and the power of narrative."
+key_ability: charisma
+hit_points_per_level: 8

@@ -1,0 +1,13 @@
+id: street_preacher
+name: Street Preacher
+archetype: drifter
+description: "Wanders the urban landscape screaming semi-coherently about weird beliefs to everyone around them. Exclusively loners. Surprisingly hard to kill."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Road to Enlightenment
+    level: 1
+    description: "Your faith sustains you through everything. Once per day when reduced to 0 HP, make a Constitution test (DN 2) to instead remain at 1 HP. Your god isn't done with you yet."

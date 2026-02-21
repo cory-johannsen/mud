@@ -1,0 +1,17 @@
+id: antifa
+name: Antifa
+archetype: influencer
+team: machete
+description: "Direct action is the only action. Antifa operatives organize the dispossessed and fight fascists wherever they find them."
+key_ability: charisma
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: "I Give a Fuck!"
+    level: 1
+    description: "You give a fuck about everything, especially the people around you. Your passion is contagious. When attempting Persuasion with allies, you may add your Charisma modifier twice."
+drawbacks:
+  - name: Wanted
+    description: "You are wanted by the authorities for your role in organizing resistance. If recognized, you must make a Resolve test (DN 3) or face arrest."

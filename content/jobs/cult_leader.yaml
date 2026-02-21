@@ -1,0 +1,16 @@
+id: cult_leader
+name: Cult Leader
+archetype: normie
+description: "A charismatic freak who has amassed a following they intend to abuse in some way. Portland has no shortage of people desperate enough to follow."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Holy Roller
+    level: 1
+    description: "Your followers would do anything for you. Once per day, issue a command that one devoted follower NPC will carry out without question."
+drawbacks:
+  - name: The End Is Nigh
+    description: "Your apocalyptic beliefs occasionally override rational decision-making. When faced with a prophesied sign, make a Resolve test (DN 3) or act on your beliefs immediately."

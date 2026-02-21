@@ -1,0 +1,5 @@
+id: criminal
+name: Criminal
+description: "Crime is a way of life. Criminals survive through cunning, deception, and the willingness to do what others won't."
+key_ability: dexterity
+hit_points_per_level: 8

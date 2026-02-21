@@ -1,0 +1,15 @@
+id: cop
+name: Cop
+archetype: drifter
+description: "Supposed to uphold the law. Usually just uphold themselves. ACAB. But having a badge — real or forged — still opens doors in Portland's ruins."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_ranged: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: "I Am The Law!"
+    level: 1
+    description: "Badge or no badge, you project authority. Gain advantage on Intimidation checks against civilians, and may demand cooperation without violence once per scene."

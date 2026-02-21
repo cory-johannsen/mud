@@ -1,0 +1,16 @@
+id: specialist
+name: Specialist
+archetype: aggressor
+description: "Trained operators of technology or machinery. Portland's ruins have plenty of machines that still work if you know how."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_weapons: trained
+  martial_ranged: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Here Comes The Cavalry
+    level: 1
+    description: "You can operate heavy weapons, vehicles, and complex machinery. Once per day, arrive at a critical moment with exactly the piece of technology the situation requires."

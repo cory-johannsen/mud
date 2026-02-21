@@ -1,0 +1,14 @@
+id: hobo
+name: Hobo
+archetype: criminal
+description: "Hobos perpetually live on the streets, not through circumstance but because they want to. They know Portland's ruins better than anyone."
+key_ability: dexterity
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Artful Dodger
+    level: 1
+    description: "You can disappear in any urban environment. Once per scene, escape pursuit or avoid detection by melting into the background — no roll required if you have 6 seconds."

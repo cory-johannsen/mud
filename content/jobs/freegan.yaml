@@ -1,0 +1,13 @@
+id: freegan
+name: Freegan
+archetype: drifter
+description: "The ultimate scavengers, living off the waste of others. Literally nobody finds them charming, but they always have what you need."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Swagger Wagon
+    level: 1
+    description: "You can find useful materials anywhere. Once per day in an urban environment, locate one piece of useful salvage without a roll — the GM determines what's available."

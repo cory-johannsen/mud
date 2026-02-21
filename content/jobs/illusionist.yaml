@@ -1,0 +1,13 @@
+id: illusionist
+name: Illusionist
+archetype: drifter
+description: "Masters of deception and trickery. They use their skills to manipulate the perceptions of others. Portland's ruined carnival folk."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Hedgewizardry
+    level: 1
+    description: "Your tricks cross the line into the uncanny. Once per day, create a convincing illusion (sight and sound) that lasts for 10 minutes or until touched."

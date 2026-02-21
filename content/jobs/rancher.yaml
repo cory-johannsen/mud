@@ -1,0 +1,14 @@
+id: rancher
+name: Rancher
+archetype: drifter
+description: "Have spent their lives raising animals, and they smell like it. Post-collapse Portland needs food, and ranchers provide it."
+key_ability: constitution
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Beastmaster
+    level: 1
+    description: "Animals trust you instinctively. You can calm any non-supernatural animal with a 1-minute interaction, and trained animals obey complex commands from you without rolls."

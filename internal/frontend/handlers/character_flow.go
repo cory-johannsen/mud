@@ -10,6 +10,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
@@ -134,34 +135,72 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	}
 	selectedRegion := regions[regionChoice-1]
 
-	// Step 3: Class
-	classes := h.classes
-	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "\r\nChoose your class:"))
-	for i, c := range classes {
-		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s (HP/lvl: %d, Key: %s)\r\n     %s",
+	// Step 3: Team selection
+	teams := h.teams
+	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "\r\nChoose your team:"))
+	for i, t := range teams {
+		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s\r\n     %s",
 			telnet.Green, i+1, telnet.Reset,
-			telnet.BrightWhite, c.Name, telnet.Reset,
-			c.HitPointsPerLevel, c.KeyAbility,
-			c.Description))
+			telnet.BrightWhite, t.Name, telnet.Reset,
+			t.Description))
+		for _, trait := range t.Traits {
+			_ = conn.WriteLine(fmt.Sprintf("     %s[%s]%s %s",
+				telnet.Yellow, trait.Name, telnet.Reset, trait.Effect))
+		}
 	}
-	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select class [1-%d]: ", len(classes)))
-	classLine, err := conn.ReadLine()
+	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select team [1-%d]: ", len(teams)))
+	teamLine, err := conn.ReadLine()
 	if err != nil {
-		return nil, fmt.Errorf("reading class selection: %w", err)
+		return nil, fmt.Errorf("reading team selection: %w", err)
 	}
-	classLine = strings.TrimSpace(classLine)
-	if strings.ToLower(classLine) == "cancel" {
+	teamLine = strings.TrimSpace(teamLine)
+	if strings.ToLower(teamLine) == "cancel" {
 		return nil, nil
 	}
-	classChoice := 0
-	if _, err := fmt.Sscanf(classLine, "%d", &classChoice); err != nil || classChoice < 1 || classChoice > len(classes) {
+	teamChoice := 0
+	if _, err := fmt.Sscanf(teamLine, "%d", &teamChoice); err != nil || teamChoice < 1 || teamChoice > len(teams) {
 		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
 		return nil, nil
 	}
-	selectedClass := classes[classChoice-1]
+	selectedTeam := teams[teamChoice-1]
 
-	// Step 4: Preview + confirm
-	newChar, err := character.Build(charName, selectedRegion, selectedClass)
+	// Step 4: Job selection — show jobs available to this team (general + team-exclusive)
+	var availableJobs []*ruleset.Job
+	for _, j := range h.jobs {
+		if j.Team == "" || j.Team == selectedTeam.ID {
+			availableJobs = append(availableJobs, j)
+		}
+	}
+	_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow, "\r\nChoose your job (%s jobs available):", selectedTeam.Name))
+	for i, j := range availableJobs {
+		exclusive := ""
+		if j.Team != "" {
+			exclusive = telnet.Colorf(telnet.BrightRed, " [%s exclusive]", selectedTeam.Name)
+		}
+		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s%s (HP/lvl: %d, Key: %s)\r\n     %s",
+			telnet.Green, i+1, telnet.Reset,
+			telnet.BrightWhite, j.Name, telnet.Reset, exclusive,
+			j.HitPointsPerLevel, j.KeyAbility,
+			j.Description))
+	}
+	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select job [1-%d]: ", len(availableJobs)))
+	jobLine, err := conn.ReadLine()
+	if err != nil {
+		return nil, fmt.Errorf("reading job selection: %w", err)
+	}
+	jobLine = strings.TrimSpace(jobLine)
+	if strings.ToLower(jobLine) == "cancel" {
+		return nil, nil
+	}
+	jobChoice := 0
+	if _, err := fmt.Sscanf(jobLine, "%d", &jobChoice); err != nil || jobChoice < 1 || jobChoice > len(availableJobs) {
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
+		return nil, nil
+	}
+	selectedJob := availableJobs[jobChoice-1]
+
+	// Step 5: Preview + confirm
+	newChar, err := character.BuildWithJob(charName, selectedRegion, selectedJob, selectedTeam)
 	if err != nil {
 		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error building character: %v", err))
 		return nil, nil
@@ -180,7 +219,7 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 		return nil, nil
 	}
 
-	// Step 5: Persist
+	// Step 6: Persist
 	newChar.AccountID = accountID
 	start := time.Now()
 	created, err := h.characters.Create(ctx, newChar)

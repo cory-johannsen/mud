@@ -1,0 +1,19 @@
+id: mercenary
+name: Mercenary
+archetype: aggressor
+description: "Soldiers for hire. They're good at what they do. They aren't nice and you probably don't want to be their friends."
+key_ability: strength
+hit_points_per_level: 10
+proficiencies:
+  simple_weapons: trained
+  martial_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+  medium_armor: trained
+features:
+  - name: Issue Challenge
+    level: 1
+    description: "You may formally challenge an enemy to single combat. They must succeed on a Resolve test (DN 3) or accept. While dueling, neither side's allies may interfere."
+drawbacks:
+  - name: Crestfallen
+    description: "You've seen too much to have illusions about victory. After any combat where an ally falls, you suffer -1 to all checks until you rest."

@@ -1,0 +1,13 @@
+id: engineer
+name: Engineer
+archetype: nerd
+description: "Designs and builds complex things. Lacks interpersonal abilities. Portland's infrastructure desperately needs them."
+key_ability: intelligence
+hit_points_per_level: 6
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: "Eureka!"
+    level: 1
+    description: "Once per day, you may declare a technical solution to a mechanical or structural problem that would take others days to solve. You complete it in one hour with available materials."

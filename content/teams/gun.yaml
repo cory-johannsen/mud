@@ -1,0 +1,10 @@
+id: gun
+name: Gun
+description: "The Gun team believes that personal armament is the only true freedom in post-collapse Portland. Every problem is a nail, and they have a very large hammer."
+traits:
+  - name: Gun Nut
+    description: You absolutely love guns. You can't resist the urge to pick up and play with any gun you see.
+    effect: "Whenever you encounter a new firearm, you must make a Resolve test (DN 3) to resist handling it."
+team_jobs:
+  - libertarian
+  - boot_gun

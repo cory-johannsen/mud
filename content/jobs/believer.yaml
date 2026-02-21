@@ -1,0 +1,16 @@
+id: believer
+name: Believer
+archetype: nerd
+description: "Believers place their faith in a higher power above the reality around them. In post-collapse Portland, that faith is tested daily."
+key_ability: intelligence
+hit_points_per_level: 6
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Turn the Other Cheek
+    level: 1
+    description: "Your genuine forgiveness disarms aggression. When you choose not to retaliate against an attacker, gain advantage on your next Charisma or Wisdom check against them."
+drawbacks:
+  - name: Lure of Power
+    description: "The temptation to use your abilities for personal gain is ever-present. When offered power or wealth, make a Resolve test (DN 3) to refuse."

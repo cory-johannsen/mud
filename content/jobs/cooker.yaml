@@ -1,0 +1,14 @@
+id: cooker
+name: Cooker
+archetype: nerd
+description: "Master of all chemical concoctions. Cookers synthesize everything from medicine to mayhem in Portland's improvised labs."
+key_ability: intelligence
+hit_points_per_level: 6
+proficiencies:
+  simple_weapons: trained
+  simple_ranged: trained
+  light_armor: trained
+features:
+  - name: Nostrum Remedium
+    level: 1
+    description: "Given basic supplies, you can synthesize a useful chemical compound once per day: a stimulant (+2 to next physical check), sedative, or improvised explosive."

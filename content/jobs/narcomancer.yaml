@@ -1,0 +1,16 @@
+id: narcomancer
+name: Narcomancer
+archetype: nerd
+description: "Master of the effect of every drug imaginable. They can use their knowledge to heal, harm, control others — or just party."
+key_ability: intelligence
+hit_points_per_level: 6
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Handle Your Drugs
+    level: 1
+    description: "You have built up an extraordinary tolerance. Drugs and toxins have no negative effects on you, and their positive effects last twice as long."
+drawbacks:
+  - name: Lure of Power
+    description: "The temptation to use your abilities for personal gain is ever-present. When offered power or wealth, make a Resolve test (DN 3) to refuse."

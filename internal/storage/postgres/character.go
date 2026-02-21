@@ -37,19 +37,19 @@ func (r *CharacterRepository) Create(ctx context.Context, c *character.Character
 	var out character.Character
 	err := r.db.QueryRow(ctx, `
 		INSERT INTO characters
-			(account_id, name, region, class, level, experience, location,
+			(account_id, name, region, class, team, level, experience, location,
 			 strength, dexterity, constitution, intelligence, wisdom, charisma,
 			 max_hp, current_hp)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-		RETURNING id, account_id, name, region, class, level, experience, location,
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+		RETURNING id, account_id, name, region, class, team, level, experience, location,
 		          strength, dexterity, constitution, intelligence, wisdom, charisma,
 		          max_hp, current_hp, created_at, updated_at`,
-		c.AccountID, c.Name, c.Region, c.Class, c.Level, c.Experience, c.Location,
+		c.AccountID, c.Name, c.Region, c.Class, c.Team, c.Level, c.Experience, c.Location,
 		c.Abilities.Strength, c.Abilities.Dexterity, c.Abilities.Constitution,
 		c.Abilities.Intelligence, c.Abilities.Wisdom, c.Abilities.Charisma,
 		c.MaxHP, c.CurrentHP,
 	).Scan(
-		&out.ID, &out.AccountID, &out.Name, &out.Region, &out.Class,
+		&out.ID, &out.AccountID, &out.Name, &out.Region, &out.Class, &out.Team,
 		&out.Level, &out.Experience, &out.Location,
 		&out.Abilities.Strength, &out.Abilities.Dexterity, &out.Abilities.Constitution,
 		&out.Abilities.Intelligence, &out.Abilities.Wisdom, &out.Abilities.Charisma,
@@ -70,7 +70,7 @@ func (r *CharacterRepository) Create(ctx context.Context, c *character.Character
 // Postcondition: Returns a slice (may be empty) or a non-nil error.
 func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64) ([]*character.Character, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id, account_id, name, region, class, level, experience, location,
+		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       strength, dexterity, constitution, intelligence, wisdom, charisma,
 		       max_hp, current_hp, created_at, updated_at
 		FROM characters WHERE account_id = $1 ORDER BY created_at ASC`,
@@ -85,7 +85,7 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 	for rows.Next() {
 		var c character.Character
 		if err := rows.Scan(
-			&c.ID, &c.AccountID, &c.Name, &c.Region, &c.Class,
+			&c.ID, &c.AccountID, &c.Name, &c.Region, &c.Class, &c.Team,
 			&c.Level, &c.Experience, &c.Location,
 			&c.Abilities.Strength, &c.Abilities.Dexterity, &c.Abilities.Constitution,
 			&c.Abilities.Intelligence, &c.Abilities.Wisdom, &c.Abilities.Charisma,
@@ -105,13 +105,13 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character.Character, error) {
 	var c character.Character
 	err := r.db.QueryRow(ctx, `
-		SELECT id, account_id, name, region, class, level, experience, location,
+		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       strength, dexterity, constitution, intelligence, wisdom, charisma,
 		       max_hp, current_hp, created_at, updated_at
 		FROM characters WHERE id = $1`,
 		id,
 	).Scan(
-		&c.ID, &c.AccountID, &c.Name, &c.Region, &c.Class,
+		&c.ID, &c.AccountID, &c.Name, &c.Region, &c.Class, &c.Team,
 		&c.Level, &c.Experience, &c.Location,
 		&c.Abilities.Strength, &c.Abilities.Dexterity, &c.Abilities.Constitution,
 		&c.Abilities.Intelligence, &c.Abilities.Wisdom, &c.Abilities.Charisma,

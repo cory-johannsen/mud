@@ -1,0 +1,13 @@
+id: exterminator
+name: Exterminator
+archetype: normie
+description: "The bane of all vermin. Post-collapse Portland has a lot of vermin. Not all of them have four legs."
+key_ability: wisdom
+hit_points_per_level: 8
+proficiencies:
+  simple_weapons: trained
+  light_armor: trained
+features:
+  - name: Gutterspeak
+    level: 1
+    description: "You understand the hidden language of Portland's underclass — the slang, signals, and territorial markings. You can communicate safely with criminal elements and read gang territories."
