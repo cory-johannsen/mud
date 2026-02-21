@@ -153,6 +153,7 @@ func TestParse_BasicForms(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
+			assert.Equal(t, tt.expr, expr.Raw)
 			assert.Equal(t, tt.wantN, expr.Count)
 			assert.Equal(t, tt.wantSides, expr.Sides)
 			assert.Equal(t, tt.wantMod, expr.Modifier)
