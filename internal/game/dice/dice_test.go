@@ -162,9 +162,8 @@ func TestParse_BasicForms(t *testing.T) {
 	}
 }
 
-// deterministicSource cycles through fixed values to enable reproducible tests.
-//
-// Precondition: values must be non-empty.
+// deterministicSource cycles through a fixed sequence of values for deterministic testing.
+// Not goroutine-safe; for sequential test use only.
 type deterministicSource struct {
 	values []int
 	idx    int
@@ -238,6 +237,81 @@ func TestMustParse_ValidExpr(t *testing.T) {
 // TestMustParse_InvalidPanics verifies MustParse panics on invalid input.
 func TestMustParse_InvalidPanics(t *testing.T) {
 	assert.Panics(t, func() { dice.MustParse("bad") })
+}
+
+func TestRoll_Property_Postconditions(t *testing.T) {
+	src := dice.NewCryptoSource()
+	rapid.Check(t, func(rt *rapid.T) {
+		count := rapid.IntRange(1, 10).Draw(rt, "count")
+		sides := rapid.IntRange(2, 20).Draw(rt, "sides")
+		modifier := rapid.IntRange(-10, 10).Draw(rt, "modifier")
+
+		expr := dice.Expression{
+			Raw:      fmt.Sprintf("%dd%d", count, sides),
+			Count:    count,
+			Sides:    sides,
+			Modifier: modifier,
+		}
+
+		result, err := dice.Roll(expr, src)
+		if err != nil {
+			rt.Fatal(err)
+		}
+
+		// Postcondition: len(Dice) == Count when no KeepHighest
+		if len(result.Dice) != count {
+			rt.Fatalf("expected %d dice, got %d", count, len(result.Dice))
+		}
+
+		// Postcondition: each die in [1, sides]
+		for _, d := range result.Dice {
+			if d < 1 || d > sides {
+				rt.Fatalf("die value %d outside [1, %d]", d, sides)
+			}
+		}
+
+		// Postcondition: Total() == sum(Dice) + Modifier
+		sum := 0
+		for _, d := range result.Dice {
+			sum += d
+		}
+		if result.Total() != sum+modifier {
+			rt.Fatalf("Total() %d != sum(%d) + modifier(%d)", result.Total(), sum, modifier)
+		}
+	})
+}
+
+func TestRoll_Property_KeepHighest_Postconditions(t *testing.T) {
+	src := dice.NewCryptoSource()
+	rapid.Check(t, func(rt *rapid.T) {
+		count := rapid.IntRange(2, 10).Draw(rt, "count")
+		keep := rapid.IntRange(1, count-1).Draw(rt, "keep")
+		sides := rapid.IntRange(2, 20).Draw(rt, "sides")
+
+		expr := dice.Expression{
+			Raw:         fmt.Sprintf("%dd%dkh%d", count, sides, keep),
+			Count:       count,
+			Sides:       sides,
+			KeepHighest: keep,
+		}
+
+		result, err := dice.Roll(expr, src)
+		if err != nil {
+			rt.Fatal(err)
+		}
+
+		// Postcondition: len(Dice) == KeepHighest
+		if len(result.Dice) != keep {
+			rt.Fatalf("expected %d kept dice, got %d", keep, len(result.Dice))
+		}
+
+		// Postcondition: each die in [1, sides]
+		for _, d := range result.Dice {
+			if d < 1 || d > sides {
+				rt.Fatalf("die value %d outside [1, %d]", d, sides)
+			}
+		}
+	})
 }
 
 // TestParse_Property_ValidExpressionsHaveCorrectFields verifies that for any
