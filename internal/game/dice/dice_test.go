@@ -121,3 +121,68 @@ func TestCryptoSource_Intn_InRange_Property(t *testing.T) {
 			"Intn postcondition: result must be < n")
 	})
 }
+
+func TestParse_BasicForms(t *testing.T) {
+	tests := []struct {
+		expr      string
+		wantN     int
+		wantSides int
+		wantMod   int
+		wantErr   bool
+	}{
+		{"d20", 1, 20, 0, false},
+		{"2d6", 2, 6, 0, false},
+		{"2d6+3", 2, 6, 3, false},
+		{"4d8-2", 4, 8, -2, false},
+		{"1d4+0", 1, 4, 0, false},
+		{"d100", 1, 100, 0, false},
+		{"", 0, 0, 0, true},
+		{"abc", 0, 0, 0, true},
+		{"2d0", 0, 0, 0, true},  // sides < 2
+		{"0d6", 0, 0, 0, true},  // count = 0
+	}
+	for _, tt := range tests {
+		t.Run(tt.expr, func(t *testing.T) {
+			expr, err := dice.Parse(tt.expr)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.wantN, expr.Count)
+			assert.Equal(t, tt.wantSides, expr.Sides)
+			assert.Equal(t, tt.wantMod, expr.Modifier)
+		})
+	}
+}
+
+// TestParse_Property_ValidExpressionsHaveCorrectFields verifies that for any
+// valid NdX+M expression, Parse produces Count=N, Sides=X, Modifier=M.
+func TestParse_Property_ValidExpressionsHaveCorrectFields(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		count := rapid.IntRange(1, 20).Draw(rt, "count")
+		sides := rapid.IntRange(2, 100).Draw(rt, "sides")
+		modifier := rapid.IntRange(-20, 20).Draw(rt, "modifier")
+
+		var exprStr string
+		if modifier >= 0 {
+			exprStr = fmt.Sprintf("%dd%d+%d", count, sides, modifier)
+		} else {
+			exprStr = fmt.Sprintf("%dd%d%d", count, sides, modifier)
+		}
+
+		expr, err := dice.Parse(exprStr)
+		if err != nil {
+			rt.Fatalf("unexpected error for %q: %v", exprStr, err)
+		}
+		if expr.Count != count {
+			rt.Fatalf("Count: got %d want %d for %q", expr.Count, count, exprStr)
+		}
+		if expr.Sides != sides {
+			rt.Fatalf("Sides: got %d want %d for %q", expr.Sides, sides, exprStr)
+		}
+		if expr.Modifier != modifier {
+			rt.Fatalf("Modifier: got %d want %d for %q", expr.Modifier, modifier, exprStr)
+		}
+	})
+}
