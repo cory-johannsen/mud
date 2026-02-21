@@ -105,4 +105,19 @@ func TestCryptoSource_Intn_InRange(t *testing.T) {
 func TestCryptoSource_Intn_PanicsOnZero(t *testing.T) {
 	src := dice.NewCryptoSource()
 	assert.Panics(t, func() { src.Intn(0) })
+	assert.Panics(t, func() { src.Intn(-1) })
+}
+
+// TestCryptoSource_Intn_InRange_Property uses property-based testing to verify
+// the postcondition: Intn(n) returns a value in [0, n) for arbitrary n >= 1.
+func TestCryptoSource_Intn_InRange_Property(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 1<<20).Draw(rt, "n")
+		src := dice.NewCryptoSource()
+		v := src.Intn(n)
+		assert.GreaterOrEqual(rt, v, 0,
+			"Intn postcondition: result must be >= 0")
+		assert.Less(rt, v, n,
+			"Intn postcondition: result must be < n")
+	})
 }
