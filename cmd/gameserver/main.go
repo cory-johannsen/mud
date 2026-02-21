@@ -15,6 +15,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/gameserver"
@@ -43,6 +44,9 @@ func main() {
 		log.Fatalf("initializing logger: %v", err)
 	}
 	defer logger.Sync()
+
+	cryptoSrc := dice.NewCryptoSource()
+	diceRoller := dice.NewLoggedRoller(cryptoSrc, logger)
 
 	logger.Info("starting game server",
 		zap.String("grpc_addr", cfg.GameServer.Addr()),
@@ -87,7 +91,7 @@ func main() {
 	// Create gRPC service
 	grpcService := gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo,
+		worldHandler, chatHandler, logger, charRepo, diceRoller,
 	)
 
 	// Create gRPC server

@@ -11,6 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -36,12 +37,13 @@ type GameServiceServer struct {
 	worldH     *WorldHandler
 	chatH      *ChatHandler
 	charSaver  CharacterSaver
+	dice       *dice.Roller
 	logger     *zap.Logger
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
 //
-// Precondition: worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, and logger must be non-nil.
+// Precondition: worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, diceRoller, and logger must be non-nil.
 // charSaver may be nil (character state will not be persisted on disconnect).
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
@@ -52,6 +54,7 @@ func NewGameServiceServer(
 	chatHandler *ChatHandler,
 	logger *zap.Logger,
 	charSaver CharacterSaver,
+	diceRoller *dice.Roller,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:     worldMgr,
@@ -60,6 +63,7 @@ func NewGameServiceServer(
 		worldH:    worldHandler,
 		chatH:     chatHandler,
 		charSaver: charSaver,
+		dice:      diceRoller,
 		logger:    logger,
 	}
 }
