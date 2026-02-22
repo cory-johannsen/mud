@@ -270,8 +270,8 @@ func FilterIAC(input []byte) []byte {
 				i = j
 				continue
 			case IAC:
-				// Escaped 0xFF — emit one 0xFF
-				result = append(result, IAC)
+				// Escaped 0xFF — discard in text-stripping context; emitting 0xFF could
+				// form a false IAC+cmd sequence with the next byte in the output.
 				i += 2
 				continue
 			default:

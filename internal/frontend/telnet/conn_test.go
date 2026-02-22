@@ -47,9 +47,11 @@ func TestFilterIAC_SubNegotiation(t *testing.T) {
 }
 
 func TestFilterIAC_EscapedIAC(t *testing.T) {
+	// IAC IAC is an escaped 0xFF; in text-stripping mode both bytes are discarded
+	// to prevent the emitted 0xFF from forming a false IAC+cmd sequence.
 	input := []byte{'a', IAC, IAC, 'b'}
 	result := FilterIAC(input)
-	assert.Equal(t, []byte{byte('a'), IAC, byte('b')}, result)
+	assert.Equal(t, []byte{'a', 'b'}, result)
 }
 
 func TestFilterIAC_NOP(t *testing.T) {
