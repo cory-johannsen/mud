@@ -16,6 +16,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/gameserver"
@@ -84,14 +85,17 @@ func main() {
 	sessMgr := session.NewManager()
 	cmdRegistry := command.DefaultRegistry()
 
+	npcMgr := npc.NewManager()
+
 	// Create handlers
-	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr)
+	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
+	npcHandler := gameserver.NewNPCHandler(npcMgr, sessMgr)
 
 	// Create gRPC service
 	grpcService := gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler,
 	)
 
 	// Create gRPC server

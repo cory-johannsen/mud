@@ -16,6 +16,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -149,11 +150,11 @@ func testGameServer(t *testing.T) string {
 
 	sessMgr := session.NewManager()
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr)
+	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := gameserver.NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil)
+	svc := gameserver.NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)

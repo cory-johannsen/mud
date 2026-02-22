@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -23,11 +24,11 @@ func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil)
+	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
