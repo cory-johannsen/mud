@@ -1,0 +1,14 @@
+id: scavenger
+name: Scavenger
+description: A wiry figure in mismatched armor, picking through the rubble with practiced efficiency.
+level: 1
+max_hp: 14
+ac: 13
+perception: 7
+abilities:
+  strength: 10
+  dexterity: 16
+  constitution: 12
+  intelligence: 12
+  wisdom: 14
+  charisma: 8

@@ -1,0 +1,14 @@
+id: lieutenant
+name: Gang Lieutenant
+description: A seasoned enforcer in a battered leather coat. His posture says he has been in more fights than you have.
+level: 3
+max_hp: 42
+ac: 16
+perception: 8
+abilities:
+  strength: 16
+  dexterity: 14
+  constitution: 16
+  intelligence: 10
+  wisdom: 12
+  charisma: 12

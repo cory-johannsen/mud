@@ -1,0 +1,14 @@
+id: ganger
+name: Ganger
+description: A street tough with a scar across one cheek. He eyes you with territorial suspicion.
+level: 1
+max_hp: 18
+ac: 14
+perception: 5
+abilities:
+  strength: 14
+  dexterity: 12
+  constitution: 14
+  intelligence: 8
+  wisdom: 10
+  charisma: 8
