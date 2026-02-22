@@ -38,6 +38,7 @@ type GameServiceServer struct {
 	chatH      *ChatHandler
 	charSaver  CharacterSaver
 	dice       *dice.Roller
+	npcH       *NPCHandler
 	logger     *zap.Logger
 }
 
@@ -55,6 +56,7 @@ func NewGameServiceServer(
 	logger *zap.Logger,
 	charSaver CharacterSaver,
 	diceRoller *dice.Roller,
+	npcHandler *NPCHandler,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:     worldMgr,
@@ -64,6 +66,7 @@ func NewGameServiceServer(
 		chatH:     chatHandler,
 		charSaver: charSaver,
 		dice:      diceRoller,
+		npcH:      npcHandler,
 		logger:    logger,
 	}
 }
@@ -220,6 +223,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleWho(uid)
 	case *gamev1.ClientMessage_Quit:
 		return s.handleQuit(uid)
+	case *gamev1.ClientMessage_Examine:
+		return s.handleExamine(uid, p.Examine)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -332,6 +337,17 @@ func (s *GameServiceServer) handleQuit(uid string) (*gamev1.ServerEvent, error) 
 			Disconnected: &gamev1.Disconnected{Reason: reason},
 		},
 	}, errQuit
+}
+
+
+func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest) (*gamev1.ServerEvent, error) {
+	view, err := s.npcH.Examine(uid, req.Target)
+	if err != nil {
+		return nil, err
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_NpcView{NpcView: view},
+	}, nil
 }
 
 // broadcastRoomEvent sends a RoomEvent to all players in a room except the excluded UID.
