@@ -31,6 +31,7 @@ func main() {
 
 	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
 	zonesDir := flag.String("zones", "content/zones", "path to zone YAML files directory")
+	npcsDir := flag.String("npcs-dir", "content/npcs", "path to NPC YAML templates directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -85,7 +86,24 @@ func main() {
 	sessMgr := session.NewManager()
 	cmdRegistry := command.DefaultRegistry()
 
+	// Load NPC templates and spawn initial instances
+	npcTemplates, err := npc.LoadTemplates(*npcsDir)
+	if err != nil {
+		logger.Fatal("loading npc templates", zap.Error(err))
+	}
+	logger.Info("loaded npc templates", zap.Int("count", len(npcTemplates)))
+
 	npcMgr := npc.NewManager()
+
+	startRoom := worldMgr.StartRoom()
+	if startRoom != nil {
+		for _, tmpl := range npcTemplates {
+			if _, err := npcMgr.Spawn(tmpl, startRoom.ID); err != nil {
+				logger.Fatal("spawning npc", zap.String("template", tmpl.ID), zap.Error(err))
+			}
+			logger.Info("spawned npc", zap.String("template", tmpl.ID), zap.String("room", startRoom.ID))
+		}
+	}
 
 	// Create handlers
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)
