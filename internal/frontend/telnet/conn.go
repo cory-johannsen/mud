@@ -154,6 +154,39 @@ func (c *Conn) handleIAC() error {
 	return nil
 }
 
+// ReadPassword reads a line of input with server-side echo suppression.
+// It sends IAC WILL Echo before reading (client stops echoing) and
+// IAC WONT Echo after (client resumes echoing), then writes a blank
+// line so the cursor advances past the hidden input.
+//
+// Postcondition: Returns the trimmed input with echo restored.
+func (c *Conn) ReadPassword() (string, error) {
+	// Suppress client echo
+	if err := c.sendEchoControl(WILL); err != nil {
+		return "", err
+	}
+
+	line, err := c.ReadLine()
+
+	// Always restore echo, even on error
+	_ = c.sendEchoControl(WONT)
+	// Advance the cursor past the invisible input
+	_ = c.Write([]byte("\r\n"))
+
+	return line, err
+}
+
+// sendEchoControl sends IAC <cmd> OptEcho to control client-side echo.
+func (c *Conn) sendEchoControl(cmd byte) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.writeTimeout > 0 {
+		_ = c.raw.SetWriteDeadline(time.Now().Add(c.writeTimeout))
+	}
+	_, err := c.raw.Write([]byte{IAC, cmd, OptEcho})
+	return err
+}
+
 // WriteLine sends a line of text followed by \r\n to the client.
 //
 // Precondition: text should not contain trailing newline characters.

@@ -40,8 +40,8 @@ const welcomeBanner = `
 
 ` + telnet.BrightYellow + `  Post-Collapse Portland, OR — A Dystopian Sci-Fi MUD` + telnet.Reset + `
 
-  Type ` + telnet.Green + `login <username> <password>` + telnet.Reset + ` to connect.
-  Type ` + telnet.Green + `register <username> <password>` + telnet.Reset + ` to create an account.
+  Type ` + telnet.Green + `login` + telnet.Reset + ` to connect.
+  Type ` + telnet.Green + `register` + telnet.Reset + ` to create an account.
   Type ` + telnet.Green + `quit` + telnet.Reset + ` to disconnect.
 `
 
@@ -160,18 +160,38 @@ func (h *AuthHandler) HandleSession(ctx context.Context, conn *telnet.Conn) erro
 	}
 }
 
-// handleLogin authenticates a player.
+// handleLogin authenticates a player interactively.
+// Username is taken from args[0] if provided, otherwise prompted.
+// Password is always prompted with echo suppressed.
 //
-// Postcondition: Returns (acct, nil) on success, (postgres.Account{}, nil) if the error was
-// shown to the user and the auth loop should continue, or (postgres.Account{}, error) on fatal errors.
+// Postcondition: Returns (acct, nil) on success, (postgres.Account{}, nil) if the
+// user should retry, or (postgres.Account{}, error) on fatal connection errors.
 func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args []string) (postgres.Account, error) {
-	if len(args) < 2 {
-		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: login <username> <password>"))
+	var username string
+	if len(args) > 0 {
+		username = args[0]
+	}
+
+	if username == "" {
+		_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Username: "))
+		var err error
+		username, err = conn.ReadLine()
+		if err != nil {
+			return postgres.Account{}, fmt.Errorf("reading username: %w", err)
+		}
+		username = strings.TrimSpace(username)
+	}
+
+	if username == "" {
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Username cannot be empty."))
 		return postgres.Account{}, nil
 	}
 
-	username := args[0]
-	password := args[1]
+	_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Password: "))
+	password, err := conn.ReadPassword()
+	if err != nil {
+		return postgres.Account{}, fmt.Errorf("reading password: %w", err)
+	}
 
 	start := time.Now()
 	acct, err := h.accounts.Authenticate(ctx, username, password)
@@ -199,19 +219,48 @@ func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args [
 	return acct, nil
 }
 
+// handleRegister creates a new account interactively.
+// Username is taken from args[0] if provided, otherwise prompted.
+// Password is prompted twice with echo suppressed; both entries must match.
 func (h *AuthHandler) handleRegister(ctx context.Context, conn *telnet.Conn, args []string) error {
-	if len(args) < 2 {
-		return conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: register <username> <password>"))
+	var username string
+	if len(args) > 0 {
+		username = args[0]
 	}
 
-	username := args[0]
-	password := args[1]
+	if username == "" {
+		_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Username: "))
+		var err error
+		username, err = conn.ReadLine()
+		if err != nil {
+			return fmt.Errorf("reading username: %w", err)
+		}
+		username = strings.TrimSpace(username)
+	}
 
 	if len(username) < 3 || len(username) > 32 {
-		return conn.WriteLine(telnet.Colorize(telnet.Red, "Username must be 3-32 characters."))
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Username must be 3-32 characters."))
+		return nil
+	}
+
+	_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Password: "))
+	password, err := conn.ReadPassword()
+	if err != nil {
+		return fmt.Errorf("reading password: %w", err)
 	}
 	if len(password) < 6 {
-		return conn.WriteLine(telnet.Colorize(telnet.Red, "Password must be at least 6 characters."))
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Password must be at least 6 characters."))
+		return nil
+	}
+
+	_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Confirm password: "))
+	confirm, err := conn.ReadPassword()
+	if err != nil {
+		return fmt.Errorf("reading password confirmation: %w", err)
+	}
+	if password != confirm {
+		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Passwords do not match."))
+		return nil
 	}
 
 	start := time.Now()
@@ -237,10 +286,10 @@ func (h *AuthHandler) handleRegister(ctx context.Context, conn *telnet.Conn, arg
 
 func (h *AuthHandler) showHelp(conn *telnet.Conn) {
 	help := telnet.Colorize(telnet.BrightWhite, "Available commands:") + "\r\n" +
-		telnet.Colorize(telnet.Green, "  login <username> <password>") + "    — Log in to your account\r\n" +
-		telnet.Colorize(telnet.Green, "  register <username> <password>") + " — Create a new account\r\n" +
-		telnet.Colorize(telnet.Green, "  help") + "                           — Show this help\r\n" +
-		telnet.Colorize(telnet.Green, "  quit") + "                           — Disconnect\r\n"
+		telnet.Colorize(telnet.Green, "  login [username]") + "    — Log in to your account\r\n" +
+		telnet.Colorize(telnet.Green, "  register [username]") + " — Create a new account\r\n" +
+		telnet.Colorize(telnet.Green, "  help") + "                — Show this help\r\n" +
+		telnet.Colorize(telnet.Green, "  quit") + "                — Disconnect\r\n"
 	_ = conn.Write([]byte(help))
 }
 

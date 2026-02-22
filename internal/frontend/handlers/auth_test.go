@@ -317,6 +317,25 @@ func TestHandleSession_UnknownCommand(t *testing.T) {
 	assert.Contains(t, telnet.StripANSI(output), "foobar")
 }
 
+// doLogin sends the login command then provides username+password interactively.
+// It waits for the "Password:" prompt before sending the password.
+func (tc *testClient) doLogin(username, password string) {
+	tc.t.Helper()
+	tc.send("login " + username)
+	tc.readUntil("Password:", 2*time.Second)
+	tc.send(password)
+}
+
+// doRegister sends the register command then provides username, password, and confirmation.
+func (tc *testClient) doRegister(username, password, confirm string) {
+	tc.t.Helper()
+	tc.send("register " + username)
+	tc.readUntil("Password:", 2*time.Second)
+	tc.send(password)
+	tc.readUntil("Confirm password:", 2*time.Second)
+	tc.send(confirm)
+}
+
 func TestHandleSession_Register(t *testing.T) {
 	store := newMockAccountStore()
 	handler := newAuthHandler(t, store, "127.0.0.1:50051")
@@ -324,7 +343,7 @@ func TestHandleSession_Register(t *testing.T) {
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("register testuser password123")
+	c.doRegister("testuser", "password123", "password123")
 	output := c.readUntil("You may now", 2*time.Second)
 	assert.Contains(t, telnet.StripANSI(output), "testuser")
 }
@@ -332,12 +351,13 @@ func TestHandleSession_Register(t *testing.T) {
 func TestHandleSession_RegisterDuplicate(t *testing.T) {
 	store := newMockAccountStore()
 	store.accounts["testuser"] = postgres.Account{ID: 1, Username: "testuser"}
+	store.passwords["testuser"] = "password123"
 	handler := newAuthHandler(t, store, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("register testuser password123")
+	c.doRegister("testuser", "password123", "password123")
 	c.readUntil("already taken", 2*time.Second)
 }
 
@@ -348,7 +368,7 @@ func TestHandleSession_RegisterShortUsername(t *testing.T) {
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("register ab password123")
+	c.send("register ab")
 	c.readUntil("3-32 characters", 2*time.Second)
 }
 
@@ -359,8 +379,21 @@ func TestHandleSession_RegisterShortPassword(t *testing.T) {
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("register testuser abc")
+	c.send("register testuser")
+	c.readUntil("Password:", 2*time.Second)
+	c.send("abc")
 	c.readUntil("at least 6", 2*time.Second)
+}
+
+func TestHandleSession_RegisterPasswordMismatch(t *testing.T) {
+	store := newMockAccountStore()
+	handler := newAuthHandler(t, store, "127.0.0.1:50051")
+	addr := testServer(t, handler)
+	c := newTestClient(t, addr)
+
+	c.waitForPrompt()
+	c.doRegister("testuser", "password123", "different!")
+	c.readUntil("do not match", 2*time.Second)
 }
 
 func TestHandleSession_RegisterMissingArgs(t *testing.T) {
@@ -369,9 +402,12 @@ func TestHandleSession_RegisterMissingArgs(t *testing.T) {
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
+	// No username arg — server prompts for it; send an empty line.
 	c.waitForPrompt()
 	c.send("register")
-	c.readUntil("Usage:", 2*time.Second)
+	c.readUntil("Username:", 2*time.Second)
+	c.send("ab") // too short — triggers validation error without needing a password
+	c.readUntil("3-32 characters", 2*time.Second)
 }
 
 func TestHandleSession_LoginNotFound(t *testing.T) {
@@ -381,7 +417,7 @@ func TestHandleSession_LoginNotFound(t *testing.T) {
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("login nobody secret123")
+	c.doLogin("nobody", "secret123")
 	c.readUntil("Account not found", 2*time.Second)
 }
 
@@ -394,19 +430,26 @@ func TestHandleSession_LoginWrongPassword(t *testing.T) {
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("login testuser wrongpass")
+	c.doLogin("testuser", "wrongpass")
 	c.readUntil("Invalid password", 2*time.Second)
 }
 
 func TestHandleSession_LoginMissingArgs(t *testing.T) {
 	store := newMockAccountStore()
+	store.accounts["testuser"] = postgres.Account{ID: 1, Username: "testuser"}
+	store.passwords["testuser"] = "password123"
 	handler := newAuthHandler(t, store, "127.0.0.1:50051")
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
 
+	// No username arg — server prompts for it.
 	c.waitForPrompt()
 	c.send("login")
-	c.readUntil("Usage:", 2*time.Second)
+	c.readUntil("Username:", 2*time.Second)
+	c.send("testuser")
+	c.readUntil("Password:", 2*time.Second)
+	c.send("password123")
+	c.readUntil("Welcome back", 2*time.Second)
 }
 
 func TestHandleSession_LoginSuccess_GameBridge(t *testing.T) {
@@ -423,7 +466,7 @@ func TestHandleSession_LoginSuccess_GameBridge(t *testing.T) {
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("login hero secret123")
+	c.doLogin("hero", "secret123")
 	c.readUntil("Welcome back", 2*time.Second)
 
 	// Character flow: one character listed, send "1" to select it.
@@ -472,7 +515,7 @@ func TestHandleSession_GameBridge_SayAndEmote(t *testing.T) {
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("login hero secret123")
+	c.doLogin("hero", "secret123")
 	c.readUntil("Welcome back", 2*time.Second)
 	c.readUntil("Your characters:", 2*time.Second)
 	c.send("1")
@@ -526,7 +569,7 @@ func TestHandleSession_GameBridge_MoveAlias(t *testing.T) {
 	c := newTestClient(t, addr)
 
 	c.waitForPrompt()
-	c.send("login hero secret123")
+	c.doLogin("hero", "secret123")
 	c.readUntil("Welcome back", 2*time.Second)
 	c.readUntil("Your characters:", 2*time.Second)
 	c.send("1")
