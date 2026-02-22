@@ -242,3 +242,29 @@ func (f *fixedSource) Intn(n int) int {
 	}
 	return f.val
 }
+
+// --- RollInitiative ---
+
+func TestRollInitiative_SetsInitiativeField(t *testing.T) {
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "A", DexMod: 2},
+		{ID: "n1", Kind: combat.KindNPC, Name: "G", DexMod: 1},
+	}
+	src := &fixedSource{val: 9} // Intn(20)→9, +1=10
+	combat.RollInitiative(combatants, src)
+
+	// player: 10 + 2 = 12; npc: 10 + 1 = 11
+	assert.Equal(t, 12, combatants[0].Initiative)
+	assert.Equal(t, 11, combatants[1].Initiative)
+}
+
+func TestRollInitiative_Property_InitiativeAtLeastOnePlusMod(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		dexMod := rapid.IntRange(-3, 5).Draw(rt, "dex_mod")
+		c := &combat.Combatant{ID: "x", Kind: combat.KindNPC, Name: "X", DexMod: dexMod}
+		src := &fixedSource{val: 0} // Intn(20)→0, +1=1
+		combat.RollInitiative([]*combat.Combatant{c}, src)
+		// minimum roll is 1, so initiative == 1 + dexMod
+		assert.Equal(rt, 1+dexMod, c.Initiative)
+	})
+}
