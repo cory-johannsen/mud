@@ -89,3 +89,26 @@ func TestProficiencyBonus_Property_AlwaysAtLeastTwo(t *testing.T) {
 		assert.GreaterOrEqual(rt, combat.ProficiencyBonus(level), 2)
 	})
 }
+
+func TestAbilityMod(t *testing.T) {
+	tests := []struct{ score, want int }{
+		{10, 0},
+		{12, 1},
+		{8, -1},
+		{9, -1},  // floor division: (9-10)/2 floors to -1
+		{20, 5},
+		{1, -5},
+	}
+	for _, tc := range tests {
+		assert.Equal(t, tc.want, combat.AbilityMod(tc.score), "score=%d", tc.score)
+	}
+}
+
+func TestAbilityMod_Property_EvenScoresSymmetric(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(0, 10).Draw(rt, "n")
+		// AbilityMod(10+2n) == n and AbilityMod(10-2n) == -n
+		assert.Equal(rt, n, combat.AbilityMod(10+2*n))
+		assert.Equal(rt, -n, combat.AbilityMod(10-2*n))
+	})
+}

@@ -49,10 +49,17 @@ type Combatant struct {
 	Initiative int
 }
 
+// IsPlayer reports whether this combatant is a player character.
+// Postcondition: Returns true iff Kind == KindPlayer.
 func (c *Combatant) IsPlayer() bool { return c.Kind == KindPlayer }
-func (c *Combatant) IsDead() bool   { return c.CurrentHP <= 0 }
+
+// IsDead reports whether this combatant has zero or fewer hit points.
+// Postcondition: Returns true iff CurrentHP <= 0.
+func (c *Combatant) IsDead() bool { return c.CurrentHP <= 0 }
 
 // ApplyDamage reduces CurrentHP by amount, flooring at zero.
+// Precondition: amount must be >= 0.
+// Postcondition: CurrentHP >= 0.
 func (c *Combatant) ApplyDamage(amount int) {
 	c.CurrentHP -= amount
 	if c.CurrentHP < 0 {
@@ -61,6 +68,8 @@ func (c *Combatant) ApplyDamage(amount int) {
 }
 
 // OutcomeFor determines the PF2E 4-tier attack outcome for a given roll vs AC.
+// Precondition: roll >= 1; ac >= 10.
+// Postcondition: Returns one of CritSuccess, Success, Failure, CritFailure.
 func OutcomeFor(roll, ac int) Outcome {
 	switch {
 	case roll >= ac+10:
@@ -75,12 +84,19 @@ func OutcomeFor(roll, ac int) Outcome {
 }
 
 // ProficiencyBonus returns the PF2E simplified proficiency bonus for the given level.
-// Formula: 2 + (level-1)/4
+// Formula: 2 + (level-1)/4, minimum 2.
+// Precondition: level >= 1.
+// Postcondition: Returns >= 2.
 func ProficiencyBonus(level int) int {
 	return 2 + (level-1)/4
 }
 
-// AbilityMod computes the standard ability modifier: (score - 10) / 2.
+// AbilityMod computes the standard ability modifier using floor division: floor((score - 10) / 2).
+// Postcondition: Returns floor((score - 10) / 2).
 func AbilityMod(score int) int {
-	return (score - 10) / 2
+	diff := score - 10
+	if diff < 0 {
+		return (diff - 1) / 2
+	}
+	return diff / 2
 }
