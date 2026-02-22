@@ -38,6 +38,29 @@ func RenderRoomView(rv *gamev1.RoomView) string {
 		b.WriteString("\r\n")
 	}
 
+	// NPCs present
+	if len(rv.Npcs) > 0 {
+		names := make([]string, 0, len(rv.Npcs))
+		for _, n := range rv.Npcs {
+			names = append(names, n.Name)
+		}
+		b.WriteString(telnet.Colorf(telnet.Yellow, "NPCs: %s", strings.Join(names, ", ")))
+		b.WriteString("\r\n")
+	}
+
+	return b.String()
+}
+
+// RenderNpcView formats an NpcView as Telnet text for the examine command.
+func RenderNpcView(nv *gamev1.NpcView) string {
+	var b strings.Builder
+	b.WriteString("\r\n")
+	b.WriteString(telnet.Colorize(telnet.BrightYellow, nv.Name))
+	b.WriteString("\r\n")
+	b.WriteString(telnet.Colorize(telnet.White, nv.Description))
+	b.WriteString("\r\n")
+	b.WriteString(telnet.Colorf(telnet.Cyan, "Condition: %s  Level: %d", nv.HealthDescription, nv.Level))
+	b.WriteString("\r\n")
 	return b.String()
 }
 

@@ -196,6 +196,19 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			_ = stream.Send(msg)
 			return nil
 
+		case command.HandlerExamine:
+			if parsed.RawArgs == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Examine what?"))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_Examine{
+					Examine: &gamev1.ExamineRequest{Target: parsed.RawArgs},
+				},
+			}
+
 		case command.HandlerHelp:
 			h.showGameHelp(conn, registry)
 			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
@@ -259,6 +272,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderExitList(p.ExitList)
 		case *gamev1.ServerEvent_Error:
 			text = RenderError(p.Error)
+		case *gamev1.ServerEvent_NpcView:
+			text = RenderNpcView(p.NpcView)
 		case *gamev1.ServerEvent_Disconnected:
 			_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason))
 			return
