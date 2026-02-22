@@ -61,7 +61,6 @@ func (c *Conn) Negotiate() error {
 
 	negotiations := []byte{
 		IAC, WILL, OptSuppressGoAhead,
-		IAC, WILL, OptEcho,
 	}
 
 	if c.writeTimeout > 0 {
