@@ -25,6 +25,8 @@ message ClientMessage {
     ExitsRequest exits = 8;
     QuitRequest quit = 9;
     ExamineRequest examine = 10;
+    AttackRequest attack = 11;
+    FleeRequest   flee   = 12;
   }
 }
 
@@ -41,6 +43,7 @@ message ServerEvent {
     Disconnected disconnected = 8;
     CharacterInfo character_info = 9;
     NpcView npc_view = 10;
+    CombatEvent combat_event = 11;
   }
 }
 
@@ -183,4 +186,35 @@ message NpcView {
   string description        = 3;
   string health_description = 4;
   int32  level              = 5;
+}
+
+// AttackRequest asks the server to attack a named target.
+message AttackRequest {
+  string target = 1;
+}
+
+// FleeRequest asks the server to attempt to flee combat.
+message FleeRequest {}
+
+// CombatEvent delivers combat narration to all players in the room.
+message CombatEvent {
+  CombatEventType type    = 1;
+  string attacker         = 2;
+  string target           = 3;
+  int32  attack_roll      = 4;
+  int32  attack_total     = 5;
+  string outcome          = 6;
+  int32  damage           = 7;
+  int32  target_hp        = 8;
+  string narrative        = 9;
+}
+
+// CombatEventType distinguishes combat narration events.
+enum CombatEventType {
+  COMBAT_EVENT_TYPE_UNSPECIFIED  = 0;
+  COMBAT_EVENT_TYPE_INITIATIVE   = 1;
+  COMBAT_EVENT_TYPE_ATTACK       = 2;
+  COMBAT_EVENT_TYPE_DEATH        = 3;
+  COMBAT_EVENT_TYPE_FLEE         = 4;
+  COMBAT_EVENT_TYPE_END          = 5;
 }
