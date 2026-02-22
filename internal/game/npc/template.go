@@ -34,7 +34,9 @@ type Template struct {
 
 // Validate checks that the template satisfies basic invariants.
 //
-// Postcondition: Returns nil if valid, or an error on the first violation.
+// Precondition: t must not be nil.
+// Postcondition: Returns nil iff ID is non-empty, Name is non-empty, Level >= 1,
+// MaxHP >= 1, and AC >= 10; returns an error on the first violation otherwise.
 func (t *Template) Validate() error {
 	if t.ID == "" {
 		return fmt.Errorf("npc template: id must not be empty")
@@ -57,7 +59,8 @@ func (t *Template) Validate() error {
 // LoadTemplates reads all *.yaml files in dir and returns the parsed templates.
 //
 // Precondition: dir must be a readable directory.
-// Postcondition: Returns all templates or an error on the first parse/validate failure.
+// Postcondition: Returns all templates or an error on the first parse or validate
+// failure; on error, the partial result is discarded.
 func LoadTemplates(dir string) ([]*Template, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {

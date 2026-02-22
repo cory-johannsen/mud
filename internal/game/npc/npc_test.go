@@ -58,26 +58,73 @@ func TestLoadTemplates_InvalidYAML(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestTemplate_Property_IDAndNameNonEmpty(t *testing.T) {
-	rapid.Check(t, func(rt *rapid.T) {
-		id := rapid.StringMatching(`[a-z][a-z0-9_]{0,15}`).Draw(rt, "id")
-		name := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz "))).
-			Filter(func(s string) bool { return len(s) > 0 }).
-			Draw(rt, "name")
-		level := rapid.IntRange(1, 20).Draw(rt, "level")
-		maxHP := rapid.IntRange(1, 300).Draw(rt, "max_hp")
-		ac := rapid.IntRange(10, 30).Draw(rt, "ac")
+func TestLoadTemplates_NonYAMLFilesSkipped(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "notes.txt"), []byte("ignore me"), 0644))
+	require.NoError(t, os.Mkdir(filepath.Join(dir, "subdir"), 0755))
+	// Write a valid .yml file (not .yaml — should be skipped)
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "template.yml"), []byte("id: x\nname: X\nlevel: 1\nmax_hp: 1\nac: 10\n"), 0644))
 
+	templates, err := npc.LoadTemplates(dir)
+	require.NoError(t, err)
+	assert.Empty(t, templates)
+}
+
+func TestLoadTemplates_ValidationError(t *testing.T) {
+	dir := t.TempDir()
+	// level: 0 is invalid per Validate
+	yaml := `id: broken
+name: Broken
+level: 0
+max_hp: 10
+ac: 10
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "broken.yaml"), []byte(yaml), 0644))
+	_, err := npc.LoadTemplates(dir)
+	assert.Error(t, err)
+}
+
+func TestLoadTemplates_NonExistentDir(t *testing.T) {
+	_, err := npc.LoadTemplates("/tmp/does-not-exist-mud-npc-test")
+	assert.Error(t, err)
+}
+
+func TestTemplate_Property_Validate_ValidInputsPass(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
 		tmpl := &npc.Template{
-			ID:    id,
-			Name:  name,
-			Level: level,
-			MaxHP: maxHP,
-			AC:    ac,
+			ID:    rapid.StringMatching(`[a-z][a-z0-9_]{0,15}`).Draw(rt, "id"),
+			Name:  rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz "))).Filter(func(s string) bool { return len(s) > 0 }).Draw(rt, "name"),
+			Level: rapid.IntRange(1, 20).Draw(rt, "level"),
+			MaxHP: rapid.IntRange(1, 300).Draw(rt, "max_hp"),
+			AC:    rapid.IntRange(10, 30).Draw(rt, "ac"),
 		}
-		assert.NotEmpty(rt, tmpl.ID)
-		assert.NotEmpty(rt, tmpl.Name)
-		assert.Greater(rt, tmpl.Level, 0)
-		assert.Greater(rt, tmpl.MaxHP, 0)
+		assert.NoError(rt, tmpl.Validate(), "valid template should pass Validate")
+	})
+}
+
+func TestTemplate_Property_Validate_InvalidInputsFail(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Pick one field to invalidate
+		field := rapid.IntRange(0, 4).Draw(rt, "field")
+		tmpl := &npc.Template{
+			ID:    "valid",
+			Name:  "Valid",
+			Level: 1,
+			MaxHP: 10,
+			AC:    10,
+		}
+		switch field {
+		case 0:
+			tmpl.ID = ""
+		case 1:
+			tmpl.Name = ""
+		case 2:
+			tmpl.Level = rapid.IntRange(-10, 0).Draw(rt, "bad_level")
+		case 3:
+			tmpl.MaxHP = rapid.IntRange(-10, 0).Draw(rt, "bad_max_hp")
+		case 4:
+			tmpl.AC = rapid.IntRange(0, 9).Draw(rt, "bad_ac")
+		}
+		assert.Error(rt, tmpl.Validate(), "invalid template should fail Validate")
 	})
 }
