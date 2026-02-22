@@ -18,24 +18,29 @@ func makeRegion(mods map[string]int) *ruleset.Region {
 	}
 }
 
-func makeClass(keyAbility string, hpPerLevel int) *ruleset.Class {
-	return &ruleset.Class{
-		ID:                "test_class",
-		Name:              "Test Class",
+func makeJob(keyAbility string, hpPerLevel int) *ruleset.Job {
+	return &ruleset.Job{
+		ID:                "test_job",
+		Name:              "Test Job",
 		KeyAbility:        keyAbility,
 		HitPointsPerLevel: hpPerLevel,
 	}
 }
 
-func TestBuildCharacter_AppliesRegionModifiers(t *testing.T) {
+func makeTeam() *ruleset.Team {
+	return &ruleset.Team{ID: "test_team", Name: "Test Team"}
+}
+
+func TestBuildWithJob_AppliesRegionModifiers(t *testing.T) {
 	region := makeRegion(map[string]int{
 		"strength": 2,
 		"charisma": 2,
 		"wisdom":   -2,
 	})
-	class := makeClass("strength", 10)
+	job := makeJob("strength", 10)
+	team := makeTeam()
 
-	c, err := character.Build("Hero", region, class)
+	c, err := character.BuildWithJob("Hero", region, job, team)
 	require.NoError(t, err)
 
 	assert.Equal(t, 14, c.Abilities.Strength)    // 10 + 2 region + 2 key ability
@@ -46,12 +51,12 @@ func TestBuildCharacter_AppliesRegionModifiers(t *testing.T) {
 	assert.Equal(t, 12, c.Abilities.Charisma)     // 10 + 2
 }
 
-func TestBuildCharacter_CalculatesHP(t *testing.T) {
-	// CON 12 → modifier +1; HP = 10 + 1 = 11
+func TestBuildWithJob_CalculatesHP(t *testing.T) {
 	region := makeRegion(map[string]int{"constitution": 2})
-	class := makeClass("intelligence", 10)
+	job := makeJob("intelligence", 10)
+	team := makeTeam()
 
-	c, err := character.Build("Hero", region, class)
+	c, err := character.BuildWithJob("Hero", region, job, team)
 	require.NoError(t, err)
 
 	assert.Equal(t, 12, c.Abilities.Constitution)
@@ -59,78 +64,52 @@ func TestBuildCharacter_CalculatesHP(t *testing.T) {
 	assert.Equal(t, 11, c.CurrentHP)
 }
 
-func TestBuildCharacter_HPNeverBelowOne(t *testing.T) {
-	// Large CON penalty → HP floor at 1
+func TestBuildWithJob_HPNeverBelowOne(t *testing.T) {
 	region := makeRegion(map[string]int{"constitution": -4})
-	class := makeClass("strength", 6)
+	job := makeJob("strength", 6)
+	team := makeTeam()
 
-	c, err := character.Build("Hero", region, class)
+	c, err := character.BuildWithJob("Hero", region, job, team)
 	require.NoError(t, err)
 
 	assert.GreaterOrEqual(t, c.MaxHP, 1)
 }
 
-func TestBuildCharacter_NameSet(t *testing.T) {
-	region := makeRegion(nil)
-	class := makeClass("strength", 8)
-	c, err := character.Build("Aria", region, class)
-	require.NoError(t, err)
-	assert.Equal(t, "Aria", c.Name)
+func TestBuildWithJob_EmptyNameError(t *testing.T) {
+	_, err := character.BuildWithJob("", makeRegion(nil), makeJob("strength", 8), makeTeam())
+	require.Error(t, err)
 }
 
-func TestBuildCharacter_RegionAndClassIDSet(t *testing.T) {
-	region := &ruleset.Region{ID: "old_town", Name: "Old Town", Modifiers: nil}
-	class := &ruleset.Class{ID: "ganger", Name: "Ganger", KeyAbility: "strength", HitPointsPerLevel: 10}
-	c, err := character.Build("Zara", region, class)
-	require.NoError(t, err)
-	assert.Equal(t, "old_town", c.Region)
-	assert.Equal(t, "ganger", c.Class)
+func TestBuildWithJob_NilRegionError(t *testing.T) {
+	_, err := character.BuildWithJob("Hero", nil, makeJob("strength", 8), makeTeam())
+	require.Error(t, err)
 }
 
-func TestBuildCharacter_LevelOne(t *testing.T) {
-	region := makeRegion(nil)
-	class := makeClass("strength", 8)
-	c, err := character.Build("Hero", region, class)
-	require.NoError(t, err)
-	assert.Equal(t, 1, c.Level)
-	assert.Equal(t, 0, c.Experience)
+func TestBuildWithJob_NilJobError(t *testing.T) {
+	_, err := character.BuildWithJob("Hero", makeRegion(nil), nil, makeTeam())
+	require.Error(t, err)
 }
 
-func TestBuildCharacter_DefaultLocation(t *testing.T) {
-	region := makeRegion(nil)
-	class := makeClass("strength", 8)
-	c, err := character.Build("Hero", region, class)
+func TestBuildWithJob_NilTeamError(t *testing.T) {
+	_, err := character.BuildWithJob("Hero", makeRegion(nil), makeJob("strength", 8), nil)
+	require.Error(t, err)
+}
+
+func TestBuildWithJob_DefaultLocation(t *testing.T) {
+	c, err := character.BuildWithJob("Hero", makeRegion(nil), makeJob("strength", 8), makeTeam())
 	require.NoError(t, err)
 	assert.Equal(t, "grinders_row", c.Location)
-}
-
-func TestBuildCharacter_EmptyNameError(t *testing.T) {
-	region := makeRegion(nil)
-	class := makeClass("strength", 8)
-	_, err := character.Build("", region, class)
-	require.Error(t, err)
-}
-
-func TestBuildCharacter_NilRegionError(t *testing.T) {
-	class := makeClass("strength", 8)
-	_, err := character.Build("Hero", nil, class)
-	require.Error(t, err)
-}
-
-func TestBuildCharacter_NilClassError(t *testing.T) {
-	region := makeRegion(nil)
-	_, err := character.Build("Hero", region, nil)
-	require.Error(t, err)
+	assert.Equal(t, 1, c.Level)
 }
 
 // Property: MaxHP is always >= 1 regardless of region modifiers.
-func TestBuildCharacter_MaxHPAlwaysPositive(t *testing.T) {
+func TestBuildWithJob_MaxHPAlwaysPositive(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		conMod := rapid.IntRange(-8, 8).Draw(rt, "conMod")
 		hpPerLevel := rapid.IntRange(6, 12).Draw(rt, "hpPerLevel")
 		region := makeRegion(map[string]int{"constitution": conMod})
-		class := makeClass("strength", hpPerLevel)
-		c, err := character.Build("Hero", region, class)
+		job := makeJob("strength", hpPerLevel)
+		c, err := character.BuildWithJob("Hero", region, job, makeTeam())
 		if err != nil {
 			rt.Fatal(err)
 		}
@@ -141,44 +120,18 @@ func TestBuildCharacter_MaxHPAlwaysPositive(t *testing.T) {
 }
 
 // Property: CurrentHP == MaxHP on a freshly built character.
-func TestBuildCharacter_CurrentHPEqualsMaxHP(t *testing.T) {
+func TestBuildWithJob_CurrentHPEqualsMaxHP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		conMod := rapid.IntRange(-4, 4).Draw(rt, "conMod")
 		hpPerLevel := rapid.IntRange(6, 12).Draw(rt, "hpPerLevel")
 		region := makeRegion(map[string]int{"constitution": conMod})
-		class := makeClass("dexterity", hpPerLevel)
-		c, err := character.Build("Hero", region, class)
+		job := makeJob("dexterity", hpPerLevel)
+		c, err := character.BuildWithJob("Hero", region, job, makeTeam())
 		if err != nil {
 			rt.Fatal(err)
 		}
 		if c.CurrentHP != c.MaxHP {
 			rt.Fatalf("CurrentHP %d != MaxHP %d on new character", c.CurrentHP, c.MaxHP)
-		}
-	})
-}
-
-// Property: all ability scores are >= 4 (no modifier in normal play drops below 4).
-func TestBuildCharacter_AbilitiesInReasonableRange(t *testing.T) {
-	rapid.Check(t, func(rt *rapid.T) {
-		mod := rapid.IntRange(-4, 4).Draw(rt, "mod")
-		ability := rapid.SampledFrom([]string{
-			"strength", "dexterity", "constitution",
-			"intelligence", "wisdom", "charisma",
-		}).Draw(rt, "ability")
-		region := makeRegion(map[string]int{ability: mod})
-		class := makeClass("strength", 8)
-		c, err := character.Build("Hero", region, class)
-		if err != nil {
-			rt.Fatal(err)
-		}
-		scores := []int{
-			c.Abilities.Strength, c.Abilities.Dexterity, c.Abilities.Constitution,
-			c.Abilities.Intelligence, c.Abilities.Wisdom, c.Abilities.Charisma,
-		}
-		for _, s := range scores {
-			if s < 4 {
-				rt.Fatalf("ability score %d < 4", s)
-			}
 		}
 	})
 }

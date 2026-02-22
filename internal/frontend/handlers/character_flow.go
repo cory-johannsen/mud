@@ -88,7 +88,7 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 // characterCreationFlow guides the player through the interactive character builder.
 // Returns (nil, nil) if the player cancels at any step.
 //
-// Precondition: accountID must be > 0; h.regions and h.classes must be non-empty.
+// Precondition: accountID must be > 0; h.regions must be non-empty.
 // Postcondition: Returns a persisted *character.Character or (nil, nil) on cancel.
 func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Conn, accountID int64) (*character.Character, error) {
 	_ = conn.WriteLine(telnet.Colorize(telnet.BrightCyan, "\r\n=== Character Creation ==="))

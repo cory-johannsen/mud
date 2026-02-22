@@ -7,44 +7,6 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 )
 
-// Build constructs a new Character from a name, region, and class.
-// Ability scores start at 10, region modifiers are applied, then the
-// class key ability receives a +2 boost. HP = max(1, hpPerLevel + CON modifier).
-//
-// Precondition: name must be non-empty; region and class must be non-nil.
-// Postcondition: Returns a Character ready for persistence, or a non-nil error.
-func Build(name string, region *ruleset.Region, class *ruleset.Class) (*Character, error) {
-	if name == "" {
-		return nil, errors.New("character name must not be empty")
-	}
-	if region == nil {
-		return nil, errors.New("region must not be nil")
-	}
-	if class == nil {
-		return nil, errors.New("class must not be nil")
-	}
-
-	abilities := applyModifiers(region.Modifiers)
-	abilities = applyKeyAbilityBoost(abilities, class.KeyAbility)
-
-	conMod := abilities.Modifier(abilities.Constitution)
-	maxHP := class.HitPointsPerLevel + conMod
-	if maxHP < 1 {
-		maxHP = 1
-	}
-
-	return &Character{
-		Name:      name,
-		Region:    region.ID,
-		Class:     class.ID,
-		Level:     1,
-		Location:  "grinders_row",
-		Abilities: abilities,
-		MaxHP:     maxHP,
-		CurrentHP: maxHP,
-	}, nil
-}
-
 // applyModifiers starts all abilities at 10 and adds region modifier values.
 func applyModifiers(mods map[string]int) AbilityScores {
 	a := AbilityScores{
