@@ -192,3 +192,77 @@ func TestInstance_Property_HealthDescriptionNonEmpty(t *testing.T) {
 		assert.NotEmpty(rt, inst.HealthDescription())
 	})
 }
+
+func TestManager_SpawnAndList(t *testing.T) {
+	tmpl := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 18, AC: 14}
+	mgr := npc.NewManager()
+
+	inst, err := mgr.Spawn(tmpl, "room-alley")
+	require.NoError(t, err)
+	assert.NotEmpty(t, inst.ID)
+	assert.Equal(t, "room-alley", inst.RoomID)
+
+	list := mgr.InstancesInRoom("room-alley")
+	require.Len(t, list, 1)
+	assert.Equal(t, inst.ID, list[0].ID)
+}
+
+func TestManager_InstancesInRoom_Empty(t *testing.T) {
+	mgr := npc.NewManager()
+	assert.Empty(t, mgr.InstancesInRoom("nonexistent-room"))
+}
+
+func TestManager_Remove(t *testing.T) {
+	tmpl := &npc.Template{ID: "g", Name: "G", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+	inst, _ := mgr.Spawn(tmpl, "room-1")
+
+	require.NoError(t, mgr.Remove(inst.ID))
+	assert.Empty(t, mgr.InstancesInRoom("room-1"))
+}
+
+func TestManager_Remove_NotFound(t *testing.T) {
+	mgr := npc.NewManager()
+	assert.Error(t, mgr.Remove("nonexistent"))
+}
+
+func TestManager_Get(t *testing.T) {
+	tmpl := &npc.Template{ID: "g", Name: "G", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+	inst, _ := mgr.Spawn(tmpl, "room-1")
+
+	got, ok := mgr.Get(inst.ID)
+	assert.True(t, ok)
+	assert.Equal(t, inst.ID, got.ID)
+
+	_, ok = mgr.Get("missing")
+	assert.False(t, ok)
+}
+
+func TestManager_FindInRoom_PrefixMatch(t *testing.T) {
+	tmpl := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+	inst, _ := mgr.Spawn(tmpl, "room-1")
+
+	found := mgr.FindInRoom("room-1", "gan")
+	require.NotNil(t, found)
+	assert.Equal(t, inst.ID, found.ID)
+
+	notFound := mgr.FindInRoom("room-1", "xyz")
+	assert.Nil(t, notFound)
+}
+
+func TestManager_Property_SpawnProducesUniqueIDs(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 20).Draw(rt, "n")
+		tmpl := &npc.Template{ID: "g", Name: "G", Level: 1, MaxHP: 10, AC: 10}
+		mgr := npc.NewManager()
+		ids := make(map[string]bool)
+		for i := 0; i < n; i++ {
+			inst, err := mgr.Spawn(tmpl, "room-1")
+			require.NoError(rt, err)
+			assert.False(rt, ids[inst.ID], "duplicate ID: %s", inst.ID)
+			ids[inst.ID] = true
+		}
+	})
+}
