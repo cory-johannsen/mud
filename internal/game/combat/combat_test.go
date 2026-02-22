@@ -5,6 +5,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -111,4 +112,82 @@ func TestAbilityMod_Property_EvenScoresSymmetric(t *testing.T) {
 		assert.Equal(rt, n, combat.AbilityMod(10+2*n))
 		assert.Equal(rt, -n, combat.AbilityMod(10-2*n))
 	})
+}
+
+// --- Engine ---
+
+func makeCombatants() []*combat.Combatant {
+	return []*combat.Combatant{
+		{ID: "player-1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "npc-ganger-1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 13, Level: 1, StrMod: 2, DexMod: 1},
+	}
+}
+
+func TestEngine_StartCombat(t *testing.T) {
+	eng := combat.NewEngine()
+	cbt, err := eng.StartCombat("room-alley", makeCombatants())
+	require.NoError(t, err)
+	assert.Equal(t, "room-alley", cbt.RoomID)
+	assert.Len(t, cbt.Combatants, 2)
+	assert.False(t, cbt.Over)
+}
+
+func TestEngine_StartCombat_DuplicateRoom(t *testing.T) {
+	eng := combat.NewEngine()
+	_, err := eng.StartCombat("room-1", makeCombatants())
+	require.NoError(t, err)
+	_, err = eng.StartCombat("room-1", makeCombatants())
+	assert.Error(t, err)
+}
+
+func TestEngine_GetCombat(t *testing.T) {
+	eng := combat.NewEngine()
+	_, err := eng.StartCombat("room-1", makeCombatants())
+	require.NoError(t, err)
+
+	cbt, ok := eng.GetCombat("room-1")
+	assert.True(t, ok)
+	assert.Equal(t, "room-1", cbt.RoomID)
+
+	_, ok = eng.GetCombat("room-missing")
+	assert.False(t, ok)
+}
+
+func TestEngine_EndCombat(t *testing.T) {
+	eng := combat.NewEngine()
+	_, err := eng.StartCombat("room-1", makeCombatants())
+	require.NoError(t, err)
+
+	eng.EndCombat("room-1")
+	_, ok := eng.GetCombat("room-1")
+	assert.False(t, ok)
+}
+
+func TestCombat_CurrentTurn(t *testing.T) {
+	eng := combat.NewEngine()
+	cbt, _ := eng.StartCombat("room-1", makeCombatants())
+	current := cbt.CurrentTurn()
+	require.NotNil(t, current)
+	assert.NotEmpty(t, current.ID)
+}
+
+func TestCombat_AdvanceTurn(t *testing.T) {
+	eng := combat.NewEngine()
+	cbt, _ := eng.StartCombat("room-1", makeCombatants())
+	first := cbt.CurrentTurn()
+	cbt.AdvanceTurn()
+	second := cbt.CurrentTurn()
+	assert.NotEqual(t, first.ID, second.ID)
+}
+
+func TestCombat_AdvanceTurn_SkipsDead(t *testing.T) {
+	eng := combat.NewEngine()
+	c := makeCombatants()
+	c[1].CurrentHP = 0 // NPC is dead
+	cbt, _ := eng.StartCombat("room-1", c)
+	for i := 0; i < 5; i++ {
+		current := cbt.CurrentTurn()
+		assert.Equal(t, combat.KindPlayer, current.Kind)
+		cbt.AdvanceTurn()
+	}
 }
