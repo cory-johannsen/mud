@@ -24,6 +24,7 @@ message ClientMessage {
     WhoRequest who = 7;
     ExitsRequest exits = 8;
     QuitRequest quit = 9;
+    ExamineRequest examine = 10;
   }
 }
 
@@ -39,6 +40,7 @@ message ServerEvent {
     ErrorEvent error = 7;
     Disconnected disconnected = 8;
     CharacterInfo character_info = 9;
+    NpcView npc_view = 10;
   }
 }
 
@@ -85,6 +87,7 @@ message RoomView {
   string description = 3;
   repeated ExitInfo exits = 4;
   repeated string players = 5;
+  repeated NpcInfo npcs = 6;
 }
 
 // ExitInfo describes a single exit from a room.
@@ -160,4 +163,24 @@ message CharacterInfo {
   int32  intelligence  = 12;
   int32  wisdom        = 13;
   int32  charisma      = 14;
+}
+
+// NpcInfo summarises an NPC visible in the room.
+message NpcInfo {
+  string instance_id = 1;
+  string name        = 2;
+}
+
+// ExamineRequest asks the server for detail on a named target.
+message ExamineRequest {
+  string target = 1;
+}
+
+// NpcView delivers detailed NPC information in response to examine.
+message NpcView {
+  string instance_id        = 1;
+  string name               = 2;
+  string description        = 3;
+  string health_description = 4;
+  int32  level              = 5;
 }

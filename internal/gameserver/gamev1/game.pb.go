@@ -135,6 +135,7 @@ type ClientMessage struct {
 	//	*ClientMessage_Who
 	//	*ClientMessage_Exits
 	//	*ClientMessage_Quit
+	//	*ClientMessage_Examine
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -256,6 +257,15 @@ func (x *ClientMessage) GetQuit() *QuitRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetExamine() *ExamineRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Examine); ok {
+			return x.Examine
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -292,6 +302,10 @@ type ClientMessage_Quit struct {
 	Quit *QuitRequest `protobuf:"bytes,9,opt,name=quit,proto3,oneof"`
 }
 
+type ClientMessage_Examine struct {
+	Examine *ExamineRequest `protobuf:"bytes,10,opt,name=examine,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -308,6 +322,8 @@ func (*ClientMessage_Exits) isClientMessage_Payload() {}
 
 func (*ClientMessage_Quit) isClientMessage_Payload() {}
 
+func (*ClientMessage_Examine) isClientMessage_Payload() {}
+
 // ServerEvent wraps all server-to-client events.
 type ServerEvent struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
@@ -322,6 +338,7 @@ type ServerEvent struct {
 	//	*ServerEvent_Error
 	//	*ServerEvent_Disconnected
 	//	*ServerEvent_CharacterInfo
+	//	*ServerEvent_NpcView
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -443,6 +460,15 @@ func (x *ServerEvent) GetCharacterInfo() *CharacterInfo {
 	return nil
 }
 
+func (x *ServerEvent) GetNpcView() *NpcView {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_NpcView); ok {
+			return x.NpcView
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -479,6 +505,10 @@ type ServerEvent_CharacterInfo struct {
 	CharacterInfo *CharacterInfo `protobuf:"bytes,9,opt,name=character_info,json=characterInfo,proto3,oneof"`
 }
 
+type ServerEvent_NpcView struct {
+	NpcView *NpcView `protobuf:"bytes,10,opt,name=npc_view,json=npcView,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -494,6 +524,8 @@ func (*ServerEvent_Error) isServerEvent_Payload() {}
 func (*ServerEvent_Disconnected) isServerEvent_Payload() {}
 
 func (*ServerEvent_CharacterInfo) isServerEvent_Payload() {}
+
+func (*ServerEvent_NpcView) isServerEvent_Payload() {}
 
 // JoinWorldRequest is sent by the client to enter the game world after authentication.
 type JoinWorldRequest struct {
@@ -863,6 +895,7 @@ type RoomView struct {
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Exits         []*ExitInfo            `protobuf:"bytes,4,rep,name=exits,proto3" json:"exits,omitempty"`
 	Players       []string               `protobuf:"bytes,5,rep,name=players,proto3" json:"players,omitempty"`
+	Npcs          []*NpcInfo             `protobuf:"bytes,6,rep,name=npcs,proto3" json:"npcs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -928,6 +961,13 @@ func (x *RoomView) GetExits() []*ExitInfo {
 func (x *RoomView) GetPlayers() []string {
 	if x != nil {
 		return x.Players
+	}
+	return nil
+}
+
+func (x *RoomView) GetNpcs() []*NpcInfo {
+	if x != nil {
+		return x.Npcs
 	}
 	return nil
 }
@@ -1460,11 +1500,186 @@ func (x *CharacterInfo) GetCharisma() int32 {
 	return 0
 }
 
+// NpcInfo summarises an NPC visible in the room.
+type NpcInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	InstanceId    string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NpcInfo) Reset() {
+	*x = NpcInfo{}
+	mi := &file_game_v1_game_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NpcInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NpcInfo) ProtoMessage() {}
+
+func (x *NpcInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NpcInfo.ProtoReflect.Descriptor instead.
+func (*NpcInfo) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *NpcInfo) GetInstanceId() string {
+	if x != nil {
+		return x.InstanceId
+	}
+	return ""
+}
+
+func (x *NpcInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+// ExamineRequest asks the server for detail on a named target.
+type ExamineRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Target        string                 `protobuf:"bytes,1,opt,name=target,proto3" json:"target,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExamineRequest) Reset() {
+	*x = ExamineRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExamineRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExamineRequest) ProtoMessage() {}
+
+func (x *ExamineRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExamineRequest.ProtoReflect.Descriptor instead.
+func (*ExamineRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ExamineRequest) GetTarget() string {
+	if x != nil {
+		return x.Target
+	}
+	return ""
+}
+
+// NpcView delivers detailed NPC information in response to examine.
+type NpcView struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	InstanceId        string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	Name              string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description       string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	HealthDescription string                 `protobuf:"bytes,4,opt,name=health_description,json=healthDescription,proto3" json:"health_description,omitempty"`
+	Level             int32                  `protobuf:"varint,5,opt,name=level,proto3" json:"level,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *NpcView) Reset() {
+	*x = NpcView{}
+	mi := &file_game_v1_game_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NpcView) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NpcView) ProtoMessage() {}
+
+func (x *NpcView) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NpcView.ProtoReflect.Descriptor instead.
+func (*NpcView) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *NpcView) GetInstanceId() string {
+	if x != nil {
+		return x.InstanceId
+	}
+	return ""
+}
+
+func (x *NpcView) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *NpcView) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *NpcView) GetHealthDescription() string {
+	if x != nil {
+		return x.HealthDescription
+	}
+	return ""
+}
+
+func (x *NpcView) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xa9\x03\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xde\x03\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -1476,8 +1691,10 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x05emote\x18\x06 \x01(\v2\x15.game.v1.EmoteRequestH\x00R\x05emote\x12'\n" +
 	"\x03who\x18\a \x01(\v2\x13.game.v1.WhoRequestH\x00R\x03who\x12-\n" +
 	"\x05exits\x18\b \x01(\v2\x15.game.v1.ExitsRequestH\x00R\x05exits\x12*\n" +
-	"\x04quit\x18\t \x01(\v2\x14.game.v1.QuitRequestH\x00R\x04quitB\t\n" +
-	"\apayload\"\xe6\x03\n" +
+	"\x04quit\x18\t \x01(\v2\x14.game.v1.QuitRequestH\x00R\x04quit\x123\n" +
+	"\aexamine\x18\n" +
+	" \x01(\v2\x17.game.v1.ExamineRequestH\x00R\aexamineB\t\n" +
+	"\apayload\"\x95\x04\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -1490,7 +1707,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\texit_list\x18\x06 \x01(\v2\x11.game.v1.ExitListH\x00R\bexitList\x12+\n" +
 	"\x05error\x18\a \x01(\v2\x13.game.v1.ErrorEventH\x00R\x05error\x12;\n" +
 	"\fdisconnected\x18\b \x01(\v2\x15.game.v1.DisconnectedH\x00R\fdisconnected\x12?\n" +
-	"\x0echaracter_info\x18\t \x01(\v2\x16.game.v1.CharacterInfoH\x00R\rcharacterInfoB\t\n" +
+	"\x0echaracter_info\x18\t \x01(\v2\x16.game.v1.CharacterInfoH\x00R\rcharacterInfo\x12-\n" +
+	"\bnpc_view\x18\n" +
+	" \x01(\v2\x10.game.v1.NpcViewH\x00R\anpcViewB\t\n" +
 	"\apayload\"\xa9\x01\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
@@ -1510,13 +1729,14 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"WhoRequest\"\x0e\n" +
 	"\fExitsRequest\"\r\n" +
-	"\vQuitRequest\"\x9e\x01\n" +
+	"\vQuitRequest\"\xc4\x01\n" +
 	"\bRoomView\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12'\n" +
 	"\x05exits\x18\x04 \x03(\v2\x11.game.v1.ExitInfoR\x05exits\x12\x18\n" +
-	"\aplayers\x18\x05 \x03(\tR\aplayers\"~\n" +
+	"\aplayers\x18\x05 \x03(\tR\aplayers\x12$\n" +
+	"\x04npcs\x18\x06 \x03(\v2\x10.game.v1.NpcInfoR\x04npcs\"~\n" +
 	"\bExitInfo\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\x12$\n" +
 	"\x0etarget_room_id\x18\x02 \x01(\tR\ftargetRoomId\x12\x16\n" +
@@ -1560,7 +1780,20 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\fconstitution\x18\v \x01(\x05R\fconstitution\x12\"\n" +
 	"\fintelligence\x18\f \x01(\x05R\fintelligence\x12\x16\n" +
 	"\x06wisdom\x18\r \x01(\x05R\x06wisdom\x12\x1a\n" +
-	"\bcharisma\x18\x0e \x01(\x05R\bcharisma*Y\n" +
+	"\bcharisma\x18\x0e \x01(\x05R\bcharisma\">\n" +
+	"\aNpcInfo\x12\x1f\n" +
+	"\vinstance_id\x18\x01 \x01(\tR\n" +
+	"instanceId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"(\n" +
+	"\x0eExamineRequest\x12\x16\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\"\xa5\x01\n" +
+	"\aNpcView\x12\x1f\n" +
+	"\vinstance_id\x18\x01 \x01(\tR\n" +
+	"instanceId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12-\n" +
+	"\x12health_description\x18\x04 \x01(\tR\x11healthDescription\x12\x14\n" +
+	"\x05level\x18\x05 \x01(\x05R\x05level*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -1585,7 +1818,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),         // 0: game.v1.MessageType
 	(RoomEventType)(0),       // 1: game.v1.RoomEventType
@@ -1608,6 +1841,9 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*ErrorEvent)(nil),       // 18: game.v1.ErrorEvent
 	(*Disconnected)(nil),     // 19: game.v1.Disconnected
 	(*CharacterInfo)(nil),    // 20: game.v1.CharacterInfo
+	(*NpcInfo)(nil),          // 21: game.v1.NpcInfo
+	(*ExamineRequest)(nil),   // 22: game.v1.ExamineRequest
+	(*NpcView)(nil),          // 23: game.v1.NpcView
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	4,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -1618,25 +1854,28 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	9,  // 5: game.v1.ClientMessage.who:type_name -> game.v1.WhoRequest
 	10, // 6: game.v1.ClientMessage.exits:type_name -> game.v1.ExitsRequest
 	11, // 7: game.v1.ClientMessage.quit:type_name -> game.v1.QuitRequest
-	12, // 8: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	14, // 9: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	15, // 10: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	16, // 11: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	17, // 12: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	18, // 13: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	19, // 14: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	20, // 15: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	13, // 16: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	0,  // 17: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,  // 18: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	13, // 19: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	2,  // 20: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	3,  // 21: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	21, // [21:22] is the sub-list for method output_type
-	20, // [20:21] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	22, // 8: game.v1.ClientMessage.examine:type_name -> game.v1.ExamineRequest
+	12, // 9: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	14, // 10: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	15, // 11: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	16, // 12: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	17, // 13: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	18, // 14: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	19, // 15: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	20, // 16: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	23, // 17: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	13, // 18: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	21, // 19: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	0,  // 20: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,  // 21: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	13, // 22: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	2,  // 23: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	3,  // 24: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	24, // [24:25] is the sub-list for method output_type
+	23, // [23:24] is the sub-list for method input_type
+	23, // [23:23] is the sub-list for extension type_name
+	23, // [23:23] is the sub-list for extension extendee
+	0,  // [0:23] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -1653,6 +1892,7 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_Who)(nil),
 		(*ClientMessage_Exits)(nil),
 		(*ClientMessage_Quit)(nil),
+		(*ClientMessage_Examine)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -1663,6 +1903,7 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_Error)(nil),
 		(*ServerEvent_Disconnected)(nil),
 		(*ServerEvent_CharacterInfo)(nil),
+		(*ServerEvent_NpcView)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1670,7 +1911,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   19,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
