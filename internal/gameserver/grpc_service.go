@@ -39,6 +39,7 @@ type GameServiceServer struct {
 	charSaver  CharacterSaver
 	dice       *dice.Roller
 	npcH       *NPCHandler
+	combatH    *CombatHandler
 	logger     *zap.Logger
 }
 
@@ -57,6 +58,7 @@ func NewGameServiceServer(
 	charSaver CharacterSaver,
 	diceRoller *dice.Roller,
 	npcHandler *NPCHandler,
+	combatHandler *CombatHandler,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:     worldMgr,
@@ -67,6 +69,7 @@ func NewGameServiceServer(
 		charSaver: charSaver,
 		dice:      diceRoller,
 		npcH:      npcHandler,
+		combatH:   combatHandler,
 		logger:    logger,
 	}
 }
@@ -225,6 +228,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleQuit(uid)
 	case *gamev1.ClientMessage_Examine:
 		return s.handleExamine(uid, p.Examine)
+	case *gamev1.ClientMessage_Attack:
+		return s.handleAttack(uid, p.Attack)
+	case *gamev1.ClientMessage_Flee:
+		return s.handleFlee(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -415,6 +422,49 @@ func (s *GameServiceServer) forwardEvents(ctx context.Context, entity *session.B
 			}
 		}
 	}
+}
+
+func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) (*gamev1.ServerEvent, error) {
+	events, err := s.combatH.Attack(uid, req.Target)
+	if err != nil {
+		return nil, err
+	}
+	if len(events) == 0 {
+		return nil, nil
+	}
+	// Broadcast all events except the first to room (first is returned directly to player).
+	sess, ok := s.sessions.GetPlayer(uid)
+	if ok {
+		for _, evt := range events[1:] {
+			s.broadcastCombatEvent(sess.RoomID, uid, evt)
+		}
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
+	}, nil
+}
+
+func (s *GameServiceServer) handleFlee(uid string) (*gamev1.ServerEvent, error) {
+	events, err := s.combatH.Flee(uid)
+	if err != nil {
+		return nil, err
+	}
+	if len(events) == 0 {
+		return nil, nil
+	}
+	sess, ok := s.sessions.GetPlayer(uid)
+	if ok {
+		s.broadcastCombatEvent(sess.RoomID, uid, events[0])
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
+	}, nil
+}
+
+func (s *GameServiceServer) broadcastCombatEvent(roomID, excludeUID string, evt *gamev1.CombatEvent) {
+	s.broadcastToRoom(roomID, excludeUID, &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: evt},
+	})
 }
 
 // cleanupPlayer removes a player from the session manager, persists character state, and broadcasts departure.

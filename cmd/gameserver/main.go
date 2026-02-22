@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/cory-johannsen/mud/internal/config"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -109,11 +110,13 @@ func main() {
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	npcHandler := gameserver.NewNPCHandler(npcMgr, sessMgr)
+	combatEngine := combat.NewEngine()
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller)
 
 	// Create gRPC service
 	grpcService := gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, combatHandler,
 	)
 
 	// Create gRPC server

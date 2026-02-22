@@ -47,3 +47,10 @@ func (r *Roller) RollExpr(expr string) (RollResult, error) {
 	}
 	return r.Roll(e)
 }
+
+// Src returns the underlying Source for direct use by packages that need it.
+//
+// Postcondition: Returns the non-nil Source this Roller was created with.
+func (r *Roller) Src() Source {
+	return r.src
+}
