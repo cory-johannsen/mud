@@ -10,15 +10,15 @@ PROTO_GO_OUT := .
 PROTO_MODULE := github.com/cory-johannsen/mud
 
 # Build targets
-build: build-frontend build-gameserver build-migrate build-import-content
+build: proto build-frontend build-gameserver build-migrate build-import-content
 
-build-frontend:
+build-frontend: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/frontend ./cmd/frontend
 
-build-gameserver:
+build-gameserver: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/gameserver ./cmd/gameserver
 
-build-migrate:
+build-migrate: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/migrate ./cmd/migrate
 
 build-import-content:
@@ -34,10 +34,10 @@ proto:
 # Test targets
 # NOTE: postgres package uses bcrypt property tests which are slow under -race.
 # Use a 10-minute timeout to accommodate the full suite.
-test:
+test: build
 	$(GO) test -race -count=1 -timeout=600s ./...
 
-test-cover:
+test-cover: build
 	$(GO) test -race -count=1 -timeout=600s -coverprofile=coverage.out ./...
 	$(GO) tool cover -html=coverage.out -o coverage.html
 
@@ -54,7 +54,7 @@ run-gameserver:
 
 # Docker
 docker-up:
-	docker compose -f deployments/docker/docker-compose.yml up -d
+	docker compose -f deployments/docker/docker-compose.yml up --build
 
 docker-down:
 	docker compose -f deployments/docker/docker-compose.yml down
