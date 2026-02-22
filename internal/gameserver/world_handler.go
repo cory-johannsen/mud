@@ -5,6 +5,7 @@ import (
 
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 
+	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 )
@@ -13,15 +14,17 @@ import (
 type WorldHandler struct {
 	world    *world.Manager
 	sessions *session.Manager
+	npcMgr   *npc.Manager
 }
 
 // NewWorldHandler creates a WorldHandler with the given dependencies.
 //
-// Precondition: worldMgr and sessMgr must be non-nil.
-func NewWorldHandler(worldMgr *world.Manager, sessMgr *session.Manager) *WorldHandler {
+// Precondition: worldMgr, sessMgr, and npcMgr must be non-nil.
+func NewWorldHandler(worldMgr *world.Manager, sessMgr *session.Manager, npcMgr *npc.Manager) *WorldHandler {
 	return &WorldHandler{
 		world:    worldMgr,
 		sessions: sessMgr,
+		npcMgr:   npcMgr,
 	}
 }
 
@@ -130,10 +133,9 @@ func (h *WorldHandler) Exits(uid string) (*gamev1.ExitList, error) {
 }
 
 // buildRoomView constructs a RoomView proto from a Room, excluding the player themselves
-// from the players list.
+// from the players list and including live NPC instances in the room.
 func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomView {
 	players := h.sessions.PlayersInRoom(room.ID)
-	// Get the current player's char name to filter from list
 	sess, _ := h.sessions.GetPlayer(uid)
 	var otherPlayers []string
 	for _, p := range players {
@@ -154,11 +156,23 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 		})
 	}
 
+	instances := h.npcMgr.InstancesInRoom(room.ID)
+	npcInfos := make([]*gamev1.NpcInfo, 0, len(instances))
+	for _, inst := range instances {
+		if !inst.IsDead() {
+			npcInfos = append(npcInfos, &gamev1.NpcInfo{
+				InstanceId: inst.ID,
+				Name:       inst.Name,
+			})
+		}
+	}
+
 	return &gamev1.RoomView{
 		RoomId:      room.ID,
 		Title:       room.Title,
 		Description: room.Description,
 		Exits:       exitInfos,
 		Players:     otherPlayers,
+		Npcs:        npcInfos,
 	}
 }
