@@ -125,3 +125,23 @@ func RenderExitList(el *gamev1.ExitList) string {
 func RenderError(ee *gamev1.ErrorEvent) string {
 	return telnet.Colorize(telnet.Red, ee.Message)
 }
+
+// RenderCombatEvent formats a CombatEvent as colored Telnet text.
+func RenderCombatEvent(ce *gamev1.CombatEvent) string {
+	switch ce.Type {
+	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK:
+		color := telnet.BrightWhite
+		if ce.Damage > 0 {
+			color = telnet.BrightRed
+		}
+		return telnet.Colorf(color, "[Combat] %s", ce.Narrative)
+	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_DEATH:
+		return telnet.Colorf(telnet.Red, "[Combat] %s", ce.Narrative)
+	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE:
+		return telnet.Colorf(telnet.Yellow, "[Combat] %s", ce.Narrative)
+	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_END:
+		return telnet.Colorf(telnet.BrightYellow, "[Combat] %s", ce.Narrative)
+	default:
+		return telnet.Colorf(telnet.White, "[Combat] %s", ce.Narrative)
+	}
+}

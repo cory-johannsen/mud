@@ -20,6 +20,8 @@ const (
 	HandlerQuit  = "quit"
 	HandlerHelp    = "help"
 	HandlerExamine = "examine"
+	HandlerAttack  = "attack"
+	HandlerFlee    = "flee"
 )
 
 // Command defines a player-invocable command.
@@ -55,6 +57,8 @@ func BuiltinCommands() []Command {
 		{Name: "look", Aliases: []string{"l"}, Help: "Look around the current room", Category: CategoryWorld, Handler: HandlerLook},
 		{Name: "exits", Aliases: nil, Help: "List available exits", Category: CategoryWorld, Handler: HandlerExits},
 		{Name: "examine", Aliases: []string{"ex"}, Help: "Examine an NPC or object in the room", Category: CategoryWorld, Handler: HandlerExamine},
+		{Name: "attack", Aliases: []string{"att", "kill"}, Help: "Attack a target", Category: CategoryWorld, Handler: HandlerAttack},
+		{Name: "flee", Aliases: []string{"run"}, Help: "Attempt to flee combat", Category: CategoryWorld, Handler: HandlerFlee},
 
 		// Communication commands
 		{Name: "say", Aliases: nil, Help: "Say something to the room", Category: CategoryCommunication, Handler: HandlerSay},
