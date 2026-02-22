@@ -20,4 +20,4 @@ COPY --from=builder /build/content /content
 EXPOSE 50051
 
 ENTRYPOINT ["/bin/gameserver"]
-CMD ["-config", "/configs/dev.yaml", "-zones", "/content/zones"]
+CMD ["-config", "/configs/dev.yaml", "-zones", "/content/zones", "-npcs-dir", "/content/npcs"]

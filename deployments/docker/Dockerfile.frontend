@@ -23,4 +23,4 @@ COPY --from=builder /build/content /content
 EXPOSE 4000
 
 ENTRYPOINT ["/bin/frontend"]
-CMD ["-config", "/configs/dev.yaml"]
+CMD ["-config", "/configs/dev.yaml", "-regions", "/content/regions", "-teams", "/content/teams", "-jobs", "/content/jobs"]
