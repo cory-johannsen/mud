@@ -191,3 +191,54 @@ func TestCombat_AdvanceTurn_SkipsDead(t *testing.T) {
 		cbt.AdvanceTurn()
 	}
 }
+
+// --- AttackResult / ResolveAttack ---
+
+func TestAttackResult_DamageByOutcome(t *testing.T) {
+	tests := []struct {
+		outcome combat.Outcome
+		base    int
+		want    int
+	}{
+		{combat.CritSuccess, 6, 12},
+		{combat.Success, 6, 6},
+		{combat.Failure, 6, 0},
+		{combat.CritFailure, 6, 0},
+	}
+	for _, tc := range tests {
+		ar := combat.AttackResult{Outcome: tc.outcome, BaseDamage: tc.base}
+		assert.Equal(t, tc.want, ar.EffectiveDamage(), "outcome=%s base=%d", tc.outcome, tc.base)
+	}
+}
+
+func TestAttackResult_Property_EffectiveDamageNeverNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		outcome := combat.Outcome(rapid.IntRange(0, 3).Draw(rt, "outcome"))
+		base := rapid.IntRange(0, 50).Draw(rt, "base")
+		ar := combat.AttackResult{Outcome: outcome, BaseDamage: base}
+		assert.GreaterOrEqual(rt, ar.EffectiveDamage(), 0)
+	})
+}
+
+func TestResolveAttack_HitDealsPositiveDamage(t *testing.T) {
+	attacker := &combat.Combatant{ID: "p1", Kind: combat.KindPlayer, Name: "A",
+		MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 3, DexMod: 1}
+	target := &combat.Combatant{ID: "n1", Kind: combat.KindNPC, Name: "G",
+		MaxHP: 18, CurrentHP: 18, AC: 10, Level: 1, StrMod: 2, DexMod: 1}
+
+	// Roll d20=20 → total = 20 + 3 (str) + 2 (prof) = 25 vs AC 10 → crit success
+	src := &fixedSource{val: 19} // Intn(20)→19 +1=20; Intn(6)→5 +1=6
+	result := combat.ResolveAttack(attacker, target, src)
+	assert.Equal(t, combat.CritSuccess, result.Outcome)
+	assert.Greater(t, result.EffectiveDamage(), 0)
+}
+
+// fixedSource always returns val for any Intn call.
+type fixedSource struct{ val int }
+
+func (f *fixedSource) Intn(n int) int {
+	if f.val >= n {
+		return n - 1
+	}
+	return f.val
+}
