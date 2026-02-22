@@ -128,3 +128,67 @@ func TestTemplate_Property_Validate_InvalidInputsFail(t *testing.T) {
 		assert.Error(rt, tmpl.Validate(), "invalid template should fail Validate")
 	})
 }
+
+func TestNewInstance_SetsFieldsFromTemplate(t *testing.T) {
+	tmpl := &npc.Template{
+		ID:          "ganger",
+		Name:        "Ganger",
+		Description: "A scarred street tough.",
+		Level:       1,
+		MaxHP:       18,
+		AC:          14,
+		Perception:  5,
+	}
+
+	inst := npc.NewInstance("inst-1", tmpl, "room-alley")
+	assert.Equal(t, "inst-1", inst.ID)
+	assert.Equal(t, "ganger", inst.TemplateID)
+	assert.Equal(t, "Ganger", inst.Name)
+	assert.Equal(t, "A scarred street tough.", inst.Description)
+	assert.Equal(t, "room-alley", inst.RoomID)
+	assert.Equal(t, 18, inst.CurrentHP)
+	assert.Equal(t, 18, inst.MaxHP)
+	assert.Equal(t, 14, inst.AC)
+	assert.False(t, inst.IsDead())
+}
+
+func TestInstance_IsDead(t *testing.T) {
+	tmpl := &npc.Template{ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 10}
+	inst := npc.NewInstance("i1", tmpl, "room-1")
+	inst.CurrentHP = 0
+	assert.True(t, inst.IsDead())
+	inst.CurrentHP = -5
+	assert.True(t, inst.IsDead())
+}
+
+func TestInstance_HealthDescription(t *testing.T) {
+	tmpl := &npc.Template{ID: "t", Name: "T", Level: 1, MaxHP: 100, AC: 10}
+	tests := []struct {
+		hp   int
+		want string
+	}{
+		{100, "unharmed"},
+		{90, "barely scratched"},
+		{70, "lightly wounded"},
+		{50, "moderately wounded"},
+		{25, "heavily wounded"},
+		{10, "critically wounded"},
+		{0, "dead"},
+	}
+	for _, tc := range tests {
+		inst := npc.NewInstance("i", tmpl, "r")
+		inst.CurrentHP = tc.hp
+		assert.Equal(t, tc.want, inst.HealthDescription(), "hp=%d", tc.hp)
+	}
+}
+
+func TestInstance_Property_HealthDescriptionNonEmpty(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		maxHP := rapid.IntRange(1, 300).Draw(rt, "max_hp")
+		currentHP := rapid.IntRange(-50, maxHP).Draw(rt, "current_hp")
+		tmpl := &npc.Template{ID: "t", Name: "T", Level: 1, MaxHP: maxHP, AC: 10}
+		inst := npc.NewInstance("i", tmpl, "r")
+		inst.CurrentHP = currentHP
+		assert.NotEmpty(rt, inst.HealthDescription())
+	})
+}

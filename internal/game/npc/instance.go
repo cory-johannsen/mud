@@ -1,0 +1,73 @@
+package npc
+
+// Instance is a live NPC entity occupying a room.
+type Instance struct {
+	// ID uniquely identifies this runtime instance.
+	ID string
+	// TemplateID is the source template's ID.
+	TemplateID string
+	// Name is copied from the template for display.
+	Name string
+	// Description is copied from the template.
+	Description string
+	// RoomID is the room this instance currently occupies.
+	RoomID string
+	// CurrentHP is the instance's current hit points.
+	CurrentHP int
+	// MaxHP is the instance's maximum hit points.
+	MaxHP int
+	// AC is the instance's armor class.
+	AC int
+	// Level is the instance's level.
+	Level int
+	// Perception is the instance's perception modifier.
+	Perception int
+}
+
+// NewInstance creates a live NPC instance from a template, placed in roomID.
+//
+// Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
+// Postcondition: CurrentHP equals tmpl.MaxHP.
+func NewInstance(id string, tmpl *Template, roomID string) *Instance {
+	return &Instance{
+		ID:          id,
+		TemplateID:  tmpl.ID,
+		Name:        tmpl.Name,
+		Description: tmpl.Description,
+		RoomID:      roomID,
+		CurrentHP:   tmpl.MaxHP,
+		MaxHP:       tmpl.MaxHP,
+		AC:          tmpl.AC,
+		Level:       tmpl.Level,
+		Perception:  tmpl.Perception,
+	}
+}
+
+// IsDead reports whether the instance has zero or fewer hit points.
+func (i *Instance) IsDead() bool {
+	return i.CurrentHP <= 0
+}
+
+// HealthDescription returns a visible health state string suitable for examine output.
+//
+// Postcondition: Returns a non-empty string.
+func (i *Instance) HealthDescription() string {
+	if i.CurrentHP <= 0 {
+		return "dead"
+	}
+	pct := float64(i.CurrentHP) / float64(i.MaxHP)
+	switch {
+	case pct >= 1.0:
+		return "unharmed"
+	case pct >= 0.85:
+		return "barely scratched"
+	case pct >= 0.60:
+		return "lightly wounded"
+	case pct >= 0.40:
+		return "moderately wounded"
+	case pct >= 0.20:
+		return "heavily wounded"
+	default:
+		return "critically wounded"
+	}
+}
