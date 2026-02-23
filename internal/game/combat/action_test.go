@@ -11,12 +11,14 @@ import (
 )
 
 func TestActionType_Cost(t *testing.T) {
+	assert.Equal(t, 0, combat.ActionUnknown.Cost())
 	assert.Equal(t, 1, combat.ActionAttack.Cost())
 	assert.Equal(t, 2, combat.ActionStrike.Cost())
 	assert.Equal(t, 0, combat.ActionPass.Cost())
 }
 
 func TestActionType_String(t *testing.T) {
+	assert.Equal(t, "unknown", combat.ActionUnknown.String())
 	assert.Equal(t, "attack", combat.ActionAttack.String())
 	assert.Equal(t, "strike", combat.ActionStrike.String())
 	assert.Equal(t, "pass", combat.ActionPass.String())
@@ -25,14 +27,15 @@ func TestActionType_String(t *testing.T) {
 func TestActionQueue_Enqueue_Success(t *testing.T) {
 	q := combat.NewActionQueue("player1", 3)
 	require.NotNil(t, q)
-	require.Equal(t, 3, q.Remaining)
+	require.Equal(t, 3, q.RemainingPoints())
 
 	err := q.Enqueue(combat.QueuedAction{Type: combat.ActionAttack, Target: "goblin"})
 	require.NoError(t, err)
-	assert.Equal(t, 2, q.Remaining)
-	assert.Len(t, q.Actions, 1)
-	assert.Equal(t, combat.ActionAttack, q.Actions[0].Type)
-	assert.Equal(t, "goblin", q.Actions[0].Target)
+	assert.Equal(t, 2, q.RemainingPoints())
+	actions := q.QueuedActions()
+	assert.Len(t, actions, 1)
+	assert.Equal(t, combat.ActionAttack, actions[0].Type)
+	assert.Equal(t, "goblin", actions[0].Target)
 }
 
 func TestActionQueue_Enqueue_InsufficientAP(t *testing.T) {
@@ -41,8 +44,18 @@ func TestActionQueue_Enqueue_InsufficientAP(t *testing.T) {
 
 	err := q.Enqueue(combat.QueuedAction{Type: combat.ActionStrike, Target: "goblin"})
 	require.Error(t, err)
-	assert.Equal(t, 1, q.Remaining)
-	assert.Empty(t, q.Actions)
+	assert.Equal(t, 1, q.RemainingPoints())
+	assert.Empty(t, q.QueuedActions())
+}
+
+func TestActionQueue_Enqueue_RejectsActionUnknown(t *testing.T) {
+	q := combat.NewActionQueue("player1", 3)
+	require.NotNil(t, q)
+
+	err := q.Enqueue(combat.QueuedAction{Type: combat.ActionUnknown})
+	require.Error(t, err)
+	assert.Equal(t, 3, q.RemainingPoints())
+	assert.Empty(t, q.QueuedActions())
 }
 
 func TestActionQueue_IsSubmitted_AfterPass(t *testing.T) {
@@ -52,7 +65,7 @@ func TestActionQueue_IsSubmitted_AfterPass(t *testing.T) {
 	err := q.Enqueue(combat.QueuedAction{Type: combat.ActionPass})
 	require.NoError(t, err)
 	// AP remaining but pass was queued — submitted
-	assert.Equal(t, 0, q.Remaining)
+	assert.Equal(t, 0, q.RemainingPoints())
 	assert.True(t, q.IsSubmitted())
 }
 
@@ -62,7 +75,7 @@ func TestActionQueue_IsSubmitted_FullSpend(t *testing.T) {
 
 	err := q.Enqueue(combat.QueuedAction{Type: combat.ActionStrike, Target: "goblin"})
 	require.NoError(t, err)
-	assert.Equal(t, 0, q.Remaining)
+	assert.Equal(t, 0, q.RemainingPoints())
 	assert.True(t, q.IsSubmitted())
 }
 
@@ -72,7 +85,7 @@ func TestActionQueue_IsSubmitted_NotYet(t *testing.T) {
 
 	err := q.Enqueue(combat.QueuedAction{Type: combat.ActionAttack, Target: "goblin"})
 	require.NoError(t, err)
-	assert.Equal(t, 2, q.Remaining)
+	assert.Equal(t, 2, q.RemainingPoints())
 	assert.False(t, q.IsSubmitted())
 }
 
@@ -103,9 +116,27 @@ func TestPropertyActionQueue_RemainingNeverNegative(t *testing.T) {
 			if at != combat.ActionPass {
 				target = "goblin"
 			}
-			// ignore error — insufficient AP is a valid outcome
-			_ = q.Enqueue(combat.QueuedAction{Type: at, Target: target})
-			assert.GreaterOrEqual(rt, q.Remaining, 0, "Remaining must never be negative")
+
+			prevRemaining := q.RemainingPoints()
+			prevLen := len(q.QueuedActions())
+
+			err := q.Enqueue(combat.QueuedAction{Type: at, Target: target})
+
+			// Postcondition: remaining is never negative.
+			assert.GreaterOrEqual(rt, q.RemainingPoints(), 0, "RemainingPoints must never be negative")
+
+			if err == nil {
+				// Success-path postconditions:
+				// 1. Queue length increased by exactly 1.
+				assert.Equal(rt, prevLen+1, len(q.QueuedActions()), "QueuedActions length must increase by 1 on success")
+				// 2. RemainingPoints decreased by exactly the action cost
+				//    (for ActionPass the cost is 0 but remaining is set to 0, so use direct check).
+				if at == combat.ActionPass {
+					assert.Equal(rt, 0, q.RemainingPoints(), "RemainingPoints must be 0 after ActionPass")
+				} else {
+					assert.Equal(rt, prevRemaining-at.Cost(), q.RemainingPoints(), "RemainingPoints must decrease by action cost on success")
+				}
+			}
 		}
 	})
 }
