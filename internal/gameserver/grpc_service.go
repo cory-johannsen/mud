@@ -232,6 +232,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleAttack(uid, p.Attack)
 	case *gamev1.ClientMessage_Flee:
 		return s.handleFlee(uid)
+	case *gamev1.ClientMessage_Pass:
+		return s.handlePass(uid)
+	case *gamev1.ClientMessage_Strike:
+		return s.handleStrike(uid, msg.GetStrike())
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -465,6 +469,54 @@ func (s *GameServiceServer) broadcastCombatEvent(roomID, excludeUID string, evt 
 	s.broadcastToRoom(roomID, excludeUID, &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: evt},
 	})
+}
+
+// BroadcastCombatEvents sends combat events to all players in the room.
+// Called by CombatHandler's round timer callback.
+//
+// Postcondition: Each event is delivered to all sessions in roomID.
+func (s *GameServiceServer) BroadcastCombatEvents(roomID string, events []*gamev1.CombatEvent) {
+	for _, evt := range events {
+		s.broadcastCombatEvent(roomID, "", evt)
+	}
+}
+
+func (s *GameServiceServer) handlePass(uid string) (*gamev1.ServerEvent, error) {
+	events, err := s.combatH.Pass(uid)
+	if err != nil {
+		return nil, err
+	}
+	if len(events) == 0 {
+		return nil, nil
+	}
+	sess, ok := s.sessions.GetPlayer(uid)
+	if ok {
+		for _, evt := range events[1:] {
+			s.broadcastCombatEvent(sess.RoomID, uid, evt)
+		}
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
+	}, nil
+}
+
+func (s *GameServiceServer) handleStrike(uid string, req *gamev1.StrikeRequest) (*gamev1.ServerEvent, error) {
+	events, err := s.combatH.Strike(uid, req.GetTarget())
+	if err != nil {
+		return nil, err
+	}
+	if len(events) == 0 {
+		return nil, nil
+	}
+	sess, ok := s.sessions.GetPlayer(uid)
+	if ok {
+		for _, evt := range events[1:] {
+			s.broadcastCombatEvent(sess.RoomID, uid, evt)
+		}
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
+	}, nil
 }
 
 // cleanupPlayer removes a player from the session manager, persists character state, and broadcasts departure.

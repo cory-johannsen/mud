@@ -75,6 +75,8 @@ type GameServerConfig struct {
 	GRPCHost string `mapstructure:"grpc_host"`
 	// GRPCPort is the TCP port for the game server gRPC service.
 	GRPCPort int `mapstructure:"grpc_port"`
+	// RoundDurationMs is the combat round timer duration in milliseconds.
+	RoundDurationMs int `mapstructure:"round_duration_ms"`
 }
 
 // Addr returns the "host:port" gRPC address.

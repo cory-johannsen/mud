@@ -26,3 +26,4 @@ logging:
 gameserver:
   grpc_host: 127.0.0.1
   grpc_port: 50051
+  round_duration_ms: 6000

@@ -12,7 +12,6 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -112,33 +111,22 @@ func main() {
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	npcHandler := gameserver.NewNPCHandler(npcMgr, sessMgr)
 	combatEngine := combat.NewEngine()
-	combatBroadcast := func(roomID string, events []*gamev1.CombatEvent) {
-		uids := sessMgr.PlayerUIDsInRoom(roomID)
-		for _, uid := range uids {
-			sess, ok := sessMgr.GetPlayer(uid)
-			if !ok {
-				continue
-			}
-			for _, evt := range events {
-				serverEvt := &gamev1.ServerEvent{
-					Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: evt},
-				}
-				data, err := proto.Marshal(serverEvt)
-				if err != nil {
-					logger.Error("marshaling combat broadcast event", zap.Error(err))
-					continue
-				}
-				if err := sess.Entity.Push(data); err != nil {
-					logger.Warn("combat broadcast push failed",
-						zap.String("uid", uid), zap.Error(err))
-				}
-			}
+
+	roundDuration := time.Duration(cfg.GameServer.RoundDurationMs) * time.Millisecond
+	if roundDuration <= 0 {
+		roundDuration = 6 * time.Second
+	}
+
+	var grpcService *gameserver.GameServiceServer
+	broadcastFn := func(roomID string, events []*gamev1.CombatEvent) {
+		if grpcService != nil {
+			grpcService.BroadcastCombatEvents(roomID, events)
 		}
 	}
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, combatBroadcast, 30*time.Second)
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration)
 
 	// Create gRPC service
-	grpcService := gameserver.NewGameServiceServer(
+	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, combatHandler,
 	)
