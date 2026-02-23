@@ -1,0 +1,19 @@
+id: dying
+name: Dying
+description: |
+  You are bleeding out. You lose all your actions. At the start of each round,
+  make a DC 15 Flat Check (d20, no modifiers). Failure advances dying; success
+  recovers you to 1 HP as Wounded 1. Critical success removes dying entirely.
+  Reaching dying 4 means death.
+duration_type: until_save
+max_stacks: 4
+attack_penalty: 0
+ac_penalty: 0
+speed_penalty: 0
+restrict_actions:
+  - attack
+  - strike
+  - pass
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

@@ -102,6 +102,15 @@ func TestRegistry_Register_OverwritesDuplicate(t *testing.T) {
 	assert.Equal(t, "Second", got.Name, "second registration must overwrite the first")
 }
 
+func TestLoadDirectory_RealConditions(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+	for _, id := range []string{"dying", "wounded", "unconscious", "stunned", "frightened", "prone", "flat_footed"} {
+		_, ok := reg.Get(id)
+		assert.True(t, ok, "condition %q must be present", id)
+	}
+}
+
 func TestPropertyRegistry_RegisterThenGet(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		id := rapid.StringMatching(`[a-z_]{3,12}`).Draw(t, "id")

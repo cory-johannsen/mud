@@ -1,0 +1,14 @@
+id: stunned
+name: Stunned
+description: |
+  You are stunned and lose actions. Stunned N means you lose N action points
+  at the start of your turn this round. Stunned reduces by 1 each round.
+duration_type: rounds
+max_stacks: 3
+attack_penalty: 0
+ac_penalty: 0
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
