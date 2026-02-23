@@ -5,6 +5,7 @@ package command
 const (
 	CategoryMovement      = "movement"
 	CategoryWorld         = "world"
+	CategoryCombat        = "combat"
 	CategoryCommunication = "communication"
 	CategorySystem        = "system"
 )
@@ -61,8 +62,8 @@ func BuiltinCommands() []Command {
 		{Name: "examine", Aliases: []string{"ex"}, Help: "Examine an NPC or object in the room", Category: CategoryWorld, Handler: HandlerExamine},
 		{Name: "attack", Aliases: []string{"att", "kill"}, Help: "Attack a target", Category: CategoryWorld, Handler: HandlerAttack},
 		{Name: "flee", Aliases: []string{"run"}, Help: "Attempt to flee combat", Category: CategoryWorld, Handler: HandlerFlee},
-		{Name: "pass", Aliases: []string{"p"}, Help: "Forfeit remaining action points this round.", Category: "combat", Handler: HandlerPass},
-		{Name: "strike", Aliases: []string{"st"}, Help: "Full attack routine (2 AP, two hits with MAP) against target.", Category: "combat", Handler: HandlerStrike},
+		{Name: "pass", Aliases: []string{"p"}, Help: "Forfeit remaining action points this round.", Category: CategoryCombat, Handler: HandlerPass},
+		{Name: "strike", Aliases: []string{"st"}, Help: "Full attack routine (2 AP, two hits with MAP) against target.", Category: CategoryCombat, Handler: HandlerStrike},
 
 		// Communication commands
 		{Name: "say", Aliases: nil, Help: "Say something to the room", Category: CategoryCommunication, Handler: HandlerSay},

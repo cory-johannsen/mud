@@ -342,6 +342,7 @@ func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry
 	}{
 		{command.CategoryMovement, "Movement"},
 		{command.CategoryWorld, "World"},
+		{command.CategoryCombat, "Combat"},
 		{command.CategoryCommunication, "Communication"},
 		{command.CategorySystem, "System"},
 	}
