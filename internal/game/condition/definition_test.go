@@ -33,6 +33,13 @@ func TestRegistry_All_ReturnsCopy(t *testing.T) {
 	reg.Register(&condition.ConditionDef{ID: "b", Name: "B", DurationType: "rounds"})
 	all := reg.All()
 	assert.Len(t, all, 2)
+	// Mutating the returned slice must not affect the registry
+	all[0] = nil
+	all2 := reg.All()
+	assert.Len(t, all2, 2)
+	for _, d := range all2 {
+		assert.NotNil(t, d, "registry must not be corrupted by mutating the returned slice")
+	}
 }
 
 func TestLoadDirectory_ParsesYAML(t *testing.T) {
@@ -77,6 +84,22 @@ func TestLoadDirectory_InvalidYAML_ReturnsError(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "bad.yaml"), []byte(":::bad:::"), 0644))
 	_, err := condition.LoadDirectory(dir)
 	assert.Error(t, err)
+}
+
+func TestLoadDirectory_NonexistentDir_ReturnsError(t *testing.T) {
+	_, err := condition.LoadDirectory("/nonexistent/path/that/does/not/exist")
+	assert.Error(t, err)
+}
+
+func TestRegistry_Register_OverwritesDuplicate(t *testing.T) {
+	reg := condition.NewRegistry()
+	first := &condition.ConditionDef{ID: "prone", Name: "First", DurationType: "permanent"}
+	second := &condition.ConditionDef{ID: "prone", Name: "Second", DurationType: "permanent"}
+	reg.Register(first)
+	reg.Register(second)
+	got, ok := reg.Get("prone")
+	require.True(t, ok)
+	assert.Equal(t, "Second", got.Name, "second registration must overwrite the first")
 }
 
 func TestPropertyRegistry_RegisterThenGet(t *testing.T) {

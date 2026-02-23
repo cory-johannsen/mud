@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -39,21 +40,27 @@ func NewRegistry() *Registry {
 // Register adds def to the registry, overwriting any existing entry with the same ID.
 // Precondition: def must not be nil and def.ID must not be empty.
 func (r *Registry) Register(def *ConditionDef) {
+	if def == nil || def.ID == "" {
+		return // silently skip invalid entries; LoadDirectory validates at parse time
+	}
 	r.defs[def.ID] = def
 }
 
-// Get returns the ConditionDef for id, or (nil, false) if not found.
+// Get returns the ConditionDef for id.
+// Postcondition: Returns (def, true) if id is registered, or (nil, false) otherwise.
 func (r *Registry) Get(id string) (*ConditionDef, bool) {
 	d, ok := r.defs[id]
 	return d, ok
 }
 
 // All returns a snapshot slice of all registered ConditionDefs.
+// Postcondition: returned slice is sorted by ID ascending.
 func (r *Registry) All() []*ConditionDef {
 	out := make([]*ConditionDef, 0, len(r.defs))
 	for _, d := range r.defs {
 		out = append(out, d)
 	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out
 }
 
