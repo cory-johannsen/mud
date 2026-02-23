@@ -567,7 +567,7 @@ func conditionEventsToProto(events []combat.RoundConditionEvent, reg *condition.
 			narrative = fmt.Sprintf("%s fades from %s.", name, ce.Name)
 		}
 		result = append(result, &gamev1.CombatEvent{
-			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_CONDITION,
 			Narrative: narrative,
 		})
 	}

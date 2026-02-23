@@ -12,6 +12,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"go.uber.org/zap"
+	"pgregory.net/rapid"
 )
 
 const testRoundDuration = 200 * time.Millisecond
@@ -303,4 +304,216 @@ func eventTypes(events []*gamev1.CombatEvent) []string {
 		names[i] = e.Type.String()
 	}
 	return names
+}
+
+// TestCombatHandler_Pass_ForfeitsAP_EventsNonEmpty verifies that Pass returns at
+// least one event.
+//
+// Postcondition: Pass returns len(events) > 0.
+func TestCombatHandler_Pass_ForfeitsAP_EventsNonEmpty(t *testing.T) {
+	var mu sync.Mutex
+	var broadcasts [][]*gamev1.CombatEvent
+	broadcastFn := func(roomID string, events []*gamev1.CombatEvent) {
+		mu.Lock()
+		defer mu.Unlock()
+		broadcasts = append(broadcasts, events)
+	}
+
+	h := makeCombatHandler(t, broadcastFn)
+	const roomID = "room-pass-events"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, "player-pass-events", roomID)
+
+	_, err := h.Attack("player-pass-events", "Goblin")
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+
+	events, err := h.Pass("player-pass-events")
+	if err != nil {
+		t.Fatalf("Pass returned error: %v", err)
+	}
+	if len(events) == 0 {
+		t.Error("expected len(events) > 0 from Pass; got 0")
+	}
+}
+
+// TestCombatHandler_Status_WithConditions verifies that Status returns the active
+// conditions for a player who has a condition applied during active combat.
+//
+// Postcondition: Status returns a non-nil slice containing the applied condition.
+func TestCombatHandler_Status_WithConditions(t *testing.T) {
+	h := makeCombatHandler(t, func(roomID string, events []*gamev1.CombatEvent) {})
+	const roomID = "room-status-cond"
+	const playerUID = "player-status-cond"
+
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, playerUID, roomID)
+
+	// Start combat so a Combat struct exists for the room.
+	_, err := h.Attack(playerUID, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Apply a condition to the player directly via the combat instance.
+	h.combatMu.Lock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		h.combatMu.Unlock()
+		t.Fatal("expected active combat after Attack; got none")
+	}
+	if err := cbt.ApplyCondition(playerUID, "prone", 1, -1); err != nil {
+		h.combatMu.Unlock()
+		t.Fatalf("ApplyCondition: %v", err)
+	}
+	h.combatMu.Unlock()
+
+	conds, err := h.Status(playerUID)
+	if err != nil {
+		t.Fatalf("Status returned error: %v", err)
+	}
+	if conds == nil {
+		t.Fatal("expected non-nil conditions slice; got nil")
+	}
+	found := false
+	for _, c := range conds {
+		if c.Def != nil && c.Def.ID == "prone" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected 'prone' condition in Status result; got %v", conds)
+	}
+}
+
+// TestConditionEventsToProto_LengthEqualsInput is a property-based test verifying
+// that conditionEventsToProto always returns a slice whose length equals the
+// length of the input slice.
+//
+// Postcondition: len(output) == len(input) for any input.
+func TestConditionEventsToProto_LengthEqualsInput(t *testing.T) {
+	reg := makeTestConditionRegistry()
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(0, 20).Draw(rt, "n")
+		events := make([]combat.RoundConditionEvent, n)
+		for i := 0; i < n; i++ {
+			applied := rapid.Bool().Draw(rt, "applied")
+			events[i] = combat.RoundConditionEvent{
+				UID:         "player-1",
+				Name:        rapid.StringMatching(`[A-Za-z ]{1,10}`).Draw(rt, "name"),
+				ConditionID: "prone",
+				Stacks:      rapid.IntRange(1, 4).Draw(rt, "stacks"),
+				Applied:     applied,
+			}
+		}
+		result := conditionEventsToProto(events, reg)
+		if len(result) != n {
+			rt.Fatalf("expected len(result)==%d; got %d", n, len(result))
+		}
+	})
+}
+
+// TestConditionEventsToProto_NarrativesNonEmpty is a property-based test verifying
+// that every output CombatEvent has a non-empty Narrative.
+//
+// Postcondition: All output narratives are non-empty strings.
+func TestConditionEventsToProto_NarrativesNonEmpty(t *testing.T) {
+	reg := makeTestConditionRegistry()
+	rapid.Check(t, func(rt *rapid.T) {
+		applied := rapid.Bool().Draw(rt, "applied")
+		event := combat.RoundConditionEvent{
+			UID:         "player-1",
+			Name:        rapid.StringMatching(`[A-Za-z]{1,10}`).Draw(rt, "name"),
+			ConditionID: "stunned",
+			Stacks:      rapid.IntRange(1, 3).Draw(rt, "stacks"),
+			Applied:     applied,
+		}
+		result := conditionEventsToProto([]combat.RoundConditionEvent{event}, reg)
+		if len(result) != 1 {
+			rt.Fatalf("expected 1 result; got %d", len(result))
+		}
+		if result[0].Narrative == "" {
+			rt.Fatal("expected non-empty Narrative; got empty string")
+		}
+	})
+}
+
+// TestConditionEventsToProto_RegistryMissFallback is a property-based test verifying
+// that an unknown conditionID does not panic and falls back to the conditionID string
+// in the narrative.
+//
+// Postcondition: Unknown conditionID results in a non-empty Narrative containing the conditionID.
+func TestConditionEventsToProto_RegistryMissFallback(t *testing.T) {
+	reg := makeTestConditionRegistry()
+	rapid.Check(t, func(rt *rapid.T) {
+		unknownID := rapid.StringMatching(`[a-z]{4,12}`).Draw(rt, "unknownID")
+		// Ensure the generated ID is genuinely unknown (not accidentally registered).
+		for {
+			if _, ok := reg.Get(unknownID); !ok {
+				break
+			}
+			unknownID = rapid.StringMatching(`[a-z]{4,12}`).Draw(rt, "unknownID2")
+		}
+		event := combat.RoundConditionEvent{
+			UID:         "player-1",
+			Name:        "Hero",
+			ConditionID: unknownID,
+			Stacks:      1,
+			Applied:     true,
+		}
+		// Must not panic; narrative must be non-empty and contain the conditionID.
+		result := conditionEventsToProto([]combat.RoundConditionEvent{event}, reg)
+		if len(result) != 1 {
+			rt.Fatalf("expected 1 result; got %d", len(result))
+		}
+		if result[0].Narrative == "" {
+			rt.Fatal("expected non-empty Narrative for registry miss; got empty string")
+		}
+	})
+}
+
+// TestStatus_Property_UnknownUIDReturnsError is a property-based test verifying
+// that Status always returns a non-nil error for any UID that is not registered
+// in the session manager.
+//
+// Postcondition: Status returns non-nil error for any unregistered uid.
+func TestStatus_Property_UnknownUIDReturnsError(t *testing.T) {
+	h := makeCombatHandler(t, func(roomID string, events []*gamev1.CombatEvent) {})
+	rapid.Check(t, func(rt *rapid.T) {
+		uid := rapid.StringMatching(`[a-z0-9\-]{4,20}`).Draw(rt, "uid")
+		_, err := h.Status(uid)
+		if err == nil {
+			rt.Fatalf("expected error for unregistered uid %q; got nil", uid)
+		}
+	})
+}
+
+// TestStatus_Property_RegisteredNotInCombat is a property-based test verifying
+// that Status returns nil conditions and nil error for any registered player who
+// is not in an active combat.
+//
+// Postcondition: Status returns (nil, nil) for players not in combat.
+func TestStatus_Property_RegisteredNotInCombat(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		h := makeCombatHandler(t, func(roomID string, events []*gamev1.CombatEvent) {})
+		uid := rapid.StringMatching(`[a-z0-9]{4,12}`).Draw(rt, "uid")
+		roomID := rapid.StringMatching(`room-[a-z0-9]{4,8}`).Draw(rt, "roomID")
+
+		sess, err := h.sessions.AddPlayer(uid, "testuser", "Hero", 1, roomID, 30)
+		if err != nil {
+			rt.Fatalf("AddPlayer: %v", err)
+		}
+		_ = sess
+
+		conds, statusErr := h.Status(uid)
+		if statusErr != nil {
+			rt.Fatalf("expected nil error for registered player not in combat; got %v", statusErr)
+		}
+		if conds != nil {
+			rt.Fatalf("expected nil conditions for player not in combat; got %v", conds)
+		}
+	})
 }

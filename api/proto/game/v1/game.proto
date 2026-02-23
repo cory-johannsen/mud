@@ -245,6 +245,7 @@ enum CombatEventType {
   COMBAT_EVENT_TYPE_DEATH        = 3;
   COMBAT_EVENT_TYPE_FLEE         = 4;
   COMBAT_EVENT_TYPE_END          = 5;
+  COMBAT_EVENT_TYPE_CONDITION    = 6;
 }
 
 // StatusRequest asks the server to return the player's active conditions.

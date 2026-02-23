@@ -13,8 +13,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"path/filepath"
-
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
@@ -36,6 +34,7 @@ func main() {
 	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
 	zonesDir := flag.String("zones", "content/zones", "path to zone YAML files directory")
 	npcsDir := flag.String("npcs-dir", "content/npcs", "path to NPC YAML templates directory")
+	conditionsDir := flag.String("conditions-dir", "content/conditions", "path to condition YAML definitions directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -110,12 +109,15 @@ func main() {
 	}
 
 	// Load condition definitions
-	condDir := filepath.Join("content", "conditions")
-	condRegistry, err := condition.LoadDirectory(condDir)
+	condStart := time.Now()
+	condRegistry, err := condition.LoadDirectory(*conditionsDir)
 	if err != nil {
 		logger.Fatal("loading condition definitions", zap.Error(err))
 	}
-	logger.Info("loaded condition definitions", zap.Int("count", len(condRegistry.All())))
+	logger.Info("loaded condition definitions",
+		zap.Int("count", len(condRegistry.All())),
+		zap.Duration("elapsed", time.Since(condStart)),
+	)
 
 	// Create handlers
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)

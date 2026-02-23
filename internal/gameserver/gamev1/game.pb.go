@@ -131,6 +131,7 @@ const (
 	CombatEventType_COMBAT_EVENT_TYPE_DEATH       CombatEventType = 3
 	CombatEventType_COMBAT_EVENT_TYPE_FLEE        CombatEventType = 4
 	CombatEventType_COMBAT_EVENT_TYPE_END         CombatEventType = 5
+	CombatEventType_COMBAT_EVENT_TYPE_CONDITION   CombatEventType = 6
 )
 
 // Enum value maps for CombatEventType.
@@ -142,6 +143,7 @@ var (
 		3: "COMBAT_EVENT_TYPE_DEATH",
 		4: "COMBAT_EVENT_TYPE_FLEE",
 		5: "COMBAT_EVENT_TYPE_END",
+		6: "COMBAT_EVENT_TYPE_CONDITION",
 	}
 	CombatEventType_value = map[string]int32{
 		"COMBAT_EVENT_TYPE_UNSPECIFIED": 0,
@@ -150,6 +152,7 @@ var (
 		"COMBAT_EVENT_TYPE_DEATH":       3,
 		"COMBAT_EVENT_TYPE_FLEE":        4,
 		"COMBAT_EVENT_TYPE_END":         5,
+		"COMBAT_EVENT_TYPE_CONDITION":   6,
 	}
 )
 
@@ -2642,14 +2645,15 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\rRoomEventType\x12\x1f\n" +
 	"\x1bROOM_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16ROOM_EVENT_TYPE_ARRIVE\x10\x01\x12\x1a\n" +
-	"\x16ROOM_EVENT_TYPE_DEPART\x10\x02*\xc8\x01\n" +
+	"\x16ROOM_EVENT_TYPE_DEPART\x10\x02*\xe9\x01\n" +
 	"\x0fCombatEventType\x12!\n" +
 	"\x1dCOMBAT_EVENT_TYPE_UNSPECIFIED\x10\x00\x12 \n" +
 	"\x1cCOMBAT_EVENT_TYPE_INITIATIVE\x10\x01\x12\x1c\n" +
 	"\x18COMBAT_EVENT_TYPE_ATTACK\x10\x02\x12\x1b\n" +
 	"\x17COMBAT_EVENT_TYPE_DEATH\x10\x03\x12\x1a\n" +
 	"\x16COMBAT_EVENT_TYPE_FLEE\x10\x04\x12\x19\n" +
-	"\x15COMBAT_EVENT_TYPE_END\x10\x052J\n" +
+	"\x15COMBAT_EVENT_TYPE_END\x10\x05\x12\x1f\n" +
+	"\x1bCOMBAT_EVENT_TYPE_CONDITION\x10\x062J\n" +
 	"\vGameService\x12;\n" +
 	"\aSession\x12\x16.game.v1.ClientMessage\x1a\x14.game.v1.ServerEvent(\x010\x01B:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
 
