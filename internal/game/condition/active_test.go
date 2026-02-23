@@ -107,6 +107,13 @@ func TestActiveSet_All_ReturnsCopy(t *testing.T) {
 	require.NoError(t, s.Apply(frightened(), 2, 2))
 	all := s.All()
 	assert.Len(t, all, 2)
+	// Mutating the returned slice must not affect the ActiveSet
+	all[0] = nil
+	all2 := s.All()
+	assert.Len(t, all2, 2)
+	for _, ac := range all2 {
+		assert.NotNil(t, ac, "ActiveSet must not be corrupted by mutating the returned slice")
+	}
 }
 
 func TestActiveSet_IncrementDyingStacks(t *testing.T) {
@@ -141,6 +148,44 @@ func TestPropertyActiveSet_ApplyRemove_HasFalse(t *testing.T) {
 		assert.False(t, s.Has("prone"),
 			"Has must return false after Remove")
 	})
+}
+
+func TestPropertyActiveSet_ReapplyStacksCapped(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		maxStacks := rapid.IntRange(1, 4).Draw(t, "max_stacks")
+		applies := rapid.IntRange(2, 6).Draw(t, "applies")
+		def := &condition.ConditionDef{
+			ID: "test", Name: "Test", DurationType: "rounds", MaxStacks: maxStacks,
+		}
+		s := condition.NewActiveSet()
+		for i := 0; i < applies; i++ {
+			require.NoError(t, s.Apply(def, 1, 5))
+		}
+		assert.LessOrEqual(t, s.Stacks("test"), maxStacks,
+			"stacks must never exceed MaxStacks even after multiple Apply calls")
+	})
+}
+
+func TestActiveSet_Apply_DurationMaxOnReapply(t *testing.T) {
+	s := condition.NewActiveSet()
+	d := frightened()
+	require.NoError(t, s.Apply(d, 1, 3))
+	// Re-apply with longer duration — should extend
+	require.NoError(t, s.Apply(d, 1, 5))
+	all := s.All()
+	require.Len(t, all, 1)
+	assert.Equal(t, 5, all[0].DurationRemaining, "longer re-apply duration must win")
+}
+
+func TestActiveSet_Apply_DurationShorterOnReapply_NotReduced(t *testing.T) {
+	s := condition.NewActiveSet()
+	d := frightened()
+	require.NoError(t, s.Apply(d, 1, 5))
+	// Re-apply with shorter duration — must not reduce
+	require.NoError(t, s.Apply(d, 1, 2))
+	all := s.All()
+	require.Len(t, all, 1)
+	assert.Equal(t, 5, all[0].DurationRemaining, "shorter re-apply duration must not reduce existing")
 }
 
 func TestPropertyActiveSet_StacksNeverExceedMaxStacks(t *testing.T) {

@@ -1,5 +1,7 @@
 package condition
 
+import "fmt"
+
 // ActiveCondition tracks one applied condition on an entity.
 type ActiveCondition struct {
 	Def               *ConditionDef
@@ -23,22 +25,25 @@ func NewActiveSet() *ActiveSet {
 // If MaxStacks == 0 (unstackable), stacks is always stored as 1.
 // duration is rounds remaining; use -1 for permanent or until_save.
 //
-// Postcondition: Has(def.ID) is true after a successful Apply.
+// Precondition: def must not be nil.
+// Postcondition: Has(def.ID) is true; stacks are incremented on re-apply (capped at MaxStacks);
+// DurationRemaining is updated to max(existing, duration) on re-apply.
 func (s *ActiveSet) Apply(def *ConditionDef, stacks, duration int) error {
-	// Determine effective stacks
-	effectiveStacks := stacks
-	if def.MaxStacks == 0 {
-		effectiveStacks = 1
+	if def == nil {
+		return fmt.Errorf("Apply: def must not be nil")
 	}
 
 	if existing, ok := s.conditions[def.ID]; ok {
-		// Increment existing stacks
-		newStacks := existing.Stacks + effectiveStacks
-		if def.MaxStacks > 0 && newStacks > def.MaxStacks {
-			newStacks = def.MaxStacks
-		}
 		if def.MaxStacks == 0 {
-			newStacks = 1
+			// unstackable: stacks stays at 1; extend duration if longer
+			if duration > existing.DurationRemaining {
+				existing.DurationRemaining = duration
+			}
+			return nil
+		}
+		newStacks := existing.Stacks + stacks
+		if newStacks > def.MaxStacks {
+			newStacks = def.MaxStacks
 		}
 		existing.Stacks = newStacks
 		if duration > existing.DurationRemaining {
@@ -47,6 +52,11 @@ func (s *ActiveSet) Apply(def *ConditionDef, stacks, duration int) error {
 		return nil
 	}
 
+	// Determine effective stacks for new condition
+	effectiveStacks := stacks
+	if def.MaxStacks == 0 {
+		effectiveStacks = 1
+	}
 	capped := effectiveStacks
 	if def.MaxStacks > 0 && capped > def.MaxStacks {
 		capped = def.MaxStacks
@@ -71,9 +81,11 @@ func (s *ActiveSet) Remove(id string) {
 // Conditions that reach 0 are removed. "permanent" and "until_save" conditions
 // (DurationRemaining == -1) are not affected.
 //
-// Postcondition: Returns the IDs of conditions that expired this tick.
+// Postcondition: For every id in the returned slice, Has(id) is false.
+// Conditions with DurationType != "rounds" or DurationRemaining == -1 are not affected.
 func (s *ActiveSet) Tick() []string {
 	var expired []string
+	// Deleting map entries during range iteration is safe per the Go specification.
 	for id, ac := range s.conditions {
 		if ac.Def.DurationType != "rounds" || ac.DurationRemaining < 0 {
 			continue
@@ -101,7 +113,9 @@ func (s *ActiveSet) Stacks(id string) int {
 	return 0
 }
 
-// All returns a snapshot slice of all active conditions.
+// All returns a slice of pointers to the active conditions.
+// The slice itself is a new allocation (mutating the slice does not affect the set),
+// but the pointed-to ActiveCondition values are shared — callers must not modify them.
 func (s *ActiveSet) All() []*ActiveCondition {
 	out := make([]*ActiveCondition, 0, len(s.conditions))
 	for _, ac := range s.conditions {
