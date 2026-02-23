@@ -27,6 +27,8 @@ message ClientMessage {
     ExamineRequest examine = 10;
     AttackRequest attack = 11;
     FleeRequest   flee   = 12;
+    PassRequest   pass   = 13;
+    StrikeRequest strike = 14;
   }
 }
 
@@ -44,6 +46,8 @@ message ServerEvent {
     CharacterInfo character_info = 9;
     NpcView npc_view = 10;
     CombatEvent combat_event = 11;
+    RoundStartEvent round_start = 12;
+    RoundEndEvent   round_end   = 13;
   }
 }
 
@@ -195,6 +199,27 @@ message AttackRequest {
 
 // FleeRequest asks the server to attempt to flee combat.
 message FleeRequest {}
+
+// PassRequest forfeits the player's remaining action points for the current round.
+message PassRequest {}
+
+// StrikeRequest queues a 2-AP full attack routine (two attacks with MAP) against a target.
+message StrikeRequest {
+  string target = 1;
+}
+
+// RoundStartEvent is broadcast to all combatants when a new round begins.
+message RoundStartEvent {
+  int32           round            = 1;
+  int32           actions_per_turn = 2;
+  int32           duration_ms      = 3;
+  repeated string turn_order       = 4;
+}
+
+// RoundEndEvent is broadcast when a round's actions have resolved.
+message RoundEndEvent {
+  int32 round = 1;
+}
 
 // CombatEvent delivers combat narration to all players in the room.
 message CombatEvent {

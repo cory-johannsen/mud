@@ -197,6 +197,8 @@ type ClientMessage struct {
 	//	*ClientMessage_Examine
 	//	*ClientMessage_Attack
 	//	*ClientMessage_Flee
+	//	*ClientMessage_Pass
+	//	*ClientMessage_Strike
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -345,6 +347,24 @@ func (x *ClientMessage) GetFlee() *FleeRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetPass() *PassRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Pass); ok {
+			return x.Pass
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetStrike() *StrikeRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Strike); ok {
+			return x.Strike
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -393,6 +413,14 @@ type ClientMessage_Flee struct {
 	Flee *FleeRequest `protobuf:"bytes,12,opt,name=flee,proto3,oneof"`
 }
 
+type ClientMessage_Pass struct {
+	Pass *PassRequest `protobuf:"bytes,13,opt,name=pass,proto3,oneof"`
+}
+
+type ClientMessage_Strike struct {
+	Strike *StrikeRequest `protobuf:"bytes,14,opt,name=strike,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -415,6 +443,10 @@ func (*ClientMessage_Attack) isClientMessage_Payload() {}
 
 func (*ClientMessage_Flee) isClientMessage_Payload() {}
 
+func (*ClientMessage_Pass) isClientMessage_Payload() {}
+
+func (*ClientMessage_Strike) isClientMessage_Payload() {}
+
 // ServerEvent wraps all server-to-client events.
 type ServerEvent struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
@@ -431,6 +463,8 @@ type ServerEvent struct {
 	//	*ServerEvent_CharacterInfo
 	//	*ServerEvent_NpcView
 	//	*ServerEvent_CombatEvent
+	//	*ServerEvent_RoundStart
+	//	*ServerEvent_RoundEnd
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -570,6 +604,24 @@ func (x *ServerEvent) GetCombatEvent() *CombatEvent {
 	return nil
 }
 
+func (x *ServerEvent) GetRoundStart() *RoundStartEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_RoundStart); ok {
+			return x.RoundStart
+		}
+	}
+	return nil
+}
+
+func (x *ServerEvent) GetRoundEnd() *RoundEndEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_RoundEnd); ok {
+			return x.RoundEnd
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -614,6 +666,14 @@ type ServerEvent_CombatEvent struct {
 	CombatEvent *CombatEvent `protobuf:"bytes,11,opt,name=combat_event,json=combatEvent,proto3,oneof"`
 }
 
+type ServerEvent_RoundStart struct {
+	RoundStart *RoundStartEvent `protobuf:"bytes,12,opt,name=round_start,json=roundStart,proto3,oneof"`
+}
+
+type ServerEvent_RoundEnd struct {
+	RoundEnd *RoundEndEvent `protobuf:"bytes,13,opt,name=round_end,json=roundEnd,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -633,6 +693,10 @@ func (*ServerEvent_CharacterInfo) isServerEvent_Payload() {}
 func (*ServerEvent_NpcView) isServerEvent_Payload() {}
 
 func (*ServerEvent_CombatEvent) isServerEvent_Payload() {}
+
+func (*ServerEvent_RoundStart) isServerEvent_Payload() {}
+
+func (*ServerEvent_RoundEnd) isServerEvent_Payload() {}
 
 // JoinWorldRequest is sent by the client to enter the game world after authentication.
 type JoinWorldRequest struct {
@@ -1864,6 +1928,202 @@ func (*FleeRequest) Descriptor() ([]byte, []int) {
 	return file_game_v1_game_proto_rawDescGZIP(), []int{23}
 }
 
+// PassRequest forfeits the player's remaining action points for the current round.
+type PassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PassRequest) Reset() {
+	*x = PassRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PassRequest) ProtoMessage() {}
+
+func (x *PassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PassRequest.ProtoReflect.Descriptor instead.
+func (*PassRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{24}
+}
+
+// StrikeRequest queues a 2-AP full attack routine (two attacks with MAP) against a target.
+type StrikeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Target        string                 `protobuf:"bytes,1,opt,name=target,proto3" json:"target,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StrikeRequest) Reset() {
+	*x = StrikeRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StrikeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StrikeRequest) ProtoMessage() {}
+
+func (x *StrikeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StrikeRequest.ProtoReflect.Descriptor instead.
+func (*StrikeRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *StrikeRequest) GetTarget() string {
+	if x != nil {
+		return x.Target
+	}
+	return ""
+}
+
+// RoundStartEvent is broadcast to all combatants when a new round begins.
+type RoundStartEvent struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Round          int32                  `protobuf:"varint,1,opt,name=round,proto3" json:"round,omitempty"`
+	ActionsPerTurn int32                  `protobuf:"varint,2,opt,name=actions_per_turn,json=actionsPerTurn,proto3" json:"actions_per_turn,omitempty"`
+	DurationMs     int32                  `protobuf:"varint,3,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	TurnOrder      []string               `protobuf:"bytes,4,rep,name=turn_order,json=turnOrder,proto3" json:"turn_order,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *RoundStartEvent) Reset() {
+	*x = RoundStartEvent{}
+	mi := &file_game_v1_game_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RoundStartEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoundStartEvent) ProtoMessage() {}
+
+func (x *RoundStartEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoundStartEvent.ProtoReflect.Descriptor instead.
+func (*RoundStartEvent) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *RoundStartEvent) GetRound() int32 {
+	if x != nil {
+		return x.Round
+	}
+	return 0
+}
+
+func (x *RoundStartEvent) GetActionsPerTurn() int32 {
+	if x != nil {
+		return x.ActionsPerTurn
+	}
+	return 0
+}
+
+func (x *RoundStartEvent) GetDurationMs() int32 {
+	if x != nil {
+		return x.DurationMs
+	}
+	return 0
+}
+
+func (x *RoundStartEvent) GetTurnOrder() []string {
+	if x != nil {
+		return x.TurnOrder
+	}
+	return nil
+}
+
+// RoundEndEvent is broadcast when a round's actions have resolved.
+type RoundEndEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Round         int32                  `protobuf:"varint,1,opt,name=round,proto3" json:"round,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RoundEndEvent) Reset() {
+	*x = RoundEndEvent{}
+	mi := &file_game_v1_game_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RoundEndEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoundEndEvent) ProtoMessage() {}
+
+func (x *RoundEndEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoundEndEvent.ProtoReflect.Descriptor instead.
+func (*RoundEndEvent) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *RoundEndEvent) GetRound() int32 {
+	if x != nil {
+		return x.Round
+	}
+	return 0
+}
+
 // CombatEvent delivers combat narration to all players in the room.
 type CombatEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1882,7 +2142,7 @@ type CombatEvent struct {
 
 func (x *CombatEvent) Reset() {
 	*x = CombatEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[24]
+	mi := &file_game_v1_game_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1894,7 +2154,7 @@ func (x *CombatEvent) String() string {
 func (*CombatEvent) ProtoMessage() {}
 
 func (x *CombatEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[24]
+	mi := &file_game_v1_game_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1907,7 +2167,7 @@ func (x *CombatEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CombatEvent.ProtoReflect.Descriptor instead.
 func (*CombatEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{24}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *CombatEvent) GetType() CombatEventType {
@@ -1977,7 +2237,7 @@ var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xbc\x04\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\x9a\x05\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -1993,8 +2253,10 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\aexamine\x18\n" +
 	" \x01(\v2\x17.game.v1.ExamineRequestH\x00R\aexamine\x120\n" +
 	"\x06attack\x18\v \x01(\v2\x16.game.v1.AttackRequestH\x00R\x06attack\x12*\n" +
-	"\x04flee\x18\f \x01(\v2\x14.game.v1.FleeRequestH\x00R\x04fleeB\t\n" +
-	"\apayload\"\xd0\x04\n" +
+	"\x04flee\x18\f \x01(\v2\x14.game.v1.FleeRequestH\x00R\x04flee\x12*\n" +
+	"\x04pass\x18\r \x01(\v2\x14.game.v1.PassRequestH\x00R\x04pass\x120\n" +
+	"\x06strike\x18\x0e \x01(\v2\x16.game.v1.StrikeRequestH\x00R\x06strikeB\t\n" +
+	"\apayload\"\xc4\x05\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -2010,7 +2272,10 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0echaracter_info\x18\t \x01(\v2\x16.game.v1.CharacterInfoH\x00R\rcharacterInfo\x12-\n" +
 	"\bnpc_view\x18\n" +
 	" \x01(\v2\x10.game.v1.NpcViewH\x00R\anpcView\x129\n" +
-	"\fcombat_event\x18\v \x01(\v2\x14.game.v1.CombatEventH\x00R\vcombatEventB\t\n" +
+	"\fcombat_event\x18\v \x01(\v2\x14.game.v1.CombatEventH\x00R\vcombatEvent\x12;\n" +
+	"\vround_start\x18\f \x01(\v2\x18.game.v1.RoundStartEventH\x00R\n" +
+	"roundStart\x125\n" +
+	"\tround_end\x18\r \x01(\v2\x16.game.v1.RoundEndEventH\x00R\broundEndB\t\n" +
 	"\apayload\"\xa9\x01\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
@@ -2097,7 +2362,19 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x05level\x18\x05 \x01(\x05R\x05level\"'\n" +
 	"\rAttackRequest\x12\x16\n" +
 	"\x06target\x18\x01 \x01(\tR\x06target\"\r\n" +
-	"\vFleeRequest\"\xa0\x02\n" +
+	"\vFleeRequest\"\r\n" +
+	"\vPassRequest\"'\n" +
+	"\rStrikeRequest\x12\x16\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\"\x91\x01\n" +
+	"\x0fRoundStartEvent\x12\x14\n" +
+	"\x05round\x18\x01 \x01(\x05R\x05round\x12(\n" +
+	"\x10actions_per_turn\x18\x02 \x01(\x05R\x0eactionsPerTurn\x12\x1f\n" +
+	"\vduration_ms\x18\x03 \x01(\x05R\n" +
+	"durationMs\x12\x1d\n" +
+	"\n" +
+	"turn_order\x18\x04 \x03(\tR\tturnOrder\"%\n" +
+	"\rRoundEndEvent\x12\x14\n" +
+	"\x05round\x18\x01 \x01(\x05R\x05round\"\xa0\x02\n" +
 	"\vCombatEvent\x12,\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x18.game.v1.CombatEventTypeR\x04type\x12\x1a\n" +
 	"\battacker\x18\x02 \x01(\tR\battacker\x12\x16\n" +
@@ -2140,7 +2417,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),         // 0: game.v1.MessageType
 	(RoomEventType)(0),       // 1: game.v1.RoomEventType
@@ -2169,7 +2446,11 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*NpcView)(nil),          // 24: game.v1.NpcView
 	(*AttackRequest)(nil),    // 25: game.v1.AttackRequest
 	(*FleeRequest)(nil),      // 26: game.v1.FleeRequest
-	(*CombatEvent)(nil),      // 27: game.v1.CombatEvent
+	(*PassRequest)(nil),      // 27: game.v1.PassRequest
+	(*StrikeRequest)(nil),    // 28: game.v1.StrikeRequest
+	(*RoundStartEvent)(nil),  // 29: game.v1.RoundStartEvent
+	(*RoundEndEvent)(nil),    // 30: game.v1.RoundEndEvent
+	(*CombatEvent)(nil),      // 31: game.v1.CombatEvent
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	5,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -2183,29 +2464,33 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	23, // 8: game.v1.ClientMessage.examine:type_name -> game.v1.ExamineRequest
 	25, // 9: game.v1.ClientMessage.attack:type_name -> game.v1.AttackRequest
 	26, // 10: game.v1.ClientMessage.flee:type_name -> game.v1.FleeRequest
-	13, // 11: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	15, // 12: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	16, // 13: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	17, // 14: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	18, // 15: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	19, // 16: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	20, // 17: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	21, // 18: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	24, // 19: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	27, // 20: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	14, // 21: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	22, // 22: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	0,  // 23: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,  // 24: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	14, // 25: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	2,  // 26: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	3,  // 27: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	4,  // 28: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	28, // [28:29] is the sub-list for method output_type
-	27, // [27:28] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	27, // [27:27] is the sub-list for extension extendee
-	0,  // [0:27] is the sub-list for field type_name
+	27, // 11: game.v1.ClientMessage.pass:type_name -> game.v1.PassRequest
+	28, // 12: game.v1.ClientMessage.strike:type_name -> game.v1.StrikeRequest
+	13, // 13: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	15, // 14: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	16, // 15: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	17, // 16: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	18, // 17: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	19, // 18: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	20, // 19: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	21, // 20: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	24, // 21: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	31, // 22: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	29, // 23: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	30, // 24: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	14, // 25: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	22, // 26: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	0,  // 27: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,  // 28: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	14, // 29: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	2,  // 30: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	3,  // 31: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	4,  // 32: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	32, // [32:33] is the sub-list for method output_type
+	31, // [31:32] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -2225,6 +2510,8 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_Examine)(nil),
 		(*ClientMessage_Attack)(nil),
 		(*ClientMessage_Flee)(nil),
+		(*ClientMessage_Pass)(nil),
+		(*ClientMessage_Strike)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -2237,6 +2524,8 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_CharacterInfo)(nil),
 		(*ServerEvent_NpcView)(nil),
 		(*ServerEvent_CombatEvent)(nil),
+		(*ServerEvent_RoundStart)(nil),
+		(*ServerEvent_RoundEnd)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -2244,7 +2533,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   25,
+			NumMessages:   29,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
