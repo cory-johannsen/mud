@@ -79,7 +79,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 			dyingStacks := s.Stacks("dying")
 			roll := src.Intn(20) + 1
 			switch {
-			case roll >= 25: // crit success: remove dying entirely, restore to 1 HP
+			case roll == 20: // natural 20 = crit success: remove dying entirely, restore to 1 HP
 				s.Remove("dying")
 				cbt.CurrentHP = 1
 				events = append(events, RoundConditionEvent{
@@ -258,7 +258,8 @@ func (c *Combat) AdvanceTurn() {
 
 // LivingCombatants returns a snapshot of combatants with CurrentHP > 0.
 //
-// Postcondition: All returned combatants have CurrentHP > 0.
+// Postcondition: All returned combatants have IsDead() == false.
+// Note: a player in the dying state (CurrentHP=0, Dead=false) is considered living.
 func (c *Combat) LivingCombatants() []*Combatant {
 	var alive []*Combatant
 	for _, cbt := range c.Combatants {

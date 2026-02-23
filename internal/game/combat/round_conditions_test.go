@@ -72,6 +72,21 @@ func TestResolveRound_NPCZeroHP_NoDyingCondition(t *testing.T) {
 	assert.False(t, cbt.HasCondition("n1", "dying"), "NPCs must NOT get dying condition — they just die")
 }
 
+func TestResolveRound_PlayerZeroHP_DyingStacksIncludeWounded(t *testing.T) {
+	cbt := makeCombatForRoundConditions(t)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+	// Pre-apply wounded 2 to player
+	require.NoError(t, cbt.ApplyCondition("p1", "wounded", 2, -1))
+	cbt.Combatants[0].CurrentHP = 1
+	cbt.Combatants[0].AC = 1 // guarantee hit
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Alice"}))
+	// Intn(20)=19 → crit success → double damage kills player
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil)
+	assert.True(t, cbt.HasCondition("p1", "dying"))
+	assert.Equal(t, 3, cbt.DyingStacks("p1"), "dying stacks must be 1 + wounded(2) = 3")
+}
+
 func TestResolveRound_AttackModifiers_ProneReducesRoll(t *testing.T) {
 	cbt := makeCombatForRoundConditions(t)
 	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})

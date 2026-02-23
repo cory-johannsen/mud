@@ -127,11 +127,29 @@ func TestStartRoundWithSrc_DyingRecovery_CritSuccess(t *testing.T) {
 	_, cbt := makeCombatWithConditions(t)
 	cbt.Combatants[0].CurrentHP = 0
 	require.NoError(t, cbt.ApplyCondition("p1", "dying", 1, -1))
-	// Intn(20) returns 24 → roll = 25 → crit success (>= 25)
-	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 24})
+	// Intn(20) returns 19 → roll = 20 → crit success (roll == 20)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 19})
 	assert.False(t, cbt.HasCondition("p1", "dying"), "dying removed on crit success")
 	assert.False(t, cbt.HasCondition("p1", "wounded"), "wounded NOT applied on crit success")
 	assert.Equal(t, 1, cbt.Combatants[0].CurrentHP, "HP restored to 1 on crit success")
+}
+
+func TestPropertyDyingStacksNeverExceedFour_MultiRound(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		rounds := rapid.IntRange(1, 5).Draw(rt, "rounds")
+		_, cbt := makeCombatWithConditions(t)
+		cbt.Combatants[0].CurrentHP = 0
+		require.NoError(t, cbt.ApplyCondition("p1", "dying", 1, -1))
+		// Run multiple rounds with failure rolls (val=9 → roll=10 < 15 = failure)
+		for i := 0; i < rounds; i++ {
+			if cbt.Combatants[0].IsDead() {
+				break
+			}
+			_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 9})
+		}
+		assert.LessOrEqual(rt, cbt.DyingStacks("p1"), 4,
+			"dying stacks must never exceed 4 across multiple rounds of failure")
+	})
 }
 
 func TestPropertyDyingStacksNeverExceedFour(t *testing.T) {

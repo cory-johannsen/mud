@@ -25,8 +25,13 @@ func findCombatantByName(cbt *Combat, name string) *Combatant {
 	return nil
 }
 
-// applyAttackConditions applies conditions based on attack outcome and damage.
-// Called after each attack resolution.
+// applyAttackConditions applies conditions triggered by an attack result:
+//   - CritFailure: attacker gains prone (permanent)
+//   - CritSuccess: target gains flat_footed (1 round)
+//   - Player target at 0 HP (not already dying): gains dying(1 + wounded stacks)
+//
+// Precondition: cbt, target, and r must be valid; cbt.condRegistry must be non-nil.
+// Postcondition: Conditions are applied in-place on cbt.
 func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult) {
 	switch r.Outcome {
 	case CritFailure:
@@ -34,8 +39,8 @@ func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult
 	case CritSuccess:
 		_ = cbt.ApplyCondition(target.ID, "flat_footed", 1, 1)
 	}
-	// After damage: if target HP hits 0 AND target is a player, apply dying
-	if target.CurrentHP <= 0 && target.Kind == KindPlayer {
+	// Only apply dying if the target is a player, at 0 HP, and NOT already dying
+	if target.CurrentHP <= 0 && target.Kind == KindPlayer && !cbt.HasCondition(target.ID, "dying") {
 		woundedStacks := cbt.Conditions[target.ID].Stacks("wounded")
 		_ = cbt.ApplyCondition(target.ID, "dying", 1+woundedStacks, -1)
 	}
