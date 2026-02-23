@@ -21,6 +21,7 @@ func TestProto_RoundStartEvent_Roundtrip(t *testing.T) {
 	assert.Equal(t, orig.Round, got.Round)
 	assert.Equal(t, orig.DurationMs, got.DurationMs)
 	assert.Equal(t, orig.TurnOrder, got.TurnOrder)
+	assert.Equal(t, orig.ActionsPerTurn, got.ActionsPerTurn)
 }
 
 func TestProto_PassRequest_Roundtrip(t *testing.T) {
