@@ -38,3 +38,4 @@ deployments/docker/.env
 .env
 .env.local
 /gameserver
+/frontend

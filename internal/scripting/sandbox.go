@@ -17,6 +17,7 @@ const DefaultInstructionLimit = 100_000
 // countingContext is a context.Context that cancels itself after Done() has
 // been called limit times. GopherLua's mainLoopWithContext calls Done() once
 // per opcode, making this an exact instruction-count limit.
+// Done is the only method overridden; Deadline, Err, and Value delegate to base.
 type countingContext struct {
 	context.Context
 	cancel    context.CancelFunc
@@ -34,8 +35,11 @@ func (c *countingContext) Done() <-chan struct{} {
 }
 
 // newCountingContext returns a context that cancels after limit calls to Done().
-// Precondition: limit > 0.
+// Precondition: limit > 0; panics if limit <= 0.
 func newCountingContext(limit int) (context.Context, context.CancelFunc) {
+	if limit <= 0 {
+		panic("newCountingContext: limit must be > 0")
+	}
 	base, cancel := context.WithCancel(context.Background())
 	rem := &atomic.Int64{}
 	rem.Store(int64(limit))
@@ -48,13 +52,15 @@ func newCountingContext(limit int) (context.Context, context.CancelFunc) {
 
 // NewSandboxedState creates a GopherLua LState with:
 //   - Only safe stdlib loaded: base, table, string, math
-//   - Dangerous globals removed: dofile, loadfile, load, collectgarbage, require
+//   - Dangerous globals removed: dofile, loadfile, load, loadstring,
+//     collectgarbage, require, module, newproxy, setfenv, getfenv, _printregs
 //   - Execution limited to at most instLimit Lua opcodes (deterministic)
 //
 // Precondition: instLimit >= 0; 0 uses DefaultInstructionLimit.
-// Postcondition: Returns a non-nil LState ready for RegisterModules and DoFile.
+// Postcondition: Returns a non-nil LState ready for RegisterModules and DoFile,
+// and a CancelFunc the caller must defer to prevent goroutine leaks.
 // The caller owns the LState and must call L.Close() when done.
-func NewSandboxedState(instLimit int) *lua.LState {
+func NewSandboxedState(instLimit int) (*lua.LState, context.CancelFunc) {
 	limit := instLimit
 	if limit <= 0 {
 		limit = DefaultInstructionLimit
@@ -69,15 +75,21 @@ func NewSandboxedState(instLimit int) *lua.LState {
 	lua.OpenMath(L)
 
 	// Strip dangerous globals left by OpenBase.
-	for _, name := range []string{"dofile", "loadfile", "load", "collectgarbage", "require"} {
+	for _, name := range []string{
+		"dofile", "loadfile", "load", "loadstring",
+		"collectgarbage", "require",
+		"module", "newproxy",
+		"setfenv", "getfenv",
+		"_printregs",
+	} {
 		L.SetGlobal(name, lua.LNil)
 	}
 
 	// Enforce deterministic instruction-count limit (SCRIPT-3).
 	// countingContext.Done() is called by GopherLua's mainLoopWithContext on
 	// every opcode; the context cancels itself after exactly limit opcodes.
-	ctx, _ := newCountingContext(limit) //nolint:govet // cancel fires automatically when limit is reached
+	ctx, cancel := newCountingContext(limit)
 	L.SetContext(ctx)
 
-	return L
+	return L, cancel
 }

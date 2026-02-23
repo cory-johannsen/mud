@@ -12,25 +12,34 @@ import (
 )
 
 func TestNewSandboxedState_UnsafeLibsNil(t *testing.T) {
-	L := scripting.NewSandboxedState(0)
+	L, cancel := scripting.NewSandboxedState(0)
+	defer cancel()
 	require.NotNil(t, L)
 	defer L.Close()
-	for _, name := range []string{"os", "io", "debug"} {
+	for _, name := range []string{"os", "io", "debug", "package", "channel", "coroutine"} {
 		assert.Equal(t, lua.LNil, L.GetGlobal(name), "expected %s to be nil", name)
 	}
 }
 
 func TestNewSandboxedState_DangerousGlobalsNil(t *testing.T) {
-	L := scripting.NewSandboxedState(0)
+	L, cancel := scripting.NewSandboxedState(0)
+	defer cancel()
 	require.NotNil(t, L)
 	defer L.Close()
-	for _, name := range []string{"dofile", "loadfile", "load", "collectgarbage", "require"} {
+	for _, name := range []string{
+		"dofile", "loadfile", "load", "loadstring",
+		"collectgarbage", "require",
+		"module", "newproxy",
+		"setfenv", "getfenv",
+		"_printregs",
+	} {
 		assert.Equal(t, lua.LNil, L.GetGlobal(name), "expected %s to be nil", name)
 	}
 }
 
 func TestNewSandboxedState_SafeLibsAvailable(t *testing.T) {
-	L := scripting.NewSandboxedState(0)
+	L, cancel := scripting.NewSandboxedState(0)
+	defer cancel()
 	require.NotNil(t, L)
 	defer L.Close()
 	err := L.DoString(`
@@ -43,7 +52,8 @@ func TestNewSandboxedState_SafeLibsAvailable(t *testing.T) {
 }
 
 func TestNewSandboxedState_InstructionLimitExceeded(t *testing.T) {
-	L := scripting.NewSandboxedState(10)
+	L, cancel := scripting.NewSandboxedState(10)
+	defer cancel()
 	require.NotNil(t, L)
 	defer L.Close()
 	err := L.DoString(`while true do end`)
@@ -51,7 +61,8 @@ func TestNewSandboxedState_InstructionLimitExceeded(t *testing.T) {
 }
 
 func TestNewSandboxedState_DefaultLimit_NormalScriptRuns(t *testing.T) {
-	L := scripting.NewSandboxedState(0)
+	L, cancel := scripting.NewSandboxedState(0)
+	defer cancel()
 	require.NotNil(t, L)
 	defer L.Close()
 	assert.NoError(t, L.DoString(`local x = 1 + 1`))
@@ -60,11 +71,25 @@ func TestNewSandboxedState_DefaultLimit_NormalScriptRuns(t *testing.T) {
 func TestProperty_InstructionLimitAlwaysErrors(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		limit := rapid.IntRange(1, 50).Draw(t, "limit")
-		L := scripting.NewSandboxedState(limit)
+		L, cancel := scripting.NewSandboxedState(limit)
+		defer cancel()
 		defer L.Close()
 		err := L.DoString(`while true do end`)
 		if err == nil {
 			t.Fatalf("expected error with limit=%d but got nil", limit)
+		}
+	})
+}
+
+func TestProperty_InstructionLimitNeverBlocksShortScript(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		limit := rapid.IntRange(10000, 100000).Draw(t, "limit")
+		L, cancel := scripting.NewSandboxedState(limit)
+		defer cancel()
+		defer L.Close()
+		err := L.DoString(`x = 1 + 1`)
+		if err != nil {
+			t.Fatalf("expected no error with limit=%d but got: %v", limit, err)
 		}
 	})
 }
