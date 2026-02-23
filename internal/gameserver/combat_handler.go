@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -317,7 +318,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	h.broadcastFn(roomID, events)
 
 	// Start the next round.
-	cbt.StartRound(3)
+	_ = cbt.StartRound(3)
 	h.autoQueueNPCsLocked(cbt)
 
 	roundStartEvents := []*gamev1.CombatEvent{
@@ -363,12 +364,12 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
 	combat.RollInitiative(combatants, h.dice.Src())
 
-	cbt, err := h.engine.StartCombat(sess.RoomID, combatants)
+	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, condition.NewRegistry())
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
 	}
 
-	cbt.StartRound(3)
+	_ = cbt.StartRound(3)
 
 	// Build initiative events.
 	var events []*gamev1.CombatEvent
@@ -534,6 +535,7 @@ func (h *CombatHandler) removeCombatant(cbt *combat.Combat, id string) {
 	for _, c := range cbt.Combatants {
 		if c.ID == id {
 			c.CurrentHP = 0
+			c.Dead = true
 			return
 		}
 	}

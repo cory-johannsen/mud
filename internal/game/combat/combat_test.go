@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
@@ -17,10 +18,20 @@ func TestCombatant_IsPlayer(t *testing.T) {
 }
 
 func TestCombatant_IsDead(t *testing.T) {
-	c := combat.Combatant{Kind: combat.KindPlayer, Name: "X", MaxHP: 10, CurrentHP: 0}
-	assert.True(t, c.IsDead())
-	c.CurrentHP = 1
-	assert.False(t, c.IsDead())
+	// NPCs: dead when HP <= 0
+	npc := combat.Combatant{Kind: combat.KindNPC, Name: "G", MaxHP: 10, CurrentHP: 0}
+	assert.True(t, npc.IsDead())
+	npc.CurrentHP = 1
+	assert.False(t, npc.IsDead())
+
+	// Players: dead only when Dead flag is set (HP=0 means dying, not dead)
+	player := combat.Combatant{Kind: combat.KindPlayer, Name: "X", MaxHP: 10, CurrentHP: 0}
+	assert.False(t, player.IsDead(), "player at HP=0 is dying, not dead")
+	player.Dead = true
+	assert.True(t, player.IsDead(), "player with Dead=true is dead")
+	player.CurrentHP = 1
+	player.Dead = false
+	assert.False(t, player.IsDead(), "player with Dead=false is alive")
 }
 
 func TestCombatant_ApplyDamage(t *testing.T) {
@@ -125,7 +136,7 @@ func makeCombatants() []*combat.Combatant {
 
 func TestEngine_StartCombat(t *testing.T) {
 	eng := combat.NewEngine()
-	cbt, err := eng.StartCombat("room-alley", makeCombatants())
+	cbt, err := eng.StartCombat("room-alley", makeCombatants(), condition.NewRegistry())
 	require.NoError(t, err)
 	assert.Equal(t, "room-alley", cbt.RoomID)
 	assert.Len(t, cbt.Combatants, 2)
@@ -134,15 +145,15 @@ func TestEngine_StartCombat(t *testing.T) {
 
 func TestEngine_StartCombat_DuplicateRoom(t *testing.T) {
 	eng := combat.NewEngine()
-	_, err := eng.StartCombat("room-1", makeCombatants())
+	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
 	require.NoError(t, err)
-	_, err = eng.StartCombat("room-1", makeCombatants())
+	_, err = eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
 	assert.Error(t, err)
 }
 
 func TestEngine_GetCombat(t *testing.T) {
 	eng := combat.NewEngine()
-	_, err := eng.StartCombat("room-1", makeCombatants())
+	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
 	require.NoError(t, err)
 
 	cbt, ok := eng.GetCombat("room-1")
@@ -155,7 +166,7 @@ func TestEngine_GetCombat(t *testing.T) {
 
 func TestEngine_EndCombat(t *testing.T) {
 	eng := combat.NewEngine()
-	_, err := eng.StartCombat("room-1", makeCombatants())
+	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
 	require.NoError(t, err)
 
 	eng.EndCombat("room-1")
@@ -165,7 +176,7 @@ func TestEngine_EndCombat(t *testing.T) {
 
 func TestCombat_CurrentTurn(t *testing.T) {
 	eng := combat.NewEngine()
-	cbt, _ := eng.StartCombat("room-1", makeCombatants())
+	cbt, _ := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
 	current := cbt.CurrentTurn()
 	require.NotNil(t, current)
 	assert.NotEmpty(t, current.ID)
@@ -173,7 +184,7 @@ func TestCombat_CurrentTurn(t *testing.T) {
 
 func TestCombat_AdvanceTurn(t *testing.T) {
 	eng := combat.NewEngine()
-	cbt, _ := eng.StartCombat("room-1", makeCombatants())
+	cbt, _ := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
 	first := cbt.CurrentTurn()
 	cbt.AdvanceTurn()
 	second := cbt.CurrentTurn()
@@ -184,7 +195,7 @@ func TestCombat_AdvanceTurn_SkipsDead(t *testing.T) {
 	eng := combat.NewEngine()
 	c := makeCombatants()
 	c[1].CurrentHP = 0 // NPC is dead
-	cbt, _ := eng.StartCombat("room-1", c)
+	cbt, _ := eng.StartCombat("room-1", c, condition.NewRegistry())
 	for i := 0; i < 5; i++ {
 		current := cbt.CurrentTurn()
 		assert.Equal(t, combat.KindPlayer, current.Kind)

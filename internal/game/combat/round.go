@@ -1,6 +1,10 @@
 package combat
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/cory-johannsen/mud/internal/game/condition"
+)
 
 // RoundEvent records what happened when one action was resolved.
 type RoundEvent struct {
@@ -19,6 +23,22 @@ func findCombatantByName(cbt *Combat, name string) *Combatant {
 		}
 	}
 	return nil
+}
+
+// applyAttackConditions applies conditions based on attack outcome and damage.
+// Called after each attack resolution.
+func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult) {
+	switch r.Outcome {
+	case CritFailure:
+		_ = cbt.ApplyCondition(actor.ID, "prone", 1, -1)
+	case CritSuccess:
+		_ = cbt.ApplyCondition(target.ID, "flat_footed", 1, 1)
+	}
+	// After damage: if target HP hits 0 AND target is a player, apply dying
+	if target.CurrentHP <= 0 && target.Kind == KindPlayer {
+		woundedStacks := cbt.Conditions[target.ID].Stacks("wounded")
+		_ = cbt.ApplyCondition(target.ID, "dying", 1+woundedStacks, -1)
+	}
 }
 
 // ResolveRound processes all queued actions for cbt in Combatants order (initiative-sorted).
@@ -73,12 +93,18 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					})
 					continue
 				}
+				atkBonus := condition.AttackBonus(cbt.Conditions[actor.ID])
+				acBonus := condition.ACBonus(cbt.Conditions[target.ID])
 				r := ResolveAttack(actor, target, src)
+				r.AttackTotal += atkBonus
+				r.AttackTotal += acBonus
+				r.Outcome = OutcomeFor(r.AttackTotal, target.AC)
 				dmg := r.EffectiveDamage()
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
+				applyAttackConditions(cbt, actor, target, r)
 				events = append(events, RoundEvent{
 					AttackResult: &r,
 					ActionType:   ActionAttack,
@@ -106,12 +132,18 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					continue
 				}
 				// First strike
+				atkBonus1 := condition.AttackBonus(cbt.Conditions[actor.ID])
+				acBonus1 := condition.ACBonus(cbt.Conditions[target.ID])
 				r1 := ResolveAttack(actor, target, src)
+				r1.AttackTotal += atkBonus1
+				r1.AttackTotal += acBonus1
+				r1.Outcome = OutcomeFor(r1.AttackTotal, target.AC)
 				dmg1 := r1.EffectiveDamage()
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
+				applyAttackConditions(cbt, actor, target, r1)
 				events = append(events, RoundEvent{
 					AttackResult: &r1,
 					ActionType:   ActionStrike,
@@ -130,7 +162,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					})
 					continue
 				}
+				atkBonus2 := condition.AttackBonus(cbt.Conditions[actor.ID])
+				acBonus2 := condition.ACBonus(cbt.Conditions[target.ID])
 				r2 := ResolveAttack(actor, target, src)
+				r2.AttackTotal += atkBonus2
+				r2.AttackTotal += acBonus2
 				r2.AttackTotal -= 5
 				r2.Outcome = OutcomeFor(r2.AttackTotal, target.AC)
 				dmg2 := r2.EffectiveDamage()
@@ -138,6 +174,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					target.ApplyDamage(dmg2)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
+				applyAttackConditions(cbt, actor, target, r2)
 				events = append(events, RoundEvent{
 					AttackResult: &r2,
 					ActionType:   ActionStrike,

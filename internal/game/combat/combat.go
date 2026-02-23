@@ -47,15 +47,27 @@ type Combatant struct {
 	StrMod     int
 	DexMod     int
 	Initiative int
+	// Dead is true when this combatant has been permanently killed.
+	// For NPCs, reaching 0 HP sets Dead=true immediately.
+	// For players, Dead=true only when the dying condition advances to stack 4.
+	Dead bool
 }
 
 // IsPlayer reports whether this combatant is a player character.
 // Postcondition: Returns true iff Kind == KindPlayer.
 func (c *Combatant) IsPlayer() bool { return c.Kind == KindPlayer }
 
-// IsDead reports whether this combatant has zero or fewer hit points.
-// Postcondition: Returns true iff CurrentHP <= 0.
-func (c *Combatant) IsDead() bool { return c.CurrentHP <= 0 }
+// IsDead reports whether this combatant is permanently dead.
+// For NPCs: true when CurrentHP <= 0.
+// For players: true when Dead flag is set (dying chain resolved to death).
+//
+// Postcondition: Returns true iff the combatant is permanently dead.
+func (c *Combatant) IsDead() bool {
+	if c.Kind == KindPlayer {
+		return c.Dead
+	}
+	return c.CurrentHP <= 0
+}
 
 // ApplyDamage reduces CurrentHP by amount, flooring at zero.
 // Precondition: amount must be >= 0.

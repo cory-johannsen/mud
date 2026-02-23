@@ -6,29 +6,34 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 )
 
 // fixedSrc is a deterministic Source for testing.
+// It returns f.val for every Intn call with no bounds clamping,
+// enabling test scenarios that need values outside the normal dice range.
 type fixedSrc struct{ val int }
 
-func (f fixedSrc) Intn(n int) int {
-	if f.val >= n {
-		return n - 1
-	}
-	return f.val
-}
+func (f fixedSrc) Intn(_ int) int { return f.val }
 
 func makeRoundCombat(t *testing.T) *combat.Combat {
 	t.Helper()
-	cbt := &combat.Combat{
-		RoomID: "room1",
-		Combatants: []*combat.Combatant{
-			{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
-			{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 12, Level: 1, StrMod: 1, DexMod: 0},
-		},
-		ActionQueues: make(map[string]*combat.ActionQueue),
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 12, Level: 1, StrMod: 1, DexMod: 0},
 	}
-	cbt.StartRound(3)
+	cbt, err := eng.StartCombat("room1", combatants, reg)
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+	_ = cbt.StartRound(3)
 	return cbt
 }
 

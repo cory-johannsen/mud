@@ -4,20 +4,34 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"pgregory.net/rapid"
 )
+
+func makeTestRegistry() *condition.Registry {
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4, RestrictActions: []string{"attack", "strike", "pass"}})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "frightened", Name: "Frightened", DurationType: "rounds", MaxStacks: 4, AttackPenalty: 1, ACPenalty: 1})
+	return reg
+}
 
 // makeTwoCombatantCombat returns a Combat with two living combatants for unit testing.
 func makeTwoCombatantCombat(t *testing.T) *combat.Combat {
 	t.Helper()
-	return &combat.Combat{
-		RoomID: "room1",
-		Combatants: []*combat.Combatant{
-			{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1},
-			{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 12, Level: 1},
-		},
-		ActionQueues: make(map[string]*combat.ActionQueue),
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 12, Level: 1},
 	}
+	cbt, err := eng.StartCombat("room1", combatants, makeTestRegistry())
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+	return cbt
 }
 
 // TestCombat_StartRound_IncrementsRound verifies Round increments from 0→1→2.
@@ -26,11 +40,11 @@ func TestCombat_StartRound_IncrementsRound(t *testing.T) {
 	if c.Round != 0 {
 		t.Fatalf("initial Round = %d, want 0", c.Round)
 	}
-	c.StartRound(3)
+	_ = c.StartRound(3)
 	if c.Round != 1 {
 		t.Errorf("after first StartRound: Round = %d, want 1", c.Round)
 	}
-	c.StartRound(3)
+	_ = c.StartRound(3)
 	if c.Round != 2 {
 		t.Errorf("after second StartRound: Round = %d, want 2", c.Round)
 	}
@@ -39,7 +53,7 @@ func TestCombat_StartRound_IncrementsRound(t *testing.T) {
 // TestCombat_StartRound_ResetsQueues verifies all living combatants get a fresh queue with actionsPerRound AP.
 func TestCombat_StartRound_ResetsQueues(t *testing.T) {
 	c := makeTwoCombatantCombat(t)
-	c.StartRound(3)
+	_ = c.StartRound(3)
 	for _, cbt := range c.Combatants {
 		q, ok := c.ActionQueues[cbt.ID]
 		if !ok {
@@ -57,7 +71,7 @@ func TestCombat_StartRound_SkipsDeadCombatants(t *testing.T) {
 	c := makeTwoCombatantCombat(t)
 	// Kill the NPC.
 	c.Combatants[1].CurrentHP = 0
-	c.StartRound(3)
+	_ = c.StartRound(3)
 
 	if _, ok := c.ActionQueues["n1"]; ok {
 		t.Error("dead combatant n1 should have no queue entry after StartRound")
@@ -70,7 +84,7 @@ func TestCombat_StartRound_SkipsDeadCombatants(t *testing.T) {
 // TestCombat_QueueAction_Success verifies a valid action is enqueued and AP decremented.
 func TestCombat_QueueAction_Success(t *testing.T) {
 	c := makeTwoCombatantCombat(t)
-	c.StartRound(3)
+	_ = c.StartRound(3)
 
 	err := c.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
 	if err != nil {
@@ -89,7 +103,7 @@ func TestCombat_QueueAction_Success(t *testing.T) {
 // TestCombat_QueueAction_UnknownUID verifies an error is returned for an unknown UID.
 func TestCombat_QueueAction_UnknownUID(t *testing.T) {
 	c := makeTwoCombatantCombat(t)
-	c.StartRound(3)
+	_ = c.StartRound(3)
 
 	err := c.QueueAction("ghost", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
 	if err == nil {
@@ -100,7 +114,7 @@ func TestCombat_QueueAction_UnknownUID(t *testing.T) {
 // TestCombat_AllActionsSubmitted_False verifies AllActionsSubmitted returns false right after StartRound.
 func TestCombat_AllActionsSubmitted_False(t *testing.T) {
 	c := makeTwoCombatantCombat(t)
-	c.StartRound(3)
+	_ = c.StartRound(3)
 
 	if c.AllActionsSubmitted() {
 		t.Error("AllActionsSubmitted should be false immediately after StartRound(3)")
@@ -110,7 +124,7 @@ func TestCombat_AllActionsSubmitted_False(t *testing.T) {
 // TestCombat_AllActionsSubmitted_True verifies AllActionsSubmitted returns true after all living combatants pass.
 func TestCombat_AllActionsSubmitted_True(t *testing.T) {
 	c := makeTwoCombatantCombat(t)
-	c.StartRound(3)
+	_ = c.StartRound(3)
 
 	pass := combat.QueuedAction{Type: combat.ActionPass}
 	if err := c.QueueAction("p1", pass); err != nil {
@@ -130,7 +144,7 @@ func TestPropertyCombat_RoundMonotonicallyIncreases(t *testing.T) {
 		n := rapid.IntRange(1, 20).Draw(rt, "rounds")
 		cbt := makeTwoCombatantCombat(t)
 		for i := 1; i <= n; i++ {
-			cbt.StartRound(3)
+			_ = cbt.StartRound(3)
 		}
 		if cbt.Round != n {
 			rt.Errorf("after %d StartRound calls: Round = %d, want %d", n, cbt.Round, n)
