@@ -158,28 +158,6 @@ func RenderConditionEvent(ce *gamev1.ConditionEvent) string {
 		ce.ConditionName, ce.TargetName)
 }
 
-// RenderStatus formats a slice of ConditionInfo as a bulleted condition list.
-//
-// Precondition: conds may be nil or empty.
-// Postcondition: returns a non-empty ANSI-colored string.
-func RenderStatus(conds []*gamev1.ConditionInfo) string {
-	if len(conds) == 0 {
-		return telnet.Colorize(telnet.Cyan, "No active conditions.")
-	}
-	var b strings.Builder
-	b.WriteString(telnet.Colorize(telnet.BrightWhite, "Active conditions:"))
-	b.WriteString("\r\n")
-	for _, c := range conds {
-		dur := "permanent"
-		if c.DurationRemaining >= 0 {
-			dur = fmt.Sprintf("%d rounds", c.DurationRemaining)
-		}
-		b.WriteString(telnet.Colorf(telnet.Yellow, "  %-20s stacks: %d  (%s)", c.Name, c.Stacks, dur))
-		b.WriteString("\r\n")
-	}
-	return b.String()
-}
-
 // RenderCombatEvent formats a CombatEvent as colored Telnet text.
 func RenderCombatEvent(ce *gamev1.CombatEvent) string {
 	switch ce.Type {

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -182,19 +183,43 @@ func TestRenderConditionEvent_Removed(t *testing.T) {
 	assert.Contains(t, result, "Alice")
 }
 
-func TestRenderStatus_Empty(t *testing.T) {
-	result := RenderStatus(nil)
-	assert.Contains(t, result, "No active conditions")
+// TestProperty_RenderConditionEvent_Applied verifies that for any non-empty target name
+// and condition name, RenderConditionEvent with Applied=true returns a non-empty string
+// containing the target name.
+func TestProperty_RenderConditionEvent_Applied(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		target := rapid.StringMatching(`[A-Za-z][A-Za-z0-9]{1,15}`).Draw(rt, "target")
+		condition := rapid.StringMatching(`[A-Za-z][A-Za-z0-9]{1,15}`).Draw(rt, "condition")
+		stacks := rapid.Int32Range(1, 10).Draw(rt, "stacks")
+
+		ce := &gamev1.ConditionEvent{
+			TargetName:    target,
+			ConditionName: condition,
+			ConditionId:   "test",
+			Stacks:        stacks,
+			Applied:       true,
+		}
+		result := RenderConditionEvent(ce)
+		assert.NotEmpty(rt, result)
+		assert.Contains(rt, telnet.StripANSI(result), target)
+	})
 }
 
-func TestRenderStatus_WithConditions(t *testing.T) {
-	conds := []*gamev1.ConditionInfo{
-		{Id: "frightened", Name: "Frightened", Stacks: 2, DurationRemaining: 3},
-		{Id: "wounded", Name: "Wounded", Stacks: 1, DurationRemaining: -1},
-	}
-	result := RenderStatus(conds)
-	assert.Contains(t, result, "Frightened")
-	assert.Contains(t, result, "Wounded")
-	assert.Contains(t, result, "permanent")
-	assert.Contains(t, result, "3 rounds")
+// TestProperty_RenderConditionEvent_Removed verifies that for any non-empty target name
+// and condition name, RenderConditionEvent with Applied=false returns a string containing "fades".
+func TestProperty_RenderConditionEvent_Removed(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		target := rapid.StringMatching(`[A-Za-z][A-Za-z0-9]{1,15}`).Draw(rt, "target")
+		condition := rapid.StringMatching(`[A-Za-z][A-Za-z0-9]{1,15}`).Draw(rt, "condition")
+
+		ce := &gamev1.ConditionEvent{
+			TargetName:    target,
+			ConditionName: condition,
+			ConditionId:   "test",
+			Stacks:        0,
+			Applied:       false,
+		}
+		result := RenderConditionEvent(ce)
+		assert.Contains(rt, telnet.StripANSI(result), "fades")
+	})
 }
