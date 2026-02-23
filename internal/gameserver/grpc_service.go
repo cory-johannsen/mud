@@ -235,7 +235,7 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 	case *gamev1.ClientMessage_Pass:
 		return s.handlePass(uid)
 	case *gamev1.ClientMessage_Strike:
-		return s.handleStrike(uid, msg.GetStrike())
+		return s.handleStrike(uid, p.Strike)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}

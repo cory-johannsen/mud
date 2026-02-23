@@ -193,6 +193,9 @@ func validateGameServer(g GameServerConfig) error {
 	if g.GRPCPort < 1 || g.GRPCPort > 65535 {
 		errs = append(errs, fmt.Sprintf("gameserver.grpc_port must be 1-65535, got %d", g.GRPCPort))
 	}
+	if g.RoundDurationMs < 0 {
+		errs = append(errs, fmt.Sprintf("gameserver.round_duration_ms must be >= 0 (got %d)", g.RoundDurationMs))
+	}
 	if len(errs) > 0 {
 		return fmt.Errorf("%s", strings.Join(errs, "; "))
 	}
