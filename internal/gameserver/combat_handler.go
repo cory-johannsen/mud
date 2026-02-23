@@ -28,6 +28,7 @@ type CombatHandler struct {
 	dice          *dice.Roller
 	broadcastFn   func(roomID string, events []*gamev1.CombatEvent)
 	roundDuration time.Duration
+	condRegistry  *condition.Registry
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -44,6 +45,7 @@ func NewCombatHandler(
 	diceRoller *dice.Roller,
 	broadcastFn func(roomID string, events []*gamev1.CombatEvent),
 	roundDuration time.Duration,
+	condRegistry *condition.Registry,
 ) *CombatHandler {
 	return &CombatHandler{
 		engine:        engine,
@@ -52,6 +54,7 @@ func NewCombatHandler(
 		dice:          diceRoller,
 		broadcastFn:   broadcastFn,
 		roundDuration: roundDuration,
+		condRegistry:  condRegistry,
 		timers:        make(map[string]*combat.RoundTimer),
 	}
 }
@@ -318,7 +321,8 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	h.broadcastFn(roomID, events)
 
 	// Start the next round.
-	_ = cbt.StartRound(3)
+	condEvents := cbt.StartRound(3)
+	condCombatEvents := conditionEventsToProto(condEvents, h.condRegistry)
 	h.autoQueueNPCsLocked(cbt)
 
 	roundStartEvents := []*gamev1.CombatEvent{
@@ -327,6 +331,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			Narrative: fmt.Sprintf("Round %d begins!", cbt.Round),
 		},
 	}
+	roundStartEvents = append(roundStartEvents, condCombatEvents...)
 	h.broadcastFn(roomID, roundStartEvents)
 	h.startTimerLocked(roomID)
 }
@@ -364,12 +369,13 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
 	combat.RollInitiative(combatants, h.dice.Src())
 
-	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, condition.NewRegistry())
+	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry)
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
 	}
 
-	_ = cbt.StartRound(3)
+	initCondEvents := cbt.StartRound(3)
+	_ = initCondEvents // round 1 starts with no active conditions; events are empty
 
 	// Build initiative events.
 	var events []*gamev1.CombatEvent
@@ -539,4 +545,50 @@ func (h *CombatHandler) removeCombatant(cbt *combat.Combat, id string) {
 			return
 		}
 	}
+}
+
+// conditionEventsToProto converts a slice of RoundConditionEvents into CombatEvents
+// for broadcast using the narrative channel.
+//
+// Precondition: reg must not be nil.
+// Postcondition: Returns one CombatEvent per RoundConditionEvent.
+func conditionEventsToProto(events []combat.RoundConditionEvent, reg *condition.Registry) []*gamev1.CombatEvent {
+	result := make([]*gamev1.CombatEvent, 0, len(events))
+	for _, ce := range events {
+		def, _ := reg.Get(ce.ConditionID)
+		name := ce.ConditionID
+		if def != nil {
+			name = def.Name
+		}
+		var narrative string
+		if ce.Applied {
+			narrative = fmt.Sprintf("%s is now %s (stacks: %d).", ce.Name, name, ce.Stacks)
+		} else {
+			narrative = fmt.Sprintf("%s fades from %s.", name, ce.Name)
+		}
+		result = append(result, &gamev1.CombatEvent{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+			Narrative: narrative,
+		})
+	}
+	return result
+}
+
+// Status returns the active conditions for the player with the given uid.
+// Returns nil, nil if no combat is active in the player's room.
+//
+// Precondition: uid must be a valid connected player.
+// Postcondition: Returns active conditions or nil if not in combat.
+func (h *CombatHandler) Status(uid string) ([]*condition.ActiveCondition, error) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil, nil // no combat active; return empty
+	}
+	return cbt.GetConditions(uid), nil
 }

@@ -13,9 +13,12 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	"path/filepath"
+
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -106,6 +109,14 @@ func main() {
 		}
 	}
 
+	// Load condition definitions
+	condDir := filepath.Join("content", "conditions")
+	condRegistry, err := condition.LoadDirectory(condDir)
+	if err != nil {
+		logger.Fatal("loading condition definitions", zap.Error(err))
+	}
+	logger.Info("loaded condition definitions", zap.Int("count", len(condRegistry.All())))
+
 	// Create handlers
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
@@ -123,7 +134,7 @@ func main() {
 			grpcService.BroadcastCombatEvents(roomID, events)
 		}
 	}
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration)
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry)
 
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(

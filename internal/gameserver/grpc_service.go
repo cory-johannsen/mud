@@ -236,6 +236,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handlePass(uid)
 	case *gamev1.ClientMessage_Strike:
 		return s.handleStrike(uid, p.Strike)
+	case *gamev1.ClientMessage_Status:
+		return s.handleStatus(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -516,6 +518,60 @@ func (s *GameServiceServer) handleStrike(uid string, req *gamev1.StrikeRequest) 
 	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
+	}, nil
+}
+
+// handleStatus returns the active conditions for uid as a ConditionEvent ServerEvent.
+// If no combat is active or there are no conditions, returns an empty sentinel ConditionEvent.
+//
+// Precondition: uid must be a valid connected player.
+// Postcondition: Returns a ServerEvent wrapping zero or more condition states, or an error.
+func (s *GameServiceServer) handleStatus(uid string) (*gamev1.ServerEvent, error) {
+	conds, err := s.combatH.Status(uid)
+	if err != nil {
+		return nil, err
+	}
+	if len(conds) == 0 {
+		// Return empty sentinel so the client knows no conditions are active.
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_ConditionEvent{
+				ConditionEvent: &gamev1.ConditionEvent{},
+			},
+		}, nil
+	}
+	// Return the first condition; additional conditions are broadcast via individual events.
+	// For simplicity, encode all conditions as separate events by returning only the first and
+	// broadcasting the rest, matching the pattern used for combat events.
+	first := conds[0]
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	for _, ac := range conds[1:] {
+		s.broadcastToRoom(sess.RoomID, "", &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_ConditionEvent{
+				ConditionEvent: &gamev1.ConditionEvent{
+					TargetUid:     uid,
+					TargetName:    sess.CharName,
+					ConditionId:   ac.Def.ID,
+					ConditionName: ac.Def.Name,
+					Stacks:        int32(ac.Stacks),
+					Applied:       true,
+				},
+			},
+		})
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_ConditionEvent{
+			ConditionEvent: &gamev1.ConditionEvent{
+				TargetUid:     uid,
+				TargetName:    sess.CharName,
+				ConditionId:   first.Def.ID,
+				ConditionName: first.Def.Name,
+				Stacks:        int32(first.Stacks),
+				Applied:       true,
+			},
+		},
 	}, nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -14,6 +15,22 @@ import (
 )
 
 const testRoundDuration = 200 * time.Millisecond
+
+// makeTestConditionRegistry constructs a condition.Registry with the standard PF2E conditions
+// needed for combat tests.
+//
+// Postcondition: Returns a non-nil Registry containing dying, wounded, stunned, prone,
+// flat_footed, and frightened definitions.
+func makeTestConditionRegistry() *condition.Registry {
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4, RestrictActions: []string{"attack", "strike", "pass"}})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "frightened", Name: "Frightened", DurationType: "rounds", MaxStacks: 4, AttackPenalty: 1, ACPenalty: 1})
+	return reg
+}
 
 // makeCombatHandler constructs a CombatHandler suitable for unit tests.
 // broadcastFn captures all events broadcast to the room.
@@ -25,7 +42,7 @@ func makeCombatHandler(t *testing.T, broadcastFn func(roomID string, events []*g
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry())
 }
 
 // spawnTestNPC creates and registers a live NPC instance in roomID.
@@ -245,6 +262,37 @@ func TestCombatHandler_Strike_Costs2AP(t *testing.T) {
 	}
 	if len(events) == 0 {
 		t.Error("expected non-empty events slice from Strike")
+	}
+}
+
+// TestCombatHandler_Status_NoActiveCombat verifies that Status returns nil, nil
+// when no combat is active in the player's room.
+//
+// Postcondition: Status returns nil conditions and nil error when not in combat.
+func TestCombatHandler_Status_NoActiveCombat(t *testing.T) {
+	h := makeCombatHandler(t, func(roomID string, events []*gamev1.CombatEvent) {})
+	const roomID = "room-status-1"
+	addTestPlayer(t, h.sessions, "player-status-1", roomID)
+
+	conds, err := h.Status("player-status-1")
+	if err != nil {
+		t.Fatalf("Status returned unexpected error: %v", err)
+	}
+	if conds != nil {
+		t.Errorf("expected nil conditions when not in combat; got %v", conds)
+	}
+}
+
+// TestCombatHandler_Status_UnknownPlayer verifies that Status returns an error
+// when the uid is not a registered player.
+//
+// Postcondition: Status returns a non-nil error for unknown uid.
+func TestCombatHandler_Status_UnknownPlayer(t *testing.T) {
+	h := makeCombatHandler(t, func(roomID string, events []*gamev1.CombatEvent) {})
+
+	_, err := h.Status("nonexistent-uid")
+	if err == nil {
+		t.Fatal("expected error for unknown player uid; got nil")
 	}
 }
 
