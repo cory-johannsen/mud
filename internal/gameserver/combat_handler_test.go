@@ -119,6 +119,8 @@ func TestCombatHandler_Attack_QueuesAction(t *testing.T) {
 		t.Fatalf("first Attack: %v", err)
 	}
 
+	// The NPC has 3 AP and consumed 1 (auto-queued attack during combat start), leaving 2 remaining.
+	// AllActionsSubmitted() is therefore false, so no early resolution fires.
 	// Second attack should queue without resolving yet (1 AP used, player has 2 left).
 	events, err := h.Attack("player-2", "Goblin")
 	if err != nil {

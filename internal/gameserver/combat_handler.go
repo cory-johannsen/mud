@@ -92,6 +92,7 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 		return nil, fmt.Errorf("queuing attack: %w", err)
 	}
 
+	// proto has no PASS/ROUND type; ATTACK is the closest available sentinel — client uses Narrative for display
 	confirmEvent := &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 		Attacker:  sess.CharName,
@@ -139,6 +140,7 @@ func (h *CombatHandler) Strike(uid, target string) ([]*gamev1.CombatEvent, error
 		return nil, fmt.Errorf("queuing strike: %w", err)
 	}
 
+	// proto has no PASS/ROUND type; ATTACK is the closest available sentinel — client uses Narrative for display
 	confirmEvent := &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 		Attacker:  sess.CharName,
@@ -178,6 +180,7 @@ func (h *CombatHandler) Pass(uid string) ([]*gamev1.CombatEvent, error) {
 		return nil, fmt.Errorf("queuing pass: %w", err)
 	}
 
+	// proto has no PASS/ROUND type; ATTACK is the closest available sentinel — client uses Narrative for display
 	confirmEvent := &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 		Attacker:  sess.CharName,
@@ -228,6 +231,9 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, error) {
 
 	var events []*gamev1.CombatEvent
 	if playerTotal > npcTotal {
+		// removeCombatant sets CurrentHP=0 (dead) so ResolveRound skips the fleeing player.
+		// Safe: entire Flee path holds combatMu; pending timer callback will no-op
+		// (GetCombat returns false after EndCombat).
 		h.removeCombatant(cbt, uid)
 		if !cbt.HasLivingPlayers() {
 			h.stopTimerLocked(sess.RoomID)
@@ -286,6 +292,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		events = append(events, h.roundEventToProto(re))
 	}
 
+	// proto has no PASS/ROUND type; ATTACK is the closest available sentinel — client uses Narrative for display
 	events = append(events, &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 		Narrative: fmt.Sprintf("Round %d complete.", cbt.Round),
@@ -329,6 +336,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 // Precondition: combatMu is held; sess and inst must be non-nil.
 // Postcondition: combat is registered in the engine; StartRound(3) is called.
 func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc.Instance) (*combat.Combat, []*gamev1.CombatEvent, error) {
+	// Placeholder defaults: AC/Level/StrMod/DexMod will come from character sheet once Stage 7 (inventory) is complete.
 	playerCbt := &combat.Combatant{
 		ID:        sess.UID,
 		Kind:      combat.KindPlayer,
@@ -517,25 +525,16 @@ func (h *CombatHandler) bestNPCCombatant(cbt *combat.Combat) *combat.Combatant {
 }
 
 // removeCombatant sets a combatant's HP to 0, marking them as dead/removed.
+//
+// Setting CurrentHP=0 marks the combatant as dead so ResolveRound skips them
+// in subsequent resolution passes. This is safe because the entire Flee path
+// holds combatMu; any pending timer callback will no-op because GetCombat
+// returns false after EndCombat is called.
 func (h *CombatHandler) removeCombatant(cbt *combat.Combat, id string) {
 	for _, c := range cbt.Combatants {
 		if c.ID == id {
 			c.CurrentHP = 0
 			return
 		}
-	}
-}
-
-// attackNarrative formats a human-readable attack outcome string.
-func (h *CombatHandler) attackNarrative(attacker, target string, result combat.AttackResult) string {
-	switch result.Outcome {
-	case combat.CritSuccess:
-		return fmt.Sprintf("%s lands a devastating blow on %s for %d damage!", attacker, target, result.EffectiveDamage())
-	case combat.Success:
-		return fmt.Sprintf("%s hits %s for %d damage.", attacker, target, result.EffectiveDamage())
-	case combat.Failure:
-		return fmt.Sprintf("%s swings at %s but misses.", attacker, target)
-	default:
-		return fmt.Sprintf("%s fumbles their attack against %s.", attacker, target)
 	}
 }
