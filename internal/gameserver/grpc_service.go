@@ -177,6 +177,22 @@ func (s *GameServiceServer) commandLoop(ctx context.Context, uid string, stream 
 			return fmt.Errorf("receiving message: %w", err)
 		}
 
+		// status is a personal query: all ConditionEvents are sent directly on the stream.
+		if _, ok := msg.Payload.(*gamev1.ClientMessage_Status); ok {
+			if err := s.handleStatus(uid, msg.RequestId, stream); err != nil {
+				errEvt := &gamev1.ServerEvent{
+					RequestId: msg.RequestId,
+					Payload: &gamev1.ServerEvent_Error{
+						Error: &gamev1.ErrorEvent{Message: err.Error()},
+					},
+				}
+				if sendErr := stream.Send(errEvt); sendErr != nil {
+					return fmt.Errorf("sending error: %w", sendErr)
+				}
+			}
+			continue
+		}
+
 		resp, err := s.dispatch(uid, msg)
 		if err == errQuit {
 			// Send Disconnected event then exit cleanly.
@@ -236,8 +252,6 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handlePass(uid)
 	case *gamev1.ClientMessage_Strike:
 		return s.handleStrike(uid, p.Strike)
-	case *gamev1.ClientMessage_Status:
-		return s.handleStatus(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -521,34 +535,34 @@ func (s *GameServiceServer) handleStrike(uid string, req *gamev1.StrikeRequest) 
 	}, nil
 }
 
-// handleStatus returns the active conditions for uid as a ConditionEvent ServerEvent.
-// If no combat is active or there are no conditions, returns an empty sentinel ConditionEvent.
+// handleStatus sends the active conditions for uid directly on stream.
+// One ConditionEvent is sent per active condition. If no conditions are active,
+// a single empty sentinel ConditionEvent is sent to signal "no conditions".
+// All events are sent only to the requesting player — no room broadcast occurs.
 //
-// Precondition: uid must be a valid connected player.
-// Postcondition: Returns a ServerEvent wrapping zero or more condition states, or an error.
-func (s *GameServiceServer) handleStatus(uid string) (*gamev1.ServerEvent, error) {
+// Precondition: uid must be a valid connected player; stream must be non-nil.
+// Postcondition: One or more ConditionEvents are sent on stream; returns nil on success.
+func (s *GameServiceServer) handleStatus(uid string, requestID string, stream gamev1.GameService_SessionServer) error {
 	conds, err := s.combatH.Status(uid)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if len(conds) == 0 {
-		// Return empty sentinel so the client knows no conditions are active.
-		return &gamev1.ServerEvent{
+		// Send empty sentinel so the client knows no conditions are active.
+		return stream.Send(&gamev1.ServerEvent{
+			RequestId: requestID,
 			Payload: &gamev1.ServerEvent_ConditionEvent{
 				ConditionEvent: &gamev1.ConditionEvent{},
 			},
-		}, nil
+		})
 	}
-	// Return the first condition; additional conditions are broadcast via individual events.
-	// For simplicity, encode all conditions as separate events by returning only the first and
-	// broadcasting the rest, matching the pattern used for combat events.
-	first := conds[0]
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
-		return nil, fmt.Errorf("player %q not found", uid)
+		return fmt.Errorf("player %q not found", uid)
 	}
-	for _, ac := range conds[1:] {
-		s.broadcastToRoom(sess.RoomID, "", &gamev1.ServerEvent{
+	for _, ac := range conds {
+		if err := stream.Send(&gamev1.ServerEvent{
+			RequestId: requestID,
 			Payload: &gamev1.ServerEvent_ConditionEvent{
 				ConditionEvent: &gamev1.ConditionEvent{
 					TargetUid:     uid,
@@ -559,20 +573,11 @@ func (s *GameServiceServer) handleStatus(uid string) (*gamev1.ServerEvent, error
 					Applied:       true,
 				},
 			},
-		})
+		}); err != nil {
+			return fmt.Errorf("sending condition event: %w", err)
+		}
 	}
-	return &gamev1.ServerEvent{
-		Payload: &gamev1.ServerEvent_ConditionEvent{
-			ConditionEvent: &gamev1.ConditionEvent{
-				TargetUid:     uid,
-				TargetName:    sess.CharName,
-				ConditionId:   first.Def.ID,
-				ConditionName: first.Def.Name,
-				Stacks:        int32(first.Stacks),
-				Applied:       true,
-			},
-		},
-	}, nil
+	return nil
 }
 
 // cleanupPlayer removes a player from the session manager, persists character state, and broadcasts departure.
