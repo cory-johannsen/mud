@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"pgregory.net/rapid"
 )
 
 // makeTwoCombatantCombat returns a Combat with two living combatants for unit testing.
@@ -125,12 +126,14 @@ func TestCombat_AllActionsSubmitted_True(t *testing.T) {
 
 // TestPropertyCombat_RoundMonotonicallyIncreases verifies Round == N after N calls to StartRound.
 func TestPropertyCombat_RoundMonotonicallyIncreases(t *testing.T) {
-	const iterations = 50
-	c := makeTwoCombatantCombat(t)
-	for i := 1; i <= iterations; i++ {
-		c.StartRound(3)
-		if c.Round != i {
-			t.Errorf("after %d StartRound calls: Round = %d, want %d", i, c.Round, i)
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 20).Draw(rt, "rounds")
+		cbt := makeTwoCombatantCombat(t)
+		for i := 1; i <= n; i++ {
+			cbt.StartRound(3)
 		}
-	}
+		if cbt.Round != n {
+			rt.Errorf("after %d StartRound calls: Round = %d, want %d", n, cbt.Round, n)
+		}
+	})
 }
