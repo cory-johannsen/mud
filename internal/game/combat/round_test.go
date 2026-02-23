@@ -211,6 +211,51 @@ func TestResolveRound_DeadCombatantSkipped(t *testing.T) {
 	}
 }
 
+// TestResolveRound_Strike_TargetDeadAtStart: target HP is 0 before round resolves;
+// both strike events for the actor have nil AttackResult and "nothing" in Narrative.
+func TestResolveRound_Strike_TargetDeadAtStart(t *testing.T) {
+	cbt := makeRoundCombat(t)
+	// Kill Ganger before the round resolves.
+	cbt.Combatants[1].CurrentHP = 0
+
+	src := fixedSrc{val: 10}
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+
+	events := combat.ResolveRound(cbt, src, noopUpdater)
+
+	var strikeEvents []combat.RoundEvent
+	for _, ev := range events {
+		if ev.ActorID == "p1" && ev.ActionType == combat.ActionStrike {
+			strikeEvents = append(strikeEvents, ev)
+		}
+	}
+	if len(strikeEvents) != 2 {
+		t.Fatalf("expected 2 ActionStrike events for p1 when target is dead at start, got %d", len(strikeEvents))
+	}
+	for i, ev := range strikeEvents {
+		if ev.AttackResult != nil {
+			t.Errorf("strike event[%d]: expected nil AttackResult when target dead at start, got non-nil", i)
+		}
+		if !containsSubstring(ev.Narrative, "nothing") {
+			t.Errorf("strike event[%d]: expected \"nothing\" in Narrative, got %q", i, ev.Narrative)
+		}
+	}
+}
+
+func containsSubstring(s, sub string) bool {
+	return len(s) >= len(sub) && (s == sub || len(sub) == 0 || func() bool {
+		for i := 0; i <= len(s)-len(sub); i++ {
+			if s[i:i+len(sub)] == sub {
+				return true
+			}
+		}
+		return false
+	}())
+}
+
 // TestPropertyResolveRound_DamageNeverExceedsStartingHP: target HP never goes below 0.
 func TestPropertyResolveRound_DamageNeverExceedsStartingHP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

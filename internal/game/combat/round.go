@@ -30,6 +30,8 @@ func findCombatantByName(cbt *Combat, name string) *Combatant {
 //
 // Dead combatants are skipped entirely (no events).
 // If a target is dead before a follow-up strike hit, emit a narrative "hit nothing" event.
+// If the ActionStrike target is nil or already dead at the start of the strike, both the first and
+// second attack produce "hit nothing" narrative events with nil AttackResult.
 //
 // targetUpdater(id string, hp int) is called after each damage application; may be nil (no-op).
 //
