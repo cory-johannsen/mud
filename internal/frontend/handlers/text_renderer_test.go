@@ -154,3 +154,47 @@ func TestRenderRoundEndEvent(t *testing.T) {
 	assert.Contains(t, result, "Round 2")
 	assert.Contains(t, result, "resolved")
 }
+
+func TestRenderConditionEvent_Applied(t *testing.T) {
+	ce := &gamev1.ConditionEvent{
+		TargetName:    "Alice",
+		ConditionName: "Prone",
+		ConditionId:   "prone",
+		Stacks:        1,
+		Applied:       true,
+	}
+	result := RenderConditionEvent(ce)
+	assert.Contains(t, result, "Alice")
+	assert.Contains(t, result, "Prone")
+	assert.Contains(t, result, "CONDITION")
+}
+
+func TestRenderConditionEvent_Removed(t *testing.T) {
+	ce := &gamev1.ConditionEvent{
+		TargetName:    "Alice",
+		ConditionName: "Frightened",
+		ConditionId:   "frightened",
+		Stacks:        0,
+		Applied:       false,
+	}
+	result := RenderConditionEvent(ce)
+	assert.Contains(t, result, "fades")
+	assert.Contains(t, result, "Alice")
+}
+
+func TestRenderStatus_Empty(t *testing.T) {
+	result := RenderStatus(nil)
+	assert.Contains(t, result, "No active conditions")
+}
+
+func TestRenderStatus_WithConditions(t *testing.T) {
+	conds := []*gamev1.ConditionInfo{
+		{Id: "frightened", Name: "Frightened", Stacks: 2, DurationRemaining: 3},
+		{Id: "wounded", Name: "Wounded", Stacks: 1, DurationRemaining: -1},
+	}
+	result := RenderStatus(conds)
+	assert.Contains(t, result, "Frightened")
+	assert.Contains(t, result, "Wounded")
+	assert.Contains(t, result, "permanent")
+	assert.Contains(t, result, "3 rounds")
+}

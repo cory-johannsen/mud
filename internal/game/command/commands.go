@@ -25,6 +25,7 @@ const (
 	HandlerFlee    = "flee"
 	HandlerPass    = "pass"
 	HandlerStrike  = "strike"
+	HandlerStatus  = "status"
 )
 
 // Command defines a player-invocable command.
@@ -64,6 +65,7 @@ func BuiltinCommands() []Command {
 		{Name: "flee", Aliases: []string{"run"}, Help: "Attempt to flee combat", Category: CategoryWorld, Handler: HandlerFlee},
 		{Name: "pass", Aliases: []string{"p"}, Help: "Forfeit remaining action points this round.", Category: CategoryCombat, Handler: HandlerPass},
 		{Name: "strike", Aliases: []string{"st"}, Help: "Full attack routine (2 AP, two hits with MAP) against target.", Category: CategoryCombat, Handler: HandlerStrike},
+		{Name: "status", Aliases: []string{"cond"}, Help: "Show your active conditions.", Category: CategoryCombat, Handler: HandlerStatus},
 
 		// Communication commands
 		{Name: "say", Aliases: nil, Help: "Say something to the room", Category: CategoryCommunication, Handler: HandlerSay},

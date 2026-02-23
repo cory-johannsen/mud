@@ -247,6 +247,12 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				},
 			}
 
+		case command.HandlerStatus:
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload:   &gamev1.ClientMessage_Status{Status: &gamev1.StatusRequest{}},
+			}
+
 		case command.HandlerHelp:
 			h.showGameHelp(conn, registry)
 			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
@@ -318,6 +324,16 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderRoundEndEvent(p.RoundEnd)
 		case *gamev1.ServerEvent_NpcView:
 			text = RenderNpcView(p.NpcView)
+		case *gamev1.ServerEvent_ConditionEvent:
+			ce := p.ConditionEvent
+			if ce.ConditionId == "" {
+				// empty sentinel — no active conditions
+				_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "No active conditions."))
+				prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName)
+				_ = conn.WritePrompt(prompt)
+				continue
+			}
+			text = RenderConditionEvent(ce)
 		case *gamev1.ServerEvent_Disconnected:
 			_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason))
 			return
