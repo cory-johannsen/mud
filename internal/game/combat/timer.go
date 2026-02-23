@@ -33,19 +33,25 @@ func NewRoundTimer(duration time.Duration, onFire func()) *RoundTimer {
 
 // Reset cancels the current timer and starts a new one with the provided duration and callback.
 //
+// Precondition: duration > 0; onFire must not be nil.
 // Postcondition: onFire will be called after duration from now unless Stop is called first.
 func (rt *RoundTimer) Reset(duration time.Duration, onFire func()) {
 	rt.mu.Lock()
 	rt.stopped = false
 	rt.timer.Stop()
-	rt.timer = time.AfterFunc(duration, func() {
+	rt.mu.Unlock()
+
+	newTimer := time.AfterFunc(duration, func() {
 		rt.mu.Lock()
-		stopped := rt.stopped
+		s := rt.stopped
 		rt.mu.Unlock()
-		if !stopped {
+		if !s {
 			onFire()
 		}
 	})
+
+	rt.mu.Lock()
+	rt.timer = newTimer
 	rt.mu.Unlock()
 }
 
