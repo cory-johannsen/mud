@@ -29,6 +29,7 @@ message ClientMessage {
     FleeRequest   flee   = 12;
     PassRequest   pass   = 13;
     StrikeRequest strike = 14;
+    StatusRequest status = 15;
   }
 }
 
@@ -48,6 +49,7 @@ message ServerEvent {
     CombatEvent combat_event = 11;
     RoundStartEvent round_start = 12;
     RoundEndEvent   round_end   = 13;
+    ConditionEvent  condition_event = 14;
   }
 }
 
@@ -95,6 +97,7 @@ message RoomView {
   repeated ExitInfo exits = 4;
   repeated string players = 5;
   repeated NpcInfo npcs = 6;
+  repeated ConditionInfo active_conditions = 7;
 }
 
 // ExitInfo describes a single exit from a room.
@@ -242,4 +245,25 @@ enum CombatEventType {
   COMBAT_EVENT_TYPE_DEATH        = 3;
   COMBAT_EVENT_TYPE_FLEE         = 4;
   COMBAT_EVENT_TYPE_END          = 5;
+}
+
+// StatusRequest asks the server to return the player's active conditions.
+message StatusRequest {}
+
+// ConditionEvent reports a condition being applied to or removed from an entity.
+message ConditionEvent {
+  string target_uid     = 1;
+  string target_name    = 2;
+  string condition_id   = 3;
+  string condition_name = 4;
+  int32  stacks         = 5;
+  bool   applied        = 6;  // true = applied/advanced, false = removed/expired
+}
+
+// ConditionInfo describes one active condition on a combatant.
+message ConditionInfo {
+  string id                 = 1;
+  string name               = 2;
+  int32  stacks             = 3;
+  int32  duration_remaining = 4;  // -1 = permanent or until_save
 }

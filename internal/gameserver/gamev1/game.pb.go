@@ -199,6 +199,7 @@ type ClientMessage struct {
 	//	*ClientMessage_Flee
 	//	*ClientMessage_Pass
 	//	*ClientMessage_Strike
+	//	*ClientMessage_Status
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -365,6 +366,15 @@ func (x *ClientMessage) GetStrike() *StrikeRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetStatus() *StatusRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Status); ok {
+			return x.Status
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -421,6 +431,10 @@ type ClientMessage_Strike struct {
 	Strike *StrikeRequest `protobuf:"bytes,14,opt,name=strike,proto3,oneof"`
 }
 
+type ClientMessage_Status struct {
+	Status *StatusRequest `protobuf:"bytes,15,opt,name=status,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -447,6 +461,8 @@ func (*ClientMessage_Pass) isClientMessage_Payload() {}
 
 func (*ClientMessage_Strike) isClientMessage_Payload() {}
 
+func (*ClientMessage_Status) isClientMessage_Payload() {}
+
 // ServerEvent wraps all server-to-client events.
 type ServerEvent struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
@@ -465,6 +481,7 @@ type ServerEvent struct {
 	//	*ServerEvent_CombatEvent
 	//	*ServerEvent_RoundStart
 	//	*ServerEvent_RoundEnd
+	//	*ServerEvent_ConditionEvent
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -622,6 +639,15 @@ func (x *ServerEvent) GetRoundEnd() *RoundEndEvent {
 	return nil
 }
 
+func (x *ServerEvent) GetConditionEvent() *ConditionEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_ConditionEvent); ok {
+			return x.ConditionEvent
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -674,6 +700,10 @@ type ServerEvent_RoundEnd struct {
 	RoundEnd *RoundEndEvent `protobuf:"bytes,13,opt,name=round_end,json=roundEnd,proto3,oneof"`
 }
 
+type ServerEvent_ConditionEvent struct {
+	ConditionEvent *ConditionEvent `protobuf:"bytes,14,opt,name=condition_event,json=conditionEvent,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -697,6 +727,8 @@ func (*ServerEvent_CombatEvent) isServerEvent_Payload() {}
 func (*ServerEvent_RoundStart) isServerEvent_Payload() {}
 
 func (*ServerEvent_RoundEnd) isServerEvent_Payload() {}
+
+func (*ServerEvent_ConditionEvent) isServerEvent_Payload() {}
 
 // JoinWorldRequest is sent by the client to enter the game world after authentication.
 type JoinWorldRequest struct {
@@ -1060,15 +1092,16 @@ func (*QuitRequest) Descriptor() ([]byte, []int) {
 
 // RoomView describes the player's current room.
 type RoomView struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RoomId        string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Exits         []*ExitInfo            `protobuf:"bytes,4,rep,name=exits,proto3" json:"exits,omitempty"`
-	Players       []string               `protobuf:"bytes,5,rep,name=players,proto3" json:"players,omitempty"`
-	Npcs          []*NpcInfo             `protobuf:"bytes,6,rep,name=npcs,proto3" json:"npcs,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	RoomId           string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	Title            string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description      string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Exits            []*ExitInfo            `protobuf:"bytes,4,rep,name=exits,proto3" json:"exits,omitempty"`
+	Players          []string               `protobuf:"bytes,5,rep,name=players,proto3" json:"players,omitempty"`
+	Npcs             []*NpcInfo             `protobuf:"bytes,6,rep,name=npcs,proto3" json:"npcs,omitempty"`
+	ActiveConditions []*ConditionInfo       `protobuf:"bytes,7,rep,name=active_conditions,json=activeConditions,proto3" json:"active_conditions,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *RoomView) Reset() {
@@ -1139,6 +1172,13 @@ func (x *RoomView) GetPlayers() []string {
 func (x *RoomView) GetNpcs() []*NpcInfo {
 	if x != nil {
 		return x.Npcs
+	}
+	return nil
+}
+
+func (x *RoomView) GetActiveConditions() []*ConditionInfo {
+	if x != nil {
+		return x.ActiveConditions
 	}
 	return nil
 }
@@ -2233,11 +2273,202 @@ func (x *CombatEvent) GetNarrative() string {
 	return ""
 }
 
+// StatusRequest asks the server to return the player's active conditions.
+type StatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StatusRequest) Reset() {
+	*x = StatusRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StatusRequest) ProtoMessage() {}
+
+func (x *StatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StatusRequest.ProtoReflect.Descriptor instead.
+func (*StatusRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{29}
+}
+
+// ConditionEvent reports a condition being applied to or removed from an entity.
+type ConditionEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TargetUid     string                 `protobuf:"bytes,1,opt,name=target_uid,json=targetUid,proto3" json:"target_uid,omitempty"`
+	TargetName    string                 `protobuf:"bytes,2,opt,name=target_name,json=targetName,proto3" json:"target_name,omitempty"`
+	ConditionId   string                 `protobuf:"bytes,3,opt,name=condition_id,json=conditionId,proto3" json:"condition_id,omitempty"`
+	ConditionName string                 `protobuf:"bytes,4,opt,name=condition_name,json=conditionName,proto3" json:"condition_name,omitempty"`
+	Stacks        int32                  `protobuf:"varint,5,opt,name=stacks,proto3" json:"stacks,omitempty"`
+	Applied       bool                   `protobuf:"varint,6,opt,name=applied,proto3" json:"applied,omitempty"` // true = applied/advanced, false = removed/expired
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConditionEvent) Reset() {
+	*x = ConditionEvent{}
+	mi := &file_game_v1_game_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConditionEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConditionEvent) ProtoMessage() {}
+
+func (x *ConditionEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConditionEvent.ProtoReflect.Descriptor instead.
+func (*ConditionEvent) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ConditionEvent) GetTargetUid() string {
+	if x != nil {
+		return x.TargetUid
+	}
+	return ""
+}
+
+func (x *ConditionEvent) GetTargetName() string {
+	if x != nil {
+		return x.TargetName
+	}
+	return ""
+}
+
+func (x *ConditionEvent) GetConditionId() string {
+	if x != nil {
+		return x.ConditionId
+	}
+	return ""
+}
+
+func (x *ConditionEvent) GetConditionName() string {
+	if x != nil {
+		return x.ConditionName
+	}
+	return ""
+}
+
+func (x *ConditionEvent) GetStacks() int32 {
+	if x != nil {
+		return x.Stacks
+	}
+	return 0
+}
+
+func (x *ConditionEvent) GetApplied() bool {
+	if x != nil {
+		return x.Applied
+	}
+	return false
+}
+
+// ConditionInfo describes one active condition on a combatant.
+type ConditionInfo struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name              string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Stacks            int32                  `protobuf:"varint,3,opt,name=stacks,proto3" json:"stacks,omitempty"`
+	DurationRemaining int32                  `protobuf:"varint,4,opt,name=duration_remaining,json=durationRemaining,proto3" json:"duration_remaining,omitempty"` // -1 = permanent or until_save
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ConditionInfo) Reset() {
+	*x = ConditionInfo{}
+	mi := &file_game_v1_game_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConditionInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConditionInfo) ProtoMessage() {}
+
+func (x *ConditionInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConditionInfo.ProtoReflect.Descriptor instead.
+func (*ConditionInfo) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ConditionInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ConditionInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ConditionInfo) GetStacks() int32 {
+	if x != nil {
+		return x.Stacks
+	}
+	return 0
+}
+
+func (x *ConditionInfo) GetDurationRemaining() int32 {
+	if x != nil {
+		return x.DurationRemaining
+	}
+	return 0
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\x9a\x05\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xcc\x05\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -2255,8 +2486,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x06attack\x18\v \x01(\v2\x16.game.v1.AttackRequestH\x00R\x06attack\x12*\n" +
 	"\x04flee\x18\f \x01(\v2\x14.game.v1.FleeRequestH\x00R\x04flee\x12*\n" +
 	"\x04pass\x18\r \x01(\v2\x14.game.v1.PassRequestH\x00R\x04pass\x120\n" +
-	"\x06strike\x18\x0e \x01(\v2\x16.game.v1.StrikeRequestH\x00R\x06strikeB\t\n" +
-	"\apayload\"\xc4\x05\n" +
+	"\x06strike\x18\x0e \x01(\v2\x16.game.v1.StrikeRequestH\x00R\x06strike\x120\n" +
+	"\x06status\x18\x0f \x01(\v2\x16.game.v1.StatusRequestH\x00R\x06statusB\t\n" +
+	"\apayload\"\x88\x06\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -2275,7 +2507,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\fcombat_event\x18\v \x01(\v2\x14.game.v1.CombatEventH\x00R\vcombatEvent\x12;\n" +
 	"\vround_start\x18\f \x01(\v2\x18.game.v1.RoundStartEventH\x00R\n" +
 	"roundStart\x125\n" +
-	"\tround_end\x18\r \x01(\v2\x16.game.v1.RoundEndEventH\x00R\broundEndB\t\n" +
+	"\tround_end\x18\r \x01(\v2\x16.game.v1.RoundEndEventH\x00R\broundEnd\x12B\n" +
+	"\x0fcondition_event\x18\x0e \x01(\v2\x17.game.v1.ConditionEventH\x00R\x0econditionEventB\t\n" +
 	"\apayload\"\xa9\x01\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
@@ -2295,14 +2528,15 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"WhoRequest\"\x0e\n" +
 	"\fExitsRequest\"\r\n" +
-	"\vQuitRequest\"\xc4\x01\n" +
+	"\vQuitRequest\"\x89\x02\n" +
 	"\bRoomView\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12'\n" +
 	"\x05exits\x18\x04 \x03(\v2\x11.game.v1.ExitInfoR\x05exits\x12\x18\n" +
 	"\aplayers\x18\x05 \x03(\tR\aplayers\x12$\n" +
-	"\x04npcs\x18\x06 \x03(\v2\x10.game.v1.NpcInfoR\x04npcs\"~\n" +
+	"\x04npcs\x18\x06 \x03(\v2\x10.game.v1.NpcInfoR\x04npcs\x12C\n" +
+	"\x11active_conditions\x18\a \x03(\v2\x16.game.v1.ConditionInfoR\x10activeConditions\"~\n" +
 	"\bExitInfo\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\x12$\n" +
 	"\x0etarget_room_id\x18\x02 \x01(\tR\ftargetRoomId\x12\x16\n" +
@@ -2385,7 +2619,22 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\aoutcome\x18\x06 \x01(\tR\aoutcome\x12\x16\n" +
 	"\x06damage\x18\a \x01(\x05R\x06damage\x12\x1b\n" +
 	"\ttarget_hp\x18\b \x01(\x05R\btargetHp\x12\x1c\n" +
-	"\tnarrative\x18\t \x01(\tR\tnarrative*Y\n" +
+	"\tnarrative\x18\t \x01(\tR\tnarrative\"\x0f\n" +
+	"\rStatusRequest\"\xcc\x01\n" +
+	"\x0eConditionEvent\x12\x1d\n" +
+	"\n" +
+	"target_uid\x18\x01 \x01(\tR\ttargetUid\x12\x1f\n" +
+	"\vtarget_name\x18\x02 \x01(\tR\n" +
+	"targetName\x12!\n" +
+	"\fcondition_id\x18\x03 \x01(\tR\vconditionId\x12%\n" +
+	"\x0econdition_name\x18\x04 \x01(\tR\rconditionName\x12\x16\n" +
+	"\x06stacks\x18\x05 \x01(\x05R\x06stacks\x12\x18\n" +
+	"\aapplied\x18\x06 \x01(\bR\aapplied\"z\n" +
+	"\rConditionInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
+	"\x06stacks\x18\x03 \x01(\x05R\x06stacks\x12-\n" +
+	"\x12duration_remaining\x18\x04 \x01(\x05R\x11durationRemaining*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -2417,7 +2666,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),         // 0: game.v1.MessageType
 	(RoomEventType)(0),       // 1: game.v1.RoomEventType
@@ -2451,6 +2700,9 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*RoundStartEvent)(nil),  // 29: game.v1.RoundStartEvent
 	(*RoundEndEvent)(nil),    // 30: game.v1.RoundEndEvent
 	(*CombatEvent)(nil),      // 31: game.v1.CombatEvent
+	(*StatusRequest)(nil),    // 32: game.v1.StatusRequest
+	(*ConditionEvent)(nil),   // 33: game.v1.ConditionEvent
+	(*ConditionInfo)(nil),    // 34: game.v1.ConditionInfo
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	5,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -2466,31 +2718,34 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	26, // 10: game.v1.ClientMessage.flee:type_name -> game.v1.FleeRequest
 	27, // 11: game.v1.ClientMessage.pass:type_name -> game.v1.PassRequest
 	28, // 12: game.v1.ClientMessage.strike:type_name -> game.v1.StrikeRequest
-	13, // 13: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	15, // 14: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	16, // 15: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	17, // 16: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	18, // 17: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	19, // 18: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	20, // 19: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	21, // 20: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	24, // 21: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	31, // 22: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	29, // 23: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	30, // 24: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	14, // 25: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	22, // 26: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	0,  // 27: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,  // 28: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	14, // 29: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	2,  // 30: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	3,  // 31: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	4,  // 32: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	32, // [32:33] is the sub-list for method output_type
-	31, // [31:32] is the sub-list for method input_type
-	31, // [31:31] is the sub-list for extension type_name
-	31, // [31:31] is the sub-list for extension extendee
-	0,  // [0:31] is the sub-list for field type_name
+	32, // 13: game.v1.ClientMessage.status:type_name -> game.v1.StatusRequest
+	13, // 14: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	15, // 15: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	16, // 16: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	17, // 17: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	18, // 18: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	19, // 19: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	20, // 20: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	21, // 21: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	24, // 22: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	31, // 23: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	29, // 24: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	30, // 25: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	33, // 26: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	14, // 27: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	22, // 28: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	34, // 29: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	0,  // 30: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,  // 31: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	14, // 32: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	2,  // 33: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	3,  // 34: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	4,  // 35: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	35, // [35:36] is the sub-list for method output_type
+	34, // [34:35] is the sub-list for method input_type
+	34, // [34:34] is the sub-list for extension type_name
+	34, // [34:34] is the sub-list for extension extendee
+	0,  // [0:34] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -2512,6 +2767,7 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_Flee)(nil),
 		(*ClientMessage_Pass)(nil),
 		(*ClientMessage_Strike)(nil),
+		(*ClientMessage_Status)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -2526,6 +2782,7 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_CombatEvent)(nil),
 		(*ServerEvent_RoundStart)(nil),
 		(*ServerEvent_RoundEnd)(nil),
+		(*ServerEvent_ConditionEvent)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -2533,7 +2790,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   29,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
