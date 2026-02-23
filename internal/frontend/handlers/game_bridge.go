@@ -215,6 +215,25 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				Payload:   &gamev1.ClientMessage_Flee{Flee: &gamev1.FleeRequest{}},
 			}
 
+		case command.HandlerPass:
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload:   &gamev1.ClientMessage_Pass{Pass: &gamev1.PassRequest{}},
+			}
+
+		case command.HandlerStrike:
+			if len(parsed.Args) == 0 {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: strike <target>"))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_Strike{
+					Strike: &gamev1.StrikeRequest{Target: strings.Join(parsed.Args, " ")},
+				},
+			}
+
 		case command.HandlerExamine:
 			if parsed.RawArgs == "" {
 				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Examine what?"))
@@ -293,6 +312,10 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderError(p.Error)
 		case *gamev1.ServerEvent_CombatEvent:
 			text = RenderCombatEvent(p.CombatEvent)
+		case *gamev1.ServerEvent_RoundStart:
+			text = RenderRoundStartEvent(p.RoundStart)
+		case *gamev1.ServerEvent_RoundEnd:
+			text = RenderRoundEndEvent(p.RoundEnd)
 		case *gamev1.ServerEvent_NpcView:
 			text = RenderNpcView(p.NpcView)
 		case *gamev1.ServerEvent_Disconnected:

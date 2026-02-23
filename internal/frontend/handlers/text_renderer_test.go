@@ -134,3 +134,23 @@ func TestRenderError(t *testing.T) {
 	stripped := telnet.StripANSI(RenderError(ee))
 	assert.Equal(t, "something went wrong", stripped)
 }
+
+func TestRenderRoundStartEvent(t *testing.T) {
+	evt := &gamev1.RoundStartEvent{
+		Round: 1, ActionsPerTurn: 3, DurationMs: 6000,
+		TurnOrder: []string{"Alice", "Ganger"},
+	}
+	result := RenderRoundStartEvent(evt)
+	assert.Contains(t, result, "Round 1")
+	assert.Contains(t, result, "Actions: 3")
+	assert.Contains(t, result, "6s")
+	assert.Contains(t, result, "Alice")
+	assert.Contains(t, result, "Ganger")
+}
+
+func TestRenderRoundEndEvent(t *testing.T) {
+	evt := &gamev1.RoundEndEvent{Round: 2}
+	result := RenderRoundEndEvent(evt)
+	assert.Contains(t, result, "Round 2")
+	assert.Contains(t, result, "resolved")
+}

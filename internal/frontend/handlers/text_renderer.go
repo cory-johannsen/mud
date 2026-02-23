@@ -126,6 +126,25 @@ func RenderError(ee *gamev1.ErrorEvent) string {
 	return telnet.Colorize(telnet.Red, ee.Message)
 }
 
+// RenderRoundStartEvent formats a round-start combat banner.
+//
+// Postcondition: Returns an ANSI-colored multiline string showing round number, action count, timer, and turn order.
+func RenderRoundStartEvent(rs *gamev1.RoundStartEvent) string {
+	durationSec := rs.DurationMs / 1000
+	order := strings.Join(rs.TurnOrder, ", ")
+	return telnet.Colorize(telnet.BrightYellow,
+		fmt.Sprintf("=== Round %d begins. Actions: %d. [%ds] ===", rs.Round, rs.ActionsPerTurn, durationSec),
+	) + "\r\n" +
+		telnet.Colorize(telnet.White, "Turn order: "+order) + "\r\n"
+}
+
+// RenderRoundEndEvent formats a round-end combat banner.
+//
+// Postcondition: Returns an ANSI-colored string indicating round resolution.
+func RenderRoundEndEvent(re *gamev1.RoundEndEvent) string {
+	return telnet.Colorize(telnet.BrightYellow, fmt.Sprintf("=== Round %d resolved. ===", re.Round)) + "\r\n"
+}
+
 // RenderCombatEvent formats a CombatEvent as colored Telnet text.
 func RenderCombatEvent(ce *gamev1.CombatEvent) string {
 	switch ce.Type {
