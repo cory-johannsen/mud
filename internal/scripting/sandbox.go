@@ -5,28 +5,59 @@ package scripting
 
 import (
 	"context"
-	"time"
+	"sync/atomic"
 
 	lua "github.com/yuin/gopher-lua"
 )
 
-// DefaultScriptTimeout is the maximum wall-clock duration per script execution
-// when no zone-specific override is configured (SCRIPT-3, SCRIPT-4).
-const DefaultScriptTimeout = 5 * time.Second
+// DefaultInstructionLimit is the maximum number of Lua opcodes allowed per
+// script execution when no zone-specific override is configured (SCRIPT-3, SCRIPT-4).
+const DefaultInstructionLimit = 100_000
+
+// countingContext is a context.Context that cancels itself after Done() has
+// been called limit times. GopherLua's mainLoopWithContext calls Done() once
+// per opcode, making this an exact instruction-count limit.
+type countingContext struct {
+	context.Context
+	cancel    context.CancelFunc
+	remaining *atomic.Int64
+}
+
+// Done returns the underlying cancellation channel. Each call decrements the
+// remaining counter; when it reaches zero the cancel function fires,
+// terminating the Lua VM on the next opcode boundary.
+func (c *countingContext) Done() <-chan struct{} {
+	if c.remaining.Add(-1) <= 0 {
+		c.cancel()
+	}
+	return c.Context.Done()
+}
+
+// newCountingContext returns a context that cancels after limit calls to Done().
+// Precondition: limit > 0.
+func newCountingContext(limit int) (context.Context, context.CancelFunc) {
+	base, cancel := context.WithCancel(context.Background())
+	rem := &atomic.Int64{}
+	rem.Store(int64(limit))
+	return &countingContext{
+		Context:   base,
+		cancel:    cancel,
+		remaining: rem,
+	}, cancel
+}
 
 // NewSandboxedState creates a GopherLua LState with:
 //   - Only safe stdlib loaded: base, table, string, math
 //   - Dangerous globals removed: dofile, loadfile, load, collectgarbage, require
-//   - Execution timeout enforced via context deadline cancellation
+//   - Execution limited to at most instLimit Lua opcodes (deterministic)
 //
-// Precondition: instLimit >= 0; 0 uses DefaultScriptTimeout; values > 0 set a
-// deadline of instLimit milliseconds from the time of creation.
+// Precondition: instLimit >= 0; 0 uses DefaultInstructionLimit.
 // Postcondition: Returns a non-nil LState ready for RegisterModules and DoFile.
 // The caller owns the LState and must call L.Close() when done.
 func NewSandboxedState(instLimit int) *lua.LState {
-	timeout := DefaultScriptTimeout
-	if instLimit > 0 {
-		timeout = time.Duration(instLimit) * time.Millisecond
+	limit := instLimit
+	if limit <= 0 {
+		limit = DefaultInstructionLimit
 	}
 
 	L := lua.NewState(lua.Options{SkipOpenLibs: true})
@@ -42,16 +73,11 @@ func NewSandboxedState(instLimit int) *lua.LState {
 		L.SetGlobal(name, lua.LNil)
 	}
 
-	// Enforce execution timeout via context deadline (SCRIPT-3).
-	// The context deadline fires automatically after timeout; no explicit cancel
-	// call is required because the timer goroutine is released when the deadline
-	// elapses. Callers that need early cancellation should call RemoveContext and
-	// set their own context before each DoString/DoFile invocation.
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	// Enforce deterministic instruction-count limit (SCRIPT-3).
+	// countingContext.Done() is called by GopherLua's mainLoopWithContext on
+	// every opcode; the context cancels itself after exactly limit opcodes.
+	ctx, _ := newCountingContext(limit) //nolint:govet // cancel fires automatically when limit is reached
 	L.SetContext(ctx)
-	// Store cancel in the state's context so it is reachable for cleanup.
-	// We intentionally invoke cancel when the LState is closed by wrapping Close.
-	_ = cancel // linter: cancel fires automatically at deadline; early cleanup not required here
 
 	return L
 }

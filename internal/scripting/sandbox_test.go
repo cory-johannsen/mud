@@ -24,7 +24,7 @@ func TestNewSandboxedState_DangerousGlobalsNil(t *testing.T) {
 	L := scripting.NewSandboxedState(0)
 	require.NotNil(t, L)
 	defer L.Close()
-	for _, name := range []string{"dofile", "loadfile", "load", "collectgarbage"} {
+	for _, name := range []string{"dofile", "loadfile", "load", "collectgarbage", "require"} {
 		assert.Equal(t, lua.LNil, L.GetGlobal(name), "expected %s to be nil", name)
 	}
 }
