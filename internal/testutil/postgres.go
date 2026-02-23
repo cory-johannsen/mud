@@ -94,7 +94,9 @@ func NewPostgresContainer(t *testing.T) *PostgresContainer {
 
 	t.Cleanup(func() {
 		pool.Close()
-		_ = container.Terminate(ctx)
+		termCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		_ = container.Terminate(termCtx)
 	})
 
 	return pc
