@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+
 // Combat holds the live state of a single combat encounter in a room.
 type Combat struct {
 	// RoomID is the room where this combat takes place.
@@ -15,6 +16,55 @@ type Combat struct {
 	turnIndex int
 	// Over is true when combat has been resolved.
 	Over bool
+	// Round is the current round number, starting at 0 and incrementing each StartRound call.
+	Round int
+	// ActionQueues maps combatant UID to their ActionQueue for the current round.
+	ActionQueues map[string]*ActionQueue
+}
+
+// StartRound increments Round and resets ActionQueues for all living combatants.
+//
+// Postcondition: Round is incremented by 1; each living combatant has a fresh ActionQueue
+// with actionsPerRound AP. Dead combatants have no queue entry (ActionQueues entry absent).
+func (c *Combat) StartRound(actionsPerRound int) {
+	c.Round++
+	c.ActionQueues = make(map[string]*ActionQueue)
+	for _, cbt := range c.Combatants {
+		if !cbt.IsDead() {
+			c.ActionQueues[cbt.ID] = NewActionQueue(cbt.ID, actionsPerRound)
+		}
+	}
+}
+
+// QueueAction enqueues an action for the combatant with the given UID.
+//
+// Precondition: uid must be a living combatant in this combat with an active queue.
+// Postcondition: Returns error if uid not found or AP insufficient; otherwise action is appended.
+func (c *Combat) QueueAction(uid string, a QueuedAction) error {
+	q, ok := c.ActionQueues[uid]
+	if !ok {
+		return fmt.Errorf("combatant %q not found or has no active queue", uid)
+	}
+	return q.Enqueue(a)
+}
+
+// AllActionsSubmitted reports whether every living combatant's queue IsSubmitted.
+//
+// Postcondition: Returns true iff all living combatants have no remaining AP or have passed.
+func (c *Combat) AllActionsSubmitted() bool {
+	for _, cbt := range c.Combatants {
+		if cbt.IsDead() {
+			continue
+		}
+		q, ok := c.ActionQueues[cbt.ID]
+		if !ok {
+			return false
+		}
+		if !q.IsSubmitted() {
+			return false
+		}
+	}
+	return true
 }
 
 // CurrentTurn returns the combatant whose turn it currently is, skipping dead ones.
@@ -107,8 +157,9 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant) (*Combat, e
 	sortByInitiativeDesc(sorted)
 
 	cbt := &Combat{
-		RoomID:     roomID,
-		Combatants: sorted,
+		RoomID:       roomID,
+		Combatants:   sorted,
+		ActionQueues: make(map[string]*ActionQueue),
 	}
 	e.combats[roomID] = cbt
 	return cbt, nil
