@@ -3,6 +3,8 @@ package combat
 import (
 	"fmt"
 
+	lua "github.com/yuin/gopher-lua"
+
 	"github.com/cory-johannsen/mud/internal/game/condition"
 )
 
@@ -25,24 +27,84 @@ func findCombatantByName(cbt *Combat, name string) *Combatant {
 	return nil
 }
 
+// hookAttackRoll invokes the on_attack_roll Lua hook (if a scriptMgr is present) and returns
+// the (possibly overridden) attack total.
+// Precondition: actor and target must be non-nil.
+// Postcondition: Returns atkTotal unchanged when no hook is defined or hook returns nil/non-number.
+func hookAttackRoll(cbt *Combat, actor, target *Combatant, atkTotal int) int {
+	if cbt.scriptMgr == nil {
+		return atkTotal
+	}
+	ret, _ := cbt.scriptMgr.CallHook(cbt.zoneID, "on_attack_roll",
+		lua.LString(actor.ID), lua.LString(target.ID),
+		lua.LNumber(float64(atkTotal)), lua.LNumber(float64(target.AC)))
+	if n, ok := ret.(lua.LNumber); ok {
+		return int(n)
+	}
+	return atkTotal
+}
+
+// hookDamageRoll invokes the on_damage_roll Lua hook (if a scriptMgr is present) and returns
+// the (possibly overridden) damage value.
+// Precondition: actor and target must be non-nil; dmg >= 0.
+// Postcondition: Returns dmg unchanged when no hook is defined or hook returns nil/non-number.
+func hookDamageRoll(cbt *Combat, actor, target *Combatant, dmg int) int {
+	if cbt.scriptMgr == nil || dmg <= 0 {
+		return dmg
+	}
+	ret, _ := cbt.scriptMgr.CallHook(cbt.zoneID, "on_damage_roll",
+		lua.LString(actor.ID), lua.LString(target.ID),
+		lua.LNumber(float64(dmg)))
+	if n, ok := ret.(lua.LNumber); ok {
+		return int(n)
+	}
+	return dmg
+}
+
+// conditionApplyAllowed invokes the on_condition_apply Lua hook.
+// Returns false (cancelling the application) only when the hook explicitly returns false.
+// Precondition: uid and condID must be non-empty.
+// Postcondition: Returns true when no hook is defined or hook does not return false.
+func conditionApplyAllowed(cbt *Combat, uid, condID string, stacks int) bool {
+	if cbt.scriptMgr == nil {
+		return true
+	}
+	ret, _ := cbt.scriptMgr.CallHook(cbt.zoneID, "on_condition_apply",
+		lua.LString(uid), lua.LString(condID), lua.LNumber(float64(stacks)))
+	if ret == lua.LFalse {
+		return false
+	}
+	return true
+}
+
+// applyConditionIfAllowed applies a condition to uid only when the on_condition_apply hook permits.
+// Precondition: uid and condID must be non-empty; stacks >= 1.
+// Postcondition: Condition is applied in-place or silently skipped when hook returns false.
+func applyConditionIfAllowed(cbt *Combat, uid, condID string, stacks, duration int) {
+	if !conditionApplyAllowed(cbt, uid, condID, stacks) {
+		return
+	}
+	_ = cbt.ApplyCondition(uid, condID, stacks, duration)
+}
+
 // applyAttackConditions applies conditions triggered by an attack result:
 //   - CritFailure: attacker gains prone (permanent)
 //   - CritSuccess: target gains flat_footed (1 round)
 //   - Player target at 0 HP (not already dying): gains dying(1 + wounded stacks)
 //
 // Precondition: cbt, target, and r must be valid; cbt.condRegistry must be non-nil.
-// Postcondition: Conditions are applied in-place on cbt.
+// Postcondition: Conditions are applied in-place on cbt, subject to on_condition_apply hooks.
 func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult) {
 	switch r.Outcome {
 	case CritFailure:
-		_ = cbt.ApplyCondition(actor.ID, "prone", 1, -1)
+		applyConditionIfAllowed(cbt, actor.ID, "prone", 1, -1)
 	case CritSuccess:
-		_ = cbt.ApplyCondition(target.ID, "flat_footed", 1, 1)
+		applyConditionIfAllowed(cbt, target.ID, "flat_footed", 1, 1)
 	}
 	// Only apply dying if the target is a player, at 0 HP, and NOT already dying
 	if target.CurrentHP <= 0 && target.Kind == KindPlayer && !cbt.HasCondition(target.ID, "dying") {
 		woundedStacks := cbt.Conditions[target.ID].Stacks("wounded")
-		_ = cbt.ApplyCondition(target.ID, "dying", 1+woundedStacks, -1)
+		applyConditionIfAllowed(cbt, target.ID, "dying", 1+woundedStacks, -1)
 	}
 }
 
@@ -59,6 +121,11 @@ func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult
 // second attack produce "hit nothing" narrative events with nil AttackResult.
 //
 // targetUpdater(id string, hp int) is called after each damage application; may be nil (no-op).
+//
+// Lua hooks fired per attack (when cbt.scriptMgr != nil):
+//   - on_attack_roll(attacker_uid, target_uid, roll_total, ac) → number: override attack total.
+//   - on_damage_roll(attacker_uid, target_uid, damage) → number: override damage value.
+//   - on_condition_apply(uid, cond_id, stacks) → false: cancel condition application.
 //
 // Precondition: cbt and src must not be nil.
 // Postcondition: Returns ordered RoundEvents; damage applied in-place on Combatants.
@@ -103,8 +170,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r := ResolveAttack(actor, target, src)
 				r.AttackTotal += atkBonus
 				r.AttackTotal += acBonus
+				r.AttackTotal = hookAttackRoll(cbt, actor, target, r.AttackTotal)
 				r.Outcome = OutcomeFor(r.AttackTotal, target.AC)
 				dmg := r.EffectiveDamage()
+				dmg = hookDamageRoll(cbt, actor, target, dmg)
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
 					targetUpdater(target.ID, target.CurrentHP)
@@ -142,8 +211,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r1 := ResolveAttack(actor, target, src)
 				r1.AttackTotal += atkBonus1
 				r1.AttackTotal += acBonus1
+				r1.AttackTotal = hookAttackRoll(cbt, actor, target, r1.AttackTotal)
 				r1.Outcome = OutcomeFor(r1.AttackTotal, target.AC)
 				dmg1 := r1.EffectiveDamage()
+				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
 					targetUpdater(target.ID, target.CurrentHP)
@@ -173,8 +244,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r2.AttackTotal += atkBonus2
 				r2.AttackTotal += acBonus2
 				r2.AttackTotal -= 5
+				r2.AttackTotal = hookAttackRoll(cbt, actor, target, r2.AttackTotal)
 				r2.Outcome = OutcomeFor(r2.AttackTotal, target.AC)
 				dmg2 := r2.EffectiveDamage()
+				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
 				if dmg2 > 0 {
 					target.ApplyDamage(dmg2)
 					targetUpdater(target.ID, target.CurrentHP)
