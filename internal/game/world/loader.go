@@ -16,13 +16,13 @@ type yamlZoneFile struct {
 
 // yamlZone is the YAML representation of a zone.
 type yamlZone struct {
-	ID          string     `yaml:"id"`
-	Name        string     `yaml:"name"`
-	Description string     `yaml:"description"`
-	StartRoom   string     `yaml:"start_room"`
+	ID                     string     `yaml:"id"`
+	Name                   string     `yaml:"name"`
+	Description            string     `yaml:"description"`
+	StartRoom              string     `yaml:"start_room"`
 	ScriptDir              string     `yaml:"script_dir"`
 	ScriptInstructionLimit int        `yaml:"script_instruction_limit"`
-	Rooms       []yamlRoom `yaml:"rooms"`
+	Rooms                  []yamlRoom `yaml:"rooms"`
 }
 
 // yamlRoom is the YAML representation of a room.
@@ -108,13 +108,13 @@ func LoadZonesFromDir(dir string) ([]*Zone, error) {
 // convertYAMLZone converts the parsed YAML structures into domain types.
 func convertYAMLZone(yz yamlZone) *Zone {
 	zone := &Zone{
-		ID:          yz.ID,
-		Name:        yz.Name,
-		Description: yz.Description,
+		ID:                     yz.ID,
+		Name:                   yz.Name,
+		Description:            yz.Description,
 		StartRoom:              yz.StartRoom,
 		ScriptDir:              yz.ScriptDir,
 		ScriptInstructionLimit: yz.ScriptInstructionLimit,
-		Rooms:       make(map[string]*Room, len(yz.Rooms)),
+		Rooms:                  make(map[string]*Room, len(yz.Rooms)),
 	}
 
 	for _, yr := range yz.Rooms {
