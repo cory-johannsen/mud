@@ -1,6 +1,7 @@
 package scripting
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,17 +34,24 @@ type RoomInfo struct {
 	Title string
 }
 
+// zoneState holds the per-zone LState and its associated resources.
+// mu serializes all LState access within a single zone.
+type zoneState struct {
+	mu     sync.Mutex
+	L      *lua.LState
+	cancel context.CancelFunc
+}
+
 // Manager owns one sandboxed LState per zone and exposes hook dispatch.
 //
 // Manager is safe for concurrent CallHook after all LoadZone calls complete.
-// Each zone's LState is single-threaded; the read lock serializes concurrent
-// calls to the same zone while allowing different zones to run concurrently.
+// Each zone's LState is serialized by a per-zone mutex; mapMu protects the
+// zone map itself.
 type Manager struct {
-	mu      sync.RWMutex
-	states  map[string]*lua.LState
-	cancels map[string]func()
-	roller  *dice.Roller
-	logger  *zap.Logger
+	mapMu  sync.RWMutex
+	zones  map[string]*zoneState
+	roller *dice.Roller
+	logger *zap.Logger
 
 	// Injected after construction. nil = no-op in engine.* modules.
 	GetCombatant   func(uid string) *CombatantInfo
@@ -58,11 +66,16 @@ type Manager struct {
 // Precondition: roller and logger must be non-nil.
 // Postcondition: Returns a non-nil Manager with an empty zone map.
 func NewManager(roller *dice.Roller, logger *zap.Logger) *Manager {
+	if roller == nil {
+		panic("scripting.NewManager: roller must be non-nil")
+	}
+	if logger == nil {
+		panic("scripting.NewManager: logger must be non-nil")
+	}
 	return &Manager{
-		states:  make(map[string]*lua.LState),
-		cancels: make(map[string]func()),
-		roller:  roller,
-		logger:  logger,
+		zones:  make(map[string]*zoneState),
+		roller: roller,
+		logger: logger,
 	}
 }
 
@@ -70,6 +83,7 @@ func NewManager(roller *dice.Roller, logger *zap.Logger) *Manager {
 // then executes every *.lua file in scriptDir in lexicographic order.
 //
 // Precondition: zoneID must be non-empty; scriptDir must be a readable directory.
+// Precondition: concurrent calls with the same zoneID are not safe; call LoadZone at startup before any concurrent CallHook.
 // Postcondition: Zone VM is registered; returns error on Lua load failure.
 func (m *Manager) LoadZone(zoneID, scriptDir string, instLimit int) error {
 	return m.loadInto(zoneID, scriptDir, instLimit)
@@ -85,6 +99,10 @@ func (m *Manager) LoadGlobal(scriptDir string, instLimit int) error {
 }
 
 func (m *Manager) loadInto(key, scriptDir string, instLimit int) error {
+	if key == "" {
+		return fmt.Errorf("scripting: zone ID must be non-empty")
+	}
+
 	L, cancel := NewSandboxedState(instLimit)
 	m.RegisterModules(L)
 
@@ -111,16 +129,15 @@ func (m *Manager) loadInto(key, scriptDir string, instLimit int) error {
 		}
 	}
 
-	m.mu.Lock()
-	if old, ok := m.states[key]; ok {
-		if oldCancel := m.cancels[key]; oldCancel != nil {
-			oldCancel()
-		}
-		old.Close()
+	zs := &zoneState{L: L, cancel: cancel}
+
+	m.mapMu.Lock()
+	if old, ok := m.zones[key]; ok {
+		old.cancel()
+		old.L.Close()
 	}
-	m.states[key] = L
-	m.cancels[key] = cancel
-	m.mu.Unlock()
+	m.zones[key] = zs
+	m.mapMu.Unlock()
 	return nil
 }
 
@@ -132,14 +149,14 @@ func (m *Manager) loadInto(key, scriptDir string, instLimit int) error {
 // Precondition: args must be valid lua.LValue instances.
 // Postcondition: Returns the first return value of the hook, or LNil.
 func (m *Manager) CallHook(zoneID, hook string, args ...lua.LValue) (lua.LValue, error) {
-	m.mu.RLock()
-	L, ok := m.states[zoneID]
+	m.mapMu.RLock()
+	zs, ok := m.zones[zoneID]
 	if !ok {
-		L = m.states[globalZoneID]
+		zs = m.zones[globalZoneID]
 	}
-	m.mu.RUnlock()
+	m.mapMu.RUnlock()
 
-	if L == nil {
+	if zs == nil {
 		m.logger.Info("scripting: no VM for zone",
 			zap.String("zone", zoneID),
 			zap.String("hook", hook),
@@ -147,12 +164,15 @@ func (m *Manager) CallHook(zoneID, hook string, args ...lua.LValue) (lua.LValue,
 		return lua.LNil, nil
 	}
 
-	fn := L.GetGlobal(hook)
+	zs.mu.Lock()
+	defer zs.mu.Unlock()
+
+	fn := zs.L.GetGlobal(hook)
 	if fn == lua.LNil {
 		return lua.LNil, nil
 	}
 
-	if err := L.CallByParam(lua.P{
+	if err := zs.L.CallByParam(lua.P{
 		Fn:      fn,
 		NRet:    1,
 		Protect: true,
@@ -165,7 +185,21 @@ func (m *Manager) CallHook(zoneID, hook string, args ...lua.LValue) (lua.LValue,
 		return lua.LNil, nil
 	}
 
-	ret := L.Get(-1)
-	L.Pop(1)
+	ret := zs.L.Get(-1)
+	zs.L.Pop(1)
 	return ret, nil
+}
+
+// Close releases all zone VMs and their associated resources.
+//
+// Precondition: No concurrent CallHook calls are in progress.
+// Postcondition: All LStates are closed; all cancel functions called.
+func (m *Manager) Close() {
+	m.mapMu.Lock()
+	defer m.mapMu.Unlock()
+	for id, zs := range m.zones {
+		zs.cancel()
+		zs.L.Close()
+		delete(m.zones, id)
+	}
 }

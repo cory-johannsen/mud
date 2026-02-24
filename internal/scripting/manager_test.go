@@ -2,6 +2,7 @@ package scripting_test
 
 import (
 	"os"
+	"sync"
 	"path/filepath"
 	"testing"
 
@@ -130,4 +131,30 @@ func TestProperty_CallHookMissingZoneNeverPanics(t *testing.T) {
 			mgr.CallHook(zoneID, hook) //nolint:errcheck
 		}
 	})
+}
+
+func TestProperty_CallHookConcurrentSameZone_NoRace(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	dir := writeTempLua(t, "hooks.lua", `
+		function concurrent_hook(a, b)
+			return a + b
+		end
+	`)
+	require.NoError(t, mgr.LoadZone("conczone", dir, 0))
+
+	const goroutines = 10
+	const callsEach = 5
+	var wg sync.WaitGroup
+	wg.Add(goroutines)
+	for i := 0; i < goroutines; i++ {
+		go func() {
+			defer wg.Done()
+			for j := 0; j < callsEach; j++ {
+				ret, err := mgr.CallHook("conczone", "concurrent_hook", lua.LNumber(1), lua.LNumber(2))
+				assert.NoError(t, err)
+				assert.Equal(t, lua.LNumber(3), ret)
+			}
+		}()
+	}
+	wg.Wait()
 }
