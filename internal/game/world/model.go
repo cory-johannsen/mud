@@ -133,6 +133,11 @@ type Zone struct {
 	StartRoom string
 	// Rooms contains all rooms in this zone, keyed by room ID.
 	Rooms map[string]*Room
+	// ScriptDir is the path to Lua scripts for this zone. Empty = no scripts.
+	ScriptDir string
+	// ScriptInstructionLimit overrides DefaultInstructionLimit for this zone's VM.
+	// 0 = use DefaultInstructionLimit.
+	ScriptInstructionLimit int
 }
 
 // Validate checks zone invariants.

@@ -193,3 +193,43 @@ func TestLoadActualDowntownZone(t *testing.T) {
 	// Verify all exit targets are valid (zone.Validate() already checks this)
 	require.NoError(t, zone.Validate())
 }
+
+func TestLoadZone_ScriptFields_Populated(t *testing.T) {
+	yamlData := []byte(`
+zone:
+  id: scripted_zone
+  name: Scripted Zone
+  description: A zone with scripts.
+  start_room: r1
+  script_dir: content/scripts/zones/scripted_zone
+  script_instruction_limit: 50000
+  rooms:
+    - id: r1
+      title: Start Room
+      description: The beginning.
+      exits: []
+`)
+	zone, err := LoadZoneFromBytes(yamlData)
+	require.NoError(t, err)
+	assert.Equal(t, "content/scripts/zones/scripted_zone", zone.ScriptDir)
+	assert.Equal(t, 50000, zone.ScriptInstructionLimit)
+}
+
+func TestLoadZone_ScriptFieldsAbsent_ZeroValue(t *testing.T) {
+	yamlData := []byte(`
+zone:
+  id: plain_zone
+  name: Plain Zone
+  description: No scripts.
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Start Room
+      description: The beginning.
+      exits: []
+`)
+	zone, err := LoadZoneFromBytes(yamlData)
+	require.NoError(t, err)
+	assert.Equal(t, "", zone.ScriptDir)
+	assert.Equal(t, 0, zone.ScriptInstructionLimit)
+}

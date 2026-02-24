@@ -3,6 +3,7 @@ zone:
   name: "Downtown Portland"
   description: "The shattered remains of Portland's urban core, where rain-slicked rubble and rusting infrastructure form the bones of a dead civilization."
   start_room: pioneer_square
+  script_dir: content/scripts/zones/downtown
   rooms:
     - id: pioneer_square
       title: "Pioneer Courthouse Square"

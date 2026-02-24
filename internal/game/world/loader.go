@@ -20,6 +20,8 @@ type yamlZone struct {
 	Name        string     `yaml:"name"`
 	Description string     `yaml:"description"`
 	StartRoom   string     `yaml:"start_room"`
+	ScriptDir              string     `yaml:"script_dir"`
+	ScriptInstructionLimit int        `yaml:"script_instruction_limit"`
 	Rooms       []yamlRoom `yaml:"rooms"`
 }
 
@@ -109,7 +111,9 @@ func convertYAMLZone(yz yamlZone) *Zone {
 		ID:          yz.ID,
 		Name:        yz.Name,
 		Description: yz.Description,
-		StartRoom:   yz.StartRoom,
+		StartRoom:              yz.StartRoom,
+		ScriptDir:              yz.ScriptDir,
+		ScriptInstructionLimit: yz.ScriptInstructionLimit,
 		Rooms:       make(map[string]*Room, len(yz.Rooms)),
 	}
 
