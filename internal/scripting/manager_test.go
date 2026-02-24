@@ -158,3 +158,42 @@ func TestProperty_CallHookConcurrentSameZone_NoRace(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+func TestManager_LoadZone_MultipleFiles_OrderedByName(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "a.lua"), []byte(`base_val = 10`), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "b.lua"), []byte(`
+		function get_val() return base_val end
+	`), 0644))
+	require.NoError(t, mgr.LoadZone("ordered", dir, 0))
+	ret, err := mgr.CallHook("ordered", "get_val")
+	require.NoError(t, err)
+	assert.Equal(t, lua.LNumber(10), ret)
+}
+
+func TestNewManager_PanicsOnNilRoller(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	assert.Panics(t, func() {
+		scripting.NewManager(nil, logger)
+	})
+}
+
+func TestNewManager_PanicsOnNilLogger(t *testing.T) {
+	roller := dice.NewLoggedRoller(dice.NewCryptoSource(), zap.NewNop())
+	assert.Panics(t, func() {
+		scripting.NewManager(roller, nil)
+	})
+}
+
+func TestManager_Close_ReleasesZones(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "init.lua"), []byte(`function get_x() return x end`), 0644))
+	require.NoError(t, mgr.LoadZone("closezone", dir, 0))
+	mgr.Close()
+	// After Close the zone is removed; CallHook returns LNil with no error.
+	ret, err := mgr.CallHook("closezone", "get_x")
+	assert.NoError(t, err)
+	assert.Equal(t, lua.LNil, ret)
+}

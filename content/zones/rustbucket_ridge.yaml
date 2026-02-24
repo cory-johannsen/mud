@@ -1,6 +1,6 @@
 zone:
-    id: ruskbucket_ridge
-    name: Ruskbucket Ridge
+    id: rustbucket_ridge
+    name: Rustbucket Ridge
     description: "From the outside, Rustbucket Ridge looks like a place forgotten by time and society, \nwhere hope rusts just as fast as the metal trailers that line the dirt-packed roads. \nThe entrance is marked by a sagging, weather-beaten sign, its faded letters barely legible, \nwith vines and weeds crawling over it like nature trying to reclaim the land. A few flickering \nlights hang on poles, casting a dim orange glow over the pothole-riddled ground, but most of the \npark is shadowed, save for the faint glow of cracked neon signs from the trailers themselves.\n\nEach trailer looks like it’s been patched together with whatever scrap could be found—corrugated steel, \nplywood, and sheets of plastic held together with duct tape and prayers. Rust stains streak the walls, \nand windows are either boarded up or covered with tattered curtains. Trash piles up in the corners of \nthe lots, with old tires, broken appliances, and forgotten bits of tech lying in heaps like offerings\nto the apocalypse.\n\nA few beaten-down vehicles, long past their prime, sit idle in makeshift driveways, some stripped for \nparts. The air smells of burning trash, oil, and something metallic, mixing with the distant sounds \nof machinery clanking away from inside the trailers. From the outside, Rustbucket Ridge feels like a\nplace where people don’t go to start over—they go to survive, holding on to the last remnants of a \nlife that the world left behind.\n"
     start_room: grinders_row
     rooms:

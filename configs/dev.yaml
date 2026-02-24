@@ -3,8 +3,8 @@ server:
   type: mud
 
 database:
-  host: 127.0.0.1
-  port: 5432
+  host: localhost
+  port: 5433
   user: mud
   password: mud
   name: mud
