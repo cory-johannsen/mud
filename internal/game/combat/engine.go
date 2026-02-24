@@ -183,9 +183,6 @@ func (c *Combat) ApplyCondition(uid, condID string, stacks, duration int) error 
 // RemoveCondition removes condID from combatant uid. No-op if not present.
 func (c *Combat) RemoveCondition(uid, condID string) {
 	if s, ok := c.Conditions[uid]; ok {
-		if c.scriptMgr != nil {
-			s.SetScripting(c.scriptMgr, c.zoneID)
-		}
 		s.Remove(uid, condID)
 	}
 }
@@ -348,7 +345,11 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 		zoneID:       zoneID,
 	}
 	for _, c := range sorted {
-		cbt.Conditions[c.ID] = condition.NewActiveSet()
+		set := condition.NewActiveSet()
+		if scriptMgr != nil {
+			set.SetScripting(scriptMgr, zoneID)
+		}
+		cbt.Conditions[c.ID] = set
 	}
 	e.combats[roomID] = cbt
 	return cbt, nil

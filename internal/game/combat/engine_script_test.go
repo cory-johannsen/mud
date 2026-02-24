@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	lua "github.com/yuin/gopher-lua"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -58,6 +60,9 @@ func TestApplyCondition_LuaOnApplyHookFires(t *testing.T) {
 		function prone_on_apply(uid, cond_id, stacks, duration)
 			_hook_uid = uid
 		end
+		function get_hook_uid()
+			return _hook_uid
+		end
 	`)
 
 	reg := condition.NewRegistry()
@@ -77,4 +82,8 @@ func TestApplyCondition_LuaOnApplyHookFires(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, cbt.ApplyCondition("p1", "prone", 1, -1))
 	assert.True(t, cbt.HasCondition("p1", "prone"))
+
+	ret, err := mgr.CallHook("room1", "get_hook_uid")
+	require.NoError(t, err)
+	assert.Equal(t, lua.LString("p1"), ret, "hook must have been called with uid=p1")
 }

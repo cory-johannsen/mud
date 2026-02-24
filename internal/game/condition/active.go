@@ -31,8 +31,8 @@ func NewActiveSet() *ActiveSet {
 // SetScripting attaches a scripting.Manager and zoneID to this ActiveSet.
 // Subsequent Apply/Remove/Tick calls will fire Lua hooks via mgr.
 //
-// Precondition: mgr must be non-nil.
-// Postcondition: Lua hooks are enabled for this set.
+// Precondition: mgr may be nil; passing nil disables Lua hooks.
+// Postcondition: Lua hooks are enabled for this set when mgr is non-nil.
 func (s *ActiveSet) SetScripting(mgr *scripting.Manager, zoneID string) {
 	s.scriptMgr = mgr
 	s.zoneID = zoneID
@@ -114,6 +114,8 @@ func (s *ActiveSet) Remove(uid, id string) {
 // Conditions that reach 0 are removed. "permanent" and "until_save" conditions
 // (DurationRemaining == -1) are not affected.
 //
+// LuaOnTick receives DurationRemaining before the decrement — the pre-tick remaining value.
+//
 // Postcondition: For every id in the returned slice, Has(id) is false.
 // Conditions with DurationType != "rounds" or DurationRemaining == -1 are not affected.
 func (s *ActiveSet) Tick(uid string) []string {
@@ -121,10 +123,7 @@ func (s *ActiveSet) Tick(uid string) []string {
 	// Deleting map entries during range iteration is safe per the Go specification.
 	for id, ac := range s.conditions {
 		if ac.Def.DurationType != "rounds" || ac.DurationRemaining < 0 {
-			if s.scriptMgr != nil && ac.Def.LuaOnTick != "" {
-				continue // non-rounds conditions: no tick hook
-			}
-			continue
+			continue // non-rounds conditions: no tick hook
 		}
 		if s.scriptMgr != nil && ac.Def.LuaOnTick != "" {
 			s.scriptMgr.CallHook(s.zoneID, ac.Def.LuaOnTick, //nolint:errcheck
