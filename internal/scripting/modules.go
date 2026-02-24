@@ -190,10 +190,10 @@ func (m *Manager) newCombatModule(L *lua.LState) *lua.LTable {
 		duration := L.CheckInt(4)
 		if err := m.ApplyCondition(uid, condID, stacks, duration); err != nil {
 			m.logger.Warn("engine.combat.apply_condition error",
-			zap.String("uid", uid),
-			zap.String("cond", condID),
-			zap.Error(err),
-		)
+				zap.String("uid", uid),
+				zap.String("cond", condID),
+				zap.Error(err),
+			)
 		}
 		return 0
 	}))
@@ -205,9 +205,10 @@ func (m *Manager) newCombatModule(L *lua.LState) *lua.LTable {
 		hp := L.CheckInt(2)
 		if err := m.ApplyDamage(uid, hp); err != nil {
 			m.logger.Warn("engine.combat.apply_damage error",
-			zap.String("uid", uid),
-			zap.Error(err),
-		)
+				zap.String("uid", uid),
+				zap.Int("hp", hp),
+				zap.Error(err),
+			)
 		}
 		return 0
 	}))

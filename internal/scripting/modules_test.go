@@ -68,7 +68,10 @@ func TestEngineLog_AllLevels(t *testing.T) {
 	for _, e := range logs.All() {
 		levels[e.Level.String()] = true
 	}
-	assert.True(t, levels["debug"] || levels["info"], "expected at least debug/info")
+	assert.True(t, levels["debug"], "expected debug log")
+	assert.True(t, levels["info"], "expected info log")
+	assert.True(t, levels["warn"], "expected warn log")
+	assert.True(t, levels["error"], "expected error log")
 }
 
 func TestEngineDice_Roll_ReturnsTable(t *testing.T) {
@@ -84,6 +87,20 @@ func TestEngineDice_Roll_ReturnsTable(t *testing.T) {
 	require.True(t, ok, "expected LNumber, got %T", ret)
 	assert.GreaterOrEqual(t, int(n), 1)
 	assert.LessOrEqual(t, int(n), 6)
+}
+
+func TestProperty_DiceRoll_TotalEqualsDicePlusModifier(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	rapid.Check(t, func(rt *rapid.T) {
+		expr := rapid.SampledFrom([]string{"1d6", "2d6", "1d4", "1d8"}).Draw(rt, "expr")
+		ret := runScript(t, mgr, `
+			function check_invariant(expr)
+				local r = engine.dice.roll(expr)
+				return r.total == r.dice + r.modifier
+			end
+		`, "check_invariant", lua.LString(expr))
+		assert.Equal(t, lua.LTrue, ret, "total must equal dice + modifier for expr %s", expr)
+	})
 }
 
 func TestEngineEntity_GetHP_NilCallback_ReturnsNil(t *testing.T) {
@@ -135,10 +152,10 @@ func TestEngineEntity_GetConditions_WithCallback(t *testing.T) {
 	ret := runScript(t, mgr, `
 		function get_it()
 			local conds = engine.entity.get_conditions("uid1")
-			return conds[1]
+			return #conds .. ":" .. conds[1] .. ":" .. conds[2]
 		end
 	`, "get_it")
-	assert.Equal(t, lua.LString("prone"), ret)
+	assert.Equal(t, lua.LString("2:prone:stunned"), ret)
 }
 
 func TestEngineCombat_ApplyCondition_CallsCallback(t *testing.T) {
@@ -209,7 +226,7 @@ func TestProperty_EventStubsNeverPanic(t *testing.T) {
 		arg := rapid.StringMatching(`[a-zA-Z0-9]{1,8}`).Draw(rt, "arg")
 		src := `function do_ev() engine.event.` + fn + `("` + arg + `") end`
 		dir := writeTempLua(t, "ev.lua", src)
-		zoneID := "evzone_" + rapid.StringMatching(`[a-z]{3}`).Draw(rt, "id")
+		zoneID := "evzone_" + rapid.StringMatching(`[a-z]{8}`).Draw(rt, "id")
 		if err := mgr.LoadZone(zoneID, dir, 0); err != nil {
 			return
 		}
