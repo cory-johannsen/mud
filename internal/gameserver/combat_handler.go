@@ -10,7 +10,9 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
 // CombatHandler handles attack, strike, pass, flee, and round timer management
@@ -29,6 +31,8 @@ type CombatHandler struct {
 	broadcastFn   func(roomID string, events []*gamev1.CombatEvent)
 	roundDuration time.Duration
 	condRegistry  *condition.Registry
+	worldMgr      *world.Manager
+	scriptMgr     *scripting.Manager
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -46,6 +50,8 @@ func NewCombatHandler(
 	broadcastFn func(roomID string, events []*gamev1.CombatEvent),
 	roundDuration time.Duration,
 	condRegistry *condition.Registry,
+	worldMgr *world.Manager,
+	scriptMgr *scripting.Manager,
 ) *CombatHandler {
 	return &CombatHandler{
 		engine:        engine,
@@ -55,6 +61,8 @@ func NewCombatHandler(
 		broadcastFn:   broadcastFn,
 		roundDuration: roundDuration,
 		condRegistry:  condRegistry,
+		worldMgr:      worldMgr,
+		scriptMgr:     scriptMgr,
 		timers:        make(map[string]*combat.RoundTimer),
 	}
 }
@@ -369,7 +377,15 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
 	combat.RollInitiative(combatants, h.dice.Src())
 
-	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry, nil, "")
+	var scriptMgr *scripting.Manager
+	var zoneID string
+	if h.scriptMgr != nil && h.worldMgr != nil {
+		scriptMgr = h.scriptMgr
+		if room, ok := h.worldMgr.GetRoom(sess.RoomID); ok {
+			zoneID = room.ZoneID
+		}
+	}
+	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry, scriptMgr, zoneID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
 	}

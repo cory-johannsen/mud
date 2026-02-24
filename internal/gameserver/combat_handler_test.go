@@ -43,7 +43,7 @@ func makeCombatHandler(t *testing.T, broadcastFn func(roomID string, events []*g
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry())
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil)
 }
 
 // spawnTestNPC creates and registers a live NPC instance in roomID.
