@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -24,6 +25,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/gameserver"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/observability"
+	"github.com/cory-johannsen/mud/internal/scripting"
 	"github.com/cory-johannsen/mud/internal/server"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
@@ -31,10 +33,12 @@ import (
 func main() {
 	start := time.Now()
 
-	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
-	zonesDir := flag.String("zones", "content/zones", "path to zone YAML files directory")
-	npcsDir := flag.String("npcs-dir", "content/npcs", "path to NPC YAML templates directory")
+	configPath    := flag.String("config", "configs/dev.yaml", "path to configuration file")
+	zonesDir      := flag.String("zones", "content/zones", "path to zone YAML files directory")
+	npcsDir       := flag.String("npcs-dir", "content/npcs", "path to NPC YAML templates directory")
 	conditionsDir := flag.String("conditions-dir", "content/conditions", "path to condition YAML definitions directory")
+	scriptRoot    := flag.String("script-root", "content/scripts", "root directory for Lua scripts; empty = scripting disabled")
+	condScriptDir := flag.String("condition-scripts", "content/scripts/conditions", "directory of global condition scripts loaded into __global__ VM")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -119,6 +123,54 @@ func main() {
 		zap.Duration("elapsed", time.Since(condStart)),
 	)
 
+	// Initialise scripting engine
+	var scriptMgr *scripting.Manager
+	if *scriptRoot != "" {
+		scriptStart := time.Now()
+		scriptMgr = scripting.NewManager(diceRoller, logger)
+
+		// Load global condition scripts.
+		if info, err := os.Stat(*condScriptDir); err == nil && info.IsDir() {
+			if err := scriptMgr.LoadGlobal(*condScriptDir, 0); err != nil {
+				logger.Fatal("loading global condition scripts",
+					zap.String("dir", *condScriptDir), zap.Error(err))
+			}
+			logger.Info("global condition scripts loaded",
+				zap.String("dir", *condScriptDir),
+				zap.Duration("elapsed", time.Since(scriptStart)))
+		}
+
+		// Load per-zone scripts.
+		for _, zone := range worldMgr.AllZones() {
+			if zone.ScriptDir == "" {
+				continue
+			}
+			info, err := os.Stat(zone.ScriptDir)
+			if err != nil || !info.IsDir() {
+				logger.Warn("zone script_dir not found, skipping",
+					zap.String("zone", zone.ID), zap.String("dir", zone.ScriptDir))
+				continue
+			}
+			if err := scriptMgr.LoadZone(zone.ID, zone.ScriptDir, zone.ScriptInstructionLimit); err != nil {
+				logger.Fatal("loading zone scripts",
+					zap.String("zone", zone.ID), zap.Error(err))
+			}
+			logger.Info("zone scripts loaded",
+				zap.String("zone", zone.ID), zap.String("dir", zone.ScriptDir))
+		}
+		logger.Info("scripting engine initialized",
+			zap.Duration("elapsed", time.Since(scriptStart)))
+
+		// Wire QueryRoom callback.
+		scriptMgr.QueryRoom = func(roomID string) *scripting.RoomInfo {
+			room, ok := worldMgr.GetRoom(roomID)
+			if !ok {
+				return nil
+			}
+			return &scripting.RoomInfo{ID: room.ID, Title: room.Title}
+		}
+	}
+
 	// Create handlers
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
@@ -141,7 +193,7 @@ func main() {
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, combatHandler, nil,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, combatHandler, scriptMgr,
 	)
 
 	// Create gRPC server

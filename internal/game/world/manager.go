@@ -110,3 +110,16 @@ func (m *Manager) ZoneCount() int {
 	defer m.mu.RUnlock()
 	return len(m.zones)
 }
+
+// AllZones returns all loaded zones.
+//
+// Postcondition: Returns a non-nil slice; may be empty.
+func (m *Manager) AllZones() []*Zone {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	zones := make([]*Zone, 0, len(m.zones))
+	for _, z := range m.zones {
+		zones = append(zones, z)
+	}
+	return zones
+}

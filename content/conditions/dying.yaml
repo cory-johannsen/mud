@@ -14,6 +14,6 @@ restrict_actions:
   - attack
   - strike
   - pass
-lua_on_apply: ""
-lua_on_remove: ""
-lua_on_tick: ""
+lua_on_apply: dying_on_apply
+lua_on_remove: dying_on_remove
+lua_on_tick: dying_on_tick
