@@ -15,6 +15,9 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/cory-johannsen/mud/internal/scripting"
+
+	lua "github.com/yuin/gopher-lua"
 )
 
 // errQuit is returned by handleQuit to signal the command loop to stop cleanly.
@@ -40,6 +43,7 @@ type GameServiceServer struct {
 	dice       *dice.Roller
 	npcH       *NPCHandler
 	combatH    *CombatHandler
+	scriptMgr  *scripting.Manager
 	logger     *zap.Logger
 }
 
@@ -59,6 +63,7 @@ func NewGameServiceServer(
 	diceRoller *dice.Roller,
 	npcHandler *NPCHandler,
 	combatHandler *CombatHandler,
+	scriptMgr *scripting.Manager,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:     worldMgr,
@@ -69,8 +74,9 @@ func NewGameServiceServer(
 		charSaver: charSaver,
 		dice:      diceRoller,
 		npcH:      npcHandler,
-		combatH:   combatHandler,
-		logger:    logger,
+		combatH:    combatHandler,
+		scriptMgr:  scriptMgr,
+		logger:     logger,
 	}
 }
 
@@ -284,6 +290,23 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		Direction: string(dir.Opposite()),
 	})
 
+	if s.scriptMgr != nil {
+		if oldRoom, ok := s.world.GetRoom(result.OldRoomID); ok {
+			s.scriptMgr.CallHook(oldRoom.ZoneID, "on_exit", //nolint:errcheck
+				lua.LString(uid),
+				lua.LString(result.OldRoomID),
+				lua.LString(result.View.RoomId),
+			)
+		}
+		if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+			s.scriptMgr.CallHook(newRoom.ZoneID, "on_enter", //nolint:errcheck
+				lua.LString(uid),
+				lua.LString(result.View.RoomId),
+				lua.LString(result.OldRoomID),
+			)
+		}
+	}
+
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: result.View},
 	}, nil
@@ -293,6 +316,16 @@ func (s *GameServiceServer) handleLook(uid string) (*gamev1.ServerEvent, error) 
 	view, err := s.worldH.Look(uid)
 	if err != nil {
 		return nil, err
+	}
+	if s.scriptMgr != nil {
+		if sess, ok := s.sessions.GetPlayer(uid); ok {
+			if room, ok := s.world.GetRoom(sess.RoomID); ok {
+				s.scriptMgr.CallHook(room.ZoneID, "on_look", //nolint:errcheck
+					lua.LString(uid),
+					lua.LString(room.ID),
+				)
+			}
+		}
 	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: view},

@@ -141,7 +141,7 @@ func main() {
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, combatHandler,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, combatHandler, nil,
 	)
 
 	// Create gRPC server
