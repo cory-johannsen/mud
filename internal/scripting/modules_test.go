@@ -76,6 +76,7 @@ func TestEngineDice_Roll_ReturnsTable(t *testing.T) {
 	ret := runScript(t, mgr, `
 		function do_roll()
 			local r = engine.dice.roll("1d6")
+			if type(r.dice) ~= "number" then error("dice field missing") end
 			return r.total
 		end
 	`, "do_roll")

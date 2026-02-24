@@ -2,6 +2,7 @@ package scripting
 
 import (
 	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 )
 
 // RegisterModules registers all engine.* Lua tables into L.
@@ -62,12 +63,15 @@ func (m *Manager) newDiceModule(L *lua.LState) *lua.LTable {
 		result, err := m.roller.RollExpr(expr)
 		if err != nil {
 			m.logger.Warn("engine.dice.roll: invalid expression",
+				zap.String("expr", expr),
+				zap.Error(err),
 			)
 			L.Push(lua.LNil)
 			return 1
 		}
 		tbl := L.NewTable()
 		L.SetField(tbl, "total", lua.LNumber(result.Total()))
+		L.SetField(tbl, "dice", lua.LNumber(result.Total()-result.Modifier))
 		L.SetField(tbl, "modifier", lua.LNumber(result.Modifier))
 		L.Push(tbl)
 		return 1
@@ -185,7 +189,11 @@ func (m *Manager) newCombatModule(L *lua.LState) *lua.LTable {
 		stacks := L.CheckInt(3)
 		duration := L.CheckInt(4)
 		if err := m.ApplyCondition(uid, condID, stacks, duration); err != nil {
-			m.logger.Warn("engine.combat.apply_condition error")
+			m.logger.Warn("engine.combat.apply_condition error",
+			zap.String("uid", uid),
+			zap.String("cond", condID),
+			zap.Error(err),
+		)
 		}
 		return 0
 	}))
@@ -196,7 +204,10 @@ func (m *Manager) newCombatModule(L *lua.LState) *lua.LTable {
 		uid := L.CheckString(1)
 		hp := L.CheckInt(2)
 		if err := m.ApplyDamage(uid, hp); err != nil {
-			m.logger.Warn("engine.combat.apply_damage error")
+			m.logger.Warn("engine.combat.apply_damage error",
+			zap.String("uid", uid),
+			zap.Error(err),
+		)
 		}
 		return 0
 	}))
