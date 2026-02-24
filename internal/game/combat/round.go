@@ -47,7 +47,9 @@ func hookAttackRoll(cbt *Combat, actor, target *Combatant, atkTotal int) int {
 // hookDamageRoll invokes the on_damage_roll Lua hook (if a scriptMgr is present) and returns
 // the (possibly overridden) damage value.
 // Precondition: actor and target must be non-nil; dmg >= 0.
-// Postcondition: Returns dmg unchanged when no hook is defined or hook returns nil/non-number.
+// Postcondition: Returns dmg unchanged if cbt.scriptMgr is nil, dmg <= 0, or hook is absent/returns nil.
+//
+//	Returns hook's integer return value when hook returns a Lua number.
 func hookDamageRoll(cbt *Combat, actor, target *Combatant, dmg int) int {
 	if cbt.scriptMgr == nil || dmg <= 0 {
 		return dmg
@@ -79,12 +81,18 @@ func conditionApplyAllowed(cbt *Combat, uid, condID string, stacks int) bool {
 
 // applyConditionIfAllowed applies a condition to uid only when the on_condition_apply hook permits.
 // Precondition: uid and condID must be non-empty; stacks >= 1.
-// Postcondition: Condition is applied in-place or silently skipped when hook returns false.
+// Postcondition: Condition is applied; skipped if hook returns false.
+//
+//	Skipped silently if condID is not in the registry (content configuration error).
 func applyConditionIfAllowed(cbt *Combat, uid, condID string, stacks, duration int) {
 	if !conditionApplyAllowed(cbt, uid, condID, stacks) {
 		return
 	}
-	_ = cbt.ApplyCondition(uid, condID, stacks, duration)
+	if err := cbt.ApplyCondition(uid, condID, stacks, duration); err != nil {
+		// Condition ID not found in registry; skip silently.
+		// This indicates a content configuration error at startup.
+		return
+	}
 }
 
 // applyAttackConditions applies conditions triggered by an attack result:

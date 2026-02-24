@@ -1,9 +1,13 @@
 package combat_test
 
 import (
+	"fmt"
+
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"pgregory.net/rapid"
 	"github.com/stretchr/testify/require"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -127,4 +131,31 @@ func TestResolveRound_ConditionApplyHook_CancelsCondition(t *testing.T) {
 
 	assert.False(t, cbt.HasCondition("n1", "flat_footed"),
 		"on_condition_apply returning false must cancel flat_footed application")
+}
+
+// TestProperty_AttackRollHook_OutcomeMatchesHookValue verifies that the outcome produced by
+// ResolveRound matches OutcomeFor(hookVal, 30) for every hookVal in [1,50].
+// Precondition: on_attack_roll hook always returns hookVal; Bob's AC is 30.
+// Postcondition: Outcome for p1's attack event must equal OutcomeFor(hookVal, 30).
+func TestProperty_AttackRollHook_OutcomeMatchesHookValue(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		hookVal := rapid.IntRange(1, 50).Draw(rt, "hookVal")
+		luaSrc := fmt.Sprintf(`function on_attack_roll(a, b, roll, ac) return %d end`, hookVal)
+		mgr := newScriptMgr(t, luaSrc)
+		cbt := startHookCombat(t, mgr)
+		cbt.StartRound(3)
+		require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Bob"}))
+		require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+
+		events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil)
+
+		// Bob's AC = 30; hookVal in [1,50], so hookVal < 30 = miss, hookVal >= 30 = hit
+		for _, e := range events {
+			if e.ActorID == "p1" && e.AttackResult != nil {
+				expectedOutcome := combat.OutcomeFor(hookVal, 30)
+				assert.Equal(t, expectedOutcome, e.AttackResult.Outcome,
+					"outcome must match OutcomeFor(hookVal=%d, ac=30)", hookVal)
+			}
+		}
+	})
 }
