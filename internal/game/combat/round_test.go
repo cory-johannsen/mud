@@ -29,7 +29,7 @@ func makeRoundCombat(t *testing.T) *combat.Combat {
 		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
 		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 12, Level: 1, StrMod: 1, DexMod: 0},
 	}
-	cbt, err := eng.StartCombat("room1", combatants, reg)
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
 	if err != nil {
 		t.Fatalf("StartCombat: %v", err)
 	}

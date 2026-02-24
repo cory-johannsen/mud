@@ -1,6 +1,12 @@
 package condition
 
-import "fmt"
+import (
+	"fmt"
+
+	lua "github.com/yuin/gopher-lua"
+
+	"github.com/cory-johannsen/mud/internal/scripting"
+)
 
 // ActiveCondition tracks one applied condition on an entity.
 type ActiveCondition struct {
@@ -13,11 +19,23 @@ type ActiveCondition struct {
 // It is not safe for concurrent use; the caller must serialise access.
 type ActiveSet struct {
 	conditions map[string]*ActiveCondition
+	scriptMgr  *scripting.Manager
+	zoneID     string
 }
 
 // NewActiveSet creates an empty ActiveSet.
 func NewActiveSet() *ActiveSet {
 	return &ActiveSet{conditions: make(map[string]*ActiveCondition)}
+}
+
+// SetScripting attaches a scripting.Manager and zoneID to this ActiveSet.
+// Subsequent Apply/Remove/Tick calls will fire Lua hooks via mgr.
+//
+// Precondition: mgr must be non-nil.
+// Postcondition: Lua hooks are enabled for this set.
+func (s *ActiveSet) SetScripting(mgr *scripting.Manager, zoneID string) {
+	s.scriptMgr = mgr
+	s.zoneID = zoneID
 }
 
 // Apply adds or updates a condition on this entity.
@@ -28,7 +46,7 @@ func NewActiveSet() *ActiveSet {
 // Precondition: def must not be nil.
 // Postcondition: Has(def.ID) is true; stacks are incremented on re-apply (capped at MaxStacks);
 // DurationRemaining is updated to max(existing, duration) on re-apply.
-func (s *ActiveSet) Apply(def *ConditionDef, stacks, duration int) error {
+func (s *ActiveSet) Apply(uid string, def *ConditionDef, stacks, duration int) error {
 	if def == nil {
 		return fmt.Errorf("Apply: def must not be nil")
 	}
@@ -66,6 +84,15 @@ func (s *ActiveSet) Apply(def *ConditionDef, stacks, duration int) error {
 		Stacks:            capped,
 		DurationRemaining: duration,
 	}
+
+	if s.scriptMgr != nil && def.LuaOnApply != "" {
+		stks := s.conditions[def.ID].Stacks
+		s.scriptMgr.CallHook(s.zoneID, def.LuaOnApply, //nolint:errcheck
+			lua.LString(uid), lua.LString(def.ID),
+			lua.LNumber(stks), lua.LNumber(float64(duration)),
+		)
+	}
+
 	return nil
 }
 
@@ -73,8 +100,14 @@ func (s *ActiveSet) Apply(def *ConditionDef, stacks, duration int) error {
 // If the condition is not present, Remove is a no-op.
 //
 // Postcondition: Has(id) is false.
-func (s *ActiveSet) Remove(id string) {
+func (s *ActiveSet) Remove(uid, id string) {
+	removed := s.conditions[id]
 	delete(s.conditions, id)
+	if s.scriptMgr != nil && removed != nil && removed.Def.LuaOnRemove != "" {
+		s.scriptMgr.CallHook(s.zoneID, removed.Def.LuaOnRemove, //nolint:errcheck
+			lua.LString(uid), lua.LString(id),
+		)
+	}
 }
 
 // Tick decrements the DurationRemaining of all "rounds"-type conditions by 1.
@@ -83,12 +116,21 @@ func (s *ActiveSet) Remove(id string) {
 //
 // Postcondition: For every id in the returned slice, Has(id) is false.
 // Conditions with DurationType != "rounds" or DurationRemaining == -1 are not affected.
-func (s *ActiveSet) Tick() []string {
+func (s *ActiveSet) Tick(uid string) []string {
 	var expired []string
 	// Deleting map entries during range iteration is safe per the Go specification.
 	for id, ac := range s.conditions {
 		if ac.Def.DurationType != "rounds" || ac.DurationRemaining < 0 {
+			if s.scriptMgr != nil && ac.Def.LuaOnTick != "" {
+				continue // non-rounds conditions: no tick hook
+			}
 			continue
+		}
+		if s.scriptMgr != nil && ac.Def.LuaOnTick != "" {
+			s.scriptMgr.CallHook(s.zoneID, ac.Def.LuaOnTick, //nolint:errcheck
+				lua.LString(uid), lua.LString(id),
+				lua.LNumber(float64(ac.Stacks)), lua.LNumber(float64(ac.DurationRemaining)),
+			)
 		}
 		ac.DurationRemaining--
 		if ac.DurationRemaining <= 0 {

@@ -136,7 +136,7 @@ func makeCombatants() []*combat.Combatant {
 
 func TestEngine_StartCombat(t *testing.T) {
 	eng := combat.NewEngine()
-	cbt, err := eng.StartCombat("room-alley", makeCombatants(), condition.NewRegistry())
+	cbt, err := eng.StartCombat("room-alley", makeCombatants(), condition.NewRegistry(), nil, "")
 	require.NoError(t, err)
 	assert.Equal(t, "room-alley", cbt.RoomID)
 	assert.Len(t, cbt.Combatants, 2)
@@ -145,15 +145,15 @@ func TestEngine_StartCombat(t *testing.T) {
 
 func TestEngine_StartCombat_DuplicateRoom(t *testing.T) {
 	eng := combat.NewEngine()
-	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
+	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry(), nil, "")
 	require.NoError(t, err)
-	_, err = eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
+	_, err = eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry(), nil, "")
 	assert.Error(t, err)
 }
 
 func TestEngine_GetCombat(t *testing.T) {
 	eng := combat.NewEngine()
-	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
+	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry(), nil, "")
 	require.NoError(t, err)
 
 	cbt, ok := eng.GetCombat("room-1")
@@ -166,7 +166,7 @@ func TestEngine_GetCombat(t *testing.T) {
 
 func TestEngine_EndCombat(t *testing.T) {
 	eng := combat.NewEngine()
-	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
+	_, err := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry(), nil, "")
 	require.NoError(t, err)
 
 	eng.EndCombat("room-1")
@@ -176,7 +176,7 @@ func TestEngine_EndCombat(t *testing.T) {
 
 func TestCombat_CurrentTurn(t *testing.T) {
 	eng := combat.NewEngine()
-	cbt, _ := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
+	cbt, _ := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry(), nil, "")
 	current := cbt.CurrentTurn()
 	require.NotNil(t, current)
 	assert.NotEmpty(t, current.ID)
@@ -184,7 +184,7 @@ func TestCombat_CurrentTurn(t *testing.T) {
 
 func TestCombat_AdvanceTurn(t *testing.T) {
 	eng := combat.NewEngine()
-	cbt, _ := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry())
+	cbt, _ := eng.StartCombat("room-1", makeCombatants(), condition.NewRegistry(), nil, "")
 	first := cbt.CurrentTurn()
 	cbt.AdvanceTurn()
 	second := cbt.CurrentTurn()
@@ -195,7 +195,7 @@ func TestCombat_AdvanceTurn_SkipsDead(t *testing.T) {
 	eng := combat.NewEngine()
 	c := makeCombatants()
 	c[1].CurrentHP = 0 // NPC is dead
-	cbt, _ := eng.StartCombat("room-1", c, condition.NewRegistry())
+	cbt, _ := eng.StartCombat("room-1", c, condition.NewRegistry(), nil, "")
 	for i := 0; i < 5; i++ {
 		current := cbt.CurrentTurn()
 		assert.Equal(t, combat.KindPlayer, current.Kind)

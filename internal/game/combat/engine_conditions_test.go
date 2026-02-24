@@ -30,7 +30,7 @@ func makeCombatWithConditions(t *testing.T) (*combat.Engine, *combat.Combat) {
 		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1, Initiative: 15},
 		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 12, CurrentHP: 12, AC: 12, Level: 1, StrMod: 1, DexMod: 0, Initiative: 10},
 	}
-	cbt, err := eng.StartCombat("room1", combatants, reg)
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
 	require.NoError(t, err)
 	return eng, cbt
 }

@@ -369,7 +369,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
 	combat.RollInitiative(combatants, h.dice.Src())
 
-	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry)
+	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry, nil, "")
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
 	}

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
 // Combat holds the live state of a single combat encounter in a room.
@@ -26,6 +27,10 @@ type Combat struct {
 	Conditions map[string]*condition.ActiveSet
 	// condRegistry is the condition registry for this combat.
 	condRegistry *condition.Registry
+	// scriptMgr is the scripting manager for Lua hook dispatch (may be nil).
+	scriptMgr *scripting.Manager
+	// zoneID is the zone used for scripting hook dispatch.
+	zoneID string
 }
 
 // RoundConditionEvent records a condition applied or removed during round startup.
@@ -60,7 +65,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		s := c.Conditions[cbt.ID]
 
 		// Tick durations; collect expired conditions
-		expired := s.Tick()
+		expired := s.Tick(cbt.ID)
 		for _, id := range expired {
 			def, _ := c.condRegistry.Get(id)
 			name := id
@@ -80,7 +85,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 			roll := src.Intn(20) + 1
 			switch {
 			case roll == 20: // natural 20 = crit success: remove dying entirely, restore to 1 HP
-				s.Remove("dying")
+				s.Remove(cbt.ID, "dying")
 				cbt.CurrentHP = 1
 				events = append(events, RoundConditionEvent{
 					UID: cbt.ID, Name: cbt.Name,
@@ -88,9 +93,9 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 					Applied: false,
 				})
 			case roll >= 15: // success: remove dying, apply wounded +1, restore to 1 HP
-				s.Remove("dying")
+				s.Remove(cbt.ID, "dying")
 				if woundedDef, ok := c.condRegistry.Get("wounded"); ok {
-					_ = s.Apply(woundedDef, 1, -1)
+					_ = s.Apply(cbt.ID, woundedDef, 1, -1)
 				}
 				cbt.CurrentHP = 1
 				events = append(events, RoundConditionEvent{
@@ -110,7 +115,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 					// Dying 4 = death
 					cbt.CurrentHP = 0
 					cbt.Dead = true
-					s.Remove("dying")
+					s.Remove(cbt.ID, "dying")
 					events = append(events, RoundConditionEvent{
 						UID: cbt.ID, Name: cbt.Name,
 						ConditionID: "dying", CondName: "Dying",
@@ -118,8 +123,8 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 					})
 				} else {
 					if dyingDef, ok := c.condRegistry.Get("dying"); ok {
-						s.Remove("dying")
-						_ = s.Apply(dyingDef, dyingStacks, -1)
+						s.Remove(cbt.ID, "dying")
+						_ = s.Apply(cbt.ID, dyingDef, dyingStacks, -1)
 					}
 					events = append(events, RoundConditionEvent{
 						UID: cbt.ID, Name: cbt.Name,
@@ -169,13 +174,19 @@ func (c *Combat) ApplyCondition(uid, condID string, stacks, duration int) error 
 	if !ok {
 		return fmt.Errorf("combatant %q not found", uid)
 	}
-	return s.Apply(def, stacks, duration)
+	if c.scriptMgr != nil {
+		s.SetScripting(c.scriptMgr, c.zoneID)
+	}
+	return s.Apply(uid, def, stacks, duration)
 }
 
 // RemoveCondition removes condID from combatant uid. No-op if not present.
 func (c *Combat) RemoveCondition(uid, condID string) {
 	if s, ok := c.Conditions[uid]; ok {
-		s.Remove(condID)
+		if c.scriptMgr != nil {
+			s.SetScripting(c.scriptMgr, c.zoneID)
+		}
+		s.Remove(uid, condID)
 	}
 }
 
@@ -310,10 +321,12 @@ func NewEngine() *Engine {
 
 // StartCombat begins a new combat in roomID with the given combatants.
 // Combatants are sorted by Initiative descending before storing.
+// scriptMgr and zoneID are optional (may be nil/"") — when provided, Lua hooks
+// are fired on condition lifecycle events.
 //
 // Precondition: roomID must be non-empty; combatants must have at least 2 entries.
 // Postcondition: Returns the new Combat or an error if combat is already active in roomID.
-func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistry *condition.Registry) (*Combat, error) {
+func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistry *condition.Registry, scriptMgr *scripting.Manager, zoneID string) (*Combat, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
@@ -331,6 +344,8 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 		ActionQueues: make(map[string]*ActionQueue),
 		Conditions:   make(map[string]*condition.ActiveSet),
 		condRegistry: condRegistry,
+		scriptMgr:    scriptMgr,
+		zoneID:       zoneID,
 	}
 	for _, c := range sorted {
 		cbt.Conditions[c.ID] = condition.NewActiveSet()
