@@ -12,20 +12,25 @@ const (
 
 // Handler identifiers mapping commands to gRPC message types.
 const (
-	HandlerMove  = "move"
-	HandlerLook  = "look"
-	HandlerExits = "exits"
-	HandlerSay   = "say"
-	HandlerEmote = "emote"
-	HandlerWho   = "who"
-	HandlerQuit  = "quit"
-	HandlerHelp    = "help"
-	HandlerExamine = "examine"
-	HandlerAttack  = "attack"
-	HandlerFlee    = "flee"
-	HandlerPass    = "pass"
-	HandlerStrike  = "strike"
-	HandlerStatus  = "status"
+	HandlerMove      = "move"
+	HandlerLook      = "look"
+	HandlerExits     = "exits"
+	HandlerSay       = "say"
+	HandlerEmote     = "emote"
+	HandlerWho       = "who"
+	HandlerQuit      = "quit"
+	HandlerHelp      = "help"
+	HandlerExamine   = "examine"
+	HandlerAttack    = "attack"
+	HandlerFlee      = "flee"
+	HandlerPass      = "pass"
+	HandlerStrike    = "strike"
+	HandlerStatus    = "status"
+	HandlerEquip     = "equip"
+	HandlerReload    = "reload"
+	HandlerFireBurst = "burst"
+	HandlerFireAuto  = "auto"
+	HandlerThrow     = "throw"
 )
 
 // Command defines a player-invocable command.
@@ -66,6 +71,11 @@ func BuiltinCommands() []Command {
 		{Name: "pass", Aliases: []string{"p"}, Help: "Forfeit remaining action points this round.", Category: CategoryCombat, Handler: HandlerPass},
 		{Name: "strike", Aliases: []string{"st"}, Help: "Full attack routine (2 AP, two hits with MAP) against target.", Category: CategoryCombat, Handler: HandlerStrike},
 		{Name: "status", Aliases: []string{"cond"}, Help: "Show your active conditions.", Category: CategoryCombat, Handler: HandlerStatus},
+		{Name: "equip", Aliases: []string{"eq"}, Help: "Equip a weapon (equip <weapon_id> [slot])", Category: CategoryCombat, Handler: HandlerEquip},
+		{Name: "reload", Aliases: []string{"rl"}, Help: "Reload equipped weapon (1 AP)", Category: CategoryCombat, Handler: HandlerReload},
+		{Name: "burst", Aliases: []string{"bf"}, Help: "Burst fire at target (2 AP, 2 attacks)", Category: CategoryCombat, Handler: HandlerFireBurst},
+		{Name: "auto", Aliases: []string{"af"}, Help: "Automatic fire at all enemies (3 AP)", Category: CategoryCombat, Handler: HandlerFireAuto},
+		{Name: "throw", Aliases: []string{"gr"}, Help: "Throw an explosive at current room", Category: CategoryCombat, Handler: HandlerThrow},
 
 		// Communication commands
 		{Name: "say", Aliases: nil, Help: "Say something to the room", Category: CategoryCommunication, Handler: HandlerSay},
