@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+
+	"pgregory.net/rapid"
 )
 
 func TestExplosiveDef_Validate_RejectsEmpty(t *testing.T) {
@@ -65,4 +67,44 @@ traits: [thrown, limited_use]
 	if len(e.Traits) != 2 {
 		t.Errorf("expected 2 traits, got %d", len(e.Traits))
 	}
+}
+
+func TestProperty_ExplosiveDef_SaveDCPositiveAfterValidation(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		dc := rapid.IntRange(1, 30).Draw(rt, "save_dc")
+		e := &inventory.ExplosiveDef{
+			ID:         "e",
+			Name:       "E",
+			DamageDice: "1d6",
+			DamageType: "piercing",
+			AreaType:   inventory.AreaTypeRoom,
+			SaveType:   "reflex",
+			SaveDC:     dc,
+			Fuse:       inventory.FuseImmediate,
+		}
+		if err := e.Validate(); err != nil {
+			rt.Fatalf("valid explosive failed validation: %v", err)
+		}
+		if e.SaveDC <= 0 {
+			rt.Fatal("SaveDC must be positive after successful validation")
+		}
+	})
+}
+
+func TestProperty_ExplosiveDef_ZeroSaveDCAlwaysInvalid(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		e := &inventory.ExplosiveDef{
+			ID:         "e",
+			Name:       "E",
+			DamageDice: "1d6",
+			DamageType: "piercing",
+			AreaType:   inventory.AreaTypeRoom,
+			SaveType:   "reflex",
+			SaveDC:     0,
+			Fuse:       inventory.FuseImmediate,
+		}
+		if err := e.Validate(); err == nil {
+			rt.Fatal("zero SaveDC must always fail validation")
+		}
+	})
 }
