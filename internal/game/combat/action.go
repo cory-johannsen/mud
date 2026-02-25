@@ -7,16 +7,20 @@ import "fmt"
 type ActionType int
 
 const (
-	ActionUnknown ActionType = iota // zero value; intentionally invalid
-	ActionAttack                    // costs 1 AP
-	ActionStrike                    // costs 2 AP; two attacks with MAP
-	ActionPass                      // costs 0 AP; forfeits remaining actions
+	ActionUnknown       ActionType = iota // zero value; intentionally invalid
+	ActionAttack                          // costs 1 AP
+	ActionStrike                          // costs 2 AP; two attacks with MAP
+	ActionPass                            // costs 0 AP; forfeits remaining actions
+	ActionReload                          // costs 1 AP; reload equipped firearm
+	ActionFireBurst                       // costs 2 AP; burst fire
+	ActionFireAutomatic                   // costs 3 AP; full-auto suppressive fire
+	ActionThrow                           // costs 1 AP; throw explosive
 )
 
 // Cost returns the action point cost for the ActionType.
-// Precondition: a is a valid ActionType (ActionAttack, ActionStrike, or ActionPass).
-// Postcondition: returns 1 for ActionAttack, 2 for ActionStrike, 0 for ActionPass,
-// and 0 for ActionUnknown (the zero value is intentionally invalid but has cost 0).
+// Precondition: a is a valid ActionType.
+// Postcondition: returns the correct AP cost for each ActionType; returns 0 for
+// ActionUnknown and unrecognized values.
 func (a ActionType) Cost() int {
 	switch a {
 	case ActionAttack:
@@ -25,6 +29,14 @@ func (a ActionType) Cost() int {
 		return 2
 	case ActionPass:
 		return 0
+	case ActionReload:
+		return 1
+	case ActionFireBurst:
+		return 2
+	case ActionFireAutomatic:
+		return 3
+	case ActionThrow:
+		return 1
 	default:
 		// ActionUnknown and any unrecognized values have cost 0.
 		return 0
@@ -32,7 +44,8 @@ func (a ActionType) Cost() int {
 }
 
 // String returns the human-readable name of the ActionType.
-// Postcondition: returns "attack", "strike", "pass", or "unknown".
+// Postcondition: returns "attack", "strike", "pass", "reload", "burst",
+// "automatic", "throw", or "unknown".
 func (a ActionType) String() string {
 	switch a {
 	case ActionAttack:
@@ -41,6 +54,14 @@ func (a ActionType) String() string {
 		return "strike"
 	case ActionPass:
 		return "pass"
+	case ActionReload:
+		return "reload"
+	case ActionFireBurst:
+		return "burst"
+	case ActionFireAutomatic:
+		return "automatic"
+	case ActionThrow:
+		return "throw"
 	default:
 		return "unknown"
 	}
@@ -48,8 +69,10 @@ func (a ActionType) String() string {
 
 // QueuedAction represents one action a combatant intends to take this round.
 type QueuedAction struct {
-	Type   ActionType
-	Target string // NPC name for attack/strike; empty for pass
+	Type        ActionType
+	Target      string // NPC name for attack/strike; empty for pass
+	WeaponID    string // for firearm actions; empty = unarmed
+	ExplosiveID string // for ActionThrow
 }
 
 // ActionQueue tracks a combatant's remaining action points and queued actions.
