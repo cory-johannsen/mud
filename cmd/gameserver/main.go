@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"time"
 
 	"go.uber.org/zap"
@@ -19,6 +20,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -39,6 +41,8 @@ func main() {
 	conditionsDir := flag.String("conditions-dir", "content/conditions", "path to condition YAML definitions directory")
 	scriptRoot    := flag.String("script-root", "content/scripts", "root directory for Lua scripts; empty = scripting disabled")
 	condScriptDir := flag.String("condition-scripts", "content/scripts/conditions", "directory of global condition scripts loaded into __global__ VM")
+	weaponsDir    := flag.String("weapons-dir", "content/weapons", "path to weapon YAML definitions directory")
+	explosivesDir := flag.String("explosives-dir", "content/explosives", "path to explosive YAML definitions directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -123,6 +127,33 @@ func main() {
 		zap.Duration("elapsed", time.Since(condStart)),
 	)
 
+	// Load inventory definitions.
+	invRegistry := inventory.NewRegistry()
+	if *weaponsDir != "" {
+		weapons, err := inventory.LoadWeapons(*weaponsDir)
+		if err != nil {
+			logger.Fatal("loading weapon definitions", zap.Error(err))
+		}
+		for _, w := range weapons {
+			if err := invRegistry.RegisterWeapon(w); err != nil {
+				logger.Fatal("registering weapon", zap.String("id", w.ID), zap.Error(err))
+			}
+		}
+		logger.Info("loaded weapon definitions", zap.Int("count", len(weapons)))
+	}
+	if *explosivesDir != "" {
+		explosives, err := inventory.LoadExplosives(*explosivesDir)
+		if err != nil {
+			logger.Fatal("loading explosive definitions", zap.Error(err))
+		}
+		for _, ex := range explosives {
+			if err := invRegistry.RegisterExplosive(ex); err != nil {
+				logger.Fatal("registering explosive", zap.String("id", ex.ID), zap.Error(err))
+			}
+		}
+		logger.Info("loaded explosive definitions", zap.Int("count", len(explosives)))
+	}
+
 	// Initialise scripting engine
 	var scriptMgr *scripting.Manager
 	if *scriptRoot != "" {
@@ -158,6 +189,16 @@ func main() {
 			logger.Info("zone scripts loaded",
 				zap.String("zone", zone.ID), zap.String("dir", zone.ScriptDir))
 		}
+
+		// Load weapon scripts.
+		weaponScriptDir := filepath.Join(*scriptRoot, "weapons")
+		if _, statErr := os.Stat(weaponScriptDir); statErr == nil {
+			if err := scriptMgr.LoadGlobal(weaponScriptDir, scripting.DefaultInstructionLimit); err != nil {
+				logger.Fatal("loading weapon scripts", zap.Error(err))
+			}
+			logger.Info("loaded weapon scripts", zap.String("dir", weaponScriptDir))
+		}
+
 		logger.Info("scripting engine initialized",
 			zap.Duration("elapsed", time.Since(scriptStart)))
 
@@ -188,7 +229,7 @@ func main() {
 			grpcService.BroadcastCombatEvents(roomID, events)
 		}
 	}
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, nil)
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry)
 
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
