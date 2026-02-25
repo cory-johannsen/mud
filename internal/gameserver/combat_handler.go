@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -33,14 +34,17 @@ type CombatHandler struct {
 	condRegistry  *condition.Registry
 	worldMgr      *world.Manager
 	scriptMgr     *scripting.Manager
+	invRegistry   *inventory.Registry
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
+	loadoutsMu    sync.Mutex
+	loadouts      map[string]*inventory.Loadout
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
 //
-// Precondition: all pointer arguments must be non-nil; roundDuration must be > 0.
+// Precondition: all pointer arguments except invRegistry must be non-nil; roundDuration must be > 0.
 // Postcondition: Returns a non-nil CombatHandler.
 func NewCombatHandler(
 	engine *combat.Engine,
@@ -52,6 +56,7 @@ func NewCombatHandler(
 	condRegistry *condition.Registry,
 	worldMgr *world.Manager,
 	scriptMgr *scripting.Manager,
+	invRegistry *inventory.Registry,
 ) *CombatHandler {
 	return &CombatHandler{
 		engine:        engine,
@@ -63,7 +68,9 @@ func NewCombatHandler(
 		condRegistry:  condRegistry,
 		worldMgr:      worldMgr,
 		scriptMgr:     scriptMgr,
+		invRegistry:   invRegistry,
 		timers:        make(map[string]*combat.RoundTimer),
+		loadouts:      make(map[string]*inventory.Loadout),
 	}
 }
 
@@ -266,6 +273,207 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, error) {
 	return events, nil
 }
 
+// Equip equips weaponID into the given slot for uid.
+//
+// Precondition: uid must be non-empty; weaponID must identify a registered weapon.
+// Postcondition: Returns nil events and nil error on success; the loadout is updated.
+func (h *CombatHandler) Equip(uid, weaponID, slotName string) ([]*gamev1.CombatEvent, error) {
+	def := h.invRegistry.Weapon(weaponID)
+	if def == nil {
+		return nil, fmt.Errorf("weapon %q not found", weaponID)
+	}
+
+	slot := inventory.SlotPrimary
+	if slotName != "" {
+		slot = inventory.Slot(slotName)
+	}
+
+	h.loadoutsMu.Lock()
+	lo, ok := h.loadouts[uid]
+	if !ok {
+		lo = inventory.NewLoadout()
+		h.loadouts[uid] = lo
+	}
+	if err := lo.Equip(slot, def); err != nil {
+		h.loadoutsMu.Unlock()
+		return nil, fmt.Errorf("equipping weapon: %w", err)
+	}
+	h.loadoutsMu.Unlock()
+
+	// If player is in active combat, update their Combatant.Loadout.
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	// Retrieve session to find roomID.
+	sess, ok := h.sessions.GetPlayer(uid)
+	if ok {
+		if cbt, active := h.engine.GetCombat(sess.RoomID); active {
+			if combatant := h.findCombatant(cbt, uid); combatant != nil {
+				combatant.Loadout = lo
+			}
+		}
+	}
+
+	return nil, nil
+}
+
+// Reload queues ActionReload for uid.
+//
+// Precondition: uid must be a valid connected player in active combat with a primary weapon equipped.
+// Postcondition: Returns resolved events if all actions submitted; nil events otherwise.
+func (h *CombatHandler) Reload(uid string) ([]*gamev1.CombatEvent, error) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil, fmt.Errorf("you are not in combat")
+	}
+
+	h.loadoutsMu.Lock()
+	lo := h.loadouts[uid]
+	h.loadoutsMu.Unlock()
+
+	var weaponID string
+	if lo != nil {
+		if primary := lo.Primary(); primary != nil {
+			weaponID = primary.Def.ID
+		}
+	}
+
+	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionReload, WeaponID: weaponID}); err != nil {
+		return nil, fmt.Errorf("queuing reload: %w", err)
+	}
+
+	if cbt.AllActionsSubmitted() {
+		h.stopTimerLocked(sess.RoomID)
+		return h.resolveAndAdvanceLocked(sess.RoomID, cbt), nil
+	}
+
+	return nil, nil
+}
+
+// FireBurst queues ActionFireBurst for uid against target.
+//
+// Precondition: uid must be a valid connected player in active combat; target must be non-empty.
+// Postcondition: Returns resolved events if all actions submitted; nil events otherwise.
+func (h *CombatHandler) FireBurst(uid, target string) ([]*gamev1.CombatEvent, error) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil, fmt.Errorf("you are not in combat")
+	}
+
+	h.loadoutsMu.Lock()
+	lo := h.loadouts[uid]
+	h.loadoutsMu.Unlock()
+
+	var weaponID string
+	if lo != nil {
+		if primary := lo.Primary(); primary != nil {
+			weaponID = primary.Def.ID
+		}
+	}
+
+	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionFireBurst, Target: target, WeaponID: weaponID}); err != nil {
+		return nil, fmt.Errorf("queuing fire burst: %w", err)
+	}
+
+	if cbt.AllActionsSubmitted() {
+		h.stopTimerLocked(sess.RoomID)
+		return h.resolveAndAdvanceLocked(sess.RoomID, cbt), nil
+	}
+
+	return nil, nil
+}
+
+// FireAutomatic queues ActionFireAutomatic for uid against target.
+//
+// Precondition: uid must be a valid connected player in active combat; target must be non-empty.
+// Postcondition: Returns resolved events if all actions submitted; nil events otherwise.
+func (h *CombatHandler) FireAutomatic(uid, target string) ([]*gamev1.CombatEvent, error) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil, fmt.Errorf("you are not in combat")
+	}
+
+	h.loadoutsMu.Lock()
+	lo := h.loadouts[uid]
+	h.loadoutsMu.Unlock()
+
+	var weaponID string
+	if lo != nil {
+		if primary := lo.Primary(); primary != nil {
+			weaponID = primary.Def.ID
+		}
+	}
+
+	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionFireAutomatic, Target: target, WeaponID: weaponID}); err != nil {
+		return nil, fmt.Errorf("queuing fire automatic: %w", err)
+	}
+
+	if cbt.AllActionsSubmitted() {
+		h.stopTimerLocked(sess.RoomID)
+		return h.resolveAndAdvanceLocked(sess.RoomID, cbt), nil
+	}
+
+	return nil, nil
+}
+
+// Throw queues ActionThrow for uid using explosiveID.
+//
+// Precondition: uid must be a valid connected player in active combat; explosiveID must identify a registered explosive.
+// Postcondition: Returns resolved events if all actions submitted; nil events otherwise.
+func (h *CombatHandler) Throw(uid, explosiveID string) ([]*gamev1.CombatEvent, error) {
+	if h.invRegistry.Explosive(explosiveID) == nil {
+		return nil, fmt.Errorf("explosive %q not found", explosiveID)
+	}
+
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil, fmt.Errorf("you are not in combat")
+	}
+
+	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionThrow, ExplosiveID: explosiveID}); err != nil {
+		return nil, fmt.Errorf("queuing throw: %w", err)
+	}
+
+	if cbt.AllActionsSubmitted() {
+		h.stopTimerLocked(sess.RoomID)
+		return h.resolveAndAdvanceLocked(sess.RoomID, cbt), nil
+	}
+
+	return nil, nil
+}
+
 // resolveAndAdvance is the timer-fired entry point. It acquires combatMu, then
 // delegates to resolveAndAdvanceLocked.
 //
@@ -287,7 +495,7 @@ func (h *CombatHandler) resolveAndAdvance(roomID string) {
 //
 // Precondition: combatMu is held; cbt is the active Combat for roomID.
 // Postcondition: round events are broadcast; combat is ended or next round is started.
-func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Combat) {
+func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Combat) []*gamev1.CombatEvent {
 	targetUpdater := func(id string, hp int) {
 		if inst, found := h.npcMgr.Get(id); found {
 			inst.CurrentHP = hp
@@ -323,7 +531,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		})
 		h.broadcastFn(roomID, events)
 		h.engine.EndCombat(roomID)
-		return
+		return events
 	}
 
 	h.broadcastFn(roomID, events)
@@ -342,6 +550,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	roundStartEvents = append(roundStartEvents, condCombatEvents...)
 	h.broadcastFn(roomID, roundStartEvents)
 	h.startTimerLocked(roomID)
+	return events
 }
 
 // startCombatLocked initialises a new combat encounter for sess attacking inst.
@@ -362,6 +571,13 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		StrMod:    2,
 		DexMod:    1,
 	}
+
+	h.loadoutsMu.Lock()
+	if lo, ok := h.loadouts[sess.UID]; ok {
+		playerCbt.Loadout = lo
+	}
+	h.loadoutsMu.Unlock()
+
 	npcCbt := &combat.Combatant{
 		ID:        inst.ID,
 		Kind:      combat.KindNPC,
