@@ -132,6 +132,8 @@ const (
 	CombatEventType_COMBAT_EVENT_TYPE_FLEE        CombatEventType = 4
 	CombatEventType_COMBAT_EVENT_TYPE_END         CombatEventType = 5
 	CombatEventType_COMBAT_EVENT_TYPE_CONDITION   CombatEventType = 6
+	CombatEventType_COMBAT_EVENT_TYPE_RELOAD      CombatEventType = 7
+	CombatEventType_COMBAT_EVENT_TYPE_THROW       CombatEventType = 8
 )
 
 // Enum value maps for CombatEventType.
@@ -144,6 +146,8 @@ var (
 		4: "COMBAT_EVENT_TYPE_FLEE",
 		5: "COMBAT_EVENT_TYPE_END",
 		6: "COMBAT_EVENT_TYPE_CONDITION",
+		7: "COMBAT_EVENT_TYPE_RELOAD",
+		8: "COMBAT_EVENT_TYPE_THROW",
 	}
 	CombatEventType_value = map[string]int32{
 		"COMBAT_EVENT_TYPE_UNSPECIFIED": 0,
@@ -153,6 +157,8 @@ var (
 		"COMBAT_EVENT_TYPE_FLEE":        4,
 		"COMBAT_EVENT_TYPE_END":         5,
 		"COMBAT_EVENT_TYPE_CONDITION":   6,
+		"COMBAT_EVENT_TYPE_RELOAD":      7,
+		"COMBAT_EVENT_TYPE_THROW":       8,
 	}
 )
 
@@ -203,6 +209,11 @@ type ClientMessage struct {
 	//	*ClientMessage_Pass
 	//	*ClientMessage_Strike
 	//	*ClientMessage_Status
+	//	*ClientMessage_Equip
+	//	*ClientMessage_Reload
+	//	*ClientMessage_FireBurst
+	//	*ClientMessage_FireAutomatic
+	//	*ClientMessage_Throw
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -378,6 +389,51 @@ func (x *ClientMessage) GetStatus() *StatusRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetEquip() *EquipRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Equip); ok {
+			return x.Equip
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetReload() *ReloadRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Reload); ok {
+			return x.Reload
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetFireBurst() *FireBurstRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_FireBurst); ok {
+			return x.FireBurst
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetFireAutomatic() *FireAutomaticRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_FireAutomatic); ok {
+			return x.FireAutomatic
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetThrow() *ThrowRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Throw); ok {
+			return x.Throw
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -438,6 +494,26 @@ type ClientMessage_Status struct {
 	Status *StatusRequest `protobuf:"bytes,15,opt,name=status,proto3,oneof"`
 }
 
+type ClientMessage_Equip struct {
+	Equip *EquipRequest `protobuf:"bytes,16,opt,name=equip,proto3,oneof"`
+}
+
+type ClientMessage_Reload struct {
+	Reload *ReloadRequest `protobuf:"bytes,17,opt,name=reload,proto3,oneof"`
+}
+
+type ClientMessage_FireBurst struct {
+	FireBurst *FireBurstRequest `protobuf:"bytes,18,opt,name=fire_burst,json=fireBurst,proto3,oneof"`
+}
+
+type ClientMessage_FireAutomatic struct {
+	FireAutomatic *FireAutomaticRequest `protobuf:"bytes,19,opt,name=fire_automatic,json=fireAutomatic,proto3,oneof"`
+}
+
+type ClientMessage_Throw struct {
+	Throw *ThrowRequest `protobuf:"bytes,20,opt,name=throw,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -465,6 +541,16 @@ func (*ClientMessage_Pass) isClientMessage_Payload() {}
 func (*ClientMessage_Strike) isClientMessage_Payload() {}
 
 func (*ClientMessage_Status) isClientMessage_Payload() {}
+
+func (*ClientMessage_Equip) isClientMessage_Payload() {}
+
+func (*ClientMessage_Reload) isClientMessage_Payload() {}
+
+func (*ClientMessage_FireBurst) isClientMessage_Payload() {}
+
+func (*ClientMessage_FireAutomatic) isClientMessage_Payload() {}
+
+func (*ClientMessage_Throw) isClientMessage_Payload() {}
 
 // ServerEvent wraps all server-to-client events.
 type ServerEvent struct {
@@ -2053,6 +2139,255 @@ func (x *StrikeRequest) GetTarget() string {
 	return ""
 }
 
+// EquipRequest asks the server to equip a weapon in the specified slot.
+type EquipRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WeaponId      string                 `protobuf:"bytes,1,opt,name=weapon_id,json=weaponId,proto3" json:"weapon_id,omitempty"`
+	Slot          string                 `protobuf:"bytes,2,opt,name=slot,proto3" json:"slot,omitempty"` // "primary", "secondary", "holster"
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EquipRequest) Reset() {
+	*x = EquipRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EquipRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EquipRequest) ProtoMessage() {}
+
+func (x *EquipRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EquipRequest.ProtoReflect.Descriptor instead.
+func (*EquipRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *EquipRequest) GetWeaponId() string {
+	if x != nil {
+		return x.WeaponId
+	}
+	return ""
+}
+
+func (x *EquipRequest) GetSlot() string {
+	if x != nil {
+		return x.Slot
+	}
+	return ""
+}
+
+// ReloadRequest asks the server to reload the specified weapon, or the primary slot if empty.
+type ReloadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WeaponId      string                 `protobuf:"bytes,1,opt,name=weapon_id,json=weaponId,proto3" json:"weapon_id,omitempty"` // empty = reload primary slot
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReloadRequest) Reset() {
+	*x = ReloadRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReloadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReloadRequest) ProtoMessage() {}
+
+func (x *ReloadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReloadRequest.ProtoReflect.Descriptor instead.
+func (*ReloadRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ReloadRequest) GetWeaponId() string {
+	if x != nil {
+		return x.WeaponId
+	}
+	return ""
+}
+
+// FireBurstRequest asks the server to fire a burst at the specified target.
+type FireBurstRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Target        string                 `protobuf:"bytes,1,opt,name=target,proto3" json:"target,omitempty"`
+	WeaponId      string                 `protobuf:"bytes,2,opt,name=weapon_id,json=weaponId,proto3" json:"weapon_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FireBurstRequest) Reset() {
+	*x = FireBurstRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FireBurstRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FireBurstRequest) ProtoMessage() {}
+
+func (x *FireBurstRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FireBurstRequest.ProtoReflect.Descriptor instead.
+func (*FireBurstRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *FireBurstRequest) GetTarget() string {
+	if x != nil {
+		return x.Target
+	}
+	return ""
+}
+
+func (x *FireBurstRequest) GetWeaponId() string {
+	if x != nil {
+		return x.WeaponId
+	}
+	return ""
+}
+
+// FireAutomaticRequest asks the server to fire automatically at the specified target.
+type FireAutomaticRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Target        string                 `protobuf:"bytes,1,opt,name=target,proto3" json:"target,omitempty"`
+	WeaponId      string                 `protobuf:"bytes,2,opt,name=weapon_id,json=weaponId,proto3" json:"weapon_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FireAutomaticRequest) Reset() {
+	*x = FireAutomaticRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FireAutomaticRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FireAutomaticRequest) ProtoMessage() {}
+
+func (x *FireAutomaticRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FireAutomaticRequest.ProtoReflect.Descriptor instead.
+func (*FireAutomaticRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *FireAutomaticRequest) GetTarget() string {
+	if x != nil {
+		return x.Target
+	}
+	return ""
+}
+
+func (x *FireAutomaticRequest) GetWeaponId() string {
+	if x != nil {
+		return x.WeaponId
+	}
+	return ""
+}
+
+// ThrowRequest asks the server to throw an explosive.
+type ThrowRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExplosiveId   string                 `protobuf:"bytes,1,opt,name=explosive_id,json=explosiveId,proto3" json:"explosive_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ThrowRequest) Reset() {
+	*x = ThrowRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ThrowRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ThrowRequest) ProtoMessage() {}
+
+func (x *ThrowRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ThrowRequest.ProtoReflect.Descriptor instead.
+func (*ThrowRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ThrowRequest) GetExplosiveId() string {
+	if x != nil {
+		return x.ExplosiveId
+	}
+	return ""
+}
+
 // RoundStartEvent is broadcast to all combatants when a new round begins.
 type RoundStartEvent struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
@@ -2066,7 +2401,7 @@ type RoundStartEvent struct {
 
 func (x *RoundStartEvent) Reset() {
 	*x = RoundStartEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[26]
+	mi := &file_game_v1_game_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2078,7 +2413,7 @@ func (x *RoundStartEvent) String() string {
 func (*RoundStartEvent) ProtoMessage() {}
 
 func (x *RoundStartEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[26]
+	mi := &file_game_v1_game_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2091,7 +2426,7 @@ func (x *RoundStartEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoundStartEvent.ProtoReflect.Descriptor instead.
 func (*RoundStartEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{26}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *RoundStartEvent) GetRound() int32 {
@@ -2132,7 +2467,7 @@ type RoundEndEvent struct {
 
 func (x *RoundEndEvent) Reset() {
 	*x = RoundEndEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[27]
+	mi := &file_game_v1_game_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2144,7 +2479,7 @@ func (x *RoundEndEvent) String() string {
 func (*RoundEndEvent) ProtoMessage() {}
 
 func (x *RoundEndEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[27]
+	mi := &file_game_v1_game_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2157,7 +2492,7 @@ func (x *RoundEndEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoundEndEvent.ProtoReflect.Descriptor instead.
 func (*RoundEndEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{27}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *RoundEndEvent) GetRound() int32 {
@@ -2179,13 +2514,14 @@ type CombatEvent struct {
 	Damage        int32                  `protobuf:"varint,7,opt,name=damage,proto3" json:"damage,omitempty"`
 	TargetHp      int32                  `protobuf:"varint,8,opt,name=target_hp,json=targetHp,proto3" json:"target_hp,omitempty"`
 	Narrative     string                 `protobuf:"bytes,9,opt,name=narrative,proto3" json:"narrative,omitempty"`
+	WeaponName    string                 `protobuf:"bytes,10,opt,name=weapon_name,json=weaponName,proto3" json:"weapon_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CombatEvent) Reset() {
 	*x = CombatEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[28]
+	mi := &file_game_v1_game_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2197,7 +2533,7 @@ func (x *CombatEvent) String() string {
 func (*CombatEvent) ProtoMessage() {}
 
 func (x *CombatEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[28]
+	mi := &file_game_v1_game_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2210,7 +2546,7 @@ func (x *CombatEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CombatEvent.ProtoReflect.Descriptor instead.
 func (*CombatEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{28}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *CombatEvent) GetType() CombatEventType {
@@ -2276,6 +2612,13 @@ func (x *CombatEvent) GetNarrative() string {
 	return ""
 }
 
+func (x *CombatEvent) GetWeaponName() string {
+	if x != nil {
+		return x.WeaponName
+	}
+	return ""
+}
+
 // StatusRequest asks the server to return the player's active conditions.
 type StatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -2285,7 +2628,7 @@ type StatusRequest struct {
 
 func (x *StatusRequest) Reset() {
 	*x = StatusRequest{}
-	mi := &file_game_v1_game_proto_msgTypes[29]
+	mi := &file_game_v1_game_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2297,7 +2640,7 @@ func (x *StatusRequest) String() string {
 func (*StatusRequest) ProtoMessage() {}
 
 func (x *StatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[29]
+	mi := &file_game_v1_game_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2310,7 +2653,7 @@ func (x *StatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StatusRequest.ProtoReflect.Descriptor instead.
 func (*StatusRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{29}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{34}
 }
 
 // ConditionEvent reports a condition being applied to or removed from an entity.
@@ -2328,7 +2671,7 @@ type ConditionEvent struct {
 
 func (x *ConditionEvent) Reset() {
 	*x = ConditionEvent{}
-	mi := &file_game_v1_game_proto_msgTypes[30]
+	mi := &file_game_v1_game_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2340,7 +2683,7 @@ func (x *ConditionEvent) String() string {
 func (*ConditionEvent) ProtoMessage() {}
 
 func (x *ConditionEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[30]
+	mi := &file_game_v1_game_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2353,7 +2696,7 @@ func (x *ConditionEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConditionEvent.ProtoReflect.Descriptor instead.
 func (*ConditionEvent) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{30}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ConditionEvent) GetTargetUid() string {
@@ -2411,7 +2754,7 @@ type ConditionInfo struct {
 
 func (x *ConditionInfo) Reset() {
 	*x = ConditionInfo{}
-	mi := &file_game_v1_game_proto_msgTypes[31]
+	mi := &file_game_v1_game_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2423,7 +2766,7 @@ func (x *ConditionInfo) String() string {
 func (*ConditionInfo) ProtoMessage() {}
 
 func (x *ConditionInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[31]
+	mi := &file_game_v1_game_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2436,7 +2779,7 @@ func (x *ConditionInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConditionInfo.ProtoReflect.Descriptor instead.
 func (*ConditionInfo) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{31}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ConditionInfo) GetId() string {
@@ -2471,7 +2814,7 @@ var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xcc\x05\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xe0\a\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -2490,7 +2833,13 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x04flee\x18\f \x01(\v2\x14.game.v1.FleeRequestH\x00R\x04flee\x12*\n" +
 	"\x04pass\x18\r \x01(\v2\x14.game.v1.PassRequestH\x00R\x04pass\x120\n" +
 	"\x06strike\x18\x0e \x01(\v2\x16.game.v1.StrikeRequestH\x00R\x06strike\x120\n" +
-	"\x06status\x18\x0f \x01(\v2\x16.game.v1.StatusRequestH\x00R\x06statusB\t\n" +
+	"\x06status\x18\x0f \x01(\v2\x16.game.v1.StatusRequestH\x00R\x06status\x12-\n" +
+	"\x05equip\x18\x10 \x01(\v2\x15.game.v1.EquipRequestH\x00R\x05equip\x120\n" +
+	"\x06reload\x18\x11 \x01(\v2\x16.game.v1.ReloadRequestH\x00R\x06reload\x12:\n" +
+	"\n" +
+	"fire_burst\x18\x12 \x01(\v2\x19.game.v1.FireBurstRequestH\x00R\tfireBurst\x12F\n" +
+	"\x0efire_automatic\x18\x13 \x01(\v2\x1d.game.v1.FireAutomaticRequestH\x00R\rfireAutomatic\x12-\n" +
+	"\x05throw\x18\x14 \x01(\v2\x15.game.v1.ThrowRequestH\x00R\x05throwB\t\n" +
 	"\apayload\"\x88\x06\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
@@ -2602,7 +2951,20 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vFleeRequest\"\r\n" +
 	"\vPassRequest\"'\n" +
 	"\rStrikeRequest\x12\x16\n" +
-	"\x06target\x18\x01 \x01(\tR\x06target\"\x91\x01\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\"?\n" +
+	"\fEquipRequest\x12\x1b\n" +
+	"\tweapon_id\x18\x01 \x01(\tR\bweaponId\x12\x12\n" +
+	"\x04slot\x18\x02 \x01(\tR\x04slot\",\n" +
+	"\rReloadRequest\x12\x1b\n" +
+	"\tweapon_id\x18\x01 \x01(\tR\bweaponId\"G\n" +
+	"\x10FireBurstRequest\x12\x16\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\x12\x1b\n" +
+	"\tweapon_id\x18\x02 \x01(\tR\bweaponId\"K\n" +
+	"\x14FireAutomaticRequest\x12\x16\n" +
+	"\x06target\x18\x01 \x01(\tR\x06target\x12\x1b\n" +
+	"\tweapon_id\x18\x02 \x01(\tR\bweaponId\"1\n" +
+	"\fThrowRequest\x12!\n" +
+	"\fexplosive_id\x18\x01 \x01(\tR\vexplosiveId\"\x91\x01\n" +
 	"\x0fRoundStartEvent\x12\x14\n" +
 	"\x05round\x18\x01 \x01(\x05R\x05round\x12(\n" +
 	"\x10actions_per_turn\x18\x02 \x01(\x05R\x0eactionsPerTurn\x12\x1f\n" +
@@ -2611,7 +2973,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"turn_order\x18\x04 \x03(\tR\tturnOrder\"%\n" +
 	"\rRoundEndEvent\x12\x14\n" +
-	"\x05round\x18\x01 \x01(\x05R\x05round\"\xa0\x02\n" +
+	"\x05round\x18\x01 \x01(\x05R\x05round\"\xc1\x02\n" +
 	"\vCombatEvent\x12,\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x18.game.v1.CombatEventTypeR\x04type\x12\x1a\n" +
 	"\battacker\x18\x02 \x01(\tR\battacker\x12\x16\n" +
@@ -2622,7 +2984,10 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\aoutcome\x18\x06 \x01(\tR\aoutcome\x12\x16\n" +
 	"\x06damage\x18\a \x01(\x05R\x06damage\x12\x1b\n" +
 	"\ttarget_hp\x18\b \x01(\x05R\btargetHp\x12\x1c\n" +
-	"\tnarrative\x18\t \x01(\tR\tnarrative\"\x0f\n" +
+	"\tnarrative\x18\t \x01(\tR\tnarrative\x12\x1f\n" +
+	"\vweapon_name\x18\n" +
+	" \x01(\tR\n" +
+	"weaponName\"\x0f\n" +
 	"\rStatusRequest\"\xcc\x01\n" +
 	"\x0eConditionEvent\x12\x1d\n" +
 	"\n" +
@@ -2645,7 +3010,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\rRoomEventType\x12\x1f\n" +
 	"\x1bROOM_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16ROOM_EVENT_TYPE_ARRIVE\x10\x01\x12\x1a\n" +
-	"\x16ROOM_EVENT_TYPE_DEPART\x10\x02*\xe9\x01\n" +
+	"\x16ROOM_EVENT_TYPE_DEPART\x10\x02*\xa4\x02\n" +
 	"\x0fCombatEventType\x12!\n" +
 	"\x1dCOMBAT_EVENT_TYPE_UNSPECIFIED\x10\x00\x12 \n" +
 	"\x1cCOMBAT_EVENT_TYPE_INITIATIVE\x10\x01\x12\x1c\n" +
@@ -2653,7 +3018,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x17COMBAT_EVENT_TYPE_DEATH\x10\x03\x12\x1a\n" +
 	"\x16COMBAT_EVENT_TYPE_FLEE\x10\x04\x12\x19\n" +
 	"\x15COMBAT_EVENT_TYPE_END\x10\x05\x12\x1f\n" +
-	"\x1bCOMBAT_EVENT_TYPE_CONDITION\x10\x062J\n" +
+	"\x1bCOMBAT_EVENT_TYPE_CONDITION\x10\x06\x12\x1c\n" +
+	"\x18COMBAT_EVENT_TYPE_RELOAD\x10\a\x12\x1b\n" +
+	"\x17COMBAT_EVENT_TYPE_THROW\x10\b2J\n" +
 	"\vGameService\x12;\n" +
 	"\aSession\x12\x16.game.v1.ClientMessage\x1a\x14.game.v1.ServerEvent(\x010\x01B:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
 
@@ -2670,43 +3037,48 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_game_v1_game_proto_goTypes = []any{
-	(MessageType)(0),         // 0: game.v1.MessageType
-	(RoomEventType)(0),       // 1: game.v1.RoomEventType
-	(CombatEventType)(0),     // 2: game.v1.CombatEventType
-	(*ClientMessage)(nil),    // 3: game.v1.ClientMessage
-	(*ServerEvent)(nil),      // 4: game.v1.ServerEvent
-	(*JoinWorldRequest)(nil), // 5: game.v1.JoinWorldRequest
-	(*MoveRequest)(nil),      // 6: game.v1.MoveRequest
-	(*LookRequest)(nil),      // 7: game.v1.LookRequest
-	(*SayRequest)(nil),       // 8: game.v1.SayRequest
-	(*EmoteRequest)(nil),     // 9: game.v1.EmoteRequest
-	(*WhoRequest)(nil),       // 10: game.v1.WhoRequest
-	(*ExitsRequest)(nil),     // 11: game.v1.ExitsRequest
-	(*QuitRequest)(nil),      // 12: game.v1.QuitRequest
-	(*RoomView)(nil),         // 13: game.v1.RoomView
-	(*ExitInfo)(nil),         // 14: game.v1.ExitInfo
-	(*MessageEvent)(nil),     // 15: game.v1.MessageEvent
-	(*RoomEvent)(nil),        // 16: game.v1.RoomEvent
-	(*PlayerList)(nil),       // 17: game.v1.PlayerList
-	(*ExitList)(nil),         // 18: game.v1.ExitList
-	(*ErrorEvent)(nil),       // 19: game.v1.ErrorEvent
-	(*Disconnected)(nil),     // 20: game.v1.Disconnected
-	(*CharacterInfo)(nil),    // 21: game.v1.CharacterInfo
-	(*NpcInfo)(nil),          // 22: game.v1.NpcInfo
-	(*ExamineRequest)(nil),   // 23: game.v1.ExamineRequest
-	(*NpcView)(nil),          // 24: game.v1.NpcView
-	(*AttackRequest)(nil),    // 25: game.v1.AttackRequest
-	(*FleeRequest)(nil),      // 26: game.v1.FleeRequest
-	(*PassRequest)(nil),      // 27: game.v1.PassRequest
-	(*StrikeRequest)(nil),    // 28: game.v1.StrikeRequest
-	(*RoundStartEvent)(nil),  // 29: game.v1.RoundStartEvent
-	(*RoundEndEvent)(nil),    // 30: game.v1.RoundEndEvent
-	(*CombatEvent)(nil),      // 31: game.v1.CombatEvent
-	(*StatusRequest)(nil),    // 32: game.v1.StatusRequest
-	(*ConditionEvent)(nil),   // 33: game.v1.ConditionEvent
-	(*ConditionInfo)(nil),    // 34: game.v1.ConditionInfo
+	(MessageType)(0),             // 0: game.v1.MessageType
+	(RoomEventType)(0),           // 1: game.v1.RoomEventType
+	(CombatEventType)(0),         // 2: game.v1.CombatEventType
+	(*ClientMessage)(nil),        // 3: game.v1.ClientMessage
+	(*ServerEvent)(nil),          // 4: game.v1.ServerEvent
+	(*JoinWorldRequest)(nil),     // 5: game.v1.JoinWorldRequest
+	(*MoveRequest)(nil),          // 6: game.v1.MoveRequest
+	(*LookRequest)(nil),          // 7: game.v1.LookRequest
+	(*SayRequest)(nil),           // 8: game.v1.SayRequest
+	(*EmoteRequest)(nil),         // 9: game.v1.EmoteRequest
+	(*WhoRequest)(nil),           // 10: game.v1.WhoRequest
+	(*ExitsRequest)(nil),         // 11: game.v1.ExitsRequest
+	(*QuitRequest)(nil),          // 12: game.v1.QuitRequest
+	(*RoomView)(nil),             // 13: game.v1.RoomView
+	(*ExitInfo)(nil),             // 14: game.v1.ExitInfo
+	(*MessageEvent)(nil),         // 15: game.v1.MessageEvent
+	(*RoomEvent)(nil),            // 16: game.v1.RoomEvent
+	(*PlayerList)(nil),           // 17: game.v1.PlayerList
+	(*ExitList)(nil),             // 18: game.v1.ExitList
+	(*ErrorEvent)(nil),           // 19: game.v1.ErrorEvent
+	(*Disconnected)(nil),         // 20: game.v1.Disconnected
+	(*CharacterInfo)(nil),        // 21: game.v1.CharacterInfo
+	(*NpcInfo)(nil),              // 22: game.v1.NpcInfo
+	(*ExamineRequest)(nil),       // 23: game.v1.ExamineRequest
+	(*NpcView)(nil),              // 24: game.v1.NpcView
+	(*AttackRequest)(nil),        // 25: game.v1.AttackRequest
+	(*FleeRequest)(nil),          // 26: game.v1.FleeRequest
+	(*PassRequest)(nil),          // 27: game.v1.PassRequest
+	(*StrikeRequest)(nil),        // 28: game.v1.StrikeRequest
+	(*EquipRequest)(nil),         // 29: game.v1.EquipRequest
+	(*ReloadRequest)(nil),        // 30: game.v1.ReloadRequest
+	(*FireBurstRequest)(nil),     // 31: game.v1.FireBurstRequest
+	(*FireAutomaticRequest)(nil), // 32: game.v1.FireAutomaticRequest
+	(*ThrowRequest)(nil),         // 33: game.v1.ThrowRequest
+	(*RoundStartEvent)(nil),      // 34: game.v1.RoundStartEvent
+	(*RoundEndEvent)(nil),        // 35: game.v1.RoundEndEvent
+	(*CombatEvent)(nil),          // 36: game.v1.CombatEvent
+	(*StatusRequest)(nil),        // 37: game.v1.StatusRequest
+	(*ConditionEvent)(nil),       // 38: game.v1.ConditionEvent
+	(*ConditionInfo)(nil),        // 39: game.v1.ConditionInfo
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	5,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -2722,34 +3094,39 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	26, // 10: game.v1.ClientMessage.flee:type_name -> game.v1.FleeRequest
 	27, // 11: game.v1.ClientMessage.pass:type_name -> game.v1.PassRequest
 	28, // 12: game.v1.ClientMessage.strike:type_name -> game.v1.StrikeRequest
-	32, // 13: game.v1.ClientMessage.status:type_name -> game.v1.StatusRequest
-	13, // 14: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	15, // 15: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	16, // 16: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	17, // 17: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	18, // 18: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	19, // 19: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	20, // 20: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	21, // 21: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	24, // 22: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	31, // 23: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	29, // 24: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	30, // 25: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	33, // 26: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	14, // 27: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	22, // 28: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	34, // 29: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	0,  // 30: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,  // 31: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	14, // 32: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	2,  // 33: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	3,  // 34: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	4,  // 35: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	35, // [35:36] is the sub-list for method output_type
-	34, // [34:35] is the sub-list for method input_type
-	34, // [34:34] is the sub-list for extension type_name
-	34, // [34:34] is the sub-list for extension extendee
-	0,  // [0:34] is the sub-list for field type_name
+	37, // 13: game.v1.ClientMessage.status:type_name -> game.v1.StatusRequest
+	29, // 14: game.v1.ClientMessage.equip:type_name -> game.v1.EquipRequest
+	30, // 15: game.v1.ClientMessage.reload:type_name -> game.v1.ReloadRequest
+	31, // 16: game.v1.ClientMessage.fire_burst:type_name -> game.v1.FireBurstRequest
+	32, // 17: game.v1.ClientMessage.fire_automatic:type_name -> game.v1.FireAutomaticRequest
+	33, // 18: game.v1.ClientMessage.throw:type_name -> game.v1.ThrowRequest
+	13, // 19: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	15, // 20: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	16, // 21: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	17, // 22: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	18, // 23: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	19, // 24: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	20, // 25: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	21, // 26: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	24, // 27: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	36, // 28: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	34, // 29: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	35, // 30: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	38, // 31: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	14, // 32: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	22, // 33: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	39, // 34: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	0,  // 35: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,  // 36: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	14, // 37: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	2,  // 38: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	3,  // 39: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	4,  // 40: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	40, // [40:41] is the sub-list for method output_type
+	39, // [39:40] is the sub-list for method input_type
+	39, // [39:39] is the sub-list for extension type_name
+	39, // [39:39] is the sub-list for extension extendee
+	0,  // [0:39] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -2772,6 +3149,11 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_Pass)(nil),
 		(*ClientMessage_Strike)(nil),
 		(*ClientMessage_Status)(nil),
+		(*ClientMessage_Equip)(nil),
+		(*ClientMessage_Reload)(nil),
+		(*ClientMessage_FireBurst)(nil),
+		(*ClientMessage_FireAutomatic)(nil),
+		(*ClientMessage_Throw)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -2794,7 +3176,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   32,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
