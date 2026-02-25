@@ -258,6 +258,16 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handlePass(uid)
 	case *gamev1.ClientMessage_Strike:
 		return s.handleStrike(uid, p.Strike)
+	case *gamev1.ClientMessage_Equip:
+		return s.handleEquip(uid, p.Equip)
+	case *gamev1.ClientMessage_Reload:
+		return s.handleReload(uid, p.Reload)
+	case *gamev1.ClientMessage_FireBurst:
+		return s.handleFireBurst(uid, p.FireBurst)
+	case *gamev1.ClientMessage_FireAutomatic:
+		return s.handleFireAutomatic(uid, p.FireAutomatic)
+	case *gamev1.ClientMessage_Throw:
+		return s.handleThrow(uid, p.Throw)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -659,4 +669,84 @@ func (s *GameServiceServer) cleanupPlayer(uid, username string) {
 		zap.String("username", username),
 		zap.Int64("character_id", characterID),
 	)
+}
+
+// errorEvent builds a ServerEvent carrying an ErrorEvent with the given message.
+//
+// Precondition: msg must be non-empty.
+// Postcondition: Returns a non-nil ServerEvent.
+func errorEvent(msg string) *gamev1.ServerEvent {
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Error{
+			Error: &gamev1.ErrorEvent{Message: msg},
+		},
+	}
+}
+
+// messageEvent builds a ServerEvent carrying a MessageEvent with the given text.
+//
+// Precondition: text must be non-empty.
+// Postcondition: Returns a non-nil ServerEvent.
+func messageEvent(text string) *gamev1.ServerEvent {
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{Content: text},
+		},
+	}
+}
+
+func (s *GameServiceServer) handleEquip(uid string, req *gamev1.EquipRequest) (*gamev1.ServerEvent, error) {
+	_, err := s.combatH.Equip(uid, req.GetWeaponId(), req.GetSlot())
+	if err != nil {
+		return errorEvent(err.Error()), nil
+	}
+	return messageEvent("Equipped " + req.GetWeaponId() + "."), nil
+}
+
+func (s *GameServiceServer) handleReload(uid string, req *gamev1.ReloadRequest) (*gamev1.ServerEvent, error) {
+	events, err := s.combatH.Reload(uid)
+	if err != nil {
+		return errorEvent(err.Error()), nil
+	}
+	sess, sErr := s.sessions.GetPlayer(uid)
+	if sErr && len(events) > 0 {
+		s.BroadcastCombatEvents(sess.RoomID, events)
+	}
+	return nil, nil
+}
+
+func (s *GameServiceServer) handleFireBurst(uid string, req *gamev1.FireBurstRequest) (*gamev1.ServerEvent, error) {
+	events, err := s.combatH.FireBurst(uid, req.GetTarget())
+	if err != nil {
+		return errorEvent(err.Error()), nil
+	}
+	sess, sErr := s.sessions.GetPlayer(uid)
+	if sErr && len(events) > 0 {
+		s.BroadcastCombatEvents(sess.RoomID, events)
+	}
+	return nil, nil
+}
+
+func (s *GameServiceServer) handleFireAutomatic(uid string, req *gamev1.FireAutomaticRequest) (*gamev1.ServerEvent, error) {
+	events, err := s.combatH.FireAutomatic(uid, req.GetTarget())
+	if err != nil {
+		return errorEvent(err.Error()), nil
+	}
+	sess, sErr := s.sessions.GetPlayer(uid)
+	if sErr && len(events) > 0 {
+		s.BroadcastCombatEvents(sess.RoomID, events)
+	}
+	return nil, nil
+}
+
+func (s *GameServiceServer) handleThrow(uid string, req *gamev1.ThrowRequest) (*gamev1.ServerEvent, error) {
+	events, err := s.combatH.Throw(uid, req.GetExplosiveId())
+	if err != nil {
+		return errorEvent(err.Error()), nil
+	}
+	sess, sErr := s.sessions.GetPlayer(uid)
+	if sErr && len(events) > 0 {
+		s.BroadcastCombatEvents(sess.RoomID, events)
+	}
+	return nil, nil
 }

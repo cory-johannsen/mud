@@ -253,6 +253,71 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				Payload:   &gamev1.ClientMessage_Status{Status: &gamev1.StatusRequest{}},
 			}
 
+		case command.HandlerEquip:
+			if parsed.RawArgs == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: equip <weapon_id> [slot]"))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			parts := strings.SplitN(parsed.RawArgs, " ", 2)
+			slot := ""
+			if len(parts) == 2 {
+				slot = strings.TrimSpace(parts[1])
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_Equip{
+					Equip: &gamev1.EquipRequest{WeaponId: strings.TrimSpace(parts[0]), Slot: slot},
+				},
+			}
+
+		case command.HandlerReload:
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_Reload{
+					Reload: &gamev1.ReloadRequest{WeaponId: parsed.RawArgs},
+				},
+			}
+
+		case command.HandlerFireBurst:
+			if parsed.RawArgs == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: burst <target>"))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_FireBurst{
+					FireBurst: &gamev1.FireBurstRequest{Target: parsed.RawArgs},
+				},
+			}
+
+		case command.HandlerFireAuto:
+			if parsed.RawArgs == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: auto <target>"))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_FireAutomatic{
+					FireAutomatic: &gamev1.FireAutomaticRequest{Target: parsed.RawArgs},
+				},
+			}
+
+		case command.HandlerThrow:
+			if parsed.RawArgs == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: throw <explosive_id>"))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_Throw{
+					Throw: &gamev1.ThrowRequest{ExplosiveId: parsed.RawArgs},
+				},
+			}
+
 		case command.HandlerHelp:
 			h.showGameHelp(conn, registry)
 			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
