@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
@@ -31,6 +32,8 @@ type Combat struct {
 	scriptMgr *scripting.Manager
 	// zoneID is the zone used for scripting hook dispatch.
 	zoneID string
+	// invRegistry is the inventory registry used for explosive lookups during combat.
+	invRegistry *inventory.Registry
 }
 
 // RoundConditionEvent records a condition applied or removed during round startup.
@@ -106,7 +109,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 				events = append(events, RoundConditionEvent{
 					UID: cbt.ID, Name: cbt.Name,
 					ConditionID: "wounded", CondName: "Wounded",
-					Stacks: s.Stacks("wounded"),
+					Stacks:  s.Stacks("wounded"),
 					Applied: true,
 				})
 			default: // failure: advance dying stacks
@@ -153,6 +156,13 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 	}
 
 	return events
+}
+
+// SetInventoryRegistry sets the inventory registry used for explosive lookups during combat.
+//
+// Precondition: reg may be nil; passing nil disables explosive resolution.
+func (c *Combat) SetInventoryRegistry(reg *inventory.Registry) {
+	c.invRegistry = reg
 }
 
 // realSrc wraps math/rand for production dice rolls.

@@ -58,13 +58,13 @@ func TestOutcomeFor(t *testing.T) {
 		ac   int
 		want combat.Outcome
 	}{
-		{30, 15, combat.CritSuccess},  // >= AC+10 (25)
-		{25, 15, combat.CritSuccess},  // exactly AC+10
-		{20, 15, combat.Success},      // >= AC
-		{15, 15, combat.Success},      // exactly AC
-		{10, 15, combat.Failure},      // >= AC-10 (5)
-		{5, 15, combat.Failure},       // exactly AC-10
-		{4, 15, combat.CritFailure},   // < AC-10
+		{30, 15, combat.CritSuccess}, // >= AC+10 (25)
+		{25, 15, combat.CritSuccess}, // exactly AC+10
+		{20, 15, combat.Success},     // >= AC
+		{15, 15, combat.Success},     // exactly AC
+		{10, 15, combat.Failure},     // >= AC-10 (5)
+		{5, 15, combat.Failure},      // exactly AC-10
+		{4, 15, combat.CritFailure},  // < AC-10
 		{1, 15, combat.CritFailure},
 	}
 	for _, tc := range tests {
@@ -107,7 +107,7 @@ func TestAbilityMod(t *testing.T) {
 		{10, 0},
 		{12, 1},
 		{8, -1},
-		{9, -1},  // floor division: (9-10)/2 floors to -1
+		{9, -1}, // floor division: (9-10)/2 floors to -1
 		{20, 5},
 		{1, -5},
 	}

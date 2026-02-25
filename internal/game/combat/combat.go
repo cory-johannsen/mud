@@ -1,6 +1,8 @@
 // Package combat implements the PvE combat engine for Gunchete.
 package combat
 
+import "github.com/cory-johannsen/mud/internal/game/inventory"
+
 // Kind distinguishes player combatants from NPC combatants.
 type Kind int
 
@@ -51,6 +53,8 @@ type Combatant struct {
 	// For NPCs, reaching 0 HP sets Dead=true immediately.
 	// For players, Dead=true only when the dying condition advances to stack 4.
 	Dead bool
+	// Loadout is the combatant's equipped weapons and magazines; may be nil.
+	Loadout *inventory.Loadout
 }
 
 // IsPlayer reports whether this combatant is a player character.

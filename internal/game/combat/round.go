@@ -2,10 +2,12 @@ package combat
 
 import (
 	"fmt"
+	"strings"
 
 	lua "github.com/yuin/gopher-lua"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 )
 
 // RoundEvent records what happened when one action was resolved.
@@ -268,9 +270,212 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorName:    actor.Name,
 					Narrative:    fmt.Sprintf("%s strikes %s again (MAP): %s (total %d).", actor.Name, target.Name, r2.Outcome, r2.AttackTotal),
 				})
+			case ActionReload:
+				events = append(events, resolveReload(cbt, actor, action))
+			case ActionFireBurst:
+				events = append(events, resolveFireBurst(cbt, actor, action, src)...)
+			case ActionFireAutomatic:
+				events = append(events, resolveFireAutomatic(cbt, actor, action, src)...)
+			case ActionThrow:
+				events = append(events, resolveThrow(cbt, actor, action, src)...)
 			}
 		}
 	}
 
 	return events
+}
+
+// resolveReload handles ActionReload: calls on_reload Lua hook and restores magazine.
+func resolveReload(cbt *Combat, actor *Combatant, qa QueuedAction) RoundEvent {
+	narrative := actor.Name + " reloads."
+	if actor.Loadout != nil {
+		if eq := actor.Loadout.Primary(); eq != nil && eq.Magazine != nil {
+			eq.Magazine.Reload()
+			narrative = fmt.Sprintf("%s reloads %s.", actor.Name, eq.Def.Name)
+		}
+	}
+	if cbt.scriptMgr != nil {
+		_, _ = cbt.scriptMgr.CallHook(cbt.zoneID, "on_reload",
+			lua.LString(actor.ID), lua.LString(qa.WeaponID))
+	}
+	return RoundEvent{ActionType: ActionReload, ActorID: actor.ID, ActorName: actor.Name, Narrative: narrative}
+}
+
+// resolveFireBurst handles ActionFireBurst: two ranged attacks against the same target.
+func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []RoundEvent {
+	target := findCombatantByNameOrID(cbt, qa.Target)
+	if target == nil || target.IsDead() {
+		return []RoundEvent{{ActionType: ActionFireBurst, ActorID: actor.ID, ActorName: actor.Name,
+			Narrative: fmt.Sprintf("%s fires burst but target not found.", actor.Name)}}
+	}
+	weapon := primaryFirearm(actor, qa.WeaponID)
+	var events []RoundEvent
+	for i := 0; i < 2; i++ {
+		var result AttackResult
+		if weapon != nil {
+			result = ResolveFirearmAttack(actor, target, weapon, 0, src)
+		} else {
+			result = ResolveAttack(actor, target, src)
+		}
+		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
+		result.Outcome = OutcomeFor(result.AttackTotal, target.AC)
+		dmg := result.EffectiveDamage()
+		dmg = hookDamageRoll(cbt, actor, target, dmg)
+		if dmg > 0 {
+			target.ApplyDamage(dmg)
+		}
+		if weapon != nil && actor.Loadout != nil {
+			if eq := actor.Loadout.Primary(); eq != nil && eq.Magazine != nil {
+				_ = eq.Magazine.Consume(1)
+			}
+		}
+		result.BaseDamage = dmg
+		events = append(events, RoundEvent{
+			AttackResult: &result,
+			ActionType:   ActionFireBurst,
+			ActorID:      actor.ID,
+			ActorName:    actor.Name,
+			Narrative:    buildNarrative(actor, target, result, dmg),
+		})
+		if target.IsDead() {
+			break
+		}
+	}
+	return events
+}
+
+// resolveFireAutomatic handles ActionFireAutomatic: one attack against each living enemy (up to 3).
+func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []RoundEvent {
+	enemies := livingEnemiesOf(cbt, actor)
+	if len(enemies) == 0 {
+		return []RoundEvent{{ActionType: ActionFireAutomatic, ActorID: actor.ID, ActorName: actor.Name,
+			Narrative: fmt.Sprintf("%s lays down suppressive fire.", actor.Name)}}
+	}
+	weapon := primaryFirearm(actor, qa.WeaponID)
+	var events []RoundEvent
+	shots := 3
+	for _, target := range enemies {
+		if shots <= 0 {
+			break
+		}
+		var result AttackResult
+		if weapon != nil {
+			result = ResolveFirearmAttack(actor, target, weapon, 0, src)
+		} else {
+			result = ResolveAttack(actor, target, src)
+		}
+		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
+		result.Outcome = OutcomeFor(result.AttackTotal, target.AC)
+		dmg := result.EffectiveDamage()
+		dmg = hookDamageRoll(cbt, actor, target, dmg)
+		if dmg > 0 {
+			target.ApplyDamage(dmg)
+		}
+		if weapon != nil && actor.Loadout != nil {
+			if eq := actor.Loadout.Primary(); eq != nil && eq.Magazine != nil {
+				_ = eq.Magazine.Consume(1)
+			}
+		}
+		result.BaseDamage = dmg
+		shots--
+		events = append(events, RoundEvent{
+			AttackResult: &result,
+			ActionType:   ActionFireAutomatic,
+			ActorID:      actor.ID,
+			ActorName:    actor.Name,
+			Narrative:    buildNarrative(actor, target, result, dmg),
+		})
+	}
+	return events
+}
+
+// resolveThrow handles ActionThrow: explosive area effect against all living enemies.
+func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []RoundEvent {
+	if cbt.invRegistry == nil {
+		return []RoundEvent{{ActionType: ActionThrow, ActorID: actor.ID, ActorName: actor.Name,
+			Narrative: fmt.Sprintf("%s fumbles the throw.", actor.Name)}}
+	}
+	grenade := cbt.invRegistry.Explosive(qa.ExplosiveID)
+	if grenade == nil {
+		return []RoundEvent{{ActionType: ActionThrow, ActorID: actor.ID, ActorName: actor.Name,
+			Narrative: fmt.Sprintf("%s reaches for an explosive but finds nothing.", actor.Name)}}
+	}
+	if cbt.scriptMgr != nil {
+		_, _ = cbt.scriptMgr.CallHook(cbt.zoneID, "on_explosive_throw",
+			lua.LString(actor.ID), lua.LString(qa.ExplosiveID))
+	}
+	enemies := livingEnemiesOf(cbt, actor)
+	results := ResolveExplosive(grenade, enemies, src)
+	var events []RoundEvent
+	for i, r := range results {
+		target := enemies[i]
+		if r.BaseDamage > 0 {
+			target.ApplyDamage(r.BaseDamage)
+		}
+		events = append(events, RoundEvent{
+			ActionType: ActionThrow,
+			ActorID:    actor.ID,
+			ActorName:  actor.Name,
+			Narrative: fmt.Sprintf("%s throws %s at %s for %d damage (save %d vs DC %d).",
+				actor.Name, grenade.Name, target.Name, r.BaseDamage, r.SaveTotal, grenade.SaveDC),
+		})
+	}
+	if len(events) == 0 {
+		events = append(events, RoundEvent{ActionType: ActionThrow, ActorID: actor.ID, ActorName: actor.Name,
+			Narrative: fmt.Sprintf("%s throws %s but no targets are in range.", actor.Name, grenade.Name)})
+	}
+	return events
+}
+
+// findCombatantByNameOrID returns the first combatant matching name or ID (case-insensitive).
+func findCombatantByNameOrID(cbt *Combat, nameOrID string) *Combatant {
+	lower := strings.ToLower(nameOrID)
+	for _, c := range cbt.Combatants {
+		if strings.ToLower(c.Name) == lower || strings.ToLower(c.ID) == lower {
+			return c
+		}
+	}
+	return nil
+}
+
+// livingEnemiesOf returns all living combatants of a different Kind from actor.
+func livingEnemiesOf(cbt *Combat, actor *Combatant) []*Combatant {
+	var out []*Combatant
+	for _, c := range cbt.Combatants {
+		if !c.IsDead() && c.ID != actor.ID && c.Kind != actor.Kind {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// primaryFirearm returns the primary slot weapon if it is a firearm matching weaponID.
+func primaryFirearm(actor *Combatant, weaponID string) *inventory.WeaponDef {
+	if actor.Loadout == nil {
+		return nil
+	}
+	eq := actor.Loadout.Primary()
+	if eq == nil || !eq.Def.IsFirearm() {
+		return nil
+	}
+	if weaponID != "" && eq.Def.ID != weaponID {
+		return nil
+	}
+	return eq.Def
+}
+
+// buildNarrative returns a human-readable attack narrative string.
+func buildNarrative(actor, target *Combatant, result AttackResult, dmg int) string {
+	switch result.Outcome {
+	case CritSuccess:
+		return fmt.Sprintf("%s scores a CRITICAL HIT on %s for %d damage!", actor.Name, target.Name, dmg)
+	case Success:
+		return fmt.Sprintf("%s hits %s for %d damage.", actor.Name, target.Name, dmg)
+	case Failure:
+		return fmt.Sprintf("%s misses %s.", actor.Name, target.Name)
+	case CritFailure:
+		return fmt.Sprintf("%s critically fails against %s.", actor.Name, target.Name)
+	default:
+		return fmt.Sprintf("%s attacks %s.", actor.Name, target.Name)
+	}
 }
