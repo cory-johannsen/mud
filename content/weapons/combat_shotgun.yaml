@@ -1,0 +1,9 @@
+id: combat_shotgun
+name: Combat Shotgun
+damage_dice: 2d8
+damage_type: piercing
+range_increment: 20
+reload_actions: 2
+magazine_capacity: 6
+firing_modes: [single, burst]
+traits: [loud, two_handed]

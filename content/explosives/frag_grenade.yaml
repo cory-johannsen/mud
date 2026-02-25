@@ -1,0 +1,9 @@
+id: frag_grenade
+name: Frag Grenade
+damage_dice: 4d6
+damage_type: piercing
+area_type: room
+save_type: reflex
+save_dc: 15
+fuse: immediate
+traits: [thrown, limited_use]
