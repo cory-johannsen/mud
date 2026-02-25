@@ -30,6 +30,11 @@ message ClientMessage {
     PassRequest   pass   = 13;
     StrikeRequest strike = 14;
     StatusRequest status = 15;
+    EquipRequest equip = 16;
+    ReloadRequest reload = 17;
+    FireBurstRequest fire_burst = 18;
+    FireAutomaticRequest fire_automatic = 19;
+    ThrowRequest throw = 20;
   }
 }
 
@@ -211,6 +216,34 @@ message StrikeRequest {
   string target = 1;
 }
 
+// EquipRequest asks the server to equip a weapon in the specified slot.
+message EquipRequest {
+  string weapon_id = 1;
+  string slot = 2; // "primary", "secondary", "holster"
+}
+
+// ReloadRequest asks the server to reload the specified weapon, or the primary slot if empty.
+message ReloadRequest {
+  string weapon_id = 1; // empty = reload primary slot
+}
+
+// FireBurstRequest asks the server to fire a burst at the specified target.
+message FireBurstRequest {
+  string target = 1;
+  string weapon_id = 2;
+}
+
+// FireAutomaticRequest asks the server to fire automatically at the specified target.
+message FireAutomaticRequest {
+  string target = 1;
+  string weapon_id = 2;
+}
+
+// ThrowRequest asks the server to throw an explosive.
+message ThrowRequest {
+  string explosive_id = 1;
+}
+
 // RoundStartEvent is broadcast to all combatants when a new round begins.
 message RoundStartEvent {
   int32           round            = 1;
@@ -235,6 +268,7 @@ message CombatEvent {
   int32  damage           = 7;
   int32  target_hp        = 8;
   string narrative        = 9;
+  string weapon_name      = 10;
 }
 
 // CombatEventType distinguishes combat narration events.
@@ -246,6 +280,8 @@ enum CombatEventType {
   COMBAT_EVENT_TYPE_FLEE         = 4;
   COMBAT_EVENT_TYPE_END          = 5;
   COMBAT_EVENT_TYPE_CONDITION    = 6;
+  COMBAT_EVENT_TYPE_RELOAD       = 7;
+  COMBAT_EVENT_TYPE_THROW        = 8;
 }
 
 // StatusRequest asks the server to return the player's active conditions.
