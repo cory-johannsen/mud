@@ -34,17 +34,17 @@ type CharacterSaver interface {
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
 type GameServiceServer struct {
 	gamev1.UnimplementedGameServiceServer
-	world      *world.Manager
-	sessions   *session.Manager
-	commands   *command.Registry
-	worldH     *WorldHandler
-	chatH      *ChatHandler
-	charSaver  CharacterSaver
-	dice       *dice.Roller
-	npcH       *NPCHandler
-	combatH    *CombatHandler
-	scriptMgr  *scripting.Manager
-	logger     *zap.Logger
+	world     *world.Manager
+	sessions  *session.Manager
+	commands  *command.Registry
+	worldH    *WorldHandler
+	chatH     *ChatHandler
+	charSaver CharacterSaver
+	dice      *dice.Roller
+	npcH      *NPCHandler
+	combatH   *CombatHandler
+	scriptMgr *scripting.Manager
+	logger    *zap.Logger
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -74,9 +74,9 @@ func NewGameServiceServer(
 		charSaver: charSaver,
 		dice:      diceRoller,
 		npcH:      npcHandler,
-		combatH:    combatHandler,
-		scriptMgr:  scriptMgr,
-		logger:     logger,
+		combatH:   combatHandler,
+		scriptMgr: scriptMgr,
+		logger:    logger,
 	}
 }
 
@@ -408,7 +408,6 @@ func (s *GameServiceServer) handleQuit(uid string) (*gamev1.ServerEvent, error) 
 		},
 	}, errQuit
 }
-
 
 func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest) (*gamev1.ServerEvent, error) {
 	view, err := s.npcH.Examine(uid, req.Target)
