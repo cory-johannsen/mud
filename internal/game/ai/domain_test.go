@@ -18,7 +18,7 @@ func TestDomain_Validate_RejectsEmpty(t *testing.T) {
 
 func TestDomain_Validate_AcceptsMinimal(t *testing.T) {
 	d := &ai.Domain{
-		ID: "test",
+		ID:    "test",
 		Tasks: []*ai.Task{{ID: "root"}},
 		Methods: []*ai.Method{{
 			TaskID:   "root",
