@@ -6,10 +6,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	lua "github.com/yuin/gopher-lua"
-	"go.uber.org/zap"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/scripting"
