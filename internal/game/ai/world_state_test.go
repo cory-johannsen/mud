@@ -80,9 +80,9 @@ func TestWorldState_AlliesOf_ExcludesSelfAndDead(t *testing.T) {
 	ws := &ai.WorldState{
 		NPC: &ai.NPCState{UID: "n1", Kind: "npc"},
 		Combatants: []*ai.CombatantState{
-			{UID: "n1", Kind: "npc", HP: 10, Dead: false}, // self — excluded
-			{UID: "n2", Kind: "npc", HP: 8, Dead: false},  // ally
-			{UID: "n3", Kind: "npc", HP: 0, Dead: true},   // dead — excluded
+			{UID: "n1", Kind: "npc", HP: 10, Dead: false},    // self — excluded
+			{UID: "n2", Kind: "npc", HP: 8, Dead: false},     // ally
+			{UID: "n3", Kind: "npc", HP: 0, Dead: true},      // dead — excluded
 			{UID: "p1", Kind: "player", HP: 20, Dead: false}, // enemy — excluded
 		},
 	}
