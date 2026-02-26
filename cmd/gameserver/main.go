@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/cory-johannsen/mud/internal/config"
+	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
@@ -35,14 +36,17 @@ import (
 func main() {
 	start := time.Now()
 
-	configPath    := flag.String("config", "configs/dev.yaml", "path to configuration file")
-	zonesDir      := flag.String("zones", "content/zones", "path to zone YAML files directory")
-	npcsDir       := flag.String("npcs-dir", "content/npcs", "path to NPC YAML templates directory")
+	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
+	zonesDir := flag.String("zones", "content/zones", "path to zone YAML files directory")
+	npcsDir := flag.String("npcs-dir", "content/npcs", "path to NPC YAML templates directory")
 	conditionsDir := flag.String("conditions-dir", "content/conditions", "path to condition YAML definitions directory")
-	scriptRoot    := flag.String("script-root", "content/scripts", "root directory for Lua scripts; empty = scripting disabled")
+	scriptRoot := flag.String("script-root", "content/scripts", "root directory for Lua scripts; empty = scripting disabled")
 	condScriptDir := flag.String("condition-scripts", "content/scripts/conditions", "directory of global condition scripts loaded into __global__ VM")
-	weaponsDir    := flag.String("weapons-dir", "content/weapons", "path to weapon YAML definitions directory")
+	weaponsDir := flag.String("weapons-dir", "content/weapons", "path to weapon YAML definitions directory")
 	explosivesDir := flag.String("explosives-dir", "content/explosives", "path to explosive YAML definitions directory")
+	aiDir := flag.String("ai-dir", "content/ai", "path to HTN AI domain YAML directory")
+	aiScriptDir := flag.String("ai-scripts", "content/scripts/ai", "path to Lua AI precondition scripts")
+	aiTickInterval := flag.Duration("ai-tick", 10*time.Second, "NPC AI tick interval")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -154,6 +158,9 @@ func main() {
 		logger.Info("loaded explosive definitions", zap.Int("count", len(explosives)))
 	}
 
+	// Load HTN AI domains.
+	aiRegistry := ai.NewRegistry()
+
 	// Initialise scripting engine
 	var scriptMgr *scripting.Manager
 	if *scriptRoot != "" {
@@ -212,6 +219,30 @@ func main() {
 		}
 	}
 
+	// Load HTN AI domain YAML files (requires scriptMgr for Lua preconditions).
+	if scriptMgr != nil && *aiDir != "" {
+		domains, err := ai.LoadDomains(*aiDir)
+		if err != nil {
+			logger.Fatal("loading AI domains", zap.Error(err))
+		}
+		for _, domain := range domains {
+			if err := aiRegistry.Register(domain, scriptMgr, ""); err != nil {
+				logger.Fatal("registering AI domain", zap.String("id", domain.ID), zap.Error(err))
+			}
+		}
+		logger.Info("loaded AI domains", zap.Int("count", len(domains)))
+	}
+
+	// Load AI precondition scripts.
+	if scriptMgr != nil && *aiScriptDir != "" {
+		if _, statErr := os.Stat(*aiScriptDir); statErr == nil {
+			if err := scriptMgr.LoadGlobal(*aiScriptDir, scripting.DefaultInstructionLimit); err != nil {
+				logger.Fatal("loading AI scripts", zap.Error(err))
+			}
+			logger.Info("loaded AI scripts", zap.String("dir", *aiScriptDir))
+		}
+	}
+
 	// Create handlers
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
@@ -229,13 +260,17 @@ func main() {
 			grpcService.BroadcastCombatEvents(roomID, events)
 		}
 	}
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, nil)
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry)
 
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, combatHandler, scriptMgr,
 	)
+
+	// Start zone AI ticks.
+	zm := gameserver.NewZoneTickManager(*aiTickInterval)
+	grpcService.StartZoneTicks(ctx, zm, aiRegistry)
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer()
