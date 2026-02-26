@@ -862,6 +862,13 @@ func conditionEventsToProto(events []combat.RoundConditionEvent, reg *condition.
 	return result
 }
 
+// IsInCombat returns true when the NPC with npcID is currently in an active combat.
+//
+// Postcondition: equivalent to engine.IsNPCInCombat(npcID).
+func (h *CombatHandler) IsInCombat(npcID string) bool {
+	return h.engine.IsNPCInCombat(npcID)
+}
+
 // Status returns the active conditions for the player with the given uid.
 // Returns nil, nil if no combat is active in the player's room.
 //

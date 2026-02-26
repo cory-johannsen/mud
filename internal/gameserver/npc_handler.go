@@ -21,6 +21,16 @@ func NewNPCHandler(npcMgr *npc.Manager, sessions *session.Manager) *NPCHandler {
 	return &NPCHandler{npcMgr: npcMgr, sessions: sessions}
 }
 
+// InstancesInRoom returns all NPC instances in roomID.
+func (h *NPCHandler) InstancesInRoom(roomID string) []*npc.Instance {
+	return h.npcMgr.InstancesInRoom(roomID)
+}
+
+// MoveNPC moves the NPC instance to newRoomID.
+func (h *NPCHandler) MoveNPC(id, newRoomID string) error {
+	return h.npcMgr.Move(id, newRoomID)
+}
+
 // Examine looks up an NPC by name prefix in the player's room and returns its detail view.
 //
 // Precondition: uid must be a valid connected player; target must be non-empty.

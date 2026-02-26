@@ -10,8 +10,10 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -748,4 +750,84 @@ func (s *GameServiceServer) handleThrow(uid string, req *gamev1.ThrowRequest) (*
 		s.BroadcastCombatEvents(sess.RoomID, events)
 	}
 	return nil, nil
+}
+
+// StartZoneTicks begins the per-zone NPC tick loop.
+//
+// Precondition: ctx must be the server's lifetime context.
+func (s *GameServiceServer) StartZoneTicks(ctx context.Context, zm *ZoneTickManager, aiReg *ai.Registry) {
+	for _, zone := range s.world.AllZones() {
+		zoneID := zone.ID
+		zm.RegisterTick(zoneID, func() {
+			s.tickZone(zoneID, aiReg)
+		})
+	}
+	zm.Start(ctx)
+}
+
+// tickZone runs one AI tick for all non-combat NPCs in zoneID.
+func (s *GameServiceServer) tickZone(zoneID string, aiReg *ai.Registry) {
+	for _, zone := range s.world.AllZones() {
+		if zone.ID != zoneID {
+			continue
+		}
+		for _, room := range zone.Rooms {
+			for _, inst := range s.npcH.InstancesInRoom(room.ID) {
+				if s.combatH.IsInCombat(inst.ID) {
+					continue
+				}
+				s.tickNPCIdle(inst, zoneID, aiReg)
+			}
+		}
+	}
+}
+
+// tickNPCIdle evaluates idle/patrol behavior for a non-combat NPC.
+func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg *ai.Registry) {
+	if inst.AIDomain == "" || aiReg == nil {
+		return
+	}
+	planner, ok := aiReg.PlannerFor(inst.AIDomain)
+	if !ok {
+		return
+	}
+	ws := &ai.WorldState{
+		NPC: &ai.NPCState{
+			UID:        inst.ID,
+			Name:       inst.Name,
+			Kind:       "npc",
+			HP:         inst.CurrentHP,
+			MaxHP:      inst.MaxHP,
+			Perception: inst.Perception,
+			ZoneID:     zoneID,
+			RoomID:     inst.RoomID,
+		},
+		Room:       &ai.RoomState{ID: inst.RoomID, ZoneID: zoneID},
+		Combatants: nil,
+	}
+	actions, err := planner.Plan(ws)
+	if err != nil || len(actions) == 0 {
+		return
+	}
+	for _, a := range actions {
+		switch a.Action {
+		case "move_random":
+			s.npcPatrolRandom(inst)
+		default:
+			// idle/pass: no-op
+		}
+	}
+}
+
+// npcPatrolRandom moves the NPC to a random visible exit.
+func (s *GameServiceServer) npcPatrolRandom(inst *npc.Instance) {
+	room, ok := s.world.GetRoom(inst.RoomID)
+	if !ok || len(room.Exits) == 0 {
+		return
+	}
+	exits := room.VisibleExits()
+	if len(exits) == 0 {
+		return
+	}
+	_ = s.npcH.MoveNPC(inst.ID, exits[0].TargetRoom)
 }

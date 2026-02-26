@@ -384,6 +384,22 @@ func (e *Engine) EndCombat(roomID string) {
 	delete(e.combats, roomID)
 }
 
+// IsNPCInCombat returns true when npcID appears as a living NPC combatant in any active combat.
+//
+// Postcondition: true only when npcID is a living NPC in at least one active combat.
+func (e *Engine) IsNPCInCombat(npcID string) bool {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	for _, cbt := range e.combats {
+		for _, c := range cbt.Combatants {
+			if c.ID == npcID && c.Kind == KindNPC && !c.IsDead() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // sortByInitiativeDesc sorts combatants in place, highest initiative first.
 func sortByInitiativeDesc(combatants []*Combatant) {
 	n := len(combatants)
