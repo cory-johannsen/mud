@@ -2,16 +2,17 @@
 -- Each function receives the NPC's UID and returns true/false.
 -- These hooks are called during active combat by the HTN planner.
 
--- ganger_has_enemy: returns true unconditionally during combat.
--- The HTN planner invokes this only when the NPC is already in an active
--- combat encounter, so the presence of a living enemy is guaranteed by context.
+-- ganger_has_enemy: returns true when at least one living enemy is present.
 function ganger_has_enemy(uid)
-    return true
+    return engine.combat.enemy_count(uid) > 0
 end
 
--- ganger_enemy_below_half: returns false, routing to the attack_any fallback.
--- Enemy HP queries require a world query API not yet available in Lua.
--- The attack_any method (unconditional attack) is the correct combat behaviour.
+-- ganger_enemy_below_half: returns true when the first living enemy's HP is
+-- strictly below 50% of its maximum, routing to the strike_weakest method.
+-- Falls through to attack_any when no enemies are found or none are below half.
 function ganger_enemy_below_half(uid)
-    return false
+    local enemies = engine.combat.get_enemies(uid)
+    if enemies == nil or #enemies == 0 then return false end
+    local e = enemies[1]
+    return e.hp < (e.max_hp * 0.5)
 end

@@ -1,16 +1,14 @@
 -- scavenger.lua: Lua preconditions for scavenger_patrol HTN domain.
 -- These hooks are called during active combat by the HTN planner.
 
--- scavenger_has_enemy: returns true unconditionally during combat.
--- The HTN planner invokes this only when the NPC is in an active combat
--- encounter, so the presence of a living enemy is guaranteed by context.
+-- scavenger_has_enemy: returns true when at least one living enemy is present.
 function scavenger_has_enemy(uid)
-    return true
+    return engine.combat.enemy_count(uid) > 0
 end
 
--- scavenger_not_outnumbered: returns true, routing to the attack path.
--- Ally/enemy count comparison requires a world query API; without it the
--- scavenger defaults to fighting rather than passing.
+-- scavenger_not_outnumbered: returns true when ally count >= enemy count,
+-- routing to the attack path. Returns false when the scavenger is outnumbered,
+-- routing to the pass action.
 function scavenger_not_outnumbered(uid)
-    return true
+    return engine.combat.ally_count(uid) >= engine.combat.enemy_count(uid)
 end
