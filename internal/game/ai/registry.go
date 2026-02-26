@@ -19,6 +19,12 @@ func NewRegistry() *Registry {
 // Precondition: domain and caller must not be nil.
 // Postcondition: returns error on domain ID collision.
 func (r *Registry) Register(domain *Domain, caller ScriptCaller, zoneID string) error {
+	if domain == nil {
+		return fmt.Errorf("ai.Registry.Register: domain must not be nil")
+	}
+	if caller == nil {
+		return fmt.Errorf("ai.Registry.Register: caller must not be nil")
+	}
 	if _, exists := r.planners[domain.ID]; exists {
 		return fmt.Errorf("ai.Registry: domain %q already registered", domain.ID)
 	}
