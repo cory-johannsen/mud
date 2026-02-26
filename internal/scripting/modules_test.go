@@ -1,6 +1,7 @@
 package scripting_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -277,5 +278,163 @@ func TestProperty_CombatantToTable_KindIsPlayerOrNPC(t *testing.T) {
 			end
 		`, "get_kind", lua.LString("uid1"))
 		assert.Equal(t, lua.LString(kind), ret)
+	})
+}
+
+func TestEngineEntity_GetRoom_NilCallback_ReturnsNil(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	ret := runScript(t, mgr, `
+		function get_it() return engine.entity.get_room("uid1") end
+	`, "get_it")
+	assert.Equal(t, lua.LNil, ret)
+}
+
+func TestEngineEntity_GetRoom_WithCallback(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	mgr.GetEntityRoom = func(uid string) string {
+		if uid == "npc1" {
+			return "room-42"
+		}
+		return ""
+	}
+	ret := runScript(t, mgr, `
+		function get_it() return engine.entity.get_room("npc1") end
+	`, "get_it")
+	assert.Equal(t, lua.LString("room-42"), ret)
+}
+
+func TestEngineEntity_GetRoom_UnknownEntity_ReturnsNil(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	mgr.GetEntityRoom = func(uid string) string { return "" }
+	ret := runScript(t, mgr, `
+		function get_it() return engine.entity.get_room("unknown") end
+	`, "get_it")
+	assert.Equal(t, lua.LNil, ret)
+}
+
+func TestEngineCombat_GetEnemies_NilCallback_ReturnsNil(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	ret := runScript(t, mgr, `
+		function get_it() return engine.combat.get_enemies("uid1") end
+	`, "get_it")
+	assert.Equal(t, lua.LNil, ret)
+}
+
+func TestEngineCombat_GetEnemies_WithCallback(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	mgr.GetEntityRoom = func(uid string) string { return "room1" }
+	mgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo {
+		return []*scripting.CombatantInfo{
+			{UID: "npc1", Name: "Ganger", HP: 20, MaxHP: 30, AC: 12, Kind: "npc"},
+			{UID: "p1", Name: "Hero", HP: 50, MaxHP: 100, AC: 14, Kind: "player"},
+		}
+	}
+	ret := runScript(t, mgr, `
+		function get_it()
+			local enemies = engine.combat.get_enemies("npc1")
+			if enemies == nil then return "nil" end
+			return tostring(#enemies) .. ":" .. enemies[1].uid
+		end
+	`, "get_it")
+	assert.Equal(t, lua.LString("1:p1"), ret)
+}
+
+func TestEngineCombat_GetAllies_WithCallback(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	mgr.GetEntityRoom = func(uid string) string { return "room1" }
+	mgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo {
+		return []*scripting.CombatantInfo{
+			{UID: "npc1", Name: "Ganger A", HP: 20, MaxHP: 30, AC: 12, Kind: "npc"},
+			{UID: "npc2", Name: "Ganger B", HP: 25, MaxHP: 30, AC: 12, Kind: "npc"},
+			{UID: "p1", Name: "Hero", HP: 50, MaxHP: 100, AC: 14, Kind: "player"},
+		}
+	}
+	ret := runScript(t, mgr, `
+		function get_it()
+			local allies = engine.combat.get_allies("npc1")
+			if allies == nil then return "nil" end
+			return tostring(#allies)
+		end
+	`, "get_it")
+	assert.Equal(t, lua.LString("1"), ret)
+}
+
+func TestEngineCombat_EnemyCount_WithCallback(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	mgr.GetEntityRoom = func(uid string) string { return "room1" }
+	mgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo {
+		return []*scripting.CombatantInfo{
+			{UID: "npc1", Kind: "npc", HP: 10, MaxHP: 10},
+			{UID: "p1", Kind: "player", HP: 10, MaxHP: 10},
+			{UID: "p2", Kind: "player", HP: 10, MaxHP: 10},
+		}
+	}
+	ret := runScript(t, mgr, `
+		function get_it() return engine.combat.enemy_count("npc1") end
+	`, "get_it")
+	assert.Equal(t, lua.LNumber(2), ret)
+}
+
+func TestEngineCombat_AllyCount_WithCallback(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	mgr.GetEntityRoom = func(uid string) string { return "room1" }
+	mgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo {
+		return []*scripting.CombatantInfo{
+			{UID: "npc1", Kind: "npc", HP: 10, MaxHP: 10},
+			{UID: "npc2", Kind: "npc", HP: 10, MaxHP: 10},
+			{UID: "npc3", Kind: "npc", HP: 10, MaxHP: 10},
+			{UID: "p1", Kind: "player", HP: 10, MaxHP: 10},
+		}
+	}
+	ret := runScript(t, mgr, `
+		function get_it() return engine.combat.ally_count("npc1") end
+	`, "get_it")
+	assert.Equal(t, lua.LNumber(2), ret)
+}
+
+func TestEngineCombat_EnemyCount_NilRoomCallback_ReturnsZero(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	ret := runScript(t, mgr, `
+		function get_it() return engine.combat.enemy_count("npc1") end
+	`, "get_it")
+	assert.Equal(t, lua.LNumber(0), ret)
+}
+
+func TestProperty_GetEnemies_CountNeverExceedsTotal(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		mgr, _ := newTestManager(t)
+		nNPCs := rapid.IntRange(1, 5).Draw(rt, "npcs")
+		nPlayers := rapid.IntRange(0, 5).Draw(rt, "players")
+
+		combatants := make([]*scripting.CombatantInfo, 0, nNPCs+nPlayers)
+		for i := 0; i < nNPCs; i++ {
+			combatants = append(combatants, &scripting.CombatantInfo{
+				UID: fmt.Sprintf("npc%d", i), Kind: "npc", HP: 10, MaxHP: 10,
+			})
+		}
+		for i := 0; i < nPlayers; i++ {
+			combatants = append(combatants, &scripting.CombatantInfo{
+				UID: fmt.Sprintf("p%d", i), Kind: "player", HP: 10, MaxHP: 10,
+			})
+		}
+		mgr.GetEntityRoom = func(uid string) string { return "room1" }
+		mgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo { return combatants }
+
+		ret := runScript(t, mgr, `
+			function get_it(uid)
+				local ec = engine.combat.enemy_count(uid)
+				local ac = engine.combat.ally_count(uid)
+				return ec + ac
+			end
+		`, "get_it", lua.LString("npc0"))
+		total, ok := ret.(lua.LNumber)
+		if !ok {
+			rt.Fatalf("expected LNumber, got %T: %v", ret, ret)
+		}
+		// enemy(nPlayers) + ally(nNPCs-1) = nNPCs + nPlayers - 1
+		expected := lua.LNumber(nNPCs + nPlayers - 1)
+		if total != expected {
+			rt.Fatalf("expected %v, got %v (nNPCs=%d nPlayers=%d)", expected, total, nNPCs, nPlayers)
+		}
 	})
 }

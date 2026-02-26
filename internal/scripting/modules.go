@@ -163,6 +163,20 @@ func (m *Manager) newEntityModule(L *lua.LState) *lua.LTable {
 		L.Push(conds)
 		return 1
 	}))
+	L.SetField(t, "get_room", L.NewFunction(func(L *lua.LState) int {
+		if m.GetEntityRoom == nil {
+			L.Push(lua.LNil)
+			return 1
+		}
+		uid := L.CheckString(1)
+		roomID := m.GetEntityRoom(uid)
+		if roomID == "" {
+			L.Push(lua.LNil)
+			return 1
+		}
+		L.Push(lua.LString(roomID))
+		return 1
+	}))
 	L.SetField(t, "set_attr", L.NewFunction(func(L *lua.LState) int {
 		// TODO(stage7): implement attribute mutation
 		return 0
@@ -180,6 +194,19 @@ func (m *Manager) newEntityModule(L *lua.LState) *lua.LTable {
 // Postcondition: All nil-callback functions are no-ops; query functions return LNil when callback is nil.
 func (m *Manager) newCombatModule(L *lua.LState) *lua.LTable {
 	t := L.NewTable()
+
+	// roomCombatants resolves the caller's room then fetches all combatants.
+	// Returns nil when either callback is absent or the room is unknown.
+	roomCombatants := func(selfUID string) []*CombatantInfo {
+		if m.GetEntityRoom == nil || m.GetCombatantsInRoom == nil {
+			return nil
+		}
+		roomID := m.GetEntityRoom(selfUID)
+		if roomID == "" {
+			return nil
+		}
+		return m.GetCombatantsInRoom(roomID)
+	}
 
 	L.SetField(t, "apply_condition", L.NewFunction(func(L *lua.LState) int {
 		if m.ApplyCondition == nil {
@@ -225,6 +252,102 @@ func (m *Manager) newCombatModule(L *lua.LState) *lua.LTable {
 			return 1
 		}
 		L.Push(combatantToTable(L, c))
+		return 1
+	}))
+	L.SetField(t, "get_enemies", L.NewFunction(func(L *lua.LState) int {
+		uid := L.CheckString(1)
+		all := roomCombatants(uid)
+		if all == nil {
+			L.Push(lua.LNil)
+			return 1
+		}
+		selfKind := ""
+		for _, c := range all {
+			if c.UID == uid {
+				selfKind = c.Kind
+				break
+			}
+		}
+		result := L.NewTable()
+		idx := 1
+		for _, c := range all {
+			if c.UID != uid && c.Kind != selfKind {
+				L.RawSetInt(result, idx, combatantToTable(L, c))
+				idx++
+			}
+		}
+		L.Push(result)
+		return 1
+	}))
+	L.SetField(t, "get_allies", L.NewFunction(func(L *lua.LState) int {
+		uid := L.CheckString(1)
+		all := roomCombatants(uid)
+		if all == nil {
+			L.Push(lua.LNil)
+			return 1
+		}
+		selfKind := ""
+		for _, c := range all {
+			if c.UID == uid {
+				selfKind = c.Kind
+				break
+			}
+		}
+		result := L.NewTable()
+		idx := 1
+		for _, c := range all {
+			if c.UID != uid && c.Kind == selfKind {
+				L.RawSetInt(result, idx, combatantToTable(L, c))
+				idx++
+			}
+		}
+		L.Push(result)
+		return 1
+	}))
+	L.SetField(t, "enemy_count", L.NewFunction(func(L *lua.LState) int {
+		uid := L.CheckString(1)
+		all := roomCombatants(uid)
+		if all == nil {
+			L.Push(lua.LNumber(0))
+			return 1
+		}
+		selfKind := ""
+		for _, c := range all {
+			if c.UID == uid {
+				selfKind = c.Kind
+				break
+			}
+		}
+		count := 0
+		for _, c := range all {
+			if c.UID != uid && c.Kind != selfKind {
+				count++
+			}
+		}
+		L.Push(lua.LNumber(count))
+		return 1
+	}))
+	L.SetField(t, "ally_count", L.NewFunction(func(L *lua.LState) int {
+		uid := L.CheckString(1)
+		all := roomCombatants(uid)
+		if all == nil {
+			L.Push(lua.LNumber(0))
+			return 1
+		}
+		selfKind := ""
+		for _, c := range all {
+			if c.UID == uid {
+				selfKind = c.Kind
+				break
+			}
+		}
+		count := 0
+		for _, c := range all {
+			if c.UID != uid && c.Kind == selfKind {
+				count++
+			}
+		}
+		L.Push(lua.LNumber(count))
 		return 1
 	}))
 	L.SetField(t, "initiate", L.NewFunction(func(L *lua.LState) int {

@@ -61,6 +61,16 @@ type Manager struct {
 	ApplyDamage    func(uid string, hp int) error
 	Broadcast      func(roomID, msg string)
 	QueryRoom      func(roomID string) *RoomInfo
+
+	// GetCombatantsInRoom returns all CombatantInfo for a room. Used by
+	// engine.combat.get_enemies, get_allies, enemy_count, and ally_count.
+	// Precondition: roomID must be non-empty.
+	// Postcondition: Returns nil when no combat is active in roomID.
+	GetCombatantsInRoom func(roomID string) []*CombatantInfo
+
+	// GetEntityRoom returns the room ID where the entity currently resides.
+	// Returns empty string when the entity is unknown.
+	GetEntityRoom func(uid string) string
 }
 
 // NewManager creates a Manager.
