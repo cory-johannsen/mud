@@ -5,6 +5,7 @@ level: 1
 max_hp: 18
 ac: 14
 perception: 5
+ai_domain: ganger_combat
 abilities:
   strength: 14
   dexterity: 12

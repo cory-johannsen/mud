@@ -22,6 +22,8 @@ type Instance struct {
 	Level int
 	// Perception is the instance's perception modifier.
 	Perception int
+	// AIDomain is the HTN domain ID copied from the template at spawn time.
+	AIDomain string
 }
 
 // NewInstance creates a live NPC instance from a template, placed in roomID.
@@ -40,6 +42,7 @@ func NewInstance(id string, tmpl *Template, roomID string) *Instance {
 		AC:          tmpl.AC,
 		Level:       tmpl.Level,
 		Perception:  tmpl.Perception,
+		AIDomain:    tmpl.AIDomain,
 	}
 }
 

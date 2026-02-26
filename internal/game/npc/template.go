@@ -30,6 +30,7 @@ type Template struct {
 	AC          int       `yaml:"ac"`
 	Perception  int       `yaml:"perception"`
 	Abilities   Abilities `yaml:"abilities"`
+	AIDomain    string    `yaml:"ai_domain"` // HTN domain ID; empty = simple attack fallback
 }
 
 // Validate checks that the template satisfies basic invariants.

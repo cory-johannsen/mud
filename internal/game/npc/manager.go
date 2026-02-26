@@ -106,6 +106,40 @@ func (m *Manager) InstancesInRoom(roomID string) []*Instance {
 	return out
 }
 
+// Move relocates an instance from its current room to newRoomID.
+//
+// Precondition: id must identify an existing instance; newRoomID must be non-empty.
+// Postcondition: instance.RoomID equals newRoomID; room index is updated accordingly.
+func (m *Manager) Move(id, newRoomID string) error {
+	if newRoomID == "" {
+		return fmt.Errorf("npc.Manager.Move: newRoomID must not be empty")
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	inst, ok := m.instances[id]
+	if !ok {
+		return fmt.Errorf("npc.Manager.Move: instance %q not found", id)
+	}
+
+	oldRoomID := inst.RoomID
+	if rs, ok := m.roomSets[oldRoomID]; ok {
+		delete(rs, id)
+		if len(rs) == 0 {
+			delete(m.roomSets, oldRoomID)
+		}
+	}
+
+	inst.RoomID = newRoomID
+	if m.roomSets[newRoomID] == nil {
+		m.roomSets[newRoomID] = make(map[string]bool)
+	}
+	m.roomSets[newRoomID][id] = true
+
+	return nil
+}
+
 // FindInRoom returns the first instance in roomID whose Name has target as a
 // case-insensitive prefix. Returns nil if no match is found.
 //

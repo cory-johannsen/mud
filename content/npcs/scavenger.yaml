@@ -5,6 +5,7 @@ level: 1
 max_hp: 14
 ac: 13
 perception: 7
+ai_domain: scavenger_patrol
 abilities:
   strength: 10
   dexterity: 16
