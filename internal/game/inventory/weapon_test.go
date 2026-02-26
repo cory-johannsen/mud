@@ -105,3 +105,56 @@ func TestProperty_WeaponDef_RangeIncrementNonNegative(t *testing.T) {
 		}
 	})
 }
+// TestWeaponDef_SupportsBurst_TrueWhenBurstPresent verifies SupportsBurst
+// returns true when FiringModeBurst is in FiringModes.
+func TestWeaponDef_SupportsBurst_TrueWhenBurstPresent(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID:               "smg",
+		Name:             "SMG",
+		DamageDice:       "1d6",
+		DamageType:       "piercing",
+		RangeIncrement:   20,
+		ReloadActions:    1,
+		MagazineCapacity: 30,
+		FiringModes:      []inventory.FiringMode{inventory.FiringModeSingle, inventory.FiringModeBurst},
+	}
+	if !w.SupportsBurst() {
+		t.Fatal("expected SupportsBurst=true, got false")
+	}
+}
+
+// TestWeaponDef_SupportsBurst_FalseWhenAbsent verifies SupportsBurst returns
+// false when FiringModeBurst is not in FiringModes.
+func TestWeaponDef_SupportsBurst_FalseWhenAbsent(t *testing.T) {
+	w := pistolDef()
+	if w.SupportsBurst() {
+		t.Fatal("expected SupportsBurst=false for single-mode pistol, got true")
+	}
+}
+
+// TestWeaponDef_SupportsAutomatic_TrueWhenAutoPresent verifies
+// SupportsAutomatic returns true when FiringModeAutomatic is in FiringModes.
+func TestWeaponDef_SupportsAutomatic_TrueWhenAutoPresent(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID:               "lmg",
+		Name:             "LMG",
+		DamageDice:       "1d10",
+		DamageType:       "piercing",
+		RangeIncrement:   50,
+		ReloadActions:    2,
+		MagazineCapacity: 100,
+		FiringModes:      []inventory.FiringMode{inventory.FiringModeSingle, inventory.FiringModeAutomatic},
+	}
+	if !w.SupportsAutomatic() {
+		t.Fatal("expected SupportsAutomatic=true, got false")
+	}
+}
+
+// TestWeaponDef_SupportsAutomatic_FalseWhenAbsent verifies SupportsAutomatic
+// returns false when FiringModeAutomatic is not in FiringModes.
+func TestWeaponDef_SupportsAutomatic_FalseWhenAbsent(t *testing.T) {
+	w := pistolDef()
+	if w.SupportsAutomatic() {
+		t.Fatal("expected SupportsAutomatic=false for single-mode pistol, got true")
+	}
+}

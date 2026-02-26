@@ -64,3 +64,47 @@ func TestRegistry_AllWeapons_ReturnsAll(t *testing.T) {
 		t.Fatalf("expected 3 weapons, got %d", len(all))
 	}
 }
+
+// TestRegistry_RegisterExplosive_Lookup verifies that a registered
+// ExplosiveDef can be retrieved by ID.
+func TestRegistry_RegisterExplosive_Lookup(t *testing.T) {
+	r := inventory.NewRegistry()
+	e := &inventory.ExplosiveDef{
+		ID:         "frag-grenade",
+		Name:       "Frag Grenade",
+		DamageDice: "3d6",
+		DamageType: "piercing",
+		AreaType:   inventory.AreaTypeBurst,
+		Fuse:       inventory.FuseDelayed,
+	}
+	if err := r.RegisterExplosive(e); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	got := r.Explosive(e.ID)
+	if got == nil {
+		t.Fatal("expected non-nil ExplosiveDef, got nil")
+	}
+	if got.ID != e.ID {
+		t.Fatalf("expected ID=%q, got %q", e.ID, got.ID)
+	}
+}
+
+// TestRegistry_RegisterExplosive_CollisionError verifies that registering two
+// ExplosiveDefs with the same ID returns an error on the second registration.
+func TestRegistry_RegisterExplosive_CollisionError(t *testing.T) {
+	r := inventory.NewRegistry()
+	e := &inventory.ExplosiveDef{
+		ID:         "frag-grenade",
+		Name:       "Frag Grenade",
+		DamageDice: "3d6",
+		DamageType: "piercing",
+		AreaType:   inventory.AreaTypeBurst,
+		Fuse:       inventory.FuseDelayed,
+	}
+	if err := r.RegisterExplosive(e); err != nil {
+		t.Fatalf("unexpected error on first register: %v", err)
+	}
+	if err := r.RegisterExplosive(e); err == nil {
+		t.Fatal("expected collision error on second register, got nil")
+	}
+}

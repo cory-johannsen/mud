@@ -86,3 +86,35 @@ func TestProperty_Magazine_LoadedNeverExceedsCapacity(t *testing.T) {
 		}
 	})
 }
+
+// TestMagazine_IsEmpty_FalseWhenLoaded verifies IsEmpty returns false for a
+// newly created magazine.
+func TestMagazine_IsEmpty_FalseWhenLoaded(t *testing.T) {
+	m := inventory.NewMagazine("pistol-9mm", 5)
+	if m.IsEmpty() {
+		t.Fatal("expected IsEmpty=false for fully loaded magazine, got true")
+	}
+}
+
+// TestMagazine_IsEmpty_TrueWhenDrained verifies IsEmpty returns true after all
+// rounds are consumed.
+func TestMagazine_IsEmpty_TrueWhenDrained(t *testing.T) {
+	m := inventory.NewMagazine("pistol-9mm", 3)
+	if err := m.Consume(3); err != nil {
+		t.Fatalf("unexpected error draining: %v", err)
+	}
+	if !m.IsEmpty() {
+		t.Fatal("expected IsEmpty=true after draining all rounds, got false")
+	}
+}
+
+// TestMagazine_NewMagazine_PanicsOnZeroCapacity verifies NewMagazine panics
+// when capacity is zero.
+func TestMagazine_NewMagazine_PanicsOnZeroCapacity(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("expected panic on capacity=0, got none")
+		}
+	}()
+	_ = inventory.NewMagazine("pistol-9mm", 0)
+}
