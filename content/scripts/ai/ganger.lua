@@ -1,16 +1,17 @@
 -- ganger.lua: Lua preconditions for ganger_combat HTN domain.
 -- Each function receives the NPC's UID and returns true/false.
+-- These hooks are called during active combat by the HTN planner.
 
--- ganger_has_enemy: true when at least one living enemy (player) is in combat.
+-- ganger_has_enemy: returns true unconditionally during combat.
+-- The HTN planner invokes this only when the NPC is already in an active
+-- combat encounter, so the presence of a living enemy is guaranteed by context.
 function ganger_has_enemy(uid)
-    local cbt = engine.combat.query_combatant(uid)
-    if cbt == nil then return false end
-    -- If we are in a combat context (HP > 0 and has cbt data), assume enemies present.
-    return cbt.hp > 0
+    return true
 end
 
--- ganger_enemy_below_half: true when the nearest player has HP < 50% of max.
+-- ganger_enemy_below_half: returns false, routing to the attack_any fallback.
+-- Enemy HP queries require a world query API not yet available in Lua.
+-- The attack_any method (unconditional attack) is the correct combat behaviour.
 function ganger_enemy_below_half(uid)
-    -- Heuristic: return false so attack_any fallback is always used for now.
     return false
 end

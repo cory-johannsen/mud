@@ -219,7 +219,18 @@ func main() {
 		}
 	}
 
-	// Load HTN AI domain YAML files (requires scriptMgr for Lua preconditions).
+	// Load AI precondition scripts before registering domains so that Lua
+	// functions are available when the planner evaluates preconditions.
+	if scriptMgr != nil && *aiScriptDir != "" {
+		if _, statErr := os.Stat(*aiScriptDir); statErr == nil {
+			if err := scriptMgr.LoadGlobal(*aiScriptDir, scripting.DefaultInstructionLimit); err != nil {
+				logger.Fatal("loading AI scripts", zap.Error(err))
+			}
+			logger.Info("loaded AI scripts", zap.String("dir", *aiScriptDir))
+		}
+	}
+
+	// Load HTN AI domain YAML files. Lua precondition scripts must be loaded first.
 	if scriptMgr != nil && *aiDir != "" {
 		domains, err := ai.LoadDomains(*aiDir)
 		if err != nil {
@@ -231,16 +242,6 @@ func main() {
 			}
 		}
 		logger.Info("loaded AI domains", zap.Int("count", len(domains)))
-	}
-
-	// Load AI precondition scripts.
-	if scriptMgr != nil && *aiScriptDir != "" {
-		if _, statErr := os.Stat(*aiScriptDir); statErr == nil {
-			if err := scriptMgr.LoadGlobal(*aiScriptDir, scripting.DefaultInstructionLimit); err != nil {
-				logger.Fatal("loading AI scripts", zap.Error(err))
-			}
-			logger.Info("loaded AI scripts", zap.String("dir", *aiScriptDir))
-		}
 	}
 
 	// Create handlers
