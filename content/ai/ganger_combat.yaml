@@ -1,0 +1,43 @@
+domain:
+  id: ganger_combat
+  description: Combat behavior for gang members. Attacks weakest enemy when able.
+
+  tasks:
+    - id: behave
+      description: Root task — choose combat or idle behavior
+    - id: fight
+      description: Engage nearest enemy
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: ganger_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: strike_weakest
+      precondition: ganger_enemy_below_half
+      subtasks: [strike_enemy]
+
+    - task: fight
+      id: attack_any
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""

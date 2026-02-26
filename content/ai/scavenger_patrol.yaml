@@ -1,0 +1,39 @@
+domain:
+  id: scavenger_patrol
+  description: Patrol and scavenge behavior. Cautious in combat — passes if outnumbered.
+
+  tasks:
+    - id: behave
+      description: Root task — fight cautiously or pass
+    - id: cautious_fight
+      description: Fight only when not outnumbered
+
+  methods:
+    - task: behave
+      id: cautious_combat
+      precondition: scavenger_has_enemy
+      subtasks: [cautious_fight]
+
+    - task: behave
+      id: idle
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: cautious_fight
+      id: fight_if_not_outnumbered
+      precondition: scavenger_not_outnumbered
+      subtasks: [attack_enemy]
+
+    - task: cautious_fight
+      id: flee_if_outnumbered
+      precondition: ""
+      subtasks: [do_pass]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
