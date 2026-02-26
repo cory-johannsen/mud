@@ -3,11 +3,11 @@ package scripting_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/dice"
@@ -231,5 +231,51 @@ func TestProperty_EventStubsNeverPanic(t *testing.T) {
 			return
 		}
 		mgr.CallHook(zoneID, "do_ev") //nolint:errcheck
+	})
+}
+
+func TestCombatantToTable_KindField_Player(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	mgr.GetCombatant = func(uid string) *scripting.CombatantInfo {
+		return &scripting.CombatantInfo{UID: uid, Name: "Hero", HP: 50, MaxHP: 100, AC: 14, Kind: "player"}
+	}
+	ret := runScript(t, mgr, `
+		function get_it()
+			local c = engine.combat.query_combatant("p1")
+			return c.kind
+		end
+	`, "get_it")
+	assert.Equal(t, lua.LString("player"), ret)
+}
+
+func TestCombatantToTable_KindField_NPC(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	mgr.GetCombatant = func(uid string) *scripting.CombatantInfo {
+		return &scripting.CombatantInfo{UID: uid, Name: "Ganger", HP: 20, MaxHP: 30, AC: 12, Kind: "npc"}
+	}
+	ret := runScript(t, mgr, `
+		function get_it()
+			local c = engine.combat.query_combatant("n1")
+			return c.kind
+		end
+	`, "get_it")
+	assert.Equal(t, lua.LString("npc"), ret)
+}
+
+func TestProperty_CombatantToTable_KindIsPlayerOrNPC(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		mgr, _ := newTestManager(t)
+		kind := rapid.SampledFrom([]string{"player", "npc"}).Draw(rt, "kind")
+		mgr.GetCombatant = func(uid string) *scripting.CombatantInfo {
+			return &scripting.CombatantInfo{UID: uid, Name: "X", HP: 10, MaxHP: 10, AC: 10, Kind: kind}
+		}
+		ret := runScript(t, mgr, `
+			function get_kind(uid)
+				local c = engine.combat.query_combatant(uid)
+				if c == nil then return "nil" end
+				return c.kind
+			end
+		`, "get_kind", lua.LString("uid1"))
+		assert.Equal(t, lua.LString(kind), ret)
 	})
 }

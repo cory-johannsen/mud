@@ -82,7 +82,7 @@ func (m *Manager) newDiceModule(L *lua.LState) *lua.LTable {
 // combatantToTable converts a CombatantInfo snapshot to a Lua table.
 //
 // Precondition: L and c must be non-nil.
-// Postcondition: Returned table has uid, name, hp, max_hp, ac, conditions fields.
+// Postcondition: Returned table has uid, name, hp, max_hp, ac, kind, conditions fields.
 func combatantToTable(L *lua.LState, c *CombatantInfo) *lua.LTable {
 	tbl := L.NewTable()
 	L.SetField(tbl, "uid", lua.LString(c.UID))
@@ -90,6 +90,7 @@ func combatantToTable(L *lua.LState, c *CombatantInfo) *lua.LTable {
 	L.SetField(tbl, "hp", lua.LNumber(c.HP))
 	L.SetField(tbl, "max_hp", lua.LNumber(c.MaxHP))
 	L.SetField(tbl, "ac", lua.LNumber(c.AC))
+	L.SetField(tbl, "kind", lua.LString(c.Kind))
 	conds := L.NewTable()
 	for i, cond := range c.Conditions {
 		L.RawSetInt(conds, i+1, lua.LString(cond))

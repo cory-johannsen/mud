@@ -26,6 +26,8 @@ type CombatantInfo struct {
 	MaxHP      int
 	AC         int
 	Conditions []string
+	// Kind is "player" or "npc" — used by Lua to distinguish combatant types.
+	Kind string
 }
 
 // RoomInfo is a snapshot of a room passed to Lua callbacks.
