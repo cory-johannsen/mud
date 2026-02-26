@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
@@ -35,6 +36,7 @@ type CombatHandler struct {
 	worldMgr      *world.Manager
 	scriptMgr     *scripting.Manager
 	invRegistry   *inventory.Registry
+	aiRegistry    *ai.Registry
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -57,6 +59,7 @@ func NewCombatHandler(
 	worldMgr *world.Manager,
 	scriptMgr *scripting.Manager,
 	invRegistry *inventory.Registry,
+	aiRegistry *ai.Registry,
 ) *CombatHandler {
 	return &CombatHandler{
 		engine:        engine,
@@ -69,6 +72,7 @@ func NewCombatHandler(
 		worldMgr:      worldMgr,
 		scriptMgr:     scriptMgr,
 		invRegistry:   invRegistry,
+		aiRegistry:    aiRegistry,
 		timers:        make(map[string]*combat.RoundTimer),
 		loadouts:      make(map[string]*inventory.Loadout),
 	}
@@ -632,29 +636,81 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	return cbt, events, nil
 }
 
-// autoQueueNPCsLocked queues ActionAttack for every living NPC in cbt, targeting
-// the first living player by name. Caller must hold combatMu.
+// autoQueueNPCsLocked queues actions for all living NPCs using the HTN planner
+// when available, falling back to a simple attack for NPCs without an AI domain.
 //
-// Precondition: combatMu is held; cbt must be non-nil.
-// Postcondition: Each living NPC has ActionAttack queued for this round.
+// Precondition: h.combatMu is held; cbt must not be nil.
 func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
-	var playerName string
 	for _, c := range cbt.Combatants {
-		if c.Kind == combat.KindPlayer && !c.IsDead() {
-			playerName = c.Name
-			break
+		if c.Kind != combat.KindNPC || c.IsDead() {
+			continue
 		}
+		// Attempt HTN planning.
+		if h.aiRegistry != nil {
+			inst, ok := h.npcMgr.Get(c.ID)
+			if ok && inst.AIDomain != "" {
+				if planner, ok := h.aiRegistry.PlannerFor(inst.AIDomain); ok {
+					zoneID := h.zoneIDForRoom(cbt.RoomID)
+					ws := ai.BuildCombatWorldState(cbt, inst, zoneID)
+					actions, err := planner.Plan(ws)
+					if err == nil {
+						h.applyPlanLocked(cbt, c, actions)
+						continue
+					}
+				}
+			}
+		}
+		// Fallback: attack first living player.
+		h.legacyAutoQueueLocked(cbt, c)
 	}
-	if playerName == "" {
-		return
-	}
+}
 
-	for _, c := range cbt.Combatants {
-		if c.Kind == combat.KindNPC && !c.IsDead() {
-			// Ignore errors — NPC may already have its AP queued.
-			_ = cbt.QueueAction(c.ID, combat.QueuedAction{Type: combat.ActionAttack, Target: playerName})
+// applyPlanLocked converts PlannedActions to QueuedActions and enqueues them.
+//
+// Precondition: h.combatMu is held.
+// Postcondition: actions queued until AP budget exhausted.
+func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combatant, actions []ai.PlannedAction) {
+	for _, a := range actions {
+		var qa combat.QueuedAction
+		switch a.Action {
+		case "attack":
+			qa = combat.QueuedAction{Type: combat.ActionAttack, Target: a.Target}
+		case "strike":
+			qa = combat.QueuedAction{Type: combat.ActionStrike, Target: a.Target}
+		case "pass":
+			qa = combat.QueuedAction{Type: combat.ActionPass}
+		default:
+			qa = combat.QueuedAction{Type: combat.ActionPass}
+		}
+		if err := cbt.QueueAction(actor.ID, qa); err != nil {
+			break // AP budget exhausted
 		}
 	}
+}
+
+// legacyAutoQueueLocked queues ActionAttack for c targeting the first living player.
+func (h *CombatHandler) legacyAutoQueueLocked(cbt *combat.Combat, c *combat.Combatant) {
+	for _, combatant := range cbt.Combatants {
+		if combatant.Kind == combat.KindPlayer && !combatant.IsDead() {
+			_ = cbt.QueueAction(c.ID, combat.QueuedAction{
+				Type:   combat.ActionAttack,
+				Target: combatant.Name,
+			})
+			return
+		}
+	}
+}
+
+// zoneIDForRoom looks up the zone ID for a room via the world manager.
+func (h *CombatHandler) zoneIDForRoom(roomID string) string {
+	if h.worldMgr == nil {
+		return ""
+	}
+	room, ok := h.worldMgr.GetRoom(roomID)
+	if !ok {
+		return ""
+	}
+	return room.ZoneID
 }
 
 // startTimerLocked starts or replaces the round timer for roomID.
