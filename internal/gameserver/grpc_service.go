@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -829,5 +830,6 @@ func (s *GameServiceServer) npcPatrolRandom(inst *npc.Instance) {
 	if len(exits) == 0 {
 		return
 	}
-	_ = s.npcH.MoveNPC(inst.ID, exits[0].TargetRoom)
+	idx := rand.Intn(len(exits))
+	_ = s.npcH.MoveNPC(inst.ID, exits[idx].TargetRoom)
 }
