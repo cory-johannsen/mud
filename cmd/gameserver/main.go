@@ -161,6 +161,8 @@ func main() {
 	// Load HTN AI domains.
 	aiRegistry := ai.NewRegistry()
 
+	combatEngine := combat.NewEngine()
+
 	// Initialise scripting engine
 	var scriptMgr *scripting.Manager
 	if *scriptRoot != "" {
@@ -217,6 +219,53 @@ func main() {
 			}
 			return &scripting.RoomInfo{ID: room.ID, Title: room.Title}
 		}
+
+		// Wire GetEntityRoom callback.
+		// Checks NPC instances first, then player sessions.
+		//
+		// Precondition: npcMgr and sessMgr must not be nil.
+		// Postcondition: Returns room ID string or empty string when entity not found.
+		scriptMgr.GetEntityRoom = func(uid string) string {
+			if inst, ok := npcMgr.Get(uid); ok {
+				return inst.RoomID
+			}
+			if sess, ok := sessMgr.GetPlayer(uid); ok {
+				return sess.RoomID
+			}
+			return ""
+		}
+
+		// Wire GetCombatantsInRoom callback.
+		// Returns CombatantInfo for all living combatants in the active combat for roomID.
+		//
+		// Precondition: combatEngine must not be nil.
+		// Postcondition: Returns nil when no active combat exists for roomID.
+		scriptMgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo {
+			cbt, ok := combatEngine.GetCombat(roomID)
+			if !ok {
+				return nil
+			}
+			living := cbt.LivingCombatants()
+			if len(living) == 0 {
+				return nil
+			}
+			out := make([]*scripting.CombatantInfo, 0, len(living))
+			for _, c := range living {
+				kind := "npc"
+				if c.Kind == combat.KindPlayer {
+					kind = "player"
+				}
+				out = append(out, &scripting.CombatantInfo{
+					UID:   c.ID,
+					Name:  c.Name,
+					HP:    c.CurrentHP,
+					MaxHP: c.MaxHP,
+					AC:    c.AC,
+					Kind:  kind,
+				})
+			}
+			return out
+		}
 	}
 
 	// Load AI precondition scripts before registering domains so that Lua
@@ -248,8 +297,6 @@ func main() {
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	npcHandler := gameserver.NewNPCHandler(npcMgr, sessMgr)
-	combatEngine := combat.NewEngine()
-
 	roundDuration := time.Duration(cfg.GameServer.RoundDurationMs) * time.Millisecond
 	if roundDuration <= 0 {
 		roundDuration = 6 * time.Second
