@@ -79,8 +79,8 @@ func spawnRespawnTestNPC(t *testing.T, npcMgr *npc.Manager, roomID, templateID s
 		Name:         "Ganger",
 		Level:        1,
 		MaxHP:        maxHP,
-		AC:           1, // very low AC so player attacks always hit
-		Perception:   2,
+		AC:           1,  // very low AC so player attacks always hit
+		Perception:   20, // high Perception → StrMod +5 so NPC reliably hits player AC 12
 		RespawnDelay: "1m",
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)
