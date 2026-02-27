@@ -185,8 +185,8 @@ func (r *RespawnManager) ResolvedDelay(templateID, roomID string) time.Duration 
 // configFor finds the RoomSpawn config for templateID in roomID.
 // Caller must NOT hold r.mu.
 func (r *RespawnManager) configFor(roomID, templateID string) (RoomSpawn, bool) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	for _, cfg := range r.spawns[roomID] {
 		if cfg.TemplateID == templateID {
 			return cfg, true
