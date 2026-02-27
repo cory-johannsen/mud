@@ -34,7 +34,8 @@ type Template struct {
 	AIDomain    string    `yaml:"ai_domain"` // HTN domain ID; empty = simple attack fallback
 	// RespawnDelay is the duration string (e.g. "5m", "30s") before a dead NPC
 	// of this template respawns. Empty means the NPC does not respawn.
-	RespawnDelay string `yaml:"respawn_delay"`
+	RespawnDelay string     `yaml:"respawn_delay"`
+	Loot         *LootTable `yaml:"loot"`
 }
 
 // Validate checks that the template satisfies basic invariants.
@@ -61,6 +62,11 @@ func (t *Template) Validate() error {
 	if t.RespawnDelay != "" {
 		if _, err := time.ParseDuration(t.RespawnDelay); err != nil {
 			return fmt.Errorf("npc template %q: respawn_delay %q is not a valid duration: %w", t.ID, t.RespawnDelay, err)
+		}
+	}
+	if t.Loot != nil {
+		if err := t.Loot.Validate(); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
 		}
 	}
 	return nil
