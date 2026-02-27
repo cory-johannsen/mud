@@ -25,6 +25,12 @@ type Backpack struct {
 // Precondition: maxSlots >= 0 and maxWeight >= 0.
 // Postcondition: returned Backpack has zero items and the specified limits.
 func NewBackpack(maxSlots int, maxWeight float64) *Backpack {
+	if maxSlots < 0 {
+		maxSlots = 0
+	}
+	if maxWeight < 0 {
+		maxWeight = 0
+	}
 	return &Backpack{
 		MaxSlots:  maxSlots,
 		MaxWeight: maxWeight,
@@ -61,10 +67,14 @@ func (b *Backpack) Add(itemDefID string, quantity int, reg *Registry) (*ItemInst
 }
 
 func (b *Backpack) addStackable(def *ItemDef, quantity int) (*ItemInstance, error) {
+	type mergeTarget struct {
+		index  int
+		amount int
+	}
+
 	// Phase 1: compute how much fits into existing stacks and how many new slots needed.
 	remaining := quantity
-	var mergeIdx int = -1
-	var mergeAmount int
+	var merges []mergeTarget
 
 	for i := range b.items {
 		if remaining <= 0 {
@@ -76,10 +86,7 @@ func (b *Backpack) addStackable(def *ItemDef, quantity int) (*ItemInstance, erro
 			if take > room {
 				take = room
 			}
-			if mergeIdx == -1 {
-				mergeIdx = i
-				mergeAmount = take
-			}
+			merges = append(merges, mergeTarget{index: i, amount: take})
 			remaining -= take
 		}
 	}
@@ -100,11 +107,11 @@ func (b *Backpack) addStackable(def *ItemDef, quantity int) (*ItemInstance, erro
 		return nil, fmt.Errorf("backpack: not enough slots")
 	}
 
-	// Phase 2: apply. Merge into first available stack.
+	// Phase 2: apply all merges.
 	var result *ItemInstance
-	if mergeIdx >= 0 && mergeAmount > 0 {
-		b.items[mergeIdx].Quantity += mergeAmount
-		result = &b.items[mergeIdx]
+	for _, m := range merges {
+		b.items[m.index].Quantity += m.amount
+		result = &b.items[m.index]
 	}
 
 	// Create new stacks for remainder.
@@ -125,8 +132,8 @@ func (b *Backpack) addStackable(def *ItemDef, quantity int) (*ItemInstance, erro
 	}
 
 	if result == nil {
-		// All went into merge (shouldn't happen given quantity > 0, but guard).
-		result = &b.items[mergeIdx]
+		// All went into merges (shouldn't happen given quantity > 0, but guard).
+		result = &b.items[merges[0].index]
 	}
 	return result, nil
 }
@@ -154,6 +161,9 @@ func (b *Backpack) addNonStackable(def *ItemDef, quantity int) (*ItemInstance, e
 // Precondition: instanceID exists in the backpack, quantity > 0 and <= instance.Quantity.
 // Postcondition: if quantity == instance.Quantity, instance is removed; otherwise quantity is decremented.
 func (b *Backpack) Remove(instanceID string, quantity int) error {
+	if quantity <= 0 {
+		return fmt.Errorf("backpack: quantity must be > 0")
+	}
 	for i := range b.items {
 		if b.items[i].InstanceID == instanceID {
 			if quantity > b.items[i].Quantity {

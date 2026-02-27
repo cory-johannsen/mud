@@ -213,6 +213,147 @@ func TestBackpack_FindByItemDefID(t *testing.T) {
 	}
 }
 
+func TestBackpack_Add_StackableMergesIntoMultipleStacks(t *testing.T) {
+	def := stackDef("ammo", 0.1, 10)
+	reg := makeRegistry(def)
+	bp := inventory.NewBackpack(5, 100.0)
+
+	// Create two partially-filled stacks of 8/10 each.
+	inst1, err := bp.Add("ammo", 8, reg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	inst2, err := bp.Add("ammo", 10, reg) // fills first stack (2 more) + new stack of 8
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// Now we have stack1=10, stack2=8. We need stack1=8, stack2=8.
+	// Reset: remove both stacks and re-add manually.
+	_ = inst1
+	_ = inst2
+
+	// Start fresh for clarity.
+	bp2 := inventory.NewBackpack(5, 100.0)
+	// Add 8 to get first stack at 8/10.
+	_, err = bp2.Add("ammo", 8, reg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// Add 10 to fill first stack (2) and create second stack of 8/10.
+	_, err = bp2.Add("ammo", 10, reg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// Verify: stack1=10, stack2=8.
+	items := bp2.FindByItemDefID("ammo")
+	if len(items) != 2 {
+		t.Fatalf("expected 2 stacks, got %d", len(items))
+	}
+	if items[0].Quantity != 10 || items[1].Quantity != 8 {
+		t.Fatalf("expected [10, 8], got [%d, %d]", items[0].Quantity, items[1].Quantity)
+	}
+
+	// Now add 4 more. Stack1 is full (10/10), stack2 has room for 2.
+	// Should merge 2 into stack2 and create a new stack of 2.
+	_, err = bp2.Add("ammo", 4, reg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	items = bp2.FindByItemDefID("ammo")
+	totalQty := 0
+	for _, it := range items {
+		totalQty += it.Quantity
+	}
+	if totalQty != 22 {
+		t.Errorf("total quantity = %d, want 22", totalQty)
+	}
+}
+
+func TestBackpack_Add_StackableMergesMultiplePartialStacks(t *testing.T) {
+	// Two stacks of 8/10 each, add 4 → merge 2 into each, no new slot.
+	def := stackDef("ammo", 0.1, 10)
+	reg := makeRegistry(def)
+	bp := inventory.NewBackpack(2, 100.0)
+
+	// Manually set up two stacks at 8/10 by adding 8, then 10 (fills first to 10, second gets 8),
+	// then removing 2 from first to get both at 8.
+	_, err := bp.Add("ammo", 8, reg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	_, err = bp.Add("ammo", 10, reg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// State: stack1=10, stack2=8. Remove 2 from stack1 to get stack1=8.
+	items := bp.FindByItemDefID("ammo")
+	if len(items) != 2 {
+		t.Fatalf("expected 2 stacks, got %d", len(items))
+	}
+	err = bp.Remove(items[0].InstanceID, 2)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Verify: both stacks at 8/10.
+	items = bp.FindByItemDefID("ammo")
+	if items[0].Quantity != 8 || items[1].Quantity != 8 {
+		t.Fatalf("expected [8, 8], got [%d, %d]", items[0].Quantity, items[1].Quantity)
+	}
+
+	// Add 4: should merge 2 into each stack, no new slot needed.
+	_, err = bp.Add("ammo", 4, reg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	items = bp.FindByItemDefID("ammo")
+	if len(items) != 2 {
+		t.Errorf("expected 2 stacks (no new slot), got %d", len(items))
+	}
+	totalQty := 0
+	for _, it := range items {
+		totalQty += it.Quantity
+	}
+	if totalQty != 20 {
+		t.Errorf("total quantity = %d, want 20", totalQty)
+	}
+}
+
+func TestBackpack_Remove_RejectsZeroQuantity(t *testing.T) {
+	def := junkDef("rock", 1.0)
+	reg := makeRegistry(def)
+	bp := inventory.NewBackpack(5, 50.0)
+
+	inst, _ := bp.Add("rock", 1, reg)
+	err := bp.Remove(inst.InstanceID, 0)
+	if err == nil {
+		t.Error("expected error for zero quantity")
+	}
+}
+
+func TestBackpack_Remove_RejectsNegativeQuantity(t *testing.T) {
+	def := junkDef("rock", 1.0)
+	reg := makeRegistry(def)
+	bp := inventory.NewBackpack(5, 50.0)
+
+	inst, _ := bp.Add("rock", 1, reg)
+	err := bp.Remove(inst.InstanceID, -1)
+	if err == nil {
+		t.Error("expected error for negative quantity")
+	}
+}
+
+func TestNewBackpack_ClampsNegativeValues(t *testing.T) {
+	bp := inventory.NewBackpack(-5, -10.0)
+	if bp.MaxSlots != 0 {
+		t.Errorf("got MaxSlots=%d, want 0", bp.MaxSlots)
+	}
+	if bp.MaxWeight != 0 {
+		t.Errorf("got MaxWeight=%f, want 0", bp.MaxWeight)
+	}
+}
+
 func TestProperty_Backpack_NeverExceedsSlots(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		maxSlots := rapid.IntRange(1, 20).Draw(t, "maxSlots")
