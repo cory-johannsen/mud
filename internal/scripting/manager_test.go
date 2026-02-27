@@ -2,15 +2,15 @@ package scripting_test
 
 import (
 	"os"
-	"sync"
 	"path/filepath"
+	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/dice"
