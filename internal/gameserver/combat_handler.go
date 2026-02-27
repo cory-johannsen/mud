@@ -37,6 +37,7 @@ type CombatHandler struct {
 	scriptMgr     *scripting.Manager
 	invRegistry   *inventory.Registry
 	aiRegistry    *ai.Registry
+	respawnMgr    *npc.RespawnManager
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -60,6 +61,7 @@ func NewCombatHandler(
 	scriptMgr *scripting.Manager,
 	invRegistry *inventory.Registry,
 	aiRegistry *ai.Registry,
+	respawnMgr *npc.RespawnManager,
 ) *CombatHandler {
 	return &CombatHandler{
 		engine:        engine,
@@ -73,6 +75,7 @@ func NewCombatHandler(
 		scriptMgr:     scriptMgr,
 		invRegistry:   invRegistry,
 		aiRegistry:    aiRegistry,
+		respawnMgr:    respawnMgr,
 		timers:        make(map[string]*combat.RoundTimer),
 		loadouts:      make(map[string]*inventory.Loadout),
 	}
@@ -534,6 +537,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			Narrative: endNarrative,
 		})
 		h.broadcastFn(roomID, events)
+		h.removeDeadNPCsLocked(cbt)
 		h.engine.EndCombat(roomID)
 		return events
 	}
@@ -831,6 +835,32 @@ func (h *CombatHandler) removeCombatant(cbt *combat.Combat, id string) {
 			c.CurrentHP = 0
 			c.Dead = true
 			return
+		}
+	}
+}
+
+// removeDeadNPCsLocked removes all dead NPC combatants from npcMgr and
+// schedules their respawn via respawnMgr.
+// Caller must hold combatMu.
+//
+// Precondition: cbt must not be nil.
+// Postcondition: dead NPC instances are removed from npcMgr; respawn
+// entries are enqueued in respawnMgr when respawnMgr is non-nil.
+func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindNPC || !c.IsDead() {
+			continue
+		}
+		inst, ok := h.npcMgr.Get(c.ID)
+		if !ok {
+			continue
+		}
+		templateID := inst.TemplateID
+		roomID := inst.RoomID
+		_ = h.npcMgr.Remove(c.ID)
+		if h.respawnMgr != nil {
+			delay := h.respawnMgr.ResolvedDelay(templateID, roomID)
+			h.respawnMgr.Schedule(templateID, roomID, time.Now(), delay)
 		}
 	}
 }

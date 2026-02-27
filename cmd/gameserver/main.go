@@ -308,7 +308,7 @@ func main() {
 			grpcService.BroadcastCombatEvents(roomID, events)
 		}
 	}
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry)
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, nil)
 
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
