@@ -29,6 +29,11 @@ type respawnEntry struct {
 // It is safe for concurrent use.
 //
 // Invariant: entries with zero delay are never queued.
+//
+// Concurrency: Tick and PopulateRoom must not be called concurrently with each
+// other or with themselves. Schedule may be called concurrently from any goroutine.
+// In practice, PopulateRoom is called only during single-threaded startup and
+// Tick is driven by a single ZoneTickManager goroutine per zone.
 type RespawnManager struct {
 	mu        sync.Mutex
 	spawns    map[string][]RoomSpawn // roomID → configs
@@ -58,16 +63,16 @@ func NewRespawnManager(spawns map[string][]RoomSpawn, templates map[string]*Temp
 // new instances to fill the room up to exactly Max.
 //
 // Precondition: roomID must be non-empty; mgr must not be nil.
-// Postcondition: for each template config in roomID, excess instances (count > Max)
-// are removed so that count == Max, and when count < Max new instances are spawned
-// until count == Max (subject to Spawn succeeding); the final live count equals
-// exactly Max when all spawns succeed.
+// Postcondition: for each template config in roomID, instances beyond Max are removed
+// and new instances are spawned until count == Max (subject to Spawn succeeding).
+// This method must not be called concurrently with Tick or other PopulateRoom calls.
 func (r *RespawnManager) PopulateRoom(roomID string, mgr *Manager) {
 	r.mu.Lock()
 	configs := append([]RoomSpawn(nil), r.spawns[roomID]...)
 	r.mu.Unlock()
 
 	for _, cfg := range configs {
+		// r.templates is read-only after construction; no lock required.
 		tmpl, ok := r.templates[cfg.TemplateID]
 		if !ok {
 			continue
@@ -98,27 +103,21 @@ func (r *RespawnManager) PopulateRoom(roomID string, mgr *Manager) {
 	}
 }
 
-// Schedule enqueues a future respawn for templateID in roomID after delay.
+// Schedule enqueues a future respawn for templateID in roomID to fire at now+delay.
 // No-op when delay == 0 (template does not respawn).
 //
-// Precondition: templateID and roomID must be non-empty.
-// Postcondition: entry is added to pending iff delay > 0.
-func (r *RespawnManager) Schedule(templateID, roomID string, delay time.Duration) {
+// Precondition: templateID and roomID must be non-empty; now must be a valid time.
+// Postcondition: entry is added to pending with readyAt = now+delay iff delay > 0.
+func (r *RespawnManager) Schedule(templateID, roomID string, now time.Time, delay time.Duration) {
 	if delay <= 0 {
 		return
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	// Subtract a small scheduling margin so that Tick called at (capturedNow + delay)
-	// reliably fires entries scheduled at approximately capturedNow. The margin
-	// (1ms) is far smaller than any meaningful delay but large enough to absorb
-	// the nanosecond-scale gap between a caller capturing "now" and Schedule
-	// recording its own time.Now().
-	const schedulingMargin = time.Millisecond
 	r.pending = append(r.pending, respawnEntry{
 		templateID: templateID,
 		roomID:     roomID,
-		readyAt:    time.Now().Add(delay - schedulingMargin),
+		readyAt:    now.Add(delay),
 	})
 }
 
@@ -127,6 +126,7 @@ func (r *RespawnManager) Schedule(templateID, roomID string, delay time.Duration
 //
 // Precondition: mgr must not be nil.
 // Postcondition: pending entries with readyAt <= now are consumed.
+// This method must not be called concurrently with other Tick or PopulateRoom calls.
 func (r *RespawnManager) Tick(now time.Time, mgr *Manager) {
 	r.mu.Lock()
 	var ready, future []respawnEntry
@@ -141,6 +141,7 @@ func (r *RespawnManager) Tick(now time.Time, mgr *Manager) {
 	r.mu.Unlock()
 
 	for _, e := range ready {
+		// r.templates is read-only after construction; no lock required.
 		tmpl, ok := r.templates[e.templateID]
 		if !ok {
 			continue

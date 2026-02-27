@@ -68,6 +68,21 @@ func TestRespawnManager_PopulateRoom_NoSpawnConfig_DoesNothing(t *testing.T) {
 	assert.Empty(t, mgr.InstancesInRoom("r1"))
 }
 
+func TestRespawnManager_PopulateRoom_RemovesExcessInstances(t *testing.T) {
+	tmpl := makeTemplate("ganger", "5m")
+	mgr := npc.NewManager()
+	// Pre-populate 4 instances against a cap of 2.
+	for i := 0; i < 4; i++ {
+		_, err := mgr.Spawn(tmpl, "r1")
+		require.NoError(t, err)
+	}
+
+	rm := makeRespawnManager("r1", "ganger", 2, "", tmpl)
+	rm.PopulateRoom("r1", mgr)
+
+	assert.Len(t, mgr.InstancesInRoom("r1"), 2)
+}
+
 // --- Schedule + Tick ---
 
 func TestRespawnManager_Tick_BeforeDeadline_DoesNotSpawn(t *testing.T) {
@@ -76,7 +91,7 @@ func TestRespawnManager_Tick_BeforeDeadline_DoesNotSpawn(t *testing.T) {
 	rm := makeRespawnManager("r1", "ganger", 2, "", tmpl)
 
 	now := time.Now()
-	rm.Schedule("ganger", "r1", 5*time.Minute)
+	rm.Schedule("ganger", "r1", now, 5*time.Minute)
 	rm.Tick(now.Add(4*time.Minute+59*time.Second), mgr)
 
 	assert.Empty(t, mgr.InstancesInRoom("r1"))
@@ -88,7 +103,7 @@ func TestRespawnManager_Tick_AfterDeadline_Spawns(t *testing.T) {
 	rm := makeRespawnManager("r1", "ganger", 2, "", tmpl)
 
 	now := time.Now()
-	rm.Schedule("ganger", "r1", 5*time.Minute)
+	rm.Schedule("ganger", "r1", now, 5*time.Minute)
 	rm.Tick(now.Add(5*time.Minute), mgr)
 
 	assert.Len(t, mgr.InstancesInRoom("r1"), 1)
@@ -103,7 +118,7 @@ func TestRespawnManager_Tick_RespectsPopulationCap(t *testing.T) {
 	require.NoError(t, err)
 
 	now := time.Now()
-	rm.Schedule("ganger", "r1", 5*time.Minute)
+	rm.Schedule("ganger", "r1", now, 5*time.Minute)
 	rm.Tick(now.Add(5*time.Minute), mgr)
 
 	assert.Len(t, mgr.InstancesInRoom("r1"), 1)
@@ -114,7 +129,8 @@ func TestRespawnManager_Tick_ZeroDelay_NeverRespawns(t *testing.T) {
 	mgr := npc.NewManager()
 	rm := makeRespawnManager("r1", "ganger", 2, "", tmpl)
 
-	rm.Schedule("ganger", "r1", 0)
+	now := time.Now()
+	rm.Schedule("ganger", "r1", now, 0)
 	rm.Tick(time.Now().Add(time.Hour), mgr)
 
 	assert.Empty(t, mgr.InstancesInRoom("r1"))
@@ -126,11 +142,25 @@ func TestRespawnManager_Tick_MultipleScheduled_SpawnsAll(t *testing.T) {
 	rm := makeRespawnManager("r1", "ganger", 3, "", tmpl)
 
 	now := time.Now()
-	rm.Schedule("ganger", "r1", time.Minute)
-	rm.Schedule("ganger", "r1", time.Minute)
+	rm.Schedule("ganger", "r1", now, time.Minute)
+	rm.Schedule("ganger", "r1", now, time.Minute)
 	rm.Tick(now.Add(time.Minute), mgr)
 
 	assert.Len(t, mgr.InstancesInRoom("r1"), 2)
+}
+
+func TestRespawnManager_Tick_CapReachedMidBatch_ExtraDropped(t *testing.T) {
+	tmpl := makeTemplate("ganger", "1m")
+	mgr := npc.NewManager()
+	rm := makeRespawnManager("r1", "ganger", 1, "", tmpl) // cap = 1
+
+	now := time.Now()
+	rm.Schedule("ganger", "r1", now, time.Minute)
+	rm.Schedule("ganger", "r1", now, time.Minute)
+	rm.Tick(now.Add(time.Minute), mgr)
+
+	// Only 1 should be spawned despite 2 being scheduled — cap is 1.
+	assert.Len(t, mgr.InstancesInRoom("r1"), 1)
 }
 
 // --- ResolvedDelay ---
@@ -175,7 +205,7 @@ func TestProperty_Tick_SpawnsNeverExceedCap(t *testing.T) {
 
 		now := time.Now()
 		for i := 0; i < scheduled; i++ {
-			rm.Schedule("ganger", "r1", time.Minute)
+			rm.Schedule("ganger", "r1", now, time.Minute)
 		}
 		rm.Tick(now.Add(time.Minute), mgr)
 
