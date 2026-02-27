@@ -37,17 +37,19 @@ type CharacterSaver interface {
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
 type GameServiceServer struct {
 	gamev1.UnimplementedGameServiceServer
-	world     *world.Manager
-	sessions  *session.Manager
-	commands  *command.Registry
-	worldH    *WorldHandler
-	chatH     *ChatHandler
-	charSaver CharacterSaver
-	dice      *dice.Roller
-	npcH      *NPCHandler
-	combatH   *CombatHandler
-	scriptMgr *scripting.Manager
-	logger    *zap.Logger
+	world      *world.Manager
+	sessions   *session.Manager
+	commands   *command.Registry
+	worldH     *WorldHandler
+	chatH      *ChatHandler
+	charSaver  CharacterSaver
+	dice       *dice.Roller
+	npcH       *NPCHandler
+	npcMgr     *npc.Manager
+	combatH    *CombatHandler
+	scriptMgr  *scripting.Manager
+	respawnMgr *npc.RespawnManager
+	logger     *zap.Logger
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -65,6 +67,7 @@ func NewGameServiceServer(
 	charSaver CharacterSaver,
 	diceRoller *dice.Roller,
 	npcHandler *NPCHandler,
+	npcMgr *npc.Manager,
 	combatHandler *CombatHandler,
 	scriptMgr *scripting.Manager,
 ) *GameServiceServer {
@@ -77,6 +80,7 @@ func NewGameServiceServer(
 		charSaver: charSaver,
 		dice:      diceRoller,
 		npcH:      npcHandler,
+		npcMgr:    npcMgr,
 		combatH:   combatHandler,
 		scriptMgr: scriptMgr,
 		logger:    logger,
@@ -756,7 +760,8 @@ func (s *GameServiceServer) handleThrow(uid string, req *gamev1.ThrowRequest) (*
 // StartZoneTicks begins the per-zone NPC tick loop.
 //
 // Precondition: ctx must be the server's lifetime context.
-func (s *GameServiceServer) StartZoneTicks(ctx context.Context, zm *ZoneTickManager, aiReg *ai.Registry) {
+func (s *GameServiceServer) StartZoneTicks(ctx context.Context, zm *ZoneTickManager, aiReg *ai.Registry, respawnMgr *npc.RespawnManager) {
+	s.respawnMgr = respawnMgr
 	for _, zone := range s.world.AllZones() {
 		zoneID := zone.ID
 		zm.RegisterTick(zoneID, func() {
@@ -780,6 +785,9 @@ func (s *GameServiceServer) tickZone(zoneID string, aiReg *ai.Registry) {
 				s.tickNPCIdle(inst, zoneID, aiReg)
 			}
 		}
+	}
+	if s.respawnMgr != nil {
+		s.respawnMgr.Tick(time.Now(), s.npcMgr)
 	}
 }
 

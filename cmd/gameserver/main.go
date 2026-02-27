@@ -110,15 +110,63 @@ func main() {
 
 	npcMgr := npc.NewManager()
 
-	startRoom := worldMgr.StartRoom()
-	if startRoom != nil {
-		for _, tmpl := range npcTemplates {
-			if _, err := npcMgr.Spawn(tmpl, startRoom.ID); err != nil {
-				logger.Fatal("spawning npc", zap.String("template", tmpl.ID), zap.Error(err))
+	// Build per-room spawn configs from zone data.
+	roomSpawns := make(map[string][]npc.RoomSpawn)
+	templateByID := make(map[string]*npc.Template, len(npcTemplates))
+	for _, tmpl := range npcTemplates {
+		templateByID[tmpl.ID] = tmpl
+	}
+	for _, zone := range worldMgr.AllZones() {
+		for _, room := range zone.Rooms {
+			for _, sc := range room.Spawns {
+				tmpl, ok := templateByID[sc.Template]
+				if !ok {
+					logger.Fatal("spawn references unknown npc template",
+						zap.String("zone", zone.ID),
+						zap.String("room", room.ID),
+						zap.String("template", sc.Template),
+					)
+				}
+				var delay time.Duration
+				switch {
+				case sc.RespawnAfter != "":
+					d, err := time.ParseDuration(sc.RespawnAfter)
+					if err != nil {
+						logger.Fatal("invalid respawn_after duration",
+							zap.String("room", room.ID),
+							zap.String("template", sc.Template),
+							zap.String("value", sc.RespawnAfter),
+							zap.Error(err),
+						)
+					}
+					delay = d
+				case tmpl.RespawnDelay != "":
+					d, err := time.ParseDuration(tmpl.RespawnDelay)
+					if err != nil {
+						logger.Fatal("invalid respawn_delay on template",
+							zap.String("template", tmpl.ID),
+							zap.String("value", tmpl.RespawnDelay),
+							zap.Error(err),
+						)
+					}
+					delay = d
+				}
+				roomSpawns[room.ID] = append(roomSpawns[room.ID], npc.RoomSpawn{
+					TemplateID:   sc.Template,
+					Max:          sc.Count,
+					RespawnDelay: delay,
+				})
 			}
-			logger.Info("spawned npc", zap.String("template", tmpl.ID), zap.String("room", startRoom.ID))
 		}
 	}
+	respawnMgr := npc.NewRespawnManager(roomSpawns, templateByID)
+	logger.Info("built respawn manager", zap.Int("room_configs", len(roomSpawns)))
+
+	// Populate all rooms with configured NPC spawns.
+	for roomID := range roomSpawns {
+		respawnMgr.PopulateRoom(roomID, npcMgr)
+	}
+	logger.Info("initial NPC population complete")
 
 	// Load condition definitions
 	condStart := time.Now()
@@ -308,17 +356,17 @@ func main() {
 			grpcService.BroadcastCombatEvents(roomID, events)
 		}
 	}
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, nil)
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr)
 
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, combatHandler, scriptMgr,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr,
 	)
 
 	// Start zone AI ticks.
 	zm := gameserver.NewZoneTickManager(*aiTickInterval)
-	grpcService.StartZoneTicks(ctx, zm, aiRegistry)
+	grpcService.StartZoneTicks(ctx, zm, aiRegistry, respawnMgr)
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer()

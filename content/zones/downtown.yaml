@@ -21,6 +21,13 @@ zone:
           target: market_district
         - direction: west
           target: transit_mall
+      spawns:
+        - template: ganger
+          count: 2
+          respawn_after: "2m"
+        - template: scavenger
+          count: 1
+          respawn_after: "3m"
       properties:
         lighting: dim
         atmosphere: rain
