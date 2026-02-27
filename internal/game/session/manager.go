@@ -3,6 +3,8 @@ package session
 import (
 	"fmt"
 	"sync"
+
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 )
 
 // PlayerSession tracks a connected player's state.
@@ -19,6 +21,10 @@ type PlayerSession struct {
 	RoomID string
 	// CurrentHP is the character's current hit points.
 	CurrentHP int
+	// Backpack is the player's inventory container.
+	Backpack *inventory.Backpack
+	// Currency is the player's total rounds (ammunition-as-currency).
+	Currency int
 	// Entity is the bridge entity for pushing events to the player.
 	Entity *BridgeEntity
 }
@@ -27,7 +33,7 @@ type PlayerSession struct {
 // All methods are safe for concurrent use.
 type Manager struct {
 	mu       sync.RWMutex
-	players  map[string]*PlayerSession // uid → session
+	players  map[string]*PlayerSession  // uid → session
 	roomSets map[string]map[string]bool // roomID → set of UIDs
 }
 
@@ -61,6 +67,9 @@ func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, r
 		CurrentHP:   currentHP,
 		Entity:      entity,
 	}
+
+	sess.Backpack = inventory.NewBackpack(20, 50.0)
+	sess.Currency = 0
 
 	m.players[uid] = sess
 	if m.roomSets[roomID] == nil {

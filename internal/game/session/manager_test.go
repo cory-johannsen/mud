@@ -49,6 +49,18 @@ func TestManager_AddPlayer(t *testing.T) {
 	assert.Equal(t, 1, m.PlayerCount())
 }
 
+func TestManager_AddPlayer_BackpackAndCurrency(t *testing.T) {
+	m := NewManager()
+	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
+	require.NoError(t, err)
+
+	require.NotNil(t, sess.Backpack, "new session must have a non-nil Backpack")
+	assert.Equal(t, 20, sess.Backpack.MaxSlots)
+	assert.Equal(t, 50.0, sess.Backpack.MaxWeight)
+	assert.Equal(t, 0, sess.Backpack.UsedSlots())
+	assert.Equal(t, 0, sess.Currency)
+}
+
 func TestManager_AddPlayerDuplicate(t *testing.T) {
 	m := NewManager()
 	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
