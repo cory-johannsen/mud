@@ -47,7 +47,8 @@ type CombatHandler struct {
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
 //
-// Precondition: all pointer arguments except invRegistry must be non-nil; roundDuration must be > 0.
+// Precondition: all pointer arguments except invRegistry and respawnMgr must be non-nil;
+// respawnMgr may be nil (respawn scheduling is skipped when nil); roundDuration must be > 0.
 // Postcondition: Returns a non-nil CombatHandler.
 func NewCombatHandler(
 	engine *combat.Engine,
@@ -843,7 +844,7 @@ func (h *CombatHandler) removeCombatant(cbt *combat.Combat, id string) {
 // schedules their respawn via respawnMgr.
 // Caller must hold combatMu.
 //
-// Precondition: cbt must not be nil.
+// Precondition: combatMu is held; cbt must not be nil.
 // Postcondition: dead NPC instances are removed from npcMgr; respawn
 // entries are enqueued in respawnMgr when respawnMgr is non-nil.
 func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
@@ -857,6 +858,7 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		}
 		templateID := inst.TemplateID
 		roomID := inst.RoomID
+		// Remove cannot fail: Get confirmed existence above, and combatMu prevents concurrent removal.
 		_ = h.npcMgr.Remove(c.ID)
 		if h.respawnMgr != nil {
 			delay := h.respawnMgr.ResolvedDelay(templateID, roomID)

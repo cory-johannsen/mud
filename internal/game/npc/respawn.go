@@ -35,7 +35,7 @@ type respawnEntry struct {
 // In practice, PopulateRoom is called only during single-threaded startup and
 // Tick is driven by a single ZoneTickManager goroutine per zone.
 type RespawnManager struct {
-	mu        sync.Mutex
+	mu        sync.RWMutex
 	spawns    map[string][]RoomSpawn // roomID → configs
 	templates map[string]*Template   // templateID → Template
 	pending   []respawnEntry
@@ -164,8 +164,8 @@ func (r *RespawnManager) Tick(now time.Time, mgr *Manager) {
 //
 // Postcondition: Returns >= 0.
 func (r *RespawnManager) ResolvedDelay(templateID, roomID string) time.Duration {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	for _, cfg := range r.spawns[roomID] {
 		if cfg.TemplateID == templateID && cfg.RespawnDelay > 0 {
 			return cfg.RespawnDelay
