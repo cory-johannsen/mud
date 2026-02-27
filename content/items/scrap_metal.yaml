@@ -1,0 +1,8 @@
+id: scrap_metal
+name: Scrap Metal
+description: Twisted metal scraps. Worth something to the right buyer.
+kind: junk
+weight: 1.0
+stackable: true
+max_stack: 10
+value: 5

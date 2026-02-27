@@ -1,0 +1,8 @@
+id: medkit
+name: Medkit
+description: A basic first-aid kit.
+kind: consumable
+weight: 0.5
+stackable: true
+max_stack: 5
+value: 50

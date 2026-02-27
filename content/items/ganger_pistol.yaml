@@ -1,0 +1,9 @@
+id: ganger_pistol_item
+name: "Ganger's Pistol"
+description: A battered 9mm pistol.
+kind: weapon
+weapon_ref: ganger_pistol
+weight: 1.2
+stackable: false
+max_stack: 1
+value: 75

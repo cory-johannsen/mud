@@ -43,6 +43,7 @@ func main() {
 	scriptRoot := flag.String("script-root", "content/scripts", "root directory for Lua scripts; empty = scripting disabled")
 	condScriptDir := flag.String("condition-scripts", "content/scripts/conditions", "directory of global condition scripts loaded into __global__ VM")
 	weaponsDir := flag.String("weapons-dir", "content/weapons", "path to weapon YAML definitions directory")
+	itemsDir := flag.String("items-dir", "content/items", "path to item YAML definitions directory")
 	explosivesDir := flag.String("explosives-dir", "content/explosives", "path to explosive YAML definitions directory")
 	aiDir := flag.String("ai-dir", "content/ai", "path to HTN AI domain YAML directory")
 	aiScriptDir := flag.String("ai-scripts", "content/scripts/ai", "path to Lua AI precondition scripts")
@@ -204,6 +205,19 @@ func main() {
 			}
 		}
 		logger.Info("loaded explosive definitions", zap.Int("count", len(explosives)))
+	}
+
+	if *itemsDir != "" {
+		items, err := inventory.LoadItems(*itemsDir)
+		if err != nil {
+			logger.Fatal("loading item definitions", zap.Error(err))
+		}
+		for _, item := range items {
+			if err := invRegistry.RegisterItem(item); err != nil {
+				logger.Fatal("registering item", zap.String("id", item.ID), zap.Error(err))
+			}
+		}
+		logger.Info("loaded item definitions", zap.Int("count", len(items)))
 	}
 
 	// Load HTN AI domains.

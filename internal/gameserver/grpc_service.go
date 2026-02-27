@@ -366,6 +366,30 @@ func (s *GameServiceServer) handleLook(uid string) (*gamev1.ServerEvent, error) 
 			}
 		}
 	}
+
+	// Append floor items to the room view.
+	//
+	// Precondition: view is a fully constructed RoomView from worldH.Look.
+	// Postcondition: view.FloorItems contains all items on the floor of the
+	// player's current room; item names are resolved from the registry when
+	// available, falling back to the raw ItemDefID.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && s.floorMgr != nil {
+		floorItems := s.floorMgr.ItemsInRoom(sess.RoomID)
+		for _, fi := range floorItems {
+			name := fi.ItemDefID
+			if s.invRegistry != nil {
+				if def, ok := s.invRegistry.Item(fi.ItemDefID); ok {
+					name = def.Name
+				}
+			}
+			view.FloorItems = append(view.FloorItems, &gamev1.FloorItem{
+				InstanceId: fi.InstanceID,
+				Name:       name,
+				Quantity:   int32(fi.Quantity),
+			})
+		}
+	}
+
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: view},
 	}, nil

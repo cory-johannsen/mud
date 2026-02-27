@@ -14,3 +14,16 @@ abilities:
   intelligence: 12
   wisdom: 14
   charisma: 8
+loot:
+  currency:
+    min: 5
+    max: 30
+  items:
+    - item: scrap_metal
+      chance: 0.75
+      min_qty: 1
+      max_qty: 5
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
