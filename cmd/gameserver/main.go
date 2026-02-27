@@ -356,10 +356,10 @@ func main() {
 			grpcService.BroadcastCombatEvents(roomID, events)
 		}
 	}
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr)
-
 	// Create floor manager for room item tracking.
 	floorMgr := inventory.NewFloorManager()
+
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr)
 
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(

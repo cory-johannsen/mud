@@ -74,6 +74,7 @@ func makeHTNCombatHandler(t *testing.T, broadcastFn func(string, []*gamev1.Comba
 		nil, // invRegistry
 		aiReg,
 		nil, // respawnMgr
+		nil, // floorMgr
 	)
 }
 

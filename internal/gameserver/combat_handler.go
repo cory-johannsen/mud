@@ -38,6 +38,7 @@ type CombatHandler struct {
 	invRegistry   *inventory.Registry
 	aiRegistry    *ai.Registry
 	respawnMgr    *npc.RespawnManager
+	floorMgr      *inventory.FloorManager
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -47,8 +48,9 @@ type CombatHandler struct {
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
 //
-// Precondition: all pointer arguments except invRegistry and respawnMgr must be non-nil;
-// respawnMgr may be nil (respawn scheduling is skipped when nil); roundDuration must be > 0.
+// Precondition: all pointer arguments except invRegistry, respawnMgr, and floorMgr must be non-nil;
+// respawnMgr may be nil (respawn scheduling is skipped when nil);
+// floorMgr may be nil (floor item drops are skipped when nil); roundDuration must be > 0.
 // Postcondition: Returns a non-nil CombatHandler.
 func NewCombatHandler(
 	engine *combat.Engine,
@@ -63,6 +65,7 @@ func NewCombatHandler(
 	invRegistry *inventory.Registry,
 	aiRegistry *ai.Registry,
 	respawnMgr *npc.RespawnManager,
+	floorMgr *inventory.FloorManager,
 ) *CombatHandler {
 	return &CombatHandler{
 		engine:        engine,
@@ -77,6 +80,7 @@ func NewCombatHandler(
 		invRegistry:   invRegistry,
 		aiRegistry:    aiRegistry,
 		respawnMgr:    respawnMgr,
+		floorMgr:      floorMgr,
 		timers:        make(map[string]*combat.RoundTimer),
 		loadouts:      make(map[string]*inventory.Loadout),
 	}
@@ -858,6 +862,28 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		}
 		templateID := inst.TemplateID
 		roomID := inst.RoomID
+		// Generate loot from NPC's loot table before removal so that
+		// the instance data is still accessible and removal serves as
+		// a happens-before signal for tests polling npcMgr.Get.
+		if inst.Loot != nil {
+			result := npc.GenerateLoot(*inst.Loot)
+			// Award currency to the first living player.
+			if result.Currency > 0 {
+				if killer := h.firstLivingPlayer(cbt); killer != nil {
+					killer.Currency += result.Currency
+				}
+			}
+			// Drop items on the room floor.
+			if h.floorMgr != nil {
+				for _, lootItem := range result.Items {
+					h.floorMgr.Drop(roomID, inventory.ItemInstance{
+						InstanceID: lootItem.InstanceID,
+						ItemDefID:  lootItem.ItemDefID,
+						Quantity:   lootItem.Quantity,
+					})
+				}
+			}
+		}
 		// Remove cannot fail: Get confirmed existence above, and combatMu prevents concurrent removal.
 		_ = h.npcMgr.Remove(c.ID)
 		if h.respawnMgr != nil {
@@ -865,6 +891,21 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			h.respawnMgr.Schedule(templateID, roomID, time.Now(), delay)
 		}
 	}
+}
+
+// firstLivingPlayer returns the session of the first living player in combat, or nil.
+//
+// Precondition: cbt must not be nil.
+// Postcondition: Returns a non-nil PlayerSession if a living player is found; nil otherwise.
+func (h *CombatHandler) firstLivingPlayer(cbt *combat.Combat) *session.PlayerSession {
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindPlayer && !c.IsDead() {
+			if sess, ok := h.sessions.GetPlayer(c.ID); ok {
+				return sess
+			}
+		}
+	}
+	return nil
 }
 
 // conditionEventsToProto converts a slice of RoundConditionEvents into CombatEvents

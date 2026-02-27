@@ -68,6 +68,7 @@ func makeRespawnHandler(
 		makeRespawnTestConditionRegistry(),
 		nil, nil, nil, nil,
 		respawnMgr,
+		nil, // floorMgr
 	)
 }
 
