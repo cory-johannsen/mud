@@ -2,10 +2,11 @@ package inventory
 
 import "fmt"
 
-// Registry holds all loaded weapon and explosive definitions indexed by ID.
+// Registry holds all loaded weapon, explosive, and item definitions indexed by ID.
 type Registry struct {
 	weapons    map[string]*WeaponDef
 	explosives map[string]*ExplosiveDef
+	items      map[string]*ItemDef
 }
 
 // NewRegistry returns an empty Registry.
@@ -15,6 +16,7 @@ func NewRegistry() *Registry {
 	return &Registry{
 		weapons:    make(map[string]*WeaponDef),
 		explosives: make(map[string]*ExplosiveDef),
+		items:      make(map[string]*ItemDef),
 	}
 }
 
@@ -50,6 +52,26 @@ func (r *Registry) Weapon(id string) *WeaponDef {
 // Explosive returns the ExplosiveDef for the given id, or nil if not found.
 func (r *Registry) Explosive(id string) *ExplosiveDef {
 	return r.explosives[id]
+}
+
+// RegisterItem adds d to the registry.
+//
+// Precondition:  d must not be nil.
+// Postcondition: Item(d.ID) returns (d, true); returns error if d.ID already registered.
+func (r *Registry) RegisterItem(d *ItemDef) error {
+	if _, exists := r.items[d.ID]; exists {
+		return fmt.Errorf("inventory: Registry.RegisterItem: item ID %q already registered", d.ID)
+	}
+	r.items[d.ID] = d
+	return nil
+}
+
+// Item returns the ItemDef for the given id and whether it was found.
+//
+// Postcondition: ok is true iff the id is registered.
+func (r *Registry) Item(id string) (*ItemDef, bool) {
+	d, ok := r.items[id]
+	return d, ok
 }
 
 // AllWeapons returns all registered WeaponDefs in unspecified order.
