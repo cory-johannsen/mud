@@ -31,6 +31,10 @@ const (
 	HandlerFireBurst = "burst"
 	HandlerFireAuto  = "auto"
 	HandlerThrow     = "throw"
+	HandlerInventory = "inventory"
+	HandlerGet       = "get"
+	HandlerDrop      = "drop"
+	HandlerBalance   = "balance"
 )
 
 // Command defines a player-invocable command.
@@ -76,6 +80,10 @@ func BuiltinCommands() []Command {
 		{Name: "burst", Aliases: []string{"bf"}, Help: "Burst fire at target (2 AP, 2 attacks)", Category: CategoryCombat, Handler: HandlerFireBurst},
 		{Name: "auto", Aliases: []string{"af"}, Help: "Automatic fire at all enemies (3 AP)", Category: CategoryCombat, Handler: HandlerFireAuto},
 		{Name: "throw", Aliases: []string{"gr"}, Help: "Throw an explosive at current room", Category: CategoryCombat, Handler: HandlerThrow},
+		{Name: "inventory", Aliases: []string{"inv", "i"}, Help: "Show backpack contents and currency", Category: CategoryWorld, Handler: HandlerInventory},
+		{Name: "get", Aliases: []string{"take"}, Help: "Pick up item from room floor", Category: CategoryWorld, Handler: HandlerGet},
+		{Name: "drop", Aliases: nil, Help: "Drop an item from your backpack", Category: CategoryWorld, Handler: HandlerDrop},
+		{Name: "balance", Aliases: []string{"bal"}, Help: "Show your currency (Rounds/Clips/Crates)", Category: CategoryWorld, Handler: HandlerBalance},
 
 		// Communication commands
 		{Name: "say", Aliases: nil, Help: "Say something to the room", Category: CategoryCommunication, Handler: HandlerSay},

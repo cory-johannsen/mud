@@ -11,9 +11,12 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 
+	"strings"
+
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -48,8 +51,10 @@ type GameServiceServer struct {
 	npcMgr     *npc.Manager
 	combatH    *CombatHandler
 	scriptMgr  *scripting.Manager
-	respawnMgr *npc.RespawnManager
-	logger     *zap.Logger
+	respawnMgr  *npc.RespawnManager
+	floorMgr    *inventory.FloorManager
+	invRegistry *inventory.Registry
+	logger      *zap.Logger
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -57,6 +62,8 @@ type GameServiceServer struct {
 // Precondition: worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, diceRoller, and logger must be non-nil.
 // charSaver may be nil (character state will not be persisted on disconnect).
 // respawnMgr may be nil (respawn functionality will be disabled).
+// floorMgr may be nil (inventory get/drop will return errors).
+// invRegistry may be nil (item name resolution will fall back to ItemDefID).
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
@@ -72,21 +79,25 @@ func NewGameServiceServer(
 	combatHandler *CombatHandler,
 	scriptMgr *scripting.Manager,
 	respawnMgr *npc.RespawnManager,
+	floorMgr *inventory.FloorManager,
+	invRegistry *inventory.Registry,
 ) *GameServiceServer {
 	return &GameServiceServer{
-		world:      worldMgr,
-		sessions:   sessMgr,
-		commands:   cmdRegistry,
-		worldH:     worldHandler,
-		chatH:      chatHandler,
-		charSaver:  charSaver,
-		dice:       diceRoller,
-		npcH:       npcHandler,
-		npcMgr:     npcMgr,
-		combatH:    combatHandler,
-		scriptMgr:  scriptMgr,
-		respawnMgr: respawnMgr,
-		logger:     logger,
+		world:       worldMgr,
+		sessions:    sessMgr,
+		commands:    cmdRegistry,
+		worldH:      worldHandler,
+		chatH:       chatHandler,
+		charSaver:   charSaver,
+		dice:        diceRoller,
+		npcH:        npcHandler,
+		npcMgr:      npcMgr,
+		combatH:     combatHandler,
+		scriptMgr:   scriptMgr,
+		respawnMgr:  respawnMgr,
+		floorMgr:    floorMgr,
+		invRegistry: invRegistry,
+		logger:      logger,
 	}
 }
 
@@ -278,6 +289,14 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleFireAutomatic(uid, p.FireAutomatic)
 	case *gamev1.ClientMessage_Throw:
 		return s.handleThrow(uid, p.Throw)
+	case *gamev1.ClientMessage_InventoryReq:
+		return s.handleInventory(uid)
+	case *gamev1.ClientMessage_GetItem:
+		return s.handleGetItem(uid, p.GetItem.Target)
+	case *gamev1.ClientMessage_DropItem:
+		return s.handleDropItem(uid, p.DropItem.Target)
+	case *gamev1.ClientMessage_Balance:
+		return s.handleBalance(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -849,4 +868,144 @@ func (s *GameServiceServer) npcPatrolRandom(inst *npc.Instance) {
 	}
 	idx := rand.Intn(len(exits))
 	_ = s.npcH.MoveNPC(inst.ID, exits[idx].TargetRoom)
+}
+
+// handleInventory sends the player's backpack contents and currency.
+//
+// Precondition: uid must be a valid connected player.
+// Postcondition: Returns a ServerEvent containing InventoryView, or an error event.
+func (s *GameServiceServer) handleInventory(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	var items []*gamev1.InventoryItem
+	for _, inst := range sess.Backpack.Items() {
+		name := inst.ItemDefID
+		kind := ""
+		weight := 0.0
+		if s.invRegistry != nil {
+			if def, ok := s.invRegistry.Item(inst.ItemDefID); ok {
+				name = def.Name
+				kind = def.Kind
+				weight = def.Weight
+			}
+		}
+		items = append(items, &gamev1.InventoryItem{
+			InstanceId: inst.InstanceID,
+			Name:       name,
+			Kind:       kind,
+			Quantity:   int32(inst.Quantity),
+			Weight:     weight * float64(inst.Quantity),
+		})
+	}
+	var totalWeight float64
+	if s.invRegistry != nil {
+		totalWeight = sess.Backpack.TotalWeight(s.invRegistry)
+	}
+	view := &gamev1.InventoryView{
+		Items:       items,
+		UsedSlots:   int32(sess.Backpack.UsedSlots()),
+		MaxSlots:    int32(sess.Backpack.MaxSlots),
+		TotalWeight: totalWeight,
+		MaxWeight:   sess.Backpack.MaxWeight,
+		Currency:    inventory.FormatRounds(sess.Currency),
+		TotalRounds: int32(sess.Currency),
+	}
+	return &gamev1.ServerEvent{Payload: &gamev1.ServerEvent_InventoryView{InventoryView: view}}, nil
+}
+
+// handleBalance sends the player's currency breakdown.
+//
+// Precondition: uid must be a valid connected player.
+// Postcondition: Returns a ServerEvent containing a message with the currency string.
+func (s *GameServiceServer) handleBalance(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	return messageEvent(fmt.Sprintf("Currency: %s", inventory.FormatRounds(sess.Currency))), nil
+}
+
+// handleGetItem picks up an item from the room floor into the player's backpack.
+//
+// Precondition: uid must be a valid connected player; target is the item name or "all".
+// Postcondition: On success the item is moved from floor to backpack; returns a message event.
+func (s *GameServiceServer) handleGetItem(uid, target string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if s.floorMgr == nil {
+		return errorEvent("floor system not available"), nil
+	}
+	if target == "all" {
+		items := s.floorMgr.PickupAll(sess.RoomID)
+		if len(items) == 0 {
+			return messageEvent("There is nothing here to pick up."), nil
+		}
+		picked := 0
+		for _, item := range items {
+			_, err := sess.Backpack.Add(item.ItemDefID, item.Quantity, s.invRegistry)
+			if err != nil {
+				s.floorMgr.Drop(sess.RoomID, item)
+				continue
+			}
+			picked++
+		}
+		return messageEvent(fmt.Sprintf("Picked up %d item(s).", picked)), nil
+	}
+
+	floorItems := s.floorMgr.ItemsInRoom(sess.RoomID)
+	for _, item := range floorItems {
+		name := item.ItemDefID
+		if s.invRegistry != nil {
+			if def, ok := s.invRegistry.Item(item.ItemDefID); ok {
+				name = def.Name
+			}
+		}
+		if strings.EqualFold(name, target) || strings.EqualFold(item.ItemDefID, target) {
+			picked, ok := s.floorMgr.Pickup(sess.RoomID, item.InstanceID)
+			if !ok {
+				return errorEvent("Item is no longer there."), nil
+			}
+			_, err := sess.Backpack.Add(picked.ItemDefID, picked.Quantity, s.invRegistry)
+			if err != nil {
+				s.floorMgr.Drop(sess.RoomID, picked)
+				return errorEvent(fmt.Sprintf("Cannot pick up: %v", err)), nil
+			}
+			return messageEvent(fmt.Sprintf("You pick up %s.", name)), nil
+		}
+	}
+	return messageEvent("You don't see that here."), nil
+}
+
+// handleDropItem drops an item from the player's backpack to the room floor.
+//
+// Precondition: uid must be a valid connected player; target is the item name.
+// Postcondition: On success the item is moved from backpack to floor; returns a message event.
+func (s *GameServiceServer) handleDropItem(uid, target string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if s.floorMgr == nil {
+		return errorEvent("floor system not available"), nil
+	}
+	for _, inst := range sess.Backpack.Items() {
+		name := inst.ItemDefID
+		if s.invRegistry != nil {
+			if def, ok := s.invRegistry.Item(inst.ItemDefID); ok {
+				name = def.Name
+			}
+		}
+		if strings.EqualFold(name, target) || strings.EqualFold(inst.ItemDefID, target) {
+			if err := sess.Backpack.Remove(inst.InstanceID, inst.Quantity); err != nil {
+				return errorEvent(fmt.Sprintf("Cannot drop: %v", err)), nil
+			}
+			s.floorMgr.Drop(sess.RoomID, inst)
+			return messageEvent(fmt.Sprintf("You drop %s.", name)), nil
+		}
+	}
+	return messageEvent("You don't have that."), nil
 }

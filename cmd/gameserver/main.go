@@ -358,10 +358,13 @@ func main() {
 	}
 	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr)
 
+	// Create floor manager for room item tracking.
+	floorMgr := inventory.NewFloorManager()
+
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, invRegistry,
 	)
 
 	// Start zone AI ticks.

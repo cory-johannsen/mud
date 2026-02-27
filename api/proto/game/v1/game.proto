@@ -35,6 +35,10 @@ message ClientMessage {
     FireBurstRequest fire_burst = 18;
     FireAutomaticRequest fire_automatic = 19;
     ThrowRequest throw = 20;
+    InventoryRequest inventory_req = 21;
+    GetItemRequest get_item = 22;
+    DropItemRequest drop_item = 23;
+    BalanceRequest balance = 24;
   }
 }
 
@@ -55,6 +59,7 @@ message ServerEvent {
     RoundStartEvent round_start = 12;
     RoundEndEvent   round_end   = 13;
     ConditionEvent  condition_event = 14;
+    InventoryView inventory_view = 15;
   }
 }
 
@@ -103,6 +108,7 @@ message RoomView {
   repeated string players = 5;
   repeated NpcInfo npcs = 6;
   repeated ConditionInfo active_conditions = 7;
+  repeated FloorItem floor_items = 8;
 }
 
 // ExitInfo describes a single exit from a room.
@@ -242,6 +248,49 @@ message FireAutomaticRequest {
 // ThrowRequest asks the server to throw an explosive.
 message ThrowRequest {
   string explosive_id = 1;
+}
+
+// InventoryRequest asks the server for the player's backpack contents and currency.
+message InventoryRequest {}
+
+// GetItemRequest asks the server to pick up an item from the room floor.
+message GetItemRequest {
+  string target = 1; // item name or "all"
+}
+
+// DropItemRequest asks the server to drop an item from the backpack.
+message DropItemRequest {
+  string target = 1; // item name
+}
+
+// BalanceRequest asks the server for the player's currency.
+message BalanceRequest {}
+
+// FloorItem describes an item on the room floor.
+message FloorItem {
+  string instance_id = 1;
+  string name = 2;
+  int32 quantity = 3;
+}
+
+// InventoryItem describes an item in the player's backpack.
+message InventoryItem {
+  string instance_id = 1;
+  string name = 2;
+  string kind = 3;
+  int32 quantity = 4;
+  double weight = 5;
+}
+
+// InventoryView shows the player's backpack and currency.
+message InventoryView {
+  repeated InventoryItem items = 1;
+  int32 used_slots = 2;
+  int32 max_slots = 3;
+  double total_weight = 4;
+  double max_weight = 5;
+  string currency = 6;
+  int32 total_rounds = 7;
 }
 
 // RoundStartEvent is broadcast to all combatants when a new round begins.
