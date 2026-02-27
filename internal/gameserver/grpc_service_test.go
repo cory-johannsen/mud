@@ -18,6 +18,61 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// TestStartZoneTicks_RespawnIntegration verifies that StartZoneTicks drives
+// RespawnManager.Tick, which spawns a pending NPC into the target room.
+func TestStartZoneTicks_RespawnIntegration(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+
+	// Build a template and npc manager.
+	tmpl := &npc.Template{
+		ID:    "rat",
+		Name:  "Rat",
+		MaxHP: 5,
+		AC:    10,
+	}
+	npcMgr := npc.NewManager()
+
+	// Configure respawn: room_a, cap=1, delay=10ms.
+	roomSpawns := map[string][]npc.RoomSpawn{
+		"room_a": {
+			{TemplateID: "rat", Max: 1, RespawnDelay: 10 * time.Millisecond},
+		},
+	}
+	templates := map[string]*npc.Template{"rat": tmpl}
+	respawnMgr := npc.NewRespawnManager(roomSpawns, templates)
+
+	// Schedule a respawn that will be ready after 10ms.
+	respawnMgr.Schedule("rat", "room_a", time.Now(), 10*time.Millisecond)
+
+	logger := zaptest.NewLogger(t)
+	cmdRegistry := command.DefaultRegistry()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr)
+	chatHandler := NewChatHandler(sessMgr)
+	npcHandler := NewNPCHandler(npcMgr, sessMgr)
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr, cmdRegistry,
+		worldHandler, chatHandler, logger,
+		nil, nil, npcHandler, npcMgr, nil, nil,
+		respawnMgr,
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	zm := NewZoneTickManager(50 * time.Millisecond)
+	svc.StartZoneTicks(ctx, zm, nil)
+
+	// Wait long enough for at least one tick to fire and drain the respawn queue.
+	time.Sleep(200 * time.Millisecond)
+
+	instances := npcMgr.InstancesInRoom("room_a")
+	require.Len(t, instances, 1, "expected 1 NPC instance in room_a after respawn tick")
+	assert.Equal(t, "rat", instances[0].TemplateID)
+
+	cancel()
+}
+
 // testGRPCServer starts an in-process gRPC server and returns a connected client.
 func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 	t.Helper()
@@ -28,7 +83,7 @@ func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil)
+	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)

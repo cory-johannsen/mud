@@ -56,6 +56,7 @@ type GameServiceServer struct {
 //
 // Precondition: worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, diceRoller, and logger must be non-nil.
 // charSaver may be nil (character state will not be persisted on disconnect).
+// respawnMgr may be nil (respawn functionality will be disabled).
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
@@ -70,20 +71,22 @@ func NewGameServiceServer(
 	npcMgr *npc.Manager,
 	combatHandler *CombatHandler,
 	scriptMgr *scripting.Manager,
+	respawnMgr *npc.RespawnManager,
 ) *GameServiceServer {
 	return &GameServiceServer{
-		world:     worldMgr,
-		sessions:  sessMgr,
-		commands:  cmdRegistry,
-		worldH:    worldHandler,
-		chatH:     chatHandler,
-		charSaver: charSaver,
-		dice:      diceRoller,
-		npcH:      npcHandler,
-		npcMgr:    npcMgr,
-		combatH:   combatHandler,
-		scriptMgr: scriptMgr,
-		logger:    logger,
+		world:      worldMgr,
+		sessions:   sessMgr,
+		commands:   cmdRegistry,
+		worldH:     worldHandler,
+		chatH:      chatHandler,
+		charSaver:  charSaver,
+		dice:       diceRoller,
+		npcH:       npcHandler,
+		npcMgr:     npcMgr,
+		combatH:    combatHandler,
+		scriptMgr:  scriptMgr,
+		respawnMgr: respawnMgr,
+		logger:     logger,
 	}
 }
 
@@ -757,11 +760,11 @@ func (s *GameServiceServer) handleThrow(uid string, req *gamev1.ThrowRequest) (*
 	return nil, nil
 }
 
-// StartZoneTicks begins the per-zone NPC tick loop.
+// StartZoneTicks starts per-zone periodic tick goroutines.
 //
-// Precondition: ctx must be the server's lifetime context.
-func (s *GameServiceServer) StartZoneTicks(ctx context.Context, zm *ZoneTickManager, aiReg *ai.Registry, respawnMgr *npc.RespawnManager) {
-	s.respawnMgr = respawnMgr
+// Precondition: ctx must not be nil; zm and aiReg must not be nil.
+// Postcondition: zone tick goroutines are running until ctx is cancelled.
+func (s *GameServiceServer) StartZoneTicks(ctx context.Context, zm *ZoneTickManager, aiReg *ai.Registry) {
 	for _, zone := range s.world.AllZones() {
 		zoneID := zone.ID
 		zm.RegisterTick(zoneID, func() {
@@ -771,15 +774,21 @@ func (s *GameServiceServer) StartZoneTicks(ctx context.Context, zm *ZoneTickMana
 	zm.Start(ctx)
 }
 
-// tickZone runs one AI tick for all non-combat NPCs in zoneID.
+// tickZone executes one game tick for the given zone, advancing NPC AI and
+// draining the respawn queue.
+//
+// Precondition: zoneID must be a valid zone identifier loaded in worldMgr.
 func (s *GameServiceServer) tickZone(zoneID string, aiReg *ai.Registry) {
 	for _, zone := range s.world.AllZones() {
 		if zone.ID != zoneID {
 			continue
 		}
+		if s.npcH == nil {
+			break
+		}
 		for _, room := range zone.Rooms {
 			for _, inst := range s.npcH.InstancesInRoom(room.ID) {
-				if s.combatH.IsInCombat(inst.ID) {
+				if s.combatH != nil && s.combatH.IsInCombat(inst.ID) {
 					continue
 				}
 				s.tickNPCIdle(inst, zoneID, aiReg)

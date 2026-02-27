@@ -361,12 +361,12 @@ func main() {
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr,
 	)
 
 	// Start zone AI ticks.
 	zm := gameserver.NewZoneTickManager(*aiTickInterval)
-	grpcService.StartZoneTicks(ctx, zm, aiRegistry, respawnMgr)
+	grpcService.StartZoneTicks(ctx, zm, aiRegistry)
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer()
