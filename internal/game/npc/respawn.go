@@ -1,7 +1,6 @@
 package npc
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -54,13 +53,15 @@ func NewRespawnManager(spawns map[string][]RoomSpawn, templates map[string]*Temp
 	}
 }
 
-// PopulateRoom enforces the population cap for each RoomSpawn config in roomID:
-// it removes excess instances when the live count exceeds Max, and spawns new
-// instances when the count is below Max.
+// PopulateRoom enforces the population cap for each RoomSpawn config in roomID.
+// It first removes excess instances when the live count exceeds Max, then spawns
+// new instances to fill the room up to exactly Max.
 //
 // Precondition: roomID must be non-empty; mgr must not be nil.
-// Postcondition: live instance count for each template in roomID == min(existing, Max)
-// after removals, then filled to Max by spawning.
+// Postcondition: for each template config in roomID, excess instances (count > Max)
+// are removed so that count == Max, and when count < Max new instances are spawned
+// until count == Max (subject to Spawn succeeding); the final live count equals
+// exactly Max when all spawns succeed.
 func (r *RespawnManager) PopulateRoom(roomID string, mgr *Manager) {
 	r.mu.Lock()
 	configs := append([]RoomSpawn(nil), r.spawns[roomID]...)
@@ -90,7 +91,8 @@ func (r *RespawnManager) PopulateRoom(roomID string, mgr *Manager) {
 		current := len(matching)
 		for i := current; i < cfg.Max; i++ {
 			if _, err := mgr.Spawn(tmpl, roomID); err != nil {
-				_ = fmt.Sprintf("respawn: spawn failed for %s in %s: %v", cfg.TemplateID, roomID, err)
+				// Spawn failure is non-fatal; the next PopulateRoom call will retry.
+				continue
 			}
 		}
 	}
