@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -57,14 +58,20 @@ func (t *Template) Validate() error {
 	if t.AC < 10 {
 		return fmt.Errorf("npc template %q: ac must be >= 10", t.ID)
 	}
+	if t.RespawnDelay != "" {
+		if _, err := time.ParseDuration(t.RespawnDelay); err != nil {
+			return fmt.Errorf("npc template %q: respawn_delay %q is not a valid duration: %w", t.ID, t.RespawnDelay, err)
+		}
+	}
 	return nil
 }
 
-// LoadTemplatesFromBytes parses a single NPC template from raw YAML bytes.
+// LoadTemplateFromBytes parses a single NPC template from raw YAML bytes.
 //
 // Precondition: data must be valid YAML for a single Template.
-// Postcondition: Returns a slice of one validated Template, or an error.
-func LoadTemplatesFromBytes(data []byte) ([]*Template, error) {
+// Postcondition: Returns a validated *Template, or an error. RespawnDelay, if
+// non-empty, is guaranteed to be a valid Go duration string.
+func LoadTemplateFromBytes(data []byte) (*Template, error) {
 	var tmpl Template
 	if err := yaml.Unmarshal(data, &tmpl); err != nil {
 		return nil, fmt.Errorf("parsing template YAML: %w", err)
@@ -72,7 +79,7 @@ func LoadTemplatesFromBytes(data []byte) ([]*Template, error) {
 	if err := tmpl.Validate(); err != nil {
 		return nil, err
 	}
-	return []*Template{&tmpl}, nil
+	return &tmpl, nil
 }
 
 // LoadTemplates reads all *.yaml files in dir and returns the parsed templates.
@@ -98,16 +105,11 @@ func LoadTemplates(dir string) ([]*Template, error) {
 			return nil, fmt.Errorf("reading %q: %w", path, err)
 		}
 
-		var tmpl Template
-		if err := yaml.Unmarshal(data, &tmpl); err != nil {
-			return nil, fmt.Errorf("parsing %q: %w", path, err)
+		tmpl, err := LoadTemplateFromBytes(data)
+		if err != nil {
+			return nil, fmt.Errorf("loading %q: %w", path, err)
 		}
-
-		if err := tmpl.Validate(); err != nil {
-			return nil, fmt.Errorf("validating %q: %w", path, err)
-		}
-
-		templates = append(templates, &tmpl)
+		templates = append(templates, tmpl)
 	}
 	return templates, nil
 }

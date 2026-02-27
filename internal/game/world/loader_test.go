@@ -245,6 +245,24 @@ zone:
 	assert.Equal(t, "", room.Spawns[1].RespawnAfter)
 }
 
+func TestLoadZone_Room_NoSpawns_EmptySlice(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: desc
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: A room.
+`)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	room := zone.Rooms["r1"]
+	assert.Empty(t, room.Spawns)
+}
+
 func TestLoadZone_ScriptFieldsAbsent_ZeroValue(t *testing.T) {
 	yamlData := []byte(`
 zone:

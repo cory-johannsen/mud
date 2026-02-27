@@ -1,7 +1,10 @@
 // Package world provides the game world model: zones, rooms, exits, and directions.
 package world
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // Direction represents a compass direction or named exit.
 type Direction string
@@ -189,6 +192,19 @@ func (z *Zone) Validate() error {
 			}
 			if _, ok := z.Rooms[exit.TargetRoom]; !ok {
 				return fmt.Errorf("zone %q: room %q: exit %q targets unknown room %q", z.ID, id, exit.Direction, exit.TargetRoom)
+			}
+		}
+		for i, s := range room.Spawns {
+			if s.Template == "" {
+				return fmt.Errorf("zone %q: room %q: spawn[%d]: template must not be empty", z.ID, id, i)
+			}
+			if s.Count < 1 {
+				return fmt.Errorf("zone %q: room %q: spawn[%d]: count must be >= 1", z.ID, id, i)
+			}
+			if s.RespawnAfter != "" {
+				if _, err := time.ParseDuration(s.RespawnAfter); err != nil {
+					return fmt.Errorf("zone %q: room %q: spawn[%d]: respawn_after %q is not a valid duration: %w", z.ID, id, i, s.RespawnAfter, err)
+				}
 			}
 		}
 	}
