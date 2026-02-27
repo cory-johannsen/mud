@@ -215,6 +215,36 @@ zone:
 	assert.Equal(t, 50000, zone.ScriptInstructionLimit)
 }
 
+func TestLoadZone_RoomSpawns_ParsedCorrectly(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: desc
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: A room.
+      spawns:
+        - template: ganger
+          count: 2
+          respawn_after: "3m"
+        - template: scavenger
+          count: 1
+`)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	room := zone.Rooms["r1"]
+	require.Len(t, room.Spawns, 2)
+	assert.Equal(t, "ganger", room.Spawns[0].Template)
+	assert.Equal(t, 2, room.Spawns[0].Count)
+	assert.Equal(t, "3m", room.Spawns[0].RespawnAfter)
+	assert.Equal(t, "scavenger", room.Spawns[1].Template)
+	assert.Equal(t, 1, room.Spawns[1].Count)
+	assert.Equal(t, "", room.Spawns[1].RespawnAfter)
+}
+
 func TestLoadZone_ScriptFieldsAbsent_ZeroValue(t *testing.T) {
 	yamlData := []byte(`
 zone:

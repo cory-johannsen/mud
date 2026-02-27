@@ -31,6 +31,9 @@ type Template struct {
 	Perception  int       `yaml:"perception"`
 	Abilities   Abilities `yaml:"abilities"`
 	AIDomain    string    `yaml:"ai_domain"` // HTN domain ID; empty = simple attack fallback
+	// RespawnDelay is the duration string (e.g. "5m", "30s") before a dead NPC
+	// of this template respawns. Empty means the NPC does not respawn.
+	RespawnDelay string `yaml:"respawn_delay"`
 }
 
 // Validate checks that the template satisfies basic invariants.
@@ -55,6 +58,21 @@ func (t *Template) Validate() error {
 		return fmt.Errorf("npc template %q: ac must be >= 10", t.ID)
 	}
 	return nil
+}
+
+// LoadTemplatesFromBytes parses a single NPC template from raw YAML bytes.
+//
+// Precondition: data must be valid YAML for a single Template.
+// Postcondition: Returns a slice of one validated Template, or an error.
+func LoadTemplatesFromBytes(data []byte) ([]*Template, error) {
+	var tmpl Template
+	if err := yaml.Unmarshal(data, &tmpl); err != nil {
+		return nil, fmt.Errorf("parsing template YAML: %w", err)
+	}
+	if err := tmpl.Validate(); err != nil {
+		return nil, err
+	}
+	return []*Template{&tmpl}, nil
 }
 
 // LoadTemplates reads all *.yaml files in dir and returns the parsed templates.

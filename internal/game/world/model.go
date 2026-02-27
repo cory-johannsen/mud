@@ -80,6 +80,18 @@ type Exit struct {
 	Hidden bool
 }
 
+// RoomSpawnConfig defines how many instances of an NPC template should exist
+// in a room and how long to wait before respawning a dead one.
+type RoomSpawnConfig struct {
+	// Template is the NPC template ID to spawn.
+	Template string
+	// Count is the maximum number of live instances of this template in the room.
+	Count int
+	// RespawnAfter is an optional duration string overriding the template's
+	// respawn_delay. Empty means use the template's default.
+	RespawnAfter string
+}
+
 // Room represents a location in the game world.
 type Room struct {
 	// ID uniquely identifies this room within the zone.
@@ -94,6 +106,8 @@ type Room struct {
 	Exits []Exit
 	// Properties holds environment tags (lighting, atmosphere, etc.).
 	Properties map[string]string
+	// Spawns lists NPC templates that populate this room and their respawn config.
+	Spawns []RoomSpawnConfig
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.

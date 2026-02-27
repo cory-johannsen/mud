@@ -25,6 +25,13 @@ type yamlZone struct {
 	Rooms                  []yamlRoom `yaml:"rooms"`
 }
 
+// yamlRoomSpawn is the YAML representation of a room spawn config.
+type yamlRoomSpawn struct {
+	Template     string `yaml:"template"`
+	Count        int    `yaml:"count"`
+	RespawnAfter string `yaml:"respawn_after"`
+}
+
 // yamlRoom is the YAML representation of a room.
 type yamlRoom struct {
 	ID          string            `yaml:"id"`
@@ -32,6 +39,7 @@ type yamlRoom struct {
 	Description string            `yaml:"description"`
 	Exits       []yamlExit        `yaml:"exits"`
 	Properties  map[string]string `yaml:"properties"`
+	Spawns      []yamlRoomSpawn   `yaml:"spawns"`
 }
 
 // yamlExit is the YAML representation of an exit.
@@ -134,6 +142,13 @@ func convertYAMLZone(yz yamlZone) *Zone {
 				TargetRoom: ye.Target,
 				Locked:     ye.Locked,
 				Hidden:     ye.Hidden,
+			})
+		}
+		for _, ys := range yr.Spawns {
+			room.Spawns = append(room.Spawns, RoomSpawnConfig{
+				Template:     ys.Template,
+				Count:        ys.Count,
+				RespawnAfter: ys.RespawnAfter,
 			})
 		}
 		zone.Rooms[room.ID] = room
