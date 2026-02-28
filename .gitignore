@@ -39,3 +39,4 @@ deployments/docker/.env
 .env.local
 /gameserver
 /frontend
+.worktrees/
