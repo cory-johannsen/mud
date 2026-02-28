@@ -3,6 +3,7 @@ package gameserver
 import (
 	"fmt"
 	"testing"
+	"unicode"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -152,4 +153,58 @@ func TestHandleEquipment_PlayerNotFound(t *testing.T) {
 	errEvt := evt.GetError()
 	require.NotNil(t, errEvt)
 	assert.Contains(t, errEvt.Message, "player not found")
+}
+
+// TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent asserts that any valid
+// session uid always receives a non-nil ServerEvent from handleLoadout, regardless of arg.
+// Precondition: uid maps to a valid player session.
+// Postcondition: event is non-nil and has a message payload.
+func TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		uid := fmt.Sprintf("prop_loadout_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
+		svc := testServiceWithAdmin(t, nil)
+		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, "player")
+		if addErr != nil {
+			rt.Fatalf("AddPlayer: %v", addErr)
+		}
+		sess, ok := svc.sessions.GetPlayer(uid)
+		if !ok {
+			rt.Fatal("session must exist after AddPlayer")
+		}
+		sess.LoadoutSet = inventory.NewLoadoutSet()
+		sess.Equipment = inventory.NewEquipment()
+
+		arg := rapid.StringOf(rapid.RuneFrom(nil, unicode.Letter)).Draw(rt, "arg")
+		evt, err := svc.handleLoadout(uid, &gamev1.LoadoutRequest{Arg: arg})
+		require.NoError(t, err)
+		require.NotNil(t, evt)
+		require.NotNil(t, evt.GetMessage())
+	})
+}
+
+// TestPropertyHandleUnequip_ValidSessionAlwaysReturnsEvent asserts that any valid
+// session uid always receives a non-nil ServerEvent from handleUnequip, regardless of slot.
+// Precondition: uid maps to a valid player session.
+// Postcondition: event is non-nil and has a message payload.
+func TestPropertyHandleUnequip_ValidSessionAlwaysReturnsEvent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		uid := fmt.Sprintf("prop_unequip_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
+		svc := testServiceWithAdmin(t, nil)
+		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, "player")
+		if addErr != nil {
+			rt.Fatalf("AddPlayer: %v", addErr)
+		}
+		sess, ok := svc.sessions.GetPlayer(uid)
+		if !ok {
+			rt.Fatal("session must exist after AddPlayer")
+		}
+		sess.LoadoutSet = inventory.NewLoadoutSet()
+		sess.Equipment = inventory.NewEquipment()
+
+		slot := rapid.StringOf(rapid.RuneFrom(nil, unicode.Letter)).Draw(rt, "slot")
+		evt, err := svc.handleUnequip(uid, &gamev1.UnequipRequest{Slot: slot})
+		require.NoError(t, err)
+		require.NotNil(t, evt)
+		require.NotNil(t, evt.GetMessage())
+	})
 }

@@ -147,6 +147,10 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			charName: charName,
 			role:     role,
 			stream:   stream,
+			helpFn: func() {
+				h.showGameHelp(conn, registry, role)
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+			},
 		}
 
 		handlerFn, ok := bridgeHandlerMap[cmd.Handler]
@@ -164,10 +168,6 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			return nil
 		}
 		if result.done {
-			if cmd.Handler == command.HandlerHelp {
-				h.showGameHelp(conn, registry, role)
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-			}
 			continue
 		}
 		if result.msg != nil {

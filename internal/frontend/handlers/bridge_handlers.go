@@ -18,6 +18,7 @@ type bridgeContext struct {
 	charName string
 	role     string
 	stream   gamev1.GameService_SessionClient
+	helpFn   func() // called by bridgeHelp to render help output
 }
 
 // bridgeResult is returned by every bridge handler.
@@ -73,17 +74,25 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
+// Precondition: bctx must be non-nil with a valid conn and charName; msg must be non-empty.
+// Postcondition: writes msg in red and the prompt, then returns done=true with nil error.
 func writeErrorPrompt(bctx *bridgeContext, msg string) (bridgeResult, error) {
 	_ = bctx.conn.WriteLine(telnet.Colorize(telnet.Red, msg))
 	_ = bctx.conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", bctx.charName))
 	return bridgeResult{done: true}, nil
 }
 
+// bridgeMove builds a MoveRequest for the named direction.
+// Precondition: bctx must be non-nil with a valid reqID and cmd.Name.
+// Postcondition: returns a non-nil msg containing a MoveRequest; done is false.
 func bridgeMove(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: buildMoveMessage(bctx.reqID, bctx.cmd.Name)}, nil
 
 }
 
+// bridgeLook builds a LookRequest for the current room.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: returns a non-nil msg containing a LookRequest; done is false.
 func bridgeLook(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -91,6 +100,9 @@ func bridgeLook(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeExits builds an ExitsRequest for the current room.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an ExitsRequest; done is false.
 func bridgeExits(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -98,6 +110,11 @@ func bridgeExits(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeSay builds a SayRequest.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a SayRequest.
 func bridgeSay(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Say what?")
@@ -108,6 +125,11 @@ func bridgeSay(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeEmote builds an EmoteRequest.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing an EmoteRequest.
 func bridgeEmote(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Emote what?")
@@ -118,6 +140,9 @@ func bridgeEmote(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeWho builds a WhoRequest to list online players.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a WhoRequest; done is false.
 func bridgeWho(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -125,6 +150,9 @@ func bridgeWho(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeQuit sends a farewell message and a QuitRequest, then signals a clean disconnect.
+// Precondition: bctx must be non-nil with a valid conn, stream, and reqID.
+// Postcondition: writes goodbye text, sends QuitRequest on the stream, and returns quit=true.
 func bridgeQuit(bctx *bridgeContext) (bridgeResult, error) {
 	_ = bctx.conn.WriteLine(telnet.Colorize(telnet.Cyan, "The rain swallows your footsteps. Goodbye."))
 	msg := &gamev1.ClientMessage{
@@ -135,11 +163,21 @@ func bridgeQuit(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{quit: true}, nil
 }
 
-// bridgeHelp signals that help is handled locally by commandLoop (no server round-trip).
-func bridgeHelp(_ *bridgeContext) (bridgeResult, error) {
+// bridgeHelp renders in-game help by invoking bctx.helpFn.
+// Precondition: bctx must be non-nil; helpFn may be nil (in which case no output is produced).
+// Postcondition: returns done=true so commandLoop continues without a server round-trip.
+func bridgeHelp(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.helpFn != nil {
+		bctx.helpFn()
+	}
 	return bridgeResult{done: true}, nil
 }
 
+// bridgeExamine builds an ExamineRequest for the named target.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing an ExamineRequest.
 func bridgeExamine(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: examine <target>")
@@ -150,6 +188,11 @@ func bridgeExamine(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeAttack builds an AttackRequest for the named target.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing an AttackRequest.
 func bridgeAttack(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: attack <target>")
@@ -160,6 +203,9 @@ func bridgeAttack(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeFlee builds a FleeRequest to escape combat.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a FleeRequest; done is false.
 func bridgeFlee(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -167,6 +213,9 @@ func bridgeFlee(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgePass builds a PassRequest to skip a combat round.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a PassRequest; done is false.
 func bridgePass(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -174,6 +223,11 @@ func bridgePass(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeStrike builds a StrikeRequest for the named target.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a StrikeRequest.
 func bridgeStrike(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: strike <target>")
@@ -184,6 +238,9 @@ func bridgeStrike(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeStatus builds a StatusRequest to display the player's character status.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a StatusRequest; done is false.
 func bridgeStatus(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -191,6 +248,11 @@ func bridgeStatus(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeEquip builds an EquipRequest with an optional slot argument.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing an EquipRequest.
 func bridgeEquip(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: equip <weapon_id> [slot]")
@@ -206,6 +268,9 @@ func bridgeEquip(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeReload builds a ReloadRequest for the specified weapon.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a ReloadRequest; done is false.
 func bridgeReload(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -213,6 +278,11 @@ func bridgeReload(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeFireBurst builds a FireBurstRequest for the named target.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a FireBurstRequest.
 func bridgeFireBurst(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: burst <target>")
@@ -223,6 +293,11 @@ func bridgeFireBurst(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeFireAuto builds a FireAutomaticRequest for the named target.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a FireAutomaticRequest.
 func bridgeFireAuto(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: auto <target>")
@@ -233,6 +308,11 @@ func bridgeFireAuto(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeThrow builds a ThrowRequest for the named explosive.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a ThrowRequest.
 func bridgeThrow(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: throw <explosive_id>")
@@ -243,6 +323,9 @@ func bridgeThrow(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeInventory builds an InventoryRequest to display the player's inventory.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an InventoryRequest; done is false.
 func bridgeInventory(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -250,6 +333,11 @@ func bridgeInventory(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeGet builds a GetItemRequest for the named item.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a GetItemRequest.
 func bridgeGet(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: get <item>")
@@ -260,6 +348,11 @@ func bridgeGet(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeDrop builds a DropItemRequest for the named item.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a DropItemRequest.
 func bridgeDrop(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: drop <item>")
@@ -270,6 +363,9 @@ func bridgeDrop(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeBalance builds a BalanceRequest to query the player's currency balance.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a BalanceRequest; done is false.
 func bridgeBalance(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -277,6 +373,11 @@ func bridgeBalance(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeSetRole builds a SetRoleRequest for the target username.
+// Precondition: bctx must be non-nil with a valid conn and reqID; caller must hold admin role.
+// Postcondition: if fewer than 2 args are present, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a SetRoleRequest.
 func bridgeSetRole(bctx *bridgeContext) (bridgeResult, error) {
 	if len(bctx.parsed.Args) < 2 {
 		_ = bctx.conn.WriteLine("Usage: setrole <username> <role>")
@@ -292,6 +393,11 @@ func bridgeSetRole(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeTeleport builds a TeleportRequest, prompting for character name and room ID if needed.
+// Precondition: bctx must be non-nil with a valid conn and reqID; caller must hold admin role.
+// Postcondition: if either character name or room ID is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a TeleportRequest.
 func bridgeTeleport(bctx *bridgeContext) (bridgeResult, error) {
 	targetChar := strings.TrimSpace(bctx.parsed.RawArgs)
 	if targetChar == "" {
@@ -323,6 +429,9 @@ func bridgeTeleport(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeLoadout builds a LoadoutRequest, passing any optional arg to the server.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a LoadoutRequest; done is false.
 func bridgeLoadout(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
@@ -330,6 +439,11 @@ func bridgeLoadout(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeUnequip builds an UnequipRequest for the named equipment slot.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing an UnequipRequest.
 func bridgeUnequip(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: unequip <slot>")
@@ -340,6 +454,9 @@ func bridgeUnequip(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
+// bridgeEquipment builds an EquipmentRequest to display all equipped items.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an EquipmentRequest; done is false.
 func bridgeEquipment(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
