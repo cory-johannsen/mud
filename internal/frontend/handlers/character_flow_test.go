@@ -126,6 +126,8 @@ func TestRandomizeRemaining_RegionFromSlice(t *testing.T) {
 	assert.NotNil(t, job)
 	assert.Contains(t, regions, region)
 	assert.Contains(t, teams, team)
+	assert.True(t, job.Team == "" || job.Team == team.ID,
+		"job %s (team=%q) incompatible with team %s", job.ID, job.Team, team.ID)
 }
 
 func TestRandomizeRemaining_JobCompatibleWithTeam(t *testing.T) {
@@ -163,6 +165,8 @@ func TestProperty_RandomizeRemaining_AlwaysValid(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		nRegions := rapid.IntRange(1, 5).Draw(rt, "nRegions")
 		nTeams := rapid.IntRange(1, 3).Draw(rt, "nTeams")
+		useFixedRegion := rapid.Bool().Draw(rt, "useFixedRegion")
+		useFixedTeam := rapid.Bool().Draw(rt, "useFixedTeam")
 
 		regions := make([]*ruleset.Region, nRegions)
 		for i := range regions {
@@ -174,11 +178,26 @@ func TestProperty_RandomizeRemaining_AlwaysValid(t *testing.T) {
 		}
 		jobs := []*ruleset.Job{{ID: "general", Team: ""}}
 
-		region, team, job := handlers.RandomizeRemaining(regions, nil, teams, nil, jobs)
+		var fixedRegion *ruleset.Region
+		if useFixedRegion {
+			fixedRegion = regions[0]
+		}
+		var fixedTeam *ruleset.Team
+		if useFixedTeam {
+			fixedTeam = teams[0]
+		}
+
+		region, team, job := handlers.RandomizeRemaining(regions, fixedRegion, teams, fixedTeam, jobs)
 		assert.NotNil(rt, region)
 		assert.NotNil(rt, team)
 		assert.NotNil(rt, job)
 		assert.True(rt, job.Team == "" || job.Team == team.ID)
+		if fixedRegion != nil {
+			assert.Equal(rt, fixedRegion, region)
+		}
+		if fixedTeam != nil {
+			assert.Equal(rt, fixedTeam, team)
+		}
 	})
 }
 

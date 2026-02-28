@@ -53,6 +53,9 @@ func RandomizeRemaining(
 			compatible = append(compatible, j)
 		}
 	}
+	if len(compatible) == 0 {
+		panic(fmt.Sprintf("RandomizeRemaining: no jobs compatible with team %q", team.ID))
+	}
 	job = compatible[rand.Intn(len(compatible))]
 	return
 }
