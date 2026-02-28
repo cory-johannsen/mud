@@ -1,0 +1,33 @@
+id: hoa_enforcer
+name: HOA Enforcer
+description: A thick-necked enforcer in a polo shirt, clipboard in one hand and a baton in the other.
+level: 3
+max_hp: 35
+ac: 16
+perception: 6
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 16
+  dexterity: 12
+  constitution: 16
+  intelligence: 9
+  wisdom: 10
+  charisma: 12
+loot:
+  currency:
+    min: 30
+    max: 100
+  items:
+    - item: hoa_citation
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: golf_club
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1

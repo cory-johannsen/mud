@@ -1,0 +1,8 @@
+id: hoa_citation
+name: HOA Citation
+description: A laminated citation for code violations. The fine is payable in rounds.
+kind: junk
+weight: 0.05
+stackable: true
+max_stack: 20
+value: 1

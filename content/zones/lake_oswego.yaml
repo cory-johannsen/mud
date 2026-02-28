@@ -1,0 +1,462 @@
+zone:
+  id: lake_oswego
+  name: "Lake Oswego Nation"
+  description: "A fortified enclave of pre-collapse wealth, where HOA bylaws carry the force of law and country clubs serve as military command posts. The residents traded democracy for security and never looked back."
+  start_room: lo_checkpoint_north
+  rooms:
+    - id: lo_checkpoint_north
+      title: "Northern Checkpoint"
+      description: |
+        A fortified gate marks the border of Lake Oswego Nation. Concrete
+        barriers funnel all traffic through a single lane flanked by
+        sandbag emplacements. A painted sign reads: "PAPERS AND PURPOSE.
+        NO EXCEPTIONS." Shell casings litter the ground like loose change.
+      exits:
+        - direction: north
+          target: director_park
+        - direction: south
+          target: lo_lake_view_blvd
+        - direction: east
+          target: lo_guard_barracks
+      spawns:
+        - template: oswego_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: floodlit
+        atmosphere: tense
+
+    - id: lo_lake_view_blvd
+      title: "Lake View Boulevard"
+      description: |
+        A wide boulevard stretches south, lined with manicured hedges
+        that have grown wild at the edges. The asphalt is swept clean.
+        Guard patrols move in predictable intervals, boots clicking
+        on pavement. Lampposts still work here, powered by generators
+        humming behind mansion walls.
+      exits:
+        - direction: north
+          target: lo_checkpoint_north
+        - direction: south
+          target: lo_the_commons
+        - direction: east
+          target: lo_first_addition
+        - direction: west
+          target: lo_lakewood_bay
+      spawns:
+        - template: oswego_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: streetlamp
+        atmosphere: orderly
+
+    - id: lo_country_club
+      title: "Lake Oswego Country Club"
+      description: |
+        The sprawling clubhouse has been converted into a military
+        headquarters. Sandbags reinforce the Georgian columns. The
+        pro shop is now an armory. Fairways have become firing ranges,
+        and the putting green hosts a mortar emplacement. Officers
+        in polo shirts study tactical maps spread across dining tables.
+      exits:
+        - direction: south
+          target: lo_driving_range
+        - direction: west
+          target: lo_the_commons
+        - direction: north
+          target: lo_tennis_grounds
+      spawns:
+        - template: country_club_sniper
+          count: 2
+          respawn_after: "5m"
+        - template: oswego_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: interior
+        atmosphere: military
+
+    - id: lo_lakewood_bay
+      title: "Lakewood Bay Estates"
+      description: |
+        Waterfront mansions line the lake shore, their docks fortified
+        with razor wire. The water is dark and still. Patrol boats
+        idle at anchor, searchlights mounted on their bows. The homes
+        are intact, curtains drawn, smoke rising from chimneys. Wealth
+        survived here, hoarded and defended.
+      exits:
+        - direction: east
+          target: lo_lake_view_blvd
+        - direction: south
+          target: lo_marina
+        - direction: north
+          target: lo_boat_house
+      properties:
+        lighting: dim
+        atmosphere: guarded
+
+    - id: lo_hoa_headquarters
+      title: "HOA Headquarters"
+      description: |
+        A former community center retrofitted into an administrative
+        fortress. Filing cabinets line every wall, stuffed with violation
+        records and property assessments. A large board displays the
+        current fine schedule: unauthorized vegetation, improper paint
+        colors, failure to salute. The penalties column lists only
+        calibers.
+      exits:
+        - direction: north
+          target: lo_the_commons
+        - direction: east
+          target: lo_citation_court
+        - direction: south
+          target: lo_gated_estates
+      spawns:
+        - template: hoa_enforcer
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: fluorescent
+        atmosphere: bureaucratic
+
+    - id: lo_the_commons
+      title: "The Commons"
+      description: |
+        A guarded shopping district occupies what was once an upscale
+        outdoor mall. Boutiques have been repurposed as supply depots.
+        A coffee stand still operates, trading espresso for ammunition.
+        Guards patrol the perimeter while residents browse with the
+        practiced calm of people who have traded freedom for safety.
+      exits:
+        - direction: north
+          target: lo_lake_view_blvd
+        - direction: east
+          target: lo_country_club
+        - direction: south
+          target: lo_hoa_headquarters
+        - direction: west
+          target: lo_millennium_park
+      spawns:
+        - template: oswego_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: well_lit
+        atmosphere: commerce
+
+    - id: lo_iron_mountain
+      title: "Iron Mountain Overlook"
+      description: |
+        The hilltop offers a commanding view of the entire enclave
+        and the surrounding wasteland beyond. Sniper nests are dug
+        into the rocky soil, camouflaged with netting and dead brush.
+        Spent brass glitters in the dirt. Radio antennas bristle
+        from a concrete bunker half-buried in the hillside.
+      exits:
+        - direction: south
+          target: lo_tryon_creek
+        - direction: west
+          target: lo_tennis_grounds
+      spawns:
+        - template: country_club_sniper
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: windswept
+
+    - id: lo_tryon_creek
+      title: "Tryon Creek Buffer Zone"
+      description: |
+        Dense forest fills the ravine, a natural barrier between
+        Lake Oswego and the outside world. Trip wires and motion
+        sensors thread between the Douglas firs. The creek itself
+        runs clear and cold, one of the few unpolluted water sources
+        in the region. Warning signs are nailed to every third tree.
+      exits:
+        - direction: north
+          target: lo_iron_mountain
+        - direction: west
+          target: lo_gated_estates
+      properties:
+        lighting: dappled
+        atmosphere: forest
+
+    - id: lo_first_addition
+      title: "First Addition District"
+      description: |
+        The historic neighborhood retains a veneer of normalcy that
+        is deeply unsettling. Houses with white picket fences stand
+        in neat rows. Lawns are mowed. American flags fly from porches.
+        The only tell is the guard tower at the intersection and the
+        armed neighborhood watch that never sleeps.
+      exits:
+        - direction: west
+          target: lo_lake_view_blvd
+        - direction: south
+          target: lo_wine_cellar_bunker
+        - direction: east
+          target: lo_patrol_route_east
+      properties:
+        lighting: residential
+        atmosphere: uncanny
+
+    - id: lo_millennium_park
+      title: "Millennium Park"
+      description: |
+        The park is impossibly well-maintained. Flower beds bloom in
+        precise rows. The fountain works. Children play on equipment
+        that looks new. It is a careful performance of civilization,
+        staged for an audience of residents who need to believe
+        the world outside the walls does not exist.
+      exits:
+        - direction: east
+          target: lo_the_commons
+        - direction: south
+          target: lo_gated_estates
+      properties:
+        lighting: sunny
+        atmosphere: pastoral
+
+    - id: lo_guard_barracks
+      title: "Guard Barracks"
+      description: |
+        A converted elementary school houses the Oswego militia.
+        Bunk beds fill former classrooms. The cafeteria serves as
+        a mess hall, the gymnasium as a training floor. Children's
+        artwork still decorates the hallways, faded crayon suns
+        watching over men cleaning rifles.
+      exits:
+        - direction: west
+          target: lo_checkpoint_north
+        - direction: south
+          target: lo_patrol_route_east
+      spawns:
+        - template: oswego_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: interior
+        atmosphere: barracks
+
+    - id: lo_marina
+      title: "Oswego Marina"
+      description: |
+        Sailboats and pleasure craft bob at their moorings, maintained
+        but rarely used. The fuel depot is heavily guarded. A patrol
+        boat idles at the end dock, engine rumbling. The marina office
+        has been converted into a watchtower with reinforced windows
+        and a mounted spotlight.
+      exits:
+        - direction: north
+          target: lo_lakewood_bay
+        - direction: east
+          target: lo_millennium_park
+      spawns:
+        - template: oswego_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: maritime
+
+    - id: lo_tennis_grounds
+      title: "Tennis Training Grounds"
+      description: |
+        The tennis courts have been stripped of their nets and
+        repurposed as a close-quarters combat training facility.
+        Plywood silhouettes stand where opponents once served.
+        Tire obstacles and low walls create an urban warfare course.
+        Drill sergeants bark orders from the umpire's chair.
+      exits:
+        - direction: east
+          target: lo_iron_mountain
+        - direction: south
+          target: lo_country_club
+      spawns:
+        - template: hoa_enforcer
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: open
+        atmosphere: drill
+
+    - id: lo_wine_cellar_bunker
+      title: "Wine Cellar Bunker"
+      description: |
+        Beneath a demolished McMansion, a vast wine cellar has been
+        converted into an emergency bunker. Cases of Pinot Noir share
+        shelf space with ammunition crates. A diesel generator hums
+        in the corner. Maps of the perimeter are pinned to oak
+        barrel-ends. It smells of tannins and gun oil.
+      exits:
+        - direction: north
+          target: lo_first_addition
+        - direction: west
+          target: lo_supply_depot
+      properties:
+        lighting: candlelit
+        atmosphere: underground
+
+    - id: lo_gated_estates
+      title: "Gated Estates"
+      description: |
+        Within the already-gated community lies an inner ring of
+        even more exclusive residences. Iron gates within iron gates.
+        These homes belong to the council members and senior officers.
+        The lawns are pristine. The silence is absolute. Cameras
+        track every movement with mechanical patience.
+      exits:
+        - direction: north
+          target: lo_millennium_park
+        - direction: east
+          target: lo_tryon_creek
+        - direction: south
+          target: lo_checkpoint_south
+        - direction: west
+          target: lo_hoa_headquarters
+      properties:
+        lighting: surveillance
+        atmosphere: sterile
+
+    - id: lo_patrol_route_east
+      title: "Eastern Patrol Route"
+      description: |
+        A paved path follows the eastern perimeter wall, a twelve-foot
+        concrete barrier topped with broken glass and concertina wire.
+        Guard stations are spaced every hundred yards, each with a
+        radio and a floodlight. Boot prints wear a groove in the
+        asphalt from endless rounds.
+      exits:
+        - direction: west
+          target: lo_first_addition
+        - direction: north
+          target: lo_guard_barracks
+        - direction: south
+          target: lo_checkpoint_south
+      spawns:
+        - template: oswego_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: floodlit
+        atmosphere: patrol
+
+    - id: lo_checkpoint_south
+      title: "Southern Checkpoint"
+      description: |
+        The southern gate is smaller than its northern counterpart
+        but no less fortified. A burned-out truck serves as a
+        permanent roadblock. Guards here are edgier, facing the
+        wild territory of Tryon Creek and whatever comes out of
+        the forest at night.
+      exits:
+        - direction: north
+          target: lo_gated_estates
+        - direction: east
+          target: lo_patrol_route_east
+      spawns:
+        - template: oswego_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: floodlit
+        atmosphere: tense
+
+    - id: lo_boat_house
+      title: "Lakeside Boat House"
+      description: |
+        A cedar boat house extends over the water on creaking pilings.
+        Kayaks and canoes hang from the rafters. The dock is slippery
+        with algae. Through gaps in the planking, the dark water
+        of the lake is visible, deep and cold. A sniper's hide
+        occupies the upper loft, overlooking the northern approach.
+      exits:
+        - direction: south
+          target: lo_lakewood_bay
+      spawns:
+        - template: country_club_sniper
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: aquatic
+
+    - id: lo_supply_depot
+      title: "Supply Depot"
+      description: |
+        A warehouse-sized garage houses the enclave's stockpile.
+        Shelving units rise to the ceiling, loaded with canned goods,
+        medical supplies, and ammunition sorted by caliber. Inventory
+        clerks with clipboards move between the rows, counting and
+        recounting. Nothing enters or leaves without paperwork.
+      exits:
+        - direction: east
+          target: lo_wine_cellar_bunker
+        - direction: north
+          target: lo_hoa_headquarters
+      spawns:
+        - template: hoa_enforcer
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: fluorescent
+        atmosphere: orderly
+
+    - id: lo_driving_range
+      title: "Driving Range Firebase"
+      description: |
+        The driving range has been converted into a firing range.
+        Distance markers still show yardage in cheerful yellow numbers.
+        Sandbag berms replace the ball-catching nets. Paper targets
+        flutter in the breeze where golf flags once stood. The crack
+        of rifle fire echoes across the open ground.
+      exits:
+        - direction: north
+          target: lo_country_club
+        - direction: west
+          target: lo_memorial_garden
+      spawns:
+        - template: country_club_sniper
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: open
+        atmosphere: gunfire
+
+    - id: lo_citation_court
+      title: "Citation Court"
+      description: |
+        A former courtroom repurposed for HOA tribunal proceedings.
+        The judge's bench is draped with a homeowners association
+        banner. Violators stand in a defendant's cage fashioned from
+        wrought-iron fence sections. The docket is always full.
+        Sentences range from fines to exile, with little in between.
+      exits:
+        - direction: west
+          target: lo_hoa_headquarters
+      spawns:
+        - template: hoa_enforcer
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overhead
+        atmosphere: judicial
+
+    - id: lo_memorial_garden
+      title: "Memorial Garden"
+      description: |
+        A quiet garden dedicated to those who fell defending the
+        enclave. Stone markers are arranged in neat rows, each
+        engraved with a name and a property address. A bronze plaque
+        reads: "They died so our property values might live."
+        The irony appears to be unintentional.
+      exits:
+        - direction: east
+          target: lo_driving_range
+        - direction: north
+          target: lo_the_commons
+      properties:
+        lighting: natural
+        atmosphere: solemn

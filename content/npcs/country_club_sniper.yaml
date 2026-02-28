@@ -1,0 +1,29 @@
+id: country_club_sniper
+name: Country Club Sniper
+description: A patient killer perched in a golf cart with a scoped rifle, scanning for trespassers.
+level: 4
+max_hp: 40
+ac: 17
+perception: 10
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 17
+  constitution: 14
+  intelligence: 12
+  wisdom: 15
+  charisma: 10
+loot:
+  currency:
+    min: 40
+    max: 150
+  items:
+    - item: silver_cufflink
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

@@ -1,0 +1,8 @@
+id: golf_club
+name: Golf Club
+description: A titanium driver, slightly dented from non-golf applications.
+kind: weapon
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 35

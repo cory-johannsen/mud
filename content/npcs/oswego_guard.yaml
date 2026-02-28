@@ -1,0 +1,29 @@
+id: oswego_guard
+name: Oswego Guard
+description: A uniformed guard in pressed khakis and body armor, patrolling with practiced efficiency.
+level: 2
+max_hp: 28
+ac: 15
+perception: 8
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 14
+  dexterity: 12
+  constitution: 15
+  intelligence: 10
+  wisdom: 14
+  charisma: 9
+loot:
+  currency:
+    min: 20
+    max: 75
+  items:
+    - item: silver_cufflink
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
