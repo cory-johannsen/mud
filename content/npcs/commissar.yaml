@@ -1,0 +1,35 @@
+id: commissar
+name: Commissar
+description: >-
+  A sharp-eyed political officer in a pristine uniform, the only clean
+  clothes in the wasteland. Their voice carries absolute authority.
+level: 4
+max_hp: 42
+ac: 16
+perception: 9
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 12
+  constitution: 14
+  intelligence: 15
+  wisdom: 14
+  charisma: 17
+loot:
+  currency:
+    min: 30
+    max: 120
+  items:
+    - item: red_armband
+      chance: 0.5
+      min_qty: 1
+      max_qty: 1
+    - item: commune_ration
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

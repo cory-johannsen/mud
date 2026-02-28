@@ -1,0 +1,8 @@
+id: harvest_sickle
+name: Harvest Sickle
+description: A curved farming sickle, sharp enough for wheat or worse.
+kind: weapon
+weight: 1.5
+stackable: false
+max_stack: 1
+value: 15

@@ -1,0 +1,8 @@
+id: red_armband
+name: Red Armband
+description: A crimson armband, symbol of the collective. Wearing one outside the collective invites trouble.
+kind: junk
+weight: 0.05
+stackable: true
+max_stack: 5
+value: 6

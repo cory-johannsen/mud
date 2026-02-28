@@ -1,0 +1,8 @@
+id: commune_ration
+name: Commune Ration
+description: A carefully portioned meal pack stamped with the collective's seal.
+kind: consumable
+weight: 0.3
+stackable: true
+max_stack: 5
+value: 8

@@ -1,0 +1,31 @@
+id: field_worker
+name: Field Worker
+description: >-
+  A weary worker in muddy overalls, hands calloused from tilling
+  the collective's fields.
+level: 1
+max_hp: 16
+ac: 13
+perception: 6
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 12
+  dexterity: 10
+  constitution: 14
+  intelligence: 9
+  wisdom: 12
+  charisma: 10
+loot:
+  currency:
+    min: 3
+    max: 20
+  items:
+    - item: commune_ration
+      chance: 0.5
+      min_qty: 1
+      max_qty: 2
+    - item: harvest_sickle
+      chance: 0.1
+      min_qty: 1
+      max_qty: 1

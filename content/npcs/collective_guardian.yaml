@@ -1,0 +1,35 @@
+id: collective_guardian
+name: Collective Guardian
+description: >-
+  A stern guardian in olive drab, red armband on the left bicep,
+  patrolling the collective's perimeter with unwavering purpose.
+level: 3
+max_hp: 34
+ac: 16
+perception: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 16
+  dexterity: 12
+  constitution: 14
+  intelligence: 10
+  wisdom: 14
+  charisma: 10
+loot:
+  currency:
+    min: 15
+    max: 60
+  items:
+    - item: red_armband
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.2
+      min_qty: 1
+      max_qty: 2

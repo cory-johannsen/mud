@@ -1,0 +1,445 @@
+zone:
+  id: battleground
+  name: "Battleground Socialist Collective"
+  description: "A fortified commune carved from the ruins of old Battleground, where collective labor and ideological discipline hold back the wasteland. Whether utopia or prison depends on whom you ask."
+  start_room: battle_i5_south
+  rooms:
+    - id: battle_i5_south
+      title: "I-5 Southbound On-Ramp"
+      description: |
+        The cracked asphalt of the old interstate on-ramp marks the southern
+        boundary of the collective's territory. Concrete jersey barriers
+        have been arranged into a crude checkpoint. Red banners snap in the
+        wind overhead, bearing the collective's hammer-and-wheat emblem.
+        To the south, the road descends toward The Couve.
+      exits:
+        - direction: south
+          target: couve_i5_north
+          zone: couve
+        - direction: north
+          target: battle_the_gate
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: battle_the_gate
+      title: "The Gate"
+      description: |
+        A reinforced barricade of welded car frames and corrugated steel
+        blocks the road. A narrow passage forces single-file entry under
+        the watchful eyes of armed guardians perched on platforms above.
+        Hand-painted signs read: ALL PROPERTY IS COLLECTIVE PROPERTY.
+        WEAPONS WILL BE INSPECTED.
+      exits:
+        - direction: south
+          target: battle_i5_south
+        - direction: north
+          target: battle_main_street
+      spawns:
+        - template: collective_guardian
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: tense
+
+    - id: battle_main_street
+      title: "Main Street"
+      description: |
+        The central avenue of the collective stretches north, lined with
+        repurposed storefronts now serving communal functions. The pavement
+        has been swept clean — a rarity in the wasteland. Propaganda posters
+        cover every available surface, exhorting unity and labor. Citizens
+        move with purpose, eyes forward, speaking in low tones.
+      exits:
+        - direction: south
+          target: battle_the_gate
+        - direction: north
+          target: battle_market_square
+        - direction: east
+          target: battle_assembly_hall
+        - direction: west
+          target: battle_the_commons
+      properties:
+        lighting: overcast
+        atmosphere: orderly
+
+    - id: battle_assembly_hall
+      title: "Assembly Hall"
+      description: |
+        A converted high school gymnasium serves as the collective's
+        political heart. Rows of folding chairs face a raised platform
+        where a lectern stands beneath an enormous red banner. The walls
+        are lined with portraits of the collective's founders, their
+        painted eyes seeming to follow you. A schedule board lists
+        mandatory attendance sessions.
+      exits:
+        - direction: west
+          target: battle_main_street
+        - direction: north
+          target: battle_the_commissariat
+      spawns:
+        - template: commissar
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: fluorescent
+        atmosphere: echo
+
+    - id: battle_the_commons
+      title: "The Commons"
+      description: |
+        Long wooden tables fill a repurposed restaurant, where the
+        collective takes its meals together. The air is heavy with the
+        smell of boiled grain and root vegetables. A serving line dispenses
+        identical portions from dented steel containers. No one eats alone.
+        No one eats more than their share.
+      exits:
+        - direction: east
+          target: battle_main_street
+        - direction: north
+          target: battle_worker_barracks
+        - direction: south
+          target: battle_infirmary
+      properties:
+        lighting: warm
+        atmosphere: crowded
+
+    - id: battle_market_square
+      title: "Market Square"
+      description: |
+        An open square where the collective's surplus goods are distributed
+        according to need — or at least according to the commissariat's
+        assessment of need. Requisition forms are stacked on a folding table.
+        A chalkboard lists available items and their labor-credit costs.
+        Private trade is forbidden, but whispers suggest otherwise.
+      exits:
+        - direction: south
+          target: battle_main_street
+        - direction: east
+          target: battle_propaganda_hall
+        - direction: north
+          target: battle_farm_east
+        - direction: west
+          target: battle_armory
+      properties:
+        lighting: overcast
+        atmosphere: busy
+
+    - id: battle_propaganda_hall
+      title: "Propaganda Hall"
+      description: |
+        The walls of this former church are covered floor to ceiling with
+        murals depicting the collective's idealized vision: workers united,
+        fields golden, enemies vanquished. A printing press in the corner
+        churns out pamphlets. The smell of fresh ink fills the air.
+        A loudspeaker mounted above the door crackles with recorded speeches.
+      exits:
+        - direction: west
+          target: battle_market_square
+        - direction: north
+          target: battle_the_commissariat
+      spawns:
+        - template: commissar
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: reverent
+
+    - id: battle_the_commissariat
+      title: "The Commissariat"
+      description: |
+        The administrative nerve center of the collective occupies a
+        fortified brick building. Filing cabinets line every wall, stuffed
+        with labor reports, production quotas, and citizen dossiers.
+        A large map of the territory bristles with colored pins.
+        The commissars who work here hold the collective's true power.
+      exits:
+        - direction: south
+          target: battle_assembly_hall
+        - direction: west
+          target: battle_propaganda_hall
+        - direction: north
+          target: battle_reeducation_center
+      spawns:
+        - template: commissar
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: fluorescent
+        atmosphere: bureaucratic
+
+    - id: battle_reeducation_center
+      title: "Reeducation Center"
+      description: |
+        A squat concrete building with barred windows and a heavy steel
+        door. The official name is painted in cheerful yellow letters above
+        the entrance: CENTER FOR IDEOLOGICAL ALIGNMENT. From within come
+        the muffled sounds of recited slogans. No one speaks of what
+        happens to those who fail to graduate.
+      exits:
+        - direction: south
+          target: battle_the_commissariat
+      spawns:
+        - template: collective_guardian
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: harsh
+        atmosphere: oppressive
+
+    - id: battle_worker_barracks
+      title: "Worker Barracks"
+      description: |
+        Rows of identical cots stretch through a converted warehouse.
+        Each sleeping space is allotted exactly two meters of width.
+        Personal belongings are stored in small footlockers — inspected
+        weekly. A duty roster posted by the door assigns every hour of
+        the day. Privacy is a bourgeois luxury.
+      exits:
+        - direction: south
+          target: battle_the_commons
+        - direction: east
+          target: battle_market_square
+        - direction: north
+          target: battle_greenhouse
+      properties:
+        lighting: dim
+        atmosphere: stale
+
+    - id: battle_armory
+      title: "The Armory"
+      description: |
+        A reinforced bunker built from stacked shipping containers,
+        the armory is the collective's most restricted building.
+        Weapons and ammunition are stored behind a cage of welded rebar.
+        A sign-out ledger tracks every round issued. The guardian on
+        duty checks papers with mechanical thoroughness.
+      exits:
+        - direction: east
+          target: battle_market_square
+      spawns:
+        - template: collective_guardian
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: secure
+
+    - id: battle_infirmary
+      title: "The Infirmary"
+      description: |
+        A converted dental office serves as the collective's medical
+        facility. The equipment is ancient but functional. A medic in
+        a stained white coat moves between patients on salvaged gurneys.
+        Supplies are rationed carefully — aspirin is worth its weight
+        in ammunition here.
+      exits:
+        - direction: north
+          target: battle_the_commons
+      properties:
+        lighting: fluorescent
+        atmosphere: antiseptic
+
+    - id: battle_farm_east
+      title: "East Fields"
+      description: |
+        Terraced plots of vegetables stretch across what was once a
+        suburban neighborhood. Foundation walls serve as raised beds.
+        Workers move between rows with hand tools, weeding and watering
+        from rain barrels. The soil is dark and rich — the collective's
+        most precious resource after its people.
+      exits:
+        - direction: south
+          target: battle_market_square
+        - direction: west
+          target: battle_farm_west
+        - direction: north
+          target: battle_north_fields
+      spawns:
+        - template: field_worker
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: earthy
+
+    - id: battle_farm_west
+      title: "West Fields"
+      description: |
+        More cultivated plots extend westward, these devoted to grain
+        and legumes. A hand-cranked irrigation system feeds water through
+        salvaged PVC pipes. Scarecrows fashioned from mannequin parts
+        stand sentinel over the crops. The wind carries the sweet smell
+        of growing things — rare and precious.
+      exits:
+        - direction: east
+          target: battle_farm_east
+        - direction: south
+          target: battle_worker_barracks
+        - direction: north
+          target: battle_the_granary
+      spawns:
+        - template: field_worker
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: pastoral
+
+    - id: battle_the_granary
+      title: "The Granary"
+      description: |
+        A converted auto repair shop now serves as the collective's
+        primary food storage. The vehicle bays are sealed and climate-
+        controlled through ingenious passive ventilation. Sacks of dried
+        grain, canned preserves, and seed stock fill every corner.
+        Armed guardians patrol the perimeter around the clock.
+      exits:
+        - direction: south
+          target: battle_farm_west
+        - direction: east
+          target: battle_north_fields
+      spawns:
+        - template: collective_guardian
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: dry
+
+    - id: battle_north_fields
+      title: "North Fields"
+      description: |
+        The northernmost agricultural plots thin out into scrubland at
+        the edge of the collective's territory. The soil here is poorer,
+        yielding only hardy root vegetables. Beyond the last fence post,
+        the wasteland begins — wild, ungoverned, dangerous.
+      exits:
+        - direction: south
+          target: battle_farm_east
+        - direction: west
+          target: battle_the_granary
+        - direction: north
+          target: battle_the_watchtower
+      spawns:
+        - template: field_worker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: exposed
+
+    - id: battle_the_watchtower
+      title: "The Watchtower"
+      description: |
+        A wooden platform built atop a cell tower provides a commanding
+        view of the northern approaches. Sandbags ring the observation
+        post. A battered pair of binoculars hangs from a nail. From here,
+        a guardian can see movement for miles across the flat terrain.
+        The wind is constant and cold.
+      exits:
+        - direction: south
+          target: battle_north_fields
+      spawns:
+        - template: collective_guardian
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: battle_memorial_grove
+      title: "Memorial Grove"
+      description: |
+        A quiet clearing behind the assembly hall where young trees
+        have been planted in memory of the collective's founders and
+        fallen defenders. Hand-carved wooden markers bear names and
+        dates. Wildflowers grow between the saplings. It is the one
+        place in the collective where silence is not suspicious.
+      exits:
+        - direction: west
+          target: battle_assembly_hall
+        - direction: north
+          target: battle_the_commissariat
+      properties:
+        lighting: dappled
+        atmosphere: solemn
+
+    - id: battle_greenhouse
+      title: "The Greenhouse"
+      description: |
+        A patchwork structure of salvaged window panes and plastic
+        sheeting traps warmth and moisture for delicate crops that
+        cannot survive the open fields. Tomato vines climb twine
+        supports. Herb boxes line makeshift shelves. A worker tends
+        seedlings with the care of a surgeon. The air is thick,
+        humid, and smells of green growth.
+      exits:
+        - direction: south
+          target: battle_worker_barracks
+        - direction: east
+          target: battle_farm_west
+      spawns:
+        - template: field_worker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: diffused
+        atmosphere: humid
+
+    - id: battle_training_yard
+      title: "Training Yard"
+      description: |
+        A packed-dirt yard behind the armory where guardians drill
+        in formation. Wooden posts serve as striking targets, their
+        surfaces splintered from countless blows. A whistle blast
+        echoes across the yard as a senior guardian barks corrections.
+        Discipline is the collective's shield.
+      exits:
+        - direction: east
+          target: battle_armory
+        - direction: north
+          target: battle_farm_west
+      spawns:
+        - template: collective_guardian
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: disciplined
+
+    - id: battle_supply_depot
+      title: "Supply Depot"
+      description: |
+        Stacked crates and barrels fill a fenced lot behind the
+        commissariat. Everything the collective scavenges from the
+        wasteland passes through here for cataloging and redistribution.
+        Inventory sheets flutter on clipboards wired to the fence.
+        Nothing enters or leaves without documentation.
+      exits:
+        - direction: south
+          target: battle_the_commissariat
+        - direction: west
+          target: battle_north_fields
+      properties:
+        lighting: overcast
+        atmosphere: orderly
+
+    - id: battle_cistern
+      title: "The Cistern"
+      description: |
+        A deep concrete cistern collects rainwater filtered through
+        layers of gravel and charcoal. The collective's water supply
+        is guarded as fiercely as its granary. The sound of dripping
+        water echoes in the chamber below. A hand pump brings water
+        to the surface for distribution.
+      exits:
+        - direction: east
+          target: battle_the_commons
+        - direction: north
+          target: battle_worker_barracks
+      properties:
+        lighting: dim
+        atmosphere: damp
