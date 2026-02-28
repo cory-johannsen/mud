@@ -23,6 +23,18 @@ const (
 	FiringModeAutomatic FiringMode = "automatic"
 )
 
+// WeaponKind categorises a weapon for equip-slot constraint enforcement.
+type WeaponKind string
+
+const (
+	// WeaponKindOneHanded fits in main hand or off-hand; enables dual wield.
+	WeaponKindOneHanded WeaponKind = "one_handed"
+	// WeaponKindTwoHanded occupies the main hand and locks off-hand empty.
+	WeaponKindTwoHanded WeaponKind = "two_handed"
+	// WeaponKindShield goes in the off-hand only; main hand must be one-handed or empty.
+	WeaponKindShield WeaponKind = "shield"
+)
+
 // WeaponDef defines the static properties of a weapon loaded from YAML.
 type WeaponDef struct {
 	ID               string       `yaml:"id"`
@@ -34,6 +46,7 @@ type WeaponDef struct {
 	MagazineCapacity int          `yaml:"magazine_capacity"` // 0 = not a firearm
 	FiringModes      []FiringMode `yaml:"firing_modes"`
 	Traits           []string     `yaml:"traits"`
+	Kind             WeaponKind   `yaml:"kind"`
 }
 
 // IsMelee reports whether the weapon is a melee weapon (RangeIncrement == 0).
@@ -65,6 +78,15 @@ func (w *WeaponDef) SupportsAutomatic() bool {
 	}
 	return false
 }
+
+// IsOneHanded reports whether the weapon is one-handed.
+func (w *WeaponDef) IsOneHanded() bool { return w.Kind == WeaponKindOneHanded }
+
+// IsTwoHanded reports whether the weapon is two-handed.
+func (w *WeaponDef) IsTwoHanded() bool { return w.Kind == WeaponKindTwoHanded }
+
+// IsShield reports whether the weapon is a shield.
+func (w *WeaponDef) IsShield() bool { return w.Kind == WeaponKindShield }
 
 // Validate checks that the WeaponDef satisfies its invariants.
 // Precondition: w is non-nil.

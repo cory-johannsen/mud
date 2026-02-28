@@ -158,3 +158,59 @@ func TestWeaponDef_SupportsAutomatic_FalseWhenAbsent(t *testing.T) {
 		t.Fatal("expected SupportsAutomatic=false for single-mode pistol, got true")
 	}
 }
+
+func TestWeaponDef_Kind_DefaultEmpty(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "knife", Name: "Knife", DamageDice: "1d6", DamageType: "slashing",
+	}
+	if w.Kind != "" {
+		t.Fatalf("expected empty Kind, got %q", w.Kind)
+	}
+}
+
+func TestWeaponDef_Validate_KindNotRequired(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "knife", Name: "Knife", DamageDice: "1d6", DamageType: "slashing",
+	}
+	if err := w.Validate(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestWeaponDef_IsOneHanded(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "pistol", Name: "Pistol", DamageDice: "2d6", DamageType: "ballistic",
+		Kind: inventory.WeaponKindOneHanded,
+	}
+	if !w.IsOneHanded() {
+		t.Fatal("expected IsOneHanded true")
+	}
+	if w.IsTwoHanded() {
+		t.Fatal("expected IsTwoHanded false")
+	}
+	if w.IsShield() {
+		t.Fatal("expected IsShield false")
+	}
+}
+
+func TestWeaponDef_IsTwoHanded(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "rifle", Name: "Rifle", DamageDice: "3d6", DamageType: "ballistic",
+		Kind: inventory.WeaponKindTwoHanded,
+		RangeIncrement: 100, FiringModes: []inventory.FiringMode{inventory.FiringModeSingle},
+		MagazineCapacity: 10,
+	}
+	if !w.IsTwoHanded() {
+		t.Fatal("expected IsTwoHanded true")
+	}
+}
+
+func TestWeaponDef_IsShield(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "buckler", Name: "Buckler", DamageDice: "1d4", DamageType: "bludgeoning",
+		Kind: inventory.WeaponKindShield,
+	}
+	if !w.IsShield() {
+		t.Fatal("expected IsShield true")
+	}
+}
