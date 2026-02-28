@@ -31,6 +31,15 @@ gameserver:
       cpu: 500m
       memory: 256Mi
 
+frontend:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
 logging:
   level: info
   format: json

@@ -1,0 +1,15 @@
+# deployments/k8s/mud/templates/frontend/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: mud
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 4000
+      targetPort: 4000
+      nodePort: 30400
+      protocol: TCP
