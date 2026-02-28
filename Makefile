@@ -100,6 +100,7 @@ docker-push:
 
 helm-install:
 	helm install $(HELM_RELEASE) $(HELM_CHART) \
+		--create-namespace \
 		--values $(HELM_VALUES) \
 		--set db.user=$(DB_USER) \
 		--set db.password=$(DB_PASSWORD) \
