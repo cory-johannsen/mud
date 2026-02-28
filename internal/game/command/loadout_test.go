@@ -180,10 +180,13 @@ func TestHandleLoadout_NonNumericArg(t *testing.T) {
 func TestHandleLoadout_SameIndexNoOp(t *testing.T) {
 	sess := newTestSession()
 	// Active is 0; selecting preset 1 (1-based) maps to idx 0 — no-op.
-	_ = command.HandleLoadout(sess, "1")
+	result := command.HandleLoadout(sess, "1")
 
 	if sess.LoadoutSet.SwappedThisRound {
 		t.Error("expected SwappedThisRound==false after selecting already-active preset")
+	}
+	if !strings.Contains(strings.ToLower(result), "already active") {
+		t.Errorf("expected message containing 'already active', got: %q", result)
 	}
 }
 

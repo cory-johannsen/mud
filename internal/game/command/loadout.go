@@ -30,16 +30,15 @@ func HandleLoadout(sess *session.PlayerSession, arg string) string {
 
 	idx := n - 1 // convert 1-based to 0-based
 
+	// Capture active index before swap to detect no-op.
+	wasActive := ls.Active
 	if err := ls.Swap(idx); err != nil {
-		msg := err.Error()
-		if strings.Contains(msg, "already") {
+		if strings.Contains(err.Error(), "already swapped") {
 			return "You have already swapped loadouts this round."
 		}
-		return fmt.Sprintf("Invalid preset index: %s", msg)
+		return fmt.Sprintf("Invalid preset %d: must be 1-%d.", n, len(ls.Presets))
 	}
-
-	if ls.Active != idx {
-		// Swap was a no-op (same preset selected); SwappedThisRound was not set.
+	if wasActive == idx {
 		return fmt.Sprintf("Preset %d is already active.", n)
 	}
 
