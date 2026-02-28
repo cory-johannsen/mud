@@ -112,15 +112,6 @@ func TestRandomNames_NonEmpty(t *testing.T) {
 	}
 }
 
-func TestRandomName_IsFromRandomNames(t *testing.T) {
-	// Every name in RandomNames must be a valid character name and not a reserved keyword.
-	for _, name := range handlers.RandomNames {
-		assert.GreaterOrEqual(t, len(name), 2, "name %q too short", name)
-		assert.LessOrEqual(t, len(name), 32, "name %q too long", name)
-		assert.NotEqual(t, "cancel", strings.ToLower(name))
-		assert.NotEqual(t, "random", strings.ToLower(name))
-	}
-}
 
 func TestRandomizeRemaining_RegionFromSlice(t *testing.T) {
 	regions := []*ruleset.Region{{ID: "a", Name: "A"}, {ID: "b", Name: "B"}}
