@@ -168,7 +168,8 @@ func TestRandomizeRemaining_RegionFromSlice(t *testing.T) {
 		{ID: "j2", Team: "gun"},
 		{ID: "j3", Team: "machete"},
 	}
-	region, team, job := handlers.RandomizeRemaining(regions, nil, teams, nil, jobs)
+	region, team, job, err := handlers.RandomizeRemaining(regions, nil, teams, nil, jobs)
+	assert.NoError(t, err)
 	assert.NotNil(t, region)
 	assert.NotNil(t, team)
 	assert.NotNil(t, job)
@@ -187,7 +188,8 @@ func TestRandomizeRemaining_JobCompatibleWithTeam(t *testing.T) {
 		{ID: "j3", Team: "machete"},
 	}
 	for i := 0; i < 50; i++ {
-		_, team, job := handlers.RandomizeRemaining(regions, nil, teams, nil, jobs)
+		_, team, job, err := handlers.RandomizeRemaining(regions, nil, teams, nil, jobs)
+		assert.NoError(t, err)
 		assert.True(t, job.Team == "" || job.Team == team.ID,
 			"job %s (team=%q) incompatible with team %s", job.ID, job.Team, team.ID)
 	}
@@ -203,7 +205,8 @@ func TestRandomizeRemaining_FixedTeamHonored(t *testing.T) {
 		{ID: "j3", Team: "machete"},
 	}
 	for i := 0; i < 50; i++ {
-		_, team, job := handlers.RandomizeRemaining(regions, nil, teams, fixedTeam, jobs)
+		_, team, job, err := handlers.RandomizeRemaining(regions, nil, teams, fixedTeam, jobs)
+		assert.NoError(t, err)
 		assert.Equal(t, fixedTeam, team)
 		assert.True(t, job.Team == "" || job.Team == "gun")
 	}
@@ -235,7 +238,8 @@ func TestProperty_RandomizeRemaining_AlwaysValid(t *testing.T) {
 			fixedTeam = teams[0]
 		}
 
-		region, team, job := handlers.RandomizeRemaining(regions, fixedRegion, teams, fixedTeam, jobs)
+		region, team, job, err := handlers.RandomizeRemaining(regions, fixedRegion, teams, fixedTeam, jobs)
+		assert.NoError(rt, err)
 		assert.NotNil(rt, region)
 		assert.NotNil(rt, team)
 		assert.NotNil(rt, job)

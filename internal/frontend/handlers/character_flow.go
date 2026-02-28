@@ -29,12 +29,12 @@ var RandomNames = []string{
 // using fixed values where provided and random selection otherwise.
 //
 // Precondition: regions, teams, and allJobs must each be non-empty.
-// Postcondition: returned job.Team is empty or equals returned team.ID.
+// Postcondition: returned job.Team is "" or equals returned team.ID; err is non-nil if no compatible jobs exist.
 func RandomizeRemaining(
 	regions []*ruleset.Region, fixedRegion *ruleset.Region,
 	teams []*ruleset.Team, fixedTeam *ruleset.Team,
 	allJobs []*ruleset.Job,
-) (region *ruleset.Region, team *ruleset.Team, job *ruleset.Job) {
+) (region *ruleset.Region, team *ruleset.Team, job *ruleset.Job, err error) {
 	if fixedRegion != nil {
 		region = fixedRegion
 	} else {
@@ -54,10 +54,11 @@ func RandomizeRemaining(
 		}
 	}
 	if len(compatible) == 0 {
-		panic(fmt.Sprintf("RandomizeRemaining: no jobs compatible with team %q", team.ID))
+		err = fmt.Errorf("RandomizeRemaining: no jobs compatible with team %q", team.ID)
+		return
 	}
 	job = compatible[rand.Intn(len(compatible))]
-	return
+	return region, team, job, nil
 }
 
 // IsRandomInput reports whether the player's input at a list step requests random selection.
@@ -190,7 +191,12 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 		return nil, nil
 	}
 	if IsRandomInput(regionLine) {
-		region, team, job := RandomizeRemaining(regions, nil, h.teams, nil, h.jobs)
+		region, team, job, err := RandomizeRemaining(regions, nil, h.teams, nil, h.jobs)
+		if err != nil {
+			h.logger.Error("randomizing character selections", zap.Error(err))
+			_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error randomizing selections: %v", err))
+			return nil, nil
+		}
 		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
 			"Random selections: Region=%s, Team=%s, Job=%s", region.Name, team.Name, job.Name))
 		return h.buildAndConfirm(ctx, conn, accountID, charName, region, job, team)
@@ -227,7 +233,12 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 		return nil, nil
 	}
 	if IsRandomInput(teamLine) {
-		_, team, job := RandomizeRemaining(regions, selectedRegion, teams, nil, h.jobs)
+		_, team, job, err := RandomizeRemaining(regions, selectedRegion, teams, nil, h.jobs)
+		if err != nil {
+			h.logger.Error("randomizing team/job selections", zap.Error(err))
+			_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error randomizing selections: %v", err))
+			return nil, nil
+		}
 		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
 			"Random selections: Team=%s, Job=%s", team.Name, job.Name))
 		return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, job, team)
@@ -245,6 +256,11 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 		if j.Team == "" || j.Team == selectedTeam.ID {
 			availableJobs = append(availableJobs, j)
 		}
+	}
+	if len(availableJobs) == 0 {
+		h.logger.Error("no jobs available for team", zap.String("team", selectedTeam.ID))
+		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "No jobs available for team %s.", selectedTeam.Name))
+		return nil, nil
 	}
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow,
 		"\r\nChoose your job (%s jobs available):", selectedTeam.Name))
