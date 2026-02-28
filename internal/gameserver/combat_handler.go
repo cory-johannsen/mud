@@ -43,7 +43,7 @@ type CombatHandler struct {
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
 	loadoutsMu    sync.Mutex
-	loadouts      map[string]*inventory.Loadout
+	loadouts      map[string]*inventory.WeaponPreset
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -82,7 +82,7 @@ func NewCombatHandler(
 		respawnMgr:    respawnMgr,
 		floorMgr:      floorMgr,
 		timers:        make(map[string]*combat.RoundTimer),
-		loadouts:      make(map[string]*inventory.Loadout),
+		loadouts:      make(map[string]*inventory.WeaponPreset),
 	}
 }
 
@@ -295,20 +295,21 @@ func (h *CombatHandler) Equip(uid, weaponID, slotName string) ([]*gamev1.CombatE
 		return nil, fmt.Errorf("weapon %q not found", weaponID)
 	}
 
-	slot := inventory.SlotPrimary
-	if slotName != "" {
-		slot = inventory.Slot(slotName)
-	}
-
 	h.loadoutsMu.Lock()
 	lo, ok := h.loadouts[uid]
 	if !ok {
-		lo = inventory.NewLoadout()
+		lo = inventory.NewWeaponPreset()
 		h.loadouts[uid] = lo
 	}
-	if err := lo.Equip(slot, def); err != nil {
+	var equipErr error
+	if slotName == string(inventory.SlotSecondary) {
+		equipErr = lo.EquipOffHand(def)
+	} else {
+		equipErr = lo.EquipMainHand(def)
+	}
+	if equipErr != nil {
 		h.loadoutsMu.Unlock()
-		return nil, fmt.Errorf("equipping weapon: %w", err)
+		return nil, fmt.Errorf("equipping weapon: %w", equipErr)
 	}
 	h.loadoutsMu.Unlock()
 
@@ -353,7 +354,7 @@ func (h *CombatHandler) Reload(uid string) ([]*gamev1.CombatEvent, error) {
 
 	var weaponID string
 	if lo != nil {
-		if primary := lo.Primary(); primary != nil {
+		if primary := lo.MainHand; primary != nil {
 			weaponID = primary.Def.ID
 		}
 	}
@@ -394,7 +395,7 @@ func (h *CombatHandler) FireBurst(uid, target string) ([]*gamev1.CombatEvent, er
 
 	var weaponID string
 	if lo != nil {
-		if primary := lo.Primary(); primary != nil {
+		if primary := lo.MainHand; primary != nil {
 			weaponID = primary.Def.ID
 		}
 	}
@@ -435,7 +436,7 @@ func (h *CombatHandler) FireAutomatic(uid, target string) ([]*gamev1.CombatEvent
 
 	var weaponID string
 	if lo != nil {
-		if primary := lo.Primary(); primary != nil {
+		if primary := lo.MainHand; primary != nil {
 			weaponID = primary.Def.ID
 		}
 	}

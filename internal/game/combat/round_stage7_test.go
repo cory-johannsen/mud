@@ -49,12 +49,12 @@ func TestResolveRound_Reload_RestoresMagazine(t *testing.T) {
 		RangeIncrement: 30, ReloadActions: 1, MagazineCapacity: 15,
 		FiringModes: []inventory.FiringMode{inventory.FiringModeSingle},
 	}
-	loadout := inventory.NewLoadout()
-	if err := loadout.Equip(inventory.SlotPrimary, pistolDef); err != nil {
-		t.Fatalf("Equip failed: %v", err)
+	preset := inventory.NewWeaponPreset()
+	if err := preset.EquipMainHand(pistolDef); err != nil {
+		t.Fatalf("EquipMainHand failed: %v", err)
 	}
 	// Consume 10 rounds.
-	eq := loadout.Primary()
+	eq := preset.MainHand
 	for i := 0; i < 10; i++ {
 		if err := eq.Magazine.Consume(1); err != nil {
 			t.Fatalf("Consume failed: %v", err)
@@ -63,7 +63,7 @@ func TestResolveRound_Reload_RestoresMagazine(t *testing.T) {
 	if eq.Magazine.Loaded != 5 {
 		t.Fatalf("expected 5 rounds after consuming 10, got %d", eq.Magazine.Loaded)
 	}
-	player.Loadout = loadout
+	player.Loadout = preset
 
 	condReg := condition.NewRegistry()
 	eng := makeEngine7()
@@ -104,11 +104,11 @@ func TestResolveRound_FireBurst_ProducesTwoEvents(t *testing.T) {
 		RangeIncrement: 20, ReloadActions: 1, MagazineCapacity: 8,
 		FiringModes: []inventory.FiringMode{inventory.FiringModeBurst},
 	}
-	loadout := inventory.NewLoadout()
-	if err := loadout.Equip(inventory.SlotPrimary, shotgunDef); err != nil {
-		t.Fatalf("Equip failed: %v", err)
+	preset := inventory.NewWeaponPreset()
+	if err := preset.EquipMainHand(shotgunDef); err != nil {
+		t.Fatalf("EquipMainHand failed: %v", err)
 	}
-	player.Loadout = loadout
+	player.Loadout = preset
 
 	condReg := condition.NewRegistry()
 	eng := makeEngine7()
