@@ -213,8 +213,8 @@ func (h *AuthHandler) handleLogin(ctx context.Context, conn *telnet.Conn, args [
 	}
 
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
-		"Welcome back, %s! (account #%d) [%s]",
-		acct.Username, acct.ID, elapsed,
+		"Logged in as %s [%s] (account #%d) [%s]",
+		acct.Username, acct.Role, acct.ID, elapsed,
 	))
 	return acct, nil
 }

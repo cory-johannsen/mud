@@ -42,7 +42,7 @@ func TestBridgeEntity_CloseIdempotent(t *testing.T) {
 
 func TestManager_AddPlayer(t *testing.T) {
 	m := NewManager()
-	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
+	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
 	require.NoError(t, err)
 	assert.Equal(t, "Alice", sess.Username)
 	assert.Equal(t, "room_a", sess.RoomID)
@@ -51,7 +51,7 @@ func TestManager_AddPlayer(t *testing.T) {
 
 func TestManager_AddPlayer_BackpackAndCurrency(t *testing.T) {
 	m := NewManager()
-	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
+	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
 	require.NoError(t, err)
 
 	require.NotNil(t, sess.Backpack, "new session must have a non-nil Backpack")
@@ -63,16 +63,16 @@ func TestManager_AddPlayer_BackpackAndCurrency(t *testing.T) {
 
 func TestManager_AddPlayerDuplicate(t *testing.T) {
 	m := NewManager()
-	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
+	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
 	require.NoError(t, err)
-	_, err = m.AddPlayer("u1", "Alice2", "Alice2", 0, "room_b", 10)
+	_, err = m.AddPlayer("u1", "Alice2", "Alice2", 0, "room_b", 10, "player")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "already connected")
 }
 
 func TestManager_RemovePlayer(t *testing.T) {
 	m := NewManager()
-	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
+	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
 	require.NoError(t, err)
 
 	err = m.RemovePlayer("u1")
@@ -91,7 +91,7 @@ func TestManager_RemovePlayerNotFound(t *testing.T) {
 
 func TestManager_MovePlayer(t *testing.T) {
 	m := NewManager()
-	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
+	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
 	require.NoError(t, err)
 
 	oldRoom, err := m.MovePlayer("u1", "room_b")
@@ -114,9 +114,9 @@ func TestManager_MovePlayerNotFound(t *testing.T) {
 
 func TestManager_PlayersInRoom(t *testing.T) {
 	m := NewManager()
-	_, _ = m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
-	_, _ = m.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10)
-	_, _ = m.AddPlayer("u3", "Charlie", "Charlie", 0, "room_b", 10)
+	_, _ = m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
+	_, _ = m.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10, "player")
+	_, _ = m.AddPlayer("u3", "Charlie", "Charlie", 0, "room_b", 10, "player")
 
 	roomA := m.PlayersInRoom("room_a")
 	assert.Len(t, roomA, 2)
@@ -132,7 +132,7 @@ func TestManager_PlayersInRoom(t *testing.T) {
 
 func TestManager_GetPlayer(t *testing.T) {
 	m := NewManager()
-	_, _ = m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10)
+	_, _ = m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
 
 	sess, ok := m.GetPlayer("u1")
 	assert.True(t, ok)
@@ -154,7 +154,7 @@ func TestManager_ConcurrentAddRemove(t *testing.T) {
 			defer wg.Done()
 			uid := fmt.Sprintf("u%d", i)
 			name := fmt.Sprintf("Player%d", i)
-			_, _ = m.AddPlayer(uid, name, name, 0, "room_a", 10)
+			_, _ = m.AddPlayer(uid, name, name, 0, "room_a", 10, "player")
 		}(i)
 	}
 	wg.Wait()
@@ -180,7 +180,7 @@ func TestManager_ConcurrentMove(t *testing.T) {
 
 	for i := 0; i < n; i++ {
 		name := fmt.Sprintf("P%d", i)
-		_, err := m.AddPlayer(fmt.Sprintf("u%d", i), name, name, 0, rooms[0], 10)
+		_, err := m.AddPlayer(fmt.Sprintf("u%d", i), name, name, 0, rooms[0], 10, "player")
 		require.NoError(t, err)
 	}
 
@@ -217,7 +217,7 @@ func TestPropertyRoomOccupancyConsistent(t *testing.T) {
 			roomIdx := rapid.IntRange(0, len(rooms)-1).Draw(t, "room_idx")
 			uid := fmt.Sprintf("p%d", i)
 			name := fmt.Sprintf("Player%d", i)
-			_, _ = m.AddPlayer(uid, name, name, 0, rooms[roomIdx], 10)
+			_, _ = m.AddPlayer(uid, name, name, 0, rooms[roomIdx], 10, "player")
 		}
 
 		// Move some players

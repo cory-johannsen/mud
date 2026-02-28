@@ -11,11 +11,31 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Role constants for account privilege levels.
+const (
+	RolePlayer = "player"
+	RoleEditor = "editor"
+	RoleAdmin  = "admin"
+)
+
+// ValidRole reports whether role is a recognised privilege level.
+func ValidRole(role string) bool {
+	switch role {
+	case RolePlayer, RoleEditor, RoleAdmin:
+		return true
+	}
+	return false
+}
+
+// ErrInvalidRole is returned when an unrecognised role string is supplied.
+var ErrInvalidRole = errors.New("invalid role")
+
 // Account represents a player account in the database.
 type Account struct {
 	ID           int64
 	Username     string
 	PasswordHash string
+	Role         string
 	CreatedAt    time.Time
 }
 
@@ -55,9 +75,9 @@ func (r *AccountRepository) Create(ctx context.Context, username, password strin
 	err = r.db.QueryRow(ctx,
 		`INSERT INTO accounts (username, password_hash)
 		 VALUES ($1, $2)
-		 RETURNING id, username, password_hash, created_at`,
+		 RETURNING id, username, password_hash, role, created_at`,
 		username, hash,
-	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.CreatedAt)
+	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.CreatedAt)
 	if err != nil {
 		if isDuplicateKeyError(err) {
 			return Account{}, ErrAccountExists
@@ -77,10 +97,10 @@ func (r *AccountRepository) Create(ctx context.Context, username, password strin
 func (r *AccountRepository) Authenticate(ctx context.Context, username, password string) (Account, error) {
 	var acct Account
 	err := r.db.QueryRow(ctx,
-		`SELECT id, username, password_hash, created_at
+		`SELECT id, username, password_hash, role, created_at
 		 FROM accounts WHERE username = $1`,
 		username,
-	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.CreatedAt)
+	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.CreatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Account{}, ErrAccountNotFound
@@ -102,10 +122,10 @@ func (r *AccountRepository) Authenticate(ctx context.Context, username, password
 func (r *AccountRepository) GetByUsername(ctx context.Context, username string) (Account, error) {
 	var acct Account
 	err := r.db.QueryRow(ctx,
-		`SELECT id, username, password_hash, created_at
+		`SELECT id, username, password_hash, role, created_at
 		 FROM accounts WHERE username = $1`,
 		username,
-	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.CreatedAt)
+	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.CreatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Account{}, ErrAccountNotFound
@@ -113,6 +133,28 @@ func (r *AccountRepository) GetByUsername(ctx context.Context, username string) 
 		return Account{}, fmt.Errorf("querying account: %w", err)
 	}
 	return acct, nil
+}
+
+// SetRole updates the role for the given account.
+//
+// Precondition: role must be a valid role string (use ValidRole to check).
+// Postcondition: The account's role is updated, or ErrInvalidRole / ErrAccountNotFound is returned.
+func (r *AccountRepository) SetRole(ctx context.Context, accountID int64, role string) error {
+	if !ValidRole(role) {
+		return ErrInvalidRole
+	}
+
+	tag, err := r.db.Exec(ctx,
+		`UPDATE accounts SET role = $1 WHERE id = $2`,
+		role, accountID,
+	)
+	if err != nil {
+		return fmt.Errorf("updating role: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrAccountNotFound
+	}
+	return nil
 }
 
 // HashPassword creates a bcrypt hash of the given password.

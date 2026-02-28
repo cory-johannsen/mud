@@ -45,6 +45,7 @@ func (m *mockAccountStore) Create(_ context.Context, username, password string) 
 	acct := postgres.Account{
 		ID:        int64(len(m.accounts) + 1),
 		Username:  username,
+		Role:      postgres.RolePlayer,
 		CreatedAt: time.Now(),
 	}
 	m.accounts[username] = acct
@@ -154,7 +155,7 @@ func testGameServer(t *testing.T) string {
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := gameserver.NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	svc := gameserver.NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
@@ -449,7 +450,7 @@ func TestHandleSession_LoginMissingArgs(t *testing.T) {
 	c.send("testuser")
 	c.readUntil("Password:", 2*time.Second)
 	c.send("password123")
-	c.readUntil("Welcome back", 2*time.Second)
+	c.readUntil("Logged in as", 2*time.Second)
 }
 
 func TestHandleSession_LoginSuccess_GameBridge(t *testing.T) {
@@ -467,7 +468,7 @@ func TestHandleSession_LoginSuccess_GameBridge(t *testing.T) {
 
 	c.waitForPrompt()
 	c.doLogin("hero", "secret123")
-	c.readUntil("Welcome back", 2*time.Second)
+	c.readUntil("Logged in as", 2*time.Second)
 
 	// Character flow: one character listed, send "1" to select it.
 	c.readUntil("Your characters:", 2*time.Second)
@@ -516,7 +517,7 @@ func TestHandleSession_GameBridge_SayAndEmote(t *testing.T) {
 
 	c.waitForPrompt()
 	c.doLogin("hero", "secret123")
-	c.readUntil("Welcome back", 2*time.Second)
+	c.readUntil("Logged in as", 2*time.Second)
 	c.readUntil("Your characters:", 2*time.Second)
 	c.send("1")
 	c.readUntil("Room A", 5*time.Second)
@@ -570,7 +571,7 @@ func TestHandleSession_GameBridge_MoveAlias(t *testing.T) {
 
 	c.waitForPrompt()
 	c.doLogin("hero", "secret123")
-	c.readUntil("Welcome back", 2*time.Second)
+	c.readUntil("Logged in as", 2*time.Second)
 	c.readUntil("Your characters:", 2*time.Second)
 	c.send("1")
 	c.readUntil("Room A", 5*time.Second)

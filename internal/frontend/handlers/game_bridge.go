@@ -15,13 +15,14 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
 // gameBridge manages the gRPC session between a Telnet client and the game server.
 //
 // Precondition: conn must be open; char must be non-nil with a valid ID.
 // Postcondition: Returns nil on clean disconnect, or a non-nil error on fatal failure.
-func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, username string, char *character.Character) error {
+func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct postgres.Account, char *character.Character) error {
 	// Connect to gameserver
 	grpcConn, err := grpc.NewClient(h.gameServerAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -52,11 +53,12 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, usernam
 		Payload: &gamev1.ClientMessage_JoinWorld{
 			JoinWorld: &gamev1.JoinWorldRequest{
 				Uid:           uid,
-				Username:      username,
+				Username:      acct.Username,
 				CharacterId:   char.ID,
 				CharacterName: char.Name,
 				CurrentHp:     int32(char.CurrentHP),
 				Location:      char.Location,
+				Role:          acct.Role,
 			},
 		},
 	}); err != nil {
@@ -358,6 +360,22 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				RequestId: reqID,
 				Payload: &gamev1.ClientMessage_Balance{
 					Balance: &gamev1.BalanceRequest{},
+				},
+			}
+
+		case command.HandlerSetRole:
+			if len(parsed.Args) < 2 {
+				_ = conn.WriteLine("Usage: setrole <username> <role>")
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_SetRole{
+					SetRole: &gamev1.SetRoleRequest{
+						TargetUsername: parsed.Args[0],
+						Role:           parsed.Args[1],
+					},
 				},
 			}
 

@@ -100,6 +100,7 @@ func main() {
 		zap.Duration("elapsed", time.Since(dbStart)),
 	)
 	charRepo := postgres.NewCharacterRepository(pool.DB())
+	accountRepo := postgres.NewAccountRepository(pool.DB())
 
 	// Create managers
 	sessMgr := session.NewManager()
@@ -381,7 +382,7 @@ func main() {
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, invRegistry,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo),
 	)
 
 	// Start zone AI ticks.

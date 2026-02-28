@@ -8,6 +8,7 @@ const (
 	CategoryCombat        = "combat"
 	CategoryCommunication = "communication"
 	CategorySystem        = "system"
+	CategoryAdmin         = "admin"
 )
 
 // Handler identifiers mapping commands to gRPC message types.
@@ -35,6 +36,7 @@ const (
 	HandlerGet       = "get"
 	HandlerDrop      = "drop"
 	HandlerBalance   = "balance"
+	HandlerSetRole   = "setrole"
 )
 
 // Command defines a player-invocable command.
@@ -93,6 +95,9 @@ func BuiltinCommands() []Command {
 		{Name: "who", Aliases: nil, Help: "List players in the room", Category: CategorySystem, Handler: HandlerWho},
 		{Name: "quit", Aliases: []string{"exit"}, Help: "Disconnect from the game", Category: CategorySystem, Handler: HandlerQuit},
 		{Name: "help", Aliases: []string{"?"}, Help: "Show available commands", Category: CategorySystem, Handler: HandlerHelp},
+
+		// Admin commands
+		{Name: "setrole", Aliases: nil, Help: "Set a player's role (admin only)", Category: CategoryAdmin, Handler: HandlerSetRole},
 	}
 }
 

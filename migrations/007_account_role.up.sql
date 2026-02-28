@@ -1,0 +1,1 @@
+ALTER TABLE accounts ADD COLUMN role VARCHAR(16) NOT NULL DEFAULT 'player';

@@ -10,7 +10,7 @@ PROTO_GO_OUT := .
 PROTO_MODULE := github.com/cory-johannsen/mud
 
 # Build targets
-build: proto build-frontend build-gameserver build-migrate build-import-content
+build: proto build-frontend build-gameserver build-migrate build-import-content build-setrole
 
 build-frontend: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/frontend ./cmd/frontend
@@ -23,6 +23,9 @@ build-migrate: proto
 
 build-import-content:
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/import-content ./cmd/import-content
+
+build-setrole: proto
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/setrole ./cmd/setrole
 
 # Protobuf code generation
 proto:
@@ -69,7 +72,7 @@ run-gameserver:
 
 # Docker
 docker-up:
-	docker compose -f deployments/docker/docker-compose.yml up --build
+	docker compose -f deployments/docker/docker-compose.yml up --build -d
 
 docker-down:
 	docker compose -f deployments/docker/docker-compose.yml down

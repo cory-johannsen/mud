@@ -41,6 +41,27 @@ func TestPropertyHashAndCheck(t *testing.T) {
 	})
 }
 
+// TestValidRole verifies the three known roles and rejects unknowns.
+func TestValidRole(t *testing.T) {
+	assert.True(t, ValidRole(RolePlayer))
+	assert.True(t, ValidRole(RoleEditor))
+	assert.True(t, ValidRole(RoleAdmin))
+	assert.False(t, ValidRole(""))
+	assert.False(t, ValidRole("superadmin"))
+}
+
+// Property: ValidRole accepts exactly the three defined roles.
+func TestPropertyValidRole(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		role := rapid.StringMatching(`[a-z]{1,20}`).Draw(t, "role")
+		got := ValidRole(role)
+		want := role == RolePlayer || role == RoleEditor || role == RoleAdmin
+		if got != want {
+			t.Fatalf("ValidRole(%q) = %v, want %v", role, got, want)
+		}
+	})
+}
+
 // Property: Different passwords produce different hashes (probabilistic, but bcrypt
 // includes salt, so even same passwords produce different hashes).
 func TestPropertyDifferentPasswordsDifferentHashes(t *testing.T) {

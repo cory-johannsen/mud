@@ -25,6 +25,8 @@ type PlayerSession struct {
 	Backpack *inventory.Backpack
 	// Currency is the player's total rounds (ammunition-as-currency).
 	Currency int
+	// Role is the account privilege level (player, editor, admin).
+	Role string
 	// Entity is the bridge entity for pushing events to the player.
 	Entity *BridgeEntity
 }
@@ -47,9 +49,9 @@ func NewManager() *Manager {
 
 // AddPlayer registers a new player session in the given room.
 //
-// Precondition: uid, username, charName, and roomID must be non-empty; characterID must be >= 0; currentHP must be >= 0.
+// Precondition: uid, username, charName, and roomID must be non-empty; characterID must be >= 0; currentHP must be >= 0; role must be non-empty.
 // Postcondition: Returns the created PlayerSession, or an error if the UID is already registered.
-func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, roomID string, currentHP int) (*PlayerSession, error) {
+func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, roomID string, currentHP int, role string) (*PlayerSession, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -65,6 +67,7 @@ func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, r
 		CharacterID: characterID,
 		RoomID:      roomID,
 		CurrentHP:   currentHP,
+		Role:        role,
 		Entity:      entity,
 	}
 

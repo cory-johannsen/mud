@@ -36,7 +36,7 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 			if c == nil {
 				continue // user cancelled — loop again
 			}
-			return h.gameBridge(ctx, conn, acct.Username, c)
+			return h.gameBridge(ctx, conn, acct, c)
 		}
 
 		// Show character list
@@ -75,13 +75,13 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 				return err
 			}
 			if c != nil {
-				return h.gameBridge(ctx, conn, acct.Username, c)
+				return h.gameBridge(ctx, conn, acct, c)
 			}
 			continue
 		}
 
 		selected := chars[choice-1]
-		return h.gameBridge(ctx, conn, acct.Username, selected)
+		return h.gameBridge(ctx, conn, acct, selected)
 	}
 }
 

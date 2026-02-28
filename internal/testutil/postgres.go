@@ -117,6 +117,7 @@ func (pc *PostgresContainer) ApplyMigrations(t *testing.T) {
 			id         BIGSERIAL    PRIMARY KEY,
 			username   VARCHAR(64)  NOT NULL UNIQUE,
 			password_hash TEXT      NOT NULL,
+			role       VARCHAR(16)  NOT NULL DEFAULT 'player',
 			created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 		);
 		CREATE INDEX IF NOT EXISTS idx_accounts_username ON accounts (username);

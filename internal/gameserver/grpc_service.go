@@ -29,6 +29,21 @@ import (
 // errQuit is returned by handleQuit to signal the command loop to stop cleanly.
 var errQuit = fmt.Errorf("quit")
 
+// AccountAdmin provides account lookup and role mutation for in-game admin commands.
+//
+// Precondition: Implementations must be safe for concurrent use.
+type AccountAdmin interface {
+	GetAccountByUsername(ctx context.Context, username string) (AccountInfo, error)
+	SetAccountRole(ctx context.Context, accountID int64, role string) error
+}
+
+// AccountInfo is a minimal view of an account used by AccountAdmin.
+type AccountInfo struct {
+	ID       int64
+	Username string
+	Role     string
+}
+
 // CharacterSaver persists character state after a session ends.
 //
 // Precondition: id must be > 0; location must be a valid room ID.
@@ -53,8 +68,9 @@ type GameServiceServer struct {
 	scriptMgr  *scripting.Manager
 	respawnMgr  *npc.RespawnManager
 	floorMgr    *inventory.FloorManager
-	invRegistry *inventory.Registry
-	logger      *zap.Logger
+	invRegistry  *inventory.Registry
+	accountAdmin AccountAdmin
+	logger       *zap.Logger
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -81,6 +97,7 @@ func NewGameServiceServer(
 	respawnMgr *npc.RespawnManager,
 	floorMgr *inventory.FloorManager,
 	invRegistry *inventory.Registry,
+	accountAdmin AccountAdmin,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:       worldMgr,
@@ -96,8 +113,9 @@ func NewGameServiceServer(
 		scriptMgr:   scriptMgr,
 		respawnMgr:  respawnMgr,
 		floorMgr:    floorMgr,
-		invRegistry: invRegistry,
-		logger:      logger,
+		invRegistry:  invRegistry,
+		accountAdmin: accountAdmin,
+		logger:       logger,
 	}
 }
 
@@ -150,7 +168,12 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		return fmt.Errorf("no start room configured")
 	}
 
-	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP)
+	role := joinReq.Role
+	if role == "" {
+		role = "player"
+	}
+
+	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP, role)
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
 	}
@@ -305,6 +328,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleDropItem(uid, p.DropItem.Target)
 	case *gamev1.ClientMessage_Balance:
 		return s.handleBalance(uid)
+	case *gamev1.ClientMessage_SetRole:
+		return s.handleSetRole(uid, p.SetRole)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -957,6 +982,37 @@ func (s *GameServiceServer) handleBalance(uid string) (*gamev1.ServerEvent, erro
 		return errorEvent("player not found"), nil
 	}
 	return messageEvent(fmt.Sprintf("Currency: %s", inventory.FormatRounds(sess.Currency))), nil
+}
+
+// handleSetRole changes a target account's privilege level.
+//
+// Precondition: uid must be a valid connected player with admin role.
+// Postcondition: Returns a success message or an error event.
+func (s *GameServiceServer) handleSetRole(uid string, req *gamev1.SetRoleRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if sess.Role != "admin" {
+		return errorEvent("permission denied: admin role required"), nil
+	}
+	if s.accountAdmin == nil {
+		return errorEvent("account administration not available"), nil
+	}
+	if req.TargetUsername == "" || req.Role == "" {
+		return errorEvent("usage: setrole <username> <role>"), nil
+	}
+
+	target, err := s.accountAdmin.GetAccountByUsername(context.Background(), req.TargetUsername)
+	if err != nil {
+		return errorEvent(fmt.Sprintf("account %q not found", req.TargetUsername)), nil
+	}
+	if err := s.accountAdmin.SetAccountRole(context.Background(), target.ID, req.Role); err != nil {
+		return errorEvent(fmt.Sprintf("failed to set role: %v", err)), nil
+	}
+
+	return messageEvent(fmt.Sprintf("Set role for %s (#%d): %s -> %s",
+		target.Username, target.ID, target.Role, req.Role)), nil
 }
 
 // handleGetItem picks up an item from the room floor into the player's backpack.
