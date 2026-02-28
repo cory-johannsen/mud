@@ -139,296 +139,39 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			continue
 		}
 
-		var msg *gamev1.ClientMessage
+		bctx := &bridgeContext{
+			reqID:    reqID,
+			cmd:      cmd,
+			parsed:   parsed,
+			conn:     conn,
+			charName: charName,
+			role:     role,
+			stream:   stream,
+		}
 
-		switch cmd.Handler {
-		case command.HandlerMove:
-			direction := cmd.Name
-			msg = buildMoveMessage(reqID, direction)
-
-		case command.HandlerLook:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload:   &gamev1.ClientMessage_Look{Look: &gamev1.LookRequest{}},
-			}
-
-		case command.HandlerExits:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload:   &gamev1.ClientMessage_Exits{Exits: &gamev1.ExitsRequest{}},
-			}
-
-		case command.HandlerSay:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Say what?"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Say{
-					Say: &gamev1.SayRequest{Message: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerEmote:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Emote what?"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Emote{
-					Emote: &gamev1.EmoteRequest{Action: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerWho:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload:   &gamev1.ClientMessage_Who{Who: &gamev1.WhoRequest{}},
-			}
-
-		case command.HandlerQuit:
-			_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "The rain swallows your footsteps. Goodbye."))
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload:   &gamev1.ClientMessage_Quit{Quit: &gamev1.QuitRequest{}},
-			}
-			_ = stream.Send(msg)
-			return nil
-
-		case command.HandlerAttack:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Attack what?"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Attack{
-					Attack: &gamev1.AttackRequest{Target: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerFlee:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload:   &gamev1.ClientMessage_Flee{Flee: &gamev1.FleeRequest{}},
-			}
-
-		case command.HandlerPass:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload:   &gamev1.ClientMessage_Pass{Pass: &gamev1.PassRequest{}},
-			}
-
-		case command.HandlerStrike:
-			if len(parsed.Args) == 0 {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: strike <target>"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Strike{
-					Strike: &gamev1.StrikeRequest{Target: strings.Join(parsed.Args, " ")},
-				},
-			}
-
-		case command.HandlerExamine:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Examine what?"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Examine{
-					Examine: &gamev1.ExamineRequest{Target: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerStatus:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload:   &gamev1.ClientMessage_Status{Status: &gamev1.StatusRequest{}},
-			}
-
-		case command.HandlerEquip:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: equip <weapon_id> [slot]"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			parts := strings.SplitN(parsed.RawArgs, " ", 2)
-			slot := ""
-			if len(parts) == 2 {
-				slot = strings.TrimSpace(parts[1])
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Equip{
-					Equip: &gamev1.EquipRequest{WeaponId: strings.TrimSpace(parts[0]), Slot: slot},
-				},
-			}
-
-		case command.HandlerReload:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Reload{
-					Reload: &gamev1.ReloadRequest{WeaponId: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerFireBurst:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: burst <target>"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_FireBurst{
-					FireBurst: &gamev1.FireBurstRequest{Target: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerFireAuto:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: auto <target>"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_FireAutomatic{
-					FireAutomatic: &gamev1.FireAutomaticRequest{Target: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerThrow:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: throw <explosive_id>"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Throw{
-					Throw: &gamev1.ThrowRequest{ExplosiveId: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerInventory:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_InventoryReq{
-					InventoryReq: &gamev1.InventoryRequest{},
-				},
-			}
-
-		case command.HandlerGet:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: get <item>"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_GetItem{
-					GetItem: &gamev1.GetItemRequest{Target: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerDrop:
-			if parsed.RawArgs == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: drop <item>"))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_DropItem{
-					DropItem: &gamev1.DropItemRequest{Target: parsed.RawArgs},
-				},
-			}
-
-		case command.HandlerBalance:
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Balance{
-					Balance: &gamev1.BalanceRequest{},
-				},
-			}
-
-		case command.HandlerSetRole:
-			if len(parsed.Args) < 2 {
-				_ = conn.WriteLine("Usage: setrole <username> <role>")
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_SetRole{
-					SetRole: &gamev1.SetRoleRequest{
-						TargetUsername: parsed.Args[0],
-						Role:           parsed.Args[1],
-					},
-				},
-			}
-
-		case command.HandlerTeleport:
-			targetChar := strings.TrimSpace(parsed.RawArgs)
-			roomID := ""
-			if targetChar == "" {
-				_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Character name: "))
-				line, err := conn.ReadLine()
-				if err != nil {
-					return fmt.Errorf("reading teleport target: %w", err)
-				}
-				targetChar = strings.TrimSpace(line)
-			}
-			if targetChar == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Character name cannot be empty."))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Room ID: "))
-			line, err := conn.ReadLine()
-			if err != nil {
-				return fmt.Errorf("reading teleport room: %w", err)
-			}
-			roomID = strings.TrimSpace(line)
-			if roomID == "" {
-				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Room ID cannot be empty."))
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-				continue
-			}
-			msg = &gamev1.ClientMessage{
-				RequestId: reqID,
-				Payload: &gamev1.ClientMessage_Teleport{
-					Teleport: &gamev1.TeleportRequest{
-						TargetCharacter: targetChar,
-						RoomId:          roomID,
-					},
-				},
-			}
-
-		case command.HandlerHelp:
-			h.showGameHelp(conn, registry, role)
-			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
-			continue
-
-		default:
+		handlerFn, ok := bridgeHandlerMap[cmd.Handler]
+		if !ok {
 			_ = conn.WriteLine(telnet.Colorf(telnet.Dim, "You don't know how to '%s'.", parsed.Command))
 			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
 			continue
 		}
 
-		if msg != nil {
-			if err := stream.Send(msg); err != nil {
+		result, err := handlerFn(bctx)
+		if err != nil {
+			return err
+		}
+		if result.quit {
+			return nil
+		}
+		if result.done {
+			if cmd.Handler == command.HandlerHelp {
+				h.showGameHelp(conn, registry, role)
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+			}
+			continue
+		}
+		if result.msg != nil {
+			if err := stream.Send(result.msg); err != nil {
 				return fmt.Errorf("sending message: %w", err)
 			}
 		}
