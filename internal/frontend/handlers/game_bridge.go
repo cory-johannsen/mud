@@ -318,6 +318,48 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				},
 			}
 
+		case command.HandlerInventory:
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_InventoryReq{
+					InventoryReq: &gamev1.InventoryRequest{},
+				},
+			}
+
+		case command.HandlerGet:
+			if parsed.RawArgs == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: get <item>"))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_GetItem{
+					GetItem: &gamev1.GetItemRequest{Target: parsed.RawArgs},
+				},
+			}
+
+		case command.HandlerDrop:
+			if parsed.RawArgs == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: drop <item>"))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_DropItem{
+					DropItem: &gamev1.DropItemRequest{Target: parsed.RawArgs},
+				},
+			}
+
+		case command.HandlerBalance:
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_Balance{
+					Balance: &gamev1.BalanceRequest{},
+				},
+			}
+
 		case command.HandlerHelp:
 			h.showGameHelp(conn, registry)
 			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
