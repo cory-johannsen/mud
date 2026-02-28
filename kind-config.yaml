@@ -1,6 +1,7 @@
 # kind-config.yaml
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+name: mud
 nodes:
   - role: control-plane
     extraPortMappings:
