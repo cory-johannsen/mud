@@ -1,0 +1,60 @@
+# deployments/k8s/mud/templates/gameserver/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gameserver
+  namespace: mud
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: gameserver
+  template:
+    metadata:
+      labels:
+        app: gameserver
+    spec:
+      containers:
+        - name: gameserver
+          image: {{ .Values.image.registry }}/{{ .Values.image.gameserverRepository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 50051
+          env:
+            - name: MUD_GAMESERVER_GRPC_HOST
+              value: "0.0.0.0"
+            - name: MUD_GAMESERVER_GRPC_PORT
+              value: "50051"
+            - name: MUD_DATABASE_HOST
+              value: postgres.mud.svc.cluster.local
+            - name: MUD_DATABASE_PORT
+              value: "5432"
+            - name: MUD_DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mud-credentials
+                  key: db-user
+            - name: MUD_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mud-credentials
+                  key: db-password
+            - name: MUD_DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: mud-credentials
+                  key: db-name
+            - name: MUD_LOGGING_LEVEL
+              value: {{ .Values.logging.level | quote }}
+            - name: MUD_LOGGING_FORMAT
+              value: {{ .Values.logging.format | quote }}
+          readinessProbe:
+            tcpSocket:
+              port: 50051
+            initialDelaySeconds: 5
+            periodSeconds: 5

@@ -1,0 +1,12 @@
+# deployments/k8s/mud/templates/gameserver/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: gameserver
+  namespace: mud
+spec:
+  selector:
+    app: gameserver
+  ports:
+    - port: 50051
+      targetPort: 50051
