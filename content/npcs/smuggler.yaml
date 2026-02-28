@@ -1,0 +1,33 @@
+id: smuggler
+name: Smuggler
+description: A shifty figure in a long coat, pockets bulging with goods of questionable origin.
+level: 2
+max_hp: 20
+ac: 14
+perception: 7
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 15
+  constitution: 12
+  intelligence: 12
+  wisdom: 9
+  charisma: 14
+loot:
+  currency:
+    min: 25
+    max: 90
+  items:
+    - item: contraband_pack
+      chance: 0.35
+      min_qty: 1
+      max_qty: 1
+    - item: trade_token
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.4
+      min_qty: 1
+      max_qty: 3

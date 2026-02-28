@@ -1,0 +1,416 @@
+zone:
+  id: aloha
+  name: "The Aloha Neutral Zone"
+  description: "A demilitarized trading post on the old TV Highway corridor, where smugglers, brokers, and refugees coexist under an uneasy truce enforced by neutral zone sentries."
+  start_room: aloha_tv_highway_east
+  rooms:
+    - id: aloha_tv_highway_east
+      title: "TV Highway — East Gate"
+      description: |
+        The eastern end of the Aloha Neutral Zone opens onto the cracked
+        asphalt of TV Highway. A makeshift barricade of wrecked cars and
+        chain-link fencing marks the border. Faded signs warn travelers
+        to check weapons at the gate. Beyond the barricade, Beaverton sprawls.
+      exits:
+        - direction: east
+          target: beav_tv_highway_west
+        - direction: west
+          target: aloha_sentry_post_alpha
+      spawns:
+        - template: neutral_zone_sentry
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: tense
+
+    - id: aloha_sentry_post_alpha
+      title: "Sentry Post Alpha"
+      description: |
+        A sandbagged guard station occupies what was once a gas station canopy.
+        The roof provides shelter from the rain, and a fire barrel crackles
+        in the corner. Sentries watch the eastern approach with practiced
+        vigilance. A logbook sits on a plywood desk, recording every arrival.
+      exits:
+        - direction: east
+          target: aloha_tv_highway_east
+        - direction: west
+          target: aloha_185th_crossing
+        - direction: south
+          target: aloha_checkpoint_lane
+      spawns:
+        - template: neutral_zone_sentry
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: firelight
+        atmosphere: guarded
+
+    - id: aloha_185th_crossing
+      title: "185th Avenue Crossing"
+      description: |
+        The intersection of TV Highway and 185th Avenue is a wide, windswept
+        crossroads. Traffic lights dangle uselessly from corroded poles.
+        Foot traffic flows in all directions — traders heading to the bazaar,
+        refugees seeking the camp, smugglers slipping toward the warehouses.
+      exits:
+        - direction: east
+          target: aloha_sentry_post_alpha
+        - direction: west
+          target: aloha_brokers_row
+        - direction: north
+          target: aloha_message_board_plaza
+        - direction: south
+          target: aloha_the_bazaar
+      properties:
+        lighting: overcast
+        atmosphere: busy
+
+    - id: aloha_the_bazaar
+      title: "The Bazaar"
+      description: |
+        An open-air market sprawls across what was once a shopping center
+        parking lot. Tarps and salvaged awnings stretch between poles, shading
+        rows of blankets and folding tables piled with scavenged goods.
+        The air is thick with the smell of grilled rat and diesel smoke.
+        Haggling voices rise and fall like waves.
+      exits:
+        - direction: north
+          target: aloha_185th_crossing
+        - direction: east
+          target: aloha_trading_post
+        - direction: south
+          target: aloha_park
+        - direction: west
+          target: aloha_water_station
+      spawns:
+        - template: aloha_broker
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: crowded
+
+    - id: aloha_brokers_row
+      title: "Broker's Row"
+      description: |
+        A line of shipping containers has been converted into cramped offices,
+        each one painted a different color to mark its owner. Hand-lettered
+        signs advertise currency exchange, contract negotiation, and caravan
+        insurance. The sound of deal-making echoes between the metal walls.
+      exits:
+        - direction: east
+          target: aloha_185th_crossing
+        - direction: west
+          target: aloha_caravansary
+        - direction: south
+          target: aloha_black_market
+      spawns:
+        - template: aloha_broker
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: commercial
+
+    - id: aloha_sentry_post_bravo
+      title: "Sentry Post Bravo"
+      description: |
+        The western guard station mirrors its eastern counterpart — sandbags,
+        fire barrel, plywood desk. A hand-painted sign reads "LEAVING NEUTRAL
+        ZONE — ARM YOURSELVES." The sentries here watch the Hillsboro road
+        with grim attention, wary of raiding parties from the west.
+      exits:
+        - direction: east
+          target: aloha_caravansary
+        - direction: west
+          target: aloha_tv_highway_west
+      spawns:
+        - template: neutral_zone_sentry
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: firelight
+        atmosphere: guarded
+
+    - id: aloha_tv_highway_west
+      title: "TV Highway — West Gate"
+      description: |
+        The western boundary of the neutral zone is marked by a wall of
+        stacked tires and corrugated steel. Beyond it, TV Highway stretches
+        toward Hillsboro, empty and rain-washed. A faded green highway sign
+        reads "Hillsboro — 4 mi" with a bullet hole through the 4.
+      exits:
+        - direction: west
+          target: hills_tv_highway_east
+        - direction: east
+          target: aloha_sentry_post_bravo
+      spawns:
+        - template: neutral_zone_sentry
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: tense
+
+    - id: aloha_caravansary
+      title: "The Caravansary"
+      description: |
+        A walled compound built from bus shells and wooden pallets serves
+        as a rest stop for traveling traders. Campfires dot the muddy yard.
+        Pack animals — mostly dogs and a few scrawny mules — are tethered
+        to posts. The smell of coffee substitute and wet canvas fills the air.
+      exits:
+        - direction: east
+          target: aloha_brokers_row
+        - direction: west
+          target: aloha_sentry_post_bravo
+        - direction: south
+          target: aloha_stables
+      spawns:
+        - template: aloha_broker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: firelight
+        atmosphere: weary
+
+    - id: aloha_park
+      title: "Aloha Park"
+      description: |
+        An overgrown park serves as neutral meeting ground. The playground
+        equipment is rusted but children still play on it. Old-growth trees
+        provide rare canopy cover. Benches carved with initials and dates
+        mark generations of survivors. This is where truces are negotiated
+        and disputes settled without bloodshed.
+      exits:
+        - direction: north
+          target: aloha_the_bazaar
+        - direction: east
+          target: aloha_refugee_camp
+        - direction: west
+          target: aloha_warehouse_district
+      properties:
+        lighting: dappled
+        atmosphere: peaceful
+
+    - id: aloha_refugee_camp
+      title: "Refugee Camp"
+      description: |
+        A sprawling tent city fills a former school field. Canvas and plastic
+        sheeting stretch over improvised frames. Cook fires send thin smoke
+        columns into the grey sky. Families huddle in clusters, sharing
+        what little they have. A hand-painted sign at the entrance reads
+        "ALL WELCOME — NO FACTION COLORS."
+      exits:
+        - direction: west
+          target: aloha_park
+        - direction: north
+          target: aloha_trading_post
+      properties:
+        lighting: dim
+        atmosphere: desperate
+
+    - id: aloha_warehouse_district
+      title: "Warehouse District"
+      description: |
+        Rows of corrugated steel warehouses line a potholed access road.
+        Most doors are padlocked or welded shut. The ones that aren't
+        lead to dimly lit interiors where goods change hands without
+        questions asked. Lookouts perch on the rooftops, watching for
+        sentries and rival smugglers alike.
+      exits:
+        - direction: east
+          target: aloha_park
+        - direction: north
+          target: aloha_black_market
+        - direction: south
+          target: aloha_back_alley
+      spawns:
+        - template: smuggler
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: suspicious
+
+    - id: aloha_trading_post
+      title: "Trading Post"
+      description: |
+        A fortified building — once a fast-food restaurant — has been
+        converted into a proper trading post. Shelves behind a barred
+        counter display ammunition, medicine, and canned food. A chalkboard
+        lists today's exchange rates in smudged handwriting.
+      exits:
+        - direction: west
+          target: aloha_the_bazaar
+        - direction: south
+          target: aloha_refugee_camp
+        - direction: north
+          target: aloha_checkpoint_lane
+      spawns:
+        - template: aloha_broker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: lantern
+        atmosphere: commercial
+
+    - id: aloha_black_market
+      title: "Black Market"
+      description: |
+        Behind a false wall in one of the warehouses, a clandestine market
+        operates by lantern light. Goods banned even by the neutral zone's
+        lax standards are laid out on oil-stained blankets — pre-war tech,
+        unregistered weapons, chemical compounds. The dealers speak in
+        whispers and accept only hard currency.
+      exits:
+        - direction: south
+          target: aloha_warehouse_district
+        - direction: north
+          target: aloha_brokers_row
+      spawns:
+        - template: smuggler
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: lantern
+        atmosphere: illicit
+
+    - id: aloha_checkpoint_lane
+      title: "Checkpoint Lane"
+      description: |
+        A narrow lane runs between the trading post and the eastern sentry
+        station. Jersey barriers funnel foot traffic into single file.
+        Sentries check packs and ask pointed questions. The walls are
+        plastered with wanted posters and trade notices, most of them
+        rain-blurred beyond reading.
+      exits:
+        - direction: north
+          target: aloha_sentry_post_alpha
+        - direction: south
+          target: aloha_trading_post
+      properties:
+        lighting: overcast
+        atmosphere: controlled
+
+    - id: aloha_message_board_plaza
+      title: "Message Board Plaza"
+      description: |
+        A small plaza centered on a massive cork board sheltered under
+        a tin roof. Hundreds of notes, sketches, and pleas are pinned
+        to it — missing persons, job postings, warnings about road
+        conditions, and coded messages for those who know how to read them.
+        People linger here, scanning the board with desperate hope.
+      exits:
+        - direction: south
+          target: aloha_185th_crossing
+        - direction: east
+          target: aloha_inn
+        - direction: west
+          target: aloha_water_station
+      properties:
+        lighting: overcast
+        atmosphere: anxious
+
+    - id: aloha_water_station
+      title: "Water Station"
+      description: |
+        A gravity-fed water filtration system built from scavenged parts
+        occupies a fenced lot. Clean water trickles into plastic drums
+        lined up in rows. A posted schedule dictates ration amounts.
+        Two sentries guard the pumps around the clock — water is worth
+        more than currency in the wastes.
+      exits:
+        - direction: east
+          target: aloha_the_bazaar
+        - direction: northeast
+          target: aloha_message_board_plaza
+      properties:
+        lighting: overcast
+        atmosphere: vital
+
+    - id: aloha_inn
+      title: "The Rusty Lantern Inn"
+      description: |
+        A two-story building with boarded windows and a hand-painted sign
+        depicting a dented lantern. Inside, cots are rented by the hour.
+        A ground-floor common room serves watered-down homebrew and
+        reheated canned stew. It is the closest thing to comfort
+        the neutral zone offers.
+      exits:
+        - direction: west
+          target: aloha_message_board_plaza
+        - direction: south
+          target: aloha_back_alley
+      properties:
+        lighting: lantern
+        atmosphere: weary
+
+    - id: aloha_stables
+      title: "The Stables"
+      description: |
+        A covered lot where pack animals are housed and carts repaired.
+        The stalls are built from highway guardrails and plywood. A farrier
+        works at a makeshift forge, hammering scrap into horseshoes.
+        The smell of hay and animal sweat cuts through the usual rain-damp air.
+      exits:
+        - direction: north
+          target: aloha_caravansary
+        - direction: east
+          target: aloha_back_alley
+      properties:
+        lighting: dim
+        atmosphere: earthy
+
+    - id: aloha_back_alley
+      title: "Back Alley"
+      description: |
+        A narrow passage runs behind the warehouses and the inn, choked
+        with refuse and puddles of oily rainwater. Doorways curtained
+        with plastic sheeting lead to unseen rooms. This is where deals
+        go wrong and people disappear. The shadows seem to have eyes.
+      exits:
+        - direction: north
+          target: aloha_inn
+        - direction: west
+          target: aloha_stables
+        - direction: east
+          target: aloha_warehouse_district
+      spawns:
+        - template: smuggler
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dark
+        atmosphere: dangerous
+
+    - id: aloha_scrap_yard
+      title: "Scrap Yard"
+      description: |
+        Mountains of twisted metal, shattered appliances, and stripped
+        vehicles fill an open lot surrounded by razor wire. Scavengers
+        pick through the piles with practiced eyes, searching for anything
+        of value. A crane with a rusted electromagnet looms overhead,
+        frozen mid-swing for eternity.
+      exits:
+        - direction: north
+          target: aloha_warehouse_district
+      properties:
+        lighting: overcast
+        atmosphere: industrial
+
+    - id: aloha_old_church
+      title: "The Old Church"
+      description: |
+        A small church with a cracked steeple stands at the edge of the
+        neutral zone. Its stained glass is mostly gone, replaced with
+        plastic wrap that glows faintly in the light. Inside, pews serve
+        as sleeping quarters. A faded mural of the Pacific Northwest
+        covers one wall, a reminder of what was lost.
+      exits:
+        - direction: north
+          target: aloha_refugee_camp
+      properties:
+        lighting: dim
+        atmosphere: solemn

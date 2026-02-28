@@ -1,0 +1,8 @@
+id: contraband_pack
+name: Contraband Pack
+description: A tightly wrapped bundle of banned goods, sealed with duct tape.
+kind: junk
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 40

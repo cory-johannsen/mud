@@ -1,0 +1,8 @@
+id: sentry_whistle
+name: Sentry Whistle
+description: A shrill whistle used by neutral zone sentries to call for backup.
+kind: junk
+weight: 0.1
+stackable: true
+max_stack: 3
+value: 5

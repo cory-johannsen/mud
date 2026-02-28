@@ -1,0 +1,29 @@
+id: neutral_zone_sentry
+name: Neutral Zone Sentry
+description: A stern-faced sentry in mismatched armor, sworn to enforce the peace of the neutral zone.
+level: 3
+max_hp: 32
+ac: 16
+perception: 9
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 14
+  dexterity: 15
+  constitution: 14
+  intelligence: 10
+  wisdom: 15
+  charisma: 10
+loot:
+  currency:
+    min: 20
+    max: 70
+  items:
+    - item: sentry_whistle
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

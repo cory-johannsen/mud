@@ -1,0 +1,29 @@
+id: aloha_broker
+name: Aloha Broker
+description: A smooth-talking trader in a well-patched suit, always ready to make a deal.
+level: 2
+max_hp: 22
+ac: 14
+perception: 9
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 9
+  dexterity: 12
+  constitution: 12
+  intelligence: 14
+  wisdom: 12
+  charisma: 15
+loot:
+  currency:
+    min: 20
+    max: 80
+  items:
+    - item: trade_token
+      chance: 0.6
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
