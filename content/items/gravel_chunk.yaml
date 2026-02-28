@@ -1,0 +1,8 @@
+id: gravel_chunk
+name: Gravel Chunk
+description: A fist-sized chunk of gravel. Useful as a projectile or building material.
+kind: junk
+weight: 2.0
+stackable: true
+max_stack: 5
+value: 3

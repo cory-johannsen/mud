@@ -1,0 +1,452 @@
+zone:
+  id: ross_island
+  name: "Ross Island"
+  description: "A small fortress island in the Willamette, dominated by a massive gravel pit and ringed by overgrown forest. Bridge toll gangs control access while hermits haunt the interior."
+  start_room: ross_bridge_east
+  rooms:
+    - id: ross_bridge_east
+      title: "Ross Island Bridge — East Landing"
+      description: |
+        The western end of the Ross Island Bridge touches down on cracked
+        concrete pilings sunk into the island's eastern shore. The bridge
+        deck behind you is a gauntlet of missing sections and buckled steel.
+        Ahead, a crude barricade of wrecked cars and chain-link fencing
+        funnels all traffic toward a toll gate. Spray-painted warnings
+        promise violence to anyone who runs the checkpoint.
+      exits:
+        - direction: north
+          target: sei_ross_bridge_approach
+        - direction: west
+          target: ross_toll_gate
+        - direction: south
+          target: ross_east_shore
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: ross_toll_gate
+      title: "Toll Gate"
+      description: |
+        A ramshackle checkpoint blocks the road west. Corrugated metal
+        walls funnel travelers through a narrow gap where a heavy chain
+        can be dropped at a moment's notice. Toll prices are scratched
+        into a sheet of plywood — the rates change daily, always upward.
+        Dented toll tokens litter the mud at your feet.
+      exits:
+        - direction: east
+          target: ross_bridge_east
+        - direction: west
+          target: ross_bridge_road
+        - direction: south
+          target: ross_shoreline_path
+      spawns:
+        - template: bridge_troll
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: tense
+
+    - id: ross_bridge_road
+      title: "Bridge Road"
+      description: |
+        A potholed road cuts west from the toll gate into the island's
+        interior. Rusted guardrails line one side; the other drops away
+        to a tangle of blackberry brambles and collapsed retaining walls.
+        Tire tracks in the mud suggest regular traffic — the gravel pit
+        still draws workers and scavengers alike.
+      exits:
+        - direction: east
+          target: ross_toll_gate
+        - direction: west
+          target: ross_pit_edge
+        - direction: south
+          target: ross_the_overgrowth
+      spawns:
+        - template: bridge_troll
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: muddy
+
+    - id: ross_east_shore
+      title: "East Shore"
+      description: |
+        A narrow strip of gravel and driftwood lines the island's
+        eastern bank. The Willamette slides past, grey and cold.
+        Bridge pilings rise overhead like the legs of some concrete
+        giant. Small fires have been lit here recently — charred
+        circles mark where someone cooked river fish.
+      exits:
+        - direction: north
+          target: ross_bridge_east
+        - direction: south
+          target: ross_south_shore
+        - direction: west
+          target: ross_shoreline_path
+      properties:
+        lighting: overcast
+        atmosphere: damp
+
+    - id: ross_shoreline_path
+      title: "Shoreline Path"
+      description: |
+        A muddy trail follows the island's southern perimeter, weaving
+        between riverside willows and heaps of industrial debris. The
+        water is close enough to touch. Old tires and shopping carts
+        protrude from the shallows. The path is well-worn — hermits
+        use it to move unseen between the shore and the interior.
+      exits:
+        - direction: north
+          target: ross_toll_gate
+        - direction: east
+          target: ross_east_shore
+        - direction: west
+          target: ross_south_shore
+        - direction: south
+          target: ross_tidal_pool
+      spawns:
+        - template: island_hermit
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: damp
+
+    - id: ross_south_shore
+      title: "South Shore"
+      description: |
+        The island's southern bank faces the open river. The current
+        is strong here, churning around exposed rocks and half-submerged
+        logs. A crude dock made of lashed pallets extends a few meters
+        into the water. Someone has tied a rowboat to it — the oars
+        are missing, but the hull looks sound enough.
+      exits:
+        - direction: north
+          target: ross_the_overgrowth
+        - direction: east
+          target: ross_east_shore
+        - direction: west
+          target: ross_driftwood_camp
+        - direction: northeast
+          target: ross_shoreline_path
+      properties:
+        lighting: overcast
+        atmosphere: river
+
+    - id: ross_tidal_pool
+      title: "Tidal Pool"
+      description: |
+        A depression in the rocky shore traps river water at low tide,
+        creating a murky pool teeming with crawdads and small fish.
+        The rocks around the edge are slick with algae. Hermits have
+        laid crude fish traps here — woven baskets weighted with stones.
+        The smell of brine and decay hangs in the still air.
+      exits:
+        - direction: north
+          target: ross_shoreline_path
+        - direction: west
+          target: ross_driftwood_camp
+      spawns:
+        - template: island_hermit
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: brackish
+
+    - id: ross_driftwood_camp
+      title: "Driftwood Camp"
+      description: |
+        A makeshift shelter built from driftwood and river debris clings
+        to the southwestern shore. Tarps stretched over leaning timbers
+        create a low ceiling. Inside, bedrolls and tin cans suggest
+        several people live here. A fire pit smolders with damp coals.
+        Fishing lines trail from stakes driven into the bank.
+      exits:
+        - direction: east
+          target: ross_tidal_pool
+        - direction: north
+          target: ross_south_shore
+        - direction: northeast
+          target: ross_the_overgrowth
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: ross_the_overgrowth
+      title: "The Overgrowth"
+      description: |
+        The island's interior is choked with vegetation gone feral.
+        Blackberry canes form impenetrable walls. Ivy has swallowed
+        whole structures — only corners and rooflines hint at what
+        lies beneath. The canopy overhead blocks most light, creating
+        a green twilight. Movement in the undergrowth could be rats,
+        could be something larger.
+      exits:
+        - direction: north
+          target: ross_bridge_road
+        - direction: south
+          target: ross_south_shore
+        - direction: west
+          target: ross_the_hermitage
+        - direction: east
+          target: ross_rubble_ridge
+      spawns:
+        - template: island_hermit
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: overgrown
+
+    - id: ross_the_hermitage
+      title: "The Hermitage"
+      description: |
+        Hidden deep in the overgrowth, a clearing has been carved from
+        the brambles. Lean-tos built against a crumbling concrete wall
+        form a small compound. Wind chimes made of scrap metal and bone
+        hang from the branches. The hermits here trade in river fish,
+        salvage, and rumors. They trust no one from the bridge.
+      exits:
+        - direction: east
+          target: ross_the_overgrowth
+        - direction: north
+          target: ross_cave_entrance
+        - direction: south
+          target: ross_driftwood_camp
+      spawns:
+        - template: island_hermit
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: sheltered
+        atmosphere: quiet
+
+    - id: ross_cave_entrance
+      title: "Cave Entrance"
+      description: |
+        A narrow opening in a moss-covered rock face leads into darkness.
+        The stone around the entrance is scored with old tool marks —
+        this was once part of the quarry operation. Cool air flows out,
+        carrying the smell of damp earth and standing water. Hermit
+        markings scratched into the rock warn outsiders away.
+      exits:
+        - direction: south
+          target: ross_the_hermitage
+        - direction: down
+          target: ross_cave_interior
+        - direction: east
+          target: ross_pit_edge
+      properties:
+        lighting: dark
+        atmosphere: damp
+
+    - id: ross_cave_interior
+      title: "Cave Interior"
+      description: |
+        The cave opens into a low chamber carved from compressed gravel
+        and sandstone. Water drips from the ceiling, pooling in shallow
+        depressions. Old mining equipment rusts in the corners — picks,
+        buckets, a section of rail track going nowhere. Someone has
+        stacked supplies against the far wall under a sheet of plastic.
+      exits:
+        - direction: up
+          target: ross_cave_entrance
+      properties:
+        lighting: dark
+        atmosphere: damp
+
+    - id: ross_rubble_ridge
+      title: "Rubble Ridge"
+      description: |
+        A long spine of heaped gravel and broken concrete rises above
+        the tree line, offering a commanding view of the island and
+        the river beyond. To the west, the gravel pit yawns open.
+        To the east, the bridge stretches toward SE Industrial.
+        The wind is fierce up here, whipping grit into your eyes.
+        Lookout posts made of stacked debris dot the ridgeline.
+      exits:
+        - direction: west
+          target: ross_the_overgrowth
+        - direction: north
+          target: ross_pit_edge
+        - direction: down
+          target: ross_quarry_floor
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: ross_pit_edge
+      title: "Pit Edge"
+      description: |
+        You stand at the rim of the Ross Island gravel pit, a vast
+        excavation that dominates the island's center. The walls drop
+        away steeply — fifty feet of layered sediment and exposed rock.
+        Heavy machinery rusts at the bottom. A switchback road carved
+        into the pit wall provides the only vehicle access. The scale
+        of the operation is staggering, even in ruin.
+      exits:
+        - direction: east
+          target: ross_bridge_road
+        - direction: south
+          target: ross_rubble_ridge
+        - direction: down
+          target: ross_gravel_pit
+        - direction: west
+          target: ross_cave_entrance
+        - direction: north
+          target: ross_north_shore
+      properties:
+        lighting: overcast
+        atmosphere: industrial
+
+    - id: ross_gravel_pit
+      title: "Gravel Pit"
+      description: |
+        The massive excavation is a world unto itself. Terraced walls
+        of grey stone and compacted earth rise on all sides. At the
+        center, a cluster of prefab buildings serves as the pit boss's
+        domain — part office, part throne room. Workers sort gravel
+        by hand, filling buckets that get hauled up the switchback
+        road. The operation is brutal but functional.
+      exits:
+        - direction: up
+          target: ross_pit_edge
+        - direction: south
+          target: ross_quarry_floor
+        - direction: east
+          target: ross_crane_platform
+        - direction: west
+          target: ross_lagoon
+      spawns:
+        - template: gravel_pit_boss
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: industrial
+
+    - id: ross_quarry_floor
+      title: "Quarry Floor"
+      description: |
+        The lowest point of the pit is a flat expanse of crushed stone
+        and standing water. Mining carts sit on rusted tracks that go
+        nowhere. The walls tower overhead, cutting off the wind but
+        trapping the cold. Workers chip at the rock face with hand
+        tools, filling bags of aggregate for the pit boss's trade
+        caravans. The work never stops.
+      exits:
+        - direction: north
+          target: ross_gravel_pit
+        - direction: up
+          target: ross_rubble_ridge
+        - direction: west
+          target: ross_lagoon
+      spawns:
+        - template: gravel_pit_boss
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: cold
+
+    - id: ross_lagoon
+      title: "Lagoon"
+      description: |
+        The western section of the pit has flooded, creating a murky
+        lagoon fed by groundwater seepage and rain. The water is
+        surprisingly deep — the bottom drops away quickly from the
+        gravel shore. Fish thrive here, drawn by the insects that
+        breed in the still water. Hermits fish from the banks with
+        handmade rods, tolerated by the pit boss for the food they
+        provide.
+      exits:
+        - direction: east
+          target: ross_gravel_pit
+        - direction: south
+          target: ross_quarry_floor
+        - direction: north
+          target: ross_west_shore
+      properties:
+        lighting: overcast
+        atmosphere: still
+
+    - id: ross_crane_platform
+      title: "Crane Platform"
+      description: |
+        A rusted construction crane stands frozen mid-swing, its boom
+        extended over the pit. The operator's cab is accessible via
+        a ladder welded to the support tower. The platform at its base
+        is reinforced concrete, one of the few solid surfaces in the
+        pit. Crates of sorted gravel are stacked here, awaiting
+        transport that may never come.
+      exits:
+        - direction: west
+          target: ross_gravel_pit
+        - direction: north
+          target: ross_pit_edge
+      properties:
+        lighting: overcast
+        atmosphere: industrial
+
+    - id: ross_north_shore
+      title: "North Shore"
+      description: |
+        The island's northern bank faces downtown Portland across the
+        grey expanse of the Willamette. The ruined skyline is visible
+        through the rain — shattered towers and collapsed overpasses.
+        From here it looks almost peaceful, if you squint. The shore
+        is rocky and exposed, battered by the river current. A few
+        rotting pilings mark where a ferry dock once stood.
+      exits:
+        - direction: south
+          target: ross_pit_edge
+        - direction: west
+          target: ross_west_shore
+        - direction: east
+          target: ross_bridge_road
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: ross_west_shore
+      title: "West Shore"
+      description: |
+        The western tip of the island narrows to a rocky point where
+        the current splits around the landmass. Driftwood accumulates
+        in massive tangles against the rocks. The river is at its
+        widest here, and the far bank is a dark line of trees and
+        industrial ruins. A narrow causeway of exposed rocks and
+        sandbars leads toward Hardtack Island at low water.
+      exits:
+        - direction: east
+          target: ross_north_shore
+        - direction: south
+          target: ross_lagoon
+        - direction: west
+          target: ross_hardtack_island
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: ross_hardtack_island
+      title: "Hardtack Island"
+      description: |
+        A tiny satellite island barely above the waterline, connected
+        to Ross Island by a shifting sandbar. Scrubby trees and tall
+        grass cover the hump of land. The remains of a campsite —
+        fire ring, scattered cans, a collapsed tent — suggest someone
+        lived here once. The isolation is absolute. The river surrounds
+        you on all sides, grey and indifferent.
+      exits:
+        - direction: east
+          target: ross_west_shore
+      spawns:
+        - template: island_hermit
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: isolated

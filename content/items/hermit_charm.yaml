@@ -1,0 +1,8 @@
+id: hermit_charm
+name: Hermit Charm
+description: A small charm made of river stones and wire. The hermits swear it brings luck.
+kind: junk
+weight: 0.1
+stackable: false
+max_stack: 1
+value: 15

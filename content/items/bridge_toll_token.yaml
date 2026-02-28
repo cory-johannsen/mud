@@ -1,0 +1,8 @@
+id: bridge_toll_token
+name: Bridge Toll Token
+description: A crudely stamped metal disc. Proof of toll payment on the Ross Island Bridge.
+kind: junk
+weight: 0.1
+stackable: true
+max_stack: 20
+value: 5

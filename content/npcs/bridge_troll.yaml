@@ -1,0 +1,33 @@
+id: bridge_troll
+name: Bridge Troll
+description: A massive brute stationed at the bridge, demanding tolls from anyone foolish enough to cross.
+level: 3
+max_hp: 36
+ac: 16
+perception: 7
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 16
+  dexterity: 12
+  constitution: 16
+  intelligence: 8
+  wisdom: 10
+  charisma: 10
+loot:
+  currency:
+    min: 30
+    max: 100
+  items:
+    - item: bridge_toll_token
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: scrap_metal
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
