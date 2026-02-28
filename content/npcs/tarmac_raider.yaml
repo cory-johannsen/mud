@@ -1,0 +1,33 @@
+id: tarmac_raider
+name: Tarmac Raider
+description: A brutal raider in improvised armor made from aircraft fuselage, wielding a propeller blade as a weapon.
+level: 4
+max_hp: 44
+ac: 17
+perception: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 17
+  dexterity: 15
+  constitution: 14
+  intelligence: 10
+  wisdom: 10
+  charisma: 10
+loot:
+  currency:
+    min: 35
+    max: 140
+  items:
+    - item: jet_fuel_vial
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.4
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

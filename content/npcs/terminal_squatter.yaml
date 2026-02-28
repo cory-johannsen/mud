@@ -1,0 +1,29 @@
+id: terminal_squatter
+name: Terminal Squatter
+description: A gaunt figure huddled in a sleeping bag between rows of airport seats, surviving on whatever the terminal provides.
+level: 1
+max_hp: 16
+ac: 13
+perception: 7
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 12
+  constitution: 14
+  intelligence: 10
+  wisdom: 12
+  charisma: 10
+loot:
+  currency:
+    min: 3
+    max: 25
+  items:
+    - item: scrap_metal
+      chance: 0.5
+      min_qty: 1
+      max_qty: 2
+    - item: airline_meal
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1

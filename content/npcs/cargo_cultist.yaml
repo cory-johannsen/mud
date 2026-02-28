@@ -1,0 +1,33 @@
+id: cargo_cultist
+name: Cargo Cultist
+description: A wild-eyed zealot in a tattered flight attendant uniform, preaching that the planes will fly again.
+level: 3
+max_hp: 30
+ac: 15
+perception: 7
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 12
+  dexterity: 10
+  constitution: 14
+  intelligence: 10
+  wisdom: 16
+  charisma: 14
+loot:
+  currency:
+    min: 15
+    max: 70
+  items:
+    - item: boarding_pass
+      chance: 0.5
+      min_qty: 1
+      max_qty: 1
+    - item: airline_meal
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1

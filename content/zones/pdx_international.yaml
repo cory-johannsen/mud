@@ -1,0 +1,464 @@
+zone:
+  id: pdx_international
+  name: "PDX International"
+  description: "The ruins of Portland International Airport, where cargo cultists worship the grounded planes and tarmac raiders fight over salvage from the hangars."
+  start_room: pdx_airport_way_west
+  rooms:
+    - id: pdx_airport_way_west
+      title: "Airport Way West"
+      description: |
+        The cracked expanse of Airport Way stretches east toward the looming
+        silhouette of PDX International. Abandoned cars rust in the median,
+        their doors flung open by long-gone refugees. To the west, the
+        overpass connects back toward the I-205 corridor and NE Portland.
+      exits:
+        - direction: west
+          target: ne_i205_onramp
+          zone: ne_portland
+        - direction: east
+          target: pdx_airport_way_east
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: pdx_airport_way_east
+      title: "Airport Way East"
+      description: |
+        Airport Way continues eastward past collapsed sound barriers and
+        overgrown retention ponds. The terminal buildings rise ahead,
+        their glass facades shattered and dark. A faded sign overhead
+        reads "Departures" with an arrow pointing into oblivion.
+      exits:
+        - direction: west
+          target: pdx_airport_way_west
+        - direction: east
+          target: pdx_terminal_entrance
+        - direction: south
+          target: pdx_parking_garage
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: pdx_i84_east
+      title: "I-84 Eastbound On-Ramp"
+      description: |
+        The elevated on-ramp curls upward toward the skeletal remains of
+        Interstate 84 heading east. Concrete barriers are scarred with
+        old bullet impacts. From here you can see the airport sprawl to
+        the south and the Columbia River glinting in the distance to the north.
+      exits:
+        - direction: east
+          target: trout_i84_west_junction
+          zone: troutdale
+        - direction: south
+          target: pdx_cargo_terminal
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: pdx_terminal_entrance
+      title: "Terminal Entrance"
+      description: |
+        The main entrance to PDX International gapes open, its automatic
+        doors long since jammed. Shattered glass crunches underfoot.
+        Faded welcome signs in a dozen languages hang askew from the
+        ceiling. The air smells of mildew and old carpet.
+      exits:
+        - direction: west
+          target: pdx_airport_way_east
+        - direction: north
+          target: pdx_ticketing_hall
+        - direction: south
+          target: pdx_max_station
+      spawns:
+        - template: terminal_squatter
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: musty
+
+    - id: pdx_ticketing_hall
+      title: "Ticketing Hall"
+      description: |
+        A massive open hall stretches before you, its vaulted timber ceiling
+        still remarkably intact. Abandoned check-in kiosks stand in long
+        rows like headstones. Squatters have strung tarps between the
+        counters, creating a makeshift shantytown beneath the departures board
+        that still reads "DELAYED" for every flight.
+      exits:
+        - direction: south
+          target: pdx_terminal_entrance
+        - direction: north
+          target: pdx_the_carpet
+        - direction: east
+          target: pdx_baggage_claim
+      spawns:
+        - template: terminal_squatter
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: smoke
+
+    - id: pdx_the_carpet
+      title: "The Carpet"
+      description: |
+        The famous PDX carpet spreads beneath your feet, its teal geometric
+        pattern faded but unmistakable. The cargo cultists have turned this
+        section into a shrine. Candles flicker in concentric circles around
+        a central altar made from stacked luggage. Faded boarding passes
+        are pinned to every surface. The zealots kneel here, murmuring
+        prayers to the sky gods for the return of flight.
+      exits:
+        - direction: south
+          target: pdx_ticketing_hall
+        - direction: north
+          target: pdx_concourse_a
+        - direction: east
+          target: pdx_concourse_b
+        - direction: west
+          target: pdx_concourse_e
+      spawns:
+        - template: cargo_cultist
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: candlelight
+        atmosphere: reverent
+
+    - id: pdx_concourse_a
+      title: "Concourse A"
+      description: |
+        Concourse A stretches northward, its floor-to-ceiling windows
+        offering a view of the dead tarmac beyond. Empty gate seating
+        areas have been converted into sleeping quarters. Hand-lettered
+        signs above each gate announce fictional destinations:
+        "Gate A3 — Paradise. Now Boarding."
+      exits:
+        - direction: south
+          target: pdx_the_carpet
+        - direction: east
+          target: pdx_concourse_b
+        - direction: north
+          target: pdx_jet_bridge
+      spawns:
+        - template: cargo_cultist
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: quiet
+
+    - id: pdx_concourse_b
+      title: "Concourse B"
+      description: |
+        Concourse B is the most intact of the terminal wings. Scavengers
+        have set up a trading post in the old duty-free shop. The smell
+        of cooking fires drifts from deeper in the corridor. A crude map
+        of the airport is painted on the wall, marking safe zones and
+        raider territory in different colors.
+      exits:
+        - direction: west
+          target: pdx_the_carpet
+        - direction: south
+          target: pdx_concourse_c
+        - direction: west
+          target: pdx_concourse_a
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: pdx_concourse_c
+      title: "Concourse C"
+      description: |
+        The central concourse is a wind tunnel. Broken windows let the
+        rain drive in sideways, and pools of standing water reflect
+        the grey sky. A partially collapsed ceiling reveals twisted
+        ductwork and dangling wires overhead. Despite the damage,
+        squatters have claimed the drier corners.
+      exits:
+        - direction: north
+          target: pdx_concourse_b
+        - direction: south
+          target: pdx_concourse_d
+        - direction: east
+          target: pdx_food_court
+      spawns:
+        - template: terminal_squatter
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: rain
+
+    - id: pdx_concourse_d
+      title: "Concourse D"
+      description: |
+        Concourse D has been heavily fortified by the cargo cultists.
+        Barricades made from luggage carts and vending machines block
+        unauthorized passage. Religious iconography covers the walls —
+        painted airplanes ascending into golden clouds, flight attendants
+        with halos, pilots depicted as saints.
+      exits:
+        - direction: north
+          target: pdx_concourse_c
+        - direction: east
+          target: pdx_concourse_e
+      spawns:
+        - template: cargo_cultist
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: candlelight
+        atmosphere: incense
+
+    - id: pdx_concourse_e
+      title: "Concourse E"
+      description: |
+        The easternmost concourse opens onto a panoramic view of the
+        runways. The cultists gather here at dawn, watching the horizon
+        for planes that will never come. Old telescopes and binoculars
+        are mounted along the windows. A hand-painted sign reads
+        "Observation Deck — Arrivals Expected."
+      exits:
+        - direction: west
+          target: pdx_concourse_d
+        - direction: south
+          target: pdx_the_carpet
+        - direction: down
+          target: pdx_the_tarmac
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: pdx_food_court
+      title: "Food Court"
+      description: |
+        The old airport food court has become a scavenger market.
+        Rusted kitchen equipment serves as trade counters. Faded menu
+        boards above each stall now list barter rates for salvage.
+        The smell of reheated airline meals mingles with wood smoke.
+        This is the closest thing to commerce the airport has.
+      exits:
+        - direction: west
+          target: pdx_concourse_c
+        - direction: south
+          target: pdx_baggage_claim
+      spawns:
+        - template: terminal_squatter
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: pdx_baggage_claim
+      title: "Baggage Claim"
+      description: |
+        The baggage carousels have been repurposed as communal sleeping
+        platforms, their conveyor belts padded with old blankets and
+        clothing. Families have staked out territories around each
+        carousel. Children play on the motionless belts. A hand-crank
+        generator provides dim, flickering light.
+      exits:
+        - direction: west
+          target: pdx_ticketing_hall
+        - direction: north
+          target: pdx_food_court
+        - direction: south
+          target: pdx_parking_garage
+      properties:
+        lighting: dim
+        atmosphere: crowded
+
+    - id: pdx_the_tarmac
+      title: "The Tarmac"
+      description: |
+        The vast expanse of cracked asphalt stretches in every direction,
+        dotted with the skeletal remains of grounded aircraft. Weeds
+        push through seams in the concrete. The wind howls across the
+        open space, carrying grit and the faint smell of old jet fuel.
+        Raiders patrol here, claiming the planes as their territory.
+      exits:
+        - direction: up
+          target: pdx_concourse_e
+        - direction: east
+          target: pdx_hangar_row
+        - direction: south
+          target: pdx_runway_south
+        - direction: north
+          target: pdx_fuel_depot
+      spawns:
+        - template: tarmac_raider
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: pdx_hangar_row
+      title: "Hangar Row"
+      description: |
+        A line of massive aircraft hangars stretches along the eastern
+        edge of the tarmac. Their corrugated metal walls are dented and
+        rusted, but still standing. Raiders have claimed the hangars as
+        workshops, stripping aircraft for armor and weapons. The sound
+        of hammering echoes from inside the nearest structure.
+      exits:
+        - direction: west
+          target: pdx_the_tarmac
+        - direction: north
+          target: pdx_cargo_terminal
+        - direction: east
+          target: pdx_control_tower
+      spawns:
+        - template: tarmac_raider
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: industrial
+
+    - id: pdx_control_tower
+      title: "Control Tower"
+      description: |
+        The air traffic control tower rises above the airport like a
+        concrete lighthouse. The climb up the interior stairwell is
+        treacherous — missing steps and crumbling railings. But the
+        view from the top is unmatched. You can see the entire airport,
+        the Columbia River, and on clear days, the ghostly outline of
+        Mt. Hood to the east.
+      exits:
+        - direction: west
+          target: pdx_hangar_row
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: pdx_cargo_terminal
+      title: "Cargo Terminal"
+      description: |
+        The freight processing building has become the cargo cult's
+        headquarters. Shipping containers are arranged in a labyrinth,
+        their interiors converted into living quarters and worship spaces.
+        The High Steward holds court here, interpreting "sacred manifests"
+        and distributing salvage according to divine cargo law.
+      exits:
+        - direction: south
+          target: pdx_hangar_row
+        - direction: north
+          target: pdx_i84_east
+      spawns:
+        - template: cargo_cultist
+          count: 3
+          respawn_after: "5m"
+      properties:
+        lighting: candlelight
+        atmosphere: incense
+
+    - id: pdx_parking_garage
+      title: "Parking Garage"
+      description: |
+        The multi-level parking structure has been converted into a
+        fortress. Vehicles on each level form walls and chokepoints.
+        Ramps between levels are gated and guarded. The rooftop level
+        serves as a lookout post with views in every direction. Rain
+        pools on the oil-stained concrete of the lower levels.
+      exits:
+        - direction: north
+          target: pdx_baggage_claim
+        - direction: east
+          target: pdx_airport_way_east
+      properties:
+        lighting: dim
+        atmosphere: enclosed
+
+    - id: pdx_max_station
+      title: "MAX Station"
+      description: |
+        The airport MAX light rail station sits in silent decay. The
+        elevated platform overlooks empty tracks that disappear into
+        overgrown brush. A derailed train car sits halfway off the rails,
+        its interior gutted and converted into a squatter shelter.
+        The electronic schedule display is dark and dead.
+      exits:
+        - direction: north
+          target: pdx_terminal_entrance
+        - direction: east
+          target: pdx_rental_car_lot
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: pdx_jet_bridge
+      title: "Jet Bridge"
+      description: |
+        The enclosed walkway extends from the terminal gate out over
+        the tarmac, ending abruptly where it once connected to an
+        aircraft door. The accordion walls sway in the wind. Looking
+        down through gaps in the floor, you can see the cracked
+        asphalt far below. The cultists consider this a sacred passage.
+      exits:
+        - direction: south
+          target: pdx_concourse_a
+      properties:
+        lighting: dim
+        atmosphere: wind
+
+    - id: pdx_runway_south
+      title: "South Runway"
+      description: |
+        The main runway stretches into the distance, its faded center
+        line barely visible beneath layers of dirt and debris. The
+        remains of a crashed cargo plane lie halfway down the strip,
+        its fuselage split open and picked clean by scavengers.
+        Raiders use the wreckage as a fortified camp.
+      exits:
+        - direction: north
+          target: pdx_the_tarmac
+        - direction: east
+          target: pdx_fuel_depot
+      spawns:
+        - template: tarmac_raider
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: pdx_fuel_depot
+      title: "Fuel Depot"
+      description: |
+        Massive fuel storage tanks rise like rusted monuments behind
+        chain-link fencing topped with razor wire. Most are empty, but
+        the raiders guard them fiercely — even trace amounts of jet fuel
+        are worth killing for. The ground is stained dark, and the air
+        burns with fumes on hot days.
+      exits:
+        - direction: south
+          target: pdx_the_tarmac
+        - direction: west
+          target: pdx_runway_south
+      spawns:
+        - template: tarmac_raider
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: chemical
+
+    - id: pdx_rental_car_lot
+      title: "Rental Car Lot"
+      description: |
+        Row after row of rusted vehicles fill the old rental car lot.
+        Most have been stripped of anything useful, but the sheer number
+        of cars creates a maze-like warren. Squatters live in the more
+        intact vehicles, and the lot's perimeter fence provides a
+        degree of security from tarmac raiders.
+      exits:
+        - direction: west
+          target: pdx_max_station
+      properties:
+        lighting: overcast
+        atmosphere: quiet

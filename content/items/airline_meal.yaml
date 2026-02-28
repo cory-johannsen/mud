@@ -1,0 +1,8 @@
+id: airline_meal
+name: Airline Meal
+description: A vacuum-sealed airline meal, somehow still preserved. Tastes exactly as you'd expect.
+kind: consumable
+weight: 0.4
+stackable: true
+max_stack: 5
+value: 6

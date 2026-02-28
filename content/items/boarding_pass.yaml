@@ -1,0 +1,8 @@
+id: boarding_pass
+name: Boarding Pass
+description: A faded boarding pass for a flight that will never depart. The cultists collect them like relics.
+kind: junk
+weight: 0.05
+stackable: true
+max_stack: 20
+value: 3

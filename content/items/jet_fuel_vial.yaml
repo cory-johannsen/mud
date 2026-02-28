@@ -1,0 +1,8 @@
+id: jet_fuel_vial
+name: Jet Fuel Vial
+description: A carefully sealed vial of jet fuel. Extremely valuable as a fire accelerant and trade good.
+kind: junk
+weight: 0.5
+stackable: true
+max_stack: 5
+value: 30
