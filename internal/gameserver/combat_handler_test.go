@@ -534,6 +534,50 @@ func TestResolveAndAdvanceLocked_ResetsSwappedThisRound(t *testing.T) {
 	}
 }
 
+// TestProperty_ResolveAndAdvanceLocked_AlwaysResetsSwappedThisRound is a
+// property-based test verifying that resolveAndAdvanceLocked unconditionally
+// resets SwappedThisRound to false regardless of its initial value.
+//
+// Precondition: SwappedThisRound is set to an arbitrary boolean value.
+// Postcondition: SwappedThisRound is always false after resolveAndAdvanceLocked.
+func TestProperty_ResolveAndAdvanceLocked_AlwaysResetsSwappedThisRound(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		var mu sync.Mutex
+		var broadcasts [][]*gamev1.CombatEvent
+		broadcastFn := func(roomID string, events []*gamev1.CombatEvent) {
+			mu.Lock()
+			defer mu.Unlock()
+			broadcasts = append(broadcasts, events)
+		}
+
+		h := makeCombatHandler(t, broadcastFn)
+		const roomID = "room-prop-swap-reset"
+		spawnTestNPC(t, h.npcMgr, roomID)
+		sess := addTestPlayer(t, h.sessions, "player-prop-swap", roomID)
+
+		_, err := h.Attack("player-prop-swap", "Goblin")
+		if err != nil {
+			rt.Fatalf("Attack to start combat: %v", err)
+		}
+
+		swapped := rapid.Bool().Draw(rt, "swapped")
+		sess.LoadoutSet.SwappedThisRound = swapped
+
+		h.combatMu.Lock()
+		cbt, ok := h.engine.GetCombat(roomID)
+		if !ok {
+			h.combatMu.Unlock()
+			rt.Fatal("expected active combat; got nil")
+		}
+		h.resolveAndAdvanceLocked(roomID, cbt)
+		h.combatMu.Unlock()
+
+		if sess.LoadoutSet.SwappedThisRound {
+			rt.Fatalf("expected SwappedThisRound to be false after resolveAndAdvanceLocked (initial=%v); got true", swapped)
+		}
+	})
+}
+
 // TestStatus_Property_RegisteredNotInCombat is a property-based test verifying
 // that Status returns nil conditions and nil error for any registered player who
 // is not in an active combat.
