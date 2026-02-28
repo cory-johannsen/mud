@@ -380,8 +380,29 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			}
 
 		case command.HandlerTeleport:
-			if len(parsed.Args) < 2 {
-				_ = conn.WriteLine("Usage: teleport <character> <room_id>")
+			targetChar := strings.TrimSpace(parsed.RawArgs)
+			roomID := ""
+			if targetChar == "" {
+				_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Character name: "))
+				line, err := conn.ReadLine()
+				if err != nil {
+					return fmt.Errorf("reading teleport target: %w", err)
+				}
+				targetChar = strings.TrimSpace(line)
+			}
+			if targetChar == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Character name cannot be empty."))
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			_ = conn.WritePrompt(telnet.Colorize(telnet.White, "Room ID: "))
+			line, err := conn.ReadLine()
+			if err != nil {
+				return fmt.Errorf("reading teleport room: %w", err)
+			}
+			roomID = strings.TrimSpace(line)
+			if roomID == "" {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Room ID cannot be empty."))
 				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
 				continue
 			}
@@ -389,8 +410,8 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				RequestId: reqID,
 				Payload: &gamev1.ClientMessage_Teleport{
 					Teleport: &gamev1.TeleportRequest{
-						TargetCharacter: parsed.Args[0],
-						RoomId:          parsed.Args[1],
+						TargetCharacter: targetChar,
+						RoomId:          roomID,
 					},
 				},
 			}
