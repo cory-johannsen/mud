@@ -1,6 +1,6 @@
 - [x] Kubernetes deployment support for production release.  To maintain stability and allow for rolling deploys the system must have a kubernetes deployment model.  Kind is already installed and can be used to host the cluster.
 - [x] Random character generation mode. At each stage of character generation the player should be able to choose Random and have the rest of the choices picked randomly. This should be the default selection.
-- [ ] Armor, rings, necklaces.  Each player should have dedicated equipped item slots for: armor (head, left arm, right arm, torso, left leg, right leg, feet), main hand weapon, off-hand weapon, neck, 10 rings)
+- [x] Armor, rings, necklaces.  Each player should have dedicated equipped item slots for: armor (head, left arm, right arm, torso, left leg, right leg, feet), main hand weapon, off-hand weapon, neck, 10 rings)
 - [ ] Region descriptions instead of ID strings in character descriptions
 - [ ] Switching characters without logout and disconnect
 - [ ] Inactivity warning before automatic disconnect.  Serverside logging of disconnect and reason.
@@ -11,6 +11,7 @@
 - [ ] Character levelling
 - [ ] Equipment levelling, advanced equipment, cursed equipment
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor.
+- [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration 
 - [ ] Non-combat NPCs: merchants, quest givers, hirelings, etc.
 - [ ] Per-NPC type custom behaviors, dialog, interactions, aggressiveness.  Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus 
 - [ ] Room equipment
