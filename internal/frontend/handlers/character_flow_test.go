@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -106,6 +107,8 @@ func TestRandomNames_NonEmpty(t *testing.T) {
 	for _, name := range handlers.RandomNames {
 		assert.GreaterOrEqual(t, len(name), 2)
 		assert.LessOrEqual(t, len(name), 32)
+		assert.NotEqual(t, "cancel", strings.ToLower(name))
+		assert.NotEqual(t, "random", strings.ToLower(name))
 	}
 }
 
