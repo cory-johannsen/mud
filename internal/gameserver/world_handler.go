@@ -121,12 +121,16 @@ func (h *WorldHandler) Exits(uid string) (*gamev1.ExitList, error) {
 
 	exitInfos := make([]*gamev1.ExitInfo, 0, len(room.Exits))
 	for _, e := range room.Exits {
-		exitInfos = append(exitInfos, &gamev1.ExitInfo{
+		info := &gamev1.ExitInfo{
 			Direction:    string(e.Direction),
 			TargetRoomId: e.TargetRoom,
 			Locked:       e.Locked,
 			Hidden:       e.Hidden,
-		})
+		}
+		if targetRoom, ok := h.world.GetRoom(e.TargetRoom); ok {
+			info.TargetTitle = targetRoom.Title
+		}
+		exitInfos = append(exitInfos, info)
 	}
 
 	return &gamev1.ExitList{Exits: exitInfos}, nil
@@ -148,12 +152,16 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 	visibleExits := room.VisibleExits()
 	exitInfos := make([]*gamev1.ExitInfo, 0, len(visibleExits))
 	for _, e := range visibleExits {
-		exitInfos = append(exitInfos, &gamev1.ExitInfo{
+		info := &gamev1.ExitInfo{
 			Direction:    string(e.Direction),
 			TargetRoomId: e.TargetRoom,
 			Locked:       e.Locked,
 			Hidden:       e.Hidden,
-		})
+		}
+		if targetRoom, ok := h.world.GetRoom(e.TargetRoom); ok {
+			info.TargetTitle = targetRoom.Title
+		}
+		exitInfos = append(exitInfos, info)
 	}
 
 	instances := h.npcMgr.InstancesInRoom(room.ID)

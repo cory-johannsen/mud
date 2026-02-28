@@ -1367,6 +1367,7 @@ type ExitInfo struct {
 	TargetRoomId  string                 `protobuf:"bytes,2,opt,name=target_room_id,json=targetRoomId,proto3" json:"target_room_id,omitempty"`
 	Locked        bool                   `protobuf:"varint,3,opt,name=locked,proto3" json:"locked,omitempty"`
 	Hidden        bool                   `protobuf:"varint,4,opt,name=hidden,proto3" json:"hidden,omitempty"`
+	TargetTitle   string                 `protobuf:"bytes,5,opt,name=target_title,json=targetTitle,proto3" json:"target_title,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1427,6 +1428,13 @@ func (x *ExitInfo) GetHidden() bool {
 		return x.Hidden
 	}
 	return false
+}
+
+func (x *ExitInfo) GetTargetTitle() string {
+	if x != nil {
+		return x.TargetTitle
+	}
+	return ""
 }
 
 // MessageEvent delivers a chat message or emote from another player.
@@ -3378,12 +3386,13 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x04npcs\x18\x06 \x03(\v2\x10.game.v1.NpcInfoR\x04npcs\x12C\n" +
 	"\x11active_conditions\x18\a \x03(\v2\x16.game.v1.ConditionInfoR\x10activeConditions\x123\n" +
 	"\vfloor_items\x18\b \x03(\v2\x12.game.v1.FloorItemR\n" +
-	"floorItems\"~\n" +
+	"floorItems\"\xa1\x01\n" +
 	"\bExitInfo\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\x12$\n" +
 	"\x0etarget_room_id\x18\x02 \x01(\tR\ftargetRoomId\x12\x16\n" +
 	"\x06locked\x18\x03 \x01(\bR\x06locked\x12\x16\n" +
-	"\x06hidden\x18\x04 \x01(\bR\x06hidden\"j\n" +
+	"\x06hidden\x18\x04 \x01(\bR\x06hidden\x12!\n" +
+	"\ftarget_title\x18\x05 \x01(\tR\vtargetTitle\"j\n" +
 	"\fMessageEvent\x12\x16\n" +
 	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12(\n" +

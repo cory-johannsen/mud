@@ -117,6 +117,7 @@ message ExitInfo {
   string target_room_id = 2;
   bool locked = 3;
   bool hidden = 4;
+  string target_title = 5;
 }
 
 // MessageEvent delivers a chat message or emote from another player.

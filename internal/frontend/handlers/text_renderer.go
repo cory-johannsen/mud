@@ -20,16 +20,22 @@ func RenderRoomView(rv *gamev1.RoomView) string {
 
 	// Exits
 	if len(rv.Exits) > 0 {
-		var dirs []string
-		for _, e := range rv.Exits {
-			dir := e.Direction
-			if e.Locked {
-				dir += " (locked)"
-			}
-			dirs = append(dirs, dir)
-		}
-		b.WriteString(telnet.Colorf(telnet.Cyan, "Exits: %s", strings.Join(dirs, ", ")))
+		b.WriteString(telnet.Colorize(telnet.Cyan, "Exits:"))
 		b.WriteString("\r\n")
+		for _, e := range rv.Exits {
+			label := e.Direction
+			if e.Locked {
+				label += " (locked)"
+			}
+			if e.TargetTitle != "" {
+				b.WriteString(fmt.Sprintf("  %s%-10s%s %s%s%s\r\n",
+					telnet.BrightCyan, label, telnet.Reset,
+					telnet.Dim, e.TargetTitle, telnet.Reset))
+			} else {
+				b.WriteString(fmt.Sprintf("  %s%s%s\r\n",
+					telnet.BrightCyan, label, telnet.Reset))
+			}
+		}
 	}
 
 	// Other players
@@ -107,18 +113,27 @@ func RenderExitList(el *gamev1.ExitList) string {
 	if len(el.Exits) == 0 {
 		return telnet.Colorize(telnet.Dim, "There are no obvious exits.")
 	}
-	var dirs []string
+	var b strings.Builder
+	b.WriteString(telnet.Colorize(telnet.Cyan, "Exits:"))
+	b.WriteString("\r\n")
 	for _, e := range el.Exits {
-		dir := e.Direction
+		label := e.Direction
 		if e.Locked {
-			dir += telnet.Colorize(telnet.Red, " (locked)")
+			label += telnet.Colorize(telnet.Red, " (locked)")
 		}
 		if e.Hidden {
-			dir += telnet.Colorize(telnet.Dim, " (hidden)")
+			label += telnet.Colorize(telnet.Dim, " (hidden)")
 		}
-		dirs = append(dirs, dir)
+		if e.TargetTitle != "" {
+			b.WriteString(fmt.Sprintf("  %s%-10s%s %s%s%s\r\n",
+				telnet.BrightCyan, label, telnet.Reset,
+				telnet.Dim, e.TargetTitle, telnet.Reset))
+		} else {
+			b.WriteString(fmt.Sprintf("  %s%s%s\r\n",
+				telnet.BrightCyan, label, telnet.Reset))
+		}
 	}
-	return telnet.Colorf(telnet.Cyan, "Exits: %s", strings.Join(dirs, ", "))
+	return b.String()
 }
 
 // RenderError formats an ErrorEvent as red Telnet text.
