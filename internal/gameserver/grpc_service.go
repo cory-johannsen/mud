@@ -385,7 +385,7 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		for _, inst := range s.npcH.InstancesInRoom(result.View.RoomId) {
 			if taunt, ok := inst.TryTaunt(time.Now()); ok {
 				s.broadcastMessage(result.View.RoomId, "", &gamev1.MessageEvent{
-					Content: fmt.Sprintf("%s says \"%s\"", inst.Name, taunt),
+					Content: fmt.Sprintf("%s says \"%s\"", inst.Name(), taunt),
 				})
 				break
 			}
@@ -901,7 +901,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 	ws := &ai.WorldState{
 		NPC: &ai.NPCState{
 			UID:        inst.ID,
-			Name:       inst.Name,
+			Name:       inst.Name(),
 			Kind:       "npc",
 			HP:         inst.CurrentHP,
 			MaxHP:      inst.MaxHP,
@@ -926,7 +926,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 	}
 	if taunt, ok := inst.TryTaunt(time.Now()); ok {
 		s.broadcastMessage(inst.RoomID, "", &gamev1.MessageEvent{
-			Content: fmt.Sprintf("%s says \"%s\"", inst.Name, taunt),
+			Content: fmt.Sprintf("%s says \"%s\"", inst.Name(), taunt),
 		})
 	}
 }

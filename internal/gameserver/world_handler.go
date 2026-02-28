@@ -170,7 +170,7 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 		if !inst.IsDead() {
 			npcInfos = append(npcInfos, &gamev1.NpcInfo{
 				InstanceId: inst.ID,
-				Name:       inst.Name,
+				Name:       inst.Name(),
 			})
 		}
 	}

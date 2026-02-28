@@ -16,7 +16,8 @@ func TestBuildCombatWorldState_PopulatesCombatants(t *testing.T) {
 			{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", CurrentHP: 15, MaxHP: 18, AC: 14},
 		},
 	}
-	inst := &npc.Instance{ID: "n1", Name: "Ganger", CurrentHP: 15, MaxHP: 18, Perception: 5, RoomID: "pioneer_square"}
+	inst := npc.NewInstance("n1", &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 18, AC: 14, Perception: 5}, "pioneer_square")
+	inst.CurrentHP = 15
 	ws := ai.BuildCombatWorldState(cbt, inst, "downtown")
 	if ws.NPC.UID != "n1" {
 		t.Fatalf("expected NPC UID n1, got %q", ws.NPC.UID)
@@ -34,7 +35,7 @@ func TestBuildCombatWorldState_DeadCombatantsMarked(t *testing.T) {
 			{ID: "n1", Kind: combat.KindNPC, Name: "G", CurrentHP: 10, MaxHP: 18},
 		},
 	}
-	inst := &npc.Instance{ID: "n1", RoomID: "room1"}
+	inst := npc.NewInstance("n1", &npc.Template{ID: "g", Name: "G", Level: 1, MaxHP: 10, AC: 10}, "room1")
 	ws := ai.BuildCombatWorldState(cbt, inst, "z1")
 	var playerState *ai.CombatantState
 	for _, c := range ws.Combatants {

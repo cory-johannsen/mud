@@ -63,11 +63,11 @@ func (m *Manager) Spawn(tmpl *Template, roomID string) (*Instance, error) {
 		// Single instance — no suffix.
 	case 1:
 		// Second instance arriving: rename the first to A, assign B to new.
-		sameTemplate[0].Name = tmpl.Name + " A"
-		inst.Name = tmpl.Name + " B"
+		sameTemplate[0].setName(tmpl.Name + " A")
+		inst.setName(tmpl.Name + " B")
 	default:
 		// Third or beyond: existing instances already have suffixes.
-		inst.Name = fmt.Sprintf("%s %c", tmpl.Name, 'A'+rune(count))
+		inst.setName(fmt.Sprintf("%s %c", tmpl.Name, 'A'+rune(count)))
 	}
 
 	m.instances[id] = inst
@@ -92,13 +92,31 @@ func (m *Manager) Remove(id string) error {
 		return fmt.Errorf("npc instance %q not found", id)
 	}
 
-	if rs, ok := m.roomSets[inst.RoomID]; ok {
+	roomID := inst.RoomID
+	templateID := inst.TemplateID
+
+	if rs, ok := m.roomSets[roomID]; ok {
 		delete(rs, id)
 		if len(rs) == 0 {
-			delete(m.roomSets, inst.RoomID)
+			delete(m.roomSets, roomID)
 		}
 	}
 	delete(m.instances, id)
+
+	// If exactly one same-template instance remains in the room, revert its name
+	// to the base (unsuffixed) name.
+	var survivors []*Instance
+	if rs, ok := m.roomSets[roomID]; ok {
+		for survivorID := range rs {
+			if s, ok := m.instances[survivorID]; ok && s.TemplateID == templateID {
+				survivors = append(survivors, s)
+			}
+		}
+	}
+	if len(survivors) == 1 {
+		survivors[0].setName(survivors[0].baseName)
+	}
+
 	return nil
 }
 
@@ -186,7 +204,7 @@ func (m *Manager) FindInRoom(roomID, target string) *Instance {
 		if !ok {
 			continue
 		}
-		if strings.HasPrefix(strings.ToLower(inst.Name), lower) {
+		if strings.HasPrefix(strings.ToLower(inst.Name()), lower) {
 			return inst
 		}
 	}

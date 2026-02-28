@@ -14,7 +14,7 @@ func BuildCombatWorldState(cbt *combat.Combat, inst *npc.Instance, zoneID string
 	ws := &WorldState{
 		NPC: &NPCState{
 			UID:        inst.ID,
-			Name:       inst.Name,
+			Name:       inst.Name(),
 			Kind:       "npc",
 			HP:         inst.CurrentHP,
 			MaxHP:      inst.MaxHP,

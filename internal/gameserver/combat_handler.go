@@ -103,7 +103,7 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 		return nil, fmt.Errorf("you don't see %q here", target)
 	}
 	if inst.IsDead() {
-		return nil, fmt.Errorf("%s is already dead", inst.Name)
+		return nil, fmt.Errorf("%s is already dead", inst.Name())
 	}
 
 	h.combatMu.Lock()
@@ -119,7 +119,7 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 		}
 	}
 
-	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionAttack, Target: inst.Name}); err != nil {
+	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionAttack, Target: inst.Name()}); err != nil {
 		return nil, fmt.Errorf("queuing attack: %w", err)
 	}
 
@@ -127,8 +127,8 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 	confirmEvent := &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 		Attacker:  sess.CharName,
-		Target:    inst.Name,
-		Narrative: fmt.Sprintf("%s readies an attack against %s.", sess.CharName, inst.Name),
+		Target:    inst.Name(),
+		Narrative: fmt.Sprintf("%s readies an attack against %s.", sess.CharName, inst.Name()),
 	}
 
 	if len(initEvents) > 0 {
@@ -594,7 +594,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	npcCbt := &combat.Combatant{
 		ID:        inst.ID,
 		Kind:      combat.KindNPC,
-		Name:      inst.Name,
+		Name:      inst.Name(),
 		MaxHP:     inst.MaxHP,
 		CurrentHP: inst.CurrentHP,
 		AC:        inst.AC,
@@ -793,7 +793,7 @@ func (h *CombatHandler) roundEventToProto(re combat.RoundEvent) *gamev1.CombatEv
 	// Resolve target name and HP from managers.
 	if r.TargetID != "" {
 		if inst, ok := h.npcMgr.Get(r.TargetID); ok {
-			evt.Target = inst.Name
+			evt.Target = inst.Name()
 			evt.TargetHp = int32(inst.CurrentHP)
 		}
 		if sess, ok := h.sessions.GetPlayer(r.TargetID); ok {

@@ -2,6 +2,7 @@ package npc
 
 import (
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -11,8 +12,13 @@ type Instance struct {
 	ID string
 	// TemplateID is the source template's ID.
 	TemplateID string
-	// Name is copied from the template for display.
-	Name string
+	// baseName is the unsuffixed name copied from the template at spawn time.
+	baseName string
+	// nameMu protects the name field.
+	nameMu sync.RWMutex
+	// name is the display name, potentially suffixed when multiple same-template
+	// instances share a room.
+	name string
 	// Description is copied from the template.
 	Description string
 	// RoomID is the room this instance currently occupies.
@@ -41,6 +47,20 @@ type Instance struct {
 	LastTauntTime time.Time
 }
 
+// Name returns the instance's current display name.
+func (i *Instance) Name() string {
+	i.nameMu.RLock()
+	defer i.nameMu.RUnlock()
+	return i.name
+}
+
+// setName sets the instance's display name.
+func (i *Instance) setName(s string) {
+	i.nameMu.Lock()
+	defer i.nameMu.Unlock()
+	i.name = s
+}
+
 // NewInstance creates a live NPC instance from a template, placed in roomID.
 //
 // Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
@@ -53,7 +73,8 @@ func NewInstance(id string, tmpl *Template, roomID string) *Instance {
 	return &Instance{
 		ID:            id,
 		TemplateID:    tmpl.ID,
-		Name:          tmpl.Name,
+		name:          tmpl.Name,
+		baseName:      tmpl.Name,
 		Description:   tmpl.Description,
 		RoomID:        roomID,
 		CurrentHP:     tmpl.MaxHP,

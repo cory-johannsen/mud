@@ -133,7 +133,7 @@ func TestCombatHandler_HTN_AutoQueueNPCsLocked_UsesHTNPath(t *testing.T) {
 	addTestPlayer(t, h.sessions, "player-htn-1", roomID)
 
 	// Attack triggers startCombatLocked then autoQueueNPCsLocked.
-	_, err := h.Attack("player-htn-1", inst.Name)
+	_, err := h.Attack("player-htn-1", inst.Name())
 	if err != nil {
 		t.Fatalf("Attack to start combat: %v", err)
 	}

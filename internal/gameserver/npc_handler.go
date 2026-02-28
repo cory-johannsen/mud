@@ -48,7 +48,7 @@ func (h *NPCHandler) Examine(uid, target string) (*gamev1.NpcView, error) {
 
 	return &gamev1.NpcView{
 		InstanceId:        inst.ID,
-		Name:              inst.Name,
+		Name:              inst.Name(),
 		Description:       inst.Description,
 		HealthDescription: inst.HealthDescription(),
 		Level:             int32(inst.Level),

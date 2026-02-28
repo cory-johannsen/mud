@@ -143,7 +143,7 @@ func TestNewInstance_SetsFieldsFromTemplate(t *testing.T) {
 	inst := npc.NewInstance("inst-1", tmpl, "room-alley")
 	assert.Equal(t, "inst-1", inst.ID)
 	assert.Equal(t, "ganger", inst.TemplateID)
-	assert.Equal(t, "Ganger", inst.Name)
+	assert.Equal(t, "Ganger", inst.Name())
 	assert.Equal(t, "A scarred street tough.", inst.Description)
 	assert.Equal(t, "room-alley", inst.RoomID)
 	assert.Equal(t, 18, inst.CurrentHP)
@@ -273,7 +273,7 @@ func TestManager_Spawn_SingleInstance_NoSuffix(t *testing.T) {
 
 	inst, err := mgr.Spawn(tmpl, "room-1")
 	require.NoError(t, err)
-	assert.Equal(t, "Ganger", inst.Name)
+	assert.Equal(t, "Ganger", inst.Name())
 }
 
 func TestManager_Spawn_TwoInstances_LetterSuffix(t *testing.T) {
@@ -289,10 +289,10 @@ func TestManager_Spawn_TwoInstances_LetterSuffix(t *testing.T) {
 	// First instance must have been renamed to A
 	got, ok := mgr.Get(first.ID)
 	require.True(t, ok)
-	assert.Equal(t, "Ganger A", got.Name)
+	assert.Equal(t, "Ganger A", got.Name())
 
 	// Second instance gets B
-	assert.Equal(t, "Ganger B", second.Name)
+	assert.Equal(t, "Ganger B", second.Name())
 }
 
 func TestManager_Spawn_ThreeInstances_LetterSuffixes(t *testing.T) {
@@ -307,9 +307,9 @@ func TestManager_Spawn_ThreeInstances_LetterSuffixes(t *testing.T) {
 	gotFirst, _ := mgr.Get(first.ID)
 	gotSecond, _ := mgr.Get(second.ID)
 
-	assert.Equal(t, "Ganger A", gotFirst.Name)
-	assert.Equal(t, "Ganger B", gotSecond.Name)
-	assert.Equal(t, "Ganger C", third.Name)
+	assert.Equal(t, "Ganger A", gotFirst.Name())
+	assert.Equal(t, "Ganger B", gotSecond.Name())
+	assert.Equal(t, "Ganger C", third.Name())
 }
 
 func TestManager_Spawn_DifferentTemplates_NoSuffix(t *testing.T) {
@@ -322,8 +322,8 @@ func TestManager_Spawn_DifferentTemplates_NoSuffix(t *testing.T) {
 	s, err := mgr.Spawn(tmplB, "room-1")
 	require.NoError(t, err)
 
-	assert.Equal(t, "Ganger", g.Name)
-	assert.Equal(t, "Scavenger", s.Name)
+	assert.Equal(t, "Ganger", g.Name())
+	assert.Equal(t, "Scavenger", s.Name())
 }
 
 func TestManager_Spawn_DifferentRooms_NoSuffix(t *testing.T) {
@@ -335,8 +335,8 @@ func TestManager_Spawn_DifferentRooms_NoSuffix(t *testing.T) {
 	inst2, err := mgr.Spawn(tmpl, "room-2")
 	require.NoError(t, err)
 
-	assert.Equal(t, "Ganger", inst1.Name)
-	assert.Equal(t, "Ganger", inst2.Name)
+	assert.Equal(t, "Ganger", inst1.Name())
+	assert.Equal(t, "Ganger", inst2.Name())
 }
 
 func TestManager_Spawn_Property_SuffixesAreUnique(t *testing.T) {
@@ -356,8 +356,8 @@ func TestManager_Spawn_Property_SuffixesAreUnique(t *testing.T) {
 		for _, id := range ids {
 			inst, ok := mgr.Get(id)
 			require.True(rt, ok)
-			assert.False(rt, names[inst.Name], "duplicate name: %s", inst.Name)
-			names[inst.Name] = true
+			assert.False(rt, names[inst.Name()], "duplicate name: %s", inst.Name())
+			names[inst.Name()] = true
 		}
 	})
 }
@@ -373,8 +373,8 @@ func TestManager_Spawn_AfterDeath_SuffixesReassigned(t *testing.T) {
 	require.NoError(t, err)
 
 	firstGot, _ := mgr.Get(first.ID)
-	assert.Equal(t, "Ganger A", firstGot.Name)
-	assert.Equal(t, "Ganger B", second.Name)
+	assert.Equal(t, "Ganger A", firstGot.Name())
+	assert.Equal(t, "Ganger B", second.Name())
 
 	// First ganger dies and is removed.
 	require.NoError(t, mgr.Remove(first.ID))
@@ -384,6 +384,25 @@ func TestManager_Spawn_AfterDeath_SuffixesReassigned(t *testing.T) {
 	require.NoError(t, err)
 
 	survivorGot, _ := mgr.Get(second.ID)
-	assert.Equal(t, "Ganger A", survivorGot.Name)
-	assert.Equal(t, "Ganger B", replacement.Name)
+	assert.Equal(t, "Ganger A", survivorGot.Name())
+	assert.Equal(t, "Ganger B", replacement.Name())
+}
+
+func TestManager_Remove_SoleSurvivorReverts_ToBaseName(t *testing.T) {
+	tmpl := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+
+	first, _ := mgr.Spawn(tmpl, "room-1")
+	second, _ := mgr.Spawn(tmpl, "room-1")
+
+	// Both have suffixes now.
+	firstGot, _ := mgr.Get(first.ID)
+	assert.Equal(t, "Ganger A", firstGot.Name())
+	assert.Equal(t, "Ganger B", second.Name())
+
+	// Remove first — sole survivor should revert to base name.
+	require.NoError(t, mgr.Remove(first.ID))
+
+	survivorGot, _ := mgr.Get(second.ID)
+	assert.Equal(t, "Ganger", survivorGot.Name())
 }
