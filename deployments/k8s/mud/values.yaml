@@ -1,0 +1,17 @@
+# deployments/k8s/mud/values.yaml
+image:
+  registry: registry.johannsen.cloud:5000
+  tag: latest
+  pullPolicy: Always
+
+db:
+  name: mud
+  user: mud
+  password: ""   # required; pass via --set db.password=...
+
+postgres:
+  storage: 5Gi
+
+logging:
+  level: info
+  format: json

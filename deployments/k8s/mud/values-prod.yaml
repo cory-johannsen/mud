@@ -1,0 +1,5 @@
+# deployments/k8s/mud/values-prod.yaml
+# Production overrides. No secrets here — pass db.password via --set at deploy time.
+logging:
+  level: info
+  format: json

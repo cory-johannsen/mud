@@ -1,0 +1,7 @@
+# deployments/k8s/mud/Chart.yaml
+apiVersion: v2
+name: mud
+description: MUD game server Helm chart
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
