@@ -3,6 +3,8 @@ image:
   registry: registry.johannsen.cloud:5000
   tag: latest
   pullPolicy: Always
+  gameserverRepository: mud-gameserver
+  frontendRepository: mud-frontend
 
 db:
   name: mud
