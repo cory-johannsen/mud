@@ -1,0 +1,5 @@
+# deployments/k8s/mud/templates/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mud
