@@ -13,6 +13,14 @@ db:
 
 postgres:
   storage: 5Gi
+  storageClass: ""   # empty uses the cluster default StorageClass
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 logging:
   level: info
