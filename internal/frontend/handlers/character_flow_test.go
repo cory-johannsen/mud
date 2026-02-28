@@ -2,13 +2,15 @@ package handlers_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"pgregory.net/rapid"
 
-	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/frontend/handlers"
+	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 )
 
 // mockCharStore implements handlers.CharacterStore for testing.
@@ -96,6 +98,84 @@ func TestProperty_FormatCharacterSummary(t *testing.T) {
 		assert.NotEmpty(rt, summary)
 		assert.Contains(rt, summary, name)
 		assert.Contains(rt, summary, class)
+	})
+}
+
+func TestRandomNames_NonEmpty(t *testing.T) {
+	assert.NotEmpty(t, handlers.RandomNames)
+	for _, name := range handlers.RandomNames {
+		assert.GreaterOrEqual(t, len(name), 2)
+		assert.LessOrEqual(t, len(name), 32)
+	}
+}
+
+func TestRandomizeRemaining_RegionFromSlice(t *testing.T) {
+	regions := []*ruleset.Region{{ID: "a", Name: "A"}, {ID: "b", Name: "B"}}
+	teams := []*ruleset.Team{{ID: "gun"}, {ID: "machete"}}
+	jobs := []*ruleset.Job{
+		{ID: "j1", Team: ""},
+		{ID: "j2", Team: "gun"},
+		{ID: "j3", Team: "machete"},
+	}
+	region, team, job := handlers.RandomizeRemaining(regions, nil, teams, nil, jobs)
+	assert.NotNil(t, region)
+	assert.NotNil(t, team)
+	assert.NotNil(t, job)
+	assert.Contains(t, regions, region)
+	assert.Contains(t, teams, team)
+}
+
+func TestRandomizeRemaining_JobCompatibleWithTeam(t *testing.T) {
+	regions := []*ruleset.Region{{ID: "r1"}}
+	teams := []*ruleset.Team{{ID: "gun"}, {ID: "machete"}}
+	jobs := []*ruleset.Job{
+		{ID: "j1", Team: ""},
+		{ID: "j2", Team: "gun"},
+		{ID: "j3", Team: "machete"},
+	}
+	for i := 0; i < 50; i++ {
+		_, team, job := handlers.RandomizeRemaining(regions, nil, teams, nil, jobs)
+		assert.True(t, job.Team == "" || job.Team == team.ID,
+			"job %s (team=%q) incompatible with team %s", job.ID, job.Team, team.ID)
+	}
+}
+
+func TestRandomizeRemaining_FixedTeamHonored(t *testing.T) {
+	regions := []*ruleset.Region{{ID: "r1"}}
+	teams := []*ruleset.Team{{ID: "gun"}, {ID: "machete"}}
+	fixedTeam := teams[0]
+	jobs := []*ruleset.Job{
+		{ID: "j1", Team: ""},
+		{ID: "j2", Team: "gun"},
+		{ID: "j3", Team: "machete"},
+	}
+	for i := 0; i < 50; i++ {
+		_, team, job := handlers.RandomizeRemaining(regions, nil, teams, fixedTeam, jobs)
+		assert.Equal(t, fixedTeam, team)
+		assert.True(t, job.Team == "" || job.Team == "gun")
+	}
+}
+
+func TestProperty_RandomizeRemaining_AlwaysValid(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		nRegions := rapid.IntRange(1, 5).Draw(rt, "nRegions")
+		nTeams := rapid.IntRange(1, 3).Draw(rt, "nTeams")
+
+		regions := make([]*ruleset.Region, nRegions)
+		for i := range regions {
+			regions[i] = &ruleset.Region{ID: fmt.Sprintf("r%d", i)}
+		}
+		teams := make([]*ruleset.Team, nTeams)
+		for i := range teams {
+			teams[i] = &ruleset.Team{ID: fmt.Sprintf("t%d", i)}
+		}
+		jobs := []*ruleset.Job{{ID: "general", Team: ""}}
+
+		region, team, job := handlers.RandomizeRemaining(regions, nil, teams, nil, jobs)
+		assert.NotNil(rt, region)
+		assert.NotNil(rt, team)
+		assert.NotNil(rt, job)
+		assert.True(rt, job.Team == "" || job.Team == team.ID)
 	})
 }
 

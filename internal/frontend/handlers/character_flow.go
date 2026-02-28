@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -13,6 +14,48 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
+
+// RandomNames is a list of post-apocalyptic themed character names suitable for
+// random selection during character creation. All names are 2-32 characters and
+// are not equal to "cancel" or "random" (case-insensitive).
+var RandomNames = []string{
+	"Raze", "Vex", "Cinder", "Sable", "Grit",
+	"Ash", "Flint", "Thorn", "Kael", "Dusk",
+	"Riven", "Scar", "Nox", "Wren", "Jace",
+	"Brix", "Colt", "Ember", "Slate", "Pike",
+}
+
+// RandomizeRemaining selects a region, team, and job for character creation,
+// using fixed values where provided and random selection otherwise.
+//
+// Precondition: regions, teams, and allJobs must each be non-empty.
+// Postcondition: returned job.Team is empty or equals returned team.ID.
+func RandomizeRemaining(
+	regions []*ruleset.Region, fixedRegion *ruleset.Region,
+	teams []*ruleset.Team, fixedTeam *ruleset.Team,
+	allJobs []*ruleset.Job,
+) (region *ruleset.Region, team *ruleset.Team, job *ruleset.Job) {
+	if fixedRegion != nil {
+		region = fixedRegion
+	} else {
+		region = regions[rand.Intn(len(regions))]
+	}
+
+	if fixedTeam != nil {
+		team = fixedTeam
+	} else {
+		team = teams[rand.Intn(len(teams))]
+	}
+
+	var compatible []*ruleset.Job
+	for _, j := range allJobs {
+		if j.Team == "" || j.Team == team.ID {
+			compatible = append(compatible, j)
+		}
+	}
+	job = compatible[rand.Intn(len(compatible))]
+	return
+}
 
 // characterFlow runs the character selection/creation UI after login.
 // It exits by calling gameBridge with the selected or newly created character.
