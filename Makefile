@@ -87,10 +87,10 @@ HELM_RELEASE := mud
 HELM_VALUES := $(HELM_CHART)/values-prod.yaml
 
 kind-up:
-	deployments/k8s/mud/scripts/cluster-up.sh
+	./deployments/k8s/mud/scripts/cluster-up.sh
 
 kind-down:
-	deployments/k8s/mud/scripts/cluster-down.sh
+	./deployments/k8s/mud/scripts/cluster-down.sh
 
 docker-push:
 	docker build -t $(REGISTRY)/mud-gameserver:$(IMAGE_TAG) -f deployments/docker/Dockerfile.gameserver .
