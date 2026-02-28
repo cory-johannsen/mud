@@ -113,6 +113,27 @@ func TestRandomNames_NonEmpty(t *testing.T) {
 }
 
 
+func TestIsRandomInput(t *testing.T) {
+	cases := []struct {
+		input    string
+		expected bool
+	}{
+		{"", true},
+		{"r", true},
+		{"R", true},
+		{"random", true},
+		{"RANDOM", true},
+		{"1", false},
+		{"2", false},
+		{"cancel", false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.input, func(t *testing.T) {
+			assert.Equal(t, tc.expected, handlers.IsRandomInput(tc.input))
+		})
+	}
+}
+
 func TestRandomizeRemaining_RegionFromSlice(t *testing.T) {
 	regions := []*ruleset.Region{{ID: "a", Name: "A"}, {ID: "b", Name: "B"}}
 	teams := []*ruleset.Team{{ID: "gun"}, {ID: "machete"}}

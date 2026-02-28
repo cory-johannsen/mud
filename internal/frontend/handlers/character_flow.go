@@ -60,6 +60,14 @@ func RandomizeRemaining(
 	return
 }
 
+// IsRandomInput reports whether the player's input at a list step requests random selection.
+// Blank input, "r", and "random" (all case-insensitive) are treated as random.
+// Exported for testing.
+func IsRandomInput(s string) bool {
+	lower := strings.ToLower(strings.TrimSpace(s))
+	return lower == "" || lower == "r" || lower == "random"
+}
+
 // characterFlow runs the character selection/creation UI after login.
 // It exits by calling gameBridge with the selected or newly created character.
 //
@@ -170,7 +178,9 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 			telnet.BrightWhite, r.Name, telnet.Reset,
 			r.Description))
 	}
-	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select region [1-%d]: ", len(regions)))
+	_ = conn.WriteLine(fmt.Sprintf("  %sR%s. Random (default)", telnet.Green, telnet.Reset))
+	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite,
+		"Select region [1-%d/R, default=R]: ", len(regions)))
 	regionLine, err := conn.ReadLine()
 	if err != nil {
 		return nil, fmt.Errorf("reading region selection: %w", err)
@@ -178,6 +188,12 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	regionLine = strings.TrimSpace(regionLine)
 	if strings.ToLower(regionLine) == "cancel" {
 		return nil, nil
+	}
+	if IsRandomInput(regionLine) {
+		region, team, job := RandomizeRemaining(regions, nil, h.teams, nil, h.jobs)
+		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
+			"Random selections: Region=%s, Team=%s, Job=%s", region.Name, team.Name, job.Name))
+		return h.buildAndConfirm(ctx, conn, accountID, charName, region, job, team)
 	}
 	regionChoice := 0
 	if _, err := fmt.Sscanf(regionLine, "%d", &regionChoice); err != nil || regionChoice < 1 || regionChoice > len(regions) {
