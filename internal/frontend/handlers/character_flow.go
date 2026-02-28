@@ -111,7 +111,7 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 		for i, c := range chars {
 			_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s",
 				telnet.Green, i+1, telnet.Reset,
-				FormatCharacterSummary(c)))
+				FormatCharacterSummary(c, h.regionDisplayName(c.Region))))
 		}
 		_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. Create a new character",
 			telnet.Green, len(chars)+1, telnet.Reset))
@@ -337,7 +337,7 @@ func (h *AuthHandler) buildAndConfirm(
 	}
 
 	_ = conn.WriteLine(telnet.Colorize(telnet.BrightCyan, "\r\n--- Character Preview ---"))
-	_ = conn.WriteLine(FormatCharacterStats(newChar))
+	_ = conn.WriteLine(FormatCharacterStats(newChar, region.DisplayName()))
 	_ = conn.WritePrompt(telnet.Colorize(telnet.BrightWhite, "Create this character? [y/N]: "))
 
 	confirm, err := conn.ReadLine()
@@ -367,26 +367,39 @@ func (h *AuthHandler) buildAndConfirm(
 	return created, nil
 }
 
+// regionDisplayName returns the DisplayName for the region with the given id, or id itself if not found.
+//
+// Precondition: id must be non-empty.
+// Postcondition: Returns a non-empty string.
+func (h *AuthHandler) regionDisplayName(id string) string {
+	for _, r := range h.regions {
+		if r.ID == id {
+			return r.DisplayName()
+		}
+	}
+	return id
+}
+
 // FormatCharacterSummary returns a one-line summary of a character for the selection list.
 // Exported for testing.
 //
-// Precondition: c must be non-nil.
+// Precondition: c must be non-nil; regionDisplay must be non-empty.
 // Postcondition: Returns a non-empty human-readable string.
-func FormatCharacterSummary(c *character.Character) string {
+func FormatCharacterSummary(c *character.Character, regionDisplay string) string {
 	return fmt.Sprintf("%s%s%s — Lvl %d %s from %s",
 		telnet.BrightWhite, c.Name, telnet.Reset,
-		c.Level, c.Class, c.Region)
+		c.Level, c.Class, regionDisplay)
 }
 
 // FormatCharacterStats returns a multi-line stats block for the character preview.
 // Exported for testing.
 //
-// Precondition: c must be non-nil.
+// Precondition: c must be non-nil; regionDisplay must be non-empty.
 // Postcondition: Returns a formatted multi-line string with HP and all six ability scores.
-func FormatCharacterStats(c *character.Character) string {
+func FormatCharacterStats(c *character.Character, regionDisplay string) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("  Name:   %s%s%s\r\n", telnet.BrightWhite, c.Name, telnet.Reset))
-	sb.WriteString(fmt.Sprintf("  Region: %s   Class: %s   Level: %d\r\n", c.Region, c.Class, c.Level))
+	sb.WriteString(fmt.Sprintf("  Region: %s   Class: %s   Level: %d\r\n", regionDisplay, c.Class, c.Level))
 	sb.WriteString(fmt.Sprintf("  HP:     %d/%d\r\n", c.CurrentHP, c.MaxHP))
 	sb.WriteString(fmt.Sprintf("  BRT:%2d  QCK:%2d  GRT:%2d  RSN:%2d  SAV:%2d  FLR:%2d\r\n",
 		c.Abilities.Brutality, c.Abilities.Quickness, c.Abilities.Grit,

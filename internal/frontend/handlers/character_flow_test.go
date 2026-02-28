@@ -55,10 +55,11 @@ func TestFormatCharacterSummary(t *testing.T) {
 		Level:  1,
 		Region: "old_town",
 	}
-	summary := handlers.FormatCharacterSummary(c)
+	summary := handlers.FormatCharacterSummary(c, "the Northeast")
 	assert.Contains(t, summary, "Zara")
 	assert.Contains(t, summary, "ganger")
 	assert.Contains(t, summary, "1")
+	assert.Contains(t, summary, "from the Northeast")
 }
 
 func TestFormatCharacterStats(t *testing.T) {
@@ -74,11 +75,12 @@ func TestFormatCharacterStats(t *testing.T) {
 			Reasoning: 10, Savvy: 8, Flair: 10,
 		},
 	}
-	stats := handlers.FormatCharacterStats(c)
+	stats := handlers.FormatCharacterStats(c, "the Northeast")
 	assert.Contains(t, stats, "BRT")
 	assert.Contains(t, stats, "14")
 	assert.Contains(t, stats, "HP")
 	assert.Contains(t, stats, "10")
+	assert.Contains(t, stats, "the Northeast")
 }
 
 // TestProperty_FormatCharacterSummary verifies that for any character, the summary
@@ -89,16 +91,18 @@ func TestProperty_FormatCharacterSummary(t *testing.T) {
 		class := rapid.StringMatching(`[a-z]{3,10}`).Draw(rt, "class")
 		level := rapid.IntRange(1, 20).Draw(rt, "level")
 
+		regionDisplay := rapid.StringMatching(`[A-Za-z ]+`).Draw(rt, "regionDisplay")
 		c := &character.Character{
 			Name:   name,
 			Class:  class,
 			Level:  level,
 			Region: "old_town",
 		}
-		summary := handlers.FormatCharacterSummary(c)
+		summary := handlers.FormatCharacterSummary(c, regionDisplay)
 		assert.NotEmpty(rt, summary)
 		assert.Contains(rt, summary, name)
 		assert.Contains(rt, summary, class)
+		assert.Contains(rt, summary, regionDisplay)
 	})
 }
 
@@ -277,10 +281,12 @@ func TestProperty_FormatCharacterStats(t *testing.T) {
 				Reasoning: rsn, Savvy: sav, Flair: flr,
 			},
 		}
-		stats := handlers.FormatCharacterStats(c)
+		regionDisplay := rapid.StringMatching(`[A-Za-z ]+`).Draw(rt, "regionDisplay")
+		stats := handlers.FormatCharacterStats(c, regionDisplay)
 		assert.NotEmpty(rt, stats)
 		for _, label := range []string{"BRT", "QCK", "GRT", "RSN", "SAV", "FLR", "HP"} {
 			assert.Contains(rt, stats, label)
 		}
+		assert.Contains(rt, stats, regionDisplay)
 	})
 }
