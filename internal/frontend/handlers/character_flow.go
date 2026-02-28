@@ -28,13 +28,25 @@ var RandomNames = []string{
 // RandomizeRemaining selects a region, team, and job for character creation,
 // using fixed values where provided and random selection otherwise.
 //
-// Precondition: regions, teams, and allJobs must each be non-empty.
+// Precondition: regions, teams, and allJobs must each be non-empty; returns error if any is empty or no compatible jobs exist.
 // Postcondition: returned job.Team is "" or equals returned team.ID; err is non-nil if no compatible jobs exist.
 func RandomizeRemaining(
 	regions []*ruleset.Region, fixedRegion *ruleset.Region,
 	teams []*ruleset.Team, fixedTeam *ruleset.Team,
 	allJobs []*ruleset.Job,
 ) (region *ruleset.Region, team *ruleset.Team, job *ruleset.Job, err error) {
+	if len(regions) == 0 {
+		err = fmt.Errorf("RandomizeRemaining: regions must be non-empty")
+		return
+	}
+	if len(teams) == 0 {
+		err = fmt.Errorf("RandomizeRemaining: teams must be non-empty")
+		return
+	}
+	if len(allJobs) == 0 {
+		err = fmt.Errorf("RandomizeRemaining: allJobs must be non-empty")
+		return
+	}
 	if fixedRegion != nil {
 		region = fixedRegion
 	} else {
@@ -345,8 +357,13 @@ func (h *AuthHandler) buildAndConfirm(
 		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Failed to create character: %v", err))
 		return nil, nil
 	}
+	elapsed := time.Since(start)
+	h.logger.Info("character created",
+		zap.String("name", created.Name),
+		zap.Int64("account_id", accountID),
+		zap.Duration("duration", elapsed))
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
-		"Character %s created! [%s]", created.Name, time.Since(start)))
+		"Character %s created! [%s]", created.Name, elapsed))
 	return created, nil
 }
 
