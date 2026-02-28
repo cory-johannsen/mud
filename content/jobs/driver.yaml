@@ -2,7 +2,7 @@ id: driver
 name: Driver
 archetype: normie
 description: "The best some can achieve is to operate a vehicle. The Driver is that person — and they're very, very good at it."
-key_ability: wisdom
+key_ability: savvy
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

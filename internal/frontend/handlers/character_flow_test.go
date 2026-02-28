@@ -67,12 +67,12 @@ func TestFormatCharacterStats(t *testing.T) {
 		MaxHP:     10,
 		CurrentHP: 10,
 		Abilities: character.AbilityScores{
-			Strength: 14, Dexterity: 10, Constitution: 10,
-			Intelligence: 10, Wisdom: 8, Charisma: 10,
+			Brutality: 14, Quickness: 10, Grit: 10,
+			Reasoning: 10, Savvy: 8, Flair: 10,
 		},
 	}
 	stats := handlers.FormatCharacterStats(c)
-	assert.Contains(t, stats, "STR")
+	assert.Contains(t, stats, "BRT")
 	assert.Contains(t, stats, "14")
 	assert.Contains(t, stats, "HP")
 	assert.Contains(t, stats, "10")
@@ -103,12 +103,12 @@ func TestProperty_FormatCharacterSummary(t *testing.T) {
 // is non-empty and contains all six ability score labels plus HP.
 func TestProperty_FormatCharacterStats(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		str := rapid.IntRange(1, 20).Draw(rt, "str")
-		dex := rapid.IntRange(1, 20).Draw(rt, "dex")
-		con := rapid.IntRange(1, 20).Draw(rt, "con")
-		intel := rapid.IntRange(1, 20).Draw(rt, "int")
-		wis := rapid.IntRange(1, 20).Draw(rt, "wis")
-		cha := rapid.IntRange(1, 20).Draw(rt, "cha")
+		brt := rapid.IntRange(1, 20).Draw(rt, "brt")
+		qck := rapid.IntRange(1, 20).Draw(rt, "qck")
+		grt := rapid.IntRange(1, 20).Draw(rt, "grt")
+		rsn := rapid.IntRange(1, 20).Draw(rt, "rsn")
+		sav := rapid.IntRange(1, 20).Draw(rt, "sav")
+		flr := rapid.IntRange(1, 20).Draw(rt, "flr")
 		hp := rapid.IntRange(1, 100).Draw(rt, "hp")
 
 		c := &character.Character{
@@ -119,13 +119,13 @@ func TestProperty_FormatCharacterStats(t *testing.T) {
 			MaxHP:     hp,
 			CurrentHP: hp,
 			Abilities: character.AbilityScores{
-				Strength: str, Dexterity: dex, Constitution: con,
-				Intelligence: intel, Wisdom: wis, Charisma: cha,
+				Brutality: brt, Quickness: qck, Grit: grt,
+				Reasoning: rsn, Savvy: sav, Flair: flr,
 			},
 		}
 		stats := handlers.FormatCharacterStats(c)
 		assert.NotEmpty(rt, stats)
-		for _, label := range []string{"STR", "DEX", "CON", "INT", "WIS", "CHA", "HP"} {
+		for _, label := range []string{"BRT", "QCK", "GRT", "RSN", "SAV", "FLR", "HP"} {
 			assert.Contains(rt, stats, label)
 		}
 	})

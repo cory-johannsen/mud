@@ -36,8 +36,8 @@ func makeTestCharacter(accountID int64, name string) *character.Character {
 		Level:     1,
 		Location:  "grinders_row",
 		Abilities: character.AbilityScores{
-			Strength: 14, Dexterity: 12, Constitution: 10,
-			Intelligence: 10, Wisdom: 8, Charisma: 12,
+			Brutality: 14, Quickness: 12, Grit: 10,
+			Reasoning: 10, Savvy: 8, Flair: 12,
 		},
 		MaxHP:     10,
 		CurrentHP: 10,
@@ -59,7 +59,7 @@ func TestCharacterRepository_Create(t *testing.T) {
 	assert.Equal(t, "ganger", created.Class)
 	assert.Equal(t, 1, created.Level)
 	assert.Equal(t, "grinders_row", created.Location)
-	assert.Equal(t, 14, created.Abilities.Strength)
+	assert.Equal(t, 14, created.Abilities.Brutality)
 	assert.Equal(t, 10, created.MaxHP)
 	assert.False(t, created.CreatedAt.IsZero())
 }
@@ -110,7 +110,7 @@ func TestCharacterRepository_GetByID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, created.ID, fetched.ID)
 	assert.Equal(t, "Zara", fetched.Name)
-	assert.Equal(t, 14, fetched.Abilities.Strength)
+	assert.Equal(t, 14, fetched.Abilities.Brutality)
 }
 
 func TestCharacterRepository_GetByID_NotFound(t *testing.T) {
@@ -172,8 +172,8 @@ func TestCharacterRepository_Property_CreateThenGetByID(t *testing.T) {
 			Level:     1,
 			Location:  "grinders_row",
 			Abilities: character.AbilityScores{
-				Strength: 10, Dexterity: 10, Constitution: 10,
-				Intelligence: 10, Wisdom: 10, Charisma: 10,
+				Brutality: 10, Quickness: 10, Grit: 10,
+				Reasoning: 10, Savvy: 10, Flair: 10,
 			},
 			MaxHP:     hp,
 			CurrentHP: hp,

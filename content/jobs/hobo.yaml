@@ -2,7 +2,7 @@ id: hobo
 name: Hobo
 archetype: criminal
 description: "Hobos perpetually live on the streets, not through circumstance but because they want to. They know Portland's ruins better than anyone."
-key_ability: dexterity
+key_ability: quickness
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

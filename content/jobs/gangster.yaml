@@ -2,7 +2,7 @@ id: gangster
 name: Gangster
 archetype: aggressor
 description: "The muscle, the enforcers, the ones who get their hands dirty. Portland's criminal organizations run on gangsters."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

@@ -2,7 +2,7 @@ id: shit_stirrer
 name: Shit-Stirrer
 archetype: influencer
 description: "Exceptionally good at creating problems and inciting chaos. Everybody needs to know one, but you never hang out with them outside work."
-key_ability: charisma
+key_ability: flair
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

@@ -2,7 +2,7 @@ id: politician
 name: Politician
 archetype: influencer
 description: "Operates through cunning and influence. Portland's collapse didn't kill politics — it just made the stakes more obvious."
-key_ability: charisma
+key_ability: flair
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

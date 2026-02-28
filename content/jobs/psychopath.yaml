@@ -2,7 +2,7 @@ id: psychopath
 name: Psychopath
 archetype: drifter
 description: "Cold, calculating, and manipulative. Often charming. Devoid of empathy. This makes them efficient killers in post-collapse Portland."
-key_ability: constitution
+key_ability: grit
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

@@ -1,0 +1,15 @@
+id: southern_california
+name: "Southern California"
+description: |
+  The sun-bleached ruins of Los Angeles and San Diego — endless sprawl turned
+  into endless wasteland. The old glamour is gone but the hustle remains. You
+  grew up fast-talking and fast-moving under skies that never rain, trading on
+  wits and connections in a land where nothing is real.
+modifiers:
+  quickness: 1
+  reasoning: 1
+  grit: -1
+  savvy: -1
+traits:
+  - smooth_talker
+  - desert_adapted

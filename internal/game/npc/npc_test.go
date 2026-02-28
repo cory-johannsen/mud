@@ -21,12 +21,12 @@ max_hp: 18
 ac: 14
 perception: 5
 abilities:
-  strength: 14
-  dexterity: 12
-  constitution: 14
-  intelligence: 8
-  wisdom: 10
-  charisma: 8
+  brutality: 14
+  quickness: 12
+  grit: 14
+  reasoning: 8
+  savvy: 10
+  flair: 8
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "ganger.yaml"), []byte(yaml), 0644))
 
@@ -41,7 +41,7 @@ abilities:
 	assert.Equal(t, 18, tmpl.MaxHP)
 	assert.Equal(t, 14, tmpl.AC)
 	assert.Equal(t, 5, tmpl.Perception)
-	assert.Equal(t, 14, tmpl.Abilities.Strength)
+	assert.Equal(t, 14, tmpl.Abilities.Brutality)
 }
 
 func TestLoadTemplates_EmptyDir(t *testing.T) {

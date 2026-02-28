@@ -2,7 +2,7 @@ id: pastor
 name: Pastor
 archetype: nerd
 description: "The Pastor leads others through shared beliefs, wielding influence over their perspectives. Post-collapse Portland needs something to believe in."
-key_ability: intelligence
+key_ability: reasoning
 hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained

@@ -2,7 +2,7 @@ id: beat_down_artist
 name: Beat Down Artist
 archetype: aggressor
 description: "Punch people in the face for a living. It's not a hard job but not very many folks qualify."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

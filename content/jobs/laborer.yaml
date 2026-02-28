@@ -2,7 +2,7 @@ id: laborer
 name: Laborer
 archetype: aggressor
 description: "Despicable, backbreaking and often thankless work is the lot in life for Laborers. Portland's ruins need constant rebuilding."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

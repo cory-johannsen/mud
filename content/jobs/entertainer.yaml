@@ -2,7 +2,7 @@ id: entertainer
 name: Entertainer
 archetype: influencer
 description: "Creative professionals who bring excitement and wonder through performance arts. Morale is a resource, and Entertainers produce it."
-key_ability: charisma
+key_ability: flair
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

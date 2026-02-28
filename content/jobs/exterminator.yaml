@@ -2,7 +2,7 @@ id: exterminator
 name: Exterminator
 archetype: normie
 description: "The bane of all vermin. Post-collapse Portland has a lot of vermin. Not all of them have four legs."
-key_ability: wisdom
+key_ability: savvy
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

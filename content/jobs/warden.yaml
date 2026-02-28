@@ -2,7 +2,7 @@ id: warden
 name: Warden
 archetype: drifter
 description: "Loners who prefer the company of animals to people. People also prefer this because they tend to smell like the animals they keep."
-key_ability: constitution
+key_ability: grit
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

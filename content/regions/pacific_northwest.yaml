@@ -1,0 +1,16 @@
+id: pacific_northwest
+name: "Pacific Northwest"
+description: |
+  You came from somewhere in the wider Pacific Northwest — maybe the rain-soaked
+  ruins of Seattle, maybe the fog-choked fishing towns along the coast. You're
+  quick on your feet and quicker with your tongue, but the soft living of the
+  temperate zone left you less hardened than those from harsher lands.
+modifiers:
+  quickness: 1
+  flair: 2
+  brutality: -1
+  grit: -1
+  reasoning: -1
+traits:
+  - silver_tongued
+  - nature_adapted

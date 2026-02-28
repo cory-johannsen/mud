@@ -3,14 +3,14 @@ package character
 
 import "time"
 
-// AbilityScores holds the six PF2E ability score values for a character.
+// AbilityScores holds the six ability score values for a character.
 type AbilityScores struct {
-	Strength     int
-	Dexterity    int
-	Constitution int
-	Intelligence int
-	Wisdom       int
-	Charisma     int
+	Brutality int
+	Grit      int
+	Quickness int
+	Reasoning int
+	Savvy     int
+	Flair     int
 }
 
 // Modifier returns the PF2E ability modifier for a given score: (score - 10) / 2.

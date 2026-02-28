@@ -2,7 +2,7 @@ id: hippie
 name: Hippie
 archetype: nerd
 description: "A spiritual seeker, a free spirit, and a lover of all things natural. Portland's collapse only confirmed what they already knew."
-key_ability: intelligence
+key_ability: reasoning
 hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained

@@ -2,7 +2,7 @@ id: beggar
 name: Beggar
 archetype: criminal
 description: "The dispossessed of Portland's ruins. Beggars survive through cunning observation and an uncanny ability to appear harmless."
-key_ability: dexterity
+key_ability: quickness
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

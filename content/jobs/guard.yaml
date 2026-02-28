@@ -2,7 +2,7 @@ id: guard
 name: Guard
 archetype: aggressor
 description: "Specializes in keeping other people in cages. Post-collapse Portland has many cages and always needs more guards."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

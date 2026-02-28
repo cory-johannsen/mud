@@ -2,7 +2,7 @@ id: illusionist
 name: Illusionist
 archetype: drifter
 description: "Masters of deception and trickery. They use their skills to manipulate the perceptions of others. Portland's ruined carnival folk."
-key_ability: constitution
+key_ability: grit
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

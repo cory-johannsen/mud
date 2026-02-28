@@ -24,9 +24,9 @@ id: old_town
 name: "Old Town"
 description: "The neon-stained ruins of Portland's oldest district."
 modifiers:
-  charisma: 2
-  dexterity: 2
-  strength: -2
+  flair: 2
+  quickness: 2
+  brutality: -2
 traits:
   - street_smart
   - scrapper
@@ -37,9 +37,9 @@ traits:
 	r := regions[0]
 	assert.Equal(t, "old_town", r.ID)
 	assert.Equal(t, "Old Town", r.Name)
-	assert.Equal(t, 2, r.Modifiers["charisma"])
-	assert.Equal(t, 2, r.Modifiers["dexterity"])
-	assert.Equal(t, -2, r.Modifiers["strength"])
+	assert.Equal(t, 2, r.Modifiers["flair"])
+	assert.Equal(t, 2, r.Modifiers["quickness"])
+	assert.Equal(t, -2, r.Modifiers["brutality"])
 	assert.Equal(t, []string{"street_smart", "scrapper"}, r.Traits)
 }
 
@@ -95,7 +95,7 @@ traits: []
 func TestLoadRegions_ActualContent(t *testing.T) {
 	regions, err := ruleset.LoadRegions("../../../content/regions")
 	require.NoError(t, err)
-	assert.Len(t, regions, 5, "expected 5 home regions")
+	assert.Len(t, regions, 11, "expected 11 home regions")
 	ids := make(map[string]bool)
 	for _, r := range regions {
 		assert.NotEmpty(t, r.ID)

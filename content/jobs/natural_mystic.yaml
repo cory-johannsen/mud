@@ -2,7 +2,7 @@ id: natural_mystic
 name: Natural Mystic
 archetype: nerd
 description: "Focused on hallucinogenic substances and mastery of the natural world. Portland's ruins have their own ecosystem, and they understand it."
-key_ability: intelligence
+key_ability: reasoning
 hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained

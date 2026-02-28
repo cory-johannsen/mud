@@ -1,0 +1,17 @@
+id: mountain
+name: "Mountain"
+description: |
+  The Rockies and the high desert beyond them — a brutal, beautiful wasteland of
+  militia compounds, survivalist communes, and ghost towns buried in snow half
+  the year. You were forged by altitude and isolation, tough in body and mind
+  but rough around the edges.
+modifiers:
+  brutality: 1
+  grit: 1
+  reasoning: 1
+  savvy: 1
+  quickness: -1
+  flair: -2
+traits:
+  - mountain_hardy
+  - self_reliant

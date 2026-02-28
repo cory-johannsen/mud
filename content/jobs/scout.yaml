@@ -2,7 +2,7 @@ id: scout
 name: Scout
 archetype: drifter
 description: "The expendable masses deployed into the streets to collect information before anyone risks their more valuable assets. Scouts know this and do it anyway."
-key_ability: constitution
+key_ability: grit
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

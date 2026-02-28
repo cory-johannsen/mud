@@ -2,7 +2,7 @@ id: hired_help
 name: Hired Help
 archetype: normie
 description: "The invisible hands that keep the world turning. Hired Help are often privy to their employers' most sensitive secrets."
-key_ability: wisdom
+key_ability: savvy
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

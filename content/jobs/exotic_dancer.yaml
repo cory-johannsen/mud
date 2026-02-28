@@ -1,8 +1,8 @@
 id: exotic_dancer
 name: Exotic Dancer
 archetype: influencer
-description: "Make their money using what they've got. Experts at getting customers to reveal information. Portland's best-paid intelligence operatives."
-key_ability: charisma
+description: "Make their money using what they've got. Experts at getting customers to reveal information. Portland's best-paid reasoning operatives."
+key_ability: flair
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

@@ -2,7 +2,7 @@ id: street_fighter
 name: Street Fighter
 archetype: aggressor
 description: "Paid to beat the living hell out of each other for the enjoyment of others. Portland's underground fight circuits are brutal and profitable."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

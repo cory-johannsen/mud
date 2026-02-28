@@ -1,0 +1,15 @@
+id: midwest
+name: "Midwest"
+description: |
+  The heartland died hard and slow — grain silos became fortresses, small towns
+  became walled compounds. You grew up in the flat emptiness between collapsed
+  cities, where resourcefulness and strong convictions kept communities alive
+  long after the coasts fell apart.
+modifiers:
+  brutality: 1
+  reasoning: 1
+  quickness: -1
+  savvy: -1
+traits:
+  - resourceful
+  - stoic

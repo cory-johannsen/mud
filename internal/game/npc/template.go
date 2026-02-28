@@ -13,12 +13,12 @@ import (
 
 // Abilities holds the six core ability scores for an NPC template.
 type Abilities struct {
-	Strength     int `yaml:"strength"`
-	Dexterity    int `yaml:"dexterity"`
-	Constitution int `yaml:"constitution"`
-	Intelligence int `yaml:"intelligence"`
-	Wisdom       int `yaml:"wisdom"`
-	Charisma     int `yaml:"charisma"`
+	Brutality int `yaml:"brutality"`
+	Grit      int `yaml:"grit"`
+	Quickness int `yaml:"quickness"`
+	Reasoning int `yaml:"reasoning"`
+	Savvy     int `yaml:"savvy"`
+	Flair     int `yaml:"flair"`
 }
 
 // Template defines a reusable NPC archetype loaded from YAML.

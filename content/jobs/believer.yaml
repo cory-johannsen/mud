@@ -2,7 +2,7 @@ id: believer
 name: Believer
 archetype: nerd
 description: "Believers place their faith in a higher power above the reality around them. In post-collapse Portland, that faith is tested daily."
-key_ability: intelligence
+key_ability: reasoning
 hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained

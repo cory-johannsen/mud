@@ -6,9 +6,9 @@ max_hp: 42
 ac: 16
 perception: 8
 abilities:
-  strength: 16
-  dexterity: 14
-  constitution: 16
-  intelligence: 10
-  wisdom: 12
-  charisma: 12
+  brutality: 16
+  quickness: 14
+  grit: 16
+  reasoning: 10
+  savvy: 12
+  flair: 12

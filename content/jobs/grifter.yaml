@@ -2,7 +2,7 @@ id: grifter
 name: Grifter
 archetype: criminal
 description: "A master of deception, able to manipulate others into doing their bidding. The long con is an art form in Portland's ruins."
-key_ability: dexterity
+key_ability: quickness
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

@@ -2,7 +2,7 @@ id: maker
 name: Maker
 archetype: normie
 description: "Makers build the things that everybody needs. Their level of skill and the reliability of the manufactured goods varies wildly."
-key_ability: wisdom
+key_ability: savvy
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

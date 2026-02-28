@@ -8,12 +8,12 @@ perception: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:
-  strength: 14
-  dexterity: 16
-  constitution: 14
-  intelligence: 10
-  wisdom: 9
-  charisma: 12
+  brutality: 14
+  quickness: 16
+  grit: 14
+  reasoning: 10
+  savvy: 9
+  flair: 12
 loot:
   currency:
     min: 25

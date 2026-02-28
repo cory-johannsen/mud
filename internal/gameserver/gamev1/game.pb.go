@@ -1750,12 +1750,12 @@ type CharacterInfo struct {
 	Experience    int32                  `protobuf:"varint,6,opt,name=experience,proto3" json:"experience,omitempty"`
 	MaxHp         int32                  `protobuf:"varint,7,opt,name=max_hp,json=maxHp,proto3" json:"max_hp,omitempty"`
 	CurrentHp     int32                  `protobuf:"varint,8,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
-	Strength      int32                  `protobuf:"varint,9,opt,name=strength,proto3" json:"strength,omitempty"`
-	Dexterity     int32                  `protobuf:"varint,10,opt,name=dexterity,proto3" json:"dexterity,omitempty"`
-	Constitution  int32                  `protobuf:"varint,11,opt,name=constitution,proto3" json:"constitution,omitempty"`
-	Intelligence  int32                  `protobuf:"varint,12,opt,name=intelligence,proto3" json:"intelligence,omitempty"`
-	Wisdom        int32                  `protobuf:"varint,13,opt,name=wisdom,proto3" json:"wisdom,omitempty"`
-	Charisma      int32                  `protobuf:"varint,14,opt,name=charisma,proto3" json:"charisma,omitempty"`
+	Brutality     int32                  `protobuf:"varint,9,opt,name=brutality,proto3" json:"brutality,omitempty"`
+	Quickness     int32                  `protobuf:"varint,10,opt,name=quickness,proto3" json:"quickness,omitempty"`
+	Grit          int32                  `protobuf:"varint,11,opt,name=grit,proto3" json:"grit,omitempty"`
+	Reasoning     int32                  `protobuf:"varint,12,opt,name=reasoning,proto3" json:"reasoning,omitempty"`
+	Savvy         int32                  `protobuf:"varint,13,opt,name=savvy,proto3" json:"savvy,omitempty"`
+	Flair         int32                  `protobuf:"varint,14,opt,name=flair,proto3" json:"flair,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1846,44 +1846,44 @@ func (x *CharacterInfo) GetCurrentHp() int32 {
 	return 0
 }
 
-func (x *CharacterInfo) GetStrength() int32 {
+func (x *CharacterInfo) GetBrutality() int32 {
 	if x != nil {
-		return x.Strength
+		return x.Brutality
 	}
 	return 0
 }
 
-func (x *CharacterInfo) GetDexterity() int32 {
+func (x *CharacterInfo) GetQuickness() int32 {
 	if x != nil {
-		return x.Dexterity
+		return x.Quickness
 	}
 	return 0
 }
 
-func (x *CharacterInfo) GetConstitution() int32 {
+func (x *CharacterInfo) GetGrit() int32 {
 	if x != nil {
-		return x.Constitution
+		return x.Grit
 	}
 	return 0
 }
 
-func (x *CharacterInfo) GetIntelligence() int32 {
+func (x *CharacterInfo) GetReasoning() int32 {
 	if x != nil {
-		return x.Intelligence
+		return x.Reasoning
 	}
 	return 0
 }
 
-func (x *CharacterInfo) GetWisdom() int32 {
+func (x *CharacterInfo) GetSavvy() int32 {
 	if x != nil {
-		return x.Wisdom
+		return x.Savvy
 	}
 	return 0
 }
 
-func (x *CharacterInfo) GetCharisma() int32 {
+func (x *CharacterInfo) GetFlair() int32 {
 	if x != nil {
-		return x.Charisma
+		return x.Flair
 	}
 	return 0
 }
@@ -3403,7 +3403,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"ErrorEvent\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"&\n" +
 	"\fDisconnected\x12\x16\n" +
-	"\x06reason\x18\x01 \x01(\tR\x06reason\"\x96\x03\n" +
+	"\x06reason\x18\x01 \x01(\tR\x06reason\"\xfa\x02\n" +
 	"\rCharacterInfo\x12!\n" +
 	"\fcharacter_id\x18\x01 \x01(\x03R\vcharacterId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
@@ -3415,14 +3415,14 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"experience\x12\x15\n" +
 	"\x06max_hp\x18\a \x01(\x05R\x05maxHp\x12\x1d\n" +
 	"\n" +
-	"current_hp\x18\b \x01(\x05R\tcurrentHp\x12\x1a\n" +
-	"\bstrength\x18\t \x01(\x05R\bstrength\x12\x1c\n" +
-	"\tdexterity\x18\n" +
-	" \x01(\x05R\tdexterity\x12\"\n" +
-	"\fconstitution\x18\v \x01(\x05R\fconstitution\x12\"\n" +
-	"\fintelligence\x18\f \x01(\x05R\fintelligence\x12\x16\n" +
-	"\x06wisdom\x18\r \x01(\x05R\x06wisdom\x12\x1a\n" +
-	"\bcharisma\x18\x0e \x01(\x05R\bcharisma\">\n" +
+	"current_hp\x18\b \x01(\x05R\tcurrentHp\x12\x1c\n" +
+	"\tbrutality\x18\t \x01(\x05R\tbrutality\x12\x1c\n" +
+	"\tquickness\x18\n" +
+	" \x01(\x05R\tquickness\x12\x12\n" +
+	"\x04grit\x18\v \x01(\x05R\x04grit\x12\x1c\n" +
+	"\treasoning\x18\f \x01(\x05R\treasoning\x12\x14\n" +
+	"\x05savvy\x18\r \x01(\x05R\x05savvy\x12\x14\n" +
+	"\x05flair\x18\x0e \x01(\x05R\x05flair\">\n" +
 	"\aNpcInfo\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +

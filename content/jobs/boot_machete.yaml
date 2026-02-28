@@ -3,7 +3,7 @@ name: Boot (Machete)
 archetype: aggressor
 team: machete
 description: "Grunt soldiers of the Machete team. Boots believe that any weapon — especially a machete — is a tool of liberation."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

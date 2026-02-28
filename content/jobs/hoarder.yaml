@@ -2,7 +2,7 @@ id: hoarder
 name: Hoarder
 archetype: nerd
 description: "Prizes knowledge above all else, even when that's stupid. Portland's ruined libraries are their cathedrals."
-key_ability: intelligence
+key_ability: reasoning
 hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained

@@ -3,7 +3,7 @@ name: Antifa
 archetype: influencer
 team: machete
 description: "Direct action is the only action. Antifa operatives organize the dispossessed and fight fascists wherever they find them."
-key_ability: charisma
+key_ability: flair
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

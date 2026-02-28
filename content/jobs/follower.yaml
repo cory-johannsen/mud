@@ -2,7 +2,7 @@ id: follower
 name: Follower
 archetype: influencer
 description: "Dedicated their life and fortune to a person or cause without consideration for whether that's a good idea. Incredibly deep knowledge of their subject."
-key_ability: charisma
+key_ability: flair
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

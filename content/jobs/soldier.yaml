@@ -2,7 +2,7 @@ id: soldier
 name: Soldier
 archetype: aggressor
 description: "Professional fighters, trained to fight in a specific way. Focus on solving problems with overwhelming force."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

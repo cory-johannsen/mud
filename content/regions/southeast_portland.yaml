@@ -5,9 +5,9 @@ description: |
   between burnt-out condos, mutual aid networks that outlasted every government.
   You learned to endure and adapt before anything else.
 modifiers:
-  constitution: 2
-  dexterity: 2
-  intelligence: -2
+  grit: 2
+  quickness: 2
+  reasoning: -2
 traits:
   - survivor
   - community_ties

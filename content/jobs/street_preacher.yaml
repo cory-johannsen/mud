@@ -2,7 +2,7 @@ id: street_preacher
 name: Street Preacher
 archetype: drifter
 description: "Wanders the urban landscape screaming semi-coherently about weird beliefs to everyone around them. Exclusively loners. Surprisingly hard to kill."
-key_ability: constitution
+key_ability: grit
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

@@ -3,7 +3,7 @@ name: Boot (Gun)
 archetype: aggressor
 team: gun
 description: "Grunt soldiers of the Gun team. Boots believe that firearms are the most elegant solution to every problem life presents."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

@@ -2,7 +2,7 @@ id: engineer
 name: Engineer
 archetype: nerd
 description: "Designs and builds complex things. Lacks interpersonal abilities. Portland's infrastructure desperately needs them."
-key_ability: intelligence
+key_ability: reasoning
 hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained

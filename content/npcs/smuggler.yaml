@@ -8,12 +8,12 @@ perception: 7
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:
-  strength: 10
-  dexterity: 15
-  constitution: 12
-  intelligence: 12
-  wisdom: 9
-  charisma: 14
+  brutality: 10
+  quickness: 15
+  grit: 12
+  reasoning: 12
+  savvy: 9
+  flair: 14
 loot:
   currency:
     min: 25

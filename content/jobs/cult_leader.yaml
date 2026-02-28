@@ -2,7 +2,7 @@ id: cult_leader
 name: Cult Leader
 archetype: normie
 description: "A charismatic freak who has amassed a following they intend to abuse in some way. Portland has no shortage of people desperate enough to follow."
-key_ability: wisdom
+key_ability: savvy
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

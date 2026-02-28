@@ -3,7 +3,7 @@ name: Libertarian
 archetype: influencer
 team: gun
 description: "You are correct about everything and nobody can question that. Libertarians have dedicated themselves to the proposition that the only true authority is the self."
-key_ability: charisma
+key_ability: flair
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

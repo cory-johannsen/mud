@@ -2,7 +2,7 @@ id: stalker
 name: Stalker
 archetype: drifter
 description: "Specialize in obsessively tracking down and capturing or killing their prey. Portland's ruins are excellent hunting grounds."
-key_ability: constitution
+key_ability: grit
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

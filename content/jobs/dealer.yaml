@@ -2,7 +2,7 @@ id: dealer
 name: Dealer
 archetype: drifter
 description: "Blends folk medicine, traditional healing practices, and heavy drugs to solve problems. Portland's underground pharmacists."
-key_ability: constitution
+key_ability: grit
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained

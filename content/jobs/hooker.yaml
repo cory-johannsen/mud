@@ -2,7 +2,7 @@ id: hooker
 name: Hooker
 archetype: criminal
 description: "Make their money the hard way. Some are really good, and make a lot of money. All of them know where the bodies are buried."
-key_ability: dexterity
+key_ability: quickness
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

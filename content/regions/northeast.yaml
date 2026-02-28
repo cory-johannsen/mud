@@ -1,0 +1,17 @@
+id: northeast
+name: "Northeast"
+description: |
+  The great cities of the eastern seaboard — Boston, New York, Philadelphia —
+  collapsed into dense urban warscapes where vertical living became vertical
+  warfare. You survived by being fast, clever, and tough enough to endure the
+  brutal winters in crumbling high-rises.
+modifiers:
+  quickness: 1
+  reasoning: 1
+  savvy: 1
+  brutality: -1
+  grit: -1
+  flair: -1
+traits:
+  - street_smart
+  - cold_adapted

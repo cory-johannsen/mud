@@ -254,8 +254,8 @@ func FormatCharacterStats(c *character.Character) string {
 	sb.WriteString(fmt.Sprintf("  Name:   %s%s%s\r\n", telnet.BrightWhite, c.Name, telnet.Reset))
 	sb.WriteString(fmt.Sprintf("  Region: %s   Class: %s   Level: %d\r\n", c.Region, c.Class, c.Level))
 	sb.WriteString(fmt.Sprintf("  HP:     %d/%d\r\n", c.CurrentHP, c.MaxHP))
-	sb.WriteString(fmt.Sprintf("  STR:%2d  DEX:%2d  CON:%2d  INT:%2d  WIS:%2d  CHA:%2d\r\n",
-		c.Abilities.Strength, c.Abilities.Dexterity, c.Abilities.Constitution,
-		c.Abilities.Intelligence, c.Abilities.Wisdom, c.Abilities.Charisma))
+	sb.WriteString(fmt.Sprintf("  BRT:%2d  QCK:%2d  GRT:%2d  RSN:%2d  SAV:%2d  FLR:%2d\r\n",
+		c.Abilities.Brutality, c.Abilities.Quickness, c.Abilities.Grit,
+		c.Abilities.Reasoning, c.Abilities.Savvy, c.Abilities.Flair))
 	return sb.String()
 }

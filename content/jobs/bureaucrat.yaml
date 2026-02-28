@@ -2,7 +2,7 @@ id: bureaucrat
 name: Bureaucrat
 archetype: influencer
 description: "Even in ruins, someone has to manage the paperwork. Bureaucrats navigate the complex web of regulations that somehow survived the collapse."
-key_ability: charisma
+key_ability: flair
 hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained

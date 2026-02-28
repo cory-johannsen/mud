@@ -1,0 +1,15 @@
+id: south
+name: "South"
+description: |
+  The American South — swamp-drowned cities, fortified plantation compounds, and
+  endless stretches of overgrown highway. The heat and humidity breed a particular
+  kind of toughness. You're built like a brick wall but not known for your
+  finesse or your charm.
+modifiers:
+  brutality: 1
+  grit: 2
+  quickness: -2
+  flair: -1
+traits:
+  - heat_hardened
+  - enduring

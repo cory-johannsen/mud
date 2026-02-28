@@ -2,7 +2,7 @@ id: grunt
 name: Grunt
 archetype: aggressor
 description: "The bottom of the professional hierarchy. Grunts do the work nobody else wants to do, and they've gotten surprisingly good at it."
-key_ability: strength
+key_ability: brutality
 hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained
