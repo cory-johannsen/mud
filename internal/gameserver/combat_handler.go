@@ -520,6 +520,15 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 
 	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater)
 
+	// Reset per-round loadout swap flag for all players in this combat.
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindPlayer {
+			if sess, found := h.sessions.GetPlayer(c.ID); found && sess.LoadoutSet != nil {
+				sess.LoadoutSet.ResetRound()
+			}
+		}
+	}
+
 	var events []*gamev1.CombatEvent
 	for _, re := range roundEvents {
 		events = append(events, h.roundEventToProto(re))
