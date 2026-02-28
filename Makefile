@@ -1,4 +1,4 @@
-.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content
+.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy
 
 GO := go
 GOFLAGS := -trimpath
@@ -76,6 +76,50 @@ docker-up:
 
 docker-down:
 	docker compose -f deployments/docker/docker-compose.yml down
+
+# Kubernetes / Kind
+REGISTRY    := registry.johannsen.cloud:5000
+DB_USER     := mud
+DB_PASSWORD :=
+IMAGE_TAG   := $(shell git rev-parse --short HEAD 2>/dev/null || echo latest)
+HELM_CHART  := deployments/k8s/mud
+HELM_RELEASE := mud
+HELM_VALUES := $(HELM_CHART)/values-prod.yaml
+
+kind-up:
+	deployments/k8s/mud/scripts/cluster-up.sh
+
+kind-down:
+	deployments/k8s/mud/scripts/cluster-down.sh
+
+docker-push:
+	docker build -t $(REGISTRY)/mud-gameserver:$(IMAGE_TAG) -f deployments/docker/Dockerfile.gameserver .
+	docker push $(REGISTRY)/mud-gameserver:$(IMAGE_TAG)
+	docker build -t $(REGISTRY)/mud-frontend:$(IMAGE_TAG) -f deployments/docker/Dockerfile.frontend .
+	docker push $(REGISTRY)/mud-frontend:$(IMAGE_TAG)
+
+helm-install:
+	helm install $(HELM_RELEASE) $(HELM_CHART) \
+		--values $(HELM_VALUES) \
+		--set db.user=$(DB_USER) \
+		--set db.password=$(DB_PASSWORD) \
+		--set image.tag=$(IMAGE_TAG)
+
+helm-upgrade:
+	helm upgrade $(HELM_RELEASE) $(HELM_CHART) \
+		--values $(HELM_VALUES) \
+		--set db.user=$(DB_USER) \
+		--set db.password=$(DB_PASSWORD) \
+		--set image.tag=$(IMAGE_TAG)
+
+helm-uninstall:
+	helm uninstall $(HELM_RELEASE)
+
+k8s-up: kind-up docker-push helm-install
+
+k8s-down: helm-uninstall kind-down
+
+k8s-redeploy: docker-push helm-upgrade
 
 # Maintenance
 clean:
