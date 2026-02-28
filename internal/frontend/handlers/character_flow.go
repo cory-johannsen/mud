@@ -215,7 +215,9 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 				telnet.Yellow, trait.Name, telnet.Reset, trait.Effect))
 		}
 	}
-	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select team [1-%d]: ", len(teams)))
+	_ = conn.WriteLine(fmt.Sprintf("  %sR%s. Random (default)", telnet.Green, telnet.Reset))
+	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite,
+		"Select team [1-%d/R, default=R]: ", len(teams)))
 	teamLine, err := conn.ReadLine()
 	if err != nil {
 		return nil, fmt.Errorf("reading team selection: %w", err)
@@ -223,6 +225,12 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	teamLine = strings.TrimSpace(teamLine)
 	if strings.ToLower(teamLine) == "cancel" {
 		return nil, nil
+	}
+	if IsRandomInput(teamLine) {
+		_, team, job := RandomizeRemaining(regions, selectedRegion, teams, nil, h.jobs)
+		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
+			"Random selections: Team=%s, Job=%s", team.Name, job.Name))
+		return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, job, team)
 	}
 	teamChoice := 0
 	if _, err := fmt.Sscanf(teamLine, "%d", &teamChoice); err != nil || teamChoice < 1 || teamChoice > len(teams) {
@@ -238,7 +246,8 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 			availableJobs = append(availableJobs, j)
 		}
 	}
-	_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow, "\r\nChoose your job (%s jobs available):", selectedTeam.Name))
+	_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow,
+		"\r\nChoose your job (%s jobs available):", selectedTeam.Name))
 	for i, j := range availableJobs {
 		exclusive := ""
 		if j.Team != "" {
@@ -250,7 +259,9 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 			j.HitPointsPerLevel, j.KeyAbility,
 			j.Description))
 	}
-	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select job [1-%d]: ", len(availableJobs)))
+	_ = conn.WriteLine(fmt.Sprintf("  %sR%s. Random (default)", telnet.Green, telnet.Reset))
+	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite,
+		"Select job [1-%d/R, default=R]: ", len(availableJobs)))
 	jobLine, err := conn.ReadLine()
 	if err != nil {
 		return nil, fmt.Errorf("reading job selection: %w", err)
@@ -259,12 +270,18 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	if strings.ToLower(jobLine) == "cancel" {
 		return nil, nil
 	}
-	jobChoice := 0
-	if _, err := fmt.Sscanf(jobLine, "%d", &jobChoice); err != nil || jobChoice < 1 || jobChoice > len(availableJobs) {
-		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
-		return nil, nil
+	var selectedJob *ruleset.Job
+	if IsRandomInput(jobLine) {
+		selectedJob = availableJobs[rand.Intn(len(availableJobs))]
+		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "Random job selected: %s", selectedJob.Name))
+	} else {
+		jobChoice := 0
+		if _, err := fmt.Sscanf(jobLine, "%d", &jobChoice); err != nil || jobChoice < 1 || jobChoice > len(availableJobs) {
+			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
+			return nil, nil
+		}
+		selectedJob = availableJobs[jobChoice-1]
 	}
-	selectedJob := availableJobs[jobChoice-1]
 
 	return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, selectedJob, selectedTeam)
 }
