@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mud-migrate
+  namespace: mud
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres.mud.svc.cluster.local -U $(DB_USER); do
+                echo "waiting for postgres..."; sleep 2;
+              done
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mud-credentials
+                  key: db-user
+      containers:
+        - name: migrate
+          image: {{ .Values.image.registry }}/{{ .Values.image.frontendRepository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/migrate
+            - -config
+            - /configs/dev.yaml
+          env:
+            - name: MUD_DATABASE_HOST
+              value: postgres.mud.svc.cluster.local
+            - name: MUD_DATABASE_PORT
+              value: "5432"
+            - name: MUD_DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mud-credentials
+                  key: db-user
+            - name: MUD_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mud-credentials
+                  key: db-password
+            - name: MUD_DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: mud-credentials
+                  key: db-name
