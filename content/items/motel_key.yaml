@@ -1,0 +1,8 @@
+id: motel_key
+name: Motel Key
+description: A bent motel room key. The plastic tag is cracked and the room number is worn away.
+kind: junk
+weight: 0.1
+stackable: true
+max_stack: 10
+value: 3

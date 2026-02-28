@@ -1,0 +1,454 @@
+zone:
+  id: felony_flats
+  name: "Felony Flats"
+  description: "The sprawl of SE 82nd Avenue and its surrounding blocks — a wasteland of burned-out strip malls, fortified motels, and desperate survivors clinging to the hustle."
+  start_room: flats_82nd_ave
+  rooms:
+    - id: flats_82nd_ave
+      title: "82nd Avenue"
+      description: |
+        The wide expanse of 82nd Avenue stretches north and south, cracked
+        asphalt dotted with burned-out cars and improvised barricades.
+        Strip malls line both sides, their signs shot out or stolen.
+        This is the spine of Felony Flats — everything flows through here.
+        The air smells of diesel smoke and something chemical.
+      exits:
+        - direction: north
+          target: flats_powell_blvd
+        - direction: south
+          target: flats_foster_road
+        - direction: east
+          target: flats_strip_mall_north
+        - direction: west
+          target: flats_motel_row
+        - direction: northeast
+          target: flats_gas_station
+      spawns:
+        - template: 82nd_enforcer
+          count: 1
+          respawn_after: "5m"
+        - template: strip_mall_scav
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: exhaust
+
+    - id: flats_motel_row
+      title: "Motel Row"
+      description: |
+        A line of single-story motels stretches along the block, their
+        doors reinforced with plywood and sheet metal. Territorial markers
+        in spray paint cover every surface. Laundry lines strung between
+        rooms carry rags that might once have been clothes.
+        Someone watches from behind a curtain on the second floor.
+      exits:
+        - direction: east
+          target: flats_82nd_ave
+        - direction: south
+          target: flats_motel_courtyard
+        - direction: west
+          target: flats_motel_back_lot
+      spawns:
+        - template: motel_raider
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: hostile
+
+    - id: flats_strip_mall_north
+      title: "North Strip Mall"
+      description: |
+        A gutted strip mall with a collapsed awning. The old signage
+        is unreadable beneath layers of graffiti. A nail salon, a pawn
+        shop, and a check-cashing place — all stripped to the studs.
+        Scavengers pick through what remains with practiced efficiency.
+      exits:
+        - direction: west
+          target: flats_82nd_ave
+        - direction: south
+          target: flats_strip_mall_south
+        - direction: east
+          target: flats_parking_lot_east
+      spawns:
+        - template: strip_mall_scav
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: dusty
+
+    - id: flats_strip_mall_south
+      title: "South Strip Mall"
+      description: |
+        The southern half of the strip mall complex. A laundromat with
+        shattered front windows stands next to a former dollar store.
+        The dollar store has been converted into a crude sleeping quarters,
+        its shelves rearranged into partitions. Rats scatter at your approach.
+      exits:
+        - direction: north
+          target: flats_strip_mall_north
+        - direction: west
+          target: flats_foster_road
+        - direction: east
+          target: flats_alley_east
+      spawns:
+        - template: strip_mall_scav
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: musty
+
+    - id: flats_foster_road
+      title: "Foster Road"
+      description: |
+        Foster Road cuts diagonally through the grid, lined with dead
+        trees and collapsed power lines. The pavement is buckled from
+        years of freeze-thaw without maintenance. A faded mural on a
+        brick wall depicts a Portland that no longer exists.
+        The road narrows as it heads south toward the edge of the zone.
+      exits:
+        - direction: north
+          target: flats_82nd_ave
+        - direction: east
+          target: flats_strip_mall_south
+        - direction: south
+          target: flats_foster_south
+        - direction: west
+          target: flats_apartments_west
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: flats_johnson_creek
+      title: "Johnson Creek"
+      description: |
+        The overgrown banks of Johnson Creek form a hidden world beneath
+        tangles of blackberry and alder. The water runs brown and slow.
+        Makeshift camps are tucked into the brush — tarps and pallets
+        arranged with survivalist ingenuity. Cookfire smoke drifts
+        through the canopy like fog.
+      exits:
+        - direction: north
+          target: flats_lents_park
+        - direction: west
+          target: flats_foster_south
+      properties:
+        lighting: shaded
+        atmosphere: damp
+
+    - id: flats_powell_blvd
+      title: "Powell Boulevard"
+      description: |
+        Powell Boulevard is wide and exposed, a six-lane killing field
+        with no cover between the burned husks of fast-food restaurants.
+        The wind whips down the corridor unimpeded. To the northwest,
+        the faint outline of downtown rises through the haze.
+      exits:
+        - direction: south
+          target: flats_82nd_ave
+        - direction: west
+          target: flats_hawthorne_approach
+        - direction: east
+          target: flats_gas_station
+        - direction: north
+          target: flats_powell_overpass
+      spawns:
+        - template: 82nd_enforcer
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: flats_lents_park
+      title: "Lents Park"
+      description: |
+        What was once a neighborhood park is now an overgrown camp.
+        The baseball diamond is a firepit circle. The playground equipment
+        has been repurposed into drying racks and lookout platforms.
+        Scavengers trade and barter here under an uneasy truce.
+      exits:
+        - direction: south
+          target: flats_johnson_creek
+        - direction: west
+          target: flats_foster_south
+        - direction: north
+          target: flats_apartments_south
+      spawns:
+        - template: strip_mall_scav
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: smoke
+
+    - id: flats_jade_district
+      title: "Jade District"
+      description: |
+        The old Jade District still clings to life. Food stalls built
+        from shipping containers serve mystery-meat skewers and rice
+        cooked over propane burners. A hand-painted sign reads
+        "TRADING POST — NO WEAPONS DRAWN." It is the closest thing
+        to neutral ground in Felony Flats.
+      exits:
+        - direction: south
+          target: flats_powell_blvd
+        - direction: east
+          target: flats_parking_lot_east
+        - direction: west
+          target: flats_powell_overpass
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: flats_hawthorne_approach
+      title: "Hawthorne Approach"
+      description: |
+        The road climbs westward toward the Hawthorne district and
+        the distant towers of downtown. A crude checkpoint of stacked
+        tires and razor wire marks the border between Felony Flats
+        and the downtown core. Beyond it, different rules apply.
+      exits:
+        - direction: east
+          target: flats_powell_blvd
+        - direction: northwest
+          target: courthouse_steps
+        - direction: south
+          target: flats_apartments_west
+      properties:
+        lighting: overcast
+        atmosphere: tense
+
+    - id: flats_foster_south
+      title: "South Foster Road"
+      description: |
+        Foster Road fades into crumbling side streets at the southern
+        edge of the flats. The buildings thin out, replaced by overgrown
+        lots and rusted chain-link. Beyond lies the industrial sprawl
+        of SE Portland. A hand-lettered sign warns: "YOU ARE LEAVING
+        THE FLATS. GOOD LUCK."
+      exits:
+        - direction: north
+          target: flats_foster_road
+        - direction: east
+          target: flats_lents_park
+        - direction: south
+          target: sei_powell_terminus
+        - direction: southeast
+          target: flats_johnson_creek
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: flats_motel_courtyard
+      title: "Motel Courtyard"
+      description: |
+        A cracked concrete courtyard between two motel wings. A dead
+        swimming pool serves as a garbage pit. Someone has strung
+        christmas lights that no longer work between the balcony
+        railings. The doors to several rooms stand open, dark inside.
+      exits:
+        - direction: north
+          target: flats_motel_row
+        - direction: south
+          target: flats_apartments_west
+        - direction: east
+          target: flats_motel_back_lot
+      spawns:
+        - template: motel_raider
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: stale
+
+    - id: flats_motel_back_lot
+      title: "Motel Back Lot"
+      description: |
+        Behind the motel, a gravel lot is choked with stripped cars
+        and overflowing dumpsters. A chain-link fence topped with
+        concertina wire separates the lot from a drainage ditch.
+        Shell casings glint in the gravel.
+      exits:
+        - direction: west
+          target: flats_motel_row
+        - direction: south
+          target: flats_motel_courtyard
+      properties:
+        lighting: dim
+        atmosphere: quiet
+
+    - id: flats_parking_lot_east
+      title: "East Parking Lot"
+      description: |
+        A vast, empty parking lot stretches under the grey sky. Faded
+        paint lines are barely visible. Shopping carts lie on their
+        sides like dead animals. A watchtower cobbled from pallets
+        and corrugated tin stands in the far corner.
+      exits:
+        - direction: west
+          target: flats_strip_mall_north
+        - direction: south
+          target: flats_alley_east
+        - direction: north
+          target: flats_jade_district
+      properties:
+        lighting: exposed
+        atmosphere: open
+
+    - id: flats_alley_east
+      title: "East Alley"
+      description: |
+        A narrow alley runs behind the strip malls, hemmed in by
+        cinderblock walls tagged with gang signs. Puddles of dark
+        water fill the potholes. A fire escape ladder hangs just
+        out of reach. The alley reeks of rot and old fires.
+      exits:
+        - direction: north
+          target: flats_parking_lot_east
+        - direction: west
+          target: flats_strip_mall_south
+      properties:
+        lighting: dark
+        atmosphere: fetid
+
+    - id: flats_apartments_west
+      title: "Western Apartments"
+      description: |
+        A block of three-story apartment buildings, their stucco facades
+        crumbling and stained with water damage. Most windows are
+        boarded. A few show candlelight. The front steps of each
+        building are territorial boundaries — cross the wrong one
+        and you will know it.
+      exits:
+        - direction: east
+          target: flats_foster_road
+        - direction: north
+          target: flats_motel_courtyard
+        - direction: south
+          target: flats_hawthorne_approach
+      properties:
+        lighting: dim
+        atmosphere: wary
+
+    - id: flats_apartments_south
+      title: "Southern Apartments"
+      description: |
+        Low-slung apartment complexes border the park, their parking
+        lots converted to garden plots behind improvised fences.
+        Laundry hangs from balcony railings. Children's toys,
+        sun-bleached and cracked, litter the concrete walkways.
+        Life goes on, even here.
+      exits:
+        - direction: south
+          target: flats_lents_park
+        - direction: west
+          target: flats_pawn_shop
+        - direction: north
+          target: flats_convenience_store
+      properties:
+        lighting: overcast
+        atmosphere: domestic
+
+    - id: flats_gas_station
+      title: "Abandoned Gas Station"
+      description: |
+        A gutted gas station with its canopy collapsed on one side.
+        The pumps are long dry, but the concrete island makes decent
+        cover. The convenience store attached has been cleaned out
+        a hundred times over. Someone is living in the car wash bay.
+      exits:
+        - direction: west
+          target: flats_powell_blvd
+        - direction: southwest
+          target: flats_82nd_ave
+        - direction: south
+          target: flats_convenience_store
+      properties:
+        lighting: overcast
+        atmosphere: chemical
+
+    - id: flats_powell_overpass
+      title: "Powell Overpass"
+      description: |
+        A crumbling concrete overpass spans the old freight rail line.
+        The guardrails are gone, stolen for scrap. From here you can
+        see the full desolation of Felony Flats spread out in every
+        direction — strip malls, motels, and parking lots stretching
+        to the grey horizon.
+      exits:
+        - direction: south
+          target: flats_powell_blvd
+        - direction: east
+          target: flats_jade_district
+        - direction: north
+          target: flats_rail_yard
+      spawns:
+        - template: 82nd_enforcer
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: flats_pawn_shop
+      title: "Ruined Pawn Shop"
+      description: |
+        The pawn shop's steel security gate is bent open like a tin can.
+        Inside, empty display cases line the walls. The back room has
+        been converted into a workshop — a grinding wheel, pliers,
+        and scrap metal suggest someone is still making crude weapons
+        here. The workbench is warm to the touch.
+      exits:
+        - direction: east
+          target: flats_apartments_south
+        - direction: north
+          target: flats_convenience_store
+      spawns:
+        - template: strip_mall_scav
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: metallic
+
+    - id: flats_convenience_store
+      title: "Looted Convenience Store"
+      description: |
+        A former convenience store with its front glass long gone.
+        The shelves are bare except for dust and rat droppings.
+        A hand-scrawled menu on the wall offers "clean water" and
+        "mystery jerky" at outrageous prices. A surly figure stands
+        behind the counter made of stacked milk crates.
+      exits:
+        - direction: south
+          target: flats_apartments_south
+        - direction: north
+          target: flats_gas_station
+        - direction: west
+          target: flats_pawn_shop
+      properties:
+        lighting: dim
+        atmosphere: commercial
+
+    - id: flats_rail_yard
+      title: "Abandoned Rail Yard"
+      description: |
+        Rusted freight cars sit on overgrown tracks, their doors hanging
+        open. Some have been converted to shelters, their interiors
+        partitioned with hanging blankets. The rail ballast crunches
+        loudly underfoot, making stealth impossible. Crows line the
+        tops of the cars like sentries.
+      exits:
+        - direction: south
+          target: flats_powell_overpass
+      spawns:
+        - template: motel_raider
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: rust

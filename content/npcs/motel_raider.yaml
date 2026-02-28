@@ -1,0 +1,33 @@
+id: motel_raider
+name: Motel Raider
+description: A violent squatter who claims motel rooms by force. His eyes are wild and his knuckles are scarred.
+level: 2
+max_hp: 26
+ac: 15
+perception: 6
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 15
+  dexterity: 14
+  constitution: 13
+  intelligence: 9
+  wisdom: 9
+  charisma: 8
+loot:
+  currency:
+    min: 15
+    max: 60
+  items:
+    - item: motel_key
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2
+    - item: cheap_blade
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.1
+      min_qty: 1
+      max_qty: 1

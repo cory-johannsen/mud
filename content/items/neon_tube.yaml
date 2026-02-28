@@ -1,0 +1,8 @@
+id: neon_tube
+name: Neon Tube
+description: A salvaged neon tube, still faintly glowing. The gas inside shifts between pink and violet.
+kind: junk
+weight: 0.8
+stackable: true
+max_stack: 5
+value: 10

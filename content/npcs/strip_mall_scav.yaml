@@ -1,0 +1,29 @@
+id: strip_mall_scav
+name: Strip Mall Scav
+description: A scrappy survivor picking through strip mall ruins. She moves with nervous efficiency, stuffing salvage into a bulging pack.
+level: 1
+max_hp: 16
+ac: 13
+perception: 8
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 14
+  constitution: 12
+  intelligence: 11
+  wisdom: 14
+  charisma: 9
+loot:
+  currency:
+    min: 5
+    max: 35
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 1
+      max_qty: 3
+    - item: neon_tube
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1

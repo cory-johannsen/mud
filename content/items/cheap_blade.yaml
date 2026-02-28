@@ -1,0 +1,8 @@
+id: cheap_blade
+name: Cheap Blade
+description: A crude knife ground from a car spring. The edge is uneven but sharp enough to do damage.
+kind: weapon
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 20
