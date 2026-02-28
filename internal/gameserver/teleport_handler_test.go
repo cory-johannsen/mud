@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -16,6 +17,22 @@ type mockCharSaver struct {
 
 func (m *mockCharSaver) SaveState(_ context.Context, id int64, location string, _ int) error {
 	m.saved[id] = location
+	return nil
+}
+
+func (m *mockCharSaver) LoadWeaponPresets(_ context.Context, _ int64) (*inventory.LoadoutSet, error) {
+	return inventory.NewLoadoutSet(), nil
+}
+
+func (m *mockCharSaver) SaveWeaponPresets(_ context.Context, _ int64, _ *inventory.LoadoutSet) error {
+	return nil
+}
+
+func (m *mockCharSaver) LoadEquipment(_ context.Context, _ int64) (*inventory.Equipment, error) {
+	return inventory.NewEquipment(), nil
+}
+
+func (m *mockCharSaver) SaveEquipment(_ context.Context, _ int64, _ *inventory.Equipment) error {
 	return nil
 }
 

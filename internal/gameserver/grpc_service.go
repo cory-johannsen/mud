@@ -44,12 +44,16 @@ type AccountInfo struct {
 	Role     string
 }
 
-// CharacterSaver persists character state after a session ends.
+// CharacterSaver persists and loads character state at session boundaries.
 //
-// Precondition: id must be > 0; location must be a valid room ID.
+// Precondition: All id/characterID arguments must be > 0.
 // Postcondition: Returns nil on success or a non-nil error on failure.
 type CharacterSaver interface {
 	SaveState(ctx context.Context, id int64, location string, currentHP int) error
+	LoadWeaponPresets(ctx context.Context, characterID int64) (*inventory.LoadoutSet, error)
+	SaveWeaponPresets(ctx context.Context, characterID int64, ls *inventory.LoadoutSet) error
+	LoadEquipment(ctx context.Context, characterID int64) (*inventory.Equipment, error)
+	SaveEquipment(ctx context.Context, characterID int64, eq *inventory.Equipment) error
 }
 
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
@@ -178,6 +182,35 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		return fmt.Errorf("adding player: %w", err)
 	}
 	defer s.cleanupPlayer(uid, username)
+
+	// Load persisted equipment state if charSaver supports it.
+	if characterID > 0 && s.charSaver != nil {
+		loadCtx, loadCancel := context.WithTimeout(stream.Context(), 5*time.Second)
+		ls, lsErr := s.charSaver.LoadWeaponPresets(loadCtx, characterID)
+		loadCancel()
+		if lsErr != nil {
+			s.logger.Warn("failed to load weapon presets on login",
+				zap.String("uid", uid),
+				zap.Int64("character_id", characterID),
+				zap.Error(lsErr),
+			)
+		} else {
+			sess.LoadoutSet = ls
+		}
+
+		loadCtx2, loadCancel2 := context.WithTimeout(stream.Context(), 5*time.Second)
+		eq, eqErr := s.charSaver.LoadEquipment(loadCtx2, characterID)
+		loadCancel2()
+		if eqErr != nil {
+			s.logger.Warn("failed to load equipment on login",
+				zap.String("uid", uid),
+				zap.Int64("character_id", characterID),
+				zap.Error(eqErr),
+			)
+		} else {
+			sess.Equipment = eq
+		}
+	}
 
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
@@ -754,6 +787,26 @@ func (s *GameServiceServer) cleanupPlayer(uid, username string) {
 				zap.Int64("character_id", characterID),
 				zap.String("room", roomID),
 			)
+		}
+
+		if sess.LoadoutSet != nil {
+			if err := s.charSaver.SaveWeaponPresets(ctx, characterID, sess.LoadoutSet); err != nil {
+				s.logger.Warn("saving weapon presets on disconnect",
+					zap.String("uid", uid),
+					zap.Int64("character_id", characterID),
+					zap.Error(err),
+				)
+			}
+		}
+
+		if sess.Equipment != nil {
+			if err := s.charSaver.SaveEquipment(ctx, characterID, sess.Equipment); err != nil {
+				s.logger.Warn("saving equipment on disconnect",
+					zap.String("uid", uid),
+					zap.Int64("character_id", characterID),
+					zap.Error(err),
+				)
+			}
 		}
 	}
 
