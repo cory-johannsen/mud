@@ -19,7 +19,7 @@ spec:
             - sh
             - -c
             - |
-              until pg_isready -h postgres.mud.svc.cluster.local -U $(DB_USER); do
+              until pg_isready -h postgres.mud.svc.cluster.local -U $DB_USER; do
                 echo "waiting for postgres..."; sleep 2;
               done
           env:
