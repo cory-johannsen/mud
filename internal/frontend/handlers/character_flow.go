@@ -253,7 +253,7 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 // Returns (nil, nil) if the player declines or cancels.
 //
 // Precondition: all pointer parameters must be non-nil; accountID must be > 0.
-// Postcondition: returns persisted *character.Character or (nil, nil) on cancel/decline.
+// Postcondition: returns persisted *character.Character or (nil, nil) on cancel, decline, build failure, or storage failure.
 func (h *AuthHandler) buildAndConfirm(
 	ctx context.Context,
 	conn *telnet.Conn,
@@ -265,6 +265,7 @@ func (h *AuthHandler) buildAndConfirm(
 ) (*character.Character, error) {
 	newChar, err := character.BuildWithJob(charName, region, job, team)
 	if err != nil {
+		h.logger.Error("building character", zap.String("name", charName), zap.Error(err))
 		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error building character: %v", err))
 		return nil, nil
 	}
