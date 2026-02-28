@@ -1,0 +1,8 @@
+id: suburban_machete
+name: Suburban Machete
+description: A hedge trimmer blade bolted to a baseball bat handle.
+kind: weapon
+weight: 1.5
+stackable: false
+max_stack: 1
+value: 30

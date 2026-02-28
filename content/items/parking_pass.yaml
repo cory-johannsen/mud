@@ -1,0 +1,8 @@
+id: parking_pass
+name: Parking Pass
+description: A plastic parking pass. Still enforced. Somehow.
+kind: junk
+weight: 0.05
+stackable: true
+max_stack: 20
+value: 2

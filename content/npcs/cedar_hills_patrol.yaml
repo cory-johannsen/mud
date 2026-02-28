@@ -1,0 +1,29 @@
+id: cedar_hills_patrol
+name: Cedar Hills Patrol
+description: A young recruit in a clean uniform, nervously checking their patrol route with a walkie-talkie that may or may not work.
+level: 1
+max_hp: 18
+ac: 14
+perception: 9
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 14
+  constitution: 12
+  intelligence: 12
+  wisdom: 14
+  charisma: 10
+loot:
+  currency:
+    min: 10
+    max: 40
+  items:
+    - item: parking_pass
+      chance: 0.5
+      min_qty: 1
+      max_qty: 2
+    - item: scrap_metal
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2

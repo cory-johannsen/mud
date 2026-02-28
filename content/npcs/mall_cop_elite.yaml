@@ -1,0 +1,33 @@
+id: mall_cop_elite
+name: Mall Cop Elite
+description: A heavily armored figure in modified mall security gear, the Segway long abandoned but the authority very much intact.
+level: 3
+max_hp: 34
+ac: 16
+perception: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 16
+  dexterity: 14
+  constitution: 14
+  intelligence: 10
+  wisdom: 10
+  charisma: 10
+loot:
+  currency:
+    min: 25
+    max: 90
+  items:
+    - item: mall_badge
+      chance: 0.4
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: parking_pass
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2

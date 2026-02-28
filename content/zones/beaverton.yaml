@@ -1,0 +1,454 @@
+zone:
+  id: beaverton
+  name: "The Free State of Beaverton"
+  description: "A suburban fortress-state where strip malls serve as government buildings, mall cops enforce martial law, and parking violations carry the death penalty."
+  start_room: beav_canyon_road_east
+  rooms:
+    - id: beav_canyon_road_east
+      title: "Canyon Road East"
+      description: |
+        The eastern border of the Free State of Beaverton. A makeshift checkpoint
+        built from jersey barriers and shopping carts spans the old Canyon Road.
+        A sun-bleached banner reads "NOW ENTERING BEAVERTON — OBEY ALL POSTED SIGNS."
+        The ruins of Downtown Portland are visible to the east through the haze.
+      exits:
+        - direction: east
+          target: transit_mall
+          zone: downtown
+        - direction: west
+          target: beav_canyon_road_west
+        - direction: south
+          target: beav_beaverton_hillsdale
+      properties:
+        lighting: overcast
+        atmosphere: guarded
+
+    - id: beav_canyon_road_west
+      title: "Canyon Road West"
+      description: |
+        Canyon Road winds westward through overgrown residential neighborhoods.
+        Toppled power lines drape across the street like dead vines. Mailboxes
+        have been repurposed as message drops, each one padlocked and numbered.
+        The road ahead leads deeper into Beaverton territory.
+      exits:
+        - direction: east
+          target: beav_canyon_road_east
+        - direction: west
+          target: beav_town_center
+        - direction: north
+          target: beav_sunset_transit
+      spawns:
+        - template: beaverton_minuteman
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: quiet
+
+    - id: beav_town_center
+      title: "Beaverton Town Center — Capitol Building"
+      description: |
+        The former Beaverton Town Center mall has been converted into the seat
+        of government. The food court serves as the legislative chamber. JCPenney
+        is now the treasury. The anchor stores have become ministries. Armed mall
+        cops patrol the perimeter with an authority that would be comical if
+        the weapons weren't so real.
+      exits:
+        - direction: east
+          target: beav_canyon_road_west
+        - direction: north
+          target: beav_hall_boulevard
+        - direction: south
+          target: beav_murray_blvd
+        - direction: west
+          target: beav_food_court_command
+      spawns:
+        - template: mall_cop_elite
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: fluorescent
+        atmosphere: bureaucratic
+
+    - id: beav_food_court_command
+      title: "Food Court Command Center"
+      description: |
+        The old food court has been stripped of its plastic tables and refit
+        as a military command post. Maps of Beaverton are pinned to the Panda Express
+        menu boards. A Sbarro counter serves as the radio station. The Cinnabon
+        still works, somehow, and the smell of frosting mingles with gun oil.
+      exits:
+        - direction: east
+          target: beav_town_center
+        - direction: south
+          target: beav_parking_garage_a
+      spawns:
+        - template: mall_cop_elite
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: fluorescent
+        atmosphere: tense
+
+    - id: beav_cedar_hills
+      title: "Cedar Hills Crossing"
+      description: |
+        The old Cedar Hills Crossing shopping center has become Beaverton's
+        primary trading hub. Merchants hawk salvage from the storefronts.
+        The parking lot is a permanent bazaar of tarps and folding tables.
+        A working generator hums behind the old Trader Joe's, powering
+        a string of lights that makes this the brightest place for miles.
+      exits:
+        - direction: east
+          target: beav_walker_road
+        - direction: south
+          target: beav_hall_boulevard
+        - direction: west
+          target: beav_tv_highway_west
+        - direction: north
+          target: beav_bike_path_north
+      spawns:
+        - template: cedar_hills_patrol
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: electric
+        atmosphere: busy
+
+    - id: beav_murray_blvd
+      title: "Murray Boulevard Patrol Corridor"
+      description: |
+        Murray Boulevard stretches north-south through the heart of Beaverton.
+        The wide lanes are kept clear of debris — a rare luxury. Patrol teams
+        march in regular circuits, their boots echoing off the empty storefronts.
+        Laminated parking regulations are posted on every corner, and they
+        are enforced with lethal enthusiasm.
+      exits:
+        - direction: north
+          target: beav_town_center
+        - direction: south
+          target: beav_progress_ridge
+        - direction: east
+          target: beav_beaverton_hillsdale
+        - direction: west
+          target: beav_cul_de_sac_west
+      spawns:
+        - template: beaverton_minuteman
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: patrolled
+
+    - id: beav_nature_park
+      title: "Tualatin Hills Nature Park"
+      description: |
+        What was once a manicured nature preserve has gone feral. The trails
+        are barely visible under decades of unchecked growth. Blackberry brambles
+        form impenetrable walls. Strange sounds echo from the creek beds.
+        The Beaverton government declared this zone off-limits years ago,
+        which means it's full of everything they don't want found.
+      exits:
+        - direction: south
+          target: beav_bike_path_north
+        - direction: east
+          target: beav_sunset_transit
+      properties:
+        lighting: dim
+        atmosphere: overgrown
+
+    - id: beav_sunset_transit
+      title: "Sunset Transit Center"
+      description: |
+        The fortified Sunset Transit Center squats at the junction of old Highway 26.
+        Concrete barriers ring the station three deep. A watchtower built from
+        stacked shipping containers overlooks the western approaches. The old
+        park-and-ride is now a motor pool for Beaverton's fleet of armored
+        golf carts and modified riding mowers.
+      exits:
+        - direction: south
+          target: beav_canyon_road_west
+        - direction: west
+          target: beav_nature_park
+        - direction: north
+          target: beav_neighborhood_watch_north
+      spawns:
+        - template: mall_cop_elite
+          count: 1
+          respawn_after: "5m"
+        - template: beaverton_minuteman
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: spotlight
+        atmosphere: fortified
+
+    - id: beav_tv_highway_west
+      title: "TV Highway West"
+      description: |
+        The western border of Beaverton along the old Tualatin Valley Highway.
+        A checkpoint even more elaborate than the eastern one blocks the road.
+        Concrete bollards, razor wire, and a hand-painted sign warning
+        "YOU ARE LEAVING CIVILIZATION" mark the boundary. Beyond lies Aloha,
+        and whatever Aloha has become.
+      exits:
+        - direction: west
+          target: aloha_tv_highway_east
+          zone: aloha
+        - direction: east
+          target: beav_cedar_hills
+      spawns:
+        - template: beaverton_minuteman
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: guarded
+
+    - id: beav_progress_ridge
+      title: "Progress Ridge Lookout"
+      description: |
+        The southern edge of Beaverton rises to a low ridge with views across
+        the Tualatin Valley. An observation post has been built atop the old
+        Progress Ridge TownSquare sign. Spotters with binoculars watch the
+        southern approaches. On clear days you can see the fires burning
+        in Tigard. On most days, it's just grey.
+      exits:
+        - direction: north
+          target: beav_murray_blvd
+        - direction: east
+          target: beav_scholls_ferry
+      spawns:
+        - template: cedar_hills_patrol
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: windy
+
+    - id: beav_walker_road
+      title: "Walker Road Residential Patrol"
+      description: |
+        A once-quiet residential street now serves as a secondary patrol route.
+        The houses are mostly intact — a rarity. Lawns have gone to seed but
+        the structures stand. Neighborhood watch signs are everywhere, and
+        unlike the old days, the watchers are armed and alert. A checkpoint
+        log hangs from a lamppost, meticulously maintained.
+      exits:
+        - direction: west
+          target: beav_cedar_hills
+        - direction: south
+          target: beav_hall_boulevard
+        - direction: east
+          target: beav_neighborhood_watch_east
+      spawns:
+        - template: beaverton_minuteman
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: suburban
+
+    - id: beav_hall_boulevard
+      title: "Hall Boulevard"
+      description: |
+        Hall Boulevard runs through Beaverton's administrative core. The old
+        city hall building has been reinforced with sandbags and sheet metal.
+        A flagpole flies the Beaverton flag — a shopping cart on a field of
+        parking-lot grey. Administrative notices flutter from every surface,
+        each one stamped with an official seal.
+      exits:
+        - direction: south
+          target: beav_town_center
+        - direction: north
+          target: beav_cedar_hills
+        - direction: west
+          target: beav_walker_road
+      properties:
+        lighting: overcast
+        atmosphere: official
+
+    - id: beav_parking_garage_a
+      title: "Parking Structure Alpha"
+      description: |
+        A multi-level parking garage repurposed as barracks and armory. Each
+        level serves a different function — ground floor is motor pool, second
+        floor is bunks, third floor is the armory, and the roof is a sniper
+        post. Faded parking space numbers still mark each bunk assignment.
+        Your parking level determines your rank.
+      exits:
+        - direction: north
+          target: beav_food_court_command
+        - direction: east
+          target: beav_parking_garage_b
+      spawns:
+        - template: mall_cop_elite
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: echoing
+
+    - id: beav_parking_garage_b
+      title: "Parking Structure Bravo"
+      description: |
+        The second of Beaverton's fortified garages. This one serves as the
+        motor vehicle department and, by extension, the court system. Parking
+        violations are tried on level two. Sentencing happens on level three.
+        A faded "Your ticket is your receipt" sign hangs over the judge's bench,
+        which is an old toll booth.
+      exits:
+        - direction: west
+          target: beav_parking_garage_a
+        - direction: south
+          target: beav_murray_blvd
+      properties:
+        lighting: dim
+        atmosphere: judicial
+
+    - id: beav_cul_de_sac_west
+      title: "Westside Cul-de-Sac Compound"
+      description: |
+        A residential cul-de-sac has been converted into a fortified compound.
+        The houses form a natural defensive ring. The center island, once home
+        to a decorative tree, now holds a rain-collection cistern and a communal
+        fire pit. Laundry lines connect the houses like a spider's web.
+        Children's toys rust in the yards beside weapon racks.
+      exits:
+        - direction: east
+          target: beav_murray_blvd
+        - direction: north
+          target: beav_hoa_court
+      properties:
+        lighting: firelight
+        atmosphere: domestic
+
+    - id: beav_hoa_court
+      title: "HOA Court of Justice"
+      description: |
+        The old homeowner's association clubhouse has been elevated to the
+        status of high court. Disputes over fence height, lawn maintenance,
+        and unauthorized paint colors are settled here with grim finality.
+        The HOA bylaws, laminated and posted on every wall, carry the force
+        of constitutional law. Violators are sentenced to parking duty.
+      exits:
+        - direction: south
+          target: beav_cul_de_sac_west
+        - direction: east
+          target: beav_hall_boulevard
+      properties:
+        lighting: fluorescent
+        atmosphere: officious
+
+    - id: beav_bike_path_north
+      title: "Fanno Creek Trail Patrol"
+      description: |
+        The old Fanno Creek multi-use path has become a patrol route and
+        supply line. The creek itself is choked with debris but still flows.
+        Patrol teams on salvaged bicycles ride circuits along the path,
+        their spoke-mounted playing cards clicking a warning of their approach.
+      exits:
+        - direction: south
+          target: beav_cedar_hills
+        - direction: north
+          target: beav_nature_park
+        - direction: east
+          target: beav_neighborhood_watch_north
+      spawns:
+        - template: cedar_hills_patrol
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: open
+
+    - id: beav_neighborhood_watch_north
+      title: "Neighborhood Watch Post North"
+      description: |
+        A fortified watch post at the northern edge of settled Beaverton.
+        Built from a converted two-story house, the upper windows have been
+        enlarged into observation slits. A hand-cranked siren sits on the roof.
+        The watch log, maintained in a three-ring binder, records every
+        movement in meticulous detail.
+      exits:
+        - direction: south
+          target: beav_sunset_transit
+        - direction: west
+          target: beav_bike_path_north
+      properties:
+        lighting: dim
+        atmosphere: vigilant
+
+    - id: beav_neighborhood_watch_east
+      title: "Neighborhood Watch Post East"
+      description: |
+        An eastern watch station overlooking the approaches from the canyon.
+        The post is built into an old Starbucks drive-through, the menu board
+        replaced with a duty roster. The drive-through window makes an
+        excellent observation port. Cold coffee is still served, brewed from
+        hoarded pre-collapse beans that are almost certainly just dirt by now.
+      exits:
+        - direction: west
+          target: beav_walker_road
+        - direction: south
+          target: beav_beaverton_hillsdale
+      properties:
+        lighting: dim
+        atmosphere: watchful
+
+    - id: beav_beaverton_hillsdale
+      title: "Beaverton-Hillsdale Highway"
+      description: |
+        The old Beaverton-Hillsdale Highway cuts through the southeastern
+        edge of the Free State. The road is cratered and overgrown but still
+        passable. Wrecked cars have been pushed to the shoulders to form
+        makeshift walls. Territorial markers — parking meters driven into
+        the ground like fence posts — line both sides.
+      exits:
+        - direction: north
+          target: beav_canyon_road_east
+        - direction: west
+          target: beav_murray_blvd
+        - direction: northeast
+          target: beav_neighborhood_watch_east
+      properties:
+        lighting: overcast
+        atmosphere: exposed
+
+    - id: beav_scholls_ferry
+      title: "Scholls Ferry Crossing"
+      description: |
+        The old Scholls Ferry Road intersection has become an informal
+        trading post at the southern fringe of Beaverton control. Travelers
+        from the south bring news and salvage. A hand-lettered price list
+        nailed to a stop sign establishes exchange rates. Everything is
+        priced in parking tokens, the unofficial currency of the Free State.
+      exits:
+        - direction: west
+          target: beav_progress_ridge
+        - direction: north
+          target: beav_cul_de_sac_south
+      properties:
+        lighting: overcast
+        atmosphere: commercial
+
+    - id: beav_cul_de_sac_south
+      title: "Southside Cul-de-Sac Compound"
+      description: |
+        Another fortified cul-de-sac, this one on Beaverton's southern edge.
+        The residents here are more weathered than their western counterparts,
+        having borne the brunt of raids from the south. Garden beds grow
+        between sandbag walls. A hand-painted mural on one garage door
+        depicts a golden shopping cart ascending into heaven.
+      exits:
+        - direction: south
+          target: beav_scholls_ferry
+        - direction: west
+          target: beav_progress_ridge
+      spawns:
+        - template: beaverton_minuteman
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: wary

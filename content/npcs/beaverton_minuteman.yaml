@@ -1,0 +1,33 @@
+id: beaverton_minuteman
+name: Beaverton Minuteman
+description: A suburbanite in camo cargo shorts and a tactical vest, gripping a homemade weapon with determined inexperience.
+level: 2
+max_hp: 24
+ac: 15
+perception: 7
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 14
+  dexterity: 12
+  constitution: 15
+  intelligence: 10
+  wisdom: 12
+  charisma: 9
+loot:
+  currency:
+    min: 15
+    max: 65
+  items:
+    - item: suburban_machete
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.4
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1

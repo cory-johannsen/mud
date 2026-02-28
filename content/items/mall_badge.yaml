@@ -1,0 +1,8 @@
+id: mall_badge
+name: Mall Badge
+description: A laminated mall security badge with a faded photo.
+kind: junk
+weight: 0.1
+stackable: true
+max_stack: 5
+value: 12
