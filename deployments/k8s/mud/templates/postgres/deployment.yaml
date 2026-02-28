@@ -49,5 +49,11 @@ spec:
               mountPath: /var/lib/postgresql/data
       volumes:
         - name: data
+          {{- if .Values.postgres.hostPath }}
+          hostPath:
+            path: {{ .Values.postgres.hostPath }}
+            type: DirectoryOrCreate
+          {{- else }}
           persistentVolumeClaim:
             claimName: postgres-data
+          {{- end }}

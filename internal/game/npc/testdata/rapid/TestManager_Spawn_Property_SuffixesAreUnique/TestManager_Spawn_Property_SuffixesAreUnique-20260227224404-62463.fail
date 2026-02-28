@@ -1,0 +1,83 @@
+# 2026/02/27 22:44:04.602417 [TestManager_Spawn_Property_SuffixesAreUnique] [rapid] draw n: 8
+# 2026/02/27 22:44:04.602458 [TestManager_Spawn_Property_SuffixesAreUnique] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:359
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:343
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Should be false
+# 	Test:       	TestManager_Spawn_Property_SuffixesAreUnique
+# 	Messages:   	duplicate name: G
+# 2026/02/27 22:44:04.602489 [TestManager_Spawn_Property_SuffixesAreUnique] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:359
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:343
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Should be false
+# 	Test:       	TestManager_Spawn_Property_SuffixesAreUnique
+# 	Messages:   	duplicate name: G
+# 2026/02/27 22:44:04.602518 [TestManager_Spawn_Property_SuffixesAreUnique] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:359
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:343
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Should be false
+# 	Test:       	TestManager_Spawn_Property_SuffixesAreUnique
+# 	Messages:   	duplicate name: G
+# 2026/02/27 22:44:04.602544 [TestManager_Spawn_Property_SuffixesAreUnique] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:359
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:343
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Should be false
+# 	Test:       	TestManager_Spawn_Property_SuffixesAreUnique
+# 	Messages:   	duplicate name: G
+# 2026/02/27 22:44:04.602850 [TestManager_Spawn_Property_SuffixesAreUnique] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:359
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:343
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Should be false
+# 	Test:       	TestManager_Spawn_Property_SuffixesAreUnique
+# 	Messages:   	duplicate name: G
+# 2026/02/27 22:44:04.603091 [TestManager_Spawn_Property_SuffixesAreUnique] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:359
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:343
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Should be false
+# 	Test:       	TestManager_Spawn_Property_SuffixesAreUnique
+# 	Messages:   	duplicate name: G
+# 2026/02/27 22:44:04.603122 [TestManager_Spawn_Property_SuffixesAreUnique] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:359
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/npc/npc_test.go:343
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Should be false
+# 	Test:       	TestManager_Spawn_Property_SuffixesAreUnique
+# 	Messages:   	duplicate name: G
+# 
+v0.4.8#3098174209941608925
+0x159b06bf07093a
+0x177e395fa0adac
+0x7

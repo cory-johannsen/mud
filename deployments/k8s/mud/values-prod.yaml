@@ -3,3 +3,6 @@
 logging:
   level: info
   format: json
+
+postgres:
+  hostPath: /mnt/nas_storage/gunchete/pgdata

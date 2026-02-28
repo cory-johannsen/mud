@@ -14,6 +14,7 @@ db:
 postgres:
   storage: 5Gi
   storageClass: ""   # empty uses the cluster default StorageClass
+  hostPath: ""       # if set, use a hostPath volume at this path instead of a PVC
   resources:
     requests:
       cpu: 100m
