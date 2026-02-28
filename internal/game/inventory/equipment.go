@@ -39,10 +39,10 @@ const (
 	SlotRing10 AccessorySlot = "ring_10"
 )
 
-// EquippedArmorItem records an equipped armor or accessory item.
+// SlottedItem records an item occupying any equipment slot (armor or accessory).
 // Full item definitions will be populated in feature #4 (weapon and armor library).
 // For now only the item definition ID and display name are stored.
-type EquippedArmorItem struct {
+type SlottedItem struct {
 	// ItemDefID is the unique item definition identifier.
 	ItemDefID string
 	// Name is the display name shown to the player.
@@ -53,9 +53,9 @@ type EquippedArmorItem struct {
 // These slots are shared across all weapon presets.
 type Equipment struct {
 	// Armor maps each ArmorSlot to the item equipped there, or nil when empty.
-	Armor map[ArmorSlot]*EquippedArmorItem
+	Armor map[ArmorSlot]*SlottedItem
 	// Accessories maps each AccessorySlot to the item equipped there, or nil when empty.
-	Accessories map[AccessorySlot]*EquippedArmorItem
+	Accessories map[AccessorySlot]*SlottedItem
 }
 
 // NewEquipment returns an empty Equipment with initialised maps.
@@ -63,7 +63,7 @@ type Equipment struct {
 // Postcondition: Armor and Accessories are non-nil, empty maps.
 func NewEquipment() *Equipment {
 	return &Equipment{
-		Armor:       make(map[ArmorSlot]*EquippedArmorItem),
-		Accessories: make(map[AccessorySlot]*EquippedArmorItem),
+		Armor:       make(map[ArmorSlot]*SlottedItem),
+		Accessories: make(map[AccessorySlot]*SlottedItem),
 	}
 }

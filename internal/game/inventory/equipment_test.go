@@ -103,37 +103,42 @@ func TestEquipment_AccessorySlotValues(t *testing.T) {
 }
 
 func TestProperty_Equipment_ArmorSlotsAreDistinct(t *testing.T) {
+	allSlots := []inventory.ArmorSlot{
+		inventory.SlotHead, inventory.SlotLeftArm, inventory.SlotRightArm,
+		inventory.SlotTorso, inventory.SlotLeftLeg, inventory.SlotRightLeg,
+		inventory.SlotFeet,
+	}
 	rapid.Check(t, func(rt *rapid.T) {
-		seen := map[string]bool{}
-		for _, slot := range []inventory.ArmorSlot{
-			inventory.SlotHead, inventory.SlotLeftArm, inventory.SlotRightArm,
-			inventory.SlotTorso, inventory.SlotLeftLeg, inventory.SlotRightLeg,
-			inventory.SlotFeet,
-		} {
-			s := string(slot)
-			if seen[s] {
-				rt.Fatalf("duplicate armor slot value: %q", s)
-			}
-			seen[s] = true
+		// Draw two distinct indices and assert the corresponding slots have different string values.
+		i := rapid.IntRange(0, len(allSlots)-1).Draw(rt, "i")
+		j := rapid.IntRange(0, len(allSlots)-1).Draw(rt, "j")
+		if i == j {
+			return // same index is trivially the same slot — skip
+		}
+		if string(allSlots[i]) == string(allSlots[j]) {
+			rt.Fatalf("armor slots at index %d (%q) and %d (%q) have the same string value",
+				i, allSlots[i], j, allSlots[j])
 		}
 	})
 }
 
 func TestProperty_Equipment_AccessorySlotsAreDistinct(t *testing.T) {
+	allSlots := []inventory.AccessorySlot{
+		inventory.SlotNeck,
+		inventory.SlotRing1, inventory.SlotRing2, inventory.SlotRing3,
+		inventory.SlotRing4, inventory.SlotRing5, inventory.SlotRing6,
+		inventory.SlotRing7, inventory.SlotRing8, inventory.SlotRing9,
+		inventory.SlotRing10,
+	}
 	rapid.Check(t, func(rt *rapid.T) {
-		seen := map[string]bool{}
-		for _, slot := range []inventory.AccessorySlot{
-			inventory.SlotNeck,
-			inventory.SlotRing1, inventory.SlotRing2, inventory.SlotRing3,
-			inventory.SlotRing4, inventory.SlotRing5, inventory.SlotRing6,
-			inventory.SlotRing7, inventory.SlotRing8, inventory.SlotRing9,
-			inventory.SlotRing10,
-		} {
-			s := string(slot)
-			if seen[s] {
-				rt.Fatalf("duplicate accessory slot value: %q", s)
-			}
-			seen[s] = true
+		i := rapid.IntRange(0, len(allSlots)-1).Draw(rt, "i")
+		j := rapid.IntRange(0, len(allSlots)-1).Draw(rt, "j")
+		if i == j {
+			return
+		}
+		if string(allSlots[i]) == string(allSlots[j]) {
+			rt.Fatalf("accessory slots at index %d (%q) and %d (%q) have the same string value",
+				i, allSlots[i], j, allSlots[j])
 		}
 	})
 }
