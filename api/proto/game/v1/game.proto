@@ -41,6 +41,9 @@ message ClientMessage {
     BalanceRequest balance = 24;
     SetRoleRequest set_role = 25;
     TeleportRequest teleport = 26;
+    LoadoutRequest   loadout   = 27;
+    UnequipRequest   unequip   = 28;
+    EquipmentRequest equipment = 29;
   }
 }
 
@@ -276,6 +279,20 @@ message SetRoleRequest {
   string target_username = 1;
   string role = 2;
 }
+
+// LoadoutRequest displays or swaps the player's weapon presets.
+// If arg is empty, the server returns the current loadout display.
+message LoadoutRequest {
+  string arg = 1;
+}
+
+// UnequipRequest removes the item in the named slot and returns it to the backpack.
+message UnequipRequest {
+  string slot = 1;
+}
+
+// EquipmentRequest asks the server to display all equipped items.
+message EquipmentRequest {}
 
 // TeleportRequest asks the server to teleport a player to a specific room.
 message TeleportRequest {
