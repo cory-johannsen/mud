@@ -8,7 +8,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - /srv/gunchete/pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mud}"]
       interval: 5s
@@ -75,5 +75,3 @@ services:
       MUD_LOGGING_LEVEL: ${LOG_LEVEL:-info}
       MUD_LOGGING_FORMAT: json
 
-volumes:
-  pgdata:
