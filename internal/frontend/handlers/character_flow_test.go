@@ -115,23 +115,49 @@ func TestRandomNames_NonEmpty(t *testing.T) {
 
 func TestIsRandomInput(t *testing.T) {
 	cases := []struct {
+		name     string
 		input    string
 		expected bool
 	}{
-		{"", true},
-		{"r", true},
-		{"R", true},
-		{"random", true},
-		{"RANDOM", true},
-		{"1", false},
-		{"2", false},
-		{"cancel", false},
+		{"empty string", "", true},
+		{"lowercase r", "r", true},
+		{"uppercase R", "R", true},
+		{"lowercase random", "random", true},
+		{"uppercase RANDOM", "RANDOM", true},
+		{"digit 1", "1", false},
+		{"digit 2", "2", false},
+		{"cancel", "cancel", false},
+		{"padded r", "  r  ", true},
+		{"padded RANDOM", "  RANDOM  ", true},
+		{"padded spaces only", "   ", true},
 	}
 	for _, tc := range cases {
-		t.Run(tc.input, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.expected, handlers.IsRandomInput(tc.input))
 		})
 	}
+}
+
+func TestProperty_IsRandomInput_RandomKeywords(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Any string whose trimmed lowercase form is "", "r", or "random" must return true.
+		keyword := rapid.SampledFrom([]string{"", "r", "R", "random", "RANDOM", "Random"}).Draw(rt, "keyword")
+		padding := rapid.StringMatching(`\s*`).Draw(rt, "padding")
+		input := padding + keyword + padding
+		assert.True(rt, handlers.IsRandomInput(input),
+			"expected IsRandomInput(%q) to be true", input)
+	})
+}
+
+func TestProperty_IsRandomInput_OtherInputsAreFalse(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Strings that aren't blank/"r"/"random" after trim+lower must return false.
+		// Generate digit strings (1-99) — these are always non-random.
+		n := rapid.IntRange(1, 99).Draw(rt, "n")
+		input := fmt.Sprintf("%d", n)
+		assert.False(rt, handlers.IsRandomInput(input),
+			"expected IsRandomInput(%q) to be false", input)
+	})
 }
 
 func TestRandomizeRemaining_RegionFromSlice(t *testing.T) {
