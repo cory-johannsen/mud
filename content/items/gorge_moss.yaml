@@ -1,0 +1,8 @@
+id: gorge_moss
+name: Gorge Moss
+description: Thick green moss scraped from gorge rocks. Has mild medicinal properties.
+kind: consumable
+weight: 0.2
+stackable: true
+max_stack: 10
+value: 8

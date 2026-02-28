@@ -1,0 +1,29 @@
+id: gorge_runner
+name: Gorge Runner
+description: A swift-footed runner in wind-resistant gear, carrying messages through the gorge's relentless winds.
+level: 2
+max_hp: 22
+ac: 15
+perception: 10
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 9
+  dexterity: 15
+  constitution: 12
+  intelligence: 10
+  wisdom: 15
+  charisma: 10
+loot:
+  currency:
+    min: 10
+    max: 50
+  items:
+    - item: gorge_moss
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

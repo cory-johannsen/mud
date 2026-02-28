@@ -1,0 +1,8 @@
+id: wind_goggles
+name: Wind Goggles
+description: Tight-fitting goggles with leather side shields. Essential for gorge travel.
+kind: junk
+weight: 0.3
+stackable: false
+max_stack: 1
+value: 35

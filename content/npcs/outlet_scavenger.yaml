@@ -1,0 +1,29 @@
+id: outlet_scavenger
+name: Outlet Scavenger
+description: A determined scavenger in a torn windbreaker, methodically picking through outlet mall debris.
+level: 1
+max_hp: 16
+ac: 13
+perception: 7
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 14
+  constitution: 12
+  intelligence: 12
+  wisdom: 12
+  charisma: 10
+loot:
+  currency:
+    min: 5
+    max: 30
+  items:
+    - item: outlet_tag
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: scrap_metal
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2

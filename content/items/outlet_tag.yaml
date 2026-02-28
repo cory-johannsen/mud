@@ -1,0 +1,8 @@
+id: outlet_tag
+name: Outlet Tag
+description: A faded price tag from the old outlet malls. Collectors trade them.
+kind: junk
+weight: 0.05
+stackable: true
+max_stack: 20
+value: 2

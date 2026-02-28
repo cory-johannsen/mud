@@ -1,0 +1,33 @@
+id: wind_walker
+name: Wind Walker
+description: A mysterious figure who moves through the gorge winds like they aren't there, wrapped in layers of woven grass and leather.
+level: 4
+max_hp: 40
+ac: 16
+perception: 11
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 16
+  constitution: 14
+  intelligence: 12
+  wisdom: 17
+  charisma: 10
+loot:
+  currency:
+    min: 30
+    max: 100
+  items:
+    - item: wind_goggles
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+    - item: gorge_moss
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1

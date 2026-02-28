@@ -1,0 +1,450 @@
+zone:
+  id: troutdale
+  name: "Troutdale"
+  description: "Gateway to the Columbia River Gorge, where outlet mall ruins and relentless winds define a landscape of scavengers, runners, and wind mystics."
+  start_room: trout_i84_west
+  rooms:
+    - id: trout_i84_west
+      title: "I-84 Westbound On-Ramp"
+      description: |
+        The crumbling westbound on-ramp of Interstate 84 marks the edge of Troutdale.
+        Wind screams through the concrete barriers, carrying grit and the smell of the river.
+        Rusted guardrails lean outward like broken teeth. To the west, the freeway
+        disappears toward the distant haze of Vancouver.
+      exits:
+        - direction: west
+          target: vantucky_i84_east
+          zone: vantucky
+        - direction: east
+          target: trout_stark_street
+        - direction: south
+          target: trout_frontage_road
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: trout_i84_west_junction
+      title: "I-84 West Junction"
+      description: |
+        A tangled interchange where old highway ramps spiral around each other
+        like concrete serpents. Faded green signs point toward PDX International
+        to the west and the gorge to the east. The wind is slightly calmer here,
+        blocked by massive retaining walls covered in faded graffiti.
+      exits:
+        - direction: west
+          target: pdx_i84_east
+          zone: pdx_international
+        - direction: east
+          target: trout_wood_village
+        - direction: south
+          target: trout_frontage_road
+      properties:
+        lighting: overcast
+        atmosphere: sheltered
+
+    - id: trout_outlet_mall
+      title: "Outlet Mall Ruins"
+      description: |
+        The massive Columbia Gorge Outlets sprawl across cracked asphalt,
+        a cathedral of consumerism reduced to hollow storefronts and shattered glass.
+        Wind whistles through empty doorframes. Faded brand logos cling to facades
+        like ghosts of the old world. Scavengers pick through the rubble methodically.
+      exits:
+        - direction: north
+          target: trout_stark_street
+        - direction: east
+          target: trout_outlet_east_wing
+        - direction: south
+          target: trout_parking_lot
+      spawns:
+        - template: outlet_scavenger
+          count: 2
+          respawn_after: "3m"
+      properties:
+        lighting: dim
+        atmosphere: wind
+
+    - id: trout_outlet_east_wing
+      title: "Outlet Mall East Wing"
+      description: |
+        The east wing of the outlet mall is partially collapsed, roof beams
+        sagging under the weight of years. A sporting goods store still has
+        racks of mildewed clothing. Water damage has warped the floors into
+        uneven ridges. The wind moans through gaps in the walls.
+      exits:
+        - direction: west
+          target: trout_outlet_mall
+        - direction: south
+          target: trout_loading_docks
+      spawns:
+        - template: outlet_scavenger
+          count: 1
+          respawn_after: "3m"
+      properties:
+        lighting: dim
+        atmosphere: musty
+
+    - id: trout_stark_street
+      title: "Stark Street"
+      description: |
+        The main road through Troutdale is cracked and heaved by decades
+        of freeze-thaw cycles. A few structures still stand along the strip:
+        a gutted gas station, a collapsed fast-food joint, a surprisingly
+        intact brick building with boarded windows. Wind funnels down the
+        street corridor like a river of air.
+      exits:
+        - direction: west
+          target: trout_i84_west
+        - direction: east
+          target: trout_edgefield
+        - direction: south
+          target: trout_outlet_mall
+        - direction: north
+          target: trout_sandy_river
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: trout_sandy_river
+      title: "Sandy River Ford"
+      description: |
+        The Sandy River rushes over a rocky ford, swollen with glacial melt
+        from Mount Hood. The old bridge is gone, reduced to concrete stumps
+        on either bank. Crossing means wading through knee-deep water over
+        slippery stones. The current is deceptively strong.
+      exits:
+        - direction: south
+          target: trout_stark_street
+        - direction: east
+          target: trout_river_trail
+      spawns:
+        - template: gorge_runner
+          count: 1
+          respawn_after: "4m"
+      properties:
+        lighting: overcast
+        atmosphere: rushing_water
+
+    - id: trout_lewis_clark_park
+      title: "Lewis and Clark State Park"
+      description: |
+        The old state park is a tangle of overgrown campsites and rotting picnic tables.
+        Massive Douglas firs tower overhead, their branches creaking in the wind.
+        A moss-covered information kiosk still displays a faded trail map.
+        Fire rings are blackened with recent use — someone camps here.
+      exits:
+        - direction: west
+          target: trout_river_trail
+        - direction: north
+          target: trout_gorge_trail
+      properties:
+        lighting: dappled
+        atmosphere: forest
+
+    - id: trout_crown_point
+      title: "Crown Point Vista"
+      description: |
+        You stand at the edge of Crown Point, hundreds of feet above the
+        Columbia River. The wind here is ferocious, a living force that
+        tears at clothing and steals breath. The view is staggering:
+        the gorge stretches east in layers of basalt and green, the river
+        a silver ribbon far below. The ruined Vista House crumbles behind you.
+      exits:
+        - direction: south
+          target: trout_gorge_trail
+        - direction: east
+          target: trout_wind_tunnel
+      spawns:
+        - template: wind_walker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: gale
+
+    - id: trout_multnomah_falls
+      title: "Multnomah Falls"
+      description: |
+        The great waterfall plunges six hundred feet down the basalt cliff face,
+        its roar drowning out even the gorge winds. The old Benson Bridge
+        spans the lower cascade, cracked but still passable. Pilgrims leave
+        offerings on the rocks — bottle caps, wire flowers, carved stones.
+        The mist is constant and cold.
+      exits:
+        - direction: west
+          target: trout_wind_tunnel
+        - direction: north
+          target: trout_falls_overlook
+      spawns:
+        - template: wind_walker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: misty
+        atmosphere: roaring_water
+
+    - id: trout_wind_tunnel
+      title: "Wind Tunnel"
+      description: |
+        A narrow passage between towering basalt walls where the gorge wind
+        accelerates to terrifying speeds. Loose gravel rattles across the ground
+        like buckshot. You have to lean forward at a sharp angle just to make
+        progress. The walls are smooth, carved by millennia of wind erosion.
+      exits:
+        - direction: west
+          target: trout_crown_point
+        - direction: east
+          target: trout_multnomah_falls
+        - direction: south
+          target: trout_wind_shelter
+      spawns:
+        - template: gorge_runner
+          count: 1
+          respawn_after: "4m"
+      properties:
+        lighting: overcast
+        atmosphere: gale
+
+    - id: trout_edgefield
+      title: "Edgefield Compound"
+      description: |
+        The old McMenamins Edgefield sprawls across its grounds, a rambling
+        collection of buildings that once housed a hotel, brewery, and winery.
+        Now it serves as Troutdale's main settlement. Cooking fires burn in
+        the old courtyard. The brewery's copper kettles have been repurposed
+        for water purification. A hand-painted sign reads "TRADE WELCOME."
+      exits:
+        - direction: west
+          target: trout_stark_street
+        - direction: north
+          target: trout_edgefield_gardens
+        - direction: east
+          target: trout_halsey_street
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: trout_wood_village
+      title: "Wood Village Ruins"
+      description: |
+        The suburban sprawl of Wood Village is a maze of collapsed ranch houses
+        and buckled cul-de-sacs. Strip mall parking lots are forests of cracked
+        asphalt and volunteer saplings. A rusted playground stands frozen
+        mid-swing. The wind carries the metallic groan of shifting debris.
+      exits:
+        - direction: west
+          target: trout_i84_west_junction
+        - direction: east
+          target: trout_frontage_road
+        - direction: south
+          target: trout_parking_lot
+      spawns:
+        - template: outlet_scavenger
+          count: 1
+          respawn_after: "3m"
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: trout_parking_lot
+      title: "Outlet Parking Lot"
+      description: |
+        A vast expanse of fractured asphalt stretching in every direction.
+        Rusted car husks sit in neat rows like a mechanical graveyard.
+        Weeds push through every crack. Shopping carts lie on their sides,
+        wheels still turning slowly in the wind. The outlet mall looms to the north.
+      exits:
+        - direction: north
+          target: trout_outlet_mall
+        - direction: east
+          target: trout_wood_village
+        - direction: south
+          target: trout_halsey_street
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: trout_ranger_station
+      title: "Gorge Ranger Station"
+      description: |
+        A squat concrete building with narrow windows, built to withstand
+        the gorge's brutal weather. The Forest Service logo is barely visible
+        under layers of grime. Inside, topographic maps paper the walls
+        and a radio tower leans precariously from the roof. Someone has
+        fortified the entrance with sandbags.
+      exits:
+        - direction: south
+          target: trout_gorge_trail
+        - direction: east
+          target: trout_dam_overlook
+      spawns:
+        - template: gorge_runner
+          count: 1
+          respawn_after: "4m"
+      properties:
+        lighting: dim
+        atmosphere: sheltered
+
+    - id: trout_dam_overlook
+      title: "Bonneville Dam Overlook"
+      description: |
+        A crumbling overlook platform offers a distant view of the Bonneville Dam,
+        its massive concrete structure still holding back the Columbia.
+        The spillways run unchecked now, sending plumes of white water
+        into the gorge. The low hum of the turbines carries on the wind,
+        a remnant of the old world's appetite for power.
+      exits:
+        - direction: west
+          target: trout_ranger_station
+      spawns:
+        - template: wind_walker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: trout_gorge_trail
+      title: "Gorge Trail"
+      description: |
+        A narrow trail carved into the basalt cliffs, winding east along
+        the gorge wall. Exposed roots and loose scree make every step
+        treacherous. The river glints far below through gaps in the trees.
+        Trail markers, faded orange diamonds nailed to trees, still guide the way.
+      exits:
+        - direction: north
+          target: trout_ranger_station
+        - direction: south
+          target: trout_lewis_clark_park
+        - direction: east
+          target: trout_crown_point
+      spawns:
+        - template: gorge_runner
+          count: 1
+          respawn_after: "4m"
+      properties:
+        lighting: dappled
+        atmosphere: wind
+
+    - id: trout_wind_shelter
+      title: "Wind Shelter"
+      description: |
+        A natural alcove in the basalt wall offers respite from the
+        relentless gorge winds. Blackened stones mark a fire pit.
+        Scratched into the rock wall are dozens of names and dates,
+        travelers who sheltered here over the years. A tattered tarp
+        stretches across the opening, flapping violently.
+      exits:
+        - direction: north
+          target: trout_wind_tunnel
+      properties:
+        lighting: dim
+        atmosphere: sheltered
+
+    - id: trout_frontage_road
+      title: "Frontage Road"
+      description: |
+        A cracked two-lane road runs parallel to the old interstate,
+        separated by a weedy median. Chain-link fences topped with razor wire
+        border abandoned industrial lots. The wind pushes shopping bags
+        and paper trash along the gutter in endless circles.
+      exits:
+        - direction: north
+          target: trout_i84_west
+        - direction: east
+          target: trout_wood_village
+        - direction: west
+          target: trout_i84_west_junction
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: trout_river_trail
+      title: "Sandy River Trail"
+      description: |
+        A muddy trail follows the Sandy River upstream through dense
+        undergrowth. Alder and cottonwood crowd the banks, their roots
+        exposed by erosion. The river's constant rush masks all other sound.
+        Animal tracks press into the soft earth — deer, coyote, and
+        something larger.
+      exits:
+        - direction: west
+          target: trout_sandy_river
+        - direction: east
+          target: trout_lewis_clark_park
+      spawns:
+        - template: gorge_runner
+          count: 1
+          respawn_after: "4m"
+      properties:
+        lighting: dappled
+        atmosphere: forest
+
+    - id: trout_halsey_street
+      title: "Halsey Street"
+      description: |
+        A residential street turned scavenger thoroughfare. Houses with
+        caved-in roofs alternate with ones still mostly intact, their
+        windows dark. A few have been fortified with plywood and sheet metal.
+        Laundry lines strung between power poles suggest habitation.
+      exits:
+        - direction: north
+          target: trout_parking_lot
+        - direction: west
+          target: trout_edgefield
+      properties:
+        lighting: overcast
+        atmosphere: quiet
+
+    - id: trout_edgefield_gardens
+      title: "Edgefield Gardens"
+      description: |
+        The old ornamental gardens of Edgefield have gone feral and magnificent.
+        Grapevines from the old winery tangle with wild roses and blackberry.
+        Raised beds grow potatoes and kale, tended by settlement residents.
+        A greenhouse with half its panes missing still shelters herbs and seedlings.
+      exits:
+        - direction: south
+          target: trout_edgefield
+      properties:
+        lighting: dappled
+        atmosphere: green
+
+    - id: trout_loading_docks
+      title: "Loading Docks"
+      description: |
+        Behind the outlet mall, concrete loading docks face a weed-choked
+        service road. Dumpsters rust in place, lids frozen open. A semi-trailer
+        sits jackknifed across the lot, its cargo long since looted.
+        The area is sheltered from the worst wind by the mall's bulk.
+      exits:
+        - direction: north
+          target: trout_outlet_east_wing
+        - direction: west
+          target: trout_parking_lot
+      spawns:
+        - template: outlet_scavenger
+          count: 1
+          respawn_after: "3m"
+      properties:
+        lighting: dim
+        atmosphere: sheltered
+
+    - id: trout_falls_overlook
+      title: "Falls Overlook"
+      description: |
+        A precarious wooden platform extends over the gorge, offering
+        a dizzying view of Multnomah Falls from above. The railing is
+        half-rotted and sways in the wind. Mist rises from below,
+        coating everything in a fine layer of moisture. Prayer flags
+        made from torn cloth flutter from the posts.
+      exits:
+        - direction: south
+          target: trout_multnomah_falls
+      spawns:
+        - template: wind_walker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: misty
+        atmosphere: wind
