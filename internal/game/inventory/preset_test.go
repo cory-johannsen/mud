@@ -191,21 +191,57 @@ func TestLoadoutSet_ActivePreset_ReturnsSecondAfterSwap(t *testing.T) {
 func TestProperty_WeaponPreset_TwoHandedAlwaysClearsOffHand(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		p := inventory.NewWeaponPreset()
-		_ = p.EquipOffHand(shieldDef("s"))
-		_ = p.EquipMainHand(twoHandedDef("r"))
+
+		// Draw a random off-hand item (one-handed or shield)
+		offHandID := rapid.StringMatching(`[a-z]{4,8}`).Draw(rt, "off_hand_id")
+		offHandKind := rapid.SampledFrom([]inventory.WeaponKind{
+			inventory.WeaponKindOneHanded,
+			inventory.WeaponKindShield,
+		}).Draw(rt, "off_hand_kind")
+		offDef := &inventory.WeaponDef{
+			ID:         offHandID,
+			Name:       offHandID,
+			DamageDice: "1d6",
+			DamageType: "slashing",
+			Kind:       offHandKind,
+		}
+		_ = p.EquipOffHand(offDef)
+
+		// Draw a random two-handed weapon
+		mainID := rapid.StringMatching(`[a-z]{4,8}`).Draw(rt, "main_id")
+		mainDef := &inventory.WeaponDef{
+			ID:         mainID,
+			Name:       mainID,
+			DamageDice: "2d8",
+			DamageType: "slashing",
+			Kind:       inventory.WeaponKindTwoHanded,
+		}
+		_ = p.EquipMainHand(mainDef)
+
 		if p.OffHand != nil {
-			rt.Fatal("two-handed main must clear off-hand")
+			rt.Fatalf("two-handed main must clear off-hand (off_hand_kind=%q, main_id=%q)", offHandKind, mainID)
 		}
 	})
 }
 
 func TestProperty_LoadoutSet_SwapAlwaysSetsActive(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		ls := inventory.NewLoadoutSet()
-		idx := rapid.IntRange(0, len(ls.Presets)-1).Draw(rt, "idx")
+		// Draw number of presets (2-8, simulating class-feature expansion)
+		numPresets := rapid.IntRange(2, 8).Draw(rt, "num_presets")
+		presets := make([]*inventory.WeaponPreset, numPresets)
+		for i := range presets {
+			presets[i] = inventory.NewWeaponPreset()
+		}
+		ls := &inventory.LoadoutSet{Presets: presets}
+
+		idx := rapid.IntRange(0, numPresets-1).Draw(rt, "idx")
+		// Skip same-index (no-op case)
+		if idx == ls.Active {
+			return
+		}
 		err := ls.Swap(idx)
 		if err != nil {
-			rt.Fatalf("unexpected error on valid swap: %v", err)
+			rt.Fatalf("unexpected error on valid swap to index %d: %v", idx, err)
 		}
 		if ls.Active != idx {
 			rt.Fatalf("expected Active=%d, got %d", idx, ls.Active)
@@ -214,4 +250,23 @@ func TestProperty_LoadoutSet_SwapAlwaysSetsActive(t *testing.T) {
 			rt.Fatal("SwappedThisRound must be true after swap")
 		}
 	})
+}
+
+func TestLoadoutSet_ActivePreset_OutOfRange_ReturnsNil(t *testing.T) {
+	ls := inventory.NewLoadoutSet()
+	ls.Active = 999
+	if p := ls.ActivePreset(); p != nil {
+		t.Fatal("expected nil ActivePreset for out-of-range Active index")
+	}
+}
+
+func TestLoadoutSet_Swap_SameIndex_IsNoop(t *testing.T) {
+	ls := inventory.NewLoadoutSet()
+	if err := ls.Swap(0); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// SwappedThisRound must still be false since it's a no-op
+	if ls.SwappedThisRound {
+		t.Fatal("same-index swap must not consume the round swap allowance")
+	}
 }

@@ -32,7 +32,9 @@ func NewWeaponPreset() *WeaponPreset {
 }
 
 // newEquippedWeapon constructs an EquippedWeapon for def.
-// For firearms, a full Magazine is initialised; for non-firearms Magazine is nil.
+// For firearms (IsFirearm()==true) a full Magazine is initialised.
+// Precondition: def must not be nil and must already have passed def.Validate()
+// to ensure MagazineCapacity > 0 for any firearm.
 func newEquippedWeapon(def *WeaponDef) *EquippedWeapon {
 	ew := &EquippedWeapon{Def: def}
 	if def.IsFirearm() {
@@ -74,10 +76,10 @@ func (p *WeaponPreset) EquipOffHand(def *WeaponDef) error {
 		return err
 	}
 	if !def.IsOneHanded() && !def.IsShield() {
-		return fmt.Errorf("inventory: off-hand slot only accepts one-handed weapons or shields, got kind=%q", def.Kind)
+		return fmt.Errorf("inventory: WeaponPreset.EquipOffHand: off-hand slot only accepts one-handed weapons or shields, got kind=%q", def.Kind)
 	}
 	if p.MainHand != nil && p.MainHand.Def.IsTwoHanded() {
-		return fmt.Errorf("inventory: cannot equip off-hand while a two-handed weapon is in the main hand")
+		return fmt.Errorf("inventory: WeaponPreset.EquipOffHand: cannot equip off-hand while a two-handed weapon is in the main hand")
 	}
 	p.OffHand = newEquippedWeapon(def)
 	return nil
@@ -136,6 +138,10 @@ func (ls *LoadoutSet) Swap(idx int) error {
 	}
 	if idx < 0 || idx >= len(ls.Presets) {
 		return fmt.Errorf("inventory: preset index %d out of range [0,%d)", idx, len(ls.Presets))
+	}
+	if idx == ls.Active {
+		// Swapping to the already-active preset is a no-op; does not consume the round action.
+		return nil
 	}
 	ls.Active = idx
 	ls.SwappedThisRound = true
