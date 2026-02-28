@@ -1,0 +1,8 @@
+id: server_rack_panel
+name: Server Rack Panel
+description: A heavy steel server rack panel. The knights wear these as breastplates.
+kind: junk
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 45

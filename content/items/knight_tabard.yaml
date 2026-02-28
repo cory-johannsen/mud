@@ -1,0 +1,8 @@
+id: knight_tabard
+name: Knight Tabard
+description: A blue-and-white tabard bearing the Intel swoosh, now the royal crest of Hillsboro.
+kind: junk
+weight: 0.5
+stackable: false
+max_stack: 1
+value: 35

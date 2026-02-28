@@ -1,0 +1,29 @@
+id: silicon_serf
+name: Silicon Serf
+description: A haggard tech worker in a stained cleanroom suit, maintaining infrastructure they no longer understand.
+level: 1
+max_hp: 14
+ac: 13
+perception: 6
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 8
+  dexterity: 12
+  constitution: 12
+  intelligence: 14
+  wisdom: 10
+  charisma: 10
+loot:
+  currency:
+    min: 3
+    max: 15
+  items:
+    - item: circuit_board
+      chance: 0.5
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2

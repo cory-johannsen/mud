@@ -1,0 +1,427 @@
+zone:
+  id: hillsboro
+  name: "Kingdom of Hillsboro"
+  description: "A feudal tech-state built on the bones of the old semiconductor industry. Knights in server rack armor patrol solar farms and data center keeps, ruling over serfs who maintain machines they no longer understand."
+  start_room: hills_tv_highway_east
+  rooms:
+    - id: hills_tv_highway_east
+      title: "TV Highway East"
+      description: |
+        The cracked asphalt of the old Tualatin Valley Highway stretches east
+        toward Aloha, littered with burned-out cars and toppled power poles.
+        To the west, the road narrows as crude barricades mark the edge of
+        the Kingdom of Hillsboro. Blue-and-white banners snap in the wind.
+      exits:
+        - direction: east
+          target: aloha_tv_highway_west
+        - direction: west
+          target: hills_campus_gate
+        - direction: north
+          target: hills_cornell_road
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: hills_campus_gate
+      title: "Campus Gate"
+      description: |
+        A fortified checkpoint built from concrete jersey barriers and welded
+        steel plate. Two guard towers fashioned from old cell towers flank
+        the entrance. The Intel logo, repainted in fresh blue, adorns a
+        sheet-metal arch above the gate. Beyond lies the tech campus heartland.
+      exits:
+        - direction: east
+          target: hills_tv_highway_east
+        - direction: west
+          target: hills_campus_boulevard
+        - direction: south
+          target: hills_orenco_station
+      spawns:
+        - template: intel_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: torchlight
+        atmosphere: guarded
+
+    - id: hills_campus_boulevard
+      title: "Campus Boulevard"
+      description: |
+        A wide road lined with dead ornamental trees runs through the heart
+        of the old tech campus. Manicured lawns have gone feral, knee-high
+        grass pushing through walkways. Buildings of glass and steel loom
+        on either side, their corporate logos faded but still legible.
+      exits:
+        - direction: east
+          target: hills_campus_gate
+        - direction: west
+          target: hills_server_keep
+        - direction: north
+          target: hills_knight_barracks
+        - direction: south
+          target: hills_serf_quarters
+      spawns:
+        - template: silicon_serf
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: quiet
+
+    - id: hills_server_keep
+      title: "The Server Keep"
+      description: |
+        The massive data center has been converted into a fortress. Its
+        windowless concrete walls need no reinforcement. Cooling towers
+        still hum with power drawn from the solar farms. Inside, rack after
+        rack of dead servers line corridors turned into throne rooms and
+        armories. This is the seat of the Kingdom's power.
+      exits:
+        - direction: east
+          target: hills_campus_boulevard
+        - direction: north
+          target: hills_throne_room
+        - direction: south
+          target: hills_the_foundry
+        - direction: down
+          target: hills_power_station
+      spawns:
+        - template: hillsboro_knight
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: fluorescent
+        atmosphere: humming
+
+    - id: hills_throne_room
+      title: "The Throne Room"
+      description: |
+        Deep within the data center, a cavernous server hall has been cleared
+        to create the throne room of the Kingdom. The throne itself is a
+        massive chair welded from server chassis, draped in blue-and-white
+        banners. Cooling fans embedded in the walls create a constant low
+        drone. LED strips cast everything in pale blue light.
+      exits:
+        - direction: south
+          target: hills_server_keep
+        - direction: east
+          target: hills_royal_archives
+      spawns:
+        - template: hillsboro_knight
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: led_blue
+        atmosphere: solemn
+
+    - id: hills_royal_archives
+      title: "The Royal Archives"
+      description: |
+        What was once a server monitoring center now serves as the Kingdom's
+        library. Salvaged technical manuals, engineering textbooks, and
+        printed-out documentation fill metal shelving. A few ancient monitors
+        still flicker with scrolling text, powered by jealously guarded
+        solar reserves. The archivists treat every page as sacred.
+      exits:
+        - direction: west
+          target: hills_throne_room
+      properties:
+        lighting: dim
+        atmosphere: quiet
+
+    - id: hills_solar_farm
+      title: "The Solar Farm"
+      description: |
+        Acres of solar panels stretch across what were once parking lots.
+        Most still function, their output carefully maintained by teams
+        of serfs. Guard towers ring the perimeter. This is the Kingdom's
+        most vital resource — without the panels, the servers go dark
+        and the Kingdom loses its claim to legitimacy.
+      exits:
+        - direction: north
+          target: hills_the_foundry
+        - direction: east
+          target: hills_serf_quarters
+        - direction: west
+          target: hills_rock_creek_trail
+      spawns:
+        - template: intel_guard
+          count: 2
+          respawn_after: "5m"
+        - template: silicon_serf
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: bright
+        atmosphere: exposed
+
+    - id: hills_serf_quarters
+      title: "Serf Quarters"
+      description: |
+        Rows of cubicle partitions have been repurposed as living spaces,
+        each small cell containing a bedroll and a few personal effects.
+        The air smells of sweat and solder flux. Workers in stained
+        cleanroom suits shuffle between shifts, their eyes hollow with
+        exhaustion. A communal cook fire smolders in a repurposed server rack.
+      exits:
+        - direction: north
+          target: hills_campus_boulevard
+        - direction: west
+          target: hills_solar_farm
+        - direction: east
+          target: hills_refugee_processing
+      spawns:
+        - template: silicon_serf
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: firelight
+        atmosphere: crowded
+
+    - id: hills_knight_barracks
+      title: "Knight Barracks"
+      description: |
+        A reinforced office building serves as the military compound for
+        the Kingdom's knights. Server rack armor hangs on improvised stands.
+        Halberds fashioned from rebar and sharpened steel lean against walls.
+        A training dummy made from bundled cable and duct tape stands in
+        the central courtyard, thoroughly battered.
+      exits:
+        - direction: south
+          target: hills_campus_boulevard
+        - direction: east
+          target: hills_training_grounds
+      spawns:
+        - template: hillsboro_knight
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: torchlight
+        atmosphere: military
+
+    - id: hills_training_grounds
+      title: "Training Grounds"
+      description: |
+        An old parking structure has been converted into a training facility.
+        Concrete pillars serve as obstacles for combat drills. Chalk outlines
+        on the floor mark sparring positions. The clang of improvised weapons
+        echoes off the low ceiling as squires practice formations their
+        masters learned from medieval history wikis.
+      exits:
+        - direction: west
+          target: hills_knight_barracks
+      properties:
+        lighting: dim
+        atmosphere: echoing
+
+    - id: hills_the_foundry
+      title: "The Foundry"
+      description: |
+        A converted clean room now serves as the Kingdom's manufacturing
+        center. Salvaged equipment is used to fabricate circuit boards,
+        repair solar panels, and forge the crude weapons and armor that
+        equip the knights. The air is thick with the acrid smell of
+        solder and the whine of repurposed industrial tools.
+      exits:
+        - direction: north
+          target: hills_server_keep
+        - direction: south
+          target: hills_solar_farm
+        - direction: east
+          target: hills_market_square
+      spawns:
+        - template: silicon_serf
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: industrial
+        atmosphere: smoke
+
+    - id: hills_market_square
+      title: "Market Square"
+      description: |
+        An open courtyard between campus buildings has become the Kingdom's
+        commercial hub. Traders from the surrounding wasteland barter for
+        circuit boards and salvaged tech. Stalls built from office furniture
+        display everything from scavenged food to makeshift weapons.
+        A knight stands watch from a second-floor balcony.
+      exits:
+        - direction: west
+          target: hills_the_foundry
+        - direction: north
+          target: hills_serf_quarters
+        - direction: south
+          target: hills_tanasbourne_ruins
+      properties:
+        lighting: overcast
+        atmosphere: bustling
+
+    - id: hills_orenco_station
+      title: "Orenco Station"
+      description: |
+        The old MAX light rail station has been converted into a trade post.
+        The platform serves as a loading dock. Rusted rail cars have been
+        gutted and turned into storage sheds and merchant stalls. Caravans
+        from the east arrive here, trading scrap and food for the Kingdom's
+        circuit boards and solar-charged batteries.
+      exits:
+        - direction: north
+          target: hills_campus_gate
+        - direction: west
+          target: hills_tanasbourne_ruins
+        - direction: south
+          target: hills_amberglen_plaza
+      properties:
+        lighting: overcast
+        atmosphere: trade
+
+    - id: hills_rock_creek_trail
+      title: "Rock Creek Trail"
+      description: |
+        A muddy trail follows the overgrown creek bed through dense
+        undergrowth. The trees here have reclaimed the suburban landscape,
+        their roots cracking through old sidewalks and driveways. Patrol
+        markers — blue rags tied to branches — indicate the Kingdom's
+        border. Something rustles in the blackberry thickets.
+      exits:
+        - direction: east
+          target: hills_solar_farm
+        - direction: north
+          target: hills_cornell_road
+      spawns:
+        - template: intel_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dappled
+        atmosphere: wilderness
+
+    - id: hills_tanasbourne_ruins
+      title: "Tanasbourne Ruins"
+      description: |
+        The skeleton of a massive shopping complex sprawls across several
+        blocks. Collapsed roofs expose aisles of rusted shelving picked
+        clean decades ago. Feral dogs den in the old anchor stores. The
+        parking lot is a wasteland of crumbling asphalt and sun-bleached
+        shopping carts. Scavengers still pick through the deeper sections.
+      exits:
+        - direction: east
+          target: hills_orenco_station
+        - direction: north
+          target: hills_market_square
+        - direction: west
+          target: hills_suburban_wasteland
+      properties:
+        lighting: dim
+        atmosphere: desolate
+
+    - id: hills_cornell_road
+      title: "Cornell Road"
+      description: |
+        The old arterial road winds north through overgrown suburbs.
+        McMansions with caved-in roofs line both sides, their HOA-approved
+        paint schemes faded to uniform grey. The road itself is cracked
+        and buckled but still passable. Kingdom patrol markers dot the
+        route at regular intervals.
+      exits:
+        - direction: south
+          target: hills_tv_highway_east
+        - direction: west
+          target: hills_rock_creek_trail
+        - direction: north
+          target: hills_helvetia_overlook
+      spawns:
+        - template: intel_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: suburban
+
+    - id: hills_power_station
+      title: "Power Station"
+      description: |
+        Below the Server Keep, a basement level houses the Kingdom's
+        power distribution center. Banks of salvaged batteries line the
+        walls, connected by a rat's nest of cabling to the solar farm
+        above. The hum of electricity is constant and oppressive. A wrong
+        step here could be fatal. Only trusted engineers are permitted entry.
+      exits:
+        - direction: up
+          target: hills_server_keep
+      properties:
+        lighting: emergency
+        atmosphere: electric
+
+    - id: hills_refugee_processing
+      title: "Refugee Processing"
+      description: |
+        A fenced compound near the serf quarters where newcomers are
+        evaluated for useful skills. Those who can repair electronics
+        or maintain solar panels are granted serf status. The rest are
+        turned away at the gate. Chain-link pens hold a dozen hollow-eyed
+        wanderers awaiting their interviews.
+      exits:
+        - direction: west
+          target: hills_serf_quarters
+      properties:
+        lighting: harsh
+        atmosphere: tense
+
+    - id: hills_amberglen_plaza
+      title: "Amberglen Plaza"
+      description: |
+        A cluster of old office parks surrounds a decorative pond choked
+        with algae. The buildings here serve as overflow housing and
+        workshops. Laundry lines strung between structures flutter with
+        faded corporate polo shirts. Children chase each other through
+        the ruins of a landscaped courtyard.
+      exits:
+        - direction: north
+          target: hills_orenco_station
+        - direction: west
+          target: hills_suburban_wasteland
+      properties:
+        lighting: overcast
+        atmosphere: domestic
+
+    - id: hills_suburban_wasteland
+      title: "Suburban Wasteland"
+      description: |
+        Beyond the Kingdom's core, endless tracts of collapsed suburban
+        housing stretch in every direction. Cul-de-sacs lead nowhere.
+        Identical floor plans repeat like a glitch in reality. The wind
+        moans through broken windows. Occasionally, a chimney still
+        stands amid the rubble like a lonely monument.
+      exits:
+        - direction: east
+          target: hills_tanasbourne_ruins
+        - direction: northeast
+          target: hills_amberglen_plaza
+        - direction: north
+          target: hills_helvetia_overlook
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: hills_helvetia_overlook
+      title: "Helvetia Overlook"
+      description: |
+        A hilltop clearing offers a panoramic view of the Kingdom below.
+        The solar farm glitters to the south. The Server Keep's cooling
+        towers trail steam into the grey sky. Beyond the borders, the
+        wasteland stretches to the horizon in every direction. A crude
+        watchtower built from telephone poles stands here, manned day
+        and night by the Kingdom's scouts.
+      exits:
+        - direction: south
+          target: hills_cornell_road
+        - direction: southeast
+          target: hills_suburban_wasteland
+      spawns:
+        - template: hillsboro_knight
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: bright
+        atmosphere: wind
