@@ -38,6 +38,9 @@ const (
 	HandlerBalance   = "balance"
 	HandlerSetRole   = "setrole"
 	HandlerTeleport  = "teleport"
+	HandlerLoadout   = "loadout"
+	HandlerUnequip   = "unequip"
+	HandlerEquipment = "equipment"
 )
 
 // Command defines a player-invocable command.
@@ -79,6 +82,9 @@ func BuiltinCommands() []Command {
 		{Name: "strike", Aliases: []string{"st"}, Help: "Full attack routine (2 AP, two hits with MAP) against target.", Category: CategoryCombat, Handler: HandlerStrike},
 		{Name: "status", Aliases: []string{"cond"}, Help: "Show your active conditions.", Category: CategoryCombat, Handler: HandlerStatus},
 		{Name: "equip", Aliases: []string{"eq"}, Help: "Equip a weapon (equip <weapon_id> [slot])", Category: CategoryCombat, Handler: HandlerEquip},
+		{Name: "loadout", Aliases: []string{"lo"}, Help: "Display or swap weapon presets (loadout [1|2])", Category: CategoryCombat, Handler: HandlerLoadout},
+		{Name: "unequip", Aliases: []string{"ueq"}, Help: "Unequip an item from a slot (unequip <slot>)", Category: CategoryCombat, Handler: HandlerUnequip},
+		{Name: "equipment", Aliases: []string{"gear"}, Help: "Show all equipped items", Category: CategoryCombat, Handler: HandlerEquipment},
 		{Name: "reload", Aliases: []string{"rl"}, Help: "Reload equipped weapon (1 AP)", Category: CategoryCombat, Handler: HandlerReload},
 		{Name: "burst", Aliases: []string{"bf"}, Help: "Burst fire at target (2 AP, 2 attacks)", Category: CategoryCombat, Handler: HandlerFireBurst},
 		{Name: "auto", Aliases: []string{"af"}, Help: "Automatic fire at all enemies (3 AP)", Category: CategoryCombat, Handler: HandlerFireAuto},

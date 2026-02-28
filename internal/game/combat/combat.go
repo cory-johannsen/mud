@@ -53,8 +53,8 @@ type Combatant struct {
 	// For NPCs, reaching 0 HP sets Dead=true immediately.
 	// For players, Dead=true only when the dying condition advances to stack 4.
 	Dead bool
-	// Loadout is the combatant's equipped weapons and magazines; may be nil.
-	Loadout *inventory.Loadout
+	// Loadout is the active weapon preset for this combatant; may be nil.
+	Loadout *inventory.WeaponPreset
 }
 
 // IsPlayer reports whether this combatant is a player character.

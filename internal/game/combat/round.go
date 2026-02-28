@@ -289,7 +289,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 func resolveReload(cbt *Combat, actor *Combatant, qa QueuedAction) RoundEvent {
 	narrative := actor.Name + " reloads."
 	if actor.Loadout != nil {
-		if eq := actor.Loadout.Primary(); eq != nil && eq.Magazine != nil {
+		if eq := actor.Loadout.MainHand; eq != nil && eq.Magazine != nil {
 			eq.Magazine.Reload()
 			narrative = fmt.Sprintf("%s reloads %s.", actor.Name, eq.Def.Name)
 		}
@@ -325,7 +325,7 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 			target.ApplyDamage(dmg)
 		}
 		if weapon != nil && actor.Loadout != nil {
-			if eq := actor.Loadout.Primary(); eq != nil && eq.Magazine != nil {
+			if eq := actor.Loadout.MainHand; eq != nil && eq.Magazine != nil {
 				_ = eq.Magazine.Consume(1)
 			}
 		}
@@ -372,7 +372,7 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 			target.ApplyDamage(dmg)
 		}
 		if weapon != nil && actor.Loadout != nil {
-			if eq := actor.Loadout.Primary(); eq != nil && eq.Magazine != nil {
+			if eq := actor.Loadout.MainHand; eq != nil && eq.Magazine != nil {
 				_ = eq.Magazine.Consume(1)
 			}
 		}
@@ -454,7 +454,7 @@ func primaryFirearm(actor *Combatant, weaponID string) *inventory.WeaponDef {
 	if actor.Loadout == nil {
 		return nil
 	}
-	eq := actor.Loadout.Primary()
+	eq := actor.Loadout.MainHand
 	if eq == nil || !eq.Def.IsFirearm() {
 		return nil
 	}

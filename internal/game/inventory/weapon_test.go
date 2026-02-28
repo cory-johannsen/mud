@@ -54,6 +54,7 @@ reload_actions: 1
 magazine_capacity: 10
 firing_modes: [single]
 traits: [concealable]
+kind: one_handed
 `
 	if err := os.WriteFile(filepath.Join(dir, "test_pistol.yaml"), []byte(content), 0644); err != nil {
 		t.Fatalf("failed to write temp YAML: %v", err)
@@ -82,6 +83,9 @@ traits: [concealable]
 	if len(w.Traits) != 1 || w.Traits[0] != "concealable" {
 		t.Errorf("unexpected traits: %v", w.Traits)
 	}
+	if w.Kind != inventory.WeaponKindOneHanded {
+		t.Errorf("expected Kind %q, got %q", inventory.WeaponKindOneHanded, w.Kind)
+	}
 }
 
 func TestProperty_WeaponDef_RangeIncrementNonNegative(t *testing.T) {
@@ -105,6 +109,7 @@ func TestProperty_WeaponDef_RangeIncrementNonNegative(t *testing.T) {
 		}
 	})
 }
+
 // TestWeaponDef_SupportsBurst_TrueWhenBurstPresent verifies SupportsBurst
 // returns true when FiringModeBurst is in FiringModes.
 func TestWeaponDef_SupportsBurst_TrueWhenBurstPresent(t *testing.T) {
@@ -157,4 +162,115 @@ func TestWeaponDef_SupportsAutomatic_FalseWhenAbsent(t *testing.T) {
 	if w.SupportsAutomatic() {
 		t.Fatal("expected SupportsAutomatic=false for single-mode pistol, got true")
 	}
+}
+
+func TestWeaponDef_Kind_DefaultEmpty(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "knife", Name: "Knife", DamageDice: "1d6", DamageType: "slashing",
+	}
+	if w.Kind != "" {
+		t.Fatalf("expected empty Kind, got %q", w.Kind)
+	}
+}
+
+func TestWeaponDef_Validate_KindNotRequired(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "knife", Name: "Knife", DamageDice: "1d6", DamageType: "slashing",
+	}
+	if err := w.Validate(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestWeaponDef_IsOneHanded(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "pistol", Name: "Pistol", DamageDice: "2d6", DamageType: "ballistic",
+		Kind: inventory.WeaponKindOneHanded,
+	}
+	if !w.IsOneHanded() {
+		t.Fatal("expected IsOneHanded true")
+	}
+	if w.IsTwoHanded() {
+		t.Fatal("expected IsTwoHanded false")
+	}
+	if w.IsShield() {
+		t.Fatal("expected IsShield false")
+	}
+}
+
+func TestWeaponDef_IsTwoHanded(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID:               "rifle",
+		Name:             "Rifle",
+		DamageDice:       "3d6",
+		DamageType:       "ballistic",
+		Kind:             inventory.WeaponKindTwoHanded,
+		RangeIncrement:   100,
+		FiringModes:      []inventory.FiringMode{inventory.FiringModeSingle},
+		MagazineCapacity: 10,
+	}
+	if !w.IsTwoHanded() {
+		t.Fatal("expected IsTwoHanded true")
+	}
+}
+
+func TestWeaponDef_IsShield(t *testing.T) {
+	w := &inventory.WeaponDef{
+		ID: "buckler", Name: "Buckler", DamageDice: "1d4", DamageType: "bludgeoning",
+		Kind: inventory.WeaponKindShield,
+	}
+	if !w.IsShield() {
+		t.Fatal("expected IsShield true")
+	}
+}
+
+func TestProperty_WeaponDef_WeaponKind_MutuallyExclusive(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		kind := rapid.SampledFrom([]inventory.WeaponKind{
+			inventory.WeaponKindOneHanded,
+			inventory.WeaponKindTwoHanded,
+			inventory.WeaponKindShield,
+			"", // zero value
+		}).Draw(rt, "kind")
+		w := &inventory.WeaponDef{
+			ID: "test", Name: "Test", DamageDice: "1d6", DamageType: "slashing",
+			Kind: kind,
+		}
+		oneHanded := w.IsOneHanded()
+		twoHanded := w.IsTwoHanded()
+		shield := w.IsShield()
+		// At most one can be true
+		count := 0
+		if oneHanded {
+			count++
+		}
+		if twoHanded {
+			count++
+		}
+		if shield {
+			count++
+		}
+		if count > 1 {
+			rt.Fatalf("multiple kind predicates true for kind=%q", kind)
+		}
+		// Expected truth matches kind
+		switch kind {
+		case inventory.WeaponKindOneHanded:
+			if !oneHanded {
+				rt.Fatalf("IsOneHanded should be true for %q", kind)
+			}
+		case inventory.WeaponKindTwoHanded:
+			if !twoHanded {
+				rt.Fatalf("IsTwoHanded should be true for %q", kind)
+			}
+		case inventory.WeaponKindShield:
+			if !shield {
+				rt.Fatalf("IsShield should be true for %q", kind)
+			}
+		case "":
+			if oneHanded || twoHanded || shield {
+				rt.Fatalf("all predicates should be false for empty kind")
+			}
+		}
+	})
 }

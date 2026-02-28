@@ -206,6 +206,40 @@ func TestManager_ConcurrentMove(t *testing.T) {
 	assert.Equal(t, n, total)
 }
 
+func TestAddPlayer_HasLoadoutSet(t *testing.T) {
+	m := NewManager()
+	sess, err := m.AddPlayer("uid1", "user", "Char", 1, "room1", 10, "player")
+	if err != nil {
+		t.Fatalf("AddPlayer: %v", err)
+	}
+	if sess.LoadoutSet == nil {
+		t.Fatal("expected non-nil LoadoutSet")
+	}
+	if len(sess.LoadoutSet.Presets) != 2 {
+		t.Fatalf("expected 2 presets, got %d", len(sess.LoadoutSet.Presets))
+	}
+	if sess.LoadoutSet.Active != 0 {
+		t.Fatalf("expected Active=0, got %d", sess.LoadoutSet.Active)
+	}
+}
+
+func TestAddPlayer_HasEquipment(t *testing.T) {
+	m := NewManager()
+	sess, err := m.AddPlayer("uid2", "user", "Char", 1, "room1", 10, "player")
+	if err != nil {
+		t.Fatalf("AddPlayer: %v", err)
+	}
+	if sess.Equipment == nil {
+		t.Fatal("expected non-nil Equipment")
+	}
+	if sess.Equipment.Armor == nil {
+		t.Fatal("expected non-nil Equipment.Armor map")
+	}
+	if sess.Equipment.Accessories == nil {
+		t.Fatal("expected non-nil Equipment.Accessories map")
+	}
+}
+
 func TestPropertyRoomOccupancyConsistent(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		m := NewManager()

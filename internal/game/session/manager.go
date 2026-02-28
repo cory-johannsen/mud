@@ -27,6 +27,10 @@ type PlayerSession struct {
 	Currency int
 	// Role is the account privilege level (player, editor, admin).
 	Role string
+	// LoadoutSet holds the player's swappable weapon presets.
+	LoadoutSet *inventory.LoadoutSet
+	// Equipment holds the player's equipped armor and accessories.
+	Equipment *inventory.Equipment
 	// Entity is the bridge entity for pushing events to the player.
 	Entity *BridgeEntity
 }
@@ -73,6 +77,8 @@ func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, r
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)
 	sess.Currency = 0
+	sess.LoadoutSet = inventory.NewLoadoutSet()
+	sess.Equipment = inventory.NewEquipment()
 
 	m.players[uid] = sess
 	if m.roomSets[roomID] == nil {
