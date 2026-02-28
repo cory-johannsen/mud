@@ -5,26 +5,28 @@ zone:
     start_room: grinders_row
     rooms:
         - id: grinders_row
-          title: Grinder's Row
+          title: Grinder’s Row
           description: The street is lined with battered trailers, makeshift shops, and the occasional wandering figure, all set against a backdrop of decay. It’s the spine of the trailer park, where the toughest residents live, and the harsh realities of the world are on full display.
           exits:
             - direction: north
               target: rotgut_alley
-            - direction: west
+            - direction: southwest
               target: wayne_dawgs_trailer
             - direction: east
               target: last_stand_lodge
             - direction: south
               target: the_rusty_oasis
+            - direction: west
+              target: ne_cully_road
           spawns:
             - template: ganger
               count: 2
               respawn_after: "3m"
         - id: wayne_dawgs_trailer
-          title: Wayne Dawg's Trailer
+          title: Wayne Dawg’s Trailer
           description: Wayne Dawg, a grizzled old tweaker, lives in this trailer. It’s covered in rust and oil stains, with a makeshift lab attached to the side. Wayne Dawg is the lowliest of low. A downright dirty dog if there ever was one. This is his trailer, and he’s not one to share.
           exits:
-            - direction: east
+            - direction: northeast
               target: grinders_row
         - id: the_rusty_oasis
           title: The Rusty Oasis

@@ -94,12 +94,29 @@ func TestZone_Validate_MissingStartRoom(t *testing.T) {
 	assert.Error(t, zone.Validate())
 }
 
-func TestZone_Validate_ExitTargetMissing(t *testing.T) {
+func TestZone_Validate_CrossZoneExitAllowed(t *testing.T) {
 	zone := validTestZone()
 	zone.Rooms["room_a"].Exits = []Exit{
-		{Direction: North, TargetRoom: "nonexistent"},
+		{Direction: North, TargetRoom: "nonexistent_cross_zone"},
+	}
+	assert.NoError(t, zone.Validate(), "cross-zone exit targets must be allowed at zone level")
+}
+
+func TestZone_Validate_EmptyExitTargetRejected(t *testing.T) {
+	zone := validTestZone()
+	zone.Rooms["room_a"].Exits = []Exit{
+		{Direction: North, TargetRoom: ""},
 	}
 	assert.Error(t, zone.Validate())
+}
+
+func TestZone_ExternalExitTargets(t *testing.T) {
+	zone := validTestZone()
+	zone.Rooms["room_a"].Exits = append(zone.Rooms["room_a"].Exits, Exit{
+		Direction: East, TargetRoom: "other_zone_room",
+	})
+	ext := zone.ExternalExitTargets()
+	assert.Contains(t, ext, "other_zone_room")
 }
 
 func TestZone_Validate_EmptyRoomTitle(t *testing.T) {

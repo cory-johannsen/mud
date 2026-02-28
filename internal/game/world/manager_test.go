@@ -180,6 +180,47 @@ func TestPropertyAllRoomsReachableFromStart(t *testing.T) {
 	})
 }
 
+func TestManager_ValidateExits_Valid(t *testing.T) {
+	mgr, err := NewManager(testManagerZones())
+	require.NoError(t, err)
+	assert.NoError(t, mgr.ValidateExits())
+}
+
+func TestManager_ValidateExits_CrossZoneValid(t *testing.T) {
+	z1 := &Zone{
+		ID: "zone_a", Name: "Zone A", Description: "A", StartRoom: "a1",
+		Rooms: map[string]*Room{
+			"a1": {ID: "a1", ZoneID: "zone_a", Title: "A1", Description: "Room A1",
+				Exits: []Exit{{Direction: North, TargetRoom: "b1"}}, Properties: map[string]string{}},
+		},
+	}
+	z2 := &Zone{
+		ID: "zone_b", Name: "Zone B", Description: "B", StartRoom: "b1",
+		Rooms: map[string]*Room{
+			"b1": {ID: "b1", ZoneID: "zone_b", Title: "B1", Description: "Room B1",
+				Exits: []Exit{{Direction: South, TargetRoom: "a1"}}, Properties: map[string]string{}},
+		},
+	}
+	mgr, err := NewManager([]*Zone{z1, z2})
+	require.NoError(t, err)
+	assert.NoError(t, mgr.ValidateExits())
+}
+
+func TestManager_ValidateExits_DanglingTarget(t *testing.T) {
+	z1 := &Zone{
+		ID: "zone_a", Name: "Zone A", Description: "A", StartRoom: "a1",
+		Rooms: map[string]*Room{
+			"a1": {ID: "a1", ZoneID: "zone_a", Title: "A1", Description: "Room A1",
+				Exits: []Exit{{Direction: North, TargetRoom: "nonexistent"}}, Properties: map[string]string{}},
+		},
+	}
+	mgr, err := NewManager([]*Zone{z1})
+	require.NoError(t, err)
+	err = mgr.ValidateExits()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "unknown room")
+}
+
 // genConnectedZone generates a zone where all rooms are reachable from start.
 func genConnectedZone(t *rapid.T) *Zone {
 	numRooms := rapid.IntRange(2, 6).Draw(t, "num_rooms")

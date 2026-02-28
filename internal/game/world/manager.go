@@ -44,6 +44,28 @@ func NewManager(zones []*Zone) (*Manager, error) {
 	return m, nil
 }
 
+// ValidateExits checks that every exit target in every room resolves to a
+// known room across all loaded zones. Call this after NewManager to catch
+// dangling cross-zone exit references.
+//
+// Precondition: Manager must be fully constructed with all zones loaded.
+// Postcondition: Returns nil if all exits resolve, or an error listing the first dangling target.
+func (m *Manager) ValidateExits() error {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, zone := range m.zones {
+		for _, room := range zone.Rooms {
+			for _, exit := range room.Exits {
+				if _, ok := m.rooms[exit.TargetRoom]; !ok {
+					return fmt.Errorf("zone %q: room %q: exit %q targets unknown room %q",
+						zone.ID, room.ID, exit.Direction, exit.TargetRoom)
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // GetRoom returns the room with the given ID.
 //
 // Postcondition: Returns (room, true) if found, or (nil, false) otherwise.

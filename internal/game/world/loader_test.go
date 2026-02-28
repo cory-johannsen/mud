@@ -94,7 +94,7 @@ zone:
 	assert.Contains(t, err.Error(), "zone ID must not be empty")
 }
 
-func TestLoadZoneFromBytes_BadExitTarget(t *testing.T) {
+func TestLoadZoneFromBytes_CrossZoneExitAllowed(t *testing.T) {
 	yaml := `
 zone:
   id: test
@@ -107,11 +107,11 @@ zone:
       description: "A room"
       exits:
         - direction: north
-          target: nonexistent
+          target: other_zone_room
 `
-	_, err := LoadZoneFromBytes([]byte(yaml))
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "unknown room")
+	zone, err := LoadZoneFromBytes([]byte(yaml))
+	assert.NoError(t, err, "cross-zone exit targets must be allowed at zone level")
+	assert.NotNil(t, zone)
 }
 
 func TestLoadZoneFromFile(t *testing.T) {

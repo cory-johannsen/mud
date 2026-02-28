@@ -157,7 +157,25 @@ type Zone struct {
 	ScriptInstructionLimit int
 }
 
-// Validate checks zone invariants.
+// ExternalExitTargets returns exit targets that reference rooms outside this zone.
+// These targets must be validated at the world-manager level once all zones are loaded.
+//
+// Postcondition: Returns a (possibly empty) slice of room IDs not found in this zone.
+func (z *Zone) ExternalExitTargets() []string {
+	var external []string
+	for _, room := range z.Rooms {
+		for _, exit := range room.Exits {
+			if _, ok := z.Rooms[exit.TargetRoom]; !ok {
+				external = append(external, exit.TargetRoom)
+			}
+		}
+	}
+	return external
+}
+
+// Validate checks zone invariants. Exit targets that reference rooms outside
+// this zone are permitted; they must be validated at the Manager level via
+// ValidateExits once all zones are loaded.
 //
 // Postcondition: Returns nil if valid, or an error describing the first violation.
 func (z *Zone) Validate() error {
@@ -190,9 +208,7 @@ func (z *Zone) Validate() error {
 			if exit.TargetRoom == "" {
 				return fmt.Errorf("zone %q: room %q: exit %q has empty target", z.ID, id, exit.Direction)
 			}
-			if _, ok := z.Rooms[exit.TargetRoom]; !ok {
-				return fmt.Errorf("zone %q: room %q: exit %q targets unknown room %q", z.ID, id, exit.Direction, exit.TargetRoom)
-			}
+			// Cross-zone exits are validated at the Manager level via ValidateExits.
 		}
 		for i, s := range room.Spawns {
 			if s.Template == "" {

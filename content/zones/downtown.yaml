@@ -97,6 +97,8 @@ zone:
           target: morrison_bridge
         - direction: south
           target: director_park
+        - direction: northwest
+          target: sauvie_bridge_south
       properties:
         lighting: overcast
         atmosphere: fog
@@ -118,6 +120,8 @@ zone:
         - direction: down
           target: underground_max
           hidden: false
+        - direction: west
+          target: beav_canyon_road_east
       properties:
         lighting: dim
         atmosphere: desolate
@@ -136,6 +140,8 @@ zone:
           target: market_district
         - direction: northeast
           target: waterfront_trail
+        - direction: south
+          target: lo_checkpoint_north
       properties:
         lighting: sheltered
         atmosphere: dry
@@ -154,6 +160,8 @@ zone:
           target: morrison_bridge
         - direction: southwest
           target: transit_mall
+        - direction: north
+          target: ne_broadway_bridge
       properties:
         lighting: exposed
         atmosphere: wind
@@ -184,6 +192,8 @@ zone:
           target: market_district
         - direction: north
           target: broadway_ruins
+        - direction: southeast
+          target: flats_hawthorne_approach
       properties:
         lighting: overcast
         atmosphere: open

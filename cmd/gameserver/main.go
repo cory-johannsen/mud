@@ -80,6 +80,9 @@ func main() {
 	if err != nil {
 		logger.Fatal("creating world manager", zap.Error(err))
 	}
+	if err := worldMgr.ValidateExits(); err != nil {
+		logger.Fatal("validating cross-zone exits", zap.Error(err))
+	}
 	logger.Info("world loaded",
 		zap.Int("zones", worldMgr.ZoneCount()),
 		zap.Int("rooms", worldMgr.RoomCount()),
