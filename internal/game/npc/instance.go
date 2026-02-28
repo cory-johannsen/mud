@@ -1,5 +1,10 @@
 package npc
 
+import (
+	"math/rand"
+	"time"
+)
+
 // Instance is a live NPC entity occupying a room.
 type Instance struct {
 	// ID uniquely identifies this runtime instance.
@@ -26,6 +31,14 @@ type Instance struct {
 	AIDomain string
 	// Loot is the loot table copied from the template; nil means no loot.
 	Loot *LootTable
+	// Taunts is the list of taunt strings copied from the template.
+	Taunts []string
+	// TauntChance is the probability (0–1) of taunting on each check.
+	TauntChance float64
+	// TauntCooldown is the minimum duration between taunts.
+	TauntCooldown time.Duration
+	// LastTauntTime is the last time this NPC taunted.
+	LastTauntTime time.Time
 }
 
 // NewInstance creates a live NPC instance from a template, placed in roomID.
@@ -33,20 +46,47 @@ type Instance struct {
 // Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
 // Postcondition: CurrentHP equals tmpl.MaxHP.
 func NewInstance(id string, tmpl *Template, roomID string) *Instance {
-	return &Instance{
-		ID:          id,
-		TemplateID:  tmpl.ID,
-		Name:        tmpl.Name,
-		Description: tmpl.Description,
-		RoomID:      roomID,
-		CurrentHP:   tmpl.MaxHP,
-		MaxHP:       tmpl.MaxHP,
-		AC:          tmpl.AC,
-		Level:       tmpl.Level,
-		Perception:  tmpl.Perception,
-		AIDomain:    tmpl.AIDomain,
-		Loot:        tmpl.Loot,
+	var cooldown time.Duration
+	if tmpl.TauntCooldown != "" {
+		cooldown, _ = time.ParseDuration(tmpl.TauntCooldown)
 	}
+	return &Instance{
+		ID:            id,
+		TemplateID:    tmpl.ID,
+		Name:          tmpl.Name,
+		Description:   tmpl.Description,
+		RoomID:        roomID,
+		CurrentHP:     tmpl.MaxHP,
+		MaxHP:         tmpl.MaxHP,
+		AC:            tmpl.AC,
+		Level:         tmpl.Level,
+		Perception:    tmpl.Perception,
+		AIDomain:      tmpl.AIDomain,
+		Loot:          tmpl.Loot,
+		Taunts:        tmpl.Taunts,
+		TauntChance:   tmpl.TauntChance,
+		TauntCooldown: cooldown,
+	}
+}
+
+// TryTaunt attempts to produce a taunt string, respecting chance and cooldown.
+//
+// Precondition: now must not be zero.
+// Postcondition: Returns (taunt, true) if a taunt fires, updating LastTauntTime;
+// returns ("", false) otherwise.
+func (i *Instance) TryTaunt(now time.Time) (string, bool) {
+	if len(i.Taunts) == 0 || i.TauntChance <= 0 {
+		return "", false
+	}
+	if !i.LastTauntTime.IsZero() && now.Sub(i.LastTauntTime) < i.TauntCooldown {
+		return "", false
+	}
+	if rand.Float64() >= i.TauntChance {
+		return "", false
+	}
+	taunt := i.Taunts[rand.Intn(len(i.Taunts))]
+	i.LastTauntTime = now
+	return taunt, true
 }
 
 // IsDead reports whether the instance has zero or fewer hit points.

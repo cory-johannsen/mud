@@ -101,6 +101,111 @@ loot:
 	assert.Equal(t, 3, tmpl.Loot.Items[1].MaxQty)
 }
 
+func TestTemplate_Taunts_ParsesCorrectly(t *testing.T) {
+	data := []byte(`
+id: ganger
+name: Ganger
+description: A tough.
+level: 1
+max_hp: 18
+ac: 14
+perception: 5
+taunt_chance: 0.3
+taunt_cooldown: "30s"
+taunts:
+  - "You don't belong here."
+  - "Keep walking."
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, 0.3, tmpl.TauntChance)
+	assert.Equal(t, "30s", tmpl.TauntCooldown)
+	assert.Equal(t, []string{"You don't belong here.", "Keep walking."}, tmpl.Taunts)
+}
+
+func TestTemplate_TauntChance_InvalidRange(t *testing.T) {
+	for _, chance := range []string{"-0.1", "1.1", "2.0"} {
+		data := []byte(fmt.Sprintf(`
+id: ganger
+name: Ganger
+description: A tough.
+level: 1
+max_hp: 18
+ac: 14
+perception: 5
+taunt_chance: %s
+`, chance))
+		_, err := npc.LoadTemplateFromBytes(data)
+		assert.Error(t, err, "expected error for taunt_chance=%s", chance)
+	}
+}
+
+func TestTemplate_TauntCooldown_InvalidDuration(t *testing.T) {
+	data := []byte(`
+id: ganger
+name: Ganger
+description: A tough.
+level: 1
+max_hp: 18
+ac: 14
+perception: 5
+taunt_cooldown: "forever"
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err)
+}
+
+func TestProperty_Template_ValidTaunts_ParseWithoutError(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		chance := rapid.Float64Range(0, 1).Draw(rt, "chance")
+		value := rapid.IntRange(1, 3600).Draw(rt, "value")
+		unit := rapid.SampledFrom([]string{"s", "m", "h"}).Draw(rt, "unit")
+		cooldown := fmt.Sprintf("%d%s", value, unit)
+
+		data := []byte(fmt.Sprintf(`
+id: ganger
+name: Ganger
+description: A tough.
+level: 1
+max_hp: 18
+ac: 14
+perception: 5
+taunt_chance: %f
+taunt_cooldown: "%s"
+taunts:
+  - "Test taunt."
+`, chance, cooldown))
+		_, err := npc.LoadTemplateFromBytes(data)
+		require.NoError(rt, err)
+	})
+}
+
+func TestProperty_Template_InvalidTauntChance_ReturnsError(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Generate chance outside [0, 1]
+		negative := rapid.Bool().Draw(rt, "negative")
+		var chance float64
+		if negative {
+			chance = -rapid.Float64Range(0.01, 100).Draw(rt, "chance")
+		} else {
+			chance = 1 + rapid.Float64Range(0.01, 100).Draw(rt, "chance")
+		}
+
+		data := []byte(fmt.Sprintf(`
+id: ganger
+name: Ganger
+description: A tough.
+level: 1
+max_hp: 18
+ac: 14
+perception: 5
+taunt_chance: %f
+`, chance))
+		_, err := npc.LoadTemplateFromBytes(data)
+		assert.Error(rt, err, "expected error for taunt_chance=%f", chance)
+	})
+}
+
 func TestProperty_Template_InvalidRespawnDelay_ReturnsError(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		// Generate invalid duration strings (words that are not valid Go durations)

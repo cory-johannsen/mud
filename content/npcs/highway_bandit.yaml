@@ -14,6 +14,12 @@ abilities:
   reasoning: 10
   savvy: 14
   flair: 10
+taunt_chance: 0.25
+taunt_cooldown: "45s"
+taunts:
+  - "Empty your pockets and nobody gets hurt."
+  - "Another traveler. How generous of you."
+  - "You picked the wrong road today."
 loot:
   currency:
     min: 15

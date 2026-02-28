@@ -14,6 +14,13 @@ abilities:
   reasoning: 8
   savvy: 10
   flair: 8
+taunt_chance: 0.3
+taunt_cooldown: "30s"
+taunts:
+  - "You don't belong here, outsider."
+  - "Keep walking if you know what's good for you."
+  - "Got any rounds? Didn't think so."
+  - "This is our turf. You're trespassing."
 loot:
   currency:
     min: 10

@@ -381,6 +381,17 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
+	if s.npcH != nil {
+		for _, inst := range s.npcH.InstancesInRoom(result.View.RoomId) {
+			if taunt, ok := inst.TryTaunt(time.Now()); ok {
+				s.broadcastMessage(result.View.RoomId, "", &gamev1.MessageEvent{
+					Content: fmt.Sprintf("%s says \"%s\"", inst.Name, taunt),
+				})
+				break
+			}
+		}
+	}
+
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: result.View},
 	}, nil
@@ -912,6 +923,11 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 		default:
 			// idle/pass: no-op
 		}
+	}
+	if taunt, ok := inst.TryTaunt(time.Now()); ok {
+		s.broadcastMessage(inst.RoomID, "", &gamev1.MessageEvent{
+			Content: fmt.Sprintf("%s says \"%s\"", inst.Name, taunt),
+		})
 	}
 }
 

@@ -14,6 +14,12 @@ abilities:
   reasoning: 8
   savvy: 10
   flair: 10
+taunt_chance: 0.4
+taunt_cooldown: "30s"
+taunts:
+  - "You want across? Pay up."
+  - "Nobody crosses for free."
+  - "Turn around or pay the toll. Your choice."
 loot:
   currency:
     min: 30
