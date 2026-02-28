@@ -1,0 +1,29 @@
+id: bike_courier
+name: Bike Courier
+description: A lean rider in patched lycra, weaving through rubble on a stripped-down fixie. A messenger bag bristles with sharp objects.
+level: 1
+max_hp: 14
+ac: 14
+perception: 8
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 16
+  constitution: 12
+  intelligence: 12
+  wisdom: 14
+  charisma: 8
+loot:
+  currency:
+    min: 5
+    max: 30
+  items:
+    - item: bike_chain
+      chance: 0.4
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1

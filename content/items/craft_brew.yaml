@@ -1,0 +1,8 @@
+id: craft_brew
+name: Craft Brew
+description: A murky bottle of post-apocalyptic IPA. Tastes terrible but packs a punch.
+kind: consumable
+weight: 0.5
+stackable: true
+max_stack: 3
+value: 15

@@ -1,0 +1,453 @@
+zone:
+  id: ne_portland
+  name: "Northeast Portland"
+  description: "The old neighborhoods of Northeast Portland have devolved into a patchwork of bike-courier territories, fortified breweries, and feral art collectives. Alberta Street's galleries now house gangs, while the brewery row on Mississippi has become a warlord's domain."
+  start_room: ne_alberta_street
+  rooms:
+    - id: ne_alberta_street
+      title: "Alberta Street"
+      description: |
+        The once-vibrant arts district is a riot of color gone wrong.
+        Murals peel from crumbling walls, their hopeful messages mocking the present.
+        Feral gallery-gangs have claimed the storefronts, decorating their turf
+        with salvaged installations and the bones of trespassers.
+      exits:
+        - direction: south
+          target: ne_fremont_street
+        - direction: east
+          target: ne_prescott_street
+        - direction: west
+          target: ne_williams_corridor
+      spawns:
+        - template: bike_courier
+          count: 2
+          respawn_after: "3m"
+        - template: alberta_drifter
+          count: 1
+          respawn_after: "3m"
+      properties:
+        lighting: dim
+        atmosphere: rain
+
+    - id: ne_mississippi_ave
+      title: "Mississippi Avenue"
+      description: |
+        Brewery row stretches before you, a gauntlet of fortified taprooms.
+        Heavy steel doors are welded shut or guarded by thick-armed enforcers.
+        The smell of fermenting grain hangs in the air like a threat.
+      exits:
+        - direction: south
+          target: ne_williams_corridor
+        - direction: north
+          target: ne_killingsworth
+        - direction: east
+          target: ne_mlk_boulevard
+      spawns:
+        - template: brew_warlord
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: ne_mlk_boulevard
+      title: "MLK Boulevard"
+      description: |
+        Martin Luther King Jr. Boulevard is a wide, exposed corridor of cracked asphalt.
+        The openness is dangerous — no cover, long sight lines, and the wind
+        howls down its length like a warning. Burnt-out cars line the median.
+      exits:
+        - direction: west
+          target: ne_mississippi_ave
+        - direction: south
+          target: ne_lloyd_district
+        - direction: north
+          target: ne_killingsworth
+        - direction: east
+          target: ne_hollywood_district
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: ne_irvington_ruins
+      title: "Irvington Ruins"
+      description: |
+        Grand Victorian mansions sag under decades of neglect and ivy.
+        Ornate porches collapse into overgrown gardens reclaimed by blackberry brambles.
+        Something moves behind broken stained-glass windows.
+      exits:
+        - direction: south
+          target: ne_broadway_bridge
+        - direction: east
+          target: ne_hollywood_district
+        - direction: north
+          target: ne_fremont_street
+      spawns:
+        - template: alberta_drifter
+          count: 1
+          respawn_after: "3m"
+      properties:
+        lighting: dim
+        atmosphere: quiet
+
+    - id: ne_hollywood_district
+      title: "Hollywood District"
+      description: |
+        The old Hollywood Theater's marquee hangs by a single bolt, its letters
+        scattered across the sidewalk. Scavenger markets have taken over the block,
+        traders hawking salvage from behind overturned dumpsters and burnt-out kiosks.
+      exits:
+        - direction: west
+          target: ne_irvington_ruins
+        - direction: south
+          target: ne_sandy_boulevard
+        - direction: north
+          target: ne_alameda_ridge
+        - direction: east
+          target: ne_i205_onramp
+      properties:
+        lighting: overcast
+        atmosphere: crowded
+
+    - id: ne_sullivans_gulch
+      title: "Sullivan's Gulch"
+      description: |
+        The old rail corridor cuts through the district like a wound.
+        Rusted freight cars serve as shelters for drifters and worse.
+        Campfire smoke rises from between the tracks, and the sound
+        of metal scraping on metal echoes from the switching yard.
+      exits:
+        - direction: north
+          target: ne_lloyd_district
+        - direction: west
+          target: ne_rose_quarter
+        - direction: east
+          target: ne_sandy_boulevard
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: ne_alameda_ridge
+      title: "Alameda Ridge"
+      description: |
+        The highest point in Northeast Portland offers a panoramic view of ruin.
+        Wind batters the exposed hilltop relentlessly. From here you can see
+        the broken skyline of downtown, the dead bridges, and smoke rising
+        from a dozen territorial fires across the district.
+      exits:
+        - direction: south
+          target: ne_hollywood_district
+        - direction: west
+          target: ne_grant_park
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: ne_lloyd_district
+      title: "Lloyd District"
+      description: |
+        The convention center's glass walls are shattered cathedral ruins.
+        Parking garages have been converted into concrete fortresses, their
+        ramps barricaded with wrecked cars. The old Lloyd Center mall
+        is a hollowed-out husk picked clean by generations of scavengers.
+      exits:
+        - direction: north
+          target: ne_mlk_boulevard
+        - direction: south
+          target: ne_sullivans_gulch
+        - direction: west
+          target: ne_rose_quarter
+      properties:
+        lighting: dim
+        atmosphere: desolate
+
+    - id: ne_broadway_bridge
+      title: "Broadway Bridge"
+      description: |
+        The old bascule bridge stretches south across the Willamette,
+        its lift span frozen at a slight angle. The steel deck is slick
+        with rain and rust. Wind whips through the open truss structure.
+        Downtown's broken towers loom on the far side.
+      exits:
+        - direction: north
+          target: ne_irvington_ruins
+        - direction: east
+          target: ne_rose_quarter
+        - direction: south
+          target: burnside_crossing
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: ne_i205_onramp
+      title: "I-205 On-Ramp"
+      description: |
+        The crumbling highway on-ramp rises above the neighborhood like a
+        concrete serpent. Abandoned vehicles choke the lanes, forming a maze
+        of rusted metal. The freeway stretches east toward the airport ruins.
+      exits:
+        - direction: west
+          target: ne_hollywood_district
+        - direction: east
+          target: pdx_airport_way_west
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: ne_cully_road
+      title: "Cully Road"
+      description: |
+        The outer edge of Northeast Portland fades into scrubland and
+        collapsed chain-link fences. Cully Road heads east through
+        abandoned strip malls and overgrown lots toward the industrial wastes.
+      exits:
+        - direction: south
+          target: ne_prescott_street
+        - direction: west
+          target: ne_columbia_blvd
+        - direction: east
+          target: grinders_row
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: ne_interstate_ave
+      title: "Interstate Avenue"
+      description: |
+        The old MAX Yellow Line corridor runs north along Interstate Avenue.
+        The light rail tracks are buried under debris, but the wide road
+        still serves as the main artery connecting the district to the bridges.
+      exits:
+        - direction: south
+          target: ne_rose_quarter
+        - direction: east
+          target: ne_williams_corridor
+        - direction: north
+          target: ne_killingsworth
+      properties:
+        lighting: dim
+        atmosphere: rain
+
+    - id: ne_killingsworth
+      title: "Killingsworth Street"
+      description: |
+        A crossroads market has sprung up at the Killingsworth intersection.
+        Traders barter from behind reinforced stalls, exchanging scrap,
+        ammunition, and information. Eyes watch from every rooftop.
+      exits:
+        - direction: south
+          target: ne_mississippi_ave
+        - direction: east
+          target: ne_prescott_street
+        - direction: west
+          target: ne_interstate_ave
+        - direction: north
+          target: ne_columbia_blvd
+      properties:
+        lighting: overcast
+        atmosphere: crowded
+
+    - id: ne_fremont_street
+      title: "Fremont Street"
+      description: |
+        Residential ruins line Fremont Street in both directions.
+        Collapsed roofs and fire-blackened walls tell stories of old conflicts.
+        A few structures have been shored up and occupied, their windows
+        glowing faintly with candlelight behind heavy curtains.
+      exits:
+        - direction: north
+          target: ne_alberta_street
+        - direction: south
+          target: ne_irvington_ruins
+        - direction: east
+          target: ne_grant_park
+      spawns:
+        - template: alberta_drifter
+          count: 2
+          respawn_after: "3m"
+      properties:
+        lighting: dim
+        atmosphere: quiet
+
+    - id: ne_sandy_boulevard
+      title: "Sandy Boulevard"
+      description: |
+        Sandy cuts diagonally through the grid at an unsettling angle,
+        creating odd triangular lots filled with rubble and shadow.
+        The diagonal sight lines make ambushes easy and escape difficult.
+        Old neon signs flicker with trapped static electricity.
+      exits:
+        - direction: north
+          target: ne_hollywood_district
+        - direction: west
+          target: ne_sullivans_gulch
+        - direction: south
+          target: ne_grant_park
+      spawns:
+        - template: bike_courier
+          count: 1
+          respawn_after: "3m"
+      properties:
+        lighting: dim
+        atmosphere: rain
+
+    - id: ne_grant_park
+      title: "Grant Park"
+      description: |
+        The old park is a tangle of overgrown trees and waist-high grass.
+        Hidden camps dot the interior, marked by thin trails of smoke.
+        The ruins of Grant High School loom at the park's edge,
+        its clock tower frozen at 3:47.
+      exits:
+        - direction: west
+          target: ne_fremont_street
+        - direction: north
+          target: ne_sandy_boulevard
+        - direction: east
+          target: ne_alameda_ridge
+      spawns:
+        - template: alberta_drifter
+          count: 2
+          respawn_after: "3m"
+      properties:
+        lighting: sheltered
+        atmosphere: quiet
+
+    - id: ne_rose_quarter
+      title: "Rose Quarter"
+      description: |
+        The old arena district is a landscape of massive concrete structures
+        slowly being reclaimed by nature. The Moda Center's roof has partially
+        collapsed inward, creating a vast sheltered space claimed by squatters.
+        Memorial Coliseum stands hollow and echoing.
+      exits:
+        - direction: east
+          target: ne_lloyd_district
+        - direction: north
+          target: ne_interstate_ave
+        - direction: west
+          target: ne_broadway_bridge
+        - direction: south
+          target: ne_sullivans_gulch
+      properties:
+        lighting: dim
+        atmosphere: desolate
+
+    - id: ne_brewery_compound
+      title: "Brewery Compound"
+      description: |
+        A cluster of old craft breweries has been welded together into a
+        fortified compound. The air is thick with the smell of fermenting
+        grain and wood smoke. Armed guards patrol catwalks made from old
+        brewing equipment. This is brew warlord territory.
+      exits:
+        - direction: south
+          target: ne_mississippi_ave
+        - direction: east
+          target: ne_williams_corridor
+      spawns:
+        - template: brew_warlord
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: ne_bike_shop_ruins
+      title: "Bike Shop Ruins"
+      description: |
+        The remains of a dozen old bike shops have been consolidated into
+        a courier hub. Stripped frames hang from the ceiling like metal skeletons.
+        Wheels spin lazily in the draft. Couriers come and go at all hours,
+        their messenger bags heavy with deliveries and weapons.
+      exits:
+        - direction: south
+          target: ne_williams_corridor
+        - direction: east
+          target: ne_alberta_street
+      spawns:
+        - template: bike_courier
+          count: 2
+          respawn_after: "3m"
+      properties:
+        lighting: dim
+        atmosphere: quiet
+
+    - id: ne_williams_corridor
+      title: "Williams Corridor"
+      description: |
+        Once a gentrified strip of boutiques and brunch spots, Williams Avenue
+        is now a contested corridor between rival factions. The bike lanes
+        are pitted with craters. Contested murals are painted over weekly.
+      exits:
+        - direction: east
+          target: ne_alberta_street
+        - direction: north
+          target: ne_mississippi_ave
+        - direction: south
+          target: ne_broadway_bridge
+        - direction: west
+          target: ne_interstate_ave
+        - direction: northeast
+          target: ne_bike_shop_ruins
+        - direction: southeast
+          target: ne_brewery_compound
+      spawns:
+        - template: bike_courier
+          count: 1
+          respawn_after: "3m"
+      properties:
+        lighting: overcast
+        atmosphere: rain
+
+    - id: ne_prescott_street
+      title: "Prescott Street"
+      description: |
+        A northern residential strip where survivors have built a loose
+        community behind walls of stacked cars and shopping carts.
+        Vegetable gardens grow in old parking lots, tended by wary residents
+        who keep weapons close at hand.
+      exits:
+        - direction: west
+          target: ne_killingsworth
+        - direction: south
+          target: ne_alberta_street
+        - direction: north
+          target: ne_cully_road
+      properties:
+        lighting: overcast
+        atmosphere: quiet
+
+    - id: ne_columbia_blvd
+      title: "Columbia Boulevard"
+      description: |
+        The northern industrial edge of the district is a wasteland of
+        collapsed warehouses and rusted shipping containers. Columbia Boulevard
+        stretches east and west through the desolation, connecting to the
+        old I-5 corridor and the outer neighborhoods.
+      exits:
+        - direction: south
+          target: ne_killingsworth
+        - direction: east
+          target: ne_cully_road
+        - direction: north
+          target: ne_i5_bridge_approach
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: ne_i5_bridge_approach
+      title: "I-5 Bridge Approach"
+      description: |
+        The southern approach to the Interstate Bridge looms ahead,
+        its twin spans reaching north across the Columbia River toward
+        the Vancouver wasteland. Concrete barriers channel traffic into
+        a killzone. Old toll booths serve as guard posts.
+      exits:
+        - direction: south
+          target: ne_columbia_blvd
+        - direction: north
+          target: couve_interstate_bridge_south
+      properties:
+        lighting: exposed
+        atmosphere: wind

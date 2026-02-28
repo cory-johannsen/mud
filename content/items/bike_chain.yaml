@@ -1,0 +1,8 @@
+id: bike_chain
+name: Bike Chain
+description: A heavy bicycle chain, rusted but still solid. Good for locking things or hitting people.
+kind: junk
+weight: 0.8
+stackable: true
+max_stack: 5
+value: 8

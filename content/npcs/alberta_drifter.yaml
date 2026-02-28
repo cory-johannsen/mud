@@ -1,0 +1,29 @@
+id: alberta_drifter
+name: Alberta Street Drifter
+description: A wiry figure wrapped in layers of mismatched clothing, eyes constantly scanning for opportunity or threat. Survivor written in every line of their face.
+level: 2
+max_hp: 24
+ac: 14
+perception: 9
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 12
+  dexterity: 14
+  constitution: 14
+  intelligence: 10
+  wisdom: 15
+  charisma: 9
+loot:
+  currency:
+    min: 10
+    max: 60
+  items:
+    - item: scrap_metal
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

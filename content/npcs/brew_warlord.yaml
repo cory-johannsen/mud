@@ -1,0 +1,33 @@
+id: brew_warlord
+name: Brew Warlord
+description: A barrel-chested brewer in a stained leather apron, reeking of hops and violence. His arms are scarred from years at the kettles and in the fights.
+level: 3
+max_hp: 38
+ac: 16
+perception: 7
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 16
+  dexterity: 12
+  constitution: 16
+  intelligence: 8
+  wisdom: 10
+  charisma: 12
+loot:
+  currency:
+    min: 30
+    max: 100
+  items:
+    - item: craft_brew
+      chance: 0.6
+      min_qty: 1
+      max_qty: 2
+    - item: scrap_metal
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

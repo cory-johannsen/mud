@@ -1,0 +1,8 @@
+id: fixie_wheel
+name: Fixie Wheel
+description: A bent but repairable bicycle wheel. Valuable to anyone with a bike.
+kind: junk
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 25
