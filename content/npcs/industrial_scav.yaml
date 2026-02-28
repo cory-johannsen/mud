@@ -1,0 +1,29 @@
+id: industrial_scav
+name: Industrial Scavenger
+description: A nimble scavenger in a hard hat and reflective vest, picking through industrial ruins with practiced efficiency.
+level: 1
+max_hp: 15
+ac: 14
+perception: 9
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 10
+  dexterity: 14
+  constitution: 12
+  intelligence: 12
+  wisdom: 14
+  charisma: 10
+loot:
+  currency:
+    min: 5
+    max: 30
+  items:
+    - item: scrap_metal
+      chance: 0.65
+      min_qty: 1
+      max_qty: 4
+    - item: shipping_manifest
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

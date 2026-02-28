@@ -1,0 +1,455 @@
+zone:
+  id: se_industrial
+  name: "Southeast Industrial"
+  description: "Portland's industrial underbelly — a maze of rusting warehouses, abandoned docks, and skeletal cranes. Rain hammers corrugated metal roofs in a ceaseless percussion. The Willamette runs brown and slow along the eastern edge."
+  start_room: sei_powell_terminus
+  rooms:
+    - id: sei_powell_terminus
+      title: "Powell Boulevard Terminus"
+      description: |
+        Powell Boulevard dead-ends here at a collapsed overpass. Rebar fingers
+        claw upward from shattered concrete. To the north, the last ragged
+        edge of the Flats gives way to industrial sprawl. South, corrugated
+        warehouses stretch in long rows toward the river. The air smells of
+        rust and diesel that seeped into the ground decades ago.
+      exits:
+        - direction: north
+          target: flats_foster_south
+        - direction: south
+          target: sei_industrial_way
+        - direction: east
+          target: sei_holgate_blvd
+        - direction: west
+          target: sei_mcloughlin_blvd
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: sei_dock_row
+      title: "Dock Row"
+      description: |
+        A line of concrete loading docks stretches along the riverfront.
+        Rusted bollards and frayed mooring lines mark where barges once
+        tied up. The Willamette laps at crumbling pilings below. Pallets
+        are stacked into makeshift barricades between the dock bays.
+        Workers move cargo by hand now — no power for the old winches.
+      exits:
+        - direction: west
+          target: sei_warehouse_district
+        - direction: south
+          target: sei_dry_dock
+        - direction: north
+          target: sei_river_access
+        - direction: east
+          target: sei_loading_bay
+      spawns:
+        - template: dock_worker
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: river
+
+    - id: sei_warehouse_district
+      title: "Warehouse District"
+      description: |
+        Massive storage buildings loom on both sides of a cracked access road.
+        Roll-up doors hang at broken angles, revealing cavernous interiors
+        stacked with salvage. Guards patrol between the buildings, steel pipes
+        glinting under grey skies. The warehouses are claimed territory —
+        spray-painted sigils mark which faction holds what.
+      exits:
+        - direction: east
+          target: sei_dock_row
+        - direction: south
+          target: sei_industrial_way
+        - direction: north
+          target: sei_holgate_blvd
+        - direction: west
+          target: sei_warehouse_interior
+      spawns:
+        - template: warehouse_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: tense
+
+    - id: sei_crane_yard
+      title: "Crane Yard"
+      description: |
+        A graveyard of construction equipment sprawls across a muddy lot.
+        Tower cranes lean at drunken angles, their cables snapped and
+        dangling. Excavators rust in pools of brown water. The remains of
+        a portable office have been converted into a scavenger's den,
+        its windows covered with sheet metal and tarpaulins.
+      exits:
+        - direction: east
+          target: sei_industrial_way
+        - direction: south
+          target: sei_pipe_yard
+        - direction: north
+          target: sei_mcloughlin_blvd
+      spawns:
+        - template: industrial_scav
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: mud
+
+    - id: sei_mcloughlin_blvd
+      title: "McLoughlin Boulevard"
+      description: |
+        The main road south cuts through the industrial district like a scar.
+        Four lanes of cracked asphalt stretch toward Milwaukie, littered with
+        burned-out vehicles and wind-blown debris. Power lines sag between
+        leaning poles. A faded billboard advertises a car dealership that
+        no longer exists. The road is exposed — poor cover, long sightlines.
+      exits:
+        - direction: north
+          target: sei_powell_terminus
+        - direction: south
+          target: sei_crane_yard
+        - direction: east
+          target: sei_milwaukie_junction
+        - direction: west
+          target: sei_chemical_plant
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: sei_milwaukie_junction
+      title: "Milwaukie Junction"
+      description: |
+        Rail lines converge here in a tangle of rusted switches and rotting
+        ties. A signal tower lists to one side, its windows shattered.
+        Boxcars sit on sidings where they were abandoned, some with doors
+        welded shut, others pried open and picked clean. The tracks lead
+        south toward the Ross Island crossing and north into the flats.
+      exits:
+        - direction: west
+          target: sei_mcloughlin_blvd
+        - direction: south
+          target: sei_rail_siding
+        - direction: east
+          target: sei_holgate_blvd
+        - direction: north
+          target: sei_signal_tower
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: sei_dry_dock
+      title: "Dry Dock"
+      description: |
+        A massive concrete dry dock juts into the Willamette, its gates
+        long since rusted open. The hull of an unfinished barge sits in
+        the basin like the skeleton of a beached whale. Someone has turned
+        the dry dock into a fortress — welded plate armor on the gates,
+        firing positions on the walls. It is the most defensible position
+        on the waterfront.
+      exits:
+        - direction: north
+          target: sei_dock_row
+        - direction: west
+          target: sei_ross_bridge_approach
+      spawns:
+        - template: warehouse_guard
+          count: 1
+          respawn_after: "5m"
+        - template: dock_worker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: fortified
+
+    - id: sei_industrial_way
+      title: "Industrial Way"
+      description: |
+        A narrow corridor between factory buildings, the road barely wide
+        enough for the trucks that once rumbled through. Steam vents from
+        cracked pipes, mixing with the rain to create a perpetual haze.
+        The walls are streaked with chemical stains in unnatural greens
+        and yellows. Underfoot, the asphalt is soft and pockmarked.
+      exits:
+        - direction: north
+          target: sei_powell_terminus
+        - direction: south
+          target: sei_ross_bridge_approach
+        - direction: east
+          target: sei_warehouse_district
+        - direction: west
+          target: sei_crane_yard
+      properties:
+        lighting: hazy
+        atmosphere: chemical
+
+    - id: sei_holgate_blvd
+      title: "Holgate Boulevard"
+      description: |
+        The east-west connector cuts across the industrial zone, linking
+        the rail yards to the waterfront. A median strip of dead grass
+        divides the lanes. Overturned dumpsters and coils of razor wire
+        form crude checkpoints at the major intersections. Shell casings
+        crunch underfoot — this road has seen its share of firefights.
+      exits:
+        - direction: west
+          target: sei_powell_terminus
+        - direction: east
+          target: sei_warehouse_district
+        - direction: south
+          target: sei_milwaukie_junction
+        - direction: north
+          target: sei_machine_shop
+      properties:
+        lighting: exposed
+        atmosphere: tense
+
+    - id: sei_ross_bridge_approach
+      title: "Ross Island Bridge Approach"
+      description: |
+        The eastern approach to the Ross Island Bridge rises on crumbling
+        concrete pillars. The bridge deck stretches west across the dark
+        water, its surface buckled and gap-toothed where sections have
+        fallen into the river below. Guardrails are long gone, stripped
+        for scrap. A cold wind funnels up from the Willamette.
+      exits:
+        - direction: north
+          target: sei_industrial_way
+        - direction: east
+          target: sei_dry_dock
+        - direction: south
+          target: ross_bridge_east
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: sei_loading_bay
+      title: "Loading Bay"
+      description: |
+        A cavernous loading bay opens onto the river side of the docks.
+        Forklifts sit dead in their charging stations. Conveyor belts
+        rust in frozen loops. The concrete floor is stained with decades
+        of hydraulic fluid and spilled cargo. Pallets of unsalvageable
+        goods rot in the corners, home now to rats and worse.
+      exits:
+        - direction: west
+          target: sei_dock_row
+        - direction: south
+          target: sei_warehouse_interior
+      spawns:
+        - template: dock_worker
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: damp
+
+    - id: sei_chemical_plant
+      title: "Chemical Plant Ruins"
+      description: |
+        Twisted piping and shattered containment vessels mark the remains
+        of a chemical processing facility. The air burns the throat.
+        Puddles of iridescent liquid collect in low spots, and the
+        concrete is eaten away in patches by old spills. Warning signs
+        in faded yellow and black litter the ground. Nobody stays
+        here longer than they have to.
+      exits:
+        - direction: east
+          target: sei_mcloughlin_blvd
+        - direction: south
+          target: sei_pipe_yard
+      spawns:
+        - template: industrial_scav
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: toxic
+
+    - id: sei_pipe_yard
+      title: "Pipe Yard"
+      description: |
+        Rows of industrial pipe — some as wide as a person — are stacked
+        in rusting pyramids across a gravel lot. Rain drums hollow notes
+        on the open ends, creating an eerie metallic chorus. The pipes
+        provide excellent cover and hiding spots. Scavengers have turned
+        some of the larger sections into shelters, blocking the ends
+        with salvaged sheet metal.
+      exits:
+        - direction: north
+          target: sei_crane_yard
+        - direction: east
+          target: sei_chemical_plant
+        - direction: south
+          target: sei_transformer_station
+      spawns:
+        - template: industrial_scav
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: echoing
+
+    - id: sei_river_access
+      title: "River Access"
+      description: |
+        A crumbling boat ramp descends into the murky Willamette. The
+        river is wide here, its current deceptively strong. Driftwood
+        and debris collect against a half-submerged retaining wall.
+        A few flat-bottomed skiffs are chained to concrete anchors,
+        their hulls patched with mismatched fiberglass. This is how
+        goods move when the roads are too dangerous.
+      exits:
+        - direction: south
+          target: sei_dock_row
+        - direction: west
+          target: sei_signal_tower
+      properties:
+        lighting: overcast
+        atmosphere: river
+
+    - id: sei_rail_siding
+      title: "Rail Siding"
+      description: |
+        A dead-end spur of track holds a line of sealed boxcars. Rust
+        has welded some doors shut; others have been cut open with
+        torches, the metal edges still bright where they were sliced.
+        The cars serve as storage, shelter, and ambush points. Gravel
+        crunches loud enough to announce any approach.
+      exits:
+        - direction: north
+          target: sei_milwaukie_junction
+        - direction: west
+          target: sei_transformer_station
+      spawns:
+        - template: warehouse_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: confined
+
+    - id: sei_machine_shop
+      title: "Machine Shop"
+      description: |
+        A corrugated metal building houses rows of industrial lathes and
+        drill presses, all frozen with rust. Tool racks line the walls,
+        mostly picked clean. The concrete floor is grooved with decades
+        of heavy machinery wear. A workbench near the back still holds
+        a functioning vise — the only thing of value the scavengers
+        left behind.
+      exits:
+        - direction: south
+          target: sei_holgate_blvd
+        - direction: east
+          target: sei_signal_tower
+      properties:
+        lighting: dim
+        atmosphere: dusty
+
+    - id: sei_signal_tower
+      title: "Signal Tower"
+      description: |
+        A three-story rail signal tower rises above the junction, its
+        windows mostly intact. The mechanical switching equipment inside
+        is a tangle of levers and cables. From the top floor, you can
+        see across the entire industrial district — the river to the
+        east, the bridge to the south, the flats to the north. Someone
+        has set up a lookout post with a salvaged spotting scope.
+      exits:
+        - direction: south
+          target: sei_milwaukie_junction
+        - direction: west
+          target: sei_machine_shop
+        - direction: east
+          target: sei_river_access
+      properties:
+        lighting: elevated
+        atmosphere: wind
+
+    - id: sei_warehouse_interior
+      title: "Warehouse Interior"
+      description: |
+        Inside the largest warehouse, the scale is cathedral-like. Steel
+        rafters arch overhead, dripping with condensation. Towers of
+        shipping containers form narrow canyons within the space. Light
+        filters through holes in the corrugated roof, casting shifting
+        columns of grey illumination. The echoes of footsteps carry
+        far in here.
+      exits:
+        - direction: east
+          target: sei_warehouse_district
+        - direction: north
+          target: sei_loading_bay
+        - direction: south
+          target: sei_container_maze
+      spawns:
+        - template: warehouse_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: echoing
+
+    - id: sei_container_maze
+      title: "Container Maze"
+      description: |
+        Shipping containers are stacked two and three high, forming a
+        labyrinth of narrow passages and dead ends. Rust streaks down
+        the corrugated walls like dried blood. Some containers have been
+        cut open and connected, creating hidden rooms and passages.
+        The scavengers who work this area know every turn by heart.
+        Outsiders get lost.
+      exits:
+        - direction: north
+          target: sei_warehouse_interior
+        - direction: east
+          target: sei_industrial_way
+      spawns:
+        - template: industrial_scav
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dark
+        atmosphere: claustrophobic
+
+    - id: sei_transformer_station
+      title: "Transformer Station"
+      description: |
+        A fenced electrical substation sits behind razor wire and warning
+        signs. The transformers are dead and cold, their cooling oil long
+        since drained for fuel. Ceramic insulators shattered by gunfire
+        litter the gravel. The chain-link fence has been cut in several
+        places, providing passage between the pipe yard and the rail
+        siding. Copper thieves stripped this place years ago.
+      exits:
+        - direction: north
+          target: sei_pipe_yard
+        - direction: east
+          target: sei_rail_siding
+        - direction: south
+          target: sei_ross_bridge_approach
+      properties:
+        lighting: overcast
+        atmosphere: desolate
+
+    - id: sei_fuel_depot
+      title: "Fuel Depot"
+      description: |
+        Cylindrical storage tanks rise like squat silos behind a sagging
+        chain-link perimeter. Most are empty, punctured by scavengers
+        draining the last dregs of diesel and kerosene. One tank has
+        been converted into a rain-catch cistern. The ground is stained
+        dark with old fuel spills that nothing will ever grow through.
+        The smell of petroleum ghosts linger in the rain.
+      exits:
+        - direction: east
+          target: sei_mcloughlin_blvd
+        - direction: south
+          target: sei_chemical_plant
+      properties:
+        lighting: overcast
+        atmosphere: chemical

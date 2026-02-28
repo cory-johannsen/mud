@@ -1,0 +1,8 @@
+id: shipping_manifest
+name: Shipping Manifest
+description: A water-stained shipping manifest. Someone might pay for the information on it.
+kind: junk
+weight: 0.1
+stackable: true
+max_stack: 10
+value: 7
