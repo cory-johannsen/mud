@@ -136,26 +136,34 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		zap.Int64("character_id", characterID),
 	)
 
-	// Step 2: Create player session in start room
-	startRoom := s.world.StartRoom()
-	if startRoom == nil {
+	// Step 2: Create player session in saved location (or global start room)
+	var spawnRoom *world.Room
+	if loc := joinReq.Location; loc != "" {
+		if r, ok := s.world.GetRoom(loc); ok {
+			spawnRoom = r
+		}
+	}
+	if spawnRoom == nil {
+		spawnRoom = s.world.StartRoom()
+	}
+	if spawnRoom == nil {
 		return fmt.Errorf("no start room configured")
 	}
 
-	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, startRoom.ID, currentHP)
+	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP)
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
 	}
 	defer s.cleanupPlayer(uid, username)
 
 	// Broadcast arrival to other players in the room
-	s.broadcastRoomEvent(startRoom.ID, uid, &gamev1.RoomEvent{
+	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
 		Player: charName,
 		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
 	})
 
 	// Send initial room view
-	roomView := s.worldH.buildRoomView(uid, startRoom)
+	roomView := s.worldH.buildRoomView(uid, spawnRoom)
 	if err := stream.Send(&gamev1.ServerEvent{
 		RequestId: firstMsg.RequestId,
 		Payload:   &gamev1.ServerEvent_RoomView{RoomView: roomView},

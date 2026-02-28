@@ -907,6 +907,7 @@ type JoinWorldRequest struct {
 	CharacterId   int64                  `protobuf:"varint,3,opt,name=character_id,json=characterId,proto3" json:"character_id,omitempty"`
 	CharacterName string                 `protobuf:"bytes,4,opt,name=character_name,json=characterName,proto3" json:"character_name,omitempty"`
 	CurrentHp     int32                  `protobuf:"varint,5,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
+	Location      string                 `protobuf:"bytes,6,opt,name=location,proto3" json:"location,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -974,6 +975,13 @@ func (x *JoinWorldRequest) GetCurrentHp() int32 {
 		return x.CurrentHp
 	}
 	return 0
+}
+
+func (x *JoinWorldRequest) GetLocation() string {
+	if x != nil {
+		return x.Location
+	}
+	return ""
 }
 
 // MoveRequest asks the server to move the player in the given direction.
@@ -3357,14 +3365,15 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tround_end\x18\r \x01(\v2\x16.game.v1.RoundEndEventH\x00R\broundEnd\x12B\n" +
 	"\x0fcondition_event\x18\x0e \x01(\v2\x17.game.v1.ConditionEventH\x00R\x0econditionEvent\x12?\n" +
 	"\x0einventory_view\x18\x0f \x01(\v2\x16.game.v1.InventoryViewH\x00R\rinventoryViewB\t\n" +
-	"\apayload\"\xa9\x01\n" +
+	"\apayload\"\xc5\x01\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
 	"\fcharacter_id\x18\x03 \x01(\x03R\vcharacterId\x12%\n" +
 	"\x0echaracter_name\x18\x04 \x01(\tR\rcharacterName\x12\x1d\n" +
 	"\n" +
-	"current_hp\x18\x05 \x01(\x05R\tcurrentHp\"+\n" +
+	"current_hp\x18\x05 \x01(\x05R\tcurrentHp\x12\x1a\n" +
+	"\blocation\x18\x06 \x01(\tR\blocation\"+\n" +
 	"\vMoveRequest\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\"\r\n" +
 	"\vLookRequest\"&\n" +
