@@ -15,9 +15,22 @@ import (
 type Region struct {
 	ID          string         `yaml:"id"`
 	Name        string         `yaml:"name"`
+	Article     string         `yaml:"article"`
 	Description string         `yaml:"description"`
 	Modifiers   map[string]int `yaml:"modifiers"`
 	Traits      []string       `yaml:"traits"`
+}
+
+// DisplayName returns the human-readable region name with its grammatical article.
+// If Article is empty, returns Name alone.
+//
+// Precondition: Name must be non-empty.
+// Postcondition: Returns a non-empty string.
+func (r *Region) DisplayName() string {
+	if r.Article == "" {
+		return r.Name
+	}
+	return r.Article + " " + r.Name
 }
 
 // LoadRegions reads all .yaml files in dir and parses each as a Region.
