@@ -1,0 +1,5 @@
+id: steel_pipe
+name: Steel Pipe
+damage_dice: 1d8
+damage_type: bludgeoning
+traits: [two_handed]

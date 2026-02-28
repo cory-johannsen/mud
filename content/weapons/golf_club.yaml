@@ -1,0 +1,5 @@
+id: golf_club
+name: Golf Club
+damage_dice: 1d8
+damage_type: bludgeoning
+traits: [two_handed]

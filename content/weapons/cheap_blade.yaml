@@ -1,0 +1,5 @@
+id: cheap_blade
+name: Cheap Blade
+damage_dice: 1d4
+damage_type: slashing
+traits: [concealable, light]

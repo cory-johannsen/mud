@@ -2,6 +2,7 @@ id: dock_hook
 name: Dock Hook
 description: A curved cargo hook with a worn wooden handle. Made for bales, used for worse.
 kind: weapon
+weapon_ref: dock_hook
 weight: 1.5
 stackable: false
 max_stack: 1

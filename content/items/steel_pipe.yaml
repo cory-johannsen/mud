@@ -2,6 +2,7 @@ id: steel_pipe
 name: Steel Pipe
 description: A length of galvanized steel pipe. Heavy, blunt, and effective.
 kind: weapon
+weapon_ref: steel_pipe
 weight: 2.0
 stackable: false
 max_stack: 1

@@ -1,0 +1,5 @@
+id: dock_hook
+name: Dock Hook
+damage_dice: 1d6
+damage_type: piercing
+traits: [grapple]

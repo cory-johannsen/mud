@@ -1,0 +1,5 @@
+id: suburban_machete
+name: Suburban Machete
+damage_dice: 1d8
+damage_type: slashing
+traits: [versatile]

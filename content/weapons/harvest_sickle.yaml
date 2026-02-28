@@ -1,0 +1,5 @@
+id: harvest_sickle
+name: Harvest Sickle
+damage_dice: 1d6
+damage_type: slashing
+traits: [light]
