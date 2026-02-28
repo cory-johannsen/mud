@@ -10,30 +10,66 @@ zone:
           exits:
             - direction: north
               target: rotgut_alley
+            - direction: west
+              target: wayne_dawgs_trailer
+            - direction: east
+              target: last_stand_lodge
+            - direction: south
+              target: the_rusty_oasis
+          spawns:
+            - template: ganger
+              count: 2
+              respawn_after: "3m"
         - id: wayne_dawgs_trailer
           title: Wayne Dawg's Trailer
           description: Wayne Dawg, a grizzled old tweaker, lives in this trailer. It’s covered in rust and oil stains, with a makeshift lab attached to the side. Wayne Dawg is the lowliest of low. A downright dirty dog if there ever was one. This is his trailer, and he’s not one to share.
+          exits:
+            - direction: east
+              target: grinders_row
         - id: the_rusty_oasis
           title: The Rusty Oasis
           description: This trailer belongs to Slick Sally, a resourceful scavenger and mechanic. Sally runs a small black-market shop out of her trailer, dealing in anything from salvaged tech to rare machine parts. Her trailer is surrounded by makeshift barricades and a pile of scrap.
+          exits:
+            - direction: north
+              target: grinders_row
+            - direction: east
+              target: roach_haven
+            - direction: south
+              target: junkers_dream
+            - direction: west
+              target: the_green_hell
           properties:
             area: filth_court
         - id: roach_haven
           title: Roach Haven
           description: The trailer of Big Lou, a conspiracy theorist who believes the apocalypse was orchestrated by secret government programs. His trailer is a fortress of tinfoil and antennae, constantly broadcasting strange signals and plastered with various symbols and warning signs.
+          exits:
+            - direction: west
+              target: the_rusty_oasis
+            - direction: south
+              target: the_bottle_shack
           properties:
             area: filth_court
         - id: last_stand_lodge
           title: Last Stand Lodge
           description: Owned by Sergeant Mack, a grizzled ex-military survivalist. His trailer is heavily fortified with sandbags and barbed wire. Inside, it’s an armory of old-world weapons and survival gear. Mack trains locals in combat and survival, and his place is a known hangout for drifters seeking protection.
+          exits:
+            - direction: west
+              target: grinders_row
         - id: junkers_dream
           title: Junker's Dream
-          description: This trailer is home to Tina Wires, a tech expert who runs a cyber rigging service for the few who can afford it. She’s modified her trailer with solar panels and digital security, and it's packed with scavenged electronics. Her place is always buzzing with a faint hum of machinery.
+          description: This trailer is home to Tina Wires, a tech expert who runs a cyber rigging service for the few who can afford it. She’s modified her trailer with solar panels and digital security, and it’s packed with scavenged electronics. Her place is always buzzing with a faint hum of machinery.
+          exits:
+            - direction: north
+              target: the_rusty_oasis
           properties:
             area: filth_court
         - id: the_green_hell
           title: The Green Hell
           description: A lush, overgrown trailer owned by Herb, a strange recluse who is obsessed with growing post-apocalyptic food in his greenhouse and hydroponic system. His trailer is filled with plants and crawling vines, and it smells strongly of soil and decay.
+          exits:
+            - direction: east
+              target: the_rusty_oasis
           properties:
             area: filth_court
         - id: rotgut_alley
@@ -42,129 +78,272 @@ zone:
           exits:
             - direction: south
               target: grinders_row
+            - direction: east
+              target: the_bottle_shack
+            - direction: west
+              target: the_heap
+            - direction: north
+              target: the_graveyard
+            - direction: northeast
+              target: ashen_hollow
+            - direction: northwest
+              target: the_still
+          spawns:
+            - template: ganger
+              count: 1
+              respawn_after: "3m"
+            - template: scavenger
+              count: 1
+              respawn_after: "3m"
         - id: the_bottle_shack
           title: The Bottle Shack
           description: This is Whiskey Joe’s trailer, a former bartender who now distills his own liquor from whatever he can find. Joe runs an unofficial bar out of his trailer, trading moonshine and stories with anyone who passes through. His trailer is surrounded by empty bottles, and a smoky fire pit is usually burning nearby.
+          exits:
+            - direction: north
+              target: roach_haven
+            - direction: west
+              target: rotgut_alley
           properties:
             area: filth_court
         - id: the_heap
           title: The Heap
           description: This trailer is a cobbled-together monstrosity, owned by Old Rusty, a legendary scavenger known for his ability to find and repurpose almost anything. The trailer is half-buried in a mountain of scrap metal, with makeshift extensions welded onto it. It's impossible to tell where the junk ends and the trailer begins.
+          exits:
+            - direction: east
+              target: rotgut_alley
+            - direction: north
+              target: the_tinkers_den
+            - direction: south
+              target: scrapshack_23
           properties:
             area: scrapheap_circle
         - id: the_tinkers_den
           title: The Tinker's Den
           description: Home to Clutch, a talented mechanic who specializes in fixing up old-world vehicles and tech. His trailer is surrounded by half-disassembled cars and bikes, with greasy tools scattered around. People come here for repairs, but at a price—often paid in valuable scrap.
+          exits:
+            - direction: south
+              target: the_heap
+            - direction: east
+              target: wreckers_rest
           properties:
             area: scrapheap_circle
         - id: scrapshack_23
           title: Scrapshack 23
           description: A trailer covered in rusted metal sheets and salvaged materials, owned by Gail "Grinder" Graves, a tough-as-nails scrapper who deals in bulk metal. Her trailer has a massive makeshift crane outside, used to haul larger pieces of debris to her scrapyard for sorting and trade.
+          exits:
+            - direction: north
+              target: the_heap
+            - direction: east
+              target: salvage_hut
           properties:
             area: scrapheap_circle
         - id: wreckers_rest
           title: Wrecker's Rest
           description: A camp site where The Twins, a duo of scavengers named Vic and Vee, operate. They live out of a beaten-up RV and spend their days sifting through the heaps of scrap around them. Their camp is surrounded by half-melted mannequins and broken droids they use for spare parts.
+          exits:
+            - direction: west
+              target: the_tinkers_den
         - id: salvage_hut
           title: Salvage Hut
           description: A trailer owned by Cog, a tech enthusiast obsessed with creating gadgets from scavenged parts. Cog’s trailer is filled with half-finished projects and bizarre contraptions. The area around his home is littered with bits of old tech, and he’s always on the lookout for rare finds to add to his collection.
+          exits:
+            - direction: west
+              target: scrapshack_23
         - id: the_still
           title: The Still
           description: Owned by Moonshine Mary, a notorious bootlegger who distills potent liquor from anything she can scrounge up. Her trailer is surrounded by barrels and old stills, with a thick, acrid smell of fermenting alcohol always in the air. Mary runs an underground bar from her trailer, offering drinks strong enough to make you forget the world’s problems—if you survive them.
+          exits:
+            - direction: southeast
+              target: rotgut_alley
+            - direction: south
+              target: rotgut_shack
+            - direction: west
+              target: the_barrel_house
           properties:
             area: rotgut_alley
         - id: rotgut_shack
           title: Rotgut Shack
           description: A dingy, dilapidated trailer belonging to One-Eyed Sam, an ex-con with a knack for smuggling and under-the-table deals. Sam’s trailer is covered in layers of grime, and people know it as a place to go for illegal goods. It’s rumored Sam hides valuable contraband in secret compartments throughout his trailer.
+          exits:
+            - direction: north
+              target: the_still
+            - direction: south
+              target: snakepit
           properties:
             area: rotgut_alley
         - id: the_barrel_house
           title: The Barrel House
           description: Whiskey Pete runs this trailer-turned-distillery, a ramshackle operation built from salvaged barrels and broken-down machinery. He specializes in rotgut—cheap, harsh liquor that barely qualifies as drinkable. Pete trades his booze for favors, and while his drinks may be terrible, they’re strong enough to keep his regulars coming back.
+          exits:
+            - direction: east
+              target: the_still
+            - direction: south
+              target: the_keg_hole
           properties:
             area: rotgut_alley
         - id: snakepit
           title: Snakepit
           description: This camp site belongs to Darla "Fangs" Carter, a shady character known for her dealings in poisons and other dangerous substances. She runs a quiet business selling tainted booze and narcotics. Darla’s camp is built around an old, rusted van, and she’s known for being quick to pull a knife if a deal goes wrong.
+          exits:
+            - direction: north
+              target: rotgut_shack
           properties:
             area: rotgut_alley
         - id: the_keg_hole
           title: The Keg Hole
-          description: A run-down trailer that Big Grizz, a former bar bouncer, has converted into a low-class dive bar. It’s packed with mismatched chairs, tables made from scrap wood, and barrels of his infamous homebrew. It’s a hotspot for seedy negotiations and drunken brawls. Grizz doesn't ask questions as long as you pay and don’t break his stuff.
+          description: A run-down trailer that Big Grizz, a former bar bouncer, has converted into a low-class dive bar. It’s packed with mismatched chairs, tables made from scrap wood, and barrels of his infamous homebrew. It’s a hotspot for seedy negotiations and drunken brawls. Grizz doesn’t ask questions as long as you pay and don’t break his stuff.
+          exits:
+            - direction: north
+              target: the_barrel_house
           properties:
             area: rotgut_alley
         - id: the_graveyard
           title: The Graveyard
           description: Owned by Silent Lucy, a mysterious woman who rarely speaks. Her trailer is surrounded by old, rusted-out vehicles and relics of the past, like a graveyard for forgotten machines. Lucy is a loner, living among these broken remnants, and some say she’s more comfortable with the dead than the living.
+          exits:
+            - direction: south
+              target: rotgut_alley
+            - direction: east
+              target: the_mausoleum
+            - direction: north
+              target: ghosts_rest
           properties:
             area: boneyard_bend
         - id: the_mausoleum
           title: The Mausoleum
           description: Grim Pete runs this eerie trailer, which looks more like a tomb than a home. It’s covered in dark, weather-beaten panels and adorned with skulls and other morbid symbols. Pete is known for his obsession with death and decay, and locals come to him when they need to dispose of things—often bodies, or items best forgotten.
+          exits:
+            - direction: west
+              target: the_graveyard
+            - direction: north
+              target: the_forgotten_trailer
           properties:
             area: boneyard_bend
         - id: ghosts_rest
           title: Ghost’s Rest
           description: A camp site set up by Wraith, a drifter who claims to have no past. His camp consists of a small, battered tent and a few scattered belongings, always shifting as he never stays long. Wraith is known to vanish for days at a time, and rumors swirl that he has ties to the supernatural, though no one knows for sure.
+          exits:
+            - direction: south
+              target: the_graveyard
+            - direction: east
+              target: bonepickers_roost
           properties:
             area: boneyard_bend
         - id: the_forgotten_trailer
           title: The Forgotten Trailer
           description: This abandoned, crumbling trailer is said to have belonged to a family that vanished years ago. Now overgrown with weeds and covered in rust, no one has dared to move in. The place is rumored to be haunted, with strange noises and shadowy figures spotted near it at night.
+          exits:
+            - direction: south
+              target: the_mausoleum
           properties:
             area: boneyard_bend
         - id: bonepickers_roost
           title: Bonepicker's Roost
           description: Old Man Tully, a former undertaker, lives in this decrepit trailer surrounded by macabre trophies. Tully scavenges anything he finds from abandoned homes or grave sites, storing his collection of eerie artifacts in plain sight. His trailer has the feel of a crypt, and Tully himself seems like a relic of the old world.
+          exits:
+            - direction: west
+              target: ghosts_rest
           properties:
             area: boneyard_bend
         - id: ashen_hollow
           title: Ashen Hollow
           description: This trailer belongs to Burner Bill, the local pyromaniac. Bill runs makeshift bonfires out of whatever flammable junk he can find. His trailer is a scorched husk, and the ground around it is charred black from constant burnings. Bill is known for his love of destruction and will burn anything for the right price.
+          exits:
+            - direction: southwest
+              target: rotgut_alley
+            - direction: east
+              target: smokers_den
+            - direction: north
+              target: the_furnace
           properties:
             area: cinder_pit
         - id: smokers_den
           title: Smoker's Den
           description: Ember, a former firefighter turned arsonist, occupies this trailer. It’s surrounded by smoking piles of debris and half-melted objects from her destructive tendencies. Ember is a master of controlled burns and uses her skills to dispose of evidence—or people—when necessary. Her trailer constantly smells of smoke, and a faint haze lingers in the air.
+          exits:
+            - direction: west
+              target: ashen_hollow
+            - direction: north
+              target: scorchside_camp
           properties:
             area: cinder_pit
         - id: the_furnace
           title: The Furnace
           description: A large, rundown trailer owned by Big Hank, a burly blacksmith who forges scrap metal into weapons and tools. His trailer doubles as his workshop, with glowing embers and a forge burning outside. The constant clanging of metal and the roar of flames make this place feel like an industrial wasteland.
+          exits:
+            - direction: south
+              target: ashen_hollow
+            - direction: east
+              target: the_embers_edge
           properties:
             area: cinder_pit
         - id: scorchside_camp
           title: Scorchside Camp
           description: This camp site is occupied by Sooty Joe, a drifter who survives by burning trash and selling scavenged materials. His tent is surrounded by piles of ash and the remains of burnt-out objects. Joe always seems to have a small fire going, and he trades in charred items that others might find useless but still hold value in a post-apocalyptic world.
+          exits:
+            - direction: south
+              target: smokers_den
           properties:
             area: cinder_pit
         - id: the_embers_edge
           title: The Ember's Edge
           description: Flint, a former chemist, operates from this trailer. Flint makes explosives and incendiary devices from whatever he can find. His trailer is lined with fire-damaged equipment and stacks of mysterious barrels, making it a hazardous place to visit. He’s well known for supplying the more violent residents of Rustbucket Ridge.
+          exits:
+            - direction: west
+              target: the_furnace
+            - direction: north
+              target: blade_house
           properties:
             area: cinder_pit
         - id: blade_house
           title: Blade House
           description: Owned by Knives, a notorious street fighter and weapons dealer. Her trailer is reinforced with metal sheets and covered in graffiti. Inside, it’s a veritable armory of knives, machetes, and other sharp implements. Knives runs an underground fight club in Shiv Way and trades weapons for favors and protection.
+          exits:
+            - direction: south
+              target: the_embers_edge
+            - direction: east
+              target: the_cutthroat
+            - direction: north
+              target: the_slashers_den
+          spawns:
+            - template: ganger
+              count: 2
+              respawn_after: "2m"
           properties:
             area: shiv_way
         - id: the_cutthroat
           title: The Cutthroat
           description: Razor Rick lives in this beat-up trailer, which is covered in makeshift fortifications and surrounded by a barbed wire fence. Rick is a hitman and enforcer for one of the local gangs. His trailer is littered with weapons, and the locals know not to mess with him unless they have business. He’s known for being ruthless, always looking for his next job.
+          exits:
+            - direction: west
+              target: blade_house
+            - direction: north
+              target: blood_camp
           properties:
             area: shiv_way
         - id: blood_camp
           title: Blood Camp
           description: Scar, a vicious mercenary, squats in this run-down camp site. His tent is made from patched-together tarps, and his area is marked by crude barricades of scrap metal and broken-down vehicles. Scar has a reputation for solving problems with violence and is often hired to settle disputes or enforce debts.
+          exits:
+            - direction: south
+              target: the_cutthroat
           properties:
             area: shiv_way
         - id: the_slashers_den
           title: The Slasher's Den
           description: This trailer belongs to Grit, a former gang leader who’s turned Shiv Way into his personal turf. Grit’s trailer is heavily fortified, with armed guards often lurking outside. It’s a hub for illegal dealings, weapon sales, and brawls. Inside, the trailer is filled with loot from years of crime, and Grit runs the show with an iron fist.
+          exits:
+            - direction: south
+              target: blade_house
+            - direction: east
+              target: the_razor_nest
           properties:
             area: shiv_way
         - id: the_razor_nest
           title: The Razor Nest
           description: A camp site occupied by Flea, a twitchy, wiry pickpocket and thief. Flea’s small tent is hidden among piles of junk and debris, and he’s known for disappearing into the shadows at a moment’s notice. He’s a low-level crook who survives by stealing from others, and his camp is littered with stolen goods, waiting to be fenced.
+          exits:
+            - direction: west
+              target: the_slashers_den
           properties:
             area: shiv_way
