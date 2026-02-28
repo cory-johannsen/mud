@@ -1,0 +1,35 @@
+# Production config for CLI tools (setrole, migrate, etc.)
+# Use with kubectl port-forward to reach the k8s postgres:
+#   kubectl port-forward -n mud svc/postgres 5432:5432
+# Then run: ./setrole --config configs/prod.yaml --username <user> --role <role>
+# Pass the DB password via env var to avoid storing it here:
+#   MUD_DATABASE_PASSWORD=<password> ./setrole --config configs/prod.yaml ...
+
+server:
+  mode: standalone
+  type: mud
+
+database:
+  host: localhost
+  port: 5432
+  user: mud
+  name: mud
+  sslmode: disable
+  max_conns: 5
+  min_conns: 1
+  max_conn_lifetime: 1h
+
+telnet:
+  host: 0.0.0.0
+  port: 4000
+  read_timeout: 5m
+  write_timeout: 30s
+
+logging:
+  level: info
+  format: console
+
+gameserver:
+  grpc_host: 127.0.0.1
+  grpc_port: 50051
+  round_duration_ms: 6000
