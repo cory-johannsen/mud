@@ -361,3 +361,29 @@ func TestManager_Spawn_Property_SuffixesAreUnique(t *testing.T) {
 		}
 	})
 }
+
+func TestManager_Spawn_AfterDeath_SuffixesReassigned(t *testing.T) {
+	tmpl := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+
+	// Spawn two gangers — they become A and B.
+	first, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+	second, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+
+	firstGot, _ := mgr.Get(first.ID)
+	assert.Equal(t, "Ganger A", firstGot.Name)
+	assert.Equal(t, "Ganger B", second.Name)
+
+	// First ganger dies and is removed.
+	require.NoError(t, mgr.Remove(first.ID))
+
+	// Spawn a replacement — survivor (B) is renamed to A, new one gets B.
+	replacement, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+
+	survivorGot, _ := mgr.Get(second.ID)
+	assert.Equal(t, "Ganger A", survivorGot.Name)
+	assert.Equal(t, "Ganger B", replacement.Name)
+}
