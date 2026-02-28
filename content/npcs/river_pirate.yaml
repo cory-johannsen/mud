@@ -1,0 +1,33 @@
+id: river_pirate
+name: River Pirate
+description: A weathered river pirate in waders and a rain slicker, eyes sharp for targets on the water.
+level: 3
+max_hp: 32
+ac: 15
+perception: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 14
+  dexterity: 16
+  constitution: 14
+  intelligence: 10
+  wisdom: 9
+  charisma: 12
+loot:
+  currency:
+    min: 25
+    max: 100
+  items:
+    - item: fishing_net
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+    - item: river_map
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

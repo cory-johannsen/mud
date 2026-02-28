@@ -1,0 +1,8 @@
+id: fishing_net
+name: Fishing Net
+description: A hand-knotted fishing net, mended many times.
+kind: junk
+weight: 1.5
+stackable: false
+max_stack: 1
+value: 18

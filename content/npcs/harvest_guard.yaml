@@ -1,0 +1,29 @@
+id: harvest_guard
+name: Harvest Guard
+description: A sturdy guard in work boots and a flak jacket, watching over the island's precious crops.
+level: 2
+max_hp: 26
+ac: 15
+perception: 7
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 15
+  dexterity: 10
+  constitution: 14
+  intelligence: 10
+  wisdom: 12
+  charisma: 10
+loot:
+  currency:
+    min: 10
+    max: 50
+  items:
+    - item: fresh_produce
+      chance: 0.35
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1

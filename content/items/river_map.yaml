@@ -1,0 +1,8 @@
+id: river_map
+name: River Map
+description: A hand-drawn map of river channels, sandbars, and pirate hideouts.
+kind: junk
+weight: 0.1
+stackable: true
+max_stack: 3
+value: 20

@@ -1,0 +1,433 @@
+zone:
+  id: sauvie_island
+  name: "Sauvie Island"
+  description: "The last agrarian holdout in the region. Farm compounds and river pirates contest over the only place still growing real food."
+  start_room: sauvie_bridge_south
+  rooms:
+    - id: sauvie_bridge_south
+      title: "Sauvie Island Bridge — South End"
+      description: |
+        The southern end of the old Sauvie Island Bridge groans under your weight.
+        Rusted cables sway in the river wind. Below, the Multnomah Channel churns
+        grey and cold. Sandbags and razor wire mark the island's first line of defense.
+        The mainland sprawls behind you to the southeast, smoke rising from the waterfront.
+      exits:
+        - direction: north
+          target: sauvie_tollgate
+        - direction: southeast
+          target: waterfront_trail
+          zone: downtown
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: sauvie_tollgate
+      title: "Bridge Tollgate"
+      description: |
+        A crude checkpoint blocks the road just past the bridge. Concrete barriers
+        funnel traffic through a single lane watched by armed sentries. A hand-painted
+        sign reads "ISLAND COUNCIL TERRITORY — STATE YOUR BUSINESS."
+        Shell casings litter the pavement.
+      exits:
+        - direction: south
+          target: sauvie_bridge_south
+        - direction: north
+          target: sauvie_road
+      spawns:
+        - template: harvest_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: tense
+
+    - id: sauvie_road
+      title: "Sauvie Island Road"
+      description: |
+        The main road cuts through overgrown fields and collapsed utility poles.
+        Cracked asphalt stretches in both directions, patched here and there with
+        packed gravel. Irrigation ditches run along both shoulders, carrying
+        brown water toward the farms. The air smells of wet earth and woodsmoke.
+      exits:
+        - direction: south
+          target: sauvie_tollgate
+        - direction: north
+          target: sauvie_trading_post
+        - direction: east
+          target: sauvie_pumpkin_patch
+        - direction: west
+          target: sauvie_irrigation_canal
+      properties:
+        lighting: overcast
+        atmosphere: rural
+
+    - id: sauvie_pumpkin_patch
+      title: "Pumpkin Patch Fields"
+      description: |
+        Rows of squash, beans, and corn stretch across the old u-pick farm grounds.
+        The soil here is dark and rich, tended by hand. Scarecrows made from
+        salvaged mannequin parts stand sentinel between the rows.
+        A weathered barn sits at the field's edge, its red paint long faded to grey.
+      exits:
+        - direction: west
+          target: sauvie_road
+        - direction: north
+          target: sauvie_berry_fields
+        - direction: east
+          target: sauvie_farmhouse
+      spawns:
+        - template: island_farmer
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: daylight
+        atmosphere: pastoral
+
+    - id: sauvie_berry_fields
+      title: "Berry Fields"
+      description: |
+        Tangled rows of blackberry and marionberry bushes run wild across
+        what was once a tidy pick-your-own operation. Thorny canes arch
+        overhead in places, forming dark tunnels. Birds scatter at your approach.
+        The berries are small but sweet — a rare luxury.
+      exits:
+        - direction: south
+          target: sauvie_pumpkin_patch
+        - direction: east
+          target: sauvie_the_orchard
+        - direction: north
+          target: sauvie_chicken_coop
+      spawns:
+        - template: island_farmer
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dappled
+        atmosphere: overgrown
+
+    - id: sauvie_farmhouse
+      title: "Island Farmhouse"
+      description: |
+        A two-story farmhouse stands stubbornly against time and weather.
+        The porch sags but holds. Smoke drifts from a chimney patched with
+        sheet metal. Muddy boots line the front steps. Through a window
+        you can see oil lamps burning on a kitchen table covered in seed catalogs.
+      exits:
+        - direction: west
+          target: sauvie_pumpkin_patch
+        - direction: north
+          target: sauvie_barn
+      properties:
+        lighting: warm
+        atmosphere: sheltered
+
+    - id: sauvie_barn
+      title: "Old Red Barn"
+      description: |
+        The barn leans slightly but its bones are solid old-growth timber.
+        Hay bales and salvaged equipment fill the interior. A loft overhead
+        holds sacks of dried grain. The smell of animals and hay is thick.
+        Chickens wander in and out through gaps in the siding.
+      exits:
+        - direction: south
+          target: sauvie_farmhouse
+        - direction: west
+          target: sauvie_chicken_coop
+        - direction: north
+          target: sauvie_dairy_farm
+      properties:
+        lighting: dim
+        atmosphere: dusty
+
+    - id: sauvie_chicken_coop
+      title: "Chicken Coops"
+      description: |
+        A cluster of wire-mesh coops and converted shipping containers
+        house the island's poultry operation. Roosters crow at all hours.
+        Feathers drift in the breeze. A hand-lettered sign warns
+        "STEAL AN EGG, LOSE A HAND — ISLAND COUNCIL."
+      exits:
+        - direction: south
+          target: sauvie_berry_fields
+        - direction: east
+          target: sauvie_barn
+        - direction: north
+          target: sauvie_dairy_farm
+      spawns:
+        - template: island_farmer
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: daylight
+        atmosphere: noisy
+
+    - id: sauvie_dairy_farm
+      title: "Dairy Farm Compound"
+      description: |
+        A fortified compound surrounds the island's dairy operation.
+        Jersey cows graze behind electrified fencing powered by solar panels.
+        The milking barn has been reinforced with corrugated steel.
+        Armed guards patrol the perimeter. Milk and cheese are worth
+        more than ammunition out here.
+      exits:
+        - direction: south
+          target: sauvie_barn
+        - direction: southwest
+          target: sauvie_chicken_coop
+        - direction: north
+          target: sauvie_oak_island
+        - direction: east
+          target: sauvie_granary
+      spawns:
+        - template: harvest_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: daylight
+        atmosphere: guarded
+
+    - id: sauvie_granary
+      title: "Island Granary"
+      description: |
+        A cluster of grain silos and storage buildings forms the heart of
+        the island's food reserves. The concrete silos are patched but
+        watertight. Guards check every sack that enters or leaves.
+        This is the most strategically important location on Sauvie Island —
+        whoever controls the granary controls the food supply.
+      exits:
+        - direction: west
+          target: sauvie_dairy_farm
+        - direction: north
+          target: sauvie_sturgeon_lake
+      spawns:
+        - template: harvest_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: daylight
+        atmosphere: guarded
+
+    - id: sauvie_irrigation_canal
+      title: "Irrigation Canal"
+      description: |
+        A hand-dug canal carries water from the Gilbert River into the farmlands.
+        Wooden sluice gates control the flow. The banks are muddy and lined
+        with cattails. Frogs croak in the shallows. Someone has rigged
+        a crude waterwheel to power a grinding stone nearby.
+      exits:
+        - direction: east
+          target: sauvie_road
+        - direction: north
+          target: sauvie_gilbert_river
+        - direction: west
+          target: sauvie_collins_beach
+      properties:
+        lighting: daylight
+        atmosphere: humid
+
+    - id: sauvie_collins_beach
+      title: "Collins Beach — Pirate Cove"
+      description: |
+        A sandy beach sheltered by cottonwood trees serves as the river pirates'
+        base of operations. Flat-bottomed boats are pulled up on the sand.
+        Driftwood shelters and canvas lean-tos dot the tree line.
+        The smell of smoked fish hangs in the air. These pirates run
+        the river trade — legitimate and otherwise.
+      exits:
+        - direction: east
+          target: sauvie_irrigation_canal
+        - direction: north
+          target: sauvie_river_dock
+      spawns:
+        - template: river_pirate
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dappled
+        atmosphere: smoky
+
+    - id: sauvie_river_dock
+      title: "River Dock"
+      description: |
+        A ramshackle dock extends into the Multnomah Channel on barnacle-crusted
+        pilings. Boats of various sizes are tied off — rowboats, a pontoon
+        barge, and a converted fishing trawler with armor plating.
+        Cargo nets hang from a hand-cranked crane. The current is strong here.
+      exits:
+        - direction: south
+          target: sauvie_collins_beach
+        - direction: east
+          target: sauvie_gilbert_river
+      spawns:
+        - template: river_pirate
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: sauvie_gilbert_river
+      title: "Gilbert River Waterway"
+      description: |
+        The Gilbert River winds through the interior of the island, sluggish
+        and reed-choked. Small boats navigate the narrow channel between
+        mudflats and sandbars. Herons stand motionless in the shallows.
+        This waterway connects the pirate cove to the interior fishing camps.
+      exits:
+        - direction: south
+          target: sauvie_irrigation_canal
+        - direction: west
+          target: sauvie_river_dock
+        - direction: east
+          target: sauvie_oak_island
+        - direction: north
+          target: sauvie_sturgeon_lake
+      properties:
+        lighting: overcast
+        atmosphere: marshy
+
+    - id: sauvie_oak_island
+      title: "Oak Island Wetlands"
+      description: |
+        A low-lying area of marshes and flooded meadows surrounds ancient
+        Oregon white oaks draped in moss. The ground squelches underfoot.
+        Migrating birds fill the sky in shifting patterns. Hidden among
+        the wetlands are hunting blinds and observation posts — someone
+        is always watching the interior approaches.
+      exits:
+        - direction: south
+          target: sauvie_dairy_farm
+        - direction: west
+          target: sauvie_gilbert_river
+        - direction: north
+          target: sauvie_north_fields
+      properties:
+        lighting: overcast
+        atmosphere: marshy
+
+    - id: sauvie_the_orchard
+      title: "The Orchard"
+      description: |
+        Rows of apple, pear, and plum trees stand in disciplined lines,
+        their branches heavy with fruit in season. The orchard is the pride
+        of the island — and its most jealously guarded resource.
+        Tripwires and noisemakers are strung between the trees.
+        Guards patrol with dogs.
+      exits:
+        - direction: west
+          target: sauvie_berry_fields
+        - direction: north
+          target: sauvie_north_fields
+      spawns:
+        - template: harvest_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dappled
+        atmosphere: guarded
+
+    - id: sauvie_north_fields
+      title: "Northern Fields"
+      description: |
+        Wide open fields stretch toward the northern tip of the island.
+        Wheat and barley sway in the river wind. The soil is sandy here
+        but productive. Distant figures work the rows with hand tools.
+        To the north, the Columbia River is visible as a grey expanse
+        beyond the tree line.
+      exits:
+        - direction: south
+          target: sauvie_oak_island
+        - direction: southeast
+          target: sauvie_the_orchard
+        - direction: north
+          target: sauvie_north_tip
+        - direction: east
+          target: sauvie_sturgeon_lake
+      spawns:
+        - template: island_farmer
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: daylight
+        atmosphere: open
+
+    - id: sauvie_sturgeon_lake
+      title: "Sturgeon Lake"
+      description: |
+        A broad, shallow lake fills the island's interior basin. Fishing camps
+        cluster along the southern shore — canvas tents, drying racks heavy
+        with smoked fish, and fire pits ringed with river stones.
+        The lake is the island's primary protein source. Sturgeon still
+        run here, some of them enormous.
+      exits:
+        - direction: south
+          target: sauvie_granary
+        - direction: west
+          target: sauvie_gilbert_river
+        - direction: southwest
+          target: sauvie_north_fields
+        - direction: north
+          target: sauvie_fishing_camp
+      spawns:
+        - template: river_pirate
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: daylight
+        atmosphere: calm
+
+    - id: sauvie_fishing_camp
+      title: "Fishing Camp"
+      description: |
+        A permanent camp of driftwood shacks and canvas shelters sits at the
+        lake's edge. Nets hang drying between poles. A smokehouse built from
+        an old shipping container produces a constant haze. Fishermen mend
+        nets and argue over territory. The catch is shared — mostly.
+      exits:
+        - direction: south
+          target: sauvie_sturgeon_lake
+        - direction: north
+          target: sauvie_north_tip
+      spawns:
+        - template: river_pirate
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: smoky
+        atmosphere: busy
+
+    - id: sauvie_north_tip
+      title: "North Tip Overlook"
+      description: |
+        The northern point of Sauvie Island juts into the confluence of the
+        Willamette and Columbia rivers. The view is vast — grey water stretching
+        to forested hills on every side. Wind hammers the exposed point.
+        A crude watchtower built from telephone poles offers a vantage point
+        over approaching river traffic. On a clear day you can see Mount St. Helens.
+      exits:
+        - direction: south
+          target: sauvie_north_fields
+        - direction: southeast
+          target: sauvie_fishing_camp
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: sauvie_trading_post
+      title: "Island Trading Post"
+      description: |
+        A fortified general store operates from a converted gas station.
+        Shelves hold preserved food, seed stock, hand tools, and ammunition.
+        Trade is conducted through a reinforced window. The proprietor,
+        known only as "the Factor," sets prices and brokers deals between
+        the farmers, the guards, and the river pirates.
+      exits:
+        - direction: south
+          target: sauvie_road
+        - direction: north
+          target: sauvie_berry_fields
+        - direction: east
+          target: sauvie_farmhouse
+      properties:
+        lighting: lantern
+        atmosphere: commercial

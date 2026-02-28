@@ -1,0 +1,29 @@
+id: island_farmer
+name: Island Farmer
+description: A sun-weathered farmer in overalls, carrying a pitchfork and a suspicious squint.
+level: 1
+max_hp: 18
+ac: 13
+perception: 7
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 12
+  dexterity: 10
+  constitution: 14
+  intelligence: 10
+  wisdom: 14
+  charisma: 9
+loot:
+  currency:
+    min: 5
+    max: 25
+  items:
+    - item: fresh_produce
+      chance: 0.6
+      min_qty: 1
+      max_qty: 2
+    - item: scrap_metal
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
