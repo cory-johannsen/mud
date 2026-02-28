@@ -330,6 +330,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleBalance(uid)
 	case *gamev1.ClientMessage_SetRole:
 		return s.handleSetRole(uid, p.SetRole)
+	case *gamev1.ClientMessage_Teleport:
+		return s.handleTeleport(uid, p.Teleport)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1013,6 +1015,85 @@ func (s *GameServiceServer) handleSetRole(uid string, req *gamev1.SetRoleRequest
 
 	return messageEvent(fmt.Sprintf("Set role for %s (#%d): %s -> %s",
 		target.Username, target.ID, target.Role, req.Role)), nil
+}
+
+// handleTeleport moves a target player to a specific room by ID.
+//
+// Precondition: uid must be a valid connected player with admin role.
+// Postcondition: Target player is moved, location is persisted, target receives a message and room view.
+func (s *GameServiceServer) handleTeleport(uid string, req *gamev1.TeleportRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if sess.Role != "admin" {
+		return errorEvent("permission denied: admin role required"), nil
+	}
+	if req.TargetCharacter == "" || req.RoomId == "" {
+		return errorEvent("usage: teleport <character> <room_id>"), nil
+	}
+
+	targetRoom, ok := s.world.GetRoom(req.RoomId)
+	if !ok {
+		return errorEvent(fmt.Sprintf("room %q not found", req.RoomId)), nil
+	}
+
+	target, ok := s.sessions.GetPlayerByCharName(req.TargetCharacter)
+	if !ok {
+		return errorEvent(fmt.Sprintf("player %q not online", req.TargetCharacter)), nil
+	}
+
+	oldRoomID, err := s.sessions.MovePlayer(target.UID, targetRoom.ID)
+	if err != nil {
+		return errorEvent(fmt.Sprintf("failed to move player: %v", err)), nil
+	}
+
+	// Persist location immediately.
+	if target.CharacterID > 0 && s.charSaver != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := s.charSaver.SaveState(ctx, target.CharacterID, targetRoom.ID, target.CurrentHP); err != nil {
+			s.logger.Warn("persisting teleport location",
+				zap.String("target", target.CharName),
+				zap.Error(err),
+			)
+		}
+	}
+
+	// Broadcast departure from old room.
+	s.broadcastRoomEvent(oldRoomID, target.UID, &gamev1.RoomEvent{
+		Player: target.CharName,
+		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_DEPART,
+	})
+
+	// Broadcast arrival in new room.
+	s.broadcastRoomEvent(targetRoom.ID, target.UID, &gamev1.RoomEvent{
+		Player: target.CharName,
+		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
+	})
+
+	// Send message and room view to the target player.
+	roomView := s.worldH.buildRoomView(target.UID, targetRoom)
+	teleportMsg := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{
+				Content: fmt.Sprintf("You have been teleported to %s.", targetRoom.Title),
+				Type:    gamev1.MessageType_MESSAGE_TYPE_SAY,
+			},
+		},
+	}
+	teleportView := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_RoomView{RoomView: roomView},
+	}
+	if data, err := proto.Marshal(teleportMsg); err == nil {
+		_ = target.Entity.Push(data)
+	}
+	if data, err := proto.Marshal(teleportView); err == nil {
+		_ = target.Entity.Push(data)
+	}
+
+	return messageEvent(fmt.Sprintf("Teleported %s to %s (%s)",
+		target.CharName, targetRoom.Title, targetRoom.ID)), nil
 }
 
 // handleGetItem picks up an item from the room floor into the player's backpack.

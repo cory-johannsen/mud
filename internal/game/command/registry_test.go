@@ -34,7 +34,7 @@ func TestResolve_Alias(t *testing.T) {
 func TestResolve_NotFound(t *testing.T) {
 	r := DefaultRegistry()
 
-	_, ok := r.Resolve("teleport")
+	_, ok := r.Resolve("xyzzy_nonsense")
 	assert.False(t, ok)
 }
 

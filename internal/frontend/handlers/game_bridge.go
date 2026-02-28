@@ -90,7 +90,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, char.Name)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role)
 
 	cancel()
 	wg.Wait()
@@ -103,7 +103,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 //
 // Precondition: stream must be open; charName must be non-empty.
 // Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string) error {
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -379,8 +379,24 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				},
 			}
 
+		case command.HandlerTeleport:
+			if len(parsed.Args) < 2 {
+				_ = conn.WriteLine("Usage: teleport <character> <room_id>")
+				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				continue
+			}
+			msg = &gamev1.ClientMessage{
+				RequestId: reqID,
+				Payload: &gamev1.ClientMessage_Teleport{
+					Teleport: &gamev1.TeleportRequest{
+						TargetCharacter: parsed.Args[0],
+						RoomId:          parsed.Args[1],
+					},
+				},
+			}
+
 		case command.HandlerHelp:
-			h.showGameHelp(conn, registry)
+			h.showGameHelp(conn, registry, role)
 			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
 			continue
 
@@ -479,7 +495,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 }
 
 // showGameHelp displays in-game help organized by category.
-func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry) {
+func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry, role string) {
 	_ = conn.WriteLine(telnet.Colorize(telnet.BrightWhite, "Available commands:"))
 
 	categories := []struct {
@@ -506,6 +522,19 @@ func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry
 				aliases = " (" + strings.Join(cmd.Aliases, ", ") + ")"
 			}
 			_ = conn.WriteLine(telnet.Colorf(telnet.Green, "    %-12s", cmd.Name) + aliases + " — " + cmd.Help)
+		}
+	}
+
+	if role == postgres.RoleAdmin {
+		if cmds := byCategory[command.CategoryAdmin]; len(cmds) > 0 {
+			_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow, "  Admin:"))
+			for _, cmd := range cmds {
+				aliases := ""
+				if len(cmd.Aliases) > 0 {
+					aliases = " (" + strings.Join(cmd.Aliases, ", ") + ")"
+				}
+				_ = conn.WriteLine(telnet.Colorf(telnet.Green, "    %-12s", cmd.Name) + aliases + " — " + cmd.Help)
+			}
 		}
 	}
 }

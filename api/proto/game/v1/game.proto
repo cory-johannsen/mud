@@ -40,6 +40,7 @@ message ClientMessage {
     DropItemRequest drop_item = 23;
     BalanceRequest balance = 24;
     SetRoleRequest set_role = 25;
+    TeleportRequest teleport = 26;
   }
 }
 
@@ -274,6 +275,12 @@ message BalanceRequest {}
 message SetRoleRequest {
   string target_username = 1;
   string role = 2;
+}
+
+// TeleportRequest asks the server to teleport a player to a specific room.
+message TeleportRequest {
+  string target_character = 1;
+  string room_id = 2;
 }
 
 // FloorItem describes an item on the room floor.

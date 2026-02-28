@@ -37,6 +37,7 @@ const (
 	HandlerDrop      = "drop"
 	HandlerBalance   = "balance"
 	HandlerSetRole   = "setrole"
+	HandlerTeleport  = "teleport"
 )
 
 // Command defines a player-invocable command.
@@ -98,6 +99,7 @@ func BuiltinCommands() []Command {
 
 		// Admin commands
 		{Name: "setrole", Aliases: nil, Help: "Set a player's role (admin only)", Category: CategoryAdmin, Handler: HandlerSetRole},
+		{Name: "teleport", Aliases: []string{"tp"}, Help: "Teleport a player to a room (admin only)", Category: CategoryAdmin, Handler: HandlerTeleport},
 	}
 }
 

@@ -194,6 +194,20 @@ func (m *Manager) GetPlayer(uid string) (*PlayerSession, bool) {
 	return sess, ok
 }
 
+// GetPlayerByCharName returns the session for the player with the given character name.
+//
+// Postcondition: Returns (session, true) if found, or (nil, false) otherwise.
+func (m *Manager) GetPlayerByCharName(charName string) (*PlayerSession, bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, sess := range m.players {
+		if sess.CharName == charName {
+			return sess, true
+		}
+	}
+	return nil, false
+}
+
 // PlayerCount returns the total number of connected players.
 func (m *Manager) PlayerCount() int {
 	m.mu.RLock()
