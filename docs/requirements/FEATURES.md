@@ -1,17 +1,22 @@
-- Kubernetes deployment support for production release.  To maintain stability and allow for rolling deploys the system must have a kubernetes deployment model.  Kind is already installed and can be used to host the cluster.
-- Random character generation mode. At each stage of character generation the player should be able to choose Random and have the rest of the choices picked randomly. This should be the default selection.
-- Armor, rings, necklaces.  Each player should have dedicated equipped item slots for: armor (head, left arm, right arm, torso, left leg, right leg, feet), main hand weapon, off-hand weapon, neck, 10 rings)
-- Weapon and armor library.  A large library of equipment needs to exist with multiple options for every item type.
-- Character initial inventory: a creation each character receives an inventory of basic items. These should conform to the character job.
-- Skills
-- Character levelling
-- Equipment levelling, advanced equipment, cursed equipment
-- Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor.
-- Non-combat NPCs: merchants, quest givers, hirelings, etc.
-- Per-NPC type custom behaviors, dialog, interactions, aggressiveness
-- Room equipment
-- Combat distance
-- Bosses 
-- Quests
-- Factions and allegiances, economies, exchange rates, faction-specific items and quests
-- Crafting
+- [x] Kubernetes deployment support for production release.  To maintain stability and allow for rolling deploys the system must have a kubernetes deployment model.  Kind is already installed and can be used to host the cluster.
+- [x] Random character generation mode. At each stage of character generation the player should be able to choose Random and have the rest of the choices picked randomly. This should be the default selection.
+- [ ] Armor, rings, necklaces.  Each player should have dedicated equipped item slots for: armor (head, left arm, right arm, torso, left leg, right leg, feet), main hand weapon, off-hand weapon, neck, 10 rings)
+- [ ] Region descriptions instead of ID strings in character descriptions
+- [ ] Switching characters without logout and disconnect
+- [ ] Inactivity warning before automatic disconnect.  Serverside logging of disconnect and reason.
+- [ ] Time of day, including daylight/darkness effects and descriptive details.  Time of day is displayed in the prompt.
+- [ ] Weapon and armor library.  A large library of equipment needs to exist with multiple options for every item type.  Each team should have customized team-specific equipment 
+- [ ] Character initial inventory: a creation each character receives an inventory of basic items. These should conform to the character job.
+- [ ] Skills and Abilities. All the P2FE skill and abilities need to be implemented.  Where the P2FE lore doesn't match Gunchete it will need migrated.  
+- [ ] Character levelling
+- [ ] Equipment levelling, advanced equipment, cursed equipment
+- [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor.
+- [ ] Non-combat NPCs: merchants, quest givers, hirelings, etc.
+- [ ] Per-NPC type custom behaviors, dialog, interactions, aggressiveness.  Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus 
+- [ ] Room equipment
+- [ ] Combat distance
+- [ ] Bosses 
+- [ ] Quests
+- [ ] Factions and allegiances, economies, exchange rates, faction-specific items and quests
+- [ ] Crafting
+- [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
