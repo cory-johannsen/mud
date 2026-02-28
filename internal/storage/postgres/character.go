@@ -177,11 +177,12 @@ func (r *CharacterRepository) LoadWeaponPresets(ctx context.Context, characterID
 		for len(ls.Presets) <= presetIdx {
 			ls.Presets = append(ls.Presets, inventory.NewWeaponPreset())
 		}
-		// Full item definition hydration is deferred to feature #4 (weapon and armor library).
-		// Slot, itemDefID, and ammoCount are stored but not yet resolved to live WeaponDef instances.
-		_ = slot
-		_ = itemDefID
-		_ = ammoCount
+		// NOTE: Full weapon hydration (populating MainHand/OffHand with a *WeaponDef) requires
+		// the weapon registry, which is added in feature #4 (weapon and armor library).
+		// Until then, the preset slot count is preserved but weapons are not reloaded.
+		// Variables slot, itemDefID, and ammoCount are consumed to avoid compiler errors;
+		// they will be used in feature #4.
+		_, _, _ = slot, itemDefID, ammoCount
 	}
 	return ls, rows.Err()
 }
@@ -261,9 +262,18 @@ func (r *CharacterRepository) LoadEquipment(ctx context.Context, characterID int
 		if err := rows.Scan(&slot, &itemDefID); err != nil {
 			return nil, fmt.Errorf("scanning equipment row: %w", err)
 		}
-		// Full item definition hydration is deferred to feature #4 (weapon and armor library).
-		_ = slot
-		_ = itemDefID
+		item := &inventory.SlottedItem{ItemDefID: itemDefID, Name: itemDefID}
+		// Determine slot type and populate the appropriate map.
+		// Full name hydration is deferred to feature #4 (weapon and armor library);
+		// until then, Name is set to ItemDefID as a placeholder.
+		switch inventory.ArmorSlot(slot) {
+		case inventory.SlotHead, inventory.SlotLeftArm, inventory.SlotRightArm,
+			inventory.SlotTorso, inventory.SlotLeftLeg, inventory.SlotRightLeg, inventory.SlotFeet:
+			eq.Armor[inventory.ArmorSlot(slot)] = item
+		default:
+			// Treat as accessory slot.
+			eq.Accessories[inventory.AccessorySlot(slot)] = item
+		}
 	}
 	return eq, rows.Err()
 }

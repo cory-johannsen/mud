@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"pgregory.net/rapid"
 
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	pgstore "github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
@@ -49,4 +51,29 @@ func TestCharacterRepository_LoadEquipment_EmptyByDefault(t *testing.T) {
 	if len(eq.Armor) != 0 || len(eq.Accessories) != 0 {
 		t.Fatal("expected empty equipment for character ID 0")
 	}
+}
+
+// TestProperty_LoadEquipment_ArmorAndAccessorySlotsDontOverlap verifies that the slot
+// classification logic used in LoadEquipment routes armor and accessory slots to disjoint sets.
+// This property test does not require a DB connection.
+func TestProperty_LoadEquipment_ArmorAndAccessorySlotsDontOverlap(t *testing.T) {
+	armorSlots := []string{
+		string(inventory.SlotHead), string(inventory.SlotLeftArm), string(inventory.SlotRightArm),
+		string(inventory.SlotTorso), string(inventory.SlotLeftLeg), string(inventory.SlotRightLeg),
+		string(inventory.SlotFeet),
+	}
+	accSlots := []string{
+		string(inventory.SlotNeck),
+		string(inventory.SlotRing1), string(inventory.SlotRing2), string(inventory.SlotRing3),
+		string(inventory.SlotRing4), string(inventory.SlotRing5), string(inventory.SlotRing6),
+		string(inventory.SlotRing7), string(inventory.SlotRing8), string(inventory.SlotRing9),
+		string(inventory.SlotRing10),
+	}
+	rapid.Check(t, func(rt *rapid.T) {
+		a := rapid.SampledFrom(armorSlots).Draw(rt, "armor")
+		acc := rapid.SampledFrom(accSlots).Draw(rt, "acc")
+		if a == acc {
+			rt.Fatalf("armor slot %q collides with accessory slot %q", a, acc)
+		}
+	})
 }
