@@ -266,3 +266,98 @@ func TestManager_Property_SpawnProducesUniqueIDs(t *testing.T) {
 		}
 	})
 }
+
+func TestManager_Spawn_SingleInstance_NoSuffix(t *testing.T) {
+	tmpl := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+
+	inst, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+	assert.Equal(t, "Ganger", inst.Name)
+}
+
+func TestManager_Spawn_TwoInstances_LetterSuffix(t *testing.T) {
+	tmpl := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+
+	first, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+
+	second, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+
+	// First instance must have been renamed to A
+	got, ok := mgr.Get(first.ID)
+	require.True(t, ok)
+	assert.Equal(t, "Ganger A", got.Name)
+
+	// Second instance gets B
+	assert.Equal(t, "Ganger B", second.Name)
+}
+
+func TestManager_Spawn_ThreeInstances_LetterSuffixes(t *testing.T) {
+	tmpl := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+
+	first, _ := mgr.Spawn(tmpl, "room-1")
+	second, _ := mgr.Spawn(tmpl, "room-1")
+	third, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+
+	gotFirst, _ := mgr.Get(first.ID)
+	gotSecond, _ := mgr.Get(second.ID)
+
+	assert.Equal(t, "Ganger A", gotFirst.Name)
+	assert.Equal(t, "Ganger B", gotSecond.Name)
+	assert.Equal(t, "Ganger C", third.Name)
+}
+
+func TestManager_Spawn_DifferentTemplates_NoSuffix(t *testing.T) {
+	tmplA := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 10, AC: 10}
+	tmplB := &npc.Template{ID: "scavenger", Name: "Scavenger", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+
+	g, err := mgr.Spawn(tmplA, "room-1")
+	require.NoError(t, err)
+	s, err := mgr.Spawn(tmplB, "room-1")
+	require.NoError(t, err)
+
+	assert.Equal(t, "Ganger", g.Name)
+	assert.Equal(t, "Scavenger", s.Name)
+}
+
+func TestManager_Spawn_DifferentRooms_NoSuffix(t *testing.T) {
+	tmpl := &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 10, AC: 10}
+	mgr := npc.NewManager()
+
+	inst1, err := mgr.Spawn(tmpl, "room-1")
+	require.NoError(t, err)
+	inst2, err := mgr.Spawn(tmpl, "room-2")
+	require.NoError(t, err)
+
+	assert.Equal(t, "Ganger", inst1.Name)
+	assert.Equal(t, "Ganger", inst2.Name)
+}
+
+func TestManager_Spawn_Property_SuffixesAreUnique(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 10).Draw(rt, "n")
+		tmpl := &npc.Template{ID: "g", Name: "G", Level: 1, MaxHP: 10, AC: 10}
+		mgr := npc.NewManager()
+
+		ids := make([]string, 0, n)
+		for i := 0; i < n; i++ {
+			inst, err := mgr.Spawn(tmpl, "room-1")
+			require.NoError(rt, err)
+			ids = append(ids, inst.ID)
+		}
+
+		names := make(map[string]bool)
+		for _, id := range ids {
+			inst, ok := mgr.Get(id)
+			require.True(rt, ok)
+			assert.False(rt, names[inst.Name], "duplicate name: %s", inst.Name)
+			names[inst.Name] = true
+		}
+	})
+}
