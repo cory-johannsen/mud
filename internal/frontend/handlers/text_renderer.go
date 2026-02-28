@@ -159,6 +159,34 @@ func RenderConditionEvent(ce *gamev1.ConditionEvent) string {
 }
 
 // RenderCombatEvent formats a CombatEvent as colored Telnet text.
+// RenderInventoryView formats an InventoryView as colored Telnet text.
+func RenderInventoryView(iv *gamev1.InventoryView) string {
+	var b strings.Builder
+	b.WriteString(telnet.Colorize(telnet.BrightWhite, "=== Inventory ==="))
+	b.WriteString("\r\n")
+	if len(iv.Items) == 0 {
+		b.WriteString(telnet.Colorize(telnet.Dim, "  Your backpack is empty."))
+		b.WriteString("\r\n")
+	} else {
+		for _, item := range iv.Items {
+			qty := ""
+			if item.Quantity > 1 {
+				qty = fmt.Sprintf(" (x%d)", item.Quantity)
+			}
+			b.WriteString(fmt.Sprintf("  %s%s%s%s", telnet.BrightWhite, item.Name, telnet.Reset, qty))
+			if item.Kind != "" {
+				b.WriteString(fmt.Sprintf(" [%s]", item.Kind))
+			}
+			b.WriteString("\r\n")
+		}
+	}
+	b.WriteString(fmt.Sprintf("  Slots: %d/%d  Weight: %.1f/%.1f",
+		iv.UsedSlots, iv.MaxSlots, iv.TotalWeight, iv.MaxWeight))
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("  Currency: %s", iv.Currency))
+	return b.String()
+}
+
 func RenderCombatEvent(ce *gamev1.CombatEvent) string {
 	switch ce.Type {
 	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK:
