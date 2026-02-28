@@ -141,7 +141,8 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	_ = conn.WriteLine("Type 'cancel' at any prompt to return to the character screen.\r\n")
 
 	// Step 1: Character name
-	_ = conn.WritePrompt(telnet.Colorize(telnet.BrightWhite, "Enter your character's name: "))
+	_ = conn.WritePrompt(telnet.Colorize(telnet.BrightWhite,
+		"Enter your character's name (or 'random'): "))
 	nameLine, err := conn.ReadLine()
 	if err != nil {
 		return nil, fmt.Errorf("reading character name: %w", err)
@@ -149,6 +150,10 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	nameLine = strings.TrimSpace(nameLine)
 	if strings.ToLower(nameLine) == "cancel" {
 		return nil, nil
+	}
+	if strings.ToLower(nameLine) == "random" {
+		nameLine = RandomNames[rand.Intn(len(RandomNames))]
+		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "Random name selected: %s", nameLine))
 	}
 	if len(nameLine) < 2 || len(nameLine) > 32 {
 		_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Name must be 2-32 characters."))
