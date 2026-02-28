@@ -1,0 +1,29 @@
+id: highway_bandit
+name: Highway Bandit
+description: A lean figure crouching beside the highway, waiting for travelers to ambush.
+level: 2
+max_hp: 22
+ac: 14
+perception: 9
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  strength: 12
+  dexterity: 15
+  constitution: 10
+  intelligence: 10
+  wisdom: 14
+  charisma: 10
+loot:
+  currency:
+    min: 15
+    max: 70
+  items:
+    - item: scrap_metal
+      chance: 0.45
+      min_qty: 1
+      max_qty: 3
+    - item: ammo_casing
+      chance: 0.35
+      min_qty: 1
+      max_qty: 3

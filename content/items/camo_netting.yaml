@@ -1,0 +1,8 @@
+id: camo_netting
+name: Camo Netting
+description: Military-grade camouflage netting, useful for concealing positions.
+kind: junk
+weight: 1.5
+stackable: false
+max_stack: 1
+value: 25

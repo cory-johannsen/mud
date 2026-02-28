@@ -1,0 +1,426 @@
+zone:
+  id: vantucky
+  name: "Vantucky"
+  description: "The rural-urban fringe east of Vancouver, where militia compounds, gun markets, and highway bandits rule a landscape of strip malls, farmland, and fortified homesteads."
+  start_room: vantucky_fourth_plain_west
+  rooms:
+    - id: vantucky_fourth_plain_west
+      title: "Fourth Plain — Vantucky Border"
+      description: |
+        The road crosses an invisible line where the Couve ends and Vantucky begins.
+        Burned tires and razor wire mark the boundary. A hand-painted sign reads
+        "WELCOME TO FREE TERRITORY" with a crude skull beneath it.
+        The pavement is cracked and patched with gravel. Pickup trucks rust in driveways.
+      exits:
+        - direction: west
+          target: couve_fourth_plain_east
+        - direction: east
+          target: vantucky_andresen_road
+        - direction: south
+          target: vantucky_gas_station_ruins
+      spawns:
+        - template: vantucky_militiaman
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: tense
+
+    - id: vantucky_andresen_road
+      title: "Andresen Road"
+      description: |
+        A commercial strip of gutted big-box stores and collapsed fast food joints.
+        The parking lots have been converted into militia drill grounds and swap meets.
+        Shell casings crunch underfoot. A faded Walmart sign hangs by one bolt,
+        swinging in the wind with a metallic groan.
+      exits:
+        - direction: west
+          target: vantucky_fourth_plain_west
+        - direction: north
+          target: vantucky_checkpoint_north
+        - direction: east
+          target: vantucky_orchards
+        - direction: south
+          target: vantucky_gun_market
+      spawns:
+        - template: vantucky_militiaman
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: commercial
+
+    - id: vantucky_orchards
+      title: "The Orchards"
+      description: |
+        Once a quiet suburban neighborhood, the Orchards has been carved into
+        fortified compounds. Chain-link fences topped with concertina wire
+        surround clusters of houses. Old fruit trees grow wild between the lots,
+        their branches heavy with unpicked apples rotting on the ground.
+        The smell of fermenting fruit mixes with wood smoke.
+      exits:
+        - direction: west
+          target: vantucky_andresen_road
+        - direction: north
+          target: vantucky_compound_alpha
+        - direction: east
+          target: vantucky_164th_ave
+        - direction: south
+          target: vantucky_burnt_bridge_creek
+      properties:
+        lighting: dappled
+        atmosphere: suburban
+
+    - id: vantucky_164th_ave
+      title: "164th Avenue — Militia Territory"
+      description: |
+        The wide avenue is blocked by vehicle barricades made from stacked cars.
+        Militia flags fly from improvised poles. Guard towers fashioned from
+        telephone poles and plywood overlook the road in both directions.
+        A hand-cranked siren sits atop the nearest tower, ready to sound the alarm.
+      exits:
+        - direction: west
+          target: vantucky_orchards
+        - direction: north
+          target: vantucky_compound_bravo
+        - direction: east
+          target: vantucky_shooting_range
+        - direction: south
+          target: vantucky_i84_overpass
+      spawns:
+        - template: vantucky_militiaman
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: militarized
+
+    - id: vantucky_i84_overpass
+      title: "I-84 Overpass"
+      description: |
+        The highway overpass is a notorious ambush point. Rusted guardrails
+        offer minimal cover. Abandoned vehicles have been pushed to the sides
+        to create a kill zone. Shell casings and old bloodstains mark the concrete.
+        Below, the interstate stretches east and west into the haze.
+      exits:
+        - direction: north
+          target: vantucky_164th_ave
+        - direction: east
+          target: vantucky_i84_east
+        - direction: south
+          target: vantucky_fishers_landing
+        - direction: west
+          target: vantucky_i84_onramp
+      spawns:
+        - template: highway_bandit
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: dangerous
+
+    - id: vantucky_fishers_landing
+      title: "Fisher's Landing"
+      description: |
+        The old transit center at Fisher's Landing overlooks the Columbia River.
+        Fishing boats are chained to makeshift docks along the muddy shore.
+        A few families have set up permanent camps in the parking structure,
+        trading smoked fish and river salvage. The water is brown but the fish
+        still bite, if you don't mind what they taste like.
+      exits:
+        - direction: north
+          target: vantucky_i84_overpass
+        - direction: west
+          target: vantucky_river_trail
+      properties:
+        lighting: overcast
+        atmosphere: riverside
+
+    - id: vantucky_compound_alpha
+      title: "Compound Alpha"
+      description: |
+        A fortified homestead surrounded by earthen berms and razor wire.
+        The main house is reinforced with steel plates and sandbag walls.
+        A watchtower made from a grain silo provides a commanding view of the
+        surrounding area. Dogs bark from somewhere inside the perimeter.
+        Radio antennas bristle from the rooftop like metal quills.
+      exits:
+        - direction: south
+          target: vantucky_orchards
+        - direction: east
+          target: vantucky_compound_bravo
+      spawns:
+        - template: compound_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: floodlit
+        atmosphere: fortified
+
+    - id: vantucky_compound_bravo
+      title: "Compound Bravo"
+      description: |
+        The second major compound in the area occupies a former farm property.
+        A barn has been converted into an armory and meeting hall. Jersey barriers
+        and old shipping containers form the outer wall. A faded Gadsden flag
+        snaps in the wind above the gate. The guards here are well-equipped
+        and suspicious of outsiders.
+      exits:
+        - direction: south
+          target: vantucky_164th_ave
+        - direction: west
+          target: vantucky_compound_alpha
+        - direction: north
+          target: vantucky_farm_compound
+      spawns:
+        - template: compound_guard
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: floodlit
+        atmosphere: fortified
+
+    - id: vantucky_gun_market
+      title: "Gun Market"
+      description: |
+        An open-air arms bazaar sprawls across the parking lot of a dead strip mall.
+        Tables display everything from hunting rifles to improvised firearms.
+        Ammunition is sold by the round. A hand-lettered sign reads
+        "ALL SALES FINAL — NO REFUNDS — NO COMPLAINTS."
+        The smell of gun oil hangs thick in the air.
+      exits:
+        - direction: north
+          target: vantucky_andresen_road
+        - direction: east
+          target: vantucky_burnt_bridge_creek
+      properties:
+        lighting: overcast
+        atmosphere: commerce
+
+    - id: vantucky_burnt_bridge_creek
+      title: "Burnt Bridge Creek"
+      description: |
+        A wooded ravine cuts through the suburban sprawl. The creek runs muddy
+        and fast after the rains. Hidden camps dot the treeline, marked only
+        by thin wisps of smoke rising through the canopy. Deer trails
+        and boot prints crisscross the muddy banks. This is where people go
+        when they want to disappear.
+      exits:
+        - direction: north
+          target: vantucky_orchards
+        - direction: west
+          target: vantucky_gun_market
+        - direction: east
+          target: vantucky_hidden_bunker
+      properties:
+        lighting: dim
+        atmosphere: wilderness
+
+    - id: vantucky_i84_east
+      title: "I-84 East — Troutdale Border"
+      description: |
+        The eastbound lanes of I-84 stretch toward the Columbia River Gorge.
+        The road is cratered and overgrown but still passable on foot.
+        A checkpoint of burned vehicles marks the border with Troutdale territory.
+        Wind howls through the gorge entrance, carrying the smell of pine and ash.
+      exits:
+        - direction: west
+          target: vantucky_i84_overpass
+        - direction: east
+          target: trout_i84_west
+      spawns:
+        - template: highway_bandit
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: wind
+
+    - id: vantucky_gas_station_ruins
+      title: "Gas Station Ruins"
+      description: |
+        The skeletal canopy of an old gas station stands over dry pumps and
+        shattered concrete. The convenience store has been looted down to the
+        drywall. Someone has set up a still in the back room, and the sharp
+        smell of moonshine cuts through the decay. Empty jugs line the counter.
+      exits:
+        - direction: north
+          target: vantucky_fourth_plain_west
+        - direction: east
+          target: vantucky_gun_market
+        - direction: south
+          target: vantucky_i84_onramp
+      properties:
+        lighting: dim
+        atmosphere: decay
+
+    - id: vantucky_shooting_range
+      title: "Shooting Range"
+      description: |
+        A clearing behind a berm of packed earth serves as the community
+        shooting range. Steel targets hang from welded frames at various distances.
+        Spent brass litters the firing line. A plywood shed holds reloading
+        equipment and a hand-painted scoreboard tracking weekly competitions.
+        The crack of gunfire echoes through the trees at all hours.
+      exits:
+        - direction: west
+          target: vantucky_164th_ave
+        - direction: south
+          target: vantucky_ammo_depot
+      spawns:
+        - template: vantucky_militiaman
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: open
+        atmosphere: loud
+
+    - id: vantucky_hidden_bunker
+      title: "Hidden Bunker"
+      description: |
+        A rusted hatch in the hillside opens to a concrete bunker from the
+        Cold War era. Someone has restocked it with supplies and ammunition.
+        The walls are lined with shelves of canned goods, water jugs, and
+        medical supplies. A ham radio crackles with static in the corner.
+        The air is stale but breathable.
+      exits:
+        - direction: west
+          target: vantucky_burnt_bridge_creek
+      properties:
+        lighting: emergency
+        atmosphere: underground
+
+    - id: vantucky_farm_compound
+      title: "Farm Compound"
+      description: |
+        A working farm surrounded by electric fence powered by solar panels.
+        Raised beds of vegetables and a small orchard provide food for the
+        nearby compounds. Armed farmers patrol the perimeter on ATVs.
+        A grain elevator towers over the property, doubling as a lookout post.
+        Chickens scratch in the dirt between rows of kale and potatoes.
+      exits:
+        - direction: south
+          target: vantucky_compound_bravo
+        - direction: east
+          target: vantucky_water_tower
+      spawns:
+        - template: compound_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: open
+        atmosphere: agricultural
+
+    - id: vantucky_checkpoint_north
+      title: "Northern Checkpoint"
+      description: |
+        A militia checkpoint controls the road heading north toward the river.
+        Concrete barriers force vehicles into a single lane. A hand-cranked
+        gate blocks the passage. Guards check everyone coming through,
+        demanding tolls or trade goods. A cage of rusted rebar serves as
+        a holding cell for those who can't pay.
+      exits:
+        - direction: south
+          target: vantucky_andresen_road
+        - direction: north
+          target: vantucky_river_trail
+      spawns:
+        - template: vantucky_militiaman
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: floodlit
+        atmosphere: controlled
+
+    - id: vantucky_river_trail
+      title: "Columbia River Trail"
+      description: |
+        A muddy trail follows the south bank of the Columbia River. The water
+        is wide and grey, the Oregon shore barely visible through the mist.
+        Driftwood and debris pile against the bank. Old boat launches are
+        half-submerged in silt. The trail connects the checkpoint to the
+        fishing camps at Fisher's Landing.
+      exits:
+        - direction: south
+          target: vantucky_checkpoint_north
+        - direction: east
+          target: vantucky_fishers_landing
+      properties:
+        lighting: overcast
+        atmosphere: riverside
+
+    - id: vantucky_i84_onramp
+      title: "I-84 On-Ramp"
+      description: |
+        The crumbling on-ramp curves up toward the interstate. Wrecked cars
+        have been pushed to the shoulders, forming walls of rusted metal.
+        Graffiti tags mark bandit territory. A burned-out RV sits at the
+        top of the ramp, converted into a lookout post with a tarp roof
+        and a collection of empty cans strung as an alarm system.
+      exits:
+        - direction: north
+          target: vantucky_gas_station_ruins
+        - direction: east
+          target: vantucky_i84_overpass
+      spawns:
+        - template: highway_bandit
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: exposed
+        atmosphere: dangerous
+
+    - id: vantucky_water_tower
+      title: "Water Tower"
+      description: |
+        A rusted municipal water tower rises above the treeline. The ladder
+        is intact and leads to a platform with a panoramic view of the
+        surrounding territory. Someone has bolted a sniper blind to the
+        catwalk. Radio equipment is lashed to the railing with paracord.
+        From here you can see the compounds, the highway, and the river.
+      exits:
+        - direction: west
+          target: vantucky_farm_compound
+        - direction: south
+          target: vantucky_shooting_range
+      properties:
+        lighting: exposed
+        atmosphere: elevated
+
+    - id: vantucky_ammo_depot
+      title: "Ammo Depot"
+      description: |
+        A fortified storage building behind the shooting range serves as the
+        militia's ammunition depot. The cinderblock walls are reinforced with
+        sandbags. Wooden crates stamped with military designations are stacked
+        to the ceiling. A guard sits at a desk keeping meticulous inventory
+        in a water-stained ledger.
+      exits:
+        - direction: north
+          target: vantucky_shooting_range
+        - direction: west
+          target: vantucky_164th_ave
+      spawns:
+        - template: compound_guard
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: secure
+
+    - id: vantucky_trailer_park
+      title: "Trailer Park"
+      description: |
+        A sprawl of mobile homes in various states of decay. Some are occupied
+        and fortified with plywood and sheet metal. Others are stripped to the
+        frame. Laundry lines stretch between units. Children play in the dirt
+        between trailers while adults keep watch from lawn chairs, weapons
+        within reach. A communal fire pit smolders in the center.
+      exits:
+        - direction: north
+          target: vantucky_gas_station_ruins
+        - direction: east
+          target: vantucky_burnt_bridge_creek
+      properties:
+        lighting: dim
+        atmosphere: residential

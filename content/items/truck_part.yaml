@@ -1,0 +1,8 @@
+id: truck_part
+name: Truck Part
+description: A salvaged truck engine component. Valuable to anyone keeping vehicles running.
+kind: junk
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 40

@@ -1,0 +1,33 @@
+id: vantucky_militiaman
+name: Vantucky Militiaman
+description: A bearded militiaman in full camo and tactical vest, American flag patch on the shoulder, eyes scanning for threats.
+level: 3
+max_hp: 34
+ac: 16
+perception: 7
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 16
+  dexterity: 12
+  constitution: 15
+  intelligence: 9
+  wisdom: 12
+  charisma: 9
+loot:
+  currency:
+    min: 20
+    max: 90
+  items:
+    - item: ammo_casing
+      chance: 0.6
+      min_qty: 1
+      max_qty: 3
+    - item: camo_netting
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

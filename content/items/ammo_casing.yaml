@@ -1,0 +1,8 @@
+id: ammo_casing
+name: Ammo Casing
+description: A spent brass casing. Reloadable with the right tools.
+kind: junk
+weight: 0.1
+stackable: true
+max_stack: 20
+value: 4

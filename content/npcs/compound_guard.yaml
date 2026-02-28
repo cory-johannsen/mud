@@ -1,0 +1,33 @@
+id: compound_guard
+name: Compound Guard
+description: A heavily armed guard behind sandbag walls, watching the approach to the compound with a rifle scope.
+level: 4
+max_hp: 44
+ac: 17
+perception: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 16
+  dexterity: 12
+  constitution: 17
+  intelligence: 10
+  wisdom: 12
+  charisma: 10
+loot:
+  currency:
+    min: 35
+    max: 130
+  items:
+    - item: ammo_casing
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: truck_part
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
