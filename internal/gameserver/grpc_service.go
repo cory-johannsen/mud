@@ -369,6 +369,12 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSetRole(uid, p.SetRole)
 	case *gamev1.ClientMessage_Teleport:
 		return s.handleTeleport(uid, p.Teleport)
+	case *gamev1.ClientMessage_Loadout:
+		return s.handleLoadout(uid, p.Loadout)
+	case *gamev1.ClientMessage_Unequip:
+		return s.handleUnequip(uid, p.Unequip)
+	case *gamev1.ClientMessage_Equipment:
+		return s.handleEquipment(uid, p.Equipment)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1057,6 +1063,42 @@ func (s *GameServiceServer) handleBalance(uid string) (*gamev1.ServerEvent, erro
 		return errorEvent("player not found"), nil
 	}
 	return messageEvent(fmt.Sprintf("Currency: %s", inventory.FormatRounds(sess.Currency))), nil
+}
+
+// handleLoadout displays or swaps weapon presets for the player.
+//
+// Precondition: uid must be a valid connected player with a non-nil LoadoutSet.
+// Postcondition: Returns a ServerEvent with the loadout display or swap result.
+func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	return messageEvent(command.HandleLoadout(sess, req.GetArg())), nil
+}
+
+// handleUnequip removes the item in the given slot and returns it to the backpack.
+//
+// Precondition: uid must be a valid connected player with non-nil LoadoutSet and Equipment; req.Slot must be non-empty.
+// Postcondition: Returns a ServerEvent with the unequip result string.
+func (s *GameServiceServer) handleUnequip(uid string, req *gamev1.UnequipRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	return messageEvent(command.HandleUnequip(sess, req.GetSlot())), nil
+}
+
+// handleEquipment displays all equipped armor, accessories, and weapon presets.
+//
+// Precondition: uid must be a valid connected player with non-nil LoadoutSet and Equipment.
+// Postcondition: Returns a ServerEvent with the full equipment display string.
+func (s *GameServiceServer) handleEquipment(uid string, _ *gamev1.EquipmentRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	return messageEvent(command.HandleEquipment(sess)), nil
 }
 
 // handleSetRole changes a target account's privilege level.
