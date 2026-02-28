@@ -130,6 +130,8 @@ func NewGameServiceServer(
 //  3. Spawn goroutine to forward entity events to gRPC stream
 //  4. Main loop: read ClientMessage, dispatch, send response
 //  5. On disconnect: clean up session
+//
+// Postcondition: sess.LoadoutSet and sess.Equipment are loaded from DB (or default-initialized on error).
 func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) error {
 	// Step 1: Wait for JoinWorldRequest
 	firstMsg, err := stream.Recv()
@@ -194,6 +196,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				zap.Int64("character_id", characterID),
 				zap.Error(lsErr),
 			)
+			sess.LoadoutSet = inventory.NewLoadoutSet()
 		} else {
 			sess.LoadoutSet = ls
 		}
@@ -207,6 +210,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				zap.Int64("character_id", characterID),
 				zap.Error(eqErr),
 			)
+			sess.Equipment = inventory.NewEquipment()
 		} else {
 			sess.Equipment = eq
 		}
