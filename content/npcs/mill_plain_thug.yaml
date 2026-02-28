@@ -1,0 +1,29 @@
+id: mill_plain_thug
+name: Mill Plain Thug
+description: A street tough in a rain-stained hoodie, looking for easy marks along Mill Plain.
+level: 1
+max_hp: 18
+ac: 13
+perception: 5
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 14
+  dexterity: 12
+  constitution: 14
+  intelligence: 8
+  wisdom: 10
+  charisma: 8
+loot:
+  currency:
+    min: 5
+    max: 40
+  items:
+    - item: scrap_metal
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.1
+      min_qty: 1
+      max_qty: 1

@@ -1,0 +1,33 @@
+id: jantzen_beach_pirate
+name: Jantzen Beach Pirate
+description: A river pirate in a rain-slicked poncho, cutlass on one hip and a boat hook on the other.
+level: 3
+max_hp: 32
+ac: 15
+perception: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 14
+  dexterity: 16
+  constitution: 14
+  intelligence: 10
+  wisdom: 9
+  charisma: 14
+loot:
+  currency:
+    min: 30
+    max: 100
+  items:
+    - item: pirate_flag
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+    - item: canadian_bacon
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1

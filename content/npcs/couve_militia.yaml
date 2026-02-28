@@ -1,0 +1,33 @@
+id: couve_militia
+name: Couve Militia
+description: A grizzled Vancouver militia member in surplus camo, fiercely protective of their strip mall territory.
+level: 2
+max_hp: 26
+ac: 15
+perception: 7
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  strength: 15
+  dexterity: 12
+  constitution: 14
+  intelligence: 9
+  wisdom: 12
+  charisma: 10
+loot:
+  currency:
+    min: 15
+    max: 65
+  items:
+    - item: militia_patch
+      chance: 0.35
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.4
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1

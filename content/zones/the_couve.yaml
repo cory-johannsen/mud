@@ -1,0 +1,415 @@
+zone:
+  id: the_couve
+  name: "The Couve"
+  description: "Vancouver, Washington — a sprawling strip mall empire north of the Columbia, where chain restaurant warlords hold court and river pirates raid from Jantzen Beach."
+  start_room: couve_interstate_bridge_south
+  rooms:
+    - id: couve_interstate_bridge_south
+      title: "Interstate Bridge — South End"
+      description: |
+        The southern anchor of the old Interstate Bridge rises from the Columbia River
+        in a lattice of rusted steel and crumbling concrete. The bridge deck stretches
+        north into Washington, swaying faintly in the river wind. South, the road
+        descends toward the Oregon side and the ruins of Northeast Portland.
+        Toll booths have been converted into guard shacks by whoever controls the crossing today.
+      exits:
+        - direction: north
+          target: couve_jantzen_beach
+        - direction: south
+          target: ne_i5_bridge_approach
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: couve_jantzen_beach
+      title: "Jantzen Beach"
+      description: |
+        The old shopping center has been gutted and rebuilt into a pirate haven.
+        Houseboats and pontoon rafts cluster along the shore, lashed together with
+        cable and chain. The smell of smoked salmon and diesel hangs in the air.
+        River pirates lounge on deck chairs, watching the Columbia roll past.
+        A hand-painted sign reads "JANTZEN BEACH FREE PORT — NO LAWS, NO REFUNDS."
+      exits:
+        - direction: south
+          target: couve_interstate_bridge_south
+        - direction: north
+          target: couve_hayden_island_causeway
+        - direction: east
+          target: couve_waterfront
+      spawns:
+        - template: jantzen_beach_pirate
+          count: 3
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: smoke
+
+    - id: couve_hayden_island_causeway
+      title: "Hayden Island Causeway"
+      description: |
+        A narrow causeway of compacted rubble and old highway guardrails connects
+        Jantzen Beach to the mainland. Shopping carts filled with salvage line the
+        edges. The river is visible on both sides, grey and restless.
+        Pirate lookouts perch on the rusted skeleton of an old car dealership sign.
+      exits:
+        - direction: south
+          target: couve_jantzen_beach
+        - direction: north
+          target: couve_waterfront
+      spawns:
+        - template: jantzen_beach_pirate
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: couve_waterfront
+      title: "Vancouver Waterfront"
+      description: |
+        The Columbia River waterfront has been rebuilt into a crude port.
+        Wooden docks jut into the current, creaking under loads of salvage and trade
+        goods. Warehouses with corrugated walls shelter barter markets. Upriver,
+        the silhouette of the railroad bridge disappears into permanent fog.
+        A ferry made from a welded-together school bus floats at anchor.
+      exits:
+        - direction: west
+          target: couve_jantzen_beach
+        - direction: north
+          target: couve_esther_short_park
+        - direction: east
+          target: couve_columbia_way
+      spawns:
+        - template: jantzen_beach_pirate
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: fog
+
+    - id: couve_columbia_way
+      title: "Columbia Way"
+      description: |
+        A waterfront road running east along the river. Old condo developments
+        have been stripped for materials, their balconies hanging like broken teeth.
+        Fishermen with homemade nets work the shallows. A faded mural of Lewis
+        and Clark peers down from a retaining wall, their painted eyes following you.
+      exits:
+        - direction: west
+          target: couve_waterfront
+        - direction: north
+          target: couve_officers_row
+      properties:
+        lighting: overcast
+        atmosphere: quiet
+
+    - id: couve_esther_short_park
+      title: "Esther Short Park"
+      description: |
+        The oldest public square in Washington state has become the Couve's central
+        marketplace. Traders hawk goods from blankets spread on dead grass. A clock
+        tower with no hands stands at the center. The old Hilton has been converted
+        into a vertical shantytown, laundry lines stretching between balconies.
+        The smell of grilled mystery meat drifts from food stalls along the perimeter.
+      exits:
+        - direction: south
+          target: couve_waterfront
+        - direction: east
+          target: couve_officers_row
+        - direction: north
+          target: couve_mill_plain_blvd
+        - direction: west
+          target: couve_i5_corridor
+      properties:
+        lighting: firelight
+        atmosphere: smoke
+
+    - id: couve_officers_row
+      title: "Officers' Row"
+      description: |
+        A line of Victorian-era officers' houses stands in various states of repair.
+        The militia has claimed this stretch as their headquarters, reinforcing porches
+        with sandbags and boarding windows with steel plate. American flags — faded
+        but intact — hang from every porch. A hand-lettered sign declares this
+        the "VANCOUVER VOLUNTEER MILITIA — KEEPING ORDER SINCE THE COLLAPSE."
+      exits:
+        - direction: west
+          target: couve_esther_short_park
+        - direction: south
+          target: couve_columbia_way
+        - direction: east
+          target: couve_fort_vancouver
+      spawns:
+        - template: couve_militia
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: lantern
+        atmosphere: guarded
+
+    - id: couve_fort_vancouver
+      title: "Fort Vancouver"
+      description: |
+        The reconstructed Hudson's Bay Company fort has found new purpose as
+        the militia's primary stronghold. The wooden palisade walls have been
+        reinforced with sheet metal and razor wire. Guard towers overlook
+        the parade ground where militia recruits drill with salvaged weapons.
+        The old blacksmith shop is operational again, its forge glowing day and night.
+      exits:
+        - direction: west
+          target: couve_officers_row
+        - direction: north
+          target: couve_mill_plain_blvd
+      spawns:
+        - template: couve_militia
+          count: 3
+          respawn_after: "5m"
+      properties:
+        lighting: firelight
+        atmosphere: guarded
+
+    - id: couve_mill_plain_blvd
+      title: "Mill Plain Boulevard"
+      description: |
+        The main commercial corridor of the Couve stretches east and west.
+        Strip malls line both sides, their parking lots converted into fortified
+        compounds. Fast food signs tower overhead — a Burgerville crown, a faded
+        golden arches — each marking a different warlord's territory.
+        The pavement is cracked and puddled. Traffic lights dangle uselessly.
+      exits:
+        - direction: south
+          target: couve_esther_short_park
+        - direction: east
+          target: couve_strip_mall_east
+        - direction: west
+          target: couve_strip_mall_west
+        - direction: north
+          target: couve_fourth_plain
+      spawns:
+        - template: mill_plain_thug
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: rain
+
+    - id: couve_strip_mall_east
+      title: "Strip Mall Compound — East"
+      description: |
+        A fortified strip mall compound anchored by a defunct Grocery Outlet.
+        The parking lot is ringed with jersey barriers and overturned shopping carts.
+        Inside, a nail salon has become an armory and a Subway franchise serves
+        as a barracks. The Couve militia maintains a checkpoint at the entrance,
+        taxing anyone who wants to trade inside.
+      exits:
+        - direction: west
+          target: couve_mill_plain_blvd
+        - direction: north
+          target: couve_applebees_fortress
+        - direction: east
+          target: couve_vancouver_mall
+      spawns:
+        - template: couve_militia
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: fluorescent
+        atmosphere: crowded
+
+    - id: couve_strip_mall_west
+      title: "Strip Mall Compound — West"
+      description: |
+        A cluster of strip mall storefronts behind a wall of stacked tires and
+        plywood. A Dollar Tree has been converted into a general store. A former
+        vape shop now sells actual medical supplies. The parking lot serves as
+        an open-air market on dry days, which is to say almost never.
+      exits:
+        - direction: east
+          target: couve_mill_plain_blvd
+        - direction: north
+          target: couve_residential_blocks
+      properties:
+        lighting: dim
+        atmosphere: rain
+
+    - id: couve_applebees_fortress
+      title: "Applebee's Fortress"
+      description: |
+        The Applebee's Neighborhood Grill and Bar has been transformed into a
+        fortified stronghold. The signature riblets are long gone, but the booths
+        have been converted into sleeping quarters and the kitchen into a weapons
+        workshop. The chain restaurant warlord who controls this location demands
+        tribute in canned goods and ammunition. A neon sign still flickers:
+        "EATIN' GOOD IN THE NEIGHBORHOOD" — though the neighborhood has seen better days.
+      exits:
+        - direction: south
+          target: couve_strip_mall_east
+        - direction: east
+          target: couve_fourth_plain
+        - direction: west
+          target: couve_residential_blocks
+      spawns:
+        - template: couve_militia
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: neon
+        atmosphere: grease
+
+    - id: couve_residential_blocks
+      title: "Residential Blocks"
+      description: |
+        Rows of ranch houses and duplexes stretch into the grey distance.
+        Some are occupied and fortified with plywood and chain-link. Others are
+        gutted shells picked clean by scavengers. Dogs bark from behind fences.
+        A hand-painted neighborhood watch sign features a skull with crossed rifles.
+      exits:
+        - direction: south
+          target: couve_strip_mall_west
+        - direction: east
+          target: couve_applebees_fortress
+        - direction: north
+          target: couve_fourth_plain
+      properties:
+        lighting: dim
+        atmosphere: quiet
+
+    - id: couve_i5_corridor
+      title: "I-5 Corridor"
+      description: |
+        The interstate cuts through Vancouver like a concrete canyon. Overpasses
+        create shadowed underpasses where squatter camps cluster around barrel fires.
+        The northbound lanes are passable on foot, weaving between abandoned
+        semis and RVs that will never move again. The sound of the wind through
+        broken windshields is a constant, mournful whistle.
+      exits:
+        - direction: east
+          target: couve_esther_short_park
+        - direction: north
+          target: couve_i5_north
+      properties:
+        lighting: dim
+        atmosphere: wind
+
+    - id: couve_i5_north
+      title: "I-5 Northbound"
+      description: |
+        The interstate stretches north toward Battle Ground and the rural wastes
+        beyond. The road surface is buckled and frost-heaved. A checkpoint made
+        of stacked concrete barriers marks the edge of Couve territory. Beyond it,
+        the highway narrows into wilderness. Militia graffiti on an overpass reads
+        "YOU ARE NOW LEAVING CIVILIZATION. GOOD LUCK."
+      exits:
+        - direction: south
+          target: couve_i5_corridor
+        - direction: north
+          target: battle_i5_south
+      properties:
+        lighting: overcast
+        atmosphere: wind
+
+    - id: couve_fourth_plain
+      title: "Fourth Plain Boulevard"
+      description: |
+        Fourth Plain is the Couve's most dangerous corridor. The wide boulevard
+        is lined with burned-out cars and ransacked businesses. Gangs of thugs
+        control intersections, demanding tolls from anyone passing through.
+        Gunfire echoes from side streets at irregular intervals. A church steeple
+        in the distance leans at a precarious angle.
+      exits:
+        - direction: south
+          target: couve_mill_plain_blvd
+        - direction: west
+          target: couve_applebees_fortress
+        - direction: east
+          target: couve_fourth_plain_east
+        - direction: north
+          target: couve_i5_north
+      spawns:
+        - template: mill_plain_thug
+          count: 3
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: dangerous
+
+    - id: couve_fourth_plain_east
+      title: "Fourth Plain — East End"
+      description: |
+        The eastern end of Fourth Plain dissolves into the sprawl toward Vantucky.
+        Pawn shops and payday loan offices with barred windows line the road.
+        The border between the Couve and Vantucky territory is marked by a line
+        of burned tires and a spray-painted warning: "VANTUCKY AHEAD — ENTER AT OWN RISK."
+        A rusted water tower looms overhead, someone's lookout post.
+      exits:
+        - direction: west
+          target: couve_fourth_plain
+        - direction: east
+          target: vantucky_fourth_plain_west
+      spawns:
+        - template: mill_plain_thug
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: dim
+        atmosphere: dangerous
+
+    - id: couve_vancouver_mall
+      title: "Vancouver Mall"
+      description: |
+        The once-thriving Vancouver Mall is now a warlord's stronghold.
+        The anchor stores have been converted into armories, granaries, and
+        barracks. The food court serves as a throne room where the Mall King
+        holds court from a throne of welded shopping carts. Skylights let in
+        grey light. The fountain in the central atrium still works somehow,
+        recirculating murky rainwater in an endless loop.
+      exits:
+        - direction: west
+          target: couve_strip_mall_east
+        - direction: north
+          target: couve_chkalov_drive
+      spawns:
+        - template: couve_militia
+          count: 2
+          respawn_after: "5m"
+      properties:
+        lighting: skylight
+        atmosphere: echo
+
+    - id: couve_chkalov_drive
+      title: "Chkalov Drive"
+      description: |
+        Named after the Soviet aviator who landed nearby, this road runs through
+        a commercial district of auto shops and ethnic grocery stores. Many are
+        still operational, their owners tough enough to survive the collapse.
+        A mechanic works on a truck engine by lantern light. The smell of
+        pho and motor oil mingles in the damp air.
+      exits:
+        - direction: south
+          target: couve_vancouver_mall
+        - direction: east
+          target: couve_fourth_plain_east
+      properties:
+        lighting: lantern
+        atmosphere: industrial
+
+    - id: couve_river_access
+      title: "River Access Point"
+      description: |
+        A muddy trail descends through blackberry brambles to a narrow beach
+        on the Columbia. Dugout canoes and inflatable rafts are pulled up on
+        the gravel. This is where the river pirates launch raids on river traffic
+        and where smugglers from Oregon make their drops. Fish traps made from
+        shopping carts sit in the shallows.
+      exits:
+        - direction: north
+          target: couve_waterfront
+        - direction: east
+          target: couve_columbia_way
+      spawns:
+        - template: jantzen_beach_pirate
+          count: 1
+          respawn_after: "5m"
+      properties:
+        lighting: overcast
+        atmosphere: mud

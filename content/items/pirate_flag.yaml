@@ -1,0 +1,8 @@
+id: pirate_flag
+name: Pirate Flag
+description: A hand-sewn Jolly Roger with a salmon skeleton motif.
+kind: junk
+weight: 0.5
+stackable: false
+max_stack: 1
+value: 20
