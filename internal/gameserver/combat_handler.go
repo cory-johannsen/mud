@@ -491,7 +491,8 @@ func (h *CombatHandler) Throw(uid, explosiveID string) ([]*gamev1.CombatEvent, e
 // delegates to resolveAndAdvanceLocked.
 //
 // Precondition: a combat must be active in roomID.
-// Postcondition: round events are broadcast; combat is ended or next round is started.
+// Postcondition: round events are broadcast; combat is ended or next round is started;
+//   SwappedThisRound is reset to false for all player sessions in this combat.
 func (h *CombatHandler) resolveAndAdvance(roomID string) {
 	h.combatMu.Lock()
 	defer h.combatMu.Unlock()
@@ -507,7 +508,8 @@ func (h *CombatHandler) resolveAndAdvance(roomID string) {
 // starts the next round. Caller must hold combatMu.
 //
 // Precondition: combatMu is held; cbt is the active Combat for roomID.
-// Postcondition: round events are broadcast; combat is ended or next round is started.
+// Postcondition: round events are broadcast; combat is ended or next round is started;
+//   SwappedThisRound is reset to false for all player sessions in this combat.
 func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Combat) []*gamev1.CombatEvent {
 	targetUpdater := func(id string, hp int) {
 		if inst, found := h.npcMgr.Get(id); found {

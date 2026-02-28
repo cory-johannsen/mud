@@ -542,13 +542,7 @@ func TestResolveAndAdvanceLocked_ResetsSwappedThisRound(t *testing.T) {
 // Postcondition: SwappedThisRound is always false after resolveAndAdvanceLocked.
 func TestProperty_ResolveAndAdvanceLocked_AlwaysResetsSwappedThisRound(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		var mu sync.Mutex
-		var broadcasts [][]*gamev1.CombatEvent
-		broadcastFn := func(roomID string, events []*gamev1.CombatEvent) {
-			mu.Lock()
-			defer mu.Unlock()
-			broadcasts = append(broadcasts, events)
-		}
+		broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
 
 		h := makeCombatHandler(t, broadcastFn)
 		const roomID = "room-prop-swap-reset"
