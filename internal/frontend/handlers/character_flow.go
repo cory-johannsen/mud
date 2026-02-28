@@ -245,8 +245,25 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	}
 	selectedJob := availableJobs[jobChoice-1]
 
-	// Step 5: Preview + confirm
-	newChar, err := character.BuildWithJob(charName, selectedRegion, selectedJob, selectedTeam)
+	return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, selectedJob, selectedTeam)
+}
+
+// buildAndConfirm builds a character from the given selections, shows the preview,
+// prompts for confirmation, and persists on yes.
+// Returns (nil, nil) if the player declines or cancels.
+//
+// Precondition: all pointer parameters must be non-nil; accountID must be > 0.
+// Postcondition: returns persisted *character.Character or (nil, nil) on cancel/decline.
+func (h *AuthHandler) buildAndConfirm(
+	ctx context.Context,
+	conn *telnet.Conn,
+	accountID int64,
+	charName string,
+	region *ruleset.Region,
+	job *ruleset.Job,
+	team *ruleset.Team,
+) (*character.Character, error) {
+	newChar, err := character.BuildWithJob(charName, region, job, team)
 	if err != nil {
 		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error building character: %v", err))
 		return nil, nil
@@ -265,7 +282,6 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 		return nil, nil
 	}
 
-	// Step 6: Persist
 	newChar.AccountID = accountID
 	start := time.Now()
 	created, err := h.characters.Create(ctx, newChar)
