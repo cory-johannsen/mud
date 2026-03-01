@@ -12,14 +12,15 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/session"
 )
 
-// newTestSession returns a PlayerSession with a freshly initialised LoadoutSet.
+// newTestSession returns a PlayerSession with a freshly initialised LoadoutSet and Equipment.
 //
-// Postcondition: sess.LoadoutSet != nil, len(Presets)==2, Active==0.
+// Postcondition: sess.LoadoutSet != nil, len(Presets)==2, Active==0; sess.Equipment != nil.
 func newTestSession() *session.PlayerSession {
 	return &session.PlayerSession{
 		UID:        "test-uid",
 		CharName:   "Tester",
 		LoadoutSet: inventory.NewLoadoutSet(),
+		Equipment:  inventory.NewEquipment(),
 	}
 }
 

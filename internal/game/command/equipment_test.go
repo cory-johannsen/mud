@@ -1,6 +1,7 @@
 package command_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -73,43 +74,51 @@ func TestHandleEquipment_WeaponDisplayedWithAmmo(t *testing.T) {
 	}
 }
 
-// TestHandleEquipment_ArmorSlotsAll verifies that all 7 armor slots appear.
+// TestHandleEquipment_ArmorSlotsAll verifies that all 8 armor slots appear using human-readable labels.
 func TestHandleEquipment_ArmorSlotsAll(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 	result := command.HandleEquipment(sess)
 
-	armorSlots := []string{"head", "torso", "left_arm", "right_arm", "left_leg", "right_leg", "feet"}
-	for _, slot := range armorSlots {
-		if !strings.Contains(result, slot) {
-			t.Errorf("expected armor slot %q in output:\n%s", slot, result)
+	armorLabels := []string{"Head:", "Torso:", "Left Arm:", "Right Arm:", "Hands:", "Left Leg:", "Right Leg:", "Feet:"}
+	for _, label := range armorLabels {
+		if !strings.Contains(result, label) {
+			t.Errorf("expected armor label %q in output:\n%s", label, result)
 		}
 	}
 }
 
-// TestHandleEquipment_AccessorySlotsRing1Through5 verifies that ring_1 through ring_5
-// are displayed (the required 5-ring display).
+// TestHandleEquipment_AccessorySlotsRing1Through5 verifies that left/right hand ring 1 through 5
+// are displayed using human-readable labels.
 func TestHandleEquipment_AccessorySlotsRing1Through5(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 	result := command.HandleEquipment(sess)
 
 	for i := 1; i <= 5; i++ {
-		slot := "ring_" + string(rune('0'+i))
-		if !strings.Contains(result, slot) {
-			t.Errorf("expected %q in output:\n%s", slot, result)
+		leftLabel := fmt.Sprintf("Left Hand Ring %d:", i)
+		rightLabel := fmt.Sprintf("Right Hand Ring %d:", i)
+		if !strings.Contains(result, leftLabel) {
+			t.Errorf("expected %q in output:\n%s", leftLabel, result)
+		}
+		if !strings.Contains(result, rightLabel) {
+			t.Errorf("expected %q in output:\n%s", rightLabel, result)
 		}
 	}
 }
 
-// TestHandleEquipment_Ring6ThroughRing10NotDisplayed verifies that ring_6 through ring_10
-// are not shown in the display (only 5 rings shown per spec).
+// TestHandleEquipment_Ring6ThroughRing10NotDisplayed verifies that left/right ring 6 through 10
+// are not shown in the display (only 5 rings per hand shown per spec).
 func TestHandleEquipment_Ring6ThroughRing10NotDisplayed(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 	result := command.HandleEquipment(sess)
 
 	for i := 6; i <= 10; i++ {
-		slot := "ring_" + string(rune('0'+i))
-		if strings.Contains(result, slot) {
-			t.Errorf("did not expect %q in output (only ring_1..5 shown):\n%s", slot, result)
+		leftLabel := fmt.Sprintf("Left Hand Ring %d:", i)
+		rightLabel := fmt.Sprintf("Right Hand Ring %d:", i)
+		if strings.Contains(result, leftLabel) {
+			t.Errorf("did not expect %q in output:\n%s", leftLabel, result)
+		}
+		if strings.Contains(result, rightLabel) {
+			t.Errorf("did not expect %q in output:\n%s", rightLabel, result)
 		}
 	}
 }
@@ -119,8 +128,8 @@ func TestHandleEquipment_NeckSlotDisplayed(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 	result := command.HandleEquipment(sess)
 
-	if !strings.Contains(result, "neck") {
-		t.Errorf("expected 'neck' in output:\n%s", result)
+	if !strings.Contains(result, "Neck:") {
+		t.Errorf("expected 'Neck:' in output:\n%s", result)
 	}
 }
 
@@ -178,4 +187,50 @@ func TestProperty_HandleEquipment_AlwaysHasAllSections(t *testing.T) {
 			rt.Fatalf("expected exactly 1 [active] marker:\n%s", result)
 		}
 	})
+}
+
+func TestHandleEquipment_HandsSlotDisplayed(t *testing.T) {
+	sess := newTestSession()
+	output := command.HandleEquipment(sess)
+	if !strings.Contains(output, "Hands:") {
+		t.Errorf("expected 'Hands:' in output, got:\n%s", output)
+	}
+}
+
+func TestHandleEquipment_HumanReadableArmorLabels(t *testing.T) {
+	sess := newTestSession()
+	output := command.HandleEquipment(sess)
+	wantLabels := []string{"Head:", "Torso:", "Left Arm:", "Right Arm:", "Hands:", "Left Leg:", "Right Leg:", "Feet:"}
+	for _, label := range wantLabels {
+		if !strings.Contains(output, label) {
+			t.Errorf("expected label %q in output, got:\n%s", label, output)
+		}
+	}
+}
+
+func TestHandleEquipment_HumanReadableRingLabels(t *testing.T) {
+	sess := newTestSession()
+	output := command.HandleEquipment(sess)
+	wantLabels := []string{
+		"Left Hand Ring 1:", "Left Hand Ring 2:", "Left Hand Ring 3:",
+		"Left Hand Ring 4:", "Left Hand Ring 5:",
+		"Right Hand Ring 1:", "Right Hand Ring 2:", "Right Hand Ring 3:",
+		"Right Hand Ring 4:", "Right Hand Ring 5:",
+	}
+	for _, label := range wantLabels {
+		if !strings.Contains(output, label) {
+			t.Errorf("expected label %q in output, got:\n%s", label, output)
+		}
+	}
+}
+
+func TestHandleEquipment_OldRingNamesNotDisplayed(t *testing.T) {
+	sess := newTestSession()
+	output := command.HandleEquipment(sess)
+	oldNames := []string{"ring_1:", "ring_2:", "ring_3:", "ring_4:", "ring_5:"}
+	for _, old := range oldNames {
+		if strings.Contains(output, old) {
+			t.Errorf("old slot name %q should not appear in output, got:\n%s", old, output)
+		}
+	}
 }
