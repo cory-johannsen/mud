@@ -55,7 +55,7 @@ func (d *ItemDef) Validate() error {
 		errs = append(errs, errors.New("Name must not be empty"))
 	}
 	if !validKinds[d.Kind] {
-		errs = append(errs, fmt.Errorf("Kind must be one of weapon, explosive, consumable, junk; got %q", d.Kind))
+		errs = append(errs, fmt.Errorf("Kind must be one of weapon, explosive, consumable, junk, armor; got %q", d.Kind))
 	}
 	if d.MaxStack < 1 {
 		errs = append(errs, errors.New("MaxStack must be >= 1"))

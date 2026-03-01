@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/command"
@@ -152,7 +153,7 @@ func TestHandleWear_ItemNotArmor(t *testing.T) {
 }
 
 // TestHandleWear_WrongSlot verifies that attempting to equip armor in the wrong body slot
-// returns a descriptive error naming the correct slot.
+// returns a descriptive error naming the correct slot, and leaves all equipment slots unchanged.
 func TestHandleWear_WrongSlot(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 	reg := newTestRegistryWithArmor()
@@ -168,6 +169,9 @@ func TestHandleWear_WrongSlot(t *testing.T) {
 	if sess.Backpack.UsedSlots() != 1 {
 		t.Errorf("expected backpack to still have item after wrong-slot attempt, got %d items", sess.Backpack.UsedSlots())
 	}
+	// Equipment slots must remain unoccupied after the failed wear.
+	assert.Nil(t, sess.Equipment.Armor[inventory.SlotHead], "head slot must remain nil after wrong-slot attempt")
+	assert.Nil(t, sess.Equipment.Armor[inventory.SlotTorso], "torso slot must remain nil after wrong-slot attempt")
 }
 
 // TestHandleWear_InvalidSlot verifies that an unrecognised slot name returns a descriptive error.
@@ -246,6 +250,66 @@ func TestProperty_HandleWear_BackpackDecreasesByOne(t *testing.T) {
 			// Slot was empty so net change must be exactly -1.
 			if after != before-1 {
 				rt.Fatalf("expected backpack to shrink by 1; before=%d after=%d", before, after)
+			}
+		}
+	})
+}
+
+// TestProperty_HandleWear_SlotUnchangedOnFailure is a property-based test verifying that
+// when HandleWear fails, all equipment armor slots remain unchanged from their pre-call state.
+func TestProperty_HandleWear_SlotUnchangedOnFailure(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		reg := inventory.NewRegistry()
+		armorDef := &inventory.ArmorDef{
+			ID:    "test_helm",
+			Name:  "Test Helm",
+			Slot:  inventory.SlotHead,
+			Group: "composite",
+		}
+		_ = reg.RegisterArmor(armorDef)
+		itemDef := &inventory.ItemDef{
+			ID:       "test_helm_item",
+			Name:     "Test Helm",
+			Kind:     inventory.KindArmor,
+			ArmorRef: "test_helm",
+			Weight:   1,
+			MaxStack: 1,
+		}
+		_ = reg.RegisterItem(itemDef)
+
+		bp := inventory.NewBackpack(20, 100)
+		eq := inventory.NewEquipment()
+		sess := &session.PlayerSession{
+			UID:        "uid",
+			CharName:   "Test",
+			Backpack:   bp,
+			Equipment:  eq,
+			LoadoutSet: inventory.NewLoadoutSet(),
+		}
+
+		// Generate random args that will mostly fail (unknown item IDs or invalid slots).
+		itemID := rapid.StringMatching(`[a-z]{3,8}`).Draw(rt, "itemID")
+		slotStr := rapid.StringMatching(`[a-z]{3,8}`).Draw(rt, "slot")
+		arg := itemID + " " + slotStr
+
+		// Capture equipment state before the call.
+		slotsBefore := make(map[inventory.ArmorSlot]*inventory.SlottedItem)
+		for k, v := range sess.Equipment.Armor {
+			slotsBefore[k] = v
+		}
+
+		result := command.HandleWear(sess, reg, arg)
+
+		// When the wear fails, all equipment slots must be unchanged.
+		if !strings.HasPrefix(result, "Wore ") {
+			for k, v := range slotsBefore {
+				assert.Equal(rt, v, sess.Equipment.Armor[k], "slot %s changed on failed wear", k)
+			}
+			// Also verify no new slot was populated.
+			for k, v := range sess.Equipment.Armor {
+				if _, existed := slotsBefore[k]; !existed {
+					assert.Nil(rt, v, "slot %s was populated on failed wear but was absent before", k)
+				}
 			}
 		}
 	})

@@ -995,8 +995,8 @@ func (s *GameServiceServer) handleWear(uid string, req *gamev1.WearRequest) (*ga
 	arg := req.GetItemId() + " " + req.GetSlot()
 	result := command.HandleWear(sess, s.invRegistry, arg)
 
-	// Apply team affinity effect only when jobRegistry is wired (Task 8).
-	if s.jobRegistry != nil && s.invRegistry != nil {
+	// Only apply team affinity effect if the wear succeeded.
+	if strings.HasPrefix(result, "Wore ") && s.jobRegistry != nil && s.invRegistry != nil {
 		itemDef, ok := s.invRegistry.Item(req.GetItemId())
 		if ok && itemDef.ArmorRef != "" {
 			if armorDef, ok := s.invRegistry.Armor(itemDef.ArmorRef); ok && armorDef.TeamAffinity != "" {
