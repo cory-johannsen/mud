@@ -26,3 +26,5 @@ logging:
 gameserver:
   grpc_host: 127.0.0.1
   grpc_port: 50051
+  game_clock_start: 6
+  game_tick_duration: 1m

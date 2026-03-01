@@ -27,3 +27,5 @@ gameserver:
   grpc_host: 127.0.0.1
   grpc_port: 50051
   round_duration_ms: 6000
+  game_clock_start: 6
+  game_tick_duration: 1m

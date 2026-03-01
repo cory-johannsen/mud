@@ -81,6 +81,10 @@ type GameServerConfig struct {
 	GRPCPort int `mapstructure:"grpc_port"`
 	// RoundDurationMs is the combat round timer duration in milliseconds.
 	RoundDurationMs int `mapstructure:"round_duration_ms"`
+	// GameClockStart is the game hour (0-23) at server startup.
+	GameClockStart int `mapstructure:"game_clock_start"`
+	// GameTickDuration is how long each game hour lasts in real time.
+	GameTickDuration time.Duration `mapstructure:"game_tick_duration"`
 }
 
 // Addr returns the "host:port" gRPC address.
@@ -292,4 +296,6 @@ func setDefaults(v *viper.Viper) {
 
 	v.SetDefault("gameserver.grpc_host", "127.0.0.1")
 	v.SetDefault("gameserver.grpc_port", 50051)
+	v.SetDefault("gameserver.game_clock_start", 6)
+	v.SetDefault("gameserver.game_tick_duration", "1m")
 }
