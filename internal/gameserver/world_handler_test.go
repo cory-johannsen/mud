@@ -1,10 +1,13 @@
 package gameserver
 
 import (
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -135,4 +138,124 @@ func TestWorldHandler_RoomViewExcludesSelf(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, view.Players, "Bob")
 	assert.NotContains(t, view.Players, "Alice")
+}
+
+// testWorldAndSessionWithClock builds a WorldHandler that includes a GameClock
+// fixed at startHour. The clock is not started so it will not advance.
+func testWorldAndSessionWithClock(t *testing.T, startHour int32) (*WorldHandler, *world.Manager, *session.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	clock := NewGameClock(startHour, time.Hour*24) // long tick — will not advance during test
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+	return h, worldMgr, sessMgr
+}
+
+func TestBuildRoomView_TimeOfDay_HourAndPeriodPopulated(t *testing.T) {
+	const startHour int32 = 17 // Dusk
+	h, _, sessMgr := testWorldAndSessionWithClock(t, startHour)
+
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	require.NoError(t, err)
+
+	view, err := h.Look("u1")
+	require.NoError(t, err)
+	assert.Equal(t, int32(17), view.Hour)
+	assert.Equal(t, string(PeriodDusk), view.Period)
+}
+
+func TestBuildRoomView_DarkPeriod_OutdoorHidesExits(t *testing.T) {
+	const startHour int32 = 0 // Midnight — dark
+	worldMgr, sessMgr := testWorldAndSession(t)
+
+	// Mark room_a as outdoor and give it an exit
+	room, ok := worldMgr.GetRoom("room_a")
+	require.True(t, ok)
+	room.Properties = map[string]string{"outdoor": "true"}
+
+	clock := NewGameClock(startHour, time.Hour*24)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	require.NoError(t, err)
+
+	view, err := h.Look("u1")
+	require.NoError(t, err)
+	assert.Nil(t, view.Exits, "outdoor exits must be hidden during dark periods")
+}
+
+func TestBuildRoomView_LightPeriod_OutdoorShowsExits(t *testing.T) {
+	const startHour int32 = 12 // Afternoon — light
+	worldMgr, sessMgr := testWorldAndSession(t)
+
+	room, ok := worldMgr.GetRoom("room_a")
+	require.True(t, ok)
+	room.Properties = map[string]string{"outdoor": "true"}
+
+	clock := NewGameClock(startHour, time.Hour*24)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	require.NoError(t, err)
+
+	view, err := h.Look("u1")
+	require.NoError(t, err)
+	assert.NotNil(t, view.Exits, "outdoor exits must be visible during light periods")
+	assert.NotEmpty(t, view.Exits)
+}
+
+func TestBuildRoomView_OutdoorFlavorText_Appended(t *testing.T) {
+	const startHour int32 = 12 // Afternoon
+	worldMgr, sessMgr := testWorldAndSession(t)
+
+	room, ok := worldMgr.GetRoom("room_a")
+	require.True(t, ok)
+	originalDesc := room.Description
+	room.Properties = map[string]string{"outdoor": "true"}
+
+	clock := NewGameClock(startHour, time.Hour*24)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	require.NoError(t, err)
+
+	view, err := h.Look("u1")
+	require.NoError(t, err)
+	assert.True(t, strings.HasPrefix(view.Description, originalDesc), "description must begin with the room's original description")
+	assert.Greater(t, len(view.Description), len(originalDesc), "description must have a non-empty flavor text suffix appended")
+}
+
+func TestBuildRoomView_IndoorNoFlavorText(t *testing.T) {
+	const startHour int32 = 12 // Afternoon
+	worldMgr, sessMgr := testWorldAndSession(t)
+
+	room, ok := worldMgr.GetRoom("room_a")
+	require.True(t, ok)
+	originalDesc := room.Description
+	// room_a already has empty Properties (no outdoor key) from testWorldAndSession
+
+	clock := NewGameClock(startHour, time.Hour*24)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	require.NoError(t, err)
+
+	view, err := h.Look("u1")
+	require.NoError(t, err)
+	assert.Equal(t, originalDesc, view.Description, "indoor rooms must have no flavor text appended")
+}
+
+func TestProperty_BuildRoomView_HourAlwaysInRange(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		startHour := rapid.Int32Range(0, 23).Draw(rt, "startHour")
+		worldMgr, sessMgr := testWorldAndSession(t)
+		clock := NewGameClock(startHour, time.Hour*24)
+		h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+
+		_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+		require.NoError(rt, err)
+
+		view, err := h.Look("u1")
+		require.NoError(rt, err)
+		assert.Equal(rt, startHour, view.Hour, "RoomView.Hour must equal the clock's startHour")
+	})
 }
