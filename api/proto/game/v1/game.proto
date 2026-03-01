@@ -46,6 +46,7 @@ message ClientMessage {
     EquipmentRequest equipment = 29;
     SwitchCharacterRequest switch_character = 30;
     WearRequest wear = 31;
+    RemoveArmorRequest remove_armor = 32;
   }
 }
 
@@ -402,6 +403,11 @@ message ConditionEvent {
 message WearRequest {
   string item_id = 1;
   string slot = 2;
+}
+
+// RemoveArmorRequest asks the server to remove armor from a body slot, returning it to the backpack.
+message RemoveArmorRequest {
+  string slot = 1;
 }
 
 // ConditionInfo describes one active condition on a combatant.

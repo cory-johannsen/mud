@@ -503,17 +503,17 @@ func bridgeWear(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
-// bridgeRemoveArmor builds an UnequipRequest for the named armor slot.
+// bridgeRemoveArmor builds a RemoveArmorRequest for the named armor slot.
 // Precondition: bctx must be non-nil with a valid conn and reqID.
 // Postcondition: if RawArgs is empty, writes usage error and returns done=true;
 //
-//	otherwise returns a non-nil msg containing an UnequipRequest.
+//	otherwise returns a non-nil msg containing a RemoveArmorRequest.
 func bridgeRemoveArmor(bctx *bridgeContext) (bridgeResult, error) {
 	if bctx.parsed.RawArgs == "" {
 		return writeErrorPrompt(bctx, "Usage: remove <slot>")
 	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
-		Payload:   &gamev1.ClientMessage_Unequip{Unequip: &gamev1.UnequipRequest{Slot: bctx.parsed.RawArgs}},
+		Payload:   &gamev1.ClientMessage_RemoveArmor{RemoveArmor: &gamev1.RemoveArmorRequest{Slot: bctx.parsed.RawArgs}},
 	}}, nil
 }

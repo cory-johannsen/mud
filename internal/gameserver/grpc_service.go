@@ -426,6 +426,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleEquipment(uid, p.Equipment)
 	case *gamev1.ClientMessage_Wear:
 		return s.handleWear(uid, p.Wear)
+	case *gamev1.ClientMessage_RemoveArmor:
+		return s.handleRemoveArmor(uid, p.RemoveArmor)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1010,6 +1012,19 @@ func (s *GameServiceServer) handleWear(uid string, req *gamev1.WearRequest) (*ga
 		}
 	}
 
+	return messageEvent(result), nil
+}
+
+// handleRemoveArmor removes armor from a player's body slot, returning it to the backpack.
+//
+// Precondition: uid must be a valid connected player; req must be non-nil.
+// Postcondition: On success, the slot is cleared and a message event is returned; on failure an error event is returned.
+func (s *GameServiceServer) handleRemoveArmor(uid string, req *gamev1.RemoveArmorRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	result := command.HandleRemoveArmor(sess, s.invRegistry, req.GetSlot())
 	return messageEvent(result), nil
 }
 
