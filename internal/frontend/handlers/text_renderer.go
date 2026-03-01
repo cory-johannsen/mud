@@ -202,6 +202,18 @@ func RenderInventoryView(iv *gamev1.InventoryView) string {
 	return b.String()
 }
 
+// RenderCharacterInfo formats a CharacterInfo event as a multi-line Telnet stats block.
+//
+// Precondition: ci must be non-nil.
+// Postcondition: Returns a non-empty human-readable string.
+func RenderCharacterInfo(ci *gamev1.CharacterInfo) string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("  %s%s%s\r\n", telnet.BrightWhite, ci.Name, telnet.Reset))
+	sb.WriteString(fmt.Sprintf("  Region: %s   Class: %s   Level: %d\r\n", ci.Region, ci.Class, ci.Level))
+	sb.WriteString(fmt.Sprintf("  HP: %d/%d\r\n", ci.CurrentHp, ci.MaxHp))
+	return sb.String()
+}
+
 func RenderCombatEvent(ce *gamev1.CombatEvent) string {
 	switch ce.Type {
 	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK:

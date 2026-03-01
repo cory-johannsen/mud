@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -221,5 +222,39 @@ func TestProperty_RenderConditionEvent_Removed(t *testing.T) {
 		}
 		result := RenderConditionEvent(ce)
 		assert.Contains(rt, telnet.StripANSI(result), "fades")
+	})
+}
+
+func TestRenderCharacterInfo(t *testing.T) {
+	ci := &gamev1.CharacterInfo{
+		Name: "Hero", Region: "the Northeast", Class: "Gunner", Level: 3,
+		CurrentHp: 15, MaxHp: 20,
+	}
+	got := RenderCharacterInfo(ci)
+	if !strings.Contains(got, "the Northeast") {
+		t.Errorf("expected 'the Northeast' in %q", got)
+	}
+	if !strings.Contains(got, "Hero") {
+		t.Errorf("expected 'Hero' in %q", got)
+	}
+	if !strings.Contains(got, "Gunner") {
+		t.Errorf("expected 'Gunner' in %q", got)
+	}
+}
+
+func TestProperty_RenderCharacterInfo_NonEmpty(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		name := rapid.StringMatching(`[A-Za-z]+`).Draw(t, "name")
+		region := rapid.StringMatching(`[A-Za-z ]+`).Draw(t, "region")
+		ci := &gamev1.CharacterInfo{
+			Name: name, Region: region, Class: "Gunner", Level: 1, CurrentHp: 10, MaxHp: 10,
+		}
+		got := RenderCharacterInfo(ci)
+		if got == "" {
+			t.Fatal("RenderCharacterInfo must not return empty string")
+		}
+		if !strings.Contains(got, region) {
+			t.Fatalf("RenderCharacterInfo must contain region %q in %q", region, got)
+		}
 	})
 }

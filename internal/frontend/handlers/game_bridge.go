@@ -246,7 +246,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		case *gamev1.ServerEvent_InventoryView:
 			text = RenderInventoryView(p.InventoryView)
 		case *gamev1.ServerEvent_CharacterInfo:
-			// Character info is displayed during join; silently ignore here.
+			text = RenderCharacterInfo(p.CharacterInfo)
 		case *gamev1.ServerEvent_Disconnected:
 			_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason))
 			return

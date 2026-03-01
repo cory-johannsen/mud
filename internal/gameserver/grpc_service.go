@@ -720,30 +720,48 @@ func (s *GameServiceServer) handleStrike(uid string, req *gamev1.StrikeRequest) 
 	}, nil
 }
 
-// handleStatus sends the active conditions for uid directly on stream.
+// handleStatus sends a CharacterInfo event followed by active condition events for uid on stream.
 // One ConditionEvent is sent per active condition. If no conditions are active,
 // a single empty sentinel ConditionEvent is sent to signal "no conditions".
 // All events are sent only to the requesting player — no room broadcast occurs.
 //
 // Precondition: uid must be a valid connected player; stream must be non-nil.
-// Postcondition: One or more ConditionEvents are sent on stream; returns nil on success.
+// Postcondition: A CharacterInfo event is sent first, followed by one or more ConditionEvents; returns nil on success.
 func (s *GameServiceServer) handleStatus(uid string, requestID string, stream gamev1.GameService_SessionServer) error {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+
+	// Send character info first.
+	if err := stream.Send(&gamev1.ServerEvent{
+		RequestId: requestID,
+		Payload: &gamev1.ServerEvent_CharacterInfo{
+			CharacterInfo: &gamev1.CharacterInfo{
+				CharacterId: sess.CharacterID,
+				Name:        sess.CharName,
+				Region:      sess.RegionDisplayName,
+				Class:       sess.Class,
+				Level:       int32(sess.Level),
+				CurrentHp:   int32(sess.CurrentHP),
+			},
+		},
+	}); err != nil {
+		return fmt.Errorf("sending character info: %w", err)
+	}
+
+	// Then send conditions.
 	conds, err := s.combatH.Status(uid)
 	if err != nil {
 		return err
 	}
 	if len(conds) == 0 {
-		// Send empty sentinel so the client knows no conditions are active.
 		return stream.Send(&gamev1.ServerEvent{
 			RequestId: requestID,
 			Payload: &gamev1.ServerEvent_ConditionEvent{
 				ConditionEvent: &gamev1.ConditionEvent{},
 			},
 		})
-	}
-	sess, ok := s.sessions.GetPlayer(uid)
-	if !ok {
-		return fmt.Errorf("player %q not found", uid)
 	}
 	for _, ac := range conds {
 		if err := stream.Send(&gamev1.ServerEvent{
