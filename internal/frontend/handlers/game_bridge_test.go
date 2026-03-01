@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -9,6 +10,81 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/frontend/handlers"
 )
+
+func TestBuildPrompt_Format(t *testing.T) {
+	got := handlers.BuildPrompt("Thorald", "Dusk", "17:00", 45, 60)
+	// Must end with "> "
+	if !strings.HasSuffix(got, "> ") {
+		t.Errorf("prompt must end with '> ', got %q", got)
+	}
+	// Must contain character name
+	if !strings.Contains(got, "Thorald") {
+		t.Errorf("prompt must contain character name, got %q", got)
+	}
+	// Must contain period
+	if !strings.Contains(got, "Dusk") {
+		t.Errorf("prompt must contain period, got %q", got)
+	}
+	// Must contain hour
+	if !strings.Contains(got, "17:00") {
+		t.Errorf("prompt must contain hour, got %q", got)
+	}
+}
+
+func TestBuildPrompt_HealthColors(t *testing.T) {
+	// Full health >= 75% — contains hp fraction
+	got := handlers.BuildPrompt("Thorald", "Dusk", "17:00", 60, 60)
+	if !strings.Contains(got, "60/60hp") {
+		t.Errorf("expected 60/60hp in prompt, got %q", got)
+	}
+	// Wounded ~40%
+	got = handlers.BuildPrompt("Thorald", "Morning", "09:00", 24, 60)
+	if !strings.Contains(got, "24/60hp") {
+		t.Errorf("expected 24/60hp in prompt, got %q", got)
+	}
+	// Critical <40%
+	got = handlers.BuildPrompt("Thorald", "Night", "22:00", 10, 60)
+	if !strings.Contains(got, "10/60hp") {
+		t.Errorf("expected 10/60hp in prompt, got %q", got)
+	}
+}
+
+func TestBuildPrompt_AllPeriods(t *testing.T) {
+	periods := []string{
+		"Midnight", "Late Night", "Dawn", "Morning",
+		"Afternoon", "Dusk", "Evening", "Night",
+	}
+	for _, p := range periods {
+		got := handlers.BuildPrompt("X", p, "00:00", 10, 10)
+		if got == "" {
+			t.Errorf("BuildPrompt returned empty for period %q", p)
+		}
+		if !strings.HasSuffix(got, "> ") {
+			t.Errorf("prompt for period %q must end with '> '", p)
+		}
+	}
+}
+
+func TestProperty_BuildPrompt_AlwaysEndsWithPromptSuffix(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		name := rapid.StringMatching(`[A-Za-z]{1,20}`).Draw(rt, "name")
+		period := rapid.SampledFrom([]string{
+			"Midnight", "Late Night", "Dawn", "Morning",
+			"Afternoon", "Dusk", "Evening", "Night",
+		}).Draw(rt, "period")
+		hour := rapid.StringMatching(`[0-9]{2}:[0-9]{2}`).Draw(rt, "hour")
+		maxHP := rapid.Int32Range(1, 1000).Draw(rt, "maxHP")
+		currentHP := rapid.Int32Range(0, maxHP).Draw(rt, "currentHP")
+
+		got := handlers.BuildPrompt(name, period, hour, currentHP, maxHP)
+		if !strings.HasSuffix(got, "> ") {
+			rt.Errorf("BuildPrompt must end with '> ', got %q", got)
+		}
+		if !strings.Contains(got, name) {
+			rt.Errorf("BuildPrompt must contain name %q, got %q", name, got)
+		}
+	})
+}
 
 // TestIdleMonitor_WarningAfterIdleTimeout verifies that the idle monitor sends
 // a warning callback after the idle timeout and a disconnect callback after

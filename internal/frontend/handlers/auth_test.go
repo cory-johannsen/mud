@@ -484,27 +484,27 @@ func TestHandleSession_LoginSuccess_GameBridge(t *testing.T) {
 
 	// After character selection, should receive initial room view + prompt
 	c.readUntil("Room A", 5*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Game bridge - look: response comes back with room view + prompt
 	c.send("look")
 	c.readUntil("Room A", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Game bridge - move north
 	c.send("north")
 	c.readUntil("Room B", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Game bridge - exits
 	c.send("exits")
 	c.readUntil("south", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Game bridge - help (handled locally, prompt re-displayed)
 	c.send("help")
 	c.readUntil("Movement", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Game bridge - quit
 	c.send("quit")
@@ -529,37 +529,37 @@ func TestHandleSession_GameBridge_SayAndEmote(t *testing.T) {
 	c.readUntil("Your characters:", 2*time.Second)
 	c.send("1")
 	c.readUntil("Room A", 5*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Say command
 	c.send("say hello world")
 	c.readUntil("hero says: hello world", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Emote command
 	c.send("emote waves")
 	c.readUntil("hero waves", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Who command
 	c.send("who")
 	c.readUntil("hero", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Say with no args
 	c.send("say")
 	c.readUntil("Say what?", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Emote with no args
 	c.send("emote")
 	c.readUntil("Emote what?", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Unknown command (treated as move, returns error)
 	c.send("dance")
 	c.readUntil("no exit", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	c.send("quit")
 	c.readUntil("Goodbye", 3*time.Second)
@@ -583,17 +583,17 @@ func TestHandleSession_GameBridge_MoveAlias(t *testing.T) {
 	c.readUntil("Your characters:", 2*time.Second)
 	c.send("1")
 	c.readUntil("Room A", 5*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Move using alias 'n' for north
 	c.send("n")
 	c.readUntil("Room B", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	// Move back using alias 's' for south
 	c.send("s")
 	c.readUntil("Room A", 3*time.Second)
-	c.readUntil("]> ", 3*time.Second)
+	c.readUntil("hp]", 3*time.Second)
 
 	c.send("quit")
 	c.readUntil("Goodbye", 3*time.Second)

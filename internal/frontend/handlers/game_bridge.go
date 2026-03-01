@@ -25,6 +25,51 @@ import (
 // characterFlow checks for this sentinel to loop back to character selection.
 var ErrSwitchCharacter = errors.New("switch character")
 
+// BuildPrompt constructs the colored telnet prompt string.
+//
+// Precondition: maxHP > 0; name, period, and hour must be non-empty.
+// Postcondition: Returns a non-empty string ending with "> ".
+func BuildPrompt(name, period, hour string, currentHP, maxHP int32) string {
+	// Name segment
+	nameSeg := telnet.Colorf(telnet.BrightCyan, "[%s]", name)
+
+	// Time segment — color by period
+	var timeColor string
+	switch period {
+	case "Dawn":
+		timeColor = telnet.Yellow
+	case "Morning":
+		timeColor = telnet.BrightYellow
+	case "Afternoon":
+		timeColor = telnet.White
+	case "Dusk":
+		timeColor = telnet.BrightRed
+	case "Evening":
+		timeColor = telnet.Magenta
+	default: // Night, Midnight, Late Night
+		timeColor = telnet.Blue
+	}
+	timeSeg := telnet.Colorf(timeColor, "[%s %s]", period, hour)
+
+	// HP segment — color by percentage
+	if maxHP <= 0 {
+		maxHP = 1
+	}
+	pct := float64(currentHP) / float64(maxHP)
+	var hpColor string
+	switch {
+	case pct >= 0.75:
+		hpColor = telnet.BrightGreen
+	case pct >= 0.40:
+		hpColor = telnet.Yellow
+	default:
+		hpColor = telnet.Red
+	}
+	hpSeg := telnet.Colorf(hpColor, "[%d/%dhp]", currentHP, maxHP)
+
+	return fmt.Sprintf("%s %s %s> ", nameSeg, timeSeg, hpSeg)
+}
+
 // IdleMonitorConfig configures the idle monitor goroutine.
 type IdleMonitorConfig struct {
 	// LastInput is the shared atomic timestamp (UnixNano) of the most recent player input.
@@ -128,6 +173,25 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		return fmt.Errorf("sending join request: %w", err)
 	}
 
+	// Initialize time-of-day state: default to Hour=6, Period="Dawn".
+	var currentTime atomic.Value
+	currentTime.Store(&gamev1.TimeOfDayEvent{Hour: 6, Period: "Dawn"})
+
+	// Initialize HP tracking from character data.
+	var currentHP atomic.Int32
+	var maxHP atomic.Int32
+	currentHP.Store(int32(char.CurrentHP))
+	if char.MaxHP > 0 {
+		maxHP.Store(int32(char.MaxHP))
+	} else {
+		maxHP.Store(int32(char.CurrentHP))
+	}
+
+	buildCurrentPrompt := func() string {
+		tod := currentTime.Load().(*gamev1.TimeOfDayEvent)
+		return BuildPrompt(char.Name, tod.Period, fmt.Sprintf("%02d:00", tod.Hour), currentHP.Load(), maxHP.Load())
+	}
+
 	// Receive initial room view
 	resp, err := stream.Recv()
 	if err != nil {
@@ -135,11 +199,14 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	}
 	if rv := resp.GetRoomView(); rv != nil {
 		_ = conn.Write([]byte(RenderRoomView(rv)))
+		// Seed time-of-day from first room view if available.
+		if rv.GetHour() > 0 || rv.GetPeriod() != "" {
+			currentTime.Store(&gamev1.TimeOfDayEvent{Hour: rv.GetHour(), Period: rv.GetPeriod()})
+		}
 	}
 
 	// Write initial prompt
-	prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", char.Name)
-	if err := conn.WritePrompt(prompt); err != nil {
+	if err := conn.WritePrompt(buildCurrentPrompt()); err != nil {
 		return fmt.Errorf("writing initial prompt: %w", err)
 	}
 
@@ -182,11 +249,11 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentHP, &maxHP, buildCurrentPrompt)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, buildCurrentPrompt)
 
 	cancel()
 	wg.Wait()
@@ -219,9 +286,9 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 // commandLoop reads lines from the Telnet connection, parses commands,
 // and sends them as gRPC ClientMessages.
 //
-// Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil.
+// Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil; buildPrompt must be non-nil.
 // Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64) error {
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, buildPrompt func() string) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -240,7 +307,7 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 
 		line = strings.TrimSpace(line)
 		if line == "" {
-			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+			_ = conn.WritePrompt(buildPrompt())
 			continue
 		}
 
@@ -266,16 +333,17 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			charName: charName,
 			role:     role,
 			stream:   stream,
+			promptFn: buildPrompt,
 			helpFn: func() {
 				h.showGameHelp(conn, registry, role)
-				_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+				_ = conn.WritePrompt(buildPrompt())
 			},
 		}
 
 		handlerFn, ok := bridgeHandlerMap[cmd.Handler]
 		if !ok {
 			_ = conn.WriteLine(telnet.Colorf(telnet.Dim, "You don't know how to '%s'.", parsed.Command))
-			_ = conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName))
+			_ = conn.WritePrompt(buildPrompt())
 			continue
 		}
 
@@ -317,10 +385,12 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // forwardServerEvents reads ServerEvents from the gRPC stream and writes
 // rendered text to the Telnet connection.
 //
-// Precondition: stream must be open; charName must be non-empty; currentRoom must be non-nil and hold a string.
+// Precondition: stream must be open; charName must be non-empty; currentRoom, currentTime, currentHP, maxHP must be non-nil; buildPrompt must be non-nil.
 // Postcondition: Returns when ctx is done, stream closes, or a disconnect event is received.
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value) {
+// Side-effect: currentTime is updated from TimeOfDayEvent or RoomView events.
+// Side-effect: currentHP and maxHP are updated from CharacterInfo events.
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, buildPrompt func() string) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -338,9 +408,17 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 
 		var text string
 		switch p := resp.Payload.(type) {
+		case *gamev1.ServerEvent_TimeOfDay:
+			currentTime.Store(p.TimeOfDay)
+			// Re-display prompt to reflect new time-of-day; no text block to render.
+			_ = conn.WritePrompt(buildPrompt())
+			continue
 		case *gamev1.ServerEvent_RoomView:
 			if roomID := p.RoomView.GetRoomId(); roomID != "" {
 				currentRoom.Store(roomID)
+			}
+			if p.RoomView.GetHour() > 0 || p.RoomView.GetPeriod() != "" {
+				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
 			}
 			text = RenderRoomView(p.RoomView)
 		case *gamev1.ServerEvent_Message:
@@ -366,15 +444,19 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			if ce.ConditionId == "" {
 				// empty sentinel — no active conditions
 				_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "No active conditions."))
-				prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName)
-				_ = conn.WritePrompt(prompt)
+				_ = conn.WritePrompt(buildPrompt())
 				continue
 			}
 			text = RenderConditionEvent(ce)
 		case *gamev1.ServerEvent_InventoryView:
 			text = RenderInventoryView(p.InventoryView)
 		case *gamev1.ServerEvent_CharacterInfo:
-			text = RenderCharacterInfo(p.CharacterInfo)
+			ci := p.CharacterInfo
+			if ci.GetMaxHp() > 0 {
+				maxHP.Store(ci.GetMaxHp())
+			}
+			currentHP.Store(ci.GetCurrentHp())
+			text = RenderCharacterInfo(ci)
 		case *gamev1.ServerEvent_Disconnected:
 			_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason))
 			return
@@ -383,8 +465,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		if text != "" {
 			_ = conn.WriteLine(text)
 			// Re-display prompt after each server event
-			prompt := telnet.Colorf(telnet.BrightCyan, "[%s]> ", charName)
-			_ = conn.WritePrompt(prompt)
+			_ = conn.WritePrompt(buildPrompt())
 		}
 	}
 }

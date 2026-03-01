@@ -18,7 +18,8 @@ type bridgeContext struct {
 	charName string
 	role     string
 	stream   gamev1.GameService_SessionClient
-	helpFn   func() // called by bridgeHelp to render help output
+	helpFn   func()      // called by bridgeHelp to render help output
+	promptFn func() string // called to build the current colored prompt
 }
 
 // bridgeResult is returned by every bridge handler.
@@ -81,7 +82,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 // Postcondition: writes msg in red and the prompt, then returns done=true with nil error.
 func writeErrorPrompt(bctx *bridgeContext, msg string) (bridgeResult, error) {
 	_ = bctx.conn.WriteLine(telnet.Colorize(telnet.Red, msg))
-	_ = bctx.conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", bctx.charName))
+	_ = bctx.conn.WritePrompt(bctx.promptFn())
 	return bridgeResult{done: true}, nil
 }
 
@@ -399,7 +400,7 @@ func bridgeBalance(bctx *bridgeContext) (bridgeResult, error) {
 func bridgeSetRole(bctx *bridgeContext) (bridgeResult, error) {
 	if len(bctx.parsed.Args) < 2 {
 		_ = bctx.conn.WriteLine("Usage: setrole <username> <role>")
-		_ = bctx.conn.WritePrompt(telnet.Colorf(telnet.BrightCyan, "[%s]> ", bctx.charName))
+		_ = bctx.conn.WritePrompt(bctx.promptFn())
 		return bridgeResult{done: true}, nil
 	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
