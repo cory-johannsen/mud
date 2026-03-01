@@ -69,27 +69,43 @@ func TestProperty_GameHour_PeriodAlwaysValid(t *testing.T) {
 
 func TestGameClock_AdvancesHour(t *testing.T) {
 	clk := gameserver.NewGameClock(0, 20*time.Millisecond)
+	ch := make(chan gameserver.GameHour, 4)
+	clk.Subscribe(ch)
 	stop := clk.Start()
 	defer stop()
+	defer clk.Unsubscribe(ch)
 
-	time.Sleep(55 * time.Millisecond) // ~2-3 ticks
+	// Wait for exactly 2 ticks
+	for i := 0; i < 2; i++ {
+		select {
+		case <-ch:
+		case <-time.After(500 * time.Millisecond):
+			t.Fatalf("timed out waiting for tick %d", i+1)
+		}
+	}
 
 	h := clk.CurrentHour()
-	if h < 1 || h > 3 {
-		t.Errorf("expected hour 1-3 after ~2-3 ticks, got %d", h)
+	if h != 2 {
+		t.Errorf("expected hour 2 after 2 ticks from 0, got %d", h)
 	}
 }
 
 func TestGameClock_Wraps(t *testing.T) {
-	clk := gameserver.NewGameClock(22, 10*time.Millisecond)
+	clk := gameserver.NewGameClock(23, 20*time.Millisecond)
+	ch := make(chan gameserver.GameHour, 4)
+	clk.Subscribe(ch)
 	stop := clk.Start()
 	defer stop()
+	defer clk.Unsubscribe(ch)
 
-	time.Sleep(45 * time.Millisecond) // enough ticks to wrap past 23
-
-	h := clk.CurrentHour()
-	if h < 0 || h > 23 {
-		t.Errorf("hour %d out of range [0,23]", h)
+	// Wait for exactly 1 tick — from 23 should wrap to 0
+	select {
+	case h := <-ch:
+		if h != 0 {
+			t.Errorf("expected hour 0 after wrapping from 23, got %d", h)
+		}
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("timed out waiting for wrap tick")
 	}
 }
 

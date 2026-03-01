@@ -28,6 +28,9 @@ type GameHour int32
 // Precondition: h is in [0, 23].
 // Postcondition: Returns one of the eight TimePeriod constants.
 func (h GameHour) Period() TimePeriod {
+	if h < 0 || h > 23 {
+		panic(fmt.Sprintf("GameHour.Period: hour %d out of range [0, 23]", h))
+	}
 	switch {
 	case h == 0:
 		return PeriodMidnight
@@ -66,8 +69,11 @@ type GameClock struct {
 // Precondition: startHour in [0, 23]; tickInterval > 0.
 // Postcondition: Returns a non-nil *GameClock ready to Start().
 func NewGameClock(startHour int32, tickInterval time.Duration) *GameClock {
+	if startHour < 0 || startHour > 23 {
+		panic(fmt.Sprintf("NewGameClock: startHour %d out of range [0, 23]", startHour))
+	}
 	return &GameClock{
-		hour:         startHour % 24,
+		hour:         startHour,
 		tickInterval: tickInterval,
 		subscribers:  make(map[chan<- GameHour]struct{}),
 	}
@@ -85,6 +91,9 @@ func (c *GameClock) CurrentHour() GameHour {
 //
 // Precondition: ch must not be nil.
 func (c *GameClock) Subscribe(ch chan<- GameHour) {
+	if ch == nil {
+		panic("GameClock.Subscribe: ch must not be nil")
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.subscribers[ch] = struct{}{}
