@@ -145,7 +145,8 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 
 	var lastInput atomic.Int64
 	lastInput.Store(time.Now().UnixNano())
-	disconnectReason := "quit"
+	var disconnectReason atomic.Value
+	disconnectReason.Store("quit")
 
 	// currentRoom tracks the live room ID for the session.
 	// It is initialized to the character's saved location and updated whenever
@@ -159,11 +160,17 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		GracePeriod:  h.telnetCfg.IdleGracePeriod,
 		TickInterval: 30 * time.Second,
 		OnWarning: func() {
-			_ = conn.WriteLine(telnet.Colorize(telnet.Yellow,
-				"Warning: You have been idle for 5 minutes. You will be disconnected in 1 minute."))
+			msg := fmt.Sprintf(
+				"Warning: You have been idle for %s. You will be disconnected in %s.",
+				h.telnetCfg.IdleTimeout.Round(time.Second),
+				h.telnetCfg.IdleGracePeriod.Round(time.Second),
+			)
+			if err := conn.WriteLine(telnet.Colorize(telnet.Yellow, msg)); err != nil {
+				h.logger.Debug("failed to send idle warning", zap.Error(err))
+			}
 		},
 		OnDisconnect: func() {
-			disconnectReason = "inactivity"
+			disconnectReason.Store("inactivity")
 			cancel()
 		},
 	})
@@ -185,15 +192,15 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Wait()
 	stopIdle()
 
-	if err != nil && !errors.Is(err, context.Canceled) && disconnectReason == "quit" {
-		disconnectReason = "connection_error"
+	if err != nil && !errors.Is(err, context.Canceled) && disconnectReason.Load().(string) == "quit" {
+		disconnectReason.Store("connection_error")
 	}
 	if errors.Is(err, ErrSwitchCharacter) {
-		disconnectReason = "switch_character"
+		disconnectReason.Store("switch_character")
 	}
 
 	h.logger.Info("player disconnected",
-		zap.String("reason", disconnectReason),
+		zap.String("reason", disconnectReason.Load().(string)),
 		zap.String("player", char.Name),
 		zap.String("account", acct.Username),
 		zap.Duration("session_duration", time.Since(sessionStart)),

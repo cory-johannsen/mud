@@ -115,32 +115,34 @@ func TestIdleMonitor_InputResetsTimer(t *testing.T) {
 // prevents any callbacks from firing.
 func TestIdleMonitor_StopPreventsCallbacks(t *testing.T) {
 	var lastInput atomic.Int64
-	lastInput.Store(time.Now().Add(-10 * time.Second).UnixNano()) // already idle
+	lastInput.Store(time.Now().UnixNano()) // NOT idle — goroutine cannot fire yet
 
-	warningCalled := make(chan struct{}, 1)
+	warned := atomic.Bool{}
+	disconnected := atomic.Bool{}
 
 	stop := handlers.StartIdleMonitor(handlers.IdleMonitorConfig{
 		LastInput:    &lastInput,
 		IdleTimeout:  10 * time.Millisecond,
 		GracePeriod:  10 * time.Millisecond,
 		TickInterval: 5 * time.Millisecond,
-		OnWarning: func() {
-			select {
-			case warningCalled <- struct{}{}:
-			default:
-			}
-		},
-		OnDisconnect: func() {},
+		OnWarning:    func() { warned.Store(true) },
+		OnDisconnect: func() { disconnected.Store(true) },
 	})
 
-	// Stop immediately before monitor can fire
+	// Stop before the idle timeout can elapse
 	stop()
 
-	select {
-	case <-warningCalled:
-		t.Fatal("warning should not fire after stop()")
-	case <-time.After(50 * time.Millisecond):
-		// good
+	// Now make it look idle — but goroutine is already stopped
+	lastInput.Store(time.Now().Add(-10 * time.Second).UnixNano())
+
+	// Wait long enough that a running goroutine would have fired
+	time.Sleep(100 * time.Millisecond)
+
+	if warned.Load() {
+		t.Error("expected no warning after stop, but OnWarning was called")
+	}
+	if disconnected.Load() {
+		t.Error("expected no disconnect after stop, but OnDisconnect was called")
 	}
 }
 
