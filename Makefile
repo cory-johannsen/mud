@@ -92,6 +92,7 @@ kind-up:
 k8s-metallb:
 	kubectl apply -f deployments/k8s/metallb/metallb-native.yaml
 	kubectl rollout status deployment/controller -n metallb-system --timeout=120s
+	kubectl rollout status daemonset/speaker -n metallb-system --timeout=120s
 	kubectl apply -f deployments/k8s/metallb/ipaddresspool.yaml
 	kubectl apply -f deployments/k8s/metallb/l2advertisement.yaml
 
