@@ -204,6 +204,12 @@ func validateGameServer(g GameServerConfig) error {
 	if g.RoundDurationMs < 0 {
 		errs = append(errs, fmt.Sprintf("gameserver.round_duration_ms must be >= 0 (got %d)", g.RoundDurationMs))
 	}
+	if g.GameClockStart < 0 || g.GameClockStart > 23 {
+		errs = append(errs, fmt.Sprintf("gameserver.game_clock_start must be 0-23, got %d", g.GameClockStart))
+	}
+	if g.GameTickDuration <= 0 {
+		errs = append(errs, fmt.Sprintf("gameserver.game_tick_duration must be positive, got %v", g.GameTickDuration))
+	}
 	if len(errs) > 0 {
 		return fmt.Errorf("%s", strings.Join(errs, "; "))
 	}

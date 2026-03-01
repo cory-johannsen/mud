@@ -39,8 +39,10 @@ func validConfig() Config {
 			Format: "json",
 		},
 		GameServer: GameServerConfig{
-			GRPCHost: "127.0.0.1",
-			GRPCPort: 50051,
+			GRPCHost:         "127.0.0.1",
+			GRPCPort:         50051,
+			GameClockStart:   6,
+			GameTickDuration: time.Minute,
 		},
 	}
 }
@@ -246,6 +248,50 @@ func TestPropertyMinConnsNeverExceedsMax(t *testing.T) {
 		err := cfg.Validate()
 		if err == nil {
 			t.Fatalf("min_conns=%d > max_conns=%d accepted", minConns, maxConns)
+		}
+	})
+}
+
+func TestGameServerConfig_GameClockStart_Valid(t *testing.T) {
+	cases := []int{0, 1, 6, 12, 22, 23}
+	for _, start := range cases {
+		cfg := validConfig()
+		cfg.GameServer.GameClockStart = start
+		if err := cfg.Validate(); err != nil {
+			t.Errorf("GameClockStart=%d: expected valid, got %v", start, err)
+		}
+	}
+}
+
+func TestGameServerConfig_GameClockStart_Invalid(t *testing.T) {
+	for _, bad := range []int{-1, 24, 100} {
+		cfg := validConfig()
+		cfg.GameServer.GameClockStart = bad
+		if err := cfg.Validate(); err == nil {
+			t.Errorf("GameClockStart=%d: expected error, got nil", bad)
+		}
+	}
+}
+
+func TestGameServerConfig_GameTickDuration_Invalid(t *testing.T) {
+	cfg := validConfig()
+	cfg.GameServer.GameTickDuration = 0
+	if err := cfg.Validate(); err == nil {
+		t.Error("expected error for zero GameTickDuration, got nil")
+	}
+	cfg.GameServer.GameTickDuration = -time.Second
+	if err := cfg.Validate(); err == nil {
+		t.Error("expected error for negative GameTickDuration, got nil")
+	}
+}
+
+func TestProperty_GameClockStart_Range(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		start := rapid.IntRange(0, 23).Draw(t, "start")
+		cfg := validConfig()
+		cfg.GameServer.GameClockStart = start
+		if err := cfg.Validate(); err != nil {
+			t.Fatalf("GameClockStart=%d: unexpected error: %v", start, err)
 		}
 	})
 }
