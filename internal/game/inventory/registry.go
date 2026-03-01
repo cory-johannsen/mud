@@ -2,11 +2,12 @@ package inventory
 
 import "fmt"
 
-// Registry holds all loaded weapon, explosive, and item definitions indexed by ID.
+// Registry holds all loaded weapon, explosive, item, and armor definitions indexed by ID.
 type Registry struct {
 	weapons    map[string]*WeaponDef
 	explosives map[string]*ExplosiveDef
 	items      map[string]*ItemDef
+	armors     map[string]*ArmorDef
 }
 
 // NewRegistry returns an empty Registry.
@@ -17,6 +18,7 @@ func NewRegistry() *Registry {
 		weapons:    make(map[string]*WeaponDef),
 		explosives: make(map[string]*ExplosiveDef),
 		items:      make(map[string]*ItemDef),
+		armors:     make(map[string]*ArmorDef),
 	}
 }
 
@@ -81,6 +83,38 @@ func (r *Registry) AllWeapons() []*WeaponDef {
 	out := make([]*WeaponDef, 0, len(r.weapons))
 	for _, w := range r.weapons {
 		out = append(out, w)
+	}
+	return out
+}
+
+// RegisterArmor adds an ArmorDef to the registry.
+//
+// Precondition: def must be non-nil with a non-empty ID.
+// Postcondition: Returns error if an armor with the same ID is already registered.
+func (r *Registry) RegisterArmor(def *ArmorDef) error {
+	if _, exists := r.armors[def.ID]; exists {
+		return fmt.Errorf("inventory: Registry.RegisterArmor: armor ID %q already registered", def.ID)
+	}
+	r.armors[def.ID] = def
+	return nil
+}
+
+// Armor returns the ArmorDef with the given ID, or false if not found.
+//
+// Precondition: id must be non-empty.
+// Postcondition: Returns (def, true) if found; (nil, false) otherwise.
+func (r *Registry) Armor(id string) (*ArmorDef, bool) {
+	def, ok := r.armors[id]
+	return def, ok
+}
+
+// AllArmors returns all registered ArmorDef instances in unspecified order.
+//
+// Postcondition: Returns a non-nil slice; may be empty if no armors registered.
+func (r *Registry) AllArmors() []*ArmorDef {
+	out := make([]*ArmorDef, 0, len(r.armors))
+	for _, def := range r.armors {
+		out = append(out, def)
 	}
 	return out
 }

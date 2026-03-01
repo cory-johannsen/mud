@@ -4,6 +4,9 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 )
 
 // TestRegistry_RegisterWeapon_Lookup verifies that a registered WeaponDef can
@@ -107,4 +110,58 @@ func TestRegistry_RegisterExplosive_CollisionError(t *testing.T) {
 	if err := r.RegisterExplosive(e); err == nil {
 		t.Fatal("expected collision error on second register, got nil")
 	}
+}
+
+func TestRegistry_RegisterArmor_And_Lookup(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{
+		ID: "test_helm", Name: "Test Helm", Slot: inventory.SlotHead, Group: "composite",
+	}
+	require.NoError(t, reg.RegisterArmor(def))
+	got, ok := reg.Armor("test_helm")
+	require.True(t, ok)
+	assert.Equal(t, def, got)
+}
+
+func TestRegistry_Armor_Unknown_ReturnsFalse(t *testing.T) {
+	reg := inventory.NewRegistry()
+	_, ok := reg.Armor("nonexistent")
+	assert.False(t, ok)
+}
+
+func TestRegistry_RegisterArmor_DuplicateReturnsError(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{ID: "dup", Name: "Dup", Slot: inventory.SlotHead, Group: "leather"}
+	require.NoError(t, reg.RegisterArmor(def))
+	assert.Error(t, reg.RegisterArmor(def))
+}
+
+func TestRegistry_AllArmors_ReturnsAll(t *testing.T) {
+	reg := inventory.NewRegistry()
+	slots := map[string]inventory.ArmorSlot{
+		"helm":  inventory.SlotHead,
+		"vest":  inventory.SlotTorso,
+		"boots": inventory.SlotFeet,
+	}
+	for id, slot := range slots {
+		require.NoError(t, reg.RegisterArmor(&inventory.ArmorDef{
+			ID: id, Name: id, Slot: slot, Group: "leather",
+		}))
+	}
+	all := reg.AllArmors()
+	assert.Len(t, all, 3)
+}
+
+func TestProperty_Registry_ArmorRoundTrip(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		reg := inventory.NewRegistry()
+		id := rapid.StringMatching(`[a-z][a-z0-9_]{1,15}`).Draw(rt, "id")
+		def := &inventory.ArmorDef{
+			ID: id, Name: "Test", Slot: inventory.SlotTorso, Group: "leather",
+		}
+		require.NoError(t, reg.RegisterArmor(def))
+		got, ok := reg.Armor(id)
+		assert.True(t, ok)
+		assert.Equal(t, def, got)
+	})
 }
