@@ -16,7 +16,7 @@
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration 
 - [ ] Non-combat NPCs: merchants, guards, quest givers, hirelings, bankers, skill trainers, etc.
-- [ ] Per-NPC type custom behaviors, dialog, interactions, aggressiveness.  Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus 
+- [ ] Per-NPC type custom behaviors, dialog, taunt and statement templates and generators, interactions, aggressiveness.  Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus 
 - [ ] Room equipment
 - [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
 - [ ] Combat distance, fleeing, pursuit, panic
