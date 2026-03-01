@@ -52,6 +52,10 @@ type TelnetConfig struct {
 	ReadTimeout time.Duration `mapstructure:"read_timeout"`
 	// WriteTimeout is the per-write timeout for Telnet connections.
 	WriteTimeout time.Duration `mapstructure:"write_timeout"`
+	// IdleTimeout is the duration of inactivity after which a warning is sent.
+	IdleTimeout time.Duration `mapstructure:"idle_timeout"`
+	// IdleGracePeriod is the additional duration after IdleTimeout before disconnecting.
+	IdleGracePeriod time.Duration `mapstructure:"idle_grace_period"`
 }
 
 // Addr returns the "host:port" listen address.
@@ -280,6 +284,8 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("telnet.port", 4000)
 	v.SetDefault("telnet.read_timeout", "5m")
 	v.SetDefault("telnet.write_timeout", "30s")
+	v.SetDefault("telnet.idle_timeout", "5m")
+	v.SetDefault("telnet.idle_grace_period", "1m")
 
 	v.SetDefault("logging.level", "info")
 	v.SetDefault("logging.format", "json")
