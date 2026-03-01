@@ -147,6 +147,12 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	lastInput.Store(time.Now().UnixNano())
 	disconnectReason := "quit"
 
+	// currentRoom tracks the live room ID for the session.
+	// It is initialized to the character's saved location and updated whenever
+	// the server sends a RoomView event (i.e. after every move or look).
+	var currentRoom atomic.Value
+	currentRoom.Store(char.Location)
+
 	stopIdle := StartIdleMonitor(IdleMonitorConfig{
 		LastInput:    &lastInput,
 		IdleTimeout:  h.telnetCfg.IdleTimeout,
@@ -169,7 +175,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
@@ -191,7 +197,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		zap.String("player", char.Name),
 		zap.String("account", acct.Username),
 		zap.Duration("session_duration", time.Since(sessionStart)),
-		zap.String("room_id", char.Location),
+		zap.String("room_id", currentRoom.Load().(string)),
 	)
 
 	if errors.Is(err, ErrSwitchCharacter) {
@@ -304,9 +310,10 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // forwardServerEvents reads ServerEvents from the gRPC stream and writes
 // rendered text to the Telnet connection.
 //
-// Precondition: stream must be open; charName must be non-empty.
+// Precondition: stream must be open; charName must be non-empty; currentRoom must be non-nil and hold a string.
 // Postcondition: Returns when ctx is done, stream closes, or a disconnect event is received.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string) {
+// Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -325,6 +332,9 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		var text string
 		switch p := resp.Payload.(type) {
 		case *gamev1.ServerEvent_RoomView:
+			if roomID := p.RoomView.GetRoomId(); roomID != "" {
+				currentRoom.Store(roomID)
+			}
 			text = RenderRoomView(p.RoomView)
 		case *gamev1.ServerEvent_Message:
 			text = RenderMessage(p.Message)
