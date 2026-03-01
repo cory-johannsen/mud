@@ -989,6 +989,9 @@ type JoinWorldRequest struct {
 	CurrentHp     int32                  `protobuf:"varint,5,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
 	Location      string                 `protobuf:"bytes,6,opt,name=location,proto3" json:"location,omitempty"`
 	Role          string                 `protobuf:"bytes,7,opt,name=role,proto3" json:"role,omitempty"`
+	RegionDisplay string                 `protobuf:"bytes,8,opt,name=region_display,json=regionDisplay,proto3" json:"region_display,omitempty"`
+	Class         string                 `protobuf:"bytes,9,opt,name=class,proto3" json:"class,omitempty"`
+	Level         int32                  `protobuf:"varint,10,opt,name=level,proto3" json:"level,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1070,6 +1073,27 @@ func (x *JoinWorldRequest) GetRole() string {
 		return x.Role
 	}
 	return ""
+}
+
+func (x *JoinWorldRequest) GetRegionDisplay() string {
+	if x != nil {
+		return x.RegionDisplay
+	}
+	return ""
+}
+
+func (x *JoinWorldRequest) GetClass() string {
+	if x != nil {
+		return x.Class
+	}
+	return ""
+}
+
+func (x *JoinWorldRequest) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
 }
 
 // MoveRequest asks the server to move the player in the given direction.
@@ -3692,7 +3716,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tround_end\x18\r \x01(\v2\x16.game.v1.RoundEndEventH\x00R\broundEnd\x12B\n" +
 	"\x0fcondition_event\x18\x0e \x01(\v2\x17.game.v1.ConditionEventH\x00R\x0econditionEvent\x12?\n" +
 	"\x0einventory_view\x18\x0f \x01(\v2\x16.game.v1.InventoryViewH\x00R\rinventoryViewB\t\n" +
-	"\apayload\"\xd9\x01\n" +
+	"\apayload\"\xac\x02\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
@@ -3701,7 +3725,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"current_hp\x18\x05 \x01(\x05R\tcurrentHp\x12\x1a\n" +
 	"\blocation\x18\x06 \x01(\tR\blocation\x12\x12\n" +
-	"\x04role\x18\a \x01(\tR\x04role\"+\n" +
+	"\x04role\x18\a \x01(\tR\x04role\x12%\n" +
+	"\x0eregion_display\x18\b \x01(\tR\rregionDisplay\x12\x14\n" +
+	"\x05class\x18\t \x01(\tR\x05class\x12\x14\n" +
+	"\x05level\x18\n" +
+	" \x01(\x05R\x05level\"+\n" +
 	"\vMoveRequest\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\"\r\n" +
 	"\vLookRequest\"&\n" +
