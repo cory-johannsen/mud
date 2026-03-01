@@ -552,7 +552,38 @@ func (s *GameServiceServer) handleQuit(uid string) (*gamev1.ServerEvent, error) 
 	}, errQuit
 }
 
+// handleExamine returns detailed information about a named target.
+// It first checks for a player with the given name in the same room;
+// if found, returns CharacterInfo. Otherwise falls back to NPC examine.
+//
+// Precondition: uid must be a valid connected player; req.Target must be non-empty.
+// Postcondition: Returns CharacterInfo for player targets in the same room, NpcView for NPC targets, or error if not found.
 func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest) (*gamev1.ServerEvent, error) {
+	// Check if target is a player in the same room.
+	examiner, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	target, ok := s.sessions.GetPlayerByCharName(req.Target)
+	if ok && target.RoomID == examiner.RoomID {
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_CharacterInfo{
+				CharacterInfo: &gamev1.CharacterInfo{
+					CharacterId: target.CharacterID,
+					Name:        target.CharName,
+					Region:      target.RegionDisplayName,
+					Class:       target.Class,
+					Level:       int32(target.Level),
+					CurrentHp:   int32(target.CurrentHP),
+				},
+			},
+		}, nil
+	}
+
+	// Fall back to NPC examine.
+	if s.npcH == nil {
+		return nil, fmt.Errorf("target %q not found", req.Target)
+	}
 	view, err := s.npcH.Examine(uid, req.Target)
 	if err != nil {
 		return nil, err
