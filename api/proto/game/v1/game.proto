@@ -77,6 +77,9 @@ message JoinWorldRequest {
   int32  current_hp     = 5;
   string location       = 6;
   string role           = 7;
+  string region_display = 8;
+  string class          = 9;
+  int32  level          = 10;
 }
 
 // MoveRequest asks the server to move the player in the given direction.

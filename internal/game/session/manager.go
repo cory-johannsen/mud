@@ -27,6 +27,12 @@ type PlayerSession struct {
 	Currency int
 	// Role is the account privilege level (player, editor, admin).
 	Role string
+	// RegionDisplayName is the human-readable region display name (e.g. "the Northeast").
+	RegionDisplayName string
+	// Class is the character's job/class ID.
+	Class string
+	// Level is the character's current level.
+	Level int
 	// LoadoutSet holds the player's swappable weapon presets.
 	LoadoutSet *inventory.LoadoutSet
 	// Equipment holds the player's equipped armor and accessories.
@@ -53,9 +59,9 @@ func NewManager() *Manager {
 
 // AddPlayer registers a new player session in the given room.
 //
-// Precondition: uid, username, charName, and roomID must be non-empty; characterID must be >= 0; currentHP must be >= 0; role must be non-empty.
+// Precondition: uid, username, charName, and roomID must be non-empty; characterID must be >= 0; currentHP must be >= 0; role must be non-empty; regionDisplayName, class, and level are informational and may be zero values.
 // Postcondition: Returns the created PlayerSession, or an error if the UID is already registered.
-func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, roomID string, currentHP int, role string) (*PlayerSession, error) {
+func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, roomID string, currentHP int, role string, regionDisplayName string, class string, level int) (*PlayerSession, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -65,14 +71,17 @@ func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, r
 
 	entity := NewBridgeEntity(uid, 64)
 	sess := &PlayerSession{
-		UID:         uid,
-		Username:    username,
-		CharName:    charName,
-		CharacterID: characterID,
-		RoomID:      roomID,
-		CurrentHP:   currentHP,
-		Role:        role,
-		Entity:      entity,
+		UID:               uid,
+		Username:          username,
+		CharName:          charName,
+		CharacterID:       characterID,
+		RoomID:            roomID,
+		CurrentHP:         currentHP,
+		Role:              role,
+		RegionDisplayName: regionDisplayName,
+		Class:             class,
+		Level:             level,
+		Entity:            entity,
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)

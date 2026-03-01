@@ -14,7 +14,7 @@ func TestChatHandler_Say(t *testing.T) {
 	sessMgr := session.NewManager()
 	h := NewChatHandler(sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
 
 	evt, err := h.Say("u1", "hello world")
@@ -36,7 +36,7 @@ func TestChatHandler_Emote(t *testing.T) {
 	sessMgr := session.NewManager()
 	h := NewChatHandler(sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
 
 	evt, err := h.Emote("u1", "waves")
@@ -50,9 +50,9 @@ func TestChatHandler_Who(t *testing.T) {
 	sessMgr := session.NewManager()
 	h := NewChatHandler(sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player")
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
-	_, err = sessMgr.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10, "player")
+	_, err = sessMgr.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
 
 	list, err := h.Who("u1")

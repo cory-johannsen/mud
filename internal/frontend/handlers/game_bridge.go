@@ -59,6 +59,9 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 				CurrentHp:     int32(char.CurrentHP),
 				Location:      char.Location,
 				Role:          acct.Role,
+				RegionDisplay: h.regionDisplayName(char.Region),
+				Class:         char.Class,
+				Level:         int32(char.Level),
 			},
 		},
 	}); err != nil {

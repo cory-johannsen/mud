@@ -179,7 +179,8 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		role = "player"
 	}
 
-	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP, role)
+	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP, role,
+		joinReq.RegionDisplay, joinReq.Class, int(joinReq.Level))
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
 	}

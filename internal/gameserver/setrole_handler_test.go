@@ -54,7 +54,7 @@ func TestHandleSetRole_AdminSuccess(t *testing.T) {
 	}}
 	svc := testServiceWithAdmin(t, admin)
 
-	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, "admin")
+	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, "admin", "", "", 0)
 	require.NoError(t, err)
 
 	resp, err := svc.handleSetRole("u1", &gamev1.SetRoleRequest{
@@ -71,7 +71,7 @@ func TestHandleSetRole_AdminSuccess(t *testing.T) {
 func TestHandleSetRole_NonAdminDenied(t *testing.T) {
 	svc := testServiceWithAdmin(t, nil)
 
-	_, err := svc.sessions.AddPlayer("u1", "player_user", "Player", 1, "room_a", 10, "player")
+	_, err := svc.sessions.AddPlayer("u1", "player_user", "Player", 1, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
 
 	resp, err := svc.handleSetRole("u1", &gamev1.SetRoleRequest{
@@ -87,7 +87,7 @@ func TestHandleSetRole_NonAdminDenied(t *testing.T) {
 func TestHandleSetRole_InvalidArgs(t *testing.T) {
 	svc := testServiceWithAdmin(t, &mockAccountAdmin{})
 
-	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, "admin")
+	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, "admin", "", "", 0)
 	require.NoError(t, err)
 
 	resp, err := svc.handleSetRole("u1", &gamev1.SetRoleRequest{})
@@ -101,7 +101,7 @@ func TestHandleSetRole_TargetNotFound(t *testing.T) {
 	admin := &mockAccountAdmin{accounts: map[string]AccountInfo{}}
 	svc := testServiceWithAdmin(t, admin)
 
-	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, "admin")
+	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, "admin", "", "", 0)
 	require.NoError(t, err)
 
 	resp, err := svc.handleSetRole("u1", &gamev1.SetRoleRequest{
@@ -122,7 +122,7 @@ func TestPropertySetRole_NonAdminAlwaysDenied(t *testing.T) {
 		role := rapid.SampledFrom([]string{"player", "editor"}).Draw(t, "role")
 
 		uid := fmt.Sprintf("u_%s_%d", role, rapid.IntRange(0, 99999).Draw(t, "uid"))
-		_, err := svc.sessions.AddPlayer(uid, "user", "User", 1, "room_a", 10, role)
+		_, err := svc.sessions.AddPlayer(uid, "user", "User", 1, "room_a", 10, role, "", "", 0)
 		if err != nil {
 			t.Fatalf("AddPlayer: %v", err)
 		}

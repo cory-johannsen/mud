@@ -20,7 +20,7 @@ import (
 func newLoadoutServer(t *testing.T, uid string) *GameServiceServer {
 	t.Helper()
 	svc := testServiceWithAdmin(t, nil)
-	_, err := svc.sessions.AddPlayer(uid, "test_user", "TestChar", 1, "room_a", 10, "player")
+	_, err := svc.sessions.AddPlayer(uid, "test_user", "TestChar", 1, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
@@ -86,7 +86,7 @@ func TestPropertyHandleEquipment_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		uid := fmt.Sprintf("prop_u_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
 		svc := testServiceWithAdmin(t, nil)
-		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, "player")
+		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, "player", "", "", 0)
 		if addErr != nil {
 			rt.Fatalf("AddPlayer: %v", addErr)
 		}
@@ -163,7 +163,7 @@ func TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		uid := fmt.Sprintf("prop_loadout_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
 		svc := testServiceWithAdmin(t, nil)
-		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, "player")
+		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, "player", "", "", 0)
 		if addErr != nil {
 			rt.Fatalf("AddPlayer: %v", addErr)
 		}
@@ -190,7 +190,7 @@ func TestPropertyHandleUnequip_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		uid := fmt.Sprintf("prop_unequip_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
 		svc := testServiceWithAdmin(t, nil)
-		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, "player")
+		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, "player", "", "", 0)
 		if addErr != nil {
 			rt.Fatalf("AddPlayer: %v", addErr)
 		}

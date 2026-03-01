@@ -93,7 +93,7 @@ func spawnRespawnTestNPC(t *testing.T, npcMgr *npc.Manager, roomID, templateID s
 // stats to reliably kill the NPC (via repeated rounds).
 func addRespawnTestPlayer(t *testing.T, sessMgr *session.Manager, uid, roomID string, hp int) *session.PlayerSession {
 	t.Helper()
-	sess, err := sessMgr.AddPlayer(uid, "testuser", "Hero", 1, roomID, hp, "player")
+	sess, err := sessMgr.AddPlayer(uid, "testuser", "Hero", 1, roomID, hp, "player", "", "", 0)
 	require.NoError(t, err)
 	return sess
 }
