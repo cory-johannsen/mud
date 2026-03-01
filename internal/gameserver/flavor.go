@@ -24,13 +24,16 @@ func FlavorText(period TimePeriod, isOutdoor bool) string {
 		return "The sky burns orange and red as the sun sinks toward the horizon."
 	case PeriodEvening:
 		return "Twilight settles softly, the first stars beginning to appear."
-	default: // PeriodNight
+	case PeriodNight:
 		return "A canopy of stars fills the night sky above."
+	default:
+		return ""
 	}
 }
 
 // IsDarkPeriod reports whether a period reduces outdoor visibility.
 //
+// Precondition: period is one of the eight TimePeriod constants.
 // Postcondition: Returns true for Midnight, LateNight, Night.
 func IsDarkPeriod(period TimePeriod) bool {
 	return period == PeriodMidnight || period == PeriodLateNight || period == PeriodNight
