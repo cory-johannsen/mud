@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -45,6 +46,35 @@ func (m *mockCharStore) GetByID(ctx context.Context, id int64) (*character.Chara
 		}
 	}
 	return nil, nil
+}
+
+func TestErrSwitchCharacter_IsError(t *testing.T) {
+	if handlers.ErrSwitchCharacter == nil {
+		t.Fatal("ErrSwitchCharacter must be a non-nil error")
+	}
+	if handlers.ErrSwitchCharacter.Error() == "" {
+		t.Fatal("ErrSwitchCharacter.Error() must be non-empty")
+	}
+}
+
+func TestIsAlreadyLoggedIn_WithAlreadyConnectedError(t *testing.T) {
+	err := errors.New("player \"uid1\" already connected")
+	if !handlers.IsAlreadyLoggedIn(err) {
+		t.Error("expected IsAlreadyLoggedIn to return true for 'already connected' error")
+	}
+}
+
+func TestIsAlreadyLoggedIn_WithOtherError(t *testing.T) {
+	err := errors.New("some other error")
+	if handlers.IsAlreadyLoggedIn(err) {
+		t.Error("expected IsAlreadyLoggedIn to return false for unrelated error")
+	}
+}
+
+func TestIsAlreadyLoggedIn_WithNil(t *testing.T) {
+	if handlers.IsAlreadyLoggedIn(nil) {
+		t.Error("expected IsAlreadyLoggedIn to return false for nil")
+	}
 }
 
 func TestFormatCharacterSummary(t *testing.T) {

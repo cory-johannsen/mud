@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -73,6 +74,14 @@ func RandomizeRemaining(
 	return region, team, job, nil
 }
 
+// IsAlreadyLoggedIn returns true if err indicates the character is already connected.
+//
+// Precondition: err may be nil or non-nil.
+// Postcondition: Returns true only when the error message contains "already connected".
+func IsAlreadyLoggedIn(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "already connected")
+}
+
 // IsRandomInput reports whether the player's input at a list step requests random selection.
 // Blank input, "r", and "random" (all case-insensitive) are treated as random.
 // Exported for testing.
@@ -103,7 +112,17 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 			if c == nil {
 				continue // user cancelled — loop again
 			}
-			return h.gameBridge(ctx, conn, acct, c)
+			if err := h.gameBridge(ctx, conn, acct, c); err != nil {
+				if errors.Is(err, ErrSwitchCharacter) {
+					continue
+				}
+				if IsAlreadyLoggedIn(err) {
+					_ = conn.WriteLine(telnet.Colorize(telnet.Red, "That character is already logged in."))
+					continue
+				}
+				return err
+			}
+			return nil
 		}
 
 		// Show character list
@@ -142,13 +161,33 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 				return err
 			}
 			if c != nil {
-				return h.gameBridge(ctx, conn, acct, c)
+				if err := h.gameBridge(ctx, conn, acct, c); err != nil {
+					if errors.Is(err, ErrSwitchCharacter) {
+						continue
+					}
+					if IsAlreadyLoggedIn(err) {
+						_ = conn.WriteLine(telnet.Colorize(telnet.Red, "That character is already logged in."))
+						continue
+					}
+					return err
+				}
+				return nil
 			}
 			continue
 		}
 
 		selected := chars[choice-1]
-		return h.gameBridge(ctx, conn, acct, selected)
+		if err := h.gameBridge(ctx, conn, acct, selected); err != nil {
+			if errors.Is(err, ErrSwitchCharacter) {
+				continue
+			}
+			if IsAlreadyLoggedIn(err) {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "That character is already logged in."))
+				continue
+			}
+			return err
+		}
+		return nil
 	}
 }
 
