@@ -15,8 +15,15 @@ func NewJobRegistry() *JobRegistry {
 // Register adds a Job to the registry.
 //
 // Precondition: job must be non-nil with a non-empty ID.
-// Postcondition: job is retrievable via TeamFor using job.ID.
+// Postcondition: job is retrievable via TeamFor using job.ID;
+// if called multiple times with the same ID, the last call wins.
 func (r *JobRegistry) Register(job *Job) {
+	if job == nil {
+		panic("JobRegistry.Register: precondition violated: job must be non-nil")
+	}
+	if job.ID == "" {
+		panic("JobRegistry.Register: precondition violated: job ID must be non-empty")
+	}
 	r.jobs[job.ID] = job
 }
 

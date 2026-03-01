@@ -39,6 +39,16 @@ func TestJobRegistry_LoadFromDir(t *testing.T) {
 	}
 }
 
+func TestJobRegistry_Register_NilJobPanics(t *testing.T) {
+	reg := ruleset.NewJobRegistry()
+	assert.Panics(t, func() { reg.Register(nil) })
+}
+
+func TestJobRegistry_Register_EmptyIDPanics(t *testing.T) {
+	reg := ruleset.NewJobRegistry()
+	assert.Panics(t, func() { reg.Register(&ruleset.Job{ID: "", Team: "gun"}) })
+}
+
 func TestProperty_JobRegistry_RoundTrip(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		id := rapid.StringMatching(`[a-z][a-z_]{1,15}`).Draw(rt, "id")
