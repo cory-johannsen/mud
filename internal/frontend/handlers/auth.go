@@ -10,6 +10,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -55,6 +56,7 @@ type AuthHandler struct {
 	jobs           []*ruleset.Job
 	logger         *zap.Logger
 	gameServerAddr string
+	telnetCfg      config.TelnetConfig
 }
 
 // NewAuthHandler creates an AuthHandler backed by the given account and character stores.
@@ -69,6 +71,7 @@ func NewAuthHandler(
 	jobs []*ruleset.Job,
 	logger *zap.Logger,
 	gameServerAddr string,
+	telnetCfg config.TelnetConfig,
 ) *AuthHandler {
 	return &AuthHandler{
 		accounts:       accounts,
@@ -78,6 +81,7 @@ func NewAuthHandler(
 		jobs:           jobs,
 		logger:         logger,
 		gameServerAddr: gameServerAddr,
+		telnetCfg:      telnetCfg,
 	}
 }
 
