@@ -159,7 +159,7 @@ func testGameServer(t *testing.T) string {
 
 	sessMgr := session.NewManager()
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 

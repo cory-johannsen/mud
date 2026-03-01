@@ -46,7 +46,7 @@ func TestStartZoneTicks_RespawnIntegration(t *testing.T) {
 
 	logger := zaptest.NewLogger(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	npcHandler := NewNPCHandler(npcMgr, sessMgr)
 
@@ -79,7 +79,7 @@ func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 

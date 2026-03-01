@@ -360,7 +360,7 @@ func main() {
 	}
 
 	// Create handlers
-	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr)
+	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	npcHandler := gameserver.NewNPCHandler(npcMgr, sessMgr)
 	roundDuration := time.Duration(cfg.GameServer.RoundDurationMs) * time.Millisecond

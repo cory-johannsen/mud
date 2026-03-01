@@ -15,16 +15,19 @@ type WorldHandler struct {
 	world    *world.Manager
 	sessions *session.Manager
 	npcMgr   *npc.Manager
+	clock    *GameClock
 }
 
 // NewWorldHandler creates a WorldHandler with the given dependencies.
 //
-// Precondition: worldMgr, sessMgr, and npcMgr must be non-nil.
-func NewWorldHandler(worldMgr *world.Manager, sessMgr *session.Manager, npcMgr *npc.Manager) *WorldHandler {
+// Precondition: worldMgr, sessMgr, and npcMgr must be non-nil. clock may be nil (disables time-of-day features).
+// Postcondition: Returns a non-nil *WorldHandler.
+func NewWorldHandler(worldMgr *world.Manager, sessMgr *session.Manager, npcMgr *npc.Manager, clock *GameClock) *WorldHandler {
 	return &WorldHandler{
 		world:    worldMgr,
 		sessions: sessMgr,
 		npcMgr:   npcMgr,
+		clock:    clock,
 	}
 }
 
@@ -175,12 +178,32 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 		}
 	}
 
+	// Time of day
+	hour := GameHour(6) // default to dawn if no clock
+	if h.clock != nil {
+		hour = h.clock.CurrentHour()
+	}
+	isOutdoor := room.Properties["outdoor"] == "true"
+	period := hour.Period()
+
+	// In dark periods, outdoor rooms hide exits
+	if IsDarkPeriod(period) && isOutdoor {
+		exitInfos = nil
+	}
+
+	description := room.Description
+	if flavor := FlavorText(period, isOutdoor); flavor != "" {
+		description = description + " " + flavor
+	}
+
 	return &gamev1.RoomView{
 		RoomId:      room.ID,
 		Title:       room.Title,
-		Description: room.Description,
+		Description: description,
 		Exits:       exitInfos,
 		Players:     otherPlayers,
 		Npcs:        npcInfos,
+		Hour:        int32(hour),
+		Period:      string(period),
 	}
 }

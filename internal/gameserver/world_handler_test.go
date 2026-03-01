@@ -50,7 +50,7 @@ func testWorldAndSession(t *testing.T) (*world.Manager, *session.Manager) {
 
 func TestWorldHandler_Look(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
 	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestWorldHandler_Look(t *testing.T) {
 
 func TestWorldHandler_Look_NotFound(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
 	_, err := h.Look("nonexistent")
 	assert.Error(t, err)
@@ -72,7 +72,7 @@ func TestWorldHandler_Look_NotFound(t *testing.T) {
 
 func TestWorldHandler_Move(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
 	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
@@ -85,7 +85,7 @@ func TestWorldHandler_Move(t *testing.T) {
 
 func TestWorldHandler_Move_NoExit(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
 	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
@@ -97,7 +97,7 @@ func TestWorldHandler_Move_NoExit(t *testing.T) {
 
 func TestWorldHandler_MoveWithContext(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
 	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
@@ -110,7 +110,7 @@ func TestWorldHandler_MoveWithContext(t *testing.T) {
 
 func TestWorldHandler_Exits(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
 	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)
@@ -124,7 +124,7 @@ func TestWorldHandler_Exits(t *testing.T) {
 
 func TestWorldHandler_RoomViewExcludesSelf(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager())
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
 	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
 	require.NoError(t, err)

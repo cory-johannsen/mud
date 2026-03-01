@@ -84,7 +84,7 @@ func testGRPCServerWithSaverFull(t *testing.T, saver CharacterSaver) (gamev1.Gam
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
 	npcMgr := npc.NewManager()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
