@@ -3,7 +3,7 @@
 - [x] Armor, rings, necklaces.  Each player should have dedicated equipped item slots for: armor (head, left arm, right arm, torso, left leg, right leg, feet), main hand weapon, off-hand weapon, neck, 10 rings)
 - [x] Region descriptions instead of ID strings in character descriptions
 - [x] Switching characters without logout and disconnect
-- [ ] Expose GRPC API and GRPC REST proxy to external clients.
+- [x] Expose GRPC API and GRPC REST proxy to external clients.
 - [ ] Inactivity warning before automatic disconnect.  Serverside logging of disconnect and reason.
 - [ ] Time of day, including daylight/darkness effects and descriptive details.  Time of day is displayed in the prompt.
 - [ ] Weapon and armor library.  A large library of equipment needs to exist with multiple options for every item type.  Each team should have customized team-specific equipment 
