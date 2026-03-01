@@ -23,6 +23,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/gameserver"
@@ -48,6 +49,8 @@ func main() {
 	aiDir := flag.String("ai-dir", "content/ai", "path to HTN AI domain YAML directory")
 	aiScriptDir := flag.String("ai-scripts", "content/scripts/ai", "path to Lua AI precondition scripts")
 	aiTickInterval := flag.Duration("ai-tick", 10*time.Second, "NPC AI tick interval")
+	armorsDir := flag.String("armors-dir", "content/armor", "path to armor YAML definitions directory")
+	jobsDir := flag.String("jobs-dir", "content/jobs", "path to job YAML definitions directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -224,6 +227,29 @@ func main() {
 		logger.Info("loaded item definitions", zap.Int("count", len(items)))
 	}
 
+	// Load armor definitions.
+	armors, err := inventory.LoadArmors(*armorsDir)
+	if err != nil {
+		zap.L().Fatal("failed to load armors", zap.Error(err))
+	}
+	for _, a := range armors {
+		if err := invRegistry.RegisterArmor(a); err != nil {
+			zap.L().Fatal("failed to register armor", zap.String("id", a.ID), zap.Error(err))
+		}
+	}
+	zap.L().Info("loaded armor definitions", zap.Int("count", len(armors)))
+
+	// Load job definitions.
+	jobList, err := ruleset.LoadJobs(*jobsDir)
+	if err != nil {
+		zap.L().Fatal("failed to load jobs", zap.Error(err))
+	}
+	jobReg := ruleset.NewJobRegistry()
+	for _, j := range jobList {
+		jobReg.Register(j)
+	}
+	zap.L().Info("loaded job definitions", zap.Int("count", len(jobList)))
+
 	// Load HTN AI domains.
 	aiRegistry := ai.NewRegistry()
 
@@ -391,6 +417,7 @@ func main() {
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
+		jobReg, condRegistry,
 	)
 
 	// Start zone AI ticks.

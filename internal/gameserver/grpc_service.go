@@ -90,6 +90,8 @@ type GameServiceServer struct {
 // floorMgr may be nil (inventory get/drop will return errors).
 // invRegistry may be nil (item name resolution will fall back to ItemDefID).
 // clock may be nil (time-of-day events will not be broadcast to sessions).
+// jobRegistry may be nil (team affinity effects will not be applied on wear).
+// condRegistry may be nil (cross-team condition effects will be skipped).
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
@@ -109,6 +111,8 @@ func NewGameServiceServer(
 	invRegistry *inventory.Registry,
 	accountAdmin AccountAdmin,
 	clock *GameClock,
+	jobRegistry *ruleset.JobRegistry,
+	condRegistry *condition.Registry,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:        worldMgr,
@@ -128,6 +132,8 @@ func NewGameServiceServer(
 		accountAdmin: accountAdmin,
 		clock:        clock,
 		logger:       logger,
+		jobRegistry:  jobRegistry,
+		condRegistry: condRegistry,
 	}
 }
 

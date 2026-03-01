@@ -584,17 +584,26 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 // Precondition: combatMu is held; sess and inst must be non-nil.
 // Postcondition: combat is registered in the engine; StartRound(3) is called.
 func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc.Instance) (*combat.Combat, []*gamev1.CombatEvent, error) {
-	// Placeholder defaults: AC/Level/StrMod/DexMod will come from character sheet once Stage 7 (inventory) is complete.
+	// Compute player AC from equipped armor. dexMod is a placeholder until character sheet stats are integrated.
+	const dexMod = 1
+	var playerAC int
+	if h.invRegistry != nil {
+		defStats := sess.Equipment.ComputedDefenses(h.invRegistry, dexMod)
+		playerAC = 10 + defStats.ACBonus + defStats.EffectiveDex
+	} else {
+		playerAC = 10 + dexMod
+	}
+
 	playerCbt := &combat.Combatant{
 		ID:        sess.UID,
 		Kind:      combat.KindPlayer,
 		Name:      sess.CharName,
 		MaxHP:     sess.CurrentHP,
 		CurrentHP: sess.CurrentHP,
-		AC:        12,
+		AC:        playerAC,
 		Level:     1,
 		StrMod:    2,
-		DexMod:    1,
+		DexMod:    dexMod,
 	}
 
 	h.loadoutsMu.Lock()

@@ -60,6 +60,9 @@ func LoadRegions(dir string) ([]*Region, error) {
 func yamlFiles(dir string) ([]string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("reading directory %s: %w", dir, err)
 	}
 	var paths []string

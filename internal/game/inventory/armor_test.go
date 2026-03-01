@@ -121,6 +121,16 @@ cross_team_effect:
 	assert.Equal(t, "clumsy-1", armors[0].CrossTeamEffect.Value)
 }
 
+// TestLoadArmors_MissingDirReturnsEmpty verifies that LoadArmors returns an empty
+// slice and nil error when the directory does not exist.
+//
+// Postcondition: Returns ([]ArmorDef{}, nil) for a non-existent directory.
+func TestLoadArmors_MissingDirReturnsEmpty(t *testing.T) {
+	armors, err := inventory.LoadArmors("/nonexistent/path/that/should/not/exist/abc123")
+	require.NoError(t, err, "expected nil error for missing directory")
+	assert.Empty(t, armors, "expected empty slice for missing directory")
+}
+
 func TestLoadArmors_EmptyDirReturnsEmpty(t *testing.T) {
 	dir := t.TempDir()
 	armors, err := inventory.LoadArmors(dir)

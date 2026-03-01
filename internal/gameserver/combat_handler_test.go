@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -595,6 +596,157 @@ func TestStatus_Property_RegisteredNotInCombat(t *testing.T) {
 		}
 		if conds != nil {
 			rt.Fatalf("expected nil conditions for player not in combat; got %v", conds)
+		}
+	})
+}
+
+// makeCombatHandlerWithRegistry constructs a CombatHandler with the given invRegistry.
+func makeCombatHandlerWithRegistry(t *testing.T, reg *inventory.Registry, broadcastFn func(roomID string, events []*gamev1.CombatEvent)) *CombatHandler {
+	t.Helper()
+	logger := zap.NewNop()
+	src := dice.NewCryptoSource()
+	roller := dice.NewLoggedRoller(src, logger)
+	engine := combat.NewEngine()
+	npcMgr := npc.NewManager()
+	sessMgr := session.NewManager()
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil)
+}
+
+// TestStartCombatLocked_NilRegistry_ACIsTenPlusDex verifies that when invRegistry
+// is nil, the player AC defaults to 10 + dexMod (i.e. 11).
+//
+// Precondition: invRegistry is nil; no armor equipped.
+// Postcondition: Player combatant AC equals 11.
+func TestStartCombatLocked_NilRegistry_ACIsTenPlusDex(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const roomID = "room-ac-nil-reg"
+
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, "player-ac-nil", roomID)
+
+	_, err := h.Attack("player-ac-nil", "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	h.combatMu.Lock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		h.combatMu.Unlock()
+		t.Fatal("expected active combat")
+	}
+	var playerAC int
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindPlayer {
+			playerAC = c.AC
+			break
+		}
+	}
+	h.combatMu.Unlock()
+
+	const wantAC = 11 // 10 + dexMod(1) with nil registry
+	if playerAC != wantAC {
+		t.Errorf("expected player AC=%d; got %d", wantAC, playerAC)
+	}
+}
+
+// TestStartCombatLocked_WithRegistry_ACIncludesArmorBonus verifies that when an
+// invRegistry is provided and the player has armor equipped, the AC reflects the
+// armor's ACBonus via ComputedDefenses.
+//
+// Precondition: invRegistry contains an armor with ACBonus=3; player has it equipped in torso slot.
+// Postcondition: Player combatant AC equals 10 + 3 (ACBonus) + 1 (EffectiveDex) = 14.
+func TestStartCombatLocked_WithRegistry_ACIncludesArmorBonus(t *testing.T) {
+	reg := inventory.NewRegistry()
+	armorDef := &inventory.ArmorDef{
+		ID:      "test-vest",
+		Name:    "Test Vest",
+		Slot:    inventory.SlotTorso,
+		ACBonus: 3,
+		DexCap:  10,
+		Group:   "light",
+	}
+	if err := reg.RegisterArmor(armorDef); err != nil {
+		t.Fatalf("RegisterArmor: %v", err)
+	}
+
+	h := makeCombatHandlerWithRegistry(t, reg, func(_ string, _ []*gamev1.CombatEvent) {})
+	const roomID = "room-ac-with-reg"
+
+	spawnTestNPC(t, h.npcMgr, roomID)
+	sess := addTestPlayer(t, h.sessions, "player-ac-armor", roomID)
+
+	// Equip the armor directly on the session's Equipment by setting the torso slot.
+	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID: "test-vest",
+		Name:      "Test Vest",
+	}
+
+	_, err := h.Attack("player-ac-armor", "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	h.combatMu.Lock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		h.combatMu.Unlock()
+		t.Fatal("expected active combat")
+	}
+	var playerAC int
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindPlayer {
+			playerAC = c.AC
+			break
+		}
+	}
+	h.combatMu.Unlock()
+
+	const wantAC = 14 // 10 + ACBonus(3) + EffectiveDex(1)
+	if playerAC != wantAC {
+		t.Errorf("expected player AC=%d; got %d", wantAC, playerAC)
+	}
+}
+
+// TestProperty_StartCombat_ACNeverLessThanTen is a property-based test verifying
+// that the player AC computed during combat start is always >= 10 when no armor
+// is equipped (ACBonus=0) and dexMod is fixed at 1.
+//
+// Postcondition: Player AC >= 10 for any valid invRegistry state with no armor.
+func TestProperty_StartCombat_ACNeverLessThanTen(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+		roomID := rapid.StringMatching(`room-prop-[a-z]{4}`).Draw(rt, "roomID")
+		uid := rapid.StringMatching(`player-prop-[a-z]{4}`).Draw(rt, "uid")
+
+		spawnTestNPC(t, h.npcMgr, roomID)
+		addTestPlayer(t, h.sessions, uid, roomID)
+
+		_, err := h.Attack(uid, "Goblin")
+		if err != nil {
+			rt.Fatalf("Attack: %v", err)
+		}
+		h.cancelTimer(roomID)
+
+		h.combatMu.Lock()
+		cbt, ok := h.engine.GetCombat(roomID)
+		if !ok {
+			h.combatMu.Unlock()
+			rt.Fatal("expected active combat")
+		}
+		var playerAC int
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindPlayer {
+				playerAC = c.AC
+				break
+			}
+		}
+		h.combatMu.Unlock()
+
+		if playerAC < 10 {
+			rt.Fatalf("expected player AC >= 10; got %d", playerAC)
 		}
 	})
 }

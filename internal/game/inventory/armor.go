@@ -98,11 +98,14 @@ func (a *ArmorDef) Validate() error {
 }
 
 // LoadArmors reads all .yaml files in dir and returns parsed ArmorDef slice.
-// Precondition: dir must be a readable directory.
+// Precondition: dir must be a path; if the directory does not exist, an empty slice and nil error are returned.
 // Postcondition: Returns non-nil slice and nil error on success; all returned defs pass Validate.
 func LoadArmors(dir string) ([]*ArmorDef, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return []*ArmorDef{}, nil
+		}
 		return nil, fmt.Errorf("LoadArmors: cannot read directory %q: %w", dir, err)
 	}
 
