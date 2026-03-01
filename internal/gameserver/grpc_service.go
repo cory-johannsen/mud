@@ -338,6 +338,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleWho(uid)
 	case *gamev1.ClientMessage_Quit:
 		return s.handleQuit(uid)
+	case *gamev1.ClientMessage_SwitchCharacter:
+		return s.handleSwitch(uid)
 	case *gamev1.ClientMessage_Examine:
 		return s.handleExamine(uid, p.Examine)
 	case *gamev1.ClientMessage_Attack:
@@ -544,6 +546,25 @@ func (s *GameServiceServer) handleQuit(uid string) (*gamev1.ServerEvent, error) 
 	reason := "Goodbye"
 	if sess != nil {
 		reason = fmt.Sprintf("%s has quit", sess.CharName)
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Disconnected{
+			Disconnected: &gamev1.Disconnected{Reason: reason},
+		},
+	}, errQuit
+}
+
+// handleSwitch saves the current player's state and signals a clean character switch.
+// The behaviour is identical to handleQuit: errQuit causes the Session goroutine to
+// call cleanupPlayer via defer, persisting all state before the stream closes.
+//
+// Precondition: uid must be non-empty.
+// Postcondition: Returns a Disconnected event with errQuit so the session terminates cleanly.
+func (s *GameServiceServer) handleSwitch(uid string) (*gamev1.ServerEvent, error) {
+	sess, _ := s.sessions.GetPlayer(uid)
+	reason := "Switching characters"
+	if sess != nil {
+		reason = fmt.Sprintf("%s is switching characters", sess.CharName)
 	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Disconnected{
