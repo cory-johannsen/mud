@@ -227,7 +227,10 @@ func TestHandleEquipment_HumanReadableRingLabels(t *testing.T) {
 func TestHandleEquipment_OldRingNamesNotDisplayed(t *testing.T) {
 	sess := newTestSession()
 	output := command.HandleEquipment(sess)
-	oldNames := []string{"ring_1:", "ring_2:", "ring_3:", "ring_4:", "ring_5:"}
+	oldNames := []string{
+		"ring_1:", "ring_2:", "ring_3:", "ring_4:", "ring_5:",
+		"ring_6:", "ring_7:", "ring_8:", "ring_9:", "ring_10:",
+	}
 	for _, old := range oldNames {
 		if strings.Contains(output, old) {
 			t.Errorf("old slot name %q should not appear in output, got:\n%s", old, output)
