@@ -41,6 +41,7 @@ const (
 	HandlerLoadout   = "loadout"
 	HandlerUnequip   = "unequip"
 	HandlerEquipment = "equipment"
+	HandlerSwitch    = "switch"
 )
 
 // Command defines a player-invocable command.
@@ -101,6 +102,7 @@ func BuiltinCommands() []Command {
 		// System commands
 		{Name: "who", Aliases: nil, Help: "List players in the room", Category: CategorySystem, Handler: HandlerWho},
 		{Name: "quit", Aliases: []string{"exit"}, Help: "Disconnect from the game", Category: CategorySystem, Handler: HandlerQuit},
+		{Name: "switch", Aliases: nil, Help: "Switch to a different character without disconnecting.", Category: CategorySystem, Handler: HandlerSwitch},
 		{Name: "help", Aliases: []string{"?"}, Help: "Show available commands", Category: CategorySystem, Handler: HandlerHelp},
 
 		// Admin commands
