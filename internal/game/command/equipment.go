@@ -14,27 +14,35 @@ var displayArmorSlots = []inventory.ArmorSlot{
 	inventory.SlotTorso,
 	inventory.SlotLeftArm,
 	inventory.SlotRightArm,
+	inventory.SlotHands,
 	inventory.SlotLeftLeg,
 	inventory.SlotRightLeg,
 	inventory.SlotFeet,
 }
 
-// displayAccessorySlots is the ordered list of accessory slots shown by HandleEquipment.
-// Only ring_1 through ring_5 are shown per the display specification.
-var displayAccessorySlots = []inventory.AccessorySlot{
-	inventory.SlotNeck,
-	inventory.SlotRing1,
-	inventory.SlotRing2,
-	inventory.SlotRing3,
-	inventory.SlotRing4,
-	inventory.SlotRing5,
+// displayLeftRingSlots is the ordered list of left-hand ring slots shown by HandleEquipment.
+var displayLeftRingSlots = []inventory.AccessorySlot{
+	inventory.SlotLeftRing1,
+	inventory.SlotLeftRing2,
+	inventory.SlotLeftRing3,
+	inventory.SlotLeftRing4,
+	inventory.SlotLeftRing5,
+}
+
+// displayRightRingSlots is the ordered list of right-hand ring slots shown by HandleEquipment.
+var displayRightRingSlots = []inventory.AccessorySlot{
+	inventory.SlotRightRing1,
+	inventory.SlotRightRing2,
+	inventory.SlotRightRing3,
+	inventory.SlotRightRing4,
+	inventory.SlotRightRing5,
 }
 
 // HandleEquipment displays the complete equipment state for the player's session.
 //
 // Precondition: sess must not be nil; sess.LoadoutSet and sess.Equipment must not be nil.
 // Postcondition: Returns a formatted multi-section string showing all weapon presets,
-// all 7 armor slots, and neck + ring_1..ring_5 accessory slots.
+// all 8 armor slots, and neck + left/right ring accessory slots with human-readable labels.
 func HandleEquipment(sess *session.PlayerSession) string {
 	var sb strings.Builder
 
@@ -47,23 +55,30 @@ func HandleEquipment(sess *session.PlayerSession) string {
 			label += " [active]"
 		}
 		sb.WriteString(label + ":\n")
-		sb.WriteString("  Main: " + formatEquippedWeapon(preset.MainHand) + "\n")
-		sb.WriteString("  Off:  " + formatEquippedWeapon(preset.OffHand) + "\n")
+		sb.WriteString("  " + inventory.SlotDisplayName("main") + ": " + formatEquippedWeapon(preset.MainHand) + "\n")
+		sb.WriteString("  " + inventory.SlotDisplayName("off") + ":  " + formatEquippedWeapon(preset.OffHand) + "\n")
 	}
 
 	// === Armor ===
 	sb.WriteString("\n=== Armor ===\n")
 	eq := sess.Equipment
 	for _, slot := range displayArmorSlots {
+		label := inventory.SlotDisplayName(string(slot)) + ":"
 		item := eq.Armor[slot]
-		sb.WriteString(fmt.Sprintf("  %-11s %s\n", string(slot)+":", formatSlottedItem(item)))
+		sb.WriteString(fmt.Sprintf("  %-12s %s\n", label, formatSlottedItem(item)))
 	}
 
 	// === Accessories ===
 	sb.WriteString("\n=== Accessories ===\n")
-	for _, slot := range displayAccessorySlots {
-		item := eq.Accessories[slot]
-		sb.WriteString(fmt.Sprintf("  %-8s %s\n", string(slot)+":", formatSlottedItem(item)))
+	neckLabel := inventory.SlotDisplayName("neck") + ":"
+	sb.WriteString(fmt.Sprintf("  %-21s %s\n", neckLabel, formatSlottedItem(eq.Accessories[inventory.SlotNeck])))
+	for _, slot := range displayLeftRingSlots {
+		label := inventory.SlotDisplayName(string(slot)) + ":"
+		sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItem(eq.Accessories[slot])))
+	}
+	for _, slot := range displayRightRingSlots {
+		label := inventory.SlotDisplayName(string(slot)) + ":"
+		sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItem(eq.Accessories[slot])))
 	}
 
 	return strings.TrimRight(sb.String(), "\n")
