@@ -104,3 +104,45 @@ func NewEquipment() *Equipment {
 		Accessories: make(map[AccessorySlot]*SlottedItem),
 	}
 }
+
+// DefenseStats holds aggregated defensive statistics computed from all equipped armor slots.
+type DefenseStats struct {
+	ACBonus      int // sum of all equipped slot ac_bonus values
+	EffectiveDex int // min(dexMod, strictest DexCap) across equipped slots
+	CheckPenalty int // sum of all slot check_penalty values (non-positive)
+	SpeedPenalty int // sum of speed_penalty values
+	StrengthReq  int // max strength_req across all equipped slots
+}
+
+// ComputedDefenses aggregates PF2e-style defense stats from all currently equipped armor slots.
+//
+// Precondition: reg must be non-nil; dexMod may be any integer.
+// Postcondition: ACBonus equals the sum of all equipped slot ac_bonus values;
+// EffectiveDex <= dexMod and <= any single slot's DexCap.
+func (e *Equipment) ComputedDefenses(reg *Registry, dexMod int) DefenseStats {
+	stats := DefenseStats{EffectiveDex: dexMod}
+	hasDexCap := false
+	for _, slotted := range e.Armor {
+		if slotted == nil {
+			continue
+		}
+		def, ok := reg.Armor(slotted.ItemDefID)
+		if !ok {
+			continue
+		}
+		stats.ACBonus += def.ACBonus
+		stats.CheckPenalty += def.CheckPenalty
+		stats.SpeedPenalty += def.SpeedPenalty
+		if def.StrengthReq > stats.StrengthReq {
+			stats.StrengthReq = def.StrengthReq
+		}
+		if !hasDexCap || def.DexCap < stats.EffectiveDex {
+			stats.EffectiveDex = def.DexCap
+			hasDexCap = true
+		}
+	}
+	if stats.EffectiveDex > dexMod {
+		stats.EffectiveDex = dexMod
+	}
+	return stats
+}

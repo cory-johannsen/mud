@@ -3,6 +3,8 @@ package inventory_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -204,5 +206,95 @@ func TestProperty_Equipment_AccessorySlotsAreDistinct(t *testing.T) {
 			rt.Fatalf("accessory slots at index %d (%q) and %d (%q) have the same string value",
 				i, allSlots[i], j, allSlots[j])
 		}
+	})
+}
+
+func TestComputedDefenses_NoArmor(t *testing.T) {
+	reg := inventory.NewRegistry()
+	eq := inventory.NewEquipment()
+	stats := eq.ComputedDefenses(reg, 3)
+	assert.Equal(t, 0, stats.ACBonus)
+	assert.Equal(t, 3, stats.EffectiveDex) // no cap = full dex
+	assert.Equal(t, 0, stats.CheckPenalty)
+	assert.Equal(t, 0, stats.SpeedPenalty)
+	assert.Equal(t, 0, stats.StrengthReq)
+}
+
+func TestComputedDefenses_SingleSlot(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{
+		ID: "vest", Name: "Vest", Slot: inventory.SlotTorso, Group: "composite",
+		ACBonus: 3, DexCap: 2, CheckPenalty: -1, SpeedPenalty: 0, StrengthReq: 14,
+	}
+	require.NoError(t, reg.RegisterArmor(def))
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{ItemDefID: "vest", Name: "Vest"}
+
+	stats := eq.ComputedDefenses(reg, 4) // dex 4, cap is 2
+	assert.Equal(t, 3, stats.ACBonus)
+	assert.Equal(t, 2, stats.EffectiveDex) // capped at 2
+	assert.Equal(t, -1, stats.CheckPenalty)
+	assert.Equal(t, 0, stats.SpeedPenalty)
+	assert.Equal(t, 14, stats.StrengthReq)
+}
+
+func TestComputedDefenses_MultiSlot_SumsPenalties(t *testing.T) {
+	reg := inventory.NewRegistry()
+	head := &inventory.ArmorDef{ID: "helm", Name: "Helm", Slot: inventory.SlotHead, Group: "composite", ACBonus: 1, DexCap: 3, CheckPenalty: -1}
+	torso := &inventory.ArmorDef{ID: "plate", Name: "Plate", Slot: inventory.SlotTorso, Group: "plate", ACBonus: 4, DexCap: 1, CheckPenalty: -2}
+	require.NoError(t, reg.RegisterArmor(head))
+	require.NoError(t, reg.RegisterArmor(torso))
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotHead] = &inventory.SlottedItem{ItemDefID: "helm", Name: "Helm"}
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{ItemDefID: "plate", Name: "Plate"}
+
+	stats := eq.ComputedDefenses(reg, 5)
+	assert.Equal(t, 5, stats.ACBonus)       // 1+4
+	assert.Equal(t, 1, stats.EffectiveDex)  // min(5, 3, 1) = 1
+	assert.Equal(t, -3, stats.CheckPenalty) // -1 + -2
+}
+
+func TestComputedDefenses_DexModBelowCap_UsesActualDex(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{ID: "light", Name: "Light", Slot: inventory.SlotTorso, Group: "leather", ACBonus: 1, DexCap: 5}
+	require.NoError(t, reg.RegisterArmor(def))
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{ItemDefID: "light", Name: "Light"}
+
+	stats := eq.ComputedDefenses(reg, 2) // dex 2, cap 5 — dex wins
+	assert.Equal(t, 2, stats.EffectiveDex)
+}
+
+func TestComputedDefenses_UnknownArmorDef_Skipped(t *testing.T) {
+	reg := inventory.NewRegistry()
+	eq := inventory.NewEquipment()
+	// Slot has an item but def is not in registry — should be skipped silently
+	eq.Armor[inventory.SlotHead] = &inventory.SlottedItem{ItemDefID: "unknown_def", Name: "Unknown"}
+	stats := eq.ComputedDefenses(reg, 3)
+	assert.Equal(t, 0, stats.ACBonus)
+	assert.Equal(t, 3, stats.EffectiveDex)
+}
+
+func TestProperty_ComputedDefenses_ACBonusEqualsSum(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		slots := []inventory.ArmorSlot{
+			inventory.SlotHead, inventory.SlotTorso, inventory.SlotHands, inventory.SlotFeet,
+		}
+		reg := inventory.NewRegistry()
+		eq := inventory.NewEquipment()
+		totalAC := 0
+		for _, slot := range slots {
+			ac := rapid.IntRange(0, 6).Draw(rt, "ac")
+			totalAC += ac
+			id := string(slot) + "_test"
+			def := &inventory.ArmorDef{
+				ID: id, Name: id, Slot: slot,
+				ACBonus: ac, DexCap: 10, Group: "leather",
+			}
+			require.NoError(rt, reg.RegisterArmor(def))
+			eq.Armor[slot] = &inventory.SlottedItem{ItemDefID: id, Name: id}
+		}
+		stats := eq.ComputedDefenses(reg, 5)
+		assert.Equal(rt, totalAC, stats.ACBonus)
 	})
 }
