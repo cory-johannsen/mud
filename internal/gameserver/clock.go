@@ -109,6 +109,7 @@ func (c *GameClock) Unsubscribe(ch chan<- GameHour) {
 // Start launches the clock goroutine and returns a stop function.
 // Calling stop() is idempotent.
 //
+// Precondition: Must not be called more than once per GameClock instance.
 // Postcondition: The clock advances by 1 hour per tickInterval until stop() is called.
 func (c *GameClock) Start() (stop func()) {
 	done := make(chan struct{})

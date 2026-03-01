@@ -200,7 +200,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	if rv := resp.GetRoomView(); rv != nil {
 		_ = conn.Write([]byte(RenderRoomView(rv)))
 		// Seed time-of-day from first room view if available.
-		if rv.GetHour() > 0 || rv.GetPeriod() != "" {
+		if rv.GetPeriod() != "" {
 			currentTime.Store(&gamev1.TimeOfDayEvent{Hour: rv.GetHour(), Period: rv.GetPeriod()})
 		}
 	}
@@ -417,7 +417,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			if roomID := p.RoomView.GetRoomId(); roomID != "" {
 				currentRoom.Store(roomID)
 			}
-			if p.RoomView.GetHour() > 0 || p.RoomView.GetPeriod() != "" {
+			if p.RoomView.GetPeriod() != "" {
 				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
 			}
 			text = RenderRoomView(p.RoomView)
