@@ -25,10 +25,12 @@ type bridgeContext struct {
 // msg is the ClientMessage to send (nil if nothing to send).
 // done is true when the handler dealt with output locally and the loop should continue.
 // quit is true when the handler has completed a clean disconnect and commandLoop should return nil.
+// switchCharacter is true when the handler signals gameBridge to return ErrSwitchCharacter.
 type bridgeResult struct {
-	msg  *gamev1.ClientMessage
-	done bool
-	quit bool
+	msg             *gamev1.ClientMessage
+	done            bool
+	quit            bool
+	switchCharacter bool
 }
 
 // bridgeHandlerFunc is the signature for all bridge dispatch functions.
@@ -50,6 +52,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerEmote:     bridgeEmote,
 	command.HandlerWho:       bridgeWho,
 	command.HandlerQuit:      bridgeQuit,
+	command.HandlerSwitch:    bridgeSwitch,
 	command.HandlerHelp:      bridgeHelp,
 	command.HandlerExamine:   bridgeExamine,
 	command.HandlerAttack:    bridgeAttack,
@@ -161,6 +164,21 @@ func bridgeQuit(bctx *bridgeContext) (bridgeResult, error) {
 	}
 	_ = bctx.stream.Send(msg)
 	return bridgeResult{quit: true}, nil
+}
+
+// bridgeSwitch sends a SwitchCharacterRequest and signals the command loop to return
+// to the character selection screen.
+//
+// Precondition: bctx must be non-nil.
+// Postcondition: Returns switchCharacter=true so gameBridge returns ErrSwitchCharacter.
+func bridgeSwitch(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{
+		msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_SwitchCharacter{SwitchCharacter: &gamev1.SwitchCharacterRequest{}},
+		},
+		switchCharacter: true,
+	}, nil
 }
 
 // bridgeHelp renders in-game help by invoking bctx.helpFn.

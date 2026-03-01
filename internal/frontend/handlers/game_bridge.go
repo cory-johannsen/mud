@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -17,6 +18,10 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
+
+// ErrSwitchCharacter is returned by gameBridge when the player uses the switch command.
+// characterFlow checks for this sentinel to loop back to character selection.
+var ErrSwitchCharacter = errors.New("switch character")
 
 // gameBridge manages the gRPC session between a Telnet client and the game server.
 //
@@ -169,6 +174,14 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		}
 		if result.quit {
 			return nil
+		}
+		if result.switchCharacter {
+			if result.msg != nil {
+				if err := stream.Send(result.msg); err != nil {
+					return fmt.Errorf("sending switch request: %w", err)
+				}
+			}
+			return ErrSwitchCharacter
 		}
 		if result.done {
 			continue
