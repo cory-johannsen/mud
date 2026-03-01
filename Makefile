@@ -1,4 +1,4 @@
-.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy
+.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb
 
 GO := go
 GOFLAGS := -trimpath
@@ -89,6 +89,13 @@ HELM_VALUES := $(HELM_CHART)/values-prod.yaml
 kind-up:
 	./deployments/k8s/mud/scripts/cluster-up.sh
 
+k8s-metallb:
+	kubectl apply -f deployments/k8s/metallb/metallb-native.yaml
+	kubectl rollout status deployment/controller -n metallb-system --timeout=120s
+	kubectl rollout status daemonset/speaker -n metallb-system --timeout=120s
+	kubectl apply -f deployments/k8s/metallb/ipaddresspool.yaml
+	kubectl apply -f deployments/k8s/metallb/l2advertisement.yaml
+
 kind-down:
 	./deployments/k8s/mud/scripts/cluster-down.sh
 
@@ -116,7 +123,7 @@ helm-upgrade:
 helm-uninstall:
 	helm uninstall $(HELM_RELEASE)
 
-k8s-up: kind-up docker-push helm-install
+k8s-up: kind-up k8s-metallb docker-push helm-install
 
 k8s-down: helm-uninstall kind-down
 
