@@ -242,6 +242,41 @@ func TestRenderCharacterInfo(t *testing.T) {
 	}
 }
 
+func TestRenderRoomView_WithTimeFields_DescriptionPreserved(t *testing.T) {
+	description := "A wide open field. The sky burns orange and red as the sun sinks toward the horizon."
+	rv := &gamev1.RoomView{
+		RoomId:      "room1",
+		Title:       "Open Field",
+		Description: description,
+		Period:      "Dusk",
+		Hour:        17,
+	}
+	rendered := RenderRoomView(rv)
+	if !strings.Contains(rendered, description) {
+		t.Errorf("expected description in render, got %q", rendered)
+	}
+}
+
+func TestRenderRoomView_TimeFields_NoExtraOutput(t *testing.T) {
+	// Verify that Hour and Period fields don't add unexpected content
+	rv1 := &gamev1.RoomView{
+		RoomId:      "room1",
+		Title:       "A Room",
+		Description: "A description.",
+	}
+	rv2 := &gamev1.RoomView{
+		RoomId:      "room1",
+		Title:       "A Room",
+		Description: "A description.",
+		Period:      "Dusk",
+		Hour:        17,
+	}
+	// RenderRoomView should produce the same output regardless of Hour/Period
+	if RenderRoomView(rv1) != RenderRoomView(rv2) {
+		t.Error("RenderRoomView should not include Hour/Period fields in output")
+	}
+}
+
 func TestProperty_RenderCharacterInfo_NonEmpty(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		name := rapid.StringMatching(`[A-Za-z]+`).Draw(t, "name")
