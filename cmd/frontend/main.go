@@ -81,7 +81,7 @@ func main() {
 	// Build services
 	accounts := postgres.NewAccountRepository(pool.DB())
 	characters := postgres.NewCharacterRepository(pool.DB())
-	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, logger, cfg.GameServer.Addr())
+	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, logger, cfg.GameServer.Addr(), cfg.Telnet)
 	telnetAcceptor := telnet.NewAcceptor(cfg.Telnet, authHandler, logger)
 
 	// Wire lifecycle

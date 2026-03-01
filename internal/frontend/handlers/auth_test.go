@@ -99,7 +99,11 @@ func newAuthHandler(t *testing.T, store AccountStore, gsAddr string) *AuthHandle
 	t.Helper()
 	logger := zaptest.NewLogger(t)
 	chars := newMockCharacterStore()
-	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, logger, gsAddr)
+	telnetCfg := config.TelnetConfig{
+		IdleTimeout:     5 * time.Minute,
+		IdleGracePeriod: time.Minute,
+	}
+	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, logger, gsAddr, telnetCfg)
 }
 
 // newAuthHandlerWithChar builds an AuthHandler whose character store returns one
@@ -109,7 +113,11 @@ func newAuthHandlerWithChar(t *testing.T, store AccountStore, char *character.Ch
 	t.Helper()
 	logger := zaptest.NewLogger(t)
 	chars := newMockCharacterStore(char)
-	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, logger, gsAddr)
+	telnetCfg := config.TelnetConfig{
+		IdleTimeout:     5 * time.Minute,
+		IdleGracePeriod: time.Minute,
+	}
+	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, logger, gsAddr, telnetCfg)
 }
 
 // testGameServer starts an in-process gRPC game server with a minimal 2-room world

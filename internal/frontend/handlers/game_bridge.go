@@ -7,6 +7,8 @@ import (
 	"io"
 	"strings"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -23,11 +25,64 @@ import (
 // characterFlow checks for this sentinel to loop back to character selection.
 var ErrSwitchCharacter = errors.New("switch character")
 
+// IdleMonitorConfig configures the idle monitor goroutine.
+type IdleMonitorConfig struct {
+	// LastInput is the shared atomic timestamp (UnixNano) of the most recent player input.
+	LastInput *atomic.Int64
+	// IdleTimeout is the duration of silence before the warning callback fires.
+	IdleTimeout time.Duration
+	// GracePeriod is the duration after the warning before the disconnect callback fires.
+	GracePeriod time.Duration
+	// TickInterval controls how often the monitor checks for idleness.
+	TickInterval time.Duration
+	// OnWarning is called once when the player has been idle for IdleTimeout.
+	OnWarning func()
+	// OnDisconnect is called once when the player has been idle for IdleTimeout + GracePeriod.
+	OnDisconnect func()
+}
+
+// StartIdleMonitor launches a goroutine that monitors player inactivity.
+// It returns a stop function that terminates the goroutine cleanly.
+//
+// Precondition: cfg.LastInput must be non-nil; cfg.OnWarning and cfg.OnDisconnect must be non-nil.
+// Postcondition: The goroutine exits when stop() is called or OnDisconnect fires.
+func StartIdleMonitor(cfg IdleMonitorConfig) (stop func()) {
+	done := make(chan struct{})
+	var once sync.Once
+	stop = func() { once.Do(func() { close(done) }) }
+
+	go func() {
+		ticker := time.NewTicker(cfg.TickInterval)
+		defer ticker.Stop()
+		warningSent := false
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				idle := time.Duration(time.Now().UnixNano() - cfg.LastInput.Load())
+				if !warningSent && idle >= cfg.IdleTimeout {
+					warningSent = true
+					cfg.OnWarning()
+				}
+				if warningSent && idle >= cfg.IdleTimeout+cfg.GracePeriod {
+					cfg.OnDisconnect()
+					return
+				}
+			}
+		}
+	}()
+
+	return stop
+}
+
 // gameBridge manages the gRPC session between a Telnet client and the game server.
 //
 // Precondition: conn must be open; char must be non-nil with a valid ID.
 // Postcondition: Returns nil on clean disconnect, or a non-nil error on fatal failure.
 func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct postgres.Account, char *character.Character) error {
+	sessionStart := time.Now()
+
 	// Connect to gameserver
 	grpcConn, err := grpc.NewClient(h.gameServerAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -88,30 +143,85 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		return fmt.Errorf("writing initial prompt: %w", err)
 	}
 
+	var lastInput atomic.Int64
+	lastInput.Store(time.Now().UnixNano())
+	var disconnectReason atomic.Value
+	disconnectReason.Store("quit")
+
+	// currentRoom tracks the live room ID for the session.
+	// It is initialized to the character's saved location and updated whenever
+	// the server sends a RoomView event (i.e. after every move or look).
+	var currentRoom atomic.Value
+	currentRoom.Store(char.Location)
+
+	stopIdle := StartIdleMonitor(IdleMonitorConfig{
+		LastInput:    &lastInput,
+		IdleTimeout:  h.telnetCfg.IdleTimeout,
+		GracePeriod:  h.telnetCfg.IdleGracePeriod,
+		TickInterval: 30 * time.Second,
+		OnWarning: func() {
+			msg := fmt.Sprintf(
+				"Warning: You have been idle for %s. You will be disconnected in %s.",
+				h.telnetCfg.IdleTimeout.Round(time.Second),
+				h.telnetCfg.IdleGracePeriod.Round(time.Second),
+			)
+			if err := conn.WriteLine(telnet.Colorize(telnet.Yellow, msg)); err != nil {
+				h.logger.Debug("failed to send idle warning", zap.Error(err))
+			}
+		},
+		OnDisconnect: func() {
+			disconnectReason.Store("inactivity")
+			cancel()
+		},
+	})
+	defer stopIdle()
+
 	// Spawn goroutine to forward server events to Telnet.
 	// After each event is rendered, the prompt is re-displayed.
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput)
 
 	cancel()
 	wg.Wait()
+	stopIdle()
 
+	if err != nil && !errors.Is(err, context.Canceled) && disconnectReason.Load().(string) == "quit" {
+		disconnectReason.Store("connection_error")
+	}
+	if errors.Is(err, ErrSwitchCharacter) {
+		disconnectReason.Store("switch_character")
+	}
+
+	h.logger.Info("player disconnected",
+		zap.String("reason", disconnectReason.Load().(string)),
+		zap.String("player", char.Name),
+		zap.String("account", acct.Username),
+		zap.Duration("session_duration", time.Since(sessionStart)),
+		zap.String("room_id", currentRoom.Load().(string)),
+	)
+
+	if errors.Is(err, ErrSwitchCharacter) {
+		return ErrSwitchCharacter
+	}
+	if errors.Is(err, context.Canceled) {
+		return nil
+	}
 	return err
 }
 
 // commandLoop reads lines from the Telnet connection, parses commands,
 // and sends them as gRPC ClientMessages.
 //
-// Precondition: stream must be open; charName must be non-empty.
+// Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil.
 // Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string) error {
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -126,6 +236,7 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		if err != nil {
 			return fmt.Errorf("reading input: %w", err)
 		}
+		lastInput.Store(time.Now().UnixNano())
 
 		line = strings.TrimSpace(line)
 		if line == "" {
@@ -206,9 +317,10 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // forwardServerEvents reads ServerEvents from the gRPC stream and writes
 // rendered text to the Telnet connection.
 //
-// Precondition: stream must be open; charName must be non-empty.
+// Precondition: stream must be open; charName must be non-empty; currentRoom must be non-nil and hold a string.
 // Postcondition: Returns when ctx is done, stream closes, or a disconnect event is received.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string) {
+// Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -227,6 +339,9 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		var text string
 		switch p := resp.Payload.(type) {
 		case *gamev1.ServerEvent_RoomView:
+			if roomID := p.RoomView.GetRoomId(); roomID != "" {
+				currentRoom.Store(roomID)
+			}
 			text = RenderRoomView(p.RoomView)
 		case *gamev1.ServerEvent_Message:
 			text = RenderMessage(p.Message)
