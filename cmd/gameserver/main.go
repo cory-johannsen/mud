@@ -359,8 +359,16 @@ func main() {
 		logger.Info("loaded AI domains", zap.Int("count", len(domains)))
 	}
 
+	// Create and start game clock.
+	gameClock := gameserver.NewGameClock(
+		int32(cfg.GameServer.GameClockStart),
+		cfg.GameServer.GameTickDuration,
+	)
+	stopClock := gameClock.Start()
+	defer stopClock()
+
 	// Create handlers
-	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
+	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, gameClock)
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	npcHandler := gameserver.NewNPCHandler(npcMgr, sessMgr)
 	roundDuration := time.Duration(cfg.GameServer.RoundDurationMs) * time.Millisecond
@@ -382,7 +390,7 @@ func main() {
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo),
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
 	)
 
 	// Start zone AI ticks.

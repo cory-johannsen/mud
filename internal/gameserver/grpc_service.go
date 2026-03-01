@@ -59,21 +59,22 @@ type CharacterSaver interface {
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
 type GameServiceServer struct {
 	gamev1.UnimplementedGameServiceServer
-	world      *world.Manager
-	sessions   *session.Manager
-	commands   *command.Registry
-	worldH     *WorldHandler
-	chatH      *ChatHandler
-	charSaver  CharacterSaver
-	dice       *dice.Roller
-	npcH       *NPCHandler
-	npcMgr     *npc.Manager
-	combatH    *CombatHandler
-	scriptMgr  *scripting.Manager
-	respawnMgr  *npc.RespawnManager
-	floorMgr    *inventory.FloorManager
+	world        *world.Manager
+	sessions     *session.Manager
+	commands     *command.Registry
+	worldH       *WorldHandler
+	chatH        *ChatHandler
+	charSaver    CharacterSaver
+	dice         *dice.Roller
+	npcH         *NPCHandler
+	npcMgr       *npc.Manager
+	combatH      *CombatHandler
+	scriptMgr    *scripting.Manager
+	respawnMgr   *npc.RespawnManager
+	floorMgr     *inventory.FloorManager
 	invRegistry  *inventory.Registry
 	accountAdmin AccountAdmin
+	clock        *GameClock
 	logger       *zap.Logger
 }
 
@@ -84,6 +85,7 @@ type GameServiceServer struct {
 // respawnMgr may be nil (respawn functionality will be disabled).
 // floorMgr may be nil (inventory get/drop will return errors).
 // invRegistry may be nil (item name resolution will fall back to ItemDefID).
+// clock may be nil (time-of-day events will not be broadcast to sessions).
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
@@ -102,23 +104,25 @@ func NewGameServiceServer(
 	floorMgr *inventory.FloorManager,
 	invRegistry *inventory.Registry,
 	accountAdmin AccountAdmin,
+	clock *GameClock,
 ) *GameServiceServer {
 	return &GameServiceServer{
-		world:       worldMgr,
-		sessions:    sessMgr,
-		commands:    cmdRegistry,
-		worldH:      worldHandler,
-		chatH:       chatHandler,
-		charSaver:   charSaver,
-		dice:        diceRoller,
-		npcH:        npcHandler,
-		npcMgr:      npcMgr,
-		combatH:     combatHandler,
-		scriptMgr:   scriptMgr,
-		respawnMgr:  respawnMgr,
-		floorMgr:    floorMgr,
+		world:        worldMgr,
+		sessions:     sessMgr,
+		commands:     cmdRegistry,
+		worldH:       worldHandler,
+		chatH:        chatHandler,
+		charSaver:    charSaver,
+		dice:         diceRoller,
+		npcH:         npcHandler,
+		npcMgr:       npcMgr,
+		combatH:      combatHandler,
+		scriptMgr:    scriptMgr,
+		respawnMgr:   respawnMgr,
+		floorMgr:     floorMgr,
 		invRegistry:  invRegistry,
 		accountAdmin: accountAdmin,
+		clock:        clock,
 		logger:       logger,
 	}
 }
@@ -232,6 +236,14 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		return fmt.Errorf("sending initial room view: %w", err)
 	}
 
+	// Subscribe to game clock ticks for this session (nil-safe: clock may be nil).
+	var clockCh chan GameHour
+	if s.clock != nil {
+		clockCh = make(chan GameHour, 2)
+		s.clock.Subscribe(clockCh)
+		defer s.clock.Unsubscribe(clockCh)
+	}
+
 	// Step 3: Spawn goroutine to forward entity events to stream
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()
@@ -242,6 +254,36 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		defer wg.Done()
 		s.forwardEvents(ctx, sess.Entity, stream)
 	}()
+
+	// Spawn goroutine to forward game clock ticks to stream as TimeOfDayEvents.
+	// Only launched when a clock is configured.
+	if clockCh != nil {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case h, ok := <-clockCh:
+					if !ok {
+						return
+					}
+					evt := &gamev1.ServerEvent{
+						Payload: &gamev1.ServerEvent_TimeOfDay{
+							TimeOfDay: &gamev1.TimeOfDayEvent{
+								Hour:   int32(h),
+								Period: string(h.Period()),
+							},
+						},
+					}
+					if err := stream.Send(evt); err != nil {
+						return
+					}
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+	}
 
 	// Step 4: Main command loop
 	err = s.commandLoop(ctx, uid, stream)
