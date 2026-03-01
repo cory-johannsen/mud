@@ -76,6 +76,19 @@ func (r *Registry) Item(id string) (*ItemDef, bool) {
 	return d, ok
 }
 
+// ItemByArmorRef returns the first ItemDef whose ArmorRef matches armorDefID, or false if none found.
+//
+// Precondition: armorDefID must be non-empty.
+// Postcondition: Returns (def, true) if a matching item is found; (nil, false) otherwise.
+func (r *Registry) ItemByArmorRef(armorDefID string) (*ItemDef, bool) {
+	for _, d := range r.items {
+		if d.ArmorRef == armorDefID {
+			return d, true
+		}
+	}
+	return nil, false
+}
+
 // AllWeapons returns all registered WeaponDefs in unspecified order.
 //
 // Postcondition: len(result) == number of registered weapons.

@@ -45,6 +45,7 @@ message ClientMessage {
     UnequipRequest   unequip   = 28;
     EquipmentRequest equipment = 29;
     SwitchCharacterRequest switch_character = 30;
+    WearRequest wear = 31;
   }
 }
 
@@ -395,6 +396,12 @@ message ConditionEvent {
   string condition_name = 4;
   int32  stacks         = 5;
   bool   applied        = 6;  // true = applied/advanced, false = removed/expired
+}
+
+// WearRequest asks the server to equip an armor item from inventory into a body slot.
+message WearRequest {
+  string item_id = 1;
+  string slot = 2;
 }
 
 // ConditionInfo describes one active condition on a combatant.

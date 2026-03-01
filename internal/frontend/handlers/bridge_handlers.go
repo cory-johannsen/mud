@@ -74,7 +74,9 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerTeleport:  bridgeTeleport,
 	command.HandlerLoadout:   bridgeLoadout,
 	command.HandlerUnequip:   bridgeUnequip,
-	command.HandlerEquipment: bridgeEquipment,
+	command.HandlerEquipment:   bridgeEquipment,
+	command.HandlerWear:        bridgeWear,
+	command.HandlerRemoveArmor: bridgeRemoveArmor,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -480,5 +482,38 @@ func bridgeEquipment(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Equipment{Equipment: &gamev1.EquipmentRequest{}},
+	}}, nil
+}
+
+// bridgeWear builds a WearRequest to equip an armor item from inventory into a body slot.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if fewer than 2 args are present, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a WearRequest.
+func bridgeWear(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) < 2 {
+		return writeErrorPrompt(bctx, "Usage: wear <item_id> <slot>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_Wear{Wear: &gamev1.WearRequest{
+			ItemId: bctx.parsed.Args[0],
+			Slot:   bctx.parsed.Args[1],
+		}},
+	}}, nil
+}
+
+// bridgeRemoveArmor builds an UnequipRequest for the named armor slot.
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing an UnequipRequest.
+func bridgeRemoveArmor(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: remove <slot>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Unequip{Unequip: &gamev1.UnequipRequest{Slot: bctx.parsed.RawArgs}},
 	}}, nil
 }

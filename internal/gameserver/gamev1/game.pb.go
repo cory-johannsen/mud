@@ -224,6 +224,7 @@ type ClientMessage struct {
 	//	*ClientMessage_Unequip
 	//	*ClientMessage_Equipment
 	//	*ClientMessage_SwitchCharacter
+	//	*ClientMessage_Wear
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -534,6 +535,15 @@ func (x *ClientMessage) GetSwitchCharacter() *SwitchCharacterRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetWear() *WearRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Wear); ok {
+			return x.Wear
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -654,6 +664,10 @@ type ClientMessage_SwitchCharacter struct {
 	SwitchCharacter *SwitchCharacterRequest `protobuf:"bytes,30,opt,name=switch_character,json=switchCharacter,proto3,oneof"`
 }
 
+type ClientMessage_Wear struct {
+	Wear *WearRequest `protobuf:"bytes,31,opt,name=wear,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -711,6 +725,8 @@ func (*ClientMessage_Unequip) isClientMessage_Payload() {}
 func (*ClientMessage_Equipment) isClientMessage_Payload() {}
 
 func (*ClientMessage_SwitchCharacter) isClientMessage_Payload() {}
+
+func (*ClientMessage_Wear) isClientMessage_Payload() {}
 
 // ServerEvent wraps all server-to-client events.
 type ServerEvent struct {
@@ -3725,6 +3741,59 @@ func (x *ConditionEvent) GetApplied() bool {
 	return false
 }
 
+// WearRequest asks the server to equip an armor item from inventory into a body slot.
+type WearRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	Slot          string                 `protobuf:"bytes,2,opt,name=slot,proto3" json:"slot,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WearRequest) Reset() {
+	*x = WearRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WearRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WearRequest) ProtoMessage() {}
+
+func (x *WearRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WearRequest.ProtoReflect.Descriptor instead.
+func (*WearRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *WearRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *WearRequest) GetSlot() string {
+	if x != nil {
+		return x.Slot
+	}
+	return ""
+}
+
 // ConditionInfo describes one active condition on a combatant.
 type ConditionInfo struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
@@ -3738,7 +3807,7 @@ type ConditionInfo struct {
 
 func (x *ConditionInfo) Reset() {
 	*x = ConditionInfo{}
-	mi := &file_game_v1_game_proto_msgTypes[50]
+	mi := &file_game_v1_game_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3750,7 +3819,7 @@ func (x *ConditionInfo) String() string {
 func (*ConditionInfo) ProtoMessage() {}
 
 func (x *ConditionInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[50]
+	mi := &file_game_v1_game_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3763,7 +3832,7 @@ func (x *ConditionInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConditionInfo.ProtoReflect.Descriptor instead.
 func (*ConditionInfo) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{50}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *ConditionInfo) GetId() string {
@@ -3798,7 +3867,7 @@ var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xa7\f\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xd3\f\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -3833,7 +3902,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\aloadout\x18\x1b \x01(\v2\x17.game.v1.LoadoutRequestH\x00R\aloadout\x123\n" +
 	"\aunequip\x18\x1c \x01(\v2\x17.game.v1.UnequipRequestH\x00R\aunequip\x129\n" +
 	"\tequipment\x18\x1d \x01(\v2\x19.game.v1.EquipmentRequestH\x00R\tequipment\x12L\n" +
-	"\x10switch_character\x18\x1e \x01(\v2\x1f.game.v1.SwitchCharacterRequestH\x00R\x0fswitchCharacterB\t\n" +
+	"\x10switch_character\x18\x1e \x01(\v2\x1f.game.v1.SwitchCharacterRequestH\x00R\x0fswitchCharacter\x12*\n" +
+	"\x04wear\x18\x1f \x01(\v2\x14.game.v1.WearRequestH\x00R\x04wearB\t\n" +
 	"\apayload\"\x84\a\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
@@ -4048,7 +4118,10 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\fcondition_id\x18\x03 \x01(\tR\vconditionId\x12%\n" +
 	"\x0econdition_name\x18\x04 \x01(\tR\rconditionName\x12\x16\n" +
 	"\x06stacks\x18\x05 \x01(\x05R\x06stacks\x12\x18\n" +
-	"\aapplied\x18\x06 \x01(\bR\aapplied\"z\n" +
+	"\aapplied\x18\x06 \x01(\bR\aapplied\":\n" +
+	"\vWearRequest\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x12\n" +
+	"\x04slot\x18\x02 \x01(\tR\x04slot\"z\n" +
 	"\rConditionInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
@@ -4088,7 +4161,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 51)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 52)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),               // 0: game.v1.MessageType
 	(RoomEventType)(0),             // 1: game.v1.RoomEventType
@@ -4143,7 +4216,8 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*CombatEvent)(nil),            // 50: game.v1.CombatEvent
 	(*StatusRequest)(nil),          // 51: game.v1.StatusRequest
 	(*ConditionEvent)(nil),         // 52: game.v1.ConditionEvent
-	(*ConditionInfo)(nil),          // 53: game.v1.ConditionInfo
+	(*WearRequest)(nil),            // 53: game.v1.WearRequest
+	(*ConditionInfo)(nil),          // 54: game.v1.ConditionInfo
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	5,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -4175,37 +4249,38 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	42, // 26: game.v1.ClientMessage.unequip:type_name -> game.v1.UnequipRequest
 	43, // 27: game.v1.ClientMessage.equipment:type_name -> game.v1.EquipmentRequest
 	13, // 28: game.v1.ClientMessage.switch_character:type_name -> game.v1.SwitchCharacterRequest
-	14, // 29: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	16, // 30: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	17, // 31: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	18, // 32: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	19, // 33: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	20, // 34: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	21, // 35: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	23, // 36: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	26, // 37: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	50, // 38: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	48, // 39: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	49, // 40: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	52, // 41: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	47, // 42: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
-	22, // 43: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
-	15, // 44: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	24, // 45: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	53, // 46: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	45, // 47: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	0,  // 48: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,  // 49: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	15, // 50: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	46, // 51: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	2,  // 52: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	3,  // 53: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	4,  // 54: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	54, // [54:55] is the sub-list for method output_type
-	53, // [53:54] is the sub-list for method input_type
-	53, // [53:53] is the sub-list for extension type_name
-	53, // [53:53] is the sub-list for extension extendee
-	0,  // [0:53] is the sub-list for field type_name
+	53, // 29: game.v1.ClientMessage.wear:type_name -> game.v1.WearRequest
+	14, // 30: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	16, // 31: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	17, // 32: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	18, // 33: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	19, // 34: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	20, // 35: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	21, // 36: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	23, // 37: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	26, // 38: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	50, // 39: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	48, // 40: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	49, // 41: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	52, // 42: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	47, // 43: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
+	22, // 44: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
+	15, // 45: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	24, // 46: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	54, // 47: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	45, // 48: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	0,  // 49: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,  // 50: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	15, // 51: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	46, // 52: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	2,  // 53: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	3,  // 54: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	4,  // 55: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	55, // [55:56] is the sub-list for method output_type
+	54, // [54:55] is the sub-list for method input_type
+	54, // [54:54] is the sub-list for extension type_name
+	54, // [54:54] is the sub-list for extension extendee
+	0,  // [0:54] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -4243,6 +4318,7 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_Unequip)(nil),
 		(*ClientMessage_Equipment)(nil),
 		(*ClientMessage_SwitchCharacter)(nil),
+		(*ClientMessage_Wear)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -4267,7 +4343,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   51,
+			NumMessages:   52,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

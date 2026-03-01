@@ -955,6 +955,24 @@ func (h *CombatHandler) IsInCombat(npcID string) bool {
 }
 
 // Status returns the active conditions for the player with the given uid.
+// ActiveCombatForPlayer returns the active combat in the player's current room, or nil if none.
+//
+// Precondition: uid must be a valid connected player.
+// Postcondition: Returns a non-nil *combat.Combat if an active combat exists in the player's room; nil otherwise.
+func (h *CombatHandler) ActiveCombatForPlayer(uid string) *combat.Combat {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil
+	}
+	return cbt
+}
+
 // Returns nil, nil if no combat is active in the player's room.
 //
 // Precondition: uid must be a valid connected player.

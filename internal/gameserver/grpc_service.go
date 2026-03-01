@@ -15,9 +15,11 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -76,6 +78,8 @@ type GameServiceServer struct {
 	accountAdmin AccountAdmin
 	clock        *GameClock
 	logger       *zap.Logger
+	jobRegistry  *ruleset.JobRegistry
+	condRegistry *condition.Registry
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -420,6 +424,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleUnequip(uid, p.Unequip)
 	case *gamev1.ClientMessage_Equipment:
 		return s.handleEquipment(uid, p.Equipment)
+	case *gamev1.ClientMessage_Wear:
+		return s.handleWear(uid, p.Wear)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -975,6 +981,77 @@ func (s *GameServiceServer) handleEquip(uid string, req *gamev1.EquipRequest) (*
 		return errorEvent(err.Error()), nil
 	}
 	return messageEvent("Equipped " + req.GetWeaponId() + "."), nil
+}
+
+// handleWear equips an armor item from the player's backpack into the specified body slot.
+//
+// Precondition: uid must be a valid connected player; req must be non-nil.
+// Postcondition: On success returns a message event; on error returns an error event.
+func (s *GameServiceServer) handleWear(uid string, req *gamev1.WearRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	arg := req.GetItemId() + " " + req.GetSlot()
+	result := command.HandleWear(sess, s.invRegistry, arg)
+
+	// Apply team affinity effect only when jobRegistry is wired (Task 8).
+	if s.jobRegistry != nil && s.invRegistry != nil {
+		itemDef, ok := s.invRegistry.Item(req.GetItemId())
+		if ok && itemDef.ArmorRef != "" {
+			if armorDef, ok := s.invRegistry.Armor(itemDef.ArmorRef); ok && armorDef.TeamAffinity != "" {
+				playerTeam := s.jobRegistry.TeamFor(sess.Class)
+				if playerTeam != "" && playerTeam != armorDef.TeamAffinity {
+					if armorDef.CrossTeamEffect != nil {
+						s.applyEquipEffect(uid, armorDef.CrossTeamEffect)
+					}
+				}
+			}
+		}
+	}
+
+	return messageEvent(result), nil
+}
+
+// applyEquipEffect applies a CrossTeamEffect when a player equips rival-team gear.
+//
+// Precondition: uid must be a valid player; effect must be non-nil.
+// Postcondition: If effect.Kind == "condition" and condition exists in condRegistry, it is applied.
+func (s *GameServiceServer) applyEquipEffect(uid string, effect *inventory.CrossTeamEffect) {
+	if effect.Kind != "condition" {
+		return
+	}
+	if s.condRegistry == nil {
+		return
+	}
+	cond, ok := s.condRegistry.Get(effect.Value)
+	if !ok {
+		if s.logger != nil {
+			s.logger.Warn("unknown cross-team condition", zap.String("condition", effect.Value))
+		}
+		return
+	}
+	// Apply the condition via the combat handler's active combat, if one exists.
+	// If no active combat, log that the condition cannot be applied outside combat.
+	cbt := s.combatH.ActiveCombatForPlayer(uid)
+	if cbt == nil {
+		if s.logger != nil {
+			s.logger.Debug("cross-team condition skipped: player not in combat",
+				zap.String("uid", uid),
+				zap.String("condition", cond.ID),
+			)
+		}
+		return
+	}
+	if err := cbt.ApplyCondition(uid, cond.ID, 1, -1); err != nil {
+		if s.logger != nil {
+			s.logger.Warn("failed to apply cross-team condition",
+				zap.String("uid", uid),
+				zap.String("condition", cond.ID),
+				zap.Error(err),
+			)
+		}
+	}
 }
 
 func (s *GameServiceServer) handleReload(uid string, req *gamev1.ReloadRequest) (*gamev1.ServerEvent, error) {

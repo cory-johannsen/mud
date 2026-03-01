@@ -15,6 +15,7 @@ const (
 	KindExplosive  = "explosive"
 	KindConsumable = "consumable"
 	KindJunk       = "junk"
+	KindArmor      = "armor"
 )
 
 // validKinds is the set of valid ItemDef kinds.
@@ -23,6 +24,7 @@ var validKinds = map[string]bool{
 	KindExplosive:  true,
 	KindConsumable: true,
 	KindJunk:       true,
+	KindArmor:      true,
 }
 
 // ItemDef defines the static properties of an inventory item loaded from YAML.
@@ -33,6 +35,7 @@ type ItemDef struct {
 	Kind         string  `yaml:"kind"`
 	Weight       float64 `yaml:"weight"`
 	WeaponRef    string  `yaml:"weapon_ref"`
+	ArmorRef     string  `yaml:"armor_ref"`    // references an ArmorDef ID; set when Kind == "armor"
 	ExplosiveRef string  `yaml:"explosive_ref"`
 	Stackable    bool    `yaml:"stackable"`
 	MaxStack     int     `yaml:"max_stack"`
@@ -65,6 +68,9 @@ func (d *ItemDef) Validate() error {
 	}
 	if d.Kind == KindExplosive && d.ExplosiveRef == "" {
 		errs = append(errs, errors.New("ExplosiveRef is required when Kind is explosive"))
+	}
+	if d.Kind == KindArmor && d.ArmorRef == "" {
+		errs = append(errs, errors.New("ArmorRef is required when Kind is armor"))
 	}
 	if len(errs) > 0 {
 		return fmt.Errorf("item validation failed: %v", errs)

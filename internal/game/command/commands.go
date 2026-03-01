@@ -41,7 +41,9 @@ const (
 	HandlerLoadout   = "loadout"
 	HandlerUnequip   = "unequip"
 	HandlerEquipment = "equipment"
-	HandlerSwitch    = "switch"
+	HandlerSwitch       = "switch"
+	HandlerWear         = "wear"
+	HandlerRemoveArmor  = "remove"
 )
 
 // Command defines a player-invocable command.
@@ -104,6 +106,10 @@ func BuiltinCommands() []Command {
 		{Name: "quit", Aliases: []string{"exit"}, Help: "Disconnect from the game", Category: CategorySystem, Handler: HandlerQuit},
 		{Name: "switch", Aliases: nil, Help: "Switch to a different character without disconnecting.", Category: CategorySystem, Handler: HandlerSwitch},
 		{Name: "help", Aliases: []string{"?"}, Help: "Show available commands", Category: CategorySystem, Handler: HandlerHelp},
+
+		// Armor commands
+		{Name: "wear", Aliases: nil, Help: "Equip a piece of armor from your inventory (wear <item_id> <slot>)", Category: CategoryCombat, Handler: HandlerWear},
+		{Name: "remove", Aliases: []string{"rem"}, Help: "Remove a piece of armor and return it to inventory (remove <slot>)", Category: CategoryCombat, Handler: HandlerRemoveArmor},
 
 		// Admin commands
 		{Name: "setrole", Aliases: nil, Help: "Set a player's role (admin only)", Category: CategoryAdmin, Handler: HandlerSetRole},
