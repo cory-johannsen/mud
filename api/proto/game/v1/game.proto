@@ -66,6 +66,7 @@ message ServerEvent {
     RoundEndEvent   round_end   = 13;
     ConditionEvent  condition_event = 14;
     InventoryView inventory_view = 15;
+    TimeOfDayEvent time_of_day = 16;
   }
 }
 
@@ -124,6 +125,8 @@ message RoomView {
   repeated NpcInfo npcs = 6;
   repeated ConditionInfo active_conditions = 7;
   repeated FloorItem floor_items = 8;
+  int32  hour   = 9;
+  string period = 10;
 }
 
 // ExitInfo describes a single exit from a room.
@@ -182,6 +185,12 @@ message ErrorEvent {
 // Disconnected signals the server is closing the session.
 message Disconnected {
   string reason = 1;
+}
+
+// TimeOfDayEvent is broadcast to all sessions when the game hour advances.
+message TimeOfDayEvent {
+  int32  hour   = 1;
+  string period = 2;
 }
 
 // CharacterInfo is sent to the client on session join to display character stats.
