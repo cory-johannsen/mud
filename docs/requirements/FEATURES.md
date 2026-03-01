@@ -4,6 +4,7 @@
 - [x] Region descriptions instead of ID strings in character descriptions
 - [x] Switching characters without logout and disconnect
 - [ ] Expose GRPC API and GRPC REST proxy to external clients.
+- [ ] The player should have a hand armor slot. The player should have 5 rings on each hand and manage them separately.  The equipment display should use human readable names for the item slots.
 - [ ] Inactivity warning before automatic disconnect.  Serverside logging of disconnect and reason.
 - [ ] Time of day, including daylight/darkness effects and descriptive details.  Time of day is displayed in the prompt.
 - [ ] Weapon and armor library.  A large library of equipment needs to exist with multiple options for every item type.  Each team should have customized team-specific equipment 
@@ -11,7 +12,7 @@
 - [ ] Skills and Abilities. All the P2FE skill and abilities need to be implemented.  Where the P2FE lore doesn't match Gunchete it will need migrated.  
 - [ ] Character levelling
 - [ ] Job proficiencies, advancement hierarchy, features and drawbacks, cross-job combinations
-- [ ] Equipment levelling, advanced equipment, cursed equipment
+- [ ] Equipment levelling, advanced equipment, cursed equipment, equipment combination and interactions
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration 
 - [ ] Non-combat NPCs: merchants, guards, quest givers, hirelings, bankers, skill trainers, etc.
