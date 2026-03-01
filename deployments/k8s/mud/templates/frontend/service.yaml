@@ -5,11 +5,10 @@ metadata:
   name: frontend
   namespace: mud
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: frontend
   ports:
     - port: 4000
       targetPort: 4000
-      nodePort: 30400
       protocol: TCP
