@@ -10,10 +10,10 @@ import (
 // validUnequipSlots lists all slot names accepted by HandleUnequip, in display order.
 var validUnequipSlots = []string{
 	"main", "off",
-	"head", "torso", "left_arm", "right_arm", "left_leg", "right_leg", "feet",
+	"head", "torso", "left_arm", "right_arm", "hands", "left_leg", "right_leg", "feet",
 	"neck",
-	"ring_1", "ring_2", "ring_3", "ring_4", "ring_5",
-	"ring_6", "ring_7", "ring_8", "ring_9", "ring_10",
+	"left_ring_1", "left_ring_2", "left_ring_3", "left_ring_4", "left_ring_5",
+	"right_ring_1", "right_ring_2", "right_ring_3", "right_ring_4", "right_ring_5",
 }
 
 // validUnequipSlotSet is the fast-lookup set derived from validUnequipSlots.

@@ -100,8 +100,11 @@ func TestHandleUnequip_ArmorSlot_AlwaysEmpty(t *testing.T) {
 // TestHandleUnequip_AccessorySlot_AlwaysEmpty verifies that accessory slots always
 // report nothing equipped.
 func TestHandleUnequip_AccessorySlot_AlwaysEmpty(t *testing.T) {
-	accessorySlots := []string{"neck", "ring_1", "ring_2", "ring_3", "ring_4", "ring_5",
-		"ring_6", "ring_7", "ring_8", "ring_9", "ring_10"}
+	accessorySlots := []string{
+		"neck",
+		"left_ring_1", "left_ring_2", "left_ring_3", "left_ring_4", "left_ring_5",
+		"right_ring_1", "right_ring_2", "right_ring_3", "right_ring_4", "right_ring_5",
+	}
 	for _, slot := range accessorySlots {
 		t.Run(slot, func(t *testing.T) {
 			sess := newTestSessionWithBackpack()
@@ -148,10 +151,10 @@ func TestHandleUnequip_EmptySlotArg_ReturnsError(t *testing.T) {
 func TestProperty_HandleUnequip_ValidSlotsNeverReturnUnknown(t *testing.T) {
 	validSlots := []string{
 		"main", "off",
-		"head", "torso", "left_arm", "right_arm", "left_leg", "right_leg", "feet",
+		"head", "torso", "left_arm", "right_arm", "hands", "left_leg", "right_leg", "feet",
 		"neck",
-		"ring_1", "ring_2", "ring_3", "ring_4", "ring_5",
-		"ring_6", "ring_7", "ring_8", "ring_9", "ring_10",
+		"left_ring_1", "left_ring_2", "left_ring_3", "left_ring_4", "left_ring_5",
+		"right_ring_1", "right_ring_2", "right_ring_3", "right_ring_4", "right_ring_5",
 	}
 
 	rapid.Check(t, func(rt *rapid.T) {
@@ -209,4 +212,40 @@ func newTestSessionEquipped() *inventory.WeaponPreset {
 	preset := inventory.NewWeaponPreset()
 	_ = preset.EquipMainHand(pistolWeaponDef())
 	return preset
+}
+
+func TestHandleUnequip_HandsSlotAccepted(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	result := command.HandleUnequip(sess, "hands")
+	if strings.Contains(result, "Unknown slot") {
+		t.Errorf("expected hands slot to be valid, got: %s", result)
+	}
+}
+
+func TestHandleUnequip_LeftRightRingSlotsAccepted(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	newSlots := []string{
+		"left_ring_1", "left_ring_2", "left_ring_3", "left_ring_4", "left_ring_5",
+		"right_ring_1", "right_ring_2", "right_ring_3", "right_ring_4", "right_ring_5",
+	}
+	for _, slot := range newSlots {
+		result := command.HandleUnequip(sess, slot)
+		if strings.Contains(result, "Unknown slot") {
+			t.Errorf("expected slot %q to be valid, got: %s", slot, result)
+		}
+	}
+}
+
+func TestHandleUnequip_OldRingSlotsRejected(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	oldSlots := []string{
+		"ring_1", "ring_2", "ring_3", "ring_4", "ring_5",
+		"ring_6", "ring_7", "ring_8", "ring_9", "ring_10",
+	}
+	for _, slot := range oldSlots {
+		result := command.HandleUnequip(sess, slot)
+		if !strings.Contains(result, "Unknown slot") {
+			t.Errorf("expected old slot %q to be rejected, got: %s", slot, result)
+		}
+	}
 }
