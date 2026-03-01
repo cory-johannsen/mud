@@ -5,6 +5,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
@@ -42,8 +43,14 @@ func TestHandleRemoveArmor_InvalidSlotReturnsError(t *testing.T) {
 func TestProperty_HandleRemoveArmor_NeverPanics(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		reg := inventory.NewRegistry()
-		sess := makeWearSession(t, reg)
+		sess := &session.PlayerSession{
+			UID:        "test-uid",
+			CharName:   "Tester",
+			LoadoutSet: inventory.NewLoadoutSet(),
+			Equipment:  inventory.NewEquipment(),
+			Backpack:   inventory.NewBackpack(20, 100.0),
+		}
 		slot := rapid.String().Draw(rt, "slot")
-		assert.NotPanics(t, func() { command.HandleRemoveArmor(sess, reg, slot) })
+		assert.NotPanics(rt, func() { command.HandleRemoveArmor(sess, reg, slot) })
 	})
 }
