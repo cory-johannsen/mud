@@ -35,6 +35,42 @@ func TestArmorDef_Validate_NegativeACBonus(t *testing.T) {
 	assert.ErrorContains(t, def.Validate(), "ac_bonus")
 }
 
+func TestArmorDef_Validate_MissingName(t *testing.T) {
+	def := &inventory.ArmorDef{ID: "test", Slot: inventory.SlotTorso, Group: "leather"}
+	assert.ErrorContains(t, def.Validate(), "name")
+}
+
+func TestArmorDef_Validate_PositiveCheckPenalty(t *testing.T) {
+	def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: inventory.SlotTorso, Group: "leather", CheckPenalty: 1}
+	assert.ErrorContains(t, def.Validate(), "check_penalty")
+}
+
+func TestArmorDef_Validate_NegativeSpeedPenalty(t *testing.T) {
+	def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: inventory.SlotTorso, Group: "leather", SpeedPenalty: -5}
+	assert.ErrorContains(t, def.Validate(), "speed_penalty")
+}
+
+func TestArmorDef_Validate_MissingGroup(t *testing.T) {
+	def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: inventory.SlotTorso}
+	assert.ErrorContains(t, def.Validate(), "group")
+}
+
+func TestArmorDef_Validate_CrossTeamEffect_InvalidKind(t *testing.T) {
+	def := &inventory.ArmorDef{
+		ID: "test", Name: "Test", Slot: inventory.SlotTorso, Group: "leather",
+		CrossTeamEffect: &inventory.CrossTeamEffect{Kind: "bad", Value: "clumsy-1"},
+	}
+	assert.ErrorContains(t, def.Validate(), "kind")
+}
+
+func TestArmorDef_Validate_CrossTeamEffect_EmptyValue(t *testing.T) {
+	def := &inventory.ArmorDef{
+		ID: "test", Name: "Test", Slot: inventory.SlotTorso, Group: "leather",
+		CrossTeamEffect: &inventory.CrossTeamEffect{Kind: "condition", Value: ""},
+	}
+	assert.ErrorContains(t, def.Validate(), "value")
+}
+
 func TestLoadArmors_LoadsYAML(t *testing.T) {
 	dir := t.TempDir()
 	yaml := `id: arm_guards
@@ -96,7 +132,7 @@ func TestLoadArmors_InvalidYAMLReturnsError(t *testing.T) {
 	dir := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "bad.yaml"), []byte(":::invalid"), 0644))
 	_, err := inventory.LoadArmors(dir)
-	assert.Error(t, err)
+	assert.ErrorContains(t, err, "cannot parse")
 }
 
 func TestProperty_ArmorSlot_AllConstantsAreValid(t *testing.T) {

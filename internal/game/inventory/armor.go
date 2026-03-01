@@ -47,9 +47,15 @@ var validArmorSlots = map[ArmorSlot]struct{}{
 	SlotFeet:     {},
 }
 
-// ValidArmorSlots returns the set of all legal ArmorSlot values.
-// Postcondition: Returns a non-nil map containing all 8 valid slot constants.
-func ValidArmorSlots() map[ArmorSlot]struct{} { return validArmorSlots }
+// ValidArmorSlots returns a defensive copy of the set of all legal ArmorSlot values.
+// Postcondition: Returns a non-nil map containing all 8 valid slot constants; callers may mutate it freely.
+func ValidArmorSlots() map[ArmorSlot]struct{} {
+	cp := make(map[ArmorSlot]struct{}, len(validArmorSlots))
+	for k, v := range validArmorSlots {
+		cp[k] = v
+	}
+	return cp
+}
 
 // Validate reports an error if the ArmorDef is missing required fields or contains illegal values.
 // Precondition: def is non-nil.
@@ -86,7 +92,7 @@ func (a *ArmorDef) Validate() error {
 		}
 	}
 	if len(errs) > 0 {
-		return fmt.Errorf("armor validation failed: %v", errs)
+		return fmt.Errorf("armor validation failed: %w", errors.Join(errs...))
 	}
 	return nil
 }
