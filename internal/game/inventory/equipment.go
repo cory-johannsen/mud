@@ -12,6 +12,8 @@ const (
 	SlotRightArm ArmorSlot = "right_arm"
 	// SlotTorso is the torso armor slot.
 	SlotTorso ArmorSlot = "torso"
+	// SlotHands is the hands armor slot (covers both hands).
+	SlotHands ArmorSlot = "hands"
 	// SlotLeftLeg is the left-leg armor slot.
 	SlotLeftLeg ArmorSlot = "left_leg"
 	// SlotRightLeg is the right-leg armor slot.
@@ -26,22 +28,57 @@ type AccessorySlot string
 const (
 	// SlotNeck is the neck accessory slot.
 	SlotNeck AccessorySlot = "neck"
-	// SlotRing1 through SlotRing10 are the ring accessory slots.
-	SlotRing1  AccessorySlot = "ring_1"
-	SlotRing2  AccessorySlot = "ring_2"
-	SlotRing3  AccessorySlot = "ring_3"
-	SlotRing4  AccessorySlot = "ring_4"
-	SlotRing5  AccessorySlot = "ring_5"
-	SlotRing6  AccessorySlot = "ring_6"
-	SlotRing7  AccessorySlot = "ring_7"
-	SlotRing8  AccessorySlot = "ring_8"
-	SlotRing9  AccessorySlot = "ring_9"
-	SlotRing10 AccessorySlot = "ring_10"
+	// SlotLeftRing1 through SlotLeftRing5 are the left-hand ring slots.
+	SlotLeftRing1 AccessorySlot = "left_ring_1"
+	SlotLeftRing2 AccessorySlot = "left_ring_2"
+	SlotLeftRing3 AccessorySlot = "left_ring_3"
+	SlotLeftRing4 AccessorySlot = "left_ring_4"
+	SlotLeftRing5 AccessorySlot = "left_ring_5"
+	// SlotRightRing1 through SlotRightRing5 are the right-hand ring slots.
+	SlotRightRing1 AccessorySlot = "right_ring_1"
+	SlotRightRing2 AccessorySlot = "right_ring_2"
+	SlotRightRing3 AccessorySlot = "right_ring_3"
+	SlotRightRing4 AccessorySlot = "right_ring_4"
+	SlotRightRing5 AccessorySlot = "right_ring_5"
 )
 
+// slotDisplayNames maps every slot identifier to its human-readable label.
+var slotDisplayNames = map[string]string{
+	"head":         "Head",
+	"left_arm":     "Left Arm",
+	"right_arm":    "Right Arm",
+	"torso":        "Torso",
+	"hands":        "Hands",
+	"left_leg":     "Left Leg",
+	"right_leg":    "Right Leg",
+	"feet":         "Feet",
+	"neck":         "Neck",
+	"left_ring_1":  "Left Hand Ring 1",
+	"left_ring_2":  "Left Hand Ring 2",
+	"left_ring_3":  "Left Hand Ring 3",
+	"left_ring_4":  "Left Hand Ring 4",
+	"left_ring_5":  "Left Hand Ring 5",
+	"right_ring_1": "Right Hand Ring 1",
+	"right_ring_2": "Right Hand Ring 2",
+	"right_ring_3": "Right Hand Ring 3",
+	"right_ring_4": "Right Hand Ring 4",
+	"right_ring_5": "Right Hand Ring 5",
+	"main":         "Main Hand",
+	"off":          "Off Hand",
+}
+
+// SlotDisplayName returns the human-readable label for a slot identifier.
+//
+// Precondition: slot is a non-empty string.
+// Postcondition: returns the registered label, or slot itself if not found.
+func SlotDisplayName(slot string) string {
+	if label, ok := slotDisplayNames[slot]; ok {
+		return label
+	}
+	return slot
+}
+
 // SlottedItem records an item occupying any equipment slot (armor or accessory).
-// Full item definitions will be populated in feature #4 (weapon and armor library).
-// For now only the item definition ID and display name are stored.
 type SlottedItem struct {
 	// ItemDefID is the unique item definition identifier.
 	ItemDefID string
