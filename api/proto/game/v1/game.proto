@@ -44,6 +44,7 @@ message ClientMessage {
     LoadoutRequest   loadout   = 27;
     UnequipRequest   unequip   = 28;
     EquipmentRequest equipment = 29;
+    SwitchCharacterRequest switch_character = 30;
   }
 }
 
@@ -108,6 +109,10 @@ message ExitsRequest {}
 
 // QuitRequest signals the client wants to disconnect.
 message QuitRequest {}
+
+// SwitchCharacterRequest asks the server to save and remove the current character
+// so the player can select a different character without disconnecting.
+message SwitchCharacterRequest {}
 
 // RoomView describes the player's current room.
 message RoomView {
