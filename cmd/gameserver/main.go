@@ -230,25 +230,25 @@ func main() {
 	// Load armor definitions.
 	armors, err := inventory.LoadArmors(*armorsDir)
 	if err != nil {
-		zap.L().Fatal("failed to load armors", zap.Error(err))
+		logger.Fatal("failed to load armors", zap.Error(err))
 	}
 	for _, a := range armors {
 		if err := invRegistry.RegisterArmor(a); err != nil {
-			zap.L().Fatal("failed to register armor", zap.String("id", a.ID), zap.Error(err))
+			logger.Fatal("failed to register armor", zap.String("id", a.ID), zap.Error(err))
 		}
 	}
-	zap.L().Info("loaded armor definitions", zap.Int("count", len(armors)))
+	logger.Info("loaded armor definitions", zap.Int("count", len(armors)))
 
 	// Load job definitions.
 	jobList, err := ruleset.LoadJobs(*jobsDir)
 	if err != nil {
-		zap.L().Fatal("failed to load jobs", zap.Error(err))
+		logger.Fatal("failed to load jobs", zap.Error(err))
 	}
 	jobReg := ruleset.NewJobRegistry()
 	for _, j := range jobList {
 		jobReg.Register(j)
 	}
-	zap.L().Info("loaded job definitions", zap.Int("count", len(jobList)))
+	logger.Info("loaded job definitions", zap.Int("count", len(jobList)))
 
 	// Load HTN AI domains.
 	aiRegistry := ai.NewRegistry()
