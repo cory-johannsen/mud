@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -222,6 +224,51 @@ func TestWeaponDef_IsShield(t *testing.T) {
 	if !w.IsShield() {
 		t.Fatal("expected IsShield true")
 	}
+}
+
+func TestWeaponDef_TeamAffinity_ParsedFromYAML(t *testing.T) {
+	dir := t.TempDir()
+	content := `id: machete_test
+name: Test Machete
+damage_dice: "1d8"
+damage_type: slashing
+range_increment: 0
+kind: one_handed
+group: blade
+team_affinity: machete
+cross_team_effect:
+  kind: condition
+  value: clumsy-1
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "machete_test.yaml"), []byte(content), 0644))
+	weapons, err := inventory.LoadWeapons(dir)
+	require.NoError(t, err)
+	require.Len(t, weapons, 1)
+	assert.Equal(t, "machete", weapons[0].TeamAffinity)
+	require.NotNil(t, weapons[0].CrossTeamEffect)
+	assert.Equal(t, "condition", weapons[0].CrossTeamEffect.Kind)
+	assert.Equal(t, "clumsy-1", weapons[0].CrossTeamEffect.Value)
+}
+
+func TestWeaponDef_NoAffinity_NilCrossTeamEffect(t *testing.T) {
+	dir := t.TempDir()
+	content := `id: generic_pistol
+name: Generic Pistol
+damage_dice: "1d6"
+damage_type: piercing
+range_increment: 30
+reload_actions: 1
+magazine_capacity: 15
+firing_modes: [single]
+kind: one_handed
+group: firearm
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "generic_pistol.yaml"), []byte(content), 0644))
+	weapons, err := inventory.LoadWeapons(dir)
+	require.NoError(t, err)
+	require.Len(t, weapons, 1)
+	assert.Empty(t, weapons[0].TeamAffinity)
+	assert.Nil(t, weapons[0].CrossTeamEffect)
 }
 
 func TestProperty_WeaponDef_WeaponKind_MutuallyExclusive(t *testing.T) {

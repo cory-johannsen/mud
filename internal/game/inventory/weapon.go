@@ -47,6 +47,9 @@ type WeaponDef struct {
 	FiringModes      []FiringMode `yaml:"firing_modes"`
 	Traits           []string     `yaml:"traits"`
 	Kind             WeaponKind   `yaml:"kind"`
+	Group            string           `yaml:"group"`             // e.g. "blade", "club", "firearm", "brawling", "energy"
+	TeamAffinity     string           `yaml:"team_affinity"`     // "gun", "machete", or ""
+	CrossTeamEffect  *CrossTeamEffect `yaml:"cross_team_effect"` // nil = no side effect
 }
 
 // IsMelee reports whether the weapon is a melee weapon (RangeIncrement == 0).
