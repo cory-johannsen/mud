@@ -11,6 +11,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -21,7 +22,17 @@ import (
 func newLoadoutServer(t *testing.T, uid string) *GameServiceServer {
 	t.Helper()
 	svc := testServiceWithAdmin(t, nil)
-	_, err := svc.sessions.AddPlayer(uid, "test_user", "TestChar", 1, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "test_user",
+		CharName:    "TestChar",
+		CharacterID: 1,
+		RoomID:      "room_a",
+		CurrentHP:   10,
+		MaxHP:       0,
+		Abilities:   character.AbilityScores{},
+		Role:        "player",
+	})
 	require.NoError(t, err)
 	sess, ok := svc.sessions.GetPlayer(uid)
 	require.True(t, ok)
@@ -87,7 +98,17 @@ func TestPropertyHandleEquipment_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		uid := fmt.Sprintf("prop_u_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
 		svc := testServiceWithAdmin(t, nil)
-		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+		_, addErr := svc.sessions.AddPlayer(session.AddPlayerOptions{
+			UID:         uid,
+			Username:    "u",
+			CharName:    "Char",
+			CharacterID: 1,
+			RoomID:      "room_a",
+			CurrentHP:   10,
+			MaxHP:       0,
+			Abilities:   character.AbilityScores{},
+			Role:        "player",
+		})
 		if addErr != nil {
 			rt.Fatalf("AddPlayer: %v", addErr)
 		}
@@ -164,7 +185,17 @@ func TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		uid := fmt.Sprintf("prop_loadout_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
 		svc := testServiceWithAdmin(t, nil)
-		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+		_, addErr := svc.sessions.AddPlayer(session.AddPlayerOptions{
+			UID:         uid,
+			Username:    "u",
+			CharName:    "Char",
+			CharacterID: 1,
+			RoomID:      "room_a",
+			CurrentHP:   10,
+			MaxHP:       0,
+			Abilities:   character.AbilityScores{},
+			Role:        "player",
+		})
 		if addErr != nil {
 			rt.Fatalf("AddPlayer: %v", addErr)
 		}
@@ -191,7 +222,17 @@ func TestPropertyHandleUnequip_ValidSessionAlwaysReturnsEvent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		uid := fmt.Sprintf("prop_unequip_%d", rapid.IntRange(0, 99999).Draw(rt, "uid"))
 		svc := testServiceWithAdmin(t, nil)
-		_, addErr := svc.sessions.AddPlayer(uid, "u", "Char", 1, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+		_, addErr := svc.sessions.AddPlayer(session.AddPlayerOptions{
+			UID:         uid,
+			Username:    "u",
+			CharName:    "Char",
+			CharacterID: 1,
+			RoomID:      "room_a",
+			CurrentHP:   10,
+			MaxHP:       0,
+			Abilities:   character.AbilityScores{},
+			Role:        "player",
+		})
 		if addErr != nil {
 			rt.Fatalf("AddPlayer: %v", addErr)
 		}

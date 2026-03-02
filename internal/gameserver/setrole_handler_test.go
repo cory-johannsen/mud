@@ -13,6 +13,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -55,7 +56,20 @@ func TestHandleSetRole_AdminSuccess(t *testing.T) {
 	}}
 	svc := testServiceWithAdmin(t, admin)
 
-	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, 0, character.AbilityScores{}, "admin", "", "", 0)
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:               "u1",
+		Username:          "admin_user",
+		CharName:          "Admin",
+		CharacterID:       1,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "admin",
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 	require.NoError(t, err)
 
 	resp, err := svc.handleSetRole("u1", &gamev1.SetRoleRequest{
@@ -72,7 +86,20 @@ func TestHandleSetRole_AdminSuccess(t *testing.T) {
 func TestHandleSetRole_NonAdminDenied(t *testing.T) {
 	svc := testServiceWithAdmin(t, nil)
 
-	_, err := svc.sessions.AddPlayer("u1", "player_user", "Player", 1, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:               "u1",
+		Username:          "player_user",
+		CharName:          "Player",
+		CharacterID:       1,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 	require.NoError(t, err)
 
 	resp, err := svc.handleSetRole("u1", &gamev1.SetRoleRequest{
@@ -88,7 +115,20 @@ func TestHandleSetRole_NonAdminDenied(t *testing.T) {
 func TestHandleSetRole_InvalidArgs(t *testing.T) {
 	svc := testServiceWithAdmin(t, &mockAccountAdmin{})
 
-	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, 0, character.AbilityScores{}, "admin", "", "", 0)
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:               "u1",
+		Username:          "admin_user",
+		CharName:          "Admin",
+		CharacterID:       1,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "admin",
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 	require.NoError(t, err)
 
 	resp, err := svc.handleSetRole("u1", &gamev1.SetRoleRequest{})
@@ -102,7 +142,20 @@ func TestHandleSetRole_TargetNotFound(t *testing.T) {
 	admin := &mockAccountAdmin{accounts: map[string]AccountInfo{}}
 	svc := testServiceWithAdmin(t, admin)
 
-	_, err := svc.sessions.AddPlayer("u1", "admin_user", "Admin", 1, "room_a", 10, 0, character.AbilityScores{}, "admin", "", "", 0)
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:               "u1",
+		Username:          "admin_user",
+		CharName:          "Admin",
+		CharacterID:       1,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "admin",
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 	require.NoError(t, err)
 
 	resp, err := svc.handleSetRole("u1", &gamev1.SetRoleRequest{
@@ -123,7 +176,20 @@ func TestPropertySetRole_NonAdminAlwaysDenied(t *testing.T) {
 		role := rapid.SampledFrom([]string{"player", "editor"}).Draw(t, "role")
 
 		uid := fmt.Sprintf("u_%s_%d", role, rapid.IntRange(0, 99999).Draw(t, "uid"))
-		_, err := svc.sessions.AddPlayer(uid, "user", "User", 1, "room_a", 10, 0, character.AbilityScores{}, role, "", "", 0)
+		_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:               uid,
+		Username:          "user",
+		CharName:          "User",
+		CharacterID:       1,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              role,
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 		if err != nil {
 			t.Fatalf("AddPlayer: %v", err)
 		}

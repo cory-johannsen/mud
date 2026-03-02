@@ -69,7 +69,17 @@ func spawnTestNPC(t *testing.T, npcMgr *npc.Manager, roomID string) *npc.Instanc
 // addTestPlayer registers a player session and returns it.
 func addTestPlayer(t *testing.T, sessMgr *session.Manager, uid, roomID string) *session.PlayerSession {
 	t.Helper()
-	sess, err := sessMgr.AddPlayer(uid, "testuser", "Hero", 1, roomID, 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    "testuser",
+		CharName:    "Hero",
+		CharacterID: 1,
+		RoomID:      roomID,
+		CurrentHP:   10,
+		MaxHP:       0,
+		Abilities:   character.AbilityScores{},
+		Role:        "player",
+	})
 	if err != nil {
 		t.Fatalf("addTestPlayer: %v", err)
 	}
@@ -585,7 +595,17 @@ func TestStatus_Property_RegisteredNotInCombat(t *testing.T) {
 		uid := rapid.StringMatching(`[a-z0-9]{4,12}`).Draw(rt, "uid")
 		roomID := rapid.StringMatching(`room-[a-z0-9]{4,8}`).Draw(rt, "roomID")
 
-		sess, err := h.sessions.AddPlayer(uid, "testuser", "Hero", 1, roomID, 10, 0, character.AbilityScores{}, "player", "", "", 0)
+		sess, err := h.sessions.AddPlayer(session.AddPlayerOptions{
+			UID:         uid,
+			Username:    "testuser",
+			CharName:    "Hero",
+			CharacterID: 1,
+			RoomID:      roomID,
+			CurrentHP:   10,
+			MaxHP:       0,
+			Abilities:   character.AbilityScores{},
+			Role:        "player",
+		})
 		if err != nil {
 			rt.Fatalf("AddPlayer: %v", err)
 		}
