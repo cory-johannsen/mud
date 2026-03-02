@@ -77,6 +77,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerEquipment:   bridgeEquipment,
 	command.HandlerWear:        bridgeWear,
 	command.HandlerRemoveArmor: bridgeRemoveArmor,
+	command.HandlerChar:        bridgeChar,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -500,6 +501,16 @@ func bridgeWear(bctx *bridgeContext) (bridgeResult, error) {
 			ItemId: bctx.parsed.Args[0],
 			Slot:   bctx.parsed.Args[1],
 		}},
+	}}, nil
+}
+
+// bridgeChar builds a CharacterSheetRequest to display the player's full character sheet.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a CharacterSheetRequest; done is false.
+func bridgeChar(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_CharSheet{CharSheet: &gamev1.CharacterSheetRequest{}},
 	}}, nil
 }
 

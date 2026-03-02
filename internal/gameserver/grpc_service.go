@@ -52,6 +52,8 @@ type AccountInfo struct {
 // Precondition: All id/characterID arguments must be > 0.
 // Postcondition: Returns nil on success or a non-nil error on failure.
 type CharacterSaver interface {
+	// GetByID retrieves the character with the given id.
+	// Postcondition: if err == nil, the returned *Character is non-nil.
 	GetByID(ctx context.Context, id int64) (*character.Character, error)
 	SaveState(ctx context.Context, id int64, location string, currentHP int) error
 	LoadWeaponPresets(ctx context.Context, characterID int64) (*inventory.LoadoutSet, error)
@@ -214,13 +216,25 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				zap.Int64("character_id", characterID),
 				zap.Error(dbErr),
 			)
-		} else {
+		} else if dbChar != nil {
 			maxHP = dbChar.MaxHP
 			abilities = dbChar.Abilities
 		}
 	}
-	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP, maxHP, abilities, role,
-		joinReq.RegionDisplay, joinReq.Class, int(joinReq.Level))
+	sess, err := s.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:               uid,
+		Username:          username,
+		CharName:          charName,
+		CharacterID:       characterID,
+		RoomID:            spawnRoom.ID,
+		CurrentHP:         currentHP,
+		MaxHP:             maxHP,
+		Abilities:         abilities,
+		Role:              role,
+		RegionDisplayName: joinReq.RegionDisplay,
+		Class:             joinReq.Class,
+		Level:             int(joinReq.Level),
+	})
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
 	}
@@ -512,6 +526,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleWear(uid, p.Wear)
 	case *gamev1.ClientMessage_RemoveArmor:
 		return s.handleRemoveArmor(uid, p.RemoveArmor)
+	case *gamev1.ClientMessage_CharSheet:
+		return s.handleChar(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1469,6 +1485,79 @@ func (s *GameServiceServer) handleEquipment(uid string, _ *gamev1.EquipmentReque
 		return errorEvent("player not found"), nil
 	}
 	return messageEvent(command.HandleEquipment(sess)), nil
+}
+
+// handleChar builds and returns a CharacterSheetView for the requesting player.
+//
+// Precondition: uid must identify an active session.
+// Postcondition: Returns CharacterSheetView on success; errorEvent if session not found.
+func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+
+	view := &gamev1.CharacterSheetView{
+		Name:         sess.CharName,
+		Level:        int32(sess.Level),
+		CurrentHp:    int32(sess.CurrentHP),
+		MaxHp:        int32(sess.MaxHP),
+		Brutality:    int32(sess.Abilities.Brutality),
+		Grit:         int32(sess.Abilities.Grit),
+		Quickness:    int32(sess.Abilities.Quickness),
+		Reasoning:    int32(sess.Abilities.Reasoning),
+		Savvy:        int32(sess.Abilities.Savvy),
+		Flair:        int32(sess.Abilities.Flair),
+		Currency:     inventory.FormatRounds(sess.Currency),
+	}
+
+	// Job info from registry.
+	if job, ok := s.jobRegistry.Job(sess.Class); ok {
+		view.Job = job.Name
+		view.Archetype = job.Archetype
+	} else {
+		view.Job = sess.Class
+	}
+	view.Team = s.jobRegistry.TeamFor(sess.Class)
+
+	// Defense stats (dex mod from Quickness).
+	dexMod := (sess.Abilities.Quickness - 10) / 2
+	def := sess.Equipment.ComputedDefenses(s.invRegistry, dexMod)
+	view.AcBonus = int32(def.ACBonus)
+	view.CheckPenalty = int32(def.CheckPenalty)
+	view.SpeedPenalty = int32(def.SpeedPenalty)
+
+	// Armor slots.
+	view.Armor = make(map[string]string)
+	for slot, item := range sess.Equipment.Armor {
+		if item != nil {
+			view.Armor[string(slot)] = item.Name
+		}
+	}
+
+	// Accessory slots.
+	view.Accessories = make(map[string]string)
+	for slot, item := range sess.Equipment.Accessories {
+		if item != nil {
+			view.Accessories[string(slot)] = item.Name
+		}
+	}
+
+	// Weapons from active loadout.
+	if sess.LoadoutSet != nil {
+		if preset := sess.LoadoutSet.ActivePreset(); preset != nil {
+			if preset.MainHand != nil {
+				view.MainHand = preset.MainHand.Def.Name
+			}
+			if preset.OffHand != nil {
+				view.OffHand = preset.OffHand.Def.Name
+			}
+		}
+	}
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CharacterSheet{CharacterSheet: view},
+	}, nil
 }
 
 // handleSetRole changes a target account's privilege level.
