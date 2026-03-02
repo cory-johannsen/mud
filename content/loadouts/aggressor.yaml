@@ -1,0 +1,18 @@
+archetype: aggressor
+base:
+  weapon: combat_knife
+  armor:
+    torso: kevlar_vest
+    hands: tactical_gloves
+  consumables:
+    - item: canadian_bacon
+      quantity: 2
+  currency: 50
+team_gun:
+  weapon: ganger_pistol
+  armor:
+    torso: tactical_vest
+team_machete:
+  weapon: cheap_blade
+  armor:
+    torso: leather_jacket

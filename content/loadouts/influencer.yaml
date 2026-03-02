@@ -1,0 +1,13 @@
+archetype: influencer
+base:
+  weapon: stun_baton
+  armor:
+    torso: corp_suit_liner
+  consumables:
+    - item: canadian_bacon
+      quantity: 2
+  currency: 75
+team_gun:
+  weapon: emp_pistol
+team_machete:
+  weapon: stun_baton

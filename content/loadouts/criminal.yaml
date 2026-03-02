@@ -1,0 +1,13 @@
+archetype: criminal
+base:
+  weapon: ceramic_shiv
+  armor:
+    torso: corp_suit_liner
+  consumables:
+    - item: canadian_bacon
+      quantity: 2
+  currency: 100
+team_gun:
+  weapon: holdout_derringer
+team_machete:
+  weapon: ceramic_shiv

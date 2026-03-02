@@ -1,0 +1,13 @@
+archetype: drifter
+base:
+  weapon: rebar_club
+  armor:
+    torso: leather_jacket
+  consumables:
+    - item: canadian_bacon
+      quantity: 3
+  currency: 25
+team_gun:
+  weapon: ganger_pistol
+team_machete:
+  weapon: rebar_club

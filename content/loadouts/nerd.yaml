@@ -1,0 +1,13 @@
+archetype: nerd
+base:
+  weapon: stun_baton
+  armor:
+    torso: kevlar_vest
+  consumables:
+    - item: canadian_bacon
+      quantity: 2
+  currency: 75
+team_gun:
+  weapon: smartgun_pistol
+team_machete:
+  weapon: stun_baton
