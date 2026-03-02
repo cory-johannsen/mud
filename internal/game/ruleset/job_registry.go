@@ -37,3 +37,12 @@ func (r *JobRegistry) TeamFor(classID string) string {
 	}
 	return ""
 }
+
+// Job returns the Job for the given class ID, if registered.
+//
+// Precondition: classID may be any string.
+// Postcondition: Returns the registered Job and true, or nil and false if not found.
+func (r *JobRegistry) Job(classID string) (*Job, bool) {
+	j, ok := r.jobs[classID]
+	return j, ok
+}

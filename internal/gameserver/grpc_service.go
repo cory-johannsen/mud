@@ -84,6 +84,7 @@ type GameServiceServer struct {
 	logger       *zap.Logger
 	jobRegistry  *ruleset.JobRegistry
 	condRegistry *condition.Registry
+	loadoutsDir  string
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -96,6 +97,7 @@ type GameServiceServer struct {
 // clock may be nil (time-of-day events will not be broadcast to sessions).
 // jobRegistry may be nil (team affinity effects will not be applied on wear).
 // condRegistry may be nil (cross-team condition effects will be skipped).
+// loadoutsDir is the path to the archetype loadout YAML directory; empty disables starting inventory grants.
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
@@ -117,6 +119,7 @@ func NewGameServiceServer(
 	clock *GameClock,
 	jobRegistry *ruleset.JobRegistry,
 	condRegistry *condition.Registry,
+	loadoutsDir string,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:        worldMgr,
@@ -138,6 +141,7 @@ func NewGameServiceServer(
 		logger:       logger,
 		jobRegistry:  jobRegistry,
 		condRegistry: condRegistry,
+		loadoutsDir:  loadoutsDir,
 	}
 }
 
@@ -232,6 +236,58 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			sess.Equipment = inventory.NewEquipment()
 		} else {
 			sess.Equipment = eq
+		}
+
+		// Load persisted inventory.
+		{
+			invItems, invErr := s.charSaver.LoadInventory(stream.Context(), characterID)
+			if invErr != nil {
+				s.logger.Warn("failed to load inventory on login",
+					zap.String("uid", uid),
+					zap.Int64("character_id", characterID),
+					zap.Error(invErr),
+				)
+			} else {
+				for _, it := range invItems {
+					if _, addErr := sess.Backpack.Add(it.ItemDefID, it.Quantity, s.invRegistry); addErr != nil {
+						s.logger.Warn("failed to restore inventory item",
+							zap.String("item", it.ItemDefID),
+							zap.Error(addErr),
+						)
+					}
+				}
+			}
+
+			// Grant starting kit on first login.
+			if s.loadoutsDir != "" {
+				received, flagErr := s.charSaver.HasReceivedStartingInventory(stream.Context(), characterID)
+				if flagErr != nil {
+					s.logger.Warn("failed to check starting inventory flag",
+						zap.String("uid", uid),
+						zap.Int64("character_id", characterID),
+						zap.Error(flagErr),
+					)
+				} else if !received {
+					archetype := joinReq.Archetype
+					team := ""
+					if s.jobRegistry != nil {
+						team = s.jobRegistry.TeamFor(sess.Class)
+					}
+					var jobOverride *inventory.StartingLoadoutOverride
+					if s.jobRegistry != nil {
+						if job, ok := s.jobRegistry.Job(sess.Class); ok && job.StartingInventory != nil {
+							jobOverride = job.StartingInventory
+						}
+					}
+					if grantErr := s.grantStartingInventory(stream.Context(), sess, characterID, archetype, team, jobOverride); grantErr != nil {
+						s.logger.Error("failed to grant starting inventory",
+							zap.String("uid", uid),
+							zap.Int64("character_id", characterID),
+							zap.Error(grantErr),
+						)
+					}
+				}
+			}
 		}
 	}
 
@@ -949,6 +1005,17 @@ func (s *GameServiceServer) cleanupPlayer(uid, username string) {
 				)
 			}
 		}
+
+		if sess.Backpack != nil {
+			invItems := backpackToInventoryItems(sess.Backpack)
+			if err := s.charSaver.SaveInventory(ctx, characterID, invItems); err != nil {
+				s.logger.Error("failed to save inventory on disconnect",
+					zap.String("uid", uid),
+					zap.Int64("character_id", characterID),
+					zap.Error(err),
+				)
+			}
+		}
 	}
 
 	s.broadcastRoomEvent(roomID, uid, &gamev1.RoomEvent{
@@ -961,6 +1028,76 @@ func (s *GameServiceServer) cleanupPlayer(uid, username string) {
 		zap.String("username", username),
 		zap.Int64("character_id", characterID),
 	)
+}
+
+// grantStartingInventory grants the starting kit for a new character and auto-equips it.
+//
+// Precondition: sess must be non-nil; characterID must be > 0; loadoutsDir must be non-empty.
+// Postcondition: Backpack populated, weapon equipped, armor equipped in slots,
+// currency set, inventory saved, flag marked. Returns nil on success.
+func (s *GameServiceServer) grantStartingInventory(ctx context.Context, sess *session.PlayerSession, characterID int64, archetype, team string, jobOverride *inventory.StartingLoadoutOverride) error {
+	sl, err := inventory.LoadStartingLoadoutWithOverride(s.loadoutsDir, archetype, team, jobOverride)
+	if err != nil {
+		return fmt.Errorf("resolving starting loadout: %w", err)
+	}
+
+	// Add weapon to backpack then equip in main hand.
+	if sl.Weapon != "" {
+		if _, addErr := sess.Backpack.Add(sl.Weapon, 1, s.invRegistry); addErr != nil {
+			s.logger.Warn("failed to add starting weapon", zap.String("item", sl.Weapon), zap.Error(addErr))
+		} else {
+			command.HandleEquip(sess, s.invRegistry, sl.Weapon+" main")
+		}
+	}
+
+	// Add and wear armor.
+	for slot, itemID := range sl.Armor {
+		if _, addErr := sess.Backpack.Add(itemID, 1, s.invRegistry); addErr != nil {
+			s.logger.Warn("failed to add starting armor", zap.String("item", itemID), zap.Error(addErr))
+			continue
+		}
+		command.HandleWear(sess, s.invRegistry, itemID+" "+string(slot))
+	}
+
+	// Add consumables.
+	for _, cg := range sl.Consumables {
+		if _, addErr := sess.Backpack.Add(cg.ItemID, cg.Quantity, s.invRegistry); addErr != nil {
+			s.logger.Warn("failed to add starting consumable", zap.String("item", cg.ItemID), zap.Error(addErr))
+		}
+	}
+
+	// Set currency.
+	sess.Currency = sl.Currency
+
+	// Persist inventory.
+	items := backpackToInventoryItems(sess.Backpack)
+	if err := s.charSaver.SaveInventory(ctx, characterID, items); err != nil {
+		return fmt.Errorf("saving starting inventory: %w", err)
+	}
+
+	// Mark flag.
+	if err := s.charSaver.MarkStartingInventoryGranted(ctx, characterID); err != nil {
+		return fmt.Errorf("marking starting inventory granted: %w", err)
+	}
+
+	return nil
+}
+
+// backpackToInventoryItems converts backpack contents to a deduplicated slice of InventoryItem.
+//
+// Precondition: bp must be non-nil.
+// Postcondition: Returns a slice with one entry per unique item def ID, summing quantities.
+func backpackToInventoryItems(bp *inventory.Backpack) []inventory.InventoryItem {
+	instances := bp.Items()
+	counts := make(map[string]int, len(instances))
+	for _, inst := range instances {
+		counts[inst.ItemDefID] += inst.Quantity
+	}
+	out := make([]inventory.InventoryItem, 0, len(counts))
+	for id, qty := range counts {
+		out = append(out, inventory.InventoryItem{ItemDefID: id, Quantity: qty})
+	}
+	return out
 }
 
 // errorEvent builds a ServerEvent carrying an ErrorEvent with the given message.

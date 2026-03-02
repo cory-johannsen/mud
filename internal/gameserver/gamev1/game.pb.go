@@ -1056,6 +1056,7 @@ type JoinWorldRequest struct {
 	RegionDisplay string                 `protobuf:"bytes,8,opt,name=region_display,json=regionDisplay,proto3" json:"region_display,omitempty"`
 	Class         string                 `protobuf:"bytes,9,opt,name=class,proto3" json:"class,omitempty"`
 	Level         int32                  `protobuf:"varint,10,opt,name=level,proto3" json:"level,omitempty"`
+	Archetype     string                 `protobuf:"bytes,11,opt,name=archetype,proto3" json:"archetype,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1158,6 +1159,13 @@ func (x *JoinWorldRequest) GetLevel() int32 {
 		return x.Level
 	}
 	return 0
+}
+
+func (x *JoinWorldRequest) GetArchetype() string {
+	if x != nil {
+		return x.Archetype
+	}
+	return ""
 }
 
 // MoveRequest asks the server to move the player in the given direction.
@@ -3989,7 +3997,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0fcondition_event\x18\x0e \x01(\v2\x17.game.v1.ConditionEventH\x00R\x0econditionEvent\x12?\n" +
 	"\x0einventory_view\x18\x0f \x01(\v2\x16.game.v1.InventoryViewH\x00R\rinventoryView\x129\n" +
 	"\vtime_of_day\x18\x10 \x01(\v2\x17.game.v1.TimeOfDayEventH\x00R\ttimeOfDayB\t\n" +
-	"\apayload\"\xac\x02\n" +
+	"\apayload\"\xca\x02\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
@@ -4002,7 +4010,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0eregion_display\x18\b \x01(\tR\rregionDisplay\x12\x14\n" +
 	"\x05class\x18\t \x01(\tR\x05class\x12\x14\n" +
 	"\x05level\x18\n" +
-	" \x01(\x05R\x05level\"+\n" +
+	" \x01(\x05R\x05level\x12\x1c\n" +
+	"\tarchetype\x18\v \x01(\tR\tarchetype\"+\n" +
 	"\vMoveRequest\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\"\r\n" +
 	"\vLookRequest\"&\n" +

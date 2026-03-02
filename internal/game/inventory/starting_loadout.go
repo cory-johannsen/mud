@@ -32,11 +32,14 @@ type StartingLoadout struct {
 
 // StartingLoadoutOverride holds fields from a job's starting_inventory block.
 // Only non-zero fields override the base+team loadout.
+//
+// YAML tags are defined so this struct can be embedded directly in Job YAML files.
+// ArmorSlot is `type ArmorSlot string` so map[ArmorSlot]string round-trips cleanly.
 type StartingLoadoutOverride struct {
-	Weapon      string
-	Armor       map[ArmorSlot]string
-	Consumables []ConsumableGrant
-	Currency    int
+	Weapon      string               `yaml:"weapon"`
+	Armor       map[ArmorSlot]string `yaml:"armor"`
+	Consumables []consumableEntry    `yaml:"consumables"`
+	Currency    int                  `yaml:"currency"`
 }
 
 // archetypeLoadoutFile is the YAML structure for content/loadouts/<archetype>.yaml.
@@ -103,7 +106,10 @@ func LoadStartingLoadoutWithOverride(dir, archetype, team string, override *Star
 			sl.Armor[slot] = itemID
 		}
 		if len(override.Consumables) > 0 {
-			sl.Consumables = override.Consumables
+			sl.Consumables = make([]ConsumableGrant, len(override.Consumables))
+			for i, c := range override.Consumables {
+				sl.Consumables[i] = ConsumableGrant{ItemID: c.Item, Quantity: c.Quantity}
+			}
 		}
 		if override.Currency != 0 {
 			sl.Currency = override.Currency

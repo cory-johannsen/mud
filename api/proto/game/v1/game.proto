@@ -84,6 +84,7 @@ message JoinWorldRequest {
   string region_display = 8;
   string class          = 9;
   int32  level          = 10;
+  string archetype      = 11;
 }
 
 // MoveRequest asks the server to move the player in the given direction.

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"gopkg.in/yaml.v3"
 )
 
@@ -32,9 +33,10 @@ type Job struct {
 	Description       string            `yaml:"description"`
 	KeyAbility        string            `yaml:"key_ability"`
 	HitPointsPerLevel int               `yaml:"hit_points_per_level"`
-	Proficiencies     map[string]string `yaml:"proficiencies"`
-	Features          []JobFeature      `yaml:"features"`
-	Drawbacks         []JobDrawback     `yaml:"drawbacks"`
+	Proficiencies     map[string]string                    `yaml:"proficiencies"`
+	Features          []JobFeature                         `yaml:"features"`
+	Drawbacks         []JobDrawback                        `yaml:"drawbacks"`
+	StartingInventory *inventory.StartingLoadoutOverride   `yaml:"starting_inventory"`
 }
 
 // LoadJobs reads all .yaml files in dir and parses each as a Job.

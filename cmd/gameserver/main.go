@@ -51,6 +51,7 @@ func main() {
 	aiTickInterval := flag.Duration("ai-tick", 10*time.Second, "NPC AI tick interval")
 	armorsDir := flag.String("armors-dir", "content/armor", "path to armor YAML definitions directory")
 	jobsDir := flag.String("jobs-dir", "content/jobs", "path to job YAML definitions directory")
+	loadoutsDir := flag.String("loadouts-dir", "content/loadouts", "path to archetype loadout YAML directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -417,7 +418,7 @@ func main() {
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
-		jobReg, condRegistry,
+		jobReg, condRegistry, *loadoutsDir,
 	)
 
 	// Start zone AI ticks.
