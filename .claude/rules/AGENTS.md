@@ -45,3 +45,13 @@ Adding a new player command requires ALL of the following steps. Omitting any st
 - CMD-5: A `bridge<Name>` function MUST be added to `internal/frontend/handlers/bridge_handlers.go` and registered in `bridgeHandlerMap`. The test `TestAllCommandHandlersAreWired` MUST pass.
 - CMD-6: A `handleName` function MUST be implemented in `internal/gameserver/grpc_service.go` and wired into the `dispatch` type switch.
 - CMD-7: All steps MUST be completed and all tests MUST pass before the command is considered done. A command that is registered in `BuiltinCommands()` but not wired end-to-end is a defect.
+
+## 6. System Requirements
+
+- SYSREQ-1: Agents MUST reference the markdown files in `/docs/requirements` for product definition
+- SYSREQ-2: Agents MUST update and maintain the markdown files in `/docs/requirements`as product requirements evolve.
+- SYSREG-3: Agents MUST maintain architecture diagrams for all features and core systems.  Agents MUST update these diagrams to reflect changes.
+- SYSREQ-4: Agents MUST consult the `foundry-vtt-mcp` MCP server as the single source of truth for P2FE rules.
+
+## 7. Deployment
+- DEPLOY-1: Agents MUST use `make k8s-redploy` to deploy changes.
