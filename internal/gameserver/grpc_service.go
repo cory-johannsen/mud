@@ -56,6 +56,10 @@ type CharacterSaver interface {
 	SaveWeaponPresets(ctx context.Context, characterID int64, ls *inventory.LoadoutSet) error
 	LoadEquipment(ctx context.Context, characterID int64) (*inventory.Equipment, error)
 	SaveEquipment(ctx context.Context, characterID int64, eq *inventory.Equipment) error
+	LoadInventory(ctx context.Context, characterID int64) ([]inventory.InventoryItem, error)
+	SaveInventory(ctx context.Context, characterID int64, items []inventory.InventoryItem) error
+	HasReceivedStartingInventory(ctx context.Context, characterID int64) (bool, error)
+	MarkStartingInventoryGranted(ctx context.Context, characterID int64) error
 }
 
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.

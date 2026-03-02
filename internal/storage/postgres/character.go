@@ -321,3 +321,83 @@ func (r *CharacterRepository) SaveEquipment(ctx context.Context, characterID int
 	}
 	return nil
 }
+
+// LoadInventory fetches all backpack items for characterID.
+//
+// Precondition: characterID must be >= 0.
+// Postcondition: Returns nil slice and nil error when no rows exist.
+func (r *CharacterRepository) LoadInventory(ctx context.Context, characterID int64) ([]inventory.InventoryItem, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT item_def_id, quantity
+		FROM character_inventory
+		WHERE character_id = $1`,
+		characterID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("loading inventory for character %d: %w", characterID, err)
+	}
+	defer rows.Close()
+
+	var items []inventory.InventoryItem
+	for rows.Next() {
+		var it inventory.InventoryItem
+		if err := rows.Scan(&it.ItemDefID, &it.Quantity); err != nil {
+			return nil, fmt.Errorf("scanning inventory row: %w", err)
+		}
+		items = append(items, it)
+	}
+	return items, rows.Err()
+}
+
+// SaveInventory replaces all backpack rows for characterID.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: DB rows reflect items exactly; returns nil on success.
+func (r *CharacterRepository) SaveInventory(ctx context.Context, characterID int64, items []inventory.InventoryItem) error {
+	if _, err := r.db.Exec(ctx, `DELETE FROM character_inventory WHERE character_id = $1`, characterID); err != nil {
+		return fmt.Errorf("clearing inventory for character %d: %w", characterID, err)
+	}
+	for _, it := range items {
+		if _, err := r.db.Exec(ctx, `
+			INSERT INTO character_inventory (character_id, item_def_id, quantity)
+			VALUES ($1, $2, $3)
+			ON CONFLICT (character_id, item_def_id) DO UPDATE SET quantity = EXCLUDED.quantity`,
+			characterID, it.ItemDefID, it.Quantity,
+		); err != nil {
+			return fmt.Errorf("saving inventory item %q for character %d: %w", it.ItemDefID, characterID, err)
+		}
+	}
+	return nil
+}
+
+// HasReceivedStartingInventory returns whether the character has already received their starting kit.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Returns false and nil error if the character has not yet received the kit.
+func (r *CharacterRepository) HasReceivedStartingInventory(ctx context.Context, characterID int64) (bool, error) {
+	var received bool
+	err := r.db.QueryRow(ctx, `
+		SELECT has_received_starting_inventory
+		FROM characters WHERE id = $1`,
+		characterID,
+	).Scan(&received)
+	if err != nil {
+		return false, fmt.Errorf("checking starting inventory flag for character %d: %w", characterID, err)
+	}
+	return received, nil
+}
+
+// MarkStartingInventoryGranted sets has_received_starting_inventory = true for characterID.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Flag is set; subsequent HasReceivedStartingInventory calls return true.
+func (r *CharacterRepository) MarkStartingInventoryGranted(ctx context.Context, characterID int64) error {
+	_, err := r.db.Exec(ctx, `
+		UPDATE characters SET has_received_starting_inventory = TRUE WHERE id = $1`,
+		characterID,
+	)
+	if err != nil {
+		return fmt.Errorf("marking starting inventory granted for character %d: %w", characterID, err)
+	}
+	return nil
+}

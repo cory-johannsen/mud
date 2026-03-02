@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 	"github.com/cory-johannsen/mud/internal/testutil"
 	"github.com/stretchr/testify/assert"
@@ -236,6 +237,47 @@ func TestCharacterRepository_Property_DuplicateNameAlwaysErrors(t *testing.T) {
 		require.Error(t, err)
 		assert.ErrorIs(t, err, postgres.ErrCharacterNameTaken)
 	})
+}
+
+func TestCharacterRepository_Inventory_RoundTrip(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	char, err := repo.Create(ctx, makeTestCharacter(accountID, "InvRoundTrip"))
+	require.NoError(t, err)
+
+	items := []inventory.InventoryItem{
+		{ItemDefID: "combat_knife", Quantity: 1},
+		{ItemDefID: "canadian_bacon", Quantity: 2},
+	}
+	require.NoError(t, repo.SaveInventory(ctx, char.ID, items))
+
+	loaded, err := repo.LoadInventory(ctx, char.ID)
+	require.NoError(t, err)
+	assert.ElementsMatch(t, items, loaded)
+}
+
+func TestCharacterRepository_HasReceivedStartingInventory_DefaultFalse(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	char, err := repo.Create(ctx, makeTestCharacter(accountID, "StartInvDefault"))
+	require.NoError(t, err)
+
+	got, err := repo.HasReceivedStartingInventory(ctx, char.ID)
+	require.NoError(t, err)
+	assert.False(t, got)
+}
+
+func TestCharacterRepository_MarkStartingInventoryGranted(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	char, err := repo.Create(ctx, makeTestCharacter(accountID, "MarkStartInv"))
+	require.NoError(t, err)
+
+	require.NoError(t, repo.MarkStartingInventoryGranted(ctx, char.ID))
+
+	got, err := repo.HasReceivedStartingInventory(ctx, char.ID)
+	require.NoError(t, err)
+	assert.True(t, got)
 }
 
 // TestCharacterRepository_Property_SaveStatePersists verifies that SaveState followed by

@@ -36,6 +36,22 @@ func (m *mockCharSaver) SaveEquipment(_ context.Context, _ int64, _ *inventory.E
 	return nil
 }
 
+func (m *mockCharSaver) LoadInventory(_ context.Context, _ int64) ([]inventory.InventoryItem, error) {
+	return nil, nil
+}
+
+func (m *mockCharSaver) SaveInventory(_ context.Context, _ int64, _ []inventory.InventoryItem) error {
+	return nil
+}
+
+func (m *mockCharSaver) HasReceivedStartingInventory(_ context.Context, _ int64) (bool, error) {
+	return false, nil
+}
+
+func (m *mockCharSaver) MarkStartingInventoryGranted(_ context.Context, _ int64) error {
+	return nil
+}
+
 func TestHandleTeleport_AdminSuccess(t *testing.T) {
 	saver := &mockCharSaver{saved: make(map[int64]string)}
 	svc := testServiceWithAdmin(t, nil)

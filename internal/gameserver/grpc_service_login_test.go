@@ -73,6 +73,26 @@ func (m *mockCharSaverFull) SaveEquipment(_ context.Context, _ int64, _ *invento
 	return nil
 }
 
+// LoadInventory satisfies CharacterSaver; always returns an empty slice.
+func (m *mockCharSaverFull) LoadInventory(_ context.Context, _ int64) ([]inventory.InventoryItem, error) {
+	return nil, nil
+}
+
+// SaveInventory satisfies CharacterSaver; always succeeds.
+func (m *mockCharSaverFull) SaveInventory(_ context.Context, _ int64, _ []inventory.InventoryItem) error {
+	return nil
+}
+
+// HasReceivedStartingInventory satisfies CharacterSaver; always returns false.
+func (m *mockCharSaverFull) HasReceivedStartingInventory(_ context.Context, _ int64) (bool, error) {
+	return false, nil
+}
+
+// MarkStartingInventoryGranted satisfies CharacterSaver; always succeeds.
+func (m *mockCharSaverFull) MarkStartingInventoryGranted(_ context.Context, _ int64) error {
+	return nil
+}
+
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied
 // CharacterSaver and returns a connected client and the session manager.
 //
