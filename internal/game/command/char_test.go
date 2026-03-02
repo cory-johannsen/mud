@@ -51,7 +51,7 @@ func TestHandleChar_ShowsCharacterName(t *testing.T) {
 func TestHandleChar_ShowsHP(t *testing.T) {
 	sess := newCharTestSession("boot_gun")
 	result := command.HandleChar(sess)
-	assert.Contains(t, result, "10")
+	assert.Contains(t, result, "10 / 10")
 }
 
 // TestHandleChar_ShowsAbilityScore verifies that ability scores appear in the sheet.
@@ -81,7 +81,7 @@ func TestHandleChar_ShowsClass(t *testing.T) {
 func TestHandleChar_ShowsLevel(t *testing.T) {
 	sess := newCharTestSession("boot_gun")
 	result := command.HandleChar(sess)
-	assert.Contains(t, result, "1")
+	assert.Contains(t, result, "Level: 1")
 }
 
 // TestHandleChar_ShowsCurrency verifies that the currency appears in the sheet.
