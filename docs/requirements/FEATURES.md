@@ -8,11 +8,16 @@
 - [x] Inactivity warning before automatic disconnect.  Serverside logging of disconnect and reason.
 - [x] Time of day, including daylight/darkness effects and descriptive details.  Time of day is displayed in the prompt.
 - [x] Weapon and armor library.  A large library of lore-friendly equipment needs to exist with multiple options for every item type.  Each team should have customized team-specific equipment
-- [ ] Character initial inventory: a creation each character receives an inventory of basic items. These should conform to the character job.
+- [x] Character initial inventory: a creation each character receives an inventory of basic items. These should conform to the character job.
 - [ ] Character sheet and command to view it
 - [ ] Player creation should start with archetype selection (listing each with its details), then restrict the jobs the user can select by their archetype.  Archetypes and jobs need to use the same attributes as the characters to match the lore.
 - [ ] `who` command should include more details: level, job, health (descriptive not numeric), status
+- [ ] Room equipment.  Some items and equipment can permanently exist in a room (water fountain), or generate automatically in a room (up to a maximum amount). 
 - [ ] Maps
+    - Player has an automap that can be consulted with the `/map` command. 
+    - The player automap is populated and persisted as the player explores. 
+    - Player automap contains the rooms, exits, and permanent room equipment.  We will include non-combat NPCs in the future.
+    - Each zone has a safe area at the primary entrance which contains a zone map.  Viewing the look map populates the automap for that zone.
 - [ ] Skills and Abilities. All the P2FE skill and abilities need to be implemented.  Where the P2FE lore doesn't match Gunchete it will need migrated.  
 - [ ] Character levelling
 - [ ] Job proficiencies, advancement hierarchy, features and drawbacks, cross-job combinations. The proficiencies defined in the content need to be mapped to the rules system. Class features and drawbacks need to be implemented and match the lore (there is no magic, there is instead high technology) 
@@ -20,7 +25,6 @@
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor.
 - [ ] Non-combat NPCs: merchants, guards, quest givers, hirelings, bankers, skill trainers, etc.
 - [ ] Per-NPC type custom behaviors, dialog, taunt and statement templates and generators, interactions, aggressiveness.  Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus 
-- [ ] Room equipment
 - [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
 - [ ] Combat distance, fleeing, pursuit, panic
 - [ ] Animals, robots, machines
