@@ -58,7 +58,7 @@ func TestHandleChar_ShowsHP(t *testing.T) {
 func TestHandleChar_ShowsAbilityScore(t *testing.T) {
 	sess := newCharTestSession("boot_gun")
 	result := command.HandleChar(sess)
-	assert.Contains(t, result, "12") // Brutality is 12
+	assert.Contains(t, result, "+1 (12)") // Brutality 12 → +1
 }
 
 // TestHandleChar_NilLoadoutSetDoesNotPanic verifies HandleChar is safe when LoadoutSet is nil.

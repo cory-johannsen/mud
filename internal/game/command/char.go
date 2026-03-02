@@ -8,6 +8,16 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/session"
 )
 
+// abilityBonus formats an ability score as its modifier with the raw score in parentheses.
+// e.g. score 14 → "+2 (14)", score 10 → "+0 (10)", score 8 → "-1 (8)"
+func abilityBonus(score int) string {
+	mod := (score - 10) / 2
+	if mod >= 0 {
+		return fmt.Sprintf("+%d (%d)", mod, score)
+	}
+	return fmt.Sprintf("%d (%d)", mod, score)
+}
+
 // HandleChar returns a plain-text character sheet for the given session.
 //
 // Precondition: sess must be non-nil.
@@ -21,8 +31,8 @@ func HandleChar(sess *session.PlayerSession) string {
 
 	sb.WriteString("--- Abilities ---\n")
 	a := sess.Abilities
-	sb.WriteString(fmt.Sprintf("BRT: %d  GRT: %d  QCK: %d\n", a.Brutality, a.Grit, a.Quickness))
-	sb.WriteString(fmt.Sprintf("RSN: %d  SAV: %d  FLR: %d\n\n", a.Reasoning, a.Savvy, a.Flair))
+	sb.WriteString(fmt.Sprintf("BRT: %s  GRT: %s  QCK: %s\n", abilityBonus(a.Brutality), abilityBonus(a.Grit), abilityBonus(a.Quickness)))
+	sb.WriteString(fmt.Sprintf("RSN: %s  SAV: %s  FLR: %s\n\n", abilityBonus(a.Reasoning), abilityBonus(a.Savvy), abilityBonus(a.Flair)))
 
 	sb.WriteString("--- Weapons ---\n")
 	if sess.LoadoutSet != nil {

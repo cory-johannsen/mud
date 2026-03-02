@@ -214,6 +214,16 @@ func RenderCharacterInfo(ci *gamev1.CharacterInfo) string {
 	return sb.String()
 }
 
+// abilityBonus formats an ability score as its modifier with the raw score in parentheses.
+// e.g. score 14 → "+2 (14)", score 10 → "+0 (10)", score 8 → "-1 (8)"
+func abilityBonus(score int32) string {
+	mod := (score - 10) / 2
+	if mod >= 0 {
+		return fmt.Sprintf("+%d (%d)", mod, score)
+	}
+	return fmt.Sprintf("%d (%d)", mod, score)
+}
+
 // RenderCharacterSheet formats a CharacterSheetView as a detailed Telnet character sheet.
 //
 // Precondition: csv must be non-nil.
@@ -235,10 +245,10 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
 	b.WriteString("\r\n")
 	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Abilities ---"))
 	b.WriteString("\r\n")
-	b.WriteString(fmt.Sprintf("BRT: %d  GRT: %d  QCK: %d\r\n",
-		csv.GetBrutality(), csv.GetGrit(), csv.GetQuickness()))
-	b.WriteString(fmt.Sprintf("RSN: %d  SAV: %d  FLR: %d\r\n",
-		csv.GetReasoning(), csv.GetSavvy(), csv.GetFlair()))
+	b.WriteString(fmt.Sprintf("BRT: %s  GRT: %s  QCK: %s\r\n",
+		abilityBonus(csv.GetBrutality()), abilityBonus(csv.GetGrit()), abilityBonus(csv.GetQuickness())))
+	b.WriteString(fmt.Sprintf("RSN: %s  SAV: %s  FLR: %s\r\n",
+		abilityBonus(csv.GetReasoning()), abilityBonus(csv.GetSavvy()), abilityBonus(csv.GetFlair())))
 
 	// Defense
 	b.WriteString("\r\n")
