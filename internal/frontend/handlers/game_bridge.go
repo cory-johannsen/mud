@@ -458,6 +458,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			}
 			currentHP.Store(ci.GetCurrentHp())
 			text = RenderCharacterInfo(ci)
+		case *gamev1.ServerEvent_CharacterSheet:
+			text = RenderCharacterSheet(p.CharacterSheet)
 		case *gamev1.ServerEvent_Disconnected:
 			_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason))
 			return

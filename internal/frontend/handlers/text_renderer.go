@@ -214,6 +214,75 @@ func RenderCharacterInfo(ci *gamev1.CharacterInfo) string {
 	return sb.String()
 }
 
+// RenderCharacterSheet formats a CharacterSheetView as a detailed Telnet character sheet.
+//
+// Precondition: csv must be non-nil.
+// Postcondition: Returns a non-empty human-readable multiline string.
+func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
+	if csv == nil {
+		return telnet.Colorize(telnet.Red, "No character sheet available.")
+	}
+	var b strings.Builder
+
+	// Header
+	b.WriteString(telnet.Colorf(telnet.BrightYellow, "=== %s ===", csv.GetName()))
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("Class: %s  Archetype: %s  Team: %s  Level: %d\r\n",
+		csv.GetJob(), csv.GetArchetype(), csv.GetTeam(), csv.GetLevel()))
+	b.WriteString(fmt.Sprintf("HP: %d / %d\r\n", csv.GetCurrentHp(), csv.GetMaxHp()))
+
+	// Abilities
+	b.WriteString("\r\n")
+	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Abilities ---"))
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("BRT: %d  GRT: %d  QCK: %d\r\n",
+		csv.GetBrutality(), csv.GetGrit(), csv.GetQuickness()))
+	b.WriteString(fmt.Sprintf("RSN: %d  SAV: %d  FLR: %d\r\n",
+		csv.GetReasoning(), csv.GetSavvy(), csv.GetFlair()))
+
+	// Defense
+	b.WriteString("\r\n")
+	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Defense ---"))
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("AC Bonus: %d  Check Penalty: %d  Speed Penalty: %d\r\n",
+		csv.GetAcBonus(), csv.GetCheckPenalty(), csv.GetSpeedPenalty()))
+
+	// Weapons
+	b.WriteString("\r\n")
+	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Weapons ---"))
+	b.WriteString("\r\n")
+	mainHand := csv.GetMainHand()
+	if mainHand == "" {
+		mainHand = "(none)"
+	}
+	offHand := csv.GetOffHand()
+	if offHand == "" {
+		offHand = "(none)"
+	}
+	b.WriteString(fmt.Sprintf("Main: %s\r\n", mainHand))
+	b.WriteString(fmt.Sprintf("Off:  %s\r\n", offHand))
+
+	// Armor
+	if armor := csv.GetArmor(); len(armor) > 0 {
+		b.WriteString("\r\n")
+		b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Armor ---"))
+		b.WriteString("\r\n")
+		for slot, item := range armor {
+			if item != "" {
+				b.WriteString(fmt.Sprintf("%s: %s\r\n", slot, item))
+			}
+		}
+	}
+
+	// Currency
+	b.WriteString("\r\n")
+	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Currency ---"))
+	b.WriteString("\r\n")
+	b.WriteString(fmt.Sprintf("%s\r\n", csv.GetCurrency()))
+
+	return b.String()
+}
+
 func RenderCombatEvent(ce *gamev1.CombatEvent) string {
 	switch ce.Type {
 	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK:
