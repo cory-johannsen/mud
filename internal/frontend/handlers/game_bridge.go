@@ -168,13 +168,6 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 				Class:         char.Class,
 				Level:         int32(char.Level),
 				Archetype:     h.archetypeForJob(char.Class),
-				MaxHp:         int32(char.MaxHP),
-				Brutality:     int32(char.Abilities.Brutality),
-				Grit:          int32(char.Abilities.Grit),
-				Quickness:     int32(char.Abilities.Quickness),
-				Reasoning:     int32(char.Abilities.Reasoning),
-				Savvy:         int32(char.Abilities.Savvy),
-				Flair:         int32(char.Abilities.Flair),
 			},
 		},
 	}); err != nil {

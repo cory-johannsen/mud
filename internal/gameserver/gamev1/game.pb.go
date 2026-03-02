@@ -1057,13 +1057,6 @@ type JoinWorldRequest struct {
 	Class         string                 `protobuf:"bytes,9,opt,name=class,proto3" json:"class,omitempty"`
 	Level         int32                  `protobuf:"varint,10,opt,name=level,proto3" json:"level,omitempty"`
 	Archetype     string                 `protobuf:"bytes,11,opt,name=archetype,proto3" json:"archetype,omitempty"`
-	MaxHp         int32                  `protobuf:"varint,12,opt,name=max_hp,json=maxHp,proto3" json:"max_hp,omitempty"`
-	Brutality     int32                  `protobuf:"varint,13,opt,name=brutality,proto3" json:"brutality,omitempty"`
-	Grit          int32                  `protobuf:"varint,14,opt,name=grit,proto3" json:"grit,omitempty"`
-	Quickness     int32                  `protobuf:"varint,15,opt,name=quickness,proto3" json:"quickness,omitempty"`
-	Reasoning     int32                  `protobuf:"varint,16,opt,name=reasoning,proto3" json:"reasoning,omitempty"`
-	Savvy         int32                  `protobuf:"varint,17,opt,name=savvy,proto3" json:"savvy,omitempty"`
-	Flair         int32                  `protobuf:"varint,18,opt,name=flair,proto3" json:"flair,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1173,55 +1166,6 @@ func (x *JoinWorldRequest) GetArchetype() string {
 		return x.Archetype
 	}
 	return ""
-}
-
-func (x *JoinWorldRequest) GetMaxHp() int32 {
-	if x != nil {
-		return x.MaxHp
-	}
-	return 0
-}
-
-func (x *JoinWorldRequest) GetBrutality() int32 {
-	if x != nil {
-		return x.Brutality
-	}
-	return 0
-}
-
-func (x *JoinWorldRequest) GetGrit() int32 {
-	if x != nil {
-		return x.Grit
-	}
-	return 0
-}
-
-func (x *JoinWorldRequest) GetQuickness() int32 {
-	if x != nil {
-		return x.Quickness
-	}
-	return 0
-}
-
-func (x *JoinWorldRequest) GetReasoning() int32 {
-	if x != nil {
-		return x.Reasoning
-	}
-	return 0
-}
-
-func (x *JoinWorldRequest) GetSavvy() int32 {
-	if x != nil {
-		return x.Savvy
-	}
-	return 0
-}
-
-func (x *JoinWorldRequest) GetFlair() int32 {
-	if x != nil {
-		return x.Flair
-	}
-	return 0
 }
 
 // MoveRequest asks the server to move the player in the given direction.
@@ -4053,7 +3997,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0fcondition_event\x18\x0e \x01(\v2\x17.game.v1.ConditionEventH\x00R\x0econditionEvent\x12?\n" +
 	"\x0einventory_view\x18\x0f \x01(\v2\x16.game.v1.InventoryViewH\x00R\rinventoryView\x129\n" +
 	"\vtime_of_day\x18\x10 \x01(\v2\x17.game.v1.TimeOfDayEventH\x00R\ttimeOfDayB\t\n" +
-	"\apayload\"\xfb\x03\n" +
+	"\apayload\"\xca\x02\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
@@ -4067,14 +4011,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x05class\x18\t \x01(\tR\x05class\x12\x14\n" +
 	"\x05level\x18\n" +
 	" \x01(\x05R\x05level\x12\x1c\n" +
-	"\tarchetype\x18\v \x01(\tR\tarchetype\x12\x15\n" +
-	"\x06max_hp\x18\f \x01(\x05R\x05maxHp\x12\x1c\n" +
-	"\tbrutality\x18\r \x01(\x05R\tbrutality\x12\x12\n" +
-	"\x04grit\x18\x0e \x01(\x05R\x04grit\x12\x1c\n" +
-	"\tquickness\x18\x0f \x01(\x05R\tquickness\x12\x1c\n" +
-	"\treasoning\x18\x10 \x01(\x05R\treasoning\x12\x14\n" +
-	"\x05savvy\x18\x11 \x01(\x05R\x05savvy\x12\x14\n" +
-	"\x05flair\x18\x12 \x01(\x05R\x05flair\"+\n" +
+	"\tarchetype\x18\v \x01(\tR\tarchetype\"+\n" +
 	"\vMoveRequest\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\"\r\n" +
 	"\vLookRequest\"&\n" +

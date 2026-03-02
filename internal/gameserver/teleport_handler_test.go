@@ -53,6 +53,10 @@ func (m *mockCharSaver) MarkStartingInventoryGranted(_ context.Context, _ int64)
 	return nil
 }
 
+func (m *mockCharSaver) GetByID(_ context.Context, id int64) (*character.Character, error) {
+	return &character.Character{ID: id}, nil
+}
+
 func TestHandleTeleport_AdminSuccess(t *testing.T) {
 	saver := &mockCharSaver{saved: make(map[int64]string)}
 	svc := testServiceWithAdmin(t, nil)

@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -91,6 +92,11 @@ func (m *mockCharSaverFull) HasReceivedStartingInventory(_ context.Context, _ in
 // MarkStartingInventoryGranted satisfies CharacterSaver; always succeeds.
 func (m *mockCharSaverFull) MarkStartingInventoryGranted(_ context.Context, _ int64) error {
 	return nil
+}
+
+// GetByID satisfies CharacterSaver; returns an empty Character with zero-value stats.
+func (m *mockCharSaverFull) GetByID(_ context.Context, id int64) (*character.Character, error) {
+	return &character.Character{ID: id}, nil
 }
 
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied

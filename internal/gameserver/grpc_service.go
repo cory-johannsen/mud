@@ -52,6 +52,7 @@ type AccountInfo struct {
 // Precondition: All id/characterID arguments must be > 0.
 // Postcondition: Returns nil on success or a non-nil error on failure.
 type CharacterSaver interface {
+	GetByID(ctx context.Context, id int64) (*character.Character, error)
 	SaveState(ctx context.Context, id int64, location string, currentHP int) error
 	LoadWeaponPresets(ctx context.Context, characterID int64) (*inventory.LoadoutSet, error)
 	SaveWeaponPresets(ctx context.Context, characterID int64, ls *inventory.LoadoutSet) error
@@ -202,15 +203,23 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		role = "player"
 	}
 
-	abilities := character.AbilityScores{
-		Brutality: int(joinReq.Brutality),
-		Grit:      int(joinReq.Grit),
-		Quickness: int(joinReq.Quickness),
-		Reasoning: int(joinReq.Reasoning),
-		Savvy:     int(joinReq.Savvy),
-		Flair:     int(joinReq.Flair),
+	// Load MaxHP and Abilities from the DB (server-authoritative).
+	// currentHP is taken from the proto (the persisted current_hp sent by the frontend).
+	var maxHP int
+	var abilities character.AbilityScores
+	if characterID > 0 && s.charSaver != nil {
+		dbChar, dbErr := s.charSaver.GetByID(stream.Context(), characterID)
+		if dbErr != nil {
+			s.logger.Warn("failed to load character from DB at login; using zero values",
+				zap.Int64("character_id", characterID),
+				zap.Error(dbErr),
+			)
+		} else {
+			maxHP = dbChar.MaxHP
+			abilities = dbChar.Abilities
+		}
 	}
-	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP, int(joinReq.MaxHp), abilities, role,
+	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP, maxHP, abilities, role,
 		joinReq.RegionDisplay, joinReq.Class, int(joinReq.Level))
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
