@@ -10,6 +10,7 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 )
@@ -55,7 +56,7 @@ func TestWorldHandler_Look(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")
@@ -77,7 +78,7 @@ func TestWorldHandler_Move(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	view, err := h.Move("u1", world.North)
@@ -90,7 +91,7 @@ func TestWorldHandler_Move_NoExit(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	_, err = h.Move("u1", world.West)
@@ -102,7 +103,7 @@ func TestWorldHandler_MoveWithContext(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	result, err := h.MoveWithContext("u1", world.North)
@@ -115,7 +116,7 @@ func TestWorldHandler_Exits(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	exitList, err := h.Exits("u1")
@@ -129,9 +130,9 @@ func TestWorldHandler_RoomViewExcludesSelf(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
-	_, err = sessMgr.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10, "player", "", "", 0)
+	_, err = sessMgr.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")
@@ -154,7 +155,7 @@ func TestBuildRoomView_TimeOfDay_HourAndPeriodPopulated(t *testing.T) {
 	const startHour int32 = 17 // Dusk
 	h, _, sessMgr := testWorldAndSessionWithClock(t, startHour)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")
@@ -175,7 +176,7 @@ func TestBuildRoomView_DarkPeriod_OutdoorHidesExits(t *testing.T) {
 	clock := NewGameClock(startHour, time.Hour*24)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")
@@ -194,7 +195,7 @@ func TestBuildRoomView_LightPeriod_OutdoorShowsExits(t *testing.T) {
 	clock := NewGameClock(startHour, time.Hour*24)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")
@@ -215,7 +216,7 @@ func TestBuildRoomView_OutdoorFlavorText_Appended(t *testing.T) {
 	clock := NewGameClock(startHour, time.Hour*24)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")
@@ -236,7 +237,7 @@ func TestBuildRoomView_IndoorNoFlavorText(t *testing.T) {
 	clock := NewGameClock(startHour, time.Hour*24)
 	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	view, err := h.Look("u1")
@@ -251,7 +252,7 @@ func TestProperty_BuildRoomView_HourAlwaysInRange(t *testing.T) {
 		clock := NewGameClock(startHour, time.Hour*24)
 		h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
 
-		_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+		_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 		require.NoError(rt, err)
 
 		view, err := h.Look("u1")

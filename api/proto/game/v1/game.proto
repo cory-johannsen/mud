@@ -85,6 +85,13 @@ message JoinWorldRequest {
   string class          = 9;
   int32  level          = 10;
   string archetype      = 11;
+  int32  max_hp         = 12;
+  int32  brutality      = 13;
+  int32  grit           = 14;
+  int32  quickness      = 15;
+  int32  reasoning      = 16;
+  int32  savvy          = 17;
+  int32  flair          = 18;
 }
 
 // MoveRequest asks the server to move the player in the given direction.

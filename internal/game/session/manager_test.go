@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
+
+	"github.com/cory-johannsen/mud/internal/game/character"
 )
 
 func TestBridgeEntity_Push(t *testing.T) {
@@ -42,7 +44,7 @@ func TestBridgeEntity_CloseIdempotent(t *testing.T) {
 
 func TestManager_AddPlayer(t *testing.T) {
 	m := NewManager()
-	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 	assert.Equal(t, "Alice", sess.Username)
 	assert.Equal(t, "room_a", sess.RoomID)
@@ -51,7 +53,7 @@ func TestManager_AddPlayer(t *testing.T) {
 
 func TestManager_AddPlayer_BackpackAndCurrency(t *testing.T) {
 	m := NewManager()
-	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	sess, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	require.NotNil(t, sess.Backpack, "new session must have a non-nil Backpack")
@@ -63,16 +65,16 @@ func TestManager_AddPlayer_BackpackAndCurrency(t *testing.T) {
 
 func TestManager_AddPlayerDuplicate(t *testing.T) {
 	m := NewManager()
-	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
-	_, err = m.AddPlayer("u1", "Alice2", "Alice2", 0, "room_b", 10, "player", "", "", 0)
+	_, err = m.AddPlayer("u1", "Alice2", "Alice2", 0, "room_b", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "already connected")
 }
 
 func TestManager_RemovePlayer(t *testing.T) {
 	m := NewManager()
-	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	err = m.RemovePlayer("u1")
@@ -91,7 +93,7 @@ func TestManager_RemovePlayerNotFound(t *testing.T) {
 
 func TestManager_MovePlayer(t *testing.T) {
 	m := NewManager()
-	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, err := m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	oldRoom, err := m.MovePlayer("u1", "room_b")
@@ -114,9 +116,9 @@ func TestManager_MovePlayerNotFound(t *testing.T) {
 
 func TestManager_PlayersInRoom(t *testing.T) {
 	m := NewManager()
-	_, _ = m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
-	_, _ = m.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10, "player", "", "", 0)
-	_, _ = m.AddPlayer("u3", "Charlie", "Charlie", 0, "room_b", 10, "player", "", "", 0)
+	_, _ = m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	_, _ = m.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	_, _ = m.AddPlayer("u3", "Charlie", "Charlie", 0, "room_b", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 
 	roomA := m.PlayersInRoom("room_a")
 	assert.Len(t, roomA, 2)
@@ -132,7 +134,7 @@ func TestManager_PlayersInRoom(t *testing.T) {
 
 func TestManager_GetPlayer(t *testing.T) {
 	m := NewManager()
-	_, _ = m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, "player", "", "", 0)
+	_, _ = m.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 
 	sess, ok := m.GetPlayer("u1")
 	assert.True(t, ok)
@@ -154,7 +156,7 @@ func TestManager_ConcurrentAddRemove(t *testing.T) {
 			defer wg.Done()
 			uid := fmt.Sprintf("u%d", i)
 			name := fmt.Sprintf("Player%d", i)
-			_, _ = m.AddPlayer(uid, name, name, 0, "room_a", 10, "player", "", "", 0)
+			_, _ = m.AddPlayer(uid, name, name, 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 		}(i)
 	}
 	wg.Wait()
@@ -180,7 +182,7 @@ func TestManager_ConcurrentMove(t *testing.T) {
 
 	for i := 0; i < n; i++ {
 		name := fmt.Sprintf("P%d", i)
-		_, err := m.AddPlayer(fmt.Sprintf("u%d", i), name, name, 0, rooms[0], 10, "player", "", "", 0)
+		_, err := m.AddPlayer(fmt.Sprintf("u%d", i), name, name, 0, rooms[0], 10, 0, character.AbilityScores{}, "player", "", "", 0)
 		require.NoError(t, err)
 	}
 
@@ -208,7 +210,7 @@ func TestManager_ConcurrentMove(t *testing.T) {
 
 func TestAddPlayer_HasLoadoutSet(t *testing.T) {
 	m := NewManager()
-	sess, err := m.AddPlayer("uid1", "user", "Char", 1, "room1", 10, "player", "", "", 0)
+	sess, err := m.AddPlayer("uid1", "user", "Char", 1, "room1", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	if err != nil {
 		t.Fatalf("AddPlayer: %v", err)
 	}
@@ -225,7 +227,7 @@ func TestAddPlayer_HasLoadoutSet(t *testing.T) {
 
 func TestAddPlayer_HasEquipment(t *testing.T) {
 	m := NewManager()
-	sess, err := m.AddPlayer("uid2", "user", "Char", 1, "room1", 10, "player", "", "", 0)
+	sess, err := m.AddPlayer("uid2", "user", "Char", 1, "room1", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	if err != nil {
 		t.Fatalf("AddPlayer: %v", err)
 	}
@@ -242,7 +244,7 @@ func TestAddPlayer_HasEquipment(t *testing.T) {
 
 func TestAddPlayer_StoresDisplayFields(t *testing.T) {
 	m := NewManager()
-	sess, err := m.AddPlayer("u1", "user", "Hero", 1, "room1", 10, "player",
+	sess, err := m.AddPlayer("u1", "user", "Hero", 1, "room1", 10, 0, character.AbilityScores{}, "player",
 		"the Northeast", "Gunner", 3)
 	if err != nil {
 		t.Fatalf("AddPlayer error: %v", err)
@@ -264,7 +266,7 @@ func TestProperty_AddPlayer_StoresDisplayFields(t *testing.T) {
 		regionDisplay := rapid.StringMatching(`[A-Za-z ]+`).Draw(t, "regionDisplay")
 		class := rapid.StringMatching(`[A-Za-z]+`).Draw(t, "class")
 		level := rapid.IntRange(1, 20).Draw(t, "level")
-		sess, err := m.AddPlayer("u1", "user", "Hero", 1, "room1", 10, "player",
+		sess, err := m.AddPlayer("u1", "user", "Hero", 1, "room1", 10, 0, character.AbilityScores{}, "player",
 			regionDisplay, class, level)
 		if err != nil {
 			t.Fatalf("AddPlayer error: %v", err)
@@ -292,7 +294,7 @@ func TestPropertyRoomOccupancyConsistent(t *testing.T) {
 			roomIdx := rapid.IntRange(0, len(rooms)-1).Draw(t, "room_idx")
 			uid := fmt.Sprintf("p%d", i)
 			name := fmt.Sprintf("Player%d", i)
-			_, _ = m.AddPlayer(uid, name, name, 0, rooms[roomIdx], 10, "player", "", "", 0)
+			_, _ = m.AddPlayer(uid, name, name, 0, rooms[roomIdx], 10, 0, character.AbilityScores{}, "player", "", "", 0)
 		}
 
 		// Move some players

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 )
 
@@ -21,6 +22,10 @@ type PlayerSession struct {
 	RoomID string
 	// CurrentHP is the character's current hit points.
 	CurrentHP int
+	// MaxHP is the character's maximum hit points.
+	MaxHP int
+	// Abilities holds the six ability scores loaded at login.
+	Abilities character.AbilityScores
 	// Backpack is the player's inventory container.
 	Backpack *inventory.Backpack
 	// Currency is the player's total rounds (ammunition-as-currency).
@@ -59,9 +64,9 @@ func NewManager() *Manager {
 
 // AddPlayer registers a new player session in the given room.
 //
-// Precondition: uid, username, charName, and roomID must be non-empty; characterID must be >= 0; currentHP must be >= 0; role must be non-empty; regionDisplayName, class, and level are informational and may be zero values.
+// Precondition: uid, username, charName, and roomID must be non-empty; characterID must be >= 0; currentHP and maxHP must be >= 0; role must be non-empty; regionDisplayName, class, and level are informational and may be zero values.
 // Postcondition: Returns the created PlayerSession, or an error if the UID is already registered.
-func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, roomID string, currentHP int, role string, regionDisplayName string, class string, level int) (*PlayerSession, error) {
+func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, roomID string, currentHP, maxHP int, abilities character.AbilityScores, role string, regionDisplayName string, class string, level int) (*PlayerSession, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -77,6 +82,8 @@ func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, r
 		CharacterID:       characterID,
 		RoomID:            roomID,
 		CurrentHP:         currentHP,
+		MaxHP:             maxHP,
+		Abilities:         abilities,
 		Role:              role,
 		RegionDisplayName: regionDisplayName,
 		Class:             class,

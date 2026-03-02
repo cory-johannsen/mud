@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
@@ -201,7 +202,15 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		role = "player"
 	}
 
-	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP, role,
+	abilities := character.AbilityScores{
+		Brutality: int(joinReq.Brutality),
+		Grit:      int(joinReq.Grit),
+		Quickness: int(joinReq.Quickness),
+		Reasoning: int(joinReq.Reasoning),
+		Savvy:     int(joinReq.Savvy),
+		Flair:     int(joinReq.Flair),
+	}
+	sess, err := s.sessions.AddPlayer(uid, username, charName, characterID, spawnRoom.ID, currentHP, int(joinReq.MaxHp), abilities, role,
 		joinReq.RegionDisplay, joinReq.Class, int(joinReq.Level))
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)

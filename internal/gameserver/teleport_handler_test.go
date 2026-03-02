@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -57,9 +58,9 @@ func TestHandleTeleport_AdminSuccess(t *testing.T) {
 	svc := testServiceWithAdmin(t, nil)
 	svc.charSaver = saver
 
-	_, err := svc.sessions.AddPlayer("admin1", "admin_user", "Admin", 1, "room_a", 10, "admin", "", "", 0)
+	_, err := svc.sessions.AddPlayer("admin1", "admin_user", "Admin", 1, "room_a", 10, 0, character.AbilityScores{}, "admin", "", "", 0)
 	require.NoError(t, err)
-	_, err = svc.sessions.AddPlayer("target1", "target_user", "Target", 2, "room_a", 10, "player", "", "", 0)
+	_, err = svc.sessions.AddPlayer("target1", "target_user", "Target", 2, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	resp, err := svc.handleTeleport("admin1", &gamev1.TeleportRequest{
@@ -83,7 +84,7 @@ func TestHandleTeleport_AdminSuccess(t *testing.T) {
 func TestHandleTeleport_NonAdminDenied(t *testing.T) {
 	svc := testServiceWithAdmin(t, nil)
 
-	_, err := svc.sessions.AddPlayer("u1", "user", "User", 1, "room_a", 10, "player", "", "", 0)
+	_, err := svc.sessions.AddPlayer("u1", "user", "User", 1, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
 	require.NoError(t, err)
 
 	resp, err := svc.handleTeleport("u1", &gamev1.TeleportRequest{
@@ -99,7 +100,7 @@ func TestHandleTeleport_NonAdminDenied(t *testing.T) {
 func TestHandleTeleport_InvalidRoom(t *testing.T) {
 	svc := testServiceWithAdmin(t, nil)
 
-	_, err := svc.sessions.AddPlayer("admin1", "admin_user", "Admin", 1, "room_a", 10, "admin", "", "", 0)
+	_, err := svc.sessions.AddPlayer("admin1", "admin_user", "Admin", 1, "room_a", 10, 0, character.AbilityScores{}, "admin", "", "", 0)
 	require.NoError(t, err)
 
 	resp, err := svc.handleTeleport("admin1", &gamev1.TeleportRequest{
@@ -116,7 +117,7 @@ func TestHandleTeleport_InvalidRoom(t *testing.T) {
 func TestHandleTeleport_TargetNotOnline(t *testing.T) {
 	svc := testServiceWithAdmin(t, nil)
 
-	_, err := svc.sessions.AddPlayer("admin1", "admin_user", "Admin", 1, "room_a", 10, "admin", "", "", 0)
+	_, err := svc.sessions.AddPlayer("admin1", "admin_user", "Admin", 1, "room_a", 10, 0, character.AbilityScores{}, "admin", "", "", 0)
 	require.NoError(t, err)
 
 	resp, err := svc.handleTeleport("admin1", &gamev1.TeleportRequest{

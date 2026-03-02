@@ -3,6 +3,7 @@ package gameserver
 import (
 	"testing"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"pgregory.net/rapid"
 )
@@ -14,7 +15,7 @@ import (
 // Postcondition: Returns errQuit and a Disconnected payload with non-empty Reason.
 func TestHandleSwitch_ReturnsDisconnectedWithReason(t *testing.T) {
 	mgr := session.NewManager()
-	_, _ = mgr.AddPlayer("uid1", "user1", "Hero", 1, "room1", 10, "player", "the Northeast", "Gunner", 3)
+	_, _ = mgr.AddPlayer("uid1", "user1", "Hero", 1, "room1", 10, 0, character.AbilityScores{}, "player", "the Northeast", "Gunner", 3)
 	s := &GameServiceServer{sessions: mgr}
 
 	result, err := s.handleSwitch("uid1")
@@ -58,7 +59,7 @@ func TestProperty_HandleSwitch_AlwaysReturnsErrQuit(t *testing.T) {
 		mgr := session.NewManager()
 		uid := rapid.StringMatching(`[a-z0-9]+`).Draw(t, "uid")
 		charName := rapid.StringMatching(`[A-Za-z]+`).Draw(t, "charName")
-		_, _ = mgr.AddPlayer(uid, "user", charName, 1, "room1", 10, "player", "the Northeast", "Gunner", 1)
+		_, _ = mgr.AddPlayer(uid, "user", charName, 1, "room1", 10, 0, character.AbilityScores{}, "player", "the Northeast", "Gunner", 1)
 		s := &GameServiceServer{sessions: mgr}
 
 		_, err := s.handleSwitch(uid)
