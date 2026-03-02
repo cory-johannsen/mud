@@ -1,0 +1,9 @@
+id: laser_rifle
+name: Laser Rifle
+description: A corporate-tech directed-energy weapon — silent, precise, and deadly.
+kind: weapon
+weapon_ref: laser_rifle
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 1800

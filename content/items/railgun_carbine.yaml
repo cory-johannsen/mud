@@ -1,0 +1,9 @@
+id: railgun_carbine
+name: Railgun Carbine
+description: A compact electromagnetic accelerator that punches through vehicle armor.
+kind: weapon
+weapon_ref: railgun_carbine
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 2000

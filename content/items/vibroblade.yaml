@@ -1,0 +1,9 @@
+id: vibroblade
+name: Vibroblade
+description: A high-frequency mono-molecular blade that hums with barely contained energy.
+kind: weapon
+weapon_ref: vibroblade
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 750

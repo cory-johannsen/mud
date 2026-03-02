@@ -1,0 +1,9 @@
+id: sonic_disruptor
+name: Sonic Disruptor
+description: Emits a focused sonic pulse that disorients and staggers without killing.
+kind: weapon
+weapon_ref: sonic_disruptor
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 1000

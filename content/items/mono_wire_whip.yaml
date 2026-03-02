@@ -1,0 +1,9 @@
+id: mono_wire_whip
+name: Mono-Wire Whip
+description: A reel of monomolecular wire that can strip limbs with a flick of the wrist.
+kind: weapon
+weapon_ref: mono_wire_whip
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 800

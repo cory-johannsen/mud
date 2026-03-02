@@ -1,0 +1,13 @@
+id: emp_pistol
+name: EMP Pistol
+description: Fires electromagnetic pulses that fry electronics and stagger cyborgs.
+damage_dice: 1d6
+damage_type: electricity
+range_increment: 20
+reload_actions: 2
+magazine_capacity: 8
+firing_modes: [single]
+traits: [gun-team, emp, nonlethal]
+kind: one_handed
+group: firearm
+team_affinity: gun

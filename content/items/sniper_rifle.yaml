@@ -1,0 +1,9 @@
+id: sniper_rifle
+name: Sniper Rifle
+description: A long-barreled precision rifle for taking shots from rooftops and shadows.
+kind: weapon
+weapon_ref: sniper_rifle
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 1500

@@ -1,0 +1,13 @@
+id: sniper_rifle
+name: Sniper Rifle
+description: A long-barreled precision rifle for taking shots from rooftops and shadows.
+damage_dice: 1d12
+damage_type: piercing
+range_increment: 200
+reload_actions: 2
+magazine_capacity: 5
+firing_modes: [single]
+traits: [gun-team, military-surplus, two-hand, precise]
+kind: two_handed
+group: firearm
+team_affinity: gun

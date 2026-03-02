@@ -1,0 +1,9 @@
+id: assault_rifle
+name: Assault Rifle
+description: Military-surplus carbine — the backbone of any well-armed street crew.
+kind: weapon
+weapon_ref: assault_rifle
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 800

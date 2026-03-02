@@ -1,0 +1,16 @@
+id: laser_rifle
+name: Laser Rifle
+description: A corporate-tech directed-energy weapon — silent, precise, and deadly.
+damage_dice: 2d6
+damage_type: fire
+range_increment: 100
+reload_actions: 3
+magazine_capacity: 20
+firing_modes: [single]
+traits: [gun-team, corp-tech, silent]
+kind: two_handed
+group: energy
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

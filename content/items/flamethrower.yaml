@@ -1,0 +1,9 @@
+id: flamethrower
+name: Flamethrower
+description: A fuel-pressured weapon that projects streams of burning gel — terrifying and indiscriminate.
+kind: weapon
+weapon_ref: flamethrower
+weight: 5.0
+stackable: false
+max_stack: 1
+value: 1200

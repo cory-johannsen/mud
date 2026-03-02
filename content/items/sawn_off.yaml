@@ -1,0 +1,9 @@
+id: sawn_off
+name: Sawn-Off Shotgun
+description: A double-barrel shotgun with the barrels hacked short — brutal at point-blank.
+kind: weapon
+weapon_ref: sawn_off
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 300

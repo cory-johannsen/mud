@@ -1,0 +1,10 @@
+id: emp_grenade
+name: EMP Grenade
+description: Releases a focused electromagnetic pulse on detonation — disables electronics and staggers cyborgs in the blast radius.
+damage_dice: 2d6
+damage_type: electricity
+area_type: room
+save_type: reflex
+save_dc: 13
+fuse: immediate
+traits: [thrown, limited_use, emp]

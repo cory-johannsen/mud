@@ -1,0 +1,9 @@
+id: corp_security_smg
+name: Corp Security SMG
+description: Standard-issue corporate security weapon — compact, reliable, and lethal.
+kind: weapon
+weapon_ref: corp_security_smg
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 600

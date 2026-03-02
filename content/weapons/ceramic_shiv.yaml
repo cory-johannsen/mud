@@ -1,0 +1,10 @@
+id: ceramic_shiv
+name: Ceramic Shiv
+description: A blade fashioned from ceramic tile — undetectable by metal scanners.
+damage_dice: 1d4
+damage_type: piercing
+range_increment: 0
+traits: [machete-team, agile, finesse, concealable]
+kind: one_handed
+group: blade
+team_affinity: machete

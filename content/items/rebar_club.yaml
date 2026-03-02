@@ -1,0 +1,9 @@
+id: rebar_club
+name: Rebar Club
+description: A length of bent construction rebar, heavy enough to cave in a helmet.
+kind: weapon
+weapon_ref: rebar_club
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 100

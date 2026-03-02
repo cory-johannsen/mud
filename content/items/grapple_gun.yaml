@@ -1,0 +1,9 @@
+id: grapple_gun
+name: Grapple Gun
+description: A pneumatic grappling hook launcher — for vertical movement and pulling enemies off ledges.
+kind: weapon
+weapon_ref: grapple_gun
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 900

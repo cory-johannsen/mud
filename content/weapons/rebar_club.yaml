@@ -1,0 +1,9 @@
+id: rebar_club
+name: Rebar Club
+description: A length of bent construction rebar, heavy enough to cave in a helmet.
+damage_dice: 1d8
+damage_type: bludgeoning
+range_increment: 0
+traits: [machete-team]
+kind: one_handed
+group: club

@@ -1,0 +1,13 @@
+id: suppressed_smg
+name: Suppressed SMG
+description: An SMG fitted with an integral suppressor — nearly silent at close range.
+damage_dice: 1d6
+damage_type: piercing
+range_increment: 25
+reload_actions: 1
+magazine_capacity: 30
+firing_modes: [single, automatic]
+traits: [gun-team, suppressed, concealable]
+kind: two_handed
+group: firearm
+team_affinity: gun

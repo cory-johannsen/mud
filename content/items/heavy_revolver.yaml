@@ -1,0 +1,9 @@
+id: heavy_revolver
+name: Heavy Revolver
+description: A six-shot magnum revolver with enough kick to knock a man off his feet.
+kind: weapon
+weapon_ref: heavy_revolver
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 400

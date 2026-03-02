@@ -1,0 +1,10 @@
+id: chainsaw
+name: Chainsaw
+description: A salvaged power tool repurposed as a devastating close-combat weapon.
+damage_dice: 2d6
+damage_type: slashing
+range_increment: 0
+traits: [machete-team, loud, two-hand]
+kind: two_handed
+group: blade
+team_affinity: machete

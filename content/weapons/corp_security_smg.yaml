@@ -1,0 +1,13 @@
+id: corp_security_smg
+name: Corp Security SMG
+description: Standard-issue corporate security weapon — compact, reliable, and lethal.
+damage_dice: 1d6
+damage_type: piercing
+range_increment: 35
+reload_actions: 1
+magazine_capacity: 30
+firing_modes: [single, burst, automatic]
+traits: [gun-team, military-surplus]
+kind: two_handed
+group: firearm
+team_affinity: gun

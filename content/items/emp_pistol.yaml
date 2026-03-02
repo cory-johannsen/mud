@@ -1,0 +1,9 @@
+id: emp_pistol
+name: EMP Pistol
+description: Fires electromagnetic pulses that fry electronics and stagger cyborgs.
+kind: weapon
+weapon_ref: emp_pistol
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 450

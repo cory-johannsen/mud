@@ -1,0 +1,13 @@
+id: mono_wire_whip
+name: Mono-Wire Whip
+description: A reel of monomolecular wire that can strip limbs with a flick of the wrist.
+damage_dice: 1d12
+damage_type: slashing
+range_increment: 0
+traits: [reach, machete-team, two-hand]
+kind: two_handed
+group: blade
+team_affinity: machete
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

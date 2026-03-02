@@ -1,0 +1,13 @@
+id: sawn_off
+name: Sawn-Off Shotgun
+description: A double-barrel shotgun with the barrels hacked short — brutal at point-blank.
+damage_dice: 2d6
+damage_type: piercing
+range_increment: 10
+reload_actions: 2
+magazine_capacity: 2
+firing_modes: [single]
+traits: [gun-team, scatter, concealable]
+kind: one_handed
+group: firearm
+team_affinity: gun

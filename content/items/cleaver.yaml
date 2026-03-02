@@ -1,0 +1,9 @@
+id: cleaver
+name: Butcher's Cleaver
+description: A heavy cleaver with a notched edge that hooks through armor gaps.
+kind: weapon
+weapon_ref: cleaver
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 150

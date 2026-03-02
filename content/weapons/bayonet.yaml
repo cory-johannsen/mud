@@ -1,0 +1,10 @@
+id: bayonet
+name: Bayonet
+description: A rifle-mount blade that doubles as a fighting knife.
+damage_dice: 1d6
+damage_type: piercing
+range_increment: 0
+traits: [gun-team, agile]
+kind: one_handed
+group: blade
+team_affinity: gun

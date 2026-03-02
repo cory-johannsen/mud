@@ -1,0 +1,16 @@
+id: railgun_carbine
+name: Railgun Carbine
+description: A compact electromagnetic accelerator that punches through vehicle armor.
+damage_dice: 2d8
+damage_type: piercing
+range_increment: 100
+reload_actions: 3
+magazine_capacity: 10
+firing_modes: [single]
+traits: [gun-team, corp-tech, armor-piercing, military-surplus]
+kind: two_handed
+group: energy
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

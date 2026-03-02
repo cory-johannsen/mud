@@ -1,0 +1,10 @@
+id: combat_knife
+name: Combat Knife
+description: A serrated military-issue blade, standard issue for street soldiers.
+damage_dice: 1d4
+damage_type: piercing
+range_increment: 0
+traits: [gun-team, agile, finesse]
+kind: one_handed
+group: blade
+team_affinity: gun

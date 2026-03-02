@@ -7,3 +7,4 @@ reload_actions: 2
 magazine_capacity: 6
 firing_modes: [single, burst]
 traits: [loud, two_handed]
+team_affinity: gun

@@ -1,0 +1,16 @@
+id: cyberlinked_smg
+name: Cyber-Linked SMG
+description: A neural-interfaced SMG that tracks targets through the user's own vision.
+damage_dice: 1d8
+damage_type: piercing
+range_increment: 40
+reload_actions: 1
+magazine_capacity: 25
+firing_modes: [single, burst, automatic]
+traits: [gun-team, smart-linked, military-surplus]
+kind: two_handed
+group: firearm
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

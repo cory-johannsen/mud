@@ -1,0 +1,9 @@
+id: street_sweeper_smg
+name: Street Sweeper SMG
+description: A crude but reliable submachine gun cobbled together in back-alley workshops.
+kind: weapon
+weapon_ref: street_sweeper_smg
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 400

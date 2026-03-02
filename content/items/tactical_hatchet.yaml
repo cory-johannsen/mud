@@ -1,0 +1,9 @@
+id: tactical_hatchet
+name: Tactical Hatchet
+description: A military-surplus hatchet with a weighted head for maximum impact.
+kind: weapon
+weapon_ref: tactical_hatchet
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 200

@@ -1,0 +1,9 @@
+id: flechette_pistol
+name: Flechette Pistol
+description: Fires a burst of needle-like darts — devastating at close range.
+kind: weapon
+weapon_ref: flechette_pistol
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 350

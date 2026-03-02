@@ -1,0 +1,9 @@
+id: incendiary_grenade
+name: Incendiary Grenade
+description: A thermite-gel grenade that erupts in a burst of clinging fire.
+kind: explosive
+explosive_ref: incendiary_grenade
+weight: 1.0
+stackable: true
+max_stack: 10
+value: 200

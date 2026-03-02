@@ -1,0 +1,9 @@
+id: suppressed_smg
+name: Suppressed SMG
+description: An SMG fitted with an integral suppressor — nearly silent at close range.
+kind: weapon
+weapon_ref: suppressed_smg
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 700

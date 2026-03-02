@@ -1,0 +1,9 @@
+id: spiked_knuckles
+name: Spiked Knuckles
+description: Brass knuckles welded with sharpened bolts for added puncture.
+kind: weapon
+weapon_ref: spiked_knuckles
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 50

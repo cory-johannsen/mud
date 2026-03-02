@@ -7,3 +7,4 @@ reload_actions: 1
 magazine_capacity: 15
 firing_modes: [single]
 traits: [concealable]
+team_affinity: gun

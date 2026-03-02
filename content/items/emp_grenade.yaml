@@ -1,0 +1,9 @@
+id: emp_grenade
+name: EMP Grenade
+description: Releases a focused electromagnetic pulse on detonation — disables electronics.
+kind: explosive
+explosive_ref: emp_grenade
+weight: 1.0
+stackable: true
+max_stack: 10
+value: 250

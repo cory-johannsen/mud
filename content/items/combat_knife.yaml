@@ -1,0 +1,9 @@
+id: combat_knife
+name: Combat Knife
+description: A serrated military-issue blade, standard issue for street soldiers.
+kind: weapon
+weapon_ref: combat_knife
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 100

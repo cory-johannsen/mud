@@ -1,0 +1,9 @@
+id: cyberlinked_smg
+name: Cyber-Linked SMG
+description: A neural-interfaced SMG that tracks targets through the user's own vision.
+kind: weapon
+weapon_ref: cyberlinked_smg
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 800

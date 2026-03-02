@@ -1,0 +1,13 @@
+id: riot_shotgun
+name: Riot Shotgun
+description: A semi-automatic shotgun with an extended tube magazine used by enforcement units.
+damage_dice: 1d10
+damage_type: piercing
+range_increment: 20
+reload_actions: 1
+magazine_capacity: 8
+firing_modes: [single]
+traits: [gun-team, military-surplus]
+kind: two_handed
+group: firearm
+team_affinity: gun

@@ -1,0 +1,12 @@
+id: grapple_gun
+name: Grapple Gun
+description: A pneumatic grappling hook launcher — for vertical movement and pulling enemies off ledges.
+damage_dice: 1d4
+damage_type: bludgeoning
+range_increment: 40
+reload_actions: 2
+magazine_capacity: 1
+firing_modes: [single]
+traits: [utility, grapple]
+kind: one_handed
+group: exotic

@@ -1,0 +1,12 @@
+id: net_launcher
+name: Net Launcher
+description: Fires an expanding weighted net — nonlethal but highly effective at immobilizing targets.
+damage_dice: 1d1
+damage_type: bludgeoning
+range_increment: 20
+reload_actions: 2
+magazine_capacity: 1
+firing_modes: [single]
+traits: [nonlethal, immobilize]
+kind: two_handed
+group: exotic

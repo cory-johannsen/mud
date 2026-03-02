@@ -1,0 +1,13 @@
+id: street_sweeper_smg
+name: Street Sweeper SMG
+description: A crude but reliable submachine gun cobbled together in back-alley workshops.
+damage_dice: 1d6
+damage_type: piercing
+range_increment: 30
+reload_actions: 1
+magazine_capacity: 32
+firing_modes: [single, automatic]
+traits: [gun-team]
+kind: two_handed
+group: firearm
+team_affinity: gun

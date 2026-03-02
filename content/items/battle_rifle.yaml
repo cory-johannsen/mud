@@ -1,0 +1,9 @@
+id: battle_rifle
+name: Battle Rifle
+description: A full-power semi-automatic rifle chambered in a hard-hitting caliber.
+kind: weapon
+weapon_ref: battle_rifle
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 900

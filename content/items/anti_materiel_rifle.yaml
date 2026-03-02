@@ -1,0 +1,9 @@
+id: anti_materiel_rifle
+name: Anti-Materiel Rifle
+description: A massive bolt-action rifle designed to destroy vehicles — and anything else.
+kind: weapon
+weapon_ref: anti_materiel_rifle
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 1500

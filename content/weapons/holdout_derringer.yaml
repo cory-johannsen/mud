@@ -1,0 +1,13 @@
+id: holdout_derringer
+name: Holdout Derringer
+description: A tiny two-shot pistol that fits in a palm — the last line of defense.
+damage_dice: 1d4
+damage_type: piercing
+range_increment: 20
+reload_actions: 2
+magazine_capacity: 2
+firing_modes: [single]
+traits: [gun-team, concealable]
+kind: one_handed
+group: firearm
+team_affinity: gun

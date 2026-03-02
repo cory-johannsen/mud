@@ -1,0 +1,10 @@
+id: stun_baton
+name: Stun Baton
+description: A collapsible electrified baton favored by corporate security.
+damage_dice: 1d6
+damage_type: electricity
+range_increment: 0
+traits: [gun-team, nonlethal]
+kind: one_handed
+group: club
+team_affinity: gun

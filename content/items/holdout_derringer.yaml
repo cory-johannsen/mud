@@ -1,0 +1,9 @@
+id: holdout_derringer
+name: Holdout Derringer
+description: A tiny two-shot pistol that fits in a palm — the last line of defense.
+kind: weapon
+weapon_ref: holdout_derringer
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 200

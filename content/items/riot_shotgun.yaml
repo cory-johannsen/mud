@@ -1,0 +1,9 @@
+id: riot_shotgun
+name: Riot Shotgun
+description: A semi-automatic shotgun with an extended tube magazine used by enforcement units.
+kind: weapon
+weapon_ref: riot_shotgun
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 500

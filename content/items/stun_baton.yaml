@@ -1,0 +1,9 @@
+id: stun_baton
+name: Stun Baton
+description: A collapsible electrified baton favored by corporate security.
+kind: weapon
+weapon_ref: stun_baton
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 250

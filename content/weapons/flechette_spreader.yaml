@@ -1,0 +1,13 @@
+id: flechette_spreader
+name: Flechette Spreader
+description: A wide-bore shotgun firing clouds of nano-shards — ignores most light armor.
+damage_dice: 1d10
+damage_type: piercing
+range_increment: 15
+reload_actions: 2
+magazine_capacity: 6
+firing_modes: [single]
+traits: [gun-team, scatter, armor-piercing]
+kind: two_handed
+group: firearm
+team_affinity: gun

@@ -1,0 +1,10 @@
+id: spiked_knuckles
+name: Spiked Knuckles
+description: Brass knuckles welded with sharpened bolts for added puncture.
+damage_dice: 1d6
+damage_type: piercing
+range_increment: 0
+traits: [gun-team, agile, unarmed]
+kind: one_handed
+group: brawling
+team_affinity: gun

@@ -1,0 +1,16 @@
+id: assault_rifle
+name: Assault Rifle
+description: Military-surplus carbine — the backbone of any well-armed street crew.
+damage_dice: 1d8
+damage_type: piercing
+range_increment: 60
+reload_actions: 1
+magazine_capacity: 30
+firing_modes: [single, burst, automatic]
+traits: [gun-team, military-surplus]
+kind: two_handed
+group: firearm
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

@@ -1,0 +1,9 @@
+id: net_launcher
+name: Net Launcher
+description: Fires an expanding weighted net — nonlethal but highly effective at immobilizing targets.
+kind: weapon
+weapon_ref: net_launcher
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 800

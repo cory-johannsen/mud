@@ -1,0 +1,13 @@
+id: anti_materiel_rifle
+name: Anti-Materiel Rifle
+description: A massive bolt-action rifle designed to destroy vehicles — and anything else.
+damage_dice: 3d8
+damage_type: piercing
+range_increment: 250
+reload_actions: 4
+magazine_capacity: 5
+firing_modes: [single]
+traits: [gun-team, military-surplus, heavy, armor-piercing]
+kind: two_handed
+group: firearm
+team_affinity: gun

@@ -1,0 +1,13 @@
+id: heavy_revolver
+name: Heavy Revolver
+description: A six-shot magnum revolver with enough kick to knock a man off his feet.
+damage_dice: 1d10
+damage_type: piercing
+range_increment: 40
+reload_actions: 3
+magazine_capacity: 6
+firing_modes: [single]
+traits: [gun-team, powerful]
+kind: one_handed
+group: firearm
+team_affinity: gun

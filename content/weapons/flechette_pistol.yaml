@@ -1,0 +1,13 @@
+id: flechette_pistol
+name: Flechette Pistol
+description: Fires a burst of needle-like darts — devastating at close range.
+damage_dice: 1d8
+damage_type: piercing
+range_increment: 15
+reload_actions: 1
+magazine_capacity: 20
+firing_modes: [single, burst]
+traits: [gun-team, scatter]
+kind: one_handed
+group: firearm
+team_affinity: gun

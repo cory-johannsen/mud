@@ -1,0 +1,10 @@
+id: incendiary_grenade
+name: Incendiary Grenade
+description: A thermite-gel grenade that erupts in a burst of clinging fire — sets everything in range ablaze.
+damage_dice: 3d6
+damage_type: fire
+area_type: room
+save_type: reflex
+save_dc: 14
+fuse: immediate
+traits: [thrown, limited_use]

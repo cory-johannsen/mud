@@ -1,0 +1,12 @@
+id: flamethrower
+name: Flamethrower
+description: A fuel-pressured weapon that projects streams of burning gel — terrifying and indiscriminate.
+damage_dice: 2d6
+damage_type: fire
+range_increment: 15
+reload_actions: 3
+magazine_capacity: 10
+firing_modes: [cone]
+traits: [heavy, area-fire, dangerous]
+kind: two_handed
+group: exotic

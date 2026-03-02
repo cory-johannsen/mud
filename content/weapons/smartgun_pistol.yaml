@@ -1,0 +1,16 @@
+id: smartgun_pistol
+name: Smartgun
+description: A cybernetically-linked pistol with targeting assist — requires neural interface.
+damage_dice: 1d6
+damage_type: piercing
+range_increment: 40
+reload_actions: 1
+magazine_capacity: 18
+firing_modes: [single]
+traits: [gun-team, smart-linked, military-surplus]
+kind: one_handed
+group: firearm
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

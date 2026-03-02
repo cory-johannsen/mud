@@ -1,0 +1,13 @@
+id: battle_rifle
+name: Battle Rifle
+description: A full-power semi-automatic rifle chambered in a hard-hitting caliber.
+damage_dice: 1d10
+damage_type: piercing
+range_increment: 80
+reload_actions: 1
+magazine_capacity: 20
+firing_modes: [single, burst]
+traits: [gun-team, military-surplus]
+kind: two_handed
+group: firearm
+team_affinity: gun

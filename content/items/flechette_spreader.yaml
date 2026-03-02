@@ -1,0 +1,9 @@
+id: flechette_spreader
+name: Flechette Spreader
+description: A wide-bore shotgun firing clouds of nano-shards — ignores most light armor.
+kind: weapon
+weapon_ref: flechette_spreader
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 550

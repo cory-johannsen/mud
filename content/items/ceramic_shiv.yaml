@@ -1,0 +1,9 @@
+id: ceramic_shiv
+name: Ceramic Shiv
+description: A blade fashioned from ceramic tile — undetectable by metal scanners.
+kind: weapon
+weapon_ref: ceramic_shiv
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 75

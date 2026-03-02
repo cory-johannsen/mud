@@ -1,0 +1,9 @@
+id: bayonet
+name: Bayonet
+description: A rifle-mount blade that doubles as a fighting knife.
+kind: weapon
+weapon_ref: bayonet
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 75

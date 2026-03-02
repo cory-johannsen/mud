@@ -1,0 +1,9 @@
+id: smartgun_pistol
+name: Smartgun
+description: A cybernetically-linked pistol with targeting assist — requires neural interface.
+kind: weapon
+weapon_ref: smartgun_pistol
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 600

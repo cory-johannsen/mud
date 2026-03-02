@@ -1,0 +1,9 @@
+id: chainsaw
+name: Chainsaw
+description: A salvaged power tool repurposed as a devastating close-combat weapon.
+kind: weapon
+weapon_ref: chainsaw
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 300
