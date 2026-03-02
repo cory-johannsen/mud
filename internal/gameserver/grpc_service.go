@@ -1512,13 +1512,17 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	}
 
 	// Job info from registry.
-	if job, ok := s.jobRegistry.Job(sess.Class); ok {
-		view.Job = job.Name
-		view.Archetype = job.Archetype
+	if s.jobRegistry != nil {
+		if job, ok := s.jobRegistry.Job(sess.Class); ok {
+			view.Job = job.Name
+			view.Archetype = job.Archetype
+		} else {
+			view.Job = sess.Class
+		}
+		view.Team = s.jobRegistry.TeamFor(sess.Class)
 	} else {
 		view.Job = sess.Class
 	}
-	view.Team = s.jobRegistry.TeamFor(sess.Class)
 
 	// Defense stats (dex mod from Quickness).
 	dexMod := (sess.Abilities.Quickness - 10) / 2
