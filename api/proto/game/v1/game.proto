@@ -47,6 +47,7 @@ message ClientMessage {
     SwitchCharacterRequest switch_character = 30;
     WearRequest wear = 31;
     RemoveArmorRequest remove_armor = 32;
+    CharacterSheetRequest char_sheet = 33;
   }
 }
 
@@ -69,6 +70,7 @@ message ServerEvent {
     ConditionEvent  condition_event = 14;
     InventoryView inventory_view = 15;
     TimeOfDayEvent time_of_day = 16;
+    CharacterSheetView character_sheet = 17;
   }
 }
 
@@ -417,4 +419,36 @@ message ConditionInfo {
   string name               = 2;
   int32  stacks             = 3;
   int32  duration_remaining = 4;  // -1 = permanent or until_save
+}
+
+// CharacterSheetRequest asks the server for the player's full character sheet.
+message CharacterSheetRequest {}
+
+// CharacterSheetView delivers the player's full character sheet.
+message CharacterSheetView {
+    string name      = 1;
+    string job       = 2;
+    string archetype = 3;
+    string team      = 4;
+    int32  level     = 5;
+
+    int32 brutality  = 6;
+    int32 grit       = 7;
+    int32 quickness  = 8;
+    int32 reasoning  = 9;
+    int32 savvy      = 10;
+    int32 flair      = 11;
+
+    int32 current_hp    = 12;
+    int32 max_hp        = 13;
+    int32 ac_bonus      = 14;
+    int32 check_penalty = 15;
+    int32 speed_penalty = 16;
+
+    string currency = 17;
+
+    map<string, string> armor       = 18;
+    map<string, string> accessories = 19;
+    string main_hand = 20;
+    string off_hand  = 21;
 }

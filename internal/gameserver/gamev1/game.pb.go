@@ -226,6 +226,7 @@ type ClientMessage struct {
 	//	*ClientMessage_SwitchCharacter
 	//	*ClientMessage_Wear
 	//	*ClientMessage_RemoveArmor
+	//	*ClientMessage_CharSheet
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -554,6 +555,15 @@ func (x *ClientMessage) GetRemoveArmor() *RemoveArmorRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetCharSheet() *CharacterSheetRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_CharSheet); ok {
+			return x.CharSheet
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -682,6 +692,10 @@ type ClientMessage_RemoveArmor struct {
 	RemoveArmor *RemoveArmorRequest `protobuf:"bytes,32,opt,name=remove_armor,json=removeArmor,proto3,oneof"`
 }
 
+type ClientMessage_CharSheet struct {
+	CharSheet *CharacterSheetRequest `protobuf:"bytes,33,opt,name=char_sheet,json=charSheet,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -744,6 +758,8 @@ func (*ClientMessage_Wear) isClientMessage_Payload() {}
 
 func (*ClientMessage_RemoveArmor) isClientMessage_Payload() {}
 
+func (*ClientMessage_CharSheet) isClientMessage_Payload() {}
+
 // ServerEvent wraps all server-to-client events.
 type ServerEvent struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
@@ -765,6 +781,7 @@ type ServerEvent struct {
 	//	*ServerEvent_ConditionEvent
 	//	*ServerEvent_InventoryView
 	//	*ServerEvent_TimeOfDay
+	//	*ServerEvent_CharacterSheet
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -949,6 +966,15 @@ func (x *ServerEvent) GetTimeOfDay() *TimeOfDayEvent {
 	return nil
 }
 
+func (x *ServerEvent) GetCharacterSheet() *CharacterSheetView {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_CharacterSheet); ok {
+			return x.CharacterSheet
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -1013,6 +1039,10 @@ type ServerEvent_TimeOfDay struct {
 	TimeOfDay *TimeOfDayEvent `protobuf:"bytes,16,opt,name=time_of_day,json=timeOfDay,proto3,oneof"`
 }
 
+type ServerEvent_CharacterSheet struct {
+	CharacterSheet *CharacterSheetView `protobuf:"bytes,17,opt,name=character_sheet,json=characterSheet,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -1042,6 +1072,8 @@ func (*ServerEvent_ConditionEvent) isServerEvent_Payload() {}
 func (*ServerEvent_InventoryView) isServerEvent_Payload() {}
 
 func (*ServerEvent_TimeOfDay) isServerEvent_Payload() {}
+
+func (*ServerEvent_CharacterSheet) isServerEvent_Payload() {}
 
 // JoinWorldRequest is sent by the client to enter the game world after authentication.
 type JoinWorldRequest struct {
@@ -3932,11 +3964,253 @@ func (x *ConditionInfo) GetDurationRemaining() int32 {
 	return 0
 }
 
+// CharacterSheetRequest asks the server for the player's full character sheet.
+type CharacterSheetRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CharacterSheetRequest) Reset() {
+	*x = CharacterSheetRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CharacterSheetRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CharacterSheetRequest) ProtoMessage() {}
+
+func (x *CharacterSheetRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CharacterSheetRequest.ProtoReflect.Descriptor instead.
+func (*CharacterSheetRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{53}
+}
+
+// CharacterSheetView delivers the player's full character sheet.
+type CharacterSheetView struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Job           string                 `protobuf:"bytes,2,opt,name=job,proto3" json:"job,omitempty"`
+	Archetype     string                 `protobuf:"bytes,3,opt,name=archetype,proto3" json:"archetype,omitempty"`
+	Team          string                 `protobuf:"bytes,4,opt,name=team,proto3" json:"team,omitempty"`
+	Level         int32                  `protobuf:"varint,5,opt,name=level,proto3" json:"level,omitempty"`
+	Brutality     int32                  `protobuf:"varint,6,opt,name=brutality,proto3" json:"brutality,omitempty"`
+	Grit          int32                  `protobuf:"varint,7,opt,name=grit,proto3" json:"grit,omitempty"`
+	Quickness     int32                  `protobuf:"varint,8,opt,name=quickness,proto3" json:"quickness,omitempty"`
+	Reasoning     int32                  `protobuf:"varint,9,opt,name=reasoning,proto3" json:"reasoning,omitempty"`
+	Savvy         int32                  `protobuf:"varint,10,opt,name=savvy,proto3" json:"savvy,omitempty"`
+	Flair         int32                  `protobuf:"varint,11,opt,name=flair,proto3" json:"flair,omitempty"`
+	CurrentHp     int32                  `protobuf:"varint,12,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
+	MaxHp         int32                  `protobuf:"varint,13,opt,name=max_hp,json=maxHp,proto3" json:"max_hp,omitempty"`
+	AcBonus       int32                  `protobuf:"varint,14,opt,name=ac_bonus,json=acBonus,proto3" json:"ac_bonus,omitempty"`
+	CheckPenalty  int32                  `protobuf:"varint,15,opt,name=check_penalty,json=checkPenalty,proto3" json:"check_penalty,omitempty"`
+	SpeedPenalty  int32                  `protobuf:"varint,16,opt,name=speed_penalty,json=speedPenalty,proto3" json:"speed_penalty,omitempty"`
+	Currency      string                 `protobuf:"bytes,17,opt,name=currency,proto3" json:"currency,omitempty"`
+	Armor         map[string]string      `protobuf:"bytes,18,rep,name=armor,proto3" json:"armor,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Accessories   map[string]string      `protobuf:"bytes,19,rep,name=accessories,proto3" json:"accessories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	MainHand      string                 `protobuf:"bytes,20,opt,name=main_hand,json=mainHand,proto3" json:"main_hand,omitempty"`
+	OffHand       string                 `protobuf:"bytes,21,opt,name=off_hand,json=offHand,proto3" json:"off_hand,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CharacterSheetView) Reset() {
+	*x = CharacterSheetView{}
+	mi := &file_game_v1_game_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CharacterSheetView) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CharacterSheetView) ProtoMessage() {}
+
+func (x *CharacterSheetView) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CharacterSheetView.ProtoReflect.Descriptor instead.
+func (*CharacterSheetView) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{54}
+}
+
+func (x *CharacterSheetView) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetJob() string {
+	if x != nil {
+		return x.Job
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetArchetype() string {
+	if x != nil {
+		return x.Archetype
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetTeam() string {
+	if x != nil {
+		return x.Team
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetLevel() int32 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetBrutality() int32 {
+	if x != nil {
+		return x.Brutality
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetGrit() int32 {
+	if x != nil {
+		return x.Grit
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetQuickness() int32 {
+	if x != nil {
+		return x.Quickness
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetReasoning() int32 {
+	if x != nil {
+		return x.Reasoning
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetSavvy() int32 {
+	if x != nil {
+		return x.Savvy
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetFlair() int32 {
+	if x != nil {
+		return x.Flair
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetCurrentHp() int32 {
+	if x != nil {
+		return x.CurrentHp
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetMaxHp() int32 {
+	if x != nil {
+		return x.MaxHp
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetAcBonus() int32 {
+	if x != nil {
+		return x.AcBonus
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetCheckPenalty() int32 {
+	if x != nil {
+		return x.CheckPenalty
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetSpeedPenalty() int32 {
+	if x != nil {
+		return x.SpeedPenalty
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetArmor() map[string]string {
+	if x != nil {
+		return x.Armor
+	}
+	return nil
+}
+
+func (x *CharacterSheetView) GetAccessories() map[string]string {
+	if x != nil {
+		return x.Accessories
+	}
+	return nil
+}
+
+func (x *CharacterSheetView) GetMainHand() string {
+	if x != nil {
+		return x.MainHand
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetOffHand() string {
+	if x != nil {
+		return x.OffHand
+	}
+	return ""
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\x95\r\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xd6\r\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -3973,8 +4247,10 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tequipment\x18\x1d \x01(\v2\x19.game.v1.EquipmentRequestH\x00R\tequipment\x12L\n" +
 	"\x10switch_character\x18\x1e \x01(\v2\x1f.game.v1.SwitchCharacterRequestH\x00R\x0fswitchCharacter\x12*\n" +
 	"\x04wear\x18\x1f \x01(\v2\x14.game.v1.WearRequestH\x00R\x04wear\x12@\n" +
-	"\fremove_armor\x18  \x01(\v2\x1b.game.v1.RemoveArmorRequestH\x00R\vremoveArmorB\t\n" +
-	"\apayload\"\x84\a\n" +
+	"\fremove_armor\x18  \x01(\v2\x1b.game.v1.RemoveArmorRequestH\x00R\vremoveArmor\x12?\n" +
+	"\n" +
+	"char_sheet\x18! \x01(\v2\x1e.game.v1.CharacterSheetRequestH\x00R\tcharSheetB\t\n" +
+	"\apayload\"\xcc\a\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -3996,7 +4272,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tround_end\x18\r \x01(\v2\x16.game.v1.RoundEndEventH\x00R\broundEnd\x12B\n" +
 	"\x0fcondition_event\x18\x0e \x01(\v2\x17.game.v1.ConditionEventH\x00R\x0econditionEvent\x12?\n" +
 	"\x0einventory_view\x18\x0f \x01(\v2\x16.game.v1.InventoryViewH\x00R\rinventoryView\x129\n" +
-	"\vtime_of_day\x18\x10 \x01(\v2\x17.game.v1.TimeOfDayEventH\x00R\ttimeOfDayB\t\n" +
+	"\vtime_of_day\x18\x10 \x01(\v2\x17.game.v1.TimeOfDayEventH\x00R\ttimeOfDay\x12F\n" +
+	"\x0fcharacter_sheet\x18\x11 \x01(\v2\x1b.game.v1.CharacterSheetViewH\x00R\x0echaracterSheetB\t\n" +
 	"\apayload\"\xca\x02\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
@@ -4199,7 +4476,39 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
 	"\x06stacks\x18\x03 \x01(\x05R\x06stacks\x12-\n" +
-	"\x12duration_remaining\x18\x04 \x01(\x05R\x11durationRemaining*Y\n" +
+	"\x12duration_remaining\x18\x04 \x01(\x05R\x11durationRemaining\"\x17\n" +
+	"\x15CharacterSheetRequest\"\x93\x06\n" +
+	"\x12CharacterSheetView\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
+	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
+	"\tarchetype\x18\x03 \x01(\tR\tarchetype\x12\x12\n" +
+	"\x04team\x18\x04 \x01(\tR\x04team\x12\x14\n" +
+	"\x05level\x18\x05 \x01(\x05R\x05level\x12\x1c\n" +
+	"\tbrutality\x18\x06 \x01(\x05R\tbrutality\x12\x12\n" +
+	"\x04grit\x18\a \x01(\x05R\x04grit\x12\x1c\n" +
+	"\tquickness\x18\b \x01(\x05R\tquickness\x12\x1c\n" +
+	"\treasoning\x18\t \x01(\x05R\treasoning\x12\x14\n" +
+	"\x05savvy\x18\n" +
+	" \x01(\x05R\x05savvy\x12\x14\n" +
+	"\x05flair\x18\v \x01(\x05R\x05flair\x12\x1d\n" +
+	"\n" +
+	"current_hp\x18\f \x01(\x05R\tcurrentHp\x12\x15\n" +
+	"\x06max_hp\x18\r \x01(\x05R\x05maxHp\x12\x19\n" +
+	"\bac_bonus\x18\x0e \x01(\x05R\aacBonus\x12#\n" +
+	"\rcheck_penalty\x18\x0f \x01(\x05R\fcheckPenalty\x12#\n" +
+	"\rspeed_penalty\x18\x10 \x01(\x05R\fspeedPenalty\x12\x1a\n" +
+	"\bcurrency\x18\x11 \x01(\tR\bcurrency\x12<\n" +
+	"\x05armor\x18\x12 \x03(\v2&.game.v1.CharacterSheetView.ArmorEntryR\x05armor\x12N\n" +
+	"\vaccessories\x18\x13 \x03(\v2,.game.v1.CharacterSheetView.AccessoriesEntryR\vaccessories\x12\x1b\n" +
+	"\tmain_hand\x18\x14 \x01(\tR\bmainHand\x12\x19\n" +
+	"\boff_hand\x18\x15 \x01(\tR\aoffHand\x1a8\n" +
+	"\n" +
+	"ArmorEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a>\n" +
+	"\x10AccessoriesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -4234,7 +4543,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 53)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 57)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),               // 0: game.v1.MessageType
 	(RoomEventType)(0),             // 1: game.v1.RoomEventType
@@ -4292,6 +4601,10 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*WearRequest)(nil),            // 53: game.v1.WearRequest
 	(*RemoveArmorRequest)(nil),     // 54: game.v1.RemoveArmorRequest
 	(*ConditionInfo)(nil),          // 55: game.v1.ConditionInfo
+	(*CharacterSheetRequest)(nil),  // 56: game.v1.CharacterSheetRequest
+	(*CharacterSheetView)(nil),     // 57: game.v1.CharacterSheetView
+	nil,                            // 58: game.v1.CharacterSheetView.ArmorEntry
+	nil,                            // 59: game.v1.CharacterSheetView.AccessoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	5,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -4325,37 +4638,41 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	13, // 28: game.v1.ClientMessage.switch_character:type_name -> game.v1.SwitchCharacterRequest
 	53, // 29: game.v1.ClientMessage.wear:type_name -> game.v1.WearRequest
 	54, // 30: game.v1.ClientMessage.remove_armor:type_name -> game.v1.RemoveArmorRequest
-	14, // 31: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	16, // 32: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	17, // 33: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	18, // 34: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	19, // 35: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	20, // 36: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	21, // 37: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	23, // 38: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	26, // 39: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	50, // 40: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	48, // 41: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	49, // 42: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	52, // 43: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	47, // 44: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
-	22, // 45: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
-	15, // 46: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	24, // 47: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	55, // 48: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	45, // 49: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	0,  // 50: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,  // 51: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	15, // 52: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	46, // 53: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	2,  // 54: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	3,  // 55: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	4,  // 56: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	56, // [56:57] is the sub-list for method output_type
-	55, // [55:56] is the sub-list for method input_type
-	55, // [55:55] is the sub-list for extension type_name
-	55, // [55:55] is the sub-list for extension extendee
-	0,  // [0:55] is the sub-list for field type_name
+	56, // 31: game.v1.ClientMessage.char_sheet:type_name -> game.v1.CharacterSheetRequest
+	14, // 32: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	16, // 33: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	17, // 34: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	18, // 35: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	19, // 36: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	20, // 37: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	21, // 38: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	23, // 39: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	26, // 40: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	50, // 41: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	48, // 42: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	49, // 43: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	52, // 44: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	47, // 45: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
+	22, // 46: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
+	57, // 47: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
+	15, // 48: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	24, // 49: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	55, // 50: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	45, // 51: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	0,  // 52: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,  // 53: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	15, // 54: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	46, // 55: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	2,  // 56: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	58, // 57: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	59, // 58: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	3,  // 59: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	4,  // 60: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	60, // [60:61] is the sub-list for method output_type
+	59, // [59:60] is the sub-list for method input_type
+	59, // [59:59] is the sub-list for extension type_name
+	59, // [59:59] is the sub-list for extension extendee
+	0,  // [0:59] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -4395,6 +4712,7 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_SwitchCharacter)(nil),
 		(*ClientMessage_Wear)(nil),
 		(*ClientMessage_RemoveArmor)(nil),
+		(*ClientMessage_CharSheet)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -4412,6 +4730,7 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_ConditionEvent)(nil),
 		(*ServerEvent_InventoryView)(nil),
 		(*ServerEvent_TimeOfDay)(nil),
+		(*ServerEvent_CharacterSheet)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -4419,7 +4738,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   53,
+			NumMessages:   57,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
