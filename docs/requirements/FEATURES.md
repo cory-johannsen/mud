@@ -7,11 +7,11 @@
 - [x] The player should have a hand armor slot. The player should have 5 rings on each hand and manage them separately.  The equipment display should use human-readable names for the item slots.
 - [x] Inactivity warning before automatic disconnect.  Serverside logging of disconnect and reason.
 - [x] Time of day, including daylight/darkness effects and descriptive details.  Time of day is displayed in the prompt.
-- [ ] Weapon and armor library.  A large library of lore-friendly equipment needs to exist with multiple options for every item type.  Each team should have customized team-specific equipment 
+- [x] Weapon and armor library.  A large library of lore-friendly equipment needs to exist with multiple options for every item type.  Each team should have customized team-specific equipment
 - [ ] Character initial inventory: a creation each character receives an inventory of basic items. These should conform to the character job.
 - [ ] Character sheet and command to view it
 - [ ] Player creation should start with archetype selection (listing each with its details), then restrict the jobs the user can select by their archetype.  Archetypes and jobs need to use the same attributes as the characters to match the lore.
-- [ ] Who command should include more details: level, job, health (descriptive not numeric), status
+- [ ] `who` command should include more details: level, job, health (descriptive not numeric), status
 - [ ] Maps
 - [ ] Skills and Abilities. All the P2FE skill and abilities need to be implemented.  Where the P2FE lore doesn't match Gunchete it will need migrated.  
 - [ ] Character levelling
@@ -29,4 +29,5 @@
 - [ ] Quests
 - [ ] Factions and allegiances, economies, exchange rates, faction-specific items and quests
 - [ ] Crafting
+- [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Max, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration
