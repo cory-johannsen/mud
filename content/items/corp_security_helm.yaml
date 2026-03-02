@@ -1,0 +1,9 @@
+id: corp_security_helm
+name: Corp Security Helm
+description: A sleek military-grade helmet with integrated HUD mount points.
+kind: armor
+armor_ref: corp_security_helm
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 600

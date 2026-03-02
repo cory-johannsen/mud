@@ -1,0 +1,9 @@
+id: street_boots
+name: Street Boots
+description: Heavy-soled boots favored by street gangers — steel toe, no frills.
+kind: armor
+armor_ref: street_boots
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 75

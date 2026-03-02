@@ -1,0 +1,9 @@
+id: tactical_boots
+name: Tactical Boots
+description: Military-pattern lace-up boots with composite toe and ankle plates.
+kind: armor
+armor_ref: tactical_boots
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 200

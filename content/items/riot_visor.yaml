@@ -1,0 +1,9 @@
+id: riot_visor
+name: Riot Visor
+description: Full-face ballistic visor used by corporate enforcement units.
+kind: armor
+armor_ref: riot_visor
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 350

@@ -1,0 +1,9 @@
+id: leather_jacket
+name: Leather Jacket
+description: A studded leather jacket — light protection with maximum street cred.
+kind: armor
+armor_ref: leather_jacket
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 150

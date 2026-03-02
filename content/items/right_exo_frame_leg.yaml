@@ -1,0 +1,9 @@
+id: right_exo_frame_leg
+name: Right Exo-Frame Leg
+description: A powered exoskeletal leg segment — corp-tech for the streets.
+kind: armor
+armor_ref: right_exo_frame_leg
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 2000

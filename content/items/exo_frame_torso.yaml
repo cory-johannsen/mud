@@ -1,0 +1,9 @@
+id: exo_frame_torso
+name: Exo-Frame Torso
+description: A powered exoskeletal chest piece — corp-tech in the wrong hands.
+kind: armor
+armor_ref: exo_frame_torso
+weight: 4.0
+stackable: false
+max_stack: 1
+value: 4500

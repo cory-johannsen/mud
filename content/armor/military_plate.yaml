@@ -1,0 +1,16 @@
+id: military_plate
+name: Military Plate
+description: Full front-and-back ballistic plate carrier — heavy but nearly impenetrable.
+slot: torso
+ac_bonus: 5
+dex_cap: 1
+check_penalty: -2
+speed_penalty: 5
+strength_req: 16
+bulk: 3
+group: plate
+traits: [gun-team, military-surplus]
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

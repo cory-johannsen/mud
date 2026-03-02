@@ -1,0 +1,9 @@
+id: kevlar_vest
+name: Kevlar Vest
+description: A soft-armor vest providing reliable protection against small arms.
+kind: armor
+armor_ref: kevlar_vest
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 200

@@ -1,0 +1,9 @@
+id: left_arm_guards
+name: Left Arm Guards
+description: Padded forearm guards salvaged from riot gear.
+kind: armor
+armor_ref: left_arm_guards
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 75

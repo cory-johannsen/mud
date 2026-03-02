@@ -1,0 +1,9 @@
+id: combat_helmet
+name: Combat Helmet
+description: A composite-shell helmet with chin strap and brow guard.
+kind: armor
+armor_ref: combat_helmet
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 250

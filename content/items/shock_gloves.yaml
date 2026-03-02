@@ -1,0 +1,9 @@
+id: shock_gloves
+name: Shock Gloves
+description: Insulated gloves with integrated shock coils — melee hits electrify.
+kind: armor
+armor_ref: shock_gloves
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 1200

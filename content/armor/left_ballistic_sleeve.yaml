@@ -1,0 +1,12 @@
+id: left_ballistic_sleeve
+name: Left Ballistic Sleeve
+description: A slim-profile ballistic sleeve worn under clothing.
+slot: left_arm
+ac_bonus: 1
+dex_cap: 5
+check_penalty: 0
+speed_penalty: 0
+strength_req: 0
+bulk: 0
+group: chain
+traits: [concealable]

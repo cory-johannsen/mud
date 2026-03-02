@@ -1,0 +1,9 @@
+id: fingerless_gloves
+name: Fingerless Gloves
+description: Light leather gloves with reinforced knuckles.
+kind: armor
+armor_ref: fingerless_gloves
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 50

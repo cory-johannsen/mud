@@ -1,0 +1,16 @@
+id: left_exo_frame_leg
+name: Left Exo-Frame Leg
+description: A powered exoskeletal leg segment — corp-tech for the streets.
+slot: left_leg
+ac_bonus: 3
+dex_cap: 2
+check_penalty: -1
+speed_penalty: 0
+strength_req: 0
+bulk: 2
+group: plate
+traits: [gun-team, corp-tech, powered]
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

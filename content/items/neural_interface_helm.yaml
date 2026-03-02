@@ -1,0 +1,9 @@
+id: neural_interface_helm
+name: Neural Interface Helm
+description: A helmet with direct neural interface ports for smart-linked weapons.
+kind: armor
+armor_ref: neural_interface_helm
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 2000

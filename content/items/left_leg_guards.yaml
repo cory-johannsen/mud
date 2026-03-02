@@ -1,0 +1,9 @@
+id: left_leg_guards
+name: Left Leg Guards
+description: Padded shin guards salvaged from sports equipment.
+kind: armor
+armor_ref: left_leg_guards
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 75

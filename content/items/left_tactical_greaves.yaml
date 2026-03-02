@@ -1,0 +1,9 @@
+id: left_tactical_greaves
+name: Left Tactical Greaves
+description: Composite shin and knee guards used by military and enforcement.
+kind: armor
+armor_ref: left_tactical_greaves
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 200

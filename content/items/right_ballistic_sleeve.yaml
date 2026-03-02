@@ -1,0 +1,9 @@
+id: right_ballistic_sleeve
+name: Right Ballistic Sleeve
+description: A slim-profile ballistic sleeve worn under clothing.
+kind: armor
+armor_ref: right_ballistic_sleeve
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 150

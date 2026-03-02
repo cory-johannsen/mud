@@ -1,0 +1,9 @@
+id: left_ballistic_leggings
+name: Left Ballistic Leggings
+description: Reinforced leggings with woven ballistic panels.
+kind: armor
+armor_ref: left_ballistic_leggings
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 175

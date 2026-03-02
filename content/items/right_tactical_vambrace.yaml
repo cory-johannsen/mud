@@ -1,0 +1,9 @@
+id: right_tactical_vambrace
+name: Right Tactical Vambrace
+description: A composite forearm guard with integrated trauma plates.
+kind: armor
+armor_ref: right_tactical_vambrace
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 200

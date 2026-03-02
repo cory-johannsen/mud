@@ -1,0 +1,11 @@
+id: kevlar_vest
+name: Kevlar Vest
+description: A soft-armor vest providing reliable protection against small arms.
+slot: torso
+ac_bonus: 2
+dex_cap: 3
+check_penalty: 0
+speed_penalty: 0
+strength_req: 0
+bulk: 1
+group: composite

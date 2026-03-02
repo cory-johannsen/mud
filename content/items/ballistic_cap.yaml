@@ -1,0 +1,9 @@
+id: ballistic_cap
+name: Ballistic Cap
+description: A reinforced baseball cap with kevlar lining — minimal protection, maximum stealth.
+kind: armor
+armor_ref: ballistic_cap
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 100

@@ -1,0 +1,9 @@
+id: left_exo_frame_arm
+name: Left Exo-Frame Arm
+description: A powered exoskeletal arm segment with integrated trauma plating.
+kind: armor
+armor_ref: left_exo_frame_arm
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 2000

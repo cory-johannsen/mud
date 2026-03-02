@@ -1,0 +1,9 @@
+id: exo_frame_feet
+name: Exo-Frame Feet
+description: Powered exoskeletal foot segment with reinforced soles.
+kind: armor
+armor_ref: exo_frame_feet
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 2500

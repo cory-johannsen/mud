@@ -1,0 +1,9 @@
+id: left_tactical_vambrace
+name: Left Tactical Vambrace
+description: A composite forearm guard with integrated trauma plates.
+kind: armor
+armor_ref: left_tactical_vambrace
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 200

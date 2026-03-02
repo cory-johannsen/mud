@@ -1,0 +1,9 @@
+id: corp_suit_liner
+name: Corp Suit Liner
+description: Ballistic mesh woven into a business suit — protection without the profile.
+kind: armor
+armor_ref: corp_suit_liner
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 250

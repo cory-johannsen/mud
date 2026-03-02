@@ -1,0 +1,16 @@
+id: exo_frame_torso
+name: Exo-Frame Torso
+description: A powered exoskeletal chest piece — corp-tech in the wrong hands.
+slot: torso
+ac_bonus: 6
+dex_cap: 0
+check_penalty: -3
+speed_penalty: 0
+strength_req: 0
+bulk: 4
+group: plate
+traits: [gun-team, corp-tech, powered]
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

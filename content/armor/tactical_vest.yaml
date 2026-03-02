@@ -1,0 +1,16 @@
+id: tactical_vest
+name: Tactical Vest
+description: Salvaged military-grade composite plating over a kevlar underlayer.
+slot: torso
+ac_bonus: 3
+dex_cap: 2
+check_penalty: -1
+speed_penalty: 0
+strength_req: 14
+bulk: 2
+group: composite
+traits: [gun-team]
+team_affinity: gun
+cross_team_effect:
+  kind: condition
+  value: clumsy-1

@@ -1,0 +1,9 @@
+id: tactical_vest
+name: Tactical Vest
+description: Salvaged military-grade composite plating over a kevlar underlayer.
+kind: armor
+armor_ref: tactical_vest
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 400

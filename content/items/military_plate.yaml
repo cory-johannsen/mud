@@ -1,0 +1,9 @@
+id: military_plate
+name: Military Plate
+description: Full front-and-back ballistic plate carrier — heavy but nearly impenetrable.
+kind: armor
+armor_ref: military_plate
+weight: 3.0
+stackable: false
+max_stack: 1
+value: 1200

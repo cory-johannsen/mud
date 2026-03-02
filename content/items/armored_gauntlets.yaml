@@ -1,0 +1,9 @@
+id: armored_gauntlets
+name: Armored Gauntlets
+description: Heavy composite gauntlets with steel-backed knuckles.
+kind: armor
+armor_ref: armored_gauntlets
+weight: 2.0
+stackable: false
+max_stack: 1
+value: 500

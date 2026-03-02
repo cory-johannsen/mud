@@ -1,0 +1,9 @@
+id: tactical_gloves
+name: Tactical Gloves
+description: Full-finger gloves with carbon-fiber knuckle plates.
+kind: armor
+armor_ref: tactical_gloves
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 100

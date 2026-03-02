@@ -1,0 +1,9 @@
+id: mag_boots
+name: Mag-Boots
+description: Electromagnetic-soled boots that grip metallic surfaces — corp-tech.
+kind: armor
+armor_ref: mag_boots
+weight: 1.0
+stackable: false
+max_stack: 1
+value: 1500
