@@ -14,6 +14,11 @@ features:
   - name: Weapons Are Tools
     level: 1
     description: "Whatever you hold becomes an instrument of liberation. When making a melee attack you may flip the results to succeed. Success is always a Critical Success; failure is always a Critical Failure."
+starting_inventory:
+  weapon: vibroblade
+  armor:
+    head: ballistic_cap
+  currency: 75
 drawbacks:
   - name: Wanted
     description: "You are wanted by the authorities. If recognized, you must make a Resolve test (DN 3) or face arrest."

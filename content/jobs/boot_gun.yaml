@@ -14,6 +14,11 @@ features:
   - name: Guns Are Tools
     level: 1
     description: "Your constant companions, guns are incredible tools for solving problems. When firing a weapon you may flip the results to succeed. Success is always a Critical Success; failure is always a Critical Failure."
+starting_inventory:
+  weapon: heavy_revolver
+  armor:
+    head: combat_helmet
+  currency: 100
 drawbacks:
   - name: Bullet Lust
     description: "You have a deep and abiding love for firearms. You can't resist picking up any gun you see, and you have a tendency to shoot first and ask questions later."
