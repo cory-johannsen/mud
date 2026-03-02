@@ -167,6 +167,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 				RegionDisplay: h.regionDisplayName(char.Region),
 				Class:         char.Class,
 				Level:         int32(char.Level),
+				Archetype:     h.archetypeForJob(char.Class),
 			},
 		},
 	}); err != nil {
@@ -468,6 +469,20 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			_ = conn.WritePrompt(buildPrompt())
 		}
 	}
+}
+
+// archetypeForJob returns the Archetype string for the job with the given ID.
+// If no matching job is found, it returns an empty string.
+//
+// Precondition: jobID must be non-empty.
+// Postcondition: Returns the archetype string or "" if the job is not registered.
+func (h *AuthHandler) archetypeForJob(jobID string) string {
+	for _, j := range h.jobs {
+		if j.ID == jobID {
+			return j.Archetype
+		}
+	}
+	return ""
 }
 
 // showGameHelp displays in-game help organized by category.

@@ -29,7 +29,7 @@ base:
       quantity: 2
   currency: 50
 `)
-	sl, err := inventory.LoadStartingLoadout(dir, "aggressor", "", "")
+	sl, err := inventory.LoadStartingLoadout(dir, "aggressor", "")
 	require.NoError(t, err)
 	assert.Equal(t, "combat_knife", sl.Weapon)
 	assert.Equal(t, "kevlar_vest", sl.Armor[inventory.SlotTorso])
@@ -53,7 +53,7 @@ team_gun:
   armor:
     torso: tactical_vest
 `)
-	sl, err := inventory.LoadStartingLoadout(dir, "aggressor", "gun", "")
+	sl, err := inventory.LoadStartingLoadout(dir, "aggressor", "gun")
 	require.NoError(t, err)
 	assert.Equal(t, "ganger_pistol", sl.Weapon)
 	assert.Equal(t, "tactical_vest", sl.Armor[inventory.SlotTorso])
@@ -83,7 +83,7 @@ team_gun:
 
 func TestLoadStartingLoadout_MissingArchetypeReturnsError(t *testing.T) {
 	dir := t.TempDir()
-	_, err := inventory.LoadStartingLoadout(dir, "unknown_archetype", "", "")
+	_, err := inventory.LoadStartingLoadout(dir, "unknown_archetype", "")
 	assert.Error(t, err)
 }
 
@@ -99,7 +99,7 @@ base:
 		archetype := rapid.SampledFrom([]string{"aggressor", "nonexistent"}).Draw(rt, "archetype")
 		team := rapid.SampledFrom([]string{"", "gun", "machete"}).Draw(rt, "team")
 		assert.NotPanics(rt, func() {
-			inventory.LoadStartingLoadout(dir, archetype, team, "") //nolint:errcheck
+			inventory.LoadStartingLoadout(dir, archetype, team) //nolint:errcheck
 		})
 	})
 }

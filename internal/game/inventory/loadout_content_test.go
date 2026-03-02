@@ -45,7 +45,7 @@ func TestContent_AllArchetypeLoadoutsLoad(t *testing.T) {
 	for _, arch := range archetypes {
 		arch := arch
 		t.Run(arch, func(t *testing.T) {
-			sl, err := inventory.LoadStartingLoadout("../../../content/loadouts", arch, "", "")
+			sl, err := inventory.LoadStartingLoadout("../../../content/loadouts", arch, "")
 			require.NoError(t, err, "archetype %q must load without error", arch)
 			assert.NotEmpty(t, sl.Weapon, "archetype %q base loadout must have a weapon", arch)
 			assert.Greater(t, sl.Currency, 0, "archetype %q base loadout must have positive currency", arch)
@@ -68,7 +68,7 @@ func TestContent_AllLoadoutItemRefsResolve(t *testing.T) {
 				label = arch + "/base"
 			}
 			t.Run(label, func(t *testing.T) {
-				sl, err := inventory.LoadStartingLoadout("../../../content/loadouts", arch, team, "")
+				sl, err := inventory.LoadStartingLoadout("../../../content/loadouts", arch, team)
 				require.NoError(t, err, "loadout %q must load without error", label)
 
 				// Weapon ID must resolve in the weapon registry.
@@ -108,8 +108,8 @@ func TestProperty_StartingLoadout_TeamOverrideIsDeterministic(t *testing.T) {
 		arch := rapid.SampledFrom(archetypes).Draw(rt, "arch")
 		team := rapid.SampledFrom(teams).Draw(rt, "team")
 
-		sl1, err1 := inventory.LoadStartingLoadout("../../../content/loadouts", arch, team, "")
-		sl2, err2 := inventory.LoadStartingLoadout("../../../content/loadouts", arch, team, "")
+		sl1, err1 := inventory.LoadStartingLoadout("../../../content/loadouts", arch, team)
+		sl2, err2 := inventory.LoadStartingLoadout("../../../content/loadouts", arch, team)
 
 		assert.Equal(rt, err1 == nil, err2 == nil, "error consistency for arch=%q team=%q", arch, team)
 		if err1 == nil {

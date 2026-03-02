@@ -66,7 +66,7 @@ type consumableEntry struct {
 //
 // Precondition: dir must be a readable directory; archetype must be non-empty.
 // Postcondition: Returns a merged StartingLoadout or an error if the archetype file is missing.
-func LoadStartingLoadout(dir, archetype, team, _ string) (*StartingLoadout, error) {
+func LoadStartingLoadout(dir, archetype, team string) (*StartingLoadout, error) {
 	return LoadStartingLoadoutWithOverride(dir, archetype, team, nil)
 }
 

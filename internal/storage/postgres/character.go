@@ -373,7 +373,7 @@ func (r *CharacterRepository) SaveInventory(ctx context.Context, characterID int
 // HasReceivedStartingInventory returns whether the character has already received their starting kit.
 //
 // Precondition: characterID must be > 0.
-// Postcondition: Returns false and nil error if the character has not yet received the kit.
+// Postcondition: Returns false and ErrCharacterNotFound if no row exists; false and nil error if the flag is unset.
 func (r *CharacterRepository) HasReceivedStartingInventory(ctx context.Context, characterID int64) (bool, error) {
 	var received bool
 	err := r.db.QueryRow(ctx, `
@@ -382,6 +382,9 @@ func (r *CharacterRepository) HasReceivedStartingInventory(ctx context.Context, 
 		characterID,
 	).Scan(&received)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, ErrCharacterNotFound
+		}
 		return false, fmt.Errorf("checking starting inventory flag for character %d: %w", characterID, err)
 	}
 	return received, nil
@@ -390,14 +393,17 @@ func (r *CharacterRepository) HasReceivedStartingInventory(ctx context.Context, 
 // MarkStartingInventoryGranted sets has_received_starting_inventory = true for characterID.
 //
 // Precondition: characterID must be > 0.
-// Postcondition: Flag is set; subsequent HasReceivedStartingInventory calls return true.
+// Postcondition: Flag is set; subsequent HasReceivedStartingInventory calls return true. Returns ErrCharacterNotFound if no row was updated.
 func (r *CharacterRepository) MarkStartingInventoryGranted(ctx context.Context, characterID int64) error {
-	_, err := r.db.Exec(ctx, `
+	tag, err := r.db.Exec(ctx, `
 		UPDATE characters SET has_received_starting_inventory = TRUE WHERE id = $1`,
 		characterID,
 	)
 	if err != nil {
 		return fmt.Errorf("marking starting inventory granted for character %d: %w", characterID, err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrCharacterNotFound
 	}
 	return nil
 }
