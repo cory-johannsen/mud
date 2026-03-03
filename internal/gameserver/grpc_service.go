@@ -528,6 +528,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleRemoveArmor(uid, p.RemoveArmor)
 	case *gamev1.ClientMessage_CharSheet:
 		return s.handleChar(uid)
+	case *gamev1.ClientMessage_ArchetypeSelection:
+		return s.handleArchetypeSelection(uid, p.ArchetypeSelection)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1769,4 +1771,16 @@ func (s *GameServiceServer) handleDropItem(uid, target string) (*gamev1.ServerEv
 		}
 	}
 	return messageEvent("You don't have that."), nil
+}
+
+// handleArchetypeSelection acknowledges an archetype selection during character creation.
+// Archetype is derived at runtime from the job; this handler satisfies CMD-6 dispatch.
+//
+// Precondition: uid must be non-empty; req must be non-nil.
+// Postcondition: Returns an empty ServerEvent or error if session not found.
+func (s *GameServiceServer) handleArchetypeSelection(uid string, req *gamev1.ArchetypeSelectionRequest) (*gamev1.ServerEvent, error) {
+	if _, ok := s.sessions.GetPlayer(uid); !ok {
+		return nil, fmt.Errorf("handleArchetypeSelection: session not found for uid %q", uid)
+	}
+	return &gamev1.ServerEvent{}, nil
 }
