@@ -9,6 +9,8 @@ const (
 	CategoryCommunication = "communication"
 	CategorySystem        = "system"
 	CategoryAdmin         = "admin"
+	// CategoryHidden marks commands that are internal flow steps and must not appear in help.
+	CategoryHidden = "hidden"
 )
 
 // Handler identifiers mapping commands to gRPC message types.
@@ -117,7 +119,7 @@ func BuiltinCommands() []Command {
 
 		{Name: "char", Aliases: []string{"sheet"}, Help: "Display your character sheet", Category: CategoryWorld, Handler: HandlerChar},
 
-		{Name: "archetype_selection", Aliases: nil, Help: "Select archetype during character creation", Category: CategoryWorld, Handler: HandlerArchetypeSelection},
+		{Name: "archetype_selection", Aliases: nil, Help: "Select archetype during character creation", Category: CategoryHidden, Handler: HandlerArchetypeSelection},
 		{Name: "use", Aliases: nil, Help: "Use an item in the room", Category: CategoryWorld, Handler: HandlerUseEquipment},
 
 		// Admin commands
