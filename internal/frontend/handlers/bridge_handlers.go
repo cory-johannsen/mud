@@ -77,7 +77,8 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerEquipment:   bridgeEquipment,
 	command.HandlerWear:        bridgeWear,
 	command.HandlerRemoveArmor: bridgeRemoveArmor,
-	command.HandlerChar:        bridgeChar,
+	command.HandlerChar:               bridgeChar,
+	command.HandlerArchetypeSelection: bridgeArchetypeSelection,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -512,6 +513,27 @@ func bridgeChar(bctx *bridgeContext) (bridgeResult, error) {
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_CharSheet{CharSheet: &gamev1.CharacterSheetRequest{}},
 	}}, nil
+}
+
+// bridgeArchetypeSelection sends an ArchetypeSelectionRequest to the game server.
+// Archetype selection occurs during character creation flow; this bridge satisfies CMD-5 wiring.
+//
+// Precondition: bctx must be non-nil.
+// Postcondition: Returns a ClientMessage wrapping ArchetypeSelectionRequest, or done=true if no args.
+func bridgeArchetypeSelection(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) == 0 {
+		return bridgeResult{done: true}, nil
+	}
+	return bridgeResult{
+		msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload: &gamev1.ClientMessage_ArchetypeSelection{
+				ArchetypeSelection: &gamev1.ArchetypeSelectionRequest{
+					ArchetypeId: bctx.parsed.Args[0],
+				},
+			},
+		},
+	}, nil
 }
 
 // bridgeRemoveArmor builds a RemoveArmorRequest for the named armor slot.
