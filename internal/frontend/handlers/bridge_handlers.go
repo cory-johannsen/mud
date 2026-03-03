@@ -79,6 +79,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerRemoveArmor: bridgeRemoveArmor,
 	command.HandlerChar:               bridgeChar,
 	command.HandlerArchetypeSelection: bridgeArchetypeSelection,
+	command.HandlerUseEquipment:       bridgeUseEquipment,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -534,6 +535,23 @@ func bridgeArchetypeSelection(bctx *bridgeContext) (bridgeResult, error) {
 			},
 		},
 	}, nil
+}
+
+// bridgeUseEquipment builds a UseEquipmentRequest for the named item instance ID.
+//
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+//
+//	otherwise returns a non-nil msg containing a UseEquipmentRequest.
+func bridgeUseEquipment(bctx *bridgeContext) (bridgeResult, error) {
+	instanceID := strings.TrimSpace(bctx.parsed.RawArgs)
+	if instanceID == "" {
+		return writeErrorPrompt(bctx, "Usage: use <instance_id>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_UseEquipment{UseEquipment: &gamev1.UseEquipmentRequest{InstanceId: instanceID}},
+	}}, nil
 }
 
 // bridgeRemoveArmor builds a RemoveArmorRequest for the named armor slot.
