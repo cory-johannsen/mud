@@ -311,6 +311,34 @@ func TestRenderRoomView_TimeFields_NoExtraOutput(t *testing.T) {
 	}
 }
 
+func TestProperty_RenderPlayerList_NeverPanics(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		statusVal := rapid.SampledFrom([]gamev1.CombatStatus{
+			gamev1.CombatStatus_COMBAT_STATUS_UNSPECIFIED,
+			gamev1.CombatStatus_COMBAT_STATUS_IDLE,
+			gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT,
+			gamev1.CombatStatus_COMBAT_STATUS_RESTING,
+			gamev1.CombatStatus_COMBAT_STATUS_UNCONSCIOUS,
+		}).Draw(rt, "status")
+		players := rapid.SliceOf(rapid.Custom(func(rt *rapid.T) *gamev1.PlayerInfo {
+			return &gamev1.PlayerInfo{
+				Name:        rapid.String().Draw(rt, "name"),
+				Level:       rapid.Int32().Draw(rt, "level"),
+				Job:         rapid.String().Draw(rt, "job"),
+				HealthLabel: rapid.String().Draw(rt, "healthLabel"),
+				Status:      statusVal,
+			}
+		})).Draw(rt, "players")
+		pl := &gamev1.PlayerList{RoomTitle: "room", Players: players}
+		result := RenderPlayerList(pl)
+		if len(players) == 0 {
+			assert.Contains(rt, result, "Nobody")
+		} else {
+			assert.NotEmpty(rt, result)
+		}
+	})
+}
+
 func TestProperty_RenderCharacterInfo_NonEmpty(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		name := rapid.StringMatching(`[A-Za-z]+`).Draw(t, "name")
