@@ -266,7 +266,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		if !sess.AutomapCache[zID][spawnRoom.ID] {
 			sess.AutomapCache[zID][spawnRoom.ID] = true
 			if s.automapRepo != nil {
-				_ = s.automapRepo.Insert(stream.Context(), characterID, zID, spawnRoom.ID)
+				if err := s.automapRepo.Insert(stream.Context(), characterID, zID, spawnRoom.ID); err != nil {
+					s.logger.Warn("persisting spawn room discovery", zap.Error(err))
+				}
 			}
 		}
 	}
