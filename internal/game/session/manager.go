@@ -136,6 +136,8 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		Class:             class,
 		Level:             level,
 		Entity:            entity,
+		// Status 1 = IDLE: newly connected players are idle by default.
+		Status: 1,
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)

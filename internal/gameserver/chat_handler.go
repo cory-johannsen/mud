@@ -3,9 +3,9 @@ package gameserver
 import (
 	"fmt"
 
-	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
-
+	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // ChatHandler handles say, emote, and who commands.
@@ -56,17 +56,27 @@ func (h *ChatHandler) Emote(uid string, action string) (*gamev1.MessageEvent, er
 	}, nil
 }
 
-// Who returns the list of players in the sender's room.
+// Who returns the list of players in the sender's room with full detail.
 //
 // Precondition: uid must be a valid connected player.
-// Postcondition: Returns a PlayerList or an error.
+// Postcondition: Returns a PlayerList with PlayerInfo entries, or an error.
 func (h *ChatHandler) Who(uid string) (*gamev1.PlayerList, error) {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
 
-	players := h.sessions.PlayersInRoom(sess.RoomID)
+	sessions := h.sessions.PlayersInRoomDetails(sess.RoomID)
+	players := make([]*gamev1.PlayerInfo, 0, len(sessions))
+	for _, s := range sessions {
+		players = append(players, &gamev1.PlayerInfo{
+			Name:        s.CharName,
+			Level:       int32(s.Level),
+			Job:         s.Class,
+			HealthLabel: command.HealthLabel(s.CurrentHP, s.MaxHP),
+			Status:      gamev1.CombatStatus(s.Status),
+		})
+	}
 	return &gamev1.PlayerList{
 		RoomTitle: sess.RoomID,
 		Players:   players,

@@ -15,7 +15,20 @@ func TestChatHandler_Say(t *testing.T) {
 	sessMgr := session.NewManager()
 	h := NewChatHandler(sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "u1",
+		Username:          "Alice",
+		CharName:          "Alice",
+		CharacterID:       0,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 	require.NoError(t, err)
 
 	evt, err := h.Say("u1", "hello world")
@@ -37,7 +50,20 @@ func TestChatHandler_Emote(t *testing.T) {
 	sessMgr := session.NewManager()
 	h := NewChatHandler(sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "u1",
+		Username:          "Alice",
+		CharName:          "Alice",
+		CharacterID:       0,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 	require.NoError(t, err)
 
 	evt, err := h.Emote("u1", "waves")
@@ -51,14 +77,64 @@ func TestChatHandler_Who(t *testing.T) {
 	sessMgr := session.NewManager()
 	h := NewChatHandler(sessMgr)
 
-	_, err := sessMgr.AddPlayer("u1", "Alice", "Alice", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "u1",
+		Username:          "Alice",
+		CharName:          "Alice",
+		CharacterID:       0,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 	require.NoError(t, err)
-	_, err = sessMgr.AddPlayer("u2", "Bob", "Bob", 0, "room_a", 10, 0, character.AbilityScores{}, "player", "", "", 0)
+	_, err = sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "u2",
+		Username:          "Bob",
+		CharName:          "Bob",
+		CharacterID:       0,
+		RoomID:            "room_a",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "",
+		Class:             "",
+		Level:             0,
+	})
 	require.NoError(t, err)
 
 	list, err := h.Who("u1")
 	require.NoError(t, err)
-	assert.Len(t, list.Players, 2)
-	assert.Contains(t, list.Players, "Alice")
-	assert.Contains(t, list.Players, "Bob")
+	require.Len(t, list.Players, 2)
+	names := []string{list.Players[0].Name, list.Players[1].Name}
+	assert.ElementsMatch(t, []string{"Alice", "Bob"}, names)
+}
+
+func TestChatHandler_Who_PopulatesPlayerInfo(t *testing.T) {
+	sessMgr := session.NewManager()
+	h := NewChatHandler(sessMgr)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "u1", Username: "Alice", CharName: "Alice",
+		CharacterID: 1, RoomID: "room_a",
+		CurrentHP:   8, MaxHP: 10,
+		Abilities:   character.AbilityScores{}, Role: "player",
+		Class:       "striker_gun", Level: 3,
+	})
+	require.NoError(t, err)
+
+	list, err := h.Who("u1")
+	require.NoError(t, err)
+	require.Len(t, list.Players, 1)
+	p := list.Players[0]
+	assert.Equal(t, "Alice", p.Name)
+	assert.Equal(t, int32(3), p.Level)
+	assert.Equal(t, "striker_gun", p.Job)
+	assert.Equal(t, "Lightly Wounded", p.HealthLabel)
+	assert.Equal(t, gamev1.CombatStatus_COMBAT_STATUS_IDLE, p.Status)
 }
