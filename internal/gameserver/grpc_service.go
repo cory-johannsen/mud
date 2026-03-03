@@ -567,6 +567,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleUseEquipment(uid, p.UseEquipment.InstanceId)
 	case *gamev1.ClientMessage_RoomEquip:
 		return s.handleRoomEquip(uid, p.RoomEquip)
+	case *gamev1.ClientMessage_Map:
+		return s.handleMap(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1969,4 +1971,49 @@ func (s *GameServiceServer) handleRoomEquip(uid string, req *gamev1.RoomEquipReq
 	default:
 		return messageEvent("Usage: roomequip <add|remove|list|modify>"), nil
 	}
+}
+
+// handleMap returns the automap tiles for the player's current zone.
+//
+// Precondition: uid must map to an active player session.
+// Postcondition: Returns a ServerEvent with MapResponse containing discovered tiles.
+func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	room, ok := s.world.GetRoom(sess.RoomID)
+	if !ok {
+		return messageEvent("You are nowhere."), nil
+	}
+	zoneID := room.ZoneID
+	zone, ok := s.world.GetZone(zoneID)
+	if !ok {
+		return messageEvent("No map available."), nil
+	}
+	discovered := sess.AutomapCache[zoneID]
+	var tiles []*gamev1.MapTile
+	for roomID := range discovered {
+		r, ok := zone.Rooms[roomID]
+		if !ok {
+			continue
+		}
+		var exits []string
+		for _, e := range r.Exits {
+			exits = append(exits, string(e.Direction))
+		}
+		tiles = append(tiles, &gamev1.MapTile{
+			RoomId:   r.ID,
+			RoomName: r.Title,
+			X:        int32(r.MapX),
+			Y:        int32(r.MapY),
+			Current:  r.ID == sess.RoomID,
+			Exits:    exits,
+		})
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Map{
+			Map: &gamev1.MapResponse{Tiles: tiles},
+		},
+	}, nil
 }

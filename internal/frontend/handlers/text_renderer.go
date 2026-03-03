@@ -343,6 +343,103 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
 	return b.String()
 }
 
+// RenderMap renders a hybrid ASCII grid + legend from a MapResponse.
+//
+// Precondition: resp may be nil or have no tiles.
+// Postcondition: Returns a non-empty string safe for telnet display.
+func RenderMap(resp *gamev1.MapResponse) string {
+	if resp == nil || len(resp.Tiles) == 0 {
+		return "No map data.\r\n"
+	}
+
+	// Find grid bounds
+	minX, minY := resp.Tiles[0].X, resp.Tiles[0].Y
+	maxX, maxY := resp.Tiles[0].X, resp.Tiles[0].Y
+	for _, t := range resp.Tiles {
+		if t.X < minX {
+			minX = t.X
+		}
+		if t.Y < minY {
+			minY = t.Y
+		}
+		if t.X > maxX {
+			maxX = t.X
+		}
+		if t.Y > maxY {
+			maxY = t.Y
+		}
+	}
+
+	// Build lookup by (x,y)
+	byCoord := make(map[[2]int32]*gamev1.MapTile)
+	for i := range resp.Tiles {
+		t := resp.Tiles[i]
+		byCoord[[2]int32{t.X, t.Y}] = t
+	}
+
+	exitSet := func(t *gamev1.MapTile) map[string]bool {
+		s := make(map[string]bool)
+		for _, e := range t.Exits {
+			s[e] = true
+		}
+		return s
+	}
+
+	var sb strings.Builder
+	sb.WriteString("\r\n")
+
+	for y := minY; y <= maxY; y++ {
+		// Room row
+		for x := minX; x <= maxX; x++ {
+			t := byCoord[[2]int32{x, y}]
+			if t == nil {
+				sb.WriteString("   ")
+			} else if t.Current {
+				sb.WriteString("[@]")
+			} else {
+				sb.WriteString("[#]")
+			}
+			if x < maxX {
+				east := byCoord[[2]int32{x, y}]
+				if east != nil && exitSet(east)["east"] {
+					sb.WriteString("-")
+				} else {
+					sb.WriteString(" ")
+				}
+			}
+		}
+		sb.WriteString("\r\n")
+
+		// South connector row
+		if y < maxY {
+			for x := minX; x <= maxX; x++ {
+				t := byCoord[[2]int32{x, y}]
+				if t != nil && exitSet(t)["south"] {
+					sb.WriteString(" | ")
+				} else {
+					sb.WriteString("   ")
+				}
+				if x < maxX {
+					sb.WriteString(" ")
+				}
+			}
+			sb.WriteString("\r\n")
+		}
+	}
+
+	// Legend
+	sb.WriteString("\r\nLegend:\r\n")
+	for i, t := range resp.Tiles {
+		marker := " "
+		if t.Current {
+			marker = "*"
+		}
+		sb.WriteString(fmt.Sprintf("  %s%2d. %s\r\n", marker, i+1, t.RoomName))
+	}
+
+	return sb.String()
+}
+
 func RenderCombatEvent(ce *gamev1.CombatEvent) string {
 	switch ce.Type {
 	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK:

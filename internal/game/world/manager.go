@@ -133,6 +133,16 @@ func (m *Manager) ZoneCount() int {
 	return len(m.zones)
 }
 
+// GetZone returns the zone with the given ID.
+//
+// Postcondition: Returns (zone, true) if found, or (nil, false) otherwise.
+func (m *Manager) GetZone(id string) (*Zone, bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	z, ok := m.zones[id]
+	return z, ok
+}
+
 // AllZones returns all loaded zones.
 //
 // Postcondition: Returns a non-nil slice; may be empty.

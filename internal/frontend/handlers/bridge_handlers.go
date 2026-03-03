@@ -82,6 +82,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerArchetypeSelection: bridgeArchetypeSelection,
 	command.HandlerUseEquipment:       bridgeUseEquipment,
 	command.HandlerRoomEquip:          bridgeRoomEquip,
+	command.HandlerMap:                bridgeMap,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -568,6 +569,17 @@ func bridgeRemoveArmor(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_RemoveArmor{RemoveArmor: &gamev1.RemoveArmorRequest{Slot: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeMap builds a MapRequest to retrieve the automap for the current zone.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a MapRequest; done is false.
+func bridgeMap(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Map{Map: &gamev1.MapRequest{}},
 	}}, nil
 }
 

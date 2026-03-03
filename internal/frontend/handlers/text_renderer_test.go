@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
@@ -354,4 +355,37 @@ func TestProperty_RenderCharacterInfo_NonEmpty(t *testing.T) {
 			t.Fatalf("RenderCharacterInfo must contain region %q in %q", region, got)
 		}
 	})
+}
+
+func TestRenderMap_Nil_ReturnsNoMapData(t *testing.T) {
+	result := RenderMap(nil)
+	require.Contains(t, result, "No map data")
+}
+
+func TestRenderMap_Empty_ReturnsNoMapData(t *testing.T) {
+	result := RenderMap(&gamev1.MapResponse{})
+	require.Contains(t, result, "No map data")
+}
+
+func TestRenderMap_SingleRoom_Current(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Start Room", X: 0, Y: 0, Current: true},
+		},
+	}
+	result := RenderMap(resp)
+	require.Contains(t, result, "[@]")
+	require.Contains(t, result, "Start Room")
+}
+
+func TestRenderMap_TwoRooms_DistinguishesCurrentFromDiscovered(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Room A", X: 0, Y: 0, Current: false},
+			{RoomId: "r2", RoomName: "Room B", X: 2, Y: 0, Current: true, Exits: []string{}},
+		},
+	}
+	result := RenderMap(resp)
+	require.Contains(t, result, "[@]")
+	require.Contains(t, result, "[#]")
 }

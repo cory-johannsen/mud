@@ -51,6 +51,7 @@ message ClientMessage {
     ArchetypeSelectionRequest archetype_selection = 34;
     UseEquipmentRequest use_equipment = 35;
     RoomEquipRequest    room_equip    = 36;
+    MapRequest          map           = 37;
   }
 }
 
@@ -74,6 +75,7 @@ message ServerEvent {
     InventoryView inventory_view = 15;
     TimeOfDayEvent time_of_day = 16;
     CharacterSheetView character_sheet = 17;
+    MapResponse        map             = 18;
   }
 }
 
@@ -363,6 +365,24 @@ message RoomEquipmentItem {
 // UseEquipmentRequest asks the server to use a room equipment item.
 message UseEquipmentRequest {
     string instance_id = 1;
+}
+
+// MapRequest is sent by the client to view the automap.
+message MapRequest {}
+
+// MapTile represents one discovered room on the automap grid.
+message MapTile {
+    string room_id   = 1;
+    string room_name = 2;
+    int32  x         = 3;
+    int32  y         = 4;
+    bool   current   = 5;
+    repeated string exits = 6;
+}
+
+// MapResponse is returned by the server with discovered tiles for the current zone.
+message MapResponse {
+    repeated MapTile tiles = 1;
 }
 
 // RoomEquipRequest asks the server to manage room equipment (editor command).
