@@ -51,6 +51,8 @@ type yamlRoom struct {
 	Properties  map[string]string   `yaml:"properties"`
 	Spawns      []yamlRoomSpawn     `yaml:"spawns"`
 	Equipment   []yamlRoomEquipment `yaml:"equipment"`
+	MapX        *int                `yaml:"map_x"`
+	MapY        *int                `yaml:"map_y"`
 }
 
 // yamlExit is the YAML representation of an exit.
@@ -83,7 +85,10 @@ func LoadZoneFromBytes(data []byte) (*Zone, error) {
 		return nil, fmt.Errorf("parsing zone YAML: %w", err)
 	}
 
-	zone := convertYAMLZone(file.Zone)
+	zone, err := convertYAMLZone(file.Zone)
+	if err != nil {
+		return nil, err
+	}
 	if err := zone.Validate(); err != nil {
 		return nil, fmt.Errorf("validating zone: %w", err)
 	}
@@ -125,7 +130,11 @@ func LoadZonesFromDir(dir string) ([]*Zone, error) {
 }
 
 // convertYAMLZone converts the parsed YAML structures into domain types.
-func convertYAMLZone(yz yamlZone) *Zone {
+//
+// Precondition: yz must be a populated yamlZone.
+// Postcondition: Returns a fully populated Zone or a non-nil error if any room
+// is missing required map_x or map_y coordinates.
+func convertYAMLZone(yz yamlZone) (*Zone, error) {
 	zone := &Zone{
 		ID:                     yz.ID,
 		Name:                   yz.Name,
@@ -137,12 +146,17 @@ func convertYAMLZone(yz yamlZone) *Zone {
 	}
 
 	for _, yr := range yz.Rooms {
+		if yr.MapX == nil || yr.MapY == nil {
+			return nil, fmt.Errorf("room %q in zone %q is missing required map_x or map_y coordinates", yr.ID, yz.ID)
+		}
 		room := &Room{
 			ID:          yr.ID,
 			ZoneID:      yz.ID,
 			Title:       yr.Title,
 			Description: strings.TrimSpace(yr.Description),
 			Properties:  yr.Properties,
+			MapX:        *yr.MapX,
+			MapY:        *yr.MapY,
 		}
 		if room.Properties == nil {
 			room.Properties = make(map[string]string)
@@ -178,5 +192,5 @@ func convertYAMLZone(yz yamlZone) *Zone {
 		zone.Rooms[room.ID] = room
 	}
 
-	return zone
+	return zone, nil
 }

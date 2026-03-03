@@ -19,6 +19,8 @@ zone:
           target: trout_stark_street
         - direction: south
           target: trout_frontage_road
+      map_x: 4
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: wind
@@ -38,6 +40,8 @@ zone:
           target: trout_wood_village
         - direction: south
           target: trout_frontage_road
+      map_x: 2
+      map_y: 6
       properties:
         lighting: overcast
         atmosphere: sheltered
@@ -56,6 +60,8 @@ zone:
           target: trout_outlet_east_wing
         - direction: south
           target: trout_parking_lot
+      map_x: 6
+      map_y: 6
       spawns:
         - template: outlet_scavenger
           count: 2
@@ -76,6 +82,8 @@ zone:
           target: trout_outlet_mall
         - direction: south
           target: trout_loading_docks
+      map_x: 8
+      map_y: 6
       spawns:
         - template: outlet_scavenger
           count: 1
@@ -101,6 +109,8 @@ zone:
           target: trout_outlet_mall
         - direction: north
           target: trout_sandy_river
+      map_x: 6
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: wind
@@ -117,6 +127,8 @@ zone:
           target: trout_stark_street
         - direction: east
           target: trout_river_trail
+      map_x: 6
+      map_y: 2
       spawns:
         - template: gorge_runner
           count: 1
@@ -137,6 +149,8 @@ zone:
           target: trout_river_trail
         - direction: north
           target: trout_gorge_trail
+      map_x: 10
+      map_y: 2
       properties:
         lighting: dappled
         atmosphere: forest
@@ -154,6 +168,8 @@ zone:
           target: trout_gorge_trail
         - direction: east
           target: trout_wind_tunnel
+      map_x: 12
+      map_y: 0
       spawns:
         - template: wind_walker
           count: 1
@@ -175,6 +191,8 @@ zone:
           target: trout_wind_tunnel
         - direction: north
           target: trout_falls_overlook
+      map_x: 16
+      map_y: 0
       spawns:
         - template: wind_walker
           count: 1
@@ -197,6 +215,8 @@ zone:
           target: trout_multnomah_falls
         - direction: south
           target: trout_wind_shelter
+      map_x: 14
+      map_y: 0
       spawns:
         - template: gorge_runner
           count: 1
@@ -220,6 +240,8 @@ zone:
           target: trout_edgefield_gardens
         - direction: east
           target: trout_halsey_street
+      map_x: 8
+      map_y: 4
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -238,6 +260,8 @@ zone:
           target: trout_frontage_road
         - direction: south
           target: trout_parking_lot
+      map_x: 6
+      map_y: 6
       spawns:
         - template: outlet_scavenger
           count: 1
@@ -260,6 +284,8 @@ zone:
           target: trout_wood_village
         - direction: south
           target: trout_halsey_street
+      map_x: 6
+      map_y: 8
       properties:
         lighting: exposed
         atmosphere: wind
@@ -277,6 +303,8 @@ zone:
           target: trout_gorge_trail
         - direction: east
           target: trout_dam_overlook
+      map_x: 10
+      map_y: -2
       spawns:
         - template: gorge_runner
           count: 1
@@ -296,6 +324,8 @@ zone:
       exits:
         - direction: west
           target: trout_ranger_station
+      map_x: 12
+      map_y: -2
       spawns:
         - template: wind_walker
           count: 1
@@ -318,6 +348,8 @@ zone:
           target: trout_lewis_clark_park
         - direction: east
           target: trout_crown_point
+      map_x: 10
+      map_y: 0
       spawns:
         - template: gorge_runner
           count: 1
@@ -337,6 +369,8 @@ zone:
       exits:
         - direction: north
           target: trout_wind_tunnel
+      map_x: 14
+      map_y: 2
       properties:
         lighting: dim
         atmosphere: sheltered
@@ -355,6 +389,8 @@ zone:
           target: trout_wood_village
         - direction: west
           target: trout_i84_west_junction
+      map_x: 4
+      map_y: 6
       properties:
         lighting: overcast
         atmosphere: wind
@@ -372,6 +408,8 @@ zone:
           target: trout_sandy_river
         - direction: east
           target: trout_lewis_clark_park
+      map_x: 8
+      map_y: 2
       spawns:
         - template: gorge_runner
           count: 1
@@ -392,6 +430,8 @@ zone:
           target: trout_parking_lot
         - direction: west
           target: trout_edgefield
+      map_x: 10
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: quiet
@@ -406,6 +446,8 @@ zone:
       exits:
         - direction: south
           target: trout_edgefield
+      map_x: 8
+      map_y: 2
       properties:
         lighting: dappled
         atmosphere: green
@@ -422,6 +464,8 @@ zone:
           target: trout_outlet_east_wing
         - direction: west
           target: trout_parking_lot
+      map_x: 8
+      map_y: 8
       spawns:
         - template: outlet_scavenger
           count: 1
@@ -441,6 +485,8 @@ zone:
       exits:
         - direction: south
           target: trout_multnomah_falls
+      map_x: 16
+      map_y: -2
       spawns:
         - template: wind_walker
           count: 1

@@ -29,12 +29,16 @@ zone:
           hidden: true
       properties:
         lighting: bright
+      map_x: 0
+      map_y: 0
     - id: room_b
       title: "Room B"
       description: "This is room B."
       exits:
         - direction: south
           target: room_a
+      map_x: 0
+      map_y: 2
     - id: room_c
       title: "Room C"
       description: "This is room C."
@@ -44,6 +48,8 @@ zone:
         - direction: north
           target: room_b
           locked: true
+      map_x: 2
+      map_y: 0
 `
 
 func TestLoadZoneFromBytes_Valid(t *testing.T) {
@@ -88,6 +94,8 @@ zone:
     - id: room_a
       title: "Room"
       description: "A room"
+      map_x: 0
+      map_y: 0
 `
 	_, err := LoadZoneFromBytes([]byte(yaml))
 	assert.Error(t, err)
@@ -108,6 +116,8 @@ zone:
       exits:
         - direction: north
           target: other_zone_room
+      map_x: 0
+      map_y: 0
 `
 	zone, err := LoadZoneFromBytes([]byte(yaml))
 	assert.NoError(t, err, "cross-zone exit targets must be allowed at zone level")
@@ -122,6 +132,43 @@ func TestLoadZoneFromFile(t *testing.T) {
 	zone, err := LoadZoneFromFile(path)
 	require.NoError(t, err)
 	assert.Equal(t, "test", zone.ID)
+}
+
+func TestLoadZoneFromBytes_MissingMapCoords_ReturnsError(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test
+  description: Test zone
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+`)
+	_, err := LoadZoneFromBytes(data)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "map_x")
+}
+
+func TestLoadZoneFromBytes_WithMapCoords_ParsesCorrectly(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test
+  description: Test zone
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 5
+      map_y: 3
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	require.Equal(t, 5, z.Rooms["r1"].MapX)
+	require.Equal(t, 3, z.Rooms["r1"].MapY)
 }
 
 func TestLoadZoneFromFile_NotFound(t *testing.T) {
@@ -143,6 +190,8 @@ zone:
     - id: start
       title: "Start"
       description: "Starting room"
+      map_x: 0
+      map_y: 0
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "zone2.yaml"), []byte(zone2), 0644))
 
@@ -208,6 +257,8 @@ zone:
       title: Start Room
       description: The beginning.
       exits: []
+      map_x: 0
+      map_y: 0
 `)
 	zone, err := LoadZoneFromBytes(yamlData)
 	require.NoError(t, err)
@@ -232,6 +283,8 @@ zone:
           respawn_after: "3m"
         - template: scavenger
           count: 1
+      map_x: 0
+      map_y: 0
 `)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
@@ -256,6 +309,8 @@ zone:
     - id: r1
       title: Room 1
       description: A room.
+      map_x: 0
+      map_y: 0
 `)
 	zone, err := LoadZoneFromBytes(data)
 	require.NoError(t, err)
@@ -298,6 +353,8 @@ zone:
       title: Start Room
       description: The beginning.
       exits: []
+      map_x: 0
+      map_y: 0
 `)
 	zone, err := LoadZoneFromBytes(yamlData)
 	require.NoError(t, err)

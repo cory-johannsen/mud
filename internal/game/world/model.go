@@ -125,6 +125,10 @@ type Room struct {
 	Spawns []RoomSpawnConfig
 	// Equipment lists static or respawning items present in this room.
 	Equipment []RoomEquipmentConfig
+	// MapX is the column position of this room on the zone map grid (required).
+	MapX int
+	// MapY is the row position of this room on the zone map grid (required).
+	MapY int
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.

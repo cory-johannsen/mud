@@ -16,6 +16,8 @@ zone:
           target: beav_tv_highway_west
         - direction: west
           target: aloha_sentry_post_alpha
+      map_x: 4
+      map_y: 4
       spawns:
         - template: neutral_zone_sentry
           count: 2
@@ -38,6 +40,8 @@ zone:
           target: aloha_185th_crossing
         - direction: south
           target: aloha_checkpoint_lane
+      map_x: 2
+      map_y: 4
       spawns:
         - template: neutral_zone_sentry
           count: 1
@@ -62,6 +66,8 @@ zone:
           target: aloha_message_board_plaza
         - direction: south
           target: aloha_the_bazaar
+      map_x: 0
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: busy
@@ -83,6 +89,8 @@ zone:
           target: aloha_park
         - direction: west
           target: aloha_water_station
+      map_x: 0
+      map_y: 6
       spawns:
         - template: aloha_broker
           count: 2
@@ -105,6 +113,8 @@ zone:
           target: aloha_caravansary
         - direction: south
           target: aloha_black_market
+      map_x: -2
+      map_y: 4
       spawns:
         - template: aloha_broker
           count: 2
@@ -125,6 +135,8 @@ zone:
           target: aloha_caravansary
         - direction: west
           target: aloha_tv_highway_west
+      map_x: -6
+      map_y: 4
       spawns:
         - template: neutral_zone_sentry
           count: 1
@@ -145,6 +157,8 @@ zone:
           target: hills_tv_highway_east
         - direction: east
           target: aloha_sentry_post_bravo
+      map_x: -8
+      map_y: 4
       spawns:
         - template: neutral_zone_sentry
           count: 2
@@ -167,6 +181,8 @@ zone:
           target: aloha_sentry_post_bravo
         - direction: south
           target: aloha_stables
+      map_x: -4
+      map_y: 4
       spawns:
         - template: aloha_broker
           count: 1
@@ -190,6 +206,8 @@ zone:
           target: aloha_refugee_camp
         - direction: west
           target: aloha_warehouse_district
+      map_x: 0
+      map_y: 8
       properties:
         lighting: dappled
         atmosphere: peaceful
@@ -207,6 +225,8 @@ zone:
           target: aloha_park
         - direction: north
           target: aloha_trading_post
+      map_x: 2
+      map_y: 10
       properties:
         lighting: dim
         atmosphere: desperate
@@ -226,6 +246,8 @@ zone:
           target: aloha_black_market
         - direction: south
           target: aloha_back_alley
+      map_x: -2
+      map_y: 8
       spawns:
         - template: smuggler
           count: 2
@@ -248,6 +270,8 @@ zone:
           target: aloha_refugee_camp
         - direction: north
           target: aloha_checkpoint_lane
+      map_x: 2
+      map_y: 8
       spawns:
         - template: aloha_broker
           count: 1
@@ -269,6 +293,8 @@ zone:
           target: aloha_warehouse_district
         - direction: north
           target: aloha_brokers_row
+      map_x: -2
+      map_y: 6
       spawns:
         - template: smuggler
           count: 2
@@ -290,6 +316,8 @@ zone:
           target: aloha_sentry_post_alpha
         - direction: south
           target: aloha_trading_post
+      map_x: 2
+      map_y: 6
       properties:
         lighting: overcast
         atmosphere: controlled
@@ -309,6 +337,8 @@ zone:
           target: aloha_inn
         - direction: west
           target: aloha_water_station
+      map_x: 0
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: anxious
@@ -326,6 +356,8 @@ zone:
           target: aloha_the_bazaar
         - direction: northeast
           target: aloha_message_board_plaza
+      map_x: -2
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: vital
@@ -343,6 +375,8 @@ zone:
           target: aloha_message_board_plaza
         - direction: south
           target: aloha_back_alley
+      map_x: 2
+      map_y: 2
       properties:
         lighting: lantern
         atmosphere: weary
@@ -359,6 +393,8 @@ zone:
           target: aloha_caravansary
         - direction: east
           target: aloha_back_alley
+      map_x: -4
+      map_y: 6
       properties:
         lighting: dim
         atmosphere: earthy
@@ -377,6 +413,8 @@ zone:
           target: aloha_stables
         - direction: east
           target: aloha_warehouse_district
+      map_x: 2
+      map_y: 4
       spawns:
         - template: smuggler
           count: 1
@@ -396,6 +434,8 @@ zone:
       exits:
         - direction: north
           target: aloha_warehouse_district
+      map_x: 0
+      map_y: 12
       properties:
         lighting: overcast
         atmosphere: industrial
@@ -411,6 +451,8 @@ zone:
       exits:
         - direction: north
           target: aloha_refugee_camp
+      map_x: 0
+      map_y: 14
       properties:
         lighting: dim
         atmosphere: solemn

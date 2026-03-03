@@ -18,6 +18,8 @@ zone:
           target: hills_campus_gate
         - direction: north
           target: hills_cornell_road
+      map_x: 4
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: wind
@@ -36,6 +38,8 @@ zone:
           target: hills_campus_boulevard
         - direction: south
           target: hills_orenco_station
+      map_x: 2
+      map_y: 4
       spawns:
         - template: intel_guard
           count: 2
@@ -60,6 +64,8 @@ zone:
           target: hills_knight_barracks
         - direction: south
           target: hills_serf_quarters
+      map_x: 0
+      map_y: 4
       spawns:
         - template: silicon_serf
           count: 1
@@ -85,6 +91,8 @@ zone:
           target: hills_the_foundry
         - direction: down
           target: hills_power_station
+      map_x: -2
+      map_y: 4
       spawns:
         - template: hillsboro_knight
           count: 2
@@ -106,6 +114,8 @@ zone:
           target: hills_server_keep
         - direction: east
           target: hills_royal_archives
+      map_x: -2
+      map_y: 2
       spawns:
         - template: hillsboro_knight
           count: 1
@@ -125,6 +135,8 @@ zone:
       exits:
         - direction: west
           target: hills_throne_room
+      map_x: 0
+      map_y: 2
       properties:
         lighting: dim
         atmosphere: quiet
@@ -144,6 +156,8 @@ zone:
           target: hills_serf_quarters
         - direction: west
           target: hills_rock_creek_trail
+      map_x: 4
+      map_y: 2
       spawns:
         - template: intel_guard
           count: 2
@@ -170,6 +184,8 @@ zone:
           target: hills_solar_farm
         - direction: east
           target: hills_refugee_processing
+      map_x: 0
+      map_y: 6
       spawns:
         - template: silicon_serf
           count: 2
@@ -191,6 +207,8 @@ zone:
           target: hills_campus_boulevard
         - direction: east
           target: hills_training_grounds
+      map_x: 0
+      map_y: 2
       spawns:
         - template: hillsboro_knight
           count: 2
@@ -210,6 +228,8 @@ zone:
       exits:
         - direction: west
           target: hills_knight_barracks
+      map_x: 2
+      map_y: 2
       properties:
         lighting: dim
         atmosphere: echoing
@@ -229,6 +249,8 @@ zone:
           target: hills_solar_farm
         - direction: east
           target: hills_market_square
+      map_x: -2
+      map_y: 6
       spawns:
         - template: silicon_serf
           count: 2
@@ -252,6 +274,8 @@ zone:
           target: hills_serf_quarters
         - direction: south
           target: hills_tanasbourne_ruins
+      map_x: 0
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: bustling
@@ -271,6 +295,8 @@ zone:
           target: hills_tanasbourne_ruins
         - direction: south
           target: hills_amberglen_plaza
+      map_x: 2
+      map_y: 6
       properties:
         lighting: overcast
         atmosphere: trade
@@ -288,6 +314,8 @@ zone:
           target: hills_solar_farm
         - direction: north
           target: hills_cornell_road
+      map_x: 2
+      map_y: 2
       spawns:
         - template: intel_guard
           count: 1
@@ -311,6 +339,8 @@ zone:
           target: hills_market_square
         - direction: west
           target: hills_suburban_wasteland
+      map_x: 0
+      map_y: 6
       properties:
         lighting: dim
         atmosphere: desolate
@@ -330,6 +360,8 @@ zone:
           target: hills_rock_creek_trail
         - direction: north
           target: hills_helvetia_overlook
+      map_x: 4
+      map_y: 2
       spawns:
         - template: intel_guard
           count: 1
@@ -349,6 +381,8 @@ zone:
       exits:
         - direction: up
           target: hills_server_keep
+      map_x: 0
+      map_y: 10
       properties:
         lighting: emergency
         atmosphere: electric
@@ -364,6 +398,8 @@ zone:
       exits:
         - direction: west
           target: hills_serf_quarters
+      map_x: 2
+      map_y: 6
       properties:
         lighting: harsh
         atmosphere: tense
@@ -381,6 +417,8 @@ zone:
           target: hills_orenco_station
         - direction: west
           target: hills_suburban_wasteland
+      map_x: 2
+      map_y: 8
       properties:
         lighting: overcast
         atmosphere: domestic
@@ -400,6 +438,8 @@ zone:
           target: hills_amberglen_plaza
         - direction: north
           target: hills_helvetia_overlook
+      map_x: 6
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -418,6 +458,8 @@ zone:
           target: hills_cornell_road
         - direction: southeast
           target: hills_suburban_wasteland
+      map_x: 4
+      map_y: 0
       spawns:
         - template: hillsboro_knight
           count: 1

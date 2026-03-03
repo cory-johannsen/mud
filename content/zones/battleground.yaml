@@ -18,6 +18,8 @@ zone:
           zone: couve
         - direction: north
           target: battle_the_gate
+      map_x: 4
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: wind
@@ -35,6 +37,8 @@ zone:
           target: battle_i5_south
         - direction: north
           target: battle_main_street
+      map_x: 4
+      map_y: 2
       spawns:
         - template: collective_guardian
           count: 2
@@ -60,6 +64,8 @@ zone:
           target: battle_assembly_hall
         - direction: west
           target: battle_the_commons
+      map_x: 4
+      map_y: 0
       properties:
         lighting: overcast
         atmosphere: orderly
@@ -78,6 +84,8 @@ zone:
           target: battle_main_street
         - direction: north
           target: battle_the_commissariat
+      map_x: 6
+      map_y: 0
       spawns:
         - template: commissar
           count: 1
@@ -101,6 +109,8 @@ zone:
           target: battle_worker_barracks
         - direction: south
           target: battle_infirmary
+      map_x: 2
+      map_y: 0
       properties:
         lighting: warm
         atmosphere: crowded
@@ -122,6 +132,8 @@ zone:
           target: battle_farm_east
         - direction: west
           target: battle_armory
+      map_x: 4
+      map_y: -2
       properties:
         lighting: overcast
         atmosphere: busy
@@ -139,6 +151,8 @@ zone:
           target: battle_market_square
         - direction: north
           target: battle_the_commissariat
+      map_x: 6
+      map_y: -2
       spawns:
         - template: commissar
           count: 1
@@ -162,6 +176,8 @@ zone:
           target: battle_propaganda_hall
         - direction: north
           target: battle_reeducation_center
+      map_x: 6
+      map_y: -2
       spawns:
         - template: commissar
           count: 1
@@ -181,6 +197,8 @@ zone:
       exits:
         - direction: south
           target: battle_the_commissariat
+      map_x: 6
+      map_y: -4
       spawns:
         - template: collective_guardian
           count: 1
@@ -204,6 +222,8 @@ zone:
           target: battle_market_square
         - direction: north
           target: battle_greenhouse
+      map_x: 2
+      map_y: -2
       properties:
         lighting: dim
         atmosphere: stale
@@ -219,6 +239,8 @@ zone:
       exits:
         - direction: east
           target: battle_market_square
+      map_x: 2
+      map_y: -2
       spawns:
         - template: collective_guardian
           count: 1
@@ -238,6 +260,8 @@ zone:
       exits:
         - direction: north
           target: battle_the_commons
+      map_x: 2
+      map_y: 2
       properties:
         lighting: fluorescent
         atmosphere: antiseptic
@@ -257,6 +281,8 @@ zone:
           target: battle_farm_west
         - direction: north
           target: battle_north_fields
+      map_x: 4
+      map_y: -4
       spawns:
         - template: field_worker
           count: 2
@@ -280,6 +306,8 @@ zone:
           target: battle_worker_barracks
         - direction: north
           target: battle_the_granary
+      map_x: 2
+      map_y: -4
       spawns:
         - template: field_worker
           count: 2
@@ -301,6 +329,8 @@ zone:
           target: battle_farm_west
         - direction: east
           target: battle_north_fields
+      map_x: 2
+      map_y: -6
       spawns:
         - template: collective_guardian
           count: 2
@@ -323,6 +353,8 @@ zone:
           target: battle_the_granary
         - direction: north
           target: battle_the_watchtower
+      map_x: 4
+      map_y: -6
       spawns:
         - template: field_worker
           count: 1
@@ -342,6 +374,8 @@ zone:
       exits:
         - direction: south
           target: battle_north_fields
+      map_x: 4
+      map_y: -8
       spawns:
         - template: collective_guardian
           count: 1
@@ -363,6 +397,8 @@ zone:
           target: battle_assembly_hall
         - direction: north
           target: battle_the_commissariat
+      map_x: 0
+      map_y: 6
       properties:
         lighting: dappled
         atmosphere: solemn
@@ -381,6 +417,8 @@ zone:
           target: battle_worker_barracks
         - direction: east
           target: battle_farm_west
+      map_x: 2
+      map_y: -4
       spawns:
         - template: field_worker
           count: 1
@@ -402,6 +440,8 @@ zone:
           target: battle_armory
         - direction: north
           target: battle_farm_west
+      map_x: 0
+      map_y: 8
       spawns:
         - template: collective_guardian
           count: 1
@@ -423,6 +463,8 @@ zone:
           target: battle_the_commissariat
         - direction: west
           target: battle_north_fields
+      map_x: 0
+      map_y: 10
       properties:
         lighting: overcast
         atmosphere: orderly
@@ -440,6 +482,8 @@ zone:
           target: battle_the_commons
         - direction: north
           target: battle_worker_barracks
+      map_x: 0
+      map_y: 12
       properties:
         lighting: dim
         atmosphere: damp

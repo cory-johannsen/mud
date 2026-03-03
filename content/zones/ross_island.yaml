@@ -20,6 +20,8 @@ zone:
           target: ross_toll_gate
         - direction: south
           target: ross_east_shore
+      map_x: 4
+      map_y: 4
       properties:
         lighting: exposed
         atmosphere: wind
@@ -39,6 +41,8 @@ zone:
           target: ross_bridge_road
         - direction: south
           target: ross_shoreline_path
+      map_x: 2
+      map_y: 4
       spawns:
         - template: bridge_troll
           count: 2
@@ -62,6 +66,8 @@ zone:
           target: ross_pit_edge
         - direction: south
           target: ross_the_overgrowth
+      map_x: 0
+      map_y: 4
       spawns:
         - template: bridge_troll
           count: 1
@@ -85,6 +91,8 @@ zone:
           target: ross_south_shore
         - direction: west
           target: ross_shoreline_path
+      map_x: 4
+      map_y: 6
       properties:
         lighting: overcast
         atmosphere: damp
@@ -106,6 +114,8 @@ zone:
           target: ross_south_shore
         - direction: south
           target: ross_tidal_pool
+      map_x: 2
+      map_y: 6
       spawns:
         - template: island_hermit
           count: 1
@@ -131,6 +141,8 @@ zone:
           target: ross_driftwood_camp
         - direction: northeast
           target: ross_shoreline_path
+      map_x: 4
+      map_y: 8
       properties:
         lighting: overcast
         atmosphere: river
@@ -148,6 +160,8 @@ zone:
           target: ross_shoreline_path
         - direction: west
           target: ross_driftwood_camp
+      map_x: 2
+      map_y: 8
       spawns:
         - template: island_hermit
           count: 1
@@ -171,6 +185,8 @@ zone:
           target: ross_south_shore
         - direction: northeast
           target: ross_the_overgrowth
+      map_x: 2
+      map_y: 8
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -193,6 +209,8 @@ zone:
           target: ross_the_hermitage
         - direction: east
           target: ross_rubble_ridge
+      map_x: 0
+      map_y: 6
       spawns:
         - template: island_hermit
           count: 2
@@ -216,6 +234,8 @@ zone:
           target: ross_cave_entrance
         - direction: south
           target: ross_driftwood_camp
+      map_x: -2
+      map_y: 6
       spawns:
         - template: island_hermit
           count: 2
@@ -239,6 +259,8 @@ zone:
           target: ross_cave_interior
         - direction: east
           target: ross_pit_edge
+      map_x: -4
+      map_y: 4
       properties:
         lighting: dark
         atmosphere: damp
@@ -254,6 +276,8 @@ zone:
       exits:
         - direction: up
           target: ross_cave_entrance
+      map_x: 0
+      map_y: 10
       properties:
         lighting: dark
         atmosphere: damp
@@ -274,6 +298,8 @@ zone:
           target: ross_pit_edge
         - direction: down
           target: ross_quarry_floor
+      map_x: -2
+      map_y: 6
       properties:
         lighting: exposed
         atmosphere: wind
@@ -298,6 +324,8 @@ zone:
           target: ross_cave_entrance
         - direction: north
           target: ross_north_shore
+      map_x: -2
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: industrial
@@ -320,6 +348,8 @@ zone:
           target: ross_crane_platform
         - direction: west
           target: ross_lagoon
+      map_x: -2
+      map_y: 4
       spawns:
         - template: gravel_pit_boss
           count: 1
@@ -344,6 +374,8 @@ zone:
           target: ross_rubble_ridge
         - direction: west
           target: ross_lagoon
+      map_x: -4
+      map_y: 6
       spawns:
         - template: gravel_pit_boss
           count: 1
@@ -369,6 +401,8 @@ zone:
           target: ross_quarry_floor
         - direction: north
           target: ross_west_shore
+      map_x: -4
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: still
@@ -387,6 +421,8 @@ zone:
           target: ross_gravel_pit
         - direction: north
           target: ross_pit_edge
+      map_x: 0
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: industrial
@@ -407,6 +443,8 @@ zone:
           target: ross_west_shore
         - direction: east
           target: ross_bridge_road
+      map_x: -2
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: wind
@@ -427,6 +465,8 @@ zone:
           target: ross_lagoon
         - direction: west
           target: ross_hardtack_island
+      map_x: -4
+      map_y: 2
       properties:
         lighting: exposed
         atmosphere: wind
@@ -443,6 +483,8 @@ zone:
       exits:
         - direction: east
           target: ross_west_shore
+      map_x: -6
+      map_y: 2
       spawns:
         - template: island_hermit
           count: 1

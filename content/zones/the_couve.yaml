@@ -17,6 +17,8 @@ zone:
           target: couve_jantzen_beach
         - direction: south
           target: ne_i5_bridge_approach
+      map_x: 4
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: wind
@@ -36,6 +38,8 @@ zone:
           target: couve_hayden_island_causeway
         - direction: east
           target: couve_waterfront
+      map_x: 4
+      map_y: 2
       spawns:
         - template: jantzen_beach_pirate
           count: 3
@@ -56,6 +60,8 @@ zone:
           target: couve_jantzen_beach
         - direction: north
           target: couve_waterfront
+      map_x: 4
+      map_y: 0
       spawns:
         - template: jantzen_beach_pirate
           count: 1
@@ -79,6 +85,8 @@ zone:
           target: couve_esther_short_park
         - direction: east
           target: couve_columbia_way
+      map_x: 6
+      map_y: 2
       spawns:
         - template: jantzen_beach_pirate
           count: 2
@@ -99,6 +107,8 @@ zone:
           target: couve_waterfront
         - direction: north
           target: couve_officers_row
+      map_x: 8
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: quiet
@@ -120,6 +130,8 @@ zone:
           target: couve_mill_plain_blvd
         - direction: west
           target: couve_i5_corridor
+      map_x: 6
+      map_y: 0
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -139,6 +151,8 @@ zone:
           target: couve_columbia_way
         - direction: east
           target: couve_fort_vancouver
+      map_x: 8
+      map_y: 0
       spawns:
         - template: couve_militia
           count: 2
@@ -160,6 +174,8 @@ zone:
           target: couve_officers_row
         - direction: north
           target: couve_mill_plain_blvd
+      map_x: 10
+      map_y: 0
       spawns:
         - template: couve_militia
           count: 3
@@ -185,6 +201,8 @@ zone:
           target: couve_strip_mall_west
         - direction: north
           target: couve_fourth_plain
+      map_x: 6
+      map_y: -2
       spawns:
         - template: mill_plain_thug
           count: 2
@@ -208,6 +226,8 @@ zone:
           target: couve_applebees_fortress
         - direction: east
           target: couve_vancouver_mall
+      map_x: 8
+      map_y: -2
       spawns:
         - template: couve_militia
           count: 1
@@ -228,6 +248,8 @@ zone:
           target: couve_mill_plain_blvd
         - direction: north
           target: couve_residential_blocks
+      map_x: 4
+      map_y: -2
       properties:
         lighting: dim
         atmosphere: rain
@@ -248,6 +270,8 @@ zone:
           target: couve_fourth_plain
         - direction: west
           target: couve_residential_blocks
+      map_x: 8
+      map_y: -4
       spawns:
         - template: couve_militia
           count: 2
@@ -270,6 +294,8 @@ zone:
           target: couve_applebees_fortress
         - direction: north
           target: couve_fourth_plain
+      map_x: 4
+      map_y: -4
       properties:
         lighting: dim
         atmosphere: quiet
@@ -287,6 +313,8 @@ zone:
           target: couve_esther_short_park
         - direction: north
           target: couve_i5_north
+      map_x: 4
+      map_y: 0
       properties:
         lighting: dim
         atmosphere: wind
@@ -304,6 +332,8 @@ zone:
           target: couve_i5_corridor
         - direction: north
           target: battle_i5_south
+      map_x: 4
+      map_y: -2
       properties:
         lighting: overcast
         atmosphere: wind
@@ -325,6 +355,8 @@ zone:
           target: couve_fourth_plain_east
         - direction: north
           target: couve_i5_north
+      map_x: 6
+      map_y: -4
       spawns:
         - template: mill_plain_thug
           count: 3
@@ -346,6 +378,8 @@ zone:
           target: couve_fourth_plain
         - direction: east
           target: vantucky_fourth_plain_west
+      map_x: 8
+      map_y: -4
       spawns:
         - template: mill_plain_thug
           count: 2
@@ -368,6 +402,8 @@ zone:
           target: couve_strip_mall_east
         - direction: north
           target: couve_chkalov_drive
+      map_x: 10
+      map_y: -2
       spawns:
         - template: couve_militia
           count: 2
@@ -389,6 +425,8 @@ zone:
           target: couve_vancouver_mall
         - direction: east
           target: couve_fourth_plain_east
+      map_x: 10
+      map_y: -4
       properties:
         lighting: lantern
         atmosphere: industrial
@@ -406,6 +444,8 @@ zone:
           target: couve_waterfront
         - direction: east
           target: couve_columbia_way
+      map_x: 0
+      map_y: 6
       spawns:
         - template: jantzen_beach_pirate
           count: 1

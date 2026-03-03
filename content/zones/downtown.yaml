@@ -21,6 +21,8 @@ zone:
           target: market_district
         - direction: west
           target: transit_mall
+      map_x: 4
+      map_y: 4
       spawns:
         - template: ganger
           count: 2
@@ -52,6 +54,8 @@ zone:
           target: burnside_crossing
         - direction: west
           target: waterfront_trail
+      map_x: 4
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: wind
@@ -69,6 +73,8 @@ zone:
           target: burnside_crossing
         - direction: south
           target: courthouse_steps
+      map_x: 6
+      map_y: 4
       properties:
         lighting: dim
         atmosphere: quiet
@@ -87,6 +93,8 @@ zone:
           target: courthouse_steps
         - direction: west
           target: director_park
+      map_x: 4
+      map_y: 6
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -105,6 +113,8 @@ zone:
           target: director_park
         - direction: northwest
           target: sauvie_bridge_south
+      map_x: 2
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: fog
@@ -128,6 +138,8 @@ zone:
           hidden: false
         - direction: west
           target: beav_canyon_road_east
+      map_x: 2
+      map_y: 4
       properties:
         lighting: dim
         atmosphere: desolate
@@ -148,6 +160,8 @@ zone:
           target: waterfront_trail
         - direction: south
           target: lo_checkpoint_north
+      map_x: 2
+      map_y: 6
       properties:
         lighting: sheltered
         atmosphere: dry
@@ -168,6 +182,8 @@ zone:
           target: transit_mall
         - direction: north
           target: ne_broadway_bridge
+      map_x: 6
+      map_y: 2
       properties:
         lighting: exposed
         atmosphere: wind
@@ -182,6 +198,8 @@ zone:
       exits:
         - direction: up
           target: transit_mall
+      map_x: 2
+      map_y: 8
       properties:
         lighting: emergency
         atmosphere: flooded
@@ -200,6 +218,8 @@ zone:
           target: broadway_ruins
         - direction: southeast
           target: flats_hawthorne_approach
+      map_x: 6
+      map_y: 6
       properties:
         lighting: overcast
         atmosphere: open

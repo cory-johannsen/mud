@@ -18,6 +18,8 @@ zone:
           target: vantucky_andresen_road
         - direction: south
           target: vantucky_gas_station_ruins
+      map_x: 4
+      map_y: 4
       spawns:
         - template: vantucky_militiaman
           count: 1
@@ -42,6 +44,8 @@ zone:
           target: vantucky_orchards
         - direction: south
           target: vantucky_gun_market
+      map_x: 6
+      map_y: 4
       spawns:
         - template: vantucky_militiaman
           count: 2
@@ -67,6 +71,8 @@ zone:
           target: vantucky_164th_ave
         - direction: south
           target: vantucky_burnt_bridge_creek
+      map_x: 8
+      map_y: 4
       properties:
         lighting: dappled
         atmosphere: suburban
@@ -87,6 +93,8 @@ zone:
           target: vantucky_shooting_range
         - direction: south
           target: vantucky_i84_overpass
+      map_x: 10
+      map_y: 4
       spawns:
         - template: vantucky_militiaman
           count: 2
@@ -111,6 +119,8 @@ zone:
           target: vantucky_fishers_landing
         - direction: west
           target: vantucky_i84_onramp
+      map_x: 6
+      map_y: 8
       spawns:
         - template: highway_bandit
           count: 2
@@ -132,6 +142,8 @@ zone:
           target: vantucky_i84_overpass
         - direction: west
           target: vantucky_river_trail
+      map_x: 8
+      map_y: 0
       properties:
         lighting: overcast
         atmosphere: riverside
@@ -149,6 +161,8 @@ zone:
           target: vantucky_orchards
         - direction: east
           target: vantucky_compound_bravo
+      map_x: 8
+      map_y: 2
       spawns:
         - template: compound_guard
           count: 2
@@ -172,6 +186,8 @@ zone:
           target: vantucky_compound_alpha
         - direction: north
           target: vantucky_farm_compound
+      map_x: 10
+      map_y: 2
       spawns:
         - template: compound_guard
           count: 2
@@ -193,6 +209,8 @@ zone:
           target: vantucky_andresen_road
         - direction: east
           target: vantucky_burnt_bridge_creek
+      map_x: 6
+      map_y: 6
       properties:
         lighting: overcast
         atmosphere: commerce
@@ -212,6 +230,8 @@ zone:
           target: vantucky_gun_market
         - direction: east
           target: vantucky_hidden_bunker
+      map_x: 8
+      map_y: 6
       properties:
         lighting: dim
         atmosphere: wilderness
@@ -228,6 +248,8 @@ zone:
           target: vantucky_i84_overpass
         - direction: east
           target: trout_i84_west
+      map_x: 8
+      map_y: 8
       spawns:
         - template: highway_bandit
           count: 1
@@ -250,6 +272,8 @@ zone:
           target: vantucky_gun_market
         - direction: south
           target: vantucky_i84_onramp
+      map_x: 4
+      map_y: 6
       properties:
         lighting: dim
         atmosphere: decay
@@ -267,6 +291,8 @@ zone:
           target: vantucky_164th_ave
         - direction: south
           target: vantucky_ammo_depot
+      map_x: 12
+      map_y: 4
       spawns:
         - template: vantucky_militiaman
           count: 1
@@ -286,6 +312,8 @@ zone:
       exits:
         - direction: west
           target: vantucky_burnt_bridge_creek
+      map_x: 10
+      map_y: 6
       properties:
         lighting: emergency
         atmosphere: underground
@@ -303,6 +331,8 @@ zone:
           target: vantucky_compound_bravo
         - direction: east
           target: vantucky_water_tower
+      map_x: 10
+      map_y: 0
       spawns:
         - template: compound_guard
           count: 1
@@ -324,6 +354,8 @@ zone:
           target: vantucky_andresen_road
         - direction: north
           target: vantucky_river_trail
+      map_x: 6
+      map_y: 2
       spawns:
         - template: vantucky_militiaman
           count: 2
@@ -345,6 +377,8 @@ zone:
           target: vantucky_checkpoint_north
         - direction: east
           target: vantucky_fishers_landing
+      map_x: 6
+      map_y: 0
       properties:
         lighting: overcast
         atmosphere: riverside
@@ -362,6 +396,8 @@ zone:
           target: vantucky_gas_station_ruins
         - direction: east
           target: vantucky_i84_overpass
+      map_x: 4
+      map_y: 8
       spawns:
         - template: highway_bandit
           count: 2
@@ -383,6 +419,8 @@ zone:
           target: vantucky_farm_compound
         - direction: south
           target: vantucky_shooting_range
+      map_x: 12
+      map_y: 0
       properties:
         lighting: exposed
         atmosphere: elevated
@@ -400,6 +438,8 @@ zone:
           target: vantucky_shooting_range
         - direction: west
           target: vantucky_164th_ave
+      map_x: 12
+      map_y: 6
       spawns:
         - template: compound_guard
           count: 1
@@ -421,6 +461,8 @@ zone:
           target: vantucky_gas_station_ruins
         - direction: east
           target: vantucky_burnt_bridge_creek
+      map_x: 0
+      map_y: 10
       properties:
         lighting: dim
         atmosphere: residential

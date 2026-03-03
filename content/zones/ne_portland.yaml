@@ -18,6 +18,8 @@ zone:
           target: ne_prescott_street
         - direction: west
           target: ne_williams_corridor
+      map_x: 4
+      map_y: 4
       spawns:
         - template: bike_courier
           count: 2
@@ -42,6 +44,8 @@ zone:
           target: ne_killingsworth
         - direction: east
           target: ne_mlk_boulevard
+      map_x: 2
+      map_y: 2
       spawns:
         - template: brew_warlord
           count: 1
@@ -65,6 +69,8 @@ zone:
           target: ne_killingsworth
         - direction: east
           target: ne_hollywood_district
+      map_x: 4
+      map_y: 2
       properties:
         lighting: exposed
         atmosphere: wind
@@ -82,6 +88,8 @@ zone:
           target: ne_hollywood_district
         - direction: north
           target: ne_fremont_street
+      map_x: 4
+      map_y: 8
       spawns:
         - template: alberta_drifter
           count: 1
@@ -105,6 +113,8 @@ zone:
           target: ne_alameda_ridge
         - direction: east
           target: ne_i205_onramp
+      map_x: 6
+      map_y: 8
       properties:
         lighting: overcast
         atmosphere: crowded
@@ -123,6 +133,8 @@ zone:
           target: ne_rose_quarter
         - direction: east
           target: ne_sandy_boulevard
+      map_x: 4
+      map_y: 4
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -139,6 +151,8 @@ zone:
           target: ne_hollywood_district
         - direction: west
           target: ne_grant_park
+      map_x: 8
+      map_y: 6
       properties:
         lighting: exposed
         atmosphere: wind
@@ -157,6 +171,8 @@ zone:
           target: ne_sullivans_gulch
         - direction: west
           target: ne_rose_quarter
+      map_x: 4
+      map_y: 4
       properties:
         lighting: dim
         atmosphere: desolate
@@ -175,6 +191,8 @@ zone:
           target: ne_rose_quarter
         - direction: south
           target: burnside_crossing
+      map_x: 2
+      map_y: 6
       properties:
         lighting: exposed
         atmosphere: wind
@@ -190,6 +208,8 @@ zone:
           target: ne_hollywood_district
         - direction: east
           target: pdx_airport_way_west
+      map_x: 8
+      map_y: 8
       properties:
         lighting: overcast
         atmosphere: wind
@@ -207,6 +227,8 @@ zone:
           target: ne_columbia_blvd
         - direction: east
           target: grinders_row
+      map_x: 6
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -224,6 +246,8 @@ zone:
           target: ne_williams_corridor
         - direction: north
           target: ne_killingsworth
+      map_x: 0
+      map_y: 4
       properties:
         lighting: dim
         atmosphere: rain
@@ -243,6 +267,8 @@ zone:
           target: ne_interstate_ave
         - direction: north
           target: ne_columbia_blvd
+      map_x: 4
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: crowded
@@ -261,6 +287,8 @@ zone:
           target: ne_irvington_ruins
         - direction: east
           target: ne_grant_park
+      map_x: 4
+      map_y: 6
       spawns:
         - template: alberta_drifter
           count: 2
@@ -283,6 +311,8 @@ zone:
           target: ne_sullivans_gulch
         - direction: south
           target: ne_grant_park
+      map_x: 6
+      map_y: 4
       spawns:
         - template: bike_courier
           count: 1
@@ -305,6 +335,8 @@ zone:
           target: ne_sandy_boulevard
         - direction: east
           target: ne_alameda_ridge
+      map_x: 6
+      map_y: 6
       spawns:
         - template: alberta_drifter
           count: 2
@@ -329,6 +361,8 @@ zone:
           target: ne_broadway_bridge
         - direction: south
           target: ne_sullivans_gulch
+      map_x: 4
+      map_y: 6
       properties:
         lighting: dim
         atmosphere: desolate
@@ -345,6 +379,8 @@ zone:
           target: ne_mississippi_ave
         - direction: east
           target: ne_williams_corridor
+      map_x: 4
+      map_y: 6
       spawns:
         - template: brew_warlord
           count: 1
@@ -365,6 +401,8 @@ zone:
           target: ne_williams_corridor
         - direction: east
           target: ne_alberta_street
+      map_x: 4
+      map_y: 2
       spawns:
         - template: bike_courier
           count: 2
@@ -392,6 +430,8 @@ zone:
           target: ne_bike_shop_ruins
         - direction: southeast
           target: ne_brewery_compound
+      map_x: 2
+      map_y: 4
       spawns:
         - template: bike_courier
           count: 1
@@ -414,6 +454,8 @@ zone:
           target: ne_alberta_street
         - direction: north
           target: ne_cully_road
+      map_x: 6
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: quiet
@@ -432,6 +474,8 @@ zone:
           target: ne_cully_road
         - direction: north
           target: ne_i5_bridge_approach
+      map_x: 4
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -448,6 +492,8 @@ zone:
           target: ne_columbia_blvd
         - direction: north
           target: couve_interstate_bridge_south
+      map_x: 4
+      map_y: 0
       properties:
         lighting: exposed
         atmosphere: wind
