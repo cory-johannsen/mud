@@ -442,22 +442,34 @@ func RenderMap(resp *gamev1.MapResponse) string {
 		}
 		sb.WriteString("\r\n")
 
-		// South connector row: only between this row and the next occupied row.
+		// South connector row: only emit if at least one room in this row
+		// has a south exit to a room in the next occupied row.
 		if yi < len(ys)-1 {
 			nextY := ys[yi+1]
-			for xi, x := range xs {
+			hasSouth := false
+			for _, x := range xs {
 				t := byCoord[[2]int32{x, y}]
 				tSouth := byCoord[[2]int32{x, nextY}]
 				if t != nil && tSouth != nil && exitSet(t)["south"] {
-					sb.WriteString("  | ")
-				} else {
-					sb.WriteString(strings.Repeat(" ", cellW))
-				}
-				if xi < len(xs)-1 {
-					sb.WriteString(" ") // aligns under east connector column
+					hasSouth = true
+					break
 				}
 			}
-			sb.WriteString("\r\n")
+			if hasSouth {
+				for xi, x := range xs {
+					t := byCoord[[2]int32{x, y}]
+					tSouth := byCoord[[2]int32{x, nextY}]
+					if t != nil && tSouth != nil && exitSet(t)["south"] {
+						sb.WriteString("  | ")
+					} else {
+						sb.WriteString(strings.Repeat(" ", cellW))
+					}
+					if xi < len(xs)-1 {
+						sb.WriteString(" ") // aligns under east connector column
+					}
+				}
+				sb.WriteString("\r\n")
+			}
 		}
 	}
 
