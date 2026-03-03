@@ -375,7 +375,7 @@ func TestRenderMap_SingleRoom_Current(t *testing.T) {
 		},
 	}
 	result := RenderMap(resp)
-	require.Contains(t, result, "[@]")
+	require.Contains(t, result, "< 1>")
 	require.Contains(t, result, "Start Room")
 }
 
@@ -387,8 +387,9 @@ func TestRenderMap_TwoRooms_DistinguishesCurrentFromDiscovered(t *testing.T) {
 		},
 	}
 	result := RenderMap(resp)
-	require.Contains(t, result, "[@]")
-	require.Contains(t, result, "[#]")
+	// Current room uses angle brackets, discovered uses square brackets.
+	require.Contains(t, result, "< 2>")
+	require.Contains(t, result, "[ 1]")
 }
 
 func TestProperty_RenderMap_NeverPanics(t *testing.T) {
@@ -410,12 +411,13 @@ func TestProperty_RenderMap_NeverPanics(t *testing.T) {
 			t.Fatal("RenderMap returned empty string")
 		}
 		if n > 0 {
-			// Must contain at least one room marker
-			if !strings.Contains(result, "[@]") && !strings.Contains(result, "[#]") {
-				t.Fatal("RenderMap with tiles must contain [@] or [#]")
+			// Must contain at least one room marker (angle or square brackets with number).
+			hasMarker := strings.Contains(result, "<") || strings.Contains(result, "[")
+			if !hasMarker {
+				t.Fatal("RenderMap with tiles must contain a room marker")
 			}
 		}
-		// Only assert [@] appears when the current tile has unique coordinates —
+		// Only assert current marker appears when the current tile has unique coordinates —
 		// if another tile shares the same (x,y), byCoord will retain only one entry
 		// and the current marker may be displaced.
 		if n > 0 && tiles[0].Current {
@@ -426,8 +428,8 @@ func TestProperty_RenderMap_NeverPanics(t *testing.T) {
 					break
 				}
 			}
-			if currentUnique && !strings.Contains(result, "[@]") {
-				t.Fatal("current tile must be marked [@]")
+			if currentUnique && !strings.Contains(result, "<") {
+				t.Fatal("current tile must use angle-bracket marker")
 			}
 		}
 	})

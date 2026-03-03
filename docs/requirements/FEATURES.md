@@ -36,14 +36,23 @@
 - [ ] Equipment levelling, advanced equipment, cursed equipment, equipment combination and interactions
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor. roomequip is an Editor command.
 - [ ] Non-combat NPCs: merchants, guards, quest givers, hirelings, bankers, skill trainers, etc.
-- [ ] Per-NPC type custom behaviors, dialog, taunt and statement templates and generators, interactions, aggressiveness.  Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus. Default combat actions, reactions, and strategy. 
+- [ ] Per-NPC type custom behaviors
+  - dialog taunt and statement templates and generators
+  - interactions
+  - aggressiveness
+  - Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus. 
+  - Default combat actions, reactions, and strategy.
+  - map movement and fencing
 - [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
 - [ ] Combat distance, fleeing, pursuit, panic
 - [ ] Animals, robots, machines
 - [ ] Drugs, alcohol, medicine, poisons, toxins 
 - [ ] Bosses 
 - [ ] Quests
-- [ ] Factions and allegiances, economies, exchange rates, faction-specific items and quests
+- [ ] Factions and allegiances
+  - economies and exchange rates
+  - faction-specific items and quests
+  - faction-owned zones and rooms
 - [ ] Crafting
 - [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Max, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration

@@ -377,6 +377,19 @@ func RenderMap(resp *gamev1.MapResponse) string {
 		byCoord[[2]int32{t.X, t.Y}] = t
 	}
 
+	// Assign legend numbers top-to-bottom, left-to-right so the number shown
+	// in each grid cell matches its legend entry.
+	numByCoord := make(map[[2]int32]int)
+	num := 1
+	for y := minY; y <= maxY; y++ {
+		for x := minX; x <= maxX; x++ {
+			if _, ok := byCoord[[2]int32{x, y}]; ok {
+				numByCoord[[2]int32{x, y}] = num
+				num++
+			}
+		}
+	}
+
 	exitSet := func(t *gamev1.MapTile) map[string]bool {
 		s := make(map[string]bool)
 		for _, e := range t.Exits {
@@ -384,6 +397,9 @@ func RenderMap(resp *gamev1.MapResponse) string {
 		}
 		return s
 	}
+
+	// cellWidth is 4: e.g. "[ 1]", "[10]", "<@1>". Connector is 1 char.
+	const cellWidth = 4
 
 	var sb strings.Builder
 	sb.WriteString("\r\n")
@@ -393,13 +409,17 @@ func RenderMap(resp *gamev1.MapResponse) string {
 		for x := minX; x <= maxX; x++ {
 			t := byCoord[[2]int32{x, y}]
 			if t == nil {
-				sb.WriteString("   ")
-			} else if t.Current {
-				sb.WriteString("[@]")
+				sb.WriteString(strings.Repeat(" ", cellWidth))
 			} else {
-				sb.WriteString("[#]")
+				n := numByCoord[[2]int32{x, y}]
+				if t.Current {
+					sb.WriteString(fmt.Sprintf("<%2d>", n))
+				} else {
+					sb.WriteString(fmt.Sprintf("[%2d]", n))
+				}
 			}
 			if x < maxX {
+				t := byCoord[[2]int32{x, y}]
 				if t != nil && exitSet(t)["east"] {
 					sb.WriteString("-")
 				} else {
@@ -414,9 +434,9 @@ func RenderMap(resp *gamev1.MapResponse) string {
 			for x := minX; x <= maxX; x++ {
 				t := byCoord[[2]int32{x, y}]
 				if t != nil && exitSet(t)["south"] {
-					sb.WriteString(" | ")
+					sb.WriteString(" |  ")
 				} else {
-					sb.WriteString("   ")
+					sb.WriteString(strings.Repeat(" ", cellWidth))
 				}
 				if x < maxX {
 					sb.WriteString(" ")
@@ -426,14 +446,22 @@ func RenderMap(resp *gamev1.MapResponse) string {
 		}
 	}
 
-	// Legend
+	// Legend — ordered top-to-bottom, left-to-right to match grid numbering.
 	sb.WriteString("\r\nLegend:\r\n")
-	for i, t := range resp.Tiles {
-		marker := " "
-		if t.Current {
-			marker = "*"
+	legendNum := 1
+	for y := minY; y <= maxY; y++ {
+		for x := minX; x <= maxX; x++ {
+			t := byCoord[[2]int32{x, y}]
+			if t == nil {
+				continue
+			}
+			marker := " "
+			if t.Current {
+				marker = "*"
+			}
+			sb.WriteString(fmt.Sprintf("  %s%2d. %s\r\n", marker, legendNum, t.RoomName))
+			legendNum++
 		}
-		sb.WriteString(fmt.Sprintf("  %s%2d. %s\r\n", marker, i+1, t.RoomName))
 	}
 
 	return sb.String()
