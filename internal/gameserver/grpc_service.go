@@ -534,6 +534,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleChar(uid)
 	case *gamev1.ClientMessage_ArchetypeSelection:
 		return s.handleArchetypeSelection(uid, p.ArchetypeSelection)
+	case *gamev1.ClientMessage_UseEquipment:
+		return s.handleUseEquipment(uid, p.UseEquipment.InstanceId)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1807,4 +1809,41 @@ func (s *GameServiceServer) handleArchetypeSelection(uid string, req *gamev1.Arc
 		return nil, fmt.Errorf("handleArchetypeSelection: session not found for uid %q", uid)
 	}
 	return &gamev1.ServerEvent{}, nil
+}
+
+// handleUseEquipment processes a UseEquipment command, invoking the Lua script
+// attached to the room equipment instance if one exists.
+//
+// Precondition: uid must map to an active player session.
+// Postcondition: Returns a ServerEvent with the result text or an error.
+func (s *GameServiceServer) handleUseEquipment(uid, instanceID string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.roomEquipMgr == nil {
+		return messageEvent("No equipment available."), nil
+	}
+	inst := s.roomEquipMgr.GetInstance(sess.RoomID, instanceID)
+	if inst == nil {
+		return messageEvent("That item is not here."), nil
+	}
+	if inst.Script == "" {
+		return messageEvent("Nothing happens."), nil
+	}
+	room, ok := s.world.GetRoom(sess.RoomID)
+	if !ok {
+		return messageEvent("Nothing happens."), nil
+	}
+	zoneID := room.ZoneID
+	result, err := s.scriptMgr.CallHook(zoneID, inst.Script, lua.LString(uid))
+	if err != nil {
+		s.logger.Warn("equipment script error", zap.Error(err))
+		return messageEvent("The item malfunctions."), nil
+	}
+	msg := "You use the item."
+	if result != lua.LNil {
+		msg = result.String()
+	}
+	return messageEvent(msg), nil
 }
