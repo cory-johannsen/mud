@@ -412,14 +412,34 @@ func main() {
 	// Create floor manager for room item tracking.
 	floorMgr := inventory.NewFloorManager()
 
+	// Create room equipment manager and seed it from zone data.
+	roomEquipMgr := inventory.NewRoomEquipmentManager()
+	for _, zone := range worldMgr.AllZones() {
+		for _, room := range zone.Rooms {
+			if len(room.Equipment) > 0 {
+				roomEquipMgr.InitRoom(room.ID, room.Equipment)
+			}
+		}
+	}
+	logger.Info("room equipment manager initialized")
+
 	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr)
 
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
 		jobReg, condRegistry, *loadoutsDir,
 	)
+
+	// Start respawn goroutine for room equipment.
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			roomEquipMgr.ProcessRespawns()
+		}
+	}()
 
 	// Start zone AI ticks.
 	zm := gameserver.NewZoneTickManager(*aiTickInterval)

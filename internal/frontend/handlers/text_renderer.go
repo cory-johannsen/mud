@@ -54,6 +54,18 @@ func RenderRoomView(rv *gamev1.RoomView) string {
 		b.WriteString("\r\n")
 	}
 
+	// Room equipment
+	for _, eq := range rv.Equipment {
+		flags := ""
+		if eq.Immovable {
+			flags += " [fixed]"
+		}
+		if eq.Usable {
+			flags += " [usable]"
+		}
+		b.WriteString(fmt.Sprintf("  %s%s%s%s\r\n", telnet.Cyan, eq.Name, telnet.Reset, flags))
+	}
+
 	return b.String()
 }
 

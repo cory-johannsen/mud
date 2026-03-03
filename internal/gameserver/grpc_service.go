@@ -82,6 +82,7 @@ type GameServiceServer struct {
 	scriptMgr    *scripting.Manager
 	respawnMgr   *npc.RespawnManager
 	floorMgr     *inventory.FloorManager
+	roomEquipMgr *inventory.RoomEquipmentManager
 	invRegistry  *inventory.Registry
 	accountAdmin AccountAdmin
 	clock        *GameClock
@@ -97,6 +98,7 @@ type GameServiceServer struct {
 // charSaver may be nil (character state will not be persisted on disconnect).
 // respawnMgr may be nil (respawn functionality will be disabled).
 // floorMgr may be nil (inventory get/drop will return errors).
+// roomEquipMgr may be nil (room equipment will not be shown in look).
 // invRegistry may be nil (item name resolution will fall back to ItemDefID).
 // clock may be nil (time-of-day events will not be broadcast to sessions).
 // jobRegistry may be nil (team affinity effects will not be applied on wear).
@@ -118,6 +120,7 @@ func NewGameServiceServer(
 	scriptMgr *scripting.Manager,
 	respawnMgr *npc.RespawnManager,
 	floorMgr *inventory.FloorManager,
+	roomEquipMgr *inventory.RoomEquipmentManager,
 	invRegistry *inventory.Registry,
 	accountAdmin AccountAdmin,
 	clock *GameClock,
@@ -139,6 +142,7 @@ func NewGameServiceServer(
 		scriptMgr:    scriptMgr,
 		respawnMgr:   respawnMgr,
 		floorMgr:     floorMgr,
+		roomEquipMgr: roomEquipMgr,
 		invRegistry:  invRegistry,
 		accountAdmin: accountAdmin,
 		clock:        clock,
@@ -631,6 +635,26 @@ func (s *GameServiceServer) handleLook(uid string) (*gamev1.ServerEvent, error) 
 				Name:       name,
 				Quantity:   int32(fi.Quantity),
 			})
+		}
+	}
+
+	if s.roomEquipMgr != nil {
+		if sess, ok := s.sessions.GetPlayer(uid); ok {
+			for _, eq := range s.roomEquipMgr.EquipmentInRoom(sess.RoomID) {
+				name := eq.ItemDefID
+				if s.invRegistry != nil {
+					if def, ok := s.invRegistry.Item(eq.ItemDefID); ok {
+						name = def.Name
+					}
+				}
+				view.Equipment = append(view.Equipment, &gamev1.RoomEquipmentItem{
+					InstanceId: eq.InstanceID,
+					Name:       name,
+					Quantity:   1,
+					Immovable:  eq.Immovable,
+					Usable:     eq.Script != "",
+				})
+			}
 		}
 	}
 
