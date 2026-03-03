@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -388,4 +389,46 @@ func TestRenderMap_TwoRooms_DistinguishesCurrentFromDiscovered(t *testing.T) {
 	result := RenderMap(resp)
 	require.Contains(t, result, "[@]")
 	require.Contains(t, result, "[#]")
+}
+
+func TestProperty_RenderMap_NeverPanics(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		n := rapid.IntRange(0, 5).Draw(t, "n")
+		tiles := make([]*gamev1.MapTile, n)
+		for i := range tiles {
+			tiles[i] = &gamev1.MapTile{
+				RoomId:   fmt.Sprintf("r%d", i),
+				RoomName: fmt.Sprintf("Room %d", i),
+				X:        int32(rapid.IntRange(-10, 10).Draw(t, fmt.Sprintf("x%d", i))),
+				Y:        int32(rapid.IntRange(-10, 10).Draw(t, fmt.Sprintf("y%d", i))),
+				Current:  i == 0 && n > 0,
+			}
+		}
+		resp := &gamev1.MapResponse{Tiles: tiles}
+		result := RenderMap(resp)
+		if result == "" {
+			t.Fatal("RenderMap returned empty string")
+		}
+		if n > 0 {
+			// Must contain at least one room marker
+			if !strings.Contains(result, "[@]") && !strings.Contains(result, "[#]") {
+				t.Fatal("RenderMap with tiles must contain [@] or [#]")
+			}
+		}
+		// Only assert [@] appears when the current tile has unique coordinates —
+		// if another tile shares the same (x,y), byCoord will retain only one entry
+		// and the current marker may be displaced.
+		if n > 0 && tiles[0].Current {
+			currentUnique := true
+			for i := 1; i < n; i++ {
+				if tiles[i].X == tiles[0].X && tiles[i].Y == tiles[0].Y {
+					currentUnique = false
+					break
+				}
+			}
+			if currentUnique && !strings.Contains(result, "[@]") {
+				t.Fatal("current tile must be marked [@]")
+			}
+		}
+	})
 }

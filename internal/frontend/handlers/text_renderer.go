@@ -400,8 +400,7 @@ func RenderMap(resp *gamev1.MapResponse) string {
 				sb.WriteString("[#]")
 			}
 			if x < maxX {
-				east := byCoord[[2]int32{x, y}]
-				if east != nil && exitSet(east)["east"] {
+				if t != nil && exitSet(t)["east"] {
 					sb.WriteString("-")
 				} else {
 					sb.WriteString(" ")
