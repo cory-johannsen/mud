@@ -360,6 +360,37 @@ func main() {
 			}
 			return out
 		}
+
+		// Wire RevealZoneMap callback.
+		// Bulk-reveals all rooms in zoneID for the player's automap cache and persists to DB.
+		//
+		// Precondition: sessMgr, worldMgr, and automapRepo must not be nil.
+		// Postcondition: All rooms in zoneID are marked discovered in the session cache and persisted.
+		scriptMgr.RevealZoneMap = func(uid, zoneID string) {
+			sess, ok := sessMgr.GetPlayer(uid)
+			if !ok {
+				return
+			}
+			zone, ok := worldMgr.GetZone(zoneID)
+			if !ok {
+				return
+			}
+			if sess.AutomapCache[zoneID] == nil {
+				sess.AutomapCache[zoneID] = make(map[string]bool)
+			}
+			var newRooms []string
+			for roomID := range zone.Rooms {
+				if !sess.AutomapCache[zoneID][roomID] {
+					sess.AutomapCache[zoneID][roomID] = true
+					newRooms = append(newRooms, roomID)
+				}
+			}
+			if automapRepo != nil && len(newRooms) > 0 {
+				if err := automapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, newRooms); err != nil {
+					logger.Warn("bulk-persisting zone map reveal", zap.Error(err))
+				}
+			}
+		}
 	}
 
 	// Load AI precondition scripts before registering domains so that Lua

@@ -71,6 +71,10 @@ type Manager struct {
 	// GetEntityRoom returns the room ID where the entity currently resides.
 	// Returns empty string when the entity is unknown.
 	GetEntityRoom func(uid string) string
+
+	// RevealZoneMap bulk-reveals all rooms in zoneID for the player identified by uid.
+	// Injected after construction; nil = no-op.
+	RevealZoneMap func(uid, zoneID string)
 }
 
 // NewManager creates a Manager.

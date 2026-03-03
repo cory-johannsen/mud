@@ -10,7 +10,7 @@ import (
 // Precondition: L must be from NewSandboxedState.
 // Postcondition: engine global is defined in L with submodules:
 //
-//	engine.log, engine.dice, engine.entity, engine.combat, engine.world, engine.event.
+//	engine.log, engine.dice, engine.entity, engine.combat, engine.world, engine.event, engine.map.
 func (m *Manager) RegisterModules(L *lua.LState) {
 	engine := L.NewTable()
 	L.SetGlobal("engine", engine)
@@ -21,6 +21,7 @@ func (m *Manager) RegisterModules(L *lua.LState) {
 	L.SetField(engine, "combat", m.newCombatModule(L))
 	L.SetField(engine, "world", m.newWorldModule(L))
 	L.SetField(engine, "event", m.newEventModule(L))
+	L.SetField(engine, "map", m.newMapModule(L))
 }
 
 // newLogModule returns the engine.log table with debug/info/warn/error functions.
@@ -396,6 +397,24 @@ func (m *Manager) newWorldModule(L *lua.LState) *lua.LTable {
 	}))
 	L.SetField(t, "move_entity", L.NewFunction(func(L *lua.LState) int {
 		// TODO(stage7): implement entity room movement
+		return 0
+	}))
+	return t
+}
+
+// newMapModule returns the engine.map table.
+//
+// Precondition: L must be non-nil.
+// Postcondition: engine.map.reveal_zone(uid, zoneID) calls RevealZoneMap callback if set; no-op if nil.
+func (m *Manager) newMapModule(L *lua.LState) *lua.LTable {
+	t := L.NewTable()
+	L.SetField(t, "reveal_zone", L.NewFunction(func(L *lua.LState) int {
+		if m.RevealZoneMap == nil {
+			return 0
+		}
+		uid := L.CheckString(1)
+		zoneID := L.CheckString(2)
+		m.RevealZoneMap(uid, zoneID)
 		return 0
 	}))
 	return t
