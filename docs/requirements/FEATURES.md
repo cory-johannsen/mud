@@ -12,13 +12,13 @@
 - [x] Character sheet and command to view it
 - [x] Player creation should start with archetype selection (listing each with its details), then restrict the jobs the user can select by their archetype.  Archetypes and jobs need to use the same attributes as the characters to match the lore.
 - [x] `who` command should include more details: level, job, health (descriptive not numeric), status
-- [ ] Room equipment.  Some items and equipment can permanently exist in a room (water fountain), or generate automatically in a room (up to a maximum amount). 
+- [x] Room equipment.  Some items and equipment can permanently exist in a room (water fountain), or generate automatically in a room (up to a maximum amount). 
 - [ ] Maps
     - Player has an automap that can be consulted with the `map` command. 
     - The player automap is populated and persisted as the player explores. 
     - Player automap contains the rooms, exits, permanent room equipment and POIs.  We will include non-combat NPCs in the future.
     - Each zone has a safe area at the primary entrance which contains a zone map.  Viewing the look map populates the automap for that zone, but only the rooms and exits; the player must visit a room to discover any permanent equipment, POIs, or non-combat NPCs.
-- [ ] Skills and Abilities. All the P2FE skill and abilities need to be implemented.  Where the P2FE lore doesn't match the Gunchete setting it will need migrated.
+- [ ] Skills and Abilities. All the P2FE skills, feats, and abilities need to be implemented.  Where the P2FE lore doesn't match the Gunchete setting it will need migrated.
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
 - [ ] Character levelling
 - [ ] Job proficiencies, advancement hierarchy, features and drawbacks, cross-job combinations. The proficiencies defined in the content need to be mapped to the rules system. Class features and drawbacks need to be implemented and match the lore (there is no magic, there is instead high technology) 
