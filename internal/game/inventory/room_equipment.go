@@ -91,17 +91,27 @@ func (m *RoomEquipmentManager) EquipmentInRoom(roomID string) []*EquipmentInstan
 }
 
 // GetInstance returns the instance with the given ID in the given room, or nil.
+// The query is matched against InstanceID (UUID) first, then ItemDefID (item name),
+// so players can type either the UUID or the human-readable item_id shown in the room.
 //
 // Precondition: roomID and instanceID may be any string.
 // Postcondition: Returns nil if not found.
 func (m *RoomEquipmentManager) GetInstance(roomID, instanceID string) *EquipmentInstance {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
+	var byItemDef *EquipmentInstance
 	for _, it := range m.rooms[roomID] {
 		if it.InstanceID == instanceID {
 			cp := *it
 			return &cp
 		}
+		if byItemDef == nil && it.ItemDefID == instanceID {
+			byItemDef = it
+		}
+	}
+	if byItemDef != nil {
+		cp := *byItemDef
+		return &cp
 	}
 	return nil
 }
