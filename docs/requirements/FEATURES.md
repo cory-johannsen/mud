@@ -10,7 +10,7 @@
 - [x] Weapon and armor library.  A large library of lore-friendly equipment needs to exist with multiple options for every item type.  Each team should have customized team-specific equipment
 - [x] Character initial inventory: a creation each character receives an inventory of basic items. These should conform to the character job.
 - [x] Character sheet and command to view it
-- [ ] Player creation should start with archetype selection (listing each with its details), then restrict the jobs the user can select by their archetype.  Archetypes and jobs need to use the same attributes as the characters to match the lore.
+- [x] Player creation should start with archetype selection (listing each with its details), then restrict the jobs the user can select by their archetype.  Archetypes and jobs need to use the same attributes as the characters to match the lore.
 - [ ] `who` command should include more details: level, job, health (descriptive not numeric), status
 - [ ] Room equipment.  Some items and equipment can permanently exist in a room (water fountain), or generate automatically in a room (up to a maximum amount). 
 - [ ] Maps
