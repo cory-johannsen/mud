@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
@@ -80,6 +81,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerChar:               bridgeChar,
 	command.HandlerArchetypeSelection: bridgeArchetypeSelection,
 	command.HandlerUseEquipment:       bridgeUseEquipment,
+	command.HandlerRoomEquip:          bridgeRoomEquip,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -566,5 +568,39 @@ func bridgeRemoveArmor(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_RemoveArmor{RemoveArmor: &gamev1.RemoveArmorRequest{Slot: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeRoomEquip builds a RoomEquipRequest from parsed subcommand arguments.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: Returns a non-nil msg containing a RoomEquipRequest populated
+// from the parsed args; done is false.
+func bridgeRoomEquip(bctx *bridgeContext) (bridgeResult, error) {
+	parts := strings.Fields(bctx.parsed.RawArgs)
+	req := &gamev1.RoomEquipRequest{}
+	if len(parts) > 0 {
+		req.SubCommand = parts[0]
+	}
+	if len(parts) > 1 {
+		req.ItemId = parts[1]
+	}
+	if len(parts) > 2 {
+		if n, err := strconv.Atoi(parts[2]); err == nil {
+			req.MaxCount = int32(n)
+		}
+	}
+	if len(parts) > 3 {
+		req.Respawn = parts[3]
+	}
+	if len(parts) > 4 {
+		req.Immovable = parts[4] == "true"
+	}
+	if len(parts) > 5 {
+		req.Script = strings.Join(parts[5:], " ")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_RoomEquip{RoomEquip: req},
 	}}, nil
 }
