@@ -44,7 +44,8 @@ const (
 	HandlerSwitch       = "switch"
 	HandlerWear         = "wear"
 	HandlerRemoveArmor  = "remove"
-	HandlerChar         = "char"
+	HandlerChar                = "char"
+	HandlerArchetypeSelection  = "archetype_selection"
 )
 
 // Command defines a player-invocable command.
@@ -113,6 +114,8 @@ func BuiltinCommands() []Command {
 		{Name: "remove", Aliases: []string{"rem"}, Help: "Remove a piece of armor and return it to inventory (remove <slot>)", Category: CategoryCombat, Handler: HandlerRemoveArmor},
 
 		{Name: "char", Aliases: []string{"sheet"}, Help: "Display your character sheet", Category: CategoryWorld, Handler: HandlerChar},
+
+		{Name: "archetype_selection", Aliases: nil, Help: "Select archetype during character creation", Category: CategoryWorld, Handler: HandlerArchetypeSelection},
 
 		// Admin commands
 		{Name: "setrole", Aliases: nil, Help: "Set a player's role (admin only)", Category: CategoryAdmin, Handler: HandlerSetRole},
