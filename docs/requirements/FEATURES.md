@@ -36,7 +36,7 @@
 - [ ] Equipment levelling, advanced equipment, cursed equipment, equipment combination and interactions
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor. roomequip is an Editor command.
 - [ ] Non-combat NPCs: merchants, guards, quest givers, hirelings, bankers, skill trainers, etc.
-- [ ] Per-NPC type custom behaviors, dialog, taunt and statement templates and generators, interactions, aggressiveness.  Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus 
+- [ ] Per-NPC type custom behaviors, dialog, taunt and statement templates and generators, interactions, aggressiveness.  Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus. Default combat actions, reactions, and strategy. 
 - [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
 - [ ] Combat distance, fleeing, pursuit, panic
 - [ ] Animals, robots, machines
