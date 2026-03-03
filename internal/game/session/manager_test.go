@@ -612,3 +612,38 @@ func TestAddPlayer_PreconditionViolations(t *testing.T) {
 		})
 	}
 }
+
+func TestManager_PlayersInRoomDetails_ReturnsSessions(t *testing.T) {
+	m := NewManager()
+	_, err := m.AddPlayer(AddPlayerOptions{
+		UID: "u1", Username: "a", CharName: "Alpha",
+		CharacterID: 1, RoomID: "room1",
+		CurrentHP: 8, MaxHP: 10,
+		Abilities: character.AbilityScores{}, Role: "player",
+		RegionDisplayName: "", Class: "striker_gun", Level: 3,
+	})
+	require.NoError(t, err)
+	_, err = m.AddPlayer(AddPlayerOptions{
+		UID: "u2", Username: "b", CharName: "Beta",
+		CharacterID: 2, RoomID: "room1",
+		CurrentHP: 10, MaxHP: 10,
+		Abilities: character.AbilityScores{}, Role: "player",
+		RegionDisplayName: "", Class: "boot_gun", Level: 1,
+	})
+	require.NoError(t, err)
+
+	details := m.PlayersInRoomDetails("room1")
+	require.Len(t, details, 2)
+	names := []string{details[0].CharName, details[1].CharName}
+	assert.ElementsMatch(t, []string{"Alpha", "Beta"}, names)
+	// Verify full fields are present
+	for _, d := range details {
+		assert.NotEmpty(t, d.Class)
+		assert.Greater(t, d.MaxHP, 0)
+	}
+}
+
+func TestManager_PlayersInRoomDetails_EmptyRoomReturnsEmpty(t *testing.T) {
+	m := NewManager()
+	assert.Empty(t, m.PlayersInRoomDetails("nonexistent"))
+}

@@ -234,6 +234,27 @@ func (m *Manager) PlayersInRoom(roomID string) []string {
 	return names
 }
 
+// PlayersInRoomDetails returns the full PlayerSession for each player in the given room.
+//
+// Precondition: roomID may be any string.
+// Postcondition: Returns a non-nil slice (may be empty); each element is a non-nil *PlayerSession.
+func (m *Manager) PlayersInRoomDetails(roomID string) []*PlayerSession {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	uids, ok := m.roomSets[roomID]
+	if !ok {
+		return []*PlayerSession{}
+	}
+	result := make([]*PlayerSession, 0, len(uids))
+	for uid := range uids {
+		if sess, ok := m.players[uid]; ok {
+			result = append(result, sess)
+		}
+	}
+	return result
+}
+
 // PlayerUIDsInRoom returns the UIDs of all players in the given room.
 //
 // Postcondition: Returns a slice of UIDs (may be empty).
