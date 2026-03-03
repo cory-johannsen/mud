@@ -63,3 +63,23 @@ func TestProperty_StatusLabel_NeverPanics(t *testing.T) {
 		_ = command.StatusLabel(status)
 	})
 }
+
+func TestProperty_HandleWho_NeverPanics(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		entries := rapid.SliceOf(rapid.Custom(func(rt *rapid.T) command.WhoEntry {
+			return command.WhoEntry{
+				Name:        rapid.String().Draw(rt, "name"),
+				Level:       rapid.Int().Draw(rt, "level"),
+				Job:         rapid.String().Draw(rt, "job"),
+				HealthLabel: rapid.String().Draw(rt, "healthLabel"),
+				Status:      rapid.String().Draw(rt, "status"),
+			}
+		})).Draw(rt, "entries")
+		result := command.HandleWho(entries)
+		if len(entries) == 0 {
+			assert.Contains(rt, result, "Nobody")
+		} else {
+			assert.NotContains(rt, result, "Nobody")
+		}
+	})
+}
