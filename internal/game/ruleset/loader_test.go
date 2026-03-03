@@ -106,6 +106,27 @@ func TestArchetypeYAML_KeyAbilitiesUseGuncheteNames(t *testing.T) {
 	}
 }
 
+func TestAllArchetypesHaveJobsForBothTeams(t *testing.T) {
+	archetypes, err := ruleset.LoadArchetypes("../../../content/archetypes")
+	require.NoError(t, err)
+	jobs, err := ruleset.LoadJobs("../../../content/jobs")
+	require.NoError(t, err)
+
+	reg := ruleset.NewJobRegistry()
+	for _, j := range jobs {
+		reg.Register(j)
+	}
+
+	teams := []string{"gun", "machete"}
+	for _, a := range archetypes {
+		for _, team := range teams {
+			teamJobs := reg.JobsForTeamAndArchetype(team, a.ID)
+			assert.NotEmpty(t, teamJobs,
+				"archetype %q has no jobs for team %q", a.ID, team)
+		}
+	}
+}
+
 func TestLoadRegions_ActualContent(t *testing.T) {
 	regions, err := ruleset.LoadRegions("../../../content/regions")
 	require.NoError(t, err)
