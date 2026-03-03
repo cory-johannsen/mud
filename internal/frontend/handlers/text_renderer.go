@@ -343,7 +343,25 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
 	return b.String()
 }
 
+// sortedInt32Set returns the keys of a map[int32]bool in ascending order.
+func sortedInt32Set(m map[int32]bool) []int32 {
+	out := make([]int32, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	// insertion sort — tile counts are small
+	for i := 1; i < len(out); i++ {
+		for j := i; j > 0 && out[j] < out[j-1]; j-- {
+			out[j], out[j-1] = out[j-1], out[j]
+		}
+	}
+	return out
+}
+
 // RenderMap renders a hybrid ASCII grid + legend from a MapResponse.
+// Only rows and columns that contain at least one room are rendered, eliminating
+// blank padding rows caused by sparse coordinate systems.
+// East/south connectors are only drawn when the neighboring cell is also discovered.
 //
 // Precondition: resp may be nil or have no tiles.
 // Postcondition: Returns a non-empty string safe for telnet display.
@@ -352,75 +370,70 @@ func RenderMap(resp *gamev1.MapResponse) string {
 		return "No map data.\r\n"
 	}
 
-	// Find grid bounds
-	minX, minY := resp.Tiles[0].X, resp.Tiles[0].Y
-	maxX, maxY := resp.Tiles[0].X, resp.Tiles[0].Y
-	for _, t := range resp.Tiles {
-		if t.X < minX {
-			minX = t.X
-		}
-		if t.Y < minY {
-			minY = t.Y
-		}
-		if t.X > maxX {
-			maxX = t.X
-		}
-		if t.Y > maxY {
-			maxY = t.Y
-		}
-	}
-
-	// Build lookup by (x,y)
+	// Build coordinate lookup.
 	byCoord := make(map[[2]int32]*gamev1.MapTile)
 	for i := range resp.Tiles {
 		t := resp.Tiles[i]
 		byCoord[[2]int32{t.X, t.Y}] = t
 	}
 
-	// Assign legend numbers top-to-bottom, left-to-right so the number shown
-	// in each grid cell matches its legend entry.
+	// Collect unique X and Y values that have rooms, sorted ascending.
+	xSet := make(map[int32]bool)
+	ySet := make(map[int32]bool)
+	for _, t := range resp.Tiles {
+		xSet[t.X] = true
+		ySet[t.Y] = true
+	}
+	xs := sortedInt32Set(xSet)
+	ys := sortedInt32Set(ySet)
+
+	// Assign legend numbers top-to-bottom, left-to-right.
 	numByCoord := make(map[[2]int32]int)
-	num := 1
-	for y := minY; y <= maxY; y++ {
-		for x := minX; x <= maxX; x++ {
+	n := 1
+	for _, y := range ys {
+		for _, x := range xs {
 			if _, ok := byCoord[[2]int32{x, y}]; ok {
-				numByCoord[[2]int32{x, y}] = num
-				num++
+				numByCoord[[2]int32{x, y}] = n
+				n++
 			}
 		}
 	}
 
 	exitSet := func(t *gamev1.MapTile) map[string]bool {
-		s := make(map[string]bool)
+		s := make(map[string]bool, len(t.Exits))
 		for _, e := range t.Exits {
 			s[e] = true
 		}
 		return s
 	}
 
-	// cellWidth is 4: e.g. "[ 1]", "[10]", "<@1>". Connector is 1 char.
-	const cellWidth = 4
+	// Each cell is 4 chars wide: "[ 1]" … "[99]" or "< 1>" … "<99>".
+	// East connector between cells: 1 char ("-" or " ").
+	// South connector below a cell: "  | " (4 chars) or "    ".
+	const cellW = 4
 
 	var sb strings.Builder
 	sb.WriteString("\r\n")
 
-	for y := minY; y <= maxY; y++ {
+	for yi, y := range ys {
 		// Room row
-		for x := minX; x <= maxX; x++ {
+		for xi, x := range xs {
 			t := byCoord[[2]int32{x, y}]
 			if t == nil {
-				sb.WriteString(strings.Repeat(" ", cellWidth))
+				sb.WriteString("    ")
 			} else {
-				n := numByCoord[[2]int32{x, y}]
+				num := numByCoord[[2]int32{x, y}]
 				if t.Current {
-					sb.WriteString(fmt.Sprintf("<%2d>", n))
+					sb.WriteString(fmt.Sprintf("<%2d>", num))
 				} else {
-					sb.WriteString(fmt.Sprintf("[%2d]", n))
+					sb.WriteString(fmt.Sprintf("[%2d]", num))
 				}
 			}
-			if x < maxX {
-				t := byCoord[[2]int32{x, y}]
-				if t != nil && exitSet(t)["east"] {
+			// East connector: only when both this cell and the next column cell exist.
+			if xi < len(xs)-1 {
+				nextX := xs[xi+1]
+				tEast := byCoord[[2]int32{nextX, y}]
+				if t != nil && tEast != nil && exitSet(t)["east"] {
 					sb.WriteString("-")
 				} else {
 					sb.WriteString(" ")
@@ -429,28 +442,30 @@ func RenderMap(resp *gamev1.MapResponse) string {
 		}
 		sb.WriteString("\r\n")
 
-		// South connector row
-		if y < maxY {
-			for x := minX; x <= maxX; x++ {
+		// South connector row: only between this row and the next occupied row.
+		if yi < len(ys)-1 {
+			nextY := ys[yi+1]
+			for xi, x := range xs {
 				t := byCoord[[2]int32{x, y}]
-				if t != nil && exitSet(t)["south"] {
-					sb.WriteString(" |  ")
+				tSouth := byCoord[[2]int32{x, nextY}]
+				if t != nil && tSouth != nil && exitSet(t)["south"] {
+					sb.WriteString("  | ")
 				} else {
-					sb.WriteString(strings.Repeat(" ", cellWidth))
+					sb.WriteString(strings.Repeat(" ", cellW))
 				}
-				if x < maxX {
-					sb.WriteString(" ")
+				if xi < len(xs)-1 {
+					sb.WriteString(" ") // aligns under east connector column
 				}
 			}
 			sb.WriteString("\r\n")
 		}
 	}
 
-	// Legend — ordered top-to-bottom, left-to-right to match grid numbering.
+	// Legend — same top-to-bottom, left-to-right ordering as number assignment.
 	sb.WriteString("\r\nLegend:\r\n")
 	legendNum := 1
-	for y := minY; y <= maxY; y++ {
-		for x := minX; x <= maxX; x++ {
+	for _, y := range ys {
+		for _, x := range xs {
 			t := byCoord[[2]int32{x, y}]
 			if t == nil {
 				continue
