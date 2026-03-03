@@ -47,6 +47,7 @@ const (
 	HandlerChar                = "char"
 	HandlerArchetypeSelection  = "archetype_selection"
 	HandlerUseEquipment        = "use_equipment"
+	HandlerRoomEquip           = "room_equip"
 )
 
 // Command defines a player-invocable command.
@@ -122,6 +123,7 @@ func BuiltinCommands() []Command {
 		// Admin commands
 		{Name: "setrole", Aliases: nil, Help: "Set a player's role (admin only)", Category: CategoryAdmin, Handler: HandlerSetRole},
 		{Name: "teleport", Aliases: []string{"tp"}, Help: "Teleport a player to a room (admin only)", Category: CategoryAdmin, Handler: HandlerTeleport},
+		{Name: "roomequip", Aliases: nil, Help: "Manage room equipment (editor)", Category: CategoryAdmin, Handler: HandlerRoomEquip},
 	}
 }
 
