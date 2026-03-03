@@ -105,6 +105,7 @@ func main() {
 	)
 	charRepo := postgres.NewCharacterRepository(pool.DB())
 	accountRepo := postgres.NewAccountRepository(pool.DB())
+	automapRepo := postgres.NewAutomapRepository(pool.DB())
 
 	// Create managers
 	sessMgr := session.NewManager()
@@ -428,7 +429,7 @@ func main() {
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
 		jobReg, condRegistry, *loadoutsDir,
 	)
 

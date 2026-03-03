@@ -647,3 +647,15 @@ func TestManager_PlayersInRoomDetails_EmptyRoomReturnsEmpty(t *testing.T) {
 	m := NewManager()
 	assert.Empty(t, m.PlayersInRoomDetails("nonexistent"))
 }
+
+func TestPlayerSession_AutomapCache_InitializedOnAdd(t *testing.T) {
+	m := NewManager()
+	sess, err := m.AddPlayer(AddPlayerOptions{
+		UID: "u1", Username: "alice", CharName: "Alice",
+		CharacterID: 1, RoomID: "r1", Role: "player",
+		CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, sess.AutomapCache)
+	require.Empty(t, sess.AutomapCache)
+}

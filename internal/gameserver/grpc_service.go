@@ -25,6 +25,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/scripting"
+	"github.com/cory-johannsen/mud/internal/storage/postgres"
 
 	lua "github.com/yuin/gopher-lua"
 )
@@ -83,6 +84,7 @@ type GameServiceServer struct {
 	respawnMgr   *npc.RespawnManager
 	floorMgr     *inventory.FloorManager
 	roomEquipMgr *inventory.RoomEquipmentManager
+	automapRepo  *postgres.AutomapRepository
 	invRegistry  *inventory.Registry
 	accountAdmin AccountAdmin
 	clock        *GameClock
@@ -121,6 +123,7 @@ func NewGameServiceServer(
 	respawnMgr *npc.RespawnManager,
 	floorMgr *inventory.FloorManager,
 	roomEquipMgr *inventory.RoomEquipmentManager,
+	automapRepo *postgres.AutomapRepository,
 	invRegistry *inventory.Registry,
 	accountAdmin AccountAdmin,
 	clock *GameClock,
@@ -143,6 +146,7 @@ func NewGameServiceServer(
 		respawnMgr:   respawnMgr,
 		floorMgr:     floorMgr,
 		roomEquipMgr: roomEquipMgr,
+		automapRepo:  automapRepo,
 		invRegistry:  invRegistry,
 		accountAdmin: accountAdmin,
 		clock:        clock,
@@ -243,6 +247,29 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		return fmt.Errorf("adding player: %w", err)
 	}
 	defer s.cleanupPlayer(uid, username)
+
+	// Load automap cache from DB and record spawn room discovery.
+	if s.automapRepo != nil {
+		discovered, loadErr := s.automapRepo.LoadAll(stream.Context(), characterID)
+		if loadErr != nil {
+			s.logger.Warn("loading automap", zap.Error(loadErr))
+		} else {
+			sess.AutomapCache = discovered
+		}
+	}
+	// Record spawn room discovery.
+	if spawnRoom != nil {
+		zID := spawnRoom.ZoneID
+		if sess.AutomapCache[zID] == nil {
+			sess.AutomapCache[zID] = make(map[string]bool)
+		}
+		if !sess.AutomapCache[zID][spawnRoom.ID] {
+			sess.AutomapCache[zID][spawnRoom.ID] = true
+			if s.automapRepo != nil {
+				_ = s.automapRepo.Insert(stream.Context(), characterID, zID, spawnRoom.ID)
+			}
+		}
+	}
 
 	// Load persisted equipment state if charSaver supports it.
 	if characterID > 0 && s.charSaver != nil {
@@ -584,6 +611,22 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 				lua.LString(result.View.RoomId),
 				lua.LString(result.OldRoomID),
 			)
+		}
+	}
+
+	// Record automap discovery for the new room.
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		zID := newRoom.ZoneID
+		if sess.AutomapCache[zID] == nil {
+			sess.AutomapCache[zID] = make(map[string]bool)
+		}
+		if !sess.AutomapCache[zID][newRoom.ID] {
+			sess.AutomapCache[zID][newRoom.ID] = true
+			if s.automapRepo != nil {
+				if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, zID, newRoom.ID); err != nil {
+					s.logger.Warn("persisting map discovery", zap.Error(err))
+				}
+			}
 		}
 	}
 

@@ -47,6 +47,9 @@ type PlayerSession struct {
 	// Status is the player's current combat state.
 	// Maps to gamev1.CombatStatus enum values: 0=Unspecified/Idle, 1=Idle, 2=InCombat, 3=Resting, 4=Unconscious.
 	Status int32
+	// AutomapCache holds discovered rooms keyed by zone ID then room ID.
+	// Populated at login from the database; written through on each new discovery.
+	AutomapCache map[string]map[string]bool
 }
 
 // Manager tracks all active player sessions and room occupancy.
@@ -137,7 +140,8 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		Level:             level,
 		Entity:            entity,
 		// Status 1 = IDLE: newly connected players are idle by default.
-		Status: 1,
+		Status:       1,
+		AutomapCache: make(map[string]map[string]bool),
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)
