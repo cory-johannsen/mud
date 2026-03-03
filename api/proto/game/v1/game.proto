@@ -174,8 +174,26 @@ enum RoomEventType {
 
 // PlayerList contains the players in the current room.
 message PlayerList {
-  string room_title = 1;
-  repeated string players = 2;
+  string              room_title = 1;
+  repeated PlayerInfo players    = 2;
+}
+
+// CombatStatus describes a player's current combat state.
+enum CombatStatus {
+    COMBAT_STATUS_UNSPECIFIED = 0;
+    COMBAT_STATUS_IDLE        = 1;
+    COMBAT_STATUS_IN_COMBAT   = 2;
+    COMBAT_STATUS_RESTING     = 3;
+    COMBAT_STATUS_UNCONSCIOUS = 4;
+}
+
+// PlayerInfo carries per-player detail for the who command.
+message PlayerInfo {
+    string       name         = 1;
+    int32        level        = 2;
+    string       job          = 3;
+    string       health_label = 4;
+    CombatStatus status       = 5;
 }
 
 // ExitList contains the exits from the current room.
