@@ -263,6 +263,29 @@ zone:
 	assert.Empty(t, room.Spawns)
 }
 
+func TestLoader_ParsesRoomEquipment(t *testing.T) {
+	zones, err := LoadZonesFromDir("../../../content/zones")
+	require.NoError(t, err)
+	var found *RoomEquipmentConfig
+	for _, z := range zones {
+		for _, r := range z.Rooms {
+			for i := range r.Equipment {
+				found = &r.Equipment[i]
+				break
+			}
+			if found != nil {
+				break
+			}
+		}
+		if found != nil {
+			break
+		}
+	}
+	require.NotNil(t, found, "expected at least one room with equipment defined")
+	assert.NotEmpty(t, found.ItemID)
+	assert.Greater(t, found.MaxCount, 0)
+}
+
 func TestLoadZone_ScriptFieldsAbsent_ZeroValue(t *testing.T) {
 	yamlData := []byte(`
 zone:

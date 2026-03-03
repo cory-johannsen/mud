@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -32,14 +33,24 @@ type yamlRoomSpawn struct {
 	RespawnAfter string `yaml:"respawn_after"`
 }
 
+// yamlRoomEquipment is the YAML representation of a room equipment config.
+type yamlRoomEquipment struct {
+	ItemID       string `yaml:"item_id"`
+	MaxCount     int    `yaml:"max_count"`
+	RespawnAfter string `yaml:"respawn_after"`
+	Immovable    bool   `yaml:"immovable"`
+	Script       string `yaml:"script"`
+}
+
 // yamlRoom is the YAML representation of a room.
 type yamlRoom struct {
-	ID          string            `yaml:"id"`
-	Title       string            `yaml:"title"`
-	Description string            `yaml:"description"`
-	Exits       []yamlExit        `yaml:"exits"`
-	Properties  map[string]string `yaml:"properties"`
-	Spawns      []yamlRoomSpawn   `yaml:"spawns"`
+	ID          string              `yaml:"id"`
+	Title       string              `yaml:"title"`
+	Description string              `yaml:"description"`
+	Exits       []yamlExit          `yaml:"exits"`
+	Properties  map[string]string   `yaml:"properties"`
+	Spawns      []yamlRoomSpawn     `yaml:"spawns"`
+	Equipment   []yamlRoomEquipment `yaml:"equipment"`
 }
 
 // yamlExit is the YAML representation of an exit.
@@ -149,6 +160,19 @@ func convertYAMLZone(yz yamlZone) *Zone {
 				Template:     ys.Template,
 				Count:        ys.Count,
 				RespawnAfter: ys.RespawnAfter,
+			})
+		}
+		for _, e := range yr.Equipment {
+			dur, err := time.ParseDuration(e.RespawnAfter)
+			if err != nil {
+				dur = 0
+			}
+			room.Equipment = append(room.Equipment, RoomEquipmentConfig{
+				ItemID:       e.ItemID,
+				MaxCount:     e.MaxCount,
+				RespawnAfter: dur,
+				Immovable:    e.Immovable,
+				Script:       e.Script,
 			})
 		}
 		zone.Rooms[room.ID] = room

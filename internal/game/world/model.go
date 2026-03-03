@@ -95,6 +95,18 @@ type RoomSpawnConfig struct {
 	RespawnAfter string
 }
 
+// RoomEquipmentConfig defines a static or respawning item present in a room.
+//
+// Precondition: ItemID must reference a valid ItemDef ID.
+// Postcondition: Immovable items with RespawnAfter==0 persist indefinitely.
+type RoomEquipmentConfig struct {
+	ItemID       string        // references inventory.ItemDef.ID
+	MaxCount     int           // max live instances allowed in this room
+	RespawnAfter time.Duration // 0 = permanent (never despawn); >0 = respawn after pickup
+	Immovable    bool          // if true, cannot be picked up
+	Script       string        // path to Lua script for use effect; empty = no effect
+}
+
 // Room represents a location in the game world.
 type Room struct {
 	// ID uniquely identifies this room within the zone.
@@ -111,6 +123,8 @@ type Room struct {
 	Properties map[string]string
 	// Spawns lists NPC templates that populate this room and their respawn config.
 	Spawns []RoomSpawnConfig
+	// Equipment lists static or respawning items present in this room.
+	Equipment []RoomEquipmentConfig
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.
