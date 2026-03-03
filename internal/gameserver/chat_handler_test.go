@@ -115,6 +115,16 @@ func TestChatHandler_Who(t *testing.T) {
 	assert.ElementsMatch(t, []string{"Alice", "Bob"}, names)
 }
 
+func TestChatHandler_Who_NotFound(t *testing.T) {
+	sessMgr := session.NewManager()
+	h := NewChatHandler(sessMgr)
+
+	list, err := h.Who("nonexistent-uid")
+	assert.Nil(t, list)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "nonexistent-uid")
+}
+
 func TestChatHandler_Who_PopulatesPlayerInfo(t *testing.T) {
 	sessMgr := session.NewManager()
 	h := NewChatHandler(sessMgr)

@@ -37,17 +37,26 @@ func HealthLabel(current, max int) string {
 	}
 }
 
+// combatStatus constants mirror gamev1.CombatStatus enum values.
+// They are defined locally to avoid importing the gamev1 proto package into the command layer.
+const (
+	combatStatusIdle        int32 = 1
+	combatStatusInCombat    int32 = 2
+	combatStatusResting     int32 = 3
+	combatStatusUnconscious int32 = 4
+)
+
 // StatusLabel returns a human-readable label for a CombatStatus int32 value.
 //
 // Precondition: status may be any int32.
 // Postcondition: Returns one of: "Idle", "In Combat", "Resting", "Unconscious".
 func StatusLabel(status int32) string {
 	switch status {
-	case 2:
+	case combatStatusInCombat:
 		return "In Combat"
-	case 3:
+	case combatStatusResting:
 		return "Resting"
-	case 4:
+	case combatStatusUnconscious:
 		return "Unconscious"
 	default:
 		return "Idle"
