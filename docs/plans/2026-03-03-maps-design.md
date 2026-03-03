@@ -15,7 +15,7 @@ Players have an automap that grows as they explore. It can be consulted with the
 
 Four components:
 
-**1. Room coordinates** — Add optional `MapX int` / `MapY int` to `Room` (yaml: `map_x`, `map_y`). On render, walk the exit graph (N/S/E/W) to assign grid positions, substituting explicit YAML coords where set. Rooms without cardinal exits or explicit coords are omitted from the 2D grid.
+**1. Room coordinates** — Add required `MapX int` / `MapY int` to `Room` (yaml: `map_x`, `map_y`). Zone loader fails fast if any room is missing coordinates. The `map` command renders directly from stored coordinates — no graph traversal.
 
 **2. Automap persistence** — New DB table `character_map_rooms(character_id, zone_id, room_id, PRIMARY KEY(...))`. `AutomapRepository` handles insert-on-discover and bulk-load. An in-memory `AutomapCache` (per session) is populated at login and written through on each new room discovery.
 
@@ -23,7 +23,7 @@ Four components:
 
 **4. `map` command** — Full CMD pipeline (CMD-1 through CMD-7). Renders hybrid ASCII grid + numbered legend. Current room marked `[@]`, discovered rooms `[#]`, exits as `---` / `|`. Legend lists room number → name.
 
-**Selected approach:** Explicit x,y with inference fallback — infer layout by default; allow optional `map_x`/`map_y` YAML overrides for zones with irregular geometry.
+**Selected approach:** Mandatory explicit coordinates — every room must declare `map_x`/`map_y` in YAML; zone load fails fast if any room is missing them. No inference.
 
 ---
 
@@ -43,8 +43,8 @@ CREATE TABLE character_map_rooms (
 ### Room struct additions
 
 ```go
-MapX int `yaml:"map_x,omitempty"`
-MapY int `yaml:"map_y,omitempty"`
+MapX int `yaml:"map_x"`
+MapY int `yaml:"map_y"`
 ```
 
 ### Proto additions
@@ -76,7 +76,7 @@ message MapResponse {
 
 ## Testing Plan
 
-- **Coordinate inference** — property tests: any connected room graph produces a grid with no two rooms at the same (x,y); YAML overrides are honored exactly
+- **Room coordinates** — table tests: zone load fails if any room is missing `map_x`/`map_y`; all rooms in valid zone have non-overlapping coordinates
 - **AutomapRepository** — table tests: insert new room, duplicate insert is idempotent, load returns all discovered rooms for character
 - **AutomapCache** — property tests: discover N rooms in any order, cache contains exactly the discovered set; bulk-reveal adds all zone rooms
 - **`map` command** — table tests: empty map renders gracefully, single room, linear corridor, branching rooms; current room always `[@]`
