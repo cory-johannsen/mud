@@ -536,6 +536,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleArchetypeSelection(uid, p.ArchetypeSelection)
 	case *gamev1.ClientMessage_UseEquipment:
 		return s.handleUseEquipment(uid, p.UseEquipment.InstanceId)
+	case *gamev1.ClientMessage_RoomEquip:
+		return s.handleRoomEquip(uid, p.RoomEquip)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1846,4 +1848,80 @@ func (s *GameServiceServer) handleUseEquipment(uid, instanceID string) (*gamev1.
 		msg = result.String()
 	}
 	return messageEvent(msg), nil
+}
+
+// handleRoomEquip processes a RoomEquip command, performing add/remove/list/modify
+// operations on the room equipment configuration for the player's current room.
+//
+// Precondition: uid must map to an active player session; req must be non-nil.
+// Postcondition: Returns a ServerEvent with the result text or an error.
+func (s *GameServiceServer) handleRoomEquip(uid string, req *gamev1.RoomEquipRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.roomEquipMgr == nil {
+		return messageEvent("Room equipment manager not available."), nil
+	}
+	roomID := sess.RoomID
+	switch req.SubCommand {
+	case "list":
+		cfgs := s.roomEquipMgr.ListConfigs(roomID)
+		if len(cfgs) == 0 {
+			return messageEvent("No equipment configured for this room."), nil
+		}
+		var sb strings.Builder
+		for _, c := range cfgs {
+			sb.WriteString(fmt.Sprintf("  %s (max:%d respawn:%s immovable:%v)\r\n",
+				c.ItemID, c.MaxCount, c.RespawnAfter, c.Immovable))
+		}
+		return messageEvent(sb.String()), nil
+	case "add":
+		if req.ItemId == "" {
+			return messageEvent("Usage: roomequip add <item_id> [max_count] [respawn] [immovable] [script]"), nil
+		}
+		dur, _ := time.ParseDuration(req.Respawn)
+		count := int(req.MaxCount)
+		if count < 1 {
+			count = 1
+		}
+		cfg := world.RoomEquipmentConfig{
+			ItemID:       req.ItemId,
+			MaxCount:     count,
+			RespawnAfter: dur,
+			Immovable:    req.Immovable,
+			Script:       req.Script,
+		}
+		s.roomEquipMgr.AddConfig(roomID, cfg)
+		return messageEvent(fmt.Sprintf("Added %s to room equipment.", req.ItemId)), nil
+	case "remove":
+		if req.ItemId == "" {
+			return messageEvent("Usage: roomequip remove <item_id>"), nil
+		}
+		if !s.roomEquipMgr.RemoveConfig(roomID, req.ItemId) {
+			return messageEvent(fmt.Sprintf("Item %q not found in room equipment.", req.ItemId)), nil
+		}
+		return messageEvent(fmt.Sprintf("Removed %s from room equipment.", req.ItemId)), nil
+	case "modify":
+		if req.ItemId == "" {
+			return messageEvent("Usage: roomequip modify <item_id> [max_count] [respawn] [immovable] [script]"), nil
+		}
+		s.roomEquipMgr.RemoveConfig(roomID, req.ItemId)
+		dur, _ := time.ParseDuration(req.Respawn)
+		count := int(req.MaxCount)
+		if count < 1 {
+			count = 1
+		}
+		cfg := world.RoomEquipmentConfig{
+			ItemID:       req.ItemId,
+			MaxCount:     count,
+			RespawnAfter: dur,
+			Immovable:    req.Immovable,
+			Script:       req.Script,
+		}
+		s.roomEquipMgr.AddConfig(roomID, cfg)
+		return messageEvent(fmt.Sprintf("Modified %s in room equipment.", req.ItemId)), nil
+	default:
+		return messageEvent("Usage: roomequip <add|remove|list|modify>"), nil
+	}
 }
