@@ -1534,17 +1534,31 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	// Armor slots.
 	view.Armor = make(map[string]string)
 	for slot, item := range sess.Equipment.Armor {
-		if item != nil {
-			view.Armor[string(slot)] = item.Name
+		if item == nil {
+			continue
 		}
+		name := item.Name
+		if s.invRegistry != nil {
+			if def, ok := s.invRegistry.Armor(item.ItemDefID); ok {
+				name = def.Name
+			}
+		}
+		view.Armor[string(slot)] = name
 	}
 
 	// Accessory slots.
 	view.Accessories = make(map[string]string)
 	for slot, item := range sess.Equipment.Accessories {
-		if item != nil {
-			view.Accessories[string(slot)] = item.Name
+		if item == nil {
+			continue
 		}
+		name := item.Name
+		if s.invRegistry != nil {
+			if def, ok := s.invRegistry.Item(item.ItemDefID); ok {
+				name = def.Name
+			}
+		}
+		view.Accessories[string(slot)] = name
 	}
 
 	// Weapons from active loadout.

@@ -224,6 +224,17 @@ func abilityBonus(score int32) string {
 	return fmt.Sprintf("%d (%d)", mod, score)
 }
 
+// formatSlotLabel converts a slot key like "left_arm" to "Left Arm".
+func formatSlotLabel(slot string) string {
+	words := strings.Split(slot, "_")
+	for i, w := range words {
+		if len(w) > 0 {
+			words[i] = strings.ToUpper(w[:1]) + w[1:]
+		}
+	}
+	return strings.Join(words, " ")
+}
+
 // RenderCharacterSheet formats a CharacterSheetView as a detailed Telnet character sheet.
 //
 // Precondition: csv must be non-nil.
@@ -279,7 +290,7 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
 		b.WriteString("\r\n")
 		for slot, item := range armor {
 			if item != "" {
-				b.WriteString(fmt.Sprintf("%s: %s\r\n", slot, item))
+				b.WriteString(fmt.Sprintf("%s: %s\r\n", formatSlotLabel(slot), item))
 			}
 		}
 	}
