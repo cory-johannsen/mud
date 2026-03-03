@@ -261,7 +261,7 @@ zone:
         - direction: south
           target: trout_parking_lot
       map_x: 6
-      map_y: 6
+      map_y: 7
       spawns:
         - template: outlet_scavenger
           count: 1
@@ -447,7 +447,7 @@ zone:
         - direction: south
           target: trout_edgefield
       map_x: 8
-      map_y: 2
+      map_y: 3
       properties:
         lighting: dappled
         atmosphere: green

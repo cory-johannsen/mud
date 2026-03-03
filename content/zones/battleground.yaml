@@ -177,7 +177,7 @@ zone:
         - direction: north
           target: battle_reeducation_center
       map_x: 6
-      map_y: -2
+      map_y: -1
       spawns:
         - template: commissar
           count: 1
@@ -240,7 +240,7 @@ zone:
         - direction: east
           target: battle_market_square
       map_x: 2
-      map_y: -2
+      map_y: -1
       spawns:
         - template: collective_guardian
           count: 1
@@ -418,7 +418,7 @@ zone:
         - direction: east
           target: battle_farm_west
       map_x: 2
-      map_y: -4
+      map_y: -3
       spawns:
         - template: field_worker
           count: 1

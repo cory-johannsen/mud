@@ -414,7 +414,7 @@ zone:
         - direction: east
           target: aloha_warehouse_district
       map_x: 2
-      map_y: 4
+      map_y: 3
       spawns:
         - template: smuggler
           count: 1

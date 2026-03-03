@@ -193,6 +193,8 @@ func genValidZone(t *rapid.T) *Zone {
 			Title:       "Room " + id,
 			Description: "Description of " + id,
 			Properties:  map[string]string{},
+			MapX:        i * 2,
+			MapY:        0,
 		}
 		// Add a random exit to another room
 		if numRooms > 1 {
@@ -231,6 +233,8 @@ func validTestZone() *Zone {
 					{Direction: North, TargetRoom: "room_b"},
 				},
 				Properties: map[string]string{},
+				MapX:        0,
+				MapY:        0,
 			},
 			"room_b": {
 				ID:          "room_b",
@@ -241,6 +245,8 @@ func validTestZone() *Zone {
 					{Direction: South, TargetRoom: "room_a"},
 				},
 				Properties: map[string]string{},
+				MapX:        0,
+				MapY:        2,
 			},
 		},
 	}

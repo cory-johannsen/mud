@@ -147,7 +147,7 @@ zone:
         - direction: north
           target: sei_signal_tower
       map_x: 6
-      map_y: 6
+      map_y: 7
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -353,7 +353,7 @@ zone:
         - direction: west
           target: sei_transformer_station
       map_x: 6
-      map_y: 8
+      map_y: 9
       spawns:
         - template: warehouse_guard
           count: 1
@@ -399,7 +399,7 @@ zone:
         - direction: east
           target: sei_river_access
       map_x: 6
-      map_y: 4
+      map_y: 5
       properties:
         lighting: elevated
         atmosphere: wind
@@ -421,7 +421,7 @@ zone:
         - direction: south
           target: sei_container_maze
       map_x: 4
-      map_y: 6
+      map_y: 7
       spawns:
         - template: warehouse_guard
           count: 1
@@ -445,7 +445,7 @@ zone:
         - direction: east
           target: sei_industrial_way
       map_x: 4
-      map_y: 8
+      map_y: 9
       spawns:
         - template: industrial_scav
           count: 1

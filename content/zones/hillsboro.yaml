@@ -208,7 +208,7 @@ zone:
         - direction: east
           target: hills_training_grounds
       map_x: 0
-      map_y: 2
+      map_y: 3
       spawns:
         - template: hillsboro_knight
           count: 2
@@ -275,7 +275,7 @@ zone:
         - direction: south
           target: hills_tanasbourne_ruins
       map_x: 0
-      map_y: 4
+      map_y: 5
       properties:
         lighting: overcast
         atmosphere: bustling
@@ -315,7 +315,7 @@ zone:
         - direction: north
           target: hills_cornell_road
       map_x: 2
-      map_y: 2
+      map_y: 3
       spawns:
         - template: intel_guard
           count: 1
@@ -340,7 +340,7 @@ zone:
         - direction: west
           target: hills_suburban_wasteland
       map_x: 0
-      map_y: 6
+      map_y: 7
       properties:
         lighting: dim
         atmosphere: desolate
@@ -361,7 +361,7 @@ zone:
         - direction: north
           target: hills_helvetia_overlook
       map_x: 4
-      map_y: 2
+      map_y: 3
       spawns:
         - template: intel_guard
           count: 1
@@ -399,7 +399,7 @@ zone:
         - direction: west
           target: hills_serf_quarters
       map_x: 2
-      map_y: 6
+      map_y: 7
       properties:
         lighting: harsh
         atmosphere: tense

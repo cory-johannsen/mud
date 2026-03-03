@@ -293,7 +293,7 @@ zone:
         - direction: south
           target: pdx_parking_garage
       map_x: 6
-      map_y: 4
+      map_y: 5
       properties:
         lighting: dim
         atmosphere: crowded

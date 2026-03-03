@@ -186,7 +186,7 @@ zone:
         - direction: northeast
           target: ross_the_overgrowth
       map_x: 2
-      map_y: 8
+      map_y: 9
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -299,7 +299,7 @@ zone:
         - direction: down
           target: ross_quarry_floor
       map_x: -2
-      map_y: 6
+      map_y: 7
       properties:
         lighting: exposed
         atmosphere: wind
@@ -349,7 +349,7 @@ zone:
         - direction: west
           target: ross_lagoon
       map_x: -2
-      map_y: 4
+      map_y: 5
       spawns:
         - template: gravel_pit_boss
           count: 1
@@ -402,7 +402,7 @@ zone:
         - direction: north
           target: ross_west_shore
       map_x: -4
-      map_y: 4
+      map_y: 5
       properties:
         lighting: overcast
         atmosphere: still
@@ -422,7 +422,7 @@ zone:
         - direction: north
           target: ross_pit_edge
       map_x: 0
-      map_y: 4
+      map_y: 5
       properties:
         lighting: overcast
         atmosphere: industrial

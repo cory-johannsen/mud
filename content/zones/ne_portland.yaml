@@ -134,7 +134,7 @@ zone:
         - direction: east
           target: ne_sandy_boulevard
       map_x: 4
-      map_y: 4
+      map_y: 5
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -172,7 +172,7 @@ zone:
         - direction: west
           target: ne_rose_quarter
       map_x: 4
-      map_y: 4
+      map_y: 7
       properties:
         lighting: dim
         atmosphere: desolate
@@ -268,7 +268,7 @@ zone:
         - direction: north
           target: ne_columbia_blvd
       map_x: 4
-      map_y: 4
+      map_y: 9
       properties:
         lighting: overcast
         atmosphere: crowded
@@ -362,7 +362,7 @@ zone:
         - direction: south
           target: ne_sullivans_gulch
       map_x: 4
-      map_y: 6
+      map_y: 10
       properties:
         lighting: dim
         atmosphere: desolate
@@ -380,7 +380,7 @@ zone:
         - direction: east
           target: ne_williams_corridor
       map_x: 4
-      map_y: 6
+      map_y: 11
       spawns:
         - template: brew_warlord
           count: 1
@@ -402,7 +402,7 @@ zone:
         - direction: east
           target: ne_alberta_street
       map_x: 4
-      map_y: 2
+      map_y: 3
       spawns:
         - template: bike_courier
           count: 2
@@ -455,7 +455,7 @@ zone:
         - direction: north
           target: ne_cully_road
       map_x: 6
-      map_y: 4
+      map_y: 5
       properties:
         lighting: overcast
         atmosphere: quiet
@@ -475,7 +475,7 @@ zone:
         - direction: north
           target: ne_i5_bridge_approach
       map_x: 4
-      map_y: 2
+      map_y: 12
       properties:
         lighting: overcast
         atmosphere: desolate

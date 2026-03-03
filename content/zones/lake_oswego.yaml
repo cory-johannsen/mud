@@ -276,7 +276,7 @@ zone:
         - direction: east
           target: lo_millennium_park
       map_x: 2
-      map_y: 8
+      map_y: 9
       spawns:
         - template: oswego_guard
           count: 1
@@ -299,7 +299,7 @@ zone:
         - direction: south
           target: lo_country_club
       map_x: 6
-      map_y: 6
+      map_y: 7
       spawns:
         - template: hoa_enforcer
           count: 1
@@ -322,7 +322,7 @@ zone:
         - direction: west
           target: lo_supply_depot
       map_x: 6
-      map_y: 8
+      map_y: 9
       properties:
         lighting: candlelit
         atmosphere: underground
@@ -366,7 +366,7 @@ zone:
         - direction: south
           target: lo_checkpoint_south
       map_x: 6
-      map_y: 6
+      map_y: 11
       spawns:
         - template: oswego_guard
           count: 1
@@ -389,7 +389,7 @@ zone:
         - direction: east
           target: lo_patrol_route_east
       map_x: 6
-      map_y: 8
+      map_y: 13
       spawns:
         - template: oswego_guard
           count: 1
@@ -433,7 +433,7 @@ zone:
         - direction: north
           target: lo_hoa_headquarters
       map_x: 4
-      map_y: 8
+      map_y: 9
       spawns:
         - template: hoa_enforcer
           count: 1
@@ -477,7 +477,7 @@ zone:
         - direction: west
           target: lo_hoa_headquarters
       map_x: 6
-      map_y: 10
+      map_y: 14
       spawns:
         - template: hoa_enforcer
           count: 1
@@ -500,7 +500,7 @@ zone:
         - direction: north
           target: lo_the_commons
       map_x: 4
-      map_y: 10
+      map_y: 11
       properties:
         lighting: natural
         atmosphere: solemn

@@ -361,7 +361,7 @@ zone:
         - direction: south
           target: flats_hawthorne_approach
       map_x: 2
-      map_y: 6
+      map_y: 7
       properties:
         lighting: dim
         atmosphere: wary
@@ -382,7 +382,7 @@ zone:
         - direction: north
           target: flats_convenience_store
       map_x: 6
-      map_y: 6
+      map_y: 7
       properties:
         lighting: overcast
         atmosphere: domestic
@@ -446,7 +446,7 @@ zone:
         - direction: north
           target: flats_convenience_store
       map_x: 4
-      map_y: 4
+      map_y: 5
       spawns:
         - template: strip_mall_scav
           count: 1
@@ -471,7 +471,7 @@ zone:
         - direction: west
           target: flats_pawn_shop
       map_x: 6
-      map_y: 4
+      map_y: 5
       properties:
         lighting: dim
         atmosphere: commercial

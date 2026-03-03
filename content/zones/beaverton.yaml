@@ -262,7 +262,7 @@ zone:
         - direction: east
           target: beav_neighborhood_watch_east
       map_x: 4
-      map_y: 4
+      map_y: 5
       spawns:
         - template: beaverton_minuteman
           count: 1
@@ -287,7 +287,7 @@ zone:
         - direction: west
           target: beav_walker_road
       map_x: 0
-      map_y: 2
+      map_y: 3
       properties:
         lighting: overcast
         atmosphere: official
@@ -348,7 +348,7 @@ zone:
         - direction: north
           target: beav_hoa_court
       map_x: 0
-      map_y: 6
+      map_y: 7
       properties:
         lighting: firelight
         atmosphere: domestic
@@ -367,7 +367,7 @@ zone:
         - direction: east
           target: beav_hall_boulevard
       map_x: 0
-      map_y: 4
+      map_y: 5
       properties:
         lighting: fluorescent
         atmosphere: officious
@@ -387,7 +387,7 @@ zone:
         - direction: east
           target: beav_neighborhood_watch_north
       map_x: 0
-      map_y: 4
+      map_y: 8
       spawns:
         - template: cedar_hills_patrol
           count: 1
@@ -488,7 +488,7 @@ zone:
         - direction: west
           target: beav_progress_ridge
       map_x: 4
-      map_y: 6
+      map_y: 7
       spawns:
         - template: beaverton_minuteman
           count: 1

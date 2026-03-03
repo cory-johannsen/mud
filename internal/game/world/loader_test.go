@@ -136,6 +136,30 @@ func TestLoadZoneFromFile(t *testing.T) {
 	assert.Equal(t, "test", zone.ID)
 }
 
+func TestLoadZoneFromBytes_DuplicateMapCoords_ReturnsError(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test
+  description: Test zone
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 4
+      map_y: 4
+    - id: r2
+      title: Room 2
+      description: Desc
+      map_x: 4
+      map_y: 4
+`)
+	_, err := LoadZoneFromBytes(data)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "share map coordinates")
+}
+
 func TestLoadZoneFromBytes_MissingMapCoords_ReturnsError(t *testing.T) {
 	data := []byte(`
 zone:

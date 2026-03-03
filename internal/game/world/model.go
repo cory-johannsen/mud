@@ -242,5 +242,14 @@ func (z *Zone) Validate() error {
 			}
 		}
 	}
+	// Enforce unique map coordinates across all rooms.
+	coordSeen := make(map[[2]int]string) // (x,y) → first room ID
+	for _, r := range z.Rooms {
+		key := [2]int{r.MapX, r.MapY}
+		if first, dup := coordSeen[key]; dup {
+			return fmt.Errorf("zone %q: rooms %q and %q share map coordinates (%d, %d)", z.ID, first, r.ID, r.MapX, r.MapY)
+		}
+		coordSeen[key] = r.ID
+	}
 	return nil
 }
