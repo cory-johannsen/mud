@@ -93,12 +93,15 @@ func ConvertZone(
 			})
 		}
 
+		mapX, mapY := 0, 0
 		roomSpecs = append(roomSpecs, importer.RoomSpec{
 			ID:          importer.NameToID(name),
 			Title:       room.Name,
 			Description: strings.TrimSpace(room.Description),
 			Exits:       exits,
 			Properties:  props,
+			MapX:        &mapX,
+			MapY:        &mapY,
 		})
 	}
 

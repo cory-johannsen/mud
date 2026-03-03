@@ -23,6 +23,8 @@ type RoomSpec struct {
 	Description string            `yaml:"description"`
 	Exits       []ExitSpec        `yaml:"exits,omitempty"`
 	Properties  map[string]string `yaml:"properties,omitempty"`
+	MapX        *int              `yaml:"map_x"`
+	MapY        *int              `yaml:"map_y"`
 }
 
 // ExitSpec holds a single exit's data.
