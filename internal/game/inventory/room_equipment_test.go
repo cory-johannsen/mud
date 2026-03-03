@@ -130,3 +130,39 @@ func TestProperty_RoomEquipmentManager_SpawnCountNeverExceedsMax(t *testing.T) {
 		assert.LessOrEqual(t, len(items), maxCount)
 	})
 }
+
+func TestRoomEquipmentManager_GetInstance_Found(t *testing.T) {
+	mgr := inventory.NewRoomEquipmentManager()
+	mgr.InitRoom("r1", []world.RoomEquipmentConfig{
+		{ItemID: "medkit", MaxCount: 1, Immovable: false},
+	})
+	items := mgr.EquipmentInRoom("r1")
+	require.Len(t, items, 1)
+
+	got := mgr.GetInstance("r1", items[0].InstanceID)
+	require.NotNil(t, got)
+	assert.Equal(t, "medkit", got.ItemDefID)
+	assert.Equal(t, items[0].InstanceID, got.InstanceID)
+}
+
+func TestRoomEquipmentManager_GetInstance_NotFound(t *testing.T) {
+	mgr := inventory.NewRoomEquipmentManager()
+	mgr.InitRoom("r1", nil)
+	got := mgr.GetInstance("r1", "nonexistent")
+	assert.Nil(t, got)
+}
+
+func TestRoomEquipmentManager_RemoveConfig_CancelsPendingRespawns(t *testing.T) {
+	mgr := inventory.NewRoomEquipmentManager()
+	mgr.InitRoom("r1", []world.RoomEquipmentConfig{
+		{ItemID: "medkit", MaxCount: 1, RespawnAfter: 10 * time.Second, Immovable: false},
+	})
+	items := mgr.EquipmentInRoom("r1")
+	require.Len(t, items, 1)
+	mgr.Pickup("r1", items[0].InstanceID) // schedules respawn
+	mgr.RemoveConfig("r1", "medkit")      // should cancel respawn
+	// Even after waiting, ProcessRespawns should not re-add the item
+	time.Sleep(1 * time.Millisecond)
+	mgr.ProcessRespawns()
+	assert.Empty(t, mgr.EquipmentInRoom("r1"))
+}

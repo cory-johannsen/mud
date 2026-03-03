@@ -99,7 +99,8 @@ func (m *RoomEquipmentManager) GetInstance(roomID, instanceID string) *Equipment
 	defer m.mu.RUnlock()
 	for _, it := range m.rooms[roomID] {
 		if it.InstanceID == instanceID {
-			return it
+			cp := *it
+			return &cp
 		}
 	}
 	return nil
@@ -205,10 +206,9 @@ func (m *RoomEquipmentManager) RemoveConfig(roomID, itemID string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	cfgs := m.configs[roomID]
-	newCfgs := cfgs[:0]
+	var newCfgs []world.RoomEquipmentConfig
 	found := false
-	for _, c := range cfgs {
+	for _, c := range m.configs[roomID] {
 		if c.ItemID == itemID {
 			found = true
 		} else {
@@ -220,14 +220,23 @@ func (m *RoomEquipmentManager) RemoveConfig(roomID, itemID string) bool {
 	}
 	m.configs[roomID] = newCfgs
 
-	items := m.rooms[roomID]
-	newItems := items[:0]
-	for _, it := range items {
+	var newItems []*EquipmentInstance
+	for _, it := range m.rooms[roomID] {
 		if it.ItemDefID != itemID {
 			newItems = append(newItems, it)
 		}
 	}
 	m.rooms[roomID] = newItems
+
+	// Cancel any pending respawns for this item to prevent stale configIdx hazard.
+	var newRespawns []respawnEntry
+	for _, r := range m.respawns {
+		if r.roomID != roomID || r.itemDefID != itemID {
+			newRespawns = append(newRespawns, r)
+		}
+	}
+	m.respawns = newRespawns
+
 	return true
 }
 
