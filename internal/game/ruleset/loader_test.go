@@ -92,6 +92,20 @@ traits: []
 	})
 }
 
+func TestArchetypeYAML_KeyAbilitiesUseGuncheteNames(t *testing.T) {
+	archetypes, err := ruleset.LoadArchetypes("../../../content/archetypes")
+	require.NoError(t, err)
+	require.NotEmpty(t, archetypes)
+	validAbilities := map[string]bool{
+		"brutality": true, "quickness": true, "grit": true,
+		"reasoning": true, "savvy": true, "flair": true,
+	}
+	for _, a := range archetypes {
+		assert.True(t, validAbilities[a.KeyAbility],
+			"archetype %q has invalid key_ability %q (must be Gunchete name)", a.ID, a.KeyAbility)
+	}
+}
+
 func TestLoadRegions_ActualContent(t *testing.T) {
 	regions, err := ruleset.LoadRegions("../../../content/regions")
 	require.NoError(t, err)
