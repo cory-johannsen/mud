@@ -48,6 +48,7 @@ message ClientMessage {
     WearRequest wear = 31;
     RemoveArmorRequest remove_armor = 32;
     CharacterSheetRequest char_sheet = 33;
+    ArchetypeSelectionRequest archetype_selection = 34;
   }
 }
 
@@ -423,6 +424,11 @@ message ConditionInfo {
 
 // CharacterSheetRequest asks the server for the player's full character sheet.
 message CharacterSheetRequest {}
+
+// ArchetypeSelectionRequest asks the server to assign an archetype to the player's character.
+message ArchetypeSelectionRequest {
+  string archetype_id = 1;
+}
 
 // CharacterSheetView delivers the player's full character sheet.
 message CharacterSheetView {
