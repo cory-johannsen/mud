@@ -54,6 +54,8 @@ type AuthHandler struct {
 	regions        []*ruleset.Region
 	teams          []*ruleset.Team
 	jobs           []*ruleset.Job
+	archetypes     []*ruleset.Archetype
+	jobRegistry    *ruleset.JobRegistry
 	logger         *zap.Logger
 	gameServerAddr string
 	telnetCfg      config.TelnetConfig
@@ -62,23 +64,30 @@ type AuthHandler struct {
 // NewAuthHandler creates an AuthHandler backed by the given account and character stores.
 //
 // Precondition: accounts, characters, and logger must be non-nil. gameServerAddr must be a valid "host:port" address.
-// Postcondition: Returns an AuthHandler ready to handle sessions.
+// Postcondition: Returns an AuthHandler ready to handle sessions with a populated JobRegistry.
 func NewAuthHandler(
 	accounts AccountStore,
 	characters CharacterStore,
 	regions []*ruleset.Region,
 	teams []*ruleset.Team,
 	jobs []*ruleset.Job,
+	archetypes []*ruleset.Archetype,
 	logger *zap.Logger,
 	gameServerAddr string,
 	telnetCfg config.TelnetConfig,
 ) *AuthHandler {
+	reg := ruleset.NewJobRegistry()
+	for _, j := range jobs {
+		reg.Register(j)
+	}
 	return &AuthHandler{
 		accounts:       accounts,
 		characters:     characters,
 		regions:        regions,
 		teams:          teams,
 		jobs:           jobs,
+		archetypes:     archetypes,
+		jobRegistry:    reg,
 		logger:         logger,
 		gameServerAddr: gameServerAddr,
 		telnetCfg:      telnetCfg,

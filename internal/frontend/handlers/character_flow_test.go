@@ -287,6 +287,16 @@ func TestProperty_RandomizeRemaining_AlwaysValid(t *testing.T) {
 	})
 }
 
+func TestRenderArchetypeMenu_ContainsKeyAbility(t *testing.T) {
+	archetypes := []*ruleset.Archetype{
+		{ID: "aggressor", Name: "Aggressor", Description: "Violence solves everything.", KeyAbility: "brutality", HitPointsPerLevel: 10},
+	}
+	output := handlers.RenderArchetypeMenu(archetypes)
+	assert.Contains(t, output, "Aggressor")
+	assert.Contains(t, output, "brutality")
+	assert.Contains(t, output, "10")
+}
+
 // TestProperty_FormatCharacterStats verifies that for any character, the stats block
 // is non-empty and contains all six ability score labels plus HP.
 func TestProperty_FormatCharacterStats(t *testing.T) {

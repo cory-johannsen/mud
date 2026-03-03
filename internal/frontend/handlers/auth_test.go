@@ -103,7 +103,7 @@ func newAuthHandler(t *testing.T, store AccountStore, gsAddr string) *AuthHandle
 		IdleTimeout:     5 * time.Minute,
 		IdleGracePeriod: time.Minute,
 	}
-	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, logger, gsAddr, telnetCfg)
+	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, []*ruleset.Archetype{}, logger, gsAddr, telnetCfg)
 }
 
 // newAuthHandlerWithChar builds an AuthHandler whose character store returns one
@@ -117,7 +117,7 @@ func newAuthHandlerWithChar(t *testing.T, store AccountStore, char *character.Ch
 		IdleTimeout:     5 * time.Minute,
 		IdleGracePeriod: time.Minute,
 	}
-	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, logger, gsAddr, telnetCfg)
+	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, []*ruleset.Archetype{}, logger, gsAddr, telnetCfg)
 }
 
 // testGameServer starts an in-process gRPC game server with a minimal 2-room world

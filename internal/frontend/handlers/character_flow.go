@@ -301,20 +301,58 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	}
 	selectedTeam := teams[teamChoice-1]
 
-	// Step 4: Job selection — show jobs available to this team (general + team-exclusive)
-	var availableJobs []*ruleset.Job
-	for _, j := range h.jobs {
-		if j.Team == "" || j.Team == selectedTeam.ID {
-			availableJobs = append(availableJobs, j)
+	// Step 4: Archetype selection — show archetypes available for this team
+	archetypeIDs := h.jobRegistry.ArchetypesForTeam(selectedTeam.ID)
+	archetypeIDSet := make(map[string]bool, len(archetypeIDs))
+	for _, id := range archetypeIDs {
+		archetypeIDSet[id] = true
+	}
+	var availableArchetypes []*ruleset.Archetype
+	for _, a := range h.archetypes {
+		if archetypeIDSet[a.ID] {
+			availableArchetypes = append(availableArchetypes, a)
 		}
 	}
+	if len(availableArchetypes) == 0 {
+		h.logger.Error("no archetypes available for team", zap.String("team", selectedTeam.ID))
+		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "No archetypes available for team %s.", selectedTeam.Name))
+		return nil, nil
+	}
+	_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow, "\r\nChoose your archetype (%s):", selectedTeam.Name))
+	_ = conn.Write([]byte(RenderArchetypeMenu(availableArchetypes)))
+	_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select archetype [1-%d/R, default=R]: ", len(availableArchetypes)))
+	archetypeLine, err := conn.ReadLine()
+	if err != nil {
+		return nil, fmt.Errorf("reading archetype selection: %w", err)
+	}
+	archetypeLine = strings.TrimSpace(archetypeLine)
+	if strings.ToLower(archetypeLine) == "cancel" {
+		return nil, nil
+	}
+	var selectedArchetype *ruleset.Archetype
+	if IsRandomInput(archetypeLine) {
+		selectedArchetype = availableArchetypes[rand.Intn(len(availableArchetypes))]
+		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "Random archetype selected: %s", selectedArchetype.Name))
+	} else {
+		archetypeChoice := 0
+		if _, err := fmt.Sscanf(archetypeLine, "%d", &archetypeChoice); err != nil || archetypeChoice < 1 || archetypeChoice > len(availableArchetypes) {
+			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection."))
+			return nil, nil
+		}
+		selectedArchetype = availableArchetypes[archetypeChoice-1]
+	}
+
+	// Step 5: Job selection — show jobs available to this team and archetype
+	availableJobs := h.jobRegistry.JobsForTeamAndArchetype(selectedTeam.ID, selectedArchetype.ID)
 	if len(availableJobs) == 0 {
-		h.logger.Error("no jobs available for team", zap.String("team", selectedTeam.ID))
-		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "No jobs available for team %s.", selectedTeam.Name))
+		h.logger.Error("no jobs available for team+archetype",
+			zap.String("team", selectedTeam.ID),
+			zap.String("archetype", selectedArchetype.ID))
+		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "No jobs available for %s / %s.", selectedTeam.Name, selectedArchetype.Name))
 		return nil, nil
 	}
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow,
-		"\r\nChoose your job (%s jobs available):", selectedTeam.Name))
+		"\r\nChoose your job (%s / %s jobs available):", selectedTeam.Name, selectedArchetype.Name))
 	for i, j := range availableJobs {
 		exclusive := ""
 		if j.Team != "" {
@@ -404,6 +442,24 @@ func (h *AuthHandler) buildAndConfirm(
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
 		"Character %s created! [%s]", created.Name, elapsed))
 	return created, nil
+}
+
+// RenderArchetypeMenu returns the formatted archetype selection menu string.
+// Exported for testing.
+//
+// Precondition: archetypes must be non-nil (may be empty).
+// Postcondition: Returns a formatted string listing all archetypes with R option.
+func RenderArchetypeMenu(archetypes []*ruleset.Archetype) string {
+	var sb strings.Builder
+	for i, a := range archetypes {
+		sb.WriteString(fmt.Sprintf("  %s%d%s. %s%s%s (HP/lvl: %d, Key: %s)\r\n     %s\r\n",
+			telnet.Green, i+1, telnet.Reset,
+			telnet.BrightWhite, a.Name, telnet.Reset,
+			a.HitPointsPerLevel, a.KeyAbility,
+			a.Description))
+	}
+	sb.WriteString(fmt.Sprintf("  %sR%s. Random (default)\r\n", telnet.Green, telnet.Reset))
+	return sb.String()
 }
 
 // regionDisplayName returns the DisplayName for the region with the given id, or id itself if not found.

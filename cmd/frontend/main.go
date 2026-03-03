@@ -27,6 +27,7 @@ func main() {
 	regionsDir := flag.String("regions", "content/regions", "path to region YAML files directory")
 	teamsDir := flag.String("teams", "content/teams", "path to team YAML files directory")
 	jobsDir := flag.String("jobs", "content/jobs", "path to job YAML files directory")
+	archetypesDir := flag.String("archetypes", "content/archetypes", "path to archetype YAML files directory")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -72,16 +73,21 @@ func main() {
 	if err != nil {
 		logger.Fatal("loading jobs", zap.Error(err))
 	}
+	archetypes, err := ruleset.LoadArchetypes(*archetypesDir)
+	if err != nil {
+		logger.Fatal("loading archetypes", zap.Error(err))
+	}
 	logger.Info("ruleset loaded",
 		zap.Int("regions", len(regions)),
 		zap.Int("teams", len(teams)),
 		zap.Int("jobs", len(jobs)),
 	)
+	logger.Info("archetypes loaded", zap.Int("archetypes", len(archetypes)))
 
 	// Build services
 	accounts := postgres.NewAccountRepository(pool.DB())
 	characters := postgres.NewCharacterRepository(pool.DB())
-	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, logger, cfg.GameServer.Addr(), cfg.Telnet)
+	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, archetypes, logger, cfg.GameServer.Addr(), cfg.Telnet)
 	telnetAcceptor := telnet.NewAcceptor(cfg.Telnet, authHandler, logger)
 
 	// Wire lifecycle
