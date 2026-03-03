@@ -137,3 +137,49 @@ func TestProperty_JobRegistry_RoundTrip(t *testing.T) {
 		assert.Equal(t, team, reg.TeamFor(id))
 	})
 }
+
+func TestJobRegistry_ArchetypesForTeam_ReturnsMatchingArchetypes(t *testing.T) {
+	reg := ruleset.NewJobRegistry()
+	reg.Register(&ruleset.Job{ID: "striker_gun", Archetype: "aggressor", Team: "gun"})
+	reg.Register(&ruleset.Job{ID: "striker_machete", Archetype: "aggressor", Team: "machete"})
+	reg.Register(&ruleset.Job{ID: "fence", Archetype: "criminal", Team: "machete"})
+
+	gun := reg.ArchetypesForTeam("gun")
+	assert.Equal(t, []string{"aggressor"}, gun)
+
+	machete := reg.ArchetypesForTeam("machete")
+	assert.ElementsMatch(t, []string{"aggressor", "criminal"}, machete)
+}
+
+func TestJobRegistry_ArchetypesForTeam_UnknownTeamReturnsEmpty(t *testing.T) {
+	reg := ruleset.NewJobRegistry()
+	reg.Register(&ruleset.Job{ID: "striker_gun", Archetype: "aggressor", Team: "gun"})
+	assert.Empty(t, reg.ArchetypesForTeam("unknown"))
+}
+
+func TestJobRegistry_JobsForTeamAndArchetype_FiltersCorrectly(t *testing.T) {
+	reg := ruleset.NewJobRegistry()
+	reg.Register(&ruleset.Job{ID: "striker_gun", Archetype: "aggressor", Team: "gun"})
+	reg.Register(&ruleset.Job{ID: "fence", Archetype: "criminal", Team: "machete"})
+	reg.Register(&ruleset.Job{ID: "scout", Archetype: "aggressor", Team: "machete"})
+
+	jobs := reg.JobsForTeamAndArchetype("gun", "aggressor")
+	require.Len(t, jobs, 1)
+	assert.Equal(t, "striker_gun", jobs[0].ID)
+}
+
+func TestJobRegistry_JobsForTeamAndArchetype_NoMatchReturnsEmpty(t *testing.T) {
+	reg := ruleset.NewJobRegistry()
+	reg.Register(&ruleset.Job{ID: "striker_gun", Archetype: "aggressor", Team: "gun"})
+	assert.Empty(t, reg.JobsForTeamAndArchetype("machete", "aggressor"))
+}
+
+func TestProperty_JobRegistry_ArchetypesForTeam_NeverPanics(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		team := rapid.String().Draw(rt, "team")
+		reg := ruleset.NewJobRegistry()
+		reg.Register(&ruleset.Job{ID: "j1", Archetype: "a1", Team: "gun"})
+		_ = reg.ArchetypesForTeam(team)
+		_ = reg.JobsForTeamAndArchetype(team, "a1")
+	})
+}

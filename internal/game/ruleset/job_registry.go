@@ -1,5 +1,7 @@
 package ruleset
 
+import "sort"
+
 // JobRegistry provides fast lookup of team affiliation by job/class ID.
 type JobRegistry struct {
 	jobs map[string]*Job
@@ -45,4 +47,39 @@ func (r *JobRegistry) TeamFor(classID string) string {
 func (r *JobRegistry) Job(classID string) (*Job, bool) {
 	j, ok := r.jobs[classID]
 	return j, ok
+}
+
+// ArchetypesForTeam returns the distinct archetype IDs that have at least one job
+// available for the given team. Jobs with an empty Team field are available to all teams.
+//
+// Precondition: team may be any string.
+// Postcondition: Returns a deduplicated, sorted slice; empty slice (not nil) if none match.
+func (r *JobRegistry) ArchetypesForTeam(team string) []string {
+	seen := make(map[string]struct{})
+	for _, j := range r.jobs {
+		if j.Team == team || j.Team == "" {
+			seen[j.Archetype] = struct{}{}
+		}
+	}
+	result := make([]string, 0, len(seen))
+	for a := range seen {
+		result = append(result, a)
+	}
+	sort.Strings(result)
+	return result
+}
+
+// JobsForTeamAndArchetype returns all jobs that match the given team and archetype.
+// A job with an empty Team field is available to any team.
+//
+// Precondition: team and archetype may be any string.
+// Postcondition: Returns a non-nil slice (may be empty).
+func (r *JobRegistry) JobsForTeamAndArchetype(team, archetype string) []*Job {
+	result := make([]*Job, 0)
+	for _, j := range r.jobs {
+		if j.Archetype == archetype && (j.Team == team || j.Team == "") {
+			result = append(result, j)
+		}
+	}
+	return result
 }
