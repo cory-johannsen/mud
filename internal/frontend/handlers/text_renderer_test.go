@@ -99,7 +99,10 @@ func TestRenderRoomEvent_ArriveNoDirection(t *testing.T) {
 
 func TestRenderPlayerList(t *testing.T) {
 	pl := &gamev1.PlayerList{
-		Players: []string{"Alice", "Bob"},
+		Players: []*gamev1.PlayerInfo{
+			{Name: "Alice", Level: 2, Job: "Striker (Melee)", HealthLabel: "Healthy", Status: gamev1.CombatStatus_COMBAT_STATUS_IDLE},
+			{Name: "Bob", Level: 5, Job: "Boot (Gun)", HealthLabel: "Wounded", Status: gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT},
+		},
 	}
 	stripped := telnet.StripANSI(RenderPlayerList(pl))
 	assert.Contains(t, stripped, "Alice")
@@ -110,6 +113,37 @@ func TestRenderPlayerList_Empty(t *testing.T) {
 	pl := &gamev1.PlayerList{}
 	stripped := telnet.StripANSI(RenderPlayerList(pl))
 	assert.Contains(t, stripped, "Nobody else")
+}
+
+func TestRenderPlayerList_EmptyList(t *testing.T) {
+	pl := &gamev1.PlayerList{RoomTitle: "room1", Players: nil}
+	result := RenderPlayerList(pl)
+	assert.Contains(t, result, "Nobody")
+}
+
+func TestRenderPlayerList_ShowsLevelAndJob(t *testing.T) {
+	pl := &gamev1.PlayerList{
+		RoomTitle: "room1",
+		Players: []*gamev1.PlayerInfo{
+			{Name: "Raze", Level: 3, Job: "Striker (Gun)", HealthLabel: "Wounded", Status: gamev1.CombatStatus_COMBAT_STATUS_IDLE},
+		},
+	}
+	result := RenderPlayerList(pl)
+	assert.Contains(t, result, "Raze")
+	assert.Contains(t, result, "Lvl 3")
+	assert.Contains(t, result, "Striker (Gun)")
+}
+
+func TestRenderPlayerList_ShowsHealthLabel(t *testing.T) {
+	pl := &gamev1.PlayerList{
+		RoomTitle: "room1",
+		Players: []*gamev1.PlayerInfo{
+			{Name: "Ash", Level: 1, Job: "Boot (Gun)", HealthLabel: "Near Death", Status: gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT},
+		},
+	}
+	result := RenderPlayerList(pl)
+	assert.Contains(t, result, "Near Death")
+	assert.Contains(t, result, "In Combat")
 }
 
 func TestRenderExitList(t *testing.T) {

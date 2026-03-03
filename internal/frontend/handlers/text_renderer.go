@@ -100,12 +100,39 @@ func RenderRoomEvent(re *gamev1.RoomEvent) string {
 	}
 }
 
-// RenderPlayerList formats a PlayerList as Telnet text.
+// RenderPlayerList formats a PlayerList for telnet display.
+//
+// Precondition: pl must be non-nil.
+// Postcondition: Returns a non-empty human-readable string.
 func RenderPlayerList(pl *gamev1.PlayerList) string {
 	if len(pl.Players) == 0 {
 		return telnet.Colorize(telnet.Dim, "Nobody else is here.")
 	}
-	return telnet.Colorf(telnet.Green, "Players here: %s", strings.Join(pl.Players, ", "))
+	var sb strings.Builder
+	sb.WriteString(telnet.Colorize(telnet.BrightWhite, "Players here:\r\n"))
+	for _, p := range pl.Players {
+		status := statusLabel(p.Status)
+		sb.WriteString(fmt.Sprintf("  %s%s%s — Lvl %d %s — %s — %s\r\n",
+			telnet.Green, p.Name, telnet.Reset,
+			p.Level, p.Job,
+			p.HealthLabel,
+			status))
+	}
+	return sb.String()
+}
+
+// statusLabel converts a CombatStatus to a display string.
+func statusLabel(s gamev1.CombatStatus) string {
+	switch s {
+	case gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT:
+		return "In Combat"
+	case gamev1.CombatStatus_COMBAT_STATUS_RESTING:
+		return "Resting"
+	case gamev1.CombatStatus_COMBAT_STATUS_UNCONSCIOUS:
+		return "Unconscious"
+	default:
+		return "Idle"
+	}
 }
 
 // RenderExitList formats an ExitList as Telnet text.
