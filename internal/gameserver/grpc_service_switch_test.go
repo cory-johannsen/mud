@@ -15,7 +15,20 @@ import (
 // Postcondition: Returns errQuit and a Disconnected payload with non-empty Reason.
 func TestHandleSwitch_ReturnsDisconnectedWithReason(t *testing.T) {
 	mgr := session.NewManager()
-	_, _ = mgr.AddPlayer("uid1", "user1", "Hero", 1, "room1", 10, 0, character.AbilityScores{}, "player", "the Northeast", "Gunner", 3)
+	_, _ = mgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid1",
+		Username:          "user1",
+		CharName:          "Hero",
+		CharacterID:       1,
+		RoomID:            "room1",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Northeast",
+		Class:             "Gunner",
+		Level:             3,
+	})
 	s := &GameServiceServer{sessions: mgr}
 
 	result, err := s.handleSwitch("uid1")
@@ -59,7 +72,20 @@ func TestProperty_HandleSwitch_AlwaysReturnsErrQuit(t *testing.T) {
 		mgr := session.NewManager()
 		uid := rapid.StringMatching(`[a-z0-9]+`).Draw(t, "uid")
 		charName := rapid.StringMatching(`[A-Za-z]+`).Draw(t, "charName")
-		_, _ = mgr.AddPlayer(uid, "user", charName, 1, "room1", 10, 0, character.AbilityScores{}, "player", "the Northeast", "Gunner", 1)
+		_, _ = mgr.AddPlayer(session.AddPlayerOptions{
+			UID:               uid,
+			Username:          "user",
+			CharName:          charName,
+			CharacterID:       1,
+			RoomID:            "room1",
+			CurrentHP:         10,
+			MaxHP:             0,
+			Abilities:         character.AbilityScores{},
+			Role:              "player",
+			RegionDisplayName: "the Northeast",
+			Class:             "Gunner",
+			Level:             1,
+		})
 		s := &GameServiceServer{sessions: mgr}
 
 		_, err := s.handleSwitch(uid)

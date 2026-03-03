@@ -3,18 +3,44 @@ package gameserver
 import (
 	"testing"
 
-	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"pgregory.net/rapid"
 )
 
 func TestHandleExamine_PlayerTarget_ReturnsCharacterInfo(t *testing.T) {
 	mgr := session.NewManager()
 	// Add examiner in room1
-	_, _ = mgr.AddPlayer("uid1", "user1", "Hero", 1, "room1", 10, 0, character.AbilityScores{}, "player", "the Northeast", "Gunner", 3)
+	_, _ = mgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid1",
+		Username:          "user1",
+		CharName:          "Hero",
+		CharacterID:       1,
+		RoomID:            "room1",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Northeast",
+		Class:             "Gunner",
+		Level:             3,
+	})
 	// Add target in same room
-	_, _ = mgr.AddPlayer("uid2", "user2", "Villain", 2, "room1", 10, 0, character.AbilityScores{}, "player", "the Midwest", "Machete", 2)
+	_, _ = mgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid2",
+		Username:          "user2",
+		CharName:          "Villain",
+		CharacterID:       2,
+		RoomID:            "room1",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Midwest",
+		Class:             "Machete",
+		Level:             2,
+	})
 
 	s := &GameServiceServer{sessions: mgr}
 	result, err := s.handleExamine("uid1", &gamev1.ExamineRequest{Target: "Villain"})
@@ -37,8 +63,34 @@ func TestHandleExamine_PlayerInDifferentRoom_FallsBackToNPC(t *testing.T) {
 	// Players in different rooms should not match — this is handled by the NPC fallback
 	// Since there's no NPC handler set up, the fallback will error — that's acceptable for this test
 	mgr := session.NewManager()
-	_, _ = mgr.AddPlayer("uid1", "user1", "Hero", 1, "room1", 10, 0, character.AbilityScores{}, "player", "the Northeast", "Gunner", 3)
-	_, _ = mgr.AddPlayer("uid2", "user2", "Villain", 2, "room2", 10, 0, character.AbilityScores{}, "player", "the Midwest", "Machete", 2)
+	_, _ = mgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid1",
+		Username:          "user1",
+		CharName:          "Hero",
+		CharacterID:       1,
+		RoomID:            "room1",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Northeast",
+		Class:             "Gunner",
+		Level:             3,
+	})
+	_, _ = mgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid2",
+		Username:          "user2",
+		CharName:          "Villain",
+		CharacterID:       2,
+		RoomID:            "room2",
+		CurrentHP:         10,
+		MaxHP:             0,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Midwest",
+		Class:             "Machete",
+		Level:             2,
+	})
 
 	s := &GameServiceServer{sessions: mgr}
 	// Villain is in a different room — should not return CharacterInfo, will try NPC path
@@ -57,8 +109,34 @@ func TestProperty_HandleExamine_PlayerTargetSameRoom_AlwaysCharacterInfo(t *test
 		mgr := session.NewManager()
 		regionDisplay := rapid.StringMatching(`[A-Za-z ]+`).Draw(t, "regionDisplay")
 		targetName := rapid.StringMatching(`[A-Za-z]+`).Draw(t, "targetName")
-		_, _ = mgr.AddPlayer("uid1", "user1", "Hero", 1, "room1", 10, 0, character.AbilityScores{}, "player", "the Northeast", "Gunner", 3)
-		_, _ = mgr.AddPlayer("uid2", "user2", targetName, 2, "room1", 10, 0, character.AbilityScores{}, "player", regionDisplay, "Machete", 2)
+		_, _ = mgr.AddPlayer(session.AddPlayerOptions{
+			UID:               "uid1",
+			Username:          "user1",
+			CharName:          "Hero",
+			CharacterID:       1,
+			RoomID:            "room1",
+			CurrentHP:         10,
+			MaxHP:             0,
+			Abilities:         character.AbilityScores{},
+			Role:              "player",
+			RegionDisplayName: "the Northeast",
+			Class:             "Gunner",
+			Level:             3,
+		})
+		_, _ = mgr.AddPlayer(session.AddPlayerOptions{
+			UID:               "uid2",
+			Username:          "user2",
+			CharName:          targetName,
+			CharacterID:       2,
+			RoomID:            "room1",
+			CurrentHP:         10,
+			MaxHP:             0,
+			Abilities:         character.AbilityScores{},
+			Role:              "player",
+			RegionDisplayName: regionDisplay,
+			Class:             "Machete",
+			Level:             2,
+		})
 
 		s := &GameServiceServer{sessions: mgr}
 		result, err := s.handleExamine("uid1", &gamev1.ExamineRequest{Target: targetName})

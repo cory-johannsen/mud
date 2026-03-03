@@ -47,7 +47,7 @@ func testServiceWithAdmin(t *testing.T, admin AccountAdmin) *GameServiceServer {
 	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
-	return NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, admin, nil, nil, nil, "")
+	return NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, admin, nil, nil, nil, "")
 }
 
 func TestHandleSetRole_AdminSuccess(t *testing.T) {
@@ -177,19 +177,19 @@ func TestPropertySetRole_NonAdminAlwaysDenied(t *testing.T) {
 
 		uid := fmt.Sprintf("u_%s_%d", role, rapid.IntRange(0, 99999).Draw(t, "uid"))
 		_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
-		UID:               uid,
-		Username:          "user",
-		CharName:          "User",
-		CharacterID:       1,
-		RoomID:            "room_a",
-		CurrentHP:         10,
-		MaxHP:             0,
-		Abilities:         character.AbilityScores{},
-		Role:              role,
-		RegionDisplayName: "",
-		Class:             "",
-		Level:             0,
-	})
+			UID:               uid,
+			Username:          "user",
+			CharName:          "User",
+			CharacterID:       1,
+			RoomID:            "room_a",
+			CurrentHP:         10,
+			MaxHP:             0,
+			Abilities:         character.AbilityScores{},
+			Role:              role,
+			RegionDisplayName: "",
+			Class:             "",
+			Level:             0,
+		})
 		if err != nil {
 			t.Fatalf("AddPlayer: %v", err)
 		}
