@@ -145,6 +145,41 @@ func (pc *PostgresContainer) ApplyMigrations(t *testing.T) {
 			CONSTRAINT uq_characters_account_name UNIQUE (account_id, name)
 		);
 		CREATE INDEX IF NOT EXISTS idx_characters_account_id ON characters (account_id);
+
+		ALTER TABLE characters
+			ADD COLUMN IF NOT EXISTS has_received_starting_inventory BOOLEAN NOT NULL DEFAULT FALSE;
+
+		CREATE TABLE IF NOT EXISTS character_weapon_presets (
+			id           BIGSERIAL PRIMARY KEY,
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			preset_index INT NOT NULL,
+			slot         TEXT NOT NULL,
+			item_def_id  TEXT NOT NULL,
+			ammo_count   INT NOT NULL DEFAULT 0,
+			CONSTRAINT uq_character_preset_slot UNIQUE (character_id, preset_index, slot)
+		);
+
+		CREATE TABLE IF NOT EXISTS character_equipment (
+			id           BIGSERIAL PRIMARY KEY,
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			slot         TEXT NOT NULL,
+			item_def_id  TEXT NOT NULL,
+			CONSTRAINT uq_character_equipment_slot UNIQUE (character_id, slot)
+		);
+
+		CREATE TABLE IF NOT EXISTS character_inventory (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			item_def_id  TEXT   NOT NULL,
+			quantity     INT    NOT NULL DEFAULT 1,
+			PRIMARY KEY (character_id, item_def_id)
+		);
+
+		CREATE TABLE IF NOT EXISTS character_map_rooms (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			zone_id      TEXT   NOT NULL,
+			room_id      TEXT   NOT NULL,
+			PRIMARY KEY (character_id, zone_id, room_id)
+		);
 	`
 
 	_, err := pc.RawPool.Exec(ctx, schema)
