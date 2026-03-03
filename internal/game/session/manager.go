@@ -44,6 +44,9 @@ type PlayerSession struct {
 	Equipment *inventory.Equipment
 	// Entity is the bridge entity for pushing events to the player.
 	Entity *BridgeEntity
+	// Status is the player's current combat state.
+	// Maps to gamev1.CombatStatus enum values: 0=Unspecified/Idle, 1=Idle, 2=InCombat, 3=Resting, 4=Unconscious.
+	Status int32
 }
 
 // Manager tracks all active player sessions and room occupancy.
@@ -62,11 +65,55 @@ func NewManager() *Manager {
 	}
 }
 
+// AddPlayerOptions holds all parameters for AddPlayer.
+//
+// Precondition: UID, Username, CharName, RoomID, and Role must be non-empty.
+// Precondition: CharacterID must be >= 0.
+// Precondition: CurrentHP and MaxHP must be >= 0.
+// Postcondition: RegionDisplayName, Class, and Level are informational and may be zero values.
+type AddPlayerOptions struct {
+	UID               string
+	Username          string
+	CharName          string
+	CharacterID       int64
+	RoomID            string
+	CurrentHP         int
+	MaxHP             int
+	Abilities         character.AbilityScores
+	Role              string
+	RegionDisplayName string
+	Class             string
+	Level             int
+}
+
 // AddPlayer registers a new player session in the given room.
 //
-// Precondition: uid, username, charName, and roomID must be non-empty; characterID must be >= 0; currentHP and maxHP must be >= 0; role must be non-empty; regionDisplayName, class, and level are informational and may be zero values.
+// Precondition: opts.UID, opts.Username, opts.CharName, opts.RoomID, and opts.Role must be non-empty; opts.CharacterID must be >= 0; opts.CurrentHP and opts.MaxHP must be >= 0.
 // Postcondition: Returns the created PlayerSession, or an error if the UID is already registered.
-func (m *Manager) AddPlayer(uid, username, charName string, characterID int64, roomID string, currentHP, maxHP int, abilities character.AbilityScores, role string, regionDisplayName string, class string, level int) (*PlayerSession, error) {
+func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
+	uid := opts.UID
+	username := opts.Username
+	charName := opts.CharName
+	characterID := opts.CharacterID
+	roomID := opts.RoomID
+	currentHP := opts.CurrentHP
+	maxHP := opts.MaxHP
+	abilities := opts.Abilities
+	role := opts.Role
+	regionDisplayName := opts.RegionDisplayName
+	class := opts.Class
+	level := opts.Level
+
+	if uid == "" || username == "" || charName == "" || roomID == "" || role == "" {
+		return nil, fmt.Errorf("AddPlayer: uid, username, charName, roomID, and role must be non-empty")
+	}
+	if characterID < 0 {
+		return nil, fmt.Errorf("AddPlayer: characterID must be >= 0, got %d", characterID)
+	}
+	if currentHP < 0 || maxHP < 0 {
+		return nil, fmt.Errorf("AddPlayer: currentHP and maxHP must be >= 0, got currentHP=%d maxHP=%d", currentHP, maxHP)
+	}
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
