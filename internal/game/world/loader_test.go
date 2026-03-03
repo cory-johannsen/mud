@@ -1,12 +1,14 @@
 package world
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 )
 
 const validZoneYAML = `
@@ -149,6 +151,54 @@ zone:
 	_, err := LoadZoneFromBytes(data)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "map_x")
+}
+
+func TestLoadZoneFromBytes_MissingMapY_ReturnsError(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test
+  description: Test zone
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 5
+`)
+	_, err := LoadZoneFromBytes(data)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "map_y")
+}
+
+func TestProperty_LoadZoneFromBytes_CoordinatesRoundTrip(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		x := rapid.Int().Draw(t, "x")
+		y := rapid.Int().Draw(t, "y")
+		data := []byte(fmt.Sprintf(`
+zone:
+  id: test
+  name: Test
+  description: Test zone
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: %d
+      map_y: %d
+`, x, y))
+		z, err := LoadZoneFromBytes(data)
+		if err != nil {
+			t.Fatalf("unexpected error for coords (%d,%d): %v", x, y, err)
+		}
+		if z.Rooms["r1"].MapX != x {
+			t.Fatalf("MapX: got %d, want %d", z.Rooms["r1"].MapX, x)
+		}
+		if z.Rooms["r1"].MapY != y {
+			t.Fatalf("MapY: got %d, want %d", z.Rooms["r1"].MapY, y)
+		}
+	})
 }
 
 func TestLoadZoneFromBytes_WithMapCoords_ParsesCorrectly(t *testing.T) {

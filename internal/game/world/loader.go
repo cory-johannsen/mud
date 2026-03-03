@@ -146,8 +146,11 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 	}
 
 	for _, yr := range yz.Rooms {
-		if yr.MapX == nil || yr.MapY == nil {
-			return nil, fmt.Errorf("room %q in zone %q is missing required map_x or map_y coordinates", yr.ID, yz.ID)
+		if yr.MapX == nil {
+			return nil, fmt.Errorf("zone %q: room %q: missing required field map_x", yz.ID, yr.ID)
+		}
+		if yr.MapY == nil {
+			return nil, fmt.Errorf("zone %q: room %q: missing required field map_y", yz.ID, yr.ID)
 		}
 		room := &Room{
 			ID:          yr.ID,
