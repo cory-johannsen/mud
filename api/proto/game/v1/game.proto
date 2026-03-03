@@ -49,6 +49,8 @@ message ClientMessage {
     RemoveArmorRequest remove_armor = 32;
     CharacterSheetRequest char_sheet = 33;
     ArchetypeSelectionRequest archetype_selection = 34;
+    UseEquipmentRequest use_equipment = 35;
+    RoomEquipRequest    room_equip    = 36;
   }
 }
 
@@ -133,6 +135,7 @@ message RoomView {
   repeated FloorItem floor_items = 8;
   int32  hour   = 9;
   string period = 10;
+  repeated RoomEquipmentItem equipment = 11;
 }
 
 // ExitInfo describes a single exit from a room.
@@ -346,6 +349,30 @@ message FloorItem {
   string instance_id = 1;
   string name = 2;
   int32 quantity = 3;
+}
+
+// RoomEquipmentItem describes a permanent or respawning item in a room.
+message RoomEquipmentItem {
+    string instance_id = 1;
+    string name        = 2;
+    int32  quantity    = 3;
+    bool   immovable   = 4;
+    bool   usable      = 5;
+}
+
+// UseEquipmentRequest asks the server to use a room equipment item.
+message UseEquipmentRequest {
+    string instance_id = 1;
+}
+
+// RoomEquipRequest asks the server to manage room equipment (editor command).
+message RoomEquipRequest {
+    string sub_command = 1;
+    string item_id     = 2;
+    int32  max_count   = 3;
+    string respawn     = 4;
+    bool   immovable   = 5;
+    string script      = 6;
 }
 
 // InventoryItem describes an item in the player's backpack.
