@@ -249,7 +249,7 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 			return nil, nil
 		}
 		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
-			"Random selections: Region=%s, Team=%s, Job=%s", region.Name, team.Name, job.Name))
+			"Random selections: Region=%s, Team=%s, Archetype=%s, Job=%s", region.Name, team.Name, job.Archetype, job.Name))
 		return h.buildAndConfirm(ctx, conn, accountID, charName, region, job, team)
 	}
 	regionChoice := 0
@@ -291,7 +291,7 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 			return nil, nil
 		}
 		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
-			"Random selections: Team=%s, Job=%s", team.Name, job.Name))
+			"Random selections: Team=%s, Archetype=%s, Job=%s", team.Name, job.Archetype, job.Name))
 		return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, job, team)
 	}
 	teamChoice := 0
