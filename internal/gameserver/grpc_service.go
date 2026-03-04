@@ -2223,10 +2223,6 @@ func (s *GameServiceServer) handleInteract(uid, instanceID string) (*gamev1.Serv
 	return s.handleUseEquipment(uid, instanceID)
 }
 
-// handleUse activates an active feat for the player, or lists available active feats.
-//
-// Precondition: uid must resolve to an active session with a loaded character.
-// Postcondition: Returns a ServerEvent with UseResponse.
 // handleUse activates an active feat or class feature for the player, or lists all available active abilities.
 //
 // Precondition: uid must resolve to an active session with a loaded character.

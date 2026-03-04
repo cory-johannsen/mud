@@ -9,6 +9,7 @@ const (
 	CategoryCommunication = "communication"
 	CategorySystem        = "system"
 	CategoryAdmin         = "admin"
+	CategoryCharacter = "character"
 	// CategoryHidden marks commands that are internal flow steps and must not appear in help.
 	CategoryHidden = "hidden"
 )
@@ -137,7 +138,7 @@ func BuiltinCommands() []Command {
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
 		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},
 		{Name: "feats", Aliases: []string{"ft"}, Help: "Display your feats.", Category: CategoryWorld, Handler: HandlerFeats},
-		{Name: HandlerClassFeatures, Aliases: []string{"cf"}, Help: "List your class features", Category: "character", Handler: HandlerClassFeatures},
+		{Name: HandlerClassFeatures, Aliases: []string{"cf"}, Help: "List your class features", Category: CategoryCharacter, Handler: HandlerClassFeatures},
 	}
 }
 
