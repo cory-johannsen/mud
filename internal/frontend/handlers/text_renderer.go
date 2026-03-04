@@ -391,6 +391,51 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
 		}
 	}
 
+	// Class Features
+	if cfs := csv.GetClassFeatures(); len(cfs) > 0 {
+		b.WriteString("\r\n")
+		b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Class Features ---"))
+		b.WriteString("\r\n")
+
+		// Archetype features
+		hasArchetype := false
+		for _, cf := range cfs {
+			if cf.GetArchetype() != "" {
+				if !hasArchetype {
+					b.WriteString(telnet.Colorize(telnet.Cyan, "  Archetype:\r\n"))
+					hasArchetype = true
+				}
+				name := cf.GetName()
+				if cf.GetActive() {
+					name += " " + telnet.Colorize(telnet.Yellow, "[active]")
+				}
+				b.WriteString(fmt.Sprintf("    %s\r\n", name))
+				if desc := cf.GetDescription(); desc != "" {
+					b.WriteString(fmt.Sprintf("      %s\r\n", desc))
+				}
+			}
+		}
+
+		// Job features
+		hasJob := false
+		for _, cf := range cfs {
+			if cf.GetJob() != "" {
+				if !hasJob {
+					b.WriteString(telnet.Colorize(telnet.Cyan, "  Job:\r\n"))
+					hasJob = true
+				}
+				name := cf.GetName()
+				if cf.GetActive() {
+					name += " " + telnet.Colorize(telnet.Yellow, "[active]")
+				}
+				b.WriteString(fmt.Sprintf("    %s\r\n", name))
+				if desc := cf.GetDescription(); desc != "" {
+					b.WriteString(fmt.Sprintf("      %s\r\n", desc))
+				}
+			}
+		}
+	}
+
 	return b.String()
 }
 

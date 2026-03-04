@@ -619,3 +619,78 @@ func TestRenderSkillsResponse_GroupedByAbility(t *testing.T) {
 		t.Error("expected Brutality section")
 	}
 }
+
+func TestRenderCharacterSheet_ClassFeatures(t *testing.T) {
+	view := &gamev1.CharacterSheetView{
+		Name:  "Test",
+		Level: 1,
+		ClassFeatures: []*gamev1.ClassFeatureEntry{
+			{FeatureId: "brutal_surge", Name: "Brutal Surge", Archetype: "aggressor", Active: true, Description: "Enter a frenzy."},
+			{FeatureId: "street_brawler", Name: "Street Brawler", Archetype: "aggressor", Active: false, Description: "Opportunity attacks."},
+			{FeatureId: "guerilla_warfare", Name: "Guerilla Warfare", Job: "soldier", Active: false, Description: "Urban cover bonus."},
+		},
+	}
+	result := RenderCharacterSheet(view)
+	assert.Contains(t, result, "Class Features")
+	assert.Contains(t, result, "Brutal Surge")
+	assert.Contains(t, result, "Street Brawler")
+	assert.Contains(t, result, "Guerilla Warfare")
+	assert.Contains(t, result, "[active]")
+}
+
+func TestRenderCharacterSheet_ClassFeatures_Property(t *testing.T) {
+	// Property 1: features with Archetype != "" appear before features with Job != "".
+	rapid.Check(t, func(rt *rapid.T) {
+		archetypeName := rapid.StringMatching(`[a-zA-Z ]{1,20}`).Draw(rt, "archetypeName")
+		jobName := rapid.StringMatching(`[a-zA-Z ]{1,20}`).Draw(rt, "jobName")
+		active := rapid.Bool().Draw(rt, "active")
+		view := &gamev1.CharacterSheetView{
+			Name:  "Hero",
+			Level: 1,
+			ClassFeatures: []*gamev1.ClassFeatureEntry{
+				{FeatureId: "arch_feat", Name: archetypeName, Archetype: "someArchetype", Active: active},
+				{FeatureId: "job_feat", Name: jobName, Job: "someJob", Active: false},
+			},
+		}
+		result := RenderCharacterSheet(view)
+		stripped := telnet.StripANSI(result)
+
+		archIdx := strings.Index(stripped, archetypeName)
+		jobIdx := strings.Index(stripped, jobName)
+		if archIdx == -1 {
+			rt.Fatalf("archetype feature %q not found in output:\n%s", archetypeName, stripped)
+		}
+		if jobIdx == -1 {
+			rt.Fatalf("job feature %q not found in output:\n%s", jobName, stripped)
+		}
+		// Archetype section header precedes job section header.
+		archetypeSectionIdx := strings.Index(stripped, "Archetype:")
+		jobSectionIdx := strings.Index(stripped, "Job:")
+		if archetypeSectionIdx == -1 || jobSectionIdx == -1 {
+			rt.Fatalf("expected both 'Archetype:' and 'Job:' section headers in output:\n%s", stripped)
+		}
+		if archetypeSectionIdx >= jobSectionIdx {
+			rt.Fatalf("archetype section must appear before job section; got:\n%s", stripped)
+		}
+		// Active archetype feature must produce [active].
+		if active && !strings.Contains(stripped, "[active]") {
+			rt.Fatalf("active archetype feature must produce [active] in output:\n%s", stripped)
+		}
+	})
+
+	// Property 2: inactive features must not produce [active].
+	rapid.Check(t, func(rt *rapid.T) {
+		name := rapid.StringMatching(`[a-zA-Z ]{1,20}`).Draw(rt, "name")
+		view := &gamev1.CharacterSheetView{
+			Name:  "Hero",
+			Level: 1,
+			ClassFeatures: []*gamev1.ClassFeatureEntry{
+				{FeatureId: "feat", Name: name, Archetype: "arch", Active: false},
+			},
+		}
+		result := telnet.StripANSI(RenderCharacterSheet(view))
+		if strings.Contains(result, "[active]") {
+			rt.Fatalf("inactive feature %q must not produce [active]; got:\n%s", name, result)
+		}
+	})
+}
