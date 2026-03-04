@@ -6,27 +6,30 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/world"
 )
 
 // EquipmentInstance is a live instance of room equipment.
 type EquipmentInstance struct {
-	InstanceID string
-	ItemDefID  string
-	RoomID     string
-	Immovable  bool
-	Script     string
-	configIdx  int
+	InstanceID  string
+	ItemDefID   string
+	RoomID      string
+	Immovable   bool
+	Script      string
+	SkillChecks []skillcheck.TriggerDef
+	configIdx   int
 }
 
 // respawnEntry tracks a pending respawn.
 type respawnEntry struct {
-	roomID    string
-	configIdx int
-	at        time.Time
-	itemDefID string
-	immovable bool
-	script    string
+	roomID      string
+	configIdx   int
+	at          time.Time
+	itemDefID   string
+	immovable   bool
+	script      string
+	skillChecks []skillcheck.TriggerDef
 }
 
 // RoomEquipmentManager manages live equipment instances in rooms.
@@ -62,12 +65,13 @@ func (m *RoomEquipmentManager) InitRoom(roomID string, configs []world.RoomEquip
 	for idx, cfg := range configs {
 		for i := 0; i < cfg.MaxCount; i++ {
 			m.rooms[roomID] = append(m.rooms[roomID], &EquipmentInstance{
-				InstanceID: uuid.New().String(),
-				ItemDefID:  cfg.ItemID,
-				RoomID:     roomID,
-				Immovable:  cfg.Immovable,
-				Script:     cfg.Script,
-				configIdx:  idx,
+				InstanceID:  uuid.New().String(),
+				ItemDefID:   cfg.ItemID,
+				RoomID:      roomID,
+				Immovable:   cfg.Immovable,
+				Script:      cfg.Script,
+				SkillChecks: cfg.SkillChecks,
+				configIdx:   idx,
 			})
 		}
 	}
@@ -137,12 +141,13 @@ func (m *RoomEquipmentManager) Pickup(roomID, instanceID string) bool {
 		cfg := m.configs[roomID]
 		if it.configIdx < len(cfg) && cfg[it.configIdx].RespawnAfter > 0 {
 			m.respawns = append(m.respawns, respawnEntry{
-				roomID:    roomID,
-				configIdx: it.configIdx,
-				at:        time.Now().Add(cfg[it.configIdx].RespawnAfter),
-				itemDefID: it.ItemDefID,
-				immovable: it.Immovable,
-				script:    it.Script,
+				roomID:      roomID,
+				configIdx:   it.configIdx,
+				at:          time.Now().Add(cfg[it.configIdx].RespawnAfter),
+				itemDefID:   it.ItemDefID,
+				immovable:   it.Immovable,
+				script:      it.Script,
+				skillChecks: it.SkillChecks,
 			})
 		}
 		return true
@@ -174,12 +179,13 @@ func (m *RoomEquipmentManager) ProcessRespawns() {
 		cfg := m.configs[r.roomID]
 		if r.configIdx < len(cfg) && live < cfg[r.configIdx].MaxCount {
 			m.rooms[r.roomID] = append(m.rooms[r.roomID], &EquipmentInstance{
-				InstanceID: uuid.New().String(),
-				ItemDefID:  r.itemDefID,
-				RoomID:     r.roomID,
-				Immovable:  r.immovable,
-				Script:     r.script,
-				configIdx:  r.configIdx,
+				InstanceID:  uuid.New().String(),
+				ItemDefID:   r.itemDefID,
+				RoomID:      r.roomID,
+				Immovable:   r.immovable,
+				Script:      r.script,
+				SkillChecks: r.skillChecks,
+				configIdx:   r.configIdx,
 			})
 		}
 	}
@@ -198,12 +204,13 @@ func (m *RoomEquipmentManager) AddConfig(roomID string, cfg world.RoomEquipmentC
 	m.configs[roomID] = append(m.configs[roomID], cfg)
 	for i := 0; i < cfg.MaxCount; i++ {
 		m.rooms[roomID] = append(m.rooms[roomID], &EquipmentInstance{
-			InstanceID: uuid.New().String(),
-			ItemDefID:  cfg.ItemID,
-			RoomID:     roomID,
-			Immovable:  cfg.Immovable,
-			Script:     cfg.Script,
-			configIdx:  idx,
+			InstanceID:  uuid.New().String(),
+			ItemDefID:   cfg.ItemID,
+			RoomID:      roomID,
+			Immovable:   cfg.Immovable,
+			Script:      cfg.Script,
+			SkillChecks: cfg.SkillChecks,
+			configIdx:   idx,
 		})
 	}
 }

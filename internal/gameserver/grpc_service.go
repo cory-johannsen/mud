@@ -2301,14 +2301,104 @@ func (s *GameServiceServer) handleUseEquipment(uid, instanceID string) (*gamev1.
 	if inst == nil {
 		return messageEvent("That item is not here."), nil
 	}
+
+	// Resolve the zone ID once; used for Lua hooks below.
+	room, roomOk := s.world.GetRoom(sess.RoomID)
+	zoneID := ""
+	if roomOk {
+		zoneID = room.ZoneID
+	}
+
+	// Fire on_use skill check triggers BEFORE invoking the item Lua script.
+	// A "deny" effect blocks script execution and returns immediately.
+	// Non-deny outcome messages are collected and prepended to the final response.
+	var skillMsgs []string
+	for _, trigger := range inst.SkillChecks {
+		if trigger.Trigger != "on_use" {
+			continue
+		}
+
+		abilityScore := s.abilityScoreForSkill(sess, trigger.Skill)
+		amod := abilityModFrom(abilityScore)
+		rank := ""
+		if sess.Skills != nil {
+			rank = sess.Skills[trigger.Skill]
+		}
+
+		var roll int
+		if s.dice != nil {
+			roll = s.dice.Src().Intn(20) + 1
+		} else {
+			roll = 10 // neutral fallback when no dice configured
+		}
+
+		checkResult := skillcheck.Resolve(roll, amod, rank, trigger.DC, trigger)
+
+		outcome := trigger.Outcomes.ForOutcome(checkResult.Outcome)
+		if outcome != nil {
+			if outcome.Effect != nil && outcome.Effect.Type == "deny" {
+				// Deny: fire Lua hook then block execution.
+				if s.scriptMgr != nil {
+					s.scriptMgr.CallHook(zoneID, "on_skill_check", //nolint:errcheck
+						lua.LString(uid),
+						lua.LString(trigger.Skill),
+						lua.LNumber(checkResult.Total),
+						lua.LNumber(trigger.DC),
+						lua.LString(checkResult.Outcome.String()),
+					)
+				}
+				return messageEvent(outcome.Message), nil
+			}
+			if outcome.Message != "" {
+				skillMsgs = append(skillMsgs, outcome.Message)
+			}
+			// Apply non-deny effects.
+			if outcome.Effect != nil && outcome.Effect.Type == "damage" && outcome.Effect.Formula != "" && s.dice != nil {
+				dmg, dmgErr := s.dice.RollExpr(outcome.Effect.Formula)
+				if dmgErr == nil {
+					sess.CurrentHP -= dmg.Total()
+					if sess.CurrentHP < 0 {
+						sess.CurrentHP = 0
+					}
+				} else {
+					s.logger.Warn("handleUseEquipment: damage formula error",
+						zap.String("formula", outcome.Effect.Formula),
+						zap.Error(dmgErr),
+					)
+				}
+			}
+		}
+
+		if s.scriptMgr != nil {
+			s.scriptMgr.CallHook(zoneID, "on_skill_check", //nolint:errcheck
+				lua.LString(uid),
+				lua.LString(trigger.Skill),
+				lua.LNumber(checkResult.Total),
+				lua.LNumber(trigger.DC),
+				lua.LString(checkResult.Outcome.String()),
+			)
+		}
+	}
+
+	// No deny blocked execution; proceed with item Lua script.
 	if inst.Script == "" {
+		if len(skillMsgs) > 0 {
+			return messageEvent(strings.Join(skillMsgs, "\r\n")), nil
+		}
 		return messageEvent("Nothing happens."), nil
 	}
-	room, ok := s.world.GetRoom(sess.RoomID)
-	if !ok {
+	if !roomOk {
+		if len(skillMsgs) > 0 {
+			return messageEvent(strings.Join(skillMsgs, "\r\n")), nil
+		}
 		return messageEvent("Nothing happens."), nil
 	}
-	zoneID := room.ZoneID
+	if s.scriptMgr == nil {
+		if len(skillMsgs) > 0 {
+			return messageEvent(strings.Join(skillMsgs, "\r\n")), nil
+		}
+		return messageEvent("Nothing happens."), nil
+	}
 	result, err := s.scriptMgr.CallHook(zoneID, inst.Script, lua.LString(uid))
 	if err != nil {
 		s.logger.Warn("equipment script error", zap.Error(err))
@@ -2317,6 +2407,9 @@ func (s *GameServiceServer) handleUseEquipment(uid, instanceID string) (*gamev1.
 	msg := "You use the item."
 	if result != lua.LNil {
 		msg = result.String()
+	}
+	if len(skillMsgs) > 0 {
+		msg = strings.Join(skillMsgs, "\r\n") + "\r\n" + msg
 	}
 	return messageEvent(msg), nil
 }
