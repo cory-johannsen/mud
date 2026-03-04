@@ -30,6 +30,13 @@ func NewCharacterRepository(db *pgxpool.Pool) *CharacterRepository {
 	return &CharacterRepository{db: db}
 }
 
+// Pool returns the underlying connection pool.
+//
+// Postcondition: Returns the pool passed to NewCharacterRepository.
+func (r *CharacterRepository) Pool() *pgxpool.Pool {
+	return r.db
+}
+
 // Create inserts a new character and returns it with ID and timestamps set.
 //
 // Precondition: c.AccountID must reference an existing account; c.Name must be non-empty.

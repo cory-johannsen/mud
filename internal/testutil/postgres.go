@@ -201,6 +201,28 @@ func NewPool(t *testing.T) *pgxpool.Pool {
 	return pc.RawPool
 }
 
+// ApplySkillsMigration adds the character_skills table used by migration 011.
+//
+// Precondition: Pool must be connected and ApplyMigrations must have been called.
+// Postcondition: The character_skills table exists in the test database.
+func (pc *PostgresContainer) ApplySkillsMigration(t *testing.T) {
+	t.Helper()
+	ctx := context.Background()
+	start := time.Now()
+	_, err := pc.RawPool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS character_skills (
+			character_id BIGINT  NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			skill_id     TEXT    NOT NULL,
+			proficiency  TEXT    NOT NULL DEFAULT 'untrained',
+			PRIMARY KEY (character_id, skill_id)
+		);
+	`)
+	if err != nil {
+		t.Fatalf("applying skills migration: %v", err)
+	}
+	t.Logf("skills migration applied [%s]", time.Since(start))
+}
+
 // DSN returns the connection string for the test database.
 func (pc *PostgresContainer) DSN() string {
 	return fmt.Sprintf(
