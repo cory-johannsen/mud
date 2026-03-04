@@ -19,7 +19,7 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
-// stubSkillsRepo is an in-memory implementation of CharacterSkillsGetter for testing.
+// stubSkillsRepo is an in-memory implementation of CharacterSkillsRepository for testing.
 type stubSkillsRepo struct {
 	data map[int64]map[string]string
 }

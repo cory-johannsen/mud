@@ -67,12 +67,20 @@ type CharacterSaver interface {
 	MarkStartingInventoryGranted(ctx context.Context, characterID int64) error
 }
 
-// CharacterSkillsGetter retrieves and persists per-character skill proficiency data.
+// CharacterSkillsGetter retrieves per-character skill proficiency data.
 //
 // Precondition: characterID must be > 0.
 // Postcondition: Returns a map of skill_id → proficiency (may be empty).
 type CharacterSkillsGetter interface {
 	GetAll(ctx context.Context, characterID int64) (map[string]string, error)
+}
+
+// CharacterSkillsRepository retrieves and persists per-character skill proficiency data.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Mutations are durably persisted before returning.
+type CharacterSkillsRepository interface {
+	CharacterSkillsGetter
 	HasSkills(ctx context.Context, characterID int64) (bool, error)
 	SetAll(ctx context.Context, characterID int64, skills map[string]string) error
 }
@@ -119,7 +127,7 @@ type GameServiceServer struct {
 	condRegistry        *condition.Registry
 	loadoutsDir         string
 	allSkills           []*ruleset.Skill
-	characterSkillsRepo CharacterSkillsGetter
+	characterSkillsRepo CharacterSkillsRepository
 	allFeats                   []*ruleset.Feat
 	featRegistry               *ruleset.FeatRegistry
 	characterFeatsRepo         CharacterFeatsGetter
@@ -170,7 +178,7 @@ func NewGameServiceServer(
 	condRegistry *condition.Registry,
 	loadoutsDir string,
 	allSkills []*ruleset.Skill,
-	characterSkillsRepo CharacterSkillsGetter,
+	characterSkillsRepo CharacterSkillsRepository,
 	allFeats []*ruleset.Feat,
 	featRegistry *ruleset.FeatRegistry,
 	characterFeatsRepo CharacterFeatsGetter,
