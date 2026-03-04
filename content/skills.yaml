@@ -1,0 +1,86 @@
+skills:
+  - id: parkour
+    name: Parkour
+    ability: quickness
+    pf2e: acrobatics
+    description: "Movement through ruins, vaults, chases, and tight spaces."
+  - id: ghosting
+    name: Ghosting
+    ability: quickness
+    pf2e: stealth
+    description: "Staying unseen and unheard in hostile territory."
+  - id: grift
+    name: Grift
+    ability: quickness
+    pf2e: thievery
+    description: "Pickpocketing, lockpicking, and sleight of hand."
+  - id: muscle
+    name: Muscle
+    ability: brutality
+    pf2e: athletics
+    description: "Climbing, swimming, lifting, and breaking things."
+  - id: tech_lore
+    name: Tech Lore
+    ability: reasoning
+    pf2e: arcana
+    description: "Electronics, hacking, and technical knowledge."
+  - id: rigging
+    name: Rigging
+    ability: reasoning
+    pf2e: crafting
+    description: "Building and fixing weapons and gear from scrap."
+  - id: conspiracy
+    name: Conspiracy
+    ability: reasoning
+    pf2e: occultism
+    description: "Cults, underground networks, and secret knowledge."
+  - id: factions
+    name: Factions
+    ability: reasoning
+    pf2e: society
+    description: "Gang hierarchies, political power structures."
+  - id: intel
+    name: Intel
+    ability: reasoning
+    pf2e: lore
+    description: "Specific knowledge: Gang Intel, Territory Intel, etc."
+  - id: patch_job
+    name: Patch Job
+    ability: savvy
+    pf2e: medicine
+    description: "Field medicine, trauma care, and stimulant use."
+  - id: wasteland
+    name: Wasteland
+    ability: savvy
+    pf2e: nature
+    description: "Navigating ruins, reading weather, urban terrain."
+  - id: gang_codes
+    name: Gang Codes
+    ability: savvy
+    pf2e: religion
+    description: "Crew rituals, street sign languages, and loyalties."
+  - id: scavenging
+    name: Scavenging
+    ability: savvy
+    pf2e: survival
+    description: "Finding food, water, shelter, and usable junk."
+  - id: hustle
+    name: Hustle
+    ability: flair
+    pf2e: deception
+    description: "Lies, cons, and disguises."
+  - id: smooth_talk
+    name: Smooth Talk
+    ability: flair
+    pf2e: diplomacy
+    description: "Negotiation, de-escalation, and calling in favors."
+  - id: hard_look
+    name: Hard Look
+    ability: flair
+    pf2e: intimidation
+    description: "Fear, coercion, and dominance displays."
+  - id: rep
+    name: Rep
+    ability: flair
+    pf2e: performance
+    description: "Street reputation, showmanship, and crowd work."
