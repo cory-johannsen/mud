@@ -54,10 +54,10 @@
   - [x] **Skill check triggers — Stage 2: extended effects**
     - [x] `condition` effect type wired to the condition system (`ActiveSet.Apply`)
     - [x] `reveal` effect type exposes hidden room exits
-  - [ ] **Active feat/class feature mechanics — Stage 3**
-    - [ ] Active feats/class features map to a named condition via `condition_id` in YAML
-    - [ ] `use <feat>` applies the condition (with `damage_bonus`, `ac_penalty`, etc.) for encounter or timed duration
-    - [ ] Condition cleared on combat end or timer expiry
+  - [x] **Active feat/class feature mechanics — Stage 3**
+    - [x] Active feats/class features map to a named condition via `condition_id` in YAML
+    - [x] `use <feat>` applies the condition (with `damage_bonus`, `ac_penalty`, etc.) for encounter or timed duration
+    - [x] Condition cleared on combat end or timer expiry
   - [ ] **Passive feat/class feature mechanics — Stage 4**
     - [ ] `sucker_punch` — sneak attack damage bonus when attacking from stealth
     - [ ] `street_brawler` — attack of opportunity when enemy leaves threat range

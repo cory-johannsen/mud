@@ -16,6 +16,7 @@ class_features:
     pf2e: rage
     active: true
     activate_text: "The red haze drops and you move on pure instinct."
+    condition_id: brutal_surge_active
     description: "Enter a combat frenzy: +2 melee damage, -2 AC until end of encounter."
 
   - id: sucker_punch
@@ -61,6 +62,7 @@ class_features:
     pf2e: inspire_courage
     active: true
     activate_text: "You raise your voice and all eyes snap to you."
+    condition_id: command_attention_active
     description: "Grant allies within earshot +1 attack and damage rolls for the current encounter."
 
   - id: fast_talk
