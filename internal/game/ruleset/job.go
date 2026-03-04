@@ -33,6 +33,21 @@ type SkillGrants struct {
 	Choices *SkillChoices `yaml:"choices"`
 }
 
+// FeatChoices defines a pool of feats the player picks from at creation.
+type FeatChoices struct {
+	Pool  []string `yaml:"pool"`
+	Count int      `yaml:"count"`
+}
+
+// FeatGrants defines feat grants from a job at character creation.
+// GeneralCount is how many general feats the player freely picks.
+// Fixed is always granted. Choices is an optional selection pool.
+type FeatGrants struct {
+	GeneralCount int          `yaml:"general_count"`
+	Fixed        []string     `yaml:"fixed"`
+	Choices      *FeatChoices `yaml:"choices"`
+}
+
 // Job defines a concrete playable job (replaces PF2E class for Gunchete).
 // Team is empty for jobs available to all players; non-empty for team-exclusive jobs.
 //
@@ -47,6 +62,7 @@ type Job struct {
 	HitPointsPerLevel int               `yaml:"hit_points_per_level"`
 	Proficiencies     map[string]string                    `yaml:"proficiencies"`
 	SkillGrants       *SkillGrants                         `yaml:"skills"`
+	FeatGrants        *FeatGrants                          `yaml:"feats"`
 	Features          []JobFeature                         `yaml:"features"`
 	Drawbacks         []JobDrawback                        `yaml:"drawbacks"`
 	StartingInventory *inventory.StartingLoadoutOverride   `yaml:"starting_inventory"`
