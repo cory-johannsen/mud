@@ -374,6 +374,23 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
 		}
 	}
 
+	// Feats
+	if feats := csv.GetFeats(); len(feats) > 0 {
+		b.WriteString("\r\n")
+		b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Feats ---"))
+		b.WriteString("\r\n")
+		for _, ft := range feats {
+			name := ft.GetName()
+			if ft.GetActive() {
+				name += " " + telnet.Colorize(telnet.Yellow, "[active]")
+			}
+			b.WriteString(fmt.Sprintf("  %s\r\n", name))
+			if desc := ft.GetDescription(); desc != "" {
+				b.WriteString(fmt.Sprintf("    %s\r\n", desc))
+			}
+		}
+	}
+
 	return b.String()
 }
 
