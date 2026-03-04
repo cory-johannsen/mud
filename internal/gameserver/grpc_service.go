@@ -898,8 +898,9 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 		if s.scriptMgr != nil {
 			s.scriptMgr.CallHook(room.ZoneID, "on_skill_check", //nolint:errcheck
 				lua.LString(uid),
-				lua.LString(room.ID),
 				lua.LString(trigger.Skill),
+				lua.LNumber(result.Total),
+				lua.LNumber(trigger.DC),
 				lua.LString(result.Outcome.String()),
 			)
 		}

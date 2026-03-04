@@ -3,11 +3,14 @@ package gameserver
 import (
 	"context"
 	"net"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -21,6 +24,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
 // fixedDiceSource always returns a fixed value for Intn, for deterministic tests.
@@ -752,4 +756,257 @@ func TestAbilityModFrom(t *testing.T) {
 		got := abilityModFrom(tc.score)
 		assert.Equal(t, tc.expected, got, "abilityModFrom(%d)", tc.score)
 	}
+}
+
+// writeTempLuaFile writes a single Lua source file into a temp directory and returns the
+// directory path.
+//
+// Precondition: t must be non-nil; src must be valid Lua source.
+// Postcondition: Returns the directory containing the written file.
+func writeTempLuaFile(t *testing.T, filename, src string) string {
+	t.Helper()
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, filename), []byte(src), 0644))
+	return dir
+}
+
+// TestApplyRoomSkillChecks_LuaHookSignature verifies that the on_skill_check Lua hook is
+// called with exactly five arguments: uid (string), skill_id (string), total (number),
+// dc (number), and outcome (string).
+//
+// Precondition: room has a parkour on_enter check DC 10; player has quickness=14, parkour=trained;
+// dice source returns 9 (total=14, success).
+// Postcondition: the recorded Lua arguments match (uid, skill_id, total, dc, outcome_string).
+func TestApplyRoomSkillChecks_LuaHookSignature(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	// Lua script records the five on_skill_check arguments into globals for inspection.
+	luaSrc := `
+captured_uid     = ""
+captured_skill   = ""
+captured_total   = 0
+captured_dc      = 0
+captured_outcome = ""
+
+function on_skill_check(uid, skill_id, total, dc, outcome)
+    captured_uid     = uid
+    captured_skill   = skill_id
+    captured_total   = total
+    captured_dc      = dc
+    captured_outcome = outcome
+end
+`
+	src := &fixedDiceSource{val: 9} // d20=10; quickness mod=+2; trained=+2 => total=14
+	roller := dice.NewLoggedRoller(src, logger)
+
+	scriptMgr := scripting.NewManager(roller, logger)
+	dir := writeTempLuaFile(t, "hooks.lua", luaSrc)
+	require.NoError(t, scriptMgr.LoadZone("test", dir, 0))
+
+	skills := []*ruleset.Skill{
+		{ID: "parkour", Name: "Parkour", Ability: "quickness"},
+	}
+
+	room := &world.Room{
+		ID:          "room_lua_hook",
+		ZoneID:      "test",
+		Title:       "Hook Room",
+		Description: "Tests Lua hook signature.",
+		Exits:       []world.Exit{},
+		Properties:  map[string]string{},
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "parkour",
+				DC:      10,
+				Trigger: "on_enter",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "You vault it."},
+					Failure: &skillcheck.Outcome{Message: "You stumble."},
+				},
+			},
+		},
+	}
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, nil, scriptMgr,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_lua_hook",
+		Username:  "Hooker",
+		CharName:  "Hooker",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{Quickness: 14},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Skills = map[string]string{"parkour": "trained"}
+
+	msgs := svc.applyRoomSkillChecks("u_lua_hook", room)
+	require.Len(t, msgs, 1)
+	assert.Equal(t, "You vault it.", msgs[0])
+
+	// Inspect captured globals from Lua to verify the hook was called with the correct signature.
+	capturedUID, _ := scriptMgr.CallHook("test", "tostring", lua.LString("u_lua_hook"))
+	_ = capturedUID // used below via direct global reads
+
+	// Read each captured global by calling a small Lua accessor.
+	checkGlobal := func(varName string) lua.LValue {
+		ret, err2 := scriptMgr.CallHook("test", "tostring",
+			lua.LString(varName)) // tostring is a placeholder; use DoString pattern instead
+		_ = ret
+		_ = err2
+		return lua.LNil
+	}
+	_ = checkGlobal
+
+	// Use a verifier hook to read the captured values back to Go.
+	verifyLua := `
+function get_captured()
+    return captured_uid, captured_skill, captured_total, captured_dc, captured_outcome
+end
+`
+	verifyDir := writeTempLuaFile(t, "verify.lua", verifyLua)
+	require.NoError(t, scriptMgr.LoadZone("test", verifyDir, 0))
+
+	// After LoadZone with a new dir the previous state is replaced — use a combined script instead.
+	// Restart: embed the verifier in the original script.
+	combinedSrc := luaSrc + `
+function get_captured_uid()     return captured_uid     end
+function get_captured_skill()   return captured_skill   end
+function get_captured_total()   return captured_total   end
+function get_captured_dc()      return captured_dc      end
+function get_captured_outcome() return captured_outcome end
+`
+	scriptMgr2 := scripting.NewManager(roller, logger)
+	dir2 := writeTempLuaFile(t, "hooks.lua", combinedSrc)
+	require.NoError(t, scriptMgr2.LoadZone("test", dir2, 0))
+
+	svc2 := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, nil, scriptMgr2,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	sess2, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_lua_hook2",
+		Username:  "Hooker2",
+		CharName:  "Hooker2",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{Quickness: 14},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess2.Skills = map[string]string{"parkour": "trained"}
+
+	room2 := *room
+	room2.ID = "room_lua_hook2"
+	msgs2 := svc2.applyRoomSkillChecks("u_lua_hook2", &room2)
+	require.Len(t, msgs2, 1)
+	assert.Equal(t, "You vault it.", msgs2[0])
+
+	gotUID, _ := scriptMgr2.CallHook("test", "get_captured_uid")
+	gotSkill, _ := scriptMgr2.CallHook("test", "get_captured_skill")
+	gotTotal, _ := scriptMgr2.CallHook("test", "get_captured_total")
+	gotDC, _ := scriptMgr2.CallHook("test", "get_captured_dc")
+	gotOutcome, _ := scriptMgr2.CallHook("test", "get_captured_outcome")
+
+	assert.Equal(t, lua.LString("u_lua_hook2"), gotUID, "on_skill_check arg[1]: uid")
+	assert.Equal(t, lua.LString("parkour"), gotSkill, "on_skill_check arg[2]: skill_id")
+	assert.Equal(t, lua.LNumber(14), gotTotal, "on_skill_check arg[3]: total")
+	assert.Equal(t, lua.LNumber(10), gotDC, "on_skill_check arg[4]: dc")
+	assert.Equal(t, lua.LString("success"), gotOutcome, "on_skill_check arg[5]: outcome")
+}
+
+// TestApplyRoomSkillChecks_DamageEffect verifies that when a skill check outcome carries a
+// damage effect the player's CurrentHP is reduced by the rolled damage.
+//
+// Precondition: room has a parkour on_enter check DC 10 with failure outcome Effect{Type:"damage",Formula:"1d4"};
+// player has quickness=10, no proficiency (untrained); dice source returns 0 (roll=1, total=1 < DC10 → failure);
+// the damage roll also uses the fixed dice source (Intn(4) returns 0 → 1 damage).
+// Postcondition: sess.CurrentHP == 9 (10 - 1).
+func TestApplyRoomSkillChecks_DamageEffect(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	// Fixed dice: Intn(n) always returns 0 regardless of n.
+	// d20 roll = 1, total = 1 + 0 (abilityMod for score 10) + 0 (untrained) = 1 < DC10 → failure.
+	// Damage formula "1d4": Intn(4) = 0 → damage = 1.
+	src := &fixedDiceSource{val: 0}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	skills := []*ruleset.Skill{
+		{ID: "parkour", Name: "Parkour", Ability: "quickness"},
+	}
+
+	room := &world.Room{
+		ID:          "room_dmg_effect",
+		ZoneID:      "test",
+		Title:       "Damage Effect Room",
+		Description: "Failure here hurts.",
+		Exits:       []world.Exit{},
+		Properties:  map[string]string{},
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "parkour",
+				DC:      10,
+				Trigger: "on_enter",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "You vault it."},
+					Failure: &skillcheck.Outcome{
+						Message: "You stumble and take damage.",
+						Effect:  &skillcheck.Effect{Type: "damage", Formula: "1d4"},
+					},
+				},
+			},
+		},
+	}
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_dmg_effect",
+		Username:  "Bruiser",
+		CharName:  "Bruiser",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{Quickness: 10},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	// No skills set → untrained (profBonus = 0).
+
+	msgs := svc.applyRoomSkillChecks("u_dmg_effect", room)
+	require.Len(t, msgs, 1)
+	assert.Equal(t, "You stumble and take damage.", msgs[0])
+
+	// Intn(4)=0 → dice result is 1; damage total = 1.
+	assert.Equal(t, 9, sess.CurrentHP, "CurrentHP must be reduced by the damage roll")
 }
