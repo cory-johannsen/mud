@@ -53,7 +53,7 @@ test-fast: build
 	$(GO) test -race -count=1 -timeout=300s $(FAST_PKGS)
 
 test-postgres: build
-	$(GO) test -race -count=1 -timeout=600s $(POSTGRES_PKG)
+	DOCKER_HOST=unix:///var/run/docker.sock $(GO) test -race -count=1 -timeout=300s $(POSTGRES_PKG) -args -rapid.checks=3
 
 test-cover: build
 	$(GO) test -race -count=1 -timeout=600s -coverprofile=coverage.out ./...
