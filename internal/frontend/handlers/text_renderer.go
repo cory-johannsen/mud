@@ -276,21 +276,23 @@ func formatSlotLabel(slot string) string {
 
 // proficiencyColor wraps a proficiency rank string with the appropriate ANSI color.
 // untrained receives no color (terminal default); trained through legendary are progressively brighter.
+// An empty string or any unrecognized rank falls through to the default case and is returned unchanged.
 //
-// Precondition: rank is a non-empty string.
-// Postcondition: Returns rank wrapped in ANSI color codes, or rank unchanged for untrained.
+// Postcondition: Returns rank wrapped in ANSI color codes for legendary/master/expert/trained,
+// or rank unchanged (no ANSI codes) for any other input including empty string.
 func proficiencyColor(rank string) string {
-	switch strings.ToLower(rank) {
+	normalized := strings.ToLower(rank)
+	switch normalized {
 	case "legendary":
-		return telnet.Colorize(telnet.Magenta, rank)
+		return telnet.Colorize(telnet.Magenta, normalized)
 	case "master":
-		return telnet.Colorize(telnet.Yellow, rank)
+		return telnet.Colorize(telnet.Yellow, normalized)
 	case "expert":
-		return telnet.Colorize(telnet.Cyan, rank)
+		return telnet.Colorize(telnet.Cyan, normalized)
 	case "trained":
-		return telnet.Colorize(telnet.White, rank)
+		return telnet.Colorize(telnet.White, normalized)
 	default:
-		return rank // untrained — no color, use terminal default
+		return rank // untrained or unknown — no color, use terminal default
 	}
 }
 

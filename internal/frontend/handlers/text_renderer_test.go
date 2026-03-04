@@ -443,6 +443,8 @@ func TestRenderCharacterSheet_Skills(t *testing.T) {
 			{SkillId: "acrobatics", Name: "Acrobatics", Ability: "QCK", Proficiency: "trained"},
 			{SkillId: "athletics", Name: "Athletics", Ability: "BRT", Proficiency: "untrained"},
 			{SkillId: "stealth", Name: "Stealth", Ability: "QCK", Proficiency: "expert"},
+			{SkillId: "deception", Name: "Deception", Ability: "FLR", Proficiency: "master"},
+			{SkillId: "diplomacy", Name: "Diplomacy", Ability: "FLR", Proficiency: "legendary"},
 		},
 	}
 	result := RenderCharacterSheet(view)
@@ -451,6 +453,90 @@ func TestRenderCharacterSheet_Skills(t *testing.T) {
 	assert.Contains(t, result, "trained")
 	assert.Contains(t, result, "untrained")
 	assert.Contains(t, result, "expert")
+	assert.Contains(t, result, "master")
+	assert.Contains(t, result, "legendary")
+}
+
+// TestProficiencyColor_KnownRanks verifies that each known rank is wrapped in ANSI escape codes
+// and that the rank string is preserved in the output.
+func TestProficiencyColor_KnownRanks(t *testing.T) {
+	knownRanks := []string{"legendary", "master", "expert", "trained"}
+	for _, rank := range knownRanks {
+		result := proficiencyColor(rank)
+		assert.Contains(t, result, rank, "output must contain rank string for %q", rank)
+		assert.Contains(t, result, "\033[", "output must contain ANSI escape for known rank %q", rank)
+	}
+}
+
+// TestProficiencyColor_UnknownRanks verifies that unknown ranks (including untrained and empty)
+// are returned unchanged with no ANSI codes.
+func TestProficiencyColor_UnknownRanks(t *testing.T) {
+	unknownRanks := []string{"untrained", "", "novice", "journeyman", "random"}
+	for _, rank := range unknownRanks {
+		result := proficiencyColor(rank)
+		assert.Equal(t, rank, result, "unknown rank %q must be returned unchanged", rank)
+		assert.NotContains(t, result, "\033[", "unknown rank %q must not contain ANSI codes", rank)
+	}
+}
+
+// TestProperty_ProficiencyColor verifies three properties:
+// 1. For any input not in {legendary, master, expert, trained}, the function returns the raw input unchanged.
+// 2. For each known rank, the output contains the rank string and starts with an ANSI escape sequence.
+// 3. Case-insensitive: "TRAINED", "trained", and "Trained" all produce the same output.
+func TestProperty_ProficiencyColor(t *testing.T) {
+	knownRanks := map[string]bool{
+		"legendary": true,
+		"master":    true,
+		"expert":    true,
+		"trained":   true,
+	}
+
+	// Property 1: unknown inputs are returned unchanged (no ANSI codes).
+	rapid.Check(t, func(rt *rapid.T) {
+		// Generate strings that are NOT one of the known ranks (case-insensitively).
+		input := rapid.StringMatching(`[a-zA-Z0-9 _-]{0,20}`).Draw(rt, "input")
+		if knownRanks[strings.ToLower(input)] {
+			return // skip known ranks in this property
+		}
+		result := proficiencyColor(input)
+		if result != input {
+			rt.Fatalf("proficiencyColor(%q) = %q; want input unchanged", input, result)
+		}
+		if strings.Contains(result, "\033[") {
+			rt.Fatalf("proficiencyColor(%q) contains ANSI escape; expected none for unknown rank", input)
+		}
+	})
+
+	// Property 2: known ranks produce ANSI-wrapped output containing the rank string.
+	rapid.Check(t, func(rt *rapid.T) {
+		rank := rapid.SampledFrom([]string{"legendary", "master", "expert", "trained"}).Draw(rt, "rank")
+		result := proficiencyColor(rank)
+		if !strings.Contains(result, rank) {
+			rt.Fatalf("proficiencyColor(%q) = %q; does not contain rank string", rank, result)
+		}
+		if !strings.Contains(result, "\033[") {
+			rt.Fatalf("proficiencyColor(%q) = %q; expected ANSI escape sequence", rank, result)
+		}
+	})
+
+	// Property 3: case-insensitive — mixed-case variants of known ranks produce identical output.
+	rapid.Check(t, func(rt *rapid.T) {
+		rank := rapid.SampledFrom([]string{"legendary", "master", "expert", "trained"}).Draw(rt, "rank")
+		upper := strings.ToUpper(rank)
+		title := strings.ToUpper(rank[:1]) + rank[1:]
+		lower := rank
+
+		resultLower := proficiencyColor(lower)
+		resultUpper := proficiencyColor(upper)
+		resultTitle := proficiencyColor(title)
+
+		if resultLower != resultUpper {
+			rt.Fatalf("proficiencyColor(%q) != proficiencyColor(%q): %q vs %q", lower, upper, resultLower, resultUpper)
+		}
+		if resultLower != resultTitle {
+			rt.Fatalf("proficiencyColor(%q) != proficiencyColor(%q): %q vs %q", lower, title, resultLower, resultTitle)
+		}
+	})
 }
 
 func TestRenderSkillsResponse_GroupedByAbility(t *testing.T) {
