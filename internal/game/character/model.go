@@ -37,6 +37,10 @@ type Character struct {
 	MaxHP     int
 	CurrentHP int
 
+	// Skills maps skill_id to proficiency rank for this character.
+	// Populated after creation or loading from DB.
+	Skills map[string]string
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

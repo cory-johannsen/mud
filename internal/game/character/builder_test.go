@@ -119,6 +119,70 @@ func TestBuildWithJob_MaxHPAlwaysPositive(t *testing.T) {
 	})
 }
 
+func TestBuildSkillsFromJob_FixedOnly(t *testing.T) {
+	allIDs := []string{"parkour", "ghosting", "muscle", "patch_job", "hustle"}
+	job := &ruleset.Job{
+		SkillGrants: &ruleset.SkillGrants{
+			Fixed: []string{"muscle", "patch_job"},
+		},
+	}
+	skills := character.BuildSkillsFromJob(job, allIDs, nil)
+
+	if len(skills) != len(allIDs) {
+		t.Fatalf("expected %d skills, got %d", len(allIDs), len(skills))
+	}
+	if skills["muscle"] != "trained" {
+		t.Errorf("expected muscle=trained, got %q", skills["muscle"])
+	}
+	if skills["patch_job"] != "trained" {
+		t.Errorf("expected patch_job=trained, got %q", skills["patch_job"])
+	}
+	if skills["parkour"] != "untrained" {
+		t.Errorf("expected parkour=untrained, got %q", skills["parkour"])
+	}
+}
+
+func TestBuildSkillsFromJob_WithChoices(t *testing.T) {
+	allIDs := []string{"parkour", "ghosting", "grift", "muscle", "patch_job"}
+	job := &ruleset.Job{
+		SkillGrants: &ruleset.SkillGrants{
+			Fixed: []string{"muscle"},
+			Choices: &ruleset.SkillChoices{
+				Pool:  []string{"parkour", "ghosting", "grift"},
+				Count: 2,
+			},
+		},
+	}
+	skills := character.BuildSkillsFromJob(job, allIDs, []string{"parkour", "ghosting"})
+
+	if skills["muscle"] != "trained" {
+		t.Errorf("expected muscle=trained")
+	}
+	if skills["parkour"] != "trained" {
+		t.Errorf("expected parkour=trained (chosen)")
+	}
+	if skills["ghosting"] != "trained" {
+		t.Errorf("expected ghosting=trained (chosen)")
+	}
+	if skills["grift"] != "untrained" {
+		t.Errorf("expected grift=untrained (not chosen), got %q", skills["grift"])
+	}
+}
+
+func TestBuildSkillsFromJob_NilGrantsAllUntrained(t *testing.T) {
+	allIDs := []string{"parkour", "muscle"}
+	job := &ruleset.Job{SkillGrants: nil}
+	skills := character.BuildSkillsFromJob(job, allIDs, nil)
+	if len(skills) != 2 {
+		t.Fatalf("expected 2 skills, got %d", len(skills))
+	}
+	for id, prof := range skills {
+		if prof != "untrained" {
+			t.Errorf("expected %s=untrained, got %q", id, prof)
+		}
+	}
+}
+
 // Property: CurrentHP == MaxHP on a freshly built character.
 func TestBuildWithJob_CurrentHPEqualsMaxHP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

@@ -93,6 +93,34 @@ func BuildWithJob(name string, region *ruleset.Region, job *ruleset.Job, team *r
 	}, nil
 }
 
+// BuildSkillsFromJob constructs a full skill proficiency map for a new character.
+// Fixed skills and player-chosen skills are set to "trained". All others are "untrained".
+//
+// Precondition: allSkillIDs contains all valid skill IDs; chosen is a subset of job.SkillGrants.Choices.Pool.
+// Postcondition: Returns a map with exactly len(allSkillIDs) entries.
+func BuildSkillsFromJob(job *ruleset.Job, allSkillIDs []string, chosen []string) map[string]string {
+	trained := make(map[string]bool)
+
+	if job.SkillGrants != nil {
+		for _, id := range job.SkillGrants.Fixed {
+			trained[id] = true
+		}
+	}
+	for _, id := range chosen {
+		trained[id] = true
+	}
+
+	out := make(map[string]string, len(allSkillIDs))
+	for _, id := range allSkillIDs {
+		if trained[id] {
+			out[id] = "trained"
+		} else {
+			out[id] = "untrained"
+		}
+	}
+	return out
+}
+
 // AbilityName returns the short display label for an ability score field.
 func AbilityName(field string) string {
 	names := map[string]string{
