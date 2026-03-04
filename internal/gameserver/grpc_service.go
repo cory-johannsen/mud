@@ -2717,22 +2717,47 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 
 // applySkillCheckEffect applies a mechanical effect from a skill check outcome.
 //
-// Precondition: sess and effect must not be nil; s.dice must be non-nil for damage effects.
-// Postcondition: damage effects reduce sess.CurrentHP to a minimum of 0.
+// Precondition: sess and effect must not be nil; s.dice must be non-nil for damage effects;
+// s.condRegistry must be non-nil for condition effects.
+// Postcondition: damage effects reduce sess.CurrentHP to a minimum of 0;
+// condition effects add the named condition to sess.Conditions.
 func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, effect *skillcheck.Effect) {
-	if effect == nil || effect.Type != "damage" || effect.Formula == "" || s.dice == nil {
+	if effect == nil {
 		return
 	}
-	dmg, err := s.dice.RollExpr(effect.Formula)
-	if err != nil {
-		s.logger.Warn("skill check damage formula error",
-			zap.String("formula", effect.Formula),
-			zap.Error(err),
-		)
-		return
-	}
-	sess.CurrentHP -= dmg.Total()
-	if sess.CurrentHP < 0 {
-		sess.CurrentHP = 0
+	switch effect.Type {
+	case "damage":
+		if effect.Formula == "" || s.dice == nil {
+			return
+		}
+		dmg, err := s.dice.RollExpr(effect.Formula)
+		if err != nil {
+			s.logger.Warn("skill check damage formula error",
+				zap.String("formula", effect.Formula),
+				zap.Error(err),
+			)
+			return
+		}
+		sess.CurrentHP -= dmg.Total()
+		if sess.CurrentHP < 0 {
+			sess.CurrentHP = 0
+		}
+	case "condition":
+		if effect.ID == "" || sess.Conditions == nil || s.condRegistry == nil {
+			return
+		}
+		def, ok := s.condRegistry.Get(effect.ID)
+		if !ok {
+			s.logger.Warn("skill check condition not found",
+				zap.String("condition_id", effect.ID),
+			)
+			return
+		}
+		if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
+			s.logger.Warn("skill check condition apply failed",
+				zap.String("condition_id", effect.ID),
+				zap.Error(err),
+			)
+		}
 	}
 }

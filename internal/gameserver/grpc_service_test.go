@@ -18,6 +18,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -1353,6 +1354,79 @@ func TestProperty_AbilityModFrom_MatchesFloor(t *testing.T) {
 		}
 		if got != want {
 			rt.Fatalf("abilityModFrom(%d) = %d, want %d", score, got, want)
+		}
+	})
+}
+
+// TestApplySkillCheckEffect_Condition verifies that a "condition" effect type
+// results in the named condition being applied to the session's ActiveSet.
+//
+// Precondition: condRegistry contains "distrusted"; sess.Conditions is initialized.
+// Postcondition: sess.Conditions.Has("distrusted") returns true.
+func TestApplySkillCheckEffect_Condition(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{
+		ID:           "distrusted",
+		Name:         "Distrusted",
+		DurationType: "permanent",
+		MaxStacks:    0,
+	})
+
+	svc := &GameServiceServer{
+		condRegistry: reg,
+		logger:       logger,
+	}
+
+	sess := &session.PlayerSession{
+		UID:        "test_uid",
+		Conditions: condition.NewActiveSet(),
+	}
+
+	svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "condition", ID: "distrusted"})
+
+	assert.True(t, sess.Conditions.Has("distrusted"), "condition 'distrusted' must be active after apply")
+}
+
+// TestProperty_ApplySkillCheckEffect_ConditionAlwaysApplied verifies that any
+// condition ID present in the registry is always applied to the ActiveSet when
+// the effect type is "condition".
+//
+// Precondition: The registry contains the sampled condition ID.
+// Postcondition: sess.Conditions.Has(id) is true for every sampled ID.
+func TestProperty_ApplySkillCheckEffect_ConditionAlwaysApplied(t *testing.T) {
+	conditionIDs := []string{"distrusted", "prone", "flat_footed"}
+
+	rapid.Check(t, func(rt *rapid.T) {
+		id := rapid.SampledFrom(conditionIDs).Draw(rt, "condition_id")
+
+		logger := zaptest.NewLogger(t)
+
+		reg := condition.NewRegistry()
+		for _, cid := range conditionIDs {
+			reg.Register(&condition.ConditionDef{
+				ID:           cid,
+				Name:         cid,
+				DurationType: "permanent",
+				MaxStacks:    0,
+			})
+		}
+
+		svc := &GameServiceServer{
+			condRegistry: reg,
+			logger:       logger,
+		}
+
+		sess := &session.PlayerSession{
+			UID:        "prop_test_uid",
+			Conditions: condition.NewActiveSet(),
+		}
+
+		svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "condition", ID: id})
+
+		if !sess.Conditions.Has(id) {
+			rt.Fatalf("expected condition %q to be active after applySkillCheckEffect, but Has() returned false", id)
 		}
 	})
 }
