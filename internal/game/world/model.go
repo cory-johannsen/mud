@@ -4,6 +4,8 @@ package world
 import (
 	"fmt"
 	"time"
+
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
 
 // Direction represents a compass direction or named exit.
@@ -129,6 +131,8 @@ type Room struct {
 	MapX int
 	// MapY is the row position of this room on the zone map grid (required).
 	MapY int
+	// SkillChecks holds all trigger-based skill check definitions declared for this room.
+	SkillChecks []skillcheck.TriggerDef
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"gopkg.in/yaml.v3"
 )
 
@@ -44,15 +45,16 @@ type yamlRoomEquipment struct {
 
 // yamlRoom is the YAML representation of a room.
 type yamlRoom struct {
-	ID          string              `yaml:"id"`
-	Title       string              `yaml:"title"`
-	Description string              `yaml:"description"`
-	Exits       []yamlExit          `yaml:"exits"`
-	Properties  map[string]string   `yaml:"properties"`
-	Spawns      []yamlRoomSpawn     `yaml:"spawns"`
-	Equipment   []yamlRoomEquipment `yaml:"equipment"`
-	MapX        *int                `yaml:"map_x"`
-	MapY        *int                `yaml:"map_y"`
+	ID          string                 `yaml:"id"`
+	Title       string                 `yaml:"title"`
+	Description string                 `yaml:"description"`
+	Exits       []yamlExit             `yaml:"exits"`
+	Properties  map[string]string      `yaml:"properties"`
+	Spawns      []yamlRoomSpawn        `yaml:"spawns"`
+	Equipment   []yamlRoomEquipment    `yaml:"equipment"`
+	SkillChecks []skillcheck.TriggerDef `yaml:"skill_checks"`
+	MapX        *int                   `yaml:"map_x"`
+	MapY        *int                   `yaml:"map_y"`
 }
 
 // yamlExit is the YAML representation of an exit.
@@ -158,6 +160,7 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 			Title:       yr.Title,
 			Description: strings.TrimSpace(yr.Description),
 			Properties:  yr.Properties,
+			SkillChecks: yr.SkillChecks,
 			MapX:        *yr.MapX,
 			MapY:        *yr.MapY,
 		}

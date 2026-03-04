@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
@@ -435,3 +436,91 @@ zone:
 	assert.Equal(t, "", zone.ScriptDir)
 	assert.Equal(t, 0, zone.ScriptInstructionLimit)
 }
+
+func TestRoom_ParsesSkillChecks(t *testing.T) {
+	raw := `
+zone:
+  id: test_zone
+  name: Test Zone
+  description: A test zone.
+  start_room: room1
+  rooms:
+  - id: room1
+    title: Test Room
+    description: A test room.
+    map_x: 0
+    map_y: 0
+    skill_checks:
+    - skill: parkour
+      dc: 14
+      trigger: on_enter
+      outcomes:
+        success:
+          message: "You pass."
+        failure:
+          message: "You fail."
+          effect:
+            type: damage
+            formula: "1d4"
+`
+	zone, err := LoadZoneFromBytes([]byte(raw))
+	require.NoError(t, err)
+	room := zone.Rooms["room1"]
+	require.Len(t, room.SkillChecks, 1)
+	sc := room.SkillChecks[0]
+	assert.Equal(t, "parkour", sc.Skill)
+	assert.Equal(t, 14, sc.DC)
+	assert.Equal(t, "on_enter", sc.Trigger)
+	require.NotNil(t, sc.Outcomes.Success)
+	assert.Equal(t, "You pass.", sc.Outcomes.Success.Message)
+	require.NotNil(t, sc.Outcomes.Failure)
+	assert.Equal(t, "You fail.", sc.Outcomes.Failure.Message)
+	require.NotNil(t, sc.Outcomes.Failure.Effect)
+	assert.Equal(t, "damage", sc.Outcomes.Failure.Effect.Type)
+	assert.Equal(t, "1d4", sc.Outcomes.Failure.Effect.Formula)
+}
+
+func TestProperty_Room_SkillChecksCount(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		n := rapid.IntRange(0, 5).Draw(t, "n")
+		entries := ""
+		for i := 0; i < n; i++ {
+			entries += fmt.Sprintf(`
+    - skill: skill%d
+      dc: %d
+      trigger: on_enter
+      outcomes:
+        success:
+          message: "ok"
+`, i, 10+i)
+		}
+		skillChecksBlock := ""
+		if n > 0 {
+			skillChecksBlock = "    skill_checks:" + entries
+		}
+		data := []byte(fmt.Sprintf(`
+zone:
+  id: prop_zone
+  name: Prop Zone
+  description: property test zone.
+  start_room: r1
+  rooms:
+  - id: r1
+    title: Room 1
+    description: A room.
+    map_x: 0
+    map_y: 0
+%s`, skillChecksBlock))
+		z, err := LoadZoneFromBytes(data)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		got := len(z.Rooms["r1"].SkillChecks)
+		if got != n {
+			t.Fatalf("expected %d SkillChecks, got %d", n, got)
+		}
+	})
+}
+
+// Ensure the skillcheck import is used; ForOutcome is referenced via the type.
+var _ = skillcheck.TriggerDef{}
