@@ -608,4 +608,8 @@ message CharacterSheetView {
     map<string, string> accessories = 19;
     string main_hand = 20;
     string off_hand  = 21;
+
+    repeated SkillEntry        skills         = 22;
+    repeated FeatEntry         feats          = 23;
+    repeated ClassFeatureEntry class_features = 24;
 }
