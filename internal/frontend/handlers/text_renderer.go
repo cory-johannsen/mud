@@ -480,7 +480,28 @@ func RenderMap(resp *gamev1.MapResponse) string {
 						sb.WriteString(strings.Repeat(" ", cellW))
 					}
 					if xi < len(xs)-1 {
-						sb.WriteString(" ") // aligns under east connector column
+						nextX := xs[xi+1]
+						// Diagonal connector in separator between columns xi and xi+1.
+						// Only meaningful when both axes step by exactly 2 (valid BFS diagonal).
+						sep := " "
+						if nextX-x == 2 && nextY-y == 2 {
+							tNE := byCoord[[2]int32{x, nextY}]     // bottom-left of separator
+							tSW := byCoord[[2]int32{nextX, y}]     // top-right of separator
+							tSE := byCoord[[2]int32{nextX, nextY}] // bottom-right of separator
+							hasFwd := (tNE != nil && exitSet(tNE)["northeast"]) ||
+								(tSW != nil && exitSet(tSW)["southwest"])
+							hasBack := (t != nil && exitSet(t)["southeast"]) ||
+								(tSE != nil && exitSet(tSE)["northwest"])
+							switch {
+							case hasFwd && hasBack:
+								sep = "X"
+							case hasFwd:
+								sep = "/"
+							case hasBack:
+								sep = "\\"
+							}
+						}
+						sb.WriteString(sep)
 					}
 				}
 				sb.WriteString("\r\n")
