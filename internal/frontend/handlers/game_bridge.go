@@ -466,6 +466,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderSkillsResponse(p.SkillsResponse)
 		case *gamev1.ServerEvent_FeatsResponse:
 			text = RenderFeatsResponse(p.FeatsResponse)
+		case *gamev1.ServerEvent_ClassFeaturesResponse:
+			text = RenderClassFeaturesResponse(p.ClassFeaturesResponse)
 		case *gamev1.ServerEvent_InteractResponse:
 			text = RenderInteractResponse(p.InteractResponse)
 		case *gamev1.ServerEvent_UseResponse:

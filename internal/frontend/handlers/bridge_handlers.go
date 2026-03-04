@@ -85,6 +85,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerMap:                bridgeMap,
 	command.HandlerSkills:             bridgeSkills,
 	command.HandlerFeats:              bridgeFeats,
+	command.HandlerClassFeatures:      bridgeClassFeatures,
 	command.HandlerInteract:           bridgeInteract,
 	command.HandlerUse:                bridgeUse,
 }
@@ -606,6 +607,17 @@ func bridgeFeats(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_FeatsRequest{FeatsRequest: &gamev1.FeatsRequest{}},
+	}}, nil
+}
+
+// bridgeClassFeatures builds a ClassFeaturesRequest to retrieve class feature list.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a ClassFeaturesRequest; done is false.
+func bridgeClassFeatures(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_ClassFeaturesRequest{ClassFeaturesRequest: &gamev1.ClassFeaturesRequest{}},
 	}}, nil
 }
 

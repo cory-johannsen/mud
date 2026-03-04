@@ -481,6 +481,7 @@ func main() {
 		jobReg, condRegistry, *loadoutsDir,
 		allSkills, characterSkillsRepo,
 		allFeats, featRegistry, characterFeatsRepo,
+		nil, nil, nil,
 	)
 
 	// Start respawn goroutine for room equipment.

@@ -54,8 +54,9 @@ message ClientMessage {
     MapRequest          map           = 37;
     SkillsRequest       skills_request = 38;
     FeatsRequest        feats_request   = 39;
-    InteractRequest     interact_request = 40;
-    UseRequest          use_request      = 41;
+    InteractRequest     interact_request    = 40;
+    UseRequest          use_request         = 41;
+    ClassFeaturesRequest class_features_request = 42;
   }
 }
 
@@ -82,8 +83,9 @@ message ServerEvent {
     MapResponse        map             = 18;
     SkillsResponse     skills_response = 19;
     FeatsResponse      feats_response   = 20;
-    InteractResponse   interact_response = 21;
-    UseResponse        use_response      = 22;
+    InteractResponse     interact_response      = 21;
+    UseResponse          use_response           = 22;
+    ClassFeaturesResponse class_features_response = 23;
   }
 }
 
@@ -535,6 +537,26 @@ message FeatEntry {
 // FeatsResponse contains all feat entries for the character.
 message FeatsResponse {
   repeated FeatEntry feats = 1;
+}
+
+// ClassFeaturesRequest is sent by the client to view class feature list.
+message ClassFeaturesRequest {}
+
+// ClassFeatureEntry represents one class feature with its details.
+message ClassFeatureEntry {
+    string feature_id    = 1;
+    string name          = 2;
+    string archetype     = 3;
+    string job           = 4;
+    bool   active        = 5;
+    string description   = 6;
+    string activate_text = 7;
+}
+
+// ClassFeaturesResponse contains all class feature entries for the character.
+message ClassFeaturesResponse {
+    repeated ClassFeatureEntry archetype_features = 1;
+    repeated ClassFeatureEntry job_features       = 2;
 }
 
 // InteractRequest asks the server to interact with a room equipment item by instance ID.

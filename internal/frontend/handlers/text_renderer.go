@@ -663,6 +663,44 @@ func RenderFeatsResponse(fr *gamev1.FeatsResponse) string {
 	return sb.String()
 }
 
+// RenderClassFeaturesResponse formats a ClassFeaturesResponse for display.
+//
+// Precondition: resp must be non-nil.
+// Postcondition: Returns a non-empty human-readable string.
+func RenderClassFeaturesResponse(resp *gamev1.ClassFeaturesResponse) string {
+	var sb strings.Builder
+	sb.WriteString(telnet.Colorize(telnet.BrightYellow, "=== Class Features ===\r\n"))
+
+	if len(resp.ArchetypeFeatures) > 0 {
+		sb.WriteString(telnet.Colorize(telnet.BrightCyan, "\r\nArchetype Features:\r\n"))
+		for _, f := range resp.ArchetypeFeatures {
+			activeTag := ""
+			if f.Active {
+				activeTag = telnet.Colorize(telnet.Green, " [active]")
+			}
+			sb.WriteString(fmt.Sprintf("  %s%s%s%s\r\n    %s\r\n",
+				telnet.BrightWhite, f.Name, telnet.Reset, activeTag, f.Description))
+		}
+	}
+
+	if len(resp.JobFeatures) > 0 {
+		sb.WriteString(telnet.Colorize(telnet.BrightCyan, "\r\nJob Features:\r\n"))
+		for _, f := range resp.JobFeatures {
+			activeTag := ""
+			if f.Active {
+				activeTag = telnet.Colorize(telnet.Green, " [active]")
+			}
+			sb.WriteString(fmt.Sprintf("  %s%s%s%s\r\n    %s\r\n",
+				telnet.BrightWhite, f.Name, telnet.Reset, activeTag, f.Description))
+		}
+	}
+
+	if len(resp.ArchetypeFeatures) == 0 && len(resp.JobFeatures) == 0 {
+		sb.WriteString(telnet.Colorize(telnet.Dim, "  No class features assigned.\r\n"))
+	}
+	return sb.String()
+}
+
 // RenderInteractResponse formats an InteractResponse as telnet text.
 //
 // Precondition: ir must be non-nil.

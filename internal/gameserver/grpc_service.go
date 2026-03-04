@@ -94,9 +94,12 @@ type GameServiceServer struct {
 	loadoutsDir         string
 	allSkills           []*ruleset.Skill
 	characterSkillsRepo *postgres.CharacterSkillsRepository
-	allFeats            []*ruleset.Feat
-	featRegistry        *ruleset.FeatRegistry
-	characterFeatsRepo  *postgres.CharacterFeatsRepository
+	allFeats                   []*ruleset.Feat
+	featRegistry               *ruleset.FeatRegistry
+	characterFeatsRepo         *postgres.CharacterFeatsRepository
+	allClassFeatures           []*ruleset.ClassFeature
+	classFeatureRegistry       *ruleset.ClassFeatureRegistry
+	characterClassFeaturesRepo *postgres.CharacterClassFeaturesRepository
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -145,6 +148,9 @@ func NewGameServiceServer(
 	allFeats []*ruleset.Feat,
 	featRegistry *ruleset.FeatRegistry,
 	characterFeatsRepo *postgres.CharacterFeatsRepository,
+	allClassFeatures []*ruleset.ClassFeature,
+	classFeatureRegistry *ruleset.ClassFeatureRegistry,
+	characterClassFeaturesRepo *postgres.CharacterClassFeaturesRepository,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:               worldMgr,
@@ -171,9 +177,12 @@ func NewGameServiceServer(
 		loadoutsDir:         loadoutsDir,
 		allSkills:           allSkills,
 		characterSkillsRepo: characterSkillsRepo,
-		allFeats:            allFeats,
-		featRegistry:        featRegistry,
-		characterFeatsRepo:  characterFeatsRepo,
+		allFeats:                   allFeats,
+		featRegistry:               featRegistry,
+		characterFeatsRepo:         characterFeatsRepo,
+		allClassFeatures:           allClassFeatures,
+		classFeatureRegistry:       classFeatureRegistry,
+		characterClassFeaturesRepo: characterClassFeaturesRepo,
 	}
 }
 
@@ -625,6 +634,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSkills(uid)
 	case *gamev1.ClientMessage_FeatsRequest:
 		return s.handleFeats(uid)
+	case *gamev1.ClientMessage_ClassFeaturesRequest:
+		return s.handleClassFeatures(uid)
 	case *gamev1.ClientMessage_InteractRequest:
 		return s.handleInteract(uid, p.InteractRequest.InstanceId)
 	case *gamev1.ClientMessage_UseRequest:
@@ -2149,6 +2160,57 @@ func (s *GameServiceServer) handleFeats(uid string) (*gamev1.ServerEvent, error)
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_FeatsResponse{
 			FeatsResponse: &gamev1.FeatsResponse{Feats: entries},
+		},
+	}, nil
+}
+
+// handleClassFeatures returns all class feature entries for the player's current character.
+//
+// Precondition: uid must resolve to an active session with a loaded character.
+// Postcondition: Returns a ClassFeaturesResponse partitioned into archetype vs. job features.
+func (s *GameServiceServer) handleClassFeatures(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.characterClassFeaturesRepo == nil || s.classFeatureRegistry == nil {
+		return messageEvent("Class feature data is not available."), nil
+	}
+	featureIDs, err := s.characterClassFeaturesRepo.GetAll(context.Background(), sess.CharacterID)
+	if err != nil {
+		return nil, fmt.Errorf("getting class features: %w", err)
+	}
+
+	var archetypeFeatures []*gamev1.ClassFeatureEntry
+	var jobFeatures []*gamev1.ClassFeatureEntry
+
+	for _, id := range featureIDs {
+		f, ok := s.classFeatureRegistry.ClassFeature(id)
+		if !ok {
+			continue
+		}
+		entry := &gamev1.ClassFeatureEntry{
+			FeatureId:    f.ID,
+			Name:         f.Name,
+			Archetype:    f.Archetype,
+			Job:          f.Job,
+			Active:       f.Active,
+			Description:  f.Description,
+			ActivateText: f.ActivateText,
+		}
+		if f.Archetype != "" {
+			archetypeFeatures = append(archetypeFeatures, entry)
+		} else {
+			jobFeatures = append(jobFeatures, entry)
+		}
+	}
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_ClassFeaturesResponse{
+			ClassFeaturesResponse: &gamev1.ClassFeaturesResponse{
+				ArchetypeFeatures: archetypeFeatures,
+				JobFeatures:       jobFeatures,
+			},
 		},
 	}, nil
 }

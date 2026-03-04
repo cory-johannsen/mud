@@ -53,6 +53,7 @@ const (
 	HandlerMap                 = "map"
 	HandlerSkills              = "skills"
 	HandlerFeats               = "feats"
+	HandlerClassFeatures       = "class_features"
 	HandlerInteract            = "interact"
 	HandlerUse                 = "use"
 )
@@ -136,6 +137,7 @@ func BuiltinCommands() []Command {
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
 		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},
 		{Name: "feats", Aliases: []string{"ft"}, Help: "Display your feats.", Category: CategoryWorld, Handler: HandlerFeats},
+		{Name: HandlerClassFeatures, Aliases: []string{"cf"}, Help: "List your class features", Category: "character", Handler: HandlerClassFeatures},
 	}
 }
 
