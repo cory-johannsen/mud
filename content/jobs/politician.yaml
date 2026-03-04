@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Machiavellian Intrigue
-    level: 1
-    description: "You can turn any social situation to your advantage. Once per scene, reframe a setback as an opportunity — gain +2 to your next social roll after suffering a social failure."
+
 skills:
   fixed:
     - rep
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [sustained_presence, reach_influence]
     count: 1
+
+class_features:
+  - command_attention
+  - fast_talk
+  - plausible_deniability

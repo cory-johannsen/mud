@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Four-in-Hand
-    level: 1
-    description: "You can drive or pilot any vehicle without penalty, including improvised ones. In a vehicle chase, you always act first."
+
 skills:
   fixed:
     - parkour
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [dirty_strike, read_the_room]
     count: 1
+
+class_features:
+  - street_tough
+  - resilience
+  - defensive_driving

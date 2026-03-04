@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   martial_melee: trained
   light_armor: trained
-features:
-  - name: The Full Monty
-    level: 1
-    description: "You've seen it all and nothing surprises you. You are immune to seduction, blackmail, and social manipulation attempts. You also know how to run them."
+
 skills:
   fixed:
     - hustle
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [quick_dodge, flying_blade]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - read_em_all

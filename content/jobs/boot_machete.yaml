@@ -10,10 +10,7 @@ proficiencies:
   martial_weapons: trained
   light_armor: trained
   medium_armor: trained
-features:
-  - name: Weapons Are Tools
-    level: 1
-    description: "Whatever you hold becomes an instrument of liberation. When making a melee attack you may flip the results to succeed. Success is always a Critical Success; failure is always a Critical Failure."
+
 starting_inventory:
   weapon: vibroblade
   armor:
@@ -40,3 +37,8 @@ feats:
   choices:
     pool: [reactive_block, overpower]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - brutal_slash

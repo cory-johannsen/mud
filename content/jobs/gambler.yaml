@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Luck of the Draw
-    level: 1
-    description: "Once per scene, you may gamble on an outcome: declare a bold action and roll twice, taking the better result. If both rolls fail, the failure is spectacular."
+
 drawbacks:
   - name: "When The Dealing's Done"
     description: "You cannot resist a wager. When offered a bet, make a Resolve test (DN 3) or you must accept, no matter the stakes."
@@ -32,3 +29,8 @@ feats:
   choices:
     pool: [overextend, quick_dodge]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - calculated_risk

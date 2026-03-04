@@ -10,10 +10,7 @@ proficiencies:
   simple_ranged: trained
   light_armor: trained
   medium_armor: trained
-features:
-  - name: Warp Spasm
-    level: 1
-    description: "Once per day, enter a berserker rage for 1 minute: gain +4 Strength, +2 HP per level, and ignore all non-lethal damage. After, suffer 1 level of Exhaustion."
+
 skills:
   fixed:
     - muscle
@@ -32,3 +29,8 @@ feats:
   choices:
     pool: [brutal_charge, overpower]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - juiced_up

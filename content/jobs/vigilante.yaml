@@ -9,10 +9,7 @@ proficiencies:
   martial_melee: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Mortality Work
-    level: 1
-    description: "You strike from shadow with purpose. When attacking an enemy who has committed a crime you've witnessed, deal +2d6 damage and leave no evidence of your involvement."
+
 drawbacks:
   - name: Alter Ego
     description: "You maintain a secret identity. If your true identity is ever revealed, you lose all social standing and become hunted by the factions you've opposed."
@@ -34,3 +31,8 @@ feats:
   choices:
     pool: [quick_dodge, twin_strike]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - double_life

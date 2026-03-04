@@ -10,10 +10,7 @@ proficiencies:
   martial_ranged: trained
   light_armor: trained
   medium_armor: trained
-features:
-  - name: Here Comes The Cavalry
-    level: 1
-    description: "You can operate heavy weapons, vehicles, and complex machinery. Once per day, arrive at a critical moment with exactly the piece of technology the situation requires."
+
 skills:
   fixed:
     - tech_lore
@@ -32,3 +29,8 @@ feats:
   choices:
     pool: [cover_fire, dual_draw]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - field_specialist

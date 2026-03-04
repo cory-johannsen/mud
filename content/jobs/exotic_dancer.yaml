@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Alfred Pfennigworth
-    level: 1
-    description: "While performing or socializing, targets reveal sensitive information freely. After 10 minutes of interaction, learn one secret the target holds."
+
 skills:
   fixed:
     - rep
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [raw_intensity, sustained_presence]
     count: 1
+
+class_features:
+  - command_attention
+  - fast_talk
+  - mesmerize

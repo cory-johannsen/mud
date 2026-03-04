@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Magnificent Bastard
-    level: 1
-    description: "You radiate the ghost of privilege. NPCs who don't know your current circumstances treat you as if you still have wealth and influence."
+
 drawbacks:
   - name: Washed Up
     description: "Your former connections know the truth. When encountered by anyone from your former social circle, they may expose your reduced circumstances at the worst possible moment."
@@ -32,3 +29,8 @@ feats:
   choices:
     pool: [crowd_performer, sustained_presence]
     count: 1
+
+class_features:
+  - command_attention
+  - fast_talk
+  - trust_fund

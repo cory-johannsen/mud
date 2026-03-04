@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   martial_ranged: trained
   light_armor: trained
-features:
-  - name: Batten Down the Hatches
-    level: 1
-    description: "You can prepare any vehicle for extreme conditions in one minute. Passengers gain +2 to all checks while you pilot through hazardous conditions."
+
 skills:
   fixed:
     - tech_lore
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [read_the_room, dirty_strike]
     count: 1
+
+class_features:
+  - street_tough
+  - resilience
+  - evasive_maneuvers

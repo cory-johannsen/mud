@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Gutterspeak
-    level: 1
-    description: "You understand the hidden language of Portland's underclass — the slang, signals, and territorial markings. You can communicate safely with criminal elements and read gang territories."
+
 skills:
   fixed:
     - scavenging
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [defensive_stance, stunning_strike]
     count: 1
+
+class_features:
+  - street_tough
+  - resilience
+  - pest_control

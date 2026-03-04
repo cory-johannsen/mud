@@ -9,10 +9,7 @@ proficiencies:
   martial_ranged: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Salty Dog
-    level: 1
-    description: "You're at home on any body of water. You never suffer seasickness, can navigate by stars, and gain +2 to all checks aboard watercraft."
+
 skills:
   fixed:
     - muscle
@@ -31,3 +28,8 @@ feats:
   choices:
     pool: [dual_draw, overpower]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - boarding_action

@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   martial_melee: trained
   light_armor: trained
-features:
-  - name: Vim & Vigor
-    level: 1
-    description: "Your ridiculous weapon choices actually work. Exotic or improvised melee weapons deal an additional 1d4 damage in your hands, and enemies are often too confused to react."
+
 skills:
   fixed:
     - muscle
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [cover_fire, snap_shot]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - tacticool

@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: I Sell the Dead
-    level: 1
-    description: "You know where the bodies are and what they're worth. Once per day in an urban area, locate a cache of salvage from the dead — equipment, currency, or information."
+
 skills:
   fixed:
     - scavenging
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [quick_dodge, tumble_behind]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - trap_sense

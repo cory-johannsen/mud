@@ -7,10 +7,7 @@ hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: True Detective
-    level: 1
-    description: "You can read a scene. After 10 minutes of investigation, you may ask the GM one yes/no question about a crime or event that occurred in this location."
+
 skills:
   fixed:
     - intel
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [research_focus, tamper]
     count: 1
+
+class_features:
+  - daily_prep
+  - formulaic_mind
+  - sharp_eye

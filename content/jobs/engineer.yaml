@@ -7,10 +7,7 @@ hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: "Eureka!"
-    level: 1
-    description: "Once per day, you may declare a technical solution to a mechanical or structural problem that would take others days to solve. You complete it in one hour with available materials."
+
 skills:
   fixed:
     - tech_lore
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [tamper, research_focus]
     count: 1
+
+class_features:
+  - daily_prep
+  - formulaic_mind
+  - jury_rig

@@ -7,10 +7,7 @@ hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Hedgewizardry
-    level: 1
-    description: "Your tricks cross the line into the uncanny. Once per day, create a convincing illusion (sight and sound) that lasts for 10 minutes or until touched."
+
 skills:
   fixed:
     - grift
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [share_intel, field_study]
     count: 1
+
+class_features:
+  - predators_eye
+  - zone_awareness
+  - misdirection

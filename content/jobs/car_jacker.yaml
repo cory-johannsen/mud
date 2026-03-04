@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   martial_ranged: trained
   light_armor: trained
-features:
-  - name: Stand And Deliver
-    level: 1
-    description: "Your ability to project menace makes targets freeze. When you demand surrender with a weapon drawn, targets must make a Resolve test (DN 3) or comply immediately."
+
 skills:
   fixed:
     - grift
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [tumble_behind, twin_strike]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - hot_wire

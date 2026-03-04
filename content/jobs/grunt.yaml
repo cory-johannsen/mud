@@ -7,10 +7,7 @@ hit_points_per_level: 10
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: "More Work?"
-    level: 1
-    description: "Hard work is your natural state. You never suffer exhaustion penalties on physical tasks, and can work for 24 hours without rest penalty."
+
 skills:
   fixed:
     - muscle
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [reactive_block, cover_fire]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - follow_orders

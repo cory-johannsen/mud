@@ -7,10 +7,7 @@ hit_points_per_level: 6
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Shadow Broker
-    level: 1
-    description: "Information is currency. Once per day, sell a piece of information to an interested party for significant material gain, or trade it for equivalent reasoning."
+
 skills:
   fixed:
     - intel
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [research_focus, tamper]
     count: 1
+
+class_features:
+  - daily_prep
+  - formulaic_mind
+  - informant

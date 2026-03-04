@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Artful Dodger
-    level: 1
-    description: "You can disappear in any urban environment. Once per scene, escape pursuit or avoid detection by melting into the background — no roll required if you have 6 seconds."
+
 skills:
   fixed:
     - wasteland
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [tumble_behind, plant_evidence]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - urban_camouflage

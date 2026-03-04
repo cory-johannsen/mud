@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Confidence Trick
-    level: 1
-    description: "You establish a false identity flawlessly. Once per day, convince a target that you are someone you're not — they won't question it without hard evidence."
+
 skills:
   fixed:
     - hustle
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [quick_dodge, plant_evidence]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - too_good_to_be_true

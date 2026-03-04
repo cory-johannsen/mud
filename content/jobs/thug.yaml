@@ -9,10 +9,7 @@ proficiencies:
   martial_weapons: trained
   light_armor: trained
   medium_armor: trained
-features:
-  - name: Shield Wall
-    level: 1
-    description: "When fighting alongside faction allies, you form a unified front. When adjacent to at least one ally, you and that ally each gain +2 to AC."
+
 skills:
   fixed:
     - muscle
@@ -31,3 +28,8 @@ feats:
   choices:
     pool: [brutal_charge, overpower]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - pack_mentality

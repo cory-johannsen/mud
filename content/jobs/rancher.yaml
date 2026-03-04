@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Beastmaster
-    level: 1
-    description: "Animals trust you instinctively. You can calm any non-supernatural animal with a 1-minute interaction, and trained animals obey complex commands from you without rolls."
+
 skills:
   fixed:
     - wasteland
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [mark_target, field_study]
     count: 1
+
+class_features:
+  - predators_eye
+  - zone_awareness
+  - animal_handling

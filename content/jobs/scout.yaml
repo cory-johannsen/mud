@@ -9,10 +9,7 @@ proficiencies:
   martial_ranged: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Situational Awareness
-    level: 1
-    description: "You are never surprised. You cannot be ambushed, and always act in the first round of combat regardless of initiative."
+
 skills:
   fixed:
     - ghosting
@@ -31,3 +28,8 @@ feats:
   choices:
     pool: [mark_target, field_study]
     count: 1
+
+class_features:
+  - predators_eye
+  - zone_awareness
+  - dead_reckoning

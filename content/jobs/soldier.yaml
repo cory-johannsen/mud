@@ -11,10 +11,7 @@ proficiencies:
   martial_ranged: trained
   light_armor: trained
   medium_armor: trained
-features:
-  - name: Guerilla Warfare
-    level: 1
-    description: "You excel at hit-and-run tactics in urban terrain. When attacking from cover and then moving at least 10 feet, enemies suffer -2 to attacks against you until your next turn."
+
 skills:
   fixed:
     - muscle
@@ -33,3 +30,8 @@ feats:
   choices:
     pool: [hit_the_dirt, combat_read]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - guerilla_warfare

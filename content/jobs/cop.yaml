@@ -9,10 +9,7 @@ proficiencies:
   martial_ranged: trained
   light_armor: trained
   medium_armor: trained
-features:
-  - name: "I Am The Law!"
-    level: 1
-    description: "Badge or no badge, you project authority. Gain advantage on Intimidation checks against civilians, and may demand cooperation without violence once per scene."
+
 skills:
   fixed:
     - hard_look
@@ -31,3 +28,8 @@ feats:
   choices:
     pool: [field_study, known_weakness]
     count: 1
+
+class_features:
+  - predators_eye
+  - zone_awareness
+  - badge_and_gun

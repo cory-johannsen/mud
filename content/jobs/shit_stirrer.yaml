@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Shaken Not Stirred
-    level: 1
-    description: "You can instigate conflict between any two parties with a well-placed rumor or incident. Once per day, start a fight, argument, or diplomatic crisis between NPCs without implicating yourself."
+
 skills:
   fixed:
     - rep
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [street_knowledge, reach_influence]
     count: 1
+
+class_features:
+  - command_attention
+  - fast_talk
+  - agitator

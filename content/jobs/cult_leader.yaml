@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Holy Roller
-    level: 1
-    description: "Your followers would do anything for you. Once per day, issue a command that one devoted follower NPC will carry out without question."
+
 drawbacks:
   - name: The End Is Nigh
     description: "Your apocalyptic beliefs occasionally override rational decision-making. When faced with a prophesied sign, make a Resolve test (DN 3) or act on your beliefs immediately."
@@ -32,3 +29,8 @@ feats:
   choices:
     pool: [dirty_strike, root_to_life]
     count: 1
+
+class_features:
+  - street_tough
+  - resilience
+  - indoctrinate

@@ -9,10 +9,7 @@ proficiencies:
   martial_weapons: trained
   light_armor: trained
   medium_armor: trained
-features:
-  - name: Dogs of War
-    level: 1
-    description: "You can be hired for violence and everyone knows it. You gain advantage on Intimidation checks, and may name your price for dangerous work without social penalty."
+
 skills:
   fixed:
     - ghosting
@@ -31,3 +28,8 @@ feats:
   choices:
     pool: [cover_fire, combat_read]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - clean_shot

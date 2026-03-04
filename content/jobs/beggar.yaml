@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Beggars Bowl
-    level: 1
-    description: "You can extract charity from almost anyone. Once per scene, receive aid (money, food, shelter, or information) from a stranger with a successful Charisma check (DN 2)."
+
 skills:
   fixed:
     - hustle
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [quick_dodge, tumble_behind]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - forgotten_face

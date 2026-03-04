@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Jack Of All Trades
-    level: 1
-    description: "You've picked up enough skills through brute necessity that you can attempt any task without penalty, even those requiring specialized training."
+
 skills:
   fixed:
     - muscle
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [reach_influence, crowd_performer]
     count: 1
+
+class_features:
+  - command_attention
+  - fast_talk
+  - muscle_up

@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Nimble Fingers
-    level: 1
-    description: "You can pick locks, pick pockets, and palm objects without a roll in normal conditions. In difficult conditions, gain advantage on Dexterity checks involving theft or sleight of hand."
+
 skills:
   fixed:
     - grift
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [plant_evidence, twin_strike]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - five_finger_discount

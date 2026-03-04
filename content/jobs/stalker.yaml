@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: For A Few Shillings More
-    level: 1
-    description: "Once you mark a target, you always find them. You can track your quarry through any terrain and always know their general direction as long as you've seen them in the last 24 hours."
+
 skills:
   fixed:
     - ghosting
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [known_weakness, rapid_shot]
     count: 1
+
+class_features:
+  - predators_eye
+  - zone_awareness
+  - shadow_step

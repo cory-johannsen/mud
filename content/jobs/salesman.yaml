@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Grease the Wheels
-    level: 1
-    description: "You know what everyone wants. Once per scene, learn what a person needs most — their price, weakness, or desire — with a successful Insight check."
+
 skills:
   fixed:
     - hustle
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [root_to_life, dirty_strike]
     count: 1
+
+class_features:
+  - street_tough
+  - resilience
+  - always_be_closing

@@ -9,10 +9,7 @@ proficiencies:
   martial_melee: trained
   unarmed: trained
   light_armor: trained
-features:
-  - name: Blood & Sand
-    level: 1
-    description: "The crowd feeds you. In front of witnesses, you deal +2 damage on all melee attacks. The more witnesses, the harder you fight."
+
 skills:
   fixed:
     - muscle
@@ -31,3 +28,8 @@ feats:
   choices:
     pool: [overpower, adrenaline_surge]
     count: 1
+
+class_features:
+  - street_brawler
+  - brutal_surge
+  - haymaker

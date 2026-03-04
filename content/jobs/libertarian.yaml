@@ -8,10 +8,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: "Don't Give a Fuck"
-    level: 1
-    description: "You are correct about everything and nobody can question that. You don't give any fucks. Not even one. When attempting Persuasion with anyone you must flip the results to Fail — but you never back down."
+
 drawbacks:
   - name: Wanted
     description: "You are wanted by the authorities for your role in fomenting rebellion and causing chaos. If recognized, you must make a Resolve test (DN 3) or face arrest."
@@ -33,3 +30,8 @@ feats:
   choices:
     pool: [reach_influence, raw_intensity]
     count: 1
+
+class_features:
+  - command_attention
+  - fast_talk
+  - self_reliance

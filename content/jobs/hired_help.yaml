@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Town Gossip
-    level: 1
-    description: "You hear everything. Once per day in a settlement, learn one piece of local gossip or a secret about a resident of your choice."
+
 skills:
   fixed:
     - hustle
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [dirty_strike, stunning_strike]
     count: 1
+
+class_features:
+  - street_tough
+  - resilience
+  - on_the_clock

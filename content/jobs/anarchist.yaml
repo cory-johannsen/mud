@@ -7,10 +7,7 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
-features:
-  - name: Rabble-Rousing
-    level: 1
-    description: "You can inspire a crowd to action with nothing but words and fury. Once per scene, rally nearby NPCs to your cause with a Charisma check (DN 2)."
+
 skills:
   fixed:
     - hard_look
@@ -29,3 +26,8 @@ feats:
   choices:
     pool: [crowd_performer, sustained_presence]
     count: 1
+
+class_features:
+  - command_attention
+  - fast_talk
+  - provoke

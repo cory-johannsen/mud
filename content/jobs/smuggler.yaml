@@ -9,10 +9,7 @@ proficiencies:
   martial_ranged: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: Hans Shot First
-    level: 1
-    description: "You always draw first. When combat begins, you may take one free action before initiative is rolled — attack, run, or hide."
+
 skills:
   fixed:
     - grift
@@ -31,3 +28,8 @@ feats:
   choices:
     pool: [plant_evidence, tumble_behind]
     count: 1
+
+class_features:
+  - sucker_punch
+  - slippery
+  - hidden_compartment

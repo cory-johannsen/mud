@@ -8,10 +8,7 @@ proficiencies:
   simple_weapons: trained
   simple_ranged: trained
   light_armor: trained
-features:
-  - name: The Show Must Go On
-    level: 1
-    description: "Your performance cannot be stopped by minor inconveniences like combat. While performing, allies within earshot gain +1 to all checks."
+
 skills:
   fixed:
     - rep
@@ -30,3 +27,8 @@ feats:
   choices:
     pool: [sustained_presence, street_knowledge]
     count: 1
+
+class_features:
+  - command_attention
+  - fast_talk
+  - crowd_pleaser
