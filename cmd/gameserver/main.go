@@ -54,6 +54,7 @@ func main() {
 	loadoutsDir := flag.String("loadouts-dir", "content/loadouts", "path to archetype loadout YAML directory")
 	skillsFile := flag.String("skills", "content/skills.yaml", "path to skills YAML file")
 	featsFile := flag.String("feats", "content/feats.yaml", "path to feats YAML file")
+	classFeatsFile := flag.String("class-features", "content/class_features.yaml", "path to class features YAML file")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -269,6 +270,14 @@ func main() {
 	featRegistry := ruleset.NewFeatRegistry(allFeats)
 	characterFeatsRepo := postgres.NewCharacterFeatsRepository(pool.DB())
 
+	classFeatures, err := ruleset.LoadClassFeatures(*classFeatsFile)
+	if err != nil {
+		logger.Fatal("loading class features", zap.Error(err))
+	}
+	cfReg := ruleset.NewClassFeatureRegistry(classFeatures)
+	logger.Info("class features loaded", zap.Int("class_features", len(classFeatures)))
+	characterClassFeaturesRepo := postgres.NewCharacterClassFeaturesRepository(pool.DB())
+
 	// Load HTN AI domains.
 	aiRegistry := ai.NewRegistry()
 
@@ -481,7 +490,7 @@ func main() {
 		jobReg, condRegistry, *loadoutsDir,
 		allSkills, characterSkillsRepo,
 		allFeats, featRegistry, characterFeatsRepo,
-		nil, nil, nil,
+		classFeatures, cfReg, characterClassFeaturesRepo,
 	)
 
 	// Start respawn goroutine for room equipment.
