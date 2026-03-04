@@ -48,6 +48,7 @@ const welcomeBanner = `
 
 // CharacterSkillsSetter defines the skill persistence operations required by AuthHandler.
 type CharacterSkillsSetter interface {
+	HasSkills(ctx context.Context, characterID int64) (bool, error)
 	SetAll(ctx context.Context, characterID int64, skills map[string]string) error
 }
 

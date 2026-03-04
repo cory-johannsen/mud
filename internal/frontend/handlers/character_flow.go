@@ -112,6 +112,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 			if c == nil {
 				continue // user cancelled — loop again
 			}
+			if err := h.ensureSkills(ctx, conn, c); err != nil {
+				return err
+			}
 			if err := h.gameBridge(ctx, conn, acct, c); err != nil {
 				if errors.Is(err, ErrSwitchCharacter) {
 					continue
@@ -161,6 +164,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 				return err
 			}
 			if c != nil {
+				if err := h.ensureSkills(ctx, conn, c); err != nil {
+					return err
+				}
 				if err := h.gameBridge(ctx, conn, acct, c); err != nil {
 					if errors.Is(err, ErrSwitchCharacter) {
 						continue
@@ -177,6 +183,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 		}
 
 		selected := chars[choice-1]
+		if err := h.ensureSkills(ctx, conn, selected); err != nil {
+			return err
+		}
 		if err := h.gameBridge(ctx, conn, acct, selected); err != nil {
 			if errors.Is(err, ErrSwitchCharacter) {
 				continue
@@ -389,6 +398,55 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	}
 
 	return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, selectedJob, selectedTeam)
+}
+
+// ensureSkills checks whether the character has skills recorded and, if not,
+// runs the interactive selection and persists the result. It is called before
+// gameBridge for both new and existing characters so backfill always prompts.
+//
+// Precondition: char must have a valid ID and Class set.
+// Postcondition: character_skills rows exist for char; returns non-nil error only on fatal failure.
+func (h *AuthHandler) ensureSkills(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
+	if h.characterSkills == nil || len(h.allSkills) == 0 {
+		return nil
+	}
+	has, err := h.characterSkills.HasSkills(ctx, char.ID)
+	if err != nil {
+		h.logger.Warn("checking skills for character", zap.Int64("id", char.ID), zap.Error(err))
+		return nil // non-fatal: enter game without skills
+	}
+	if has {
+		return nil
+	}
+
+	job, ok := h.jobRegistry.Job(char.Class)
+	if !ok {
+		h.logger.Warn("unknown job for skill backfill", zap.String("class", char.Class))
+		return nil
+	}
+
+	allSkillIDs := make([]string, len(h.allSkills))
+	for i, sk := range h.allSkills {
+		allSkillIDs[i] = sk.ID
+	}
+
+	var chosen []string
+	if job.SkillGrants != nil && job.SkillGrants.Choices != nil && job.SkillGrants.Choices.Count > 0 {
+		_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow,
+			"\r\nYour character needs to select trained skills before entering the world."))
+		chosen, err = h.skillChoiceLoop(ctx, conn, job.SkillGrants.Choices.Pool, job.SkillGrants.Choices.Count)
+		if err != nil {
+			return fmt.Errorf("skill backfill choice: %w", err)
+		}
+		// If cancelled, proceed with nil chosen — fixed skills still assigned.
+	}
+
+	skillMap := character.BuildSkillsFromJob(job, allSkillIDs, chosen)
+	if err := h.characterSkills.SetAll(ctx, char.ID, skillMap); err != nil {
+		h.logger.Error("persisting backfill skills", zap.Int64("id", char.ID), zap.Error(err))
+		_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Warning: skills could not be saved."))
+	}
+	return nil
 }
 
 // skillChoiceLoop prompts the player to pick `count` skills from the provided pool,
