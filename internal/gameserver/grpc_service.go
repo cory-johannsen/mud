@@ -187,7 +187,7 @@ func NewGameServiceServer(
 	classFeatureRegistry *ruleset.ClassFeatureRegistry,
 	characterClassFeaturesRepo CharacterClassFeaturesGetter,
 ) *GameServiceServer {
-	return &GameServiceServer{
+	s := &GameServiceServer{
 		world:               worldMgr,
 		sessions:            sessMgr,
 		commands:            cmdRegistry,
@@ -219,6 +219,17 @@ func NewGameServiceServer(
 		classFeatureRegistry:       classFeatureRegistry,
 		characterClassFeaturesRepo: characterClassFeaturesRepo,
 	}
+	if s.combatH != nil {
+		s.combatH.SetOnCombatEnd(func(roomID string) {
+			sessions := s.sessions.PlayersInRoomDetails(roomID)
+			for _, sess := range sessions {
+				if sess.Conditions != nil {
+					sess.Conditions.ClearEncounter()
+				}
+			}
+		})
+	}
+	return s
 }
 
 // Session implements the bidirectional streaming RPC.
