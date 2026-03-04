@@ -120,7 +120,7 @@ func TestDamageBonus_AppliedCondition(t *testing.T) {
 
 func TestProperty_DamageBonus_NeverNegative(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		bonus := rapid.IntRange(0, 10).Draw(rt, "bonus")
+		bonus := rapid.IntRange(-10, 10).Draw(rt, "bonus")
 		s := condition.NewActiveSet()
 		def := &condition.ConditionDef{
 			ID: "test", Name: "Test", DamageBonus: bonus,

@@ -49,12 +49,8 @@ func IsActionRestricted(s *ActiveSet, actionType string) bool {
 // Postcondition: returns >= 0.
 func DamageBonus(s *ActiveSet) int {
 	total := 0
-	for _, ac := range s.All() {
-		stacks := ac.Stacks
-		if stacks < 1 {
-			stacks = 1
-		}
-		total += ac.Def.DamageBonus * stacks
+	for _, ac := range s.conditions {
+		total += ac.Def.DamageBonus * ac.Stacks
 	}
 	if total < 0 {
 		total = 0
