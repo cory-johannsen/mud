@@ -29,25 +29,42 @@
   - [x] Lua hook: `on_skill_check(uid, skill_id, total, dc, outcome)` fired after every resolved check.
   - [x] PlayerSession carries per-character skill ranks and proficiency bonus used by the resolver.
 - [ ] Skills, Feats and Class features.
-  - [ ] All the P2FE skills need to be implemented.
-  - [ ] All the P2FE feats need to be implemented.
-  - [ ] All the P2FE class features need to be implemented.
-  - Where the P2FE lore doesn't match the Gunchete setting it will need migrated.
-  - [x] Skills should appear on the character sheet
-  - [x] Feats should appear on the character sheet
-  - [x] Class features should appear on the character sheet
-  - New commands `skills`, `feats` that display the known items with details
-  - [ ] Players get assigned their initial skills based on their job.  This should happen at creation but also at login for existing characters.
-  - [ ] Players get assigned their initial class features based on their job.  This should happen at creation but also at login for existing characters.
-  - [ ] Players get assigned their initial feats based on their job.  This should happen at creation but also at login for existing characters.
-  - During character creation if the player must choose between multiple options they should be prompted to choose from a list.
-    - Existing characters must be checked at login for missing options and prompted to select them
-  - [ ] For active skills features a command must exists that allows the player to activate them.
-    - The command should accept the name of the skill feature but if not provided should prompt the player to select from a list.
-  - [ ] For active feats features a command must exists that allows the player to activate them.
-    - The command should accept the name of the feat feature but if not provided should prompt the player to select from a list.
-  - [ ] For active class features a command must exists that allows the player to activate them.
-    - The command should accept the name of the class feature but if not provided should prompt the player to select from a list.
+  - [x] **Skills — Data pipeline**
+    - [x] 17 P2FE skills defined in `content/skills.yaml`, mapped to Gunchete setting
+    - [x] Skills stored in DB per character with proficiency rank (untrained/trained/expert/master/legendary)
+    - [x] Job YAML declares starting skills; assigned at character creation and backfilled at login for existing characters
+    - [x] `skills` command displays all 17 skills grouped by ability score; trained skills highlighted
+    - [x] Skills appear on the character sheet (`sheet`/`char` command)
+    - [x] PlayerSession carries skill ranks for use by the skill check resolver
+  - [x] **Feats — Data pipeline**
+    - [x] Feats defined in `content/feats.yaml` covering general feats and job-specific feats by archetype; lore migrated to Gunchete setting
+    - [x] Feats stored in DB per character
+    - [x] Job YAML declares starting feats; assigned at character creation and backfilled at login for existing characters
+    - [x] `feats` command displays character feats grouped by category; active feats marked `[active]`
+    - [x] Feats appear on the character sheet
+    - [x] `use <feat>` activates an active feat and displays its `activate_text`; prints an error for passive feats
+  - [x] **Class features — Data pipeline**
+    - [x] Class features defined in `content/class_features.yaml`; lore migrated to Gunchete setting
+    - [x] Class features stored in DB per character
+    - [x] Job YAML declares starting class features; assigned at creation and backfilled at login for existing characters
+    - [x] `class_features` command displays character class features grouped by archetype vs. job; active features marked `[active]`
+    - [x] Class features appear on the character sheet
+    - [x] `use <class_feature>` activates an active class feature and displays its `activate_text`
+  - [x] **Skill check triggers — Stage 1** (see "Skill Check Triggers" entry above for details)
+  - [ ] **Skill check triggers — Stage 2: NPC `on_greet` and item `on_use` extended effects**
+    - [ ] `condition` effect type wired to the condition system (`ActiveSet.Apply`)
+    - [ ] `reveal` effect type exposes hidden room exits or items
+  - [ ] **Active feat/class feature mechanics — Stage 3**
+    - [ ] Active feats/class features map to a named condition via `condition_id` in YAML
+    - [ ] `use <feat>` applies the condition (with `damage_bonus`, `ac_penalty`, etc.) for encounter or timed duration
+    - [ ] Condition cleared on combat end or timer expiry
+  - [ ] **Passive feat/class feature mechanics — Stage 4**
+    - [ ] `sucker_punch` — sneak attack damage bonus when attacking from stealth
+    - [ ] `street_brawler` — attack of opportunity when enemy leaves threat range
+    - [ ] `predators_eye` — bonus to first attack vs unaware target
+    - [ ] `zone_awareness` — removes difficult terrain movement penalty
+    - [ ] Lua hook `on_passive_feat_check(uid, feat_id, context)` for custom passive logic
+  - [ ] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
 - [ ] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
 - [ ] Character levelling
