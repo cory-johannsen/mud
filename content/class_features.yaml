@@ -1,0 +1,800 @@
+class_features:
+  # Archetype-shared features (archetype set, job = "")
+  - id: street_brawler
+    name: Street Brawler
+    archetype: aggressor
+    job: ""
+    pf2e: attack_of_opportunity
+    active: false
+    activate_text: ""
+    description: "You can make an Attack of Opportunity against foes that move through your reach or provoke."
+
+  - id: brutal_surge
+    name: Brutal Surge
+    archetype: aggressor
+    job: ""
+    pf2e: rage
+    active: true
+    activate_text: "The red haze drops and you move on pure instinct."
+    description: "Enter a combat frenzy: +2 melee damage, -2 AC until end of encounter."
+
+  - id: sucker_punch
+    name: Sucker Punch
+    archetype: criminal
+    job: ""
+    pf2e: sneak_attack
+    active: false
+    activate_text: ""
+    description: "Deal +1d6 bonus damage to flat-footed or flanked targets."
+
+  - id: slippery
+    name: Slippery
+    archetype: criminal
+    job: ""
+    pf2e: evasion
+    active: false
+    activate_text: ""
+    description: "When you succeed at a Reflex save you gain a critical success instead."
+
+  - id: predators_eye
+    name: Predator's Eye
+    archetype: drifter
+    job: ""
+    pf2e: hunters_edge
+    active: false
+    activate_text: ""
+    description: "Choose a favored target type; you deal +1d8 precision damage to that type."
+
+  - id: zone_awareness
+    name: Zone Awareness
+    archetype: drifter
+    job: ""
+    pf2e: wild_stride
+    active: false
+    activate_text: ""
+    description: "Difficult terrain from natural hazards does not slow your movement."
+
+  - id: command_attention
+    name: Command Attention
+    archetype: influencer
+    job: ""
+    pf2e: inspire_courage
+    active: true
+    activate_text: "You raise your voice and all eyes snap to you."
+    description: "Grant allies within earshot +1 attack and damage rolls for the current encounter."
+
+  - id: fast_talk
+    name: Fast Talk
+    archetype: influencer
+    job: ""
+    pf2e: inspire_defense
+    active: true
+    activate_text: "You spin a rapid web of distracting chatter."
+    description: "Grant allies within earshot +1 AC and saving throws for the current encounter."
+
+  - id: daily_prep
+    name: Daily Prep
+    archetype: nerd
+    job: ""
+    pf2e: daily_infusions
+    active: false
+    activate_text: ""
+    description: "Each day you may prepare a number of crafted consumables equal to your Intelligence modifier."
+
+  - id: formulaic_mind
+    name: Formulaic Mind
+    archetype: nerd
+    job: ""
+    pf2e: formula_book
+    active: false
+    activate_text: ""
+    description: "You maintain a personal formula database; you never fumble on crafting attempts for known formulas."
+
+  - id: street_tough
+    name: Street Tough
+    archetype: normie
+    job: ""
+    pf2e: flurry_of_blows
+    active: true
+    activate_text: "You throw a rapid flurry of blows."
+    description: "Make two unarmed strikes as a single action with only a -1 penalty to each."
+
+  - id: resilience
+    name: Resilience
+    archetype: normie
+    job: ""
+    pf2e: incredible_movement
+    active: false
+    activate_text: ""
+    description: "+10 ft to your base movement speed."
+
+  # Job-specific features (job set, archetype = "")
+  # aggressor jobs
+  - id: bone_breaker
+    name: Bone Breaker
+    archetype: ""
+    job: beat_down_artist
+    pf2e: grapple
+    active: false
+    activate_text: ""
+    description: "A successful Grapple check reduces the target's movement speed by 10 ft until end of encounter."
+
+  - id: quick_draw
+    name: Quick Draw
+    archetype: ""
+    job: boot_gun
+    pf2e: quick_draw
+    active: false
+    activate_text: ""
+    description: "Draw and fire a concealed weapon as a free action once per encounter; enemies cannot react to the draw."
+
+  - id: brutal_slash
+    name: Brutal Slash
+    archetype: ""
+    job: boot_machete
+    pf2e: raging_strikes
+    active: true
+    activate_text: "You swing with everything you have."
+    description: "Once per encounter, deal +1d6 bleed damage on a melee hit."
+
+  - id: clean_shot
+    name: Clean Shot
+    archetype: ""
+    job: contract_killer
+    pf2e: assassinate
+    active: false
+    activate_text: ""
+    description: "Your first attack against a target that has not yet acted in combat is always a surprise attack."
+
+  - id: turf_war
+    name: Turf War
+    archetype: ""
+    job: gangster
+    pf2e: intimidating_strike
+    active: false
+    activate_text: ""
+    description: "+2 to attack and damage rolls when fighting in your home zone."
+
+  - id: follow_orders
+    name: Follow Orders
+    archetype: ""
+    job: grunt
+    pf2e: aid
+    active: false
+    activate_text: ""
+    description: "When commanded to attack by an ally, gain +2 to your next attack roll against the designated target."
+
+  - id: watchful_eye
+    name: Watchful Eye
+    archetype: ""
+    job: guard
+    pf2e: vigilant_sentry
+    active: false
+    activate_text: ""
+    description: "You cannot be flanked; gain +1 to Perception checks against Stealth."
+
+  - id: back_of_a_truck
+    name: Back of a Truck
+    archetype: ""
+    job: laborer
+    pf2e: powerful_leap
+    active: false
+    activate_text: ""
+    description: "You ignore the first 3 bulk of encumbrance and can carry loads that would stop others."
+
+  - id: tacticool
+    name: Tacticool
+    archetype: ""
+    job: mall_ninja
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "+1 to attack rolls when wielding a weapon with at least one modification or accessory attached."
+
+  - id: double_time
+    name: Double Time
+    archetype: ""
+    job: mercenary
+    pf2e: sudden_charge
+    active: true
+    activate_text: "You break into a full sprint before anyone can react."
+    description: "Once per encounter, move up to your speed and make an attack before initiative is rolled."
+
+  - id: boarding_action
+    name: Boarding Action
+    archetype: ""
+    job: pirate
+    pf2e: leap_attack
+    active: false
+    activate_text: ""
+    description: "+2 to attack rolls when you moved at least 10 ft toward the target this turn."
+
+  - id: juiced_up
+    name: Juiced Up
+    archetype: ""
+    job: roid_rager
+    pf2e: raging_strikes
+    active: false
+    activate_text: ""
+    description: "While in Brutal Surge, add your Strength modifier a second time to melee damage."
+
+  - id: guerilla_warfare
+    name: Guerilla Warfare
+    archetype: ""
+    job: soldier
+    pf2e: cover_fire
+    active: false
+    activate_text: ""
+    description: "+2 attack bonus when you have cover in urban or fortified terrain."
+
+  - id: field_specialist
+    name: Field Specialist
+    archetype: ""
+    job: specialist
+    pf2e: weapon_specialization
+    active: false
+    activate_text: ""
+    description: "Choose one weapon group; deal +2 damage with weapons from that group."
+
+  - id: haymaker
+    name: Haymaker
+    archetype: ""
+    job: street_fighter
+    pf2e: power_attack
+    active: true
+    activate_text: "You wind up for a devastating overhand strike."
+    description: "Make one melee strike at -1 to deal double damage dice."
+
+  - id: pack_mentality
+    name: Pack Mentality
+    archetype: ""
+    job: thug
+    pf2e: gang_up
+    active: false
+    activate_text: ""
+    description: "You are never flat-footed when outnumbered 2-to-1 or less."
+
+  - id: apprentice_strike
+    name: Apprentice Strike
+    archetype: ""
+    job: trainee
+    pf2e: attack_of_opportunity
+    active: false
+    activate_text: ""
+    description: "+1 to attack rolls; if you miss, your next attack against the same target this turn gains +2."
+
+  # criminal jobs
+  - id: forgotten_face
+    name: Forgotten Face
+    archetype: ""
+    job: beggar
+    pf2e: concealment
+    active: false
+    activate_text: ""
+    description: "NPCs who've seen you before require a DC 20 Perception check to recognize you in a new location."
+
+  - id: hot_wire
+    name: Hot Wire
+    archetype: ""
+    job: car_jacker
+    pf2e: disable_device
+    active: false
+    activate_text: ""
+    description: "Start any vehicle in 30 seconds without a key; +2 to Driving checks for stolen or commandeered vehicles."
+
+  - id: off_the_grid
+    name: Off the Grid
+    archetype: ""
+    job: free_spirit
+    pf2e: cover_tracks
+    active: false
+    activate_text: ""
+    description: "You cannot be tracked by electronic surveillance; +2 to saves against social manipulation."
+
+  - id: calculated_risk
+    name: Calculated Risk
+    archetype: ""
+    job: gambler
+    pf2e: assurance
+    active: true
+    activate_text: "You size up the odds and make your move."
+    description: "Once per encounter, reroll any d20 check and take the higher result."
+
+  - id: too_good_to_be_true
+    name: Too Good to Be True
+    archetype: ""
+    job: grifter
+    pf2e: silver_tongue
+    active: false
+    activate_text: ""
+    description: "+2 to Deception; when you critically succeed on Deception the target is helpful to you for 1 hour."
+
+  - id: urban_camouflage
+    name: Urban Camouflage
+    archetype: ""
+    job: hobo
+    pf2e: hide
+    active: false
+    activate_text: ""
+    description: "In urban environments you can attempt to Hide in plain sight while others are observing you."
+
+  - id: read_em_all
+    name: Read 'Em All
+    archetype: ""
+    job: hooker
+    pf2e: empathic_sense
+    active: false
+    activate_text: ""
+    description: "You can attempt Sense Motive as a free action once per round without provoking."
+
+  - id: enforcer_presence
+    name: Enforcer Presence
+    archetype: ""
+    job: muscle
+    pf2e: coerce
+    active: false
+    activate_text: ""
+    description: "On a successful Intimidate check, the target is shaken for 1 minute rather than 1 round."
+
+  - id: hidden_compartment
+    name: Hidden Compartment
+    archetype: ""
+    job: smuggler
+    pf2e: concealment
+    active: false
+    activate_text: ""
+    description: "You can conceal items of up to 2 bulk on your person; Perception DC to find them is +4."
+
+  - id: five_finger_discount
+    name: Five-Finger Discount
+    archetype: ""
+    job: thief
+    pf2e: theft
+    active: false
+    activate_text: ""
+    description: "After a successful Steal attempt, immediately palm a second small item from the same target."
+
+  - id: trap_sense
+    name: Trap Sense
+    archetype: ""
+    job: tomb_raider
+    pf2e: search
+    active: false
+    activate_text: ""
+    description: "+2 to Perception to detect traps; on a critical success you automatically disable the trap."
+
+  - id: double_life
+    name: Double Life
+    archetype: ""
+    job: vigilante
+    pf2e: impersonate
+    active: false
+    activate_text: ""
+    description: "You maintain a civilian identity; switching identities takes 1 minute and is undetectable without magic."
+
+  # drifter jobs
+  - id: carrier
+    name: Carrier
+    archetype: ""
+    job: bagman
+    pf2e: expeditious_search
+    active: false
+    activate_text: ""
+    description: "You can carry 2 extra bulk without penalty and can move through tight spaces without squeezing."
+
+  - id: badge_and_gun
+    name: Badge and Gun
+    archetype: ""
+    job: cop
+    pf2e: coerce
+    active: false
+    activate_text: ""
+    description: "NPCs who know you are law enforcement are helpful or better on first contact in civic areas."
+
+  - id: street_connections
+    name: Street Connections
+    archetype: ""
+    job: dealer
+    pf2e: connections
+    active: true
+    activate_text: "You make a few calls."
+    description: "Once per day, locate any common item within your current zone within 1 hour."
+
+  - id: waste_not
+    name: Waste Not
+    archetype: ""
+    job: freegan
+    pf2e: forager
+    active: false
+    activate_text: ""
+    description: "You can subsist on discarded or foraged food at no cost and always find enough for yourself."
+
+  - id: misdirection
+    name: Misdirection
+    archetype: ""
+    job: illusionist
+    pf2e: distracting_performance
+    active: true
+    activate_text: "You create a perfect distraction at exactly the right moment."
+    description: "Once per encounter, force one enemy to waste their next action pursuing a false lead."
+
+  - id: unreadable
+    name: Unreadable
+    archetype: ""
+    job: psychopath
+    pf2e: demoralize
+    active: false
+    activate_text: ""
+    description: "You are immune to Sense Motive attempts; your true intentions cannot be determined by mundane means."
+
+  - id: animal_handling
+    name: Animal Handling
+    archetype: ""
+    job: rancher
+    pf2e: nature
+    active: false
+    activate_text: ""
+    description: "You can calm, tame, and ride any non-exotic animal; animals will not attack you unless directly provoked."
+
+  - id: dead_reckoning
+    name: Dead Reckoning
+    archetype: ""
+    job: scout
+    pf2e: terrain_expertise
+    active: false
+    activate_text: ""
+    description: "You always know your direction and current zone; no navigation penalty in explored areas."
+
+  - id: shadow_step
+    name: Shadow Step
+    archetype: ""
+    job: stalker
+    pf2e: swift_sneak
+    active: false
+    activate_text: ""
+    description: "Your movement in dim light or darkness does not provoke attacks of opportunity."
+
+  - id: brimstone
+    name: Brimstone
+    archetype: ""
+    job: street_preacher
+    pf2e: demoralize
+    active: true
+    activate_text: "You invoke fire and damnation against your enemies."
+    description: "Once per encounter, make a single Intimidate check against all enemies within 20 ft simultaneously."
+
+  - id: read_the_signs
+    name: Read the Signs
+    archetype: ""
+    job: tracker
+    pf2e: read_sign
+    active: false
+    activate_text: ""
+    description: "You can determine the number, type, and elapsed time of creatures that passed through an area."
+
+  - id: territory_control
+    name: Territory Control
+    archetype: ""
+    job: warden
+    pf2e: terrain_expertise
+    active: false
+    activate_text: ""
+    description: "+2 to Perception and Stealth checks in your designated territory zone."
+
+  # influencer jobs
+  - id: provoke
+    name: Provoke
+    archetype: ""
+    job: anarchist
+    pf2e: demoralize
+    active: false
+    activate_text: ""
+    description: "Your attacks against authorities, corporations, and institutions deal +1d4 bonus damage."
+
+  - id: solidarity
+    name: Solidarity
+    archetype: ""
+    job: antifa
+    pf2e: aid
+    active: false
+    activate_text: ""
+    description: "+1 to all checks when an ally within 30 ft is also adjacent to the same enemy as you."
+
+  - id: red_tape
+    name: Red Tape
+    archetype: ""
+    job: bureaucrat
+    pf2e: connections
+    active: true
+    activate_text: "You bury the request in paperwork."
+    description: "Once per scene, delay any official or legal action by 24 hours without raising suspicion."
+
+  - id: crowd_pleaser
+    name: Crowd Pleaser
+    archetype: ""
+    job: entertainer
+    pf2e: captivating_performance
+    active: true
+    activate_text: "You turn on the charm and command the room."
+    description: "Once per encounter, make an opposed Perform check to distract all enemies within 30 ft for 1 round."
+
+  - id: mesmerize
+    name: Mesmerize
+    archetype: ""
+    job: exotic_dancer
+    pf2e: captivating_performance
+    active: true
+    activate_text: "You fix them with a look that stops them cold."
+    description: "Once per encounter, one humanoid must succeed on a Will save or be fascinated for 1 round."
+
+  - id: make_an_example
+    name: Make an Example
+    archetype: ""
+    job: extortionist
+    pf2e: coerce
+    active: true
+    activate_text: "You make absolutely clear what happens to people who don't comply."
+    description: "Intimidate a target; on success they take no hostile action against you for 24 hours."
+
+  - id: trust_fund
+    name: Trust Fund
+    archetype: ""
+    job: fallen_trustafarian
+    pf2e: connections
+    active: true
+    activate_text: "You make a single phone call to a family contact."
+    description: "Once per session, call in a favor worth up to 500 credits with no questions asked."
+
+  - id: true_devotion
+    name: True Devotion
+    archetype: ""
+    job: follower
+    pf2e: aid
+    active: false
+    activate_text: ""
+    description: "When following an explicit order from a designated leader, gain +2 to all checks for that action."
+
+  - id: muscle_up
+    name: Muscle Up
+    archetype: ""
+    job: goon
+    pf2e: coerce
+    active: false
+    activate_text: ""
+    description: "+1 to Intimidate checks per allied creature within 10 ft of you (maximum +4)."
+
+  - id: speak_to_the_manager
+    name: Speak to the Manager
+    archetype: ""
+    job: karen
+    pf2e: coerce
+    active: true
+    activate_text: "You demand to speak to whoever is in charge."
+    description: "Once per scene, force an NPC in a service or official role to comply with a reasonable demand or escalate."
+
+  - id: self_reliance
+    name: Self-Reliance
+    archetype: ""
+    job: libertarian
+    pf2e: fortitude
+    active: false
+    activate_text: ""
+    description: "+2 to saves against fear and mind-affecting effects; you cannot be charmed."
+
+  - id: plausible_deniability
+    name: Plausible Deniability
+    archetype: ""
+    job: politician
+    pf2e: deception
+    active: true
+    activate_text: "You spin the narrative before it spins you."
+    description: "Once per session, negate the social consequences of one failed Deception check retroactively."
+
+  - id: working_the_room
+    name: Working the Room
+    archetype: ""
+    job: schmoozer
+    pf2e: diplomacy
+    active: false
+    activate_text: ""
+    description: "+2 to Diplomacy; on a critical success the target also introduces you to one useful contact."
+
+  - id: agitator
+    name: Agitator
+    archetype: ""
+    job: shit_stirrer
+    pf2e: demoralize
+    active: true
+    activate_text: "You say exactly the wrong thing to exactly the right people."
+    description: "Your provocations cause NPCs to redirect their hostility toward each other rather than you for 1 scene."
+
+  # nerd jobs
+  - id: divine_insight
+    name: Divine Insight
+    archetype: ""
+    job: believer
+    pf2e: recall_knowledge
+    active: true
+    activate_text: "You open yourself to the possibility of something beyond."
+    description: "Once per day, ask one yes/no question about a topic and receive a truthful answer at the GM's discretion."
+
+  - id: pure_product
+    name: Pure Product
+    archetype: ""
+    job: cooker
+    pf2e: crafting
+    active: false
+    activate_text: ""
+    description: "Alchemical items and drugs you craft have their save DC or effect increased by 2."
+
+  - id: sharp_eye
+    name: Sharp Eye
+    archetype: ""
+    job: detective
+    pf2e: investigate
+    active: false
+    activate_text: ""
+    description: "On a successful Investigate check, gain one additional clue beyond what the GM planned to reveal."
+
+  - id: jury_rig
+    name: Jury-Rig
+    archetype: ""
+    job: engineer
+    pf2e: quick_repair
+    active: true
+    activate_text: "You improvise a rapid field fix."
+    description: "Repair a broken item or restore one disabled function as a single action."
+
+  - id: hands_on
+    name: Hands On
+    archetype: ""
+    job: grease_monkey
+    pf2e: expert_crafting
+    active: false
+    activate_text: ""
+    description: "You can diagnose any mechanical fault within 1 minute; +2 to all Crafting checks on vehicles and machines."
+
+  - id: natural_remedy
+    name: Natural Remedy
+    archetype: ""
+    job: hippie
+    pf2e: treat_poison
+    active: false
+    activate_text: ""
+    description: "You can treat poison and disease using foraged materials; no alchemical kit required for the attempt."
+
+  - id: pack_rat
+    name: Pack Rat
+    archetype: ""
+    job: hoarder
+    pf2e: efficient_search
+    active: false
+    activate_text: ""
+    description: "Your carrying capacity is doubled; once per scene the GM grants you a mundane item you need from your stash."
+
+  - id: embedded
+    name: Embedded
+    archetype: ""
+    job: journalist
+    pf2e: connections
+    active: false
+    activate_text: ""
+    description: "You can attend restricted events and areas with press credentials; +2 to Gather Information checks."
+
+  - id: dealer_discount
+    name: Dealer's Discount
+    archetype: ""
+    job: narcomancer
+    pf2e: drug_tolerance
+    active: false
+    activate_text: ""
+    description: "You are immune to addiction; you can identify any drug or toxin by smell, taste, or observation."
+
+  - id: informant
+    name: Informant
+    archetype: ""
+    job: narc
+    pf2e: connections
+    active: true
+    activate_text: "You check in with your handler."
+    description: "Once per session, call in your handler for access to restricted information, equipment, or a safe location."
+
+  - id: nature_sense
+    name: Nature Sense
+    archetype: ""
+    job: natural_mystic
+    pf2e: nature
+    active: false
+    activate_text: ""
+    description: "+2 to Perception in outdoor environments; predict weather for the next 24 hours with a Survival check."
+
+  - id: shepherd
+    name: Shepherd
+    archetype: ""
+    job: pastor
+    pf2e: demoralize
+    active: true
+    activate_text: "You offer words of comfort and faith."
+    description: "Once per day, remove the frightened condition from one demoralized ally as a single action."
+
+  # normie jobs
+  - id: indoctrinate
+    name: Indoctrinate
+    archetype: ""
+    job: cult_leader
+    pf2e: coerce
+    active: true
+    activate_text: "You speak with absolute conviction and leave no room for doubt."
+    description: "Once per day, one NPC who fails a Will save becomes a devoted follower for 24 hours."
+
+  - id: defensive_driving
+    name: Defensive Driving
+    archetype: ""
+    job: driver
+    pf2e: skilled_driver
+    active: false
+    activate_text: ""
+    description: "You never suffer penalties on Driving checks from weather, difficult terrain, or vehicle damage below 50%."
+
+  - id: pest_control
+    name: Pest Control
+    archetype: ""
+    job: exterminator
+    pf2e: fortitude
+    active: false
+    activate_text: ""
+    description: "You are immune to disease from vermin; +2 to saves vs. poison and infestation effects."
+
+  - id: ride_coattails
+    name: Ride Coattails
+    archetype: ""
+    job: hanger_on
+    pf2e: diplomacy
+    active: false
+    activate_text: ""
+    description: "When adjacent to an ally with higher social standing than you, gain +2 to all social skill checks."
+
+  - id: on_the_clock
+    name: On the Clock
+    archetype: ""
+    job: hired_help
+    pf2e: crafting
+    active: false
+    activate_text: ""
+    description: "You may take an additional action per day that involves a tool, trade skill, or physical labor task."
+
+  - id: fabricate
+    name: Fabricate
+    archetype: ""
+    job: maker
+    pf2e: crafting
+    active: true
+    activate_text: "You get to work."
+    description: "Create any common item from raw materials in half the normal time with a successful Crafting check."
+
+  - id: field_medicine
+    name: Field Medicine
+    archetype: ""
+    job: medic
+    pf2e: battle_medicine
+    active: true
+    activate_text: "You administer emergency trauma care."
+    description: "Restore 2d8 + your Medicine modifier HP to a creature as a single action; usable once per target per day."
+
+  - id: evasive_maneuvers
+    name: Evasive Maneuvers
+    archetype: ""
+    job: pilot
+    pf2e: piloting
+    active: true
+    activate_text: "You throw the controls into a hard bank."
+    description: "Once per encounter, avoid one attack targeting your vehicle by succeeding on a Piloting check vs. the attack roll."
+
+  - id: always_be_closing
+    name: Always Be Closing
+    archetype: ""
+    job: salesman
+    pf2e: diplomacy
+    active: false
+    activate_text: ""
+    description: "+2 to Diplomacy for buying, selling, and negotiating; you always know the fair market value of any item."
