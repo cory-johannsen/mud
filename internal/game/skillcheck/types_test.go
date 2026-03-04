@@ -105,21 +105,3 @@ func TestProperty_OutcomeMap_ForOutcome_RoundTrip(t *testing.T) {
 		}
 	})
 }
-
-func TestProperty_CheckResult_TotalInvariant(t *testing.T) {
-	rapid.Check(t, func(t *rapid.T) {
-		roll := rapid.Int().Draw(t, "roll")
-		abilityMod := rapid.Int().Draw(t, "abilityMod")
-		profBonus := rapid.Int().Draw(t, "profBonus")
-		total := roll + abilityMod + profBonus
-		cr := skillcheck.CheckResult{
-			Roll:       roll,
-			AbilityMod: abilityMod,
-			ProfBonus:  profBonus,
-			Total:      total,
-		}
-		if cr.Roll+cr.AbilityMod+cr.ProfBonus != cr.Total {
-			t.Fatalf("Total invariant violated: %d + %d + %d != %d", cr.Roll, cr.AbilityMod, cr.ProfBonus, cr.Total)
-		}
-	})
-}
