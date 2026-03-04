@@ -2718,7 +2718,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 // applySkillCheckEffect applies a mechanical effect from a skill check outcome.
 //
 // Precondition: sess and effect must not be nil; s.dice must be non-nil for damage effects;
-// s.condRegistry must be non-nil for condition effects.
+// s.condRegistry may be nil; condition effects are silently skipped when it is nil.
 // Postcondition: damage effects reduce sess.CurrentHP to a minimum of 0;
 // condition effects add the named condition to sess.Conditions.
 func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, effect *skillcheck.Effect) {

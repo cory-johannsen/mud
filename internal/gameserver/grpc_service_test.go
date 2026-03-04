@@ -1389,25 +1389,27 @@ func TestApplySkillCheckEffect_Condition(t *testing.T) {
 	assert.True(t, sess.Conditions.Has("distrusted"), "condition 'distrusted' must be active after apply")
 }
 
-// TestProperty_ApplySkillCheckEffect_ConditionAlwaysApplied verifies that any
-// condition ID present in the registry is always applied to the ActiveSet when
-// the effect type is "condition".
+// TestProperty_ApplySkillCheckEffect_ConditionAlwaysApplied verifies that:
+//   - a condition that is registered is always applied after applySkillCheckEffect;
+//   - a condition that is NOT registered is never applied.
 //
-// Precondition: The registry contains the sampled condition ID.
-// Postcondition: sess.Conditions.Has(id) is true for every sampled ID.
+// Precondition: id is an arbitrary valid condition ID string; register controls
+// whether the ID is present in the registry before the call.
+// Postcondition: sess.Conditions.Has(id) matches the value of register.
 func TestProperty_ApplySkillCheckEffect_ConditionAlwaysApplied(t *testing.T) {
-	conditionIDs := []string{"distrusted", "prone", "flat_footed"}
-
 	rapid.Check(t, func(rt *rapid.T) {
-		id := rapid.SampledFrom(conditionIDs).Draw(rt, "condition_id")
+		// Generate an arbitrary condition ID.
+		id := rapid.StringMatching(`[a-z_]{3,20}`).Draw(rt, "condition_id")
+		// Decide randomly whether to register it.
+		register := rapid.Bool().Draw(rt, "register")
 
 		logger := zaptest.NewLogger(t)
 
 		reg := condition.NewRegistry()
-		for _, cid := range conditionIDs {
+		if register {
 			reg.Register(&condition.ConditionDef{
-				ID:           cid,
-				Name:         cid,
+				ID:           id,
+				Name:         id,
 				DurationType: "permanent",
 				MaxStacks:    0,
 			})
@@ -1419,14 +1421,18 @@ func TestProperty_ApplySkillCheckEffect_ConditionAlwaysApplied(t *testing.T) {
 		}
 
 		sess := &session.PlayerSession{
-			UID:        "prop_test_uid",
+			UID:        "test_uid",
 			Conditions: condition.NewActiveSet(),
 		}
 
 		svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "condition", ID: id})
 
-		if !sess.Conditions.Has(id) {
-			rt.Fatalf("expected condition %q to be active after applySkillCheckEffect, but Has() returned false", id)
+		got := sess.Conditions.Has(id)
+		if register && !got {
+			rt.Fatalf("condition %q was registered but not applied; Has() = false", id)
+		}
+		if !register && got {
+			rt.Fatalf("condition %q was NOT registered but was applied; Has() = true", id)
 		}
 	})
 }
