@@ -53,6 +53,9 @@ message ClientMessage {
     RoomEquipRequest    room_equip    = 36;
     MapRequest          map           = 37;
     SkillsRequest       skills_request = 38;
+    FeatsRequest        feats_request   = 39;
+    InteractRequest     interact_request = 40;
+    UseRequest          use_request      = 41;
   }
 }
 
@@ -78,6 +81,9 @@ message ServerEvent {
     CharacterSheetView character_sheet = 17;
     MapResponse        map             = 18;
     SkillsResponse     skills_response = 19;
+    FeatsResponse      feats_response   = 20;
+    InteractResponse   interact_response = 21;
+    UseResponse        use_response      = 22;
   }
 }
 
@@ -511,6 +517,46 @@ message CharacterSheetRequest {}
 // ArchetypeSelectionRequest asks the server to assign an archetype to the player's character.
 message ArchetypeSelectionRequest {
   string archetype_id = 1;
+}
+
+// FeatsRequest is sent by the client to view feat list.
+message FeatsRequest {}
+
+// FeatEntry represents one feat with its details.
+message FeatEntry {
+  string feat_id       = 1;
+  string name          = 2;
+  string category      = 3;
+  bool   active        = 4;
+  string description   = 5;
+  string activate_text = 6;
+}
+
+// FeatsResponse contains all feat entries for the character.
+message FeatsResponse {
+  repeated FeatEntry feats = 1;
+}
+
+// InteractRequest asks the server to interact with a room equipment item by instance ID.
+message InteractRequest {
+  string instance_id = 1;
+}
+
+// InteractResponse carries the result of a room equipment interaction.
+message InteractResponse {
+  string message = 1;
+}
+
+// UseRequest asks the server to activate an active feat.
+// An empty feat_id causes the server to return the list of available active feats.
+message UseRequest {
+  string feat_id = 1;
+}
+
+// UseResponse carries the result of a feat activation or a list of active feats.
+message UseResponse {
+  string             message = 1;
+  repeated FeatEntry choices = 2;
 }
 
 // CharacterSheetView delivers the player's full character sheet.

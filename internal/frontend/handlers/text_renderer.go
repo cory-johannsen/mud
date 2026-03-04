@@ -619,3 +619,79 @@ func RenderSkillsResponse(sr *gamev1.SkillsResponse) string {
 	}
 	return sb.String()
 }
+
+// RenderFeatsResponse formats a FeatsResponse as colored telnet text.
+// Feats are grouped by category. Active feats are marked with [active].
+//
+// Precondition: fr must be non-nil.
+// Postcondition: Returns a non-empty human-readable string.
+func RenderFeatsResponse(fr *gamev1.FeatsResponse) string {
+	categoryOrder := []string{"general", "skill", "job"}
+	categoryLabel := map[string]string{
+		"general": "General",
+		"skill":   "Skill",
+		"job":     "Job",
+	}
+
+	byCategory := make(map[string][]*gamev1.FeatEntry)
+	for _, f := range fr.Feats {
+		byCategory[f.Category] = append(byCategory[f.Category], f)
+	}
+
+	var sb strings.Builder
+	sb.WriteString(telnet.Colorize(telnet.BrightWhite, "=== Feats ==="))
+	sb.WriteString("\r\n")
+
+	for _, cat := range categoryOrder {
+		feats, ok := byCategory[cat]
+		if !ok {
+			continue
+		}
+		sb.WriteString(fmt.Sprintf("\r\n%s:\r\n", categoryLabel[cat]))
+		for _, f := range feats {
+			activeTag := ""
+			if f.Active {
+				activeTag = telnet.Colorize(telnet.BrightYellow, " [active]")
+			}
+			name := fmt.Sprintf("  %-20s", f.Name)
+			sb.WriteString(telnet.Colorize(telnet.Cyan, name))
+			sb.WriteString(activeTag)
+			sb.WriteString(telnet.Colorize(telnet.Dim, " "+f.Description))
+			sb.WriteString("\r\n")
+		}
+	}
+	return sb.String()
+}
+
+// RenderInteractResponse formats an InteractResponse as telnet text.
+//
+// Precondition: ir must be non-nil.
+// Postcondition: Returns the message string from the response.
+func RenderInteractResponse(ir *gamev1.InteractResponse) string {
+	return ir.Message
+}
+
+// RenderUseResponse formats a UseResponse as telnet text.
+// If Choices is non-empty, renders an interactive selection list.
+// Otherwise renders the activation message.
+//
+// Precondition: ur must be non-nil.
+// Postcondition: Returns a non-empty human-readable string.
+func RenderUseResponse(ur *gamev1.UseResponse) string {
+	if ur.Message != "" {
+		return ur.Message
+	}
+	if len(ur.Choices) == 0 {
+		return telnet.Colorize(telnet.Yellow, "You have no active feats.")
+	}
+	var sb strings.Builder
+	sb.WriteString(telnet.Colorize(telnet.BrightWhite, "Active feats:\r\n"))
+	for i, f := range ur.Choices {
+		sb.WriteString(fmt.Sprintf("  %s%d%s. %s%-20s%s - %s%s%s\r\n",
+			telnet.Green, i+1, telnet.Reset,
+			telnet.BrightWhite, f.Name, telnet.Reset,
+			telnet.Dim, f.Description, telnet.Reset))
+	}
+	sb.WriteString(telnet.Colorf(telnet.BrightWhite, "Type: use <feat name> to activate"))
+	return sb.String()
+}

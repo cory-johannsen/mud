@@ -119,7 +119,7 @@ func testGRPCServerWithSaverFull(t *testing.T, saver CharacterSaver) (gamev1.Gam
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil,
+		nil, nil, nil, nil, nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")

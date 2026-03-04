@@ -94,6 +94,9 @@ type GameServiceServer struct {
 	loadoutsDir         string
 	allSkills           []*ruleset.Skill
 	characterSkillsRepo *postgres.CharacterSkillsRepository
+	allFeats            []*ruleset.Feat
+	featRegistry        *ruleset.FeatRegistry
+	characterFeatsRepo  *postgres.CharacterFeatsRepository
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -110,6 +113,9 @@ type GameServiceServer struct {
 // loadoutsDir is the path to the archetype loadout YAML directory; empty disables starting inventory grants.
 // allSkills may be nil (skill backfill on session startup will be skipped).
 // characterSkillsRepo may be nil (skill backfill on session startup will be skipped).
+// allFeats may be nil (feat commands will return a not-available message).
+// featRegistry may be nil (feat commands will return a not-available message).
+// characterFeatsRepo may be nil (feat commands will return a not-available message).
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
@@ -136,6 +142,9 @@ func NewGameServiceServer(
 	loadoutsDir string,
 	allSkills []*ruleset.Skill,
 	characterSkillsRepo *postgres.CharacterSkillsRepository,
+	allFeats []*ruleset.Feat,
+	featRegistry *ruleset.FeatRegistry,
+	characterFeatsRepo *postgres.CharacterFeatsRepository,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:               worldMgr,
@@ -162,6 +171,9 @@ func NewGameServiceServer(
 		loadoutsDir:         loadoutsDir,
 		allSkills:           allSkills,
 		characterSkillsRepo: characterSkillsRepo,
+		allFeats:            allFeats,
+		featRegistry:        featRegistry,
+		characterFeatsRepo:  characterFeatsRepo,
 	}
 }
 
@@ -611,6 +623,12 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleMap(uid)
 	case *gamev1.ClientMessage_SkillsRequest:
 		return s.handleSkills(uid)
+	case *gamev1.ClientMessage_FeatsRequest:
+		return s.handleFeats(uid)
+	case *gamev1.ClientMessage_InteractRequest:
+		return s.handleInteract(uid, p.InteractRequest.InstanceId)
+	case *gamev1.ClientMessage_UseRequest:
+		return s.handleUse(uid, p.UseRequest.FeatId)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -2094,4 +2112,106 @@ func (s *GameServiceServer) handleSkills(uid string) (*gamev1.ServerEvent, error
 			SkillsResponse: &gamev1.SkillsResponse{Skills: entries},
 		},
 	}, nil
+}
+
+// handleFeats returns all feat entries for the player's current character.
+//
+// Precondition: uid must resolve to an active session with a loaded character.
+// Postcondition: Returns a ServerEvent with FeatsResponse containing all feats.
+func (s *GameServiceServer) handleFeats(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.characterFeatsRepo == nil || s.featRegistry == nil {
+		return messageEvent("Feat data is not available."), nil
+	}
+	featIDs, err := s.characterFeatsRepo.GetAll(context.Background(), sess.CharacterID)
+	if err != nil {
+		return nil, fmt.Errorf("getting feats for %s: %w", uid, err)
+	}
+
+	var entries []*gamev1.FeatEntry
+	for _, id := range featIDs {
+		f, ok := s.featRegistry.Feat(id)
+		if !ok {
+			continue
+		}
+		entries = append(entries, &gamev1.FeatEntry{
+			FeatId:       f.ID,
+			Name:         f.Name,
+			Category:     f.Category,
+			Active:       f.Active,
+			Description:  f.Description,
+			ActivateText: f.ActivateText,
+		})
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_FeatsResponse{
+			FeatsResponse: &gamev1.FeatsResponse{Feats: entries},
+		},
+	}, nil
+}
+
+// handleInteract delegates room-equipment interaction to handleUseEquipment.
+//
+// Precondition: uid must resolve to an active session; instanceID must be non-empty.
+// Postcondition: Returns the same ServerEvent as handleUseEquipment.
+func (s *GameServiceServer) handleInteract(uid, instanceID string) (*gamev1.ServerEvent, error) {
+	return s.handleUseEquipment(uid, instanceID)
+}
+
+// handleUse activates an active feat for the player, or lists available active feats.
+//
+// Precondition: uid must resolve to an active session with a loaded character.
+// Postcondition: Returns a ServerEvent with UseResponse.
+func (s *GameServiceServer) handleUse(uid, featID string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.characterFeatsRepo == nil || s.featRegistry == nil {
+		return messageEvent("Feat data is not available."), nil
+	}
+	featIDs, err := s.characterFeatsRepo.GetAll(context.Background(), sess.CharacterID)
+	if err != nil {
+		return nil, fmt.Errorf("getting feats for use: %w", err)
+	}
+
+	// Collect active feats this character holds.
+	var active []*ruleset.Feat
+	for _, id := range featIDs {
+		f, ok := s.featRegistry.Feat(id)
+		if ok && f.Active {
+			active = append(active, f)
+		}
+	}
+
+	if featID == "" {
+		// Return list of active feats for the client to prompt selection.
+		entries := make([]*gamev1.FeatEntry, len(active))
+		for i, f := range active {
+			entries[i] = &gamev1.FeatEntry{
+				FeatId: f.ID, Name: f.Name, Category: f.Category,
+				Active: f.Active, Description: f.Description, ActivateText: f.ActivateText,
+			}
+		}
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_UseResponse{
+				UseResponse: &gamev1.UseResponse{Choices: entries},
+			},
+		}, nil
+	}
+
+	// Activate the named feat.
+	for _, f := range active {
+		if strings.EqualFold(f.ID, featID) || strings.EqualFold(f.Name, featID) {
+			return &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_UseResponse{
+					UseResponse: &gamev1.UseResponse{Message: f.ActivateText},
+				},
+			}, nil
+		}
+	}
+	return messageEvent(fmt.Sprintf("You don't have an active feat named %q.", featID)), nil
 }

@@ -84,6 +84,9 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerRoomEquip:          bridgeRoomEquip,
 	command.HandlerMap:                bridgeMap,
 	command.HandlerSkills:             bridgeSkills,
+	command.HandlerFeats:              bridgeFeats,
+	command.HandlerInteract:           bridgeInteract,
+	command.HandlerUse:                bridgeUse,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -592,6 +595,46 @@ func bridgeSkills(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_SkillsRequest{SkillsRequest: &gamev1.SkillsRequest{}},
+	}}, nil
+}
+
+// bridgeFeats builds a FeatsRequest to retrieve feat list.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a FeatsRequest; done is false.
+func bridgeFeats(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_FeatsRequest{FeatsRequest: &gamev1.FeatsRequest{}},
+	}}, nil
+}
+
+// bridgeInteract builds an InteractRequest for the named item instance ID.
+//
+// Precondition: bctx must be non-nil with a valid reqID and Args.
+// Postcondition: if RawArgs is empty, writes usage error and returns done=true;
+// otherwise returns a non-nil msg containing an InteractRequest.
+func bridgeInteract(bctx *bridgeContext) (bridgeResult, error) {
+	instanceID := strings.TrimSpace(bctx.parsed.RawArgs)
+	if instanceID == "" {
+		return writeErrorPrompt(bctx, "Usage: interact <item>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_InteractRequest{InteractRequest: &gamev1.InteractRequest{InstanceId: instanceID}},
+	}}, nil
+}
+
+// bridgeUse builds a UseRequest for feat activation.
+// If no feat name is given, sends an empty feat_id to trigger listing.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a UseRequest.
+func bridgeUse(bctx *bridgeContext) (bridgeResult, error) {
+	featID := strings.TrimSpace(bctx.parsed.RawArgs)
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_UseRequest{UseRequest: &gamev1.UseRequest{FeatId: featID}},
 	}}, nil
 }
 

@@ -464,6 +464,12 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderMap(p.Map)
 		case *gamev1.ServerEvent_SkillsResponse:
 			text = RenderSkillsResponse(p.SkillsResponse)
+		case *gamev1.ServerEvent_FeatsResponse:
+			text = RenderFeatsResponse(p.FeatsResponse)
+		case *gamev1.ServerEvent_InteractResponse:
+			text = RenderInteractResponse(p.InteractResponse)
+		case *gamev1.ServerEvent_UseResponse:
+			text = RenderUseResponse(p.UseResponse)
 		case *gamev1.ServerEvent_Disconnected:
 			_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason))
 			return

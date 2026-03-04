@@ -471,6 +471,7 @@ func main() {
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
 		jobReg, condRegistry, *loadoutsDir,
 		allSkills, characterSkillsRepo,
+		nil, nil, nil,
 	)
 
 	// Start respawn goroutine for room equipment.

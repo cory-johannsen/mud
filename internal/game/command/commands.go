@@ -52,6 +52,9 @@ const (
 	HandlerRoomEquip           = "room_equip"
 	HandlerMap                 = "map"
 	HandlerSkills              = "skills"
+	HandlerFeats               = "feats"
+	HandlerInteract            = "interact"
+	HandlerUse                 = "use"
 )
 
 // Command defines a player-invocable command.
@@ -122,7 +125,8 @@ func BuiltinCommands() []Command {
 		{Name: "char", Aliases: []string{"sheet"}, Help: "Display your character sheet", Category: CategoryWorld, Handler: HandlerChar},
 
 		{Name: "archetype_selection", Aliases: nil, Help: "Select archetype during character creation", Category: CategoryHidden, Handler: HandlerArchetypeSelection},
-		{Name: "use", Aliases: nil, Help: "Use an item in the room", Category: CategoryWorld, Handler: HandlerUseEquipment},
+		{Name: "use", Aliases: nil, Help: "Activate an active feat. With no argument, shows a list.", Category: CategoryWorld, Handler: HandlerUse},
+		{Name: "interact", Aliases: []string{"int"}, Help: "Interact with an item in the room.", Category: CategoryWorld, Handler: HandlerInteract},
 
 		// Admin commands
 		{Name: "setrole", Aliases: nil, Help: "Set a player's role (admin only)", Category: CategoryAdmin, Handler: HandlerSetRole},
@@ -131,6 +135,7 @@ func BuiltinCommands() []Command {
 
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
 		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},
+		{Name: "feats", Aliases: []string{"ft"}, Help: "Display your feats.", Category: CategoryWorld, Handler: HandlerFeats},
 	}
 }
 
