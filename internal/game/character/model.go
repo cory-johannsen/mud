@@ -45,6 +45,10 @@ type Character struct {
 	// Populated after creation or loading from DB.
 	Feats []string
 
+	// ClassFeatures is the list of class feature IDs granted by the character's job.
+	// Populated after creation or loading from DB.
+	ClassFeatures []string
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
