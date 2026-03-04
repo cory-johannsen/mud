@@ -39,6 +39,7 @@ type CombatHandler struct {
 	aiRegistry    *ai.Registry
 	respawnMgr    *npc.RespawnManager
 	floorMgr      *inventory.FloorManager
+	onCombatEndFn func(roomID string) // optional; called after combat ends; may be nil
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -84,6 +85,14 @@ func NewCombatHandler(
 		timers:        make(map[string]*combat.RoundTimer),
 		loadouts:      make(map[string]*inventory.WeaponPreset),
 	}
+}
+
+// SetOnCombatEnd registers a callback invoked after each combat ends.
+//
+// Precondition: fn may be nil (no-op after combat end).
+// Postcondition: fn is called with the roomID of the ended combat.
+func (h *CombatHandler) SetOnCombatEnd(fn func(roomID string)) {
+	h.onCombatEndFn = fn
 }
 
 // Attack queues a 1-AP ActionAttack for uid against target.
@@ -269,6 +278,9 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, error) {
 		if !cbt.HasLivingPlayers() {
 			h.stopTimerLocked(sess.RoomID)
 			h.engine.EndCombat(sess.RoomID)
+			if h.onCombatEndFn != nil {
+				h.onCombatEndFn(sess.RoomID)
+			}
 		}
 		events = append(events, &gamev1.CombatEvent{
 			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
@@ -556,6 +568,9 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		h.broadcastFn(roomID, events)
 		h.removeDeadNPCsLocked(cbt)
 		h.engine.EndCombat(roomID)
+		if h.onCombatEndFn != nil {
+			h.onCombatEndFn(roomID)
+		}
 		return events
 	}
 

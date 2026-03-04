@@ -771,3 +771,163 @@ func TestProperty_StartCombat_ACNeverLessThanTen(t *testing.T) {
 		}
 	})
 }
+
+// TestCombatHandler_SetOnCombatEnd_CallbackInvoked verifies that the onCombatEndFn
+// callback is invoked with the correct roomID when combat ends via resolveAndAdvanceLocked.
+//
+// Precondition: A CombatHandler is constructed with a player and NPC in the same room.
+// Postcondition: After all enemies are killed, the callback fires with the room ID.
+func TestCombatHandler_SetOnCombatEnd_CallbackInvoked(t *testing.T) {
+	var broadcastMu sync.Mutex
+	var broadcasts [][]*gamev1.CombatEvent
+	broadcastFn := func(roomID string, events []*gamev1.CombatEvent) {
+		broadcastMu.Lock()
+		defer broadcastMu.Unlock()
+		broadcasts = append(broadcasts, events)
+	}
+
+	h := makeCombatHandler(t, broadcastFn)
+	const roomID = "room-callback"
+
+	// Register callback before combat starts.
+	var callbackMu sync.Mutex
+	var callbackRoomIDs []string
+	h.SetOnCombatEnd(func(rid string) {
+		callbackMu.Lock()
+		defer callbackMu.Unlock()
+		callbackRoomIDs = append(callbackRoomIDs, rid)
+	})
+
+	inst := spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, "player-cb", roomID)
+
+	// Start combat.
+	_, err := h.Attack("player-cb", inst.Name())
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Kill the NPC directly to force end-of-combat on next resolve.
+	h.combatMu.Lock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		h.combatMu.Unlock()
+		t.Fatal("expected active combat after attack")
+	}
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			c.CurrentHP = 0
+			c.Dead = true
+		}
+	}
+	// Resolve manually to trigger end-of-combat path.
+	h.resolveAndAdvanceLocked(roomID, cbt)
+	h.combatMu.Unlock()
+
+	callbackMu.Lock()
+	ids := callbackRoomIDs
+	callbackMu.Unlock()
+
+	if len(ids) == 0 {
+		t.Fatal("expected onCombatEndFn to be called; it was not")
+	}
+	if ids[0] != roomID {
+		t.Fatalf("onCombatEndFn called with roomID %q; want %q", ids[0], roomID)
+	}
+}
+
+// TestCombatHandler_SetOnCombatEnd_NilCallback_NoPanic verifies that if no
+// callback is registered, combat end does not panic.
+//
+// Precondition: CombatHandler has no onCombatEndFn set.
+// Postcondition: resolveAndAdvanceLocked completes without panic when all NPCs are dead.
+func TestCombatHandler_SetOnCombatEnd_NilCallback_NoPanic(t *testing.T) {
+	broadcastFn := func(roomID string, events []*gamev1.CombatEvent) {}
+	h := makeCombatHandler(t, broadcastFn)
+	// Intentionally do NOT call SetOnCombatEnd — fn remains nil.
+	const roomID = "room-nil-cb"
+
+	inst := spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, "player-nil", roomID)
+
+	_, err := h.Attack("player-nil", inst.Name())
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	h.combatMu.Lock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		h.combatMu.Unlock()
+		t.Fatal("expected active combat")
+	}
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			c.CurrentHP = 0
+			c.Dead = true
+		}
+	}
+	// Must not panic.
+	h.resolveAndAdvanceLocked(roomID, cbt)
+	h.combatMu.Unlock()
+}
+
+// TestProperty_OnCombatEnd_CallbackAlwaysReceivesRoomID is a property test verifying
+// that when onCombatEndFn is set, it always receives the exact roomID passed to EndCombat.
+//
+// Precondition: arbitrary roomID strings used as keys.
+// Postcondition: callback receives the same roomID passed to the combat engine for every run.
+func TestProperty_OnCombatEnd_CallbackAlwaysReceivesRoomID(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		roomID := rapid.StringMatching(`[a-z][a-z0-9-]{1,15}`).Draw(rt, "roomID")
+
+		broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
+		h := makeCombatHandler(t, broadcastFn)
+
+		var got string
+		h.SetOnCombatEnd(func(rid string) { got = rid })
+
+		// Spawn NPC inline (rapid.T is not *testing.T).
+		tmpl := &npc.Template{
+			ID: "goblin-prop", Name: "GoblinProp", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		}
+		inst, err := h.npcMgr.Spawn(tmpl, roomID)
+		if err != nil {
+			rt.Fatalf("Spawn: %v", err)
+		}
+		_, addErr := h.sessions.AddPlayer(session.AddPlayerOptions{
+			UID: "player-prop", Username: "u", CharName: "Hero", CharacterID: 1,
+			RoomID: roomID, CurrentHP: 10, MaxHP: 10, Role: "player",
+		})
+		if addErr != nil {
+			rt.Fatalf("AddPlayer: %v", addErr)
+		}
+
+		_, attackErr := h.Attack("player-prop", inst.Name())
+		if attackErr != nil {
+			rt.Fatalf("Attack: %v", attackErr)
+		}
+		h.cancelTimer(roomID)
+
+		h.combatMu.Lock()
+		cbt, ok := h.engine.GetCombat(roomID)
+		if !ok {
+			h.combatMu.Unlock()
+			rt.Fatal("expected active combat")
+		}
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindNPC {
+				c.CurrentHP = 0
+				c.Dead = true
+			}
+		}
+		h.resolveAndAdvanceLocked(roomID, cbt)
+		h.combatMu.Unlock()
+
+		if got != roomID {
+			rt.Fatalf("callback got roomID %q; want %q", got, roomID)
+		}
+	})
+}

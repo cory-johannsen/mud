@@ -483,6 +483,15 @@ func main() {
 
 	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr)
 
+	// Register post-combat cleanup: clear encounter-duration conditions from all players in the room.
+	combatHandler.SetOnCombatEnd(func(roomID string) {
+		for _, sess := range sessMgr.PlayersInRoomDetails(roomID) {
+			if sess.Conditions != nil {
+				sess.Conditions.ClearEncounter()
+			}
+		}
+	})
+
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
