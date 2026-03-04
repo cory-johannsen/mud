@@ -270,3 +270,173 @@ func genConnectedZone(t *rapid.T) *Zone {
 		Rooms:       rooms,
 	}
 }
+
+// testZoneWithHiddenExit returns a Manager containing a zone with room_a that
+// has a hidden east exit and a visible north exit.
+func testZoneWithHiddenExit(t *testing.T) *Manager {
+	t.Helper()
+	zone := &Zone{
+		ID:        "reveal_test",
+		Name:      "Reveal Test",
+		StartRoom: "room_a",
+		Rooms: map[string]*Room{
+			"room_a": {
+				ID:          "room_a",
+				ZoneID:      "reveal_test",
+				Title:       "Room A",
+				Description: "Test room.",
+				Exits: []Exit{
+					{Direction: North, TargetRoom: "room_b"},
+					{Direction: East, TargetRoom: "room_c", Hidden: true},
+				},
+				Properties: map[string]string{},
+				MapX:        0,
+				MapY:        0,
+			},
+			"room_b": {
+				ID:          "room_b",
+				ZoneID:      "reveal_test",
+				Title:       "Room B",
+				Description: "North room.",
+				Exits:       []Exit{{Direction: South, TargetRoom: "room_a"}},
+				Properties:  map[string]string{},
+				MapX:        0,
+				MapY:        2,
+			},
+			"room_c": {
+				ID:          "room_c",
+				ZoneID:      "reveal_test",
+				Title:       "Room C",
+				Description: "East room.",
+				Exits:       []Exit{{Direction: West, TargetRoom: "room_a"}},
+				Properties:  map[string]string{},
+				MapX:        2,
+				MapY:        0,
+			},
+		},
+	}
+	mgr, err := NewManager([]*Zone{zone})
+	require.NoError(t, err)
+	return mgr
+}
+
+// TestRevealExit_HiddenExitBecomesVisible verifies that a hidden exit is un-hidden
+// and VisibleExits() now includes it.
+//
+// Precondition: room_a has a hidden east exit.
+// Postcondition: RevealExit returns true; east exit is now in VisibleExits().
+func TestRevealExit_HiddenExitBecomesVisible(t *testing.T) {
+	mgr := testZoneWithHiddenExit(t)
+
+	room, ok := mgr.GetRoom("room_a")
+	require.True(t, ok)
+	visibleBefore := room.VisibleExits()
+
+	result := mgr.RevealExit("room_a", "east")
+
+	assert.True(t, result, "RevealExit must return true when a hidden exit is found")
+
+	visibleAfter := room.VisibleExits()
+	assert.Len(t, visibleAfter, len(visibleBefore)+1, "VisibleExits count must increase by one")
+
+	var foundEast bool
+	for _, e := range visibleAfter {
+		if e.Direction == East {
+			foundEast = true
+		}
+	}
+	assert.True(t, foundEast, "east exit must now be in VisibleExits()")
+}
+
+// TestRevealExit_NonExistentRoom_ReturnsFalse verifies that a missing room ID returns false.
+//
+// Precondition: "no_such_room" does not exist in the Manager.
+// Postcondition: RevealExit returns false.
+func TestRevealExit_NonExistentRoom_ReturnsFalse(t *testing.T) {
+	mgr := testZoneWithHiddenExit(t)
+	result := mgr.RevealExit("no_such_room", "east")
+	assert.False(t, result)
+}
+
+// TestRevealExit_WrongDirection_ReturnsFalse verifies that a direction not in the room's exits returns false.
+//
+// Precondition: room_a has no south exit.
+// Postcondition: RevealExit returns false.
+func TestRevealExit_WrongDirection_ReturnsFalse(t *testing.T) {
+	mgr := testZoneWithHiddenExit(t)
+	result := mgr.RevealExit("room_a", "south")
+	assert.False(t, result)
+}
+
+// TestRevealExit_AlreadyVisible_ReturnsFalse verifies that revealing an already-visible exit returns false.
+//
+// Precondition: room_a's north exit is visible (Hidden == false).
+// Postcondition: RevealExit returns false; VisibleExits count is unchanged.
+func TestRevealExit_AlreadyVisible_ReturnsFalse(t *testing.T) {
+	mgr := testZoneWithHiddenExit(t)
+
+	room, ok := mgr.GetRoom("room_a")
+	require.True(t, ok)
+	before := len(room.VisibleExits())
+
+	result := mgr.RevealExit("room_a", "north")
+
+	assert.False(t, result, "RevealExit must return false for an already-visible exit")
+	assert.Equal(t, before, len(room.VisibleExits()), "VisibleExits count must not change")
+}
+
+// TestProperty_RevealExit_VisibleExitsCountNeverDecreases is a property test verifying
+// that calling RevealExit never reduces the number of visible exits.
+//
+// Postcondition: len(VisibleExits()) after RevealExit >= len(VisibleExits()) before.
+func TestProperty_RevealExit_VisibleExitsCountNeverDecreases(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Pick a direction from the standard set.
+		dirIdx := rapid.IntRange(0, len(StandardDirections)-1).Draw(rt, "dir_idx")
+		dir := StandardDirections[dirIdx]
+		hidden := rapid.Bool().Draw(rt, "hidden")
+
+		zone := &Zone{
+			ID:        "prop_test",
+			Name:      "Prop Test",
+			StartRoom: "room_x",
+			Rooms: map[string]*Room{
+				"room_x": {
+					ID:          "room_x",
+					ZoneID:      "prop_test",
+					Title:       "Room X",
+					Description: "Property test room.",
+					Exits: []Exit{
+						{Direction: dir, TargetRoom: "room_y", Hidden: hidden},
+					},
+					Properties: map[string]string{},
+					MapX:        0,
+					MapY:        0,
+				},
+				"room_y": {
+					ID:          "room_y",
+					ZoneID:      "prop_test",
+					Title:       "Room Y",
+					Description: "Property test target.",
+					Exits:       []Exit{{Direction: dir.Opposite(), TargetRoom: "room_x"}},
+					Properties:  map[string]string{},
+					MapX:        0,
+					MapY:        2,
+				},
+			},
+		}
+		mgr, err := NewManager([]*Zone{zone})
+		require.NoError(t, err)
+
+		room, ok := mgr.GetRoom("room_x")
+		require.True(t, ok)
+
+		before := len(room.VisibleExits())
+		mgr.RevealExit("room_x", string(dir))
+		after := len(room.VisibleExits())
+
+		if after < before {
+			rt.Fatalf("VisibleExits count decreased from %d to %d after RevealExit", before, after)
+		}
+	})
+}

@@ -906,7 +906,7 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 			if outcome.Message != "" {
 				msgs = append(msgs, outcome.Message)
 			}
-			s.applySkillCheckEffect(sess, outcome.Effect)
+			s.applySkillCheckEffect(sess, outcome.Effect, room.ID)
 		}
 
 		if s.scriptMgr != nil {
@@ -973,7 +973,7 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 				}
 				// Apply non-deny effects (deny is not applicable for on_greet).
 				if outcome.Effect == nil || outcome.Effect.Type != "deny" {
-					s.applySkillCheckEffect(sess, outcome.Effect)
+					s.applySkillCheckEffect(sess, outcome.Effect, roomID)
 				}
 			}
 
@@ -2331,7 +2331,7 @@ func (s *GameServiceServer) handleUseEquipment(uid, instanceID string) (*gamev1.
 				skillMsgs = append(skillMsgs, outcome.Message)
 			}
 			// Apply non-deny effects.
-			s.applySkillCheckEffect(sess, outcome.Effect)
+			s.applySkillCheckEffect(sess, outcome.Effect, sess.RoomID)
 		}
 
 		if s.scriptMgr != nil {
@@ -2718,10 +2718,12 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 // applySkillCheckEffect applies a mechanical effect from a skill check outcome.
 //
 // Precondition: sess and effect must not be nil; s.dice must be non-nil for damage effects;
-// s.condRegistry may be nil; condition effects are silently skipped when it is nil.
+// s.condRegistry may be nil; condition effects are silently skipped when it is nil;
+// roomID must be non-empty for reveal effects.
 // Postcondition: damage effects reduce sess.CurrentHP to a minimum of 0;
-// condition effects add the named condition to sess.Conditions.
-func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, effect *skillcheck.Effect) {
+// condition effects add the named condition to sess.Conditions;
+// reveal effects un-hide the exit in effect.Target from the given room.
+func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, effect *skillcheck.Effect, roomID string) {
 	if effect == nil {
 		return
 	}
@@ -2757,6 +2759,20 @@ func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, e
 			s.logger.Warn("skill check condition apply failed",
 				zap.String("condition_id", effect.ID),
 				zap.Error(err),
+			)
+		}
+	case "reveal":
+		if effect.Target == "" || roomID == "" {
+			return
+		}
+		if s.world == nil {
+			return
+		}
+		revealed := s.world.RevealExit(roomID, effect.Target)
+		if !revealed {
+			s.logger.Debug("skill check reveal: no hidden exit found",
+				zap.String("room_id", roomID),
+				zap.String("direction", effect.Target),
 			)
 		}
 	}

@@ -2,6 +2,7 @@ package world
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 )
 
@@ -124,6 +125,30 @@ func (m *Manager) RoomCount() int {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return len(m.rooms)
+}
+
+// RevealExit un-hides the exit in the given direction from the specified room.
+//
+// Precondition: roomID must identify a valid room; direction is lowercase (e.g., "north").
+// Postcondition: if a hidden exit in that direction exists, it is now visible; returns true.
+// Returns false if the room does not exist, the direction is not found, or the exit was already visible.
+func (m *Manager) RevealExit(roomID, direction string) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	room, ok := m.rooms[roomID]
+	if !ok {
+		return false
+	}
+	for i := range room.Exits {
+		if strings.EqualFold(string(room.Exits[i].Direction), direction) {
+			if room.Exits[i].Hidden {
+				room.Exits[i].Hidden = false
+				return true
+			}
+			return false // already visible
+		}
+	}
+	return false
 }
 
 // ZoneCount returns the number of loaded zones.

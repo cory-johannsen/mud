@@ -1384,7 +1384,7 @@ func TestApplySkillCheckEffect_Condition(t *testing.T) {
 		Conditions: condition.NewActiveSet(),
 	}
 
-	svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "condition", ID: "distrusted"})
+	svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "condition", ID: "distrusted"}, "")
 
 	assert.True(t, sess.Conditions.Has("distrusted"), "condition 'distrusted' must be active after apply")
 }
@@ -1425,7 +1425,7 @@ func TestProperty_ApplySkillCheckEffect_ConditionAlwaysApplied(t *testing.T) {
 			Conditions: condition.NewActiveSet(),
 		}
 
-		svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "condition", ID: id})
+		svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "condition", ID: id}, "")
 
 		got := sess.Conditions.Has(id)
 		if register && !got {
@@ -1435,4 +1435,77 @@ func TestProperty_ApplySkillCheckEffect_ConditionAlwaysApplied(t *testing.T) {
 			rt.Fatalf("condition %q was NOT registered but was applied; Has() = true", id)
 		}
 	})
+}
+
+// TestApplySkillCheckEffect_Reveal_UnhidesExit verifies that a "reveal" effect
+// un-hides the exit specified by effect.Target from the given room.
+//
+// Precondition: world contains room_a with a hidden north exit; effect.Target == "north".
+// Postcondition: after applySkillCheckEffect, the north exit is no longer hidden.
+func TestApplySkillCheckEffect_Reveal_UnhidesExit(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+
+	zone := &world.Zone{
+		ID:        "reveal_svc_test",
+		Name:      "Reveal Svc Test",
+		StartRoom: "room_a",
+		Rooms: map[string]*world.Room{
+			"room_a": {
+				ID:          "room_a",
+				ZoneID:      "reveal_svc_test",
+				Title:       "Room A",
+				Description: "Test room.",
+				Exits: []world.Exit{
+					{Direction: world.North, TargetRoom: "room_b", Hidden: true},
+				},
+				Properties: map[string]string{},
+				MapX:        0,
+				MapY:        0,
+			},
+			"room_b": {
+				ID:          "room_b",
+				ZoneID:      "reveal_svc_test",
+				Title:       "Room B",
+				Description: "North room.",
+				Exits:       []world.Exit{{Direction: world.South, TargetRoom: "room_a"}},
+				Properties:  map[string]string{},
+				MapX:        0,
+				MapY:        2,
+			},
+		},
+	}
+	mgr, err := world.NewManager([]*world.Zone{zone})
+	require.NoError(t, err)
+
+	svc := &GameServiceServer{
+		world:  mgr,
+		logger: logger,
+	}
+
+	sess := &session.PlayerSession{
+		UID:    "test_uid",
+		RoomID: "room_a",
+	}
+
+	svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "reveal", Target: "north"}, "room_a")
+
+	room, ok := mgr.GetRoom("room_a")
+	require.True(t, ok)
+
+	var northHidden bool
+	for _, e := range room.Exits {
+		if e.Direction == world.North {
+			northHidden = e.Hidden
+		}
+	}
+	assert.False(t, northHidden, "north exit must not be hidden after reveal effect")
+
+	visible := room.VisibleExits()
+	var foundNorth bool
+	for _, e := range visible {
+		if e.Direction == world.North {
+			foundNorth = true
+		}
+	}
+	assert.True(t, foundNorth, "north exit must appear in VisibleExits() after reveal effect")
 }
