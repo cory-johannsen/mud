@@ -11,3 +11,14 @@ features:
   - name: Don't Kill the Messenger
     level: 1
     description: "You are just following orders and everyone knows it. Enemies must succeed on a Resolve test (DN 3) before targeting you while others are present."
+skills:
+  fixed:
+    - factions
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - intel
+      - hustle
+      - conspiracy
+      - rep

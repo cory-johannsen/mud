@@ -14,3 +14,14 @@ features:
 drawbacks:
   - name: Lure of Power
     description: "The temptation to use your abilities for personal gain is ever-present. When offered power or wealth, make a Resolve test (DN 3) to refuse."
+skills:
+  fixed:
+    - gang_codes
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - factions
+      - hard_look
+      - rep
+      - conspiracy

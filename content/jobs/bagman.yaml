@@ -11,3 +11,14 @@ features:
   - name: Pay the Piper
     level: 1
     description: "You always collect your due. When attempting to recover a debt or extract information under duress, you may add your Constitution modifier to Intimidation checks."
+skills:
+  fixed:
+    - hustle
+    - factions
+  choices:
+    count: 2
+    pool:
+      - grift
+      - smooth_talk
+      - ghosting
+      - intel

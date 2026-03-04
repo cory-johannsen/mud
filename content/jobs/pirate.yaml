@@ -13,3 +13,14 @@ features:
   - name: Salty Dog
     level: 1
     description: "You're at home on any body of water. You never suffer seasickness, can navigate by stars, and gain +2 to all checks aboard watercraft."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - wasteland
+      - scavenging
+      - grift

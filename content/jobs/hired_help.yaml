@@ -11,3 +11,14 @@ features:
   - name: Town Gossip
     level: 1
     description: "You hear everything. Once per day in a settlement, learn one piece of local gossip or a secret about a resident of your choice."
+skills:
+  fixed:
+    - hustle
+    - intel
+  choices:
+    count: 2
+    pool:
+      - factions
+      - smooth_talk
+      - ghosting
+      - scavenging

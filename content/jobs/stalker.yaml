@@ -12,3 +12,14 @@ features:
   - name: For A Few Shillings More
     level: 1
     description: "Once you mark a target, you always find them. You can track your quarry through any terrain and always know their general direction as long as you've seen them in the last 24 hours."
+skills:
+  fixed:
+    - ghosting
+    - wasteland
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - hard_look
+      - intel
+      - scavenging

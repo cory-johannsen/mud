@@ -11,3 +11,14 @@ features:
   - name: Learned Devotee
     level: 1
     description: "You have devoted yourself to understanding machines. You can repair any mechanical device given time and parts, and may identify a device's function and flaws with a 1-minute inspection."
+skills:
+  fixed:
+    - rigging
+    - tech_lore
+  choices:
+    count: 2
+    pool:
+      - scavenging
+      - muscle
+      - patch_job
+      - wasteland

@@ -11,3 +11,14 @@ features:
   - name: Book Worm
     level: 1
     description: "Your collection is vast. Once per day, recall a relevant fact from your reading that grants advantage on a Knowledge or Investigation check."
+skills:
+  fixed:
+    - scavenging
+    - intel
+  choices:
+    count: 2
+    pool:
+      - tech_lore
+      - wasteland
+      - rigging
+      - patch_job

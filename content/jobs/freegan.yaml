@@ -11,3 +11,14 @@ features:
   - name: Swagger Wagon
     level: 1
     description: "You can find useful materials anywhere. Once per day in an urban environment, locate one piece of useful salvage without a roll — the GM determines what's available."
+skills:
+  fixed:
+    - scavenging
+    - wasteland
+  choices:
+    count: 2
+    pool:
+      - hustle
+      - ghosting
+      - patch_job
+      - muscle

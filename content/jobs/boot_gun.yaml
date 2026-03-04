@@ -22,3 +22,14 @@ starting_inventory:
 drawbacks:
   - name: Bullet Lust
     description: "You have a deep and abiding love for firearms. You can't resist picking up any gun you see, and you have a tendency to shoot first and ask questions later."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - ghosting
+      - grift
+      - scavenging

@@ -12,3 +12,14 @@ features:
   - name: Eldritch Signs
     level: 1
     description: "You can read the omens in the urban decay around you. Once per day, ask the GM one question about what dangers or opportunities lie within a mile of your location."
+skills:
+  fixed:
+    - wasteland
+    - scavenging
+  choices:
+    count: 2
+    pool:
+      - patch_job
+      - conspiracy
+      - intel
+      - smooth_talk

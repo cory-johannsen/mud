@@ -11,3 +11,14 @@ features:
   - name: "Pliers... Scalpel... Bonesaw"
     level: 1
     description: "You can treat injuries with improvised tools. Once per day, restore 1d6+Constitution modifier HP to a patient through a 10-minute field treatment."
+skills:
+  fixed:
+    - patch_job
+    - scavenging
+  choices:
+    count: 2
+    pool:
+      - tech_lore
+      - rigging
+      - smooth_talk
+      - wasteland

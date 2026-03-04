@@ -15,3 +15,14 @@ features:
 drawbacks:
   - name: Death Wish
     description: "You are drawn to danger. When presented with a safer and a more dangerous route to the same goal, make a Resolve test (DN 3) or choose the dangerous one."
+skills:
+  fixed:
+    - ghosting
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - muscle
+      - grift
+      - parkour
+      - intel

@@ -11,3 +11,14 @@ features:
   - name: True Detective
     level: 1
     description: "You can read a scene. After 10 minutes of investigation, you may ask the GM one yes/no question about a crime or event that occurred in this location."
+skills:
+  fixed:
+    - intel
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - factions
+      - hustle
+      - ghosting
+      - tech_lore

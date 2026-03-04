@@ -11,3 +11,14 @@ features:
   - name: Hedgewizardry
     level: 1
     description: "Your tricks cross the line into the uncanny. Once per day, create a convincing illusion (sight and sound) that lasts for 10 minutes or until touched."
+skills:
+  fixed:
+    - grift
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - hustle
+      - ghosting
+      - rep
+      - parkour

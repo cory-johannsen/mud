@@ -12,3 +12,14 @@ features:
   - name: Nimble Fingers
     level: 1
     description: "You can pick locks, pick pockets, and palm objects without a roll in normal conditions. In difficult conditions, gain advantage on Dexterity checks involving theft or sleight of hand."
+skills:
+  fixed:
+    - grift
+    - ghosting
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - hustle
+      - scavenging
+      - tech_lore

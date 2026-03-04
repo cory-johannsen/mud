@@ -12,3 +12,14 @@ features:
   - name: Batten Down the Hatches
     level: 1
     description: "You can prepare any vehicle for extreme conditions in one minute. Passengers gain +2 to all checks while you pilot through hazardous conditions."
+skills:
+  fixed:
+    - tech_lore
+    - wasteland
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - scavenging
+      - rigging
+      - intel

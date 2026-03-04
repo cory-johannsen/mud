@@ -12,3 +12,14 @@ features:
   - name: Sneak Attack
     level: 1
     description: "You deal an additional 2d6 damage when attacking an enemy who is unaware of you or flanked by an ally."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - grift
+      - ghosting
+      - gang_codes

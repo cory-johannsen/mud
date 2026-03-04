@@ -15,3 +15,14 @@ features:
   - name: Hue & Cry
     level: 1
     description: "You can call for backup. Once per day, summon 1d4 allied gang members who arrive within 10 minutes and follow your orders for the scene."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - grift
+      - gang_codes
+      - parkour
+      - ghosting

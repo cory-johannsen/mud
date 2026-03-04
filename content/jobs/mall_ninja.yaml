@@ -12,3 +12,14 @@ features:
   - name: Vim & Vigor
     level: 1
     description: "Your ridiculous weapon choices actually work. Exotic or improvised melee weapons deal an additional 1d4 damage in your hands, and enemies are often too confused to react."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - grift
+      - ghosting
+      - tech_lore

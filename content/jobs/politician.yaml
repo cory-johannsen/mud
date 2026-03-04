@@ -11,3 +11,14 @@ features:
   - name: Machiavellian Intrigue
     level: 1
     description: "You can turn any social situation to your advantage. Once per scene, reframe a setback as an opportunity — gain +2 to your next social roll after suffering a social failure."
+skills:
+  fixed:
+    - rep
+    - factions
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - hustle
+      - intel
+      - conspiracy

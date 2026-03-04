@@ -11,3 +11,14 @@ features:
   - name: Alfred Pfennigworth
     level: 1
     description: "While performing or socializing, targets reveal sensitive information freely. After 10 minutes of interaction, learn one secret the target holds."
+skills:
+  fixed:
+    - rep
+    - hustle
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - hard_look
+      - grift
+      - parkour

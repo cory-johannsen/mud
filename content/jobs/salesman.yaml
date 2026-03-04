@@ -11,3 +11,14 @@ features:
   - name: Grease the Wheels
     level: 1
     description: "You know what everyone wants. Once per scene, learn what a person needs most — their price, weakness, or desire — with a successful Insight check."
+skills:
+  fixed:
+    - hustle
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - grift
+      - factions
+      - rep
+      - intel

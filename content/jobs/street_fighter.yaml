@@ -13,3 +13,14 @@ features:
   - name: Blood & Sand
     level: 1
     description: "The crowd feeds you. In front of witnesses, you deal +2 damage on all melee attacks. The more witnesses, the harder you fight."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - rep
+      - gang_codes
+      - ghosting

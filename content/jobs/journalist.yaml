@@ -11,3 +11,14 @@ features:
   - name: "Scrivener's Speed"
     level: 1
     description: "You can record, recall, and disseminate information faster than anyone. Once per day, your published account of an event becomes the accepted version of what happened."
+skills:
+  fixed:
+    - intel
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - factions
+      - hustle
+      - conspiracy
+      - rep

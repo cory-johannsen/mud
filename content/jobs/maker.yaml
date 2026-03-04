@@ -11,3 +11,14 @@ features:
   - name: Guild Privilege
     level: 1
     description: "You belong to one of Portland's surviving craft networks. Invoke your guild connections to obtain materials, shelter, or introductions at favorable rates."
+skills:
+  fixed:
+    - rigging
+    - tech_lore
+  choices:
+    count: 2
+    pool:
+      - scavenging
+      - patch_job
+      - hustle
+      - intel

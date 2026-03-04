@@ -11,3 +11,14 @@ features:
   - name: Confidence Trick
     level: 1
     description: "You establish a false identity flawlessly. Once per day, convince a target that you are someone you're not — they won't question it without hard evidence."
+skills:
+  fixed:
+    - hustle
+    - grift
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - ghosting
+      - factions
+      - rep

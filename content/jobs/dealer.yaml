@@ -14,3 +14,14 @@ features:
 drawbacks:
   - name: Abstain From Violence
     description: "Your healer's ethic makes violence repugnant. When initiating (not defending) violence, make a Resolve test (DN 2) or hesitate, losing your first action."
+skills:
+  fixed:
+    - hustle
+    - factions
+  choices:
+    count: 2
+    pool:
+      - grift
+      - smooth_talk
+      - ghosting
+      - intel

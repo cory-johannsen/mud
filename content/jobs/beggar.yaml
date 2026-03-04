@@ -11,3 +11,14 @@ features:
   - name: Beggars Bowl
     level: 1
     description: "You can extract charity from almost anyone. Once per scene, receive aid (money, food, shelter, or information) from a stranger with a successful Charisma check (DN 2)."
+skills:
+  fixed:
+    - hustle
+    - scavenging
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - ghosting
+      - wasteland
+      - intel

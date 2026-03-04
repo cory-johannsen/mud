@@ -13,3 +13,14 @@ features:
   - name: Hans Shot First
     level: 1
     description: "You always draw first. When combat begins, you may take one free action before initiative is rolled — attack, run, or hide."
+skills:
+  fixed:
+    - grift
+    - ghosting
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - hustle
+      - factions
+      - wasteland

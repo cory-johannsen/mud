@@ -15,3 +15,14 @@ features:
 drawbacks:
   - name: Wanted
     description: "You are wanted by the authorities for your role in fomenting rebellion and causing chaos. If recognized, you must make a Resolve test (DN 3) or face arrest."
+skills:
+  fixed:
+    - rep
+    - factions
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - intel
+      - conspiracy
+      - hard_look

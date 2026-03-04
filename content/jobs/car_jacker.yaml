@@ -12,3 +12,14 @@ features:
   - name: Stand And Deliver
     level: 1
     description: "Your ability to project menace makes targets freeze. When you demand surrender with a weapon drawn, targets must make a Resolve test (DN 3) or comply immediately."
+skills:
+  fixed:
+    - grift
+    - parkour
+  choices:
+    count: 2
+    pool:
+      - ghosting
+      - muscle
+      - hustle
+      - tech_lore

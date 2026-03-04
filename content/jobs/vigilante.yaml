@@ -16,3 +16,14 @@ features:
 drawbacks:
   - name: Alter Ego
     description: "You maintain a secret identity. If your true identity is ever revealed, you lose all social standing and become hunted by the factions you've opposed."
+skills:
+  fixed:
+    - hard_look
+    - intel
+  choices:
+    count: 2
+    pool:
+      - muscle
+      - parkour
+      - factions
+      - ghosting

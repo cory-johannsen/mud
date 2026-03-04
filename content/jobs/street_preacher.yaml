@@ -11,3 +11,14 @@ features:
   - name: Road to Enlightenment
     level: 1
     description: "Your faith sustains you through everything. Once per day when reduced to 0 HP, make a Constitution test (DN 2) to instead remain at 1 HP. Your god isn't done with you yet."
+skills:
+  fixed:
+    - rep
+    - wasteland
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - conspiracy
+      - gang_codes
+      - hard_look

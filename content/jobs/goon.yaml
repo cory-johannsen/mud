@@ -12,3 +12,14 @@ features:
   - name: Jack Of All Trades
     level: 1
     description: "You've picked up enough skills through brute necessity that you can attempt any task without penalty, even those requiring specialized training."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - rep
+      - grift
+      - parkour
+      - gang_codes

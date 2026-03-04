@@ -14,3 +14,14 @@ features:
 drawbacks:
   - name: "When The Dealing's Done"
     description: "You cannot resist a wager. When offered a bet, make a Resolve test (DN 3) or you must accept, no matter the stakes."
+skills:
+  fixed:
+    - hustle
+    - grift
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - factions
+      - rep
+      - intel

@@ -14,3 +14,14 @@ features:
 drawbacks:
   - name: The End Is Nigh
     description: "Your apocalyptic beliefs occasionally override rational decision-making. When faced with a prophesied sign, make a Resolve test (DN 3) or act on your beliefs immediately."
+skills:
+  fixed:
+    - rep
+    - gang_codes
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - hard_look
+      - conspiracy
+      - factions

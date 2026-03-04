@@ -13,3 +13,14 @@ features:
   - name: Shield Wall
     level: 1
     description: "When fighting alongside faction allies, you form a unified front. When adjacent to at least one ally, you and that ally each gain +2 to AC."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - grift
+      - ghosting
+      - gang_codes

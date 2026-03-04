@@ -11,3 +11,14 @@ features:
   - name: I Sell the Dead
     level: 1
     description: "You know where the bodies are and what they're worth. Once per day in an urban area, locate a cache of salvage from the dead — equipment, currency, or information."
+skills:
+  fixed:
+    - scavenging
+    - ghosting
+  choices:
+    count: 2
+    pool:
+      - wasteland
+      - parkour
+      - grift
+      - intel

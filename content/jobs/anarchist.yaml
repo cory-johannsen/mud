@@ -11,3 +11,14 @@ features:
   - name: Rabble-Rousing
     level: 1
     description: "You can inspire a crowd to action with nothing but words and fury. Once per scene, rally nearby NPCs to your cause with a Charisma check (DN 2)."
+skills:
+  fixed:
+    - hard_look
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - hustle
+      - rep
+      - factions
+      - conspiracy

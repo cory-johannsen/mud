@@ -14,3 +14,14 @@ features:
   - name: "Mettle & Steel"
     level: 1
     description: "Discipline is your armor. When you follow explicit orders from a commanding officer or superior, gain +2 to all attack and damage rolls for the duration of that mission."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - ghosting
+      - factions
+      - tech_lore

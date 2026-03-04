@@ -12,3 +12,14 @@ features:
   - name: Aimless Drifter
     level: 1
     description: "Your lack of agenda reads as harmlessness. Strangers are automatically friendly toward you unless you give them reason not to be."
+skills:
+  fixed:
+    - grift
+    - parkour
+  choices:
+    count: 2
+    pool:
+      - hustle
+      - ghosting
+      - smooth_talk
+      - wasteland

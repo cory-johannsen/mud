@@ -12,3 +12,14 @@ features:
   - name: Nostrum Remedium
     level: 1
     description: "Given basic supplies, you can synthesize a useful chemical compound once per day: a stimulant (+2 to next physical check), sedative, or improvised explosive."
+skills:
+  fixed:
+    - rigging
+    - tech_lore
+  choices:
+    count: 2
+    pool:
+      - scavenging
+      - patch_job
+      - conspiracy
+      - hustle

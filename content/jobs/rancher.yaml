@@ -12,3 +12,14 @@ features:
   - name: Beastmaster
     level: 1
     description: "Animals trust you instinctively. You can calm any non-supernatural animal with a 1-minute interaction, and trained animals obey complex commands from you without rolls."
+skills:
+  fixed:
+    - wasteland
+    - scavenging
+  choices:
+    count: 2
+    pool:
+      - muscle
+      - patch_job
+      - rigging
+      - intel

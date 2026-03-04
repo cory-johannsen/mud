@@ -14,3 +14,14 @@ features:
 drawbacks:
   - name: Cruel Tutelage
     description: "Your mentor's methods have left scars. When directly contradicting your mentor's teachings, make a Resolve test (DN 3) or be unable to act against their interests."
+skills:
+  fixed:
+    - rep
+    - gang_codes
+  choices:
+    count: 2
+    pool:
+      - factions
+      - smooth_talk
+      - hard_look
+      - intel

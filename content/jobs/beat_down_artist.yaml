@@ -12,3 +12,14 @@ features:
   - name: "Mortal Combat!"
     level: 1
     description: "Your fists are weapons. Unarmed strikes deal damage as if you were one size category larger, and you may use Strength instead of Dexterity for unarmed attack rolls."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - ghosting
+      - rep
+      - scavenging

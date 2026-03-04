@@ -14,3 +14,14 @@ features:
 drawbacks:
   - name: Washed Up
     description: "Your former connections know the truth. When encountered by anyone from your former social circle, they may expose your reduced circumstances at the worst possible moment."
+skills:
+  fixed:
+    - rep
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - factions
+      - hustle
+      - grift
+      - hard_look

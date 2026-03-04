@@ -12,3 +12,14 @@ features:
   - name: The Show Must Go On
     level: 1
     description: "Your performance cannot be stopped by minor inconveniences like combat. While performing, allies within earshot gain +1 to all checks."
+skills:
+  fixed:
+    - rep
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - hustle
+      - factions
+      - hard_look
+      - gang_codes

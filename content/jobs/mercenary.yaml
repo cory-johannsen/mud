@@ -17,3 +17,14 @@ features:
 drawbacks:
   - name: Crestfallen
     description: "You've seen too much to have illusions about victory. After any combat where an ally falls, you suffer -1 to all checks until you rest."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - ghosting
+      - wasteland
+      - scavenging

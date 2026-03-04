@@ -12,3 +12,14 @@ features:
   - name: Warden of the Wild
     level: 1
     description: "The living things of Portland's ruins answer to you. Wild animals will not attack you unless you attack them first, and will warn you of nearby danger."
+skills:
+  fixed:
+    - wasteland
+    - scavenging
+  choices:
+    count: 2
+    pool:
+      - muscle
+      - patch_job
+      - intel
+      - ghosting

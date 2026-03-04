@@ -13,3 +13,14 @@ features:
   - name: Situational Awareness
     level: 1
     description: "You are never surprised. You cannot be ambushed, and always act in the first round of combat regardless of initiative."
+skills:
+  fixed:
+    - ghosting
+    - wasteland
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - intel
+      - scavenging
+      - hard_look

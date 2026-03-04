@@ -22,3 +22,14 @@ starting_inventory:
 drawbacks:
   - name: Wanted
     description: "You are wanted by the authorities. If recognized, you must make a Resolve test (DN 3) or face arrest."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - ghosting
+      - grift
+      - scavenging

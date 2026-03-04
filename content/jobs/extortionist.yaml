@@ -11,3 +11,14 @@ features:
   - name: Mastermind
     level: 1
     description: "You see three moves ahead. Once per scene, declare that a situation is playing out exactly as you planned — adding your Intelligence modifier to any one roll."
+skills:
+  fixed:
+    - hard_look
+    - factions
+  choices:
+    count: 2
+    pool:
+      - muscle
+      - hustle
+      - smooth_talk
+      - grift

@@ -12,3 +12,14 @@ features:
   - name: Feast or Famine
     level: 1
     description: "When in the company of a famous or powerful person, you share their social privileges. You can invoke your famous companion's name to open doors — until they find out."
+skills:
+  fixed:
+    - rep
+    - hustle
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - factions
+      - hard_look
+      - gang_codes

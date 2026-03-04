@@ -14,3 +14,14 @@ features:
   - name: Warp Spasm
     level: 1
     description: "Once per day, enter a berserker rage for 1 minute: gain +4 Strength, +2 HP per level, and ignore all non-lethal damage. After, suffer 1 level of Exhaustion."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - rep
+      - gang_codes
+      - ghosting

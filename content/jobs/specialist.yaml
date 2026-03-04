@@ -14,3 +14,14 @@ features:
   - name: Here Comes The Cavalry
     level: 1
     description: "You can operate heavy weapons, vehicles, and complex machinery. Once per day, arrive at a critical moment with exactly the piece of technology the situation requires."
+skills:
+  fixed:
+    - tech_lore
+    - muscle
+  choices:
+    count: 2
+    pool:
+      - rigging
+      - parkour
+      - hard_look
+      - wasteland

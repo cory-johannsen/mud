@@ -11,3 +11,14 @@ features:
   - name: "More Work?"
     level: 1
     description: "Hard work is your natural state. You never suffer exhaustion penalties on physical tasks, and can work for 24 hours without rest penalty."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - ghosting
+      - wasteland
+      - scavenging

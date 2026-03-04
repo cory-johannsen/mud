@@ -12,3 +12,14 @@ features:
   - name: Shaken Not Stirred
     level: 1
     description: "You can instigate conflict between any two parties with a well-placed rumor or incident. Once per day, start a fight, argument, or diplomatic crisis between NPCs without implicating yourself."
+skills:
+  fixed:
+    - rep
+    - conspiracy
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - factions
+      - hustle
+      - hard_look

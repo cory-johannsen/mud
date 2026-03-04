@@ -11,3 +11,14 @@ features:
   - name: Gutterspeak
     level: 1
     description: "You understand the hidden language of Portland's underclass — the slang, signals, and territorial markings. You can communicate safely with criminal elements and read gang territories."
+skills:
+  fixed:
+    - scavenging
+    - wasteland
+  choices:
+    count: 2
+    pool:
+      - muscle
+      - patch_job
+      - ghosting
+      - tech_lore

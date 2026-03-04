@@ -13,3 +13,14 @@ features:
   - name: "I Am The Law!"
     level: 1
     description: "Badge or no badge, you project authority. Gain advantage on Intimidation checks against civilians, and may demand cooperation without violence once per scene."
+skills:
+  fixed:
+    - hard_look
+    - factions
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - intel
+      - muscle
+      - ghosting

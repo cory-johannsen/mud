@@ -11,3 +11,14 @@ features:
   - name: Shadow Broker
     level: 1
     description: "Information is currency. Once per day, sell a piece of information to an interested party for significant material gain, or trade it for equivalent reasoning."
+skills:
+  fixed:
+    - intel
+    - hustle
+  choices:
+    count: 2
+    pool:
+      - smooth_talk
+      - factions
+      - ghosting
+      - conspiracy

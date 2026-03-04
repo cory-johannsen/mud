@@ -15,3 +15,14 @@ features:
   - name: Guerilla Warfare
     level: 1
     description: "You excel at hit-and-run tactics in urban terrain. When attacking from cover and then moving at least 10 feet, enemies suffer -2 to attacks against you until your next turn."
+skills:
+  fixed:
+    - muscle
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - parkour
+      - ghosting
+      - wasteland
+      - scavenging

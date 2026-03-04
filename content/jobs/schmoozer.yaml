@@ -11,3 +11,14 @@ features:
   - name: Fame & Fortune
     level: 1
     description: "You are always at the right party. In any settlement, immediately identify the most powerful or useful person present and secure an introduction within the hour."
+skills:
+  fixed:
+    - rep
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - factions
+      - hustle
+      - grift
+      - hard_look

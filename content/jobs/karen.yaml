@@ -12,3 +12,14 @@ features:
   - name: Banter and Jibe
     level: 1
     description: "Your verbal aggression is exhausting and effective. Targets who fail a Resolve test (DN 2) against your complaints and demands comply with your requests simply to make you stop."
+skills:
+  fixed:
+    - rep
+    - smooth_talk
+  choices:
+    count: 2
+    pool:
+      - factions
+      - hustle
+      - hard_look
+      - conspiracy

@@ -12,3 +12,14 @@ features:
   - name: Artful Dodger
     level: 1
     description: "You can disappear in any urban environment. Once per scene, escape pursuit or avoid detection by melting into the background — no roll required if you have 6 seconds."
+skills:
+  fixed:
+    - wasteland
+    - scavenging
+  choices:
+    count: 2
+    pool:
+      - ghosting
+      - hustle
+      - parkour
+      - smooth_talk

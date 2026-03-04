@@ -13,3 +13,14 @@ features:
   - name: Dogs of War
     level: 1
     description: "You can be hired for violence and everyone knows it. You gain advantage on Intimidation checks, and may name your price for dangerous work without social penalty."
+skills:
+  fixed:
+    - ghosting
+    - hard_look
+  choices:
+    count: 2
+    pool:
+      - muscle
+      - parkour
+      - grift
+      - wasteland

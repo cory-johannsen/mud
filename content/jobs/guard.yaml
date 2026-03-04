@@ -13,3 +13,14 @@ features:
   - name: Tortuous Inquisition
     level: 1
     description: "You know how to break someone down. In an interrogation, targets must succeed on a Resolve test (DN 3) each hour or reveal one piece of information."
+skills:
+  fixed:
+    - hard_look
+    - muscle
+  choices:
+    count: 2
+    pool:
+      - factions
+      - gang_codes
+      - parkour
+      - ghosting
