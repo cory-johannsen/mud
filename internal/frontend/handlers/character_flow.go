@@ -398,10 +398,12 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 // Precondition: count >= 1; pool must be non-empty and contain valid skill IDs present in h.allSkills.
 // Postcondition: Returns exactly count chosen IDs, or (nil, nil) on cancel.
 func (h *AuthHandler) skillChoiceLoop(ctx context.Context, conn *telnet.Conn, pool []string, count int) ([]string, error) {
-	// Build a name lookup from h.allSkills for display.
+	// Build name and description lookups from h.allSkills for display.
 	nameFor := make(map[string]string, len(h.allSkills))
+	descFor := make(map[string]string, len(h.allSkills))
 	for _, sk := range h.allSkills {
 		nameFor[sk.ID] = sk.Name
+		descFor[sk.ID] = sk.Description
 	}
 
 	remaining := make([]string, len(pool))
@@ -417,9 +419,17 @@ func (h *AuthHandler) skillChoiceLoop(ctx context.Context, conn *telnet.Conn, po
 			if name == "" {
 				name = id
 			}
-			_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s",
-				telnet.Green, i+1, telnet.Reset,
-				telnet.BrightWhite, name, telnet.Reset))
+			desc := descFor[id]
+			if desc != "" {
+				_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%-14s%s - %s%s%s",
+					telnet.Green, i+1, telnet.Reset,
+					telnet.BrightWhite, name, telnet.Reset,
+					telnet.Dim, desc, telnet.Reset))
+			} else {
+				_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s",
+					telnet.Green, i+1, telnet.Reset,
+					telnet.BrightWhite, name, telnet.Reset))
+			}
 		}
 		_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select skill [1-%d]: ", len(remaining)))
 		line, err := conn.ReadLine()
