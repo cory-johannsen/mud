@@ -198,7 +198,7 @@ class_features:
     pf2e: sudden_charge
     active: true
     activate_text: "You break into a full sprint before anyone can react."
-    description: "Once per encounter, move up to your speed and make an attack before initiative is rolled."
+    description: "Once per encounter, before your first turn begins, move up to your speed and make one melee or ranged attack."
 
   - id: boarding_action
     name: Boarding Action
@@ -298,7 +298,7 @@ class_features:
     pf2e: assurance
     active: true
     activate_text: "You size up the odds and make your move."
-    description: "Once per encounter, reroll any d20 check and take the higher result."
+    description: "Once per encounter, reroll any d20 roll you make and take the higher result."
 
   - id: too_good_to_be_true
     name: Too Good to Be True
@@ -588,7 +588,7 @@ class_features:
     pf2e: deception
     active: true
     activate_text: "You spin the narrative before it spins you."
-    description: "Once per session, negate the social consequences of one failed Deception check retroactively."
+    description: "Once per session, negate the social consequences of one failed Deception check made earlier in the same scene."
 
   - id: working_the_room
     name: Working the Room
