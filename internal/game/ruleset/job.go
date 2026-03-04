@@ -62,7 +62,8 @@ type Job struct {
 	HitPointsPerLevel int               `yaml:"hit_points_per_level"`
 	Proficiencies     map[string]string                    `yaml:"proficiencies"`
 	SkillGrants       *SkillGrants                         `yaml:"skills"`
-	FeatGrants        *FeatGrants                          `yaml:"feats"`
+	FeatGrants         *FeatGrants                          `yaml:"feats"`
+	ClassFeatureGrants []string                             `yaml:"class_features"`
 	Features          []JobFeature                         `yaml:"features"`
 	Drawbacks         []JobDrawback                        `yaml:"drawbacks"`
 	StartingInventory *inventory.StartingLoadoutOverride   `yaml:"starting_inventory"`
