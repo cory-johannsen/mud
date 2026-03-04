@@ -202,3 +202,38 @@ func TestPropertyActiveSet_StacksNeverExceedMaxStacks(t *testing.T) {
 			"stacks must never exceed MaxStacks")
 	})
 }
+
+func TestClearEncounter_RemovesEncounterConditions(t *testing.T) {
+	s := condition.NewActiveSet()
+	enc := &condition.ConditionDef{ID: "surge", Name: "Surge", DurationType: "encounter", MaxStacks: 0}
+	perm := &condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0}
+	_ = s.Apply("uid", enc, 1, -1)
+	_ = s.Apply("uid", perm, 1, -1)
+	assert.True(t, s.Has("surge"))
+	assert.True(t, s.Has("prone"))
+
+	s.ClearEncounter()
+
+	assert.False(t, s.Has("surge"), "encounter condition should be cleared")
+	assert.True(t, s.Has("prone"), "permanent condition should remain")
+}
+
+func TestClearEncounter_EmptySet_NoPanic(t *testing.T) {
+	s := condition.NewActiveSet()
+	assert.NotPanics(t, func() { s.ClearEncounter() })
+}
+
+func TestProperty_ClearEncounter_OnlyRemovesEncounterType(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		durType := rapid.SampledFrom([]string{"permanent", "rounds", "until_save", "encounter"}).Draw(rt, "dur")
+		s := condition.NewActiveSet()
+		def := &condition.ConditionDef{ID: "c1", Name: "C1", DurationType: durType, MaxStacks: 0}
+		_ = s.Apply("uid", def, 1, -1)
+		s.ClearEncounter()
+		if durType == "encounter" {
+			assert.False(t, s.Has("c1"), "encounter condition must be cleared")
+		} else {
+			assert.True(t, s.Has("c1"), "non-encounter condition must remain")
+		}
+	})
+}

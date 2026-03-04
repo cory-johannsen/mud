@@ -154,6 +154,18 @@ func (s *ActiveSet) Stacks(id string) int {
 	return 0
 }
 
+// ClearEncounter removes all conditions with DurationType == "encounter".
+// Called at the end of combat to clear temporary combat-only conditions.
+// Precondition: s must not be nil.
+// Postcondition: all encounter-duration conditions are removed; other conditions unchanged.
+func (s *ActiveSet) ClearEncounter() {
+	for id, ac := range s.conditions {
+		if ac.Def.DurationType == "encounter" {
+			delete(s.conditions, id)
+		}
+	}
+}
+
 // All returns a slice of pointers to the active conditions.
 // The slice itself is a new allocation (mutating the slice does not affect the set),
 // but the pointed-to ActiveCondition values are shared — callers must not modify them.
