@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
 
 // Instance is a live NPC entity occupying a room.
@@ -45,6 +47,8 @@ type Instance struct {
 	TauntCooldown time.Duration
 	// LastTauntTime is the last time this NPC taunted.
 	LastTauntTime time.Time
+	// SkillChecks defines skill check triggers fired when a player greets this NPC.
+	SkillChecks []skillcheck.TriggerDef
 }
 
 // Name returns the instance's current display name.
@@ -87,6 +91,7 @@ func NewInstance(id string, tmpl *Template, roomID string) *Instance {
 		Taunts:        tmpl.Taunts,
 		TauntChance:   tmpl.TauntChance,
 		TauntCooldown: cooldown,
+		SkillChecks:   tmpl.SkillChecks,
 	}
 }
 

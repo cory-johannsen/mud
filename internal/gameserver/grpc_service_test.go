@@ -1010,3 +1010,243 @@ func TestApplyRoomSkillChecks_DamageEffect(t *testing.T) {
 	// Intn(4)=0 → dice result is 1; damage total = 1.
 	assert.Equal(t, 9, sess.CurrentHP, "CurrentHP must be reduced by the damage roll")
 }
+
+// TestApplyNPCSkillChecks_OnGreet_Success verifies that applyNPCSkillChecks fires
+// on_greet triggers for NPCs in the room and returns the success message when the
+// player's roll exceeds the DC.
+//
+// Setup: NPC template has smooth_talk on_greet DC 12. Player has Flair=16 (mod=+3)
+// and smooth_talk "trained" (profBonus=2). dice source returns 9 → roll=10, total=10+3+2=15 >= 12 → success.
+func TestApplyNPCSkillChecks_OnGreet_Success(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	npcMgr := npc.NewManager()
+
+	tmpl := &npc.Template{
+		ID:          "charming_vendor",
+		Name:        "Charming Vendor",
+		Description: "A vendor with a warm smile.",
+		Level:       1,
+		MaxHP:       10,
+		AC:          10,
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "smooth_talk",
+				DC:      12,
+				Trigger: "on_greet",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "They warm up to you."},
+					Failure: &skillcheck.Outcome{Message: "They sneer."},
+				},
+			},
+		},
+	}
+	_, err := npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+
+	// Fixed dice: Intn(20) always returns 9, so d20 roll = 10.
+	// Flair=16 → abilityModFrom(16) = (16-10)/2 = 3.
+	// smooth_talk trained → profBonus=2.
+	// total = 10 + 3 + 2 = 15 >= DC 12 → success.
+	src := &fixedDiceSource{val: 9}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	skills := []*ruleset.Skill{
+		{ID: "smooth_talk", Name: "Smooth Talk", Ability: "flair"},
+	}
+
+	npcHandler := NewNPCHandler(npcMgr, sessMgr)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, npcHandler, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_npc_greet",
+		Username:  "Diplomat",
+		CharName:  "Diplomat",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{Flair: 16},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Skills = map[string]string{"smooth_talk": "trained"}
+
+	msgs := svc.applyNPCSkillChecks("u_npc_greet", "room_a")
+	require.Len(t, msgs, 1, "expected exactly one outcome message from NPC on_greet check")
+	assert.Equal(t, "They warm up to you.", msgs[0])
+}
+
+// TestApplyNPCSkillChecks_OnGreet_Failure verifies that applyNPCSkillChecks returns
+// the failure message when the player's roll falls short of the DC.
+//
+// Setup: NPC template has smooth_talk on_greet DC 16. dice source returns 4 → roll=5.
+// Flair=16 → mod=+3; trained → profBonus=2. total=5+3+2=10 < 16 and 10 > 16-10=6 → regular Failure.
+func TestApplyNPCSkillChecks_OnGreet_Failure(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	npcMgr := npc.NewManager()
+
+	tmpl := &npc.Template{
+		ID:          "stern_guard",
+		Name:        "Stern Guard",
+		Description: "A guard who doesn't like visitors.",
+		Level:       1,
+		MaxHP:       10,
+		AC:          10,
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "smooth_talk",
+				DC:      16,
+				Trigger: "on_greet",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "They nod reluctantly."},
+					Failure: &skillcheck.Outcome{Message: "They sneer."},
+				},
+			},
+		},
+	}
+	_, err := npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+
+	// Fixed dice: Intn(20) always returns 4, so d20 roll = 5.
+	// Flair=16 → mod=+3; trained → profBonus=2. total=5+3+2=10.
+	// CritFailure threshold = DC-10 = 6. total=10 > 6, so it is a regular Failure (not CritFailure).
+	// 10 < 16 → Failure.
+	src := &fixedDiceSource{val: 4}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	skills := []*ruleset.Skill{
+		{ID: "smooth_talk", Name: "Smooth Talk", Ability: "flair"},
+	}
+
+	npcHandler := NewNPCHandler(npcMgr, sessMgr)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, npcHandler, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_npc_greet_fail",
+		Username:  "Diplomat2",
+		CharName:  "Diplomat2",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{Flair: 16},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Skills = map[string]string{"smooth_talk": "trained"}
+
+	msgs := svc.applyNPCSkillChecks("u_npc_greet_fail", "room_a")
+	require.Len(t, msgs, 1, "expected exactly one outcome message from NPC on_greet check")
+	assert.Equal(t, "They sneer.", msgs[0])
+}
+
+// TestApplyNPCSkillChecks_NoNPCs verifies that applyNPCSkillChecks returns nil when
+// there are no NPCs in the room.
+func TestApplyNPCSkillChecks_NoNPCs(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	npcMgr := npc.NewManager()
+	npcHandler := NewNPCHandler(npcMgr, sessMgr)
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, npcHandler, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_no_npc",
+		Username:  "Wanderer",
+		CharName:  "Wanderer",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+
+	msgs := svc.applyNPCSkillChecks("u_no_npc", "room_a")
+	assert.Nil(t, msgs, "expected nil when no NPCs present")
+}
+
+// TestApplyNPCSkillChecks_NonGreetTriggerIgnored verifies that skill checks with
+// triggers other than on_greet are not fired by applyNPCSkillChecks.
+func TestApplyNPCSkillChecks_NonGreetTriggerIgnored(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	npcMgr := npc.NewManager()
+
+	tmpl := &npc.Template{
+		ID:          "passive_npc",
+		Name:        "Passive NPC",
+		Description: "Does nothing on enter.",
+		Level:       1,
+		MaxHP:       10,
+		AC:          10,
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "smooth_talk",
+				DC:      10,
+				Trigger: "on_enter", // NOT on_greet — should be ignored
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "Wrong trigger fired."},
+				},
+			},
+		},
+	}
+	_, err := npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+
+	npcHandler := NewNPCHandler(npcMgr, sessMgr)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, npcHandler, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	_, err = sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_non_greet",
+		Username:  "Explorer",
+		CharName:  "Explorer",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+
+	msgs := svc.applyNPCSkillChecks("u_non_greet", "room_a")
+	assert.Empty(t, msgs, "expected no messages when NPC has no on_greet triggers")
+}

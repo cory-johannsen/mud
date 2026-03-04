@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
 
 // Abilities holds the six core ability scores for an NPC template.
@@ -39,6 +41,8 @@ type Template struct {
 	Taunts        []string   `yaml:"taunts"`
 	TauntChance   float64    `yaml:"taunt_chance"`
 	TauntCooldown string     `yaml:"taunt_cooldown"`
+	// SkillChecks defines skill check triggers fired when a player greets this NPC.
+	SkillChecks []skillcheck.TriggerDef `yaml:"skill_checks"`
 }
 
 // Validate checks that the template satisfies basic invariants.

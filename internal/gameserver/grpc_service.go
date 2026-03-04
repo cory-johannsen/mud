@@ -797,6 +797,30 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
+	if msgs := s.applyNPCSkillChecks(uid, result.View.RoomId); len(msgs) > 0 {
+		if npcSess, ok := s.sessions.GetPlayer(uid); ok {
+			for _, msg := range msgs {
+				msgEvt := &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_Message{
+						Message: &gamev1.MessageEvent{
+							Content: msg,
+							Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+						},
+					},
+				}
+				data, marshalErr := proto.Marshal(msgEvt)
+				if marshalErr == nil {
+					if pushErr := npcSess.Entity.Push(data); pushErr != nil {
+						s.logger.Warn("pushing NPC skill check message to player entity",
+							zap.String("uid", uid),
+							zap.Error(pushErr),
+						)
+					}
+				}
+			}
+		}
+	}
+
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: result.View},
 	}, nil
@@ -903,6 +927,68 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 				lua.LNumber(trigger.DC),
 				lua.LString(result.Outcome.String()),
 			)
+		}
+	}
+	return msgs
+}
+
+// applyNPCSkillChecks fires on_greet skill check triggers for all NPCs in the room.
+// Returns message strings to send to the player; callers are responsible for delivery.
+//
+// Precondition: uid must be non-empty; roomID must be non-empty.
+// Postcondition: each on_greet TriggerDef on every NPC instance in the room is resolved;
+// deny effects are not applicable for greet and are silently skipped.
+func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []string {
+	if s.npcH == nil {
+		return nil
+	}
+
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil
+	}
+
+	var msgs []string
+	for _, inst := range s.npcH.InstancesInRoom(roomID) {
+		for _, trigger := range inst.SkillChecks {
+			if trigger.Trigger != "on_greet" {
+				continue
+			}
+
+			abilityScore := s.abilityScoreForSkill(sess, trigger.Skill)
+			amod := abilityModFrom(abilityScore)
+			rank := ""
+			if sess.Skills != nil {
+				rank = sess.Skills[trigger.Skill]
+			}
+
+			var roll int
+			if s.dice != nil {
+				roll = s.dice.Src().Intn(20) + 1
+			} else {
+				roll = 10 // neutral fallback when no dice configured
+			}
+
+			result := skillcheck.Resolve(roll, amod, rank, trigger.DC, trigger)
+
+			outcome := trigger.Outcomes.ForOutcome(result.Outcome)
+			if outcome != nil && outcome.Message != "" {
+				msgs = append(msgs, outcome.Message)
+			}
+
+			if s.scriptMgr != nil {
+				var zoneID string
+				if room, roomOk := s.world.GetRoom(sess.RoomID); roomOk {
+					zoneID = room.ZoneID
+				}
+				s.scriptMgr.CallHook(zoneID, "on_skill_check", //nolint:errcheck
+					lua.LString(uid),
+					lua.LString(trigger.Skill),
+					lua.LNumber(result.Total),
+					lua.LNumber(trigger.DC),
+					lua.LString(result.Outcome.String()),
+				)
+			}
 		}
 	}
 	return msgs
