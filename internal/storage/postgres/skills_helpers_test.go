@@ -34,6 +34,7 @@ func testDB(t *testing.T) *pgxpool.Pool {
 	pc := testutil.NewPostgresContainer(t)
 	pc.ApplyMigrations(t)
 	pc.ApplySkillsMigration(t)
+	pc.ApplyFeatsMigration(t)
 	return pc.RawPool
 }
 

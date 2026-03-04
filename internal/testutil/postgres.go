@@ -223,6 +223,27 @@ func (pc *PostgresContainer) ApplySkillsMigration(t *testing.T) {
 	t.Logf("skills migration applied [%s]", time.Since(start))
 }
 
+// ApplyFeatsMigration adds the character_feats table used by migration 012.
+//
+// Precondition: Pool must be connected and ApplyMigrations must have been called.
+// Postcondition: The character_feats table exists in the test database.
+func (pc *PostgresContainer) ApplyFeatsMigration(t *testing.T) {
+	t.Helper()
+	ctx := context.Background()
+	start := time.Now()
+	_, err := pc.RawPool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS character_feats (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			feat_id      TEXT NOT NULL,
+			PRIMARY KEY (character_id, feat_id)
+		);
+	`)
+	if err != nil {
+		t.Fatalf("applying feats migration: %v", err)
+	}
+	t.Logf("feats migration applied [%s]", time.Since(start))
+}
+
 // DSN returns the connection string for the test database.
 func (pc *PostgresContainer) DSN() string {
 	return fmt.Sprintf(
