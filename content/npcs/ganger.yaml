@@ -32,8 +32,14 @@ skill_checks:
         message: "The ganger seems less hostile than usual. He gives you a curt nod."
       failure:
         message: "The ganger sneers. 'Flattery won't save your teeth, outsider.'"
+        effect:
+          type: condition
+          id: distrusted
       crit_failure:
         message: "The ganger takes your approach as a personal insult. His hand moves toward his weapon."
+        effect:
+          type: condition
+          id: distrusted
 loot:
   currency:
     min: 10

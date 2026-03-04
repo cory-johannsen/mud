@@ -51,9 +51,9 @@
     - [x] Class features appear on the character sheet
     - [x] `use <class_feature>` activates an active class feature and displays its `activate_text`
   - [x] **Skill check triggers — Stage 1** (see "Skill Check Triggers" entry above for details)
-  - [ ] **Skill check triggers — Stage 2: NPC `on_greet` and item `on_use` extended effects**
-    - [ ] `condition` effect type wired to the condition system (`ActiveSet.Apply`)
-    - [ ] `reveal` effect type exposes hidden room exits or items
+  - [x] **Skill check triggers — Stage 2: extended effects**
+    - [x] `condition` effect type wired to the condition system (`ActiveSet.Apply`)
+    - [x] `reveal` effect type exposes hidden room exits
   - [ ] **Active feat/class feature mechanics — Stage 3**
     - [ ] Active feats/class features map to a named condition via `condition_id` in YAML
     - [ ] `use <feat>` applies the condition (with `damage_bonus`, `ac_penalty`, etc.) for encounter or timed duration
@@ -65,13 +65,30 @@
     - [ ] `zone_awareness` — removes difficult terrain movement penalty
     - [ ] Lua hook `on_passive_feat_check(uid, feat_id, context)` for custom passive logic
   - [ ] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
+- [ ] Telnet UI upgrades
+  - The screen is sectioned into three segments, from top to bottoms:
+    - Room display
+    - Console
+    - Player input
+  - [ ] Player input
+    - [ ] The player input section must be pinned to the bottom of the screen
+    - [ ] The player input section is composed of two items, the prompt and the player input area
+      - [ ] The prompt must refresh independent of the input section such that the prompt reflects changes without player input.
+    - [ ] Console messages must never overwrite the player input section 
+    - [ ] When a player is prompted to select from a list of items, in addition to selection by number they must be able to use the up/down cursor keys
+  - [ ] Room display
+    - [ ] The room display must always be pinned to the top of the screen 
+    - [ ] The room display contains the output of the `look` command
+    - [ ] The room display must update independent of the console messages and player prompt such that the room state is always up-to-date.
+    - [ ] Console messages must never overwrite the room display
+    - [ ] When a player is in combat the room display must reflect this
 - [ ] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
 - [ ] Character levelling
 - [ ] Job proficiencies, advancement hierarchy, features and drawbacks, cross-job combinations. The proficiencies defined in the content need to be mapped to the rules system. Class features and drawbacks need to be implemented and match the lore (there is no magic, there is instead high technology) 
 - [ ] Equipment mechanics expansion 
   - advanced equipment and equipment levelling
-    - player requirements 
+    - player requirements
     - equipment rarity and features
       - 5 rarity levels 
         - each increases the base equipment stats

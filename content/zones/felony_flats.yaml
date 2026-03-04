@@ -412,8 +412,30 @@ zone:
       target: flats_parking_lot_east
     - direction: west
       target: flats_strip_mall_south
+    - direction: south
+      target: flats_lents_park
+      hidden: true
     map_x: 4
     map_y: 2
+    skill_checks:
+    - skill: wasteland
+      dc: 14
+      trigger: on_enter
+      outcomes:
+        crit_success:
+          message: "Your sharp eye catches a narrow gap between the cinderblock walls — a hidden passage leads south toward the park."
+          effect:
+            type: reveal
+            target: south
+        success:
+          message: "Something catches your eye — there's a concealed passage squeezed between the walls to the south."
+          effect:
+            type: reveal
+            target: south
+        failure:
+          message: "Nothing unusual catches your attention."
+        crit_failure:
+          message: "You're completely oblivious to your surroundings."
     properties:
       lighting: dark
       atmosphere: fetid
