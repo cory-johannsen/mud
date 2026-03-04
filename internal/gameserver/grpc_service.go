@@ -451,6 +451,25 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
+	// Load skills into the session for runtime access (e.g. skill checks).
+	// This runs after the backfill block above so the data is always present.
+	if characterID > 0 && s.characterSkillsRepo != nil {
+		skillMap, loadSkillsErr := s.characterSkillsRepo.GetAll(stream.Context(), characterID)
+		if loadSkillsErr != nil {
+			s.logger.Warn("loading character skills into session",
+				zap.Int64("character_id", characterID),
+				zap.Error(loadSkillsErr),
+			)
+		} else {
+			if sess.Skills == nil {
+				sess.Skills = make(map[string]string)
+			}
+			for id, rank := range skillMap {
+				sess.Skills[id] = rank
+			}
+		}
+	}
+
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
 		Player: charName,

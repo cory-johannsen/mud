@@ -50,6 +50,9 @@ type PlayerSession struct {
 	// AutomapCache holds discovered rooms keyed by zone ID then room ID.
 	// Populated at login from the database; written through on each new discovery.
 	AutomapCache map[string]map[string]bool
+	// Skills maps skill_id to proficiency rank for the active character.
+	// Populated after ensureSkills completes; empty map means all untrained.
+	Skills map[string]string
 }
 
 // Manager tracks all active player sessions and room occupancy.

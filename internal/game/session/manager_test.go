@@ -659,3 +659,24 @@ func TestPlayerSession_AutomapCache_InitializedOnAdd(t *testing.T) {
 	require.NotNil(t, sess.AutomapCache)
 	require.Empty(t, sess.AutomapCache)
 }
+
+func TestPlayerSession_HasSkillsField(t *testing.T) {
+	sess := &PlayerSession{}
+	assert.NotNil(t, sess)
+	sess.Skills = map[string]string{"parkour": "trained"}
+	assert.Equal(t, "trained", sess.Skills["parkour"])
+}
+
+func TestProperty_PlayerSession_SkillsFieldRoundTrip(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		key := rapid.StringMatching(`[a-z_]{1,20}`).Draw(t, "skill_id")
+		rank := rapid.SampledFrom([]string{"untrained", "trained", "expert", "master", "legendary"}).Draw(t, "rank")
+		sess := &PlayerSession{
+			Skills: map[string]string{key: rank},
+		}
+		got := sess.Skills[key]
+		if got != rank {
+			t.Fatalf("Skills[%q] = %q, want %q", key, got, rank)
+		}
+	})
+}
