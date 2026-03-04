@@ -98,3 +98,36 @@ func TestPropertyACBonus_AlwaysNonPositive(t *testing.T) {
 		assert.LessOrEqual(t, bonus, 0, "ACBonus must always be <= 0")
 	})
 }
+
+func TestDamageBonus_ZeroWhenNoConditions(t *testing.T) {
+	s := condition.NewActiveSet()
+	assert.Equal(t, 0, condition.DamageBonus(s))
+}
+
+func TestDamageBonus_AppliedCondition(t *testing.T) {
+	s := condition.NewActiveSet()
+	def := &condition.ConditionDef{
+		ID:           "surge",
+		Name:         "Surge",
+		DamageBonus:  3,
+		DurationType: "encounter",
+		MaxStacks:    0,
+	}
+	err := s.Apply("uid1", def, 1, -1)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, condition.DamageBonus(s))
+}
+
+func TestProperty_DamageBonus_NeverNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		bonus := rapid.IntRange(0, 10).Draw(rt, "bonus")
+		s := condition.NewActiveSet()
+		def := &condition.ConditionDef{
+			ID: "test", Name: "Test", DamageBonus: bonus,
+			DurationType: "permanent", MaxStacks: 0,
+		}
+		_ = s.Apply("uid", def, 1, -1)
+		got := condition.DamageBonus(s)
+		assert.GreaterOrEqual(t, got, 0, "DamageBonus should be non-negative")
+	})
+}

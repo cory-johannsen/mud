@@ -42,6 +42,26 @@ func IsActionRestricted(s *ActiveSet, actionType string) bool {
 	return false
 }
 
+// DamageBonus returns the total damage bonus granted by all active conditions.
+// For stackable conditions, the bonus is multiplied by the current stack count.
+//
+// Precondition: s must not be nil.
+// Postcondition: returns >= 0.
+func DamageBonus(s *ActiveSet) int {
+	total := 0
+	for _, ac := range s.All() {
+		stacks := ac.Stacks
+		if stacks < 1 {
+			stacks = 1
+		}
+		total += ac.Def.DamageBonus * stacks
+	}
+	if total < 0 {
+		total = 0
+	}
+	return total
+}
+
 // StunnedAPReduction returns the number of AP to subtract from the action queue
 // this round due to the stunned condition. Equal to the current stunned stack count.
 //
