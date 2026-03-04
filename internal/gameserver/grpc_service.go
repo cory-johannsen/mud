@@ -22,6 +22,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/scripting"
@@ -742,6 +743,33 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
+	// Fire on_enter skill check triggers for the new room.
+	// Messages are pushed to the player's entity channel so they are delivered
+	// alongside the room-view response via the forwardEvents goroutine.
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		if msgs := s.applyRoomSkillChecks(uid, newRoom); len(msgs) > 0 {
+			for _, msg := range msgs {
+				msgEvt := &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_Message{
+						Message: &gamev1.MessageEvent{
+							Content: msg,
+							Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+						},
+					},
+				}
+				data, marshalErr := proto.Marshal(msgEvt)
+				if marshalErr == nil {
+					if pushErr := sess.Entity.Push(data); pushErr != nil {
+						s.logger.Warn("pushing skill check message to player entity",
+							zap.String("uid", uid),
+							zap.Error(pushErr),
+						)
+					}
+				}
+			}
+		}
+	}
+
 	// Record automap discovery for the new room.
 	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
 		zID := newRoom.ZoneID
@@ -772,6 +800,111 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: result.View},
 	}, nil
+}
+
+// abilityModFrom returns the PF2E-style ability modifier for a given score.
+//
+// Precondition: score is any integer.
+// Postcondition: returns (score-10)/2 for scores >= 10, and (score-11)/2 for scores < 10,
+// matching the standard mathematical floor division for negative values.
+func abilityModFrom(score int) int {
+	if score >= 10 {
+		return (score - 10) / 2
+	}
+	return (score - 11) / 2
+}
+
+// abilityScoreForSkill returns the raw ability score from the session corresponding to
+// the ability linked to the given skill ID.
+//
+// Precondition: sess must be non-nil; skillID must be non-empty.
+// Postcondition: returns the ability score, or 10 (neutral) if the skill is not found in allSkills.
+func (s *GameServiceServer) abilityScoreForSkill(sess *session.PlayerSession, skillID string) int {
+	for _, sk := range s.allSkills {
+		if sk.ID == skillID {
+			switch sk.Ability {
+			case "brutality":
+				return sess.Abilities.Brutality
+			case "grit":
+				return sess.Abilities.Grit
+			case "quickness":
+				return sess.Abilities.Quickness
+			case "reasoning":
+				return sess.Abilities.Reasoning
+			case "savvy":
+				return sess.Abilities.Savvy
+			case "flair":
+				return sess.Abilities.Flair
+			}
+		}
+	}
+	return 10
+}
+
+// applyRoomSkillChecks fires all on_enter skill check triggers for the given room.
+// Returns the outcome message strings to send to the player; callers are responsible for delivery.
+//
+// Precondition: uid must be non-empty; room must be non-nil.
+// Postcondition: each on_enter TriggerDef in room.SkillChecks is resolved; damage effects reduce sess.CurrentHP.
+func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) []string {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil
+	}
+
+	var msgs []string
+	for _, trigger := range room.SkillChecks {
+		if trigger.Trigger != "on_enter" {
+			continue
+		}
+
+		abilityScore := s.abilityScoreForSkill(sess, trigger.Skill)
+		amod := abilityModFrom(abilityScore)
+		rank := ""
+		if sess.Skills != nil {
+			rank = sess.Skills[trigger.Skill]
+		}
+
+		var roll int
+		if s.dice != nil {
+			roll = s.dice.Src().Intn(20) + 1
+		} else {
+			roll = 10 // neutral fallback when no dice configured
+		}
+
+		result := skillcheck.Resolve(roll, amod, rank, trigger.DC, trigger)
+
+		outcome := trigger.Outcomes.ForOutcome(result.Outcome)
+		if outcome != nil {
+			if outcome.Message != "" {
+				msgs = append(msgs, outcome.Message)
+			}
+			if outcome.Effect != nil && outcome.Effect.Type == "damage" && outcome.Effect.Formula != "" && s.dice != nil {
+				dmg, dmgErr := s.dice.RollExpr(outcome.Effect.Formula)
+				if dmgErr == nil {
+					sess.CurrentHP -= dmg.Total()
+					if sess.CurrentHP < 0 {
+						sess.CurrentHP = 0
+					}
+				} else {
+					s.logger.Warn("applyRoomSkillChecks: damage formula error",
+						zap.String("formula", outcome.Effect.Formula),
+						zap.Error(dmgErr),
+					)
+				}
+			}
+		}
+
+		if s.scriptMgr != nil {
+			s.scriptMgr.CallHook(room.ZoneID, "on_skill_check", //nolint:errcheck
+				lua.LString(uid),
+				lua.LString(room.ID),
+				lua.LString(trigger.Skill),
+				lua.LString(result.Outcome.String()),
+			)
+		}
+	}
+	return msgs
 }
 
 func (s *GameServiceServer) handleLook(uid string) (*gamev1.ServerEvent, error) {

@@ -12,12 +12,21 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
+	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
+
+// fixedDiceSource always returns a fixed value for Intn, for deterministic tests.
+type fixedDiceSource struct{ val int }
+
+func (f *fixedDiceSource) Intn(_ int) int { return f.val }
 
 // stubSkillsRepo is an in-memory implementation of CharacterSkillsRepository for testing.
 type stubSkillsRepo struct {
@@ -528,4 +537,219 @@ func TestHandleChar(t *testing.T) {
 	assert.Equal(t, "Battle Cry", sheet.ClassFeatures[0].Name)
 	assert.Equal(t, "warrior", sheet.ClassFeatures[0].Archetype)
 	assert.Equal(t, "soldier", sheet.ClassFeatures[0].Job)
+}
+
+// TestApplyRoomSkillChecks_OnEnter_Success verifies that applyRoomSkillChecks returns the
+// success message when the player rolls high enough.
+//
+// Precondition: room has a parkour on_enter skill check DC 10; player has parkour=trained,
+// Quickness=14 (mod=+2); dice source returns 9 (so roll=10, total=10+2+2=14 >= DC10 → success).
+func TestApplyRoomSkillChecks_OnEnter_Success(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	// Build a room with an on_enter skill check for parkour.
+	room := &world.Room{
+		ID:          "room_skill",
+		ZoneID:      "test",
+		Title:       "Skill Room",
+		Description: "A room requiring parkour.",
+		Exits:       []world.Exit{},
+		Properties:  map[string]string{},
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "parkour",
+				DC:      10,
+				Trigger: "on_enter",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "You vault it."},
+					Failure: &skillcheck.Outcome{Message: "You stumble."},
+				},
+			},
+		},
+	}
+
+	// Fixed dice: Intn(20) always returns 9, so d20 roll = 10.
+	// Quickness=14 → abilityModFrom(14) = (14-10)/2 = 2.
+	// parkour trained → profBonus=2.
+	// total = 10 + 2 + 2 = 14 >= DC 10 → success.
+	src := &fixedDiceSource{val: 9}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	// Register the parkour skill so abilityScoreForSkill can find it.
+	skills := []*ruleset.Skill{
+		{ID: "parkour", Name: "Parkour", Ability: "quickness"},
+	}
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	// Add a player session with Skills and Abilities set.
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_skill",
+		Username:  "Tester",
+		CharName:  "Tester",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{Quickness: 14},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Skills = map[string]string{"parkour": "trained"}
+
+	msgs := svc.applyRoomSkillChecks("u_skill", room)
+	require.Len(t, msgs, 1, "expected exactly one outcome message")
+	assert.Equal(t, "You vault it.", msgs[0])
+}
+
+// TestApplyRoomSkillChecks_OnEnter_Failure verifies that applyRoomSkillChecks returns the
+// failure message when the player rolls too low.
+//
+// Precondition: same room/player setup; dice source returns 0 (roll=1, total=1+2+2=5 < DC10 → failure).
+func TestApplyRoomSkillChecks_OnEnter_Failure(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	room := &world.Room{
+		ID:          "room_skill",
+		ZoneID:      "test",
+		Title:       "Skill Room",
+		Description: "A room requiring parkour.",
+		Exits:       []world.Exit{},
+		Properties:  map[string]string{},
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "parkour",
+				DC:      10,
+				Trigger: "on_enter",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "You vault it."},
+					Failure: &skillcheck.Outcome{Message: "You stumble."},
+				},
+			},
+		},
+	}
+
+	// Fixed dice: Intn(20) returns 0, so d20 roll = 1.
+	// total = 1 + 2 + 2 = 5 < DC 10 → failure.
+	src := &fixedDiceSource{val: 0}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	skills := []*ruleset.Skill{
+		{ID: "parkour", Name: "Parkour", Ability: "quickness"},
+	}
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_skill2",
+		Username:  "Tester2",
+		CharName:  "Tester2",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{Quickness: 14},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Skills = map[string]string{"parkour": "trained"}
+
+	msgs := svc.applyRoomSkillChecks("u_skill2", room)
+	require.Len(t, msgs, 1)
+	assert.Equal(t, "You stumble.", msgs[0])
+}
+
+// TestApplyRoomSkillChecks_NoOnEnterTriggers verifies that non-on_enter triggers are ignored.
+func TestApplyRoomSkillChecks_NoOnEnterTriggers(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	room := &world.Room{
+		ID:          "room_no_trigger",
+		ZoneID:      "test",
+		Title:       "No Trigger Room",
+		Description: "No on_enter checks here.",
+		Exits:       []world.Exit{},
+		Properties:  map[string]string{},
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "parkour",
+				DC:      10,
+				Trigger: "on_use", // different trigger type — must be ignored
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "Used."},
+				},
+			},
+		},
+	}
+
+	src := &fixedDiceSource{val: 19}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_skill3",
+		Username:  "Tester3",
+		CharName:  "Tester3",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+
+	msgs := svc.applyRoomSkillChecks("u_skill3", room)
+	assert.Empty(t, msgs, "on_use trigger must not fire on room enter")
+}
+
+// TestAbilityModFrom verifies the ability modifier calculation.
+func TestAbilityModFrom(t *testing.T) {
+	cases := []struct {
+		score    int
+		expected int
+	}{
+		{10, 0},
+		{11, 0},
+		{12, 1},
+		{14, 2},
+		{18, 4},
+		{9, -1},
+		{8, -1},
+		{7, -2},
+		{6, -2},
+		{1, -5},
+	}
+	for _, tc := range cases {
+		got := abilityModFrom(tc.score)
+		assert.Equal(t, tc.expected, got, "abilityModFrom(%d)", tc.score)
+	}
 }
