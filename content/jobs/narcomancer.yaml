@@ -25,3 +25,10 @@ skills:
       - scavenging
       - conspiracy
       - smooth_talk
+feats:
+  general_count: 1
+  fixed:
+    - quick_bomb
+  choices:
+    pool: [variable_load, field_identify]
+    count: 1

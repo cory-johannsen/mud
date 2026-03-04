@@ -23,3 +23,10 @@ skills:
       - hard_look
       - intel
       - scavenging
+feats:
+  general_count: 1
+  fixed:
+    - mark_target
+  choices:
+    pool: [known_weakness, rapid_shot]
+    count: 1

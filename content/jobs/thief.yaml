@@ -23,3 +23,10 @@ skills:
       - hustle
       - scavenging
       - tech_lore
+feats:
+  general_count: 1
+  fixed:
+    - quick_dodge
+  choices:
+    pool: [plant_evidence, twin_strike]
+    count: 1

@@ -22,3 +22,10 @@ skills:
       - ghosting
       - rep
       - parkour
+feats:
+  general_count: 1
+  fixed:
+    - mark_target
+  choices:
+    pool: [share_intel, field_study]
+    count: 1

@@ -22,3 +22,10 @@ skills:
       - smooth_talk
       - ghosting
       - scavenging
+feats:
+  general_count: 1
+  fixed:
+    - defensive_stance
+  choices:
+    pool: [dirty_strike, stunning_strike]
+    count: 1

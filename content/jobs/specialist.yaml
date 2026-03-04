@@ -25,3 +25,10 @@ skills:
       - parkour
       - hard_look
       - wasteland
+feats:
+  general_count: 1
+  fixed:
+    - snap_shot
+  choices:
+    pool: [cover_fire, dual_draw]
+    count: 1

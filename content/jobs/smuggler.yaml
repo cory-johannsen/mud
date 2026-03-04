@@ -24,3 +24,10 @@ skills:
       - hustle
       - factions
       - wasteland
+feats:
+  general_count: 1
+  fixed:
+    - quick_dodge
+  choices:
+    pool: [plant_evidence, tumble_behind]
+    count: 1

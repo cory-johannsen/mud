@@ -23,3 +23,10 @@ skills:
       - patch_job
       - rigging
       - intel
+feats:
+  general_count: 1
+  fixed:
+    - animal_companion_drifter
+  choices:
+    pool: [mark_target, field_study]
+    count: 1

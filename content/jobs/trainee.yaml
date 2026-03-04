@@ -25,3 +25,9 @@ skills:
       - ghosting
       - factions
       - tech_lore
+feats:
+  general_count: 1
+  fixed: []
+  choices:
+    pool: [brutal_charge, reactive_block, cover_fire]
+    count: 1

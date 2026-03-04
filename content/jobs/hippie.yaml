@@ -22,3 +22,10 @@ skills:
       - patch_job
       - rep
       - conspiracy
+feats:
+  general_count: 1
+  fixed:
+    - research_focus
+  choices:
+    pool: [field_identify, variable_load]
+    count: 1

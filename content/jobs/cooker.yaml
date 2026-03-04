@@ -23,3 +23,10 @@ skills:
       - patch_job
       - conspiracy
       - hustle
+feats:
+  general_count: 1
+  fixed:
+    - quick_bomb
+  choices:
+    pool: [field_identify, variable_load]
+    count: 1

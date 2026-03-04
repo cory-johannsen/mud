@@ -22,3 +22,10 @@ skills:
       - parkour
       - grift
       - intel
+feats:
+  general_count: 1
+  fixed:
+    - trap_eye
+  choices:
+    pool: [quick_dodge, tumble_behind]
+    count: 1

@@ -23,3 +23,10 @@ skills:
       - scavenging
       - ghosting
       - rigging
+feats:
+  general_count: 1
+  fixed:
+    - defensive_stance
+  choices:
+    pool: [dirty_strike, read_the_room]
+    count: 1

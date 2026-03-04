@@ -22,3 +22,10 @@ skills:
       - ghosting
       - wasteland
       - intel
+feats:
+  general_count: 1
+  fixed:
+    - plant_evidence
+  choices:
+    pool: [quick_dodge, tumble_behind]
+    count: 1

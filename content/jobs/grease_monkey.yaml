@@ -22,3 +22,10 @@ skills:
       - muscle
       - patch_job
       - wasteland
+feats:
+  general_count: 1
+  fixed:
+    - jury_rig
+  choices:
+    pool: [quick_bomb, field_identify]
+    count: 1

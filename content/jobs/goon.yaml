@@ -23,3 +23,10 @@ skills:
       - grift
       - parkour
       - gang_codes
+feats:
+  general_count: 1
+  fixed:
+    - raw_intensity
+  choices:
+    pool: [reach_influence, crowd_performer]
+    count: 1

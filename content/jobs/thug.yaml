@@ -24,3 +24,10 @@ skills:
       - grift
       - ghosting
       - gang_codes
+feats:
+  general_count: 1
+  fixed:
+    - raging_threat
+  choices:
+    pool: [brutal_charge, overpower]
+    count: 1

@@ -24,3 +24,10 @@ skills:
       - parkour
       - grift
       - wasteland
+feats:
+  general_count: 1
+  fixed:
+    - snap_shot
+  choices:
+    pool: [cover_fire, combat_read]
+    count: 1

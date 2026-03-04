@@ -22,3 +22,10 @@ skills:
       - patch_job
       - intel
       - wasteland
+feats:
+  general_count: 1
+  fixed:
+    - jury_rig
+  choices:
+    pool: [tamper, research_focus]
+    count: 1

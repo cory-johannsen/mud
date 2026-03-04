@@ -23,3 +23,10 @@ skills:
       - rigging
       - parkour
       - patch_job
+feats:
+  general_count: 1
+  fixed:
+    - overpower
+  choices:
+    pool: [brutal_charge, reactive_block]
+    count: 1

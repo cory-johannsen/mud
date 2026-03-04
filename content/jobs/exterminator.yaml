@@ -22,3 +22,10 @@ skills:
       - patch_job
       - ghosting
       - tech_lore
+feats:
+  general_count: 1
+  fixed:
+    - dirty_strike
+  choices:
+    pool: [defensive_stance, stunning_strike]
+    count: 1

@@ -22,3 +22,10 @@ skills:
       - factions
       - ghosting
       - conspiracy
+feats:
+  general_count: 1
+  fixed:
+    - field_identify
+  choices:
+    pool: [research_focus, tamper]
+    count: 1

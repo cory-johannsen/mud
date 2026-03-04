@@ -27,3 +27,10 @@ skills:
       - parkour
       - factions
       - ghosting
+feats:
+  general_count: 1
+  fixed:
+    - youre_next
+  choices:
+    pool: [quick_dodge, twin_strike]
+    count: 1

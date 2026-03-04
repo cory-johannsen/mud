@@ -22,3 +22,10 @@ skills:
       - hustle
       - smooth_talk
       - grift
+feats:
+  general_count: 1
+  fixed:
+    - raw_intensity
+  choices:
+    pool: [reach_influence, street_knowledge]
+    count: 1

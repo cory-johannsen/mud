@@ -24,3 +24,10 @@ skills:
       - wasteland
       - scavenging
       - grift
+feats:
+  general_count: 1
+  fixed:
+    - brutal_charge
+  choices:
+    pool: [dual_draw, overpower]
+    count: 1

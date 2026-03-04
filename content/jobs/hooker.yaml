@@ -23,3 +23,10 @@ skills:
       - grift
       - rep
       - ghosting
+feats:
+  general_count: 1
+  fixed:
+    - overextend
+  choices:
+    pool: [quick_dodge, flying_blade]
+    count: 1

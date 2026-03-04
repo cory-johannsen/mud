@@ -22,3 +22,10 @@ skills:
       - hard_look
       - grift
       - parkour
+feats:
+  general_count: 1
+  fixed:
+    - crowd_performer
+  choices:
+    pool: [raw_intensity, sustained_presence]
+    count: 1

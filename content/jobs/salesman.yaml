@@ -22,3 +22,10 @@ skills:
       - factions
       - rep
       - intel
+feats:
+  general_count: 1
+  fixed:
+    - read_the_room
+  choices:
+    pool: [root_to_life, dirty_strike]
+    count: 1

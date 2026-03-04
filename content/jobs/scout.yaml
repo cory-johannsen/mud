@@ -24,3 +24,10 @@ skills:
       - intel
       - scavenging
       - hard_look
+feats:
+  general_count: 1
+  fixed:
+    - rapid_shot
+  choices:
+    pool: [mark_target, field_study]
+    count: 1

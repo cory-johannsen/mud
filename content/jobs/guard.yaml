@@ -24,3 +24,10 @@ skills:
       - gang_codes
       - parkour
       - ghosting
+feats:
+  general_count: 1
+  fixed:
+    - reactive_block
+  choices:
+    pool: [cover_fire, combat_read]
+    count: 1

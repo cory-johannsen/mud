@@ -25,3 +25,10 @@ skills:
       - factions
       - rep
       - intel
+feats:
+  general_count: 1
+  fixed:
+    - plant_evidence
+  choices:
+    pool: [overextend, quick_dodge]
+    count: 1

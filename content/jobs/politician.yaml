@@ -22,3 +22,10 @@ skills:
       - hustle
       - intel
       - conspiracy
+feats:
+  general_count: 1
+  fixed:
+    - crowd_performer
+  choices:
+    pool: [sustained_presence, reach_influence]
+    count: 1

@@ -26,3 +26,10 @@ skills:
       - ghosting
       - wasteland
       - scavenging
+feats:
+  general_count: 1
+  fixed:
+    - cover_fire
+  choices:
+    pool: [hit_the_dirt, combat_read]
+    count: 1

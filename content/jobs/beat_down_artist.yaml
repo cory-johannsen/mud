@@ -23,3 +23,10 @@ skills:
       - ghosting
       - rep
       - scavenging
+feats:
+  general_count: 1
+  fixed:
+    - brutal_charge
+  choices:
+    pool: [overpower, adrenaline_surge]
+    count: 1

@@ -33,3 +33,10 @@ skills:
       - ghosting
       - grift
       - scavenging
+feats:
+  general_count: 1
+  fixed:
+    - cover_fire
+  choices:
+    pool: [dual_draw, hit_the_dirt]
+    count: 1

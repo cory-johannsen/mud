@@ -26,3 +26,10 @@ skills:
       - factions
       - ghosting
       - conspiracy
+feats:
+  general_count: 1
+  fixed:
+    - street_knowledge
+  choices:
+    pool: [crowd_performer, reach_influence]
+    count: 1

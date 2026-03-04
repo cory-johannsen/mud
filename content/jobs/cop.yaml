@@ -24,3 +24,10 @@ skills:
       - intel
       - muscle
       - ghosting
+feats:
+  general_count: 1
+  fixed:
+    - mark_target
+  choices:
+    pool: [field_study, known_weakness]
+    count: 1

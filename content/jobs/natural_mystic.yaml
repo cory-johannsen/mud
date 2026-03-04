@@ -23,3 +23,10 @@ skills:
       - conspiracy
       - intel
       - smooth_talk
+feats:
+  general_count: 1
+  fixed:
+    - research_focus
+  choices:
+    pool: [field_identify, variable_load]
+    count: 1

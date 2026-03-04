@@ -22,3 +22,10 @@ skills:
       - rigging
       - smooth_talk
       - wasteland
+feats:
+  general_count: 1
+  fixed:
+    - root_to_life
+  choices:
+    pool: [read_the_room, dirty_strike]
+    count: 1

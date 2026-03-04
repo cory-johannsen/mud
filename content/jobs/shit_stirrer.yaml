@@ -23,3 +23,10 @@ skills:
       - factions
       - hustle
       - hard_look
+feats:
+  general_count: 1
+  fixed:
+    - raw_intensity
+  choices:
+    pool: [street_knowledge, reach_influence]
+    count: 1

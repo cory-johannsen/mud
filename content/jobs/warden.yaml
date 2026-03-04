@@ -23,3 +23,10 @@ skills:
       - patch_job
       - intel
       - ghosting
+feats:
+  general_count: 1
+  fixed:
+    - mark_target
+  choices:
+    pool: [rapid_shot, field_study]
+    count: 1

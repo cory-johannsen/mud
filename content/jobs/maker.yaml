@@ -22,3 +22,10 @@ skills:
       - patch_job
       - hustle
       - intel
+feats:
+  general_count: 1
+  fixed:
+    - read_the_room
+  choices:
+    pool: [dirty_strike, defensive_stance]
+    count: 1

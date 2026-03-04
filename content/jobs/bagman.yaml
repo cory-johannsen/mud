@@ -22,3 +22,10 @@ skills:
       - smooth_talk
       - ghosting
       - intel
+feats:
+  general_count: 1
+  fixed:
+    - mark_target
+  choices:
+    pool: [known_weakness, share_intel]
+    count: 1

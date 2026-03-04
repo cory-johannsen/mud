@@ -33,3 +33,10 @@ skills:
       - ghosting
       - grift
       - scavenging
+feats:
+  general_count: 1
+  fixed:
+    - brutal_charge
+  choices:
+    pool: [reactive_block, overpower]
+    count: 1

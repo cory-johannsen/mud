@@ -22,3 +22,10 @@ skills:
       - hustle
       - conspiracy
       - rep
+feats:
+  general_count: 1
+  fixed:
+    - reach_influence
+  choices:
+    pool: [street_knowledge, crowd_performer]
+    count: 1

@@ -23,3 +23,10 @@ skills:
       - factions
       - hard_look
       - gang_codes
+feats:
+  general_count: 1
+  fixed:
+    - read_the_room
+  choices:
+    pool: [root_to_life, defensive_stance]
+    count: 1

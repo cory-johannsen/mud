@@ -23,3 +23,10 @@ skills:
       - factions
       - hard_look
       - gang_codes
+feats:
+  general_count: 1
+  fixed:
+    - crowd_performer
+  choices:
+    pool: [sustained_presence, street_knowledge]
+    count: 1

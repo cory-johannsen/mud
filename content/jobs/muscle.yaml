@@ -23,3 +23,10 @@ skills:
       - grift
       - ghosting
       - gang_codes
+feats:
+  general_count: 1
+  fixed:
+    - twin_strike
+  choices:
+    pool: [quick_dodge, youre_next]
+    count: 1

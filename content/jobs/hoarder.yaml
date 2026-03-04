@@ -22,3 +22,10 @@ skills:
       - wasteland
       - rigging
       - patch_job
+feats:
+  general_count: 1
+  fixed:
+    - field_identify
+  choices:
+    pool: [research_focus, jury_rig]
+    count: 1

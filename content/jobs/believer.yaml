@@ -25,3 +25,10 @@ skills:
       - hard_look
       - rep
       - conspiracy
+feats:
+  general_count: 1
+  fixed:
+    - research_focus
+  choices:
+    pool: [field_identify, tamper]
+    count: 1

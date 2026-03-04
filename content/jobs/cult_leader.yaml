@@ -25,3 +25,10 @@ skills:
       - hard_look
       - conspiracy
       - factions
+feats:
+  general_count: 1
+  fixed:
+    - read_the_room
+  choices:
+    pool: [dirty_strike, root_to_life]
+    count: 1

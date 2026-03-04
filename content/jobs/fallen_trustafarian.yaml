@@ -25,3 +25,10 @@ skills:
       - hustle
       - grift
       - hard_look
+feats:
+  general_count: 1
+  fixed:
+    - street_knowledge
+  choices:
+    pool: [crowd_performer, sustained_presence]
+    count: 1

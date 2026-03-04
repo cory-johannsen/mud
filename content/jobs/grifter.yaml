@@ -22,3 +22,10 @@ skills:
       - ghosting
       - factions
       - rep
+feats:
+  general_count: 1
+  fixed:
+    - overextend
+  choices:
+    pool: [quick_dodge, plant_evidence]
+    count: 1

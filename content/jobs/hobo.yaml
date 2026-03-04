@@ -23,3 +23,10 @@ skills:
       - hustle
       - parkour
       - smooth_talk
+feats:
+  general_count: 1
+  fixed:
+    - quick_dodge
+  choices:
+    pool: [tumble_behind, plant_evidence]
+    count: 1

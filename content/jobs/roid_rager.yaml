@@ -25,3 +25,10 @@ skills:
       - rep
       - gang_codes
       - ghosting
+feats:
+  general_count: 1
+  fixed:
+    - adrenaline_surge
+  choices:
+    pool: [brutal_charge, overpower]
+    count: 1

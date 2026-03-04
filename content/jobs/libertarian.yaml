@@ -26,3 +26,10 @@ skills:
       - intel
       - conspiracy
       - hard_look
+feats:
+  general_count: 1
+  fixed:
+    - street_knowledge
+  choices:
+    pool: [reach_influence, raw_intensity]
+    count: 1

@@ -23,3 +23,10 @@ skills:
       - scavenging
       - rigging
       - intel
+feats:
+  general_count: 1
+  fixed:
+    - defensive_stance
+  choices:
+    pool: [read_the_room, dirty_strike]
+    count: 1

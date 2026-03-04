@@ -23,3 +23,10 @@ skills:
       - hustle
       - hard_look
       - conspiracy
+feats:
+  general_count: 1
+  fixed:
+    - reach_influence
+  choices:
+    pool: [raw_intensity, crowd_performer]
+    count: 1

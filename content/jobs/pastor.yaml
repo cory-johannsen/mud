@@ -25,3 +25,10 @@ skills:
       - factions
       - hard_look
       - conspiracy
+feats:
+  general_count: 1
+  fixed:
+    - research_focus
+  choices:
+    pool: [field_identify, jury_rig]
+    count: 1

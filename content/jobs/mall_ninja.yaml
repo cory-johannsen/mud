@@ -23,3 +23,10 @@ skills:
       - grift
       - ghosting
       - tech_lore
+feats:
+  general_count: 1
+  fixed:
+    - dual_draw
+  choices:
+    pool: [cover_fire, snap_shot]
+    count: 1

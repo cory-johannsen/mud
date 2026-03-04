@@ -22,3 +22,10 @@ skills:
       - hustle
       - conspiracy
       - rep
+feats:
+  general_count: 1
+  fixed:
+    - research_focus
+  choices:
+    pool: [field_identify, tamper]
+    count: 1

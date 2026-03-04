@@ -22,3 +22,10 @@ skills:
       - ghosting
       - wasteland
       - scavenging
+feats:
+  general_count: 1
+  fixed:
+    - brutal_charge
+  choices:
+    pool: [reactive_block, cover_fire]
+    count: 1
