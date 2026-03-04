@@ -2227,53 +2227,83 @@ func (s *GameServiceServer) handleInteract(uid, instanceID string) (*gamev1.Serv
 //
 // Precondition: uid must resolve to an active session with a loaded character.
 // Postcondition: Returns a ServerEvent with UseResponse.
-func (s *GameServiceServer) handleUse(uid, featID string) (*gamev1.ServerEvent, error) {
+// handleUse activates an active feat or class feature for the player, or lists all available active abilities.
+//
+// Precondition: uid must resolve to an active session with a loaded character.
+// Postcondition: Returns a ServerEvent with UseResponse containing choices or an activation message.
+func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
-	if s.characterFeatsRepo == nil || s.featRegistry == nil {
-		return messageEvent("Feat data is not available."), nil
-	}
-	featIDs, err := s.characterFeatsRepo.GetAll(context.Background(), sess.CharacterID)
-	if err != nil {
-		return nil, fmt.Errorf("getting feats for use: %w", err)
+
+	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil {
+		return messageEvent("Ability data is not available."), nil
 	}
 
-	// Collect active feats this character holds.
-	var active []*ruleset.Feat
-	for _, id := range featIDs {
-		f, ok := s.featRegistry.Feat(id)
-		if ok && f.Active {
-			active = append(active, f)
+	ctx := context.Background()
+	var active []*gamev1.FeatEntry
+
+	// Collect active feats
+	if s.characterFeatsRepo != nil && s.featRegistry != nil {
+		featIDs, err := s.characterFeatsRepo.GetAll(ctx, sess.CharacterID)
+		if err != nil {
+			return nil, fmt.Errorf("getting feats for use: %w", err)
 		}
-	}
-
-	if featID == "" {
-		// Return list of active feats for the client to prompt selection.
-		entries := make([]*gamev1.FeatEntry, len(active))
-		for i, f := range active {
-			entries[i] = &gamev1.FeatEntry{
-				FeatId: f.ID, Name: f.Name, Category: f.Category,
-				Active: f.Active, Description: f.Description, ActivateText: f.ActivateText,
+		for _, id := range featIDs {
+			f, ok := s.featRegistry.Feat(id)
+			if ok && f.Active {
+				active = append(active, &gamev1.FeatEntry{
+					FeatId:       f.ID,
+					Name:         f.Name,
+					Category:     f.Category,
+					Active:       f.Active,
+					Description:  f.Description,
+					ActivateText: f.ActivateText,
+				})
 			}
 		}
+	}
+
+	// Collect active class features (appended to same list as feats)
+	if s.characterClassFeaturesRepo != nil && s.classFeatureRegistry != nil {
+		cfIDs, err := s.characterClassFeaturesRepo.GetAll(ctx, sess.CharacterID)
+		if err != nil {
+			return nil, fmt.Errorf("getting class features for use: %w", err)
+		}
+		for _, id := range cfIDs {
+			cf, ok := s.classFeatureRegistry.ClassFeature(id)
+			if ok && cf.Active {
+				active = append(active, &gamev1.FeatEntry{
+					FeatId:       cf.ID,
+					Name:         cf.Name,
+					Category:     "class_feature",
+					Active:       cf.Active,
+					Description:  cf.Description,
+					ActivateText: cf.ActivateText,
+				})
+			}
+		}
+	}
+
+	if abilityID == "" {
+		// Return list of all active abilities for the client to prompt selection.
 		return &gamev1.ServerEvent{
 			Payload: &gamev1.ServerEvent_UseResponse{
-				UseResponse: &gamev1.UseResponse{Choices: entries},
+				UseResponse: &gamev1.UseResponse{Choices: active},
 			},
 		}, nil
 	}
 
-	// Activate the named feat.
-	for _, f := range active {
-		if strings.EqualFold(f.ID, featID) || strings.EqualFold(f.Name, featID) {
+	// Activate the named ability (feat or class feature).
+	for _, entry := range active {
+		if strings.EqualFold(entry.FeatId, abilityID) || strings.EqualFold(entry.Name, abilityID) {
 			return &gamev1.ServerEvent{
 				Payload: &gamev1.ServerEvent_UseResponse{
-					UseResponse: &gamev1.UseResponse{Message: f.ActivateText},
+					UseResponse: &gamev1.UseResponse{Message: entry.ActivateText},
 				},
 			}, nil
 		}
 	}
-	return messageEvent(fmt.Sprintf("You don't have an active feat named %q.", featID)), nil
+	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
 }
