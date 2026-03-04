@@ -46,6 +46,13 @@ func TestBuildClassFeaturesFromJob_EmptyGrants(t *testing.T) {
 	}
 }
 
+func TestBuildClassFeaturesFromJob_NilJob(t *testing.T) {
+	result := character.BuildClassFeaturesFromJob(nil)
+	if result != nil {
+		t.Errorf("expected nil for nil job, got %v", result)
+	}
+}
+
 func TestCharacter_HasClassFeaturesField(t *testing.T) {
 	// This test verifies ClassFeatures field exists on Character
 	c := &character.Character{

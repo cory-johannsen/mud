@@ -155,10 +155,10 @@ func BuildFeatsFromJob(job *ruleset.Job, chosen []string, generalChosen []string
 // BuildClassFeaturesFromJob returns all class feature IDs granted by the job.
 // All grants are fixed; no player selection required.
 //
-// Precondition: job must be non-nil.
-// Postcondition: Returns a slice of feature IDs (may be empty if job has none).
+// Precondition: job may be nil (returns nil in that case).
+// Postcondition: Returns a slice of feature IDs (may be nil if job is nil or has no grants).
 func BuildClassFeaturesFromJob(job *ruleset.Job) []string {
-	if len(job.ClassFeatureGrants) == 0 {
+	if job == nil || len(job.ClassFeatureGrants) == 0 {
 		return nil
 	}
 	result := make([]string, len(job.ClassFeatureGrants))
