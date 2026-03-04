@@ -21,6 +21,7 @@ type Feat struct {
 	PF2E         string `yaml:"pf2e"`
 	Active       bool   `yaml:"active"`
 	ActivateText string `yaml:"activate_text"`
+	ConditionID  string `yaml:"condition_id"` // optional; non-empty means Use applies this condition
 	Description  string `yaml:"description"`
 }
 

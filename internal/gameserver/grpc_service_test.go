@@ -1623,3 +1623,206 @@ func TestProperty_ApplySkillCheckEffect_Reveal(t *testing.T) {
 		}
 	})
 }
+
+// TestHandleUse_AppliesConditionWhenConditionIDSet verifies that when an active feat has a non-empty
+// ConditionID and the condRegistry contains that condition, calling handleUse applies the condition
+// to the player session.
+//
+// Precondition: condRegistry contains "surge_active" (DurationType: "encounter", DamageBonus: 2).
+// Player has feat "power-surge" with Active=true, ConditionID="surge_active".
+// Postcondition: sess.Conditions.Has("surge_active") == true and response contains ActivateText.
+func TestHandleUse_AppliesConditionWhenConditionIDSet(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	condReg := condition.NewRegistry()
+	condReg.Register(&condition.ConditionDef{
+		ID:           "surge_active",
+		Name:         "Power Surge",
+		DurationType: "encounter",
+		DamageBonus:  2,
+	})
+
+	feat := &ruleset.Feat{
+		ID:           "power-surge",
+		Name:         "Power Surge",
+		Active:       true,
+		ActivateText: "You surge with power!",
+		ConditionID:  "surge_active",
+	}
+	featRegistry := ruleset.NewFeatRegistry([]*ruleset.Feat{feat})
+	featsRepo := &stubFeatsRepo{
+		data: map[int64][]string{
+			0: {"power-surge"},
+		},
+	}
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil,
+		[]*ruleset.Feat{feat}, featRegistry, featsRepo,
+		nil, nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_use_cond",
+		Username: "Hero",
+		CharName: "Hero",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+
+	event, err := svc.handleUse("u_use_cond", "power-surge")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+
+	useResp := event.GetUseResponse()
+	require.NotNil(t, useResp, "expected UseResponse")
+	assert.Equal(t, "You surge with power!", useResp.Message)
+
+	assert.True(t, sess.Conditions.Has("surge_active"), "expected surge_active condition to be applied")
+}
+
+// TestHandleUse_NoConditionAppliedWhenConditionIDEmpty verifies that when an active feat has an
+// empty ConditionID, calling handleUse does not apply any condition to the player session.
+//
+// Precondition: Player has feat "quick-strike" with Active=true, ConditionID="" (empty).
+// Postcondition: sess.Conditions is empty (no conditions applied).
+func TestHandleUse_NoConditionAppliedWhenConditionIDEmpty(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	feat := &ruleset.Feat{
+		ID:           "quick-strike",
+		Name:         "Quick Strike",
+		Active:       true,
+		ActivateText: "You strike quickly!",
+		ConditionID:  "",
+	}
+	featRegistry := ruleset.NewFeatRegistry([]*ruleset.Feat{feat})
+	featsRepo := &stubFeatsRepo{
+		data: map[int64][]string{
+			0: {"quick-strike"},
+		},
+	}
+
+	condReg := condition.NewRegistry()
+	condReg.Register(&condition.ConditionDef{
+		ID:           "some_condition",
+		Name:         "Some Condition",
+		DurationType: "encounter",
+	})
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil,
+		[]*ruleset.Feat{feat}, featRegistry, featsRepo,
+		nil, nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_use_no_cond",
+		Username: "Rogue",
+		CharName: "Rogue",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+
+	event, err := svc.handleUse("u_use_no_cond", "quick-strike")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+
+	useResp := event.GetUseResponse()
+	require.NotNil(t, useResp, "expected UseResponse")
+	assert.Equal(t, "You strike quickly!", useResp.Message)
+
+	assert.Empty(t, sess.Conditions.All(), "expected no conditions applied when ConditionID is empty")
+}
+
+// TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied is a property test verifying that
+// when a feat's ConditionID is empty, no condition is ever applied regardless of condRegistry contents.
+//
+// Precondition: feat has Active=true, ConditionID="" (always empty).
+// Postcondition: sess.Conditions.All() is always empty after handleUse.
+func TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		condID := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz_"))).Draw(rt, "condID")
+
+		worldMgr, sessMgr := testWorldAndSession(t)
+		logger := zaptest.NewLogger(t)
+
+		feat := &ruleset.Feat{
+			ID:           "prop-feat",
+			Name:         "Prop Feat",
+			Active:       true,
+			ActivateText: "Activated.",
+			ConditionID:  "", // always empty
+		}
+		featRegistry := ruleset.NewFeatRegistry([]*ruleset.Feat{feat})
+		featsRepo := &stubFeatsRepo{
+			data: map[int64][]string{
+				0: {"prop-feat"},
+			},
+		}
+
+		// Populate registry with condID so it exists but should never be applied.
+		condReg := condition.NewRegistry()
+		if condID != "" {
+			condReg.Register(&condition.ConditionDef{
+				ID:           condID,
+				Name:         condID,
+				DurationType: "encounter",
+			})
+		}
+
+		svc := NewGameServiceServer(
+			worldMgr, sessMgr,
+			command.DefaultRegistry(),
+			NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+			NewChatHandler(sessMgr),
+			logger,
+			nil, nil, nil, nil, nil, nil,
+			nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+			nil, nil,
+			[]*ruleset.Feat{feat}, featRegistry, featsRepo,
+			nil, nil, nil,
+		)
+
+		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID:      "prop_uid_use",
+			Username: "Tester",
+			CharName: "Tester",
+			RoomID:   "room_a",
+			Role:     "player",
+		})
+		if err != nil {
+			rt.Skip()
+		}
+		sess.Conditions = condition.NewActiveSet()
+
+		_, err = svc.handleUse("prop_uid_use", "prop-feat")
+		if err != nil {
+			rt.Fatal("handleUse returned unexpected error:", err)
+		}
+
+		if len(sess.Conditions.All()) != 0 {
+			rt.Fatalf("expected no conditions applied when ConditionID is empty, got %d conditions", len(sess.Conditions.All()))
+		}
+	})
+}

@@ -2703,13 +2703,73 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 	}
 
 	// Activate the named ability (feat or class feature).
-	for _, entry := range active {
-		if strings.EqualFold(entry.FeatId, abilityID) || strings.EqualFold(entry.Name, abilityID) {
-			return &gamev1.ServerEvent{
-				Payload: &gamev1.ServerEvent_UseResponse{
-					UseResponse: &gamev1.UseResponse{Message: entry.ActivateText},
-				},
-			}, nil
+	// Search feats first, then class features, to obtain ConditionID for condition application.
+	if s.characterFeatsRepo != nil && s.featRegistry != nil {
+		featIDs, err := s.characterFeatsRepo.GetAll(ctx, sess.CharacterID)
+		if err != nil {
+			return nil, fmt.Errorf("getting feats for activation: %w", err)
+		}
+		for _, id := range featIDs {
+			f, ok := s.featRegistry.Feat(id)
+			if !ok || !f.Active {
+				continue
+			}
+			if strings.EqualFold(f.ID, abilityID) || strings.EqualFold(f.Name, abilityID) {
+				condID := f.ConditionID
+				if condID != "" && sess.Conditions != nil && s.condRegistry != nil {
+					if def, ok := s.condRegistry.Get(condID); ok {
+						if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
+							s.logger.Warn("failed to apply feat condition",
+								zap.String("condition_id", condID),
+								zap.Error(err),
+							)
+						}
+					} else {
+						s.logger.Warn("feat condition not found in registry",
+							zap.String("condition_id", condID),
+						)
+					}
+				}
+				return &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_UseResponse{
+						UseResponse: &gamev1.UseResponse{Message: f.ActivateText},
+					},
+				}, nil
+			}
+		}
+	}
+	if s.characterClassFeaturesRepo != nil && s.classFeatureRegistry != nil {
+		cfIDs, err := s.characterClassFeaturesRepo.GetAll(ctx, sess.CharacterID)
+		if err != nil {
+			return nil, fmt.Errorf("getting class features for activation: %w", err)
+		}
+		for _, id := range cfIDs {
+			cf, ok := s.classFeatureRegistry.ClassFeature(id)
+			if !ok || !cf.Active {
+				continue
+			}
+			if strings.EqualFold(cf.ID, abilityID) || strings.EqualFold(cf.Name, abilityID) {
+				condID := cf.ConditionID
+				if condID != "" && sess.Conditions != nil && s.condRegistry != nil {
+					if def, ok := s.condRegistry.Get(condID); ok {
+						if err := sess.Conditions.Apply(sess.UID, def, 1, -1); err != nil {
+							s.logger.Warn("failed to apply class feature condition",
+								zap.String("condition_id", condID),
+								zap.Error(err),
+							)
+						}
+					} else {
+						s.logger.Warn("class feature condition not found in registry",
+							zap.String("condition_id", condID),
+						)
+					}
+				}
+				return &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_UseResponse{
+						UseResponse: &gamev1.UseResponse{Message: cf.ActivateText},
+					},
+				}, nil
+			}
 		}
 	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
