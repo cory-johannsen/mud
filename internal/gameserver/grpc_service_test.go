@@ -14,6 +14,7 @@ import (
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
@@ -1334,4 +1335,24 @@ func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
 
 	// Intn(4)=0 → dice result=1; damage total=1; 10-1=9.
 	assert.Equal(t, 9, sess.CurrentHP, "CurrentHP must be reduced by the NPC on_greet damage effect")
+}
+
+// TestProperty_AbilityModFrom_MatchesFloor verifies that abilityModFrom matches
+// the floor((score-10)/2) reference formula for all scores in [-10, 30].
+func TestProperty_AbilityModFrom_MatchesFloor(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		score := rapid.IntRange(-10, 30).Draw(rt, "score")
+		got := abilityModFrom(score)
+		// Reference: floor((score-10) / 2)
+		n := score - 10
+		var want int
+		if n < 0 && n%2 != 0 {
+			want = n/2 - 1
+		} else {
+			want = n / 2
+		}
+		if got != want {
+			rt.Fatalf("abilityModFrom(%d) = %d, want %d", score, got, want)
+		}
+	})
 }

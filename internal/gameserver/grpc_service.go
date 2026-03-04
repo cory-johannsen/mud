@@ -903,20 +903,7 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 			if outcome.Message != "" {
 				msgs = append(msgs, outcome.Message)
 			}
-			if outcome.Effect != nil && outcome.Effect.Type == "damage" && outcome.Effect.Formula != "" && s.dice != nil {
-				dmg, dmgErr := s.dice.RollExpr(outcome.Effect.Formula)
-				if dmgErr == nil {
-					sess.CurrentHP -= dmg.Total()
-					if sess.CurrentHP < 0 {
-						sess.CurrentHP = 0
-					}
-				} else {
-					s.logger.Warn("applyRoomSkillChecks: damage formula error",
-						zap.String("formula", outcome.Effect.Formula),
-						zap.Error(dmgErr),
-					)
-				}
-			}
+			s.applySkillCheckEffect(sess, outcome.Effect)
 		}
 
 		if s.scriptMgr != nil {
@@ -948,6 +935,11 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 		return nil
 	}
 
+	var zoneID string
+	if room, roomOk := s.world.GetRoom(roomID); roomOk {
+		zoneID = room.ZoneID
+	}
+
 	var msgs []string
 	for _, inst := range s.npcH.InstancesInRoom(roomID) {
 		for _, trigger := range inst.SkillChecks {
@@ -977,29 +969,12 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 					msgs = append(msgs, outcome.Message)
 				}
 				// Apply non-deny effects (deny is not applicable for on_greet).
-				if outcome.Effect != nil && outcome.Effect.Type != "deny" {
-					if outcome.Effect.Type == "damage" && outcome.Effect.Formula != "" && s.dice != nil {
-						dmg, dmgErr := s.dice.RollExpr(outcome.Effect.Formula)
-						if dmgErr == nil {
-							sess.CurrentHP -= dmg.Total()
-							if sess.CurrentHP < 0 {
-								sess.CurrentHP = 0
-							}
-						} else {
-							s.logger.Warn("applyNPCSkillChecks: damage formula error",
-								zap.String("formula", outcome.Effect.Formula),
-								zap.Error(dmgErr),
-							)
-						}
-					}
+				if outcome.Effect == nil || outcome.Effect.Type != "deny" {
+					s.applySkillCheckEffect(sess, outcome.Effect)
 				}
 			}
 
 			if s.scriptMgr != nil {
-				var zoneID string
-				if room, roomOk := s.world.GetRoom(sess.RoomID); roomOk {
-					zoneID = room.ZoneID
-				}
 				s.scriptMgr.CallHook(zoneID, "on_skill_check", //nolint:errcheck
 					lua.LString(uid),
 					lua.LString(trigger.Skill),
@@ -2353,20 +2328,7 @@ func (s *GameServiceServer) handleUseEquipment(uid, instanceID string) (*gamev1.
 				skillMsgs = append(skillMsgs, outcome.Message)
 			}
 			// Apply non-deny effects.
-			if outcome.Effect != nil && outcome.Effect.Type == "damage" && outcome.Effect.Formula != "" && s.dice != nil {
-				dmg, dmgErr := s.dice.RollExpr(outcome.Effect.Formula)
-				if dmgErr == nil {
-					sess.CurrentHP -= dmg.Total()
-					if sess.CurrentHP < 0 {
-						sess.CurrentHP = 0
-					}
-				} else {
-					s.logger.Warn("handleUseEquipment: damage formula error",
-						zap.String("formula", outcome.Effect.Formula),
-						zap.Error(dmgErr),
-					)
-				}
-			}
+			s.applySkillCheckEffect(sess, outcome.Effect)
 		}
 
 		if s.scriptMgr != nil {
@@ -2748,4 +2710,26 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 		}
 	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
+}
+
+// applySkillCheckEffect applies a mechanical effect from a skill check outcome.
+//
+// Precondition: sess and effect must not be nil; s.dice must be non-nil for damage effects.
+// Postcondition: damage effects reduce sess.CurrentHP to a minimum of 0.
+func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, effect *skillcheck.Effect) {
+	if effect == nil || effect.Type != "damage" || effect.Formula == "" || s.dice == nil {
+		return
+	}
+	dmg, err := s.dice.RollExpr(effect.Formula)
+	if err != nil {
+		s.logger.Warn("skill check damage formula error",
+			zap.String("formula", effect.Formula),
+			zap.Error(err),
+		)
+		return
+	}
+	sess.CurrentHP -= dmg.Total()
+	if sess.CurrentHP < 0 {
+		sess.CurrentHP = 0
+	}
 }
