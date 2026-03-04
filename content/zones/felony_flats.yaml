@@ -23,8 +23,8 @@ zone:
           target: flats_motel_row
         - direction: northeast
           target: flats_gas_station
-      map_x: 4
-      map_y: 4
+      map_x: 0
+      map_y: 0
       spawns:
         - template: 82nd_enforcer
           count: 1
@@ -57,8 +57,8 @@ zone:
           target: flats_motel_courtyard
         - direction: west
           target: flats_motel_back_lot
-      map_x: 2
-      map_y: 4
+      map_x: -2
+      map_y: 0
       spawns:
         - template: motel_raider
           count: 2
@@ -81,8 +81,8 @@ zone:
           target: flats_strip_mall_south
         - direction: east
           target: flats_parking_lot_east
-      map_x: 6
-      map_y: 4
+      map_x: 2
+      map_y: 0
       spawns:
         - template: strip_mall_scav
           count: 2
@@ -105,8 +105,8 @@ zone:
           target: flats_foster_road
         - direction: east
           target: flats_alley_east
-      map_x: 6
-      map_y: 6
+      map_x: 2
+      map_y: 2
       spawns:
         - template: strip_mall_scav
           count: 1
@@ -132,8 +132,8 @@ zone:
           target: flats_foster_south
         - direction: west
           target: flats_apartments_west
-      map_x: 4
-      map_y: 6
+      map_x: 0
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: wind
@@ -151,8 +151,8 @@ zone:
           target: flats_lents_park
         - direction: west
           target: flats_foster_south
-      map_x: 6
-      map_y: 10
+      map_x: 2
+      map_y: 6
       properties:
         lighting: shaded
         atmosphere: damp
@@ -173,8 +173,8 @@ zone:
           target: flats_gas_station
         - direction: north
           target: flats_powell_overpass
-      map_x: 4
-      map_y: 2
+      map_x: 0
+      map_y: -2
       spawns:
         - template: 82nd_enforcer
           count: 1
@@ -197,8 +197,8 @@ zone:
           target: flats_foster_south
         - direction: north
           target: flats_apartments_south
-      map_x: 6
-      map_y: 8
+      map_x: 2
+      map_y: 4
       spawns:
         - template: strip_mall_scav
           count: 1
@@ -222,8 +222,8 @@ zone:
           target: flats_parking_lot_east
         - direction: west
           target: flats_powell_overpass
-      map_x: 6
-      map_y: 0
+      map_x: 2
+      map_y: -4
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -242,8 +242,8 @@ zone:
           target: courthouse_steps
         - direction: south
           target: flats_apartments_west
-      map_x: 2
-      map_y: 2
+      map_x: -2
+      map_y: -2
       properties:
         lighting: overcast
         atmosphere: tense
@@ -265,8 +265,8 @@ zone:
           target: sei_powell_terminus
         - direction: southeast
           target: flats_johnson_creek
-      map_x: 4
-      map_y: 8
+      map_x: 0
+      map_y: 4
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -285,8 +285,8 @@ zone:
           target: flats_apartments_west
         - direction: east
           target: flats_motel_back_lot
-      map_x: 2
-      map_y: 6
+      map_x: -4
+      map_y: 2
       spawns:
         - template: motel_raider
           count: 1
@@ -307,8 +307,8 @@ zone:
           target: flats_motel_row
         - direction: south
           target: flats_motel_courtyard
-      map_x: 0
-      map_y: 4
+      map_x: -4
+      map_y: 0
       properties:
         lighting: dim
         atmosphere: quiet
@@ -327,8 +327,8 @@ zone:
           target: flats_alley_east
         - direction: north
           target: flats_jade_district
-      map_x: 8
-      map_y: 4
+      map_x: 4
+      map_y: 0
       properties:
         lighting: exposed
         atmosphere: open
@@ -345,8 +345,8 @@ zone:
           target: flats_parking_lot_east
         - direction: west
           target: flats_strip_mall_south
-      map_x: 8
-      map_y: 6
+      map_x: 4
+      map_y: 2
       properties:
         lighting: dark
         atmosphere: fetid
@@ -366,8 +366,8 @@ zone:
           target: flats_motel_courtyard
         - direction: south
           target: flats_hawthorne_approach
-      map_x: 2
-      map_y: 7
+      map_x: -2
+      map_y: 2
       properties:
         lighting: dim
         atmosphere: wary
@@ -387,8 +387,8 @@ zone:
           target: flats_pawn_shop
         - direction: north
           target: flats_convenience_store
-      map_x: 6
-      map_y: 7
+      map_x: 202
+      map_y: 0
       properties:
         lighting: overcast
         atmosphere: domestic
@@ -407,8 +407,8 @@ zone:
           target: flats_82nd_ave
         - direction: south
           target: flats_convenience_store
-      map_x: 6
-      map_y: 2
+      map_x: 2
+      map_y: -2
       properties:
         lighting: overcast
         atmosphere: chemical
@@ -428,8 +428,8 @@ zone:
           target: flats_jade_district
         - direction: north
           target: flats_rail_yard
-      map_x: 4
-      map_y: 0
+      map_x: 0
+      map_y: -4
       spawns:
         - template: 82nd_enforcer
           count: 1
@@ -451,8 +451,8 @@ zone:
           target: flats_apartments_south
         - direction: north
           target: flats_convenience_store
-      map_x: 4
-      map_y: 5
+      map_x: 202
+      map_y: 2
       spawns:
         - template: strip_mall_scav
           count: 1
@@ -476,8 +476,8 @@ zone:
           target: flats_gas_station
         - direction: west
           target: flats_pawn_shop
-      map_x: 6
-      map_y: 5
+      map_x: 202
+      map_y: 4
       properties:
         lighting: dim
         atmosphere: commercial
@@ -493,8 +493,8 @@ zone:
       exits:
         - direction: south
           target: flats_powell_overpass
-      map_x: 4
-      map_y: -2
+      map_x: 0
+      map_y: -6
       spawns:
         - template: motel_raider
           count: 1

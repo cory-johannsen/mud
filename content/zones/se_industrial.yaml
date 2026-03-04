@@ -21,8 +21,8 @@ zone:
           target: sei_holgate_blvd
         - direction: west
           target: sei_mcloughlin_blvd
-      map_x: 4
-      map_y: 4
+      map_x: 0
+      map_y: 0
       equipment:
         - item_id: zone_map
           max_count: 1
@@ -50,8 +50,8 @@ zone:
           target: sei_river_access
         - direction: east
           target: sei_loading_bay
-      map_x: 8
-      map_y: 6
+      map_x: 4
+      map_y: 2
       spawns:
         - template: dock_worker
           count: 2
@@ -77,8 +77,8 @@ zone:
           target: sei_holgate_blvd
         - direction: west
           target: sei_warehouse_interior
-      map_x: 6
-      map_y: 6
+      map_x: 2
+      map_y: 2
       spawns:
         - template: warehouse_guard
           count: 2
@@ -102,8 +102,8 @@ zone:
           target: sei_pipe_yard
         - direction: north
           target: sei_mcloughlin_blvd
-      map_x: 2
-      map_y: 6
+      map_x: -2
+      map_y: 2
       spawns:
         - template: industrial_scav
           count: 2
@@ -129,8 +129,8 @@ zone:
           target: sei_milwaukie_junction
         - direction: west
           target: sei_chemical_plant
-      map_x: 2
-      map_y: 4
+      map_x: -2
+      map_y: 0
       properties:
         lighting: exposed
         atmosphere: wind
@@ -152,8 +152,8 @@ zone:
           target: sei_holgate_blvd
         - direction: north
           target: sei_signal_tower
-      map_x: 6
-      map_y: 7
+      map_x: 202
+      map_y: 0
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -172,8 +172,8 @@ zone:
           target: sei_dock_row
         - direction: west
           target: sei_ross_bridge_approach
-      map_x: 6
-      map_y: 8
+      map_x: 2
+      map_y: 4
       spawns:
         - template: warehouse_guard
           count: 1
@@ -202,8 +202,8 @@ zone:
           target: sei_warehouse_district
         - direction: west
           target: sei_crane_yard
-      map_x: 4
-      map_y: 6
+      map_x: 0
+      map_y: 2
       properties:
         lighting: hazy
         atmosphere: chemical
@@ -225,8 +225,8 @@ zone:
           target: sei_milwaukie_junction
         - direction: north
           target: sei_machine_shop
-      map_x: 6
-      map_y: 4
+      map_x: 2
+      map_y: 0
       properties:
         lighting: exposed
         atmosphere: tense
@@ -246,8 +246,8 @@ zone:
           target: sei_dry_dock
         - direction: south
           target: ross_bridge_east
-      map_x: 4
-      map_y: 8
+      map_x: 0
+      map_y: 4
       properties:
         lighting: exposed
         atmosphere: wind
@@ -265,8 +265,8 @@ zone:
           target: sei_dock_row
         - direction: south
           target: sei_warehouse_interior
-      map_x: 10
-      map_y: 6
+      map_x: 6
+      map_y: 2
       spawns:
         - template: dock_worker
           count: 1
@@ -289,8 +289,8 @@ zone:
           target: sei_mcloughlin_blvd
         - direction: south
           target: sei_pipe_yard
-      map_x: 0
-      map_y: 4
+      map_x: -4
+      map_y: 0
       spawns:
         - template: industrial_scav
           count: 1
@@ -315,8 +315,8 @@ zone:
           target: sei_chemical_plant
         - direction: south
           target: sei_transformer_station
-      map_x: 2
-      map_y: 8
+      map_x: -2
+      map_y: 4
       spawns:
         - template: industrial_scav
           count: 2
@@ -339,8 +339,8 @@ zone:
           target: sei_dock_row
         - direction: west
           target: sei_signal_tower
-      map_x: 8
-      map_y: 4
+      map_x: 4
+      map_y: 0
       properties:
         lighting: overcast
         atmosphere: river
@@ -358,8 +358,8 @@ zone:
           target: sei_milwaukie_junction
         - direction: west
           target: sei_transformer_station
-      map_x: 6
-      map_y: 9
+      map_x: 0
+      map_y: 6
       spawns:
         - template: warehouse_guard
           count: 1
@@ -382,8 +382,8 @@ zone:
           target: sei_holgate_blvd
         - direction: east
           target: sei_signal_tower
-      map_x: 6
-      map_y: 2
+      map_x: 2
+      map_y: -2
       properties:
         lighting: dim
         atmosphere: dusty
@@ -404,8 +404,8 @@ zone:
           target: sei_machine_shop
         - direction: east
           target: sei_river_access
-      map_x: 6
-      map_y: 5
+      map_x: 4
+      map_y: -2
       properties:
         lighting: elevated
         atmosphere: wind
@@ -426,8 +426,8 @@ zone:
           target: sei_loading_bay
         - direction: south
           target: sei_container_maze
-      map_x: 4
-      map_y: 7
+      map_x: 6
+      map_y: 4
       spawns:
         - template: warehouse_guard
           count: 1
@@ -450,8 +450,8 @@ zone:
           target: sei_warehouse_interior
         - direction: east
           target: sei_industrial_way
-      map_x: 4
-      map_y: 9
+      map_x: 6
+      map_y: 6
       spawns:
         - template: industrial_scav
           count: 1
@@ -476,8 +476,8 @@ zone:
           target: sei_rail_siding
         - direction: south
           target: sei_ross_bridge_approach
-      map_x: 2
-      map_y: 10
+      map_x: -2
+      map_y: 6
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -496,8 +496,8 @@ zone:
           target: sei_mcloughlin_blvd
         - direction: south
           target: sei_chemical_plant
-      map_x: 0
-      map_y: 12
+      map_x: 202
+      map_y: 2
       properties:
         lighting: overcast
         atmosphere: chemical

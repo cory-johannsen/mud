@@ -19,8 +19,8 @@ zone:
           target: beav_canyon_road_west
         - direction: south
           target: beav_beaverton_hillsdale
-      map_x: 4
-      map_y: 4
+      map_x: 0
+      map_y: 0
       equipment:
         - item_id: zone_map
           max_count: 1
@@ -45,8 +45,8 @@ zone:
           target: beav_town_center
         - direction: north
           target: beav_sunset_transit
-      map_x: 2
-      map_y: 4
+      map_x: 202
+      map_y: 0
       spawns:
         - template: beaverton_minuteman
           count: 1
@@ -72,8 +72,8 @@ zone:
           target: beav_murray_blvd
         - direction: west
           target: beav_food_court_command
-      map_x: 0
-      map_y: 4
+      map_x: 202
+      map_y: 2
       spawns:
         - template: mall_cop_elite
           count: 2
@@ -94,7 +94,7 @@ zone:
           target: beav_town_center
         - direction: south
           target: beav_parking_garage_a
-      map_x: -2
+      map_x: 202
       map_y: 4
       spawns:
         - template: mall_cop_elite
@@ -121,8 +121,8 @@ zone:
           target: beav_tv_highway_west
         - direction: north
           target: beav_bike_path_north
-      map_x: 0
-      map_y: 0
+      map_x: 202
+      map_y: 6
       spawns:
         - template: cedar_hills_patrol
           count: 2
@@ -148,8 +148,8 @@ zone:
           target: beav_beaverton_hillsdale
         - direction: west
           target: beav_cul_de_sac_west
-      map_x: 2
-      map_y: 6
+      map_x: 202
+      map_y: 8
       spawns:
         - template: beaverton_minuteman
           count: 2
@@ -171,8 +171,8 @@ zone:
           target: beav_bike_path_north
         - direction: east
           target: beav_sunset_transit
-      map_x: 0
-      map_y: 2
+      map_x: 202
+      map_y: 10
       properties:
         lighting: dim
         atmosphere: overgrown
@@ -192,8 +192,8 @@ zone:
           target: beav_nature_park
         - direction: north
           target: beav_neighborhood_watch_north
-      map_x: 2
-      map_y: 2
+      map_x: 202
+      map_y: 12
       spawns:
         - template: mall_cop_elite
           count: 1
@@ -219,8 +219,8 @@ zone:
           zone: aloha
         - direction: east
           target: beav_cedar_hills
-      map_x: -2
-      map_y: 0
+      map_x: 202
+      map_y: 14
       spawns:
         - template: beaverton_minuteman
           count: 1
@@ -242,8 +242,8 @@ zone:
           target: beav_murray_blvd
         - direction: east
           target: beav_scholls_ferry
-      map_x: 2
-      map_y: 8
+      map_x: 202
+      map_y: 16
       spawns:
         - template: cedar_hills_patrol
           count: 1
@@ -267,8 +267,8 @@ zone:
           target: beav_hall_boulevard
         - direction: east
           target: beav_neighborhood_watch_east
-      map_x: 4
-      map_y: 5
+      map_x: 202
+      map_y: 18
       spawns:
         - template: beaverton_minuteman
           count: 1
@@ -292,8 +292,8 @@ zone:
           target: beav_cedar_hills
         - direction: west
           target: beav_walker_road
-      map_x: 0
-      map_y: 3
+      map_x: 202
+      map_y: 20
       properties:
         lighting: overcast
         atmosphere: official
@@ -311,8 +311,8 @@ zone:
           target: beav_food_court_command
         - direction: east
           target: beav_parking_garage_b
-      map_x: -2
-      map_y: 6
+      map_x: 202
+      map_y: 22
       spawns:
         - template: mall_cop_elite
           count: 1
@@ -334,8 +334,8 @@ zone:
           target: beav_parking_garage_a
         - direction: south
           target: beav_murray_blvd
-      map_x: 0
-      map_y: 6
+      map_x: 202
+      map_y: 24
       properties:
         lighting: dim
         atmosphere: judicial
@@ -353,8 +353,8 @@ zone:
           target: beav_murray_blvd
         - direction: north
           target: beav_hoa_court
-      map_x: 0
-      map_y: 7
+      map_x: 202
+      map_y: 26
       properties:
         lighting: firelight
         atmosphere: domestic
@@ -372,8 +372,8 @@ zone:
           target: beav_cul_de_sac_west
         - direction: east
           target: beav_hall_boulevard
-      map_x: 0
-      map_y: 5
+      map_x: 202
+      map_y: 28
       properties:
         lighting: fluorescent
         atmosphere: officious
@@ -392,8 +392,8 @@ zone:
           target: beav_nature_park
         - direction: east
           target: beav_neighborhood_watch_north
-      map_x: 0
-      map_y: 8
+      map_x: 202
+      map_y: 30
       spawns:
         - template: cedar_hills_patrol
           count: 1
@@ -415,8 +415,8 @@ zone:
           target: beav_sunset_transit
         - direction: west
           target: beav_bike_path_north
-      map_x: 2
-      map_y: 0
+      map_x: 202
+      map_y: 32
       properties:
         lighting: dim
         atmosphere: vigilant
@@ -434,8 +434,8 @@ zone:
           target: beav_walker_road
         - direction: south
           target: beav_beaverton_hillsdale
-      map_x: 6
-      map_y: 4
+      map_x: 202
+      map_y: 34
       properties:
         lighting: dim
         atmosphere: watchful
@@ -455,8 +455,8 @@ zone:
           target: beav_murray_blvd
         - direction: northeast
           target: beav_neighborhood_watch_east
-      map_x: 4
-      map_y: 6
+      map_x: 202
+      map_y: 36
       properties:
         lighting: overcast
         atmosphere: exposed
@@ -474,8 +474,8 @@ zone:
           target: beav_progress_ridge
         - direction: north
           target: beav_cul_de_sac_south
-      map_x: 4
-      map_y: 8
+      map_x: 202
+      map_y: 38
       properties:
         lighting: overcast
         atmosphere: commercial
@@ -493,8 +493,8 @@ zone:
           target: beav_scholls_ferry
         - direction: west
           target: beav_progress_ridge
-      map_x: 4
-      map_y: 7
+      map_x: 202
+      map_y: 40
       spawns:
         - template: beaverton_minuteman
           count: 1

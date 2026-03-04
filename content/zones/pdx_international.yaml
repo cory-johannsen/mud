@@ -17,8 +17,8 @@ zone:
           zone: ne_portland
         - direction: east
           target: pdx_airport_way_east
-      map_x: 4
-      map_y: 4
+      map_x: 0
+      map_y: 0
       equipment:
         - item_id: zone_map
           max_count: 1
@@ -43,8 +43,8 @@ zone:
           target: pdx_terminal_entrance
         - direction: south
           target: pdx_parking_garage
-      map_x: 6
-      map_y: 4
+      map_x: 202
+      map_y: 0
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -62,8 +62,8 @@ zone:
           zone: troutdale
         - direction: south
           target: pdx_cargo_terminal
-      map_x: 0
-      map_y: 8
+      map_x: 202
+      map_y: 2
       properties:
         lighting: exposed
         atmosphere: wind
@@ -82,7 +82,7 @@ zone:
           target: pdx_ticketing_hall
         - direction: south
           target: pdx_max_station
-      map_x: 8
+      map_x: 202
       map_y: 4
       spawns:
         - template: terminal_squatter
@@ -107,8 +107,8 @@ zone:
           target: pdx_the_carpet
         - direction: east
           target: pdx_baggage_claim
-      map_x: 8
-      map_y: 2
+      map_x: 202
+      map_y: 6
       spawns:
         - template: terminal_squatter
           count: 2
@@ -135,8 +135,8 @@ zone:
           target: pdx_concourse_b
         - direction: west
           target: pdx_concourse_e
-      map_x: 8
-      map_y: 0
+      map_x: 202
+      map_y: 8
       spawns:
         - template: cargo_cultist
           count: 2
@@ -160,8 +160,8 @@ zone:
           target: pdx_concourse_b
         - direction: north
           target: pdx_jet_bridge
-      map_x: 8
-      map_y: -2
+      map_x: 202
+      map_y: 10
       spawns:
         - template: cargo_cultist
           count: 1
@@ -185,8 +185,8 @@ zone:
           target: pdx_concourse_c
         - direction: west
           target: pdx_concourse_a
-      map_x: 10
-      map_y: 0
+      map_x: 202
+      map_y: 12
       properties:
         lighting: firelight
         atmosphere: smoke
@@ -206,8 +206,8 @@ zone:
           target: pdx_concourse_d
         - direction: east
           target: pdx_food_court
-      map_x: 4
-      map_y: 2
+      map_x: 202
+      map_y: 14
       spawns:
         - template: terminal_squatter
           count: 1
@@ -229,8 +229,8 @@ zone:
           target: pdx_concourse_c
         - direction: east
           target: pdx_concourse_e
-      map_x: 4
-      map_y: 0
+      map_x: 202
+      map_y: 16
       spawns:
         - template: cargo_cultist
           count: 2
@@ -254,8 +254,8 @@ zone:
           target: pdx_the_carpet
         - direction: down
           target: pdx_the_tarmac
-      map_x: 6
-      map_y: 0
+      map_x: 202
+      map_y: 18
       properties:
         lighting: overcast
         atmosphere: wind
@@ -273,8 +273,8 @@ zone:
           target: pdx_concourse_c
         - direction: south
           target: pdx_baggage_claim
-      map_x: 6
-      map_y: 2
+      map_x: 202
+      map_y: 20
       spawns:
         - template: terminal_squatter
           count: 2
@@ -298,8 +298,8 @@ zone:
           target: pdx_food_court
         - direction: south
           target: pdx_parking_garage
-      map_x: 6
-      map_y: 5
+      map_x: 202
+      map_y: 22
       properties:
         lighting: dim
         atmosphere: crowded
@@ -321,8 +321,8 @@ zone:
           target: pdx_runway_south
         - direction: north
           target: pdx_fuel_depot
-      map_x: 0
-      map_y: 10
+      map_x: 202
+      map_y: 24
       spawns:
         - template: tarmac_raider
           count: 2
@@ -346,8 +346,8 @@ zone:
           target: pdx_cargo_terminal
         - direction: east
           target: pdx_control_tower
-      map_x: 0
-      map_y: 12
+      map_x: 202
+      map_y: 26
       spawns:
         - template: tarmac_raider
           count: 2
@@ -368,8 +368,8 @@ zone:
       exits:
         - direction: west
           target: pdx_hangar_row
-      map_x: 0
-      map_y: 14
+      map_x: 202
+      map_y: 28
       properties:
         lighting: exposed
         atmosphere: wind
@@ -387,8 +387,8 @@ zone:
           target: pdx_hangar_row
         - direction: north
           target: pdx_i84_east
-      map_x: 0
-      map_y: 16
+      map_x: 202
+      map_y: 30
       spawns:
         - template: cargo_cultist
           count: 3
@@ -410,8 +410,8 @@ zone:
           target: pdx_baggage_claim
         - direction: east
           target: pdx_airport_way_east
-      map_x: 6
-      map_y: 6
+      map_x: 202
+      map_y: 32
       properties:
         lighting: dim
         atmosphere: enclosed
@@ -429,8 +429,8 @@ zone:
           target: pdx_terminal_entrance
         - direction: east
           target: pdx_rental_car_lot
-      map_x: 8
-      map_y: 6
+      map_x: 202
+      map_y: 34
       properties:
         lighting: overcast
         atmosphere: desolate
@@ -446,8 +446,8 @@ zone:
       exits:
         - direction: south
           target: pdx_concourse_a
-      map_x: 8
-      map_y: -4
+      map_x: 202
+      map_y: 36
       properties:
         lighting: dim
         atmosphere: wind
@@ -465,8 +465,8 @@ zone:
           target: pdx_the_tarmac
         - direction: east
           target: pdx_fuel_depot
-      map_x: 0
-      map_y: 18
+      map_x: 202
+      map_y: 38
       spawns:
         - template: tarmac_raider
           count: 1
@@ -488,8 +488,8 @@ zone:
           target: pdx_the_tarmac
         - direction: west
           target: pdx_runway_south
-      map_x: 0
-      map_y: 20
+      map_x: 202
+      map_y: 40
       spawns:
         - template: tarmac_raider
           count: 1
@@ -509,8 +509,8 @@ zone:
       exits:
         - direction: west
           target: pdx_max_station
-      map_x: 10
-      map_y: 6
+      map_x: 202
+      map_y: 42
       properties:
         lighting: overcast
         atmosphere: quiet

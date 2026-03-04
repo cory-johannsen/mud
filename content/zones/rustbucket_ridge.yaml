@@ -18,8 +18,8 @@ zone:
               target: the_rusty_oasis
             - direction: west
               target: ne_cully_road
-          map_x: 4
-          map_y: 4
+          map_x: 0
+          map_y: 0
           spawns:
             - template: ganger
               count: 2
@@ -36,8 +36,8 @@ zone:
           exits:
             - direction: northeast
               target: grinders_row
-          map_x: 2
-          map_y: 6
+          map_x: 202
+          map_y: 0
         - id: the_rusty_oasis
           title: The Rusty Oasis
           description: This trailer belongs to Slick Sally, a resourceful scavenger and mechanic. Sally runs a small black-market shop out of her trailer, dealing in anything from salvaged tech to rare machine parts. Her trailer is surrounded by makeshift barricades and a pile of scrap.
@@ -50,8 +50,8 @@ zone:
               target: junkers_dream
             - direction: west
               target: the_green_hell
-          map_x: 4
-          map_y: 6
+          map_x: 0
+          map_y: 2
           properties:
             area: filth_court
         - id: roach_haven
@@ -62,8 +62,8 @@ zone:
               target: the_rusty_oasis
             - direction: south
               target: the_bottle_shack
-          map_x: 6
-          map_y: 6
+          map_x: 2
+          map_y: 2
           properties:
             area: filth_court
         - id: last_stand_lodge
@@ -72,16 +72,16 @@ zone:
           exits:
             - direction: west
               target: grinders_row
-          map_x: 6
-          map_y: 4
+          map_x: 2
+          map_y: 0
         - id: junkers_dream
           title: Junker's Dream
           description: This trailer is home to Tina Wires, a tech expert who runs a cyber rigging service for the few who can afford it. She’s modified her trailer with solar panels and digital security, and it’s packed with scavenged electronics. Her place is always buzzing with a faint hum of machinery.
           exits:
             - direction: north
               target: the_rusty_oasis
-          map_x: 4
-          map_y: 8
+          map_x: 0
+          map_y: 4
           properties:
             area: filth_court
         - id: the_green_hell
@@ -90,8 +90,8 @@ zone:
           exits:
             - direction: east
               target: the_rusty_oasis
-          map_x: 2
-          map_y: 7
+          map_x: -2
+          map_y: 2
           properties:
             area: filth_court
         - id: rotgut_alley
@@ -110,8 +110,8 @@ zone:
               target: ashen_hollow
             - direction: northwest
               target: the_still
-          map_x: 2
-          map_y: 8
+          map_x: 0
+          map_y: -2
           spawns:
             - template: ganger
               count: 1
@@ -128,7 +128,7 @@ zone:
             - direction: west
               target: rotgut_alley
           map_x: 2
-          map_y: 9
+          map_y: -2
           properties:
             area: filth_court
         - id: the_heap
@@ -141,8 +141,8 @@ zone:
               target: the_tinkers_den
             - direction: south
               target: scrapshack_23
-          map_x: 2
-          map_y: 10
+          map_x: -2
+          map_y: -2
           properties:
             area: scrapheap_circle
         - id: the_tinkers_den
@@ -153,8 +153,8 @@ zone:
               target: the_heap
             - direction: east
               target: wreckers_rest
-          map_x: 2
-          map_y: 11
+          map_x: -2
+          map_y: -4
           properties:
             area: scrapheap_circle
         - id: scrapshack_23
@@ -165,8 +165,8 @@ zone:
               target: the_heap
             - direction: east
               target: salvage_hut
-          map_x: 2
-          map_y: 12
+          map_x: -2
+          map_y: 0
           properties:
             area: scrapheap_circle
         - id: wreckers_rest
@@ -175,16 +175,16 @@ zone:
           exits:
             - direction: west
               target: the_tinkers_den
-          map_x: 2
-          map_y: 13
+          map_x: 202
+          map_y: 2
         - id: salvage_hut
           title: Salvage Hut
           description: A trailer owned by Cog, a tech enthusiast obsessed with creating gadgets from scavenged parts. Cog’s trailer is filled with half-finished projects and bizarre contraptions. The area around his home is littered with bits of old tech, and he’s always on the lookout for rare finds to add to his collection.
           exits:
             - direction: west
               target: scrapshack_23
-          map_x: 2
-          map_y: 15
+          map_x: 202
+          map_y: 4
         - id: the_still
           title: The Still
           description: Owned by Moonshine Mary, a notorious bootlegger who distills potent liquor from anything she can scrounge up. Her trailer is surrounded by barrels and old stills, with a thick, acrid smell of fermenting alcohol always in the air. Mary runs an underground bar from her trailer, offering drinks strong enough to make you forget the world’s problems—if you survive them.
@@ -195,8 +195,8 @@ zone:
               target: rotgut_shack
             - direction: west
               target: the_barrel_house
-          map_x: 2
-          map_y: 16
+          map_x: 202
+          map_y: 6
           properties:
             area: rotgut_alley
         - id: rotgut_shack
@@ -207,8 +207,8 @@ zone:
               target: the_still
             - direction: south
               target: snakepit
-          map_x: 2
-          map_y: 17
+          map_x: 202
+          map_y: 8
           properties:
             area: rotgut_alley
         - id: the_barrel_house
@@ -219,8 +219,8 @@ zone:
               target: the_still
             - direction: south
               target: the_keg_hole
-          map_x: 2
-          map_y: 19
+          map_x: 202
+          map_y: 10
           properties:
             area: rotgut_alley
         - id: snakepit
@@ -229,8 +229,8 @@ zone:
           exits:
             - direction: north
               target: rotgut_shack
-          map_x: 2
-          map_y: 23
+          map_x: 202
+          map_y: 12
           properties:
             area: rotgut_alley
         - id: the_keg_hole
@@ -239,8 +239,8 @@ zone:
           exits:
             - direction: north
               target: the_barrel_house
-          map_x: 2
-          map_y: 26
+          map_x: 202
+          map_y: 14
           properties:
             area: rotgut_alley
         - id: the_graveyard
@@ -253,8 +253,8 @@ zone:
               target: the_mausoleum
             - direction: north
               target: ghosts_rest
-          map_x: 2
-          map_y: 28
+          map_x: 0
+          map_y: -4
           properties:
             area: boneyard_bend
         - id: the_mausoleum
@@ -265,8 +265,8 @@ zone:
               target: the_graveyard
             - direction: north
               target: the_forgotten_trailer
-          map_x: 3
-          map_y: 28
+          map_x: 2
+          map_y: -4
           properties:
             area: boneyard_bend
         - id: ghosts_rest
@@ -277,8 +277,8 @@ zone:
               target: the_graveyard
             - direction: east
               target: bonepickers_roost
-          map_x: 2
-          map_y: 30
+          map_x: 0
+          map_y: -6
           properties:
             area: boneyard_bend
         - id: the_forgotten_trailer
@@ -287,8 +287,8 @@ zone:
           exits:
             - direction: south
               target: the_mausoleum
-          map_x: 3
-          map_y: 30
+          map_x: 2
+          map_y: -6
           properties:
             area: boneyard_bend
         - id: bonepickers_roost
@@ -297,8 +297,8 @@ zone:
           exits:
             - direction: west
               target: ghosts_rest
-          map_x: 2
-          map_y: 24
+          map_x: 202
+          map_y: 16
           properties:
             area: boneyard_bend
         - id: ashen_hollow
@@ -311,8 +311,8 @@ zone:
               target: smokers_den
             - direction: north
               target: the_furnace
-          map_x: 2
-          map_y: 25
+          map_x: 202
+          map_y: 18
           properties:
             area: cinder_pit
         - id: smokers_den
@@ -323,8 +323,8 @@ zone:
               target: ashen_hollow
             - direction: north
               target: scorchside_camp
-          map_x: 3
-          map_y: 25
+          map_x: 202
+          map_y: 20
           properties:
             area: cinder_pit
         - id: the_furnace
@@ -335,8 +335,8 @@ zone:
               target: ashen_hollow
             - direction: east
               target: the_embers_edge
-          map_x: 2
-          map_y: 29
+          map_x: 202
+          map_y: 22
           properties:
             area: cinder_pit
         - id: scorchside_camp
@@ -345,8 +345,8 @@ zone:
           exits:
             - direction: south
               target: smokers_den
-          map_x: 3
-          map_y: 29
+          map_x: 202
+          map_y: 24
           properties:
             area: cinder_pit
         - id: the_embers_edge
@@ -357,8 +357,8 @@ zone:
               target: the_furnace
             - direction: north
               target: blade_house
-          map_x: 4
-          map_y: 14
+          map_x: 202
+          map_y: 26
           properties:
             area: cinder_pit
         - id: blade_house
@@ -371,8 +371,8 @@ zone:
               target: the_cutthroat
             - direction: north
               target: the_slashers_den
-          map_x: 5
-          map_y: 14
+          map_x: 202
+          map_y: 28
           spawns:
             - template: ganger
               count: 2
@@ -387,8 +387,8 @@ zone:
               target: blade_house
             - direction: north
               target: blood_camp
-          map_x: 6
-          map_y: 14
+          map_x: 202
+          map_y: 30
           properties:
             area: shiv_way
         - id: blood_camp
@@ -397,8 +397,8 @@ zone:
           exits:
             - direction: south
               target: the_cutthroat
-          map_x: 7
-          map_y: 14
+          map_x: 202
+          map_y: 32
           properties:
             area: shiv_way
         - id: the_slashers_den
@@ -409,8 +409,8 @@ zone:
               target: blade_house
             - direction: east
               target: the_razor_nest
-          map_x: 5
-          map_y: 15
+          map_x: 202
+          map_y: 34
           properties:
             area: shiv_way
         - id: the_razor_nest
@@ -419,7 +419,7 @@ zone:
           exits:
             - direction: west
               target: the_slashers_den
-          map_x: 6
-          map_y: 12
+          map_x: 202
+          map_y: 36
           properties:
             area: shiv_way

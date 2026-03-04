@@ -18,8 +18,8 @@ zone:
           target: lo_lake_view_blvd
         - direction: east
           target: lo_guard_barracks
-      map_x: 4
-      map_y: 4
+      map_x: 0
+      map_y: 0
       spawns:
         - template: oswego_guard
           count: 2
@@ -51,8 +51,8 @@ zone:
           target: lo_first_addition
         - direction: west
           target: lo_lakewood_bay
-      map_x: 4
-      map_y: 6
+      map_x: 0
+      map_y: 2
       spawns:
         - template: oswego_guard
           count: 1
@@ -76,8 +76,8 @@ zone:
           target: lo_the_commons
         - direction: north
           target: lo_tennis_grounds
-      map_x: 6
-      map_y: 8
+      map_x: 2
+      map_y: 4
       spawns:
         - template: country_club_sniper
           count: 2
@@ -104,8 +104,8 @@ zone:
           target: lo_marina
         - direction: north
           target: lo_boat_house
-      map_x: 2
-      map_y: 6
+      map_x: -2
+      map_y: 2
       properties:
         lighting: dim
         atmosphere: guarded
@@ -126,8 +126,8 @@ zone:
           target: lo_citation_court
         - direction: south
           target: lo_gated_estates
-      map_x: 4
-      map_y: 10
+      map_x: 0
+      map_y: 6
       spawns:
         - template: hoa_enforcer
           count: 2
@@ -153,8 +153,8 @@ zone:
           target: lo_hoa_headquarters
         - direction: west
           target: lo_millennium_park
-      map_x: 4
-      map_y: 8
+      map_x: 0
+      map_y: 4
       spawns:
         - template: oswego_guard
           count: 1
@@ -176,8 +176,8 @@ zone:
           target: lo_tryon_creek
         - direction: west
           target: lo_tennis_grounds
-      map_x: 8
-      map_y: 6
+      map_x: 202
+      map_y: 0
       spawns:
         - template: country_club_sniper
           count: 2
@@ -199,8 +199,8 @@ zone:
           target: lo_iron_mountain
         - direction: west
           target: lo_gated_estates
-      map_x: 6
-      map_y: 12
+      map_x: 2
+      map_y: 8
       properties:
         lighting: dappled
         atmosphere: forest
@@ -220,8 +220,8 @@ zone:
           target: lo_wine_cellar_bunker
         - direction: east
           target: lo_patrol_route_east
-      map_x: 6
-      map_y: 6
+      map_x: 2
+      map_y: 2
       properties:
         lighting: residential
         atmosphere: uncanny
@@ -239,8 +239,8 @@ zone:
           target: lo_the_commons
         - direction: south
           target: lo_gated_estates
-      map_x: 2
-      map_y: 8
+      map_x: -2
+      map_y: 4
       properties:
         lighting: sunny
         atmosphere: pastoral
@@ -258,8 +258,8 @@ zone:
           target: lo_checkpoint_north
         - direction: south
           target: lo_patrol_route_east
-      map_x: 6
-      map_y: 4
+      map_x: 2
+      map_y: 0
       spawns:
         - template: oswego_guard
           count: 2
@@ -281,8 +281,8 @@ zone:
           target: lo_lakewood_bay
         - direction: east
           target: lo_millennium_park
-      map_x: 2
-      map_y: 9
+      map_x: 202
+      map_y: 2
       spawns:
         - template: oswego_guard
           count: 1
@@ -304,8 +304,8 @@ zone:
           target: lo_iron_mountain
         - direction: south
           target: lo_country_club
-      map_x: 6
-      map_y: 7
+      map_x: 202
+      map_y: 4
       spawns:
         - template: hoa_enforcer
           count: 1
@@ -327,8 +327,8 @@ zone:
           target: lo_first_addition
         - direction: west
           target: lo_supply_depot
-      map_x: 6
-      map_y: 9
+      map_x: 202
+      map_y: 6
       properties:
         lighting: candlelit
         atmosphere: underground
@@ -350,8 +350,8 @@ zone:
           target: lo_checkpoint_south
         - direction: west
           target: lo_hoa_headquarters
-      map_x: 4
-      map_y: 12
+      map_x: 0
+      map_y: 8
       properties:
         lighting: surveillance
         atmosphere: sterile
@@ -371,8 +371,8 @@ zone:
           target: lo_guard_barracks
         - direction: south
           target: lo_checkpoint_south
-      map_x: 6
-      map_y: 11
+      map_x: 4
+      map_y: 2
       spawns:
         - template: oswego_guard
           count: 1
@@ -394,8 +394,8 @@ zone:
           target: lo_gated_estates
         - direction: east
           target: lo_patrol_route_east
-      map_x: 6
-      map_y: 13
+      map_x: 4
+      map_y: 4
       spawns:
         - template: oswego_guard
           count: 1
@@ -415,8 +415,8 @@ zone:
       exits:
         - direction: south
           target: lo_lakewood_bay
-      map_x: 2
-      map_y: 4
+      map_x: -2
+      map_y: 0
       spawns:
         - template: country_club_sniper
           count: 1
@@ -438,8 +438,8 @@ zone:
           target: lo_wine_cellar_bunker
         - direction: north
           target: lo_hoa_headquarters
-      map_x: 4
-      map_y: 9
+      map_x: 202
+      map_y: 8
       spawns:
         - template: hoa_enforcer
           count: 1
@@ -461,8 +461,8 @@ zone:
           target: lo_country_club
         - direction: west
           target: lo_memorial_garden
-      map_x: 6
-      map_y: 10
+      map_x: 2
+      map_y: 6
       spawns:
         - template: country_club_sniper
           count: 1
@@ -482,8 +482,8 @@ zone:
       exits:
         - direction: west
           target: lo_hoa_headquarters
-      map_x: 6
-      map_y: 14
+      map_x: 202
+      map_y: 10
       spawns:
         - template: hoa_enforcer
           count: 1
@@ -505,8 +505,8 @@ zone:
           target: lo_driving_range
         - direction: north
           target: lo_the_commons
-      map_x: 4
-      map_y: 11
+      map_x: 202
+      map_y: 12
       properties:
         lighting: natural
         atmosphere: solemn

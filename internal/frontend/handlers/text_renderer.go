@@ -429,28 +429,39 @@ func RenderMap(resp *gamev1.MapResponse) string {
 					sb.WriteString(fmt.Sprintf("[%2d]", num))
 				}
 			}
-			// East connector: only when both this cell and the next column cell exist.
+				// East connector:
+			// "-" = discovered neighbor at next column same row
+			// ">" = exit exists but no discovered neighbor (unexplored route)
+			// " " = no east exit
 			if xi < len(xs)-1 {
 				nextX := xs[xi+1]
 				tEast := byCoord[[2]int32{nextX, y}]
-				if t != nil && tEast != nil && exitSet(t)["east"] {
-					sb.WriteString("-")
+				if t != nil && exitSet(t)["east"] {
+					if tEast != nil {
+						sb.WriteString("-")
+					} else {
+						sb.WriteString(">")
+					}
 				} else {
 					sb.WriteString(" ")
 				}
+			} else if t != nil && exitSet(t)["east"] {
+				// Last column with east exit — show stub beyond the grid.
+				sb.WriteString(">")
 			}
 		}
 		sb.WriteString("\r\n")
 
-		// South connector row: only emit if at least one room in this row
-		// has a south exit to a room in the next occupied row.
+		// South connector row: emit whenever any room in this row has a south exit,
+		// whether or not the neighbor is discovered.
+		// "|" = discovered neighbor at next row same column
+		// "." = exit exists but no discovered neighbor (unexplored route)
 		if yi < len(ys)-1 {
 			nextY := ys[yi+1]
 			hasSouth := false
 			for _, x := range xs {
 				t := byCoord[[2]int32{x, y}]
-				tSouth := byCoord[[2]int32{x, nextY}]
-				if t != nil && tSouth != nil && exitSet(t)["south"] {
+				if t != nil && exitSet(t)["south"] {
 					hasSouth = true
 					break
 				}
@@ -459,13 +470,42 @@ func RenderMap(resp *gamev1.MapResponse) string {
 				for xi, x := range xs {
 					t := byCoord[[2]int32{x, y}]
 					tSouth := byCoord[[2]int32{x, nextY}]
-					if t != nil && tSouth != nil && exitSet(t)["south"] {
-						sb.WriteString("  | ")
+					if t != nil && exitSet(t)["south"] {
+						if tSouth != nil {
+							sb.WriteString("  | ")
+						} else {
+							sb.WriteString("  . ")
+						}
 					} else {
 						sb.WriteString(strings.Repeat(" ", cellW))
 					}
 					if xi < len(xs)-1 {
 						sb.WriteString(" ") // aligns under east connector column
+					}
+				}
+				sb.WriteString("\r\n")
+			}
+		} else {
+			// Last row: emit a trailing south-stub row if any room has a south exit.
+			lastY := ys[len(ys)-1]
+			hasSouthStub := false
+			for _, x := range xs {
+				t := byCoord[[2]int32{x, lastY}]
+				if t != nil && exitSet(t)["south"] {
+					hasSouthStub = true
+					break
+				}
+			}
+			if hasSouthStub {
+				for xi, x := range xs {
+					t := byCoord[[2]int32{x, lastY}]
+					if t != nil && exitSet(t)["south"] {
+						sb.WriteString("  . ")
+					} else {
+						sb.WriteString(strings.Repeat(" ", cellW))
+					}
+					if xi < len(xs)-1 {
+						sb.WriteString(" ")
 					}
 				}
 				sb.WriteString("\r\n")

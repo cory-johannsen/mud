@@ -17,8 +17,8 @@ zone:
         - direction: southeast
           target: waterfront_trail
           zone: downtown
-      map_x: 4
-      map_y: 4
+      map_x: 0
+      map_y: 0
       equipment:
         - item_id: zone_map
           max_count: 1
@@ -41,8 +41,8 @@ zone:
           target: sauvie_bridge_south
         - direction: north
           target: sauvie_road
-      map_x: 4
-      map_y: 2
+      map_x: 0
+      map_y: -2
       spawns:
         - template: harvest_guard
           count: 2
@@ -67,8 +67,8 @@ zone:
           target: sauvie_pumpkin_patch
         - direction: west
           target: sauvie_irrigation_canal
-      map_x: 4
-      map_y: 0
+      map_x: 0
+      map_y: -4
       properties:
         lighting: overcast
         atmosphere: rural
@@ -87,8 +87,8 @@ zone:
           target: sauvie_berry_fields
         - direction: east
           target: sauvie_farmhouse
-      map_x: 6
-      map_y: 0
+      map_x: 2
+      map_y: -4
       spawns:
         - template: island_farmer
           count: 2
@@ -111,8 +111,8 @@ zone:
           target: sauvie_the_orchard
         - direction: north
           target: sauvie_chicken_coop
-      map_x: 4
-      map_y: -4
+      map_x: 0
+      map_y: -8
       spawns:
         - template: island_farmer
           count: 1
@@ -133,8 +133,8 @@ zone:
           target: sauvie_pumpkin_patch
         - direction: north
           target: sauvie_barn
-      map_x: 6
-      map_y: -2
+      map_x: 2
+      map_y: -6
       properties:
         lighting: warm
         atmosphere: sheltered
@@ -153,8 +153,8 @@ zone:
           target: sauvie_chicken_coop
         - direction: north
           target: sauvie_dairy_farm
-      map_x: 6
-      map_y: -4
+      map_x: 202
+      map_y: 0
       properties:
         lighting: dim
         atmosphere: dusty
@@ -173,8 +173,8 @@ zone:
           target: sauvie_barn
         - direction: north
           target: sauvie_dairy_farm
-      map_x: 4
-      map_y: -6
+      map_x: 0
+      map_y: -10
       spawns:
         - template: island_farmer
           count: 1
@@ -200,8 +200,8 @@ zone:
           target: sauvie_oak_island
         - direction: east
           target: sauvie_granary
-      map_x: 4
-      map_y: -8
+      map_x: 0
+      map_y: -12
       spawns:
         - template: harvest_guard
           count: 1
@@ -223,8 +223,8 @@ zone:
           target: sauvie_dairy_farm
         - direction: north
           target: sauvie_sturgeon_lake
-      map_x: 2
-      map_y: -2
+      map_x: 202
+      map_y: 2
       spawns:
         - template: harvest_guard
           count: 2
@@ -247,8 +247,8 @@ zone:
           target: sauvie_gilbert_river
         - direction: west
           target: sauvie_collins_beach
-      map_x: 2
-      map_y: 0
+      map_x: -2
+      map_y: -4
       properties:
         lighting: daylight
         atmosphere: humid
@@ -266,8 +266,8 @@ zone:
           target: sauvie_irrigation_canal
         - direction: north
           target: sauvie_river_dock
-      map_x: 0
-      map_y: 0
+      map_x: -4
+      map_y: -4
       spawns:
         - template: river_pirate
           count: 2
@@ -288,8 +288,8 @@ zone:
           target: sauvie_collins_beach
         - direction: east
           target: sauvie_gilbert_river
-      map_x: 0
-      map_y: -2
+      map_x: -4
+      map_y: -6
       spawns:
         - template: river_pirate
           count: 1
@@ -314,8 +314,8 @@ zone:
           target: sauvie_oak_island
         - direction: north
           target: sauvie_sturgeon_lake
-      map_x: 2
-      map_y: -1
+      map_x: -2
+      map_y: -6
       properties:
         lighting: overcast
         atmosphere: marshy
@@ -335,8 +335,8 @@ zone:
           target: sauvie_gilbert_river
         - direction: north
           target: sauvie_north_fields
-      map_x: 4
-      map_y: -2
+      map_x: 0
+      map_y: -14
       properties:
         lighting: overcast
         atmosphere: marshy
@@ -354,8 +354,8 @@ zone:
           target: sauvie_berry_fields
         - direction: north
           target: sauvie_north_fields
-      map_x: 6
-      map_y: -3
+      map_x: 2
+      map_y: -8
       spawns:
         - template: harvest_guard
           count: 2
@@ -381,8 +381,8 @@ zone:
           target: sauvie_north_tip
         - direction: east
           target: sauvie_sturgeon_lake
-      map_x: 6
-      map_y: -6
+      map_x: 2
+      map_y: -10
       spawns:
         - template: island_farmer
           count: 2
@@ -408,8 +408,8 @@ zone:
           target: sauvie_north_fields
         - direction: north
           target: sauvie_fishing_camp
-      map_x: 2
-      map_y: -4
+      map_x: -2
+      map_y: -8
       spawns:
         - template: river_pirate
           count: 1
@@ -430,8 +430,8 @@ zone:
           target: sauvie_sturgeon_lake
         - direction: north
           target: sauvie_north_tip
-      map_x: 2
-      map_y: -6
+      map_x: -2
+      map_y: -10
       spawns:
         - template: river_pirate
           count: 1
@@ -453,8 +453,8 @@ zone:
           target: sauvie_north_fields
         - direction: southeast
           target: sauvie_fishing_camp
-      map_x: 6
-      map_y: -8
+      map_x: 2
+      map_y: -12
       properties:
         lighting: exposed
         atmosphere: wind
@@ -474,8 +474,8 @@ zone:
           target: sauvie_berry_fields
         - direction: east
           target: sauvie_farmhouse
-      map_x: 4
-      map_y: -1
+      map_x: 0
+      map_y: -6
       properties:
         lighting: lantern
         atmosphere: commercial
