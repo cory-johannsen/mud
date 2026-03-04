@@ -434,3 +434,22 @@ func TestProperty_RenderMap_NeverPanics(t *testing.T) {
 		}
 	})
 }
+
+func TestRenderSkillsResponse_GroupedByAbility(t *testing.T) {
+	sr := &gamev1.SkillsResponse{
+		Skills: []*gamev1.SkillEntry{
+			{SkillId: "parkour", Name: "Parkour", Ability: "quickness", Proficiency: "trained"},
+			{SkillId: "muscle", Name: "Muscle", Ability: "brutality", Proficiency: "untrained"},
+		},
+	}
+	out := RenderSkillsResponse(sr)
+	if !strings.Contains(out, "Quickness") {
+		t.Error("expected Quickness section")
+	}
+	if !strings.Contains(out, "Parkour") {
+		t.Error("expected Parkour skill")
+	}
+	if !strings.Contains(out, "Brutality") {
+		t.Error("expected Brutality section")
+	}
+}

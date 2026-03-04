@@ -51,6 +51,7 @@ const (
 	HandlerUseEquipment        = "use_equipment"
 	HandlerRoomEquip           = "room_equip"
 	HandlerMap                 = "map"
+	HandlerSkills              = "skills"
 )
 
 // Command defines a player-invocable command.
@@ -129,6 +130,7 @@ func BuiltinCommands() []Command {
 		{Name: "roomequip", Aliases: nil, Help: "Manage room equipment (editor)", Category: CategoryAdmin, Handler: HandlerRoomEquip},
 
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
+		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},
 	}
 }
 

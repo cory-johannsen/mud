@@ -52,6 +52,7 @@ message ClientMessage {
     UseEquipmentRequest use_equipment = 35;
     RoomEquipRequest    room_equip    = 36;
     MapRequest          map           = 37;
+    SkillsRequest       skills_request = 38;
   }
 }
 
@@ -76,6 +77,7 @@ message ServerEvent {
     TimeOfDayEvent time_of_day = 16;
     CharacterSheetView character_sheet = 17;
     MapResponse        map             = 18;
+    SkillsResponse     skills_response = 19;
   }
 }
 
@@ -383,6 +385,22 @@ message MapTile {
 // MapResponse is returned by the server with discovered tiles for the current zone.
 message MapResponse {
     repeated MapTile tiles = 1;
+}
+
+// SkillsRequest is sent by the client to view skill proficiencies.
+message SkillsRequest {}
+
+// SkillEntry represents one skill with its proficiency rank.
+message SkillEntry {
+  string skill_id    = 1;
+  string name        = 2;
+  string ability     = 3;
+  string proficiency = 4;
+}
+
+// SkillsResponse contains all skill entries for the character.
+message SkillsResponse {
+  repeated SkillEntry skills = 1;
 }
 
 // RoomEquipRequest asks the server to manage room equipment (editor command).

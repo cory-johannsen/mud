@@ -573,3 +573,49 @@ func RenderCombatEvent(ce *gamev1.CombatEvent) string {
 		return telnet.Colorf(telnet.White, "[Combat] %s", ce.Narrative)
 	}
 }
+
+// RenderSkillsResponse formats a SkillsResponse as colored telnet text.
+// Skills are grouped by ability score. Trained skills are highlighted in cyan; untrained are dim.
+//
+// Precondition: sr must be non-nil.
+// Postcondition: Returns a non-empty human-readable string.
+func RenderSkillsResponse(sr *gamev1.SkillsResponse) string {
+	abilityOrder := []string{"quickness", "brutality", "reasoning", "savvy", "flair"}
+	abilityLabel := map[string]string{
+		"quickness": "Quickness",
+		"brutality": "Brutality",
+		"reasoning": "Reasoning",
+		"savvy":     "Savvy",
+		"flair":     "Flair",
+	}
+
+	byAbility := make(map[string][]*gamev1.SkillEntry)
+	for _, sk := range sr.Skills {
+		byAbility[sk.Ability] = append(byAbility[sk.Ability], sk)
+	}
+
+	var sb strings.Builder
+	sb.WriteString(telnet.Colorize(telnet.BrightWhite, "=== Skills ==="))
+	sb.WriteString("\r\n")
+
+	for _, ability := range abilityOrder {
+		skills, ok := byAbility[ability]
+		if !ok {
+			continue
+		}
+		sb.WriteString(fmt.Sprintf("\r\n%s:\r\n", abilityLabel[ability]))
+		for _, sk := range skills {
+			name := fmt.Sprintf("  %-14s", sk.Name)
+			prof := sk.Proficiency
+			if prof != "untrained" {
+				sb.WriteString(telnet.Colorize(telnet.Cyan, name))
+				sb.WriteString(telnet.Colorize(telnet.Cyan, prof))
+			} else {
+				sb.WriteString(telnet.Colorize(telnet.Dim, name))
+				sb.WriteString(telnet.Colorize(telnet.Dim, prof))
+			}
+			sb.WriteString("\r\n")
+		}
+	}
+	return sb.String()
+}

@@ -609,6 +609,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleRoomEquip(uid, p.RoomEquip)
 	case *gamev1.ClientMessage_Map:
 		return s.handleMap(uid)
+	case *gamev1.ClientMessage_SkillsRequest:
+		return s.handleSkills(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -2054,6 +2056,42 @@ func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Map{
 			Map: &gamev1.MapResponse{Tiles: tiles},
+		},
+	}, nil
+}
+
+// handleSkills returns all skill proficiencies for the player's current character.
+//
+// Precondition: uid must resolve to an active session with a loaded character.
+// Postcondition: Returns a ServerEvent with SkillsResponse containing all skills.
+func (s *GameServiceServer) handleSkills(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if s.characterSkillsRepo == nil || len(s.allSkills) == 0 {
+		return messageEvent("Skill data is not available."), nil
+	}
+	skills, err := s.characterSkillsRepo.GetAll(context.Background(), sess.CharacterID)
+	if err != nil {
+		return nil, fmt.Errorf("getting skills for %s: %w", uid, err)
+	}
+	entries := make([]*gamev1.SkillEntry, 0, len(s.allSkills))
+	for _, sk := range s.allSkills {
+		prof, ok := skills[sk.ID]
+		if !ok {
+			prof = "untrained"
+		}
+		entries = append(entries, &gamev1.SkillEntry{
+			SkillId:     sk.ID,
+			Name:        sk.Name,
+			Ability:     sk.Ability,
+			Proficiency: prof,
+		})
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_SkillsResponse{
+			SkillsResponse: &gamev1.SkillsResponse{Skills: entries},
 		},
 	}, nil
 }
