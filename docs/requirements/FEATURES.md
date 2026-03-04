@@ -21,8 +21,15 @@
   - The player automap is populated and persisted as the player explores.
   - Player automap contains the rooms, exits, permanent room equipment and POIs.  We will include non-combat NPCs in the future.
   - Each zone has a safe area at the primary entrance which contains a zone map.  Viewing the look map populates the automap for that zone, but only the rooms and exits; the player must visit a room to discover any permanent equipment, POIs, or non-combat NPCs.
-- [ ] Skills, Feats and Abilities. 
-  - [ ] All the P2FE skills need to be implemented. 
+- [x] Skill Check Triggers (Stage 1). Passive skill checks fired automatically by world events.
+  - [x] Core resolver: d20 + ability_mod + proficiency_bonus vs DC, 4-tier outcome (crit_success / success / failure / crit_failure).
+  - [x] Room `on_enter` trigger: fires declared skill checks when a player enters a room. Sample: Parkour DC 12 in Felony Flats North Strip Mall (collapsed awning / debris).
+  - [x] NPC `on_greet` trigger: fires declared skill checks when a player greets an NPC. Sample: Smooth Talk DC 16 on the Ganger NPC.
+  - [x] Item `on_use` trigger: fires declared skill checks when a player uses room equipment. Supports `deny` effect to block item use on failure. Sample: Grift DC 14 on the Felony Flats zone map terminal.
+  - [x] Lua hook: `on_skill_check(uid, skill_id, total, dc, outcome)` fired after every resolved check.
+  - [x] PlayerSession carries per-character skill ranks and proficiency bonus used by the resolver.
+- [ ] Skills, Feats and Class features.
+  - [ ] All the P2FE skills need to be implemented.
   - [ ] All the P2FE feats need to be implemented.
   - [ ] All the P2FE class features need to be implemented.
   - Where the P2FE lore doesn't match the Gunchete setting it will need migrated.
@@ -35,11 +42,11 @@
   - [ ] Players get assigned their initial feats based on their job.  This should happen at creation but also at login for existing characters.
   - During character creation if the player must choose between multiple options they should be prompted to choose from a list.
     - Existing characters must be checked at login for missing options and prompted to select them
-  - [ ] For active skills features a command must exists that allows the player to activate them.  
+  - [ ] For active skills features a command must exists that allows the player to activate them.
     - The command should accept the name of the skill feature but if not provided should prompt the player to select from a list.
-  - [ ] For active feats features a command must exists that allows the player to activate them.  
+  - [ ] For active feats features a command must exists that allows the player to activate them.
     - The command should accept the name of the feat feature but if not provided should prompt the player to select from a list.
-  - [ ] For active class features a command must exists that allows the player to activate them.  
+  - [ ] For active class features a command must exists that allows the player to activate them.
     - The command should accept the name of the class feature but if not provided should prompt the player to select from a list.
 - [ ] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)

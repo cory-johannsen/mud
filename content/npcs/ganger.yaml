@@ -21,6 +21,19 @@ taunts:
   - "Keep walking if you know what's good for you."
   - "Got any rounds? Didn't think so."
   - "This is our turf. You're trespassing."
+skill_checks:
+  - skill: smooth_talk
+    dc: 16
+    trigger: on_greet
+    outcomes:
+      crit_success:
+        message: "The ganger regards you with grudging respect. 'Didn't think you had it in you.'"
+      success:
+        message: "The ganger seems less hostile than usual. He gives you a curt nod."
+      failure:
+        message: "The ganger sneers. 'Flattery won't save your teeth, outsider.'"
+      crit_failure:
+        message: "The ganger takes your approach as a personal insult. His hand moves toward his weapon."
 loot:
   currency:
     min: 10

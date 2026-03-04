@@ -44,6 +44,23 @@ zone:
       respawn_after: 0s
       immovable: true
       script: zone_map_use
+      skill_checks:
+      - skill: grift
+        dc: 14
+        trigger: on_use
+        outcomes:
+          crit_success:
+            message: "The terminal's security bypass clicks over. You pull the full district layout."
+          success:
+            message: "The lock clicks. You're in — partial map data loads onto the screen."
+          failure:
+            message: "The terminal rejects your attempt. The interface locks you out."
+            effect:
+              type: deny
+          crit_failure:
+            message: "You fumble the bypass and trigger an alert. The terminal goes dark."
+            effect:
+              type: deny
     properties:
       lighting: overcast
       atmosphere: exhaust
@@ -98,6 +115,25 @@ zone:
     - template: strip_mall_scav
       count: 2
       respawn_after: 5m
+    skill_checks:
+    - skill: parkour
+      dc: 12
+      trigger: on_enter
+      outcomes:
+        crit_success:
+          message: "You vault the collapsed awning with practiced ease, landing clean on the far side."
+        success:
+          message: "You carefully pick your way through the debris, ducking under buckled metal."
+        failure:
+          message: "You stumble through the wreckage, scraping yourself on a jagged edge."
+          effect:
+            type: damage
+            formula: "1d4"
+        crit_failure:
+          message: "You trip hard on a chunk of concrete and crash into the rubble."
+          effect:
+            type: damage
+            formula: "2d4"
     properties:
       lighting: dim
       atmosphere: dusty
