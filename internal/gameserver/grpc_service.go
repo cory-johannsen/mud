@@ -89,9 +89,11 @@ type GameServiceServer struct {
 	accountAdmin AccountAdmin
 	clock        *GameClock
 	logger       *zap.Logger
-	jobRegistry  *ruleset.JobRegistry
-	condRegistry *condition.Registry
-	loadoutsDir  string
+	jobRegistry         *ruleset.JobRegistry
+	condRegistry        *condition.Registry
+	loadoutsDir         string
+	allSkills           []*ruleset.Skill
+	characterSkillsRepo *postgres.CharacterSkillsRepository
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -106,6 +108,8 @@ type GameServiceServer struct {
 // jobRegistry may be nil (team affinity effects will not be applied on wear).
 // condRegistry may be nil (cross-team condition effects will be skipped).
 // loadoutsDir is the path to the archetype loadout YAML directory; empty disables starting inventory grants.
+// allSkills may be nil (skill backfill on session startup will be skipped).
+// characterSkillsRepo may be nil (skill backfill on session startup will be skipped).
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
@@ -130,30 +134,34 @@ func NewGameServiceServer(
 	jobRegistry *ruleset.JobRegistry,
 	condRegistry *condition.Registry,
 	loadoutsDir string,
+	allSkills []*ruleset.Skill,
+	characterSkillsRepo *postgres.CharacterSkillsRepository,
 ) *GameServiceServer {
 	return &GameServiceServer{
-		world:        worldMgr,
-		sessions:     sessMgr,
-		commands:     cmdRegistry,
-		worldH:       worldHandler,
-		chatH:        chatHandler,
-		charSaver:    charSaver,
-		dice:         diceRoller,
-		npcH:         npcHandler,
-		npcMgr:       npcMgr,
-		combatH:      combatHandler,
-		scriptMgr:    scriptMgr,
-		respawnMgr:   respawnMgr,
-		floorMgr:     floorMgr,
-		roomEquipMgr: roomEquipMgr,
-		automapRepo:  automapRepo,
-		invRegistry:  invRegistry,
-		accountAdmin: accountAdmin,
-		clock:        clock,
-		logger:       logger,
-		jobRegistry:  jobRegistry,
-		condRegistry: condRegistry,
-		loadoutsDir:  loadoutsDir,
+		world:               worldMgr,
+		sessions:            sessMgr,
+		commands:            cmdRegistry,
+		worldH:              worldHandler,
+		chatH:               chatHandler,
+		charSaver:           charSaver,
+		dice:                diceRoller,
+		npcH:                npcHandler,
+		npcMgr:              npcMgr,
+		combatH:             combatHandler,
+		scriptMgr:           scriptMgr,
+		respawnMgr:          respawnMgr,
+		floorMgr:            floorMgr,
+		roomEquipMgr:        roomEquipMgr,
+		automapRepo:         automapRepo,
+		invRegistry:         invRegistry,
+		accountAdmin:        accountAdmin,
+		clock:               clock,
+		logger:              logger,
+		jobRegistry:         jobRegistry,
+		condRegistry:        condRegistry,
+		loadoutsDir:         loadoutsDir,
+		allSkills:           allSkills,
+		characterSkillsRepo: characterSkillsRepo,
 	}
 }
 
@@ -351,6 +359,38 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 							zap.Error(grantErr),
 						)
 					}
+				}
+			}
+		}
+	}
+
+	// Skill backfill: auto-assign skills for characters that have none recorded.
+	// This covers characters created before the skills system existed.
+	// No interactive choice is presented; fixed grants are applied and choice slots are left untrained.
+	if characterID > 0 && s.characterSkillsRepo != nil && len(s.allSkills) > 0 && s.jobRegistry != nil {
+		has, skillCheckErr := s.characterSkillsRepo.HasSkills(stream.Context(), characterID)
+		if skillCheckErr != nil {
+			s.logger.Warn("checking character skills for backfill",
+				zap.Int64("character_id", characterID),
+				zap.Error(skillCheckErr),
+			)
+		} else if !has {
+			if job, ok := s.jobRegistry.Job(sess.Class); ok {
+				allSkillIDs := make([]string, len(s.allSkills))
+				for i, sk := range s.allSkills {
+					allSkillIDs[i] = sk.ID
+				}
+				skillMap := character.BuildSkillsFromJob(job, allSkillIDs, nil)
+				if setErr := s.characterSkillsRepo.SetAll(stream.Context(), characterID, skillMap); setErr != nil {
+					s.logger.Error("backfilling character skills",
+						zap.Int64("character_id", characterID),
+						zap.Error(setErr),
+					)
+				} else {
+					s.logger.Info("backfilled skills for character",
+						zap.Int64("character_id", characterID),
+						zap.String("class", sess.Class),
+					)
 				}
 			}
 		}

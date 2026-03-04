@@ -103,7 +103,7 @@ func newAuthHandler(t *testing.T, store AccountStore, gsAddr string) *AuthHandle
 		IdleTimeout:     5 * time.Minute,
 		IdleGracePeriod: time.Minute,
 	}
-	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, []*ruleset.Archetype{}, logger, gsAddr, telnetCfg)
+	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, []*ruleset.Archetype{}, logger, gsAddr, telnetCfg, nil, nil)
 }
 
 // newAuthHandlerWithChar builds an AuthHandler whose character store returns one
@@ -117,7 +117,7 @@ func newAuthHandlerWithChar(t *testing.T, store AccountStore, char *character.Ch
 		IdleTimeout:     5 * time.Minute,
 		IdleGracePeriod: time.Minute,
 	}
-	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, []*ruleset.Archetype{}, logger, gsAddr, telnetCfg)
+	return NewAuthHandler(store, chars, []*ruleset.Region{}, []*ruleset.Team{}, []*ruleset.Job{}, []*ruleset.Archetype{}, logger, gsAddr, telnetCfg, nil, nil)
 }
 
 // testGameServer starts an in-process gRPC game server with a minimal 2-room world
@@ -163,7 +163,7 @@ func testGameServer(t *testing.T) string {
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := gameserver.NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "")
+	svc := gameserver.NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)

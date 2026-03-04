@@ -46,6 +46,11 @@ const welcomeBanner = `
   Type ` + telnet.Green + `quit` + telnet.Reset + ` to disconnect.
 `
 
+// CharacterSkillsSetter defines the skill persistence operations required by AuthHandler.
+type CharacterSkillsSetter interface {
+	SetAll(ctx context.Context, characterID int64, skills map[string]string) error
+}
+
 // AuthHandler implements telnet.SessionHandler and processes the
 // authentication loop for a connected client.
 type AuthHandler struct {
@@ -56,6 +61,8 @@ type AuthHandler struct {
 	jobs           []*ruleset.Job
 	archetypes     []*ruleset.Archetype
 	jobRegistry    *ruleset.JobRegistry
+	allSkills      []*ruleset.Skill
+	characterSkills CharacterSkillsSetter
 	logger         *zap.Logger
 	gameServerAddr string
 	telnetCfg      config.TelnetConfig
@@ -64,6 +71,7 @@ type AuthHandler struct {
 // NewAuthHandler creates an AuthHandler backed by the given account and character stores.
 //
 // Precondition: accounts, characters, and logger must be non-nil. gameServerAddr must be a valid "host:port" address.
+// allSkills may be nil (skill selection will be skipped). characterSkills may be nil (skills will not be persisted).
 // Postcondition: Returns an AuthHandler ready to handle sessions with a populated JobRegistry.
 func NewAuthHandler(
 	accounts AccountStore,
@@ -75,22 +83,26 @@ func NewAuthHandler(
 	logger *zap.Logger,
 	gameServerAddr string,
 	telnetCfg config.TelnetConfig,
+	allSkills []*ruleset.Skill,
+	characterSkills CharacterSkillsSetter,
 ) *AuthHandler {
 	reg := ruleset.NewJobRegistry()
 	for _, j := range jobs {
 		reg.Register(j)
 	}
 	return &AuthHandler{
-		accounts:       accounts,
-		characters:     characters,
-		regions:        regions,
-		teams:          teams,
-		jobs:           jobs,
-		archetypes:     archetypes,
-		jobRegistry:    reg,
-		logger:         logger,
-		gameServerAddr: gameServerAddr,
-		telnetCfg:      telnetCfg,
+		accounts:        accounts,
+		characters:      characters,
+		regions:         regions,
+		teams:           teams,
+		jobs:            jobs,
+		archetypes:      archetypes,
+		jobRegistry:     reg,
+		allSkills:       allSkills,
+		characterSkills: characterSkills,
+		logger:          logger,
+		gameServerAddr:  gameServerAddr,
+		telnetCfg:       telnetCfg,
 	}
 }
 

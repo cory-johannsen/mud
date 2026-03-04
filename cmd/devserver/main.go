@@ -28,6 +28,7 @@ func main() {
 	teamsDir := flag.String("teams", "content/teams", "path to team YAML files directory")
 	jobsDir := flag.String("jobs", "content/jobs", "path to job YAML files directory")
 	archetypesDir := flag.String("archetypes", "content/archetypes", "path to archetype YAML files directory")
+	skillsFile := flag.String("skills", "content/skills.yaml", "path to skills YAML file")
 	flag.Parse()
 
 	// Load configuration
@@ -86,10 +87,17 @@ func main() {
 	)
 	logger.Info("archetypes loaded", zap.Int("archetypes", len(archetypes)))
 
+	skills, err := ruleset.LoadSkills(*skillsFile)
+	if err != nil {
+		logger.Fatal("loading skills", zap.Error(err))
+	}
+	logger.Info("skills loaded", zap.Int("skills", len(skills)))
+
 	// Build services
 	accounts := postgres.NewAccountRepository(pool.DB())
 	characters := postgres.NewCharacterRepository(pool.DB())
-	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, archetypes, logger, cfg.GameServer.Addr(), cfg.Telnet)
+	characterSkillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
+	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, archetypes, logger, cfg.GameServer.Addr(), cfg.Telnet, skills, characterSkillsRepo)
 	telnetAcceptor := telnet.NewAcceptor(cfg.Telnet, authHandler, logger)
 
 	// Wire lifecycle

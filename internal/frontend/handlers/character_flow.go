@@ -391,6 +391,59 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, selectedJob, selectedTeam)
 }
 
+// skillChoiceLoop prompts the player to pick `count` skills from the provided pool,
+// one at a time. The pool is a list of skill IDs; h.allSkills is consulted for display names.
+// Returns the chosen skill IDs or (nil, nil) if the player cancels.
+//
+// Precondition: count >= 1; pool must be non-empty and contain valid skill IDs present in h.allSkills.
+// Postcondition: Returns exactly count chosen IDs, or (nil, nil) on cancel.
+func (h *AuthHandler) skillChoiceLoop(ctx context.Context, conn *telnet.Conn, pool []string, count int) ([]string, error) {
+	// Build a name lookup from h.allSkills for display.
+	nameFor := make(map[string]string, len(h.allSkills))
+	for _, sk := range h.allSkills {
+		nameFor[sk.ID] = sk.Name
+	}
+
+	remaining := make([]string, len(pool))
+	copy(remaining, pool)
+
+	var chosen []string
+	for len(chosen) < count && len(remaining) > 0 {
+		left := count - len(chosen)
+		_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow,
+			"\r\nChoose a trained skill (%d remaining):", left))
+		for i, id := range remaining {
+			name := nameFor[id]
+			if name == "" {
+				name = id
+			}
+			_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s",
+				telnet.Green, i+1, telnet.Reset,
+				telnet.BrightWhite, name, telnet.Reset))
+		}
+		_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select skill [1-%d]: ", len(remaining)))
+		line, err := conn.ReadLine()
+		if err != nil {
+			return nil, fmt.Errorf("reading skill choice: %w", err)
+		}
+		line = strings.TrimSpace(line)
+		if strings.ToLower(line) == "cancel" {
+			return nil, nil
+		}
+		choice := 0
+		if _, err := fmt.Sscanf(line, "%d", &choice); err != nil || choice < 1 || choice > len(remaining) {
+			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection. Please enter a number from the list."))
+			continue
+		}
+		picked := remaining[choice-1]
+		chosen = append(chosen, picked)
+		// Remove chosen skill from remaining pool.
+		remaining = append(remaining[:choice-1], remaining[choice:]...)
+		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "Selected: %s", nameFor[picked]))
+	}
+	return chosen, nil
+}
+
 // buildAndConfirm builds a character from the given selections, shows the preview,
 // prompts for confirmation, and persists on yes.
 // Returns (nil, nil) if the player declines or cancels.
@@ -439,6 +492,34 @@ func (h *AuthHandler) buildAndConfirm(
 		zap.String("name", created.Name),
 		zap.Int64("account_id", accountID),
 		zap.Duration("duration", elapsed))
+
+	// Skill selection: only when skills and skill storage are configured.
+	if h.characterSkills != nil && len(h.allSkills) > 0 {
+		var chosenSkills []string
+		if job.SkillGrants != nil && job.SkillGrants.Choices != nil && job.SkillGrants.Choices.Count > 0 {
+			chosenSkills, err = h.skillChoiceLoop(ctx, conn, job.SkillGrants.Choices.Pool, job.SkillGrants.Choices.Count)
+			if err != nil {
+				h.logger.Error("skill choice loop", zap.String("name", created.Name), zap.Error(err))
+				_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error during skill selection: %v", err))
+				return created, nil // character was created; skills will be backfilled on login
+			}
+			if chosenSkills == nil {
+				// player cancelled skill selection — return character; skills backfilled on login
+				return created, nil
+			}
+		}
+		allSkillIDs := make([]string, len(h.allSkills))
+		for i, sk := range h.allSkills {
+			allSkillIDs[i] = sk.ID
+		}
+		skillMap := character.BuildSkillsFromJob(job, allSkillIDs, chosenSkills)
+		if err := h.characterSkills.SetAll(ctx, created.ID, skillMap); err != nil {
+			h.logger.Error("persisting character skills", zap.String("name", created.Name), zap.Error(err))
+			_ = conn.WriteLine(telnet.Colorf(telnet.Yellow,
+				"Warning: skills could not be saved and will be assigned on login."))
+		}
+	}
+
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
 		"Character %s created! [%s]", created.Name, elapsed))
 	return created, nil

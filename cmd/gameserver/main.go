@@ -52,6 +52,7 @@ func main() {
 	armorsDir := flag.String("armors-dir", "content/armor", "path to armor YAML definitions directory")
 	jobsDir := flag.String("jobs-dir", "content/jobs", "path to job YAML definitions directory")
 	loadoutsDir := flag.String("loadouts-dir", "content/loadouts", "path to archetype loadout YAML directory")
+	skillsFile := flag.String("skills", "content/skills.yaml", "path to skills YAML file")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -251,6 +252,13 @@ func main() {
 		jobReg.Register(j)
 	}
 	logger.Info("loaded job definitions", zap.Int("count", len(jobList)))
+
+	allSkills, err := ruleset.LoadSkills(*skillsFile)
+	if err != nil {
+		logger.Fatal("failed to load skills", zap.Error(err))
+	}
+	logger.Info("loaded skill definitions", zap.Int("count", len(allSkills)))
+	characterSkillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
 
 	// Load HTN AI domains.
 	aiRegistry := ai.NewRegistry()
@@ -462,6 +470,7 @@ func main() {
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
 		jobReg, condRegistry, *loadoutsDir,
+		allSkills, characterSkillsRepo,
 	)
 
 	// Start respawn goroutine for room equipment.
