@@ -174,6 +174,19 @@ func TestJobRegistry_JobsForTeamAndArchetype_NoMatchReturnsEmpty(t *testing.T) {
 	assert.Empty(t, reg.JobsForTeamAndArchetype("machete", "aggressor"))
 }
 
+func TestJob_SkillGrantsFieldExists(t *testing.T) {
+	jobs, err := ruleset.LoadJobs("../../../content/jobs")
+	require.NoError(t, err)
+	reg := ruleset.NewJobRegistry()
+	for _, j := range jobs {
+		reg.Register(j)
+	}
+	job, ok := reg.Job("anarchist")
+	require.True(t, ok, "anarchist job not found")
+	// SkillGrants field must exist on Job (may be nil until Task 4 adds YAML)
+	_ = job.SkillGrants
+}
+
 func TestProperty_JobRegistry_ArchetypesForTeam_NeverPanics(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		team := rapid.String().Draw(rt, "team")

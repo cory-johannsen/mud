@@ -21,6 +21,18 @@ type JobDrawback struct {
 	Description string `yaml:"description"`
 }
 
+// SkillChoices defines a pool of skills the player picks from at creation.
+type SkillChoices struct {
+	Pool  []string `yaml:"pool"`
+	Count int      `yaml:"count"`
+}
+
+// SkillGrants defines the skill proficiencies a job grants at creation.
+type SkillGrants struct {
+	Fixed   []string      `yaml:"fixed"`
+	Choices *SkillChoices `yaml:"choices"`
+}
+
 // Job defines a concrete playable job (replaces PF2E class for Gunchete).
 // Team is empty for jobs available to all players; non-empty for team-exclusive jobs.
 //
@@ -34,6 +46,7 @@ type Job struct {
 	KeyAbility        string            `yaml:"key_ability"`
 	HitPointsPerLevel int               `yaml:"hit_points_per_level"`
 	Proficiencies     map[string]string                    `yaml:"proficiencies"`
+	SkillGrants       *SkillGrants                         `yaml:"skills"`
 	Features          []JobFeature                         `yaml:"features"`
 	Drawbacks         []JobDrawback                        `yaml:"drawbacks"`
 	StartingInventory *inventory.StartingLoadoutOverride   `yaml:"starting_inventory"`
