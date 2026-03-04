@@ -121,6 +121,37 @@ func BuildSkillsFromJob(job *ruleset.Job, allSkillIDs []string, chosen []string)
 	return out
 }
 
+// BuildFeatsFromJob constructs the feat list for a new or backfilled character.
+//
+// Precondition: job must not be nil. chosen, generalChosen, skillChosen may be nil.
+// Postcondition: Returns a slice containing all granted feat IDs (no duplicates).
+func BuildFeatsFromJob(job *ruleset.Job, chosen []string, generalChosen []string, skillChosen []string) []string {
+	seen := make(map[string]bool)
+	var feats []string
+	add := func(id string) {
+		if !seen[id] {
+			seen[id] = true
+			feats = append(feats, id)
+		}
+	}
+	if job.FeatGrants == nil {
+		return feats
+	}
+	for _, id := range job.FeatGrants.Fixed {
+		add(id)
+	}
+	for _, id := range chosen {
+		add(id)
+	}
+	for _, id := range generalChosen {
+		add(id)
+	}
+	for _, id := range skillChosen {
+		add(id)
+	}
+	return feats
+}
+
 // AbilityName returns the short display label for an ability score field.
 func AbilityName(field string) string {
 	names := map[string]string{

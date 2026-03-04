@@ -41,6 +41,10 @@ type Character struct {
 	// Populated after creation or loading from DB.
 	Skills map[string]string
 
+	// Feats is the list of feat IDs held by this character.
+	// Populated after creation or loading from DB.
+	Feats []string
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

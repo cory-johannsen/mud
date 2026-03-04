@@ -183,6 +183,42 @@ func TestBuildSkillsFromJob_NilGrantsAllUntrained(t *testing.T) {
 	}
 }
 
+func TestBuildFeatsFromJob_FixedAndChosen(t *testing.T) {
+	job := &ruleset.Job{
+		FeatGrants: &ruleset.FeatGrants{
+			GeneralCount: 1,
+			Fixed:        []string{"quick_dodge"},
+			Choices:      &ruleset.FeatChoices{Pool: []string{"twin_strike", "trap_eye"}, Count: 1},
+		},
+	}
+	chosen := []string{"twin_strike"}
+	generalChosen := []string{"toughness"}
+	skillChosen := []string{"combat_patch"}
+	got := character.BuildFeatsFromJob(job, chosen, generalChosen, skillChosen)
+	want := map[string]bool{
+		"quick_dodge":  true,
+		"twin_strike":  true,
+		"toughness":    true,
+		"combat_patch": true,
+	}
+	if len(got) != len(want) {
+		t.Errorf("expected %d feats, got %d: %v", len(want), len(got), got)
+	}
+	for _, f := range got {
+		if !want[f] {
+			t.Errorf("unexpected feat %q", f)
+		}
+	}
+}
+
+func TestBuildFeatsFromJob_NilGrants(t *testing.T) {
+	job := &ruleset.Job{FeatGrants: nil}
+	got := character.BuildFeatsFromJob(job, nil, nil, nil)
+	if len(got) != 0 {
+		t.Errorf("expected empty feats for nil FeatGrants, got %v", got)
+	}
+}
+
 // Property: CurrentHP == MaxHP on a freshly built character.
 func TestBuildWithJob_CurrentHPEqualsMaxHP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
