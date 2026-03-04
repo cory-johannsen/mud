@@ -274,6 +274,26 @@ func formatSlotLabel(slot string) string {
 	return strings.Join(words, " ")
 }
 
+// proficiencyColor wraps a proficiency rank string with the appropriate ANSI color.
+// untrained receives no color (terminal default); trained through legendary are progressively brighter.
+//
+// Precondition: rank is a non-empty string.
+// Postcondition: Returns rank wrapped in ANSI color codes, or rank unchanged for untrained.
+func proficiencyColor(rank string) string {
+	switch strings.ToLower(rank) {
+	case "legendary":
+		return telnet.Colorize(telnet.Magenta, rank)
+	case "master":
+		return telnet.Colorize(telnet.Yellow, rank)
+	case "expert":
+		return telnet.Colorize(telnet.Cyan, rank)
+	case "trained":
+		return telnet.Colorize(telnet.White, rank)
+	default:
+		return rank // untrained — no color, use terminal default
+	}
+}
+
 // RenderCharacterSheet formats a CharacterSheetView as a detailed Telnet character sheet.
 //
 // Precondition: csv must be non-nil.
@@ -339,6 +359,18 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
 	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Currency ---"))
 	b.WriteString("\r\n")
 	b.WriteString(fmt.Sprintf("%s\r\n", csv.GetCurrency()))
+
+	// Skills
+	if skills := csv.GetSkills(); len(skills) > 0 {
+		b.WriteString("\r\n")
+		b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Skills ---"))
+		b.WriteString("\r\n")
+		for _, sk := range skills {
+			label := fmt.Sprintf("%-20s (%s)", sk.GetName(), sk.GetAbility())
+			rank := proficiencyColor(sk.GetProficiency())
+			b.WriteString(fmt.Sprintf("  %-32s %s\r\n", label, rank))
+		}
+	}
 
 	return b.String()
 }

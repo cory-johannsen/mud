@@ -435,6 +435,24 @@ func TestProperty_RenderMap_NeverPanics(t *testing.T) {
 	})
 }
 
+func TestRenderCharacterSheet_Skills(t *testing.T) {
+	view := &gamev1.CharacterSheetView{
+		Name:  "Test",
+		Level: 1,
+		Skills: []*gamev1.SkillEntry{
+			{SkillId: "acrobatics", Name: "Acrobatics", Ability: "QCK", Proficiency: "trained"},
+			{SkillId: "athletics", Name: "Athletics", Ability: "BRT", Proficiency: "untrained"},
+			{SkillId: "stealth", Name: "Stealth", Ability: "QCK", Proficiency: "expert"},
+		},
+	}
+	result := RenderCharacterSheet(view)
+	assert.Contains(t, result, "Skills")
+	assert.Contains(t, result, "Acrobatics")
+	assert.Contains(t, result, "trained")
+	assert.Contains(t, result, "untrained")
+	assert.Contains(t, result, "expert")
+}
+
 func TestRenderSkillsResponse_GroupedByAbility(t *testing.T) {
 	sr := &gamev1.SkillsResponse{
 		Skills: []*gamev1.SkillEntry{
