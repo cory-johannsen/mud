@@ -67,6 +67,32 @@ type CharacterSaver interface {
 	MarkStartingInventoryGranted(ctx context.Context, characterID int64) error
 }
 
+// CharacterSkillsGetter retrieves and persists per-character skill proficiency data.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Returns a map of skill_id → proficiency (may be empty).
+type CharacterSkillsGetter interface {
+	GetAll(ctx context.Context, characterID int64) (map[string]string, error)
+	HasSkills(ctx context.Context, characterID int64) (bool, error)
+	SetAll(ctx context.Context, characterID int64, skills map[string]string) error
+}
+
+// CharacterFeatsGetter retrieves the feat IDs assigned to a character.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Returns a slice of feat IDs (may be empty).
+type CharacterFeatsGetter interface {
+	GetAll(ctx context.Context, characterID int64) ([]string, error)
+}
+
+// CharacterClassFeaturesGetter retrieves the class feature IDs assigned to a character.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Returns a slice of feature IDs (may be empty).
+type CharacterClassFeaturesGetter interface {
+	GetAll(ctx context.Context, characterID int64) ([]string, error)
+}
+
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
 type GameServiceServer struct {
 	gamev1.UnimplementedGameServiceServer
@@ -93,13 +119,13 @@ type GameServiceServer struct {
 	condRegistry        *condition.Registry
 	loadoutsDir         string
 	allSkills           []*ruleset.Skill
-	characterSkillsRepo *postgres.CharacterSkillsRepository
+	characterSkillsRepo CharacterSkillsGetter
 	allFeats                   []*ruleset.Feat
 	featRegistry               *ruleset.FeatRegistry
-	characterFeatsRepo         *postgres.CharacterFeatsRepository
+	characterFeatsRepo         CharacterFeatsGetter
 	allClassFeatures           []*ruleset.ClassFeature
 	classFeatureRegistry       *ruleset.ClassFeatureRegistry
-	characterClassFeaturesRepo *postgres.CharacterClassFeaturesRepository
+	characterClassFeaturesRepo CharacterClassFeaturesGetter
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -144,13 +170,13 @@ func NewGameServiceServer(
 	condRegistry *condition.Registry,
 	loadoutsDir string,
 	allSkills []*ruleset.Skill,
-	characterSkillsRepo *postgres.CharacterSkillsRepository,
+	characterSkillsRepo CharacterSkillsGetter,
 	allFeats []*ruleset.Feat,
 	featRegistry *ruleset.FeatRegistry,
-	characterFeatsRepo *postgres.CharacterFeatsRepository,
+	characterFeatsRepo CharacterFeatsGetter,
 	allClassFeatures []*ruleset.ClassFeature,
 	classFeatureRegistry *ruleset.ClassFeatureRegistry,
-	characterClassFeaturesRepo *postgres.CharacterClassFeaturesRepository,
+	characterClassFeaturesRepo CharacterClassFeaturesGetter,
 ) *GameServiceServer {
 	return &GameServiceServer{
 		world:               worldMgr,
@@ -1717,6 +1743,67 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 			}
 			if preset.OffHand != nil {
 				view.OffHand = preset.OffHand.Def.Name
+			}
+		}
+	}
+
+	// Skills block.
+	if s.characterSkillsRepo != nil && len(s.allSkills) > 0 {
+		skillMap, err := s.characterSkillsRepo.GetAll(context.Background(), sess.CharacterID)
+		if err == nil {
+			for _, sk := range s.allSkills {
+				rank := skillMap[sk.ID]
+				if rank == "" {
+					rank = "untrained"
+				}
+				view.Skills = append(view.Skills, &gamev1.SkillEntry{
+					SkillId:     sk.ID,
+					Name:        sk.Name,
+					Ability:     sk.Ability,
+					Proficiency: rank,
+				})
+			}
+		}
+	}
+
+	// Feats block.
+	if s.characterFeatsRepo != nil && s.featRegistry != nil {
+		featIDs, err := s.characterFeatsRepo.GetAll(context.Background(), sess.CharacterID)
+		if err == nil {
+			for _, fid := range featIDs {
+				f, ok := s.featRegistry.Feat(fid)
+				if !ok {
+					continue
+				}
+				view.Feats = append(view.Feats, &gamev1.FeatEntry{
+					FeatId:       f.ID,
+					Name:         f.Name,
+					Active:       f.Active,
+					Description:  f.Description,
+					ActivateText: f.ActivateText,
+				})
+			}
+		}
+	}
+
+	// Class features block.
+	if s.characterClassFeaturesRepo != nil && s.classFeatureRegistry != nil {
+		cfIDs, err := s.characterClassFeaturesRepo.GetAll(context.Background(), sess.CharacterID)
+		if err == nil {
+			for _, cfid := range cfIDs {
+				cf, ok := s.classFeatureRegistry.ClassFeature(cfid)
+				if !ok {
+					continue
+				}
+				view.ClassFeatures = append(view.ClassFeatures, &gamev1.ClassFeatureEntry{
+					FeatureId:    cf.ID,
+					Name:         cf.Name,
+					Archetype:    cf.Archetype,
+					Job:          cf.Job,
+					Active:       cf.Active,
+					Description:  cf.Description,
+					ActivateText: cf.ActivateText,
+				})
 			}
 		}
 	}

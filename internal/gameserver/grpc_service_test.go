@@ -14,9 +14,50 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
+
+// stubSkillsRepo is an in-memory implementation of CharacterSkillsGetter for testing.
+type stubSkillsRepo struct {
+	data map[int64]map[string]string
+}
+
+func (r *stubSkillsRepo) GetAll(_ context.Context, characterID int64) (map[string]string, error) {
+	if m, ok := r.data[characterID]; ok {
+		return m, nil
+	}
+	return map[string]string{}, nil
+}
+
+func (r *stubSkillsRepo) HasSkills(_ context.Context, characterID int64) (bool, error) {
+	m, ok := r.data[characterID]
+	return ok && len(m) > 0, nil
+}
+
+func (r *stubSkillsRepo) SetAll(_ context.Context, characterID int64, skills map[string]string) error {
+	r.data[characterID] = skills
+	return nil
+}
+
+// stubFeatsRepo is an in-memory implementation of CharacterFeatsGetter for testing.
+type stubFeatsRepo struct {
+	data map[int64][]string
+}
+
+func (r *stubFeatsRepo) GetAll(_ context.Context, characterID int64) ([]string, error) {
+	return r.data[characterID], nil
+}
+
+// stubClassFeaturesRepo is an in-memory implementation of CharacterClassFeaturesGetter for testing.
+type stubClassFeaturesRepo struct {
+	data map[int64][]string
+}
+
+func (r *stubClassFeaturesRepo) GetAll(_ context.Context, characterID int64) ([]string, error) {
+	return r.data[characterID], nil
+}
 
 // TestStartZoneTicks_RespawnIntegration verifies that StartZoneTicks drives
 // RespawnManager.Tick, which spawns a pending NPC into the target room.
@@ -365,4 +406,126 @@ func TestGRPCService_Broadcast(t *testing.T) {
 	assert.Equal(t, 2, sessMgr.PlayerCount())
 	players := sessMgr.PlayersInRoom("room_a")
 	assert.Len(t, players, 2)
+}
+
+// testGRPCServerWithCharData starts an in-process gRPC server wired with stub repos
+// and in-memory ruleset data for skills, feats, and class features.
+func testGRPCServerWithCharData(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
+	t.Helper()
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	cmdRegistry := command.DefaultRegistry()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	chatHandler := NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+
+	// Skills.
+	allSkills := []*ruleset.Skill{
+		{ID: "acrobatics", Name: "Acrobatics", Ability: "dex"},
+		{ID: "athletics", Name: "Athletics", Ability: "str"},
+	}
+	skillsRepo := &stubSkillsRepo{
+		data: map[int64]map[string]string{
+			// characterID 0 (the default in test sessions) gets one trained skill.
+			0: {"acrobatics": "trained"},
+		},
+	}
+
+	// Feats.
+	allFeats := []*ruleset.Feat{
+		{ID: "quick-draw", Name: "Quick Draw", Active: true, Description: "Draw fast.", ActivateText: "Activate."},
+	}
+	featRegistry := ruleset.NewFeatRegistry(allFeats)
+	featsRepo := &stubFeatsRepo{
+		data: map[int64][]string{
+			0: {"quick-draw"},
+		},
+	}
+
+	// Class features.
+	allClassFeatures := []*ruleset.ClassFeature{
+		{ID: "battle-cry", Name: "Battle Cry", Archetype: "warrior", Job: "soldier", Active: true, Description: "Cry out.", ActivateText: "Use it."},
+	}
+	cfRegistry := ruleset.NewClassFeatureRegistry(allClassFeatures)
+	cfRepo := &stubClassFeaturesRepo{
+		data: map[int64][]string{
+			0: {"battle-cry"},
+		},
+	}
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr, cmdRegistry,
+		worldHandler, chatHandler, logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		allSkills, skillsRepo,
+		allFeats, featRegistry, featsRepo,
+		allClassFeatures, cfRegistry, cfRepo,
+	)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	grpcServer := grpc.NewServer()
+	gamev1.RegisterGameServiceServer(grpcServer, svc)
+	go func() { _ = grpcServer.Serve(lis) }()
+	t.Cleanup(func() { grpcServer.Stop() })
+
+	conn, err := grpc.NewClient(lis.Addr().String(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	require.NoError(t, err)
+	t.Cleanup(func() { conn.Close() })
+
+	return gamev1.NewGameServiceClient(conn), sessMgr
+}
+
+// TestHandleChar verifies that handleChar populates Skills, Feats, and ClassFeatures
+// on the returned CharacterSheetView.
+func TestHandleChar(t *testing.T) {
+	client, _ := testGRPCServerWithCharData(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := client.Session(ctx)
+	require.NoError(t, err)
+
+	joinWorld(t, stream, "u1", "Alice")
+
+	err = stream.Send(&gamev1.ClientMessage{
+		RequestId: "char1",
+		Payload:   &gamev1.ClientMessage_CharSheet{CharSheet: &gamev1.CharacterSheetRequest{}},
+	})
+	require.NoError(t, err)
+
+	resp, err := stream.Recv()
+	require.NoError(t, err)
+
+	sheet := resp.GetCharacterSheet()
+	require.NotNil(t, sheet, "expected CharacterSheetView response")
+
+	// Skills: two skills expected (acrobatics trained, athletics untrained).
+	require.Len(t, sheet.Skills, 2, "expected 2 skill entries")
+	skillByID := make(map[string]*gamev1.SkillEntry, len(sheet.Skills))
+	for _, sk := range sheet.Skills {
+		skillByID[sk.SkillId] = sk
+	}
+	require.Contains(t, skillByID, "acrobatics")
+	assert.Equal(t, "trained", skillByID["acrobatics"].Proficiency)
+	assert.Equal(t, "dex", skillByID["acrobatics"].Ability)
+	require.Contains(t, skillByID, "athletics")
+	assert.Equal(t, "untrained", skillByID["athletics"].Proficiency)
+
+	// Feats: one feat expected.
+	require.Len(t, sheet.Feats, 1, "expected 1 feat entry")
+	assert.Equal(t, "quick-draw", sheet.Feats[0].FeatId)
+	assert.Equal(t, "Quick Draw", sheet.Feats[0].Name)
+	assert.True(t, sheet.Feats[0].Active)
+
+	// Class features: one class feature expected.
+	require.Len(t, sheet.ClassFeatures, 1, "expected 1 class feature entry")
+	assert.Equal(t, "battle-cry", sheet.ClassFeatures[0].FeatureId)
+	assert.Equal(t, "Battle Cry", sheet.ClassFeatures[0].Name)
+	assert.Equal(t, "warrior", sheet.ClassFeatures[0].Archetype)
+	assert.Equal(t, "soldier", sheet.ClassFeatures[0].Job)
 }
