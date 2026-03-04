@@ -22,31 +22,91 @@
   - Player automap contains the rooms, exits, permanent room equipment and POIs.  We will include non-combat NPCs in the future.
   - Each zone has a safe area at the primary entrance which contains a zone map.  Viewing the look map populates the automap for that zone, but only the rooms and exits; the player must visit a room to discover any permanent equipment, POIs, or non-combat NPCs.
 - [ ] Skills, Feats and Abilities. 
-  - All the P2FE skills, feats, and abilities need to be implemented.  
+  - [ ] All the P2FE skills need to be implemented. 
+  - [ ] All the P2FE feats need to be implemented.
+  - [ ] All the P2FE class features need to be implemented.
   - Where the P2FE lore doesn't match the Gunchete setting it will need migrated.
-  - Skills, feats, and abilities should appear on the character sheet
-  - New commands `skills`, `feats`, and `abilities` that display the known items with details
-  - Players get assigned their initialize skills, abilities, and feats based on their job.  This should happen at creation but also for existing characters.
-  - During character creation (and on backfill for existing characters) if the player must choose between multiple options they should be prompted to choose from a list.
-  - For active skills/feats/abilities a command must exists that allows the player to activate them.  The command should accept the name of the skill/feat/ability but if not provided should prompt the player to select from a list.
+  - [x] Skills should appear on the character sheet
+  - [x] Feats should appear on the character sheet
+  - [x] Class features should appear on the character sheet
+  - New commands `skills`, `feats` that display the known items with details
+  - [ ] Players get assigned their initial skills based on their job.  This should happen at creation but also at login for existing characters.
+  - [ ] Players get assigned their initial class features based on their job.  This should happen at creation but also at login for existing characters.
+  - [ ] Players get assigned their initial feats based on their job.  This should happen at creation but also at login for existing characters.
+  - During character creation if the player must choose between multiple options they should be prompted to choose from a list.
+    - Existing characters must be checked at login for missing options and prompted to select them
+  - [ ] For active skills features a command must exists that allows the player to activate them.  
+    - The command should accept the name of the skill feature but if not provided should prompt the player to select from a list.
+  - [ ] For active feats features a command must exists that allows the player to activate them.  
+    - The command should accept the name of the feat feature but if not provided should prompt the player to select from a list.
+  - [ ] For active class features a command must exists that allows the player to activate them.  
+    - The command should accept the name of the class feature but if not provided should prompt the player to select from a list.
 - [ ] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
 - [ ] Character levelling
 - [ ] Job proficiencies, advancement hierarchy, features and drawbacks, cross-job combinations. The proficiencies defined in the content need to be mapped to the rules system. Class features and drawbacks need to be implemented and match the lore (there is no magic, there is instead high technology) 
-- [ ] Equipment levelling, advanced equipment, cursed equipment, equipment combination and interactions
+- [ ] Equipment mechanics expansion 
+  - advanced equipment and equipment levelling
+    - player requirements 
+    - equipment rarity and features
+      - 5 rarity levels 
+        - each increases the base equipment stats
+        - each increases the number of features
+        - each increases the effectiveness of the existing features
+      - Item names are color coded by rarity level
+  - tuned, defective, and cursed equipment
+    - tuned equipment has a bonus or positive passive effect applied to the specific item
+    - defective equipment has a penalty or negative effect applied to the specific item
+    - cursed equipment applies a penalty or negative effect to player.  
+      - cursed items cannot be removed by the player
+      - cursed items do not appear cursed until equipped
+      - cursed item removal will be developed later
+  - equipment combination and interactions
+  - equipment sets
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor. roomequip is an Editor command.
 - [ ] Non-combat NPCs: merchants, guards, quest givers, hirelings, bankers, skill trainers, etc.
+- [ ] Safe rooms
+  - Rooms are classified as Safe, Sketchy, Dangerous, All Out War
+    - Safe rooms contain no aggressive NPCs, only non-combat NPCs.
+      - Combat is disabled in Safe zones.
+    - Sketchy rooms contain non-Combat NPCs and combat NPCs
+      - Combat is enabled in Sketchy rooms
+      - Combat can only be initiated by players in Sketchy rooms, not by NPCs
+    - Dangerous rooms contain non-Combat NPCs and combat NPCs
+      - Combat is enabled in Dangerous rooms
+      - Combat can only be initiated by anyone in a Dangerous room
+    - All Out War rooms contain only combat NPCs
+      - Combat is enabled in All Out War rooms
+      - NPCs attack on sight in an All Out War room
+  - The safely level of a room should be included in the room description, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
+  - The safely level of a room should be included in the map, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
 - [ ] Per-NPC type custom behaviors
   - dialog taunt and statement templates and generators
   - interactions
-  - aggressiveness
-  - Include daily patterns driven by time of day, reaction to weather and other external environmental stimulus. 
-  - Default combat actions, reactions, and strategy.
+  - aggressiveness/hostility
+  - daily patterns driven by time of day, reaction to weather and other external environmental stimulus. 
+  - default combat actions, reactions, and strategy.
   - map movement and fencing
 - [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
-- [ ] Combat distance, fleeing, pursuit, panic
-- [ ] Animals, robots, machines
-- [ ] Drugs, alcohol, medicine, poisons, toxins 
+- [ ] World map
+  - fast travel
+- [ ] Advanced combat mechanics
+  - Combat distance
+  - NPC fleeing
+  - Pursuit
+  - Panic
+  - Psychosis
+- [ ] Non-Human NPCs
+  - Animals
+  - Robots
+  - Machines
+- [ ] Advanced health effects
+  - drugs
+  - alcohol
+  - medicine
+  - poisons
+  - toxins 
+  - addiction & recovery
 - [ ] Bosses 
 - [ ] Quests
 - [ ] Factions and allegiances
