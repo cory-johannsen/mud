@@ -118,6 +118,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 			if err := h.ensureFeats(ctx, conn, c); err != nil {
 				return err
 			}
+			if err := h.ensureClassFeatures(ctx, conn, c); err != nil {
+				return err
+			}
 			if err := h.gameBridge(ctx, conn, acct, c); err != nil {
 				if errors.Is(err, ErrSwitchCharacter) {
 					continue
@@ -173,6 +176,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 				if err := h.ensureFeats(ctx, conn, c); err != nil {
 					return err
 				}
+				if err := h.ensureClassFeatures(ctx, conn, c); err != nil {
+					return err
+				}
 				if err := h.gameBridge(ctx, conn, acct, c); err != nil {
 					if errors.Is(err, ErrSwitchCharacter) {
 						continue
@@ -193,6 +199,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 			return err
 		}
 		if err := h.ensureFeats(ctx, conn, selected); err != nil {
+			return err
+		}
+		if err := h.ensureClassFeatures(ctx, conn, selected); err != nil {
 			return err
 		}
 		if err := h.gameBridge(ctx, conn, acct, selected); err != nil {
@@ -670,6 +679,46 @@ func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *
 		h.logger.Error("persisting backfill feats", zap.Int64("id", char.ID), zap.Error(err))
 		_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Warning: feats could not be saved."))
 	}
+	return nil
+}
+
+// ensureClassFeatures checks whether the character has class features recorded and, if not,
+// assigns all class features from the job (all fixed — no player selection) and persists.
+// Called before gameBridge for both new and existing characters so backfill always runs.
+//
+// Precondition: char must have a valid ID and Class set.
+// Postcondition: character_class_features rows exist for char; returns non-nil error only on fatal failure.
+func (h *AuthHandler) ensureClassFeatures(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
+	if h.characterClassFeatures == nil || h.classFeatureRegistry == nil {
+		return nil
+	}
+	has, err := h.characterClassFeatures.HasClassFeatures(ctx, char.ID)
+	if err != nil {
+		h.logger.Warn("checking class features for character", zap.Int64("id", char.ID), zap.Error(err))
+		return nil
+	}
+	if has {
+		return nil
+	}
+
+	job, ok := h.jobRegistry.Job(char.Class)
+	if !ok {
+		h.logger.Warn("unknown job for class feature backfill", zap.String("class", char.Class))
+		return nil
+	}
+
+	featureIDs := character.BuildClassFeaturesFromJob(job)
+	if len(featureIDs) == 0 {
+		return nil
+	}
+
+	if err := h.characterClassFeatures.SetAll(ctx, char.ID, featureIDs); err != nil {
+		h.logger.Warn("persisting class features", zap.Int64("id", char.ID), zap.Error(err))
+		return nil
+	}
+
+	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
+		"Class features assigned: %d features from %s.", len(featureIDs), job.Name))
 	return nil
 }
 

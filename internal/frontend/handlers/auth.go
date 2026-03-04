@@ -58,6 +58,12 @@ type CharacterFeatsSetter interface {
 	SetAll(ctx context.Context, characterID int64, feats []string) error
 }
 
+// CharacterClassFeaturesSetter defines class feature persistence operations required by AuthHandler.
+type CharacterClassFeaturesSetter interface {
+	HasClassFeatures(ctx context.Context, characterID int64) (bool, error)
+	SetAll(ctx context.Context, characterID int64, featureIDs []string) error
+}
+
 // AuthHandler implements telnet.SessionHandler and processes the
 // authentication loop for a connected client.
 type AuthHandler struct {
@@ -71,9 +77,12 @@ type AuthHandler struct {
 	allSkills       []*ruleset.Skill
 	characterSkills CharacterSkillsSetter
 	characterFeats  CharacterFeatsSetter
-	allFeats        []*ruleset.Feat
-	featRegistry    *ruleset.FeatRegistry
-	logger          *zap.Logger
+	allFeats               []*ruleset.Feat
+	featRegistry           *ruleset.FeatRegistry
+	characterClassFeatures CharacterClassFeaturesSetter
+	allClassFeatures       []*ruleset.ClassFeature
+	classFeatureRegistry   *ruleset.ClassFeatureRegistry
+	logger                 *zap.Logger
 	gameServerAddr string
 	telnetCfg      config.TelnetConfig
 }
@@ -97,6 +106,8 @@ func NewAuthHandler(
 	characterSkills CharacterSkillsSetter,
 	allFeats []*ruleset.Feat,
 	characterFeats CharacterFeatsSetter,
+	allClassFeatures []*ruleset.ClassFeature,
+	characterClassFeatures CharacterClassFeaturesSetter,
 ) *AuthHandler {
 	reg := ruleset.NewJobRegistry()
 	for _, j := range jobs {
@@ -105,6 +116,10 @@ func NewAuthHandler(
 	var featReg *ruleset.FeatRegistry
 	if len(allFeats) > 0 {
 		featReg = ruleset.NewFeatRegistry(allFeats)
+	}
+	var cfReg *ruleset.ClassFeatureRegistry
+	if len(allClassFeatures) > 0 {
+		cfReg = ruleset.NewClassFeatureRegistry(allClassFeatures)
 	}
 	return &AuthHandler{
 		accounts:        accounts,
@@ -116,10 +131,13 @@ func NewAuthHandler(
 		jobRegistry:     reg,
 		allSkills:       allSkills,
 		characterSkills: characterSkills,
-		characterFeats:  characterFeats,
-		allFeats:        allFeats,
-		featRegistry:    featReg,
-		logger:          logger,
+		characterFeats:         characterFeats,
+		allFeats:               allFeats,
+		featRegistry:           featReg,
+		characterClassFeatures: characterClassFeatures,
+		allClassFeatures:       allClassFeatures,
+		classFeatureRegistry:   cfReg,
+		logger:                 logger,
 		gameServerAddr:  gameServerAddr,
 		telnetCfg:       telnetCfg,
 	}
