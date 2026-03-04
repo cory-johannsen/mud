@@ -972,8 +972,27 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 			result := skillcheck.Resolve(roll, amod, rank, trigger.DC, trigger)
 
 			outcome := trigger.Outcomes.ForOutcome(result.Outcome)
-			if outcome != nil && outcome.Message != "" {
-				msgs = append(msgs, outcome.Message)
+			if outcome != nil {
+				if outcome.Message != "" {
+					msgs = append(msgs, outcome.Message)
+				}
+				// Apply non-deny effects (deny is not applicable for on_greet).
+				if outcome.Effect != nil && outcome.Effect.Type != "deny" {
+					if outcome.Effect.Type == "damage" && outcome.Effect.Formula != "" && s.dice != nil {
+						dmg, dmgErr := s.dice.RollExpr(outcome.Effect.Formula)
+						if dmgErr == nil {
+							sess.CurrentHP -= dmg.Total()
+							if sess.CurrentHP < 0 {
+								sess.CurrentHP = 0
+							}
+						} else {
+							s.logger.Warn("applyNPCSkillChecks: damage formula error",
+								zap.String("formula", outcome.Effect.Formula),
+								zap.Error(dmgErr),
+							)
+						}
+					}
+				}
 			}
 
 			if s.scriptMgr != nil {

@@ -1250,3 +1250,88 @@ func TestApplyNPCSkillChecks_NonGreetTriggerIgnored(t *testing.T) {
 	msgs := svc.applyNPCSkillChecks("u_non_greet", "room_a")
 	assert.Empty(t, msgs, "expected no messages when NPC has no on_greet triggers")
 }
+
+// TestApplyNPCSkillChecks_DamageEffect verifies that when an NPC on_greet skill check
+// outcome carries a damage effect the player's CurrentHP is reduced by the rolled damage.
+//
+// Precondition: NPC template has smooth_talk on_greet DC 10 with failure outcome
+// Effect{Type:"damage", Formula:"1d4"}; player has Flair=10 (mod=0), untrained (profBonus=0);
+// fixed dice source returns 0 → d20 roll=1, total=1; CritFailure threshold=DC-10=0, so
+// total=1 > 0 → regular Failure (not CritFailure); total=1 < DC10 → failure branch taken.
+// Damage formula "1d4": Intn(4)=0 → damage=1.
+// Postcondition: sess.CurrentHP == 9 (10 - 1).
+func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+
+	npcMgr := npc.NewManager()
+
+	tmpl := &npc.Template{
+		ID:          "brutal_guard",
+		Name:        "Brutal Guard",
+		Description: "A guard who attacks on a failed greeting.",
+		Level:       1,
+		MaxHP:       10,
+		AC:          10,
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "smooth_talk",
+				DC:      10,
+				Trigger: "on_greet",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "They let you pass."},
+					Failure: &skillcheck.Outcome{
+						Message: "They strike you!",
+						Effect:  &skillcheck.Effect{Type: "damage", Formula: "1d4"},
+					},
+				},
+			},
+		},
+	}
+	_, err := npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+
+	// Fixed dice: Intn(n) always returns 0.
+	// d20 roll=1; Flair=10 → mod=0; untrained → profBonus=0; total=1.
+	// CritFailure threshold=DC-10=0; total=1 > 0 → regular Failure.
+	// total=1 < DC10 → Failure branch taken.
+	// Damage formula "1d4": Intn(4)=0 → damage=1.
+	src := &fixedDiceSource{val: 0}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	skills := []*ruleset.Skill{
+		{ID: "smooth_talk", Name: "Smooth Talk", Ability: "flair"},
+	}
+
+	npcHandler := NewNPCHandler(npcMgr, sessMgr)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, npcHandler, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_npc_dmg_effect",
+		Username:  "Victim",
+		CharName:  "Victim",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{Flair: 10},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	// No skills set → untrained (profBonus = 0).
+
+	msgs := svc.applyNPCSkillChecks("u_npc_dmg_effect", "room_a")
+	require.Len(t, msgs, 1, "expected exactly one outcome message")
+	assert.Equal(t, "They strike you!", msgs[0])
+
+	// Intn(4)=0 → dice result=1; damage total=1; 10-1=9.
+	assert.Equal(t, 9, sess.CurrentHP, "CurrentHP must be reduced by the NPC on_greet damage effect")
+}
