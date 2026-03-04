@@ -1,0 +1,1048 @@
+feats:
+  # ── GENERAL FEATS ─────────────────────────────────────────────────────────
+  - id: toughness
+    name: Toughness
+    category: general
+    pf2e: toughness
+    active: false
+    activate_text: ""
+    description: "Max HP increases by your level; recovery checks are easier."
+
+  - id: fleet
+    name: Fleet
+    category: general
+    pf2e: fleet
+    active: false
+    activate_text: ""
+    description: "Your movement speed increases by 5 feet."
+
+  - id: hair_trigger
+    name: Hair Trigger
+    category: general
+    pf2e: incredible_initiative
+    active: false
+    activate_text: ""
+    description: "+2 to initiative rolls."
+
+  - id: armor_training
+    name: Armor Training
+    category: general
+    pf2e: armor_proficiency
+    active: false
+    activate_text: ""
+    description: "Gain proficiency in one additional armor category."
+
+  - id: weapon_training
+    name: Weapon Training
+    category: general
+    pf2e: weapon_proficiency
+    active: false
+    activate_text: ""
+    description: "Gain proficiency with one weapon group or specific weapon."
+
+  - id: block
+    name: Block
+    category: general
+    pf2e: shield_block
+    active: true
+    activate_text: "You raise your shield and absorb the blow."
+    description: "When hit by a physical attack, use your reaction to reduce damage with a raised shield."
+
+  - id: hard_to_kill
+    name: Hard to Kill
+    category: general
+    pf2e: diehard
+    active: false
+    activate_text: ""
+    description: "You die at dying 5 instead of dying 4."
+
+  - id: quick_recovery
+    name: Quick Recovery
+    category: general
+    pf2e: fast_recovery
+    active: false
+    activate_text: ""
+    description: "Recover twice as fast; rest restores bonus HP equal to your Grit modifier."
+
+  - id: iron_lungs
+    name: Iron Lungs
+    category: general
+    pf2e: breath_control
+    active: false
+    activate_text: ""
+    description: "Hold your breath 25x longer; bonus to saves vs. gas and inhaled toxins."
+
+  - id: sharpened_edge
+    name: Sharpened Edge
+    category: general
+    pf2e: canny_acumen
+    active: false
+    activate_text: ""
+    description: "Increase your proficiency rank in Fortitude, Reflex, Will, or Perception."
+
+  - id: light_step
+    name: Light Step
+    category: general
+    pf2e: feather_step
+    active: true
+    activate_text: "You pick your way through the debris with practiced ease."
+    description: "Step into difficult terrain (rubble, debris) as normal movement."
+
+  # ── SKILL FEATS: PARKOUR ──────────────────────────────────────────────────
+  - id: assurance_parkour
+    name: Steady Parkour
+    category: skill
+    skill: parkour
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Parkour rolls as 10; ignore circumstance and status penalties."
+
+  - id: fall_breaker
+    name: Fall Breaker
+    category: skill
+    skill: parkour
+    pf2e: cat_fall
+    active: false
+    activate_text: ""
+    description: "Treat falls as 10 feet shorter; you land rolling without injury."
+
+  - id: squeeze_through
+    name: Squeeze Through
+    category: skill
+    skill: parkour
+    pf2e: quick_squeeze
+    active: true
+    activate_text: "You contort and slip through at full speed."
+    description: "Move through tight spaces at full speed without slowing."
+
+  - id: street_footing
+    name: Street Footing
+    category: skill
+    skill: parkour
+    pf2e: steady_balance
+    active: false
+    activate_text: ""
+    description: "Ignore unstable ground penalties; stand from prone without drawing reactions."
+
+  # ── SKILL FEATS: GHOSTING ─────────────────────────────────────────────────
+  - id: assurance_ghosting
+    name: Steady Ghosting
+    category: skill
+    skill: ghosting
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Ghosting rolls as 10."
+
+  - id: clean_pass
+    name: Clean Pass
+    category: skill
+    skill: ghosting
+    pf2e: experienced_smuggler
+    active: false
+    activate_text: ""
+    description: "+2 to conceal items; can hide objects in plain sight on your person."
+
+  - id: zone_stalker
+    name: Zone Stalker
+    category: skill
+    skill: ghosting
+    pf2e: terrain_stalker
+    active: false
+    activate_text: ""
+    description: "Choose one terrain type (rubble, sewer, crowd); move through it silently without a roll."
+
+  # ── SKILL FEATS: GRIFT ────────────────────────────────────────────────────
+  - id: assurance_grift
+    name: Steady Grift
+    category: skill
+    skill: grift
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Grift rolls as 10."
+
+  - id: pickpocket
+    name: Pickpocket
+    category: skill
+    skill: grift
+    pf2e: pickpocket
+    active: true
+    activate_text: "Your hand moves before they even notice."
+    description: "Lift items up to light bulk even from alert targets without penalty."
+
+  - id: clean_lift
+    name: Clean Lift
+    category: skill
+    skill: grift
+    pf2e: subtle_theft
+    active: false
+    activate_text: ""
+    description: "Bystanders must pass a Perception check to notice a successful steal."
+
+  # ── SKILL FEATS: MUSCLE ───────────────────────────────────────────────────
+  - id: assurance_muscle
+    name: Steady Muscle
+    category: skill
+    skill: muscle
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Muscle rolls as 10."
+
+  - id: combat_climber
+    name: Combat Climber
+    category: skill
+    skill: muscle
+    pf2e: combat_climber
+    active: false
+    activate_text: ""
+    description: "Climb without going flat-footed; use a hand holding an item for climbing."
+
+  - id: pack_mule
+    name: Pack Mule
+    category: skill
+    skill: muscle
+    pf2e: hefty_hauler
+    active: false
+    activate_text: ""
+    description: "Your carry weight limit increases by 2 Bulk."
+
+  - id: quick_jump
+    name: Quick Jump
+    category: skill
+    skill: muscle
+    pf2e: quick_jump
+    active: true
+    activate_text: "You launch yourself in one fluid motion."
+    description: "High Jump or Long Jump as a single action instead of two."
+
+  - id: size_up
+    name: Size Up
+    category: skill
+    skill: muscle
+    pf2e: titan_wrestler
+    active: false
+    activate_text: ""
+    description: "Disarm, Grapple, Shove, or Trip creatures up to two sizes larger than you."
+
+  - id: waterproof
+    name: Waterproof
+    category: skill
+    skill: muscle
+    pf2e: underwater_marauder
+    active: false
+    activate_text: ""
+    description: "No penalty for weapon use underwater; not flat-footed while submerged."
+
+  # ── SKILL FEATS: TECH LORE ────────────────────────────────────────────────
+  - id: assurance_tech_lore
+    name: Steady Tech Lore
+    category: skill
+    skill: tech_lore
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Tech Lore rolls as 10."
+
+  - id: tech_sense
+    name: Tech Sense
+    category: skill
+    skill: tech_lore
+    pf2e: arcane_sense
+    active: true
+    activate_text: "You close your eyes and let your training guide you. Nearby electronics flicker at the edge of your awareness."
+    description: "Detect active electronics, transmitters, or powered devices nearby at will."
+
+  # ── SKILL FEATS: RIGGING ──────────────────────────────────────────────────
+  - id: assurance_rigging
+    name: Steady Rigging
+    category: skill
+    skill: rigging
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Rigging rolls as 10."
+
+  - id: chem_crafting
+    name: Chem Crafting
+    category: skill
+    skill: rigging
+    pf2e: alchemical_crafting
+    active: true
+    activate_text: "You mix the compounds from memory, hands moving with practiced efficiency."
+    description: "Craft drugs, poisons, and chemical items; start with four common formulas."
+
+  - id: quick_fix
+    name: Quick Fix
+    category: skill
+    skill: rigging
+    pf2e: quick_repair
+    active: true
+    activate_text: "You jam the components together and hope for the best."
+    description: "Repair gear in 1 minute instead of 10; at higher skill in a single action."
+
+  - id: trap_crafting
+    name: Trap Crafting
+    category: skill
+    skill: rigging
+    pf2e: snare_crafting
+    active: true
+    activate_text: "You set the mechanism with careful hands."
+    description: "Craft mechanical traps; start with four common trap formulas."
+
+  - id: specialty_work
+    name: Specialty Work
+    category: skill
+    skill: rigging
+    pf2e: specialty_crafting
+    active: false
+    activate_text: ""
+    description: "Choose a craft type; +1 bonus to that type, improving with proficiency."
+
+  # ── SKILL FEATS: CONSPIRACY ───────────────────────────────────────────────
+  - id: assurance_conspiracy
+    name: Steady Conspiracy
+    category: skill
+    skill: conspiracy
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Conspiracy rolls as 10."
+
+  - id: anomaly_id
+    name: Anomaly ID
+    category: skill
+    skill: conspiracy
+    pf2e: oddity_identification
+    active: false
+    activate_text: ""
+    description: "+2 to Recall Knowledge about cover-ups, weird phenomena, and shadow organizations."
+
+  # ── SKILL FEATS: FACTIONS ─────────────────────────────────────────────────
+  - id: assurance_factions
+    name: Steady Factions
+    category: skill
+    skill: factions
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Factions rolls as 10."
+
+  - id: faction_protocol
+    name: Faction Protocol
+    category: skill
+    skill: factions
+    pf2e: courtly_graces
+    active: true
+    activate_text: "You switch into the correct register for this crowd."
+    description: "Use Factions instead of Smooth Talk to make an impression on faction leaders."
+
+  - id: multilingual
+    name: Multilingual
+    category: skill
+    skill: factions
+    pf2e: multilingual
+    active: false
+    activate_text: ""
+    description: "Learn two additional street dialects or languages."
+
+  - id: read_lips
+    name: Read Lips
+    category: skill
+    skill: factions
+    pf2e: read_lips
+    active: false
+    activate_text: ""
+    description: "Lip-read anyone you can see, even through a window or at a distance."
+
+  - id: street_signs
+    name: Street Signs
+    category: skill
+    skill: factions
+    pf2e: sign_language
+    active: false
+    activate_text: ""
+    description: "Know gang sign language for your territory plus one additional crew's signs."
+
+  - id: streetwise
+    name: Streetwise
+    category: skill
+    skill: factions
+    pf2e: streetwise
+    active: true
+    activate_text: "You tap your network and start asking the right questions."
+    description: "Use Factions instead of Smooth Talk to gather information in urban areas."
+
+  # ── SKILL FEATS: INTEL ────────────────────────────────────────────────────
+  - id: assurance_intel
+    name: Steady Intel
+    category: skill
+    skill: intel
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Intel rolls as 10."
+
+  - id: field_intel
+    name: Field Intel
+    category: skill
+    skill: intel
+    pf2e: additional_lore
+    active: false
+    activate_text: ""
+    description: "Add one additional Intel specialty area as a trained knowledge."
+
+  - id: street_cred
+    name: Street Cred
+    category: skill
+    skill: intel
+    pf2e: experienced_professional
+    active: false
+    activate_text: ""
+    description: "Earn income via Intel; on a critical failure you earn the partial amount instead of nothing."
+
+  # ── SKILL FEATS: PATCH JOB ────────────────────────────────────────────────
+  - id: assurance_patch_job
+    name: Steady Patch Job
+    category: skill
+    skill: patch_job
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Patch Job rolls as 10."
+
+  - id: combat_patch
+    name: Combat Patch
+    category: skill
+    skill: patch_job
+    pf2e: battle_medicine
+    active: true
+    activate_text: "You slap a patch on the wound and keep moving."
+    description: "Apply first aid as a single action without a kit; target immune for 1 day."
+
+  # ── SKILL FEATS: WASTELAND ────────────────────────────────────────────────
+  - id: assurance_wasteland
+    name: Steady Wasteland
+    category: skill
+    skill: wasteland
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Wasteland rolls as 10."
+
+  - id: wasteland_remedy
+    name: Wasteland Remedy
+    category: skill
+    skill: wasteland
+    pf2e: natural_medicine
+    active: true
+    activate_text: "You gather what you can from the ruins and get to work."
+    description: "Use Wasteland instead of Patch Job to treat wounds with found materials."
+
+  - id: animal_bond
+    name: Animal Bond
+    category: skill
+    skill: wasteland
+    pf2e: train_animal
+    active: true
+    activate_text: "You crouch down and make yourself small, earning trust the slow way."
+    description: "Teach a non-magical animal up to 2 commands or tricks."
+
+  # ── SKILL FEATS: GANG CODES ───────────────────────────────────────────────
+  - id: assurance_gang_codes
+    name: Steady Gang Codes
+    category: skill
+    skill: gang_codes
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Gang Codes rolls as 10."
+
+  - id: code_scholar
+    name: Code Scholar
+    category: skill
+    skill: gang_codes
+    pf2e: student_of_the_canon
+    active: false
+    activate_text: ""
+    description: "Never critically fail Gang Codes recall checks; +2 to religious and ritual knowledge."
+
+  # ── SKILL FEATS: SCAVENGING ───────────────────────────────────────────────
+  - id: assurance_scavenging
+    name: Steady Scavenging
+    category: skill
+    skill: scavenging
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Scavenging rolls as 10."
+
+  - id: trail_reader
+    name: Trail Reader
+    category: skill
+    skill: scavenging
+    pf2e: experienced_tracker
+    active: false
+    activate_text: ""
+    description: "Track without moving at half speed; follow trails while moving at normal pace."
+
+  - id: scavengers_eye
+    name: Scavenger's Eye
+    category: skill
+    skill: scavenging
+    pf2e: forager
+    active: true
+    activate_text: "You sweep the area with practiced eyes, pulling together what you need."
+    description: "Subsist yourself and allies equal to your Scavenging modifier in the ruins."
+
+  - id: zone_survey
+    name: Zone Survey
+    category: skill
+    skill: scavenging
+    pf2e: survey_wildlife
+    active: true
+    activate_text: "You spend ten minutes reading the zone — movement, smells, heat signatures."
+    description: "10-minute survey of an area reveals threats, resources, and hazards."
+
+  - id: zone_expertise
+    name: Zone Expertise
+    category: skill
+    skill: scavenging
+    pf2e: terrain_expertise
+    active: false
+    activate_text: ""
+    description: "Choose a terrain (ruins, sewers, industrial); +1 to Scavenging checks there."
+
+  # ── SKILL FEATS: HUSTLE ───────────────────────────────────────────────────
+  - id: assurance_hustle
+    name: Steady Hustle
+    category: skill
+    skill: hustle
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Hustle rolls as 10."
+
+  - id: silver_tongue
+    name: Silver Tongue
+    category: skill
+    skill: hustle
+    pf2e: charming_liar
+    active: false
+    activate_text: ""
+    description: "Critical success on a lie makes the target friendly or helpful toward you."
+
+  - id: long_con
+    name: Long Con
+    category: skill
+    skill: hustle
+    pf2e: lengthy_diversion
+    active: false
+    activate_text: ""
+    description: "A diversion you create lasts until end of your next turn rather than a moment."
+
+  - id: bs_detector
+    name: BS Detector
+    category: skill
+    skill: hustle
+    pf2e: lie_to_me
+    active: true
+    activate_text: "You watch their face carefully, looking for the tells."
+    description: "When someone lies to you, use Hustle instead of Perception to detect it."
+
+  # ── SKILL FEATS: SMOOTH TALK ──────────────────────────────────────────────
+  - id: assurance_smooth_talk
+    name: Steady Smooth Talk
+    category: skill
+    skill: smooth_talk
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Smooth Talk rolls as 10."
+
+  - id: deal_finder
+    name: Deal Finder
+    category: skill
+    skill: smooth_talk
+    pf2e: bargain_hunter
+    active: false
+    activate_text: ""
+    description: "When earning income via Smooth Talk, find discounts and special items for sale."
+
+  - id: crowd_work
+    name: Crowd Work
+    category: skill
+    skill: smooth_talk
+    pf2e: group_impression
+    active: true
+    activate_text: "You play to the whole room at once."
+    description: "Make an impression on up to 10 people at once with a single check."
+
+  - id: street_networker
+    name: Street Networker
+    category: skill
+    skill: smooth_talk
+    pf2e: hobnobber
+    active: true
+    activate_text: "You work your contacts and get answers fast."
+    description: "Gather information in half the normal time; critical failure still yields partial info."
+
+  # ── SKILL FEATS: HARD LOOK ────────────────────────────────────────────────
+  - id: assurance_hard_look
+    name: Steady Hard Look
+    category: skill
+    skill: hard_look
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Hard Look rolls as 10."
+
+  - id: mass_intimidation
+    name: Mass Intimidation
+    category: skill
+    skill: hard_look
+    pf2e: group_coercion
+    active: true
+    activate_text: "You sweep the room with a look that says you mean business."
+    description: "Coerce up to 5 people at once with a single check."
+
+  - id: death_stare
+    name: Death Stare
+    category: skill
+    skill: hard_look
+    pf2e: intimidating_glare
+    active: true
+    activate_text: "You fix them with a look that says exactly how this ends."
+    description: "Demoralize a target with a look alone; no words required."
+
+  - id: fast_threat
+    name: Fast Threat
+    category: skill
+    skill: hard_look
+    pf2e: quick_coercion
+    active: true
+    activate_text: "You get your point across in one sentence."
+    description: "Coerce someone with only one exchange of words rather than a minute."
+
+  # ── SKILL FEATS: REP ──────────────────────────────────────────────────────
+  - id: assurance_rep
+    name: Steady Rep
+    category: skill
+    skill: rep
+    pf2e: assurance
+    active: false
+    activate_text: ""
+    description: "Treat Rep rolls as 10."
+
+  - id: crowd_control
+    name: Crowd Control
+    category: skill
+    skill: rep
+    pf2e: fascinating_performance
+    active: true
+    activate_text: "You command the room. Everyone watches."
+    description: "Perform to hold up to 4 people's attention; -2 Perception vs. others."
+
+  - id: rep_play
+    name: Rep Play
+    category: skill
+    skill: rep
+    pf2e: impressive_performance
+    active: true
+    activate_text: "You turn on the presence and let your reputation do the work."
+    description: "Use Rep instead of Smooth Talk to make an impression."
+
+  - id: signature_style
+    name: Signature Style
+    category: skill
+    skill: rep
+    pf2e: virtuosic_performer
+    active: false
+    activate_text: ""
+    description: "Choose a Rep specialty (music, street art, combat style); +1 to that type."
+
+  # ── JOB FEATS: AGGRESSOR ──────────────────────────────────────────────────
+  - id: brutal_charge
+    name: Brutal Charge
+    category: job
+    archetype: aggressor
+    pf2e: sudden_charge
+    active: true
+    activate_text: "You close the distance before they can react."
+    description: "Advance twice and make a melee strike as a single sequence."
+
+  - id: reactive_block
+    name: Reactive Block
+    category: job
+    archetype: aggressor
+    pf2e: reactive_shield
+    active: true
+    activate_text: "You snap your shield up just in time."
+    description: "When hit by a physical attack, raise your shield as a reaction to reduce damage."
+
+  - id: overpower
+    name: Overpower
+    category: job
+    archetype: aggressor
+    pf2e: vicious_swing
+    active: true
+    activate_text: "You put everything into it."
+    description: "Wind up a two-handed strike dealing two extra damage dice."
+
+  - id: snap_shot
+    name: Snap Shot
+    category: job
+    archetype: aggressor
+    pf2e: exacting_strike
+    active: true
+    activate_text: "You squeeze the trigger the moment you have a bead."
+    description: "A missed attack counts as only one hit for multi-attack penalty purposes."
+
+  - id: adrenaline_surge
+    name: Adrenaline Surge
+    category: job
+    archetype: aggressor
+    pf2e: moment_of_clarity
+    active: true
+    activate_text: "The adrenaline cuts through the haze and you think clearly for a moment."
+    description: "Once per rage, use a focus action that normally can't be used while enraged."
+
+  - id: raging_threat
+    name: Raging Threat
+    category: job
+    archetype: aggressor
+    pf2e: raging_intimidation
+    active: false
+    activate_text: ""
+    description: "Demoralize enemies while enraged; your rage itself counts as a threat display."
+
+  - id: cover_fire
+    name: Cover Fire
+    category: job
+    archetype: aggressor
+    pf2e: cover_fire
+    active: true
+    activate_text: "You lay down fire to keep their heads down."
+    description: "Fire at a target to give an ally +2 AC against that target's next ranged attack."
+
+  - id: dual_draw
+    name: Dual Draw
+    category: job
+    archetype: aggressor
+    pf2e: dual_weapon_reload
+    active: true
+    activate_text: "You reload and draw in one smooth motion."
+    description: "Reload a one-handed firearm and simultaneously draw a second weapon."
+
+  - id: combat_read
+    name: Combat Read
+    category: job
+    archetype: aggressor
+    pf2e: combat_assessment
+    active: true
+    activate_text: "You study their stance and attack at the same time."
+    description: "Strike and simultaneously attempt to read the target's weaknesses on a hit."
+
+  - id: hit_the_dirt
+    name: Hit the Dirt
+    category: job
+    archetype: aggressor
+    pf2e: hit_the_dirt
+    active: true
+    activate_text: "You drop flat the moment you hear the shot."
+    description: "Drop prone as a reaction when targeted by ranged fire; gain +2 AC against that attack."
+
+  # ── JOB FEATS: CRIMINAL ───────────────────────────────────────────────────
+  - id: quick_dodge
+    name: Quick Dodge
+    category: job
+    archetype: criminal
+    pf2e: nimble_dodge
+    active: true
+    activate_text: "You twist out of the way at the last moment."
+    description: "When targeted by an attack, use your reaction to gain +2 AC."
+
+  - id: trap_eye
+    name: Trap Eye
+    category: job
+    archetype: criminal
+    pf2e: trap_finder
+    active: false
+    activate_text: ""
+    description: "+1 to spot traps; bonus to AC and saves against traps; passively notice traps."
+
+  - id: twin_strike
+    name: Twin Strike
+    category: job
+    archetype: criminal
+    pf2e: twin_feint
+    active: true
+    activate_text: "You feint high and follow through low."
+    description: "Two quick strikes with different weapons; the second automatically catches them off-guard."
+
+  - id: youre_next
+    name: You're Next
+    category: job
+    archetype: criminal
+    pf2e: youre_next
+    active: true
+    activate_text: "You look at the next one and let the moment speak for itself."
+    description: "When you drop an enemy to 0 HP, immediately demoralize a nearby enemy as a reaction."
+
+  - id: overextend
+    name: Overextend
+    category: job
+    archetype: criminal
+    pf2e: overextending_feint
+    active: false
+    activate_text: ""
+    description: "A successful feint leaves the target off-guard against all your attacks this turn."
+
+  - id: tumble_behind
+    name: Tumble Behind
+    category: job
+    archetype: criminal
+    pf2e: tumble_behind
+    active: false
+    activate_text: ""
+    description: "Tumbling through a foe's space leaves them off-guard to your next attack."
+
+  - id: plant_evidence
+    name: Plant Evidence
+    category: job
+    archetype: criminal
+    pf2e: plant_evidence
+    active: true
+    activate_text: "Smooth and clean. They'll never know."
+    description: "Plant an item on a target without being detected."
+
+  - id: dueling_guard
+    name: Dueling Guard
+    category: job
+    archetype: criminal
+    pf2e: dueling_parry
+    active: true
+    activate_text: "You settle into your guard and dare them to come at you."
+    description: "Use an action to gain +2 AC until next turn when fighting with one melee weapon."
+
+  - id: flying_blade
+    name: Flying Blade
+    category: job
+    archetype: criminal
+    pf2e: flying_blade
+    active: false
+    activate_text: ""
+    description: "Thrown melee weapons apply your precision bonus as if you were in melee."
+
+  # ── JOB FEATS: DRIFTER ────────────────────────────────────────────────────
+  - id: mark_target
+    name: Mark Target
+    category: job
+    archetype: drifter
+    pf2e: hunt_prey
+    active: true
+    activate_text: "You fix them in your mind and start tracking every detail."
+    description: "Designate a target; gain +1 to all checks against that target for 1 day."
+
+  - id: rapid_shot
+    name: Rapid Shot
+    category: job
+    archetype: drifter
+    pf2e: hunted_shot
+    active: true
+    activate_text: "Two shots, one breath."
+    description: "Fire two ranged attacks at your marked target as a single action."
+
+  - id: field_study
+    name: Field Study
+    category: job
+    archetype: drifter
+    pf2e: monster_hunter
+    active: true
+    activate_text: "You read them as you mark them."
+    description: "As part of marking a target, attempt a Recall Knowledge check about them."
+
+  - id: known_weakness
+    name: Known Weakness
+    category: job
+    archetype: drifter
+    pf2e: known_weakness
+    active: false
+    activate_text: ""
+    description: "Successful Recall Knowledge also reveals one weakness; critical success reveals two."
+
+  - id: share_intel
+    name: Share Intel
+    category: job
+    archetype: drifter
+    pf2e: clue_them_all_in
+    active: true
+    activate_text: "You brief the team on what you know."
+    description: "Share your Mark Target bonus with up to 5 allies."
+
+  - id: animal_companion_drifter
+    name: Animal Companion
+    category: job
+    archetype: drifter
+    pf2e: animal_companion
+    active: false
+    activate_text: ""
+    description: "Gain a young animal companion that assists you in the field."
+
+  # ── JOB FEATS: INFLUENCER ─────────────────────────────────────────────────
+  - id: street_knowledge
+    name: Street Knowledge
+    category: job
+    archetype: influencer
+    pf2e: bardic_lore
+    active: true
+    activate_text: "You dig through memory for what you know about this."
+    description: "Use your Rep modifier for any Recall Knowledge check regardless of the skill required."
+
+  - id: sustained_presence
+    name: Sustained Presence
+    category: job
+    archetype: influencer
+    pf2e: lingering_composition
+    active: true
+    activate_text: "You keep the energy up, feeding it deliberately."
+    description: "Extend a performance or social effect by 1 round on a success, 3 on a critical success."
+
+  - id: crowd_performer
+    name: Crowd Performer
+    category: job
+    archetype: influencer
+    pf2e: versatile_performance
+    active: true
+    activate_text: "You read the crowd and switch registers."
+    description: "Use Rep in place of Smooth Talk, Hard Look, or Hustle for certain social actions."
+
+  - id: raw_intensity
+    name: Raw Intensity
+    category: job
+    archetype: influencer
+    pf2e: dangerous_sorcery
+    active: false
+    activate_text: ""
+    description: "Damage-dealing social or psychological actions deal bonus damage equal to their intensity rank."
+
+  - id: reach_influence
+    name: Reach Influence
+    category: job
+    archetype: influencer
+    pf2e: reach_spell
+    active: true
+    activate_text: "You project further than they expect."
+    description: "Spend 1 extra action to extend the reach or area of a social action."
+
+  # ── JOB FEATS: NERD ───────────────────────────────────────────────────────
+  - id: quick_bomb
+    name: Quick Bomb
+    category: job
+    archetype: nerd
+    pf2e: quick_bomber
+    active: true
+    activate_text: "You have it out and armed before the moment is gone."
+    description: "Draw an explosive or chemical item and immediately use it as one combined action."
+
+  - id: field_identify
+    name: Field Identify
+    category: job
+    archetype: nerd
+    pf2e: alchemical_savant
+    active: true
+    activate_text: "You turn it over in your hands and know exactly what it is."
+    description: "Identify a tech or chemical item you're holding in a single action."
+
+  - id: tamper
+    name: Tamper
+    category: job
+    archetype: nerd
+    pf2e: tamper
+    active: true
+    activate_text: "You make a small, invisible adjustment."
+    description: "Sabotage a foe's weapon or armor; -2 to attack or AC until they clear it."
+
+  - id: jury_rig
+    name: Jury Rig
+    category: job
+    archetype: nerd
+    pf2e: haphazard_repair
+    active: true
+    activate_text: "You slap it together and cross your fingers."
+    description: "Attempt an emergency repair in combat with a DC 15 Rigging check."
+
+  - id: research_focus
+    name: Research Focus
+    category: job
+    archetype: nerd
+    pf2e: spellbook_prodigy
+    active: false
+    activate_text: ""
+    description: "Learn new technical knowledge in half the time; critical successes compound the benefit."
+
+  - id: variable_load
+    name: Variable Load
+    category: job
+    archetype: nerd
+    pf2e: variable_core
+    active: false
+    activate_text: ""
+    description: "During daily prep, switch your primary explosive or tech damage type."
+
+  # ── JOB FEATS: NORMIE ─────────────────────────────────────────────────────
+  - id: defensive_stance
+    name: Defensive Stance
+    category: job
+    archetype: normie
+    pf2e: crane_stance
+    active: true
+    activate_text: "You drop into a guard that makes you a smaller target."
+    description: "Enter a stance granting +1 AC and access to precise, fast unarmed strikes."
+
+  - id: iron_fist
+    name: Iron Fist
+    category: job
+    archetype: normie
+    pf2e: dragon_stance
+    active: true
+    activate_text: "You square up and let your body become the weapon."
+    description: "Enter a stance enabling powerful, forceful unarmed strikes (d10 base damage)."
+
+  - id: stunning_strike
+    name: Stunning Strike
+    category: job
+    archetype: normie
+    pf2e: stunning_fist
+    active: true
+    activate_text: "You follow up with a strike aimed at the nerve cluster."
+    description: "After a flurry of strikes, if one lands, force a Fortitude save or stun the target."
+
+  - id: dirty_strike
+    name: Dirty Strike
+    category: job
+    archetype: normie
+    pf2e: instructive_strike
+    active: true
+    activate_text: "You hit them and read their reaction at the same time."
+    description: "Strike and simultaneously learn one weakness or vulnerability on a hit."
+
+  - id: read_the_room
+    name: Read the Room
+    category: job
+    archetype: normie
+    pf2e: diverse_lore
+    active: false
+    activate_text: ""
+    description: "Take a -2 penalty to attempt any Recall Knowledge check outside your area of expertise."
+
+  - id: root_to_life
+    name: Root to Life
+    category: job
+    archetype: normie
+    pf2e: root_to_life
+    active: true
+    activate_text: "You get your hands on them and focus entirely on keeping them alive."
+    description: "Stabilize a dying ally in 1 action; 2 actions also clears persistent damage effects."
