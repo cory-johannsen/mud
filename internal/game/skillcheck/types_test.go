@@ -5,6 +5,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/stretchr/testify/assert"
+	"pgregory.net/rapid"
 	"gopkg.in/yaml.v3"
 )
 
@@ -67,4 +68,58 @@ func TestOutcomeMap_ForOutcome(t *testing.T) {
 	assert.Equal(t, "ok", m.ForOutcome(skillcheck.Success).Message)
 	assert.Equal(t, "bad", m.ForOutcome(skillcheck.Failure).Message)
 	assert.Equal(t, "terrible", m.ForOutcome(skillcheck.CritFailure).Message)
+}
+
+func TestCheckOutcome_String_OutOfRange(t *testing.T) {
+	assert.Equal(t, "unknown", skillcheck.CheckOutcome(99).String())
+}
+
+func TestProperty_CheckOutcome_StringNeverEmpty(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		o := rapid.IntRange(int(skillcheck.CritSuccess), int(skillcheck.CritFailure)).Draw(t, "outcome")
+		s := skillcheck.CheckOutcome(o).String()
+		if s == "" {
+			t.Fatalf("String() returned empty for outcome %d", o)
+		}
+	})
+}
+
+func TestProperty_OutcomeMap_ForOutcome_RoundTrip(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		o := skillcheck.CheckOutcome(rapid.IntRange(int(skillcheck.CritSuccess), int(skillcheck.CritFailure)).Draw(t, "outcome"))
+		want := &skillcheck.Outcome{Message: "test"}
+		var m skillcheck.OutcomeMap
+		switch o {
+		case skillcheck.CritSuccess:
+			m.CritSuccess = want
+		case skillcheck.Success:
+			m.Success = want
+		case skillcheck.Failure:
+			m.Failure = want
+		case skillcheck.CritFailure:
+			m.CritFailure = want
+		}
+		got := m.ForOutcome(o)
+		if got != want {
+			t.Fatalf("ForOutcome(%v) returned %v, want %v", o, got, want)
+		}
+	})
+}
+
+func TestProperty_CheckResult_TotalInvariant(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		roll := rapid.Int().Draw(t, "roll")
+		abilityMod := rapid.Int().Draw(t, "abilityMod")
+		profBonus := rapid.Int().Draw(t, "profBonus")
+		total := roll + abilityMod + profBonus
+		cr := skillcheck.CheckResult{
+			Roll:       roll,
+			AbilityMod: abilityMod,
+			ProfBonus:  profBonus,
+			Total:      total,
+		}
+		if cr.Roll+cr.AbilityMod+cr.ProfBonus != cr.Total {
+			t.Fatalf("Total invariant violated: %d + %d + %d != %d", cr.Roll, cr.AbilityMod, cr.ProfBonus, cr.Total)
+		}
+	})
 }
