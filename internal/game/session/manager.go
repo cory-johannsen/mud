@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 )
 
@@ -53,6 +54,9 @@ type PlayerSession struct {
 	// Skills maps skill_id to proficiency rank for the active character.
 	// Populated after ensureSkills completes; empty map means all untrained.
 	Skills map[string]string
+	// Conditions tracks active conditions applied outside of combat (e.g., from skill check effects).
+	// Initialized at login; nil before Session() runs.
+	Conditions *condition.ActiveSet
 }
 
 // Manager tracks all active player sessions and room occupancy.

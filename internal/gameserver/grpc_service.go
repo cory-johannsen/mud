@@ -471,6 +471,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
+	// Initialize out-of-combat conditions set for this session.
+	sess.Conditions = condition.NewActiveSet()
+
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
 		Player: charName,

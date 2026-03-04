@@ -10,6 +10,7 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 )
 
 func TestBridgeEntity_Push(t *testing.T) {
@@ -665,6 +666,24 @@ func TestPlayerSession_HasSkillsField(t *testing.T) {
 	assert.NotNil(t, sess)
 	sess.Skills = map[string]string{"parkour": "trained"}
 	assert.Equal(t, "trained", sess.Skills["parkour"])
+}
+
+func TestPlayerSession_HasConditionsField(t *testing.T) {
+	sess := &PlayerSession{}
+	assert.NotNil(t, sess)
+	_ = sess.Conditions // compile error if field missing
+}
+
+func TestProperty_PlayerSession_ConditionsNilSafe(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sess := &PlayerSession{
+			Conditions: condition.NewActiveSet(),
+		}
+		result := sess.Conditions.Has("anything")
+		if result {
+			rt.Fatalf("expected empty ActiveSet to return false for Has()")
+		}
+	})
 }
 
 func TestProperty_PlayerSession_SkillsFieldRoundTrip(t *testing.T) {
