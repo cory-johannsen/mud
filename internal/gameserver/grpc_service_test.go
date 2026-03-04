@@ -1509,3 +1509,117 @@ func TestApplySkillCheckEffect_Reveal_UnhidesExit(t *testing.T) {
 	}
 	assert.True(t, foundNorth, "north exit must appear in VisibleExits() after reveal effect")
 }
+
+// TestProperty_ApplySkillCheckEffect_Reveal is a property-based test (SWENG-5a) that
+// exercises applySkillCheckEffect with the "reveal" type across all four cardinal
+// directions and both hidden states.
+//
+// Preconditions: a world with room1 containing one exit in the drawn direction,
+// hidden or not; a GameServiceServer backed by that world.
+//
+// Postconditions (invariants checked on every run):
+//   - The visible exit count never decreases after a reveal effect.
+//   - A previously hidden exit becomes visible (count increases by exactly 1).
+//   - A previously visible exit count is unchanged.
+func TestProperty_ApplySkillCheckEffect_Reveal(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+
+	directions := []world.Direction{world.North, world.South, world.East, world.West}
+
+	// oppositeDir returns the opposite direction so that room2's return exit is valid.
+	oppositeDir := func(d world.Direction) world.Direction {
+		switch d {
+		case world.North:
+			return world.South
+		case world.South:
+			return world.North
+		case world.East:
+			return world.West
+		default: // West
+			return world.East
+		}
+	}
+
+	rapid.Check(t, func(rt *rapid.T) {
+		dir := rapid.SampledFrom(directions).Draw(rt, "direction")
+		hidden := rapid.Bool().Draw(rt, "hidden")
+
+		zone := &world.Zone{
+			ID:        "prop_reveal_zone",
+			Name:      "Property Reveal Zone",
+			StartRoom: "room1",
+			Rooms: map[string]*world.Room{
+				"room1": {
+					ID:          "room1",
+					ZoneID:      "prop_reveal_zone",
+					Title:       "Room 1",
+					Description: "A room.",
+					Exits: []world.Exit{
+						{Direction: dir, TargetRoom: "room2", Hidden: hidden},
+					},
+					Properties: map[string]string{},
+					MapX:        0,
+					MapY:        0,
+				},
+				"room2": {
+					ID:          "room2",
+					ZoneID:      "prop_reveal_zone",
+					Title:       "Room 2",
+					Description: "Another room.",
+					Exits: []world.Exit{
+						{Direction: oppositeDir(dir), TargetRoom: "room1"},
+					},
+					Properties: map[string]string{},
+					MapX:        0,
+					MapY:        2,
+				},
+			},
+		}
+
+		mgr, err := world.NewManager([]*world.Zone{zone})
+		if err != nil {
+			rt.Skip()
+		}
+
+		room1, ok := mgr.GetRoom("room1")
+		if !ok {
+			rt.Fatal("room1 not found in manager")
+		}
+
+		beforeVisible := len(room1.VisibleExits())
+
+		svc := &GameServiceServer{
+			world:  mgr,
+			logger: logger,
+		}
+		sess := &session.PlayerSession{
+			UID:        "prop_uid",
+			RoomID:     "room1",
+			Conditions: condition.NewActiveSet(),
+		}
+
+		svc.applySkillCheckEffect(sess, &skillcheck.Effect{Type: "reveal", Target: string(dir)}, "room1")
+
+		room1after, ok := mgr.GetRoom("room1")
+		if !ok {
+			rt.Fatal("room1 not found after effect")
+		}
+		afterVisible := len(room1after.VisibleExits())
+
+		// Invariant: visible count must never decrease.
+		if afterVisible < beforeVisible {
+			rt.Fatalf("visible exits decreased: direction=%s hidden=%v before=%d after=%d",
+				dir, hidden, beforeVisible, afterVisible)
+		}
+		// If exit was hidden it must now be visible (count +1).
+		if hidden && afterVisible != beforeVisible+1 {
+			rt.Fatalf("hidden exit not revealed: direction=%s before=%d after=%d",
+				dir, beforeVisible, afterVisible)
+		}
+		// If exit was already visible, count must be unchanged.
+		if !hidden && afterVisible != beforeVisible {
+			rt.Fatalf("visible exit count changed unexpectedly: direction=%s before=%d after=%d",
+				dir, beforeVisible, afterVisible)
+		}
+	})
+}
