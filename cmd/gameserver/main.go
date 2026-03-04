@@ -53,6 +53,7 @@ func main() {
 	jobsDir := flag.String("jobs-dir", "content/jobs", "path to job YAML definitions directory")
 	loadoutsDir := flag.String("loadouts-dir", "content/loadouts", "path to archetype loadout YAML directory")
 	skillsFile := flag.String("skills", "content/skills.yaml", "path to skills YAML file")
+	featsFile := flag.String("feats", "content/feats.yaml", "path to feats YAML file")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -259,6 +260,14 @@ func main() {
 	}
 	logger.Info("loaded skill definitions", zap.Int("count", len(allSkills)))
 	characterSkillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
+
+	allFeats, err := ruleset.LoadFeats(*featsFile)
+	if err != nil {
+		logger.Fatal("failed to load feats", zap.Error(err))
+	}
+	logger.Info("loaded feat definitions", zap.Int("count", len(allFeats)))
+	featRegistry := ruleset.NewFeatRegistry(allFeats)
+	characterFeatsRepo := postgres.NewCharacterFeatsRepository(pool.DB())
 
 	// Load HTN AI domains.
 	aiRegistry := ai.NewRegistry()
@@ -471,7 +480,7 @@ func main() {
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
 		jobReg, condRegistry, *loadoutsDir,
 		allSkills, characterSkillsRepo,
-		nil, nil, nil,
+		allFeats, featRegistry, characterFeatsRepo,
 	)
 
 	// Start respawn goroutine for room equipment.
