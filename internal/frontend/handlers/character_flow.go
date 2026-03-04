@@ -115,6 +115,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 			if err := h.ensureSkills(ctx, conn, c); err != nil {
 				return err
 			}
+			if err := h.ensureFeats(ctx, conn, c); err != nil {
+				return err
+			}
 			if err := h.gameBridge(ctx, conn, acct, c); err != nil {
 				if errors.Is(err, ErrSwitchCharacter) {
 					continue
@@ -167,6 +170,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 				if err := h.ensureSkills(ctx, conn, c); err != nil {
 					return err
 				}
+				if err := h.ensureFeats(ctx, conn, c); err != nil {
+					return err
+				}
 				if err := h.gameBridge(ctx, conn, acct, c); err != nil {
 					if errors.Is(err, ErrSwitchCharacter) {
 						continue
@@ -184,6 +190,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 
 		selected := chars[choice-1]
 		if err := h.ensureSkills(ctx, conn, selected); err != nil {
+			return err
+		}
+		if err := h.ensureFeats(ctx, conn, selected); err != nil {
 			return err
 		}
 		if err := h.gameBridge(ctx, conn, acct, selected); err != nil {
@@ -510,6 +519,158 @@ func (h *AuthHandler) skillChoiceLoop(ctx context.Context, conn *telnet.Conn, po
 		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "Selected: %s", nameFor[picked]))
 	}
 	return chosen, nil
+}
+
+// featChoiceLoop prompts the player to pick `count` feats from pool, one at a time.
+// pool is a list of feat IDs; h.featRegistry is consulted for display names and descriptions.
+// Returns chosen feat IDs or (nil, nil) if the player cancels.
+//
+// Precondition: count >= 1; pool must be non-empty and contain valid feat IDs in h.featRegistry.
+// Postcondition: Returns exactly count chosen IDs, or (nil, nil) on cancel.
+func (h *AuthHandler) featChoiceLoop(ctx context.Context, conn *telnet.Conn, header string, pool []string, count int) ([]string, error) {
+	remaining := make([]string, len(pool))
+	copy(remaining, pool)
+
+	var chosen []string
+	for len(chosen) < count && len(remaining) > 0 {
+		left := count - len(chosen)
+		_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow, "\r\n%s (%d remaining):", header, left))
+		for i, id := range remaining {
+			name := id
+			desc := ""
+			if h.featRegistry != nil {
+				if f, ok := h.featRegistry.Feat(id); ok {
+					name = f.Name
+					desc = f.Description
+				}
+			}
+			if desc != "" {
+				_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%-20s%s - %s%s%s",
+					telnet.Green, i+1, telnet.Reset,
+					telnet.BrightWhite, name, telnet.Reset,
+					telnet.Dim, desc, telnet.Reset))
+			} else {
+				_ = conn.WriteLine(fmt.Sprintf("  %s%d%s. %s%s%s",
+					telnet.Green, i+1, telnet.Reset,
+					telnet.BrightWhite, name, telnet.Reset))
+			}
+		}
+		_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select feat [1-%d]: ", len(remaining)))
+		line, err := conn.ReadLine()
+		if err != nil {
+			return nil, fmt.Errorf("reading feat choice: %w", err)
+		}
+		line = strings.TrimSpace(line)
+		if strings.ToLower(line) == "cancel" {
+			return nil, nil
+		}
+		choice := 0
+		if _, err := fmt.Sscanf(line, "%d", &choice); err != nil || choice < 1 || choice > len(remaining) {
+			_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection. Please enter a number from the list."))
+			continue
+		}
+		picked := remaining[choice-1]
+		chosen = append(chosen, picked)
+		remaining = append(remaining[:choice-1], remaining[choice:]...)
+		if h.featRegistry != nil {
+			if f, ok := h.featRegistry.Feat(picked); ok {
+				_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "Selected: %s", f.Name))
+			}
+		}
+	}
+	return chosen, nil
+}
+
+// ensureFeats checks whether the character has feats recorded and, if not,
+// runs interactive selection and persists the result. Called before gameBridge.
+//
+// Precondition: char must have a valid ID, Class, and Skills populated.
+// Postcondition: character_feats rows exist for char; returns non-nil error only on fatal failure.
+func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
+	if h.characterFeats == nil || h.featRegistry == nil {
+		return nil
+	}
+	has, err := h.characterFeats.HasFeats(ctx, char.ID)
+	if err != nil {
+		h.logger.Warn("checking feats for character", zap.Int64("id", char.ID), zap.Error(err))
+		return nil
+	}
+	if has {
+		return nil
+	}
+
+	job, ok := h.jobRegistry.Job(char.Class)
+	if !ok {
+		h.logger.Warn("unknown job for feat backfill", zap.String("class", char.Class))
+		return nil
+	}
+
+	_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow,
+		"\r\n=== Step 2: Feats ==="))
+
+	// Announce fixed job feats.
+	var fixedNames []string
+	if job.FeatGrants != nil {
+		for _, id := range job.FeatGrants.Fixed {
+			if f, ok := h.featRegistry.Feat(id); ok {
+				fixedNames = append(fixedNames, f.Name)
+			} else {
+				fixedNames = append(fixedNames, id)
+			}
+		}
+	}
+	if len(fixedNames) > 0 {
+		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "Your job grants you the following feats:"))
+		for _, n := range fixedNames {
+			_ = conn.WriteLine(fmt.Sprintf("  %s- %s%s", telnet.BrightWhite, n, telnet.Reset))
+		}
+	}
+
+	// Job feat choices.
+	var jobChosen []string
+	if job.FeatGrants != nil && job.FeatGrants.Choices != nil && job.FeatGrants.Choices.Count > 0 {
+		jobChosen, err = h.featChoiceLoop(ctx, conn, "Choose a job feat", job.FeatGrants.Choices.Pool, job.FeatGrants.Choices.Count)
+		if err != nil {
+			return fmt.Errorf("feat job choice: %w", err)
+		}
+	}
+
+	// General feat choices.
+	var generalChosen []string
+	if job.FeatGrants != nil && job.FeatGrants.GeneralCount > 0 {
+		generalPool := h.featRegistry.ByCategory("general")
+		poolIDs := make([]string, len(generalPool))
+		for i, f := range generalPool {
+			poolIDs[i] = f.ID
+		}
+		generalChosen, err = h.featChoiceLoop(ctx, conn, "Choose a general feat", poolIDs, job.FeatGrants.GeneralCount)
+		if err != nil {
+			return fmt.Errorf("feat general choice: %w", err)
+		}
+	}
+
+	// Skill feat choice — 1 pick from trained skills' feat pools.
+	var skillChosen []string
+	if len(char.Skills) > 0 {
+		skillFeatPool := h.featRegistry.SkillFeatsForTrainedSkills(char.Skills)
+		if len(skillFeatPool) > 0 {
+			poolIDs := make([]string, len(skillFeatPool))
+			for i, f := range skillFeatPool {
+				poolIDs[i] = f.ID
+			}
+			skillChosen, err = h.featChoiceLoop(ctx, conn, "Choose a skill feat", poolIDs, 1)
+			if err != nil {
+				return fmt.Errorf("feat skill choice: %w", err)
+			}
+		}
+	}
+
+	feats := character.BuildFeatsFromJob(job, jobChosen, generalChosen, skillChosen)
+	if err := h.characterFeats.SetAll(ctx, char.ID, feats); err != nil {
+		h.logger.Error("persisting backfill feats", zap.Int64("id", char.ID), zap.Error(err))
+		_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Warning: feats could not be saved."))
+	}
+	return nil
 }
 
 // buildAndConfirm builds a character from the given selections, shows the preview,

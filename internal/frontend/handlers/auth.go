@@ -52,6 +52,12 @@ type CharacterSkillsSetter interface {
 	SetAll(ctx context.Context, characterID int64, skills map[string]string) error
 }
 
+// CharacterFeatsSetter defines feat persistence operations required by AuthHandler.
+type CharacterFeatsSetter interface {
+	HasFeats(ctx context.Context, characterID int64) (bool, error)
+	SetAll(ctx context.Context, characterID int64, feats []string) error
+}
+
 // AuthHandler implements telnet.SessionHandler and processes the
 // authentication loop for a connected client.
 type AuthHandler struct {
@@ -62,9 +68,12 @@ type AuthHandler struct {
 	jobs           []*ruleset.Job
 	archetypes     []*ruleset.Archetype
 	jobRegistry    *ruleset.JobRegistry
-	allSkills      []*ruleset.Skill
+	allSkills       []*ruleset.Skill
 	characterSkills CharacterSkillsSetter
-	logger         *zap.Logger
+	characterFeats  CharacterFeatsSetter
+	allFeats        []*ruleset.Feat
+	featRegistry    *ruleset.FeatRegistry
+	logger          *zap.Logger
 	gameServerAddr string
 	telnetCfg      config.TelnetConfig
 }
@@ -86,10 +95,16 @@ func NewAuthHandler(
 	telnetCfg config.TelnetConfig,
 	allSkills []*ruleset.Skill,
 	characterSkills CharacterSkillsSetter,
+	allFeats []*ruleset.Feat,
+	characterFeats CharacterFeatsSetter,
 ) *AuthHandler {
 	reg := ruleset.NewJobRegistry()
 	for _, j := range jobs {
 		reg.Register(j)
+	}
+	var featReg *ruleset.FeatRegistry
+	if len(allFeats) > 0 {
+		featReg = ruleset.NewFeatRegistry(allFeats)
 	}
 	return &AuthHandler{
 		accounts:        accounts,
@@ -101,6 +116,9 @@ func NewAuthHandler(
 		jobRegistry:     reg,
 		allSkills:       allSkills,
 		characterSkills: characterSkills,
+		characterFeats:  characterFeats,
+		allFeats:        allFeats,
+		featRegistry:    featReg,
 		logger:          logger,
 		gameServerAddr:  gameServerAddr,
 		telnetCfg:       telnetCfg,

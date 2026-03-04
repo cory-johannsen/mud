@@ -29,6 +29,7 @@ func main() {
 	jobsDir := flag.String("jobs", "content/jobs", "path to job YAML files directory")
 	archetypesDir := flag.String("archetypes", "content/archetypes", "path to archetype YAML files directory")
 	skillsFile := flag.String("skills", "content/skills.yaml", "path to skills YAML file")
+	featsFile := flag.String("feats", "content/feats.yaml", "path to feats YAML file")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -91,11 +92,18 @@ func main() {
 	}
 	logger.Info("skills loaded", zap.Int("skills", len(skills)))
 
+	feats, err := ruleset.LoadFeats(*featsFile)
+	if err != nil {
+		logger.Fatal("loading feats", zap.Error(err))
+	}
+	logger.Info("feats loaded", zap.Int("feats", len(feats)))
+
 	// Build services
 	accounts := postgres.NewAccountRepository(pool.DB())
 	characters := postgres.NewCharacterRepository(pool.DB())
 	characterSkillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
-	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, archetypes, logger, cfg.GameServer.Addr(), cfg.Telnet, skills, characterSkillsRepo)
+	characterFeatsRepo := postgres.NewCharacterFeatsRepository(pool.DB())
+	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, archetypes, logger, cfg.GameServer.Addr(), cfg.Telnet, skills, characterSkillsRepo, feats, characterFeatsRepo)
 	telnetAcceptor := telnet.NewAcceptor(cfg.Telnet, authHandler, logger)
 
 	// Wire lifecycle
