@@ -11,6 +11,8 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/google/uuid"
+
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
@@ -819,6 +821,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleInteract(uid, p.InteractRequest.InstanceId)
 	case *gamev1.ClientMessage_UseRequest:
 		return s.handleUse(uid, p.UseRequest.FeatId)
+	case *gamev1.ClientMessage_SummonItem:
+		return s.handleSummonItem(uid, p.SummonItem)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -2241,6 +2245,41 @@ func (s *GameServiceServer) handleSetRole(uid string, req *gamev1.SetRoleRequest
 
 	return messageEvent(fmt.Sprintf("Set role for %s (#%d): %s -> %s",
 		target.Username, target.ID, target.Role, req.Role)), nil
+}
+
+// handleSummonItem places an item instance on the floor of the caller's current room.
+//
+// Precondition: uid identifies an active session; req is non-nil.
+// Postcondition: on success, one ItemInstance is added to the room floor and a success
+// message is returned; on failure, a message event is returned with no side effects.
+func (s *GameServiceServer) handleSummonItem(uid string, req *gamev1.SummonItemRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("player not found"), nil
+	}
+	if sess.Role != "editor" && sess.Role != "admin" {
+		return messageEvent("permission denied: editor role required"), nil
+	}
+	if s.invRegistry == nil {
+		return messageEvent("item registry unavailable"), nil
+	}
+	def, ok := s.invRegistry.Item(req.ItemId)
+	if !ok {
+		return messageEvent(fmt.Sprintf("unknown item: %q", req.ItemId)), nil
+	}
+	qty := int(req.Quantity)
+	if qty < 1 {
+		qty = 1
+	}
+	inst := inventory.ItemInstance{
+		InstanceID: uuid.New().String(),
+		ItemDefID:  req.ItemId,
+		Quantity:   qty,
+	}
+	if s.floorMgr != nil {
+		s.floorMgr.Drop(sess.RoomID, inst)
+	}
+	return messageEvent(fmt.Sprintf("Summoned %dx %s to the room.", qty, def.Name)), nil
 }
 
 // handleTeleport moves a target player to a specific room by ID.
