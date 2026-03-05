@@ -400,10 +400,12 @@ message SkillsRequest {}
 
 // SkillEntry represents one skill with its proficiency rank.
 message SkillEntry {
-  string skill_id    = 1;
-  string name        = 2;
-  string ability     = 3;
-  string proficiency = 4;
+  string skill_id     = 1;
+  string name         = 2;
+  string ability      = 3;
+  string proficiency  = 4;
+  int32  bonus        = 5;
+  string description  = 6;
 }
 
 // SkillsResponse contains all skill entries for the character.

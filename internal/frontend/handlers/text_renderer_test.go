@@ -604,8 +604,8 @@ func TestProperty_RenderCharacterSheet_Feats(t *testing.T) {
 func TestRenderSkillsResponse_GroupedByAbility(t *testing.T) {
 	sr := &gamev1.SkillsResponse{
 		Skills: []*gamev1.SkillEntry{
-			{SkillId: "parkour", Name: "Parkour", Ability: "quickness", Proficiency: "trained"},
-			{SkillId: "muscle", Name: "Muscle", Ability: "brutality", Proficiency: "untrained"},
+			{SkillId: "parkour", Name: "Parkour", Ability: "quickness", Proficiency: "trained", Bonus: 2, Description: "Movement through ruins and tight spaces."},
+			{SkillId: "muscle", Name: "Muscle", Ability: "brutality", Proficiency: "untrained", Bonus: 0, Description: "Climbing, swimming, and breaking things."},
 		},
 	}
 	out := RenderSkillsResponse(sr)
@@ -617,6 +617,18 @@ func TestRenderSkillsResponse_GroupedByAbility(t *testing.T) {
 	}
 	if !strings.Contains(out, "Brutality") {
 		t.Error("expected Brutality section")
+	}
+	if !strings.Contains(out, "+2") {
+		t.Error("expected +2 bonus for trained skill")
+	}
+	if !strings.Contains(out, "+0") {
+		t.Error("expected +0 bonus for untrained skill")
+	}
+	if !strings.Contains(out, "Movement through ruins") {
+		t.Error("expected description for Parkour")
+	}
+	if !strings.Contains(out, "Climbing, swimming") {
+		t.Error("expected description for Muscle")
 	}
 }
 

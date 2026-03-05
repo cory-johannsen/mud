@@ -2673,6 +2673,8 @@ func (s *GameServiceServer) handleSkills(uid string) (*gamev1.ServerEvent, error
 			Name:        sk.Name,
 			Ability:     sk.Ability,
 			Proficiency: prof,
+			Bonus:       int32(skillcheck.ProficiencyBonus(prof)),
+			Description: sk.Description,
 		})
 	}
 	return &gamev1.ServerEvent{

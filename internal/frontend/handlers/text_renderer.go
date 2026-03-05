@@ -702,13 +702,13 @@ func RenderSkillsResponse(sr *gamev1.SkillsResponse) string {
 		sb.WriteString(fmt.Sprintf("\r\n%s:\r\n", abilityLabel[ability]))
 		for _, sk := range skills {
 			name := fmt.Sprintf("  %-14s", sk.Name)
-			prof := sk.Proficiency
-			if prof != "untrained" {
-				sb.WriteString(telnet.Colorize(telnet.Cyan, name))
-				sb.WriteString(telnet.Colorize(telnet.Cyan, prof))
+			bonus := fmt.Sprintf("+%d", sk.Bonus)
+			rank := fmt.Sprintf("%-11s", sk.Proficiency)
+			line := fmt.Sprintf("%s%s %s  %s", name, bonus, rank, sk.Description)
+			if sk.Proficiency != "untrained" {
+				sb.WriteString(telnet.Colorize(telnet.Cyan, line))
 			} else {
-				sb.WriteString(telnet.Colorize(telnet.Dim, name))
-				sb.WriteString(telnet.Colorize(telnet.Dim, prof))
+				sb.WriteString(telnet.Colorize(telnet.Dim, line))
 			}
 			sb.WriteString("\r\n")
 		}
