@@ -61,9 +61,12 @@ type PlayerSession struct {
 	// Populated at login; used by combat passive checks without additional DB queries.
 	PassiveFeats map[string]bool
 	// FavoredTarget is the NPC type favored by the predators_eye class feature.
-	// Empty string means unset (feature not held, or not yet chosen).
-	// Populated at login when character_favored_target row exists.
+	// Populated after the generic feature-choice loop from
+	// FeatureChoices["predators_eye"]["favored_target"].
 	FavoredTarget string
+	// FeatureChoices maps feature_id → choice_key → selected value.
+	// Populated at login from character_feature_choices table.
+	FeatureChoices map[string]map[string]string
 }
 
 // Manager tracks all active player sessions and room occupancy.
