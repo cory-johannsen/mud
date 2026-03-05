@@ -206,6 +206,61 @@ func (m *Manager) CallHook(zoneID, hook string, args ...lua.LValue) (lua.LValue,
 	return ret, nil
 }
 
+// CallHookWithContext calls the named Lua global function in zoneID's VM, passing
+// uid and hookArg as the first two arguments, followed by a Lua table built from ctx.
+// The ctx map keys become string keys in the table; values must be valid lua.LValue instances.
+// If the zone has no VM the call is a no-op and returns (LNil, nil).
+// Lua runtime errors are logged at Warn level and not propagated.
+//
+// Precondition: uid, hookArg, and hook must be non-empty; ctx may be nil (empty table passed).
+// Postcondition: Returns the first return value of the hook, or LNil.
+func (m *Manager) CallHookWithContext(zoneID, hook, uid, hookArg string, ctx map[string]lua.LValue) (lua.LValue, error) {
+	m.mapMu.RLock()
+	zs, ok := m.zones[zoneID]
+	if !ok {
+		zs = m.zones[globalZoneID]
+	}
+	m.mapMu.RUnlock()
+
+	if zs == nil {
+		m.logger.Info("scripting: no VM for zone",
+			zap.String("zone", zoneID),
+			zap.String("hook", hook),
+		)
+		return lua.LNil, nil
+	}
+
+	zs.mu.Lock()
+	defer zs.mu.Unlock()
+
+	fn := zs.L.GetGlobal(hook)
+	if fn == lua.LNil {
+		return lua.LNil, nil
+	}
+
+	tbl := zs.L.NewTable()
+	for k, v := range ctx {
+		zs.L.SetField(tbl, k, v)
+	}
+
+	if err := zs.L.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    1,
+		Protect: true,
+	}, lua.LString(uid), lua.LString(hookArg), tbl); err != nil {
+		m.logger.Warn("scripting: Lua runtime error",
+			zap.String("zone", zoneID),
+			zap.String("hook", hook),
+			zap.Error(err),
+		)
+		return lua.LNil, nil
+	}
+
+	ret := zs.L.Get(-1)
+	zs.L.Pop(1)
+	return ret, nil
+}
+
 // Close releases all zone VMs and their associated resources.
 //
 // Precondition: No concurrent CallHook calls are in progress.
