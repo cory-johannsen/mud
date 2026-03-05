@@ -199,7 +199,11 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		return fmt.Errorf("receiving initial room view: %w", err)
 	}
 	if rv := resp.GetRoomView(); rv != nil {
-		_ = conn.Write([]byte(RenderRoomView(rv)))
+		if conn.IsSplitScreen() {
+			_ = conn.WriteRoom(RenderRoomView(rv))
+		} else {
+			_ = conn.Write([]byte(RenderRoomView(rv)))
+		}
 		// Seed time-of-day from first room view if available.
 		if rv.GetPeriod() != "" {
 			currentTime.Store(&gamev1.TimeOfDayEvent{Hour: rv.GetHour(), Period: rv.GetPeriod()})
@@ -207,8 +211,14 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	}
 
 	// Write initial prompt
-	if err := conn.WritePrompt(buildCurrentPrompt()); err != nil {
-		return fmt.Errorf("writing initial prompt: %w", err)
+	var initPromptErr error
+	if conn.IsSplitScreen() {
+		initPromptErr = conn.WritePromptSplit(buildCurrentPrompt())
+	} else {
+		initPromptErr = conn.WritePrompt(buildCurrentPrompt())
+	}
+	if initPromptErr != nil {
+		return fmt.Errorf("writing initial prompt: %w", initPromptErr)
 	}
 
 	var lastInput atomic.Int64
@@ -221,6 +231,9 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	// the server sends a RoomView event (i.e. after every move or look).
 	var currentRoom atomic.Value
 	currentRoom.Store(char.Location)
+
+	var lastRoomText atomic.Value
+	lastRoomText.Store("")
 
 	stopIdle := StartIdleMonitor(IdleMonitorConfig{
 		LastInput:    &lastInput,
@@ -250,7 +263,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentHP, &maxHP, buildCurrentPrompt)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentHP, &maxHP, &lastRoomText, buildCurrentPrompt)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
@@ -391,7 +404,7 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime is updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP and maxHP are updated from CharacterInfo events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, buildPrompt func() string) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomText *atomic.Value, buildPrompt func() string) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -411,8 +424,11 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		switch p := resp.Payload.(type) {
 		case *gamev1.ServerEvent_TimeOfDay:
 			currentTime.Store(p.TimeOfDay)
-			// Re-display prompt to reflect new time-of-day; no text block to render.
-			_ = conn.WritePrompt(buildPrompt())
+			if conn.IsSplitScreen() {
+				_ = conn.WritePromptSplit(buildPrompt())
+			} else {
+				_ = conn.WritePrompt(buildPrompt())
+			}
 			continue
 		case *gamev1.ServerEvent_RoomView:
 			if roomID := p.RoomView.GetRoomId(); roomID != "" {
@@ -422,6 +438,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
 			}
 			text = RenderRoomView(p.RoomView)
+		lastRoomText.Store(text)
 		case *gamev1.ServerEvent_Message:
 			text = RenderMessage(p.Message)
 		case *gamev1.ServerEvent_RoomEvent:
@@ -443,9 +460,13 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		case *gamev1.ServerEvent_ConditionEvent:
 			ce := p.ConditionEvent
 			if ce.ConditionId == "" {
-				// empty sentinel — no active conditions
-				_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "No active conditions."))
-				_ = conn.WritePrompt(buildPrompt())
+				if conn.IsSplitScreen() {
+					_ = conn.WriteConsole(telnet.Colorize(telnet.Cyan, "No active conditions."))
+					_ = conn.WritePromptSplit(buildPrompt())
+				} else {
+					_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "No active conditions."))
+					_ = conn.WritePrompt(buildPrompt())
+				}
 				continue
 			}
 			text = RenderConditionEvent(ce)
@@ -478,9 +499,19 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		}
 
 		if text != "" {
-			_ = conn.WriteLine(text)
-			// Re-display prompt after each server event
-			_ = conn.WritePrompt(buildPrompt())
+			if conn.IsSplitScreen() {
+				switch resp.Payload.(type) {
+				case *gamev1.ServerEvent_RoomView:
+					_ = conn.WriteRoom(text)
+				default:
+					_ = conn.WriteConsole(text)
+				}
+				_ = conn.WritePromptSplit(buildPrompt())
+			} else {
+				_ = conn.WriteLine(text)
+				// Re-display prompt after each server event
+				_ = conn.WritePrompt(buildPrompt())
+			}
 		}
 	}
 }
