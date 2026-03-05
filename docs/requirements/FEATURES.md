@@ -68,7 +68,7 @@
     - [x] The `skills` command should display both the level (train, untrained, etc) and the numeric bonus using +# format (+0, +2, +4, etc)
     - [x] The `skills` command should display a description for each skill
   - [x] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
-- [ ] Admin command `summon_item` which take an item ID as a parameter.  An instance of the specified item must be added to the room.
+- [x] Admin command `summon_item` which take an item ID as a parameter.  An instance of the specified item must be added to the room.
 - [ ] TODO list: a full itemized list of all stubs and intentionally unimplemented code.
 - [ ] Telnet UI upgrades
   - The screen is sectioned into three segments, from top to bottoms:
