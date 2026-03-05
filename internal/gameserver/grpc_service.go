@@ -886,6 +886,29 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
+	// zone_awareness: notify the player when entering a difficult terrain room,
+	// unless they possess the zone_awareness passive feat.
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		if newRoom.Properties["terrain"] == "difficult" && !sess.PassiveFeats["zone_awareness"] {
+			terrainEvt := &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{
+						Content: "The ground here is difficult terrain — your movement feels sluggish.",
+						Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+					},
+				},
+			}
+			if data, marshalErr := proto.Marshal(terrainEvt); marshalErr == nil {
+				if pushErr := sess.Entity.Push(data); pushErr != nil {
+					s.logger.Warn("pushing difficult terrain message to player entity",
+						zap.String("uid", uid),
+						zap.Error(pushErr),
+					)
+				}
+			}
+		}
+	}
+
 	// Record automap discovery for the new room.
 	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
 		zID := newRoom.ZoneID
