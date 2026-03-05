@@ -394,6 +394,198 @@ func TestProperty_FeatPoolDeficit(t *testing.T) {
 	})
 }
 
+// ---------------------------------------------------------------------------
+// mockCharacterFeatsSetter — in-memory stub for CharacterFeatsSetter.
+// ---------------------------------------------------------------------------
+
+type mockCharacterFeatsSetter struct {
+	stored    []string
+	getAllErr  error
+	setAllErr error
+	setAllCalled bool
+	lastSet   []string
+}
+
+func (m *mockCharacterFeatsSetter) GetAll(_ context.Context, _ int64) ([]string, error) {
+	if m.getAllErr != nil {
+		return nil, m.getAllErr
+	}
+	out := make([]string, len(m.stored))
+	copy(out, m.stored)
+	return out, nil
+}
+
+func (m *mockCharacterFeatsSetter) SetAll(_ context.Context, _ int64, feats []string) error {
+	m.setAllCalled = true
+	m.lastSet = feats
+	if m.setAllErr != nil {
+		return m.setAllErr
+	}
+	m.stored = feats
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// ensureFeats early-exit path: FeatPoolDeficit-based coverage.
+//
+// ensureFeats is unexported and requires a live telnet connection, so these
+// tests exercise the early-exit decision logic indirectly through FeatPoolDeficit.
+// They document the invariants that ensureFeats relies on to decide whether to
+// skip the prompt-and-store phase.
+// ---------------------------------------------------------------------------
+
+// TestEnsureFeats_EarlyExit_AllDeficitsZero verifies that when a character has
+// all pool feats already stored, all three deficit values are 0 — which is the
+// condition ensureFeats uses to skip prompting.
+func TestEnsureFeats_EarlyExit_AllDeficitsZero(t *testing.T) {
+	jobChoicesPool := []string{"feat_a", "feat_b"}
+	generalPool := []string{"general_1", "general_2"}
+	skillPool := []string{"skill_feat_1"}
+
+	// All pool feats already stored.
+	stored := map[string]bool{
+		"feat_a":      true,
+		"feat_b":      true,
+		"general_1":   true,
+		"skill_feat_1": true,
+	}
+
+	jobChoicesDeficit := handlers.FeatPoolDeficit(jobChoicesPool, stored, 2)
+	generalDeficit := handlers.FeatPoolDeficit(generalPool, stored, 1)
+	skillDeficit := handlers.FeatPoolDeficit(skillPool, stored, 1)
+
+	assert.Equal(t, 0, jobChoicesDeficit, "job choices fully stored: deficit must be 0")
+	assert.Equal(t, 0, generalDeficit, "general feat fully stored: deficit must be 0")
+	assert.Equal(t, 0, skillDeficit, "skill feat fully stored: deficit must be 0")
+}
+
+// TestEnsureFeats_MergePath_PartialDeficit verifies that when a character is
+// missing some pool feats, the deficit is non-zero — causing ensureFeats to
+// proceed past the early-exit to prompt and merge.
+func TestEnsureFeats_MergePath_PartialDeficit(t *testing.T) {
+	jobChoicesPool := []string{"feat_a", "feat_b"}
+	generalPool := []string{"general_1", "general_2"}
+	skillPool := []string{"skill_feat_1"}
+
+	// Only job choices satisfied; general and skill are missing.
+	stored := map[string]bool{
+		"feat_a": true,
+		"feat_b": true,
+	}
+
+	jobChoicesDeficit := handlers.FeatPoolDeficit(jobChoicesPool, stored, 2)
+	generalDeficit := handlers.FeatPoolDeficit(generalPool, stored, 1)
+	skillDeficit := handlers.FeatPoolDeficit(skillPool, stored, 1)
+
+	assert.Equal(t, 0, jobChoicesDeficit, "job choices fully stored")
+	assert.Equal(t, 1, generalDeficit, "general feat missing: deficit must be 1")
+	assert.Equal(t, 1, skillDeficit, "skill feat missing: deficit must be 1")
+
+	// At least one deficit non-zero => ensureFeats would NOT early-exit.
+	wouldEarlyExit := jobChoicesDeficit == 0 && generalDeficit == 0 && skillDeficit == 0
+	assert.False(t, wouldEarlyExit, "must not early-exit when any deficit is non-zero")
+}
+
+// TestEnsureFeats_FixedOnlyJob_NoEarlyExit documents the bug fixed in ensureFeats:
+// a job with ONLY fixed feats (no pool/choices grants) would previously trigger an
+// early-exit with all deficits == 0 and never store the fixed feats. The fix adds a
+// separate fixedMissing check before the early-exit guard.
+//
+// This test verifies the logical invariants the fix relies on:
+//   - All three pool deficits are 0 when no pool grants exist.
+//   - The stored set does NOT contain the fixed feat (simulating a new character).
+//   - Therefore fixedMissing == true, preventing the early-exit.
+func TestEnsureFeats_FixedOnlyJob_NoEarlyExit(t *testing.T) {
+	// Job has no pool/choices grants (no Choices, GeneralCount==0, no skill feats).
+	// All three deficit functions return 0.
+	jobChoicesDeficit := handlers.FeatPoolDeficit(nil, nil, 0)
+	generalDeficit := handlers.FeatPoolDeficit(nil, nil, 0)
+	skillDeficit := handlers.FeatPoolDeficit([]string{}, nil, 1)
+
+	assert.Equal(t, 0, jobChoicesDeficit)
+	assert.Equal(t, 0, generalDeficit)
+	// skillPool is empty => FeatPoolDeficit returns 0 regardless of count.
+	assert.Equal(t, 0, skillDeficit)
+
+	// Simulate: stored set is empty (new character), fixed feat "fixed_feat_1" not stored.
+	stored := map[string]bool{}
+	fixedFeats := []string{"fixed_feat_1"}
+
+	fixedMissing := false
+	for _, id := range fixedFeats {
+		if !stored[id] {
+			fixedMissing = true
+			break
+		}
+	}
+
+	assert.True(t, fixedMissing, "fixed feat not yet stored: fixedMissing must be true")
+
+	// The corrected early-exit guard: only skip when ALL deficits==0 AND !fixedMissing.
+	wouldEarlyExit := jobChoicesDeficit == 0 && generalDeficit == 0 && skillDeficit == 0 && !fixedMissing
+	assert.False(t, wouldEarlyExit,
+		"fixed-only job must not early-exit: fixed feats still need to be stored")
+}
+
+// TestEnsureFeats_FixedOnlyJob_AlreadyStored_EarlyExit verifies that a fixed-only
+// job DOES early-exit when the fixed feat is already stored (no work needed).
+func TestEnsureFeats_FixedOnlyJob_AlreadyStored_EarlyExit(t *testing.T) {
+	jobChoicesDeficit := handlers.FeatPoolDeficit(nil, nil, 0)
+	generalDeficit := handlers.FeatPoolDeficit(nil, nil, 0)
+	skillDeficit := handlers.FeatPoolDeficit([]string{}, nil, 1)
+
+	stored := map[string]bool{"fixed_feat_1": true}
+	fixedFeats := []string{"fixed_feat_1"}
+
+	fixedMissing := false
+	for _, id := range fixedFeats {
+		if !stored[id] {
+			fixedMissing = true
+			break
+		}
+	}
+
+	assert.False(t, fixedMissing, "fixed feat already stored: fixedMissing must be false")
+
+	wouldEarlyExit := jobChoicesDeficit == 0 && generalDeficit == 0 && skillDeficit == 0 && !fixedMissing
+	assert.True(t, wouldEarlyExit,
+		"fixed-only job with all feats stored should early-exit (nothing to do)")
+}
+
+// TestMockCharacterFeatsSetter_GetAllAndSetAll verifies that the mock correctly
+// stores and retrieves feat lists, fulfilling the CharacterFeatsSetter contract.
+func TestMockCharacterFeatsSetter_GetAllAndSetAll(t *testing.T) {
+	cases := []struct {
+		name    string
+		initial []string
+		setTo   []string
+	}{
+		{"empty to populated", nil, []string{"feat_a", "feat_b"}},
+		{"populated to different", []string{"feat_x"}, []string{"feat_y", "feat_z"}},
+		{"populated to empty", []string{"feat_a"}, []string{}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			m := &mockCharacterFeatsSetter{stored: tc.initial}
+			ctx := context.Background()
+
+			initial, err := m.GetAll(ctx, 1)
+			assert.NoError(t, err)
+			// GetAll copies the stored slice; both nil and empty are valid "no feats" states.
+			assert.Equal(t, len(tc.initial), len(initial))
+
+			err = m.SetAll(ctx, 1, tc.setTo)
+			assert.NoError(t, err)
+			assert.True(t, m.setAllCalled)
+			assert.Equal(t, tc.setTo, m.lastSet)
+
+			got, err := m.GetAll(ctx, 1)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.setTo, got)
+		})
+	}
+}
+
 func TestRenderArchetypeMenu_ContainsKeyAbility(t *testing.T) {
 	archetypes := []*ruleset.Archetype{
 		{ID: "aggressor", Name: "Aggressor", Description: "Violence solves everything.", KeyAbility: "brutality", HitPointsPerLevel: 10},

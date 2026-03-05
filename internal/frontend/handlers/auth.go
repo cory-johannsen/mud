@@ -53,8 +53,11 @@ type CharacterSkillsSetter interface {
 }
 
 // CharacterFeatsSetter defines feat persistence operations required by AuthHandler.
+// HasFeats is intentionally omitted: ensureFeats uses GetAll to load the stored
+// feat list and computes per-pool deficits directly, so a separate boolean check
+// is not needed. The concrete type still provides HasFeats; it is simply not
+// required by this interface.
 type CharacterFeatsSetter interface {
-	HasFeats(ctx context.Context, characterID int64) (bool, error)
 	GetAll(ctx context.Context, characterID int64) ([]string, error)
 	SetAll(ctx context.Context, characterID int64, feats []string) error
 }

@@ -596,7 +596,8 @@ func (h *AuthHandler) featChoiceLoop(ctx context.Context, conn *telnet.Conn, hea
 // When pool is empty there are no feats available to satisfy count, so
 // the deficit is always 0 (the loop cannot be filled).
 //
-// Precondition: count >= 0; pool may be nil or empty; storedFeatIDs may be nil.
+// Precondition: count >= 0; pool may be nil or empty; storedFeatIDs may be nil
+// (nil is treated identically to an empty map — no stored feats means full deficit).
 // Postcondition: returns max(0, count - len(intersection(pool, storedFeatIDs)));
 // returns 0 when pool is empty.
 func FeatPoolDeficit(pool []string, storedFeatIDs map[string]bool, count int) int {
@@ -671,8 +672,24 @@ func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *
 		skillDeficit = FeatPoolDeficit(skillPoolIDs, storedSet, 1)
 	}
 
-	// If all pools are fully satisfied, nothing to do.
-	if jobChoicesDeficit == 0 && generalDeficit == 0 && skillDeficit == 0 {
+	// Determine whether any fixed feats are missing from the stored set.
+	// Fixed feats are not part of any pool/choices deficit, so they must be
+	// checked independently. A job whose FeatGrants contains only Fixed entries
+	// (no Choices, no GeneralCount, no skill feats) would otherwise trigger the
+	// early-exit below and never store its fixed feats.
+	fixedMissing := false
+	if job.FeatGrants != nil {
+		for _, id := range job.FeatGrants.Fixed {
+			if !storedSet[id] {
+				fixedMissing = true
+				break
+			}
+		}
+	}
+
+	// If all pools are fully satisfied AND all fixed feats are already stored,
+	// nothing to do.
+	if jobChoicesDeficit == 0 && generalDeficit == 0 && skillDeficit == 0 && !fixedMissing {
 		return nil
 	}
 
