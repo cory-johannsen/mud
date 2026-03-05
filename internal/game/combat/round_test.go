@@ -261,6 +261,203 @@ func containsSubstring(s, sub string) bool {
 	}())
 }
 
+// TestResolveRound_ConditionDamageBonusApplied_Attack: a condition with DamageBonus=5 on the actor
+// increases damage dealt during ActionAttack beyond what the base roll alone would produce.
+func TestResolveRound_ConditionDamageBonusApplied_Attack(t *testing.T) {
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "powered_up", Name: "Powered Up", DurationType: "rounds", MaxStacks: 1, DamageBonus: 5})
+
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 100, CurrentHP: 100, AC: 12, Level: 1, StrMod: 1, DexMod: 0},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+	_ = cbt.StartRound(3)
+
+	// Apply DamageBonus=5 condition to the player actor.
+	if err := cbt.ApplyCondition("p1", "powered_up", 1, 2); err != nil {
+		t.Fatalf("ApplyCondition: %v", err)
+	}
+
+	// val=19 → d20=20 → guaranteed CritSuccess hit; base dmg=(19%6+1)*2=2*2=4; with bonus: 4+5=9
+	src := fixedSrc{val: 19}
+
+	// Measure HP before without bonus (reference run using a fresh combat without the condition).
+	regNoBonus := condition.NewRegistry()
+	regNoBonus.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	regNoBonus.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	regNoBonus.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	regNoBonus.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	regNoBonus.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+
+	engRef := combat.NewEngine()
+	combatantsRef := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 100, CurrentHP: 100, AC: 12, Level: 1, StrMod: 1, DexMod: 0},
+	}
+	cbtRef, err := engRef.StartCombat("room1", combatantsRef, regNoBonus, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat ref: %v", err)
+	}
+	_ = cbtRef.StartRound(3)
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction (bonus): %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 (bonus): %v", err)
+	}
+	if err := cbtRef.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction (ref): %v", err)
+	}
+	if err := cbtRef.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 (ref): %v", err)
+	}
+
+	combat.ResolveRound(cbt, src, noopUpdater)
+	combat.ResolveRound(cbtRef, src, noopUpdater)
+
+	gangerWithBonus := cbt.Combatants[1].CurrentHP
+	gangerNoBonus := cbtRef.Combatants[1].CurrentHP
+
+	// The actor with powered_up (DamageBonus=5) must deal more damage.
+	if gangerWithBonus >= gangerNoBonus {
+		t.Errorf("expected condition DamageBonus to increase damage: hpWithBonus=%d hpNoBonus=%d (lower HP = more damage)", gangerWithBonus, gangerNoBonus)
+	}
+	damageWithBonus := 100 - gangerWithBonus
+	damageNoBonus := 100 - gangerNoBonus
+	extraDamage := damageWithBonus - damageNoBonus
+	if extraDamage != 5 {
+		t.Errorf("expected exactly 5 extra damage from DamageBonus=5, got %d (withBonus=%d noBonus=%d)", extraDamage, damageWithBonus, damageNoBonus)
+	}
+}
+
+// TestResolveRound_ConditionDamageBonusApplied_Strike: a condition with DamageBonus=5 on the actor
+// increases damage dealt during ActionStrike for both the first and second hit.
+func TestResolveRound_ConditionDamageBonusApplied_Strike(t *testing.T) {
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "powered_up", Name: "Powered Up", DurationType: "rounds", MaxStacks: 1, DamageBonus: 5})
+
+	eng := combat.NewEngine()
+	// High HP target so it survives both strikes for comparison.
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 200, CurrentHP: 200, AC: 1, Level: 1, StrMod: 1, DexMod: 0},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+	_ = cbt.StartRound(3)
+
+	if err := cbt.ApplyCondition("p1", "powered_up", 1, 2); err != nil {
+		t.Fatalf("ApplyCondition: %v", err)
+	}
+
+	// val=19 → d20=20 → guaranteed CritSuccess for first strike; second strike also hits (AC=1).
+	src := fixedSrc{val: 19}
+
+	regRef := condition.NewRegistry()
+	regRef.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	regRef.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	regRef.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	regRef.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	regRef.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+
+	engRef := combat.NewEngine()
+	combatantsRef := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 200, CurrentHP: 200, AC: 1, Level: 1, StrMod: 1, DexMod: 0},
+	}
+	cbtRef, err := engRef.StartCombat("room1", combatantsRef, regRef, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat ref: %v", err)
+	}
+	_ = cbtRef.StartRound(3)
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction (bonus): %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 (bonus): %v", err)
+	}
+	if err := cbtRef.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction (ref): %v", err)
+	}
+	if err := cbtRef.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 (ref): %v", err)
+	}
+
+	combat.ResolveRound(cbt, src, noopUpdater)
+	combat.ResolveRound(cbtRef, src, noopUpdater)
+
+	gangerWithBonus := cbt.Combatants[1].CurrentHP
+	gangerNoBonus := cbtRef.Combatants[1].CurrentHP
+
+	if gangerWithBonus >= gangerNoBonus {
+		t.Errorf("expected condition DamageBonus to increase strike damage: hpWithBonus=%d hpNoBonus=%d", gangerWithBonus, gangerNoBonus)
+	}
+}
+
+// TestProperty_ResolveRound_DamageBonusNeverNegatesHit: with any DamageBonus in [0,20],
+// a guaranteed hit still results in target HP <= initialHP (damage is non-negative).
+func TestProperty_ResolveRound_DamageBonusNeverNegatesHit(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		bonus := rapid.IntRange(0, 20).Draw(rt, "bonus")
+
+		reg := condition.NewRegistry()
+		reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+		reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+		reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+		reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+		reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+		reg.Register(&condition.ConditionDef{ID: "buffed", Name: "Buffed", DurationType: "rounds", MaxStacks: 1, DamageBonus: bonus})
+
+		eng := combat.NewEngine()
+		combatants := []*combat.Combatant{
+			{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+			{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 200, CurrentHP: 200, AC: 1, Level: 1, StrMod: 1, DexMod: 0},
+		}
+		cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
+		if err != nil {
+			rt.Fatalf("StartCombat: %v", err)
+		}
+		_ = cbt.StartRound(3)
+
+		if err := cbt.ApplyCondition("p1", "buffed", 1, 2); err != nil {
+			rt.Fatalf("ApplyCondition: %v", err)
+		}
+
+		// val=19 → guaranteed CritSuccess hit.
+		src := fixedSrc{val: 19}
+
+		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
+		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
+
+		initialHP := cbt.Combatants[1].CurrentHP
+		combat.ResolveRound(cbt, src, noopUpdater)
+		finalHP := cbt.Combatants[1].CurrentHP
+
+		if finalHP > initialHP {
+			rt.Errorf("finalHP=%d > initialHP=%d: damage bonus should never heal target", finalHP, initialHP)
+		}
+	})
+}
+
 // TestPropertyResolveRound_DamageNeverExceedsStartingHP: target HP never goes below 0.
 func TestPropertyResolveRound_DamageNeverExceedsStartingHP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
