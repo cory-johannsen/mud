@@ -29,6 +29,18 @@ func findCombatantByName(cbt *Combat, name string) *Combatant {
 	return nil
 }
 
+// findCombatantByID returns the first Combatant in cbt whose ID matches id, or nil.
+// Precondition: cbt must be non-nil.
+// Postcondition: Returns nil when no combatant with the given ID exists.
+func findCombatantByID(cbt *Combat, id string) *Combatant {
+	for _, c := range cbt.Combatants {
+		if c.ID == id {
+			return c
+		}
+	}
+	return nil
+}
+
 // hookAttackRoll invokes the on_attack_roll Lua hook (if a scriptMgr is present) and returns
 // the (possibly overridden) attack total.
 // Precondition: actor and target must be non-nil.
@@ -62,11 +74,8 @@ func hookPassiveFeatCheck(cbt *Combat, actorID, targetID, featID string, bonus i
 		outcome = "met"
 	}
 	targetType := ""
-	for _, c := range cbt.Combatants {
-		if c.ID == targetID {
-			targetType = c.NPCType
-			break
-		}
+	if t := findCombatantByID(cbt, targetID); t != nil {
+		targetType = t.NPCType
 	}
 	ctx := map[string]lua.LValue{
 		"target_uid":   lua.LString(targetID),
@@ -74,6 +83,7 @@ func hookPassiveFeatCheck(cbt *Combat, actorID, targetID, featID string, bonus i
 		"outcome":      lua.LString(outcome),
 		"target_type":  lua.LString(targetType),
 	}
+	// Error is always nil; CallHookWithContext logs Lua runtime errors internally and never propagates them.
 	ret, _ := cbt.scriptMgr.CallHookWithContext(cbt.zoneID, "on_passive_feat_check", actorID, featID, ctx)
 	if n, ok := ret.(lua.LNumber); ok {
 		return int(n)
@@ -153,6 +163,38 @@ func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult
 	}
 }
 
+// applyPassiveFeats evaluates all active passive feats for actor against target and returns
+// the total bonus damage to add.
+// Precondition: actor and target must be non-nil; dmg is the base hit damage (0 on miss).
+// Postcondition: Returns 0 when actor is not a player, sessionGetter is nil, or no feats are active.
+func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Source) int {
+	if actor.Kind != KindPlayer || cbt.sessionGetter == nil {
+		return 0
+	}
+	ps, ok := cbt.sessionGetter(actor.ID)
+	if !ok {
+		return 0
+	}
+	bonus := 0
+	if ps.PassiveFeats["sucker_punch"] {
+		spBonus := 0
+		spMet := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") && dmg > 0
+		if spMet {
+			spBonus = src.Intn(6) + 1
+		}
+		bonus += hookPassiveFeatCheck(cbt, actor.ID, target.ID, "sucker_punch", spBonus, spMet)
+	}
+	if ps.PassiveFeats["predators_eye"] {
+		peBonus := 0
+		peMet := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget && dmg > 0
+		if peMet {
+			peBonus = src.Intn(8) + 1
+		}
+		bonus += hookPassiveFeatCheck(cbt, actor.ID, target.ID, "predators_eye", peBonus, peMet)
+	}
+	return bonus
+}
+
 // ResolveRound processes all queued actions for cbt in Combatants order (initiative-sorted).
 // For each living combatant, iterates their QueuedActions():
 //   - ActionAttack: one ResolveAttack call; damage applied to target combatant; targetUpdater called.
@@ -223,30 +265,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r.Outcome = OutcomeFor(r.AttackTotal, target.AC)
 				dmg := r.EffectiveDamage()
 				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
-				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
-					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
-						spBonus := 0
-						spMet := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") && dmg > 0
-						if spMet {
-							spBonus = src.Intn(6) + 1
-						}
-						spBonus = hookPassiveFeatCheck(cbt, actor.ID, target.ID, "sucker_punch", spBonus, spMet)
-						dmg += spBonus
-					}
-				}
-				// predators_eye: +1d8 precision damage vs favored NPC type.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
-					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
-						peBonus := 0
-						peMet := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget && dmg > 0
-						if peMet {
-							peBonus = src.Intn(8) + 1
-						}
-						peBonus = hookPassiveFeatCheck(cbt, actor.ID, target.ID, "predators_eye", peBonus, peMet)
-						dmg += peBonus
-					}
-				}
+				dmg += applyPassiveFeats(cbt, actor, target, dmg, src)
 				dmg = hookDamageRoll(cbt, actor, target, dmg)
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
@@ -293,30 +312,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r1.Outcome = OutcomeFor(r1.AttackTotal, target.AC)
 				dmg1 := r1.EffectiveDamage()
 				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
-				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
-					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
-						spBonus1 := 0
-						spMet1 := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") && dmg1 > 0
-						if spMet1 {
-							spBonus1 = src.Intn(6) + 1
-						}
-						spBonus1 = hookPassiveFeatCheck(cbt, actor.ID, target.ID, "sucker_punch", spBonus1, spMet1)
-						dmg1 += spBonus1
-					}
-				}
-				// predators_eye: +1d8 precision damage vs favored NPC type.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
-					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
-						peBonus1 := 0
-						peMet1 := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget && dmg1 > 0
-						if peMet1 {
-							peBonus1 = src.Intn(8) + 1
-						}
-						peBonus1 = hookPassiveFeatCheck(cbt, actor.ID, target.ID, "predators_eye", peBonus1, peMet1)
-						dmg1 += peBonus1
-					}
-				}
+				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
 				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
@@ -355,30 +351,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r2.Outcome = OutcomeFor(r2.AttackTotal, target.AC)
 				dmg2 := r2.EffectiveDamage()
 				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
-				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
-					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
-						spBonus2 := 0
-						spMet2 := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") && dmg2 > 0
-						if spMet2 {
-							spBonus2 = src.Intn(6) + 1
-						}
-						spBonus2 = hookPassiveFeatCheck(cbt, actor.ID, target.ID, "sucker_punch", spBonus2, spMet2)
-						dmg2 += spBonus2
-					}
-				}
-				// predators_eye: +1d8 precision damage vs favored NPC type.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
-					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
-						peBonus2 := 0
-						peMet2 := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget && dmg2 > 0
-						if peMet2 {
-							peBonus2 = src.Intn(8) + 1
-						}
-						peBonus2 = hookPassiveFeatCheck(cbt, actor.ID, target.ID, "predators_eye", peBonus2, peMet2)
-						dmg2 += peBonus2
-					}
-				}
+				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)
 				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
 				if dmg2 > 0 {
 					target.ApplyDamage(dmg2)

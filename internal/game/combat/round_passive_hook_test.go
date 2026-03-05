@@ -261,6 +261,10 @@ func TestPassiveFeatHook_SuckerPunch_ConditionNotMet_HookCalledWithNotMetOutcome
 	}
 	require.NotNil(t, npc)
 	assert.Less(t, npc.CurrentHP, 200, "attack should have dealt damage")
+
+	// Verify hook was called with outcome="not_met" via Lua state getter.
+	assert.Equal(t, "not_met", callLuaGetter(t, cbt, "get_outcome"),
+		"hook must be called with outcome=not_met when flat_footed condition is absent")
 }
 
 // TestPassiveFeatHook_NilScriptMgr_NoHookNoPanic verifies that when scriptMgr is nil,
