@@ -218,8 +218,6 @@ func TestPassiveFeatHook_SuckerPunch_MissFiresHook(t *testing.T) {
 //
 // Postcondition: NPC HP loss must equal base damage (hook returns nil → no override from passive bonus).
 func TestPassiveFeatHook_SuckerPunch_ConditionNotMet_HookCalledWithNotMetOutcome(t *testing.T) {
-	var capturedOutcome string
-	var capturedBonus float64 = -1
 	// Hook records args and returns nil (no override).
 	luaSrc := `
 		_outcome = "unset"
@@ -232,8 +230,6 @@ func TestPassiveFeatHook_SuckerPunch_ConditionNotMet_HookCalledWithNotMetOutcome
 		function get_outcome() return _outcome end
 		function get_bonus() return _bonus end
 	`
-	_ = capturedOutcome
-	_ = capturedBonus
 
 	cbt := makePassiveHookCombatWithScript(t, luaSrc)
 	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
@@ -254,8 +250,8 @@ func TestPassiveFeatHook_SuckerPunch_ConditionNotMet_HookCalledWithNotMetOutcome
 	// NPC HP must be less than 200 (attack hit) but the sucker_punch bonus must be 0.
 	// We can verify by checking the scripting state via a fresh manager with state variables.
 	// The combat's internal manager is not exported; instead we verify NPC HP is reduced
-	// by <= natural attack damage (no bonus). With fixedSrc{val:15}: d8 damage = Intn(8)+1 = 16
-	// which is clamped by modulo to 15%8=7 → 8. No passive bonus (not_met), so total damage = base+mods.
+	// by <= natural attack damage (no bonus). With fixedSrc{val:15}: d8 damage = Intn(8)+1 = 15%8+1 = 7+1 = 8.
+	// No passive bonus (not_met), so total damage = base+mods.
 	// We just confirm NPC HP < 200 (hit occurred) and the test passes when code calls hook with not_met.
 	var npc *combat.Combatant
 	for _, c := range cbt.Combatants {
@@ -364,4 +360,200 @@ func TestProperty_PassiveFeatHook_OverrideIsUsedAsBonus(t *testing.T) {
 		assert.LessOrEqual(rt, npc.CurrentHP, 200-overrideVal,
 			"hook override=%d must result in NPC HP <= %d; got %d", overrideVal, 200-overrideVal, npc.CurrentHP)
 	})
+}
+
+// makePassiveHookCombatWithScriptAndNPCType creates a combat identical to makePassiveHookCombatWithScript
+// but sets NPCType on the NPC combatant and installs a predators_eye session getter.
+// Precondition: luaSrc must be valid Lua; zoneID must be "room1".
+// Postcondition: Returns a non-nil Combat with script manager and StartRound called.
+func makePassiveHookCombatWithScriptAndNPCType(t *testing.T, luaSrc, npcType, favoredTarget string) *combat.Combat {
+	t.Helper()
+	mgr := newScriptMgr(t, luaSrc)
+	reg := makePassiveHookConditionRegistry()
+	eng := combat.NewEngine()
+	cbt, err := eng.StartCombat("room1",
+		[]*combat.Combatant{
+			{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 100, CurrentHP: 100, AC: 10, Level: 1, StrMod: 3, DexMod: 0, Initiative: 20},
+			{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 200, CurrentHP: 200, AC: 10, Level: 1, StrMod: 0, DexMod: 0, Initiative: 5, NPCType: npcType},
+		},
+		reg, mgr, "room1",
+	)
+	require.NoError(t, err)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 15})
+	return cbt
+}
+
+// TestPassiveFeatHook_PredatorsEye_ConditionMet_HookCalledWithMetOutcome verifies that when
+// a player with predators_eye and FavoredTarget=="human" attacks an NPC with NPCType=="human",
+// the on_passive_feat_check hook is fired with feat_id="predators_eye" and outcome="met",
+// and the hook return value (99) is applied as the bonus.
+//
+// Precondition: predators_eye feat active; FavoredTarget=="human"; target.NPCType=="human"; hit guaranteed.
+// Postcondition: Lua globals _last_feat_id=="predators_eye" and _last_outcome=="met".
+// Postcondition: NPC HP <= 200-99 (hook override of 99 applied as bonus).
+func TestPassiveFeatHook_PredatorsEye_ConditionMet_HookCalledWithMetOutcome(t *testing.T) {
+	luaSrc := `
+		_last_feat_id = ""
+		_last_outcome = ""
+		_last_bonus = -1
+		function on_passive_feat_check(uid, feat_id, ctx)
+			_last_feat_id = feat_id
+			_last_outcome = ctx.outcome
+			_last_bonus = ctx.damage_bonus
+			return 99
+		end
+		function get_last_feat_id() return _last_feat_id end
+		function get_last_outcome() return _last_outcome end
+		function get_last_bonus() return _last_bonus end
+	`
+	cbt := makePassiveHookCombatWithScriptAndNPCType(t, luaSrc, "human", "human")
+
+	// Install session getter so predators_eye condition check fires for p1.
+	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
+		if uid == "p1" {
+			return &session.PlayerSession{
+				PassiveFeats:  map[string]bool{"predators_eye": true},
+				FavoredTarget: "human",
+			}, true
+		}
+		return nil, false
+	})
+
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+
+	// val=15: d20=16, atkTotal=16+3=19 vs AC 10 → hit; EffectiveDamage>0 → predators_eye fires.
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil)
+
+	// Verify hook was called with the correct feat_id and outcome via Lua state getters.
+	assert.Equal(t, "predators_eye", callLuaGetter(t, cbt, "get_last_feat_id"),
+		"hook must be called with feat_id=predators_eye")
+	assert.Equal(t, "met", callLuaGetter(t, cbt, "get_last_outcome"),
+		"hook must be called with outcome=met when FavoredTarget matches NPCType and hit lands")
+
+	// Verify NPC HP reflects the hook override of 99.
+	var npc *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.ID == "n1" {
+			npc = c
+		}
+	}
+	require.NotNil(t, npc)
+	assert.LessOrEqual(t, npc.CurrentHP, 200-99,
+		"hook override of 99 must result in NPC HP <= 101 (200 - 99); got %d", npc.CurrentHP)
+}
+
+// TestPassiveFeatHook_PredatorsEye_ConditionNotMet_HookCalledWithNotMetOutcome verifies that when
+// a player with predators_eye and FavoredTarget=="human" attacks an NPC with NPCType=="robot",
+// the on_passive_feat_check hook is still fired but with outcome="not_met".
+//
+// Precondition: predators_eye feat active; FavoredTarget=="human"; target.NPCType=="robot".
+// Postcondition: Lua globals _last_feat_id=="predators_eye" and _last_outcome=="not_met".
+func TestPassiveFeatHook_PredatorsEye_ConditionNotMet_HookCalledWithNotMetOutcome(t *testing.T) {
+	luaSrc := `
+		_last_feat_id = ""
+		_last_outcome = ""
+		function on_passive_feat_check(uid, feat_id, ctx)
+			_last_feat_id = feat_id
+			_last_outcome = ctx.outcome
+			-- return nil (no override)
+		end
+		function get_last_feat_id() return _last_feat_id end
+		function get_last_outcome() return _last_outcome end
+	`
+	cbt := makePassiveHookCombatWithScriptAndNPCType(t, luaSrc, "robot", "human")
+
+	// Install session getter: FavoredTarget="human" but NPC is "robot" → condition not met.
+	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
+		if uid == "p1" {
+			return &session.PlayerSession{
+				PassiveFeats:  map[string]bool{"predators_eye": true},
+				FavoredTarget: "human",
+			}, true
+		}
+		return nil, false
+	})
+
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+
+	// val=15: d20=16, atkTotal=16+3=19 vs AC 10 → hit; NPCType mismatch → condition not met.
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil)
+
+	assert.Equal(t, "predators_eye", callLuaGetter(t, cbt, "get_last_feat_id"),
+		"hook must be called with feat_id=predators_eye even when condition is not met")
+	assert.Equal(t, "not_met", callLuaGetter(t, cbt, "get_last_outcome"),
+		"hook must be called with outcome=not_met when FavoredTarget does not match NPCType")
+}
+
+// TestPassiveFeatHook_SuckerPunch_ActionStrike_HookFires verifies that when a player with
+// sucker_punch performs an ActionStrike against a flat_footed NPC, the on_passive_feat_check
+// hook is fired with feat_id="sucker_punch" and outcome="met" for the first strike hit.
+//
+// Precondition: sucker_punch feat active; NPC has flat_footed; hit guaranteed via AC=1 and val=15.
+// Postcondition: Lua global _last_feat_id=="sucker_punch" and _last_outcome=="met".
+// Postcondition: NPC HP <= 200-99 (hook override applied on at least the first strike).
+func TestPassiveFeatHook_SuckerPunch_ActionStrike_HookFires(t *testing.T) {
+	luaSrc := `
+		_last_feat_id = ""
+		_last_outcome = ""
+		_last_bonus = -1
+		function on_passive_feat_check(uid, feat_id, ctx)
+			_last_feat_id = feat_id
+			_last_outcome = ctx.outcome
+			_last_bonus = ctx.damage_bonus
+			return 99
+		end
+		function get_last_feat_id() return _last_feat_id end
+		function get_last_outcome() return _last_outcome end
+		function get_last_bonus() return _last_bonus end
+	`
+	// Use a low-AC NPC so both strikes hit with val=15.
+	mgr := newScriptMgr(t, luaSrc)
+	reg := makePassiveHookConditionRegistry()
+	eng := combat.NewEngine()
+	cbt, err := eng.StartCombat("room1",
+		[]*combat.Combatant{
+			{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 100, CurrentHP: 100, AC: 10, Level: 1, StrMod: 3, DexMod: 0, Initiative: 20},
+			{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 500, CurrentHP: 500, AC: 1, Level: 1, StrMod: 0, DexMod: 0, Initiative: 5, NPCType: "humanoid"},
+		},
+		reg, mgr, "room1",
+	)
+	require.NoError(t, err)
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 15})
+
+	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
+		if uid == "p1" {
+			return &session.PlayerSession{
+				PassiveFeats: map[string]bool{"sucker_punch": true},
+			}, true
+		}
+		return nil, false
+	})
+
+	// Apply flat_footed to the NPC so sucker_punch condition is met.
+	require.NoError(t, cbt.ApplyCondition("n1", "flat_footed", 1, -1))
+
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+
+	// val=15: d20=16, atkTotal=16+3=19 vs AC 1 → CritSuccess on first strike.
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil)
+
+	// Hook must have fired with feat_id=sucker_punch and outcome=met.
+	assert.Equal(t, "sucker_punch", callLuaGetter(t, cbt, "get_last_feat_id"),
+		"hook must be called with feat_id=sucker_punch for ActionStrike")
+	assert.Equal(t, "met", callLuaGetter(t, cbt, "get_last_outcome"),
+		"hook must be called with outcome=met when flat_footed condition is active and strike hits")
+
+	// Verify NPC HP reflects the hook override applied at least once.
+	var npc *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.ID == "n1" {
+			npc = c
+		}
+	}
+	require.NotNil(t, npc)
+	assert.LessOrEqual(t, npc.CurrentHP, 500-99,
+		"hook override of 99 on ActionStrike must result in NPC HP <= 401; got %d", npc.CurrentHP)
 }
