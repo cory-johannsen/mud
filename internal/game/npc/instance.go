@@ -14,6 +14,9 @@ type Instance struct {
 	ID string
 	// TemplateID is the source template's ID.
 	TemplateID string
+	// Type is the NPC category copied from the template, used for predators_eye matching.
+	// Empty string means no category is defined.
+	Type string
 	// baseName is the unsuffixed name copied from the template at spawn time.
 	baseName string
 	// nameMu protects the name field.
@@ -77,6 +80,7 @@ func NewInstance(id string, tmpl *Template, roomID string) *Instance {
 	return &Instance{
 		ID:            id,
 		TemplateID:    tmpl.ID,
+		Type:          tmpl.Type,
 		name:          tmpl.Name,
 		baseName:      tmpl.Name,
 		Description:   tmpl.Description,

@@ -55,6 +55,9 @@ type Combatant struct {
 	Dead bool
 	// Loadout is the active weapon preset for this combatant; may be nil.
 	Loadout *inventory.WeaponPreset
+	// NPCType is the category of this combatant used for predators_eye passive matching.
+	// Empty string for player combatants.
+	NPCType string
 }
 
 // IsPlayer reports whether this combatant is a player character.

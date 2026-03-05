@@ -637,6 +637,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		Level:     inst.Level,
 		StrMod:    combat.AbilityMod(inst.Perception),
 		DexMod:    1,
+		NPCType:   inst.Type,
 	}
 
 	combatants := []*combat.Combatant{playerCbt, npcCbt}

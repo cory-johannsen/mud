@@ -196,6 +196,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 				}
+				// predators_eye: +1d8 precision damage vs favored NPC type.
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg > 0 {
+					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
+						if ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget {
+							dmg += src.Intn(8) + 1
+						}
+					}
+				}
 				dmg = hookDamageRoll(cbt, actor, target, dmg)
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
@@ -250,6 +258,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						}
 					}
 				}
+				// predators_eye: +1d8 precision damage vs favored NPC type.
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg1 > 0 {
+					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
+						if ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget {
+							dmg1 += src.Intn(8) + 1
+						}
+					}
+				}
 				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
@@ -293,6 +309,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
 						if cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") {
 							dmg2 += src.Intn(6) + 1
+						}
+					}
+				}
+				// predators_eye: +1d8 precision damage vs favored NPC type.
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg2 > 0 {
+					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
+						if ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget {
+							dmg2 += src.Intn(8) + 1
 						}
 					}
 				}

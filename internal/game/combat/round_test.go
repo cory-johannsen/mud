@@ -600,6 +600,174 @@ func TestProperty_SuckerPunch_DamageNonNegative(t *testing.T) {
 	})
 }
 
+// makePredatorsEyeCombat builds a combat for predators_eye tests.
+// npcType is set on the NPC Combatant. hasFeat and favoredTarget are placed in the player session.
+func makePredatorsEyeCombat(t *testing.T, hasFeat bool, favoredTarget, npcType string) *combat.Combat {
+	t.Helper()
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+
+	eng := combat.NewEngine()
+	// AC=1 ensures guaranteed hit; MaxHP=200 keeps target alive through both runs.
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 200, CurrentHP: 200, AC: 1, Level: 1, StrMod: 1, DexMod: 0, NPCType: npcType},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+
+	ps := &session.PlayerSession{
+		PassiveFeats:  map[string]bool{"predators_eye": hasFeat},
+		FavoredTarget: favoredTarget,
+	}
+	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
+		if uid == "p1" {
+			return ps, true
+		}
+		return nil, false
+	})
+
+	_ = cbt.StartRound(3)
+	return cbt
+}
+
+// TestResolveRound_PredatorsEye_MatchingType_AddsDamage: player with predators_eye and FavoredTarget=="robot"
+// attacking NPCType=="robot" must deal more damage than without the feat, on a guaranteed hit.
+func TestResolveRound_PredatorsEye_MatchingType_AddsDamage(t *testing.T) {
+	// val=19: d20=20 (CritSuccess guaranteed); d8 result = (19%8)+1 = 4 for the bonus.
+	src := fixedSrc{val: 19}
+
+	cbtWith := makePredatorsEyeCombat(t, true, "robot", "robot")
+	cbtWithout := makePredatorsEyeCombat(t, false, "robot", "robot")
+
+	if err := cbtWith.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction with: %v", err)
+	}
+	if err := cbtWith.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 with: %v", err)
+	}
+	if err := cbtWithout.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction without: %v", err)
+	}
+	if err := cbtWithout.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 without: %v", err)
+	}
+
+	combat.ResolveRound(cbtWith, src, noopUpdater)
+	combat.ResolveRound(cbtWithout, src, noopUpdater)
+
+	hpWith := cbtWith.Combatants[1].CurrentHP
+	hpWithout := cbtWithout.Combatants[1].CurrentHP
+
+	// Lower HP means more damage was dealt. With predators_eye vs matching type must deal more.
+	if hpWith >= hpWithout {
+		t.Errorf("expected predators_eye to add damage vs matching NPC type: hpWith=%d hpWithout=%d (lower HP = more damage)", hpWith, hpWithout)
+	}
+}
+
+// TestResolveRound_PredatorsEye_NonMatchingType_NoBonus: player with predators_eye and FavoredTarget=="robot"
+// attacking NPCType=="animal" must deal no bonus damage.
+func TestResolveRound_PredatorsEye_NonMatchingType_NoBonus(t *testing.T) {
+	src := fixedSrc{val: 19}
+
+	// FavoredTarget="robot", but NPC is "animal" — no bonus.
+	cbtFeat := makePredatorsEyeCombat(t, true, "robot", "animal")
+	cbtNoFeat := makePredatorsEyeCombat(t, false, "robot", "animal")
+
+	if err := cbtFeat.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction feat: %v", err)
+	}
+	if err := cbtFeat.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 feat: %v", err)
+	}
+	if err := cbtNoFeat.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction no feat: %v", err)
+	}
+	if err := cbtNoFeat.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 no feat: %v", err)
+	}
+
+	combat.ResolveRound(cbtFeat, src, noopUpdater)
+	combat.ResolveRound(cbtNoFeat, src, noopUpdater)
+
+	hpFeat := cbtFeat.Combatants[1].CurrentHP
+	hpNoFeat := cbtNoFeat.Combatants[1].CurrentHP
+
+	// Type mismatch — damage must be identical.
+	if hpFeat != hpNoFeat {
+		t.Errorf("expected no predators_eye bonus vs non-matching NPC type: hpFeat=%d hpNoFeat=%d", hpFeat, hpNoFeat)
+	}
+}
+
+// TestResolveRound_PredatorsEye_EmptyFavoredTarget_NoBonus: player with predators_eye but FavoredTarget==""
+// must not receive bonus, even when NPC has a type.
+func TestResolveRound_PredatorsEye_EmptyFavoredTarget_NoBonus(t *testing.T) {
+	src := fixedSrc{val: 19}
+
+	// hasFeat=true, favoredTarget="" (unset), npcType="robot".
+	cbtFeat := makePredatorsEyeCombat(t, true, "", "robot")
+	cbtNoFeat := makePredatorsEyeCombat(t, false, "", "robot")
+
+	if err := cbtFeat.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction feat: %v", err)
+	}
+	if err := cbtFeat.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 feat: %v", err)
+	}
+	if err := cbtNoFeat.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction no feat: %v", err)
+	}
+	if err := cbtNoFeat.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 no feat: %v", err)
+	}
+
+	combat.ResolveRound(cbtFeat, src, noopUpdater)
+	combat.ResolveRound(cbtNoFeat, src, noopUpdater)
+
+	hpFeat := cbtFeat.Combatants[1].CurrentHP
+	hpNoFeat := cbtNoFeat.Combatants[1].CurrentHP
+
+	// Empty FavoredTarget means feature not configured — no bonus.
+	if hpFeat != hpNoFeat {
+		t.Errorf("expected no predators_eye bonus with empty FavoredTarget: hpFeat=%d hpNoFeat=%d", hpFeat, hpNoFeat)
+	}
+}
+
+// TestProperty_PredatorsEye_DamageNonNegative: regardless of feat/type combination,
+// NPC HP must never exceed initial HP (no healing) and must never go below 0.
+func TestProperty_PredatorsEye_DamageNonNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		hasFeat := rapid.Bool().Draw(rt, "hasFeat")
+		favored := rapid.SampledFrom([]string{"human", "robot", "animal", "mutant", ""}).Draw(rt, "favored")
+		npcType := rapid.SampledFrom([]string{"human", "robot", "animal", "mutant"}).Draw(rt, "npcType")
+		diceVal := rapid.IntRange(0, 19).Draw(rt, "diceVal")
+		src := fixedSrc{val: diceVal}
+
+		cbt := makePredatorsEyeCombat(t, hasFeat, favored, npcType)
+
+		initialHP := cbt.Combatants[1].CurrentHP
+
+		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
+		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
+
+		combat.ResolveRound(cbt, src, noopUpdater)
+
+		finalHP := cbt.Combatants[1].CurrentHP
+		if finalHP > initialHP {
+			rt.Errorf("finalHP=%d > initialHP=%d: predators_eye must not heal the target", finalHP, initialHP)
+		}
+		if finalHP < 0 {
+			rt.Errorf("finalHP=%d < 0: HP must not go below zero", finalHP)
+		}
+	})
+}
+
 // TestPropertyResolveRound_DamageNeverExceedsStartingHP: target HP never goes below 0.
 func TestPropertyResolveRound_DamageNeverExceedsStartingHP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
