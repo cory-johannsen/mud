@@ -21,13 +21,26 @@ type Feat struct {
 	PF2E         string `yaml:"pf2e"`
 	Active       bool   `yaml:"active"`
 	ActivateText string `yaml:"activate_text"`
-	ConditionID  string `yaml:"condition_id"` // optional; non-empty means Use applies this condition
-	Description  string `yaml:"description"`
+	ConditionID  string          `yaml:"condition_id"` // optional; non-empty means Use applies this condition
+	Description  string          `yaml:"description"`
+	Choices      *FeatureChoices `yaml:"choices"`
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.
 type featsFile struct {
 	Feats []*Feat `yaml:"feats"`
+}
+
+// LoadFeatsFromBytes parses feats from raw YAML bytes.
+//
+// Precondition: data must be valid YAML matching the featsFile schema.
+// Postcondition: Returns all feats or a non-nil error.
+func LoadFeatsFromBytes(data []byte) ([]*Feat, error) {
+	var f featsFile
+	if err := yaml.Unmarshal(data, &f); err != nil {
+		return nil, fmt.Errorf("parsing feats: %w", err)
+	}
+	return f.Feats, nil
 }
 
 // LoadFeats reads the feats master YAML file and returns all feat definitions.

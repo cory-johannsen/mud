@@ -7,25 +7,46 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// FeatureChoices declares an interactive player choice attached to a feature or feat.
+// Precondition: Options must be non-empty; Key and Prompt must be non-empty strings.
+type FeatureChoices struct {
+	Key     string   `yaml:"key"`
+	Prompt  string   `yaml:"prompt"`
+	Options []string `yaml:"options"`
+}
+
 // ClassFeature defines one Gunchete class feature and its P2FE equivalent.
 //
 // Archetype is non-empty for archetype-shared features; Job is non-empty for job-specific features.
 // Active features require player action to use; passive features are always-on.
 type ClassFeature struct {
-	ID           string `yaml:"id"`
-	Name         string `yaml:"name"`
-	Archetype    string `yaml:"archetype"`
-	Job          string `yaml:"job"`
-	PF2E         string `yaml:"pf2e"`
-	Active       bool   `yaml:"active"`
-	ActivateText string `yaml:"activate_text"`
-	ConditionID  string `yaml:"condition_id"` // optional; non-empty means Use applies this condition
-	Description  string `yaml:"description"`
+	ID           string          `yaml:"id"`
+	Name         string          `yaml:"name"`
+	Archetype    string          `yaml:"archetype"`
+	Job          string          `yaml:"job"`
+	PF2E         string          `yaml:"pf2e"`
+	Active       bool            `yaml:"active"`
+	ActivateText string          `yaml:"activate_text"`
+	ConditionID  string          `yaml:"condition_id"` // optional; non-empty means Use applies this condition
+	Description  string          `yaml:"description"`
+	Choices      *FeatureChoices `yaml:"choices"`
 }
 
 // classFeaturesFile is the top-level YAML structure for content/class_features.yaml.
 type classFeaturesFile struct {
 	ClassFeatures []*ClassFeature `yaml:"class_features"`
+}
+
+// LoadClassFeaturesFromBytes parses class features from raw YAML bytes.
+//
+// Precondition: data must be valid YAML matching the classFeaturesFile schema.
+// Postcondition: Returns all class features or a non-nil error.
+func LoadClassFeaturesFromBytes(data []byte) ([]*ClassFeature, error) {
+	var f classFeaturesFile
+	if err := yaml.Unmarshal(data, &f); err != nil {
+		return nil, fmt.Errorf("parsing class features: %w", err)
+	}
+	return f.ClassFeatures, nil
 }
 
 // LoadClassFeatures reads the class features master YAML file and returns all feature definitions.
