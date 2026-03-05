@@ -24,6 +24,7 @@ const (
 	// Telnet options
 	OptEcho            byte = 1
 	OptSuppressGoAhead byte = 3
+	OptNAWS            byte = 31 // Negotiate About Window Size, RFC 1073
 	OptLinemode        byte = 34
 )
 
@@ -36,6 +37,12 @@ type Conn struct {
 
 	readTimeout  time.Duration
 	writeTimeout time.Duration
+
+	// Split-screen state (guarded by mu)
+	width       int
+	height      int
+	splitScreen bool
+	inputBuf    string
 }
 
 // NewConn wraps a raw TCP connection with Telnet protocol handling.
@@ -61,6 +68,7 @@ func (c *Conn) Negotiate() error {
 
 	negotiations := []byte{
 		IAC, WILL, OptSuppressGoAhead,
+		IAC, DO, OptNAWS,
 	}
 
 	if c.writeTimeout > 0 {
@@ -68,6 +76,21 @@ func (c *Conn) Negotiate() error {
 	}
 	_, err := c.raw.Write(negotiations)
 	return err
+}
+
+// Dimensions returns the negotiated terminal width and height.
+// Returns (0, 0) before NAWS subnegotiation is received.
+func (c *Conn) Dimensions() (width, height int) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.width, c.height
+}
+
+// IsSplitScreen reports whether the connection is in split-screen mode.
+func (c *Conn) IsSplitScreen() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.splitScreen
 }
 
 // ReadLine reads a single line of input, filtering Telnet IAC sequences.

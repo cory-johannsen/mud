@@ -232,8 +232,47 @@ func TestConn_Negotiate(t *testing.T) {
 
 	expected := []byte{
 		IAC, WILL, OptSuppressGoAhead,
+		IAC, DO, OptNAWS,
 	}
 	assert.Equal(t, expected, buf[:n])
+}
+
+func TestConn_Negotiate_SendsNAWS(t *testing.T) {
+	conn, client := newTestConn(t)
+
+	go func() {
+		err := conn.Negotiate()
+		assert.NoError(t, err)
+	}()
+
+	buf := make([]byte, 256)
+	_ = client.SetReadDeadline(time.Now().Add(2 * time.Second))
+	n, err := client.Read(buf)
+	require.NoError(t, err)
+
+	expected := []byte{
+		IAC, WILL, OptSuppressGoAhead,
+		IAC, DO, OptNAWS,
+	}
+	assert.Equal(t, expected, buf[:n])
+}
+
+func TestConn_Dimensions_DefaultZero(t *testing.T) {
+	client, server := net.Pipe()
+	defer client.Close()
+	defer server.Close()
+	conn := NewConn(server, time.Second, time.Second)
+	w, h := conn.Dimensions()
+	assert.Equal(t, 0, w)
+	assert.Equal(t, 0, h)
+}
+
+func TestConn_SplitScreen_DefaultFalse(t *testing.T) {
+	client, server := net.Pipe()
+	defer client.Close()
+	defer server.Close()
+	conn := NewConn(server, time.Second, time.Second)
+	assert.False(t, conn.IsSplitScreen())
 }
 
 // --- Property tests ---
