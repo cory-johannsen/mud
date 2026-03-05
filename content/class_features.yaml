@@ -45,6 +45,10 @@ class_features:
     active: false
     activate_text: ""
     description: "Choose a favored target type at character creation; you deal +1d8 precision damage against targets of that type."
+    choices:
+      key: favored_target
+      prompt: "Choose your favored target type"
+      options: [human, robot, animal, mutant]
 
   - id: zone_awareness
     name: Zone Awareness
