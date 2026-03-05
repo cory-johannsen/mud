@@ -378,6 +378,31 @@ func TestConn_AwaitNAWS_TimesOut(t *testing.T) {
 	assert.Equal(t, 0, h)
 }
 
+// TestConn_ResizeCh_FiresOnNAWS verifies that after ReadLine processes a NAWS
+// subnegotiation, the resize channel receives a signal.
+func TestConn_ResizeCh_FiresOnNAWS(t *testing.T) {
+	conn, client := newTestConn(t)
+
+	resizeCh := conn.ResizeCh()
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		naws := []byte{IAC, SB, OptNAWS, 0x00, 0x50, 0x00, 0x18, IAC, SE}
+		naws = append(naws, []byte("x\r\n")...)
+		_, _ = client.Write(naws)
+	}()
+
+	_, err := conn.ReadLine()
+	require.NoError(t, err)
+
+	select {
+	case <-resizeCh:
+		// good — signal received
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("resize channel did not fire after NAWS")
+	}
+}
+
 // --- Property tests ---
 
 // Property: FilterIAC on input without any IAC bytes returns the input unchanged.

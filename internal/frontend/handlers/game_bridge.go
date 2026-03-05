@@ -436,6 +436,18 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		select {
 		case <-ctx.Done():
 			return
+		case <-conn.ResizeCh():
+			if conn.IsSplitScreen() {
+				if err := conn.InitScreen(); err != nil {
+					h.logger.Warn("split-screen resize init failed", zap.Error(err))
+					continue
+				}
+				if room := lastRoomText.Load().(string); room != "" {
+					_ = conn.WriteRoom(room)
+				}
+				_ = conn.WritePromptSplit(buildPrompt())
+			}
+			continue
 		default:
 		}
 

@@ -43,6 +43,9 @@ type Conn struct {
 	height      int
 	splitScreen bool
 	inputBuf    string
+
+	// resizeCh is signalled (non-blocking) whenever NAWS updates width/height.
+	resizeCh chan struct{}
 }
 
 // NewConn wraps a raw TCP connection with Telnet protocol handling.
@@ -55,6 +58,7 @@ func NewConn(raw net.Conn, readTimeout, writeTimeout time.Duration) *Conn {
 		reader:       bufio.NewReaderSize(raw, 4096),
 		readTimeout:  readTimeout,
 		writeTimeout: writeTimeout,
+		resizeCh:     make(chan struct{}, 1),
 	}
 }
 
@@ -91,6 +95,12 @@ func (c *Conn) IsSplitScreen() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.splitScreen
+}
+
+// ResizeCh returns a channel that receives a value whenever terminal dimensions change.
+// The channel is buffered (capacity 1) so the signal is non-blocking.
+func (c *Conn) ResizeCh() <-chan struct{} {
+	return c.resizeCh
 }
 
 // ReadLine reads a single line of input, filtering Telnet IAC sequences.
@@ -225,6 +235,11 @@ func (c *Conn) handleIAC() error {
 			c.width = w
 			c.height = h
 			c.mu.Unlock()
+			// Signal resize (non-blocking — capacity-1 buffer absorbs rapid resizes)
+			select {
+			case c.resizeCh <- struct{}{}:
+			default:
+			}
 		}
 	case IAC:
 		// Escaped IAC (literal 0xFF) — we ignore it in text context
