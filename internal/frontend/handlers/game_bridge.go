@@ -319,9 +319,23 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		}
 		lastInput.Store(time.Now().UnixNano())
 
+		// Handle arrow key sentinels — no command history implemented yet.
+		if line == "\x00UP" || line == "\x00DOWN" {
+			if conn.IsSplitScreen() {
+				_ = conn.WritePromptSplit(buildPrompt())
+			} else {
+				_ = conn.WritePrompt(buildPrompt())
+			}
+			continue
+		}
+
 		line = strings.TrimSpace(line)
 		if line == "" {
-			_ = conn.WritePrompt(buildPrompt())
+			if conn.IsSplitScreen() {
+				_ = conn.WritePromptSplit(buildPrompt())
+			} else {
+				_ = conn.WritePrompt(buildPrompt())
+			}
 			continue
 		}
 
@@ -350,14 +364,22 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			promptFn: buildPrompt,
 			helpFn: func() {
 				h.showGameHelp(conn, registry, role)
-				_ = conn.WritePrompt(buildPrompt())
+				if conn.IsSplitScreen() {
+					_ = conn.WritePromptSplit(buildPrompt())
+				} else {
+					_ = conn.WritePrompt(buildPrompt())
+				}
 			},
 		}
 
 		handlerFn, ok := bridgeHandlerMap[cmd.Handler]
 		if !ok {
 			_ = conn.WriteLine(telnet.Colorf(telnet.Dim, "You don't know how to '%s'.", parsed.Command))
-			_ = conn.WritePrompt(buildPrompt())
+			if conn.IsSplitScreen() {
+				_ = conn.WritePromptSplit(buildPrompt())
+			} else {
+				_ = conn.WritePrompt(buildPrompt())
+			}
 			continue
 		}
 
@@ -377,6 +399,11 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			return ErrSwitchCharacter
 		}
 		if result.done {
+			if conn.IsSplitScreen() {
+				_ = conn.WritePromptSplit(buildPrompt())
+			} else {
+				_ = conn.WritePrompt(buildPrompt())
+			}
 			continue
 		}
 		if result.msg != nil {
