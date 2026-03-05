@@ -577,11 +577,15 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 						zap.String("uid", uid),
 						zap.String("input", selText),
 					)
+					_ = stream.Send(&gamev1.ServerEvent{
+						Payload: &gamev1.ServerEvent_Message{
+							Message: &gamev1.MessageEvent{Content: "Invalid selection. You will be prompted again on next login."},
+						},
+					})
 				}
 			}
 		}
 	}
-	_ = validTypes // suppress unused warning when block is not entered
 
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
