@@ -70,26 +70,26 @@
   - [x] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
 - [x] Admin command `summon_item` which take an item ID as a parameter.  An instance of the specified item must be added to the room.
 - [ ] TODO list: a full itemized list of all stubs and intentionally unimplemented code.
-- [ ] Telnet UI upgrades
+- [x] Telnet UI upgrades
   - The screen is sectioned into three segments, from top to bottoms:
     - Room display
     - Console
     - Player input
-  - [ ] Player input
-    - [ ] The player input section must be pinned to the bottom of the screen
-    - [ ] The player input section is composed of two items, the prompt and the player input area
-      - [ ] The prompt must refresh independent of the input section such that the prompt reflects changes without player input.
-      - [ ] The prompt must never overwrite the player input area
-    - [ ] The player input section must have a horizontal divider on the top to separate it from the console
-    - [ ] Console messages must never overwrite the player input section 
-    - [ ] When a player is prompted to select from a list of items, in addition to selection by number they must be able to use the up/down cursor keys
-  - [ ] Room display
-    - [ ] The room display must always be pinned to the top of the screen 
-    - [ ] The room display contains the output of the `look` command
-    - [ ] The room display must update independent of the console messages and player prompt such that the room state is always up-to-date.
-    - [ ] The room display section must have a horizontal divider on the bottom to separate it from the console
-    - [ ] Console messages must never overwrite the room display
-    - [ ] When a player is in combat the room display must reflect this
+  - [x] Player input
+    - [x] The player input section must be pinned to the bottom of the screen
+    - [x] The player input section is composed of two items, the prompt and the player input area
+      - [x] The prompt must refresh independent of the input section such that the prompt reflects changes without player input.
+      - [x] The prompt must never overwrite the player input area
+    - [x] The player input section must have a horizontal divider on the top to separate it from the console
+    - [x] Console messages must never overwrite the player input section
+    - [x] When a player is prompted to select from a list of items, in addition to selection by number they must be able to use the up/down cursor keys
+  - [x] Room display
+    - [x] The room display must always be pinned to the top of the screen
+    - [x] The room display contains the output of the `look` command
+    - [x] The room display must update independent of the console messages and player prompt such that the room state is always up-to-date.
+    - [x] The room display section must have a horizontal divider on the bottom to separate it from the console
+    - [x] Console messages must never overwrite the room display
+    - [x] When a player is in combat the room display must reflect this
 - [ ] Character ability boosts
   - [ ] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
     - [ ] Archetype - Mirrors Ancestry
