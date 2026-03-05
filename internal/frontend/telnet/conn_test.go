@@ -154,6 +154,7 @@ func TestConn_ReadLine_CROnly(t *testing.T) {
 	go func() {
 		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
 		_, _ = client.Write([]byte("test\r"))
+		client.Close() // Close so Peek returns EOF immediately instead of blocking
 	}()
 
 	line, err := conn.ReadLine()
@@ -237,41 +238,15 @@ func TestConn_Negotiate(t *testing.T) {
 	assert.Equal(t, expected, buf[:n])
 }
 
-func TestConn_Negotiate_SendsNAWS(t *testing.T) {
-	conn, client := newTestConn(t)
-
-	go func() {
-		err := conn.Negotiate()
-		assert.NoError(t, err)
-	}()
-
-	buf := make([]byte, 256)
-	_ = client.SetReadDeadline(time.Now().Add(2 * time.Second))
-	n, err := client.Read(buf)
-	require.NoError(t, err)
-
-	expected := []byte{
-		IAC, WILL, OptSuppressGoAhead,
-		IAC, DO, OptNAWS,
-	}
-	assert.Equal(t, expected, buf[:n])
-}
-
 func TestConn_Dimensions_DefaultZero(t *testing.T) {
-	client, server := net.Pipe()
-	defer client.Close()
-	defer server.Close()
-	conn := NewConn(server, time.Second, time.Second)
+	conn, _ := newTestConn(t)
 	w, h := conn.Dimensions()
 	assert.Equal(t, 0, w)
 	assert.Equal(t, 0, h)
 }
 
 func TestConn_SplitScreen_DefaultFalse(t *testing.T) {
-	client, server := net.Pipe()
-	defer client.Close()
-	defer server.Close()
-	conn := NewConn(server, time.Second, time.Second)
+	conn, _ := newTestConn(t)
 	assert.False(t, conn.IsSplitScreen())
 }
 
@@ -295,7 +270,7 @@ func TestPropertyFilterIAC_NoIACBytesPassThrough(t *testing.T) {
 func TestPropertyFilterIAC_OutputHasNoIACCommands(t *testing.T) {
 	commandBytes := map[byte]bool{
 		WILL: true, WONT: true, DO: true, DONT: true,
-		SB: true, NOP: true, GA: true,
+		SB: true, SE: true, NOP: true, GA: true,
 	}
 	rapid.Check(t, func(t *rapid.T) {
 		length := rapid.IntRange(0, 100).Draw(t, "length")
