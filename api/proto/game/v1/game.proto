@@ -57,6 +57,7 @@ message ClientMessage {
     InteractRequest     interact_request    = 40;
     UseRequest          use_request         = 41;
     ClassFeaturesRequest class_features_request = 42;
+    SummonItemRequest summon_item = 43;
   }
 }
 
@@ -354,6 +355,12 @@ message EquipmentRequest {}
 message TeleportRequest {
   string target_character = 1;
   string room_id = 2;
+}
+
+// SummonItemRequest asks the server to spawn an item directly into the player's inventory (admin only).
+message SummonItemRequest {
+  string item_id = 1;
+  int32 quantity = 2;
 }
 
 // FloorItem describes an item on the room floor.
