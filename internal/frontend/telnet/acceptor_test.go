@@ -77,6 +77,25 @@ func TestAcceptorStartAndStop(t *testing.T) {
 	_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 	_, _ = conn.Read(buf)
 
+	// Respond with NAWS (80x24) so AwaitNAWS returns immediately.
+	naws := []byte{IAC, SB, OptNAWS, 0x00, 0x50, 0x00, 0x18, IAC, SE}
+	_, err = conn.Write(naws)
+	require.NoError(t, err)
+
+	// Drain all InitScreen ANSI escape sequences before interacting.
+	// InitScreen output can exceed 500 bytes for an 80-column terminal so we
+	// loop with a short deadline until the server stops sending escape data.
+	drainBuf := make([]byte, 4096)
+	for {
+		_ = conn.SetReadDeadline(time.Now().Add(50 * time.Millisecond))
+		_, readErr := conn.Read(drainBuf)
+		if readErr != nil {
+			// Deadline exceeded — nothing more to drain.
+			break
+		}
+	}
+	_ = conn.SetReadDeadline(time.Time{}) // clear deadline
+
 	// Send a message
 	_, err = conn.Write([]byte("hello\r\n"))
 	require.NoError(t, err)
@@ -151,6 +170,9 @@ func TestAcceptorMultipleClients(t *testing.T) {
 		buf := make([]byte, 256)
 		_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 		_, _ = conn.Read(buf)
+		// Respond with NAWS (80x24) so AwaitNAWS returns immediately.
+		naws := []byte{IAC, SB, OptNAWS, 0x00, 0x50, 0x00, 0x18, IAC, SE}
+		_, _ = conn.Write(naws)
 	}
 
 	// Each client quits

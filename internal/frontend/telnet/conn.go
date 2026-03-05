@@ -207,8 +207,12 @@ func (c *Conn) handleIAC() error {
 				if next == SE {
 					break
 				}
-				// IAC IAC inside SB = literal 0xFF
+				// IAC IAC inside SB = literal 0xFF; the byte after IAC is
+				// still regular data and must not be discarded.
 				subdata = append(subdata, 0xFF)
+				if next != IAC {
+					subdata = append(subdata, next)
+				}
 				continue
 			}
 			subdata = append(subdata, b)
@@ -228,6 +232,34 @@ func (c *Conn) handleIAC() error {
 		// Other commands (NOP, GA, etc.) — ignore
 	}
 	return nil
+}
+
+// AwaitNAWS waits up to timeout for the client to send a NAWS subnegotiation.
+// It reads and discards all incoming bytes until NAWS dimensions arrive or timeout.
+// Returns true if non-zero dimensions were received before the timeout.
+//
+// Precondition: Negotiate() must already have been called (IAC DO NAWS was sent).
+// Postcondition: conn.width and conn.height are set if NAWS was received.
+func (c *Conn) AwaitNAWS(timeout time.Duration) bool {
+	_ = c.raw.SetReadDeadline(time.Now().Add(timeout))
+	defer func() { _ = c.raw.SetReadDeadline(time.Time{}) }()
+
+	for {
+		b, err := c.reader.ReadByte()
+		if err != nil {
+			return false
+		}
+		if b != IAC {
+			continue
+		}
+		if err := c.handleIAC(); err != nil {
+			return false
+		}
+		w, h := c.Dimensions()
+		if w > 0 && h > 0 {
+			return true
+		}
+	}
 }
 
 // ReadPassword reads a line of input with server-side echo suppression.

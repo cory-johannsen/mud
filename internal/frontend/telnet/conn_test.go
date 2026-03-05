@@ -348,6 +348,36 @@ func TestConn_ReadLine_UnknownEscapeIgnored(t *testing.T) {
 	assert.Equal(t, "hi", line)
 }
 
+// TestConn_AwaitNAWS_SetsWidthHeight verifies that AwaitNAWS processes the NAWS
+// subnegotiation and returns true when dimensions are received within the timeout.
+func TestConn_AwaitNAWS_SetsWidthHeight(t *testing.T) {
+	conn, client := newTestConn(t)
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		naws := []byte{IAC, SB, OptNAWS, 0x00, 0x50, 0x00, 0x18, IAC, SE}
+		_, _ = client.Write(naws)
+	}()
+
+	got := conn.AwaitNAWS(500 * time.Millisecond)
+	assert.True(t, got)
+	w, h := conn.Dimensions()
+	assert.Equal(t, 80, w)
+	assert.Equal(t, 24, h)
+}
+
+// TestConn_AwaitNAWS_TimesOut verifies that AwaitNAWS returns false when
+// no NAWS arrives within the timeout.
+func TestConn_AwaitNAWS_TimesOut(t *testing.T) {
+	conn, _ := newTestConn(t)
+
+	got := conn.AwaitNAWS(50 * time.Millisecond)
+	assert.False(t, got)
+	w, h := conn.Dimensions()
+	assert.Equal(t, 0, w)
+	assert.Equal(t, 0, h)
+}
+
 // --- Property tests ---
 
 // Property: FilterIAC on input without any IAC bytes returns the input unchanged.

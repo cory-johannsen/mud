@@ -106,6 +106,16 @@ func (a *Acceptor) handleConn(raw net.Conn) {
 		return
 	}
 
+	// Wait up to 1 second for NAWS window-size response.
+	if conn.AwaitNAWS(time.Second) {
+		if err := conn.InitScreen(); err != nil {
+			a.logger.Warn("split-screen init failed, falling back to legacy mode",
+				zap.String("remote_addr", addr), zap.Error(err))
+		} else {
+			conn.EnableSplitScreen()
+		}
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
