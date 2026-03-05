@@ -590,21 +590,41 @@ func (h *AuthHandler) featChoiceLoop(ctx context.Context, conn *telnet.Conn, hea
 	return chosen, nil
 }
 
-// ensureFeats checks whether the character has feats recorded and, if not,
-// runs interactive selection and persists the result. Called before gameBridge.
+// FeatPoolDeficit returns the number of feats still needed from pool.
+// It counts how many feat IDs in pool are present in storedFeatIDs, then
+// subtracts that from count. The result is clamped to zero from below.
+// When pool is empty there are no feats available to satisfy count, so
+// the deficit is always 0 (the loop cannot be filled).
+//
+// Precondition: count >= 0; pool may be nil or empty; storedFeatIDs may be nil.
+// Postcondition: returns max(0, count - len(intersection(pool, storedFeatIDs)));
+// returns 0 when pool is empty.
+func FeatPoolDeficit(pool []string, storedFeatIDs map[string]bool, count int) int {
+	if len(pool) == 0 {
+		return 0
+	}
+	stored := 0
+	for _, id := range pool {
+		if storedFeatIDs[id] {
+			stored++
+		}
+	}
+	if stored >= count {
+		return 0
+	}
+	return count - stored
+}
+
+// ensureFeats checks which feat pools still have a deficit for the character and,
+// for each pool with a deficit, runs interactive selection for exactly the missing
+// count. It is called before gameBridge for both new and existing characters so
+// backfill always prompts for any un-filled pool.
 //
 // Precondition: char must have a valid ID, Class, and Skills populated.
-// Postcondition: character_feats rows exist for char; returns non-nil error only on fatal failure.
+// Postcondition: character_feats rows exist for char covering all granted pools;
+// returns non-nil error only on fatal failure.
 func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
 	if h.characterFeats == nil || h.featRegistry == nil {
-		return nil
-	}
-	has, err := h.characterFeats.HasFeats(ctx, char.ID)
-	if err != nil {
-		h.logger.Warn("checking feats for character", zap.Int64("id", char.ID), zap.Error(err))
-		return nil
-	}
-	if has {
 		return nil
 	}
 
@@ -614,10 +634,52 @@ func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *
 		return nil
 	}
 
+	// Load already-stored feats to compute per-pool deficits.
+	storedIDs, err := h.characterFeats.GetAll(ctx, char.ID)
+	if err != nil {
+		h.logger.Warn("loading stored feats for deficit check", zap.Int64("id", char.ID), zap.Error(err))
+		return nil
+	}
+	storedSet := make(map[string]bool, len(storedIDs))
+	for _, id := range storedIDs {
+		storedSet[id] = true
+	}
+
+	// Determine whether any pool has a deficit.
+	jobChoicesDeficit := 0
+	if job.FeatGrants != nil && job.FeatGrants.Choices != nil && job.FeatGrants.Choices.Count > 0 {
+		jobChoicesDeficit = FeatPoolDeficit(job.FeatGrants.Choices.Pool, storedSet, job.FeatGrants.Choices.Count)
+	}
+
+	generalPool := h.featRegistry.ByCategory("general")
+	generalPoolIDs := make([]string, len(generalPool))
+	for i, f := range generalPool {
+		generalPoolIDs[i] = f.ID
+	}
+	generalDeficit := 0
+	if job.FeatGrants != nil && job.FeatGrants.GeneralCount > 0 {
+		generalDeficit = FeatPoolDeficit(generalPoolIDs, storedSet, job.FeatGrants.GeneralCount)
+	}
+
+	skillFeatPool := h.featRegistry.SkillFeatsForTrainedSkills(char.Skills)
+	skillPoolIDs := make([]string, len(skillFeatPool))
+	for i, f := range skillFeatPool {
+		skillPoolIDs[i] = f.ID
+	}
+	skillDeficit := 0
+	if len(skillPoolIDs) > 0 {
+		skillDeficit = FeatPoolDeficit(skillPoolIDs, storedSet, 1)
+	}
+
+	// If all pools are fully satisfied, nothing to do.
+	if jobChoicesDeficit == 0 && generalDeficit == 0 && skillDeficit == 0 {
+		return nil
+	}
+
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow,
 		"\r\n=== Step 2: Feats ==="))
 
-	// Announce fixed job feats.
+	// Announce fixed job feats (informational only, already stored or will be added).
 	var fixedNames []string
 	if job.FeatGrants != nil {
 		for _, id := range job.FeatGrants.Fixed {
@@ -635,47 +697,44 @@ func (h *AuthHandler) ensureFeats(ctx context.Context, conn *telnet.Conn, char *
 		}
 	}
 
-	// Job feat choices.
+	// Job feat choices — only prompt for the deficit count.
 	var jobChosen []string
-	if job.FeatGrants != nil && job.FeatGrants.Choices != nil && job.FeatGrants.Choices.Count > 0 {
-		jobChosen, err = h.featChoiceLoop(ctx, conn, "Choose a job feat", job.FeatGrants.Choices.Pool, job.FeatGrants.Choices.Count)
+	if jobChoicesDeficit > 0 {
+		jobChosen, err = h.featChoiceLoop(ctx, conn, "Choose a job feat", job.FeatGrants.Choices.Pool, jobChoicesDeficit)
 		if err != nil {
 			return fmt.Errorf("feat job choice: %w", err)
 		}
 	}
 
-	// General feat choices.
+	// General feat choices — only prompt for the deficit count.
 	var generalChosen []string
-	if job.FeatGrants != nil && job.FeatGrants.GeneralCount > 0 {
-		generalPool := h.featRegistry.ByCategory("general")
-		poolIDs := make([]string, len(generalPool))
-		for i, f := range generalPool {
-			poolIDs[i] = f.ID
-		}
-		generalChosen, err = h.featChoiceLoop(ctx, conn, "Choose a general feat", poolIDs, job.FeatGrants.GeneralCount)
+	if generalDeficit > 0 {
+		generalChosen, err = h.featChoiceLoop(ctx, conn, "Choose a general feat", generalPoolIDs, generalDeficit)
 		if err != nil {
 			return fmt.Errorf("feat general choice: %w", err)
 		}
 	}
 
-	// Skill feat choice — 1 pick from trained skills' feat pools.
+	// Skill feat choice — only prompt if deficit > 0.
 	var skillChosen []string
-	if len(char.Skills) > 0 {
-		skillFeatPool := h.featRegistry.SkillFeatsForTrainedSkills(char.Skills)
-		if len(skillFeatPool) > 0 {
-			poolIDs := make([]string, len(skillFeatPool))
-			for i, f := range skillFeatPool {
-				poolIDs[i] = f.ID
-			}
-			skillChosen, err = h.featChoiceLoop(ctx, conn, "Choose a skill feat", poolIDs, 1)
-			if err != nil {
-				return fmt.Errorf("feat skill choice: %w", err)
-			}
+	if skillDeficit > 0 {
+		skillChosen, err = h.featChoiceLoop(ctx, conn, "Choose a skill feat", skillPoolIDs, skillDeficit)
+		if err != nil {
+			return fmt.Errorf("feat skill choice: %w", err)
 		}
 	}
 
-	feats := character.BuildFeatsFromJob(job, jobChosen, generalChosen, skillChosen)
-	if err := h.characterFeats.SetAll(ctx, char.ID, feats); err != nil {
+	// Merge newly chosen feats with already-stored feats to produce the full set.
+	newFeats := character.BuildFeatsFromJob(job, jobChosen, generalChosen, skillChosen)
+	merged := make([]string, 0, len(storedIDs)+len(newFeats))
+	merged = append(merged, storedIDs...)
+	for _, id := range newFeats {
+		if !storedSet[id] {
+			merged = append(merged, id)
+		}
+	}
+
+	if err := h.characterFeats.SetAll(ctx, char.ID, merged); err != nil {
 		h.logger.Error("persisting backfill feats", zap.Int64("id", char.ID), zap.Error(err))
 		_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Warning: feats could not be saved."))
 	}

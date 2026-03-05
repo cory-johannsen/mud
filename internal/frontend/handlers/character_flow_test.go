@@ -287,6 +287,113 @@ func TestProperty_RandomizeRemaining_AlwaysValid(t *testing.T) {
 	})
 }
 
+// ---------------------------------------------------------------------------
+// FeatPoolDeficit tests
+// ---------------------------------------------------------------------------
+
+// TestFeatPoolDeficit_PartialStored verifies that a pool with count=2 and 1 stored
+// feat from the pool returns deficit 1.
+func TestFeatPoolDeficit_PartialStored(t *testing.T) {
+	pool := []string{"feat_a", "feat_b", "feat_c"}
+	stored := map[string]bool{"feat_a": true}
+	deficit := handlers.FeatPoolDeficit(pool, stored, 2)
+	assert.Equal(t, 1, deficit)
+}
+
+// TestFeatPoolDeficit_FullyStored verifies that a pool with count=2 and 2 stored
+// feats from the pool returns deficit 0.
+func TestFeatPoolDeficit_FullyStored(t *testing.T) {
+	pool := []string{"feat_a", "feat_b", "feat_c"}
+	stored := map[string]bool{"feat_a": true, "feat_b": true}
+	deficit := handlers.FeatPoolDeficit(pool, stored, 2)
+	assert.Equal(t, 0, deficit)
+}
+
+// TestFeatPoolDeficit_OverStored verifies that a pool with count=2 and 3 stored
+// feats (more than count) returns deficit 0.
+func TestFeatPoolDeficit_OverStored(t *testing.T) {
+	pool := []string{"feat_a", "feat_b", "feat_c"}
+	stored := map[string]bool{"feat_a": true, "feat_b": true, "feat_c": true}
+	deficit := handlers.FeatPoolDeficit(pool, stored, 2)
+	assert.Equal(t, 0, deficit)
+}
+
+// TestFeatPoolDeficit_NilStored verifies that a nil storedFeatIDs map returns
+// deficit == count.
+func TestFeatPoolDeficit_NilStored(t *testing.T) {
+	pool := []string{"feat_a", "feat_b"}
+	deficit := handlers.FeatPoolDeficit(pool, nil, 2)
+	assert.Equal(t, 2, deficit)
+}
+
+// TestFeatPoolDeficit_EmptyPool verifies that an empty pool always returns
+// deficit 0 regardless of count.
+func TestFeatPoolDeficit_EmptyPool(t *testing.T) {
+	deficit := handlers.FeatPoolDeficit([]string{}, map[string]bool{}, 3)
+	assert.Equal(t, 0, deficit)
+}
+
+// TestFeatPoolDeficit_ZeroCount verifies that count=0 always returns deficit 0.
+func TestFeatPoolDeficit_ZeroCount(t *testing.T) {
+	pool := []string{"feat_a", "feat_b"}
+	deficit := handlers.FeatPoolDeficit(pool, nil, 0)
+	assert.Equal(t, 0, deficit)
+}
+
+// TestFeatPoolDeficit_StoredOutsidePool verifies that feats stored but not in
+// pool are not counted toward satisfying the deficit.
+func TestFeatPoolDeficit_StoredOutsidePool(t *testing.T) {
+	pool := []string{"feat_a", "feat_b"}
+	stored := map[string]bool{"feat_x": true, "feat_y": true} // not in pool
+	deficit := handlers.FeatPoolDeficit(pool, stored, 2)
+	assert.Equal(t, 2, deficit)
+}
+
+// TestProperty_FeatPoolDeficit verifies structural invariants with property-based testing.
+func TestProperty_FeatPoolDeficit(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		count := rapid.IntRange(0, 5).Draw(rt, "count")
+		poolSize := rapid.IntRange(0, 6).Draw(rt, "poolSize")
+		pool := make([]string, poolSize)
+		for i := range pool {
+			pool[i] = fmt.Sprintf("feat_%d", i)
+		}
+
+		storedCount := rapid.IntRange(0, poolSize).Draw(rt, "storedCount")
+		stored := make(map[string]bool, storedCount)
+		for i := 0; i < storedCount; i++ {
+			stored[fmt.Sprintf("feat_%d", i)] = true
+		}
+
+		deficit := handlers.FeatPoolDeficit(pool, stored, count)
+
+		// Invariant 1: deficit is never negative.
+		assert.GreaterOrEqual(rt, deficit, 0, "deficit must not be negative")
+
+		// Invariant 2: deficit is never greater than count.
+		assert.LessOrEqual(rt, deficit, count, "deficit must not exceed count")
+
+		// Invariant 3: deficit matches reference formula.
+		// When pool is empty there is nothing to pick, so deficit is 0.
+		var expected int
+		if len(pool) == 0 {
+			expected = 0
+		} else {
+			storedFromPool := 0
+			for _, id := range pool {
+				if stored[id] {
+					storedFromPool++
+				}
+			}
+			expected = count - storedFromPool
+			if expected < 0 {
+				expected = 0
+			}
+		}
+		assert.Equal(rt, expected, deficit)
+	})
+}
+
 func TestRenderArchetypeMenu_ContainsKeyAbility(t *testing.T) {
 	archetypes := []*ruleset.Archetype{
 		{ID: "aggressor", Name: "Aggressor", Description: "Violence solves everything.", KeyAbility: "brutality", HitPointsPerLevel: 10},

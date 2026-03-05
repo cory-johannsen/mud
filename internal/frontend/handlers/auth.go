@@ -55,6 +55,7 @@ type CharacterSkillsSetter interface {
 // CharacterFeatsSetter defines feat persistence operations required by AuthHandler.
 type CharacterFeatsSetter interface {
 	HasFeats(ctx context.Context, characterID int64) (bool, error)
+	GetAll(ctx context.Context, characterID int64) ([]string, error)
 	SetAll(ctx context.Context, characterID int64, feats []string) error
 }
 
