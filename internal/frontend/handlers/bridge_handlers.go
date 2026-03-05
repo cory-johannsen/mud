@@ -659,11 +659,12 @@ func bridgeUse(bctx *bridgeContext) (bridgeResult, error) {
 func bridgeSummonItem(bctx *bridgeContext) (bridgeResult, error) {
 	parsed := command.HandleSummonItem(strings.Join(bctx.parsed.Args, " "))
 	if strings.HasPrefix(parsed, "Usage:") {
-		_ = bctx.conn.WriteLine(parsed)
-		_ = bctx.conn.WritePrompt(bctx.promptFn())
-		return bridgeResult{done: true}, nil
+		return writeErrorPrompt(bctx, parsed)
 	}
 	parts := strings.Fields(parsed)
+	if len(parts) != 2 {
+		return writeErrorPrompt(bctx, "Usage: summon_item <item_id> [quantity]")
+	}
 	itemID := parts[0]
 	qty, _ := strconv.Atoi(parts[1]) // safe: HandleSummonItem already validated
 	return bridgeResult{msg: &gamev1.ClientMessage{
