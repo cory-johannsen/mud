@@ -250,6 +250,58 @@ func TestConn_SplitScreen_DefaultFalse(t *testing.T) {
 	assert.False(t, conn.IsSplitScreen())
 }
 
+// TestConn_ReadLine_NAWSUpdatesWidthHeight verifies that a NAWS subnegotiation
+// embedded in the input stream sets Width and Height on the Conn.
+func TestConn_ReadLine_NAWSUpdatesWidthHeight(t *testing.T) {
+	conn, client := newTestConn(t)
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		// NAWS: 80 wide (0x00, 0x50), 24 high (0x00, 0x18)
+		naws := []byte{IAC, SB, OptNAWS, 0x00, 0x50, 0x00, 0x18, IAC, SE}
+		naws = append(naws, []byte("ok\r\n")...)
+		_, _ = client.Write(naws)
+	}()
+
+	line, err := conn.ReadLine()
+	require.NoError(t, err)
+	assert.Equal(t, "ok", line)
+
+	w, h := conn.Dimensions()
+	assert.Equal(t, 80, w)
+	assert.Equal(t, 24, h)
+}
+
+// TestConn_ReadLine_NAWS_SetsWidthHeight_Property verifies any valid 16-bit
+// NAWS dimensions are stored correctly.
+func TestConn_ReadLine_NAWS_SetsWidthHeight_Property(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		w := rapid.IntRange(10, 300).Draw(rt, "w")
+		h := rapid.IntRange(5, 100).Draw(rt, "h")
+
+		conn, client := newTestConn(t)
+
+		go func() {
+			_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+			naws := []byte{
+				IAC, SB, OptNAWS,
+				byte(w >> 8), byte(w & 0xFF),
+				byte(h >> 8), byte(h & 0xFF),
+				IAC, SE,
+			}
+			naws = append(naws, []byte("x\r\n")...)
+			_, _ = client.Write(naws)
+		}()
+
+		_, err := conn.ReadLine()
+		require.NoError(t, err)
+
+		gw, gh := conn.Dimensions()
+		assert.Equal(t, w, gw)
+		assert.Equal(t, h, gh)
+	})
+}
+
 // --- Property tests ---
 
 // Property: FilterIAC on input without any IAC bytes returns the input unchanged.

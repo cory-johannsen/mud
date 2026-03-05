@@ -153,7 +153,12 @@ func (c *Conn) handleIAC() error {
 		_, err := c.reader.ReadByte()
 		return err
 	case SB:
-		// Sub-negotiation: read until IAC SE
+		// Sub-negotiation: read option byte, then data until IAC SE.
+		opt, err := c.reader.ReadByte()
+		if err != nil {
+			return err
+		}
+		var subdata []byte
 		for {
 			b, err := c.reader.ReadByte()
 			if err != nil {
@@ -167,7 +172,20 @@ func (c *Conn) handleIAC() error {
 				if next == SE {
 					break
 				}
+				// IAC IAC inside SB = literal 0xFF
+				subdata = append(subdata, 0xFF)
+				continue
 			}
+			subdata = append(subdata, b)
+		}
+		// Parse NAWS: option 31, exactly 4 payload bytes (W-hi W-lo H-hi H-lo)
+		if opt == OptNAWS && len(subdata) == 4 {
+			w := int(subdata[0])<<8 | int(subdata[1])
+			h := int(subdata[2])<<8 | int(subdata[3])
+			c.mu.Lock()
+			c.width = w
+			c.height = h
+			c.mu.Unlock()
 		}
 	case IAC:
 		// Escaped IAC (literal 0xFF) — we ignore it in text context
