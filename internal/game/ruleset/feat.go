@@ -13,14 +13,14 @@ import (
 // Skill is non-empty only for category="skill"; Archetype is non-empty only for category="job".
 // Active feats require player action to use; passive feats are always-on.
 type Feat struct {
-	ID           string `yaml:"id"`
-	Name         string `yaml:"name"`
-	Category     string `yaml:"category"`
-	Skill        string `yaml:"skill"`
-	Archetype    string `yaml:"archetype"`
-	PF2E         string `yaml:"pf2e"`
-	Active       bool   `yaml:"active"`
-	ActivateText string `yaml:"activate_text"`
+	ID           string          `yaml:"id"`
+	Name         string          `yaml:"name"`
+	Category     string          `yaml:"category"`
+	Skill        string          `yaml:"skill"`
+	Archetype    string          `yaml:"archetype"`
+	PF2E         string          `yaml:"pf2e"`
+	Active       bool            `yaml:"active"`
+	ActivateText string          `yaml:"activate_text"`
 	ConditionID  string          `yaml:"condition_id"` // optional; non-empty means Use applies this condition
 	Description  string          `yaml:"description"`
 	Choices      *FeatureChoices `yaml:"choices"`
@@ -52,11 +52,7 @@ func LoadFeats(path string) ([]*Feat, error) {
 	if err != nil {
 		return nil, fmt.Errorf("reading feats file %s: %w", path, err)
 	}
-	var f featsFile
-	if err := yaml.Unmarshal(data, &f); err != nil {
-		return nil, fmt.Errorf("parsing feats file %s: %w", path, err)
-	}
-	return f.Feats, nil
+	return LoadFeatsFromBytes(data)
 }
 
 // FeatRegistry provides fast lookup of feats by ID, category, skill, and archetype.
@@ -92,22 +88,34 @@ func NewFeatRegistry(feats []*Feat) *FeatRegistry {
 }
 
 // Feat returns the feat with the given ID and true, or nil and false if not found.
+//
+// Precondition: id must be non-empty.
+// Postcondition: Returns the feat and true, or nil and false.
 func (r *FeatRegistry) Feat(id string) (*Feat, bool) {
 	f, ok := r.byID[id]
 	return f, ok
 }
 
 // ByCategory returns all feats in the given category.
+//
+// Precondition: category must be non-empty.
+// Postcondition: Returns a slice (may be empty).
 func (r *FeatRegistry) ByCategory(category string) []*Feat {
 	return r.byCategory[category]
 }
 
 // BySkill returns all skill feats unlocked by the given skill ID.
+//
+// Precondition: skillID must be non-empty.
+// Postcondition: Returns a slice (may be empty).
 func (r *FeatRegistry) BySkill(skillID string) []*Feat {
 	return r.bySkill[skillID]
 }
 
 // ByArchetype returns all job feats for the given archetype.
+//
+// Precondition: archetype must be non-empty.
+// Postcondition: Returns a slice (may be empty).
 func (r *FeatRegistry) ByArchetype(archetype string) []*Feat {
 	return r.byArchetype[archetype]
 }

@@ -58,11 +58,7 @@ func LoadClassFeatures(path string) ([]*ClassFeature, error) {
 	if err != nil {
 		return nil, fmt.Errorf("reading class features file %s: %w", path, err)
 	}
-	var f classFeaturesFile
-	if err := yaml.Unmarshal(data, &f); err != nil {
-		return nil, fmt.Errorf("parsing class features file %s: %w", path, err)
-	}
-	return f.ClassFeatures, nil
+	return LoadClassFeaturesFromBytes(data)
 }
 
 // ClassFeatureRegistry provides fast lookup of class features by ID, archetype, and job.

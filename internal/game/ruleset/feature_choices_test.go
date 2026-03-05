@@ -72,6 +72,7 @@ feats:
 	f := feats[0]
 	require.NotNil(t, f.Choices)
 	assert.Equal(t, "weapon_group", f.Choices.Key)
+	assert.Equal(t, "Choose a weapon group", f.Choices.Prompt)
 	assert.Equal(t, []string{"pistol", "rifle", "melee", "explosive"}, f.Choices.Options)
 }
 
@@ -110,8 +111,16 @@ func TestPropertyFeatureChoices_OptionsRoundtrip(t *testing.T) {
 		if got.Key != orig.Key {
 			rt.Fatalf("Key mismatch: got %q want %q", got.Key, orig.Key)
 		}
+		if got.Prompt != orig.Prompt {
+			rt.Fatalf("Prompt mismatch: got %q want %q", got.Prompt, orig.Prompt)
+		}
 		if len(got.Options) != len(orig.Options) {
 			rt.Fatalf("Options len mismatch: got %d want %d", len(got.Options), len(orig.Options))
+		}
+		for i, o := range orig.Options {
+			if got.Options[i] != o {
+				rt.Fatalf("Options[%d] mismatch: got %q want %q", i, got.Options[i], o)
+			}
 		}
 	})
 }
