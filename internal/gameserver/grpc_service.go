@@ -2255,17 +2255,17 @@ func (s *GameServiceServer) handleSetRole(uid string, req *gamev1.SetRoleRequest
 func (s *GameServiceServer) handleSummonItem(uid string, req *gamev1.SummonItemRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
-		return messageEvent("player not found"), nil
+		return errorEvent("player not found"), nil
 	}
 	if sess.Role != "editor" && sess.Role != "admin" {
-		return messageEvent("permission denied: editor role required"), nil
+		return errorEvent("permission denied: editor role required"), nil
 	}
 	if s.invRegistry == nil {
-		return messageEvent("item registry unavailable"), nil
+		return errorEvent("item registry unavailable"), nil
 	}
 	def, ok := s.invRegistry.Item(req.ItemId)
 	if !ok {
-		return messageEvent(fmt.Sprintf("unknown item: %q", req.ItemId)), nil
+		return errorEvent(fmt.Sprintf("unknown item: %q", req.ItemId)), nil
 	}
 	qty := int(req.Quantity)
 	if qty < 1 {
@@ -2276,9 +2276,10 @@ func (s *GameServiceServer) handleSummonItem(uid string, req *gamev1.SummonItemR
 		ItemDefID:  req.ItemId,
 		Quantity:   qty,
 	}
-	if s.floorMgr != nil {
-		s.floorMgr.Drop(sess.RoomID, inst)
+	if s.floorMgr == nil {
+		return errorEvent("floor system not available"), nil
 	}
+	s.floorMgr.Drop(sess.RoomID, inst)
 	return messageEvent(fmt.Sprintf("Summoned %dx %s to the room.", qty, def.Name)), nil
 }
 

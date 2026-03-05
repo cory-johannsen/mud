@@ -25,9 +25,9 @@ var testSummonItemDef = &inventory.ItemDef{
 	MaxStack: 1,
 }
 
-// newSummonItemService builds a GameServiceServer wired with the given
-// FloorManager and inventory Registry for use in summon_item tests.
-func newSummonItemService(t *testing.T, fm *inventory.FloorManager, reg *inventory.Registry) *GameServiceServer {
+// newSummonItemServiceOpts builds a GameServiceServer wired with the given
+// FloorManager (may be nil) and inventory Registry for use in summon_item tests.
+func newSummonItemServiceOpts(t *testing.T, fm *inventory.FloorManager, reg *inventory.Registry) *GameServiceServer {
 	t.Helper()
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
@@ -43,6 +43,13 @@ func newSummonItemService(t *testing.T, fm *inventory.FloorManager, reg *invento
 		nil, nil, nil, nil, nil,
 		nil, nil, nil, nil,
 	)
+}
+
+// newSummonItemService builds a GameServiceServer wired with the given
+// FloorManager and inventory Registry for use in summon_item tests.
+func newSummonItemService(t *testing.T, fm *inventory.FloorManager, reg *inventory.Registry) *GameServiceServer {
+	t.Helper()
+	return newSummonItemServiceOpts(t, fm, reg)
 }
 
 // addSummonTestPlayer is a helper that adds a player with the given uid, roomID, and role to svc.sessions.
@@ -131,9 +138,9 @@ func TestHandleSummonItem_PlayerDenied(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	msg := resp.GetMessage()
-	require.NotNil(t, msg, "expected message event for permission denied")
-	assert.Contains(t, msg.Content, "permission denied")
+	errEvt := resp.GetError()
+	require.NotNil(t, errEvt, "expected error event for permission denied")
+	assert.Contains(t, errEvt.Message, "permission denied")
 
 	items := fm.ItemsInRoom("room_a")
 	assert.Empty(t, items, "no items should be placed when permission is denied")
@@ -154,9 +161,9 @@ func TestHandleSummonItem_UnknownItemID(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	msg := resp.GetMessage()
-	require.NotNil(t, msg, "expected message event for unknown item")
-	assert.Contains(t, msg.Content, "unknown item")
+	errEvt := resp.GetError()
+	require.NotNil(t, errEvt, "expected error event for unknown item")
+	assert.Contains(t, errEvt.Message, "unknown item")
 
 	items := fm.ItemsInRoom("room_a")
 	assert.Empty(t, items, "no items should be placed for unknown item ID")
@@ -178,9 +185,9 @@ func TestHandleSummonItem_SessionNotFound(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	msg := resp.GetMessage()
-	require.NotNil(t, msg, "expected message event for missing session")
-	assert.Contains(t, msg.Content, "player not found")
+	errEvt := resp.GetError()
+	require.NotNil(t, errEvt, "expected error event for missing session")
+	assert.Contains(t, errEvt.Message, "player not found")
 
 	items := fm.ItemsInRoom("room_a")
 	assert.Empty(t, items, "no items should be placed when session is missing")
@@ -208,6 +215,27 @@ func TestHandleSummonItem_ZeroQuantityDefaultsToOne(t *testing.T) {
 	items := fm.ItemsInRoom("room_a")
 	require.Len(t, items, 1)
 	assert.Equal(t, 1, items[0].Quantity, "quantity 0 must default to 1")
+}
+
+// TestHandleSummonItem_FloorMgrNil verifies that when the FloorManager is nil,
+// handleSummonItem returns an error event containing "floor system not available"
+// and does not panic.
+func TestHandleSummonItem_FloorMgrNil(t *testing.T) {
+	reg := inventory.NewRegistry()
+	require.NoError(t, reg.RegisterItem(testSummonItemDef))
+
+	svc := newSummonItemServiceOpts(t, nil, reg)
+	addSummonTestPlayer(t, svc, "u_nil_fm", "room_a", "editor")
+
+	resp, err := svc.handleSummonItem("u_nil_fm", &gamev1.SummonItemRequest{
+		ItemId:   "sword_01",
+		Quantity: 1,
+	})
+	require.NoError(t, err)
+
+	errEvt := resp.GetError()
+	require.NotNil(t, errEvt, "expected error event when floorMgr is nil")
+	assert.Contains(t, errEvt.Message, "floor system not available")
 }
 
 // TestPropertySummonItem_EditorValidQtyAlwaysSucceeds is a property-based test that
