@@ -47,32 +47,45 @@ func readAll(t *testing.T, client net.Conn, d time.Duration) string {
 	return string(buf)
 }
 
+// For H=24: scrollBottom=16, dividerRow=17, firstRow=18, lastRow=23, promptRow=24.
+
 func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
-	conn, client := newSplitConn(t, 80, 24)
+	const W, H = 80, 24
+	lo := newRoomLayout(H)
+	conn, client := newSplitConn(t, W, H)
 	go func() { _ = conn.InitScreen() }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	assert.Contains(t, out, "\033[?25l")                            // hide cursor
-	assert.Contains(t, out, "\033[2J")                              // clear screen
-	assert.Contains(t, out, fmt.Sprintf("\033[8;%dr", 22))          // scroll region 8..22 (H-2=22)
-	assert.Contains(t, out, "\033[7;1H")                            // top divider row 7
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", 23))          // bottom divider row H-1=23
-	assert.Contains(t, out, "\033[?25h")                            // show cursor
-	assert.Contains(t, out, strings.Repeat("═", 80))                // divider chars
+	assert.Contains(t, out, "\033[?25l")                                           // hide cursor
+	assert.Contains(t, out, "\033[2J")                                             // clear screen
+	assert.Contains(t, out, fmt.Sprintf("\033[1;%dr", lo.scrollBottom))            // scroll region 1..scrollBottom
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))              // room divider row
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))               // cursor at prompt row
+	assert.Contains(t, out, "\033[?25h")                                           // show cursor
+	assert.Contains(t, out, strings.Repeat("═", W))                               // divider chars
 }
 
-func TestWriteRoom_UsesDECOMOffAndAbsoluteRows(t *testing.T) {
-	conn, client := newSplitConn(t, 80, 24)
+func TestWriteRoom_WritesToRowsBelowScrollRegion(t *testing.T) {
+	const W, H = 80, 24
+	lo := newRoomLayout(H)
+	conn, client := newSplitConn(t, W, H)
 	go func() { _ = conn.WriteRoom("Nexus Hub\nA bustling crossroads.\nExits: N S E W") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	assert.NotContains(t, out, "\033[s")    // must NOT save cursor (undoes DECOM fix)
-	assert.NotContains(t, out, "\033[u")    // must NOT restore cursor
-	assert.Contains(t, out, "\033[?6l")     // DECOM off — absolute row addresses
-	assert.Contains(t, out, "\033[1;1H")    // start at absolute row 1
+	// No cursor save/restore — not needed with below-scroll-region layout.
+	assert.NotContains(t, out, "\033[s")
+	assert.NotContains(t, out, "\033[u")
+
+	// Room divider must be redrawn.
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
+	assert.Contains(t, out, strings.Repeat("═", W))
+
+	// Content must appear (first room line written at firstRow).
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.firstRow))
 	assert.Contains(t, out, "Nexus Hub")
-	assert.Contains(t, out, "\033[7;1H")    // top divider redrawn at row 7
-	assert.Contains(t, out, strings.Repeat("═", 80)) // divider characters
+
+	// Cursor left at prompt row.
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
 }
 
 func TestWriteRoom_ClearsExactly6Lines(t *testing.T) {

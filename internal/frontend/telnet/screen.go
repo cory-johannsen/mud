@@ -8,11 +8,47 @@ import (
 
 const roomRegionRows = 6
 
-// InitScreen initializes the split-screen layout.
-// Sends: hide cursor, clear screen, set scroll region (rows 8..H-2),
-// draw top divider (row 7), draw bottom divider (row H-1), show cursor.
+// roomLayout computes the row numbers for the split-screen layout given a
+// terminal height h.  All computed rows are BELOW the scroll region so that
+// cursor positioning works even when the terminal restricts absolute movement
+// to rows within the scroll region (a common TinTin++ / xterm quirk).
 //
-// Precondition: conn.splitScreen must be true; conn.width and conn.height must be > 0.
+// Layout (rows are 1-based):
+//
+//	1 … scrollBottom   : scroll region (console messages)
+//	scrollBottom+1     : room divider ═══
+//	scrollBottom+2 … h-1 : room content (roomRegionRows lines)
+//	h                  : prompt / input
+type roomLayout struct {
+	scrollBottom int // last row of scroll region   = h - (roomRegionRows + 2)
+	dividerRow   int // room divider row             = h - (roomRegionRows + 1)
+	firstRow     int // first room content row       = h - roomRegionRows
+	lastRow      int // last  room content row       = h - 1
+	promptRow    int // input / prompt row           = h
+}
+
+func newRoomLayout(h int) roomLayout {
+	return roomLayout{
+		scrollBottom: h - (roomRegionRows + 2),
+		dividerRow:   h - (roomRegionRows + 1),
+		firstRow:     h - roomRegionRows,
+		lastRow:      h - 1,
+		promptRow:    h,
+	}
+}
+
+// InitScreen initializes the split-screen layout.
+//
+// Scroll region = rows 1..scrollBottom.
+// Room divider  = row dividerRow.
+// Room content  = rows firstRow..lastRow  (roomRegionRows rows).
+// Prompt        = row h.
+//
+// All room/divider/prompt rows are BELOW the scroll region so that cursor
+// positioning works regardless of whether the terminal restricts movement to
+// the scroll region.
+//
+// Precondition:  conn.width and conn.height must be > 0.
 // Postcondition: Terminal is configured for three-region layout.
 func (c *Conn) InitScreen() error {
 	c.mu.Lock()
@@ -20,28 +56,37 @@ func (c *Conn) InitScreen() error {
 	h := c.height
 	c.mu.Unlock()
 
+	lo := newRoomLayout(h)
 	divider := strings.Repeat("═", w)
 
 	var buf strings.Builder
-	buf.WriteString("\033[?25l")                      // hide cursor
-	buf.WriteString("\033[2J\033[H")                  // clear screen, home
-	buf.WriteString("\033[?6l")                       // DECOM off — cursor addresses are screen-absolute
-	fmt.Fprintf(&buf, "\033[8;%dr", h-2)              // set scroll region rows 8..(H-2)
-	fmt.Fprintf(&buf, "\033[7;1H%s", divider)         // top divider at row 7
-	fmt.Fprintf(&buf, "\033[%d;1H%s", h-1, divider)  // bottom divider at row H-1
-	fmt.Fprintf(&buf, "\033[%d;1H", h)                // move to input row
-	buf.WriteString("\033[?25h")                       // show cursor
+	buf.WriteString("\033[?25l")    // hide cursor
+	buf.WriteString("\033[2J\033[H") // clear screen, home
+
+	// Set scroll region to rows 1..scrollBottom.  The cursor moves to home
+	// after DECSTBM; home is row 1 (DECOM off, which is the default).
+	fmt.Fprintf(&buf, "\033[1;%dr", lo.scrollBottom)
+
+	// Draw room divider and blank the room content rows.
+	// These rows are all BELOW the scroll region so absolute positioning works.
+	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
+	for row := lo.firstRow; row <= lo.lastRow; row++ {
+		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", row)
+	}
+
+	// Position cursor at input row.
+	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
+	buf.WriteString("\033[?25h") // show cursor
 
 	return c.writeRaw(buf.String())
 }
 
-// WriteRoom renders content into the pinned room region (rows 1-6).
-// Content is split on newlines; only the first roomRegionRows lines are used.
-// DECOM is forced off so absolute row addresses always refer to the screen top.
-// Cursor is left at row H; WritePromptSplit must always be called after.
+// WriteRoom renders content into the pinned room region.
+// The room region sits BELOW the scroll region (rows firstRow..lastRow) so
+// that absolute cursor positioning is never restricted by the scroll region.
 //
-// Precondition: conn.splitScreen must be true; conn.width and conn.height must be > 0.
-// Postcondition: Rows 1-6 contain the room content; row 7 holds the top divider; cursor is at row H.
+// Precondition:  conn.splitScreen must be true; conn.width and conn.height > 0.
+// Postcondition: Room divider and content rows are updated; cursor at promptRow.
 func (c *Conn) WriteRoom(content string) error {
 	c.mu.Lock()
 	w := c.width
@@ -54,35 +99,37 @@ func (c *Conn) WriteRoom(content string) error {
 	normalized := strings.ReplaceAll(strings.ReplaceAll(content, "\r\n", "\n"), "\r", "")
 	lines := strings.Split(strings.TrimSpace(normalized), "\n")
 
+	lo := newRoomLayout(h)
 	divider := strings.Repeat("═", w)
 
 	var buf strings.Builder
-	buf.WriteString("\033[?6l") // DECOM off — not sandwiched in save/restore so it sticks
+	// Redraw room divider (below scroll region — absolute positioning reliable).
+	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
 
-	for row := 0; row < roomRegionRows; row++ {
-		fmt.Fprintf(&buf, "\033[%d;1H", row+1) // absolute row positioning
-		buf.WriteString("\033[2K")              // clear line
-		if row < len(lines) {
-			line := lines[row]
+	// Write room content rows.
+	for i := 0; i < roomRegionRows; i++ {
+		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", lo.firstRow+i)
+		if i < len(lines) {
+			line := lines[i]
 			if w > 0 && visualWidth(line) > w {
 				line = truncateToVisualWidth(line, w)
 			}
 			buf.WriteString(line)
 		}
 	}
-	// Redraw top divider (defensive — WriteConsole may have corrupted it)
-	fmt.Fprintf(&buf, "\033[7;1H%s", divider)
-	// Leave cursor at input row; WritePromptSplit (always called after) finalises it.
-	fmt.Fprintf(&buf, "\033[%d;1H", h)
+
+	// Leave cursor at prompt row; WritePromptSplit (always called after) writes it.
+	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
 
 	return c.writeRaw(buf.String())
 }
 
 // WriteConsole writes a message into the VT100 scroll region and redraws
-// the bottom divider and prompt row. The player's partially-typed input is preserved.
+// the room divider, room content, and prompt row.
+// The player's partially-typed input is preserved.
 //
-// Precondition: conn.splitScreen must be true; conn.height must be > 0.
-// Postcondition: Message appears in console; prompt is redrawn at row H.
+// Precondition:  conn.splitScreen must be true; conn.height must be > 0.
+// Postcondition: Message appears in scroll region; room and prompt are redrawn.
 func (c *Conn) WriteConsole(text string) error {
 	c.mu.Lock()
 	h := c.height
@@ -91,66 +138,55 @@ func (c *Conn) WriteConsole(text string) error {
 	room := c.roomBuf
 	c.mu.Unlock()
 
+	lo := newRoomLayout(h)
 	divider := strings.Repeat("═", w)
 
 	var buf strings.Builder
 	// Strip trailing newlines from the text before wrapping. A trailing \n
 	// would produce an empty element from wrapText, causing a second \r\n
-	// scroll that leaves a blank row between the message and the bottom divider.
+	// scroll that leaves a blank row between the message and the divider.
 	trimmed := strings.TrimRight(text, "\r\n")
 	// Position at bottom of scroll region; scroll up before each line so the
-	// line lands at the bottom of the region without leaving a trailing blank.
-	fmt.Fprintf(&buf, "\033[%d;1H", h-2)
+	// line lands at the bottom without leaving a trailing blank.
+	fmt.Fprintf(&buf, "\033[%d;1H", lo.scrollBottom)
 	for _, line := range wrapText(trimmed, w) {
 		buf.WriteString("\r\n")
 		buf.WriteString(line)
 	}
-	// Redraw bottom divider
-	fmt.Fprintf(&buf, "\033[%d;1H%s", h-1, divider)
-	// Redraw input row with preserved input
-	fmt.Fprintf(&buf, "\033[%d;1H\033[2K%s", h, input)
 
-	// Redraw the pinned room region (rows 1-6) and top divider (row 7).
-	// This corrects any corruption caused by spurious terminal scrolls
-	// (e.g., from client-side echo of \r\n at the last terminal row).
+	// Redraw room divider and content (all below scroll region — reliable).
+	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
 	if room != "" {
-		appendRoomRedraw(&buf, room, w)
+		appendRoomRedraw(&buf, room, w, lo)
 	}
+
+	// Redraw input row with preserved input.
+	fmt.Fprintf(&buf, "\033[%d;1H\033[2K%s", lo.promptRow, input)
 
 	return c.writeRaw(buf.String())
 }
 
-// appendRoomRedraw writes the room region (rows 1-6) and top divider (row 7)
-// into buf without moving the cursor from its post-input position.
-// It uses cursor save/restore so the caller's cursor position is unchanged.
-func appendRoomRedraw(buf *strings.Builder, content string, w int) {
+// appendRoomRedraw writes room content rows into buf.
+// All rows are below the scroll region so absolute positioning is reliable.
+func appendRoomRedraw(buf *strings.Builder, content string, w int, lo roomLayout) {
 	normalized := strings.ReplaceAll(strings.ReplaceAll(content, "\r\n", "\n"), "\r", "")
 	lines := strings.Split(strings.TrimSpace(normalized), "\n")
 
-	divider := strings.Repeat("═", w)
-
-	buf.WriteString("\033[?6l") // DECOM off — not sandwiched in save/restore so it sticks
-
-	for row := 0; row < roomRegionRows; row++ {
-		fmt.Fprintf(buf, "\033[%d;1H", row+1) // absolute row positioning
-		buf.WriteString("\033[2K")             // clear line
-		if row < len(lines) {
-			line := lines[row]
+	for i := 0; i < roomRegionRows; i++ {
+		fmt.Fprintf(buf, "\033[%d;1H\033[2K", lo.firstRow+i)
+		if i < len(lines) {
+			line := lines[i]
 			if w > 0 && visualWidth(line) > w {
 				line = truncateToVisualWidth(line, w)
 			}
 			buf.WriteString(line)
 		}
 	}
-
-	// Redraw top divider at row 7
-	fmt.Fprintf(buf, "\033[7;1H%s", divider)
-	// Caller (WriteConsole) repositions cursor to row H via its own fmt.Fprintf.
 }
 
-// WritePromptSplit writes the prompt and buffered input at the input row (row H).
+// WritePromptSplit writes the prompt and buffered input at the prompt row (row H).
 //
-// Precondition: conn.splitScreen must be true; conn.height must be > 0.
+// Precondition:  conn.splitScreen must be true; conn.height must be > 0.
 // Postcondition: Prompt appears at row H with cursor after prompt+input.
 func (c *Conn) WritePromptSplit(prompt string) error {
 	c.mu.Lock()
@@ -158,8 +194,9 @@ func (c *Conn) WritePromptSplit(prompt string) error {
 	input := c.inputBuf
 	c.mu.Unlock()
 
+	lo := newRoomLayout(h)
 	var buf strings.Builder
-	fmt.Fprintf(&buf, "\033[%d;1H\033[2K%s%s", h, prompt, input)
+	fmt.Fprintf(&buf, "\033[%d;1H\033[2K%s%s", lo.promptRow, prompt, input)
 
 	return c.writeRaw(buf.String())
 }
@@ -182,7 +219,7 @@ func (c *Conn) SetInputBuf(s string) {
 
 // writeRaw writes a raw string to the connection without line-terminator wrapping.
 //
-// Precondition: s must be a valid string; the connection must be open.
+// Precondition:  s must be a valid string; the connection must be open.
 // Postcondition: All bytes of s are written to the underlying connection.
 func (c *Conn) writeRaw(s string) error {
 	c.mu.Lock()

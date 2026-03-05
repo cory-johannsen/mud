@@ -279,34 +279,38 @@ func newSplitConnTB(t tHelper, w, h int) (*Conn, net.Conn) {
 
 // ─── InitScreen layout tests ──────────────────────────────────────────────────
 
-func TestIntegration_InitScreen_ScrollRegionAndDividers(t *testing.T) {
+// TestIntegration_InitScreen_ScrollRegionAndDivider verifies InitScreen configures
+// the new bottom-room layout: scroll region 1..scrollBottom, divider at dividerRow,
+// blank room rows, cursor at promptRow.
+func TestIntegration_InitScreen_ScrollRegionAndDivider(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H) // scrollBottom=16, dividerRow=17, firstRow=18, lastRow=23, promptRow=24
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
 	go func() { _ = conn.InitScreen() }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	// Scroll region must be rows 8..(H-2)=22
-	assert.Equal(t, 8, screen.scrollTop, "scroll region top must be row 8")
-	assert.Equal(t, H-2, screen.scrollBottom, "scroll region bottom must be row H-2")
+	// Scroll region must be rows 1..scrollBottom.
+	assert.Equal(t, 1, screen.scrollTop, "scroll region top must be row 1")
+	assert.Equal(t, lo.scrollBottom, screen.scrollBottom, "scroll region bottom must be scrollBottom")
 
-	// Row 7 must contain the top divider (═ repeated)
-	assert.Contains(t, screen.RowText(7), "═", "row 7 must have top divider")
+	// Room divider must be present.
+	assert.Contains(t, screen.RowText(lo.dividerRow), "═",
+		fmt.Sprintf("row %d (dividerRow) must have room divider", lo.dividerRow))
 
-	// Row H-1 must contain the bottom divider
-	assert.Contains(t, screen.RowText(H-1), "═", "row H-1 must have bottom divider")
-
-	// Rows 1-6 must be blank after InitScreen (no room content written yet)
-	for r := 1; r <= 6; r++ {
-		assert.Empty(t, screen.RowText(r), fmt.Sprintf("row %d must be blank after InitScreen", r))
+	// Room content rows must be blank after InitScreen.
+	for r := lo.firstRow; r <= lo.lastRow; r++ {
+		assert.Empty(t, screen.RowText(r),
+			fmt.Sprintf("room row %d must be blank after InitScreen", r))
 	}
 }
 
 // ─── WriteRoom layout tests ───────────────────────────────────────────────────
 
-func TestIntegration_WriteRoom_PlacesLinesInRows1to6(t *testing.T) {
+func TestIntegration_WriteRoom_PlacesLinesInRoomRows(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
@@ -314,84 +318,86 @@ func TestIntegration_WriteRoom_PlacesLinesInRows1to6(t *testing.T) {
 	go func() { _ = conn.WriteRoom(content) }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	assert.Equal(t, "Title", screen.RowText(1), "row 1 must contain title")
-	assert.Equal(t, "Description text.", screen.RowText(2), "row 2 must contain description")
-	assert.Equal(t, "Exits:", screen.RowText(3), "row 3 must contain 'Exits:'")
-	assert.Equal(t, "  north", screen.RowText(4), "row 4 must contain north exit")
-	assert.Equal(t, "  south", screen.RowText(5), "row 5 must contain south exit")
-	assert.Empty(t, screen.RowText(6), "row 6 must be blank (no 6th content line)")
+	assert.Equal(t, "Title", screen.RowText(lo.firstRow+0), "firstRow must contain title")
+	assert.Equal(t, "Description text.", screen.RowText(lo.firstRow+1), "firstRow+1 must contain description")
+	assert.Equal(t, "Exits:", screen.RowText(lo.firstRow+2), "firstRow+2 must contain 'Exits:'")
+	assert.Equal(t, "  north", screen.RowText(lo.firstRow+3), "firstRow+3 must contain north exit")
+	assert.Equal(t, "  south", screen.RowText(lo.firstRow+4), "firstRow+4 must contain south exit")
+	assert.Empty(t, screen.RowText(lo.firstRow+5), "firstRow+5 must be blank (no 6th content line)")
 }
 
 func TestIntegration_WriteRoom_ExcessLinesAreTruncated(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	// 8 lines: only first 6 should appear
+	// 8 lines: only first 6 should appear in room rows.
 	lines := []string{"L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"}
 	go func() { _ = conn.WriteRoom(strings.Join(lines, "\n")) }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	for i := 1; i <= 6; i++ {
-		assert.Equal(t, fmt.Sprintf("L%d", i), screen.RowText(i))
+	for i := 0; i < roomRegionRows; i++ {
+		assert.Equal(t, fmt.Sprintf("L%d", i+1), screen.RowText(lo.firstRow+i),
+			fmt.Sprintf("room row %d must contain L%d", lo.firstRow+i, i+1))
 	}
-	// Rows 7+ must not be overwritten (row 7 is the divider region, not a room row)
 }
 
-func TestIntegration_WriteRoom_EmptyContent_ClearsAll6Rows(t *testing.T) {
+func TestIntegration_WriteRoom_EmptyContent_ClearsAllRoomRows(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	// Pre-fill rows 1-6 with garbage to ensure WriteRoom clears them.
-	for r := 0; r < 6; r++ {
+	// Pre-fill room rows with garbage to ensure WriteRoom clears them.
+	for r := lo.firstRow; r <= lo.lastRow; r++ {
 		for c := 0; c < W; c++ {
-			screen.cells[r][c] = 'X'
+			screen.cells[r-1][c] = 'X'
 		}
 	}
 
 	go func() { _ = conn.WriteRoom("") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	for r := 1; r <= 6; r++ {
-		assert.Empty(t, screen.RowText(r), fmt.Sprintf("row %d must be blank after WriteRoom('')", r))
+	for r := lo.firstRow; r <= lo.lastRow; r++ {
+		assert.Empty(t, screen.RowText(r),
+			fmt.Sprintf("room row %d must be blank after WriteRoom('')", r))
 	}
 }
 
-func TestIntegration_WriteRoom_RestoresCursorToSavedPosition(t *testing.T) {
+func TestIntegration_WriteRoom_LeavesCursorAtPromptRow(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
-
-	// Position cursor at row H (input row) before WriteRoom, as gameBridge does.
-	screen.curRow, screen.curCol = H, 1
-	screen.savedRow, screen.savedCol = H, 1
 
 	go func() { _ = conn.WriteRoom("Hello\nWorld") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	// Cursor must be restored to saved position (row H).
-	assert.Equal(t, H, screen.CursorRow(), "cursor must be restored to row H after WriteRoom")
+	// Cursor must be at promptRow after WriteRoom.
+	assert.Equal(t, lo.promptRow, screen.CursorRow(),
+		"cursor must be at promptRow after WriteRoom")
 }
 
 func TestIntegration_WriteRoom_DoesNotCorruptScrollRegionRows(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	// Simulate InitScreen first: set scroll region so the emulator knows the layout.
-	screen.scrollTop, screen.scrollBottom = 8, H-2
+	// Simulate InitScreen: scroll region 1..scrollBottom.
+	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
 	// Pre-fill scroll region rows with sentinel text.
-	for r := 8; r <= H-2; r++ {
+	for r := 1; r <= lo.scrollBottom; r++ {
 		copy(screen.cells[r-1], []rune("SCROLL_SENTINEL                                                                 "))
 	}
 
 	go func() { _ = conn.WriteRoom("Title\nDesc") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	// Scroll region rows must be untouched (WriteRoom only touches rows 1-6).
-	for r := 8; r <= H-2; r++ {
+	// Scroll region rows must be untouched (WriteRoom only touches dividerRow..promptRow).
+	for r := 1; r <= lo.scrollBottom; r++ {
 		assert.Contains(t, screen.RowFull(r), "SCROLL",
 			fmt.Sprintf("scroll region row %d must not be overwritten by WriteRoom", r))
 	}
@@ -401,41 +407,46 @@ func TestIntegration_WriteRoom_DoesNotCorruptScrollRegionRows(t *testing.T) {
 
 func TestIntegration_WriteConsole_AppendsInScrollRegion(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
 	// Simulate the scroll region established by InitScreen.
-	screen.scrollTop, screen.scrollBottom = 8, H-2
+	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
 	go func() { _ = conn.WriteConsole("A goblin attacks!") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	// Message must appear somewhere in the scroll region (rows 8..H-2).
+	// Message must appear somewhere in the scroll region (rows 1..scrollBottom).
 	found := false
-	for r := 8; r <= H-2; r++ {
+	for r := 1; r <= lo.scrollBottom; r++ {
 		if strings.Contains(screen.RowText(r), "A goblin attacks!") {
 			found = true
 			break
 		}
 	}
-	assert.True(t, found, "console message must appear in the scroll region rows 8..H-2")
+	assert.True(t, found,
+		fmt.Sprintf("console message must appear in scroll region rows 1..%d", lo.scrollBottom))
 }
 
-func TestIntegration_WriteConsole_RedrawsBottomDividerAtHMinus1(t *testing.T) {
+func TestIntegration_WriteConsole_RedrawsDividerAtDividerRow(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	screen.scrollTop, screen.scrollBottom = 8, H-2
+	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
 	go func() { _ = conn.WriteConsole("test") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	assert.Contains(t, screen.RowText(H-1), "═", "bottom divider must be redrawn at row H-1")
+	assert.Contains(t, screen.RowText(lo.dividerRow), "═",
+		fmt.Sprintf("room divider must be redrawn at row %d (dividerRow)", lo.dividerRow))
 }
 
 func TestIntegration_WriteConsole_RedrawsPromptAtRowH(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
@@ -443,17 +454,18 @@ func TestIntegration_WriteConsole_RedrawsPromptAtRowH(t *testing.T) {
 	conn.inputBuf = "partial"
 	conn.mu.Unlock()
 
-	screen.scrollTop, screen.scrollBottom = 8, H-2
+	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
 	go func() { _ = conn.WriteConsole("message") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	assert.Contains(t, screen.RowText(H), "partial",
-		"prompt row H must show preserved partial input after WriteConsole")
+	assert.Contains(t, screen.RowText(lo.promptRow), "partial",
+		"prompt row must show preserved partial input after WriteConsole")
 }
 
 func TestIntegration_WriteConsole_RedrawsRoomRegion(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
@@ -461,67 +473,72 @@ func TestIntegration_WriteConsole_RedrawsRoomRegion(t *testing.T) {
 	conn.roomBuf = "MyRoom\nA dark chamber.\nExits:\n  east"
 	conn.mu.Unlock()
 
-	screen.scrollTop, screen.scrollBottom = 8, H-2
+	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
 	go func() { _ = conn.WriteConsole("NPC says hello.") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	// Room region must be redrawn.
-	assert.Equal(t, "MyRoom", screen.RowText(1), "room title must be redrawn at row 1 after WriteConsole")
-	assert.Equal(t, "A dark chamber.", screen.RowText(2), "room desc must be redrawn at row 2 after WriteConsole")
+	assert.Equal(t, "MyRoom", screen.RowText(lo.firstRow),
+		fmt.Sprintf("room title must be redrawn at row %d (firstRow) after WriteConsole", lo.firstRow))
+	assert.Equal(t, "A dark chamber.", screen.RowText(lo.firstRow+1),
+		"room description must be redrawn after WriteConsole")
 }
 
 // ─── WritePromptSplit tests ───────────────────────────────────────────────────
 
 func TestIntegration_WritePromptSplit_PlacesPromptAtRowH(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
 	go func() { _ = conn.WritePromptSplit("[Newb]> ") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	assert.Contains(t, screen.RowFull(H), "[Newb]> ",
-		"prompt must be placed at row H (the input row)")
+	assert.Contains(t, screen.RowFull(lo.promptRow), "[Newb]> ",
+		"prompt must be placed at promptRow (row H)")
 }
 
 // ─── Full layout integration: InitScreen + WriteRoom + WriteConsole ───────────
 
 func TestIntegration_FullLayout_InitThenWriteRoomThenConsole(t *testing.T) {
 	const W, H = 80, 24
+	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
+	roomContent := "Rotgut Alley\nA grungy street.\nExits:\n  south\n  east"
 	go func() {
 		_ = conn.InitScreen()
 		conn.mu.Lock()
 		conn.roomBuf = ""
 		conn.mu.Unlock()
-		_ = conn.WriteRoom("Rotgut Alley\nA grungy street.\nExits:\n  south\n  east")
+		_ = conn.WriteRoom(roomContent)
 		conn.mu.Lock()
-		conn.roomBuf = "Rotgut Alley\nA grungy street.\nExits:\n  south\n  east"
+		conn.roomBuf = roomContent
 		conn.mu.Unlock()
 		_ = conn.WriteConsole("Ganger says: keep walking.")
-		// In the real game, WritePromptSplit is called after every WriteConsole
-		// to restore the prompt at row H.
+		// In the real game, WritePromptSplit is called after every WriteConsole.
 		_ = conn.WritePromptSplit("[Newb]> ")
 	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	// Room region rows 1-5 must have room content.
-	assert.Equal(t, "Rotgut Alley", screen.RowText(1), "row 1: room title")
-	assert.Equal(t, "A grungy street.", screen.RowText(2), "row 2: room description")
-	assert.Equal(t, "Exits:", screen.RowText(3), "row 3: exits header")
-	assert.Equal(t, "  south", screen.RowText(4), "row 4: south exit")
-	assert.Equal(t, "  east", screen.RowText(5), "row 5: east exit")
-	assert.Empty(t, screen.RowText(6), "row 6: blank")
+	// Room content rows.
+	assert.Equal(t, "Rotgut Alley", screen.RowText(lo.firstRow+0), "firstRow: room title")
+	assert.Equal(t, "A grungy street.", screen.RowText(lo.firstRow+1), "firstRow+1: room description")
+	assert.Equal(t, "Exits:", screen.RowText(lo.firstRow+2), "firstRow+2: exits header")
+	assert.Equal(t, "  south", screen.RowText(lo.firstRow+3), "firstRow+3: south exit")
+	assert.Equal(t, "  east", screen.RowText(lo.firstRow+4), "firstRow+4: east exit")
+	assert.Empty(t, screen.RowText(lo.firstRow+5), "firstRow+5: blank")
 
-	// Top divider at row 7.
-	assert.Contains(t, screen.RowText(7), "═", "row 7: top divider")
+	// Room divider.
+	assert.Contains(t, screen.RowText(lo.dividerRow), "═",
+		fmt.Sprintf("row %d: room divider", lo.dividerRow))
 
-	// Console message in scroll region.
+	// Console message in scroll region (rows 1..scrollBottom).
 	found := false
-	for r := 8; r <= H-2; r++ {
+	for r := 1; r <= lo.scrollBottom; r++ {
 		if strings.Contains(screen.RowText(r), "Ganger says") {
 			found = true
 			break
@@ -529,22 +546,21 @@ func TestIntegration_FullLayout_InitThenWriteRoomThenConsole(t *testing.T) {
 	}
 	assert.True(t, found, "console message must appear in scroll region")
 
-	// Bottom divider at row H-1.
-	assert.Contains(t, screen.RowText(H-1), "═", "row H-1: bottom divider")
-
 	// Prompt at row H.
-	assert.Contains(t, screen.RowFull(H), "[Newb]> ", "row H: prompt")
+	assert.Contains(t, screen.RowFull(lo.promptRow), "[Newb]> ", "promptRow: prompt")
 }
 
 // ─── Property-based tests ─────────────────────────────────────────────────────
 
-// TestProperty_WriteRoom_RoomRegionNeverOverflowsIntoScrollRegion verifies that
-// WriteRoom never writes to rows 7+ regardless of content size or terminal size.
-func TestProperty_WriteRoom_RoomRegionNeverOverflowsIntoScrollRegion(t *testing.T) {
+// TestProperty_WriteRoom_NeverOverwritesScrollRegion verifies that WriteRoom
+// never writes to the scroll region rows (1..scrollBottom) regardless of
+// content size or terminal dimensions.
+func TestProperty_WriteRoom_NeverOverwritesScrollRegion(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
 		H := rapid.IntRange(12, 50).Draw(rt, "height")
 		lineCount := rapid.IntRange(0, 20).Draw(rt, "lines")
+		lo := newRoomLayout(H)
 
 		lines := make([]string, lineCount)
 		for i := range lines {
@@ -552,11 +568,10 @@ func TestProperty_WriteRoom_RoomRegionNeverOverflowsIntoScrollRegion(t *testing.
 		}
 
 		screen := newVT100Screen(W, H)
-		// Simulate scroll region from InitScreen.
-		screen.scrollTop, screen.scrollBottom = 8, H-2
+		screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
-		// Pre-fill rows 7+ with sentinel so any overwrite is detectable.
-		for r := 7; r <= H; r++ {
+		// Pre-fill scroll region rows with sentinel so any overwrite is detectable.
+		for r := 1; r <= lo.scrollBottom; r++ {
 			for c := 0; c < W; c++ {
 				screen.cells[r-1][c] = '.'
 			}
@@ -573,35 +588,36 @@ func TestProperty_WriteRoom_RoomRegionNeverOverflowsIntoScrollRegion(t *testing.
 		<-done
 		screen.Feed(raw)
 
-		// WriteRoom now intentionally redraws the top divider at row 7.
-		// Row 7 should contain "═" (divider), not "." (sentinel).
-		require.Contains(rt, screen.RowFull(7), "═",
-			fmt.Sprintf("WriteRoom must redraw top divider at row 7 (W=%d H=%d lines=%d)", W, H, lineCount))
-		// Rows 8+ (scroll region and below) must not be touched.
-		for r := 8; r <= H; r++ {
-			rowContent := screen.RowFull(r)
-			require.Contains(rt, rowContent, ".",
-				fmt.Sprintf("WriteRoom overflowed into row %d (W=%d H=%d lines=%d)", r, W, H, lineCount))
+		// Scroll region rows must be untouched.
+		for r := 1; r <= lo.scrollBottom; r++ {
+			require.Contains(rt, screen.RowFull(r), ".",
+				fmt.Sprintf("WriteRoom must not overwrite scroll region row %d (W=%d H=%d lines=%d)",
+					r, W, H, lineCount))
 		}
+
+		// Room divider must be present.
+		require.Contains(rt, screen.RowFull(lo.dividerRow), "═",
+			fmt.Sprintf("WriteRoom must draw divider at row %d (W=%d H=%d lines=%d)",
+				lo.dividerRow, W, H, lineCount))
 	})
 }
 
 // TestProperty_WriteRoom_AlwaysShowsFirstNLinesInOrder verifies that the first
-// min(len(lines), roomRegionRows) lines of content appear in rows 1..N in order.
+// min(len(lines), roomRegionRows) lines of content appear in room rows in order.
 func TestProperty_WriteRoom_AlwaysShowsFirstNLinesInOrder(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
 		H := rapid.IntRange(12, 50).Draw(rt, "height")
 		lineCount := rapid.IntRange(1, 15).Draw(rt, "lines")
+		lo := newRoomLayout(H)
 
 		lines := make([]string, lineCount)
 		for i := range lines {
-			// Short, simple ASCII lines — no ANSI codes in this property test.
 			lines[i] = fmt.Sprintf("L%03d", i+1)
 		}
 
 		screen := newVT100Screen(W, H)
-		screen.scrollTop, screen.scrollBottom = 8, H-2
+		screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
 		conn, client := newSplitConnTB(rt, W, H)
 		go func() {
@@ -616,27 +632,28 @@ func TestProperty_WriteRoom_AlwaysShowsFirstNLinesInOrder(t *testing.T) {
 			expected = roomRegionRows
 		}
 		for i := 0; i < expected; i++ {
-			row := i + 1
+			row := lo.firstRow + i
 			got := screen.RowText(row)
 			require.Equal(rt, lines[i], got,
-				fmt.Sprintf("row %d must contain line %d content (W=%d H=%d)", row, i+1, W, H))
+				fmt.Sprintf("room row %d must contain line %d (W=%d H=%d)", row, i+1, W, H))
 		}
 	})
 }
 
 // TestProperty_WriteConsole_NeverOverwritesRoomRegion verifies that WriteConsole
-// does not corrupt rows 1-6 with console text (it may redraw them via appendRoomRedraw,
-// but the room content must remain correct).
+// does not corrupt room rows with console text (it redraws them via appendRoomRedraw
+// with the cached room content).
 func TestProperty_WriteConsole_NeverOverwritesRoomRegion(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
 		H := rapid.IntRange(12, 50).Draw(rt, "height")
+		lo := newRoomLayout(H)
 
 		roomContent := "RoomTitle\nRoom description.\nExits:\n  north"
 		consoleMsg := rapid.StringMatching(`[A-Za-z0-9 !?,]{5,40}`).Draw(rt, "msg")
 
 		screen := newVT100Screen(W, H)
-		screen.scrollTop, screen.scrollBottom = 8, H-2
+		screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
 		conn, client := newSplitConnTB(rt, W, H)
 		conn.mu.Lock()
@@ -650,30 +667,31 @@ func TestProperty_WriteConsole_NeverOverwritesRoomRegion(t *testing.T) {
 		raw := readAllConn(client, 2*time.Second)
 		screen.Feed(raw)
 
-		// The console message must NOT appear in rows 1-6.
-		for r := 1; r <= 6; r++ {
+		// The console message must NOT appear in room rows.
+		for r := lo.firstRow; r <= lo.lastRow; r++ {
 			require.NotContains(rt, screen.RowText(r), consoleMsg,
-				fmt.Sprintf("row %d must not contain console text (W=%d H=%d)", r, W, H))
+				fmt.Sprintf("room row %d must not contain console text (W=%d H=%d)", r, W, H))
 		}
 
-		// Room title must still be in row 1.
-		require.Equal(rt, "RoomTitle", screen.RowText(1),
-			fmt.Sprintf("room title must remain in row 1 after WriteConsole (W=%d H=%d)", W, H))
+		// Room title must be redrawn in firstRow.
+		require.Equal(rt, "RoomTitle", screen.RowText(lo.firstRow),
+			fmt.Sprintf("room title must remain at firstRow=%d after WriteConsole (W=%d H=%d)",
+				lo.firstRow, W, H))
 	})
 }
 
-// TestProperty_WriteConsole_MessageAlwaysInScrollRegion verifies that the console
-// message always ends up somewhere in the scroll region rows 8..H-2.
+// TestProperty_WriteConsole_MessageAlwaysInScrollRegion verifies that console
+// messages always appear in the scroll region rows 1..scrollBottom.
 func TestProperty_WriteConsole_MessageAlwaysInScrollRegion(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
 		H := rapid.IntRange(12, 50).Draw(rt, "height")
+		lo := newRoomLayout(H)
 
-		// Simple short message that fits in one line.
 		msg := "SentinelMsg"
 
 		screen := newVT100Screen(W, H)
-		screen.scrollTop, screen.scrollBottom = 8, H-2
+		screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
 		conn, client := newSplitConnTB(rt, W, H)
 
@@ -685,13 +703,14 @@ func TestProperty_WriteConsole_MessageAlwaysInScrollRegion(t *testing.T) {
 		screen.Feed(raw)
 
 		found := false
-		for r := 8; r <= H-2; r++ {
+		for r := 1; r <= lo.scrollBottom; r++ {
 			if strings.Contains(screen.RowText(r), msg) {
 				found = true
 				break
 			}
 		}
 		require.True(rt, found,
-			fmt.Sprintf("console message must appear in scroll region 8..%d (W=%d H=%d)", H-2, W, H))
+			fmt.Sprintf("console message must appear in scroll region 1..%d (W=%d H=%d)",
+				lo.scrollBottom, W, H))
 	})
 }
