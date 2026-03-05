@@ -191,6 +191,7 @@ zone:
     properties:
       lighting: overcast
       atmosphere: wind
+      terrain: difficult
   - id: flats_johnson_creek
     title: Johnson Creek
     description: 'The overgrown banks of Johnson Creek form a hidden world beneath
