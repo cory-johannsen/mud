@@ -686,6 +686,23 @@ func TestProperty_PlayerSession_ConditionsNilSafe(t *testing.T) {
 	})
 }
 
+func TestPlayerSession_HasFeatureChoicesField(t *testing.T) {
+	m := NewManager()
+	sess, err := m.AddPlayer(AddPlayerOptions{
+		UID:         "u1",
+		Username:    "alice",
+		CharName:    "Alice",
+		CharacterID: 1,
+		RoomID:      "r1",
+		Role:        "player",
+		CurrentHP:   10,
+		MaxHP:       10,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, sess.FeatureChoices, "FeatureChoices must be initialized by AddPlayer")
+	require.Empty(t, sess.FeatureChoices)
+}
+
 func TestProperty_PlayerSession_SkillsFieldRoundTrip(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		key := rapid.StringMatching(`[a-z_]{1,20}`).Draw(t, "skill_id")

@@ -158,7 +158,8 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		Entity:            entity,
 		// Status 1 = IDLE: newly connected players are idle by default.
 		Status:       1,
-		AutomapCache: make(map[string]map[string]bool),
+		AutomapCache:   make(map[string]map[string]bool),
+		FeatureChoices: make(map[string]map[string]string),
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)
