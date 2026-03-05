@@ -163,6 +163,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorName:  actor.Name,
 					Narrative:  fmt.Sprintf("%s passes.", actor.Name),
 				})
+				// Clear flat_footed from NPC combatants after their first action resolves.
+				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+				}
 
 			case ActionAttack:
 				target := findCombatantByName(cbt, action.Target)
@@ -184,6 +188,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r.Outcome = OutcomeFor(r.AttackTotal, target.AC)
 				dmg := r.EffectiveDamage()
 				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
+				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg > 0 {
+					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
+						if cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") {
+							dmg += src.Intn(6) + 1
+						}
+					}
+				}
 				dmg = hookDamageRoll(cbt, actor, target, dmg)
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
@@ -197,6 +209,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorName:    actor.Name,
 					Narrative:    fmt.Sprintf("%s attacks %s: %s (total %d).", actor.Name, target.Name, r.Outcome, r.AttackTotal),
 				})
+				// Clear flat_footed from NPC combatants after their first action resolves.
+				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+				}
 
 			case ActionStrike:
 				target := findCombatantByName(cbt, action.Target)
@@ -226,6 +242,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r1.Outcome = OutcomeFor(r1.AttackTotal, target.AC)
 				dmg1 := r1.EffectiveDamage()
 				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
+				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg1 > 0 {
+					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
+						if cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") {
+							dmg1 += src.Intn(6) + 1
+						}
+					}
+				}
 				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
@@ -239,6 +263,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorName:    actor.Name,
 					Narrative:    fmt.Sprintf("%s strikes %s: %s (total %d).", actor.Name, target.Name, r1.Outcome, r1.AttackTotal),
 				})
+				// Clear flat_footed from NPC combatants after their first action resolves.
+				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+				}
 
 				// Second strike with MAP penalty
 				if target.IsDead() {
@@ -260,6 +288,14 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r2.Outcome = OutcomeFor(r2.AttackTotal, target.AC)
 				dmg2 := r2.EffectiveDamage()
 				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
+				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg2 > 0 {
+					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
+						if cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") {
+							dmg2 += src.Intn(6) + 1
+						}
+					}
+				}
 				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
 				if dmg2 > 0 {
 					target.ApplyDamage(dmg2)

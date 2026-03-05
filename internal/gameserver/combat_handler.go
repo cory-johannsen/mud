@@ -655,6 +655,21 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
 	}
 
+	// Apply flat_footed to all NPC combatants at combat start (sucker_punch window).
+	if h.condRegistry != nil {
+		if def, ok := h.condRegistry.Get("flat_footed"); ok {
+			if cbt.Conditions[npcCbt.ID] == nil {
+				cbt.Conditions[npcCbt.ID] = condition.NewActiveSet()
+			}
+			_ = cbt.Conditions[npcCbt.ID].Apply(npcCbt.ID, def, 1, 1)
+		}
+	}
+
+	// Register session getter so ResolveRound can look up passive feats.
+	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
+		return h.sessions.GetPlayer(uid)
+	})
+
 	initCondEvents := cbt.StartRound(3)
 	_ = initCondEvents // round 1 starts with no active conditions; events are empty
 

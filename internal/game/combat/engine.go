@@ -7,6 +7,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
@@ -34,6 +35,9 @@ type Combat struct {
 	zoneID string
 	// invRegistry is the inventory registry used for explosive lookups during combat.
 	invRegistry *inventory.Registry
+	// sessionGetter looks up a player session by UID.
+	// May be nil; when nil, passive feat checks are silently skipped.
+	sessionGetter func(uid string) (*session.PlayerSession, bool)
 }
 
 // RoundConditionEvent records a condition applied or removed during round startup.
@@ -163,6 +167,15 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 // Precondition: reg may be nil; passing nil disables explosive resolution.
 func (c *Combat) SetInventoryRegistry(reg *inventory.Registry) {
 	c.invRegistry = reg
+}
+
+// SetSessionGetter registers a function for looking up player sessions by UID.
+// Called before combat begins.
+//
+// Precondition: fn may be nil (passive checks silently skipped when nil).
+// Postcondition: c.sessionGetter is set to fn.
+func (c *Combat) SetSessionGetter(fn func(uid string) (*session.PlayerSession, bool)) {
+	c.sessionGetter = fn
 }
 
 // realSrc wraps math/rand for production dice rolls.

@@ -7,6 +7,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/session"
 )
 
 // fixedSrc is a deterministic Source for testing.
@@ -454,6 +455,147 @@ func TestProperty_ResolveRound_DamageBonusNeverNegatesHit(t *testing.T) {
 
 		if finalHP > initialHP {
 			rt.Errorf("finalHP=%d > initialHP=%d: damage bonus should never heal target", finalHP, initialHP)
+		}
+	})
+}
+
+// makeSuckerPunchCombat returns a Combat configured for sucker_punch tests.
+// The player (p1) has sessionGetter wired to return hasFeat in PassiveFeats["sucker_punch"].
+// The NPC (n1) has flat_footed applied when isFlatFooted is true.
+// src val=19 guarantees a CritSuccess hit; val=5 guarantees a d6 result of 6 for sucker_punch bonus.
+func makeSuckerPunchCombat(t *testing.T, hasFeat, isFlatFooted bool) *combat.Combat {
+	t.Helper()
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 200, CurrentHP: 200, AC: 1, Level: 1, StrMod: 1, DexMod: 0},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+
+	ps := &session.PlayerSession{
+		PassiveFeats: map[string]bool{"sucker_punch": hasFeat},
+	}
+	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
+		if uid == "p1" {
+			return ps, true
+		}
+		return nil, false
+	})
+
+	// StartRound before applying flat_footed to avoid it being ticked away by Tick().
+	_ = cbt.StartRound(3)
+
+	if isFlatFooted {
+		if def, ok := reg.Get("flat_footed"); ok {
+			_ = cbt.Conditions["n1"].Apply("n1", def, 1, 1)
+		}
+	}
+
+	return cbt
+}
+
+// TestResolveRound_SuckerPunch_FlatFooted_AddsDamage: player with sucker_punch feat attacking
+// a flat_footed NPC deals more damage than without the feat, on a guaranteed hit.
+func TestResolveRound_SuckerPunch_FlatFooted_AddsDamage(t *testing.T) {
+	// val=19: d20=20 (CritSuccess guaranteed); d6 = (19%6)+1 = 2; sucker_punch d6 = same src = 2.
+	// We use val=19 to guarantee a hit and get deterministic bonus.
+	src := fixedSrc{val: 19}
+
+	cbtWith := makeSuckerPunchCombat(t, true, true)
+	cbtWithout := makeSuckerPunchCombat(t, false, true)
+
+	if err := cbtWith.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction with: %v", err)
+	}
+	if err := cbtWith.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 with: %v", err)
+	}
+	if err := cbtWithout.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction without: %v", err)
+	}
+	if err := cbtWithout.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 without: %v", err)
+	}
+
+	combat.ResolveRound(cbtWith, src, noopUpdater)
+	combat.ResolveRound(cbtWithout, src, noopUpdater)
+
+	hpWith := cbtWith.Combatants[1].CurrentHP
+	hpWithout := cbtWithout.Combatants[1].CurrentHP
+
+	// Lower HP means more damage was dealt. With sucker_punch must deal more.
+	if hpWith >= hpWithout {
+		t.Errorf("expected sucker_punch to add damage: hpWith=%d hpWithout=%d (lower HP = more damage)", hpWith, hpWithout)
+	}
+}
+
+// TestResolveRound_SuckerPunch_NotFlatFooted_NoBonus: player with sucker_punch feat attacking
+// a non-flat_footed NPC deals the same damage as without the feat.
+func TestResolveRound_SuckerPunch_NotFlatFooted_NoBonus(t *testing.T) {
+	src := fixedSrc{val: 19}
+
+	cbtWith := makeSuckerPunchCombat(t, true, false)
+	cbtWithout := makeSuckerPunchCombat(t, false, false)
+
+	if err := cbtWith.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction with: %v", err)
+	}
+	if err := cbtWith.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 with: %v", err)
+	}
+	if err := cbtWithout.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction without: %v", err)
+	}
+	if err := cbtWithout.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1 without: %v", err)
+	}
+
+	combat.ResolveRound(cbtWith, src, noopUpdater)
+	combat.ResolveRound(cbtWithout, src, noopUpdater)
+
+	hpWith := cbtWith.Combatants[1].CurrentHP
+	hpWithout := cbtWithout.Combatants[1].CurrentHP
+
+	// No flat_footed — sucker_punch must not add bonus damage.
+	if hpWith != hpWithout {
+		t.Errorf("expected no sucker_punch bonus without flat_footed: hpWith=%d hpWithout=%d", hpWith, hpWithout)
+	}
+}
+
+// TestProperty_SuckerPunch_DamageNonNegative: regardless of feat/flat_footed combination,
+// the NPC's HP must never exceed its initial HP (no healing) and never go below 0.
+func TestProperty_SuckerPunch_DamageNonNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		hasFeat := rapid.Bool().Draw(rt, "hasFeat")
+		isFlatFooted := rapid.Bool().Draw(rt, "isFlatFooted")
+		diceVal := rapid.IntRange(0, 19).Draw(rt, "diceVal")
+		src := fixedSrc{val: diceVal}
+
+		cbt := makeSuckerPunchCombat(t, hasFeat, isFlatFooted)
+
+		initialHP := cbt.Combatants[1].CurrentHP
+
+		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
+		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
+
+		combat.ResolveRound(cbt, src, noopUpdater)
+
+		finalHP := cbt.Combatants[1].CurrentHP
+		if finalHP > initialHP {
+			rt.Errorf("finalHP=%d > initialHP=%d: sucker_punch must not heal the target", finalHP, initialHP)
+		}
+		if finalHP < 0 {
+			rt.Errorf("finalHP=%d < 0: HP must not go below zero", finalHP)
 		}
 	})
 }
