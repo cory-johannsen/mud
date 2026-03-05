@@ -88,6 +88,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerClassFeatures:      bridgeClassFeatures,
 	command.HandlerInteract:           bridgeInteract,
 	command.HandlerUse:                bridgeUse,
+	command.HandlerSummonItem:         bridgeSummonItem,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -647,6 +648,30 @@ func bridgeUse(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_UseRequest{UseRequest: &gamev1.UseRequest{FeatId: featID}},
+	}}, nil
+}
+
+// bridgeSummonItem builds a SummonItemRequest, delegating arg validation to HandleSummonItem.
+//
+// Precondition: bctx must be non-nil with a valid conn, reqID, and parsed.Args.
+// Postcondition: if HandleSummonItem returns a Usage string, writes it and returns done=true;
+// otherwise returns a non-nil msg containing a SummonItemRequest.
+func bridgeSummonItem(bctx *bridgeContext) (bridgeResult, error) {
+	parsed := command.HandleSummonItem(strings.Join(bctx.parsed.Args, " "))
+	if strings.HasPrefix(parsed, "Usage:") {
+		_ = bctx.conn.WriteLine(parsed)
+		_ = bctx.conn.WritePrompt(bctx.promptFn())
+		return bridgeResult{done: true}, nil
+	}
+	parts := strings.Fields(parsed)
+	itemID := parts[0]
+	qty, _ := strconv.Atoi(parts[1]) // safe: HandleSummonItem already validated
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_SummonItem{SummonItem: &gamev1.SummonItemRequest{
+			ItemId:   itemID,
+			Quantity: int32(qty),
+		}},
 	}}, nil
 }
 
