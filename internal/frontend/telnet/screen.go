@@ -2,6 +2,7 @@ package telnet
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 )
@@ -101,6 +102,12 @@ func (c *Conn) WriteRoom(content string) error {
 
 	lo := newRoomLayout(h)
 	divider := strings.Repeat("═", w)
+
+	fmt.Fprintf(os.Stderr, "[WriteRoom] h=%d w=%d firstRow=%d lastRow=%d promptRow=%d lines=%d\n",
+		h, w, lo.firstRow, lo.lastRow, lo.promptRow, len(lines))
+	for i, line := range lines {
+		fmt.Fprintf(os.Stderr, "[WriteRoom]   line[%d] bytes=%d visualW=%d\n", i, len(line), visualWidth(line))
+	}
 
 	var buf strings.Builder
 	// Redraw room divider (below scroll region — absolute positioning reliable).
