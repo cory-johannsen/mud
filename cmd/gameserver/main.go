@@ -277,7 +277,7 @@ func main() {
 	cfReg := ruleset.NewClassFeatureRegistry(classFeatures)
 	logger.Info("class features loaded", zap.Int("class_features", len(classFeatures)))
 	characterClassFeaturesRepo := postgres.NewCharacterClassFeaturesRepository(pool.DB())
-	favoredTargetRepo := postgres.NewCharacterFavoredTargetRepo(pool.DB())
+	featureChoicesRepo := postgres.NewCharacterFeatureChoicesRepo(pool.DB())
 
 	// Load HTN AI domains.
 	aiRegistry := ai.NewRegistry()
@@ -492,7 +492,7 @@ func main() {
 		allSkills, characterSkillsRepo,
 		allFeats, featRegistry, characterFeatsRepo,
 		classFeatures, cfReg, characterClassFeaturesRepo,
-		favoredTargetRepo,
+		featureChoicesRepo,
 	)
 
 	// Start respawn goroutine for room equipment.

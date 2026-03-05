@@ -432,45 +432,52 @@ func TestSession_PassiveFeatsPopulatedAtLogin(t *testing.T) {
 	assert.False(t, sess.PassiveFeats["berserk_rush"], "active feature berserk_rush must not be in PassiveFeats")
 }
 
-// mockFavoredTargetRepo is a test double for FavoredTargetRepository.
+// mockFeatureChoicesRepo is a test double for CharacterFeatureChoicesRepository.
 //
-// It records Set calls and returns a configured value from Get.
-type mockFavoredTargetRepo struct {
-	// getVal is the value returned by Get.
-	getVal string
-	// getErr, if non-nil, is returned by Get instead of getVal.
-	getErr error
+// It records Set calls and returns a configured map from GetAll.
+type mockFeatureChoicesRepo struct {
+	// getAllVal is the map returned by GetAll.
+	getAllVal map[string]map[string]string
+	// getAllErr, if non-nil, is returned by GetAll instead of getAllVal.
+	getAllErr error
 
-	// setCalled records the argument passed to Set.
-	setCalled string
+	// setCalled records the last Set arguments.
+	setFeatureID string
+	setChoiceKey string
+	setValue     string
 	// setErr, if non-nil, is returned by Set.
 	setErr error
 }
 
-// Get satisfies FavoredTargetRepository.
-func (m *mockFavoredTargetRepo) Get(_ context.Context, _ int64) (string, error) {
-	if m.getErr != nil {
-		return "", m.getErr
+// GetAll satisfies CharacterFeatureChoicesRepository.
+func (m *mockFeatureChoicesRepo) GetAll(_ context.Context, _ int64) (map[string]map[string]string, error) {
+	if m.getAllErr != nil {
+		return nil, m.getAllErr
 	}
-	return m.getVal, nil
+	if m.getAllVal != nil {
+		return m.getAllVal, nil
+	}
+	return make(map[string]map[string]string), nil
 }
 
-// Set satisfies FavoredTargetRepository; records the call.
-func (m *mockFavoredTargetRepo) Set(_ context.Context, _ int64, targetType string) error {
-	m.setCalled = targetType
+// Set satisfies CharacterFeatureChoicesRepository; records the call.
+func (m *mockFeatureChoicesRepo) Set(_ context.Context, _ int64, featureID, choiceKey, value string) error {
+	m.setFeatureID = featureID
+	m.setChoiceKey = choiceKey
+	m.setValue = value
 	return m.setErr
 }
 
-// testGRPCServerWithFavoredTarget starts an in-process gRPC server configured
-// with the supplied class feature registry, class features repo, and favored target repo.
+// testGRPCServerWithFeatureChoices starts an in-process gRPC server configured
+// with the supplied class feature registry, class features repo, and feature choices repo.
 //
 // Precondition: t must be non-nil; all repo/registry args may be nil.
 // Postcondition: Returns a connected GameServiceClient and the underlying session.Manager.
-func testGRPCServerWithFavoredTarget(
+func testGRPCServerWithFeatureChoices(
 	t *testing.T,
 	cfRegistry *ruleset.ClassFeatureRegistry,
 	cfRepo CharacterClassFeaturesGetter,
-	ftRepo FavoredTargetRepository,
+	fcRepo CharacterFeatureChoicesRepository,
 ) (gamev1.GameServiceClient, *session.Manager) {
 	t.Helper()
 
@@ -486,7 +493,7 @@ func testGRPCServerWithFavoredTarget(
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, ftRepo,
+		nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, fcRepo,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -508,14 +515,18 @@ func testGRPCServerWithFavoredTarget(
 }
 
 // TestSession_FavoredTargetLoadedAtLogin verifies that FavoredTarget is populated
-// from the repo when a character logs in.
+// from the feature choices repo when a character logs in with a stored choice.
 //
-// Precondition: characterID must be > 0 so the favored target loading path executes.
-// Postcondition: sess.FavoredTarget equals the value returned by the repo.
+// Precondition: characterID must be > 0 so the feature choices loading path executes.
+// Postcondition: sess.FavoredTarget equals the value stored in the repo.
 func TestSession_FavoredTargetLoadedAtLogin(t *testing.T) {
-	ftRepo := &mockFavoredTargetRepo{getVal: "robot"}
+	fcRepo := &mockFeatureChoicesRepo{
+		getAllVal: map[string]map[string]string{
+			"predators_eye": {"favored_target": "robot"},
+		},
+	}
 
-	client, sessMgr := testGRPCServerWithFavoredTarget(t, nil, nil, ftRepo)
+	client, sessMgr := testGRPCServerWithFeatureChoices(t, nil, nil, fcRepo)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -531,26 +542,35 @@ func TestSession_FavoredTargetLoadedAtLogin(t *testing.T) {
 	sess, ok := sessMgr.GetPlayer("u1")
 	require.True(t, ok, "player session must exist after login")
 	assert.Equal(t, "robot", sess.FavoredTarget,
-		"FavoredTarget must be populated from repo at login")
+		"FavoredTarget must be populated from feature choices repo at login")
 }
 
 // TestSession_FavoredTargetPromptedWhenMissing verifies that when a character
-// holds predators_eye but has no favored target set, the server prompts them
-// to choose, reads their selection, persists it via the repo, and sets it on
+// holds predators_eye (with a Choices block) but has no favored_target stored,
+// the server prompts them to choose, persists via the repo, and sets it on
 // the session.
 //
-// Precondition: characterID must be > 0; PassiveFeats["predators_eye"] must be true.
+// Precondition: characterID must be > 0; predators_eye ClassFeature must have Choices.
 // Postcondition: sess.FavoredTarget equals the chosen value; repo.Set was called.
 func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
-	// predators_eye is a passive class feature.
-	predEye := &ruleset.ClassFeature{ID: "predators_eye", Name: "Predator's Eye", Active: false}
+	// predators_eye is a passive class feature with a favored_target choice.
+	predEye := &ruleset.ClassFeature{
+		ID:     "predators_eye",
+		Name:   "Predator's Eye",
+		Active: false,
+		Choices: &ruleset.FeatureChoices{
+			Key:     "favored_target",
+			Prompt:  "Choose your favored target type:",
+			Options: []string{"human", "robot", "animal", "mutant"},
+		},
+	}
 	cfRegistry := ruleset.NewClassFeatureRegistry([]*ruleset.ClassFeature{predEye})
 	cfRepo := &mockClassFeaturesRepo{featureIDs: []string{"predators_eye"}}
 
-	// Repo returns "" so the prompt path is entered.
-	ftRepo := &mockFavoredTargetRepo{getVal: ""}
+	// Repo returns empty map so the prompt path is entered.
+	fcRepo := &mockFeatureChoicesRepo{}
 
-	client, sessMgr := testGRPCServerWithFavoredTarget(t, cfRegistry, cfRepo, ftRepo)
+	client, sessMgr := testGRPCServerWithFeatureChoices(t, cfRegistry, cfRepo, fcRepo)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -571,7 +591,7 @@ func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// The server sends a prompt message before the room view because predators_eye is set.
+	// The server sends a prompt message before the room view because predators_eye has Choices.
 	// Receive the prompt.
 	promptResp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
@@ -602,6 +622,10 @@ func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
 	require.True(t, ok, "player session must exist after login")
 	assert.Equal(t, "robot", sess.FavoredTarget,
 		"FavoredTarget must be set to the chosen value after prompt")
-	assert.Equal(t, "robot", ftRepo.setCalled,
-		"repo.Set must be called with the chosen favored target type")
+	assert.Equal(t, "predators_eye", fcRepo.setFeatureID,
+		"repo.Set must be called with feature ID predators_eye")
+	assert.Equal(t, "favored_target", fcRepo.setChoiceKey,
+		"repo.Set must be called with choice key favored_target")
+	assert.Equal(t, "robot", fcRepo.setValue,
+		"repo.Set must be called with the chosen favored target value")
 }

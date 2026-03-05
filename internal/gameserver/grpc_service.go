@@ -102,13 +102,13 @@ type CharacterClassFeaturesGetter interface {
 	GetAll(ctx context.Context, characterID int64) ([]string, error)
 }
 
-// FavoredTargetRepository persists and retrieves the favored NPC target type per character.
+// CharacterFeatureChoicesRepository persists and retrieves per-character feature choices.
 //
 // Precondition: characterID must be > 0.
-// Postcondition: Get returns ("", nil) when no row exists; Set durably persists the value.
-type FavoredTargetRepository interface {
-	Get(ctx context.Context, characterID int64) (string, error)
-	Set(ctx context.Context, characterID int64, targetType string) error
+// Postcondition: GetAll returns a non-nil map; Set durably persists the choice.
+type CharacterFeatureChoicesRepository interface {
+	GetAll(ctx context.Context, characterID int64) (map[string]map[string]string, error)
+	Set(ctx context.Context, characterID int64, featureID, choiceKey, value string) error
 }
 
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
@@ -144,7 +144,7 @@ type GameServiceServer struct {
 	allClassFeatures           []*ruleset.ClassFeature
 	classFeatureRegistry       *ruleset.ClassFeatureRegistry
 	characterClassFeaturesRepo CharacterClassFeaturesGetter
-	favoredTargetRepo          FavoredTargetRepository
+	featureChoicesRepo         CharacterFeatureChoicesRepository
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -196,7 +196,7 @@ func NewGameServiceServer(
 	allClassFeatures []*ruleset.ClassFeature,
 	classFeatureRegistry *ruleset.ClassFeatureRegistry,
 	characterClassFeaturesRepo CharacterClassFeaturesGetter,
-	favoredTargetRepo FavoredTargetRepository,
+	featureChoicesRepo CharacterFeatureChoicesRepository,
 ) *GameServiceServer {
 	s := &GameServiceServer{
 		world:               worldMgr,
@@ -229,7 +229,7 @@ func NewGameServiceServer(
 		allClassFeatures:           allClassFeatures,
 		classFeatureRegistry:       classFeatureRegistry,
 		characterClassFeaturesRepo: characterClassFeaturesRepo,
-		favoredTargetRepo:          favoredTargetRepo,
+		featureChoicesRepo:         featureChoicesRepo,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
@@ -513,78 +513,84 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
-	// Load favored target for predators_eye.
-	if characterID > 0 && s.favoredTargetRepo != nil {
-		ft, ftErr := s.favoredTargetRepo.Get(stream.Context(), characterID)
-		if ftErr != nil {
-			s.logger.Warn("loading favored target", zap.Error(ftErr))
+	// Load stored feature choices and resolve any missing ones interactively.
+	sess.FeatureChoices = make(map[string]map[string]string)
+	if characterID > 0 && s.featureChoicesRepo != nil {
+		stored, fcErr := s.featureChoicesRepo.GetAll(stream.Context(), characterID)
+		if fcErr != nil {
+			s.logger.Warn("loading feature choices", zap.Int64("character_id", characterID), zap.Error(fcErr))
 		} else {
-			sess.FavoredTarget = ft
+			sess.FeatureChoices = stored
 		}
-	}
 
-	// Prompt predators_eye holders who have not yet chosen a favored target.
-	validTypes := []string{"human", "robot", "animal", "mutant"}
-	if sess.PassiveFeats["predators_eye"] && sess.FavoredTarget == "" && s.favoredTargetRepo != nil {
-		promptText := "You have the Predator's Eye ability. Choose your favored target type:\n" +
-			"  1) human\n" +
-			"  2) robot\n" +
-			"  3) animal\n" +
-			"  4) mutant\n" +
-			"Enter 1-4:"
-		if sendErr := stream.Send(&gamev1.ServerEvent{
-			Payload: &gamev1.ServerEvent_Message{
-				Message: &gamev1.MessageEvent{Content: promptText},
-			},
-		}); sendErr != nil {
-			s.logger.Warn("sending favored target prompt", zap.Error(sendErr))
-		} else {
-			// Read selection from the player. The client sends a SayRequest with
-			// the numeric choice as the message body (e.g. "1", "2", "3", or "4").
-			selMsg, selErr := stream.Recv()
-			if selErr == nil {
-				selText := ""
-				if sayMsg := selMsg.GetSay(); sayMsg != nil {
-					selText = strings.TrimSpace(sayMsg.GetMessage())
-				}
-				idx := -1
-				switch selText {
-				case "1":
-					idx = 0
-				case "2":
-					idx = 1
-				case "3":
-					idx = 2
-				case "4":
-					idx = 3
-				}
-				if idx >= 0 {
-					chosen := validTypes[idx]
-					if setErr := s.favoredTargetRepo.Set(stream.Context(), characterID, chosen); setErr != nil {
-						s.logger.Warn("persisting favored target", zap.Error(setErr))
-					} else {
-						sess.FavoredTarget = chosen
-						if confirmErr := stream.Send(&gamev1.ServerEvent{
-							Payload: &gamev1.ServerEvent_Message{
-								Message: &gamev1.MessageEvent{Content: "Favored target set to: " + chosen},
-							},
-						}); confirmErr != nil {
-							s.logger.Warn("sending favored target confirmation", zap.Error(confirmErr))
-						}
+		if s.characterClassFeaturesRepo != nil && s.classFeatureRegistry != nil {
+			cfIDs, cfErr2 := s.characterClassFeaturesRepo.GetAll(stream.Context(), characterID)
+			if cfErr2 != nil {
+				s.logger.Warn("loading class features for choice resolution", zap.Error(cfErr2))
+			} else {
+				for _, id := range cfIDs {
+					cf, ok := s.classFeatureRegistry.ClassFeature(id)
+					if !ok || cf.Choices == nil {
+						continue
 					}
-				} else {
-					s.logger.Warn("invalid favored target selection",
-						zap.String("uid", uid),
-						zap.String("input", selText),
-					)
-					_ = stream.Send(&gamev1.ServerEvent{
-						Payload: &gamev1.ServerEvent_Message{
-							Message: &gamev1.MessageEvent{Content: "Invalid selection. You will be prompted again on next login."},
-						},
-					})
+					if sess.FeatureChoices[id] != nil && sess.FeatureChoices[id][cf.Choices.Key] != "" {
+						continue
+					}
+					chosen, promptErr := s.promptFeatureChoice(stream, id, cf.Choices)
+					if promptErr != nil {
+						s.logger.Warn("prompting feature choice", zap.String("feature", id), zap.Error(promptErr))
+						continue
+					}
+					if chosen == "" {
+						continue
+					}
+					if setErr := s.featureChoicesRepo.Set(stream.Context(), characterID, id, cf.Choices.Key, chosen); setErr != nil {
+						s.logger.Warn("persisting feature choice", zap.String("feature", id), zap.Error(setErr))
+						continue
+					}
+					if sess.FeatureChoices[id] == nil {
+						sess.FeatureChoices[id] = make(map[string]string)
+					}
+					sess.FeatureChoices[id][cf.Choices.Key] = chosen
 				}
 			}
 		}
+
+		if s.characterFeatsRepo != nil && s.featRegistry != nil {
+			featIDs, featErr := s.characterFeatsRepo.GetAll(stream.Context(), characterID)
+			if featErr != nil {
+				s.logger.Warn("loading feats for choice resolution", zap.Error(featErr))
+			} else {
+				for _, id := range featIDs {
+					f, ok := s.featRegistry.Feat(id)
+					if !ok || f.Choices == nil {
+						continue
+					}
+					if sess.FeatureChoices[id] != nil && sess.FeatureChoices[id][f.Choices.Key] != "" {
+						continue
+					}
+					chosen, promptErr := s.promptFeatureChoice(stream, id, f.Choices)
+					if promptErr != nil {
+						s.logger.Warn("prompting feat choice", zap.String("feat", id), zap.Error(promptErr))
+						continue
+					}
+					if chosen == "" {
+						continue
+					}
+					if setErr := s.featureChoicesRepo.Set(stream.Context(), characterID, id, f.Choices.Key, chosen); setErr != nil {
+						s.logger.Warn("persisting feat choice", zap.String("feat", id), zap.Error(setErr))
+						continue
+					}
+					if sess.FeatureChoices[id] == nil {
+						sess.FeatureChoices[id] = make(map[string]string)
+					}
+					sess.FeatureChoices[id][f.Choices.Key] = chosen
+				}
+			}
+		}
+
+		// Populate derived fields from FeatureChoices.
+		sess.FavoredTarget = sess.FeatureChoices["predators_eye"]["favored_target"]
 	}
 
 	// Broadcast arrival to other players in the room
@@ -2984,4 +2990,68 @@ func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, e
 			)
 		}
 	}
+}
+
+// promptFeatureChoice sends a numbered prompt for the given FeatureChoices block
+// over stream and reads a single numeric response.
+//
+// Precondition: stream must be writable; choices must be non-nil with non-empty Options.
+// Postcondition: Returns one of choices.Options, or "" on invalid input or recv failure.
+func (s *GameServiceServer) promptFeatureChoice(
+	stream gamev1.GameService_SessionServer,
+	featureID string,
+	choices *ruleset.FeatureChoices,
+) (string, error) {
+	var sb strings.Builder
+	sb.WriteString(choices.Prompt)
+	sb.WriteString("\n")
+	for i, opt := range choices.Options {
+		fmt.Fprintf(&sb, "  %d) %s\n", i+1, opt)
+	}
+	fmt.Fprintf(&sb, "Enter 1-%d:", len(choices.Options))
+
+	if err := stream.Send(&gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{Content: sb.String()},
+		},
+	}); err != nil {
+		return "", fmt.Errorf("sending choice prompt for %s: %w", featureID, err)
+	}
+
+	msg, err := stream.Recv()
+	if err != nil {
+		return "", fmt.Errorf("receiving choice for %s: %w", featureID, err)
+	}
+
+	selText := ""
+	if say := msg.GetSay(); say != nil {
+		selText = strings.TrimSpace(say.GetMessage())
+	}
+
+	n := 0
+	idx := -1
+	if _, scanErr := fmt.Sscanf(selText, "%d", &n); scanErr == nil && n >= 1 && n <= len(choices.Options) {
+		idx = n - 1
+	}
+
+	if idx < 0 {
+		s.logger.Warn("invalid feature choice selection",
+			zap.String("feature", featureID),
+			zap.String("input", selText),
+		)
+		_ = stream.Send(&gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: "Invalid selection. You will be prompted again on next login."},
+			},
+		})
+		return "", nil
+	}
+
+	chosen := choices.Options[idx]
+	_ = stream.Send(&gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{Content: choices.Key + " set to: " + chosen},
+		},
+	})
+	return chosen, nil
 }
