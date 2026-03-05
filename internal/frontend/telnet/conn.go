@@ -128,6 +128,15 @@ func (c *Conn) ReadLine() (string, error) {
 			break
 		}
 
+		// Handle ESC: detect VT100 arrow key sequences
+		if b == 0x1B {
+			if sentinel := c.tryReadEscapeSeq(); sentinel != "" {
+				return sentinel, nil
+			}
+			// Unknown or incomplete escape sequence — swallow and continue
+			continue
+		}
+
 		// Filter control characters except tab
 		if b < 32 && b != '\t' {
 			continue
@@ -137,6 +146,32 @@ func (c *Conn) ReadLine() (string, error) {
 	}
 
 	return line.String(), nil
+}
+
+// tryReadEscapeSeq attempts to read a VT100 CSI escape sequence after ESC (0x1B)
+// has been consumed. Returns a sentinel string if the sequence is a recognized
+// arrow key, or "" to indicate an unrecognized sequence (all bytes consumed).
+//
+// Precondition: ESC byte has already been read from c.reader.
+// Postcondition: The full CSI sequence ([ + final byte) has been consumed.
+func (c *Conn) tryReadEscapeSeq() string {
+	next, err := c.reader.ReadByte()
+	if err != nil || next != '[' {
+		// Bare ESC or read error — nothing more to consume
+		return ""
+	}
+	final, err := c.reader.ReadByte()
+	if err != nil {
+		return ""
+	}
+	switch final {
+	case 'A':
+		return "\x00UP"
+	case 'B':
+		return "\x00DOWN"
+	default:
+		return ""
+	}
 }
 
 // handleIAC processes a Telnet IAC sequence after the initial IAC byte

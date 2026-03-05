@@ -302,6 +302,52 @@ func TestConn_ReadLine_NAWS_SetsWidthHeight_Property(t *testing.T) {
 	})
 }
 
+// TestConn_ReadLine_UpArrow verifies that \033[A returns the sentinel "\x00UP".
+func TestConn_ReadLine_UpArrow(t *testing.T) {
+	conn, client := newTestConn(t)
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		_, _ = client.Write([]byte{0x1B, '[', 'A'})
+		client.Close()
+	}()
+
+	line, err := conn.ReadLine()
+	require.NoError(t, err)
+	assert.Equal(t, "\x00UP", line)
+}
+
+// TestConn_ReadLine_DownArrow verifies that \033[B returns the sentinel "\x00DOWN".
+func TestConn_ReadLine_DownArrow(t *testing.T) {
+	conn, client := newTestConn(t)
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		_, _ = client.Write([]byte{0x1B, '[', 'B'})
+		client.Close()
+	}()
+
+	line, err := conn.ReadLine()
+	require.NoError(t, err)
+	assert.Equal(t, "\x00DOWN", line)
+}
+
+// TestConn_ReadLine_UnknownEscapeIgnored verifies that unknown CSI sequences
+// are swallowed and reading continues.
+func TestConn_ReadLine_UnknownEscapeIgnored(t *testing.T) {
+	conn, client := newTestConn(t)
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		// \033[C (right arrow) then actual text
+		_, _ = client.Write([]byte{0x1B, '[', 'C', 'h', 'i', '\r', '\n'})
+	}()
+
+	line, err := conn.ReadLine()
+	require.NoError(t, err)
+	assert.Equal(t, "hi", line)
+}
+
 // --- Property tests ---
 
 // Property: FilterIAC on input without any IAC bytes returns the input unchanged.
