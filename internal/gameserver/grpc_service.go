@@ -2251,7 +2251,7 @@ func (s *GameServiceServer) handleSetRole(uid string, req *gamev1.SetRoleRequest
 //
 // Precondition: uid identifies an active session; req is non-nil.
 // Postcondition: on success, one ItemInstance is added to the room floor and a success
-// message is returned; on failure, a message event is returned with no side effects.
+// message is returned; on failure, an error event is returned with no side effects.
 func (s *GameServiceServer) handleSummonItem(uid string, req *gamev1.SummonItemRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
