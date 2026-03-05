@@ -17,6 +17,9 @@ func HandleSummonItem(args string) string {
 		return usage
 	}
 	itemID := parts[0]
+	if len(parts) > 2 {
+		return usage
+	}
 	qty := 1
 	if len(parts) >= 2 {
 		n, err := strconv.Atoi(parts[1])

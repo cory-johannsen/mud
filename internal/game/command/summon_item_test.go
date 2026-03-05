@@ -39,6 +39,11 @@ func TestHandleSummonItem_NegativeQuantity(t *testing.T) {
 	assert.Equal(t, "Usage: summon_item <item_id> [quantity]", result)
 }
 
+func TestHandleSummonItem_ExtraArgs(t *testing.T) {
+	result := command.HandleSummonItem("assault_rifle 3 garbage")
+	assert.Equal(t, "Usage: summon_item <item_id> [quantity]", result)
+}
+
 func TestPropertyHandleSummonItem_ValidQuantityAlwaysReturnsItemIDAndQty(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		qty := rapid.IntRange(1, 1000).Draw(rt, "qty")
