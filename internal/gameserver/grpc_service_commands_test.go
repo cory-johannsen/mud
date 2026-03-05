@@ -177,6 +177,59 @@ func TestHandleEquipment_PlayerNotFound(t *testing.T) {
 	assert.Contains(t, errEvt.Message, "player not found")
 }
 
+// TestHandleEquip_UpdatesSessionLoadout is a regression test verifying that calling
+// handleEquip actually updates sess.LoadoutSet (the source of truth for the equipment display).
+//
+// Precondition: A weapon item is in the player's backpack; sess.LoadoutSet is initialized.
+// Postcondition: After handleEquip, sess.LoadoutSet.ActivePreset().MainHand is non-nil.
+func TestHandleEquip_UpdatesSessionLoadout(t *testing.T) {
+	// Build a registry with a real weapon item AND its weapon definition.
+	reg := inventory.NewRegistry()
+	require.NoError(t, reg.RegisterWeapon(&inventory.WeaponDef{
+		ID:         "test_cleaver",
+		Name:       "Butcher's Cleaver",
+		Kind:       inventory.WeaponKindOneHanded,
+		DamageDice: "1d6",
+		DamageType: "slashing",
+	}))
+	require.NoError(t, reg.RegisterItem(&inventory.ItemDef{
+		ID:        "test_cleaver",
+		Name:      "Butcher's Cleaver",
+		Kind:      "weapon",
+		WeaponRef: "test_cleaver",
+		MaxStack:  1,
+	}))
+
+	// Build the server with the registry.
+	svc := newSummonItemService(t, nil, reg)
+
+	// Add a session with LoadoutSet and a backpack containing the cleaver.
+	uid := "equip_test_u1"
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: "TestEquipper", CharacterID: 1,
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Abilities: character.AbilityScores{}, Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.LoadoutSet = inventory.NewLoadoutSet()
+	_, addErr := sess.Backpack.Add("test_cleaver", 1, reg)
+	require.NoError(t, addErr)
+
+	// Equip the cleaver.
+	resp, err := svc.handleEquip(uid, &gamev1.EquipRequest{WeaponId: "test_cleaver", Slot: "main"})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	// The equipment display must now show the cleaver — not empty.
+	equipResp, err := svc.handleEquipment(uid, &gamev1.EquipmentRequest{})
+	require.NoError(t, err)
+	msg := equipResp.GetMessage()
+	require.NotNil(t, msg, "expected a message event from handleEquipment")
+	assert.Contains(t, msg.Content, "Butcher's Cleaver",
+		"equipment display should show the equipped cleaver, not empty hands")
+}
+
 // TestPropertyHandleLoadout_ValidSessionAlwaysReturnsEvent asserts that any valid
 // session uid always receives a non-nil ServerEvent from handleLoadout, regardless of arg.
 // Precondition: uid maps to a valid player session.

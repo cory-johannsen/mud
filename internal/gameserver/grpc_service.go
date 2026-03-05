@@ -1735,12 +1735,34 @@ func messageEvent(text string) *gamev1.ServerEvent {
 	}
 }
 
+// handleEquip equips a weapon from the player's backpack into the named slot.
+//
+// Precondition: uid identifies an active session; req is non-nil.
+// Postcondition: on success, sess.LoadoutSet is updated and persisted; on failure an error event is returned.
 func (s *GameServiceServer) handleEquip(uid string, req *gamev1.EquipRequest) (*gamev1.ServerEvent, error) {
-	_, err := s.combatH.Equip(uid, req.GetWeaponId(), req.GetSlot())
-	if err != nil {
-		return errorEvent(err.Error()), nil
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
 	}
-	return messageEvent("Equipped " + req.GetWeaponId() + "."), nil
+	arg := req.GetWeaponId()
+	if slot := req.GetSlot(); slot != "" {
+		arg += " " + slot
+	}
+	result := command.HandleEquip(sess, s.invRegistry, arg)
+	if result == "" || result == "Usage: equip <item_id> <main|off>" || result == "specify main or off" {
+		return errorEvent(result), nil
+	}
+	// Persist the updated loadout if we have a character saver.
+	if s.charSaver != nil && sess.LoadoutSet != nil {
+		if err := s.charSaver.SaveWeaponPresets(context.Background(), sess.CharacterID, sess.LoadoutSet); err != nil {
+			s.logger.Warn("failed to persist weapon presets after equip", zap.Error(err))
+		}
+	}
+	// Also update the combat handler's loadout cache if in combat.
+	if s.combatH != nil {
+		_, _ = s.combatH.Equip(uid, req.GetWeaponId(), req.GetSlot())
+	}
+	return messageEvent(result), nil
 }
 
 // handleWear equips an armor item from the player's backpack into the specified body slot.
