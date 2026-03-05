@@ -178,6 +178,20 @@ func (c *Combat) SetSessionGetter(fn func(uid string) (*session.PlayerSession, b
 	c.sessionGetter = fn
 }
 
+// ScriptManager returns the scripting.Manager attached to this combat, or nil.
+// Precondition: none.
+// Postcondition: Returns the scripting manager used for Lua hook dispatch; may be nil.
+func (c *Combat) ScriptManager() *scripting.Manager {
+	return c.scriptMgr
+}
+
+// ZoneID returns the zone identifier used for Lua hook dispatch.
+// Precondition: none.
+// Postcondition: Returns the zoneID string; empty string when no scripting is configured.
+func (c *Combat) ZoneID() string {
+	return c.zoneID
+}
+
 // realSrc wraps math/rand for production dice rolls.
 type realSrc struct{}
 

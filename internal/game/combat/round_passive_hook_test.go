@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	lua "github.com/yuin/gopher-lua"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
@@ -69,12 +71,29 @@ func makePassiveHookCombatWithScript(t *testing.T, luaSrc string) *combat.Combat
 	return cbt
 }
 
+// callLuaGetter invokes a zero-argument Lua global function in the combat's script manager
+// and returns the result as a string, or "" if the call fails or returns nil.
+// Precondition: cbt.ScriptManager() must be non-nil; fnName must be a defined Lua global.
+// Postcondition: Returns the string representation of the Lua return value, or "".
+func callLuaGetter(t *testing.T, cbt *combat.Combat, fnName string) string {
+	t.Helper()
+	mgr := cbt.ScriptManager()
+	require.NotNil(t, mgr, "ScriptManager must be non-nil to call Lua getters")
+	ret, err := mgr.CallHook(cbt.ZoneID(), fnName)
+	require.NoError(t, err)
+	if ret == lua.LNil {
+		return ""
+	}
+	return ret.String()
+}
+
 // TestPassiveFeatHook_SuckerPunch_ConditionMet_HookCalledWithMetOutcome verifies that when
 // a player with sucker_punch attacks a flat_footed NPC (hit guaranteed), the
-// on_passive_feat_check hook is called with feat_id="sucker_punch", outcome="met",
-// and damage_bonus > 0. The hook return value (99) is used as the bonus.
+// on_passive_feat_check hook is called with feat_id="sucker_punch" and outcome="met".
+// The hook return value (99) is used as the bonus, and Lua state is queried to confirm.
 //
 // Postcondition: NPC HP must be reduced by at least 99 (the hook override) below its start HP.
+// Postcondition: Lua globals _last_feat_id=="sucker_punch" and _last_outcome=="met".
 func TestPassiveFeatHook_SuckerPunch_ConditionMet_HookCalledWithMetOutcome(t *testing.T) {
 	// Use fixedSrc{val:15}: Intn(6)=3 so natural bonus=4, but hook overrides to 99.
 	luaSrc := `
@@ -112,10 +131,13 @@ func TestPassiveFeatHook_SuckerPunch_ConditionMet_HookCalledWithMetOutcome(t *te
 	// val=15: d20=16, atkTotal=16+3=19 vs AC 10 → hit; EffectiveDamage>0 → sucker_punch fires.
 	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil)
 
-	// Verify hook was called with the correct feat_id and outcome.
-	mgr := newScriptMgr(t, luaSrc) // re-create to call getters against the original instance
-	// We need to retrieve from the combat's own mgr; instead check NPC HP.
-	// NPC started at 200 HP; with hook override 99, bonus alone is 99, so total dmg >= 99.
+	// Verify hook was called with the correct feat_id and outcome via Lua state getters.
+	assert.Equal(t, "sucker_punch", callLuaGetter(t, cbt, "get_last_feat_id"),
+		"hook must be called with feat_id=sucker_punch")
+	assert.Equal(t, "met", callLuaGetter(t, cbt, "get_last_outcome"),
+		"hook must be called with outcome=met when flat_footed condition is active and hit lands")
+
+	// Verify NPC HP reflects the hook override of 99.
 	var npc *combat.Combatant
 	for _, c := range cbt.Combatants {
 		if c.ID == "n1" {
@@ -126,7 +148,68 @@ func TestPassiveFeatHook_SuckerPunch_ConditionMet_HookCalledWithMetOutcome(t *te
 	// The hook override is 99; combined with base damage and condition bonuses the NPC lost >= 99 HP.
 	assert.LessOrEqual(t, npc.CurrentHP, 200-99,
 		"hook override of 99 must result in NPC HP <= 101 (200 - 99); got %d", npc.CurrentHP)
-	_ = mgr // suppress unused variable error; mgr is used only for verification below
+}
+
+// TestPassiveFeatHook_SuckerPunch_MissFiresHook verifies that on_passive_feat_check is called
+// even when the attack misses (dmg=0). The hook must be called with outcome="not_met" and
+// damage_bonus=0 when the attack does not connect.
+//
+// Precondition: sucker_punch feat active; NPC has flat_footed; attack forced to miss via on_attack_roll.
+// Postcondition: Lua global _last_feat_id=="sucker_punch" and _last_outcome=="not_met".
+// Postcondition: NPC HP must be unchanged (miss deals no damage).
+func TestPassiveFeatHook_SuckerPunch_MissFiresHook(t *testing.T) {
+	luaSrc := `
+		_last_feat_id = "not_called"
+		_last_outcome = "not_called"
+		_last_bonus = -999
+		function on_passive_feat_check(uid, feat_id, ctx)
+			_last_feat_id = feat_id
+			_last_outcome = ctx.outcome
+			_last_bonus = ctx.damage_bonus
+			-- return nil: no override
+		end
+		function on_attack_roll(attacker_uid, target_uid, roll_total, ac)
+			-- Force a miss: return 1, which is always below any AC.
+			return 1
+		end
+		function get_last_feat_id() return _last_feat_id end
+		function get_last_outcome() return _last_outcome end
+		function get_last_bonus() return _last_bonus end
+	`
+	cbt := makePassiveHookCombatWithScript(t, luaSrc)
+
+	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
+		if uid == "p1" {
+			return &session.PlayerSession{
+				PassiveFeats: map[string]bool{"sucker_punch": true},
+			}, true
+		}
+		return nil, false
+	})
+
+	// Apply flat_footed so the condition would normally be met — but the attack misses.
+	require.NoError(t, cbt.ApplyCondition("n1", "flat_footed", 1, -1))
+
+	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
+	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
+
+	combat.ResolveRound(cbt, &fixedSrc{val: 15}, nil)
+
+	// Hook must have fired with feat_id=sucker_punch and outcome=not_met (miss → dmg=0).
+	assert.Equal(t, "sucker_punch", callLuaGetter(t, cbt, "get_last_feat_id"),
+		"hook must be called even when the attack misses")
+	assert.Equal(t, "not_met", callLuaGetter(t, cbt, "get_last_outcome"),
+		"hook outcome must be not_met when attack misses (dmg=0)")
+
+	// NPC must be unharmed (attack missed).
+	var npc *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.ID == "n1" {
+			npc = c
+		}
+	}
+	require.NotNil(t, npc)
+	assert.Equal(t, 200, npc.CurrentHP, "NPC must be unharmed when attack misses")
 }
 
 // TestPassiveFeatHook_SuckerPunch_ConditionNotMet_HookCalledWithNotMetOutcome verifies that

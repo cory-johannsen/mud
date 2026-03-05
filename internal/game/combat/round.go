@@ -224,10 +224,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg := r.EffectiveDamage()
 				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
 				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg > 0 {
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
 					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
-						spMet := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed")
 						spBonus := 0
+						spMet := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") && dmg > 0
 						if spMet {
 							spBonus = src.Intn(6) + 1
 						}
@@ -236,10 +236,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				// predators_eye: +1d8 precision damage vs favored NPC type.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg > 0 {
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
 					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
-						peMet := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget
 						peBonus := 0
+						peMet := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget && dmg > 0
 						if peMet {
 							peBonus = src.Intn(8) + 1
 						}
@@ -294,10 +294,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg1 := r1.EffectiveDamage()
 				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg1 > 0 {
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
 					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
-						spMet1 := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed")
 						spBonus1 := 0
+						spMet1 := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") && dmg1 > 0
 						if spMet1 {
 							spBonus1 = src.Intn(6) + 1
 						}
@@ -306,10 +306,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				// predators_eye: +1d8 precision damage vs favored NPC type.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg1 > 0 {
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
 					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
-						peMet1 := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget
 						peBonus1 := 0
+						peMet1 := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget && dmg1 > 0
 						if peMet1 {
 							peBonus1 = src.Intn(8) + 1
 						}
@@ -356,10 +356,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg2 := r2.EffectiveDamage()
 				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				// sucker_punch: +1d6 damage vs flat-footed targets on a hit.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg2 > 0 {
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
 					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["sucker_punch"] {
-						spMet2 := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed")
 						spBonus2 := 0
+						spMet2 := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") && dmg2 > 0
 						if spMet2 {
 							spBonus2 = src.Intn(6) + 1
 						}
@@ -368,10 +368,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				// predators_eye: +1d8 precision damage vs favored NPC type.
-				if actor.Kind == KindPlayer && cbt.sessionGetter != nil && dmg2 > 0 {
+				if actor.Kind == KindPlayer && cbt.sessionGetter != nil {
 					if ps, ok := cbt.sessionGetter(actor.ID); ok && ps.PassiveFeats["predators_eye"] {
-						peMet2 := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget
 						peBonus2 := 0
+						peMet2 := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget && dmg2 > 0
 						if peMet2 {
 							peBonus2 = src.Intn(8) + 1
 						}
