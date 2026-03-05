@@ -156,9 +156,10 @@ func (r *CharacterRepository) SaveState(ctx context.Context, id int64, location 
 // LoadWeaponPresets fetches all weapon preset rows for characterID and assembles a LoadoutSet.
 // Returns a LoadoutSet with 2 empty presets when no rows exist.
 //
-// Precondition: characterID must be >= 0.
+// Precondition: characterID must be >= 0; reg must not be nil.
 // Postcondition: Returns a non-nil *inventory.LoadoutSet and nil error on success.
-func (r *CharacterRepository) LoadWeaponPresets(ctx context.Context, characterID int64) (*inventory.LoadoutSet, error) {
+// Weapon definitions found in reg are re-hydrated into the preset slots; unknown IDs are skipped.
+func (r *CharacterRepository) LoadWeaponPresets(ctx context.Context, characterID int64, reg *inventory.Registry) (*inventory.LoadoutSet, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT preset_index, slot, item_def_id, ammo_count
 		FROM character_weapon_presets
@@ -184,12 +185,24 @@ func (r *CharacterRepository) LoadWeaponPresets(ctx context.Context, characterID
 		for len(ls.Presets) <= presetIdx {
 			ls.Presets = append(ls.Presets, inventory.NewWeaponPreset())
 		}
-		// NOTE: Full weapon hydration (populating MainHand/OffHand with a *WeaponDef) requires
-		// the weapon registry, which is added in feature #4 (weapon and armor library).
-		// Until then, the preset slot count is preserved but weapons are not reloaded.
-		// Variables slot, itemDefID, and ammoCount are consumed to avoid compiler errors;
-		// they will be used in feature #4.
-		_, _, _ = slot, itemDefID, ammoCount
+		// Look up the weapon definition from the registry and re-hydrate the preset slot.
+		// Unknown item IDs (e.g. items removed from the registry) are silently skipped.
+		def := reg.Weapon(itemDefID)
+		if def == nil {
+			continue
+		}
+		preset := ls.Presets[presetIdx]
+		switch slot {
+		case "main_hand":
+			if equipErr := preset.EquipMainHand(def); equipErr != nil {
+				return nil, fmt.Errorf("rehydrating main_hand preset %d for character %d: %w", presetIdx, characterID, equipErr)
+			}
+		case "off_hand":
+			if equipErr := preset.EquipOffHand(def); equipErr != nil {
+				return nil, fmt.Errorf("rehydrating off_hand preset %d for character %d: %w", presetIdx, characterID, equipErr)
+			}
+		}
+		_ = ammoCount // ammo count restoration is deferred to magazine hydration feature
 	}
 	return ls, rows.Err()
 }
@@ -275,7 +288,7 @@ func (r *CharacterRepository) LoadEquipment(ctx context.Context, characterID int
 		// until then, Name is set to ItemDefID as a placeholder.
 		switch inventory.ArmorSlot(slot) {
 		case inventory.SlotHead, inventory.SlotLeftArm, inventory.SlotRightArm,
-			inventory.SlotTorso, inventory.SlotLeftLeg, inventory.SlotRightLeg, inventory.SlotFeet:
+			inventory.SlotTorso, inventory.SlotHands, inventory.SlotLeftLeg, inventory.SlotRightLeg, inventory.SlotFeet:
 			eq.Armor[inventory.ArmorSlot(slot)] = item
 		default:
 			// Treat as accessory slot.

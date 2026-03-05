@@ -22,7 +22,7 @@ func (m *mockCharSaver) SaveState(_ context.Context, id int64, location string, 
 	return nil
 }
 
-func (m *mockCharSaver) LoadWeaponPresets(_ context.Context, _ int64) (*inventory.LoadoutSet, error) {
+func (m *mockCharSaver) LoadWeaponPresets(_ context.Context, _ int64, _ *inventory.Registry) (*inventory.LoadoutSet, error) {
 	return inventory.NewLoadoutSet(), nil
 }
 

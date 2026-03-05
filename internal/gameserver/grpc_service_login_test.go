@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"net"
+	"os"
+	"path/filepath"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -46,7 +48,7 @@ func (m *mockCharSaverFull) SaveState(_ context.Context, _ int64, _ string, _ in
 
 // LoadWeaponPresets returns an error if loadWeaponPresetsErr is set,
 // otherwise returns a default-initialized LoadoutSet.
-func (m *mockCharSaverFull) LoadWeaponPresets(_ context.Context, _ int64) (*inventory.LoadoutSet, error) {
+func (m *mockCharSaverFull) LoadWeaponPresets(_ context.Context, _ int64, _ *inventory.Registry) (*inventory.LoadoutSet, error) {
 	if m.loadWeaponPresetsErr != nil {
 		return nil, m.loadWeaponPresetsErr
 	}
@@ -249,4 +251,82 @@ func TestSession_Cleanup_SavesWeaponPresetsAndEquipment(t *testing.T) {
 			saver.saveEquipmentCalled.Load() > 0
 	}, 2*time.Second, 25*time.Millisecond,
 		"SaveWeaponPresets and SaveEquipment must each be called during cleanup")
+}
+
+// mockCharSaverGrantTracking extends mockCharSaverFull with per-method call counters
+// for SaveInventory, SaveEquipment, and SaveWeaponPresets so that grantStartingInventory
+// persistence calls can be independently verified.
+type mockCharSaverGrantTracking struct {
+	mockCharSaverFull
+	saveInventoryCalled     atomic.Int32
+	saveEquipmentCalledGrant atomic.Int32
+	saveWeaponPresetsCalledGrant atomic.Int32
+}
+
+func (m *mockCharSaverGrantTracking) SaveInventory(_ context.Context, _ int64, _ []inventory.InventoryItem) error {
+	m.saveInventoryCalled.Add(1)
+	return nil
+}
+
+func (m *mockCharSaverGrantTracking) SaveEquipment(_ context.Context, _ int64, _ *inventory.Equipment) error {
+	m.saveEquipmentCalledGrant.Add(1)
+	return nil
+}
+
+func (m *mockCharSaverGrantTracking) SaveWeaponPresets(_ context.Context, _ int64, _ *inventory.LoadoutSet) error {
+	m.saveWeaponPresetsCalledGrant.Add(1)
+	return nil
+}
+
+// TestGrantStartingInventory_SavesEquipmentAndWeaponPresets verifies that
+// grantStartingInventory calls SaveEquipment and SaveWeaponPresets in addition
+// to SaveInventory after equipping the starting kit.
+// This is a regression test for Bug 3.
+func TestGrantStartingInventory_SavesEquipmentAndWeaponPresets(t *testing.T) {
+	// Write a minimal loadout YAML to a temp directory.
+	loadoutsDir := t.TempDir()
+	loadoutYAML := `archetype: test_arch
+base:
+  weapon: ""
+  armor: {}
+  consumables: []
+  currency: 0
+`
+	require.NoError(t, os.WriteFile(filepath.Join(loadoutsDir, "test_arch.yaml"), []byte(loadoutYAML), 0600))
+
+	saver := &mockCharSaverGrantTracking{}
+	logger := zaptest.NewLogger(t)
+
+	mgr := session.NewManager()
+	sess, err := mgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "u-grant",
+		Username:          "grantuser",
+		CharName:          "Grantee",
+		CharacterID:       99,
+		RoomID:            "room1",
+		CurrentHP:         10,
+		MaxHP:             10,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "Test Region",
+		Class:             "Aggressor",
+		Level:             1,
+	})
+	require.NoError(t, err)
+
+	svc := &GameServiceServer{
+		charSaver:   saver,
+		invRegistry: inventory.NewRegistry(),
+		loadoutsDir: loadoutsDir,
+		logger:      logger,
+		sessions:    mgr,
+		commands:    command.DefaultRegistry(),
+	}
+
+	err = svc.grantStartingInventory(context.Background(), sess, 99, "test_arch", "", nil)
+	require.NoError(t, err)
+
+	assert.Equal(t, int32(1), saver.saveInventoryCalled.Load(), "SaveInventory must be called once")
+	assert.Equal(t, int32(1), saver.saveEquipmentCalledGrant.Load(), "SaveEquipment must be called once during starting grant")
+	assert.Equal(t, int32(1), saver.saveWeaponPresetsCalledGrant.Load(), "SaveWeaponPresets must be called once during starting grant")
 }

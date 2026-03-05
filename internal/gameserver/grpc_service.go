@@ -58,7 +58,7 @@ type CharacterSaver interface {
 	// Postcondition: if err == nil, the returned *Character is non-nil.
 	GetByID(ctx context.Context, id int64) (*character.Character, error)
 	SaveState(ctx context.Context, id int64, location string, currentHP int) error
-	LoadWeaponPresets(ctx context.Context, characterID int64) (*inventory.LoadoutSet, error)
+	LoadWeaponPresets(ctx context.Context, characterID int64, reg *inventory.Registry) (*inventory.LoadoutSet, error)
 	SaveWeaponPresets(ctx context.Context, characterID int64, ls *inventory.LoadoutSet) error
 	LoadEquipment(ctx context.Context, characterID int64) (*inventory.Equipment, error)
 	SaveEquipment(ctx context.Context, characterID int64, eq *inventory.Equipment) error
@@ -351,7 +351,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// Load persisted equipment state if charSaver supports it.
 	if characterID > 0 && s.charSaver != nil {
 		loadCtx, loadCancel := context.WithTimeout(stream.Context(), 5*time.Second)
-		ls, lsErr := s.charSaver.LoadWeaponPresets(loadCtx, characterID)
+		ls, lsErr := s.charSaver.LoadWeaponPresets(loadCtx, characterID, s.invRegistry)
 		loadCancel()
 		if lsErr != nil {
 			s.logger.Warn("failed to load weapon presets on login",
@@ -1536,6 +1536,16 @@ func (s *GameServiceServer) grantStartingInventory(ctx context.Context, sess *se
 	items := backpackToInventoryItems(sess.Backpack)
 	if err := s.charSaver.SaveInventory(ctx, characterID, items); err != nil {
 		return fmt.Errorf("saving starting inventory: %w", err)
+	}
+
+	// Persist equipment (armor slots worn during starting grant).
+	if err := s.charSaver.SaveEquipment(ctx, characterID, sess.Equipment); err != nil {
+		return fmt.Errorf("saving starting equipment: %w", err)
+	}
+
+	// Persist weapon presets (weapon equipped during starting grant).
+	if err := s.charSaver.SaveWeaponPresets(ctx, characterID, sess.LoadoutSet); err != nil {
+		return fmt.Errorf("saving starting weapon presets: %w", err)
 	}
 
 	// Mark flag.
