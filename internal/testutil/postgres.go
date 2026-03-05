@@ -244,6 +244,27 @@ func (pc *PostgresContainer) ApplyFeatsMigration(t *testing.T) {
 	t.Logf("feats migration applied [%s]", time.Since(start))
 }
 
+// ApplyFavoredTargetMigration adds the character_favored_target table used by migration 014.
+//
+// Precondition: Pool must be connected and ApplyMigrations must have been called.
+// Postcondition: The character_favored_target table exists in the test database.
+func (pc *PostgresContainer) ApplyFavoredTargetMigration(t *testing.T) {
+	t.Helper()
+	ctx := context.Background()
+	start := time.Now()
+	_, err := pc.RawPool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS character_favored_target (
+			character_id  BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			target_type   TEXT   NOT NULL,
+			PRIMARY KEY (character_id)
+		);
+	`)
+	if err != nil {
+		t.Fatalf("applying favored target migration: %v", err)
+	}
+	t.Logf("favored target migration applied [%s]", time.Since(start))
+}
+
 // DSN returns the connection string for the test database.
 func (pc *PostgresContainer) DSN() string {
 	return fmt.Sprintf(

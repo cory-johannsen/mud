@@ -1,11 +1,12 @@
 id: flat_footed
 name: Flat-Footed
 description: |
-  You are caught off guard. You take a -2 penalty to AC.
+  This combatant has not yet acted in combat and is unprepared for incoming attacks.
+  Attackers with Sucker Punch deal +1d6 bonus damage to flat-footed targets.
 duration_type: rounds
 max_stacks: 0
 attack_penalty: 0
-ac_penalty: 2
+ac_penalty: 0
 speed_penalty: 0
 restrict_actions: []
 lua_on_apply: ""
