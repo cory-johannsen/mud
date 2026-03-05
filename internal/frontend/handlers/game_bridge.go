@@ -438,7 +438,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
 			}
 			text = RenderRoomView(p.RoomView)
-		lastRoomText.Store(text)
+			lastRoomText.Store(text)
 		case *gamev1.ServerEvent_Message:
 			text = RenderMessage(p.Message)
 		case *gamev1.ServerEvent_RoomEvent:
