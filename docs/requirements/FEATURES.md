@@ -58,13 +58,18 @@
     - [x] Active feats/class features map to a named condition via `condition_id` in YAML
     - [x] `use <feat>` applies the condition (with `damage_bonus`, `ac_penalty`, etc.) for encounter or timed duration
     - [x] Condition cleared on combat end or timer expiry
-  - [ ] **Passive feat/class feature mechanics — Stage 4**
-    - [ ] `sucker_punch` — sneak attack damage bonus when attacking from stealth
-    - [ ] `street_brawler` — attack of opportunity when enemy leaves threat range
-    - [ ] `predators_eye` — bonus to first attack vs unaware target
-    - [ ] `zone_awareness` — removes difficult terrain movement penalty
-    - [ ] Lua hook `on_passive_feat_check(uid, feat_id, context)` for custom passive logic
+  - [x] **Passive feat/class feature mechanics — Stage 4**
+    - [x] `sucker_punch` — sneak attack damage bonus when attacking from stealth
+    - [x] `street_brawler` — attack of opportunity when enemy leaves threat range
+    - [x] `predators_eye` — bonus to first attack vs unaware target
+    - [x] `zone_awareness` — removes difficult terrain movement penalty
+    - [x] Lua hook `on_passive_feat_check(uid, feat_id, context)` for custom passive logic
+  - [ ] `skills command improvements
+    - [ ] The `skills` command should display both the level (train, untrained, etc) and the numeric bonus using +# format (+1, +2, +4, etc)
+    - [ ] The `skills` command should display a description for each skill
   - [ ] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
+- [ ] Admin command `summon_item` which take an item ID as a parameter.  An instance of the specified item must be added to the room.
+- [ ] TODO list: a full itemized list of all stubs and intentionally unimplemented code.
 - [ ] Telnet UI upgrades
   - The screen is sectioned into three segments, from top to bottoms:
     - Room display
@@ -74,18 +79,68 @@
     - [ ] The player input section must be pinned to the bottom of the screen
     - [ ] The player input section is composed of two items, the prompt and the player input area
       - [ ] The prompt must refresh independent of the input section such that the prompt reflects changes without player input.
+    - [ ] The player input section must have a horizontal divider on the top to separate it from the console
     - [ ] Console messages must never overwrite the player input section 
     - [ ] When a player is prompted to select from a list of items, in addition to selection by number they must be able to use the up/down cursor keys
   - [ ] Room display
     - [ ] The room display must always be pinned to the top of the screen 
     - [ ] The room display contains the output of the `look` command
     - [ ] The room display must update independent of the console messages and player prompt such that the room state is always up-to-date.
+    - [ ] The room display section must have a horizontal divider on the bottom to separate it from the console
     - [ ] Console messages must never overwrite the room display
     - [ ] When a player is in combat the room display must reflect this
+- [ ] Character ability boosts
+  - [ ] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
+    - [ ] Archetype - Mirrors Ancestry
+    - [ ] Region - Mirrors Background
+    - [ ] Job - Mirrors Class
+  - [ ] Player's that have not selected boosts must be prompted at login
+- [ ] Proficiencies
+  - [ ] Armor
+      - [ ] Unarmored
+      - [ ] Light
+      - [ ] Medium
+      - [ ] Heavy
+  - [ ] Weapons
+    - [ ] Unarmed
+    - [ ] Simple
+    - [ ] Martial
+    - [ ] Specialized
+- [ ] Actions
+  - [ ] Exploration
+  - [ ] Downtime
+  - [ ] Gear
+- [ ] Saving rolls
 - [ ] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
 - [ ] Character levelling
-- [ ] Job proficiencies, advancement hierarchy, features and drawbacks, cross-job combinations. The proficiencies defined in the content need to be mapped to the rules system. Class features and drawbacks need to be implemented and match the lore (there is no magic, there is instead high technology) 
+  - [ ] Max character level limit is 100
+  - [ ] Max job level for any job is 20
+- [ ] Job development
+    - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
+    - [ ] advancement hierarchy - every job has multiple levels of specialization
+      - [x] Basic (existing)
+      - [ ] Specialist - when the player has reached the necessary requirements in a Basic job they may train to become a Specialist
+        - Each Specialist job provides a set of attribute boosts
+          - Specialist attribute boosts are cumulative with base Job attribute boosts
+        - Each Specialist job provides a set of advanced feats
+          - Specialist advanced feats are cumulative with base Job feats
+        - Each Specialist job provides a set of proficiencies
+            - Specialist advanced feats are cumulative with base Job proficiencies
+        - Each Specialist job provides a set of skills
+            - Specialist advanced feats are cumulative with base Job skills
+      - [ ] Expert - when the player has reached the necessary requirements in a Specialist job they may train to become an Expert
+          - Each Expert job provides a set of attribute boosts
+              - Expert attribute boosts are cumulative with base and Specialist Job attribute boosts
+          - Each Expert job provides a set of advanced feats
+              - Expert advanced feats are cumulative with base and Specialist Job feats
+          - Each Expert job provides a set of proficiencies
+              - Expert advanced feats are cumulative with base and Specialist Job proficiencies
+          - Each Expert job provides a set of skills
+              - Expert advanced feats are cumulative with base and Specialist Job skills
+  - [ ] multi-job advancement
+    - [ ] when levelling up a player may opt to learn a new job. This is functionally equivalent to multi-classing in P2FE   
+    - [ ] cross-job combinations  
 - [ ] Equipment mechanics expansion 
   - advanced equipment and equipment levelling
     - player requirements
@@ -105,7 +160,18 @@
   - equipment combination and interactions
   - equipment sets
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor. roomequip is an Editor command.
-- [ ] Non-combat NPCs: merchants, guards, quest givers, hirelings, bankers, skill trainers, etc.
+- [ ] Non-combat NPCs
+  - [ ] merchants
+    - [ ] weapons
+    - [ ] armor
+    - [ ] rings and neck equipment
+    - [ ] consumables
+    - [ ] maps
+  - [ ] guards
+  - [ ] quest givers
+  - [ ] hirelings
+  - [ ] bankers
+  - [ ] job trainers
 - [ ] Safe rooms
   - Rooms are classified as Safe, Sketchy, Dangerous, All Out War
     - Safe rooms contain no aggressive NPCs, only non-combat NPCs.
@@ -133,6 +199,9 @@
   - fast travel
 - [ ] Advanced combat mechanics
   - Combat distance
+      - Range
+      - Attack of opportunity
+      - Terrain types
   - NPC fleeing
   - Pursuit
   - Panic

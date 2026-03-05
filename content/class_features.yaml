@@ -26,7 +26,7 @@ class_features:
     pf2e: sneak_attack
     active: false
     activate_text: ""
-    description: "Deal +1d6 bonus damage to flat-footed or flanked targets."
+    description: "Deal +1d6 bonus damage against flat-footed targets — enemies who have not yet acted in the current combat encounter."
 
   - id: slippery
     name: Slippery
@@ -44,7 +44,7 @@ class_features:
     pf2e: hunters_edge
     active: false
     activate_text: ""
-    description: "Choose a favored target type; you deal +1d8 precision damage to that type."
+    description: "Choose a favored target type at character creation; you deal +1d8 precision damage against targets of that type."
 
   - id: zone_awareness
     name: Zone Awareness

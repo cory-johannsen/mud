@@ -439,6 +439,7 @@ zone:
     properties:
       lighting: dark
       atmosphere: fetid
+      terrain: difficult
   - id: flats_apartments_west
     title: Western Apartments
     description: 'A block of three-story apartment buildings, their stucco facades

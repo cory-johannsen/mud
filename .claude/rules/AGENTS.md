@@ -55,3 +55,4 @@ Adding a new player command requires ALL of the following steps. Omitting any st
 
 ## 7. Deployment
 - DEPLOY-1: Agents MUST use `make k8s-redploy` to deploy changes.
+- DEPLOY-2: Agents MUST reference `.claude/rules/.env` for the database password
