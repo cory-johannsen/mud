@@ -102,6 +102,15 @@ type CharacterClassFeaturesGetter interface {
 	GetAll(ctx context.Context, characterID int64) ([]string, error)
 }
 
+// FavoredTargetRepository persists and retrieves the favored NPC target type per character.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Get returns ("", nil) when no row exists; Set durably persists the value.
+type FavoredTargetRepository interface {
+	Get(ctx context.Context, characterID int64) (string, error)
+	Set(ctx context.Context, characterID int64, targetType string) error
+}
+
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
 type GameServiceServer struct {
 	gamev1.UnimplementedGameServiceServer
@@ -135,6 +144,7 @@ type GameServiceServer struct {
 	allClassFeatures           []*ruleset.ClassFeature
 	classFeatureRegistry       *ruleset.ClassFeatureRegistry
 	characterClassFeaturesRepo CharacterClassFeaturesGetter
+	favoredTargetRepo          FavoredTargetRepository
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -186,6 +196,7 @@ func NewGameServiceServer(
 	allClassFeatures []*ruleset.ClassFeature,
 	classFeatureRegistry *ruleset.ClassFeatureRegistry,
 	characterClassFeaturesRepo CharacterClassFeaturesGetter,
+	favoredTargetRepo FavoredTargetRepository,
 ) *GameServiceServer {
 	s := &GameServiceServer{
 		world:               worldMgr,
@@ -218,6 +229,7 @@ func NewGameServiceServer(
 		allClassFeatures:           allClassFeatures,
 		classFeatureRegistry:       classFeatureRegistry,
 		characterClassFeaturesRepo: characterClassFeaturesRepo,
+		favoredTargetRepo:          favoredTargetRepo,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
@@ -500,6 +512,76 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			}
 		}
 	}
+
+	// Load favored target for predators_eye.
+	if characterID > 0 && s.favoredTargetRepo != nil {
+		ft, ftErr := s.favoredTargetRepo.Get(stream.Context(), characterID)
+		if ftErr != nil {
+			s.logger.Warn("loading favored target", zap.Error(ftErr))
+		} else {
+			sess.FavoredTarget = ft
+		}
+	}
+
+	// Prompt predators_eye holders who have not yet chosen a favored target.
+	validTypes := []string{"human", "robot", "animal", "mutant"}
+	if sess.PassiveFeats["predators_eye"] && sess.FavoredTarget == "" && s.favoredTargetRepo != nil {
+		promptText := "You have the Predator's Eye ability. Choose your favored target type:\n" +
+			"  1) human\n" +
+			"  2) robot\n" +
+			"  3) animal\n" +
+			"  4) mutant\n" +
+			"Enter 1-4:"
+		if sendErr := stream.Send(&gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: promptText},
+			},
+		}); sendErr != nil {
+			s.logger.Warn("sending favored target prompt", zap.Error(sendErr))
+		} else {
+			// Read selection from the player. The client sends a SayRequest with
+			// the numeric choice as the message body (e.g. "1", "2", "3", or "4").
+			selMsg, selErr := stream.Recv()
+			if selErr == nil {
+				selText := ""
+				if sayMsg := selMsg.GetSay(); sayMsg != nil {
+					selText = strings.TrimSpace(sayMsg.GetMessage())
+				}
+				idx := -1
+				switch selText {
+				case "1":
+					idx = 0
+				case "2":
+					idx = 1
+				case "3":
+					idx = 2
+				case "4":
+					idx = 3
+				}
+				if idx >= 0 {
+					chosen := validTypes[idx]
+					if setErr := s.favoredTargetRepo.Set(stream.Context(), characterID, chosen); setErr != nil {
+						s.logger.Warn("persisting favored target", zap.Error(setErr))
+					} else {
+						sess.FavoredTarget = chosen
+						if confirmErr := stream.Send(&gamev1.ServerEvent{
+							Payload: &gamev1.ServerEvent_Message{
+								Message: &gamev1.MessageEvent{Content: "Favored target set to: " + chosen},
+							},
+						}); confirmErr != nil {
+							s.logger.Warn("sending favored target confirmation", zap.Error(confirmErr))
+						}
+					}
+				} else {
+					s.logger.Warn("invalid favored target selection",
+						zap.String("uid", uid),
+						zap.String("input", selText),
+					)
+				}
+			}
+		}
+	}
+	_ = validTypes // suppress unused warning when block is not entered
 
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{

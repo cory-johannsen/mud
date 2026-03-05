@@ -122,7 +122,7 @@ func testGRPCServerWithSaverFull(t *testing.T, saver CharacterSaver) (gamev1.Gam
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -374,7 +374,7 @@ func testGRPCServerWithClassFeatures(
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo,
+		nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -430,4 +430,178 @@ func TestSession_PassiveFeatsPopulatedAtLogin(t *testing.T) {
 	assert.True(t, sess.PassiveFeats["sucker_punch"], "sucker_punch must be in PassiveFeats")
 	assert.True(t, sess.PassiveFeats["zone_awareness"], "zone_awareness must be in PassiveFeats")
 	assert.False(t, sess.PassiveFeats["berserk_rush"], "active feature berserk_rush must not be in PassiveFeats")
+}
+
+// mockFavoredTargetRepo is a test double for FavoredTargetRepository.
+//
+// It records Set calls and returns a configured value from Get.
+type mockFavoredTargetRepo struct {
+	// getVal is the value returned by Get.
+	getVal string
+	// getErr, if non-nil, is returned by Get instead of getVal.
+	getErr error
+
+	// setCalled records the argument passed to Set.
+	setCalled string
+	// setErr, if non-nil, is returned by Set.
+	setErr error
+}
+
+// Get satisfies FavoredTargetRepository.
+func (m *mockFavoredTargetRepo) Get(_ context.Context, _ int64) (string, error) {
+	if m.getErr != nil {
+		return "", m.getErr
+	}
+	return m.getVal, nil
+}
+
+// Set satisfies FavoredTargetRepository; records the call.
+func (m *mockFavoredTargetRepo) Set(_ context.Context, _ int64, targetType string) error {
+	m.setCalled = targetType
+	return m.setErr
+}
+
+// testGRPCServerWithFavoredTarget starts an in-process gRPC server configured
+// with the supplied class feature registry, class features repo, and favored target repo.
+//
+// Precondition: t must be non-nil; all repo/registry args may be nil.
+// Postcondition: Returns a connected GameServiceClient and the underlying session.Manager.
+func testGRPCServerWithFavoredTarget(
+	t *testing.T,
+	cfRegistry *ruleset.ClassFeatureRegistry,
+	cfRepo CharacterClassFeaturesGetter,
+	ftRepo FavoredTargetRepository,
+) (gamev1.GameServiceClient, *session.Manager) {
+	t.Helper()
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	cmdRegistry := command.DefaultRegistry()
+	npcMgr := npc.NewManager()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
+	chatHandler := NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr, cmdRegistry,
+		worldHandler, chatHandler, logger,
+		nil, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, ftRepo,
+	)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	grpcServer := grpc.NewServer()
+	gamev1.RegisterGameServiceServer(grpcServer, svc)
+
+	go func() { _ = grpcServer.Serve(lis) }()
+	t.Cleanup(func() { grpcServer.Stop() })
+
+	conn, err := grpc.NewClient(lis.Addr().String(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	require.NoError(t, err)
+	t.Cleanup(func() { conn.Close() })
+
+	return gamev1.NewGameServiceClient(conn), sessMgr
+}
+
+// TestSession_FavoredTargetLoadedAtLogin verifies that FavoredTarget is populated
+// from the repo when a character logs in.
+//
+// Precondition: characterID must be > 0 so the favored target loading path executes.
+// Postcondition: sess.FavoredTarget equals the value returned by the repo.
+func TestSession_FavoredTargetLoadedAtLogin(t *testing.T) {
+	ftRepo := &mockFavoredTargetRepo{getVal: "robot"}
+
+	client, sessMgr := testGRPCServerWithFavoredTarget(t, nil, nil, ftRepo)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := client.Session(ctx)
+	require.NoError(t, err)
+
+	joinWorldWithCharID(t, stream, "u1", "Alice", 1)
+
+	// Allow server goroutine to complete session initialization.
+	time.Sleep(50 * time.Millisecond)
+
+	sess, ok := sessMgr.GetPlayer("u1")
+	require.True(t, ok, "player session must exist after login")
+	assert.Equal(t, "robot", sess.FavoredTarget,
+		"FavoredTarget must be populated from repo at login")
+}
+
+// TestSession_FavoredTargetPromptedWhenMissing verifies that when a character
+// holds predators_eye but has no favored target set, the server prompts them
+// to choose, reads their selection, persists it via the repo, and sets it on
+// the session.
+//
+// Precondition: characterID must be > 0; PassiveFeats["predators_eye"] must be true.
+// Postcondition: sess.FavoredTarget equals the chosen value; repo.Set was called.
+func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
+	// predators_eye is a passive class feature.
+	predEye := &ruleset.ClassFeature{ID: "predators_eye", Name: "Predator's Eye", Active: false}
+	cfRegistry := ruleset.NewClassFeatureRegistry([]*ruleset.ClassFeature{predEye})
+	cfRepo := &mockClassFeaturesRepo{featureIDs: []string{"predators_eye"}}
+
+	// Repo returns "" so the prompt path is entered.
+	ftRepo := &mockFavoredTargetRepo{getVal: ""}
+
+	client, sessMgr := testGRPCServerWithFavoredTarget(t, cfRegistry, cfRepo, ftRepo)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := client.Session(ctx)
+	require.NoError(t, err)
+
+	// Send the join request.
+	err = stream.Send(&gamev1.ClientMessage{
+		RequestId: "join",
+		Payload: &gamev1.ClientMessage_JoinWorld{
+			JoinWorld: &gamev1.JoinWorldRequest{
+				Uid:         "u2",
+				Username:    "Bob",
+				CharacterId: 1,
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	// The server sends a prompt message before the room view because predators_eye is set.
+	// Receive the prompt.
+	promptResp, recvErr := stream.Recv()
+	require.NoError(t, recvErr)
+	require.NotNil(t, promptResp.GetMessage(), "expected prompt MessageEvent before room view")
+
+	// Respond with "2" to select "robot".
+	err = stream.Send(&gamev1.ClientMessage{
+		Payload: &gamev1.ClientMessage_Say{
+			Say: &gamev1.SayRequest{Message: "2"},
+		},
+	})
+	require.NoError(t, err)
+
+	// Receive confirmation message.
+	confirmResp, recvErr2 := stream.Recv()
+	require.NoError(t, recvErr2)
+	require.NotNil(t, confirmResp.GetMessage(), "expected confirmation MessageEvent after selection")
+
+	// Receive the room view.
+	roomResp, recvErr3 := stream.Recv()
+	require.NoError(t, recvErr3)
+	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView after favored target selection")
+
+	// Allow server goroutine to complete.
+	time.Sleep(50 * time.Millisecond)
+
+	sess, ok := sessMgr.GetPlayer("u2")
+	require.True(t, ok, "player session must exist after login")
+	assert.Equal(t, "robot", sess.FavoredTarget,
+		"FavoredTarget must be set to the chosen value after prompt")
+	assert.Equal(t, "robot", ftRepo.setCalled,
+		"repo.Set must be called with the chosen favored target type")
 }

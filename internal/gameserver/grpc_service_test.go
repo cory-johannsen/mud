@@ -111,7 +111,7 @@ func TestStartZoneTicks_RespawnIntegration(t *testing.T) {
 		worldHandler, chatHandler, logger,
 		nil, nil, npcHandler, npcMgr, nil, nil,
 		respawnMgr, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -140,7 +140,7 @@ func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil)
+	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
@@ -475,7 +475,7 @@ func testGRPCServerWithCharData(t *testing.T) (gamev1.GameServiceClient, *sessio
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		allSkills, skillsRepo,
 		allFeats, featRegistry, featsRepo,
-		allClassFeatures, cfRegistry, cfRepo,
+		allClassFeatures, cfRegistry, cfRepo, nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -595,7 +595,7 @@ func TestApplyRoomSkillChecks_OnEnter_Success(t *testing.T) {
 		logger,
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	// Add a player session with Skills and Abilities set.
@@ -662,7 +662,7 @@ func TestApplyRoomSkillChecks_OnEnter_Failure(t *testing.T) {
 		logger,
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -718,7 +718,7 @@ func TestApplyRoomSkillChecks_NoOnEnterTriggers(t *testing.T) {
 		logger,
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -838,7 +838,7 @@ end
 		logger,
 		nil, roller, nil, nil, nil, scriptMgr,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -902,7 +902,7 @@ function get_captured_outcome() return captured_outcome end
 		logger,
 		nil, roller, nil, nil, nil, scriptMgr2,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	sess2, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -989,7 +989,7 @@ func TestApplyRoomSkillChecks_DamageEffect(t *testing.T) {
 		logger,
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1067,7 +1067,7 @@ func TestApplyNPCSkillChecks_OnGreet_Success(t *testing.T) {
 		logger,
 		nil, roller, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1141,7 +1141,7 @@ func TestApplyNPCSkillChecks_OnGreet_Failure(t *testing.T) {
 		logger,
 		nil, roller, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1179,7 +1179,7 @@ func TestApplyNPCSkillChecks_NoNPCs(t *testing.T) {
 		logger,
 		nil, nil, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1235,7 +1235,7 @@ func TestApplyNPCSkillChecks_NonGreetTriggerIgnored(t *testing.T) {
 		logger,
 		nil, nil, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	_, err = sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1314,7 +1314,7 @@ func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
 		logger,
 		nil, roller, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1667,7 +1667,7 @@ func TestHandleUse_AppliesConditionWhenConditionIDSet(t *testing.T) {
 		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
 		nil, nil,
 		[]*ruleset.Feat{feat}, featRegistry, featsRepo,
-		nil, nil, nil,
+		nil, nil, nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1731,7 +1731,7 @@ func TestHandleUse_NoConditionAppliedWhenConditionIDEmpty(t *testing.T) {
 		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
 		nil, nil,
 		[]*ruleset.Feat{feat}, featRegistry, featsRepo,
-		nil, nil, nil,
+		nil, nil, nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1801,7 +1801,7 @@ func TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied(t *testing.T) {
 			nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
 			nil, nil,
 			[]*ruleset.Feat{feat}, featRegistry, featsRepo,
-			nil, nil, nil,
+			nil, nil, nil, nil,
 		)
 
 		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
