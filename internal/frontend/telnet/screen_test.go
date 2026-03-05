@@ -61,15 +61,18 @@ func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 	assert.Contains(t, out, strings.Repeat("═", 80))                // divider chars
 }
 
-func TestWriteRoom_StartsWithSaveCursorAndRow1(t *testing.T) {
+func TestWriteRoom_UsesDECOMOffAndAbsoluteRows(t *testing.T) {
 	conn, client := newSplitConn(t, 80, 24)
 	go func() { _ = conn.WriteRoom("Nexus Hub\nA bustling crossroads.\nExits: N S E W") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	assert.Contains(t, out, "\033[s")    // save cursor
-	assert.Contains(t, out, "\033[1;1H") // move to row 1
+	assert.NotContains(t, out, "\033[s")    // must NOT save cursor (undoes DECOM fix)
+	assert.NotContains(t, out, "\033[u")    // must NOT restore cursor
+	assert.Contains(t, out, "\033[?6l")     // DECOM off — absolute row addresses
+	assert.Contains(t, out, "\033[1;1H")    // start at absolute row 1
 	assert.Contains(t, out, "Nexus Hub")
-	assert.Contains(t, out, "\033[u") // restore cursor
+	assert.Contains(t, out, "\033[7;1H")    // top divider redrawn at row 7
+	assert.Contains(t, out, strings.Repeat("═", 80)) // divider characters
 }
 
 func TestWriteRoom_ClearsExactly6Lines(t *testing.T) {
