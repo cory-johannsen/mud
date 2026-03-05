@@ -271,6 +271,27 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, error) {
 
 	var events []*gamev1.CombatEvent
 	if playerTotal > npcTotal {
+		// street_brawler: players in the same combat who hold this passive feat fire a
+		// free attack of opportunity against the fleeing player before they escape.
+		for _, other := range cbt.Combatants {
+			if other.ID == uid || other.IsDead() || other.Kind != combat.KindPlayer {
+				continue
+			}
+			otherSess, ok := h.sessions.GetPlayer(other.ID)
+			if !ok || !otherSess.PassiveFeats["street_brawler"] {
+				continue
+			}
+			aooResult := combat.ResolveAttack(other, playerCbt, h.dice.Src())
+			aooNarrative := fmt.Sprintf("%s lashes out at the fleeing %s: %s (total %d).",
+				other.Name, playerCbt.Name, aooResult.Outcome, aooResult.AttackTotal)
+			events = append(events, &gamev1.CombatEvent{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+				Attacker:  other.Name,
+				Target:    playerCbt.Name,
+				Narrative: aooNarrative,
+			})
+		}
+
 		// removeCombatant sets CurrentHP=0 (dead) so ResolveRound skips the fleeing player.
 		// Safe: entire Flee path holds combatMu; pending timer callback will no-op
 		// (GetCombat returns false after EndCombat).
