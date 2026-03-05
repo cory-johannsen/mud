@@ -108,13 +108,13 @@ func TestPropertyWriteRoom_Always6LineClearSequences(t *testing.T) {
 		}
 
 		conn, client := newSplitConn(t, 80, 24)
-		go func() { _ = conn.WriteRoom(strings.Join(lines, "\n")) }()
-		out := readAll(t, client, 500*time.Millisecond)
+		go func() {
+			_ = conn.WriteRoom(strings.Join(lines, "\n"))
+			conn.Close() // Close after write so readAll drains immediately via EOF
+		}()
+		out := readAll(t, client, 2*time.Second)
 
-		assert.Equal(t, 6, strings.Count(out, "\033[2K"),
+		require.Equal(t, 6, strings.Count(out, "\033[2K"),
 			"WriteRoom must always clear exactly 6 lines regardless of content")
 	})
 }
-
-// Ensure require is used at least once to satisfy the import.
-var _ = require.New
