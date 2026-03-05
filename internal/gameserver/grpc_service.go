@@ -497,18 +497,25 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// Initialize out-of-combat conditions set for this session.
 	sess.Conditions = condition.NewActiveSet()
 
+	// Fetch class feature IDs once; reused for both passive-feat caching and
+	// choice-resolution below to avoid a duplicate repository call.
+	var cfIDs []string
+	if characterID > 0 && s.characterClassFeaturesRepo != nil {
+		var cfErr error
+		cfIDs, cfErr = s.characterClassFeaturesRepo.GetAll(stream.Context(), characterID)
+		if cfErr != nil {
+			s.logger.Warn("loading class features", zap.Error(cfErr))
+			cfIDs = nil
+		}
+	}
+
 	// Populate passive feat cache from class features.
 	sess.PassiveFeats = make(map[string]bool)
-	if characterID > 0 && s.characterClassFeaturesRepo != nil && s.classFeatureRegistry != nil {
-		cfIDs, cfErr := s.characterClassFeaturesRepo.GetAll(stream.Context(), characterID)
-		if cfErr != nil {
-			s.logger.Warn("loading class features for passive cache", zap.Error(cfErr))
-		} else {
-			for _, id := range cfIDs {
-				cf, ok := s.classFeatureRegistry.ClassFeature(id)
-				if ok && !cf.Active {
-					sess.PassiveFeats[id] = true
-				}
+	if s.classFeatureRegistry != nil {
+		for _, id := range cfIDs {
+			cf, ok := s.classFeatureRegistry.ClassFeature(id)
+			if ok && !cf.Active {
+				sess.PassiveFeats[id] = true
 			}
 		}
 	}
@@ -523,36 +530,31 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			sess.FeatureChoices = stored
 		}
 
-		if s.characterClassFeaturesRepo != nil && s.classFeatureRegistry != nil {
-			cfIDs, cfErr2 := s.characterClassFeaturesRepo.GetAll(stream.Context(), characterID)
-			if cfErr2 != nil {
-				s.logger.Warn("loading class features for choice resolution", zap.Error(cfErr2))
-			} else {
-				for _, id := range cfIDs {
-					cf, ok := s.classFeatureRegistry.ClassFeature(id)
-					if !ok || cf.Choices == nil {
-						continue
-					}
-					if sess.FeatureChoices[id] != nil && sess.FeatureChoices[id][cf.Choices.Key] != "" {
-						continue
-					}
-					chosen, promptErr := s.promptFeatureChoice(stream, id, cf.Choices)
-					if promptErr != nil {
-						s.logger.Warn("prompting feature choice", zap.String("feature", id), zap.Error(promptErr))
-						continue
-					}
-					if chosen == "" {
-						continue
-					}
-					if setErr := s.featureChoicesRepo.Set(stream.Context(), characterID, id, cf.Choices.Key, chosen); setErr != nil {
-						s.logger.Warn("persisting feature choice", zap.String("feature", id), zap.Error(setErr))
-						continue
-					}
-					if sess.FeatureChoices[id] == nil {
-						sess.FeatureChoices[id] = make(map[string]string)
-					}
-					sess.FeatureChoices[id][cf.Choices.Key] = chosen
+		if s.classFeatureRegistry != nil {
+			for _, id := range cfIDs {
+				cf, ok := s.classFeatureRegistry.ClassFeature(id)
+				if !ok || cf.Choices == nil {
+					continue
 				}
+				if sess.FeatureChoices[id] != nil && sess.FeatureChoices[id][cf.Choices.Key] != "" {
+					continue
+				}
+				chosen, promptErr := s.promptFeatureChoice(stream, id, cf.Choices)
+				if promptErr != nil {
+					s.logger.Warn("prompting feature choice", zap.String("feature", id), zap.Error(promptErr))
+					continue
+				}
+				if chosen == "" {
+					continue
+				}
+				if setErr := s.featureChoicesRepo.Set(stream.Context(), characterID, id, cf.Choices.Key, chosen); setErr != nil {
+					s.logger.Warn("persisting feature choice", zap.String("feature", id), zap.Error(setErr))
+					continue
+				}
+				if sess.FeatureChoices[id] == nil {
+					sess.FeatureChoices[id] = make(map[string]string)
+				}
+				sess.FeatureChoices[id][cf.Choices.Key] = chosen
 			}
 		}
 
@@ -590,6 +592,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 
 		// Populate derived fields from FeatureChoices.
+		// Backward-compat: FavoredTarget is still read by combat code; derive from generic choices store.
 		sess.FavoredTarget = sess.FeatureChoices["predators_eye"]["favored_target"]
 	}
 
@@ -2996,12 +2999,17 @@ func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, e
 // over stream and reads a single numeric response.
 //
 // Precondition: stream must be writable; choices must be non-nil with non-empty Options.
-// Postcondition: Returns one of choices.Options, or "" on invalid input or recv failure.
+// Postcondition: Returns (selectedValue, nil) on valid input, ("", nil) on invalid input,
+// ("", err) on stream or send/recv failure.
 func (s *GameServiceServer) promptFeatureChoice(
 	stream gamev1.GameService_SessionServer,
 	featureID string,
 	choices *ruleset.FeatureChoices,
 ) (string, error) {
+	if len(choices.Options) == 0 {
+		return "", fmt.Errorf("feature %s has empty Options slice", featureID)
+	}
+
 	var sb strings.Builder
 	sb.WriteString(choices.Prompt)
 	sb.WriteString("\n")
@@ -3039,19 +3047,25 @@ func (s *GameServiceServer) promptFeatureChoice(
 			zap.String("feature", featureID),
 			zap.String("input", selText),
 		)
-		_ = stream.Send(&gamev1.ServerEvent{
+		if sendErr := stream.Send(&gamev1.ServerEvent{
 			Payload: &gamev1.ServerEvent_Message{
 				Message: &gamev1.MessageEvent{Content: "Invalid selection. You will be prompted again on next login."},
 			},
-		})
+		}); sendErr != nil {
+			s.logger.Warn("sending invalid-selection feedback", zap.String("feature", featureID), zap.Error(sendErr))
+			return "", sendErr
+		}
 		return "", nil
 	}
 
 	chosen := choices.Options[idx]
-	_ = stream.Send(&gamev1.ServerEvent{
+	if sendErr := stream.Send(&gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Message{
 			Message: &gamev1.MessageEvent{Content: choices.Key + " set to: " + chosen},
 		},
-	})
+	}); sendErr != nil {
+		// Non-fatal: value is already selected; log and continue.
+		s.logger.Warn("sending choice confirmation", zap.String("feature", featureID), zap.Error(sendErr))
+	}
 	return chosen, nil
 }

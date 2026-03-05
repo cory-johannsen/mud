@@ -434,17 +434,15 @@ func TestSession_PassiveFeatsPopulatedAtLogin(t *testing.T) {
 
 // mockFeatureChoicesRepo is a test double for CharacterFeatureChoicesRepository.
 //
-// It records Set calls and returns a configured map from GetAll.
+// It records all Set calls and returns a configured map from GetAll.
 type mockFeatureChoicesRepo struct {
 	// getAllVal is the map returned by GetAll.
 	getAllVal map[string]map[string]string
 	// getAllErr, if non-nil, is returned by GetAll instead of getAllVal.
 	getAllErr error
 
-	// setCalled records the last Set arguments.
-	setFeatureID string
-	setChoiceKey string
-	setValue     string
+	// setCalls records every Set invocation in order.
+	setCalls []struct{ featureID, choiceKey, value string }
 	// setErr, if non-nil, is returned by Set.
 	setErr error
 }
@@ -460,11 +458,9 @@ func (m *mockFeatureChoicesRepo) GetAll(_ context.Context, _ int64) (map[string]
 	return make(map[string]map[string]string), nil
 }
 
-// Set satisfies CharacterFeatureChoicesRepository; records the call.
+// Set satisfies CharacterFeatureChoicesRepository; records all calls.
 func (m *mockFeatureChoicesRepo) Set(_ context.Context, _ int64, featureID, choiceKey, value string) error {
-	m.setFeatureID = featureID
-	m.setChoiceKey = choiceKey
-	m.setValue = value
+	m.setCalls = append(m.setCalls, struct{ featureID, choiceKey, value string }{featureID, choiceKey, value})
 	return m.setErr
 }
 
@@ -622,10 +618,114 @@ func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
 	require.True(t, ok, "player session must exist after login")
 	assert.Equal(t, "robot", sess.FavoredTarget,
 		"FavoredTarget must be set to the chosen value after prompt")
-	assert.Equal(t, "predators_eye", fcRepo.setFeatureID,
+	require.Len(t, fcRepo.setCalls, 1, "repo.Set must be called exactly once")
+	assert.Equal(t, "predators_eye", fcRepo.setCalls[0].featureID,
 		"repo.Set must be called with feature ID predators_eye")
-	assert.Equal(t, "favored_target", fcRepo.setChoiceKey,
+	assert.Equal(t, "favored_target", fcRepo.setCalls[0].choiceKey,
 		"repo.Set must be called with choice key favored_target")
-	assert.Equal(t, "robot", fcRepo.setValue,
+	assert.Equal(t, "robot", fcRepo.setCalls[0].value,
 		"repo.Set must be called with the chosen favored target value")
+}
+
+// TestSession_FeatureChoicesGetAllError_FallsBackToEmptyMap verifies that when
+// the feature choices repo returns an error on GetAll the login still succeeds,
+// the session is created, and FeatureChoices is an empty (non-nil) map.
+//
+// Precondition: characterID must be > 0 so the feature-choices loading path runs.
+// Postcondition: Login completes; sess.FeatureChoices is non-nil and empty.
+func TestSession_FeatureChoicesGetAllError_FallsBackToEmptyMap(t *testing.T) {
+	fcRepo := &mockFeatureChoicesRepo{
+		getAllErr: errors.New("db unavailable"),
+	}
+
+	client, sessMgr := testGRPCServerWithFeatureChoices(t, nil, nil, fcRepo)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := client.Session(ctx)
+	require.NoError(t, err)
+
+	joinWorldWithCharID(t, stream, "u-fc-err", "Carol", 1)
+
+	time.Sleep(50 * time.Millisecond)
+
+	sess, ok := sessMgr.GetPlayer("u-fc-err")
+	require.True(t, ok, "player session must exist after login even when feature choices repo errors")
+	require.NotNil(t, sess.FeatureChoices, "FeatureChoices must be non-nil after repo error")
+	assert.Empty(t, sess.FeatureChoices, "FeatureChoices must be empty when repo returns an error")
+}
+
+// TestSession_FavoredTargetPromptedWhenMissing_InvalidInput verifies that when the
+// player responds to a choice prompt with non-numeric or out-of-range input,
+// promptFeatureChoice returns an empty string (no choice stored, no crash).
+//
+// Precondition: predators_eye has Choices; stored choices are empty.
+// Postcondition: sess.FavoredTarget is empty; no repo.Set call is recorded.
+func TestSession_FavoredTargetPromptedWhenMissing_InvalidInput(t *testing.T) {
+	predEye := &ruleset.ClassFeature{
+		ID:     "predators_eye",
+		Name:   "Predator's Eye",
+		Active: false,
+		Choices: &ruleset.FeatureChoices{
+			Key:     "favored_target",
+			Prompt:  "Choose your favored target type:",
+			Options: []string{"human", "robot", "animal", "mutant"},
+		},
+	}
+	cfRegistry := ruleset.NewClassFeatureRegistry([]*ruleset.ClassFeature{predEye})
+	cfRepo := &mockClassFeaturesRepo{featureIDs: []string{"predators_eye"}}
+	fcRepo := &mockFeatureChoicesRepo{}
+
+	client, sessMgr := testGRPCServerWithFeatureChoices(t, cfRegistry, cfRepo, fcRepo)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := client.Session(ctx)
+	require.NoError(t, err)
+
+	err = stream.Send(&gamev1.ClientMessage{
+		RequestId: "join",
+		Payload: &gamev1.ClientMessage_JoinWorld{
+			JoinWorld: &gamev1.JoinWorldRequest{
+				Uid:         "u-invalid",
+				Username:    "Dave",
+				CharacterId: 1,
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	// Receive the prompt.
+	promptResp, recvErr := stream.Recv()
+	require.NoError(t, recvErr)
+	require.NotNil(t, promptResp.GetMessage(), "expected prompt MessageEvent before room view")
+
+	// Respond with an out-of-range number.
+	err = stream.Send(&gamev1.ClientMessage{
+		Payload: &gamev1.ClientMessage_Say{
+			Say: &gamev1.SayRequest{Message: "99"},
+		},
+	})
+	require.NoError(t, err)
+
+	// Receive the invalid-selection feedback message.
+	feedbackResp, recvErr2 := stream.Recv()
+	require.NoError(t, recvErr2)
+	require.NotNil(t, feedbackResp.GetMessage(), "expected invalid-selection feedback MessageEvent")
+
+	// Receive the room view (login proceeds despite invalid input).
+	roomResp, recvErr3 := stream.Recv()
+	require.NoError(t, recvErr3)
+	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView after invalid favored target input")
+
+	time.Sleep(50 * time.Millisecond)
+
+	sess, ok := sessMgr.GetPlayer("u-invalid")
+	require.True(t, ok, "player session must exist after login")
+	assert.Empty(t, sess.FavoredTarget,
+		"FavoredTarget must be empty string when invalid input was provided")
+	assert.Empty(t, fcRepo.setCalls,
+		"repo.Set must not be called when input was invalid")
 }
