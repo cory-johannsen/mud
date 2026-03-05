@@ -67,7 +67,7 @@
   - [x] `skills` command improvements
     - [x] The `skills` command should display both the level (train, untrained, etc) and the numeric bonus using +# format (+0, +2, +4, etc)
     - [x] The `skills` command should display a description for each skill
-  - [ ] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
+  - [x] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
 - [ ] Admin command `summon_item` which take an item ID as a parameter.  An instance of the specified item must be added to the room.
 - [ ] TODO list: a full itemized list of all stubs and intentionally unimplemented code.
 - [ ] Telnet UI upgrades
@@ -79,6 +79,7 @@
     - [ ] The player input section must be pinned to the bottom of the screen
     - [ ] The player input section is composed of two items, the prompt and the player input area
       - [ ] The prompt must refresh independent of the input section such that the prompt reflects changes without player input.
+      - [ ] The prompt must never overwrite the player input area
     - [ ] The player input section must have a horizontal divider on the top to separate it from the console
     - [ ] Console messages must never overwrite the player input section 
     - [ ] When a player is prompted to select from a list of items, in addition to selection by number they must be able to use the up/down cursor keys
@@ -106,16 +107,17 @@
     - [ ] Simple
     - [ ] Martial
     - [ ] Specialized
-- [ ] Actions
-  - [ ] Exploration
-  - [ ] Downtime
-  - [ ] Gear
 - [ ] Saving rolls
+- [ ] Character levelling
+    - [ ] Max character level limit is 100
+    - [ ] Max job level for any job is 20
+- [ ] Skill advancement
+- [ ] Actions
+      - [ ] Exploration
+      - [ ] Downtime
+      - [ ] Gear
 - [ ] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
-- [ ] Character levelling
-  - [ ] Max character level limit is 100
-  - [ ] Max job level for any job is 20
 - [ ] Job development
     - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
     - [ ] advancement hierarchy - every job has multiple levels of specialization
@@ -200,6 +202,7 @@
 - [ ] Advanced combat mechanics
   - Combat distance
       - Range
+      - Movement
       - Attack of opportunity
       - Terrain types
   - NPC fleeing
