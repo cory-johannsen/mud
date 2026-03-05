@@ -485,6 +485,22 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// Initialize out-of-combat conditions set for this session.
 	sess.Conditions = condition.NewActiveSet()
 
+	// Populate passive feat cache from class features.
+	sess.PassiveFeats = make(map[string]bool)
+	if characterID > 0 && s.characterClassFeaturesRepo != nil && s.classFeatureRegistry != nil {
+		cfIDs, cfErr := s.characterClassFeaturesRepo.GetAll(stream.Context(), characterID)
+		if cfErr != nil {
+			s.logger.Warn("loading class features for passive cache", zap.Error(cfErr))
+		} else {
+			for _, id := range cfIDs {
+				cf, ok := s.classFeatureRegistry.ClassFeature(id)
+				if ok && !cf.Active {
+					sess.PassiveFeats[id] = true
+				}
+			}
+		}
+	}
+
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
 		Player: charName,

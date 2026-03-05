@@ -20,6 +20,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -329,4 +330,104 @@ base:
 	assert.Equal(t, int32(1), saver.saveInventoryCalled.Load(), "SaveInventory must be called once")
 	assert.Equal(t, int32(1), saver.saveEquipmentCalledGrant.Load(), "SaveEquipment must be called once during starting grant")
 	assert.Equal(t, int32(1), saver.saveWeaponPresetsCalledGrant.Load(), "SaveWeaponPresets must be called once during starting grant")
+}
+
+// mockClassFeaturesRepo is a test double for CharacterClassFeaturesGetter.
+//
+// It returns a fixed set of feature IDs for any characterID.
+type mockClassFeaturesRepo struct {
+	// featureIDs is the slice returned by GetAll.
+	featureIDs []string
+	// err, if non-nil, is returned instead of featureIDs.
+	err error
+}
+
+// GetAll satisfies CharacterClassFeaturesGetter.
+func (m *mockClassFeaturesRepo) GetAll(_ context.Context, _ int64) ([]string, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.featureIDs, nil
+}
+
+// testGRPCServerWithClassFeatures starts an in-process gRPC server configured
+// with the supplied class feature registry and character class features repo.
+//
+// Precondition: t must be non-nil; cfRegistry and cfRepo may be nil.
+// Postcondition: Returns a connected GameServiceClient and the underlying session.Manager.
+func testGRPCServerWithClassFeatures(
+	t *testing.T,
+	cfRegistry *ruleset.ClassFeatureRegistry,
+	cfRepo CharacterClassFeaturesGetter,
+) (gamev1.GameServiceClient, *session.Manager) {
+	t.Helper()
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	cmdRegistry := command.DefaultRegistry()
+	npcMgr := npc.NewManager()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
+	chatHandler := NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr, cmdRegistry,
+		worldHandler, chatHandler, logger,
+		nil, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo,
+	)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	grpcServer := grpc.NewServer()
+	gamev1.RegisterGameServiceServer(grpcServer, svc)
+
+	go func() { _ = grpcServer.Serve(lis) }()
+	t.Cleanup(func() { grpcServer.Stop() })
+
+	conn, err := grpc.NewClient(lis.Addr().String(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	require.NoError(t, err)
+	t.Cleanup(func() { conn.Close() })
+
+	return gamev1.NewGameServiceClient(conn), sessMgr
+}
+
+// TestSession_PassiveFeatsPopulatedAtLogin verifies that PassiveFeats is populated
+// with only passive (Active==false) class features assigned to the character at login.
+//
+// Precondition: characterID must be > 0 so the class feature loading path executes.
+// Postcondition: sess.PassiveFeats contains exactly the passive feature IDs, not active ones.
+func TestSession_PassiveFeatsPopulatedAtLogin(t *testing.T) {
+	sucker := &ruleset.ClassFeature{ID: "sucker_punch", Name: "Sucker Punch", Active: false}
+	zone := &ruleset.ClassFeature{ID: "zone_awareness", Name: "Zone Awareness", Active: false}
+	berserk := &ruleset.ClassFeature{ID: "berserk_rush", Name: "Berserk Rush", Active: true}
+
+	cfRegistry := ruleset.NewClassFeatureRegistry([]*ruleset.ClassFeature{sucker, zone, berserk})
+	cfRepo := &mockClassFeaturesRepo{
+		featureIDs: []string{"sucker_punch", "zone_awareness", "berserk_rush"},
+	}
+
+	client, sessMgr := testGRPCServerWithClassFeatures(t, cfRegistry, cfRepo)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := client.Session(ctx)
+	require.NoError(t, err)
+
+	joinWorldWithCharID(t, stream, "u1", "Alice", 1)
+
+	// Allow server goroutine to complete session initialization.
+	time.Sleep(50 * time.Millisecond)
+
+	sess, ok := sessMgr.GetPlayer("u1")
+	require.True(t, ok, "player session must exist after login")
+
+	require.NotNil(t, sess.PassiveFeats, "PassiveFeats must be non-nil after login")
+	assert.True(t, sess.PassiveFeats["sucker_punch"], "sucker_punch must be in PassiveFeats")
+	assert.True(t, sess.PassiveFeats["zone_awareness"], "zone_awareness must be in PassiveFeats")
+	assert.False(t, sess.PassiveFeats["berserk_rush"], "active feature berserk_rush must not be in PassiveFeats")
 }

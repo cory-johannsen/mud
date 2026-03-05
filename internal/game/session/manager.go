@@ -57,6 +57,13 @@ type PlayerSession struct {
 	// Conditions tracks active conditions applied outside of combat (e.g., from skill check effects).
 	// Initialized at login; nil before Session() runs.
 	Conditions *condition.ActiveSet
+	// PassiveFeats holds the IDs of all passive class features and feats for this character.
+	// Populated at login; used by combat passive checks without additional DB queries.
+	PassiveFeats map[string]bool
+	// FavoredTarget is the NPC type favored by the predators_eye class feature.
+	// Empty string means unset (feature not held, or not yet chosen).
+	// Populated at login when character_favored_target row exists.
+	FavoredTarget string
 }
 
 // Manager tracks all active player sessions and room occupancy.
