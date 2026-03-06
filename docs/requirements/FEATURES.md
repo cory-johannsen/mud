@@ -69,7 +69,9 @@
     - [x] The `skills` command should display a description for each skill
   - [x] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
 - [x] Admin command `summon_item` which take an item ID as a parameter.  An instance of the specified item must be added to the room.
-- [ ] TODO list: a full itemized list of all stubs and intentionally unimplemented code.
+- [ ] TODO list: 
+  - [ ] full itemized list of all stubs / unimplemented code.
+  - [ ] missing tests
 - [x] Telnet UI upgrades
   - The screen is sectioned into three segments, from top to bottoms:
     - Room display
@@ -105,12 +107,14 @@
   - [x] NPC speech/actions in the console have inconsistent format, start with " : ", do not necessarily include NPC name
   - [x] Idle timer message is not appearing for user.  The timer should warn the user at 4 minutes of idle time and again at 4m30s that automatic disconnect is pending
 - [x] PgUp/PgDn should scroll the Console section so the user can look back 
-- [ ] Character ability boosts
-  - [ ] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
-    - [ ] Archetype - Mirrors Ancestry
-    - [ ] Region - Mirrors Background
-    - [ ] Job - Mirrors Class
-  - [ ] Player's that have not selected boosts must be prompted at login
+- [x] Character ability boosts
+  - [x] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
+    - [x] Archetype - Mirrors Ancestry
+    - [x] Region - Mirrors Background
+    - [x] Job - Mirrors Class
+  - [x] Player's that have not selected boosts must be prompted at login
+- [ ] Expanded Archetype options to match P2FE
+  - 
 - [ ] Proficiencies
   - [ ] Armor
       - [ ] Unarmored
