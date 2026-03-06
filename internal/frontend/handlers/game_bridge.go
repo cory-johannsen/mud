@@ -193,17 +193,45 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		return BuildPrompt(char.Name, tod.Period, fmt.Sprintf("%02d:00", tod.Hour), currentHP.Load(), maxHP.Load())
 	}
 
+	// Initialize split-screen now that the game session is starting.
+	// This is deferred from acceptor so the auth/char-select flow renders
+	// without a scroll region. Re-entering gameBridge (after switch) also
+	// re-initializes to clear the char-select menu.
+	if termW, termH := conn.Dimensions(); termW > 0 && termH > 0 {
+		h.logger.Info("split-screen init", zap.Int("termW", termW), zap.Int("termH", termH))
+		if err := conn.InitScreen(); err != nil {
+			h.logger.Warn("split-screen init failed, falling back to scrolling mode",
+				zap.Error(err))
+		} else {
+			conn.EnableSplitScreen()
+			// Suppress client-side echo so \r\n at row H never triggers a
+			// full-screen scroll.  The server echoes all characters via ReadLineSplit.
+			_ = conn.SuppressEcho()
+			defer conn.RestoreEcho()
+		}
+	}
+
+	// lastRoomText must be declared before the initial room render so the
+	// resize handler in forwardServerEvents always finds a valid (non-empty)
+	// value even if a resize signal fires immediately after InitScreen.
+	var lastRoomText atomic.Value
+	lastRoomText.Store("")
+
 	// Receive initial room view
 	resp, err := stream.Recv()
 	if err != nil {
 		return fmt.Errorf("receiving initial room view: %w", err)
 	}
 	if rv := resp.GetRoomView(); rv != nil {
+		renderedRoom := RenderRoomView(rv)
 		if conn.IsSplitScreen() {
-			_ = conn.WriteRoom(RenderRoomView(rv))
+			_ = conn.WriteRoom(renderedRoom)
 		} else {
-			_ = conn.Write([]byte(RenderRoomView(rv)))
+			_ = conn.Write([]byte(renderedRoom))
 		}
+		// Seed lastRoomText so the resize handler can redraw the room region
+		// without waiting for the next move/look.
+		lastRoomText.Store(renderedRoom)
 		// Seed time-of-day from first room view if available.
 		if rv.GetPeriod() != "" {
 			currentTime.Store(&gamev1.TimeOfDayEvent{Hour: rv.GetHour(), Period: rv.GetPeriod()})
@@ -221,6 +249,15 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		return fmt.Errorf("writing initial prompt: %w", initPromptErr)
 	}
 
+	// Drain any pending resize signal left over from the AwaitNAWS call in the
+	// acceptor.  Without this drain, forwardServerEvents fires a spurious
+	// re-InitScreen immediately on startup, clearing the freshly-rendered
+	// screen and pushing the initial render into scrollback.
+	select {
+	case <-conn.ResizeCh():
+	default:
+	}
+
 	var lastInput atomic.Int64
 	lastInput.Store(time.Now().UnixNano())
 	var disconnectReason atomic.Value
@@ -231,9 +268,6 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	// the server sends a RoomView event (i.e. after every move or look).
 	var currentRoom atomic.Value
 	currentRoom.Store(char.Location)
-
-	var lastRoomText atomic.Value
-	lastRoomText.Store("")
 
 	stopIdle := StartIdleMonitor(IdleMonitorConfig{
 		LastInput:    &lastInput,
@@ -246,7 +280,14 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 				h.telnetCfg.IdleTimeout.Round(time.Second),
 				h.telnetCfg.IdleGracePeriod.Round(time.Second),
 			)
-			if err := conn.WriteLine(telnet.Colorize(telnet.Yellow, msg)); err != nil {
+			colored := telnet.Colorize(telnet.Yellow, msg)
+			var err error
+			if conn.IsSplitScreen() {
+				err = conn.WriteConsole(colored)
+			} else {
+				err = conn.WriteLine(colored)
+			}
+			if err != nil {
 				h.logger.Debug("failed to send idle warning", zap.Error(err))
 			}
 		},
@@ -313,7 +354,15 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		default:
 		}
 
-		line, err := conn.ReadLine()
+		var line string
+		var err error
+		if conn.IsSplitScreen() {
+			// Split-screen mode: use character-by-character reading that echoes
+			// each key at row H without ever sending a newline to the terminal.
+			line, err = conn.ReadLineSplit()
+		} else {
+			line, err = conn.ReadLine()
+		}
 		if err != nil {
 			return fmt.Errorf("reading input: %w", err)
 		}
@@ -374,10 +423,12 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 
 		handlerFn, ok := bridgeHandlerMap[cmd.Handler]
 		if !ok {
-			_ = conn.WriteLine(telnet.Colorf(telnet.Dim, "You don't know how to '%s'.", parsed.Command))
+			msg := telnet.Colorf(telnet.Dim, "You don't know how to '%s'.", parsed.Command)
 			if conn.IsSplitScreen() {
+				_ = conn.WriteConsole(msg)
 				_ = conn.WritePromptSplit(buildPrompt())
 			} else {
+				_ = conn.WriteLine(msg)
 				_ = conn.WritePrompt(buildPrompt())
 			}
 			continue
@@ -438,6 +489,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			return
 		case <-conn.ResizeCh():
 			if conn.IsSplitScreen() {
+				rw, rh := conn.Dimensions()
+				h.logger.Info("split-screen resize", zap.Int("termW", rw), zap.Int("termH", rh))
 				if err := conn.InitScreen(); err != nil {
 					h.logger.Warn("split-screen resize init failed", zap.Error(err))
 					continue
@@ -533,7 +586,12 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		case *gamev1.ServerEvent_UseResponse:
 			text = RenderUseResponse(p.UseResponse)
 		case *gamev1.ServerEvent_Disconnected:
-			_ = conn.WriteLine(telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason))
+			dcMsg := telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason)
+			if conn.IsSplitScreen() {
+				_ = conn.WriteConsole(dcMsg)
+			} else {
+				_ = conn.WriteLine(dcMsg)
+			}
 			return
 		}
 
@@ -570,9 +628,9 @@ func (h *AuthHandler) archetypeForJob(jobID string) string {
 }
 
 // showGameHelp displays in-game help organized by category.
+// In split-screen mode, the entire help block is sent as a single WriteConsole call
+// to avoid full-terminal scrolls from individual WriteLine calls at row H.
 func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry, role string) {
-	_ = conn.WriteLine(telnet.Colorize(telnet.BrightWhite, "Available commands:"))
-
 	categories := []struct {
 		name  string
 		label string
@@ -585,6 +643,45 @@ func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry
 	}
 
 	byCategory := registry.CommandsByCategory()
+
+	if conn.IsSplitScreen() {
+		var sb strings.Builder
+		sb.WriteString(telnet.Colorize(telnet.BrightWhite, "Available commands:"))
+		for _, cat := range categories {
+			cmds := byCategory[cat.name]
+			if len(cmds) == 0 {
+				continue
+			}
+			sb.WriteString("\r\n")
+			sb.WriteString(telnet.Colorf(telnet.BrightYellow, "  %s:", cat.label))
+			for _, cmd := range cmds {
+				aliases := ""
+				if len(cmd.Aliases) > 0 {
+					aliases = " (" + strings.Join(cmd.Aliases, ", ") + ")"
+				}
+				sb.WriteString("\r\n")
+				sb.WriteString(telnet.Colorf(telnet.Green, "    %-12s", cmd.Name) + aliases + " — " + cmd.Help)
+			}
+		}
+		if role == postgres.RoleAdmin {
+			if cmds := byCategory[command.CategoryAdmin]; len(cmds) > 0 {
+				sb.WriteString("\r\n")
+				sb.WriteString(telnet.Colorf(telnet.BrightYellow, "  Admin:"))
+				for _, cmd := range cmds {
+					aliases := ""
+					if len(cmd.Aliases) > 0 {
+						aliases = " (" + strings.Join(cmd.Aliases, ", ") + ")"
+					}
+					sb.WriteString("\r\n")
+					sb.WriteString(telnet.Colorf(telnet.Green, "    %-12s", cmd.Name) + aliases + " — " + cmd.Help)
+				}
+			}
+		}
+		_ = conn.WriteConsole(sb.String())
+		return
+	}
+
+	_ = conn.WriteLine(telnet.Colorize(telnet.BrightWhite, "Available commands:"))
 	for _, cat := range categories {
 		cmds := byCategory[cat.name]
 		if len(cmds) == 0 {
