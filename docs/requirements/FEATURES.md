@@ -169,16 +169,25 @@
 - [ ] Non-combat NPCs
   - [ ] merchants
     - [ ] weapons
+      - Sergeant Mack in Last Stand Lodge, Rustbucket Ridge
     - [ ] armor
     - [ ] rings and neck equipment
     - [ ] consumables
+      - Slick Sally in the Rusty Oasis, Rustbucket Ridge
+      - Whiskey Joe in The Bottle Shack, Rustbucket Ridge
+      - Old Rusty in The Heap, Rustbucket Ridge
+      - Herb in The Green Hell,  Rustbucket Ridge
     - [ ] maps
   - [ ] guards
+  - [ ] healers
+    - Clutch in The Tinker's Den, Rustbucket Ridge
+    - Tina Wires in Junker's Dream, Rustbucket Ridge
   - [ ] quest givers
+    - Gail "Grinder" Graves in Scrapshack 23, Rustbucket Ridge
   - [ ] hirelings
   - [ ] bankers
   - [ ] job trainers
-- [ ] Safe rooms
+- [ ] Room danger levels
   - Rooms are classified as Safe, Sketchy, Dangerous, All Out War
     - Safe rooms contain no aggressive NPCs, only non-combat NPCs.
       - Combat is disabled in Safe zones.
@@ -204,12 +213,16 @@
 - [ ] World map
   - fast travel
 - [ ] Advanced combat mechanics
-  - Combat distance
-      - Range
+  - [ ] Combat distance
       - Movement
+      - Range
+        - Melee
+        - Short
+        - Long
+        - Extreme
       - Attack of opportunity
       - Terrain types
-  - NPC fleeing
+      - Fleeing
   - Pursuit
   - Panic
   - Psychosis
@@ -238,5 +251,5 @@
   - [ ] trip wires
   - [ ] pressure plates
   - [ ] Honkeypot
-- [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Max, Debian linux.
+- [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Mac, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration

@@ -2,10 +2,10 @@ package telnet
 
 import (
 	"fmt"
-	"net"
 	"strings"
 	"testing"
 	"time"
+	"net"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -47,7 +47,7 @@ func readAll(t *testing.T, client net.Conn, d time.Duration) string {
 	return string(buf)
 }
 
-// For H=24: scrollBottom=16, dividerRow=17, firstRow=18, lastRow=23, promptRow=24.
+// For H=24: firstRow=1, lastRow=8, dividerRow=9, scrollTop=10, scrollBottom=24, promptRow=24.
 
 func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 	const W, H = 80, 24
@@ -56,49 +56,45 @@ func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 	go func() { _ = conn.InitScreen() }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	assert.Contains(t, out, "\033[?25l")                                           // hide cursor
-	assert.Contains(t, out, "\033[2J")                                             // clear screen
+	assert.Contains(t, out, "\033[?25l")                                          // hide cursor
+	assert.Contains(t, out, "\033[2J")                                            // clear screen
 	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))              // safe abs pos to promptRow (before scroll region)
-	assert.Contains(t, out, "\x1b7")                                               // DECSC: save cursor at promptRow
-	assert.Contains(t, out, fmt.Sprintf("\033[1;%dr", lo.scrollBottom))            // scroll region 1..scrollBottom
-	assert.Contains(t, out, "\x1b8")                                               // DECRC: restore cursor to promptRow
-	assert.Contains(t, out, "\033[?25h")                                           // show cursor
-	// dividerRow is never addressed absolutely — no TinTin++ spurious scroll.
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
+	assert.Contains(t, out, "\x1b7")                                              // DECSC: save cursor at promptRow
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;%dr", lo.scrollTop, lo.scrollBottom)) // scroll region scrollTop..h
+	assert.Contains(t, out, "\x1b8")                                              // DECRC: restore cursor to promptRow
+	assert.Contains(t, out, "\033[?25h")                                          // show cursor
 	// InitScreen does NOT draw the divider — WriteRoom is the sole divider drawer.
 	assert.NotContains(t, out, strings.Repeat("═", W))
 }
 
-func TestWriteRoom_WritesToRowsBelowScrollRegion(t *testing.T) {
+func TestWriteRoom_DrawsDividerAndContent(t *testing.T) {
 	const W, H = 80, 24
-	lo := newRoomLayout(H)
 	conn, client := newSplitConn(t, W, H)
 	go func() { _ = conn.WriteRoom("Nexus Hub\nA bustling crossroads.\nExits: N S E W") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	// No cursor save/restore (ANSI) — we use DEC ESC 7/8 only in WriteConsole.
+	// No ANSI cursor save/restore — WriteRoom uses absolute positioning only.
 	assert.NotContains(t, out, "\033[s")
 	assert.NotContains(t, out, "\033[u")
 
-	// Room divider drawn via CUU from promptRow — no absolute pos at dividerRow.
-	assert.Contains(t, out, fmt.Sprintf("\033[%dA", roomRegionRows+1)) // CUU to dividerRow
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow)) // no abs pos at dividerRow
+	// Room drawn via absolute position to row 1 (above scroll region, safe).
+	assert.Contains(t, out, "\033[1;1H")
+
+	// Divider must be drawn.
 	assert.Contains(t, out, strings.Repeat("═", W))
 
-	// Content must appear via \r\n advancement (no absolute positioning for room rows).
+	// Content must be present.
 	assert.Contains(t, out, "Nexus Hub")
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.firstRow))   // no unsafe abs pos
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))  // no unsafe abs pos
-	assert.NotContains(t, out, "\033[?7l") // DECAWM not needed
-	assert.NotContains(t, out, "\033[?7h")
 }
 
-func TestWriteRoom_ClearsExactly6Lines(t *testing.T) {
+func TestWriteRoom_ClearsExactly9Lines(t *testing.T) {
+	// appendRoomRedraw clears roomRegionRows content lines + 1 divider line = roomRegionRows+1.
 	conn, client := newSplitConn(t, 80, 24)
 	go func() { _ = conn.WriteRoom("line1\nline2") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	assert.Equal(t, roomRegionRows, strings.Count(out, "\033[2K"), "WriteRoom must clear exactly roomRegionRows lines")
+	assert.Equal(t, roomRegionRows+1, strings.Count(out, "\033[2K"),
+		"WriteRoom must clear exactly roomRegionRows+1 lines (room content + divider)")
 }
 
 func TestWriteConsole_ContainsText(t *testing.T) {
@@ -109,12 +105,10 @@ func TestWriteConsole_ContainsText(t *testing.T) {
 	out := readAll(t, client, 500*time.Millisecond)
 
 	assert.Contains(t, out, "You swing at the goblin.")
-	// Room redrawn via CUU from promptRow — no abs pos at dividerRow.
-	assert.Contains(t, out, fmt.Sprintf("\033[%dA", roomRegionRows+1))
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
-	// Message written at scrollBottom (safe: within scroll region).
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.scrollBottom))
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
+	// Room redrawn via abs pos to row 1 (safe: above scroll region).
+	assert.Contains(t, out, "\033[1;1H")
+	// WriteConsole navigates to promptRow (= scrollBottom) to write messages.
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
 }
 
 func TestWritePromptSplit_AtRowH(t *testing.T) {
@@ -123,13 +117,10 @@ func TestWritePromptSplit_AtRowH(t *testing.T) {
 	out := readAll(t, client, 500*time.Millisecond)
 
 	// Prompt is written in-place: \r to col 1, erase line, prompt text.
-	// No absolute cursor positioning anywhere.
 	assert.Contains(t, out, "\r\033[2K> ")
-	assert.NotContains(t, out, ";1H") // no row;colH absolute positioning
-
 }
 
-func TestPropertyWriteRoom_AlwaysRoomRegionRowsClearSequences(t *testing.T) {
+func TestPropertyWriteRoom_AlwaysRoomRegionRowsPlusOneClearSequences(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		lineCount := rapid.IntRange(0, 20).Draw(rt, "lines")
 		var lines []string
@@ -144,7 +135,7 @@ func TestPropertyWriteRoom_AlwaysRoomRegionRowsClearSequences(t *testing.T) {
 		}()
 		out := readAll(t, client, 2*time.Second)
 
-		require.Equal(t, roomRegionRows, strings.Count(out, "\033[2K"),
-			"WriteRoom must always clear exactly roomRegionRows lines regardless of content")
+		require.Equal(t, roomRegionRows+1, strings.Count(out, "\033[2K"),
+			"WriteRoom must always clear exactly roomRegionRows+1 lines regardless of content")
 	})
 }
