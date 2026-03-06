@@ -193,6 +193,11 @@ func (c *Conn) tryReadEscapeSeq() string {
 		}
 		return "\x00PGDN"
 	default:
+		// For digit-prefixed sequences (e.g. ESC [ 3 ~), consume the trailing ~
+		// to avoid it leaking as a literal character.
+		if final >= '0' && final <= '9' {
+			_, _ = c.reader.ReadByte() // consume '~' or whatever follows
+		}
 		return ""
 	}
 }

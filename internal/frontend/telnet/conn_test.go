@@ -3,6 +3,7 @@ package telnet
 import (
 	"bufio"
 	"bytes"
+	"io"
 	"net"
 	"testing"
 	"time"
@@ -423,12 +424,17 @@ func TestTryReadEscapeSeq_PgDn(t *testing.T) {
 }
 
 func TestTryReadEscapeSeq_UnrecognizedDigitSwallowed(t *testing.T) {
+	// ESC [ 3 ~ — unrecognized digit sequence; all bytes including ~ must be consumed.
+	data := []byte{'[', '3', '~'}
 	raw := &bytes.Buffer{}
-	raw.Write([]byte{'[', '3', '~'})
-	c := &Conn{reader: bufio.NewReader(raw)}
+	raw.Write(data)
+	br := bufio.NewReader(raw)
+	c := &Conn{reader: br}
 	got := c.tryReadEscapeSeq()
 	assert.Equal(t, "", got)
-	assert.Equal(t, 0, raw.Len())
+	// Verify ~ was consumed: attempting to read another byte should EOF.
+	_, err := br.ReadByte()
+	assert.ErrorIs(t, err, io.EOF)
 }
 
 func TestTryReadEscapeSeq_ArrowsUnchanged(t *testing.T) {
