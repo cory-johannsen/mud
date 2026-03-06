@@ -35,7 +35,9 @@ spec:
           command:
             - /bin/migrate
             - -config
-            - /configs/dev.yaml
+            - /configs/prod.yaml
+            - -migrations
+            - /migrations
           env:
             - name: MUD_DATABASE_HOST
               value: postgres.mud.svc.cluster.local

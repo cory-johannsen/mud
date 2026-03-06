@@ -19,6 +19,7 @@ func main() {
 	start := time.Now()
 
 	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
+	migrationsDir := flag.String("migrations", "migrations", "path to migrations directory")
 	direction := flag.String("direction", "up", "migration direction: up or down")
 	steps := flag.Int("steps", 0, "number of steps (0 = all)")
 	flag.Parse()
@@ -29,7 +30,7 @@ func main() {
 	}
 
 	dsn := cfg.Database.DSN()
-	m, err := migrate.New("file://migrations", dsn)
+	m, err := migrate.New("file://"+*migrationsDir, dsn)
 	if err != nil {
 		log.Fatalf("creating migrator: %v", err)
 	}
