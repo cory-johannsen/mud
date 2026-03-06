@@ -12,11 +12,14 @@ import (
 func RenderRoomView(rv *gamev1.RoomView) string {
 	var b strings.Builder
 
-	b.WriteString("\r\n")
-	b.WriteString(telnet.Colorize(telnet.BrightYellow, rv.Title))
-	b.WriteString("\r\n")
-	b.WriteString(telnet.Colorize(telnet.White, rv.Description))
-	b.WriteString("\r\n")
+	if rv.Title != "" {
+		b.WriteString(telnet.Colorize(telnet.BrightYellow, rv.Title))
+		b.WriteString("\r\n")
+	}
+	if rv.Description != "" {
+		b.WriteString(telnet.Colorize(telnet.White, rv.Description))
+		b.WriteString("\r\n")
+	}
 
 	// Exits
 	if len(rv.Exits) > 0 {

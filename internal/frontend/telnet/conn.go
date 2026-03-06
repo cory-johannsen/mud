@@ -43,6 +43,7 @@ type Conn struct {
 	height      int
 	splitScreen bool
 	inputBuf    string
+	roomBuf     string // last rendered room content for redraw after console scroll
 
 	// resizeCh is signalled (non-blocking) whenever NAWS updates width/height.
 	resizeCh chan struct{}
@@ -73,6 +74,10 @@ func (c *Conn) Negotiate() error {
 	negotiations := []byte{
 		IAC, WILL, OptSuppressGoAhead,
 		IAC, DO, OptNAWS,
+		// Explicitly refuse linemode so the client operates in character-at-a-time
+		// mode and does not locally echo \r\n on Enter (which would scroll the
+		// terminal past the scroll region).
+		IAC, DONT, OptLinemode,
 	}
 
 	if c.writeTimeout > 0 {
@@ -297,6 +302,96 @@ func (c *Conn) ReadPassword() (string, error) {
 	_ = c.Write([]byte("\r\n"))
 
 	return line, err
+}
+
+// SuppressEcho sends IAC WILL Echo, suppressing client-side echo.
+// Used when entering split-screen game mode so the server controls all echoing.
+//
+// Postcondition: Client stops echoing characters; all echo is server-driven.
+func (c *Conn) SuppressEcho() error {
+	return c.sendEchoControl(WILL)
+}
+
+// RestoreEcho sends IAC WONT Echo, allowing the client to resume local echo.
+// Called when leaving split-screen mode (clean quit or character switch).
+//
+// Postcondition: Client resumes echoing characters locally.
+func (c *Conn) RestoreEcho() error {
+	return c.sendEchoControl(WONT)
+}
+
+// ReadLineSplit reads a single line in split-screen mode.
+// Each printable character is echoed at the current cursor position so the server
+// controls all terminal output. Unlike ReadLine, it never echoes a newline, which
+// prevents the full-screen scroll that occurs when \r\n is sent at the last row.
+// inputBuf is updated on every keystroke so WriteConsole can redraw partial input.
+//
+// Postcondition: Returns the complete line (without trailing newline),
+// an arrow-key sentinel ("\x00UP" / "\x00DOWN"), or an error.
+func (c *Conn) ReadLineSplit() (string, error) {
+	if c.readTimeout > 0 {
+		_ = c.raw.SetReadDeadline(time.Now().Add(c.readTimeout))
+	}
+
+	var line bytes.Buffer
+	for {
+		b, err := c.reader.ReadByte()
+		if err != nil {
+			return line.String(), err
+		}
+
+		if b == IAC {
+			if err := c.handleIAC(); err != nil {
+				return line.String(), err
+			}
+			continue
+		}
+
+		if b == '\n' {
+			break
+		}
+		if b == '\r' {
+			next, err := c.reader.Peek(1)
+			if err == nil && len(next) > 0 && next[0] == '\n' {
+				_, _ = c.reader.ReadByte()
+			}
+			break
+		}
+
+		// Backspace (0x08) or DEL (0x7F): erase last character.
+		if b == 0x7F || b == 0x08 {
+			if line.Len() > 0 {
+				s := line.String()
+				newS := s[:len(s)-1]
+				line.Reset()
+				line.WriteString(newS)
+				c.SetInputBuf(newS)
+				_ = c.writeRaw("\b \b")
+			}
+			continue
+		}
+
+		// ESC: check for arrow key sequences.
+		if b == 0x1B {
+			if sentinel := c.tryReadEscapeSeq(); sentinel != "" {
+				c.SetInputBuf("")
+				return sentinel, nil
+			}
+			continue
+		}
+
+		// Filter control characters except tab.
+		if b < 32 && b != '\t' {
+			continue
+		}
+
+		line.WriteByte(b)
+		c.SetInputBuf(line.String())
+		_ = c.writeRaw(string([]byte{b}))
+	}
+
+	c.SetInputBuf("")
+	return line.String(), nil
 }
 
 // sendEchoControl sends IAC <cmd> OptEcho to control client-side echo.

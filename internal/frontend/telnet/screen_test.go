@@ -58,12 +58,13 @@ func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 
 	assert.Contains(t, out, "\033[?25l")                                           // hide cursor
 	assert.Contains(t, out, "\033[2J")                                             // clear screen
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))              // safe abs pos to promptRow (before scroll region)
+	assert.Contains(t, out, "\x1b7")                                               // DECSC: save cursor at promptRow
 	assert.Contains(t, out, fmt.Sprintf("\033[1;%dr", lo.scrollBottom))            // scroll region 1..scrollBottom
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))              // one-time abs pos (unavoidable)
-	assert.Contains(t, out, "\033[J")                                              // erase to end of screen
-	assert.Contains(t, out, fmt.Sprintf("\033[%dB", roomRegionRows+1))             // CUD to promptRow after erase
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))            // promptRow never addressed absolutely
+	assert.Contains(t, out, "\x1b8")                                               // DECRC: restore cursor to promptRow
 	assert.Contains(t, out, "\033[?25h")                                           // show cursor
+	// dividerRow is never addressed absolutely — no TinTin++ spurious scroll.
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
 	// InitScreen does NOT draw the divider — WriteRoom is the sole divider drawer.
 	assert.NotContains(t, out, strings.Repeat("═", W))
 }

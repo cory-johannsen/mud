@@ -107,14 +107,9 @@ func (a *Acceptor) handleConn(raw net.Conn) {
 	}
 
 	// Wait up to 1 second for NAWS window-size response.
-	if conn.AwaitNAWS(time.Second) {
-		if err := conn.InitScreen(); err != nil {
-			a.logger.Warn("split-screen init failed, falling back to legacy mode",
-				zap.String("remote_addr", addr), zap.Error(err))
-		} else {
-			conn.EnableSplitScreen()
-		}
-	}
+	// Split-screen setup is deferred to gameBridge so the auth/char-select
+	// flow can render without a pre-established scroll region.
+	conn.AwaitNAWS(time.Second)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

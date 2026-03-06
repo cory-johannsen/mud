@@ -65,19 +65,21 @@ func (c *Conn) InitScreen() error {
 
 	var buf strings.Builder
 	buf.WriteString("\033[?25l")     // hide cursor
-	buf.WriteString("\033[2J\033[H") // clear screen, home
+	buf.WriteString("\033[2J\033[H") // clear screen; cursor home (no scroll region yet)
 
-	// Set scroll region to rows 1..scrollBottom.
+	// Navigate to promptRow BEFORE setting scroll region.
+	// Before DECSTBM the default scroll region is 1..h, so absolute positioning
+	// is safe at any row — TinTin++ only causes spurious scrolls when the cursor
+	// is beyond a *restricted* scroll region.
+	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
+	// Save cursor at promptRow (DECSC = ESC 7). DECSC saves position but not scroll region.
+	buf.WriteString("\x1b7")
+	// Set scroll region rows 1..scrollBottom. DECSTBM resets cursor to (1,1).
 	fmt.Fprintf(&buf, "\033[1;%dr", lo.scrollBottom)
+	// Restore cursor to promptRow (DECRC = ESC 8). Scroll region is now 1..scrollBottom.
+	buf.WriteString("\x1b8")
 
-	// Position at dividerRow and erase to end of screen, then advance to
-	// promptRow via CUD.  The one \033[dividerRow;1H] here is unavoidable but
-	// harmless: the screen was just cleared so any TinTin++ scroll shifts only
-	// blank rows.  CUD from dividerRow (outside scroll region) reaches promptRow.
-	// Postcondition: cursor at promptRow so appendRoomRedraw can use CUU.
-	fmt.Fprintf(&buf, "\033[%d;1H\033[J\033[%dB", lo.dividerRow, roomRegionRows+1)
-
-	buf.WriteString("\033[?25h") // show cursor
+	buf.WriteString("\033[?25h") // show cursor; cursor ends at promptRow
 
 	return c.writeRaw(buf.String())
 }

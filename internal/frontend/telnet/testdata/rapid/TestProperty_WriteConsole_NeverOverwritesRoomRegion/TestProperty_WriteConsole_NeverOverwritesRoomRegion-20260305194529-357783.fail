@@ -1,0 +1,51 @@
+# 2026/03/05 19:45:29.375292 [TestProperty_WriteConsole_NeverOverwritesRoomRegion] [rapid] draw width: 40
+# 2026/03/05 19:45:29.375300 [TestProperty_WriteConsole_NeverOverwritesRoomRegion] [rapid] draw height: 12
+# 2026/03/05 19:45:29.375306 [TestProperty_WriteConsole_NeverOverwritesRoomRegion] [rapid] draw msg: "     "
+# 2026/03/05 19:45:29.375445 [TestProperty_WriteConsole_NeverOverwritesRoomRegion] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/frontend/telnet/vt100_test.go:736
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/frontend/telnet/vt100_test.go:706
+# 	Error:      	Not equal: 
+# 	            	expected: "RoomTitle"
+# 	            	actual  : ""
+# 	            	
+# 	            	Diff:
+# 	            	--- Expected
+# 	            	+++ Actual
+# 	            	@@ -1 +1 @@
+# 	            	-RoomTitle
+# 	            	+
+# 	Test:       	TestProperty_WriteConsole_NeverOverwritesRoomRegion
+# 	Messages:   	room title must remain at firstRow=4 after WriteConsole (W=40 H=12)
+# 
+v0.4.8#11982582799865172335
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

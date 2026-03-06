@@ -90,6 +90,10 @@
     - [x] The room display section must have a horizontal divider on the bottom to separate it from the console
     - [x] Console messages must never overwrite the room display
     - [x] When a player is in combat the room display must reflect this
+- [ ] Bugs
+  - [ ] The room description is truncated in the Room section of the screen.  
+  - [ ] Missing divider between Room section and Prompt section of the screen
+  - [ ] Time-of-day events cause prompt duplication
 - [ ] Character ability boosts
   - [ ] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
     - [ ] Archetype - Mirrors Ancestry
@@ -227,5 +231,12 @@
   - faction-specific items and quests
   - faction-owned zones and rooms
 - [ ] Crafting
+- [ ] Traps
+  - [ ] Mines
+  - [ ] Pits
+  - [ ] Bear traps
+  - [ ] trip wires
+  - [ ] pressure plates
+  - [ ] Honkeypot
 - [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Max, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration

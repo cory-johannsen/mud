@@ -95,8 +95,14 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 // Precondition: bctx must be non-nil with a valid conn and charName; msg must be non-empty.
 // Postcondition: writes msg in red and the prompt, then returns done=true with nil error.
 func writeErrorPrompt(bctx *bridgeContext, msg string) (bridgeResult, error) {
-	_ = bctx.conn.WriteLine(telnet.Colorize(telnet.Red, msg))
-	_ = bctx.conn.WritePrompt(bctx.promptFn())
+	colored := telnet.Colorize(telnet.Red, msg)
+	if bctx.conn.IsSplitScreen() {
+		_ = bctx.conn.WriteConsole(colored)
+		_ = bctx.conn.WritePromptSplit(bctx.promptFn())
+	} else {
+		_ = bctx.conn.WriteLine(colored)
+		_ = bctx.conn.WritePrompt(bctx.promptFn())
+	}
 	return bridgeResult{done: true}, nil
 }
 
@@ -172,7 +178,12 @@ func bridgeWho(bctx *bridgeContext) (bridgeResult, error) {
 // Precondition: bctx must be non-nil with a valid conn, stream, and reqID.
 // Postcondition: writes goodbye text, sends QuitRequest on the stream, and returns quit=true.
 func bridgeQuit(bctx *bridgeContext) (bridgeResult, error) {
-	_ = bctx.conn.WriteLine(telnet.Colorize(telnet.Cyan, "The rain swallows your footsteps. Goodbye."))
+	goodbye := telnet.Colorize(telnet.Cyan, "The rain swallows your footsteps. Goodbye.")
+	if bctx.conn.IsSplitScreen() {
+		_ = bctx.conn.WriteConsole(goodbye)
+	} else {
+		_ = bctx.conn.WriteLine(goodbye)
+	}
 	msg := &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Quit{Quit: &gamev1.QuitRequest{}},
@@ -413,8 +424,13 @@ func bridgeBalance(bctx *bridgeContext) (bridgeResult, error) {
 //	otherwise returns a non-nil msg containing a SetRoleRequest.
 func bridgeSetRole(bctx *bridgeContext) (bridgeResult, error) {
 	if len(bctx.parsed.Args) < 2 {
-		_ = bctx.conn.WriteLine("Usage: setrole <username> <role>")
-		_ = bctx.conn.WritePrompt(bctx.promptFn())
+		if bctx.conn.IsSplitScreen() {
+			_ = bctx.conn.WriteConsole("Usage: setrole <username> <role>")
+			_ = bctx.conn.WritePromptSplit(bctx.promptFn())
+		} else {
+			_ = bctx.conn.WriteLine("Usage: setrole <username> <role>")
+			_ = bctx.conn.WritePrompt(bctx.promptFn())
+		}
 		return bridgeResult{done: true}, nil
 	}
 	return bridgeResult{msg: &gamev1.ClientMessage{

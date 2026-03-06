@@ -234,6 +234,7 @@ func TestConn_Negotiate(t *testing.T) {
 	expected := []byte{
 		IAC, WILL, OptSuppressGoAhead,
 		IAC, DO, OptNAWS,
+		IAC, DONT, OptLinemode,
 	}
 	assert.Equal(t, expected, buf[:n])
 }
