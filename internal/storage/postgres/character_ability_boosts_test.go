@@ -111,29 +111,87 @@ func TestPropertyCharacterAbilityBoostsRepo_RoundTrip(t *testing.T) {
 
 	rapid.Check(t, func(rt *rapid.T) {
 		ch := createTestCharacter(t, charRepo, ctx)
-		source := rapid.StringMatching(`[a-z_]{1,16}`).Draw(rt, "source")
-		ability := rapid.StringMatching(`[a-z_]{1,16}`).Draw(rt, "ability")
 
-		if err := repo.Add(ctx, ch.ID, source, ability); err != nil {
-			rt.Fatalf("Add: %v", err)
+		// Generate a map of source → distinct abilities to write.
+		written := rapid.MapOf(
+			rapid.StringMatching(`[a-z_]{1,16}`),
+			rapid.SliceOfDistinct(
+				rapid.StringMatching(`[a-z_]{1,16}`),
+				func(a string) string { return a },
+			),
+		).Draw(rt, "boosts")
+
+		for src, abilities := range written {
+			for _, ab := range abilities {
+				if err := repo.Add(ctx, ch.ID, src, ab); err != nil {
+					rt.Fatalf("Add(%q, %q): %v", src, ab, err)
+				}
+			}
 		}
+
 		got, err := repo.GetAll(ctx, ch.ID)
 		if err != nil {
 			rt.Fatalf("GetAll: %v", err)
 		}
-		abilities, ok := got[source]
-		if !ok {
-			rt.Fatalf("source %q not found in result", source)
-		}
-		found := false
-		for _, a := range abilities {
-			if a == ability {
-				found = true
-				break
+
+		// No extra sources beyond what was written.
+		for src := range got {
+			if _, ok := written[src]; !ok {
+				rt.Fatalf("unexpected source %q in result", src)
 			}
 		}
-		if !found {
-			rt.Fatalf("ability %q not found under source %q: %v", ability, source, abilities)
+
+		// Each source has exactly the abilities written — no extras.
+		for src, wantAbilities := range written {
+			gotAbilities, ok := got[src]
+			if len(wantAbilities) == 0 {
+				// A source with no abilities written should not appear.
+				if ok && len(gotAbilities) > 0 {
+					rt.Fatalf("source %q has unexpected abilities: %v", src, gotAbilities)
+				}
+				continue
+			}
+			if !ok {
+				rt.Fatalf("source %q not found in result", src)
+			}
+			want := make([]string, len(wantAbilities))
+			copy(want, wantAbilities)
+			sort.Strings(want)
+			if len(gotAbilities) != len(want) {
+				rt.Fatalf("source %q: got %d abilities, want %d: got=%v want=%v",
+					src, len(gotAbilities), len(want), gotAbilities, want)
+			}
+			for i := range want {
+				if gotAbilities[i] != want[i] {
+					rt.Fatalf("source %q abilities mismatch: got=%v want=%v", src, gotAbilities, want)
+				}
+			}
 		}
+	})
+}
+
+func TestCharacterAbilityBoostsRepo_InvalidInputs(t *testing.T) {
+	pc := testDBWithAbilityBoosts(t)
+	ctx := context.Background()
+	repo := pgstore.NewCharacterAbilityBoostsRepository(pc.RawPool)
+
+	t.Run("Add_characterID_zero_returns_error", func(t *testing.T) {
+		err := repo.Add(ctx, 0, "archetype", "brutality")
+		require.Error(t, err)
+	})
+
+	t.Run("Add_empty_source_returns_error", func(t *testing.T) {
+		err := repo.Add(ctx, 1, "", "brutality")
+		require.Error(t, err)
+	})
+
+	t.Run("Add_empty_ability_returns_error", func(t *testing.T) {
+		err := repo.Add(ctx, 1, "archetype", "")
+		require.Error(t, err)
+	})
+
+	t.Run("GetAll_characterID_zero_returns_error", func(t *testing.T) {
+		_, err := repo.GetAll(ctx, 0)
+		require.Error(t, err)
 	})
 }

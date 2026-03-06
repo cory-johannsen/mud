@@ -39,6 +39,9 @@ func NewCharacterAbilityBoostsRepository(pool *pgxpool.Pool) *PostgresCharacterA
 
 // GetAll implements CharacterAbilityBoostsRepository.
 func (r *PostgresCharacterAbilityBoostsRepository) GetAll(ctx context.Context, characterID int64) (map[string][]string, error) {
+	if characterID <= 0 {
+		return nil, fmt.Errorf("characterID must be > 0, got %d", characterID)
+	}
 	rows, err := r.db.Query(ctx,
 		`SELECT source, ability
          FROM character_ability_boosts
@@ -70,6 +73,15 @@ func (r *PostgresCharacterAbilityBoostsRepository) GetAll(ctx context.Context, c
 
 // Add implements CharacterAbilityBoostsRepository.
 func (r *PostgresCharacterAbilityBoostsRepository) Add(ctx context.Context, characterID int64, source, ability string) error {
+	if characterID <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", characterID)
+	}
+	if source == "" {
+		return fmt.Errorf("source must not be empty")
+	}
+	if ability == "" {
+		return fmt.Errorf("ability must not be empty")
+	}
 	_, err := r.db.Exec(ctx,
 		`INSERT INTO character_ability_boosts (character_id, source, ability)
          VALUES ($1, $2, $3)
