@@ -297,6 +297,11 @@ func truncateToVisualWidth(s string, maxW int) string {
 	return string(result)
 }
 
+// WrapText splits text into lines of at most width visible characters.
+// ANSI escape sequences are preserved and not counted toward the width.
+// This is the exported form of wrapText.
+func WrapText(text string, width int) []string { return wrapText(text, width) }
+
 // wrapText splits text into lines of at most width visible characters.
 // ANSI escape sequences are preserved and not counted toward the width.
 // Lines already shorter than width are returned unchanged.

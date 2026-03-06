@@ -211,11 +211,11 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		}
 	}
 
-	// lastRoomText must be declared before the initial room render so the
-	// resize handler in forwardServerEvents always finds a valid (non-empty)
-	// value even if a resize signal fires immediately after InitScreen.
-	var lastRoomText atomic.Value
-	lastRoomText.Store("")
+	// lastRoomView stores the most recent *gamev1.RoomView so the resize
+	// handler can re-render it at the new terminal width.  Declared before the
+	// initial render so the resize handler always finds a valid value.
+	var lastRoomView atomic.Value
+	lastRoomView.Store((*gamev1.RoomView)(nil))
 
 	// Receive initial room view
 	resp, err := stream.Recv()
@@ -223,15 +223,16 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		return fmt.Errorf("receiving initial room view: %w", err)
 	}
 	if rv := resp.GetRoomView(); rv != nil {
-		renderedRoom := RenderRoomView(rv)
+		w, _ := conn.Dimensions()
+		renderedRoom := RenderRoomView(rv, w)
 		if conn.IsSplitScreen() {
 			_ = conn.WriteRoom(renderedRoom)
 		} else {
 			_ = conn.Write([]byte(renderedRoom))
 		}
-		// Seed lastRoomText so the resize handler can redraw the room region
+		// Seed lastRoomView so the resize handler can redraw the room region
 		// without waiting for the next move/look.
-		lastRoomText.Store(renderedRoom)
+		lastRoomView.Store(rv)
 		// Seed time-of-day from first room view if available.
 		if rv.GetPeriod() != "" {
 			currentTime.Store(&gamev1.TimeOfDayEvent{Hour: rv.GetHour(), Period: rv.GetPeriod()})
@@ -304,7 +305,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentHP, &maxHP, &lastRoomText, buildCurrentPrompt)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentHP, &maxHP, &lastRoomView, buildCurrentPrompt)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
@@ -482,7 +483,7 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime is updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP and maxHP are updated from CharacterInfo events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomText *atomic.Value, buildPrompt func() string) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -495,8 +496,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					h.logger.Warn("split-screen resize init failed", zap.Error(err))
 					continue
 				}
-				if room := lastRoomText.Load().(string); room != "" {
-					_ = conn.WriteRoom(room)
+				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil {
+					_ = conn.WriteRoom(RenderRoomView(rv, rw))
 				}
 				_ = conn.WritePromptSplit(buildPrompt())
 			}
@@ -529,8 +530,9 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			if p.RoomView.GetPeriod() != "" {
 				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
 			}
-			text = RenderRoomView(p.RoomView)
-			lastRoomText.Store(text)
+			w, _ := conn.Dimensions()
+			text = RenderRoomView(p.RoomView, w)
+			lastRoomView.Store(p.RoomView)
 		case *gamev1.ServerEvent_Message:
 			text = RenderMessage(p.Message)
 		case *gamev1.ServerEvent_RoomEvent:
