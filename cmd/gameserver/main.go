@@ -55,6 +55,8 @@ func main() {
 	skillsFile := flag.String("skills", "content/skills.yaml", "path to skills YAML file")
 	featsFile := flag.String("feats", "content/feats.yaml", "path to feats YAML file")
 	classFeatsFile := flag.String("class-features", "content/class_features.yaml", "path to class features YAML file")
+	archetypesDir := flag.String("archetypes-dir", "content/archetypes", "path to archetype YAML definitions directory")
+	regionsDir := flag.String("regions-dir", "content/regions", "path to region YAML definitions directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -280,7 +282,7 @@ func main() {
 	featureChoicesRepo := postgres.NewCharacterFeatureChoicesRepo(pool.DB())
 	charAbilityBoostsRepo := postgres.NewCharacterAbilityBoostsRepository(pool.DB())
 
-	archetypeList, err := ruleset.LoadArchetypes("content/archetypes")
+	archetypeList, err := ruleset.LoadArchetypes(*archetypesDir)
 	if err != nil {
 		logger.Fatal("failed to load archetypes", zap.Error(err))
 	}
@@ -290,7 +292,7 @@ func main() {
 	}
 	logger.Info("loaded archetype definitions", zap.Int("count", len(archetypeList)))
 
-	regionList, err := ruleset.LoadRegions("content/regions")
+	regionList, err := ruleset.LoadRegions(*regionsDir)
 	if err != nil {
 		logger.Fatal("failed to load regions", zap.Error(err))
 	}
