@@ -9,7 +9,8 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -o /bin/frontend ./cmd/frontend
+ARG VERSION=dev
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags "-X github.com/cory-johannsen/mud/internal/version.Version=${VERSION}" -o /bin/frontend ./cmd/frontend
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -o /bin/migrate ./cmd/migrate
 
 FROM gcr.io/distroless/static-debian12:nonroot

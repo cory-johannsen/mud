@@ -15,6 +15,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
+	"github.com/cory-johannsen/mud/internal/version"
 )
 
 // AccountStore defines the account persistence operations required by AuthHandler.
@@ -30,7 +31,9 @@ type CharacterStore interface {
 	GetByID(ctx context.Context, id int64) (*character.Character, error)
 }
 
-const welcomeBanner = `
+// buildWelcomeBanner returns the connection banner with the current version embedded.
+func buildWelcomeBanner() string {
+	return `
 ` + telnet.Bold + telnet.BrightCyan + `
   ██████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗███████╗████████╗███████╗
  ██╔════╝ ██║   ██║████╗  ██║██╔════╝██║  ██║██╔════╝╚══██╔══╝██╔════╝
@@ -40,11 +43,13 @@ const welcomeBanner = `
   ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝` + telnet.Reset + `
 
 ` + telnet.BrightYellow + `  Post-Collapse Portland, OR — A Dystopian Sci-Fi MUD` + telnet.Reset + `
+` + telnet.Dim + `  ` + version.Version + telnet.Reset + `
 
   Type ` + telnet.Green + `login` + telnet.Reset + ` to connect.
   Type ` + telnet.Green + `register` + telnet.Reset + ` to create an account.
   Type ` + telnet.Green + `quit` + telnet.Reset + ` to disconnect.
 `
+}
 
 // CharacterSkillsSetter defines the skill persistence operations required by AuthHandler.
 type CharacterSkillsSetter interface {
@@ -155,7 +160,7 @@ func (h *AuthHandler) HandleSession(ctx context.Context, conn *telnet.Conn) erro
 	start := time.Now()
 	addr := conn.RemoteAddr().String()
 
-	if err := conn.Write([]byte(welcomeBanner)); err != nil {
+	if err := conn.Write([]byte(buildWelcomeBanner())); err != nil {
 		return fmt.Errorf("sending welcome: %w", err)
 	}
 

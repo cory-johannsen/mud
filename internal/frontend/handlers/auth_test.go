@@ -270,7 +270,7 @@ func (tc *testClient) waitForPrompt() string {
 }
 
 func TestWelcomeBannerContainsKeyElements(t *testing.T) {
-	stripped := telnet.StripANSI(welcomeBanner)
+	stripped := telnet.StripANSI(buildWelcomeBanner())
 	assert.Contains(t, stripped, "Post-Collapse Portland")
 	assert.Contains(t, stripped, "login")
 	assert.Contains(t, stripped, "register")
