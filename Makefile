@@ -1,7 +1,7 @@
 .PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb
 
 GO := go
-VERSION := $(shell cat VERSION 2>/dev/null || echo dev)
+VERSION := $(shell cat VERSION 2>/dev/null || echo dev)-$(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 VERSION_PKG := github.com/cory-johannsen/mud/internal/version
 LDFLAGS := -X $(VERSION_PKG).Version=$(VERSION)
 GOFLAGS := -trimpath -ldflags "$(LDFLAGS)"
