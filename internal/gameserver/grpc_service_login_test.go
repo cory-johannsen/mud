@@ -102,6 +102,11 @@ func (m *mockCharSaverFull) GetByID(_ context.Context, id int64) (*character.Cha
 	return &character.Character{ID: id}, nil
 }
 
+// SaveAbilities satisfies CharacterSaver; always succeeds.
+func (m *mockCharSaverFull) SaveAbilities(_ context.Context, _ int64, _ character.AbilityScores) error {
+	return nil
+}
+
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied
 // CharacterSaver and returns a connected client and the session manager.
 //

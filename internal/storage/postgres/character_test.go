@@ -280,6 +280,41 @@ func TestCharacterRepository_MarkStartingInventoryGranted(t *testing.T) {
 	assert.True(t, got)
 }
 
+func TestCharacterRepository_SaveAbilities(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+
+	created, err := repo.Create(ctx, makeTestCharacter(accountID, "AbilSave"))
+	require.NoError(t, err)
+
+	updated := character.AbilityScores{
+		Brutality: 16, Grit: 14, Quickness: 12,
+		Reasoning: 8, Savvy: 10, Flair: 18,
+	}
+	require.NoError(t, repo.SaveAbilities(ctx, created.ID, updated))
+
+	fetched, err := repo.GetByID(ctx, created.ID)
+	require.NoError(t, err)
+	assert.Equal(t, updated.Brutality, fetched.Abilities.Brutality)
+	assert.Equal(t, updated.Grit, fetched.Abilities.Grit)
+	assert.Equal(t, updated.Quickness, fetched.Abilities.Quickness)
+	assert.Equal(t, updated.Reasoning, fetched.Abilities.Reasoning)
+	assert.Equal(t, updated.Savvy, fetched.Abilities.Savvy)
+	assert.Equal(t, updated.Flair, fetched.Abilities.Flair)
+}
+
+func TestCharacterRepository_SaveAbilities_InvalidID(t *testing.T) {
+	repo, _ := setupCharRepos(t)
+	ctx := context.Background()
+	abilities := character.AbilityScores{Brutality: 10, Grit: 10, Quickness: 10, Reasoning: 10, Savvy: 10, Flair: 10}
+
+	err := repo.SaveAbilities(ctx, 0, abilities)
+	require.Error(t, err)
+
+	err = repo.SaveAbilities(ctx, -1, abilities)
+	require.Error(t, err)
+}
+
 // TestCharacterRepository_Property_SaveStatePersists verifies that SaveState followed by
 // GetByID always reflects the new location and currentHP values.
 func TestCharacterRepository_Property_SaveStatePersists(t *testing.T) {

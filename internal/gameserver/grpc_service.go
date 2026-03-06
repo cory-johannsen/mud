@@ -68,6 +68,7 @@ type CharacterSaver interface {
 	SaveInventory(ctx context.Context, characterID int64, items []inventory.InventoryItem) error
 	HasReceivedStartingInventory(ctx context.Context, characterID int64) (bool, error)
 	MarkStartingInventoryGranted(ctx context.Context, characterID int64) error
+	SaveAbilities(ctx context.Context, characterID int64, abilities character.AbilityScores) error
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.

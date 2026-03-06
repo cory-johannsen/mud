@@ -58,6 +58,10 @@ func (m *mockCharSaver) GetByID(_ context.Context, id int64) (*character.Charact
 	return &character.Character{ID: id}, nil
 }
 
+func (m *mockCharSaver) SaveAbilities(_ context.Context, _ int64, _ character.AbilityScores) error {
+	return nil
+}
+
 func TestHandleTeleport_AdminSuccess(t *testing.T) {
 	saver := &mockCharSaver{saved: make(map[int64]string)}
 	svc := testServiceWithAdmin(t, nil)

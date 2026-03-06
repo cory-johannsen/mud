@@ -153,6 +153,36 @@ func (r *CharacterRepository) SaveState(ctx context.Context, id int64, location 
 	return nil
 }
 
+// SaveAbilities persists the six ability scores for a character.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Returns nil on success, ErrCharacterNotFound if no row was updated.
+func (r *CharacterRepository) SaveAbilities(ctx context.Context, characterID int64, abilities character.AbilityScores) error {
+	if characterID <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", characterID)
+	}
+	tag, err := r.db.Exec(ctx, `
+		UPDATE characters SET
+			brutality = $2,
+			grit = $3,
+			quickness = $4,
+			reasoning = $5,
+			savvy = $6,
+			flair = $7
+		WHERE id = $1`,
+		characterID,
+		abilities.Brutality, abilities.Grit, abilities.Quickness,
+		abilities.Reasoning, abilities.Savvy, abilities.Flair,
+	)
+	if err != nil {
+		return fmt.Errorf("saving abilities for character %d: %w", characterID, err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrCharacterNotFound
+	}
+	return nil
+}
+
 // LoadWeaponPresets fetches all weapon preset rows for characterID and assembles a LoadoutSet.
 // Returns a LoadoutSet with 2 empty presets when no rows exist.
 //
