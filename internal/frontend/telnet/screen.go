@@ -103,19 +103,17 @@ func (c *Conn) WriteRoom(content string) error {
 	divider := strings.Repeat("═", w)
 
 	var buf strings.Builder
-	// Redraw room divider (below scroll region — absolute positioning reliable).
+	// Disable auto-wrap so a full-width line does not leave a pending-wrap state
+	// that would shift subsequent absolute cursor-position commands by one row.
+	buf.WriteString("\033[?7l")
+
+	// Redraw room divider (absolute positioning to dividerRow works in TinTin++).
 	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
 
-	// Advance from dividerRow to firstRow and write each room content row.
-	// Use \r\033[B (CR + CUD) instead of \r\n: CUD moves the cursor down one row
-	// without triggering any scroll operation, even when adjacent to the scroll
-	// region boundary (unlike LF which TinTin++ may treat as a scroll trigger).
-	buf.WriteString("\r\033[B")
+	// Write each room content row with absolute positioning.
+	// DECAWM is off so full-width lines clip at column W without pending-wrap.
 	for i := 0; i < roomRegionRows; i++ {
-		if i > 0 {
-			buf.WriteString("\r\033[B")
-		}
-		buf.WriteString("\033[2K")
+		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", lo.firstRow+i)
 		if i < len(lines) {
 			line := lines[i]
 			if w > 0 && visualWidth(line) > w {
@@ -127,6 +125,8 @@ func (c *Conn) WriteRoom(content string) error {
 
 	// Leave cursor at prompt row; WritePromptSplit (always called after) writes it.
 	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
+	// Re-enable auto-wrap for scroll-region console output.
+	buf.WriteString("\033[?7h")
 
 	return c.writeRaw(buf.String())
 }
@@ -184,13 +184,10 @@ func appendRoomRedraw(buf *strings.Builder, content string, w int, lo roomLayout
 	normalized := strings.ReplaceAll(strings.ReplaceAll(content, "\r\n", "\n"), "\r", "")
 	lines := strings.Split(strings.TrimSpace(normalized), "\n")
 
+	buf.WriteString("\033[?7l")
 	fmt.Fprintf(buf, "\033[%d;1H%s", lo.dividerRow, divider)
-	buf.WriteString("\r\033[B")
 	for i := 0; i < roomRegionRows; i++ {
-		if i > 0 {
-			buf.WriteString("\r\033[B")
-		}
-		buf.WriteString("\033[2K")
+		fmt.Fprintf(buf, "\033[%d;1H\033[2K", lo.firstRow+i)
 		if i < len(lines) {
 			line := lines[i]
 			if w > 0 && visualWidth(line) > w {
@@ -199,6 +196,7 @@ func appendRoomRedraw(buf *strings.Builder, content string, w int, lo roomLayout
 			buf.WriteString(line)
 		}
 	}
+	buf.WriteString("\033[?7h")
 }
 
 // WritePromptSplit writes the prompt and buffered input at the prompt row (row H).
