@@ -56,13 +56,14 @@ func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 	go func() { _ = conn.InitScreen() }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	assert.Contains(t, out, "\033[?25l")                                          // hide cursor
-	assert.Contains(t, out, "\033[2J")                                            // clear screen
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))              // safe abs pos to promptRow (before scroll region)
-	assert.Contains(t, out, "\x1b7")                                              // DECSC: save cursor at promptRow
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;%dr", lo.scrollTop, lo.scrollBottom)) // scroll region scrollTop..h
-	assert.Contains(t, out, "\x1b8")                                              // DECRC: restore cursor to promptRow
-	assert.Contains(t, out, "\033[?25h")                                          // show cursor
+	assert.Contains(t, out, "\033[?25l")                                // hide cursor
+	assert.Contains(t, out, "\033[2J")                                 // clear screen
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))  // abs pos to promptRow
+	assert.Contains(t, out, "\033[?25h")                               // show cursor
+	// No DECSTBM (scroll region) — full-screen default avoids TinTin++ DECOM offset quirk.
+	assert.NotContains(t, out, "\033[?7l")
+	assert.NotContains(t, out, "\x1b7") // no DECSC
+	assert.NotContains(t, out, "\x1b8") // no DECRC
 	// InitScreen does NOT draw the divider — WriteRoom is the sole divider drawer.
 	assert.NotContains(t, out, strings.Repeat("═", W))
 }

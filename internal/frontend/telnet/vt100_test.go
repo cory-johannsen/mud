@@ -317,20 +317,21 @@ func newSplitConnTB(t tHelper, w, h int) (*Conn, net.Conn) {
 
 // ─── InitScreen layout tests ──────────────────────────────────────────────────
 
-// TestIntegration_InitScreen_ScrollRegionAndDivider verifies InitScreen configures
-// the top-room layout: scroll region scrollTop..h, blank room rows, cursor at promptRow.
-func TestIntegration_InitScreen_ScrollRegionAndDivider(t *testing.T) {
+// TestIntegration_InitScreen_NoScrollRegionAndBlankRoomRows verifies InitScreen does NOT
+// send DECSTBM (scroll region stays at full-screen default), clears room rows, and
+// positions cursor at promptRow.
+func TestIntegration_InitScreen_NoScrollRegionAndBlankRoomRows(t *testing.T) {
 	const W, H = 80, 24
-	lo := newRoomLayout(H) // firstRow=1, lastRow=8, dividerRow=9, scrollTop=10, scrollBottom=24, promptRow=24
+	lo := newRoomLayout(H) // firstRow=1, lastRow=8, dividerRow=9, consoleTop=10, promptRow=24
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
 	go func() { _ = conn.InitScreen() }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	// Scroll region must be rows scrollTop..h.
-	assert.Equal(t, lo.scrollTop, screen.scrollTop, "scroll region top must be scrollTop")
-	assert.Equal(t, lo.scrollBottom, screen.scrollBottom, "scroll region bottom must be scrollBottom (= h)")
+	// No DECSTBM sent → scroll region stays at full-screen default (1..H).
+	assert.Equal(t, 1, screen.scrollTop, "scroll region top must remain 1 (no DECSTBM)")
+	assert.Equal(t, H, screen.scrollBottom, "scroll region bottom must remain H (no DECSTBM)")
 
 	// InitScreen does NOT draw the divider — WriteRoom is the sole divider drawer.
 	assert.NotContains(t, screen.RowText(lo.dividerRow), "═",
@@ -428,27 +429,26 @@ func TestIntegration_WriteRoom_LeavesCursorAtPromptRow(t *testing.T) {
 		"cursor must be at promptRow after WriteRoom")
 }
 
-func TestIntegration_WriteRoom_DoesNotCorruptScrollRegionRows(t *testing.T) {
+func TestIntegration_WriteRoom_DoesNotCorruptConsoleAreaRows(t *testing.T) {
 	const W, H = 80, 24
 	lo := newRoomLayout(H)
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	// Run InitScreen first (sets scroll region + cursor at promptRow),
-	// then pre-fill scroll region rows with sentinel text.
+	// Run InitScreen first, then pre-fill console area rows with sentinel text.
 	go func() { _ = conn.InitScreen() }()
 	feedScreen(t, screen, client, 200*time.Millisecond)
-	for r := lo.scrollTop; r <= lo.scrollBottom; r++ {
-		copy(screen.cells[r-1], []rune("SCROLL_SENTINEL                                                                 "))
+	for r := lo.consoleTop; r <= lo.promptRow; r++ {
+		copy(screen.cells[r-1], []rune("CONSOLE_SENTINEL                                                                "))
 	}
 
 	go func() { _ = conn.WriteRoom("Title\nDesc") }()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	// Scroll region rows must be untouched (WriteRoom only touches rows 1..dividerRow).
-	for r := lo.scrollTop; r <= lo.scrollBottom; r++ {
-		assert.Contains(t, screen.RowFull(r), "SCROLL",
-			fmt.Sprintf("scroll region row %d must not be overwritten by WriteRoom", r))
+	// Console area rows must be untouched (WriteRoom only touches rows 1..dividerRow).
+	for r := lo.consoleTop; r <= lo.promptRow; r++ {
+		assert.Contains(t, screen.RowFull(r), "CONSOLE",
+			fmt.Sprintf("console area row %d must not be overwritten by WriteRoom", r))
 	}
 }
 
@@ -466,16 +466,16 @@ func TestIntegration_WriteConsole_AppendsInScrollRegion(t *testing.T) {
 	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
-	// Message must appear somewhere in the scroll region (rows 1..scrollBottom).
+	// Message must appear somewhere in the console area (rows consoleTop..promptRow).
 	found := false
-	for r := lo.scrollTop; r <= lo.scrollBottom; r++ {
+	for r := lo.consoleTop; r <= lo.promptRow; r++ {
 		if strings.Contains(screen.RowText(r), "A goblin attacks!") {
 			found = true
 			break
 		}
 	}
 	assert.True(t, found,
-		fmt.Sprintf("console message must appear in scroll region rows scrollTop..%d", lo.scrollBottom))
+		fmt.Sprintf("console message must appear in console area rows consoleTop..%d", lo.promptRow))
 }
 
 func TestIntegration_WriteConsole_RedrawsDividerAtDividerRow(t *testing.T) {
@@ -592,15 +592,15 @@ func TestIntegration_FullLayout_InitThenWriteRoomThenConsole(t *testing.T) {
 	assert.Contains(t, screen.RowText(lo.dividerRow), "═",
 		fmt.Sprintf("row %d: room divider", lo.dividerRow))
 
-	// Console message in scroll region (rows 1..scrollBottom).
+	// Console message in console area (rows consoleTop..promptRow).
 	found := false
-	for r := lo.scrollTop; r <= lo.scrollBottom; r++ {
+	for r := lo.consoleTop; r <= lo.promptRow; r++ {
 		if strings.Contains(screen.RowText(r), "Ganger says") {
 			found = true
 			break
 		}
 	}
-	assert.True(t, found, "console message must appear in scroll region")
+	assert.True(t, found, "console message must appear in console area")
 
 	// Prompt at row H.
 	assert.Contains(t, screen.RowFull(lo.promptRow), "[Newb]> ", "promptRow: prompt")
@@ -608,10 +608,10 @@ func TestIntegration_FullLayout_InitThenWriteRoomThenConsole(t *testing.T) {
 
 // ─── Property-based tests ─────────────────────────────────────────────────────
 
-// TestProperty_WriteRoom_NeverOverwritesScrollRegion verifies that WriteRoom
-// never writes to the scroll region rows (1..scrollBottom) regardless of
+// TestProperty_WriteRoom_NeverOverwritesConsoleArea verifies that WriteRoom
+// never writes to the console area rows (consoleTop..promptRow) regardless of
 // content size or terminal dimensions.
-func TestProperty_WriteRoom_NeverOverwritesScrollRegion(t *testing.T) {
+func TestProperty_WriteRoom_NeverOverwritesConsoleArea(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
 		H := rapid.IntRange(12, 50).Draw(rt, "height")
@@ -627,21 +627,21 @@ func TestProperty_WriteRoom_NeverOverwritesScrollRegion(t *testing.T) {
 
 		conn, client := newSplitConnTB(rt, W, H)
 
-		// Phase 1: run InitScreen (sets scroll region and cursor at promptRow).
+		// Phase 1: run InitScreen (cursor at promptRow, no scroll region change).
 		done1 := make(chan struct{})
 		go func() { defer close(done1); _ = conn.InitScreen() }()
 		raw1 := readAllConn(client, time.Second)
 		<-done1
 		screen.Feed(raw1)
 
-		// Pre-fill scroll region with sentinel dots after InitScreen clears screen.
-		for r := lo.scrollTop; r <= lo.scrollBottom; r++ {
+		// Pre-fill console area with sentinel dots after InitScreen clears screen.
+		for r := lo.consoleTop; r <= lo.promptRow; r++ {
 			for c := 0; c < W; c++ {
 				screen.cells[r-1][c] = '.'
 			}
 		}
 
-		// Phase 2: run WriteRoom; scroll region sentinels must survive.
+		// Phase 2: run WriteRoom; console area sentinels must survive.
 		done2 := make(chan struct{})
 		go func() {
 			defer close(done2)
@@ -652,10 +652,10 @@ func TestProperty_WriteRoom_NeverOverwritesScrollRegion(t *testing.T) {
 		<-done2
 		screen.Feed(raw2)
 
-		// Scroll region rows must be untouched (still '.' sentinel).
-		for r := lo.scrollTop; r <= lo.scrollBottom; r++ {
+		// Console area rows must be untouched (still '.' sentinel).
+		for r := lo.consoleTop; r <= lo.promptRow; r++ {
 			require.Contains(rt, screen.RowFull(r), ".",
-				fmt.Sprintf("WriteRoom must not overwrite scroll region row %d (W=%d H=%d lines=%d)",
+				fmt.Sprintf("WriteRoom must not overwrite console area row %d (W=%d H=%d lines=%d)",
 					r, W, H, lineCount))
 		}
 
@@ -742,9 +742,9 @@ func TestProperty_WriteConsole_NeverOverwritesRoomRegion(t *testing.T) {
 	})
 }
 
-// TestProperty_WriteConsole_MessageAlwaysInScrollRegion verifies that console
-// messages always appear in the scroll region rows scrollTop..scrollBottom.
-func TestProperty_WriteConsole_MessageAlwaysInScrollRegion(t *testing.T) {
+// TestProperty_WriteConsole_MessageAlwaysInConsoleArea verifies that console
+// messages always appear in the console area rows (consoleTop..promptRow).
+func TestProperty_WriteConsole_MessageAlwaysInConsoleArea(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
 		H := rapid.IntRange(12, 50).Draw(rt, "height")
@@ -764,14 +764,14 @@ func TestProperty_WriteConsole_MessageAlwaysInScrollRegion(t *testing.T) {
 		screen.Feed(raw)
 
 		found := false
-		for r := lo.scrollTop; r <= lo.scrollBottom; r++ {
+		for r := lo.consoleTop; r <= lo.promptRow; r++ {
 			if strings.Contains(screen.RowText(r), msg) {
 				found = true
 				break
 			}
 		}
 		require.True(rt, found,
-			fmt.Sprintf("console message must appear in scroll region scrollTop..%d (W=%d H=%d)",
-				lo.scrollBottom, W, H))
+			fmt.Sprintf("console message must appear in console area consoleTop..%d (W=%d H=%d)",
+				lo.promptRow, W, H))
 	})
 }
