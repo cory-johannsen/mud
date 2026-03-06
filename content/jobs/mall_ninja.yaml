@@ -1,6 +1,6 @@
 id: mall_ninja
 name: Mall Ninja
-archetype: aggressor
+archetype: schemer
 description: "Mall Ninjas believe the fastest way to solve any problem is cutting it into smaller problems, preferably with the stupidest looking sword ever seen."
 key_ability: brutality
 hit_points_per_level: 10

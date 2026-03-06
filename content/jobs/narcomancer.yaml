@@ -1,6 +1,6 @@
 id: narcomancer
 name: Narcomancer
-archetype: nerd
+archetype: schemer
 description: "Master of the effect of every drug imaginable. They can use their knowledge to heal, harm, control others — or just party."
 key_ability: reasoning
 hit_points_per_level: 6
