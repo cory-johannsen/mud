@@ -267,6 +267,28 @@ func (pc *PostgresContainer) ApplyFeatureChoicesMigration(t *testing.T) {
 	t.Logf("feature choices migration applied [%s]", time.Since(start))
 }
 
+// ApplyAbilityBoostsMigration adds the character_ability_boosts table for tests.
+//
+// Precondition: Pool connected; characters table exists.
+// Postcondition: character_ability_boosts table exists in the test database.
+func (pc *PostgresContainer) ApplyAbilityBoostsMigration(t *testing.T) {
+	t.Helper()
+	ctx := context.Background()
+	start := time.Now()
+	_, err := pc.RawPool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS character_ability_boosts (
+			character_id  BIGINT  NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			source        TEXT    NOT NULL,
+			ability       TEXT    NOT NULL,
+			PRIMARY KEY (character_id, source, ability)
+		);
+	`)
+	if err != nil {
+		t.Fatalf("applying ability boosts migration: %v", err)
+	}
+	t.Logf("ability boosts migration applied [%s]", time.Since(start))
+}
+
 // DSN returns the connection string for the test database.
 func (pc *PostgresContainer) DSN() string {
 	return fmt.Sprintf(
