@@ -1,0 +1,9 @@
+id: naturalist
+name: Naturalist
+description: "When civilization collapses, someone has to understand what grows in the cracks. Naturalists are survivors, foragers, and those who read the land better than any map."
+key_ability: reasoning
+hit_points_per_level: 8
+
+ability_boosts:
+  fixed: [grit, reasoning]
+  free: 2

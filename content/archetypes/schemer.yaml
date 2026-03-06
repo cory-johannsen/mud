@@ -1,0 +1,9 @@
+id: schemer
+name: Schemer
+description: "Knowledge is power, and Schemers collect both. Through chemical mastery, psychological manipulation, and forbidden insight, they bend situations — and people — to their will."
+key_ability: savvy
+hit_points_per_level: 6
+
+ability_boosts:
+  fixed: [savvy, flair]
+  free: 2

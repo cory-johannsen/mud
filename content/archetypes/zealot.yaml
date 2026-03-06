@@ -1,0 +1,9 @@
+id: zealot
+name: Zealot
+description: "True believers and community enforcers. Zealots draw power from conviction — religious, political, or tribal — and use it to protect their flock and punish the wicked."
+key_ability: grit
+hit_points_per_level: 8
+
+ability_boosts:
+  fixed: [grit, flair]
+  free: 2
