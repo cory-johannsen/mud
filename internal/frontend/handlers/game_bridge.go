@@ -274,7 +274,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		LastInput:    &lastInput,
 		IdleTimeout:  h.telnetCfg.IdleTimeout,
 		GracePeriod:  h.telnetCfg.IdleGracePeriod,
-		TickInterval: 30 * time.Second,
+		TickInterval: 10 * time.Second,
 		OnWarning: func() {
 			msg := fmt.Sprintf(
 				"Warning: You have been idle for %s. You will be disconnected in %s.",
@@ -293,6 +293,13 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 			}
 		},
 		OnDisconnect: func() {
+			msg := "Disconnecting due to inactivity."
+			colored := telnet.Colorize(telnet.Red, msg)
+			if conn.IsSplitScreen() {
+				_ = conn.WriteConsole(colored)
+			} else {
+				_ = conn.WriteLine(colored)
+			}
 			disconnectReason.Store("inactivity")
 			cancel()
 		},

@@ -294,8 +294,8 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("telnet.port", 4000)
 	v.SetDefault("telnet.read_timeout", "5m")
 	v.SetDefault("telnet.write_timeout", "30s")
-	v.SetDefault("telnet.idle_timeout", "5m")
-	v.SetDefault("telnet.idle_grace_period", "1m")
+	v.SetDefault("telnet.idle_timeout", "4m")
+	v.SetDefault("telnet.idle_grace_period", "30s")
 
 	v.SetDefault("logging.level", "info")
 	v.SetDefault("logging.format", "json")
