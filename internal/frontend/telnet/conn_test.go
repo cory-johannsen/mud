@@ -589,3 +589,71 @@ func TestConsoleSlice_FewerLinesThanHeight(t *testing.T) {
 	assert.Equal(t, 3, len(lines))
 	assert.Equal(t, "c", lines[len(lines)-1])
 }
+
+func TestScrollUp_IncrementsOffset(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	for i := 0; i < 100; i++ {
+		c.consoleBuf = append(c.consoleBuf, fmt.Sprintf("line-%d", i))
+	}
+	c.scrollUpState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	c.mu.Unlock()
+	// consoleHeight = 24 - 10 - 2 = 12
+	assert.Equal(t, 12, off)
+}
+
+func TestScrollDown_DecrementsOffset(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	for i := 0; i < 100; i++ {
+		c.consoleBuf = append(c.consoleBuf, fmt.Sprintf("line-%d", i))
+	}
+	c.mu.Lock()
+	c.scrollOffset = 12
+	c.pendingNew = 5
+	c.mu.Unlock()
+	c.scrollDownState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	pn := c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 0, off)
+	assert.Equal(t, 0, pn) // pendingNew cleared when returning to live
+}
+
+func TestScrollUp_ClampsAtBufferBound(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	for i := 0; i < 5; i++ {
+		c.consoleBuf = append(c.consoleBuf, fmt.Sprintf("line-%d", i))
+	}
+	c.scrollUpState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	c.mu.Unlock()
+	assert.Equal(t, 5, off) // clamped to len(buf)=5, not consoleHeight=12
+}
+
+func TestScrollDown_ClampsAtZero(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	c.scrollDownState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	c.mu.Unlock()
+	assert.Equal(t, 0, off)
+}
+
+func TestScrollDown_PartialPage(t *testing.T) {
+	// scrollOffset = 6, consoleHeight = 12 → scrollDown clamps to 0
+	c := &Conn{height: 24, width: 80}
+	c.mu.Lock()
+	c.scrollOffset = 6
+	c.pendingNew = 3
+	c.mu.Unlock()
+	c.scrollDownState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	pn := c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 0, off)
+	assert.Equal(t, 0, pn)
+}

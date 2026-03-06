@@ -429,6 +429,58 @@ func truncateToVisualWidth(s string, maxW int) string {
 	return string(result)
 }
 
+// scrollUpState adjusts scrollOffset backward by one page (consoleHeight lines),
+// clamped to len(consoleBuf) so we cannot scroll past the oldest buffered line.
+//
+// Precondition: none.
+// Postcondition: scrollOffset <= len(consoleBuf).
+func (c *Conn) scrollUpState() {
+	ch := c.consoleHeight()
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.scrollOffset += ch
+	if c.scrollOffset > len(c.consoleBuf) {
+		c.scrollOffset = len(c.consoleBuf)
+	}
+}
+
+// scrollDownState adjusts scrollOffset forward by one page (consoleHeight lines),
+// clamped to 0 (live view). Clears pendingNew when returning to live.
+//
+// Precondition: none.
+// Postcondition: scrollOffset >= 0; pendingNew == 0 if scrollOffset == 0.
+func (c *Conn) scrollDownState() {
+	ch := c.consoleHeight()
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.scrollOffset -= ch
+	if c.scrollOffset < 0 {
+		c.scrollOffset = 0
+	}
+	if c.scrollOffset == 0 {
+		c.pendingNew = 0
+	}
+}
+
+// ScrollUp scrolls the console region back by one page and redraws.
+//
+// Precondition: conn must be in split-screen mode.
+// Postcondition: Console region shows older content; status line rendered if scrolled.
+func (c *Conn) ScrollUp() error {
+	c.scrollUpState()
+	return c.redrawConsole()
+}
+
+// ScrollDown scrolls the console region forward by one page and redraws.
+// When returning to live view (scrollOffset == 0), pendingNew is cleared.
+//
+// Precondition: conn must be in split-screen mode.
+// Postcondition: Console shows newer content; pendingNew cleared if live.
+func (c *Conn) ScrollDown() error {
+	c.scrollDownState()
+	return c.redrawConsole()
+}
+
 // WrapText splits text into lines of at most width visible characters.
 // ANSI escape sequences are preserved and not counted toward the width.
 // This is the exported form of wrapText.
