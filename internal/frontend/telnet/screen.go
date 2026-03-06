@@ -2,7 +2,6 @@ package telnet
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 )
@@ -103,19 +102,19 @@ func (c *Conn) WriteRoom(content string) error {
 	lo := newRoomLayout(h)
 	divider := strings.Repeat("═", w)
 
-	fmt.Fprintf(os.Stderr, "[WriteRoom] h=%d w=%d firstRow=%d lastRow=%d promptRow=%d lines=%d\n",
-		h, w, lo.firstRow, lo.lastRow, lo.promptRow, len(lines))
-	for i, line := range lines {
-		fmt.Fprintf(os.Stderr, "[WriteRoom]   line[%d] bytes=%d visualW=%d\n", i, len(line), visualWidth(line))
-	}
-
 	var buf strings.Builder
 	// Redraw room divider (below scroll region — absolute positioning reliable).
 	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
 
-	// Write room content rows.
+	// Advance from dividerRow to firstRow and write each room content row using
+	// \r\n so that pending-wrap state from a full-width line never interacts
+	// with an absolute cursor-position command (a TinTin++ quirk).
+	buf.WriteString("\r\n")
 	for i := 0; i < roomRegionRows; i++ {
-		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", lo.firstRow+i)
+		if i > 0 {
+			buf.WriteString("\r\n")
+		}
+		buf.WriteString("\033[2K")
 		if i < len(lines) {
 			line := lines[i]
 			if w > 0 && visualWidth(line) > w {
@@ -161,10 +160,11 @@ func (c *Conn) WriteConsole(text string) error {
 		buf.WriteString(line)
 	}
 
-	// Redraw room divider and content (all below scroll region — reliable).
-	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
+	// Redraw room divider and content using appendRoomRedraw (handles divider + \r\n advancement).
 	if room != "" {
-		appendRoomRedraw(&buf, room, w, lo)
+		appendRoomRedraw(&buf, room, w, lo, divider)
+	} else {
+		fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
 	}
 
 	// Redraw input row with preserved input.
@@ -175,12 +175,21 @@ func (c *Conn) WriteConsole(text string) error {
 
 // appendRoomRedraw writes room content rows into buf.
 // All rows are below the scroll region so absolute positioning is reliable.
-func appendRoomRedraw(buf *strings.Builder, content string, w int, lo roomLayout) {
+// appendRoomRedraw writes the divider and room content rows into buf.
+// Caller must have already written any preceding content; this function
+// positions at dividerRow and uses \r\n advancement to avoid pending-wrap
+// interaction with absolute cursor-position commands.
+func appendRoomRedraw(buf *strings.Builder, content string, w int, lo roomLayout, divider string) {
 	normalized := strings.ReplaceAll(strings.ReplaceAll(content, "\r\n", "\n"), "\r", "")
 	lines := strings.Split(strings.TrimSpace(normalized), "\n")
 
+	fmt.Fprintf(buf, "\033[%d;1H%s", lo.dividerRow, divider)
+	buf.WriteString("\r\n")
 	for i := 0; i < roomRegionRows; i++ {
-		fmt.Fprintf(buf, "\033[%d;1H\033[2K", lo.firstRow+i)
+		if i > 0 {
+			buf.WriteString("\r\n")
+		}
+		buf.WriteString("\033[2K")
 		if i < len(lines) {
 			line := lines[i]
 			if w > 0 && visualWidth(line) > w {

@@ -80,9 +80,9 @@ func TestWriteRoom_WritesToRowsBelowScrollRegion(t *testing.T) {
 	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
 	assert.Contains(t, out, strings.Repeat("═", W))
 
-	// Content must appear (first room line written at firstRow).
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.firstRow))
+	// Content must appear; room rows advanced via \r\n from dividerRow (no absolute firstRow position).
 	assert.Contains(t, out, "Nexus Hub")
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.firstRow), "room rows use \\r\\n not absolute position")
 
 	// Cursor left at prompt row.
 	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
