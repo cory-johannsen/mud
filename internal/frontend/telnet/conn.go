@@ -28,6 +28,9 @@ const (
 	OptLinemode        byte = 34
 )
 
+// consoleBufMax is the maximum number of console lines retained in the scroll buffer.
+const consoleBufMax = 1000
+
 // Conn wraps a TCP connection with Telnet protocol handling.
 // It filters IAC sequences from input and provides line-based reading.
 type Conn struct {
@@ -45,6 +48,11 @@ type Conn struct {
 	inputBuf    string
 	roomBuf     string // last rendered room content for redraw after console scroll
 
+	// Scroll buffer (guarded by mu)
+	consoleBuf   []string // ring buffer of console lines, max consoleBufMax
+	scrollOffset int      // lines scrolled back from live; 0 = live
+	pendingNew   int      // new lines received while scrolled back
+
 	// resizeCh is signalled (non-blocking) whenever NAWS updates width/height.
 	resizeCh chan struct{}
 }
@@ -60,6 +68,24 @@ func NewConn(raw net.Conn, readTimeout, writeTimeout time.Duration) *Conn {
 		readTimeout:  readTimeout,
 		writeTimeout: writeTimeout,
 		resizeCh:     make(chan struct{}, 1),
+	}
+}
+
+// appendConsoleLine appends a line to the console scroll buffer, enforcing the
+// ring limit by dropping the oldest entries when at capacity.
+// When scrollOffset > 0, increments pendingNew (caller is responsible for redraw).
+//
+// Precondition: line must be a single display line (no embedded newlines).
+// Postcondition: len(consoleBuf) <= consoleBufMax.
+func (c *Conn) appendConsoleLine(line string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.consoleBuf = append(c.consoleBuf, line)
+	if len(c.consoleBuf) > consoleBufMax {
+		c.consoleBuf = c.consoleBuf[len(c.consoleBuf)-consoleBufMax:]
+	}
+	if c.scrollOffset > 0 {
+		c.pendingNew++
 	}
 }
 

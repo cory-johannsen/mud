@@ -3,6 +3,7 @@ package telnet
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"net"
 	"testing"
@@ -515,4 +516,40 @@ func TestPropertyFilterIAC_OutputNeverLongerThanInput(t *testing.T) {
 		assert.LessOrEqual(t, len(result), len(input),
 			"filtered output should never be longer than input")
 	})
+}
+
+func TestConsoleBuf_RingTruncatesAt1000(t *testing.T) {
+	c := &Conn{}
+	for i := 0; i < 1100; i++ {
+		c.appendConsoleLine(fmt.Sprintf("line %d", i))
+	}
+	c.mu.Lock()
+	n := len(c.consoleBuf)
+	c.mu.Unlock()
+	assert.Equal(t, consoleBufMax, n)
+	c.mu.Lock()
+	first := c.consoleBuf[0]
+	c.mu.Unlock()
+	assert.Equal(t, "line 100", first)
+}
+
+func TestConsoleBuf_PendingNewIncrementsWhenScrolled(t *testing.T) {
+	c := &Conn{}
+	c.mu.Lock()
+	c.scrollOffset = 5
+	c.mu.Unlock()
+	c.appendConsoleLine("msg")
+	c.mu.Lock()
+	pn := c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 1, pn)
+}
+
+func TestConsoleBuf_PendingNewNotIncrementedWhenLive(t *testing.T) {
+	c := &Conn{}
+	c.appendConsoleLine("msg")
+	c.mu.Lock()
+	pn := c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 0, pn)
 }
