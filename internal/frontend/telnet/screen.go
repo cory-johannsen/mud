@@ -85,6 +85,117 @@ func (c *Conn) InitScreen() error {
 	return c.writeRaw(buf.String())
 }
 
+// consoleHeight returns the number of rows available for console output.
+// Formula: termHeight - roomRegionRows (room) - 1 (divider) - 1 (prompt)
+//
+// Postcondition: Returns at least 1.
+func (c *Conn) consoleHeight() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	h := c.height
+	if h <= roomRegionRows+2 {
+		return 1
+	}
+	return h - roomRegionRows - 2
+}
+
+// consoleSlice returns the slice of consoleBuf lines to display given the current
+// scrollOffset. The returned slice has at most consoleHeight() entries, ending at
+// len(consoleBuf)-scrollOffset (clamped to valid bounds).
+//
+// Precondition: c.mu must NOT be held by caller.
+// Postcondition: returned slice may alias consoleBuf backing array; do not mutate.
+func (c *Conn) consoleSlice() []string {
+	c.mu.Lock()
+	buf := c.consoleBuf
+	offset := c.scrollOffset
+	c.mu.Unlock()
+
+	ch := c.consoleHeight()
+	end := len(buf) - offset
+	if end < 0 {
+		end = 0
+	}
+	if end > len(buf) {
+		end = len(buf)
+	}
+	start := end - ch
+	if start < 0 {
+		start = 0
+	}
+	return buf[start:end]
+}
+
+// redrawConsole redraws the console region from the scroll buffer.
+// When scrolled back (scrollOffset > 0), a dim status line is shown at the
+// last console row: "[scrolled back — N new message(s)]" or "[scrolled back]".
+//
+// Precondition: conn must be in split-screen mode; height and width must be set.
+// Postcondition: Console region rows rewritten; room region and prompt restored.
+func (c *Conn) redrawConsole() error {
+	c.mu.Lock()
+	h := c.height
+	w := c.width
+	input := c.inputBuf
+	room := c.roomBuf
+	offset := c.scrollOffset
+	pending := c.pendingNew
+	c.mu.Unlock()
+
+	lo := newRoomLayout(h)
+	ch := c.consoleHeight()
+	lines := c.consoleSlice()
+	divider := strings.Repeat("═", w)
+
+	var roomLines []string
+	if room != "" {
+		normalized := strings.ReplaceAll(strings.ReplaceAll(room, "\r\n", "\n"), "\r", "")
+		roomLines = strings.Split(strings.TrimSpace(normalized), "\n")
+	}
+
+	var buf strings.Builder
+
+	// Clear console region (rows consoleTop .. promptRow-1)
+	for row := lo.consoleTop; row < lo.promptRow; row++ {
+		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", row)
+	}
+
+	// Write buffered lines into console rows (bottom-aligned)
+	for i, line := range lines {
+		row := lo.consoleTop + (ch - len(lines)) + i
+		if row >= lo.promptRow {
+			break
+		}
+		fmt.Fprintf(&buf, "\033[%d;1H", row)
+		if w > 0 && visualWidth(line) > w {
+			line = truncateToVisualWidth(line, w)
+		}
+		buf.WriteString(line)
+	}
+
+	// Status line when scrolled back (occupies last console row above prompt)
+	if offset > 0 {
+		statusRow := lo.promptRow - 1
+		var status string
+		if pending > 0 {
+			status = fmt.Sprintf("[scrolled back — %d new message(s)]", pending)
+		} else {
+			status = "[scrolled back]"
+		}
+		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", statusRow)
+		buf.WriteString("\033[2m") // dim
+		buf.WriteString(status)
+		buf.WriteString("\033[0m") // reset
+	}
+
+	// Restore room region and prompt
+	appendRoomRedraw(&buf, roomLines, w, divider)
+	fmt.Fprintf(&buf, "\033[%d;1H\033[2K", lo.promptRow)
+	buf.WriteString(input)
+
+	return c.writeRaw(buf.String())
+}
+
 // WriteRoom renders content into the pinned room region (rows 1..dividerRow).
 //
 // Uses \033[1;1H] (absolute, always safe with full-screen scroll region) to
@@ -137,6 +248,20 @@ func (c *Conn) WriteConsole(text string) error {
 	room := c.roomBuf
 	c.mu.Unlock()
 
+	// Buffer lines for scroll history.
+	wrappedLines := wrapText(strings.TrimRight(text, "\r\n"), w)
+	for _, l := range wrappedLines {
+		c.appendConsoleLine(l)
+	}
+
+	// If scrolled back, skip rendering — pendingNew was incremented by appendConsoleLine.
+	c.mu.Lock()
+	scrolled := c.scrollOffset > 0
+	c.mu.Unlock()
+	if scrolled {
+		return nil
+	}
+
 	lo := newRoomLayout(h)
 	divider := strings.Repeat("═", w)
 
@@ -154,8 +279,7 @@ func (c *Conn) WriteConsole(text string) error {
 	// Each subsequent \r\n scrolls the entire screen up by one row.
 	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
 	buf.WriteString("\033[2K")
-	trimmed := strings.TrimRight(text, "\r\n")
-	lines := wrapText(trimmed, w)
+	lines := wrappedLines
 	for _, line := range lines {
 		buf.WriteString("\r\n")
 		buf.WriteString(line)

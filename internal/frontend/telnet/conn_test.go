@@ -553,3 +553,39 @@ func TestConsoleBuf_PendingNewNotIncrementedWhenLive(t *testing.T) {
 	c.mu.Unlock()
 	assert.Equal(t, 0, pn)
 }
+
+func TestConsoleSlice_LiveView(t *testing.T) {
+	buf := make([]string, 50)
+	for i := range buf {
+		buf[i] = fmt.Sprintf("line-%d", i)
+	}
+	c := &Conn{consoleBuf: buf, height: 24, width: 80}
+	// consoleHeight = 24 - 10 - 2 = 12
+	lines := c.consoleSlice()
+	assert.Equal(t, 12, len(lines))
+	assert.Equal(t, "line-49", lines[len(lines)-1])
+	assert.Equal(t, "line-38", lines[0])
+}
+
+func TestConsoleSlice_ScrolledBack(t *testing.T) {
+	buf := make([]string, 50)
+	for i := range buf {
+		buf[i] = fmt.Sprintf("line-%d", i)
+	}
+	c := &Conn{consoleBuf: buf, height: 24, width: 80}
+	c.mu.Lock()
+	c.scrollOffset = 12
+	c.mu.Unlock()
+	lines := c.consoleSlice()
+	assert.Equal(t, 12, len(lines))
+	assert.Equal(t, "line-37", lines[len(lines)-1])
+	assert.Equal(t, "line-26", lines[0])
+}
+
+func TestConsoleSlice_FewerLinesThanHeight(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	c.consoleBuf = []string{"a", "b", "c"}
+	lines := c.consoleSlice()
+	assert.Equal(t, 3, len(lines))
+	assert.Equal(t, "c", lines[len(lines)-1])
+}
