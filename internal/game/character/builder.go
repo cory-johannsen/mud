@@ -166,6 +166,76 @@ func BuildClassFeaturesFromJob(job *ruleset.Job) []string {
 	return result
 }
 
+// ApplyAbilityBoosts returns the ability scores after stacking all boost sources.
+// Order: archetype fixed → archetype free chosen → region fixed → region free chosen.
+// Each boost adds +2. Nil grants and nil chosen slices are no-ops.
+//
+// Precondition: archetypeChosen and regionChosen satisfy within-source uniqueness (caller enforces).
+// Postcondition: Each boosted ability increases by exactly +2 per application.
+func ApplyAbilityBoosts(
+	base AbilityScores,
+	archetypeBoosts *ruleset.AbilityBoostGrant, archetypeChosen []string,
+	regionBoosts *ruleset.AbilityBoostGrant, regionChosen []string,
+) AbilityScores {
+	result := base
+	applyBoost := func(ability string) {
+		switch ability {
+		case "brutality":
+			result.Brutality += 2
+		case "grit":
+			result.Grit += 2
+		case "quickness":
+			result.Quickness += 2
+		case "reasoning":
+			result.Reasoning += 2
+		case "savvy":
+			result.Savvy += 2
+		case "flair":
+			result.Flair += 2
+		}
+	}
+	if archetypeBoosts != nil {
+		for _, ab := range archetypeBoosts.Fixed {
+			applyBoost(ab)
+		}
+	}
+	for _, ab := range archetypeChosen {
+		applyBoost(ab)
+	}
+	if regionBoosts != nil {
+		for _, ab := range regionBoosts.Fixed {
+			applyBoost(ab)
+		}
+	}
+	for _, ab := range regionChosen {
+		applyBoost(ab)
+	}
+	return result
+}
+
+// AbilityBoostPool returns the valid free-boost ability pool for a source.
+// Excludes abilities in fixed and abilities already in alreadyChosen.
+// Returns abilities in canonical order: brutality, grit, quickness, reasoning, savvy, flair.
+//
+// Precondition: fixed and alreadyChosen may be nil.
+// Postcondition: No ability appears more than once in the returned slice.
+func AbilityBoostPool(fixed []string, alreadyChosen []string) []string {
+	excluded := make(map[string]bool)
+	for _, ab := range fixed {
+		excluded[ab] = true
+	}
+	for _, ab := range alreadyChosen {
+		excluded[ab] = true
+	}
+	var pool []string
+	for _, ab := range ruleset.AllAbilities() {
+		if !excluded[ab] {
+			pool = append(pool, ab)
+		}
+	}
+	return pool
+}
+
 // AbilityName returns the short display label for an ability score field.
 func AbilityName(field string) string {
 	names := map[string]string{
