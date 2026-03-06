@@ -1,6 +1,6 @@
 id: hanger_on
 name: Hanger-On
-archetype: normie
+archetype: criminal
 description: "Surrounds themselves with famous people to benefit from their status. Portland's celebrity ecosystem is bizarre but persistent."
 key_ability: savvy
 hit_points_per_level: 8

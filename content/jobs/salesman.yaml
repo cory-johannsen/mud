@@ -1,6 +1,6 @@
 id: salesman
 name: Salesman
-archetype: normie
+archetype: schemer
 description: "The lowest of lows. Peddles whatever they can for more than it's worth. Truly awful people who are also somehow essential to Portland's survival."
 key_ability: savvy
 hit_points_per_level: 8

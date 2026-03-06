@@ -1,6 +1,6 @@
 id: maker
 name: Maker
-archetype: normie
+archetype: schemer
 description: "Makers build the things that everybody needs. Their level of skill and the reliability of the manufactured goods varies wildly."
 key_ability: savvy
 hit_points_per_level: 8

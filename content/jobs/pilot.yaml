@@ -1,6 +1,6 @@
 id: pilot
 name: Pilot
-archetype: normie
+archetype: drifter
 description: "Specializes in operating non-road vehicles: boats, aircraft, whatever still flies in post-collapse Portland."
 key_ability: savvy
 hit_points_per_level: 8
