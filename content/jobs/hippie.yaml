@@ -1,6 +1,6 @@
 id: hippie
 name: Hippie
-archetype: nerd
+archetype: naturalist
 description: "A spiritual seeker, a free spirit, and a lover of all things natural. Portland's collapse only confirmed what they already knew."
 key_ability: reasoning
 hit_points_per_level: 6

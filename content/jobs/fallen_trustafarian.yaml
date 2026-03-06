@@ -1,6 +1,6 @@
 id: fallen_trustafarian
 name: Fallen Trustafarian
-archetype: influencer
+archetype: naturalist
 description: "A formerly wealthy individual now struggling financially, positioned among still-affluent peers as a cautionary tale. They still have the accent."
 key_ability: flair
 hit_points_per_level: 8

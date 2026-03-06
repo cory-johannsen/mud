@@ -1,6 +1,6 @@
 id: freegan
 name: Freegan
-archetype: drifter
+archetype: naturalist
 description: "The ultimate scavengers, living off the waste of others. Literally nobody finds them charming, but they always have what you need."
 key_ability: grit
 hit_points_per_level: 10
