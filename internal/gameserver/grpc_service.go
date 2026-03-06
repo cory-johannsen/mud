@@ -319,13 +319,16 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// currentHP is taken from the proto (the persisted current_hp sent by the frontend).
 	var maxHP int
 	var abilities character.AbilityScores
+	var dbChar *character.Character
 	if characterID > 0 && s.charSaver != nil {
-		dbChar, dbErr := s.charSaver.GetByID(stream.Context(), characterID)
+		var dbErr error
+		dbChar, dbErr = s.charSaver.GetByID(stream.Context(), characterID)
 		if dbErr != nil {
 			s.logger.Warn("failed to load character from DB at login; using zero values",
 				zap.Int64("character_id", characterID),
 				zap.Error(dbErr),
 			)
+			dbChar = nil
 		} else if dbChar != nil {
 			maxHP = dbChar.MaxHP
 			abilities = dbChar.Abilities
@@ -630,6 +633,99 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		// Populate derived fields from FeatureChoices.
 		// Backward-compat: FavoredTarget is still read by combat code; derive from generic choices store.
 		sess.FavoredTarget = sess.FeatureChoices["predators_eye"]["favored_target"]
+	}
+
+	// Resolve missing ability boost choices.
+	if s.charAbilityBoostsRepo != nil && s.archetypes != nil && s.regions != nil {
+		storedBoosts, boostErr := s.charAbilityBoostsRepo.GetAll(stream.Context(), characterID)
+		if boostErr != nil {
+			s.logger.Warn("loading ability boosts", zap.Int64("character_id", characterID), zap.Error(boostErr))
+			storedBoosts = map[string][]string{}
+		}
+
+		// Determine archetype from job.
+		archetypeID := ""
+		if s.jobRegistry != nil {
+			if job, ok := s.jobRegistry.Job(sess.Class); ok {
+				archetypeID = job.Archetype
+			}
+		}
+
+		// Prompt for archetype free boosts.
+		if archetypeID != "" {
+			if archetype, ok := s.archetypes[archetypeID]; ok && archetype.AbilityBoosts != nil {
+				chosenForArchetype := storedBoosts["archetype"]
+				needed := archetype.AbilityBoosts.Free - len(chosenForArchetype)
+				for i := 0; i < needed; i++ {
+					pool := character.AbilityBoostPool(archetype.AbilityBoosts.Fixed, chosenForArchetype)
+					if len(pool) == 0 {
+						break
+					}
+					choices := &ruleset.FeatureChoices{
+						Prompt:  fmt.Sprintf("Choose archetype free ability boost %d of %d:", len(chosenForArchetype)+1, archetype.AbilityBoosts.Free),
+						Options: pool,
+						Key:     fmt.Sprintf("archetype_boost_%d", i),
+					}
+					chosen, promptErr := s.promptFeatureChoice(stream, "archetype_boost", choices)
+					if promptErr != nil || chosen == "" {
+						break
+					}
+					if addErr := s.charAbilityBoostsRepo.Add(stream.Context(), characterID, "archetype", chosen); addErr != nil {
+						s.logger.Warn("persisting archetype boost", zap.Error(addErr))
+					}
+					chosenForArchetype = append(chosenForArchetype, chosen)
+				}
+				storedBoosts["archetype"] = chosenForArchetype
+			}
+		}
+
+		// Prompt for region free boost.
+		if dbChar != nil {
+			if region, ok := s.regions[dbChar.Region]; ok && region.AbilityBoosts != nil {
+				chosenForRegion := storedBoosts["region"]
+				needed := region.AbilityBoosts.Free - len(chosenForRegion)
+				for i := 0; i < needed; i++ {
+					pool := character.AbilityBoostPool(region.AbilityBoosts.Fixed, chosenForRegion)
+					if len(pool) == 0 {
+						break
+					}
+					choices := &ruleset.FeatureChoices{
+						Prompt:  fmt.Sprintf("Choose region free ability boost %d of %d:", len(chosenForRegion)+1, region.AbilityBoosts.Free),
+						Options: pool,
+						Key:     fmt.Sprintf("region_boost_%d", i),
+					}
+					chosen, promptErr := s.promptFeatureChoice(stream, "region_boost", choices)
+					if promptErr != nil || chosen == "" {
+						break
+					}
+					if addErr := s.charAbilityBoostsRepo.Add(stream.Context(), characterID, "region", chosen); addErr != nil {
+						s.logger.Warn("persisting region boost", zap.Error(addErr))
+					}
+					chosenForRegion = append(chosenForRegion, chosen)
+				}
+				storedBoosts["region"] = chosenForRegion
+			}
+		}
+
+		// Recompute scores from scratch, apply all boosts, persist.
+		if dbChar != nil {
+			baseScores := recomputeBaseScores(dbChar, s.regions, s.jobRegistry)
+			archetypeBoosts := (*ruleset.AbilityBoostGrant)(nil)
+			if archetypeID != "" {
+				if archetype, ok := s.archetypes[archetypeID]; ok {
+					archetypeBoosts = archetype.AbilityBoosts
+				}
+			}
+			regionBoosts := (*ruleset.AbilityBoostGrant)(nil)
+			if region, ok := s.regions[dbChar.Region]; ok {
+				regionBoosts = region.AbilityBoosts
+			}
+			newAbilities := character.ApplyAbilityBoosts(baseScores, archetypeBoosts, storedBoosts["archetype"], regionBoosts, storedBoosts["region"])
+			sess.Abilities = newAbilities
+			if saveErr := s.charSaver.SaveAbilities(stream.Context(), characterID, newAbilities); saveErr != nil {
+				s.logger.Warn("saving ability scores to DB", zap.Error(saveErr))
+			}
+		}
 	}
 
 	// Subscribe to game clock ticks for this session (nil-safe: clock may be nil).
@@ -3176,4 +3272,53 @@ func (s *GameServiceServer) promptFeatureChoice(
 		s.logger.Warn("sending choice confirmation", zap.String("feature", featureID), zap.Error(sendErr))
 	}
 	return chosen, nil
+}
+
+// recomputeBaseScores returns ability scores before any archetype/region boost choices are applied.
+// Computes: base 10 + region modifiers + job key ability (+2).
+//
+// Precondition: dbChar must not be nil.
+// Postcondition: Scores reflect only fixed sources (region modifiers and job key ability).
+func recomputeBaseScores(dbChar *character.Character, regions map[string]*ruleset.Region, jobReg *ruleset.JobRegistry) character.AbilityScores {
+	base := character.AbilityScores{
+		Brutality: 10, Grit: 10, Quickness: 10,
+		Reasoning: 10, Savvy: 10, Flair: 10,
+	}
+	if region, ok := regions[dbChar.Region]; ok {
+		for ab, delta := range region.Modifiers {
+			switch ab {
+			case "brutality":
+				base.Brutality += delta
+			case "grit":
+				base.Grit += delta
+			case "quickness":
+				base.Quickness += delta
+			case "reasoning":
+				base.Reasoning += delta
+			case "savvy":
+				base.Savvy += delta
+			case "flair":
+				base.Flair += delta
+			}
+		}
+	}
+	if jobReg != nil {
+		if job, ok := jobReg.Job(dbChar.Class); ok {
+			switch job.KeyAbility {
+			case "brutality":
+				base.Brutality += 2
+			case "grit":
+				base.Grit += 2
+			case "quickness":
+				base.Quickness += 2
+			case "reasoning":
+				base.Reasoning += 2
+			case "savvy":
+				base.Savvy += 2
+			case "flair":
+				base.Flair += 2
+			}
+		}
+	}
+	return base
 }
