@@ -18,7 +18,8 @@ type Region struct {
 	Article     string         `yaml:"article"`
 	Description string         `yaml:"description"`
 	Modifiers   map[string]int `yaml:"modifiers"`
-	Traits      []string       `yaml:"traits"`
+	Traits        []string           `yaml:"traits"`
+	AbilityBoosts *AbilityBoostGrant `yaml:"ability_boosts"`
 }
 
 // DisplayName returns the human-readable region name with its grammatical article.

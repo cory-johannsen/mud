@@ -15,7 +15,8 @@ type Archetype struct {
 	Name              string `yaml:"name"`
 	Description       string `yaml:"description"`
 	KeyAbility        string `yaml:"key_ability"`
-	HitPointsPerLevel int    `yaml:"hit_points_per_level"`
+	HitPointsPerLevel int                `yaml:"hit_points_per_level"`
+	AbilityBoosts     *AbilityBoostGrant `yaml:"ability_boosts"`
 }
 
 // LoadArchetypes reads all .yaml files in dir and parses each as an Archetype.
