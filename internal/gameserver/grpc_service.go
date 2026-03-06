@@ -638,9 +638,11 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// Resolve missing ability boost choices.
 	if s.charAbilityBoostsRepo != nil && s.archetypes != nil && s.regions != nil {
 		storedBoosts, boostErr := s.charAbilityBoostsRepo.GetAll(stream.Context(), characterID)
+		skipBoostPrompts := false
 		if boostErr != nil {
-			s.logger.Warn("loading ability boosts", zap.Int64("character_id", characterID), zap.Error(boostErr))
+			s.logger.Warn("loading ability boosts, skipping prompt", zap.Int64("character_id", characterID), zap.Error(boostErr))
 			storedBoosts = map[string][]string{}
+			skipBoostPrompts = true
 		}
 
 		// Determine archetype from job.
@@ -652,7 +654,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 
 		// Prompt for archetype free boosts.
-		if archetypeID != "" {
+		if !skipBoostPrompts && archetypeID != "" {
 			if archetype, ok := s.archetypes[archetypeID]; ok && archetype.AbilityBoosts != nil {
 				chosenForArchetype := storedBoosts["archetype"]
 				needed := archetype.AbilityBoosts.Free - len(chosenForArchetype)
@@ -680,7 +682,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 
 		// Prompt for region free boost.
-		if dbChar != nil {
+		if !skipBoostPrompts && dbChar != nil {
 			if region, ok := s.regions[dbChar.Region]; ok && region.AbilityBoosts != nil {
 				chosenForRegion := storedBoosts["region"]
 				needed := region.AbilityBoosts.Free - len(chosenForRegion)
