@@ -64,16 +64,31 @@ func newVT100Screen(width, height int) *vt100Screen {
 func (s *vt100Screen) Feed(data string) {
 	i := 0
 	for i < len(data) {
-		if data[i] == '\033' && i+1 < len(data) && data[i+1] == '[' {
-			// CSI sequence: collect params until final byte [0x40–0x7E]
-			j := i + 2
-			for j < len(data) && !isCSIFinal(data[j]) {
-				j++
-			}
-			if j < len(data) {
-				s.handleCSI(data[i+2:j], data[j])
-				i = j + 1
+		if data[i] == '\033' && i+1 < len(data) {
+			// ESC 7 (DECSC) – save cursor position.
+			if data[i+1] == '7' {
+				s.savedRow, s.savedCol = s.curRow, s.curCol
+				i += 2
 				continue
+			}
+			// ESC 8 (DECRC) – restore cursor position.
+			if data[i+1] == '8' {
+				s.curRow = clampInt(s.savedRow, 1, s.height)
+				s.curCol = clampInt(s.savedCol, 1, s.width)
+				i += 2
+				continue
+			}
+			if data[i+1] == '[' {
+				// CSI sequence: collect params until final byte [0x40–0x7E]
+				j := i + 2
+				for j < len(data) && !isCSIFinal(data[j]) {
+					j++
+				}
+				if j < len(data) {
+					s.handleCSI(data[i+2:j], data[j])
+					i = j + 1
+					continue
+				}
 			}
 		}
 		switch data[i] {
@@ -118,7 +133,17 @@ func (s *vt100Screen) handleCSI(params string, final byte) {
 
 	case 'J': // erase in display
 		n := parseOne(params, 0)
-		if n == 2 { // erase entire screen
+		switch n {
+		case 0: // erase from cursor to end of screen
+			for c := s.curCol - 1; c < s.width; c++ {
+				s.cells[s.curRow-1][c] = ' '
+			}
+			for r := s.curRow; r < s.height; r++ {
+				for c := 0; c < s.width; c++ {
+					s.cells[r][c] = ' '
+				}
+			}
+		case 2: // erase entire screen
 			for r := 0; r < s.height; r++ {
 				for c := 0; c < s.width; c++ {
 					s.cells[r][c] = ' '
@@ -323,7 +348,10 @@ func TestIntegration_WriteRoom_PlacesLinesInRoomRows(t *testing.T) {
 	conn, client := newSplitConnTB(t, W, H)
 
 	content := "Title\nDescription text.\nExits:\n  north\n  south"
-	go func() { _ = conn.WriteRoom(content) }()
+	go func() {
+		_ = conn.InitScreen()
+		_ = conn.WriteRoom(content)
+	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	assert.Equal(t, "Title", screen.RowText(lo.firstRow+0), "firstRow must contain title")
@@ -342,7 +370,10 @@ func TestIntegration_WriteRoom_ExcessLinesAreTruncated(t *testing.T) {
 
 	// 8 lines: only first 6 should appear in room rows.
 	lines := []string{"L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"}
-	go func() { _ = conn.WriteRoom(strings.Join(lines, "\n")) }()
+	go func() {
+		_ = conn.InitScreen()
+		_ = conn.WriteRoom(strings.Join(lines, "\n"))
+	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	for i := 0; i < roomRegionRows; i++ {
@@ -357,7 +388,10 @@ func TestIntegration_WriteRoom_EmptyContent_ClearsAllRoomRows(t *testing.T) {
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	// Pre-fill room rows with garbage to ensure WriteRoom clears them.
+	// Run InitScreen first so cursor is at promptRow, then pre-fill room rows
+	// with garbage to ensure WriteRoom("") clears them.
+	go func() { _ = conn.InitScreen() }()
+	feedScreen(t, screen, client, 200*time.Millisecond)
 	for r := lo.firstRow; r <= lo.lastRow; r++ {
 		for c := 0; c < W; c++ {
 			screen.cells[r-1][c] = 'X'
@@ -379,7 +413,10 @@ func TestIntegration_WriteRoom_LeavesCursorAtPromptRow(t *testing.T) {
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	go func() { _ = conn.WriteRoom("Hello\nWorld") }()
+	go func() {
+		_ = conn.InitScreen()
+		_ = conn.WriteRoom("Hello\nWorld")
+	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	// Cursor must be at promptRow after WriteRoom.
@@ -393,10 +430,10 @@ func TestIntegration_WriteRoom_DoesNotCorruptScrollRegionRows(t *testing.T) {
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	// Simulate InitScreen: scroll region 1..scrollBottom.
-	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
-
-	// Pre-fill scroll region rows with sentinel text.
+	// Run InitScreen first (sets scroll region + cursor at promptRow),
+	// then pre-fill scroll region rows with sentinel text.
+	go func() { _ = conn.InitScreen() }()
+	feedScreen(t, screen, client, 200*time.Millisecond)
 	for r := 1; r <= lo.scrollBottom; r++ {
 		copy(screen.cells[r-1], []rune("SCROLL_SENTINEL                                                                 "))
 	}
@@ -419,10 +456,10 @@ func TestIntegration_WriteConsole_AppendsInScrollRegion(t *testing.T) {
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	// Simulate the scroll region established by InitScreen.
-	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
-
-	go func() { _ = conn.WriteConsole("A goblin attacks!") }()
+	go func() {
+		_ = conn.InitScreen()
+		_ = conn.WriteConsole("A goblin attacks!")
+	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	// Message must appear somewhere in the scroll region (rows 1..scrollBottom).
@@ -443,9 +480,10 @@ func TestIntegration_WriteConsole_RedrawsDividerAtDividerRow(t *testing.T) {
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
-
-	go func() { _ = conn.WriteConsole("test") }()
+	go func() {
+		_ = conn.InitScreen()
+		_ = conn.WriteConsole("test")
+	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	assert.Contains(t, screen.RowText(lo.dividerRow), "═",
@@ -462,9 +500,10 @@ func TestIntegration_WriteConsole_RedrawsPromptAtRowH(t *testing.T) {
 	conn.inputBuf = "partial"
 	conn.mu.Unlock()
 
-	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
-
-	go func() { _ = conn.WriteConsole("message") }()
+	go func() {
+		_ = conn.InitScreen()
+		_ = conn.WriteConsole("message")
+	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	assert.Contains(t, screen.RowText(lo.promptRow), "partial",
@@ -481,9 +520,10 @@ func TestIntegration_WriteConsole_RedrawsRoomRegion(t *testing.T) {
 	conn.roomBuf = "MyRoom\nA dark chamber.\nExits:\n  east"
 	conn.mu.Unlock()
 
-	screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
-
-	go func() { _ = conn.WriteConsole("NPC says hello.") }()
+	go func() {
+		_ = conn.InitScreen()
+		_ = conn.WriteConsole("NPC says hello.")
+	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	// Room region must be redrawn.
@@ -502,6 +542,7 @@ func TestIntegration_WritePromptSplit_PlacesPromptAtRowH(t *testing.T) {
 	conn, client := newSplitConnTB(t, W, H)
 
 	go func() {
+		_ = conn.InitScreen()
 		_ = conn.WriteRoom("Nexus Hub")
 		_ = conn.WritePromptSplit("[Newb]> ")
 	}()
@@ -579,27 +620,35 @@ func TestProperty_WriteRoom_NeverOverwritesScrollRegion(t *testing.T) {
 		}
 
 		screen := newVT100Screen(W, H)
-		screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
 
-		// Pre-fill scroll region rows with sentinel so any overwrite is detectable.
+		conn, client := newSplitConnTB(rt, W, H)
+
+		// Phase 1: run InitScreen (sets scroll region and cursor at promptRow).
+		done1 := make(chan struct{})
+		go func() { defer close(done1); _ = conn.InitScreen() }()
+		raw1 := readAllConn(client, time.Second)
+		<-done1
+		screen.Feed(raw1)
+
+		// Pre-fill scroll region with sentinel dots after InitScreen clears screen.
 		for r := 1; r <= lo.scrollBottom; r++ {
 			for c := 0; c < W; c++ {
 				screen.cells[r-1][c] = '.'
 			}
 		}
 
-		conn, client := newSplitConnTB(rt, W, H)
-		done := make(chan struct{})
+		// Phase 2: run WriteRoom; scroll region sentinels must survive.
+		done2 := make(chan struct{})
 		go func() {
-			defer close(done)
+			defer close(done2)
 			_ = conn.WriteRoom(strings.Join(lines, "\n"))
 			conn.Close()
 		}()
-		raw := readAllConn(client, 2*time.Second)
-		<-done
-		screen.Feed(raw)
+		raw2 := readAllConn(client, 2*time.Second)
+		<-done2
+		screen.Feed(raw2)
 
-		// Scroll region rows must be untouched.
+		// Scroll region rows must be untouched (still '.' sentinel).
 		for r := 1; r <= lo.scrollBottom; r++ {
 			require.Contains(rt, screen.RowFull(r), ".",
 				fmt.Sprintf("WriteRoom must not overwrite scroll region row %d (W=%d H=%d lines=%d)",
@@ -628,10 +677,9 @@ func TestProperty_WriteRoom_AlwaysShowsFirstNLinesInOrder(t *testing.T) {
 		}
 
 		screen := newVT100Screen(W, H)
-		screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
-
 		conn, client := newSplitConnTB(rt, W, H)
 		go func() {
+			_ = conn.InitScreen()
 			_ = conn.WriteRoom(strings.Join(lines, "\n"))
 			conn.Close()
 		}()
@@ -664,14 +712,13 @@ func TestProperty_WriteConsole_NeverOverwritesRoomRegion(t *testing.T) {
 		consoleMsg := rapid.StringMatching(`[A-Za-z0-9 !?,]{5,40}`).Draw(rt, "msg")
 
 		screen := newVT100Screen(W, H)
-		screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
-
 		conn, client := newSplitConnTB(rt, W, H)
 		conn.mu.Lock()
 		conn.roomBuf = roomContent
 		conn.mu.Unlock()
 
 		go func() {
+			_ = conn.InitScreen()
 			_ = conn.WriteConsole(consoleMsg)
 			conn.Close()
 		}()
@@ -702,11 +749,10 @@ func TestProperty_WriteConsole_MessageAlwaysInScrollRegion(t *testing.T) {
 		msg := "SentinelMsg"
 
 		screen := newVT100Screen(W, H)
-		screen.scrollTop, screen.scrollBottom = 1, lo.scrollBottom
-
 		conn, client := newSplitConnTB(rt, W, H)
 
 		go func() {
+			_ = conn.InitScreen()
 			_ = conn.WriteConsole(msg)
 			conn.Close()
 		}()

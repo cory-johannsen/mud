@@ -59,8 +59,9 @@ func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 	assert.Contains(t, out, "\033[?25l")                                           // hide cursor
 	assert.Contains(t, out, "\033[2J")                                             // clear screen
 	assert.Contains(t, out, fmt.Sprintf("\033[1;%dr", lo.scrollBottom))            // scroll region 1..scrollBottom
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))              // room divider row (only safe abs pos)
-	assert.Contains(t, out, "\033[J")                                              // erase to end of screen (no \r\n loop)
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))              // one-time abs pos (unavoidable)
+	assert.Contains(t, out, "\033[J")                                              // erase to end of screen
+	assert.Contains(t, out, fmt.Sprintf("\033[%dB", roomRegionRows+1))             // CUD to promptRow after erase
 	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))            // promptRow never addressed absolutely
 	assert.Contains(t, out, "\033[?25h")                                           // show cursor
 	// InitScreen does NOT draw the divider — WriteRoom is the sole divider drawer.
@@ -74,12 +75,13 @@ func TestWriteRoom_WritesToRowsBelowScrollRegion(t *testing.T) {
 	go func() { _ = conn.WriteRoom("Nexus Hub\nA bustling crossroads.\nExits: N S E W") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	// No cursor save/restore — not needed with below-scroll-region layout.
+	// No cursor save/restore (ANSI) — we use DEC ESC 7/8 only in WriteConsole.
 	assert.NotContains(t, out, "\033[s")
 	assert.NotContains(t, out, "\033[u")
 
-	// Room divider must be redrawn at dividerRow (the only safe absolute position).
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
+	// Room divider drawn via CUU from promptRow — no absolute pos at dividerRow.
+	assert.Contains(t, out, fmt.Sprintf("\033[%dA", roomRegionRows+1)) // CUU to dividerRow
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow)) // no abs pos at dividerRow
 	assert.Contains(t, out, strings.Repeat("═", W))
 
 	// Content must appear via \r\n advancement (no absolute positioning for room rows).
@@ -106,8 +108,11 @@ func TestWriteConsole_ContainsText(t *testing.T) {
 	out := readAll(t, client, 500*time.Millisecond)
 
 	assert.Contains(t, out, "You swing at the goblin.")
-	// dividerRow is the only safe absolute position in the room region.
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
+	// Room redrawn via CUU from promptRow — no abs pos at dividerRow.
+	assert.Contains(t, out, fmt.Sprintf("\033[%dA", roomRegionRows+1))
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
+	// Message written at scrollBottom (safe: within scroll region).
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.scrollBottom))
 	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
 }
 
