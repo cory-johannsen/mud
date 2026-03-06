@@ -437,6 +437,19 @@ func TestTryReadEscapeSeq_UnrecognizedDigitSwallowed(t *testing.T) {
 	assert.ErrorIs(t, err, io.EOF)
 }
 
+func TestTryReadEscapeSeq_MultiDigitSwallowed(t *testing.T) {
+	// ESC [ 1 5 ~ (F5 on VT220) — two digit parameters, must consume all bytes.
+	raw := &bytes.Buffer{}
+	raw.Write([]byte{'[', '1', '5', '~'})
+	br := bufio.NewReader(raw)
+	c := &Conn{reader: br}
+	got := c.tryReadEscapeSeq()
+	assert.Equal(t, "", got)
+	// Verify ~ was consumed: reader should be empty.
+	_, err := br.ReadByte()
+	assert.ErrorIs(t, err, io.EOF)
+}
+
 func TestTryReadEscapeSeq_ArrowsUnchanged(t *testing.T) {
 	for _, tc := range []struct {
 		in   byte

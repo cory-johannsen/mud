@@ -168,7 +168,8 @@ func (c *Conn) ReadLine() (string, error) {
 // arrow key, or "" to indicate an unrecognized sequence (all bytes consumed).
 //
 // Precondition: ESC byte has already been read from c.reader.
-// Postcondition: The full CSI sequence ([ + final byte) has been consumed.
+// Postcondition: All bytes of the recognized or unrecognized CSI sequence
+// (including parameter bytes and terminator) have been consumed.
 func (c *Conn) tryReadEscapeSeq() string {
 	next, err := c.reader.ReadByte()
 	if err != nil || next != '[' {
@@ -193,10 +194,22 @@ func (c *Conn) tryReadEscapeSeq() string {
 		}
 		return "\x00PGDN"
 	default:
-		// For digit-prefixed sequences (e.g. ESC [ 3 ~), consume the trailing ~
-		// to avoid it leaking as a literal character.
-		if final >= '0' && final <= '9' {
-			_, _ = c.reader.ReadByte() // consume '~' or whatever follows
+		// For CSI sequences with parameter bytes (e.g. ESC [ 3 ~ or ESC [ 1 5 ~),
+		// consume all remaining bytes until a non-parameter byte (terminator).
+		// Parameter bytes are digits (0x30-0x39) and semicolons (0x3B).
+		// This prevents F-key and other multi-parameter sequences from leaking
+		// partial bytes into subsequent input.
+		if final >= '0' && final <= '9' || final == ';' {
+			for {
+				b, err := c.reader.ReadByte()
+				if err != nil {
+					break
+				}
+				// Stop when we reach the terminator (non-parameter byte)
+				if b < 0x30 || b > 0x3F {
+					break
+				}
+			}
 		}
 		return ""
 	}
