@@ -315,6 +315,42 @@ func TestCharacterRepository_SaveAbilities_InvalidID(t *testing.T) {
 	require.Error(t, err)
 }
 
+// TestPropertyCharacterRepository_SaveAbilities verifies that SaveAbilities followed by
+// GetByID always reflects all six ability score fields exactly.
+func TestPropertyCharacterRepository_SaveAbilities(t *testing.T) {
+	charRepo, acctRepo := setupCharReposShared(t)
+	ctx := context.Background()
+
+	rapid.Check(t, func(rt *rapid.T) {
+		acct, err := acctRepo.Create(ctx, uniqueName("user"), "pass")
+		require.NoError(t, err)
+
+		created, err := charRepo.Create(ctx, makeTestCharacter(acct.ID, "Prop"))
+		require.NoError(t, err)
+
+		abilities := character.AbilityScores{
+			Brutality:  int(rapid.Int32Range(1, 30).Draw(rt, "brutality")),
+			Grit:       int(rapid.Int32Range(1, 30).Draw(rt, "grit")),
+			Quickness:  int(rapid.Int32Range(1, 30).Draw(rt, "quickness")),
+			Reasoning:  int(rapid.Int32Range(1, 30).Draw(rt, "reasoning")),
+			Savvy:      int(rapid.Int32Range(1, 30).Draw(rt, "savvy")),
+			Flair:      int(rapid.Int32Range(1, 30).Draw(rt, "flair")),
+		}
+
+		err = charRepo.SaveAbilities(ctx, created.ID, abilities)
+		require.NoError(t, err)
+
+		fetched, err := charRepo.GetByID(ctx, created.ID)
+		require.NoError(t, err)
+		assert.Equal(t, abilities.Brutality, fetched.Abilities.Brutality)
+		assert.Equal(t, abilities.Grit, fetched.Abilities.Grit)
+		assert.Equal(t, abilities.Quickness, fetched.Abilities.Quickness)
+		assert.Equal(t, abilities.Reasoning, fetched.Abilities.Reasoning)
+		assert.Equal(t, abilities.Savvy, fetched.Abilities.Savvy)
+		assert.Equal(t, abilities.Flair, fetched.Abilities.Flair)
+	})
+}
+
 // TestCharacterRepository_Property_SaveStatePersists verifies that SaveState followed by
 // GetByID always reflects the new location and currentHP values.
 func TestCharacterRepository_Property_SaveStatePersists(t *testing.T) {
