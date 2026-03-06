@@ -672,3 +672,49 @@ func TestSnapToLive_ClearsScrollAndPending(t *testing.T) {
 	assert.Equal(t, 0, off)
 	assert.Equal(t, 0, pn)
 }
+
+func TestIntegration_ConsoleScroll(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+
+	// Write 200 lines into the buffer.
+	for i := 0; i < 200; i++ {
+		c.appendConsoleLine(fmt.Sprintf("line-%d", i))
+	}
+
+	// consoleHeight = 24 - 10 - 2 = 12
+	// Scroll up one page.
+	c.scrollUpState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	c.mu.Unlock()
+	assert.Equal(t, 12, off)
+
+	// consoleSlice should show lines 176-187
+	// end = 200 - 12 = 188; start = 188 - 12 = 176
+	slice := c.consoleSlice()
+	assert.Equal(t, 12, len(slice))
+	assert.Equal(t, "line-176", slice[0])
+	assert.Equal(t, "line-187", slice[len(slice)-1])
+
+	// Append more lines while scrolled — pendingNew increments.
+	c.appendConsoleLine("new-0")
+	c.appendConsoleLine("new-1")
+	c.mu.Lock()
+	pn := c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 2, pn)
+
+	// Scroll down to live — pendingNew cleared.
+	c.scrollDownState()
+	c.mu.Lock()
+	off = c.scrollOffset
+	pn = c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 0, off)
+	assert.Equal(t, 0, pn)
+
+	// consoleSlice at live shows the 12 most recent lines (196-201 = line-196..line-199, new-0, new-1)
+	slice = c.consoleSlice()
+	assert.Equal(t, 12, len(slice))
+	assert.Equal(t, "new-1", slice[len(slice)-1])
+}
