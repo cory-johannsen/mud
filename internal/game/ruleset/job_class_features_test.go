@@ -12,7 +12,7 @@ func TestJob_ClassFeatureGrants_Parses(t *testing.T) {
 	content := `
 id: test_job
 name: Test Job
-archetype: normie
+archetype: aggressor
 class_features:
   - resilience
   - working_stiff

@@ -113,8 +113,18 @@
     - [x] Region - Mirrors Background
     - [x] Job - Mirrors Class
   - [x] Player's that have not selected boosts must be prompted at login
-- [ ] Expanded Archetype options to match P2FE
-  - 
+- [x] Expanded Archetype options to match PF2E
+  - Full list of Player Core classes that need supported:
+    - [x] Bard -> Influencer
+    - [x] Cleric -> Zealot (new)
+    - [x] Druid -> Naturalist (new)
+    - [x] Fighter -> Aggressor
+    - [x] Ranger -> Drifter
+    - [x] Rogue -> Criminal
+    - [x] Witch -> Schemer (new)
+    - [x] Wizard -> Nerd
+  - [x] Normie dissolved; jobs redistributed lore-first
+  - [x] Jobs redistributed for balance (8-12 per archetype)
 - [ ] Proficiencies
   - [ ] Armor
       - [ ] Unarmored

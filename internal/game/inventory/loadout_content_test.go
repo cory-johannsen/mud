@@ -10,7 +10,7 @@ import (
 	"pgregory.net/rapid"
 )
 
-var archetypes = []string{"aggressor", "criminal", "drifter", "influencer", "nerd", "normie"}
+var archetypes = []string{"aggressor", "criminal", "drifter", "influencer", "naturalist", "nerd", "schemer", "zealot"}
 
 // buildTestRegistry loads all weapons, armors, and items from the content directories
 // and registers them in a Registry suitable for ID-resolution checks.
