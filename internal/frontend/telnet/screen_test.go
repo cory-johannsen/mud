@@ -59,8 +59,8 @@ func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 	assert.Contains(t, out, "\033[?25l")                                           // hide cursor
 	assert.Contains(t, out, "\033[2J")                                             // clear screen
 	assert.Contains(t, out, fmt.Sprintf("\033[1;%dr", lo.scrollBottom))            // scroll region 1..scrollBottom
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))              // room divider row
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))               // cursor at prompt row
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))              // room divider row (only safe abs pos)
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))            // promptRow reached via \r\n not abs pos
 	assert.Contains(t, out, "\033[?25h")                                           // show cursor
 	assert.Contains(t, out, strings.Repeat("═", W))                               // divider chars
 }
@@ -76,18 +76,16 @@ func TestWriteRoom_WritesToRowsBelowScrollRegion(t *testing.T) {
 	assert.NotContains(t, out, "\033[s")
 	assert.NotContains(t, out, "\033[u")
 
-	// Room divider must be redrawn.
+	// Room divider must be redrawn at dividerRow (the only safe absolute position).
 	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
 	assert.Contains(t, out, strings.Repeat("═", W))
 
-	// Content must appear at firstRow via absolute positioning with DECAWM off.
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.firstRow))
+	// Content must appear via \r\n advancement (no absolute positioning for room rows).
 	assert.Contains(t, out, "Nexus Hub")
-	assert.Contains(t, out, "\033[?7l") // DECAWM off before room writes
-	assert.Contains(t, out, "\033[?7h") // DECAWM on after room writes
-
-	// Cursor left at prompt row.
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.firstRow))   // no unsafe abs pos
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))  // no unsafe abs pos
+	assert.NotContains(t, out, "\033[?7l") // DECAWM not needed
+	assert.NotContains(t, out, "\033[?7h")
 }
 
 func TestWriteRoom_ClearsExactly6Lines(t *testing.T) {
@@ -99,21 +97,28 @@ func TestWriteRoom_ClearsExactly6Lines(t *testing.T) {
 }
 
 func TestWriteConsole_ContainsText(t *testing.T) {
-	conn, client := newSplitConn(t, 80, 24)
+	const W, H = 80, 24
+	lo := newRoomLayout(H)
+	conn, client := newSplitConn(t, W, H)
 	go func() { _ = conn.WriteConsole("You swing at the goblin.") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
 	assert.Contains(t, out, "You swing at the goblin.")
-	// Prompt row must be referenced
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", 24))
+	// Divider row is the only safe absolute position; prompt reached via \r\n.
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
 }
 
 func TestWritePromptSplit_AtRowH(t *testing.T) {
-	conn, client := newSplitConn(t, 80, 24)
+	const W, H = 80, 24
+	lo := newRoomLayout(H)
+	conn, client := newSplitConn(t, W, H)
 	go func() { _ = conn.WritePromptSplit("> ") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", 24))
+	// Prompt reached via dividerRow + \r\n steps, not absolute positioning.
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
 	assert.Contains(t, out, "> ")
 }
 

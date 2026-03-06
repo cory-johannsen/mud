@@ -40,13 +40,14 @@ func newRoomLayout(h int) roomLayout {
 // InitScreen initializes the split-screen layout.
 //
 // Scroll region = rows 1..scrollBottom.
-// Room divider  = row dividerRow.
+// Room divider  = row dividerRow  (= scrollBottom+1, the one safe absolute position).
 // Room content  = rows firstRow..lastRow  (roomRegionRows rows).
 // Prompt        = row h.
 //
-// All room/divider/prompt rows are BELOW the scroll region so that cursor
-// positioning works regardless of whether the terminal restricts movement to
-// the scroll region.
+// TinTin++ quirk: \033[row;1H for row > scrollBottom+1 causes row-scrollBottom-1
+// scroll operations instead of positioning.  Only \033[dividerRow;1H] (row =
+// scrollBottom+1) is safe.  All other below-scroll rows are reached via \r\n
+// from dividerRow.
 //
 // Precondition:  conn.width and conn.height must be > 0.
 // Postcondition: Terminal is configured for three-region layout.
@@ -60,30 +61,32 @@ func (c *Conn) InitScreen() error {
 	divider := strings.Repeat("═", w)
 
 	var buf strings.Builder
-	buf.WriteString("\033[?25l")    // hide cursor
+	buf.WriteString("\033[?25l")     // hide cursor
 	buf.WriteString("\033[2J\033[H") // clear screen, home
 
-	// Set scroll region to rows 1..scrollBottom.  The cursor moves to home
-	// after DECSTBM; home is row 1 (DECOM off, which is the default).
+	// Set scroll region to rows 1..scrollBottom.
 	fmt.Fprintf(&buf, "\033[1;%dr", lo.scrollBottom)
 
-	// Draw room divider and blank the room content rows.
-	// These rows are all BELOW the scroll region so absolute positioning works.
+	// Draw divider at dividerRow (safe: scrollBottom+1 = 0 scroll ops).
+	// Clear each room row and advance to promptRow using \r\n — LF below
+	// the scroll region advances the cursor without triggering any scroll.
 	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
-	for row := lo.firstRow; row <= lo.lastRow; row++ {
-		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", row)
+	for i := 0; i <= roomRegionRows; i++ { // roomRegionRows rows + 1 step to promptRow
+		buf.WriteString("\r\n\033[2K")
 	}
 
-	// Position cursor at input row.
-	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
-	buf.WriteString("\033[?25h") // show cursor
+	buf.WriteString("\033[?25h") // show cursor (cursor is now at promptRow)
 
 	return c.writeRaw(buf.String())
 }
 
 // WriteRoom renders content into the pinned room region.
-// The room region sits BELOW the scroll region (rows firstRow..lastRow) so
-// that absolute cursor positioning is never restricted by the scroll region.
+//
+// All rows are reached from dividerRow via \r\n.  \033[dividerRow;1H is the
+// only absolute cursor-position command used; it is the one safe position
+// (scrollBottom+1 = 0 TinTin++ scroll ops).  All other room rows and the
+// prompt row are reached by advancing with \r\n, which does not scroll when
+// the cursor is below the scroll region.
 //
 // Precondition:  conn.splitScreen must be true; conn.width and conn.height > 0.
 // Postcondition: Room divider and content rows are updated; cursor at promptRow.
@@ -103,30 +106,9 @@ func (c *Conn) WriteRoom(content string) error {
 	divider := strings.Repeat("═", w)
 
 	var buf strings.Builder
-	// Disable auto-wrap so a full-width line does not leave a pending-wrap state
-	// that would shift subsequent absolute cursor-position commands by one row.
-	buf.WriteString("\033[?7l")
-
-	// Redraw room divider (absolute positioning to dividerRow works in TinTin++).
-	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
-
-	// Write each room content row with absolute positioning.
-	// DECAWM is off so full-width lines clip at column W without pending-wrap.
-	for i := 0; i < roomRegionRows; i++ {
-		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", lo.firstRow+i)
-		if i < len(lines) {
-			line := lines[i]
-			if w > 0 && visualWidth(line) > w {
-				line = truncateToVisualWidth(line, w)
-			}
-			buf.WriteString(line)
-		}
-	}
-
-	// Leave cursor at prompt row; WritePromptSplit (always called after) writes it.
-	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
-	// Re-enable auto-wrap for scroll-region console output.
-	buf.WriteString("\033[?7h")
+	appendRoomRedraw(&buf, lines, w, lo, divider)
+	// Advance one more row from lastRow to promptRow.
+	buf.WriteString("\r\n")
 
 	return c.writeRaw(buf.String())
 }
@@ -161,33 +143,31 @@ func (c *Conn) WriteConsole(text string) error {
 		buf.WriteString(line)
 	}
 
-	// Redraw room divider and content using appendRoomRedraw (handles divider + \r\n advancement).
+	// Redraw room divider and content. Normalize cached room to lines first.
+	var roomLines []string
 	if room != "" {
-		appendRoomRedraw(&buf, room, w, lo, divider)
-	} else {
-		fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
+		normalized := strings.ReplaceAll(strings.ReplaceAll(room, "\r\n", "\n"), "\r", "")
+		roomLines = strings.Split(strings.TrimSpace(normalized), "\n")
 	}
+	appendRoomRedraw(&buf, roomLines, w, lo, divider)
 
-	// Redraw input row with preserved input.
-	fmt.Fprintf(&buf, "\033[%d;1H\033[2K%s", lo.promptRow, input)
+	// Advance from lastRow to promptRow and redraw input.
+	buf.WriteString("\r\n\033[2K")
+	buf.WriteString(input)
 
 	return c.writeRaw(buf.String())
 }
 
-// appendRoomRedraw writes room content rows into buf.
-// All rows are below the scroll region so absolute positioning is reliable.
 // appendRoomRedraw writes the divider and room content rows into buf.
-// Caller must have already written any preceding content; this function
-// positions at dividerRow and uses \r\n advancement to avoid pending-wrap
-// interaction with absolute cursor-position commands.
-func appendRoomRedraw(buf *strings.Builder, content string, w int, lo roomLayout, divider string) {
-	normalized := strings.ReplaceAll(strings.ReplaceAll(content, "\r\n", "\n"), "\r", "")
-	lines := strings.Split(strings.TrimSpace(normalized), "\n")
-
-	buf.WriteString("\033[?7l")
+// Positions at dividerRow (the only safe absolute position below the scroll
+// region) and uses \r\n to advance to each subsequent row.  \r\n below the
+// scroll region advances the cursor without triggering any scroll.
+// Precondition: lines are already split and normalized (no \r\n).
+// Postcondition: cursor is at lastRow (roomRegionRows \r\n steps from dividerRow).
+func appendRoomRedraw(buf *strings.Builder, lines []string, w int, lo roomLayout, divider string) {
 	fmt.Fprintf(buf, "\033[%d;1H%s", lo.dividerRow, divider)
 	for i := 0; i < roomRegionRows; i++ {
-		fmt.Fprintf(buf, "\033[%d;1H\033[2K", lo.firstRow+i)
+		buf.WriteString("\r\n\033[2K")
 		if i < len(lines) {
 			line := lines[i]
 			if w > 0 && visualWidth(line) > w {
@@ -196,7 +176,6 @@ func appendRoomRedraw(buf *strings.Builder, content string, w int, lo roomLayout
 			buf.WriteString(line)
 		}
 	}
-	buf.WriteString("\033[?7h")
 }
 
 // WritePromptSplit writes the prompt and buffered input at the prompt row (row H).
@@ -211,7 +190,13 @@ func (c *Conn) WritePromptSplit(prompt string) error {
 
 	lo := newRoomLayout(h)
 	var buf strings.Builder
-	fmt.Fprintf(&buf, "\033[%d;1H\033[2K%s%s", lo.promptRow, prompt, input)
+	// Navigate to promptRow via dividerRow + (roomRegionRows+1) \r\n steps.
+	// \033[promptRow;1H is unsafe (causes roomRegionRows+1 TinTin++ scroll ops).
+	fmt.Fprintf(&buf, "\033[%d;1H", lo.dividerRow)
+	for i := 0; i <= roomRegionRows; i++ {
+		buf.WriteString("\r\n")
+	}
+	fmt.Fprintf(&buf, "\033[2K%s%s", prompt, input)
 
 	return c.writeRaw(buf.String())
 }
