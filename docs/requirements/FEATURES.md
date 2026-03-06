@@ -90,7 +90,7 @@
     - [x] The room display section must have a horizontal divider on the bottom to separate it from the console
     - [x] Console messages must never overwrite the room display
     - [x] When a player is in combat the room display must reflect this
-- [ ] Bugs
+- [x] Bugs
   - [x] The room description is truncated in the Room section of the screen.
     - Wrapping the description will push the exits down and force them out of the Room section so they need to be arranged in columns with 3 per row
   - [x] Prompt is echoed to console
@@ -102,9 +102,9 @@
   - [x] zone_map did not appear in the Room section until the user issued the look command
     - Instead of the object id zone_map, use the description text Zone Map
   - [x] player prompts to select missing feats and class features at load time doesn't display the list of options for players that are missing selections
-  - [ ] NPC speech/actions in the console have inconsistent format, start with " : ", do not necessarily include NPC name
+  - [x] NPC speech/actions in the console have inconsistent format, start with " : ", do not necessarily include NPC name
   - [x] Idle timer message is not appearing for user.  The timer should warn the user at 4 minutes of idle time and again at 4m30s that automatic disconnect is pending
-- [ ] PgUp/PgDn should scroll the Console section so the user can look back 
+- [x] PgUp/PgDn should scroll the Console section so the user can look back 
 - [ ] Character ability boosts
   - [ ] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
     - [ ] Archetype - Mirrors Ancestry
@@ -262,5 +262,7 @@
   - [ ] trip wires
   - [ ] pressure plates
   - [ ] Honkeypot
+- New zones
+  - Clown Camp
 - [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Mac, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration
