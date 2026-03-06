@@ -574,7 +574,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			currentHP.Store(ci.GetCurrentHp())
 			text = RenderCharacterInfo(ci)
 		case *gamev1.ServerEvent_CharacterSheet:
-			text = RenderCharacterSheet(p.CharacterSheet)
+			cw, _ := conn.Dimensions()
+			text = RenderCharacterSheet(p.CharacterSheet, cw)
 		case *gamev1.ServerEvent_Map:
 			text = RenderMap(p.Map)
 		case *gamev1.ServerEvent_SkillsResponse:

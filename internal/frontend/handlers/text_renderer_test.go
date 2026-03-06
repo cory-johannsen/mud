@@ -449,7 +449,7 @@ func TestRenderCharacterSheet_Skills(t *testing.T) {
 			{SkillId: "diplomacy", Name: "Diplomacy", Ability: "FLR", Proficiency: "legendary"},
 		},
 	}
-	result := RenderCharacterSheet(view)
+	result := RenderCharacterSheet(view, 80)
 	assert.Contains(t, result, "Skills")
 	assert.Contains(t, result, "Acrobatics")
 	assert.Contains(t, result, "trained")
@@ -550,21 +550,21 @@ func TestRenderCharacterSheet_Feats(t *testing.T) {
 			{FeatId: "power_attack", Name: "Power Attack", Active: true, ActivateText: "Strike hard.", Description: "Deal extra damage."},
 		},
 	}
-	result := RenderCharacterSheet(view)
+	result := RenderCharacterSheet(view, 80)
 	stripped := telnet.StripANSI(result)
 	assert.Contains(t, stripped, "Feats")
 	assert.Contains(t, stripped, "Iron Will")
 	assert.Contains(t, stripped, "Power Attack")
-	assert.Contains(t, stripped, "[active]")
-	// Only Power Attack is active — Iron Will must not be followed by [active]
-	assert.NotContains(t, stripped, "Iron Will [active]")
+	assert.Contains(t, stripped, "[A]")
+	// Only Power Attack is active — Iron Will must not be followed by [A]
+	assert.NotContains(t, stripped, "Iron Will [A]")
 }
 
 // TestProperty_RenderCharacterSheet_Feats verifies two properties:
-// 1. For any feat with Active=true, the rendered output contains "[active]".
-// 2. For a sheet containing only inactive feats, the output does not contain "[active]".
+// 1. For any feat with Active=true, the rendered output contains "[A]".
+// 2. For a sheet containing only inactive feats, the output does not contain "[A]".
 func TestProperty_RenderCharacterSheet_Feats(t *testing.T) {
-	// Property 1: at least one active feat => output contains "[active]".
+	// Property 1: at least one active feat => output contains "[A]".
 	rapid.Check(t, func(rt *rapid.T) {
 		name := rapid.StringMatching(`[a-zA-Z ]{1,20}`).Draw(rt, "name")
 		feat := &gamev1.FeatEntry{
@@ -577,13 +577,13 @@ func TestProperty_RenderCharacterSheet_Feats(t *testing.T) {
 			Level: 1,
 			Feats: []*gamev1.FeatEntry{feat},
 		}
-		result := telnet.StripANSI(RenderCharacterSheet(view))
-		if !strings.Contains(result, "[active]") {
-			rt.Fatalf("active feat %q: output does not contain [active]; got:\n%s", name, result)
+		result := telnet.StripANSI(RenderCharacterSheet(view, 80))
+		if !strings.Contains(result, "[A]") {
+			rt.Fatalf("active feat %q: output does not contain [A]; got:\n%s", name, result)
 		}
 	})
 
-	// Property 2: all inactive feats => output does not contain "[active]".
+	// Property 2: all inactive feats => output does not contain "[A]".
 	rapid.Check(t, func(rt *rapid.T) {
 		name := rapid.StringMatching(`[a-zA-Z ]{1,20}`).Draw(rt, "name")
 		feat := &gamev1.FeatEntry{
@@ -596,9 +596,9 @@ func TestProperty_RenderCharacterSheet_Feats(t *testing.T) {
 			Level: 1,
 			Feats: []*gamev1.FeatEntry{feat},
 		}
-		result := telnet.StripANSI(RenderCharacterSheet(view))
-		if strings.Contains(result, "[active]") {
-			rt.Fatalf("inactive feat %q: output must not contain [active]; got:\n%s", name, result)
+		result := telnet.StripANSI(RenderCharacterSheet(view, 80))
+		if strings.Contains(result, "[A]") {
+			rt.Fatalf("inactive feat %q: output must not contain [A]; got:\n%s", name, result)
 		}
 	})
 }
@@ -644,12 +644,12 @@ func TestRenderCharacterSheet_ClassFeatures(t *testing.T) {
 			{FeatureId: "guerilla_warfare", Name: "Guerilla Warfare", Job: "soldier", Active: false, Description: "Urban cover bonus."},
 		},
 	}
-	result := RenderCharacterSheet(view)
+	result := RenderCharacterSheet(view, 80)
 	assert.Contains(t, result, "Class Features")
 	assert.Contains(t, result, "Brutal Surge")
 	assert.Contains(t, result, "Street Brawler")
 	assert.Contains(t, result, "Guerilla Warfare")
-	assert.Contains(t, result, "[active]")
+	assert.Contains(t, result, "[A]")
 }
 
 func TestRenderCharacterSheet_ClassFeatures_Property(t *testing.T) {
@@ -666,7 +666,7 @@ func TestRenderCharacterSheet_ClassFeatures_Property(t *testing.T) {
 				{FeatureId: "job_feat", Name: jobName, Job: "someJob", Active: false},
 			},
 		}
-		result := RenderCharacterSheet(view)
+		result := RenderCharacterSheet(view, 80)
 		stripped := telnet.StripANSI(result)
 
 		archIdx := strings.Index(stripped, archetypeName)
@@ -686,13 +686,13 @@ func TestRenderCharacterSheet_ClassFeatures_Property(t *testing.T) {
 		if archetypeSectionIdx >= jobSectionIdx {
 			rt.Fatalf("archetype section must appear before job section; got:\n%s", stripped)
 		}
-		// Active archetype feature must produce [active].
-		if active && !strings.Contains(stripped, "[active]") {
-			rt.Fatalf("active archetype feature must produce [active] in output:\n%s", stripped)
+		// Active archetype feature must produce [A].
+		if active && !strings.Contains(stripped, "[A]") {
+			rt.Fatalf("active archetype feature must produce [A] in output:\n%s", stripped)
 		}
 	})
 
-	// Property 2: inactive features must not produce [active].
+	// Property 2: inactive features must not produce [A].
 	rapid.Check(t, func(rt *rapid.T) {
 		name := rapid.StringMatching(`[a-zA-Z ]{1,20}`).Draw(rt, "name")
 		view := &gamev1.CharacterSheetView{
@@ -702,9 +702,9 @@ func TestRenderCharacterSheet_ClassFeatures_Property(t *testing.T) {
 				{FeatureId: "feat", Name: name, Archetype: "arch", Active: false},
 			},
 		}
-		result := telnet.StripANSI(RenderCharacterSheet(view))
-		if strings.Contains(result, "[active]") {
-			rt.Fatalf("inactive feature %q must not produce [active]; got:\n%s", name, result)
+		result := telnet.StripANSI(RenderCharacterSheet(view, 80))
+		if strings.Contains(result, "[A]") {
+			rt.Fatalf("inactive feature %q must not produce [A]; got:\n%s", name, result)
 		}
 	})
 }

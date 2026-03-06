@@ -93,12 +93,14 @@
 - [ ] Bugs
   - [x] The room description is truncated in the Room section of the screen.
     - Wrapping the description will push the exits down and force them out of the Room section so they need to be arranged in columns with 3 per row
-  - [ ] Prompt is echoed to console 
+  - [x] Prompt is echoed to console
     - when a command is entered
     - when NPCs speak
-  - [ ] Character sheet scrolls off the screen, move the feats and class features into a second column
+  - [ ] Character sheet scrolls off the screen, needs to be reformatted. move the feats and class features into a second column
   - [ ] Time-of-day events only update the prompt when the description changes, not when the time changes
   - [ ] zone_map did not appear in the Room section until the user issued the look command
+  - [ ] player prompts to select missing feats and class features at load time doesn't display the list of options for players that are missing selections
+  - [ ] NPC speech/actions in the console should include a time of day indicator in the message, before of the " : "
 - [ ] Character ability boosts
   - [ ] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
     - [ ] Archetype - Mirrors Ancestry

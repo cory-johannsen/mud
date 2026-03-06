@@ -363,43 +363,95 @@ func proficiencyColor(rank string) string {
 	}
 }
 
+// sheetLine is a rendered line for the character sheet two-column layout.
+// text may contain ANSI escape codes; visW is the visible (printable) width.
+type sheetLine struct {
+	text string
+	visW int
+}
+
+// sl builds a sheetLine from an already-colored string.
+func sl(text string) sheetLine {
+	return sheetLine{text: text, visW: len(telnet.StripANSI(text))}
+}
+
+// slPlain builds a sheetLine from a plain (no ANSI) string.
+func slPlain(text string) sheetLine { return sheetLine{text: text, visW: len(text)} }
+
+// assembleColumns zips left and right line slices into a two-column layout.
+// Each row is: left line padded to leftW chars + " | " + right line + \r\n.
+//
+// Precondition: leftW > 0.
+// Postcondition: returns a non-empty string with one output row per max(len(left), len(right)).
+func assembleColumns(left, right []sheetLine, leftW int) string {
+	var b strings.Builder
+	n := len(left)
+	if len(right) > n {
+		n = len(right)
+	}
+	for i := 0; i < n; i++ {
+		var l, r sheetLine
+		if i < len(left) {
+			l = left[i]
+		}
+		if i < len(right) {
+			r = right[i]
+		}
+		pad := leftW - l.visW
+		if pad < 0 {
+			pad = 0
+		}
+		b.WriteString(l.text)
+		b.WriteString(strings.Repeat(" ", pad))
+		b.WriteString(" | ")
+		b.WriteString(r.text)
+		b.WriteString("\r\n")
+	}
+	return b.String()
+}
+
 // RenderCharacterSheet formats a CharacterSheetView as a detailed Telnet character sheet.
 //
-// Precondition: csv must be non-nil.
+// When width >= 73, feats and class features are placed in a right column beside
+// the stats/skills block.  For narrower terminals a single-column layout is used.
+//
+// Precondition: csv must be non-nil; width is the terminal width (0 = unknown → single column).
 // Postcondition: Returns a non-empty human-readable multiline string.
-func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
+func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	if csv == nil {
 		return telnet.Colorize(telnet.Red, "No character sheet available.")
 	}
-	var b strings.Builder
 
-	// Header
-	b.WriteString(telnet.Colorf(telnet.BrightYellow, "=== %s ===", csv.GetName()))
-	b.WriteString("\r\n")
-	b.WriteString(fmt.Sprintf("Class: %s  Archetype: %s  Team: %s  Level: %d\r\n",
-		csv.GetJob(), csv.GetArchetype(), csv.GetTeam(), csv.GetLevel()))
-	b.WriteString(fmt.Sprintf("HP: %d / %d\r\n", csv.GetCurrentHp(), csv.GetMaxHp()))
+	const leftW = 50 // visible width of the left column
+	const minWidth = 73 // leftW + 3 (" | ") + 20 (minimum right column)
+	twoCol := width >= minWidth
+	rightW := 0
+	if twoCol {
+		rightW = width - leftW - 3
+	}
 
-	// Abilities
-	b.WriteString("\r\n")
-	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Abilities ---"))
-	b.WriteString("\r\n")
-	b.WriteString(fmt.Sprintf("BRT: %s  GRT: %s  QCK: %s\r\n",
-		abilityBonus(csv.GetBrutality()), abilityBonus(csv.GetGrit()), abilityBonus(csv.GetQuickness())))
-	b.WriteString(fmt.Sprintf("RSN: %s  SAV: %s  FLR: %s\r\n",
-		abilityBonus(csv.GetReasoning()), abilityBonus(csv.GetSavvy()), abilityBonus(csv.GetFlair())))
+	// ── Left column: header, stats, armor, currency, skills ──────────────────
+	var left []sheetLine
 
-	// Defense
-	b.WriteString("\r\n")
-	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Defense ---"))
-	b.WriteString("\r\n")
-	b.WriteString(fmt.Sprintf("AC Bonus: %d  Check Penalty: %d  Speed Penalty: %d\r\n",
-		csv.GetAcBonus(), csv.GetCheckPenalty(), csv.GetSpeedPenalty()))
+	left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "=== %s ===", csv.GetName())))
+	left = append(left, slPlain(fmt.Sprintf("Class: %s  Archetype: %s  Team: %s  Level: %d",
+		csv.GetJob(), csv.GetArchetype(), csv.GetTeam(), csv.GetLevel())))
+	left = append(left, slPlain(fmt.Sprintf("HP: %d / %d", csv.GetCurrentHp(), csv.GetMaxHp())))
 
-	// Weapons
-	b.WriteString("\r\n")
-	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Weapons ---"))
-	b.WriteString("\r\n")
+	left = append(left, slPlain(""))
+	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Abilities ---")))
+	left = append(left, slPlain(fmt.Sprintf("BRT: %s  GRT: %s  QCK: %s",
+		abilityBonus(csv.GetBrutality()), abilityBonus(csv.GetGrit()), abilityBonus(csv.GetQuickness()))))
+	left = append(left, slPlain(fmt.Sprintf("RSN: %s  SAV: %s  FLR: %s",
+		abilityBonus(csv.GetReasoning()), abilityBonus(csv.GetSavvy()), abilityBonus(csv.GetFlair()))))
+
+	left = append(left, slPlain(""))
+	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Defense ---")))
+	left = append(left, slPlain(fmt.Sprintf("AC Bonus: %d  Check Penalty: %d  Speed Penalty: %d",
+		csv.GetAcBonus(), csv.GetCheckPenalty(), csv.GetSpeedPenalty())))
+
+	left = append(left, slPlain(""))
+	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Weapons ---")))
 	mainHand := csv.GetMainHand()
 	if mainHand == "" {
 		mainHand = "(none)"
@@ -408,102 +460,122 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView) string {
 	if offHand == "" {
 		offHand = "(none)"
 	}
-	b.WriteString(fmt.Sprintf("Main: %s\r\n", mainHand))
-	b.WriteString(fmt.Sprintf("Off:  %s\r\n", offHand))
+	left = append(left, slPlain(fmt.Sprintf("Main: %s", mainHand)))
+	left = append(left, slPlain(fmt.Sprintf("Off:  %s", offHand)))
 
-	// Armor
 	if armor := csv.GetArmor(); len(armor) > 0 {
-		b.WriteString("\r\n")
-		b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Armor ---"))
-		b.WriteString("\r\n")
+		left = append(left, slPlain(""))
+		left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Armor ---")))
 		for slot, item := range armor {
 			if item != "" {
-				b.WriteString(fmt.Sprintf("%s: %s\r\n", formatSlotLabel(slot), item))
+				left = append(left, slPlain(fmt.Sprintf("%s: %s", formatSlotLabel(slot), item)))
 			}
 		}
 	}
 
-	// Currency
-	b.WriteString("\r\n")
-	b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Currency ---"))
-	b.WriteString("\r\n")
-	b.WriteString(fmt.Sprintf("%s\r\n", csv.GetCurrency()))
+	left = append(left, slPlain(""))
+	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Currency ---")))
+	left = append(left, slPlain(csv.GetCurrency()))
 
-	// Skills
 	if skills := csv.GetSkills(); len(skills) > 0 {
-		b.WriteString("\r\n")
-		b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Skills ---"))
-		b.WriteString("\r\n")
+		left = append(left, slPlain(""))
+		left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Skills ---")))
 		for _, sk := range skills {
-			label := fmt.Sprintf("%-20s (%s)", sk.GetName(), sk.GetAbility())
-			rank := proficiencyColor(sk.GetProficiency())
-			b.WriteString(fmt.Sprintf("  %-32s %s\r\n", label, rank))
+			plain := fmt.Sprintf("  %-14s (%s) %s", sk.GetName(), sk.GetAbility(), proficiencyColor(sk.GetProficiency()))
+			left = append(left, sl(plain))
 		}
 	}
 
-	// Feats
+	// ── Right column: feats and class features ────────────────────────────────
+	var right []sheetLine
+
 	if feats := csv.GetFeats(); len(feats) > 0 {
-		b.WriteString("\r\n")
-		b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Feats ---"))
-		b.WriteString("\r\n")
+		right = append(right, sl(telnet.Colorize(telnet.BrightCyan, "--- Feats ---")))
 		for _, ft := range feats {
-			name := ft.GetName()
+			activeTag := ""
 			if ft.GetActive() {
-				name += " " + telnet.Colorize(telnet.Yellow, "[active]")
+				activeTag = telnet.Colorize(telnet.Yellow, " [A]")
 			}
-			b.WriteString(fmt.Sprintf("  %s\r\n", name))
+			nameLine := fmt.Sprintf("  %s%s", ft.GetName(), activeTag)
+			right = append(right, sl(nameLine))
 			if desc := ft.GetDescription(); desc != "" {
-				b.WriteString(fmt.Sprintf("    %s\r\n", desc))
+				d := desc
+				if twoCol && len(d) > rightW-4 && rightW > 4 {
+					d = d[:rightW-4]
+				}
+				right = append(right, slPlain(fmt.Sprintf("    %s", d)))
 			}
 		}
 	}
 
-	// Class Features
 	if cfs := csv.GetClassFeatures(); len(cfs) > 0 {
-		b.WriteString("\r\n")
-		b.WriteString(telnet.Colorize(telnet.BrightCyan, "--- Class Features ---"))
-		b.WriteString("\r\n")
+		if len(right) > 0 {
+			right = append(right, slPlain(""))
+		}
+		right = append(right, sl(telnet.Colorize(telnet.BrightCyan, "--- Class Features ---")))
 
-		// Archetype features
 		hasArchetype := false
 		for _, cf := range cfs {
-			if cf.GetArchetype() != "" {
-				if !hasArchetype {
-					b.WriteString(telnet.Colorize(telnet.Cyan, "  Archetype:\r\n"))
-					hasArchetype = true
+			if cf.GetArchetype() == "" {
+				continue
+			}
+			if !hasArchetype {
+				right = append(right, sl(telnet.Colorize(telnet.Cyan, "  Archetype:")))
+				hasArchetype = true
+			}
+			activeTag := ""
+			if cf.GetActive() {
+				activeTag = telnet.Colorize(telnet.Yellow, " [A]")
+			}
+			right = append(right, sl(fmt.Sprintf("    %s%s", cf.GetName(), activeTag)))
+			if desc := cf.GetDescription(); desc != "" {
+				d := desc
+				if twoCol && len(d) > rightW-6 && rightW > 6 {
+					d = d[:rightW-6]
 				}
-				name := cf.GetName()
-				if cf.GetActive() {
-					name += " " + telnet.Colorize(telnet.Yellow, "[active]")
-				}
-				b.WriteString(fmt.Sprintf("    %s\r\n", name))
-				if desc := cf.GetDescription(); desc != "" {
-					b.WriteString(fmt.Sprintf("      %s\r\n", desc))
-				}
+				right = append(right, slPlain(fmt.Sprintf("      %s", d)))
 			}
 		}
 
-		// Job features
 		hasJob := false
 		for _, cf := range cfs {
-			if cf.GetJob() != "" {
-				if !hasJob {
-					b.WriteString(telnet.Colorize(telnet.Cyan, "  Job:\r\n"))
-					hasJob = true
+			if cf.GetJob() == "" {
+				continue
+			}
+			if !hasJob {
+				right = append(right, sl(telnet.Colorize(telnet.Cyan, "  Job:")))
+				hasJob = true
+			}
+			activeTag := ""
+			if cf.GetActive() {
+				activeTag = telnet.Colorize(telnet.Yellow, " [A]")
+			}
+			right = append(right, sl(fmt.Sprintf("    %s%s", cf.GetName(), activeTag)))
+			if desc := cf.GetDescription(); desc != "" {
+				d := desc
+				if twoCol && len(d) > rightW-6 && rightW > 6 {
+					d = d[:rightW-6]
 				}
-				name := cf.GetName()
-				if cf.GetActive() {
-					name += " " + telnet.Colorize(telnet.Yellow, "[active]")
-				}
-				b.WriteString(fmt.Sprintf("    %s\r\n", name))
-				if desc := cf.GetDescription(); desc != "" {
-					b.WriteString(fmt.Sprintf("      %s\r\n", desc))
-				}
+				right = append(right, slPlain(fmt.Sprintf("      %s", d)))
 			}
 		}
 	}
 
-	return b.String()
+	// ── Assemble ──────────────────────────────────────────────────────────────
+	if !twoCol {
+		// Single column: left then right, each line terminated with \r\n.
+		var b strings.Builder
+		for _, l := range left {
+			b.WriteString(l.text)
+			b.WriteString("\r\n")
+		}
+		for _, r := range right {
+			b.WriteString(r.text)
+			b.WriteString("\r\n")
+		}
+		return b.String()
+	}
+	return assembleColumns(left, right, leftW)
 }
 
 // sortedInt32Set returns the keys of a map[int32]bool in ascending order.
