@@ -376,14 +376,33 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		}
 		lastInput.Store(time.Now().UnixNano())
 
-		// Handle arrow key sentinels — no command history implemented yet.
-		if line == "\x00UP" || line == "\x00DOWN" {
+		// Handle navigation sentinels.
+		switch line {
+		case "\x00UP", "\x00DOWN":
+			// Arrow keys: redraw prompt only (no command history yet).
 			if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(buildPrompt())
 			} else {
 				_ = conn.WritePrompt(buildPrompt())
 			}
 			continue
+		case "\x00PGUP":
+			if conn.IsSplitScreen() {
+				_ = conn.ScrollUp()
+			}
+			continue
+		case "\x00PGDN":
+			if conn.IsSplitScreen() {
+				_ = conn.ScrollDown()
+			}
+			continue
+		}
+
+		// Any real command while scrolled back: snap to live first.
+		if conn.IsSplitScreen() {
+			if snapErr := conn.SnapToLive(); snapErr != nil {
+				h.logger.Debug("snap to live failed", zap.Error(snapErr))
+			}
 		}
 
 		line = strings.TrimSpace(line)

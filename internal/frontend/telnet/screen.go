@@ -481,6 +481,25 @@ func (c *Conn) ScrollDown() error {
 	return c.redrawConsole()
 }
 
+// snapToLiveState clears scrollOffset and pendingNew without triggering a redraw.
+//
+// Postcondition: scrollOffset == 0; pendingNew == 0.
+func (c *Conn) snapToLiveState() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.scrollOffset = 0
+	c.pendingNew = 0
+}
+
+// SnapToLive returns to live view (scrollOffset=0) and redraws the console.
+//
+// Precondition: conn must be in split-screen mode.
+// Postcondition: scrollOffset=0, pendingNew=0, console shows latest buffered lines.
+func (c *Conn) SnapToLive() error {
+	c.snapToLiveState()
+	return c.redrawConsole()
+}
+
 // WrapText splits text into lines of at most width visible characters.
 // ANSI escape sequences are preserved and not counted toward the width.
 // This is the exported form of wrapText.

@@ -657,3 +657,18 @@ func TestScrollDown_PartialPage(t *testing.T) {
 	assert.Equal(t, 0, off)
 	assert.Equal(t, 0, pn)
 }
+
+func TestSnapToLive_ClearsScrollAndPending(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	c.mu.Lock()
+	c.scrollOffset = 24
+	c.pendingNew = 7
+	c.mu.Unlock()
+	c.snapToLiveState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	pn := c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 0, off)
+	assert.Equal(t, 0, pn)
+}
