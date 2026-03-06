@@ -56,7 +56,7 @@ func TestRenderMessage_Say(t *testing.T) {
 		Content: "hello world",
 		Type:    gamev1.MessageType_MESSAGE_TYPE_SAY,
 	}
-	stripped := telnet.StripANSI(RenderMessage(msg))
+	stripped := telnet.StripANSI(RenderMessage(msg, ""))
 	assert.Contains(t, stripped, "Alice says: hello world")
 }
 
@@ -66,7 +66,7 @@ func TestRenderMessage_Emote(t *testing.T) {
 		Content: "waves",
 		Type:    gamev1.MessageType_MESSAGE_TYPE_EMOTE,
 	}
-	stripped := telnet.StripANSI(RenderMessage(msg))
+	stripped := telnet.StripANSI(RenderMessage(msg, ""))
 	assert.Contains(t, stripped, "Alice waves")
 }
 

@@ -102,7 +102,7 @@
   - [x] zone_map did not appear in the Room section until the user issued the look command
     - Instead of the object id zone_map, use the description text Zone Map
   - [x] player prompts to select missing feats and class features at load time doesn't display the list of options for players that are missing selections
-  - [ ] NPC speech/actions in the console should include a time of day indicator in the message, before of the " : "
+  - [ ] NPC speech/actions in the console have inconsistent format, start with " : ", do not necessarily include NPC name
   - [ ] Idle timer message is not appearing for user.  The timer should warn the user at 4 minutes of idle time and again at 4m30s that automatic disconnect is pending
 - [ ] PgUp/PgDn should scroll the Console section so the user can look back 
 - [ ] Character ability boosts

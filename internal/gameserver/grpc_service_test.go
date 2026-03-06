@@ -1085,7 +1085,7 @@ func TestApplyNPCSkillChecks_OnGreet_Success(t *testing.T) {
 
 	msgs := svc.applyNPCSkillChecks("u_npc_greet", "room_a")
 	require.Len(t, msgs, 1, "expected exactly one outcome message from NPC on_greet check")
-	assert.Equal(t, "They warm up to you.", msgs[0])
+	assert.Equal(t, "Charming Vendor: They warm up to you.", msgs[0])
 }
 
 // TestApplyNPCSkillChecks_OnGreet_Failure verifies that applyNPCSkillChecks returns
@@ -1159,7 +1159,7 @@ func TestApplyNPCSkillChecks_OnGreet_Failure(t *testing.T) {
 
 	msgs := svc.applyNPCSkillChecks("u_npc_greet_fail", "room_a")
 	require.Len(t, msgs, 1, "expected exactly one outcome message from NPC on_greet check")
-	assert.Equal(t, "They sneer.", msgs[0])
+	assert.Equal(t, "Stern Guard: They sneer.", msgs[0])
 }
 
 // TestApplyNPCSkillChecks_NoNPCs verifies that applyNPCSkillChecks returns nil when
@@ -1332,7 +1332,7 @@ func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
 
 	msgs := svc.applyNPCSkillChecks("u_npc_dmg_effect", "room_a")
 	require.Len(t, msgs, 1, "expected exactly one outcome message")
-	assert.Equal(t, "They strike you!", msgs[0])
+	assert.Equal(t, "Brutal Guard: They strike you!", msgs[0])
 
 	// Intn(4)=0 → dice result=1; damage total=1; 10-1=9.
 	assert.Equal(t, 9, sess.CurrentHP, "CurrentHP must be reduced by the NPC on_greet damage effect")

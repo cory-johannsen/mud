@@ -162,14 +162,27 @@ func RenderNpcView(nv *gamev1.NpcView) string {
 }
 
 // RenderMessage formats a MessageEvent as Telnet text.
-func RenderMessage(me *gamev1.MessageEvent) string {
+// RenderMessage formats a MessageEvent as colored Telnet text.
+// timePeriod is the current time-of-day period string (e.g. "Morning"); if
+// non-empty it is prepended as "[period] " before the message body.
+//
+// Precondition: me must be non-nil.
+// Postcondition: Returns a non-empty string for any non-nil input.
+func RenderMessage(me *gamev1.MessageEvent, timePeriod string) string {
+	prefix := ""
+	if timePeriod != "" {
+		prefix = telnet.Colorf(telnet.Dim, "[%s] ", timePeriod)
+	}
 	switch me.Type {
 	case gamev1.MessageType_MESSAGE_TYPE_SAY:
-		return telnet.Colorf(telnet.BrightWhite, "%s says: %s", me.Sender, me.Content)
+		return prefix + telnet.Colorf(telnet.BrightWhite, "%s says: %s", me.Sender, me.Content)
 	case gamev1.MessageType_MESSAGE_TYPE_EMOTE:
-		return telnet.Colorf(telnet.Magenta, "%s %s", me.Sender, me.Content)
+		return prefix + telnet.Colorf(telnet.Magenta, "%s %s", me.Sender, me.Content)
 	default:
-		return fmt.Sprintf("%s: %s", me.Sender, me.Content)
+		if me.Sender != "" {
+			return prefix + fmt.Sprintf("%s: %s", me.Sender, me.Content)
+		}
+		return prefix + me.Content
 	}
 }
 

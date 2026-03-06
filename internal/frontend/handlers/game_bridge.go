@@ -560,7 +560,11 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows)
 			lastRoomView.Store(p.RoomView)
 		case *gamev1.ServerEvent_Message:
-			text = RenderMessage(p.Message)
+			period := ""
+			if tod, ok := currentTime.Load().(*gamev1.TimeOfDayEvent); ok && tod != nil {
+				period = tod.GetPeriod()
+			}
+			text = RenderMessage(p.Message, period)
 		case *gamev1.ServerEvent_RoomEvent:
 			text = RenderRoomEvent(p.RoomEvent)
 		case *gamev1.ServerEvent_PlayerList:

@@ -1144,7 +1144,7 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 			outcome := trigger.Outcomes.ForOutcome(result.Outcome)
 			if outcome != nil {
 				if outcome.Message != "" {
-					msgs = append(msgs, outcome.Message)
+					msgs = append(msgs, fmt.Sprintf("%s: %s", inst.Name(), outcome.Message))
 				}
 				// Apply non-deny effects (deny is not applicable for on_greet).
 				if outcome.Effect == nil || outcome.Effect.Type != "deny" {
