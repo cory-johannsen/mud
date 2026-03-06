@@ -29,7 +29,7 @@ func main() {
 	}
 
 	dsn := cfg.Database.DSN()
-	m, err := migrate.New("file:///migrations", dsn)
+	m, err := migrate.New("file://migrations", dsn)
 	if err != nil {
 		log.Fatalf("creating migrator: %v", err)
 	}

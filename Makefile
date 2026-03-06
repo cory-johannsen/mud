@@ -63,8 +63,10 @@ test-cover: build
 	$(GO) tool cover -html=coverage.out -o coverage.html
 
 # Database
-migrate:
-	$(BIN_DIR)/migrate -config configs/dev.yaml
+CONFIG ?= configs/dev.yaml
+
+migrate: build-migrate
+	$(BIN_DIR)/migrate -config $(CONFIG)
 
 # Run
 run-frontend:
