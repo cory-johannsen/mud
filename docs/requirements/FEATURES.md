@@ -91,9 +91,14 @@
     - [x] Console messages must never overwrite the room display
     - [x] When a player is in combat the room display must reflect this
 - [ ] Bugs
-  - [ ] The room description is truncated in the Room section of the screen.  
-  - [ ] Missing divider between Room section and Prompt section of the screen
-  - [ ] Time-of-day events cause prompt duplication
+  - [x] The room description is truncated in the Room section of the screen.
+    - Wrapping the description will push the exits down and force them out of the Room section so they need to be arranged in columns with 3 per row
+  - [ ] Prompt is echoed to console 
+    - when a command is entered
+    - when NPCs speak
+  - [ ] Character sheet scrolls off the screen, move the feats and class features into a second column
+  - [ ] Time-of-day events only update the prompt when the description changes, not when the time changes
+  - [ ] zone_map did not appear in the Room section until the user issued the look command
 - [ ] Character ability boosts
   - [ ] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
     - [ ] Archetype - Mirrors Ancestry

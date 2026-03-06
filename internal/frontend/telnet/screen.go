@@ -143,9 +143,12 @@ func (c *Conn) WriteConsole(text string) error {
 
 	var buf strings.Builder
 
-	// Position at promptRow (= last row of full-screen scroll region) and
-	// write message lines.  Each \r\n scrolls the entire screen up by one row.
+	// Position at promptRow (= last row of full-screen scroll region).
+	// Clear the line first so the current prompt/input is not scrolled into
+	// the console area — otherwise the prompt text appears as a console line.
+	// Each subsequent \r\n scrolls the entire screen up by one row.
 	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
+	buf.WriteString("\033[2K")
 	trimmed := strings.TrimRight(text, "\r\n")
 	lines := wrapText(trimmed, w)
 	for _, line := range lines {
