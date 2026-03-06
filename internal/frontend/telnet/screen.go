@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const roomRegionRows = 6
+const roomRegionRows = 8
 
 // roomLayout computes the row numbers for the split-screen layout given a
 // terminal height h.  All computed rows are BELOW the scroll region so that

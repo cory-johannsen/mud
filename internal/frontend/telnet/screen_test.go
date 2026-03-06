@@ -93,7 +93,7 @@ func TestWriteRoom_ClearsExactly6Lines(t *testing.T) {
 	go func() { _ = conn.WriteRoom("line1\nline2") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	assert.Equal(t, 6, strings.Count(out, "\033[2K"), "WriteRoom must clear exactly 6 lines")
+	assert.Equal(t, roomRegionRows, strings.Count(out, "\033[2K"), "WriteRoom must clear exactly roomRegionRows lines")
 }
 
 func TestWriteConsole_ContainsText(t *testing.T) {
@@ -115,7 +115,7 @@ func TestWritePromptSplit_AtRowH(t *testing.T) {
 	assert.Contains(t, out, "> ")
 }
 
-func TestPropertyWriteRoom_Always6LineClearSequences(t *testing.T) {
+func TestPropertyWriteRoom_AlwaysRoomRegionRowsClearSequences(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		lineCount := rapid.IntRange(0, 20).Draw(rt, "lines")
 		var lines []string
@@ -130,7 +130,7 @@ func TestPropertyWriteRoom_Always6LineClearSequences(t *testing.T) {
 		}()
 		out := readAll(t, client, 2*time.Second)
 
-		require.Equal(t, 6, strings.Count(out, "\033[2K"),
-			"WriteRoom must always clear exactly 6 lines regardless of content")
+		require.Equal(t, roomRegionRows, strings.Count(out, "\033[2K"),
+			"WriteRoom must always clear exactly roomRegionRows lines regardless of content")
 	})
 }
