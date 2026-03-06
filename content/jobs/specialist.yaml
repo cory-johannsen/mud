@@ -1,6 +1,6 @@
 id: specialist
 name: Specialist
-archetype: aggressor
+archetype: nerd
 description: "Trained operators of technology or machinery. Portland's ruins have plenty of machines that still work if you know how."
 key_ability: brutality
 hit_points_per_level: 10

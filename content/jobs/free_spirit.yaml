@@ -1,6 +1,6 @@
 id: free_spirit
 name: Free Spirit
-archetype: criminal
+archetype: drifter
 description: "An aimless wanderer with no goals or purpose in life. Fun to be around, always great at taking advantage of the niceness of others."
 key_ability: quickness
 hit_points_per_level: 8

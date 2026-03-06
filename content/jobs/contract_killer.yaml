@@ -1,6 +1,6 @@
 id: contract_killer
 name: Contract Killer
-archetype: aggressor
+archetype: criminal
 description: "Contract Killers are paid to kill people. That's pretty much the extent of the job description."
 key_ability: brutality
 hit_points_per_level: 10
