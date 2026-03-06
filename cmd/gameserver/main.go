@@ -278,6 +278,27 @@ func main() {
 	logger.Info("class features loaded", zap.Int("class_features", len(classFeatures)))
 	characterClassFeaturesRepo := postgres.NewCharacterClassFeaturesRepository(pool.DB())
 	featureChoicesRepo := postgres.NewCharacterFeatureChoicesRepo(pool.DB())
+	charAbilityBoostsRepo := postgres.NewCharacterAbilityBoostsRepository(pool.DB())
+
+	archetypeList, err := ruleset.LoadArchetypes("content/archetypes")
+	if err != nil {
+		logger.Fatal("failed to load archetypes", zap.Error(err))
+	}
+	archetypeMap := make(map[string]*ruleset.Archetype, len(archetypeList))
+	for _, a := range archetypeList {
+		archetypeMap[a.ID] = a
+	}
+	logger.Info("loaded archetype definitions", zap.Int("count", len(archetypeList)))
+
+	regionList, err := ruleset.LoadRegions("content/regions")
+	if err != nil {
+		logger.Fatal("failed to load regions", zap.Error(err))
+	}
+	regionMap := make(map[string]*ruleset.Region, len(regionList))
+	for _, r := range regionList {
+		regionMap[r.ID] = r
+	}
+	logger.Info("loaded region definitions", zap.Int("count", len(regionList)))
 
 	// Load HTN AI domains.
 	aiRegistry := ai.NewRegistry()
@@ -495,6 +516,9 @@ func main() {
 		allFeats, featRegistry, characterFeatsRepo,
 		classFeatures, cfReg, characterClassFeaturesRepo,
 		featureChoicesRepo,
+		charAbilityBoostsRepo,
+		archetypeMap,
+		regionMap,
 	)
 
 	// Start respawn goroutine for room equipment.

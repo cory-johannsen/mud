@@ -148,6 +148,9 @@ type GameServiceServer struct {
 	classFeatureRegistry       *ruleset.ClassFeatureRegistry
 	characterClassFeaturesRepo CharacterClassFeaturesGetter
 	featureChoicesRepo         CharacterFeatureChoicesRepository
+	charAbilityBoostsRepo      postgres.CharacterAbilityBoostsRepository
+	archetypes                 map[string]*ruleset.Archetype
+	regions                    map[string]*ruleset.Region
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -167,6 +170,9 @@ type GameServiceServer struct {
 // allFeats may be nil (feat commands will return a not-available message).
 // featRegistry may be nil (feat commands will return a not-available message).
 // characterFeatsRepo may be nil (feat commands will return a not-available message).
+// charAbilityBoostsRepo may be nil (ability boost persistence will be skipped).
+// archetypes may be nil (ability boost archetype lookup will be skipped).
+// regions may be nil (ability boost region lookup will be skipped).
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
 	worldMgr *world.Manager,
@@ -200,6 +206,9 @@ func NewGameServiceServer(
 	classFeatureRegistry *ruleset.ClassFeatureRegistry,
 	characterClassFeaturesRepo CharacterClassFeaturesGetter,
 	featureChoicesRepo CharacterFeatureChoicesRepository,
+	charAbilityBoostsRepo postgres.CharacterAbilityBoostsRepository,
+	archetypes map[string]*ruleset.Archetype,
+	regions map[string]*ruleset.Region,
 ) *GameServiceServer {
 	s := &GameServiceServer{
 		world:               worldMgr,
@@ -233,6 +242,9 @@ func NewGameServiceServer(
 		classFeatureRegistry:       classFeatureRegistry,
 		characterClassFeaturesRepo: characterClassFeaturesRepo,
 		featureChoicesRepo:         featureChoicesRepo,
+		charAbilityBoostsRepo:      charAbilityBoostsRepo,
+		archetypes:                 archetypes,
+		regions:                    regions,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
