@@ -80,7 +80,8 @@ docker-down:
 # Kubernetes / Kind
 REGISTRY    := registry.johannsen.cloud:5000
 DB_USER     := mud
-DB_PASSWORD :=
+DB_PASSWORD := mud
+HELM_NAMESPACE := mud
 IMAGE_TAG   := $(shell git rev-parse --short HEAD 2>/dev/null || echo latest)
 HELM_CHART  := deployments/k8s/mud
 HELM_RELEASE := mud
@@ -107,6 +108,7 @@ docker-push:
 
 helm-install:
 	helm install $(HELM_RELEASE) $(HELM_CHART) \
+		--namespace $(HELM_NAMESPACE) \
 		--create-namespace \
 		--values $(HELM_VALUES) \
 		--set db.user=$(DB_USER) \
@@ -115,13 +117,14 @@ helm-install:
 
 helm-upgrade:
 	helm upgrade $(HELM_RELEASE) $(HELM_CHART) \
+		--namespace $(HELM_NAMESPACE) \
 		--values $(HELM_VALUES) \
 		--set db.user=$(DB_USER) \
 		--set db.password=$(DB_PASSWORD) \
 		--set image.tag=$(IMAGE_TAG)
 
 helm-uninstall:
-	helm uninstall $(HELM_RELEASE)
+	helm uninstall $(HELM_RELEASE) --namespace $(HELM_NAMESPACE)
 
 k8s-up: kind-up k8s-metallb docker-push helm-install
 
