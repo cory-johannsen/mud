@@ -53,12 +53,10 @@ func newRoomLayout(h int) roomLayout {
 // Postcondition: Terminal is configured for three-region layout.
 func (c *Conn) InitScreen() error {
 	c.mu.Lock()
-	w := c.width
 	h := c.height
 	c.mu.Unlock()
 
 	lo := newRoomLayout(h)
-	divider := strings.Repeat("═", w)
 
 	var buf strings.Builder
 	buf.WriteString("\033[?25l")     // hide cursor
@@ -68,11 +66,9 @@ func (c *Conn) InitScreen() error {
 	fmt.Fprintf(&buf, "\033[1;%dr", lo.scrollBottom)
 
 	// Position at dividerRow (safe: scrollBottom+1 = 0 scroll ops), then erase
-	// from there to end of screen — clears all room rows and prompt row in one
-	// command without any \r\n that could trigger TinTin++ scroll ops.
-	// Then write the divider over the just-cleared dividerRow.
-	// Cursor ends at end of divider line; WriteRoom will reposition.
-	fmt.Fprintf(&buf, "\033[%d;1H\033[J%s", lo.dividerRow, divider)
+	// from there to end of screen. Do NOT draw the divider here; WriteRoom is
+	// the sole divider drawer to prevent a double-divider when TinTin++ scrolls on \033[J].
+	fmt.Fprintf(&buf, "\033[%d;1H\033[J", lo.dividerRow)
 
 	buf.WriteString("\033[?25h") // show cursor
 

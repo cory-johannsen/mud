@@ -303,9 +303,9 @@ func TestIntegration_InitScreen_ScrollRegionAndDivider(t *testing.T) {
 	assert.Equal(t, 1, screen.scrollTop, "scroll region top must be row 1")
 	assert.Equal(t, lo.scrollBottom, screen.scrollBottom, "scroll region bottom must be scrollBottom")
 
-	// Room divider must be present.
-	assert.Contains(t, screen.RowText(lo.dividerRow), "═",
-		fmt.Sprintf("row %d (dividerRow) must have room divider", lo.dividerRow))
+	// InitScreen does NOT draw the divider — WriteRoom is the sole divider drawer.
+	assert.NotContains(t, screen.RowText(lo.dividerRow), "═",
+		fmt.Sprintf("row %d (dividerRow) must NOT have divider after InitScreen alone", lo.dividerRow))
 
 	// Room content rows must be blank after InitScreen.
 	for r := lo.firstRow; r <= lo.lastRow; r++ {

@@ -63,7 +63,8 @@ func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 	assert.Contains(t, out, "\033[J")                                              // erase to end of screen (no \r\n loop)
 	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))            // promptRow never addressed absolutely
 	assert.Contains(t, out, "\033[?25h")                                           // show cursor
-	assert.Contains(t, out, strings.Repeat("═", W))                               // divider chars
+	// InitScreen does NOT draw the divider — WriteRoom is the sole divider drawer.
+	assert.NotContains(t, out, strings.Repeat("═", W))
 }
 
 func TestWriteRoom_WritesToRowsBelowScrollRegion(t *testing.T) {
