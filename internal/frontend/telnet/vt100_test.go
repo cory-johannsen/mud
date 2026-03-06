@@ -501,7 +501,10 @@ func TestIntegration_WritePromptSplit_PlacesPromptAtRowH(t *testing.T) {
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	go func() { _ = conn.WritePromptSplit("[Newb]> ") }()
+	go func() {
+		_ = conn.WriteRoom("Nexus Hub")
+		_ = conn.WritePromptSplit("[Newb]> ")
+	}()
 	feedScreen(t, screen, client, 500*time.Millisecond)
 
 	assert.Contains(t, screen.RowFull(lo.promptRow), "[Newb]> ",

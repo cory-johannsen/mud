@@ -60,7 +60,8 @@ func TestInitScreen_ContainsRequiredSequences(t *testing.T) {
 	assert.Contains(t, out, "\033[2J")                                             // clear screen
 	assert.Contains(t, out, fmt.Sprintf("\033[1;%dr", lo.scrollBottom))            // scroll region 1..scrollBottom
 	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))              // room divider row (only safe abs pos)
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))            // promptRow reached via \r\n not abs pos
+	assert.Contains(t, out, "\033[J")                                              // erase to end of screen (no \r\n loop)
+	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))            // promptRow never addressed absolutely
 	assert.Contains(t, out, "\033[?25h")                                           // show cursor
 	assert.Contains(t, out, strings.Repeat("═", W))                               // divider chars
 }
@@ -104,22 +105,21 @@ func TestWriteConsole_ContainsText(t *testing.T) {
 	out := readAll(t, client, 500*time.Millisecond)
 
 	assert.Contains(t, out, "You swing at the goblin.")
-	// Divider row is the only safe absolute position; prompt reached via \r\n.
+	// dividerRow is the only safe absolute position in the room region.
 	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
 	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
 }
 
 func TestWritePromptSplit_AtRowH(t *testing.T) {
-	const W, H = 80, 24
-	lo := newRoomLayout(H)
-	conn, client := newSplitConn(t, W, H)
+	conn, client := newSplitConn(t, 80, 24)
 	go func() { _ = conn.WritePromptSplit("> ") }()
 	out := readAll(t, client, 500*time.Millisecond)
 
-	// Prompt reached via dividerRow + \r\n steps, not absolute positioning.
-	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", lo.dividerRow))
-	assert.NotContains(t, out, fmt.Sprintf("\033[%d;1H", lo.promptRow))
-	assert.Contains(t, out, "> ")
+	// Prompt is written in-place: \r to col 1, erase line, prompt text.
+	// No absolute cursor positioning anywhere.
+	assert.Contains(t, out, "\r\033[2K> ")
+	assert.NotContains(t, out, ";1H") // no row;colH absolute positioning
+
 }
 
 func TestPropertyWriteRoom_AlwaysRoomRegionRowsClearSequences(t *testing.T) {

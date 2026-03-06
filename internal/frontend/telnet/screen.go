@@ -67,15 +67,14 @@ func (c *Conn) InitScreen() error {
 	// Set scroll region to rows 1..scrollBottom.
 	fmt.Fprintf(&buf, "\033[1;%dr", lo.scrollBottom)
 
-	// Draw divider at dividerRow (safe: scrollBottom+1 = 0 scroll ops).
-	// Clear each room row and advance to promptRow using \r\n — LF below
-	// the scroll region advances the cursor without triggering any scroll.
-	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
-	for i := 0; i <= roomRegionRows; i++ { // roomRegionRows rows + 1 step to promptRow
-		buf.WriteString("\r\n\033[2K")
-	}
+	// Position at dividerRow (safe: scrollBottom+1 = 0 scroll ops), then erase
+	// from there to end of screen — clears all room rows and prompt row in one
+	// command without any \r\n that could trigger TinTin++ scroll ops.
+	// Then write the divider over the just-cleared dividerRow.
+	// Cursor ends at end of divider line; WriteRoom will reposition.
+	fmt.Fprintf(&buf, "\033[%d;1H\033[J%s", lo.dividerRow, divider)
 
-	buf.WriteString("\033[?25h") // show cursor (cursor is now at promptRow)
+	buf.WriteString("\033[?25h") // show cursor
 
 	return c.writeRaw(buf.String())
 }
@@ -184,19 +183,15 @@ func appendRoomRedraw(buf *strings.Builder, lines []string, w int, lo roomLayout
 // Postcondition: Prompt appears at row H with cursor after prompt+input.
 func (c *Conn) WritePromptSplit(prompt string) error {
 	c.mu.Lock()
-	h := c.height
 	input := c.inputBuf
 	c.mu.Unlock()
 
-	lo := newRoomLayout(h)
+	// Cursor is always at promptRow when WritePromptSplit is called
+	// (WriteRoom, WriteConsole, and ReadLineSplit all leave cursor there).
+	// Write prompt in-place: \r to col 1, erase line, write prompt+input.
+	// No navigation needed — avoids \r\n scroll ops.
 	var buf strings.Builder
-	// Navigate to promptRow via dividerRow + (roomRegionRows+1) \r\n steps.
-	// \033[promptRow;1H is unsafe (causes roomRegionRows+1 TinTin++ scroll ops).
-	fmt.Fprintf(&buf, "\033[%d;1H", lo.dividerRow)
-	for i := 0; i <= roomRegionRows; i++ {
-		buf.WriteString("\r\n")
-	}
-	fmt.Fprintf(&buf, "\033[2K%s%s", prompt, input)
+	fmt.Fprintf(&buf, "\r\033[2K%s%s", prompt, input)
 
 	return c.writeRaw(buf.String())
 }
