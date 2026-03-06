@@ -16,3 +16,7 @@ modifiers:
 traits:
   - street_smart
   - cold_adapted
+
+ability_boosts:
+  fixed: [quickness, reasoning]
+  free: 1

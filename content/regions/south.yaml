@@ -14,3 +14,7 @@ modifiers:
 traits:
   - heat_hardened
   - enduring
+
+ability_boosts:
+  fixed: [grit, brutality]
+  free: 1

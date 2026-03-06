@@ -12,3 +12,7 @@ modifiers:
 traits:
   - educated
   - archivalist
+
+ability_boosts:
+  fixed: [reasoning, savvy]
+  free: 1

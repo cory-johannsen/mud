@@ -14,3 +14,7 @@ modifiers:
 traits:
   - resourceful
   - stoic
+
+ability_boosts:
+  fixed: [brutality, reasoning]
+  free: 1

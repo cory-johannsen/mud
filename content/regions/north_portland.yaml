@@ -12,3 +12,7 @@ modifiers:
 traits:
   - labor_hardened
   - intimidating
+
+ability_boosts:
+  fixed: [brutality, grit]
+  free: 1

@@ -15,3 +15,7 @@ modifiers:
 traits:
   - silver_tongued
   - nature_adapted
+
+ability_boosts:
+  fixed: [flair, quickness]
+  free: 1

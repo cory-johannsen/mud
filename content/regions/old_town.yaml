@@ -12,3 +12,7 @@ modifiers:
 traits:
   - street_smart
   - networked
+
+ability_boosts:
+  fixed: [flair, quickness]
+  free: 1

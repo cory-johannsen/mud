@@ -3,3 +3,7 @@ name: Nerd
 description: "Ummm, ACTUALLY. Nerds possess deep specialized knowledge that most survivors consider useless — until it isn't."
 key_ability: reasoning
 hit_points_per_level: 6
+
+ability_boosts:
+  fixed: [reasoning, savvy]
+  free: 2

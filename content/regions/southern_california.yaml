@@ -14,3 +14,7 @@ modifiers:
 traits:
   - smooth_talker
   - desert_adapted
+
+ability_boosts:
+  fixed: [quickness, reasoning]
+  free: 1

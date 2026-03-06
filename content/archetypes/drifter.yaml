@@ -3,3 +3,7 @@ name: Drifter
 description: "A rolling stone gathers no moss. Drifters are survivors who thrive on the margins, outlasting every hardship the ruins of Portland can throw at them."
 key_ability: grit
 hit_points_per_level: 10
+
+ability_boosts:
+  fixed: [grit, brutality]
+  free: 2

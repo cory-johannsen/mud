@@ -3,3 +3,7 @@ name: Criminal
 description: "Crime is a way of life. Criminals survive through cunning, deception, and the willingness to do what others won't."
 key_ability: quickness
 hit_points_per_level: 8
+
+ability_boosts:
+  fixed: [quickness, savvy]
+  free: 2

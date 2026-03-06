@@ -12,3 +12,7 @@ modifiers:
 traits:
   - forager
   - self_reliant
+
+ability_boosts:
+  fixed: [savvy, grit]
+  free: 1

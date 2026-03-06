@@ -12,3 +12,7 @@ modifiers:
 traits:
   - survivor
   - community_ties
+
+ability_boosts:
+  fixed: [grit, quickness]
+  free: 1

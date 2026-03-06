@@ -16,3 +16,7 @@ modifiers:
 traits:
   - mountain_hardy
   - self_reliant
+
+ability_boosts:
+  fixed: [brutality, grit]
+  free: 1
