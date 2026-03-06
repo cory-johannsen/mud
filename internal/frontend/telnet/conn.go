@@ -172,7 +172,6 @@ func (c *Conn) ReadLine() (string, error) {
 func (c *Conn) tryReadEscapeSeq() string {
 	next, err := c.reader.ReadByte()
 	if err != nil || next != '[' {
-		// Bare ESC or read error — nothing more to consume
 		return ""
 	}
 	final, err := c.reader.ReadByte()
@@ -184,6 +183,15 @@ func (c *Conn) tryReadEscapeSeq() string {
 		return "\x00UP"
 	case 'B':
 		return "\x00DOWN"
+	case '5', '6':
+		term, err := c.reader.ReadByte()
+		if err != nil || term != '~' {
+			return ""
+		}
+		if final == '5' {
+			return "\x00PGUP"
+		}
+		return "\x00PGDN"
 	default:
 		return ""
 	}

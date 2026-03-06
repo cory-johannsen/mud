@@ -1,6 +1,8 @@
 package telnet
 
 import (
+	"bufio"
+	"bytes"
 	"net"
 	"testing"
 	"time"
@@ -401,6 +403,45 @@ func TestConn_ResizeCh_FiresOnNAWS(t *testing.T) {
 		// good — signal received
 	case <-time.After(500 * time.Millisecond):
 		t.Fatal("resize channel did not fire after NAWS")
+	}
+}
+
+func TestTryReadEscapeSeq_PgUp(t *testing.T) {
+	raw := &bytes.Buffer{}
+	raw.Write([]byte{'[', '5', '~'})
+	c := &Conn{reader: bufio.NewReader(raw)}
+	got := c.tryReadEscapeSeq()
+	assert.Equal(t, "\x00PGUP", got)
+}
+
+func TestTryReadEscapeSeq_PgDn(t *testing.T) {
+	raw := &bytes.Buffer{}
+	raw.Write([]byte{'[', '6', '~'})
+	c := &Conn{reader: bufio.NewReader(raw)}
+	got := c.tryReadEscapeSeq()
+	assert.Equal(t, "\x00PGDN", got)
+}
+
+func TestTryReadEscapeSeq_UnrecognizedDigitSwallowed(t *testing.T) {
+	raw := &bytes.Buffer{}
+	raw.Write([]byte{'[', '3', '~'})
+	c := &Conn{reader: bufio.NewReader(raw)}
+	got := c.tryReadEscapeSeq()
+	assert.Equal(t, "", got)
+	assert.Equal(t, 0, raw.Len())
+}
+
+func TestTryReadEscapeSeq_ArrowsUnchanged(t *testing.T) {
+	for _, tc := range []struct {
+		in   byte
+		want string
+	}{
+		{'A', "\x00UP"}, {'B', "\x00DOWN"},
+	} {
+		raw := &bytes.Buffer{}
+		raw.Write([]byte{'[', tc.in})
+		c := &Conn{reader: bufio.NewReader(raw)}
+		assert.Equal(t, tc.want, c.tryReadEscapeSeq())
 	}
 }
 
