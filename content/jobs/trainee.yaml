@@ -1,6 +1,6 @@
 id: trainee
 name: Trainee
-archetype: aggressor
+archetype: zealot
 description: "Long hours of training to develop both martial and scholarly skills. Strict discipline instilled through rote tasks. The foundation of any serious fighting force."
 key_ability: brutality
 hit_points_per_level: 10

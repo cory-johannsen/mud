@@ -1,6 +1,6 @@
 id: follower
 name: Follower
-archetype: influencer
+archetype: zealot
 description: "Dedicated their life and fortune to a person or cause without consideration for whether that's a good idea. Incredibly deep knowledge of their subject."
 key_ability: flair
 hit_points_per_level: 8
