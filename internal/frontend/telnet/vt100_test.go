@@ -143,6 +143,14 @@ func (s *vt100Screen) handleCSI(params string, final byte) {
 			}
 		}
 
+	case 'A': // CUU – cursor up N rows (no scroll)
+		n := parseOne(params, 1)
+		s.curRow = clampInt(s.curRow-n, 1, s.height)
+
+	case 'B': // CUD – cursor down N rows (no scroll)
+		n := parseOne(params, 1)
+		s.curRow = clampInt(s.curRow+n, 1, s.height)
+
 	case 's': // save cursor position
 		s.savedRow, s.savedCol = s.curRow, s.curCol
 

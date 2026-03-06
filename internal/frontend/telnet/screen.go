@@ -106,13 +106,14 @@ func (c *Conn) WriteRoom(content string) error {
 	// Redraw room divider (below scroll region — absolute positioning reliable).
 	fmt.Fprintf(&buf, "\033[%d;1H%s", lo.dividerRow, divider)
 
-	// Advance from dividerRow to firstRow and write each room content row using
-	// \r\n so that pending-wrap state from a full-width line never interacts
-	// with an absolute cursor-position command (a TinTin++ quirk).
-	buf.WriteString("\r\n")
+	// Advance from dividerRow to firstRow and write each room content row.
+	// Use \r\033[B (CR + CUD) instead of \r\n: CUD moves the cursor down one row
+	// without triggering any scroll operation, even when adjacent to the scroll
+	// region boundary (unlike LF which TinTin++ may treat as a scroll trigger).
+	buf.WriteString("\r\033[B")
 	for i := 0; i < roomRegionRows; i++ {
 		if i > 0 {
-			buf.WriteString("\r\n")
+			buf.WriteString("\r\033[B")
 		}
 		buf.WriteString("\033[2K")
 		if i < len(lines) {
@@ -184,10 +185,10 @@ func appendRoomRedraw(buf *strings.Builder, content string, w int, lo roomLayout
 	lines := strings.Split(strings.TrimSpace(normalized), "\n")
 
 	fmt.Fprintf(buf, "\033[%d;1H%s", lo.dividerRow, divider)
-	buf.WriteString("\r\n")
+	buf.WriteString("\r\033[B")
 	for i := 0; i < roomRegionRows; i++ {
 		if i > 0 {
-			buf.WriteString("\r\n")
+			buf.WriteString("\r\033[B")
 		}
 		buf.WriteString("\033[2K")
 		if i < len(lines) {
