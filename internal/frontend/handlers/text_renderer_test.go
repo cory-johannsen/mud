@@ -452,11 +452,11 @@ func TestRenderCharacterSheet_Skills(t *testing.T) {
 	result := RenderCharacterSheet(view, 80)
 	assert.Contains(t, result, "Skills")
 	assert.Contains(t, result, "Acrobatics")
-	assert.Contains(t, result, "trained")
-	assert.Contains(t, result, "untrained")
-	assert.Contains(t, result, "expert")
-	assert.Contains(t, result, "master")
-	assert.Contains(t, result, "legendary")
+	assert.Contains(t, result, "trnd")
+	assert.Contains(t, result, "untr")
+	assert.Contains(t, result, "expt")
+	assert.Contains(t, result, "mstr")
+	assert.Contains(t, result, "lgnd")
 }
 
 // TestProficiencyColor_KnownRanks verifies that each known rank is wrapped in ANSI escape codes

@@ -587,11 +587,16 @@ func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// The server sends a prompt message before the room view because predators_eye has Choices.
-	// Receive the prompt.
-	promptResp, recvErr := stream.Recv()
+	// The server sends the room view first (to initialize split-screen), then the prompt.
+	// Receive the room view.
+	roomResp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
-	require.NotNil(t, promptResp.GetMessage(), "expected prompt MessageEvent before room view")
+	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView before prompt")
+
+	// Receive the prompt message.
+	promptResp, recvErr2 := stream.Recv()
+	require.NoError(t, recvErr2)
+	require.NotNil(t, promptResp.GetMessage(), "expected prompt MessageEvent after room view")
 
 	// Respond with "2" to select "robot".
 	err = stream.Send(&gamev1.ClientMessage{
@@ -602,14 +607,9 @@ func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
 	require.NoError(t, err)
 
 	// Receive confirmation message.
-	confirmResp, recvErr2 := stream.Recv()
-	require.NoError(t, recvErr2)
-	require.NotNil(t, confirmResp.GetMessage(), "expected confirmation MessageEvent after selection")
-
-	// Receive the room view.
-	roomResp, recvErr3 := stream.Recv()
+	confirmResp, recvErr3 := stream.Recv()
 	require.NoError(t, recvErr3)
-	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView after favored target selection")
+	require.NotNil(t, confirmResp.GetMessage(), "expected confirmation MessageEvent after selection")
 
 	// Allow server goroutine to complete.
 	time.Sleep(50 * time.Millisecond)
@@ -697,10 +697,16 @@ func TestSession_FavoredTargetPromptedWhenMissing_InvalidInput(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// Receive the prompt.
-	promptResp, recvErr := stream.Recv()
+	// The server sends the room view first (to initialize split-screen), then the prompt.
+	// Receive the room view.
+	roomResp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
-	require.NotNil(t, promptResp.GetMessage(), "expected prompt MessageEvent before room view")
+	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView before prompt")
+
+	// Receive the prompt message.
+	promptResp, recvErr2 := stream.Recv()
+	require.NoError(t, recvErr2)
+	require.NotNil(t, promptResp.GetMessage(), "expected prompt MessageEvent after room view")
 
 	// Respond with an out-of-range number.
 	err = stream.Send(&gamev1.ClientMessage{
@@ -711,14 +717,13 @@ func TestSession_FavoredTargetPromptedWhenMissing_InvalidInput(t *testing.T) {
 	require.NoError(t, err)
 
 	// Receive the invalid-selection feedback message.
-	feedbackResp, recvErr2 := stream.Recv()
-	require.NoError(t, recvErr2)
+	feedbackResp, recvErr3 := stream.Recv()
+	require.NoError(t, recvErr3)
 	require.NotNil(t, feedbackResp.GetMessage(), "expected invalid-selection feedback MessageEvent")
 
 	// Receive the room view (login proceeds despite invalid input).
-	roomResp, recvErr3 := stream.Recv()
-	require.NoError(t, recvErr3)
-	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView after invalid favored target input")
+	// Note: the test context times out here since no further room view is sent; that is expected.
+	_ = roomResp // already verified above
 
 	time.Sleep(50 * time.Millisecond)
 

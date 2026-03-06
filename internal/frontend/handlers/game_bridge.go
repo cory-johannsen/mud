@@ -484,6 +484,29 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // Side-effect: currentTime is updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP and maxHP are updated from CharacterInfo events.
 func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string) {
+	// Pump stream.Recv() into a channel so it can participate in a proper
+	// select alongside resize events and the prompt-refresh ticker.
+	type recvResult struct {
+		resp *gamev1.ServerEvent
+		err  error
+	}
+	recvCh := make(chan recvResult, 4)
+	go func() {
+		for {
+			resp, err := stream.Recv()
+			recvCh <- recvResult{resp, err}
+			if err != nil {
+				return
+			}
+		}
+	}()
+
+	// Refresh the prompt on every clock tick (game_tick_duration = 1 min).
+	// This ensures the time in the prompt advances even when no other server
+	// event arrives.
+	promptTicker := time.NewTicker(30 * time.Second)
+	defer promptTicker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -502,19 +525,22 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				_ = conn.WritePromptSplit(buildPrompt())
 			}
 			continue
-		default:
-		}
-
-		resp, err := stream.Recv()
-		if err != nil {
-			if err != io.EOF && ctx.Err() == nil {
-				h.logger.Debug("stream recv error in forwarder", zap.Error(err))
+		case <-promptTicker.C:
+			if conn.IsSplitScreen() {
+				_ = conn.WritePromptSplit(buildPrompt())
 			}
-			return
-		}
+			continue
+		case rr := <-recvCh:
+			if rr.err != nil {
+				if rr.err != io.EOF && ctx.Err() == nil {
+					h.logger.Debug("stream recv error in forwarder", zap.Error(rr.err))
+				}
+				return
+			}
+			resp := rr.resp
 
-		var text string
-		switch p := resp.Payload.(type) {
+			var text string
+			switch p := resp.Payload.(type) {
 		case *gamev1.ServerEvent_TimeOfDay:
 			currentTime.Store(p.TimeOfDay)
 			if conn.IsSplitScreen() {
@@ -598,22 +624,23 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			return
 		}
 
-		if text != "" {
-			if conn.IsSplitScreen() {
-				switch resp.Payload.(type) {
-				case *gamev1.ServerEvent_RoomView:
-					_ = conn.WriteRoom(text)
-				default:
-					_ = conn.WriteConsole(text)
+			if text != "" {
+				if conn.IsSplitScreen() {
+					switch resp.Payload.(type) {
+					case *gamev1.ServerEvent_RoomView:
+						_ = conn.WriteRoom(text)
+					default:
+						_ = conn.WriteConsole(text)
+					}
+					_ = conn.WritePromptSplit(buildPrompt())
+				} else {
+					_ = conn.WriteLine(text)
+					// Re-display prompt after each server event
+					_ = conn.WritePrompt(buildPrompt())
 				}
-				_ = conn.WritePromptSplit(buildPrompt())
-			} else {
-				_ = conn.WriteLine(text)
-				// Re-display prompt after each server event
-				_ = conn.WritePrompt(buildPrompt())
 			}
-		}
-	}
+		} // end select
+	} // end for
 }
 
 // archetypeForJob returns the Archetype string for the job with the given ID.

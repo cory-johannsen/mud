@@ -96,11 +96,15 @@
   - [x] Prompt is echoed to console
     - when a command is entered
     - when NPCs speak
-  - [ ] Character sheet scrolls off the screen, needs to be reformatted. move the feats and class features into a second column
-  - [ ] Time-of-day events only update the prompt when the description changes, not when the time changes
+  - [x] Character sheet scrolls off the screen, needs to be reformatted. move the feats and class features into a second column
+  - [x] Time-of-day events only update the prompt when the description changes, not when the time changes
+  - [ ] Semver is properly utilized and is displayed at connection time under the Gunchete header.
   - [ ] zone_map did not appear in the Room section until the user issued the look command
-  - [ ] player prompts to select missing feats and class features at load time doesn't display the list of options for players that are missing selections
+    - Instead of the object id zone_map, use the description text Zone Map
+  - [x] player prompts to select missing feats and class features at load time doesn't display the list of options for players that are missing selections
   - [ ] NPC speech/actions in the console should include a time of day indicator in the message, before of the " : "
+  - [ ] Idle timer message is not appearing for user.  The timer should warn the user at 4 minutes of idle time and again at 4m30s that automatic disconnect is pending
+- [ ] PgUp/PgDn should scroll the Console section so the user can look back 
 - [ ] Character ability boosts
   - [ ] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
     - [ ] Archetype - Mirrors Ancestry

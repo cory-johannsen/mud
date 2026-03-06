@@ -522,7 +522,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
-	// Load stored feature choices and resolve any missing ones interactively.
+	// Load stored feature choices (interactive prompting deferred until after initial room view).
 	sess.FeatureChoices = make(map[string]map[string]string)
 	if characterID > 0 && s.featureChoicesRepo != nil {
 		stored, fcErr := s.featureChoicesRepo.GetAll(stream.Context(), characterID)
@@ -531,7 +531,28 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		} else {
 			sess.FeatureChoices = stored
 		}
+	}
 
+	// Broadcast arrival to other players in the room
+	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
+		Player: charName,
+		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
+	})
+
+	// Send initial room view — this initializes the client's split-screen layout.
+	// Feature choice prompts are sent after this so they appear in the console region.
+	roomView := s.worldH.buildRoomView(uid, spawnRoom)
+	if err := stream.Send(&gamev1.ServerEvent{
+		RequestId: firstMsg.RequestId,
+		Payload:   &gamev1.ServerEvent_RoomView{RoomView: roomView},
+	}); err != nil {
+		return fmt.Errorf("sending initial room view: %w", err)
+	}
+
+	// Resolve any missing feature/feat choices interactively now that split-screen is active.
+	// promptFeatureChoice blocks on stream.Recv(); no entity/clock goroutines are running yet
+	// so there are no concurrent stream.Send calls during this phase.
+	if characterID > 0 && s.featureChoicesRepo != nil {
 		if s.classFeatureRegistry != nil {
 			for _, id := range cfIDs {
 				cf, ok := s.classFeatureRegistry.ClassFeature(id)
@@ -598,21 +619,6 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		sess.FavoredTarget = sess.FeatureChoices["predators_eye"]["favored_target"]
 	}
 
-	// Broadcast arrival to other players in the room
-	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
-		Player: charName,
-		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
-	})
-
-	// Send initial room view
-	roomView := s.worldH.buildRoomView(uid, spawnRoom)
-	if err := stream.Send(&gamev1.ServerEvent{
-		RequestId: firstMsg.RequestId,
-		Payload:   &gamev1.ServerEvent_RoomView{RoomView: roomView},
-	}); err != nil {
-		return fmt.Errorf("sending initial room view: %w", err)
-	}
-
 	// Subscribe to game clock ticks for this session (nil-safe: clock may be nil).
 	var clockCh chan GameHour
 	if s.clock != nil {
@@ -633,27 +639,47 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	}()
 
 	// Spawn goroutine to forward game clock ticks to stream as TimeOfDayEvents.
+	// When the period changes (e.g., Dawn→Morning), also push an updated RoomView
+	// through the entity channel so the room display reflects the new flavor text.
 	// Only launched when a clock is configured.
 	if clockCh != nil {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			lastPeriod := TimePeriod(roomView.GetPeriod())
 			for {
 				select {
 				case h, ok := <-clockCh:
 					if !ok {
 						return
 					}
+					period := h.Period()
 					evt := &gamev1.ServerEvent{
 						Payload: &gamev1.ServerEvent_TimeOfDay{
 							TimeOfDay: &gamev1.TimeOfDayEvent{
 								Hour:   int32(h),
-								Period: string(h.Period()),
+								Period: string(period),
 							},
 						},
 					}
 					if err := stream.Send(evt); err != nil {
 						return
+					}
+					// On period change, push an updated RoomView so the room
+					// display reflects the new time-of-day flavor text.
+					if period != lastPeriod {
+						lastPeriod = period
+						if sess, ok := s.sessions.GetPlayer(uid); ok {
+							if room, ok := s.world.GetRoom(sess.RoomID); ok {
+								rv := s.worldH.buildRoomView(uid, room)
+								rvEvt := &gamev1.ServerEvent{
+									Payload: &gamev1.ServerEvent_RoomView{RoomView: rv},
+								}
+								if data, err := proto.Marshal(rvEvt); err == nil {
+									_ = sess.Entity.Push(data)
+								}
+							}
+						}
 					}
 				case <-ctx.Done():
 					return
@@ -3093,9 +3119,16 @@ func (s *GameServiceServer) promptFeatureChoice(
 		return "", fmt.Errorf("receiving choice for %s: %w", featureID, err)
 	}
 
+	// Extract selection text from any client message type.
+	// The commandLoop may send different message types depending on how the
+	// player's input was parsed (e.g. a bare number "1" becomes a MoveRequest
+	// because it is not a recognized command name).
 	selText := ""
-	if say := msg.GetSay(); say != nil {
-		selText = strings.TrimSpace(say.GetMessage())
+	switch {
+	case msg.GetSay() != nil:
+		selText = strings.TrimSpace(msg.GetSay().GetMessage())
+	case msg.GetMove() != nil:
+		selText = strings.TrimSpace(msg.GetMove().GetDirection())
 	}
 
 	n := 0

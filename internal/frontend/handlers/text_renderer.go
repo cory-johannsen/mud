@@ -480,26 +480,81 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	if skills := csv.GetSkills(); len(skills) > 0 {
 		left = append(left, slPlain(""))
 		left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Skills ---")))
-		// Render skills 2 per row; each cell is 24 visible chars:
-		//   "  name(12) ability(3) rank(7)" = 24
+		// Render skills 2 per row; each cell is 23 visible chars:
+		//   "  name(12) abil(3) rank(4)" = 2+12+1+3+1+4 = 23
+		// Ability is abbreviated to 3 chars to keep column width fixed.
+		abilAbbrev := map[string]string{
+			"quickness": "QCK",
+			"brutality": "BRT",
+			"reasoning": "RSN",
+			"savvy":     "SAV",
+			"flair":     "FLR",
+			"grit":      "GRT",
+		}
+		rankAbbrev := map[string]string{
+			"untrained": "untr",
+			"trained":   "trnd",
+			"expert":    "expt",
+			"master":    "mstr",
+			"legendary": "lgnd",
+		}
+		abbrevRank := func(rank string) string {
+			if a, ok := rankAbbrev[strings.ToLower(rank)]; ok {
+				return a
+			}
+			if len(rank) > 4 {
+				return rank[:4]
+			}
+			return rank
+		}
+		abbrevAbil := func(ability string) string {
+			if a, ok := abilAbbrev[strings.ToLower(ability)]; ok {
+				return a
+			}
+			if len(ability) > 3 {
+				return strings.ToUpper(ability[:3])
+			}
+			return strings.ToUpper(ability)
+		}
+		// colorRankAbbrev applies the same color scheme as proficiencyColor but to
+		// the abbreviated rank string (abbrevRank output is 4 chars, not the full word).
+		colorRankAbbrev := func(rank string) string {
+			abbr := fmt.Sprintf("%-4s", abbrevRank(rank))
+			switch strings.ToLower(rank) {
+			case "legendary":
+				return telnet.Colorize(telnet.Magenta, abbr)
+			case "master":
+				return telnet.Colorize(telnet.Yellow, abbr)
+			case "expert":
+				return telnet.Colorize(telnet.Cyan, abbr)
+			case "trained":
+				return telnet.Colorize(telnet.White, abbr)
+			default:
+				return abbr
+			}
+		}
+		// cell returns the plain (no ANSI) version for width accounting.
+		// Each cell is exactly 23 visible chars: 2+12+1+3+1+4 = 23.
+		cell := func(sk *gamev1.SkillEntry) string {
+			return fmt.Sprintf("  %-12s %-3s %-4s",
+				sk.GetName(), abbrevAbil(sk.GetAbility()), abbrevRank(sk.GetProficiency()))
+		}
+		// colorCell returns the display version with ANSI color on the rank.
+		colorCell := func(sk *gamev1.SkillEntry) string {
+			return fmt.Sprintf("  %-12s %-3s %s",
+				sk.GetName(), abbrevAbil(sk.GetAbility()), colorRankAbbrev(sk.GetProficiency()))
+		}
 		for i := 0; i < len(skills); i += 2 {
 			a := skills[i]
-			cell := func(sk *gamev1.SkillEntry) string {
-				return fmt.Sprintf("  %-12s %-3s %-7s", sk.GetName(), sk.GetAbility(), telnet.StripANSI(proficiencyColor(sk.GetProficiency())))
-			}
-			colorCell := func(sk *gamev1.SkillEntry) string {
-				return fmt.Sprintf("  %-12s %-3s %s", sk.GetName(), sk.GetAbility(), proficiencyColor(sk.GetProficiency()))
-			}
 			if i+1 < len(skills) {
 				b := skills[i+1]
-				// visW = len of two plain cells
 				visW := len(cell(a)) + len(cell(b))
 				left = append(left, sheetLine{
 					text: colorCell(a) + colorCell(b),
 					visW: visW,
 				})
 			} else {
-				left = append(left, sl(colorCell(a)))
+				left = append(left, sheetLine{text: colorCell(a), visW: len(cell(a))})
 			}
 		}
 	}
