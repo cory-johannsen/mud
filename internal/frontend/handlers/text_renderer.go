@@ -434,8 +434,8 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	var left []sheetLine
 
 	left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "=== %s ===", csv.GetName())))
-	left = append(left, slPlain(fmt.Sprintf("Class: %s  Archetype: %s  Team: %s  Level: %d",
-		csv.GetJob(), csv.GetArchetype(), csv.GetTeam(), csv.GetLevel())))
+	left = append(left, slPlain(fmt.Sprintf("Class: %s  Archetype: %s", csv.GetJob(), csv.GetArchetype())))
+	left = append(left, slPlain(fmt.Sprintf("Team: %s  Level: %d", csv.GetTeam(), csv.GetLevel())))
 	left = append(left, slPlain(fmt.Sprintf("HP: %d / %d", csv.GetCurrentHp(), csv.GetMaxHp())))
 
 	left = append(left, slPlain(""))
@@ -480,9 +480,27 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	if skills := csv.GetSkills(); len(skills) > 0 {
 		left = append(left, slPlain(""))
 		left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Skills ---")))
-		for _, sk := range skills {
-			plain := fmt.Sprintf("  %-14s (%s) %s", sk.GetName(), sk.GetAbility(), proficiencyColor(sk.GetProficiency()))
-			left = append(left, sl(plain))
+		// Render skills 2 per row; each cell is 24 visible chars:
+		//   "  name(12) ability(3) rank(7)" = 24
+		for i := 0; i < len(skills); i += 2 {
+			a := skills[i]
+			cell := func(sk *gamev1.SkillEntry) string {
+				return fmt.Sprintf("  %-12s %-3s %-7s", sk.GetName(), sk.GetAbility(), telnet.StripANSI(proficiencyColor(sk.GetProficiency())))
+			}
+			colorCell := func(sk *gamev1.SkillEntry) string {
+				return fmt.Sprintf("  %-12s %-3s %s", sk.GetName(), sk.GetAbility(), proficiencyColor(sk.GetProficiency()))
+			}
+			if i+1 < len(skills) {
+				b := skills[i+1]
+				// visW = len of two plain cells
+				visW := len(cell(a)) + len(cell(b))
+				left = append(left, sheetLine{
+					text: colorCell(a) + colorCell(b),
+					visW: visW,
+				})
+			} else {
+				left = append(left, sl(colorCell(a)))
+			}
 		}
 	}
 
