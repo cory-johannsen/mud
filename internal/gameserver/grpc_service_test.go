@@ -102,7 +102,7 @@ func TestStartZoneTicks_RespawnIntegration(t *testing.T) {
 
 	logger := zaptest.NewLogger(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	npcHandler := NewNPCHandler(npcMgr, sessMgr)
 
@@ -136,7 +136,7 @@ func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
@@ -430,7 +430,7 @@ func testGRPCServerWithCharData(t *testing.T) (gamev1.GameServiceClient, *sessio
 
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
@@ -590,7 +590,7 @@ func TestApplyRoomSkillChecks_OnEnter_Success(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, nil, nil, nil,
@@ -657,7 +657,7 @@ func TestApplyRoomSkillChecks_OnEnter_Failure(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, nil, nil, nil,
@@ -713,7 +713,7 @@ func TestApplyRoomSkillChecks_NoOnEnterTriggers(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, nil, nil, nil,
@@ -833,7 +833,7 @@ end
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, nil, nil, scriptMgr,
@@ -897,7 +897,7 @@ function get_captured_outcome() return captured_outcome end
 	svc2 := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, nil, nil, scriptMgr2,
@@ -984,7 +984,7 @@ func TestApplyRoomSkillChecks_DamageEffect(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, nil, nil, nil,
@@ -1062,7 +1062,7 @@ func TestApplyNPCSkillChecks_OnGreet_Success(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, npcHandler, npcMgr, nil, nil,
@@ -1136,7 +1136,7 @@ func TestApplyNPCSkillChecks_OnGreet_Failure(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, npcHandler, npcMgr, nil, nil,
@@ -1174,7 +1174,7 @@ func TestApplyNPCSkillChecks_NoNPCs(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, nil, npcHandler, npcMgr, nil, nil,
@@ -1230,7 +1230,7 @@ func TestApplyNPCSkillChecks_NonGreetTriggerIgnored(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, nil, npcHandler, npcMgr, nil, nil,
@@ -1309,7 +1309,7 @@ func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, npcHandler, npcMgr, nil, nil,
@@ -1660,7 +1660,7 @@ func TestHandleUse_AppliesConditionWhenConditionIDSet(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, nil, nil, nil, nil, nil,
@@ -1724,7 +1724,7 @@ func TestHandleUse_NoConditionAppliedWhenConditionIDEmpty(t *testing.T) {
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 		NewChatHandler(sessMgr),
 		logger,
 		nil, nil, nil, nil, nil, nil,
@@ -1794,7 +1794,7 @@ func TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied(t *testing.T) {
 		svc := NewGameServiceServer(
 			worldMgr, sessMgr,
 			command.DefaultRegistry(),
-			NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil),
+			NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
 			NewChatHandler(sessMgr),
 			logger,
 			nil, nil, nil, nil, nil, nil,

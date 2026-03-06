@@ -6,7 +6,12 @@ import (
 	"time"
 )
 
-const roomRegionRows = 8
+// RoomRegionRows is the number of content rows in the pinned room region.
+// Exported so the renderer can enforce this limit when building room text.
+const RoomRegionRows = 10
+
+// roomRegionRows is an internal alias kept for use within this package.
+const roomRegionRows = RoomRegionRows
 
 // roomLayout computes the row numbers for the split-screen layout given a
 // terminal height h.

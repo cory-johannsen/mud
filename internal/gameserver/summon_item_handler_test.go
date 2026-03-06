@@ -31,7 +31,7 @@ func newSummonItemServiceOpts(t *testing.T, fm *inventory.FloorManager, reg *inv
 	t.Helper()
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 	return NewGameServiceServer(

@@ -113,7 +113,7 @@ func testGRPCServerWithSaverFull(t *testing.T, saver CharacterSaver) (gamev1.Gam
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
 	npcMgr := npc.NewManager()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
@@ -365,7 +365,7 @@ func testGRPCServerWithClassFeatures(
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
 	npcMgr := npc.NewManager()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
@@ -480,7 +480,7 @@ func testGRPCServerWithFeatureChoices(
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
 	npcMgr := npc.NewManager()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 

@@ -98,7 +98,7 @@
     - when NPCs speak
   - [x] Character sheet scrolls off the screen, needs to be reformatted. move the feats and class features into a second column
   - [x] Time-of-day events only update the prompt when the description changes, not when the time changes
-  - [ ] Semver is properly utilized and is displayed at connection time under the Gunchete header.
+  - [x] Semver is properly utilized and is displayed at connection time under the Gunchete header.
   - [ ] zone_map did not appear in the Room section until the user issued the look command
     - Instead of the object id zone_map, use the description text Zone Map
   - [x] player prompts to select missing feats and class features at load time doesn't display the list of options for players that are missing selections

@@ -44,7 +44,7 @@ func testServiceWithAdmin(t *testing.T, admin AccountAdmin) *GameServiceServer {
 	t.Helper()
 	worldMgr, sessMgr := testWorldAndSession(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 	return NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, admin, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil)

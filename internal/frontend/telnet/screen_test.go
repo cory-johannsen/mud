@@ -88,7 +88,7 @@ func TestWriteRoom_DrawsDividerAndContent(t *testing.T) {
 	assert.Contains(t, out, "Nexus Hub")
 }
 
-func TestWriteRoom_ClearsExactly9Lines(t *testing.T) {
+func TestWriteRoom_ClearsRoomRegionRowsPlusOne(t *testing.T) {
 	// appendRoomRedraw clears roomRegionRows content lines + 1 divider line = roomRegionRows+1.
 	conn, client := newSplitConn(t, 80, 24)
 	go func() { _ = conn.WriteRoom("line1\nline2") }()

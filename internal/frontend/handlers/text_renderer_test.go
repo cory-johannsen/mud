@@ -25,7 +25,7 @@ func TestRenderRoomView(t *testing.T) {
 		Players: []string{"Bob"},
 	}
 
-	rendered := RenderRoomView(rv, 80)
+	rendered := RenderRoomView(rv, 80, 0)
 	stripped := telnet.StripANSI(rendered)
 
 	assert.Contains(t, stripped, "Test Room")
@@ -42,7 +42,7 @@ func TestRenderRoomView_NoExitsNoPlayers(t *testing.T) {
 		Description: "Nothing here.",
 	}
 
-	rendered := RenderRoomView(rv, 80)
+	rendered := RenderRoomView(rv, 80, 0)
 	stripped := telnet.StripANSI(rendered)
 
 	assert.Contains(t, stripped, "Empty Room")
@@ -288,7 +288,7 @@ func TestRenderRoomView_WithTimeFields_DescriptionPreserved(t *testing.T) {
 		Hour:        17,
 	}
 	// Use a wide width so the description is not wrapped and appears verbatim.
-	rendered := RenderRoomView(rv, 200)
+	rendered := RenderRoomView(rv, 200, 0)
 	stripped := telnet.StripANSI(rendered)
 	if !strings.Contains(stripped, description) {
 		t.Errorf("expected description in render, got %q", stripped)
@@ -310,7 +310,7 @@ func TestRenderRoomView_TimeFields_NoExtraOutput(t *testing.T) {
 		Hour:        17,
 	}
 	// RenderRoomView should produce the same output regardless of Hour/Period
-	if RenderRoomView(rv1, 80) != RenderRoomView(rv2, 80) {
+	if RenderRoomView(rv1, 80, 0) != RenderRoomView(rv2, 80, 0) {
 		t.Error("RenderRoomView should not include Hour/Period fields in output")
 	}
 }

@@ -8,41 +8,47 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
-// RenderRoomView formats a RoomView as colored Telnet text.
+// RenderRoomView formats a RoomView as colored Telnet text, capped at maxLines rows.
 //
 // Precondition: width > 0 for word-wrapping and column layout; if width <= 0
-// a fallback single-column layout is used.
-// Postcondition: Returns a multi-line ANSI-colored string suitable for WriteRoom.
-func RenderRoomView(rv *gamev1.RoomView, width int) string {
-	var b strings.Builder
+// a fallback single-column layout is used. maxLines > 0 enforces a hard row
+// limit so the output never overflows the pinned room region.
+// Postcondition: Returns a multi-line ANSI-colored string of at most maxLines
+// rows suitable for WriteRoom.
+func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string {
+	// Collect all lines in priority order, then trim to maxLines.
+	var lines []string
 
 	if rv.Title != "" {
-		b.WriteString(telnet.Colorize(telnet.BrightYellow, rv.Title))
-		b.WriteString("\r\n")
+		lines = append(lines, telnet.Colorize(telnet.BrightYellow, rv.Title))
 	}
 	if rv.Description != "" {
 		if width > 0 {
 			for _, line := range telnet.WrapText(rv.Description, width) {
-				b.WriteString(telnet.Colorize(telnet.White, line))
-				b.WriteString("\r\n")
+				lines = append(lines, telnet.Colorize(telnet.White, line))
 			}
 		} else {
-			b.WriteString(telnet.Colorize(telnet.White, rv.Description))
-			b.WriteString("\r\n")
+			lines = append(lines, telnet.Colorize(telnet.White, rv.Description))
 		}
 	}
 
 	// Exits — 3 per row in fixed-width columns.
 	if len(rv.Exits) > 0 {
-		b.WriteString(telnet.Colorize(telnet.Cyan, "Exits:"))
-		b.WriteString("\r\n")
-		appendExits(&b, rv.Exits, width)
+		var exitBuf strings.Builder
+		exitBuf.WriteString(telnet.Colorize(telnet.Cyan, "Exits:"))
+		lines = append(lines, exitBuf.String())
+		var rowBuf strings.Builder
+		appendExits(&rowBuf, rv.Exits, width)
+		for _, row := range strings.Split(strings.TrimRight(rowBuf.String(), "\r\n"), "\r\n") {
+			if row != "" {
+				lines = append(lines, row)
+			}
+		}
 	}
 
 	// Other players
 	if len(rv.Players) > 0 {
-		b.WriteString(telnet.Colorf(telnet.Green, "Also here: %s", strings.Join(rv.Players, ", ")))
-		b.WriteString("\r\n")
+		lines = append(lines, telnet.Colorf(telnet.Green, "Also here: %s", strings.Join(rv.Players, ", ")))
 	}
 
 	// NPCs present
@@ -51,22 +57,28 @@ func RenderRoomView(rv *gamev1.RoomView, width int) string {
 		for _, n := range rv.Npcs {
 			names = append(names, n.Name)
 		}
-		b.WriteString(telnet.Colorf(telnet.Yellow, "NPCs: %s", strings.Join(names, ", ")))
-		b.WriteString("\r\n")
+		lines = append(lines, telnet.Colorf(telnet.Yellow, "NPCs: %s", strings.Join(names, ", ")))
 	}
 
 	// Room equipment
 	for _, eq := range rv.Equipment {
 		flags := ""
-		if eq.Immovable {
-			flags += " [fixed]"
-		}
 		if eq.Usable {
-			flags += " [usable]"
+			flags += " [use]"
 		}
-		b.WriteString(fmt.Sprintf("  %s%s%s%s\r\n", telnet.Cyan, eq.Name, telnet.Reset, flags))
+		lines = append(lines, fmt.Sprintf("  %s%s%s%s", telnet.Cyan, eq.Name, telnet.Reset, flags))
 	}
 
+	// Enforce maxLines hard limit.
+	if maxLines > 0 && len(lines) > maxLines {
+		lines = lines[:maxLines]
+	}
+
+	var b strings.Builder
+	for _, l := range lines {
+		b.WriteString(l)
+		b.WriteString("\r\n")
+	}
 	return b.String()
 }
 

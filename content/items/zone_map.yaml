@@ -1,0 +1,8 @@
+id: zone_map
+name: Zone Map
+description: A large map of the local area mounted on the wall, showing roads, landmarks, and points of interest. Studying it reveals the layout of the zone.
+kind: junk
+weight: 0
+stackable: false
+max_stack: 1
+value: 0

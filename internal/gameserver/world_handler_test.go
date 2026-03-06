@@ -54,7 +54,7 @@ func testWorldAndSession(t *testing.T) (*world.Manager, *session.Manager) {
 
 func TestWorldHandler_Look(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -81,7 +81,7 @@ func TestWorldHandler_Look(t *testing.T) {
 
 func TestWorldHandler_Look_NotFound(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 
 	_, err := h.Look("nonexistent")
 	assert.Error(t, err)
@@ -89,7 +89,7 @@ func TestWorldHandler_Look_NotFound(t *testing.T) {
 
 func TestWorldHandler_Move(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -115,7 +115,7 @@ func TestWorldHandler_Move(t *testing.T) {
 
 func TestWorldHandler_Move_NoExit(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -140,7 +140,7 @@ func TestWorldHandler_Move_NoExit(t *testing.T) {
 
 func TestWorldHandler_MoveWithContext(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -166,7 +166,7 @@ func TestWorldHandler_MoveWithContext(t *testing.T) {
 
 func TestWorldHandler_Exits(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -193,7 +193,7 @@ func TestWorldHandler_Exits(t *testing.T) {
 
 func TestWorldHandler_RoomViewExcludesSelf(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -238,7 +238,7 @@ func testWorldAndSessionWithClock(t *testing.T, startHour int32) (*WorldHandler,
 	t.Helper()
 	worldMgr, sessMgr := testWorldAndSession(t)
 	clock := NewGameClock(startHour, time.Hour*24) // long tick — will not advance during test
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock, nil, nil)
 	return h, worldMgr, sessMgr
 }
 
@@ -278,7 +278,7 @@ func TestBuildRoomView_DarkPeriod_OutdoorHidesExits(t *testing.T) {
 	room.Properties = map[string]string{"outdoor": "true"}
 
 	clock := NewGameClock(startHour, time.Hour*24)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -310,7 +310,7 @@ func TestBuildRoomView_LightPeriod_OutdoorShowsExits(t *testing.T) {
 	room.Properties = map[string]string{"outdoor": "true"}
 
 	clock := NewGameClock(startHour, time.Hour*24)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -344,7 +344,7 @@ func TestBuildRoomView_OutdoorFlavorText_Appended(t *testing.T) {
 	room.Properties = map[string]string{"outdoor": "true"}
 
 	clock := NewGameClock(startHour, time.Hour*24)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -378,7 +378,7 @@ func TestBuildRoomView_IndoorNoFlavorText(t *testing.T) {
 	// room_a already has empty Properties (no outdoor key) from testWorldAndSession
 
 	clock := NewGameClock(startHour, time.Hour*24)
-	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+	h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock, nil, nil)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:               "u1",
@@ -406,7 +406,7 @@ func TestProperty_BuildRoomView_HourAlwaysInRange(t *testing.T) {
 		startHour := rapid.Int32Range(0, 23).Draw(rt, "startHour")
 		worldMgr, sessMgr := testWorldAndSession(t)
 		clock := NewGameClock(startHour, time.Hour*24)
-		h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock)
+		h := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), clock, nil, nil)
 
 		_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 			UID:               "u1",

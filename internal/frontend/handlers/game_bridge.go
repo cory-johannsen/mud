@@ -224,7 +224,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	}
 	if rv := resp.GetRoomView(); rv != nil {
 		w, _ := conn.Dimensions()
-		renderedRoom := RenderRoomView(rv, w)
+		renderedRoom := RenderRoomView(rv, w, telnet.RoomRegionRows)
 		if conn.IsSplitScreen() {
 			_ = conn.WriteRoom(renderedRoom)
 		} else {
@@ -520,7 +520,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					continue
 				}
 				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil {
-					_ = conn.WriteRoom(RenderRoomView(rv, rw))
+					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows))
 				}
 				_ = conn.WritePromptSplit(buildPrompt())
 			}
@@ -557,7 +557,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
 			}
 			w, _ := conn.Dimensions()
-			text = RenderRoomView(p.RoomView, w)
+			text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows)
 			lastRoomView.Store(p.RoomView)
 		case *gamev1.ServerEvent_Message:
 			text = RenderMessage(p.Message)

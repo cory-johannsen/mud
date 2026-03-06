@@ -454,7 +454,7 @@ func main() {
 	defer stopClock()
 
 	// Create handlers
-	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, gameClock)
+	// worldHandler is initialized after roomEquipMgr below.
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	npcHandler := gameserver.NewNPCHandler(npcMgr, sessMgr)
 	roundDuration := time.Duration(cfg.GameServer.RoundDurationMs) * time.Millisecond
@@ -481,6 +481,8 @@ func main() {
 		}
 	}
 	logger.Info("room equipment manager initialized")
+
+	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, gameClock, roomEquipMgr, invRegistry)
 
 	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr)
 

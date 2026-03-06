@@ -1,0 +1,20 @@
+# 2026/03/06 09:19:20.060415 [TestProperty_WriteConsole_MessageAlwaysInConsoleArea] [rapid] draw width: 40
+# 2026/03/06 09:19:20.060428 [TestProperty_WriteConsole_MessageAlwaysInConsoleArea] [rapid] draw height: 12
+# 2026/03/06 09:19:20.060597 [TestProperty_WriteConsole_MessageAlwaysInConsoleArea] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/frontend/telnet/vt100_test.go:773
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/frontend/telnet/vt100_test.go:748
+# 	Error:      	Should be true
+# 	Test:       	TestProperty_WriteConsole_MessageAlwaysInConsoleArea
+# 	Messages:   	console message must appear in console area consoleTop..12 (W=40 H=12)
+# 
+v0.4.8#3493365993017528730
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

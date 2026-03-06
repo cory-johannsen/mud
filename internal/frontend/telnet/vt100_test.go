@@ -373,8 +373,11 @@ func TestIntegration_WriteRoom_ExcessLinesAreTruncated(t *testing.T) {
 	screen := newVT100Screen(W, H)
 	conn, client := newSplitConnTB(t, W, H)
 
-	// 8 lines: only first 6 should appear in room rows.
-	lines := []string{"L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"}
+	// roomRegionRows+2 lines: only first roomRegionRows should appear in the room region.
+	lines := make([]string, roomRegionRows+2)
+	for i := range lines {
+		lines[i] = fmt.Sprintf("L%d", i+1)
+	}
 	go func() {
 		_ = conn.InitScreen()
 		_ = conn.WriteRoom(strings.Join(lines, "\n"))
@@ -614,7 +617,7 @@ func TestIntegration_FullLayout_InitThenWriteRoomThenConsole(t *testing.T) {
 func TestProperty_WriteRoom_NeverOverwritesConsoleArea(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
-		H := rapid.IntRange(12, 50).Draw(rt, "height")
+		H := rapid.IntRange(roomRegionRows+3, 50).Draw(rt, "height")
 		lineCount := rapid.IntRange(0, 20).Draw(rt, "lines")
 		lo := newRoomLayout(H)
 
@@ -671,7 +674,7 @@ func TestProperty_WriteRoom_NeverOverwritesConsoleArea(t *testing.T) {
 func TestProperty_WriteRoom_AlwaysShowsFirstNLinesInOrder(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
-		H := rapid.IntRange(12, 50).Draw(rt, "height")
+		H := rapid.IntRange(roomRegionRows+3, 50).Draw(rt, "height")
 		lineCount := rapid.IntRange(1, 15).Draw(rt, "lines")
 		lo := newRoomLayout(H)
 
@@ -709,7 +712,7 @@ func TestProperty_WriteRoom_AlwaysShowsFirstNLinesInOrder(t *testing.T) {
 func TestProperty_WriteConsole_NeverOverwritesRoomRegion(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
-		H := rapid.IntRange(12, 50).Draw(rt, "height")
+		H := rapid.IntRange(roomRegionRows+3, 50).Draw(rt, "height")
 		lo := newRoomLayout(H)
 
 		roomContent := "RoomTitle\nRoom description.\nExits:\n  north"
@@ -747,7 +750,7 @@ func TestProperty_WriteConsole_NeverOverwritesRoomRegion(t *testing.T) {
 func TestProperty_WriteConsole_MessageAlwaysInConsoleArea(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
-		H := rapid.IntRange(12, 50).Draw(rt, "height")
+		H := rapid.IntRange(roomRegionRows+3, 50).Draw(rt, "height")
 		lo := newRoomLayout(H)
 
 		msg := "SentinelMsg"

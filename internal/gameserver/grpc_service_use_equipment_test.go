@@ -150,7 +150,7 @@ func newUseEquipServerWithSkillChecks(
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
 	cmdRegistry := command.DefaultRegistry()
-	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 
 	svc := NewGameServiceServer(

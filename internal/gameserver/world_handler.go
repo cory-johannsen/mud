@@ -5,6 +5,7 @@ import (
 
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -12,22 +13,26 @@ import (
 
 // WorldHandler handles movement, look, and exit commands.
 type WorldHandler struct {
-	world    *world.Manager
-	sessions *session.Manager
-	npcMgr   *npc.Manager
-	clock    *GameClock
+	world        *world.Manager
+	sessions     *session.Manager
+	npcMgr       *npc.Manager
+	clock        *GameClock
+	roomEquipMgr *inventory.RoomEquipmentManager
+	invRegistry  *inventory.Registry
 }
 
 // NewWorldHandler creates a WorldHandler with the given dependencies.
 //
-// Precondition: worldMgr, sessMgr, and npcMgr must be non-nil. clock may be nil (disables time-of-day features).
+// Precondition: worldMgr, sessMgr, and npcMgr must be non-nil. clock, roomEquipMgr, and invRegistry may be nil.
 // Postcondition: Returns a non-nil *WorldHandler.
-func NewWorldHandler(worldMgr *world.Manager, sessMgr *session.Manager, npcMgr *npc.Manager, clock *GameClock) *WorldHandler {
+func NewWorldHandler(worldMgr *world.Manager, sessMgr *session.Manager, npcMgr *npc.Manager, clock *GameClock, roomEquipMgr *inventory.RoomEquipmentManager, invRegistry *inventory.Registry) *WorldHandler {
 	return &WorldHandler{
-		world:    worldMgr,
-		sessions: sessMgr,
-		npcMgr:   npcMgr,
-		clock:    clock,
+		world:        worldMgr,
+		sessions:     sessMgr,
+		npcMgr:       npcMgr,
+		clock:        clock,
+		roomEquipMgr: roomEquipMgr,
+		invRegistry:  invRegistry,
 	}
 }
 
@@ -196,6 +201,25 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 		description = description + " " + flavor
 	}
 
+	var equipInfos []*gamev1.RoomEquipmentItem
+	if h.roomEquipMgr != nil {
+		for _, eq := range h.roomEquipMgr.EquipmentInRoom(room.ID) {
+			name := eq.ItemDefID
+			if h.invRegistry != nil {
+				if def, ok := h.invRegistry.Item(eq.ItemDefID); ok {
+					name = def.Name
+				}
+			}
+			equipInfos = append(equipInfos, &gamev1.RoomEquipmentItem{
+				InstanceId: eq.InstanceID,
+				Name:       name,
+				Quantity:   1,
+				Immovable:  eq.Immovable,
+				Usable:     eq.Script != "",
+			})
+		}
+	}
+
 	return &gamev1.RoomView{
 		RoomId:      room.ID,
 		Title:       room.Title,
@@ -205,5 +229,6 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 		Npcs:        npcInfos,
 		Hour:        int32(hour),
 		Period:      string(period),
+		Equipment:   equipInfos,
 	}
 }

@@ -95,7 +95,7 @@ func newNormalTerrainWorld(t *testing.T) (*world.Manager, *session.Manager) {
 func newMoveTestService(t *testing.T, worldMgr *world.Manager, sessMgr *session.Manager) *GameServiceServer {
 	t.Helper()
 	logger := zaptest.NewLogger(t)
-	wh := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil)
+	wh := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 	ch := NewChatHandler(sessMgr)
 	return NewGameServiceServer(
 		worldMgr, sessMgr,
