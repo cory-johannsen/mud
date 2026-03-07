@@ -10,6 +10,8 @@ type AwardResult struct {
 	HPGained int
 	// NewBoosts is the number of new ability boosts earned this award.
 	NewBoosts int
+	// NewSkillIncreases is the number of new skill rank increases earned (one per even level gained).
+	NewSkillIncreases int
 	// LeveledUp is true if the character gained at least one level.
 	LeveledUp bool
 }
@@ -61,11 +63,19 @@ func Award(level, currentXP, awardXP int, cfg *XPConfig) AwardResult {
 		}
 	}
 
+	newSkillIncreases := 0
+	for l := level + 1; l <= newLevel; l++ {
+		if l%2 == 0 {
+			newSkillIncreases++
+		}
+	}
+
 	return AwardResult{
-		NewXP:     newXP,
-		NewLevel:  newLevel,
-		HPGained:  hpGained,
-		NewBoosts: newBoosts,
-		LeveledUp: newLevel > level,
+		NewXP:             newXP,
+		NewLevel:          newLevel,
+		HPGained:          hpGained,
+		NewBoosts:         newBoosts,
+		NewSkillIncreases: newSkillIncreases,
+		LeveledUp:         newLevel > level,
 	}
 }

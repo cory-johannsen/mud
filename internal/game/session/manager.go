@@ -43,6 +43,8 @@ type PlayerSession struct {
 	Experience int
 	// PendingBoosts is the number of ability boosts the player has not yet assigned.
 	PendingBoosts int
+	// PendingSkillIncreases is the number of skill rank increases the player has not yet assigned.
+	PendingSkillIncreases int
 	// DefaultCombatAction is the persisted default combat action; "pass" when unset.
 	DefaultCombatAction string
 	// LastCombatTarget is the last explicit attack/strike target; in-memory only.

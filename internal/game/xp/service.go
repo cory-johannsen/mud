@@ -14,10 +14,18 @@ type ProgressSaver interface {
 	SaveProgress(ctx context.Context, id int64, level, experience, maxHP, pendingBoosts int) error
 }
 
+// SkillIncreaseSaver persists pending skill increases awarded at level-up.
+//
+// Precondition: characterID must be > 0; n must be >= 1.
+type SkillIncreaseSaver interface {
+	IncrementPendingSkillIncreases(ctx context.Context, id int64, n int) error
+}
+
 // Service orchestrates XP awards and level-up detection.
 type Service struct {
-	cfg   *XPConfig
-	saver ProgressSaver
+	cfg         *XPConfig
+	saver       ProgressSaver
+	skillSaver  SkillIncreaseSaver
 }
 
 // NewService creates a new XP Service.
@@ -26,6 +34,13 @@ type Service struct {
 // Postcondition: Returns a non-nil Service ready to award XP.
 func NewService(cfg *XPConfig, saver ProgressSaver) *Service {
 	return &Service{cfg: cfg, saver: saver}
+}
+
+// SetSkillIncreaseSaver registers the saver for pending skill increases.
+//
+// Postcondition: skill increases will be persisted via saver on each level-up that grants them.
+func (s *Service) SetSkillIncreaseSaver(saver SkillIncreaseSaver) {
+	s.skillSaver = saver
 }
 
 // Config returns the XPConfig used by this Service.
@@ -76,6 +91,7 @@ func (s *Service) award(ctx context.Context, sess *session.PlayerSession, charac
 		sess.CurrentHP = sess.MaxHP
 	}
 	sess.PendingBoosts += result.NewBoosts
+	sess.PendingSkillIncreases += result.NewSkillIncreases
 
 	if !result.LeveledUp {
 		return nil, nil
@@ -89,10 +105,18 @@ func (s *Service) award(ctx context.Context, sess *session.PlayerSession, charac
 	if result.NewBoosts > 0 {
 		msgs = append(msgs, "You have a pending ability boost! Type 'levelup' to assign it.")
 	}
+	if result.NewSkillIncreases > 0 {
+		msgs = append(msgs, "You have a pending skill increase! Type 'trainskill <skill>' to advance a skill.")
+	}
 
 	if characterID > 0 {
 		if err := s.saver.SaveProgress(ctx, characterID, sess.Level, sess.Experience, sess.MaxHP, sess.PendingBoosts); err != nil {
 			return msgs, fmt.Errorf("saving progress after level-up: %w", err)
+		}
+		if result.NewSkillIncreases > 0 && s.skillSaver != nil {
+			if err := s.skillSaver.IncrementPendingSkillIncreases(ctx, characterID, result.NewSkillIncreases); err != nil {
+				return msgs, fmt.Errorf("saving skill increases after level-up: %w", err)
+			}
 		}
 	}
 

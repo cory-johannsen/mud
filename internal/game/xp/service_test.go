@@ -2,6 +2,7 @@ package xp_test
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -127,6 +128,77 @@ func TestService_BoostPending_NotifiedAtInterval(t *testing.T) {
 	// Last message should mention levelup command
 	assert.Contains(t, msgs[len(msgs)-1], "levelup")
 	assert.Equal(t, 1, saver.savedBoosts)
+}
+
+type mockSkillIncreaseSaver struct {
+	mu    sync.Mutex
+	calls []int
+	err   error
+}
+
+func (m *mockSkillIncreaseSaver) IncrementPendingSkillIncreases(_ context.Context, _ int64, n int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.err != nil {
+		return m.err
+	}
+	m.calls = append(m.calls, n)
+	return nil
+}
+
+func TestService_SkillIncrease_OnEvenLevelUp(t *testing.T) {
+	saver := &fakeProgressSaver{}
+	skillSaver := &mockSkillIncreaseSaver{}
+	svc := xp.NewService(testCfg(), saver)
+	svc.SetSkillIncreaseSaver(skillSaver)
+
+	// Level 1 → 2 (even): should get 1 skill increase
+	// XPToLevel(2, 100) = 400; start at 350, award 50 via kill (npcLevel=1, 50xp/level)
+	sess := testSess(1, 350, 10)
+	msgs, err := svc.AwardKill(context.Background(), sess, 1, 1)
+	require.NoError(t, err)
+	assert.Equal(t, 2, sess.Level)
+	assert.Equal(t, 1, sess.PendingSkillIncreases)
+	assert.Equal(t, []int{1}, skillSaver.calls)
+	// Check message is present
+	found := false
+	for _, m := range msgs {
+		if len(m) > 0 && m == "You have a pending skill increase! Type 'trainskill <skill>' to advance a skill." {
+			found = true
+		}
+	}
+	assert.True(t, found, "expected skill increase message in: %v", msgs)
+}
+
+func TestService_SkillIncrease_OddLevelUp_NoIncrease(t *testing.T) {
+	saver := &fakeProgressSaver{}
+	skillSaver := &mockSkillIncreaseSaver{}
+	svc := xp.NewService(testCfg(), saver)
+	svc.SetSkillIncreaseSaver(skillSaver)
+
+	// Level 2 → 3 (odd): should get 0 skill increases
+	// XPToLevel(2,100)=400, XPToLevel(3,100)=900, need 500 more XP
+	// AwardKill npcLevel=10 gives 500 XP
+	sess := testSess(2, 400, 15)
+	_, err := svc.AwardKill(context.Background(), sess, 10, 1)
+	require.NoError(t, err)
+	assert.Equal(t, 3, sess.Level)
+	assert.Equal(t, 0, sess.PendingSkillIncreases)
+	assert.Empty(t, skillSaver.calls)
+}
+
+func TestService_SkillIncrease_NoLevelUp_NoIncrease(t *testing.T) {
+	saver := &fakeProgressSaver{}
+	skillSaver := &mockSkillIncreaseSaver{}
+	svc := xp.NewService(testCfg(), saver)
+	svc.SetSkillIncreaseSaver(skillSaver)
+
+	sess := testSess(1, 0, 10)
+	_, err := svc.AwardKill(context.Background(), sess, 1, 1)
+	require.NoError(t, err)
+	assert.Equal(t, 1, sess.Level)
+	assert.Equal(t, 0, sess.PendingSkillIncreases)
+	assert.Empty(t, skillSaver.calls)
 }
 
 func TestService_CurrentHPCappedAtMaxHP(t *testing.T) {
