@@ -838,7 +838,7 @@ func TestRenderCharacterSheet_XPSection_PendingBoosts(t *testing.T) {
 	}
 	result := telnet.StripANSI(RenderCharacterSheet(view, 80))
 	assert.Contains(t, result, "Progress")
-	assert.Contains(t, result, "1")  // pending boosts count
+	assert.Contains(t, result, "Pending Boosts: 1")
 	assert.Contains(t, result, "levelup")
 }
 

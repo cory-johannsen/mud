@@ -624,6 +624,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	condEvents := cbt.StartRound(3)
 	condCombatEvents := conditionEventsToProto(condEvents, h.condRegistry)
 	h.autoQueueNPCsLocked(cbt)
+	h.autoQueuePlayersLocked(cbt)
 
 	roundStartEvents := []*gamev1.CombatEvent{
 		{
@@ -759,6 +760,86 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	})
 
 	return cbt, events, nil
+}
+
+// autoQueuePlayersLocked queues default actions for all living players in cbt
+// who have not yet submitted their action queue for this round.
+//
+// Precondition: h.combatMu is held; cbt must not be nil.
+// Postcondition: Each unsubmitted player receives their DefaultCombatAction
+// queued against the best available target, and is notified via their entity.
+func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer || c.IsDead() {
+			continue
+		}
+		q, ok := cbt.ActionQueues[c.ID]
+		if !ok || len(q.QueuedActions()) > 0 {
+			continue
+		}
+
+		sess, ok := h.sessions.GetPlayer(c.ID)
+		if !ok {
+			continue
+		}
+
+		// Resolve target: prefer LastCombatTarget if that NPC is still alive in the room.
+		var targetName string
+		if sess.LastCombatTarget != "" {
+			for _, combatant := range cbt.Combatants {
+				if combatant.Kind == combat.KindNPC && !combatant.IsDead() && combatant.Name == sess.LastCombatTarget {
+					targetName = combatant.Name
+					break
+				}
+			}
+		}
+		// Fallback: first living NPC in combat.
+		if targetName == "" {
+			for _, combatant := range cbt.Combatants {
+				if combatant.Kind == combat.KindNPC && !combatant.IsDead() {
+					targetName = combatant.Name
+					break
+				}
+			}
+		}
+
+		// Determine the action type from DefaultCombatAction.
+		action := sess.DefaultCombatAction
+		if action == "" {
+			action = "pass"
+		}
+
+		var qa combat.QueuedAction
+		switch action {
+		case "attack":
+			qa = combat.QueuedAction{Type: combat.ActionAttack, Target: targetName}
+		case "strike":
+			qa = combat.QueuedAction{Type: combat.ActionStrike, Target: targetName}
+		default:
+			qa = combat.QueuedAction{Type: combat.ActionPass}
+		}
+
+		if err := cbt.QueueAction(c.ID, qa); err != nil {
+			continue
+		}
+
+		// Notify player of the auto-queued action.
+		narrative := fmt.Sprintf("[Auto] Your default action: %s", action)
+		if targetName != "" && action != "pass" {
+			narrative = fmt.Sprintf("[Auto] Your default action: %s → %s", action, targetName)
+		}
+		notifyEvt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{
+					Content: narrative,
+					Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+				},
+			},
+		}
+		if data, marshalErr := proto.Marshal(notifyEvt); marshalErr == nil {
+			_ = sess.Entity.Push(data)
+		}
+	}
 }
 
 // autoQueueNPCsLocked queues actions for all living NPCs using the HTN planner

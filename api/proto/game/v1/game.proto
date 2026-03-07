@@ -61,6 +61,7 @@ message ClientMessage {
     ProficienciesRequest proficiencies_request = 44;
     LevelUpRequest level_up = 45;
     CombatDefaultRequest combat_default = 46;
+    TrainSkillRequest train_skill = 47;
   }
 }
 
@@ -662,4 +663,9 @@ message LevelUpRequest {
 // CombatDefaultRequest asks the server to persist the player's preferred default combat action.
 message CombatDefaultRequest {
   string action = 1;
+}
+
+// TrainSkillRequest asks the server to advance a skill proficiency rank.
+message TrainSkillRequest {
+  string skill_id = 1;
 }

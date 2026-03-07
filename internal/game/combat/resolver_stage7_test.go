@@ -128,7 +128,7 @@ func TestResolveExplosive_AllTargetsDamaged(t *testing.T) {
 }
 
 // TestResolveExplosive_CritSuccessSave_ZeroDamage verifies that a high save roll
-// (SaveTotal >= SaveDC+10) yields CritSuccess and BaseDamage==0.
+// (roll+mod >= SaveDC+10) yields CritSuccess and BaseDamage==0.
 func TestResolveExplosive_CritSuccessSave_ZeroDamage(t *testing.T) {
 	// fixedSrc.v=19 → Intn(20)=19 → d20=20 for save; damage dice also return 19→max
 	// SaveDC=5; save roll=20+0=20 >= 5+10=15 → CritSuccess

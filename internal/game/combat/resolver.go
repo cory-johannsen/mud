@@ -79,11 +79,7 @@ func ResolveAttack(attacker, target *Combatant, src Source) AttackResult {
 type ExplosiveResult struct {
 	// TargetID is the ID of the target combatant.
 	TargetID string
-	// SaveRoll is the raw d20 result of the Reflex save.
-	SaveRoll int
-	// SaveTotal is the full save roll: d20 + DexMod.
-	SaveTotal int
-	// SaveResult is the 4-tier outcome of the save vs SaveDC.
+	// SaveResult is the 4-tier outcome of the hustle save vs SaveDC.
 	SaveResult Outcome
 	// BaseDamage is the damage after applying the save outcome; never negative.
 	BaseDamage int

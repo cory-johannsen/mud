@@ -56,6 +56,17 @@ func (r *stubSkillsRepo) SetAll(_ context.Context, characterID int64, skills map
 	return nil
 }
 
+func (r *stubSkillsRepo) UpgradeSkill(_ context.Context, characterID int64, skillID, newRank string) error {
+	if r.data == nil {
+		r.data = make(map[int64]map[string]string)
+	}
+	if r.data[characterID] == nil {
+		r.data[characterID] = make(map[string]string)
+	}
+	r.data[characterID][skillID] = newRank
+	return nil
+}
+
 // stubFeatsRepo is an in-memory implementation of CharacterFeatsGetter for testing.
 type stubFeatsRepo struct {
 	data map[int64][]string

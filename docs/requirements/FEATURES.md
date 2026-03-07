@@ -156,8 +156,8 @@
     - [x] Pending ability boost awarded every 5 levels
     - [x] `levelup` command to assign pending ability boosts
     - [x] XP and pending boosts displayed on character sheet
-    - [ ] Max character level limit is 100
-    - [ ] Max job level for any job is 20
+    - [x] Max character level limit is 100
+    - [x] Max job level for any job is 20
 - [x] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
   - [x] `default_combat_action` column added to `characters` table (migration 020)
   - [x] `SaveDefaultCombatAction` repository method persists the player's chosen default
@@ -165,7 +165,14 @@
   - [x] Auto-queuing: players without an explicit action each combat round auto-queue their default action
   - [x] `LastCombatTarget` tracks the last explicit target; used for auto-queue targeting with fallback to first living NPC
 - [ ] Skill advancement
+- [ ] Map
+  - [ ] interacting with the zone map requires the player to use the object id, should use the descriptive name
+  - [ ] interacting with the zone map does not populate the zone map for the player, it should populate and persist the zone map for the player
 - [ ] Actions
+  - [ ] Archetype and Job
+    - Each Archetype should have at least 1 unique Action
+    - Each Job should have at least 1 unique action
+  - [ ] General
   - [ ] Exploration
   - [ ] Downtime
   - [ ] Gear

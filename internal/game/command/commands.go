@@ -61,6 +61,7 @@ const (
 	HandlerProficiencies       = "proficiencies"
 	HandlerLevelUp             = "levelup"
 	HandlerCombatDefault       = "combat_default"
+	HandlerTrainSkill          = "trainskill"
 )
 
 // Command defines a player-invocable command.
@@ -148,6 +149,7 @@ func BuiltinCommands() []Command {
 		{Name: "summon_item", Aliases: nil, Help: "Summon an item into the current room (editor+)", Category: CategoryAdmin, Handler: HandlerSummonItem},
 		{Name: "levelup", Aliases: []string{"lu"}, Help: "Assign a pending ability boost to the named ability", Category: CategoryCharacter, Handler: HandlerLevelUp},
 		{Name: "combat_default", Aliases: []string{"cd"}, Help: "Set your default combat action (attack/strike/bash/dodge/parry/cast/pass/flee)", Category: CategoryCombat, Handler: HandlerCombatDefault},
+		{Name: "trainskill", Aliases: []string{"ts"}, Help: "Advance a skill proficiency rank using a pending skill increase", Category: CategoryCharacter, Handler: HandlerTrainSkill},
 	}
 }
 

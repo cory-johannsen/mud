@@ -511,8 +511,8 @@ func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []
 			ActionType: ActionThrow,
 			ActorID:    actor.ID,
 			ActorName:  actor.Name,
-			Narrative: fmt.Sprintf("%s throws %s at %s for %d damage (save %d vs DC %d).",
-				actor.Name, grenade.Name, target.Name, r.BaseDamage, r.SaveTotal, grenade.SaveDC),
+			Narrative: fmt.Sprintf("%s throws %s at %s for %d damage (hustle save: %s).",
+				actor.Name, grenade.Name, target.Name, r.BaseDamage, r.SaveResult),
 		})
 	}
 	if len(events) == 0 {

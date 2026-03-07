@@ -91,6 +91,7 @@ type CharacterSkillsRepository interface {
 	CharacterSkillsGetter
 	HasSkills(ctx context.Context, characterID int64) (bool, error)
 	SetAll(ctx context.Context, characterID int64, skills map[string]string) error
+	UpgradeSkill(ctx context.Context, characterID int64, skillID, newRank string) error
 }
 
 // CharacterProficienciesRepository persists per-character armor/weapon proficiency data.
@@ -1090,6 +1091,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleLevelUp(uid, p.LevelUp.Ability)
 	case *gamev1.ClientMessage_CombatDefault:
 		return s.handleCombatDefault(uid, p.CombatDefault.Action)
+	case *gamev1.ClientMessage_TrainSkill:
+		return s.handleTrainSkill(uid, p.TrainSkill.SkillId)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -3794,4 +3797,112 @@ func (s *GameServiceServer) pushHPUpdate(uid string, sess *session.PlayerSession
 	if pushErr := sess.Entity.Push(data); pushErr != nil {
 		s.logger.Warn("pushing HP update CharacterInfo", zap.String("uid", uid), zap.Error(pushErr))
 	}
+}
+
+// nextSkillRank returns (nextRank, gateLevel, err).
+// gateLevel == 0 means the advancement is allowed at the current level.
+// If currentRank is "legendary", returns an error.
+//
+// Precondition: currentRank is one of the five rank strings; level >= 1.
+// Postcondition: nextRank is the rank after currentRank; gateLevel is the minimum level required (0 = no gate).
+func nextSkillRank(currentRank string, level int) (nextRank string, gateLevel int, err error) {
+	type step struct {
+		next string
+		gate int
+	}
+	progression := map[string]step{
+		"untrained": {"trained", 0},
+		"trained":   {"expert", 15},
+		"expert":    {"master", 35},
+		"master":    {"legendary", 75},
+	}
+	s, ok := progression[currentRank]
+	if !ok {
+		return "", 0, fmt.Errorf("skill is already at maximum rank (legendary)")
+	}
+	if s.gate > 0 && level < s.gate {
+		return s.next, s.gate, nil
+	}
+	return s.next, 0, nil
+}
+
+// handleTrainSkill advances a skill proficiency rank for the player.
+//
+// Precondition: uid must identify an active session; skillID must be a valid skill ID.
+// Postcondition: if no pending skill increases, returns error message event;
+// if level gate not met, returns error message event;
+// otherwise upgrades skill rank, decrements pending count, updates session, returns confirmation.
+func (s *GameServiceServer) handleTrainSkill(uid, skillID string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if sess.PendingSkillIncreases <= 0 {
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: "You have no pending skill increases."},
+			},
+		}, nil
+	}
+
+	currentRank := sess.Skills[skillID]
+	if currentRank == "" {
+		currentRank = "untrained"
+	}
+
+	nextRank, gateLevel, rankErr := nextSkillRank(currentRank, sess.Level)
+	if rankErr != nil {
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: rankErr.Error()},
+			},
+		}, nil
+	}
+	if gateLevel > 0 {
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{
+					Content: fmt.Sprintf("You must be level %d to advance %s to %s.", gateLevel, skillID, nextRank),
+				},
+			},
+		}, nil
+	}
+
+	ctx := context.Background()
+	if s.characterSkillsRepo != nil {
+		if err := s.characterSkillsRepo.UpgradeSkill(ctx, sess.CharacterID, skillID, nextRank); err != nil {
+			s.logger.Warn("handleTrainSkill: UpgradeSkill failed", zap.Error(err))
+			return &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: "Failed to upgrade skill. Please try again."},
+				},
+			}, nil
+		}
+	}
+	if s.progressRepo != nil {
+		if err := s.progressRepo.ConsumePendingSkillIncrease(ctx, sess.CharacterID); err != nil {
+			s.logger.Warn("handleTrainSkill: ConsumePendingSkillIncrease failed", zap.Error(err))
+			return &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: "Failed to consume skill increase. Please try again."},
+				},
+			}, nil
+		}
+	}
+
+	// Both persistence calls succeeded — mutate session.
+	if sess.Skills == nil {
+		sess.Skills = make(map[string]string)
+	}
+	sess.Skills[skillID] = nextRank
+	sess.PendingSkillIncreases--
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{
+				Content: fmt.Sprintf("You advanced %s from %s to %s. Pending skill increases remaining: %d.",
+					skillID, currentRank, nextRank, sess.PendingSkillIncreases),
+			},
+		},
+	}, nil
 }
