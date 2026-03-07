@@ -70,6 +70,7 @@ type CharacterSaver interface {
 	HasReceivedStartingInventory(ctx context.Context, characterID int64) (bool, error)
 	MarkStartingInventoryGranted(ctx context.Context, characterID int64) error
 	SaveAbilities(ctx context.Context, characterID int64, abilities character.AbilityScores) error
+	SaveProgress(ctx context.Context, id int64, level, experience, maxHP, pendingBoosts int) error
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.

@@ -457,3 +457,12 @@ func (r *CharacterRepository) MarkStartingInventoryGranted(ctx context.Context, 
 	}
 	return nil
 }
+
+// SaveProgress persists level, experience, max_hp and pending ability boost count
+// for a character, delegating to CharacterProgressRepository.
+//
+// Precondition: id > 0; level >= 1; experience >= 0; maxHP >= 1; pendingBoosts >= 0.
+// Postcondition: characters row and character_pending_boosts row are updated atomically.
+func (r *CharacterRepository) SaveProgress(ctx context.Context, id int64, level, experience, maxHP, pendingBoosts int) error {
+	return NewCharacterProgressRepository(r.db).SaveProgress(ctx, id, level, experience, maxHP, pendingBoosts)
+}

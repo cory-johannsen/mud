@@ -62,6 +62,10 @@ func (m *mockCharSaver) SaveAbilities(_ context.Context, _ int64, _ character.Ab
 	return nil
 }
 
+func (m *mockCharSaver) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error {
+	return nil
+}
+
 func TestHandleTeleport_AdminSuccess(t *testing.T) {
 	saver := &mockCharSaver{saved: make(map[int64]string)}
 	svc := testServiceWithAdmin(t, nil)

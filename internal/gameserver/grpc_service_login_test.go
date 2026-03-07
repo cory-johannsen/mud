@@ -107,6 +107,11 @@ func (m *mockCharSaverFull) SaveAbilities(_ context.Context, _ int64, _ characte
 	return nil
 }
 
+// SaveProgress satisfies CharacterSaver; always succeeds.
+func (m *mockCharSaverFull) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error {
+	return nil
+}
+
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied
 // CharacterSaver and returns a connected client and the session manager.
 //

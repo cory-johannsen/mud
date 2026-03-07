@@ -311,6 +311,27 @@ func (pc *PostgresContainer) ApplyProficienciesMigration(t *testing.T) {
 	t.Logf("proficiencies migration applied [%s]", time.Since(start))
 }
 
+// ApplyPendingBoostsMigration adds the character_pending_boosts table for tests.
+//
+// Precondition: Pool connected; characters table exists.
+// Postcondition: character_pending_boosts table exists in the test database.
+func (pc *PostgresContainer) ApplyPendingBoostsMigration(t *testing.T) {
+	t.Helper()
+	ctx := context.Background()
+	start := time.Now()
+	_, err := pc.RawPool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS character_pending_boosts (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			count        INT    NOT NULL DEFAULT 0,
+			PRIMARY KEY (character_id)
+		);
+	`)
+	if err != nil {
+		t.Fatalf("applying pending boosts migration: %v", err)
+	}
+	t.Logf("pending boosts migration applied [%s]", time.Since(start))
+}
+
 // DSN returns the connection string for the test database.
 func (pc *PostgresContainer) DSN() string {
 	return fmt.Sprintf(
