@@ -102,12 +102,13 @@ type RoomSpawnConfig struct {
 // Precondition: ItemID must reference a valid ItemDef ID.
 // Postcondition: Immovable items with RespawnAfter==0 persist indefinitely.
 type RoomEquipmentConfig struct {
-	ItemID       string                   // references inventory.ItemDef.ID
-	MaxCount     int                      // max live instances allowed in this room
-	RespawnAfter time.Duration            // 0 = permanent (never despawn); >0 = respawn after pickup
-	Immovable    bool                     // if true, cannot be picked up
-	Script       string                   // path to Lua script for use effect; empty = no effect
-	SkillChecks  []skillcheck.TriggerDef  // skill check triggers fired on_use
+	ItemID       string                  // references inventory.ItemDef.ID
+	Description  string                  // player-visible name for interact command matching
+	MaxCount     int                     // max live instances allowed in this room
+	RespawnAfter time.Duration           // 0 = permanent (never despawn); >0 = respawn after pickup
+	Immovable    bool                    // if true, cannot be picked up
+	Script       string                  // path to Lua script for use effect; empty = no effect
+	SkillChecks  []skillcheck.TriggerDef // skill check triggers fired on_use
 }
 
 // Room represents a location in the game world.

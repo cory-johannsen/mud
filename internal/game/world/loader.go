@@ -36,12 +36,13 @@ type yamlRoomSpawn struct {
 
 // yamlRoomEquipment is the YAML representation of a room equipment config.
 type yamlRoomEquipment struct {
-	ItemID       string                   `yaml:"item_id"`
-	MaxCount     int                      `yaml:"max_count"`
-	RespawnAfter string                   `yaml:"respawn_after"`
-	Immovable    bool                     `yaml:"immovable"`
-	Script       string                   `yaml:"script"`
-	SkillChecks  []skillcheck.TriggerDef  `yaml:"skill_checks"`
+	ItemID       string                  `yaml:"item_id"`
+	Description  string                  `yaml:"description"`
+	MaxCount     int                     `yaml:"max_count"`
+	RespawnAfter string                  `yaml:"respawn_after"`
+	Immovable    bool                    `yaml:"immovable"`
+	Script       string                  `yaml:"script"`
+	SkillChecks  []skillcheck.TriggerDef `yaml:"skill_checks"`
 }
 
 // yamlRoom is the YAML representation of a room.
@@ -190,6 +191,7 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 			}
 			room.Equipment = append(room.Equipment, RoomEquipmentConfig{
 				ItemID:       e.ItemID,
+				Description:  e.Description,
 				MaxCount:     e.MaxCount,
 				RespawnAfter: dur,
 				Immovable:    e.Immovable,
