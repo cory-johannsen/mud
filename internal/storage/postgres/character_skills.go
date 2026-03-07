@@ -85,3 +85,25 @@ func (r *CharacterSkillsRepository) SetAll(ctx context.Context, characterID int6
 	}
 	return tx.Commit(ctx)
 }
+
+// UpgradeSkill upserts a single skill rank for a character.
+//
+// Precondition: characterID > 0; skillID and newRank must be non-empty.
+// Postcondition: character_skills row for (characterID, skillID) has proficiency = newRank.
+func (r *CharacterSkillsRepository) UpgradeSkill(ctx context.Context, characterID int64, skillID, newRank string) error {
+	if characterID <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", characterID)
+	}
+	if skillID == "" || newRank == "" {
+		return fmt.Errorf("skillID and newRank must be non-empty")
+	}
+	_, err := r.db.Exec(ctx, `
+		INSERT INTO character_skills (character_id, skill_id, proficiency)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (character_id, skill_id) DO UPDATE SET proficiency = EXCLUDED.proficiency
+	`, characterID, skillID, newRank)
+	if err != nil {
+		return fmt.Errorf("UpgradeSkill: %w", err)
+	}
+	return nil
+}
