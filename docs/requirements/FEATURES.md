@@ -147,7 +147,15 @@
 - [x] Only show modifier bonuses.  PF2E does not use attributes scores, only modifiers.
 - [x] Up/down arrow show scroll back through the previously entered commands, Shift+Up/Shift-Down should scroll the console.
 - [x] Saving rolls (Toughness/Hustle/Cool — Gunchete-themed PF2E saves with proficiency ranks, ResolveSave function, character sheet display)
-- [ ] Character levelling
+- [x] Character levelling
+    - [x] XP-based levelling with geometric XP curve
+    - [x] XP awarded from combat kills
+    - [x] XP awarded from room discovery
+    - [x] XP awarded from skill checks
+    - [x] Automatic level-up with HP gain on XP threshold reached
+    - [x] Pending ability boost awarded every 5 levels
+    - [x] `levelup` command to assign pending ability boosts
+    - [x] XP and pending boosts displayed on character sheet
     - [ ] Max character level limit is 100
     - [ ] Max job level for any job is 20
 - [ ] Skill advancement
@@ -272,7 +280,13 @@
   - poisons
   - toxins 
   - addiction & recovery
-- [ ] Bosses 
+- [ ] Advanced Enemies
+  - NPC difficulty tiers
+    - Tags
+    - Feats
+    - Loot scaling
+  - Bosses 
+    - 
 - [ ] Quests
 - [ ] Factions and allegiances
   - economies and exchange rates
