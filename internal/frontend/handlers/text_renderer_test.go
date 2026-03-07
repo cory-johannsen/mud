@@ -645,7 +645,7 @@ func TestRenderCharacterSheet_ClassFeatures(t *testing.T) {
 		},
 	}
 	result := RenderCharacterSheet(view, 80)
-	assert.Contains(t, result, "Class Features")
+	assert.Contains(t, result, "Job Features")
 	assert.Contains(t, result, "Brutal Surge")
 	assert.Contains(t, result, "Street Brawler")
 	assert.Contains(t, result, "Guerilla Warfare")

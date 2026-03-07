@@ -610,7 +610,7 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 		if len(right) > 0 {
 			right = append(right, slPlain(""))
 		}
-		right = append(right, sl(telnet.Colorize(telnet.BrightCyan, "--- Class Features ---")))
+		right = append(right, sl(telnet.Colorize(telnet.BrightCyan, "--- Job Features ---")))
 
 		hasArchetype := false
 		for _, cf := range cfs {
@@ -659,26 +659,25 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 		}
 	}
 
-	// ── Proficiencies: appended below both columns ────────────────────────────
-	var profLines []sheetLine
+	// ── Proficiencies: second column, below Class Features ───────────────────
 	if profs := csv.GetProficiencies(); len(profs) > 0 {
-		profLines = append(profLines, slPlain(""))
-		profLines = append(profLines, sl(telnet.Colorize(telnet.BrightCyan, "--- Proficiencies ---")))
+		if len(right) > 0 {
+			right = append(right, slPlain(""))
+		}
+		right = append(right, sl(telnet.Colorize(telnet.BrightCyan, "--- Proficiencies ---")))
 		for _, e := range profs {
 			rankLabel := fmt.Sprintf("[%s]", e.GetRank())
 			bonusLabel := fmt.Sprintf("+%d", e.GetBonus())
-			// visW accounts for plain-text width: "  " + 18 + " " + 12 + " " + bonus
 			visPlain := fmt.Sprintf("  %-18s %-12s %s", e.GetName(), rankLabel, bonusLabel)
-			// text uses colored rank label for terminal display.
 			coloredRank := proficiencyColor(e.GetRank())
 			text := fmt.Sprintf("  %-18s [%s] %s", e.GetName(), coloredRank, bonusLabel)
-			profLines = append(profLines, sheetLine{text: text, visW: len(visPlain)})
+			right = append(right, sheetLine{text: text, visW: len(visPlain)})
 		}
 	}
 
 	// ── Assemble ──────────────────────────────────────────────────────────────
 	if !twoCol {
-		// Single column: left then right then proficiencies, each line terminated with \r\n.
+		// Single column: left then right, each line terminated with \r\n.
 		var b strings.Builder
 		for _, l := range left {
 			b.WriteString(l.text)
@@ -688,23 +687,9 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			b.WriteString(r.text)
 			b.WriteString("\r\n")
 		}
-		for _, p := range profLines {
-			b.WriteString(p.text)
-			b.WriteString("\r\n")
-		}
 		return b.String()
 	}
-	out := assembleColumns(left, right, leftW)
-	if len(profLines) > 0 {
-		var b strings.Builder
-		b.WriteString(out)
-		for _, p := range profLines {
-			b.WriteString(p.text)
-			b.WriteString("\r\n")
-		}
-		return b.String()
-	}
-	return out
+	return assembleColumns(left, right, leftW)
 }
 
 // sortedInt32Set returns the keys of a map[int32]bool in ascending order.
@@ -1033,7 +1018,7 @@ func RenderFeatsResponse(fr *gamev1.FeatsResponse) string {
 // Postcondition: Returns a non-empty human-readable string.
 func RenderClassFeaturesResponse(resp *gamev1.ClassFeaturesResponse) string {
 	var sb strings.Builder
-	sb.WriteString(telnet.Colorize(telnet.BrightYellow, "=== Class Features ===\r\n"))
+	sb.WriteString(telnet.Colorize(telnet.BrightYellow, "=== Job Features ===\r\n"))
 
 	if len(resp.ArchetypeFeatures) > 0 {
 		sb.WriteString(telnet.Colorize(telnet.BrightCyan, "\r\nArchetype Features:\r\n"))
