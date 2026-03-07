@@ -340,7 +340,7 @@ func RenderInventoryView(iv *gamev1.InventoryView) string {
 func RenderCharacterInfo(ci *gamev1.CharacterInfo) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("  %s%s%s\r\n", telnet.BrightWhite, ci.Name, telnet.Reset))
-	sb.WriteString(fmt.Sprintf("  Region: %s   Class: %s   Level: %d\r\n", ci.Region, ci.Class, ci.Level))
+	sb.WriteString(fmt.Sprintf("  Region: %s   Job: %s   Level: %d\r\n", ci.Region, ci.Class, ci.Level))
 	sb.WriteString(fmt.Sprintf("  HP: %d/%d\r\n", ci.CurrentHp, ci.MaxHp))
 	return sb.String()
 }
@@ -459,7 +459,7 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	var left []sheetLine
 
 	left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "=== %s ===", csv.GetName())))
-	left = append(left, slPlain(fmt.Sprintf("Class: %s  Archetype: %s", csv.GetJob(), csv.GetArchetype())))
+	left = append(left, slPlain(fmt.Sprintf("Job: %s  Archetype: %s", csv.GetJob(), csv.GetArchetype())))
 	left = append(left, slPlain(fmt.Sprintf("Team: %s  Level: %d", csv.GetTeam(), csv.GetLevel())))
 	left = append(left, slPlain(fmt.Sprintf("HP: %d / %d", csv.GetCurrentHp(), csv.GetMaxHp())))
 
