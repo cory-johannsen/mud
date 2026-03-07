@@ -158,12 +158,17 @@
     - [x] XP and pending boosts displayed on character sheet
     - [ ] Max character level limit is 100
     - [ ] Max job level for any job is 20
+- [x] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
+  - [x] `default_combat_action` column added to `characters` table (migration 020)
+  - [x] `SaveDefaultCombatAction` repository method persists the player's chosen default
+  - [x] `combat_default <action>` command (valid actions: attack/strike/bash/dodge/parry/cast/pass/flee)
+  - [x] Auto-queuing: players without an explicit action each combat round auto-queue their default action
+  - [x] `LastCombatTarget` tracks the last explicit target; used for auto-queue targeting with fallback to first living NPC
 - [ ] Skill advancement
 - [ ] Actions
-      - [ ] Exploration
-      - [ ] Downtime
-      - [ ] Gear
-- [ ] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
+  - [ ] Exploration
+  - [ ] Downtime
+  - [ ] Gear
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
 - [ ] Job development
     - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
