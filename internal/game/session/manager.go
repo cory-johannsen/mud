@@ -39,6 +39,10 @@ type PlayerSession struct {
 	Class string
 	// Level is the character's current level.
 	Level int
+	// Experience is the character's total accumulated XP.
+	Experience int
+	// PendingBoosts is the number of ability boosts the player has not yet assigned.
+	PendingBoosts int
 	// LoadoutSet holds the player's swappable weapon presets.
 	LoadoutSet *inventory.LoadoutSet
 	// Equipment holds the player's equipped armor and accessories.

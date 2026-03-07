@@ -1,9 +1,12 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
+
+	"google.golang.org/protobuf/proto"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -13,6 +16,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
+	"github.com/cory-johannsen/mud/internal/game/xp"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
@@ -40,6 +44,7 @@ type CombatHandler struct {
 	respawnMgr    *npc.RespawnManager
 	floorMgr      *inventory.FloorManager
 	onCombatEndFn func(roomID string) // optional; called after combat ends; may be nil
+	xpSvc         *xp.Service        // optional; awards kill XP on NPC death; may be nil
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -85,6 +90,14 @@ func NewCombatHandler(
 		timers:        make(map[string]*combat.RoundTimer),
 		loadouts:      make(map[string]*inventory.WeaponPreset),
 	}
+}
+
+// SetXPService registers the XP service used to award kill XP.
+//
+// Precondition: svc must be non-nil.
+// Postcondition: Kill XP is awarded to the first living player on NPC death.
+func (h *CombatHandler) SetXPService(svc *xp.Service) {
+	h.xpSvc = svc
 }
 
 // SetOnCombatEnd registers a callback invoked after each combat ends.
@@ -977,6 +990,27 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 				}
 			}
 		}
+		// Award kill XP to the first living player.
+		if h.xpSvc != nil {
+			if killer := h.firstLivingPlayer(cbt); killer != nil {
+				if xpMsgs, xpErr := h.xpSvc.AwardKill(context.Background(), killer, inst.Level, killer.CharacterID); xpErr == nil {
+					for _, msg := range xpMsgs {
+						xpEvt := &gamev1.ServerEvent{
+							Payload: &gamev1.ServerEvent_Message{
+								Message: &gamev1.MessageEvent{
+									Content: msg,
+									Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+								},
+							},
+						}
+						if data, marshalErr := proto.Marshal(xpEvt); marshalErr == nil {
+							_ = killer.Entity.Push(data)
+						}
+					}
+				}
+			}
+		}
+
 		// Remove cannot fail: Get confirmed existence above, and combatMu prevents concurrent removal.
 		_ = h.npcMgr.Remove(c.ID)
 		if h.respawnMgr != nil {

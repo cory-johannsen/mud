@@ -27,6 +27,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/world"
+	"github.com/cory-johannsen/mud/internal/game/xp"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/scripting"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
@@ -163,6 +164,8 @@ type GameServiceServer struct {
 	charAbilityBoostsRepo      postgres.CharacterAbilityBoostsRepository
 	archetypes                 map[string]*ruleset.Archetype
 	regions                    map[string]*ruleset.Region
+	xpSvc                      *xp.Service
+	progressRepo               *postgres.CharacterProgressRepository
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -274,6 +277,22 @@ func NewGameServiceServer(
 	return s
 }
 
+// SetProgressRepo registers the CharacterProgressRepository used to load pending boosts at login.
+//
+// Precondition: repo must be non-nil.
+// Postcondition: PendingBoosts are loaded from the DB on each player login.
+func (s *GameServiceServer) SetProgressRepo(repo *postgres.CharacterProgressRepository) {
+	s.progressRepo = repo
+}
+
+// SetXPService registers the XP service used to award experience.
+//
+// Precondition: svc must be non-nil.
+// Postcondition: XP is awarded at kill, room discovery, and skill check sites.
+func (s *GameServiceServer) SetXPService(svc *xp.Service) {
+	s.xpSvc = svc
+}
+
 // Session implements the bidirectional streaming RPC.
 // Flow:
 //  1. Wait for JoinWorldRequest
@@ -367,6 +386,22 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		return fmt.Errorf("adding player: %w", err)
 	}
 	defer s.cleanupPlayer(uid, username)
+
+	// Load XP and pending boosts into session from persisted state.
+	if dbChar != nil {
+		sess.Experience = dbChar.Experience
+	}
+	if characterID > 0 && s.progressRepo != nil {
+		_, _, _, boosts, progressErr := s.progressRepo.GetProgress(stream.Context(), characterID)
+		if progressErr == nil {
+			sess.PendingBoosts = boosts
+		} else {
+			s.logger.Warn("loading pending boosts at login",
+				zap.Int64("character_id", characterID),
+				zap.Error(progressErr),
+			)
+		}
+	}
 
 	// Load automap cache from DB and record spawn room discovery.
 	if s.automapRepo != nil {
@@ -1137,6 +1172,28 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 					s.logger.Warn("persisting map discovery", zap.Error(err))
 				}
 			}
+			// Award room discovery XP for newly discovered rooms.
+			if s.xpSvc != nil {
+				if xpMsgs, xpErr := s.xpSvc.AwardRoomDiscovery(context.Background(), sess, sess.CharacterID); xpErr != nil {
+					s.logger.Warn("awarding room discovery XP", zap.String("uid", uid), zap.Error(xpErr))
+				} else {
+					for _, msg := range xpMsgs {
+						xpEvt := &gamev1.ServerEvent{
+							Payload: &gamev1.ServerEvent_Message{
+								Message: &gamev1.MessageEvent{
+									Content: msg,
+									Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+								},
+							},
+						}
+						if data, marshalErr := proto.Marshal(xpEvt); marshalErr == nil {
+							if pushErr := sess.Entity.Push(data); pushErr != nil {
+								s.logger.Warn("pushing room discovery XP message", zap.String("uid", uid), zap.Error(pushErr))
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -1260,6 +1317,16 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 			s.applySkillCheckEffect(sess, outcome.Effect, room.ID)
 		}
 
+		// Award XP for successful skill checks.
+		if s.xpSvc != nil && (result.Outcome == skillcheck.CritSuccess || result.Outcome == skillcheck.Success) {
+			isCrit := result.Outcome == skillcheck.CritSuccess
+			if xpMsgs, xpErr := s.xpSvc.AwardSkillCheck(context.Background(), sess, trigger.DC, isCrit, sess.CharacterID); xpErr != nil {
+				s.logger.Warn("awarding skill check XP", zap.String("uid", uid), zap.Error(xpErr))
+			} else {
+				msgs = append(msgs, xpMsgs...)
+			}
+		}
+
 		if s.scriptMgr != nil {
 			s.scriptMgr.CallHook(room.ZoneID, "on_skill_check", //nolint:errcheck
 				lua.LString(uid),
@@ -1325,6 +1392,16 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 				// Apply non-deny effects (deny is not applicable for on_greet).
 				if outcome.Effect == nil || outcome.Effect.Type != "deny" {
 					s.applySkillCheckEffect(sess, outcome.Effect, roomID)
+				}
+			}
+
+			// Award XP for successful NPC skill checks.
+			if s.xpSvc != nil && (result.Outcome == skillcheck.CritSuccess || result.Outcome == skillcheck.Success) {
+				isCrit := result.Outcome == skillcheck.CritSuccess
+				if xpMsgs, xpErr := s.xpSvc.AwardSkillCheck(context.Background(), sess, trigger.DC, isCrit, sess.CharacterID); xpErr != nil {
+					s.logger.Warn("awarding NPC skill check XP", zap.String("uid", uid), zap.Error(xpErr))
+				} else {
+					msgs = append(msgs, xpMsgs...)
 				}
 			}
 
