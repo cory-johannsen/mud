@@ -112,6 +112,11 @@ func (m *mockCharSaverFull) SaveProgress(_ context.Context, _ int64, _, _, _, _ 
 	return nil
 }
 
+// SaveDefaultCombatAction satisfies CharacterSaver; always succeeds.
+func (m *mockCharSaverFull) SaveDefaultCombatAction(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied
 // CharacterSaver and returns a connected client and the session manager.
 //

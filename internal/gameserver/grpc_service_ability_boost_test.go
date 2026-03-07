@@ -88,6 +88,11 @@ func (m *mockCharSaverAbilityBoost) SaveAbilities(_ context.Context, _ int64, ab
 	return nil
 }
 
+// SaveDefaultCombatAction satisfies CharacterSaver; always succeeds.
+func (m *mockCharSaverAbilityBoost) SaveDefaultCombatAction(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+
 // testGRPCServerWithAbilityBoosts starts an in-process gRPC server configured with
 // the supplied char saver, ability boosts repo, archetypes, and regions, then returns
 // a connected client and the underlying session manager.

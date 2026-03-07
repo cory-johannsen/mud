@@ -91,6 +91,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerSummonItem:         bridgeSummonItem,
 	command.HandlerProficiencies:      bridgeProficiencies,
 	command.HandlerLevelUp:            bridgeLevelUp,
+	command.HandlerCombatDefault:      bridgeCombatDefault,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -718,6 +719,22 @@ func bridgeLevelUp(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_LevelUp{LevelUp: &gamev1.LevelUpRequest{Ability: result}},
+	}}, nil
+}
+
+// bridgeCombatDefault validates and sends a CombatDefaultRequest to set the player's default combat action.
+//
+// Precondition: bctx must be non-nil with a valid conn and reqID.
+// Postcondition: if HandleCombatDefault returns an error, writes usage error and returns done=true;
+// otherwise returns a non-nil msg containing a CombatDefaultRequest.
+func bridgeCombatDefault(bctx *bridgeContext) (bridgeResult, error) {
+	action, err := command.HandleCombatDefault(bctx.parsed.Args)
+	if err != nil {
+		return writeErrorPrompt(bctx, err.Error())
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_CombatDefault{CombatDefault: &gamev1.CombatDefaultRequest{Action: action}},
 	}}, nil
 }
 

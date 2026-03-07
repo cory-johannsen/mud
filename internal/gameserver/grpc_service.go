@@ -72,6 +72,7 @@ type CharacterSaver interface {
 	MarkStartingInventoryGranted(ctx context.Context, characterID int64) error
 	SaveAbilities(ctx context.Context, characterID int64, abilities character.AbilityScores) error
 	SaveProgress(ctx context.Context, id int64, level, experience, maxHP, pendingBoosts int) error
+	SaveDefaultCombatAction(ctx context.Context, characterID int64, action string) error
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.
@@ -1073,6 +1074,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleProficiencies(uid)
 	case *gamev1.ClientMessage_LevelUp:
 		return s.handleLevelUp(uid, p.LevelUp.Ability)
+	case *gamev1.ClientMessage_CombatDefault:
+		return s.handleCombatDefault(uid, p.CombatDefault.Action)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -3298,6 +3301,34 @@ func abilityValue(a character.AbilityScores, ability string) int {
 	default:
 		return 0
 	}
+}
+
+// handleCombatDefault persists the player's preferred default combat action.
+//
+// Precondition: uid must identify an active session; action must be a valid combat action.
+// Postcondition: sess.DefaultCombatAction is updated and persisted; a confirmation message event is returned.
+func (s *GameServiceServer) handleCombatDefault(uid, action string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	ctx := context.Background()
+	if sess.CharacterID > 0 && s.charSaver != nil {
+		if err := s.charSaver.SaveDefaultCombatAction(ctx, sess.CharacterID, action); err != nil {
+			s.logger.Warn("handleCombatDefault: SaveDefaultCombatAction failed", zap.Error(err))
+			return &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: "Failed to save default combat action. Please try again."},
+				},
+			}, nil
+		}
+	}
+	sess.DefaultCombatAction = action
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{Content: fmt.Sprintf("Default combat action set to: %s", action)},
+		},
+	}, nil
 }
 
 // buildProficiencyEntries constructs a slice of ProficiencyEntry from a proficiency map.
