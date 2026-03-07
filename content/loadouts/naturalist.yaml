@@ -1,0 +1,18 @@
+archetype: naturalist
+base:
+  weapon: harvest_sickle
+  armor:
+    torso: leather_jacket
+    hands: fingerless_gloves
+  consumables:
+    - item: canadian_bacon
+      quantity: 2
+  currency: 50
+team_gun:
+  weapon: holdout_derringer
+  armor:
+    torso: corp_suit_liner
+team_machete:
+  weapon: suburban_machete
+  armor:
+    torso: leather_jacket

@@ -1,0 +1,18 @@
+archetype: schemer
+base:
+  weapon: ceramic_shiv
+  armor:
+    torso: corp_suit_liner
+    hands: fingerless_gloves
+  consumables:
+    - item: canadian_bacon
+      quantity: 2
+  currency: 100
+team_gun:
+  weapon: holdout_derringer
+  armor:
+    torso: corp_suit_liner
+team_machete:
+  weapon: ceramic_shiv
+  armor:
+    torso: leather_jacket
