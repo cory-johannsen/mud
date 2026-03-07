@@ -11,6 +11,9 @@ proficiencies:
   martial_ranged: trained
   light_armor: trained
   medium_armor: trained
+  toughness: expert
+  hustle: trained
+  cool: trained
 
 skills:
   fixed:

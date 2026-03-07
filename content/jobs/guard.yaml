@@ -9,6 +9,9 @@ proficiencies:
   martial_weapons: trained
   light_armor: trained
   medium_armor: trained
+  toughness: trained
+  hustle: trained
+  cool: trained
 
 skills:
   fixed:

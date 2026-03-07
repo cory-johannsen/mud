@@ -8,6 +8,9 @@ proficiencies:
   simple_weapons: trained
   martial_melee: trained
   light_armor: trained
+  toughness: trained
+  hustle: trained
+  cool: trained
 
 skills:
   fixed:

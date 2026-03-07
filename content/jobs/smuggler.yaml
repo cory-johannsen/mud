@@ -9,6 +9,9 @@ proficiencies:
   martial_ranged: trained
   simple_ranged: trained
   light_armor: trained
+  toughness: trained
+  hustle: expert
+  cool: trained
 
 skills:
   fixed:

@@ -9,6 +9,9 @@ proficiencies:
   martial_melee: trained
   unarmed: trained
   light_armor: trained
+  toughness: expert
+  hustle: trained
+  cool: trained
 
 skills:
   fixed:

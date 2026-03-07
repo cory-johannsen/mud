@@ -7,6 +7,9 @@ hit_points_per_level: 8
 proficiencies:
   simple_weapons: trained
   light_armor: trained
+  toughness: trained
+  hustle: expert
+  cool: trained
 
 skills:
   fixed:

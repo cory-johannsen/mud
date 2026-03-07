@@ -10,6 +10,9 @@ proficiencies:
   martial_weapons: trained
   light_armor: trained
   medium_armor: trained
+  toughness: expert
+  hustle: trained
+  cool: trained
 
 starting_inventory:
   weapon: heavy_revolver

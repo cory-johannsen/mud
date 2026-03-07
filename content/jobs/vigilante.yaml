@@ -9,6 +9,9 @@ proficiencies:
   martial_melee: trained
   simple_ranged: trained
   light_armor: trained
+  toughness: expert
+  hustle: trained
+  cool: trained
 
 drawbacks:
   - name: Alter Ego
