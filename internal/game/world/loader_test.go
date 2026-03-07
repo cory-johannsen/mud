@@ -549,5 +549,31 @@ zone:
 	assert.Equal(t, "Zone Map", room.Equipment[0].Description)
 }
 
+func TestLoadZone_RoomEquipment_Description_AbsentIsEmpty(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: desc
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: A room.
+      equipment:
+        - item_id: zone_map
+          max_count: 1
+          immovable: true
+      map_x: 0
+      map_y: 0
+`)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	room := zone.Rooms["r1"]
+	require.Len(t, room.Equipment, 1)
+	assert.Equal(t, "zone_map", room.Equipment[0].ItemID)
+	assert.Equal(t, "", room.Equipment[0].Description)
+}
+
 // Ensure the skillcheck import is used; ForOutcome is referenced via the type.
 var _ = skillcheck.TriggerDef{}
