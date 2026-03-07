@@ -7,4 +7,5 @@ range_increment: 0
 traits: [machete-team, agile, finesse, concealable]
 kind: one_handed
 group: blade
+proficiency_category: simple_weapons
 team_affinity: machete

@@ -4,3 +4,4 @@ damage_dice: 1d8
 damage_type: slashing
 traits: [versatile]
 team_affinity: machete
+proficiency_category: simple_weapons

@@ -10,4 +10,5 @@ firing_modes: [single]
 traits: [gun-team, emp, nonlethal]
 kind: one_handed
 group: firearm
+proficiency_category: specialized
 team_affinity: gun

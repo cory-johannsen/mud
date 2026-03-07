@@ -10,4 +10,5 @@ firing_modes: [single]
 traits: [gun-team, military-surplus]
 kind: two_handed
 group: firearm
+proficiency_category: simple_ranged
 team_affinity: gun

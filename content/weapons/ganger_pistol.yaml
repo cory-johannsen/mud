@@ -8,3 +8,4 @@ magazine_capacity: 15
 firing_modes: [single]
 traits: [concealable]
 team_affinity: gun
+proficiency_category: simple_ranged

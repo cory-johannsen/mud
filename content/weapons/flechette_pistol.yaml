@@ -10,4 +10,5 @@ firing_modes: [single, burst]
 traits: [gun-team, scatter]
 kind: one_handed
 group: firearm
+proficiency_category: martial_ranged
 team_affinity: gun

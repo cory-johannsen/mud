@@ -11,21 +11,21 @@ import (
 func oneHandedDef(id string) *inventory.WeaponDef {
 	return &inventory.WeaponDef{
 		ID: id, Name: id, DamageDice: "1d6", DamageType: "slashing",
-		Kind: inventory.WeaponKindOneHanded,
+		Kind: inventory.WeaponKindOneHanded, ProficiencyCategory: "simple_weapons",
 	}
 }
 
 func twoHandedDef(id string) *inventory.WeaponDef {
 	return &inventory.WeaponDef{
 		ID: id, Name: id, DamageDice: "2d8", DamageType: "slashing",
-		Kind: inventory.WeaponKindTwoHanded,
+		Kind: inventory.WeaponKindTwoHanded, ProficiencyCategory: "martial_weapons",
 	}
 }
 
 func shieldDef(id string) *inventory.WeaponDef {
 	return &inventory.WeaponDef{
 		ID: id, Name: id, DamageDice: "1d4", DamageType: "bludgeoning",
-		Kind: inventory.WeaponKindShield,
+		Kind: inventory.WeaponKindShield, ProficiencyCategory: "simple_weapons",
 	}
 }
 
@@ -199,22 +199,24 @@ func TestProperty_WeaponPreset_TwoHandedAlwaysClearsOffHand(t *testing.T) {
 			inventory.WeaponKindShield,
 		}).Draw(rt, "off_hand_kind")
 		offDef := &inventory.WeaponDef{
-			ID:         offHandID,
-			Name:       offHandID,
-			DamageDice: "1d6",
-			DamageType: "slashing",
-			Kind:       offHandKind,
+			ID:                  offHandID,
+			Name:                offHandID,
+			DamageDice:          "1d6",
+			DamageType:          "slashing",
+			Kind:                offHandKind,
+			ProficiencyCategory: "simple_weapons",
 		}
 		_ = p.EquipOffHand(offDef)
 
 		// Draw a random two-handed weapon
 		mainID := rapid.StringMatching(`[a-z]{4,8}`).Draw(rt, "main_id")
 		mainDef := &inventory.WeaponDef{
-			ID:         mainID,
-			Name:       mainID,
-			DamageDice: "2d8",
-			DamageType: "slashing",
-			Kind:       inventory.WeaponKindTwoHanded,
+			ID:                  mainID,
+			Name:                mainID,
+			DamageDice:          "2d8",
+			DamageType:          "slashing",
+			Kind:                inventory.WeaponKindTwoHanded,
+			ProficiencyCategory: "martial_weapons",
 		}
 		_ = p.EquipMainHand(mainDef)
 

@@ -3,3 +3,4 @@ name: Steel Pipe
 damage_dice: 1d8
 damage_type: bludgeoning
 traits: [two_handed]
+proficiency_category: simple_weapons

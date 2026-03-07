@@ -11,23 +11,25 @@ import (
 // pistolDef returns a valid firearm WeaponDef for use in tests.
 func pistolDef() *inventory.WeaponDef {
 	return &inventory.WeaponDef{
-		ID:               "pistol-9mm",
-		Name:             "9mm Pistol",
-		DamageDice:       "2d6",
-		DamageType:       "ballistic",
-		RangeIncrement:   30,
-		FiringModes:      []inventory.FiringMode{inventory.FiringModeSingle},
-		MagazineCapacity: 15,
+		ID:                  "pistol-9mm",
+		Name:                "9mm Pistol",
+		DamageDice:          "2d6",
+		DamageType:          "ballistic",
+		RangeIncrement:      30,
+		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
+		MagazineCapacity:    15,
+		ProficiencyCategory: "simple_ranged",
 	}
 }
 
 // knifeDef returns a valid melee WeaponDef for use in tests.
 func knifeDef() *inventory.WeaponDef {
 	return &inventory.WeaponDef{
-		ID:         "knife-combat",
-		Name:       "Combat Knife",
-		DamageDice: "1d6",
-		DamageType: "slashing",
+		ID:                  "knife-combat",
+		Name:                "Combat Knife",
+		DamageDice:          "1d6",
+		DamageType:          "slashing",
+		ProficiencyCategory: "simple_weapons",
 		// RangeIncrement == 0 means melee; no FiringModes for melee.
 	}
 }

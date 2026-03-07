@@ -7,4 +7,5 @@ range_increment: 0
 traits: [gun-team, agile, unarmed]
 kind: one_handed
 group: brawling
+proficiency_category: unarmed
 team_affinity: gun

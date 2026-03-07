@@ -10,3 +10,4 @@ firing_modes: [single]
 traits: [nonlethal, immobilize]
 kind: two_handed
 group: exotic
+proficiency_category: specialized

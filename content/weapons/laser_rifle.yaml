@@ -10,6 +10,7 @@ firing_modes: [single]
 traits: [gun-team, corp-tech, silent]
 kind: two_handed
 group: energy
+proficiency_category: specialized
 team_affinity: gun
 cross_team_effect:
   kind: condition

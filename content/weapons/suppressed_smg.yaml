@@ -10,4 +10,5 @@ firing_modes: [single, automatic]
 traits: [gun-team, suppressed, concealable]
 kind: two_handed
 group: firearm
+proficiency_category: martial_ranged
 team_affinity: gun

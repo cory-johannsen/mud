@@ -10,6 +10,7 @@ firing_modes: [single, burst, automatic]
 traits: [gun-team, smart-linked, military-surplus]
 kind: two_handed
 group: firearm
+proficiency_category: martial_ranged
 team_affinity: gun
 cross_team_effect:
   kind: condition

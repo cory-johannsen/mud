@@ -20,10 +20,11 @@ func TestWeaponDef_Validate_RejectsEmpty(t *testing.T) {
 
 func TestWeaponDef_Validate_AcceptsMinimal(t *testing.T) {
 	w := &inventory.WeaponDef{
-		ID:         "test_sword",
-		Name:       "Test Sword",
-		DamageDice: "1d6",
-		DamageType: "slashing",
+		ID:                  "test_sword",
+		Name:                "Test Sword",
+		DamageDice:          "1d6",
+		DamageType:          "slashing",
+		ProficiencyCategory: "simple_weapons",
 	}
 	if err := w.Validate(); err != nil {
 		t.Fatalf("expected no error for minimal melee WeaponDef, got: %v", err)
@@ -57,6 +58,7 @@ magazine_capacity: 10
 firing_modes: [single]
 traits: [concealable]
 kind: one_handed
+proficiency_category: simple_ranged
 `
 	if err := os.WriteFile(filepath.Join(dir, "test_pistol.yaml"), []byte(content), 0644); err != nil {
 		t.Fatalf("failed to write temp YAML: %v", err)
@@ -178,6 +180,7 @@ func TestWeaponDef_Kind_DefaultEmpty(t *testing.T) {
 func TestWeaponDef_Validate_KindNotRequired(t *testing.T) {
 	w := &inventory.WeaponDef{
 		ID: "knife", Name: "Knife", DamageDice: "1d6", DamageType: "slashing",
+		ProficiencyCategory: "simple_weapons",
 	}
 	if err := w.Validate(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -235,6 +238,7 @@ damage_type: slashing
 range_increment: 0
 kind: one_handed
 group: blade
+proficiency_category: simple_weapons
 team_affinity: machete
 cross_team_effect:
   kind: condition
@@ -262,6 +266,7 @@ magazine_capacity: 15
 firing_modes: [single]
 kind: one_handed
 group: firearm
+proficiency_category: simple_ranged
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "generic_pistol.yaml"), []byte(content), 0644))
 	weapons, err := inventory.LoadWeapons(dir)
@@ -269,6 +274,17 @@ group: firearm
 	require.Len(t, weapons, 1)
 	assert.Empty(t, weapons[0].TeamAffinity)
 	assert.Nil(t, weapons[0].CrossTeamEffect)
+}
+
+func TestAllWeaponsHaveProficiencyCategory(t *testing.T) {
+	weapons, err := inventory.LoadWeapons("../../../content/weapons")
+	require.NoError(t, err)
+	require.NotEmpty(t, weapons)
+	for _, w := range weapons {
+		assert.NotEmpty(t, w.ProficiencyCategory, "weapon %s missing proficiency_category", w.ID)
+		err := w.Validate()
+		assert.NoError(t, err, "weapon %s failed validation", w.ID)
+	}
 }
 
 func TestProperty_WeaponDef_WeaponKind_MutuallyExclusive(t *testing.T) {

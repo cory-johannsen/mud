@@ -10,3 +10,4 @@ firing_modes: [single]
 traits: [utility, grapple]
 kind: one_handed
 group: exotic
+proficiency_category: specialized

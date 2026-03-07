@@ -7,6 +7,7 @@ range_increment: 0
 traits: [reach, machete-team, two-hand]
 kind: two_handed
 group: blade
+proficiency_category: specialized
 team_affinity: machete
 cross_team_effect:
   kind: condition

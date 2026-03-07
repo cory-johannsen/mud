@@ -7,4 +7,5 @@ range_increment: 0
 traits: [finesse, machete-team]
 kind: one_handed
 group: blade
+proficiency_category: martial_melee
 team_affinity: machete

@@ -46,8 +46,9 @@ type WeaponDef struct {
 	MagazineCapacity int          `yaml:"magazine_capacity"` // 0 = not a firearm
 	FiringModes      []FiringMode `yaml:"firing_modes"`
 	Traits           []string     `yaml:"traits"`
-	Kind             WeaponKind   `yaml:"kind"`
-	Group            string           `yaml:"group"`             // e.g. "blade", "club", "firearm", "brawling", "energy"
+	Kind                 WeaponKind   `yaml:"kind"`
+	Group                string           `yaml:"group"`                // e.g. "blade", "club", "firearm", "brawling", "energy"
+	ProficiencyCategory  string           `yaml:"proficiency_category"` // e.g. "simple_weapons", "martial_ranged", "specialized"
 	TeamAffinity     string           `yaml:"team_affinity"`     // "gun", "machete", or ""
 	CrossTeamEffect  *CrossTeamEffect `yaml:"cross_team_effect"` // nil = no side effect
 }
@@ -110,6 +111,13 @@ func (w *WeaponDef) Validate() error {
 	}
 	if w.IsFirearm() && w.MagazineCapacity <= 0 {
 		errs = append(errs, errors.New("firearm MagazineCapacity must be > 0"))
+	}
+	validWeaponProfCategories := map[string]bool{
+		"simple_weapons": true, "simple_ranged": true, "martial_weapons": true,
+		"martial_ranged": true, "martial_melee": true, "unarmed": true, "specialized": true,
+	}
+	if !validWeaponProfCategories[w.ProficiencyCategory] {
+		errs = append(errs, fmt.Errorf("proficiency_category %q is not valid", w.ProficiencyCategory))
 	}
 	if len(errs) > 0 {
 		return fmt.Errorf("weapon validation failed: %v", errs)
