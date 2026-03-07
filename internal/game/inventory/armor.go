@@ -29,9 +29,9 @@ type ArmorDef struct {
 	SpeedPenalty    int              `yaml:"speed_penalty"`    // non-negative feet reduction
 	StrengthReq     int              `yaml:"strength_req"`
 	Bulk            int              `yaml:"bulk"`
-	Group                string           `yaml:"group"`
-	ProficiencyCategory  string           `yaml:"proficiency_category"`
-	Traits               []string         `yaml:"traits"`
+	Group               string           `yaml:"group"`
+	ProficiencyCategory string           `yaml:"proficiency_category"`
+	Traits              []string         `yaml:"traits"`
 	TeamAffinity    string           `yaml:"team_affinity"`    // "gun", "machete", or ""
 	CrossTeamEffect *CrossTeamEffect `yaml:"cross_team_effect"`
 }
