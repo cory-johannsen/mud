@@ -164,7 +164,14 @@
   - [x] `combat_default <action>` command (valid actions: attack/strike/bash/dodge/parry/cast/pass/flee)
   - [x] Auto-queuing: players without an explicit action each combat round auto-queue their default action
   - [x] `LastCombatTarget` tracks the last explicit target; used for auto-queue targeting with fallback to first living NPC
-- [ ] Skill advancement
+- [x] Skill advancement
+  - [x] `pending_skill_increases` column on `characters` table (migration 021)
+  - [x] Skill increases awarded at every even character level (L2, L4, L6...)
+  - [x] Rank gates: expert (L15+), master (L35+), legendary (L75+)
+  - [x] `trainskill <skill>` command to spend pending skill increases
+  - [x] Level gate enforcement at assignment time
+  - [x] Backfill: existing characters receive `floor(level/2)` pending increases at login
+  - [x] Pending skill increases displayed on character sheet with `trainskill` hint
 - [ ] Map
   - [ ] interacting with the zone map requires the player to use the object id, should use the descriptive name
   - [ ] interacting with the zone map does not populate the zone map for the player, it should populate and persist the zone map for the player
