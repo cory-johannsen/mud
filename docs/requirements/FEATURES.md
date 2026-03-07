@@ -172,9 +172,9 @@
   - [x] Level gate enforcement at assignment time
   - [x] Backfill: existing characters receive `floor(level/2)` pending increases at login
   - [x] Pending skill increases displayed on character sheet with `trainskill` hint
-- [ ] Map
-  - [ ] interacting with the zone map requires the player to use the object id, should use the descriptive name
-  - [ ] interacting with the zone map does not populate the zone map for the player, it should populate and persist the zone map for the player
+- [x] Map
+  - [x] `interact Zone Map` works by descriptive name (was: zone_map object ID required)
+  - [x] Zone map use populates automap in current session
 - [ ] Actions
   - [ ] Archetype and Job
     - Each Archetype should have at least 1 unique Action
@@ -184,6 +184,9 @@
   - [ ] Downtime
   - [ ] Gear
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
+  - [ ] Traditions of magic -> Types of technology / Substances
+    - [ ] Use PF2E Traits, mapping to Gunchete lore as required
+  - 
 - [ ] Job development
     - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
     - [ ] advancement hierarchy - every job has multiple levels of specialization
@@ -259,9 +262,10 @@
     - Dangerous rooms contain non-Combat NPCs and combat NPCs
       - Combat is enabled in Dangerous rooms
       - Combat can only be initiated by anyone in a Dangerous room
+      - Non-combat NPCs flee combat if engaged
     - All Out War rooms contain only combat NPCs
       - Combat is enabled in All Out War rooms
-      - NPCs attack on sight in an All Out War room
+      - Combat NPCs attack on sight in an All Out War room
   - The safely level of a room should be included in the room description, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
   - The safely level of a room should be included in the map, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
 - [ ] Per-NPC type custom behaviors
@@ -320,6 +324,31 @@
   - [ ] pressure plates
   - [ ] Honkeypot
 - New zones
-  - Clown Camp
+  - [ ] Clown Camp
+    - [ ] Continuous zone effects: delirium, fear
+    - [ ] Locations
+      - [ ] The Empty Theater
+      - [ ] Backstage
+      - [ ] The Changing Rooms
+      - [ ] The Stage
+        - [ ] Boss Fight: Just Clownin'!
+  - [ ] SteamPDX
+    - [ ] Continuous zone effects: horror, nausea, reduced visibility
+    - [ ] Locations
+      - [ ] Lobby
+      - [ ] Locker Room
+      - [ ] Sauna
+      - [ ] Hot tub
+      - [ ] Glory Hole
+        - [ ] Boss Fight: The Big 3
+  - [ ] The Velvet Rope
+    - [ ] continuous zone effects: temptation, revulsion, difficult terrain (lube)
+    - [ ] Locations
+      - [ ] The Buffet
+      - [ ] The "Play" Rooms
+      - [ ] Party Theater
+        - [ ] Boss Fights: Gangbang!
+      - [ ] The Basement
+  - [ ] Club Privata
 - [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Mac, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration
