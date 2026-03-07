@@ -99,8 +99,8 @@ func (m *RoomEquipmentManager) EquipmentInRoom(roomID string) []*EquipmentInstan
 }
 
 // GetInstance returns the instance with the given ID in the given room, or nil.
-// The query is matched against InstanceID (UUID) first, then ItemDefID (item name),
-// so players can type either the UUID or the human-readable item_id shown in the room.
+// The query is matched against InstanceID (UUID) first, then ItemDefID, then Description (case-insensitive),
+// so players can use the UUID, the item_id, or the human-readable description shown in the room.
 //
 // Precondition: roomID and instanceID may be any string.
 // Postcondition: Returns nil if not found.
