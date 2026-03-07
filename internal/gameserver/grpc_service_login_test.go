@@ -127,7 +127,7 @@ func testGRPCServerWithSaverFull(t *testing.T, saver CharacterSaver) (gamev1.Gam
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -379,7 +379,7 @@ func testGRPCServerWithClassFeatures(
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, nil, nil, nil, nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -494,7 +494,7 @@ func testGRPCServerWithFeatureChoices(
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-		nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, fcRepo, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, fcRepo, nil, nil, nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")

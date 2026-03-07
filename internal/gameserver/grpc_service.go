@@ -89,6 +89,15 @@ type CharacterSkillsRepository interface {
 	SetAll(ctx context.Context, characterID int64, skills map[string]string) error
 }
 
+// CharacterProficienciesRepository persists per-character armor/weapon proficiency data.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Mutations are durably persisted before returning.
+type CharacterProficienciesRepository interface {
+	GetAll(ctx context.Context, characterID int64) (map[string]string, error)
+	Upsert(ctx context.Context, characterID int64, category, rank string) error
+}
+
 // CharacterFeatsGetter retrieves the feat IDs assigned to a character.
 //
 // Precondition: characterID must be > 0.
@@ -139,8 +148,9 @@ type GameServiceServer struct {
 	jobRegistry         *ruleset.JobRegistry
 	condRegistry        *condition.Registry
 	loadoutsDir         string
-	allSkills           []*ruleset.Skill
-	characterSkillsRepo CharacterSkillsRepository
+	allSkills                   []*ruleset.Skill
+	characterSkillsRepo         CharacterSkillsRepository
+	characterProficienciesRepo  CharacterProficienciesRepository
 	allFeats                   []*ruleset.Feat
 	featRegistry               *ruleset.FeatRegistry
 	characterFeatsRepo         CharacterFeatsGetter
@@ -167,6 +177,7 @@ type GameServiceServer struct {
 // loadoutsDir is the path to the archetype loadout YAML directory; empty disables starting inventory grants.
 // allSkills may be nil (skill backfill on session startup will be skipped).
 // characterSkillsRepo may be nil (skill backfill on session startup will be skipped).
+// characterProficienciesRepo may be nil (proficiency backfill on session startup will be skipped).
 // allFeats may be nil (feat commands will return a not-available message).
 // featRegistry may be nil (feat commands will return a not-available message).
 // characterFeatsRepo may be nil (feat commands will return a not-available message).
@@ -199,6 +210,7 @@ func NewGameServiceServer(
 	loadoutsDir string,
 	allSkills []*ruleset.Skill,
 	characterSkillsRepo CharacterSkillsRepository,
+	characterProficienciesRepo CharacterProficienciesRepository,
 	allFeats []*ruleset.Feat,
 	featRegistry *ruleset.FeatRegistry,
 	characterFeatsRepo CharacterFeatsGetter,
@@ -233,8 +245,9 @@ func NewGameServiceServer(
 		jobRegistry:         jobRegistry,
 		condRegistry:        condRegistry,
 		loadoutsDir:         loadoutsDir,
-		allSkills:           allSkills,
-		characterSkillsRepo: characterSkillsRepo,
+		allSkills:                  allSkills,
+		characterSkillsRepo:        characterSkillsRepo,
+		characterProficienciesRepo: characterProficienciesRepo,
 		allFeats:                   allFeats,
 		featRegistry:               featRegistry,
 		characterFeatsRepo:         characterFeatsRepo,
@@ -508,6 +521,54 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			}
 			for id, rank := range skillMap {
 				sess.Skills[id] = rank
+			}
+		}
+	}
+
+	// Proficiency backfill: assign job proficiencies for characters that have none recorded.
+	// Always adds `unarmored: trained` (PF2E baseline for all characters).
+	// Idempotent: safe to run on every login.
+	if characterID > 0 && s.characterProficienciesRepo != nil && s.jobRegistry != nil {
+		existing, profCheckErr := s.characterProficienciesRepo.GetAll(stream.Context(), characterID)
+		if profCheckErr != nil {
+			s.logger.Warn("checking character proficiencies for backfill",
+				zap.Int64("character_id", characterID),
+				zap.Error(profCheckErr),
+			)
+		} else {
+			// Always ensure unarmored is trained; override with job proficiencies.
+			profMap := map[string]string{"unarmored": "trained"}
+			if job, ok := s.jobRegistry.Job(sess.Class); ok {
+				for cat, rank := range job.Proficiencies {
+					profMap[cat] = rank
+				}
+			}
+			for cat, rank := range profMap {
+				if _, alreadySet := existing[cat]; !alreadySet {
+					if upsertErr := s.characterProficienciesRepo.Upsert(
+						stream.Context(), characterID, cat, rank,
+					); upsertErr != nil {
+						s.logger.Error("upserting proficiency",
+							zap.String("category", cat),
+							zap.Error(upsertErr),
+						)
+					}
+				}
+			}
+		}
+		// Load proficiencies into session.
+		profMap, loadProfErr := s.characterProficienciesRepo.GetAll(stream.Context(), characterID)
+		if loadProfErr != nil {
+			s.logger.Warn("loading character proficiencies into session",
+				zap.Int64("character_id", characterID),
+				zap.Error(loadProfErr),
+			)
+		} else {
+			if sess.Proficiencies == nil {
+				sess.Proficiencies = make(map[string]string)
+			}
+			for cat, rank := range profMap {
+				sess.Proficiencies[cat] = rank
 			}
 		}
 	}

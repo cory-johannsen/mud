@@ -116,7 +116,7 @@ func testGRPCServerWithAbilityBoosts(
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, jobReg, nil, "",
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, boostsRepo, archetypes, regions,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, boostsRepo, archetypes, regions,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")

@@ -263,6 +263,7 @@ func main() {
 	}
 	logger.Info("loaded skill definitions", zap.Int("count", len(allSkills)))
 	characterSkillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
+	characterProficienciesRepo := postgres.NewCharacterProficienciesRepository(pool.DB())
 
 	allFeats, err := ruleset.LoadFeats(*featsFile)
 	if err != nil {
@@ -514,7 +515,7 @@ func main() {
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
 		jobReg, condRegistry, *loadoutsDir,
-		allSkills, characterSkillsRepo,
+		allSkills, characterSkillsRepo, characterProficienciesRepo,
 		allFeats, featRegistry, characterFeatsRepo,
 		classFeatures, cfReg, characterClassFeaturesRepo,
 		featureChoicesRepo,

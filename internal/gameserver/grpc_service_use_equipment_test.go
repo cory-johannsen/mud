@@ -157,7 +157,7 @@ func newUseEquipServerWithSkillChecks(
 		worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger,
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, mgr, nil, nil, nil, nil, nil, nil, "",
-		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	)
 
 	uid := "ue_sc_u1"
