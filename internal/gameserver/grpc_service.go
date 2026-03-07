@@ -3312,6 +3312,17 @@ func (s *GameServiceServer) handleCombatDefault(uid, action string) (*gamev1.Ser
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
+	validSet := map[string]bool{}
+	for _, a := range command.ValidCombatActions {
+		validSet[a] = true
+	}
+	if !validSet[action] {
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: fmt.Sprintf("Invalid combat action %q. Valid actions: attack, strike, bash, dodge, parry, cast, pass, flee.", action)},
+			},
+		}, nil
+	}
 	ctx := context.Background()
 	if sess.CharacterID > 0 && s.charSaver != nil {
 		if err := s.charSaver.SaveDefaultCombatAction(ctx, sess.CharacterID, action); err != nil {
