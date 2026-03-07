@@ -51,7 +51,7 @@ func (r *CharacterRepository) Create(ctx context.Context, c *character.Character
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
 		RETURNING id, account_id, name, region, class, team, level, experience, location,
 		          brutality, quickness, grit, reasoning, savvy, flair,
-		          max_hp, current_hp, created_at, updated_at`,
+		          max_hp, current_hp, created_at, updated_at, default_combat_action`,
 		c.AccountID, c.Name, c.Region, c.Class, c.Team, c.Level, c.Experience, c.Location,
 		c.Abilities.Brutality, c.Abilities.Quickness, c.Abilities.Grit,
 		c.Abilities.Reasoning, c.Abilities.Savvy, c.Abilities.Flair,
@@ -61,7 +61,7 @@ func (r *CharacterRepository) Create(ctx context.Context, c *character.Character
 		&out.Level, &out.Experience, &out.Location,
 		&out.Abilities.Brutality, &out.Abilities.Quickness, &out.Abilities.Grit,
 		&out.Abilities.Reasoning, &out.Abilities.Savvy, &out.Abilities.Flair,
-		&out.MaxHP, &out.CurrentHP, &out.CreatedAt, &out.UpdatedAt,
+		&out.MaxHP, &out.CurrentHP, &out.CreatedAt, &out.UpdatedAt, &out.DefaultCombatAction,
 	)
 	if err != nil {
 		if isDuplicateKeyError(err) {
@@ -153,7 +153,7 @@ func (r *CharacterRepository) SaveDefaultCombatAction(ctx context.Context, chara
 		return fmt.Errorf("SaveDefaultCombatAction: %w", err)
 	}
 	if tag.RowsAffected() == 0 {
-		return fmt.Errorf("SaveDefaultCombatAction: character %d not found", characterID)
+		return fmt.Errorf("SaveDefaultCombatAction: %w", ErrCharacterNotFound)
 	}
 	return nil
 }

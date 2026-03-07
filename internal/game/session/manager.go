@@ -103,18 +103,19 @@ func NewManager() *Manager {
 // Precondition: CurrentHP and MaxHP must be >= 0.
 // Postcondition: RegionDisplayName, Class, and Level are informational and may be zero values.
 type AddPlayerOptions struct {
-	UID               string
-	Username          string
-	CharName          string
-	CharacterID       int64
-	RoomID            string
-	CurrentHP         int
-	MaxHP             int
-	Abilities         character.AbilityScores
-	Role              string
-	RegionDisplayName string
-	Class             string
-	Level             int
+	UID                  string
+	Username             string
+	CharName             string
+	CharacterID          int64
+	RoomID               string
+	CurrentHP            int
+	MaxHP                int
+	Abilities            character.AbilityScores
+	Role                 string
+	RegionDisplayName    string
+	Class                string
+	Level                int
+	DefaultCombatAction  string
 }
 
 // AddPlayer registers a new player session in the given room.
@@ -134,6 +135,10 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 	regionDisplayName := opts.RegionDisplayName
 	class := opts.Class
 	level := opts.Level
+	defaultCombatAction := opts.DefaultCombatAction
+	if defaultCombatAction == "" {
+		defaultCombatAction = "pass"
+	}
 
 	if uid == "" || username == "" || charName == "" || roomID == "" || role == "" {
 		return nil, fmt.Errorf("AddPlayer: uid, username, charName, roomID, and role must be non-empty")
@@ -154,21 +159,22 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 
 	entity := NewBridgeEntity(uid, 64)
 	sess := &PlayerSession{
-		UID:               uid,
-		Username:          username,
-		CharName:          charName,
-		CharacterID:       characterID,
-		RoomID:            roomID,
-		CurrentHP:         currentHP,
-		MaxHP:             maxHP,
-		Abilities:         abilities,
-		Role:              role,
-		RegionDisplayName: regionDisplayName,
-		Class:             class,
-		Level:             level,
-		Entity:            entity,
+		UID:                 uid,
+		Username:            username,
+		CharName:            charName,
+		CharacterID:         characterID,
+		RoomID:              roomID,
+		CurrentHP:           currentHP,
+		MaxHP:               maxHP,
+		Abilities:           abilities,
+		Role:                role,
+		RegionDisplayName:   regionDisplayName,
+		Class:               class,
+		Level:               level,
+		DefaultCombatAction: defaultCombatAction,
+		Entity:              entity,
 		// Status 1 = IDLE: newly connected players are idle by default.
-		Status:       1,
+		Status:         1,
 		AutomapCache:   make(map[string]map[string]bool),
 		FeatureChoices: make(map[string]map[string]string),
 	}

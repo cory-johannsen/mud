@@ -387,6 +387,25 @@ func TestSaveDefaultCombatAction_RoundTrip(t *testing.T) {
 	assert.Equal(t, "attack", loaded.DefaultCombatAction)
 }
 
+func TestPropertySaveDefaultCombatAction_RoundTrip(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	rapid.Check(t, func(rt *rapid.T) {
+		name := uniqueName("prop_combat_rt")
+		ch, err := repo.Create(ctx, makeTestCharacter(accountID, name))
+		require.NoError(rt, err)
+		action := rapid.StringMatching(`[a-z_]{1,32}`).Draw(rt, "action")
+		if action == "" {
+			return
+		}
+		err = repo.SaveDefaultCombatAction(ctx, ch.ID, action)
+		require.NoError(rt, err)
+		loaded, err := repo.GetByID(ctx, ch.ID)
+		require.NoError(rt, err)
+		assert.Equal(rt, action, loaded.DefaultCombatAction)
+	})
+}
+
 func TestSaveDefaultCombatAction_InvalidID_ReturnsError(t *testing.T) {
 	repo, _ := setupCharRepos(t)
 	ctx := context.Background()

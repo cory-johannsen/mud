@@ -368,19 +368,24 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			abilities = dbChar.Abilities
 		}
 	}
+	defaultCombatAction := "pass"
+	if dbChar != nil && dbChar.DefaultCombatAction != "" {
+		defaultCombatAction = dbChar.DefaultCombatAction
+	}
 	sess, err := s.sessions.AddPlayer(session.AddPlayerOptions{
-		UID:               uid,
-		Username:          username,
-		CharName:          charName,
-		CharacterID:       characterID,
-		RoomID:            spawnRoom.ID,
-		CurrentHP:         currentHP,
-		MaxHP:             maxHP,
-		Abilities:         abilities,
-		Role:              role,
-		RegionDisplayName: joinReq.RegionDisplay,
-		Class:             joinReq.Class,
-		Level:             int(joinReq.Level),
+		UID:                 uid,
+		Username:            username,
+		CharName:            charName,
+		CharacterID:         characterID,
+		RoomID:              spawnRoom.ID,
+		CurrentHP:           currentHP,
+		MaxHP:               maxHP,
+		Abilities:           abilities,
+		Role:                role,
+		RegionDisplayName:   joinReq.RegionDisplay,
+		Class:               joinReq.Class,
+		Level:               int(joinReq.Level),
+		DefaultCombatAction: defaultCombatAction,
 	})
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
@@ -407,16 +412,6 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	} else if dbChar != nil {
 		sess.Experience = dbChar.Experience
-	}
-
-	// Populate default combat action from persisted character state.
-	if dbChar != nil {
-		sess.DefaultCombatAction = dbChar.DefaultCombatAction
-		if sess.DefaultCombatAction == "" {
-			sess.DefaultCombatAction = "pass"
-		}
-	} else {
-		sess.DefaultCombatAction = "pass"
 	}
 
 	// Load automap cache from DB and record spawn room discovery.
