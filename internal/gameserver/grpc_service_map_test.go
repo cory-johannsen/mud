@@ -322,5 +322,57 @@ func TestProperty_HandleMap_DiscoveredRoomsAlwaysInResponse(t *testing.T) {
 	})
 }
 
+// TestHandleMap_ReflectsSessionCacheUpdatedMidSession verifies that when the AutomapCache
+// is populated after AddPlayer (simulating a RevealZoneMap callback executing mid-session),
+// handleMap returns the newly revealed rooms.
+//
+// Precondition: Player session exists with an empty AutomapCache; rooms are added to the cache
+// by direct pointer mutation (as RevealZoneMap does via GetPlayer pointer).
+// Postcondition: handleMap returns a MapResponse containing all rooms added to the cache.
+func TestHandleMap_ReflectsSessionCacheUpdatedMidSession(t *testing.T) {
+	const zoneID = "zone1"
+	const roomID = "room1"
+
+	wMgr := newWorldWithRoom(zoneID, roomID)
+	sMgr := session.NewManager()
+	_, err := sMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid1",
+		Username:          "user1",
+		CharName:          "Hero",
+		CharacterID:       1,
+		RoomID:            roomID,
+		CurrentHP:         10,
+		MaxHP:             10,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Northeast",
+		Class:             "Gunner",
+		Level:             1,
+	})
+	require.NoError(t, err)
+
+	// Simulate RevealZoneMap: obtain the live session pointer and mutate AutomapCache.
+	sess, ok := sMgr.GetPlayer("uid1")
+	require.True(t, ok)
+	require.Empty(t, sess.AutomapCache[zoneID], "AutomapCache should be empty before reveal")
+
+	// Mutate the cache through the pointer — exactly as RevealZoneMap does.
+	if sess.AutomapCache[zoneID] == nil {
+		sess.AutomapCache[zoneID] = make(map[string]bool)
+	}
+	sess.AutomapCache[zoneID][roomID] = true
+
+	// handleMap should now see the updated cache.
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	result, err := s.handleMap("uid1")
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	mapResp := result.GetMap()
+	require.NotNil(t, mapResp)
+	require.Len(t, mapResp.Tiles, 1, "expected 1 tile after mid-session cache update")
+	require.Equal(t, roomID, mapResp.Tiles[0].RoomId)
+	require.True(t, mapResp.Tiles[0].Current, "tile for the player's current room must have Current == true")
+}
+
 // Compile-time check that gamev1 is used.
 var _ *gamev1.MapResponse
