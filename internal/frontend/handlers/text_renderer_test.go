@@ -776,3 +776,19 @@ func TestProperty_RenderCharacterSheet_Proficiencies(t *testing.T) {
 		}
 	})
 }
+
+func TestAbilityBonus_ModifierOnly(t *testing.T) {
+	result := RenderCharacterSheet(&gamev1.CharacterSheetView{
+		Name:      "Hero",
+		Level:     1,
+		Brutality:  14,
+		Grit:       10,
+		Quickness:  8,
+	}, 80)
+	assert.Contains(t, result, "BRT: +2")
+	assert.Contains(t, result, "GRT: +0")
+	assert.Contains(t, result, "QCK: -1")
+	assert.NotContains(t, result, "(14)")
+	assert.NotContains(t, result, "(10)")
+	assert.NotContains(t, result, "(8)")
+}

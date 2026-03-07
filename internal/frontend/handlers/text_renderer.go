@@ -345,14 +345,14 @@ func RenderCharacterInfo(ci *gamev1.CharacterInfo) string {
 	return sb.String()
 }
 
-// abilityBonus formats an ability score as its modifier with the raw score in parentheses.
-// e.g. score 14 → "+2 (14)", score 10 → "+0 (10)", score 8 → "-1 (8)"
+// abilityBonus formats an ability score as its PF2E modifier only.
+// e.g. score 14 → "+2", score 10 → "+0", score 8 → "-1"
 func abilityBonus(score int32) string {
 	mod := (score - 10) / 2
 	if mod >= 0 {
-		return fmt.Sprintf("+%d (%d)", mod, score)
+		return fmt.Sprintf("+%d", mod)
 	}
-	return fmt.Sprintf("%d (%d)", mod, score)
+	return fmt.Sprintf("%d", mod)
 }
 
 // formatSlotLabel converts a slot key like "left_arm" to "Left Arm".
