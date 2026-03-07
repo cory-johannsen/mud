@@ -41,7 +41,9 @@ type XPConfig struct {
 // LoadXPConfig reads and parses the XP configuration from the given YAML file.
 //
 // Precondition: path must refer to a readable YAML file matching XPConfig.
-// Postcondition: Returns a non-nil *XPConfig on success, or a non-nil error.
+// Postcondition: Returns a non-nil *XPConfig populated from the YAML file on success,
+// or a non-nil error if the file cannot be read or parsed. Callers are responsible
+// for validating that required numeric fields are positive before use.
 func LoadXPConfig(path string) (*XPConfig, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 )
 
 func TestLoadXPConfig_ParsesAllFields(t *testing.T) {
-	yaml := `
+	yamlContent := `
 base_xp: 100
 hp_per_level: 5
 boost_interval: 5
@@ -26,7 +26,7 @@ awards:
   skill_check_dc_multiplier: 2
 `
 	tmp := filepath.Join(t.TempDir(), "xp_config.yaml")
-	require.NoError(t, os.WriteFile(tmp, []byte(yaml), 0644))
+	require.NoError(t, os.WriteFile(tmp, []byte(yamlContent), 0644))
 
 	cfg, err := xp.LoadXPConfig(tmp)
 	require.NoError(t, err)
@@ -44,5 +44,13 @@ awards:
 
 func TestLoadXPConfig_MissingFile(t *testing.T) {
 	_, err := xp.LoadXPConfig("/nonexistent/xp_config.yaml")
+	assert.ErrorContains(t, err, "/nonexistent/xp_config.yaml")
+}
+
+func TestLoadXPConfig_MalformedYAML(t *testing.T) {
+	tmp := filepath.Join(t.TempDir(), "bad.yaml")
+	require.NoError(t, os.WriteFile(tmp, []byte("key: [[["), 0644))
+
+	_, err := xp.LoadXPConfig(tmp)
 	assert.Error(t, err)
 }

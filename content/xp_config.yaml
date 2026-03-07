@@ -1,12 +1,22 @@
+# XP curve: xp_to_reach_level(n) = n² × base_xp
 base_xp: 100
+# Max HP increase per level-up
 hp_per_level: 5
+# Ability boost granted every N levels
 boost_interval: 5
+# Hard cap on character level
 level_cap: 100
+# Hard cap on any single job's level (reserved for job advancement)
 job_level_cap: 20
 
 awards:
+  # XP per NPC level for a kill (total = npc_level × this)
   kill_xp_per_npc_level: 50
+  # Flat XP for discovering a new room
   new_room_xp: 10
+  # Base XP for a skill check success outcome
   skill_check_success_xp: 10
+  # Base XP for a skill check crit_success outcome
   skill_check_crit_success_xp: 25
+  # Multiplied by DC and added to skill check XP (total = base + DC × this)
   skill_check_dc_multiplier: 2
