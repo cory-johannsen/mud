@@ -52,7 +52,7 @@ type Source interface {
 func ResolveAttack(attacker, target *Combatant, src Source) AttackResult {
 	// Attack roll: d20 + STR modifier + proficiency bonus
 	d20 := src.Intn(20) + 1
-	atkMod := attacker.StrMod + ProficiencyBonus(attacker.Level)
+	atkMod := attacker.StrMod + CombatProficiencyBonus(attacker.Level, attacker.WeaponProficiencyRank)
 	atkTotal := d20 + atkMod
 	outcome := OutcomeFor(atkTotal, target.AC)
 
@@ -97,7 +97,7 @@ func ResolveFirearmAttack(attacker, target *Combatant, weapon *inventory.WeaponD
 	// Attack roll: d20
 	rawRoll := src.Intn(20) + 1
 
-	profBonus := 2 + (attacker.Level-1)/4
+	profBonus := CombatProficiencyBonus(attacker.Level, attacker.WeaponProficiencyRank)
 	if rangeIncrements < 0 {
 		rangeIncrements = 0
 	}

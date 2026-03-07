@@ -58,6 +58,12 @@ type Combatant struct {
 	// NPCType is the category of this combatant used for predators_eye passive matching.
 	// Empty string for player combatants.
 	NPCType string
+	// WeaponProficiencyRank is the character's proficiency rank for their equipped weapon category.
+	// Empty string or "untrained" means no proficiency bonus on attack rolls.
+	WeaponProficiencyRank string
+	// ArmorProficiencyRank is the character's proficiency rank for their equipped armor category.
+	// Empty string or "untrained" means no proficiency bonus to AC.
+	ArmorProficiencyRank string
 }
 
 // IsPlayer reports whether this combatant is a player character.
@@ -102,12 +108,32 @@ func OutcomeFor(roll, ac int) Outcome {
 	}
 }
 
-// ProficiencyBonus returns the PF2E simplified proficiency bonus for the given level.
-// Formula: 2 + (level-1)/4, minimum 2.
+// CombatProficiencyBonus returns the PF2E proficiency bonus for an attack or AC calculation.
+//
+// Precondition: level >= 1; rank is one of "untrained", "trained", "expert", "master", "legendary", or "".
+// Postcondition: Returns 0 for untrained/empty; level+2 for trained; level+4 for expert; level+6 for master; level+8 for legendary.
+func CombatProficiencyBonus(level int, rank string) int {
+	switch rank {
+	case "trained":
+		return level + 2
+	case "expert":
+		return level + 4
+	case "master":
+		return level + 6
+	case "legendary":
+		return level + 8
+	default: // "untrained" or unknown/empty
+		return 0
+	}
+}
+
+// ProficiencyBonus returns the combat proficiency bonus assuming trained rank.
+//
+// Deprecated: use CombatProficiencyBonus with an explicit rank.
 // Precondition: level >= 1.
-// Postcondition: Returns >= 2.
+// Postcondition: Returns level+2 (equivalent to CombatProficiencyBonus(level, "trained")).
 func ProficiencyBonus(level int) int {
-	return 2 + (level-1)/4
+	return CombatProficiencyBonus(level, "trained")
 }
 
 // AbilityMod computes the standard ability modifier using floor division: floor((score - 10) / 2).

@@ -648,6 +648,16 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	}
 	h.loadoutsMu.Unlock()
 
+	// Determine weapon proficiency rank from equipped main-hand weapon.
+	weaponProfRank := "untrained"
+	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
+		cat := playerCbt.Loadout.MainHand.Def.ProficiencyCategory
+		if r, ok := sess.Proficiencies[cat]; ok {
+			weaponProfRank = r
+		}
+	}
+	playerCbt.WeaponProficiencyRank = weaponProfRank
+
 	npcCbt := &combat.Combatant{
 		ID:        inst.ID,
 		Kind:      combat.KindNPC,

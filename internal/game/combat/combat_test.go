@@ -85,10 +85,10 @@ func TestOutcomeFor_Property_AllRollsMapToAnOutcome(t *testing.T) {
 }
 
 func TestProficiencyBonus(t *testing.T) {
+	// ProficiencyBonus is now a shim for CombatProficiencyBonus(level, "trained") = level+2.
 	tests := []struct{ level, want int }{
-		{1, 2}, {2, 2}, {3, 2}, {4, 2},
-		{5, 3}, {6, 3}, {7, 3}, {8, 3},
-		{9, 4}, {17, 6}, {20, 6},
+		{1, 3}, {2, 4}, {3, 5}, {4, 6},
+		{5, 7}, {10, 12}, {20, 22},
 	}
 	for _, tc := range tests {
 		assert.Equal(t, tc.want, combat.ProficiencyBonus(tc.level), "level=%d", tc.level)
@@ -99,6 +99,65 @@ func TestProficiencyBonus_Property_AlwaysAtLeastTwo(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		level := rapid.IntRange(1, 20).Draw(rt, "level")
 		assert.GreaterOrEqual(rt, combat.ProficiencyBonus(level), 2)
+	})
+}
+
+func TestCombatProficiencyBonus_UntrainedAlwaysZero(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		got := combat.CombatProficiencyBonus(level, "untrained")
+		assert.Equal(rt, 0, got)
+	})
+}
+
+func TestCombatProficiencyBonus_EmptyRankAlwaysZero(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		got := combat.CombatProficiencyBonus(level, "")
+		assert.Equal(rt, 0, got)
+	})
+}
+
+func TestCombatProficiencyBonus_TrainedIsLevelPlusTwo(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		got := combat.CombatProficiencyBonus(level, "trained")
+		assert.Equal(rt, level+2, got)
+	})
+}
+
+func TestCombatProficiencyBonus_ExpertGreaterThanTrained(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		expert := combat.CombatProficiencyBonus(level, "expert")
+		trained := combat.CombatProficiencyBonus(level, "trained")
+		assert.Greater(rt, expert, trained)
+	})
+}
+
+func TestCombatProficiencyBonus_MasterGreaterThanExpert(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		master := combat.CombatProficiencyBonus(level, "master")
+		expert := combat.CombatProficiencyBonus(level, "expert")
+		assert.Greater(rt, master, expert)
+	})
+}
+
+func TestCombatProficiencyBonus_LegendaryGreaterThanMaster(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		legendary := combat.CombatProficiencyBonus(level, "legendary")
+		master := combat.CombatProficiencyBonus(level, "master")
+		assert.Greater(rt, legendary, master)
+	})
+}
+
+func TestCombatProficiencyBonus_TrainedPositiveForPositiveLevel(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		got := combat.CombatProficiencyBonus(level, "trained")
+		assert.Greater(rt, got, 0)
 	})
 }
 
