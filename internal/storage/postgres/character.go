@@ -80,7 +80,7 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 	rows, err := r.db.Query(ctx, `
 		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       brutality, quickness, grit, reasoning, savvy, flair,
-		       max_hp, current_hp, created_at, updated_at
+		       max_hp, current_hp, created_at, updated_at, default_combat_action
 		FROM characters WHERE account_id = $1 ORDER BY created_at ASC`,
 		accountID,
 	)
@@ -97,7 +97,7 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 			&c.Level, &c.Experience, &c.Location,
 			&c.Abilities.Brutality, &c.Abilities.Quickness, &c.Abilities.Grit,
 			&c.Abilities.Reasoning, &c.Abilities.Savvy, &c.Abilities.Flair,
-			&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt,
+			&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction,
 		); err != nil {
 			return nil, fmt.Errorf("scanning character row: %w", err)
 		}

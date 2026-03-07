@@ -98,6 +98,22 @@ func TestCharacterRepository_ListByAccount_Empty(t *testing.T) {
 	assert.Empty(t, chars)
 }
 
+func TestCharacterRepository_ListByAccount_DefaultCombatAction(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+
+	created, err := repo.Create(ctx, makeTestCharacter(accountID, "CombatListTest"))
+	require.NoError(t, err)
+
+	err = repo.SaveDefaultCombatAction(ctx, created.ID, "attack")
+	require.NoError(t, err)
+
+	chars, err := repo.ListByAccount(ctx, accountID)
+	require.NoError(t, err)
+	require.Len(t, chars, 1)
+	assert.Equal(t, "attack", chars[0].DefaultCombatAction)
+}
+
 func TestCharacterRepository_GetByID(t *testing.T) {
 	repo, accountID := setupCharRepos(t)
 	ctx := context.Background()
@@ -395,9 +411,6 @@ func TestPropertySaveDefaultCombatAction_RoundTrip(t *testing.T) {
 		ch, err := repo.Create(ctx, makeTestCharacter(accountID, name))
 		require.NoError(rt, err)
 		action := rapid.StringMatching(`[a-z_]{1,32}`).Draw(rt, "action")
-		if action == "" {
-			return
-		}
 		err = repo.SaveDefaultCombatAction(ctx, ch.ID, action)
 		require.NoError(rt, err)
 		loaded, err := repo.GetByID(ctx, ch.ID)
