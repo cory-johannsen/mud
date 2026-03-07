@@ -1200,6 +1200,9 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 							}
 						}
 					}
+					if len(xpMsgs) > 0 {
+						s.pushHPUpdate(uid, sess)
+					}
 				}
 			}
 		}
@@ -1332,6 +1335,9 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 				s.logger.Warn("awarding skill check XP", zap.String("uid", uid), zap.Error(xpErr))
 			} else {
 				msgs = append(msgs, xpMsgs...)
+				if len(xpMsgs) > 0 {
+					s.pushHPUpdate(uid, sess)
+				}
 			}
 		}
 
@@ -1410,6 +1416,9 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 					s.logger.Warn("awarding NPC skill check XP", zap.String("uid", uid), zap.Error(xpErr))
 				} else {
 					msgs = append(msgs, xpMsgs...)
+					if len(xpMsgs) > 0 {
+						s.pushHPUpdate(uid, sess)
+					}
 				}
 			}
 
@@ -3695,4 +3704,29 @@ func recomputeBaseScores(dbChar *character.Character, regions map[string]*rulese
 		}
 	}
 	return base
+}
+
+// pushHPUpdate sends a CharacterInfo event to the player with the current
+// and maximum HP from the session. Used to keep the frontend prompt in sync
+// after any event that changes sess.CurrentHP or sess.MaxHP.
+//
+// Precondition: uid must be non-empty; sess must be non-nil.
+// Postcondition: CharacterInfo event pushed to sess.Entity; push errors are logged.
+func (s *GameServiceServer) pushHPUpdate(uid string, sess *session.PlayerSession) {
+	ciEvt := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CharacterInfo{
+			CharacterInfo: &gamev1.CharacterInfo{
+				CurrentHp: int32(sess.CurrentHP),
+				MaxHp:     int32(sess.MaxHP),
+			},
+		},
+	}
+	data, marshalErr := proto.Marshal(ciEvt)
+	if marshalErr != nil {
+		s.logger.Warn("marshalling HP update CharacterInfo", zap.String("uid", uid), zap.Error(marshalErr))
+		return
+	}
+	if pushErr := sess.Entity.Push(data); pushErr != nil {
+		s.logger.Warn("pushing HP update CharacterInfo", zap.String("uid", uid), zap.Error(pushErr))
+	}
 }

@@ -1025,6 +1025,19 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 							_ = killer.Entity.Push(data)
 						}
 					}
+					if len(xpMsgs) > 0 {
+						ciEvt := &gamev1.ServerEvent{
+							Payload: &gamev1.ServerEvent_CharacterInfo{
+								CharacterInfo: &gamev1.CharacterInfo{
+									CurrentHp: int32(killer.CurrentHP),
+									MaxHp:     int32(killer.MaxHP),
+								},
+							},
+						}
+						if data, marshalErr := proto.Marshal(ciEvt); marshalErr == nil {
+							_ = killer.Entity.Push(data)
+						}
+					}
 				}
 			}
 		}

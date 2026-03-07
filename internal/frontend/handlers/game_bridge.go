@@ -624,7 +624,12 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		case *gamev1.ServerEvent_Error:
 			text = RenderError(p.Error)
 		case *gamev1.ServerEvent_CombatEvent:
-			text = RenderCombatEvent(p.CombatEvent)
+			ce := p.CombatEvent
+			// Update current HP when this player is the attack target.
+			if ce.GetTarget() == charName && ce.GetTargetHp() != 0 {
+				currentHP.Store(ce.GetTargetHp())
+			}
+			text = RenderCombatEvent(ce)
 		case *gamev1.ServerEvent_RoundStart:
 			text = RenderRoundStartEvent(p.RoundStart)
 		case *gamev1.ServerEvent_RoundEnd:
