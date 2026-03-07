@@ -1,0 +1,1 @@
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS pending_skill_increases INTEGER NOT NULL DEFAULT 0;

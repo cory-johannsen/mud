@@ -96,6 +96,85 @@ func TestGetProgress_InvalidID(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestGetPendingSkillIncreases_DefaultsToZero(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+
+	n, err := repo.GetPendingSkillIncreases(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.Equal(t, 0, n)
+}
+
+func TestIncrementPendingSkillIncreases_RoundTrip(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+
+	require.NoError(t, repo.IncrementPendingSkillIncreases(ctx, ch.ID, 3))
+	n, err := repo.GetPendingSkillIncreases(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.Equal(t, 3, n)
+}
+
+func TestIncrementPendingSkillIncreases_InvalidID(t *testing.T) {
+	ctx := context.Background()
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+	assert.Error(t, repo.IncrementPendingSkillIncreases(ctx, 0, 1))
+	assert.Error(t, repo.IncrementPendingSkillIncreases(ctx, -1, 1))
+}
+
+func TestIncrementPendingSkillIncreases_InvalidN(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+	assert.Error(t, repo.IncrementPendingSkillIncreases(ctx, ch.ID, 0))
+}
+
+func TestConsumePendingSkillIncrease_Decrements(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+
+	require.NoError(t, repo.IncrementPendingSkillIncreases(ctx, ch.ID, 2))
+	require.NoError(t, repo.ConsumePendingSkillIncrease(ctx, ch.ID))
+	n, err := repo.GetPendingSkillIncreases(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.Equal(t, 1, n)
+}
+
+func TestConsumePendingSkillIncrease_NoneAvailable_ReturnsError(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+
+	err := repo.ConsumePendingSkillIncrease(ctx, ch.ID)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no pending skill increases")
+}
+
+func TestPropertyIncrementPendingSkillIncreases(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	repo := pgstore.NewCharacterProgressRepository(sharedPool)
+
+	rapid.Check(t, func(rt *rapid.T) {
+		ch := createTestCharacter(t, charRepo, ctx)
+		n := rapid.IntRange(1, 10).Draw(rt, "n")
+		require.NoError(rt, repo.IncrementPendingSkillIncreases(ctx, ch.ID, n))
+		got, err := repo.GetPendingSkillIncreases(ctx, ch.ID)
+		require.NoError(rt, err)
+		if got != n {
+			rt.Fatalf("expected %d, got %d", n, got)
+		}
+	})
+}
+
 func TestProperty_SaveProgress_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 	charRepo := pgstore.NewCharacterRepository(sharedPool)

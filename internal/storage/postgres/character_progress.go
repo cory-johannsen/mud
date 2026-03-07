@@ -80,6 +80,68 @@ func (r *CharacterProgressRepository) GetProgress(ctx context.Context, id int64)
 	return level, experience, maxHP, pendingBoosts, nil
 }
 
+// GetPendingSkillIncreases returns the number of unspent skill increases for a character.
+//
+// Precondition: id > 0.
+// Postcondition: Returns the current pending_skill_increases value.
+func (r *CharacterProgressRepository) GetPendingSkillIncreases(ctx context.Context, id int64) (int, error) {
+	if id <= 0 {
+		return 0, fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	var n int
+	err := r.pool.QueryRow(ctx,
+		`SELECT pending_skill_increases FROM characters WHERE id = $1`, id,
+	).Scan(&n)
+	if err != nil {
+		return 0, fmt.Errorf("GetPendingSkillIncreases: %w", err)
+	}
+	return n, nil
+}
+
+// IncrementPendingSkillIncreases adds n to the character's pending skill increases.
+//
+// Precondition: id > 0; n >= 1.
+// Postcondition: pending_skill_increases increased by n.
+func (r *CharacterProgressRepository) IncrementPendingSkillIncreases(ctx context.Context, id int64, n int) error {
+	if id <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	if n < 1 {
+		return fmt.Errorf("n must be >= 1, got %d", n)
+	}
+	_, err := r.pool.Exec(ctx,
+		`UPDATE characters SET pending_skill_increases = pending_skill_increases + $2 WHERE id = $1`,
+		id, n,
+	)
+	if err != nil {
+		return fmt.Errorf("IncrementPendingSkillIncreases: %w", err)
+	}
+	return nil
+}
+
+// ConsumePendingSkillIncrease decrements pending_skill_increases by 1.
+// Returns an error containing "no pending skill increases" if none are available.
+//
+// Precondition: id > 0.
+// Postcondition: pending_skill_increases decremented by 1, or error returned.
+func (r *CharacterProgressRepository) ConsumePendingSkillIncrease(ctx context.Context, id int64) error {
+	if id <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	tag, err := r.pool.Exec(ctx,
+		`UPDATE characters SET pending_skill_increases = pending_skill_increases - 1
+         WHERE id = $1 AND pending_skill_increases > 0`,
+		id,
+	)
+	if err != nil {
+		return fmt.Errorf("ConsumePendingSkillIncrease: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return errors.New("no pending skill increases available for character")
+	}
+	return nil
+}
+
 // ConsumePendingBoost decrements the pending boost count by 1 for a character.
 // Returns an error containing "no pending boosts" if the character has none.
 //
