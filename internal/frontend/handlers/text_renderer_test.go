@@ -827,6 +827,34 @@ func TestRenderCharacterSheet_XPSection(t *testing.T) {
 	assert.NotContains(t, result, "levelup") // no hint when boosts == 0
 }
 
+func TestRenderCharacterSheet_PendingSkillIncreases_Shown(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{
+		Name:                  "Test",
+		Level:                 4,
+		Experience:            1600,
+		XpToNext:              900,
+		PendingBoosts:         0,
+		PendingSkillIncreases: 2,
+	}
+	result := RenderCharacterSheet(csv, 120)
+	assert.Contains(t, result, "Pending Skill Increases: 2")
+	assert.Contains(t, result, "trainskill")
+}
+
+func TestRenderCharacterSheet_PendingSkillIncreases_Zero_NotShown(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{
+		Name:                  "Test",
+		Level:                 4,
+		Experience:            1600,
+		XpToNext:              900,
+		PendingBoosts:         0,
+		PendingSkillIncreases: 0,
+	}
+	result := RenderCharacterSheet(csv, 120)
+	assert.NotContains(t, result, "Pending Skill Increases")
+	assert.NotContains(t, result, "trainskill")
+}
+
 // TestRenderCharacterSheet_XPSection_PendingBoosts verifies the levelup hint appears when pending_boosts > 0.
 func TestRenderCharacterSheet_XPSection_PendingBoosts(t *testing.T) {
 	view := &gamev1.CharacterSheetView{
