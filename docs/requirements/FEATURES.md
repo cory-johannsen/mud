@@ -125,17 +125,26 @@
     - [x] Wizard -> Nerd
   - [x] Normie dissolved; jobs redistributed lore-first
   - [x] Jobs redistributed for balance (8-12 per archetype)
-- [ ] Proficiencies
-  - [ ] Armor
-      - [ ] Unarmored
-      - [ ] Light
-      - [ ] Medium
-      - [ ] Heavy
-  - [ ] Weapons
-    - [ ] Unarmed
-    - [ ] Simple
-    - [ ] Martial
-    - [ ] Specialized
+- [x] Proficiencies
+  - [x] `proficiency_category` field on all weapon and armor YAML definitions
+  - [x] `character_proficiencies` DB table (migration 018); `CharacterProficienciesRepository` with upsert and GetAll
+  - [x] Backfill at login: job-granted proficiencies + always-granted `unarmored: trained`
+  - [x] `PlayerSession.Proficiencies` map (category → rank) loaded each login
+  - [x] Rank-aware `CombatProficiencyBonus(level, rank)`: untrained=0, trained=level+2, expert=level+4, etc.
+  - [x] Combat attack rolls use weapon proficiency rank from session
+  - [x] `proficiencies` / `prof` command lists all character proficiencies
+  - [x] Proficiencies section on character sheet
+  - [x] Armor
+      - [x] Unarmored
+      - [x] Light
+      - [x] Medium
+      - [x] Heavy
+  - [x] Weapons
+    - [x] Unarmed
+    - [x] Simple
+    - [x] Martial
+    - [x] Specialized
+- [ ] Only show modifier bonuses.  PF2E does not use attributes scores, only modifiers.  
 - [ ] Saving rolls
 - [ ] Character levelling
     - [ ] Max character level limit is 100

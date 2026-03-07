@@ -27,7 +27,9 @@
 - SWENG-3: Systems SHOULD use a Functional Core with an Imperative Shell.
 - SWENG-4: State mutation MUST be isolated at the system boundaries.
 - SWENG-5: Test driven development (TDD) MUST be used for all new code and all regressions.
-    - SWENG-5a: Test driven development (TDD) MUST use Property-Based Testing (https://en.wikipedia.org/wiki/Property_testing)
+  - SWENG-5a: Test driven development (TDD) MUST use Property-Based Testing (https://en.wikipedia.org/wiki/Property_testing)
+- SWENG-6: Test suite MUST be executed with 100% success prior to committing changes or marking tasks complete.
+  -  SWENG-6A: Test suite MUST be executed automatically
 
 ## 4. Golang Development Standards
 - GO-1: Go development MUST use adhere to industry standard best practices and The One True Way.
