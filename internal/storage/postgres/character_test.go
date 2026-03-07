@@ -372,3 +372,33 @@ func TestCharacterRepository_Property_SaveStatePersists(t *testing.T) {
 		assert.Equal(t, newHP, fetched.CurrentHP)
 	})
 }
+
+func TestSaveDefaultCombatAction_RoundTrip(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	ch, err := repo.Create(ctx, makeTestCharacter(accountID, uniqueName("combat_rt")))
+	require.NoError(t, err)
+
+	err = repo.SaveDefaultCombatAction(ctx, ch.ID, "attack")
+	require.NoError(t, err)
+
+	loaded, err := repo.GetByID(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.Equal(t, "attack", loaded.DefaultCombatAction)
+}
+
+func TestSaveDefaultCombatAction_InvalidID_ReturnsError(t *testing.T) {
+	repo, _ := setupCharRepos(t)
+	ctx := context.Background()
+	err := repo.SaveDefaultCombatAction(ctx, 0, "attack")
+	require.Error(t, err)
+}
+
+func TestSaveDefaultCombatAction_EmptyAction_ReturnsError(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	ch, err := repo.Create(ctx, makeTestCharacter(accountID, uniqueName("combat_empty")))
+	require.NoError(t, err)
+	err = repo.SaveDefaultCombatAction(ctx, ch.ID, "")
+	require.Error(t, err)
+}

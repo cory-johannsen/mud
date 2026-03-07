@@ -212,6 +212,8 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			count        INT    NOT NULL DEFAULT 0,
 			PRIMARY KEY (character_id)
 		);
+
+		ALTER TABLE characters ADD COLUMN IF NOT EXISTS default_combat_action TEXT NOT NULL DEFAULT 'pass';
 	`)
 	return err
 }

@@ -43,6 +43,10 @@ type PlayerSession struct {
 	Experience int
 	// PendingBoosts is the number of ability boosts the player has not yet assigned.
 	PendingBoosts int
+	// DefaultCombatAction is the persisted default combat action; "pass" when unset.
+	DefaultCombatAction string
+	// LastCombatTarget is the last explicit attack/strike target; in-memory only.
+	LastCombatTarget string
 	// LoadoutSet holds the player's swappable weapon presets.
 	LoadoutSet *inventory.LoadoutSet
 	// Equipment holds the player's equipped armor and accessories.

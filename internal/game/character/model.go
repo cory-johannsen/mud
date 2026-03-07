@@ -37,6 +37,10 @@ type Character struct {
 	MaxHP     int
 	CurrentHP int
 
+	// DefaultCombatAction is the player's preferred combat action when no explicit choice is made.
+	// Persisted to DB; "pass" when unset.
+	DefaultCombatAction string
+
 	// Skills maps skill_id to proficiency rank for this character.
 	// Populated after creation or loading from DB.
 	Skills map[string]string

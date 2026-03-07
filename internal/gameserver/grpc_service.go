@@ -409,6 +409,16 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		sess.Experience = dbChar.Experience
 	}
 
+	// Populate default combat action from persisted character state.
+	if dbChar != nil {
+		sess.DefaultCombatAction = dbChar.DefaultCombatAction
+		if sess.DefaultCombatAction == "" {
+			sess.DefaultCombatAction = "pass"
+		}
+	} else {
+		sess.DefaultCombatAction = "pass"
+	}
+
 	// Load automap cache from DB and record spawn room discovery.
 	if s.automapRepo != nil {
 		discovered, loadErr := s.automapRepo.LoadAll(stream.Context(), characterID)

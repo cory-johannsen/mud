@@ -115,7 +115,7 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 	err := r.db.QueryRow(ctx, `
 		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       brutality, quickness, grit, reasoning, savvy, flair,
-		       max_hp, current_hp, created_at, updated_at
+		       max_hp, current_hp, created_at, updated_at, default_combat_action
 		FROM characters WHERE id = $1`,
 		id,
 	).Scan(
@@ -123,7 +123,7 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 		&c.Level, &c.Experience, &c.Location,
 		&c.Abilities.Brutality, &c.Abilities.Quickness, &c.Abilities.Grit,
 		&c.Abilities.Reasoning, &c.Abilities.Savvy, &c.Abilities.Flair,
-		&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt,
+		&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -132,6 +132,30 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 		return nil, fmt.Errorf("querying character: %w", err)
 	}
 	return &c, nil
+}
+
+// SaveDefaultCombatAction persists the player's preferred default combat action.
+//
+// Precondition: characterID > 0; action must be non-empty.
+// Postcondition: characters.default_combat_action updated for the given ID.
+func (r *CharacterRepository) SaveDefaultCombatAction(ctx context.Context, characterID int64, action string) error {
+	if characterID <= 0 {
+		return fmt.Errorf("SaveDefaultCombatAction: characterID must be > 0")
+	}
+	if action == "" {
+		return fmt.Errorf("SaveDefaultCombatAction: action must be non-empty")
+	}
+	tag, err := r.db.Exec(ctx,
+		`UPDATE characters SET default_combat_action = $2 WHERE id = $1`,
+		characterID, action,
+	)
+	if err != nil {
+		return fmt.Errorf("SaveDefaultCombatAction: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("SaveDefaultCombatAction: character %d not found", characterID)
+	}
+	return nil
 }
 
 // SaveState persists a character's current location and HP after a session.
