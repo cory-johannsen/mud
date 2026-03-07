@@ -48,9 +48,6 @@ func LevelForXP(xp int, cfg *XPConfig) int {
 func Award(level, currentXP, awardXP int, cfg *XPConfig) AwardResult {
 	newXP := currentXP + awardXP
 	newLevel := LevelForXP(newXP, cfg)
-	if newLevel > cfg.LevelCap {
-		newLevel = cfg.LevelCap
-	}
 
 	levelsGained := newLevel - level
 	hpGained := levelsGained * cfg.HPPerLevel

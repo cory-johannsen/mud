@@ -102,7 +102,9 @@ func TestProperty_Award_NeverExceedsCap(t *testing.T) {
 	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
 	rapid.Check(t, func(rt *rapid.T) {
 		level := rapid.IntRange(1, 99).Draw(rt, "level")
-		currentXP := xp.XPToLevel(level, cfg.BaseXP)
+		// currentXP anywhere in the valid range for this level
+		levelFloor := xp.XPToLevel(level, cfg.BaseXP)
+		currentXP := rapid.IntRange(levelFloor, levelFloor+500).Draw(rt, "currentXP")
 		awardAmt := rapid.IntRange(0, 10_000_000).Draw(rt, "award")
 		result := xp.Award(level, currentXP, awardAmt, cfg)
 		if result.NewLevel > cfg.LevelCap {
@@ -110,6 +112,28 @@ func TestProperty_Award_NeverExceedsCap(t *testing.T) {
 		}
 		if result.NewLevel < level {
 			rt.Fatalf("level went backward: %d → %d", level, result.NewLevel)
+		}
+	})
+}
+
+func TestProperty_Award_BoostCountMatchesIntervalMultiples(t *testing.T) {
+	cfg := &xp.XPConfig{BaseXP: 100, LevelCap: 100, HPPerLevel: 5, BoostInterval: 5}
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 95).Draw(rt, "level")
+		levelFloor := xp.XPToLevel(level, cfg.BaseXP)
+		currentXP := rapid.IntRange(levelFloor, levelFloor+200).Draw(rt, "currentXP")
+		awardAmt := rapid.IntRange(0, 5_000_000).Draw(rt, "award")
+		result := xp.Award(level, currentXP, awardAmt, cfg)
+
+		// Manually count expected boosts: multiples of BoostInterval in (level, newLevel]
+		expectedBoosts := 0
+		for l := level + 1; l <= result.NewLevel; l++ {
+			if l%cfg.BoostInterval == 0 {
+				expectedBoosts++
+			}
+		}
+		if result.NewBoosts != expectedBoosts {
+			rt.Fatalf("level %d→%d: got %d boosts, want %d", level, result.NewLevel, result.NewBoosts, expectedBoosts)
 		}
 	})
 }
