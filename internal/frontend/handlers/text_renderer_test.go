@@ -677,11 +677,11 @@ func TestRenderCharacterSheet_ClassFeatures_Property(t *testing.T) {
 		if jobIdx == -1 {
 			rt.Fatalf("job feature %q not found in output:\n%s", jobName, stripped)
 		}
-		// Archetype section header precedes job section header.
-		archetypeSectionIdx := strings.Index(stripped, "Archetype:")
-		jobSectionIdx := strings.Index(stripped, "Job:")
+		// Archetype section header precedes job section header (indented labels inside class features).
+		archetypeSectionIdx := strings.Index(stripped, "  Archetype:")
+		jobSectionIdx := strings.LastIndex(stripped, "  Job:")
 		if archetypeSectionIdx == -1 || jobSectionIdx == -1 {
-			rt.Fatalf("expected both 'Archetype:' and 'Job:' section headers in output:\n%s", stripped)
+			rt.Fatalf("expected both '  Archetype:' and '  Job:' section headers in output:\n%s", stripped)
 		}
 		if archetypeSectionIdx >= jobSectionIdx {
 			rt.Fatalf("archetype section must appear before job section; got:\n%s", stripped)
