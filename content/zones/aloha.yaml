@@ -1,5 +1,6 @@
 zone:
   id: aloha
+  script_dir: content/scripts/zones/aloha
   name: The Aloha Neutral Zone
   description: A demilitarized trading post on the old TV Highway corridor, where smugglers, brokers, and refugees coexist
     under an uneasy truce enforced by neutral zone sentries.

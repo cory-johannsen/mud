@@ -1,5 +1,6 @@
 zone:
   id: vantucky
+  script_dir: content/scripts/zones/vantucky
   name: Vantucky
   description: The rural-urban fringe east of Vancouver, where militia compounds, gun markets, and highway bandits rule a
     landscape of strip malls, farmland, and fortified homesteads.

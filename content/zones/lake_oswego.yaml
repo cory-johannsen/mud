@@ -1,5 +1,6 @@
 zone:
   id: lake_oswego
+  script_dir: content/scripts/zones/lake_oswego
   name: Lake Oswego Nation
   description: A fortified enclave of pre-collapse wealth, where HOA bylaws carry the force of law and country clubs serve
     as military command posts. The residents traded democracy for security and never looked back.

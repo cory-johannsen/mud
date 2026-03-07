@@ -1,5 +1,6 @@
 zone:
   id: the_couve
+  script_dir: content/scripts/zones/the_couve
   name: The Couve
   description: Vancouver, Washington — a sprawling strip mall empire north of the Columbia, where chain restaurant warlords
     hold court and river pirates raid from Jantzen Beach.

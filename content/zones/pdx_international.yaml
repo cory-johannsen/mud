@@ -1,5 +1,6 @@
 zone:
   id: pdx_international
+  script_dir: content/scripts/zones/pdx_international
   name: PDX International
   description: The ruins of Portland International Airport, where cargo cultists worship the grounded planes and tarmac raiders
     fight over salvage from the hangars.

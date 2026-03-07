@@ -1,5 +1,6 @@
 zone:
   id: hillsboro
+  script_dir: content/scripts/zones/hillsboro
   name: Kingdom of Hillsboro
   description: A feudal tech-state built on the bones of the old semiconductor industry. Knights in server rack armor patrol
     solar farms and data center keeps, ruling over serfs who maintain machines they no longer understand.

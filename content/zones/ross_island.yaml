@@ -1,5 +1,6 @@
 zone:
   id: ross_island
+  script_dir: content/scripts/zones/ross_island
   name: Ross Island
   description: A small fortress island in the Willamette, dominated by a massive gravel pit and ringed by overgrown forest.
     Bridge toll gangs control access while hermits haunt the interior.

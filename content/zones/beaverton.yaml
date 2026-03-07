@@ -1,5 +1,6 @@
 zone:
   id: beaverton
+  script_dir: content/scripts/zones/beaverton
   name: The Free State of Beaverton
   description: A suburban fortress-state where strip malls serve as government buildings, mall cops enforce martial law, and
     parking violations carry the death penalty.
