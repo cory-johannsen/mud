@@ -27,14 +27,15 @@ func newTestSession() *session.PlayerSession {
 // pistolWeaponDef returns a valid firearm WeaponDef for use in tests.
 func pistolWeaponDef() *inventory.WeaponDef {
 	return &inventory.WeaponDef{
-		ID:               "pistol-9mm",
-		Name:             "9mm Pistol",
-		DamageDice:       "2d6",
-		DamageType:       "ballistic",
-		RangeIncrement:   30,
-		FiringModes:      []inventory.FiringMode{inventory.FiringModeSingle},
-		MagazineCapacity: 15,
-		Kind:             inventory.WeaponKindOneHanded,
+		ID:                  "pistol-9mm",
+		Name:                "9mm Pistol",
+		DamageDice:          "2d6",
+		DamageType:          "ballistic",
+		RangeIncrement:      30,
+		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
+		MagazineCapacity:    15,
+		Kind:                inventory.WeaponKindOneHanded,
+		ProficiencyCategory: "simple_ranged",
 	}
 }
 

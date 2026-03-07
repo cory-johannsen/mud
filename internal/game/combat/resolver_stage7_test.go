@@ -27,7 +27,8 @@ func makeTestWeapon(damageDice string) *inventory.WeaponDef {
 		FiringModes: []inventory.FiringMode{
 			inventory.FiringModeSingle,
 		},
-		MagazineCapacity: 10,
+		MagazineCapacity:    10,
+		ProficiencyCategory: "simple_ranged",
 	}
 }
 

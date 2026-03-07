@@ -88,11 +88,12 @@ func TestLoadWeaponPresets_RehydratesMainHand(t *testing.T) {
 	// Build a registry with one weapon.
 	reg := inventory.NewRegistry()
 	def := &inventory.WeaponDef{
-		ID:         "machete_basic",
-		Name:       "Basic Machete",
-		DamageDice: "1d6",
-		DamageType: "slashing",
-		Kind:       inventory.WeaponKindOneHanded,
+		ID:                  "machete_basic",
+		Name:                "Basic Machete",
+		DamageDice:          "1d6",
+		DamageType:          "slashing",
+		Kind:                inventory.WeaponKindOneHanded,
+		ProficiencyCategory: "simple_weapons",
 	}
 	if err := reg.RegisterWeapon(def); err != nil {
 		t.Fatalf("RegisterWeapon: %v", err)

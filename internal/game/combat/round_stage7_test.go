@@ -47,7 +47,8 @@ func TestResolveRound_Reload_RestoresMagazine(t *testing.T) {
 		ID: "pistol", Name: "Pistol",
 		DamageDice: "1d6", DamageType: "piercing",
 		RangeIncrement: 30, ReloadActions: 1, MagazineCapacity: 15,
-		FiringModes: []inventory.FiringMode{inventory.FiringModeSingle},
+		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
+		ProficiencyCategory: "simple_ranged",
 	}
 	preset := inventory.NewWeaponPreset()
 	if err := preset.EquipMainHand(pistolDef); err != nil {
@@ -102,7 +103,8 @@ func TestResolveRound_FireBurst_ProducesTwoEvents(t *testing.T) {
 		ID: "shotgun", Name: "Shotgun",
 		DamageDice: "2d6", DamageType: "piercing",
 		RangeIncrement: 20, ReloadActions: 1, MagazineCapacity: 8,
-		FiringModes: []inventory.FiringMode{inventory.FiringModeBurst},
+		FiringModes:         []inventory.FiringMode{inventory.FiringModeBurst},
+		ProficiencyCategory: "martial_ranged",
 	}
 	preset := inventory.NewWeaponPreset()
 	if err := preset.EquipMainHand(shotgunDef); err != nil {

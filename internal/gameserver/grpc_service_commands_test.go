@@ -186,11 +186,12 @@ func TestHandleEquip_UpdatesSessionLoadout(t *testing.T) {
 	// Build a registry with a real weapon item AND its weapon definition.
 	reg := inventory.NewRegistry()
 	require.NoError(t, reg.RegisterWeapon(&inventory.WeaponDef{
-		ID:         "test_cleaver",
-		Name:       "Butcher's Cleaver",
-		Kind:       inventory.WeaponKindOneHanded,
-		DamageDice: "1d6",
-		DamageType: "slashing",
+		ID:                  "test_cleaver",
+		Name:                "Butcher's Cleaver",
+		Kind:                inventory.WeaponKindOneHanded,
+		DamageDice:          "1d6",
+		DamageType:          "slashing",
+		ProficiencyCategory: "simple_weapons",
 	}))
 	require.NoError(t, reg.RegisterItem(&inventory.ItemDef{
 		ID:        "test_cleaver",

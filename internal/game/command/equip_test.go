@@ -52,14 +52,15 @@ func rifleItemDef() *inventory.ItemDef {
 // rifleWeaponDef returns a two-handed weapon definition.
 func rifleWeaponDef() *inventory.WeaponDef {
 	return &inventory.WeaponDef{
-		ID:               "rifle-ar",
-		Name:             "Assault Rifle",
-		DamageDice:       "3d6",
-		DamageType:       "ballistic",
-		RangeIncrement:   60,
-		FiringModes:      []inventory.FiringMode{inventory.FiringModeSingle, inventory.FiringModeBurst},
-		MagazineCapacity: 30,
-		Kind:             inventory.WeaponKindTwoHanded,
+		ID:                  "rifle-ar",
+		Name:                "Assault Rifle",
+		DamageDice:          "3d6",
+		DamageType:          "ballistic",
+		RangeIncrement:      60,
+		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle, inventory.FiringModeBurst},
+		MagazineCapacity:    30,
+		Kind:                inventory.WeaponKindTwoHanded,
+		ProficiencyCategory: "martial_ranged",
 	}
 }
 
