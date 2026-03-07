@@ -380,18 +380,31 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		switch line {
 		case "\x00UP":
 			if conn.IsSplitScreen() {
-				_ = conn.ScrollUpLine()
+				if cmd, ok := conn.HistoryUp(); ok {
+					_ = conn.SetInputLine(buildPrompt(), cmd)
+				}
 			} else {
 				_ = conn.WritePrompt(buildPrompt())
 			}
 			continue
 		case "\x00DOWN":
+			if conn.IsSplitScreen() {
+				cmd, _ := conn.HistoryDown()
+				_ = conn.SetInputLine(buildPrompt(), cmd)
+			} else {
+				_ = conn.WritePrompt(buildPrompt())
+			}
+			continue
+		case "\x00SHIFT_UP":
+			if conn.IsSplitScreen() {
+				_ = conn.ScrollUpLine()
+			}
+			continue
+		case "\x00SHIFT_DOWN":
 			if conn.IsSplitScreen() && conn.IsScrolledBack() {
 				_ = conn.ScrollDownLine()
 			} else if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(buildPrompt())
-			} else {
-				_ = conn.WritePrompt(buildPrompt())
 			}
 			continue
 		case "\x00PGUP":
@@ -414,6 +427,9 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		}
 
 		line = strings.TrimSpace(line)
+		if line != "" && conn.IsSplitScreen() {
+			conn.AppendHistory(line)
+		}
 		if line == "" {
 			if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(buildPrompt())

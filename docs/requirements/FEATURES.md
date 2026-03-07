@@ -145,7 +145,7 @@
     - [x] Martial
     - [x] Specialized
 - [x] Only show modifier bonuses.  PF2E does not use attributes scores, only modifiers.
-- [ ] Up/down arrow show scroll back through the previously entered commands, Shift+Up/Shift-Down should scroll the console.
+- [x] Up/down arrow show scroll back through the previously entered commands, Shift+Up/Shift-Down should scroll the console.
 - [ ] Saving rolls
 - [ ] Character levelling
     - [ ] Max character level limit is 100
