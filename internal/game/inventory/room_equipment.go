@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"strings"
 	"sync"
 	"time"
 
@@ -17,6 +18,7 @@ type EquipmentInstance struct {
 	RoomID      string
 	Immovable   bool
 	Script      string
+	Description string
 	SkillChecks []skillcheck.TriggerDef
 	configIdx   int
 }
@@ -29,6 +31,7 @@ type respawnEntry struct {
 	itemDefID   string
 	immovable   bool
 	script      string
+	description string
 	skillChecks []skillcheck.TriggerDef
 }
 
@@ -70,6 +73,7 @@ func (m *RoomEquipmentManager) InitRoom(roomID string, configs []world.RoomEquip
 				RoomID:      roomID,
 				Immovable:   cfg.Immovable,
 				Script:      cfg.Script,
+				Description: cfg.Description,
 				SkillChecks: cfg.SkillChecks,
 				configIdx:   idx,
 			})
@@ -104,6 +108,7 @@ func (m *RoomEquipmentManager) GetInstance(roomID, instanceID string) *Equipment
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	var byItemDef *EquipmentInstance
+	var byDesc *EquipmentInstance
 	for _, it := range m.rooms[roomID] {
 		if it.InstanceID == instanceID {
 			cp := *it
@@ -112,9 +117,16 @@ func (m *RoomEquipmentManager) GetInstance(roomID, instanceID string) *Equipment
 		if byItemDef == nil && it.ItemDefID == instanceID {
 			byItemDef = it
 		}
+		if byDesc == nil && it.Description != "" && strings.EqualFold(it.Description, instanceID) {
+			byDesc = it
+		}
 	}
 	if byItemDef != nil {
 		cp := *byItemDef
+		return &cp
+	}
+	if byDesc != nil {
+		cp := *byDesc
 		return &cp
 	}
 	return nil
@@ -147,6 +159,7 @@ func (m *RoomEquipmentManager) Pickup(roomID, instanceID string) bool {
 				itemDefID:   it.ItemDefID,
 				immovable:   it.Immovable,
 				script:      it.Script,
+				description: it.Description,
 				skillChecks: it.SkillChecks,
 			})
 		}
@@ -184,6 +197,7 @@ func (m *RoomEquipmentManager) ProcessRespawns() {
 				RoomID:      r.roomID,
 				Immovable:   r.immovable,
 				Script:      r.script,
+				Description: r.description,
 				SkillChecks: r.skillChecks,
 				configIdx:   r.configIdx,
 			})
@@ -209,6 +223,7 @@ func (m *RoomEquipmentManager) AddConfig(roomID string, cfg world.RoomEquipmentC
 			RoomID:      roomID,
 			Immovable:   cfg.Immovable,
 			Script:      cfg.Script,
+			Description: cfg.Description,
 			SkillChecks: cfg.SkillChecks,
 			configIdx:   idx,
 		})

@@ -152,6 +152,41 @@ func TestRoomEquipmentManager_GetInstance_NotFound(t *testing.T) {
 	assert.Nil(t, got)
 }
 
+func TestRoomEquipmentManager_GetInstance_ByDescription(t *testing.T) {
+	cfg := []world.RoomEquipmentConfig{
+		{ItemID: "zone_map", MaxCount: 1, Immovable: true, Script: "zone_map_use", Description: "Zone Map"},
+	}
+	mgr := inventory.NewRoomEquipmentManager()
+	mgr.InitRoom("room1", cfg)
+
+	// Match by description (exact case)
+	inst := mgr.GetInstance("room1", "Zone Map")
+	require.NotNil(t, inst, "should match by description")
+	assert.Equal(t, "zone_map", inst.ItemDefID)
+
+	// Match by description (different case)
+	inst2 := mgr.GetInstance("room1", "zone map")
+	require.NotNil(t, inst2, "should match case-insensitively")
+
+	// No match for unrelated query
+	inst3 := mgr.GetInstance("room1", "Medkit")
+	assert.Nil(t, inst3)
+}
+
+func TestRoomEquipmentManager_GetInstance_ByDescription_Property(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		desc := rapid.StringMatching(`[A-Za-z ]{1,20}`).Draw(t, "desc")
+		cfg := []world.RoomEquipmentConfig{
+			{ItemID: "item1", MaxCount: 1, Immovable: true, Description: desc},
+		}
+		mgr := inventory.NewRoomEquipmentManager()
+		mgr.InitRoom("r1", cfg)
+		inst := mgr.GetInstance("r1", desc)
+		require.NotNil(t, inst)
+		assert.Equal(t, "item1", inst.ItemDefID)
+	})
+}
+
 func TestRoomEquipmentManager_RemoveConfig_CancelsPendingRespawns(t *testing.T) {
 	mgr := inventory.NewRoomEquipmentManager()
 	mgr.InitRoom("r1", []world.RoomEquipmentConfig{
