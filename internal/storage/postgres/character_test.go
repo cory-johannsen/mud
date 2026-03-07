@@ -9,7 +9,6 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
-	"github.com/cory-johannsen/mud/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
@@ -21,11 +20,10 @@ func uniqueName(prefix string) string {
 
 func setupCharRepos(t *testing.T) (*postgres.CharacterRepository, int64) {
 	t.Helper()
-	pool := testutil.NewPool(t)
-	acctRepo := postgres.NewAccountRepository(pool)
+	acctRepo := postgres.NewAccountRepository(sharedPool)
 	acct, err := acctRepo.Create(context.Background(), uniqueName("user"), "password123")
 	require.NoError(t, err)
-	return postgres.NewCharacterRepository(pool), acct.ID
+	return postgres.NewCharacterRepository(sharedPool), acct.ID
 }
 
 func makeTestCharacter(accountID int64, name string) *character.Character {
@@ -147,10 +145,8 @@ func TestCharacterRepository_SaveState_NotFound(t *testing.T) {
 // setupCharReposShared creates a single pool and account repository for use across
 // multiple rapid iterations within one property test. Each iteration creates a fresh
 // account to ensure isolation without spawning a new container per iteration.
-func setupCharReposShared(t *testing.T) (*postgres.CharacterRepository, *postgres.AccountRepository) {
-	t.Helper()
-	pool := testutil.NewPool(t)
-	return postgres.NewCharacterRepository(pool), postgres.NewAccountRepository(pool)
+func setupCharReposShared(_ *testing.T) (*postgres.CharacterRepository, *postgres.AccountRepository) {
+	return postgres.NewCharacterRepository(sharedPool), postgres.NewAccountRepository(sharedPool)
 }
 
 // TestCharacterRepository_Property_CreateThenGetByID verifies that for any valid

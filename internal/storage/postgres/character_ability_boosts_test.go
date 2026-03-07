@@ -9,24 +9,21 @@ import (
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	pgstore "github.com/cory-johannsen/mud/internal/storage/postgres"
-	"github.com/cory-johannsen/mud/internal/testutil"
 )
 
-func testDBWithAbilityBoosts(t *testing.T) *testutil.PostgresContainer {
-	t.Helper()
-	pc := testutil.NewPostgresContainer(t)
-	pc.ApplyMigrations(t)
-	pc.ApplyAbilityBoostsMigration(t)
-	return pc
+func testDBWithAbilityBoosts(_ *testing.T) *pgxpool.Pool {
+	return sharedPool
 }
 
 func TestCharacterAbilityBoostsRepo_GetAll_EmptyForNew(t *testing.T) {
-	pc := testDBWithAbilityBoosts(t)
+	pool := testDBWithAbilityBoosts(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterAbilityBoostsRepository(pc.RawPool)
+	repo := pgstore.NewCharacterAbilityBoostsRepository(pool)
 
 	got, err := repo.GetAll(ctx, ch.ID)
 	require.NoError(t, err)
@@ -35,11 +32,11 @@ func TestCharacterAbilityBoostsRepo_GetAll_EmptyForNew(t *testing.T) {
 }
 
 func TestCharacterAbilityBoostsRepo_Add_And_GetAll(t *testing.T) {
-	pc := testDBWithAbilityBoosts(t)
+	pool := testDBWithAbilityBoosts(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterAbilityBoostsRepository(pc.RawPool)
+	repo := pgstore.NewCharacterAbilityBoostsRepository(pool)
 
 	err := repo.Add(ctx, ch.ID, "archetype", "brutality")
 	require.NoError(t, err)
@@ -51,11 +48,11 @@ func TestCharacterAbilityBoostsRepo_Add_And_GetAll(t *testing.T) {
 }
 
 func TestCharacterAbilityBoostsRepo_Add_Idempotent(t *testing.T) {
-	pc := testDBWithAbilityBoosts(t)
+	pool := testDBWithAbilityBoosts(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterAbilityBoostsRepository(pc.RawPool)
+	repo := pgstore.NewCharacterAbilityBoostsRepository(pool)
 
 	require.NoError(t, repo.Add(ctx, ch.ID, "archetype", "quickness"))
 	require.NoError(t, repo.Add(ctx, ch.ID, "archetype", "quickness"))
@@ -66,11 +63,11 @@ func TestCharacterAbilityBoostsRepo_Add_Idempotent(t *testing.T) {
 }
 
 func TestCharacterAbilityBoostsRepo_GetAll_SortedAbilities(t *testing.T) {
-	pc := testDBWithAbilityBoosts(t)
+	pool := testDBWithAbilityBoosts(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterAbilityBoostsRepository(pc.RawPool)
+	repo := pgstore.NewCharacterAbilityBoostsRepository(pool)
 
 	abilities := []string{"savvy", "brutality", "grit", "flair"}
 	for _, a := range abilities {
@@ -88,11 +85,11 @@ func TestCharacterAbilityBoostsRepo_GetAll_SortedAbilities(t *testing.T) {
 }
 
 func TestCharacterAbilityBoostsRepo_GetAll_MultipleSources(t *testing.T) {
-	pc := testDBWithAbilityBoosts(t)
+	pool := testDBWithAbilityBoosts(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterAbilityBoostsRepository(pc.RawPool)
+	repo := pgstore.NewCharacterAbilityBoostsRepository(pool)
 
 	require.NoError(t, repo.Add(ctx, ch.ID, "archetype", "brutality"))
 	require.NoError(t, repo.Add(ctx, ch.ID, "region", "reasoning"))
@@ -104,10 +101,10 @@ func TestCharacterAbilityBoostsRepo_GetAll_MultipleSources(t *testing.T) {
 }
 
 func TestPropertyCharacterAbilityBoostsRepo_RoundTrip(t *testing.T) {
-	pc := testDBWithAbilityBoosts(t)
+	pool := testDBWithAbilityBoosts(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
-	repo := pgstore.NewCharacterAbilityBoostsRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
+	repo := pgstore.NewCharacterAbilityBoostsRepository(pool)
 
 	rapid.Check(t, func(rt *rapid.T) {
 		ch := createTestCharacter(t, charRepo, ctx)
@@ -171,9 +168,9 @@ func TestPropertyCharacterAbilityBoostsRepo_RoundTrip(t *testing.T) {
 }
 
 func TestCharacterAbilityBoostsRepo_InvalidInputs(t *testing.T) {
-	pc := testDBWithAbilityBoosts(t)
+	pool := testDBWithAbilityBoosts(t)
 	ctx := context.Background()
-	repo := pgstore.NewCharacterAbilityBoostsRepository(pc.RawPool)
+	repo := pgstore.NewCharacterAbilityBoostsRepository(pool)
 
 	t.Run("Add_characterID_zero_returns_error", func(t *testing.T) {
 		err := repo.Add(ctx, 0, "archetype", "brutality")

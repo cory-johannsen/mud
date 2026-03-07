@@ -9,7 +9,7 @@ import (
 	"pgregory.net/rapid"
 
 	pgstore "github.com/cory-johannsen/mud/internal/storage/postgres"
-	"github.com/cory-johannsen/mud/internal/testutil"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // validCategories enumerates the known proficiency category values.
@@ -22,12 +22,8 @@ var validCategories = []string{
 // validRanks enumerates the known proficiency rank values.
 var validRanks = []string{"untrained", "trained", "expert", "master", "legendary"}
 
-func testDBWithProficiencies(t *testing.T) *testutil.PostgresContainer {
-	t.Helper()
-	pc := testutil.NewPostgresContainer(t)
-	pc.ApplyMigrations(t)
-	pc.ApplyProficienciesMigration(t)
-	return pc
+func testDBWithProficiencies(_ *testing.T) *pgxpool.Pool {
+	return sharedPool
 }
 
 // --- nil-pool precondition tests (no DB required) ---
@@ -67,11 +63,11 @@ func TestCharacterProficienciesRepository_Upsert_ValidatesInputs(t *testing.T) {
 // --- DB integration tests ---
 
 func TestCharacterProficienciesRepository_GetAll_EmptyForNew(t *testing.T) {
-	pc := testDBWithProficiencies(t)
+	pool := testDBWithProficiencies(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterProficienciesRepository(pc.RawPool)
+	repo := pgstore.NewCharacterProficienciesRepository(pool)
 
 	got, err := repo.GetAll(ctx, ch.ID)
 	require.NoError(t, err)
@@ -80,11 +76,11 @@ func TestCharacterProficienciesRepository_GetAll_EmptyForNew(t *testing.T) {
 }
 
 func TestCharacterProficienciesRepository_Upsert_RoundTrip(t *testing.T) {
-	pc := testDBWithProficiencies(t)
+	pool := testDBWithProficiencies(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterProficienciesRepository(pc.RawPool)
+	repo := pgstore.NewCharacterProficienciesRepository(pool)
 
 	err := repo.Upsert(ctx, ch.ID, "light_armor", "trained")
 	require.NoError(t, err)
@@ -96,11 +92,11 @@ func TestCharacterProficienciesRepository_Upsert_RoundTrip(t *testing.T) {
 }
 
 func TestCharacterProficienciesRepository_Upsert_UpdatesExisting(t *testing.T) {
-	pc := testDBWithProficiencies(t)
+	pool := testDBWithProficiencies(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterProficienciesRepository(pc.RawPool)
+	repo := pgstore.NewCharacterProficienciesRepository(pool)
 
 	require.NoError(t, repo.Upsert(ctx, ch.ID, "heavy_armor", "untrained"))
 	require.NoError(t, repo.Upsert(ctx, ch.ID, "heavy_armor", "expert"))
@@ -113,10 +109,10 @@ func TestCharacterProficienciesRepository_Upsert_UpdatesExisting(t *testing.T) {
 // --- property-based tests ---
 
 func TestProperty_CharacterProficienciesRepository_UpsertIdempotent(t *testing.T) {
-	pc := testDBWithProficiencies(t)
+	pool := testDBWithProficiencies(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
-	repo := pgstore.NewCharacterProficienciesRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
+	repo := pgstore.NewCharacterProficienciesRepository(pool)
 
 	rapid.Check(t, func(rt *rapid.T) {
 		ch := createTestCharacter(t, charRepo, ctx)

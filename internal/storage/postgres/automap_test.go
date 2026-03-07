@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
-	"github.com/cory-johannsen/mud/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
@@ -15,14 +14,13 @@ import (
 // Returns the AutomapRepository and the ID of a persisted test character.
 func setupAutomapRepos(t *testing.T) (*postgres.AutomapRepository, int64) {
 	t.Helper()
-	pool := testutil.NewPool(t)
-	acctRepo := postgres.NewAccountRepository(pool)
+	acctRepo := postgres.NewAccountRepository(sharedPool)
 	acct, err := acctRepo.Create(context.Background(), uniqueName("automap_user"), "password123")
 	require.NoError(t, err)
-	charRepo := postgres.NewCharacterRepository(pool)
+	charRepo := postgres.NewCharacterRepository(sharedPool)
 	char, err := charRepo.Create(context.Background(), makeTestCharacter(acct.ID, uniqueName("AutomapChar")))
 	require.NoError(t, err)
-	return postgres.NewAutomapRepository(pool), char.ID
+	return postgres.NewAutomapRepository(sharedPool), char.ID
 }
 
 func TestAutomapRepository_Insert_And_LoadAll(t *testing.T) {
@@ -71,8 +69,7 @@ func TestAutomapRepository_BulkInsert_EmptyRoomIDs_IsNoOp(t *testing.T) {
 }
 
 func TestAutomapRepository_LoadAll_Empty(t *testing.T) {
-	pool := testutil.NewPool(t)
-	repo := postgres.NewAutomapRepository(pool)
+	repo := postgres.NewAutomapRepository(sharedPool)
 	ctx := context.Background()
 
 	// Use a character ID that does not exist — LoadAll must return non-nil empty map.
@@ -102,10 +99,9 @@ func TestAutomapRepository_LoadAll_MultipleZones(t *testing.T) {
 // TestAutomapRepository_Property_InsertThenLoad verifies that for any valid
 // (zoneID, roomID) pair, Insert followed by LoadAll always returns the room as discovered.
 func TestAutomapRepository_Property_InsertThenLoad(t *testing.T) {
-	pool := testutil.NewPool(t)
-	acctRepo := postgres.NewAccountRepository(pool)
-	charRepo := postgres.NewCharacterRepository(pool)
-	repo := postgres.NewAutomapRepository(pool)
+	acctRepo := postgres.NewAccountRepository(sharedPool)
+	charRepo := postgres.NewCharacterRepository(sharedPool)
+	repo := postgres.NewAutomapRepository(sharedPool)
 	ctx := context.Background()
 
 	rapid.Check(t, func(rt *rapid.T) {

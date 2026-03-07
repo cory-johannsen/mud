@@ -9,23 +9,19 @@ import (
 	"pgregory.net/rapid"
 
 	pgstore "github.com/cory-johannsen/mud/internal/storage/postgres"
-	"github.com/cory-johannsen/mud/internal/testutil"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func testDBWithFeatureChoices(t *testing.T) *testutil.PostgresContainer {
-	t.Helper()
-	pc := testutil.NewPostgresContainer(t)
-	pc.ApplyMigrations(t)
-	pc.ApplyFeatureChoicesMigration(t)
-	return pc
+func testDBWithFeatureChoices(_ *testing.T) *pgxpool.Pool {
+	return sharedPool
 }
 
 func TestCharacterFeatureChoicesRepo_GetAll_EmptyForNew(t *testing.T) {
-	pc := testDBWithFeatureChoices(t)
+	pool := testDBWithFeatureChoices(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterFeatureChoicesRepo(pc.RawPool)
+	repo := pgstore.NewCharacterFeatureChoicesRepo(pool)
 
 	got, err := repo.GetAll(ctx, ch.ID)
 	require.NoError(t, err)
@@ -34,11 +30,11 @@ func TestCharacterFeatureChoicesRepo_GetAll_EmptyForNew(t *testing.T) {
 }
 
 func TestCharacterFeatureChoicesRepo_Set_And_GetAll(t *testing.T) {
-	pc := testDBWithFeatureChoices(t)
+	pool := testDBWithFeatureChoices(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterFeatureChoicesRepo(pc.RawPool)
+	repo := pgstore.NewCharacterFeatureChoicesRepo(pool)
 
 	err := repo.Set(ctx, ch.ID, "predators_eye", "favored_target", "human")
 	require.NoError(t, err)
@@ -50,11 +46,11 @@ func TestCharacterFeatureChoicesRepo_Set_And_GetAll(t *testing.T) {
 }
 
 func TestCharacterFeatureChoicesRepo_Set_IsIdempotent(t *testing.T) {
-	pc := testDBWithFeatureChoices(t)
+	pool := testDBWithFeatureChoices(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterFeatureChoicesRepo(pc.RawPool)
+	repo := pgstore.NewCharacterFeatureChoicesRepo(pool)
 
 	require.NoError(t, repo.Set(ctx, ch.ID, "predators_eye", "favored_target", "robot"))
 	require.NoError(t, repo.Set(ctx, ch.ID, "predators_eye", "favored_target", "mutant"))
@@ -65,11 +61,11 @@ func TestCharacterFeatureChoicesRepo_Set_IsIdempotent(t *testing.T) {
 }
 
 func TestCharacterFeatureChoicesRepo_MultipleFeatures(t *testing.T) {
-	pc := testDBWithFeatureChoices(t)
+	pool := testDBWithFeatureChoices(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
 	ch := createTestCharacter(t, charRepo, ctx)
-	repo := pgstore.NewCharacterFeatureChoicesRepo(pc.RawPool)
+	repo := pgstore.NewCharacterFeatureChoicesRepo(pool)
 
 	require.NoError(t, repo.Set(ctx, ch.ID, "predators_eye", "favored_target", "animal"))
 	require.NoError(t, repo.Set(ctx, ch.ID, "weapon_focus", "weapon_group", "rifle"))
@@ -81,10 +77,10 @@ func TestCharacterFeatureChoicesRepo_MultipleFeatures(t *testing.T) {
 }
 
 func TestPropertyCharacterFeatureChoicesRepo_RoundTrip(t *testing.T) {
-	pc := testDBWithFeatureChoices(t)
+	pool := testDBWithFeatureChoices(t)
 	ctx := context.Background()
-	charRepo := pgstore.NewCharacterRepository(pc.RawPool)
-	repo := pgstore.NewCharacterFeatureChoicesRepo(pc.RawPool)
+	charRepo := pgstore.NewCharacterRepository(pool)
+	repo := pgstore.NewCharacterFeatureChoicesRepo(pool)
 
 	rapid.Check(t, func(rt *rapid.T) {
 		ch := createTestCharacter(t, charRepo, ctx)

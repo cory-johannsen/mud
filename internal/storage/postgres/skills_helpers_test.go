@@ -10,8 +10,8 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/character"
 	pgstore "github.com/cory-johannsen/mud/internal/storage/postgres"
-	"github.com/cory-johannsen/mud/internal/testutil"
 )
+
 
 // NewCharacterSkillsRepository is a thin wrapper so the skills test file
 // can call it without a package qualifier.
@@ -24,18 +24,12 @@ func NewCharacterRepository(db *pgxpool.Pool) *pgstore.CharacterRepository {
 	return pgstore.NewCharacterRepository(db)
 }
 
-// testDB starts a fresh Postgres container, applies all migrations including
-// character_skills, and returns the raw pool.
+// testDB returns the shared database pool initialized by TestMain.
 //
-// Precondition: Docker must be available.
-// Postcondition: Returns a connected pool with schema applied, or fails the test.
-func testDB(t *testing.T) *pgxpool.Pool {
-	t.Helper()
-	pc := testutil.NewPostgresContainer(t)
-	pc.ApplyMigrations(t)
-	pc.ApplySkillsMigration(t)
-	pc.ApplyFeatsMigration(t)
-	return pc.RawPool
+// Precondition: TestMain must have initialized sharedPool.
+// Postcondition: Returns the package-wide pool with all migrations applied.
+func testDB(_ *testing.T) *pgxpool.Pool {
+	return sharedPool
 }
 
 // createTestCharacter creates a minimal character in the database and returns it.
