@@ -664,18 +664,9 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	playerCbt.SavvyMod = combat.AbilityMod(sess.Abilities.Savvy)
 
 	// Wire save proficiency ranks from session.
-	playerCbt.ToughnessRank = sess.Proficiencies["toughness"]
-	playerCbt.HustleRank = sess.Proficiencies["hustle"]
-	playerCbt.CoolRank = sess.Proficiencies["cool"]
-	if playerCbt.ToughnessRank == "" {
-		playerCbt.ToughnessRank = "untrained"
-	}
-	if playerCbt.HustleRank == "" {
-		playerCbt.HustleRank = "untrained"
-	}
-	if playerCbt.CoolRank == "" {
-		playerCbt.CoolRank = "untrained"
-	}
+	playerCbt.ToughnessRank = combat.DefaultSaveRank(sess.Proficiencies["toughness"])
+	playerCbt.HustleRank = combat.DefaultSaveRank(sess.Proficiencies["hustle"])
+	playerCbt.CoolRank = combat.DefaultSaveRank(sess.Proficiencies["cool"])
 
 	npcCbt := &combat.Combatant{
 		ID:        inst.ID,

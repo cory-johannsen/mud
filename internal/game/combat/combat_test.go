@@ -194,8 +194,24 @@ func TestCombatant_SaveFields(t *testing.T) {
 		CoolRank:      "untrained",
 	}
 	assert.Equal(t, 2, c.GritMod)
+	assert.Equal(t, 1, c.QuicknessMod)
+	assert.Equal(t, 3, c.SavvyMod)
+	assert.Equal(t, "trained", c.ToughnessRank)
 	assert.Equal(t, "expert", c.HustleRank)
 	assert.Equal(t, "untrained", c.CoolRank)
+}
+
+func TestProperty_DefaultSaveRank(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		validRanks := []string{"untrained", "trained", "expert", "master", "legendary"}
+		rank := rapid.SampledFrom(validRanks).Draw(rt, "rank")
+		got := combat.DefaultSaveRank(rank)
+		assert.Equal(rt, rank, got, "non-empty rank should be returned as-is")
+	})
+}
+
+func TestDefaultSaveRank_EmptyReturnsUntrained(t *testing.T) {
+	assert.Equal(t, "untrained", combat.DefaultSaveRank(""))
 }
 
 // --- Engine ---

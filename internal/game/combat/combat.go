@@ -64,14 +64,24 @@ type Combatant struct {
 	// ArmorProficiencyRank is the character's proficiency rank for their equipped armor category.
 	// Empty string or "untrained" means no proficiency bonus to AC.
 	ArmorProficiencyRank string
-	// Save ability modifiers (derived from character ability scores at combat start).
-	GritMod      int // used for Toughness saves
-	QuicknessMod int // used for Hustle saves
-	SavvyMod     int // used for Cool saves
-	// Save proficiency ranks from character_proficiencies.
-	ToughnessRank string // "untrained", "trained", "expert", "master", "legendary"
-	HustleRank    string
-	CoolRank      string
+	// GritMod is the character's Grit ability modifier, used for Toughness saving rolls.
+	// Computed via AbilityMod(sess.Abilities.Grit) at combat start; zero for NPCs.
+	GritMod int
+	// QuicknessMod is the character's Quickness ability modifier, used for Hustle saving rolls.
+	// Computed via AbilityMod(sess.Abilities.Quickness) at combat start; zero for NPCs.
+	QuicknessMod int
+	// SavvyMod is the character's Savvy ability modifier, used for Cool saving rolls.
+	// Computed via AbilityMod(sess.Abilities.Savvy) at combat start; zero for NPCs.
+	SavvyMod int
+	// ToughnessRank is the character's proficiency rank for Toughness saving rolls.
+	// Valid values: "untrained", "trained", "expert", "master", "legendary". Defaults to "untrained".
+	ToughnessRank string
+	// HustleRank is the character's proficiency rank for Hustle saving rolls.
+	// Valid values: "untrained", "trained", "expert", "master", "legendary". Defaults to "untrained".
+	HustleRank string
+	// CoolRank is the character's proficiency rank for Cool saving rolls.
+	// Valid values: "untrained", "trained", "expert", "master", "legendary". Defaults to "untrained".
+	CoolRank string
 }
 
 // IsPlayer reports whether this combatant is a player character.
@@ -152,4 +162,14 @@ func AbilityMod(score int) int {
 		return (diff - 1) / 2
 	}
 	return diff / 2
+}
+
+// DefaultSaveRank returns rank if non-empty, otherwise "untrained".
+// Precondition: none.
+// Postcondition: Returns a non-empty proficiency rank string.
+func DefaultSaveRank(rank string) string {
+	if rank == "" {
+		return "untrained"
+	}
+	return rank
 }
