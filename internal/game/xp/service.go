@@ -28,6 +28,13 @@ func NewService(cfg *XPConfig, saver ProgressSaver) *Service {
 	return &Service{cfg: cfg, saver: saver}
 }
 
+// Config returns the XPConfig used by this Service.
+//
+// Postcondition: Returns a non-nil *XPConfig.
+func (s *Service) Config() *XPConfig {
+	return s.cfg
+}
+
 // AwardKill awards XP for killing an NPC of the given level.
 // Returns player-facing notification messages (level-up announcement, boost prompt).
 //

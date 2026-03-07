@@ -629,6 +629,10 @@ message CharacterSheetView {
     int32 toughness_save = 26; // static bonus: grit_mod + proficiency_bonus
     int32 hustle_save    = 27; // static bonus: quickness_mod + proficiency_bonus
     int32 cool_save      = 28; // static bonus: savvy_mod + proficiency_bonus
+
+    int32 experience     = 29; // current total XP
+    int32 xp_to_next     = 30; // XP remaining to reach next level (0 if at level cap)
+    int32 pending_boosts = 31; // number of unassigned ability boosts
 }
 
 // ProficienciesRequest is sent by the client to view armor/weapon proficiencies.

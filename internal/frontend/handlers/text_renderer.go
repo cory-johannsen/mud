@@ -517,6 +517,15 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Currency ---")))
 	left = append(left, slPlain(csv.GetCurrency()))
 
+	left = append(left, slPlain(""))
+	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Progress ---")))
+	xpLine := fmt.Sprintf("XP: %d / %d   Pending Boosts: %d",
+		csv.GetExperience(), csv.GetXpToNext(), csv.GetPendingBoosts())
+	left = append(left, slPlain(xpLine))
+	if csv.GetPendingBoosts() > 0 {
+		left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "  (type 'levelup' to assign)")))
+	}
+
 	if skills := csv.GetSkills(); len(skills) > 0 {
 		left = append(left, slPlain(""))
 		left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Skills ---")))

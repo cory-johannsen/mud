@@ -2535,6 +2535,21 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.CoolSave = int32(combat.AbilityMod(sess.Abilities.Savvy) +
 		combat.CombatProficiencyBonus(level, sess.Proficiencies["cool"]))
 
+	// XP progress.
+	view.Experience = int32(sess.Experience)
+	view.PendingBoosts = int32(sess.PendingBoosts)
+	if s.xpSvc != nil {
+		cfg := s.xpSvc.Config()
+		if sess.Level < cfg.LevelCap {
+			xpToNext := xp.XPToLevel(sess.Level+1, cfg.BaseXP) - sess.Experience
+			if xpToNext < 0 {
+				xpToNext = 0
+			}
+			view.XpToNext = int32(xpToNext)
+		}
+		// If at level cap, XpToNext remains 0 (zero-value).
+	}
+
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_CharacterSheet{CharacterSheet: view},
 	}, nil

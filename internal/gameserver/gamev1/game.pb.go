@@ -5655,6 +5655,9 @@ type CharacterSheetView struct {
 	ToughnessSave int32                  `protobuf:"varint,26,opt,name=toughness_save,json=toughnessSave,proto3" json:"toughness_save,omitempty"` // static bonus: grit_mod + proficiency_bonus
 	HustleSave    int32                  `protobuf:"varint,27,opt,name=hustle_save,json=hustleSave,proto3" json:"hustle_save,omitempty"`          // static bonus: quickness_mod + proficiency_bonus
 	CoolSave      int32                  `protobuf:"varint,28,opt,name=cool_save,json=coolSave,proto3" json:"cool_save,omitempty"`                // static bonus: savvy_mod + proficiency_bonus
+	Experience    int32                  `protobuf:"varint,29,opt,name=experience,proto3" json:"experience,omitempty"`                            // current total XP
+	XpToNext      int32                  `protobuf:"varint,30,opt,name=xp_to_next,json=xpToNext,proto3" json:"xp_to_next,omitempty"`              // XP remaining to reach next level (0 if at level cap)
+	PendingBoosts int32                  `protobuf:"varint,31,opt,name=pending_boosts,json=pendingBoosts,proto3" json:"pending_boosts,omitempty"` // number of unassigned ability boosts
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5881,6 +5884,27 @@ func (x *CharacterSheetView) GetHustleSave() int32 {
 func (x *CharacterSheetView) GetCoolSave() int32 {
 	if x != nil {
 		return x.CoolSave
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetExperience() int32 {
+	if x != nil {
+		return x.Experience
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetXpToNext() int32 {
+	if x != nil {
+		return x.XpToNext
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetPendingBoosts() int32 {
+	if x != nil {
+		return x.PendingBoosts
 	}
 	return 0
 }
@@ -6469,7 +6493,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\afeat_id\x18\x01 \x01(\tR\x06featId\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
-	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xd3\b\n" +
+	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xb8\t\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -6501,7 +6525,13 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0etoughness_save\x18\x1a \x01(\x05R\rtoughnessSave\x12\x1f\n" +
 	"\vhustle_save\x18\x1b \x01(\x05R\n" +
 	"hustleSave\x12\x1b\n" +
-	"\tcool_save\x18\x1c \x01(\x05R\bcoolSave\x1a8\n" +
+	"\tcool_save\x18\x1c \x01(\x05R\bcoolSave\x12\x1e\n" +
+	"\n" +
+	"experience\x18\x1d \x01(\x05R\n" +
+	"experience\x12\x1c\n" +
+	"\n" +
+	"xp_to_next\x18\x1e \x01(\x05R\bxpToNext\x12%\n" +
+	"\x0epending_boosts\x18\x1f \x01(\x05R\rpendingBoosts\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +

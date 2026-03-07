@@ -810,3 +810,58 @@ func TestRenderCharacterSheet_Saves(t *testing.T) {
 	assert.Contains(t, result, "Cool")
 	assert.Contains(t, result, "-1") // negative modifier, no + prefix
 }
+
+// TestRenderCharacterSheet_XPSection verifies that XP progress fields are rendered.
+func TestRenderCharacterSheet_XPSection(t *testing.T) {
+	view := &gamev1.CharacterSheetView{
+		Name:          "Hero",
+		Level:         3,
+		Experience:    250,
+		XpToNext:      650,
+		PendingBoosts: 0,
+	}
+	result := telnet.StripANSI(RenderCharacterSheet(view, 80))
+	assert.Contains(t, result, "Progress")
+	assert.Contains(t, result, "250")
+	assert.Contains(t, result, "650")
+	assert.NotContains(t, result, "levelup") // no hint when boosts == 0
+}
+
+// TestRenderCharacterSheet_XPSection_PendingBoosts verifies the levelup hint appears when pending_boosts > 0.
+func TestRenderCharacterSheet_XPSection_PendingBoosts(t *testing.T) {
+	view := &gamev1.CharacterSheetView{
+		Name:          "Hero",
+		Level:         4,
+		Experience:    1600,
+		XpToNext:      900,
+		PendingBoosts: 1,
+	}
+	result := telnet.StripANSI(RenderCharacterSheet(view, 80))
+	assert.Contains(t, result, "Progress")
+	assert.Contains(t, result, "1")  // pending boosts count
+	assert.Contains(t, result, "levelup")
+}
+
+// TestProperty_RenderCharacterSheet_XPSection verifies XP values always appear in output.
+func TestProperty_RenderCharacterSheet_XPSection(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		xp := rapid.Int32Range(0, 1000000).Draw(rt, "experience")
+		xpToNext := rapid.Int32Range(0, 1000000).Draw(rt, "xp_to_next")
+		boosts := rapid.Int32Range(0, 10).Draw(rt, "pending_boosts")
+		view := &gamev1.CharacterSheetView{
+			Experience:    xp,
+			XpToNext:      xpToNext,
+			PendingBoosts: boosts,
+		}
+		result := telnet.StripANSI(RenderCharacterSheet(view, 80))
+		if !strings.Contains(result, "Progress") {
+			rt.Fatalf("expected 'Progress' section in output:\n%s", result)
+		}
+		if boosts > 0 && !strings.Contains(result, "levelup") {
+			rt.Fatalf("expected 'levelup' hint when pending_boosts=%d:\n%s", boosts, result)
+		}
+		if boosts == 0 && strings.Contains(result, "levelup") {
+			rt.Fatalf("unexpected 'levelup' hint when pending_boosts=0:\n%s", result)
+		}
+	})
+}
