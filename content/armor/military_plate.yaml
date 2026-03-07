@@ -9,6 +9,7 @@ speed_penalty: 5
 strength_req: 16
 bulk: 3
 group: plate
+proficiency_category: heavy_armor
 traits: [gun-team, military-surplus]
 team_affinity: gun
 cross_team_effect:

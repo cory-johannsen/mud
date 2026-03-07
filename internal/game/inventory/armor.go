@@ -29,8 +29,9 @@ type ArmorDef struct {
 	SpeedPenalty    int              `yaml:"speed_penalty"`    // non-negative feet reduction
 	StrengthReq     int              `yaml:"strength_req"`
 	Bulk            int              `yaml:"bulk"`
-	Group           string           `yaml:"group"`
-	Traits          []string         `yaml:"traits"`
+	Group                string           `yaml:"group"`
+	ProficiencyCategory  string           `yaml:"proficiency_category"`
+	Traits               []string         `yaml:"traits"`
 	TeamAffinity    string           `yaml:"team_affinity"`    // "gun", "machete", or ""
 	CrossTeamEffect *CrossTeamEffect `yaml:"cross_team_effect"`
 }
@@ -82,6 +83,12 @@ func (a *ArmorDef) Validate() error {
 	}
 	if a.Group == "" {
 		errs = append(errs, errors.New("group must not be empty"))
+	}
+	validArmorProfCategories := map[string]bool{
+		"unarmored": true, "light_armor": true, "medium_armor": true, "heavy_armor": true,
+	}
+	if !validArmorProfCategories[a.ProficiencyCategory] {
+		errs = append(errs, fmt.Errorf("proficiency_category %q is not valid", a.ProficiencyCategory))
 	}
 	if a.CrossTeamEffect != nil {
 		if a.CrossTeamEffect.Kind != "condition" && a.CrossTeamEffect.Kind != "penalty" {

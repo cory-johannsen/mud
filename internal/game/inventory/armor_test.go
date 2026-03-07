@@ -15,7 +15,7 @@ func TestArmorDef_Validate_Valid(t *testing.T) {
 	def := &inventory.ArmorDef{
 		ID: "test_armor", Name: "Test Armor", Slot: inventory.SlotTorso,
 		ACBonus: 2, DexCap: 3, CheckPenalty: -1, SpeedPenalty: 0,
-		StrengthReq: 12, Bulk: 2, Group: "composite",
+		StrengthReq: 12, Bulk: 2, Group: "composite", ProficiencyCategory: "medium_armor",
 	}
 	assert.NoError(t, def.Validate())
 }
@@ -83,6 +83,7 @@ speed_penalty: 0
 strength_req: 10
 bulk: 1
 group: leather
+proficiency_category: light_armor
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "arm_guards.yaml"), []byte(yaml), 0644))
 	armors, err := inventory.LoadArmors(dir)
@@ -106,6 +107,7 @@ speed_penalty: 0
 strength_req: 14
 bulk: 2
 group: composite
+proficiency_category: medium_armor
 team_affinity: gun
 cross_team_effect:
   kind: condition
@@ -145,13 +147,29 @@ func TestLoadArmors_InvalidYAMLReturnsError(t *testing.T) {
 	assert.ErrorContains(t, err, "cannot parse")
 }
 
+func TestArmorDef_Validate_InvalidProficiencyCategory(t *testing.T) {
+	def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: inventory.SlotTorso, Group: "leather", ProficiencyCategory: "bad_category"}
+	assert.ErrorContains(t, def.Validate(), "proficiency_category")
+}
+
+func TestAllArmorHasProficiencyCategory(t *testing.T) {
+	armors, err := inventory.LoadArmors("../../../content/armor")
+	require.NoError(t, err)
+	require.NotEmpty(t, armors)
+	for _, a := range armors {
+		assert.NotEmpty(t, a.ProficiencyCategory, "armor %s missing proficiency_category", a.ID)
+		err := a.Validate()
+		assert.NoError(t, err, "armor %s failed validation", a.ID)
+	}
+}
+
 func TestProperty_ArmorSlot_AllConstantsAreValid(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		slot := rapid.SampledFrom([]inventory.ArmorSlot{
 			inventory.SlotHead, inventory.SlotTorso, inventory.SlotLeftArm, inventory.SlotRightArm,
 			inventory.SlotHands, inventory.SlotLeftLeg, inventory.SlotRightLeg, inventory.SlotFeet,
 		}).Draw(rt, "slot")
-		def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: slot, Group: "leather"}
+		def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: slot, Group: "leather", ProficiencyCategory: "light_armor"}
 		assert.NoError(t, def.Validate())
 	})
 }

@@ -9,3 +9,4 @@ speed_penalty: 0
 strength_req: 0
 bulk: 1
 group: composite
+proficiency_category: medium_armor

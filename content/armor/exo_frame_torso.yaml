@@ -9,6 +9,7 @@ speed_penalty: 0
 strength_req: 0
 bulk: 4
 group: plate
+proficiency_category: heavy_armor
 traits: [gun-team, corp-tech, powered]
 team_affinity: gun
 cross_team_effect:

@@ -9,6 +9,7 @@ speed_penalty: 0
 strength_req: 14
 bulk: 2
 group: composite
+proficiency_category: medium_armor
 traits: [gun-team]
 team_affinity: gun
 cross_team_effect:
