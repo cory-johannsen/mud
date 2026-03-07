@@ -509,6 +509,7 @@ func main() {
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, gameClock, roomEquipMgr, invRegistry)
 
 	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr)
+	combatHandler.SetLogger(logger)
 
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(

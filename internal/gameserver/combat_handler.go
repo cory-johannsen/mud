@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
@@ -45,6 +46,7 @@ type CombatHandler struct {
 	floorMgr      *inventory.FloorManager
 	onCombatEndFn func(roomID string) // optional; called after combat ends; may be nil
 	xpSvc         *xp.Service        // optional; awards kill XP on NPC death; may be nil
+	logger        *zap.Logger        // optional; used for error logging; may be nil
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -98,6 +100,14 @@ func NewCombatHandler(
 // Postcondition: Kill XP is awarded to the first living player on NPC death.
 func (h *CombatHandler) SetXPService(svc *xp.Service) {
 	h.xpSvc = svc
+}
+
+// SetLogger registers the logger used for error reporting inside CombatHandler.
+//
+// Precondition: logger must be non-nil.
+// Postcondition: Errors such as AwardKill failures are logged via logger.Warn.
+func (h *CombatHandler) SetLogger(logger *zap.Logger) {
+	h.logger = logger
 }
 
 // SetOnCombatEnd registers a callback invoked after each combat ends.
@@ -993,7 +1003,15 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		// Award kill XP to the first living player.
 		if h.xpSvc != nil {
 			if killer := h.firstLivingPlayer(cbt); killer != nil {
-				if xpMsgs, xpErr := h.xpSvc.AwardKill(context.Background(), killer, inst.Level, killer.CharacterID); xpErr == nil {
+				if xpMsgs, xpErr := h.xpSvc.AwardKill(context.Background(), killer, inst.Level, killer.CharacterID); xpErr != nil {
+					if h.logger != nil {
+						h.logger.Warn("AwardKill failed",
+							zap.String("killer_uid", killer.UID),
+							zap.Int64("character_id", killer.CharacterID),
+							zap.Error(xpErr),
+						)
+					}
+				} else {
 					for _, msg := range xpMsgs {
 						xpEvt := &gamev1.ServerEvent{
 							Payload: &gamev1.ServerEvent_Message{

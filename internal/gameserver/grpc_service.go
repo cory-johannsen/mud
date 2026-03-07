@@ -387,20 +387,26 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	}
 	defer s.cleanupPlayer(uid, username)
 
-	// Load XP and pending boosts into session from persisted state.
-	if dbChar != nil {
-		sess.Experience = dbChar.Experience
-	}
+	// Load XP, level, maxHP, and pending boosts into session from persisted state.
 	if characterID > 0 && s.progressRepo != nil {
-		_, _, _, boosts, progressErr := s.progressRepo.GetProgress(stream.Context(), characterID)
+		dbLevel, dbExperience, dbMaxHP, boosts, progressErr := s.progressRepo.GetProgress(stream.Context(), characterID)
 		if progressErr == nil {
+			sess.Level = dbLevel
+			sess.Experience = dbExperience
+			sess.MaxHP = dbMaxHP
 			sess.PendingBoosts = boosts
 		} else {
-			s.logger.Warn("loading pending boosts at login",
+			s.logger.Warn("loading progress at login",
 				zap.Int64("character_id", characterID),
 				zap.Error(progressErr),
 			)
+			// Fall back to client-supplied level and DB character experience when available.
+			if dbChar != nil {
+				sess.Experience = dbChar.Experience
+			}
 		}
+	} else if dbChar != nil {
+		sess.Experience = dbChar.Experience
 	}
 
 	// Load automap cache from DB and record spawn room discovery.
