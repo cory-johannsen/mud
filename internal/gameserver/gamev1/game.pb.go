@@ -5636,6 +5636,9 @@ type CharacterSheetView struct {
 	Feats         []*FeatEntry           `protobuf:"bytes,23,rep,name=feats,proto3" json:"feats,omitempty"`
 	ClassFeatures []*ClassFeatureEntry   `protobuf:"bytes,24,rep,name=class_features,json=classFeatures,proto3" json:"class_features,omitempty"`
 	Proficiencies []*ProficiencyEntry    `protobuf:"bytes,25,rep,name=proficiencies,proto3" json:"proficiencies,omitempty"`
+	ToughnessSave int32                  `protobuf:"varint,26,opt,name=toughness_save,json=toughnessSave,proto3" json:"toughness_save,omitempty"` // static bonus: grit_mod + proficiency_bonus
+	HustleSave    int32                  `protobuf:"varint,27,opt,name=hustle_save,json=hustleSave,proto3" json:"hustle_save,omitempty"`          // static bonus: quickness_mod + proficiency_bonus
+	CoolSave      int32                  `protobuf:"varint,28,opt,name=cool_save,json=coolSave,proto3" json:"cool_save,omitempty"`                // static bonus: savvy_mod + proficiency_bonus
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5843,6 +5846,27 @@ func (x *CharacterSheetView) GetProficiencies() []*ProficiencyEntry {
 		return x.Proficiencies
 	}
 	return nil
+}
+
+func (x *CharacterSheetView) GetToughnessSave() int32 {
+	if x != nil {
+		return x.ToughnessSave
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetHustleSave() int32 {
+	if x != nil {
+		return x.HustleSave
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetCoolSave() int32 {
+	if x != nil {
+		return x.CoolSave
+	}
+	return 0
 }
 
 // ProficienciesRequest is sent by the client to view armor/weapon proficiencies.
@@ -6383,7 +6407,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\afeat_id\x18\x01 \x01(\tR\x06featId\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
-	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xee\a\n" +
+	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xd3\b\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -6411,7 +6435,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x06skills\x18\x16 \x03(\v2\x13.game.v1.SkillEntryR\x06skills\x12(\n" +
 	"\x05feats\x18\x17 \x03(\v2\x12.game.v1.FeatEntryR\x05feats\x12A\n" +
 	"\x0eclass_features\x18\x18 \x03(\v2\x1a.game.v1.ClassFeatureEntryR\rclassFeatures\x12?\n" +
-	"\rproficiencies\x18\x19 \x03(\v2\x19.game.v1.ProficiencyEntryR\rproficiencies\x1a8\n" +
+	"\rproficiencies\x18\x19 \x03(\v2\x19.game.v1.ProficiencyEntryR\rproficiencies\x12%\n" +
+	"\x0etoughness_save\x18\x1a \x01(\x05R\rtoughnessSave\x12\x1f\n" +
+	"\vhustle_save\x18\x1b \x01(\x05R\n" +
+	"hustleSave\x12\x1b\n" +
+	"\tcool_save\x18\x1c \x01(\x05R\bcoolSave\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +

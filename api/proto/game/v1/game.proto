@@ -624,6 +624,10 @@ message CharacterSheetView {
     repeated FeatEntry         feats          = 23;
     repeated ClassFeatureEntry class_features = 24;
     repeated ProficiencyEntry  proficiencies  = 25;
+
+    int32 toughness_save = 26; // static bonus: grit_mod + proficiency_bonus
+    int32 hustle_save    = 27; // static bonus: quickness_mod + proficiency_bonus
+    int32 cool_save      = 28; // static bonus: savvy_mod + proficiency_bonus
 }
 
 // ProficienciesRequest is sent by the client to view armor/weapon proficiencies.

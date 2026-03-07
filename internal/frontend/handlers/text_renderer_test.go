@@ -792,3 +792,21 @@ func TestAbilityBonus_ModifierOnly(t *testing.T) {
 	assert.NotContains(t, result, "(10)")
 	assert.NotContains(t, result, "(8)")
 }
+
+func TestRenderCharacterSheet_Saves(t *testing.T) {
+	view := &gamev1.CharacterSheetView{
+		Name:          "Hero",
+		Level:         1,
+		ToughnessSave: 5,
+		HustleSave:    3,
+		CoolSave:      -1,
+	}
+	result := RenderCharacterSheet(view, 80)
+	assert.Contains(t, result, "Saves")
+	assert.Contains(t, result, "Toughness")
+	assert.Contains(t, result, "+5")
+	assert.Contains(t, result, "Hustle")
+	assert.Contains(t, result, "+3")
+	assert.Contains(t, result, "Cool")
+	assert.Contains(t, result, "-1") // negative modifier, no + prefix
+}

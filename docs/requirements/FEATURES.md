@@ -146,7 +146,7 @@
     - [x] Specialized
 - [x] Only show modifier bonuses.  PF2E does not use attributes scores, only modifiers.
 - [x] Up/down arrow show scroll back through the previously entered commands, Shift+Up/Shift-Down should scroll the console.
-- [ ] Saving rolls
+- [x] Saving rolls (Toughness/Hustle/Cool — Gunchete-themed PF2E saves with proficiency ranks, ResolveSave function, character sheet display)
 - [ ] Character levelling
     - [ ] Max character level limit is 100
     - [ ] Max job level for any job is 20

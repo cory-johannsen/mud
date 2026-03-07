@@ -355,6 +355,14 @@ func abilityBonus(score int32) string {
 	return fmt.Sprintf("%d", mod)
 }
 
+// signedInt formats an integer with an explicit sign prefix: +5, -1, +0.
+func signedInt(n int) string {
+	if n >= 0 {
+		return fmt.Sprintf("+%d", n)
+	}
+	return fmt.Sprintf("%d", n)
+}
+
 // formatSlotLabel converts a slot key like "left_arm" to "Left Arm".
 func formatSlotLabel(slot string) string {
 	words := strings.Split(slot, "_")
@@ -474,6 +482,13 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Defense ---")))
 	left = append(left, slPlain(fmt.Sprintf("AC Bonus: %d  Check Penalty: %d  Speed Penalty: %d",
 		csv.GetAcBonus(), csv.GetCheckPenalty(), csv.GetSpeedPenalty())))
+
+	left = append(left, slPlain(""))
+	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Saves ---")))
+	left = append(left, slPlain(fmt.Sprintf("Toughness: %s  Hustle: %s  Cool: %s",
+		signedInt(int(csv.GetToughnessSave())),
+		signedInt(int(csv.GetHustleSave())),
+		signedInt(int(csv.GetCoolSave())))))
 
 	left = append(left, slPlain(""))
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Weapons ---")))

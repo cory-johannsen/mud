@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
@@ -2439,6 +2440,14 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		level = 1
 	}
 	view.Proficiencies = buildProficiencyEntries(sess.Proficiencies, level)
+
+	// Saves: static bonus = ability_mod + CombatProficiencyBonus(level, rank).
+	view.ToughnessSave = int32(combat.AbilityMod(sess.Abilities.Grit) +
+		combat.CombatProficiencyBonus(level, sess.Proficiencies["toughness"]))
+	view.HustleSave = int32(combat.AbilityMod(sess.Abilities.Quickness) +
+		combat.CombatProficiencyBonus(level, sess.Proficiencies["hustle"]))
+	view.CoolSave = int32(combat.AbilityMod(sess.Abilities.Savvy) +
+		combat.CombatProficiencyBonus(level, sess.Proficiencies["cool"]))
 
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_CharacterSheet{CharacterSheet: view},
