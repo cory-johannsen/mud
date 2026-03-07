@@ -31,6 +31,9 @@ const (
 // consoleBufMax is the maximum number of console lines retained in the scroll buffer.
 const consoleBufMax = 1000
 
+// cmdHistoryMax is the maximum number of commands retained in the history buffer.
+const cmdHistoryMax = 100
+
 // Conn wraps a TCP connection with Telnet protocol handling.
 // It filters IAC sequences from input and provides line-based reading.
 type Conn struct {
@@ -55,6 +58,10 @@ type Conn struct {
 
 	// resizeCh is signalled (non-blocking) whenever NAWS updates width/height.
 	resizeCh chan struct{}
+
+	// Command history (guarded by mu)
+	cmdHistory []string // submitted commands, max cmdHistoryMax
+	historyIdx int      // cursor; len(cmdHistory) = live (past-end)
 }
 
 // NewConn wraps a raw TCP connection with Telnet protocol handling.
@@ -69,6 +76,52 @@ func NewConn(raw net.Conn, readTimeout, writeTimeout time.Duration) *Conn {
 		writeTimeout: writeTimeout,
 		resizeCh:     make(chan struct{}, 1),
 	}
+}
+
+// AppendHistory adds a submitted command to the history buffer and resets the
+// cursor to the live (past-end) position.
+//
+// Precondition: cmd must be non-empty.
+// Postcondition: cmdHistory contains cmd; historyIdx == len(cmdHistory).
+func (c *Conn) AppendHistory(cmd string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.cmdHistory = append(c.cmdHistory, cmd)
+	if len(c.cmdHistory) > cmdHistoryMax {
+		c.cmdHistory = c.cmdHistory[len(c.cmdHistory)-cmdHistoryMax:]
+	}
+	c.historyIdx = len(c.cmdHistory)
+}
+
+// HistoryUp moves the cursor one step back and returns the command there.
+// Returns ("", false) when already at the oldest entry.
+//
+// Postcondition: historyIdx decremented by 1 if > 0.
+func (c *Conn) HistoryUp() (string, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.historyIdx == 0 {
+		return "", false
+	}
+	c.historyIdx--
+	return c.cmdHistory[c.historyIdx], true
+}
+
+// HistoryDown moves the cursor one step forward and returns the command there.
+// Returns ("", false) if now at the live (past-end) position.
+//
+// Postcondition: historyIdx incremented by 1 if < len(cmdHistory).
+func (c *Conn) HistoryDown() (string, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.historyIdx >= len(c.cmdHistory) {
+		return "", false
+	}
+	c.historyIdx++
+	if c.historyIdx == len(c.cmdHistory) {
+		return "", false
+	}
+	return c.cmdHistory[c.historyIdx], true
 }
 
 // appendConsoleLine appends a line to the console scroll buffer, enforcing the
@@ -210,6 +263,36 @@ func (c *Conn) tryReadEscapeSeq() string {
 		return "\x00UP"
 	case 'B':
 		return "\x00DOWN"
+	case '1':
+		// ESC [ 1 ; 2 A = Shift+Up, ESC [ 1 ; 2 B = Shift+Down
+		// ESC [ 1 5 ~ = F5 (and other ESC [ 1 N ~ sequences) — consume and discard.
+		b1, err := c.reader.ReadByte() // expect ';' or digit
+		if err != nil {
+			return ""
+		}
+		b2, err := c.reader.ReadByte() // expect '2' or digit/'~'
+		if err != nil {
+			return ""
+		}
+		b3, err := c.reader.ReadByte() // expect 'A' or 'B' or '~'
+		if err != nil {
+			return ""
+		}
+		if b1 == ';' && b2 == '2' && b3 == 'A' {
+			return "\x00SHIFT_UP"
+		}
+		if b1 == ';' && b2 == '2' && b3 == 'B' {
+			return "\x00SHIFT_DOWN"
+		}
+		// Consume remaining bytes until non-parameter terminator.
+		cur := b3
+		for cur >= 0x30 && cur <= 0x3F {
+			cur, err = c.reader.ReadByte()
+			if err != nil {
+				break
+			}
+		}
+		return ""
 	case '5', '6':
 		term, err := c.reader.ReadByte()
 		if err != nil || term != '~' {

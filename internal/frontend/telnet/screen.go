@@ -364,6 +364,20 @@ func (c *Conn) SetInputBuf(s string) {
 	c.inputBuf = s
 }
 
+// SetInputLine replaces the prompt input area with s and updates inputBuf.
+// Used by command history navigation to display a recalled command.
+//
+// Precondition: splitScreen must be true; prompt is the current prompt string.
+// Postcondition: inputBuf == s; prompt row redrawn showing prompt+s.
+func (c *Conn) SetInputLine(prompt, s string) error {
+	c.mu.Lock()
+	c.inputBuf = s
+	c.mu.Unlock()
+	var buf strings.Builder
+	fmt.Fprintf(&buf, "\r\033[2K%s%s", prompt, s)
+	return c.writeRaw(buf.String())
+}
+
 // writeRaw writes a raw string to the connection without line-terminator wrapping.
 //
 // Precondition:  s must be a valid string; the connection must be open.

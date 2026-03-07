@@ -740,6 +740,93 @@ func TestIsScrolledBack(t *testing.T) {
 	assert.True(t, c.IsScrolledBack())
 }
 
+func TestConn_History_AppendAndNavigate(t *testing.T) {
+	c := &Conn{}
+	c.AppendHistory("look")
+	c.AppendHistory("north")
+	c.AppendHistory("inventory")
+
+	got, ok := c.HistoryUp()
+	require.True(t, ok)
+	assert.Equal(t, "inventory", got)
+
+	got, ok = c.HistoryUp()
+	require.True(t, ok)
+	assert.Equal(t, "north", got)
+
+	got, ok = c.HistoryUp()
+	require.True(t, ok)
+	assert.Equal(t, "look", got)
+
+	// At oldest entry, HistoryUp is a no-op
+	got2, ok2 := c.HistoryUp()
+	assert.False(t, ok2)
+	assert.Equal(t, "", got2)
+
+	// HistoryDown from oldest moves forward
+	got, ok = c.HistoryDown()
+	require.True(t, ok)
+	assert.Equal(t, "north", got)
+
+	got, ok = c.HistoryDown()
+	require.True(t, ok)
+	assert.Equal(t, "inventory", got)
+
+	// HistoryDown at live position returns "", false
+	got, ok = c.HistoryDown()
+	assert.False(t, ok)
+	assert.Equal(t, "", got)
+}
+
+func TestConn_History_ResetOnSubmit(t *testing.T) {
+	c := &Conn{}
+	c.AppendHistory("look")
+	c.AppendHistory("north")
+	_, _ = c.HistoryUp()
+	c.AppendHistory("inventory")
+	got, ok := c.HistoryUp()
+	require.True(t, ok)
+	assert.Equal(t, "inventory", got)
+}
+
+func TestProperty_History_ReverseOrder(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 20).Draw(rt, "n")
+		c := &Conn{}
+		cmds := make([]string, n)
+		for i := range cmds {
+			cmds[i] = fmt.Sprintf("cmd%d", i)
+			c.AppendHistory(cmds[i])
+		}
+		for i := n - 1; i >= 0; i-- {
+			got, ok := c.HistoryUp()
+			if !ok {
+				rt.Fatalf("HistoryUp returned false at index %d", i)
+			}
+			if got != cmds[i] {
+				rt.Fatalf("at index %d: want %q, got %q", i, cmds[i], got)
+			}
+		}
+	})
+}
+
+func TestTryReadEscapeSeq_ShiftArrows(t *testing.T) {
+	tests := []struct {
+		input    []byte
+		sentinel string
+	}{
+		{[]byte{'[', '1', ';', '2', 'A'}, "\x00SHIFT_UP"},
+		{[]byte{'[', '1', ';', '2', 'B'}, "\x00SHIFT_DOWN"},
+		{[]byte{'[', 'A'}, "\x00UP"},
+		{[]byte{'[', 'B'}, "\x00DOWN"},
+	}
+	for _, tt := range tests {
+		c := &Conn{reader: bufio.NewReader(bytes.NewReader(tt.input))}
+		got := c.tryReadEscapeSeq()
+		assert.Equal(t, tt.sentinel, got, "input %v", tt.input)
+	}
+}
+
 func TestIntegration_ConsoleScroll(t *testing.T) {
 	c := &Conn{height: 24, width: 80}
 
