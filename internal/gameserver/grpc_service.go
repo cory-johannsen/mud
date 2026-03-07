@@ -2948,9 +2948,7 @@ func (s *GameServiceServer) handleUseEquipment(uid, instanceID string) (*gamev1.
 		}
 		return messageEvent("Nothing happens."), nil
 	}
-	s.logger.Info("DIAG handleUseEquipment: calling script", zap.String("uid", uid), zap.String("zoneID", zoneID), zap.String("script", inst.Script))
 	result, err := s.scriptMgr.CallHook(zoneID, inst.Script, lua.LString(uid))
-	s.logger.Info("DIAG handleUseEquipment: script returned", zap.String("result", result.String()), zap.Bool("isNil", result == lua.LNil))
 	if err != nil {
 		s.logger.Warn("equipment script error", zap.Error(err))
 		return messageEvent("The item malfunctions."), nil
@@ -3060,7 +3058,6 @@ func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
 		return messageEvent("No map available."), nil
 	}
 	discovered := sess.AutomapCache[zoneID]
-	s.logger.Info("DIAG handleMap", zap.String("uid", uid), zap.String("zoneID", zoneID), zap.Int("discovered", len(discovered)))
 	var tiles []*gamev1.MapTile
 	for roomID := range discovered {
 		r, ok := zone.Rooms[roomID]
