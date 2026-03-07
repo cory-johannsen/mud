@@ -1,9 +1,11 @@
 package combat
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/stretchr/testify/assert"
 	"pgregory.net/rapid"
 )
 
@@ -192,6 +194,54 @@ func TestProperty_FirearmAttack_RangePenaltyMonotone(t *testing.T) {
 		if rangeA < rangeB && rA.AttackTotal < rB.AttackTotal {
 			rt.Errorf("rangeA=%d gave total=%d but rangeB=%d gave total=%d; expected monotone decrease",
 				rangeA, rA.AttackTotal, rangeB, rB.AttackTotal)
+		}
+	})
+}
+
+func TestResolveSave_Untrained_AlwaysReturnsSomeOutcome(t *testing.T) {
+	c := &Combatant{Level: 1, GritMod: 0, ToughnessRank: "untrained"}
+	src := rand.New(rand.NewSource(42))
+	outcome := ResolveSave("toughness", c, 10, src)
+	// Any valid outcome is acceptable — just must not panic
+	validOutcomes := map[Outcome]bool{
+		CritSuccess: true, Success: true,
+		Failure: true, CritFailure: true,
+	}
+	assert.True(t, validOutcomes[outcome])
+}
+
+func TestResolveSave_UnknownType_ReturnsCritFailure(t *testing.T) {
+	c := &Combatant{Level: 1}
+	src := rand.New(rand.NewSource(42))
+	outcome := ResolveSave("unknown_save", c, 10, src)
+	assert.Equal(t, CritFailure, outcome)
+}
+
+func TestProperty_ResolveSave_AllTypesReturnValidOutcome(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		saveType := rapid.SampledFrom([]string{"toughness", "hustle", "cool"}).Draw(rt, "saveType")
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		mod := rapid.IntRange(-5, 5).Draw(rt, "mod")
+		rank := rapid.SampledFrom([]string{"untrained", "trained", "expert", "master", "legendary"}).Draw(rt, "rank")
+		dc := rapid.IntRange(1, 30).Draw(rt, "dc")
+		c := &Combatant{
+			Level:         level,
+			GritMod:       mod,
+			QuicknessMod:  mod,
+			SavvyMod:      mod,
+			ToughnessRank: rank,
+			HustleRank:    rank,
+			CoolRank:      rank,
+		}
+		src := rand.New(rand.NewSource(rapid.Int64().Draw(rt, "seed")))
+		outcome := ResolveSave(saveType, c, dc, src)
+		validOutcomes := map[Outcome]bool{
+			CritSuccess: true, Success: true,
+			Failure: true, CritFailure: true,
+		}
+		if !validOutcomes[outcome] {
+			rt.Fatalf("invalid outcome %v for saveType=%s level=%d mod=%d rank=%s dc=%d",
+				outcome, saveType, level, mod, rank, dc)
 		}
 	})
 }

@@ -127,10 +127,38 @@ func ResolveFirearmAttack(attacker, target *Combatant, weapon *inventory.WeaponD
 	}
 }
 
+// ResolveSave resolves a saving throw for a combatant against a DC using the
+// Toughness/Hustle/Cool save system.
+//
+// Precondition: combatant and src must be non-nil; dc >= 0; saveType must be
+// "toughness", "hustle", or "cool".
+// Postcondition: Returns CritFailure for unknown save types; otherwise
+// returns a 4-tier Outcome based on 1d20 + ability_mod + proficiency_bonus vs dc.
+func ResolveSave(saveType string, combatant *Combatant, dc int, src Source) Outcome {
+	var abilityMod int
+	var rank string
+	switch saveType {
+	case "toughness":
+		abilityMod = combatant.GritMod
+		rank = combatant.ToughnessRank
+	case "hustle":
+		abilityMod = combatant.QuicknessMod
+		rank = combatant.HustleRank
+	case "cool":
+		abilityMod = combatant.SavvyMod
+		rank = combatant.CoolRank
+	default:
+		return CritFailure
+	}
+	roll := src.Intn(20) + 1
+	total := roll + abilityMod + CombatProficiencyBonus(combatant.Level, rank)
+	return OutcomeFor(total, dc)
+}
+
 // ResolveExplosive resolves an explosive against all targets.
 //
 // Precondition: grenade and all targets must not be nil.
-// Postcondition: each target makes a Reflex save (1d20 + DexMod) vs grenade.SaveDC;
+// Postcondition: each target makes a Hustle save vs grenade.SaveDC;
 // damage scaled by save outcome; BaseDamage >= 0.
 func ResolveExplosive(grenade *inventory.ExplosiveDef, targets []*Combatant, src Source) []ExplosiveResult {
 	// Roll damage once for all targets.
@@ -145,10 +173,7 @@ func ResolveExplosive(grenade *inventory.ExplosiveDef, targets []*Combatant, src
 
 	results := make([]ExplosiveResult, 0, len(targets))
 	for _, target := range targets {
-		// Reflex save: 1d20 + DexMod vs SaveDC
-		saveRaw := src.Intn(20) + 1
-		saveTotal := saveRaw + target.DexMod
-		saveOutcome := OutcomeFor(saveTotal, grenade.SaveDC)
+		saveOutcome := ResolveSave("hustle", target, grenade.SaveDC, src)
 
 		var dmg int
 		switch saveOutcome {
@@ -167,8 +192,6 @@ func ResolveExplosive(grenade *inventory.ExplosiveDef, targets []*Combatant, src
 
 		results = append(results, ExplosiveResult{
 			TargetID:   target.ID,
-			SaveRoll:   saveRaw,
-			SaveTotal:  saveTotal,
 			SaveResult: saveOutcome,
 			BaseDamage: dmg,
 		})
