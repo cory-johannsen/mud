@@ -86,6 +86,9 @@ func NewConn(raw net.Conn, readTimeout, writeTimeout time.Duration) *Conn {
 func (c *Conn) AppendHistory(cmd string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if cmd == "" {
+		return
+	}
 	c.cmdHistory = append(c.cmdHistory, cmd)
 	if len(c.cmdHistory) > cmdHistoryMax {
 		c.cmdHistory = c.cmdHistory[len(c.cmdHistory)-cmdHistoryMax:]

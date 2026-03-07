@@ -789,13 +789,30 @@ func TestConn_History_ResetOnSubmit(t *testing.T) {
 	assert.Equal(t, "inventory", got)
 }
 
+func TestConn_History_RingOverflow(t *testing.T) {
+	c := &Conn{}
+	// Append 110 commands (10 over the 100-entry max)
+	for i := range 110 {
+		c.AppendHistory(fmt.Sprintf("cmd%d", i))
+	}
+	// Only the last 100 should be retained
+	// HistoryUp 100 times should succeed; 101st should fail
+	for i := range 100 {
+		_, ok := c.HistoryUp()
+		require.True(t, ok, "HistoryUp should succeed at step %d", i)
+	}
+	_, ok := c.HistoryUp()
+	assert.False(t, ok, "HistoryUp beyond 100 entries should return false")
+}
+
 func TestProperty_History_ReverseOrder(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		n := rapid.IntRange(1, 20).Draw(rt, "n")
 		c := &Conn{}
 		cmds := make([]string, n)
-		for i := range cmds {
-			cmds[i] = fmt.Sprintf("cmd%d", i)
+		for i := range n {
+			// Generate non-empty printable strings as realistic commands
+			cmds[i] = rapid.StringMatching(`[a-zA-Z0-9]{1,20}`).Draw(rt, fmt.Sprintf("cmd%d", i))
 			c.AppendHistory(cmds[i])
 		}
 		for i := n - 1; i >= 0; i-- {
