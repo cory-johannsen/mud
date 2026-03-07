@@ -462,6 +462,37 @@ func (c *Conn) scrollDownState() {
 	}
 }
 
+// scrollUpLineState adjusts scrollOffset backward by one line,
+// clamped to len(consoleBuf) so we cannot scroll past the oldest buffered line.
+//
+// Precondition: none.
+// Postcondition: scrollOffset <= len(consoleBuf).
+func (c *Conn) scrollUpLineState() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.scrollOffset++
+	if c.scrollOffset > len(c.consoleBuf) {
+		c.scrollOffset = len(c.consoleBuf)
+	}
+}
+
+// scrollDownLineState adjusts scrollOffset forward by one line,
+// clamped to 0 (live view). Clears pendingNew when returning to live.
+//
+// Precondition: none.
+// Postcondition: scrollOffset >= 0; pendingNew == 0 if scrollOffset == 0.
+func (c *Conn) scrollDownLineState() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.scrollOffset--
+	if c.scrollOffset < 0 {
+		c.scrollOffset = 0
+	}
+	if c.scrollOffset == 0 {
+		c.pendingNew = 0
+	}
+}
+
 // ScrollUp scrolls the console region back by one page and redraws.
 //
 // Precondition: conn must be in split-screen mode.
@@ -479,6 +510,34 @@ func (c *Conn) ScrollUp() error {
 func (c *Conn) ScrollDown() error {
 	c.scrollDownState()
 	return c.redrawConsole()
+}
+
+// ScrollUpLine scrolls the console region back by one line and redraws.
+//
+// Precondition: conn must be in split-screen mode.
+// Postcondition: Console region shows older content; status line rendered if scrolled.
+func (c *Conn) ScrollUpLine() error {
+	c.scrollUpLineState()
+	return c.redrawConsole()
+}
+
+// ScrollDownLine scrolls the console region forward by one line and redraws.
+// When returning to live view (scrollOffset == 0), pendingNew is cleared.
+//
+// Precondition: conn must be in split-screen mode.
+// Postcondition: Console shows newer content; pendingNew cleared if live.
+func (c *Conn) ScrollDownLine() error {
+	c.scrollDownLineState()
+	return c.redrawConsole()
+}
+
+// IsScrolledBack reports whether the console is currently scrolled back from live.
+//
+// Postcondition: returns true iff scrollOffset > 0.
+func (c *Conn) IsScrolledBack() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.scrollOffset > 0
 }
 
 // snapToLiveState clears scrollOffset and pendingNew without triggering a redraw.

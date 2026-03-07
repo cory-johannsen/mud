@@ -378,9 +378,17 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 
 		// Handle navigation sentinels.
 		switch line {
-		case "\x00UP", "\x00DOWN":
-			// Arrow keys: redraw prompt only (no command history yet).
+		case "\x00UP":
 			if conn.IsSplitScreen() {
+				_ = conn.ScrollUpLine()
+			} else {
+				_ = conn.WritePrompt(buildPrompt())
+			}
+			continue
+		case "\x00DOWN":
+			if conn.IsSplitScreen() && conn.IsScrolledBack() {
+				_ = conn.ScrollDownLine()
+			} else if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(buildPrompt())
 			} else {
 				_ = conn.WritePrompt(buildPrompt())

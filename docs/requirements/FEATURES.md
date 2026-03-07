@@ -106,7 +106,7 @@
   - [x] player prompts to select missing feats and class features at load time doesn't display the list of options for players that are missing selections
   - [x] NPC speech/actions in the console have inconsistent format, start with " : ", do not necessarily include NPC name
   - [x] Idle timer message is not appearing for user.  The timer should warn the user at 4 minutes of idle time and again at 4m30s that automatic disconnect is pending
-- [x] PgUp/PgDn should scroll the Console section so the user can look back 
+- [x] PgUp/PgDn and Up/Down arrow keys scroll the Console section so the user can look back (arrow keys scroll by line; PgUp/PgDn scroll by page)
 - [x] Character ability boosts
   - [x] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
     - [x] Archetype - Mirrors Ancestry

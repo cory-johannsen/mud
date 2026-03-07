@@ -673,6 +673,73 @@ func TestSnapToLive_ClearsScrollAndPending(t *testing.T) {
 	assert.Equal(t, 0, pn)
 }
 
+func TestScrollUpLine_IncrementsOffsetByOne(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	for i := 0; i < 100; i++ {
+		c.consoleBuf = append(c.consoleBuf, fmt.Sprintf("line-%d", i))
+	}
+	c.scrollUpLineState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	c.mu.Unlock()
+	assert.Equal(t, 1, off)
+}
+
+func TestScrollDownLine_DecrementsOffsetByOne(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	for i := 0; i < 100; i++ {
+		c.consoleBuf = append(c.consoleBuf, fmt.Sprintf("line-%d", i))
+	}
+	c.mu.Lock()
+	c.scrollOffset = 5
+	c.pendingNew = 3
+	c.mu.Unlock()
+	c.scrollDownLineState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	pn := c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 4, off)
+	assert.Equal(t, 3, pn) // pendingNew not cleared until live
+}
+
+func TestScrollDownLine_ClearsLiveView(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	c.mu.Lock()
+	c.scrollOffset = 1
+	c.pendingNew = 2
+	c.mu.Unlock()
+	c.scrollDownLineState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	pn := c.pendingNew
+	c.mu.Unlock()
+	assert.Equal(t, 0, off)
+	assert.Equal(t, 0, pn)
+}
+
+func TestScrollUpLine_ClampsAtBufferBound(t *testing.T) {
+	c := &Conn{height: 24, width: 80}
+	c.consoleBuf = []string{"a", "b"}
+	c.mu.Lock()
+	c.scrollOffset = 2
+	c.mu.Unlock()
+	c.scrollUpLineState()
+	c.mu.Lock()
+	off := c.scrollOffset
+	c.mu.Unlock()
+	assert.Equal(t, 2, off) // clamped to len(buf)
+}
+
+func TestIsScrolledBack(t *testing.T) {
+	c := &Conn{}
+	assert.False(t, c.IsScrolledBack())
+	c.mu.Lock()
+	c.scrollOffset = 3
+	c.mu.Unlock()
+	assert.True(t, c.IsScrolledBack())
+}
+
 func TestIntegration_ConsoleScroll(t *testing.T) {
 	c := &Conn{height: 24, width: 80}
 
