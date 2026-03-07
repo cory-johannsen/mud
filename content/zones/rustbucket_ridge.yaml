@@ -42,6 +42,7 @@ zone:
       respawn_after: 0s
       immovable: true
       script: zone_map_use
+      description: Zone Map
   - id: wayne_dawgs_trailer
     title: Wayne Dawg’s Trailer
     description: Wayne Dawg, a grizzled old tweaker, lives in this trailer. It’s covered in rust and oil stains, with a makeshift
