@@ -184,6 +184,20 @@ func TestAbilityMod_Property_EvenScoresSymmetric(t *testing.T) {
 	})
 }
 
+func TestCombatant_SaveFields(t *testing.T) {
+	c := &combat.Combatant{
+		GritMod:       2,
+		QuicknessMod:  1,
+		SavvyMod:      3,
+		ToughnessRank: "trained",
+		HustleRank:    "expert",
+		CoolRank:      "untrained",
+	}
+	assert.Equal(t, 2, c.GritMod)
+	assert.Equal(t, "expert", c.HustleRank)
+	assert.Equal(t, "untrained", c.CoolRank)
+}
+
 // --- Engine ---
 
 func makeCombatants() []*combat.Combatant {

@@ -64,6 +64,14 @@ type Combatant struct {
 	// ArmorProficiencyRank is the character's proficiency rank for their equipped armor category.
 	// Empty string or "untrained" means no proficiency bonus to AC.
 	ArmorProficiencyRank string
+	// Save ability modifiers (derived from character ability scores at combat start).
+	GritMod      int // used for Toughness saves
+	QuicknessMod int // used for Hustle saves
+	SavvyMod     int // used for Cool saves
+	// Save proficiency ranks from character_proficiencies.
+	ToughnessRank string // "untrained", "trained", "expert", "master", "legendary"
+	HustleRank    string
+	CoolRank      string
 }
 
 // IsPlayer reports whether this combatant is a player character.
