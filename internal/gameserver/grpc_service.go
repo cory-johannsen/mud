@@ -94,6 +94,18 @@ type CharacterSkillsRepository interface {
 	UpgradeSkill(ctx context.Context, characterID int64, skillID, newRank string) error
 }
 
+// ProgressRepository persists and retrieves character level, XP, max HP, and pending counts.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: Mutations are durably persisted before returning.
+type ProgressRepository interface {
+	GetProgress(ctx context.Context, id int64) (level, experience, maxHP, pendingBoosts int, err error)
+	GetPendingSkillIncreases(ctx context.Context, id int64) (int, error)
+	IncrementPendingSkillIncreases(ctx context.Context, id int64, n int) error
+	ConsumePendingBoost(ctx context.Context, id int64) error
+	ConsumePendingSkillIncrease(ctx context.Context, id int64) error
+}
+
 // CharacterProficienciesRepository persists per-character armor/weapon proficiency data.
 //
 // Precondition: characterID must be > 0.
@@ -167,7 +179,7 @@ type GameServiceServer struct {
 	archetypes                 map[string]*ruleset.Archetype
 	regions                    map[string]*ruleset.Region
 	xpSvc                      *xp.Service
-	progressRepo               *postgres.CharacterProgressRepository
+	progressRepo               ProgressRepository
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -283,7 +295,7 @@ func NewGameServiceServer(
 //
 // Precondition: repo must be non-nil.
 // Postcondition: PendingBoosts are loaded from the DB on each player login.
-func (s *GameServiceServer) SetProgressRepo(repo *postgres.CharacterProgressRepository) {
+func (s *GameServiceServer) SetProgressRepo(repo ProgressRepository) {
 	s.progressRepo = repo
 }
 
