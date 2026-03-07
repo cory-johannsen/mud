@@ -26,6 +26,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
+	"github.com/cory-johannsen/mud/internal/game/xp"
 	"github.com/cory-johannsen/mud/internal/gameserver"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/observability"
@@ -57,6 +58,7 @@ func main() {
 	classFeatsFile := flag.String("class-features", "content/class_features.yaml", "path to class features YAML file")
 	archetypesDir := flag.String("archetypes-dir", "content/archetypes", "path to archetype YAML definitions directory")
 	regionsDir := flag.String("regions-dir", "content/regions", "path to region YAML definitions directory")
+	xpConfigFile := flag.String("xp-config", "content/xp_config.yaml", "path to XP configuration YAML file")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -111,6 +113,7 @@ func main() {
 	charRepo := postgres.NewCharacterRepository(pool.DB())
 	accountRepo := postgres.NewAccountRepository(pool.DB())
 	automapRepo := postgres.NewAutomapRepository(pool.DB())
+	progressRepo := postgres.NewCharacterProgressRepository(pool.DB())
 
 	// Create managers
 	sessMgr := session.NewManager()
@@ -524,6 +527,17 @@ func main() {
 		archetypeMap,
 		regionMap,
 	)
+
+	// Wire XP service with progress and skill-increase persistence.
+	if xpCfg, xpErr := xp.LoadXPConfig(*xpConfigFile); xpErr != nil {
+		logger.Warn("loading xp config; XP awards disabled", zap.Error(xpErr))
+	} else {
+		xpSvc := xp.NewService(xpCfg, progressRepo)
+		xpSvc.SetSkillIncreaseSaver(progressRepo)
+		grpcService.SetProgressRepo(progressRepo)
+		grpcService.SetXPService(xpSvc)
+		combatHandler.SetXPService(xpSvc)
+	}
 
 	// Start respawn goroutine for room equipment.
 	go func() {

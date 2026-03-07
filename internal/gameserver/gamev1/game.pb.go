@@ -5642,40 +5642,41 @@ func (x *UseResponse) GetChoices() []*FeatEntry {
 
 // CharacterSheetView delivers the player's full character sheet.
 type CharacterSheetView struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Job           string                 `protobuf:"bytes,2,opt,name=job,proto3" json:"job,omitempty"`
-	Archetype     string                 `protobuf:"bytes,3,opt,name=archetype,proto3" json:"archetype,omitempty"`
-	Team          string                 `protobuf:"bytes,4,opt,name=team,proto3" json:"team,omitempty"`
-	Level         int32                  `protobuf:"varint,5,opt,name=level,proto3" json:"level,omitempty"`
-	Brutality     int32                  `protobuf:"varint,6,opt,name=brutality,proto3" json:"brutality,omitempty"`
-	Grit          int32                  `protobuf:"varint,7,opt,name=grit,proto3" json:"grit,omitempty"`
-	Quickness     int32                  `protobuf:"varint,8,opt,name=quickness,proto3" json:"quickness,omitempty"`
-	Reasoning     int32                  `protobuf:"varint,9,opt,name=reasoning,proto3" json:"reasoning,omitempty"`
-	Savvy         int32                  `protobuf:"varint,10,opt,name=savvy,proto3" json:"savvy,omitempty"`
-	Flair         int32                  `protobuf:"varint,11,opt,name=flair,proto3" json:"flair,omitempty"`
-	CurrentHp     int32                  `protobuf:"varint,12,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
-	MaxHp         int32                  `protobuf:"varint,13,opt,name=max_hp,json=maxHp,proto3" json:"max_hp,omitempty"`
-	AcBonus       int32                  `protobuf:"varint,14,opt,name=ac_bonus,json=acBonus,proto3" json:"ac_bonus,omitempty"`
-	CheckPenalty  int32                  `protobuf:"varint,15,opt,name=check_penalty,json=checkPenalty,proto3" json:"check_penalty,omitempty"`
-	SpeedPenalty  int32                  `protobuf:"varint,16,opt,name=speed_penalty,json=speedPenalty,proto3" json:"speed_penalty,omitempty"`
-	Currency      string                 `protobuf:"bytes,17,opt,name=currency,proto3" json:"currency,omitempty"`
-	Armor         map[string]string      `protobuf:"bytes,18,rep,name=armor,proto3" json:"armor,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Accessories   map[string]string      `protobuf:"bytes,19,rep,name=accessories,proto3" json:"accessories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	MainHand      string                 `protobuf:"bytes,20,opt,name=main_hand,json=mainHand,proto3" json:"main_hand,omitempty"`
-	OffHand       string                 `protobuf:"bytes,21,opt,name=off_hand,json=offHand,proto3" json:"off_hand,omitempty"`
-	Skills        []*SkillEntry          `protobuf:"bytes,22,rep,name=skills,proto3" json:"skills,omitempty"`
-	Feats         []*FeatEntry           `protobuf:"bytes,23,rep,name=feats,proto3" json:"feats,omitempty"`
-	ClassFeatures []*ClassFeatureEntry   `protobuf:"bytes,24,rep,name=class_features,json=classFeatures,proto3" json:"class_features,omitempty"`
-	Proficiencies []*ProficiencyEntry    `protobuf:"bytes,25,rep,name=proficiencies,proto3" json:"proficiencies,omitempty"`
-	ToughnessSave int32                  `protobuf:"varint,26,opt,name=toughness_save,json=toughnessSave,proto3" json:"toughness_save,omitempty"` // static bonus: grit_mod + proficiency_bonus
-	HustleSave    int32                  `protobuf:"varint,27,opt,name=hustle_save,json=hustleSave,proto3" json:"hustle_save,omitempty"`          // static bonus: quickness_mod + proficiency_bonus
-	CoolSave      int32                  `protobuf:"varint,28,opt,name=cool_save,json=coolSave,proto3" json:"cool_save,omitempty"`                // static bonus: savvy_mod + proficiency_bonus
-	Experience    int32                  `protobuf:"varint,29,opt,name=experience,proto3" json:"experience,omitempty"`                            // current total XP
-	XpToNext      int32                  `protobuf:"varint,30,opt,name=xp_to_next,json=xpToNext,proto3" json:"xp_to_next,omitempty"`              // XP remaining to reach next level (0 if at level cap)
-	PendingBoosts int32                  `protobuf:"varint,31,opt,name=pending_boosts,json=pendingBoosts,proto3" json:"pending_boosts,omitempty"` // number of unassigned ability boosts
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Name                  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Job                   string                 `protobuf:"bytes,2,opt,name=job,proto3" json:"job,omitempty"`
+	Archetype             string                 `protobuf:"bytes,3,opt,name=archetype,proto3" json:"archetype,omitempty"`
+	Team                  string                 `protobuf:"bytes,4,opt,name=team,proto3" json:"team,omitempty"`
+	Level                 int32                  `protobuf:"varint,5,opt,name=level,proto3" json:"level,omitempty"`
+	Brutality             int32                  `protobuf:"varint,6,opt,name=brutality,proto3" json:"brutality,omitempty"`
+	Grit                  int32                  `protobuf:"varint,7,opt,name=grit,proto3" json:"grit,omitempty"`
+	Quickness             int32                  `protobuf:"varint,8,opt,name=quickness,proto3" json:"quickness,omitempty"`
+	Reasoning             int32                  `protobuf:"varint,9,opt,name=reasoning,proto3" json:"reasoning,omitempty"`
+	Savvy                 int32                  `protobuf:"varint,10,opt,name=savvy,proto3" json:"savvy,omitempty"`
+	Flair                 int32                  `protobuf:"varint,11,opt,name=flair,proto3" json:"flair,omitempty"`
+	CurrentHp             int32                  `protobuf:"varint,12,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
+	MaxHp                 int32                  `protobuf:"varint,13,opt,name=max_hp,json=maxHp,proto3" json:"max_hp,omitempty"`
+	AcBonus               int32                  `protobuf:"varint,14,opt,name=ac_bonus,json=acBonus,proto3" json:"ac_bonus,omitempty"`
+	CheckPenalty          int32                  `protobuf:"varint,15,opt,name=check_penalty,json=checkPenalty,proto3" json:"check_penalty,omitempty"`
+	SpeedPenalty          int32                  `protobuf:"varint,16,opt,name=speed_penalty,json=speedPenalty,proto3" json:"speed_penalty,omitempty"`
+	Currency              string                 `protobuf:"bytes,17,opt,name=currency,proto3" json:"currency,omitempty"`
+	Armor                 map[string]string      `protobuf:"bytes,18,rep,name=armor,proto3" json:"armor,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Accessories           map[string]string      `protobuf:"bytes,19,rep,name=accessories,proto3" json:"accessories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	MainHand              string                 `protobuf:"bytes,20,opt,name=main_hand,json=mainHand,proto3" json:"main_hand,omitempty"`
+	OffHand               string                 `protobuf:"bytes,21,opt,name=off_hand,json=offHand,proto3" json:"off_hand,omitempty"`
+	Skills                []*SkillEntry          `protobuf:"bytes,22,rep,name=skills,proto3" json:"skills,omitempty"`
+	Feats                 []*FeatEntry           `protobuf:"bytes,23,rep,name=feats,proto3" json:"feats,omitempty"`
+	ClassFeatures         []*ClassFeatureEntry   `protobuf:"bytes,24,rep,name=class_features,json=classFeatures,proto3" json:"class_features,omitempty"`
+	Proficiencies         []*ProficiencyEntry    `protobuf:"bytes,25,rep,name=proficiencies,proto3" json:"proficiencies,omitempty"`
+	ToughnessSave         int32                  `protobuf:"varint,26,opt,name=toughness_save,json=toughnessSave,proto3" json:"toughness_save,omitempty"`                           // static bonus: grit_mod + proficiency_bonus
+	HustleSave            int32                  `protobuf:"varint,27,opt,name=hustle_save,json=hustleSave,proto3" json:"hustle_save,omitempty"`                                    // static bonus: quickness_mod + proficiency_bonus
+	CoolSave              int32                  `protobuf:"varint,28,opt,name=cool_save,json=coolSave,proto3" json:"cool_save,omitempty"`                                          // static bonus: savvy_mod + proficiency_bonus
+	Experience            int32                  `protobuf:"varint,29,opt,name=experience,proto3" json:"experience,omitempty"`                                                      // current total XP
+	XpToNext              int32                  `protobuf:"varint,30,opt,name=xp_to_next,json=xpToNext,proto3" json:"xp_to_next,omitempty"`                                        // XP remaining to reach next level (0 if at level cap)
+	PendingBoosts         int32                  `protobuf:"varint,31,opt,name=pending_boosts,json=pendingBoosts,proto3" json:"pending_boosts,omitempty"`                           // number of unassigned ability boosts
+	PendingSkillIncreases int32                  `protobuf:"varint,32,opt,name=pending_skill_increases,json=pendingSkillIncreases,proto3" json:"pending_skill_increases,omitempty"` // number of unassigned skill rank increases
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *CharacterSheetView) Reset() {
@@ -5921,6 +5922,13 @@ func (x *CharacterSheetView) GetXpToNext() int32 {
 func (x *CharacterSheetView) GetPendingBoosts() int32 {
 	if x != nil {
 		return x.PendingBoosts
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetPendingSkillIncreases() int32 {
+	if x != nil {
+		return x.PendingSkillIncreases
 	}
 	return 0
 }
@@ -6555,7 +6563,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\afeat_id\x18\x01 \x01(\tR\x06featId\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
-	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xb8\t\n" +
+	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xf0\t\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -6593,7 +6601,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"experience\x12\x1c\n" +
 	"\n" +
 	"xp_to_next\x18\x1e \x01(\x05R\bxpToNext\x12%\n" +
-	"\x0epending_boosts\x18\x1f \x01(\x05R\rpendingBoosts\x1a8\n" +
+	"\x0epending_boosts\x18\x1f \x01(\x05R\rpendingBoosts\x126\n" +
+	"\x17pending_skill_increases\x18  \x01(\x05R\x15pendingSkillIncreases\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +

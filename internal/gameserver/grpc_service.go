@@ -401,6 +401,20 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			sess.Experience = dbExperience
 			sess.MaxHP = dbMaxHP
 			sess.PendingBoosts = boosts
+			if skillIncreases, siErr := s.progressRepo.GetPendingSkillIncreases(stream.Context(), characterID); siErr == nil {
+				sess.PendingSkillIncreases = skillIncreases
+			} else {
+				s.logger.Warn("GetPendingSkillIncreases failed", zap.Error(siErr))
+			}
+			// Backfill: existing characters with no recorded skill increases get floor(level/2) pending.
+			earnedIncreases := sess.Level / 2
+			if sess.PendingSkillIncreases == 0 && earnedIncreases > 0 {
+				if bfErr := s.progressRepo.IncrementPendingSkillIncreases(stream.Context(), characterID, earnedIncreases); bfErr == nil {
+					sess.PendingSkillIncreases = earnedIncreases
+				} else {
+					s.logger.Warn("backfill skill increases failed", zap.Error(bfErr))
+				}
+			}
 		} else {
 			s.logger.Warn("loading progress at login",
 				zap.Int64("character_id", characterID),
@@ -1710,9 +1724,10 @@ func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) 
 	if len(events) == 0 {
 		return nil, nil
 	}
-	// Broadcast all events except the first to room (first is returned directly to player).
+	// Track last explicit combat target and broadcast all events except the first.
 	sess, ok := s.sessions.GetPlayer(uid)
 	if ok {
+		sess.LastCombatTarget = req.Target
 		for _, evt := range events[1:] {
 			s.broadcastCombatEvent(sess.RoomID, uid, evt)
 		}
@@ -1782,8 +1797,10 @@ func (s *GameServiceServer) handleStrike(uid string, req *gamev1.StrikeRequest) 
 	if len(events) == 0 {
 		return nil, nil
 	}
+	// Track last explicit combat target and broadcast all events except the first.
 	sess, ok := s.sessions.GetPlayer(uid)
 	if ok {
+		sess.LastCombatTarget = req.GetTarget()
 		for _, evt := range events[1:] {
 			s.broadcastCombatEvent(sess.RoomID, uid, evt)
 		}
@@ -2555,6 +2572,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	// XP progress.
 	view.Experience = int32(sess.Experience)
 	view.PendingBoosts = int32(sess.PendingBoosts)
+	view.PendingSkillIncreases = int32(sess.PendingSkillIncreases)
 	if s.xpSvc != nil {
 		cfg := s.xpSvc.Config()
 		if sess.Level < cfg.LevelCap {
