@@ -13,7 +13,7 @@ func makeCombatForRoundConditions(t *testing.T) *combat.Combat {
 	t.Helper()
 	eng := combat.NewEngine()
 	combatants := []*combat.Combatant{
-		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1, Initiative: 15},
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1, Initiative: 15, WeaponProficiencyRank: "trained"},
 		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 12, CurrentHP: 12, AC: 12, Level: 1, StrMod: 1, DexMod: 0, Initiative: 10},
 	}
 	cbt, err := eng.StartCombat("room1", combatants, makeConditionReg(), nil, "")
@@ -94,7 +94,7 @@ func TestResolveRound_AttackModifiers_ProneReducesRoll(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
-	// Intn(20)=5 → d20=6, base mods = StrMod(2) + Prof(2) = 4, prone=-2 → total = 6+4-2 = 8
+	// Intn(20)=5 → d20=6, base mods = StrMod(2) + CombatProficiencyBonus(1,"trained")=3 → mods=5, prone=-2 → total = 6+5-2 = 9
 	events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil)
 	var attackEvent *combat.RoundEvent
 	for i := range events {
@@ -104,5 +104,5 @@ func TestResolveRound_AttackModifiers_ProneReducesRoll(t *testing.T) {
 		}
 	}
 	require.NotNil(t, attackEvent, "attack event must be present")
-	assert.Equal(t, 8, attackEvent.AttackResult.AttackTotal, "attack total must include prone penalty of -2")
+	assert.Equal(t, 9, attackEvent.AttackResult.AttackTotal, "attack total must include prone penalty of -2")
 }

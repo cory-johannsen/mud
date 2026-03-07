@@ -26,7 +26,7 @@ func HandleChar(sess *session.PlayerSession) string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("=== %s ===\n", sess.CharName))
-	sb.WriteString(fmt.Sprintf("Class: %s  Level: %d\n", sess.Class, sess.Level))
+	sb.WriteString(fmt.Sprintf("Job: %s  Level: %d\n", sess.Class, sess.Level))
 	sb.WriteString(fmt.Sprintf("HP: %d / %d\n\n", sess.CurrentHP, sess.MaxHP))
 
 	sb.WriteString("--- Abilities ---\n")

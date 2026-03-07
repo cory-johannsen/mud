@@ -1,0 +1,41 @@
+# 2026/03/06 18:27:55.580948 [TestProperty_RenderCharacterSheet_Proficiencies] [rapid] draw name: "  "
+# 2026/03/06 18:27:55.580952 [TestProperty_RenderCharacterSheet_Proficiencies] [rapid] draw rank: "untrained"
+# 2026/03/06 18:27:55.580953 [TestProperty_RenderCharacterSheet_Proficiencies] [rapid] draw kind: "armor"
+# 2026/03/06 18:27:55.580954 [TestProperty_RenderCharacterSheet_Proficiencies] [rapid] draw bonus: 0
+# 2026/03/06 18:27:55.580967 [TestProperty_RenderCharacterSheet_Proficiencies] expected 'Proficiencies' section header in output:
+# === Hero ===                                       | 
+# Class:   Archetype:                                | 
+# Team:   Level: 1                                   | 
+# HP: 0 / 0                                          | 
+#                                                    | 
+# --- Abilities ---                                  | 
+# BRT: -5 (0)  GRT: -5 (0)  QCK: -5 (0)              | 
+# RSN: -5 (0)  SAV: -5 (0)  FLR: -5 (0)              | 
+#                                                    | 
+# --- Defense ---                                    | 
+# AC Bonus: 0  Check Penalty: 0  Speed Penalty: 0    | 
+#                                                    | 
+# --- Weapons ---                                    | 
+# Main: (none)                                       | 
+# Off:  (none)                                       | 
+#                                                    | 
+# --- Currency ---                                   | 
+#                                                    | 
+# 
+v0.4.8#5212867770975906107
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

@@ -62,11 +62,12 @@ func makeCombatant(id string, ac, level, strMod, dexMod int) *Combatant {
 }
 
 // TestResolveFirearmAttack_HitWithinRange verifies that roll=18 with DexMod=2,
-// profBonus=2 (level 1), rangeIncrements=0 yields AttackTotal=22 vs AC 14 → Success.
+// profBonus=3 (level 1, trained rank), rangeIncrements=0 yields AttackTotal=23 vs AC 14 → CritSuccess.
 func TestResolveFirearmAttack_HitWithinRange(t *testing.T) {
 	// fixedSrc.v=17 → Intn(20) returns 17 → d20 = 18
 	src := fixedSrc{v: 17}
 	attacker := makeCombatant("attacker", 10, 1, 0, 2)
+	attacker.WeaponProficiencyRank = "trained" // trained: level+2 = 1+2 = 3
 	target := makeCombatant("target", 14, 1, 0, 0)
 	weapon := makeTestWeapon("1d6")
 
@@ -75,8 +76,8 @@ func TestResolveFirearmAttack_HitWithinRange(t *testing.T) {
 	if result.AttackRoll != 18 {
 		t.Errorf("expected AttackRoll=18, got %d", result.AttackRoll)
 	}
-	if result.AttackTotal != 22 {
-		t.Errorf("expected AttackTotal=22 (18+2+2-0), got %d", result.AttackTotal)
+	if result.AttackTotal != 23 {
+		t.Errorf("expected AttackTotal=23 (18+2+3-0), got %d", result.AttackTotal)
 	}
 	if result.Outcome != Success && result.Outcome != CritSuccess {
 		t.Errorf("expected hit outcome, got %v", result.Outcome)

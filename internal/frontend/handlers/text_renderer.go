@@ -659,9 +659,26 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 		}
 	}
 
+	// ── Proficiencies: appended below both columns ────────────────────────────
+	var profLines []sheetLine
+	if profs := csv.GetProficiencies(); len(profs) > 0 {
+		profLines = append(profLines, slPlain(""))
+		profLines = append(profLines, sl(telnet.Colorize(telnet.BrightCyan, "--- Proficiencies ---")))
+		for _, e := range profs {
+			rankLabel := fmt.Sprintf("[%s]", e.GetRank())
+			bonusLabel := fmt.Sprintf("+%d", e.GetBonus())
+			// visW accounts for plain-text width: "  " + 18 + " " + 12 + " " + bonus
+			visPlain := fmt.Sprintf("  %-18s %-12s %s", e.GetName(), rankLabel, bonusLabel)
+			// text uses colored rank label for terminal display.
+			coloredRank := proficiencyColor(e.GetRank())
+			text := fmt.Sprintf("  %-18s [%s] %s", e.GetName(), coloredRank, bonusLabel)
+			profLines = append(profLines, sheetLine{text: text, visW: len(visPlain)})
+		}
+	}
+
 	// ── Assemble ──────────────────────────────────────────────────────────────
 	if !twoCol {
-		// Single column: left then right, each line terminated with \r\n.
+		// Single column: left then right then proficiencies, each line terminated with \r\n.
 		var b strings.Builder
 		for _, l := range left {
 			b.WriteString(l.text)
@@ -671,9 +688,23 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			b.WriteString(r.text)
 			b.WriteString("\r\n")
 		}
+		for _, p := range profLines {
+			b.WriteString(p.text)
+			b.WriteString("\r\n")
+		}
 		return b.String()
 	}
-	return assembleColumns(left, right, leftW)
+	out := assembleColumns(left, right, leftW)
+	if len(profLines) > 0 {
+		var b strings.Builder
+		b.WriteString(out)
+		for _, p := range profLines {
+			b.WriteString(p.text)
+			b.WriteString("\r\n")
+		}
+		return b.String()
+	}
+	return out
 }
 
 // sortedInt32Set returns the keys of a map[int32]bool in ascending order.
@@ -1064,5 +1095,46 @@ func RenderUseResponse(ur *gamev1.UseResponse) string {
 			telnet.Dim, f.Description, telnet.Reset))
 	}
 	sb.WriteString(telnet.Colorf(telnet.BrightWhite, "Type: use <feat name> to activate"))
+	return sb.String()
+}
+
+// RenderProficienciesResponse formats a ProficienciesResponse as colored telnet text.
+// Armor and weapon proficiencies are displayed in separate sections.
+// Trained entries are highlighted in cyan; untrained entries are dim.
+//
+// Precondition: pr must be non-nil.
+// Postcondition: Returns a non-empty human-readable string.
+func RenderProficienciesResponse(pr *gamev1.ProficienciesResponse) string {
+	var sb strings.Builder
+	sb.WriteString(telnet.Colorize(telnet.BrightWhite, "=== Proficiencies ===\r\n"))
+
+	sb.WriteString(telnet.Colorize(telnet.BrightCyan, "\r\nArmor:\r\n"))
+	for _, e := range pr.Proficiencies {
+		if e.Kind != "armor" {
+			continue
+		}
+		line := fmt.Sprintf("  %-18s %-12s +%d", e.Name, "["+e.Rank+"]", e.Bonus)
+		if e.Rank != "untrained" {
+			sb.WriteString(telnet.Colorize(telnet.Cyan, line))
+		} else {
+			sb.WriteString(telnet.Colorize(telnet.Dim, line))
+		}
+		sb.WriteString("\r\n")
+	}
+
+	sb.WriteString(telnet.Colorize(telnet.BrightCyan, "\r\nWeapons:\r\n"))
+	for _, e := range pr.Proficiencies {
+		if e.Kind != "weapon" {
+			continue
+		}
+		line := fmt.Sprintf("  %-18s %-12s +%d", e.Name, "["+e.Rank+"]", e.Bonus)
+		if e.Rank != "untrained" {
+			sb.WriteString(telnet.Colorize(telnet.Cyan, line))
+		} else {
+			sb.WriteString(telnet.Colorize(telnet.Dim, line))
+		}
+		sb.WriteString("\r\n")
+	}
+
 	return sb.String()
 }

@@ -89,6 +89,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerInteract:           bridgeInteract,
 	command.HandlerUse:                bridgeUse,
 	command.HandlerSummonItem:         bridgeSummonItem,
+	command.HandlerProficiencies:      bridgeProficiencies,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -635,6 +636,17 @@ func bridgeClassFeatures(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_ClassFeaturesRequest{ClassFeaturesRequest: &gamev1.ClassFeaturesRequest{}},
+	}}, nil
+}
+
+// bridgeProficiencies builds a ProficienciesRequest to retrieve armor/weapon proficiency list.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a ProficienciesRequest; done is false.
+func bridgeProficiencies(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_ProficienciesRequest{ProficienciesRequest: &gamev1.ProficienciesRequest{}},
 	}}, nil
 }
 

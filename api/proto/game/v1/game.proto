@@ -58,6 +58,7 @@ message ClientMessage {
     UseRequest          use_request         = 41;
     ClassFeaturesRequest class_features_request = 42;
     SummonItemRequest summon_item = 43;
+    ProficienciesRequest proficiencies_request = 44;
   }
 }
 
@@ -87,6 +88,7 @@ message ServerEvent {
     InteractResponse     interact_response      = 21;
     UseResponse          use_response           = 22;
     ClassFeaturesResponse class_features_response = 23;
+    ProficienciesResponse proficiencies_response = 24;
   }
 }
 
@@ -621,4 +623,22 @@ message CharacterSheetView {
     repeated SkillEntry        skills         = 22;
     repeated FeatEntry         feats          = 23;
     repeated ClassFeatureEntry class_features = 24;
+    repeated ProficiencyEntry  proficiencies  = 25;
+}
+
+// ProficienciesRequest is sent by the client to view armor/weapon proficiencies.
+message ProficienciesRequest {}
+
+// ProficiencyEntry represents one proficiency category with its rank and bonus.
+message ProficiencyEntry {
+  string category = 1; // e.g. "light_armor", "simple_weapons"
+  string name     = 2; // e.g. "Light Armor", "Simple Weapons"
+  string rank     = 3; // "untrained", "trained", etc.
+  int32  bonus    = 4; // CombatProficiencyBonus(level, rank)
+  string kind     = 5; // "armor" or "weapon"
+}
+
+// ProficienciesResponse contains all proficiency entries for the character.
+message ProficienciesResponse {
+  repeated ProficiencyEntry proficiencies = 1;
 }

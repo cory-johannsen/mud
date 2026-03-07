@@ -1021,6 +1021,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleUse(uid, p.UseRequest.FeatId)
 	case *gamev1.ClientMessage_SummonItem:
 		return s.handleSummonItem(uid, p.SummonItem)
+	case *gamev1.ClientMessage_ProficienciesRequest:
+		return s.handleProficiencies(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -2431,6 +2433,13 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		}
 	}
 
+	// Proficiencies block.
+	level := sess.Level
+	if level < 1 {
+		level = 1
+	}
+	view.Proficiencies = buildProficiencyEntries(sess.Proficiencies, level)
+
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_CharacterSheet{CharacterSheet: view},
 	}, nil
@@ -3041,6 +3050,97 @@ func (s *GameServiceServer) handleClassFeatures(uid string) (*gamev1.ServerEvent
 			},
 		},
 	}, nil
+}
+
+// handleProficiencies returns all armor/weapon proficiency entries for the player's character.
+//
+// Precondition: uid must resolve to an active session with a loaded character.
+// Postcondition: Returns a ProficienciesResponse with one entry per proficiency category.
+func (s *GameServiceServer) handleProficiencies(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	level := sess.Level
+	if level < 1 {
+		level = 1
+	}
+	entries := buildProficiencyEntries(sess.Proficiencies, level)
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_ProficienciesResponse{
+			ProficienciesResponse: &gamev1.ProficienciesResponse{
+				Proficiencies: entries,
+			},
+		},
+	}, nil
+}
+
+// buildProficiencyEntries constructs a slice of ProficiencyEntry from a proficiency map.
+//
+// Precondition: profs may be nil (treated as all untrained); level must be >= 1.
+// Postcondition: Returns entries in canonical armor-then-weapon order.
+func buildProficiencyEntries(profs map[string]string, level int) []*gamev1.ProficiencyEntry {
+	displayNames := map[string]string{
+		"unarmored":       "Unarmored",
+		"light_armor":     "Light Armor",
+		"medium_armor":    "Medium Armor",
+		"heavy_armor":     "Heavy Armor",
+		"simple_weapons":  "Simple Weapons",
+		"simple_ranged":   "Simple Ranged",
+		"martial_weapons": "Martial Weapons",
+		"martial_ranged":  "Martial Ranged",
+		"martial_melee":   "Martial Melee",
+		"unarmed":         "Unarmed",
+		"specialized":     "Specialized",
+	}
+	order := []struct{ cat, kind string }{
+		{"unarmored", "armor"},
+		{"light_armor", "armor"},
+		{"medium_armor", "armor"},
+		{"heavy_armor", "armor"},
+		{"simple_weapons", "weapon"},
+		{"simple_ranged", "weapon"},
+		{"martial_weapons", "weapon"},
+		{"martial_ranged", "weapon"},
+		{"martial_melee", "weapon"},
+		{"unarmed", "weapon"},
+		{"specialized", "weapon"},
+	}
+	entries := make([]*gamev1.ProficiencyEntry, 0, len(order))
+	for _, o := range order {
+		rank := "untrained"
+		if profs != nil {
+			if r, ok := profs[o.cat]; ok && r != "" {
+				rank = r
+			}
+		}
+		bonus := combatProficiencyBonusForRank(level, rank)
+		entries = append(entries, &gamev1.ProficiencyEntry{
+			Category: o.cat,
+			Name:     displayNames[o.cat],
+			Rank:     rank,
+			Bonus:    int32(bonus),
+			Kind:     o.kind,
+		})
+	}
+	return entries
+}
+
+// combatProficiencyBonusForRank returns the PF2E proficiency bonus.
+// Untrained: 0. Trained: level+2. Expert: level+4. Master: level+6. Legendary: level+8.
+func combatProficiencyBonusForRank(level int, rank string) int {
+	switch rank {
+	case "trained":
+		return level + 2
+	case "expert":
+		return level + 4
+	case "master":
+		return level + 6
+	case "legendary":
+		return level + 8
+	default:
+		return 0
+	}
 }
 
 // handleInteract delegates room-equipment interaction to handleUseEquipment.

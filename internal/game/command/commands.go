@@ -58,6 +58,7 @@ const (
 	HandlerInteract            = "interact"
 	HandlerUse                 = "use"
 	HandlerSummonItem          = "summon_item"
+	HandlerProficiencies       = "proficiencies"
 )
 
 // Command defines a player-invocable command.
@@ -140,6 +141,7 @@ func BuiltinCommands() []Command {
 		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},
 		{Name: "feats", Aliases: []string{"ft"}, Help: "Display your feats.", Category: CategoryWorld, Handler: HandlerFeats},
 		{Name: HandlerClassFeatures, Aliases: []string{"cf"}, Help: "List your class features", Category: CategoryCharacter, Handler: HandlerClassFeatures},
+		{Name: "proficiencies", Aliases: []string{"prof"}, Help: "Display your armor and weapon proficiencies.", Category: CategoryCharacter, Handler: HandlerProficiencies},
 
 		{Name: "summon_item", Aliases: nil, Help: "Summon an item into the current room (editor+)", Category: CategoryAdmin, Handler: HandlerSummonItem},
 	}

@@ -708,3 +708,71 @@ func TestRenderCharacterSheet_ClassFeatures_Property(t *testing.T) {
 		}
 	})
 }
+
+// TestRenderCharacterSheet_Proficiencies verifies that a CharacterSheetView with
+// proficiency entries renders a Proficiencies section with each entry listed.
+func TestRenderCharacterSheet_Proficiencies(t *testing.T) {
+	view := &gamev1.CharacterSheetView{
+		Name:  "Test",
+		Level: 1,
+		Proficiencies: []*gamev1.ProficiencyEntry{
+			{Category: "unarmored", Name: "Unarmored", Rank: "trained", Bonus: 3, Kind: "armor"},
+			{Category: "light_armor", Name: "Light Armor", Rank: "untrained", Bonus: 0, Kind: "armor"},
+			{Category: "simple_weapons", Name: "Simple Weapons", Rank: "trained", Bonus: 3, Kind: "weapon"},
+		},
+	}
+	result := RenderCharacterSheet(view, 80)
+	stripped := telnet.StripANSI(result)
+
+	require.Contains(t, stripped, "Proficiencies")
+	assert.Contains(t, stripped, "Unarmored")
+	assert.Contains(t, stripped, "Light Armor")
+	assert.Contains(t, stripped, "Simple Weapons")
+	assert.Contains(t, stripped, "trained")
+	assert.Contains(t, stripped, "untrained")
+}
+
+// TestRenderCharacterSheet_EmptyProficiencies verifies that a CharacterSheetView
+// with no proficiency entries does not render a Proficiencies section.
+func TestRenderCharacterSheet_EmptyProficiencies(t *testing.T) {
+	view := &gamev1.CharacterSheetView{
+		Name:          "Test",
+		Level:         1,
+		Proficiencies: nil,
+	}
+	result := RenderCharacterSheet(view, 80)
+	stripped := telnet.StripANSI(result)
+	assert.NotContains(t, stripped, "Proficiencies")
+}
+
+// TestProperty_RenderCharacterSheet_Proficiencies verifies that every proficiency
+// entry name provided in the view appears in the rendered output.
+func TestProperty_RenderCharacterSheet_Proficiencies(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		name := rapid.StringMatching(`[a-zA-Z ]{2,15}`).Draw(rt, "name")
+		rank := rapid.SampledFrom([]string{"untrained", "trained", "expert", "master", "legendary"}).Draw(rt, "rank")
+		kind := rapid.SampledFrom([]string{"armor", "weapon"}).Draw(rt, "kind")
+		bonus := rapid.Int32Range(0, 30).Draw(rt, "bonus")
+		view := &gamev1.CharacterSheetView{
+			Name:  "Hero",
+			Level: 1,
+			Proficiencies: []*gamev1.ProficiencyEntry{
+				{Category: "test_cat", Name: name, Rank: rank, Bonus: bonus, Kind: kind},
+			},
+		}
+		result := telnet.StripANSI(RenderCharacterSheet(view, 80))
+		if !strings.Contains(result, "Proficiencies") {
+			rt.Fatalf("expected 'Proficiencies' section header in output:\n%s", result)
+		}
+		if !strings.Contains(result, name) {
+			rt.Fatalf("expected proficiency name %q in output:\n%s", name, result)
+		}
+		if !strings.Contains(result, rank) {
+			rt.Fatalf("expected rank %q in output:\n%s", rank, result)
+		}
+		bonusStr := fmt.Sprintf("+%d", bonus)
+		if !strings.Contains(result, bonusStr) {
+			rt.Fatalf("expected bonus %q in output:\n%s", bonusStr, result)
+		}
+	})
+}
