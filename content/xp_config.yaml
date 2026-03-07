@@ -1,0 +1,12 @@
+base_xp: 100
+hp_per_level: 5
+boost_interval: 5
+level_cap: 100
+job_level_cap: 20
+
+awards:
+  kill_xp_per_npc_level: 50
+  new_room_xp: 10
+  skill_check_success_xp: 10
+  skill_check_crit_success_xp: 25
+  skill_check_dc_multiplier: 2
