@@ -1066,6 +1066,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSummonItem(uid, p.SummonItem)
 	case *gamev1.ClientMessage_ProficienciesRequest:
 		return s.handleProficiencies(uid)
+	case *gamev1.ClientMessage_LevelUp:
+		return s.handleLevelUp(uid, p.LevelUp.Ability)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -3166,6 +3168,93 @@ func (s *GameServiceServer) handleProficiencies(uid string) (*gamev1.ServerEvent
 			},
 		},
 	}, nil
+}
+
+// handleLevelUp applies a pending ability boost to the named ability for the player.
+//
+// Precondition: uid must identify an active session; ability must be one of the six valid ability names.
+// Postcondition: if the player has no pending boosts, returns an error message event;
+// otherwise increments the named ability by 2, decrements PendingBoosts, persists both,
+// and returns a confirmation message event.
+func (s *GameServiceServer) handleLevelUp(uid, ability string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if sess.PendingBoosts <= 0 {
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: "You have no pending ability boosts."},
+			},
+		}, nil
+	}
+
+	switch ability {
+	case "brutality":
+		sess.Abilities.Brutality += 2
+	case "quickness":
+		sess.Abilities.Quickness += 2
+	case "grit":
+		sess.Abilities.Grit += 2
+	case "reasoning":
+		sess.Abilities.Reasoning += 2
+	case "savvy":
+		sess.Abilities.Savvy += 2
+	case "flair":
+		sess.Abilities.Flair += 2
+	default:
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: fmt.Sprintf("Unknown ability '%s'.", ability)},
+			},
+		}, nil
+	}
+
+	sess.PendingBoosts--
+
+	ctx := context.Background()
+	if sess.CharacterID > 0 && s.charSaver != nil {
+		if err := s.charSaver.SaveAbilities(ctx, sess.CharacterID, sess.Abilities); err != nil {
+			s.logger.Warn("handleLevelUp: SaveAbilities failed", zap.Error(err))
+		}
+	}
+	if sess.CharacterID > 0 && s.progressRepo != nil {
+		if err := s.progressRepo.ConsumePendingBoost(ctx, sess.CharacterID); err != nil {
+			s.logger.Warn("handleLevelUp: ConsumePendingBoost failed", zap.Error(err))
+		}
+	}
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{
+				Content: fmt.Sprintf("Ability boost applied: %s is now %d. Pending boosts remaining: %d.",
+					ability, abilityValue(sess.Abilities, ability), sess.PendingBoosts),
+			},
+		},
+	}, nil
+}
+
+// abilityValue returns the current score for the named ability from an AbilityScores struct.
+//
+// Precondition: ability must be one of the six valid ability names.
+// Postcondition: returns the current value of the named ability, or 0 if the name is unrecognized.
+func abilityValue(a character.AbilityScores, ability string) int {
+	switch ability {
+	case "brutality":
+		return a.Brutality
+	case "quickness":
+		return a.Quickness
+	case "grit":
+		return a.Grit
+	case "reasoning":
+		return a.Reasoning
+	case "savvy":
+		return a.Savvy
+	case "flair":
+		return a.Flair
+	default:
+		return 0
+	}
 }
 
 // buildProficiencyEntries constructs a slice of ProficiencyEntry from a proficiency map.

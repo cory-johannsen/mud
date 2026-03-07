@@ -90,6 +90,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerUse:                bridgeUse,
 	command.HandlerSummonItem:         bridgeSummonItem,
 	command.HandlerProficiencies:      bridgeProficiencies,
+	command.HandlerLevelUp:            bridgeLevelUp,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -701,6 +702,22 @@ func bridgeSummonItem(bctx *bridgeContext) (bridgeResult, error) {
 			ItemId:   itemID,
 			Quantity: int32(qty),
 		}},
+	}}, nil
+}
+
+// bridgeLevelUp builds a LevelUpRequest, delegating validation to HandleLevelUp.
+//
+// Precondition: bctx must be non-nil with a valid conn, reqID, and parsed.RawArgs.
+// Postcondition: if HandleLevelUp returns a usage or error string, writes it and returns done=true;
+// otherwise returns a non-nil msg containing a LevelUpRequest.
+func bridgeLevelUp(bctx *bridgeContext) (bridgeResult, error) {
+	result := command.HandleLevelUp(bctx.parsed.RawArgs)
+	if strings.HasPrefix(result, "Usage:") || strings.HasPrefix(result, "Unknown ability") {
+		return writeErrorPrompt(bctx, result)
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_LevelUp{LevelUp: &gamev1.LevelUpRequest{Ability: result}},
 	}}, nil
 }
 

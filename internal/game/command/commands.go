@@ -59,6 +59,7 @@ const (
 	HandlerUse                 = "use"
 	HandlerSummonItem          = "summon_item"
 	HandlerProficiencies       = "proficiencies"
+	HandlerLevelUp             = "levelup"
 )
 
 // Command defines a player-invocable command.
@@ -144,6 +145,7 @@ func BuiltinCommands() []Command {
 		{Name: "proficiencies", Aliases: []string{"prof"}, Help: "Display your armor and weapon proficiencies.", Category: CategoryCharacter, Handler: HandlerProficiencies},
 
 		{Name: "summon_item", Aliases: nil, Help: "Summon an item into the current room (editor+)", Category: CategoryAdmin, Handler: HandlerSummonItem},
+		{Name: "levelup", Aliases: []string{"lu"}, Help: "Assign a pending ability boost to the named ability", Category: CategoryCharacter, Handler: HandlerLevelUp},
 	}
 }
 

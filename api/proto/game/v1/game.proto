@@ -59,6 +59,7 @@ message ClientMessage {
     ClassFeaturesRequest class_features_request = 42;
     SummonItemRequest summon_item = 43;
     ProficienciesRequest proficiencies_request = 44;
+    LevelUpRequest level_up = 45;
   }
 }
 
@@ -645,4 +646,9 @@ message ProficiencyEntry {
 // ProficienciesResponse contains all proficiency entries for the character.
 message ProficienciesResponse {
   repeated ProficiencyEntry proficiencies = 1;
+}
+
+// LevelUpRequest asks the server to apply a pending ability boost to the named ability.
+message LevelUpRequest {
+  string ability = 1;
 }
