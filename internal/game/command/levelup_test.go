@@ -10,18 +10,20 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/command"
 )
 
-const validAbilityList = "brutality, quickness, grit, reasoning, savvy, flair"
+func validAbilityList() string {
+	return strings.Join(command.ValidAbilities, ", ")
+}
 
 func TestHandleLevelUp_NoArg_ReturnsUsage(t *testing.T) {
 	result := command.HandleLevelUp("")
 	assert.Contains(t, result, "Usage: levelup <ability>")
-	assert.Contains(t, result, validAbilityList)
+	assert.Contains(t, result, validAbilityList())
 }
 
 func TestHandleLevelUp_InvalidAbility_ReturnsError(t *testing.T) {
 	result := command.HandleLevelUp("strength")
 	assert.Contains(t, result, "Unknown ability 'strength'")
-	assert.Contains(t, result, validAbilityList)
+	assert.Contains(t, result, validAbilityList())
 }
 
 func TestHandleLevelUp_ValidAbilities_ReturnNormalized(t *testing.T) {
@@ -48,18 +50,14 @@ func TestHandleLevelUp_ValidAbilities_ReturnNormalized(t *testing.T) {
 }
 
 func TestPropertyHandleLevelUp_InvalidAbilities_AlwaysReturnError(t *testing.T) {
-	validAbilities := map[string]bool{
-		"brutality": true,
-		"quickness": true,
-		"grit":      true,
-		"reasoning": true,
-		"savvy":     true,
-		"flair":     true,
+	validSet := make(map[string]bool, len(command.ValidAbilities))
+	for _, a := range command.ValidAbilities {
+		validSet[a] = true
 	}
 	rapid.Check(t, func(rt *rapid.T) {
 		ability := rapid.StringMatching(`[a-zA-Z]{3,20}`).Draw(rt, "ability")
 		normalized := strings.ToLower(strings.TrimSpace(ability))
-		if validAbilities[normalized] {
+		if validSet[normalized] {
 			rt.Skip()
 		}
 		result := command.HandleLevelUp(ability)
@@ -70,9 +68,8 @@ func TestPropertyHandleLevelUp_InvalidAbilities_AlwaysReturnError(t *testing.T) 
 }
 
 func TestPropertyHandleLevelUp_ValidAbilities_AlwaysReturnNormalized(t *testing.T) {
-	validAbilities := []string{"brutality", "quickness", "grit", "reasoning", "savvy", "flair"}
 	rapid.Check(t, func(rt *rapid.T) {
-		ability := rapid.SampledFrom(validAbilities).Draw(rt, "ability")
+		ability := rapid.SampledFrom(command.ValidAbilities).Draw(rt, "ability")
 		result := command.HandleLevelUp(ability)
 		assert.Equal(rt, ability, result)
 	})

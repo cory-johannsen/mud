@@ -5,17 +5,19 @@ import (
 	"strings"
 )
 
-// validAbilities is the set of ability names accepted by HandleLevelUp.
-var validAbilities = map[string]bool{
-	"brutality": true,
-	"quickness": true,
-	"grit":      true,
-	"reasoning": true,
-	"savvy":     true,
-	"flair":     true,
-}
+// ValidAbilities is the set of ability names accepted by HandleLevelUp.
+var ValidAbilities = []string{"brutality", "quickness", "grit", "reasoning", "savvy", "flair"}
 
-const abilityList = "brutality, quickness, grit, reasoning, savvy, flair"
+// validAbilities is the O(1) lookup set built from ValidAbilities.
+var validAbilities = func() map[string]bool {
+	m := make(map[string]bool, len(ValidAbilities))
+	for _, a := range ValidAbilities {
+		m[a] = true
+	}
+	return m
+}()
+
+var abilityList = strings.Join(ValidAbilities, ", ")
 
 // HandleLevelUp parses and validates a levelup command argument.
 //

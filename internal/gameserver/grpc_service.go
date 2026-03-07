@@ -3189,19 +3189,21 @@ func (s *GameServiceServer) handleLevelUp(uid, ability string) (*gamev1.ServerEv
 		}, nil
 	}
 
+	// Compute updated abilities without mutating sess yet.
+	updated := sess.Abilities
 	switch ability {
 	case "brutality":
-		sess.Abilities.Brutality += 2
+		updated.Brutality += 2
 	case "quickness":
-		sess.Abilities.Quickness += 2
+		updated.Quickness += 2
 	case "grit":
-		sess.Abilities.Grit += 2
+		updated.Grit += 2
 	case "reasoning":
-		sess.Abilities.Reasoning += 2
+		updated.Reasoning += 2
 	case "savvy":
-		sess.Abilities.Savvy += 2
+		updated.Savvy += 2
 	case "flair":
-		sess.Abilities.Flair += 2
+		updated.Flair += 2
 	default:
 		return &gamev1.ServerEvent{
 			Payload: &gamev1.ServerEvent_Message{
@@ -3210,19 +3212,31 @@ func (s *GameServiceServer) handleLevelUp(uid, ability string) (*gamev1.ServerEv
 		}, nil
 	}
 
-	sess.PendingBoosts--
-
 	ctx := context.Background()
 	if sess.CharacterID > 0 && s.charSaver != nil {
-		if err := s.charSaver.SaveAbilities(ctx, sess.CharacterID, sess.Abilities); err != nil {
+		if err := s.charSaver.SaveAbilities(ctx, sess.CharacterID, updated); err != nil {
 			s.logger.Warn("handleLevelUp: SaveAbilities failed", zap.Error(err))
+			return &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: "Failed to save ability boost. Please try again."},
+				},
+			}, nil
 		}
 	}
 	if sess.CharacterID > 0 && s.progressRepo != nil {
 		if err := s.progressRepo.ConsumePendingBoost(ctx, sess.CharacterID); err != nil {
 			s.logger.Warn("handleLevelUp: ConsumePendingBoost failed", zap.Error(err))
+			return &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: "Failed to consume pending boost. Please try again."},
+				},
+			}, nil
 		}
 	}
+
+	// Both persistence calls succeeded — apply mutations to session.
+	sess.Abilities = updated
+	sess.PendingBoosts--
 
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_Message{
