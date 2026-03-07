@@ -421,17 +421,23 @@ func main() {
 		// Precondition: sessMgr, worldMgr, and automapRepo must not be nil.
 		// Postcondition: All rooms in zoneID are marked discovered in the session cache and persisted.
 		scriptMgr.RevealZoneMap = func(uid, zoneID string) {
+			logger.Info("DIAG RevealZoneMap called", zap.String("uid", uid), zap.String("zoneID", zoneID))
 			sess, ok := sessMgr.GetPlayer(uid)
 			if !ok {
+				logger.Warn("DIAG RevealZoneMap: session not found", zap.String("uid", uid))
 				return
 			}
+			logger.Info("DIAG RevealZoneMap: session found", zap.Int64("charID", sess.CharacterID))
 			zone, ok := worldMgr.GetZone(zoneID)
 			if !ok {
+				logger.Warn("DIAG RevealZoneMap: zone not found", zap.String("zoneID", zoneID))
 				return
 			}
+			logger.Info("DIAG RevealZoneMap: zone found", zap.Int("rooms", len(zone.Rooms)))
 			if sess.AutomapCache[zoneID] == nil {
 				sess.AutomapCache[zoneID] = make(map[string]bool)
 			}
+			before := len(sess.AutomapCache[zoneID])
 			var newRooms []string
 			for roomID := range zone.Rooms {
 				if !sess.AutomapCache[zoneID][roomID] {
@@ -439,9 +445,16 @@ func main() {
 					newRooms = append(newRooms, roomID)
 				}
 			}
+			logger.Info("DIAG RevealZoneMap: cache updated",
+				zap.Int("before", before),
+				zap.Int("after", len(sess.AutomapCache[zoneID])),
+				zap.Int("newRooms", len(newRooms)),
+			)
 			if automapRepo != nil && len(newRooms) > 0 {
 				if err := automapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, newRooms); err != nil {
 					logger.Warn("bulk-persisting zone map reveal", zap.Error(err))
+				} else {
+					logger.Info("DIAG RevealZoneMap: DB write OK", zap.Int("rows", len(newRooms)))
 				}
 			}
 		}
