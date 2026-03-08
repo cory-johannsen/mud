@@ -355,6 +355,92 @@ func abilityBonus(score int32) string {
 	return fmt.Sprintf("%d", mod)
 }
 
+// coloredAbilityBonus returns abilityBonus(score) wrapped in an ANSI color
+// based on the modifier value:
+//   negative: red family (≤-3 bright-red, -2/-1 red/-1 yellow)
+//   zero:     white
+//   positive: teal→green→blue→purple family
+func coloredAbilityBonus(score int32) string {
+	mod := (score - 10) / 2
+	s := abilityBonus(score)
+	switch {
+	case mod <= -3:
+		return telnet.Colorize(telnet.BrightRed, s)
+	case mod == -2:
+		return telnet.Colorize(telnet.Red, s)
+	case mod == -1:
+		return telnet.Colorize(telnet.Yellow, s)
+	case mod == 0:
+		return telnet.Colorize(telnet.White, s)
+	case mod == 1:
+		return telnet.Colorize(telnet.Cyan, s)
+	case mod == 2:
+		return telnet.Colorize(telnet.Green, s)
+	case mod == 3:
+		return telnet.Colorize(telnet.Blue, s)
+	default: // mod >= 4
+		return telnet.Colorize(telnet.Magenta, s)
+	}
+}
+
+// coloredSignedBonus wraps a signed integer bonus (e.g. proficiency bonus) in
+// an ANSI color: positive=green, zero=white, negative=red.
+func coloredSignedBonus(n int32) string {
+	s := signedInt(int(n))
+	switch {
+	case n > 0:
+		return telnet.Colorize(telnet.Green, s)
+	case n < 0:
+		return telnet.Colorize(telnet.Red, s)
+	default:
+		return telnet.Colorize(telnet.White, s)
+	}
+}
+
+// wordWrap splits text into lines no longer than maxWidth visible chars.
+// The first line has no prefix; continuation lines are prefixed with indent.
+func wordWrap(text string, maxWidth int, indent string) []string {
+	if maxWidth <= 0 || len(text) <= maxWidth {
+		return []string{text}
+	}
+	var lines []string
+	remaining := text
+	first := true
+	for len(remaining) > 0 {
+		limit := maxWidth
+		if !first {
+			limit = maxWidth - len(indent)
+		}
+		if limit <= 0 {
+			limit = maxWidth
+		}
+		if len(remaining) <= limit {
+			if first {
+				lines = append(lines, remaining)
+			} else {
+				lines = append(lines, indent+remaining)
+			}
+			break
+		}
+		// Find last space at or before limit.
+		cut := limit
+		for cut > 0 && remaining[cut] != ' ' {
+			cut--
+		}
+		if cut == 0 {
+			cut = limit // no space found, hard-cut
+		}
+		if first {
+			lines = append(lines, remaining[:cut])
+		} else {
+			lines = append(lines, indent+remaining[:cut])
+		}
+		remaining = strings.TrimLeft(remaining[cut:], " ")
+		first = false
+	}
+	return lines
+}
+
 // signedInt formats an integer with an explicit sign prefix: +5, -1, +0.
 func signedInt(n int) string {
 	if n >= 0 {
@@ -471,12 +557,25 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	left = append(left, slPlain(fmt.Sprintf("Team: %s  Level: %d", csv.GetTeam(), csv.GetLevel())))
 	left = append(left, slPlain(fmt.Sprintf("HP: %d / %d", csv.GetCurrentHp(), csv.GetMaxHp())))
 
+	// abilCell returns a fixed-width ability cell: "Label:     +N  " (15 visible chars).
+	// The colored modifier is right-aligned after the label.
+	abilCell := func(label string, score int32) (colored string, plain string) {
+		mod := coloredAbilityBonus(score)
+		raw := abilityBonus(score)
+		colored = fmt.Sprintf("%-11s%s  ", label+":", mod)
+		plain = fmt.Sprintf("%-11s%s  ", label+":", raw)
+		return
+	}
 	left = append(left, slPlain(""))
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Abilities ---")))
-	left = append(left, slPlain(fmt.Sprintf("BRT: %s  GRT: %s  QCK: %s",
-		abilityBonus(csv.GetBrutality()), abilityBonus(csv.GetGrit()), abilityBonus(csv.GetQuickness()))))
-	left = append(left, slPlain(fmt.Sprintf("RSN: %s  SAV: %s  FLR: %s",
-		abilityBonus(csv.GetReasoning()), abilityBonus(csv.GetSavvy()), abilityBonus(csv.GetFlair()))))
+	brtC, brtP := abilCell("Brutality", csv.GetBrutality())
+	grtC, grtP := abilCell("Grit", csv.GetGrit())
+	qckC, qckP := abilCell("Quickness", csv.GetQuickness())
+	rsnC, rsnP := abilCell("Reasoning", csv.GetReasoning())
+	savC, savP := abilCell("Savvy", csv.GetSavvy())
+	flrC, flrP := abilCell("Flair", csv.GetFlair())
+	left = append(left, sheetLine{text: brtC + grtC + qckC, visW: len(brtP + grtP + qckP)})
+	left = append(left, sheetLine{text: rsnC + savC + flrC, visW: len(rsnP + savP + flrP)})
 
 	left = append(left, slPlain(""))
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Defense ---")))
@@ -623,6 +722,10 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 
 	if feats := csv.GetFeats(); len(feats) > 0 {
 		right = append(right, sl(telnet.Colorize(telnet.BrightCyan, "--- Feats ---")))
+		descColW := rightW
+		if !twoCol {
+			descColW = leftW
+		}
 		for _, ft := range feats {
 			activeTag := ""
 			if ft.GetActive() {
@@ -631,11 +734,9 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			nameLine := fmt.Sprintf("  %s%s", ft.GetName(), activeTag)
 			right = append(right, sl(nameLine))
 			if desc := ft.GetDescription(); desc != "" {
-				d := desc
-				if twoCol && len(d) > rightW-4 && rightW > 4 {
-					d = d[:rightW-4]
+				for _, line := range wordWrap(desc, descColW-4, "    ") {
+					right = append(right, slPlain(fmt.Sprintf("    %s", line)))
 				}
-				right = append(right, slPlain(fmt.Sprintf("    %s", d)))
 			}
 		}
 	}
@@ -645,6 +746,10 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			right = append(right, slPlain(""))
 		}
 		right = append(right, sl(telnet.Colorize(telnet.BrightCyan, "--- Job Features ---")))
+		cfDescColW := rightW
+		if !twoCol {
+			cfDescColW = leftW
+		}
 
 		hasArchetype := false
 		for _, cf := range cfs {
@@ -661,11 +766,9 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			}
 			right = append(right, sl(fmt.Sprintf("    %s%s", cf.GetName(), activeTag)))
 			if desc := cf.GetDescription(); desc != "" {
-				d := desc
-				if twoCol && len(d) > rightW-6 && rightW > 6 {
-					d = d[:rightW-6]
+				for _, line := range wordWrap(desc, cfDescColW-6, "      ") {
+					right = append(right, slPlain(fmt.Sprintf("      %s", line)))
 				}
-				right = append(right, slPlain(fmt.Sprintf("      %s", d)))
 			}
 		}
 
@@ -684,11 +787,9 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			}
 			right = append(right, sl(fmt.Sprintf("    %s%s", cf.GetName(), activeTag)))
 			if desc := cf.GetDescription(); desc != "" {
-				d := desc
-				if twoCol && len(d) > rightW-6 && rightW > 6 {
-					d = d[:rightW-6]
+				for _, line := range wordWrap(desc, cfDescColW-6, "      ") {
+					right = append(right, slPlain(fmt.Sprintf("      %s", line)))
 				}
-				right = append(right, slPlain(fmt.Sprintf("      %s", d)))
 			}
 		}
 	}
@@ -704,7 +805,8 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			bonusLabel := fmt.Sprintf("+%d", e.GetBonus())
 			visPlain := fmt.Sprintf("  %-18s %-12s %s", e.GetName(), rankLabel, bonusLabel)
 			coloredRank := proficiencyColor(e.GetRank())
-			text := fmt.Sprintf("  %-18s [%s] %s", e.GetName(), coloredRank, bonusLabel)
+			coloredBonus := coloredSignedBonus(e.GetBonus())
+			text := fmt.Sprintf("  %-18s [%s] %s", e.GetName(), coloredRank, coloredBonus)
 			right = append(right, sheetLine{text: text, visW: len(visPlain)})
 		}
 	}

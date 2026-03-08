@@ -785,12 +785,16 @@ func TestAbilityBonus_ModifierOnly(t *testing.T) {
 		Grit:       10,
 		Quickness:  8,
 	}, 80)
-	assert.Contains(t, result, "BRT: +2")
-	assert.Contains(t, result, "GRT: +0")
-	assert.Contains(t, result, "QCK: -1")
-	assert.NotContains(t, result, "(14)")
-	assert.NotContains(t, result, "(10)")
-	assert.NotContains(t, result, "(8)")
+	stripped := telnet.StripANSI(result)
+	assert.Contains(t, stripped, "Brutality:")
+	assert.Contains(t, stripped, "+2")
+	assert.Contains(t, stripped, "Grit:")
+	assert.Contains(t, stripped, "+0")
+	assert.Contains(t, stripped, "Quickness:")
+	assert.Contains(t, stripped, "-1")
+	assert.NotContains(t, stripped, "(14)")
+	assert.NotContains(t, stripped, "(10)")
+	assert.NotContains(t, stripped, "(8)")
 }
 
 func TestRenderCharacterSheet_Saves(t *testing.T) {
