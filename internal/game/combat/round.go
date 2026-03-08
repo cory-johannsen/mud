@@ -261,8 +261,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r := ResolveAttack(actor, target, src)
 				r.AttackTotal += atkBonus
 				r.AttackTotal += acBonus
+				r.AttackTotal += actor.InitiativeBonus
+				effectiveAC := target.AC + target.InitiativeBonus
 				r.AttackTotal = hookAttackRoll(cbt, actor, target, r.AttackTotal)
-				r.Outcome = OutcomeFor(r.AttackTotal, target.AC)
+				r.Outcome = OutcomeFor(r.AttackTotal, effectiveAC)
 				dmg := r.EffectiveDamage()
 				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg += applyPassiveFeats(cbt, actor, target, dmg, src)
@@ -308,8 +310,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r1 := ResolveAttack(actor, target, src)
 				r1.AttackTotal += atkBonus1
 				r1.AttackTotal += acBonus1
+				r1.AttackTotal += actor.InitiativeBonus
+				effectiveAC1 := target.AC + target.InitiativeBonus
 				r1.AttackTotal = hookAttackRoll(cbt, actor, target, r1.AttackTotal)
-				r1.Outcome = OutcomeFor(r1.AttackTotal, target.AC)
+				r1.Outcome = OutcomeFor(r1.AttackTotal, effectiveAC1)
 				dmg1 := r1.EffectiveDamage()
 				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
@@ -346,9 +350,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				r2 := ResolveAttack(actor, target, src)
 				r2.AttackTotal += atkBonus2
 				r2.AttackTotal += acBonus2
+				r2.AttackTotal += actor.InitiativeBonus
 				r2.AttackTotal -= 5
+				effectiveAC2 := target.AC + target.InitiativeBonus
 				r2.AttackTotal = hookAttackRoll(cbt, actor, target, r2.AttackTotal)
-				r2.Outcome = OutcomeFor(r2.AttackTotal, target.AC)
+				r2.Outcome = OutcomeFor(r2.AttackTotal, effectiveAC2)
 				dmg2 := r2.EffectiveDamage()
 				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)

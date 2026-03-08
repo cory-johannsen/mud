@@ -768,6 +768,57 @@ func TestProperty_PredatorsEye_DamageNonNegative(t *testing.T) {
 	})
 }
 
+// TestResolveRound_InitiativeBonus: player with InitiativeBonus=2 and StrMod=2 attacking with
+// a fixed dice source that always rolls 0 (d20 = 1) must have AttackTotal >= 5 (1 + 2 + 2).
+func TestResolveRound_InitiativeBonus(t *testing.T) {
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 0, InitiativeBonus: 2},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 1, Level: 1, StrMod: 0, DexMod: 0},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+	_ = cbt.StartRound(3)
+
+	// val=0 → d20 = 0+1 = 1 (see ResolveAttack: roll = src.Intn(20)+1)
+	src := fixedSrc{val: 0}
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+
+	events := combat.ResolveRound(cbt, src, noopUpdater)
+
+	var attackEv *combat.RoundEvent
+	for i := range events {
+		if events[i].ActionType == combat.ActionAttack && events[i].ActorID == "p1" {
+			attackEv = &events[i]
+		}
+	}
+	if attackEv == nil {
+		t.Fatal("no ActionAttack event found for p1")
+	}
+	if attackEv.AttackResult == nil {
+		t.Fatal("expected non-nil AttackResult")
+	}
+	// roll=1 + StrMod=2 + InitiativeBonus=2 = 5
+	if attackEv.AttackResult.AttackTotal < 5 {
+		t.Errorf("expected AttackTotal >= 5 (roll=1 + StrMod=2 + InitiativeBonus=2), got %d", attackEv.AttackResult.AttackTotal)
+	}
+}
+
 // TestPropertyResolveRound_DamageNeverExceedsStartingHP: target HP never goes below 0.
 func TestPropertyResolveRound_DamageNeverExceedsStartingHP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
