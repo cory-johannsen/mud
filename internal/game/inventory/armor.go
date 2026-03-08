@@ -34,6 +34,10 @@ type ArmorDef struct {
 	Traits              []string         `yaml:"traits"`
 	TeamAffinity    string           `yaml:"team_affinity"`    // "gun", "machete", or ""
 	CrossTeamEffect *CrossTeamEffect `yaml:"cross_team_effect"`
+	// Resistances maps damage type → flat reduction granted to wearer. Highest value per type across equipped slots applies.
+	Resistances map[string]int `yaml:"resistances"`
+	// Weaknesses maps damage type → flat addition applied to wearer. Additive across equipped slots.
+	Weaknesses  map[string]int `yaml:"weaknesses"`
 }
 
 // validArmorSlots is the set of all legal ArmorSlot values.

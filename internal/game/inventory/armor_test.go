@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 	"pgregory.net/rapid"
 )
 
@@ -172,4 +173,13 @@ func TestProperty_ArmorSlot_AllConstantsAreValid(t *testing.T) {
 		def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: slot, Group: "leather", ProficiencyCategory: "light_armor"}
 		assert.NoError(t, def.Validate())
 	})
+}
+
+func TestArmorDef_ResistancesWeaknesses_YAML(t *testing.T) {
+	input := "id: test_armor\nname: Test Armor\nslot: torso\nac_bonus: 3\ndex_cap: 2\ncheck_penalty: 0\nspeed_penalty: 0\nstrength_req: 0\nbulk: 1\ngroup: leather\nproficiency_category: light_armor\nresistances:\n  fire: 5\n  piercing: 2\nweaknesses:\n  electricity: 3\n"
+	var a inventory.ArmorDef
+	require.NoError(t, yaml.Unmarshal([]byte(input), &a))
+	assert.Equal(t, 5, a.Resistances["fire"])
+	assert.Equal(t, 2, a.Resistances["piercing"])
+	assert.Equal(t, 3, a.Weaknesses["electricity"])
 }
