@@ -66,6 +66,7 @@ message ClientMessage {
     RaiseShieldRequest raise_shield = 49;
     TakeCoverRequest take_cover = 50;
     FirstAidRequest first_aid = 51;
+    FeintRequest feint = 52;
   }
 }
 
@@ -711,3 +712,8 @@ message TakeCoverRequest {}
 
 // FirstAidRequest asks the server to apply first aid to the player.
 message FirstAidRequest {}
+
+// FeintRequest asks the server to feint against a target NPC.
+message FeintRequest {
+    string target = 1;
+}

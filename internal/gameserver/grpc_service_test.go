@@ -2355,3 +2355,150 @@ func TestHandleFirstAid_InCombat_InsufficientAP(t *testing.T) {
 	errEvt := event.GetError()
 	require.NotNil(t, errEvt, "expected an error event when SpendAP fails (no active combat)")
 }
+
+// newFeintSvc builds a minimal GameServiceServer for handleFeint tests.
+// npcMgr may be nil; combatHandler may be nil.
+func newFeintSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatHandler *CombatHandler) (*GameServiceServer, *session.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	if npcMgr == nil {
+		npcMgr = npc.NewManager()
+	}
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+	return svc, sessMgr
+}
+
+// TestHandleFeint_NoSession verifies that handleFeint returns an error when the
+// player session does not exist.
+//
+// Precondition: uid "unknown_feint_uid" has no session.
+// Postcondition: error is returned; event is nil.
+func TestHandleFeint_NoSession(t *testing.T) {
+	svc, _ := newFeintSvc(t, nil, nil, nil)
+	event, err := svc.handleFeint("unknown_feint_uid", &gamev1.FeintRequest{Target: "bandit"})
+	require.Error(t, err)
+	assert.Nil(t, event)
+}
+
+// TestHandleFeint_NotInCombat verifies that handleFeint returns an error event
+// when the player is not in combat.
+//
+// Precondition: sess.Status != statusInCombat.
+// Postcondition: error event containing "only available in combat".
+func TestHandleFeint_NotInCombat(t *testing.T) {
+	svc, sessMgr := newFeintSvc(t, nil, nil, nil)
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_feint_nc",
+		Username: "Rogue",
+		CharName: "Rogue",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+
+	event, err := svc.handleFeint("u_feint_nc", &gamev1.FeintRequest{Target: "bandit"})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event")
+	assert.Contains(t, errEvt.Message, "only available in combat")
+}
+
+// TestHandleFeint_EmptyTarget verifies that handleFeint returns an error event
+// when no target is specified.
+//
+// Precondition: player in combat; req.Target == "".
+// Postcondition: error event containing "Usage: feint".
+func TestHandleFeint_EmptyTarget(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, nil, worldMgr, nil, nil, nil, nil, nil)
+	logger := zaptest.NewLogger(t)
+	npcMgr := npc.NewManager()
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_feint_et",
+		Username: "Rogue",
+		CharName: "Rogue",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+
+	event, err := svc.handleFeint("u_feint_et", &gamev1.FeintRequest{Target: ""})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event")
+	assert.Contains(t, errEvt.Message, "Usage: feint")
+}
+
+// TestHandleFeint_InCombat_NoActiveSession verifies that handleFeint returns an error
+// event when SpendAP fails due to no active combat registered.
+//
+// Precondition: player in combat; CombatHandler has no registered combat.
+// Postcondition: error event returned from SpendAP failure.
+func TestHandleFeint_InCombat_NoActiveSession(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 19}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, nil, worldMgr, nil, nil, nil, nil, nil)
+	npcMgr := npc.NewManager()
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_feint_nas",
+		Username: "Rogue",
+		CharName: "Rogue",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+
+	event, err := svc.handleFeint("u_feint_nas", &gamev1.FeintRequest{Target: "bandit"})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event when SpendAP fails (no active combat)")
+}

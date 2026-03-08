@@ -1128,6 +1128,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleTakeCover(uid)
 	case *gamev1.ClientMessage_FirstAid:
 		return s.handleFirstAid(uid)
+	case *gamev1.ClientMessage_Feint:
+		return s.handleFeint(uid, p.Feint)
 	case *gamev1.ClientMessage_SummonItem:
 		return s.handleSummonItem(uid, p.SummonItem)
 	case *gamev1.ClientMessage_ProficienciesRequest:
@@ -4253,4 +4255,62 @@ func (s *GameServiceServer) handleFirstAid(uid string) (*gamev1.ServerEvent, err
 	msg := fmt.Sprintf("First aid check: rolled %d+%d=%d vs DC %d — success! You recover %d HP. (%d/%d)",
 		roll, bonus, total, dc, healed, newHP, sess.MaxHP)
 	return messageEvent(msg), nil
+}
+
+// handleFeint performs a grift skill check against the target NPC's Perception DC.
+// On success, applies flat_footed (-2 AC) to the target combatant for this round.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; req.Target must name an NPC in the room.
+// Postcondition: On success, target's ACMod is decremented by 2.
+func (s *GameServiceServer) handleFeint(uid string, req *gamev1.FeintRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Feint is only available in combat."), nil
+	}
+
+	if req.GetTarget() == "" {
+		return errorEvent("Usage: feint <target>"), nil
+	}
+
+	// Spend 1 AP.
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Find target NPC in room to get Perception DC.
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	// Skill check: 1d20 + grift bonus vs target Perception.
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleFeint: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["grift"])
+	total := roll + bonus
+	dc := inst.Perception
+
+	detail := fmt.Sprintf("Feint (grift DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. Your feint is transparent."), nil
+	}
+
+	// Success: apply flat_footed to NPC combatant (-2 AC).
+	if err := s.combatH.ApplyCombatantACMod(uid, inst.ID, -2); err != nil {
+		s.logger.Warn("handleFeint: ApplyCombatantACMod failed",
+			zap.String("npc_id", inst.ID), zap.Error(err))
+	}
+
+	return messageEvent(detail + fmt.Sprintf(" — success! %s is caught off-guard (-2 AC this round).", inst.Name())), nil
 }

@@ -97,6 +97,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerRaiseShield:        bridgeRaiseShield,
 	command.HandlerTakeCover:          bridgeTakeCover,
 	command.HandlerFirstAid:           bridgeFirstAid,
+	command.HandlerFeint:              bridgeFeint,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -840,5 +841,15 @@ func bridgeFirstAid(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_FirstAid{FirstAid: &gamev1.FirstAidRequest{}},
+	}}, nil
+}
+
+// bridgeFeint builds a FeintRequest with the target name.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a FeintRequest; done is false.
+func bridgeFeint(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Feint{Feint: &gamev1.FeintRequest{Target: bctx.parsed.RawArgs}},
 	}}, nil
 }
