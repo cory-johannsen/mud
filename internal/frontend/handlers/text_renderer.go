@@ -1122,11 +1122,19 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 func RenderCombatEvent(ce *gamev1.CombatEvent) string {
 	switch ce.Type {
 	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK:
-		color := telnet.BrightWhite
-		if ce.Damage > 0 {
-			color = telnet.BrightRed
+		switch ce.Outcome {
+		case "critical success":
+			// Crit hit: bright yellow with emphasis
+			return telnet.Colorf(telnet.BrightYellow, "[Combat] %s", ce.Narrative)
+		case "critical failure":
+			// Crit miss: bright red with emphasis
+			return telnet.Colorf(telnet.BrightRed, "[Combat] %s", ce.Narrative)
+		default:
+			if ce.Damage > 0 {
+				return telnet.Colorf(telnet.Red, "[Combat] %s", ce.Narrative)
+			}
+			return telnet.Colorf(telnet.BrightWhite, "[Combat] %s", ce.Narrative)
 		}
-		return telnet.Colorf(color, "[Combat] %s", ce.Narrative)
 	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_DEATH:
 		return telnet.Colorf(telnet.Red, "[Combat] %s", ce.Narrative)
 	case gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE:

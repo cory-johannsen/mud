@@ -195,13 +195,11 @@
   - [x] Player resistances/weaknesses from armor; shown on character sheet; applied in combat
 - [x] Character sheet should display total AC
   - [x] Each armor item should display the AC contribution
-- [ ] Critical hits and misses
-  - [ ] Critical hits should be announced in the console with color-coding and emphasis
-  - [ ] Critical hits should apply critical hit modifiers and bonuses
-    - [ ] Critical hit bonuses should be unique to the type of roll that was attempted
-  - [ ] Critical misses should be announced in the console color-coding and emphasis
-  - [ ] Critical misses should apply critical miss modifiers and penalties
-    - [ ] Critical miss penalties should be unique to the type of roll that was attempted
+- [x] Critical hits and misses
+  - [x] Critical hits announced in console with bright yellow color and *** CRITICAL HIT! *** emphasis
+  - [x] Critical hits apply 2× damage (attack rolls); flat_footed condition on target
+  - [x] Critical misses announced in console with bright red color and *** CRITICAL MISS! *** emphasis
+  - [x] Critical misses result in 0 damage and prone condition on attacker (attack rolls)
 - [ ] Out-of-combat health regeneration
   - [ ] Player and NPC health should slowly regenerate when not in combat.  
     - [ ] Regeneration rate is defined by the player's Grit bonus

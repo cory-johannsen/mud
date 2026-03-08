@@ -13,10 +13,22 @@ import (
 // attackNarrative builds a human-readable attack result string.
 // When dmg > 0 (a hit landed), the damage dealt is included.
 func attackNarrative(actorName, verb, targetName string, outcome Outcome, total, dmg int) string {
-	if dmg > 0 {
-		return fmt.Sprintf("%s %s %s: %s (total %d) for %d damage.", actorName, verb, targetName, outcome, total, dmg)
+	switch outcome {
+	case CritSuccess:
+		if dmg > 0 {
+			return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s (total %d) for %d damage!", actorName, verb, targetName, total, dmg)
+		}
+		return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s (total %d)!", actorName, verb, targetName, total)
+	case CritFailure:
+		return fmt.Sprintf("*** CRITICAL MISS! *** %s fumbles against %s (total %d)!", actorName, targetName, total)
+	case Success:
+		if dmg > 0 {
+			return fmt.Sprintf("%s %s %s (total %d) for %d damage.", actorName, verb, targetName, total, dmg)
+		}
+		return fmt.Sprintf("%s %s %s (total %d).", actorName, verb, targetName, total)
+	default: // Failure
+		return fmt.Sprintf("%s %s %s (total %d) — miss.", actorName, verb, targetName, total)
 	}
-	return fmt.Sprintf("%s %s %s: %s (total %d).", actorName, verb, targetName, outcome, total)
 }
 
 // applyResistanceWeakness adjusts baseDmg based on target's resistances and weaknesses
@@ -618,13 +630,19 @@ func primaryFirearm(actor *Combatant, weaponID string) *inventory.WeaponDef {
 func buildNarrative(actor, target *Combatant, result AttackResult, dmg int) string {
 	switch result.Outcome {
 	case CritSuccess:
-		return fmt.Sprintf("%s scores a CRITICAL HIT on %s for %d damage!", actor.Name, target.Name, dmg)
+		if dmg > 0 {
+			return fmt.Sprintf("*** CRITICAL HIT! *** %s hits %s for %d damage!", actor.Name, target.Name, dmg)
+		}
+		return fmt.Sprintf("*** CRITICAL HIT! *** %s hits %s!", actor.Name, target.Name)
 	case Success:
-		return fmt.Sprintf("%s hits %s for %d damage.", actor.Name, target.Name, dmg)
+		if dmg > 0 {
+			return fmt.Sprintf("%s hits %s for %d damage.", actor.Name, target.Name, dmg)
+		}
+		return fmt.Sprintf("%s hits %s.", actor.Name, target.Name)
 	case Failure:
 		return fmt.Sprintf("%s misses %s.", actor.Name, target.Name)
 	case CritFailure:
-		return fmt.Sprintf("%s critically fails against %s.", actor.Name, target.Name)
+		return fmt.Sprintf("*** CRITICAL MISS! *** %s fumbles against %s!", actor.Name, target.Name)
 	default:
 		return fmt.Sprintf("%s attacks %s.", actor.Name, target.Name)
 	}
