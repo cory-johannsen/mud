@@ -537,6 +537,7 @@ func main() {
 		grpcService.SetProgressRepo(progressRepo)
 		grpcService.SetXPService(xpSvc)
 		combatHandler.SetXPService(xpSvc)
+		combatHandler.SetCurrencySaver(charRepo)
 	}
 
 	// Start respawn goroutine for room equipment.

@@ -73,6 +73,8 @@ type CharacterSaver interface {
 	SaveAbilities(ctx context.Context, characterID int64, abilities character.AbilityScores) error
 	SaveProgress(ctx context.Context, id int64, level, experience, maxHP, pendingBoosts int) error
 	SaveDefaultCombatAction(ctx context.Context, characterID int64, action string) error
+	SaveCurrency(ctx context.Context, characterID int64, currency int) error
+	LoadCurrency(ctx context.Context, characterID int64) (int, error)
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.
@@ -517,6 +519,17 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				}
 			}
 
+
+			// Load persisted currency.
+			if savedCurrency, currErr := s.charSaver.LoadCurrency(stream.Context(), characterID); currErr != nil {
+				s.logger.Warn("failed to load currency on login",
+					zap.String("uid", uid),
+					zap.Int64("character_id", characterID),
+					zap.Error(currErr),
+				)
+			} else {
+				sess.Currency = savedCurrency
+			}
 			// Grant starting kit on first login.
 			if s.loadoutsDir != "" {
 				received, flagErr := s.charSaver.HasReceivedStartingInventory(stream.Context(), characterID)

@@ -490,3 +490,28 @@ func (r *CharacterRepository) MarkStartingInventoryGranted(ctx context.Context, 
 func (r *CharacterRepository) SaveProgress(ctx context.Context, id int64, level, experience, maxHP, pendingBoosts int) error {
 	return NewCharacterProgressRepository(r.db).SaveProgress(ctx, id, level, experience, maxHP, pendingBoosts)
 }
+
+// SaveCurrency persists the player's current currency (rounds) to the characters table.
+//
+// Precondition: id > 0; currency >= 0.
+// Postcondition: characters.currency column is updated.
+func (r *CharacterRepository) SaveCurrency(ctx context.Context, id int64, currency int) error {
+	if id <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	_, err := r.db.Exec(ctx, `UPDATE characters SET currency = $2 WHERE id = $1`, id, currency)
+	return err
+}
+
+// LoadCurrency returns the stored currency value for the given character.
+//
+// Precondition: id > 0.
+// Postcondition: returns (currency, nil) on success.
+func (r *CharacterRepository) LoadCurrency(ctx context.Context, id int64) (int, error) {
+	if id <= 0 {
+		return 0, fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	var currency int
+	err := r.db.QueryRow(ctx, `SELECT COALESCE(currency, 0) FROM characters WHERE id = $1`, id).Scan(&currency)
+	return currency, err
+}

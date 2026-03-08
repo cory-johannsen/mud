@@ -186,7 +186,19 @@
 - [x] Initiative — replaced with persistent combat bonus when player wins initiative roll.
   - Margin 1–5 → +1, 6–10 → +2, 11+ → +3 to attack rolls and AC for the entire combat.
   - Announced in combat start: "You win initiative! +N to attack and AC this combat."
-- [ ] The Zone Map room equipment is displayed with the indicator [use], but that should say [interact]
+- [ ] The Zone Map room equipment is displayed with the indicator [use], but that should say [interact] to reflect the command required
+  - [ ] `examine` should have the same effect as `interact` for Zone Map room equipment.  This does not apply to all room equipment, it is custom behavior.  
+- [ ] Critical hits and misses
+  - [ ] Critical hits should be announced in the console
+  - [ ] Critical hits should apply critical hit modifiers and bonuses
+    - [ ] Critical hit bonuses should be unique to the type of roll that was attempted
+  - [ ] Critical misses should be announced in the console
+  - [ ] Critical misses should apply critical miss modifiers and penalties
+    - [ ] Critical miss penalties should be unique to the type of roll that was attempted
+- [ ] Out-of-combat health regeneration
+  - [ ] Player and NPC health should slowly regenerate when not in combat.  
+    - [ ] Regeneration rate is defined by the player's Grit bonus
+- [ ] NPC health and status should be reflected in the Room display
 - [ ] Actions
   - [ ] Archetype and Job
     - Each Archetype should have at least 1 unique Action
@@ -207,13 +219,27 @@
         - Attack of opportunity
         - Terrain types
         - Fleeing
-    - Pursuit
-    - Panic
-    - Psychosis
+    - [ ] Multi-player combat
+      - [ ] Other players can join combat already in progress
+        - [ ] All players in a combat encounter share XP for the encounter (XP is divided equally among the players)
+        - [ ] All players in a combat encounter share loot for the encounter (loot is divided equally among the players)
+      - [ ] Players can form groups
+        - [ ] Players in a group all automatically enter combat when any player initiates combat
+        - [ ] New group commands: 
+          - [ ] group (create a group or list the members of the current group)
+          - [ ] ungroup (leave the current group)
+          - [ ] invite (invite a player to the group)
+          - [ ] kick (remove a player from the group)
+    - [ ] Pursuit
+    - [ ] Mental state
+      - [ ] Panic
+      - [ ] Psychosis
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
     - [ ] Traditions of magic -> Types of technology / Substances
       - [ ] Use PF2E Traits, mapping to Gunchete lore as required
-    - 
+    - [ ] Archetype and Job define the technologies available for the player
+      - [ ] Levelling up allows for additions and changes
+      - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
 - [ ] Job development
       - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
       - [ ] advancement hierarchy - every job has multiple levels of specialization

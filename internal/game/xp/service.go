@@ -93,6 +93,13 @@ func (s *Service) award(ctx context.Context, sess *session.PlayerSession, charac
 	sess.PendingBoosts += result.NewBoosts
 	sess.PendingSkillIncreases += result.NewSkillIncreases
 
+	// Always persist XP, even when no level-up occurred.
+	if characterID > 0 {
+		if err := s.saver.SaveProgress(ctx, characterID, sess.Level, sess.Experience, sess.MaxHP, sess.PendingBoosts); err != nil {
+			return nil, fmt.Errorf("saving XP progress: %w", err)
+		}
+	}
+
 	if !result.LeveledUp {
 		return nil, nil
 	}
@@ -109,14 +116,10 @@ func (s *Service) award(ctx context.Context, sess *session.PlayerSession, charac
 		msgs = append(msgs, "You have a pending skill increase! Type 'trainskill <skill>' to advance a skill.")
 	}
 
-	if characterID > 0 {
-		if err := s.saver.SaveProgress(ctx, characterID, sess.Level, sess.Experience, sess.MaxHP, sess.PendingBoosts); err != nil {
-			return msgs, fmt.Errorf("saving progress after level-up: %w", err)
-		}
-		if result.NewSkillIncreases > 0 && s.skillSaver != nil {
-			if err := s.skillSaver.IncrementPendingSkillIncreases(ctx, characterID, result.NewSkillIncreases); err != nil {
-				return msgs, fmt.Errorf("saving skill increases after level-up: %w", err)
-			}
+	// SaveProgress was already called above (always); only persist skill increases here.
+	if characterID > 0 && result.NewSkillIncreases > 0 && s.skillSaver != nil {
+		if err := s.skillSaver.IncrementPendingSkillIncreases(ctx, characterID, result.NewSkillIncreases); err != nil {
+			return msgs, fmt.Errorf("saving skill increases after level-up: %w", err)
 		}
 	}
 

@@ -22,6 +22,11 @@ import (
 	"github.com/cory-johannsen/mud/internal/scripting"
 )
 
+// CurrencySaver persists a player's currency to durable storage.
+type CurrencySaver interface {
+	SaveCurrency(ctx context.Context, characterID int64, currency int) error
+}
+
 // CombatHandler handles attack, strike, pass, flee, and round timer management
 // for the 3-action-point economy (Stage 4).
 //
@@ -46,6 +51,7 @@ type CombatHandler struct {
 	floorMgr      *inventory.FloorManager
 	onCombatEndFn func(roomID string) // optional; called after combat ends; may be nil
 	xpSvc         *xp.Service        // optional; awards kill XP on NPC death; may be nil
+	currencySaver CurrencySaver      // optional; persists currency after loot award; may be nil
 	logger        *zap.Logger        // optional; used for error logging; may be nil
 	combatMu      sync.Mutex
 	timersMu      sync.Mutex
@@ -100,6 +106,14 @@ func NewCombatHandler(
 // Postcondition: Kill XP is awarded to the first living player on NPC death.
 func (h *CombatHandler) SetXPService(svc *xp.Service) {
 	h.xpSvc = svc
+}
+
+// SetCurrencySaver registers the saver used to persist player currency after loot award.
+//
+// Precondition: saver must be non-nil.
+// Postcondition: Currency is persisted to durable storage after each NPC kill that drops currency.
+func (h *CombatHandler) SetCurrencySaver(saver CurrencySaver) {
+	h.currencySaver = saver
 }
 
 // SetLogger registers the logger used for error reporting inside CombatHandler.
@@ -1079,6 +1093,15 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			if result.Currency > 0 {
 				if killer := h.firstLivingPlayer(cbt); killer != nil {
 					killer.Currency += result.Currency
+					if h.currencySaver != nil {
+						if saveErr := h.currencySaver.SaveCurrency(context.Background(), killer.CharacterID, killer.Currency); saveErr != nil && h.logger != nil {
+							h.logger.Warn("SaveCurrency failed",
+								zap.String("uid", killer.UID),
+								zap.Int64("character_id", killer.CharacterID),
+								zap.Error(saveErr),
+							)
+						}
+					}
 				}
 			}
 			// Drop items on the room floor.
