@@ -205,14 +205,23 @@
     - [x] Regeneration rate is defined by the player's Grit bonus
 - [x] NPC health and status should be reflected in the Room display
 - [x] Health display in the prompt should update when the player regenerates health
-- [ ] Actions
-  - [ ] Archetype and Job
-    - Each Archetype should have at least 1 unique Action
-    - Each Job should have at least 1 unique action
+- [x] Actions
+  - [x] Archetype and Job
+    - [x] Each Archetype has at least 1 unique active action:
+      - [x] Criminal: `ghost` (active)
+      - [x] Drifter: `mark` (active)
+      - [x] Nerd: `exploit` (active)
+      - [x] Naturalist: `primal_surge` (active), `hardy` (passive)
+      - [x] Schemer: `setup` (active), `smooth_operator` (passive)
+      - [x] Zealot: `lay_hands` (active), `true_believer` (passive)
+    - [x] Each Job has at least 1 unique action (52 jobs across all archetypes)
   - [ ] General
   - [ ] Exploration
   - [ ] Downtime
   - [ ] Gear
+- [ ] Console notifications
+  - [ ] The player should be notified in the console every time a skill is used automatically
+  - [ ] The player should be notified in the console every time XP is awarded and why
 - [ ] Advanced combat mechanics
     - [ ] Combat distance
         - Movement
