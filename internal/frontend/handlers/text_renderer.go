@@ -356,29 +356,35 @@ func abilityBonus(score int32) string {
 }
 
 // coloredAbilityBonus returns abilityBonus(score) wrapped in an ANSI color
-// based on the modifier value:
-//   negative: red family (≤-3 bright-red, -2/-1 red/-1 yellow)
-//   zero:     white
-//   positive: teal→green→blue→purple family
+// based on the modifier value, with wide bands to support high-level characters:
+//
+//	≤ -7: BrightRed   (extreme penalty)
+//	-6 to -4: Red
+//	-3 to -1: Yellow
+//	0:        White
+//	+1 to +4: Cyan    (teal)
+//	+5 to +8: Green
+//	+9 to +12: Blue
+//	≥ +13: Magenta    (purple)
 func coloredAbilityBonus(score int32) string {
 	mod := (score - 10) / 2
 	s := abilityBonus(score)
 	switch {
-	case mod <= -3:
+	case mod <= -7:
 		return telnet.Colorize(telnet.BrightRed, s)
-	case mod == -2:
+	case mod <= -4:
 		return telnet.Colorize(telnet.Red, s)
-	case mod == -1:
+	case mod <= -1:
 		return telnet.Colorize(telnet.Yellow, s)
 	case mod == 0:
 		return telnet.Colorize(telnet.White, s)
-	case mod == 1:
+	case mod <= 4:
 		return telnet.Colorize(telnet.Cyan, s)
-	case mod == 2:
+	case mod <= 8:
 		return telnet.Colorize(telnet.Green, s)
-	case mod == 3:
+	case mod <= 12:
 		return telnet.Colorize(telnet.Blue, s)
-	default: // mod >= 4
+	default: // mod >= 13
 		return telnet.Colorize(telnet.Magenta, s)
 	}
 }
@@ -460,26 +466,35 @@ func formatSlotLabel(slot string) string {
 	return strings.Join(words, " ")
 }
 
+// proficiencyColorCode returns the ANSI escape code for a given proficiency rank.
+// untrained (or unknown) returns "" (no color).
+func proficiencyColorCode(rank string) string {
+	switch strings.ToLower(rank) {
+	case "legendary":
+		return telnet.Magenta
+	case "master":
+		return telnet.Yellow
+	case "expert":
+		return telnet.Cyan
+	case "trained":
+		return telnet.White
+	default:
+		return "" // untrained or unknown — no color
+	}
+}
+
 // proficiencyColor wraps a proficiency rank string with the appropriate ANSI color.
 // untrained receives no color (terminal default); trained through legendary are progressively brighter.
-// An empty string or any unrecognized rank falls through to the default case and is returned unchanged.
 //
 // Postcondition: Returns rank wrapped in ANSI color codes for legendary/master/expert/trained,
 // or rank unchanged (no ANSI codes) for any other input including empty string.
 func proficiencyColor(rank string) string {
+	code := proficiencyColorCode(rank)
 	normalized := strings.ToLower(rank)
-	switch normalized {
-	case "legendary":
-		return telnet.Colorize(telnet.Magenta, normalized)
-	case "master":
-		return telnet.Colorize(telnet.Yellow, normalized)
-	case "expert":
-		return telnet.Colorize(telnet.Cyan, normalized)
-	case "trained":
-		return telnet.Colorize(telnet.White, normalized)
-	default:
-		return rank // untrained or unknown — no color, use terminal default
+	if code == "" {
+		return rank
 	}
+	return telnet.Colorize(code, normalized)
 }
 
 // sheetLine is a rendered line for the character sheet two-column layout.
@@ -674,22 +689,16 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			}
 			return strings.ToUpper(ability)
 		}
-		// colorRankAbbrev applies the same color scheme as proficiencyColor but to
-		// the abbreviated rank string (abbrevRank output is 4 chars, not the full word).
+		// colorRankAbbrev applies proficiencyColorCode to the 4-char abbreviated rank.
+		// untrained uses BrightBlack (dim) so it is visually distinct from no-rank.
 		colorRankAbbrev := func(rank string) string {
 			abbr := fmt.Sprintf("%-4s", abbrevRank(rank))
-			switch strings.ToLower(rank) {
-			case "legendary":
-				return telnet.Colorize(telnet.Magenta, abbr)
-			case "master":
-				return telnet.Colorize(telnet.Yellow, abbr)
-			case "expert":
-				return telnet.Colorize(telnet.Cyan, abbr)
-			case "trained":
-				return telnet.Colorize(telnet.White, abbr)
-			default:
-				return abbr
+			code := proficiencyColorCode(rank)
+			if code != "" {
+				return telnet.Colorize(code, abbr)
 			}
+			// untrained: dim so it reads as "low" without being invisible
+			return telnet.Colorize(telnet.BrightBlack, abbr)
 		}
 		// cell returns the plain (no ANSI) version for width accounting.
 		// Each cell is exactly 23 visible chars: 2+12+1+3+1+4 = 23.
@@ -805,7 +814,14 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 			bonusLabel := fmt.Sprintf("+%d", e.GetBonus())
 			visPlain := fmt.Sprintf("  %-18s %-12s %s", e.GetName(), rankLabel, bonusLabel)
 			coloredRank := proficiencyColor(e.GetRank())
-			coloredBonus := coloredSignedBonus(e.GetBonus())
+			// Bonus uses the same color as the rank label so both match.
+			colorCode := proficiencyColorCode(e.GetRank())
+			var coloredBonus string
+			if colorCode != "" {
+				coloredBonus = telnet.Colorize(colorCode, bonusLabel)
+			} else {
+				coloredBonus = bonusLabel
+			}
 			text := fmt.Sprintf("  %-18s [%s] %s", e.GetName(), coloredRank, coloredBonus)
 			right = append(right, sheetLine{text: text, visW: len(visPlain)})
 		}
