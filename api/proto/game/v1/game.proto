@@ -626,6 +626,7 @@ message CharacterSheetView {
     string main_hand_damage       = 34; // e.g. "1d8+3" or "—" if no weapon
     string off_hand_attack_bonus  = 35; // e.g. "+3" or "—" if no off-hand weapon
     string off_hand_damage        = 36; // e.g. "1d6+1" or "—" if no off-hand weapon
+    int32  total_ac               = 37; // 10 + effective dex mod + sum of armor ac_bonus
 
     repeated SkillEntry        skills         = 22;
     repeated FeatEntry         feats          = 23;

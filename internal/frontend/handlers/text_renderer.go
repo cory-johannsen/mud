@@ -594,8 +594,18 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 
 	left = append(left, slPlain(""))
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Defense ---")))
-	left = append(left, slPlain(fmt.Sprintf("AC Bonus: %d  Check Penalty: %d  Speed Penalty: %d",
-		csv.GetAcBonus(), csv.GetCheckPenalty(), csv.GetSpeedPenalty())))
+	acLine := fmt.Sprintf("AC: %s", telnet.Colorize(telnet.BrightWhite, fmt.Sprintf("%d", csv.GetTotalAc())))
+	if csv.GetAcBonus() != 0 || csv.GetCheckPenalty() != 0 || csv.GetSpeedPenalty() != 0 {
+		acLine += fmt.Sprintf("  (armor +%d", csv.GetAcBonus())
+		if csv.GetCheckPenalty() != 0 {
+			acLine += fmt.Sprintf("  check %d", csv.GetCheckPenalty())
+		}
+		if csv.GetSpeedPenalty() != 0 {
+			acLine += fmt.Sprintf("  speed %d", csv.GetSpeedPenalty())
+		}
+		acLine += ")"
+	}
+	left = append(left, slPlain(acLine))
 
 	left = append(left, slPlain(""))
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Saves ---")))

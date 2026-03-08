@@ -5684,6 +5684,7 @@ type CharacterSheetView struct {
 	MainHandDamage        string                 `protobuf:"bytes,34,opt,name=main_hand_damage,json=mainHandDamage,proto3" json:"main_hand_damage,omitempty"`                  // e.g. "1d8+3" or "—" if no weapon
 	OffHandAttackBonus    string                 `protobuf:"bytes,35,opt,name=off_hand_attack_bonus,json=offHandAttackBonus,proto3" json:"off_hand_attack_bonus,omitempty"`    // e.g. "+3" or "—" if no off-hand weapon
 	OffHandDamage         string                 `protobuf:"bytes,36,opt,name=off_hand_damage,json=offHandDamage,proto3" json:"off_hand_damage,omitempty"`                     // e.g. "1d6+1" or "—" if no off-hand weapon
+	TotalAc               int32                  `protobuf:"varint,37,opt,name=total_ac,json=totalAc,proto3" json:"total_ac,omitempty"`                                        // 10 + effective dex mod + sum of armor ac_bonus
 	Skills                []*SkillEntry          `protobuf:"bytes,22,rep,name=skills,proto3" json:"skills,omitempty"`
 	Feats                 []*FeatEntry           `protobuf:"bytes,23,rep,name=feats,proto3" json:"feats,omitempty"`
 	ClassFeatures         []*ClassFeatureEntry   `protobuf:"bytes,24,rep,name=class_features,json=classFeatures,proto3" json:"class_features,omitempty"`
@@ -5902,6 +5903,13 @@ func (x *CharacterSheetView) GetOffHandDamage() string {
 		return x.OffHandDamage
 	}
 	return ""
+}
+
+func (x *CharacterSheetView) GetTotalAc() int32 {
+	if x != nil {
+		return x.TotalAc
+	}
+	return 0
 }
 
 func (x *CharacterSheetView) GetSkills() []*SkillEntry {
@@ -6658,7 +6666,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\afeat_id\x18\x01 \x01(\tR\x06featId\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
-	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xaa\v\n" +
+	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xc5\v\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -6686,7 +6694,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x16main_hand_attack_bonus\x18! \x01(\tR\x13mainHandAttackBonus\x12(\n" +
 	"\x10main_hand_damage\x18\" \x01(\tR\x0emainHandDamage\x121\n" +
 	"\x15off_hand_attack_bonus\x18# \x01(\tR\x12offHandAttackBonus\x12&\n" +
-	"\x0foff_hand_damage\x18$ \x01(\tR\roffHandDamage\x12+\n" +
+	"\x0foff_hand_damage\x18$ \x01(\tR\roffHandDamage\x12\x19\n" +
+	"\btotal_ac\x18% \x01(\x05R\atotalAc\x12+\n" +
 	"\x06skills\x18\x16 \x03(\v2\x13.game.v1.SkillEntryR\x06skills\x12(\n" +
 	"\x05feats\x18\x17 \x03(\v2\x12.game.v1.FeatEntryR\x05feats\x12A\n" +
 	"\x0eclass_features\x18\x18 \x03(\v2\x1a.game.v1.ClassFeatureEntryR\rclassFeatures\x12?\n" +

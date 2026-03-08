@@ -2511,6 +2511,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.AcBonus = int32(def.ACBonus)
 	view.CheckPenalty = int32(def.CheckPenalty)
 	view.SpeedPenalty = int32(def.SpeedPenalty)
+	view.TotalAc = int32(10 + def.EffectiveDex + def.ACBonus)
 
 	// Armor slots.
 	view.Armor = make(map[string]string)
@@ -2520,8 +2521,11 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		}
 		name := item.Name
 		if s.invRegistry != nil {
-			if def, ok := s.invRegistry.Armor(item.ItemDefID); ok {
-				name = def.Name
+			if armorDef, ok := s.invRegistry.Armor(item.ItemDefID); ok {
+				name = armorDef.Name
+				if armorDef.ACBonus > 0 {
+					name = fmt.Sprintf("%s (+%d AC)", armorDef.Name, armorDef.ACBonus)
+				}
 			}
 		}
 		view.Armor[string(slot)] = name

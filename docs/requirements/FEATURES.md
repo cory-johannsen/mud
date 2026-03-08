@@ -192,8 +192,8 @@
 - [x] Damage types
   - [x] Resistance
   - [x] Weakness
-- [ ] Character sheet should display total AC
-  - [ ] Each armor item should display the AC contribution
+- [x] Character sheet should display total AC
+  - [x] Each armor item should display the AC contribution
 - [ ] Critical hits and misses
   - [ ] Critical hits should be announced in the console with color-coding and emphasis
   - [ ] Critical hits should apply critical hit modifiers and bonuses
