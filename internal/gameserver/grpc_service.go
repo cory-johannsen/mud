@@ -1298,6 +1298,31 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 	}, nil
 }
 
+// signedInt formats n with an explicit sign, e.g. "+3" or "-1" or "+0".
+//
+// Postcondition: always has a leading '+' or '-'.
+func signedInt(n int) string {
+	if n >= 0 {
+		return fmt.Sprintf("+%d", n)
+	}
+	return fmt.Sprintf("%d", n)
+}
+
+// weaponDamageString formats weapon damage for display, e.g. "1d8+3" or "1d8".
+// For melee weapons the ability modifier is added to damage; ranged weapons show only the dice.
+//
+// Precondition: damageDice is a valid dice expression (e.g. "1d8").
+// Postcondition: returns a non-empty string.
+func weaponDamageString(damageDice string, abilityMod int, isMelee bool) string {
+	if !isMelee || abilityMod == 0 {
+		return damageDice
+	}
+	if abilityMod > 0 {
+		return fmt.Sprintf("%s+%d", damageDice, abilityMod)
+	}
+	return fmt.Sprintf("%s%d", damageDice, abilityMod)
+}
+
 // abilityModFrom returns the PF2E-style ability modifier for a given score.
 //
 // Precondition: score is any integer.
@@ -2520,11 +2545,26 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	// Weapons from active loadout.
 	if sess.LoadoutSet != nil {
 		if preset := sess.LoadoutSet.ActivePreset(); preset != nil {
+			brutalityMod := combat.AbilityMod(sess.Abilities.Brutality)
+			weaponLevel := sess.Level
+			if weaponLevel < 1 {
+				weaponLevel = 1
+			}
 			if preset.MainHand != nil {
-				view.MainHand = preset.MainHand.Def.Name
+				def := preset.MainHand.Def
+				view.MainHand = def.Name
+				profRank := sess.Proficiencies[def.ProficiencyCategory]
+				atkBonus := brutalityMod + combat.CombatProficiencyBonus(weaponLevel, profRank)
+				view.MainHandAttackBonus = signedInt(atkBonus)
+				view.MainHandDamage = weaponDamageString(def.DamageDice, brutalityMod, def.IsMelee())
 			}
 			if preset.OffHand != nil {
-				view.OffHand = preset.OffHand.Def.Name
+				def := preset.OffHand.Def
+				view.OffHand = def.Name
+				profRank := sess.Proficiencies[def.ProficiencyCategory]
+				atkBonus := brutalityMod + combat.CombatProficiencyBonus(weaponLevel, profRank)
+				view.OffHandAttackBonus = signedInt(atkBonus)
+				view.OffHandDamage = weaponDamageString(def.DamageDice, brutalityMod, def.IsMelee())
 			}
 		}
 	}

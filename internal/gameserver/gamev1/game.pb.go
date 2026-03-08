@@ -5680,6 +5680,10 @@ type CharacterSheetView struct {
 	Accessories           map[string]string      `protobuf:"bytes,19,rep,name=accessories,proto3" json:"accessories,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	MainHand              string                 `protobuf:"bytes,20,opt,name=main_hand,json=mainHand,proto3" json:"main_hand,omitempty"`
 	OffHand               string                 `protobuf:"bytes,21,opt,name=off_hand,json=offHand,proto3" json:"off_hand,omitempty"`
+	MainHandAttackBonus   string                 `protobuf:"bytes,33,opt,name=main_hand_attack_bonus,json=mainHandAttackBonus,proto3" json:"main_hand_attack_bonus,omitempty"` // e.g. "+5" or "—" if no weapon
+	MainHandDamage        string                 `protobuf:"bytes,34,opt,name=main_hand_damage,json=mainHandDamage,proto3" json:"main_hand_damage,omitempty"`                  // e.g. "1d8+3" or "—" if no weapon
+	OffHandAttackBonus    string                 `protobuf:"bytes,35,opt,name=off_hand_attack_bonus,json=offHandAttackBonus,proto3" json:"off_hand_attack_bonus,omitempty"`    // e.g. "+3" or "—" if no off-hand weapon
+	OffHandDamage         string                 `protobuf:"bytes,36,opt,name=off_hand_damage,json=offHandDamage,proto3" json:"off_hand_damage,omitempty"`                     // e.g. "1d6+1" or "—" if no off-hand weapon
 	Skills                []*SkillEntry          `protobuf:"bytes,22,rep,name=skills,proto3" json:"skills,omitempty"`
 	Feats                 []*FeatEntry           `protobuf:"bytes,23,rep,name=feats,proto3" json:"feats,omitempty"`
 	ClassFeatures         []*ClassFeatureEntry   `protobuf:"bytes,24,rep,name=class_features,json=classFeatures,proto3" json:"class_features,omitempty"`
@@ -5868,6 +5872,34 @@ func (x *CharacterSheetView) GetMainHand() string {
 func (x *CharacterSheetView) GetOffHand() string {
 	if x != nil {
 		return x.OffHand
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetMainHandAttackBonus() string {
+	if x != nil {
+		return x.MainHandAttackBonus
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetMainHandDamage() string {
+	if x != nil {
+		return x.MainHandDamage
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetOffHandAttackBonus() string {
+	if x != nil {
+		return x.OffHandAttackBonus
+	}
+	return ""
+}
+
+func (x *CharacterSheetView) GetOffHandDamage() string {
+	if x != nil {
+		return x.OffHandDamage
 	}
 	return ""
 }
@@ -6626,7 +6658,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\afeat_id\x18\x01 \x01(\tR\x06featId\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
-	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xf0\t\n" +
+	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xaa\v\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -6650,7 +6682,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x05armor\x18\x12 \x03(\v2&.game.v1.CharacterSheetView.ArmorEntryR\x05armor\x12N\n" +
 	"\vaccessories\x18\x13 \x03(\v2,.game.v1.CharacterSheetView.AccessoriesEntryR\vaccessories\x12\x1b\n" +
 	"\tmain_hand\x18\x14 \x01(\tR\bmainHand\x12\x19\n" +
-	"\boff_hand\x18\x15 \x01(\tR\aoffHand\x12+\n" +
+	"\boff_hand\x18\x15 \x01(\tR\aoffHand\x123\n" +
+	"\x16main_hand_attack_bonus\x18! \x01(\tR\x13mainHandAttackBonus\x12(\n" +
+	"\x10main_hand_damage\x18\" \x01(\tR\x0emainHandDamage\x121\n" +
+	"\x15off_hand_attack_bonus\x18# \x01(\tR\x12offHandAttackBonus\x12&\n" +
+	"\x0foff_hand_damage\x18$ \x01(\tR\roffHandDamage\x12+\n" +
 	"\x06skills\x18\x16 \x03(\v2\x13.game.v1.SkillEntryR\x06skills\x12(\n" +
 	"\x05feats\x18\x17 \x03(\v2\x12.game.v1.FeatEntryR\x05feats\x12A\n" +
 	"\x0eclass_features\x18\x18 \x03(\v2\x1a.game.v1.ClassFeatureEntryR\rclassFeatures\x12?\n" +

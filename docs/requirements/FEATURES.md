@@ -186,8 +186,8 @@
 - [x] Initiative — replaced with persistent combat bonus when player wins initiative roll.
   - Margin 1–5 → +1, 6–10 → +2, 11+ → +3 to attack rolls and AC for the entire combat.
   - Announced in combat start: "You win initiative! +N to attack and AC this combat."
-- [ ] The Zone Map room equipment is displayed with the indicator [use], but that should say [interact] to reflect the command required
-  - [ ] `examine` should have the same effect as `interact` for Zone Map room equipment.  This does not apply to all room equipment, it is custom behavior.  
+- [x] The Zone Map room equipment is displayed with the indicator [use], but that should say [interact] to reflect the command required
+  - [x] `examine` should have the same effect as `interact` for Zone Map room equipment.  This does not apply to all room equipment, it is custom behavior.
 - [ ] Character sheet weapon information should show attack bonus and damage 
 - [ ] Critical hits and misses
   - [ ] Critical hits should be announced in the console with color-coding and emphasis

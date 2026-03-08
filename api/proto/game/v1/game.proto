@@ -620,8 +620,12 @@ message CharacterSheetView {
 
     map<string, string> armor       = 18;
     map<string, string> accessories = 19;
-    string main_hand = 20;
-    string off_hand  = 21;
+    string main_hand              = 20;
+    string off_hand               = 21;
+    string main_hand_attack_bonus = 33; // e.g. "+5" or "—" if no weapon
+    string main_hand_damage       = 34; // e.g. "1d8+3" or "—" if no weapon
+    string off_hand_attack_bonus  = 35; // e.g. "+3" or "—" if no off-hand weapon
+    string off_hand_damage        = 36; // e.g. "1d6+1" or "—" if no off-hand weapon
 
     repeated SkillEntry        skills         = 22;
     repeated FeatEntry         feats          = 23;

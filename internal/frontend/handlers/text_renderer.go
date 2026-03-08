@@ -608,14 +608,22 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Weapons ---")))
 	mainHand := csv.GetMainHand()
 	if mainHand == "" {
-		mainHand = "(none)"
+		left = append(left, slPlain("Main: (none)"))
+	} else {
+		left = append(left, slPlain(fmt.Sprintf("Main: %s  %s  %s",
+			mainHand,
+			telnet.Colorize(telnet.Green, csv.GetMainHandAttackBonus()),
+			telnet.Colorize(telnet.Yellow, csv.GetMainHandDamage()))))
 	}
 	offHand := csv.GetOffHand()
 	if offHand == "" {
-		offHand = "(none)"
+		left = append(left, slPlain("Off:  (none)"))
+	} else {
+		left = append(left, slPlain(fmt.Sprintf("Off:  %s  %s  %s",
+			offHand,
+			telnet.Colorize(telnet.Green, csv.GetOffHandAttackBonus()),
+			telnet.Colorize(telnet.Yellow, csv.GetOffHandDamage()))))
 	}
-	left = append(left, slPlain(fmt.Sprintf("Main: %s", mainHand)))
-	left = append(left, slPlain(fmt.Sprintf("Off:  %s", offHand)))
 
 	if armor := csv.GetArmor(); len(armor) > 0 {
 		left = append(left, slPlain(""))
