@@ -749,6 +749,17 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		})
 	}
 
+	// Announce initiative bonus if the player won.
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindPlayer && c.InitiativeBonus > 0 {
+			events = append(events, &gamev1.CombatEvent{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
+				Attacker:  c.Name,
+				Narrative: fmt.Sprintf("You win initiative! +%d to attack and AC this combat.", c.InitiativeBonus),
+			})
+		}
+	}
+
 	turnOrder := make([]string, 0, len(cbt.Combatants))
 	for _, c := range cbt.Combatants {
 		turnOrder = append(turnOrder, c.Name)
