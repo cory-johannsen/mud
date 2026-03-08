@@ -11,3 +11,5 @@ bulk: 1
 group: chain
 proficiency_category: medium_armor
 traits: [concealable]
+weaknesses:
+  slashing: 1

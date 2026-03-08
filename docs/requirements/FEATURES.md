@@ -192,6 +192,7 @@
 - [x] Damage types
   - [x] Resistance
   - [x] Weakness
+  - [x] Player resistances/weaknesses from armor; shown on character sheet; applied in combat
 - [x] Character sheet should display total AC
   - [x] Each armor item should display the AC contribution
 - [ ] Critical hits and misses

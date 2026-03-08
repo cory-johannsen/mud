@@ -15,3 +15,5 @@ team_affinity: gun
 cross_team_effect:
   kind: condition
   value: clumsy-1
+resistances:
+  piercing: 2

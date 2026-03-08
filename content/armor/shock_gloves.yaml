@@ -12,3 +12,5 @@ group: composite
 proficiency_category: medium_armor
 traits: [gun-team, corp-tech]
 team_affinity: gun
+resistances:
+  electricity: 3
