@@ -696,6 +696,11 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	}
 	playerCbt.WeaponProficiencyRank = weaponProfRank
 
+	// Wire weapon damage type from equipped main-hand weapon.
+	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
+		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
+	}
+
 	// Wire save ability mods from character ability scores.
 	playerCbt.GritMod = combat.AbilityMod(sess.Abilities.Grit)
 	playerCbt.QuicknessMod = combat.AbilityMod(sess.Abilities.Quickness)
@@ -707,16 +712,18 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	playerCbt.CoolRank = combat.DefaultSaveRank(sess.Proficiencies["cool"])
 
 	npcCbt := &combat.Combatant{
-		ID:        inst.ID,
-		Kind:      combat.KindNPC,
-		Name:      inst.Name(),
-		MaxHP:     inst.MaxHP,
-		CurrentHP: inst.CurrentHP,
-		AC:        inst.AC,
-		Level:     inst.Level,
-		StrMod:    combat.AbilityMod(inst.Perception),
-		DexMod:    1,
-		NPCType:   inst.Type,
+		ID:          inst.ID,
+		Kind:        combat.KindNPC,
+		Name:        inst.Name(),
+		MaxHP:       inst.MaxHP,
+		CurrentHP:   inst.CurrentHP,
+		AC:          inst.AC,
+		Level:       inst.Level,
+		StrMod:      combat.AbilityMod(inst.Perception),
+		DexMod:      1,
+		NPCType:     inst.Type,
+		Resistances: inst.Resistances,
+		Weaknesses:  inst.Weaknesses,
 	}
 
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
