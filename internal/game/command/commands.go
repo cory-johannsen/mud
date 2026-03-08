@@ -62,6 +62,7 @@ const (
 	HandlerLevelUp             = "levelup"
 	HandlerCombatDefault       = "combat_default"
 	HandlerTrainSkill          = "trainskill"
+	HandlerAction              = "action"
 )
 
 // Command defines a player-invocable command.
@@ -150,6 +151,7 @@ func BuiltinCommands() []Command {
 		{Name: "levelup", Aliases: []string{"lu"}, Help: "Assign a pending ability boost to the named ability", Category: CategoryCharacter, Handler: HandlerLevelUp},
 		{Name: "combat_default", Aliases: []string{"cd"}, Help: "Set your default combat action (attack/strike/bash/dodge/parry/cast/pass/flee)", Category: CategoryCombat, Handler: HandlerCombatDefault},
 		{Name: "trainskill", Aliases: []string{"ts"}, Help: "Advance a skill proficiency rank using a pending skill increase", Category: CategoryCharacter, Handler: HandlerTrainSkill},
+		{Name: "action", Aliases: []string{"act"}, Help: "Activate an archetype or job action. Usage: action [name] [target]", Category: CategoryCombat, Handler: HandlerAction},
 	}
 }
 
