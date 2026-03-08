@@ -361,12 +361,12 @@ func TestProperty_RenderCharacterInfo_NonEmpty(t *testing.T) {
 }
 
 func TestRenderMap_Nil_ReturnsNoMapData(t *testing.T) {
-	result := RenderMap(nil)
+	result := RenderMap(nil, 80)
 	require.Contains(t, result, "No map data")
 }
 
 func TestRenderMap_Empty_ReturnsNoMapData(t *testing.T) {
-	result := RenderMap(&gamev1.MapResponse{})
+	result := RenderMap(&gamev1.MapResponse{}, 80)
 	require.Contains(t, result, "No map data")
 }
 
@@ -376,7 +376,7 @@ func TestRenderMap_SingleRoom_Current(t *testing.T) {
 			{RoomId: "r1", RoomName: "Start Room", X: 0, Y: 0, Current: true},
 		},
 	}
-	result := RenderMap(resp)
+	result := RenderMap(resp, 80)
 	require.Contains(t, result, "< 1>")
 	require.Contains(t, result, "Start Room")
 }
@@ -388,7 +388,7 @@ func TestRenderMap_TwoRooms_DistinguishesCurrentFromDiscovered(t *testing.T) {
 			{RoomId: "r2", RoomName: "Room B", X: 2, Y: 0, Current: true, Exits: []string{}},
 		},
 	}
-	result := RenderMap(resp)
+	result := RenderMap(resp, 80)
 	// Current room uses angle brackets, discovered uses square brackets.
 	require.Contains(t, result, "< 2>")
 	require.Contains(t, result, "[ 1]")
@@ -408,7 +408,7 @@ func TestProperty_RenderMap_NeverPanics(t *testing.T) {
 			}
 		}
 		resp := &gamev1.MapResponse{Tiles: tiles}
-		result := RenderMap(resp)
+		result := RenderMap(resp, 80)
 		if result == "" {
 			t.Fatal("RenderMap returned empty string")
 		}

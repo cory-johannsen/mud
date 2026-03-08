@@ -746,9 +746,9 @@ func sortedInt32Set(m map[int32]bool) []int32 {
 // blank padding rows caused by sparse coordinate systems.
 // East/south connectors are only drawn when the neighboring cell is also discovered.
 //
-// Precondition: resp may be nil or have no tiles.
+// Precondition: resp may be nil or have no tiles; width is the terminal width in columns.
 // Postcondition: Returns a non-empty string safe for telnet display.
-func RenderMap(resp *gamev1.MapResponse) string {
+func RenderMap(resp *gamev1.MapResponse, width int) string {
 	if resp == nil || len(resp.Tiles) == 0 {
 		return "No map data.\r\n"
 	}
@@ -936,8 +936,15 @@ func RenderMap(resp *gamev1.MapResponse) string {
 	}
 	const legendCols = 4
 	// Each column entry: " *NN. Name" — pad to a fixed width so columns align.
-	// Width: 2 (marker+space) + 2 (num) + 2 (". ") + name, capped at colWidth chars total.
-	const colWidth = 22
+	// colWidth is derived from terminal width; minimum 22 chars per column.
+	if width <= 0 {
+		width = 80
+	}
+	colWidth := width / legendCols
+	if colWidth < 22 {
+		colWidth = 22
+	}
+	nameWidth := colWidth - 4 // " *NN." prefix is 4 chars
 	sb.WriteString("\r\nLegend:\r\n")
 	for i := 0; i < len(entries); i += legendCols {
 		for col := 0; col < legendCols; col++ {
@@ -950,7 +957,7 @@ func RenderMap(resp *gamev1.MapResponse) string {
 			if e.current {
 				marker = "*"
 			}
-			cell := fmt.Sprintf("%s%2d.%-*s", marker, e.num, colWidth-4, e.name)
+			cell := fmt.Sprintf("%s%2d.%-*s", marker, e.num, nameWidth, e.name)
 			if len(cell) > colWidth {
 				cell = cell[:colWidth]
 			}
