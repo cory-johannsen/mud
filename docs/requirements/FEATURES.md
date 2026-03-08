@@ -175,6 +175,18 @@
 - [x] Map
   - [x] `interact Zone Map` works by descriptive name (was: zone_map object ID required)
   - [x] Zone map use populates automap in current session
+- [x] Character sheet updates
+  - [x] XP displayed
+  - [x] Skill level color-coded (untrained=dim, trained=white, expert=cyan, master=yellow, legendary=magenta)
+  - [x] Proficiency level and bonus color-coded with matching colors
+  - [x] Feat/class feature descriptions word-wrap with aligned continuation indent
+  - [x] Ability bonuses color-coded (red family for negative, white for 0, teal→green→blue→purple for positive; wide bands for high-level growth)
+  - [x] Ability names spelled out (Brutality, Grit, Quickness, Reasoning, Savvy, Flair)
+  - [ ] Excess newline between primary and off-hand weapon
+- [ ] Initiative.  
+  - PF2E uses Initiative for combat order but Gunchete uses a timed round with simultaneous action.  
+  - Initiative grants players an advantage in P2FE that Gunchete has lost
+    - I want to replace it with a combat bonus that reflects the original advantage initiative provided.
 - [ ] Actions
   - [ ] Archetype and Job
     - Each Archetype should have at least 1 unique Action
@@ -183,115 +195,123 @@
   - [ ] Exploration
   - [ ] Downtime
   - [ ] Gear
+- [ ] Advanced combat mechanics
+    - [ ] Combat distance
+        - Movement
+        - Range
+            - Melee
+            - Short
+            - Long
+            - Extreme
+        - Area of Effect
+        - Attack of opportunity
+        - Terrain types
+        - Fleeing
+    - Pursuit
+    - Panic
+    - Psychosis
 - [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
-  - [ ] Traditions of magic -> Types of technology / Substances
-    - [ ] Use PF2E Traits, mapping to Gunchete lore as required
-  - 
+    - [ ] Traditions of magic -> Types of technology / Substances
+      - [ ] Use PF2E Traits, mapping to Gunchete lore as required
+    - 
 - [ ] Job development
-    - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
-    - [ ] advancement hierarchy - every job has multiple levels of specialization
-      - [x] Basic (existing)
-      - [ ] Specialist - when the player has reached the necessary requirements in a Basic job they may train to become a Specialist
-        - Each Specialist job provides a set of attribute boosts
-          - Specialist attribute boosts are cumulative with base Job attribute boosts
-        - Each Specialist job provides a set of advanced feats
-          - Specialist advanced feats are cumulative with base Job feats
-        - Each Specialist job provides a set of proficiencies
-            - Specialist advanced feats are cumulative with base Job proficiencies
-        - Each Specialist job provides a set of skills
-            - Specialist advanced feats are cumulative with base Job skills
-      - [ ] Expert - when the player has reached the necessary requirements in a Specialist job they may train to become an Expert
-          - Each Expert job provides a set of attribute boosts
-              - Expert attribute boosts are cumulative with base and Specialist Job attribute boosts
-          - Each Expert job provides a set of advanced feats
-              - Expert advanced feats are cumulative with base and Specialist Job feats
-          - Each Expert job provides a set of proficiencies
-              - Expert advanced feats are cumulative with base and Specialist Job proficiencies
-          - Each Expert job provides a set of skills
-              - Expert advanced feats are cumulative with base and Specialist Job skills
-  - [ ] multi-job advancement
-    - [ ] when levelling up a player may opt to learn a new job. This is functionally equivalent to multi-classing in P2FE   
-    - [ ] cross-job combinations  
+      - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
+      - [ ] advancement hierarchy - every job has multiple levels of specialization
+        - [x] Basic (existing)
+        - [ ] Specialist - when the player has reached the necessary requirements in a Basic job they may train to become a Specialist
+          - Each Specialist job provides a set of attribute boosts
+      - Specialist attribute boosts are cumulative with base Job attribute boosts
+          - Each Specialist job provides a set of advanced feats
+      - Specialist advanced feats are cumulative with base Job feats
+          - Each Specialist job provides a set of proficiencies
+      - Specialist advanced feats are cumulative with base Job proficiencies
+          - Each Specialist job provides a set of skills
+      - Specialist advanced feats are cumulative with base Job skills
+        - [ ] Expert - when the player has reached the necessary requirements in a Specialist job they may train to become an Expert
+      - Each Expert job provides a set of attribute boosts
+      - Expert attribute boosts are cumulative with base and Specialist Job attribute boosts
+      - Each Expert job provides a set of advanced feats
+      - Expert advanced feats are cumulative with base and Specialist Job feats
+      - Each Expert job provides a set of proficiencies
+      - Expert advanced feats are cumulative with base and Specialist Job proficiencies
+      - Each Expert job provides a set of skills
+      - Expert advanced feats are cumulative with base and Specialist Job skills
+    - [ ] multi-job advancement
+      - [ ] when levelling up a player may opt to learn a new job. This is functionally equivalent to multi-classing in P2FE   
+      - [ ] cross-job combinations  
 - [ ] Equipment mechanics expansion 
-  - advanced equipment and equipment levelling
-    - player requirements
-    - equipment rarity and features
-      - 5 rarity levels 
-        - each increases the base equipment stats
-        - each increases the number of features
-        - each increases the effectiveness of the existing features
-      - Item names are color coded by rarity level
-  - tuned, defective, and cursed equipment
-    - tuned equipment has a bonus or positive passive effect applied to the specific item
-    - defective equipment has a penalty or negative effect applied to the specific item
-    - cursed equipment applies a penalty or negative effect to player.  
-      - cursed items cannot be removed by the player
-      - cursed items do not appear cursed until equipped
-      - cursed item removal will be developed later
-  - equipment combination and interactions
-  - equipment sets
+    - advanced equipment and equipment levelling
+      - player requirements
+      - equipment rarity and features
+        - 5 rarity levels 
+          - each increases the base equipment stats
+          - each increases the number of features
+          - each increases the effectiveness of the existing features
+        - Item names are color coded by rarity level
+    - tuned, defective, and cursed equipment
+      - tuned equipment has a bonus or positive passive effect applied to the specific item
+      - defective equipment has a penalty or negative effect applied to the specific item
+      - cursed equipment applies a penalty or negative effect to player.  
+        - cursed items cannot be removed by the player
+        - cursed items do not appear cursed until equipped
+        - cursed item removal will be developed later
+    - equipment combination and interactions
+    - equipment sets
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor. roomequip is an Editor command.
-- [ ] Non-combat NPCs
-  - [ ] merchants
-    - [ ] weapons
-      - Sergeant Mack in Last Stand Lodge, Rustbucket Ridge
-    - [ ] armor
-    - [ ] rings and neck equipment
-    - [ ] consumables
-      - Slick Sally in the Rusty Oasis, Rustbucket Ridge
-      - Whiskey Joe in The Bottle Shack, Rustbucket Ridge
-      - Old Rusty in The Heap, Rustbucket Ridge
-      - Herb in The Green Hell,  Rustbucket Ridge
-    - [ ] maps
-  - [ ] guards
-  - [ ] healers
-    - Clutch in The Tinker's Den, Rustbucket Ridge
-    - Tina Wires in Junker's Dream, Rustbucket Ridge
-  - [ ] quest givers
-    - Gail "Grinder" Graves in Scrapshack 23, Rustbucket Ridge
-  - [ ] hirelings
-  - [ ] bankers
-  - [ ] job trainers
+- [ ] Non-combat NPCs. Define the data model and behavior for the following NPCs and implement those specifically mentioned.  For those not mentioned generate one that lives in a room in Rustbucket Ridge and matches the lore. Multiple NPCs can occupy the same room.
+    - [ ] merchants
+      - [ ] weapons
+        - Sergeant Mack in Last Stand Lodge, Rustbucket Ridge
+      - [ ] armor
+      - [ ] rings and neck equipment
+      - [ ] consumables
+        - Slick Sally in the Rusty Oasis, Rustbucket Ridge
+        - Whiskey Joe in The Bottle Shack, Rustbucket Ridge
+        - Old Rusty in The Heap, Rustbucket Ridge
+        - Herb in The Green Hell,  Rustbucket Ridge
+      - [ ] maps - sells maps to other zones
+      - [ ] technology
+      - [ ] drugs
+    - [ ] guards
+    - [ ] healers
+      - Clutch in The Tinker's Den, Rustbucket Ridge
+      - Tina Wires in Junker's Dream, Rustbucket Ridge
+    - [ ] quest givers
+      - Gail "Grinder" Graves in Scrapshack 23, Rustbucket Ridge
+    - [ ] hirelings
+    - [ ] bankers
+    - [ ] job trainers
+- [ ] Non-combat PC and room equipment are Map POIs 
+  - should be included on the map and legend using a unique color-coded symbol 
+  - only appear on the map and legend when the room has been explored; the zone map does not reveal these (the zone map only reveals the dooms and exits)
 - [ ] Room danger levels
-  - Rooms are classified as Safe, Sketchy, Dangerous, All Out War
-    - Safe rooms contain no aggressive NPCs, only non-combat NPCs.
-      - Combat is disabled in Safe zones.
-    - Sketchy rooms contain non-Combat NPCs and combat NPCs
-      - Combat is enabled in Sketchy rooms
-      - Combat can only be initiated by players in Sketchy rooms, not by NPCs
-    - Dangerous rooms contain non-Combat NPCs and combat NPCs
-      - Combat is enabled in Dangerous rooms
-      - Combat can only be initiated by anyone in a Dangerous room
-      - Non-combat NPCs flee combat if engaged
-    - All Out War rooms contain only combat NPCs
-      - Combat is enabled in All Out War rooms
-      - Combat NPCs attack on sight in an All Out War room
-  - The safely level of a room should be included in the room description, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
-  - The safely level of a room should be included in the map, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
+      - Rooms are classified as Safe, Sketchy, Dangerous, All Out War
+  - Safe rooms contain no aggressive NPCs, only non-combat NPCs.
+  - Combat is disabled in Safe zones.
+  - Sketchy rooms contain non-Combat NPCs and combat NPCs
+  - Combat is enabled in Sketchy rooms
+  - Combat can only be initiated by players in Sketchy rooms, not by NPCs
+  - Dangerous rooms contain non-Combat NPCs and combat NPCs
+  - Combat is enabled in Dangerous rooms
+  - Combat can only be initiated by anyone in a Dangerous room
+  - Non-combat NPCs flee combat if engaged
+  - All Out War rooms contain only combat NPCs
+  - Combat is enabled in All Out War rooms
+  - Combat NPCs attack on sight in an All Out War room
+      - The safely level of a room should be included in the room description, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
+      - The safely level of a room should be included in the map, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
+- [ ] Non-combat NPCs - All zones
+  - [ ] Every zone must have a lore appropriate instance of each non-combat NPC type that lives in a Safe room.  Multiple NPCs can live in the same room.
 - [ ] Per-NPC type custom behaviors
   - dialog taunt and statement templates and generators
   - interactions
-  - aggressiveness/hostility
-  - daily patterns driven by time of day, reaction to weather and other external environmental stimulus. 
-  - default combat actions, reactions, and strategy.
-  - map movement and fencing
+      - aggressiveness/hostility
+    - daily patterns driven by time of day, reaction to weather and other external environmental stimulus. 
+    - default combat actions, reactions, and strategy.
+    - map movement and fencing
 - [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
 - [ ] World map
-  - fast travel
-- [ ] Advanced combat mechanics
-  - [ ] Combat distance
-      - Movement
-      - Range
-        - Melee
-        - Short
-        - Long
-        - Extreme
-      - Attack of opportunity
-      - Terrain types
-      - Fleeing
-  - Pursuit
-  - Panic
-  - Psychosis
+    - fast travel
 - [ ] Non-Human NPCs
   - Animals
   - Robots
