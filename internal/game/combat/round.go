@@ -19,6 +19,31 @@ func attackNarrative(actorName, verb, targetName string, outcome Outcome, total,
 	return fmt.Sprintf("%s %s %s: %s (total %d).", actorName, verb, targetName, outcome, total)
 }
 
+// applyResistanceWeakness adjusts baseDmg based on target's resistances and weaknesses
+// for the given damageType. Returns the final damage (minimum 0) and annotation strings.
+//
+// Precondition: baseDmg >= 0; damageType may be empty (returns baseDmg unchanged).
+// Postcondition: returned damage >= 0.
+func applyResistanceWeakness(target *Combatant, damageType string, baseDmg int) (int, []string) {
+	if damageType == "" || baseDmg == 0 {
+		return baseDmg, nil
+	}
+	var annotations []string
+	result := baseDmg
+	if r, ok := target.Resistances[damageType]; ok && r > 0 {
+		result -= r
+		if result < 0 {
+			result = 0
+		}
+		annotations = append(annotations, fmt.Sprintf("resisted %d %s", r, damageType))
+	}
+	if w, ok := target.Weaknesses[damageType]; ok && w > 0 {
+		result += w
+		annotations = append(annotations, fmt.Sprintf("weak to %s +%d", damageType, w))
+	}
+	return result, annotations
+}
+
 // RoundEvent records what happened when one action was resolved.
 type RoundEvent struct {
 	AttackResult *AttackResult // nil for pass
@@ -278,17 +303,22 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg += applyPassiveFeats(cbt, actor, target, dmg, src)
 				dmg = hookDamageRoll(cbt, actor, target, dmg)
+				dmg, rwAnnotations := applyResistanceWeakness(target, r.DamageType, dmg)
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
 				applyAttackConditions(cbt, actor, target, r)
+				narrative := attackNarrative(actor.Name, "attacks", target.Name, r.Outcome, r.AttackTotal, dmg)
+				if len(rwAnnotations) > 0 {
+					narrative += " (" + strings.Join(rwAnnotations, "; ") + ")"
+				}
 				events = append(events, RoundEvent{
 					AttackResult: &r,
 					ActionType:   ActionAttack,
 					ActorID:      actor.ID,
 					ActorName:    actor.Name,
-					Narrative:    attackNarrative(actor.Name, "attacks", target.Name, r.Outcome, r.AttackTotal, dmg),
+					Narrative:    narrative,
 				})
 				// Clear flat_footed from NPC combatants after their first action resolves.
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
@@ -327,17 +357,22 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
 				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
+				dmg1, rwAnnotations1 := applyResistanceWeakness(target, r1.DamageType, dmg1)
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
 				applyAttackConditions(cbt, actor, target, r1)
+				narrative1 := attackNarrative(actor.Name, "strikes", target.Name, r1.Outcome, r1.AttackTotal, dmg1)
+				if len(rwAnnotations1) > 0 {
+					narrative1 += " (" + strings.Join(rwAnnotations1, "; ") + ")"
+				}
 				events = append(events, RoundEvent{
 					AttackResult: &r1,
 					ActionType:   ActionStrike,
 					ActorID:      actor.ID,
 					ActorName:    actor.Name,
-					Narrative:    attackNarrative(actor.Name, "strikes", target.Name, r1.Outcome, r1.AttackTotal, dmg1),
+					Narrative:    narrative1,
 				})
 				// Clear flat_footed from NPC combatants after their first action resolves.
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
@@ -368,17 +403,22 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)
 				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
+				dmg2, rwAnnotations2 := applyResistanceWeakness(target, r2.DamageType, dmg2)
 				if dmg2 > 0 {
 					target.ApplyDamage(dmg2)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
 				applyAttackConditions(cbt, actor, target, r2)
+				narrative2 := attackNarrative(actor.Name, "strikes", target.Name, r2.Outcome, r2.AttackTotal, dmg2)
+				if len(rwAnnotations2) > 0 {
+					narrative2 += " (" + strings.Join(rwAnnotations2, "; ") + ")"
+				}
 				events = append(events, RoundEvent{
 					AttackResult: &r2,
 					ActionType:   ActionStrike,
 					ActorID:      actor.ID,
 					ActorName:    actor.Name,
-					Narrative:    attackNarrative(actor.Name, "strikes", target.Name, r2.Outcome, r2.AttackTotal, dmg2),
+					Narrative:    narrative2,
 				})
 			case ActionReload:
 				events = append(events, resolveReload(cbt, actor, action))
