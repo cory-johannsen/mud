@@ -42,5 +42,15 @@ func TestHandleFeint_Property(t *testing.T) {
 		if req == nil {
 			rt.Fatal("expected non-nil FeintRequest")
 		}
+		// Invariant: Target is the first arg when args are present, empty otherwise.
+		if len(args) >= 1 {
+			if req.Target != args[0] {
+				rt.Fatalf("expected Target=%q, got %q", args[0], req.Target)
+			}
+		} else {
+			if req.Target != "" {
+				rt.Fatalf("expected empty Target when no args, got %q", req.Target)
+			}
+		}
 	})
 }

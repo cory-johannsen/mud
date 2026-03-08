@@ -4277,18 +4277,18 @@ func (s *GameServiceServer) handleFeint(uid string, req *gamev1.FeintRequest) (*
 		return errorEvent("Usage: feint <target>"), nil
 	}
 
-	// Spend 1 AP.
+	// Find target NPC in room to get Perception DC before spending AP.
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	// Spend 1 AP only after the target is confirmed to exist.
 	if s.combatH == nil {
 		return errorEvent("Combat handler unavailable."), nil
 	}
 	if err := s.combatH.SpendAP(uid, 1); err != nil {
 		return errorEvent(err.Error()), nil
-	}
-
-	// Find target NPC in room to get Perception DC.
-	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
-	if inst == nil {
-		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
 	}
 
 	// Skill check: 1d20 + grift bonus vs target Perception.

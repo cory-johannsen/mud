@@ -845,9 +845,14 @@ func bridgeFirstAid(bctx *bridgeContext) (bridgeResult, error) {
 }
 
 // bridgeFeint builds a FeintRequest with the target name.
-// Precondition: bctx must be non-nil with a valid reqID.
-// Postcondition: returns a non-nil msg containing a FeintRequest; done is false.
+//
+// Precondition: bctx must be non-nil with a valid reqID and non-empty RawArgs.
+// Postcondition: returns a non-nil msg containing a FeintRequest when RawArgs is non-empty;
+// otherwise returns done=true with a usage error event.
 func bridgeFeint(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: feint <target>")
+	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Feint{Feint: &gamev1.FeintRequest{Target: bctx.parsed.RawArgs}},
