@@ -154,10 +154,10 @@ class_features:
       - combat
       - exploration
     activate_text: "You spot the weak point in their system."
-    description: "Reasoning skill check (DC 15) to find a weakness and gain tactical advantage."
+    description: "Tech Lore skill check (DC 15) to find a weakness and gain tactical advantage."
     effect:
       type: skill_check
-      skill: Reasoning
+      skill: tech_lore
       dc: 15
 
   # --- naturalist archetype passive feature ---
