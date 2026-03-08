@@ -104,6 +104,147 @@ class_features:
     activate_text: ""
     description: "You maintain a personal formula database; you never fumble on crafting attempts for known formulas."
 
+  # --- criminal archetype active feature ---
+  - id: ghost
+    name: Ghost
+    archetype: criminal
+    job: ""
+    pf2e: ""
+    active: true
+    shortcut: ghost
+    action_cost: 1
+    contexts:
+      - combat
+      - exploration
+    activate_text: "You become one with the shadows."
+    description: "Activate concealment: +2 Stealth, treated as hidden for 1 minute."
+    effect:
+      type: condition
+      target: self
+      condition_id: ghost_active
+
+  # --- drifter archetype active feature ---
+  - id: mark
+    name: Mark
+    archetype: drifter
+    job: ""
+    pf2e: ""
+    active: true
+    shortcut: mark
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You memorize every detail of your quarry."
+    description: "Designate a target as marked; you gain +1 on attacks against them."
+    effect:
+      type: condition
+      target: self
+      condition_id: mark_active
+
+  # --- nerd archetype active feature ---
+  - id: exploit
+    name: Exploit
+    archetype: nerd
+    job: ""
+    pf2e: ""
+    active: true
+    shortcut: exploit
+    action_cost: 1
+    contexts:
+      - combat
+      - exploration
+    activate_text: "You spot the weak point in their system."
+    description: "Reasoning skill check (DC 15) to find a weakness and gain tactical advantage."
+    effect:
+      type: skill_check
+      skill: Reasoning
+      dc: 15
+
+  # --- naturalist archetype passive feature ---
+  - id: hardy
+    name: Hardy
+    archetype: naturalist
+    job: ""
+    pf2e: ""
+    active: false
+    activate_text: ""
+    description: "+1 Fortitude saves; immune to extreme temperature effects."
+
+  # --- naturalist archetype active feature ---
+  - id: primal_surge
+    name: Primal Surge
+    archetype: naturalist
+    job: ""
+    pf2e: ""
+    active: true
+    shortcut: primal
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "The beast within surges to the surface."
+    description: "+2 Strength checks and +2 damage until end of combat."
+    effect:
+      type: condition
+      target: self
+      condition_id: primal_surge_active
+
+  # --- schemer archetype passive feature ---
+  - id: smooth_operator
+    name: Smooth Operator
+    archetype: schemer
+    job: ""
+    pf2e: ""
+    active: false
+    activate_text: ""
+    description: "+2 bonus to all Deception checks."
+
+  # --- schemer archetype active feature ---
+  - id: setup
+    name: Setup
+    archetype: schemer
+    job: ""
+    pf2e: ""
+    active: true
+    shortcut: setup
+    action_cost: 1
+    contexts:
+      - combat
+      - exploration
+    activate_text: "You position yourself for the play."
+    description: "Your next social check is made with advantage."
+    effect:
+      type: condition
+      target: self
+      condition_id: setup_active
+
+  # --- zealot archetype passive feature ---
+  - id: true_believer
+    name: True Believer
+    archetype: zealot
+    job: ""
+    pf2e: ""
+    active: false
+    activate_text: ""
+    description: "+2 Will saves; immune to the demoralized condition."
+
+  # --- zealot archetype active feature ---
+  - id: lay_hands
+    name: Lay Hands
+    archetype: zealot
+    job: ""
+    pf2e: ""
+    active: true
+    shortcut: hands
+    action_cost: 2
+    contexts:
+      - combat
+      - exploration
+    activate_text: "Holy warmth flows through your hands."
+    description: "Channel healing energy to restore 1d8 hit points."
+    effect:
+      type: heal
+      amount: "1d8"
+
   - id: street_tough
     name: Street Tough
     archetype: normie
