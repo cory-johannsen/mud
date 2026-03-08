@@ -918,21 +918,45 @@ func RenderMap(resp *gamev1.MapResponse) string {
 	}
 
 	// Legend — same top-to-bottom, left-to-right ordering as number assignment.
-	sb.WriteString("\r\nLegend:\r\n")
-	legendNum := 1
+	// Rendered in 4 columns to conserve vertical space.
+	type legendEntry struct {
+		num     int
+		name    string
+		current bool
+	}
+	var entries []legendEntry
 	for _, y := range ys {
 		for _, x := range xs {
 			t := byCoord[[2]int32{x, y}]
 			if t == nil {
 				continue
 			}
+			entries = append(entries, legendEntry{num: len(entries) + 1, name: t.RoomName, current: t.Current})
+		}
+	}
+	const legendCols = 4
+	// Each column entry: " *NN. Name" — pad to a fixed width so columns align.
+	// Width: 2 (marker+space) + 2 (num) + 2 (". ") + name, capped at colWidth chars total.
+	const colWidth = 22
+	sb.WriteString("\r\nLegend:\r\n")
+	for i := 0; i < len(entries); i += legendCols {
+		for col := 0; col < legendCols; col++ {
+			idx := i + col
+			if idx >= len(entries) {
+				break
+			}
+			e := entries[idx]
 			marker := " "
-			if t.Current {
+			if e.current {
 				marker = "*"
 			}
-			sb.WriteString(fmt.Sprintf("  %s%2d. %s\r\n", marker, legendNum, t.RoomName))
-			legendNum++
+			cell := fmt.Sprintf("%s%2d.%-*s", marker, e.num, colWidth-4, e.name)
+			if len(cell) > colWidth {
+				cell = cell[:colWidth]
+			}
+			sb.WriteString(cell)
 		}
+		sb.WriteString("\r\n")
 	}
 
 	return sb.String()

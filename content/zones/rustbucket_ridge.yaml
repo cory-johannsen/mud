@@ -95,13 +95,15 @@ zone:
     map_x: 2
     map_y: 0
   - id: junkers_dream
-    title: Junker's Dream
+    title: Junker’s Dream
     description: This trailer is home to Tina Wires, a tech expert who runs a cyber rigging service for the few who can afford
       it. She’s modified her trailer with solar panels and digital security, and it’s packed with scavenged electronics. Her
       place is always buzzing with a faint hum of machinery.
     exits:
     - direction: north
       target: the_rusty_oasis
+    - direction: south
+      target: the_still
     map_x: 0
     map_y: 4
     properties:
@@ -226,11 +228,13 @@ zone:
       air. Mary runs an underground bar from her trailer, offering drinks strong enough to make you forget the world’s problems—if
       you survive them.
     exits:
+    - direction: north
+      target: junkers_dream
     - direction: south
       target: rotgut_shack
     - direction: west
       target: the_barrel_house
-    map_x: 202
+    map_x: 0
     map_y: 6
     properties:
       area: rotgut_alley
@@ -244,7 +248,7 @@ zone:
       target: the_still
     - direction: south
       target: snakepit
-    map_x: 202
+    map_x: 0
     map_y: 8
     properties:
       area: rotgut_alley
@@ -258,8 +262,8 @@ zone:
       target: the_still
     - direction: south
       target: the_keg_hole
-    map_x: 202
-    map_y: 10
+    map_x: -2
+    map_y: 6
     properties:
       area: rotgut_alley
   - id: snakepit
@@ -270,8 +274,10 @@ zone:
     exits:
     - direction: north
       target: rotgut_shack
-    map_x: 202
-    map_y: 12
+    - direction: east
+      target: ashen_hollow
+    map_x: 0
+    map_y: 10
     properties:
       area: rotgut_alley
   - id: the_keg_hole
@@ -282,8 +288,8 @@ zone:
     exits:
     - direction: north
       target: the_barrel_house
-    map_x: 202
-    map_y: 14
+    map_x: -2
+    map_y: 8
     properties:
       area: rotgut_alley
   - id: the_graveyard
@@ -336,6 +342,8 @@ zone:
     exits:
     - direction: south
       target: the_mausoleum
+    - direction: east
+      target: bonepickers_roost
     map_x: 2
     map_y: -6
     properties:
@@ -345,9 +353,11 @@ zone:
     description: Old Man Tully, a former undertaker, lives in this decrepit trailer surrounded by macabre trophies. Tully
       scavenges anything he finds from abandoned homes or grave sites, storing his collection of eerie artifacts in plain
       sight. His trailer has the feel of a crypt, and Tully himself seems like a relic of the old world.
-    exits: []
-    map_x: 202
-    map_y: 16
+    exits:
+    - direction: west
+      target: the_forgotten_trailer
+    map_x: 4
+    map_y: -6
     properties:
       area: boneyard_bend
   - id: ashen_hollow
@@ -356,12 +366,14 @@ zone:
       junk he can find. His trailer is a scorched husk, and the ground around it is charred black from constant burnings.
       Bill is known for his love of destruction and will burn anything for the right price.
     exits:
+    - direction: west
+      target: snakepit
     - direction: east
       target: smokers_den
     - direction: north
       target: the_furnace
-    map_x: 202
-    map_y: 18
+    map_x: 2
+    map_y: 10
     properties:
       area: cinder_pit
   - id: smokers_den
@@ -375,8 +387,8 @@ zone:
       target: ashen_hollow
     - direction: north
       target: scorchside_camp
-    map_x: 202
-    map_y: 20
+    map_x: 4
+    map_y: 10
     properties:
       area: cinder_pit
   - id: the_furnace
@@ -389,8 +401,8 @@ zone:
       target: ashen_hollow
     - direction: east
       target: the_embers_edge
-    map_x: 202
-    map_y: 22
+    map_x: 2
+    map_y: 8
     properties:
       area: cinder_pit
   - id: scorchside_camp
@@ -401,8 +413,8 @@ zone:
     exits:
     - direction: south
       target: smokers_den
-    map_x: 202
-    map_y: 24
+    map_x: 6
+    map_y: 10
     properties:
       area: cinder_pit
   - id: the_embers_edge
@@ -415,8 +427,8 @@ zone:
       target: the_furnace
     - direction: north
       target: blade_house
-    map_x: 202
-    map_y: 26
+    map_x: 4
+    map_y: 8
     properties:
       area: cinder_pit
   - id: blade_house
@@ -431,8 +443,8 @@ zone:
       target: the_cutthroat
     - direction: north
       target: the_slashers_den
-    map_x: 202
-    map_y: 28
+    map_x: 4
+    map_y: 6
     spawns:
     - template: ganger
       count: 2
@@ -450,8 +462,8 @@ zone:
       target: blade_house
     - direction: north
       target: blood_camp
-    map_x: 202
-    map_y: 30
+    map_x: 6
+    map_y: 6
     properties:
       area: shiv_way
   - id: blood_camp
@@ -462,8 +474,8 @@ zone:
     exits:
     - direction: south
       target: the_cutthroat
-    map_x: 202
-    map_y: 32
+    map_x: 8
+    map_y: 6
     properties:
       area: shiv_way
   - id: the_slashers_den
@@ -476,8 +488,8 @@ zone:
       target: blade_house
     - direction: east
       target: the_razor_nest
-    map_x: 202
-    map_y: 34
+    map_x: 4
+    map_y: 4
     properties:
       area: shiv_way
   - id: the_razor_nest
@@ -488,7 +500,7 @@ zone:
     exits:
     - direction: west
       target: the_slashers_den
-    map_x: 202
-    map_y: 36
+    map_x: 6
+    map_y: 4
     properties:
       area: shiv_way
