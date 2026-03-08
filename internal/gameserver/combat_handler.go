@@ -364,6 +364,51 @@ func (h *CombatHandler) ApplyCombatantAttackMod(uid, targetID string, mod int) e
 	return fmt.Errorf("combatant %q not found in combat", targetID)
 }
 
+// ApplyCombatCondition applies condID (stacks=1, duration=-1) to the combatant identified by
+// targetID in the active combat for the room where uid is fighting.
+//
+// Precondition: uid must be in active combat; targetID must be a valid combatant ID in that combat;
+// condID must be registered in the combat's condition registry.
+// Postcondition: The condition is active on the target combatant; returns nil on success.
+func (h *CombatHandler) ApplyCombatCondition(uid, targetID, condID string) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("no active combat in room %q", sess.RoomID)
+	}
+	return cbt.ApplyCondition(targetID, condID, 1, -1)
+}
+
+// SetCombatantHidden sets the Hidden field on the combatant identified by uid
+// in the active combat for that player's room.
+//
+// Precondition: uid must be in active combat.
+// Postcondition: The combatant's Hidden field equals hidden; returns nil on success.
+func (h *CombatHandler) SetCombatantHidden(uid string, hidden bool) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("no active combat in room %q", sess.RoomID)
+	}
+	for _, c := range cbt.Combatants {
+		if c.ID == uid {
+			c.Hidden = hidden
+			return nil
+		}
+	}
+	return fmt.Errorf("combatant %q not found in combat", uid)
+}
+
 // GetCombatant returns the Combatant with the given targetID from the active combat
 // in the room of the player identified by uid.
 //

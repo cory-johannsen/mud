@@ -86,6 +86,9 @@ type PlayerSession struct {
 	// Weaknesses maps damage type → total flat addition from equipped armor (additive).
 	// Populated from ComputedDefenses at login and after equip/unequip.
 	Weaknesses map[string]int
+	// GrabberID is the NPC instance ID of the NPC currently grappling this player.
+	// Empty string when the player is not grabbed. Set by NPC grapple; cleared by escape.
+	GrabberID string
 }
 
 // Manager tracks all active player sessions and room occupancy.

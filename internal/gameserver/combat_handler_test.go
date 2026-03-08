@@ -1692,3 +1692,211 @@ func TestGetCombatant_Found(t *testing.T) {
 		t.Errorf("expected ACMod=-2; got %d", c.ACMod)
 	}
 }
+
+// makeTestConditionRegistryWithGrabbed returns a condition registry containing
+// all standard test conditions plus "grabbed".
+//
+// Postcondition: Returns a non-nil Registry that includes the grabbed condition.
+func makeTestConditionRegistryWithGrabbed() *condition.Registry {
+	reg := makeTestConditionRegistry()
+	reg.Register(&condition.ConditionDef{ID: "grabbed", Name: "Grabbed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	return reg
+}
+
+// makeCombatHandlerGrab constructs a CombatHandler whose condition registry includes "grabbed".
+func makeCombatHandlerGrab(t *testing.T, broadcastFn func(roomID string, events []*gamev1.CombatEvent)) *CombatHandler {
+	t.Helper()
+	logger := zap.NewNop()
+	src := dice.NewCryptoSource()
+	roller := dice.NewLoggedRoller(src, logger)
+	engine := combat.NewEngine()
+	npcMgr := npc.NewManager()
+	sessMgr := session.NewManager()
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistryWithGrabbed(), nil, nil, nil, nil, nil, nil)
+}
+
+// TestCombatHandler_ApplyCombatCondition_NoSession verifies that ApplyCombatCondition
+// returns an error when uid is not in the session manager.
+//
+// Precondition: uid is not registered.
+// Postcondition: Returns a non-nil error.
+func TestCombatHandler_ApplyCombatCondition_NoSession(t *testing.T) {
+	h := makeCombatHandlerGrab(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	err := h.ApplyCombatCondition("no-such-player", "target-id", "grabbed")
+	if err == nil {
+		t.Fatal("expected error for unknown uid; got nil")
+	}
+}
+
+// TestCombatHandler_ApplyCombatCondition_NotInCombat verifies that ApplyCombatCondition
+// returns an error when the player session exists but there is no active combat.
+//
+// Precondition: Player session exists; no active combat in the room.
+// Postcondition: Returns a non-nil error.
+func TestCombatHandler_ApplyCombatCondition_NotInCombat(t *testing.T) {
+	h := makeCombatHandlerGrab(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-applycond-nocombat"
+	const roomID = "room-applycond-nocombat"
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	err := h.ApplyCombatCondition(uid, "target-id", "grabbed")
+	if err == nil {
+		t.Fatal("expected error when no active combat; got nil")
+	}
+}
+
+// TestCombatHandler_ApplyCombatCondition_Success verifies that ApplyCombatCondition
+// applies the "grabbed" condition to an NPC combatant in active combat.
+//
+// Precondition: Active combat with NPC combatant; grabbed registered in condition registry.
+// Postcondition: cbt.Conditions[npcID].Has("grabbed") == true; no error.
+func TestCombatHandler_ApplyCombatCondition_Success(t *testing.T) {
+	h := makeCombatHandlerGrab(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-applycond-ok"
+	const roomID = "room-applycond-ok"
+	inst := spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	err = h.ApplyCombatCondition(uid, inst.ID, "grabbed")
+	if err != nil {
+		t.Fatalf("ApplyCombatCondition: %v", err)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	sess, _ := h.sessions.GetPlayer(uid)
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		t.Fatal("expected active combat")
+	}
+	condSet, exists := cbt.Conditions[inst.ID]
+	if !exists {
+		t.Fatalf("no condition set for NPC %q", inst.ID)
+	}
+	if !condSet.Has("grabbed") {
+		t.Errorf("expected grabbed condition on NPC %q; not found", inst.ID)
+	}
+}
+
+// TestCombatHandler_SetCombatantHidden_NoSession verifies that SetCombatantHidden
+// returns an error when uid is not in the session manager.
+//
+// Precondition: uid is not registered.
+// Postcondition: Returns a non-nil error.
+func TestCombatHandler_SetCombatantHidden_NoSession(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	err := h.SetCombatantHidden("no-such-player", true)
+	if err == nil {
+		t.Fatal("expected error for unknown uid; got nil")
+	}
+}
+
+// TestCombatHandler_SetCombatantHidden_NotInCombat verifies that SetCombatantHidden
+// returns an error when the player session exists but there is no active combat.
+//
+// Precondition: Player session exists; no active combat in the room.
+// Postcondition: Returns a non-nil error.
+func TestCombatHandler_SetCombatantHidden_NotInCombat(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-hidden-nocombat"
+	const roomID = "room-hidden-nocombat"
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	err := h.SetCombatantHidden(uid, true)
+	if err == nil {
+		t.Fatal("expected error when no active combat; got nil")
+	}
+}
+
+// TestCombatHandler_SetCombatantHidden_Success verifies that SetCombatantHidden sets
+// the Hidden field on the player combatant in active combat.
+//
+// Precondition: Active combat with player combatant uid.
+// Postcondition: The combatant's Hidden field equals true; no error.
+func TestCombatHandler_SetCombatantHidden_Success(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-hidden-ok"
+	const roomID = "room-hidden-ok"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	if err := h.SetCombatantHidden(uid, true); err != nil {
+		t.Fatalf("SetCombatantHidden: %v", err)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	sess, _ := h.sessions.GetPlayer(uid)
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		t.Fatal("expected active combat")
+	}
+	for _, c := range cbt.Combatants {
+		if c.ID == uid {
+			if !c.Hidden {
+				t.Errorf("expected Hidden=true on player combatant; got false")
+			}
+			return
+		}
+	}
+	t.Fatal("player combatant not found in combat")
+}
+
+// TestPropertyCombatHandler_SetCombatantHidden_Idempotent verifies that calling
+// SetCombatantHidden(uid, b) twice leaves the Hidden field equal to b.
+//
+// Precondition: Active combat with player combatant.
+// Postcondition: Hidden == b after two calls with the same value.
+func TestPropertyCombatHandler_SetCombatantHidden_Idempotent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+		const uid = "player-hidden-idem"
+		const roomID = "room-hidden-idem"
+		spawnTestNPC(t, h.npcMgr, roomID)
+		addTestPlayer(t, h.sessions, uid, roomID)
+
+		_, err := h.Attack(uid, "Goblin")
+		if err != nil {
+			rt.Fatalf("Attack: %v", err)
+		}
+		h.cancelTimer(roomID)
+
+		b := rapid.Bool().Draw(rt, "hidden")
+
+		if err := h.SetCombatantHidden(uid, b); err != nil {
+			rt.Fatalf("first SetCombatantHidden: %v", err)
+		}
+		if err := h.SetCombatantHidden(uid, b); err != nil {
+			rt.Fatalf("second SetCombatantHidden: %v", err)
+		}
+
+		h.combatMu.Lock()
+		defer h.combatMu.Unlock()
+		sess, _ := h.sessions.GetPlayer(uid)
+		cbt, ok := h.engine.GetCombat(sess.RoomID)
+		if !ok {
+			rt.Fatal("expected active combat")
+		}
+		for _, c := range cbt.Combatants {
+			if c.ID == uid {
+				if c.Hidden != b {
+					rt.Errorf("expected Hidden=%v after two calls; got %v", b, c.Hidden)
+				}
+				return
+			}
+		}
+		rt.Fatal("player combatant not found in combat")
+	})
+}

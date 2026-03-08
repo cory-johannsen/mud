@@ -98,6 +98,10 @@ type Combatant struct {
 	// AttackMod is a temporary mid-round attack roll modifier applied by conditions (e.g. frightened).
 	// Negative values reduce the attacker's roll total.
 	AttackMod int
+	// Hidden is true when this combatant is concealed. Attackers must pass a DC 11 flat check.
+	// For player combatants: set by hide/divert actions; cleared when the player attacks or is targeted.
+	// For NPC combatants: unused (always false).
+	Hidden bool
 }
 
 // IsPlayer reports whether this combatant is a player character.
