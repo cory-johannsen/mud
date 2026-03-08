@@ -183,6 +183,7 @@ type GameServiceServer struct {
 	regions                    map[string]*ruleset.Region
 	xpSvc                      *xp.Service
 	progressRepo               ProgressRepository
+	actionH                    *ActionHandler
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -243,6 +244,7 @@ func NewGameServiceServer(
 	charAbilityBoostsRepo postgres.CharacterAbilityBoostsRepository,
 	archetypes map[string]*ruleset.Archetype,
 	regions map[string]*ruleset.Region,
+	actionH *ActionHandler,
 ) *GameServiceServer {
 	s := &GameServiceServer{
 		world:               worldMgr,
@@ -280,6 +282,7 @@ func NewGameServiceServer(
 		charAbilityBoostsRepo:      charAbilityBoostsRepo,
 		archetypes:                 archetypes,
 		regions:                    regions,
+		actionH:                    actionH,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
@@ -1117,6 +1120,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleInteract(uid, p.InteractRequest.InstanceId)
 	case *gamev1.ClientMessage_UseRequest:
 		return s.handleUse(uid, p.UseRequest.FeatId)
+	case *gamev1.ClientMessage_Action:
+		return s.handleAction(uid, p.Action)
 	case *gamev1.ClientMessage_SummonItem:
 		return s.handleSummonItem(uid, p.SummonItem)
 	case *gamev1.ClientMessage_ProficienciesRequest:
@@ -3682,6 +3687,22 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 		}
 	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
+}
+
+// handleAction resolves a player-activated class feature action.
+//
+// Precondition: uid must resolve to an active session; req.Name may be empty (list mode).
+// Postcondition: Returns nil, nil on success; nil and an error from ActionHandler.Handle on failure.
+func (s *GameServiceServer) handleAction(uid string, req *gamev1.ActionRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	ctx := context.Background()
+	if err := s.actionH.Handle(ctx, sess, req.GetName(), req.GetTarget()); err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
 
 // applySkillCheckEffect applies a mechanical effect from a skill check outcome.
