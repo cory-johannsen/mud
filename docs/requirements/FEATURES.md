@@ -203,7 +203,8 @@
 - [x] Out-of-combat health regeneration
   - [x] Player and NPC health should slowly regenerate when not in combat.
     - [x] Regeneration rate is defined by the player's Grit bonus
-- [ ] NPC health and status should be reflected in the Room display
+- [x] NPC health and status should be reflected in the Room display
+- [ ] Health display in the prompt should update when the player regenerates health
 - [ ] Actions
   - [ ] Archetype and Job
     - Each Archetype should have at least 1 unique Action

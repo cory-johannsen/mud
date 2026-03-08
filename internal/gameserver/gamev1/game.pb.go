@@ -2706,11 +2706,12 @@ func (x *CharacterInfo) GetFlair() int32 {
 
 // NpcInfo summarises an NPC visible in the room.
 type NpcInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	InstanceId    string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	InstanceId        string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	Name              string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	HealthDescription string                 `protobuf:"bytes,3,opt,name=health_description,json=healthDescription,proto3" json:"health_description,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *NpcInfo) Reset() {
@@ -2753,6 +2754,13 @@ func (x *NpcInfo) GetInstanceId() string {
 func (x *NpcInfo) GetName() string {
 	if x != nil {
 		return x.Name
+	}
+	return ""
+}
+
+func (x *NpcInfo) GetHealthDescription() string {
+	if x != nil {
+		return x.HealthDescription
 	}
 	return ""
 }
@@ -6541,11 +6549,12 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x04grit\x18\v \x01(\x05R\x04grit\x12\x1c\n" +
 	"\treasoning\x18\f \x01(\x05R\treasoning\x12\x14\n" +
 	"\x05savvy\x18\r \x01(\x05R\x05savvy\x12\x14\n" +
-	"\x05flair\x18\x0e \x01(\x05R\x05flair\">\n" +
+	"\x05flair\x18\x0e \x01(\x05R\x05flair\"m\n" +
 	"\aNpcInfo\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"(\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12-\n" +
+	"\x12health_description\x18\x03 \x01(\tR\x11healthDescription\"(\n" +
 	"\x0eExamineRequest\x12\x16\n" +
 	"\x06target\x18\x01 \x01(\tR\x06target\"\xa5\x01\n" +
 	"\aNpcView\x12\x1f\n" +

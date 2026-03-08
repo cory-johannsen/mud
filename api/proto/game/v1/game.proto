@@ -258,8 +258,9 @@ message CharacterInfo {
 
 // NpcInfo summarises an NPC visible in the room.
 message NpcInfo {
-  string instance_id = 1;
-  string name        = 2;
+  string instance_id         = 1;
+  string name                = 2;
+  string health_description  = 3;
 }
 
 // ExamineRequest asks the server for detail on a named target.

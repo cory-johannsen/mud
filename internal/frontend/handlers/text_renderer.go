@@ -51,13 +51,14 @@ func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string {
 		lines = append(lines, telnet.Colorf(telnet.Green, "Also here: %s", strings.Join(rv.Players, ", ")))
 	}
 
-	// NPCs present
-	if len(rv.Npcs) > 0 {
-		names := make([]string, 0, len(rv.Npcs))
-		for _, n := range rv.Npcs {
-			names = append(names, n.Name)
-		}
-		lines = append(lines, telnet.Colorf(telnet.Yellow, "NPCs: %s", strings.Join(names, ", ")))
+	// NPCs present — show name and health status with color coding.
+	for _, n := range rv.Npcs {
+		healthColor := npcHealthColor(n.HealthDescription)
+		entry := fmt.Sprintf("  %s%s%s  %s(%s)%s",
+			telnet.Yellow, n.Name, telnet.Reset,
+			healthColor, n.HealthDescription, telnet.Reset,
+		)
+		lines = append(lines, entry)
 	}
 
 	// Room equipment
@@ -80,6 +81,26 @@ func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string {
 		b.WriteString("\r\n")
 	}
 	return b.String()
+}
+
+// npcHealthColor returns the ANSI color escape for an NPC health description.
+//
+// Postcondition: Returns a non-empty ANSI escape string.
+func npcHealthColor(desc string) string {
+	switch desc {
+	case "unharmed":
+		return telnet.Green
+	case "barely scratched", "lightly wounded":
+		return telnet.BrightGreen
+	case "moderately wounded":
+		return telnet.Yellow
+	case "heavily wounded":
+		return telnet.BrightRed
+	case "critically wounded":
+		return telnet.Red
+	default:
+		return telnet.White
+	}
 }
 
 // appendExits renders exit entries 3 per row into buf.
