@@ -364,6 +364,33 @@ func (h *CombatHandler) ApplyCombatantAttackMod(uid, targetID string, mod int) e
 	return fmt.Errorf("combatant %q not found in combat", targetID)
 }
 
+// GetCombatant returns the Combatant with the given targetID from the active combat
+// in the room of the player identified by uid.
+//
+// Precondition: uid must identify a player session; targetID must be a combatant in that room's active combat.
+// Postcondition: Returns a pointer to the Combatant and true if found; nil and false otherwise.
+func (h *CombatHandler) GetCombatant(uid, targetID string) (*combat.Combatant, bool) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, false
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil, false
+	}
+
+	for _, c := range cbt.Combatants {
+		if c.ID == targetID {
+			return c, true
+		}
+	}
+	return nil, false
+}
+
 // Pass forfeits uid's remaining AP for this round.
 // Requires active combat. Early-resolves if all actions submitted.
 //

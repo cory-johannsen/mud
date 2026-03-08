@@ -2641,9 +2641,10 @@ func TestHandleFeint_Success_RollAbove(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event on successful feint")
 	assert.Contains(t, msgEvt.Content, "success")
 
-	// Verify ApplyCombatantACMod was called: applying -2 to the NPC combatant should succeed.
-	// (We can verify indirectly — no error and message confirms success path ran.)
-	_ = inst
+	// Verify that ApplyCombatantACMod was called: the NPC combatant must have ACMod == -2.
+	c, ok := combatHandler.GetCombatant("u_feint_ra", inst.ID)
+	require.True(t, ok, "expected to find NPC combatant after feint")
+	assert.Equal(t, -2, c.ACMod, "NPC ACMod must be -2 after successful feint")
 }
 
 // newDemoralizeSvc builds a minimal GameServiceServer for handleDemoralize tests.
@@ -2882,5 +2883,10 @@ func TestHandleDemoralize_RollAbove(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event on successful demoralize")
 	assert.Contains(t, msgEvt.Content, "success")
 
-	_ = inst
+	// Verify that ApplyCombatantACMod and ApplyCombatantAttackMod were both called:
+	// the NPC combatant must have ACMod == -1 and AttackMod == -1.
+	c, ok := combatHandler.GetCombatant("u_dem_ra", inst.ID)
+	require.True(t, ok, "expected to find NPC combatant after demoralize")
+	assert.Equal(t, -1, c.ACMod, "NPC ACMod must be -1 after successful demoralize")
+	assert.Equal(t, -1, c.AttackMod, "NPC AttackMod must be -1 after successful demoralize")
 }

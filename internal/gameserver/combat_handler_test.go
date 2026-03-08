@@ -1588,3 +1588,107 @@ func TestCombatHandler_ApplyCombatantAttackMod_AddsModAdditively(t *testing.T) {
 	}
 	t.Fatal("player combatant not found in combat")
 }
+
+// TestGetCombatant_NotFound verifies that GetCombatant returns false when the player
+// session does not exist.
+//
+// Precondition: no session for the given uid.
+// Postcondition: returns nil, false.
+func TestGetCombatant_NotFound(t *testing.T) {
+	src := newSeqSource(5)
+	h := makeCombatHandlerWithDice(t, src, func(_ string, _ []*gamev1.CombatEvent) {})
+
+	got, ok := h.GetCombatant("no_such_uid", "some_target")
+	if ok {
+		t.Fatalf("expected false, got true with combatant %+v", got)
+	}
+	if got != nil {
+		t.Fatalf("expected nil combatant, got %+v", got)
+	}
+}
+
+// TestGetCombatant_TargetNotInCombat verifies that GetCombatant returns false when
+// the targetID is not a combatant in the active combat.
+//
+// Precondition: player in active combat; targetID does not exist.
+// Postcondition: returns nil, false.
+func TestGetCombatant_TargetNotInCombat(t *testing.T) {
+	src := newSeqSource(5)
+	h := makeCombatHandlerWithDice(t, src, func(_ string, _ []*gamev1.CombatEvent) {})
+
+	const roomID = "room_gcomb_miss"
+	_, err := h.npcMgr.Spawn(&npc.Template{
+		ID: "orc-gcomb-miss", Name: "Orc", Level: 1, MaxHP: 20, AC: 12, Perception: 10,
+	}, roomID)
+	if err != nil {
+		t.Fatalf("Spawn: %v", err)
+	}
+	sess, err := h.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "u_gcomb_miss", Username: "Hero", CharName: "Hero",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	if err != nil {
+		t.Fatalf("AddPlayer: %v", err)
+	}
+	sess.Status = statusInCombat
+	_, err = h.Attack("u_gcomb_miss", "Orc")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	got, ok := h.GetCombatant("u_gcomb_miss", "ghost")
+	if ok {
+		t.Fatalf("expected false for missing target, got true with %+v", got)
+	}
+	if got != nil {
+		t.Fatalf("expected nil combatant, got %+v", got)
+	}
+}
+
+// TestGetCombatant_Found verifies that GetCombatant returns the correct combatant
+// with its current mods after ApplyCombatantACMod has been called.
+//
+// Precondition: player in active combat; NPC combatant exists; ACMod applied.
+// Postcondition: returns the combatant pointer with ACMod == applied value.
+func TestGetCombatant_Found(t *testing.T) {
+	src := newSeqSource(5)
+	h := makeCombatHandlerWithDice(t, src, func(_ string, _ []*gamev1.CombatEvent) {})
+
+	const roomID = "room_gcomb_found"
+	inst, err := h.npcMgr.Spawn(&npc.Template{
+		ID: "troll-gcomb", Name: "Troll", Level: 2, MaxHP: 30, AC: 14, Perception: 10,
+	}, roomID)
+	if err != nil {
+		t.Fatalf("Spawn: %v", err)
+	}
+	sess, err := h.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "u_gcomb_found", Username: "Fighter", CharName: "Fighter",
+		RoomID: roomID, CurrentHP: 15, MaxHP: 20, Role: "player",
+	})
+	if err != nil {
+		t.Fatalf("AddPlayer: %v", err)
+	}
+	sess.Status = statusInCombat
+	_, err = h.Attack("u_gcomb_found", "Troll")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Apply a mod and then verify GetCombatant reflects it.
+	if err := h.ApplyCombatantACMod("u_gcomb_found", inst.ID, -2); err != nil {
+		t.Fatalf("ApplyCombatantACMod: %v", err)
+	}
+
+	c, ok := h.GetCombatant("u_gcomb_found", inst.ID)
+	if !ok {
+		t.Fatal("expected to find Troll combatant, got false")
+	}
+	if c == nil {
+		t.Fatal("expected non-nil combatant")
+	}
+	if c.ACMod != -2 {
+		t.Errorf("expected ACMod=-2; got %d", c.ACMod)
+	}
+}
