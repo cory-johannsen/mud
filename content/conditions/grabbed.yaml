@@ -2,7 +2,6 @@ id: grabbed
 name: Grabbed
 description: |
   You are held in place. You are flat-footed (-2 AC) while grabbed.
-  Immobilized effect is pending implementation.
 duration_type: rounds
 max_stacks: 0
 attack_penalty: 0
