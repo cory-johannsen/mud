@@ -2591,11 +2591,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	if s.xpSvc != nil {
 		cfg := s.xpSvc.Config()
 		if sess.Level < cfg.LevelCap {
-			xpToNext := xp.XPToLevel(sess.Level+1, cfg.BaseXP) - sess.Experience
-			if xpToNext < 0 {
-				xpToNext = 0
-			}
-			view.XpToNext = int32(xpToNext)
+			view.XpToNext = int32(xp.XPToLevel(sess.Level+1, cfg.BaseXP))
 		}
 		// If at level cap, XpToNext remains 0 (zero-value).
 	}
