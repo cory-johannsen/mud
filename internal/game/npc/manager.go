@@ -130,6 +130,19 @@ func (m *Manager) Get(id string) (*Instance, bool) {
 	return inst, ok
 }
 
+// AllInstances returns a snapshot of every live NPC instance.
+//
+// Postcondition: Returns a non-nil slice (may be empty); each element is non-nil.
+func (m *Manager) AllInstances() []*Instance {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make([]*Instance, 0, len(m.instances))
+	for _, inst := range m.instances {
+		out = append(out, inst)
+	}
+	return out
+}
+
 // InstancesInRoom returns a snapshot of all live instances in roomID.
 //
 // Postcondition: Returns a non-nil slice (may be empty).

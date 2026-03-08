@@ -353,3 +353,16 @@ func (m *Manager) PlayerCount() int {
 	defer m.mu.RUnlock()
 	return len(m.players)
 }
+
+// AllPlayers returns a snapshot of all active player sessions.
+//
+// Postcondition: Returns a non-nil slice (may be empty); each element is non-nil.
+func (m *Manager) AllPlayers() []*PlayerSession {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make([]*PlayerSession, 0, len(m.players))
+	for _, sess := range m.players {
+		out = append(out, sess)
+	}
+	return out
+}

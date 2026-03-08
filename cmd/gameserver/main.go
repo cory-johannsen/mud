@@ -549,6 +549,10 @@ func main() {
 		}
 	}()
 
+	// Start out-of-combat health regeneration.
+	regenMgr := gameserver.NewRegenManager(sessMgr, npcMgr, combatHandler, charRepo, gameserver.RegenInterval, logger)
+	regenMgr.Start(ctx)
+
 	// Start zone AI ticks.
 	zm := gameserver.NewZoneTickManager(*aiTickInterval)
 	grpcService.StartZoneTicks(ctx, zm, aiRegistry)

@@ -985,6 +985,17 @@ func (h *CombatHandler) stopTimerLocked(roomID string) {
 	h.timersMu.Unlock()
 }
 
+// IsRoomInCombat reports whether roomID currently has an active combat round timer.
+// Safe to call from any goroutine.
+//
+// Postcondition: Returns true if and only if a running timer exists for roomID.
+func (h *CombatHandler) IsRoomInCombat(roomID string) bool {
+	h.timersMu.Lock()
+	_, ok := h.timers[roomID]
+	h.timersMu.Unlock()
+	return ok
+}
+
 // cancelTimer stops and removes the round timer for roomID without requiring
 // combatMu to be held. Safe to call from tests or external code.
 //

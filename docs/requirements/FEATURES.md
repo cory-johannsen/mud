@@ -200,9 +200,9 @@
   - [x] Critical hits apply 2× damage (attack rolls); flat_footed condition on target
   - [x] Critical misses announced in console with bright red color and *** CRITICAL MISS! *** emphasis
   - [x] Critical misses result in 0 damage and prone condition on attacker (attack rolls)
-- [ ] Out-of-combat health regeneration
-  - [ ] Player and NPC health should slowly regenerate when not in combat.  
-    - [ ] Regeneration rate is defined by the player's Grit bonus
+- [x] Out-of-combat health regeneration
+  - [x] Player and NPC health should slowly regenerate when not in combat.
+    - [x] Regeneration rate is defined by the player's Grit bonus
 - [ ] NPC health and status should be reflected in the Room display
 - [ ] Actions
   - [ ] Archetype and Job
