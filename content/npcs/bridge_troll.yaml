@@ -37,3 +37,7 @@ loot:
       chance: 0.15
       min_qty: 1
       max_qty: 1
+resistances:
+  slashing: 1
+weaknesses:
+  fire: 3

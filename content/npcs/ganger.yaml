@@ -57,3 +57,5 @@ loot:
       chance: 0.05
       min_qty: 1
       max_qty: 1
+weaknesses:
+  piercing: 2

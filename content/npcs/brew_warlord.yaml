@@ -31,3 +31,7 @@ loot:
       chance: 0.2
       min_qty: 1
       max_qty: 1
+resistances:
+  bludgeoning: 1
+weaknesses:
+  fire: 3
