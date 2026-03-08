@@ -1,0 +1,15 @@
+id: floored_active
+name: Floored Active
+description: |
+  You have the pedal to the metal. Your movement speed is doubled until
+  your next turn.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: -2
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

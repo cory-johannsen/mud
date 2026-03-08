@@ -1247,3 +1247,142 @@ class_features:
       type: skill_check
       skill: scavenging
       dc: 13
+
+  # --- drifter job active features ---
+  - id: cash_drop
+    name: Cash Drop
+    archetype: ""
+    job: bagman
+    pf2e: ""
+    active: true
+    shortcut: cash
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You make the handoff like a ghost."
+    description: "Hustle skill check (DC 13) to complete a transaction discreetly."
+    effect:
+      type: skill_check
+      skill: hustle
+      dc: 13
+
+  - id: arrest
+    name: Arrest
+    archetype: ""
+    job: cop
+    pf2e: ""
+    active: true
+    shortcut: arrest
+    action_cost: 1
+    contexts:
+      - combat
+      - exploration
+    activate_text: "Hands where I can see them."
+    description: "Invoke authority to flat-foot the target until they act against you."
+    effect:
+      type: condition
+      target: self
+      condition_id: arrest_active
+
+  - id: floored
+    name: Floored
+    archetype: ""
+    job: driver
+    pf2e: ""
+    active: true
+    shortcut: floor
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You bury the accelerator."
+    description: "Double your movement speed until your next turn."
+    effect:
+      type: condition
+      target: self
+      condition_id: floored_active
+
+  - id: go_with_the_flow
+    name: Go With the Flow
+    archetype: ""
+    job: free_spirit
+    pf2e: ""
+    active: true
+    shortcut: flow
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You let the universe guide you."
+    description: "Hard Look skill check (DC 12) to intuit the best path forward."
+    effect:
+      type: skill_check
+      skill: hard_look
+      dc: 12
+
+  - id: unnerve
+    name: Unnerve
+    archetype: ""
+    job: psychopath
+    pf2e: ""
+    active: true
+    shortcut: unnerve
+    action_cost: 1
+    contexts:
+      - combat
+      - exploration
+    activate_text: "You let them see what you really are."
+    description: "Hard Look skill check (DC 15) to frighten or destabilize a target."
+    effect:
+      type: skill_check
+      skill: hard_look
+      dc: 15
+
+  - id: reconnoiter
+    name: Reconnoiter
+    archetype: ""
+    job: scout
+    pf2e: ""
+    active: true
+    shortcut: recon
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You sweep the area with practiced efficiency."
+    description: "Wasteland skill check (DC 13) to gather tactical information."
+    effect:
+      type: skill_check
+      skill: wasteland
+      dc: 13
+
+  - id: shadow_action
+    name: Shadow
+    archetype: ""
+    job: stalker
+    pf2e: ""
+    active: true
+    shortcut: shadow
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You become the darkness."
+    description: "Blend into the environment: treated as hidden, +2 Ghosting."
+    effect:
+      type: condition
+      target: self
+      condition_id: shadow_active
+
+  - id: hold_the_line
+    name: Hold the Line
+    archetype: ""
+    job: warden
+    pf2e: ""
+    active: true
+    shortcut: hold
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "Nobody gets past you."
+    description: "+1 AC and cannot be forcibly moved until your next turn."
+    effect:
+      type: condition
+      target: self
+      condition_id: hold_the_line_active

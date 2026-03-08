@@ -1,0 +1,15 @@
+id: arrest_active
+name: Arrest Active
+description: |
+  You have invoked your authority. The target must comply or face escalating
+  consequences — treat them as flat-footed until they act against you.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
