@@ -1386,3 +1386,192 @@ class_features:
       type: condition
       target: self
       condition_id: hold_the_line_active
+
+  # --- influencer job active features ---
+  - id: incite
+    name: Incite
+    archetype: ""
+    job: anarchist
+    pf2e: ""
+    active: true
+    shortcut: incite
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You fan the flames of discontent."
+    description: "Rep skill check (DC 14) to rile up a crowd or individual."
+    effect:
+      type: skill_check
+      skill: rep
+      dc: 14
+
+  - id: bloc_up_action
+    name: Bloc Up
+    archetype: ""
+    job: antifa
+    pf2e: ""
+    active: true
+    shortcut: bloc
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You form up with whoever's nearby."
+    description: "Deal 1d6 bludgeoning damage — strength in numbers."
+    effect:
+      type: damage
+      amount: "1d6"
+      damage_type: bludgeoning
+
+  - id: property_rights
+    name: Property Rights
+    archetype: ""
+    job: libertarian
+    pf2e: ""
+    active: true
+    shortcut: rights
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You invoke the sanctity of private property."
+    description: "Factions skill check (DC 14) to assert a legal or moral argument."
+    effect:
+      type: skill_check
+      skill: factions
+      dc: 14
+
+  - id: schmooze
+    name: Schmooze
+    archetype: ""
+    job: schmoozer
+    pf2e: ""
+    active: true
+    shortcut: schmooze
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You slide into the conversation like you own the room."
+    description: "Smooth Talk skill check (DC 13) to make a favorable impression."
+    effect:
+      type: skill_check
+      skill: smooth_talk
+      dc: 13
+
+  # --- nerd job active features ---
+  - id: mix
+    name: Mix
+    archetype: ""
+    job: cooker
+    pf2e: ""
+    active: true
+    shortcut: mix
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You run through the formula in your head."
+    description: "Rigging skill check (DC 15) to synthesize a substance or recall a formula."
+    effect:
+      type: skill_check
+      skill: rigging
+      dc: 15
+
+  - id: deduce
+    name: Deduce
+    archetype: ""
+    job: detective
+    pf2e: ""
+    active: true
+    shortcut: deduce
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "The pieces click together."
+    description: "Intel skill check (DC 15) to draw a conclusion from available evidence."
+    effect:
+      type: skill_check
+      skill: intel
+      dc: 15
+
+  - id: quick_fix
+    name: Quick Fix
+    archetype: ""
+    job: grease_monkey
+    pf2e: ""
+    active: true
+    shortcut: qfix
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You slap it together with zip ties and hope."
+    description: "Rigging skill check (DC 13) to jury-rig a repair on the spot."
+    effect:
+      type: skill_check
+      skill: rigging
+      dc: 13
+
+  - id: dig_out
+    name: Dig Out
+    archetype: ""
+    job: hoarder
+    pf2e: ""
+    active: true
+    shortcut: dig
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You know you have one of these somewhere..."
+    description: "Scavenging skill check (DC 12) to locate a useful item in your collection."
+    effect:
+      type: skill_check
+      skill: scavenging
+      dc: 12
+
+  - id: expose
+    name: Expose
+    archetype: ""
+    job: journalist
+    pf2e: ""
+    active: true
+    shortcut: expose
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "The truth, unvarnished."
+    description: "Intel skill check (DC 15) to uncover or reveal hidden information."
+    effect:
+      type: skill_check
+      skill: intel
+      dc: 15
+
+  - id: commune
+    name: Commune
+    archetype: ""
+    job: natural_mystic
+    pf2e: ""
+    active: true
+    shortcut: commune
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You open yourself to the flows of nature."
+    description: "Conspiracy skill check (DC 14) to sense hidden or spiritual information."
+    effect:
+      type: skill_check
+      skill: conspiracy
+      dc: 14
+
+  - id: expert_analysis
+    name: Expert Analysis
+    archetype: ""
+    job: specialist
+    pf2e: ""
+    active: true
+    shortcut: analyze
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You apply your training to the problem."
+    description: "Tech Lore skill check (DC 16) to provide a precise professional assessment."
+    effect:
+      type: skill_check
+      skill: tech_lore
+      dc: 16

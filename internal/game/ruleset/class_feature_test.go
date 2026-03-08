@@ -11,8 +11,8 @@ func TestLoadClassFeatures_Count(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadClassFeatures: %v", err)
 	}
-	if len(features) != 122 {
-		t.Errorf("expected 122 features, got %d", len(features))
+	if len(features) != 133 {
+		t.Errorf("expected 133 features, got %d", len(features))
 	}
 }
 
