@@ -368,3 +368,25 @@ func TestRollInitiative_Property_InitiativeAtLeastOnePlusMod(t *testing.T) {
 		assert.Equal(rt, 1+dexMod, c.Initiative)
 	})
 }
+
+// TestPropertyCombatant_Hidden_ZeroValue verifies that the zero value of Combatant.Hidden is false.
+func TestPropertyCombatant_Hidden_ZeroValue(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		c := &combat.Combatant{}
+		if c.Hidden != false {
+			rt.Fatal("Combatant.Hidden zero value must be false")
+		}
+	})
+}
+
+// TestPropertyCombatant_Hidden_Assignment verifies that Combatant.Hidden stores the assigned value.
+func TestPropertyCombatant_Hidden_Assignment(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		c := &combat.Combatant{}
+		val := rapid.Bool().Draw(rt, "hidden")
+		c.Hidden = val
+		if c.Hidden != val {
+			rt.Fatalf("expected Hidden=%v, got %v", val, c.Hidden)
+		}
+	})
+}

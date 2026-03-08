@@ -379,7 +379,7 @@ func (h *CombatHandler) ApplyCombatCondition(uid, targetID, condID string) error
 	defer h.combatMu.Unlock()
 	cbt, ok := h.engine.GetCombat(sess.RoomID)
 	if !ok {
-		return fmt.Errorf("no active combat in room %q", sess.RoomID)
+		return fmt.Errorf("player %q is not in active combat", uid)
 	}
 	return cbt.ApplyCondition(targetID, condID, 1, -1)
 }
@@ -398,7 +398,7 @@ func (h *CombatHandler) SetCombatantHidden(uid string, hidden bool) error {
 	defer h.combatMu.Unlock()
 	cbt, ok := h.engine.GetCombat(sess.RoomID)
 	if !ok {
-		return fmt.Errorf("no active combat in room %q", sess.RoomID)
+		return fmt.Errorf("player %q is not in active combat", uid)
 	}
 	for _, c := range cbt.Combatants {
 		if c.ID == uid {

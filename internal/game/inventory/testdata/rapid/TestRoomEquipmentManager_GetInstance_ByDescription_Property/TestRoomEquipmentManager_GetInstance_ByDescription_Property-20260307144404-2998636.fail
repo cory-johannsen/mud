@@ -1,0 +1,17 @@
+# 2026/03/07 14:44:04.260709 [TestRoomEquipmentManager_GetInstance_ByDescription_Property] [rapid] draw desc: " "
+# 2026/03/07 14:44:04.260745 [TestRoomEquipmentManager_GetInstance_ByDescription_Property] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/inventory/room_equipment_test.go:185
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/inventory/room_equipment_test.go:177
+# 	Error:      	Expected value not to be nil.
+# 	Test:       	TestRoomEquipmentManager_GetInstance_ByDescription_Property
+# 
+v0.4.8#2426753760220790298
+0x0
+0x0
+0x0
+0x0
+0x0

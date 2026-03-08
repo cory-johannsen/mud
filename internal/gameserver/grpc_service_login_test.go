@@ -141,6 +141,7 @@ func testGRPCServerWithSaverFull(t *testing.T, saver CharacterSaver) (gamev1.Gam
 		saver, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -393,6 +394,7 @@ func testGRPCServerWithClassFeatures(
 		nil, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, nil, nil, nil, nil,
+		nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -508,6 +510,7 @@ func testGRPCServerWithFeatureChoices(
 		nil, nil, nil, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, fcRepo, nil, nil, nil,
+		nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")

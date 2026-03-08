@@ -703,6 +703,16 @@ func TestPlayerSession_HasFeatureChoicesField(t *testing.T) {
 	require.Empty(t, sess.FeatureChoices)
 }
 
+// TestPropertyPlayerSession_GrabberID_ZeroValue verifies that GrabberID is empty string by default.
+func TestPropertyPlayerSession_GrabberID_ZeroValue(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sess := &PlayerSession{}
+		if sess.GrabberID != "" {
+			rt.Fatal("GrabberID zero value must be empty string")
+		}
+	})
+}
+
 func TestProperty_PlayerSession_SkillsFieldRoundTrip(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		key := rapid.StringMatching(`[a-z_]{1,20}`).Draw(t, "skill_id")

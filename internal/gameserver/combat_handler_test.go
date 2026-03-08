@@ -1900,3 +1900,43 @@ func TestPropertyCombatHandler_SetCombatantHidden_Idempotent(t *testing.T) {
 		rt.Fatal("player combatant not found in combat")
 	})
 }
+
+// TestPropertyCombatHandler_ApplyCombatCondition_AlwaysAppliesCondition verifies that
+// ApplyCombatCondition always applies "grabbed" to the target NPC when called in active combat.
+//
+// Precondition: Active combat with a registered NPC and player.
+// Postcondition: err == nil AND cbt.Conditions[npcID].Has("grabbed") == true.
+func TestPropertyCombatHandler_ApplyCombatCondition_AlwaysAppliesCondition(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		h := makeCombatHandlerGrab(t, func(_ string, _ []*gamev1.CombatEvent) {})
+		const uid = "player-prop-applycond"
+		const roomID = "room-prop-applycond"
+		inst := spawnTestNPC(t, h.npcMgr, roomID)
+		addTestPlayer(t, h.sessions, uid, roomID)
+
+		if _, err := h.Attack(uid, "Goblin"); err != nil {
+			rt.Fatalf("Attack: %v", err)
+		}
+		h.cancelTimer(roomID)
+
+		err := h.ApplyCombatCondition(uid, inst.ID, "grabbed")
+		if err != nil {
+			rt.Fatalf("ApplyCombatCondition: %v", err)
+		}
+
+		h.combatMu.Lock()
+		defer h.combatMu.Unlock()
+		sess, _ := h.sessions.GetPlayer(uid)
+		cbt, ok := h.engine.GetCombat(sess.RoomID)
+		if !ok {
+			rt.Fatal("expected active combat")
+		}
+		condSet, ok := cbt.Conditions[inst.ID]
+		if !ok {
+			rt.Fatalf("no condition set for NPC %q", inst.ID)
+		}
+		if !condSet.Has("grabbed") {
+			rt.Fatalf("expected grabbed condition on NPC %q; not found", inst.ID)
+		}
+	})
+}
