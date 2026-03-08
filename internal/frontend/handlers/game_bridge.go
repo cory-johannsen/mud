@@ -676,6 +676,18 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderInteractResponse(p.InteractResponse)
 		case *gamev1.ServerEvent_UseResponse:
 			text = RenderUseResponse(p.UseResponse)
+		case *gamev1.ServerEvent_HpUpdate:
+			hpu := p.HpUpdate
+			currentHP.Store(hpu.GetCurrentHp())
+			if hpu.GetMaxHp() > 0 {
+				maxHP.Store(hpu.GetMaxHp())
+			}
+			if conn.IsSplitScreen() {
+				_ = conn.WritePromptSplit(buildPrompt())
+			} else {
+				_ = conn.WritePrompt(buildPrompt())
+			}
+			continue
 		case *gamev1.ServerEvent_Disconnected:
 			dcMsg := telnet.Colorf(telnet.Yellow, "Disconnected: %s", p.Disconnected.Reason)
 			if conn.IsSplitScreen() {

@@ -92,7 +92,15 @@ message ServerEvent {
     UseResponse          use_response           = 22;
     ClassFeaturesResponse class_features_response = 23;
     ProficienciesResponse proficiencies_response = 24;
+    HpUpdateEvent         hp_update              = 25;
   }
+}
+
+// HpUpdateEvent delivers a lightweight HP update to refresh the prompt bar.
+// No console text is displayed; only the prompt is redrawn.
+message HpUpdateEvent {
+  int32 current_hp = 1;
+  int32 max_hp     = 2;
 }
 
 // JoinWorldRequest is sent by the client to enter the game world after authentication.

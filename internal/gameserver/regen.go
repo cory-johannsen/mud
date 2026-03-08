@@ -119,9 +119,9 @@ func (r *RegenManager) regenPlayers(ctx context.Context) {
 			}
 		}
 
-		// Notify the player.
+		// Notify the player with a console message.
 		msg := fmt.Sprintf("You recover %d HP. (%d/%d)", regen, newHP, sess.MaxHP)
-		evt := &gamev1.ServerEvent{
+		msgEvt := &gamev1.ServerEvent{
 			Payload: &gamev1.ServerEvent_Message{
 				Message: &gamev1.MessageEvent{
 					Content: msg,
@@ -129,7 +129,20 @@ func (r *RegenManager) regenPlayers(ctx context.Context) {
 				},
 			},
 		}
-		if data, err := proto.Marshal(evt); err == nil {
+		if data, err := proto.Marshal(msgEvt); err == nil {
+			_ = sess.Entity.Push(data)
+		}
+
+		// Send an HP update event so the prompt bar refreshes immediately.
+		hpEvt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_HpUpdate{
+				HpUpdate: &gamev1.HpUpdateEvent{
+					CurrentHp: int32(newHP),
+					MaxHp:     int32(sess.MaxHP),
+				},
+			},
+		}
+		if data, err := proto.Marshal(hpEvt); err == nil {
 			_ = sess.Entity.Push(data)
 		}
 	}
