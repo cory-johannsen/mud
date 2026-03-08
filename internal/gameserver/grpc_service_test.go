@@ -17,9 +17,11 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -1879,6 +1881,201 @@ func TestSkillDisplayName(t *testing.T) {
 			assert.Equal(t, tc.want, got)
 		})
 	}
+}
+
+// newRaiseShieldSvc builds a minimal GameServiceServer for handleRaiseShield tests.
+// condReg may be nil to test the no-registry path.
+func newRaiseShieldSvc(t *testing.T, condReg *condition.Registry) (*GameServiceServer, *session.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+	return svc, sessMgr
+}
+
+// TestHandleRaiseShield_NoSession verifies that handleRaiseShield returns an error when the
+// player session does not exist.
+//
+// Precondition: uid "unknown_uid" has no session.
+// Postcondition: error is returned; event is nil.
+func TestHandleRaiseShield_NoSession(t *testing.T) {
+	svc, _ := newRaiseShieldSvc(t, nil)
+	event, err := svc.handleRaiseShield("unknown_uid")
+	require.Error(t, err)
+	assert.Nil(t, event)
+}
+
+// TestHandleRaiseShield_NoLoadout verifies that handleRaiseShield returns an error event when
+// the player has no equipment loadout.
+//
+// Precondition: player session exists; sess.LoadoutSet == nil.
+// Postcondition: error event with "no equipment" message; no error returned.
+func TestHandleRaiseShield_NoLoadout(t *testing.T) {
+	svc, sessMgr := newRaiseShieldSvc(t, nil)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_raiseshield_noloadout",
+		Username: "Hero",
+		CharName: "Hero",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.LoadoutSet = nil
+
+	event, err := svc.handleRaiseShield("u_raiseshield_noloadout")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event")
+	assert.Contains(t, errEvt.Message, "no equipment")
+}
+
+// TestHandleRaiseShield_NoShield verifies that handleRaiseShield returns an error event when
+// the player has no shield in the off-hand slot.
+//
+// Precondition: player has a loadout with no off-hand weapon.
+// Postcondition: error event containing "shield"; no error returned.
+func TestHandleRaiseShield_NoShield(t *testing.T) {
+	svc, sessMgr := newRaiseShieldSvc(t, nil)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_raiseshield_noshield",
+		Username: "Hero",
+		CharName: "Hero",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	// LoadoutSet with empty preset (no off-hand weapon).
+	sess.LoadoutSet = inventory.NewLoadoutSet()
+
+	event, err := svc.handleRaiseShield("u_raiseshield_noshield")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event")
+	assert.Contains(t, errEvt.Message, "shield")
+}
+
+// TestHandleRaiseShield_OutOfCombat_ShieldEquipped verifies that handleRaiseShield applies the
+// shield_raised condition and returns a success message when out of combat with a shield equipped.
+//
+// Precondition: condRegistry contains "shield_raised"; player has shield in off-hand; status is not in-combat.
+// Postcondition: sess.Conditions.Has("shield_raised") == true; message event contains "+2 AC".
+func TestHandleRaiseShield_OutOfCombat_ShieldEquipped(t *testing.T) {
+	condReg := condition.NewRegistry()
+	condReg.Register(&condition.ConditionDef{
+		ID:           "shield_raised",
+		Name:         "Shield Raised",
+		DurationType: "round",
+	})
+
+	svc, sessMgr := newRaiseShieldSvc(t, condReg)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_raiseshield_ooc",
+		Username: "Hero",
+		CharName: "Hero",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.LoadoutSet = inventory.NewLoadoutSet()
+	shieldDef := &inventory.WeaponDef{
+		ID:                  "wooden_shield",
+		Name:                "Wooden Shield",
+		Kind:                inventory.WeaponKindShield,
+		DamageDice:          "1d4",
+		DamageType:          "bludgeoning",
+		ProficiencyCategory: "simple_weapons",
+	}
+	preset := sess.LoadoutSet.ActivePreset()
+	require.NoError(t, preset.EquipOffHand(shieldDef))
+	sess.Conditions = condition.NewActiveSet()
+	// Status is default (out of combat).
+
+	event, err := svc.handleRaiseShield("u_raiseshield_ooc")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event")
+	assert.Contains(t, msgEvt.Content, "+2 AC")
+	assert.True(t, sess.Conditions.Has("shield_raised"), "expected shield_raised condition applied")
+}
+
+// TestHandleRaiseShield_InCombat_InsufficientAP verifies that handleRaiseShield returns an error
+// event when the player is in combat but has no active combat (SpendAP fails).
+//
+// Precondition: player status == statusInCombat; no CombatHandler set (combatH is nil).
+// Postcondition: error event returned (SpendAP fails because combatH is nil/panics, or no combat found).
+//
+// Note: combatH is nil here so SpendAP is called on nil, which would panic.  We instead set
+// Status to in-combat without a combatHandler to show the guard: because combatH is nil the
+// service would panic if it called SpendAP.  To avoid requiring a real combat engine in unit
+// tests, this test verifies the path by using a non-nil CombatHandler that has no registered
+// combat (so SpendAP returns "not in active combat" error).
+func TestHandleRaiseShield_InCombat_InsufficientAP(t *testing.T) {
+	condReg := condition.NewRegistry()
+	condReg.Register(&condition.ConditionDef{
+		ID:           "shield_raised",
+		Name:         "Shield Raised",
+		DurationType: "round",
+	})
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, condReg, worldMgr, nil, nil, nil, nil, nil)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_raiseshield_combat",
+		Username: "Hero",
+		CharName: "Hero",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.LoadoutSet = inventory.NewLoadoutSet()
+	shieldDef := &inventory.WeaponDef{
+		ID:                  "wooden_shield",
+		Name:                "Wooden Shield",
+		Kind:                inventory.WeaponKindShield,
+		DamageDice:          "1d4",
+		DamageType:          "bludgeoning",
+		ProficiencyCategory: "simple_weapons",
+	}
+	preset := sess.LoadoutSet.ActivePreset()
+	require.NoError(t, preset.EquipOffHand(shieldDef))
+	sess.Conditions = condition.NewActiveSet()
+	sess.Status = statusInCombat // triggers SpendAP path
+
+	event, err := svc.handleRaiseShield("u_raiseshield_combat")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event when SpendAP fails (no active combat)")
 }
 
 func TestOutcomeDisplayName(t *testing.T) {

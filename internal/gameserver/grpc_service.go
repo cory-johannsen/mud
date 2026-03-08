@@ -4108,11 +4108,17 @@ func (s *GameServiceServer) handleRaiseShield(uid string) (*gamev1.ServerEvent, 
 	// Apply the shield_raised condition to the player session.
 	if s.condRegistry != nil {
 		def, ok := s.condRegistry.Get("shield_raised")
-		if ok {
+		if !ok {
+			s.logger.Warn("handleRaiseShield: shield_raised condition not found in registry",
+				zap.String("uid", uid))
+		} else {
 			if sess.Conditions == nil {
 				sess.Conditions = condition.NewActiveSet()
 			}
-			_ = sess.Conditions.Apply(uid, def, 1, -1)
+			if err := sess.Conditions.Apply(uid, def, 1, -1); err != nil {
+				s.logger.Warn("handleRaiseShield: Apply shield_raised failed",
+					zap.String("uid", uid), zap.Error(err))
+			}
 		}
 	}
 
