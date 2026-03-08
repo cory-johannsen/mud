@@ -213,6 +213,8 @@ func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult
 // the total bonus damage to add.
 // Precondition: actor and target must be non-nil; dmg is the base hit damage (0 on miss).
 // Postcondition: Returns 0 when actor is not a player, sessionGetter is nil, or no feats are active.
+//
+//	Attacking always breaks concealment: actor.Hidden is cleared before feat checks run.
 func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Source) int {
 	if actor.Kind != KindPlayer || cbt.sessionGetter == nil {
 		return 0
@@ -221,10 +223,19 @@ func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Sourc
 	if !ok {
 		return 0
 	}
+
+	// Capture hidden state before clearing — attacking always breaks concealment.
+	actorHidden := actor.Hidden
+	if actorHidden {
+		actor.Hidden = false
+	}
+
 	bonus := 0
 	if ps.PassiveFeats["sucker_punch"] {
 		spBonus := 0
-		spMet := cbt.Conditions[target.ID] != nil && cbt.Conditions[target.ID].Has("flat_footed") && dmg > 0
+		targetOffGuard := cbt.Conditions[target.ID] != nil &&
+			(cbt.Conditions[target.ID].Has("flat_footed") || cbt.Conditions[target.ID].Has("grabbed"))
+		spMet := (targetOffGuard || actorHidden) && dmg > 0
 		if spMet {
 			spBonus = src.Intn(6) + 1
 		}
