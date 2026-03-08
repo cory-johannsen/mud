@@ -1,6 +1,12 @@
 // Package command provides the command registry, parser, and built-in command definitions.
 package command
 
+import (
+	"fmt"
+
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
+)
+
 // Categories for organizing commands.
 const (
 	CategoryMovement      = "movement"
@@ -153,6 +159,39 @@ func BuiltinCommands() []Command {
 		{Name: "trainskill", Aliases: []string{"ts"}, Help: "Advance a skill proficiency rank using a pending skill increase", Category: CategoryCharacter, Handler: HandlerTrainSkill},
 		{Name: "action", Aliases: []string{"act"}, Help: "Activate an archetype or job action. Usage: action [name] [target]", Category: CategoryCombat, Handler: HandlerAction},
 	}
+}
+
+// RegisterShortcuts builds shortcut Command entries for active class features and
+// appends them to the existing commands slice. Panics at startup if any shortcut
+// collides with an existing command name or alias.
+//
+// Precondition: features must be non-nil; existing must be the current command slice.
+// Postcondition: Returns extended slice with one entry per non-empty active shortcut;
+// panics on collision.
+func RegisterShortcuts(features []*ruleset.ClassFeature, existing []Command) []Command {
+	names := make(map[string]bool, len(existing))
+	for _, c := range existing {
+		names[c.Name] = true
+		for _, alias := range c.Aliases {
+			names[alias] = true
+		}
+	}
+	for _, f := range features {
+		if !f.Active || f.Shortcut == "" {
+			continue
+		}
+		if names[f.Shortcut] {
+			panic(fmt.Sprintf("command.RegisterShortcuts: shortcut %q (feature %s) collides with existing command", f.Shortcut, f.ID))
+		}
+		names[f.Shortcut] = true
+		existing = append(existing, Command{
+			Name:     f.Shortcut,
+			Handler:  HandlerAction,
+			Help:     fmt.Sprintf("Shortcut for action %s.", f.Name),
+			Category: CategoryCombat,
+		})
+	}
+	return existing
 }
 
 // IsMovementCommand reports whether the command name is a movement direction.

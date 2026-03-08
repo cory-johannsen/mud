@@ -117,7 +117,7 @@ func main() {
 
 	// Create managers
 	sessMgr := session.NewManager()
-	cmdRegistry := command.DefaultRegistry()
+	// cmdRegistry is built after class features are loaded so shortcuts can be registered.
 
 	// Load NPC templates and spawn initial instances
 	npcTemplates, err := npc.LoadTemplates(*npcsDir)
@@ -282,6 +282,12 @@ func main() {
 	}
 	cfReg := ruleset.NewClassFeatureRegistry(classFeatures)
 	logger.Info("class features loaded", zap.Int("class_features", len(classFeatures)))
+	allCmds := command.RegisterShortcuts(classFeatures, command.BuiltinCommands())
+	cmdRegistry, err := command.NewRegistry(allCmds)
+	if err != nil {
+		logger.Fatal("building command registry with shortcuts", zap.Error(err))
+	}
+	logger.Info("command registry built", zap.Int("commands", len(allCmds)))
 	characterClassFeaturesRepo := postgres.NewCharacterClassFeaturesRepository(pool.DB())
 	featureChoicesRepo := postgres.NewCharacterFeatureChoicesRepo(pool.DB())
 	charAbilityBoostsRepo := postgres.NewCharacterAbilityBoostsRepository(pool.DB())
