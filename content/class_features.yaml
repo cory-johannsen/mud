@@ -15,9 +15,17 @@ class_features:
     job: ""
     pf2e: rage
     active: true
+    shortcut: surge
+    action_cost: 1
+    contexts:
+      - combat
     activate_text: "The red haze drops and you move on pure instinct."
     condition_id: brutal_surge_active
     description: "Enter a combat frenzy: +2 melee damage, -2 AC until end of encounter."
+    effect:
+      type: condition
+      target: self
+      condition_id: brutal_surge_active
 
   - id: sucker_punch
     name: Sucker Punch

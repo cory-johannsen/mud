@@ -15,6 +15,19 @@ type FeatureChoices struct {
 	Options []string `yaml:"options"`
 }
 
+// ActionEffect describes the mechanical outcome of activating an action.
+//
+// Precondition: Type must be one of "condition", "heal", "damage", "skill_check".
+type ActionEffect struct {
+	Type        string `yaml:"type"`         // condition | heal | damage | skill_check
+	Target      string `yaml:"target"`       // self | target
+	ConditionID string `yaml:"condition_id"` // for type=condition
+	Amount      string `yaml:"amount"`       // for type=heal|damage (dice string or flat int)
+	DamageType  string `yaml:"damage_type"`  // for type=damage
+	Skill       string `yaml:"skill"`        // for type=skill_check
+	DC          int    `yaml:"dc"`           // for type=skill_check
+}
+
 // ClassFeature defines one Gunchete class feature and its P2FE equivalent.
 //
 // Archetype is non-empty for archetype-shared features; Job is non-empty for job-specific features.
@@ -30,6 +43,10 @@ type ClassFeature struct {
 	ConditionID  string          `yaml:"condition_id"` // optional; non-empty means Use applies this condition
 	Description  string          `yaml:"description"`
 	Choices      *FeatureChoices `yaml:"choices"`
+	Shortcut     string          `yaml:"shortcut"`    // direct command alias; empty = no shortcut
+	ActionCost   int             `yaml:"action_cost"` // AP cost in combat; 1, 2, or 3
+	Contexts     []string        `yaml:"contexts"`    // valid contexts: combat, exploration, downtime
+	Effect       *ActionEffect   `yaml:"effect"`      // nil for passive features
 }
 
 // classFeaturesFile is the top-level YAML structure for content/class_features.yaml.
@@ -112,4 +129,17 @@ func (r *ClassFeatureRegistry) ByArchetype(archetype string) []*ClassFeature {
 // Postcondition: Returns a slice (may be empty).
 func (r *ClassFeatureRegistry) ByJob(job string) []*ClassFeature {
 	return r.byJob[job]
+}
+
+// ActiveFeatures returns all features that are active (player-activated).
+//
+// Postcondition: Returns a slice of all active features; may be empty.
+func (r *ClassFeatureRegistry) ActiveFeatures() []*ClassFeature {
+	var out []*ClassFeature
+	for _, f := range r.byID {
+		if f.Active {
+			out = append(out, f)
+		}
+	}
+	return out
 }
