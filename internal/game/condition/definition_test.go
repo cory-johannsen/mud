@@ -105,7 +105,7 @@ func TestRegistry_Register_OverwritesDuplicate(t *testing.T) {
 func TestLoadDirectory_RealConditions(t *testing.T) {
 	reg, err := condition.LoadDirectory("../../../content/conditions")
 	require.NoError(t, err)
-	for _, id := range []string{"dying", "wounded", "unconscious", "stunned", "frightened", "prone", "flat_footed"} {
+	for _, id := range []string{"dying", "wounded", "unconscious", "stunned", "frightened", "prone", "flat_footed", "grabbed", "hidden"} {
 		_, ok := reg.Get(id)
 		assert.True(t, ok, "condition %q must be present", id)
 	}
