@@ -61,24 +61,38 @@ func (s *Service) AwardKill(ctx context.Context, sess *session.PlayerSession, np
 }
 
 // AwardRoomDiscovery awards XP for entering a previously unseen room.
+// Always returns at least one message (the XP grant) prepended before any level-up messages.
 //
 // Precondition: sess must be non-nil.
 // Postcondition: sess.Experience updated; SaveProgress called on level-up.
 func (s *Service) AwardRoomDiscovery(ctx context.Context, sess *session.PlayerSession, characterID int64) ([]string, error) {
-	return s.award(ctx, sess, characterID, s.cfg.Awards.NewRoomXP)
+	xpAmount := s.cfg.Awards.NewRoomXP
+	levelMsgs, err := s.award(ctx, sess, characterID, xpAmount)
+	if err != nil {
+		return nil, err
+	}
+	grant := fmt.Sprintf("You gain %d XP for discovering a new room.", xpAmount)
+	return append([]string{grant}, levelMsgs...), nil
 }
 
 // AwardSkillCheck awards XP for a successful or crit-successful skill check.
+// Always returns at least one message (the XP grant) prepended before any level-up messages.
 // Set isCrit=true for crit_success outcomes.
 //
-// Precondition: sess must be non-nil; dc >= 0.
+// Precondition: sess must be non-nil; skillName must be non-empty; dc >= 0.
 // Postcondition: sess.Experience updated; SaveProgress called on level-up.
-func (s *Service) AwardSkillCheck(ctx context.Context, sess *session.PlayerSession, dc int, isCrit bool, characterID int64) ([]string, error) {
+func (s *Service) AwardSkillCheck(ctx context.Context, sess *session.PlayerSession, skillName string, dc int, isCrit bool, characterID int64) ([]string, error) {
 	base := s.cfg.Awards.SkillCheckSuccessXP
 	if isCrit {
 		base = s.cfg.Awards.SkillCheckCritSuccessXP
 	}
-	return s.award(ctx, sess, characterID, base+dc*s.cfg.Awards.SkillCheckDCMultiplier)
+	xpAmount := base + dc*s.cfg.Awards.SkillCheckDCMultiplier
+	levelMsgs, err := s.award(ctx, sess, characterID, xpAmount)
+	if err != nil {
+		return nil, err
+	}
+	grant := fmt.Sprintf("You gain %d XP for the %s check.", xpAmount, skillName)
+	return append([]string{grant}, levelMsgs...), nil
 }
 
 // award applies awardXP to sess and handles level-up side effects.

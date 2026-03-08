@@ -2,11 +2,13 @@ package xp_test
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/xp"
@@ -97,7 +99,7 @@ func TestService_AwardSkillCheck_Success(t *testing.T) {
 	svc := xp.NewService(testCfg(), saver)
 	sess := testSess(1, 0, 10)
 
-	_, err := svc.AwardSkillCheck(context.Background(), sess, 14, false, 0)
+	_, err := svc.AwardSkillCheck(context.Background(), sess, "parkour", 14, false, 0)
 	require.NoError(t, err)
 	// 10 + 14×2 = 38
 	assert.Equal(t, 38, sess.Experience)
@@ -108,7 +110,7 @@ func TestService_AwardSkillCheck_CritSuccess(t *testing.T) {
 	svc := xp.NewService(testCfg(), saver)
 	sess := testSess(1, 0, 10)
 
-	_, err := svc.AwardSkillCheck(context.Background(), sess, 14, true, 0)
+	_, err := svc.AwardSkillCheck(context.Background(), sess, "parkour", 14, true, 0)
 	require.NoError(t, err)
 	// 25 + 14×2 = 53
 	assert.Equal(t, 53, sess.Experience)
@@ -212,4 +214,50 @@ func TestService_CurrentHPCappedAtMaxHP(t *testing.T) {
 	// MaxHP went from 10 to 15; CurrentHP was at 10 = old MaxHP, new MaxHP=15, CurrentHP stays 10.
 	assert.Equal(t, 15, sess.MaxHP)
 	assert.Equal(t, 10, sess.CurrentHP)
+}
+
+func TestService_AwardRoomDiscovery_ReturnsGrantMessage(t *testing.T) {
+	saver := &fakeProgressSaver{}
+	svc := xp.NewService(testCfg(), saver)
+	sess := testSess(1, 0, 10)
+
+	msgs, err := svc.AwardRoomDiscovery(context.Background(), sess, 0)
+	require.NoError(t, err)
+	require.NotEmpty(t, msgs, "must return at least the XP grant message")
+	assert.Contains(t, msgs[0], "You gain")
+	assert.Contains(t, msgs[0], "XP")
+	assert.Contains(t, msgs[0], "discovering a new room")
+}
+
+func TestService_AwardSkillCheck_ReturnsGrantMessage(t *testing.T) {
+	saver := &fakeProgressSaver{}
+	svc := xp.NewService(testCfg(), saver)
+	sess := testSess(1, 0, 10)
+
+	msgs, err := svc.AwardSkillCheck(context.Background(), sess, "parkour", 14, false, 0)
+	require.NoError(t, err)
+	require.NotEmpty(t, msgs)
+	assert.Contains(t, msgs[0], "You gain")
+	assert.Contains(t, msgs[0], "XP")
+	assert.Contains(t, msgs[0], "parkour")
+}
+
+func TestPropertyService_AwardRoomDiscovery_GrantMessageAlwaysFirst(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		saver := &fakeProgressSaver{}
+		svc := xp.NewService(testCfg(), saver)
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		xpAmt := rapid.IntRange(0, 999).Draw(rt, "xp")
+		sess := testSess(level, xpAmt, 10)
+		msgs, err := svc.AwardRoomDiscovery(context.Background(), sess, 0)
+		if err != nil {
+			rt.Fatal(err)
+		}
+		if len(msgs) == 0 {
+			rt.Fatal("expected at least one message")
+		}
+		if !strings.Contains(msgs[0], "You gain") {
+			rt.Fatalf("first message must be XP grant, got: %q", msgs[0])
+		}
+	})
 }

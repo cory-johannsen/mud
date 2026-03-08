@@ -1420,7 +1420,7 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 		// Award XP for successful skill checks.
 		if s.xpSvc != nil && (result.Outcome == skillcheck.CritSuccess || result.Outcome == skillcheck.Success) {
 			isCrit := result.Outcome == skillcheck.CritSuccess
-			if xpMsgs, xpErr := s.xpSvc.AwardSkillCheck(context.Background(), sess, trigger.DC, isCrit, sess.CharacterID); xpErr != nil {
+			if xpMsgs, xpErr := s.xpSvc.AwardSkillCheck(context.Background(), sess, trigger.Skill, trigger.DC, isCrit, sess.CharacterID); xpErr != nil {
 				s.logger.Warn("awarding skill check XP", zap.String("uid", uid), zap.Error(xpErr))
 			} else {
 				msgs = append(msgs, xpMsgs...)
@@ -1501,7 +1501,7 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 			// Award XP for successful NPC skill checks.
 			if s.xpSvc != nil && (result.Outcome == skillcheck.CritSuccess || result.Outcome == skillcheck.Success) {
 				isCrit := result.Outcome == skillcheck.CritSuccess
-				if xpMsgs, xpErr := s.xpSvc.AwardSkillCheck(context.Background(), sess, trigger.DC, isCrit, sess.CharacterID); xpErr != nil {
+				if xpMsgs, xpErr := s.xpSvc.AwardSkillCheck(context.Background(), sess, trigger.Skill, trigger.DC, isCrit, sess.CharacterID); xpErr != nil {
 					s.logger.Warn("awarding NPC skill check XP", zap.String("uid", uid), zap.Error(xpErr))
 				} else {
 					msgs = append(msgs, xpMsgs...)
