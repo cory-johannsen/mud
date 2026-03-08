@@ -1110,3 +1110,140 @@ class_features:
       type: skill_check
       skill: rep
       dc: 14
+
+  # --- criminal job active features ---
+  - id: beg
+    name: Beg
+    archetype: ""
+    job: beggar
+    pf2e: ""
+    active: true
+    shortcut: beg
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You look as pitiful as possible."
+    description: "Smooth Talk skill check (DC 12) to elicit sympathy and resources."
+    effect:
+      type: skill_check
+      skill: smooth_talk
+      dc: 12
+
+  - id: ram
+    name: Ram
+    archetype: ""
+    job: car_jacker
+    pf2e: ""
+    active: true
+    shortcut: ram
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You use whatever you can as a battering ram."
+    description: "Deal 1d6 bludgeoning damage by ramming or improvised assault."
+    effect:
+      type: damage
+      amount: "1d6"
+      damage_type: bludgeoning
+
+  - id: execution_strike
+    name: Execution Strike
+    archetype: ""
+    job: contract_killer
+    pf2e: ""
+    active: true
+    shortcut: execute
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "Clean. Precise. Professional."
+    description: "Deal 1d8 piercing damage — a precisely aimed killing strike."
+    effect:
+      type: damage
+      amount: "1d8"
+      damage_type: piercing
+
+  - id: mooch
+    name: Mooch
+    archetype: ""
+    job: hanger_on
+    pf2e: ""
+    active: true
+    shortcut: mooch
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You latch on to whoever looks most generous."
+    description: "Smooth Talk skill check (DC 13) to obtain free goods or services."
+    effect:
+      type: skill_check
+      skill: smooth_talk
+      dc: 13
+
+  - id: honey_trap
+    name: Honey Trap
+    archetype: ""
+    job: hooker
+    pf2e: ""
+    active: true
+    shortcut: honey
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You turn on the charm like a weapon."
+    description: "Grift skill check (DC 14) to distract or manipulate a target."
+    effect:
+      type: skill_check
+      skill: grift
+      dc: 14
+
+  - id: stash_it
+    name: Stash It
+    archetype: ""
+    job: smuggler
+    pf2e: ""
+    active: true
+    shortcut: stash
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You know how to hide things where they won't be found."
+    description: "Conceal contraband so it goes undetected this scene."
+    effect:
+      type: condition
+      target: self
+      condition_id: stash_active
+
+  - id: pickpocket_action
+    name: Pickpocket
+    archetype: ""
+    job: thief
+    pf2e: ""
+    active: true
+    shortcut: pick
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "Light fingers, lighter wallet."
+    description: "Grift skill check (DC 14) to lift an item without detection."
+    effect:
+      type: skill_check
+      skill: grift
+      dc: 14
+
+  - id: loot
+    name: Loot
+    archetype: ""
+    job: tomb_raider
+    pf2e: ""
+    active: true
+    shortcut: loot
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "Your eyes sweep the space for anything worth taking."
+    description: "Scavenging skill check (DC 13) to find valuables in the current location."
+    effect:
+      type: skill_check
+      skill: scavenging
+      dc: 13
