@@ -62,6 +62,7 @@ message ClientMessage {
     LevelUpRequest level_up = 45;
     CombatDefaultRequest combat_default = 46;
     TrainSkillRequest train_skill = 47;
+    ActionRequest action = 48;
   }
 }
 
@@ -690,4 +691,11 @@ message CombatDefaultRequest {
 // TrainSkillRequest asks the server to advance a skill proficiency rank.
 message TrainSkillRequest {
   string skill_id = 1;
+}
+
+// ActionRequest asks the server to perform a named action against an optional target.
+// An empty name causes the server to return the list of available actions.
+message ActionRequest {
+  string name   = 1; // action ID or shortcut alias; empty means list available actions
+  string target = 2; // target NPC name; empty if not required
 }
