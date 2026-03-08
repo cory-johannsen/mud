@@ -93,6 +93,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerLevelUp:            bridgeLevelUp,
 	command.HandlerCombatDefault:      bridgeCombatDefault,
 	command.HandlerTrainSkill:         bridgeTrainSkill,
+	command.HandlerAction:             bridgeAction,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -752,6 +753,25 @@ func bridgeTrainSkill(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_TrainSkill{TrainSkill: &gamev1.TrainSkillRequest{SkillId: skillID}},
+	}}, nil
+}
+
+// bridgeAction validates and sends an ActionRequest for a named archetype or job action.
+//
+// Precondition: bctx must be non-nil with a valid conn, reqID, and parsed.Args.
+// Postcondition: if HandleAction returns an error, writes usage error and returns done=true;
+// otherwise returns a non-nil msg containing an ActionRequest.
+func bridgeAction(bctx *bridgeContext) (bridgeResult, error) {
+	req, err := command.HandleAction(bctx.parsed.Args)
+	if err != nil {
+		return writeErrorPrompt(bctx, err.Error())
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_Action{Action: &gamev1.ActionRequest{
+			Name:   req.Name,
+			Target: req.Target,
+		}},
 	}}, nil
 }
 
