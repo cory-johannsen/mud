@@ -94,6 +94,19 @@ type ActionQueue struct {
 // RemainingPoints returns the number of action points still available this round.
 func (q *ActionQueue) RemainingPoints() int { return q.remaining }
 
+// DeductAP reduces remaining action points by cost without queuing an action.
+// Use for out-of-queue combat actions (raise_shield, take_cover, feint, demoralize, first_aid).
+//
+// Precondition: cost > 0.
+// Postcondition: remaining decremented by cost on success; unchanged on error.
+func (q *ActionQueue) DeductAP(cost int) error {
+	if q.remaining < cost {
+		return fmt.Errorf("not enough AP: have %d, need %d", q.remaining, cost)
+	}
+	q.remaining -= cost
+	return nil
+}
+
 // QueuedActions returns a copy of the slice of queued actions.
 func (q *ActionQueue) QueuedActions() []QueuedAction {
 	cp := make([]QueuedAction, len(q.actions))

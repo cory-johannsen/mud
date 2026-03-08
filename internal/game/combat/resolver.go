@@ -56,7 +56,7 @@ func ResolveAttack(attacker, target *Combatant, src Source) AttackResult {
 	d20 := src.Intn(20) + 1
 	atkMod := attacker.StrMod + CombatProficiencyBonus(attacker.Level, attacker.WeaponProficiencyRank)
 	atkTotal := d20 + atkMod
-	outcome := OutcomeFor(atkTotal, target.AC)
+	outcome := OutcomeFor(atkTotal+attacker.AttackMod, target.AC+target.ACMod)
 
 	// Damage roll: 1d6 + STR modifier (unarmed baseline)
 	dmgDie := src.Intn(6) + 1
@@ -70,7 +70,7 @@ func ResolveAttack(attacker, target *Combatant, src Source) AttackResult {
 		AttackerID:  attacker.ID,
 		TargetID:    target.ID,
 		AttackRoll:  d20,
-		AttackTotal: atkTotal,
+		AttackTotal: atkTotal + attacker.AttackMod,
 		Outcome:     outcome,
 		BaseDamage:  baseDmg,
 		DamageRoll:  []int{dmgDie},

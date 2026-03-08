@@ -1,6 +1,7 @@
 package combat_test
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -132,6 +133,51 @@ func TestActionUseAbility_String(t *testing.T) {
 	if combat.ActionUseAbility.String() != "use_ability" {
 		t.Errorf("String(): got %q, want %q", combat.ActionUseAbility.String(), "use_ability")
 	}
+}
+
+func TestPropertyActionUseAbility_RemainingNeverNegative(t *testing.T) {
+	const iterations = 1000
+	for i := 0; i < iterations; i++ {
+		startingPoints := rand.Intn(5) + 1 // 1..5
+		cost := rand.Intn(startingPoints+2) // 0..startingPoints+1 (may exceed)
+		q := combat.NewActionQueue("prop-test", startingPoints)
+		qa := combat.QueuedAction{
+			Type:        combat.ActionUseAbility,
+			AbilityID:   "test_ability",
+			AbilityCost: cost,
+		}
+		err := q.Enqueue(qa)
+		if err != nil {
+			// Enqueue failed (cost > remaining); remaining must be unchanged.
+			if q.RemainingPoints() != startingPoints {
+				t.Errorf("iter %d: failed enqueue left remaining=%d, want %d",
+					i, q.RemainingPoints(), startingPoints)
+			}
+			continue
+		}
+		// Enqueue succeeded; remaining must equal startingPoints - cost, and >= 0.
+		want := startingPoints - cost
+		if q.RemainingPoints() != want {
+			t.Errorf("iter %d: remaining=%d, want %d", i, q.RemainingPoints(), want)
+		}
+		if q.RemainingPoints() < 0 {
+			t.Errorf("iter %d: remaining went negative: %d", i, q.RemainingPoints())
+		}
+	}
+}
+
+func TestActionQueue_DeductAP_Success(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	err := q.DeductAP(1)
+	require.NoError(t, err)
+	assert.Equal(t, 2, q.RemainingPoints())
+}
+
+func TestActionQueue_DeductAP_InsufficientAP(t *testing.T) {
+	q := combat.NewActionQueue("u1", 1)
+	err := q.DeductAP(2)
+	require.Error(t, err)
+	assert.Equal(t, 1, q.RemainingPoints(), "AP must not change on failure")
 }
 
 func TestPropertyActionQueue_RemainingNeverNegative(t *testing.T) {

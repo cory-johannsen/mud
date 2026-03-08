@@ -198,6 +198,27 @@ func TestProperty_FirearmAttack_RangePenaltyMonotone(t *testing.T) {
 	})
 }
 
+func TestResolveAttack_ACMod_RaisesEffectiveAC(t *testing.T) {
+	// d20=15, atkMod=0, total=15 vs AC 15 normally succeeds.
+	// With ACMod=+5, effectiveAC=20, should miss.
+	src := fixedSrc{v: 14} // Intn(20) returns 14, so d20=15
+	attacker := makeCombatant("a", 10, 1, 0, 0)
+	target := makeCombatant("b", 15, 1, 0, 0)
+	target.ACMod = 5
+	result := ResolveAttack(attacker, target, src)
+	assert.Equal(t, Failure, result.Outcome)
+}
+
+func TestResolveAttack_AttackMod_ReducesAttackTotal(t *testing.T) {
+	// d20=10, atkMod=0, normally total=10. With AttackMod=-5, total=5 vs AC 15 → failure.
+	src := fixedSrc{v: 9} // Intn(20) returns 9, so d20=10
+	attacker := makeCombatant("a", 10, 1, 0, 0)
+	attacker.AttackMod = -5
+	target := makeCombatant("b", 15, 1, 0, 0)
+	result := ResolveAttack(attacker, target, src)
+	assert.Equal(t, Failure, result.Outcome)
+}
+
 func TestResolveSave_Untrained_AlwaysReturnsSomeOutcome(t *testing.T) {
 	c := &Combatant{Level: 1, GritMod: 0, ToughnessRank: "untrained"}
 	src := rand.New(rand.NewSource(42))

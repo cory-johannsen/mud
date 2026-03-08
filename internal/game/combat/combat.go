@@ -92,6 +92,12 @@ type Combatant struct {
 	// CoolRank is the character's proficiency rank for Cool saving rolls.
 	// Valid values: "untrained", "trained", "expert", "master", "legendary". Defaults to "untrained".
 	CoolRank string
+	// ACMod is a temporary mid-round AC modifier applied by conditions (e.g. flat_footed, shield_raised).
+	// Negative values reduce effective AC; positive values increase it.
+	ACMod int
+	// AttackMod is a temporary mid-round attack roll modifier applied by conditions (e.g. frightened).
+	// Negative values reduce the attacker's roll total.
+	AttackMod int
 }
 
 // IsPlayer reports whether this combatant is a player character.

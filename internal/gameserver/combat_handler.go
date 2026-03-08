@@ -283,6 +283,87 @@ func (h *CombatHandler) RemainingAP(uid string) int {
 	return q.RemainingPoints()
 }
 
+// SpendAP deducts cost AP from the combatant uid's action queue in their active combat.
+//
+// Precondition: uid must be non-empty; cost must be > 0.
+// Postcondition: Returns nil on success; error if player not in combat or insufficient AP.
+func (h *CombatHandler) SpendAP(uid string, cost int) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("player %q is not in active combat", uid)
+	}
+
+	q, ok := cbt.ActionQueues[uid]
+	if !ok {
+		return fmt.Errorf("no action queue for player %q", uid)
+	}
+	return q.DeductAP(cost)
+}
+
+// ApplyCombatantACMod adds mod to the named combatant's ACMod in the player's active combat.
+// Use to apply mid-round AC modifiers from feint (negative) or raise_shield/take_cover (positive).
+//
+// Precondition: uid must be a player in active combat; targetID must be a combatant in that combat.
+// Postcondition: Returns nil on success.
+func (h *CombatHandler) ApplyCombatantACMod(uid, targetID string, mod int) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("player %q is not in active combat", uid)
+	}
+
+	for _, c := range cbt.Combatants {
+		if c.ID == targetID {
+			c.ACMod += mod
+			return nil
+		}
+	}
+	return fmt.Errorf("combatant %q not found in combat", targetID)
+}
+
+// ApplyCombatantAttackMod adds mod to the named combatant's AttackMod in the player's active combat.
+// Use to apply attack penalties (e.g. demoralize, frightened).
+//
+// Precondition: uid must be a player in active combat; targetID must be a combatant in that combat.
+// Postcondition: Returns nil on success.
+func (h *CombatHandler) ApplyCombatantAttackMod(uid, targetID string, mod int) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("player %q is not in active combat", uid)
+	}
+
+	for _, c := range cbt.Combatants {
+		if c.ID == targetID {
+			c.AttackMod += mod
+			return nil
+		}
+	}
+	return fmt.Errorf("combatant %q not found in combat", targetID)
+}
+
 // Pass forfeits uid's remaining AP for this round.
 // Requires active combat. Early-resolves if all actions submitted.
 //
