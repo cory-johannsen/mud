@@ -64,6 +64,13 @@ type Combatant struct {
 	// WeaponProficiencyRank is the character's proficiency rank for their equipped weapon category.
 	// Empty string or "untrained" means no proficiency bonus on attack rolls.
 	WeaponProficiencyRank string
+	// WeaponDamageType is the damage type of the currently equipped main-hand weapon.
+	// Empty string means unarmed (no special type).
+	WeaponDamageType string
+	// Resistances maps damage type → flat damage reduction (minimum 0). Always nil for players.
+	Resistances map[string]int
+	// Weaknesses maps damage type → flat damage addition. Always nil for players.
+	Weaknesses map[string]int
 	// ArmorProficiencyRank is the character's proficiency rank for their equipped armor category.
 	// Empty string or "untrained" means no proficiency bonus to AC.
 	ArmorProficiencyRank string
