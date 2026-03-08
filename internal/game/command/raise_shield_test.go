@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/command"
 )
@@ -19,4 +20,17 @@ func TestHandleRaiseShield_WithArgs_Ignored(t *testing.T) {
 	req, err := command.HandleRaiseShield([]string{"extra"})
 	require.NoError(t, err)
 	assert.NotNil(t, req)
+}
+
+func TestPropertyHandleRaiseShield_AlwaysSucceeds(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		args := rapid.SliceOf(rapid.String()).Draw(rt, "args")
+		req, err := command.HandleRaiseShield(args)
+		if err != nil {
+			rt.Fatalf("HandleRaiseShield must never return error, got: %v", err)
+		}
+		if req == nil {
+			rt.Fatal("HandleRaiseShield must never return nil request")
+		}
+	})
 }

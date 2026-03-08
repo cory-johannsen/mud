@@ -4096,12 +4096,16 @@ func (s *GameServiceServer) handleRaiseShield(uid string) (*gamev1.ServerEvent, 
 
 	// In combat: spend 1 AP and update the combatant's ACMod.
 	if sess.Status == statusInCombat {
+		if s.combatH == nil {
+			return errorEvent("Combat handler unavailable."), nil
+		}
 		if err := s.combatH.SpendAP(uid, 1); err != nil {
 			return errorEvent(err.Error()), nil
 		}
 		if err := s.combatH.ApplyCombatantACMod(uid, uid, +2); err != nil {
 			s.logger.Warn("handleRaiseShield: ApplyCombatantACMod failed",
 				zap.String("uid", uid), zap.Error(err))
+			return errorEvent(fmt.Sprintf("Failed to raise shield: %v", err)), nil
 		}
 	}
 
