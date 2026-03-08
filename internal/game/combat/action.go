@@ -15,6 +15,7 @@ const (
 	ActionFireBurst                       // costs 2 AP; burst fire
 	ActionFireAutomatic                   // costs 3 AP; full-auto suppressive fire
 	ActionThrow                           // costs 1 AP; throw explosive
+	ActionUseAbility                      // costs AbilityCost AP; activate a class ability
 )
 
 // Cost returns the action point cost for the ActionType.
@@ -37,6 +38,8 @@ func (a ActionType) Cost() int {
 		return 3
 	case ActionThrow:
 		return 1
+	case ActionUseAbility:
+		return 0 // cost comes from QueuedAction.AbilityCost
 	default:
 		// ActionUnknown and any unrecognized values have cost 0.
 		return 0
@@ -62,6 +65,8 @@ func (a ActionType) String() string {
 		return "automatic"
 	case ActionThrow:
 		return "throw"
+	case ActionUseAbility:
+		return "use_ability"
 	default:
 		return "unknown"
 	}
@@ -73,6 +78,8 @@ type QueuedAction struct {
 	Target      string // NPC name for attack/strike; empty for pass
 	WeaponID    string // for firearm actions; empty = unarmed
 	ExplosiveID string // for ActionThrow
+	AbilityID   string // for ActionUseAbility; the ClassFeature ID
+	AbilityCost int    // for ActionUseAbility; AP cost from ClassFeature.ActionCost
 }
 
 // ActionQueue tracks a combatant's remaining action points and queued actions.
@@ -117,6 +124,9 @@ func (q *ActionQueue) Enqueue(a QueuedAction) error {
 		return fmt.Errorf("invalid action type: ActionUnknown is not a valid action")
 	}
 	cost := a.Type.Cost()
+	if a.Type == ActionUseAbility {
+		cost = a.AbilityCost
+	}
 	if a.Type == ActionPass {
 		q.actions = append(q.actions, a)
 		q.remaining = 0

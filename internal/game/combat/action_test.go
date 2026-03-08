@@ -99,6 +99,41 @@ func TestActionQueue_HasPoints(t *testing.T) {
 	assert.False(t, q.HasPoints())
 }
 
+func TestActionUseAbility_Cost(t *testing.T) {
+	tests := []struct {
+		cost     int
+		expected int
+	}{
+		{1, 1},
+		{2, 2},
+		{3, 3},
+	}
+	for _, tt := range tests {
+		qa := combat.QueuedAction{Type: combat.ActionUseAbility, AbilityID: "surge", AbilityCost: tt.cost}
+		q := combat.NewActionQueue("player1", 3)
+		if err := q.Enqueue(qa); err != nil {
+			t.Errorf("cost=%d: unexpected Enqueue error: %v", tt.cost, err)
+		}
+		if q.RemainingPoints() != 3-tt.cost {
+			t.Errorf("cost=%d: remaining=%d, want %d", tt.cost, q.RemainingPoints(), 3-tt.cost)
+		}
+	}
+}
+
+func TestActionUseAbility_InsufficientAP(t *testing.T) {
+	q := combat.NewActionQueue("player1", 1)
+	qa := combat.QueuedAction{Type: combat.ActionUseAbility, AbilityID: "surge", AbilityCost: 2}
+	if err := q.Enqueue(qa); err == nil {
+		t.Error("expected insufficient AP error, got nil")
+	}
+}
+
+func TestActionUseAbility_String(t *testing.T) {
+	if combat.ActionUseAbility.String() != "use_ability" {
+		t.Errorf("String(): got %q, want %q", combat.ActionUseAbility.String(), "use_ability")
+	}
+}
+
 func TestPropertyActionQueue_RemainingNeverNegative(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		maxPoints := rapid.IntRange(1, 6).Draw(rt, "maxPoints")
