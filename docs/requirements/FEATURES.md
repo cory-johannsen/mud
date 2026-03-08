@@ -183,10 +183,10 @@
   - [x] Ability bonuses color-coded (red family for negative, white for 0, teal→green→blue→purple for positive; wide bands for high-level growth)
   - [x] Ability names spelled out (Brutality, Grit, Quickness, Reasoning, Savvy, Flair)
   - [ ] Excess newline between primary and off-hand weapon
-- [ ] Initiative.  
-  - PF2E uses Initiative for combat order but Gunchete uses a timed round with simultaneous action.  
-  - Initiative grants players an advantage in P2FE that Gunchete has lost
-    - I want to replace it with a combat bonus that reflects the original advantage initiative provided.
+- [x] Initiative — replaced with persistent combat bonus when player wins initiative roll.
+  - Margin 1–5 → +1, 6–10 → +2, 11+ → +3 to attack rolls and AC for the entire combat.
+  - Announced in combat start: "You win initiative! +N to attack and AC this combat."
+- [ ] The Zone Map room equipment is displayed with the indicator [use], but that should say [interact]
 - [ ] Actions
   - [ ] Archetype and Job
     - Each Archetype should have at least 1 unique Action
