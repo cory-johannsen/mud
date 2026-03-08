@@ -234,6 +234,55 @@ func (h *CombatHandler) Strike(uid, target string) ([]*gamev1.CombatEvent, error
 	return []*gamev1.CombatEvent{confirmEvent}, nil
 }
 
+// ActivateAbility queues an ActionUseAbility for the combatant identified by uid.
+//
+// Precondition: uid must be a valid connected player in active combat; qa.Type must be ActionUseAbility.
+// Postcondition: Returns nil on success, or an error if the combatant has insufficient AP or is not found.
+func (h *CombatHandler) ActivateAbility(uid string, qa combat.QueuedAction) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("you are not in combat")
+	}
+
+	if err := cbt.QueueAction(uid, qa); err != nil {
+		return fmt.Errorf("queuing ability: %w", err)
+	}
+	return nil
+}
+
+// RemainingAP returns the number of action points remaining for combatant uid.
+//
+// Precondition: uid must be non-empty.
+// Postcondition: Returns 0 if the combatant is not found or has no remaining AP.
+func (h *CombatHandler) RemainingAP(uid string) int {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return 0
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return 0
+	}
+
+	q, ok := cbt.ActionQueues[uid]
+	if !ok {
+		return 0
+	}
+	return q.RemainingPoints()
+}
+
 // Pass forfeits uid's remaining AP for this round.
 // Requires active combat. Early-resolves if all actions submitted.
 //

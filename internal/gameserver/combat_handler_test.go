@@ -1194,3 +1194,123 @@ func TestCombatHandler_StreetBrawler_AoO_NotFiredForNPCs(t *testing.T) {
 		}
 	}
 }
+
+// TestCombatHandler_ActivateAbility_InsufficientAP verifies that ActivateAbility
+// returns an error when the combatant has insufficient AP for the requested cost.
+//
+// Precondition: Player is in active combat with only 1 AP remaining; ability costs 2 AP.
+// Postcondition: ActivateAbility returns a non-nil error; AP is unchanged.
+func TestCombatHandler_ActivateAbility_InsufficientAP(t *testing.T) {
+	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
+	h := makeCombatHandler(t, broadcastFn)
+	const roomID = "room-activate-insufficient"
+	const uid = "player-activate-insufficient"
+
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	// Start combat (costs 1 AP, leaves 2 AP remaining).
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Spend 2 more AP via Strike (leaving 0 AP).
+	_, err = h.Strike(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Strike: %v", err)
+	}
+
+	// Now try to activate an ability costing 1 AP with 0 AP remaining.
+	qa := combat.QueuedAction{Type: combat.ActionUseAbility, AbilityID: "surge", AbilityCost: 1}
+	activateErr := h.ActivateAbility(uid, qa)
+	if activateErr == nil {
+		t.Fatal("expected error from ActivateAbility with insufficient AP; got nil")
+	}
+}
+
+// TestCombatHandler_ActivateAbility_Success verifies that ActivateAbility succeeds
+// and deducts AP when the combatant has sufficient AP.
+//
+// Precondition: Player is in active combat with AP remaining; ability costs 1 AP.
+// Postcondition: ActivateAbility returns nil; RemainingAP decreases by the ability cost.
+func TestCombatHandler_ActivateAbility_Success(t *testing.T) {
+	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
+	h := makeCombatHandler(t, broadcastFn)
+	const roomID = "room-activate-success"
+	const uid = "player-activate-success"
+
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	// Start combat (costs 1 AP, leaves 2 AP remaining).
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	apBefore := h.RemainingAP(uid)
+
+	// Activate an ability costing 1 AP.
+	qa := combat.QueuedAction{Type: combat.ActionUseAbility, AbilityID: "surge", AbilityCost: 1}
+	if err := h.ActivateAbility(uid, qa); err != nil {
+		t.Fatalf("ActivateAbility returned unexpected error: %v", err)
+	}
+
+	apAfter := h.RemainingAP(uid)
+	if apAfter != apBefore-1 {
+		t.Errorf("expected RemainingAP=%d after 1-AP ability; got %d", apBefore-1, apAfter)
+	}
+}
+
+// TestCombatHandler_RemainingAP_UnknownUID verifies that RemainingAP returns 0
+// for a uid that is not enrolled in any active combat.
+//
+// Precondition: No combat is active for the given uid.
+// Postcondition: RemainingAP returns 0.
+func TestCombatHandler_RemainingAP_UnknownUID(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	ap := h.RemainingAP("nonexistent-player")
+	if ap != 0 {
+		t.Errorf("expected RemainingAP=0 for unknown uid; got %d", ap)
+	}
+}
+
+// TestCombatHandler_RemainingAP_AfterAbility verifies that RemainingAP returns
+// the correct remaining AP after an ability has been activated.
+//
+// Precondition: Player is in active combat with known starting AP.
+// Postcondition: RemainingAP equals startingAP minus the ability's AbilityCost.
+func TestCombatHandler_RemainingAP_AfterAbility(t *testing.T) {
+	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
+	h := makeCombatHandler(t, broadcastFn)
+	const roomID = "room-remaining-ap"
+	const uid = "player-remaining-ap"
+
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	// Start combat (costs 1 AP, leaves 2 AP remaining).
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Verify 2 AP remain after the 1-AP attack.
+	if ap := h.RemainingAP(uid); ap != 2 {
+		t.Fatalf("expected 2 AP after 1-AP attack; got %d", ap)
+	}
+
+	// Activate a 2-AP ability.
+	qa := combat.QueuedAction{Type: combat.ActionUseAbility, AbilityID: "surge", AbilityCost: 2}
+	if err := h.ActivateAbility(uid, qa); err != nil {
+		t.Fatalf("ActivateAbility: %v", err)
+	}
+
+	if ap := h.RemainingAP(uid); ap != 0 {
+		t.Errorf("expected 0 AP after 2-AP ability; got %d", ap)
+	}
+}
