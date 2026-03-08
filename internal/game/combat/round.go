@@ -10,6 +10,15 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 )
 
+// attackNarrative builds a human-readable attack result string.
+// When dmg > 0 (a hit landed), the damage dealt is included.
+func attackNarrative(actorName, verb, targetName string, outcome Outcome, total, dmg int) string {
+	if dmg > 0 {
+		return fmt.Sprintf("%s %s %s: %s (total %d) for %d damage.", actorName, verb, targetName, outcome, total, dmg)
+	}
+	return fmt.Sprintf("%s %s %s: %s (total %d).", actorName, verb, targetName, outcome, total)
+}
+
 // RoundEvent records what happened when one action was resolved.
 type RoundEvent struct {
 	AttackResult *AttackResult // nil for pass
@@ -279,7 +288,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActionType:   ActionAttack,
 					ActorID:      actor.ID,
 					ActorName:    actor.Name,
-					Narrative:    fmt.Sprintf("%s attacks %s: %s (total %d).", actor.Name, target.Name, r.Outcome, r.AttackTotal),
+					Narrative:    attackNarrative(actor.Name, "attacks", target.Name, r.Outcome, r.AttackTotal, dmg),
 				})
 				// Clear flat_footed from NPC combatants after their first action resolves.
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
@@ -328,7 +337,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActionType:   ActionStrike,
 					ActorID:      actor.ID,
 					ActorName:    actor.Name,
-					Narrative:    fmt.Sprintf("%s strikes %s: %s (total %d).", actor.Name, target.Name, r1.Outcome, r1.AttackTotal),
+					Narrative:    attackNarrative(actor.Name, "strikes", target.Name, r1.Outcome, r1.AttackTotal, dmg1),
 				})
 				// Clear flat_footed from NPC combatants after their first action resolves.
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
@@ -369,7 +378,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActionType:   ActionStrike,
 					ActorID:      actor.ID,
 					ActorName:    actor.Name,
-					Narrative:    fmt.Sprintf("%s strikes %s again (MAP): %s (total %d).", actor.Name, target.Name, r2.Outcome, r2.AttackTotal),
+					Narrative:    attackNarrative(actor.Name, "strikes", target.Name, r2.Outcome, r2.AttackTotal, dmg2),
 				})
 			case ActionReload:
 				events = append(events, resolveReload(cbt, actor, action))

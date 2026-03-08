@@ -1092,9 +1092,18 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 				}
 			}
 		}
+		// Announce NPC death in the console.
+		h.broadcastFn(inst.RoomID, []*gamev1.CombatEvent{{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_DEATH,
+			Attacker:  c.Name,
+			Narrative: fmt.Sprintf("%s is dead!", c.Name),
+		}})
+
 		// Award kill XP to the first living player.
 		if h.xpSvc != nil {
 			if killer := h.firstLivingPlayer(cbt); killer != nil {
+				cfg := h.xpSvc.Config()
+				xpAmount := inst.Level * cfg.Awards.KillXPPerNPCLevel
 				if xpMsgs, xpErr := h.xpSvc.AwardKill(context.Background(), killer, inst.Level, killer.CharacterID); xpErr != nil {
 					if h.logger != nil {
 						h.logger.Warn("AwardKill failed",
@@ -1104,6 +1113,19 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 						)
 					}
 				} else {
+					// Announce XP grant directly to the killer.
+					xpGrantMsg := fmt.Sprintf("You gain %d XP for killing %s.", xpAmount, c.Name)
+					xpGrantEvt := &gamev1.ServerEvent{
+						Payload: &gamev1.ServerEvent_Message{
+							Message: &gamev1.MessageEvent{
+								Content: xpGrantMsg,
+								Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+							},
+						},
+					}
+					if data, marshalErr := proto.Marshal(xpGrantEvt); marshalErr == nil {
+						_ = killer.Entity.Push(data)
+					}
 					for _, msg := range xpMsgs {
 						xpEvt := &gamev1.ServerEvent{
 							Payload: &gamev1.ServerEvent_Message{
