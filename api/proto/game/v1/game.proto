@@ -65,6 +65,7 @@ message ClientMessage {
     ActionRequest action = 48;
     RaiseShieldRequest raise_shield = 49;
     TakeCoverRequest take_cover = 50;
+    FirstAidRequest first_aid = 51;
   }
 }
 
@@ -707,3 +708,6 @@ message RaiseShieldRequest {}
 
 // TakeCoverRequest asks the server to have the player take cover.
 message TakeCoverRequest {}
+
+// FirstAidRequest asks the server to apply first aid to the player.
+message FirstAidRequest {}

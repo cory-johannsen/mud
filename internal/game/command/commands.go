@@ -71,6 +71,7 @@ const (
 	HandlerAction              = "action"
 	HandlerRaiseShield         = "raise_shield"
 	HandlerTakeCover           = "take_cover"
+	HandlerFirstAid            = "first_aid"
 )
 
 // Command defines a player-invocable command.
@@ -162,6 +163,7 @@ func BuiltinCommands() []Command {
 		{Name: "action", Aliases: []string{"act"}, Help: "Activate an archetype or job action. Usage: action [name] [target]", Category: CategoryCombat, Handler: HandlerAction},
 		{Name: "raise", Aliases: []string{"rs"}, Help: "Raise your shield (+2 AC until start of next turn). Requires a shield in the off-hand slot.", Category: CategoryCombat, Handler: HandlerRaiseShield},
 		{Name: "cover", Aliases: []string{"tc"}, Help: "Take cover (+2 AC for the encounter). Costs 1 AP in combat.", Category: CategoryCombat, Handler: HandlerTakeCover},
+		{Name: "aid", Aliases: []string{"fa"}, Help: "Apply first aid (patch_job DC 15; success heals 2d8+4 HP). Costs 2 AP in combat.", Category: CategoryCombat, Handler: HandlerFirstAid},
 	}
 }
 

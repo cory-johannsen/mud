@@ -2210,3 +2210,148 @@ func TestPropertySkillDisplayName_NeverEmpty(t *testing.T) {
 		}
 	})
 }
+
+// newFirstAidSvc builds a minimal GameServiceServer for handleFirstAid tests.
+// roller may be nil to test the nil-dice path.
+func newFirstAidSvc(t *testing.T, roller *dice.Roller, combatHandler *CombatHandler) (*GameServiceServer, *session.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+	return svc, sessMgr
+}
+
+// TestHandleFirstAid_NoSession verifies that handleFirstAid returns an error when the
+// player session does not exist.
+//
+// Precondition: uid "unknown_fa_uid" has no session.
+// Postcondition: error is returned; event is nil.
+func TestHandleFirstAid_NoSession(t *testing.T) {
+	svc, _ := newFirstAidSvc(t, nil, nil)
+	event, err := svc.handleFirstAid("unknown_fa_uid")
+	require.Error(t, err)
+	assert.Nil(t, event)
+}
+
+// TestHandleFirstAid_OutOfCombat_FailedCheck verifies that handleFirstAid returns a failure
+// message when the skill check total is below DC 15.
+//
+// Precondition: player has no patch_job skill (bonus=0); dice source returns 0 (roll=1, total=1 < DC 15).
+// Postcondition: message event contains "failure".
+func TestHandleFirstAid_OutOfCombat_FailedCheck(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	// Intn(20)=0 → roll=1, bonus=0, total=1 < DC 15 → failure.
+	src := &fixedDiceSource{val: 0}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	svc, sessMgr := newFirstAidSvc(t, roller, nil)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_fa_fail",
+		Username:  "Medic",
+		CharName:  "Medic",
+		RoomID:    "room_a",
+		CurrentHP: 5,
+		MaxHP:     20,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Skills = map[string]string{} // no patch_job → bonus=0
+
+	event, err := svc.handleFirstAid("u_fa_fail")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event")
+	assert.Contains(t, msgEvt.Content, "failure")
+}
+
+// TestHandleFirstAid_OutOfCombat_SuccessCheck verifies that handleFirstAid heals the player
+// when the skill check total meets or exceeds DC 15.
+//
+// Precondition: player has patch_job="trained" (bonus=2); dice source returns 12 (roll=13, total=15 >= DC 15).
+// Postcondition: message event contains "success"; player CurrentHP increases.
+func TestHandleFirstAid_OutOfCombat_SuccessCheck(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	// Intn(20)=12 → roll=13; patch_job=trained → bonus=2; total=15 >= DC 15 → success.
+	// Intn(8) for 2d8 also returns 0 each → each d8=1; +4 fixed → healed=6.
+	src := &fixedDiceSource{val: 12}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	svc, sessMgr := newFirstAidSvc(t, roller, nil)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_fa_success",
+		Username:  "Medic",
+		CharName:  "Medic",
+		RoomID:    "room_a",
+		CurrentHP: 5,
+		MaxHP:     20,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Skills = map[string]string{"patch_job": "trained"}
+
+	event, err := svc.handleFirstAid("u_fa_success")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event")
+	assert.Contains(t, msgEvt.Content, "success")
+	assert.Greater(t, sess.CurrentHP, 5, "expected HP to increase on success")
+}
+
+// TestHandleFirstAid_InCombat_InsufficientAP verifies that handleFirstAid returns an error
+// event when the player is in combat but SpendAP fails (no active combat).
+//
+// Precondition: player status == statusInCombat; CombatHandler has no registered combat.
+// Postcondition: error event returned.
+func TestHandleFirstAid_InCombat_InsufficientAP(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 19}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, nil, worldMgr, nil, nil, nil, nil, nil)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_fa_combat",
+		Username:  "Medic",
+		CharName:  "Medic",
+		RoomID:    "room_a",
+		CurrentHP: 5,
+		MaxHP:     20,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat // triggers SpendAP path
+
+	event, err := svc.handleFirstAid("u_fa_combat")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event when SpendAP fails (no active combat)")
+}

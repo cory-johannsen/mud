@@ -1126,6 +1126,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleRaiseShield(uid)
 	case *gamev1.ClientMessage_TakeCover:
 		return s.handleTakeCover(uid)
+	case *gamev1.ClientMessage_FirstAid:
+		return s.handleFirstAid(uid)
 	case *gamev1.ClientMessage_SummonItem:
 		return s.handleSummonItem(uid, p.SummonItem)
 	case *gamev1.ClientMessage_ProficienciesRequest:
@@ -4174,4 +4176,81 @@ func (s *GameServiceServer) handleTakeCover(uid string) (*gamev1.ServerEvent, er
 	}
 
 	return messageEvent("You take cover. (+2 AC for the encounter)"), nil
+}
+
+// handleFirstAid performs a patch_job skill check (DC 15).
+// On success, heals 2d8+4 HP (self). Costs 2 AP in combat.
+//
+// Precondition: uid must identify a valid player session.
+// Postcondition: On skill check success, heals player HP and persists via charSaver.
+func (s *GameServiceServer) handleFirstAid(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// In combat: spend 2 AP.
+	if sess.Status == statusInCombat {
+		if s.combatH == nil {
+			return errorEvent("Combat handler unavailable."), nil
+		}
+		if err := s.combatH.SpendAP(uid, 2); err != nil {
+			return errorEvent(err.Error()), nil
+		}
+	}
+
+	// Skill check: 1d20 + patch_job rank bonus vs DC 15.
+	if s.dice == nil {
+		return nil, fmt.Errorf("handleFirstAid: dice roller not configured")
+	}
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleFirstAid: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["patch_job"])
+	total := roll + bonus
+	dc := 15
+
+	if total < dc {
+		msg := fmt.Sprintf("First aid check: rolled %d+%d=%d vs DC %d — failure. You fail to apply treatment.",
+			roll, bonus, total, dc)
+		return messageEvent(msg), nil
+	}
+
+	// Success: heal 2d8+4.
+	healResult, err := s.dice.RollExpr("2d8+4")
+	if err != nil {
+		return nil, fmt.Errorf("handleFirstAid: rolling heal: %w", err)
+	}
+	healed := healResult.Total()
+	newHP := sess.CurrentHP + healed
+	if newHP > sess.MaxHP {
+		newHP = sess.MaxHP
+	}
+	sess.CurrentHP = newHP
+
+	ctx := context.Background()
+	if s.charSaver != nil {
+		if saveErr := s.charSaver.SaveState(ctx, sess.CharacterID, sess.RoomID, newHP); saveErr != nil {
+			s.logger.Warn("handleFirstAid: saving HP", zap.String("uid", uid), zap.Error(saveErr))
+		}
+	}
+
+	// Push HP update event.
+	hpEvt := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_HpUpdate{
+			HpUpdate: &gamev1.HpUpdateEvent{
+				CurrentHp: int32(newHP),
+				MaxHp:     int32(sess.MaxHP),
+			},
+		},
+	}
+	if data, err := proto.Marshal(hpEvt); err == nil {
+		_ = sess.Entity.Push(data)
+	}
+
+	msg := fmt.Sprintf("First aid check: rolled %d+%d=%d vs DC %d — success! You recover %d HP. (%d/%d)",
+		roll, bonus, total, dc, healed, newHP, sess.MaxHP)
+	return messageEvent(msg), nil
 }
