@@ -188,7 +188,12 @@
   - Announced in combat start: "You win initiative! +N to attack and AC this combat."
 - [x] The Zone Map room equipment is displayed with the indicator [use], but that should say [interact] to reflect the command required
   - [x] `examine` should have the same effect as `interact` for Zone Map room equipment.  This does not apply to all room equipment, it is custom behavior.
-- [ ] Character sheet weapon information should show attack bonus and damage 
+- [x] Character sheet weapon information should show attack bonus and damage 
+- [x] Damage types
+  - [x] Resistance
+  - [x] Weakness
+- [ ] Character sheet should display total AC
+  - [ ] Each armor item should display the AC contribution
 - [ ] Critical hits and misses
   - [ ] Critical hits should be announced in the console with color-coding and emphasis
   - [ ] Critical hits should apply critical hit modifiers and bonuses
