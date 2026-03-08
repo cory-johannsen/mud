@@ -520,6 +520,9 @@ func main() {
 	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr)
 	combatHandler.SetLogger(logger)
 
+	// Create action handler for player-activated class feature actions.
+	actionH := gameserver.NewActionHandler(sessMgr, cfReg, condRegistry, npcMgr, combatHandler, charRepo, diceRoller, logger)
+
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
@@ -532,6 +535,7 @@ func main() {
 		charAbilityBoostsRepo,
 		archetypeMap,
 		regionMap,
+		actionH,
 	)
 
 	// Wire XP service with progress and skill-increase persistence.
