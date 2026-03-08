@@ -112,6 +112,10 @@ type DefenseStats struct {
 	CheckPenalty int // sum of all slot check_penalty values (non-positive)
 	SpeedPenalty int // sum of speed_penalty values
 	StrengthReq  int // max strength_req across all equipped slots
+	// Resistances maps damage type → effective flat reduction (highest single-source value per type).
+	Resistances map[string]int
+	// Weaknesses maps damage type → total flat addition (sum across all sources).
+	Weaknesses map[string]int
 }
 
 // ComputedDefenses aggregates PF2e-style defense stats from all currently equipped armor slots.
@@ -120,7 +124,11 @@ type DefenseStats struct {
 // Postcondition: ACBonus equals the sum of all equipped slot ac_bonus values;
 // EffectiveDex <= dexMod and <= any single slot's DexCap.
 func (e *Equipment) ComputedDefenses(reg *Registry, dexMod int) DefenseStats {
-	stats := DefenseStats{EffectiveDex: dexMod}
+	stats := DefenseStats{
+		EffectiveDex: dexMod,
+		Resistances:  make(map[string]int),
+		Weaknesses:   make(map[string]int),
+	}
 	hasDexCap := false
 	for _, slotted := range e.Armor {
 		if slotted == nil {
@@ -139,6 +147,14 @@ func (e *Equipment) ComputedDefenses(reg *Registry, dexMod int) DefenseStats {
 		if !hasDexCap || def.DexCap < stats.EffectiveDex {
 			stats.EffectiveDex = def.DexCap
 			hasDexCap = true
+		}
+		for dmgType, val := range def.Resistances {
+			if val > stats.Resistances[dmgType] {
+				stats.Resistances[dmgType] = val
+			}
+		}
+		for dmgType, val := range def.Weaknesses {
+			stats.Weaknesses[dmgType] += val
 		}
 	}
 	if stats.EffectiveDex > dexMod {
