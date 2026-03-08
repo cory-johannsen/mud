@@ -1342,6 +1342,38 @@ func weaponDamageString(damageDice string, abilityMod int, isMelee bool) string 
 // Precondition: score is any integer.
 // Postcondition: returns (score-10)/2 for scores >= 10, and (score-11)/2 for scores < 10,
 // matching the standard mathematical floor division for negative values.
+// skillDisplayName converts a snake_case skill ID to a title-cased display name.
+//
+// Precondition: id must be non-empty.
+// Postcondition: Returns a non-empty title-cased string.
+func skillDisplayName(id string) string {
+	parts := strings.Split(id, "_")
+	for i, p := range parts {
+		if len(p) > 0 {
+			parts[i] = strings.ToUpper(p[:1]) + p[1:]
+		}
+	}
+	return strings.Join(parts, " ")
+}
+
+// outcomeDisplayName converts a CheckOutcome to a human-readable string.
+//
+// Postcondition: Returns one of "critical success", "success", "failure", "critical failure".
+func outcomeDisplayName(o skillcheck.CheckOutcome) string {
+	switch o {
+	case skillcheck.CritSuccess:
+		return "critical success"
+	case skillcheck.Success:
+		return "success"
+	case skillcheck.Failure:
+		return "failure"
+	case skillcheck.CritFailure:
+		return "critical failure"
+	default:
+		return "unknown"
+	}
+}
+
 func abilityModFrom(score int) int {
 	if score >= 10 {
 		return (score - 10) / 2
@@ -1408,6 +1440,10 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 		}
 
 		result := skillcheck.Resolve(roll, amod, rank, trigger.DC, trigger)
+
+		detail := fmt.Sprintf("%s check (DC %d): rolled %d+%d=%d — %s.",
+			skillDisplayName(trigger.Skill), trigger.DC, roll, amod, result.Total, outcomeDisplayName(result.Outcome))
+		msgs = append(msgs, detail)
 
 		outcome := trigger.Outcomes.ForOutcome(result.Outcome)
 		if outcome != nil {
@@ -1486,6 +1522,10 @@ func (s *GameServiceServer) applyNPCSkillChecks(uid string, roomID string) []str
 			}
 
 			result := skillcheck.Resolve(roll, amod, rank, trigger.DC, trigger)
+
+			detail := fmt.Sprintf("%s check (DC %d): rolled %d+%d=%d — %s.",
+				skillDisplayName(trigger.Skill), trigger.DC, roll, amod, result.Total, outcomeDisplayName(result.Outcome))
+			msgs = append(msgs, detail)
 
 			outcome := trigger.Outcomes.ForOutcome(result.Outcome)
 			if outcome != nil {

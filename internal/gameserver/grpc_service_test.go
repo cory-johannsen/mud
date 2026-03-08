@@ -123,6 +123,7 @@ func TestStartZoneTicks_RespawnIntegration(t *testing.T) {
 		nil, nil, npcHandler, npcMgr, nil, nil,
 		respawnMgr, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -151,7 +152,7 @@ func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
@@ -487,6 +488,7 @@ func testGRPCServerWithCharData(t *testing.T) (gamev1.GameServiceClient, *sessio
 		allSkills, skillsRepo, nil,
 		allFeats, featRegistry, featsRepo,
 		allClassFeatures, cfRegistry, cfRepo, nil, nil, nil, nil,
+		nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -607,6 +609,7 @@ func TestApplyRoomSkillChecks_OnEnter_Success(t *testing.T) {
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	// Add a player session with Skills and Abilities set.
@@ -624,8 +627,9 @@ func TestApplyRoomSkillChecks_OnEnter_Success(t *testing.T) {
 	sess.Skills = map[string]string{"parkour": "trained"}
 
 	msgs := svc.applyRoomSkillChecks("u_skill", room)
-	require.Len(t, msgs, 1, "expected exactly one outcome message")
-	assert.Equal(t, "You vault it.", msgs[0])
+	require.Len(t, msgs, 2, "expected detail line and outcome message")
+	assert.Equal(t, "Parkour check (DC 10): rolled 10+2=14 — success.", msgs[0])
+	assert.Equal(t, "You vault it.", msgs[1])
 }
 
 // TestApplyRoomSkillChecks_OnEnter_Failure verifies that applyRoomSkillChecks returns the
@@ -674,6 +678,7 @@ func TestApplyRoomSkillChecks_OnEnter_Failure(t *testing.T) {
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -690,8 +695,9 @@ func TestApplyRoomSkillChecks_OnEnter_Failure(t *testing.T) {
 	sess.Skills = map[string]string{"parkour": "trained"}
 
 	msgs := svc.applyRoomSkillChecks("u_skill2", room)
-	require.Len(t, msgs, 1)
-	assert.Equal(t, "You stumble.", msgs[0])
+	require.Len(t, msgs, 2, "expected detail line and outcome message")
+	assert.Equal(t, "Parkour check (DC 10): rolled 1+2=5 — failure.", msgs[0])
+	assert.Equal(t, "You stumble.", msgs[1])
 }
 
 // TestApplyRoomSkillChecks_NoOnEnterTriggers verifies that non-on_enter triggers are ignored.
@@ -730,6 +736,7 @@ func TestApplyRoomSkillChecks_NoOnEnterTriggers(t *testing.T) {
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -850,6 +857,7 @@ end
 		nil, roller, nil, nil, nil, scriptMgr,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -866,8 +874,9 @@ end
 	sess.Skills = map[string]string{"parkour": "trained"}
 
 	msgs := svc.applyRoomSkillChecks("u_lua_hook", room)
-	require.Len(t, msgs, 1)
-	assert.Equal(t, "You vault it.", msgs[0])
+	require.Len(t, msgs, 2, "expected detail line and outcome message")
+	assert.Equal(t, "Parkour check (DC 10): rolled 10+2=14 — success.", msgs[0])
+	assert.Equal(t, "You vault it.", msgs[1])
 
 	// Inspect captured globals from Lua to verify the hook was called with the correct signature.
 	capturedUID, _ := scriptMgr.CallHook("test", "tostring", lua.LString("u_lua_hook"))
@@ -914,6 +923,7 @@ function get_captured_outcome() return captured_outcome end
 		nil, roller, nil, nil, nil, scriptMgr2,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess2, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -932,8 +942,9 @@ function get_captured_outcome() return captured_outcome end
 	room2 := *room
 	room2.ID = "room_lua_hook2"
 	msgs2 := svc2.applyRoomSkillChecks("u_lua_hook2", &room2)
-	require.Len(t, msgs2, 1)
-	assert.Equal(t, "You vault it.", msgs2[0])
+	require.Len(t, msgs2, 2, "expected detail line and outcome message")
+	assert.Equal(t, "Parkour check (DC 10): rolled 10+2=14 — success.", msgs2[0])
+	assert.Equal(t, "You vault it.", msgs2[1])
 
 	gotUID, _ := scriptMgr2.CallHook("test", "get_captured_uid")
 	gotSkill, _ := scriptMgr2.CallHook("test", "get_captured_skill")
@@ -1001,6 +1012,7 @@ func TestApplyRoomSkillChecks_DamageEffect(t *testing.T) {
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1017,8 +1029,9 @@ func TestApplyRoomSkillChecks_DamageEffect(t *testing.T) {
 	// No skills set → untrained (profBonus = 0).
 
 	msgs := svc.applyRoomSkillChecks("u_dmg_effect", room)
-	require.Len(t, msgs, 1)
-	assert.Equal(t, "You stumble and take damage.", msgs[0])
+	require.Len(t, msgs, 2, "expected detail line and outcome message")
+	assert.Equal(t, "Parkour check (DC 10): rolled 1+0=1 — failure.", msgs[0])
+	assert.Equal(t, "You stumble and take damage.", msgs[1])
 
 	// Intn(4)=0 → dice result is 1; damage total = 1.
 	assert.Equal(t, 9, sess.CurrentHP, "CurrentHP must be reduced by the damage roll")
@@ -1079,6 +1092,7 @@ func TestApplyNPCSkillChecks_OnGreet_Success(t *testing.T) {
 		nil, roller, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1095,8 +1109,9 @@ func TestApplyNPCSkillChecks_OnGreet_Success(t *testing.T) {
 	sess.Skills = map[string]string{"smooth_talk": "trained"}
 
 	msgs := svc.applyNPCSkillChecks("u_npc_greet", "room_a")
-	require.Len(t, msgs, 1, "expected exactly one outcome message from NPC on_greet check")
-	assert.Equal(t, "Charming Vendor: They warm up to you.", msgs[0])
+	require.Len(t, msgs, 2, "expected detail line and outcome message from NPC on_greet check")
+	assert.Equal(t, "Smooth Talk check (DC 12): rolled 10+3=15 — success.", msgs[0])
+	assert.Equal(t, "Charming Vendor: They warm up to you.", msgs[1])
 }
 
 // TestApplyNPCSkillChecks_OnGreet_Failure verifies that applyNPCSkillChecks returns
@@ -1153,6 +1168,7 @@ func TestApplyNPCSkillChecks_OnGreet_Failure(t *testing.T) {
 		nil, roller, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1169,8 +1185,9 @@ func TestApplyNPCSkillChecks_OnGreet_Failure(t *testing.T) {
 	sess.Skills = map[string]string{"smooth_talk": "trained"}
 
 	msgs := svc.applyNPCSkillChecks("u_npc_greet_fail", "room_a")
-	require.Len(t, msgs, 1, "expected exactly one outcome message from NPC on_greet check")
-	assert.Equal(t, "Stern Guard: They sneer.", msgs[0])
+	require.Len(t, msgs, 2, "expected detail line and outcome message from NPC on_greet check")
+	assert.Equal(t, "Smooth Talk check (DC 16): rolled 5+3=10 — failure.", msgs[0])
+	assert.Equal(t, "Stern Guard: They sneer.", msgs[1])
 }
 
 // TestApplyNPCSkillChecks_NoNPCs verifies that applyNPCSkillChecks returns nil when
@@ -1191,6 +1208,7 @@ func TestApplyNPCSkillChecks_NoNPCs(t *testing.T) {
 		nil, nil, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1247,6 +1265,7 @@ func TestApplyNPCSkillChecks_NonGreetTriggerIgnored(t *testing.T) {
 		nil, nil, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	_, err = sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1326,6 +1345,7 @@ func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
 		nil, roller, npcHandler, npcMgr, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1342,8 +1362,9 @@ func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
 	// No skills set → untrained (profBonus = 0).
 
 	msgs := svc.applyNPCSkillChecks("u_npc_dmg_effect", "room_a")
-	require.Len(t, msgs, 1, "expected exactly one outcome message")
-	assert.Equal(t, "Brutal Guard: They strike you!", msgs[0])
+	require.Len(t, msgs, 2, "expected detail line and outcome message")
+	assert.Equal(t, "Smooth Talk check (DC 10): rolled 1+0=1 — failure.", msgs[0])
+	assert.Equal(t, "Brutal Guard: They strike you!", msgs[1])
 
 	// Intn(4)=0 → dice result=1; damage total=1; 10-1=9.
 	assert.Equal(t, 9, sess.CurrentHP, "CurrentHP must be reduced by the NPC on_greet damage effect")
@@ -1679,6 +1700,7 @@ func TestHandleUse_AppliesConditionWhenConditionIDSet(t *testing.T) {
 		nil, nil, nil,
 		[]*ruleset.Feat{feat}, featRegistry, featsRepo,
 		nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1743,6 +1765,7 @@ func TestHandleUse_NoConditionAppliedWhenConditionIDEmpty(t *testing.T) {
 		nil, nil, nil,
 		[]*ruleset.Feat{feat}, featRegistry, featsRepo,
 		nil, nil, nil, nil, nil, nil, nil,
+		nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1813,6 +1836,7 @@ func TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied(t *testing.T) {
 			nil, nil, nil,
 			[]*ruleset.Feat{feat}, featRegistry, featsRepo,
 			nil, nil, nil, nil, nil, nil, nil,
+			nil,
 		)
 
 		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1834,6 +1858,42 @@ func TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied(t *testing.T) {
 
 		if len(sess.Conditions.All()) != 0 {
 			rt.Fatalf("expected no conditions applied when ConditionID is empty, got %d conditions", len(sess.Conditions.All()))
+		}
+	})
+}
+
+func TestSkillDisplayName(t *testing.T) {
+	cases := []struct {
+		id   string
+		want string
+	}{
+		{"parkour", "Parkour"},
+		{"tech_lore", "Tech Lore"},
+		{"hard_look", "Hard Look"},
+		{"smooth_talk", "Smooth Talk"},
+		{"rep", "Rep"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.id, func(t *testing.T) {
+			got := skillDisplayName(tc.id)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestOutcomeDisplayName(t *testing.T) {
+	assert.Equal(t, "critical success", outcomeDisplayName(skillcheck.CritSuccess))
+	assert.Equal(t, "success", outcomeDisplayName(skillcheck.Success))
+	assert.Equal(t, "failure", outcomeDisplayName(skillcheck.Failure))
+	assert.Equal(t, "critical failure", outcomeDisplayName(skillcheck.CritFailure))
+}
+
+func TestPropertySkillDisplayName_NeverEmpty(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		id := rapid.StringMatching(`[a-z][a-z_]{0,19}`).Draw(rt, "id")
+		result := skillDisplayName(id)
+		if result == "" {
+			rt.Fatal("skillDisplayName must never return empty string")
 		}
 	})
 }

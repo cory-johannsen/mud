@@ -219,9 +219,9 @@
   - [ ] Exploration
   - [ ] Downtime
   - [ ] Gear
-- [ ] Console notifications
-  - [ ] The player should be notified in the console every time a skill is used automatically
-  - [ ] The player should be notified in the console every time XP is awarded and why
+- [x] Console notifications
+  - [x] The player should be notified in the console every time a skill is used automatically
+  - [x] The player should be notified in the console every time XP is awarded and why
 - [ ] Advanced combat mechanics
     - [ ] Combat distance
         - Movement
