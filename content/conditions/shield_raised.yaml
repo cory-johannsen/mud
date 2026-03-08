@@ -1,11 +1,11 @@
-id: flat_footed
-name: Flat-Footed
+id: shield_raised
+name: Shield Raised
 description: |
-  You are caught off guard, suffering -2 AC until the start of your next turn.
+  You have raised your shield, gaining +2 AC until the start of your next turn.
 duration_type: round
 max_stacks: 0
 attack_penalty: 0
-ac_penalty: 2
+ac_penalty: 0
 damage_bonus: 0
 speed_penalty: 0
 restrict_actions: []

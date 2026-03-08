@@ -1,11 +1,11 @@
-id: flat_footed
-name: Flat-Footed
+id: in_cover
+name: In Cover
 description: |
-  You are caught off guard, suffering -2 AC until the start of your next turn.
-duration_type: round
+  You are taking cover, gaining +2 AC until you move or the encounter ends.
+duration_type: encounter
 max_stacks: 0
 attack_penalty: 0
-ac_penalty: 2
+ac_penalty: 0
 damage_bonus: 0
 speed_penalty: 0
 restrict_actions: []

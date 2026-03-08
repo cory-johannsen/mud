@@ -1,12 +1,12 @@
 id: frightened
 name: Frightened
 description: |
-  You are frightened. You take a penalty to attack rolls and AC equal to your
-  frightened value. Frightened reduces by 1 at the end of each round.
-duration_type: rounds
-max_stacks: 4
+  You are shaken by fear, suffering -1 to attack rolls and AC per stack.
+duration_type: encounter
+max_stacks: 3
 attack_penalty: 1
 ac_penalty: 1
+damage_bonus: 0
 speed_penalty: 0
 restrict_actions: []
 lua_on_apply: ""
