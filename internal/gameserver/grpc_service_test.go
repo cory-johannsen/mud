@@ -2645,3 +2645,242 @@ func TestHandleFeint_Success_RollAbove(t *testing.T) {
 	// (We can verify indirectly — no error and message confirms success path ran.)
 	_ = inst
 }
+
+// newDemoralizeSvc builds a minimal GameServiceServer for handleDemoralize tests.
+// npcMgr may be nil; combatHandler may be nil.
+func newDemoralizeSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatHandler *CombatHandler) (*GameServiceServer, *session.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	if npcMgr == nil {
+		npcMgr = npc.NewManager()
+	}
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+	return svc, sessMgr
+}
+
+// newDemoralizeSvcWithCombat builds a GameServiceServer, session.Manager, npc.Manager, and
+// CombatHandler sharing the same session.Manager, suitable for tests that need real
+// in-progress combat state.
+//
+// Precondition: t must be non-nil.
+// Postcondition: Returns a non-nil svc, sessMgr, npcMgr, and combatHandler all sharing the same sessMgr.
+func newDemoralizeSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer, *session.Manager, *npc.Manager, *CombatHandler) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	npcMgr := npc.NewManager()
+	combatHandler := NewCombatHandler(
+		combat.NewEngine(), npcMgr, sessMgr, roller,
+		func(_ string, _ []*gamev1.CombatEvent) {},
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil,
+	)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+	return svc, sessMgr, npcMgr, combatHandler
+}
+
+// TestHandleDemoralize_NoSession verifies that handleDemoralize returns an error when the
+// player session does not exist.
+//
+// Precondition: uid "unknown_dem_uid" has no session.
+// Postcondition: error is returned; event is nil.
+func TestHandleDemoralize_NoSession(t *testing.T) {
+	svc, _ := newDemoralizeSvc(t, nil, nil, nil)
+	event, err := svc.handleDemoralize("unknown_dem_uid", &gamev1.DemoralizeRequest{Target: "bandit"})
+	require.Error(t, err)
+	assert.Nil(t, event)
+}
+
+// TestHandleDemoralize_NotInCombat verifies that handleDemoralize returns an error event
+// when the player is not in combat.
+//
+// Precondition: sess.Status != statusInCombat.
+// Postcondition: error event containing "only available in combat".
+func TestHandleDemoralize_NotInCombat(t *testing.T) {
+	svc, sessMgr := newDemoralizeSvc(t, nil, nil, nil)
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_dem_nc",
+		Username: "Smooth",
+		CharName: "Smooth",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+
+	event, err := svc.handleDemoralize("u_dem_nc", &gamev1.DemoralizeRequest{Target: "bandit"})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event")
+	assert.Contains(t, errEvt.Message, "only available in combat")
+}
+
+// TestHandleDemoralize_EmptyTarget verifies that handleDemoralize returns an error event
+// when no target is specified.
+//
+// Precondition: player in combat; req.Target == "".
+// Postcondition: error event containing "Usage: demoralize".
+func TestHandleDemoralize_EmptyTarget(t *testing.T) {
+	svc, sessMgr := newDemoralizeSvc(t, nil, nil, nil)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_dem_et",
+		Username: "Smooth",
+		CharName: "Smooth",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+
+	event, err := svc.handleDemoralize("u_dem_et", &gamev1.DemoralizeRequest{Target: ""})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event")
+	assert.Contains(t, errEvt.Message, "Usage: demoralize")
+}
+
+// TestHandleDemoralize_TargetNotFound verifies that handleDemoralize returns an error event
+// when the named target NPC is not in the player's room, and that AP is NOT spent.
+//
+// Precondition: player in combat; no NPC named "ghost" in room.
+// Postcondition: error event containing "not found"; AP is not decremented.
+func TestHandleDemoralize_TargetNotFound(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 19}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	svc, sessMgr, npcMgr, combatHandler := newDemoralizeSvcWithCombat(t, roller)
+
+	const roomID = "room_dem_tnf"
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "goblin-dem-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+	}, roomID)
+	require.NoError(t, err)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_dem_tnf", Username: "Smooth", CharName: "Smooth",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_dem_tnf", "Goblin")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	apBefore := combatHandler.RemainingAP("u_dem_tnf")
+
+	event, err := svc.handleDemoralize("u_dem_tnf", &gamev1.DemoralizeRequest{Target: "ghost"})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected error event for non-existent target")
+	assert.Contains(t, errEvt.Message, "not found")
+
+	apAfter := combatHandler.RemainingAP("u_dem_tnf")
+	assert.Equal(t, apBefore, apAfter, "AP must not be spent when target is not found")
+
+	_ = sess
+}
+
+// TestHandleDemoralize_RollBelow verifies that handleDemoralize returns a failure message
+// when the smooth_talk roll total is below the target's Level+10 DC.
+//
+// Precondition: player in combat; NPC Level=5 → DC=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
+// Postcondition: message event containing "failure".
+func TestHandleDemoralize_RollBelow(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 0}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	svc, sessMgr, npcMgr, combatHandler := newDemoralizeSvcWithCombat(t, roller)
+
+	const roomID = "room_dem_rb"
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "bandit-dem-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+	}, roomID)
+	require.NoError(t, err)
+
+	sessRB, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_dem_rb", Username: "Smooth", CharName: "Smooth",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sessRB.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_dem_rb", "Bandit")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	event, err := svc.handleDemoralize("u_dem_rb", &gamev1.DemoralizeRequest{Target: "Bandit"})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event on failed demoralize")
+	assert.Contains(t, msgEvt.Content, "failure")
+}
+
+// TestHandleDemoralize_RollAbove verifies that handleDemoralize returns a success message
+// and applies -1 AC and -1 attack when the smooth_talk roll meets or exceeds Level+10 DC.
+//
+// Precondition: player in combat; NPC Level=1 → DC=11; dice returns 19 (roll=20, bonus=0, total=20 >= 11).
+// Postcondition: message event containing "success".
+func TestHandleDemoralize_RollAbove(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 19}
+	roller := dice.NewLoggedRoller(src, logger)
+
+	svc, sessMgr, npcMgr, combatHandler := newDemoralizeSvcWithCombat(t, roller)
+
+	const roomID = "room_dem_ra"
+	inst, err := npcMgr.Spawn(&npc.Template{
+		ID: "ganger-dem-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+	}, roomID)
+	require.NoError(t, err)
+
+	sessRA, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_dem_ra", Username: "Smooth", CharName: "Smooth",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sessRA.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_dem_ra", "Ganger")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	event, err := svc.handleDemoralize("u_dem_ra", &gamev1.DemoralizeRequest{Target: "Ganger"})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event on successful demoralize")
+	assert.Contains(t, msgEvt.Content, "success")
+
+	_ = inst
+}

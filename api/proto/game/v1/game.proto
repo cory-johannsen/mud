@@ -67,6 +67,7 @@ message ClientMessage {
     TakeCoverRequest take_cover = 50;
     FirstAidRequest first_aid = 51;
     FeintRequest feint = 52;
+    DemoralizeRequest demoralize = 53;
   }
 }
 
@@ -715,5 +716,10 @@ message FirstAidRequest {}
 
 // FeintRequest asks the server to feint against a target NPC.
 message FeintRequest {
+    string target = 1;
+}
+
+// DemoralizeRequest asks the server to demoralize a target NPC.
+message DemoralizeRequest {
     string target = 1;
 }

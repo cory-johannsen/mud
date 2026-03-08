@@ -73,6 +73,7 @@ const (
 	HandlerTakeCover           = "take_cover"
 	HandlerFirstAid            = "first_aid"
 	HandlerFeint               = "feint"
+	HandlerDemoralize          = "demoralize"
 )
 
 // Command defines a player-invocable command.
@@ -166,6 +167,7 @@ func BuiltinCommands() []Command {
 		{Name: "cover", Aliases: []string{"tc"}, Help: "Take cover (+2 AC for the encounter). Costs 1 AP in combat.", Category: CategoryCombat, Handler: HandlerTakeCover},
 		{Name: "aid", Aliases: []string{"fa"}, Help: "Apply first aid (patch_job DC 15; success heals 2d8+4 HP). Costs 2 AP in combat.", Category: CategoryCombat, Handler: HandlerFirstAid},
 		{Name: "feint", Aliases: nil, Help: "Feint against a target (grift vs Perception DC; success applies flat_footed -2 AC for 1 round). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerFeint},
+		{Name: "demoralize", Aliases: []string{"dem"}, Help: "Demoralize a target (smooth_talk vs Level+10 DC; success applies -1 AC and -1 attack for the encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDemoralize},
 	}
 }
 

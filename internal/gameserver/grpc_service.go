@@ -1130,6 +1130,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleFirstAid(uid)
 	case *gamev1.ClientMessage_Feint:
 		return s.handleFeint(uid, p.Feint)
+	case *gamev1.ClientMessage_Demoralize:
+		return s.handleDemoralize(uid, p.Demoralize)
 	case *gamev1.ClientMessage_SummonItem:
 		return s.handleSummonItem(uid, p.SummonItem)
 	case *gamev1.ClientMessage_ProficienciesRequest:
@@ -4313,4 +4315,66 @@ func (s *GameServiceServer) handleFeint(uid string, req *gamev1.FeintRequest) (*
 	}
 
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is caught off-guard (-2 AC this round).", inst.Name())), nil
+}
+
+// handleDemoralize performs a smooth_talk skill check against the target NPC's Level+10 DC.
+// On success, applies -1 AC and -1 attack to the target combatant for the encounter.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; req.Target must name an NPC in the room.
+// Postcondition: On success, target's ACMod and AttackMod are each decremented by 1.
+func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Demoralize is only available in combat."), nil
+	}
+
+	if req.GetTarget() == "" {
+		return errorEvent("Usage: demoralize <target>"), nil
+	}
+
+	// Find target NPC in room to get Level DC before spending AP.
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	// Spend 1 AP only after the target is confirmed to exist.
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Skill check: 1d20 + smooth_talk bonus vs target Level+10.
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleDemoralize: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["smooth_talk"])
+	total := roll + bonus
+	dc := inst.Level + 10
+
+	detail := fmt.Sprintf("Demoralize (smooth_talk DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. Your words fall flat."), nil
+	}
+
+	// Success: apply -1 AC and -1 attack to NPC combatant.
+	if err := s.combatH.ApplyCombatantACMod(uid, inst.ID, -1); err != nil {
+		s.logger.Warn("handleDemoralize: ApplyCombatantACMod failed",
+			zap.String("npc_id", inst.ID), zap.Error(err))
+	}
+	if err := s.combatH.ApplyCombatantAttackMod(uid, inst.ID, -1); err != nil {
+		s.logger.Warn("handleDemoralize: ApplyCombatantAttackMod failed",
+			zap.String("npc_id", inst.ID), zap.Error(err))
+	}
+
+	return messageEvent(detail + fmt.Sprintf(" — success! %s is demoralized (-1 AC, -1 attack).", inst.Name())), nil
 }
