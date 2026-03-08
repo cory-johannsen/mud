@@ -18,24 +18,29 @@ import (
 
 // Context string constants for action availability filtering.
 const (
-	// ContextCombat is active when the player is in combat.
-	ContextCombat = "combat"
-	// ContextExploration is active when the player is idle or exploring.
-	ContextExploration = "exploration"
+	// combatContext is active when the player is in combat.
+	combatContext = "combat"
+	// explorationContext is active when the player is idle or exploring.
+	explorationContext = "exploration"
+	// downtimeContext is active when the player is in downtime.
+	downtimeContext = "downtime"
 )
 
-// inCombatStatus is the Status value from gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT.
-const inCombatStatusAction = int32(2)
+// statusInCombat is the Status value from gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT.
+const statusInCombat = int32(2)
+
+// statusUnconscious is the Status value for an unconscious player.
+const statusUnconscious = int32(3)
 
 // ContextForSession derives the current context string from a player session.
 //
 // Precondition: sess must not be nil.
 // Postcondition: Returns "combat" if sess.Status == 2 (IN_COMBAT), "exploration" otherwise.
 func ContextForSession(sess *session.PlayerSession) string {
-	if sess.Status == inCombatStatusAction {
-		return ContextCombat
+	if sess.Status == statusInCombat {
+		return combatContext
 	}
-	return ContextExploration
+	return explorationContext
 }
 
 // AvailableActions returns all active class features from reg that:
@@ -130,7 +135,7 @@ func (h *ActionHandler) Handle(ctx context.Context, sess *session.PlayerSession,
 		return fmt.Errorf("ability %q is not available in the current context (%s)", name, actionCtx)
 	}
 
-	if actionCtx == ContextCombat {
+	if actionCtx == combatContext {
 		return h.queueCombatAction(ctx, sess, feature, target)
 	}
 
@@ -174,7 +179,7 @@ func (h *ActionHandler) listActions(sess *session.PlayerSession) string {
 // Precondition: sess and feature must be non-nil.
 // Postcondition: Returns nil on success or an error if the action cannot be queued.
 func (h *ActionHandler) queueCombatAction(ctx context.Context, sess *session.PlayerSession, feature *ruleset.ClassFeature, target string) error {
-	ap := h.remainingAP(sess.UID)
+	ap := h.combatH.RemainingAP(sess.UID)
 	cost := feature.ActionCost
 	if cost <= 0 {
 		cost = 1
@@ -190,25 +195,13 @@ func (h *ActionHandler) queueCombatAction(ctx context.Context, sess *session.Pla
 		AbilityCost: cost,
 	}
 
-	if err := h.activateAbility(sess.UID, qa); err != nil {
+	if err := h.combatH.ActivateAbility(sess.UID, qa); err != nil {
 		return fmt.Errorf("queuing combat ability %q: %w", feature.ID, err)
 	}
 
 	msg := fmt.Sprintf("Ability %q queued for combat (cost: %d AP).", feature.Name, cost)
 	h.sendMessage(sess, msg)
 	return nil
-}
-
-// activateAbilityStub is replaced when CombatHandler.ActivateAbility is wired (Task 8).
-// For now it returns a "not implemented" error to prevent panic.
-func (h *ActionHandler) activateAbility(uid string, qa combat.QueuedAction) error {
-	return fmt.Errorf("combat ability queuing not yet implemented")
-}
-
-// remainingAP returns the remaining action points for the player.
-// Replaced when CombatHandler.RemainingAP is wired (Task 8).
-func (h *ActionHandler) remainingAP(uid string) int {
-	return 0
 }
 
 // resolveEffect applies the feature's ActionEffect to the player and/or target.
