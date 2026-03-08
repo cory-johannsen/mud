@@ -1,0 +1,15 @@
+id: ghost_active
+name: Ghost Active
+description: |
+  You melt into the shadows. You gain concealment and a +2 bonus to Stealth
+  checks for one minute.
+duration_type: minute
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
