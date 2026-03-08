@@ -1,7 +1,7 @@
 id: mark_active
 name: Mark Active
 description: |
-  You have identified your quarry's weak points. You gain +1d4 bonus damage
+  You have identified your quarry's weak points. You gain +1 bonus damage
   on attacks against your designated target.
 duration_type: encounter
 max_stacks: 0
