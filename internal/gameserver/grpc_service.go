@@ -2512,6 +2512,8 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.CheckPenalty = int32(def.CheckPenalty)
 	view.SpeedPenalty = int32(def.SpeedPenalty)
 	view.TotalAc = int32(10 + def.EffectiveDex + def.ACBonus)
+	sess.Resistances = def.Resistances
+	sess.Weaknesses = def.Weaknesses
 
 	// Armor slots.
 	view.Armor = make(map[string]string)

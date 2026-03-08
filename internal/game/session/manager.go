@@ -80,6 +80,12 @@ type PlayerSession struct {
 	// FeatureChoices maps feature_id → choice_key → selected value.
 	// Populated at login from character_feature_choices table.
 	FeatureChoices map[string]map[string]string
+	// Resistances maps damage type → effective flat reduction from equipped armor (highest per type).
+	// Populated from ComputedDefenses at login and after equip/unequip.
+	Resistances map[string]int
+	// Weaknesses maps damage type → total flat addition from equipped armor (additive).
+	// Populated from ComputedDefenses at login and after equip/unequip.
+	Weaknesses map[string]int
 }
 
 // Manager tracks all active player sessions and room occupancy.

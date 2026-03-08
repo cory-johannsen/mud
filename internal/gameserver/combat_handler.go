@@ -701,6 +701,10 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
 	}
 
+	// Wire player resistances/weaknesses from equipped armor.
+	playerCbt.Resistances = sess.Resistances
+	playerCbt.Weaknesses = sess.Weaknesses
+
 	// Wire save ability mods from character ability scores.
 	playerCbt.GritMod = combat.AbilityMod(sess.Abilities.Grit)
 	playerCbt.QuicknessMod = combat.AbilityMod(sess.Abilities.Quickness)
