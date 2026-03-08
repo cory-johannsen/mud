@@ -94,6 +94,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerCombatDefault:      bridgeCombatDefault,
 	command.HandlerTrainSkill:         bridgeTrainSkill,
 	command.HandlerAction:             bridgeAction,
+	command.HandlerRaiseShield:        bridgeRaiseShield,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -806,5 +807,16 @@ func bridgeRoomEquip(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_RoomEquip{RoomEquip: req},
+	}}, nil
+}
+
+// bridgeRaiseShield builds a RaiseShieldRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a RaiseShieldRequest; done is false.
+func bridgeRaiseShield(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_RaiseShield{RaiseShield: &gamev1.RaiseShieldRequest{}},
 	}}, nil
 }

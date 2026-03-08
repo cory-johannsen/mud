@@ -1122,6 +1122,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleUse(uid, p.UseRequest.FeatId)
 	case *gamev1.ClientMessage_Action:
 		return s.handleAction(uid, p.Action)
+	case *gamev1.ClientMessage_RaiseShield:
+		return s.handleRaiseShield(uid)
 	case *gamev1.ClientMessage_SummonItem:
 		return s.handleSummonItem(uid, p.SummonItem)
 	case *gamev1.ClientMessage_ProficienciesRequest:
@@ -4070,4 +4072,49 @@ func (s *GameServiceServer) handleTrainSkill(uid, skillID string) (*gamev1.Serve
 			},
 		},
 	}, nil
+}
+
+// handleRaiseShield applies the shield_raised condition (+2 AC for one round).
+// Requires a shield equipped in the off-hand slot.
+//
+// Precondition: uid must identify a valid player session.
+// Postcondition: Applies shield_raised condition; in combat, deducts 1 AP and updates Combatant ACMod.
+func (s *GameServiceServer) handleRaiseShield(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// Verify a shield is equipped in the off-hand slot.
+	if sess.LoadoutSet == nil {
+		return errorEvent("You have no equipment loaded."), nil
+	}
+	preset := sess.LoadoutSet.ActivePreset()
+	if preset == nil || preset.OffHand == nil || !preset.OffHand.Def.IsShield() {
+		return errorEvent("You must have a shield equipped in the off-hand slot to raise a shield."), nil
+	}
+
+	// In combat: spend 1 AP and update the combatant's ACMod.
+	if sess.Status == statusInCombat {
+		if err := s.combatH.SpendAP(uid, 1); err != nil {
+			return errorEvent(err.Error()), nil
+		}
+		if err := s.combatH.ApplyCombatantACMod(uid, uid, +2); err != nil {
+			s.logger.Warn("handleRaiseShield: ApplyCombatantACMod failed",
+				zap.String("uid", uid), zap.Error(err))
+		}
+	}
+
+	// Apply the shield_raised condition to the player session.
+	if s.condRegistry != nil {
+		def, ok := s.condRegistry.Get("shield_raised")
+		if ok {
+			if sess.Conditions == nil {
+				sess.Conditions = condition.NewActiveSet()
+			}
+			_ = sess.Conditions.Apply(uid, def, 1, -1)
+		}
+	}
+
+	return messageEvent("You raise your shield. (+2 AC until start of next turn)"), nil
 }

@@ -69,6 +69,7 @@ const (
 	HandlerCombatDefault       = "combat_default"
 	HandlerTrainSkill          = "trainskill"
 	HandlerAction              = "action"
+	HandlerRaiseShield         = "raise_shield"
 )
 
 // Command defines a player-invocable command.
@@ -158,6 +159,7 @@ func BuiltinCommands() []Command {
 		{Name: "combat_default", Aliases: []string{"cd"}, Help: "Set your default combat action (attack/strike/bash/dodge/parry/cast/pass/flee)", Category: CategoryCombat, Handler: HandlerCombatDefault},
 		{Name: "trainskill", Aliases: []string{"ts"}, Help: "Advance a skill proficiency rank using a pending skill increase", Category: CategoryCharacter, Handler: HandlerTrainSkill},
 		{Name: "action", Aliases: []string{"act"}, Help: "Activate an archetype or job action. Usage: action [name] [target]", Category: CategoryCombat, Handler: HandlerAction},
+		{Name: "raise", Aliases: []string{"rs"}, Help: "Raise your shield (+2 AC until start of next turn). Requires a shield in the off-hand slot.", Category: CategoryCombat, Handler: HandlerRaiseShield},
 	}
 }
 

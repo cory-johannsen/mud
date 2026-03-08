@@ -298,6 +298,7 @@ type ClientMessage struct {
 	//	*ClientMessage_CombatDefault
 	//	*ClientMessage_TrainSkill
 	//	*ClientMessage_Action
+	//	*ClientMessage_RaiseShield
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -770,6 +771,15 @@ func (x *ClientMessage) GetAction() *ActionRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetRaiseShield() *RaiseShieldRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_RaiseShield); ok {
+			return x.RaiseShield
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -962,6 +972,10 @@ type ClientMessage_Action struct {
 	Action *ActionRequest `protobuf:"bytes,48,opt,name=action,proto3,oneof"`
 }
 
+type ClientMessage_RaiseShield struct {
+	RaiseShield *RaiseShieldRequest `protobuf:"bytes,49,opt,name=raise_shield,json=raiseShield,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -1055,6 +1069,8 @@ func (*ClientMessage_CombatDefault) isClientMessage_Payload() {}
 func (*ClientMessage_TrainSkill) isClientMessage_Payload() {}
 
 func (*ClientMessage_Action) isClientMessage_Payload() {}
+
+func (*ClientMessage_RaiseShield) isClientMessage_Payload() {}
 
 // ServerEvent wraps all server-to-client events.
 type ServerEvent struct {
@@ -6500,11 +6516,48 @@ func (x *ActionRequest) GetTarget() string {
 	return ""
 }
 
+// RaiseShieldRequest asks the server to raise the player's shield.
+type RaiseShieldRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RaiseShieldRequest) Reset() {
+	*x = RaiseShieldRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[86]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RaiseShieldRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RaiseShieldRequest) ProtoMessage() {}
+
+func (x *RaiseShieldRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[86]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RaiseShieldRequest.ProtoReflect.Descriptor instead.
+func (*RaiseShieldRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{86}
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xb0\x15\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xf2\x15\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -6562,7 +6615,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0ecombat_default\x18. \x01(\v2\x1d.game.v1.CombatDefaultRequestH\x00R\rcombatDefault\x12=\n" +
 	"\vtrain_skill\x18/ \x01(\v2\x1a.game.v1.TrainSkillRequestH\x00R\n" +
 	"trainSkill\x120\n" +
-	"\x06action\x180 \x01(\v2\x16.game.v1.ActionRequestH\x00R\x06actionB\t\n" +
+	"\x06action\x180 \x01(\v2\x16.game.v1.ActionRequestH\x00R\x06action\x12@\n" +
+	"\fraise_shield\x181 \x01(\v2\x1b.game.v1.RaiseShieldRequestH\x00R\vraiseShieldB\t\n" +
 	"\apayload\"\xea\v\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
@@ -6965,7 +7019,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\bskill_id\x18\x01 \x01(\tR\askillId\";\n" +
 	"\rActionRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
-	"\x06target\x18\x02 \x01(\tR\x06target*Y\n" +
+	"\x06target\x18\x02 \x01(\tR\x06target\"\x14\n" +
+	"\x12RaiseShieldRequest*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -7006,7 +7061,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 88)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 89)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -7098,115 +7153,117 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*CombatDefaultRequest)(nil),      // 87: game.v1.CombatDefaultRequest
 	(*TrainSkillRequest)(nil),         // 88: game.v1.TrainSkillRequest
 	(*ActionRequest)(nil),             // 89: game.v1.ActionRequest
-	nil,                               // 90: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 91: game.v1.CharacterSheetView.AccessoriesEntry
+	(*RaiseShieldRequest)(nil),        // 90: game.v1.RaiseShieldRequest
+	nil,                               // 91: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 92: game.v1.CharacterSheetView.AccessoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
-	7,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
-	8,  // 1: game.v1.ClientMessage.move:type_name -> game.v1.MoveRequest
-	9,  // 2: game.v1.ClientMessage.look:type_name -> game.v1.LookRequest
-	10, // 3: game.v1.ClientMessage.say:type_name -> game.v1.SayRequest
-	11, // 4: game.v1.ClientMessage.emote:type_name -> game.v1.EmoteRequest
-	12, // 5: game.v1.ClientMessage.who:type_name -> game.v1.WhoRequest
-	13, // 6: game.v1.ClientMessage.exits:type_name -> game.v1.ExitsRequest
-	14, // 7: game.v1.ClientMessage.quit:type_name -> game.v1.QuitRequest
-	28, // 8: game.v1.ClientMessage.examine:type_name -> game.v1.ExamineRequest
-	30, // 9: game.v1.ClientMessage.attack:type_name -> game.v1.AttackRequest
-	31, // 10: game.v1.ClientMessage.flee:type_name -> game.v1.FleeRequest
-	32, // 11: game.v1.ClientMessage.pass:type_name -> game.v1.PassRequest
-	33, // 12: game.v1.ClientMessage.strike:type_name -> game.v1.StrikeRequest
-	64, // 13: game.v1.ClientMessage.status:type_name -> game.v1.StatusRequest
-	34, // 14: game.v1.ClientMessage.equip:type_name -> game.v1.EquipRequest
-	35, // 15: game.v1.ClientMessage.reload:type_name -> game.v1.ReloadRequest
-	36, // 16: game.v1.ClientMessage.fire_burst:type_name -> game.v1.FireBurstRequest
-	37, // 17: game.v1.ClientMessage.fire_automatic:type_name -> game.v1.FireAutomaticRequest
-	38, // 18: game.v1.ClientMessage.throw:type_name -> game.v1.ThrowRequest
-	39, // 19: game.v1.ClientMessage.inventory_req:type_name -> game.v1.InventoryRequest
-	40, // 20: game.v1.ClientMessage.get_item:type_name -> game.v1.GetItemRequest
-	41, // 21: game.v1.ClientMessage.drop_item:type_name -> game.v1.DropItemRequest
-	42, // 22: game.v1.ClientMessage.balance:type_name -> game.v1.BalanceRequest
-	43, // 23: game.v1.ClientMessage.set_role:type_name -> game.v1.SetRoleRequest
-	47, // 24: game.v1.ClientMessage.teleport:type_name -> game.v1.TeleportRequest
-	44, // 25: game.v1.ClientMessage.loadout:type_name -> game.v1.LoadoutRequest
-	45, // 26: game.v1.ClientMessage.unequip:type_name -> game.v1.UnequipRequest
-	46, // 27: game.v1.ClientMessage.equipment:type_name -> game.v1.EquipmentRequest
-	15, // 28: game.v1.ClientMessage.switch_character:type_name -> game.v1.SwitchCharacterRequest
-	66, // 29: game.v1.ClientMessage.wear:type_name -> game.v1.WearRequest
-	67, // 30: game.v1.ClientMessage.remove_armor:type_name -> game.v1.RemoveArmorRequest
-	69, // 31: game.v1.ClientMessage.char_sheet:type_name -> game.v1.CharacterSheetRequest
-	70, // 32: game.v1.ClientMessage.archetype_selection:type_name -> game.v1.ArchetypeSelectionRequest
-	51, // 33: game.v1.ClientMessage.use_equipment:type_name -> game.v1.UseEquipmentRequest
-	58, // 34: game.v1.ClientMessage.room_equip:type_name -> game.v1.RoomEquipRequest
-	52, // 35: game.v1.ClientMessage.map:type_name -> game.v1.MapRequest
-	55, // 36: game.v1.ClientMessage.skills_request:type_name -> game.v1.SkillsRequest
-	71, // 37: game.v1.ClientMessage.feats_request:type_name -> game.v1.FeatsRequest
-	77, // 38: game.v1.ClientMessage.interact_request:type_name -> game.v1.InteractRequest
-	79, // 39: game.v1.ClientMessage.use_request:type_name -> game.v1.UseRequest
-	74, // 40: game.v1.ClientMessage.class_features_request:type_name -> game.v1.ClassFeaturesRequest
-	48, // 41: game.v1.ClientMessage.summon_item:type_name -> game.v1.SummonItemRequest
-	83, // 42: game.v1.ClientMessage.proficiencies_request:type_name -> game.v1.ProficienciesRequest
-	86, // 43: game.v1.ClientMessage.level_up:type_name -> game.v1.LevelUpRequest
-	87, // 44: game.v1.ClientMessage.combat_default:type_name -> game.v1.CombatDefaultRequest
-	88, // 45: game.v1.ClientMessage.train_skill:type_name -> game.v1.TrainSkillRequest
-	89, // 46: game.v1.ClientMessage.action:type_name -> game.v1.ActionRequest
-	16, // 47: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	18, // 48: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	19, // 49: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	20, // 50: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	22, // 51: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	23, // 52: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	24, // 53: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	26, // 54: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	29, // 55: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	63, // 56: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	61, // 57: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	62, // 58: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	65, // 59: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	60, // 60: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
-	25, // 61: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
-	81, // 62: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
-	54, // 63: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
-	57, // 64: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
-	73, // 65: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
-	78, // 66: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
-	80, // 67: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
-	76, // 68: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
-	85, // 69: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
-	6,  // 70: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
-	17, // 71: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	27, // 72: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	68, // 73: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	49, // 74: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	50, // 75: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
-	0,  // 76: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,  // 77: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	21, // 78: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
-	2,  // 79: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
-	17, // 80: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	53, // 81: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
-	56, // 82: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
-	59, // 83: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	3,  // 84: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	72, // 85: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
-	75, // 86: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
-	75, // 87: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
-	72, // 88: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	90, // 89: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	91, // 90: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
-	82, // 91: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
-	82, // 92: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
-	56, // 93: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
-	72, // 94: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
-	75, // 95: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
-	84, // 96: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
-	84, // 97: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	4,  // 98: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	5,  // 99: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	99, // [99:100] is the sub-list for method output_type
-	98, // [98:99] is the sub-list for method input_type
-	98, // [98:98] is the sub-list for extension type_name
-	98, // [98:98] is the sub-list for extension extendee
-	0,  // [0:98] is the sub-list for field type_name
+	7,   // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
+	8,   // 1: game.v1.ClientMessage.move:type_name -> game.v1.MoveRequest
+	9,   // 2: game.v1.ClientMessage.look:type_name -> game.v1.LookRequest
+	10,  // 3: game.v1.ClientMessage.say:type_name -> game.v1.SayRequest
+	11,  // 4: game.v1.ClientMessage.emote:type_name -> game.v1.EmoteRequest
+	12,  // 5: game.v1.ClientMessage.who:type_name -> game.v1.WhoRequest
+	13,  // 6: game.v1.ClientMessage.exits:type_name -> game.v1.ExitsRequest
+	14,  // 7: game.v1.ClientMessage.quit:type_name -> game.v1.QuitRequest
+	28,  // 8: game.v1.ClientMessage.examine:type_name -> game.v1.ExamineRequest
+	30,  // 9: game.v1.ClientMessage.attack:type_name -> game.v1.AttackRequest
+	31,  // 10: game.v1.ClientMessage.flee:type_name -> game.v1.FleeRequest
+	32,  // 11: game.v1.ClientMessage.pass:type_name -> game.v1.PassRequest
+	33,  // 12: game.v1.ClientMessage.strike:type_name -> game.v1.StrikeRequest
+	64,  // 13: game.v1.ClientMessage.status:type_name -> game.v1.StatusRequest
+	34,  // 14: game.v1.ClientMessage.equip:type_name -> game.v1.EquipRequest
+	35,  // 15: game.v1.ClientMessage.reload:type_name -> game.v1.ReloadRequest
+	36,  // 16: game.v1.ClientMessage.fire_burst:type_name -> game.v1.FireBurstRequest
+	37,  // 17: game.v1.ClientMessage.fire_automatic:type_name -> game.v1.FireAutomaticRequest
+	38,  // 18: game.v1.ClientMessage.throw:type_name -> game.v1.ThrowRequest
+	39,  // 19: game.v1.ClientMessage.inventory_req:type_name -> game.v1.InventoryRequest
+	40,  // 20: game.v1.ClientMessage.get_item:type_name -> game.v1.GetItemRequest
+	41,  // 21: game.v1.ClientMessage.drop_item:type_name -> game.v1.DropItemRequest
+	42,  // 22: game.v1.ClientMessage.balance:type_name -> game.v1.BalanceRequest
+	43,  // 23: game.v1.ClientMessage.set_role:type_name -> game.v1.SetRoleRequest
+	47,  // 24: game.v1.ClientMessage.teleport:type_name -> game.v1.TeleportRequest
+	44,  // 25: game.v1.ClientMessage.loadout:type_name -> game.v1.LoadoutRequest
+	45,  // 26: game.v1.ClientMessage.unequip:type_name -> game.v1.UnequipRequest
+	46,  // 27: game.v1.ClientMessage.equipment:type_name -> game.v1.EquipmentRequest
+	15,  // 28: game.v1.ClientMessage.switch_character:type_name -> game.v1.SwitchCharacterRequest
+	66,  // 29: game.v1.ClientMessage.wear:type_name -> game.v1.WearRequest
+	67,  // 30: game.v1.ClientMessage.remove_armor:type_name -> game.v1.RemoveArmorRequest
+	69,  // 31: game.v1.ClientMessage.char_sheet:type_name -> game.v1.CharacterSheetRequest
+	70,  // 32: game.v1.ClientMessage.archetype_selection:type_name -> game.v1.ArchetypeSelectionRequest
+	51,  // 33: game.v1.ClientMessage.use_equipment:type_name -> game.v1.UseEquipmentRequest
+	58,  // 34: game.v1.ClientMessage.room_equip:type_name -> game.v1.RoomEquipRequest
+	52,  // 35: game.v1.ClientMessage.map:type_name -> game.v1.MapRequest
+	55,  // 36: game.v1.ClientMessage.skills_request:type_name -> game.v1.SkillsRequest
+	71,  // 37: game.v1.ClientMessage.feats_request:type_name -> game.v1.FeatsRequest
+	77,  // 38: game.v1.ClientMessage.interact_request:type_name -> game.v1.InteractRequest
+	79,  // 39: game.v1.ClientMessage.use_request:type_name -> game.v1.UseRequest
+	74,  // 40: game.v1.ClientMessage.class_features_request:type_name -> game.v1.ClassFeaturesRequest
+	48,  // 41: game.v1.ClientMessage.summon_item:type_name -> game.v1.SummonItemRequest
+	83,  // 42: game.v1.ClientMessage.proficiencies_request:type_name -> game.v1.ProficienciesRequest
+	86,  // 43: game.v1.ClientMessage.level_up:type_name -> game.v1.LevelUpRequest
+	87,  // 44: game.v1.ClientMessage.combat_default:type_name -> game.v1.CombatDefaultRequest
+	88,  // 45: game.v1.ClientMessage.train_skill:type_name -> game.v1.TrainSkillRequest
+	89,  // 46: game.v1.ClientMessage.action:type_name -> game.v1.ActionRequest
+	90,  // 47: game.v1.ClientMessage.raise_shield:type_name -> game.v1.RaiseShieldRequest
+	16,  // 48: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	18,  // 49: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	19,  // 50: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	20,  // 51: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	22,  // 52: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	23,  // 53: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	24,  // 54: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	26,  // 55: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	29,  // 56: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	63,  // 57: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	61,  // 58: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	62,  // 59: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	65,  // 60: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	60,  // 61: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
+	25,  // 62: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
+	81,  // 63: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
+	54,  // 64: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
+	57,  // 65: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
+	73,  // 66: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
+	78,  // 67: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
+	80,  // 68: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
+	76,  // 69: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
+	85,  // 70: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
+	6,   // 71: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
+	17,  // 72: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	27,  // 73: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	68,  // 74: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	49,  // 75: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	50,  // 76: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
+	0,   // 77: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,   // 78: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	21,  // 79: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
+	2,   // 80: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
+	17,  // 81: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	53,  // 82: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
+	56,  // 83: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
+	59,  // 84: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	3,   // 85: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	72,  // 86: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
+	75,  // 87: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
+	75,  // 88: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
+	72,  // 89: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
+	91,  // 90: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	92,  // 91: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	82,  // 92: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
+	82,  // 93: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
+	56,  // 94: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
+	72,  // 95: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
+	75,  // 96: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
+	84,  // 97: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
+	84,  // 98: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
+	4,   // 99: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	5,   // 100: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	100, // [100:101] is the sub-list for method output_type
+	99,  // [99:100] is the sub-list for method input_type
+	99,  // [99:99] is the sub-list for extension type_name
+	99,  // [99:99] is the sub-list for extension extendee
+	0,   // [0:99] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -7262,6 +7319,7 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_CombatDefault)(nil),
 		(*ClientMessage_TrainSkill)(nil),
 		(*ClientMessage_Action)(nil),
+		(*ClientMessage_RaiseShield)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -7295,7 +7353,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   88,
+			NumMessages:   89,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

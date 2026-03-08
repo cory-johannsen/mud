@@ -63,6 +63,7 @@ message ClientMessage {
     CombatDefaultRequest combat_default = 46;
     TrainSkillRequest train_skill = 47;
     ActionRequest action = 48;
+    RaiseShieldRequest raise_shield = 49;
   }
 }
 
@@ -699,3 +700,6 @@ message ActionRequest {
   string name   = 1; // action ID or shortcut alias; empty means list available actions
   string target = 2; // target NPC name; empty if not required
 }
+
+// RaiseShieldRequest asks the server to raise the player's shield.
+message RaiseShieldRequest {}
