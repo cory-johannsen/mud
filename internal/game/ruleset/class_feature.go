@@ -3,6 +3,7 @@ package ruleset
 import (
 	"fmt"
 	"os"
+	"sort"
 
 	"gopkg.in/yaml.v3"
 )
@@ -141,5 +142,6 @@ func (r *ClassFeatureRegistry) ActiveFeatures() []*ClassFeature {
 			out = append(out, f)
 		}
 	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out
 }

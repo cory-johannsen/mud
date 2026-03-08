@@ -176,13 +176,18 @@ func TestClassFeatureRegistry_ActiveOnly(t *testing.T) {
 	features := []*ruleset.ClassFeature{
 		{ID: "passive_feat", Active: false},
 		{ID: "surge", Active: true, Shortcut: "surge", ActionCost: 1, Contexts: []string{"combat"}},
+		{ID: "patch", Active: true, Shortcut: "patch", ActionCost: 2, Contexts: []string{"exploration"}},
 	}
 	reg := ruleset.NewClassFeatureRegistry(features)
 	active := reg.ActiveFeatures()
-	if len(active) != 1 {
-		t.Errorf("expected 1 active feature, got %d", len(active))
+	if len(active) != 2 {
+		t.Errorf("expected 2 active features, got %d", len(active))
 	}
-	if active[0].ID != "surge" {
-		t.Errorf("wrong active feature: %s", active[0].ID)
+	// ActiveFeatures must return features sorted by ID for deterministic order.
+	if active[0].ID != "patch" {
+		t.Errorf("first active feature: got %q, want %q", active[0].ID, "patch")
+	}
+	if active[1].ID != "surge" {
+		t.Errorf("second active feature: got %q, want %q", active[1].ID, "surge")
 	}
 }
