@@ -1337,11 +1337,6 @@ func weaponDamageString(damageDice string, abilityMod int, isMelee bool) string 
 	return fmt.Sprintf("%s%d", damageDice, abilityMod)
 }
 
-// abilityModFrom returns the PF2E-style ability modifier for a given score.
-//
-// Precondition: score is any integer.
-// Postcondition: returns (score-10)/2 for scores >= 10, and (score-11)/2 for scores < 10,
-// matching the standard mathematical floor division for negative values.
 // skillDisplayName converts a snake_case skill ID to a title-cased display name.
 //
 // Precondition: id must be non-empty.
@@ -1374,6 +1369,11 @@ func outcomeDisplayName(o skillcheck.CheckOutcome) string {
 	}
 }
 
+// abilityModFrom returns the PF2E-style ability modifier for a given score.
+//
+// Precondition: score is any integer.
+// Postcondition: returns (score-10)/2 for scores >= 10, and (score-11)/2 for scores < 10,
+// matching the standard mathematical floor division for negative values.
 func abilityModFrom(score int) int {
 	if score >= 10 {
 		return (score - 10) / 2
