@@ -161,3 +161,45 @@ func TestPropertyDyingStacksNeverExceedFour(t *testing.T) {
 		assert.LessOrEqual(rt, cbt.DyingStacks("p1"), 4, "dying stacks must never exceed 4")
 	})
 }
+
+// TestStartRoundWithSrc_ResetsACModAndAttackMod verifies that ACMod and AttackMod
+// are zeroed on all living combatants at the start of each round.
+//
+// Precondition: Combatants have non-zero ACMod and AttackMod set from a prior round.
+// Postcondition: StartRoundWithSrc zeros ACMod and AttackMod on all living combatants.
+func TestStartRoundWithSrc_ResetsACModAndAttackMod(t *testing.T) {
+	_, cbt := makeCombatWithConditions(t)
+
+	// Simulate mods applied during the previous round.
+	cbt.Combatants[0].ACMod = 2
+	cbt.Combatants[0].AttackMod = -1
+	cbt.Combatants[1].ACMod = 1
+	cbt.Combatants[1].AttackMod = 3
+
+	_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+
+	assert.Equal(t, 0, cbt.Combatants[0].ACMod, "ACMod must be zeroed at round start")
+	assert.Equal(t, 0, cbt.Combatants[0].AttackMod, "AttackMod must be zeroed at round start")
+	assert.Equal(t, 0, cbt.Combatants[1].ACMod, "ACMod must be zeroed at round start for NPC")
+	assert.Equal(t, 0, cbt.Combatants[1].AttackMod, "AttackMod must be zeroed at round start for NPC")
+}
+
+// TestProperty_StartRound_AlwaysResetsACModAndAttackMod verifies that no matter
+// what ACMod/AttackMod values are set, StartRoundWithSrc always zeros them.
+//
+// Precondition: Combatants may have arbitrary non-zero ACMod/AttackMod values.
+// Postcondition: After StartRoundWithSrc, ACMod == 0 and AttackMod == 0 for all living combatants.
+func TestProperty_StartRound_AlwaysResetsACModAndAttackMod(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		_, cbt := makeCombatWithConditions(t)
+		for _, c := range cbt.Combatants {
+			c.ACMod = rapid.Int().Draw(rt, "acmod")
+			c.AttackMod = rapid.Int().Draw(rt, "attackmod")
+		}
+		_ = cbt.StartRoundWithSrc(3, &fixedSrc{val: 0})
+		for _, c := range cbt.Combatants {
+			assert.Equal(rt, 0, c.ACMod, "ACMod must be 0 after StartRound")
+			assert.Equal(rt, 0, c.AttackMod, "AttackMod must be 0 after StartRound")
+		}
+	})
+}

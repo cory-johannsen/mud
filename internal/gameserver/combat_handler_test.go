@@ -1314,3 +1314,277 @@ func TestCombatHandler_RemainingAP_AfterAbility(t *testing.T) {
 		t.Errorf("expected 0 AP after 2-AP ability; got %d", ap)
 	}
 }
+
+// TestCombatHandler_SpendAP_NotInCombat verifies that SpendAP returns an error
+// when the player is not enrolled in any active combat.
+//
+// Precondition: Player is registered but no active combat exists.
+// Postcondition: SpendAP returns a non-nil error.
+func TestCombatHandler_SpendAP_NotInCombat(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-spendap-nocombat"
+	const roomID = "room-spendap-nocombat"
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	err := h.SpendAP(uid, 1)
+	if err == nil {
+		t.Fatal("expected error from SpendAP when not in combat; got nil")
+	}
+}
+
+// TestCombatHandler_SpendAP_InsufficientAP verifies that SpendAP returns an error
+// when the combatant has fewer AP than the requested cost.
+//
+// Precondition: Player is in active combat with 0 remaining AP.
+// Postcondition: SpendAP returns a non-nil error.
+func TestCombatHandler_SpendAP_InsufficientAP(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-spendap-insufficient"
+	const roomID = "room-spendap-insufficient"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Exhaust all AP via Strike (costs 2 AP; 2 remain after Attack).
+	_, err = h.Strike(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Strike: %v", err)
+	}
+
+	// Now 0 AP remain; SpendAP must fail.
+	if err := h.SpendAP(uid, 1); err == nil {
+		t.Fatal("expected error from SpendAP with 0 AP; got nil")
+	}
+}
+
+// TestCombatHandler_SpendAP_DeductsAP verifies that SpendAP decrements remaining AP
+// by the requested cost when the combatant has sufficient AP.
+//
+// Precondition: Player is in active combat with at least 1 remaining AP.
+// Postcondition: RemainingAP decreases by cost after successful SpendAP.
+func TestCombatHandler_SpendAP_DeductsAP(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-spendap-success"
+	const roomID = "room-spendap-success"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	apBefore := h.RemainingAP(uid)
+	if err := h.SpendAP(uid, 1); err != nil {
+		t.Fatalf("SpendAP: %v", err)
+	}
+	apAfter := h.RemainingAP(uid)
+	if apAfter != apBefore-1 {
+		t.Errorf("expected RemainingAP=%d after SpendAP(1); got %d", apBefore-1, apAfter)
+	}
+}
+
+// TestProperty_SpendAP_NeverGoesNegative verifies that SpendAP never leaves
+// remaining AP in a negative state regardless of cost.
+//
+// Precondition: Player is in active combat.
+// Postcondition: RemainingAP >= 0 after any SpendAP call (successful or not).
+func TestProperty_SpendAP_NeverGoesNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+		uid := rapid.StringMatching(`[a-z]{4,8}`).Draw(rt, "uid") + "-prop-spendap"
+		roomID := "room-prop-spendap-" + uid
+		spawnTestNPC(t, h.npcMgr, roomID)
+		addTestPlayer(t, h.sessions, uid, roomID)
+
+		_, err := h.Attack(uid, "Goblin")
+		if err != nil {
+			rt.Skip()
+		}
+		h.cancelTimer(roomID)
+
+		cost := rapid.IntRange(1, 10).Draw(rt, "cost")
+		_ = h.SpendAP(uid, cost)
+
+		ap := h.RemainingAP(uid)
+		if ap < 0 {
+			rt.Errorf("RemainingAP must never be negative; got %d", ap)
+		}
+	})
+}
+
+// TestCombatHandler_ApplyCombatantACMod_NotInCombat verifies that ApplyCombatantACMod
+// returns an error when the player is not in active combat.
+//
+// Precondition: Player is registered but no active combat exists.
+// Postcondition: ApplyCombatantACMod returns a non-nil error.
+func TestCombatHandler_ApplyCombatantACMod_NotInCombat(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-acmod-nocombat"
+	const roomID = "room-acmod-nocombat"
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	err := h.ApplyCombatantACMod(uid, uid, 2)
+	if err == nil {
+		t.Fatal("expected error from ApplyCombatantACMod when not in combat; got nil")
+	}
+}
+
+// TestCombatHandler_ApplyCombatantACMod_TargetNotFound verifies that ApplyCombatantACMod
+// returns an error when the targetID does not exist in the active combat.
+//
+// Precondition: Player is in active combat; targetID is not a combatant.
+// Postcondition: ApplyCombatantACMod returns a non-nil error.
+func TestCombatHandler_ApplyCombatantACMod_TargetNotFound(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-acmod-notarget"
+	const roomID = "room-acmod-notarget"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	err = h.ApplyCombatantACMod(uid, "nonexistent-target", 2)
+	if err == nil {
+		t.Fatal("expected error from ApplyCombatantACMod for unknown target; got nil")
+	}
+}
+
+// TestCombatHandler_ApplyCombatantACMod_AddsModAdditively verifies that successive
+// ApplyCombatantACMod calls accumulate (are additive, not replacing).
+//
+// Precondition: Player is in active combat; target combatant exists.
+// Postcondition: ACMod on the target combatant equals the sum of all applied mods.
+func TestCombatHandler_ApplyCombatantACMod_AddsModAdditively(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-acmod-additive"
+	const roomID = "room-acmod-additive"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	if err := h.ApplyCombatantACMod(uid, uid, 2); err != nil {
+		t.Fatalf("first ApplyCombatantACMod: %v", err)
+	}
+	if err := h.ApplyCombatantACMod(uid, uid, 1); err != nil {
+		t.Fatalf("second ApplyCombatantACMod: %v", err)
+	}
+
+	// Retrieve the ACMod directly from the combat state.
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	sess, _ := h.sessions.GetPlayer(uid)
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		t.Fatal("expected active combat")
+	}
+	for _, c := range cbt.Combatants {
+		if c.ID == uid {
+			if c.ACMod != 3 {
+				t.Errorf("expected ACMod=3 (2+1); got %d", c.ACMod)
+			}
+			return
+		}
+	}
+	t.Fatal("player combatant not found in combat")
+}
+
+// TestCombatHandler_ApplyCombatantAttackMod_NotInCombat verifies that ApplyCombatantAttackMod
+// returns an error when the player is not in active combat.
+//
+// Precondition: Player is registered but no active combat exists.
+// Postcondition: ApplyCombatantAttackMod returns a non-nil error.
+func TestCombatHandler_ApplyCombatantAttackMod_NotInCombat(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-atkmod-nocombat"
+	const roomID = "room-atkmod-nocombat"
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	err := h.ApplyCombatantAttackMod(uid, uid, -1)
+	if err == nil {
+		t.Fatal("expected error from ApplyCombatantAttackMod when not in combat; got nil")
+	}
+}
+
+// TestCombatHandler_ApplyCombatantAttackMod_TargetNotFound verifies that ApplyCombatantAttackMod
+// returns an error when the targetID does not exist in the active combat.
+//
+// Precondition: Player is in active combat; targetID is not a combatant.
+// Postcondition: ApplyCombatantAttackMod returns a non-nil error.
+func TestCombatHandler_ApplyCombatantAttackMod_TargetNotFound(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-atkmod-notarget"
+	const roomID = "room-atkmod-notarget"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	err = h.ApplyCombatantAttackMod(uid, "nonexistent-target", -1)
+	if err == nil {
+		t.Fatal("expected error from ApplyCombatantAttackMod for unknown target; got nil")
+	}
+}
+
+// TestCombatHandler_ApplyCombatantAttackMod_AddsModAdditively verifies that successive
+// ApplyCombatantAttackMod calls accumulate (are additive, not replacing).
+//
+// Precondition: Player is in active combat; target combatant exists.
+// Postcondition: AttackMod on the target combatant equals the sum of all applied mods.
+func TestCombatHandler_ApplyCombatantAttackMod_AddsModAdditively(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const uid = "player-atkmod-additive"
+	const roomID = "room-atkmod-additive"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	if err := h.ApplyCombatantAttackMod(uid, uid, -2); err != nil {
+		t.Fatalf("first ApplyCombatantAttackMod: %v", err)
+	}
+	if err := h.ApplyCombatantAttackMod(uid, uid, -1); err != nil {
+		t.Fatalf("second ApplyCombatantAttackMod: %v", err)
+	}
+
+	// Retrieve the AttackMod directly from the combat state.
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	sess, _ := h.sessions.GetPlayer(uid)
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		t.Fatal("expected active combat")
+	}
+	for _, c := range cbt.Combatants {
+		if c.ID == uid {
+			if c.AttackMod != -3 {
+				t.Errorf("expected AttackMod=-3 (-2+-1); got %d", c.AttackMod)
+			}
+			return
+		}
+	}
+	t.Fatal("player combatant not found in combat")
+}

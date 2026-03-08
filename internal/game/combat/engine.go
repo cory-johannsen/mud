@@ -143,6 +143,15 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		}
 	}
 
+	// Reset per-round modifiers so condition effects do not carry across rounds.
+	for _, cbt := range c.Combatants {
+		if cbt.IsDead() {
+			continue
+		}
+		cbt.ACMod = 0
+		cbt.AttackMod = 0
+	}
+
 	// Reset action queues with stunned AP reduction
 	c.ActionQueues = make(map[string]*ActionQueue)
 	for _, cbt := range c.Combatants {
