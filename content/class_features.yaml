@@ -1575,3 +1575,122 @@ class_features:
       type: skill_check
       skill: tech_lore
       dc: 16
+
+  # --- naturalist job active features ---
+  - id: fumigate
+    name: Fumigate
+    archetype: ""
+    job: exterminator
+    pf2e: ""
+    active: true
+    shortcut: fumigate
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You deploy your chemicals with practiced efficiency."
+    description: "Deal 1d6 poison damage to a target in range."
+    effect:
+      type: damage
+      amount: "1d6"
+      damage_type: poison
+
+  - id: scavenge
+    name: Scavenge
+    archetype: ""
+    job: freegan
+    pf2e: ""
+    active: true
+    shortcut: scav
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You see value where others see garbage."
+    description: "Scavenging skill check (DC 12) to find useful discarded materials."
+    effect:
+      type: skill_check
+      skill: scavenging
+      dc: 12
+
+  - id: chill_out
+    name: Chill Out
+    archetype: ""
+    job: hippie
+    pf2e: ""
+    active: true
+    shortcut: chill
+    action_cost: 2
+    contexts:
+      - exploration
+    activate_text: "You share something healing with yourself."
+    description: "Use herbal knowledge to restore 1d4 hit points."
+    effect:
+      type: heal
+      amount: "1d4"
+
+  - id: lay_low
+    name: Lay Low
+    archetype: ""
+    job: hobo
+    pf2e: ""
+    active: true
+    shortcut: laylow
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You become part of the scenery."
+    description: "Ghosting skill check (DC 12) to go unnoticed in a public space."
+    effect:
+      type: skill_check
+      skill: ghosting
+      dc: 12
+
+  - id: dig_in_action
+    name: Dig In
+    archetype: ""
+    job: laborer
+    pf2e: ""
+    active: true
+    shortcut: digin
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You plant your feet and lean into the work."
+    description: "+1 AC, cannot be knocked down until your next turn."
+    effect:
+      type: condition
+      target: self
+      condition_id: dig_in_active
+
+  - id: wrangle
+    name: Wrangle
+    archetype: ""
+    job: rancher
+    pf2e: ""
+    active: true
+    shortcut: wrangle
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You approach the situation like a spooked animal."
+    description: "Wasteland skill check (DC 13) to handle or calm an animal or unruly person."
+    effect:
+      type: skill_check
+      skill: wasteland
+      dc: 13
+
+  - id: mark_trail
+    name: Mark Trail
+    archetype: ""
+    job: tracker
+    pf2e: ""
+    active: true
+    shortcut: trail
+    action_cost: 1
+    contexts:
+      - exploration
+    activate_text: "You catalog every disturbance in the environment."
+    description: "Wasteland skill check (DC 14) to follow or identify a trail."
+    effect:
+      type: skill_check
+      skill: wasteland
+      dc: 14

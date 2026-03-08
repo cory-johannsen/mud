@@ -1,0 +1,15 @@
+id: dig_in_active
+name: Dig In Active
+description: |
+  You plant your feet and brace for impact. You gain +1 AC and resistance
+  to being knocked down until your next turn.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: -1
+damage_bonus: 0
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
