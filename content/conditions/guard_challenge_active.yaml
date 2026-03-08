@@ -1,0 +1,15 @@
+id: guard_challenge_active
+name: Guard Challenge Active
+description: |
+  You have issued a formal challenge. The target must engage you or be
+  treated as fleeing — they are flat-footed if they try to move past you.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
