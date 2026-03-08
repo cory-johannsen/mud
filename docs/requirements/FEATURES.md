@@ -215,10 +215,67 @@
       - [x] Schemer: `setup` (active), `smooth_operator` (passive)
       - [x] Zealot: `lay_hands` (active), `true_believer` (passive)
     - [x] Each Job has at least 1 unique action (52 jobs across all archetypes)
-  - [ ] General
-  - [ ] Exploration
-  - [ ] Downtime
-  - [ ] Gear
+  - [ ] Full import of all PF2E actions
+    - [ ] Combat
+      - Basic Actions (Everyone can do these)
+        - Stride [1A]: Move up to your Speed.
+        - Strike [1A]: Attack with a weapon or unarmed strike.
+        - Step [1A]: Move 5 feet without triggering Reactions (like Reactive Strike).
+        - Interact [1A]: Draw/stow a weapon, open a door, or Swap a held item.
+        - [x] Raise a Shield [1A]: Gain the shield’s AC bonus until your next turn.
+        - [x] Take Cover [1A]: Gain or improve cover bonuses (+2 AC).
+        - Seek [1A]: Look for hidden enemies or objects (Perception).
+        - Sense Motive [1A]: Check if a creature is lying or behaving oddly.
+        - Escape [1A]: Attempt to break free from being grabbed or restrained.
+        - Delay [0A]: Move your entire turn to later in the initiative order.
+      - Athletics Actions
+        - [ ] Grapple — opposed Athletics check; apply Grabbed condition
+        - [ ] Shove — Athletics vs Fortitude DC; push target 5 ft
+        - [ ] Trip — Athletics vs Reflex DC; apply Prone condition
+        - [ ] Disarm — Athletics vs Reflex DC; knock weapon from target
+        - [ ] Climb — Athletics check vs surface DC; vertical movement
+        - [ ] Swim — Athletics check vs current DC; water movement
+      - Tactical Actions
+        - [ ] Step — move 5 ft without triggering reactions
+        - [ ] Seek — Perception check to detect hidden creatures/objects
+        - [ ] Sense Motive — Perception vs Deception to detect lies/intent
+        - [ ] Escape — Athletics/Acrobatics vs grappler DC to break free
+        - [ ] Delay — forfeit initiative position to act later in round
+      - Stealth & Deception Actions
+        - [x] Feint — Deception vs target Perception DC; apply flat_footed (-2 AC) for 1 round
+        - [x] Demoralize — Intimidation vs target Will DC; apply frightened (-1 attack, -1 AC) for encounter
+        - [ ] Hide — Stealth vs Perception DC; become Hidden
+        - [ ] Sneak — Stealth vs Perception DC; move while Hidden
+        - [ ] Create Diversion — Deception vs Perception DC; become Hidden briefly
+        - [ ] Tumble Through — Acrobatics vs Reflex DC; move through enemy space
+      - Medicine Actions
+        - [x] First Aid [2A] — patch_job vs DC 15; success heals 2d8+4 HP
+    - [ ] General
+      - Aid: Spend an action on your turn to prepare; use your Reaction to give an ally a bonus.
+      - Ready [2A]: Set a trigger to take a single action as a Reaction later.
+      - Hero Point: Spend a point to reroll a check or (if dying) to stabilize at 0 HP.
+    - [ ] Exploration
+      - Avoid Notice: Use Stealth to roll for initiative and start the fight hidden.
+      - Defend: Move with your shield up (start combat with Raise a Shield active).
+      - Detect Magic: Constantly scan for magical auras while moving.
+      - Search: Meticulously look for secret doors and traps (free secret Perception checks).
+      - Scout: Give your whole party a +1 circumstance bonus to Initiative.
+      - Follow the Expert: A high-level ally helps you with a skill you aren’t good at.
+      - Investigate: Use Recall Knowledge (Arcana, Society, etc.) while traveling.
+      - Refocus: Spend 10 minutes to regain a Focus Point.
+    - [ ] Downtime
+      - Earn Income: Use a skill (Crafting, Lore, Performance) to make money.
+      - Craft: Spend days creating items, equipment, or consumables.
+      - Retrain: Spend a week or more to change a Feat, Skill, or Class feature.
+      - Treat Disease: Spend time caring for an ill patient (Medicine).
+      - Subsist: Find food and shelter in the wild or a city for free.
+      - Create Forgery: Spend a day or more making a fake document.
+      - Long-Term Rest: Spend 24 hours to recover double your level in HP.
+    - [ ] Gear
+      - Activate an Item: Varies (1-3 actions). Used for potions, wands, and magic gear.
+      - Repair: Spend 10 minutes (with a Repair Kit) to fix a damaged item.
+      - Affix a Precious Material: Add specialized materials to gear.
+      - Swap [1A]: A Remaster addition—you can put away one item and draw another in a single action.
 - [x] Console notifications
   - [x] The player should be notified in the console every time a skill is used automatically
   - [x] The player should be notified in the console every time XP is awarded and why
@@ -230,6 +287,7 @@
             - Short
             - Long
             - Extreme
+        - Cover
         - Area of Effect
         - Attack of opportunity
         - Terrain types
@@ -249,12 +307,32 @@
     - [ ] Mental state
       - [ ] Panic
       - [ ] Psychosis
-- [ ] Technology instead of magic.  The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism)
-    - [ ] Traditions of magic -> Types of technology / Substances
-      - [ ] Use PF2E Traits, mapping to Gunchete lore as required
-    - [ ] Archetype and Job define the technologies available for the player
-      - [ ] Levelling up allows for additions and changes
-      - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
+- [ ] Technology instead of magic.  
+  - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism).  
+  - For the remainder of the features specification Technology refers to the combined effects of both technological devices and drugs.
+      - [ ] Traditions of magic -> Types of technology / Substances
+        - Use PF2E Traits, mapping to Gunchete lore as required
+        - [ ] Arcane -> Technical
+        - [ ] Divine -> Fanatic Doctrine
+        - [ ] Occult -> Neural
+        - [ ] Primal -> Bio-Synthetic
+      - [ ] Archetype and Job define the technologies available for the player
+        - [ ] Levelling up allows for additions and changes
+        - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
+          - [ ] Cantrips -> unlimited use minor Technologies
+            - [ ] Fixed list per Job, no player adjustment 
+          - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
+            - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
+            - [ ] Fixed number of uses per Technology per level (i.e. 5 level 1, 3 level 2, 1 level 3)
+            - [ ] Can be rearranged when resting
+            - [ ] Player gets to choose which new Technologies are learned with levelling up. 
+          - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
+            - [ ] Fixed list of Technologies per job level
+            - [ ] Fixed number usages for each Technology level (resets with long rest)
+            - [ ] Player gets to choose which new Technologies are learned with levelling up.
+          - [ ] Heightened Spells -> Amped Technology
+            - Follows the PF2E rules 
+          - [ ] Innate Technologies
 - [ ] Job development
       - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
       - [ ] advancement hierarchy - every job has multiple levels of specialization
