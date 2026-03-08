@@ -180,6 +180,20 @@ func TestActionQueue_DeductAP_InsufficientAP(t *testing.T) {
 	assert.Equal(t, 1, q.RemainingPoints(), "AP must not change on failure")
 }
 
+func TestActionQueue_DeductAP_ZeroCost_ReturnsError(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	err := q.DeductAP(0)
+	require.Error(t, err)
+	assert.Equal(t, 3, q.RemainingPoints(), "AP must not change on zero-cost call")
+}
+
+func TestActionQueue_DeductAP_NegativeCost_ReturnsError(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	err := q.DeductAP(-1)
+	require.Error(t, err)
+	assert.Equal(t, 3, q.RemainingPoints(), "AP must not change on negative-cost call")
+}
+
 func TestPropertyActionQueue_RemainingNeverNegative(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		maxPoints := rapid.IntRange(1, 6).Draw(rt, "maxPoints")

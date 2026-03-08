@@ -100,6 +100,9 @@ func (q *ActionQueue) RemainingPoints() int { return q.remaining }
 // Precondition: cost > 0.
 // Postcondition: remaining decremented by cost on success; unchanged on error.
 func (q *ActionQueue) DeductAP(cost int) error {
+	if cost <= 0 {
+		return fmt.Errorf("DeductAP: cost must be positive, got %d", cost)
+	}
 	if q.remaining < cost {
 		return fmt.Errorf("not enough AP: have %d, need %d", q.remaining, cost)
 	}
