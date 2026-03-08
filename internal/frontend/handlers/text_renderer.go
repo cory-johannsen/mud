@@ -64,7 +64,7 @@ func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string {
 	for _, eq := range rv.Equipment {
 		flags := ""
 		if eq.Usable {
-			flags += " [use]"
+			flags += " [interact]"
 		}
 		lines = append(lines, fmt.Sprintf("  %s%s%s%s", telnet.Cyan, eq.Name, telnet.Reset, flags))
 	}

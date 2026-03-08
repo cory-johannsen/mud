@@ -1665,16 +1665,24 @@ func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest
 	}
 
 	// Fall back to NPC examine.
-	if s.npcH == nil {
-		return nil, fmt.Errorf("target %q not found", req.Target)
+	if s.npcH != nil {
+		view, err := s.npcH.Examine(uid, req.Target)
+		if err == nil {
+			return &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_NpcView{NpcView: view},
+			}, nil
+		}
 	}
-	view, err := s.npcH.Examine(uid, req.Target)
-	if err != nil {
-		return nil, err
+
+	// Fall back to room equipment interaction (e.g. "examine Zone Map" → interact).
+	if s.roomEquipMgr != nil {
+		evt, err := s.handleInteract(uid, req.Target)
+		if err == nil {
+			return evt, nil
+		}
 	}
-	return &gamev1.ServerEvent{
-		Payload: &gamev1.ServerEvent_NpcView{NpcView: view},
-	}, nil
+
+	return nil, fmt.Errorf("target %q not found", req.Target)
 }
 
 // broadcastRoomEvent sends a RoomEvent to all players in a room except the excluded UID.
