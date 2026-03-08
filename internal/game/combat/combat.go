@@ -49,6 +49,9 @@ type Combatant struct {
 	StrMod     int
 	DexMod     int
 	Initiative int
+	// InitiativeBonus is the persistent attack+AC bonus for a player who wins initiative.
+	// Scaled 1–5→+1, 6–10→+2, 11+→+3. Always 0 for NPCs.
+	InitiativeBonus int
 	// Dead is true when this combatant has been permanently killed.
 	// For NPCs, reaching 0 HP sets Dead=true immediately.
 	// For players, Dead=true only when the dying condition advances to stack 4.
