@@ -64,6 +64,7 @@ message ClientMessage {
     TrainSkillRequest train_skill = 47;
     ActionRequest action = 48;
     RaiseShieldRequest raise_shield = 49;
+    TakeCoverRequest take_cover = 50;
   }
 }
 
@@ -703,3 +704,6 @@ message ActionRequest {
 
 // RaiseShieldRequest asks the server to raise the player's shield.
 message RaiseShieldRequest {}
+
+// TakeCoverRequest asks the server to have the player take cover.
+message TakeCoverRequest {}

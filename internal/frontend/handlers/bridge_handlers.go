@@ -95,6 +95,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerTrainSkill:         bridgeTrainSkill,
 	command.HandlerAction:             bridgeAction,
 	command.HandlerRaiseShield:        bridgeRaiseShield,
+	command.HandlerTakeCover:          bridgeTakeCover,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -818,5 +819,15 @@ func bridgeRaiseShield(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_RaiseShield{RaiseShield: &gamev1.RaiseShieldRequest{}},
+	}}, nil
+}
+
+// bridgeTakeCover builds a TakeCoverRequest.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a TakeCoverRequest; done is false.
+func bridgeTakeCover(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_TakeCover{TakeCover: &gamev1.TakeCoverRequest{}},
 	}}, nil
 }

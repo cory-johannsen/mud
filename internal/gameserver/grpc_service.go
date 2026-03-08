@@ -1124,6 +1124,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleAction(uid, p.Action)
 	case *gamev1.ClientMessage_RaiseShield:
 		return s.handleRaiseShield(uid)
+	case *gamev1.ClientMessage_TakeCover:
+		return s.handleTakeCover(uid)
 	case *gamev1.ClientMessage_SummonItem:
 		return s.handleSummonItem(uid, p.SummonItem)
 	case *gamev1.ClientMessage_ProficienciesRequest:
@@ -4127,4 +4129,49 @@ func (s *GameServiceServer) handleRaiseShield(uid string) (*gamev1.ServerEvent, 
 	}
 
 	return messageEvent("You raise your shield. (+2 AC until start of next turn)"), nil
+}
+
+// handleTakeCover applies the in_cover condition (+2 AC for the encounter).
+//
+// Precondition: uid must identify a valid player session.
+// Postcondition: Applies in_cover condition; in combat, deducts 1 AP and updates Combatant ACMod.
+func (s *GameServiceServer) handleTakeCover(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// In combat: spend 1 AP and update the combatant's ACMod.
+	if sess.Status == statusInCombat {
+		if s.combatH == nil {
+			return errorEvent("Combat handler unavailable."), nil
+		}
+		if err := s.combatH.SpendAP(uid, 1); err != nil {
+			return errorEvent(err.Error()), nil
+		}
+		if err := s.combatH.ApplyCombatantACMod(uid, uid, +2); err != nil {
+			s.logger.Warn("handleTakeCover: ApplyCombatantACMod failed",
+				zap.String("uid", uid), zap.Error(err))
+			return errorEvent(fmt.Sprintf("Failed to take cover: %v", err)), nil
+		}
+	}
+
+	// Apply the in_cover condition to the player session.
+	if s.condRegistry != nil {
+		def, ok := s.condRegistry.Get("in_cover")
+		if !ok {
+			s.logger.Warn("handleTakeCover: in_cover condition not found in registry",
+				zap.String("uid", uid))
+		} else {
+			if sess.Conditions == nil {
+				sess.Conditions = condition.NewActiveSet()
+			}
+			if err := sess.Conditions.Apply(uid, def, 1, -1); err != nil {
+				s.logger.Warn("handleTakeCover: Apply in_cover failed",
+					zap.String("uid", uid), zap.Error(err))
+			}
+		}
+	}
+
+	return messageEvent("You take cover. (+2 AC for the encounter)"), nil
 }

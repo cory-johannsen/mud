@@ -70,6 +70,7 @@ const (
 	HandlerTrainSkill          = "trainskill"
 	HandlerAction              = "action"
 	HandlerRaiseShield         = "raise_shield"
+	HandlerTakeCover           = "take_cover"
 )
 
 // Command defines a player-invocable command.
@@ -160,6 +161,7 @@ func BuiltinCommands() []Command {
 		{Name: "trainskill", Aliases: []string{"ts"}, Help: "Advance a skill proficiency rank using a pending skill increase", Category: CategoryCharacter, Handler: HandlerTrainSkill},
 		{Name: "action", Aliases: []string{"act"}, Help: "Activate an archetype or job action. Usage: action [name] [target]", Category: CategoryCombat, Handler: HandlerAction},
 		{Name: "raise", Aliases: []string{"rs"}, Help: "Raise your shield (+2 AC until start of next turn). Requires a shield in the off-hand slot.", Category: CategoryCombat, Handler: HandlerRaiseShield},
+		{Name: "cover", Aliases: []string{"tc"}, Help: "Take cover (+2 AC for the encounter). Costs 1 AP in combat.", Category: CategoryCombat, Handler: HandlerTakeCover},
 	}
 }
 

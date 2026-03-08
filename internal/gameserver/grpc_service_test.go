@@ -2078,6 +2078,122 @@ func TestHandleRaiseShield_InCombat_InsufficientAP(t *testing.T) {
 	require.NotNil(t, errEvt, "expected an error event when SpendAP fails (no active combat)")
 }
 
+// newTakeCoverSvc builds a minimal GameServiceServer for handleTakeCover tests.
+// condReg may be nil to test the no-registry path.
+func newTakeCoverSvc(t *testing.T, condReg *condition.Registry) (*GameServiceServer, *session.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+	return svc, sessMgr
+}
+
+// TestHandleTakeCover_NoSession verifies that handleTakeCover returns an error when the
+// player session does not exist.
+//
+// Precondition: uid "unknown_uid" has no session.
+// Postcondition: error is returned; event is nil.
+func TestHandleTakeCover_NoSession(t *testing.T) {
+	svc, _ := newTakeCoverSvc(t, nil)
+	event, err := svc.handleTakeCover("unknown_uid")
+	require.Error(t, err)
+	assert.Nil(t, event)
+}
+
+// TestHandleTakeCover_OutOfCombat verifies that handleTakeCover applies the in_cover condition
+// and returns a success message when out of combat (no AP cost).
+//
+// Precondition: condRegistry contains "in_cover"; player status is not in-combat.
+// Postcondition: sess.Conditions.Has("in_cover") == true; message event contains "+2 AC".
+func TestHandleTakeCover_OutOfCombat(t *testing.T) {
+	condReg := condition.NewRegistry()
+	condReg.Register(&condition.ConditionDef{
+		ID:           "in_cover",
+		Name:         "In Cover",
+		DurationType: "encounter",
+	})
+
+	svc, sessMgr := newTakeCoverSvc(t, condReg)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_takecover_ooc",
+		Username: "Hero",
+		CharName: "Hero",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+	// Status is default (out of combat).
+
+	event, err := svc.handleTakeCover("u_takecover_ooc")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event")
+	assert.Contains(t, msgEvt.Content, "+2 AC")
+	assert.True(t, sess.Conditions.Has("in_cover"), "expected in_cover condition applied")
+}
+
+// TestHandleTakeCover_InCombat_InsufficientAP verifies that handleTakeCover returns an error
+// event when the player is in combat but has no active combat (SpendAP fails).
+//
+// Precondition: player status == statusInCombat; CombatHandler has no registered combat.
+// Postcondition: error event returned (SpendAP fails because no active combat found).
+func TestHandleTakeCover_InCombat_InsufficientAP(t *testing.T) {
+	condReg := condition.NewRegistry()
+	condReg.Register(&condition.ConditionDef{
+		ID:           "in_cover",
+		Name:         "In Cover",
+		DurationType: "encounter",
+	})
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, condReg, worldMgr, nil, nil, nil, nil, nil)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_takecover_combat",
+		Username: "Hero",
+		CharName: "Hero",
+		RoomID:   "room_a",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+	sess.Status = statusInCombat // triggers SpendAP path
+
+	event, err := svc.handleTakeCover("u_takecover_combat")
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	errEvt := event.GetError()
+	require.NotNil(t, errEvt, "expected an error event when SpendAP fails (no active combat)")
+}
+
 func TestOutcomeDisplayName(t *testing.T) {
 	assert.Equal(t, "critical success", outcomeDisplayName(skillcheck.CritSuccess))
 	assert.Equal(t, "success", outcomeDisplayName(skillcheck.Success))
