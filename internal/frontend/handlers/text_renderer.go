@@ -606,6 +606,20 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 		acLine += ")"
 	}
 	left = append(left, slPlain(acLine))
+	if len(csv.GetPlayerResistances()) > 0 {
+		parts := make([]string, 0, len(csv.GetPlayerResistances()))
+		for _, r := range csv.GetPlayerResistances() {
+			parts = append(parts, fmt.Sprintf("%s %d", r.GetDamageType(), r.GetValue()))
+		}
+		left = append(left, slPlain(telnet.Colorize(telnet.Green, fmt.Sprintf("Resist: %s", strings.Join(parts, "  ")))))
+	}
+	if len(csv.GetPlayerWeaknesses()) > 0 {
+		parts := make([]string, 0, len(csv.GetPlayerWeaknesses()))
+		for _, r := range csv.GetPlayerWeaknesses() {
+			parts = append(parts, fmt.Sprintf("%s %d", r.GetDamageType(), r.GetValue()))
+		}
+		left = append(left, slPlain(telnet.Colorize(telnet.Red, fmt.Sprintf("Weak:   %s", strings.Join(parts, "  ")))))
+	}
 
 	left = append(left, slPlain(""))
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Saves ---")))

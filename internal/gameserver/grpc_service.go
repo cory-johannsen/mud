@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"sort"
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
@@ -497,6 +498,14 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			sess.Equipment = inventory.NewEquipment()
 		} else {
 			sess.Equipment = eq
+		}
+
+		// Compute defense stats from equipped armor (AC, resistances, weaknesses).
+		{
+			loginDexMod := (sess.Abilities.Quickness - 10) / 2
+			loginDef := sess.Equipment.ComputedDefenses(s.invRegistry, loginDexMod)
+			sess.Resistances = loginDef.Resistances
+			sess.Weaknesses = loginDef.Weaknesses
 		}
 
 		// Load persisted inventory.
@@ -2514,6 +2523,26 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.TotalAc = int32(10 + def.EffectiveDex + def.ACBonus)
 	sess.Resistances = def.Resistances
 	sess.Weaknesses = def.Weaknesses
+
+	// Player resistances and weaknesses from equipped armor.
+	for dmgType, val := range sess.Resistances {
+		view.PlayerResistances = append(view.PlayerResistances, &gamev1.ResistanceEntry{
+			DamageType: dmgType,
+			Value:      int32(val),
+		})
+	}
+	sort.Slice(view.PlayerResistances, func(i, j int) bool {
+		return view.PlayerResistances[i].DamageType < view.PlayerResistances[j].DamageType
+	})
+	for dmgType, val := range sess.Weaknesses {
+		view.PlayerWeaknesses = append(view.PlayerWeaknesses, &gamev1.ResistanceEntry{
+			DamageType: dmgType,
+			Value:      int32(val),
+		})
+	}
+	sort.Slice(view.PlayerWeaknesses, func(i, j int) bool {
+		return view.PlayerWeaknesses[i].DamageType < view.PlayerWeaknesses[j].DamageType
+	})
 
 	// Armor slots.
 	view.Armor = make(map[string]string)
