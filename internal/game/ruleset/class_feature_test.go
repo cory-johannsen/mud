@@ -11,8 +11,8 @@ func TestLoadClassFeatures_Count(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadClassFeatures: %v", err)
 	}
-	if len(features) != 97 {
-		t.Errorf("expected 97 features, got %d", len(features))
+	if len(features) != 106 {
+		t.Errorf("expected 106 features, got %d", len(features))
 	}
 }
 
@@ -37,8 +37,8 @@ func TestClassFeatureRegistry_ByJob(t *testing.T) {
 	reg := ruleset.NewClassFeatureRegistry(features)
 
 	jobFeatures := reg.ByJob("soldier")
-	if len(jobFeatures) != 1 {
-		t.Errorf("expected 1 soldier job feature, got %d", len(jobFeatures))
+	if len(jobFeatures) != 2 {
+		t.Errorf("expected 2 soldier job features, got %d", len(jobFeatures))
 	}
 }
 

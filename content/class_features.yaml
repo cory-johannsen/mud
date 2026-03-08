@@ -953,3 +953,160 @@ class_features:
     active: false
     activate_text: ""
     description: "+2 to Diplomacy for buying, selling, and negotiating; you always know the fair market value of any item."
+
+  # --- aggressor job active features ---
+  - id: savage_beatdown
+    name: Savage Beatdown
+    archetype: ""
+    job: beat_down_artist
+    pf2e: ""
+    active: true
+    shortcut: beatdown
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You rain blows down like a machine."
+    description: "Deal 1d8 bludgeoning damage to a single target."
+    effect:
+      type: damage
+      amount: "1d8"
+      damage_type: bludgeoning
+
+  - id: quick_draw_shot
+    name: Quick Draw Shot
+    archetype: ""
+    job: boot_gun
+    pf2e: ""
+    active: true
+    shortcut: qdraw
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "Your hand moves before your brain even registers the threat."
+    description: "Deal 1d6 piercing damage on a snap shot."
+    effect:
+      type: damage
+      amount: "1d6"
+      damage_type: piercing
+
+  - id: turf_war_shout
+    name: Turf War Shout
+    archetype: ""
+    job: gangster
+    pf2e: ""
+    active: true
+    shortcut: turf
+    action_cost: 1
+    contexts:
+      - combat
+      - exploration
+    activate_text: "You announce your presence and your intentions."
+    description: "Presence skill check (DC 14) to intimidate and establish dominance."
+    effect:
+      type: skill_check
+      skill: hard_look
+      dc: 14
+
+  - id: muscle_through
+    name: Muscle Through
+    archetype: ""
+    job: goon
+    pf2e: ""
+    active: true
+    shortcut: mthru
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You barrel forward, shoulder down."
+    description: "Deal 1d6 bludgeoning damage and shove target 5 feet."
+    effect:
+      type: damage
+      amount: "1d6"
+      damage_type: bludgeoning
+
+  - id: advance_order
+    name: Advance
+    archetype: ""
+    job: grunt
+    pf2e: ""
+    active: true
+    shortcut: advance
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You push forward under fire."
+    description: "Deal 1d6 piercing damage — your training overrides the fear."
+    effect:
+      type: damage
+      amount: "1d6"
+      damage_type: piercing
+
+  - id: flex_intimidate
+    name: Flex
+    archetype: ""
+    job: muscle
+    pf2e: ""
+    active: true
+    shortcut: flex
+    action_cost: 1
+    contexts:
+      - combat
+      - exploration
+    activate_text: "You let your body do the talking."
+    description: "Muscle skill check (DC 13) to intimidate through sheer physical presence."
+    effect:
+      type: skill_check
+      skill: muscle
+      dc: 13
+
+  - id: roid_rage
+    name: Roid Rage
+    archetype: ""
+    job: roid_rager
+    pf2e: ""
+    active: true
+    shortcut: rage
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "The chemicals take over."
+    description: "+2 melee damage, -1 AC for the rest of this encounter."
+    effect:
+      type: condition
+      target: self
+      condition_id: roid_rage_active
+
+  - id: suppressive_fire
+    name: Suppressive Fire
+    archetype: ""
+    job: soldier
+    pf2e: ""
+    active: true
+    shortcut: suppress
+    action_cost: 1
+    contexts:
+      - combat
+    activate_text: "You blanket the area in lead."
+    description: "Lay down suppressive fire, forcing enemies to spend extra AP to move."
+    effect:
+      type: condition
+      target: self
+      condition_id: suppressive_fire_active
+
+  - id: shakedown
+    name: Shakedown
+    archetype: ""
+    job: thug
+    pf2e: ""
+    active: true
+    shortcut: shake
+    action_cost: 1
+    contexts:
+      - combat
+      - exploration
+    activate_text: "You get right up in their face."
+    description: "Rep skill check (DC 14) to extort or intimidate a target."
+    effect:
+      type: skill_check
+      skill: rep
+      dc: 14
