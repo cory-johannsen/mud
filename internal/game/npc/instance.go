@@ -52,6 +52,10 @@ type Instance struct {
 	LastTauntTime time.Time
 	// SkillChecks defines skill check triggers fired when a player greets this NPC.
 	SkillChecks []skillcheck.TriggerDef
+	// Resistances maps damage type → flat reduction. Copied from template at spawn.
+	Resistances map[string]int
+	// Weaknesses maps damage type → flat bonus. Copied from template at spawn.
+	Weaknesses map[string]int
 }
 
 // Name returns the instance's current display name.
@@ -96,6 +100,8 @@ func NewInstance(id string, tmpl *Template, roomID string) *Instance {
 		TauntChance:   tmpl.TauntChance,
 		TauntCooldown: cooldown,
 		SkillChecks:   tmpl.SkillChecks,
+		Resistances:   tmpl.Resistances,
+		Weaknesses:    tmpl.Weaknesses,
 	}
 }
 

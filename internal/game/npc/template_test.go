@@ -7,6 +7,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 	"pgregory.net/rapid"
 )
 
@@ -224,4 +225,24 @@ respawn_delay: "%s"
 		_, err := npc.LoadTemplateFromBytes(data)
 		assert.Error(rt, err, "expected error for invalid respawn_delay %q", invalid)
 	})
+}
+
+func TestTemplate_ResistancesWeaknesses_LoadedFromYAML(t *testing.T) {
+	input := "id: test_npc\nname: Test NPC\ndescription: desc\nlevel: 1\nmax_hp: 10\nac: 10\nperception: 0\nresistances:\n  fire: 5\n  piercing: 2\nweaknesses:\n  electricity: 3\n"
+	var tmpl npc.Template
+	require.NoError(t, yaml.Unmarshal([]byte(input), &tmpl))
+	assert.Equal(t, 5, tmpl.Resistances["fire"])
+	assert.Equal(t, 2, tmpl.Resistances["piercing"])
+	assert.Equal(t, 3, tmpl.Weaknesses["electricity"])
+}
+
+func TestNewInstance_CopiesResistancesWeaknesses(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 10,
+		Resistances: map[string]int{"fire": 5},
+		Weaknesses:  map[string]int{"electricity": 3},
+	}
+	inst := npc.NewInstance("i1", tmpl, "room1")
+	assert.Equal(t, 5, inst.Resistances["fire"])
+	assert.Equal(t, 3, inst.Weaknesses["electricity"])
 }

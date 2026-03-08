@@ -46,6 +46,10 @@ type Template struct {
 	TauntCooldown string     `yaml:"taunt_cooldown"`
 	// SkillChecks defines skill check triggers fired when a player greets this NPC.
 	SkillChecks []skillcheck.TriggerDef `yaml:"skill_checks"`
+	// Resistances maps damage type → flat damage reduction (minimum 0 after reduction).
+	Resistances map[string]int `yaml:"resistances"`
+	// Weaknesses maps damage type → flat damage addition applied on any hit.
+	Weaknesses map[string]int `yaml:"weaknesses"`
 }
 
 // Validate checks that the template satisfies basic invariants.
