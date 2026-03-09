@@ -45,30 +45,52 @@
         - [x] First Aid [2A] — patch_job vs DC 15; success heals 2d8+4 HP
     - [ ] General
       - Aid: Spend an action on your turn to prepare; use your Reaction to give an ally a bonus.
+        - [ ] Aid command — implement `aid <target>` (2-action: prepare on your turn, then Reaction to give ally +2 circumstance bonus on their next check; requires multi-player combat and Reactions)
       - Ready [2A]: Set a trigger to take a single action as a Reaction later.
+        - [ ] Ready command — implement `ready <action> when <trigger>` (costs 2 AP; stores a pending Reaction that fires when trigger condition is met during the round; requires Reactions and initiative trigger system)
       - Hero Point: Spend a point to reroll a check or (if dying) to stabilize at 0 HP.
+        - [ ] Hero Point system — track hero points per player (awarded by GM or on milestone); implement `heropoint` command to spend a point to reroll the last check or stabilize at 0 HP when dying; requires hero point award events and dying/stabilize state
     - [ ] Exploration
       - Avoid Notice: Use Stealth to roll for initiative and start the fight hidden.
+        - [ ] Avoid Notice mode — player may declare `avoid notice` during exploration; on combat start, roll Stealth vs NPC Perception for initiative and apply hidden condition if successful; requires exploration mode tracking
       - Defend: Move with your shield up (start combat with Raise a Shield active).
+        - [ ] Defend mode — player may declare `defend` during exploration; on combat start automatically apply shield_raised condition (requires shield equipped); requires exploration mode tracking
       - Detect Magic: Constantly scan for magical auras while moving.
+        - [ ] Detect Magic mode — player may declare `detect magic` during exploration; rooms with magical auras or items emit a notification on entry; requires magic aura flag on rooms/items and exploration mode tracking
       - Search: Meticulously look for secret doors and traps (free secret Perception checks).
+        - [ ] Search mode — player may declare `search` during exploration; on room entry make a secret Perception check to reveal hidden exits, traps, or items; requires hidden exit/trap/item flags on rooms and exploration mode tracking
       - Scout: Give your whole party a +1 circumstance bonus to Initiative.
+        - [ ] Scout mode — player may declare `scout` during exploration; all party members gain +1 circumstance bonus to Initiative rolls when combat starts; requires multi-player party system and exploration mode tracking
       - Follow the Expert: A high-level ally helps you with a skill you aren’t good at.
+        - [ ] Follow the Expert mode — player may declare `follow <ally>` during exploration; ally’s skill rank is used in place of the player’s for the chosen skill while exploring; requires multi-player party system and exploration mode tracking
       - Investigate: Use Recall Knowledge (Arcana, Society, etc.) while traveling.
+        - [ ] Investigate mode — player may declare `investigate` during exploration; on room entry make a secret Recall Knowledge check to surface lore about NPCs, items, or zone history; requires lore/knowledge flags on rooms and NPCs and exploration mode tracking
       - Refocus: Spend 10 minutes to regain a Focus Point.
+        - [ ] Refocus command — implement `refocus` (unavailable in combat; costs in-game time; restores 1 Focus Point; requires Focus Point system and in-game time tracking)
     - [ ] Downtime
       - Earn Income: Use a skill (Crafting, Lore, Performance) to make money.
+        - [ ] Earn Income command — implement `earnincome <skill>` (skill check vs city DC; result determines credits earned per day; requires downtime time-tracking system and city-tier DC table)
       - Craft: Spend days creating items, equipment, or consumables.
+        - [ ] Craft command — implement `craft <item>` (Crafting check vs item DC; costs materials and downtime days; produces item on success; requires item recipe data, material inventory, and downtime time-tracking)
       - Retrain: Spend a week or more to change a Feat, Skill, or Job feature.
+        - [ ] Retrain command — implement `retrain <feat|skill> <old> <new>` (costs downtime days scaled to what is retrained; requires downtime time-tracking and trainer NPC in safe room)
       - Treat Disease: Spend time caring for an ill patient (Medicine).
+        - [ ] Treat Disease command — implement `treatdisease <target>` (Medicine check vs disease DC once per day during downtime; success reduces disease severity; requires disease/condition system and downtime time-tracking)
       - Subsist: Find food and shelter in the wild or a city for free.
+        - [ ] Subsist command — implement `subsist` (Survival or Society check vs zone DC; success covers food/shelter for the week at no cost; failure imposes a condition penalty; requires downtime time-tracking and zone DC table)
       - Create Forgery: Spend a day or more making a fake document.
+        - [ ] Create Forgery command — implement `forgery <document>` (Society check vs DC; costs downtime days; produces a forged document item used in quests or social encounters; requires document item type and downtime time-tracking)
       - Long-Term Rest: Spend 24 hours to recover double your level in HP.
+        - [ ] Long-Term Rest command — implement `longrest` (unavailable in combat or dangerous rooms; costs 24 in-game hours; heals 2×level HP and removes minor conditions; requires in-game time tracking and Resting/safe-room enforcement)
     - [ ] Gear
       - Activate an Item: Varies (1-3 actions). Used for potions, wands, and magic gear.
+        - [ ] Activate Item command — implement `activate <item>` (reads activation cost from item YAML; triggers item’s effect; requires activatable item type with action cost and effect definition in item YAML)
       - Repair: Spend 10 minutes (with a Repair Kit) to fix a damaged item.
+        - [ ] Repair command — implement `repair <item>` (Crafting check vs item Hardness DC; costs 10 in-game minutes and a Repair Kit consumable; restores item to functioning; requires item durability/broken state and Repair Kit item type)
       - Affix a Precious Material: Add specialized materials to gear.
+        - [ ] Affix Material command — implement `affix <material> <item>` (Crafting check vs material DC; permanently upgrades item with material properties; requires precious material item type and item upgrade slots in item YAML)
       - Swap [1A]: A Remaster addition—you can put away one item and draw another in a single action.
+        - [ ] Swap command — implement `swap <slot> <item>` (costs 1 AP in combat; swaps the item in a given equipped slot with another item in inventory; requires equipped slot tracking and in-combat item management)
 - [x] Console notifications
   - [x] The player should be notified in the console every time a skill is used automatically
   - [x] The player should be notified in the console every time XP is awarded and why
