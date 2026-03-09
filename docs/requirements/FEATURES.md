@@ -101,7 +101,7 @@
     - [x] missing tests
       - [x] add implementation items to the appropriate feature category
         - [x] if no feature category exists, add a new feature category
-- [ ] Player gender
+- [x] Player gender
   - [ ] Allow the player to select their gender at creation time.  Allow for random selection.
     - Male
     - Female
@@ -112,6 +112,19 @@
     - [ ] Add gender selection step to character creation flow: present numbered options; option 5 prompts for custom text input; option 0 randomizes
   - [ ] Backfill missing gender at player load
     - [ ] On player load, if gender field is null or empty, assign a random gender value and persist it
+- [ ] Room display 
+  - [ ] Should refresh more frequently
+  - [ ] Exits should be 4 columns per line
+    - [ ] Exits label should be on the same line as the first line of exits.
+  - [ ] NPCs should include combat status
+    - Examples: 
+      - Ganger A (unharmed)
+      - Ganger A (unharmed) fighting `player_name`
+    - [ ] should be in 2 columns per line
+    - [ ] Should be labelled.  The label should be on the same row as the NPCs
+  - [ ] room equipment should be placed between the exits and the NPCs
+    - [ ] should be 4 columns per line
+    - [ ] Should be labelled.  The label should be on the same row as the equipment.
 - [ ] NPC equipment - each NPC gets equipment assigned and equipped
   - Weapon
   - Armor
@@ -130,27 +143,27 @@
     - [ ] Reactive Strike (Attack of Opportunity) — NPC triggers a Strike when a player in melee range moves or uses Step; required before Step and Tumble Through are meaningful
   - Distance
     - Measures the distance from the player to the target
-    - Maximum distance 100m
-    - Minimum distance 0m
-    - Distance is measurement in 5m increments
-    - Combat begins with the players at 20 meters distance from the enemy
+    - Maximum distance 100ft
+    - Minimum distance 5ft
+    - Distance is measurement in 5ft increments
+    - Combat begins with the players at 25ft distance from the enemy
       - The player may specify an alternate initial distance
-        - The player may not initiate combat with a starting distance less than 10m unless using a skill or feat that allows this
+        - The player may not initiate combat with a starting distance less than 15ft unless using a skill or feat that allows this
       - NPCs always start at distance 0
-    - [ ] Add `Distance int` field to Combat struct (in 5m increments); initialize to 20 for player-initiated combat
-    - [ ] Stride command — implement `stride` (1 AP; moves 5m toward or away from target; display updated distance; required before range enforcement)
-    - [ ] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5m; ranged attacks have accuracy penalties by range band
+    - [ ] Add `Distance int` field to Combat struct (in 5ft increments); initialize to 25 for player-initiated combat
+    - [ ] Stride command — implement `stride` (1 AP; moves 25ft toward or away from target; display updated distance; required before range enforcement)
+    - [ ] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5ft; ranged attacks have accuracy penalties by range band
   - Movement
     - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
-    - [ ] Positional tracking — track each combatant's position within a room in 5-ft increments; required for Shove, Step, and Tumble Through
-    - [ ] Shove command — implement `shove <target>` (Athletics vs Fortitude DC; on success push target 5 ft away; requires positional tracking)
-    - [ ] Step command — implement `step <direction>` (move 5 ft without triggering Reactive Strike; requires positional tracking and Reactions)
+    - [ ] Positional tracking — track each combatant's position within a room in 5ft increments; required for Shove, Step, and Tumble Through
+    - [ ] Shove command — implement `shove <target>` (Athletics vs Fortitude DC; on success push target 5ft away; requires positional tracking)
+    - [ ] Step command — implement `step <direction>` (move 5ft without triggering Reactive Strike; requires positional tracking and Reactions)
     - [ ] Tumble Through command — implement `tumble <target>` (Acrobatics vs Reflex DC; on success move through enemy space without triggering Reactive Strike; requires positional tracking)
   - Range
-    - Melee: <5m
-    - Short: 5-20m
-    - Long: 25-40m
-    - Extreme: 55m+
+    - Melee: 5ft
+    - Short: 10-25ft
+    - Long: 30-50ft
+    - Extreme: 55+ ft
   - Cover
     - Room equipment may serve as cover
       - Whether equipment may be used as cover (and what kind of cover it provides) should be stored in the yaml for the room
@@ -199,29 +212,29 @@
 - [ ] Technology instead of magic.  
   - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism).  
   - For the remainder of the features specification Technology refers to the combined effects of both technological devices and drugs.
-      - [ ] Traditions of magic -> Types of technology / Substances
-        - Use PF2E Traits, mapping to Gunchete lore as required
-        - [ ] Arcane -> Technical
-        - [ ] Divine -> Fanatic Doctrine
-        - [ ] Occult -> Neural
-        - [ ] Primal -> Bio-Synthetic
-      - [ ] Archetype and Job define the technologies available for the player
-        - [ ] Levelling up allows for additions and changes
-        - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
-          - [ ] Cantrips -> unlimited use minor Technologies
-            - [ ] Fixed list per Job, no player adjustment 
-          - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
-            - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
-            - [ ] Fixed number of uses per Technology per level (i.e. 5 level 1, 3 level 2, 1 level 3)
-            - [ ] Can be rearranged when resting
-            - [ ] Player gets to choose which new Technologies are learned with levelling up. 
-          - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
-            - [ ] Fixed list of Technologies per job level
-            - [ ] Fixed number usages for each Technology level (resets with long rest)
-            - [ ] Player gets to choose which new Technologies are learned with levelling up.
-          - [ ] Heightened Spells -> Amped Technology
-            - Follows the PF2E rules 
-          - [ ] Innate Technologies
+  - [ ] Traditions of magic -> Types of technology / Substances
+    - Use PF2E Traits, mapping to Gunchete lore as required
+    - [ ] Arcane -> Technical
+    - [ ] Divine -> Fanatic Doctrine
+    - [ ] Occult -> Neural
+    - [ ] Primal -> Bio-Synthetic
+  - [ ] Archetype and Job define the technologies available for the player
+    - [ ] Levelling up allows for additions and changes
+    - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
+      - [ ] Cantrips -> unlimited use minor Technologies
+        - [ ] Fixed list per Job, no player adjustment 
+      - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
+        - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
+        - [ ] Fixed number of uses per Technology per level (i.e. 5 level 1, 3 level 2, 1 level 3)
+        - [ ] Can be rearranged when resting
+        - [ ] Player gets to choose which new Technologies are learned with levelling up. 
+      - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
+        - [ ] Fixed list of Technologies per job level
+        - [ ] Fixed number usages for each Technology level (resets with long rest)
+        - [ ] Player gets to choose which new Technologies are learned with levelling up.
+      - [ ] Heightened Spells -> Amped Technology
+        - Follows the PF2E rules 
+      - [ ] Innate Technologies
 - [ ] Non-combat NPCs. Define the data model and behavior for the following NPCs and implement those specifically mentioned.
   - For those not mentioned generate one that lives in a room in Rustbucket Ridge and matches the lore. Multiple NPCs can occupy the same room.
   - [ ] Non-combat NPC base data model — add `npc_type` field (merchant, guard, healer, quest_giver, hireling, banker, job_trainer) to NPC YAML; non-combat NPCs do not appear in combat initiative; they flee or cower when combat starts in their room
