@@ -853,6 +853,59 @@ func TestProperty_RenderCharacterSheet_Proficiencies(t *testing.T) {
 	})
 }
 
+func TestRenderRoomView_NPCsLabelled(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title: "Test Room",
+		Npcs: []*gamev1.NpcInfo{
+			{Name: "Ganger A", HealthDescription: "unharmed"},
+		},
+	}
+	rendered := RenderRoomView(rv, 80, 0)
+	stripped := telnet.StripANSI(rendered)
+	assert.Contains(t, stripped, "NPCs:")
+	for _, line := range strings.Split(stripped, "\r\n") {
+		if strings.Contains(line, "NPCs:") {
+			assert.Contains(t, line, "Ganger A", "first NPC must be on same line as NPCs: label")
+			break
+		}
+	}
+}
+
+func TestRenderRoomView_NPCsTwoColumns(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title: "Test Room",
+		Npcs: []*gamev1.NpcInfo{
+			{Name: "Ganger A", HealthDescription: "unharmed"},
+			{Name: "Ganger B", HealthDescription: "lightly wounded"},
+			{Name: "Ganger C", HealthDescription: "unharmed"},
+		},
+	}
+	rendered := RenderRoomView(rv, 80, 0)
+	stripped := telnet.StripANSI(rendered)
+	var npcLines []string
+	for _, l := range strings.Split(strings.TrimRight(stripped, "\r\n"), "\r\n") {
+		if strings.Contains(l, "Ganger") {
+			npcLines = append(npcLines, l)
+		}
+	}
+	require.Equal(t, 2, len(npcLines), "3 NPCs should span 2 rows at 2 per row")
+	assert.Contains(t, npcLines[0], "Ganger A")
+	assert.Contains(t, npcLines[0], "Ganger B")
+	assert.Contains(t, npcLines[1], "Ganger C")
+}
+
+func TestRenderRoomView_NPCsFightingTarget(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title: "Test Room",
+		Npcs: []*gamev1.NpcInfo{
+			{Name: "Ganger A", HealthDescription: "unharmed", FightingTarget: "alice"},
+		},
+	}
+	rendered := RenderRoomView(rv, 80, 0)
+	stripped := telnet.StripANSI(rendered)
+	assert.Contains(t, stripped, "fighting alice")
+}
+
 func TestAbilityBonus_ModifierOnly(t *testing.T) {
 	result := RenderCharacterSheet(&gamev1.CharacterSheetView{
 		Name:      "Hero",

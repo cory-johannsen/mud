@@ -42,14 +42,9 @@ func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string {
 		lines = append(lines, telnet.Colorf(telnet.Green, "Also here: %s", strings.Join(rv.Players, ", ")))
 	}
 
-	// NPCs present — show name and health status with color coding.
-	for _, n := range rv.Npcs {
-		healthColor := npcHealthColor(n.HealthDescription)
-		entry := fmt.Sprintf("  %s%s%s  %s(%s)%s",
-			telnet.Yellow, n.Name, telnet.Reset,
-			healthColor, n.HealthDescription, telnet.Reset,
-		)
-		lines = append(lines, entry)
+	// NPCs present — 2 per row with "NPCs:  " label inline on the first row.
+	if len(rv.Npcs) > 0 {
+		lines = append(lines, renderNPCs(rv.Npcs, width)...)
 	}
 
 	// Room equipment
@@ -92,6 +87,54 @@ func npcHealthColor(desc string) string {
 	default:
 		return telnet.White
 	}
+}
+
+// renderNPCs renders NPC entries 2 per row, with "NPCs:  " label inline on the first row.
+// Each entry format: "Name (health)" or "Name (health) fighting Target".
+//
+// Precondition: npcs must be non-empty.
+// Postcondition: Returns at least one non-empty string.
+func renderNPCs(npcs []*gamev1.NpcInfo, width int) []string {
+	const perRow = 2
+	label := telnet.Colorize(telnet.BrightWhite, "NPCs:  ")
+	labelVisLen := len("NPCs:  ")
+	indentStr := strings.Repeat(" ", labelVisLen)
+
+	colW := 0
+	if width > labelVisLen {
+		colW = (width - labelVisLen) / perRow
+	}
+
+	var out []string
+	for i := 0; i < len(npcs); i += perRow {
+		var rowBuf strings.Builder
+		if i == 0 {
+			rowBuf.WriteString(label)
+		} else {
+			rowBuf.WriteString(indentStr)
+		}
+		for j := 0; j < perRow && i+j < len(npcs); j++ {
+			n := npcs[i+j]
+			healthColor := npcHealthColor(n.HealthDescription)
+			entry := fmt.Sprintf("%s%s%s %s(%s)%s",
+				telnet.Yellow, n.Name, telnet.Reset,
+				healthColor, n.HealthDescription, telnet.Reset)
+			if n.FightingTarget != "" {
+				entry += fmt.Sprintf(" %sfighting %s%s",
+					telnet.BrightRed, n.FightingTarget, telnet.Reset)
+			}
+			// Pad to column width so second column aligns (skip padding on last in row).
+			if colW > 0 && j < perRow-1 {
+				visLen := len(telnet.StripANSI(entry))
+				if visLen < colW {
+					entry += strings.Repeat(" ", colW-visLen)
+				}
+			}
+			rowBuf.WriteString(entry)
+		}
+		out = append(out, rowBuf.String())
+	}
+	return out
 }
 
 // renderExits renders exit entries 4 per row, with "Exits: " label inline on the first row.
