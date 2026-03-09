@@ -76,6 +76,7 @@ type CharacterSaver interface {
 	SaveDefaultCombatAction(ctx context.Context, characterID int64, action string) error
 	SaveCurrency(ctx context.Context, characterID int64, currency int) error
 	LoadCurrency(ctx context.Context, characterID int64) (int, error)
+	SaveGender(ctx context.Context, characterID int64, gender string) error
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.
@@ -392,6 +393,10 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	if dbChar != nil && dbChar.DefaultCombatAction != "" {
 		defaultCombatAction = dbChar.DefaultCombatAction
 	}
+	genderVal := ""
+	if dbChar != nil {
+		genderVal = dbChar.Gender
+	}
 	sess, err := s.sessions.AddPlayer(session.AddPlayerOptions{
 		UID:                 uid,
 		Username:            username,
@@ -406,11 +411,20 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		Class:               joinReq.Class,
 		Level:               int(joinReq.Level),
 		DefaultCombatAction: defaultCombatAction,
+		Gender:              genderVal,
 	})
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
 	}
 	defer s.cleanupPlayer(uid, username)
+
+	// Backfill gender: if the loaded character has no gender, assign a random standard gender and persist it.
+	if sess.Gender == "" && characterID > 0 && s.charSaver != nil {
+		sess.Gender = character.RandomStandardGender()
+		if gErr := s.charSaver.SaveGender(stream.Context(), characterID, sess.Gender); gErr != nil {
+			s.logger.Warn("backfilling gender", zap.Int64("character_id", characterID), zap.Error(gErr))
+		}
+	}
 
 	// Load XP, level, maxHP, and pending boosts into session from persisted state.
 	if characterID > 0 && s.progressRepo != nil {

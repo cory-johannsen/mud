@@ -89,6 +89,8 @@ type PlayerSession struct {
 	// GrabberID is the NPC instance ID of the NPC currently grappling this player.
 	// Empty string when the player is not grabbed. Set by NPC grapple; cleared by escape.
 	GrabberID string
+	// Gender is the character's gender identity string, loaded at login.
+	Gender string
 }
 
 // Manager tracks all active player sessions and room occupancy.
@@ -127,6 +129,7 @@ type AddPlayerOptions struct {
 	Class                string
 	Level                int
 	DefaultCombatAction  string
+	Gender               string
 }
 
 // AddPlayer registers a new player session in the given room.
@@ -183,6 +186,7 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		Class:               class,
 		Level:               level,
 		DefaultCombatAction: defaultCombatAction,
+		Gender:              opts.Gender,
 		Entity:              entity,
 		// Status 1 = IDLE: newly connected players are idle by default.
 		Status:         1,
