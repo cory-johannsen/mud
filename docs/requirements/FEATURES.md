@@ -79,9 +79,26 @@
     - [ ] missing tests
       - [ ] add implementation items to the appropriate feature category
         - [ ] if no feature category exists, add a new feature category 
+- [ ] Player gender 
+  - [ ] Allow the player to select their gender at creation time.  Allow for random selection.
+    - Male
+    - Female
+    - Non-binary
+    - Indeterminate
+    - Other (player enters)
+  - [ ] Backfill missing gender at player load
+- [ ] NPC equipment - each NPC gets equipment assigned and equipped
+  - Weapon
+  - Armor
+  - [ ] Disarm command — implement `disarm <target>` (Athletics vs Reflex DC; on success removes target's active weapon from their equipped slot for the remainder of combat; requires NPC equipment tracking in combat)
+- [ ] Disarm action
 - [ ] Advanced combat mechanics
   - [ ] Immobilized — prevent grabbed creatures from moving between rooms
+  - [ ] Delay command — implement `delay` (player forfeits current turn and re-enters initiative at a chosen later point; requires initiative order to support mid-round insertion)
+  - [ ] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
+  - [ ] Sense Motive command — implement `motive <target>` (Perception vs target Deception skill; on success reveals whether the NPC is bluffing, holding back an action, or concealing intent)
   - Reactions
+    - [ ] Reactive Strike (Attack of Opportunity) — NPC triggers a Strike when a player in melee range moves or uses Step; required before Step and Tumble Through are meaningful
   - Distance
     - Measures the distance from the player to the target
     - Maximum distance 100m
@@ -93,6 +110,10 @@
       - NPCs always start at distance 0
   - Movement
     - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
+    - [ ] Positional tracking — track each combatant's position within a room in 5-ft increments; required for Shove, Step, and Tumble Through
+    - [ ] Shove command — implement `shove <target>` (Athletics vs Fortitude DC; on success push target 5 ft away; requires positional tracking)
+    - [ ] Step command — implement `step <direction>` (move 5 ft without triggering Reactive Strike; requires positional tracking and Reactions)
+    - [ ] Tumble Through command — implement `tumble <target>` (Acrobatics vs Reflex DC; on success move through enemy space without triggering Reactive Strike; requires positional tracking)
   - Range
     - Melee: <5m
     - Short: 5-20m
@@ -105,6 +126,10 @@
   - Area of Effect
   - Attack of opportunity
   - Terrain types
+    - [ ] Climbable surfaces — rooms with climbable terrain (walls, ladders, ruins) support vertical movement; stored in room YAML; required for Climb command
+    - [ ] Climb command — implement `climb` (Athletics vs surface DC defined in room YAML; available only in rooms with climbable terrain)
+    - [ ] Water terrain — rooms with water terrain support swimming; stored in room YAML with a current DC value; required for Swim command
+    - [ ] Swim command — implement `swim` (Athletics vs current DC defined in room YAML; available only in rooms with water terrain)
   - Fleeing
     - Pursuit
   - Mental state
@@ -183,29 +208,30 @@
         - The Active Job is the one that earns XP.
         - Inactive Jobs do not earn XP, but the player may still use the feats and proficiencies they provide
         - A command must exist to allow the player to view their Jobs and select which one is Active
+- [ ] Hero points
 - [ ] Job development
-     - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
-     - [ ] advancement hierarchy - every job has multiple levels of specialization
-       - [x] Basic (existing)
-         - [ ] Specialist - when the player has reached the necessary requirements in a Basic job they may train to become a Specialist
-           - Each Specialist job provides a set of attribute boosts
-           - Specialist attribute boosts are cumulative with base Job attribute boosts
-          - Each Specialist job provides a set of advanced feats
-            - Specialist advanced feats are cumulative with base Job feats
-          - Each Specialist job provides a set of proficiencies
-            - Specialist advanced feats are cumulative with base Job proficiencies
-          - Each Specialist job provides a set of skills
-            - Specialist advanced feats are cumulative with base Job skills
-       - [ ] Expert - when the player has reached the necessary requirements in a Specialist job they may train to become an Expert
-         - Each Expert job provides a set of attribute boosts
-           - Expert attribute boosts are cumulative with base and Specialist Job attribute boosts
-         - Each Expert job provides a set of advanced feats
-           - Expert advanced feats are cumulative with base and Specialist Job feats
-         - Each Expert job provides a set of proficiencies
-           - Expert advanced feats are cumulative with base and Specialist Job proficiencies
-         - Each Expert job provides a set of skills
-           - Expert advanced feats are cumulative with base and Specialist Job skills
-     - [ ] multi-job combinations  
+  - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
+  - [ ] advancement hierarchy - every job has multiple levels of specialization
+    - [x] Basic (existing)
+      - [ ] Specialist - when the player has reached the necessary requirements in a Basic job they may train to become a Specialist
+        - Each Specialist job provides a set of attribute boosts
+        - Specialist attribute boosts are cumulative with base Job attribute boosts
+       - Each Specialist job provides a set of advanced feats
+         - Specialist advanced feats are cumulative with base Job feats
+       - Each Specialist job provides a set of proficiencies
+         - Specialist advanced feats are cumulative with base Job proficiencies
+       - Each Specialist job provides a set of skills
+         - Specialist advanced feats are cumulative with base Job skills
+    - [ ] Expert - when the player has reached the necessary requirements in a Specialist job they may train to become an Expert
+      - Each Expert job provides a set of attribute boosts
+        - Expert attribute boosts are cumulative with base and Specialist Job attribute boosts
+      - Each Expert job provides a set of advanced feats
+        - Expert advanced feats are cumulative with base and Specialist Job feats
+      - Each Expert job provides a set of proficiencies
+        - Expert advanced feats are cumulative with base and Specialist Job proficiencies
+      - Each Expert job provides a set of skills
+        - Expert advanced feats are cumulative with base and Specialist Job skills
+  - [ ] multi-job combinations  
 - [ ] Equipment mechanics expansion 
   - Durability
     - breakage
@@ -273,9 +299,9 @@
   - dialog taunt and statement templates and generators
   - interactions
       - aggressiveness/hostility
-    - daily patterns driven by time of day, reaction to weather and other external environmental stimulus. 
-    - default combat actions, reactions, and strategy.
-    - map movement and fencing
+  - daily patterns driven by time of day, reaction to weather and other external environmental stimulus. 
+  - default combat actions, reactions, and strategy.
+  - map movement and fencing
 - [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
 - [ ] World map
     - fast travel
@@ -354,7 +380,7 @@
     - All NPCs are male
       - All NPCs have a high probability attempt to seduce male players
         - On failure to seduce NPCs become aggressive
-    - All NPCs are aggressive to female players
+    - All NPCs are aggressive to non-male players
     - All rooms in zone are Dangerous
     - [ ] Continuous zone effects: horror, nausea, reduced visibility
     - [ ] Locations
