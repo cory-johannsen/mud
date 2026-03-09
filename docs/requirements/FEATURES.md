@@ -113,12 +113,12 @@
   - [x] Backfill missing gender at player load
     - [x] On player load, if gender field is null or empty, assign a random gender value and persist it
 - [x] `trainskill` does not persist the player selection (the result is gone when the player logs in again and the character sheet shows Pending Skill Increases: 1)
-- [ ] `grant` Editor command 
-  - Accepts a parameter for the type of grant
-    - xp: grants a player XP
-    - money: grants a player currency
-  - Accepts a character name, prompting if not provided. 
-  - Prompts for the amount of the resource to grant.
+- [x] `grant` Editor command
+  - [x] Accepts a parameter for the type of grant
+    - [x] xp: grants a player XP
+    - [x] money: grants a player currency
+  - [x] Accepts a character name (target must be online)
+  - [x] Accepts the amount as an argument (must be > 0)
 - [ ] Room display 
   - [ ] Should refresh more frequently
   - [ ] Exits should be 4 columns per line
@@ -132,6 +132,9 @@
   - [ ] room equipment should be placed between the exits and the NPCs
     - [ ] should be 4 columns per line
     - [ ] Should be labelled.  The label should be on the same row as the equipment.
+- [ ] Perception
+  - PF2E Perception should be implemented using the name Awareness
+  - Awareness should be displayed on the character sheet
 - [ ] NPC equipment - each NPC gets equipment assigned and equipped
   - Weapon
   - Armor
