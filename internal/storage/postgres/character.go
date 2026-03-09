@@ -47,21 +47,21 @@ func (r *CharacterRepository) Create(ctx context.Context, c *character.Character
 		INSERT INTO characters
 			(account_id, name, region, class, team, level, experience, location,
 			 brutality, quickness, grit, reasoning, savvy, flair,
-			 max_hp, current_hp)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+			 max_hp, current_hp, gender)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
 		RETURNING id, account_id, name, region, class, team, level, experience, location,
 		          brutality, quickness, grit, reasoning, savvy, flair,
-		          max_hp, current_hp, created_at, updated_at, default_combat_action`,
+		          max_hp, current_hp, created_at, updated_at, default_combat_action, gender`,
 		c.AccountID, c.Name, c.Region, c.Class, c.Team, c.Level, c.Experience, c.Location,
 		c.Abilities.Brutality, c.Abilities.Quickness, c.Abilities.Grit,
 		c.Abilities.Reasoning, c.Abilities.Savvy, c.Abilities.Flair,
-		c.MaxHP, c.CurrentHP,
+		c.MaxHP, c.CurrentHP, c.Gender,
 	).Scan(
 		&out.ID, &out.AccountID, &out.Name, &out.Region, &out.Class, &out.Team,
 		&out.Level, &out.Experience, &out.Location,
 		&out.Abilities.Brutality, &out.Abilities.Quickness, &out.Abilities.Grit,
 		&out.Abilities.Reasoning, &out.Abilities.Savvy, &out.Abilities.Flair,
-		&out.MaxHP, &out.CurrentHP, &out.CreatedAt, &out.UpdatedAt, &out.DefaultCombatAction,
+		&out.MaxHP, &out.CurrentHP, &out.CreatedAt, &out.UpdatedAt, &out.DefaultCombatAction, &out.Gender,
 	)
 	if err != nil {
 		if isDuplicateKeyError(err) {
@@ -80,7 +80,7 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 	rows, err := r.db.Query(ctx, `
 		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       brutality, quickness, grit, reasoning, savvy, flair,
-		       max_hp, current_hp, created_at, updated_at, default_combat_action
+		       max_hp, current_hp, created_at, updated_at, default_combat_action, gender
 		FROM characters WHERE account_id = $1 ORDER BY created_at ASC`,
 		accountID,
 	)
@@ -97,7 +97,7 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 			&c.Level, &c.Experience, &c.Location,
 			&c.Abilities.Brutality, &c.Abilities.Quickness, &c.Abilities.Grit,
 			&c.Abilities.Reasoning, &c.Abilities.Savvy, &c.Abilities.Flair,
-			&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction,
+			&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction, &c.Gender,
 		); err != nil {
 			return nil, fmt.Errorf("scanning character row: %w", err)
 		}
@@ -115,7 +115,7 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 	err := r.db.QueryRow(ctx, `
 		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       brutality, quickness, grit, reasoning, savvy, flair,
-		       max_hp, current_hp, created_at, updated_at, default_combat_action
+		       max_hp, current_hp, created_at, updated_at, default_combat_action, gender
 		FROM characters WHERE id = $1`,
 		id,
 	).Scan(
@@ -123,7 +123,7 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 		&c.Level, &c.Experience, &c.Location,
 		&c.Abilities.Brutality, &c.Abilities.Quickness, &c.Abilities.Grit,
 		&c.Abilities.Reasoning, &c.Abilities.Savvy, &c.Abilities.Flair,
-		&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction,
+		&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction, &c.Gender,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -154,6 +154,27 @@ func (r *CharacterRepository) SaveDefaultCombatAction(ctx context.Context, chara
 	}
 	if tag.RowsAffected() == 0 {
 		return fmt.Errorf("SaveDefaultCombatAction: %w", ErrCharacterNotFound)
+	}
+	return nil
+}
+
+// SaveGender persists the player's gender to the characters table.
+//
+// Precondition: id > 0; gender must be non-empty.
+// Postcondition: characters.gender column is updated; returns ErrCharacterNotFound if no row updated.
+func (r *CharacterRepository) SaveGender(ctx context.Context, id int64, gender string) error {
+	if id <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	if gender == "" {
+		return fmt.Errorf("gender must be non-empty")
+	}
+	tag, err := r.db.Exec(ctx, `UPDATE characters SET gender = $2 WHERE id = $1`, id, gender)
+	if err != nil {
+		return fmt.Errorf("SaveGender: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrCharacterNotFound
 	}
 	return nil
 }
