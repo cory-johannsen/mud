@@ -19,6 +19,15 @@ type WorldHandler struct {
 	clock        *GameClock
 	roomEquipMgr *inventory.RoomEquipmentManager
 	invRegistry  *inventory.Registry
+	combatH      *CombatHandler
+}
+
+// SetCombatHandler wires in the CombatHandler for NPC combat status lookup.
+//
+// Precondition: none (may be nil to disable combat status).
+// Postcondition: h.combatH is set to combatH.
+func (h *WorldHandler) SetCombatHandler(combatH *CombatHandler) {
+	h.combatH = combatH
 }
 
 // NewWorldHandler creates a WorldHandler with the given dependencies.
@@ -176,10 +185,15 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 	npcInfos := make([]*gamev1.NpcInfo, 0, len(instances))
 	for _, inst := range instances {
 		if !inst.IsDead() {
+			fightingTarget := ""
+			if h.combatH != nil {
+				fightingTarget = h.combatH.FightingTargetName(inst.ID)
+			}
 			npcInfos = append(npcInfos, &gamev1.NpcInfo{
 				InstanceId:        inst.ID,
 				Name:              inst.Name(),
 				HealthDescription: inst.HealthDescription(),
+				FightingTarget:    fightingTarget,
 			})
 		}
 	}

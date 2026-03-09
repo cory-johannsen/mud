@@ -411,6 +411,20 @@ func (e *Engine) GetCombat(roomID string) (*Combat, bool) {
 	return cbt, ok
 }
 
+// AllCombats returns a snapshot of all active combats.
+//
+// Precondition: none.
+// Postcondition: Returns a slice of all active Combat pointers (may be empty).
+func (e *Engine) AllCombats() []*Combat {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	out := make([]*Combat, 0, len(e.combats))
+	for _, c := range e.combats {
+		out = append(out, c)
+	}
+	return out
+}
+
 // EndCombat removes the combat record for roomID.
 //
 // Precondition: roomID must be non-empty.

@@ -436,6 +436,29 @@ func (h *CombatHandler) GetCombatant(uid, targetID string) (*combat.Combatant, b
 	return nil, false
 }
 
+// GetCombatConditionSet returns the condition ActiveSet for targetID from the active combat
+// in the room of the player identified by uid.
+//
+// Precondition: uid must identify a player session; targetID must have a condition entry in that room's active combat.
+// Postcondition: Returns a pointer to the ActiveSet and true if found; nil and false otherwise.
+func (h *CombatHandler) GetCombatConditionSet(uid, targetID string) (*condition.ActiveSet, bool) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, false
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil, false
+	}
+
+	s, ok := cbt.Conditions[targetID]
+	return s, ok
+}
+
 // Pass forfeits uid's remaining AP for this round.
 // Requires active combat. Early-resolves if all actions submitted.
 //
@@ -1459,6 +1482,29 @@ func conditionEventsToProto(events []combat.RoundConditionEvent, reg *condition.
 // Postcondition: equivalent to engine.IsNPCInCombat(npcID).
 func (h *CombatHandler) IsInCombat(npcID string) bool {
 	return h.engine.IsNPCInCombat(npcID)
+}
+
+// FightingTargetName returns the name of the player combatant this NPC is currently fighting,
+// or "" if the NPC is not in active combat.
+//
+// Precondition: npcID must be non-empty.
+// Postcondition: Returns the player's Name, or "" if not found.
+func (h *CombatHandler) FightingTargetName(npcID string) string {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	for _, cbt := range h.engine.AllCombats() {
+		for _, c := range cbt.Combatants {
+			if c.ID == npcID {
+				for _, other := range cbt.Combatants {
+					if other.Kind == combat.KindPlayer {
+						return other.Name
+					}
+				}
+				return ""
+			}
+		}
+	}
+	return ""
 }
 
 // Status returns the active conditions for the player with the given uid.

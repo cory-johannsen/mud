@@ -296,6 +296,7 @@ func NewGameServiceServer(
 				}
 			}
 		})
+		s.worldH.SetCombatHandler(s.combatH)
 	}
 	return s
 }

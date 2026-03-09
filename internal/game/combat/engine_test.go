@@ -5,6 +5,8 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -150,4 +152,24 @@ func TestPropertyCombat_RoundMonotonicallyIncreases(t *testing.T) {
 			rt.Errorf("after %d StartRound calls: Round = %d, want %d", n, cbt.Round, n)
 		}
 	})
+}
+
+// TestEngine_AllCombats_Empty verifies AllCombats returns an empty slice when no combats are active.
+func TestEngine_AllCombats_Empty(t *testing.T) {
+	eng := combat.NewEngine()
+	assert.Empty(t, eng.AllCombats())
+}
+
+// TestEngine_AllCombats_ReturnsActive verifies AllCombats returns all active combats.
+func TestEngine_AllCombats_ReturnsActive(t *testing.T) {
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 12, Level: 1},
+	}
+	cbt, err := eng.StartCombat("room-1", combatants, makeTestRegistry(), nil, "")
+	require.NoError(t, err)
+	all := eng.AllCombats()
+	require.Len(t, all, 1)
+	assert.Equal(t, cbt, all[0])
 }
