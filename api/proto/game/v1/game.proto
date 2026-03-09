@@ -74,6 +74,7 @@ message ClientMessage {
     SneakRequest sneak = 57;
     DivertRequest divert = 58;
     EscapeRequest escape = 59;
+    GrantRequest grant = 60;
   }
 }
 
@@ -752,3 +753,10 @@ message DivertRequest {}
 
 // EscapeRequest asks the server to escape from the grabbed condition.
 message EscapeRequest {}
+
+// GrantRequest asks the server to grant XP or money to a named player (editor command).
+message GrantRequest {
+  string grant_type = 1; // "xp" or "money"
+  string char_name  = 2; // target character name
+  int32  amount     = 3; // amount to grant (must be > 0)
+}
