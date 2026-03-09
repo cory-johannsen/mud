@@ -4,13 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/frontend/handlers"
+	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 )
@@ -628,4 +632,164 @@ func TestProperty_FormatCharacterStats(t *testing.T) {
 		}
 		assert.Contains(rt, stats, regionDisplay)
 	})
+}
+
+// ---------------------------------------------------------------------------
+// PromptGenderStep tests
+// ---------------------------------------------------------------------------
+
+// newGenderTestConn creates a telnet.Conn backed by net.Pipe.
+// It drains all server-side writes in a goroutine (so writes don't block),
+// and feeds clientInputs one at a time to the server's ReadLine calls.
+// The drainer goroutine exits when client is closed.
+func newGenderTestConn(t *testing.T, clientInputs ...string) (*telnet.Conn, net.Conn) {
+	t.Helper()
+	client, server := net.Pipe()
+	conn := telnet.NewConn(server, 2*time.Second, 2*time.Second)
+	t.Cleanup(func() {
+		_ = client.Close()
+		_ = conn.Close()
+	})
+	// Drain server output so writes never block.
+	go func() {
+		buf := make([]byte, 4096)
+		for {
+			_, err := client.Read(buf)
+			if err != nil {
+				return
+			}
+		}
+	}()
+	// Feed inputs one at a time.
+	go func() {
+		for _, line := range clientInputs {
+			_, _ = fmt.Fprintf(client, "%s\r\n", line)
+		}
+	}()
+	return conn, client
+}
+
+// TestPromptGenderStep_Male verifies that input "1" returns "male".
+func TestPromptGenderStep_Male(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "1")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Equal(t, "male", gender)
+}
+
+// TestPromptGenderStep_Female verifies that input "2" returns "female".
+func TestPromptGenderStep_Female(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "2")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Equal(t, "female", gender)
+}
+
+// TestPromptGenderStep_NonBinary verifies that input "3" returns "non-binary".
+func TestPromptGenderStep_NonBinary(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "3")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Equal(t, "non-binary", gender)
+}
+
+// TestPromptGenderStep_Indeterminate verifies that input "4" returns "indeterminate".
+func TestPromptGenderStep_Indeterminate(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "4")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Equal(t, "indeterminate", gender)
+}
+
+// TestPromptGenderStep_Custom verifies that input "5" followed by a custom string
+// returns "custom:<string>".
+func TestPromptGenderStep_Custom(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "5", "Wanderer")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Equal(t, "custom:Wanderer", gender)
+}
+
+// TestPromptGenderStep_CustomTruncated verifies that a custom gender longer than
+// 32 chars is truncated to 32 chars.
+func TestPromptGenderStep_CustomTruncated(t *testing.T) {
+	long := strings.Repeat("x", 40)
+	conn, _ := newGenderTestConn(t, "5", long)
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Equal(t, "custom:"+strings.Repeat("x", 32), gender)
+}
+
+// TestPromptGenderStep_CustomCancel verifies that "cancel" as custom gender
+// returns ("", nil).
+func TestPromptGenderStep_CustomCancel(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "5", "cancel")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Equal(t, "", gender)
+}
+
+// TestPromptGenderStep_Cancel verifies that "cancel" as top-level input returns ("", nil).
+func TestPromptGenderStep_Cancel(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "cancel")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Equal(t, "", gender)
+}
+
+// TestPromptGenderStep_Zero verifies that "0" returns a standard gender (random).
+func TestPromptGenderStep_Zero(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "0")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Contains(t, character.StandardGenders, gender)
+}
+
+// TestPromptGenderStep_Default verifies that empty input returns a standard gender (random).
+func TestPromptGenderStep_Default(t *testing.T) {
+	conn, _ := newGenderTestConn(t, "")
+	gender, err := handlers.PromptGenderStep(conn)
+	require.NoError(t, err)
+	assert.Contains(t, character.StandardGenders, gender)
+}
+
+// TestFormatCharacterStats_ShowsGender verifies that FormatCharacterStats includes
+// the character's gender in the output.
+func TestFormatCharacterStats_ShowsGender(t *testing.T) {
+	c := &character.Character{
+		Name:   "Ash",
+		Class:  "ganger",
+		Level:  1,
+		Region: "old_town",
+		Gender: "non-binary",
+		MaxHP:  10, CurrentHP: 10,
+	}
+	stats := handlers.FormatCharacterStats(c, "Old Town")
+	assert.Contains(t, stats, "non-binary")
+	assert.Contains(t, stats, "Gender")
+}
+
+// TestProperty_PromptGenderStep_StandardSelections verifies that choices 1-4
+// always return the corresponding standard gender value.
+func TestProperty_PromptGenderStep_StandardSelections(t *testing.T) {
+	cases := []struct {
+		input    string
+		expected string
+	}{
+		{"1", "male"},
+		{"2", "female"},
+		{"3", "non-binary"},
+		{"4", "indeterminate"},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			rapid.Check(t, func(rt *rapid.T) {
+				conn, _ := newGenderTestConn(t, tc.input)
+				gender, err := handlers.PromptGenderStep(conn)
+				require.NoError(rt, err)
+				assert.Equal(rt, tc.expected, gender)
+			})
+		})
+	}
 }

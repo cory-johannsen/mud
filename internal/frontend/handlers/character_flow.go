@@ -248,6 +248,16 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 	}
 	charName := nameLine
 
+	// Step 1b: Gender
+	gender, err := PromptGenderStep(conn)
+	if err != nil {
+		return nil, fmt.Errorf("reading gender selection: %w", err)
+	}
+	if gender == "" {
+		// player typed cancel
+		return nil, nil
+	}
+
 	// Step 2: Home region
 	regions := h.regions
 	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "\r\nChoose your home region:"))
@@ -277,7 +287,7 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 		}
 		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
 			"Random selections: Region=%s, Team=%s, Archetype=%s, Job=%s", region.Name, team.Name, job.Archetype, job.Name))
-		return h.buildAndConfirm(ctx, conn, accountID, charName, region, job, team)
+		return h.buildAndConfirm(ctx, conn, accountID, charName, gender, region, job, team)
 	}
 	regionChoice := 0
 	if _, err := fmt.Sscanf(regionLine, "%d", &regionChoice); err != nil || regionChoice < 1 || regionChoice > len(regions) {
@@ -319,7 +329,7 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 		}
 		_ = conn.WriteLine(telnet.Colorf(telnet.Cyan,
 			"Random selections: Team=%s, Archetype=%s, Job=%s", team.Name, job.Archetype, job.Name))
-		return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, job, team)
+		return h.buildAndConfirm(ctx, conn, accountID, charName, gender, selectedRegion, job, team)
 	}
 	teamChoice := 0
 	if _, err := fmt.Sscanf(teamLine, "%d", &teamChoice); err != nil || teamChoice < 1 || teamChoice > len(teams) {
@@ -415,7 +425,7 @@ func (h *AuthHandler) characterCreationFlow(ctx context.Context, conn *telnet.Co
 		selectedJob = availableJobs[jobChoice-1]
 	}
 
-	return h.buildAndConfirm(ctx, conn, accountID, charName, selectedRegion, selectedJob, selectedTeam)
+	return h.buildAndConfirm(ctx, conn, accountID, charName, gender, selectedRegion, selectedJob, selectedTeam)
 }
 
 // ensureSkills checks whether the character has skills recorded and, if not,
@@ -798,6 +808,57 @@ func (h *AuthHandler) ensureClassFeatures(ctx context.Context, conn *telnet.Conn
 	return nil
 }
 
+// PromptGenderStep shows the gender selection menu and returns the chosen gender string.
+// Returns ("", nil) if the player types "cancel".
+// Options: 1=male, 2=female, 3=non-binary, 4=indeterminate, 5=custom, 0=random.
+//
+// Precondition: conn must be open.
+// Postcondition: Returns a valid gender string or ("", nil) on cancel.
+func PromptGenderStep(conn *telnet.Conn) (string, error) {
+	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow, "\r\nChoose your character's gender:"))
+	_ = conn.WriteLine(fmt.Sprintf("  %s1%s. Male", telnet.Green, telnet.Reset))
+	_ = conn.WriteLine(fmt.Sprintf("  %s2%s. Female", telnet.Green, telnet.Reset))
+	_ = conn.WriteLine(fmt.Sprintf("  %s3%s. Non-binary", telnet.Green, telnet.Reset))
+	_ = conn.WriteLine(fmt.Sprintf("  %s4%s. Indeterminate", telnet.Green, telnet.Reset))
+	_ = conn.WriteLine(fmt.Sprintf("  %s5%s. Custom...", telnet.Green, telnet.Reset))
+	_ = conn.WriteLine(fmt.Sprintf("  %s0%s. Random (default)", telnet.Green, telnet.Reset))
+	_ = conn.WritePrompt(telnet.Colorize(telnet.BrightWhite, "Select [0-5, default=0]: "))
+	line, err := conn.ReadLine()
+	if err != nil {
+		return "", fmt.Errorf("reading gender selection: %w", err)
+	}
+	line = strings.TrimSpace(line)
+	if strings.ToLower(line) == "cancel" {
+		return "", nil
+	}
+	switch line {
+	case "1":
+		return "male", nil
+	case "2":
+		return "female", nil
+	case "3":
+		return "non-binary", nil
+	case "4":
+		return "indeterminate", nil
+	case "5":
+		_ = conn.WritePrompt(telnet.Colorize(telnet.BrightWhite, "Enter custom gender (max 32 chars): "))
+		custom, err := conn.ReadLine()
+		if err != nil {
+			return "", fmt.Errorf("reading custom gender: %w", err)
+		}
+		custom = strings.TrimSpace(custom)
+		if strings.ToLower(custom) == "cancel" || custom == "" {
+			return "", nil
+		}
+		if len(custom) > 32 {
+			custom = custom[:32]
+		}
+		return "custom:" + custom, nil
+	default:
+		return character.RandomStandardGender(), nil
+	}
+}
+
 // buildAndConfirm builds a character from the given selections, shows the preview,
 // prompts for confirmation, and persists on yes.
 // Returns (nil, nil) if the player declines or cancels.
@@ -809,6 +870,7 @@ func (h *AuthHandler) buildAndConfirm(
 	conn *telnet.Conn,
 	accountID int64,
 	charName string,
+	gender string,
 	region *ruleset.Region,
 	job *ruleset.Job,
 	team *ruleset.Team,
@@ -819,6 +881,7 @@ func (h *AuthHandler) buildAndConfirm(
 		_ = conn.WriteLine(telnet.Colorf(telnet.Red, "Error building character: %v", err))
 		return nil, nil
 	}
+	newChar.Gender = gender
 
 	_ = conn.WriteLine(telnet.Colorize(telnet.BrightCyan, "\r\n--- Character Preview ---"))
 	_ = conn.WriteLine(FormatCharacterStats(newChar, region.DisplayName()))
@@ -930,6 +993,7 @@ func FormatCharacterStats(c *character.Character, regionDisplay string) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("  Name:   %s%s%s\r\n", telnet.BrightWhite, c.Name, telnet.Reset))
 	sb.WriteString(fmt.Sprintf("  Region: %s   Class: %s   Level: %d\r\n", regionDisplay, c.Class, c.Level))
+	sb.WriteString(fmt.Sprintf("  Gender: %s\r\n", c.Gender))
 	sb.WriteString(fmt.Sprintf("  HP:     %d/%d\r\n", c.CurrentHP, c.MaxHP))
 	sb.WriteString(fmt.Sprintf("  BRT:%2d  QCK:%2d  GRT:%2d  RSN:%2d  SAV:%2d  FLR:%2d\r\n",
 		c.Abilities.Brutality, c.Abilities.Quickness, c.Abilities.Grit,
