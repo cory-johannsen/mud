@@ -32,18 +32,9 @@ func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string {
 		}
 	}
 
-	// Exits — 3 per row in fixed-width columns.
+	// Exits — 4 per row with "Exits: " label inline on the first row.
 	if len(rv.Exits) > 0 {
-		var exitBuf strings.Builder
-		exitBuf.WriteString(telnet.Colorize(telnet.Cyan, "Exits:"))
-		lines = append(lines, exitBuf.String())
-		var rowBuf strings.Builder
-		appendExits(&rowBuf, rv.Exits, width)
-		for _, row := range strings.Split(strings.TrimRight(rowBuf.String(), "\r\n"), "\r\n") {
-			if row != "" {
-				lines = append(lines, row)
-			}
-		}
+		lines = append(lines, renderExits(rv.Exits, width)...)
 	}
 
 	// Other players
@@ -103,46 +94,56 @@ func npcHealthColor(desc string) string {
 	}
 }
 
-// appendExits renders exit entries 3 per row into buf.
+// renderExits renders exit entries 4 per row, with "Exits: " label inline on the first row.
 //
-// Each row has a 2-space indent. With width > 0 each of the 3 columns is
-// (width-2)/3 visible characters wide: a 10-char direction field (with "*"
-// suffix when locked) and the remainder for the target room title.
-// When width <= 0, exits are rendered one per line (fallback).
-//
-// Precondition: exits must be non-empty; buf must be non-nil.
-// Postcondition: exit rows are appended to buf; each row ends with \r\n.
-func appendExits(buf *strings.Builder, exits []*gamev1.ExitInfo, width int) {
-	const perRow = 3
-	const dirW = 10 // visual chars for the direction+locked field
+// Precondition: exits must be non-empty.
+// Postcondition: Returns at least one non-empty string; first string begins with "Exits: " label.
+func renderExits(exits []*gamev1.ExitInfo, width int) []string {
+	const perRow = 4
+	const dirW = 10 // visible chars for direction + optional "*"
+
+	label := telnet.Colorize(telnet.Cyan, "Exits: ")
+	labelVisLen := len("Exits: ")
+	indentStr := strings.Repeat(" ", labelVisLen)
 
 	if width <= 0 {
-		// Fallback: one per line.
-		for _, e := range exits {
-			label := e.Direction
+		var out []string
+		for i, e := range exits {
+			dir := e.Direction
 			if e.Locked {
-				label += "*"
+				dir += "*"
 			}
+			var entry string
 			if e.TargetTitle != "" {
-				buf.WriteString(fmt.Sprintf("  %s%-10s%s %s%s%s\r\n",
-					telnet.BrightCyan, label, telnet.Reset,
-					telnet.Dim, e.TargetTitle, telnet.Reset))
+				entry = fmt.Sprintf("%s%-10s%s %s%s%s",
+					telnet.BrightCyan, dir, telnet.Reset,
+					telnet.Dim, e.TargetTitle, telnet.Reset)
 			} else {
-				buf.WriteString(fmt.Sprintf("  %s%s%s\r\n",
-					telnet.BrightCyan, label, telnet.Reset))
+				entry = fmt.Sprintf("%s%-10s%s", telnet.BrightCyan, dir, telnet.Reset)
+			}
+			if i == 0 {
+				out = append(out, label+entry)
+			} else {
+				out = append(out, indentStr+entry)
 			}
 		}
-		return
+		return out
 	}
 
-	colW := (width - 2) / perRow // visual width per column (excludes leading "  ")
-	targetW := colW - dirW - 1   // 1 for space between dir and target
+	colW := (width - labelVisLen) / perRow
+	targetW := colW - dirW - 1
 	if targetW < 0 {
 		targetW = 0
 	}
 
+	var out []string
 	for i := 0; i < len(exits); i += perRow {
-		buf.WriteString("  ") // leading indent
+		var rowBuf strings.Builder
+		if i == 0 {
+			rowBuf.WriteString(label)
+		} else {
+			rowBuf.WriteString(indentStr)
+		}
 		for j := 0; j < perRow && i+j < len(exits); j++ {
 			e := exits[i+j]
 			dir := e.Direction
@@ -156,18 +157,20 @@ func appendExits(buf *strings.Builder, exits []*gamev1.ExitInfo, width int) {
 					target = target[:targetW]
 				}
 				paddedTarget := fmt.Sprintf("%-*s", targetW, target)
-				buf.WriteString(fmt.Sprintf("%s%s%s %s%s%s",
+				rowBuf.WriteString(fmt.Sprintf("%s%s%s %s%s%s",
 					telnet.BrightCyan, paddedDir, telnet.Reset,
 					telnet.Dim, paddedTarget, telnet.Reset))
 			} else {
-				paddedBlank := fmt.Sprintf("%-*s", targetW, "")
-				buf.WriteString(fmt.Sprintf("%s%s%s%s",
-					telnet.BrightCyan, paddedDir, telnet.Reset, paddedBlank))
+				blank := fmt.Sprintf("%-*s", targetW+1, "")
+				rowBuf.WriteString(fmt.Sprintf("%s%s%s%s",
+					telnet.BrightCyan, paddedDir, telnet.Reset, blank))
 			}
 		}
-		buf.WriteString("\r\n")
+		out = append(out, rowBuf.String())
 	}
+	return out
 }
+
 
 // RenderNpcView formats an NpcView as Telnet text for the examine command.
 func RenderNpcView(nv *gamev1.NpcView) string {

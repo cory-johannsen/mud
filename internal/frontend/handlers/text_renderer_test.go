@@ -35,6 +35,69 @@ func TestRenderRoomView(t *testing.T) {
 	assert.Contains(t, stripped, "Bob")
 }
 
+func TestRenderRoomView_ExitsLabelInline(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title: "Test Room",
+		Exits: []*gamev1.ExitInfo{
+			{Direction: "north", TargetTitle: "Alley"},
+		},
+	}
+	rendered := RenderRoomView(rv, 80, 0)
+	lines := strings.Split(strings.TrimRight(rendered, "\r\n"), "\r\n")
+	var exitsLine string
+	for _, l := range lines {
+		if strings.Contains(telnet.StripANSI(l), "Exits:") {
+			exitsLine = l
+			break
+		}
+	}
+	require.NotEmpty(t, exitsLine, "must have an Exits line")
+	stripped := telnet.StripANSI(exitsLine)
+	assert.Contains(t, stripped, "north", "first exit must be on same line as Exits label")
+}
+
+func TestRenderRoomView_ExitsFourPerRow(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title: "Test Room",
+		Exits: []*gamev1.ExitInfo{
+			{Direction: "north"}, {Direction: "south"},
+			{Direction: "east"}, {Direction: "west"},
+			{Direction: "up"},
+		},
+	}
+	rendered := RenderRoomView(rv, 80, 0)
+	// Count lines that contain exit directions after the label
+	exitDirs := map[string]bool{"north": true, "south": true, "east": true, "west": true, "up": true}
+	var exitRowCount int
+	for _, l := range strings.Split(strings.TrimRight(rendered, "\r\n"), "\r\n") {
+		stripped := telnet.StripANSI(l)
+		if strings.Contains(stripped, "Exits:") {
+			exitRowCount++
+			continue
+		}
+		if exitRowCount > 0 {
+			hasExit := false
+			for dir := range exitDirs {
+				if strings.Contains(stripped, dir) {
+					hasExit = true
+					break
+				}
+			}
+			if hasExit {
+				exitRowCount++
+			} else {
+				break
+			}
+		}
+	}
+	// 5 exits at 4/row: first row has label+"north south east west", second row has "up"
+	// But since label is INLINE on first row, exitRowCount counts:
+	// 1 for the "Exits: north south east west" line
+	// 1 for the "       up" line
+	// Total = 2
+	assert.Equal(t, 2, exitRowCount, "5 exits should produce 2 rows (4+1)")
+}
+
 func TestRenderRoomView_NoExitsNoPlayers(t *testing.T) {
 	rv := &gamev1.RoomView{
 		RoomId:      "empty",
