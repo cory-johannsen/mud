@@ -105,6 +105,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerSneak:              bridgeSneak,
 	command.HandlerDivert:             bridgeDivert,
 	command.HandlerEscape:             bridgeEscape,
+	command.HandlerGrant:              bridgeGrant,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -952,5 +953,29 @@ func bridgeEscape(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Escape{Escape: &gamev1.EscapeRequest{}},
+	}}, nil
+}
+
+// bridgeGrant builds a GrantRequest from parsed grant subcommand arguments.
+//
+// Precondition: bctx.parsed.Args contains the args following "grant"; HandleGrant validates structure.
+// Postcondition: Returns a non-nil msg containing a GrantRequest, or writes usage and returns done=true.
+func bridgeGrant(bctx *bridgeContext) (bridgeResult, error) {
+	parsed := command.HandleGrant(strings.Join(bctx.parsed.Args, " "))
+	if strings.HasPrefix(parsed, "Usage:") {
+		return writeErrorPrompt(bctx, parsed)
+	}
+	parts := strings.Fields(parsed) // "grant <type> <charname> <amount>"
+	grantType := parts[1]
+	charName := parts[2]
+	amount, _ := strconv.Atoi(parts[3]) // safe: HandleGrant validated
+
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_Grant{Grant: &gamev1.GrantRequest{
+			GrantType: grantType,
+			CharName:  charName,
+			Amount:    int32(amount),
+		}},
 	}}, nil
 }
