@@ -41,6 +41,11 @@ type Character struct {
 	// Persisted to DB; "pass" when unset.
 	DefaultCombatAction string
 
+	// Gender is the player-selected gender identity string.
+	// One of "male", "female", "non-binary", "indeterminate", or "custom:<text>".
+	// Empty string means unset (will be backfilled at login).
+	Gender string
+
 	// Skills maps skill_id to proficiency rank for this character.
 	// Populated after creation or loading from DB.
 	Skills map[string]string
