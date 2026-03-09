@@ -282,6 +282,7 @@ message NpcInfo {
   string instance_id         = 1;
   string name                = 2;
   string health_description  = 3;
+  string fighting_target     = 4; // name of the player this NPC is currently fighting; empty if not in combat
 }
 
 // ExamineRequest asks the server for detail on a named target.
