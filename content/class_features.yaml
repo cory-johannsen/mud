@@ -1719,7 +1719,7 @@ class_features:
     job: mall_ninja
     pf2e: ""
     active: true
-    shortcut: reload
+    shortcut: tacload
     action_cost: 1
     contexts:
       - combat
