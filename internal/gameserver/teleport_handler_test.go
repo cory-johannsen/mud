@@ -72,6 +72,7 @@ func (m *mockCharSaver) SaveDefaultCombatAction(_ context.Context, _ int64, _ st
 
 func (m *mockCharSaver) SaveCurrency(_ context.Context, _ int64, _ int) error { return nil }
 func (m *mockCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (m *mockCharSaver) SaveGender(_ context.Context, _ int64, _ string) error { return nil }
 
 func TestHandleTeleport_AdminSuccess(t *testing.T) {
 	saver := &mockCharSaver{saved: make(map[int64]string)}

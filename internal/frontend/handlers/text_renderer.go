@@ -591,6 +591,7 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "=== %s ===", csv.GetName())))
 	left = append(left, slPlain(fmt.Sprintf("Job: %s  Archetype: %s", csv.GetJob(), csv.GetArchetype())))
 	left = append(left, slPlain(fmt.Sprintf("Team: %s  Level: %d", csv.GetTeam(), csv.GetLevel())))
+	left = append(left, slPlain(fmt.Sprintf("Gender: %s", csv.GetGender())))
 	left = append(left, slPlain(fmt.Sprintf("HP: %d / %d", csv.GetCurrentHp(), csv.GetMaxHp())))
 
 	// abilCell returns a fixed-width ability cell: "Label:     +N  " (15 visible chars).

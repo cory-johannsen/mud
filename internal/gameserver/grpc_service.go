@@ -2580,6 +2580,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		Savvy:        int32(sess.Abilities.Savvy),
 		Flair:        int32(sess.Abilities.Flair),
 		Currency:     inventory.FormatRounds(sess.Currency),
+		Gender:       sess.Gender,
 	}
 
 	// Job info from registry.

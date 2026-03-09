@@ -148,6 +148,19 @@ func TestRenderPlayerList_ShowsHealthLabel(t *testing.T) {
 	assert.Contains(t, result, "In Combat")
 }
 
+func TestRenderCharacterSheet_ShowsGender(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{
+		Name:   "Ash",
+		Job:    "gunslinger",
+		Gender: "non-binary",
+		Level:  1,
+	}
+	result := RenderCharacterSheet(csv, 80)
+	if !strings.Contains(result, "non-binary") {
+		t.Errorf("expected 'non-binary' in rendered sheet, got:\n%s", result)
+	}
+}
+
 func TestRenderExitList(t *testing.T) {
 	el := &gamev1.ExitList{
 		Exits: []*gamev1.ExitInfo{

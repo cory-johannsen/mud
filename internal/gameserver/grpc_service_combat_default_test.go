@@ -47,6 +47,9 @@ func (m *mockCharSaverCombatDefault) SaveCurrency(_ context.Context, _ int64, _ 
 func (m *mockCharSaverCombatDefault) LoadCurrency(_ context.Context, _ int64) (int, error) {
 	return 0, nil
 }
+func (m *mockCharSaverCombatDefault) SaveGender(_ context.Context, _ int64, _ string) error {
+	return nil
+}
 
 // testServiceForCombatDefault creates a minimal GameServiceServer suitable for handleCombatDefault tests.
 //

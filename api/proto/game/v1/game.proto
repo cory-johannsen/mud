@@ -664,6 +664,7 @@ message CharacterSheetView {
     int32 xp_to_next     = 30; // XP remaining to reach next level (0 if at level cap)
     int32 pending_boosts          = 31; // number of unassigned ability boosts
     int32 pending_skill_increases = 32; // number of unassigned skill rank increases
+    string gender = 40;
 }
 
 // ResistanceEntry represents one player damage-type resistance or weakness.
