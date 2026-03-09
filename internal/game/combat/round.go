@@ -215,6 +215,8 @@ func applyAttackConditions(cbt *Combat, actor, target *Combatant, r AttackResult
 // Postcondition: Returns 0 when actor is not a player, sessionGetter is nil, or no feats are active.
 //
 //	Attacking always breaks concealment: actor.Hidden is cleared before feat checks run.
+//
+// Postcondition: actor.Hidden is set to false if it was true on entry (attacking always breaks concealment).
 func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Source) int {
 	if actor.Kind != KindPlayer || cbt.sessionGetter == nil {
 		return 0
@@ -313,6 +315,21 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					})
 					continue
 				}
+				// Hidden flat check: NPC attacking a hidden player must pass DC 11.
+				if actor.Kind == KindNPC && target.Kind == KindPlayer && target.Hidden {
+					target.Hidden = false // being targeted always breaks concealment
+					flatRoll := src.Intn(20) + 1
+					if flatRoll <= 10 {
+						events = append(events, RoundEvent{
+							ActionType: ActionAttack,
+							ActorID:    actor.ID,
+							ActorName:  actor.Name,
+							Narrative:  fmt.Sprintf("%s attacks %s but fails to locate them (flat check %d)!", actor.Name, target.Name, flatRoll),
+						})
+						continue
+					}
+					// Flat check passed — attack proceeds normally against now-revealed target.
+				}
 				atkBonus := condition.AttackBonus(cbt.Conditions[actor.ID])
 				acBonus := condition.ACBonus(cbt.Conditions[target.ID])
 				r := ResolveAttack(actor, target, src)
@@ -365,6 +382,22 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 						Narrative:  fmt.Sprintf("%s strikes again but hits nothing.", actor.Name),
 					})
 					continue
+				}
+				// Hidden flat check: NPC striking a hidden player must pass DC 11.
+				// On failure, skip BOTH strikes with a single flat-check-fail event.
+				if actor.Kind == KindNPC && target.Kind == KindPlayer && target.Hidden {
+					target.Hidden = false // being targeted always breaks concealment
+					flatRoll := src.Intn(20) + 1
+					if flatRoll <= 10 {
+						events = append(events, RoundEvent{
+							ActionType: ActionStrike,
+							ActorID:    actor.ID,
+							ActorName:  actor.Name,
+							Narrative:  fmt.Sprintf("%s strikes at %s but fails to locate them (flat check %d)!", actor.Name, target.Name, flatRoll),
+						})
+						continue
+					}
+					// Flat check passed — both strikes proceed normally against now-revealed target.
 				}
 				// First strike
 				atkBonus1 := condition.AttackBonus(cbt.Conditions[actor.ID])
