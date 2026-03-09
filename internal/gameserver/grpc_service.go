@@ -1180,6 +1180,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleCombatDefault(uid, p.CombatDefault.Action)
 	case *gamev1.ClientMessage_TrainSkill:
 		return s.handleTrainSkill(uid, p.TrainSkill.SkillId)
+	case *gamev1.ClientMessage_Grant:
+		return s.handleGrant(uid, p.Grant)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -4768,4 +4770,100 @@ func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error
 	sess.GrabberID = ""
 
 	return messageEvent(detail + " — success! You break free from the grab."), nil
+}
+
+// handleGrant awards XP or money to a named online player (editor/admin command).
+//
+// Precondition: uid identifies an active session with role "editor" or "admin"; req is non-nil.
+// Postcondition: on "xp" grant, target.Experience is increased and persisted;
+// on "money" grant, target.Currency is increased and persisted;
+// target receives a console notification; caller receives a success MessageEvent.
+func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if sess.Role != "editor" && sess.Role != "admin" {
+		return errorEvent("permission denied: editor role required"), nil
+	}
+	if req.Amount <= 0 {
+		return errorEvent("amount must be greater than zero"), nil
+	}
+	target, ok := s.sessions.GetPlayerByCharName(req.CharName)
+	if !ok {
+		return errorEvent(fmt.Sprintf("player %q not online", req.CharName)), nil
+	}
+
+	amount := int(req.Amount)
+	ctx := context.Background()
+
+	switch req.GrantType {
+	case "xp":
+		var levelMsgs []string
+		if s.xpSvc != nil {
+			result := xp.Award(target.Level, target.Experience, amount, s.xpSvc.Config())
+			target.Experience = result.NewXP
+			target.Level = result.NewLevel
+			target.MaxHP += result.HPGained
+			if target.CurrentHP > target.MaxHP {
+				target.CurrentHP = target.MaxHP
+			}
+			target.PendingBoosts += result.NewBoosts
+			target.PendingSkillIncreases += result.NewSkillIncreases
+			if target.CharacterID > 0 && s.charSaver != nil {
+				if pErr := s.charSaver.SaveProgress(ctx, target.CharacterID, target.Level, target.Experience, target.MaxHP, target.PendingBoosts); pErr != nil {
+					s.logger.Warn("handleGrant: SaveProgress failed", zap.Error(pErr))
+				}
+			}
+			if result.LeveledUp {
+				levelMsgs = append(levelMsgs, fmt.Sprintf("*** You reached level %d! ***", result.NewLevel))
+				if result.HPGained > 0 {
+					levelMsgs = append(levelMsgs, fmt.Sprintf("Max HP increased by %d (now %d).", result.HPGained, target.MaxHP))
+				}
+				if result.NewBoosts > 0 {
+					levelMsgs = append(levelMsgs, "You have a pending ability boost! Type 'levelup' to assign it.")
+				}
+				if result.NewSkillIncreases > 0 {
+					levelMsgs = append(levelMsgs, "You have a pending skill increase! Type 'trainskill <skill>' to advance a skill.")
+				}
+			}
+		} else {
+			target.Experience += amount
+			if s.charSaver != nil && target.CharacterID > 0 {
+				if pErr := s.charSaver.SaveProgress(ctx, target.CharacterID, target.Level, target.Experience, target.MaxHP, target.PendingBoosts); pErr != nil {
+					s.logger.Warn("handleGrant: SaveProgress failed", zap.Error(pErr))
+				}
+			}
+		}
+		// Send level-up messages to target if any.
+		for _, m := range levelMsgs {
+			notif := messageEvent(m)
+			if data, mErr := proto.Marshal(notif); mErr == nil {
+				_ = target.Entity.Push(data)
+			}
+		}
+		// Notify target.
+		notif := messageEvent(fmt.Sprintf("You have been granted %d XP by %s.", amount, sess.CharName))
+		if data, mErr := proto.Marshal(notif); mErr == nil {
+			_ = target.Entity.Push(data)
+		}
+		return messageEvent(fmt.Sprintf("Granted %d XP to %s.", amount, target.CharName)), nil
+
+	case "money":
+		target.Currency += amount
+		if s.charSaver != nil && target.CharacterID > 0 {
+			if cErr := s.charSaver.SaveCurrency(ctx, target.CharacterID, target.Currency); cErr != nil {
+				s.logger.Warn("handleGrant: SaveCurrency failed", zap.Error(cErr))
+			}
+		}
+		// Notify target.
+		notif := messageEvent(fmt.Sprintf("You have been granted %d gold by %s.", amount, sess.CharName))
+		if data, mErr := proto.Marshal(notif); mErr == nil {
+			_ = target.Entity.Push(data)
+		}
+		return messageEvent(fmt.Sprintf("Granted %d gold to %s.", amount, target.CharName)), nil
+
+	default:
+		return errorEvent(fmt.Sprintf("unknown grant type %q: use 'xp' or 'money'", req.GrantType)), nil
+	}
 }
