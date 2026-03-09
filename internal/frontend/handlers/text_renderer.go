@@ -42,18 +42,14 @@ func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string {
 		lines = append(lines, telnet.Colorf(telnet.Green, "Also here: %s", strings.Join(rv.Players, ", ")))
 	}
 
+	// Equipment — 4 per row with "Items: " label inline on the first row.
+	if len(rv.Equipment) > 0 {
+		lines = append(lines, renderEquipment(rv.Equipment, width)...)
+	}
+
 	// NPCs present — 2 per row with "NPCs:  " label inline on the first row.
 	if len(rv.Npcs) > 0 {
 		lines = append(lines, renderNPCs(rv.Npcs, width)...)
-	}
-
-	// Room equipment
-	for _, eq := range rv.Equipment {
-		flags := ""
-		if eq.Usable {
-			flags += " [interact]"
-		}
-		lines = append(lines, fmt.Sprintf("  %s%s%s%s", telnet.Cyan, eq.Name, telnet.Reset, flags))
 	}
 
 	// Enforce maxLines hard limit.
@@ -92,6 +88,49 @@ func npcHealthColor(desc string) string {
 // renderNPCs renders NPC entries 2 per row, with "NPCs:  " label inline on the first row.
 // Each entry format: "Name (health)" or "Name (health) fighting Target".
 //
+// renderEquipment renders room equipment 4 per row, with "Items: " label inline on the first row.
+//
+// Precondition: equipment must be non-empty.
+// Postcondition: Returns at least one non-empty string.
+func renderEquipment(equipment []*gamev1.RoomEquipmentItem, width int) []string {
+	const perRow = 4
+	label := telnet.Colorize(telnet.BrightWhite, "Items: ")
+	labelVisLen := len("Items: ")
+	indentStr := strings.Repeat(" ", labelVisLen)
+
+	colW := 0
+	if width > labelVisLen {
+		colW = (width - labelVisLen) / perRow
+	}
+
+	var out []string
+	for i := 0; i < len(equipment); i += perRow {
+		var rowBuf strings.Builder
+		if i == 0 {
+			rowBuf.WriteString(label)
+		} else {
+			rowBuf.WriteString(indentStr)
+		}
+		for j := 0; j < perRow && i+j < len(equipment); j++ {
+			eq := equipment[i+j]
+			name := eq.Name
+			if eq.Usable {
+				name += " [interact]"
+			}
+			entry := fmt.Sprintf("%s%s%s", telnet.Cyan, name, telnet.Reset)
+			if colW > 0 && j < perRow-1 {
+				visLen := len(telnet.StripANSI(entry))
+				if visLen < colW {
+					entry += strings.Repeat(" ", colW-visLen)
+				}
+			}
+			rowBuf.WriteString(entry)
+		}
+		out = append(out, rowBuf.String())
+	}
+	return out
+}
+
 // Precondition: npcs must be non-empty.
 // Postcondition: Returns at least one non-empty string.
 func renderNPCs(npcs []*gamev1.NpcInfo, width int) []string {

@@ -906,6 +906,73 @@ func TestRenderRoomView_NPCsFightingTarget(t *testing.T) {
 	assert.Contains(t, stripped, "fighting alice")
 }
 
+func TestRenderRoomView_EquipmentLabelled(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title:     "Test Room",
+		Equipment: []*gamev1.RoomEquipmentItem{{Name: "Crate"}},
+	}
+	rendered := RenderRoomView(rv, 80, 0)
+	stripped := telnet.StripANSI(rendered)
+	for _, l := range strings.Split(stripped, "\r\n") {
+		if strings.Contains(l, "Items:") {
+			assert.Contains(t, l, "Crate", "first item must be on same line as Items: label")
+			return
+		}
+	}
+	t.Fatal("Items: label not found")
+}
+
+func TestRenderRoomView_EquipmentFourColumns(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title: "Test Room",
+		Equipment: []*gamev1.RoomEquipmentItem{
+			{Name: "A"}, {Name: "B"}, {Name: "C"}, {Name: "D"}, {Name: "E"},
+		},
+	}
+	rendered := RenderRoomView(rv, 80, 0)
+	stripped := telnet.StripANSI(rendered)
+	var itemLines []string
+	inItems := false
+	for _, l := range strings.Split(strings.TrimRight(stripped, "\r\n"), "\r\n") {
+		if strings.Contains(l, "Items:") {
+			inItems = true
+			itemLines = append(itemLines, l)
+			continue
+		}
+		if inItems {
+			trimmed := strings.TrimSpace(l)
+			if trimmed == "" {
+				break
+			}
+			itemLines = append(itemLines, l)
+		}
+	}
+	assert.Equal(t, 2, len(itemLines), "5 items should produce 2 rows (4+1)")
+}
+
+func TestRenderRoomView_EquipmentAfterExitsBeforeNPCs(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title:     "Test Room",
+		Exits:     []*gamev1.ExitInfo{{Direction: "north"}},
+		Equipment: []*gamev1.RoomEquipmentItem{{Name: "Crate"}},
+		Npcs:      []*gamev1.NpcInfo{{Name: "Ganger A", HealthDescription: "unharmed"}},
+	}
+	rendered := RenderRoomView(rv, 80, 0)
+	stripped := telnet.StripANSI(rendered)
+	lines := strings.Split(strings.TrimRight(stripped, "\r\n"), "\r\n")
+	exitIdx, equipIdx, npcIdx := -1, -1, -1
+	for i, l := range lines {
+		if strings.Contains(l, "Exits:") && exitIdx == -1   { exitIdx = i }
+		if strings.Contains(l, "Items:") && equipIdx == -1  { equipIdx = i }
+		if strings.Contains(l, "Ganger A") && npcIdx == -1  { npcIdx = i }
+	}
+	require.Greater(t, exitIdx, -1, "must have exits")
+	require.Greater(t, equipIdx, -1, "must have items label")
+	require.Greater(t, npcIdx, -1, "must have NPC")
+	assert.Greater(t, equipIdx, exitIdx, "items must appear after exits")
+	assert.Greater(t, npcIdx, equipIdx, "NPCs must appear after items")
+}
+
 func TestAbilityBonus_ModifierOnly(t *testing.T) {
 	result := RenderCharacterSheet(&gamev1.CharacterSheetView{
 		Name:      "Hero",
