@@ -68,6 +68,12 @@ message ClientMessage {
     FirstAidRequest first_aid = 51;
     FeintRequest feint = 52;
     DemoralizeRequest demoralize = 53;
+    GrappleRequest grapple = 54;
+    TripRequest trip = 55;
+    HideRequest hide = 56;
+    SneakRequest sneak = 57;
+    DivertRequest divert = 58;
+    EscapeRequest escape = 59;
   }
 }
 
@@ -723,3 +729,25 @@ message FeintRequest {
 message DemoralizeRequest {
     string target = 1;
 }
+
+// GrappleRequest asks the server to grapple a target NPC.
+message GrappleRequest {
+    string target = 1;
+}
+
+// TripRequest asks the server to trip a target NPC.
+message TripRequest {
+    string target = 1;
+}
+
+// HideRequest asks the server to attempt to hide the player.
+message HideRequest {}
+
+// SneakRequest asks the server to attempt to sneak while hidden.
+message SneakRequest {}
+
+// DivertRequest asks the server to create a diversion to hide the player.
+message DivertRequest {}
+
+// EscapeRequest asks the server to escape from the grabbed condition.
+message EscapeRequest {}

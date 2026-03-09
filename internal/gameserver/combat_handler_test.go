@@ -65,7 +65,7 @@ const testRoundDuration = 200 * time.Millisecond
 // needed for combat tests.
 //
 // Postcondition: Returns a non-nil Registry containing dying, wounded, stunned, prone,
-// flat_footed, and frightened definitions.
+// flat_footed, frightened, and grabbed definitions.
 func makeTestConditionRegistry() *condition.Registry {
 	reg := condition.NewRegistry()
 	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4, RestrictActions: []string{"attack", "strike", "pass"}})
@@ -74,6 +74,8 @@ func makeTestConditionRegistry() *condition.Registry {
 	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
 	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
 	reg.Register(&condition.ConditionDef{ID: "frightened", Name: "Frightened", DurationType: "rounds", MaxStacks: 4, AttackPenalty: 1, ACPenalty: 1})
+	reg.Register(&condition.ConditionDef{ID: "grabbed", Name: "Grabbed", DurationType: "permanent", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "hidden", Name: "Hidden", DurationType: "permanent", MaxStacks: 0})
 	return reg
 }
 

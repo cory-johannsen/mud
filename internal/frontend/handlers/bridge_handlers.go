@@ -99,6 +99,12 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerFirstAid:           bridgeFirstAid,
 	command.HandlerFeint:              bridgeFeint,
 	command.HandlerDemoralize:         bridgeDemoralize,
+	command.HandlerGrapple:            bridgeGrapple,
+	command.HandlerTrip:               bridgeTrip,
+	command.HandlerHide:               bridgeHide,
+	command.HandlerSneak:              bridgeSneak,
+	command.HandlerDivert:             bridgeDivert,
+	command.HandlerEscape:             bridgeEscape,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -872,5 +878,79 @@ func bridgeDemoralize(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Demoralize{Demoralize: &gamev1.DemoralizeRequest{Target: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeGrapple builds a GrappleRequest with the target name.
+//
+// Precondition: bctx must be non-nil with a valid reqID and non-empty RawArgs.
+// Postcondition: returns a non-nil msg containing a GrappleRequest when RawArgs is non-empty;
+// otherwise returns done=true with a usage error event.
+func bridgeGrapple(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: grapple <target>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Grapple{Grapple: &gamev1.GrappleRequest{Target: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeTrip builds a TripRequest with the target name.
+//
+// Precondition: bctx must be non-nil with a valid reqID and non-empty RawArgs.
+// Postcondition: returns a non-nil msg containing a TripRequest when RawArgs is non-empty;
+// otherwise returns done=true with a usage error event.
+func bridgeTrip(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: trip <target>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Trip{Trip: &gamev1.TripRequest{Target: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeHide builds a HideRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a HideRequest; done is false.
+func bridgeHide(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Hide{Hide: &gamev1.HideRequest{}},
+	}}, nil
+}
+
+// bridgeSneak builds a SneakRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a SneakRequest; done is false.
+func bridgeSneak(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Sneak{Sneak: &gamev1.SneakRequest{}},
+	}}, nil
+}
+
+// bridgeDivert builds a DivertRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a DivertRequest; done is false.
+func bridgeDivert(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Divert{Divert: &gamev1.DivertRequest{}},
+	}}, nil
+}
+
+// bridgeEscape builds an EscapeRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an EscapeRequest; done is false.
+func bridgeEscape(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Escape{Escape: &gamev1.EscapeRequest{}},
 	}}, nil
 }

@@ -1132,6 +1132,18 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleFeint(uid, p.Feint)
 	case *gamev1.ClientMessage_Demoralize:
 		return s.handleDemoralize(uid, p.Demoralize)
+	case *gamev1.ClientMessage_Grapple:
+		return s.handleGrapple(uid, p.Grapple)
+	case *gamev1.ClientMessage_Trip:
+		return s.handleTrip(uid, p.Trip)
+	case *gamev1.ClientMessage_Hide:
+		return s.handleHide(uid)
+	case *gamev1.ClientMessage_Sneak:
+		return s.handleSneak(uid)
+	case *gamev1.ClientMessage_Divert:
+		return s.handleDivert(uid)
+	case *gamev1.ClientMessage_Escape:
+		return s.handleEscape(uid)
 	case *gamev1.ClientMessage_SummonItem:
 		return s.handleSummonItem(uid, p.SummonItem)
 	case *gamev1.ClientMessage_ProficienciesRequest:
@@ -4377,4 +4389,356 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 	}
 
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is demoralized (-1 AC, -1 attack).", inst.Name())), nil
+}
+
+// handleGrapple performs an athletics skill check against the target NPC's Level+10 DC.
+// On success, applies the grabbed condition (-2 AC) to the target combatant for the encounter.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; req.Target must name an NPC in the room.
+// Postcondition: On success, the grabbed condition is applied to the target combatant.
+func (s *GameServiceServer) handleGrapple(uid string, req *gamev1.GrappleRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Grapple is only available in combat."), nil
+	}
+
+	if req.GetTarget() == "" {
+		return errorEvent("Usage: grapple <target>"), nil
+	}
+
+	// Find target NPC in room before spending AP.
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	// Spend 1 AP only after the target is confirmed to exist.
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Skill check: 1d20 + athletics bonus vs target Level+10.
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleGrapple: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["athletics"])
+	total := roll + bonus
+	dc := inst.Level + 10
+
+	detail := fmt.Sprintf("Grapple (athletics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. Your grapple attempt fails."), nil
+	}
+
+	// Success: apply grabbed condition to NPC combatant.
+	if err := s.combatH.ApplyCombatCondition(uid, inst.ID, "grabbed"); err != nil {
+		s.logger.Warn("handleGrapple: ApplyCombatCondition failed",
+			zap.String("npc_id", inst.ID), zap.Error(err))
+	}
+
+	return messageEvent(detail + fmt.Sprintf(" — success! %s is grabbed (flat-footed, -2 AC).", inst.Name())), nil
+}
+
+// handleTrip performs an athletics skill check against the target NPC's Level+10 DC.
+// On success, applies the prone condition (-2 attack) to the target combatant for the encounter.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; req.Target must name an NPC in the room.
+// Postcondition: On success, the prone condition is applied to the target combatant.
+func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Trip is only available in combat."), nil
+	}
+
+	if req.GetTarget() == "" {
+		return errorEvent("Usage: trip <target>"), nil
+	}
+
+	// Find target NPC in room before spending AP.
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	// Spend 1 AP only after the target is confirmed to exist.
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Skill check: 1d20 + athletics bonus vs target Level+10.
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleTrip: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["athletics"])
+	total := roll + bonus
+	dc := inst.Level + 10
+
+	detail := fmt.Sprintf("Trip (athletics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. Your trip attempt fails."), nil
+	}
+
+	// Success: apply prone condition to NPC combatant.
+	if err := s.combatH.ApplyCombatCondition(uid, inst.ID, "prone"); err != nil {
+		s.logger.Warn("handleTrip: ApplyCombatCondition failed",
+			zap.String("npc_id", inst.ID), zap.Error(err))
+	}
+
+	return messageEvent(detail + fmt.Sprintf(" — success! %s is knocked prone (-2 attack rolls).", inst.Name())), nil
+}
+
+// maxNPCPerceptionInRoom returns the highest Perception value among all living NPCs in roomID.
+// If no living NPCs are present, returns 10 as the base DC.
+//
+// Precondition: roomID must be non-empty.
+// Postcondition: Returns an integer >= 10.
+func (s *GameServiceServer) maxNPCPerceptionInRoom(roomID string) int {
+	insts := s.npcMgr.InstancesInRoom(roomID)
+	max := 10
+	for _, inst := range insts {
+		if !inst.IsDead() && inst.Perception > max {
+			max = inst.Perception
+		}
+	}
+	return max
+}
+
+// handleHide performs a stealth skill check against the highest NPC Perception DC in the room.
+// On success, applies the hidden condition to the player and sets combatant Hidden flag.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat.
+// Postcondition: On success, hidden condition is applied; combatant Hidden is true.
+func (s *GameServiceServer) handleHide(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Hide is only available in combat."), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleHide: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["stealth"])
+	total := roll + bonus
+	dc := s.maxNPCPerceptionInRoom(sess.RoomID)
+
+	detail := fmt.Sprintf("Hide (stealth DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. You fail to hide."), nil
+	}
+
+	// Success: apply hidden condition to player session.
+	if s.condRegistry != nil {
+		if def, ok2 := s.condRegistry.Get("hidden"); ok2 {
+			if err := sess.Conditions.Apply(uid, def, 1, -1); err != nil {
+				s.logger.Warn("handleHide: condition apply failed", zap.Error(err))
+			}
+		}
+	}
+	if err := s.combatH.SetCombatantHidden(uid, true); err != nil {
+		s.logger.Warn("handleHide: SetCombatantHidden failed", zap.Error(err))
+	}
+
+	return messageEvent(detail + " — success! You are hidden."), nil
+}
+
+// handleSneak performs a stealth skill check while hidden.
+// On failure, removes the hidden condition and clears combatant Hidden flag.
+// Requires the player to already have the hidden condition.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; player must have hidden condition.
+// Postcondition: On failure, hidden condition is removed; on success, hidden is maintained.
+func (s *GameServiceServer) handleSneak(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Sneak is only available in combat."), nil
+	}
+
+	if sess.Conditions == nil || !sess.Conditions.Has("hidden") {
+		return errorEvent("You must be hidden to sneak. Use 'hide' first."), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleSneak: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["stealth"])
+	total := roll + bonus
+	dc := s.maxNPCPerceptionInRoom(sess.RoomID)
+
+	detail := fmt.Sprintf("Sneak (stealth DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		// Failure: remove hidden condition.
+		sess.Conditions.Remove(uid, "hidden")
+		if err := s.combatH.SetCombatantHidden(uid, false); err != nil {
+			s.logger.Warn("handleSneak: SetCombatantHidden false failed", zap.Error(err))
+		}
+		return messageEvent(detail + " — failure. You have been spotted and lose the hidden condition."), nil
+	}
+
+	return messageEvent(detail + " — success! You remain hidden."), nil
+}
+
+// handleDivert performs a grift skill check to create a diversion against the highest NPC Perception DC.
+// On success, applies the hidden condition to the player and sets combatant Hidden flag.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat.
+// Postcondition: On success, hidden condition is applied; combatant Hidden is true.
+func (s *GameServiceServer) handleDivert(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Divert is only available in combat."), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleDivert: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["grift"])
+	total := roll + bonus
+	dc := s.maxNPCPerceptionInRoom(sess.RoomID)
+
+	detail := fmt.Sprintf("Divert (grift DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. Your diversion fails."), nil
+	}
+
+	// Success: apply hidden condition to player session.
+	if s.condRegistry != nil {
+		if def, ok2 := s.condRegistry.Get("hidden"); ok2 {
+			if err := sess.Conditions.Apply(uid, def, 1, -1); err != nil {
+				s.logger.Warn("handleDivert: condition apply failed", zap.Error(err))
+			}
+		}
+	}
+	if err := s.combatH.SetCombatantHidden(uid, true); err != nil {
+		s.logger.Warn("handleDivert: SetCombatantHidden failed", zap.Error(err))
+	}
+
+	return messageEvent(detail + " — success! You slip into the shadows while enemies are distracted."), nil
+}
+
+// handleEscape performs a max(athletics, acrobatics) skill check to escape the grabbed condition.
+// DC is grabber's Level+14 if the grabber NPC is alive in the room, else 15.
+// Requires the player to have the grabbed condition.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; player must have grabbed condition.
+// Postcondition: On success, grabbed condition is removed; GrabberID is cleared.
+func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Escape is only available in combat."), nil
+	}
+
+	if sess.Conditions == nil || !sess.Conditions.Has("grabbed") {
+		return errorEvent("You are not grabbed."), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleEscape: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+
+	ath := skillRankBonus(sess.Skills["athletics"])
+	acr := skillRankBonus(sess.Skills["acrobatics"])
+	bonus := ath
+	if acr > bonus {
+		bonus = acr
+	}
+	total := roll + bonus
+
+	// Determine DC: grabber Level+14 if alive in room, else 15.
+	dc := 15
+	if sess.GrabberID != "" {
+		insts := s.npcMgr.InstancesInRoom(sess.RoomID)
+		for _, inst := range insts {
+			if inst.ID == sess.GrabberID && !inst.IsDead() {
+				dc = inst.Level + 14
+				break
+			}
+		}
+	}
+
+	detail := fmt.Sprintf("Escape (DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. You fail to break free."), nil
+	}
+
+	// Success: remove grabbed condition and clear GrabberID.
+	sess.Conditions.Remove(uid, "grabbed")
+	sess.GrabberID = ""
+
+	return messageEvent(detail + " — success! You break free from the grab."), nil
 }
