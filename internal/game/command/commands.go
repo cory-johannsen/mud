@@ -80,6 +80,7 @@ const (
 	HandlerSneak               = "sneak"
 	HandlerDivert              = "divert"
 	HandlerEscape              = "escape"
+	HandlerGrant               = "grant"
 )
 
 // Command defines a player-invocable command.
@@ -157,6 +158,7 @@ func BuiltinCommands() []Command {
 		{Name: "setrole", Aliases: nil, Help: "Set a player's role (admin only)", Category: CategoryAdmin, Handler: HandlerSetRole},
 		{Name: "teleport", Aliases: []string{"tp"}, Help: "Teleport a player to a room (admin only)", Category: CategoryAdmin, Handler: HandlerTeleport},
 		{Name: "roomequip", Aliases: nil, Help: "Manage room equipment (editor)", Category: CategoryAdmin, Handler: HandlerRoomEquip},
+		{Name: "grant", Aliases: nil, Help: "Grant XP or money to a player (editor)", Category: CategoryAdmin, Handler: HandlerGrant},
 
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
 		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},
