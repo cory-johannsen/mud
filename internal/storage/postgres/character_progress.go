@@ -142,6 +142,42 @@ func (r *CharacterProgressRepository) ConsumePendingSkillIncrease(ctx context.Co
 	return nil
 }
 
+// IsSkillIncreasesInitialized reports whether the one-time skill-increase backfill
+// has already been applied to this character.
+//
+// Precondition: id > 0.
+// Postcondition: Returns the skill_increases_initialized flag value.
+func (r *CharacterProgressRepository) IsSkillIncreasesInitialized(ctx context.Context, id int64) (bool, error) {
+	if id <= 0 {
+		return false, fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	var initialized bool
+	err := r.pool.QueryRow(ctx,
+		`SELECT skill_increases_initialized FROM characters WHERE id = $1`, id,
+	).Scan(&initialized)
+	if err != nil {
+		return false, fmt.Errorf("IsSkillIncreasesInitialized: %w", err)
+	}
+	return initialized, nil
+}
+
+// MarkSkillIncreasesInitialized sets skill_increases_initialized = true for a character.
+//
+// Precondition: id > 0.
+// Postcondition: skill_increases_initialized is true in the characters table.
+func (r *CharacterProgressRepository) MarkSkillIncreasesInitialized(ctx context.Context, id int64) error {
+	if id <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	_, err := r.pool.Exec(ctx,
+		`UPDATE characters SET skill_increases_initialized = TRUE WHERE id = $1`, id,
+	)
+	if err != nil {
+		return fmt.Errorf("MarkSkillIncreasesInitialized: %w", err)
+	}
+	return nil
+}
+
 // ConsumePendingBoost decrements the pending boost count by 1 for a character.
 // Returns an error containing "no pending boosts" if the character has none.
 //

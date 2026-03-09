@@ -108,6 +108,8 @@ type ProgressRepository interface {
 	IncrementPendingSkillIncreases(ctx context.Context, id int64, n int) error
 	ConsumePendingBoost(ctx context.Context, id int64) error
 	ConsumePendingSkillIncrease(ctx context.Context, id int64) error
+	IsSkillIncreasesInitialized(ctx context.Context, id int64) (bool, error)
+	MarkSkillIncreasesInitialized(ctx context.Context, id int64) error
 }
 
 // CharacterProficienciesRepository persists per-character armor/weapon proficiency data.
@@ -439,13 +441,23 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			} else {
 				s.logger.Warn("GetPendingSkillIncreases failed", zap.Error(siErr))
 			}
-			// Backfill: existing characters with no recorded skill increases get floor(level/2) pending.
+			// Backfill: existing characters that have never been granted skill increases
+			// get floor(level/2) pending. The initialized flag prevents re-granting on
+			// subsequent logins after the player has spent their increases.
 			earnedIncreases := sess.Level / 2
-			if sess.PendingSkillIncreases == 0 && earnedIncreases > 0 {
-				if bfErr := s.progressRepo.IncrementPendingSkillIncreases(stream.Context(), characterID, earnedIncreases); bfErr == nil {
-					sess.PendingSkillIncreases = earnedIncreases
-				} else {
-					s.logger.Warn("backfill skill increases failed", zap.Error(bfErr))
+			if earnedIncreases > 0 {
+				initialized, initErr := s.progressRepo.IsSkillIncreasesInitialized(stream.Context(), characterID)
+				if initErr != nil {
+					s.logger.Warn("IsSkillIncreasesInitialized failed", zap.Error(initErr))
+				} else if !initialized {
+					if bfErr := s.progressRepo.IncrementPendingSkillIncreases(stream.Context(), characterID, earnedIncreases); bfErr == nil {
+						sess.PendingSkillIncreases = earnedIncreases
+						if markErr := s.progressRepo.MarkSkillIncreasesInitialized(stream.Context(), characterID); markErr != nil {
+							s.logger.Warn("MarkSkillIncreasesInitialized failed", zap.Error(markErr))
+						}
+					} else {
+						s.logger.Warn("backfill skill increases failed", zap.Error(bfErr))
+					}
 				}
 			}
 		} else {

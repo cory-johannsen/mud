@@ -64,6 +64,12 @@ func (m *mockProgressRepo) ConsumePendingSkillIncrease(_ context.Context, _ int6
 	m.consumeCalls.Add(1)
 	return m.consumeErr
 }
+func (m *mockProgressRepo) IsSkillIncreasesInitialized(_ context.Context, _ int64) (bool, error) {
+	return true, nil
+}
+func (m *mockProgressRepo) MarkSkillIncreasesInitialized(_ context.Context, _ int64) error {
+	return nil
+}
 
 // ---------------------------------------------------------------------------
 // Helper: build a GameServiceServer wired for handleTrainSkill tests.

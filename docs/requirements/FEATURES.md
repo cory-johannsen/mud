@@ -112,7 +112,7 @@
     - [x] Add gender selection step to character creation flow: present numbered options; option 5 prompts for custom text input; option 0 randomizes
   - [x] Backfill missing gender at player load
     - [x] On player load, if gender field is null or empty, assign a random gender value and persist it
-- [ ] `trainskill` does not persist the player selection (the result is gone when the player logs in again and the character sheet shows Pending Skill Increases: 1)
+- [x] `trainskill` does not persist the player selection (the result is gone when the player logs in again and the character sheet shows Pending Skill Increases: 1)
 - [ ] `grant` Editor command 
   - Accepts a parameter for the type of grant
     - xp: grants a player XP

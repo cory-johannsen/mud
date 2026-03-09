@@ -1,0 +1,1 @@
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS skill_increases_initialized BOOLEAN NOT NULL DEFAULT FALSE;
