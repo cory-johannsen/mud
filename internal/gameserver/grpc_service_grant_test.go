@@ -15,6 +15,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/xp"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -29,6 +30,7 @@ import (
 type grantCharSaver struct {
 	savedCurrency     atomic.Int64
 	saveCurrencyCalls atomic.Int32
+	saveProgressCalls atomic.Int32
 }
 
 func (m *grantCharSaver) SaveState(_ context.Context, _ int64, _ string, _ int) error { return nil }
@@ -60,7 +62,10 @@ func (m *grantCharSaver) GetByID(_ context.Context, id int64) (*character.Charac
 func (m *grantCharSaver) SaveAbilities(_ context.Context, _ int64, _ character.AbilityScores) error {
 	return nil
 }
-func (m *grantCharSaver) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error { return nil }
+func (m *grantCharSaver) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error {
+	m.saveProgressCalls.Add(1)
+	return nil
+}
 func (m *grantCharSaver) SaveDefaultCombatAction(_ context.Context, _ int64, _ string) error {
 	return nil
 }
@@ -72,12 +77,15 @@ func (m *grantCharSaver) SaveCurrency(_ context.Context, _ int64, currency int) 
 func (m *grantCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (m *grantCharSaver) SaveGender(_ context.Context, _ int64, _ string) error { return nil }
 
-// grantProgressRepo is a ProgressRepository test double that records SaveProgress calls.
+// grantProgressRepo is a ProgressRepository test double that records SaveProgress and skill increase calls.
 //
 // Precondition: none.
-// Postcondition: SaveProgress records call count; all other methods no-op or return zero values.
+// Postcondition: SaveProgress and IncrementPendingSkillIncreases record call counts; all other methods no-op or return zero values.
 type grantProgressRepo struct {
-	saveProgressCalls atomic.Int32
+	saveProgressCalls              atomic.Int32
+	incrementSkillIncreasesCalls   atomic.Int32
+	incrementSkillIncreasesTotal   atomic.Int32
+	markSkillIncreasesInitCalls    atomic.Int32
 }
 
 func (m *grantProgressRepo) GetProgress(_ context.Context, _ int64) (int, int, int, int, error) {
@@ -86,7 +94,9 @@ func (m *grantProgressRepo) GetProgress(_ context.Context, _ int64) (int, int, i
 func (m *grantProgressRepo) GetPendingSkillIncreases(_ context.Context, _ int64) (int, error) {
 	return 0, nil
 }
-func (m *grantProgressRepo) IncrementPendingSkillIncreases(_ context.Context, _ int64, _ int) error {
+func (m *grantProgressRepo) IncrementPendingSkillIncreases(_ context.Context, _ int64, n int) error {
+	m.incrementSkillIncreasesCalls.Add(1)
+	m.incrementSkillIncreasesTotal.Add(int32(n))
 	return nil
 }
 func (m *grantProgressRepo) ConsumePendingBoost(_ context.Context, _ int64) error { return nil }
@@ -97,6 +107,7 @@ func (m *grantProgressRepo) IsSkillIncreasesInitialized(_ context.Context, _ int
 	return true, nil
 }
 func (m *grantProgressRepo) MarkSkillIncreasesInitialized(_ context.Context, _ int64) error {
+	m.markSkillIncreasesInitCalls.Add(1)
 	return nil
 }
 func (m *grantProgressRepo) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error {
@@ -217,6 +228,7 @@ func TestHandleGrant_EditorGrantsXP(t *testing.T) {
 	require.NotNil(t, evt)
 	assert.NotNil(t, evt.GetMessage(), "expected a success MessageEvent")
 	assert.Equal(t, initialXP+100, target.Experience, "target.Experience must increase by amount")
+	assert.Equal(t, int32(1), charSaver.saveProgressCalls.Load(), "SaveProgress must be called once")
 }
 
 // TestHandleGrant_EditorGrantsMoney verifies that an editor can grant money to an online player,
@@ -411,4 +423,91 @@ func TestHandleGrant_PropertyBased(t *testing.T) {
 			rt.Fatalf("expected Experience=%d, got %d", initialXP+int(amount), target.Experience)
 		}
 	})
+}
+
+// grantXPProgressSaver is a minimal xp.ProgressSaver stub for xpSvc wiring in tests.
+//
+// Precondition: none.
+// Postcondition: SaveProgress is a no-op that always succeeds.
+type grantXPProgressSaver struct{}
+
+func (g *grantXPProgressSaver) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error {
+	return nil
+}
+
+// testXPConfig returns a minimal XPConfig sufficient to trigger a level-up with 1000 XP at level 1.
+// Level 2 requires 2² × 100 = 400 XP; 1000 XP is sufficient to reach level 3 (3² × 100 = 900 XP).
+//
+// Precondition: none.
+// Postcondition: Returns a non-nil *xp.XPConfig with BaseXP=100.
+func testXPConfig() *xp.XPConfig {
+	return &xp.XPConfig{
+		BaseXP:        100,
+		HPPerLevel:    5,
+		BoostInterval: 5,
+		LevelCap:      100,
+		Awards: xp.Awards{
+			KillXPPerNPCLevel:       50,
+			NewRoomXP:               10,
+			SkillCheckSuccessXP:     10,
+			SkillCheckCritSuccessXP: 25,
+			SkillCheckDCMultiplier:  2,
+		},
+	}
+}
+
+// TestHandleGrant_XP_WithXPService_LevelUp verifies that granting enough XP via a wired xpSvc
+// causes the target to level up, and that IncrementPendingSkillIncreases is called when skill
+// increases are awarded.
+//
+// Precondition: xpSvc is configured with BaseXP=500; target starts at level 1 with 0 XP;
+// 1000 XP is granted, which is sufficient to reach level 2 and level 3.
+// Postcondition: target.Level > 1; target.Experience reflects post-award XP;
+// SaveProgress is called; if skill increases are earned, IncrementPendingSkillIncreases is called.
+func TestHandleGrant_XP_WithXPService_LevelUp(t *testing.T) {
+	charSaver := &grantCharSaver{}
+	progressRepo := &grantProgressRepo{}
+
+	svc := testServiceForGrant(t, grantTestOptions{charSaver: charSaver, progressRepo: progressRepo})
+	xpSvc := xp.NewService(testXPConfig(), &grantXPProgressSaver{})
+	svc.SetXPService(xpSvc)
+
+	addEditorForGrant(t, svc, "editor_xpsvc")
+	target := addTargetForGrant(t, svc, "target_xpsvc", "LevelUpChar")
+	require.Equal(t, 1, target.Level, "precondition: target starts at level 1")
+
+	// Granting 1000 XP to a level-1 character with BaseXP=500 should trigger at least one level-up.
+	evt, err := svc.handleGrant("editor_xpsvc", &gamev1.GrantRequest{
+		GrantType: "xp",
+		CharName:  "LevelUpChar",
+		Amount:    1000,
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.NotNil(t, evt.GetMessage(), "expected a success MessageEvent on level-up grant")
+	assert.Greater(t, target.Level, 1, "target must have leveled up")
+	assert.Equal(t, int32(1), charSaver.saveProgressCalls.Load(), "SaveProgress must be called once")
+}
+
+// TestHandleGrant_NegativeAmount verifies that granting a negative amount returns an error event.
+//
+// Precondition: caller has editor role; target is online; amount is -5.
+// Postcondition: Returns an error event with "amount must be" in the message.
+func TestHandleGrant_NegativeAmount(t *testing.T) {
+	svc := testServiceForGrant(t, grantTestOptions{})
+	addEditorForGrant(t, svc, "editor_neg")
+	addTargetForGrant(t, svc, "target_neg", "NegTarget")
+
+	evt, err := svc.handleGrant("editor_neg", &gamev1.GrantRequest{
+		GrantType: "xp",
+		CharName:  "NegTarget",
+		Amount:    -5,
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	errEvt := evt.GetError()
+	require.NotNil(t, errEvt, "expected an error event for negative amount")
+	assert.Contains(t, errEvt.Message, "amount must be", "error must reference amount constraint")
 }

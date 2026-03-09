@@ -4815,6 +4815,12 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 					s.logger.Warn("handleGrant: SaveProgress failed", zap.Error(pErr))
 				}
 			}
+			if result.NewSkillIncreases > 0 && s.progressRepo != nil {
+				if err := s.progressRepo.IncrementPendingSkillIncreases(ctx, target.CharacterID, result.NewSkillIncreases); err != nil {
+					s.logger.Warn("handleGrant: IncrementPendingSkillIncreases failed", zap.Error(err))
+				}
+				_ = s.progressRepo.MarkSkillIncreasesInitialized(ctx, target.CharacterID)
+			}
 			if result.LeveledUp {
 				levelMsgs = append(levelMsgs, fmt.Sprintf("*** You reached level %d! ***", result.NewLevel))
 				if result.HPGained > 0 {
