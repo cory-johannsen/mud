@@ -1,210 +1,3 @@
-- [x] Kubernetes deployment support for production release.  To maintain stability and allow for rolling deploys the system must have a kubernetes deployment model.  Kind is already installed and can be used to host the cluster.
-- [x] Random character generation mode. At each stage of character generation the player should be able to choose Random and have the rest of the choices picked randomly. This should be the default selection.
-- [x] Armor, rings, necklaces.  Each player should have dedicated equipped item slots for: armor (head, left arm, right arm, torso, left leg, right leg, feet), main hand weapon, off-hand weapon, neck, 10 rings)
-- [x] Region descriptions instead of ID strings in character descriptions
-- [x] Switching characters without logout and disconnect
-- [x] Expose GRPC API and GRPC REST proxy to external clients.
-- [x] The player should have a hand armor slot. The player should have 5 rings on each hand and manage them separately.  The equipment display should use human-readable names for the item slots.
-- [x] Inactivity warning before automatic disconnect.  Serverside logging of disconnect and reason.
-- [x] Time of day, including daylight/darkness effects and descriptive details.  Time of day is displayed in the prompt.
-- [x] Weapon and armor library.  A large library of lore-friendly equipment needs to exist with multiple options for every item type.  Each team should have customized team-specific equipment
-- [x] Character initial inventory: a creation each character receives an inventory of basic items. These should conform to the character job.
-- [x] Character sheet and command to view it
-- [x] Player creation should start with archetype selection (listing each with its details), then restrict the jobs the user can select by their archetype.  Archetypes and jobs need to use the same attributes as the characters to match the lore.
-- [x] `who` command should include more details: level, job, health (descriptive not numeric), status
-- [x] Room equipment.  Some items and equipment can permanently exist in a room (water fountain), or generate automatically in a room (up to a maximum amount). 
-- [x] Defects
-      - [x] There is an `archetype_selection` command in the game help UI.  That should not be exposed as a command, the player can't change it after their initial choice.
-      - [x] On character creation after the player chooses a Team there error "No archetypes available for team" is produced.  Both teams have access to all the archetypes, this should never occur.
-- [x] Maps
-  - Player has an automap that can be consulted with the `map` command.
-  - The player automap is populated and persisted as the player explores.
-  - Player automap contains the rooms, exits, permanent room equipment and POIs.  We will include non-combat NPCs in the future.
-  - Each zone has a safe area at the primary entrance which contains a zone map.  Viewing the look map populates the automap for that zone, but only the rooms and exits; the player must visit a room to discover any permanent equipment, POIs, or non-combat NPCs.
-- [x] Skill Check Triggers (Stage 1). Passive skill checks fired automatically by world events.
-  - [x] Core resolver: d20 + ability_mod + proficiency_bonus vs DC, 4-tier outcome (crit_success / success / failure / crit_failure).
-  - [x] Room `on_enter` trigger: fires declared skill checks when a player enters a room. Sample: Parkour DC 12 in Felony Flats North Strip Mall (collapsed awning / debris).
-  - [x] NPC `on_greet` trigger: fires declared skill checks when a player greets an NPC. Sample: Smooth Talk DC 16 on the Ganger NPC.
-  - [x] Item `on_use` trigger: fires declared skill checks when a player uses room equipment. Supports `deny` effect to block item use on failure. Sample: Grift DC 14 on the Felony Flats zone map terminal.
-  - [x] Lua hook: `on_skill_check(uid, skill_id, total, dc, outcome)` fired after every resolved check.
-  - [x] PlayerSession carries per-character skill ranks and proficiency bonus used by the resolver.
-- [ ] Skills, Feats and Class features.
-  - [x] **Skills — Data pipeline**
-    - [x] 17 P2FE skills defined in `content/skills.yaml`, mapped to Gunchete setting
-    - [x] Skills stored in DB per character with proficiency rank (untrained/trained/expert/master/legendary)
-    - [x] Job YAML declares starting skills; assigned at character creation and backfilled at login for existing characters
-    - [x] `skills` command displays all 17 skills grouped by ability score; trained skills highlighted
-    - [x] Skills appear on the character sheet (`sheet`/`char` command)
-    - [x] PlayerSession carries skill ranks for use by the skill check resolver
-  - [x] **Feats — Data pipeline**
-    - [x] Feats defined in `content/feats.yaml` covering general feats and job-specific feats by archetype; lore migrated to Gunchete setting
-    - [x] Feats stored in DB per character
-    - [x] Job YAML declares starting feats; assigned at character creation and backfilled at login for existing characters
-    - [x] `feats` command displays character feats grouped by category; active feats marked `[active]`
-    - [x] Feats appear on the character sheet
-    - [x] `use <feat>` activates an active feat and displays its `activate_text`; prints an error for passive feats
-  - [x] **Class features — Data pipeline**
-    - [x] Class features defined in `content/class_features.yaml`; lore migrated to Gunchete setting
-    - [x] Class features stored in DB per character
-    - [x] Job YAML declares starting class features; assigned at creation and backfilled at login for existing characters
-    - [x] `class_features` command displays character class features grouped by archetype vs. job; active features marked `[active]`
-    - [x] Class features appear on the character sheet
-    - [x] `use <class_feature>` activates an active class feature and displays its `activate_text`
-  - [x] **Skill check triggers — Stage 1** (see "Skill Check Triggers" entry above for details)
-  - [x] **Skill check triggers — Stage 2: extended effects**
-    - [x] `condition` effect type wired to the condition system (`ActiveSet.Apply`)
-    - [x] `reveal` effect type exposes hidden room exits
-  - [x] **Active feat/class feature mechanics — Stage 3**
-    - [x] Active feats/class features map to a named condition via `condition_id` in YAML
-    - [x] `use <feat>` applies the condition (with `damage_bonus`, `ac_penalty`, etc.) for encounter or timed duration
-    - [x] Condition cleared on combat end or timer expiry
-  - [x] **Passive feat/class feature mechanics — Stage 4**
-    - [x] `sucker_punch` — sneak attack damage bonus when attacking from stealth
-    - [x] `street_brawler` — attack of opportunity when enemy leaves threat range
-    - [x] `predators_eye` — bonus to first attack vs unaware target
-    - [x] `zone_awareness` — removes difficult terrain movement penalty
-    - [x] Lua hook `on_passive_feat_check(uid, feat_id, context)` for custom passive logic
-  - [x] `skills` command improvements
-    - [x] The `skills` command should display both the level (train, untrained, etc) and the numeric bonus using +# format (+0, +2, +4, etc)
-    - [x] The `skills` command should display a description for each skill
-  - [x] During character creation, if the player must choose between multiple feat/feature options they should be prompted to select from a list; existing characters checked at login for missing choices
-- [x] Admin command `summon_item` which take an item ID as a parameter.  An instance of the specified item must be added to the room.
-- [ ] TODO list: 
-  - [ ] full itemized list of all stubs / unimplemented code.
-  - [ ] missing tests
-- [x] Telnet UI upgrades
-  - The screen is sectioned into three segments, from top to bottoms:
-    - Room display
-    - Console
-    - Player input
-  - [x] Player input
-    - [x] The player input section must be pinned to the bottom of the screen
-    - [x] The player input section is composed of two items, the prompt and the player input area
-      - [x] The prompt must refresh independent of the input section such that the prompt reflects changes without player input.
-      - [x] The prompt must never overwrite the player input area
-    - [x] The player input section must have a horizontal divider on the top to separate it from the console
-    - [x] Console messages must never overwrite the player input section
-    - [x] When a player is prompted to select from a list of items, in addition to selection by number they must be able to use the up/down cursor keys
-  - [x] Room display
-    - [x] The room display must always be pinned to the top of the screen
-    - [x] The room display contains the output of the `look` command
-    - [x] The room display must update independent of the console messages and player prompt such that the room state is always up-to-date.
-    - [x] The room display section must have a horizontal divider on the bottom to separate it from the console
-    - [x] Console messages must never overwrite the room display
-    - [x] When a player is in combat the room display must reflect this
-- [x] Bugs
-  - [x] The room description is truncated in the Room section of the screen.
-    - Wrapping the description will push the exits down and force them out of the Room section so they need to be arranged in columns with 3 per row
-  - [x] Prompt is echoed to console
-    - when a command is entered
-    - when NPCs speak
-  - [x] Character sheet scrolls off the screen, needs to be reformatted. move the feats and class features into a second column
-  - [x] Time-of-day events only update the prompt when the description changes, not when the time changes
-  - [x] Semver is properly utilized and is displayed at connection time under the Gunchete header.
-  - [x] zone_map did not appear in the Room section until the user issued the look command
-    - Instead of the object id zone_map, use the description text Zone Map
-  - [x] player prompts to select missing feats and class features at load time doesn't display the list of options for players that are missing selections
-  - [x] NPC speech/actions in the console have inconsistent format, start with " : ", do not necessarily include NPC name
-  - [x] Idle timer message is not appearing for user.  The timer should warn the user at 4 minutes of idle time and again at 4m30s that automatic disconnect is pending
-- [x] PgUp/PgDn and Up/Down arrow keys scroll the Console section so the user can look back (arrow keys scroll by line; PgUp/PgDn scroll by page)
-- [x] Character ability boosts
-  - [x] At creation player's get to select attributes boosts (as in P2FE). The boosts are based on:
-    - [x] Archetype - Mirrors Ancestry
-    - [x] Region - Mirrors Background
-    - [x] Job - Mirrors Class
-  - [x] Player's that have not selected boosts must be prompted at login
-- [x] Expanded Archetype options to match PF2E
-  - Full list of Player Core classes that need supported:
-    - [x] Bard -> Influencer
-    - [x] Cleric -> Zealot (new)
-    - [x] Druid -> Naturalist (new)
-    - [x] Fighter -> Aggressor
-    - [x] Ranger -> Drifter
-    - [x] Rogue -> Criminal
-    - [x] Witch -> Schemer (new)
-    - [x] Wizard -> Nerd
-  - [x] Normie dissolved; jobs redistributed lore-first
-  - [x] Jobs redistributed for balance (8-12 per archetype)
-- [x] Proficiencies
-  - [x] `proficiency_category` field on all weapon and armor YAML definitions
-  - [x] `character_proficiencies` DB table (migration 018); `CharacterProficienciesRepository` with upsert and GetAll
-  - [x] Backfill at login: job-granted proficiencies + always-granted `unarmored: trained`
-  - [x] `PlayerSession.Proficiencies` map (category → rank) loaded each login
-  - [x] Rank-aware `CombatProficiencyBonus(level, rank)`: untrained=0, trained=level+2, expert=level+4, etc.
-  - [x] Combat attack rolls use weapon proficiency rank from session
-  - [x] `proficiencies` / `prof` command lists all character proficiencies
-  - [x] Proficiencies section on character sheet
-  - [x] Armor
-      - [x] Unarmored
-      - [x] Light
-      - [x] Medium
-      - [x] Heavy
-  - [x] Weapons
-    - [x] Unarmed
-    - [x] Simple
-    - [x] Martial
-    - [x] Specialized
-- [x] Only show modifier bonuses.  PF2E does not use attributes scores, only modifiers.
-- [x] Up/down arrow show scroll back through the previously entered commands, Shift+Up/Shift-Down should scroll the console.
-- [x] Saving rolls (Toughness/Hustle/Cool — Gunchete-themed PF2E saves with proficiency ranks, ResolveSave function, character sheet display)
-- [x] Character levelling
-    - [x] XP-based levelling with geometric XP curve
-    - [x] XP awarded from combat kills
-    - [x] XP awarded from room discovery
-    - [x] XP awarded from skill checks
-    - [x] Automatic level-up with HP gain on XP threshold reached
-    - [x] Pending ability boost awarded every 5 levels
-    - [x] `levelup` command to assign pending ability boosts
-    - [x] XP and pending boosts displayed on character sheet
-    - [x] Max character level limit is 100
-    - [x] Max job level for any job is 20
-- [x] Default combat actions.  Each player must have the option to select the default action used in combat if no selection is made.  This should default to idle (take no action).
-  - [x] `default_combat_action` column added to `characters` table (migration 020)
-  - [x] `SaveDefaultCombatAction` repository method persists the player's chosen default
-  - [x] `combat_default <action>` command (valid actions: attack/strike/bash/dodge/parry/cast/pass/flee)
-  - [x] Auto-queuing: players without an explicit action each combat round auto-queue their default action
-  - [x] `LastCombatTarget` tracks the last explicit target; used for auto-queue targeting with fallback to first living NPC
-- [x] Skill advancement
-  - [x] `pending_skill_increases` column on `characters` table (migration 021)
-  - [x] Skill increases awarded at every even character level (L2, L4, L6...)
-  - [x] Rank gates: expert (L15+), master (L35+), legendary (L75+)
-  - [x] `trainskill <skill>` command to spend pending skill increases
-  - [x] Level gate enforcement at assignment time
-  - [x] Backfill: existing characters receive `floor(level/2)` pending increases at login
-  - [x] Pending skill increases displayed on character sheet with `trainskill` hint
-- [x] Map
-  - [x] `interact Zone Map` works by descriptive name (was: zone_map object ID required)
-  - [x] Zone map use populates automap in current session
-- [x] Character sheet updates
-  - [x] XP displayed
-  - [x] Skill level color-coded (untrained=dim, trained=white, expert=cyan, master=yellow, legendary=magenta)
-  - [x] Proficiency level and bonus color-coded with matching colors
-  - [x] Feat/class feature descriptions word-wrap with aligned continuation indent
-  - [x] Ability bonuses color-coded (red family for negative, white for 0, teal→green→blue→purple for positive; wide bands for high-level growth)
-  - [x] Ability names spelled out (Brutality, Grit, Quickness, Reasoning, Savvy, Flair)
-  - [x] Excess newline between primary and off-hand weapon
-- [x] Initiative — replaced with persistent combat bonus when player wins initiative roll.
-  - Margin 1–5 → +1, 6–10 → +2, 11+ → +3 to attack rolls and AC for the entire combat.
-  - Announced in combat start: "You win initiative! +N to attack and AC this combat."
-- [x] The Zone Map room equipment is displayed with the indicator [use], but that should say [interact] to reflect the command required
-  - [x] `examine` should have the same effect as `interact` for Zone Map room equipment.  This does not apply to all room equipment, it is custom behavior.
-- [x] Character sheet weapon information should show attack bonus and damage 
-- [x] Damage types
-  - [x] Resistance
-  - [x] Weakness
-  - [x] Player resistances/weaknesses from armor; shown on character sheet; applied in combat
-- [x] Character sheet should display total AC
-  - [x] Each armor item should display the AC contribution
-- [x] Critical hits and misses
-  - [x] Critical hits announced in console with bright yellow color and *** CRITICAL HIT! *** emphasis
-  - [x] Critical hits apply 2× damage (attack rolls); flat_footed condition on target
-  - [x] Critical misses announced in console with bright red color and *** CRITICAL MISS! *** emphasis
-  - [x] Critical misses result in 0 damage and prone condition on attacker (attack rolls)
-- [x] Out-of-combat health regeneration
-  - [x] Player and NPC health should slowly regenerate when not in combat.
-    - [x] Regeneration rate is defined by the player's Grit bonus
-- [x] NPC health and status should be reflected in the Room display
-- [x] Health display in the prompt should update when the player regenerates health
 - [x] Actions
   - [x] Archetype and Job
     - [x] Each Archetype has at least 1 unique active action:
@@ -229,9 +22,9 @@
         - Escape [1A]: Attempt to break free from being grabbed or restrained.
         - Delay [0A]: Move your entire turn to later in the initiative order.
       - Athletics Actions
-        - [ ] Grapple — opposed Athletics check; apply Grabbed condition
+        - [x] Grapple — Athletics vs Level+10 DC; success applies grabbed condition (-2 AC, flat-footed)
         - [ ] Shove — Athletics vs Fortitude DC; push target 5 ft
-        - [ ] Trip — Athletics vs Reflex DC; apply Prone condition
+        - [x] Trip — Athletics vs Level+10 DC; success applies prone condition (-2 attack rolls)
         - [ ] Disarm — Athletics vs Reflex DC; knock weapon from target
         - [ ] Climb — Athletics check vs surface DC; vertical movement
         - [ ] Swim — Athletics check vs current DC; water movement
@@ -239,14 +32,14 @@
         - [ ] Step — move 5 ft without triggering reactions
         - [ ] Seek — Perception check to detect hidden creatures/objects
         - [ ] Sense Motive — Perception vs Deception to detect lies/intent
-        - [ ] Escape — Athletics/Acrobatics vs grappler DC to break free
+        - [x] Escape — Max(athletics, acrobatics) vs grabber DC; success removes grabbed condition
         - [ ] Delay — forfeit initiative position to act later in round
       - Stealth & Deception Actions
         - [x] Feint — Deception vs target Perception DC; apply flat_footed (-2 AC) for 1 round
         - [x] Demoralize — Intimidation vs target Will DC; apply frightened (-1 attack, -1 AC) for encounter
-        - [ ] Hide — Stealth vs Perception DC; become Hidden
-        - [ ] Sneak — Stealth vs Perception DC; move while Hidden
-        - [ ] Create Diversion — Deception vs Perception DC; become Hidden briefly
+        - [x] Hide — Stealth vs highest NPC Perception DC; success applies hidden condition
+        - [x] Sneak — Stealth vs highest NPC Perception DC while hidden; failure removes hidden
+        - [x] Create Diversion (divert) — Grift vs highest NPC Perception DC; success applies hidden condition
         - [ ] Tumble Through — Acrobatics vs Reflex DC; move through enemy space
       - Medicine Actions
         - [x] First Aid [2A] — patch_job vs DC 15; success heals 2d8+4 HP
@@ -266,7 +59,7 @@
     - [ ] Downtime
       - Earn Income: Use a skill (Crafting, Lore, Performance) to make money.
       - Craft: Spend days creating items, equipment, or consumables.
-      - Retrain: Spend a week or more to change a Feat, Skill, or Class feature.
+      - Retrain: Spend a week or more to change a Feat, Skill, or Job feature.
       - Treat Disease: Spend time caring for an ill patient (Medicine).
       - Subsist: Find food and shelter in the wild or a city for free.
       - Create Forgery: Spend a day or more making a fake document.
@@ -279,34 +72,55 @@
 - [x] Console notifications
   - [x] The player should be notified in the console every time a skill is used automatically
   - [x] The player should be notified in the console every time XP is awarded and why
+- [ ] TODO list:
+    - [ ] full itemized list of all stubs / unimplemented code.
+      - [ ] add implementation items to the appropriate feature category
+        - [ ] if no feature category exists, add a new feature category
+    - [ ] missing tests
+      - [ ] add implementation items to the appropriate feature category
+        - [ ] if no feature category exists, add a new feature category 
 - [ ] Advanced combat mechanics
-    - [ ] Combat distance
-        - Movement
-        - Range
-            - Melee
-            - Short
-            - Long
-            - Extreme
-        - Cover
-        - Area of Effect
-        - Attack of opportunity
-        - Terrain types
-        - Fleeing
-    - [ ] Multi-player combat
-      - [ ] Other players can join combat already in progress
-        - [ ] All players in a combat encounter share XP for the encounter (XP is divided equally among the players)
-        - [ ] All players in a combat encounter share loot for the encounter (loot is divided equally among the players)
-      - [ ] Players can form groups
-        - [ ] Players in a group all automatically enter combat when any player initiates combat
-        - [ ] New group commands: 
-          - [ ] group (create a group or list the members of the current group)
-          - [ ] ungroup (leave the current group)
-          - [ ] invite (invite a player to the group)
-          - [ ] kick (remove a player from the group)
-    - [ ] Pursuit
-    - [ ] Mental state
-      - [ ] Panic
-      - [ ] Psychosis
+  - [ ] Immobilized — prevent grabbed creatures from moving between rooms
+  - Reactions
+  - Distance
+    - Measures the distance from the player to the target
+    - Maximum distance 100m
+    - Minimum distance 0m
+    - Distance is measurement in 5m increments
+    - Combat begins with the players at 20 meters distance from the enemy
+      - The player may specify an alternate initial distance
+        - The player may not initiate combat with a starting distance less than 10m unless using a skill or feat that allows this
+      - NPCs always start at distance 0
+  - Movement
+    - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
+  - Range
+    - Melee: <5m
+    - Short: 5-20m
+    - Long: 25-40m
+    - Extreme: 55m+
+  - Cover
+    - Room equipment may serve as cover
+      - Whether equipment may be used as cover (and what kind of cover it provides) should be stored in the yaml for the room 
+    - Cover uses the PF2E rules
+  - Area of Effect
+  - Attack of opportunity
+  - Terrain types
+  - Fleeing
+    - Pursuit
+  - Mental state
+    - Panic
+      - Psychosis
+- [ ] Multi-player combat
+  - [ ] Other players can join combat already in progress
+    - [ ] All players in a combat encounter share XP for the encounter (XP is divided equally among the players)
+    - [ ] All players in a combat encounter share loot for the encounter (loot is divided equally among the players)
+  - [ ] Players can form groups
+    - [ ] Players in a group all automatically enter combat when any player initiates combat
+    - [ ] New group commands: 
+      - [ ] group (create a group or list the members of the current group)
+      - [ ] ungroup (leave the current group)
+      - [ ] invite (invite a player to the group)
+      - [ ] kick (remove a player from the group)
 - [ ] Technology instead of magic.  
   - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism).  
   - For the remainder of the features specification Technology refers to the combined effects of both technological devices and drugs.
@@ -370,51 +184,52 @@
         - Inactive Jobs do not earn XP, but the player may still use the feats and proficiencies they provide
         - A command must exist to allow the player to view their Jobs and select which one is Active
 - [ ] Job development
-        - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
-        - [ ] advancement hierarchy - every job has multiple levels of specialization
-          - [x] Basic (existing)
-          - [ ] Specialist - when the player has reached the necessary requirements in a Basic job they may train to become a Specialist
-      - Each Specialist job provides a set of attribute boosts
-        - Specialist attribute boosts are cumulative with base Job attribute boosts
-      - Each Specialist job provides a set of advanced feats
-        - Specialist advanced feats are cumulative with base Job feats
-      - Each Specialist job provides a set of proficiencies
-        - Specialist advanced feats are cumulative with base Job proficiencies
-      - Each Specialist job provides a set of skills
-        - Specialist advanced feats are cumulative with base Job skills
-          - [ ] Expert - when the player has reached the necessary requirements in a Specialist job they may train to become an Expert
-        - Each Expert job provides a set of attribute boosts
-        - Expert attribute boosts are cumulative with base and Specialist Job attribute boosts
-        - Each Expert job provides a set of advanced feats
-        - Expert advanced feats are cumulative with base and Specialist Job feats
-        - Each Expert job provides a set of proficiencies
-        - Expert advanced feats are cumulative with base and Specialist Job proficiencies
-        - Each Expert job provides a set of skills
-        - Expert advanced feats are cumulative with base and Specialist Job skills
-      - [ ] multi-job advancement
-        - [ ] when levelling up a player may opt to learn a new job. This is functionally equivalent to multi-classing in P2FE   
-        - [ ] cross-job combinations  
+     - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
+     - [ ] advancement hierarchy - every job has multiple levels of specialization
+       - [x] Basic (existing)
+         - [ ] Specialist - when the player has reached the necessary requirements in a Basic job they may train to become a Specialist
+           - Each Specialist job provides a set of attribute boosts
+           - Specialist attribute boosts are cumulative with base Job attribute boosts
+          - Each Specialist job provides a set of advanced feats
+            - Specialist advanced feats are cumulative with base Job feats
+          - Each Specialist job provides a set of proficiencies
+            - Specialist advanced feats are cumulative with base Job proficiencies
+          - Each Specialist job provides a set of skills
+            - Specialist advanced feats are cumulative with base Job skills
+       - [ ] Expert - when the player has reached the necessary requirements in a Specialist job they may train to become an Expert
+         - Each Expert job provides a set of attribute boosts
+           - Expert attribute boosts are cumulative with base and Specialist Job attribute boosts
+         - Each Expert job provides a set of advanced feats
+           - Expert advanced feats are cumulative with base and Specialist Job feats
+         - Each Expert job provides a set of proficiencies
+           - Expert advanced feats are cumulative with base and Specialist Job proficiencies
+         - Each Expert job provides a set of skills
+           - Expert advanced feats are cumulative with base and Specialist Job skills
+     - [ ] multi-job combinations  
 - [ ] Equipment mechanics expansion 
-      - advanced equipment and equipment levelling
-        - player requirements
-        - equipment rarity and features
-          - 5 rarity levels 
-      - each increases the base equipment stats
-      - each increases the number of features
-      - each increases the effectiveness of the existing features
-          - Item names are color coded by rarity level
-      - tuned, defective, and cursed equipment
-        - tuned equipment has a bonus or positive passive effect applied to the specific item
-        - defective equipment has a penalty or negative effect applied to the specific item
-        - cursed equipment applies a penalty or negative effect to player.  
-          - cursed items cannot be removed by the player
-          - cursed items do not appear cursed until equipped
-          - cursed item removal will be developed later
-      - equipment combination and interactions
-      - equipment sets
+  - Durability
+    - breakage
+    - repair
+  - advanced equipment and equipment levelling
+    - player requirements
+    - equipment rarity and features
+      - 5 rarity levels 
+    - each increases the base equipment stats
+    - each increases the number of features
+    - each increases the effectiveness of the existing features
+        - Item names are color coded by rarity level
+    - tuned, defective, and cursed equipment
+      - tuned equipment has a bonus or positive passive effect applied to the specific item
+      - defective equipment has a penalty or negative effect applied to the specific item
+      - cursed equipment applies a penalty or negative effect to player.  
+        - cursed items cannot be removed by the player
+        - cursed items do not appear cursed until equipped
+        - cursed item removal will be developed later
+    - equipment combination and interactions
+    - equipment sets
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor. roomequip is an Editor command.
 - [ ] Resting
-    - [ ] motels
+  - [ ] motels
     - [ ] camping
       - [ ] gear required
       - [ ] exploration only, not allowed in safe rooms.
@@ -428,13 +243,28 @@
     - Sketchy rooms contain non-Combat NPCs and combat NPCs
       - Combat is enabled in Sketchy rooms
       - Combat can only be initiated by players in Sketchy rooms, not by NPCs
+      - Sketchy rooms may contain cover
+        - Cover can not be destroyed in Sketchy rooms
+        - Cover has a low chance of being trapped in Sketchy rooms
+      - Sketchy rooms do not contain room traps
+      - Sketchy rooms have a low chance of traps on room equipment
     - Dangerous rooms contain non-Combat NPCs and combat NPCs
       - Combat is enabled in Dangerous rooms
       - Combat can only be initiated by anyone in a Dangerous room
       - Non-combat NPCs flee combat if engaged
+      - Dangerous rooms may contain cover
+        - Cover can be destroyed in Dangerous rooms
+        - Cover has a high chance to be trapped in Dangerous rooms
+      - Combat rooms have a moderate change to contain room traps
+      - Combat rooms have a moderate chance to contain traps on room equipment
     - All Out War rooms contain only combat NPCs
       - Combat is enabled in All Out War rooms
       - Combat NPCs attack on sight in an All Out War room
+      - All Out War rooms may contain cover
+        - Cover can be destroyed in All Out War rooms
+        - Cover has a high chance to be trapped in All Out War rooms
+      - Combat rooms have a high chance to contain room traps
+      - Combat rooms have a high chance to contain traps on room equipment
   - The safely level of a room should be included in the room description, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
   - The safely level of a room should be included in the map, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
 - [ ] Non-combat NPCs - All zones
@@ -508,31 +338,49 @@
   - [ ] pressure plates
   - [ ] Honkeypot
 - New zones
+  - All NPCs are clowns
+  - All NPCs are aggressive
+  - All rooms in zone are Dangerous
   - [ ] Clown Camp
     - [ ] Continuous zone effects: delirium, fear
     - [ ] Locations
       - [ ] The Empty Theater
-      - [ ] Backstage
+      - [ ] Coat check
       - [ ] The Changing Rooms
+      - [ ] Backstage
       - [ ] The Stage
         - [ ] Boss Fight: Just Clownin'!
   - [ ] SteamPDX
+    - All NPCs are male
+      - All NPCs have a high probability attempt to seduce male players
+        - On failure to seduce NPCs become aggressive
+    - All NPCs are aggressive to female players
+    - All rooms in zone are Dangerous
     - [ ] Continuous zone effects: horror, nausea, reduced visibility
     - [ ] Locations
+      - [ ] Parking Lot
       - [ ] Lobby
       - [ ] Locker Room
+      - [ ] Showers
       - [ ] Sauna
       - [ ] Hot tub
       - [ ] Glory Hole
         - [ ] Boss Fight: The Big 3
   - [ ] The Velvet Rope
+    - All NPCs have a high probability attempt to seduce the player
+      - On failure to seduce NPCs become aggressive
+    - All rooms in zone are Sketchy unless otherwise indicated 
     - [ ] continuous zone effects: temptation, revulsion, difficult terrain (lube)
     - [ ] Locations
       - [ ] The Buffet
       - [ ] The "Play" Rooms
-      - [ ] Party Theater
-        - [ ] Boss Fights: Gangbang!
-      - [ ] The Basement
+        - [ ] The Strangers
+        - [ ] The Spit Roast
+        - [ ] The Pineapple Room
+          - This room is Dangerous 
+      - [ ] "Party" Theater
+        - This room is Dangerous
+        - [ ] Boss Fight: Gangbang!
   - [ ] Club Privata
 - [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Mac, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration
