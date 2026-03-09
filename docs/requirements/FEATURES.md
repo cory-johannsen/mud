@@ -119,19 +119,19 @@
     - [x] money: grants a player currency
   - [x] Accepts a character name (target must be online)
   - [x] Accepts the amount as an argument (must be > 0)
-- [ ] Room display 
+- [ ] Room display
   - [ ] Should refresh more frequently
-  - [ ] Exits should be 4 columns per line
-    - [ ] Exits label should be on the same line as the first line of exits.
-  - [ ] NPCs should include combat status
-    - Examples: 
+  - [x] Exits should be 4 columns per line
+    - [x] Exits label should be on the same line as the first line of exits.
+  - [x] NPCs should include combat status
+    - Examples:
       - Ganger A (unharmed)
       - Ganger A (unharmed) fighting `player_name`
-    - [ ] should be in 2 columns per line
-    - [ ] Should be labelled.  The label should be on the same row as the NPCs
-  - [ ] room equipment should be placed between the exits and the NPCs
-    - [ ] should be 4 columns per line
-    - [ ] Should be labelled.  The label should be on the same row as the equipment.
+    - [x] should be in 2 columns per line
+    - [x] Should be labelled.  The label should be on the same row as the NPCs
+  - [x] room equipment should be placed between the exits and the NPCs
+    - [x] should be 4 columns per line
+    - [x] Should be labelled.  The label should be on the same row as the equipment.
 - [ ] Perception
   - PF2E Perception should be implemented using the name Awareness
   - Awareness should be displayed on the character sheet
