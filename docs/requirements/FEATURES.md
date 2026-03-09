@@ -94,13 +94,13 @@
 - [x] Console notifications
   - [x] The player should be notified in the console every time a skill is used automatically
   - [x] The player should be notified in the console every time XP is awarded and why
-- [ ] TODO list:
-    - [ ] full itemized list of all stubs / unimplemented code.
-      - [ ] add implementation items to the appropriate feature category
-        - [ ] if no feature category exists, add a new feature category
-    - [ ] missing tests
-      - [ ] add implementation items to the appropriate feature category
-        - [ ] if no feature category exists, add a new feature category 
+- [x] TODO list:
+    - [x] full itemized list of all stubs / unimplemented code.
+      - [x] add implementation items to the appropriate feature category
+        - [x] if no feature category exists, add a new feature category
+    - [x] missing tests
+      - [x] add implementation items to the appropriate feature category
+        - [x] if no feature category exists, add a new feature category
 - [ ] Player gender
   - [ ] Allow the player to select their gender at creation time.  Allow for random selection.
     - Male
