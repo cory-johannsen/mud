@@ -956,19 +956,75 @@ func bridgeEscape(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
-// bridgeGrant builds a GrantRequest from parsed grant subcommand arguments.
+// bridgeGrant builds a GrantRequest, prompting for grant type, character name, and amount if missing.
+// Character name is read as a full line to support multiword names.
 //
-// Precondition: bctx.parsed.Args contains the args following "grant"; HandleGrant validates structure.
-// Postcondition: Returns a non-nil msg containing a GrantRequest, or writes usage and returns done=true.
+// Precondition: bctx must be non-nil with a valid conn and reqID; caller must hold editor/admin role.
+// Postcondition: Returns a non-nil msg containing a GrantRequest, or writes an error and returns done=true.
 func bridgeGrant(bctx *bridgeContext) (bridgeResult, error) {
-	parsed := command.HandleGrant(strings.Join(bctx.parsed.Args, " "))
-	if strings.HasPrefix(parsed, "Usage:") {
-		return writeErrorPrompt(bctx, parsed)
+	args := bctx.parsed.Args
+
+	// Resolve grant type from first arg or prompt.
+	var grantType string
+	if len(args) > 0 {
+		grantType = strings.ToLower(args[0])
 	}
-	parts := strings.Fields(parsed) // "grant <type> <charname> <amount>"
-	grantType := parts[1]
-	charName := parts[2]
-	amount, _ := strconv.Atoi(parts[3]) // safe: HandleGrant validated
+	if grantType != "xp" && grantType != "money" {
+		_ = bctx.conn.WritePrompt(telnet.Colorize(telnet.White, "Grant type (xp/money): "))
+		line, err := bctx.conn.ReadLine()
+		if err != nil {
+			return bridgeResult{}, fmt.Errorf("reading grant type: %w", err)
+		}
+		grantType = strings.ToLower(strings.TrimSpace(line))
+		if grantType != "xp" && grantType != "money" {
+			return writeErrorPrompt(bctx, "Grant type must be 'xp' or 'money'.")
+		}
+	}
+
+	// Resolve character name from remaining args or prompt.
+	// Always prompt when no args follow the type so multiword names are supported via readline.
+	var charName string
+	if len(args) > 2 {
+		// args[1..n-1] are the name; args[n] is the amount if it parses as an int.
+		last := args[len(args)-1]
+		if _, aErr := strconv.Atoi(last); aErr == nil && len(args) > 2 {
+			charName = strings.Join(args[1:len(args)-1], " ")
+		} else {
+			charName = strings.Join(args[1:], " ")
+		}
+	}
+	if charName == "" {
+		_ = bctx.conn.WritePrompt(telnet.Colorize(telnet.White, "Character name: "))
+		line, err := bctx.conn.ReadLine()
+		if err != nil {
+			return bridgeResult{}, fmt.Errorf("reading character name: %w", err)
+		}
+		charName = strings.TrimSpace(line)
+	}
+	if charName == "" {
+		return writeErrorPrompt(bctx, "Character name cannot be empty.")
+	}
+
+	// Resolve amount from last arg or prompt.
+	var amountStr string
+	if len(args) > 2 {
+		last := args[len(args)-1]
+		if _, aErr := strconv.Atoi(last); aErr == nil {
+			amountStr = last
+		}
+	}
+	if amountStr == "" {
+		_ = bctx.conn.WritePrompt(telnet.Colorize(telnet.White, "Amount: "))
+		line, err := bctx.conn.ReadLine()
+		if err != nil {
+			return bridgeResult{}, fmt.Errorf("reading amount: %w", err)
+		}
+		amountStr = strings.TrimSpace(line)
+	}
+	amount, err := strconv.Atoi(amountStr)
+	if err != nil || amount <= 0 {
+		return writeErrorPrompt(bctx, "Amount must be a positive integer.")
+	}
 
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
