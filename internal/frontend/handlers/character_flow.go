@@ -112,6 +112,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 			if c == nil {
 				continue // user cancelled — loop again
 			}
+			if err := h.ensureGender(ctx, conn, c); err != nil {
+				return err
+			}
 			if err := h.ensureSkills(ctx, conn, c); err != nil {
 				return err
 			}
@@ -170,6 +173,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 				return err
 			}
 			if c != nil {
+				if err := h.ensureGender(ctx, conn, c); err != nil {
+					return err
+				}
 				if err := h.ensureSkills(ctx, conn, c); err != nil {
 					return err
 				}
@@ -195,6 +201,9 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 		}
 
 		selected := chars[choice-1]
+		if err := h.ensureGender(ctx, conn, selected); err != nil {
+			return err
+		}
 		if err := h.ensureSkills(ctx, conn, selected); err != nil {
 			return err
 		}
@@ -805,6 +814,33 @@ func (h *AuthHandler) ensureClassFeatures(ctx context.Context, conn *telnet.Conn
 
 	_ = conn.WriteLine(telnet.Colorf(telnet.BrightGreen,
 		"Class features assigned: %d features from %s.", len(featureIDs), job.Name))
+	return nil
+}
+
+// ensureGender checks whether the character has a gender set and, if not,
+// prompts the player to select one and persists the result.
+// Called before gameBridge for both new and existing characters.
+//
+// Precondition: char must have a valid ID.
+// Postcondition: char.Gender is non-empty on return; returns non-nil error only on fatal failure.
+func (h *AuthHandler) ensureGender(ctx context.Context, conn *telnet.Conn, char *character.Character) error {
+	if char.Gender != "" {
+		return nil
+	}
+	_ = conn.WriteLine(telnet.Colorize(telnet.BrightYellow,
+		"\r\nYour character needs a gender before entering the world."))
+	gender, err := PromptGenderStep(conn)
+	if err != nil {
+		return fmt.Errorf("gender prompt: %w", err)
+	}
+	if gender == "" {
+		// player cancelled — assign random so they can enter the game
+		gender = character.RandomStandardGender()
+	}
+	if err := h.characters.SaveGender(ctx, char.ID, gender); err != nil {
+		h.logger.Warn("saving gender", zap.Int64("id", char.ID), zap.Error(err))
+	}
+	char.Gender = gender
 	return nil
 }
 

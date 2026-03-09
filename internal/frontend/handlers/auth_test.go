@@ -93,6 +93,10 @@ func (m *mockCharacterStore) GetByID(_ context.Context, id int64) (*character.Ch
 	return nil, nil
 }
 
+func (m *mockCharacterStore) SaveGender(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+
 // newAuthHandler builds an AuthHandler with empty regions/classes for tests that
 // do not exercise character creation.
 func newAuthHandler(t *testing.T, store AccountStore, gsAddr string) *AuthHandler {
@@ -469,7 +473,7 @@ func TestHandleSession_LoginSuccess_GameBridge(t *testing.T) {
 	store.passwords["hero"] = "secret123"
 
 	// Pre-load a character so the character flow immediately selects it.
-	char := &character.Character{ID: 1, Name: "hero", Class: "ganger", Region: "old_town", Level: 1, CurrentHP: 10, MaxHP: 10}
+	char := &character.Character{ID: 1, Name: "hero", Class: "ganger", Region: "old_town", Level: 1, CurrentHP: 10, MaxHP: 10, Gender: "female"}
 	handler := newAuthHandlerWithChar(t, store, char, gsAddr)
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
@@ -518,7 +522,7 @@ func TestHandleSession_GameBridge_SayAndEmote(t *testing.T) {
 	store.accounts["hero"] = postgres.Account{ID: 1, Username: "hero"}
 	store.passwords["hero"] = "secret123"
 
-	char := &character.Character{ID: 1, Name: "hero", Class: "ganger", Region: "old_town", Level: 1, CurrentHP: 10, MaxHP: 10}
+	char := &character.Character{ID: 1, Name: "hero", Class: "ganger", Region: "old_town", Level: 1, CurrentHP: 10, MaxHP: 10, Gender: "female"}
 	handler := newAuthHandlerWithChar(t, store, char, gsAddr)
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)
@@ -572,7 +576,7 @@ func TestHandleSession_GameBridge_MoveAlias(t *testing.T) {
 	store.accounts["hero"] = postgres.Account{ID: 1, Username: "hero"}
 	store.passwords["hero"] = "secret123"
 
-	char := &character.Character{ID: 1, Name: "hero", Class: "ganger", Region: "old_town", Level: 1, CurrentHP: 10, MaxHP: 10}
+	char := &character.Character{ID: 1, Name: "hero", Class: "ganger", Region: "old_town", Level: 1, CurrentHP: 10, MaxHP: 10, Gender: "female"}
 	handler := newAuthHandlerWithChar(t, store, char, gsAddr)
 	addr := testServer(t, handler)
 	c := newTestClient(t, addr)

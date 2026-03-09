@@ -29,6 +29,7 @@ type CharacterStore interface {
 	ListByAccount(ctx context.Context, accountID int64) ([]*character.Character, error)
 	Create(ctx context.Context, c *character.Character) (*character.Character, error)
 	GetByID(ctx context.Context, id int64) (*character.Character, error)
+	SaveGender(ctx context.Context, id int64, gender string) error
 }
 
 // buildWelcomeBanner returns the connection banner with the current version embedded.
