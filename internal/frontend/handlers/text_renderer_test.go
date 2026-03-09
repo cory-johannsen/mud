@@ -156,8 +156,8 @@ func TestRenderCharacterSheet_ShowsGender(t *testing.T) {
 		Level:  1,
 	}
 	result := RenderCharacterSheet(csv, 80)
-	if !strings.Contains(result, "non-binary") {
-		t.Errorf("expected 'non-binary' in rendered sheet, got:\n%s", result)
+	if !strings.Contains(result, "Non-binary") {
+		t.Errorf("expected 'Non-binary' in rendered sheet, got:\n%s", result)
 	}
 }
 

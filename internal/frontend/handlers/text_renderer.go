@@ -591,7 +591,7 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	left = append(left, sl(telnet.Colorf(telnet.BrightYellow, "=== %s ===", csv.GetName())))
 	left = append(left, slPlain(fmt.Sprintf("Job: %s  Archetype: %s", csv.GetJob(), csv.GetArchetype())))
 	left = append(left, slPlain(fmt.Sprintf("Team: %s  Level: %d", csv.GetTeam(), csv.GetLevel())))
-	left = append(left, slPlain(fmt.Sprintf("Gender: %s", csv.GetGender())))
+	left = append(left, slPlain(fmt.Sprintf("Gender: %s", displayGender(csv.GetGender()))))
 	left = append(left, slPlain(fmt.Sprintf("HP: %d / %d", csv.GetCurrentHp(), csv.GetMaxHp())))
 
 	// abilCell returns a fixed-width ability cell: "Label:     +N  " (15 visible chars).
@@ -1367,4 +1367,20 @@ func RenderProficienciesResponse(pr *gamev1.ProficienciesResponse) string {
 	}
 
 	return sb.String()
+}
+
+// displayGender formats a stored gender value for display.
+// Strips the "custom:" prefix and capitalizes the first letter.
+// Returns the value unchanged if empty.
+func displayGender(g string) string {
+	if g == "" {
+		return g
+	}
+	if strings.HasPrefix(g, "custom:") {
+		g = g[len("custom:"):]
+	}
+	if len(g) == 0 {
+		return g
+	}
+	return strings.ToUpper(g[:1]) + g[1:]
 }
