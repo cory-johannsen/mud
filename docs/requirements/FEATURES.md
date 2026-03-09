@@ -101,19 +101,26 @@
     - [ ] missing tests
       - [ ] add implementation items to the appropriate feature category
         - [ ] if no feature category exists, add a new feature category 
-- [ ] Player gender 
+- [ ] Player gender
   - [ ] Allow the player to select their gender at creation time.  Allow for random selection.
     - Male
     - Female
     - Non-binary
     - Indeterminate
     - Other (player enters)
+    - [ ] Add `gender` field (string enum: male, female, non-binary, indeterminate, custom) to character data model and DB schema
+    - [ ] Add gender selection step to character creation flow: present numbered options; option 5 prompts for custom text input; option 0 randomizes
   - [ ] Backfill missing gender at player load
+    - [ ] On player load, if gender field is null or empty, assign a random gender value and persist it
 - [ ] NPC equipment - each NPC gets equipment assigned and equipped
   - Weapon
   - Armor
+  - [ ] Add `weapon` and `armor` fields to NPC YAML schema (item ID or weighted random table); parsed at load time
+  - [ ] On NPC spawn, populate equipped weapon and armor from YAML; apply armor AC bonus to NPC base AC
+  - [ ] Include equipped weapon name in combat strike messages (e.g., "Bandit attacks with a rusty knife")
   - [ ] Disarm command — implement `disarm <target>` (Athletics vs Reflex DC; on success removes target's active weapon from their equipped slot for the remainder of combat; requires NPC equipment tracking in combat)
 - [ ] Disarm action
+  - [ ] See implementation items under NPC equipment — Disarm requires NPC weapon slot tracking in combat
 - [ ] Advanced combat mechanics
   - [ ] Immobilized — prevent grabbed creatures from moving between rooms
   - [ ] Delay command — implement `delay` (player forfeits current turn and re-enters initiative at a chosen later point; requires initiative order to support mid-round insertion)
@@ -130,6 +137,9 @@
       - The player may specify an alternate initial distance
         - The player may not initiate combat with a starting distance less than 10m unless using a skill or feat that allows this
       - NPCs always start at distance 0
+    - [ ] Add `Distance int` field to Combat struct (in 5m increments); initialize to 20 for player-initiated combat
+    - [ ] Stride command — implement `stride` (1 AP; moves 5m toward or away from target; display updated distance; required before range enforcement)
+    - [ ] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5m; ranged attacks have accuracy penalties by range band
   - Movement
     - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
     - [ ] Positional tracking — track each combatant's position within a room in 5-ft increments; required for Shove, Step, and Tumble Through
@@ -143,10 +153,14 @@
     - Extreme: 55m+
   - Cover
     - Room equipment may serve as cover
-      - Whether equipment may be used as cover (and what kind of cover it provides) should be stored in the yaml for the room 
+      - Whether equipment may be used as cover (and what kind of cover it provides) should be stored in the yaml for the room
     - Cover uses the PF2E rules
+    - [ ] Add `cover_bonus int` and `cover_destructible bool` fields to room equipment YAML; loaded by the room system
+    - [ ] Cover destruction — when `cover_destructible` is true, NPCs may target cover; after a threshold of hits the cover is removed and its AC bonus lost
   - Area of Effect
+    - [ ] AoE attack type — add `aoe_radius int` field to weapon/ability YAML; on resolution apply damage roll to all combatants within radius in the current combat
   - Attack of opportunity
+    - [ ] See Reactive Strike under Reactions — Attack of Opportunity is implemented as Reactive Strike (NPC triggers a free Strike when a player in melee range uses a move action)
   - Terrain types
     - [ ] Climbable surfaces — rooms with climbable terrain (walls, ladders, ruins) support vertical movement; stored in room YAML; required for Climb command
     - [ ] Climb command — implement `climb` (Athletics vs surface DC defined in room YAML; available only in rooms with climbable terrain)
@@ -154,20 +168,34 @@
     - [ ] Swim command — implement `swim` (Athletics vs current DC defined in room YAML; available only in rooms with water terrain)
   - Fleeing
     - Pursuit
+    - [ ] Flee command — implement `flee` (costs all remaining AP; Athletics or Acrobatics check vs highest NPC Athletics DC in room; on success combat ends and player moves to a random adjacent room)
+    - [ ] Pursuit — on flee failure, each NPC makes a separate Athletics check; on NPC success the NPC follows the player to the adjacent room and re-initiates combat
   - Mental state
     - Panic
       - Psychosis
+    - [ ] Mental state system — add `MentalState` enum (Normal, Panicked, Psychotic) to PlayerSession; state transitions driven by conditions, zone effects, or health thresholds
+    - [ ] Panic condition — implement as a condition with `restrict_actions` effect; on each turn a random available action is chosen instead of player input; triggered by specific NPC abilities, zone effects, or dropping below 25% HP
+    - [ ] Psychosis condition — escalation of Panic; player may attack random targets including allies; triggered by prolonged Panic or specific substances
 - [ ] Multi-player combat
   - [ ] Other players can join combat already in progress
+    - [ ] Combat join — when a player enters a room with active combat, offer to join; on joining, add player as a new combatant with a fresh initiative roll and full AP
     - [ ] All players in a combat encounter share XP for the encounter (XP is divided equally among the players)
+      - [ ] Track participant list on Combat struct; on combat end divide total XP equally among all participants
     - [ ] All players in a combat encounter share loot for the encounter (loot is divided equally among the players)
+      - [ ] Currency drops split equally; item drops distributed round-robin ordered by initiative roll
   - [ ] Players can form groups
+    - [ ] Group data model — add Group struct (leader UID, member UIDs slice) stored in session manager; one group per player
     - [ ] Players in a group all automatically enter combat when any player initiates combat
-    - [ ] New group commands: 
+      - [ ] On combat start, check if initiating player is in a group; add all group members in the same room as combatants
+    - [ ] New group commands:
       - [ ] group (create a group or list the members of the current group)
+        - [ ] Implement `group` — no args: display current group members and leader; with player name: create a new group and invite that player
       - [ ] ungroup (leave the current group)
+        - [ ] Implement `ungroup` — remove self from group; if leader, disband the group and notify all members
       - [ ] invite (invite a player to the group)
+        - [ ] Implement `invite <player>` — leader sends invitation; target receives a prompt to accept or decline; on accept, add to group
       - [ ] kick (remove a player from the group)
+        - [ ] Implement `kick <player>` — leader only; removes the named player from the group and notifies them
 - [ ] Technology instead of magic.  
   - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism).  
   - For the remainder of the features specification Technology refers to the combined effects of both technological devices and drugs.
@@ -194,43 +222,70 @@
           - [ ] Heightened Spells -> Amped Technology
             - Follows the PF2E rules 
           - [ ] Innate Technologies
-- [ ] Non-combat NPCs. Define the data model and behavior for the following NPCs and implement those specifically mentioned.  For those not mentioned generate one that lives in a room in Rustbucket Ridge and matches the lore. Multiple NPCs can occupy the same room.
-    - [ ] merchants
-        - types:
-            - [ ] weapons
-                - Sergeant Mack in Last Stand Lodge, Rustbucket Ridge
-            - [ ] armor
-            - [ ] rings and neck equipment
-            - [ ] consumables
-                - Slick Sally in the Rusty Oasis, Rustbucket Ridge
-                - Whiskey Joe in The Bottle Shack, Rustbucket Ridge
-                - Old Rusty in The Heap, Rustbucket Ridge
-                - Herb in The Green Hell,  Rustbucket Ridge
-            - [ ] maps - sells maps to other zones
-            - [ ] technology - sells Technology
-            - [ ] drugs - sells Drugs and other Technological substances
-        - Each merchant has a budget with which to purchase items from players
-        - Each merchant has a profit margin they apply to the items they buy and sell
-        - Purchasing items from a merchant should provide players with the necessary skills to attempt to negotiate
-            - Critical success: provides a substantial discount or bonus on the transaction
-            - Success: provides a discount or bonus on the transactions
-            - Failure: No effect
-            - Critical failure: adds a penalty to on the transactions
+- [ ] Non-combat NPCs. Define the data model and behavior for the following NPCs and implement those specifically mentioned.
+  - For those not mentioned generate one that lives in a room in Rustbucket Ridge and matches the lore. Multiple NPCs can occupy the same room.
+  - [ ] Non-combat NPC base data model — add `npc_type` field (merchant, guard, healer, quest_giver, hireling, banker, job_trainer) to NPC YAML; non-combat NPCs do not appear in combat initiative; they flee or cower when combat starts in their room
+  - [ ] merchants
+      - types:
+        - [ ] weapons
+          - Sergeant Mack in Last Stand Lodge, Rustbucket Ridge
+        - [ ] armor
+        - [ ] rings and neck equipment
+        - [ ] consumables
+          - Slick Sally in the Rusty Oasis, Rustbucket Ridge
+          - Whiskey Joe in The Bottle Shack, Rustbucket Ridge
+          - Old Rusty in The Heap, Rustbucket Ridge
+          - Herb in The Green Hell, Rustbucket Ridge
+        - [ ] maps - sells maps to other zones
+        - [ ] technology - sells Technology
+        - [ ] drugs - sells Drugs and other Technological substances
+      - Each merchant has a budget with which to purchase items from players
+      - Each merchant has a profit margin they apply to the items they buy and sell
+      - Purchasing items from a merchant should provide players with the necessary skills to attempt to negotiate
+          - Critical success: provides a substantial discount or bonus on the transaction
+          - Success: provides a discount or bonus on the transactions
+          - Failure: No effect
+          - Critical failure: adds a penalty to on the transactions
+      - [ ] Merchant YAML schema — add `inventory` (list of item IDs with stock quantities and base prices), `sell_margin` (markup multiplier), `buy_margin` (fraction of item value paid to player), `budget` (max credits available to buy from players)
+      - [ ] `buy <item> [qty]` command — available in rooms with a merchant NPC; deducts credits from player, adds item to inventory
+      - [ ] `sell <item> [qty]` command — available in rooms with a merchant NPC; pays player `buy_margin × item value`; checks merchant budget
+      - [ ] `browse` command — list merchant's inventory with current prices
+      - [ ] Negotiate skill check — player may use `negotiate` before a buy/sell; smooth_talk or grift vs merchant Perception DC; critical success: ±20% price; success: ±10%; failure: no effect; critical failure: +10% penalty applied
+      - [ ] Add named merchant NPCs: Sergeant Mack (weapons, Last Stand Lodge), Slick Sally (consumables, Rusty Oasis), Whiskey Joe (consumables, Bottle Shack), Old Rusty (consumables, The Heap), Herb (consumables, The Green Hell)
     - [ ] guards
+      - [ ] Guard behavior — guards are present in Safe rooms; they attack players with a Wanted flag; they do not initiate combat with non-Wanted players; if combat occurs in a Safe room they target the aggressor
+      - [ ] Add a lore-appropriate guard NPC in a Safe room in Rustbucket Ridge
     - [ ] healers
         - Clutch in The Tinker's Den, Rustbucket Ridge
         - Tina Wires in Junker's Dream, Rustbucket Ridge
+      - [ ] Healer behavior — players may `heal` in a healer's room for a credit cost; full heal or partial heal at a per-HP rate; healer has a daily capacity
+      - [ ] Add Clutch (The Tinker's Den) and Tina Wires (Junker's Dream) NPC YAML files
     - [ ] quest givers
         - Gail "Grinder" Graves in Scrapshack 23, Rustbucket Ridge
+      - [ ] Quest giver behavior — `talk <npc>` offers available quests; on quest completion player receives XP and item/credit reward; requires Quest system
+      - [ ] Add Gail "Grinder" Graves NPC YAML (Scrapshack 23); wire to a starter quest once Quest system exists
     - [ ] hirelings
+      - [ ] Hireling behavior — `hire <npc>` for a daily credit cost; hireling follows the player between rooms and joins combat as an AI-controlled combatant; `dismiss` releases the hireling
+      - [ ] Add a lore-appropriate hireling NPC in Rustbucket Ridge
     - [ ] bankers
-    - [ ] job trainers - allow players to learn new jobs once they meet the requirements.  
+      - [ ] Banker behavior — `deposit <amount>` and `withdraw <amount>` commands available in banker's room; credit stash persists on character separate from carried credits; display stash balance in `inventory`
+      - [ ] Add a lore-appropriate banker NPC in a Safe room in Rustbucket Ridge
+    - [ ] job trainers - allow players to learn new jobs once they meet the requirements.
       - Each job has minimum requirements
-      - Each player has exactly one active Job.  
+      - Each player has exactly one active Job.
         - The Active Job is the one that earns XP.
         - Inactive Jobs do not earn XP, but the player may still use the feats and proficiencies they provide
         - A command must exist to allow the player to view their Jobs and select which one is Active
+      - [ ] Job trainer behavior — `train <job>` command in trainer's room; checks player meets job prerequisites; deducts training credit cost; adds job to player's job list
+      - [ ] `jobs` command — list player's active and inactive jobs; `setjob <job>` switches the active job
+      - [ ] Add a lore-appropriate job trainer NPC in Rustbucket Ridge
+    - [ ] equipment repair and crafting
+      - [ ] Repair NPC behavior — `repair <item>` command in repair NPC's room; pays credit cost proportional to item damage; restores item durability; requires item durability system
 - [ ] Hero points
+  - [ ] Add `HeroPoints int` field to PlayerSession; award 1 point at session start and on milestone events (level up, boss kill, GM grant)
+  - [ ] `heropoint reroll` — re-roll the most recent skill or attack check and take the higher result; costs 1 hero point; unavailable if no recent check
+  - [ ] `heropoint stabilize` — when in a dying state, stabilize at 0 HP; costs 1 hero point
+  - [ ] Display current hero point count on the character sheet
 - [ ] Job development
   - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
   - [ ] advancement hierarchy - every job has multiple levels of specialization
@@ -430,5 +485,29 @@
         - This room is Dangerous
         - [ ] Boss Fight: Gangbang!
   - [ ] Club Privata
+    - [ ] continuous zone effect: sonic assault (bad techno)
+    - [ ] Locations
+      - [ ] First Floor
+        - [ ] Bar
+        - [ ] Dance floor
+        - [ ] Dining area
+        - [ ] Couple's lounge
+        - [ ] Seating area
+        - [ ] Lockers & Showers
+        - [ ] Restrooms
+      - [ ] Second Floor
+        - [ ] Private Rooms
+        - [ ] Bottle service area
+        - [ ] Dance pole
+        - [ ] Mezzanine
+        - [ ] Seating area
+        - [ ] Restrooms
+      - [ ] Third Floor
+        - [ ] Public play area
+        - [ ] Couple's lounge with private rooms
+        - [ ] Bar & Restrooms
+        - [ ] VIP Suite
+          - [ ] Boss Fight
+        - [ ] Lockers
 - [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Mac, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration
