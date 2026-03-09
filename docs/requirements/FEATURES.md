@@ -102,16 +102,23 @@
       - [x] add implementation items to the appropriate feature category
         - [x] if no feature category exists, add a new feature category
 - [x] Player gender
-  - [ ] Allow the player to select their gender at creation time.  Allow for random selection.
+  - [x] Allow the player to select their gender at creation time.  Allow for random selection.
     - Male
     - Female
     - Non-binary
     - Indeterminate
     - Other (player enters)
-    - [ ] Add `gender` field (string enum: male, female, non-binary, indeterminate, custom) to character data model and DB schema
-    - [ ] Add gender selection step to character creation flow: present numbered options; option 5 prompts for custom text input; option 0 randomizes
-  - [ ] Backfill missing gender at player load
-    - [ ] On player load, if gender field is null or empty, assign a random gender value and persist it
+    - [x] Add `gender` field (string enum: male, female, non-binary, indeterminate, custom) to character data model and DB schema
+    - [x] Add gender selection step to character creation flow: present numbered options; option 5 prompts for custom text input; option 0 randomizes
+  - [x] Backfill missing gender at player load
+    - [x] On player load, if gender field is null or empty, assign a random gender value and persist it
+- [ ] `trainskill` does not persist the player selection (the result is gone when the player logs in again and the character sheet shows Pending Skill Increases: 1)
+- [ ] `grant` Editor command 
+  - Accepts a parameter for the type of grant
+    - xp: grants a player XP
+    - money: grants a player currency
+  - Accepts a character name, prompting if not provided. 
+  - Prompts for the amount of the resource to grant.
 - [ ] Room display 
   - [ ] Should refresh more frequently
   - [ ] Exits should be 4 columns per line
