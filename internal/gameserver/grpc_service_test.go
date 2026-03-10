@@ -2958,3 +2958,62 @@ func TestHandleChar_Awareness_BackfilledWhenMissing(t *testing.T) {
 	// With trained backfill: 10 + AbilityMod(10)=0 + CombatProficiencyBonus(1,"trained")=3 = 13
 	assert.Equal(t, int32(13), sheet.GetAwareness())
 }
+
+// drainEntity reads all buffered events from entity without blocking.
+func drainEntity(e *session.BridgeEntity) {
+	for {
+		select {
+		case <-e.Events():
+		default:
+			return
+		}
+	}
+}
+
+func TestPushRoomViewToAllInRoom_SendsToPlayersInRoom(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	_ = worldMgr
+	uid := "rv-player-1"
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "rv1", CharName: "RV1",
+		RoomID: "room_a", Role: "player", CharacterID: 0,
+		CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+
+	svc := testMinimalService(t, sessMgr)
+	drainEntity(sess.Entity)
+
+	svc.pushRoomViewToAllInRoom("room_a")
+
+	select {
+	case data := <-sess.Entity.Events():
+		require.NotNil(t, data)
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("expected RoomView event within 500ms")
+	}
+}
+
+func TestPushRoomViewToAllInRoom_SkipsPlayersElsewhere(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	_ = worldMgr
+	uid := "rv-player-2"
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "rv2", CharName: "RV2",
+		RoomID: "room_a", Role: "player", CharacterID: 0,
+		CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	drainEntity(sess.Entity)
+
+	svc := testMinimalService(t, sessMgr)
+
+	svc.pushRoomViewToAllInRoom("nonexistent_room")
+
+	select {
+	case <-sess.Entity.Events():
+		t.Fatal("player in different room should not receive RoomView")
+	case <-time.After(200 * time.Millisecond):
+		// correct: nothing received
+	}
+}

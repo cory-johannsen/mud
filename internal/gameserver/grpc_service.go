@@ -1858,6 +1858,34 @@ func (s *GameServiceServer) broadcastToRoom(roomID, excludeUID string, evt *game
 	}
 }
 
+// pushRoomViewToAllInRoom builds a fresh RoomView for each player currently in
+// roomID and delivers it via their entity channel.
+//
+// Precondition: roomID must be a valid room identifier.
+// Postcondition: Each player in roomID receives a RoomView event; players
+// elsewhere are unaffected.
+func (s *GameServiceServer) pushRoomViewToAllInRoom(roomID string) {
+	room, ok := s.world.GetRoom(roomID)
+	if !ok {
+		return
+	}
+	uids := s.sessions.PlayerUIDsInRoom(roomID)
+	for _, uid := range uids {
+		rv := s.worldH.buildRoomView(uid, room)
+		evt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_RoomView{RoomView: rv},
+		}
+		data, err := proto.Marshal(evt)
+		if err != nil {
+			s.logger.Error("pushRoomViewToAllInRoom: marshal failed", zap.Error(err))
+			continue
+		}
+		if sess, ok := s.sessions.GetPlayer(uid); ok {
+			_ = sess.Entity.Push(data)
+		}
+	}
+}
+
 // forwardEvents reads from the BridgeEntity events channel and sends
 // deserialized ServerEvents to the gRPC stream.
 func (s *GameServiceServer) forwardEvents(ctx context.Context, entity *session.BridgeEntity, stream gamev1.GameService_SessionServer) {
