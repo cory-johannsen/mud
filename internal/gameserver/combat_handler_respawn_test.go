@@ -9,6 +9,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gameserver "github.com/cory-johannsen/mud/internal/gameserver"
@@ -109,6 +110,26 @@ func addRespawnTestPlayer(t *testing.T, sessMgr *session.Manager, uid, roomID st
 	return sess
 }
 
+// equipTestPistol registers a pistol loadout for uid on handler h.
+// The pistol has RangeIncrement=30 so attacks succeed at the initial combat
+// distance of 25ft enforced by range-enforcement logic.
+//
+// Precondition: h and uid must be non-nil/non-empty.
+// Postcondition: uid's loadout is set to a pistol preset with a full magazine.
+func equipTestPistol(t *testing.T, h *gameserver.CombatHandler, uid string) {
+	t.Helper()
+	def := &inventory.WeaponDef{
+		ID: "test-pistol", Name: "Test Pistol",
+		DamageDice: "1d6", DamageType: "piercing",
+		RangeIncrement: 30, ReloadActions: 1, MagazineCapacity: 30,
+		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
+		ProficiencyCategory: "simple_ranged",
+	}
+	preset := inventory.NewWeaponPreset()
+	require.NoError(t, preset.EquipMainHand(def))
+	h.RegisterLoadout(uid, preset)
+}
+
 // waitForCombatEnd polls broadcast events until an END event is observed or the
 // timeout elapses. Returns true if an END event was seen.
 func waitForCombatEnd(t *testing.T, getEvents func() [][]*gamev1.CombatEvent, timeout time.Duration) bool {
@@ -157,6 +178,8 @@ func TestCombatHandler_NPCDiedInCombat_RemovedFromManager(t *testing.T) {
 	_ = inst
 
 	addRespawnTestPlayer(t, sessMgr, "player-respawn-1", roomID, 100)
+	// Equip a pistol so the player can attack at the initial 25ft combat distance.
+	equipTestPistol(t, h, "player-respawn-1")
 
 	// Start combat. Player attacks NPC (1 HP) — should die this or next round.
 	_, err := h.Attack("player-respawn-1", "Ganger")
@@ -187,6 +210,8 @@ func TestCombatHandler_NilRespawnMgr_NoPanic(t *testing.T) {
 	// Spawn NPC with 1 HP so any attack kills it.
 	inst := spawnRespawnTestNPC(t, npcMgr, roomID, "ganger", 1)
 	addRespawnTestPlayer(t, sessMgr, "player-respawn-nil", roomID, 100)
+	// Equip a pistol so the player can attack at the initial 25ft combat distance.
+	equipTestPistol(t, h, "player-respawn-nil")
 
 	_, err := h.Attack("player-respawn-nil", "Ganger")
 	require.NoError(t, err)
@@ -212,11 +237,14 @@ func TestCombatHandler_LivingNPC_RetainedInManager(t *testing.T) {
 	const roomID = "room-retain-1"
 	// Spawn NPC with very high HP so it survives the player dying.
 	inst := spawnRespawnTestNPC(t, npcMgr, roomID, "ganger", 10000)
-	// Player with 1 HP will die from any NPC attack.
+	// Player with 1 HP will die from any NPC melee attack.
 	addRespawnTestPlayer(t, sessMgr, "player-retain-1", roomID, 1)
 
 	_, err := h.Attack("player-retain-1", "Ganger")
 	require.NoError(t, err)
+	// Set distance to 5ft (melee range) so the NPC can land a melee attack
+	// and kill the 1-HP player this round.
+	require.NoError(t, h.SetActiveCombatDistance("player-retain-1", 5))
 
 	ended := waitForCombatEnd(t, getEvents, 3*time.Second)
 	require.True(t, ended, "expected combat END event within timeout")

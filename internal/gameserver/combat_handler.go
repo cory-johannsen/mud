@@ -590,6 +590,38 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, error) {
 	return events, nil
 }
 
+// SetActiveCombatDistance sets the Distance on the active combat for uid's current room.
+// Returns an error if the player has no session or is not in active combat.
+//
+// Precondition: uid must be non-empty; dist must be in [5, 100].
+// Postcondition: The combat distance is updated to dist (clamped by SetDistance).
+func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("no active combat in room %q", sess.RoomID)
+	}
+	cbt.SetDistance(dist)
+	return nil
+}
+
+// RegisterLoadout directly registers a pre-built WeaponPreset for uid.
+// This is intended for testing and other callers that build a preset outside the
+// inventory registry workflow.
+//
+// Precondition: uid must be non-empty; lo must not be nil.
+// Postcondition: The preset is stored; any subsequent attack by uid uses lo.
+func (h *CombatHandler) RegisterLoadout(uid string, lo *inventory.WeaponPreset) {
+	h.loadoutsMu.Lock()
+	h.loadouts[uid] = lo
+	h.loadoutsMu.Unlock()
+}
+
 // Equip equips weaponID into the given slot for uid.
 //
 // Precondition: uid must be non-empty; weaponID must identify a registered weapon.

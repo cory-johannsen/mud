@@ -335,9 +335,55 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 					// Flat check passed — attack proceeds normally against now-revealed target.
 				}
+				// Range enforcement: determine weapon type and enforce distance rules.
+				var mainHandDef *inventory.WeaponDef
+				if actor.Loadout != nil && actor.Loadout.MainHand != nil {
+					mainHandDef = actor.Loadout.MainHand.Def
+				}
+				isMelee := mainHandDef == nil || mainHandDef.RangeIncrement == 0
+				if isMelee {
+					// Melee weapons (including unarmed) cannot attack beyond 5ft.
+					if cbt.Distance > 5 {
+						events = append(events, RoundEvent{
+							ActionType: ActionAttack,
+							ActorID:    actor.ID,
+							ActorName:  actor.Name,
+							Narrative:  fmt.Sprintf("%s swings but %s is out of melee range.", actor.Name, target.Name),
+						})
+						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+							cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+						}
+						continue
+					}
+				} else {
+					// Ranged weapon: enforce extreme range (beyond 4x RangeIncrement).
+					if cbt.Distance > 4*mainHandDef.RangeIncrement {
+						events = append(events, RoundEvent{
+							ActionType: ActionAttack,
+							ActorID:    actor.ID,
+							ActorName:  actor.Name,
+							Narrative:  fmt.Sprintf("%s fires but %s is at extreme range.", actor.Name, target.Name),
+						})
+						if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
+							cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")
+						}
+						continue
+					}
+				}
+
 				atkBonus := condition.AttackBonus(cbt.Conditions[actor.ID])
 				acBonus := condition.ACBonus(cbt.Conditions[target.ID])
-				r := ResolveAttack(actor, target, src)
+				var r AttackResult
+				if !isMelee {
+					// Ranged attack: compute range increments from combat distance.
+					ri := 0
+					if cbt.Distance > mainHandDef.RangeIncrement {
+						ri = (cbt.Distance - mainHandDef.RangeIncrement) / mainHandDef.RangeIncrement
+					}
+					r = ResolveFirearmAttack(actor, target, mainHandDef, ri, src)
+				} else {
+					r = ResolveAttack(actor, target, src)
+				}
 				r.AttackTotal += atkBonus
 				r.AttackTotal += acBonus
 				r.AttackTotal += actor.InitiativeBonus
