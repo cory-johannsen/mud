@@ -401,3 +401,55 @@ func TestNPCAutoStride_RangedNPC_DoesNotStride(t *testing.T) {
 	require.NotEmpty(t, actions, "expected at least one action in queue")
 	assert.Equal(t, combat.ActionAttack, actions[0].Type, "first action must be ActionAttack (no stride for ranged NPC)")
 }
+
+// TestHandleStride_ReactiveStrike verifies that when a player strides away from an
+// adjacent NPC (within 5ft before the stride), the response message includes a
+// reactive strike narrative from that NPC.
+//
+// Precondition: player in combat at Position=5 (adjacent to NPC at Position=0); direction=="away".
+// Postcondition: response message contains "reactive strike".
+func TestHandleStride_ReactiveStrike(t *testing.T) {
+	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
+
+	const roomID = "room_str_rs"
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "goblin-str-rs", Name: "Goblin", Level: 1, MaxHP: 20, AC: 10, Perception: 2,
+	}, roomID)
+	require.NoError(t, err)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_str_rs", Username: "Fighter", CharName: "Fighter",
+		RoomID: roomID, CurrentHP: 30, MaxHP: 30, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_str_rs", "Goblin")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	cbt, ok := combatHandler.GetCombatForRoom(roomID)
+	require.True(t, ok)
+
+	// Place player at Position=30, NPC at Position=25 (dist=5 ≤ 5 → adjacent).
+	// handleStride "away" decreases Position by 25: 30-25=5. New dist = |5-25| = 20 > 5 → RS fires.
+	playerCbt := cbt.GetCombatant("u_str_rs")
+	require.NotNil(t, playerCbt)
+	playerCbt.Position = 30
+
+	// Place NPC at Position=25 (adjacent: dist = |30-25| = 5 ≤ 5).
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			c.Position = 25
+			break
+		}
+	}
+
+	// Stride away: player moves from 30 to 5. Old dist=5, new dist=20 → RS fires.
+	event, err := svc.handleStride("u_str_rs", &gamev1.StrideRequest{Direction: "away"})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event")
+	assert.Contains(t, msgEvt.Content, "reactive strike", "response must contain reactive strike narrative")
+}

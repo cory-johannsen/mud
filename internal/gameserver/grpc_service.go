@@ -4691,6 +4691,8 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 //
 // Precondition: uid must be in active combat.
 // Postcondition: Player combatant's Position updated; message event returned.
+// When the player strides away from adjacent NPCs, CheckReactiveStrikes fires
+// and the results are appended to the response message.
 func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -4719,6 +4721,7 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 		return errorEvent("You are not a combatant in this fight."), nil
 	}
 
+	oldPos := combatant.Position
 	dir := req.GetDirection()
 	switch dir {
 	case "toward", "":
@@ -4733,8 +4736,19 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	default:
 		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", dir)), nil
 	}
-	return messageEvent(fmt.Sprintf("You stride %s.", dir)), nil
+
+	msg := fmt.Sprintf("You stride %s.", dir)
+	rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldPos, globalRandSrc{})
+	for _, ev := range rsEvents {
+		msg += "\n" + ev.Narrative
+	}
+	return messageEvent(msg), nil
 }
+
+// globalRandSrc implements combat.Source using the global math/rand functions.
+type globalRandSrc struct{}
+
+func (globalRandSrc) Intn(n int) int { return rand.Intn(n) }
 
 // maxNPCPerceptionInRoom returns the highest Perception value among all living NPCs in roomID.
 // If no living NPCs are present, returns 10 as the base DC.

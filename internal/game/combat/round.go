@@ -10,6 +10,79 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 )
 
+// CheckReactiveStrikes returns attack events from all NPCs that are adjacent
+// (≤5 ft) to mover before the stride and whose position did not change
+// (i.e., they were not the one striding).
+//
+// Precondition: cbt non-nil; moverID non-empty; oldPos is mover's position before stride.
+// Postcondition: Returns zero or more RoundEvent{ActionType: ActionAttack} events.
+func CheckReactiveStrikes(cbt *Combat, moverID string, oldPos int, rng Source) []RoundEvent {
+	mover := findCombatantByID(cbt, moverID)
+	if mover == nil {
+		return nil
+	}
+	newPos := mover.Position
+
+	var events []RoundEvent
+	for _, c := range cbt.Combatants {
+		if c.ID == moverID || c.IsDead() {
+			continue
+		}
+		// Distance before stride: use oldPos for the mover's position.
+		distBefore := c.Position - oldPos
+		if distBefore < 0 {
+			distBefore = -distBefore
+		}
+		if distBefore > 5 {
+			// NPC was not adjacent before the stride — no reactive strike.
+			continue
+		}
+		// Check that the mover actually moved away (new distance > 5).
+		distAfter := c.Position - newPos
+		if distAfter < 0 {
+			distAfter = -distAfter
+		}
+		if distAfter <= 5 {
+			// Mover didn't move away from this combatant.
+			continue
+		}
+
+		// Perform the reactive strike: d20 + attacker.Level vs mover.AC.
+		d20 := rng.Intn(20) + 1
+		atkTotal := d20 + c.Level
+		outcome := OutcomeFor(atkTotal, mover.AC)
+		dmg := 0
+		hitNarrative := fmt.Sprintf("%s makes a reactive strike against %s!", c.Name, mover.Name)
+		switch outcome {
+		case CritSuccess:
+			dmg = rng.Intn(6) + 1 + rng.Intn(6) + 1 // double damage die on crit
+			mover.ApplyDamage(dmg)
+			hitNarrative = fmt.Sprintf("%s makes a reactive strike against %s! *** CRITICAL HIT! *** Deals %d damage (total %d)!", c.Name, mover.Name, dmg, atkTotal)
+		case Success:
+			dmg = rng.Intn(6) + 1
+			mover.ApplyDamage(dmg)
+			hitNarrative = fmt.Sprintf("%s makes a reactive strike against %s! Hit for %d damage (total %d).", c.Name, mover.Name, dmg, atkTotal)
+		default:
+			hitNarrative = fmt.Sprintf("%s makes a reactive strike against %s! Miss (total %d).", c.Name, mover.Name, atkTotal)
+		}
+
+		r := AttackResult{
+			AttackTotal: atkTotal,
+			BaseDamage:  dmg,
+			Outcome:     outcome,
+		}
+		events = append(events, RoundEvent{
+			AttackResult: &r,
+			ActionType:   ActionAttack,
+			ActorID:      c.ID,
+			ActorName:    c.Name,
+			TargetID:     moverID,
+			Narrative:    hitNarrative,
+		})
+	}
+	return events
+}
+
 // attackNarrative builds a human-readable attack result string.
 // When dmg > 0 (a hit landed), the damage dealt is included.
 // When weaponName is non-empty, the weapon is included as "with a <weaponName>".
@@ -67,7 +140,10 @@ type RoundEvent struct {
 	ActionType   ActionType
 	ActorID      string
 	ActorName    string
-	Narrative    string
+	// TargetID is the combatant ID of the target, when applicable (e.g. reactive strikes).
+	// Empty for non-targeted actions such as pass or stride.
+	TargetID  string
+	Narrative string
 }
 
 // findCombatantByName returns the first Combatant in cbt whose Name matches name, or nil.
