@@ -1537,6 +1537,44 @@ func (h *CombatHandler) ActiveCombatForPlayer(uid string) *combat.Combat {
 
 // Returns nil, nil if no combat is active in the player's room.
 //
+// DisarmNPC clears the weapon from the NPC combatant identified by npcInstID
+// in the active combat for the room where uid is fighting.
+// Returns the weapon item ID that was cleared (empty string if NPC was already unarmed).
+//
+// Precondition: uid must be in active combat; npcInstID must be a valid combatant ID.
+// Postcondition: WeaponName is cleared on the combatant; WeaponID is cleared on the NPC instance.
+func (h *CombatHandler) DisarmNPC(uid, npcInstID string) (weaponItemID string, err error) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return "", fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return "", fmt.Errorf("player %q is not in active combat", uid)
+	}
+
+	// Clear WeaponName on the combatant.
+	for _, c := range cbt.Combatants {
+		if c.ID == npcInstID {
+			c.WeaponName = ""
+			break
+		}
+	}
+
+	// Clear WeaponID on the NPC instance; capture old value.
+	inst, found := h.npcMgr.Get(npcInstID)
+	if found {
+		weaponItemID = inst.WeaponID
+		inst.WeaponID = ""
+	}
+
+	return weaponItemID, nil
+}
+
 // Precondition: uid must be a valid connected player.
 // Postcondition: Returns active conditions or nil if not in combat.
 func (h *CombatHandler) Status(uid string) ([]*condition.ActiveCondition, error) {

@@ -1184,6 +1184,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleGrapple(uid, p.Grapple)
 	case *gamev1.ClientMessage_Trip:
 		return s.handleTrip(uid, p.Trip)
+	case *gamev1.ClientMessage_Disarm:
+		return s.handleDisarm(uid, p.Disarm)
 	case *gamev1.ClientMessage_Hide:
 		return s.handleHide(uid)
 	case *gamev1.ClientMessage_Sneak:
@@ -4602,6 +4604,81 @@ func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*ga
 	}
 
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is knocked prone (-2 attack rolls).", inst.Name())), nil
+}
+
+// handleDisarm performs an athletics skill check against the target NPC's Level+10 DC.
+// On success, removes the NPC's equipped weapon and drops it to the room floor.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; req.Target must name an NPC in the room.
+// Postcondition: On success, NPC's WeaponID and WeaponName are cleared; weapon item dropped to floor.
+func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Disarm is only available in combat."), nil
+	}
+
+	if req.GetTarget() == "" {
+		return errorEvent("Usage: disarm <target>"), nil
+	}
+
+	// Find target NPC in room before spending AP.
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	// Spend 1 AP only after target confirmed.
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Skill check: 1d20 + athletics bonus vs target Level+10.
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleDisarm: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["athletics"])
+	total := roll + bonus
+	dc := inst.Level + 10
+
+	detail := fmt.Sprintf("Disarm (athletics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. Your disarm attempt fails."), nil
+	}
+
+	// Success: clear NPC weapon via combat handler.
+	weaponItemID, disarmErr := s.combatH.DisarmNPC(uid, inst.ID)
+	if disarmErr != nil {
+		s.logger.Warn("handleDisarm: DisarmNPC failed",
+			zap.String("npc_id", inst.ID), zap.Error(disarmErr))
+	}
+
+	// Drop the weapon to the room floor if the NPC had one.
+	weaponName := "weapon"
+	if weaponItemID != "" && s.floorMgr != nil {
+		if s.invRegistry != nil {
+			if wDef := s.invRegistry.Weapon(weaponItemID); wDef != nil {
+				weaponName = wDef.Name
+			}
+		}
+		dropped := inventory.ItemInstance{
+			InstanceID: fmt.Sprintf("disarmed-%s-%d", weaponItemID, time.Now().UnixNano()),
+			ItemDefID:  weaponItemID,
+			Quantity:   1,
+		}
+		s.floorMgr.Drop(sess.RoomID, dropped)
+	}
+
+	return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed. The %s clatters to the floor.", inst.Name(), weaponName)), nil
 }
 
 // maxNPCPerceptionInRoom returns the highest Perception value among all living NPCs in roomID.
