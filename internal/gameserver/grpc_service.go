@@ -4277,6 +4277,22 @@ func coverTierRank(tier string) int {
 
 // handleTakeCover applies the best available cover condition from room equipment.
 //
+// clearPlayerCover removes any active cover condition and resets combatant cover fields.
+// This is called whenever the player moves, per PF2E rules (cover is lost on movement).
+//
+// Precondition: uid must identify a valid player session.
+// Postcondition: All cover conditions removed; combatant cover fields cleared if in combat.
+func (s *GameServiceServer) clearPlayerCover(uid string, sess *session.PlayerSession) {
+	if sess.Conditions != nil {
+		for _, coverID := range []string{"greater_cover", "standard_cover", "lesser_cover"} {
+			sess.Conditions.Remove(uid, coverID)
+		}
+	}
+	if sess.Status == statusInCombat && s.combatH != nil {
+		s.combatH.ClearCombatantCover(sess.RoomID, uid)
+	}
+}
+
 // Precondition: uid must identify a valid player session.
 // Postcondition: Applies the appropriate cover condition; in combat, deducts 1 AP
 // and sets CoverEquipmentID/CoverTier on the Combatant.
@@ -4874,6 +4890,8 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", dir)), nil
 	}
 
+	s.clearPlayerCover(uid, sess)
+
 	msg := fmt.Sprintf("You stride %s.", dir)
 	rsUpdater := func(id string, hp int) {
 		if target, ok := s.sessions.GetPlayer(id); ok {
@@ -4935,6 +4953,8 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 	default:
 		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", dir)), nil
 	}
+
+	s.clearPlayerCover(uid, sess)
 
 	// Find the NPC combatant to compute distance.
 	dist := 0
@@ -5008,6 +5028,7 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 			return errorEvent("You are not a combatant in this fight."), nil
 		}
 		combatant.Position += 5
+		s.clearPlayerCover(uid, sess)
 
 		// Compute new distance to the target NPC.
 		dist := 0
