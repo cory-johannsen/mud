@@ -152,6 +152,28 @@ func testServiceForGrant(t *testing.T, opts grantTestOptions) *GameServiceServer
 	return svc
 }
 
+// testMinimalService constructs a GameServiceServer using the provided session manager.
+//
+// Precondition: sessMgr must be non-nil.
+// Postcondition: Returns a GameServiceServer suitable for unit-testing handleChar and similar methods.
+func testMinimalService(t *testing.T, sessMgr *session.Manager) *GameServiceServer {
+	t.Helper()
+	worldMgr, _ := testWorldAndSession(t)
+	cmdRegistry := command.DefaultRegistry()
+	npcMgr := npc.NewManager()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
+	chatHandler := NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+	return NewGameServiceServer(
+		worldMgr, sessMgr, cmdRegistry,
+		worldHandler, chatHandler, logger,
+		nil, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+}
+
 // addEditorForGrant adds a player session with the editor role.
 //
 // Precondition: svc must have a valid session manager.

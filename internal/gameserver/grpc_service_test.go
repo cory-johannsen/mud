@@ -2890,3 +2890,49 @@ func TestHandleDemoralize_RollAbove(t *testing.T) {
 	assert.Equal(t, -1, c.ACMod, "NPC ACMod must be -1 after successful demoralize")
 	assert.Equal(t, -1, c.AttackMod, "NPC AttackMod must be -1 after successful demoralize")
 }
+
+func TestHandleChar_Awareness_TrainedRank(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	_ = worldMgr
+	uid := "player-uid-awareness"
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "tester", CharName: "Tester",
+		RoomID: "grinders_row", Role: "player", CharacterID: 0,
+		CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	sess.Abilities.Savvy = 14 // mod = +2
+	sess.Level = 1
+	sess.Proficiencies = map[string]string{"awareness": "trained"}
+
+	svc := testMinimalService(t, sessMgr)
+	evt, err := svc.handleChar(uid)
+	require.NoError(t, err)
+	sheet := evt.GetCharacterSheet()
+	require.NotNil(t, sheet)
+	// 10 + AbilityMod(14)=+2 + CombatProficiencyBonus(1,"trained")=3 = 15
+	assert.Equal(t, int32(15), sheet.GetAwareness())
+}
+
+func TestHandleChar_Awareness_UntrainedRank(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	_ = worldMgr
+	uid := "player-uid-awareness-2"
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "tester2", CharName: "Tester2",
+		RoomID: "grinders_row", Role: "player", CharacterID: 0,
+		CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	sess.Abilities.Savvy = 10
+	sess.Level = 1
+	sess.Proficiencies = map[string]string{"awareness": "untrained"}
+
+	svc := testMinimalService(t, sessMgr)
+	evt, err := svc.handleChar(uid)
+	require.NoError(t, err)
+	sheet := evt.GetCharacterSheet()
+	require.NotNil(t, sheet)
+	// 10 + AbilityMod(10)=0 + CombatProficiencyBonus(1,"untrained")=0 = 10
+	assert.Equal(t, int32(10), sheet.GetAwareness())
+}

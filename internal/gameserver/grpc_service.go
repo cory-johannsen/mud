@@ -2777,6 +2777,10 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.CoolSave = int32(combat.AbilityMod(sess.Abilities.Savvy) +
 		combat.CombatProficiencyBonus(level, sess.Proficiencies["cool"]))
 
+	// Awareness: 10 + savvy_mod + awareness proficiency bonus.
+	view.Awareness = int32(10 + combat.AbilityMod(sess.Abilities.Savvy) +
+		combat.CombatProficiencyBonus(level, sess.Proficiencies["awareness"]))
+
 	// XP progress.
 	view.Experience = int32(sess.Experience)
 	view.PendingBoosts = int32(sess.PendingBoosts)
