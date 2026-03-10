@@ -176,3 +176,21 @@ func TestNewInstanceWithResolver_NilResolver_NoACBonus(t *testing.T) {
 	assert.Equal(t, "leather_jacket", inst.ArmorID)
 	assert.Equal(t, 12, inst.AC) // no bonus — resolver is nil
 }
+
+func TestManager_Spawn_AppliesArmorACBonus(t *testing.T) {
+	mgr := npc.NewManager()
+	mgr.SetArmorACResolver(func(armorID string) int {
+		if armorID == "leather_jacket" {
+			return 2
+		}
+		return 0
+	})
+	tmpl := &npc.Template{
+		ID: "guard", Name: "Guard", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		Armor: []npc.EquipmentEntry{{ID: "leather_jacket", Weight: 1}},
+	}
+	inst, err := mgr.Spawn(tmpl, "room1")
+	require.NoError(t, err)
+	assert.Equal(t, 14, inst.AC) // 12 + 2
+	assert.Equal(t, "leather_jacket", inst.ArmorID)
+}

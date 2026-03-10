@@ -10,10 +10,11 @@ import (
 // Manager tracks all live NPC instances by ID and by room.
 // All methods are safe for concurrent use.
 type Manager struct {
-	mu        sync.RWMutex
-	instances map[string]*Instance       // instanceID → Instance
-	roomSets  map[string]map[string]bool // roomID → set of instanceIDs
-	counter   atomic.Uint64
+	mu              sync.RWMutex
+	instances       map[string]*Instance       // instanceID → Instance
+	roomSets        map[string]map[string]bool // roomID → set of instanceIDs
+	counter         atomic.Uint64
+	armorACResolver func(string) int
 }
 
 // NewManager creates an empty NPC Manager.
@@ -22,6 +23,15 @@ func NewManager() *Manager {
 		instances: make(map[string]*Instance),
 		roomSets:  make(map[string]map[string]bool),
 	}
+}
+
+// SetArmorACResolver registers an optional resolver that returns the AC bonus
+// for a given armor ID. Called at startup when an armor registry is available.
+//
+// Precondition: fn may be nil (disables AC bonus application).
+// Postcondition: Subsequent Spawn calls apply armor AC bonuses via fn.
+func (m *Manager) SetArmorACResolver(fn func(string) int) {
+	m.armorACResolver = fn
 }
 
 // Spawn creates a new Instance from tmpl and places it in roomID.
@@ -42,7 +52,7 @@ func (m *Manager) Spawn(tmpl *Template, roomID string) (*Instance, error) {
 
 	n := m.counter.Add(1)
 	id := fmt.Sprintf("%s-%s-%d", tmpl.ID, roomID, n)
-	inst := NewInstance(id, tmpl, roomID)
+	inst := NewInstanceWithResolver(id, tmpl, roomID, m.armorACResolver)
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
