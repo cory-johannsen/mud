@@ -2523,8 +2523,12 @@ func (s *GameServiceServer) npcPatrolRandom(inst *npc.Instance) {
 	if len(exits) == 0 {
 		return
 	}
+	oldRoomID := inst.RoomID
 	idx := rand.Intn(len(exits))
-	_ = s.npcH.MoveNPC(inst.ID, exits[idx].TargetRoom)
+	newRoomID := exits[idx].TargetRoom
+	_ = s.npcH.MoveNPC(inst.ID, newRoomID)
+	s.pushRoomViewToAllInRoom(oldRoomID)
+	s.pushRoomViewToAllInRoom(newRoomID)
 }
 
 // handleInventory sends the player's backpack contents and currency.
