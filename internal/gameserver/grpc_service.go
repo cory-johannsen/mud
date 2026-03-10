@@ -5010,6 +5010,29 @@ func (s *GameServiceServer) maxNPCPerceptionInRoom(roomID string) int {
 	return max
 }
 
+// maxNPCStealthInRoom returns the highest Stealth value among all living NPCs in roomID.
+// A zero Stealth value is treated as 10. Returns 10 if no living NPCs are present.
+//
+// Precondition: roomID must be non-empty.
+// Postcondition: Returns an integer >= 10.
+func (s *GameServiceServer) maxNPCStealthInRoom(roomID string) int {
+	insts := s.npcMgr.InstancesInRoom(roomID)
+	max := 10
+	for _, inst := range insts {
+		if inst.IsDead() {
+			continue
+		}
+		stealth := inst.Stealth
+		if stealth == 0 {
+			stealth = 10
+		}
+		if stealth > max {
+			max = stealth
+		}
+	}
+	return max
+}
+
 // handleHide performs a stealth skill check against the highest NPC Perception DC in the room.
 // On success, applies the hidden condition to the player and sets combatant Hidden flag.
 // Combat only; costs 1 AP.
@@ -5060,6 +5083,62 @@ func (s *GameServiceServer) handleHide(uid string) (*gamev1.ServerEvent, error) 
 	}
 
 	return messageEvent(detail + " — success! You are hidden."), nil
+}
+
+// handleSeek performs a Perception check against the highest NPC Stealth DC in the room.
+// On success, sets RevealedUntilRound on all hidden NPC combatants to cbt.Round+1.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat.
+// Postcondition: On success, all hidden NPC combatants have RevealedUntilRound > cbt.Round.
+func (s *GameServiceServer) handleSeek(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if sess.Status != statusInCombat {
+		return errorEvent("Seek is only available in combat."), nil
+	}
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleSeek: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["awareness"])
+	total := roll + bonus
+	dc := s.maxNPCStealthInRoom(sess.RoomID)
+
+	detail := fmt.Sprintf("Seek (stealth DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + " — you search carefully but find nothing hidden."), nil
+	}
+
+	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
+	if !ok {
+		return messageEvent(detail + " — no active combat found."), nil
+	}
+
+	var revealed []string
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC && c.Hidden {
+			if err := s.combatH.SetCombatantRevealedUntilRound(sess.RoomID, c.ID, cbt.Round+1); err != nil {
+				s.logger.Warn("handleSeek: SetCombatantRevealedUntilRound failed", zap.Error(err))
+				continue
+			}
+			revealed = append(revealed, c.Name)
+		}
+	}
+	if len(revealed) == 0 {
+		return messageEvent(detail + " — you carefully scan the area but find no hidden threats."), nil
+	}
+	return messageEvent(detail + fmt.Sprintf(" — success! You locate: %s.", strings.Join(revealed, ", "))), nil
 }
 
 // handleSneak performs a stealth skill check while hidden.

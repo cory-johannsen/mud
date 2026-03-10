@@ -419,6 +419,26 @@ func (h *CombatHandler) SetCombatantHidden(uid string, hidden bool) error {
 	return fmt.Errorf("combatant %q not found in combat", uid)
 }
 
+// SetCombatantRevealedUntilRound sets RevealedUntilRound on the combatant with npcID
+// in the active combat for roomID.
+//
+// Precondition: roomID and npcID must be non-empty.
+// Postcondition: On success, combatant RevealedUntilRound is set to round.
+func (h *CombatHandler) SetCombatantRevealedUntilRound(roomID, npcID string, round int) error {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return fmt.Errorf("no active combat in room %q", roomID)
+	}
+	c := cbt.GetCombatant(npcID)
+	if c == nil {
+		return fmt.Errorf("combatant %q not found in room %q", npcID, roomID)
+	}
+	c.RevealedUntilRound = round
+	return nil
+}
+
 // GetCombatant returns the Combatant with the given targetID from the active combat
 // in the room of the player identified by uid.
 //
