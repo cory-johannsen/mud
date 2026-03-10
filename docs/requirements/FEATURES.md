@@ -23,13 +23,13 @@
         - Delay [0A]: Move your entire turn to later in the initiative order.
       - Athletics Actions
         - [x] Grapple — Athletics vs Level+10 DC; success applies grabbed condition (-2 AC, flat-footed)
-        - [ ] Shove — Athletics vs Fortitude DC; push target 5 ft
+        - [x] Shove — Athletics vs Fortitude DC; push target 5 ft
         - [x] Trip — Athletics vs Level+10 DC; success applies prone condition (-2 attack rolls)
         - [ ] Disarm — Athletics vs Reflex DC; knock weapon from target
         - [ ] Climb — Athletics check vs surface DC; vertical movement
         - [ ] Swim — Athletics check vs current DC; water movement
       - Tactical Actions
-        - [ ] Step — move 5 ft without triggering reactions
+        - [x] Step — move 5 ft without triggering reactions
         - [ ] Seek — Perception check to detect hidden creatures/objects
         - [ ] Sense Motive — Perception vs Deception to detect lies/intent
         - [x] Escape — Max(athletics, acrobatics) vs grabber DC; success removes grabbed condition
@@ -40,7 +40,7 @@
         - [x] Hide — Stealth vs highest NPC Perception DC; success applies hidden condition
         - [x] Sneak — Stealth vs highest NPC Perception DC while hidden; failure removes hidden
         - [x] Create Diversion (divert) — Grift vs highest NPC Perception DC; success applies hidden condition
-        - [ ] Tumble Through — Acrobatics vs Reflex DC; move through enemy space
+        - [x] Tumble Through — Acrobatics vs Reflex DC; move through enemy space
       - Medicine Actions
         - [x] First Aid [2A] — patch_job vs DC 15; success heals 2d8+4 HP
     - [ ] General
@@ -146,7 +146,7 @@
   - [x] See implementation items under NPC equipment — Disarm requires NPC weapon slot tracking in combat
 - [ ] Advanced combat mechanics
   - Reactions
-      - [ ] Reactive Strike (Attack of Opportunity) — NPC triggers a Strike when a player in melee range moves or uses Step; required before Step and Tumble Through are meaningful
+      - [x] Reactive Strike (Attack of Opportunity) — NPC triggers a Strike when a player in melee range moves or uses Step; required before Step and Tumble Through are meaningful
   - Distance
       - Measures the distance from the player to the target
       - Maximum distance 100ft
@@ -161,10 +161,10 @@
       - [x] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5ft; ranged attacks have accuracy penalties by range band
   - Movement
       - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
-      - [ ] Positional tracking — track each combatant's position within a room in 5ft increments; required for Shove, Step, and Tumble Through
-      - [ ] Shove command — implement `shove <target>` (Athletics vs Fortitude DC; on success push target 5ft away; requires positional tracking)
-      - [ ] Step command — implement `step <direction>` (move 5ft without triggering Reactive Strike; requires positional tracking and Reactions)
-      - [ ] Tumble Through command — implement `tumble <target>` (Acrobatics vs Reflex DC; on success move through enemy space without triggering Reactive Strike; requires positional tracking)
+      - [x] Positional tracking — track each combatant's position within a room in 5ft increments; required for Shove, Step, and Tumble Through
+      - [x] Shove command — implement `shove <target>` (Athletics vs Fortitude DC; on success push target 5ft away; requires positional tracking)
+      - [x] Step command — implement `step <direction>` (move 5ft without triggering Reactive Strike; requires positional tracking and Reactions)
+      - [x] Tumble Through command — implement `tumble <target>` (Acrobatics vs Reflex DC; on success move through enemy space without triggering Reactive Strike; requires positional tracking)
   - Range
       - Melee: 5ft
       - Short: 10-25ft
