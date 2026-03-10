@@ -988,6 +988,25 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}()
 	}
 
+	// Periodic room-view refresh: push a fresh RoomView to the player every 5s
+	// so NPC movement and combat status stay current without requiring look.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		roomRefreshTicker := time.NewTicker(5 * time.Second)
+		defer roomRefreshTicker.Stop()
+		for {
+			select {
+			case <-roomRefreshTicker.C:
+				if sess, ok := s.sessions.GetPlayer(uid); ok {
+					s.pushRoomViewToAllInRoom(sess.RoomID)
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
 	// Step 4: Main command loop
 	err = s.commandLoop(ctx, uid, stream)
 
