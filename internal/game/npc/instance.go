@@ -38,6 +38,8 @@ type Instance struct {
 	Level int
 	// Perception is the instance's perception modifier.
 	Perception int
+	// Stealth is the instance's stealth modifier.
+	Stealth int `yaml:"stealth"`
 	// AIDomain is the HTN domain ID copied from the template at spawn time.
 	AIDomain string
 	// Loot is the loot table copied from the template; nil means no loot.

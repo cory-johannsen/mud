@@ -389,6 +389,14 @@ func TestPropertyCombatant_Hidden_ZeroValue(t *testing.T) {
 	})
 }
 
+// TestPropertyCombatant_RevealedUntilRound_ZeroValue verifies that the zero value of Combatant.RevealedUntilRound is 0.
+func TestPropertyCombatant_RevealedUntilRound_ZeroValue(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		c := &combat.Combatant{}
+		require.Equal(rt, 0, c.RevealedUntilRound)
+	})
+}
+
 // TestPropertyCombatant_Hidden_Assignment verifies that Combatant.Hidden stores the assigned value.
 func TestPropertyCombatant_Hidden_Assignment(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

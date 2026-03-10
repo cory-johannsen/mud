@@ -104,6 +104,9 @@ type Combatant struct {
 	// For player combatants: set by hide/divert actions; cleared when the player attacks or is targeted.
 	// For NPC combatants: unused (always false).
 	Hidden bool
+	// RevealedUntilRound suppresses the DC 11 flat check for attackers through this round number.
+	// Set by a successful Seek action to cbt.Round+1.
+	RevealedUntilRound int
 	// Position is the distance in feet along the combat axis from the player's starting point (0).
 	// Player combatants are initialized to 0; NPC combatants are initialized to 25.
 	Position int
