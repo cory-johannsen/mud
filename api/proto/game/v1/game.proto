@@ -76,6 +76,7 @@ message ClientMessage {
     EscapeRequest escape = 59;
     GrantRequest grant = 60;
     DisarmRequest disarm = 61;
+    StrideRequest stride = 62;
   }
 }
 
@@ -748,6 +749,11 @@ message TripRequest {
 // DisarmRequest asks the server to disarm a target NPC.
 message DisarmRequest {
     string target = 1;
+}
+
+// StrideRequest asks the server to stride toward or away from the current target.
+message StrideRequest {
+    string direction = 1; // "toward" or "away"
 }
 
 // HideRequest asks the server to attempt to hide the player.

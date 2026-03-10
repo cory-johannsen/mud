@@ -102,6 +102,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerGrapple:            bridgeGrapple,
 	command.HandlerTrip:               bridgeTrip,
 	command.HandlerDisarm:             bridgeDisarm,
+	command.HandlerStride:             bridgeStride,
 	command.HandlerHide:               bridgeHide,
 	command.HandlerSneak:              bridgeSneak,
 	command.HandlerDivert:             bridgeDivert,
@@ -925,6 +926,21 @@ func bridgeDisarm(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Disarm{Disarm: &gamev1.DisarmRequest{Target: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeStride builds a StrideRequest with the direction ("toward" or "away").
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a StrideRequest; direction is "toward" or "away".
+func bridgeStride(bctx *bridgeContext) (bridgeResult, error) {
+	dir := "toward"
+	if bctx.parsed.RawArgs == "away" {
+		dir = "away"
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Stride{Stride: &gamev1.StrideRequest{Direction: dir}},
 	}}, nil
 }
 
