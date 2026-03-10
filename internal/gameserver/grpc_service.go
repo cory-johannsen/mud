@@ -4738,7 +4738,12 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	}
 
 	msg := fmt.Sprintf("You stride %s.", dir)
-	rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldPos, globalRandSrc{})
+	rsUpdater := func(id string, hp int) {
+		if target, ok := s.sessions.GetPlayer(id); ok {
+			target.CurrentHP = hp
+		}
+	}
+	rsEvents := combat.CheckReactiveStrikes(cbt, uid, oldPos, globalRandSrc{}, rsUpdater)
 	for _, ev := range rsEvents {
 		msg += "\n" + ev.Narrative
 	}

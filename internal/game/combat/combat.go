@@ -204,7 +204,15 @@ func DefaultSaveRank(rank string) string {
 // Precondition: a and b must be non-nil.
 // Postcondition: Returns abs(a.Position - b.Position).
 func combatantDist(a, b *Combatant) int {
-	d := a.Position - b.Position
+	return posDist(a.Position, b.Position)
+}
+
+// posDist returns the absolute distance between two raw position values.
+//
+// Precondition: none.
+// Postcondition: Returns abs(a - b).
+func posDist(a, b int) int {
+	d := a - b
 	if d < 0 {
 		d = -d
 	}

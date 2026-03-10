@@ -16,7 +16,11 @@ import (
 //
 // Precondition: cbt non-nil; moverID non-empty; oldPos is mover's position before stride.
 // Postcondition: Returns zero or more RoundEvent{ActionType: ActionAttack} events.
-func CheckReactiveStrikes(cbt *Combat, moverID string, oldPos int, rng Source) []RoundEvent {
+// targetUpdater(id, hp) is called after each damage application; may be nil (no-op).
+func CheckReactiveStrikes(cbt *Combat, moverID string, oldPos int, rng Source, targetUpdater func(id string, hp int)) []RoundEvent {
+	if targetUpdater == nil {
+		targetUpdater = func(id string, hp int) {}
+	}
 	mover := findCombatantByID(cbt, moverID)
 	if mover == nil {
 		return nil
@@ -29,25 +33,17 @@ func CheckReactiveStrikes(cbt *Combat, moverID string, oldPos int, rng Source) [
 			continue
 		}
 		// Distance before stride: use oldPos for the mover's position.
-		distBefore := c.Position - oldPos
-		if distBefore < 0 {
-			distBefore = -distBefore
-		}
-		if distBefore > 5 {
+		if posDist(c.Position, oldPos) > 5 {
 			// NPC was not adjacent before the stride — no reactive strike.
 			continue
 		}
 		// Check that the mover actually moved away (new distance > 5).
-		distAfter := c.Position - newPos
-		if distAfter < 0 {
-			distAfter = -distAfter
-		}
-		if distAfter <= 5 {
+		if posDist(c.Position, newPos) <= 5 {
 			// Mover didn't move away from this combatant.
 			continue
 		}
 
-		// Perform the reactive strike: d20 + attacker.Level vs mover.AC.
+		// Simplified reactive-strike roll: no hooks, conditions, resistances, or weapon dice.
 		d20 := rng.Intn(20) + 1
 		atkTotal := d20 + c.Level
 		outcome := OutcomeFor(atkTotal, mover.AC)
@@ -57,10 +53,12 @@ func CheckReactiveStrikes(cbt *Combat, moverID string, oldPos int, rng Source) [
 		case CritSuccess:
 			dmg = rng.Intn(6) + 1 + rng.Intn(6) + 1 // double damage die on crit
 			mover.ApplyDamage(dmg)
+			targetUpdater(mover.ID, mover.CurrentHP)
 			hitNarrative = fmt.Sprintf("%s makes a reactive strike against %s! *** CRITICAL HIT! *** Deals %d damage (total %d)!", c.Name, mover.Name, dmg, atkTotal)
 		case Success:
 			dmg = rng.Intn(6) + 1
 			mover.ApplyDamage(dmg)
+			targetUpdater(mover.ID, mover.CurrentHP)
 			hitNarrative = fmt.Sprintf("%s makes a reactive strike against %s! Hit for %d damage (total %d).", c.Name, mover.Name, dmg, atkTotal)
 		default:
 			hitNarrative = fmt.Sprintf("%s makes a reactive strike against %s! Miss (total %d).", c.Name, mover.Name, atkTotal)
