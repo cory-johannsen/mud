@@ -30,7 +30,7 @@
         - [ ] Swim — Athletics check vs current DC; water movement
       - Tactical Actions
         - [x] Step — move 5 ft without triggering reactions
-        - [ ] Seek — Perception check to detect hidden creatures/objects
+        - [x] Seek — Perception check to detect hidden creatures/objects
         - [ ] Sense Motive — Perception vs Deception to detect lies/intent
         - [x] Escape — Max(athletics, acrobatics) vs grabber DC; success removes grabbed condition
         - [ ] Delay — forfeit initiative position to act later in round
@@ -195,7 +195,7 @@
       - [ ] Mental state system — add `MentalState` enum (Normal, Panicked, Psychotic) to PlayerSession; state transitions driven by conditions, zone effects, or health thresholds
       - [ ] Panic condition — implement as a condition with `restrict_actions` effect; on each turn a random available action is chosen instead of player input; triggered by specific NPC abilities, zone effects, or dropping below 25% HP
       - [ ] Psychosis condition — escalation of Panic; player may attack random targets including allies; triggered by prolonged Panic or specific substances
-  - [ ] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
+  - [x] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
   - [ ] Immobilized — prevent grabbed creatures from moving between rooms
   - [ ] Sense Motive command — implement `motive <target>` (Perception vs target Deception skill; on success reveals whether the NPC is bluffing, holding back an action, or concealing intent)
 - [ ] Replace 'Level + 10' implementation for Grapple, Trip, Reflex DC with real calculations
@@ -400,7 +400,12 @@
   - interactions
       - aggressiveness/hostility
   - daily patterns driven by time of day, reaction to weather and other external environmental stimulus. 
-  - default combat actions, reactions, and strategy.
+  - combat:
+    - default combat actions
+    - reactions
+    - strategy
+      - stealth
+      - action selection
   - map movement and fencing
 - [ ] Wayne Dawg, Dwayne Dawg, Jennifer Dawg
 - [ ] World map
