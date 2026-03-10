@@ -369,6 +369,42 @@ func TestRollInitiative_Property_InitiativeAtLeastOnePlusMod(t *testing.T) {
 	})
 }
 
+// --- Combat Distance ---
+
+func TestCombat_Distance_DefaultsToZero(t *testing.T) {
+	cbt := &combat.Combat{}
+	assert.Equal(t, 0, cbt.Distance)
+}
+
+func TestCombat_SetDistance_ClampMin(t *testing.T) {
+	cbt := &combat.Combat{Distance: 5}
+	cbt.SetDistance(0)
+	assert.Equal(t, 5, cbt.Distance)
+}
+
+func TestCombat_SetDistance_ClampMax(t *testing.T) {
+	cbt := &combat.Combat{Distance: 100}
+	cbt.SetDistance(200)
+	assert.Equal(t, 100, cbt.Distance)
+}
+
+func TestCombat_SetDistance_SetValid(t *testing.T) {
+	cbt := &combat.Combat{Distance: 25}
+	cbt.SetDistance(50)
+	assert.Equal(t, 50, cbt.Distance)
+}
+
+func TestCombat_SetDistance_Property(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		initial := rapid.IntRange(5, 100).Draw(t, "initial")
+		newVal := rapid.IntRange(-100, 200).Draw(t, "newVal")
+		cbt := &combat.Combat{Distance: initial}
+		cbt.SetDistance(newVal)
+		assert.GreaterOrEqual(t, cbt.Distance, 5)
+		assert.LessOrEqual(t, cbt.Distance, 100)
+	})
+}
+
 // TestPropertyCombatant_Hidden_ZeroValue verifies that the zero value of Combatant.Hidden is false.
 func TestPropertyCombatant_Hidden_ZeroValue(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
