@@ -4335,6 +4335,7 @@ func (s *GameServiceServer) handleTakeCover(uid string) (*gamev1.ServerEvent, er
 		if err := s.combatH.SetCombatantCover(sess.RoomID, uid, bestEquipID, bestTier); err != nil {
 			s.logger.Warn("handleTakeCover: SetCombatantCover failed",
 				zap.String("uid", uid), zap.Error(err))
+			return errorEvent(fmt.Sprintf("Failed to take cover: %v", err)), nil
 		}
 		// Init cover HP state if destructible and not yet tracked.
 		if bestDestructible && bestHP > 0 && s.combatH.GetCoverHP(sess.RoomID, bestEquipID) < 0 {
