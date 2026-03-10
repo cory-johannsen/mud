@@ -364,6 +364,16 @@ func (h *CombatHandler) ApplyCombatantAttackMod(uid, targetID string, mod int) e
 	return fmt.Errorf("combatant %q not found in combat", targetID)
 }
 
+// GetCombatForRoom returns the active combat in roomID, or (nil, false) if none.
+//
+// Precondition: roomID must be a non-empty string.
+// Postcondition: Returns (combat, true) if active combat exists; (nil, false) otherwise.
+func (h *CombatHandler) GetCombatForRoom(roomID string) (*combat.Combat, bool) {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	return h.engine.GetCombat(roomID)
+}
+
 // ApplyCombatCondition applies condID (stacks=1, duration=-1) to the combatant identified by
 // targetID in the active combat for the room where uid is fighting.
 //

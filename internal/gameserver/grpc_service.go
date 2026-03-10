@@ -1186,6 +1186,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleTrip(uid, p.Trip)
 	case *gamev1.ClientMessage_Disarm:
 		return s.handleDisarm(uid, p.Disarm)
+	case *gamev1.ClientMessage_Stride:
+		return s.handleStride(uid, p.Stride)
 	case *gamev1.ClientMessage_Hide:
 		return s.handleHide(uid)
 	case *gamev1.ClientMessage_Sneak:
@@ -4682,6 +4684,49 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 		return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed, but had no weapon equipped.", inst.Name())), nil
 	}
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed. The %s clatters to the floor.", inst.Name(), weaponName)), nil
+}
+
+// handleStride moves the player 25 ft toward or away from the combat target.
+// Combat only; costs 1 AP. Distance is clamped to [5, 100].
+//
+// Precondition: uid must be in active combat.
+// Postcondition: Combat Distance updated; message event returned with new distance.
+func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Stride is only available in combat."), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
+	if !ok {
+		return errorEvent("No active combat found."), nil
+	}
+
+	newDist := cbt.Distance
+	if req.GetDirection() == "away" {
+		newDist += 25
+	} else {
+		newDist -= 25
+	}
+	cbt.SetDistance(newDist)
+
+	dir := "toward"
+	if req.GetDirection() == "away" {
+		dir = "away"
+	}
+	return messageEvent(fmt.Sprintf("You stride %s. Distance to target: %d ft.", dir, cbt.Distance)), nil
 }
 
 // maxNPCPerceptionInRoom returns the highest Perception value among all living NPCs in roomID.
