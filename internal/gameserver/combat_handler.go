@@ -995,7 +995,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 	}
 
-	coverDegrader := func(rID, equipID string) {
+	coverDegrader := func(rID, equipID string) bool {
 		h.DecrementCoverHP(rID, equipID)
 		if h.GetCoverHP(rID, equipID) == 0 {
 			h.ClearCoverForEquipment(rID, equipID)
@@ -1007,7 +1007,9 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 					}
 				}
 			}
+			return true
 		}
+		return false
 	}
 	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, coverDegrader)
 

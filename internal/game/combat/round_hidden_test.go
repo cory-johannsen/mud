@@ -1,6 +1,7 @@
 package combat_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -148,7 +149,7 @@ func TestResolveRound_HiddenFlatCheckPass_HitsNormally(t *testing.T) {
 func TestResolveRound_HiddenClearedAfterNPCAttack(t *testing.T) {
 	for _, flatRollVal := range []int{0, 4, 9, 10, 11, 14, 19} {
 		val := flatRollVal
-		t.Run("flatCheckRollVal="+itoa(val), func(t *testing.T) {
+		t.Run("flatCheckRollVal="+fmt.Sprintf("%d", val), func(t *testing.T) {
 			src := fixedSrc{val: val}
 
 			cbt, player := makeHiddenCombat(t, true)
@@ -240,22 +241,28 @@ func TestPropertyResolveRound_HiddenFlatCheck_NeverDamageOnFail(t *testing.T) {
 	})
 }
 
-// itoa is a minimal int-to-string helper for subtest naming.
-func itoa(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	neg := n < 0
-	if neg {
-		n = -n
-	}
-	digits := []byte{}
-	for n > 0 {
-		digits = append([]byte{byte('0' + n%10)}, digits...)
-		n /= 10
-	}
-	if neg {
-		digits = append([]byte{'-'}, digits...)
-	}
-	return string(digits)
+// TestPropertyResolveRound_HiddenFlatCheck_StrikeNeverDamageOnFail verifies that for any flat
+// roll ≤ 10, the player takes no damage from an NPC ActionStrike and Hidden is cleared.
+func TestPropertyResolveRound_HiddenFlatCheck_StrikeNeverDamageOnFail(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Force flat check to fail: Intn(20)+1 ≤ 10 means val ∈ [0,9].
+		val := rapid.IntRange(0, 9).Draw(rt, "flatRollVal")
+		src := fixedSrc{val: val}
+
+		cbt, player := makeHiddenCombat(t, true)
+		initialHP := player.CurrentHP
+
+		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass})
+		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Alice"})
+
+		combat.ResolveRound(cbt, src, noopUpdater)
+
+		if player.CurrentHP != initialHP {
+			rt.Errorf("flatRollVal=%d (flat check=%d ≤ 10): expected no damage from Strike, got initialHP=%d finalHP=%d",
+				val, val+1, initialHP, player.CurrentHP)
+		}
+		if player.Hidden {
+			rt.Errorf("flatRollVal=%d: expected player.Hidden=false after NPC Strike", val)
+		}
+	})
 }

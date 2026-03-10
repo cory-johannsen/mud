@@ -1,0 +1,30 @@
+# 2026/03/10 09:47:37.371185 [TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5] [rapid] draw distance: 8
+# 2026/03/10 09:47:37.371243 [TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/combat/round_distance_test.go:126
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/combat/round_distance_test.go:95
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	"*** CRITICAL HIT! *** Player attacks T (total 24) for 48 damage!" does not contain "out of melee range"
+# 	Test:       	TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5
+# 	Messages:   	distance=8: melee attack must miss beyond 5ft
+# 2026/03/10 09:47:37.371273 [TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/game/combat/round_distance_test.go:130
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/game/combat/round_distance_test.go:95
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Not equal: 
+# 	            	expected: 20
+# 	            	actual  : 0
+# 	Test:       	TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5
+# 	Messages:   	distance=8: target must be unharmed
+# 
+v0.4.8#17072606803399539725
+0xce97683eabb95
+0x424cb8f81ad88
+0x2

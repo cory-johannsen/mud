@@ -355,12 +355,13 @@ func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Sourc
 // Precondition: cbt and src must not be nil.
 // Postcondition: Returns ordered RoundEvents; damage applied in-place on Combatants.
 // coverDegrader(roomID, equipID) is called when an attack misses the target but would have
-// hit without the cover penalty (i.e., the cover absorbed the shot). May be nil (no-op).
-func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int), coverDegraderArgs ...func(roomID, equipID string)) []RoundEvent {
+// hit without the cover penalty (i.e., the cover absorbed the shot). Returns true when the
+// cover is destroyed. May be nil (no-op; treated as always returning false).
+func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int), coverDegraderArgs ...func(roomID, equipID string) bool) []RoundEvent {
 	if targetUpdater == nil {
 		targetUpdater = func(id string, hp int) {}
 	}
-	coverDegrader := func(roomID, equipID string) {}
+	coverDegrader := func(roomID, equipID string) bool { return false }
 	if len(coverDegraderArgs) > 0 && coverDegraderArgs[0] != nil {
 		coverDegrader = coverDegraderArgs[0]
 	}
@@ -540,7 +541,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					target.CoverTier != "" && target.CoverEquipmentID != "" {
 					attackWithoutCoverPenalty := r.AttackTotal - acBonus // acBonus <= 0, so this raises the effective roll
 					if attackWithoutCoverPenalty >= effectiveAC {
-						coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						destroyed := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
 						events = append(events, RoundEvent{
 							ActionType: ActionCoverHit,
 							ActorID:    actor.ID,
@@ -548,6 +549,15 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							TargetID:   target.ID,
 							Narrative:  fmt.Sprintf("%s's attack hits %s's cover!", actor.Name, target.Name),
 						})
+						if destroyed {
+							events = append(events, RoundEvent{
+								ActionType: ActionCoverDestroy,
+								ActorID:    actor.ID,
+								ActorName:  actor.Name,
+								TargetID:   target.ID,
+								Narrative:  fmt.Sprintf("%s's cover is destroyed!", target.Name),
+							})
+						}
 					}
 				}
 				dmg := r.EffectiveDamage()
@@ -625,7 +635,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					target.CoverTier != "" && target.CoverEquipmentID != "" {
 					attackWithoutCoverPenalty1 := r1.AttackTotal - acBonus1
 					if attackWithoutCoverPenalty1 >= effectiveAC1 {
-						coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						destroyed1 := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
 						events = append(events, RoundEvent{
 							ActionType: ActionCoverHit,
 							ActorID:    actor.ID,
@@ -633,6 +643,15 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							TargetID:   target.ID,
 							Narrative:  fmt.Sprintf("%s's strike hits %s's cover!", actor.Name, target.Name),
 						})
+						if destroyed1 {
+							events = append(events, RoundEvent{
+								ActionType: ActionCoverDestroy,
+								ActorID:    actor.ID,
+								ActorName:  actor.Name,
+								TargetID:   target.ID,
+								Narrative:  fmt.Sprintf("%s's cover is destroyed!", target.Name),
+							})
+						}
 					}
 				}
 				dmg1 := r1.EffectiveDamage()
@@ -686,7 +705,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					target.CoverTier != "" && target.CoverEquipmentID != "" {
 					attackWithoutCoverPenalty2 := r2.AttackTotal - acBonus2
 					if attackWithoutCoverPenalty2 >= effectiveAC2 {
-						coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						destroyed2 := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
 						events = append(events, RoundEvent{
 							ActionType: ActionCoverHit,
 							ActorID:    actor.ID,
@@ -694,6 +713,15 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							TargetID:   target.ID,
 							Narrative:  fmt.Sprintf("%s's strike hits %s's cover!", actor.Name, target.Name),
 						})
+						if destroyed2 {
+							events = append(events, RoundEvent{
+								ActionType: ActionCoverDestroy,
+								ActorID:    actor.ID,
+								ActorName:  actor.Name,
+								TargetID:   target.ID,
+								Narrative:  fmt.Sprintf("%s's cover is destroyed!", target.Name),
+							})
+						}
 					}
 				}
 				dmg2 := r2.EffectiveDamage()
@@ -720,9 +748,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 			case ActionReload:
 				events = append(events, resolveReload(cbt, actor, action))
 			case ActionFireBurst:
-				events = append(events, resolveFireBurst(cbt, actor, action, src)...)
+				events = append(events, resolveFireBurst(cbt, actor, action, src, coverDegrader)...)
 			case ActionFireAutomatic:
-				events = append(events, resolveFireAutomatic(cbt, actor, action, src)...)
+				events = append(events, resolveFireAutomatic(cbt, actor, action, src, coverDegrader)...)
 			case ActionThrow:
 				events = append(events, resolveThrow(cbt, actor, action, src)...)
 			}
@@ -749,11 +777,15 @@ func resolveReload(cbt *Combat, actor *Combatant, qa QueuedAction) RoundEvent {
 }
 
 // resolveFireBurst handles ActionFireBurst: two ranged attacks against the same target.
-func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []RoundEvent {
+// coverDegrader is called when a shot misses the target but would have hit without cover; may be nil.
+func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool) []RoundEvent {
 	target := findCombatantByNameOrID(cbt, qa.Target)
 	if target == nil || target.IsDead() {
 		return []RoundEvent{{ActionType: ActionFireBurst, ActorID: actor.ID, ActorName: actor.Name,
 			Narrative: fmt.Sprintf("%s fires burst but target not found.", actor.Name)}}
+	}
+	if coverDegrader == nil {
+		coverDegrader = func(roomID, equipID string) bool { return false }
 	}
 	weapon := primaryFirearm(actor, qa.WeaponID)
 	var events []RoundEvent
@@ -765,7 +797,33 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 			result = ResolveAttack(actor, target, src)
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
-		result.Outcome = OutcomeFor(result.AttackTotal, target.AC)
+		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+		effectiveAC := target.AC + target.InitiativeBonus
+		result.Outcome = OutcomeFor(result.AttackTotal, effectiveAC)
+		// Crossfire degradation: burst shot missed but would have hit without cover penalty.
+		if (result.Outcome == Failure || result.Outcome == CritFailure) &&
+			target.CoverTier != "" && target.CoverEquipmentID != "" {
+			attackWithoutCoverPenalty := result.AttackTotal - acBonus
+			if attackWithoutCoverPenalty >= effectiveAC {
+				destroyed := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+				events = append(events, RoundEvent{
+					ActionType: ActionCoverHit,
+					ActorID:    actor.ID,
+					ActorName:  actor.Name,
+					TargetID:   target.ID,
+					Narrative:  fmt.Sprintf("%s's burst fire hits %s's cover!", actor.Name, target.Name),
+				})
+				if destroyed {
+					events = append(events, RoundEvent{
+						ActionType: ActionCoverDestroy,
+						ActorID:    actor.ID,
+						ActorName:  actor.Name,
+						TargetID:   target.ID,
+						Narrative:  fmt.Sprintf("%s's cover is destroyed!", target.Name),
+					})
+				}
+			}
+		}
 		dmg := result.EffectiveDamage()
 		dmg = hookDamageRoll(cbt, actor, target, dmg)
 		if dmg > 0 {
@@ -792,11 +850,15 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 }
 
 // resolveFireAutomatic handles ActionFireAutomatic: one attack against each living enemy (up to 3).
-func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []RoundEvent {
+// coverDegrader is called when a shot misses a target but would have hit without cover; may be nil.
+func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool) []RoundEvent {
 	enemies := livingEnemiesOf(cbt, actor)
 	if len(enemies) == 0 {
 		return []RoundEvent{{ActionType: ActionFireAutomatic, ActorID: actor.ID, ActorName: actor.Name,
 			Narrative: fmt.Sprintf("%s lays down suppressive fire.", actor.Name)}}
+	}
+	if coverDegrader == nil {
+		coverDegrader = func(roomID, equipID string) bool { return false }
 	}
 	weapon := primaryFirearm(actor, qa.WeaponID)
 	var events []RoundEvent
@@ -812,7 +874,33 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 			result = ResolveAttack(actor, target, src)
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
-		result.Outcome = OutcomeFor(result.AttackTotal, target.AC)
+		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+		effectiveAC := target.AC + target.InitiativeBonus
+		result.Outcome = OutcomeFor(result.AttackTotal, effectiveAC)
+		// Crossfire degradation: automatic shot missed but would have hit without cover penalty.
+		if (result.Outcome == Failure || result.Outcome == CritFailure) &&
+			target.CoverTier != "" && target.CoverEquipmentID != "" {
+			attackWithoutCoverPenalty := result.AttackTotal - acBonus
+			if attackWithoutCoverPenalty >= effectiveAC {
+				destroyed := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+				events = append(events, RoundEvent{
+					ActionType: ActionCoverHit,
+					ActorID:    actor.ID,
+					ActorName:  actor.Name,
+					TargetID:   target.ID,
+					Narrative:  fmt.Sprintf("%s's automatic fire hits %s's cover!", actor.Name, target.Name),
+				})
+				if destroyed {
+					events = append(events, RoundEvent{
+						ActionType: ActionCoverDestroy,
+						ActorID:    actor.ID,
+						ActorName:  actor.Name,
+						TargetID:   target.ID,
+						Narrative:  fmt.Sprintf("%s's cover is destroyed!", target.Name),
+					})
+				}
+			}
+		}
 		dmg := result.EffectiveDamage()
 		dmg = hookDamageRoll(cbt, actor, target, dmg)
 		if dmg > 0 {

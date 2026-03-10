@@ -1,0 +1,8 @@
+# 2026/03/08 16:51:33.101423 [TestPropertyResolveRound_HiddenFlatCheck_NeverDamageOnFail] [rapid] draw flatRollVal: 0
+# 2026/03/08 16:51:33.101430 [TestPropertyResolveRound_HiddenFlatCheck_NeverDamageOnFail] flatRollVal=0 (flat check=1 ≤ 10): expected no damage, got initialHP=100 finalHP=94
+# 2026/03/08 16:51:33.101431 [TestPropertyResolveRound_HiddenFlatCheck_NeverDamageOnFail] flatRollVal=0: expected player.Hidden=false after NPC attack
+# 
+v0.4.8#1607504086169892108
+0x0
+0x0
+0x0

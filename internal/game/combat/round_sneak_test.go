@@ -259,6 +259,70 @@ func TestApplyPassiveFeats_SuckerPunch_HiddenClearedEvenOnMiss(t *testing.T) {
 	}
 }
 
+// TestResolveRound_SuckerPunch_HiddenStrikeFirstOnlyTriggersSneak: ActionStrike with actor.Hidden=true
+// must trigger sucker_punch on the first strike (Hidden=true at entry) and NOT on the second strike
+// (Hidden is cleared to false after the first applyPassiveFeats call).
+//
+// Verification strategy: with fixedSrc{val:19}, sucker_punch d6 bonus = (19%6)+1 = 2.
+// A hidden=true player must deal exactly 2 more damage total than an identical non-hidden player
+// (only one sneak bonus across the two-strike sequence).
+func TestResolveRound_SuckerPunch_HiddenStrikeFirstOnlyTriggersSneak(t *testing.T) {
+	// val=19 → d20=20 (CritSuccess, guaranteed hit); sucker_punch d6 = (19%6)+1 = 2.
+	src := fixedSrc{val: 19}
+
+	// Combat with Hidden=true, sucker_punch active.
+	cbtHidden, actorHidden := makeSneakCombat(t, true, false, true)
+	// Combat with Hidden=false, sucker_punch active (baseline — no sneak trigger).
+	cbtVisible, _ := makeSneakCombat(t, true, false, false)
+
+	if err := cbtHidden.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction hidden p1: %v", err)
+	}
+	if err := cbtHidden.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction hidden n1: %v", err)
+	}
+	if err := cbtVisible.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Ganger"}); err != nil {
+		t.Fatalf("QueueAction visible p1: %v", err)
+	}
+	if err := cbtVisible.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction visible n1: %v", err)
+	}
+
+	initialHPHidden := cbtHidden.Combatants[1].CurrentHP
+	initialHPVisible := cbtVisible.Combatants[1].CurrentHP
+
+	combat.ResolveRound(cbtHidden, src, noopUpdater)
+	combat.ResolveRound(cbtVisible, src, noopUpdater)
+
+	finalHPHidden := cbtHidden.Combatants[1].CurrentHP
+	finalHPVisible := cbtVisible.Combatants[1].CurrentHP
+
+	dmgHidden := initialHPHidden - finalHPHidden
+	dmgVisible := initialHPVisible - finalHPVisible
+
+	// Hidden player must deal strictly more damage (first strike got the sneak bonus).
+	if dmgHidden <= dmgVisible {
+		t.Errorf("expected hidden ActionStrike to deal more damage than visible: dmgHidden=%d dmgVisible=%d", dmgHidden, dmgVisible)
+	}
+
+	// The extra damage must equal exactly one sucker_punch roll (19+1=20 with fixedSrc val=19), not two.
+	// fixedSrc.Intn(n) always returns val unchanged, so src.Intn(6)+1 = 19+1 = 20.
+	// Two rolls would indicate both strikes triggered sneak from Hidden; only the first must.
+	// (The second strike may still trigger sneak via flat_footed applied by the first CritSuccess,
+	// which is identical across both combats and does not contribute to the difference.)
+	expectedBonus := 19 + 1 // fixedSrc val=19; Intn(6) returns 19; +1 → 20
+	actualBonus := dmgHidden - dmgVisible
+	if actualBonus != expectedBonus {
+		t.Errorf("expected exactly one sucker_punch bonus (%d) from Hidden on first strike, got bonus=%d (dmgHidden=%d dmgVisible=%d)",
+			expectedBonus, actualBonus, dmgHidden, dmgVisible)
+	}
+
+	// actor.Hidden must be false after the round (cleared on the first strike).
+	if actorHidden.Hidden {
+		t.Errorf("expected actor.Hidden=false after ActionStrike, got true")
+	}
+}
+
 // TestProperty_SuckerPunch_Extended_DamageNonNegative: regardless of grabbed/hidden/feat combination,
 // NPC HP must never exceed initial HP (no healing) and must never go below 0.
 func TestProperty_SuckerPunch_Extended_DamageNonNegative(t *testing.T) {

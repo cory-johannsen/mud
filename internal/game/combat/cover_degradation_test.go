@@ -101,7 +101,7 @@ func TestCoverDegradationOnCoverAbsorbedHit(t *testing.T) {
 		cbt := buildCoverCombat(t, baseAC, coverPenalty, attackRoll)
 		degraded := false
 		combat.ResolveRound(cbt, coverFixedSrc{roll: attackRoll}, func(id string, hp int) {},
-			func(roomID, equipID string) { degraded = true })
+			func(roomID, equipID string) bool { degraded = true; return false })
 		if !degraded {
 			t.Errorf("expected coverDegrader to fire (roll=%d baseAC=%d coverPenalty=%d)",
 				attackRoll, baseAC, coverPenalty)
@@ -123,7 +123,7 @@ func TestNoCoverDegradationOnCleanMiss(t *testing.T) {
 		cbt := buildCoverCombat(t, baseAC, coverPenalty, attackRoll)
 		degraded := false
 		combat.ResolveRound(cbt, coverFixedSrc{roll: attackRoll}, func(id string, hp int) {},
-			func(roomID, equipID string) { degraded = true })
+			func(roomID, equipID string) bool { degraded = true; return false })
 		if degraded {
 			t.Errorf("unexpected coverDegrader call (roll=%d baseAC=%d coverPenalty=%d)",
 				attackRoll, baseAC, coverPenalty)
