@@ -497,6 +497,48 @@ func (h *CombatHandler) SetCombatantRevealedUntilRound(roomID, npcID string, rou
 	return nil
 }
 
+// SetCombatantCover sets the CoverEquipmentID and CoverTier on the combatant
+// identified by uid in the combat for roomID.
+//
+// Precondition: uid must identify an active combatant in the room's combat.
+// Postcondition: combatant.CoverEquipmentID and .CoverTier are updated.
+func (h *CombatHandler) SetCombatantCover(roomID, uid, equipID, tier string) error {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return fmt.Errorf("no active combat in room %q", roomID)
+	}
+	for _, c := range cbt.Combatants {
+		if c.ID == uid {
+			c.CoverEquipmentID = equipID
+			c.CoverTier = tier
+			return nil
+		}
+	}
+	return fmt.Errorf("combatant %q not found in room %q", uid, roomID)
+}
+
+// ClearCombatantCover removes cover from a combatant.
+//
+// Precondition: uid must identify an active combatant in the room's combat.
+// Postcondition: combatant.CoverEquipmentID and .CoverTier are cleared.
+func (h *CombatHandler) ClearCombatantCover(roomID, uid string) {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return
+	}
+	for _, c := range cbt.Combatants {
+		if c.ID == uid {
+			c.CoverEquipmentID = ""
+			c.CoverTier = ""
+			return
+		}
+	}
+}
+
 // GetCombatant returns the Combatant with the given targetID from the active combat
 // in the room of the player identified by uid.
 //

@@ -2112,25 +2112,60 @@ func TestHandleTakeCover_NoSession(t *testing.T) {
 	assert.Nil(t, event)
 }
 
-// TestHandleTakeCover_OutOfCombat verifies that handleTakeCover applies the in_cover condition
-// and returns a success message when out of combat (no AP cost).
+// TestHandleTakeCover_OutOfCombat verifies that handleTakeCover applies the standard_cover
+// condition and returns a success message when out of combat (no AP cost).
 //
-// Precondition: condRegistry contains "in_cover"; player status is not in-combat.
-// Postcondition: sess.Conditions.Has("in_cover") == true; message event contains "+2 AC".
+// Precondition: condRegistry contains "standard_cover"; room has standard cover equipment;
+// player status is not in-combat.
+// Postcondition: sess.Conditions.Has("standard_cover") == true; message event contains "standard cover".
 func TestHandleTakeCover_OutOfCombat(t *testing.T) {
 	condReg := condition.NewRegistry()
 	condReg.Register(&condition.ConditionDef{
-		ID:           "in_cover",
-		Name:         "In Cover",
+		ID:           "standard_cover",
+		Name:         "Standard Cover",
 		DurationType: "encounter",
+		ACPenalty:    2,
+		ReflexBonus:  2,
+		StealthBonus: 2,
 	})
 
-	svc, sessMgr := newTakeCoverSvc(t, condReg)
+	// Build a world with a room that has standard cover equipment.
+	zone := &world.Zone{
+		ID: "test_ooc_cover", Name: "Test", Description: "Test zone",
+		StartRoom: "room_cover_ooc",
+		Rooms: map[string]*world.Room{
+			"room_cover_ooc": {
+				ID: "room_cover_ooc", ZoneID: "test_ooc_cover",
+				Title: "Cover Room", Description: "A room.", Properties: map[string]string{},
+				Equipment: []world.RoomEquipmentConfig{
+					{ItemID: "barrel_ooc", CoverTier: combat.CoverTierStandard},
+				},
+			},
+		},
+	}
+	worldMgr, err := world.NewManager([]*world.Zone{zone})
+	require.NoError(t, err)
+	sessMgr := session.NewManager()
+	logger := zaptest.NewLogger(t)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:      "u_takecover_ooc",
 		Username: "Hero",
 		CharName: "Hero",
-		RoomID:   "room_a",
+		RoomID:   "room_cover_ooc",
 		Role:     "player",
 	})
 	require.NoError(t, err)
@@ -2142,24 +2177,43 @@ func TestHandleTakeCover_OutOfCombat(t *testing.T) {
 	require.NotNil(t, event)
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
-	assert.Contains(t, msgEvt.Content, "+2 AC")
-	assert.True(t, sess.Conditions.Has("in_cover"), "expected in_cover condition applied")
+	assert.Contains(t, msgEvt.Content, "standard cover")
+	assert.True(t, sess.Conditions.Has("standard_cover"), "expected standard_cover condition applied")
 }
 
 // TestHandleTakeCover_InCombat_InsufficientAP verifies that handleTakeCover returns an error
-// event when the player is in combat but has no active combat (SpendAP fails).
+// event when the player is in combat but SpendAP fails due to no active combat being registered.
 //
-// Precondition: player status == statusInCombat; CombatHandler has no registered combat.
+// Precondition: player status == statusInCombat; room has cover equipment; CombatHandler has no registered combat.
 // Postcondition: error event returned (SpendAP fails because no active combat found).
 func TestHandleTakeCover_InCombat_InsufficientAP(t *testing.T) {
 	condReg := condition.NewRegistry()
 	condReg.Register(&condition.ConditionDef{
-		ID:           "in_cover",
-		Name:         "In Cover",
+		ID:           "standard_cover",
+		Name:         "Standard Cover",
 		DurationType: "encounter",
+		ACPenalty:    2,
+		ReflexBonus:  2,
+		StealthBonus: 2,
 	})
 
-	worldMgr, sessMgr := testWorldAndSession(t)
+	// Build a world with a room that has cover equipment.
+	zone := &world.Zone{
+		ID: "test_iap_cover", Name: "Test", Description: "Test zone",
+		StartRoom: "room_cover_iap",
+		Rooms: map[string]*world.Room{
+			"room_cover_iap": {
+				ID: "room_cover_iap", ZoneID: "test_iap_cover",
+				Title: "Cover Room", Description: "A room.", Properties: map[string]string{},
+				Equipment: []world.RoomEquipmentConfig{
+					{ItemID: "barrel_iap", CoverTier: combat.CoverTierStandard},
+				},
+			},
+		},
+	}
+	worldMgr, err := world.NewManager([]*world.Zone{zone})
+	require.NoError(t, err)
+	sessMgr := session.NewManager()
 	logger := zaptest.NewLogger(t)
 	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, condReg, worldMgr, nil, nil, nil, nil, nil)
 	svc := NewGameServiceServer(
@@ -2180,7 +2234,7 @@ func TestHandleTakeCover_InCombat_InsufficientAP(t *testing.T) {
 		UID:      "u_takecover_combat",
 		Username: "Hero",
 		CharName: "Hero",
-		RoomID:   "room_a",
+		RoomID:   "room_cover_iap",
 		Role:     "player",
 	})
 	require.NoError(t, err)

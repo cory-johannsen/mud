@@ -4259,17 +4259,72 @@ func (s *GameServiceServer) handleRaiseShield(uid string) (*gamev1.ServerEvent, 
 	return messageEvent("You raise your shield. (+2 AC until start of next turn)"), nil
 }
 
-// handleTakeCover applies the in_cover condition (+2 AC for the encounter).
+// coverTierRank returns a numeric rank for cover tier comparison.
+//
+// Postcondition: Returns 3 for "greater", 2 for "standard", 1 for "lesser", 0 otherwise.
+func coverTierRank(tier string) int {
+	switch tier {
+	case combat.CoverTierGreater:
+		return 3
+	case combat.CoverTierStandard:
+		return 2
+	case combat.CoverTierLesser:
+		return 1
+	default:
+		return 0
+	}
+}
+
+// handleTakeCover applies the best available cover condition from room equipment.
 //
 // Precondition: uid must identify a valid player session.
-// Postcondition: Applies in_cover condition; in combat, deducts 1 AP and updates Combatant ACMod.
+// Postcondition: Applies the appropriate cover condition; in combat, deducts 1 AP
+// and sets CoverEquipmentID/CoverTier on the Combatant.
 func (s *GameServiceServer) handleTakeCover(uid string) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
 
-	// In combat: spend 1 AP and update the combatant's ACMod.
+	// Find best cover available in the room.
+	room, ok := s.world.GetRoom(sess.RoomID)
+	if !ok {
+		return errorEvent("Cannot determine room layout."), nil
+	}
+	bestTier := ""
+	bestEquipID := ""
+	bestHP := 0
+	bestDestructible := false
+	for _, eq := range room.Equipment {
+		if eq.CoverTier == "" {
+			continue
+		}
+		if coverTierRank(eq.CoverTier) > coverTierRank(bestTier) {
+			bestTier = eq.CoverTier
+			bestEquipID = eq.ItemID
+			bestHP = eq.CoverHP
+			bestDestructible = eq.CoverDestructible
+		}
+	}
+	if bestTier == "" {
+		return messageEvent("There is no cover available in this area."), nil
+	}
+
+	// Check if already in equal or better cover.
+	currentTier := ""
+	if sess.Conditions != nil {
+		for _, coverID := range []string{"greater_cover", "standard_cover", "lesser_cover"} {
+			if sess.Conditions.Has(coverID) {
+				currentTier = strings.TrimSuffix(coverID, "_cover")
+				break
+			}
+		}
+	}
+	if coverTierRank(currentTier) >= coverTierRank(bestTier) {
+		return messageEvent(fmt.Sprintf("You are already in %s cover.", currentTier)), nil
+	}
+
+	// In combat: spend 1 AP and set combatant cover fields.
 	if sess.Status == statusInCombat {
 		if s.combatH == nil {
 			return errorEvent("Combat handler unavailable."), nil
@@ -4277,31 +4332,38 @@ func (s *GameServiceServer) handleTakeCover(uid string) (*gamev1.ServerEvent, er
 		if err := s.combatH.SpendAP(uid, 1); err != nil {
 			return errorEvent(err.Error()), nil
 		}
-		if err := s.combatH.ApplyCombatantACMod(uid, uid, +2); err != nil {
-			s.logger.Warn("handleTakeCover: ApplyCombatantACMod failed",
+		if err := s.combatH.SetCombatantCover(sess.RoomID, uid, bestEquipID, bestTier); err != nil {
+			s.logger.Warn("handleTakeCover: SetCombatantCover failed",
 				zap.String("uid", uid), zap.Error(err))
-			return errorEvent(fmt.Sprintf("Failed to take cover: %v", err)), nil
+		}
+		// Init cover HP state if destructible and not yet tracked.
+		if bestDestructible && bestHP > 0 && s.combatH.GetCoverHP(sess.RoomID, bestEquipID) < 0 {
+			s.combatH.InitCoverState(sess.RoomID, bestEquipID, bestHP)
 		}
 	}
 
-	// Apply the in_cover condition to the player session.
-	if s.condRegistry != nil {
-		def, ok := s.condRegistry.Get("in_cover")
-		if !ok {
-			s.logger.Warn("handleTakeCover: in_cover condition not found in registry",
-				zap.String("uid", uid))
-		} else {
-			if sess.Conditions == nil {
-				sess.Conditions = condition.NewActiveSet()
-			}
-			if err := sess.Conditions.Apply(uid, def, 1, -1); err != nil {
-				s.logger.Warn("handleTakeCover: Apply in_cover failed",
-					zap.String("uid", uid), zap.Error(err))
-			}
-		}
+	// Remove any existing cover condition, then apply the new one.
+	if sess.Conditions == nil {
+		sess.Conditions = condition.NewActiveSet()
+	}
+	for _, old := range []string{"greater_cover", "standard_cover", "lesser_cover", "in_cover"} {
+		sess.Conditions.Remove(uid, old)
+	}
+	condID := bestTier + "_cover"
+	if s.condRegistry == nil {
+		return errorEvent("Condition registry unavailable."), nil
+	}
+	def, ok := s.condRegistry.Get(condID)
+	if !ok {
+		s.logger.Warn("handleTakeCover: condition not found", zap.String("condID", condID))
+		return errorEvent(fmt.Sprintf("Cover condition %q not found.", condID)), nil
+	}
+	if err := sess.Conditions.Apply(uid, def, 1, -1); err != nil {
+		s.logger.Warn("handleTakeCover: Apply failed", zap.String("uid", uid), zap.Error(err))
 	}
 
-	return messageEvent("You take cover. (+2 AC for the encounter)"), nil
+	return messageEvent(fmt.Sprintf("You take %s cover. (+%d AC, +%d Reflex, +%d Stealth)",
+		bestTier, def.ACPenalty, def.ReflexBonus, def.StealthBonus)), nil
 }
 
 // handleFirstAid performs a patch_job skill check (DC 15).
