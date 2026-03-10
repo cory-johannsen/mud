@@ -101,6 +101,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerDemoralize:         bridgeDemoralize,
 	command.HandlerGrapple:            bridgeGrapple,
 	command.HandlerTrip:               bridgeTrip,
+	command.HandlerDisarm:             bridgeDisarm,
 	command.HandlerHide:               bridgeHide,
 	command.HandlerSneak:              bridgeSneak,
 	command.HandlerDivert:             bridgeDivert,
@@ -909,6 +910,21 @@ func bridgeTrip(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Trip{Trip: &gamev1.TripRequest{Target: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeDisarm builds a DisarmRequest with the target name.
+//
+// Precondition: bctx must be non-nil with a valid reqID and non-empty RawArgs.
+// Postcondition: returns a non-nil msg containing a DisarmRequest when RawArgs is non-empty;
+// otherwise returns done=true with a usage error event.
+func bridgeDisarm(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: disarm <target>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Disarm{Disarm: &gamev1.DisarmRequest{Target: bctx.parsed.RawArgs}},
 	}}, nil
 }
 

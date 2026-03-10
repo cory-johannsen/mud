@@ -75,6 +75,7 @@ message ClientMessage {
     DivertRequest divert = 58;
     EscapeRequest escape = 59;
     GrantRequest grant = 60;
+    DisarmRequest disarm = 61;
   }
 }
 
@@ -741,6 +742,11 @@ message GrappleRequest {
 
 // TripRequest asks the server to trip a target NPC.
 message TripRequest {
+    string target = 1;
+}
+
+// DisarmRequest asks the server to disarm a target NPC.
+message DisarmRequest {
     string target = 1;
 }
 
