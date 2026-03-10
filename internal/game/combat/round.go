@@ -297,6 +297,25 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 		}
 		for _, action := range q.QueuedActions() {
 			switch action.Type {
+			case ActionStride:
+				dir := action.Direction
+				if dir == "" {
+					dir = "toward"
+				}
+				newDist := cbt.Distance
+				if dir == "away" {
+					newDist += 25
+				} else {
+					newDist -= 25
+				}
+				cbt.SetDistance(newDist)
+				events = append(events, RoundEvent{
+					ActionType: ActionStride,
+					ActorID:    actor.ID,
+					ActorName:  actor.Name,
+					Narrative:  fmt.Sprintf("%s strides %s. Distance: %d ft.", actor.Name, dir, cbt.Distance),
+				})
+
 			case ActionPass:
 				events = append(events, RoundEvent{
 					ActionType: ActionPass,

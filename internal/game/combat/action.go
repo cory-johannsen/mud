@@ -16,6 +16,7 @@ const (
 	ActionFireAutomatic                   // costs 3 AP; full-auto suppressive fire
 	ActionThrow                           // costs 1 AP; throw explosive
 	ActionUseAbility                      // costs AbilityCost AP; activate a class ability
+	ActionStride                          // costs 1 AP; move 25ft toward or away from target
 )
 
 // Cost returns the action point cost for the ActionType.
@@ -40,6 +41,8 @@ func (a ActionType) Cost() int {
 		return 1
 	case ActionUseAbility:
 		return 0 // cost comes from QueuedAction.AbilityCost
+	case ActionStride:
+		return 1
 	default:
 		// ActionUnknown and any unrecognized values have cost 0.
 		return 0
@@ -67,6 +70,8 @@ func (a ActionType) String() string {
 		return "throw"
 	case ActionUseAbility:
 		return "use_ability"
+	case ActionStride:
+		return "stride"
 	default:
 		return "unknown"
 	}
@@ -76,6 +81,7 @@ func (a ActionType) String() string {
 type QueuedAction struct {
 	Type        ActionType
 	Target      string // NPC name for attack/strike; empty for pass
+	Direction   string // used by ActionStride: "toward" or "away"
 	WeaponID    string // for firearm actions; empty = unarmed
 	ExplosiveID string // for ActionThrow
 	AbilityID   string // for ActionUseAbility; the ClassFeature ID

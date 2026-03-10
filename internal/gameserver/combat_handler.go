@@ -1208,7 +1208,18 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 }
 
 // legacyAutoQueueLocked queues ActionAttack for c targeting the first living player.
+// If the distance is > 5 and the NPC has no ranged weapon, it first queues an
+// ActionStride toward the player.
 func (h *CombatHandler) legacyAutoQueueLocked(cbt *combat.Combat, c *combat.Combatant) {
+	isRanged := false
+	if inst, ok := h.npcMgr.Get(c.ID); ok && inst.WeaponID != "" && h.invRegistry != nil {
+		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil && wDef.RangeIncrement > 0 {
+			isRanged = true
+		}
+	}
+	if !isRanged && cbt.Distance > 5 {
+		_ = cbt.QueueAction(c.ID, combat.QueuedAction{Type: combat.ActionStride, Direction: "toward"})
+	}
 	for _, combatant := range cbt.Combatants {
 		if combatant.Kind == combat.KindPlayer && !combatant.IsDead() {
 			_ = cbt.QueueAction(c.ID, combat.QueuedAction{
