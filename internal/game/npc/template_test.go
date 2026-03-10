@@ -246,3 +246,47 @@ func TestNewInstance_CopiesResistancesWeaknesses(t *testing.T) {
 	assert.Equal(t, 5, inst.Resistances["fire"])
 	assert.Equal(t, 3, inst.Weaknesses["electricity"])
 }
+
+func TestLoadTemplateFromBytes_WeaponAndArmor(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 12
+perception: 4
+weapon:
+  - id: cheap_blade
+    weight: 3
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 1
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	require.Len(t, tmpl.Weapon, 2)
+	assert.Equal(t, "cheap_blade", tmpl.Weapon[0].ID)
+	assert.Equal(t, 3, tmpl.Weapon[0].Weight)
+	assert.Equal(t, "combat_knife", tmpl.Weapon[1].ID)
+	assert.Equal(t, 1, tmpl.Weapon[1].Weight)
+	require.Len(t, tmpl.Armor, 1)
+	assert.Equal(t, "leather_jacket", tmpl.Armor[0].ID)
+	assert.Equal(t, 1, tmpl.Armor[0].Weight)
+}
+
+func TestLoadTemplateFromBytes_NoEquipment(t *testing.T) {
+	data := []byte(`
+id: bare_npc
+name: Bare NPC
+level: 1
+max_hp: 10
+ac: 12
+perception: 4
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Empty(t, tmpl.Weapon)
+	assert.Empty(t, tmpl.Armor)
+}

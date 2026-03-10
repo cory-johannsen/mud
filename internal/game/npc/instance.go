@@ -56,6 +56,10 @@ type Instance struct {
 	Resistances map[string]int
 	// Weaknesses maps damage type → flat bonus. Copied from template at spawn.
 	Weaknesses map[string]int
+	// WeaponID is the weapon item ID selected at spawn. Empty = unarmed.
+	WeaponID string
+	// ArmorID is the armor item ID selected at spawn. Empty = no armor.
+	ArmorID string
 }
 
 // Name returns the instance's current display name.

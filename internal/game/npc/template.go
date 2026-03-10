@@ -13,6 +13,12 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
 
+// EquipmentEntry represents one option in a weighted random equipment table.
+type EquipmentEntry struct {
+	ID     string `yaml:"id"`
+	Weight int    `yaml:"weight"`
+}
+
 // Abilities holds the six core ability scores for an NPC template.
 type Abilities struct {
 	Brutality int `yaml:"brutality"`
@@ -50,6 +56,10 @@ type Template struct {
 	Resistances map[string]int `yaml:"resistances"`
 	// Weaknesses maps damage type → flat damage addition applied on any hit.
 	Weaknesses map[string]int `yaml:"weaknesses"`
+	// Weapon is a weighted random table of weapon IDs. Empty = unarmed.
+	Weapon []EquipmentEntry `yaml:"weapon"`
+	// Armor is a weighted random table of armor IDs. Empty = no armor.
+	Armor []EquipmentEntry `yaml:"armor"`
 }
 
 // Validate checks that the template satisfies basic invariants.
