@@ -141,64 +141,64 @@
   - [x] Add `weapon` and `armor` fields to NPC YAML schema (item ID or weighted random table); parsed at load time
   - [x] On NPC spawn, populate equipped weapon and armor from YAML; apply armor AC bonus to NPC base AC
   - [x] Include equipped weapon name in combat strike messages (e.g., "Bandit attacks with a rusty knife")
-  - [ ] Disarm command — implement `disarm <target>` (Athletics vs Reflex DC; on success removes target's active weapon from their equipped slot for the remainder of combat; requires NPC equipment tracking in combat)
-- [ ] Disarm action
-  - [ ] See implementation items under NPC equipment — Disarm requires NPC weapon slot tracking in combat
+  - [x] Disarm command — implement `disarm <target>` (Athletics vs Reflex DC; on success removes target's active weapon from their equipped slot for the remainder of combat; requires NPC equipment tracking in combat)
+- [x] Disarm action
+  - [x] See implementation items under NPC equipment — Disarm requires NPC weapon slot tracking in combat
 - [ ] Advanced combat mechanics
-  - [ ] Immobilized — prevent grabbed creatures from moving between rooms
-  - [ ] Delay command — implement `delay` (player forfeits current turn and re-enters initiative at a chosen later point; requires initiative order to support mid-round insertion)
-  - [ ] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
-  - [ ] Sense Motive command — implement `motive <target>` (Perception vs target Deception skill; on success reveals whether the NPC is bluffing, holding back an action, or concealing intent)
   - Reactions
-    - [ ] Reactive Strike (Attack of Opportunity) — NPC triggers a Strike when a player in melee range moves or uses Step; required before Step and Tumble Through are meaningful
+      - [ ] Reactive Strike (Attack of Opportunity) — NPC triggers a Strike when a player in melee range moves or uses Step; required before Step and Tumble Through are meaningful
   - Distance
-    - Measures the distance from the player to the target
-    - Maximum distance 100ft
-    - Minimum distance 5ft
-    - Distance is measurement in 5ft increments
-    - Combat begins with the players at 25ft distance from the enemy
-      - The player may specify an alternate initial distance
-        - The player may not initiate combat with a starting distance less than 15ft unless using a skill or feat that allows this
-      - NPCs always start at distance 0
-    - [ ] Add `Distance int` field to Combat struct (in 5ft increments); initialize to 25 for player-initiated combat
-    - [ ] Stride command — implement `stride` (1 AP; moves 25ft toward or away from target; display updated distance; required before range enforcement)
-    - [ ] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5ft; ranged attacks have accuracy penalties by range band
+      - Measures the distance from the player to the target
+      - Maximum distance 100ft
+      - Minimum distance 5ft
+      - Distance is measurement in 5ft increments
+      - Combat begins with the players at 25ft distance from the enemy
+        - The player may specify an alternate initial distance
+    - The player may not initiate combat with a starting distance less than 15ft unless using a skill or feat that allows this
+        - NPCs always start at distance 0
+      - [ ] Add `Distance int` field to Combat struct (in 5ft increments); initialize to 25 for player-initiated combat
+      - [ ] Stride command — implement `stride` (1 AP; moves 25ft toward or away from target; display updated distance; required before range enforcement)
+      - [ ] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5ft; ranged attacks have accuracy penalties by range band
   - Movement
-    - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
-    - [ ] Positional tracking — track each combatant's position within a room in 5ft increments; required for Shove, Step, and Tumble Through
-    - [ ] Shove command — implement `shove <target>` (Athletics vs Fortitude DC; on success push target 5ft away; requires positional tracking)
-    - [ ] Step command — implement `step <direction>` (move 5ft without triggering Reactive Strike; requires positional tracking and Reactions)
-    - [ ] Tumble Through command — implement `tumble <target>` (Acrobatics vs Reflex DC; on success move through enemy space without triggering Reactive Strike; requires positional tracking)
+      - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
+      - [ ] Positional tracking — track each combatant's position within a room in 5ft increments; required for Shove, Step, and Tumble Through
+      - [ ] Shove command — implement `shove <target>` (Athletics vs Fortitude DC; on success push target 5ft away; requires positional tracking)
+      - [ ] Step command — implement `step <direction>` (move 5ft without triggering Reactive Strike; requires positional tracking and Reactions)
+      - [ ] Tumble Through command — implement `tumble <target>` (Acrobatics vs Reflex DC; on success move through enemy space without triggering Reactive Strike; requires positional tracking)
   - Range
-    - Melee: 5ft
-    - Short: 10-25ft
-    - Long: 30-50ft
-    - Extreme: 55+ ft
+      - Melee: 5ft
+      - Short: 10-25ft
+      - Long: 30-50ft
+      - Extreme: 55+ ft
   - Cover
-    - Room equipment may serve as cover
-      - Whether equipment may be used as cover (and what kind of cover it provides) should be stored in the yaml for the room
-    - Cover uses the PF2E rules
-    - [ ] Add `cover_bonus int` and `cover_destructible bool` fields to room equipment YAML; loaded by the room system
-    - [ ] Cover destruction — when `cover_destructible` is true, NPCs may target cover; after a threshold of hits the cover is removed and its AC bonus lost
+      - Room equipment may serve as cover
+        - Whether equipment may be used as cover (and what kind of cover it provides) should be stored in the yaml for the room
+      - Cover uses the PF2E rules
+      - [ ] Add `cover_bonus int` and `cover_destructible bool` fields to room equipment YAML; loaded by the room system
+      - [ ] Cover destruction — when `cover_destructible` is true, NPCs may target cover; after a threshold of hits the cover is removed and its AC bonus lost
   - Area of Effect
-    - [ ] AoE attack type — add `aoe_radius int` field to weapon/ability YAML; on resolution apply damage roll to all combatants within radius in the current combat
+      - [ ] AoE attack type — add `aoe_radius int` field to weapon/ability YAML; on resolution apply damage roll to all combatants within radius in the current combat
   - Attack of opportunity
-    - [ ] See Reactive Strike under Reactions — Attack of Opportunity is implemented as Reactive Strike (NPC triggers a free Strike when a player in melee range uses a move action)
+      - [ ] See Reactive Strike under Reactions — Attack of Opportunity is implemented as Reactive Strike (NPC triggers a free Strike when a player in melee range uses a move action)
   - Terrain types
-    - [ ] Climbable surfaces — rooms with climbable terrain (walls, ladders, ruins) support vertical movement; stored in room YAML; required for Climb command
-    - [ ] Climb command — implement `climb` (Athletics vs surface DC defined in room YAML; available only in rooms with climbable terrain)
-    - [ ] Water terrain — rooms with water terrain support swimming; stored in room YAML with a current DC value; required for Swim command
-    - [ ] Swim command — implement `swim` (Athletics vs current DC defined in room YAML; available only in rooms with water terrain)
+      - [ ] Climbable surfaces — rooms with climbable terrain (walls, ladders, ruins) support vertical movement; stored in room YAML; required for Climb command
+      - [ ] Climb command — implement `climb` (Athletics vs surface DC defined in room YAML; available only in rooms with climbable terrain)
+      - [ ] Water terrain — rooms with water terrain support swimming; stored in room YAML with a current DC value; required for Swim command
+      - [ ] Swim command — implement `swim` (Athletics vs current DC defined in room YAML; available only in rooms with water terrain)
   - Fleeing
-    - Pursuit
-    - [ ] Flee command — implement `flee` (costs all remaining AP; Athletics or Acrobatics check vs highest NPC Athletics DC in room; on success combat ends and player moves to a random adjacent room)
-    - [ ] Pursuit — on flee failure, each NPC makes a separate Athletics check; on NPC success the NPC follows the player to the adjacent room and re-initiates combat
+      - Pursuit
+      - [ ] Flee command — implement `flee` (costs all remaining AP; Athletics or Acrobatics check vs highest NPC Athletics DC in room; on success combat ends and player moves to a random adjacent room)
+      - [ ] Pursuit — on flee failure, each NPC makes a separate Athletics check; on NPC success the NPC follows the player to the adjacent room and re-initiates combat
   - Mental state
-    - Panic
-      - Psychosis
-    - [ ] Mental state system — add `MentalState` enum (Normal, Panicked, Psychotic) to PlayerSession; state transitions driven by conditions, zone effects, or health thresholds
-    - [ ] Panic condition — implement as a condition with `restrict_actions` effect; on each turn a random available action is chosen instead of player input; triggered by specific NPC abilities, zone effects, or dropping below 25% HP
-    - [ ] Psychosis condition — escalation of Panic; player may attack random targets including allies; triggered by prolonged Panic or specific substances
+      - Panic
+        - Psychosis
+      - [ ] Mental state system — add `MentalState` enum (Normal, Panicked, Psychotic) to PlayerSession; state transitions driven by conditions, zone effects, or health thresholds
+      - [ ] Panic condition — implement as a condition with `restrict_actions` effect; on each turn a random available action is chosen instead of player input; triggered by specific NPC abilities, zone effects, or dropping below 25% HP
+      - [ ] Psychosis condition — escalation of Panic; player may attack random targets including allies; triggered by prolonged Panic or specific substances
+  - [ ] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
+  - [ ] Immobilized — prevent grabbed creatures from moving between rooms
+  - [ ] Sense Motive command — implement `motive <target>` (Perception vs target Deception skill; on success reveals whether the NPC is bluffing, holding back an action, or concealing intent)
+- [ ] Replace 'Level + 10' implementation for Grapple, Trip, Reflex DC with real calculations
 - [ ] Multi-player combat
   - [ ] Other players can join combat already in progress
     - [ ] Combat join — when a player enters a room with active combat, offer to join; on joining, add player as a new combatant with a fresh initiative roll and full AP
