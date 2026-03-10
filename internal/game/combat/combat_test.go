@@ -405,6 +405,11 @@ func TestCombat_SetDistance_Property(t *testing.T) {
 	})
 }
 
+func TestCombatant_Position_DefaultsToZero(t *testing.T) {
+	c := &combat.Combatant{}
+	assert.Equal(t, 0, c.Position)
+}
+
 // TestPropertyCombatant_Hidden_ZeroValue verifies that the zero value of Combatant.Hidden is false.
 func TestPropertyCombatant_Hidden_ZeroValue(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

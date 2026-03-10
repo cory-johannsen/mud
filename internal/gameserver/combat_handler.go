@@ -1017,11 +1017,12 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 			zoneID = room.ZoneID
 		}
 	}
+	playerCbt.Position = 0  // player starts at near end
+	npcCbt.Position = 25    // NPC starts 25ft away
 	cbt, err := h.engine.StartCombat(sess.RoomID, combatants, h.condRegistry, scriptMgr, zoneID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
 	}
-	cbt.SetDistance(25) // player-initiated combat: start 25ft from enemy
 
 	// Apply flat_footed to all NPC combatants at combat start (sucker_punch window).
 	if h.condRegistry != nil {

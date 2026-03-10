@@ -104,6 +104,9 @@ type Combatant struct {
 	// For player combatants: set by hide/divert actions; cleared when the player attacks or is targeted.
 	// For NPC combatants: unused (always false).
 	Hidden bool
+	// Position is the distance in feet along the combat axis from the player's starting point (0).
+	// Player combatants are initialized to 0; NPC combatants are initialized to 25.
+	Position int
 }
 
 // IsPlayer reports whether this combatant is a player character.
