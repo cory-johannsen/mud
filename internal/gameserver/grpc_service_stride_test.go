@@ -6,6 +6,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -246,4 +247,131 @@ func TestHandleStride_ClampAtMaximum(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event")
 
 	assert.Equal(t, 100, cbt.Distance, "distance should remain 100 when already at maximum")
+}
+
+// newStrideSvcWithCombatAndRegistry builds a GameServiceServer and associated helpers with
+// the given inventory.Registry wired into the CombatHandler, so that NPC weapon
+// lookups (e.g. ranged vs melee detection) function correctly.
+//
+// Precondition: t must be non-nil; reg may be nil.
+// Postcondition: Returns non-nil svc, sessMgr, npcMgr, and combatHandler all sharing the same sessMgr.
+func newStrideSvcWithCombatAndRegistry(t *testing.T, reg *inventory.Registry) (*GameServiceServer, *session.Manager, *npc.Manager, *CombatHandler) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	logger := zaptest.NewLogger(t)
+	npcMgr := npc.NewManager()
+	src := &fixedDiceSource{val: 10}
+	roller := dice.NewLoggedRoller(src, logger)
+	combatHandler := NewCombatHandler(
+		combat.NewEngine(), npcMgr, sessMgr, roller,
+		func(_ string, _ []*gamev1.CombatEvent) {},
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil,
+	)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+	return svc, sessMgr, npcMgr, combatHandler
+}
+
+// TestNPCAutoStride_MeleeNPC_ClosesDistance verifies that a melee NPC at distance > 5
+// has ActionStride{Direction:"toward"} prepended before ActionAttack in its queue.
+//
+// Precondition: NPC has no WeaponID (unarmed/melee); combat distance == 25.
+// Postcondition: NPC action queue contains ActionStride as first action.
+func TestNPCAutoStride_MeleeNPC_ClosesDistance(t *testing.T) {
+	_, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombatAndRegistry(t, nil)
+
+	const roomID = "room_npc_melee_stride"
+	inst, err := npcMgr.Spawn(&npc.Template{
+		ID: "goblin-melee-stride", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+	}, roomID)
+	require.NoError(t, err)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_npc_melee_stride", Username: "Fighter", CharName: "Fighter",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_npc_melee_stride", "Goblin")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	combatHandler.combatMu.Lock()
+	cbt, ok := combatHandler.engine.GetCombat(roomID)
+	require.True(t, ok)
+	cbt.SetDistance(25)
+	// Reset queues so autoQueueNPCsLocked populates from a clean state.
+	cbt.StartRound(3)
+	combatHandler.autoQueueNPCsLocked(cbt)
+	q := cbt.ActionQueues[inst.ID]
+	combatHandler.combatMu.Unlock()
+
+	require.NotNil(t, q, "expected an action queue for the NPC")
+	actions := q.QueuedActions()
+	require.GreaterOrEqual(t, len(actions), 2, "expected at least stride + attack in queue")
+	assert.Equal(t, combat.ActionStride, actions[0].Type, "first action must be ActionStride")
+	assert.Equal(t, "toward", actions[0].Direction, "stride direction must be toward")
+	assert.Equal(t, combat.ActionAttack, actions[1].Type, "second action must be ActionAttack")
+}
+
+// TestNPCAutoStride_RangedNPC_DoesNotStride verifies that an NPC equipped with a
+// ranged weapon does NOT queue ActionStride even when distance > 5.
+//
+// Precondition: NPC WeaponID references a WeaponDef with RangeIncrement > 0; combat distance == 25.
+// Postcondition: NPC action queue starts directly with ActionAttack (no ActionStride).
+func TestNPCAutoStride_RangedNPC_DoesNotStride(t *testing.T) {
+	reg := inventory.NewRegistry()
+	bowDef := &inventory.WeaponDef{
+		ID:             "shortbow",
+		Name:           "Shortbow",
+		RangeIncrement: 60,
+	}
+	require.NoError(t, reg.RegisterWeapon(bowDef))
+
+	_, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombatAndRegistry(t, reg)
+
+	const roomID = "room_npc_ranged_stride"
+	inst, err := npcMgr.Spawn(&npc.Template{
+		ID: "archer-ranged-stride", Name: "Archer", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+	}, roomID)
+	require.NoError(t, err)
+	// Assign the ranged weapon to the NPC instance directly.
+	inst.WeaponID = "shortbow"
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_npc_ranged_stride", Username: "Ranger", CharName: "Ranger",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_npc_ranged_stride", "Archer")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	combatHandler.combatMu.Lock()
+	cbt, ok := combatHandler.engine.GetCombat(roomID)
+	require.True(t, ok)
+	cbt.SetDistance(25)
+	cbt.StartRound(3)
+	combatHandler.autoQueueNPCsLocked(cbt)
+	q := cbt.ActionQueues[inst.ID]
+	combatHandler.combatMu.Unlock()
+
+	require.NotNil(t, q, "expected an action queue for the NPC")
+	actions := q.QueuedActions()
+	require.NotEmpty(t, actions, "expected at least one action in queue")
+	assert.Equal(t, combat.ActionAttack, actions[0].Type, "first action must be ActionAttack (no stride for ranged NPC)")
 }
