@@ -456,6 +456,23 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 					// Flat check passed — attack proceeds normally against now-revealed target.
 				}
+				// Hidden NPC flat check: player attacking a hidden NPC must pass DC 11,
+				// unless the NPC has been revealed by Seek (RevealedUntilRound > cbt.Round).
+				if actor.Kind == KindPlayer && target.Kind == KindNPC && target.Hidden && target.RevealedUntilRound <= cbt.Round {
+					flatRoll := src.Intn(20) + 1
+					if flatRoll <= 10 {
+						events = append(events, RoundEvent{
+							ActionType: ActionAttack,
+							ActorID:    actor.ID,
+							ActorName:  actor.Name,
+							TargetID:   target.ID,
+							Narrative:  fmt.Sprintf("%s swings at %s but can't locate them (flat check %d)!", actor.Name, target.Name, flatRoll),
+						})
+						continue
+					}
+					// Flat check passed — attack proceeds, hidden is cleared.
+					target.Hidden = false
+				}
 				// Range enforcement: determine weapon type and enforce distance rules.
 				var mainHandDef *inventory.WeaponDef
 				if actor.Loadout != nil && actor.Loadout.MainHand != nil {
