@@ -295,6 +295,8 @@ func NewGameServiceServer(
 					sess.Conditions.ClearEncounter()
 				}
 			}
+			// Push updated room view so "fighting X" labels clear immediately.
+			s.pushRoomViewToAllInRoom(roomID)
 		})
 		s.worldH.SetCombatHandler(s.combatH)
 	}
@@ -1944,6 +1946,8 @@ func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) 
 		for _, evt := range events[1:] {
 			s.broadcastCombatEvent(sess.RoomID, uid, evt)
 		}
+		// Push updated room view so all players see the combat status immediately.
+		s.pushRoomViewToAllInRoom(sess.RoomID)
 	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
