@@ -29,6 +29,13 @@ type Abilities struct {
 	Flair     int `yaml:"flair"`
 }
 
+// CombatStrategy defines per-NPC-type tactical behaviors in combat.
+type CombatStrategy struct {
+	// UseCover indicates whether this NPC will automatically take cover
+	// at the start of their turn if cover is available in the room.
+	UseCover bool `yaml:"use_cover"`
+}
+
 // Template defines a reusable NPC archetype loaded from YAML.
 type Template struct {
 	ID          string    `yaml:"id"`
@@ -60,6 +67,8 @@ type Template struct {
 	Weapon []EquipmentEntry `yaml:"weapon"`
 	// Armor is a weighted random table of armor IDs. Empty = no armor.
 	Armor []EquipmentEntry `yaml:"armor"`
+	// Combat defines the tactical strategy this NPC uses in combat.
+	Combat CombatStrategy `yaml:"combat"`
 }
 
 // Validate checks that the template satisfies basic invariants.

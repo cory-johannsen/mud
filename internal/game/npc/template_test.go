@@ -290,3 +290,20 @@ perception: 4
 	assert.Empty(t, tmpl.Weapon)
 	assert.Empty(t, tmpl.Armor)
 }
+
+func TestCombatStrategyUseCover(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		useCover := rapid.Bool().Draw(t, "useCover")
+		tmpl := &npc.Template{
+			ID:    "test",
+			Name:  "Test",
+			Level: 1,
+			MaxHP: 10,
+			AC:    10,
+			Combat: npc.CombatStrategy{UseCover: useCover},
+		}
+		if tmpl.Combat.UseCover != useCover {
+			t.Errorf("UseCover: got %v", tmpl.Combat.UseCover)
+		}
+	})
+}

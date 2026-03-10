@@ -251,3 +251,25 @@ func validTestZone() *Zone {
 		},
 	}
 }
+
+func TestRoomEquipmentCoverFields(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		tier := rapid.SampledFrom([]string{"", "lesser", "standard", "greater"}).Draw(t, "tier")
+		destructible := rapid.Bool().Draw(t, "destructible")
+		hp := rapid.IntRange(0, 100).Draw(t, "hp")
+		rec := RoomEquipmentConfig{
+			CoverTier:         tier,
+			CoverDestructible: destructible,
+			CoverHP:           hp,
+		}
+		if rec.CoverTier != tier {
+			t.Errorf("CoverTier: got %q", rec.CoverTier)
+		}
+		if rec.CoverDestructible != destructible {
+			t.Errorf("CoverDestructible: got %v", rec.CoverDestructible)
+		}
+		if rec.CoverHP != hp {
+			t.Errorf("CoverHP: got %d", rec.CoverHP)
+		}
+	})
+}

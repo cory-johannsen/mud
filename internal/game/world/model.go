@@ -109,6 +109,14 @@ type RoomEquipmentConfig struct {
 	Immovable    bool                    // if true, cannot be picked up
 	Script       string                  // path to Lua script for use effect; empty = no effect
 	SkillChecks  []skillcheck.TriggerDef // skill check triggers fired on_use
+	// CoverTier specifies the cover tier this equipment provides: "lesser", "standard",
+	// "greater", or "" (no cover). Only meaningful when Immovable is true.
+	CoverTier         string `yaml:"cover_tier"`
+	// CoverDestructible indicates whether this cover object can be degraded and destroyed.
+	CoverDestructible bool   `yaml:"cover_destructible"`
+	// CoverHP is the number of hits this cover object can absorb before being destroyed.
+	// Only meaningful when CoverDestructible is true.
+	CoverHP           int    `yaml:"cover_hp"`
 }
 
 // Room represents a location in the game world.
