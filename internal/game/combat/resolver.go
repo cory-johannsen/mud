@@ -23,6 +23,8 @@ type AttackResult struct {
 	DamageRoll []int
 	// DamageType is the damage type of the attack (e.g. "fire", "piercing"). Empty means untyped.
 	DamageType string
+	// WeaponName is the weapon name used in this attack; empty = unarmed.
+	WeaponName string
 }
 
 // EffectiveDamage returns the damage dealt after applying the outcome multiplier.
@@ -75,6 +77,7 @@ func ResolveAttack(attacker, target *Combatant, src Source) AttackResult {
 		BaseDamage:  baseDmg,
 		DamageRoll:  []int{dmgDie},
 		DamageType:  attacker.WeaponDamageType,
+		WeaponName:  attacker.WeaponName,
 	}
 }
 

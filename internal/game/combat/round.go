@@ -12,22 +12,27 @@ import (
 
 // attackNarrative builds a human-readable attack result string.
 // When dmg > 0 (a hit landed), the damage dealt is included.
-func attackNarrative(actorName, verb, targetName string, outcome Outcome, total, dmg int) string {
+// When weaponName is non-empty, the weapon is included as "with a <weaponName>".
+func attackNarrative(actorName, verb, targetName, weaponName string, outcome Outcome, total, dmg int) string {
+	with := ""
+	if weaponName != "" {
+		with = " with a " + weaponName
+	}
 	switch outcome {
 	case CritSuccess:
 		if dmg > 0 {
-			return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s (total %d) for %d damage!", actorName, verb, targetName, total, dmg)
+			return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s%s (total %d) for %d damage!", actorName, verb, targetName, with, total, dmg)
 		}
-		return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s (total %d)!", actorName, verb, targetName, total)
+		return fmt.Sprintf("*** CRITICAL HIT! *** %s %s %s%s (total %d)!", actorName, verb, targetName, with, total)
 	case CritFailure:
 		return fmt.Sprintf("*** CRITICAL MISS! *** %s fumbles against %s (total %d)!", actorName, targetName, total)
 	case Success:
 		if dmg > 0 {
-			return fmt.Sprintf("%s %s %s (total %d) for %d damage.", actorName, verb, targetName, total, dmg)
+			return fmt.Sprintf("%s %s %s%s (total %d) for %d damage.", actorName, verb, targetName, with, total, dmg)
 		}
-		return fmt.Sprintf("%s %s %s (total %d).", actorName, verb, targetName, total)
+		return fmt.Sprintf("%s %s %s%s (total %d).", actorName, verb, targetName, with, total)
 	default: // Failure
-		return fmt.Sprintf("%s %s %s (total %d) — miss.", actorName, verb, targetName, total)
+		return fmt.Sprintf("%s %s %s%s (total %d) — miss.", actorName, verb, targetName, with, total)
 	}
 }
 
@@ -349,7 +354,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
 				applyAttackConditions(cbt, actor, target, r)
-				narrative := attackNarrative(actor.Name, "attacks", target.Name, r.Outcome, r.AttackTotal, dmg)
+				narrative := attackNarrative(actor.Name, "attacks", target.Name, r.WeaponName, r.Outcome, r.AttackTotal, dmg)
 				if len(rwAnnotations) > 0 {
 					narrative += " (" + strings.Join(rwAnnotations, "; ") + ")"
 				}
@@ -419,7 +424,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
 				applyAttackConditions(cbt, actor, target, r1)
-				narrative1 := attackNarrative(actor.Name, "strikes", target.Name, r1.Outcome, r1.AttackTotal, dmg1)
+				narrative1 := attackNarrative(actor.Name, "strikes", target.Name, r1.WeaponName, r1.Outcome, r1.AttackTotal, dmg1)
 				if len(rwAnnotations1) > 0 {
 					narrative1 += " (" + strings.Join(rwAnnotations1, "; ") + ")"
 				}
@@ -465,7 +470,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					targetUpdater(target.ID, target.CurrentHP)
 				}
 				applyAttackConditions(cbt, actor, target, r2)
-				narrative2 := attackNarrative(actor.Name, "strikes", target.Name, r2.Outcome, r2.AttackTotal, dmg2)
+				narrative2 := attackNarrative(actor.Name, "strikes", target.Name, r2.WeaponName, r2.Outcome, r2.AttackTotal, dmg2)
 				if len(rwAnnotations2) > 0 {
 					narrative2 += " (" + strings.Join(rwAnnotations2, "; ") + ")"
 				}
