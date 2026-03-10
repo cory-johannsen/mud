@@ -79,6 +79,7 @@ message ClientMessage {
     StrideRequest stride = 62;
     ShoveRequest shove = 63;
     StepRequest step = 64;
+    TumbleRequest tumble = 65;
   }
 }
 
@@ -780,6 +781,11 @@ message DivertRequest {}
 
 // EscapeRequest asks the server to escape from the grabbed condition.
 message EscapeRequest {}
+
+// TumbleRequest asks the server to tumble through the target NPC's space (Acrobatics vs Level+10).
+message TumbleRequest {
+  string target = 1;
+}
 
 // GrantRequest asks the server to grant XP or money to a named player (editor command).
 message GrantRequest {

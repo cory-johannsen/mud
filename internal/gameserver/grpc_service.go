@@ -1212,6 +1212,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleGrant(uid, p.Grant)
 	case *gamev1.ClientMessage_Shove:
 		return s.handleShove(uid, p.Shove)
+	case *gamev1.ClientMessage_Tumble:
+		return s.handleTumble(uid, p.Tumble)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -4879,6 +4881,111 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 
 	msg := fmt.Sprintf("You step %s. Distance to target: %d ft.", dir, dist)
 	return messageEvent(msg), nil
+}
+
+// handleTumble attempts to move the player 5 ft through the target NPC's space using Acrobatics.
+// On success: player moves 5 ft toward the NPC (no reactive strike from the tumbled-through NPC).
+// On failure: player is blocked and the target NPC makes a Reactive Strike against the player.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; req.Target must name an NPC in the room.
+// Postcondition: On success, player combatant's Position increases by 5.
+// On failure, NPC makes a reactive strike that may reduce player HP; no position change.
+func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Tumble is only available in combat."), nil
+	}
+
+	if req.GetTarget() == "" {
+		return errorEvent("Usage: tumble <target>"), nil
+	}
+
+	// Find target NPC in room before spending AP.
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	// Spend 1 AP only after the target is confirmed to exist.
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Skill check: 1d20 + acrobatics bonus vs target Level+10.
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleTumble: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["acrobatics"])
+	total := roll + bonus
+	dc := inst.Level + 10
+
+	detail := fmt.Sprintf("Tumble (acrobatics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+
+	if total >= dc {
+		// Success: move player 5 ft toward NPC.
+		cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
+		if !ok {
+			return errorEvent("No active combat found."), nil
+		}
+		combatant := cbt.GetCombatant(uid)
+		if combatant == nil {
+			return errorEvent("You are not a combatant in this fight."), nil
+		}
+		combatant.Position += 5
+
+		// Compute new distance to the target NPC.
+		dist := 0
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindNPC && c.ID == inst.ID {
+				dist = combat.PosDist(combatant.Position, c.Position)
+				break
+			}
+		}
+		return messageEvent(detail + fmt.Sprintf(" — success! You tumble through %s's space! Distance: %d ft.", inst.Name(), dist)), nil
+	}
+
+	// Failure: player is blocked; NPC makes a Reactive Strike.
+	rsNarrative := fmt.Sprintf("%s makes a reactive strike", inst.Name())
+	attkResult, attkErr := s.dice.RollExpr("1d20")
+	if attkErr != nil {
+		return nil, fmt.Errorf("handleTumble: rolling reactive strike attack: %w", attkErr)
+	}
+	attkRoll := attkResult.Total() + inst.Level
+	// Determine player's effective AC from the combatant record.
+	playerAC := 10
+	if cbt, cbtOk := s.combatH.GetCombatForRoom(sess.RoomID); cbtOk {
+		if playerCbt := cbt.GetCombatant(uid); playerCbt != nil {
+			playerAC = playerCbt.AC + playerCbt.ACMod
+		}
+	}
+
+	if attkRoll >= playerAC {
+		// Reactive Strike hits: roll 1d6 damage.
+		dmgResult, dmgErr := s.dice.RollExpr("1d6")
+		if dmgErr != nil {
+			return nil, fmt.Errorf("handleTumble: rolling reactive strike damage: %w", dmgErr)
+		}
+		dmg := dmgResult.Total()
+		sess.CurrentHP -= dmg
+		if sess.CurrentHP < 0 {
+			sess.CurrentHP = 0
+		}
+		rsNarrative += fmt.Sprintf(" (hit for %d damage! You have %d HP remaining)", dmg, sess.CurrentHP)
+	} else {
+		rsNarrative += " (miss)"
+	}
+
+	return messageEvent(detail + fmt.Sprintf(" — failure! You fail to tumble through %s's space! %s.", inst.Name(), rsNarrative)), nil
 }
 
 // globalRandSrc implements combat.Source using the global math/rand functions.
