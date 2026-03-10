@@ -77,6 +77,7 @@ const (
 	HandlerGrapple             = "grapple"
 	HandlerTrip                = "trip"
 	HandlerDisarm              = "disarm"
+	HandlerStride              = "stride"
 	HandlerHide                = "hide"
 	HandlerSneak               = "sneak"
 	HandlerDivert              = "divert"
@@ -180,6 +181,7 @@ func BuiltinCommands() []Command {
 		{Name: "grapple", Aliases: []string{"grp"}, Help: "Grapple a target (athletics vs Level+10 DC; success applies grabbed condition, target is -2 AC for encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerGrapple},
 		{Name: "trip", Aliases: []string{"trp"}, Help: "Trip a target (athletics vs Level+10 DC; success applies prone, -2 attack for encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerTrip},
 		{Name: "disarm", Aliases: []string{"dsm"}, Help: "Disarm a target (athletics vs Level+10 DC; success removes NPC weapon and drops it to the floor). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDisarm},
+		{Name: "stride", Aliases: []string{"str"}, Help: "Move toward or away from your target (stride [toward|away]; 1 AP; changes distance by 25ft). Combat only.", Category: CategoryCombat, Handler: HandlerStride},
 		{Name: "hide", Aliases: nil, Help: "Attempt to hide (stealth vs highest NPC Perception DC; success applies hidden condition). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerHide},
 		{Name: "sneak", Aliases: nil, Help: "Move while hidden (stealth vs highest NPC Perception DC; fail removes hidden). Requires hidden condition. Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerSneak},
 		{Name: "divert", Aliases: []string{"div"}, Help: "Create a diversion (grift vs highest NPC Perception DC; success applies hidden condition). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDivert},
