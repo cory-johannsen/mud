@@ -4275,8 +4275,6 @@ func coverTierRank(tier string) int {
 	}
 }
 
-// handleTakeCover applies the best available cover condition from room equipment.
-
 // clearPlayerCover removes any active cover condition and resets combatant cover fields.
 // Precondition: uid must identify a valid player session.
 // Postcondition: All cover conditions removed; combatant cover fields cleared if in combat.
@@ -4291,6 +4289,8 @@ func (s *GameServiceServer) clearPlayerCover(uid string, sess *session.PlayerSes
 	}
 }
 
+// handleTakeCover applies the best available cover condition from room equipment.
+//
 // Precondition: uid must identify a valid player session.
 // Postcondition: Applies the appropriate cover condition; in combat, deducts 1 AP
 // and sets CoverEquipmentID/CoverTier on the Combatant.
