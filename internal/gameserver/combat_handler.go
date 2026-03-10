@@ -1656,6 +1656,53 @@ func (h *CombatHandler) DisarmNPC(uid, npcInstID string) (weaponItemID string, e
 	return weaponItemID, nil
 }
 
+// ShoveNPC adjusts the NPC combatant's position by the given push distance.
+// The direction of the push is away from the player (increases NPC position when NPC is ahead of player).
+//
+// Precondition: uid must be a valid connected player in active combat; npcInstID must be a combatant in that combat.
+// Postcondition: NPC Position is increased by pushFt if NPC.Position > player.Position, otherwise decreased by pushFt (floored at 0).
+func (h *CombatHandler) ShoveNPC(uid, npcInstID string, pushFt int) error {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("player %q not found", uid)
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return fmt.Errorf("player %q is not in active combat", uid)
+	}
+
+	var playerCbt *combat.Combatant
+	var npcCbt *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.ID == uid {
+			playerCbt = c
+		}
+		if c.ID == npcInstID {
+			npcCbt = c
+		}
+	}
+	if playerCbt == nil {
+		return fmt.Errorf("player combatant %q not found", uid)
+	}
+	if npcCbt == nil {
+		return fmt.Errorf("NPC combatant %q not found", npcInstID)
+	}
+
+	if npcCbt.Position >= playerCbt.Position {
+		npcCbt.Position += pushFt
+	} else {
+		npcCbt.Position -= pushFt
+		if npcCbt.Position < 0 {
+			npcCbt.Position = 0
+		}
+	}
+	return nil
+}
+
 // Precondition: uid must be a valid connected player.
 // Postcondition: Returns active conditions or nil if not in combat.
 func (h *CombatHandler) Status(uid string) ([]*condition.ActiveCondition, error) {

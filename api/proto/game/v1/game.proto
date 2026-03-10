@@ -77,6 +77,7 @@ message ClientMessage {
     GrantRequest grant = 60;
     DisarmRequest disarm = 61;
     StrideRequest stride = 62;
+    ShoveRequest shove = 63;
   }
 }
 
@@ -754,6 +755,11 @@ message DisarmRequest {
 // StrideRequest asks the server to stride toward or away from the current target.
 message StrideRequest {
     string direction = 1; // "toward" or "away"
+}
+
+// ShoveRequest asks the server to shove a target NPC, pushing them back 5ft (10ft on critical success).
+message ShoveRequest {
+    string target = 1;
 }
 
 // HideRequest asks the server to attempt to hide the player.

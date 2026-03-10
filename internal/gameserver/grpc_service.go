@@ -1208,6 +1208,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleTrainSkill(uid, p.TrainSkill.SkillId)
 	case *gamev1.ClientMessage_Grant:
 		return s.handleGrant(uid, p.Grant)
+	case *gamev1.ClientMessage_Shove:
+		return s.handleShove(uid, p.Shove)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -4684,6 +4686,71 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 		return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed, but had no weapon equipped.", inst.Name())), nil
 	}
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed. The %s clatters to the floor.", inst.Name(), weaponName)), nil
+}
+
+// handleShove performs an athletics skill check against the target NPC's Level+10 DC.
+// On success, the NPC is pushed 5ft; on critical success (beat DC by 10+), pushed 10ft.
+// Combat only; costs 1 AP.
+//
+// Precondition: uid must be in active combat; req.Target must name an NPC in the room.
+// Postcondition: On success, NPC combatant's Position is updated by 5ft (or 10ft on crit).
+func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Shove is only available in combat."), nil
+	}
+
+	if req.GetTarget() == "" {
+		return errorEvent("Usage: shove <target>"), nil
+	}
+
+	// Find target NPC in room before spending AP.
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	// Spend 1 AP only after the target is confirmed to exist.
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	// Skill check: 1d20 + athletics bonus vs target Level+10.
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleShove: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["athletics"])
+	total := roll + bonus
+	dc := inst.Level + 10
+
+	detail := fmt.Sprintf("Shove (athletics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + fmt.Sprintf(" — fail. You fail to shove %s.", inst.Name())), nil
+	}
+
+	pushFt := 5
+	if total >= dc+10 {
+		pushFt = 10
+	}
+
+	if err := s.combatH.ShoveNPC(uid, inst.ID, pushFt); err != nil {
+		s.logger.Warn("handleShove: ShoveNPC failed",
+			zap.String("npc_id", inst.ID), zap.Error(err))
+	}
+
+	if pushFt == 10 {
+		return messageEvent(detail + fmt.Sprintf(" — critical success! %s is shoved back 10 ft!", inst.Name())), nil
+	}
+	return messageEvent(detail + fmt.Sprintf(" — success! %s is pushed back 5 ft.", inst.Name())), nil
 }
 
 // handleStride moves the player 25 ft toward or away from the combat target.

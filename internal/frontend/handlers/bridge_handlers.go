@@ -108,6 +108,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerDivert:             bridgeDivert,
 	command.HandlerEscape:             bridgeEscape,
 	command.HandlerGrant:              bridgeGrant,
+	command.HandlerShove:              bridgeShove,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -926,6 +927,21 @@ func bridgeDisarm(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Disarm{Disarm: &gamev1.DisarmRequest{Target: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeShove builds a ShoveRequest with the target name.
+//
+// Precondition: bctx must be non-nil with a valid reqID and non-empty RawArgs.
+// Postcondition: returns a non-nil msg containing a ShoveRequest when RawArgs is non-empty;
+// otherwise returns done=true with a usage error event.
+func bridgeShove(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: shove <target>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Shove{Shove: &gamev1.ShoveRequest{Target: bctx.parsed.RawArgs}},
 	}}, nil
 }
 
