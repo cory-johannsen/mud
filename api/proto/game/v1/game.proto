@@ -667,6 +667,7 @@ message CharacterSheetView {
     int32 pending_boosts          = 31; // number of unassigned ability boosts
     int32 pending_skill_increases = 32; // number of unassigned skill rank increases
     string gender = 40;
+    int32  awareness = 41; // static bonus: 10 + savvy_mod + awareness_proficiency_bonus
 }
 
 // ResistanceEntry represents one player damage-type resistance or weakness.

@@ -5993,6 +5993,7 @@ type CharacterSheetView struct {
 	PendingBoosts         int32                  `protobuf:"varint,31,opt,name=pending_boosts,json=pendingBoosts,proto3" json:"pending_boosts,omitempty"`                           // number of unassigned ability boosts
 	PendingSkillIncreases int32                  `protobuf:"varint,32,opt,name=pending_skill_increases,json=pendingSkillIncreases,proto3" json:"pending_skill_increases,omitempty"` // number of unassigned skill rank increases
 	Gender                string                 `protobuf:"bytes,40,opt,name=gender,proto3" json:"gender,omitempty"`
+	Awareness             int32                  `protobuf:"varint,41,opt,name=awareness,proto3" json:"awareness,omitempty"` // static bonus: 10 + savvy_mod + awareness_proficiency_bonus
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -6305,6 +6306,13 @@ func (x *CharacterSheetView) GetGender() string {
 		return x.Gender
 	}
 	return ""
+}
+
+func (x *CharacterSheetView) GetAwareness() int32 {
+	if x != nil {
+		return x.Awareness
+	}
+	return 0
 }
 
 // ResistanceEntry represents one player damage-type resistance or weakness.
@@ -7614,7 +7622,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\afeat_id\x18\x01 \x01(\tR\x06featId\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
-	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\xed\f\n" +
+	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"\x8b\r\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -7661,7 +7669,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"xp_to_next\x18\x1e \x01(\x05R\bxpToNext\x12%\n" +
 	"\x0epending_boosts\x18\x1f \x01(\x05R\rpendingBoosts\x126\n" +
 	"\x17pending_skill_increases\x18  \x01(\x05R\x15pendingSkillIncreases\x12\x16\n" +
-	"\x06gender\x18( \x01(\tR\x06gender\x1a8\n" +
+	"\x06gender\x18( \x01(\tR\x06gender\x12\x1c\n" +
+	"\tawareness\x18) \x01(\x05R\tawareness\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
