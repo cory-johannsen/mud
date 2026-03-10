@@ -156,9 +156,9 @@
         - The player may specify an alternate initial distance
     - The player may not initiate combat with a starting distance less than 15ft unless using a skill or feat that allows this
         - NPCs always start at distance 0
-      - [ ] Add `Distance int` field to Combat struct (in 5ft increments); initialize to 25 for player-initiated combat
-      - [ ] Stride command — implement `stride` (1 AP; moves 25ft toward or away from target; display updated distance; required before range enforcement)
-      - [ ] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5ft; ranged attacks have accuracy penalties by range band
+      - [x] Add `Distance int` field to Combat struct (in 5ft increments); initialize to 25 for player-initiated combat
+      - [x] Stride command — implement `stride` (1 AP; moves 25ft toward or away from target; display updated distance; required before range enforcement)
+      - [x] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5ft; ranged attacks have accuracy penalties by range band
   - Movement
       - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
       - [ ] Positional tracking — track each combatant's position within a room in 5ft increments; required for Shove, Step, and Tumble Through
