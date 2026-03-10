@@ -2777,6 +2777,14 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.CoolSave = int32(combat.AbilityMod(sess.Abilities.Savvy) +
 		combat.CombatProficiencyBonus(level, sess.Proficiencies["cool"]))
 
+	// Awareness defaults to trained if no rank is recorded.
+	if _, hasAwareness := sess.Proficiencies["awareness"]; !hasAwareness {
+		if sess.Proficiencies == nil {
+			sess.Proficiencies = make(map[string]string)
+		}
+		sess.Proficiencies["awareness"] = "trained"
+	}
+
 	// Awareness: 10 + savvy_mod + awareness proficiency bonus.
 	view.Awareness = int32(10 + combat.AbilityMod(sess.Abilities.Savvy) +
 		combat.CombatProficiencyBonus(level, sess.Proficiencies["awareness"]))

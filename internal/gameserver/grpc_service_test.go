@@ -2936,3 +2936,25 @@ func TestHandleChar_Awareness_UntrainedRank(t *testing.T) {
 	// 10 + AbilityMod(10)=0 + CombatProficiencyBonus(1,"untrained")=0 = 10
 	assert.Equal(t, int32(10), sheet.GetAwareness())
 }
+
+func TestHandleChar_Awareness_BackfilledWhenMissing(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	_ = worldMgr
+	uid := "player-uid-awareness-bf"
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "bf", CharName: "BF",
+		RoomID: "grinders_row", Role: "player", CharacterID: 0,
+		CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	sess.Abilities.Savvy = 10
+	sess.Level = 1
+	sess.Proficiencies = map[string]string{} // no awareness
+
+	svc := testMinimalService(t, sessMgr)
+	evt, err := svc.handleChar(uid)
+	require.NoError(t, err)
+	sheet := evt.GetCharacterSheet()
+	// With trained backfill: 10 + AbilityMod(10)=0 + CombatProficiencyBonus(1,"trained")=3 = 13
+	assert.Equal(t, int32(13), sheet.GetAwareness())
+}
