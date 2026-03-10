@@ -132,9 +132,9 @@
   - [x] room equipment should be placed between the exits and the NPCs
     - [x] should be 4 columns per line
     - [x] Should be labelled.  The label should be on the same row as the equipment.
-- [ ] Perception
-  - PF2E Perception should be implemented using the name Awareness
-  - Awareness should be displayed on the character sheet
+- [x] Perception
+  - [x] PF2E Perception should be implemented using the name Awareness
+  - [x] Awareness should be displayed on the character sheet
 - [ ] NPC equipment - each NPC gets equipment assigned and equipped
   - Weapon
   - Armor
