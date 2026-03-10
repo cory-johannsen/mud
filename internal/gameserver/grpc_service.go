@@ -4678,6 +4678,9 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 		s.floorMgr.Drop(sess.RoomID, dropped)
 	}
 
+	if weaponItemID == "" {
+		return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed, but had no weapon equipped.", inst.Name())), nil
+	}
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed. The %s clatters to the floor.", inst.Name(), weaponName)), nil
 }
 

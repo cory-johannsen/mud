@@ -1535,8 +1535,6 @@ func (h *CombatHandler) ActiveCombatForPlayer(uid string) *combat.Combat {
 	return cbt
 }
 
-// Returns nil, nil if no combat is active in the player's room.
-//
 // DisarmNPC clears the weapon from the NPC combatant identified by npcInstID
 // in the active combat for the room where uid is fighting.
 // Returns the weapon item ID that was cleared (empty string if NPC was already unarmed).
