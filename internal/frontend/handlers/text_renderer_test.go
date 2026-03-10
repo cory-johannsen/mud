@@ -1070,6 +1070,24 @@ func TestRenderCharacterSheet_XPSection_PendingBoosts(t *testing.T) {
 	assert.Contains(t, result, "levelup")
 }
 
+func TestRenderCharacterSheet_ShowsAwareness(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{
+		Name:      "TestChar",
+		Awareness: 15,
+	}
+	rendered := RenderCharacterSheet(csv, 80)
+	assert.Contains(t, telnet.StripANSI(rendered), "Awareness: +15")
+}
+
+func TestRenderCharacterSheet_ShowsAwareness_NoBonus(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{
+		Name:      "TestChar",
+		Awareness: 10,
+	}
+	rendered := RenderCharacterSheet(csv, 80)
+	assert.Contains(t, telnet.StripANSI(rendered), "Awareness: +10")
+}
+
 // TestProperty_RenderCharacterSheet_XPSection verifies XP values always appear in output.
 func TestProperty_RenderCharacterSheet_XPSection(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

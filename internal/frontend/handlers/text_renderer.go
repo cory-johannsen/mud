@@ -734,6 +734,8 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 		signedInt(int(csv.GetToughnessSave())),
 		signedInt(int(csv.GetHustleSave())),
 		signedInt(int(csv.GetCoolSave())))))
+	left = append(left, slPlain(fmt.Sprintf("Awareness: %s",
+		signedInt(int(csv.GetAwareness())))))
 
 	left = append(left, slPlain(""))
 	left = append(left, sl(telnet.Colorize(telnet.BrightCyan, "--- Weapons ---")))
