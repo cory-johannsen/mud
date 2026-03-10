@@ -995,7 +995,21 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 	}
 
-	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater)
+	coverDegrader := func(rID, equipID string) {
+		h.DecrementCoverHP(rID, equipID)
+		if h.GetCoverHP(rID, equipID) == 0 {
+			h.ClearCoverForEquipment(rID, equipID)
+			if activeCbt, ok := h.engine.GetCombat(rID); ok {
+				for _, c := range activeCbt.Combatants {
+					if c.CoverEquipmentID == equipID {
+						c.CoverEquipmentID = ""
+						c.CoverTier = ""
+					}
+				}
+			}
+		}
+	}
+	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, coverDegrader)
 
 	// Reset per-round loadout swap flag for all players in this combat.
 	for _, c := range cbt.Combatants {

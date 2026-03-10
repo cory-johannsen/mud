@@ -354,9 +354,15 @@ func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Sourc
 //
 // Precondition: cbt and src must not be nil.
 // Postcondition: Returns ordered RoundEvents; damage applied in-place on Combatants.
-func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)) []RoundEvent {
+// coverDegrader(roomID, equipID) is called when an attack misses the target but would have
+// hit without the cover penalty (i.e., the cover absorbed the shot). May be nil (no-op).
+func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int), coverDegraderArgs ...func(roomID, equipID string)) []RoundEvent {
 	if targetUpdater == nil {
 		targetUpdater = func(id string, hp int) {}
+	}
+	coverDegrader := func(roomID, equipID string) {}
+	if len(coverDegraderArgs) > 0 && coverDegraderArgs[0] != nil {
+		coverDegrader = coverDegraderArgs[0]
 	}
 
 	var events []RoundEvent
@@ -529,6 +535,21 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				effectiveAC := target.AC + target.InitiativeBonus
 				r.AttackTotal = hookAttackRoll(cbt, actor, target, r.AttackTotal)
 				r.Outcome = OutcomeFor(r.AttackTotal, effectiveAC)
+				// Crossfire degradation: attack missed but would have hit without cover penalty.
+				if (r.Outcome == Failure || r.Outcome == CritFailure) &&
+					target.CoverTier != "" && target.CoverEquipmentID != "" {
+					attackWithoutCoverPenalty := r.AttackTotal - acBonus // acBonus <= 0, so this raises the effective roll
+					if attackWithoutCoverPenalty >= effectiveAC {
+						coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						events = append(events, RoundEvent{
+							ActionType: ActionCoverHit,
+							ActorID:    actor.ID,
+							ActorName:  actor.Name,
+							TargetID:   target.ID,
+							Narrative:  fmt.Sprintf("%s's attack hits %s's cover!", actor.Name, target.Name),
+						})
+					}
+				}
 				dmg := r.EffectiveDamage()
 				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg += applyPassiveFeats(cbt, actor, target, dmg, src)
@@ -599,6 +620,21 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				effectiveAC1 := target.AC + target.InitiativeBonus
 				r1.AttackTotal = hookAttackRoll(cbt, actor, target, r1.AttackTotal)
 				r1.Outcome = OutcomeFor(r1.AttackTotal, effectiveAC1)
+				// Crossfire degradation: first strike missed but would have hit without cover penalty.
+				if (r1.Outcome == Failure || r1.Outcome == CritFailure) &&
+					target.CoverTier != "" && target.CoverEquipmentID != "" {
+					attackWithoutCoverPenalty1 := r1.AttackTotal - acBonus1
+					if attackWithoutCoverPenalty1 >= effectiveAC1 {
+						coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						events = append(events, RoundEvent{
+							ActionType: ActionCoverHit,
+							ActorID:    actor.ID,
+							ActorName:  actor.Name,
+							TargetID:   target.ID,
+							Narrative:  fmt.Sprintf("%s's strike hits %s's cover!", actor.Name, target.Name),
+						})
+					}
+				}
 				dmg1 := r1.EffectiveDamage()
 				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
@@ -645,6 +681,21 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				effectiveAC2 := target.AC + target.InitiativeBonus
 				r2.AttackTotal = hookAttackRoll(cbt, actor, target, r2.AttackTotal)
 				r2.Outcome = OutcomeFor(r2.AttackTotal, effectiveAC2)
+				// Crossfire degradation: second strike missed but would have hit without cover penalty.
+				if (r2.Outcome == Failure || r2.Outcome == CritFailure) &&
+					target.CoverTier != "" && target.CoverEquipmentID != "" {
+					attackWithoutCoverPenalty2 := r2.AttackTotal - acBonus2
+					if attackWithoutCoverPenalty2 >= effectiveAC2 {
+						coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						events = append(events, RoundEvent{
+							ActionType: ActionCoverHit,
+							ActorID:    actor.ID,
+							ActorName:  actor.Name,
+							TargetID:   target.ID,
+							Narrative:  fmt.Sprintf("%s's strike hits %s's cover!", actor.Name, target.Name),
+						})
+					}
+				}
 				dmg2 := r2.EffectiveDamage()
 				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)

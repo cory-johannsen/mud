@@ -17,6 +17,8 @@ const (
 	ActionThrow                           // costs 1 AP; throw explosive
 	ActionUseAbility                      // costs AbilityCost AP; activate a class ability
 	ActionStride                          // costs 1 AP; move 25ft toward or away from target
+	ActionCoverHit                        // informational: attack absorbed by cover
+	ActionCoverDestroy                    // informational: cover object destroyed
 )
 
 // Cost returns the action point cost for the ActionType.
