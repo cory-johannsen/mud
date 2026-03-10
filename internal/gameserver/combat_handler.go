@@ -158,6 +158,28 @@ func (h *CombatHandler) ClearCoverForEquipment(roomID, equipID string) {
 	delete(h.roomCoverState, coverKey(roomID, equipID))
 }
 
+// DecrementAndCheckDestroyed decrements cover HP atomically and clears the entry if it reaches zero.
+// Returns true when the cover was destroyed (HP just reached 0), false otherwise.
+//
+// Precondition: cover must have been initialized via InitCoverState.
+// Postcondition: if returned true, the entry is removed from roomCoverState.
+func (h *CombatHandler) DecrementAndCheckDestroyed(roomID, equipID string) bool {
+	h.coverMu.Lock()
+	defer h.coverMu.Unlock()
+	k := coverKey(roomID, equipID)
+	v, ok := h.roomCoverState[k]
+	if !ok || v == 0 {
+		return false
+	}
+	v--
+	h.roomCoverState[k] = v
+	if v == 0 {
+		delete(h.roomCoverState, k)
+		return true
+	}
+	return false
+}
+
 // SetXPService registers the XP service used to award kill XP.
 //
 // Precondition: svc must be non-nil.
@@ -996,20 +1018,16 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	}
 
 	coverDegrader := func(rID, equipID string) bool {
-		h.DecrementCoverHP(rID, equipID)
-		if h.GetCoverHP(rID, equipID) == 0 {
-			h.ClearCoverForEquipment(rID, equipID)
-			if activeCbt, ok := h.engine.GetCombat(rID); ok {
-				for _, c := range activeCbt.Combatants {
-					if c.CoverEquipmentID == equipID {
-						c.CoverEquipmentID = ""
-						c.CoverTier = ""
-					}
+		destroyed := h.DecrementAndCheckDestroyed(rID, equipID)
+		if destroyed {
+			for _, c := range cbt.Combatants {
+				if c.CoverEquipmentID == equipID {
+					c.CoverEquipmentID = ""
+					c.CoverTier = ""
 				}
 			}
-			return true
 		}
-		return false
+		return destroyed
 	}
 	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, coverDegrader)
 

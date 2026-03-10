@@ -4276,10 +4276,8 @@ func coverTierRank(tier string) int {
 }
 
 // handleTakeCover applies the best available cover condition from room equipment.
-//
+
 // clearPlayerCover removes any active cover condition and resets combatant cover fields.
-// This is called whenever the player moves, per PF2E rules (cover is lost on movement).
-//
 // Precondition: uid must identify a valid player session.
 // Postcondition: All cover conditions removed; combatant cover fields cleared if in combat.
 func (s *GameServiceServer) clearPlayerCover(uid string, sess *session.PlayerSession) {

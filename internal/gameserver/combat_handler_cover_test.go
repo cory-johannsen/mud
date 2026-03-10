@@ -52,3 +52,22 @@ func TestInitCoverStateIgnoresZeroHP(t *testing.T) {
 		t.Errorf("expected -1 (not initialized) for hp=0, got %d", got)
 	}
 }
+
+func TestDecrementAndCheckDestroyed(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		hp := rapid.IntRange(1, 5).Draw(rt, "hp")
+		h := newCoverTestHandler(t)
+		h.InitCoverState("room1", "eq1", hp)
+		destroyed := false
+		for i := 0; i < hp; i++ {
+			destroyed = h.DecrementAndCheckDestroyed("room1", "eq1")
+		}
+		if !destroyed {
+			rt.Errorf("expected destroyed=true after %d decrements of HP=%d", hp, hp)
+		}
+		// After destruction, entry is removed.
+		if h.GetCoverHP("room1", "eq1") != -1 {
+			rt.Errorf("expected -1 after destruction, got %d", h.GetCoverHP("room1", "eq1"))
+		}
+	})
+}

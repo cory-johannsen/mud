@@ -798,6 +798,7 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
 		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+		result.AttackTotal += acBonus
 		effectiveAC := target.AC + target.InitiativeBonus
 		result.Outcome = OutcomeFor(result.AttackTotal, effectiveAC)
 		// Crossfire degradation: burst shot missed but would have hit without cover penalty.
@@ -875,6 +876,7 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 		}
 		result.AttackTotal = hookAttackRoll(cbt, actor, target, result.AttackTotal)
 		acBonus := condition.ACBonus(cbt.Conditions[target.ID])
+		result.AttackTotal += acBonus
 		effectiveAC := target.AC + target.InitiativeBonus
 		result.Outcome = OutcomeFor(result.AttackTotal, effectiveAC)
 		// Crossfire degradation: automatic shot missed but would have hit without cover penalty.

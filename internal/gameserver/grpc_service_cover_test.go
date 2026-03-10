@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+	"pgregory.net/rapid"
 )
 
 // makeCoverConditionRegistry returns a condition registry with the three cover tiers.
@@ -323,143 +324,188 @@ func setupPlayerInCombatWithCover(
 	return sess, playerCombatant
 }
 
-// TestStrideRemovesCoverCondition verifies that Stride removes cover.
+// TestStrideRemovesCoverCondition verifies that Stride removes cover for any cover tier.
 func TestStrideRemovesCoverCondition(t *testing.T) {
-	worldMgr, sessMgr := testWorldWithCoverRoom(t)
-	condReg := makeCoverConditionRegistry()
-	npcMgr := npc.NewManager()
-	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "guard-stride-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
-	}, "room_cover")
-	require.NoError(t, err)
+	rapid.Check(t, func(rt *rapid.T) {
+		tier := rapid.SampledFrom([]string{"lesser", "standard", "greater"}).Draw(rt, "tier")
+		condID := tier + "_cover"
 
-	logger := zaptest.NewLogger(t)
-	roller := dice.NewLoggedRoller(dice.NewCryptoSource(), logger)
-	combatHandler := NewCombatHandler(
-		combat.NewEngine(), npcMgr, sessMgr, roller,
-		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
-	)
-	svc := NewGameServiceServer(
-		worldMgr, sessMgr,
-		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
-		NewChatHandler(sessMgr),
-		logger,
-		nil, nil, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
-		nil, nil, nil,
-		nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil,
-		nil,
-	)
+		worldMgr, sessMgr := testWorldWithCoverRoom(t)
+		condReg := makeCoverConditionRegistry()
+		npcMgr := npc.NewManager()
+		_, err := npcMgr.Spawn(&npc.Template{
+			ID: "guard-stride-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		}, "room_cover")
+		require.NoError(t, err)
 
-	const uid = "u_stride_cover"
-	sess, playerCombatant := setupPlayerInCombatWithCover(t, sessMgr, combatHandler, condReg, uid, "room_cover")
+		logger := zaptest.NewLogger(t)
+		roller := dice.NewLoggedRoller(dice.NewCryptoSource(), logger)
+		combatHandler := NewCombatHandler(
+			combat.NewEngine(), npcMgr, sessMgr, roller,
+			func(_ string, _ []*gamev1.CombatEvent) {},
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		)
+		svc := NewGameServiceServer(
+			worldMgr, sessMgr,
+			command.DefaultRegistry(),
+			NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+			NewChatHandler(sessMgr),
+			logger,
+			nil, nil, nil, npcMgr, combatHandler, nil,
+			nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+			nil, nil, nil,
+			nil, nil, nil,
+			nil, nil, nil, nil, nil, nil, nil,
+			nil,
+		)
 
-	require.True(t, sess.Conditions.Has("standard_cover"), "precondition: cover must be active before stride")
-	require.Equal(t, combat.CoverTierStandard, playerCombatant.CoverTier, "precondition: combatant cover tier must be set")
+		uid := "u_stride_cover_" + tier
+		sess, playerCombatant := setupPlayerInCombatWithCover(t, sessMgr, combatHandler, condReg, uid, "room_cover")
+		// Override the cover tier applied by the helper to match the drawn tier.
+		sess.Conditions.Remove(uid, "standard_cover")
+		def, ok := condReg.Get(condID)
+		require.True(t, ok)
+		require.NoError(t, sess.Conditions.Apply(uid, def, 1, -1))
+		playerCombatant.CoverTier = tier
 
-	event, err := svc.handleStride(uid, &gamev1.StrideRequest{Direction: "away"})
-	require.NoError(t, err)
-	require.NotNil(t, event)
+		require.True(t, sess.Conditions.Has(condID), "precondition: %s must be active before stride", condID)
+		require.Equal(t, tier, playerCombatant.CoverTier, "precondition: combatant cover tier must be set")
 
-	assert.False(t, sess.Conditions.Has("standard_cover"), "cover condition must be removed after stride")
-	assert.Equal(t, "", playerCombatant.CoverTier, "combatant CoverTier must be cleared after stride")
+		event, err := svc.handleStride(uid, &gamev1.StrideRequest{Direction: "away"})
+		require.NoError(t, err)
+		require.NotNil(t, event)
+
+		if sess.Conditions.Has(condID) {
+			rt.Errorf("cover condition %s must be removed after stride", condID)
+		}
+		if playerCombatant.CoverTier != "" {
+			rt.Errorf("combatant CoverTier must be cleared after stride, got %q", playerCombatant.CoverTier)
+		}
+	})
 }
 
-// TestStepRemovesCoverCondition verifies that Step removes cover.
+// TestStepRemovesCoverCondition verifies that Step removes cover for any cover tier.
 func TestStepRemovesCoverCondition(t *testing.T) {
-	worldMgr, sessMgr := testWorldWithCoverRoom(t)
-	condReg := makeCoverConditionRegistry()
-	npcMgr := npc.NewManager()
-	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "guard-step-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
-	}, "room_cover")
-	require.NoError(t, err)
+	rapid.Check(t, func(rt *rapid.T) {
+		tier := rapid.SampledFrom([]string{"lesser", "standard", "greater"}).Draw(rt, "tier")
+		condID := tier + "_cover"
 
-	logger := zaptest.NewLogger(t)
-	roller := dice.NewLoggedRoller(dice.NewCryptoSource(), logger)
-	combatHandler := NewCombatHandler(
-		combat.NewEngine(), npcMgr, sessMgr, roller,
-		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
-	)
-	svc := NewGameServiceServer(
-		worldMgr, sessMgr,
-		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
-		NewChatHandler(sessMgr),
-		logger,
-		nil, nil, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
-		nil, nil, nil,
-		nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil,
-		nil,
-	)
+		worldMgr, sessMgr := testWorldWithCoverRoom(t)
+		condReg := makeCoverConditionRegistry()
+		npcMgr := npc.NewManager()
+		_, err := npcMgr.Spawn(&npc.Template{
+			ID: "guard-step-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		}, "room_cover")
+		require.NoError(t, err)
 
-	const uid = "u_step_cover"
-	sess, playerCombatant := setupPlayerInCombatWithCover(t, sessMgr, combatHandler, condReg, uid, "room_cover")
+		logger := zaptest.NewLogger(t)
+		roller := dice.NewLoggedRoller(dice.NewCryptoSource(), logger)
+		combatHandler := NewCombatHandler(
+			combat.NewEngine(), npcMgr, sessMgr, roller,
+			func(_ string, _ []*gamev1.CombatEvent) {},
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		)
+		svc := NewGameServiceServer(
+			worldMgr, sessMgr,
+			command.DefaultRegistry(),
+			NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+			NewChatHandler(sessMgr),
+			logger,
+			nil, nil, nil, npcMgr, combatHandler, nil,
+			nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+			nil, nil, nil,
+			nil, nil, nil,
+			nil, nil, nil, nil, nil, nil, nil,
+			nil,
+		)
 
-	require.True(t, sess.Conditions.Has("standard_cover"), "precondition: cover must be active before step")
-	require.Equal(t, combat.CoverTierStandard, playerCombatant.CoverTier, "precondition: combatant cover tier must be set")
+		uid := "u_step_cover_" + tier
+		sess, playerCombatant := setupPlayerInCombatWithCover(t, sessMgr, combatHandler, condReg, uid, "room_cover")
+		// Override the cover tier applied by the helper to match the drawn tier.
+		sess.Conditions.Remove(uid, "standard_cover")
+		def, ok := condReg.Get(condID)
+		require.True(t, ok)
+		require.NoError(t, sess.Conditions.Apply(uid, def, 1, -1))
+		playerCombatant.CoverTier = tier
 
-	event, err := svc.handleStep(uid, &gamev1.StepRequest{Direction: "away"})
-	require.NoError(t, err)
-	require.NotNil(t, event)
+		require.True(t, sess.Conditions.Has(condID), "precondition: %s must be active before step", condID)
+		require.Equal(t, tier, playerCombatant.CoverTier, "precondition: combatant cover tier must be set")
 
-	assert.False(t, sess.Conditions.Has("standard_cover"), "cover condition must be removed after step")
-	assert.Equal(t, "", playerCombatant.CoverTier, "combatant CoverTier must be cleared after step")
+		event, err := svc.handleStep(uid, &gamev1.StepRequest{Direction: "away"})
+		require.NoError(t, err)
+		require.NotNil(t, event)
+
+		if sess.Conditions.Has(condID) {
+			rt.Errorf("cover condition %s must be removed after step", condID)
+		}
+		if playerCombatant.CoverTier != "" {
+			rt.Errorf("combatant CoverTier must be cleared after step, got %q", playerCombatant.CoverTier)
+		}
+	})
 }
 
-// TestTumbleSuccessRemovesCoverCondition verifies that a successful Tumble removes cover.
+// TestTumbleSuccessRemovesCoverCondition verifies that a successful Tumble removes cover for any tier.
 func TestTumbleSuccessRemovesCoverCondition(t *testing.T) {
-	worldMgr, sessMgr := testWorldWithCoverRoom(t)
-	condReg := makeCoverConditionRegistry()
-	npcMgr := npc.NewManager()
-	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "guard-tumble-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
-	}, "room_cover")
-	require.NoError(t, err)
+	rapid.Check(t, func(rt *rapid.T) {
+		tier := rapid.SampledFrom([]string{"lesser", "standard", "greater"}).Draw(rt, "tier")
+		condID := tier + "_cover"
 
-	logger := zaptest.NewLogger(t)
-	// Use a deterministic roller that always returns 19 (d20 = 20) to guarantee Tumble success.
-	roller := dice.NewLoggedRoller(&fixedDiceSource{val: 19}, logger)
-	combatHandler := NewCombatHandler(
-		combat.NewEngine(), npcMgr, sessMgr, roller,
-		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
-	)
-	svc := NewGameServiceServer(
-		worldMgr, sessMgr,
-		command.DefaultRegistry(),
-		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
-		NewChatHandler(sessMgr),
-		logger,
-		nil, nil, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
-		nil, nil, nil,
-		nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil,
-		nil,
-	)
-	// Wire the fixed-source roller into the service.
-	svc.dice = roller
+		worldMgr, sessMgr := testWorldWithCoverRoom(t)
+		condReg := makeCoverConditionRegistry()
+		npcMgr := npc.NewManager()
+		_, err := npcMgr.Spawn(&npc.Template{
+			ID: "guard-tumble-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		}, "room_cover")
+		require.NoError(t, err)
 
-	const uid = "u_tumble_cover"
-	sess, playerCombatant := setupPlayerInCombatWithCover(t, sessMgr, combatHandler, condReg, uid, "room_cover")
+		logger := zaptest.NewLogger(t)
+		// Use a deterministic roller that always returns 19 (d20 = 20) to guarantee Tumble success.
+		roller := dice.NewLoggedRoller(&fixedDiceSource{val: 19}, logger)
+		combatHandler := NewCombatHandler(
+			combat.NewEngine(), npcMgr, sessMgr, roller,
+			func(_ string, _ []*gamev1.CombatEvent) {},
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		)
+		svc := NewGameServiceServer(
+			worldMgr, sessMgr,
+			command.DefaultRegistry(),
+			NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+			NewChatHandler(sessMgr),
+			logger,
+			nil, nil, nil, npcMgr, combatHandler, nil,
+			nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+			nil, nil, nil,
+			nil, nil, nil,
+			nil, nil, nil, nil, nil, nil, nil,
+			nil,
+		)
+		// Wire the fixed-source roller into the service.
+		svc.dice = roller
 
-	require.True(t, sess.Conditions.Has("standard_cover"), "precondition: cover must be active before tumble")
-	require.Equal(t, combat.CoverTierStandard, playerCombatant.CoverTier, "precondition: combatant cover tier must be set")
+		uid := "u_tumble_cover_" + tier
+		sess, playerCombatant := setupPlayerInCombatWithCover(t, sessMgr, combatHandler, condReg, uid, "room_cover")
+		// Override the cover tier applied by the helper to match the drawn tier.
+		sess.Conditions.Remove(uid, "standard_cover")
+		def, ok := condReg.Get(condID)
+		require.True(t, ok)
+		require.NoError(t, sess.Conditions.Apply(uid, def, 1, -1))
+		playerCombatant.CoverTier = tier
 
-	event, err := svc.handleTumble(uid, &gamev1.TumbleRequest{Target: "Guard"})
-	require.NoError(t, err)
-	require.NotNil(t, event)
-	msgEvt := event.GetMessage()
-	require.NotNil(t, msgEvt)
-	require.Contains(t, msgEvt.Content, "success", "expected tumble success narrative")
+		require.True(t, sess.Conditions.Has(condID), "precondition: %s must be active before tumble", condID)
+		require.Equal(t, tier, playerCombatant.CoverTier, "precondition: combatant cover tier must be set")
 
-	assert.False(t, sess.Conditions.Has("standard_cover"), "cover condition must be removed after successful tumble")
-	assert.Equal(t, "", playerCombatant.CoverTier, "combatant CoverTier must be cleared after successful tumble")
+		event, err := svc.handleTumble(uid, &gamev1.TumbleRequest{Target: "Guard"})
+		require.NoError(t, err)
+		require.NotNil(t, event)
+		msgEvt := event.GetMessage()
+		require.NotNil(t, msgEvt)
+		require.Contains(t, msgEvt.Content, "success", "expected tumble success narrative")
+
+		if sess.Conditions.Has(condID) {
+			rt.Errorf("cover condition %s must be removed after successful tumble", condID)
+		}
+		if playerCombatant.CoverTier != "" {
+			rt.Errorf("combatant CoverTier must be cleared after successful tumble, got %q", playerCombatant.CoverTier)
+		}
+	})
 }
