@@ -207,14 +207,17 @@ func combatantDist(a, b *Combatant) int {
 	return posDist(a.Position, b.Position)
 }
 
-// posDist returns the absolute distance between two raw position values.
+// PosDist returns the absolute distance between two raw position values.
 //
 // Precondition: none.
 // Postcondition: Returns abs(a - b).
-func posDist(a, b int) int {
+func PosDist(a, b int) int {
 	d := a - b
 	if d < 0 {
 		d = -d
 	}
 	return d
 }
+
+// posDist is the unexported alias for PosDist, kept for internal use.
+func posDist(a, b int) int { return PosDist(a, b) }

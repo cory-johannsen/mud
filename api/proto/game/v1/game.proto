@@ -78,6 +78,7 @@ message ClientMessage {
     DisarmRequest disarm = 61;
     StrideRequest stride = 62;
     ShoveRequest shove = 63;
+    StepRequest step = 64;
   }
 }
 
@@ -760,6 +761,12 @@ message StrideRequest {
 // ShoveRequest asks the server to shove a target NPC, pushing them back 5ft (10ft on critical success).
 message ShoveRequest {
     string target = 1;
+}
+
+// StepRequest asks the server to step 5 ft toward or away from the current target.
+// Step does not trigger Reactive Strikes.
+message StepRequest {
+    string direction = 1; // "toward" or "away"
 }
 
 // HideRequest asks the server to attempt to hide the player.

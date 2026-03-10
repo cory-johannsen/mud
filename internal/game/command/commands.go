@@ -84,6 +84,7 @@ const (
 	HandlerEscape              = "escape"
 	HandlerGrant               = "grant"
 	HandlerShove               = "shove"
+	HandlerStep                = "step"
 )
 
 // Command defines a player-invocable command.
@@ -188,6 +189,7 @@ func BuiltinCommands() []Command {
 		{Name: "divert", Aliases: []string{"div"}, Help: "Create a diversion (grift vs highest NPC Perception DC; success applies hidden condition). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDivert},
 		{Name: "escape", Aliases: []string{"esc"}, Help: "Escape from grabbed condition (max athletics/acrobatics vs DC; success removes grabbed). Requires grabbed. Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerEscape},
 		{Name: "shove", Aliases: nil, Help: "Shove a target, pushing them back 5 ft (10 ft on critical success). Requires Athletics check vs target level+10.", Category: CategoryCombat, Handler: HandlerShove},
+		{Name: "step", Handler: HandlerStep, Help: "Step 5 ft toward or away from your target. Does not trigger Reactive Strikes.", Category: CategoryCombat},
 	}
 }
 

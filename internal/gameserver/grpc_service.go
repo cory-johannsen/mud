@@ -1188,6 +1188,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleDisarm(uid, p.Disarm)
 	case *gamev1.ClientMessage_Stride:
 		return s.handleStride(uid, p.Stride)
+	case *gamev1.ClientMessage_Step:
+		return s.handleStep(uid, p.Step)
 	case *gamev1.ClientMessage_Hide:
 		return s.handleHide(uid)
 	case *gamev1.ClientMessage_Sneak:
@@ -4814,6 +4816,68 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	for _, ev := range rsEvents {
 		msg += "\n" + ev.Narrative
 	}
+	return messageEvent(msg), nil
+}
+
+// handleStep moves the player 5 ft toward or away from the combat target.
+// Combat only; costs 1 AP. Step explicitly does NOT trigger Reactive Strikes.
+//
+// Precondition: uid must be in active combat.
+// Postcondition: Player combatant's Position updated by 5; message event returned.
+// No CheckReactiveStrikes is called — Step is safe from reactive strikes by rule.
+func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return errorEvent("Step is only available in combat."), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
+	if !ok {
+		return errorEvent("No active combat found."), nil
+	}
+
+	combatant := cbt.GetCombatant(uid)
+	if combatant == nil {
+		return errorEvent("You are not a combatant in this fight."), nil
+	}
+
+	dir := req.GetDirection()
+	switch dir {
+	case "toward", "":
+		dir = "toward"
+		combatant.Position += 5 // toward NPC = increase position
+	case "away":
+		if combatant.Position-5 < 0 {
+			combatant.Position = 0
+		} else {
+			combatant.Position -= 5
+		}
+	default:
+		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", dir)), nil
+	}
+
+	// Find the NPC combatant to compute distance.
+	dist := 0
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			dist = combat.PosDist(combatant.Position, c.Position)
+			break
+		}
+	}
+
+	msg := fmt.Sprintf("You step %s. Distance to target: %d ft.", dir, dist)
 	return messageEvent(msg), nil
 }
 
