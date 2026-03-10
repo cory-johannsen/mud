@@ -119,8 +119,8 @@
     - [x] money: grants a player currency
   - [x] Accepts a character name (target must be online)
   - [x] Accepts the amount as an argument (must be > 0)
-- [ ] Room display
-  - [ ] Should refresh more frequently
+- [x] Room display
+  - [x] Should refresh more frequently
   - [x] Exits should be 4 columns per line
     - [x] Exits label should be on the same line as the first line of exits.
   - [x] NPCs should include combat status
