@@ -4715,16 +4715,19 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	}
 
 	newDist := cbt.Distance
-	if req.GetDirection() == "away" {
+	switch req.GetDirection() {
+	case "away":
 		newDist += 25
-	} else {
+	case "toward", "":
 		newDist -= 25
+	default:
+		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", req.GetDirection())), nil
 	}
 	cbt.SetDistance(newDist)
 
-	dir := "toward"
-	if req.GetDirection() == "away" {
-		dir = "away"
+	dir := req.GetDirection()
+	if dir == "" {
+		dir = "toward"
 	}
 	return messageEvent(fmt.Sprintf("You stride %s. Distance to target: %d ft.", dir, cbt.Distance)), nil
 }

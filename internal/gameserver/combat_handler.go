@@ -53,7 +53,7 @@ type CombatHandler struct {
 	xpSvc         *xp.Service        // optional; awards kill XP on NPC death; may be nil
 	currencySaver CurrencySaver      // optional; persists currency after loot award; may be nil
 	logger        *zap.Logger        // optional; used for error logging; may be nil
-	combatMu      sync.Mutex
+	combatMu      sync.RWMutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
 	loadoutsMu    sync.Mutex
@@ -369,8 +369,8 @@ func (h *CombatHandler) ApplyCombatantAttackMod(uid, targetID string, mod int) e
 // Precondition: roomID must be a non-empty string.
 // Postcondition: Returns (combat, true) if active combat exists; (nil, false) otherwise.
 func (h *CombatHandler) GetCombatForRoom(roomID string) (*combat.Combat, bool) {
-	h.combatMu.Lock()
-	defer h.combatMu.Unlock()
+	h.combatMu.RLock()
+	defer h.combatMu.RUnlock()
 	return h.engine.GetCombat(roomID)
 }
 
