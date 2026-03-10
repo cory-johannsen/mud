@@ -568,6 +568,7 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, error) {
 		// Safe: entire Flee path holds combatMu; pending timer callback will no-op
 		// (GetCombat returns false after EndCombat).
 		h.removeCombatant(cbt, uid)
+		sess.Status = int32(1) // gamev1.CombatStatus_COMBAT_STATUS_IDLE
 		if !cbt.HasLivingPlayers() {
 			h.stopTimerLocked(sess.RoomID)
 			h.engine.EndCombat(sess.RoomID)
@@ -1040,6 +1041,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	if err != nil {
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
 	}
+	sess.Status = int32(2) // gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT
 
 	// Apply flat_footed to all NPC combatants at combat start (sucker_punch window).
 	if h.condRegistry != nil {

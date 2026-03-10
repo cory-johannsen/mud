@@ -291,6 +291,7 @@ func NewGameServiceServer(
 		s.combatH.SetOnCombatEnd(func(roomID string) {
 			sessions := s.sessions.PlayersInRoomDetails(roomID)
 			for _, sess := range sessions {
+				sess.Status = int32(1) // gamev1.CombatStatus_COMBAT_STATUS_IDLE
 				if sess.Conditions != nil {
 					sess.Conditions.ClearEncounter()
 				}
