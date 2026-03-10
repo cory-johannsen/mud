@@ -1215,6 +1215,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleShove(uid, p.Shove)
 	case *gamev1.ClientMessage_Tumble:
 		return s.handleTumble(uid, p.Tumble)
+	case *gamev1.ClientMessage_Seek:
+		return s.handleSeek(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}

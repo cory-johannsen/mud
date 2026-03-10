@@ -80,6 +80,7 @@ message ClientMessage {
     ShoveRequest shove = 63;
     StepRequest step = 64;
     TumbleRequest tumble = 65;
+    SeekRequest seek = 66;
   }
 }
 
@@ -786,6 +787,9 @@ message EscapeRequest {}
 message TumbleRequest {
   string target = 1;
 }
+
+// SeekRequest asks the server to scan for hidden NPCs (Perception vs NPC Stealth DC).
+message SeekRequest {}
 
 // GrantRequest asks the server to grant XP or money to a named player (editor command).
 message GrantRequest {
