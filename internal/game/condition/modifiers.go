@@ -65,3 +65,35 @@ func DamageBonus(s *ActiveSet) int {
 func StunnedAPReduction(s *ActiveSet) int {
 	return s.Stacks("stunned")
 }
+
+// ReflexBonus returns the total Reflex save bonus granted by all active conditions.
+// For stackable conditions, the bonus is multiplied by the current stack count.
+//
+// Precondition: s must not be nil.
+// Postcondition: Returns >= 0.
+func ReflexBonus(s *ActiveSet) int {
+	total := 0
+	for _, ac := range s.conditions {
+		total += ac.Def.ReflexBonus * ac.Stacks
+	}
+	if total < 0 {
+		total = 0
+	}
+	return total
+}
+
+// StealthBonus returns the total Stealth skill bonus granted by all active conditions.
+// For stackable conditions, the bonus is multiplied by the current stack count.
+//
+// Precondition: s must not be nil.
+// Postcondition: Returns >= 0.
+func StealthBonus(s *ActiveSet) int {
+	total := 0
+	for _, ac := range s.conditions {
+		total += ac.Def.StealthBonus * ac.Stacks
+	}
+	if total < 0 {
+		total = 0
+	}
+	return total
+}
