@@ -44,3 +44,11 @@ func TestRoomCoverStateManagement(t *testing.T) {
 		}
 	})
 }
+
+func TestInitCoverStateIgnoresZeroHP(t *testing.T) {
+	h := newCoverTestHandler(t)
+	h.InitCoverState("room1", "equip1", 0)
+	if got := h.GetCoverHP("room1", "equip1"); got != -1 {
+		t.Errorf("expected -1 (not initialized) for hp=0, got %d", got)
+	}
+}

@@ -113,6 +113,9 @@ func coverKey(roomID, equipID string) string { return roomID + ":" + equipID }
 // Precondition: hp > 0.
 // Postcondition: GetCoverHP(roomID, equipID) == hp.
 func (h *CombatHandler) InitCoverState(roomID, equipID string, hp int) {
+	if hp <= 0 {
+		return // invalid HP; do not initialize
+	}
 	h.coverMu.Lock()
 	defer h.coverMu.Unlock()
 	h.roomCoverState[coverKey(roomID, equipID)] = hp
