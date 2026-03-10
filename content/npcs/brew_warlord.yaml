@@ -35,3 +35,15 @@ resistances:
   bludgeoning: 1
 weaknesses:
   fire: 3
+weapon:
+  - id: steel_pipe
+    weight: 2
+  - id: cleaver
+    weight: 2
+  - id: suburban_machete
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 3
+  - id: kevlar_vest
+    weight: 1

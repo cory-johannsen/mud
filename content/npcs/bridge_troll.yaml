@@ -41,3 +41,15 @@ resistances:
   slashing: 1
 weaknesses:
   fire: 3
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+  - id: suburban_machete
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 3
+  - id: kevlar_vest
+    weight: 2

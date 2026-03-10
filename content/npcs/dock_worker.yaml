@@ -31,3 +31,13 @@ loot:
       chance: 0.1
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: dock_hook
+    weight: 4
+  - id: steel_pipe
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 3
+  - id: tactical_vest
+    weight: 1

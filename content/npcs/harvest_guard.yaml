@@ -27,3 +27,15 @@ loot:
       chance: 0.15
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: harvest_sickle
+    weight: 3
+  - id: combat_knife
+    weight: 2
+  - id: sawn_off
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2

@@ -14,6 +14,18 @@ abilities:
   reasoning: 9
   savvy: 10
   flair: 10
+weapon:
+  - id: cheap_blade
+    weight: 2
+  - id: combat_knife
+    weight: 2
+  - id: ganger_pistol
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 2
+  - id: kevlar_vest
+    weight: 2
 loot:
   currency:
     min: 25

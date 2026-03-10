@@ -27,3 +27,15 @@ loot:
       chance: 0.2
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: combat_knife
+    weight: 2
+  - id: assault_rifle
+    weight: 2
+  - id: riot_shotgun
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 3
+  - id: kevlar_vest
+    weight: 2

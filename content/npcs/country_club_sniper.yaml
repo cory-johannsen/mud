@@ -27,3 +27,13 @@ loot:
       chance: 0.2
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: sniper_rifle
+    weight: 4
+  - id: heavy_revolver
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 3
+  - id: kevlar_vest
+    weight: 2

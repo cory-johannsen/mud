@@ -31,3 +31,15 @@ loot:
       chance: 0.25
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: assault_rifle
+    weight: 3
+  - id: battle_rifle
+    weight: 2
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 2
+  - id: kevlar_vest
+    weight: 3

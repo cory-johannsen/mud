@@ -27,3 +27,15 @@ loot:
       chance: 0.25
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: cheap_blade
+    weight: 3
+  - id: rebar_club
+    weight: 2
+  - id: golf_club
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 4
+  - id: kevlar_vest
+    weight: 1

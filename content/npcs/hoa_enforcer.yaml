@@ -31,3 +31,13 @@ loot:
       chance: 0.15
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: stun_baton
+    weight: 4
+  - id: spiked_knuckles
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 2
+  - id: tactical_vest
+    weight: 3

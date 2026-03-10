@@ -34,3 +34,15 @@ loot:
 resistances:
   bludgeoning: 2
   slashing: 2
+weapon:
+  - id: tactical_hatchet
+    weight: 2
+  - id: suburban_machete
+    weight: 2
+  - id: bayonet
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 2
+  - id: kevlar_vest
+    weight: 3

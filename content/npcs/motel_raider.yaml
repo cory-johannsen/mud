@@ -31,3 +31,15 @@ loot:
       chance: 0.1
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: rebar_club
+    weight: 2
+  - id: cheap_blade
+    weight: 2
+  - id: sawn_off
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 4
+  - id: kevlar_vest
+    weight: 1

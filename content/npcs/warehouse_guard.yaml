@@ -31,3 +31,15 @@ loot:
       chance: 0.2
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: steel_pipe
+    weight: 3
+  - id: rebar_club
+    weight: 2
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 2
+  - id: tactical_vest
+    weight: 3

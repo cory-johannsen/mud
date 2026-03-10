@@ -31,3 +31,15 @@ loot:
       chance: 0.2
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: dock_hook
+    weight: 3
+  - id: suburban_machete
+    weight: 2
+  - id: sawn_off
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 4
+  - id: tactical_vest
+    weight: 1

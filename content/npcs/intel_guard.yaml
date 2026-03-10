@@ -27,3 +27,13 @@ loot:
       chance: 0.2
       min_qty: 1
       max_qty: 1
+weapon:
+  - id: corp_security_smg
+    weight: 3
+  - id: combat_knife
+    weight: 2
+armor:
+  - id: tactical_vest
+    weight: 2
+  - id: kevlar_vest
+    weight: 3
