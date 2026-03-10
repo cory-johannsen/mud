@@ -249,6 +249,14 @@ func main() {
 	}
 	logger.Info("loaded armor definitions", zap.Int("count", len(armors)))
 
+	// Wire armor AC resolver so NPC spawn applies equipped armor AC bonus.
+	npcMgr.SetArmorACResolver(func(armorID string) int {
+		if def, ok := invRegistry.Armor(armorID); ok {
+			return def.ACBonus
+		}
+		return 0
+	})
+
 	// Load job definitions.
 	jobList, err := ruleset.LoadJobs(*jobsDir)
 	if err != nil {
