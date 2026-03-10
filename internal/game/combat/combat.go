@@ -198,3 +198,15 @@ func DefaultSaveRank(rank string) string {
 	}
 	return rank
 }
+
+// combatantDist returns the distance in feet between two combatants.
+//
+// Precondition: a and b must be non-nil.
+// Postcondition: Returns abs(a.Position - b.Position).
+func combatantDist(a, b *Combatant) int {
+	d := a.Position - b.Position
+	if d < 0 {
+		d = -d
+	}
+	return d
+}

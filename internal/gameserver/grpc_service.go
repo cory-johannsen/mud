@@ -4687,10 +4687,10 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 }
 
 // handleStride moves the player 25 ft toward or away from the combat target.
-// Combat only; costs 1 AP. Distance is clamped to [5, 100].
+// Combat only; costs 1 AP.
 //
 // Precondition: uid must be in active combat.
-// Postcondition: Combat Distance updated; message event returned with new distance.
+// Postcondition: Player combatant's Position updated; message event returned.
 func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -4714,22 +4714,26 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 		return errorEvent("No active combat found."), nil
 	}
 
-	newDist := cbt.Distance
-	switch req.GetDirection() {
-	case "away":
-		newDist += 25
-	case "toward", "":
-		newDist -= 25
-	default:
-		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", req.GetDirection())), nil
+	combatant := cbt.GetCombatant(uid)
+	if combatant == nil {
+		return errorEvent("You are not a combatant in this fight."), nil
 	}
-	cbt.SetDistance(newDist)
 
 	dir := req.GetDirection()
-	if dir == "" {
+	switch dir {
+	case "toward", "":
 		dir = "toward"
+		combatant.Position += 25 // toward NPC = increase position
+	case "away":
+		if combatant.Position-25 < 0 {
+			combatant.Position = 0
+		} else {
+			combatant.Position -= 25
+		}
+	default:
+		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", dir)), nil
 	}
-	return messageEvent(fmt.Sprintf("You stride %s. Distance to target: %d ft.", dir, cbt.Distance)), nil
+	return messageEvent(fmt.Sprintf("You stride %s.", dir)), nil
 }
 
 // maxNPCPerceptionInRoom returns the highest Perception value among all living NPCs in roomID.

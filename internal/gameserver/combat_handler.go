@@ -590,11 +590,12 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, error) {
 	return events, nil
 }
 
-// SetActiveCombatDistance sets the Distance on the active combat for uid's current room.
+// SetActiveCombatDistance sets the player combatant's Position so that the computed
+// distance to the NPC equals dist.
 // Returns an error if the player has no session or is not in active combat.
 //
-// Precondition: uid must be non-empty; dist must be in [5, 100].
-// Postcondition: The combat distance is updated to dist (clamped by SetDistance).
+// Precondition: uid must be non-empty; dist >= 0.
+// Postcondition: Player combatant's Position is updated so combatantDist(player, npc) == dist.
 func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
@@ -606,7 +607,23 @@ func (h *CombatHandler) SetActiveCombatDistance(uid string, dist int) error {
 	if !ok {
 		return fmt.Errorf("no active combat in room %q", sess.RoomID)
 	}
-	cbt.SetDistance(dist)
+	playerCbt := cbt.GetCombatant(uid)
+	if playerCbt == nil {
+		return fmt.Errorf("player %q is not a combatant", uid)
+	}
+	// Find NPC position (default 25).
+	npcPos := 25
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			npcPos = c.Position
+			break
+		}
+	}
+	newPos := npcPos - dist
+	if newPos < 0 {
+		newPos = 0
+	}
+	playerCbt.Position = newPos
 	return nil
 }
 
@@ -1218,7 +1235,18 @@ func (h *CombatHandler) legacyAutoQueueLocked(cbt *combat.Combat, c *combat.Comb
 			isRanged = true
 		}
 	}
-	if !isRanged && cbt.Distance > 5 {
+	playerDist := 25 // fallback if no player found
+	for _, comb := range cbt.Combatants {
+		if comb.Kind == combat.KindPlayer && !comb.IsDead() {
+			d := c.Position - comb.Position
+			if d < 0 {
+				d = -d
+			}
+			playerDist = d
+			break
+		}
+	}
+	if !isRanged && playerDist > 5 {
 		_ = cbt.QueueAction(c.ID, combat.QueuedAction{Type: combat.ActionStride, Direction: "toward"})
 	}
 	for _, combatant := range cbt.Combatants {

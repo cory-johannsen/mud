@@ -38,23 +38,6 @@ type Combat struct {
 	// sessionGetter looks up a player session by UID.
 	// May be nil; when nil, passive feat checks are silently skipped.
 	sessionGetter func(uid string) (*session.PlayerSession, bool)
-	// Distance is the current distance in feet between the player and the NPC.
-	// Valid range: [5, 100]. Initialized to 25 on player-initiated combat.
-	Distance int
-}
-
-// SetDistance updates the combat distance, clamping to [5, 100].
-//
-// Precondition: none.
-// Postcondition: Distance is in [5, 100].
-func (c *Combat) SetDistance(feet int) {
-	if feet < 5 {
-		feet = 5
-	}
-	if feet > 100 {
-		feet = 100
-	}
-	c.Distance = feet
 }
 
 // RoundConditionEvent records a condition applied or removed during round startup.
@@ -416,6 +399,19 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 	}
 	e.combats[roomID] = cbt
 	return cbt, nil
+}
+
+// GetCombatant returns the combatant with the given ID, or nil if not found.
+//
+// Precondition: none.
+// Postcondition: Returns the shared combatant pointer or nil.
+func (c *Combat) GetCombatant(id string) *Combatant {
+	for _, cbt := range c.Combatants {
+		if cbt.ID == id {
+			return cbt
+		}
+	}
+	return nil
 }
 
 // GetCombat returns the active combat in roomID.

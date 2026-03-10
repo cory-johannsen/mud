@@ -17,7 +17,8 @@ type fixedSrcDist struct{ val int }
 
 func (f fixedSrcDist) Intn(_ int) int { return f.val }
 
-// makeDistanceCombat creates a minimal two-combatant combat with the given distance.
+// makeDistanceCombat creates a minimal two-combatant combat with combatantDist == distanceFt.
+// Player starts at Position=0; NPC at Position=distanceFt.
 // The player combatant has no loadout (unarmed / melee).
 func makeDistanceCombat(t *testing.T, distanceFt int) (*combat.Combat, *combat.Combatant, *combat.Combatant) {
 	t.Helper()
@@ -29,16 +30,17 @@ func makeDistanceCombat(t *testing.T, distanceFt int) (*combat.Combat, *combat.C
 	attacker := &combat.Combatant{
 		ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2,
+		Position: 0,
 	}
 	target := &combat.Combatant{
 		ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1,
+		Position: distanceFt,
 	}
 
 	eng := combat.NewEngine()
 	cbt, err := eng.StartCombat("room_a", []*combat.Combatant{attacker, target}, reg, nil, "")
 	require.NoError(t, err)
-	cbt.SetDistance(distanceFt)
 	return cbt, attacker, target
 }
 
@@ -103,15 +105,16 @@ func TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5(t *testing.T
 		attacker := &combat.Combatant{
 			ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 			CurrentHP: 20, MaxHP: 20, AC: 5, Level: 1, StrMod: 5,
+			Position: 0,
 		}
 		target := &combat.Combatant{
 			ID: "n1", Kind: combat.KindNPC, Name: "T",
 			CurrentHP: 20, MaxHP: 20, AC: 5, Level: 1,
+			Position: dist,
 		}
 		eng := combat.NewEngine()
 		cbt, err := eng.StartCombat("room_a", []*combat.Combatant{attacker, target}, reg, nil, "")
 		require.NoError(rt, err)
-		cbt.SetDistance(dist)
 
 		cbt.StartRound(3)
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "T"})
@@ -153,18 +156,18 @@ func TestRangeEnforcement_RangedWeapon_ExtremeRange_Misses(t *testing.T) {
 	attacker := &combat.Combatant{
 		ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2,
-		Loadout: preset,
+		Loadout: preset, Position: 0,
 	}
 	target := &combat.Combatant{
 		ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1,
+		// 4 * 20 = 80; Position=85 means distance=85 (extreme range).
+		Position: 85,
 	}
 
 	eng := combat.NewEngine()
 	cbt, err := eng.StartCombat("room_a", []*combat.Combatant{attacker, target}, reg, nil, "")
 	require.NoError(t, err)
-	// 4 * 20 = 80; distance 85 is extreme range.
-	cbt.SetDistance(85)
 
 	cbt.StartRound(3)
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
@@ -205,18 +208,18 @@ func TestRangeEnforcement_RangedWeapon_WithinRange_CanResolve(t *testing.T) {
 	attacker := &combat.Combatant{
 		ID: "p1", Kind: combat.KindPlayer, Name: "Player",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1, StrMod: 2,
-		Loadout: preset,
+		Loadout: preset, Position: 0,
 	}
 	target := &combat.Combatant{
 		ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
 		CurrentHP: 20, MaxHP: 20, AC: 10, Level: 1,
+		// Distance 15 is within first range increment (20).
+		Position: 15,
 	}
 
 	eng := combat.NewEngine()
 	cbt, err := eng.StartCombat("room_a", []*combat.Combatant{attacker, target}, reg, nil, "")
 	require.NoError(t, err)
-	// Distance 15 is within first range increment (20).
-	cbt.SetDistance(15)
 
 	cbt.StartRound(3)
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))

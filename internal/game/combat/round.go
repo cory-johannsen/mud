@@ -302,18 +302,46 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if dir == "" {
 					dir = "toward"
 				}
-				newDist := cbt.Distance
-				if dir == "away" {
-					newDist += 25
-				} else {
-					newDist -= 25
+				// Find the first living opponent to determine relative stride direction.
+				var opponent *Combatant
+				for _, c := range cbt.Combatants {
+					if c.ID != actor.ID && c.Kind != actor.Kind && !c.IsDead() {
+						opponent = c
+						break
+					}
 				}
-				cbt.SetDistance(newDist)
+				// actorAhead is true when the actor is positioned beyond (greater than) the opponent.
+				actorAhead := opponent != nil && actor.Position > opponent.Position
+				if dir == "toward" {
+					// Move actor toward opponent.
+					if actorAhead {
+						// Actor is beyond opponent; decrease to close gap.
+						if actor.Position-25 < 0 {
+							actor.Position = 0
+						} else {
+							actor.Position -= 25
+						}
+					} else {
+						// Actor is behind (or at same level as) opponent; increase to close gap.
+						actor.Position += 25
+					}
+				} else { // "away"
+					// Move actor away from opponent (opposite of toward).
+					if actorAhead {
+						actor.Position += 25
+					} else {
+						if actor.Position-25 < 0 {
+							actor.Position = 0
+						} else {
+							actor.Position -= 25
+						}
+					}
+				}
 				events = append(events, RoundEvent{
 					ActionType: ActionStride,
 					ActorID:    actor.ID,
 					ActorName:  actor.Name,
-					Narrative:  fmt.Sprintf("%s strides %s. Distance: %d ft.", actor.Name, dir, cbt.Distance),
+					Narrative:  fmt.Sprintf("%s strides %s.", actor.Name, dir),
 				})
 
 			case ActionPass:
@@ -359,10 +387,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if actor.Loadout != nil && actor.Loadout.MainHand != nil {
 					mainHandDef = actor.Loadout.MainHand.Def
 				}
+				dist := combatantDist(actor, target)
 				isMelee := mainHandDef == nil || mainHandDef.RangeIncrement == 0
 				if isMelee {
 					// Melee weapons (including unarmed) cannot attack beyond 5ft.
-					if cbt.Distance > 5 {
+					if dist > 5 {
 						events = append(events, RoundEvent{
 							ActionType: ActionAttack,
 							ActorID:    actor.ID,
@@ -376,7 +405,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				} else {
 					// Ranged weapon: enforce extreme range (beyond 4x RangeIncrement).
-					if cbt.Distance > 4*mainHandDef.RangeIncrement {
+					if dist > 4*mainHandDef.RangeIncrement {
 						events = append(events, RoundEvent{
 							ActionType: ActionAttack,
 							ActorID:    actor.ID,
@@ -396,8 +425,8 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if !isMelee {
 					// Ranged attack: compute range increments from combat distance.
 					ri := 0
-					if cbt.Distance > mainHandDef.RangeIncrement {
-						ri = (cbt.Distance - mainHandDef.RangeIncrement) / mainHandDef.RangeIncrement
+					if dist > mainHandDef.RangeIncrement {
+						ri = (dist - mainHandDef.RangeIncrement) / mainHandDef.RangeIncrement
 					}
 					r = ResolveFirearmAttack(actor, target, mainHandDef, ri, src)
 				} else {
