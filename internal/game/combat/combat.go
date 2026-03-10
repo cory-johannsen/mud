@@ -37,6 +37,14 @@ func (o Outcome) String() string {
 	}
 }
 
+// Cover tier constants define the valid values for Combatant.CoverTier.
+const (
+	CoverTierNone     = ""
+	CoverTierLesser   = "lesser"
+	CoverTierStandard = "standard"
+	CoverTierGreater  = "greater"
+)
+
 // Combatant represents one participant in a combat — either a player or an NPC instance.
 type Combatant struct {
 	ID         string

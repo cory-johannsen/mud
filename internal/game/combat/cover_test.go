@@ -10,7 +10,7 @@ import (
 
 func TestCombatantCoverFields(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
-		tier := rapid.SampledFrom([]string{"", "lesser", "standard", "greater"}).Draw(t, "tier")
+		tier := rapid.SampledFrom([]string{combat.CoverTierNone, combat.CoverTierLesser, combat.CoverTierStandard, combat.CoverTierGreater}).Draw(t, "tier")
 		equipID := rapid.String().Draw(t, "equipID")
 		c := &combat.Combatant{
 			CoverEquipmentID: equipID,

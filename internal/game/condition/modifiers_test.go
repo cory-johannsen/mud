@@ -134,26 +134,34 @@ func TestProperty_DamageBonus_NeverNegative(t *testing.T) {
 
 func TestReflexBonus(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
-		bonus := rapid.IntRange(0, 10).Draw(t, "bonus")
+		bonus := rapid.IntRange(-5, 10).Draw(t, "bonus")
 		def := &condition.ConditionDef{ID: "test_cover", ReflexBonus: bonus}
 		s := condition.NewActiveSet()
 		_ = s.Apply("uid", def, 1, -1)
 		got := condition.ReflexBonus(s)
-		if got != bonus {
-			t.Errorf("ReflexBonus: got %d, want %d", got, bonus)
+		want := bonus
+		if want < 0 {
+			want = 0
+		}
+		if got != want {
+			t.Errorf("ReflexBonus: got %d, want %d (bonus=%d)", got, want, bonus)
 		}
 	})
 }
 
 func TestStealthBonus(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
-		bonus := rapid.IntRange(0, 10).Draw(t, "bonus")
+		bonus := rapid.IntRange(-5, 10).Draw(t, "bonus")
 		def := &condition.ConditionDef{ID: "test_cover", StealthBonus: bonus}
 		s := condition.NewActiveSet()
 		_ = s.Apply("uid", def, 1, -1)
 		got := condition.StealthBonus(s)
-		if got != bonus {
-			t.Errorf("StealthBonus: got %d, want %d", got, bonus)
+		want := bonus
+		if want < 0 {
+			want = 0
+		}
+		if got != want {
+			t.Errorf("StealthBonus: got %d, want %d (bonus=%d)", got, want, bonus)
 		}
 	})
 }
