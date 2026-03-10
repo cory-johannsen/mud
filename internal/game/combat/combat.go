@@ -110,6 +110,12 @@ type Combatant struct {
 	// Position is the distance in feet along the combat axis from the player's starting point (0).
 	// Player combatants are initialized to 0; NPC combatants are initialized to 25.
 	Position int
+	// CoverEquipmentID is the ItemID of the room equipment object this combatant is
+	// using for cover. Empty string means the combatant is not in cover.
+	CoverEquipmentID string
+	// CoverTier is the tier of cover this combatant has: "lesser", "standard",
+	// "greater", or "" (none).
+	CoverTier string
 }
 
 // IsPlayer reports whether this combatant is a player character.
