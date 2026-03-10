@@ -21,7 +21,9 @@ type ConditionDef struct {
 	AttackPenalty   int      `yaml:"attack_penalty"`
 	ACPenalty       int      `yaml:"ac_penalty"`
 	SpeedPenalty    int      `yaml:"speed_penalty"`
-	DamageBonus     int      `yaml:"damage_bonus"` // positive = bonus to damage rolls
+	DamageBonus     int      `yaml:"damage_bonus"`   // positive = bonus to damage rolls
+	ReflexBonus     int      `yaml:"reflex_bonus"`   // positive = bonus to Reflex saves
+	StealthBonus    int      `yaml:"stealth_bonus"`  // positive = bonus to Stealth checks
 	RestrictActions []string `yaml:"restrict_actions"`
 	LuaOnApply      string   `yaml:"lua_on_apply"`  // stored; ignored until Stage 6
 	LuaOnRemove     string   `yaml:"lua_on_remove"` // stored; ignored until Stage 6

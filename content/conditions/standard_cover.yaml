@@ -1,0 +1,16 @@
+id: standard_cover
+name: Standard Cover
+description: |
+  You are taking standard cover, gaining +2 circumstance bonus to AC, Reflex saves, and Stealth checks.
+duration_type: encounter
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 2
+damage_bonus: 0
+speed_penalty: 0
+reflex_bonus: 2
+stealth_bonus: 2
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

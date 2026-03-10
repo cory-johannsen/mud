@@ -1,12 +1,14 @@
 package condition_test
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
@@ -108,6 +110,47 @@ func TestLoadDirectory_RealConditions(t *testing.T) {
 	for _, id := range []string{"dying", "wounded", "unconscious", "stunned", "frightened", "prone", "flat_footed", "grabbed", "hidden"} {
 		_, ok := reg.Get(id)
 		assert.True(t, ok, "condition %q must be present", id)
+	}
+}
+
+func TestCoverConditionYAML(t *testing.T) {
+	cases := []struct {
+		file        string
+		wantID      string
+		wantACP     int
+		wantReflex  int
+		wantStealth int
+	}{
+		{"lesser_cover", "lesser_cover", 1, 1, 1},
+		{"standard_cover", "standard_cover", 2, 2, 2},
+		{"greater_cover", "greater_cover", 4, 4, 4},
+	}
+	for _, tc := range cases {
+		t.Run(tc.file, func(t *testing.T) {
+			path := filepath.Join("../../../content/conditions", tc.file+".yaml")
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatalf("reading %s: %v", path, err)
+			}
+			var def condition.ConditionDef
+			dec := yaml.NewDecoder(bytes.NewReader(data))
+			dec.KnownFields(true)
+			if err := dec.Decode(&def); err != nil {
+				t.Fatalf("parsing %s: %v", path, err)
+			}
+			if def.ID != tc.wantID {
+				t.Errorf("ID: got %q, want %q", def.ID, tc.wantID)
+			}
+			if def.ACPenalty != tc.wantACP {
+				t.Errorf("ACPenalty: got %d, want %d", def.ACPenalty, tc.wantACP)
+			}
+			if def.ReflexBonus != tc.wantReflex {
+				t.Errorf("ReflexBonus: got %d, want %d", def.ReflexBonus, tc.wantReflex)
+			}
+			if def.StealthBonus != tc.wantStealth {
+				t.Errorf("StealthBonus: got %d, want %d", def.StealthBonus, tc.wantStealth)
+			}
+		})
 	}
 }
 
