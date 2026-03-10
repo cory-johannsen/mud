@@ -940,6 +940,14 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	playerCbt.HustleRank = combat.DefaultSaveRank(sess.Proficiencies["hustle"])
 	playerCbt.CoolRank = combat.DefaultSaveRank(sess.Proficiencies["cool"])
 
+	// Resolve NPC weapon name for combat narrative.
+	npcWeaponName := ""
+	if inst.WeaponID != "" && h.invRegistry != nil {
+		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
+			npcWeaponName = wDef.Name
+		}
+	}
+
 	npcCbt := &combat.Combatant{
 		ID:          inst.ID,
 		Kind:        combat.KindNPC,
@@ -953,6 +961,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		NPCType:     inst.Type,
 		Resistances: inst.Resistances,
 		Weaknesses:  inst.Weaknesses,
+		WeaponName:  npcWeaponName,
 	}
 
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
