@@ -76,15 +76,47 @@ func (i *Instance) setName(s string) {
 	i.name = s
 }
 
-// NewInstance creates a live NPC instance from a template, placed in roomID.
+// pickWeighted selects one EquipmentEntry ID using weighted random selection.
+// Returns "" if entries is empty or all weights are zero.
+//
+// Precondition: entries must not be nil.
+func pickWeighted(entries []EquipmentEntry) string {
+	total := 0
+	for _, e := range entries {
+		total += e.Weight
+	}
+	if total <= 0 {
+		return ""
+	}
+	roll := rand.Intn(total)
+	for _, e := range entries {
+		roll -= e.Weight
+		if roll < 0 {
+			return e.ID
+		}
+	}
+	return entries[len(entries)-1].ID
+}
+
+// NewInstanceWithResolver creates a live NPC instance from a template, placed in roomID.
+// armorACBonus is an optional func(armorID string) int that returns the armor's AC bonus;
+// pass nil to skip AC adjustment.
 //
 // Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
-// Postcondition: CurrentHP equals tmpl.MaxHP.
-func NewInstance(id string, tmpl *Template, roomID string) *Instance {
+// Postcondition: CurrentHP equals tmpl.MaxHP; WeaponID and ArmorID are set from weighted roll.
+func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBonus func(string) int) *Instance {
 	var cooldown time.Duration
 	if tmpl.TauntCooldown != "" {
 		cooldown, _ = time.ParseDuration(tmpl.TauntCooldown)
 	}
+
+	weaponID := pickWeighted(tmpl.Weapon)
+	armorID := pickWeighted(tmpl.Armor)
+	ac := tmpl.AC
+	if armorID != "" && armorACBonus != nil {
+		ac += armorACBonus(armorID)
+	}
+
 	return &Instance{
 		ID:            id,
 		TemplateID:    tmpl.ID,
@@ -95,7 +127,7 @@ func NewInstance(id string, tmpl *Template, roomID string) *Instance {
 		RoomID:        roomID,
 		CurrentHP:     tmpl.MaxHP,
 		MaxHP:         tmpl.MaxHP,
-		AC:            tmpl.AC,
+		AC:            ac,
 		Level:         tmpl.Level,
 		Perception:    tmpl.Perception,
 		AIDomain:      tmpl.AIDomain,
@@ -106,7 +138,18 @@ func NewInstance(id string, tmpl *Template, roomID string) *Instance {
 		SkillChecks:   tmpl.SkillChecks,
 		Resistances:   tmpl.Resistances,
 		Weaknesses:    tmpl.Weaknesses,
+		WeaponID:      weaponID,
+		ArmorID:       armorID,
 	}
+}
+
+// NewInstance creates a live NPC instance from a template with no armor AC resolver.
+// Use NewInstanceWithResolver when an inventory registry is available to apply AC bonuses.
+//
+// Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
+// Postcondition: CurrentHP equals tmpl.MaxHP; WeaponID/ArmorID are set; AC is base only.
+func NewInstance(id string, tmpl *Template, roomID string) *Instance {
+	return NewInstanceWithResolver(id, tmpl, roomID, nil)
 }
 
 // TryTaunt attempts to produce a taunt string, respecting chance and cooldown.

@@ -122,3 +122,57 @@ func TestProperty_TryTaunt_NeverTauntsWithinCooldown(t *testing.T) {
 		assert.False(rt, ok, "TryTaunt must not fire within cooldown window")
 	})
 }
+
+func TestNewInstance_PicksWeaponFromTable(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		Weapon: []npc.EquipmentEntry{
+			{ID: "cheap_blade", Weight: 1},
+		},
+	}
+	inst := npc.NewInstance("id1", tmpl, "room1")
+	assert.Equal(t, "cheap_blade", inst.WeaponID)
+}
+
+func TestNewInstance_NoWeapon_EmptyWeaponID(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+	}
+	inst := npc.NewInstance("id1", tmpl, "room1")
+	assert.Empty(t, inst.WeaponID)
+}
+
+func TestNewInstanceWithResolver_ArmorACBonusAddedToBase(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		Armor: []npc.EquipmentEntry{{ID: "test_armor", Weight: 1}},
+	}
+	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", func(armorID string) int {
+		if armorID == "test_armor" {
+			return 3
+		}
+		return 0
+	})
+	assert.Equal(t, "test_armor", inst.ArmorID)
+	assert.Equal(t, 15, inst.AC) // 12 + 3
+}
+
+func TestNewInstanceWithResolver_NoArmor_ACUnchanged(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+	}
+	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil)
+	assert.Empty(t, inst.ArmorID)
+	assert.Equal(t, 12, inst.AC)
+}
+
+func TestNewInstanceWithResolver_NilResolver_NoACBonus(t *testing.T) {
+	// Even with an armor entry, nil resolver means no AC adjustment.
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		Armor: []npc.EquipmentEntry{{ID: "leather_jacket", Weight: 1}},
+	}
+	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil)
+	assert.Equal(t, "leather_jacket", inst.ArmorID)
+	assert.Equal(t, 12, inst.AC) // no bonus — resolver is nil
+}
