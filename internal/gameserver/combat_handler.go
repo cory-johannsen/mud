@@ -58,6 +58,10 @@ type CombatHandler struct {
 	timers        map[string]*combat.RoundTimer
 	loadoutsMu    sync.Mutex
 	loadouts      map[string]*inventory.WeaponPreset
+	// roomCoverState tracks current HP for destructible cover objects.
+	// Keyed by roomID+":"+equipmentID. Value is current HP (0 = destroyed).
+	coverMu       sync.Mutex
+	roomCoverState map[string]int
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -95,9 +99,60 @@ func NewCombatHandler(
 		aiRegistry:    aiRegistry,
 		respawnMgr:    respawnMgr,
 		floorMgr:      floorMgr,
-		timers:        make(map[string]*combat.RoundTimer),
-		loadouts:      make(map[string]*inventory.WeaponPreset),
+		timers:         make(map[string]*combat.RoundTimer),
+		loadouts:       make(map[string]*inventory.WeaponPreset),
+		roomCoverState: make(map[string]int),
 	}
+}
+
+// coverKey returns the map key for a room+equipment pair.
+func coverKey(roomID, equipID string) string { return roomID + ":" + equipID }
+
+// InitCoverState sets the initial HP for a destructible cover object.
+//
+// Precondition: hp > 0.
+// Postcondition: GetCoverHP(roomID, equipID) == hp.
+func (h *CombatHandler) InitCoverState(roomID, equipID string, hp int) {
+	h.coverMu.Lock()
+	defer h.coverMu.Unlock()
+	h.roomCoverState[coverKey(roomID, equipID)] = hp
+}
+
+// GetCoverHP returns the current HP of a cover object.
+// Returns -1 when the cover object has not been initialized.
+//
+// Postcondition: Returns -1 (uninitialized), 0 (destroyed), or > 0 (intact).
+func (h *CombatHandler) GetCoverHP(roomID, equipID string) int {
+	h.coverMu.Lock()
+	defer h.coverMu.Unlock()
+	v, ok := h.roomCoverState[coverKey(roomID, equipID)]
+	if !ok {
+		return -1
+	}
+	return v
+}
+
+// DecrementCoverHP reduces the cover object's HP by 1, flooring at 0.
+//
+// Precondition: cover must have been initialized via InitCoverState.
+// Postcondition: HP is decremented; if result is 0, cover is destroyed.
+func (h *CombatHandler) DecrementCoverHP(roomID, equipID string) {
+	h.coverMu.Lock()
+	defer h.coverMu.Unlock()
+	k := coverKey(roomID, equipID)
+	if v, ok := h.roomCoverState[k]; ok && v > 0 {
+		h.roomCoverState[k] = v - 1
+	}
+}
+
+// ClearCoverForEquipment removes the cover state entry entirely.
+// Called after cover is destroyed to free memory.
+//
+// Postcondition: GetCoverHP(roomID, equipID) == -1.
+func (h *CombatHandler) ClearCoverForEquipment(roomID, equipID string) {
+	h.coverMu.Lock()
+	defer h.coverMu.Unlock()
+	delete(h.roomCoverState, coverKey(roomID, equipID))
 }
 
 // SetXPService registers the XP service used to award kill XP.
