@@ -102,6 +102,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerGrapple:            bridgeGrapple,
 	command.HandlerTrip:               bridgeTrip,
 	command.HandlerDisarm:             bridgeDisarm,
+	command.HandlerClimb:              bridgeClimb,
 	command.HandlerStride:             bridgeStride,
 	command.HandlerHide:               bridgeHide,
 	command.HandlerSneak:              bridgeSneak,
@@ -915,6 +916,17 @@ func bridgeTrip(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Trip{Trip: &gamev1.TripRequest{Target: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeClimb builds a ClimbRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a ClimbRequest; done is false.
+func bridgeClimb(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Climb{Climb: &gamev1.ClimbRequest{}},
 	}}, nil
 }
 
