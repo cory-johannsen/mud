@@ -1220,6 +1220,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSeek(uid)
 	case *gamev1.ClientMessage_Climb:
 		return s.handleClimb(uid, p.Climb)
+	case *gamev1.ClientMessage_Swim:
+		return s.handleSwim(uid, p.Swim)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1948,6 +1950,9 @@ func (s *GameServiceServer) forwardEvents(ctx context.Context, entity *session.B
 }
 
 func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) (*gamev1.ServerEvent, error) {
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") {
+		return messageEvent("You are submerged underwater and cannot attack. Swim or Escape to surface."), nil
+	}
 	events, err := s.combatH.Attack(uid, req.Target)
 	if err != nil {
 		return nil, err
@@ -2404,6 +2409,9 @@ func (s *GameServiceServer) applyEquipEffect(uid string, effect *inventory.Cross
 }
 
 func (s *GameServiceServer) handleReload(uid string, req *gamev1.ReloadRequest) (*gamev1.ServerEvent, error) {
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") {
+		return messageEvent("You are submerged underwater and cannot attack. Swim or Escape to surface."), nil
+	}
 	events, err := s.combatH.Reload(uid)
 	if err != nil {
 		return errorEvent(err.Error()), nil
@@ -2416,6 +2424,9 @@ func (s *GameServiceServer) handleReload(uid string, req *gamev1.ReloadRequest) 
 }
 
 func (s *GameServiceServer) handleFireBurst(uid string, req *gamev1.FireBurstRequest) (*gamev1.ServerEvent, error) {
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") {
+		return messageEvent("You are submerged underwater and cannot attack. Swim or Escape to surface."), nil
+	}
 	events, err := s.combatH.FireBurst(uid, req.GetTarget())
 	if err != nil {
 		return errorEvent(err.Error()), nil
@@ -2428,6 +2439,9 @@ func (s *GameServiceServer) handleFireBurst(uid string, req *gamev1.FireBurstReq
 }
 
 func (s *GameServiceServer) handleFireAutomatic(uid string, req *gamev1.FireAutomaticRequest) (*gamev1.ServerEvent, error) {
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") {
+		return messageEvent("You are submerged underwater and cannot attack. Swim or Escape to surface."), nil
+	}
 	events, err := s.combatH.FireAutomatic(uid, req.GetTarget())
 	if err != nil {
 		return errorEvent(err.Error()), nil
@@ -5623,6 +5637,132 @@ func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*ga
 					_ = sess.Conditions.Apply(uid, def, 1, -1)
 					msg += " You are knocked prone."
 				}
+			}
+		}
+		return messageEvent(msg), nil
+	}
+}
+
+// handleSwim processes a SwimRequest from the player.
+//
+// Precondition: uid is a valid connected player session.
+// Postcondition: Player moves on success; submerged condition applied on critical failure.
+func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("session not found: %s", uid)
+	}
+
+	room, ok := s.world.GetRoom(sess.RoomID)
+	if !ok {
+		return messageEvent("Room not found."), nil
+	}
+
+	isWaterRoom := room.Properties["water_terrain"] == "true"
+	isSubmerged := sess.Conditions != nil && sess.Conditions.Has("submerged")
+
+	if !isWaterRoom && !isSubmerged {
+		return messageEvent("There is no water here to swim in."), nil
+	}
+
+	// Apply out-of-combat drowning damage before acting if submerged.
+	inCombat := sess.Status == statusInCombat
+	if isSubmerged && !inCombat {
+		dmgResult, _ := s.dice.RollExpr("1d6")
+		dmg := dmgResult.Total()
+		if dmg < 1 {
+			dmg = 1
+		}
+		sess.CurrentHP -= dmg
+		if sess.CurrentHP < 0 {
+			sess.CurrentHP = 0
+		}
+	}
+
+	// Spend AP if in combat.
+	if inCombat {
+		if s.combatH == nil {
+			return messageEvent("Not enough action points to swim."), nil
+		}
+		if err := s.combatH.SpendAP(uid, 2); err != nil {
+			return messageEvent("Not enough action points to swim."), nil
+		}
+	}
+
+	// Parse DC (default 12).
+	dc := 12
+	if dcStr, ok := room.Properties["water_dc"]; ok {
+		if parsed, err := strconv.Atoi(dcStr); err == nil {
+			dc = parsed
+		}
+	}
+
+	// Roll athletics check.
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, err
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["athletics"])
+	total := roll + bonus
+
+	outcome := combat.OutcomeFor(total, dc)
+
+	switch outcome {
+	case combat.CritSuccess, combat.Success:
+		// Clear submerged if present.
+		if isSubmerged {
+			if sess.Conditions != nil {
+				sess.Conditions.Remove(uid, "submerged")
+			}
+			return messageEvent(fmt.Sprintf(
+				"You surface! (rolled %d+%d=%d vs DC %d)",
+				roll, bonus, total, dc,
+			)), nil
+		}
+		// Move to first available exit in the room.
+		if len(room.Exits) > 0 {
+			if _, moveErr := s.worldH.MoveWithContext(uid, room.Exits[0].Direction); moveErr != nil {
+				return messageEvent(fmt.Sprintf(
+					"You swim successfully (rolled %d+%d=%d vs DC %d) but cannot proceed: %s.",
+					roll, bonus, total, dc, moveErr.Error(),
+				)), nil
+			}
+			return messageEvent(fmt.Sprintf(
+				"You swim through (rolled %d+%d=%d vs DC %d).",
+				roll, bonus, total, dc,
+			)), nil
+		}
+		return messageEvent(fmt.Sprintf(
+			"You swim in place (rolled %d+%d=%d vs DC %d). No exit available.",
+			roll, bonus, total, dc,
+		)), nil
+
+	case combat.Failure:
+		return messageEvent(fmt.Sprintf(
+			"You fail to make progress (rolled %d+%d=%d vs DC %d).",
+			roll, bonus, total, dc,
+		)), nil
+
+	default: // CritFailure
+		dmgResult, _ := s.dice.RollExpr("1d6")
+		dmg := dmgResult.Total()
+		if dmg < 1 {
+			dmg = 1
+		}
+		sess.CurrentHP -= dmg
+		if sess.CurrentHP < 0 {
+			sess.CurrentHP = 0
+		}
+
+		msg := fmt.Sprintf(
+			"You are pulled under! (rolled %d+%d=%d vs DC %d) Taking %d drowning damage.",
+			roll, bonus, total, dc, dmg,
+		)
+		if s.condRegistry != nil {
+			if def, ok := s.condRegistry.Get("submerged"); ok && sess.Conditions != nil {
+				_ = sess.Conditions.Apply(uid, def, 1, -1)
+				msg += " You are submerged."
 			}
 		}
 		return messageEvent(msg), nil
