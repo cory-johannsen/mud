@@ -123,7 +123,7 @@ func TestCommandsByCategory(t *testing.T) {
 	assert.Contains(t, cats, CategoryWorld)
 	assert.Contains(t, cats, CategoryCommunication)
 	assert.Contains(t, cats, CategorySystem)
-	assert.Len(t, cats[CategoryMovement], 10)
+	assert.Len(t, cats[CategoryMovement], 12)
 }
 
 func TestPropertyAllAliasesResolveToCanonical(t *testing.T) {
