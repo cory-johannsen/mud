@@ -174,8 +174,11 @@
       - Room equipment may serve as cover
         - Whether equipment may be used as cover (and what kind of cover it provides) should be stored in the yaml for the room
       - Cover uses the PF2E rules
-      - [ ] Add `cover_bonus int` and `cover_destructible bool` fields to room equipment YAML; loaded by the room system
-      - [ ] Cover destruction — when `cover_destructible` is true, NPCs may target cover; after a threshold of hits the cover is removed and its AC bonus lost
+      - [x] Add `cover_tier`, `cover_destructible`, and `cover_hp` fields to room equipment YAML; loaded by the room system
+      - [x] Three-tier PF2E cover: Lesser (+1 AC/Stealth), Standard (+2), Greater (+4); conditions applied via condition system
+      - [x] Cover destruction — crossfire degradation (missed attacks that would hit without cover decrement cover HP); on destruction conditions cleared from all users; ActionCoverHit/ActionCoverDestroy events emitted
+      - [x] NPC cover strategy — `combat.strategy.use_cover: true` in NPC YAML causes NPC to auto-take best available cover at turn start
+      - [x] Cover cleared on Stride/Step/Tumble (success path)
   - Area of Effect
       - [ ] AoE attack type — add `aoe_radius int` field to weapon/ability YAML; on resolution apply damage roll to all combatants within radius in the current combat
   - Attack of opportunity
