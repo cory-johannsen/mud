@@ -199,6 +199,7 @@ import (
 
 	"pgregory.net/rapid"
 	"github.com/stretchr/testify/assert"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 )
 
@@ -702,7 +703,8 @@ func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*game
 	// Apply out-of-combat drowning damage before acting if submerged.
 	inCombat := sess.Status == statusInCombat
 	if isSubmerged && !inCombat {
-		dmg, _ := s.dice.RollExpr("1d6")
+		dmgResult, _ := s.dice.RollExpr("1d6")
+		dmg := dmgResult.Total()
 		if dmg < 1 {
 			dmg = 1
 		}
@@ -870,19 +872,16 @@ if sess.Conditions.Has("submerged") {
 
 - [ ] **Step 3: Write a round-start drowning test**
 
-Add to `grpc_service_swim_test.go` with a complete (non-placeholder) test body. Study the existing combat round-start tests in `combat_handler_test.go` for the construction pattern:
+Read `combat_handler_test.go` completely before writing this test. Build and run a complete test (no comment-only bodies).
 
-```go
-// TestSubmergedDrowningOnRoundStart — drowning damage is applied at the start
-// of the player's turn when the submerged condition is active.
-func TestSubmergedDrowningOnRoundStart(t *testing.T) {
-    // 1. Build a combat session with the player having the submerged condition.
-    // 2. Record player HP before round start.
-    // 3. Trigger round/turn start.
-    // 4. Assert player HP has decreased by at least 1.
-    // Follow the pattern in combat_handler_test.go exactly.
-}
-```
+The test must:
+1. Construct a `GameServiceServer` with a test condition registry that includes `submerged`.
+2. Create a player session in combat with `submerged` applied via `sess.Conditions.Apply(uid, def, 1, -1)`.
+3. Record the player's current HP.
+4. Trigger the turn-start path (send a StartRound or equivalent request — use the same mechanism used in `combat_handler_test.go`).
+5. Assert that the player's current HP after the trigger is strictly less than before.
+
+Add the completed test to `grpc_service_swim_test.go`. Do NOT commit until the test body compiles and passes.
 
 - [ ] **Step 4: Run test**
 
