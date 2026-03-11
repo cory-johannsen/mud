@@ -306,7 +306,7 @@ func TestLoadActualDowntownZone(t *testing.T) {
 	assert.Equal(t, "downtown", zone.ID)
 	assert.Equal(t, "Downtown Portland", zone.Name)
 	assert.Equal(t, "pioneer_square", zone.StartRoom)
-	assert.Len(t, zone.Rooms, 10)
+	assert.Len(t, zone.Rooms, 13)
 
 	// Verify start room exists and has exits
 	start := zone.Rooms["pioneer_square"]

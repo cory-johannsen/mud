@@ -247,8 +247,68 @@ zone:
       target: broadway_ruins
     - direction: southeast
       target: flats_hawthorne_approach
+    - direction: east
+      target: cliff_base
     map_x: 2
     map_y: 2
     properties:
       lighting: overcast
       atmosphere: open
+  - id: cliff_base
+    title: Base of the Cliff
+    description: 'A sheer rock face rises before you. Hand-holds have been carved into the stone,
+      worn smooth by countless ascents. The cliff stretches upward into darkness above.
+
+      You can see the stone glints with moisture in places, suggesting water seeps from cracks
+      higher up.
+
+      '
+    exits:
+    - direction: west
+      target: courthouse_steps
+    - direction: up
+      target: cliff_top
+    map_x: 4
+    map_y: 2
+    properties:
+      lighting: dim
+      atmosphere: stone
+  - id: cliff_top
+    title: Top of the Cliff
+    description: 'You stand on a rocky ledge overlooking the city ruins below. From this vantage,
+      you can see the twisted streets and collapsed buildings of the downtown core spreading
+      out in all directions.
+
+      The wind is stronger up here, carrying the smell of rain and rust. To the east,
+      a steep ravine drops away sharply.
+
+      '
+    exits:
+    - direction: down
+      target: cliff_base
+    - direction: east
+      target: ravine_flooded
+    map_x: 4
+    map_y: 0
+    properties:
+      lighting: overcast
+      atmosphere: wind
+  - id: ravine_flooded
+    title: Flooded Ravine
+    description: 'You stand in a narrow ravine filled with murky water. The current is strong,
+      fed by underground springs and seepage from the cliff face above.
+
+      The water is cold and opaque, impossible to see more than a few inches down.
+      The ravine walls are slick with moss and algae.
+
+      '
+    exits:
+    - direction: west
+      target: cliff_top
+    map_x: 4
+    map_y: -2
+    properties:
+      lighting: dim
+      atmosphere: flooded
+      water_terrain: "true"
+      water_dc: "12"
