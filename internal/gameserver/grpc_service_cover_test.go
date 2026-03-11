@@ -93,6 +93,188 @@ func newCoverSvc(t *testing.T, worldMgr *world.Manager, sessMgr *session.Manager
 	)
 }
 
+// newCoverSvcWithCombat builds a GameServiceServer with a CombatHandler wired, using the
+// cover condition registry and the provided world manager.
+func newCoverSvcWithCombat(t *testing.T, worldMgr *world.Manager, sessMgr *session.Manager) (*GameServiceServer, *npc.Manager, *CombatHandler) {
+	t.Helper()
+	logger := zaptest.NewLogger(t)
+	npcMgr := npc.NewManager()
+	condReg := makeCoverConditionRegistry()
+	roller := dice.NewLoggedRoller(dice.NewCryptoSource(), logger)
+	combatHandler := NewCombatHandler(
+		combat.NewEngine(), npcMgr, sessMgr, roller,
+		func(_ string, _ []*gamev1.CombatEvent) {},
+		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil,
+	)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil,
+	)
+	return svc, npcMgr, combatHandler
+}
+
+// TestMaxNPCStealthInRoomWithCoverBonus verifies that an NPC with an active cover condition
+// contributes its stealth bonus to the DC returned by maxNPCStealthInRoom.
+func TestMaxNPCStealthInRoomWithCoverBonus(t *testing.T) {
+	worldMgr, sessMgr := testWorldWithCoverRoom(t)
+	svc, npcMgr, combatHandler := newCoverSvcWithCombat(t, worldMgr, sessMgr)
+
+	const roomID = "room_cover"
+	inst, err := npcMgr.Spawn(&npc.Template{
+		ID: "stalker-cover-stealth", Name: "Stalker", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+	}, roomID)
+	require.NoError(t, err)
+	inst.Stealth = 15
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_stl_cover", Username: "Scout", CharName: "Scout",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+	sess.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_stl_cover", "Stalker")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	// Apply standard_cover condition (StealthBonus=2) to the NPC combatant.
+	cbt, ok := combatHandler.GetCombatForRoom(roomID)
+	require.True(t, ok)
+	var npcCombatant *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			npcCombatant = c
+			break
+		}
+	}
+	require.NotNil(t, npcCombatant)
+	condReg := makeCoverConditionRegistry()
+	def, ok := condReg.Get("standard_cover")
+	require.True(t, ok)
+	if cbt.Conditions[npcCombatant.ID] == nil {
+		cbt.Conditions[npcCombatant.ID] = condition.NewActiveSet()
+	}
+	require.NoError(t, cbt.Conditions[npcCombatant.ID].Apply(npcCombatant.ID, def, 1, -1))
+
+	// maxNPCStealthInRoom must return at least 15 + 2 = 17 (base=15, standard_cover StealthBonus=2).
+	// Without cover bonus, it would return 15. With the bonus it must return >= 17.
+	dc := svc.maxNPCStealthInRoom(roomID)
+	assert.GreaterOrEqual(t, dc, 17, "expected stealth DC >= 17 (base=15 + cover=2), got %d", dc)
+}
+
+// TestNPCWithUseCoverStrategyTakesCover verifies that an NPC with UseCover=true automatically
+// takes cover at the start of its turn when cover equipment is present in the room.
+func TestNPCWithUseCoverStrategyTakesCover(t *testing.T) {
+	worldMgr, sessMgr := testWorldWithCoverRoom(t)
+	_, npcMgr, combatHandler := newCoverSvcWithCombat(t, worldMgr, sessMgr)
+
+	const roomID = "room_cover"
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID:     "sniper-use-cover",
+		Name:   "Sniper",
+		Level:  1,
+		MaxHP:  20,
+		AC:     13,
+		Combat: npc.CombatStrategy{UseCover: true},
+	}, roomID)
+	require.NoError(t, err)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_npc_uc_yes", Username: "Target", CharName: "Target",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+	sess.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_npc_uc_yes", "Sniper")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	cbt, ok := combatHandler.GetCombatForRoom(roomID)
+	require.True(t, ok)
+
+	// Trigger NPC auto-queue, which should apply cover to UseCover NPCs.
+	combatHandler.combatMu.Lock()
+	combatHandler.autoQueueNPCsLocked(cbt)
+	combatHandler.combatMu.Unlock()
+
+	var npcCombatant *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			npcCombatant = c
+			break
+		}
+	}
+	require.NotNil(t, npcCombatant)
+	assert.NotEmpty(t, npcCombatant.CoverTier, "NPC with UseCover=true must have cover tier set")
+	assert.NotEmpty(t, npcCombatant.CoverEquipmentID, "NPC with UseCover=true must have cover equipment ID set")
+
+	// The cover condition must be applied.
+	if condSet, ok := cbt.Conditions[npcCombatant.ID]; ok {
+		assert.True(t, condSet.Has("standard_cover"), "NPC must have standard_cover condition applied")
+	} else {
+		t.Errorf("NPC with UseCover=true must have conditions entry applied")
+	}
+}
+
+// TestNPCWithoutUseCoverStrategyDoesNotTakeCover verifies that an NPC with UseCover=false (default)
+// does not take cover even when cover equipment is present in the room.
+func TestNPCWithoutUseCoverStrategyDoesNotTakeCover(t *testing.T) {
+	worldMgr, sessMgr := testWorldWithCoverRoom(t)
+	_, npcMgr, combatHandler := newCoverSvcWithCombat(t, worldMgr, sessMgr)
+
+	const roomID = "room_cover"
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID:    "grunt-no-cover",
+		Name:  "Grunt",
+		Level: 1,
+		MaxHP: 20,
+		AC:    13,
+		// Combat.UseCover defaults to false.
+	}, roomID)
+	require.NoError(t, err)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_npc_uc_no", Username: "Target2", CharName: "Target2",
+		RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+	sess.Status = statusInCombat
+
+	_, err = combatHandler.Attack("u_npc_uc_no", "Grunt")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	cbt, ok := combatHandler.GetCombatForRoom(roomID)
+	require.True(t, ok)
+
+	combatHandler.combatMu.Lock()
+	combatHandler.autoQueueNPCsLocked(cbt)
+	combatHandler.combatMu.Unlock()
+
+	var npcCombatant *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			npcCombatant = c
+			break
+		}
+	}
+	require.NotNil(t, npcCombatant)
+	assert.Empty(t, npcCombatant.CoverTier, "NPC with UseCover=false must NOT have cover tier set")
+}
+
 // TestHandleTakeCover_NoCoverInRoom verifies that a room with no equipment yields the "no cover" message.
 func TestHandleTakeCover_NoCoverInRoom(t *testing.T) {
 	worldMgr, sessMgr := testWorldWithCoverRoom(t)

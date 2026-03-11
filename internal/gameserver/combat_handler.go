@@ -1334,10 +1334,42 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 //
 // Precondition: h.combatMu is held; cbt must not be nil.
 func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
+	// Fetch room once for NPC auto-cover checks.
+	var room *world.Room
+	if h.worldMgr != nil {
+		if r, ok := h.worldMgr.GetRoom(cbt.RoomID); ok {
+			room = r
+		}
+	}
+
 	for _, c := range cbt.Combatants {
 		if c.Kind != combat.KindNPC || c.IsDead() {
 			continue
 		}
+
+		// Auto-use-cover: apply cover at start of NPC turn when strategy enables it
+		// and the NPC is not already in cover.
+		if c.CoverTier == "" {
+			if inst, ok := h.npcMgr.Get(c.ID); ok && inst.UseCover && room != nil {
+				if bestEquip, bestTier := bestCoverInRoom(room); bestTier != "" {
+					c.CoverEquipmentID = bestEquip.ItemID
+					c.CoverTier = bestTier
+					condID := bestTier + "_cover"
+					if h.condRegistry != nil {
+						if def, ok := h.condRegistry.Get(condID); ok {
+							if cbt.Conditions[c.ID] == nil {
+								cbt.Conditions[c.ID] = condition.NewActiveSet()
+							}
+							_ = cbt.Conditions[c.ID].Apply(c.ID, def, 1, -1)
+						}
+					}
+					if bestEquip.CoverDestructible && bestEquip.CoverHP > 0 && h.GetCoverHP(cbt.RoomID, bestEquip.ItemID) < 0 {
+						h.InitCoverState(cbt.RoomID, bestEquip.ItemID, bestEquip.CoverHP)
+					}
+				}
+			}
+		}
+
 		// Attempt HTN planning.
 		if h.aiRegistry != nil {
 			inst, ok := h.npcMgr.Get(c.ID)
@@ -1414,6 +1446,26 @@ func (h *CombatHandler) legacyAutoQueueLocked(cbt *combat.Combat, c *combat.Comb
 			return
 		}
 	}
+}
+
+// bestCoverInRoom returns the highest-tier cover equipment in the room.
+// Returns a zero RoomEquipmentConfig and empty string if no cover equipment is present.
+//
+// Precondition: room must not be nil.
+// Postcondition: Returns the RoomEquipmentConfig with the highest CoverTier, or (zero, "").
+func bestCoverInRoom(room *world.Room) (world.RoomEquipmentConfig, string) {
+	bestTier := ""
+	var bestEquip world.RoomEquipmentConfig
+	for _, eq := range room.Equipment {
+		if eq.CoverTier == "" {
+			continue
+		}
+		if coverTierRank(eq.CoverTier) > coverTierRank(bestTier) {
+			bestTier = eq.CoverTier
+			bestEquip = eq
+		}
+	}
+	return bestEquip, bestTier
 }
 
 // zoneIDForRoom looks up the zone ID for a room via the world manager.

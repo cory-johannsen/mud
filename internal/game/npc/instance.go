@@ -62,6 +62,9 @@ type Instance struct {
 	WeaponID string
 	// ArmorID is the armor item ID selected at spawn. Empty = no armor.
 	ArmorID string
+	// UseCover is copied from the template's Combat.UseCover at spawn time.
+	// When true, the NPC automatically takes cover at the start of its turn.
+	UseCover bool
 }
 
 // Name returns the instance's current display name.
@@ -142,6 +145,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		Weaknesses:    tmpl.Weaknesses,
 		WeaponID:      weaponID,
 		ArmorID:       armorID,
+		UseCover:      tmpl.Combat.UseCover,
 	}
 }
 

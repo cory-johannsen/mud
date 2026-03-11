@@ -5102,6 +5102,15 @@ func (s *GameServiceServer) maxNPCPerceptionInRoom(roomID string) int {
 func (s *GameServiceServer) maxNPCStealthInRoom(roomID string) int {
 	insts := s.npcMgr.InstancesInRoom(roomID)
 	max := 10
+
+	// Fetch active combat for this room once so we can check NPC cover conditions.
+	var cbt *combat.Combat
+	if s.combatH != nil {
+		if c, ok := s.combatH.GetCombatForRoom(roomID); ok {
+			cbt = c
+		}
+	}
+
 	for _, inst := range insts {
 		if inst.IsDead() {
 			continue
@@ -5109,6 +5118,12 @@ func (s *GameServiceServer) maxNPCStealthInRoom(roomID string) int {
 		stealth := inst.Stealth
 		if stealth == 0 {
 			stealth = 10
+		}
+		// Add stealth bonus from any active cover conditions on this NPC combatant.
+		if cbt != nil {
+			if condSet, ok := cbt.Conditions[inst.ID]; ok && condSet != nil {
+				stealth += condition.StealthBonus(condSet)
+			}
 		}
 		if stealth > max {
 			max = stealth
