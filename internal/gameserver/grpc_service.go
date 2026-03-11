@@ -4377,8 +4377,8 @@ func (s *GameServiceServer) handleTakeCover(uid string) (*gamev1.ServerEvent, er
 		s.logger.Warn("handleTakeCover: Apply failed", zap.String("uid", uid), zap.Error(err))
 	}
 
-	return messageEvent(fmt.Sprintf("You take %s cover. (+%d AC, +%d Reflex, +%d Stealth)",
-		bestTier, def.ACPenalty, def.ReflexBonus, def.StealthBonus)), nil
+	return messageEvent(fmt.Sprintf("You take %s cover. (+%d AC, +%d Stealth)",
+		bestTier, def.ACPenalty, def.StealthBonus)), nil
 }
 
 // handleFirstAid performs a patch_job skill check (DC 15).

@@ -135,19 +135,6 @@ func (h *CombatHandler) GetCoverHP(roomID, equipID string) int {
 	return v
 }
 
-// DecrementCoverHP reduces the cover object's HP by 1, flooring at 0.
-//
-// Precondition: cover must have been initialized via InitCoverState.
-// Postcondition: HP is decremented; if result is 0, cover is destroyed.
-func (h *CombatHandler) DecrementCoverHP(roomID, equipID string) {
-	h.coverMu.Lock()
-	defer h.coverMu.Unlock()
-	k := coverKey(roomID, equipID)
-	if v, ok := h.roomCoverState[k]; ok && v > 0 {
-		h.roomCoverState[k] = v - 1
-	}
-}
-
 // ClearCoverForEquipment removes the cover state entry entirely.
 // Called after cover is destroyed to free memory.
 //
@@ -1024,6 +1011,11 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 				if c.CoverEquipmentID == equipID {
 					c.CoverEquipmentID = ""
 					c.CoverTier = ""
+					if sess, ok := h.sessions.GetPlayer(c.ID); ok && sess.Conditions != nil {
+						for _, condID := range []string{"greater_cover", "standard_cover", "lesser_cover"} {
+							sess.Conditions.Remove(c.ID, condID)
+						}
+					}
 				}
 			}
 		}

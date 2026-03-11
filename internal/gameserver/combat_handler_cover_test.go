@@ -29,13 +29,13 @@ func TestRoomCoverStateManagement(t *testing.T) {
 			rt.Errorf("GetCoverHP after init: got %d, want %d", got, hp)
 		}
 
-		h.DecrementCoverHP(roomID, equipID)
+		h.DecrementAndCheckDestroyed(roomID, equipID)
 		after := h.GetCoverHP(roomID, equipID)
 		if hp > 1 && after != hp-1 {
 			rt.Errorf("after decrement: got %d, want %d", after, hp-1)
 		}
-		if hp == 1 && after != 0 {
-			rt.Errorf("at 1HP after decrement: got %d, want 0", after)
+		if hp == 1 && after != -1 {
+			rt.Errorf("at 1HP after decrement: expected -1 (destroyed), got %d", after)
 		}
 
 		h.ClearCoverForEquipment(roomID, equipID)
