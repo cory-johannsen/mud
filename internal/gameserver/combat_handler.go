@@ -1071,6 +1071,37 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	h.autoQueueNPCsLocked(cbt)
 	h.autoQueuePlayersLocked(cbt)
 
+	// Apply per-round drowning damage to any submerged player combatants (TERRAIN-13).
+	// Precondition: combatMu is held; cbt is non-nil.
+	// Postcondition: Each submerged player session has CurrentHP decremented by 1d6 (min 1).
+	var drowningEvents []*gamev1.CombatEvent
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer {
+			continue
+		}
+		sess, ok := h.sessions.GetPlayer(c.ID)
+		if !ok || sess.Conditions == nil || !sess.Conditions.Has("submerged") {
+			continue
+		}
+		dmgResult, _ := h.dice.RollExpr("1d6")
+		dmg := dmgResult.Total()
+		if dmg < 1 {
+			dmg = 1
+		}
+		sess.CurrentHP -= dmg
+		if sess.CurrentHP < 0 {
+			sess.CurrentHP = 0
+		}
+		drowningEvents = append(drowningEvents, &gamev1.CombatEvent{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+			Attacker:  "Drowning",
+			Target:    sess.CharName,
+			Damage:    int32(dmg),
+			TargetHp:  int32(sess.CurrentHP),
+			Narrative: fmt.Sprintf("%s takes %d drowning damage from being submerged!", sess.CharName, dmg),
+		})
+	}
+
 	roundStartEvents := []*gamev1.CombatEvent{
 		{
 			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
@@ -1078,6 +1109,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		},
 	}
 	roundStartEvents = append(roundStartEvents, condCombatEvents...)
+	roundStartEvents = append(roundStartEvents, drowningEvents...)
 	h.broadcastFn(roomID, roundStartEvents)
 	h.startTimerLocked(roomID)
 	return events

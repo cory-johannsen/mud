@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -14,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+	"pgregory.net/rapid"
 )
 
 // makeTestConditionRegistryWithSubmerged returns a condition registry that includes
@@ -242,6 +244,123 @@ func TestHandleSwim_SubmergedSurface(t *testing.T) {
 	assert.Contains(t, msgEvt.Content, "surface")
 
 	assert.False(t, sess.Conditions.Has("submerged"), "submerged condition must be removed on success")
+}
+
+// TestSubmergedDrowning verifies that resolveAndAdvanceLocked applies 1d6 drowning damage
+// to a player with the submerged condition at the start of each combat round (TERRAIN-13).
+//
+// Precondition: Player is in combat with the submerged condition applied.
+// Postcondition: Player HP is strictly less than before after resolveAndAdvanceLocked.
+func TestSubmergedDrowning(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	// Use fixedDiceSource val=5 so Intn(6)=5 → d6 roll=6 (guaranteed non-zero damage).
+	src := &fixedDiceSource{val: 5}
+	roller := dice.NewLoggedRoller(src, logger)
+	condReg := makeTestConditionRegistryWithSubmerged()
+
+	_, sessMgr, npcMgr, combatHandler := newSwimSvcWithCombat(t, roller, condReg)
+
+	const roomID = "room_water"
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "bandit-drown", Name: "Bandit", Level: 1, MaxHP: 30, AC: 10, Perception: 0,
+	}, roomID)
+	require.NoError(t, err)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_drown",
+		Username:  "Diver",
+		CharName:  "Diver",
+		RoomID:    roomID,
+		CurrentHP: 20,
+		MaxHP:     20,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	initSessionConditions(sess)
+
+	// Apply submerged condition.
+	def, ok := condReg.Get("submerged")
+	require.True(t, ok, "submerged condition must be in registry")
+	err = sess.Conditions.Apply("u_drown", def, 1, -1)
+	require.NoError(t, err)
+	require.True(t, sess.Conditions.Has("submerged"), "precondition: session must have submerged condition")
+
+	// Start combat — Attack registers the player and NPC into the engine.
+	_, err = combatHandler.Attack("u_drown", "Bandit")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	hpBefore := sess.CurrentHP
+
+	// Trigger round resolution directly, which resolves current round and starts the next.
+	combatHandler.combatMu.Lock()
+	cbt, ok := combatHandler.engine.GetCombat(roomID)
+	require.True(t, ok, "active combat must exist after Attack")
+	combatHandler.resolveAndAdvanceLocked(roomID, cbt)
+	combatHandler.combatMu.Unlock()
+	combatHandler.cancelTimer(roomID)
+
+	assert.Less(t, sess.CurrentHP, hpBefore, "player HP must decrease due to drowning damage at round-start when submerged")
+}
+
+// TestProperty_SubmergedDrowning_HPAlwaysDecreases is a property-based test verifying
+// that a submerged player always loses HP at the start of each combat round.
+//
+// Precondition: Player is in combat with submerged condition; HP is drawn from [2, 100].
+// Postcondition: HP after resolveAndAdvanceLocked is always strictly less than HP before.
+func TestProperty_SubmergedDrowning_HPAlwaysDecreases(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		initialHP := rapid.IntRange(2, 100).Draw(rt, "initialHP")
+
+		logger := zaptest.NewLogger(t)
+		// val=5 → Intn(6)=5 → d6=6, guaranteed non-zero damage regardless of HP.
+		src := &fixedDiceSource{val: 5}
+		roller := dice.NewLoggedRoller(src, logger)
+		condReg := makeTestConditionRegistryWithSubmerged()
+
+		_, sessMgr, npcMgr, combatHandler := newSwimSvcWithCombat(t, roller, condReg)
+
+		const roomID = "room_water"
+		_, err := npcMgr.Spawn(&npc.Template{
+			ID: "bandit-prop-drown", Name: "Bandit", Level: 1, MaxHP: 30, AC: 10, Perception: 0,
+		}, roomID)
+		require.NoError(t, err)
+
+		uid := fmt.Sprintf("u_drown_prop_%d", initialHP)
+		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID:       uid,
+			Username:  "Diver",
+			CharName:  "Diver",
+			RoomID:    roomID,
+			CurrentHP: initialHP,
+			MaxHP:     initialHP,
+			Role:      "player",
+		})
+		require.NoError(t, err)
+		initSessionConditions(sess)
+
+		def, ok := condReg.Get("submerged")
+		require.True(t, ok)
+		err = sess.Conditions.Apply(uid, def, 1, -1)
+		require.NoError(t, err)
+
+		_, err = combatHandler.Attack(uid, "Bandit")
+		require.NoError(t, err)
+		combatHandler.cancelTimer(roomID)
+
+		hpBefore := sess.CurrentHP
+
+		combatHandler.combatMu.Lock()
+		cbt, ok := combatHandler.engine.GetCombat(roomID)
+		require.True(t, ok)
+		combatHandler.resolveAndAdvanceLocked(roomID, cbt)
+		combatHandler.combatMu.Unlock()
+		combatHandler.cancelTimer(roomID)
+
+		if sess.CurrentHP >= hpBefore {
+			rt.Fatalf("expected HP to decrease from drowning: before=%d after=%d", hpBefore, sess.CurrentHP)
+		}
+	})
 }
 
 // TestHandleSwim_BlocksAttackWhenSubmerged verifies that handleAttack returns a blocked
