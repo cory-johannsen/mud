@@ -113,6 +113,16 @@ func TestLoadDirectory_RealConditions(t *testing.T) {
 	}
 }
 
+func TestSubmergedConditionLoads(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+	def, ok := reg.Get("submerged")
+	require.True(t, ok, "submerged condition must be registered")
+	assert.Equal(t, "submerged", def.ID)
+	assert.Equal(t, 1, def.MaxStacks)
+	assert.Equal(t, "permanent", def.DurationType)
+}
+
 func TestCoverConditionYAML(t *testing.T) {
 	cases := []struct {
 		file        string
