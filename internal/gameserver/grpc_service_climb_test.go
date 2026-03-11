@@ -33,7 +33,7 @@ func initSessionConditions(sess *session.PlayerSession) {
 // Postcondition: Registry contains at least prone and submerged definitions.
 func makeTestConditionRegistryWithProneAndSubmerged() *condition.Registry {
 	reg := makeTestConditionRegistry()
-	reg.Register(&condition.ConditionDef{ID: "submerged", Name: "Submerged", DurationType: "permanent", MaxStacks: 0})
+	reg.Register(&condition.ConditionDef{ID: "submerged", Name: "Submerged", DurationType: "permanent", MaxStacks: 1})
 	return reg
 }
 

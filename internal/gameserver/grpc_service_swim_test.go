@@ -22,7 +22,7 @@ import (
 // Postcondition: Registry contains at least a "submerged" definition.
 func makeTestConditionRegistryWithSubmerged() *condition.Registry {
 	reg := makeTestConditionRegistry()
-	reg.Register(&condition.ConditionDef{ID: "submerged", Name: "Submerged", DurationType: "permanent", MaxStacks: 0})
+	reg.Register(&condition.ConditionDef{ID: "submerged", Name: "Submerged", DurationType: "permanent", MaxStacks: 1})
 	return reg
 }
 
