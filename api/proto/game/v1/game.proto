@@ -81,6 +81,8 @@ message ClientMessage {
     StepRequest step = 64;
     TumbleRequest tumble = 65;
     SeekRequest seek = 66;
+    ClimbRequest climb = 67;
+    SwimRequest swim = 68;
   }
 }
 
@@ -790,6 +792,12 @@ message TumbleRequest {
 
 // SeekRequest asks the server to scan for hidden NPCs (Perception vs NPC Stealth DC).
 message SeekRequest {}
+
+// ClimbRequest asks the server to attempt climbing a climbable surface.
+message ClimbRequest {}
+
+// SwimRequest asks the server to attempt swimming or surfacing.
+message SwimRequest {}
 
 // GrantRequest asks the server to grant XP or money to a named player (editor command).
 message GrantRequest {
