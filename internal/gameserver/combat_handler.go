@@ -663,6 +663,18 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, bool, error) {
 		return nil, false, fmt.Errorf("you are not a combatant")
 	}
 
+	// IMMOBILIZED: grabbed condition prevents fleeing.
+	if sess.Conditions != nil && condition.IsActionRestricted(sess.Conditions, "move") {
+		// IMMOBILIZED: release lock manually — all exit paths in this function manage combatMu explicitly.
+		h.combatMu.Unlock()
+		evt := &gamev1.CombatEvent{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+			Attacker:  uid,
+			Narrative: "You are grabbed and cannot flee!",
+		}
+		return []*gamev1.CombatEvent{evt}, false, nil
+	}
+
 	// FLEE-1 / FLEE-2: AP guard — inline to avoid re-acquiring combatMu (SpendAP locks it).
 	q, hasQ := cbt.ActionQueues[uid]
 	if !hasQ || q.RemainingPoints() < 1 {

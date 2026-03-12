@@ -1243,6 +1243,13 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*gamev1.ServerEvent, error) {
 	dir := world.Direction(req.Direction)
 
+	// IMMOBILIZED: grabbed condition prevents leaving the room.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil {
+		if condition.IsActionRestricted(sess.Conditions, "move") {
+			return errorEvent("You are grabbed and cannot move!"), nil
+		}
+	}
+
 	result, err := s.worldH.MoveWithContext(uid, dir)
 	if err != nil {
 		return nil, err
@@ -2007,8 +2014,8 @@ func (s *GameServiceServer) handleFlee(uid string) (*gamev1.ServerEvent, error) 
 		return nil, nil
 	}
 
-	// Broadcast all events to the original room.
-	for _, evt := range events {
+	// Broadcast all events except the first to the original room (first is returned directly to caller).
+	for _, evt := range events[1:] {
 		s.broadcastCombatEvent(origRoomID, uid, evt)
 	}
 
@@ -2033,10 +2040,8 @@ func (s *GameServiceServer) handleFlee(uid string) (*gamev1.ServerEvent, error) 
 		}
 	}
 
-	// Return the last event — this is the most contextually relevant message to the
-	// fleeing player (e.g., "nowhere to run" overrides the generic "breaks free" event).
 	return &gamev1.ServerEvent{
-		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[len(events)-1]},
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
 	}, nil
 }
 
