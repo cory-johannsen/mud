@@ -183,11 +183,9 @@
       - [ ] AoE attack type — add `aoe_radius int` field to weapon/ability YAML; on resolution apply damage roll to all combatants within radius in the current combat
   - Attack of opportunity
       - [ ] See Reactive Strike under Reactions — Attack of Opportunity is implemented as Reactive Strike (NPC triggers a free Strike when a player in melee range uses a move action)
-  - Terrain types
-      - [ ] Climbable surfaces — rooms with climbable terrain (walls, ladders, ruins) support vertical movement; stored in room YAML; required for Climb command
-      - [ ] Climb command — implement `climb` (Athletics vs surface DC defined in room YAML; available only in rooms with climbable terrain)
-      - [ ] Water terrain — rooms with water terrain support swimming; stored in room YAML with a current DC value; required for Swim command
-      - [ ] Swim command — implement `swim` (Athletics vs current DC defined in room YAML; available only in rooms with water terrain)
+  - [x] Terrain types
+      - [x] Climbable surfaces — `climb` command, Athletics vs DC, 4-tier outcomes, falling damage + prone on crit fail
+      - [x] Water terrain — `swim` command, Athletics vs DC, 4-tier outcomes, drowning damage + submerged condition on crit fail
   - Fleeing
       - Pursuit
       - [ ] Flee command — implement `flee` (costs all remaining AP; Athletics or Acrobatics check vs highest NPC Athletics DC in room; on success combat ends and player moves to a random adjacent room)
