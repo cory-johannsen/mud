@@ -1046,12 +1046,12 @@ func bridgeSeek(bctx *bridgeContext) (bridgeResult, error) {
 // Postcondition: returns a non-nil msg containing a MotiveRequest when RawArgs is non-empty;
 // otherwise returns done=true with a usage error event.
 func bridgeMotive(bctx *bridgeContext) (bridgeResult, error) {
-	if bctx.parsed.RawArgs == "" {
+	if len(bctx.parsed.Args) == 0 {
 		return writeErrorPrompt(bctx, "Usage: motive <target>")
 	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
-		Payload:   &gamev1.ClientMessage_Motive{Motive: &gamev1.MotiveRequest{Target: bctx.parsed.RawArgs}},
+		Payload:   &gamev1.ClientMessage_Motive{Motive: &gamev1.MotiveRequest{Target: bctx.parsed.Args[0]}},
 	}}, nil
 }
 
