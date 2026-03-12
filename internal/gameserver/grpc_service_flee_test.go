@@ -91,7 +91,7 @@ func TestHandleFlee_NotEnoughAP(t *testing.T) {
 	roller := dice.NewRoller(src)
 	svc, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
-	const roomID = "room_flee_ap"
+	const roomID = "room_a"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "ganger-flee-ap", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Perception: 2,
 	}, roomID)
@@ -124,7 +124,7 @@ func TestHandleFlee_Failure(t *testing.T) {
 	roller := dice.NewRoller(src)
 	svc, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
-	const roomID = "room_flee_fail"
+	const roomID = "room_a"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "ganger-flee-fail", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Perception: 4,
 	}, roomID)
@@ -389,33 +389,36 @@ func TestProperty_Pursuit_RollOutcome(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		fleeRoll := rapid.IntRange(11, 20).Draw(rt, "fleeRoll") // ensure flee succeeds (>=10+0)
 		pursuitRoll := rapid.IntRange(1, 20).Draw(rt, "pursuitRoll")
+		suffix := rapid.StringMatching(`[a-z]{6}`).Draw(rt, "suffix")
 
 		src := dice.NewDeterministicSource([]int{fleeRoll, pursuitRoll})
 		roller := dice.NewRoller(src)
 		_, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
-		roomID := "room_a"
+		const roomID = "room_a"
+		npcID := "prop-pursue-npc-" + suffix
+		uid := "prop-pursue-uid-" + suffix
 		inst, spawnErr := npcMgr.Spawn(&npc.Template{
-			ID: "prop-pursue-npc", Name: "Pursuer", Level: 1,
+			ID: npcID, Name: "Pursuer", Level: 1,
 			MaxHP: 10, AC: 12, Perception: 0, // StrMod=0 → DC=10; fleeRoll≥11 always succeeds
 		}, roomID)
 		if spawnErr != nil {
 			rt.Skip()
 		}
 		sess, addErr := sessMgr.AddPlayer(session.AddPlayerOptions{
-			UID: "prop-pursue-uid", Username: "Runner", CharName: "Runner",
+			UID: uid, Username: "Runner", CharName: "Runner",
 			RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
 		})
 		if addErr != nil {
 			rt.Skip()
 		}
-		_, attackErr := combatHandler.Attack("prop-pursue-uid", "Pursuer")
+		_, attackErr := combatHandler.Attack(uid, "Pursuer")
 		if attackErr != nil {
 			rt.Skip()
 		}
 		combatHandler.cancelTimer(roomID)
 
-		_, fled, err := combatHandler.Flee("prop-pursue-uid")
+		_, fled, err := combatHandler.Flee(uid)
 		if err != nil || !fled {
 			rt.Skip()
 		}
@@ -441,33 +444,37 @@ func TestProperty_Pursuit_RollOutcome(t *testing.T) {
 // exit where Hidden==false && Locked==false.
 func TestProperty_Flee_ExitSelection(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
+		suffix := rapid.StringMatching(`[a-z]{6}`).Draw(rt, "suffix")
+
 		// All exits in room_a are unlocked/unhidden (room_a → room_b via North).
 		src := dice.NewDeterministicSource([]int{20, 1}) // flee succeeds; NPC stays
 		roller := dice.NewRoller(src)
 		_, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
 		const roomID = "room_a"
+		npcID := "prop-exit-npc-" + suffix
+		uid := "prop-exit-uid-" + suffix
 		_, spawnErr := npcMgr.Spawn(&npc.Template{
-			ID: "prop-exit-npc", Name: "Blocker", Level: 1,
+			ID: npcID, Name: "Blocker", Level: 1,
 			MaxHP: 10, AC: 12, Perception: 0,
 		}, roomID)
 		if spawnErr != nil {
 			rt.Skip()
 		}
 		sess, addErr := sessMgr.AddPlayer(session.AddPlayerOptions{
-			UID: "prop-exit-uid", Username: "Runner", CharName: "Runner",
+			UID: uid, Username: "Runner", CharName: "Runner",
 			RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
 		})
 		if addErr != nil {
 			rt.Skip()
 		}
-		_, attackErr := combatHandler.Attack("prop-exit-uid", "Blocker")
+		_, attackErr := combatHandler.Attack(uid, "Blocker")
 		if attackErr != nil {
 			rt.Skip()
 		}
 		combatHandler.cancelTimer(roomID)
 
-		_, fled, err := combatHandler.Flee("prop-exit-uid")
+		_, fled, err := combatHandler.Flee(uid)
 		if err != nil || !fled {
 			rt.Skip()
 		}
