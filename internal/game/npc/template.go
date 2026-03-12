@@ -48,6 +48,9 @@ type Template struct {
 	MaxHP       int       `yaml:"max_hp"`
 	AC          int       `yaml:"ac"`
 	Perception  int       `yaml:"perception"`
+	// Deception is the NPC's deception skill modifier, used as the DC for the motive command.
+	// Zero means untrained. Loaded from YAML field "deception".
+	Deception   int       `yaml:"deception"`
 	Abilities   Abilities `yaml:"abilities"`
 	AIDomain    string    `yaml:"ai_domain"` // HTN domain ID; empty = simple attack fallback
 	// RespawnDelay is the duration string (e.g. "5m", "30s") before a dead NPC
