@@ -1,0 +1,17 @@
+id: rage_irritated
+name: Irritated
+description: |
+  Anger sharpens your strikes but leaves you exposed.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 1
+damage_bonus: 1
+speed_penalty: 0
+ap_reduction: 0
+skip_turn: false
+skill_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

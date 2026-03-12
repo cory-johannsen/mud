@@ -97,3 +97,56 @@ func StealthBonus(s *ActiveSet) int {
 	}
 	return total
 }
+
+// APReduction returns the total AP reduction from all active conditions.
+// Each condition contributes APReduction * Stacks.
+//
+// Precondition: s must not be nil.
+// Postcondition: Returns >= 0.
+func APReduction(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
+	total := 0
+	for _, ac := range s.conditions {
+		total += ac.Def.APReduction * ac.Stacks
+	}
+	if total < 0 {
+		total = 0
+	}
+	return total
+}
+
+// SkipTurn returns true if any active condition has SkipTurn set.
+//
+// Precondition: s must not be nil.
+func SkipTurn(s *ActiveSet) bool {
+	if s == nil {
+		return false
+	}
+	for _, ac := range s.conditions {
+		if ac.Def.SkipTurn {
+			return true
+		}
+	}
+	return false
+}
+
+// SkillPenalty returns the total skill penalty from all active conditions.
+// Each condition contributes SkillPenalty * Stacks.
+//
+// Precondition: s must not be nil.
+// Postcondition: Returns >= 0.
+func SkillPenalty(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
+	total := 0
+	for _, ac := range s.conditions {
+		total += ac.Def.SkillPenalty * ac.Stacks
+	}
+	if total < 0 {
+		total = 0
+	}
+	return total
+}

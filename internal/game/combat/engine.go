@@ -160,7 +160,7 @@ func (c *Combat) StartRoundWithSrc(actionsPerRound int, src Source) []RoundCondi
 		}
 		ap := actionsPerRound
 		s := c.Conditions[cbt.ID]
-		reduction := condition.StunnedAPReduction(s)
+		reduction := condition.StunnedAPReduction(s) + condition.APReduction(s)
 		ap -= reduction
 		if ap < 0 {
 			ap = 0

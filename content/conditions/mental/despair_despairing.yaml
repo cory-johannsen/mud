@@ -1,0 +1,17 @@
+id: despair_despairing
+name: Despairing
+description: |
+  You see no point in fighting. Your movements are sluggish and ineffective.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 1
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+ap_reduction: 2
+skip_turn: false
+skill_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

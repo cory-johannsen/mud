@@ -1,0 +1,18 @@
+id: despair_catatonic
+name: Catatonic
+description: |
+  You stand frozen, unable to act or move.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+ap_reduction: 0
+skip_turn: true
+skill_penalty: 0
+restrict_actions:
+  - move
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

@@ -179,3 +179,39 @@ func TestStealthBonusNoConditions(t *testing.T) {
 		t.Errorf("empty set: got %d, want 0", got)
 	}
 }
+
+func TestAPReduction_NoConditions(t *testing.T) {
+	s := condition.NewActiveSet()
+	assert.Equal(t, 0, condition.APReduction(s))
+}
+
+func TestAPReduction_WithCondition(t *testing.T) {
+	s := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "test_ap", APReduction: 2, DurationType: "rounds"}
+	require.NoError(t, s.Apply("uid", def, 1, 3))
+	assert.Equal(t, 2, condition.APReduction(s))
+}
+
+func TestSkipTurn_False(t *testing.T) {
+	s := condition.NewActiveSet()
+	assert.False(t, condition.SkipTurn(s))
+}
+
+func TestSkipTurn_True(t *testing.T) {
+	s := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "test_skip", SkipTurn: true, DurationType: "rounds"}
+	require.NoError(t, s.Apply("uid", def, 1, 3))
+	assert.True(t, condition.SkipTurn(s))
+}
+
+func TestSkillPenalty_NoConditions(t *testing.T) {
+	s := condition.NewActiveSet()
+	assert.Equal(t, 0, condition.SkillPenalty(s))
+}
+
+func TestSkillPenalty_WithCondition(t *testing.T) {
+	s := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "test_skill", SkillPenalty: 2, DurationType: "rounds"}
+	require.NoError(t, s.Apply("uid", def, 1, 3))
+	assert.Equal(t, 2, condition.SkillPenalty(s))
+}

@@ -25,6 +25,12 @@ type ConditionDef struct {
 	ReflexBonus     int      `yaml:"reflex_bonus"`   // positive = bonus to Reflex saves
 	StealthBonus    int      `yaml:"stealth_bonus"`  // positive = bonus to Stealth checks
 	RestrictActions []string `yaml:"restrict_actions"`
+	// APReduction is the number of AP removed from the combatant's action queue at round start.
+	APReduction int `yaml:"ap_reduction"`
+	// SkipTurn, if true, causes the combatant's entire turn to be skipped.
+	SkipTurn bool `yaml:"skip_turn"`
+	// SkillPenalty is the penalty applied to skill checks while this condition is active.
+	SkillPenalty int `yaml:"skill_penalty"`
 	LuaOnApply      string   `yaml:"lua_on_apply"`  // stored; ignored until Stage 6
 	LuaOnRemove     string   `yaml:"lua_on_remove"` // stored; ignored until Stage 6
 	LuaOnTick       string   `yaml:"lua_on_tick"`   // stored; ignored until Stage 6
