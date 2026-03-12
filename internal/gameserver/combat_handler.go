@@ -789,7 +789,7 @@ func (h *CombatHandler) resolvePursuitLocked(cbt *combat.Combat, playerSess *ses
 			continue
 		}
 		pursuitRoll, _ := h.dice.RollExpr("d20")
-		pursuitTotal := pursuitRoll.Total()
+		pursuitTotal := pursuitRoll.Total() + c.StrMod
 		if pursuitTotal >= playerTotal {
 			// PURSUIT-2: move NPC; skip if move fails.
 			if err := h.npcMgr.Move(c.ID, destRoomID); err != nil {

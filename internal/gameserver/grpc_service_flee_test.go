@@ -232,7 +232,8 @@ func TestHandleFlee_Success_NPCPursues(t *testing.T) {
 
 	const roomID = "room_a"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-flee-pursue", Name: "Pursuer", Level: 1, MaxHP: 20, AC: 12, Perception: 2,
+		// Perception: 10 → StrMod=0; pursuitTotal=20+0=20 >= playerTotal=20 → pursues.
+		ID: "ganger-flee-pursue", Name: "Pursuer", Level: 1, MaxHP: 20, AC: 12, Perception: 10,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -418,7 +419,7 @@ func TestProperty_Pursuit_RollOutcome(t *testing.T) {
 		uid := "prop-pursue-uid-" + suffix
 		inst, spawnErr := npcMgr.Spawn(&npc.Template{
 			ID: npcID, Name: "Pursuer", Level: 1,
-			MaxHP: 10, AC: 12, Perception: 0, // StrMod=0 → DC=10; fleeRoll≥11 always succeeds
+			MaxHP: 10, AC: 12, Perception: 10, // Perception:10 → StrMod=0; DC=10; fleeRoll≥11 always succeeds
 		}, roomID)
 		if spawnErr != nil {
 			rt.Skip()
