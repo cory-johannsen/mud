@@ -188,8 +188,8 @@
       - [x] Water terrain — `swim` command, Athletics vs DC, 4-tier outcomes, drowning damage + submerged condition on crit fail
   - Fleeing
       - Pursuit
-      - [ ] Flee command — implement `flee` (costs all remaining AP; Athletics or Acrobatics check vs highest NPC Athletics DC in room; on success combat ends and player moves to a random adjacent room)
-      - [ ] Pursuit — on flee failure, each NPC makes a separate Athletics check; on NPC success the NPC follows the player to the adjacent room and re-initiates combat
+      - [x] Flee command — implement `flee` (costs all remaining AP; Athletics or Acrobatics check vs highest NPC Athletics DC in room; on success combat ends and player moves to a random adjacent room)
+      - [x] Pursuit — on flee failure, each NPC makes a separate Athletics check; on NPC success the NPC follows the player to the adjacent room and re-initiates combat
   - Mental state
       - Panic
         - Psychosis
@@ -200,6 +200,7 @@
   - [ ] Immobilized — prevent grabbed creatures from moving between rooms
   - [ ] Sense Motive command — implement `motive <target>` (Perception vs target Deception skill; on success reveals whether the NPC is bluffing, holding back an action, or concealing intent)
 - [ ] Replace 'Level + 10' implementation for Grapple, Trip, Reflex DC with real calculations
+- [ ] NPCs rob the player if the player is defeated in combat for 20% of the player currency
 - [ ] Multi-player combat
   - [ ] Other players can join combat already in progress
     - [ ] Combat join — when a player enters a room with active combat, offer to join; on joining, add player as a new combatant with a fresh initiative roll and full AP
