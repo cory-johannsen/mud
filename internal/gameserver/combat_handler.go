@@ -637,86 +637,339 @@ func (h *CombatHandler) Pass(uid string) ([]*gamev1.CombatEvent, error) {
 	return []*gamev1.CombatEvent{confirmEvent}, nil
 }
 
-// Flee attempts to remove the player from combat using an opposed Athletics check.
+// Flee attempts to remove the player from active combat using an Athletics/Acrobatics
+// skill check against the highest NPC StrMod DC in the room.
 //
-// Precondition: uid must be a valid connected player in active combat.
-// Postcondition: Returns events describing the flee attempt outcome.
-func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, error) {
+// Precondition: uid must be a valid connected player in active combat with >= 1 AP.
+// Postcondition: On success, player is removed from combat roster, moved to a random
+//   valid exit (if any), and NPC pursuit is resolved. Returns fled=true on success.
+func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, bool, error) {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
-		return nil, fmt.Errorf("player %q not found", uid)
+		return nil, false, fmt.Errorf("player %q not found", uid)
 	}
 
 	h.combatMu.Lock()
-	defer h.combatMu.Unlock()
 
 	cbt, ok := h.engine.GetCombat(sess.RoomID)
 	if !ok {
-		return nil, fmt.Errorf("you are not in combat")
+		h.combatMu.Unlock()
+		return nil, false, fmt.Errorf("you are not in combat")
 	}
 
 	playerCbt := h.findCombatant(cbt, uid)
 	if playerCbt == nil {
-		return nil, fmt.Errorf("you are not a combatant")
+		h.combatMu.Unlock()
+		return nil, false, fmt.Errorf("you are not a combatant")
 	}
 
-	playerRoll, _ := h.dice.RollExpr("d20")
-	playerTotal := playerRoll.Total() + playerCbt.StrMod
+	// FLEE-1 / FLEE-2: AP guard — inline to avoid re-acquiring combatMu (SpendAP locks it).
+	q, hasQ := cbt.ActionQueues[uid]
+	if !hasQ || q.RemainingPoints() < 1 {
+		h.combatMu.Unlock()
+		return nil, false, fmt.Errorf("you need at least 1 AP to flee")
+	}
+	_ = q.DeductAP(q.RemainingPoints())
 
+	// FLEE-3: skill check — auto-pick best of athletics or acrobatics.
+	roll, _ := h.dice.RollExpr("d20")
+	athleticsBonus := skillRankBonus(sess.Skills["athletics"])
+	acrobaticsBonus := skillRankBonus(sess.Skills["acrobatics"])
+	bonus := athleticsBonus
+	if acrobaticsBonus > athleticsBonus {
+		bonus = acrobaticsBonus
+	}
+	playerTotal := roll.Total() + bonus
+
+	// FLEE-4: DC = 10 + highest NPC StrMod.
 	bestNPC := h.bestNPCCombatant(cbt)
-	npcTotal := 0
+	dc := 10
 	if bestNPC != nil {
-		npcRoll, _ := h.dice.RollExpr("d20")
-		npcTotal = npcRoll.Total() + bestNPC.StrMod
+		dc = 10 + bestNPC.StrMod
 	}
 
 	var events []*gamev1.CombatEvent
-	if playerTotal > npcTotal {
-		// street_brawler: players in the same combat who hold this passive feat fire a
-		// free attack of opportunity against the fleeing player before they escape.
-		for _, other := range cbt.Combatants {
-			if other.ID == uid || other.IsDead() || other.Kind != combat.KindPlayer {
+
+	if playerTotal < dc {
+		// FLEE-5: failure — stay in room, combat continues.
+		events = append(events, &gamev1.CombatEvent{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+			Attacker:  sess.CharName,
+			Narrative: fmt.Sprintf("%s tries to flee but can't escape! (rolled %d vs DC %d)", sess.CharName, playerTotal, dc),
+		})
+		h.combatMu.Unlock()
+		return events, false, nil
+	}
+
+	// FLEE-6: success — remove from combat and set idle.
+	origRoomID := sess.RoomID
+	h.removeCombatant(cbt, uid)
+	sess.Status = int32(1) // idle
+
+	events = append(events, &gamev1.CombatEvent{
+		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+		Attacker:  sess.CharName,
+		Narrative: fmt.Sprintf("%s breaks free and runs! (rolled %d vs DC %d)", sess.CharName, playerTotal, dc),
+	})
+
+	// FLEE-7 / FLEE-8: pick a valid exit.
+	var destRoomID string
+	if h.worldMgr != nil {
+		if room, ok := h.worldMgr.GetRoom(origRoomID); ok {
+			var validExits []world.Exit
+			for _, e := range room.Exits {
+				if !e.Hidden && !e.Locked {
+					validExits = append(validExits, e)
+				}
+			}
+			if len(validExits) > 0 {
+				idx := 0
+				if len(validExits) > 1 {
+					idx = h.dice.Src().Intn(len(validExits))
+				}
+				chosen := validExits[idx]
+				sess.RoomID = chosen.TargetRoom
+				destRoomID = chosen.TargetRoom
+			} else {
+				events = append(events, &gamev1.CombatEvent{
+					Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+					Attacker:  sess.CharName,
+					Narrative: "There is nowhere to run — but you are no longer in combat.",
+				})
+			}
+		}
+	}
+
+	// FLEE-11: end original room combat if no players remain.
+	// Collect the callback so it can be invoked after releasing combatMu; calling it
+	// while holding the lock risks deadlock if the callback re-enters combatMu.
+	var postUnlockFn func()
+	if !cbt.HasLivingPlayers() {
+		h.stopTimerLocked(origRoomID)
+		h.engine.EndCombat(origRoomID)
+		if h.onCombatEndFn != nil {
+			fn := h.onCombatEndFn
+			rid := origRoomID
+			postUnlockFn = func() { fn(rid) }
+		}
+	}
+
+	// Pursuit (stub — implemented fully in Task 3).
+	if destRoomID != "" {
+		pursuitEvents := h.resolvePursuitLocked(cbt, sess, playerTotal, destRoomID)
+		events = append(events, pursuitEvents...)
+	}
+
+	h.combatMu.Unlock()
+
+	// Invoke post-unlock callbacks after releasing the lock (FLEE-11).
+	if postUnlockFn != nil {
+		postUnlockFn()
+	}
+
+	return events, true, nil
+}
+
+// resolvePursuitLocked resolves NPC pursuit checks after a successful flee.
+// Caller must hold combatMu.
+//
+// Precondition: combatMu is held; destRoomID non-empty; playerSess.RoomID == destRoomID.
+// Postcondition: Pursuing NPCs moved to destRoomID; new combat started if any pursue;
+//   returned events are for deferred broadcasting by the caller.
+func (h *CombatHandler) resolvePursuitLocked(cbt *combat.Combat, playerSess *session.PlayerSession, playerTotal int, destRoomID string) []*gamev1.CombatEvent {
+	var events []*gamev1.CombatEvent
+	var pursuers []*npc.Instance
+
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindNPC || c.IsDead() {
+			continue
+		}
+		inst, ok := h.npcMgr.Get(c.ID)
+		if !ok {
+			continue
+		}
+		pursuitRoll, _ := h.dice.RollExpr("d20")
+		pursuitTotal := pursuitRoll.Total()
+		if pursuitTotal >= playerTotal {
+			// PURSUIT-2: move NPC; skip if move fails.
+			if err := h.npcMgr.Move(c.ID, destRoomID); err != nil {
+				events = append(events, &gamev1.CombatEvent{
+					Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+					Attacker:  c.Name,
+					Narrative: fmt.Sprintf("%s gives chase but loses you!", c.Name),
+				})
 				continue
 			}
-			otherSess, ok := h.sessions.GetPlayer(other.ID)
-			if !ok || !otherSess.PassiveFeats["street_brawler"] {
-				continue
-			}
-			aooResult := combat.ResolveAttack(other, playerCbt, h.dice.Src())
-			aooNarrative := fmt.Sprintf("%s lashes out at the fleeing %s: %s (total %d).",
-				other.Name, playerCbt.Name, aooResult.Outcome, aooResult.AttackTotal)
+			pursuers = append(pursuers, inst)
 			events = append(events, &gamev1.CombatEvent{
-				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
-				Attacker:  other.Name,
-				Target:    playerCbt.Name,
-				Narrative: aooNarrative,
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+				Attacker:  c.Name,
+				Narrative: fmt.Sprintf("%s gives chase! (rolled %d)", c.Name, pursuitTotal),
+			})
+		} else {
+			events = append(events, &gamev1.CombatEvent{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+				Attacker:  c.Name,
+				Narrative: fmt.Sprintf("%s can't keep up and falls behind. (rolled %d)", c.Name, pursuitTotal),
 			})
 		}
+	}
 
-		// removeCombatant sets CurrentHP=0 (dead) so ResolveRound skips the fleeing player.
-		// Safe: entire Flee path holds combatMu; pending timer callback will no-op
-		// (GetCombat returns false after EndCombat).
-		h.removeCombatant(cbt, uid)
-		sess.Status = int32(1) // gamev1.CombatStatus_COMBAT_STATUS_IDLE
-		if !cbt.HasLivingPlayers() {
-			h.stopTimerLocked(sess.RoomID)
-			h.engine.EndCombat(sess.RoomID)
-			if h.onCombatEndFn != nil {
-				h.onCombatEndFn(sess.RoomID)
+	if len(pursuers) > 0 {
+		initEvents, err := h.startPursuitCombatLocked(playerSess, pursuers)
+		if err != nil {
+			events = append(events, &gamev1.CombatEvent{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+				Narrative: fmt.Sprintf("Pursuit error: %v", err),
+			})
+		} else {
+			events = append(events, initEvents...)
+		}
+	}
+
+	return events
+}
+
+// startPursuitCombatLocked initiates a new combat in the player's current room
+// (the destination after fleeing) with all pursuing NPC instances.
+// Caller must hold combatMu. Does NOT call broadcastFn — returns init events for
+// deferred broadcasting to avoid deadlock.
+//
+// Precondition: combatMu is held; playerSess.RoomID is the destination room;
+//   insts is non-empty.
+// Postcondition: combat registered in engine; StartRound(3) called; timer started.
+func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSession, insts []*npc.Instance) ([]*gamev1.CombatEvent, error) {
+	const dexMod = 1
+	var playerAC int
+	if h.invRegistry != nil {
+		defStats := playerSess.Equipment.ComputedDefenses(h.invRegistry, dexMod)
+		playerAC = 10 + defStats.ACBonus + defStats.EffectiveDex
+	} else {
+		playerAC = 10 + dexMod
+	}
+
+	playerCbt := &combat.Combatant{
+		ID:        playerSess.UID,
+		Kind:      combat.KindPlayer,
+		Name:      playerSess.CharName,
+		MaxHP:     playerSess.CurrentHP,
+		CurrentHP: playerSess.CurrentHP,
+		AC:        playerAC,
+		Level:     1,
+		StrMod:    2,
+		DexMod:    dexMod,
+	}
+
+	h.loadoutsMu.Lock()
+	if lo, ok := h.loadouts[playerSess.UID]; ok {
+		playerCbt.Loadout = lo
+	}
+	h.loadoutsMu.Unlock()
+
+	// Weapon proficiency rank — same pattern as startCombatLocked.
+	weaponProfRank := "untrained"
+	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
+		cat := playerCbt.Loadout.MainHand.Def.ProficiencyCategory
+		if r, ok := playerSess.Proficiencies[cat]; ok {
+			weaponProfRank = r
+		}
+		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
+	}
+	playerCbt.WeaponProficiencyRank = weaponProfRank
+
+	// Resistances / weaknesses.
+	playerCbt.Resistances = playerSess.Resistances
+	playerCbt.Weaknesses = playerSess.Weaknesses
+
+	// Save mods and proficiency ranks.
+	playerCbt.GritMod = combat.AbilityMod(playerSess.Abilities.Grit)
+	playerCbt.QuicknessMod = combat.AbilityMod(playerSess.Abilities.Quickness)
+	playerCbt.SavvyMod = combat.AbilityMod(playerSess.Abilities.Savvy)
+	playerCbt.ToughnessRank = combat.DefaultSaveRank(playerSess.Proficiencies["toughness"])
+	playerCbt.HustleRank = combat.DefaultSaveRank(playerSess.Proficiencies["hustle"])
+	playerCbt.CoolRank = combat.DefaultSaveRank(playerSess.Proficiencies["cool"])
+
+	playerCbt.Position = 0
+
+	combatants := []*combat.Combatant{playerCbt}
+	for _, inst := range insts {
+		npcWeaponName := ""
+		if inst.WeaponID != "" && h.invRegistry != nil {
+			if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
+				npcWeaponName = wDef.Name
 			}
 		}
+		npcCbt := &combat.Combatant{
+			ID:          inst.ID,
+			Kind:        combat.KindNPC,
+			Name:        inst.Name(),
+			MaxHP:       inst.MaxHP,
+			CurrentHP:   inst.CurrentHP,
+			AC:          inst.AC,
+			Level:       inst.Level,
+			StrMod:      combat.AbilityMod(inst.Perception),
+			DexMod:      1,
+			NPCType:     inst.Type,
+			Resistances: inst.Resistances,
+			Weaknesses:  inst.Weaknesses,
+			WeaponName:  npcWeaponName,
+			Position:    25,
+		}
+		combatants = append(combatants, npcCbt)
+	}
+
+	combat.RollInitiative(combatants, h.dice.Src())
+
+	var scriptMgr *scripting.Manager
+	var zoneID string
+	if h.scriptMgr != nil && h.worldMgr != nil {
+		scriptMgr = h.scriptMgr
+		if room, ok := h.worldMgr.GetRoom(playerSess.RoomID); ok {
+			zoneID = room.ZoneID
+		}
+	}
+
+	cbt, err := h.engine.StartCombat(playerSess.RoomID, combatants, h.condRegistry, scriptMgr, zoneID)
+	if err != nil {
+		return nil, fmt.Errorf("startPursuitCombatLocked: %w", err)
+	}
+	playerSess.Status = int32(2) // in combat
+
+	// Apply flat_footed to all pursuing NPC combatants at combat start — same
+	// pattern as startCombatLocked.
+	if h.condRegistry != nil {
+		if def, ok := h.condRegistry.Get("flat_footed"); ok {
+			for _, npcCbt := range cbt.Combatants {
+				if npcCbt.Kind != combat.KindNPC {
+					continue
+				}
+				if cbt.Conditions[npcCbt.ID] == nil {
+					cbt.Conditions[npcCbt.ID] = condition.NewActiveSet()
+				}
+				_ = cbt.Conditions[npcCbt.ID].Apply(npcCbt.ID, def, 1, 1)
+			}
+		}
+	}
+
+	cbt.SetSessionGetter(func(uid string) (*session.PlayerSession, bool) {
+		return h.sessions.GetPlayer(uid)
+	})
+	cbt.StartRound(3)
+
+	var events []*gamev1.CombatEvent
+	for _, c := range cbt.Combatants {
 		events = append(events, &gamev1.CombatEvent{
-			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
-			Attacker:  sess.CharName,
-			Narrative: fmt.Sprintf("%s breaks free and runs!", sess.CharName),
-		})
-	} else {
-		events = append(events, &gamev1.CombatEvent{
-			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
-			Attacker:  sess.CharName,
-			Narrative: fmt.Sprintf("%s tries to flee but can't escape!", sess.CharName),
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
+			Attacker:  c.Name,
+			Narrative: fmt.Sprintf("%s rolls initiative: %d", c.Name, c.Initiative),
 		})
 	}
+	events = append(events, &gamev1.CombatEvent{
+		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
+		Narrative: fmt.Sprintf("Pursuit! Round %d begins!", cbt.Round),
+	})
+
+	h.startTimerLocked(playerSess.RoomID)
 	return events, nil
 }
 
@@ -1831,7 +2084,20 @@ func (h *CombatHandler) FightingTargetName(npcID string) string {
 	return ""
 }
 
-// Status returns the active conditions for the player with the given uid.
+// ActiveCombatForRoom returns the active combat in roomID, or nil if none.
+//
+// Precondition: roomID must be non-empty.
+// Postcondition: Returns a non-nil *combat.Combat if active; nil otherwise.
+func (h *CombatHandler) ActiveCombatForRoom(roomID string) *combat.Combat {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return nil
+	}
+	return cbt
+}
+
 // ActiveCombatForPlayer returns the active combat in the player's current room, or nil if none.
 //
 // Precondition: uid must be a valid connected player.

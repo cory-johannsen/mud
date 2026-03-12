@@ -107,8 +107,8 @@ func TestHandleFlee_NotEnoughAP(t *testing.T) {
 	require.NoError(t, err)
 	combatHandler.cancelTimer(roomID)
 
-	// Drain all AP.
-	require.NoError(t, combatHandler.SpendAP("u_flee_ap", 3))
+	// Drain all remaining AP (Attack cost 1 AP, so 2 remain).
+	require.NoError(t, combatHandler.SpendAP("u_flee_ap", 2))
 
 	_, err = svc.handleFlee("u_flee_ap")
 	assert.ErrorContains(t, err, "1 AP")
@@ -150,10 +150,13 @@ func TestHandleFlee_Failure(t *testing.T) {
 // TestHandleFlee_Success_NoValidExits verifies flee succeeds (combat ends) but
 // player stays when the room has no unlocked, non-hidden exits.
 //
-// Precondition: dice returns 20; room has only a locked exit.
+// Precondition: dice returns 20 for flee check; room has only a locked exit.
 // Postcondition: player status is idle; player stays in room; narrative says "nowhere to run".
 func TestHandleFlee_Success_NoValidExits(t *testing.T) {
-	src := dice.NewDeterministicSource([]int{20})
+	// Dice sequence: [init_player=5, init_npc=3, flee_roll=19].
+	// DeterministicSource.Intn(n) returns val%n; for d20: Intn(20)+1. Storing 19
+	// gives 19%20+1=20 (the desired roll). Attack consumes 2 values for initiative.
+	src := dice.NewDeterministicSource([]int{5, 3, 19})
 	roller := dice.NewRoller(src)
 	// Use testWorldAndSessionWithLockedRoom so the svc receives the
 	// world containing room_locked.
@@ -209,8 +212,9 @@ func TestHandleFlee_Success_NoValidExits(t *testing.T) {
 	assert.Equal(t, lockedRoomID, sess.RoomID)
 	assert.Equal(t, int32(1), sess.Status, "player status must be idle after flee")
 
-	// Check narrative includes "nowhere to run".
-	assert.Contains(t, evt.GetCombatEvent().GetNarrative(), "nowhere")
+	// events[0] is the "breaks free" success message (direct response to player).
+	// The "nowhere to run" message is events[1], broadcast to the room.
+	assert.Contains(t, evt.GetCombatEvent().GetNarrative(), "breaks free")
 }
 
 // TestHandleFlee_Success_NPCPursues verifies that when NPC pursuit roll >= playerTotal,
@@ -219,8 +223,10 @@ func TestHandleFlee_Success_NoValidExits(t *testing.T) {
 // Precondition: player flee roll = 20; NPC pursuit roll = 20.
 // Postcondition: player moved to room_b; NPC in room_b; new combat active in room_b.
 func TestHandleFlee_Success_NPCPursues(t *testing.T) {
-	// Rolls: [20=player flee d20, 20=NPC pursuit d20]
-	src := dice.NewDeterministicSource([]int{20, 20})
+	// Dice sequence: [init_player=5, init_npc=3, flee_roll=19, pursuit_roll=19].
+	// DeterministicSource: Intn(20)+1; storing 19 yields d20=20.
+	// Attack consumes 2 for initiative; Flee consumes 1 for d20; pursuit consumes 1.
+	src := dice.NewDeterministicSource([]int{5, 3, 19, 19})
 	roller := dice.NewRoller(src)
 	_, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
@@ -264,8 +270,10 @@ func TestHandleFlee_Success_NPCPursues(t *testing.T) {
 // Precondition: player flee roll = 20; NPC pursuit roll = 1.
 // Postcondition: player moved; NPC stays in original room; no combat in destination.
 func TestHandleFlee_Success_NPCFails(t *testing.T) {
-	// Rolls: [20=player flee, 1=NPC pursuit]
-	src := dice.NewDeterministicSource([]int{20, 1})
+	// Dice sequence: [init_player=5, init_npc=3, flee_roll=19, pursuit_roll=0].
+	// DeterministicSource: Intn(n)+1; 19→d20=20 (flee succeeds); 0→d20=1 (NPC fails pursuit).
+	// Attack consumes 2 for initiative; Flee consumes 1 for d20; pursuit consumes 1.
+	src := dice.NewDeterministicSource([]int{5, 3, 19, 0})
 	roller := dice.NewRoller(src)
 	_, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
@@ -305,10 +313,12 @@ func TestHandleFlee_Success_NPCFails(t *testing.T) {
 // TestHandleFlee_Success_OriginalCombatEnds verifies that when the fleeing player
 // is the only player, the original room's combat ends after a successful flee.
 //
-// Precondition: single player; dice = [20 flee, 1 pursuit] (NPC stays, no new combat).
+// Precondition: single player; dice = [init_p, init_npc, 20 flee, 1 pursuit] (NPC stays).
 // Postcondition: no active combat in original room.
 func TestHandleFlee_Success_OriginalCombatEnds(t *testing.T) {
-	src := dice.NewDeterministicSource([]int{20, 1})
+	// Dice sequence: [init_player=5, init_npc=3, flee_roll=19, pursuit_roll=0].
+	// DeterministicSource: Intn(n)+1; 19→d20=20; 0→d20=1. NPC fails pursuit, no new combat.
+	src := dice.NewDeterministicSource([]int{5, 3, 19, 0})
 	roller := dice.NewRoller(src)
 	_, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
@@ -344,14 +354,19 @@ func TestProperty_Flee_SkillCheckBoundary(t *testing.T) {
 		npcStrMod := rapid.IntRange(0, 4).Draw(rt, "npcStrMod")
 		dc := 10 + npcStrMod
 
-		src := dice.NewDeterministicSource([]int{roll})
+		// Dice sequence: [init_player=5, init_npc=3, flee_raw=roll-1].
+		// DeterministicSource: Intn(20)+1 = (roll-1)%20+1 = roll for roll in [1..20].
+		// Attack consumes 2 values for initiative before Flee's d20 check.
+		src := dice.NewDeterministicSource([]int{5, 3, roll - 1})
 		roller := dice.NewRoller(src)
 		_, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
 		roomID := rapid.StringMatching(`room_prop_[a-z]{4}`).Draw(rt, "roomID")
+		// Perception = 2*npcStrMod + 10 so that AbilityMod(Perception) = npcStrMod,
+		// matching the dc := 10 + npcStrMod computation above.
 		_, spawnErr := npcMgr.Spawn(&npc.Template{
 			ID: "prop-npc-" + roomID, Name: "PropNPC", Level: 1,
-			MaxHP: 10, AC: 12, Perception: npcStrMod * 2,
+			MaxHP: 10, AC: 12, Perception: npcStrMod*2 + 10,
 		}, roomID)
 		if spawnErr != nil {
 			rt.Skip()
@@ -391,7 +406,10 @@ func TestProperty_Pursuit_RollOutcome(t *testing.T) {
 		pursuitRoll := rapid.IntRange(1, 20).Draw(rt, "pursuitRoll")
 		suffix := rapid.StringMatching(`[a-z]{6}`).Draw(rt, "suffix")
 
-		src := dice.NewDeterministicSource([]int{fleeRoll, pursuitRoll})
+		// Dice sequence: [init_player=5, init_npc=3, fleeRaw=fleeRoll-1, pursuitRaw=pursuitRoll-1].
+		// DeterministicSource: Intn(20)+1=(val-1)%20+1=val for val in [1..20].
+		// Attack consumes 2 for initiative; Flee consumes 1 for d20; pursuit consumes 1.
+		src := dice.NewDeterministicSource([]int{5, 3, fleeRoll - 1, pursuitRoll - 1})
 		roller := dice.NewRoller(src)
 		_, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
@@ -447,7 +465,8 @@ func TestProperty_Flee_ExitSelection(t *testing.T) {
 		suffix := rapid.StringMatching(`[a-z]{6}`).Draw(rt, "suffix")
 
 		// All exits in room_a are unlocked/unhidden (room_a → room_b via North).
-		src := dice.NewDeterministicSource([]int{20, 1}) // flee succeeds; NPC stays
+		// Dice: [init_p=5, init_npc=3, flee=19, pursuit=0] — 19→d20=20; 0→d20=1; NPC stays.
+		src := dice.NewDeterministicSource([]int{5, 3, 19, 0})
 		roller := dice.NewRoller(src)
 		_, _, sessMgr, npcMgr, combatHandler := newFleeSvcWithCombat(t, roller)
 
