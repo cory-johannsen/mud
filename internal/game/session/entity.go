@@ -5,6 +5,7 @@ package session
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 // BridgeEntity routes push calls to a Go channel, bridging
@@ -51,6 +52,30 @@ func (e *BridgeEntity) Push(data []byte) error {
 		return nil
 	default:
 		return fmt.Errorf("entity %s event buffer full", e.uid)
+	}
+}
+
+// PushBlocking sends data to the events channel, blocking until the send succeeds
+// or the timeout elapses. Returns an error if the entity is closed or the timeout is exceeded.
+//
+// Precondition: data must be a non-nil byte slice; timeout must be > 0.
+// Postcondition: Data is enqueued, or an error is returned without dropping the event silently.
+func (e *BridgeEntity) PushBlocking(data []byte, timeout time.Duration) error {
+	e.mu.Lock()
+	if e.closed {
+		e.mu.Unlock()
+		return fmt.Errorf("entity %s is closed", e.uid)
+	}
+	ch := e.events
+	e.mu.Unlock()
+
+	timer := time.NewTimer(timeout)
+	defer timer.Stop()
+	select {
+	case ch <- data:
+		return nil
+	case <-timer.C:
+		return fmt.Errorf("entity %s push timed out after %v", e.uid, timeout)
 	}
 }
 

@@ -171,7 +171,7 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		return nil, fmt.Errorf("player %q already connected", uid)
 	}
 
-	entity := NewBridgeEntity(uid, 64)
+	entity := NewBridgeEntity(uid, 256)
 	sess := &PlayerSession{
 		UID:                 uid,
 		Username:            username,

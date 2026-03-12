@@ -1933,7 +1933,11 @@ func (s *GameServiceServer) pushRoomViewToAllInRoom(roomID string) {
 			continue
 		}
 		if sess, ok := s.sessions.GetPlayer(uid); ok {
-			_ = sess.Entity.Push(data)
+			// Use PushBlocking so the room view is never silently dropped
+			// when the event buffer is full (e.g., after a busy combat round).
+			if err := sess.Entity.PushBlocking(data, 2*time.Second); err != nil {
+				s.logger.Warn("pushRoomViewToAllInRoom: failed to deliver room view", zap.String("uid", uid), zap.Error(err))
+			}
 		}
 	}
 }
