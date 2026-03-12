@@ -4,7 +4,7 @@
 
 **Goal:** Add a four-track mental state system (Fear, Rage, Despair, Delirium) with severity escalation, duration-based escalation, auto-recovery, and active recovery via the `calm` command.
 
-**Architecture:** MentalStateManager in `internal/game/mentalstate/` owns state tracking and escalation. Effects are applied via conditions on `PlayerSession.Conditions` — the Manager owns which condition is active per track. New `APReduction` and `SkipTurn` fields on `ConditionDef` support AP reduction and turn-skip effects. `calm` follows the full CMD-1 through CMD-7 command pattern.
+**Architecture:** MentalStateManager in `internal/game/mentalstate/` owns state tracking and escalation. Effects are applied via conditions on `PlayerSession.Conditions` — the Manager owns which condition is active per track. New `APReduction`, `SkipTurn`, and `SkillPenalty` fields on `ConditionDef` support AP reduction, turn-skip, and skill penalty effects. `calm` follows the full CMD-1 through CMD-7 command pattern.
 
 **Tech Stack:** Go, protobuf, pgregory.net/rapid (property tests)
 
@@ -542,13 +542,15 @@ git commit -m "feat(mentalstate): add MentalState types and Manager (4 tracks, 3
 
 **Background:**
 
-Add two new fields to `ConditionDef`:
+Add three new fields to `ConditionDef`:
 - `APReduction int \`yaml:"ap_reduction"\`` — reduces AP at round start (like StunnedAPReduction but general)
 - `SkipTurn bool \`yaml:"skip_turn"\`` — if true, the combatant's turn is skipped entirely
+- `SkillPenalty int \`yaml:"skill_penalty"\`` — penalty applied to skill checks
 
-Add two helper functions to `modifiers.go`:
+Add three helper functions to `modifiers.go`:
 - `APReduction(s *ActiveSet) int` — sums `Def.APReduction * Stacks` across all active conditions
 - `SkipTurn(s *ActiveSet) bool` — returns true if any active condition has SkipTurn=true
+- `SkillPenalty(s *ActiveSet) int` — sums `Def.SkillPenalty * Stacks` across all active conditions
 
 In `combat/engine.go`, in `StartRoundWithSrc`, replace or extend the `reduction` calculation:
 ```go
@@ -562,22 +564,20 @@ The 12 YAML files go in `content/conditions/mental/`. Check how `LoadDirectory` 
 
 **Effects per condition:**
 
-| ID | attack_penalty | ac_penalty | damage_bonus | ap_reduction | skip_turn | restrict_actions |
-|----|----------------|------------|--------------|--------------|-----------|------------------|
-| fear_uneasy | 0 | 0 | 0 | 0 | false | [] |
-| fear_panicked | 0 | 0 | 0 | 0 | false | [] |
-| fear_psychotic | 0 | 0 | 0 | 0 | false | [] |
-| rage_irritated | 0 | 1 | 1 | 0 | false | [] |
-| rage_enraged | 0 | 2 | 2 | 0 | false | [flee] |
-| rage_berserker | 2 | 3 | 3 | 0 | false | [flee] |
-| despair_discouraged | 0 | 0 | 0 | 1 | false | [] |
-| despair_despairing | 1 | 0 | 0 | 2 | false | [] |
-| despair_catatonic | 0 | 0 | 0 | 0 | true | [move] |
-| delirium_confused | 1 | 0 | 0 | 0 | false | [] |
-| delirium_delirious | 2 | 0 | 0 | 0 | false | [] |
-| delirium_hallucinatory | 3 | 0 | 0 | 0 | true | [] |
-
-Note: `fear_uneasy` has a skill penalty (not in condition system). This is handled separately by the combat handler checking mental state severity. See Task 4.
+| ID | attack_penalty | ac_penalty | damage_bonus | ap_reduction | skip_turn | skill_penalty | restrict_actions |
+|----|----------------|------------|--------------|--------------|-----------|---------------|------------------|
+| fear_uneasy | 0 | 0 | 0 | 0 | false | 1 | [] |
+| fear_panicked | 0 | 0 | 0 | 0 | false | 2 | [] |
+| fear_psychotic | 0 | 0 | 0 | 0 | false | 3 | [] |
+| rage_irritated | 0 | 1 | 1 | 0 | false | 0 | [] |
+| rage_enraged | 0 | 2 | 2 | 0 | false | 0 | [flee] |
+| rage_berserker | 2 | 3 | 3 | 0 | false | 0 | [flee] |
+| despair_discouraged | 0 | 0 | 0 | 1 | false | 0 | [] |
+| despair_despairing | 1 | 0 | 0 | 2 | false | 0 | [] |
+| despair_catatonic | 0 | 0 | 0 | 0 | true | 0 | [move] |
+| delirium_confused | 1 | 0 | 0 | 0 | false | 1 | [] |
+| delirium_delirious | 2 | 0 | 0 | 0 | false | 2 | [] |
+| delirium_hallucinatory | 3 | 0 | 0 | 0 | true | 3 | [] |
 
 Note: `restrict_actions: [flee]` is a new action type. Add it to the flee check in combat_handler.go in Task 4.
 
@@ -623,29 +623,47 @@ func TestSkipTurn_True(t *testing.T) {
 		t.Error("expected true")
 	}
 }
+
+func TestSkillPenalty_NoConditions(t *testing.T) {
+	s := &ActiveSet{conditions: make(map[string]*ActiveCondition)}
+	if got := SkillPenalty(s); got != 0 {
+		t.Errorf("expected 0, got %d", got)
+	}
+}
+
+func TestSkillPenalty_WithCondition(t *testing.T) {
+	s := &ActiveSet{conditions: make(map[string]*ActiveCondition)}
+	def := &ConditionDef{ID: "test_skill", SkillPenalty: 2, DurationType: "rounds"}
+	s.conditions["test_skill"] = &ActiveCondition{Def: def, Stacks: 1, DurationRemaining: 3}
+	if got := SkillPenalty(s); got != 2 {
+		t.Errorf("expected 2, got %d", got)
+	}
+}
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
 cd /home/cjohannsen/src/mud
-go test ./internal/game/condition/... -run "TestAPReduction|TestSkipTurn" -v 2>&1 | tail -5
+go test ./internal/game/condition/... -run "TestAPReduction|TestSkipTurn|TestSkillPenalty" -v 2>&1 | tail -5
 ```
 
-Expected: compile error — `APReduction` and `SkipTurn` do not exist.
+Expected: compile error — `APReduction`, `SkipTurn`, and `SkillPenalty` do not exist.
 
-- [ ] **Step 3: Add APReduction and SkipTurn to ConditionDef**
+- [ ] **Step 3: Add APReduction, SkipTurn, and SkillPenalty to ConditionDef**
 
 In `internal/game/condition/definition.go`, add to the `ConditionDef` struct after `RestrictActions`:
 
 ```go
 // APReduction is the number of AP removed from the combatant's action queue at round start.
-APReduction int  `yaml:"ap_reduction"`
+APReduction  int  `yaml:"ap_reduction"`
 // SkipTurn, if true, causes the combatant's entire turn to be skipped.
-SkipTurn    bool `yaml:"skip_turn"`
+SkipTurn     bool `yaml:"skip_turn"`
+// SkillPenalty is the penalty applied to skill checks while this condition is active.
+SkillPenalty int  `yaml:"skill_penalty"`
 ```
 
-- [ ] **Step 4: Add APReduction and SkipTurn helpers to modifiers.go**
+- [ ] **Step 4: Add APReduction, SkipTurn, and SkillPenalty helpers to modifiers.go**
 
 In `internal/game/condition/modifiers.go`, add after the existing functions:
 
@@ -675,13 +693,26 @@ func SkipTurn(s *ActiveSet) bool {
 	}
 	return false
 }
+
+// SkillPenalty returns the total skill penalty from all active conditions.
+// Each condition contributes SkillPenalty * Stacks.
+func SkillPenalty(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
+	total := 0
+	for _, ac := range s.conditions {
+		total += ac.Def.SkillPenalty * ac.Stacks
+	}
+	return total
+}
 ```
 
 - [ ] **Step 5: Run tests to verify they pass**
 
 ```bash
 cd /home/cjohannsen/src/mud
-go test ./internal/game/condition/... -run "TestAPReduction|TestSkipTurn" -v 2>&1
+go test ./internal/game/condition/... -run "TestAPReduction|TestSkipTurn|TestSkillPenalty" -v 2>&1
 ```
 
 Expected: PASS.
@@ -729,6 +760,7 @@ damage_bonus: 0
 speed_penalty: 0
 ap_reduction: 0
 skip_turn: false
+skill_penalty: 1
 restrict_actions: []
 lua_on_apply: ""
 lua_on_remove: ""
@@ -749,6 +781,7 @@ damage_bonus: 0
 speed_penalty: 0
 ap_reduction: 0
 skip_turn: false
+skill_penalty: 2
 restrict_actions: []
 lua_on_apply: ""
 lua_on_remove: ""
@@ -769,6 +802,7 @@ damage_bonus: 0
 speed_penalty: 0
 ap_reduction: 0
 skip_turn: false
+skill_penalty: 3
 restrict_actions: []
 lua_on_apply: ""
 lua_on_remove: ""
@@ -912,6 +946,7 @@ damage_bonus: 0
 speed_penalty: 0
 ap_reduction: 0
 skip_turn: false
+skill_penalty: 1
 restrict_actions: []
 lua_on_apply: ""
 lua_on_remove: ""
@@ -932,6 +967,7 @@ damage_bonus: 0
 speed_penalty: 0
 ap_reduction: 0
 skip_turn: false
+skill_penalty: 2
 restrict_actions: []
 lua_on_apply: ""
 lua_on_remove: ""
@@ -952,6 +988,7 @@ damage_bonus: 0
 speed_penalty: 0
 ap_reduction: 0
 skip_turn: true
+skill_penalty: 3
 restrict_actions: []
 lua_on_apply: ""
 lua_on_remove: ""

@@ -10,7 +10,13 @@ Option C: Conditions-as-triggers + MentalStateManager-as-lifecycle-owner.
 - MentalStateManager tracks active states per player (4 tracks × 4 severity levels), escalation timers, auto-recovery
 - Mental state effects are expressed as conditions applied to `PlayerSession.Conditions`; the Manager owns which condition is active per track
 - Conditions remain the enforcement mechanism for attack/AC/damage/action restrictions
-- New fields added to `ConditionDef`: `APReduction int`, `SkipTurn bool`
+- New fields added to `ConditionDef`:
+  - `APReduction int \`yaml:"ap_reduction"\``
+  - `SkipTurn bool \`yaml:"skip_turn"\``
+  - `SkillPenalty int \`yaml:"skill_penalty"\`` — NEW
+- Condition YAMLs for mental states load from `content/conditions/mental/` subdirectory. Server startup must call `LoadDirectory` twice: once for `content/conditions/` and once for `content/conditions/mental/`.
+- MentalStateManager is in-memory only. Mental state is ephemeral — it resets on player disconnect/reconnect. No database persistence is required.
+- The new generic `APReduction(s *ActiveSet) int` helper sums `Def.APReduction * Stacks` across all active conditions (analogous to `AttackBonus`/`ACBonus`). The existing `StunnedAPReduction` function continues to use its hardcoded lookup for backward compatibility; in `StartRoundWithSrc` the total reduction is `StunnedAPReduction(s) + APReduction(s)`.
 - Calm command follows CMD-1 through CMD-7 for active recovery
 
 ## Tracks and Severity Levels
@@ -28,13 +34,13 @@ Four independent tracks. A player can have one active level per track simultaneo
 
 **Fear:**
 - Uneasy: skill_penalty=-1
-- Panicked: restrict_actions=[flee_disabled, random forced action — v2], skill_penalty=-2
-- Psychotic: restrict_actions=[attack_nearest forced — v2], skill_penalty=-3
+- Panicked: restrict_actions=[flee_disabled], skill_penalty=-2
+- Psychotic: skill_penalty=-3
 
 **Rage:**
 - Irritated: damage_bonus=1, ac_penalty=1
 - Enraged: damage_bonus=2, ac_penalty=2, restrict_actions=[flee]
-- Berserker: damage_bonus=3, ac_penalty=3, restrict_actions=[flee], attack_penalty=-2 (reckless)
+- Berserker: damage_bonus=3, ac_penalty=3, restrict_actions=[flee], attack_penalty=2 (reckless)
 
 **Despair:**
 - Discouraged: ap_reduction=1
@@ -48,7 +54,7 @@ Four independent tracks. A player can have one active level per track simultaneo
 
 ## Escalation
 
-Duration-based: if player remains at a severity for N rounds without recovery, advances to next level.
+Duration-based: if player remains at a severity for N rounds without recovery, advances to next level. When both escalation threshold and auto-recovery threshold are reached on the same round, escalation takes priority.
 - Level 1 → Level 2: Fear=3, Rage=4, Despair=5, Delirium=4 rounds
 - Level 2 → Level 3: all tracks = 5 rounds
 
@@ -66,7 +72,7 @@ Level 2+ states require active recovery via `calm` command or item.
 ## Active Recovery: `calm` Command
 
 - `calm` — costs all remaining AP in combat; no AP cost out of combat
-- Rolls `d20 + GritMod` vs DC = 10 + (severity × 4)
+- Rolls `d20 + combat.AbilityMod(sess.Abilities.Grit)` (modifier = (Grit-10)/2, per PF2e formula) vs DC = 10 + (severity × 4)
 - On success: worst active track steps down one severity level
 - Recovery always steps down one level at a time (never jumps to Normal)
 
@@ -90,5 +96,13 @@ Loaded from `content/conditions/mental/*.yaml`.
 
 - `combat_handler.go`: `AdvanceRound` called at end of each combat round; HP threshold check after player takes damage; condition apply/remove on state change
 - `grpc_service.go`: `handleMove` checks `RestrictMove` via existing `condition.IsActionRestricted(sess.Conditions, "move")` — no change needed if Catatonic restricts "move"; `handleCalm` for active recovery
-- `combat/engine.go`: AP reduction via `condition.APReduction(s)` — new helper using new `APReduction` field
-- `round.go`: SkipTurn via `condition.SkipTurn(s)` — new helper; flee restriction via existing `IsActionRestricted`
+- `combat/engine.go`: AP reduction via `condition.APReduction(s)` and `condition.SkillPenalty(s)` — new helpers using new `APReduction` and `SkillPenalty` fields
+- `internal/game/combat/` (round processing): SkipTurn checked via `condition.SkipTurn(s)` before queuing actions; flee restriction via existing `IsActionRestricted(s, "flee")`; `combat_handler.go` (`resolveAndAdvanceLocked`): `AdvanceRound` called after round completion
+- PlayerSession.Conditions is `*condition.ActiveSet` (field `Conditions` in `internal/game/session/manager.go`); initialized at login.
+
+## Future Work (Out of Scope for This Plan)
+
+- Forced action execution: Panicked (random action), Psychotic/Berserker (attack nearest) — requires combat auto-execution mechanism
+- NPC ability triggers for Rage, Despair, Delirium tracks
+- Zone effect triggers for all tracks
+- Non-self calm (ally target): `calm <player_name>`
