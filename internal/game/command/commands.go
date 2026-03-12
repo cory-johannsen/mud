@@ -90,6 +90,7 @@ const (
 	HandlerMotive              = "motive"
 	HandlerClimb               = "climb"
 	HandlerSwim                = "swim"
+	HandlerCalm                = "calm"
 )
 
 // Command defines a player-invocable command.
@@ -200,6 +201,7 @@ func BuiltinCommands() []Command {
 		{Name: "motive", Aliases: []string{"mot"}, Help: "Read an NPC's intentions (awareness vs Deception DC; success reveals HP tier in combat). Costs 1 AP in combat.", Category: CategoryCombat, Handler: HandlerMotive},
 		{Name: "climb", Aliases: []string{"cl"}, Help: "Climb a climbable surface (athletics vs DC; costs 2 AP in combat).", Category: CategoryMovement, Handler: HandlerClimb},
 		{Name: "swim", Aliases: []string{"sm"}, Help: "Swim through water or surface when submerged (athletics vs DC; costs 2 AP in combat).", Category: CategoryMovement, Handler: HandlerSwim},
+		{Name: "calm", Help: "Attempt to calm your worst active mental state (Grit check; costs all AP in combat).", Category: CategoryCombat, Handler: HandlerCalm},
 	}
 }
 
