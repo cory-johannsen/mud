@@ -87,6 +87,7 @@ const (
 	HandlerStep                = "step"
 	HandlerTumble              = "tumble"
 	HandlerSeek                = "seek"
+	HandlerMotive              = "motive"
 	HandlerClimb               = "climb"
 	HandlerSwim                = "swim"
 )
@@ -196,6 +197,7 @@ func BuiltinCommands() []Command {
 		{Name: "step", Handler: HandlerStep, Help: "Step 5 ft toward or away from your target. Does not trigger Reactive Strikes.", Category: CategoryCombat},
 		{Name: "tumble", Handler: HandlerTumble, Help: "Attempt to tumble through an enemy's space. Acrobatics vs Level+10. Success: 5ft move. Failure: blocked + Reactive Strike.", Category: CategoryCombat},
 		{Name: "seek", Handler: HandlerSeek, Help: "Scan for hidden enemies (Perception vs NPC Stealth DC; reveals hidden NPCs for 1 round). Combat only, costs 1 AP.", Category: CategoryCombat},
+		{Name: "motive", Aliases: []string{"mot"}, Help: "Read an NPC's intentions (awareness vs Deception DC; success reveals HP tier in combat). Costs 1 AP in combat.", Category: CategoryCombat, Handler: HandlerMotive},
 		{Name: "climb", Aliases: []string{"cl"}, Help: "Climb a climbable surface (athletics vs DC; costs 2 AP in combat).", Category: CategoryMovement, Handler: HandlerClimb},
 		{Name: "swim", Aliases: []string{"sm"}, Help: "Swim through water or surface when submerged (athletics vs DC; costs 2 AP in combat).", Category: CategoryMovement, Handler: HandlerSwim},
 	}
