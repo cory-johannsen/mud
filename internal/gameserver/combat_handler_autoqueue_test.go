@@ -27,7 +27,7 @@ func makeAutoQueueHandler(t *testing.T) (*CombatHandler, *npc.Manager, *session.
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
 	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
-	h := NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, 10*time.Second, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil)
+	h := NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, 10*time.Second, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil)
 	return h, npcMgr, sessMgr
 }
 
@@ -300,7 +300,7 @@ func TestAutoQueuePlayers_Property(t *testing.T) {
 		npcMgr := npc.NewManager()
 		sessMgr := session.NewManager()
 		broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
-		h := NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, 10*time.Second, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil)
+		h := NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, 10*time.Second, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil)
 
 		tmpl := &npc.Template{
 			ID: "prop-goblin", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,

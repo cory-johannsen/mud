@@ -34,7 +34,7 @@ func newDivertSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combat
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -49,7 +49,7 @@ func newDivertSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -62,7 +62,7 @@ func newDivertSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

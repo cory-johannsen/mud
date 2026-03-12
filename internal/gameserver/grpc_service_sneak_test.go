@@ -34,7 +34,7 @@ func newSneakSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatH
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -49,7 +49,7 @@ func newSneakSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -62,7 +62,7 @@ func newSneakSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

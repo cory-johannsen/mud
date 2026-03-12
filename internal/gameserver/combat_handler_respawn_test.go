@@ -71,6 +71,7 @@ func makeRespawnHandler(
 		nil, nil, nil, nil,
 		respawnMgr,
 		nil, // floorMgr
+		nil, // mentalStateMgr
 	)
 }
 

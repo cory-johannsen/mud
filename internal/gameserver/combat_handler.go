@@ -12,6 +12,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -49,10 +50,11 @@ type CombatHandler struct {
 	aiRegistry    *ai.Registry
 	respawnMgr    *npc.RespawnManager
 	floorMgr      *inventory.FloorManager
-	onCombatEndFn func(roomID string) // optional; called after combat ends; may be nil
-	xpSvc         *xp.Service        // optional; awards kill XP on NPC death; may be nil
-	currencySaver CurrencySaver      // optional; persists currency after loot award; may be nil
-	logger        *zap.Logger        // optional; used for error logging; may be nil
+	onCombatEndFn  func(roomID string)    // optional; called after combat ends; may be nil
+	xpSvc          *xp.Service            // optional; awards kill XP on NPC death; may be nil
+	currencySaver  CurrencySaver          // optional; persists currency after loot award; may be nil
+	mentalStateMgr *mentalstate.Manager   // optional; manages mental state conditions; may be nil
+	logger         *zap.Logger            // optional; used for error logging; may be nil
 	combatMu      sync.RWMutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -82,8 +84,9 @@ func NewCombatHandler(
 	scriptMgr *scripting.Manager,
 	invRegistry *inventory.Registry,
 	aiRegistry *ai.Registry,
-	respawnMgr *npc.RespawnManager,
-	floorMgr *inventory.FloorManager,
+	respawnMgr     *npc.RespawnManager,
+	floorMgr       *inventory.FloorManager,
+	mentalStateMgr *mentalstate.Manager,
 ) *CombatHandler {
 	return &CombatHandler{
 		engine:        engine,
@@ -97,8 +100,9 @@ func NewCombatHandler(
 		scriptMgr:     scriptMgr,
 		invRegistry:   invRegistry,
 		aiRegistry:    aiRegistry,
-		respawnMgr:    respawnMgr,
-		floorMgr:      floorMgr,
+		respawnMgr:     respawnMgr,
+		floorMgr:       floorMgr,
+		mentalStateMgr: mentalStateMgr,
 		timers:         make(map[string]*combat.RoundTimer),
 		loadouts:       make(map[string]*inventory.WeaponPreset),
 		roomCoverState: make(map[string]int),

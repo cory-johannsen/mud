@@ -21,6 +21,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -196,6 +197,14 @@ func main() {
 		zap.Int("count", len(condRegistry.All())),
 		zap.Duration("elapsed", time.Since(condStart)),
 	)
+	mentalCondRegistry, err := condition.LoadDirectory("content/conditions/mental")
+	if err != nil {
+		logger.Fatal("loading mental condition definitions", zap.Error(err))
+	}
+	for _, def := range mentalCondRegistry.All() {
+		condRegistry.Register(def)
+	}
+	logger.Info("loaded mental condition definitions", zap.Int("count", len(mentalCondRegistry.All())))
 
 	// Load inventory definitions.
 	invRegistry := inventory.NewRegistry()
@@ -525,7 +534,7 @@ func main() {
 
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, gameClock, roomEquipMgr, invRegistry)
 
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr)
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr, mentalstate.NewManager())
 	combatHandler.SetLogger(logger)
 
 	// Create action handler for player-activated class feature actions.
@@ -543,6 +552,7 @@ func main() {
 		charAbilityBoostsRepo,
 		archetypeMap,
 		regionMap,
+		mentalstate.NewManager(),
 		actionH,
 	)
 

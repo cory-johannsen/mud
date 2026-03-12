@@ -35,7 +35,7 @@ func newStrideSvc(t *testing.T, combatHandler *CombatHandler) (*GameServiceServe
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -56,7 +56,7 @@ func newStrideSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager,
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -69,7 +69,7 @@ func newStrideSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager,
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -280,7 +280,7 @@ func newStrideSvcWithCombatAndRegistry(t *testing.T, reg *inventory.Registry) (*
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -293,7 +293,7 @@ func newStrideSvcWithCombatAndRegistry(t *testing.T, reg *inventory.Registry) (*
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

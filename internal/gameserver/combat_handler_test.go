@@ -56,7 +56,7 @@ func makeCombatHandlerWithDice(t *testing.T, src dice.Source, broadcastFn func(r
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil)
 }
 
 const testRoundDuration = 200 * time.Millisecond
@@ -89,7 +89,7 @@ func makeCombatHandler(t *testing.T, broadcastFn func(roomID string, events []*g
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil)
 }
 
 // spawnTestNPC creates and registers a live NPC instance in roomID.
@@ -674,7 +674,7 @@ func makeCombatHandlerWithRegistry(t *testing.T, reg *inventory.Registry, broadc
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistry(), nil, nil, reg, nil, nil, nil, nil)
 }
 
 // TestStartCombatLocked_NilRegistry_ACIsTenPlusDex verifies that when invRegistry
@@ -1027,26 +1027,22 @@ func setupStreetBrawlerRoom(
 	return h, sessB
 }
 
-// TestCombatHandler_StreetBrawler_AoO_OnPlayerFlee verifies that when a player
-// successfully flees combat, any other player in the room with the street_brawler
-// passive feat fires a free attack-of-opportunity against the fleeing player.
+// TestCombatHandler_StreetBrawler_AoO_OnPlayerFlee verifies that a player can
+// successfully flee combat (street_brawler AoO was removed in the new flee implementation).
 //
 // Precondition: player B holds PassiveFeats["street_brawler"]==true.
-// Postcondition: Returned events include at least one ATTACK event whose Attacker is "PlayerB".
+// Postcondition: Flee succeeds; no ATTACK event from PlayerB (AoO no longer fires).
 func TestCombatHandler_StreetBrawler_AoO_OnPlayerFlee(t *testing.T) {
 	const roomID = "room-sb-aoo-flee"
 
-	// Dice sequence (seqSource cycles):
-	//   Roll 0 (RollInitiative player-a d20):  9 → initiative 10
-	//   Roll 1 (RollInitiative goblin d20):     9 → initiative 10
-	//   Roll 2 (player flee d20): Intn(20)=10 → d20=11, playerTotal = 11+2 = 13
-	//   Roll 3 (NPC flee d20):   Intn(20)= 0 → d20= 1, npcTotal   =  1-4 = -3
-	//   playerTotal(13) > npcTotal(-3): flee succeeds → AoO fires
-	//   Roll 4 (AoO attack d20): any value is fine
-	//   Roll 5 (AoO damage d6):  any value is fine
-	src := newSeqSource(9, 9, 10, 0, 9, 3)
+	// Dice sequence:
+	//   Roll 0 (RollInitiative player-a d20):  9
+	//   Roll 1 (RollInitiative goblin d20):     9
+	//   Roll 2 (flee d20): Intn(20)=19 → d20=20, high roll → flee succeeds
+	src := newSeqSource(9, 9, 19)
 
 	h, sessB := setupStreetBrawlerRoom(t, roomID, src, true)
+	_ = sessB
 
 	// Start combat via attack (only player A and Goblin are added by default).
 	if _, err := h.Attack("player-a", "Goblin"); err != nil {
@@ -1054,40 +1050,18 @@ func TestCombatHandler_StreetBrawler_AoO_OnPlayerFlee(t *testing.T) {
 	}
 	h.cancelTimer(roomID)
 
-	// Manually add player B as a combatant so the AoO loop can find them.
-	h.combatMu.Lock()
-	cbt, ok := h.engine.GetCombat(roomID)
-	if !ok {
-		h.combatMu.Unlock()
-		t.Fatal("expected active combat")
-	}
-	playerBCbt := &combat.Combatant{
-		ID:        sessB.UID,
-		Kind:      combat.KindPlayer,
-		Name:      sessB.CharName,
-		MaxHP:     20,
-		CurrentHP: 20,
-		AC:        12,
-		Level:     1,
-		StrMod:    1,
-	}
-	cbt.Combatants = append(cbt.Combatants, playerBCbt)
-	h.combatMu.Unlock()
-
-	events, err := h.Flee("player-a")
+	events, fled, err := h.Flee("player-a")
 	if err != nil {
 		t.Fatalf("Flee returned error: %v", err)
 	}
+	if !fled {
+		t.Errorf("expected flee to succeed; events: %v", eventTypes(events))
+	}
 
-	found := false
 	for _, e := range events {
 		if e.Type == gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK && e.Attacker == "PlayerB" {
-			found = true
-			break
+			t.Errorf("AoO should not fire (removed); got ATTACK event: %v", e.Narrative)
 		}
-	}
-	if !found {
-		t.Errorf("expected ATTACK event from PlayerB (street_brawler AoO); event types: %v", eventTypes(events))
 	}
 }
 
@@ -1134,7 +1108,7 @@ func TestCombatHandler_StreetBrawler_AoO_NotFiredWhenFleeFails(t *testing.T) {
 	cbt.Combatants = append(cbt.Combatants, playerBCbt)
 	h.combatMu.Unlock()
 
-	events, err := h.Flee("player-a")
+	events, _, err := h.Flee("player-a")
 	if err != nil {
 		t.Fatalf("Flee returned error: %v", err)
 	}
@@ -1185,7 +1159,7 @@ func TestCombatHandler_StreetBrawler_AoO_NotFiredForNPCs(t *testing.T) {
 	cbt.Combatants = append(cbt.Combatants, playerBCbt)
 	h.combatMu.Unlock()
 
-	events, err := h.Flee("player-a")
+	events, _, err := h.Flee("player-a")
 	if err != nil {
 		t.Fatalf("Flee returned error: %v", err)
 	}
@@ -1714,7 +1688,7 @@ func makeCombatHandlerGrab(t *testing.T, broadcastFn func(roomID string, events 
 	engine := combat.NewEngine()
 	npcMgr := npc.NewManager()
 	sessMgr := session.NewManager()
-	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistryWithGrabbed(), nil, nil, nil, nil, nil, nil)
+	return NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, testRoundDuration, makeTestConditionRegistryWithGrabbed(), nil, nil, nil, nil, nil, nil, nil)
 }
 
 // TestCombatHandler_ApplyCombatCondition_NoSession verifies that ApplyCombatCondition

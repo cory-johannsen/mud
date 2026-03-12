@@ -117,7 +117,7 @@ func newClimbSvc(t *testing.T, roller *dice.Roller, condReg *condition.Registry)
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -135,7 +135,7 @@ func newClimbSvcWithCombat(t *testing.T, roller *dice.Roller, condReg *condition
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -148,7 +148,7 @@ func newClimbSvcWithCombat(t *testing.T, roller *dice.Roller, condReg *condition
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

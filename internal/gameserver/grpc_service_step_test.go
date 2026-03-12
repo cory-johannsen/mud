@@ -29,7 +29,7 @@ func newStepSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager, *
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil,
+		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -42,7 +42,7 @@ func newStepSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager, *
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -67,7 +67,7 @@ func newStepSvc(t *testing.T, combatHandler *CombatHandler) (*GameServiceServer,
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }

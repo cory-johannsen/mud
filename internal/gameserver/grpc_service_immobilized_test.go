@@ -49,7 +49,7 @@ func newImmobilizedMoveSvc(t *testing.T) (*GameServiceServer, *session.Manager) 
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -65,7 +65,7 @@ func newImmobilizedFleeSvc(t *testing.T, roller *dice.Roller) (*GameServiceServe
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -78,7 +78,7 @@ func newImmobilizedFleeSvc(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

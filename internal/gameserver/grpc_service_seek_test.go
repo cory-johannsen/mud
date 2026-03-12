@@ -25,7 +25,7 @@ func newSeekSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -38,7 +38,7 @@ func newSeekSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -59,7 +59,7 @@ func TestHandleSeek_NoSession(t *testing.T) {
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	event, err := svc.handleSeek("unknown_seek_uid")
 	require.Error(t, err)
@@ -82,7 +82,7 @@ func TestHandleSeek_NotInCombat(t *testing.T) {
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID: "u_seek_nc", Username: "Scout", CharName: "Scout", RoomID: "room_seek_nc", Role: "player",

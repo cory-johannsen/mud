@@ -95,7 +95,7 @@ func newCoverSvc(t *testing.T, worldMgr *world.Manager, sessMgr *session.Manager
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 }
 
@@ -117,7 +117,7 @@ func newCoverSvcWithCombatTB(t *testing.T, worldMgr *world.Manager, sessMgr *ses
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -130,7 +130,7 @@ func newCoverSvcWithCombatTB(t *testing.T, worldMgr *world.Manager, sessMgr *ses
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, npcMgr, combatHandler
 }
@@ -457,7 +457,7 @@ func TestHandleTakeCover_InCombat_SpendAP(t *testing.T) {
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -470,7 +470,7 @@ func TestHandleTakeCover_InCombat_SpendAP(t *testing.T) {
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 
 	const roomID = "room_cover"
@@ -531,7 +531,7 @@ func newCombatSvcWithCover(t *testing.T, worldMgr *world.Manager, sessMgr *sessi
 	combatHandler := NewCombatHandler(
 		combat.NewEngine(), npcMgr, sessMgr, roller,
 		func(_ string, _ []*gamev1.CombatEvent) {},
-		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 	)
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr,
@@ -544,7 +544,7 @@ func newCombatSvcWithCover(t *testing.T, worldMgr *world.Manager, sessMgr *sessi
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, combatHandler
 }
@@ -613,7 +613,7 @@ func TestStrideRemovesCoverCondition(t *testing.T) {
 		combatHandler := NewCombatHandler(
 			combat.NewEngine(), npcMgr, sessMgr, roller,
 			func(_ string, _ []*gamev1.CombatEvent) {},
-			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 		)
 		svc := NewGameServiceServer(
 			worldMgr, sessMgr,
@@ -626,7 +626,7 @@ func TestStrideRemovesCoverCondition(t *testing.T) {
 			nil, nil, nil,
 			nil, nil, nil,
 			nil, nil, nil, nil, nil, nil, nil,
-			nil,
+			nil, nil,
 		)
 
 		uid := "u_stride_cover_" + tier
@@ -673,7 +673,7 @@ func TestStepRemovesCoverCondition(t *testing.T) {
 		combatHandler := NewCombatHandler(
 			combat.NewEngine(), npcMgr, sessMgr, roller,
 			func(_ string, _ []*gamev1.CombatEvent) {},
-			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 		)
 		svc := NewGameServiceServer(
 			worldMgr, sessMgr,
@@ -686,7 +686,7 @@ func TestStepRemovesCoverCondition(t *testing.T) {
 			nil, nil, nil,
 			nil, nil, nil,
 			nil, nil, nil, nil, nil, nil, nil,
-			nil,
+			nil, nil,
 		)
 
 		uid := "u_step_cover_" + tier
@@ -734,7 +734,7 @@ func TestTumbleSuccessRemovesCoverCondition(t *testing.T) {
 		combatHandler := NewCombatHandler(
 			combat.NewEngine(), npcMgr, sessMgr, roller,
 			func(_ string, _ []*gamev1.CombatEvent) {},
-			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil,
+			testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 		)
 		svc := NewGameServiceServer(
 			worldMgr, sessMgr,
@@ -747,7 +747,7 @@ func TestTumbleSuccessRemovesCoverCondition(t *testing.T) {
 			nil, nil, nil,
 			nil, nil, nil,
 			nil, nil, nil, nil, nil, nil, nil,
-			nil,
+			nil, nil,
 		)
 		// Wire the fixed-source roller into the service.
 		svc.dice = roller

@@ -23,6 +23,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -187,6 +188,7 @@ type GameServiceServer struct {
 	regions                    map[string]*ruleset.Region
 	xpSvc                      *xp.Service
 	progressRepo               ProgressRepository
+	mentalStateMgr             *mentalstate.Manager
 	actionH                    *ActionHandler
 }
 
@@ -246,9 +248,10 @@ func NewGameServiceServer(
 	characterClassFeaturesRepo CharacterClassFeaturesGetter,
 	featureChoicesRepo CharacterFeatureChoicesRepository,
 	charAbilityBoostsRepo postgres.CharacterAbilityBoostsRepository,
-	archetypes map[string]*ruleset.Archetype,
-	regions map[string]*ruleset.Region,
-	actionH *ActionHandler,
+	archetypes     map[string]*ruleset.Archetype,
+	regions        map[string]*ruleset.Region,
+	mentalStateMgr *mentalstate.Manager,
+	actionH        *ActionHandler,
 ) *GameServiceServer {
 	s := &GameServiceServer{
 		world:               worldMgr,
@@ -286,6 +289,7 @@ func NewGameServiceServer(
 		charAbilityBoostsRepo:      charAbilityBoostsRepo,
 		archetypes:                 archetypes,
 		regions:                    regions,
+		mentalStateMgr:             mentalStateMgr,
 		actionH:                    actionH,
 	}
 	if s.combatH != nil {

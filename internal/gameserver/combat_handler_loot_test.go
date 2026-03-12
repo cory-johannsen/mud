@@ -60,6 +60,7 @@ func makeLootHandler(
 		nil, nil, nil, nil,
 		respawnMgr,
 		floorMgr,
+		nil, // mentalStateMgr
 	)
 }
 
