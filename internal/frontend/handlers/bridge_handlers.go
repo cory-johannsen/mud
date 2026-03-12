@@ -114,6 +114,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerStep:               bridgeStep,
 	command.HandlerTumble:             bridgeTumble,
 	command.HandlerSeek:               bridgeSeek,
+	command.HandlerMotive:             bridgeMotive,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1036,6 +1037,21 @@ func bridgeSeek(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Seek{Seek: &gamev1.SeekRequest{}},
+	}}, nil
+}
+
+// bridgeMotive builds a MotiveRequest with the target name.
+//
+// Precondition: bctx must be non-nil with a valid reqID and non-empty RawArgs.
+// Postcondition: returns a non-nil msg containing a MotiveRequest when RawArgs is non-empty;
+// otherwise returns done=true with a usage error event.
+func bridgeMotive(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: motive <target>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Motive{Motive: &gamev1.MotiveRequest{Target: bctx.parsed.RawArgs}},
 	}}, nil
 }
 

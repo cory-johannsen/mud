@@ -83,6 +83,7 @@ message ClientMessage {
     SeekRequest seek = 66;
     ClimbRequest climb = 67;
     SwimRequest swim = 68;
+    MotiveRequest motive = 69;
   }
 }
 
@@ -798,6 +799,11 @@ message ClimbRequest {}
 
 // SwimRequest asks the server to attempt swimming or surfacing.
 message SwimRequest {}
+
+// MotiveRequest asks the server to read an NPC's intentions (awareness vs Deception DC).
+message MotiveRequest {
+  string target = 1;
+}
 
 // GrantRequest asks the server to grant XP or money to a named player (editor command).
 message GrantRequest {
