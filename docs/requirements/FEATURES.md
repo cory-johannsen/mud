@@ -191,11 +191,15 @@
       - [x] Flee command — implement `flee` (costs all remaining AP; Athletics or Acrobatics check vs highest NPC Athletics DC in room; on success combat ends and player moves to a random adjacent room)
       - [x] Pursuit — on flee failure, each NPC makes a separate Athletics check; on NPC success the NPC follows the player to the adjacent room and re-initiates combat
   - Mental state
-      - Panic
-        - Psychosis
-      - [ ] Mental state system — add `MentalState` enum (Normal, Panicked, Psychotic) to PlayerSession; state transitions driven by conditions, zone effects, or health thresholds
-      - [ ] Panic condition — implement as a condition with `restrict_actions` effect; on each turn a random available action is chosen instead of player input; triggered by specific NPC abilities, zone effects, or dropping below 25% HP
-      - [ ] Psychosis condition — escalation of Panic; player may attack random targets including allies; triggered by prolonged Panic or specific substances
+      - [x] Mental state system — MentalStateManager with four independent tracks (Fear, Rage, Despair, Delirium), three severity levels each, duration-based escalation, auto-recovery for level 1 states
+      - [x] Fear track — Uneasy (skill penalty) → Panicked → Psychotic; triggered by HP ≤ 25%; escalates over rounds
+      - [x] Rage track — Irritated (+dmg/-AC) → Enraged (flee restricted) → Berserker; triggered by NPC abilities (future)
+      - [x] Despair track — Discouraged (-1 AP) → Despairing (-2 AP) → Catatonic (skip turn); triggered by NPC abilities (future)
+      - [x] Delirium track — Confused (-atk) → Delirious (-atk) → Hallucinatory (-atk, skip turn); triggered by toxins/zones (future)
+      - [x] Calm command — `calm` (Grit check vs DC 10+severity×4; costs all AP in combat; success steps down worst active track)
+      - [ ] Forced action execution — Panicked (random action), Psychotic (attack nearest), Berserker (attack nearest) — requires combat auto-execution mechanism
+      - [ ] NPC ability triggers for Rage, Despair, Delirium tracks
+      - [ ] Zone effect triggers for all tracks
   - [x] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
   - [x] Immobilized — prevent grabbed creatures from moving between rooms
   - [x] Sense Motive command — implement `motive <target>` (awareness vs Deception DC; in combat costs 1 AP and reveals NPC HP tier; out-of-combat behavior stubbed for non-combat NPC extension)
@@ -203,7 +207,9 @@
   - the legend column should support multiple columns of text (like the legend currently does)
   - the legend should default to 1 column if the screen width cannot support more
 - [ ] Replace 'Level + 10' implementation for Grapple, Trip, Reflex DC with real calculations
-- [ ] NPCs rob the player if the player is defeated in combat for 20% of the player currency
+- [ ] NPCs rob the player if the player is defeated in combat 
+  - rob for 5-30% of the player currency
+  - percentage taken randomized at NPC creation weighted by NPC level and type
 - [ ] Multi-player combat
   - [ ] Other players can join combat already in progress
     - [ ] Combat join — when a player enters a room with active combat, offer to join; on joining, add player as a new combatant with a fresh initiative roll and full AP

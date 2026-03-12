@@ -84,6 +84,7 @@ message ClientMessage {
     ClimbRequest climb = 67;
     SwimRequest swim = 68;
     MotiveRequest motive = 69;
+    CalmRequest calm = 70;
   }
 }
 
@@ -799,6 +800,9 @@ message ClimbRequest {}
 
 // SwimRequest asks the server to attempt swimming or surfacing.
 message SwimRequest {}
+
+// CalmRequest asks the server to attempt calming the player's worst active mental state.
+message CalmRequest {}
 
 // MotiveRequest asks the server to read an NPC's intentions (awareness vs Deception DC).
 message MotiveRequest {

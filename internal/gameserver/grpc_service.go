@@ -1241,6 +1241,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSwim(uid, p.Swim)
 	case *gamev1.ClientMessage_Motive:
 		return s.handleMotive(uid, p.Motive)
+	case *gamev1.ClientMessage_Calm:
+		return s.handleCalm(uid, p.Calm)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -5365,6 +5367,79 @@ func (s *GameServiceServer) handleMotive(uid string, req *gamev1.MotiveRequest) 
 
 	tier := npcHPTier(inst.CurrentHP, inst.MaxHP)
 	return messageEvent(detail + fmt.Sprintf(" — success! %s appears %s.", inst.Name(), tier)), nil
+}
+
+// handleCalm attempts to calm the player's worst active mental state via a Grit check.
+// In combat: costs all remaining AP. Out of combat: no AP cost.
+//
+// Precondition: uid must be a valid player session.
+// Postcondition: On success, worst active track steps down one severity level.
+func (s *GameServiceServer) handleCalm(uid string, _ *gamev1.CalmRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if s.mentalStateMgr == nil {
+		return errorEvent("Mental state system unavailable."), nil
+	}
+
+	track, sev := s.mentalStateMgr.WorstActiveTrack(uid)
+	if sev == mentalstate.SeverityNone {
+		return messageEvent("You are mentally composed — nothing to calm."), nil
+	}
+
+	if sess.Status == statusInCombat && s.combatH != nil {
+		s.combatH.SpendAllAP(uid)
+	}
+
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleCalm: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	gritMod := combat.AbilityMod(sess.Abilities.Grit)
+	total := roll + gritMod
+	dc := 10 + int(sev)*4
+
+	detail := fmt.Sprintf("Calm (Grit DC %d): rolled %d+%d=%d", dc, roll, gritMod, total)
+	if total < dc {
+		return messageEvent(detail + " — failure. Your mental state resists your efforts."), nil
+	}
+
+	changes := s.mentalStateMgr.Recover(uid, track)
+	if s.combatH != nil {
+		s.combatH.applyMentalStateChanges(uid, changes)
+	} else {
+		applyMentalChangesToSession(sess, uid, changes, s.condRegistry)
+	}
+	msg := detail + " — success!"
+	if len(changes) > 0 && changes[0].Message != "" {
+		msg += " " + changes[0].Message
+	}
+	return messageEvent(msg), nil
+}
+
+// applyMentalChangesToSession applies mental state condition swaps directly to a session.
+// Used outside combat when CombatHandler is not available.
+//
+// Precondition: sess must be non-nil.
+// Postcondition: Conditions listed in changes are removed/applied to the session.
+func applyMentalChangesToSession(sess *session.PlayerSession, uid string, changes []mentalstate.StateChange, condReg *condition.Registry) {
+	if sess.Conditions == nil || condReg == nil {
+		return
+	}
+	for _, ch := range changes {
+		if ch.OldConditionID != "" {
+			sess.Conditions.Remove(uid, ch.OldConditionID)
+		}
+		if ch.NewConditionID != "" {
+			def, ok := condReg.Get(ch.NewConditionID)
+			if ok {
+				_ = sess.Conditions.Apply(uid, def, 1, -1)
+			}
+		}
+	}
 }
 
 // npcHPTier returns a human-readable HP tier string for the given current/max HP values.

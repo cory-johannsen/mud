@@ -379,6 +379,34 @@ func (h *CombatHandler) SpendAP(uid string, cost int) error {
 	return q.DeductAP(cost)
 }
 
+// SpendAllAP drains all remaining AP from uid's action queue in their active combat.
+// If the player is not in combat or has no action queue, SpendAllAP is a no-op.
+//
+// Precondition: uid must be non-empty.
+// Postcondition: uid's remaining AP is zero when they are in active combat with a queue.
+func (h *CombatHandler) SpendAllAP(uid string) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return
+	}
+	q, ok := cbt.ActionQueues[uid]
+	if !ok {
+		return
+	}
+	remaining := q.RemainingPoints()
+	if remaining > 0 {
+		_ = q.DeductAP(remaining)
+	}
+}
+
 // ApplyCombatantACMod adds mod to the named combatant's ACMod in the player's active combat.
 // Use to apply mid-round AC modifiers from feint (negative) or raise_shield/take_cover (positive).
 //

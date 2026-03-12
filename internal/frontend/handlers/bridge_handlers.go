@@ -115,6 +115,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerTumble:             bridgeTumble,
 	command.HandlerSeek:               bridgeSeek,
 	command.HandlerMotive:             bridgeMotive,
+	command.HandlerCalm:               bridgeCalm,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1037,6 +1038,16 @@ func bridgeSeek(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Seek{Seek: &gamev1.SeekRequest{}},
+	}}, nil
+}
+
+// bridgeCalm sends a CalmRequest with no arguments.
+//
+// Postcondition: Always returns a non-nil msg containing a CalmRequest.
+func bridgeCalm(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Calm{Calm: &gamev1.CalmRequest{}},
 	}}, nil
 }
 
