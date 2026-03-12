@@ -1235,6 +1235,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleClimb(uid, p.Climb)
 	case *gamev1.ClientMessage_Swim:
 		return s.handleSwim(uid, p.Swim)
+	case *gamev1.ClientMessage_Motive:
+		return s.handleMotive(uid, p.Motive)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -5308,6 +5310,78 @@ func (s *GameServiceServer) handleSeek(uid string) (*gamev1.ServerEvent, error) 
 		return messageEvent(detail + " — you carefully scan the area but find no hidden threats."), nil
 	}
 	return messageEvent(detail + fmt.Sprintf(" — success! You locate: %s.", strings.Join(revealed, ", "))), nil
+}
+
+// handleMotive performs an awareness skill check against the target NPC's Deception DC (10 + Deception).
+// In combat: costs 1 AP; on success reveals the NPC's HP tier.
+// Out of combat: returns a stub message for future non-combat NPC extension.
+//
+// Precondition: uid must be a valid player session; req.Target must name an NPC in the room when in combat.
+// Postcondition: In combat on success, returns a message with the NPC's HP tier string.
+func (s *GameServiceServer) handleMotive(uid string, req *gamev1.MotiveRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// Out-of-combat stub: behavior added when non-combat NPCs are implemented.
+	if sess.Status != statusInCombat {
+		return messageEvent("There's no one here worth reading."), nil
+	}
+
+	if req.GetTarget() == "" {
+		return errorEvent("Usage: motive <target>"), nil
+	}
+
+	inst := s.npcMgr.FindInRoom(sess.RoomID, req.GetTarget())
+	if inst == nil {
+		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return errorEvent(err.Error()), nil
+	}
+
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleMotive: rolling d20: %w", err)
+	}
+	roll := rollResult.Total()
+	bonus := skillRankBonus(sess.Skills["awareness"])
+	total := roll + bonus
+	dc := 10 + inst.Deception
+
+	detail := fmt.Sprintf("Motive (deception DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	if total < dc {
+		return messageEvent(detail + fmt.Sprintf(" — failure. You can't get a read on %s.", inst.Name())), nil
+	}
+
+	tier := npcHPTier(inst.CurrentHP, inst.MaxHP)
+	return messageEvent(detail + fmt.Sprintf(" — success! %s appears %s.", inst.Name(), tier)), nil
+}
+
+// npcHPTier returns a human-readable HP tier string for the given current/max HP values.
+//
+// Precondition: maxHP > 0.
+// Postcondition: Returns one of "unharmed", "lightly wounded", "bloodied", "badly wounded".
+func npcHPTier(currentHP, maxHP int) string {
+	if maxHP <= 0 {
+		return "badly wounded"
+	}
+	ratio := float64(currentHP) / float64(maxHP)
+	switch {
+	case ratio > 0.75:
+		return "unharmed"
+	case ratio > 0.50:
+		return "lightly wounded"
+	case ratio > 0.25:
+		return "bloodied"
+	default:
+		return "badly wounded"
+	}
 }
 
 // handleSneak performs a stealth skill check while hidden.

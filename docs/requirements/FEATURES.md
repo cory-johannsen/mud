@@ -198,7 +198,7 @@
       - [ ] Psychosis condition — escalation of Panic; player may attack random targets including allies; triggered by prolonged Panic or specific substances
   - [x] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
   - [x] Immobilized — prevent grabbed creatures from moving between rooms
-  - [ ] Sense Motive command — implement `motive <target>` (Perception vs target Deception skill; on success reveals whether the NPC is bluffing, holding back an action, or concealing intent)
+  - [x] Sense Motive command — implement `motive <target>` (awareness vs Deception DC; in combat costs 1 AP and reveals NPC HP tier; out-of-combat behavior stubbed for non-combat NPC extension)
 - [ ] Replace 'Level + 10' implementation for Grapple, Trip, Reflex DC with real calculations
 - [ ] NPCs rob the player if the player is defeated in combat for 20% of the player currency
 - [ ] Multi-player combat
