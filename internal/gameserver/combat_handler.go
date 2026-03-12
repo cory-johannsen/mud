@@ -1272,6 +1272,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 		if sess, found := h.sessions.GetPlayer(id); found {
 			sess.CurrentHP = hp
+			h.checkHPThresholdFear(id)
 		}
 	}
 
@@ -1303,6 +1304,23 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 	}
 
+	// Advance mental state for all players in this combat and collect narrative messages.
+	var mentalStateEvents []*gamev1.CombatEvent
+	if h.mentalStateMgr != nil {
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindPlayer {
+				changes := h.mentalStateMgr.AdvanceRound(c.ID)
+				msgs := h.applyMentalStateChanges(c.ID, changes)
+				for _, msg := range msgs {
+					mentalStateEvents = append(mentalStateEvents, &gamev1.CombatEvent{
+						Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+						Narrative: msg,
+					})
+				}
+			}
+		}
+	}
+
 	var events []*gamev1.CombatEvent
 	for _, re := range roundEvents {
 		events = append(events, h.roundEventToProto(re))
@@ -1313,6 +1331,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 		Narrative: fmt.Sprintf("Round %d complete.", cbt.Round),
 	})
+	events = append(events, mentalStateEvents...)
 
 	if !cbt.HasLivingNPCs() || !cbt.HasLivingPlayers() {
 		var endNarrative string
@@ -2217,6 +2236,68 @@ func (h *CombatHandler) ShoveNPC(uid, npcInstID string, pushFt int) error {
 		}
 	}
 	return nil
+}
+
+// applyMentalStateChanges applies condition swaps from mental state transitions to the player session.
+// Returns narrative messages for broadcast.
+//
+// Precondition: uid is a valid player session; changes may be nil or empty.
+// Postcondition: conditions applied/removed on session; messages returned.
+func (h *CombatHandler) applyMentalStateChanges(uid string, changes []mentalstate.StateChange) []string {
+	if len(changes) == 0 || h.mentalStateMgr == nil {
+		return nil
+	}
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok || sess.Conditions == nil {
+		return nil
+	}
+	var messages []string
+	for _, ch := range changes {
+		if ch.OldConditionID != "" {
+			sess.Conditions.Remove(uid, ch.OldConditionID)
+		}
+		if ch.NewConditionID != "" {
+			def, ok := h.condRegistry.Get(ch.NewConditionID)
+			if ok {
+				_ = sess.Conditions.Apply(uid, def, 1, -1) // -1 = permanent duration for mental state
+			}
+		}
+		if ch.Message != "" {
+			messages = append(messages, ch.Message)
+		}
+	}
+	return messages
+}
+
+// checkHPThresholdFear triggers Fear (Uneasy) if player HP is at or below 25% of MaxHP.
+// Call after player takes damage during combat.
+//
+// Precondition: uid is a valid player session.
+// Postcondition: if HP <= 25% of MaxHP, ApplyTrigger(TrackFear, SeverityMild) is called and
+//
+//	resulting messages are broadcast as narrative combat events.
+func (h *CombatHandler) checkHPThresholdFear(uid string) {
+	if h.mentalStateMgr == nil {
+		return
+	}
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok || sess.MaxHP == 0 {
+		return
+	}
+	if float64(sess.CurrentHP)/float64(sess.MaxHP) <= 0.25 {
+		changes := h.mentalStateMgr.ApplyTrigger(uid, mentalstate.TrackFear, mentalstate.SeverityMild)
+		msgs := h.applyMentalStateChanges(uid, changes)
+		if len(msgs) > 0 && h.broadcastFn != nil {
+			var events []*gamev1.CombatEvent
+			for _, msg := range msgs {
+				events = append(events, &gamev1.CombatEvent{
+					Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+					Narrative: msg,
+				})
+			}
+			h.broadcastFn(sess.RoomID, events)
+		}
+	}
 }
 
 // Precondition: uid must be a valid connected player.
