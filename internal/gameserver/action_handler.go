@@ -337,7 +337,8 @@ func (h *ActionHandler) resolveSkillCheckEffect(ctx context.Context, sess *sessi
 	roll := result.Total()
 	rank := sess.Skills[effect.Skill]
 	bonus := skillRankBonus(rank)
-	total := roll + bonus
+	penalty := condition.SkillPenalty(sess.Conditions)
+	total := roll + bonus - penalty
 
 	var outcome string
 	switch {
@@ -351,8 +352,14 @@ func (h *ActionHandler) resolveSkillCheckEffect(ctx context.Context, sess *sessi
 		outcome = "failure"
 	}
 
-	msg := fmt.Sprintf("You use %s — %s skill check: rolled %d+%d=%d vs DC %d — %s.",
-		feature.Name, effect.Skill, roll, bonus, total, effect.DC, outcome)
+	var msg string
+	if penalty > 0 {
+		msg = fmt.Sprintf("You use %s — %s skill check: rolled %d+%d-%d=%d vs DC %d — %s.",
+			feature.Name, effect.Skill, roll, bonus, penalty, total, effect.DC, outcome)
+	} else {
+		msg = fmt.Sprintf("You use %s — %s skill check: rolled %d+%d=%d vs DC %d — %s.",
+			feature.Name, effect.Skill, roll, bonus, total, effect.DC, outcome)
+	}
 	h.sendMessage(sess, msg)
 	return nil
 }

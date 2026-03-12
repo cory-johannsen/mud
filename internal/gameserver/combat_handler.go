@@ -1632,6 +1632,25 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 			}
 		}
 
+		// If a condition requires skipping the turn entirely, force a pass and notify.
+		if condition.SkipTurn(sess.Conditions) {
+			if err := cbt.QueueAction(c.ID, combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+				continue
+			}
+			skipEvt := &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{
+						Content: "You are overwhelmed and cannot act this round.",
+						Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+					},
+				},
+			}
+			if data, marshalErr := proto.Marshal(skipEvt); marshalErr == nil {
+				_ = sess.Entity.Push(data)
+			}
+			continue
+		}
+
 		// Determine the action type from DefaultCombatAction.
 		action := sess.DefaultCombatAction
 		if action == "" {

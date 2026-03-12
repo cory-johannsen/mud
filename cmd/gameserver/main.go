@@ -534,7 +534,8 @@ func main() {
 
 	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, gameClock, roomEquipMgr, invRegistry)
 
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr, mentalstate.NewManager())
+	mentalMgr := mentalstate.NewManager()
+	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr, mentalMgr)
 	combatHandler.SetLogger(logger)
 
 	// Create action handler for player-activated class feature actions.
@@ -552,7 +553,7 @@ func main() {
 		charAbilityBoostsRepo,
 		archetypeMap,
 		regionMap,
-		mentalstate.NewManager(),
+		mentalMgr,
 		actionH,
 	)
 
