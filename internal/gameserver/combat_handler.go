@@ -754,7 +754,7 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, bool, error) {
 		}
 	}
 
-	// Pursuit (stub — implemented fully in Task 3).
+	// PURSUIT-1 through PURSUIT-6: resolve NPC pursuit into the destination room.
 	if destRoomID != "" {
 		pursuitEvents := h.resolvePursuitLocked(cbt, sess, playerTotal, destRoomID)
 		events = append(events, pursuitEvents...)
@@ -866,16 +866,18 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	}
 	h.loadoutsMu.Unlock()
 
-	// Weapon proficiency rank — same pattern as startCombatLocked.
+	// Weapon proficiency rank and damage type — same pattern as startCombatLocked.
 	weaponProfRank := "untrained"
 	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
 		cat := playerCbt.Loadout.MainHand.Def.ProficiencyCategory
 		if r, ok := playerSess.Proficiencies[cat]; ok {
 			weaponProfRank = r
 		}
-		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
 	}
 	playerCbt.WeaponProficiencyRank = weaponProfRank
+	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
+		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
+	}
 
 	// Resistances / weaknesses.
 	playerCbt.Resistances = playerSess.Resistances
