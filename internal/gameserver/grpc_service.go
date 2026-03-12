@@ -1993,19 +1993,50 @@ func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) 
 }
 
 func (s *GameServiceServer) handleFlee(uid string) (*gamev1.ServerEvent, error) {
-	events, err := s.combatH.Flee(uid)
+	// Capture origRoomID before Flee mutates sess.RoomID on success (FLEE-12).
+	origRoomID := ""
+	if sess, ok := s.sessions.GetPlayer(uid); ok {
+		origRoomID = sess.RoomID
+	}
+
+	events, fled, err := s.combatH.Flee(uid)
 	if err != nil {
 		return nil, err
 	}
 	if len(events) == 0 {
 		return nil, nil
 	}
-	sess, ok := s.sessions.GetPlayer(uid)
-	if ok {
-		s.broadcastCombatEvent(sess.RoomID, uid, events[0])
+
+	// Broadcast all events to the original room.
+	for _, evt := range events {
+		s.broadcastCombatEvent(origRoomID, uid, evt)
 	}
+
+	if fled {
+		// Push room view to players remaining in original room (FLEE-10).
+		s.pushRoomViewToAllInRoom(origRoomID)
+
+		// Push room view to the fleeing player in their new room (FLEE-9).
+		if sess, ok := s.sessions.GetPlayer(uid); ok {
+			if newRoom, ok := s.world.GetRoom(sess.RoomID); ok {
+				rv := s.worldH.buildRoomView(uid, newRoom)
+				evt := &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_RoomView{RoomView: rv},
+				}
+				data, err := proto.Marshal(evt)
+				if err != nil {
+					s.logger.Error("handleFlee: marshal room view failed", zap.Error(err))
+				} else {
+					_ = sess.Entity.PushBlocking(data, 2*time.Second)
+				}
+			}
+		}
+	}
+
+	// Return the last event — this is the most contextually relevant message to the
+	// fleeing player (e.g., "nowhere to run" overrides the generic "breaks free" event).
 	return &gamev1.ServerEvent{
-		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[len(events)-1]},
 	}, nil
 }
 
