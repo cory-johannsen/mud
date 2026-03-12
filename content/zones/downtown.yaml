@@ -271,6 +271,8 @@ zone:
     map_x: 4
     map_y: 2
     properties:
+      climbable: "true"
+      climb_dc: "15"
       lighting: dim
       atmosphere: stone
   - id: cliff_top

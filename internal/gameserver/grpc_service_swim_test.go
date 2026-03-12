@@ -411,3 +411,86 @@ func TestHandleSwim_BlocksAttackWhenSubmerged(t *testing.T) {
 	require.NotNil(t, msgEvt, "expected a message event blocking attack")
 	assert.Contains(t, msgEvt.Content, "submerged")
 }
+
+// TestHandleSwim_BlocksAllAttacksWhenSubmerged verifies that attack, burst, auto, and reload
+// are all blocked with a "submerged" message when the player has the submerged condition.
+//
+// Precondition: Player has submerged condition applied and is in combat.
+// Postcondition: Each blocked command returns a message event containing "submerged".
+func TestHandleSwim_BlocksAllAttacksWhenSubmerged(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 10}
+	roller := dice.NewLoggedRoller(src, logger)
+	condReg := makeTestConditionRegistryWithSubmerged()
+	svc, sessMgr, npcMgr, combatHandler := newSwimSvcWithCombat(t, roller, condReg)
+
+	const roomID = "room_water"
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "bandit-all-block", Name: "Bandit", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+	}, roomID)
+	require.NoError(t, err)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_all_block",
+		Username:  "Blocker",
+		CharName:  "Blocker",
+		RoomID:    roomID,
+		CurrentHP: 20,
+		MaxHP:     20,
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+	initSessionConditions(sess)
+
+	_, err = combatHandler.Attack("u_all_block", "Bandit")
+	require.NoError(t, err)
+	combatHandler.cancelTimer(roomID)
+
+	// Apply submerged condition.
+	def, ok := condReg.Get("submerged")
+	require.True(t, ok)
+	err = sess.Conditions.Apply("u_all_block", def, 1, -1)
+	require.NoError(t, err)
+
+	cases := []struct {
+		name string
+		call func() (*gamev1.ServerEvent, error)
+	}{
+		{
+			name: "attack",
+			call: func() (*gamev1.ServerEvent, error) {
+				return svc.handleAttack("u_all_block", &gamev1.AttackRequest{Target: "Bandit"})
+			},
+		},
+		{
+			name: "fire burst",
+			call: func() (*gamev1.ServerEvent, error) {
+				return svc.handleFireBurst("u_all_block", &gamev1.FireBurstRequest{Target: "Bandit"})
+			},
+		},
+		{
+			name: "fire automatic",
+			call: func() (*gamev1.ServerEvent, error) {
+				return svc.handleFireAutomatic("u_all_block", &gamev1.FireAutomaticRequest{Target: "Bandit"})
+			},
+		},
+		{
+			name: "reload",
+			call: func() (*gamev1.ServerEvent, error) {
+				return svc.handleReload("u_all_block", &gamev1.ReloadRequest{})
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			event, err := tc.call()
+			require.NoError(t, err)
+			require.NotNil(t, event)
+			msgEvt := event.GetMessage()
+			require.NotNil(t, msgEvt, fmt.Sprintf("expected a message event blocking %s", tc.name))
+			assert.Contains(t, msgEvt.Content, "submerged")
+		})
+	}
+}

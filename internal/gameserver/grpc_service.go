@@ -1091,6 +1091,19 @@ func (s *GameServiceServer) commandLoop(ctx context.Context, uid string, stream 
 
 // dispatch routes a ClientMessage to the appropriate handler.
 func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*gamev1.ServerEvent, error) {
+	// Apply out-of-combat drowning damage on every dispatch while submerged.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") && sess.Status != statusInCombat {
+		dmgResult, _ := s.dice.RollExpr("1d6")
+		dmg := dmgResult.Total()
+		if dmg < 1 {
+			dmg = 1
+		}
+		sess.CurrentHP -= dmg
+		if sess.CurrentHP < 0 {
+			sess.CurrentHP = 0
+		}
+	}
+
 	switch p := msg.Payload.(type) {
 	case *gamev1.ClientMessage_Move:
 		return s.handleMove(uid, p.Move)
@@ -2410,7 +2423,7 @@ func (s *GameServiceServer) applyEquipEffect(uid string, effect *inventory.Cross
 
 func (s *GameServiceServer) handleReload(uid string, req *gamev1.ReloadRequest) (*gamev1.ServerEvent, error) {
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") {
-		return messageEvent("You are submerged underwater and cannot attack. Swim or Escape to surface."), nil
+		return messageEvent("You are submerged underwater and cannot perform that action. Swim or Escape to surface."), nil
 	}
 	events, err := s.combatH.Reload(uid)
 	if err != nil {
@@ -5376,8 +5389,10 @@ func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error
 		return errorEvent("Escape is only available in combat."), nil
 	}
 
-	if sess.Conditions == nil || !sess.Conditions.Has("grabbed") {
-		return errorEvent("You are not grabbed."), nil
+	hasGrabbed := sess.Conditions != nil && sess.Conditions.Has("grabbed")
+	hasSubmerged := sess.Conditions != nil && sess.Conditions.Has("submerged")
+	if !hasGrabbed && !hasSubmerged {
+		return errorEvent("You are not grabbed or submerged."), nil
 	}
 
 	if s.combatH == nil {
@@ -5418,11 +5433,16 @@ func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error
 		return messageEvent(detail + " — failure. You fail to break free."), nil
 	}
 
-	// Success: remove grabbed condition and clear GrabberID.
-	sess.Conditions.Remove(uid, "grabbed")
-	sess.GrabberID = ""
+	// Success: remove grabbed and/or submerged conditions.
+	if hasGrabbed {
+		sess.Conditions.Remove(uid, "grabbed")
+		sess.GrabberID = ""
+	}
+	if hasSubmerged {
+		sess.Conditions.Remove(uid, "submerged")
+	}
 
-	return messageEvent(detail + " — success! You break free from the grab."), nil
+	return messageEvent(detail + " — success! You break free."), nil
 }
 
 // handleGrant awards XP or money to a named online player (editor/admin command).
@@ -5665,21 +5685,8 @@ func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*game
 		return messageEvent("There is no water here to swim in."), nil
 	}
 
-	// Apply out-of-combat drowning damage before acting if submerged.
-	inCombat := sess.Status == statusInCombat
-	if isSubmerged && !inCombat {
-		dmgResult, _ := s.dice.RollExpr("1d6")
-		dmg := dmgResult.Total()
-		if dmg < 1 {
-			dmg = 1
-		}
-		sess.CurrentHP -= dmg
-		if sess.CurrentHP < 0 {
-			sess.CurrentHP = 0
-		}
-	}
-
 	// Spend AP if in combat.
+	inCombat := sess.Status == statusInCombat
 	if inCombat {
 		if s.combatH == nil {
 			return messageEvent("Not enough action points to swim."), nil
