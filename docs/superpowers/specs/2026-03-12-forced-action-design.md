@@ -38,8 +38,10 @@ Valid values:
 ### Condition Modifier Helper (`internal/game/condition/modifiers.go`)
 
 ```go
-// ForcedActionType returns the forced_action string from the highest-priority
-// active condition that has one, or empty string if none.
+// ForcedActionType returns the forced_action string from the first active
+// condition that has one (map iteration order), or empty string if none.
+// In practice, simultaneous forced conditions from different tracks are not
+// expected; deterministic ordering is not required.
 func ForcedActionType(s *ActiveSet) string
 ```
 
@@ -52,20 +54,29 @@ func ForcedActionType(s *ActiveSet) string
 ### ActionQueue Method (`internal/game/combat/action.go`)
 
 ```go
-// ClearActions drains all queued actions and restores full AP for this round.
+// ClearActions drains all queued actions, restores remaining AP to MaxPoints,
+// and marks the queue as unsubmitted (IsSubmitted() returns false after this call).
 func (q *ActionQueue) ClearActions()
 ```
 
+**Note:** The ConditionDef struct change and YAML updates must land together — `LoadDirectory` uses `KnownFields(true)` and will error if YAML contains `forced_action` without the struct field.
+
 ### Combat Handler Extension (`internal/gameserver/combat_handler.go`, `autoQueuePlayersLocked`)
 
-Before the existing `SkipTurn` check, insert the following logic:
+The existing early-exit guard (`if !ok || len(q.QueuedActions()) > 0 { continue }`) must be restructured to allow forced actions to override pre-submitted player input. The new logic:
 
-1. Call `condition.ForcedActionType(sess.Conditions)`.
-2. If non-empty:
-   - Call `q.ClearActions()` to override any player-submitted actions.
-   - `"random_attack"`: pick a random alive combatant (any faction) using `rand.Intn`. Queue `ActionAttack` against it. Notify player: `"Panic grips you — you lash out wildly at [target]!"`
-   - `"lowest_hp_attack"`: scan all alive combatants for minimum `CurrentHP`. Queue `ActionAttack` against that target. Notify player: `"Berserker rage drives you to destroy the weakest target — you attack [target]!"`
-3. `continue` to skip normal action selection.
+```
+forcedAction := condition.ForcedActionType(sess.Conditions)
+if forcedAction == "" && len(q.QueuedActions()) > 0 {
+    continue  // player submitted an action and has no forced override — skip
+}
+```
+
+Then, if `forcedAction` is non-empty:
+1. Call `q.ClearActions()` to drain any player-submitted actions.
+2. `"random_attack"`: pick a random alive combatant (any faction) using `rand.Intn`. Queue `ActionAttack` against it. Notify player: `"Panic grips you — you lash out wildly at [target]!"`
+3. `"lowest_hp_attack"`: scan all alive combatants for minimum `CurrentHP`. Queue `ActionAttack` against that target. Notify player: `"Berserker rage drives you to destroy the weakest target — you attack [target]!"`
+4. `continue` to skip normal action selection.
 
 Target resolution uses the combatants list already available in `autoQueuePlayersLocked`. If no valid target exists (edge case: all others dead, only self remains), attack self.
 
@@ -77,13 +88,15 @@ Target resolution uses the combatants list already available in `autoQueuePlayer
 
 - REQ-T1: `ForcedActionType` returns empty string when no forced condition is active.
 - REQ-T2: `ForcedActionType` returns the correct type when a forced condition is active.
-- REQ-T3: When multiple forced conditions are active, `ForcedActionType` returns the type from the highest-priority condition.
+- REQ-T3: When multiple forced conditions are active, `ForcedActionType` returns a non-empty string (any valid forced action type). Simultaneous forced conditions from different tracks are not expected in practice; deterministic ordering between them is not required.
 
 ### `internal/game/combat/action_test.go`
 
-- REQ-T4: `ClearActions` drains the queue and restores full AP for the round.
+- REQ-T4: `ClearActions` drains the queue (`len(q.QueuedActions()) == 0`) and restores `q.RemainingPoints() == q.MaxPoints` (the raw maximum, not adjusted for AP-reduction conditions).
 
 ### `internal/gameserver/grpc_service_forced_action_test.go` (integration)
+
+Use `newCombatSvcWithMentalMgr` from `grpc_service_mentalstate_test.go` to set up the combat service. Apply conditions to `sess.Conditions` using the condition registry (follow the pattern in `grpc_service_mentalstate_test.go` and `grpc_service_trip_test.go`).
 
 - REQ-T5: A player with `fear_panicked` active receives a forced random attack, not their submitted target.
 - REQ-T6: A player with `rage_berserker` active attacks the lowest-HP alive combatant.
