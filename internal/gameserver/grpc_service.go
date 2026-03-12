@@ -5393,6 +5393,9 @@ func (s *GameServiceServer) handleCalm(uid string, _ *gamev1.CalmRequest) (*game
 		s.combatH.SpendAllAP(uid)
 	}
 
+	if s.dice == nil {
+		return errorEvent("Dice roller unavailable."), nil
+	}
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleCalm: rolling d20: %w", err)
@@ -5411,7 +5414,7 @@ func (s *GameServiceServer) handleCalm(uid string, _ *gamev1.CalmRequest) (*game
 	if s.combatH != nil {
 		s.combatH.applyMentalStateChanges(uid, changes)
 	} else {
-		applyMentalChangesToSession(sess, uid, changes, s.condRegistry)
+		applyMentalChangesToSession(sess, uid, changes, s.condRegistry, s.logger)
 	}
 	msg := detail + " — success!"
 	if len(changes) > 0 && changes[0].Message != "" {
@@ -5425,8 +5428,16 @@ func (s *GameServiceServer) handleCalm(uid string, _ *gamev1.CalmRequest) (*game
 //
 // Precondition: sess must be non-nil.
 // Postcondition: Conditions listed in changes are removed/applied to the session.
-func applyMentalChangesToSession(sess *session.PlayerSession, uid string, changes []mentalstate.StateChange, condReg *condition.Registry) {
-	if sess.Conditions == nil || condReg == nil {
+func applyMentalChangesToSession(sess *session.PlayerSession, uid string, changes []mentalstate.StateChange, condReg *condition.Registry, logger *zap.Logger) {
+	if sess.Conditions == nil {
+		if logger != nil {
+			logger.Warn("applyMentalChangesToSession: sess.Conditions is nil; mental state changes lost",
+				zap.String("uid", uid),
+			)
+		}
+		return
+	}
+	if condReg == nil {
 		return
 	}
 	for _, ch := range changes {
@@ -5436,7 +5447,15 @@ func applyMentalChangesToSession(sess *session.PlayerSession, uid string, change
 		if ch.NewConditionID != "" {
 			def, ok := condReg.Get(ch.NewConditionID)
 			if ok {
-				_ = sess.Conditions.Apply(uid, def, 1, -1)
+				if err := sess.Conditions.Apply(uid, def, 1, -1); err != nil {
+					if logger != nil {
+						logger.Warn("applyMentalChangesToSession: failed to apply condition",
+							zap.String("uid", uid),
+							zap.String("condition_id", ch.NewConditionID),
+							zap.Error(err),
+						)
+					}
+				}
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -141,6 +142,50 @@ func TestHandleCalm_NotInCombat_Failure(t *testing.T) {
 	assert.Equal(t, mentalstate.SeveritySevere, mentalMgr.CurrentSeverity("u_calm_fail", mentalstate.TrackFear))
 }
 
+// TestHandleCalm_InCombat_Failure_SpendAllAP verifies that a failed calm in combat still drains all AP.
+//
+// Precondition: Player is in combat with active Fear SeverityMild (DC=14); Grit=10 (mod=0); roll=1 → total=1 < 14.
+// Postcondition: Event message contains "failure"; player has 0 AP remaining.
+func TestHandleCalm_InCombat_Failure_SpendAllAP(t *testing.T) {
+	mentalMgr := mentalstate.NewManager()
+	// Deterministic source: Intn(20) returns 0 → roll = 1 (always fails DC 14).
+	roller := dice.NewRoller(dice.NewDeterministicSource([]int{0, 0, 0, 0, 0}))
+	svc, sessMgr, npcMgr, combatH := newCalmSvc(t, mentalMgr, roller)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_calm_ap_fail", Username: "T", CharName: "T", RoomID: "room_calm_ap_fail", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer("u_calm_ap_fail")
+	require.True(t, ok)
+	sess.Abilities.Grit = 10 // mod = 0; roll=1 → total=1 < DC=14
+	sess.DefaultCombatAction = "attack"
+
+	// Spawn NPC and start combat via Attack.
+	spawnCalmNPC(t, npcMgr, "room_calm_ap_fail", "GoblinFail")
+	_, err = combatH.Attack("u_calm_ap_fail", "GoblinFail")
+	require.NoError(t, err)
+	combatH.cancelTimer("room_calm_ap_fail")
+	sess.Status = statusInCombat
+
+	mentalMgr.ApplyTrigger("u_calm_ap_fail", mentalstate.TrackFear, mentalstate.SeverityMild)
+
+	evt, err := svc.handleCalm("u_calm_ap_fail", &gamev1.CalmRequest{})
+	require.NoError(t, err)
+	msg := evt.GetMessage()
+	require.NotNil(t, msg)
+	assert.Contains(t, msg.Content, "failure")
+
+	// Verify AP drained even on failure.
+	combatH.combatMu.Lock()
+	cbt, ok := combatH.engine.GetCombat("room_calm_ap_fail")
+	combatH.combatMu.Unlock()
+	require.True(t, ok)
+	q := cbt.ActionQueues["u_calm_ap_fail"]
+	require.NotNil(t, q)
+	assert.Equal(t, 0, q.RemainingPoints())
+}
+
 // TestHandleCalm_InCombat_SpendAllAP verifies that when in combat a successful calm drains all AP.
 //
 // Precondition: Player is in combat with AP remaining; roll=20 succeeds.
@@ -182,14 +227,77 @@ func TestHandleCalm_InCombat_SpendAllAP(t *testing.T) {
 	assert.Equal(t, 0, q.RemainingPoints())
 }
 
-// TestProperty_CalmDC_AlwaysBasedOnSeverity verifies DC = 10 + severity*4 for all valid severities.
+// TestProperty_CalmDC_AlwaysBasedOnSeverity verifies DC = 10 + severity*4 for all valid severities
+// by calling handleCalm with deterministic dice and checking success/failure boundaries.
 //
-// Precondition: severity in [1, 3].
-// Postcondition: DC is in [14, 22].
+// Precondition: severity in [1, 3]; Grit=10 (mod=0).
+// Postcondition: rolling exactly DC-1 produces failure; rolling exactly DC produces success.
 func TestProperty_CalmDC_AlwaysBasedOnSeverity(t *testing.T) {
+	sevMap := map[int]mentalstate.Severity{
+		1: mentalstate.SeverityMild,
+		2: mentalstate.SeverityMod,
+		3: mentalstate.SeveritySevere,
+	}
 	rapid.Check(t, func(rt *rapid.T) {
 		sev := rapid.IntRange(1, 3).Draw(rt, "severity")
 		dc := 10 + sev*4
-		assert.True(rt, dc >= 14 && dc <= 22, "DC out of expected range: %d", dc)
+		uid := "u_prop_dc"
+
+		dcStr := fmt.Sprintf("DC %d", dc)
+
+		// --- Fail test: roll=1+Grit=10 → total=1, always below DC≥14 ---
+		{
+			mentalMgr := mentalstate.NewManager()
+			// Intn(20)=0 → roll=1.
+			roller := dice.NewRoller(dice.NewDeterministicSource([]int{0, 0, 0, 0, 0}))
+			svc, sessMgr, _, _ := newCalmSvc(t, mentalMgr, roller)
+			_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+				UID: uid, Username: "T", CharName: "T", RoomID: "room_a", Role: "player",
+			})
+			require.NoError(rt, err)
+			sess, ok := sessMgr.GetPlayer(uid)
+			require.True(rt, ok)
+			sess.Abilities.Grit = 10 // mod=0; total=1 < dc
+			mentalMgr.ApplyTrigger(uid, mentalstate.TrackFear, sevMap[sev])
+			evt, err := svc.handleCalm(uid, &gamev1.CalmRequest{})
+			require.NoError(rt, err)
+			msg := evt.GetMessage()
+			require.NotNil(rt, msg)
+			assert.Contains(rt, msg.Content, "failure",
+				"sev=%d dc=%d: expected failure with roll=1", sev, dc)
+			assert.Contains(rt, msg.Content, dcStr,
+				"sev=%d: expected DC string %q in message", sev, dcStr)
+		}
+
+		// --- Pass test: roll=20+gritMod≥DC ---
+		// For DC≤20: Grit=10 (mod=0), roll=20 → total=20≥DC.
+		// For DC=22: Grit=14 (mod=2), roll=20 → total=22≥DC.
+		{
+			mentalMgr := mentalstate.NewManager()
+			// Intn(20)=19 → roll=20.
+			roller := dice.NewRoller(dice.NewDeterministicSource([]int{19, 19, 19, 19, 19}))
+			svc, sessMgr, _, _ := newCalmSvc(t, mentalMgr, roller)
+			_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+				UID: uid, Username: "T", CharName: "T", RoomID: "room_a", Role: "player",
+			})
+			require.NoError(rt, err)
+			sess, ok := sessMgr.GetPlayer(uid)
+			require.True(rt, ok)
+			// Ensure total=roll+mod≥dc: mod=(Grit-10)/2; need mod≥dc-20 → Grit≥10+(dc-20)*2.
+			neededGrit := 10
+			if dc > 20 {
+				neededGrit = 10 + (dc-20)*2
+			}
+			sess.Abilities.Grit = neededGrit
+			mentalMgr.ApplyTrigger(uid, mentalstate.TrackFear, sevMap[sev])
+			evt, err := svc.handleCalm(uid, &gamev1.CalmRequest{})
+			require.NoError(rt, err)
+			msg := evt.GetMessage()
+			require.NotNil(rt, msg)
+			assert.Contains(rt, msg.Content, "success",
+				"sev=%d dc=%d grit=%d: expected success with roll=20", sev, dc, neededGrit)
+			assert.Contains(rt, msg.Content, dcStr,
+				"sev=%d: expected DC string %q in message", sev, dcStr)
+		}
 	})
 }
