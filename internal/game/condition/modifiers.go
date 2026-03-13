@@ -150,3 +150,21 @@ func SkillPenalty(s *ActiveSet) int {
 	}
 	return total
 }
+
+// ForcedActionType returns the forced_action value from the first active condition
+// that has one, or empty string if none. Map iteration order is non-deterministic;
+// simultaneous forced conditions from different tracks are not expected in practice.
+//
+// Precondition: s may be nil.
+// Postcondition: Returns "" or one of "random_attack", "lowest_hp_attack".
+func ForcedActionType(s *ActiveSet) string {
+	if s == nil {
+		return ""
+	}
+	for _, ac := range s.conditions {
+		if ac.Def.ForcedAction != "" {
+			return ac.Def.ForcedAction
+		}
+	}
+	return ""
+}

@@ -12,6 +12,7 @@ ap_reduction: 0
 skip_turn: false
 skill_penalty: 2
 restrict_actions: []
+forced_action: random_attack
 lua_on_apply: ""
 lua_on_remove: ""
 lua_on_tick: ""

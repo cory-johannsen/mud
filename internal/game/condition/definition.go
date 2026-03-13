@@ -31,6 +31,9 @@ type ConditionDef struct {
 	SkipTurn bool `yaml:"skip_turn"`
 	// SkillPenalty is the penalty applied to skill checks while this condition is active.
 	SkillPenalty int `yaml:"skill_penalty"`
+	// ForcedAction, if non-empty, forces a specific action type each combat round.
+	// Valid values: "random_attack" (attack random alive combatant), "lowest_hp_attack" (attack lowest-HP alive combatant).
+	ForcedAction string `yaml:"forced_action"`
 	LuaOnApply      string   `yaml:"lua_on_apply"`  // stored; ignored until Stage 6
 	LuaOnRemove     string   `yaml:"lua_on_remove"` // stored; ignored until Stage 6
 	LuaOnTick       string   `yaml:"lua_on_tick"`   // stored; ignored until Stage 6

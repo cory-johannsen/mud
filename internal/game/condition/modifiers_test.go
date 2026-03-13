@@ -215,3 +215,46 @@ func TestSkillPenalty_WithCondition(t *testing.T) {
 	require.NoError(t, s.Apply("uid", def, 1, 3))
 	assert.Equal(t, 2, condition.SkillPenalty(s))
 }
+
+func TestForcedActionType_NoConditions(t *testing.T) {
+	s := condition.NewActiveSet()
+	assert.Equal(t, "", condition.ForcedActionType(s))
+}
+
+func TestForcedActionType_WithForcedCondition(t *testing.T) {
+	s := condition.NewActiveSet()
+	def := &condition.ConditionDef{
+		ID:           "fear_panicked",
+		Name:         "Panicked",
+		ForcedAction: "random_attack",
+		DurationType: "rounds",
+	}
+	require.NoError(t, s.Apply("uid", def, 1, 3))
+	assert.Equal(t, "random_attack", condition.ForcedActionType(s))
+}
+
+func TestForcedActionType_NilSet(t *testing.T) {
+	assert.Equal(t, "", condition.ForcedActionType(nil))
+}
+
+func TestForcedActionType_MultipleConditions_ReturnsNonEmpty(t *testing.T) {
+	s := condition.NewActiveSet()
+	def1 := &condition.ConditionDef{ID: "c1", ForcedAction: "random_attack", DurationType: "rounds"}
+	def2 := &condition.ConditionDef{ID: "c2", ForcedAction: "lowest_hp_attack", DurationType: "rounds"}
+	require.NoError(t, s.Apply("uid", def1, 1, 3))
+	require.NoError(t, s.Apply("uid", def2, 1, 3))
+	got := condition.ForcedActionType(s)
+	assert.True(t, got == "random_attack" || got == "lowest_hp_attack", "expected a non-empty forced action type, got %q", got)
+}
+
+func TestProperty_ForcedActionType_AlwaysValidOrEmpty(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		forcedAction := rapid.SampledFrom([]string{"", "random_attack", "lowest_hp_attack"}).Draw(rt, "forced_action")
+		s := condition.NewActiveSet()
+		def := &condition.ConditionDef{ID: "test_forced", ForcedAction: forcedAction, DurationType: "rounds"}
+		require.NoError(t, s.Apply("uid", def, 1, 3))
+		got := condition.ForcedActionType(s)
+		valid := got == "" || got == "random_attack" || got == "lowest_hp_attack"
+		assert.True(t, valid, "ForcedActionType returned unexpected value %q", got)
+	})
+}
