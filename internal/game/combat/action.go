@@ -187,3 +187,12 @@ func (q *ActionQueue) IsSubmitted() bool {
 	}
 	return false
 }
+
+// ClearActions drains all queued actions, restores remaining AP to MaxPoints,
+// and marks the queue as unsubmitted (IsSubmitted() returns false after this call).
+//
+// Postcondition: len(QueuedActions()) == 0; RemainingPoints() == MaxPoints; IsSubmitted() == false.
+func (q *ActionQueue) ClearActions() {
+	q.actions = q.actions[:0]
+	q.remaining = q.MaxPoints
+}

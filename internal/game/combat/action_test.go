@@ -235,3 +235,49 @@ func TestPropertyActionQueue_RemainingNeverNegative(t *testing.T) {
 		}
 	})
 }
+
+func TestClearActions_EmptyQueue(t *testing.T) {
+	q := combat.NewActionQueue("uid1", 3)
+	q.ClearActions()
+	assert.Equal(t, 0, len(q.QueuedActions()))
+	assert.Equal(t, q.MaxPoints, q.RemainingPoints())
+	assert.False(t, q.IsSubmitted())
+}
+
+func TestClearActions_AfterEnqueue(t *testing.T) {
+	q := combat.NewActionQueue("uid1", 3)
+	err := q.Enqueue(combat.QueuedAction{Type: combat.ActionAttack, Target: "Goblin"})
+	require.NoError(t, err)
+	require.Greater(t, len(q.QueuedActions()), 0)
+
+	q.ClearActions()
+	assert.Equal(t, 0, len(q.QueuedActions()))
+	assert.Equal(t, q.MaxPoints, q.RemainingPoints())
+	assert.False(t, q.IsSubmitted())
+}
+
+func TestClearActions_AfterPass(t *testing.T) {
+	q := combat.NewActionQueue("uid1", 3)
+	err := q.Enqueue(combat.QueuedAction{Type: combat.ActionPass})
+	require.NoError(t, err)
+	require.True(t, q.IsSubmitted())
+
+	q.ClearActions()
+	assert.Equal(t, 0, len(q.QueuedActions()))
+	assert.Equal(t, q.MaxPoints, q.RemainingPoints())
+	assert.False(t, q.IsSubmitted())
+}
+
+func TestProperty_ClearActions_AlwaysRestoresMaxPoints(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		maxAP := rapid.IntRange(1, 5).Draw(rt, "maxAP")
+		q := combat.NewActionQueue("uid", maxAP)
+		if rapid.Bool().Draw(rt, "enqueue_pass") {
+			_ = q.Enqueue(combat.QueuedAction{Type: combat.ActionPass})
+		}
+		q.ClearActions()
+		assert.Equal(rt, 0, len(q.QueuedActions()), "queue must be empty after ClearActions")
+		assert.Equal(rt, maxAP, q.RemainingPoints(), "remaining must equal MaxPoints after ClearActions")
+		assert.False(rt, q.IsSubmitted(), "IsSubmitted must be false after ClearActions")
+	})
+}
