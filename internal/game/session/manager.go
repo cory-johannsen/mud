@@ -91,6 +91,16 @@ type PlayerSession struct {
 	GrabberID string
 	// Gender is the character's gender identity string, loaded at login.
 	Gender string
+	// HeroPoints is the number of hero points available (persisted).
+	HeroPoints int
+	// LastCheckRoll is the dice result of the most recent ability check (session-only; 0 = none recorded).
+	LastCheckRoll int
+	// LastCheckDC is the DC of the most recent ability check (session-only).
+	LastCheckDC int
+	// LastCheckName is the display name of the most recent check (session-only).
+	LastCheckName string
+	// Dead is true when the character is dying and eligible for stabilize (session-only).
+	Dead bool
 }
 
 // Manager tracks all active player sessions and room occupancy.

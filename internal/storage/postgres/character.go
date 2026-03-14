@@ -536,3 +536,29 @@ func (r *CharacterRepository) LoadCurrency(ctx context.Context, id int64) (int, 
 	err := r.db.QueryRow(ctx, `SELECT COALESCE(currency, 0) FROM characters WHERE id = $1`, id).Scan(&currency)
 	return currency, err
 }
+
+// SaveHeroPoints persists the player's current hero point count.
+//
+// Precondition: id > 0; heroPoints >= 0.
+// Postcondition: characters.hero_points column is updated.
+func (r *CharacterRepository) SaveHeroPoints(ctx context.Context, id int64, heroPoints int) error {
+	if id <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	_, err := r.db.Exec(ctx, `UPDATE characters SET hero_points = $2 WHERE id = $1`, id, heroPoints)
+	return err
+}
+
+// LoadHeroPoints returns the stored hero point count for the given character.
+// Returns 0 for characters without a persisted count.
+//
+// Precondition: id > 0.
+// Postcondition: returns (heroPoints, nil) on success.
+func (r *CharacterRepository) LoadHeroPoints(ctx context.Context, id int64) (int, error) {
+	if id <= 0 {
+		return 0, fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	var heroPoints int
+	err := r.db.QueryRow(ctx, `SELECT COALESCE(hero_points, 0) FROM characters WHERE id = $1`, id).Scan(&heroPoints)
+	return heroPoints, err
+}

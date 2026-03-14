@@ -79,6 +79,8 @@ type CharacterSaver interface {
 	SaveCurrency(ctx context.Context, characterID int64, currency int) error
 	LoadCurrency(ctx context.Context, characterID int64) (int, error)
 	SaveGender(ctx context.Context, characterID int64, gender string) error
+	SaveHeroPoints(ctx context.Context, characterID int64, heroPoints int) error
+	LoadHeroPoints(ctx context.Context, characterID int64) (int, error)
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.
@@ -576,6 +578,16 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				)
 			} else {
 				sess.Currency = savedCurrency
+			}
+			// Load persisted hero points.
+			if savedHP, hpErr := s.charSaver.LoadHeroPoints(stream.Context(), characterID); hpErr != nil {
+				s.logger.Warn("failed to load hero points on login",
+					zap.String("uid", uid),
+					zap.Int64("character_id", characterID),
+					zap.Error(hpErr),
+				)
+			} else {
+				sess.HeroPoints = savedHP
 			}
 			// Grant starting kit on first login.
 			if s.loadoutsDir != "" {

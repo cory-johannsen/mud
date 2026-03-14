@@ -220,6 +220,10 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 		ALTER TABLE characters ADD COLUMN IF NOT EXISTS gender TEXT NOT NULL DEFAULT '';
 
 		ALTER TABLE characters ADD COLUMN IF NOT EXISTS skill_increases_initialized BOOLEAN NOT NULL DEFAULT FALSE;
+
+		ALTER TABLE characters ADD COLUMN IF NOT EXISTS currency INTEGER NOT NULL DEFAULT 0;
+
+		ALTER TABLE characters ADD COLUMN IF NOT EXISTS hero_points INTEGER NOT NULL DEFAULT 0;
 	`)
 	return err
 }

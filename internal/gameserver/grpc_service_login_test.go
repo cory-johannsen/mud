@@ -120,6 +120,8 @@ func (m *mockCharSaverFull) SaveDefaultCombatAction(_ context.Context, _ int64, 
 func (m *mockCharSaverFull) SaveCurrency(_ context.Context, _ int64, _ int) error { return nil }
 func (m *mockCharSaverFull) LoadCurrency(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (m *mockCharSaverFull) SaveGender(_ context.Context, _ int64, _ string) error { return nil }
+func (m *mockCharSaverFull) SaveHeroPoints(_ context.Context, _ int64, _ int) error { return nil }
+func (m *mockCharSaverFull) LoadHeroPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied
 // CharacterSaver and returns a connected client and the session manager.
