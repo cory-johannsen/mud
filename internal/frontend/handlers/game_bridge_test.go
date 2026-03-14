@@ -2,7 +2,10 @@ package handlers_test
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -319,11 +322,16 @@ func TestBuildPrompt_OneCondition(t *testing.T) {
 
 func TestBuildPrompt_MultipleConditions(t *testing.T) {
 	got := handlers.BuildPrompt("Thorald", "Morning", "09:00", 50, 60, []string{"Panicked", "Grabbed"})
-	if !strings.Contains(got, "[Panicked]") {
-		t.Errorf("expected [Panicked] in prompt, got %q", got)
+	wantPanicked := telnet.Colorf(telnet.BrightMagenta, "[Panicked]")
+	wantGrabbed := telnet.Colorf(telnet.BrightMagenta, "[Grabbed]")
+	if !strings.Contains(got, wantPanicked) {
+		t.Errorf("expected BrightMagenta [Panicked] in prompt, got %q", got)
 	}
-	if !strings.Contains(got, "[Grabbed]") {
-		t.Errorf("expected [Grabbed] in prompt, got %q", got)
+	if !strings.Contains(got, wantGrabbed) {
+		t.Errorf("expected BrightMagenta [Grabbed] in prompt, got %q", got)
+	}
+	if !strings.HasSuffix(got, "> ") {
+		t.Errorf("prompt must end with '> ', got %q", got)
 	}
 }
 
@@ -331,8 +339,10 @@ func TestProperty_BuildPrompt_ConditionsAllPresent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		n := rapid.IntRange(0, 5).Draw(rt, "n")
 		conds := make([]string, n)
+		seen := make(map[string]bool)
 		for i := range conds {
 			conds[i] = rapid.StringMatching(`[A-Za-z]{1,15}`).Draw(rt, fmt.Sprintf("cond%d", i))
+			seen[conds[i]] = true
 		}
 		name := rapid.StringMatching(`[A-Za-z]{1,10}`).Draw(rt, "name")
 		period := rapid.SampledFrom([]string{"Morning", "Night", "Dawn"}).Draw(rt, "period")
@@ -340,13 +350,59 @@ func TestProperty_BuildPrompt_ConditionsAllPresent(t *testing.T) {
 		curHP := rapid.Int32Range(0, maxHP).Draw(rt, "curHP")
 
 		got := handlers.BuildPrompt(name, period, "08:00", curHP, maxHP, conds)
-		for _, c := range conds {
-			if !strings.Contains(got, "["+c+"]") {
-				rt.Errorf("condition %q not found in prompt %q", c, got)
+		// Each unique condition name must appear exactly once as a BrightMagenta segment.
+		for c := range seen {
+			want := telnet.Colorf(telnet.BrightMagenta, "[%s]", c)
+			count := strings.Count(got, want)
+			if count != 1 {
+				rt.Errorf("condition %q appears %d times (want 1) in prompt %q", c, count, got)
 			}
 		}
 		if !strings.HasSuffix(got, "> ") {
 			rt.Errorf("prompt must end with '> ', got %q", got)
 		}
 	})
+}
+
+func TestBuildPrompt_ConditionAppliedThenRemoved(t *testing.T) {
+	// Simulate the activeConditions map that forwardServerEvents maintains.
+	activeConditions := make(map[string]string)
+	var condMu sync.Mutex
+
+	buildPrompt := func() string {
+		condMu.Lock()
+		sortedIDs := slices.Sorted(maps.Keys(activeConditions))
+		names := make([]string, 0, len(sortedIDs))
+		for _, id := range sortedIDs {
+			names = append(names, activeConditions[id])
+		}
+		condMu.Unlock()
+		return handlers.BuildPrompt("Hero", "Morning", "08:00", 10, 10, names)
+	}
+
+	// Before any condition: no condition in prompt.
+	got := buildPrompt()
+	if strings.Contains(got, "[Panicked]") {
+		t.Errorf("expected no [Panicked] before apply, got %q", got)
+	}
+
+	// Apply condition.
+	condMu.Lock()
+	activeConditions["fear_panicked"] = "Panicked"
+	condMu.Unlock()
+
+	got = buildPrompt()
+	if !strings.Contains(got, "[Panicked]") {
+		t.Errorf("expected [Panicked] after apply, got %q", got)
+	}
+
+	// Remove condition.
+	condMu.Lock()
+	delete(activeConditions, "fear_panicked")
+	condMu.Unlock()
+
+	got = buildPrompt()
+	if strings.Contains(got, "[Panicked]") {
+		t.Errorf("expected no [Panicked] after remove, got %q", got)
+	}
 }
