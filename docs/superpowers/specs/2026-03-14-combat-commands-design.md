@@ -212,7 +212,7 @@ Current `handleMotive` implementation (in `internal/gameserver/grpc_service.go`)
 
 #### 4.2.2 New NPC Fields
 
-Add the following fields to `npc.Template` in `internal/game/npc/template.go`:
+Add the following fields to `npc.Template` in `internal/game/npc/template.go` and copy to `npc.Instance` at spawn time:
 
 ```go
 // SpecialAbilities lists named special abilities (e.g. "Rage", "Poison Spit").
@@ -227,7 +227,11 @@ Disposition string `yaml:"disposition"`
 
 (Note: `npc.Template` already has `Resistances map[string]int` and `Weaknesses map[string]int`; these are NOT replaced. The existing fields are used as-is for the motive critical success reveal.)
 
-Add runtime `Disposition string` to `npc.Instance` in `internal/game/npc/instance.go`, initialized from `tmpl.Disposition` at spawn time. If `tmpl.Disposition` is empty, default to `"hostile"`.
+Add to `npc.Instance` in `internal/game/npc/instance.go`, initialized from template at spawn time:
+- `SpecialAbilities []string` — copy from `tmpl.SpecialAbilities` at spawn.
+- `Disposition string` — copy from `tmpl.Disposition` at spawn; default to `"hostile"` if empty.
+
+The heuristic in §4.2.7 accesses `inst.SpecialAbilities` (the instance field, not the template field directly).
 
 **REQ-MOTIVE-15:** MUST add `SpecialAbilities []string` (YAML: `special_abilities`) to `npc.Template`. This is a NEW field; it does NOT conflict with the existing `Abilities npc.Abilities` struct field.
 
@@ -356,7 +360,7 @@ At the start of each player's new combat round, before awarding fresh AP:
 
 - **REQ-DELAY-10:** MUST add banked AP: `sess.RemainingAP += sess.BankedAP`.
 - **REQ-DELAY-11:** MUST clear banked AP: `sess.BankedAP = 0`.
-- **REQ-DELAY-12:** The `-2 AC` penalty expires automatically because `DelayedUntilRound` records the round it was applied; any round after that round has no penalty (condition: `currentRound <= sess.DelayedUntilRound`).
+- **REQ-DELAY-12:** The `-2 AC` penalty expires automatically because `DelayedUntilRound` records the round it was applied; any round after that round has no penalty (condition: `currentRound <= sess.DelayedUntilRound`). The penalty does NOT carry into the next round; it applies only within the round the delay was called.
 
 ---
 
@@ -437,19 +441,27 @@ At the start of each player's new combat round, before awarding fresh AP:
 
 ### 8.1 Commands Registry
 
-**REQ-CMD-1:** Add `HandlerClimb`, `HandlerSwim`, `HandlerMotive`, `HandlerDelay` constants to `internal/game/command/commands.go`. (Note: `HandlerClimb`, `HandlerSwim`, `HandlerMotive` may already exist; verify and add only missing ones.)
+**REQ-CMD-1:** Verify or add handler constants in `internal/game/command/commands.go`:
+- `HandlerClimb`, `HandlerSwim`, `HandlerMotive` — already present; verify correct values.
+- `HandlerDelay` — does NOT exist yet. MUST add as a new constant (e.g., `HandlerDelay = "delay"`).
 
-**REQ-CMD-2:** Append or update `Command{...}` entries in `BuiltinCommands()` with correct `Skill` references (muscle/awareness).
+**REQ-CMD-2:** Append or update `Command{...}` entries in `BuiltinCommands()` with correct `Skill` references (muscle/awareness):
+- `delay` command entry — does NOT exist yet. MUST add.
+- `climb`, `swim`, `motive` entries — update `Help` strings and skill references (REQ-RENAME-2, REQ-RENAME-6).
 
 ### 8.2 Proto Messages
 
-**REQ-CMD-4a:** Add proto request messages to `api/proto/game/v1/game.proto`:
-- `ClimbRequest` with `direction string` field
-- `SwimRequest` with `direction string` field
-- `MotiveRequest` with `target string` field
-- `DelayRequest` (no fields)
+**REQ-CMD-4a:** Update existing proto messages in `api/proto/game/v1/game.proto`:
+- `ClimbRequest` (line 802) — currently empty `{}`. MUST add `string direction = 1;` field.
+- `SwimRequest` (line 805) — currently empty `{}`. MUST add `string direction = 1;` field.
+- `MotiveRequest` (line 816) — already has `string target = 1;`. No change needed.
+- `DelayRequest` — does NOT exist yet. MUST add new message: `message DelayRequest {}` (no fields).
 
-**REQ-CMD-4b:** Add all new messages to the `ClientMessage` oneof. (Note: `ClimbRequest`, `SwimRequest`, `MotiveRequest` may already be present; verify.)
+**REQ-CMD-4b:** Add `DelayRequest` to the `ClientMessage` oneof as field number 72:
+```proto
+DelayRequest delay = 72;
+```
+(Note: `ClimbRequest = 67`, `SwimRequest = 68`, `MotiveRequest = 69` are already in the oneof.)
 
 **REQ-CMD-4c:** Run `make proto` to regenerate Go bindings.
 
@@ -468,12 +480,12 @@ At the start of each player's new combat round, before awarding fresh AP:
 ### 8.4 gRPC Service
 
 **REQ-CMD-6a:** Implement handlers in `internal/gameserver/grpc_service.go`:
-- `handleClimb(uid, req *gamev1.ClimbRequest)`
-- `handleSwim(uid, req *gamev1.SwimRequest)`
-- `handleMotive(uid, req *gamev1.MotiveRequest)`
-- `handleDelay(uid, req *gamev1.DelayRequest)`
+- `handleClimb(uid string, req *gamev1.ClimbRequest)` — existing function currently discards the request (`_ *gamev1.ClimbRequest`). MUST change to use `req` to read `req.Direction`.
+- `handleSwim(uid string, req *gamev1.SwimRequest)` — existing function currently discards the request (`_ *gamev1.SwimRequest`). MUST change to use `req` to read `req.Direction`.
+- `handleMotive(uid string, req *gamev1.MotiveRequest)` — existing function, MUST rework per §4.
+- `handleDelay(uid string, req *gamev1.DelayRequest)` — does NOT exist yet. MUST implement from scratch.
 
-**REQ-CMD-6b:** Wire all handlers into the `dispatch` type switch.
+**REQ-CMD-6b:** Wire `handleDelay` into the `dispatch` type switch. (The other three are already wired.)
 
 ### 8.5 Completion Criteria
 
@@ -486,11 +498,13 @@ At the start of each player's new combat round, before awarding fresh AP:
 - [ ] Add `Terrain string` to `world.Room` (YAML tag: `terrain`)
 - [ ] Add `ClimbDC int` and `Height int` to `world.Exit` (YAML tags: `climb_dc`, `height`)
 - [ ] Add `SwimDC int` to `world.Exit` (YAML tag: `swim_dc`)
-- [ ] Add `SpecialAbilities []string` to `npc.Template` (YAML tag: `special_abilities`)
-- [ ] Add `Disposition string` to `npc.Template` (YAML tag: `disposition`) and `npc.Instance`
+- [ ] Add `SpecialAbilities []string` to `npc.Template` (YAML tag: `special_abilities`) and `npc.Instance` (copied at spawn)
+- [ ] Add `Disposition string` to `npc.Template` (YAML tag: `disposition`) and `npc.Instance` (copied at spawn, default "hostile")
 - [ ] Add `MotiveBonus int` to `npc.Instance`
 - [ ] Rename `npc.Template.Deception` → `npc.Template.Hustle` (YAML tag: `hustle`)
 - [ ] Rename `npc.Instance.Deception` → `npc.Instance.Hustle`
+- [ ] Add `HandlerDelay` constant to `internal/game/command/commands.go`
+- [ ] Add `delay` entry to `BuiltinCommands()` in `internal/game/command/commands.go`
 - [ ] Add `BankedAP int` and `DelayedUntilRound int` to `PlayerSession` (session-only)
 - [ ] Remove room property fallbacks: `climbable`, `climb_dc`, `water_terrain`, `water_dc`
 - [ ] Update all YAML room and NPC definitions
