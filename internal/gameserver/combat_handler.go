@@ -3,6 +3,7 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -1603,12 +1604,67 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 			continue
 		}
 		q, ok := cbt.ActionQueues[c.ID]
-		if !ok || len(q.QueuedActions()) > 0 {
+		if !ok {
 			continue
 		}
 
 		sess, ok := h.sessions.GetPlayer(c.ID)
 		if !ok {
+			continue
+		}
+
+		forcedAction := condition.ForcedActionType(sess.Conditions)
+		if forcedAction == "" && len(q.QueuedActions()) > 0 {
+			continue // player submitted and no forced override
+		}
+
+		if forcedAction != "" {
+			q.ClearActions()
+			var forcedTarget string
+			switch forcedAction {
+			case "random_attack":
+				var targets []string
+				for _, combatant := range cbt.Combatants {
+					if !combatant.IsDead() {
+						targets = append(targets, combatant.Name)
+					}
+				}
+				if len(targets) > 0 {
+					forcedTarget = targets[rand.Intn(len(targets))]
+				}
+			case "lowest_hp_attack":
+				lowestHP := int(^uint(0) >> 1) // MaxInt
+				for _, combatant := range cbt.Combatants {
+					if !combatant.IsDead() && combatant.CurrentHP < lowestHP {
+						lowestHP = combatant.CurrentHP
+						forcedTarget = combatant.Name
+					}
+				}
+			}
+			if forcedTarget == "" {
+				forcedTarget = c.Name
+			}
+			if err := cbt.QueueAction(c.ID, combat.QueuedAction{Type: combat.ActionAttack, Target: forcedTarget}); err != nil {
+				continue
+			}
+			var msg string
+			switch forcedAction {
+			case "random_attack":
+				msg = fmt.Sprintf("Panic grips you — you lash out wildly at %s!", forcedTarget)
+			case "lowest_hp_attack":
+				msg = fmt.Sprintf("Berserker rage drives you to destroy the weakest target — you attack %s!", forcedTarget)
+			}
+			notifyEvt := &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{
+						Content: msg,
+						Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+					},
+				},
+			}
+			if data, marshalErr := proto.Marshal(notifyEvt); marshalErr == nil {
+				_ = sess.Entity.Push(data)
+			}
 			continue
 		}
 

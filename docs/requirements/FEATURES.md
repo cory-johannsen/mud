@@ -197,12 +197,14 @@
       - [x] Despair track — Discouraged (-1 AP) → Despairing (-2 AP) → Catatonic (skip turn); triggered by NPC abilities (future)
       - [x] Delirium track — Confused (-atk) → Delirious (-atk) → Hallucinatory (-atk, skip turn); triggered by toxins/zones (future)
       - [x] Calm command — `calm` (Grit check vs DC 10+severity×4; costs all AP in combat; success steps down worst active track)
-      - [ ] Forced action execution — Panicked (random action), Psychotic (attack nearest), Berserker (attack nearest) — requires combat auto-execution mechanism
+      - [x] Forced action execution — Panicked/Psychotic (random attack any combatant), Berserker (attack lowest-HP combatant); overrides player pre-submitted actions each round
       - [ ] NPC ability triggers for Rage, Despair, Delirium tracks
       - [ ] Zone effect triggers for all tracks
   - [x] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
   - [x] Immobilized — prevent grabbed creatures from moving between rooms
   - [x] Sense Motive command — implement `motive <target>` (awareness vs Deception DC; in combat costs 1 AP and reveals NPC HP tier; out-of-combat behavior stubbed for non-combat NPC extension)
+- [ ] Player prompt should include mental state if applicable
+- [ ] Room section should include NPC mental state if applicable
 - [ ] map and legend should be presented in 2-column view.  
   - the legend column should support multiple columns of text (like the legend currently does)
   - the legend should default to 1 column if the screen width cannot support more
