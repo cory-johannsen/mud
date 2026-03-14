@@ -318,17 +318,18 @@ No delay command exists in the current implementation. Players cannot bank Actio
 
 #### 5.2.1 Session State Extension
 
-Add new fields to `PlayerSession` in `internal/game/session/manager.go`:
+Add one new field to `PlayerSession` in `internal/game/session/manager.go`:
 
 ```go
 type PlayerSession struct {
     // ... existing fields ...
-    BankedAP         int // AP reserved for next round (session-only, not persisted)
-    DelayedUntilRound int // Combat round after which the -2 AC penalty expires (session-only)
+    BankedAP int // AP reserved for next round (session-only, not persisted)
 }
 ```
 
-**REQ-DELAY-1:** Both fields MUST be session-only (not persisted to database).
+**REQ-DELAY-1:** `BankedAP` MUST be session-only (not persisted to database).
+
+**Architecture note:** AP state lives in `combat.ActionQueue` (via `CombatHandler.RemainingAP`, `SpendAP`, `SpendAllAP` in `internal/gameserver/combat_handler.go`), not in `PlayerSession`. The AC penalty uses `Combatant.ACMod` (defined on `combat.Combatant` in `internal/game/combat/combat.go`), which is automatically zeroed by `cbt.StartRound(N)` at the beginning of each round.
 
 #### 5.2.2 Command Behavior
 
@@ -344,23 +345,38 @@ type PlayerSession struct {
 
 **Effect (order of operations):**
 
-1. Deduct 1 AP: `sess.RemainingAP -= 1`
-2. Compute and bank remaining AP: `sess.BankedAP = min(sess.RemainingAP, 2)`
-3. Zero current AP: `sess.RemainingAP = 0`
-4. Record AC penalty: `sess.DelayedUntilRound = currentRound`
+1. Read current remaining AP: `remaining := h.combatH.RemainingAP(uid)` (pre-spend value)
+2. Spend 1 AP: `h.combatH.SpendAP(uid, 1)` (fails if remaining < 1)
+3. Compute banked AP: `sess.BankedAP = min(remaining-1, 2)` (remaining-1 = post-spend remaining)
+4. Drain remaining AP: `h.combatH.SpendAllAP(uid)`
+5. Apply AC penalty: find player's `*combat.Combatant` in the active combat by uid; set `combatant.ACMod -= 2`
 
-- **REQ-DELAY-6:** MUST compute `BankedAP = min(sess.RemainingAP, 2)` AFTER deducting the 1 AP cost (step 2 above, using the already-decremented value).
-- **REQ-DELAY-7:** MUST zero current round AP after banking.
-- **REQ-DELAY-8:** MUST apply -2 AC penalty via inline `DelayedUntilRound` tracking (Option B). Combat AC calculation MUST subtract 2 when `currentRound <= sess.DelayedUntilRound`.
+- **REQ-DELAY-6:** MUST compute `BankedAP = min(remaining-1, 2)` where `remaining` is captured BEFORE `SpendAP` is called. This equals `min(postSpendRemaining, 2)`.
+- **REQ-DELAY-7:** MUST call `h.combatH.SpendAllAP(uid)` to zero current round AP.
+- **REQ-DELAY-8:** MUST set `combatant.ACMod -= 2` on the player's `*combat.Combatant`. This penalty is automatically cleared by `cbt.StartRound(N)` at the start of the next round — no `DelayedUntilRound` field is needed.
 - **REQ-DELAY-9:** MUST display: `"You delay, banking {N} AP for next round. You are exposed (-2 AC)."`
 
 #### 5.2.3 Round Start Logic
 
-At the start of each player's new combat round, before awarding fresh AP:
+In `resolveAndAdvanceLocked` in `internal/gameserver/combat_handler.go`, after `cbt.StartRound(3)` at line ~1400 (which rebuilds all ActionQueues), add a loop over player combatants:
 
-- **REQ-DELAY-10:** MUST add banked AP: `sess.RemainingAP += sess.BankedAP`.
-- **REQ-DELAY-11:** MUST clear banked AP: `sess.BankedAP = 0`.
-- **REQ-DELAY-12:** The `-2 AC` penalty expires automatically because `DelayedUntilRound` records the round it was applied; any round after that round has no penalty (condition: `currentRound <= sess.DelayedUntilRound`). The penalty does NOT carry into the next round; it applies only within the round the delay was called.
+```go
+// Inject banked AP from delayed players.
+for _, c := range cbt.Combatants {
+    if c.Kind != combat.KindPlayer { continue }
+    sess, ok := h.sessions.GetPlayer(c.ID)
+    if !ok || sess.BankedAP <= 0 { continue }
+    q := cbt.ActionQueues[c.ID]
+    if q != nil {
+        q.AddAP(sess.BankedAP) // new method — see REQ-DELAY-10 note
+    }
+    sess.BankedAP = 0
+}
+```
+
+- **REQ-DELAY-10:** MUST add a new method `func (q *ActionQueue) AddAP(n int)` in `internal/game/combat/action.go` that increments `q.remaining` by `n`. Precondition: `n >= 0`. Postcondition: `q.remaining` increases by `n`.
+- **REQ-DELAY-11:** MUST clear `sess.BankedAP = 0` after calling `q.AddAP`.
+- **REQ-DELAY-12:** The `-2 AC` penalty (`combatant.ACMod -= 2`) is automatically cleared because `cbt.StartRound(N)` zeroes `ACMod` for all combatants at the start of each new round. No additional cleanup is needed. The penalty does NOT carry into the next round.
 
 ---
 
@@ -505,7 +521,8 @@ DelayRequest delay = 72;
 - [ ] Rename `npc.Instance.Deception` → `npc.Instance.Hustle`
 - [ ] Add `HandlerDelay` constant to `internal/game/command/commands.go`
 - [ ] Add `delay` entry to `BuiltinCommands()` in `internal/game/command/commands.go`
-- [ ] Add `BankedAP int` and `DelayedUntilRound int` to `PlayerSession` (session-only)
+- [ ] Add `BankedAP int` to `PlayerSession` (session-only)
+- [ ] Add `AddAP(n int)` method to `ActionQueue` in `internal/game/combat/action.go`
 - [ ] Remove room property fallbacks: `climbable`, `climb_dc`, `water_terrain`, `water_dc`
 - [ ] Update all YAML room and NPC definitions
 - [ ] Update all handler code (skill name, field name, message strings, Help fields)
