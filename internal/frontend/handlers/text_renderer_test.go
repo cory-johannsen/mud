@@ -1088,6 +1088,65 @@ func TestRenderCharacterSheet_ShowsAwareness_NoBonus(t *testing.T) {
 	assert.Contains(t, telnet.StripANSI(rendered), "Awareness: +10")
 }
 
+func TestRenderNPCs_ConditionsShown(t *testing.T) {
+	npcs := []*gamev1.NpcInfo{
+		{
+			Name:              "Goblin",
+			HealthDescription: "lightly wounded",
+			FightingTarget:    "Hero",
+			Conditions:        []string{"prone", "grabbed"},
+		},
+	}
+	lines := renderNPCs(npcs, 120)
+	joined := strings.Join(lines, "\n")
+	stripped := telnet.StripANSI(joined)
+	if !strings.Contains(stripped, "prone") {
+		t.Errorf("expected 'prone' in NPC display, got %q", stripped)
+	}
+	if !strings.Contains(stripped, "grabbed") {
+		t.Errorf("expected 'grabbed' in NPC display, got %q", stripped)
+	}
+}
+
+func TestRenderNPCs_NoConditions(t *testing.T) {
+	npcs := []*gamev1.NpcInfo{
+		{
+			Name:              "Goblin",
+			HealthDescription: "unharmed",
+			Conditions:        nil,
+		},
+	}
+	lines := renderNPCs(npcs, 120)
+	joined := strings.Join(lines, "\n")
+	stripped := telnet.StripANSI(joined)
+	if strings.Contains(stripped, "prone") || strings.Contains(stripped, "grabbed") {
+		t.Errorf("unexpected condition text in %q", stripped)
+	}
+}
+
+func TestProperty_RenderNPCs_AllConditionsPresent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(0, 4).Draw(rt, "n")
+		conds := make([]string, n)
+		for i := range conds {
+			conds[i] = rapid.StringMatching(`[a-z]{3,10}`).Draw(rt, fmt.Sprintf("cond%d", i))
+		}
+		npc := &gamev1.NpcInfo{
+			Name:              "Goblin",
+			HealthDescription: "unharmed",
+			Conditions:        conds,
+		}
+		lines := renderNPCs([]*gamev1.NpcInfo{npc}, 120)
+		joined := strings.Join(lines, "\n")
+		stripped := telnet.StripANSI(joined)
+		for _, c := range conds {
+			if !strings.Contains(stripped, c) {
+				rt.Errorf("condition %q missing from NPC display %q", c, stripped)
+			}
+		}
+	})
+}
+
 // TestProperty_RenderCharacterSheet_XPSection verifies XP values always appear in output.
 func TestProperty_RenderCharacterSheet_XPSection(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

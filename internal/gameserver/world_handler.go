@@ -186,14 +186,22 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 	for _, inst := range instances {
 		if !inst.IsDead() {
 			fightingTarget := ""
+			var condNames []string
 			if h.combatH != nil {
 				fightingTarget = h.combatH.FightingTargetName(inst.ID)
+				// Precondition: uid is the viewing player's UID (same room).
+				if activeSet, ok := h.combatH.GetCombatConditionSet(uid, inst.ID); ok {
+					for _, ac := range activeSet.All() {
+						condNames = append(condNames, ac.Def.Name)
+					}
+				}
 			}
 			npcInfos = append(npcInfos, &gamev1.NpcInfo{
 				InstanceId:        inst.ID,
 				Name:              inst.Name(),
 				HealthDescription: inst.HealthDescription(),
 				FightingTarget:    fightingTarget,
+				Conditions:        condNames,
 			})
 		}
 	}

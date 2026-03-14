@@ -162,6 +162,10 @@ func renderNPCs(npcs []*gamev1.NpcInfo, width int) []string {
 				entry += fmt.Sprintf(" %sfighting %s%s",
 					telnet.BrightRed, n.FightingTarget, telnet.Reset)
 			}
+			if len(n.Conditions) > 0 {
+				entry += fmt.Sprintf(" %s[%s]%s",
+					telnet.Yellow, strings.Join(n.Conditions, ", "), telnet.Reset)
+			}
 			// Pad to column width so second column aligns (skip padding on last in row).
 			if colW > 0 && j < perRow-1 {
 				visLen := len(telnet.StripANSI(entry))

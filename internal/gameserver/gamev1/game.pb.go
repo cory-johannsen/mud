@@ -3149,6 +3149,7 @@ type NpcInfo struct {
 	Name              string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	HealthDescription string                 `protobuf:"bytes,3,opt,name=health_description,json=healthDescription,proto3" json:"health_description,omitempty"`
 	FightingTarget    string                 `protobuf:"bytes,4,opt,name=fighting_target,json=fightingTarget,proto3" json:"fighting_target,omitempty"` // name of the player this NPC is currently fighting; empty if not in combat
+	Conditions        []string               `protobuf:"bytes,5,rep,name=conditions,proto3" json:"conditions,omitempty"`                               // display names of active conditions (empty when not in combat or no conditions)
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -3209,6 +3210,13 @@ func (x *NpcInfo) GetFightingTarget() string {
 		return x.FightingTarget
 	}
 	return ""
+}
+
+func (x *NpcInfo) GetConditions() []string {
+	if x != nil {
+		return x.Conditions
+	}
+	return nil
 }
 
 // ExamineRequest asks the server for detail on a named target.
@@ -8015,13 +8023,16 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x04grit\x18\v \x01(\x05R\x04grit\x12\x1c\n" +
 	"\treasoning\x18\f \x01(\x05R\treasoning\x12\x14\n" +
 	"\x05savvy\x18\r \x01(\x05R\x05savvy\x12\x14\n" +
-	"\x05flair\x18\x0e \x01(\x05R\x05flair\"\x96\x01\n" +
+	"\x05flair\x18\x0e \x01(\x05R\x05flair\"\xb6\x01\n" +
 	"\aNpcInfo\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12-\n" +
 	"\x12health_description\x18\x03 \x01(\tR\x11healthDescription\x12'\n" +
-	"\x0ffighting_target\x18\x04 \x01(\tR\x0efightingTarget\"(\n" +
+	"\x0ffighting_target\x18\x04 \x01(\tR\x0efightingTarget\x12\x1e\n" +
+	"\n" +
+	"conditions\x18\x05 \x03(\tR\n" +
+	"conditions\"(\n" +
 	"\x0eExamineRequest\x12\x16\n" +
 	"\x06target\x18\x01 \x01(\tR\x06target\"\xa5\x01\n" +
 	"\aNpcView\x12\x1f\n" +
