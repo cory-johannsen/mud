@@ -13,6 +13,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 func testWorldAndSession(t *testing.T) (*world.Manager, *session.Manager) {
@@ -399,6 +400,58 @@ func TestBuildRoomView_IndoorNoFlavorText(t *testing.T) {
 	view, err := h.Look("u1")
 	require.NoError(t, err)
 	assert.Equal(t, originalDesc, view.Description, "indoor rooms must have no flavor text appended")
+}
+
+// TestBuildRoomView_NpcConditions_NoCombat verifies REQ-T5: when there is no active
+// combat the NpcInfo.Conditions slice is empty for every NPC in the room.
+//
+// Precondition: NPC is alive in room; no active combat.
+// Postcondition: NpcInfo.Conditions is nil or empty.
+func TestBuildRoomView_NpcConditions_NoCombat(t *testing.T) {
+	worldMgr, _ := testWorldAndSession(t)
+	combatH := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	// Share the combat handler's session manager so player lookups resolve correctly.
+	h := NewWorldHandler(worldMgr, combatH.sessions, combatH.npcMgr, nil, nil, nil)
+	h.SetCombatHandler(combatH)
+
+	const roomID = "room_a"
+	spawnTestNPC(t, combatH.npcMgr, roomID)
+	addTestPlayer(t, combatH.sessions, "u_t5", roomID)
+
+	view, err := h.Look("u_t5")
+	require.NoError(t, err)
+	require.Len(t, view.Npcs, 1, "expected exactly one NPC in room")
+	assert.Empty(t, view.Npcs[0].Conditions, "REQ-T5: NpcInfo.Conditions must be empty when no active combat")
+}
+
+// TestBuildRoomView_NpcConditions_WithCombat verifies REQ-T6: when an NPC has active
+// conditions in combat, NpcInfo.Conditions contains the condition display names.
+//
+// Precondition: Active combat with NPC; "grabbed" condition applied to NPC.
+// Postcondition: NpcInfo.Conditions contains "Grabbed".
+func TestBuildRoomView_NpcConditions_WithCombat(t *testing.T) {
+	worldMgr, _ := testWorldAndSession(t)
+	combatH := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	// Share the combat handler's session manager so player lookups resolve correctly.
+	h := NewWorldHandler(worldMgr, combatH.sessions, combatH.npcMgr, nil, nil, nil)
+	h.SetCombatHandler(combatH)
+
+	const roomID = "room_a"
+	const uid = "u_t6"
+	inst := spawnTestNPC(t, combatH.npcMgr, roomID)
+	addTestPlayer(t, combatH.sessions, uid, roomID)
+
+	_, err := combatH.Attack(uid, "Goblin")
+	require.NoError(t, err)
+	combatH.cancelTimer(roomID)
+
+	err = combatH.ApplyCombatCondition(uid, inst.ID, "grabbed")
+	require.NoError(t, err)
+
+	view, err := h.Look(uid)
+	require.NoError(t, err)
+	require.Len(t, view.Npcs, 1, "expected exactly one NPC in room")
+	assert.Contains(t, view.Npcs[0].Conditions, "Grabbed", "REQ-T6: NpcInfo.Conditions must contain 'Grabbed' when condition is active")
 }
 
 func TestProperty_BuildRoomView_HourAlwaysInRange(t *testing.T) {

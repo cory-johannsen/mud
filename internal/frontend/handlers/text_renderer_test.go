@@ -1106,6 +1106,9 @@ func TestRenderNPCs_ConditionsShown(t *testing.T) {
 	if !strings.Contains(stripped, "grabbed") {
 		t.Errorf("expected 'grabbed' in NPC display, got %q", stripped)
 	}
+	if strings.Contains(stripped, "[prone") || strings.Contains(stripped, "grabbed]") {
+		t.Errorf("conditions must be rendered without square brackets, got %q", stripped)
+	}
 }
 
 func TestRenderNPCs_NoConditions(t *testing.T) {
