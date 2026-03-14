@@ -5729,6 +5729,14 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 				if result.NewSkillIncreases > 0 {
 					levelMsgs = append(levelMsgs, "You have a pending skill increase! Type 'trainskill <skill>' to advance a skill.")
 				}
+				// Award 1 hero point on level-up (REQ-AWARD1).
+				target.HeroPoints++
+				if target.CharacterID > 0 && s.charSaver != nil {
+					if hpErr := s.charSaver.SaveHeroPoints(ctx, target.CharacterID, target.HeroPoints); hpErr != nil {
+						s.logger.Warn("handleGrant: SaveHeroPoints failed on level-up", zap.Error(hpErr))
+					}
+				}
+				levelMsgs = append(levelMsgs, "You earned 1 hero point!")
 			}
 		} else {
 			target.Experience += amount
