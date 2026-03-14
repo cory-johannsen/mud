@@ -85,6 +85,34 @@ func TestNotifyCombatJoinIfEligible_NoCombat_NoChange(t *testing.T) {
 	assert.Equal(t, "", sess.PendingCombatJoin, "No combat in room — PendingCombatJoin must remain empty")
 }
 
+// REQ: Player who is already a combatant in the room's combat does not get a new join prompt.
+func TestNotifyCombatJoinIfEligible_PlayerAlreadyCombatant_NoChange(t *testing.T) {
+	svc, sessMgr := newMoveJoinSvc(t)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      "u_movejoin4",
+		Username: "Alice",
+		CharName: "Alice",
+		RoomID:   "room-3",
+		Role:     "player",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, sess)
+
+	// Start a combat where sess.UID is already a combatant.
+	playerCbt := &combat.Combatant{ID: sess.UID, Kind: combat.KindPlayer, Name: "Alice",
+		MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, Initiative: 15}
+	npc1 := &combat.Combatant{ID: "n1", Kind: combat.KindNPC, Name: "Ganger",
+		MaxHP: 10, CurrentHP: 10, AC: 12, Level: 1, Initiative: 8}
+	_, err = svc.combatH.engine.StartCombat("room-3", []*combat.Combatant{playerCbt, npc1},
+		makeTestConditionRegistry(), nil, "")
+	require.NoError(t, err)
+
+	svc.notifyCombatJoinIfEligible(sess, "room-3")
+
+	assert.Equal(t, "", sess.PendingCombatJoin,
+		"Player already a combatant must not receive a new join prompt")
+}
+
 // REQ-T-PROP: clearPendingJoinForRoom always leaves no session with PendingCombatJoin == roomID.
 func TestProperty_ClearPendingJoin_AlwaysClearsMatchingRoom(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
