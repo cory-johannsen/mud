@@ -456,6 +456,63 @@ func (e *Engine) EndCombat(roomID string) {
 	delete(e.combats, roomID)
 }
 
+// AddCombatant inserts c into the combat for roomID in initiative order.
+//
+// Precondition: a Combat for roomID exists; c.Initiative has already been rolled.
+// Postcondition: c appears in cbt.Combatants sorted by initiative descending;
+//
+//	c.ID appended to cbt.Participants if c.Kind == KindPlayer;
+//	cbt.Conditions[c.ID] initialized to match the pattern used in StartCombat.
+//	ActionQueues is NOT populated — StartRound rebuilds it each round.
+//
+// Locking: acquires e.mu (write lock) for the full duration. Caller must NOT hold e.mu.
+//
+// turnIndex: If insertion position i <= cbt.turnIndex, cbt.turnIndex is incremented
+//
+//	to preserve the identity of the current actor.
+func (e *Engine) AddCombatant(roomID string, c *Combatant) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	cbt, ok := e.combats[roomID]
+	if !ok {
+		return fmt.Errorf("AddCombatant: no combat in room %q", roomID)
+	}
+
+	// Find insertion index: first position where existing combatant has strictly lower initiative.
+	insertAt := len(cbt.Combatants)
+	for i, existing := range cbt.Combatants {
+		if c.Initiative > existing.Initiative {
+			insertAt = i
+			break
+		}
+	}
+
+	// Positional insert (single-position slice expansion, not re-sort).
+	cbt.Combatants = append(cbt.Combatants, nil)
+	copy(cbt.Combatants[insertAt+1:], cbt.Combatants[insertAt:])
+	cbt.Combatants[insertAt] = c
+
+	// Adjust turnIndex to preserve the current actor's identity.
+	if insertAt <= cbt.turnIndex {
+		cbt.turnIndex++
+	}
+
+	// Track player combatants in Participants.
+	if c.Kind == KindPlayer {
+		cbt.Participants = append(cbt.Participants, c.ID)
+	}
+
+	// Initialize conditions for the new combatant (same pattern as StartCombat).
+	set := condition.NewActiveSet()
+	if cbt.scriptMgr != nil {
+		set.SetScripting(cbt.scriptMgr, cbt.zoneID)
+	}
+	cbt.Conditions[c.ID] = set
+
+	return nil
+}
+
 // IsNPCInCombat returns true when npcID appears as a living NPC combatant in any active combat.
 //
 // Postcondition: true only when npcID is a living NPC in at least one active combat.
