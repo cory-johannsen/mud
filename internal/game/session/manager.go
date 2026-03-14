@@ -101,6 +101,8 @@ type PlayerSession struct {
 	LastCheckName string
 	// Dead is true when the character is dying and eligible for stabilize (session-only).
 	Dead bool
+	// BankedAP is AP banked from a delay action; added to the next round's AP pool; session-only, not persisted.
+	BankedAP int
 }
 
 // Manager tracks all active player sessions and room occupancy.

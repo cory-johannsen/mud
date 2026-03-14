@@ -268,6 +268,27 @@ func TestClearActions_AfterPass(t *testing.T) {
 	assert.False(t, q.IsSubmitted())
 }
 
+// TestActionQueue_AddAP_IncreasesRemaining verifies AddAP adds to remaining AP.
+//
+// Precondition: queue with 2 remaining; AddAP(1) called.
+// Postcondition: RemainingPoints() == 3.
+func TestActionQueue_AddAP_IncreasesRemaining(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	_ = q.DeductAP(1) // remaining = 2
+	q.AddAP(1)
+	assert.Equal(t, 3, q.RemainingPoints())
+}
+
+// TestActionQueue_AddAP_Zero_NoChange verifies AddAP(0) is a no-op.
+//
+// Precondition: queue with 3 remaining; AddAP(0).
+// Postcondition: RemainingPoints() == 3.
+func TestActionQueue_AddAP_Zero_NoChange(t *testing.T) {
+	q := combat.NewActionQueue("u1", 3)
+	q.AddAP(0)
+	assert.Equal(t, 3, q.RemainingPoints())
+}
+
 func TestProperty_ClearActions_AlwaysRestoresMaxPoints(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		maxAP := rapid.IntRange(1, 5).Draw(rt, "maxAP")

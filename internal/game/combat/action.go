@@ -118,6 +118,17 @@ func (q *ActionQueue) DeductAP(cost int) error {
 	return nil
 }
 
+// AddAP adds n action points to remaining.
+//
+// Precondition: n >= 0.
+// Postcondition: remaining increases by n.
+func (q *ActionQueue) AddAP(n int) {
+	if n <= 0 {
+		return
+	}
+	q.remaining += n
+}
+
 // QueuedActions returns a copy of the slice of queued actions.
 func (q *ActionQueue) QueuedActions() []QueuedAction {
 	cp := make([]QueuedAction, len(q.actions))
