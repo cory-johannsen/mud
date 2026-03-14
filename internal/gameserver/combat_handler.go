@@ -408,6 +408,54 @@ func (h *CombatHandler) SpendAllAP(uid string) {
 	}
 }
 
+// ApplyPlayerACMod adds delta to the player's own Combatant.ACMod in their active combat.
+// No-op if player is not in active combat.
+//
+// Precondition: uid must be non-empty.
+// Postcondition: Player combatant ACMod incremented by delta when player is in active combat.
+func (h *CombatHandler) ApplyPlayerACMod(uid string, delta int) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return
+	}
+	for _, c := range cbt.Combatants {
+		if c.ID == uid && c.Kind == combat.KindPlayer {
+			c.ACMod += delta
+			return
+		}
+	}
+}
+
+// PlayerACMod returns the player's Combatant.ACMod in their active combat.
+// Returns 0 if player is not in active combat.
+//
+// Precondition: uid must be non-empty.
+// Postcondition: Returns current ACMod for the player combatant, or 0 if not found.
+func (h *CombatHandler) PlayerACMod(uid string) int {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return 0
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return 0
+	}
+	for _, c := range cbt.Combatants {
+		if c.ID == uid && c.Kind == combat.KindPlayer {
+			return c.ACMod
+		}
+	}
+	return 0
+}
+
 // ApplyCombatantACMod adds mod to the named combatant's ACMod in the player's active combat.
 // Use to apply mid-round AC modifiers from feint (negative) or raise_shield/take_cover (positive).
 //
@@ -1413,6 +1461,24 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 		c.AttackMod += inst.MotiveBonus
 		inst.MotiveBonus = 0
+	}
+
+	// Inject banked AP from delayed players into their new ActionQueue.
+	// Precondition: combatMu held; cbt.StartRound has reset ActionQueues.
+	// Postcondition: Each delayed player's ActionQueue has extra AP added; BankedAP zeroed.
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer {
+			continue
+		}
+		playerSess, playerOK := h.sessions.GetPlayer(c.ID)
+		if !playerOK || playerSess.BankedAP <= 0 {
+			continue
+		}
+		q := cbt.ActionQueues[c.ID]
+		if q != nil {
+			q.AddAP(playerSess.BankedAP)
+		}
+		playerSess.BankedAP = 0
 	}
 
 	h.autoQueueNPCsLocked(cbt)

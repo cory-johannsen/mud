@@ -101,6 +101,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerDemoralize:         bridgeDemoralize,
 	command.HandlerGrapple:            bridgeGrapple,
 	command.HandlerTrip:               bridgeTrip,
+	command.HandlerDelay:              bridgeDelay,
 	command.HandlerDisarm:             bridgeDisarm,
 	command.HandlerClimb:              bridgeClimb,
 	command.HandlerStride:             bridgeStride,
@@ -1218,5 +1219,16 @@ func bridgeGrant(bctx *bridgeContext) (bridgeResult, error) {
 			CharName:  charName,
 			Amount:    int32(amount),
 		}},
+	}}, nil
+}
+
+// bridgeDelay builds a DelayRequest message with no arguments.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a DelayRequest.
+func bridgeDelay(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Delay{Delay: &gamev1.DelayRequest{}},
 	}}, nil
 }

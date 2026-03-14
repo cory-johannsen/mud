@@ -76,6 +76,7 @@ const (
 	HandlerDemoralize          = "demoralize"
 	HandlerGrapple             = "grapple"
 	HandlerTrip                = "trip"
+	HandlerDelay               = "delay"
 	HandlerDisarm              = "disarm"
 	HandlerStride              = "stride"
 	HandlerHide                = "hide"
@@ -204,6 +205,7 @@ func BuiltinCommands() []Command {
 		{Name: "swim", Aliases: []string{"sm"}, Help: "Swim through water or surface when submerged (muscle vs DC; costs 2 AP in combat).", Category: CategoryMovement, Handler: HandlerSwim},
 		{Name: "calm", Help: "Attempt to calm your worst active mental state (Grit check; costs all AP in combat).", Category: CategoryCombat, Handler: HandlerCalm},
 		{Name: "heropoint", Aliases: []string{"hp"}, Help: "Spend a hero point (heropoint reroll | heropoint stabilize)", Category: CategoryCharacter, Handler: HandlerHeroPoint},
+		{Name: "delay", Aliases: []string{"dl"}, Help: "Bank remaining AP (up to 2) for next round at cost of -2 AC. Combat only.", Category: CategoryCombat, Handler: HandlerDelay},
 	}
 }
 

@@ -1215,6 +1215,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleGrapple(uid, p.Grapple)
 	case *gamev1.ClientMessage_Trip:
 		return s.handleTrip(uid, p.Trip)
+	case *gamev1.ClientMessage_Delay:
+		return s.handleDelay(uid, p.Delay)
 	case *gamev1.ClientMessage_Disarm:
 		return s.handleDisarm(uid, p.Disarm)
 	case *gamev1.ClientMessage_Stride:
@@ -6310,4 +6312,52 @@ func (s *GameServiceServer) handleSwim(uid string, req *gamev1.SwimRequest) (*ga
 		}
 		return messageEvent(msg), nil
 	}
+}
+
+// handleDelay banks remaining AP for next round at cost of -2 AC.
+//
+// Precondition: uid is a valid player in active combat with >= 1 AP remaining.
+// Postcondition: 1 AP spent; remaining AP banked (capped at 2) in sess.BankedAP;
+//   all AP zeroed; player combatant ACMod reduced by 2.
+func (s *GameServiceServer) handleDelay(uid string, _ *gamev1.DelayRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("session not found: %s", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return messageEvent("You cannot delay outside of combat."), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+
+	remaining := s.combatH.RemainingAP(uid)
+	if remaining < 1 {
+		return messageEvent("Not enough AP to delay."), nil
+	}
+
+	// Step 1: spend 1 AP for the delay action itself.
+	if err := s.combatH.SpendAP(uid, 1); err != nil {
+		return messageEvent("Not enough AP to delay."), nil
+	}
+
+	// Step 2: bank remaining AP after cost, capped at 2.
+	postCost := remaining - 1
+	banked := postCost
+	if banked > 2 {
+		banked = 2
+	}
+	sess.BankedAP = banked
+
+	// Step 3: zero all remaining AP for this round.
+	s.combatH.SpendAllAP(uid)
+
+	// Step 4: apply -2 AC penalty to player's combatant for this round.
+	s.combatH.ApplyPlayerACMod(uid, -2)
+
+	return messageEvent(fmt.Sprintf(
+		"You delay, banking %d AP for next round. You are exposed (-2 AC).", banked,
+	)), nil
 }
