@@ -307,3 +307,71 @@ func TestCombatStrategyUseCover(t *testing.T) {
 		}
 	})
 }
+
+// TestTemplate_SaveRankFields_DefaultToEmpty verifies that toughness_rank,
+// hustle_rank, cool_rank all default to "" when not set in YAML.
+//
+// Precondition: YAML has no rank fields.
+// Postcondition: all three rank fields are "".
+func TestTemplate_SaveRankFields_DefaultToEmpty(t *testing.T) {
+	yamlData := `
+id: test-npc
+name: Test
+level: 1
+max_hp: 10
+ac: 10
+perception: 0
+`
+	tmpl, err := npc.LoadTemplateFromBytes([]byte(yamlData))
+	require.NoError(t, err)
+	assert.Equal(t, "", tmpl.ToughnessRank)
+	assert.Equal(t, "", tmpl.HustleRank)
+	assert.Equal(t, "", tmpl.CoolRank)
+}
+
+// TestTemplate_SaveRankFields_ParseFromYAML verifies that rank fields round-trip
+// through YAML parsing.
+//
+// Precondition: YAML specifies toughness_rank=trained, hustle_rank=expert, cool_rank=master.
+// Postcondition: parsed fields equal the specified values.
+func TestTemplate_SaveRankFields_ParseFromYAML(t *testing.T) {
+	yamlData := `
+id: test-npc
+name: Test
+level: 1
+max_hp: 10
+ac: 10
+perception: 0
+toughness_rank: trained
+hustle_rank: expert
+cool_rank: master
+`
+	tmpl, err := npc.LoadTemplateFromBytes([]byte(yamlData))
+	require.NoError(t, err)
+	assert.Equal(t, "trained", tmpl.ToughnessRank)
+	assert.Equal(t, "expert", tmpl.HustleRank)
+	assert.Equal(t, "master", tmpl.CoolRank)
+}
+
+// TestInstance_SaveFields_CopiedFromTemplate verifies that Instance fields
+// Brutality, Quickness, Savvy, ToughnessRank, HustleRank, CoolRank are copied
+// from the template at spawn.
+//
+// Precondition: template has non-zero ability scores and rank fields.
+// Postcondition: instance fields equal template values.
+func TestInstance_SaveFields_CopiedFromTemplate(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "t1", Name: "T", Level: 1, MaxHP: 10, AC: 10, Perception: 0,
+		Abilities:     npc.Abilities{Brutality: 14, Quickness: 12, Savvy: 8},
+		ToughnessRank: "trained",
+		HustleRank:    "expert",
+		CoolRank:      "master",
+	}
+	inst := npc.NewInstance("i1", tmpl, "room1")
+	assert.Equal(t, 14, inst.Brutality)
+	assert.Equal(t, 12, inst.Quickness)
+	assert.Equal(t, 8, inst.Savvy)
+	assert.Equal(t, "trained", inst.ToughnessRank)
+	assert.Equal(t, "expert", inst.HustleRank)
+	assert.Equal(t, "master", inst.CoolRank)
+}

@@ -72,6 +72,16 @@ type Template struct {
 	Armor []EquipmentEntry `yaml:"armor"`
 	// Combat defines the tactical strategy this NPC uses in combat.
 	Combat CombatStrategy `yaml:"combat"`
+	// ToughnessRank is the NPC's Toughness save proficiency rank
+	// ("trained", "expert", "master", "legendary", or "" for untrained).
+	// Used to compute Toughness DC for Grapple and Shove.
+	ToughnessRank string `yaml:"toughness_rank"`
+	// HustleRank is the NPC's Hustle save proficiency rank.
+	// Used to compute Hustle DC for Trip, Disarm, and Tumble.
+	HustleRank string `yaml:"hustle_rank"`
+	// CoolRank is the NPC's Cool save proficiency rank.
+	// Used to compute Cool DC for Demoralize.
+	CoolRank string `yaml:"cool_rank"`
 }
 
 // Validate checks that the template satisfies basic invariants.

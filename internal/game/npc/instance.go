@@ -67,6 +67,21 @@ type Instance struct {
 	// UseCover is copied from the template's Combat.UseCover at spawn time.
 	// When true, the NPC automatically takes cover at the start of its turn.
 	UseCover bool
+	// Brutality is copied from the template's Abilities.Brutality at spawn.
+	// Used to compute Toughness DC.
+	Brutality int
+	// Quickness is copied from the template's Abilities.Quickness at spawn.
+	// Used to compute Hustle DC.
+	Quickness int
+	// Savvy is copied from the template's Abilities.Savvy at spawn.
+	// Used to compute Cool DC.
+	Savvy int
+	// ToughnessRank is the Toughness save proficiency rank, copied from template.
+	ToughnessRank string
+	// HustleRank is the Hustle save proficiency rank, copied from template.
+	HustleRank string
+	// CoolRank is the Cool save proficiency rank, copied from template.
+	CoolRank string
 }
 
 // Name returns the instance's current display name.
@@ -149,6 +164,12 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		WeaponID:      weaponID,
 		ArmorID:       armorID,
 		UseCover:      tmpl.Combat.UseCover,
+		Brutality:     tmpl.Abilities.Brutality,
+		Quickness:     tmpl.Abilities.Quickness,
+		Savvy:         tmpl.Abilities.Savvy,
+		ToughnessRank: tmpl.ToughnessRank,
+		HustleRank:    tmpl.HustleRank,
+		CoolRank:      tmpl.CoolRank,
 	}
 }
 
