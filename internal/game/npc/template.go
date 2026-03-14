@@ -87,6 +87,11 @@ type Template struct {
 	// Values > 1.0 represent especially predatory NPCs.
 	// Used at spawn to compute Instance.RobPercent.
 	RobMultiplier float64 `yaml:"rob_multiplier"`
+	// SpecialAbilities lists named special abilities for sense motive reveal.
+	SpecialAbilities []string `yaml:"special_abilities"`
+	// Disposition sets the initial NPC disposition: "hostile","wary","neutral","friendly".
+	// Empty string defaults to "hostile" at spawn.
+	Disposition string `yaml:"disposition"`
 }
 
 // Validate checks that the template satisfies basic invariants.
