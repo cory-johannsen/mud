@@ -438,7 +438,7 @@ for _, c := range cbt.Combatants {
 
 ### 7.4 Delay Tests
 
-- **REQ-T11:** Delay in combat MUST: deduct 1 AP, bank remaining (capped at 2), zero current AP, set `DelayedUntilRound`.
+- **REQ-T11:** Delay in combat MUST: deduct 1 AP, bank remaining (capped at 2) into `sess.BankedAP`, zero current AP via `SpendAllAP`, and set `combatant.ACMod -= 2`.
 - **REQ-T12:** Banked AP at round start MUST be added to new AP total and `BankedAP` MUST be cleared.
 - **REQ-T13 (property):** For any remaining AP in [0, 10], after delay `BankedAP` MUST equal `min(remainingAP - 1, 2)` (pre-cost remaining), equivalently `min(postCostRemaining, 2)` where `postCostRemaining = remainingAP - 1`.
 
