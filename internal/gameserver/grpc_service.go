@@ -1259,6 +1259,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleCalm(uid, p.Calm)
 	case *gamev1.ClientMessage_HeroPoint:
 		return s.handleHeroPoint(uid, p.HeroPoint)
+	case *gamev1.ClientMessage_Join:
+		return s.handleJoin(uid, p.Join)
+	case *gamev1.ClientMessage_Decline:
+		return s.handleDecline(uid, p.Decline)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -6360,4 +6364,125 @@ func (s *GameServiceServer) handleDelay(uid string, _ *gamev1.DelayRequest) (*ga
 	return messageEvent(fmt.Sprintf(
 		"You delay, banking %d AP for next round. You are exposed (-2 AC).", banked,
 	)), nil
+}
+
+// handleJoin joins an active combat in the player's pending room.
+//
+// Precondition: uid must identify an existing player session.
+// Postcondition: if PendingCombatJoin is non-empty and the combat exists, the player is
+//
+//	inserted into the combat, sess.Status is set to statusInCombat, and PendingCombatJoin is cleared.
+func (s *GameServiceServer) handleJoin(uid string, _ *gamev1.JoinRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	s.combatH.combatMu.Lock()
+	roomID := sess.PendingCombatJoin
+	if roomID == "" {
+		s.combatH.combatMu.Unlock()
+		return messageEvent("No combat to join."), nil
+	}
+
+	_, exists := s.combatH.engine.GetCombat(roomID)
+	if !exists {
+		sess.PendingCombatJoin = ""
+		s.combatH.combatMu.Unlock()
+		return messageEvent("The combat has ended."), nil
+	}
+	s.combatH.combatMu.Unlock()
+
+	// Build player combatant outside combatMu (RollInitiative modifies only the struct).
+	const dexMod = 1
+	var playerAC int
+	if s.combatH.invRegistry != nil {
+		defStats := sess.Equipment.ComputedDefenses(s.combatH.invRegistry, dexMod)
+		playerAC = 10 + defStats.ACBonus + defStats.EffectiveDex
+	} else {
+		playerAC = 10 + dexMod
+	}
+
+	playerCbt := &combat.Combatant{
+		ID:        sess.UID,
+		Kind:      combat.KindPlayer,
+		Name:      sess.CharName,
+		MaxHP:     sess.CurrentHP,
+		CurrentHP: sess.CurrentHP,
+		AC:        playerAC,
+		Level:     1,
+		DexMod:    dexMod,
+	}
+
+	s.combatH.loadoutsMu.Lock()
+	if lo, ok2 := s.combatH.loadouts[sess.UID]; ok2 {
+		playerCbt.Loadout = lo
+	}
+	s.combatH.loadoutsMu.Unlock()
+
+	weaponProfRank := "untrained"
+	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
+		cat := playerCbt.Loadout.MainHand.Def.ProficiencyCategory
+		if r, ok2 := sess.Proficiencies[cat]; ok2 {
+			weaponProfRank = r
+		}
+	}
+	playerCbt.WeaponProficiencyRank = weaponProfRank
+	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
+		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
+	}
+
+	playerCbt.Resistances = sess.Resistances
+	playerCbt.Weaknesses = sess.Weaknesses
+	playerCbt.GritMod = combat.AbilityMod(sess.Abilities.Grit)
+	playerCbt.QuicknessMod = combat.AbilityMod(sess.Abilities.Quickness)
+	playerCbt.SavvyMod = combat.AbilityMod(sess.Abilities.Savvy)
+	playerCbt.ToughnessRank = combat.DefaultSaveRank(sess.Proficiencies["toughness"])
+	playerCbt.HustleRank = combat.DefaultSaveRank(sess.Proficiencies["hustle"])
+	playerCbt.CoolRank = combat.DefaultSaveRank(sess.Proficiencies["cool"])
+
+	// Roll initiative for just this player against existing combatants.
+	if s.dice != nil {
+		roll := s.dice.Src().Intn(20) + 1
+		playerCbt.Initiative = roll + playerCbt.DexMod
+	}
+
+	// AddCombatant acquires engine.mu internally.
+	if err := s.combatH.engine.AddCombatant(roomID, playerCbt); err != nil {
+		return errorEvent(fmt.Sprintf("Could not join combat: %v", err)), nil
+	}
+
+	s.combatH.combatMu.Lock()
+	sess.Status = statusInCombat
+	sess.PendingCombatJoin = ""
+	s.combatH.combatMu.Unlock()
+
+	s.broadcastMessage(roomID, uid, &gamev1.MessageEvent{
+		Content: fmt.Sprintf("%s joins the combat!", sess.CharName),
+	})
+
+	return messageEvent(fmt.Sprintf("You join the combat in %s!", roomID)), nil
+}
+
+// handleDecline declines a pending combat join invitation.
+//
+// Precondition: uid must identify an existing player session.
+// Postcondition: if PendingCombatJoin is non-empty it is cleared and a watch message is returned;
+//
+//	otherwise a "Nothing to decline." message is returned.
+func (s *GameServiceServer) handleDecline(uid string, _ *gamev1.DeclineRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	s.combatH.combatMu.Lock()
+	defer s.combatH.combatMu.Unlock()
+
+	if sess.PendingCombatJoin == "" {
+		return messageEvent("Nothing to decline."), nil
+	}
+
+	sess.PendingCombatJoin = ""
+	return messageEvent("You stay back and watch the combat from a distance."), nil
 }
