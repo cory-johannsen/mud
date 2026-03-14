@@ -3,6 +3,7 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
@@ -1367,6 +1368,9 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			endNarrative = "Combat is over. You stand victorious."
 		} else {
 			endNarrative = "Everything goes dark."
+			// Rob defeated players before broadcasting the end event.
+			robEvents := h.robPlayersLocked(cbt)
+			events = append(events, robEvents...)
 		}
 		events = append(events, &gamev1.CombatEvent{
 			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_END,
@@ -2056,10 +2060,12 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		// a happens-before signal for tests polling npcMgr.Get.
 		if inst.Loot != nil {
 			result := npc.GenerateLoot(*inst.Loot)
-			// Award currency to the first living player.
-			if result.Currency > 0 {
+			// Award currency to the first living player (loot table + rob wallet).
+			totalCurrency := result.Currency + inst.Currency
+			inst.Currency = 0
+			if totalCurrency > 0 {
 				if killer := h.firstLivingPlayer(cbt); killer != nil {
-					killer.Currency += result.Currency
+					killer.Currency += totalCurrency
 					if h.currencySaver != nil {
 						if saveErr := h.currencySaver.SaveCurrency(context.Background(), killer.CharacterID, killer.Currency); saveErr != nil && h.logger != nil {
 							h.logger.Warn("SaveCurrency failed",
@@ -2079,6 +2085,21 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 						ItemDefID:  lootItem.ItemDefID,
 						Quantity:   lootItem.Quantity,
 					})
+				}
+			}
+		} else if inst.Currency > 0 {
+			// No loot table but NPC has rob wallet — pay it out to the killer.
+			if killer := h.firstLivingPlayer(cbt); killer != nil {
+				killer.Currency += inst.Currency
+				inst.Currency = 0
+				if h.currencySaver != nil {
+					if saveErr := h.currencySaver.SaveCurrency(context.Background(), killer.CharacterID, killer.Currency); saveErr != nil && h.logger != nil {
+						h.logger.Warn("SaveCurrency failed after rob payout",
+							zap.String("uid", killer.UID),
+							zap.Int64("character_id", killer.CharacterID),
+							zap.Error(saveErr),
+						)
+					}
 				}
 			}
 		}
@@ -2168,6 +2189,63 @@ func (h *CombatHandler) firstLivingPlayer(cbt *combat.Combat) *session.PlayerSes
 		}
 	}
 	return nil
+}
+
+// robPlayersLocked executes the robbery sequence when all players are defeated.
+// For each living NPC with RobPercent > 0, a fraction of each dead player's
+// remaining currency is transferred to the NPC's Currency wallet.
+// Rob messages are returned as CombatEvents for broadcast.
+//
+// Precondition: combatMu is held; cbt must not be nil.
+// Postcondition: Each living robbing NPC has inst.Currency incremented by stolen amount;
+// each dead player session has Currency decremented by same; returned events contain
+// one narrative event per robbery that occurred.
+func (h *CombatHandler) robPlayersLocked(cbt *combat.Combat) []*gamev1.CombatEvent {
+	var events []*gamev1.CombatEvent
+	var robbedSessions []*session.PlayerSession
+
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindNPC || c.IsDead() {
+			continue
+		}
+		inst, ok := h.npcMgr.Get(c.ID)
+		if !ok || inst.RobPercent <= 0 {
+			continue
+		}
+		for _, pc := range cbt.Combatants {
+			if pc.Kind != combat.KindPlayer || !pc.IsDead() {
+				continue
+			}
+			sess, ok := h.sessions.GetPlayer(pc.ID)
+			if !ok {
+				continue
+			}
+			stolen := int(math.Floor(float64(sess.Currency) * inst.RobPercent / 100.0))
+			if stolen <= 0 {
+				continue
+			}
+			inst.Currency += stolen
+			sess.Currency -= stolen
+			robbedSessions = append(robbedSessions, sess)
+			events = append(events, &gamev1.CombatEvent{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+				Narrative: fmt.Sprintf("The %s rifles through your pockets, taking %d rounds.", inst.Name(), stolen),
+			})
+		}
+	}
+
+	if h.currencySaver != nil {
+		for _, sess := range robbedSessions {
+			if saveErr := h.currencySaver.SaveCurrency(context.Background(), sess.CharacterID, sess.Currency); saveErr != nil && h.logger != nil {
+				h.logger.Warn("robPlayersLocked: SaveCurrency failed",
+					zap.String("uid", sess.UID),
+					zap.Int64("character_id", sess.CharacterID),
+					zap.Error(saveErr),
+				)
+			}
+		}
+	}
+	return events
 }
 
 // conditionEventsToProto converts a slice of RoundConditionEvents into CombatEvents
