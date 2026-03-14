@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"os"
 	"path/filepath"
@@ -2835,6 +2836,7 @@ func TestHandleDemoralize_TargetNotFound(t *testing.T) {
 	const roomID = "room_dem_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "goblin-dem-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -2865,9 +2867,9 @@ func TestHandleDemoralize_TargetNotFound(t *testing.T) {
 }
 
 // TestHandleDemoralize_RollBelow verifies that handleDemoralize returns a failure message
-// when the smooth_talk roll total is below the target's Level+10 DC.
+// when the smooth_talk roll total is below the target's Cool DC.
 //
-// Precondition: player in combat; NPC Level=5 → DC=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
+// Precondition: player in combat; NPC Level=5, Savvy=10 → Cool DC=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
 // Postcondition: message event containing "failure".
 func TestHandleDemoralize_RollBelow(t *testing.T) {
 	logger := zaptest.NewLogger(t)
@@ -2879,6 +2881,7 @@ func TestHandleDemoralize_RollBelow(t *testing.T) {
 	const roomID = "room_dem_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "bandit-dem-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -2902,9 +2905,9 @@ func TestHandleDemoralize_RollBelow(t *testing.T) {
 }
 
 // TestHandleDemoralize_RollAbove verifies that handleDemoralize returns a success message
-// and applies -1 AC and -1 attack when the smooth_talk roll meets or exceeds Level+10 DC.
+// and applies -1 AC and -1 attack when the smooth_talk roll meets or exceeds the Cool DC.
 //
-// Precondition: player in combat; NPC Level=1 → DC=11; dice returns 19 (roll=20, bonus=0, total=20 >= 11).
+// Precondition: player in combat; NPC Level=1, Savvy=10 → Cool DC=11; dice returns 19 (roll=20, bonus=0, total=20 >= 11).
 // Postcondition: message event containing "success".
 func TestHandleDemoralize_RollAbove(t *testing.T) {
 	logger := zaptest.NewLogger(t)
@@ -2916,6 +2919,7 @@ func TestHandleDemoralize_RollAbove(t *testing.T) {
 	const roomID = "room_dem_ra"
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "ganger-dem-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -3070,4 +3074,55 @@ func TestPushRoomViewToAllInRoom_SkipsPlayersElsewhere(t *testing.T) {
 	case <-time.After(200 * time.Millisecond):
 		// correct: nothing received
 	}
+}
+
+// TestProperty_HandleDemoralize_CoolDC_Formula verifies that the Cool DC
+// used by handleDemoralize equals 10 + level + abilityMod(savvy) + rankBonus.
+//
+// Precondition: rapid generates level (1-20), savvy (1-20), rank string.
+// Postcondition: message content contains the expected DC value.
+func TestProperty_HandleDemoralize_CoolDC_Formula(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		savvy := rapid.IntRange(1, 20).Draw(rt, "savvy")
+		rank := rapid.SampledFrom([]string{"", "trained", "expert", "master", "legendary"}).Draw(rt, "rank")
+
+		expectedMod := combat.AbilityMod(savvy)
+		expectedRankBonus := skillRankBonus(rank)
+		expectedDC := 10 + level + expectedMod + expectedRankBonus
+
+		tmpl := &npc.Template{
+			ID: fmt.Sprintf("dem-prop-%d-%d", level, savvy), Name: "Target", Level: level,
+			MaxHP: 20, AC: 13, Perception: 5,
+			Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: savvy},
+			CoolRank:  rank,
+		}
+
+		logger := zaptest.NewLogger(t)
+		src := &fixedDiceSource{val: 99}
+		roller := dice.NewLoggedRoller(src, logger)
+		svc, sessMgr, npcMgr, combatHandler := newDemoralizeSvcWithCombat(t, roller)
+
+		roomID := fmt.Sprintf("room_dem_prop_%d_%d", level, savvy)
+		uid := fmt.Sprintf("u_dem_prop_%d_%d", level, savvy)
+		_, err := npcMgr.Spawn(tmpl, roomID)
+		require.NoError(rt, err)
+		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID: uid, Username: "F", CharName: "F",
+			RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+		})
+		require.NoError(rt, err)
+		sess.Status = statusInCombat
+		_, err = combatHandler.Attack(uid, "Target")
+		require.NoError(rt, err)
+		combatHandler.cancelTimer(roomID)
+
+		event, err := svc.handleDemoralize(uid, &gamev1.DemoralizeRequest{Target: "Target"})
+		require.NoError(rt, err)
+		require.NotNil(rt, event)
+		msgEvt := event.GetMessage()
+		require.NotNil(rt, msgEvt)
+		assert.Contains(rt, msgEvt.Content, fmt.Sprintf("DC %d", expectedDC),
+			"message must include computed Cool DC")
+	})
 }

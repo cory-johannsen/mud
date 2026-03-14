@@ -4594,7 +4594,7 @@ func (s *GameServiceServer) handleFeint(uid string, req *gamev1.FeintRequest) (*
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is caught off-guard (-2 AC this round).", inst.Name())), nil
 }
 
-// handleDemoralize performs a smooth_talk skill check against the target NPC's Level+10 DC.
+// handleDemoralize performs a smooth_talk skill check against the target NPC's Cool DC (10 + level + AbilityMod(Savvy) + CoolRank bonus).
 // On success, applies -1 AC and -1 attack to the target combatant for the encounter.
 // Combat only; costs 1 AP.
 //
@@ -4628,7 +4628,7 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + smooth_talk bonus vs target Level+10.
+	// Skill check: 1d20 + smooth_talk bonus vs target Cool DC. Cool DC = 10 + level + AbilityMod(Savvy) + proficiency rank bonus.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleDemoralize: rolling d20: %w", err)
@@ -4636,9 +4636,9 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["smooth_talk"])
 	total := roll + bonus
-	dc := inst.Level + 10
+	dc := 10 + inst.Level + combat.AbilityMod(inst.Savvy) + skillRankBonus(inst.CoolRank)
 
-	detail := fmt.Sprintf("Demoralize (smooth_talk DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Demoralize (smooth_talk Cool DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + " — failure. Your words fall flat."), nil
 	}
