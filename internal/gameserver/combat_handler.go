@@ -2234,8 +2234,14 @@ func (h *CombatHandler) robPlayersLocked(cbt *combat.Combat) []*gamev1.CombatEve
 		}
 	}
 
+	// Persist updated currency, deduplicating by UID.
 	if h.currencySaver != nil {
+		seen := make(map[string]bool)
 		for _, sess := range robbedSessions {
+			if seen[sess.UID] {
+				continue
+			}
+			seen[sess.UID] = true
 			if saveErr := h.currencySaver.SaveCurrency(context.Background(), sess.CharacterID, sess.Currency); saveErr != nil && h.logger != nil {
 				h.logger.Warn("robPlayersLocked: SaveCurrency failed",
 					zap.String("uid", sess.UID),

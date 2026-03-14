@@ -186,7 +186,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 // Returns 0 if multiplier is 0 (NPC does not rob).
 // Otherwise returns clamp((rand(5,20) + min(level,10)) * multiplier, 5.0, 30.0).
 //
-// Precondition: level >= 1.
+// Precondition: multiplier >= 0; level >= 1.
 // Postcondition: returns 0 if multiplier == 0; returns value in [5.0, 30.0] otherwise.
 func computeRobPercent(multiplier float64, level int) float64 {
 	if multiplier == 0 {

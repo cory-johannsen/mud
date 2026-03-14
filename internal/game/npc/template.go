@@ -123,6 +123,9 @@ func (t *Template) Validate() error {
 			return fmt.Errorf("npc template %q: taunt_cooldown %q is not a valid duration: %w", t.ID, t.TauntCooldown, err)
 		}
 	}
+	if t.RobMultiplier < 0 {
+		return fmt.Errorf("npc template %q: rob_multiplier must be >= 0", t.ID)
+	}
 	if t.Loot != nil {
 		if err := t.Loot.Validate(); err != nil {
 			return fmt.Errorf("npc template %q: %w", t.ID, err)
