@@ -4656,7 +4656,7 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is demoralized (-1 AC, -1 attack).", inst.Name())), nil
 }
 
-// handleGrapple performs an athletics skill check against the target NPC's Level+10 DC.
+// handleGrapple performs an athletics skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
 // On success, applies the grabbed condition (-2 AC) to the target combatant for the encounter.
 // Combat only; costs 1 AP.
 //
@@ -4850,7 +4850,7 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed. The %s clatters to the floor.", inst.Name(), weaponName)), nil
 }
 
-// handleShove performs an athletics skill check against the target NPC's Level+10 DC.
+// handleShove performs an athletics skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
 // On success, the NPC is pushed 5ft; on critical success (beat DC by 10+), pushed 10ft.
 // Combat only; costs 1 AP.
 //
