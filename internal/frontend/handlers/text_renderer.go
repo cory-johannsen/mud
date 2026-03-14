@@ -85,9 +85,6 @@ func npcHealthColor(desc string) string {
 	}
 }
 
-// renderNPCs renders NPC entries 2 per row, with "NPCs:  " label inline on the first row.
-// Each entry format: "Name (health)" or "Name (health) fighting Target".
-//
 // renderEquipment renders room equipment 4 per row, with "Items: " label inline on the first row.
 //
 // Precondition: equipment must be non-empty.
@@ -131,6 +128,10 @@ func renderEquipment(equipment []*gamev1.RoomEquipmentItem, width int) []string 
 	return out
 }
 
+// renderNPCs renders NPC entries 2 per row, with "NPCs:  " label inline on the first row.
+// Each entry format: "Name (health)" or "Name (health) fighting Target" or
+// "Name (health) fighting Target cond1, cond2" when the NPC has active conditions.
+//
 // Precondition: npcs must be non-empty.
 // Postcondition: Returns at least one non-empty string.
 func renderNPCs(npcs []*gamev1.NpcInfo, width int) []string {
