@@ -387,3 +387,50 @@ func TestRob_NoLootTable_RobWalletPaidOut(t *testing.T) {
 	assert.Equal(t, 40, sess.Currency, "player should receive rob wallet when NPC has no loot table")
 	assert.Equal(t, 0, inst.Currency, "inst.Currency must be zeroed after payout")
 }
+
+// TestRob_DeadNPC_DoesNotRob verifies that a dead NPC with RobPercent > 0
+// does not rob the player (REQ-T7).
+//
+// Precondition: NPC has RobPercent=20 but is dead in combat; player has 50 currency.
+// Postcondition: inst.Currency == 0; player currency unchanged.
+func TestRob_DeadNPC_DoesNotRob(t *testing.T) {
+	npcMgr := npc.NewManager()
+	sessMgr := session.NewManager()
+	h := newRobCombatHandler(t, npcMgr, sessMgr)
+
+	const roomID = "room_rob_dead_npc"
+	inst, err := npcMgr.Spawn(&npc.Template{
+		ID: "robber-dead", Name: "DeadRobber", Level: 3, MaxHP: 10, AC: 10,
+		Perception: 0,
+	}, roomID)
+	require.NoError(t, err)
+	inst.RobPercent = 20.0
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "u_rob_dead_npc", Username: "Victim", CharName: "Victim",
+		RoomID: roomID, CurrentHP: 1, MaxHP: 10, Role: "player",
+	})
+	require.NoError(t, err)
+	sess.Currency = 50
+
+	_, err = h.Attack("u_rob_dead_npc", "DeadRobber")
+	require.NoError(t, err)
+	h.cancelTimer(roomID)
+
+	h.combatMu.Lock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	require.True(t, ok)
+	// Mark the NPC as dead in this combat
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			c.CurrentHP = 0
+			c.Dead = true
+		}
+	}
+	robEvents := h.robPlayersLocked(cbt)
+	h.combatMu.Unlock()
+
+	assert.Empty(t, robEvents, "dead NPC must not generate rob events")
+	assert.Equal(t, 0, inst.Currency, "dead NPC must not gain currency")
+	assert.Equal(t, 50, sess.Currency, "player currency must be unchanged when NPC is dead")
+}
