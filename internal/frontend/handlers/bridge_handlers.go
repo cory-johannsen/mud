@@ -1138,15 +1138,15 @@ func bridgeGrant(bctx *bridgeContext) (bridgeResult, error) {
 	if len(args) > 0 {
 		grantType = strings.ToLower(args[0])
 	}
-	if grantType != "xp" && grantType != "money" {
-		_ = bctx.conn.WritePrompt(telnet.Colorize(telnet.White, "Grant type (xp/money): "))
+	if grantType != "xp" && grantType != "money" && grantType != "heropoint" {
+		_ = bctx.conn.WritePrompt(telnet.Colorize(telnet.White, "Grant type (xp/money/heropoint): "))
 		line, err := bctx.conn.ReadLine()
 		if err != nil {
 			return bridgeResult{}, fmt.Errorf("reading grant type: %w", err)
 		}
 		grantType = strings.ToLower(strings.TrimSpace(line))
-		if grantType != "xp" && grantType != "money" {
-			return writeErrorPrompt(bctx, "Grant type must be 'xp' or 'money'.")
+		if grantType != "xp" && grantType != "money" && grantType != "heropoint" {
+			return writeErrorPrompt(bctx, "Grant type must be 'xp', 'money', or 'heropoint'.")
 		}
 	}
 
@@ -1174,25 +1174,31 @@ func bridgeGrant(bctx *bridgeContext) (bridgeResult, error) {
 		return writeErrorPrompt(bctx, "Character name cannot be empty.")
 	}
 
-	// Resolve amount from last arg or prompt.
-	var amountStr string
-	if len(args) > 2 {
-		last := args[len(args)-1]
-		if _, aErr := strconv.Atoi(last); aErr == nil {
-			amountStr = last
+	// Resolve amount: heropoint grants always use amount=1; others prompt or parse from args.
+	var amount int
+	if grantType == "heropoint" {
+		amount = 1
+	} else {
+		var amountStr string
+		if len(args) > 2 {
+			last := args[len(args)-1]
+			if _, aErr := strconv.Atoi(last); aErr == nil {
+				amountStr = last
+			}
 		}
-	}
-	if amountStr == "" {
-		_ = bctx.conn.WritePrompt(telnet.Colorize(telnet.White, "Amount: "))
-		line, err := bctx.conn.ReadLine()
-		if err != nil {
-			return bridgeResult{}, fmt.Errorf("reading amount: %w", err)
+		if amountStr == "" {
+			_ = bctx.conn.WritePrompt(telnet.Colorize(telnet.White, "Amount: "))
+			line, err := bctx.conn.ReadLine()
+			if err != nil {
+				return bridgeResult{}, fmt.Errorf("reading amount: %w", err)
+			}
+			amountStr = strings.TrimSpace(line)
 		}
-		amountStr = strings.TrimSpace(line)
-	}
-	amount, err := strconv.Atoi(amountStr)
-	if err != nil || amount <= 0 {
-		return writeErrorPrompt(bctx, "Amount must be a positive integer.")
+		var convErr error
+		amount, convErr = strconv.Atoi(amountStr)
+		if convErr != nil || amount <= 0 {
+			return writeErrorPrompt(bctx, "Amount must be a positive integer.")
+		}
 	}
 
 	return bridgeResult{msg: &gamev1.ClientMessage{

@@ -5817,7 +5817,7 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 	if sess.Role != "editor" && sess.Role != "admin" {
 		return errorEvent("permission denied: editor role required"), nil
 	}
-	if req.Amount <= 0 {
+	if req.GrantType != "heropoint" && req.Amount <= 0 {
 		return errorEvent("amount must be greater than zero"), nil
 	}
 	target, ok := s.sessions.GetPlayerByCharName(req.CharName)
@@ -5908,8 +5908,22 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 		}
 		return messageEvent(fmt.Sprintf("Granted %d gold to %s.", amount, target.CharName)), nil
 
+	case "heropoint":
+		target.HeroPoints++
+		if target.CharacterID > 0 && s.charSaver != nil {
+			if hpErr := s.charSaver.SaveHeroPoints(ctx, target.CharacterID, target.HeroPoints); hpErr != nil {
+				s.logger.Warn("handleGrant: SaveHeroPoints failed", zap.Error(hpErr))
+			}
+		}
+		// Notify target.
+		notif := messageEvent(fmt.Sprintf("You have been granted a hero point by %s. You now have %d.", sess.CharName, target.HeroPoints))
+		if data, mErr := proto.Marshal(notif); mErr == nil {
+			_ = target.Entity.Push(data)
+		}
+		return messageEvent(fmt.Sprintf("Granted 1 hero point to %s. They now have %d.", target.CharName, target.HeroPoints)), nil
+
 	default:
-		return errorEvent(fmt.Sprintf("unknown grant type %q: use 'xp' or 'money'", req.GrantType)), nil
+		return errorEvent(fmt.Sprintf("unknown grant type %q: use 'xp', 'money', or 'heropoint'", req.GrantType)), nil
 	}
 }
 
