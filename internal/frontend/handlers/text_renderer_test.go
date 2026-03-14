@@ -1193,6 +1193,22 @@ func TestRenderMap_WideLayout_HasSeparator(t *testing.T) {
 	}
 }
 
+// TestRenderMap_BoundaryWide verifies the exact threshold: width=100 triggers 2-column layout (REQ-T9).
+func TestRenderMap_BoundaryWide(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Threshold", X: 0, Y: 0, Current: true, Exits: []string{}},
+		},
+	}
+	out := RenderMap(resp, 100)
+	if !strings.Contains(out, "│") {
+		t.Errorf("expected '│' separator at exact threshold width=100, got:\n%s", out)
+	}
+	if !strings.Contains(out, "Threshold") {
+		t.Errorf("expected 'Threshold' in legend at width=100, got:\n%s", out)
+	}
+}
+
 func TestRenderMap_NarrowLayout_NoSeparator(t *testing.T) {
 	resp := &gamev1.MapResponse{
 		Tiles: []*gamev1.MapTile{
@@ -1205,6 +1221,22 @@ func TestRenderMap_NarrowLayout_NoSeparator(t *testing.T) {
 	}
 	if !strings.Contains(out, "Legend:") {
 		t.Errorf("expected 'Legend:' in stacked layout, got:\n%s", out)
+	}
+}
+
+// TestRenderMap_BoundaryNarrow verifies the exact threshold: width=99 keeps stacked layout (REQ-T10).
+func TestRenderMap_BoundaryNarrow(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Threshold", X: 0, Y: 0, Current: true, Exits: []string{}},
+		},
+	}
+	out := RenderMap(resp, 99)
+	if strings.Contains(out, "│") {
+		t.Errorf("unexpected '│' separator at width=99 (one below threshold), got:\n%s", out)
+	}
+	if !strings.Contains(out, "Legend:") {
+		t.Errorf("expected 'Legend:' in stacked layout at width=99, got:\n%s", out)
 	}
 }
 
@@ -1226,8 +1258,9 @@ func TestProperty_RenderMap_AllLegendEntriesPresent(t *testing.T) {
 		resp := &gamev1.MapResponse{Tiles: tiles}
 		out := RenderMap(resp, width)
 		for _, tile := range tiles {
-			if !strings.Contains(out, tile.RoomName) {
-				rt.Errorf("legend entry %q missing from wide map output", tile.RoomName)
+			count := strings.Count(out, tile.RoomName)
+			if count != 1 {
+				rt.Errorf("legend entry %q appears %d times (want 1) in wide map output", tile.RoomName, count)
 			}
 		}
 		if !strings.Contains(out, "│") {
