@@ -317,11 +317,11 @@
       - [ ] Add a lore-appropriate job trainer NPC in Rustbucket Ridge
     - [ ] equipment repair and crafting
       - [ ] Repair NPC behavior — `repair <item>` command in repair NPC's room; pays credit cost proportional to item damage; restores item durability; requires item durability system
-- [ ] Hero points
-  - [ ] Add `HeroPoints int` field to PlayerSession; award 1 point at session start and on milestone events (level up, boss kill, GM grant)
-  - [ ] `heropoint reroll` — re-roll the most recent skill or attack check and take the higher result; costs 1 hero point; unavailable if no recent check
-  - [ ] `heropoint stabilize` — when in a dying state, stabilize at 0 HP; costs 1 hero point
-  - [ ] Display current hero point count on the character sheet
+- [x] Hero points
+  - [x] Add `HeroPoints int` field to PlayerSession; award 1 point at session start and on milestone events (level up, boss kill, GM grant)
+  - [x] `heropoint reroll` — re-roll the most recent skill or attack check and take the higher result; costs 1 hero point; unavailable if no recent check
+  - [x] `heropoint stabilize` — when in a dying state, stabilize at 0 HP; costs 1 hero point
+  - [x] Display current hero point count on the character sheet
 - [ ] Job development
   - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
   - [ ] advancement hierarchy - every job has multiple levels of specialization
@@ -467,6 +467,7 @@
     - Boss abilities
     - Boss behavior
     - Boss rewards
+      - [ ] Award 1 hero point on boss kill
     - Minions
 - [ ] Quests
 - [ ] Factions and allegiances
