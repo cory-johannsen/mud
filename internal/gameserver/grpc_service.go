@@ -5957,14 +5957,40 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 	}
 }
 
+// climbDCForExit returns the effective climb DC for an exit.
+// Returns 0 if the exit is not climbable (no explicit DC and no terrain default).
+//
+// Precondition: exit and terrain are provided.
+// Postcondition: Returns DC >= 0; 0 means the exit is not climbable.
+func climbDCForExit(exit world.Exit, terrain string) int {
+	if exit.ClimbDC > 0 {
+		return exit.ClimbDC
+	}
+	switch terrain {
+	case "rubble":
+		return 12
+	case "cliff":
+		return 20
+	case "wall":
+		return 15
+	case "sewer":
+		return 10
+	}
+	return 0
+}
+
 // handleClimb processes a ClimbRequest from the player.
 //
-// Precondition: uid is a valid connected player session.
-// Postcondition: Player moves via vertical exit on success; falling damage applied on critical failure.
-func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*gamev1.ServerEvent, error) {
+// Precondition: uid is a valid connected player session; req.Direction is non-empty.
+// Postcondition: Player moves via climbable exit on success; fall damage applied on critical failure.
+func (s *GameServiceServer) handleClimb(uid string, req *gamev1.ClimbRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("session not found: %s", uid)
+	}
+
+	if req.GetDirection() == "" {
+		return messageEvent("Climb which direction?"), nil
 	}
 
 	room, ok := s.world.GetRoom(sess.RoomID)
@@ -5972,20 +5998,15 @@ func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*ga
 		return messageEvent("Room not found."), nil
 	}
 
-	// Check climbable property.
-	if room.Properties["climbable"] != "true" {
+	dir := world.Direction(req.GetDirection())
+	exit, found := room.ExitForDirection(dir)
+	if !found {
 		return messageEvent("There is nothing to climb here."), nil
 	}
 
-	// Find vertical exit: prefer "up", fall back to "down".
-	dir := world.Up
-	exit, found := room.ExitForDirection(world.Up)
-	if !found {
-		exit, found = room.ExitForDirection(world.Down)
-		dir = world.Down
-	}
-	if !found {
-		return messageEvent("The climbable surface has no clear route up or down."), nil
+	dc := climbDCForExit(exit, room.Terrain)
+	if dc == 0 {
+		return messageEvent("There is nothing to climb here."), nil
 	}
 
 	// Spend AP if in combat.
@@ -5996,14 +6017,6 @@ func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*ga
 		}
 		if err := s.combatH.SpendAP(uid, 2); err != nil {
 			return messageEvent("Not enough action points to climb."), nil
-		}
-	}
-
-	// Parse DC (default 15).
-	dc := 15
-	if dcStr, ok := room.Properties["climb_dc"]; ok {
-		if parsed, err := strconv.Atoi(dcStr); err == nil {
-			dc = parsed
 		}
 	}
 
@@ -6023,7 +6036,6 @@ func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*ga
 
 	switch outcome {
 	case combat.CritSuccess, combat.Success:
-		// Move the player to the target room.
 		if _, moveErr := s.worldH.MoveWithContext(uid, dir); moveErr != nil {
 			return messageEvent(fmt.Sprintf(
 				"You climb successfully (rolled %d+%d=%d vs DC %d) but cannot proceed: %s.",
@@ -6042,13 +6054,17 @@ func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*ga
 
 	case combat.Failure:
 		return messageEvent(fmt.Sprintf(
-			"You fail to climb (rolled %d+%d=%d vs DC %d).",
+			"You fail to gain purchase on the climb (rolled %d+%d=%d vs DC %d).",
 			roll, bonus, total, dc,
 		)), nil
 
 	default: // CritFailure
-		// Apply falling damage.
-		dmgResult, _ := s.dice.RollExpr("1d6")
+		numDice := exit.Height / 10
+		if numDice < 1 {
+			numDice = 1
+		}
+		expr := fmt.Sprintf("%dd6", numDice)
+		dmgResult, _ := s.dice.RollExpr(expr)
 		dmg := dmgResult.Total()
 		if dmg < 1 {
 			dmg = 1
@@ -6057,19 +6073,14 @@ func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*ga
 		if sess.CurrentHP < 0 {
 			sess.CurrentHP = 0
 		}
-
 		msg := fmt.Sprintf(
 			"You fall! (rolled %d+%d=%d vs DC %d) Taking %d falling damage.",
 			roll, bonus, total, dc, dmg,
 		)
-
-		// Apply prone in combat only (TERRAIN-9).
-		if inCombat && sess.Conditions != nil {
-			if s.condRegistry != nil {
-				if def, ok := s.condRegistry.Get("prone"); ok {
-					_ = sess.Conditions.Apply(uid, def, 1, -1)
-					msg += " You are knocked prone."
-				}
+		if inCombat && sess.Conditions != nil && s.condRegistry != nil {
+			if def, ok := s.condRegistry.Get("prone"); ok {
+				_ = sess.Conditions.Apply(uid, def, 1, -1)
+				msg += " You are knocked prone."
 			}
 		}
 		return messageEvent(msg), nil

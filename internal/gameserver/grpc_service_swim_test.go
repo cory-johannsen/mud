@@ -28,6 +28,16 @@ func makeTestConditionRegistryWithSubmerged() *condition.Registry {
 	return reg
 }
 
+// initSessionConditions initialises a player session's condition set if nil.
+//
+// Precondition: sess is non-nil.
+// Postcondition: sess.Conditions is a non-nil *condition.ActiveSet.
+func initSessionConditions(sess *session.PlayerSession) {
+	if sess.Conditions == nil {
+		sess.Conditions = condition.NewActiveSet()
+	}
+}
+
 // newSwimWorld creates a world suitable for swim tests.
 // Room "room_water" has water_terrain=true and an east exit to "room_water_east".
 // Room "room_plain" is a plain room with no water property.
