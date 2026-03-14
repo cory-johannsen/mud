@@ -203,9 +203,9 @@
   - [x] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
   - [x] Immobilized — prevent grabbed creatures from moving between rooms
   - [x] Sense Motive command — implement `motive <target>` (awareness vs Deception DC; in combat costs 1 AP and reveals NPC HP tier; out-of-combat behavior stubbed for non-combat NPC extension)
-- [ ] Player prompt should include mental state if applicable
-- [ ] Room section should include NPC mental state if applicable
-- [ ] map and legend should be presented in 2-column view.  
+- [x] Player prompt should include mental state if applicable
+- [x] Room section should include NPC mental state if applicable
+- [x] map and legend should be presented in 2-column view.
   - the legend column should support multiple columns of text (like the legend currently does)
   - the legend should default to 1 column if the screen width cannot support more
 - [ ] Replace 'Level + 10' implementation for Grapple, Trip, Reflex DC with real calculations

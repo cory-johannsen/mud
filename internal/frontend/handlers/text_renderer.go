@@ -1181,8 +1181,7 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 		}
 	}
 
-	// Legend — same top-to-bottom, left-to-right ordering as number assignment.
-	// Rendered in 4 columns to conserve vertical space.
+	// ── Legend entries ────────────────────────────────────────────────────
 	type legendEntry struct {
 		num     int
 		name    string
@@ -1198,12 +1197,64 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 			entries = append(entries, legendEntry{num: len(entries) + 1, name: t.RoomName, current: t.Current})
 		}
 	}
-	const legendCols = 4
-	// Each column entry: " *NN. Name" — pad to a fixed width so columns align.
-	// colWidth is derived from terminal width; minimum 22 chars per column.
+
 	if width <= 0 {
 		width = 80
 	}
+
+	// ── Two-column layout (width ≥ 100): grid left, legend right ──────────
+	if width >= 100 {
+		halfWidth := width / 2 // integer division; left gets the smaller half on odd widths
+
+		// Split grid string into lines (strip trailing empty line from final \r\n).
+		gridStr := sb.String()
+		gridLines := strings.Split(strings.TrimRight(gridStr, "\r\n"), "\r\n")
+
+		// Build legend lines (one entry per line, no multi-column layout).
+		legendLines := make([]string, 0, len(entries))
+		for _, e := range entries {
+			marker := " "
+			if e.current {
+				marker = "*"
+			}
+			legendLines = append(legendLines, fmt.Sprintf("%s%2d. %s", marker, e.num, e.name))
+		}
+
+		// Zip grid and legend with │ separator.
+		maxLen := len(gridLines)
+		if len(legendLines) > maxLen {
+			maxLen = len(legendLines)
+		}
+		var out strings.Builder
+		for i := 0; i < maxLen; i++ {
+			var gridPart, legendPart string
+			if i < len(gridLines) {
+				gridPart = gridLines[i]
+			}
+			if i < len(legendLines) {
+				legendPart = legendLines[i]
+			}
+			// Pad grid part to halfWidth-3 visible chars.
+			visLen := len(telnet.StripANSI(gridPart))
+			targetW := halfWidth - 3
+			if targetW < 0 {
+				targetW = 0
+			}
+			if visLen < targetW {
+				gridPart += strings.Repeat(" ", targetW-visLen)
+			}
+			out.WriteString(gridPart)
+			if i < len(legendLines) {
+				out.WriteString(" │ ")
+				out.WriteString(legendPart)
+			}
+			out.WriteString("\r\n")
+		}
+		return out.String()
+	}
+
+	// ── Stacked layout (width < 100): current behavior ────────────────────
+	const legendCols = 4
 	colWidth := width / legendCols
 	if colWidth < 22 {
 		colWidth = 22
@@ -1229,7 +1280,6 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 		}
 		sb.WriteString("\r\n")
 	}
-
 	return sb.String()
 }
 

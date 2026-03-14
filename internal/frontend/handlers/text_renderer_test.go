@@ -1173,3 +1173,90 @@ func TestProperty_RenderCharacterSheet_XPSection(t *testing.T) {
 		}
 	})
 }
+
+func TestRenderMap_WideLayout_HasSeparator(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Start", X: 0, Y: 0, Current: true, Exits: []string{"east"}},
+			{RoomId: "r2", RoomName: "East Room", X: 1, Y: 0, Current: false, Exits: []string{"west"}},
+		},
+	}
+	out := RenderMap(resp, 120)
+	if !strings.Contains(out, "│") {
+		t.Errorf("expected '│' separator in wide map layout, got:\n%s", out)
+	}
+	if !strings.Contains(out, "Start") {
+		t.Errorf("expected 'Start' in legend, got:\n%s", out)
+	}
+	if !strings.Contains(out, "East Room") {
+		t.Errorf("expected 'East Room' in legend, got:\n%s", out)
+	}
+}
+
+func TestRenderMap_NarrowLayout_NoSeparator(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Start", X: 0, Y: 0, Current: true, Exits: []string{}},
+		},
+	}
+	out := RenderMap(resp, 80)
+	if strings.Contains(out, "│") {
+		t.Errorf("unexpected '│' separator in narrow map layout (width=80), got:\n%s", out)
+	}
+	if !strings.Contains(out, "Legend:") {
+		t.Errorf("expected 'Legend:' in stacked layout, got:\n%s", out)
+	}
+}
+
+func TestProperty_RenderMap_AllLegendEntriesPresent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 10).Draw(rt, "n")
+		tiles := make([]*gamev1.MapTile, n)
+		for i := range tiles {
+			tiles[i] = &gamev1.MapTile{
+				RoomId:   fmt.Sprintf("r%d", i),
+				RoomName: fmt.Sprintf("Room%d", i),
+				X:        int32(i),
+				Y:        0,
+				Current:  i == 0,
+				Exits:    []string{},
+			}
+		}
+		width := rapid.IntRange(100, 200).Draw(rt, "width")
+		resp := &gamev1.MapResponse{Tiles: tiles}
+		out := RenderMap(resp, width)
+		for _, tile := range tiles {
+			if !strings.Contains(out, tile.RoomName) {
+				rt.Errorf("legend entry %q missing from wide map output", tile.RoomName)
+			}
+		}
+		if !strings.Contains(out, "│") {
+			rt.Errorf("expected '│' separator at width=%d", width)
+		}
+	})
+}
+
+func TestProperty_RenderMap_NarrowUnchanged(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 5).Draw(rt, "n")
+		tiles := make([]*gamev1.MapTile, n)
+		for i := range tiles {
+			tiles[i] = &gamev1.MapTile{
+				RoomId:   fmt.Sprintf("r%d", i),
+				RoomName: fmt.Sprintf("Room%d", i),
+				X:        int32(i),
+				Y:        0,
+				Current:  i == 0,
+			}
+		}
+		width := rapid.IntRange(1, 99).Draw(rt, "width")
+		resp := &gamev1.MapResponse{Tiles: tiles}
+		out := RenderMap(resp, width)
+		if strings.Contains(out, "│") {
+			rt.Errorf("unexpected '│' separator at narrow width=%d", width)
+		}
+		if !strings.Contains(out, "Legend:") {
+			rt.Errorf("expected 'Legend:' in stacked output at width=%d", width)
+		}
+	})
+}
