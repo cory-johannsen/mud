@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"fmt"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -9,10 +10,11 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/frontend/handlers"
+	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 )
 
 func TestBuildPrompt_Format(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", "Dusk", "17:00", 45, 60)
+	got := handlers.BuildPrompt("Thorald", "Dusk", "17:00", 45, 60, nil)
 	// Must end with "> "
 	if !strings.HasSuffix(got, "> ") {
 		t.Errorf("prompt must end with '> ', got %q", got)
@@ -33,17 +35,17 @@ func TestBuildPrompt_Format(t *testing.T) {
 
 func TestBuildPrompt_HealthColors(t *testing.T) {
 	// Full health >= 75% — contains hp fraction
-	got := handlers.BuildPrompt("Thorald", "Dusk", "17:00", 60, 60)
+	got := handlers.BuildPrompt("Thorald", "Dusk", "17:00", 60, 60, nil)
 	if !strings.Contains(got, "60/60hp") {
 		t.Errorf("expected 60/60hp in prompt, got %q", got)
 	}
 	// Wounded ~40%
-	got = handlers.BuildPrompt("Thorald", "Morning", "09:00", 24, 60)
+	got = handlers.BuildPrompt("Thorald", "Morning", "09:00", 24, 60, nil)
 	if !strings.Contains(got, "24/60hp") {
 		t.Errorf("expected 24/60hp in prompt, got %q", got)
 	}
 	// Critical <40%
-	got = handlers.BuildPrompt("Thorald", "Night", "22:00", 10, 60)
+	got = handlers.BuildPrompt("Thorald", "Night", "22:00", 10, 60, nil)
 	if !strings.Contains(got, "10/60hp") {
 		t.Errorf("expected 10/60hp in prompt, got %q", got)
 	}
@@ -55,7 +57,7 @@ func TestBuildPrompt_AllPeriods(t *testing.T) {
 		"Afternoon", "Dusk", "Evening", "Night",
 	}
 	for _, p := range periods {
-		got := handlers.BuildPrompt("X", p, "00:00", 10, 10)
+		got := handlers.BuildPrompt("X", p, "00:00", 10, 10, nil)
 		if got == "" {
 			t.Errorf("BuildPrompt returned empty for period %q", p)
 		}
@@ -76,7 +78,7 @@ func TestProperty_BuildPrompt_AlwaysEndsWithPromptSuffix(t *testing.T) {
 		maxHP := rapid.Int32Range(1, 1000).Draw(rt, "maxHP")
 		currentHP := rapid.Int32Range(0, maxHP).Draw(rt, "currentHP")
 
-		got := handlers.BuildPrompt(name, period, hour, currentHP, maxHP)
+		got := handlers.BuildPrompt(name, period, hour, currentHP, maxHP, nil)
 		if !strings.HasSuffix(got, "> ") {
 			rt.Errorf("BuildPrompt must end with '> ', got %q", got)
 		}
@@ -288,6 +290,63 @@ func TestProperty_IdleMonitor_ActivePlayerNeverDisconnected(t *testing.T) {
 			rt.Fatal("active player should never be disconnected")
 		default:
 			// good
+		}
+	})
+}
+
+func TestBuildPrompt_NoConditions_FormatUnchanged(t *testing.T) {
+	got := handlers.BuildPrompt("Thorald", "Morning", "09:00", 50, 60, nil)
+	if !strings.HasSuffix(got, "> ") {
+		t.Errorf("prompt must end with '> ', got %q", got)
+	}
+	// Strip ANSI codes before counting brackets to avoid false positives from escape sequences.
+	stripped := telnet.StripANSI(got)
+	// Should have exactly 3 bracket groups: [Name], [Period Hour], [HP/MaxHPhp]
+	if strings.Count(stripped, "[") != 3 {
+		t.Errorf("expected exactly 3 bracket groups (no conditions), got %q", stripped)
+	}
+}
+
+func TestBuildPrompt_OneCondition(t *testing.T) {
+	got := handlers.BuildPrompt("Thorald", "Morning", "09:00", 50, 60, []string{"Panicked"})
+	if !strings.Contains(got, "[Panicked]") {
+		t.Errorf("expected [Panicked] in prompt, got %q", got)
+	}
+	if !strings.HasSuffix(got, "> ") {
+		t.Errorf("prompt must end with '> ', got %q", got)
+	}
+}
+
+func TestBuildPrompt_MultipleConditions(t *testing.T) {
+	got := handlers.BuildPrompt("Thorald", "Morning", "09:00", 50, 60, []string{"Panicked", "Grabbed"})
+	if !strings.Contains(got, "[Panicked]") {
+		t.Errorf("expected [Panicked] in prompt, got %q", got)
+	}
+	if !strings.Contains(got, "[Grabbed]") {
+		t.Errorf("expected [Grabbed] in prompt, got %q", got)
+	}
+}
+
+func TestProperty_BuildPrompt_ConditionsAllPresent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(0, 5).Draw(rt, "n")
+		conds := make([]string, n)
+		for i := range conds {
+			conds[i] = rapid.StringMatching(`[A-Za-z]{1,15}`).Draw(rt, fmt.Sprintf("cond%d", i))
+		}
+		name := rapid.StringMatching(`[A-Za-z]{1,10}`).Draw(rt, "name")
+		period := rapid.SampledFrom([]string{"Morning", "Night", "Dawn"}).Draw(rt, "period")
+		maxHP := rapid.Int32Range(1, 100).Draw(rt, "maxHP")
+		curHP := rapid.Int32Range(0, maxHP).Draw(rt, "curHP")
+
+		got := handlers.BuildPrompt(name, period, "08:00", curHP, maxHP, conds)
+		for _, c := range conds {
+			if !strings.Contains(got, "["+c+"]") {
+				rt.Errorf("condition %q not found in prompt %q", c, got)
+			}
+		}
+		if !strings.HasSuffix(got, "> ") {
+			rt.Errorf("prompt must end with '> ', got %q", got)
 		}
 	})
 }

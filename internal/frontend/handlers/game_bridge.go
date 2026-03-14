@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -29,7 +31,7 @@ var ErrSwitchCharacter = errors.New("switch character")
 //
 // Precondition: maxHP > 0; name, period, and hour must be non-empty.
 // Postcondition: Returns a non-empty string ending with "> ".
-func BuildPrompt(name, period, hour string, currentHP, maxHP int32) string {
+func BuildPrompt(name, period, hour string, currentHP, maxHP int32, conditions []string) string {
 	// Name segment
 	nameSeg := telnet.Colorf(telnet.BrightCyan, "[%s]", name)
 
@@ -67,7 +69,15 @@ func BuildPrompt(name, period, hour string, currentHP, maxHP int32) string {
 	}
 	hpSeg := telnet.Colorf(hpColor, "[%d/%dhp]", currentHP, maxHP)
 
-	return fmt.Sprintf("%s %s %s> ", nameSeg, timeSeg, hpSeg)
+	// Condition segments — BrightMagenta, one per active condition
+	var condSegs []string
+	for _, c := range conditions {
+		condSegs = append(condSegs, telnet.Colorf(telnet.BrightMagenta, "[%s]", c))
+	}
+
+	parts := []string{nameSeg, timeSeg, hpSeg}
+	parts = append(parts, condSegs...)
+	return strings.Join(parts, " ") + "> "
 }
 
 // IdleMonitorConfig configures the idle monitor goroutine.
@@ -188,9 +198,21 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		maxHP.Store(int32(char.CurrentHP))
 	}
 
+	// activeConditions tracks condition ID → display name for the prompt.
+	// Protected by condMu because buildCurrentPrompt and the event loop share it.
+	var condMu sync.Mutex
+	activeConditions := make(map[string]string)
+
 	buildCurrentPrompt := func() string {
 		tod := currentTime.Load().(*gamev1.TimeOfDayEvent)
-		return BuildPrompt(char.Name, tod.Period, fmt.Sprintf("%02d:00", tod.Hour), currentHP.Load(), maxHP.Load())
+		condMu.Lock()
+		sortedIDs := slices.Sorted(maps.Keys(activeConditions))
+		names := make([]string, 0, len(sortedIDs))
+		for _, id := range sortedIDs {
+			names = append(names, activeConditions[id])
+		}
+		condMu.Unlock()
+		return BuildPrompt(char.Name, tod.Period, fmt.Sprintf("%02d:00", tod.Hour), currentHP.Load(), maxHP.Load(), names)
 	}
 
 	// Initialize split-screen now that the game session is starting.
@@ -312,7 +334,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentHP, &maxHP, &lastRoomView, buildCurrentPrompt)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentHP, &maxHP, &lastRoomView, buildCurrentPrompt, &condMu, activeConditions)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
@@ -533,7 +555,7 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime is updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP and maxHP are updated from CharacterInfo events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string, condMu *sync.Mutex, activeConditions map[string]string) {
 	// Pump stream.Recv() into a channel so it can participate in a proper
 	// select alongside resize events and the prompt-refresh ticker.
 	type recvResult struct {
@@ -648,6 +670,13 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				}
 				continue
 			}
+			condMu.Lock()
+			if ce.GetApplied() {
+				activeConditions[ce.GetConditionId()] = ce.GetConditionName()
+			} else {
+				delete(activeConditions, ce.GetConditionId())
+			}
+			condMu.Unlock()
 			text = RenderConditionEvent(ce)
 		case *gamev1.ServerEvent_InventoryView:
 			text = RenderInventoryView(p.InventoryView)
