@@ -173,6 +173,39 @@ func TestHandleHeroPointStabilize_Success(t *testing.T) {
 	assert.Equal(t, 0, sess.HeroPoints)
 }
 
+// TestProperty_HeroPointStabilize_Invariants verifies stabilize invariants:
+// Dead becomes false, CurrentHP becomes 0, HeroPoints decrements by 1.
+//
+// Precondition: sess.Dead == true; sess.HeroPoints >= 1; sess.CurrentHP < 0.
+// Postcondition: sess.Dead == false; sess.CurrentHP == 0; sess.HeroPoints == heroPoints-1.
+func TestProperty_HeroPointStabilize_Invariants(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		heroPoints := rapid.IntRange(1, 10).Draw(rt, "heroPoints")
+		startHP := rapid.IntRange(-20, -1).Draw(rt, "startHP")
+
+		svc, sessMgr := newGrappleSvc(t, nil, nil, nil)
+		uid := fmt.Sprintf("u_stab_prop_%d_%d", heroPoints, -startHP)
+		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID: uid, Username: "P", CharName: "P",
+			RoomID: "room_stab_prop", Role: "player",
+		})
+		require.NoError(rt, err)
+		sess.HeroPoints = heroPoints
+		sess.Dead = true
+		sess.CurrentHP = startHP
+
+		event, err := svc.handleHeroPoint(uid, &gamev1.HeroPointRequest{Subcommand: "stabilize"})
+		require.NoError(rt, err)
+		require.NotNil(rt, event)
+		msgEvt := event.GetMessage()
+		require.NotNil(rt, msgEvt, "stabilize must return message event")
+
+		assert.False(rt, sess.Dead, "Dead must be false after stabilize")
+		assert.Equal(rt, 0, sess.CurrentHP, "CurrentHP must be 0 after stabilize")
+		assert.Equal(rt, heroPoints-1, sess.HeroPoints, "HeroPoints must decrement by 1")
+	})
+}
+
 // TestProperty_HeroPointReroll_Invariants verifies: after reroll, HeroPoints decrements by 1
 // and the winner equals max(old, new).
 //

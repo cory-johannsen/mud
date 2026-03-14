@@ -1368,6 +1368,15 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			endNarrative = "Combat is over. You stand victorious."
 		} else {
 			endNarrative = "Everything goes dark."
+			// Mark all dead player combatants so sess.Dead == true.
+			// This is required for the heropoint stabilize subcommand to work.
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindPlayer && c.IsDead() {
+					if sess, ok := h.sessions.GetPlayer(c.ID); ok {
+						sess.Dead = true
+					}
+				}
+			}
 			// Rob defeated players before broadcasting the end event.
 			robEvents := h.robPlayersLocked(cbt)
 			events = append(events, robEvents...)

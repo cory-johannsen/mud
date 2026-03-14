@@ -579,7 +579,8 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			} else {
 				sess.Currency = savedCurrency
 			}
-			// Load persisted hero points.
+			// HeroPoints is loaded separately from AddPlayerOptions because it requires
+			// a DB read that is only available at login, not at session construction time.
 			if savedHP, hpErr := s.charSaver.LoadHeroPoints(stream.Context(), characterID); hpErr != nil {
 				s.logger.Warn("failed to load hero points on login",
 					zap.String("uid", uid),
@@ -2731,6 +2732,32 @@ func (s *GameServiceServer) handleEquipment(uid string, _ *gamev1.EquipmentReque
 		return errorEvent("player not found"), nil
 	}
 	return messageEvent(command.HandleEquipment(sess)), nil
+}
+
+// pushCharacterSheet sends an updated CharacterSheetView to the player's entity
+// channel. It is used after in-place session mutations (e.g. hero point spends)
+// so the client display reflects the new state without requiring the player to
+// type "char" manually.
+//
+// Precondition: sess must be non-nil and have a non-nil Entity.
+// Postcondition: A CharacterSheetView event is marshaled and pushed; errors are
+// logged and silently dropped so the calling handler is unaffected.
+func (s *GameServiceServer) pushCharacterSheet(sess *session.PlayerSession) {
+	if sess == nil || sess.Entity == nil {
+		return
+	}
+	evt, err := s.handleChar(sess.UID)
+	if err != nil || evt == nil {
+		return
+	}
+	data, err := proto.Marshal(evt)
+	if err != nil {
+		s.logger.Warn("pushCharacterSheet: marshal failed", zap.Error(err))
+		return
+	}
+	if err := sess.Entity.Push(data); err != nil {
+		s.logger.Warn("pushCharacterSheet: push failed", zap.String("uid", sess.UID), zap.Error(err))
+	}
 }
 
 // handleChar builds and returns a CharacterSheetView for the requesting player.
@@ -5532,6 +5559,7 @@ func (s *GameServiceServer) handleHeroPointReroll(sess *session.PlayerSession) (
 	}
 
 	msg := fmt.Sprintf("You spend a hero point. Original roll: %d, New roll: %d — keeping %d.", oldRoll, newRoll, winner)
+	s.pushCharacterSheet(sess)
 	return messageEvent(msg), nil
 }
 
@@ -5557,6 +5585,7 @@ func (s *GameServiceServer) handleHeroPointStabilize(sess *session.PlayerSession
 		}
 	}
 
+	s.pushCharacterSheet(sess)
 	return messageEvent("You spend a hero point, pulling back from the brink. You stabilize at 0 HP."), nil
 }
 
