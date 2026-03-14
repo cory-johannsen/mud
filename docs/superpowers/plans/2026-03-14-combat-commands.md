@@ -1840,7 +1840,7 @@ func TestProperty_BankedAP_Formula(t *testing.T) {
 		startingAP := rapid.IntRange(1, 3).Draw(rt, "startingAP") // [1,3]: >=1 avoids "not enough AP"; <=3 stays within default AP grant
 
 		roller := dice.NewRoller(dice.NewConstSource(10))
-		svc, sessMgr, combatHandler := newDelaySvcWithCombat(rt, roller)
+		svc, sessMgr, combatHandler := newDelaySvcWithCombat(t, roller)
 
 		_, addErr := sessMgr.AddPlayer(session.AddPlayerOptions{
 			UID: "u", Username: "u", CharName: "u", Role: "player",
