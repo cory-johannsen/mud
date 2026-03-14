@@ -302,6 +302,8 @@ func NewGameServiceServer(
 					sess.Conditions.ClearEncounter()
 				}
 			}
+			// Clear pending join invitations for this room now that combat has ended.
+			s.clearPendingJoinForRoom(roomID)
 			// Push updated room view so "fighting X" labels clear immediately.
 			s.pushRoomViewToAllInRoom(roomID)
 		})
@@ -1444,6 +1446,9 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 			}
 		}
 	}
+
+	// Combat join trigger — prompt the player if entering a room with active combat.
+	s.notifyCombatJoinIfEligible(sess, result.View.RoomId)
 
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: result.View},
@@ -6485,4 +6490,75 @@ func (s *GameServiceServer) handleDecline(uid string, _ *gamev1.DeclineRequest) 
 
 	sess.PendingCombatJoin = ""
 	return messageEvent("You stay back and watch the combat from a distance."), nil
+}
+
+// notifyCombatJoinIfEligible sets PendingCombatJoin and sends a join prompt if
+// the player has just entered a room with active combat and is eligible to join.
+//
+// Precondition: sess != nil; called after a successful move; combatH.combatMu NOT held.
+// Postcondition: if the destination room has active combat and the player is not already
+//
+//	a combatant, sess.PendingCombatJoin is set to newRoomID and a join prompt is pushed.
+func (s *GameServiceServer) notifyCombatJoinIfEligible(sess *session.PlayerSession, newRoomID string) {
+	if s.combatH == nil {
+		return
+	}
+	if sess.Status == statusInCombat {
+		return
+	}
+
+	s.combatH.combatMu.Lock()
+	defer s.combatH.combatMu.Unlock()
+
+	cbt, exists := s.combatH.engine.GetCombat(newRoomID)
+	if !exists {
+		return
+	}
+
+	// Ensure the player is not already registered as a combatant.
+	for _, c := range cbt.Combatants {
+		if c.ID == sess.UID {
+			return
+		}
+	}
+
+	sess.PendingCombatJoin = newRoomID
+
+	if sess.Entity != nil {
+		evt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{
+					Content: "Active combat in progress. Join the fight? (join / decline)",
+				},
+			},
+		}
+		if data, err := proto.Marshal(evt); err == nil {
+			_ = sess.Entity.Push(data)
+		}
+	}
+}
+
+// clearPendingJoinForRoom clears PendingCombatJoin for all players waiting to join
+// the combat in roomID (called when that combat ends).
+//
+// Precondition: roomID is non-empty.
+// Postcondition: no player session has PendingCombatJoin == roomID.
+func (s *GameServiceServer) clearPendingJoinForRoom(roomID string) {
+	for _, sess := range s.sessions.AllPlayers() {
+		if sess.PendingCombatJoin == roomID {
+			sess.PendingCombatJoin = ""
+			if sess.Entity != nil {
+				evt := &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_Message{
+						Message: &gamev1.MessageEvent{
+							Content: "The combat has ended.",
+						},
+					},
+				}
+				if data, err := proto.Marshal(evt); err == nil {
+					_ = sess.Entity.Push(data)
+				}
+			}
+		}
+	}
 }
