@@ -208,7 +208,7 @@
 - [x] map and legend should be presented in 2-column view.
   - the legend column should support multiple columns of text (like the legend currently does)
   - the legend should default to 1 column if the screen width cannot support more
-- [ ] Replace 'Level + 10' implementation for Grapple, Trip, Reflex DC with real calculations
+- [x] Replace 'Level + 10' implementation for Grapple, Shove, Trip, Disarm, Tumble, Demoralize with real Toughness/Hustle/Cool DC calculations (10 + level + abilityMod + proficiencyRank)
 - [ ] NPCs rob the player if the player is defeated in combat 
   - rob for 5-30% of the player currency
   - percentage taken randomized at NPC creation weighted by NPC level and type
