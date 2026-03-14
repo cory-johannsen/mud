@@ -82,6 +82,13 @@ type Instance struct {
 	HustleRank string
 	// CoolRank is the Cool save proficiency rank, copied from template.
 	CoolRank string
+	// RobPercent is the fraction of a defeated player's currency this NPC steals,
+	// as a percentage in [5.0, 30.0]. 0 means this NPC never robs.
+	// Computed once at spawn from template RobMultiplier, level, and randomness.
+	RobPercent float64
+	// Currency is the NPC's wallet accumulated from robbing players.
+	// Added to loot payout when the NPC dies. Zero at spawn.
+	Currency int
 }
 
 // Name returns the instance's current display name.
@@ -170,7 +177,34 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		ToughnessRank: tmpl.ToughnessRank,
 		HustleRank:    tmpl.HustleRank,
 		CoolRank:      tmpl.CoolRank,
+		RobPercent:    computeRobPercent(tmpl.RobMultiplier, tmpl.Level),
+		Currency:      0,
 	}
+}
+
+// computeRobPercent calculates the rob percentage for an NPC at spawn time.
+// Returns 0 if multiplier is 0 (NPC does not rob).
+// Otherwise returns clamp((rand(5,20) + min(level,10)) * multiplier, 5.0, 30.0).
+//
+// Precondition: level >= 1.
+// Postcondition: returns 0 if multiplier == 0; returns value in [5.0, 30.0] otherwise.
+func computeRobPercent(multiplier float64, level int) float64 {
+	if multiplier == 0 {
+		return 0
+	}
+	base := 5 + rand.Intn(16) // [5, 20]
+	levelBonus := level
+	if levelBonus > 10 {
+		levelBonus = 10
+	}
+	raw := float64(base+levelBonus) * multiplier
+	if raw < 5.0 {
+		raw = 5.0
+	}
+	if raw > 30.0 {
+		raw = 30.0
+	}
+	return raw
 }
 
 // NewInstance creates a live NPC instance from a template with no armor AC resolver.

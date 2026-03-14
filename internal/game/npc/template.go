@@ -82,6 +82,11 @@ type Template struct {
 	// CoolRank is the NPC's Cool save proficiency rank.
 	// Used to compute Cool DC for Demoralize.
 	CoolRank string `yaml:"cool_rank"`
+	// RobMultiplier controls whether and how aggressively this NPC robs defeated
+	// players. 0.0 = never robs (default). 1.0 = baseline human aggression.
+	// Values > 1.0 represent especially predatory NPCs.
+	// Used at spawn to compute Instance.RobPercent.
+	RobMultiplier float64 `yaml:"rob_multiplier"`
 }
 
 // Validate checks that the template satisfies basic invariants.

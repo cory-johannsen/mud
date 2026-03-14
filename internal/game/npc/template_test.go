@@ -353,6 +353,81 @@ cool_rank: master
 	assert.Equal(t, "master", tmpl.CoolRank)
 }
 
+// TestTemplate_RobMultiplier_DefaultsToZero verifies that rob_multiplier defaults
+// to 0.0 when not present in YAML.
+//
+// Precondition: YAML has no rob_multiplier field.
+// Postcondition: tmpl.RobMultiplier == 0.0.
+func TestTemplate_RobMultiplier_DefaultsToZero(t *testing.T) {
+	yamlData := `
+id: test-npc
+name: Test
+level: 1
+max_hp: 10
+ac: 10
+perception: 0
+`
+	tmpl, err := npc.LoadTemplateFromBytes([]byte(yamlData))
+	require.NoError(t, err)
+	assert.Equal(t, 0.0, tmpl.RobMultiplier)
+}
+
+// TestTemplate_RobMultiplier_ParsesFromYAML verifies that rob_multiplier round-trips
+// through YAML parsing.
+//
+// Precondition: YAML specifies rob_multiplier: 1.5.
+// Postcondition: tmpl.RobMultiplier == 1.5.
+func TestTemplate_RobMultiplier_ParsesFromYAML(t *testing.T) {
+	yamlData := `
+id: test-npc
+name: Test
+level: 1
+max_hp: 10
+ac: 10
+perception: 0
+rob_multiplier: 1.5
+`
+	tmpl, err := npc.LoadTemplateFromBytes([]byte(yamlData))
+	require.NoError(t, err)
+	assert.Equal(t, 1.5, tmpl.RobMultiplier)
+}
+
+// TestInstance_RobPercent_ZeroWhenMultiplierZero verifies that Instance.RobPercent
+// is 0 when the template RobMultiplier is 0.
+//
+// Precondition: tmpl.RobMultiplier == 0.
+// Postcondition: inst.RobPercent == 0.
+func TestInstance_RobPercent_ZeroWhenMultiplierZero(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "t1", Name: "T", Level: 5, MaxHP: 10, AC: 10, Perception: 0,
+		RobMultiplier: 0.0,
+	}
+	inst := npc.NewInstance("i1", tmpl, "room1")
+	assert.Equal(t, 0.0, inst.RobPercent)
+	assert.Equal(t, 0, inst.Currency)
+}
+
+// TestProperty_Instance_RobPercent_InRange verifies that for any RobMultiplier > 0
+// and level in [1,20], inst.RobPercent is in [5.0, 30.0].
+//
+// Uses rapid property-based testing (SWENG-5a).
+func TestProperty_Instance_RobPercent_InRange(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		multiplier := rapid.Float64Range(0.1, 3.0).Draw(rt, "multiplier")
+
+		tmpl := &npc.Template{
+			ID: "prop-rob", Name: "T", Level: level, MaxHP: 10, AC: 10, Perception: 0,
+			RobMultiplier: multiplier,
+		}
+		inst := npc.NewInstance(fmt.Sprintf("i-%d", level), tmpl, "room1")
+		assert.GreaterOrEqual(rt, inst.RobPercent, 5.0,
+			"RobPercent must be >= 5.0 when multiplier > 0")
+		assert.LessOrEqual(rt, inst.RobPercent, 30.0,
+			"RobPercent must be <= 30.0")
+	})
+}
+
 // TestInstance_SaveFields_CopiedFromTemplate verifies that Instance fields
 // Brutality, Quickness, Savvy, ToughnessRank, HustleRank, CoolRank are copied
 // from the template at spawn.
