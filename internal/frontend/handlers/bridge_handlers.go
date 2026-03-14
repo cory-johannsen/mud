@@ -118,6 +118,8 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerMotive:             bridgeMotive,
 	command.HandlerCalm:               bridgeCalm,
 	command.HandlerHeroPoint:          bridgeHeroPoint,
+	command.HandlerJoin:               bridgeJoin,
+	command.HandlerDecline:            bridgeDecline,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1230,5 +1232,27 @@ func bridgeDelay(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Delay{Delay: &gamev1.DelayRequest{}},
+	}}, nil
+}
+
+// bridgeJoin builds a JoinRequest message with no arguments.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a JoinRequest.
+func bridgeJoin(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Join{Join: &gamev1.JoinRequest{}},
+	}}, nil
+}
+
+// bridgeDecline builds a DeclineRequest message with no arguments.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a DeclineRequest.
+func bridgeDecline(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Decline{Decline: &gamev1.DeclineRequest{}},
 	}}, nil
 }

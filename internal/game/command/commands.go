@@ -93,6 +93,8 @@ const (
 	HandlerSwim                = "swim"
 	HandlerCalm                = "calm"
 	HandlerHeroPoint           = "heropoint"
+	HandlerJoin                = "join"
+	HandlerDecline             = "decline"
 )
 
 // Command defines a player-invocable command.
@@ -206,6 +208,8 @@ func BuiltinCommands() []Command {
 		{Name: "calm", Help: "Attempt to calm your worst active mental state (Grit check; costs all AP in combat).", Category: CategoryCombat, Handler: HandlerCalm},
 		{Name: "heropoint", Aliases: []string{"hp"}, Help: "Spend a hero point (heropoint reroll | heropoint stabilize)", Category: CategoryCharacter, Handler: HandlerHeroPoint},
 		{Name: "delay", Aliases: []string{"dl"}, Help: "Bank remaining AP (up to 2) for next round at cost of -2 AC. Combat only.", Category: CategoryCombat, Handler: HandlerDelay},
+		{Name: "join", Help: "Join active combat in the current room.", Category: CategoryCombat, Handler: HandlerJoin},
+		{Name: "decline", Help: "Decline to join active combat.", Category: CategoryCombat, Handler: HandlerDecline},
 	}
 }
 

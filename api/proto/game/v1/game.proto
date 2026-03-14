@@ -87,6 +87,8 @@ message ClientMessage {
     CalmRequest calm = 70;
     HeroPointRequest hero_point = 71;
     DelayRequest delay = 72;
+    JoinRequest join = 73;
+    DeclineRequest decline = 74;
   }
 }
 
@@ -819,6 +821,12 @@ message HeroPointRequest {
 
 // DelayRequest banks remaining AP for next round at cost of -2 AC.
 message DelayRequest {}
+
+// JoinRequest asks the server to join active combat in the current room.
+message JoinRequest {}
+
+// DeclineRequest asks the server to decline joining active combat.
+message DeclineRequest {}
 
 // MotiveRequest asks the server to read an NPC's intentions (awareness vs Hustle DC).
 message MotiveRequest {
