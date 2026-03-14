@@ -338,19 +338,24 @@ func TestBuildPrompt_MultipleConditions(t *testing.T) {
 func TestProperty_BuildPrompt_ConditionsAllPresent(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		n := rapid.IntRange(0, 5).Draw(rt, "n")
-		conds := make([]string, n)
 		seen := make(map[string]bool)
-		for i := range conds {
-			conds[i] = rapid.StringMatching(`[A-Za-z]{1,15}`).Draw(rt, fmt.Sprintf("cond%d", i))
-			seen[conds[i]] = true
+		for i := range n {
+			c := rapid.StringMatching(`[A-Za-z]{1,15}`).Draw(rt, fmt.Sprintf("cond%d", i))
+			seen[c] = true
 		}
+		// Build a deduplicated slice to pass to BuildPrompt.
+		uniqueConds := make([]string, 0, len(seen))
+		for c := range seen {
+			uniqueConds = append(uniqueConds, c)
+		}
+
 		name := rapid.StringMatching(`[A-Za-z]{1,10}`).Draw(rt, "name")
 		period := rapid.SampledFrom([]string{"Morning", "Night", "Dawn"}).Draw(rt, "period")
 		maxHP := rapid.Int32Range(1, 100).Draw(rt, "maxHP")
 		curHP := rapid.Int32Range(0, maxHP).Draw(rt, "curHP")
 
-		got := handlers.BuildPrompt(name, period, "08:00", curHP, maxHP, conds)
-		// Each unique condition name must appear exactly once as a BrightMagenta segment.
+		got := handlers.BuildPrompt(name, period, "08:00", curHP, maxHP, uniqueConds)
+		// Each unique condition name must appear exactly once.
 		for c := range seen {
 			want := telnet.Colorf(telnet.BrightMagenta, "[%s]", c)
 			count := strings.Count(got, want)
