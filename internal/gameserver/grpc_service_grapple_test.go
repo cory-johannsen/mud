@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -12,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+	"pgregory.net/rapid"
 )
 
 // newGrappleSvc builds a minimal GameServiceServer for handleGrapple tests.
@@ -148,6 +150,7 @@ func TestHandleGrapple_TargetNotFound(t *testing.T) {
 	const roomID = "room_grp_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "goblin-grp-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -190,6 +193,7 @@ func TestHandleGrapple_RollBelowDC_Failure(t *testing.T) {
 	const roomID = "room_grp_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "bandit-grp-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -227,6 +231,7 @@ func TestHandleGrapple_RollAboveDC_Success(t *testing.T) {
 	const roomID = "room_grp_ra"
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "ganger-grp-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -252,4 +257,55 @@ func TestHandleGrapple_RollAboveDC_Success(t *testing.T) {
 	condSet, ok := combatHandler.GetCombatConditionSet("u_grp_ra", inst.ID)
 	require.True(t, ok, "expected to find condition set for NPC after grapple")
 	assert.True(t, condSet.Has("grabbed"), "NPC must have grabbed condition after successful grapple")
+}
+
+// TestProperty_HandleGrapple_ToughnessDC_Formula verifies that the Toughness DC
+// used by handleGrapple equals 10 + level + abilityMod(brutality) + rankBonus.
+//
+// Precondition: rapid generates level (1-20), brutality (1-20), rank string.
+// Postcondition: message content contains the expected DC value.
+func TestProperty_HandleGrapple_ToughnessDC_Formula(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		brutality := rapid.IntRange(1, 20).Draw(rt, "brutality")
+		rank := rapid.SampledFrom([]string{"", "trained", "expert", "master", "legendary"}).Draw(rt, "rank")
+
+		expectedMod := combat.AbilityMod(brutality)
+		expectedRankBonus := skillRankBonus(rank)
+		expectedDC := 10 + level + expectedMod + expectedRankBonus
+
+		tmpl := &npc.Template{
+			ID: fmt.Sprintf("grp-prop-%d-%d", level, brutality), Name: "Target", Level: level,
+			MaxHP: 20, AC: 13, Perception: 5,
+			Abilities:     npc.Abilities{Brutality: brutality, Quickness: 10, Savvy: 10},
+			ToughnessRank: rank,
+		}
+
+		logger := zaptest.NewLogger(t)
+		src := &fixedDiceSource{val: 99}
+		roller := dice.NewLoggedRoller(src, logger)
+		svc, sessMgr, npcMgr, combatHandler := newGrappleSvcWithCombat(t, roller)
+
+		roomID := fmt.Sprintf("room_grp_prop_%d_%d", level, brutality)
+		uid := fmt.Sprintf("u_grp_prop_%d_%d", level, brutality)
+		_, err := npcMgr.Spawn(tmpl, roomID)
+		require.NoError(rt, err)
+		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID: uid, Username: "F", CharName: "F",
+			RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+		})
+		require.NoError(rt, err)
+		sess.Status = statusInCombat
+		_, err = combatHandler.Attack(uid, "Target")
+		require.NoError(rt, err)
+		combatHandler.cancelTimer(roomID)
+
+		event, err := svc.handleGrapple(uid, &gamev1.GrappleRequest{Target: "Target"})
+		require.NoError(rt, err)
+		require.NotNil(rt, event)
+		msgEvt := event.GetMessage()
+		require.NotNil(rt, msgEvt)
+		assert.Contains(rt, msgEvt.Content, fmt.Sprintf("DC %d", expectedDC),
+			"message must include computed Toughness DC")
+	})
 }

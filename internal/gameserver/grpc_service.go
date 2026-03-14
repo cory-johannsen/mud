@@ -4690,7 +4690,7 @@ func (s *GameServiceServer) handleGrapple(uid string, req *gamev1.GrappleRequest
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + athletics bonus vs target Level+10.
+	// Skill check: 1d20 + athletics bonus vs target Toughness DC. Toughness DC = 10 + level + AbilityMod(Brutality) + proficiency rank bonus.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleGrapple: rolling d20: %w", err)
@@ -4698,9 +4698,9 @@ func (s *GameServiceServer) handleGrapple(uid string, req *gamev1.GrappleRequest
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
-	dc := inst.Level + 10
+	dc := 10 + inst.Level + combat.AbilityMod(inst.Brutality) + skillRankBonus(inst.ToughnessRank)
 
-	detail := fmt.Sprintf("Grapple (athletics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Grapple (athletics Toughness DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + " — failure. Your grapple attempt fails."), nil
 	}
@@ -4884,7 +4884,7 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + athletics bonus vs target Level+10.
+	// Skill check: 1d20 + athletics bonus vs target Toughness DC. Toughness DC = 10 + level + AbilityMod(Brutality) + proficiency rank bonus.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleShove: rolling d20: %w", err)
@@ -4892,9 +4892,9 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
-	dc := inst.Level + 10
+	dc := 10 + inst.Level + combat.AbilityMod(inst.Brutality) + skillRankBonus(inst.ToughnessRank)
 
-	detail := fmt.Sprintf("Shove (athletics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Shove (athletics Toughness DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + fmt.Sprintf(" — fail. You fail to shove %s.", inst.Name())), nil
 	}
