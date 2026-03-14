@@ -83,6 +83,9 @@ type Exit struct {
 	Locked bool
 	// Hidden indicates the exit is not visible by default.
 	Hidden bool
+	ClimbDC int `yaml:"climb_dc"` // 0 = not climbable (unless terrain default applies)
+	Height  int `yaml:"height"`   // feet; used for fall damage: max(1, floor(Height/10)) d6
+	SwimDC  int `yaml:"swim_dc"`  // 0 = not swimmable (unless terrain default applies)
 }
 
 // RoomSpawnConfig defines how many instances of an NPC template should exist
@@ -143,6 +146,8 @@ type Room struct {
 	MapY int
 	// SkillChecks holds all trigger-based skill check definitions declared for this room.
 	SkillChecks []skillcheck.TriggerDef
+	// Terrain is an optional terrain type tag: rubble, cliff, wall, sewer, river, ocean, flooded.
+	Terrain string `yaml:"terrain"`
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.
