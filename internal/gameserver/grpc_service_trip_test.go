@@ -179,9 +179,9 @@ func TestHandleTrip_TargetNotFound(t *testing.T) {
 }
 
 // TestHandleTrip_RollBelowDC_Failure verifies that handleTrip returns a failure message
-// when the athletics roll total is below the target's Level+10 DC.
+// when the athletics roll total is below the target's Hustle DC.
 //
-// Precondition: player in combat; NPC Level=5 → DC=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
+// Precondition: player in combat; NPC Level=5 → DC=15 (Hustle DC: Level=5, Quickness=10, rank=untrained → 10+5+0+0=15); dice returns 0 (roll=1, bonus=0, total=1 < 15).
 // Postcondition: message event containing "failure".
 func TestHandleTrip_RollBelowDC_Failure(t *testing.T) {
 	logger := zaptest.NewLogger(t)
@@ -217,7 +217,7 @@ func TestHandleTrip_RollBelowDC_Failure(t *testing.T) {
 }
 
 // TestHandleTrip_RollAboveDC_Success verifies that handleTrip returns a success message
-// and applies the prone condition when the athletics roll meets or exceeds Level+10 DC.
+// and applies the prone condition when the athletics roll meets or exceeds the Hustle DC.
 //
 // Precondition: player in combat; NPC Level=1 → DC=11; dice returns 19 (roll=20, bonus=0, total=20 >= 11).
 // Postcondition: message event containing "success"; prone condition active on target combatant.

@@ -177,7 +177,7 @@ func TestHandleTumble_TargetNotFound(t *testing.T) {
 }
 
 // TestHandleTumble_RollAboveDC_Success verifies that handleTumble returns a success message
-// and the player's position increases by 5 ft when the acrobatics roll meets or exceeds Level+10 DC.
+// and the player's position increases by 5 ft when the acrobatics roll meets or exceeds the Hustle DC.
 //
 // Precondition: player in combat; NPC Level=1 → DC=11; dice returns 19 (roll=20, bonus=0, total=20 >= 11).
 // Postcondition: message event containing "tumble through"; player position increased by 5.
@@ -224,9 +224,9 @@ func TestHandleTumble_RollAboveDC_Success(t *testing.T) {
 }
 
 // TestHandleTumble_RollBelowDC_Failure verifies that handleTumble returns a failure message
-// and the player's position does NOT change when the acrobatics roll is below Level+10 DC.
+// and the player's position does NOT change when the acrobatics roll is below the Hustle DC.
 //
-// Precondition: player in combat; NPC Level=5 → DC=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
+// Precondition: player in combat; NPC Level=5 → DC=15 (Hustle DC: Level=5, Quickness=10, rank=untrained → 10+5+0+0=15); dice returns 0 (roll=1, bonus=0, total=1 < 15).
 // Postcondition: message event containing "reactive strike"; player position unchanged.
 func TestHandleTumble_RollBelowDC_Failure(t *testing.T) {
 	logger := zaptest.NewLogger(t)

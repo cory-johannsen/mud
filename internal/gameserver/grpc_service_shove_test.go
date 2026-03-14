@@ -177,9 +177,9 @@ func TestHandleShove_TargetNotFound(t *testing.T) {
 }
 
 // TestHandleShove_Failure verifies that handleShove returns a failure message
-// when the athletics roll total is below the target's Level+10 DC.
+// when the athletics roll total is below the target's Toughness DC.
 //
-// Precondition: player in combat; NPC Level=5 → DC=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
+// Precondition: player in combat; NPC Level=5 → DC=15 (Toughness DC: Level=5, Brutality=10, rank=untrained → 10+5+0+0=15); dice returns 0 (roll=1, bonus=0, total=1 < 15).
 // Postcondition: message event containing "failure"; NPC position unchanged.
 func TestHandleShove_Failure(t *testing.T) {
 	logger := zaptest.NewLogger(t)
@@ -269,7 +269,7 @@ func TestHandleShove_Success(t *testing.T) {
 
 // TestHandleShove_CriticalSuccess verifies that handleShove pushes the NPC 10ft on a critical success.
 //
-// Precondition: player in combat; NPC Level=1 → DC=11; dice returns 19 (roll=20, total=20 >= 21? No, 20 < 21).
+// Precondition: player in combat; NPC Level=1 → DC=11 (Toughness DC: Level=1, Brutality=10, rank=untrained → 10+1+0+0=11); dice returns 19 (roll=20, total=20 >= 21? No, 20 < 21).
 // Use Level=1, DC=11; dice=19 → roll=20, total=20 < 21 so not crit. Use Level=1, DC=11; dice returns enough.
 // beat DC by 10+: total >= DC+10=21, so need dice val 20 (roll=21). fixedDiceSource val=20.
 func TestHandleShove_CriticalSuccess(t *testing.T) {

@@ -788,7 +788,7 @@ message DivertRequest {}
 // EscapeRequest asks the server to escape from the grabbed condition.
 message EscapeRequest {}
 
-// TumbleRequest asks the server to tumble through the target NPC's space (Acrobatics vs Level+10).
+// TumbleRequest asks the server to tumble through the target NPC's space (Acrobatics vs Hustle DC).
 message TumbleRequest {
   string target = 1;
 }
