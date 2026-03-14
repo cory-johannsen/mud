@@ -4714,7 +4714,7 @@ func (s *GameServiceServer) handleGrapple(uid string, req *gamev1.GrappleRequest
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is grabbed (flat-footed, -2 AC).", inst.Name())), nil
 }
 
-// handleTrip performs an athletics skill check against the target NPC's Level+10 DC.
+// handleTrip performs an athletics skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
 // On success, applies the prone condition (-2 attack) to the target combatant for the encounter.
 // Combat only; costs 1 AP.
 //
@@ -4772,7 +4772,7 @@ func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*ga
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is knocked prone (-2 attack rolls).", inst.Name())), nil
 }
 
-// handleDisarm performs an athletics skill check against the target NPC's Level+10 DC.
+// handleDisarm performs an athletics skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
 // On success, removes the NPC's equipped weapon and drops it to the room floor.
 // Combat only; costs 1 AP.
 //
