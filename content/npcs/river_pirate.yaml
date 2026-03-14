@@ -4,6 +4,7 @@ description: A weathered river pirate in waders and a rain slicker, eyes sharp f
 level: 3
 max_hp: 32
 ac: 15
+rob_multiplier: 1.0
 perception: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"

@@ -4,6 +4,7 @@ description: A wild-eyed zealot in a tattered flight attendant uniform, preachin
 level: 3
 max_hp: 30
 ac: 15
+rob_multiplier: 1.0
 perception: 7
 ai_domain: ganger_combat
 respawn_delay: "5m"

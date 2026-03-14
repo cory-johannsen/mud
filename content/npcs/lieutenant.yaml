@@ -4,6 +4,7 @@ description: A seasoned enforcer in a battered leather coat. His posture says he
 level: 3
 max_hp: 42
 ac: 16
+rob_multiplier: 1.5
 perception: 8
 abilities:
   brutality: 16

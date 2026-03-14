@@ -4,6 +4,7 @@ description: A street tough in a rain-stained hoodie, looking for easy marks alo
 level: 1
 max_hp: 18
 ac: 13
+rob_multiplier: 1.0
 perception: 5
 ai_domain: ganger_combat
 respawn_delay: "5m"
