@@ -160,7 +160,7 @@ func TestHandleSwim_RoomNotWater_NotSubmerged(t *testing.T) {
 	assert.Contains(t, msgEvt.Content, "no water")
 }
 
-// TestHandleSwim_CritFailure verifies that a critical failure on the athletics check
+// TestHandleSwim_CritFailure verifies that a critical failure on the muscle check
 // applies the submerged condition and reduces player HP.
 //
 // Precondition: Player is in "room_water" (water_terrain=true, DC=12).
@@ -202,7 +202,7 @@ func TestHandleSwim_CritFailure(t *testing.T) {
 }
 
 // TestHandleSwim_SubmergedSurface verifies that a player with the submerged condition
-// who succeeds the athletics check loses the submerged condition.
+// who succeeds the muscle check loses the submerged condition.
 //
 // Precondition: Player is in "room_plain" with submerged condition applied (no water_terrain needed when submerged).
 // Dice fixed at val=19: roll=20, bonus=0, total=20; DC=12; 20 >= 12+10=22? No, 20 >= 22 is false → Success (not CritSuccess).

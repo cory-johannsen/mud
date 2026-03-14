@@ -4707,7 +4707,7 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is demoralized (-1 AC, -1 attack).", inst.Name())), nil
 }
 
-// handleGrapple performs an muscle skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
+// handleGrapple performs a muscle skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
 // On success, applies the grabbed condition (-2 AC) to the target combatant for the encounter.
 // Combat only; costs 1 AP.
 //
@@ -4768,7 +4768,7 @@ func (s *GameServiceServer) handleGrapple(uid string, req *gamev1.GrappleRequest
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is grabbed (flat-footed, -2 AC).", inst.Name())), nil
 }
 
-// handleTrip performs an muscle skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
+// handleTrip performs a muscle skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
 // On success, applies the prone condition (-2 attack) to the target combatant for the encounter.
 // Combat only; costs 1 AP.
 //
@@ -4829,7 +4829,7 @@ func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*ga
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is knocked prone (-2 attack rolls).", inst.Name())), nil
 }
 
-// handleDisarm performs an muscle skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
+// handleDisarm performs a muscle skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
 // On success, removes the NPC's equipped weapon and drops it to the room floor.
 // Combat only; costs 1 AP.
 //
@@ -4910,7 +4910,7 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed. The %s clatters to the floor.", inst.Name(), weaponName)), nil
 }
 
-// handleShove performs an muscle skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
+// handleShove performs a muscle skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
 // On success, the NPC is pushed 5ft; on critical success (beat DC by 10+), pushed 10ft.
 // Combat only; costs 1 AP.
 //
@@ -5792,9 +5792,9 @@ func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error
 	}
 	roll := rollResult.Total()
 
-	ath := skillRankBonus(sess.Skills["muscle"])
+	mus := skillRankBonus(sess.Skills["muscle"])
 	acr := skillRankBonus(sess.Skills["acrobatics"])
-	bonus := ath
+	bonus := mus
 	if acr > bonus {
 		bonus = acr
 	}

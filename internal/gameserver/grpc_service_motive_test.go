@@ -145,9 +145,9 @@ func TestHandleMotive_TargetNotFound(t *testing.T) {
 }
 
 // TestHandleMotive_RollFailure verifies that handleMotive returns a failure message
-// when the awareness roll falls below the Deception DC.
+// when the awareness roll falls below the Hustle DC.
 //
-// Precondition: player in combat; NPC Deception=0 → DC=10; fixedDiceSource{val:0} → roll=1, bonus=0, total=1 < 10.
+// Precondition: player in combat; NPC Hustle=0 → DC=10; fixedDiceSource{val:0} → roll=1, bonus=0, total=1 < 10.
 // Postcondition: message event containing "failure".
 func TestHandleMotive_RollFailure(t *testing.T) {
 	logger := zaptest.NewLogger(t)
@@ -185,7 +185,7 @@ func TestHandleMotive_RollFailure(t *testing.T) {
 // TestHandleMotive_RollSuccess_HPTier verifies that handleMotive returns a success message
 // containing the NPC's HP tier when the roll meets or exceeds the DC.
 //
-// Precondition: player in combat; NPC Deception=0 → DC=10; fixedDiceSource{val:19} → roll=20 >= 10; NPC at full HP.
+// Precondition: player in combat; NPC Hustle=0 → DC=10; fixedDiceSource{val:19} → roll=20 >= 10; NPC at full HP.
 // Postcondition: message event containing "success" and "unharmed".
 func TestHandleMotive_RollSuccess_HPTier(t *testing.T) {
 	logger := zaptest.NewLogger(t)
@@ -222,16 +222,16 @@ func TestHandleMotive_RollSuccess_HPTier(t *testing.T) {
 }
 
 // TestProperty_Motive_SuccessAlwaysRevealsHPTier is a property-based test verifying
-// that when the roll always beats the DC (roll=20 with any Deception 0–9), the message
+// that when the roll always beats the DC (roll=20 with any Hustle DC 0–9), the message
 // always contains one of the known HP tier strings.
 //
-// Precondition: deception in [0,9]; fixedDiceSource{val:19} → roll=20; DC=10+deception <= 19, so 20 always succeeds.
+// Precondition: hustle in [0,9]; fixedDiceSource{val:19} → roll=20; DC=10+hustle <= 19, so 20 always succeeds.
 // Postcondition: message contains one of the HP tier strings.
 func TestProperty_Motive_SuccessAlwaysRevealsHPTier(t *testing.T) {
 	tiers := []string{"unharmed", "lightly wounded", "bloodied", "badly wounded"}
 
 	rapid.Check(t, func(rt *rapid.T) {
-		deception := rapid.IntRange(0, 9).Draw(rt, "deception")
+		hustle := rapid.IntRange(0, 9).Draw(rt, "hustle")
 		suffix := rapid.StringMatching(`[a-z]{4}`).Draw(rt, "suffix")
 
 		logger := zaptest.NewLogger(t)
@@ -250,7 +250,7 @@ func TestProperty_Motive_SuccessAlwaysRevealsHPTier(t *testing.T) {
 			MaxHP:     20,
 			AC:        13,
 			Perception: 2,
-			Hustle: deception,
+			Hustle: hustle,
 		}, roomID)
 		require.NoError(rt, err)
 

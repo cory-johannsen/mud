@@ -452,7 +452,7 @@ func testGRPCServerWithCharData(t *testing.T) (gamev1.GameServiceClient, *sessio
 	// Skills.
 	allSkills := []*ruleset.Skill{
 		{ID: "acrobatics", Name: "Acrobatics", Ability: "dex"},
-		{ID: "athletics", Name: "Athletics", Ability: "str"},
+		{ID: "muscle", Name: "Muscle", Ability: "brutality"},
 	}
 	skillsRepo := &stubSkillsRepo{
 		data: map[int64]map[string]string{
@@ -544,8 +544,8 @@ func TestHandleChar(t *testing.T) {
 	require.Contains(t, skillByID, "acrobatics")
 	assert.Equal(t, "trained", skillByID["acrobatics"].Proficiency)
 	assert.Equal(t, "dex", skillByID["acrobatics"].Ability)
-	require.Contains(t, skillByID, "athletics")
-	assert.Equal(t, "untrained", skillByID["athletics"].Proficiency)
+	require.Contains(t, skillByID, "muscle")
+	assert.Equal(t, "untrained", skillByID["muscle"].Proficiency)
 
 	// Feats: one feat expected.
 	require.Len(t, sheet.Feats, 1, "expected 1 feat entry")
