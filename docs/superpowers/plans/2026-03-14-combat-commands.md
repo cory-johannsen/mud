@@ -388,15 +388,17 @@ import (
 func newClimbWorld(t *testing.T) (*world.Manager, *session.Manager) {
 	t.Helper()
 	zone := &world.Zone{
-		ID:        "test",
-		Name:      "Test",
-		StartRoom: "room_ground",
+		ID:          "test",
+		Name:        "Test",
+		Description: "Test zone.",
+		StartRoom:   "room_ground",
 		Rooms: map[string]*world.Room{
 			"room_ground": {
-				ID:      "room_ground",
-				ZoneID:  "test",
-				Title:   "Ground Floor",
-				Terrain: "wall",
+				ID:          "room_ground",
+				ZoneID:      "test",
+				Title:       "Ground Floor",
+				Description: "A ground level area.",
+				Terrain:     "wall",
 				Exits: []world.Exit{
 					{Direction: world.Up, TargetRoom: "room_top", ClimbDC: 15, Height: 20},
 					{Direction: world.North, TargetRoom: "room_b"},
@@ -404,18 +406,20 @@ func newClimbWorld(t *testing.T) (*world.Manager, *session.Manager) {
 				Properties: map[string]string{},
 			},
 			"room_top": {
-				ID:     "room_top",
-				ZoneID: "test",
-				Title:  "Top",
-				Exits:  []world.Exit{{Direction: world.Down, TargetRoom: "room_ground"}},
-				Properties: map[string]string{},
+				ID:          "room_top",
+				ZoneID:      "test",
+				Title:       "Top",
+				Description: "The top of the wall.",
+				Exits:       []world.Exit{{Direction: world.Down, TargetRoom: "room_ground"}},
+				Properties:  map[string]string{},
 			},
 			"room_b": {
-				ID:      "room_b",
-				ZoneID:  "test",
-				Title:   "Room B",
-				Exits:   []world.Exit{{Direction: world.South, TargetRoom: "room_ground"}},
-				Properties: map[string]string{},
+				ID:          "room_b",
+				ZoneID:      "test",
+				Title:       "Room B",
+				Description: "A nearby room.",
+				Exits:       []world.Exit{{Direction: world.South, TargetRoom: "room_ground"}},
+				Properties:  map[string]string{},
 			},
 		},
 	}
@@ -545,16 +549,17 @@ func TestProperty_FallDamage_HeightRange(t *testing.T) {
 		roller := dice.NewRoller(dice.NewConstSource(1)) // always 1 → crit fail; each d6 = 1
 		worldMgr, sessMgr := func() (*world.Manager, *session.Manager) {
 			zone := &world.Zone{
-				ID: "t", Name: "T", StartRoom: "r",
+				ID: "t", Name: "T", Description: "Test zone.", StartRoom: "r",
 				Rooms: map[string]*world.Room{
 					"r": {
 						ID: "r", ZoneID: "t",
+						Title: "Start", Description: "A room.",
 						Exits: []world.Exit{
 							{Direction: world.Up, TargetRoom: "r2", ClimbDC: dc, Height: height},
 						},
 						Properties: map[string]string{},
 					},
-					"r2": {ID: "r2", ZoneID: "t", Properties: map[string]string{}},
+					"r2": {ID: "r2", ZoneID: "t", Title: "Top", Description: "Top room.", Properties: map[string]string{}},
 				},
 			}
 			wm, err := world.NewManager([]*world.Zone{zone})
@@ -808,10 +813,10 @@ import (
 func newSwimWorld(t *testing.T) (*world.Manager, *session.Manager) {
 	t.Helper()
 	zone := &world.Zone{
-		ID: "test", Name: "Test", StartRoom: "room_water",
+		ID: "test", Name: "Test", Description: "Test zone.", StartRoom: "room_water",
 		Rooms: map[string]*world.Room{
 			"room_water": {
-				ID: "room_water", ZoneID: "test", Title: "River",
+				ID: "room_water", ZoneID: "test", Title: "River", Description: "A rushing river.",
 				Terrain: "river",
 				Exits: []world.Exit{
 					{Direction: world.North, TargetRoom: "room_bank", SwimDC: 15},
@@ -819,7 +824,7 @@ func newSwimWorld(t *testing.T) (*world.Manager, *session.Manager) {
 				Properties: map[string]string{},
 			},
 			"room_bank": {
-				ID: "room_bank", ZoneID: "test", Title: "Bank",
+				ID: "room_bank", ZoneID: "test", Title: "Bank", Description: "The river bank.",
 				Exits: []world.Exit{{Direction: world.South, TargetRoom: "room_water"}},
 				Properties: map[string]string{},
 			},
@@ -1290,10 +1295,11 @@ func TestHandleMotive_OutOfCombat_Success(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	inst := npcMgr.SpawnInRoom(&npc.Template{
+	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "ganger1", Name: "Ganger", MaxHP: 20, AC: 12,
 		Hustle: 2, Disposition: "neutral",
-	}, "room_a", func(_ string) int { return 0 })
+	}, "room_a")
+	require.NoError(t, err)
 
 	ev, err := svc.handleMotive("u1", &gamev1.MotiveRequest{Target: inst.Name()})
 	require.NoError(t, err)
@@ -1319,7 +1325,8 @@ func TestHandleMotive_OutOfCombat_CritFailure_FlipsDisposition(t *testing.T) {
 		ID: "ganger2", Name: "Ganger", MaxHP: 20, AC: 12,
 		Hustle: 0, Disposition: "neutral",
 	}
-	inst := npcMgr.SpawnInRoom(tmpl, "room_a", func(_ string) int { return 0 })
+	inst, err := npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
 
 	_, err = svc.handleMotive("u1", &gamev1.MotiveRequest{Target: inst.Name()})
 	require.NoError(t, err)
@@ -1366,7 +1373,8 @@ func TestHandleMotive_InCombat_Success_RevealsNextAction(t *testing.T) {
 	sess.Status = statusInCombat
 
 	tmpl := &npc.Template{ID: "g3", Name: "Ganger", MaxHP: 20, AC: 12, Hustle: 0}
-	inst := npcMgr.SpawnInRoom(tmpl, "room_a", func(_ string) int { return 0 })
+	inst, err := npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
 	inst.CurrentHP = 20 // > 25%
 
 	// Start combat so SpendAP works
@@ -1416,7 +1424,8 @@ func TestHandleMotive_InCombat_CritFailure_SetsMotiveBonus(t *testing.T) {
 	sess.Status = statusInCombat
 
 	tmpl := &npc.Template{ID: "g4", Name: "Ganger", MaxHP: 20, AC: 12, Hustle: 0}
-	inst := npcMgr.SpawnInRoom(tmpl, "room_a", func(_ string) int { return 0 })
+	inst, err := npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
 
 	_, startErr := combatHandler.StartCombat("room_a", []string{"u1"})
 	require.NoError(t, startErr)
@@ -1580,16 +1589,13 @@ for _, c := range cbt.Combatants {
     if c.Kind != combat.KindNPC {
         continue
     }
-    inst := h.npcMgr.GetInstance(c.ID)
-    if inst == nil || inst.MotiveBonus <= 0 {
+    inst, instOK := h.npcMgr.Get(c.ID)
+    if !instOK || inst == nil || inst.MotiveBonus <= 0 {
         continue
     }
     c.AttackMod += inst.MotiveBonus
     inst.MotiveBonus = 0
 }
-```
-
-Verify `h.npcMgr.GetInstance(id string) *npc.Instance` exists. If not, use whatever the correct retrieval method is (`grep -n "func.*GetInstance\|func.*Get.*npc\|func.*Instance" internal/game/npc/manager.go`).
 
 - [ ] **Step 5: Run tests**
 
@@ -1831,25 +1837,10 @@ func TestHandleDelay_InCombat_AppliesACPenalty(t *testing.T) {
 // Postcondition: BankedAP == min(startingAP - 1, 2); capped non-negative.
 func TestProperty_BankedAP_Formula(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		startingAP := rapid.IntRange(1, 10).Draw(rt, "startingAP") // >=1 to avoid "not enough AP" error
+		startingAP := rapid.IntRange(1, 3).Draw(rt, "startingAP") // [1,3]: >=1 avoids "not enough AP"; <=3 stays within default AP grant
 
 		roller := dice.NewRoller(dice.NewConstSource(10))
-		_, sessMgr, combatHandler := newDelaySvcWithCombat(rt, roller)
-
-		worldMgr, _ := testWorldAndSession(rt)
-		logger := zaptest.NewLogger(rt)
-		npcMgr := npc.NewManager()
-		svc := NewGameServiceServer(
-			worldMgr, sessMgr, command.DefaultRegistry(),
-			NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
-			NewChatHandler(sessMgr), logger,
-			nil, roller, nil, npcMgr, combatHandler, nil,
-			nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
-			nil, nil, nil,
-		nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil,
-		nil, nil,
-		)
+		svc, sessMgr, combatHandler := newDelaySvcWithCombat(rt, roller)
 
 		_, addErr := sessMgr.AddPlayer(session.AddPlayerOptions{
 			UID: "u", Username: "u", CharName: "u", Role: "player",
@@ -1861,14 +1852,13 @@ func TestProperty_BankedAP_Formula(t *testing.T) {
 
 		_, startErr := combatHandler.StartCombat("room_a", []string{"u"})
 		require.NoError(rt, startErr)
-
-		// Adjust AP to startingAP (StartCombat gives 3; spend/add to reach desired)
+		// StartCombat gives 3 AP; adjust to startingAP by spending the difference.
 		current := combatHandler.RemainingAP("u")
 		if diff := current - startingAP; diff > 0 {
 			_ = combatHandler.SpendAP("u", diff)
-		} else if diff < 0 {
-			// Use AddAP via action queue directly — need access; skip if not feasible
 		}
+		// If startingAP > 3, AddAP is called after StartCombat via the queue.
+		// For this test, limit to [1,3] to stay within default 3 AP grant; adjust rapid range if needed.
 
 		_, err := svc.handleDelay("u", &gamev1.DelayRequest{})
 		require.NoError(rt, err)
@@ -1992,13 +1982,17 @@ In `internal/gameserver/combat_handler.go`, add two methods:
 // ApplyPlayerACMod adds delta to the player's Combatant.ACMod in their active combat.
 // No-op if player not in active combat.
 //
-// Precondition: combatMu NOT held by caller.
+// Precondition: combatMu NOT held by caller; uid is a valid player UID.
 // Postcondition: player's Combatant.ACMod incremented by delta.
 func (h *CombatHandler) ApplyPlayerACMod(uid string, delta int) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return
+	}
 	h.combatMu.Lock()
 	defer h.combatMu.Unlock()
-	cbt := h.engine.CombatForPlayer(uid)
-	if cbt == nil {
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
 		return
 	}
 	for _, c := range cbt.Combatants {
@@ -2012,13 +2006,17 @@ func (h *CombatHandler) ApplyPlayerACMod(uid string, delta int) {
 // PlayerACMod returns the player's Combatant.ACMod in their active combat.
 // Returns 0 if not in combat.
 //
-// Precondition: combatMu NOT held by caller.
+// Precondition: combatMu NOT held by caller; uid is a valid player UID.
 // Postcondition: returns current ACMod value.
 func (h *CombatHandler) PlayerACMod(uid string) int {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return 0
+	}
 	h.combatMu.Lock()
 	defer h.combatMu.Unlock()
-	cbt := h.engine.CombatForPlayer(uid)
-	if cbt == nil {
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
 		return 0
 	}
 	for _, c := range cbt.Combatants {
@@ -2028,9 +2026,6 @@ func (h *CombatHandler) PlayerACMod(uid string) int {
 	}
 	return 0
 }
-```
-
-Verify `h.engine.CombatForPlayer(uid string) *combat.Combat` exists. If not, use the equivalent engine lookup method (`grep -n "func.*CombatFor\|CombatByPlayer\|CombatFor" internal/game/combat/engine.go`).
 
 - [ ] **Step 7: Inject BankedAP in resolveAndAdvanceLocked**
 
