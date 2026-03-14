@@ -71,7 +71,7 @@ If preconditions are not met, the subcommand MUST return an error and MUST NOT c
 
 ### REQ-REROLL3
 When `heropoint reroll` executes successfully, it MUST:
-1. Roll fresh dice using the same die type as `LastCheckRoll`
+1. Roll fresh 1d20
 2. Determine the winner by selecting `max(LastCheckRoll, NewRoll)`
 3. Update `LastCheckRoll` to the winner value
 4. Decrement `HeroPoints` by exactly 1
