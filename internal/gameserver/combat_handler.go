@@ -1399,6 +1399,22 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	// Start the next round.
 	condEvents := cbt.StartRound(3)
 	condCombatEvents := conditionEventsToProto(condEvents, h.condRegistry)
+
+	// Apply MotiveBonus from sense motive critical failures to NPC AttackMod.
+	// Precondition: combatMu held; cbt.StartRound has reset per-round state.
+	// Postcondition: NPC combatants with MotiveBonus > 0 have AttackMod incremented; MotiveBonus zeroed.
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindNPC {
+			continue
+		}
+		inst, instOK := h.npcMgr.Get(c.ID)
+		if !instOK || inst == nil || inst.MotiveBonus <= 0 {
+			continue
+		}
+		c.AttackMod += inst.MotiveBonus
+		inst.MotiveBonus = 0
+	}
+
 	h.autoQueueNPCsLocked(cbt)
 	h.autoQueuePlayersLocked(cbt)
 

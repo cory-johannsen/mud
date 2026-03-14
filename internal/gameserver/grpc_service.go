@@ -5389,21 +5389,17 @@ func (s *GameServiceServer) handleSeek(uid string) (*gamev1.ServerEvent, error) 
 	return messageEvent(detail + fmt.Sprintf(" — success! You locate: %s.", strings.Join(revealed, ", "))), nil
 }
 
-// handleMotive performs an awareness skill check against the target NPC's Hustle DC (10 + Hustle).
-// In combat: costs 1 AP; on success reveals the NPC's HP tier.
-// Out of combat: returns a stub message for future non-combat NPC extension.
+// handleMotive performs a sense motive check against a target NPC.
+// In combat: 4-outcome system revealing NPC state. Out of combat: reveals disposition.
 //
-// Precondition: uid must be a valid player session; req.Target must name an NPC in the room when in combat.
-// Postcondition: In combat on success, returns a message with the NPC's HP tier string.
+// Precondition: uid is a valid player session; req.Target names an NPC in the player's room.
+// Postcondition: On crit success reveals full NPC state; on success reveals next action or disposition;
+//
+//	on crit fail sets inst.MotiveBonus=2 or flips disposition to hostile.
 func (s *GameServiceServer) handleMotive(uid string, req *gamev1.MotiveRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
-	}
-
-	// Out-of-combat stub: behavior added when non-combat NPCs are implemented.
-	if sess.Status != statusInCombat {
-		return messageEvent("There's no one here worth reading."), nil
 	}
 
 	if req.GetTarget() == "" {
@@ -5415,11 +5411,14 @@ func (s *GameServiceServer) handleMotive(uid string, req *gamev1.MotiveRequest) 
 		return errorEvent(fmt.Sprintf("Target %q not found in current room.", req.GetTarget())), nil
 	}
 
-	if s.combatH == nil {
-		return errorEvent("Combat handler unavailable."), nil
-	}
-	if err := s.combatH.SpendAP(uid, 1); err != nil {
-		return errorEvent(err.Error()), nil
+	inCombat := sess.Status == statusInCombat
+	if inCombat {
+		if s.combatH == nil {
+			return errorEvent("Combat handler unavailable."), nil
+		}
+		if err := s.combatH.SpendAP(uid, 1); err != nil {
+			return errorEvent(err.Error()), nil
+		}
 	}
 
 	rollResult, err := s.dice.RollExpr("1d20")
@@ -5434,13 +5433,100 @@ func (s *GameServiceServer) handleMotive(uid string, req *gamev1.MotiveRequest) 
 	sess.LastCheckDC = dc
 	sess.LastCheckName = "motive"
 
-	detail := fmt.Sprintf("Motive (hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
-	if total < dc {
-		return messageEvent(detail + fmt.Sprintf(" — failure. You can't get a read on %s.", inst.Name())), nil
-	}
+	outcome := combat.OutcomeFor(total, dc)
+	detail := fmt.Sprintf("Motive (Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 
-	tier := npcHPTier(inst.CurrentHP, inst.MaxHP)
-	return messageEvent(detail + fmt.Sprintf(" — success! %s appears %s.", inst.Name(), tier)), nil
+	if inCombat {
+		return s.handleMotiveInCombat(detail, outcome, inst)
+	}
+	return s.handleMotiveOutOfCombat(detail, outcome, inst)
+}
+
+// handleMotiveInCombat applies the 4-outcome sense motive results during combat.
+//
+// Precondition: detail is a non-empty roll summary string; inst is non-nil.
+// Postcondition: On crit success reveals full NPC state; on success reveals next action;
+//
+//	on failure returns cannot-read message; on crit fail sets inst.MotiveBonus=2.
+func (s *GameServiceServer) handleMotiveInCombat(detail string, outcome combat.Outcome, inst *npc.Instance) (*gamev1.ServerEvent, error) {
+	switch outcome {
+	case combat.CritSuccess:
+		msg := detail + " — critical success!\n"
+		msg += fmt.Sprintf("%s: %s\n", inst.Name(), motiveNextAction(inst))
+		if len(inst.SpecialAbilities) > 0 {
+			msg += fmt.Sprintf("Hidden abilities: %s\n", strings.Join(inst.SpecialAbilities, ", "))
+		}
+		if len(inst.Resistances) > 0 {
+			msg += "Resistant to: " + formatResistanceMap(inst.Resistances) + "\n"
+		}
+		if len(inst.Weaknesses) > 0 {
+			msg += "Weak to: " + formatResistanceMap(inst.Weaknesses) + "\n"
+		}
+		return messageEvent(strings.TrimRight(msg, "\n")), nil
+
+	case combat.Success:
+		return messageEvent(detail + " — success! " + inst.Name() + " " + motiveNextAction(inst) + "."), nil
+
+	case combat.Failure:
+		return messageEvent(detail + " — failure. You cannot read their intentions."), nil
+
+	default: // CritFailure
+		inst.MotiveBonus = 2
+		return messageEvent(detail + " — critical failure. You misread them completely — they notice."), nil
+	}
+}
+
+// handleMotiveOutOfCombat applies sense motive results outside of combat.
+//
+// Precondition: detail is a non-empty roll summary string; inst is non-nil.
+// Postcondition: On success reveals disposition; on failure cannot-read; on crit fail flips disposition to hostile.
+func (s *GameServiceServer) handleMotiveOutOfCombat(detail string, outcome combat.Outcome, inst *npc.Instance) (*gamev1.ServerEvent, error) {
+	switch outcome {
+	case combat.CritSuccess, combat.Success:
+		return messageEvent(fmt.Sprintf("%s — success! %s seems %s.", detail, inst.Name(), inst.Disposition)), nil
+
+	case combat.Failure:
+		return messageEvent(detail + " — failure. You cannot get a read on them."), nil
+
+	default: // CritFailure
+		if inst.Disposition == "neutral" || inst.Disposition == "wary" {
+			inst.Disposition = "hostile"
+		}
+		return messageEvent(detail + " — critical failure. You misread them badly."), nil
+	}
+}
+
+// motiveNextAction returns the "next intended action" heuristic string for an NPC.
+//
+// Precondition: inst is non-nil; inst.MaxHP > 0.
+// Postcondition: Returns a non-empty descriptive string.
+func motiveNextAction(inst *npc.Instance) string {
+	hpPct := float64(inst.CurrentHP) / float64(inst.MaxHP) * 100
+	if hpPct < 25 {
+		return "looks ready to flee"
+	}
+	if len(inst.SpecialAbilities) > 0 {
+		return "seems to be holding something back"
+	}
+	return "looks focused on the fight"
+}
+
+// formatResistanceMap returns "fire (5), cold (3)" format for a resistance/weakness map.
+// Keys are sorted for determinism.
+//
+// Precondition: m is non-nil.
+// Postcondition: Returns a non-empty comma-separated string of "key (val)" pairs sorted by key.
+func formatResistanceMap(m map[string]int) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	parts := make([]string, 0, len(keys))
+	for _, k := range keys {
+		parts = append(parts, fmt.Sprintf("%s (%d)", k, m[k]))
+	}
+	return strings.Join(parts, ", ")
 }
 
 // handleCalm attempts to calm the player's worst active mental state via a Grit check.
