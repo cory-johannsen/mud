@@ -165,7 +165,7 @@ func TestHandleDisarm_TargetNotFound(t *testing.T) {
 }
 
 // TestHandleDisarm_RollFailure_NoArmChange verifies that handleDisarm returns a failure message
-// and does not clear the NPC's WeaponID when the athletics roll falls below the DC.
+// and does not clear the NPC's WeaponID when the muscle roll falls below the DC.
 //
 // Precondition: player in combat; NPC Level=5 → DC=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
 // Postcondition: message event containing "failure"; NPC WeaponID unchanged.

@@ -812,7 +812,7 @@ message HeroPointRequest {
   string subcommand = 1; // "reroll" or "stabilize"
 }
 
-// MotiveRequest asks the server to read an NPC's intentions (awareness vs Deception DC).
+// MotiveRequest asks the server to read an NPC's intentions (awareness vs Hustle DC).
 message MotiveRequest {
   string target = 1;
 }

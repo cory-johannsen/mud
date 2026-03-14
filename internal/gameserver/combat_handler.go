@@ -716,12 +716,12 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, bool, error) {
 	}
 	_ = q.DeductAP(q.RemainingPoints())
 
-	// FLEE-3: skill check — auto-pick best of athletics or acrobatics.
+	// FLEE-3: skill check — auto-pick best of muscle or acrobatics.
 	roll, _ := h.dice.RollExpr("d20")
-	athleticsBonus := skillRankBonus(sess.Skills["athletics"])
+	muscleBonus := skillRankBonus(sess.Skills["muscle"])
 	acrobaticsBonus := skillRankBonus(sess.Skills["acrobatics"])
-	bonus := athleticsBonus
-	if acrobaticsBonus > athleticsBonus {
+	bonus := muscleBonus
+	if acrobaticsBonus > muscleBonus {
 		bonus = acrobaticsBonus
 	}
 	playerTotal := roll.Total() + bonus

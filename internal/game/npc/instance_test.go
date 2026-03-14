@@ -177,24 +177,24 @@ func TestNewInstanceWithResolver_NilResolver_NoACBonus(t *testing.T) {
 	assert.Equal(t, 12, inst.AC) // no bonus — resolver is nil
 }
 
-func TestNewInstance_DeceptionCopiedFromTemplate(t *testing.T) {
+func TestNewInstance_HustleCopiedFromTemplate(t *testing.T) {
 	tmpl := &npc.Template{
 		ID: "test-npc", Name: "Test", Level: 1, MaxHP: 10, AC: 10,
 		Hustle: 7,
 	}
 	inst := npc.NewInstance("inst-1", tmpl, "room_a")
 	if inst.Hustle != 7 {
-		t.Errorf("expected Deception=7, got %d", inst.Hustle)
+		t.Errorf("expected Hustle=7, got %d", inst.Hustle)
 	}
 }
 
-func TestNewInstance_DeceptionDefaultsToZero(t *testing.T) {
+func TestNewInstance_HustleDefaultsToZero(t *testing.T) {
 	tmpl := &npc.Template{
 		ID: "test-npc2", Name: "Test2", Level: 1, MaxHP: 10, AC: 10,
 	}
 	inst := npc.NewInstance("inst-2", tmpl, "room_a")
 	if inst.Hustle != 0 {
-		t.Errorf("expected Deception=0, got %d", inst.Hustle)
+		t.Errorf("expected Hustle=0, got %d", inst.Hustle)
 	}
 }
 

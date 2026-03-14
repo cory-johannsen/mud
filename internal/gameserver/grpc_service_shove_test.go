@@ -177,7 +177,7 @@ func TestHandleShove_TargetNotFound(t *testing.T) {
 }
 
 // TestHandleShove_Failure verifies that handleShove returns a failure message
-// when the athletics roll total is below the target's Toughness DC.
+// when the muscle roll total is below the target's Toughness DC.
 //
 // Precondition: player in combat; NPC Level=5 → DC=15 (Toughness DC: Level=5, Brutality=10, rank=untrained → 10+5+0+0=15); dice returns 0 (roll=1, bonus=0, total=1 < 15).
 // Postcondition: message event containing "failure"; NPC position unchanged.
