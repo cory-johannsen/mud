@@ -1,6 +1,7 @@
 package combat_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -172,4 +173,70 @@ func TestEngine_AllCombats_ReturnsActive(t *testing.T) {
 	all := eng.AllCombats()
 	require.Len(t, all, 1)
 	assert.Equal(t, cbt, all[0])
+}
+func TestStartCombat_PopulatesParticipants_OnePlayer(t *testing.T) {
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, Initiative: 15},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 10, CurrentHP: 10, AC: 12, Level: 1, Initiative: 8},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, makeTestRegistry(), nil, "")
+	require.NoError(t, err)
+	require.Len(t, cbt.Participants, 1, "expected 1 participant (player only)")
+	assert.Equal(t, "p1", cbt.Participants[0])
+}
+
+func TestStartCombat_PopulatesParticipants_TwoPlayers(t *testing.T) {
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, Initiative: 15},
+		{ID: "p2", Kind: combat.KindPlayer, Name: "Bob", MaxHP: 20, CurrentHP: 20, AC: 13, Level: 1, Initiative: 12},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 10, CurrentHP: 10, AC: 12, Level: 1, Initiative: 8},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, makeTestRegistry(), nil, "")
+	require.NoError(t, err)
+	assert.Len(t, cbt.Participants, 2, "expected 2 participants (both players)")
+}
+
+func TestStartCombat_NPCNotInParticipants(t *testing.T) {
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, Initiative: 15},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 10, CurrentHP: 10, AC: 12, Level: 1, Initiative: 8},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, makeTestRegistry(), nil, "")
+	require.NoError(t, err)
+	for _, uid := range cbt.Participants {
+		assert.NotEqual(t, "n1", uid, "NPC should not appear in Participants")
+	}
+}
+
+// REQ-T-PROP (property): for any mix of combatants, len(Participants) == number of KindPlayer combatants.
+func TestProperty_StartCombat_ParticipantsCountEqualsPlayerCount(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 8).Draw(rt, "n")
+		var combatants []*combat.Combatant
+		wantCount := 0
+		for i := 0; i < n; i++ {
+			kind := rapid.SampledFrom([]combat.Kind{combat.KindPlayer, combat.KindNPC}).Draw(rt, fmt.Sprintf("kind_%d", i))
+			id := fmt.Sprintf("c%d", i)
+			combatants = append(combatants, &combat.Combatant{
+				ID:         id,
+				Kind:       kind,
+				Name:       id,
+				MaxHP:      20,
+				CurrentHP:  20,
+				AC:         12,
+				Level:      1,
+				Initiative: rapid.IntRange(1, 20).Draw(rt, fmt.Sprintf("init_%d", i)),
+			})
+			if kind == combat.KindPlayer {
+				wantCount++
+			}
+		}
+		eng := combat.NewEngine()
+		cbt, err := eng.StartCombat("room1", combatants, makeTestRegistry(), nil, "")
+		require.NoError(rt, err)
+		require.Equal(rt, wantCount, len(cbt.Participants), "Participants count must equal player count")
+	})
 }

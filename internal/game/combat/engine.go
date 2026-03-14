@@ -21,6 +21,9 @@ type Combat struct {
 	turnIndex int
 	// Over is true when combat has been resolved.
 	Over bool
+	// Participants is the ordered list of player UIDs who were ever active combatants
+	// in this encounter. Used for XP and loot distribution. Never shrunk after join.
+	Participants []string
 	// Round is the current round number, starting at 0 and incrementing each StartRound call.
 	Round int
 	// ActionQueues maps combatant UID to their ActionQueue for the current round.
@@ -396,6 +399,12 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 			set.SetScripting(scriptMgr, zoneID)
 		}
 		cbt.Conditions[c.ID] = set
+	}
+	// Populate Participants with player UIDs from the initial combatant list.
+	for _, c := range combatants {
+		if c.Kind == KindPlayer {
+			cbt.Participants = append(cbt.Participants, c.ID)
+		}
 	}
 	e.combats[roomID] = cbt
 	return cbt, nil
