@@ -2151,23 +2151,11 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		// a happens-before signal for tests polling npcMgr.Get.
 		if inst.Loot != nil {
 			result := npc.GenerateLoot(*inst.Loot)
-			// Award currency to the first living player (loot table + rob wallet).
+			// Distribute currency equally among all living participants.
 			totalCurrency := result.Currency + inst.Currency
 			inst.Currency = 0
-			if totalCurrency > 0 {
-				if killer := h.firstLivingPlayer(cbt); killer != nil {
-					killer.Currency += totalCurrency
-					if h.currencySaver != nil {
-						if saveErr := h.currencySaver.SaveCurrency(context.Background(), killer.CharacterID, killer.Currency); saveErr != nil && h.logger != nil {
-							h.logger.Warn("SaveCurrency failed",
-								zap.String("uid", killer.UID),
-								zap.Int64("character_id", killer.CharacterID),
-								zap.Error(saveErr),
-							)
-						}
-					}
-				}
-			}
+			livingParticipants := h.livingParticipantSessions(cbt)
+			h.distributeCurrencyLocked(context.Background(), livingParticipants, totalCurrency)
 			// Drop items on the room floor.
 			if h.floorMgr != nil {
 				for _, lootItem := range result.Items {
@@ -2179,20 +2167,11 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 				}
 			}
 		} else if inst.Currency > 0 {
-			// No loot table but NPC has rob wallet — pay it out to the killer.
-			if killer := h.firstLivingPlayer(cbt); killer != nil {
-				killer.Currency += inst.Currency
-				inst.Currency = 0
-				if h.currencySaver != nil {
-					if saveErr := h.currencySaver.SaveCurrency(context.Background(), killer.CharacterID, killer.Currency); saveErr != nil && h.logger != nil {
-						h.logger.Warn("SaveCurrency failed after rob payout",
-							zap.String("uid", killer.UID),
-							zap.Int64("character_id", killer.CharacterID),
-							zap.Error(saveErr),
-						)
-					}
-				}
-			}
+			// No loot table but NPC has rob wallet — distribute to living participants.
+			totalCurrency := inst.Currency
+			inst.Currency = 0
+			livingParticipants := h.livingParticipantSessions(cbt)
+			h.distributeCurrencyLocked(context.Background(), livingParticipants, totalCurrency)
 		}
 		// Announce NPC death in the console.
 		h.broadcastFn(inst.RoomID, []*gamev1.CombatEvent{{
@@ -2201,57 +2180,34 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			Narrative: fmt.Sprintf("%s is dead!", c.Name),
 		}})
 
-		// Award kill XP to the first living player.
+		// Award kill XP split among all living participants.
 		if h.xpSvc != nil {
-			if killer := h.firstLivingPlayer(cbt); killer != nil {
-				cfg := h.xpSvc.Config()
-				xpAmount := inst.Level * cfg.Awards.KillXPPerNPCLevel
-				if xpMsgs, xpErr := h.xpSvc.AwardKill(context.Background(), killer, inst.Level, killer.CharacterID); xpErr != nil {
-					if h.logger != nil {
-						h.logger.Warn("AwardKill failed",
-							zap.String("killer_uid", killer.UID),
-							zap.Int64("character_id", killer.CharacterID),
+			cfg := h.xpSvc.Config()
+			livingParticipants := h.livingParticipantSessions(cbt)
+			if len(livingParticipants) > 0 {
+				totalXP := inst.Level * cfg.Awards.KillXPPerNPCLevel
+				share := totalXP / len(livingParticipants)
+				if share == 0 && totalXP > 0 {
+					p := livingParticipants[0]
+					xpMsgs, xpErr := h.xpSvc.AwardXPAmount(context.Background(), p, p.CharacterID, 1)
+					if xpErr == nil {
+						h.pushXPMessages(p, xpMsgs, 1, c.Name)
+					} else if h.logger != nil {
+						h.logger.Warn("AwardXPAmount failed",
+							zap.String("uid", p.UID),
 							zap.Error(xpErr),
 						)
 					}
 				} else {
-					// Announce XP grant directly to the killer.
-					xpGrantMsg := fmt.Sprintf("You gain %d XP for killing %s.", xpAmount, c.Name)
-					xpGrantEvt := &gamev1.ServerEvent{
-						Payload: &gamev1.ServerEvent_Message{
-							Message: &gamev1.MessageEvent{
-								Content: xpGrantMsg,
-								Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
-							},
-						},
-					}
-					if data, marshalErr := proto.Marshal(xpGrantEvt); marshalErr == nil {
-						_ = killer.Entity.Push(data)
-					}
-					for _, msg := range xpMsgs {
-						xpEvt := &gamev1.ServerEvent{
-							Payload: &gamev1.ServerEvent_Message{
-								Message: &gamev1.MessageEvent{
-									Content: msg,
-									Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
-								},
-							},
-						}
-						if data, marshalErr := proto.Marshal(xpEvt); marshalErr == nil {
-							_ = killer.Entity.Push(data)
-						}
-					}
-					if len(xpMsgs) > 0 {
-						ciEvt := &gamev1.ServerEvent{
-							Payload: &gamev1.ServerEvent_CharacterInfo{
-								CharacterInfo: &gamev1.CharacterInfo{
-									CurrentHp: int32(killer.CurrentHP),
-									MaxHp:     int32(killer.MaxHP),
-								},
-							},
-						}
-						if data, marshalErr := proto.Marshal(ciEvt); marshalErr == nil {
-							_ = killer.Entity.Push(data)
+					for _, p := range livingParticipants {
+						xpMsgs, xpErr := h.xpSvc.AwardXPAmount(context.Background(), p, p.CharacterID, share)
+						if xpErr == nil {
+							h.pushXPMessages(p, xpMsgs, share, c.Name)
+						} else if h.logger != nil {
+							h.logger.Warn("AwardXPAmount failed",
+								zap.String("uid", p.UID),
+								zap.Error(xpErr),
+							)
 						}
 					}
 				}
@@ -2263,6 +2219,108 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		if h.respawnMgr != nil {
 			delay := h.respawnMgr.ResolvedDelay(templateID, roomID)
 			h.respawnMgr.Schedule(templateID, roomID, time.Now(), delay)
+		}
+	}
+}
+
+// livingParticipantSessions returns []*session.PlayerSession for all combat participants
+// whose Dead field is false, in Combatants order.
+//
+// Precondition: combatMu is held; cbt must not be nil.
+// Postcondition: Returns a non-nil (possibly empty) slice of living player sessions.
+func (h *CombatHandler) livingParticipantSessions(cbt *combat.Combat) []*session.PlayerSession {
+	participantSet := make(map[string]bool, len(cbt.Participants))
+	for _, uid := range cbt.Participants {
+		participantSet[uid] = true
+	}
+	var result []*session.PlayerSession
+	for _, c := range cbt.Combatants {
+		if !participantSet[c.ID] || c.IsDead() {
+			continue
+		}
+		if sess, ok := h.sessions.GetPlayer(c.ID); ok {
+			result = append(result, sess)
+		}
+	}
+	return result
+}
+
+// distributeCurrencyLocked distributes totalCurrency equally among livingParticipants.
+// When share == 0 (more participants than currency units), only the first participant
+// receives 1 unit. SaveCurrency errors are logged as warnings and do not propagate.
+//
+// Precondition: combatMu is held.
+// Postcondition: Each participant's Currency is incremented by their share; persisted when currencySaver is non-nil.
+func (h *CombatHandler) distributeCurrencyLocked(ctx context.Context, livingParticipants []*session.PlayerSession, totalCurrency int) {
+	if totalCurrency == 0 || len(livingParticipants) == 0 {
+		return
+	}
+	share := totalCurrency / len(livingParticipants)
+	if share == 0 {
+		livingParticipants[0].Currency++
+		if h.currencySaver != nil {
+			if err := h.currencySaver.SaveCurrency(ctx, livingParticipants[0].CharacterID, livingParticipants[0].Currency); err != nil && h.logger != nil {
+				h.logger.Warn("SaveCurrency failed (share=0 fallback)",
+					zap.String("uid", livingParticipants[0].UID),
+					zap.Error(err),
+				)
+			}
+		}
+		return
+	}
+	for _, p := range livingParticipants {
+		p.Currency += share
+		if h.currencySaver != nil {
+			if err := h.currencySaver.SaveCurrency(ctx, p.CharacterID, p.Currency); err != nil && h.logger != nil {
+				h.logger.Warn("SaveCurrency failed",
+					zap.String("uid", p.UID),
+					zap.Error(err),
+				)
+			}
+		}
+	}
+}
+
+// pushXPMessages sends XP narrative messages to sess after an AwardXPAmount call.
+//
+// Precondition: sess must not be nil; xpAmount must be >= 0.
+// Postcondition: XP grant message and any level-up messages are pushed to the player's entity stream.
+func (h *CombatHandler) pushXPMessages(sess *session.PlayerSession, levelMsgs []string, xpAmount int, npcName string) {
+	xpGrantEvt := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{
+				Content: fmt.Sprintf("You gain %d XP for killing %s.", xpAmount, npcName),
+				Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+			},
+		},
+	}
+	if data, marshalErr := proto.Marshal(xpGrantEvt); marshalErr == nil {
+		_ = sess.Entity.Push(data)
+	}
+	for _, msg := range levelMsgs {
+		xpEvt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{
+					Content: msg,
+					Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+				},
+			},
+		}
+		if data, marshalErr := proto.Marshal(xpEvt); marshalErr == nil {
+			_ = sess.Entity.Push(data)
+		}
+	}
+	if len(levelMsgs) > 0 {
+		ciEvt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_CharacterInfo{
+				CharacterInfo: &gamev1.CharacterInfo{
+					CurrentHp: int32(sess.CurrentHP),
+					MaxHp:     int32(sess.MaxHP),
+				},
+			},
+		}
+		if data, marshalErr := proto.Marshal(ciEvt); marshalErr == nil {
+			_ = sess.Entity.Push(data)
 		}
 	}
 }
