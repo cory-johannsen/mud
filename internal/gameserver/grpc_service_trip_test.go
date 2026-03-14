@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -12,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+	"pgregory.net/rapid"
 )
 
 // newTripSvc builds a minimal GameServiceServer for handleTrip tests.
@@ -148,6 +150,7 @@ func TestHandleTrip_TargetNotFound(t *testing.T) {
 	const roomID = "room_trp_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "goblin-trp-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -190,6 +193,7 @@ func TestHandleTrip_RollBelowDC_Failure(t *testing.T) {
 	const roomID = "room_trp_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "bandit-trp-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -227,6 +231,7 @@ func TestHandleTrip_RollAboveDC_Success(t *testing.T) {
 	const roomID = "room_trp_ra"
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "ganger-trp-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -252,4 +257,55 @@ func TestHandleTrip_RollAboveDC_Success(t *testing.T) {
 	condSet, ok := combatHandler.GetCombatConditionSet("u_trp_ra", inst.ID)
 	require.True(t, ok, "expected to find condition set for NPC after trip")
 	assert.True(t, condSet.Has("prone"), "NPC must have prone condition after successful trip")
+}
+
+// TestProperty_HandleTrip_HustleDC_Formula verifies that the Hustle DC
+// used by handleTrip equals 10 + level + abilityMod(quickness) + rankBonus.
+//
+// Precondition: rapid generates level (1-20), quickness (1-20), rank string.
+// Postcondition: message content contains the expected DC value.
+func TestProperty_HandleTrip_HustleDC_Formula(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		quickness := rapid.IntRange(1, 20).Draw(rt, "quickness")
+		rank := rapid.SampledFrom([]string{"", "trained", "expert", "master", "legendary"}).Draw(rt, "rank")
+
+		expectedMod := combat.AbilityMod(quickness)
+		expectedRankBonus := skillRankBonus(rank)
+		expectedDC := 10 + level + expectedMod + expectedRankBonus
+
+		tmpl := &npc.Template{
+			ID: fmt.Sprintf("trip-prop-%d-%d", level, quickness), Name: "Target", Level: level,
+			MaxHP: 20, AC: 13, Perception: 5,
+			Abilities:  npc.Abilities{Brutality: 10, Quickness: quickness, Savvy: 10},
+			HustleRank: rank,
+		}
+
+		logger := zaptest.NewLogger(t)
+		src := &fixedDiceSource{val: 99}
+		roller := dice.NewLoggedRoller(src, logger)
+		svc, sessMgr, npcMgr, combatHandler := newTripSvcWithCombat(t, roller)
+
+		roomID := fmt.Sprintf("room_trip_prop_%d_%d", level, quickness)
+		uid := fmt.Sprintf("u_trip_prop_%d_%d", level, quickness)
+		_, err := npcMgr.Spawn(tmpl, roomID)
+		require.NoError(rt, err)
+		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID: uid, Username: "F", CharName: "F",
+			RoomID: roomID, CurrentHP: 10, MaxHP: 20, Role: "player",
+		})
+		require.NoError(rt, err)
+		sess.Status = statusInCombat
+		_, err = combatHandler.Attack(uid, "Target")
+		require.NoError(rt, err)
+		combatHandler.cancelTimer(roomID)
+
+		event, err := svc.handleTrip(uid, &gamev1.TripRequest{Target: "Target"})
+		require.NoError(rt, err)
+		require.NotNil(rt, event)
+		msgEvt := event.GetMessage()
+		require.NotNil(rt, msgEvt)
+		assert.Contains(rt, msgEvt.Content, fmt.Sprintf("DC %d", expectedDC),
+			"message must include computed Hustle DC")
+	})
 }

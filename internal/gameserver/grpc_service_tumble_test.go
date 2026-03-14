@@ -148,6 +148,7 @@ func TestHandleTumble_TargetNotFound(t *testing.T) {
 	const roomID = "room_tbl_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "goblin-tbl-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -190,6 +191,7 @@ func TestHandleTumble_RollAboveDC_Success(t *testing.T) {
 	const roomID = "room_tbl_ra"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "ganger-tbl-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 
@@ -236,6 +238,7 @@ func TestHandleTumble_RollBelowDC_Failure(t *testing.T) {
 	const roomID = "room_tbl_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
 		ID: "bandit-tbl-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
 

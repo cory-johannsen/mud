@@ -4748,7 +4748,7 @@ func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*ga
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + athletics bonus vs target Level+10.
+	// Skill check: 1d20 + athletics bonus vs target Hustle DC. Hustle DC = 10 + level + AbilityMod(Quickness) + proficiency rank bonus.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleTrip: rolling d20: %w", err)
@@ -4756,9 +4756,9 @@ func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*ga
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
-	dc := inst.Level + 10
+	dc := 10 + inst.Level + combat.AbilityMod(inst.Quickness) + skillRankBonus(inst.HustleRank)
 
-	detail := fmt.Sprintf("Trip (athletics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Trip (athletics Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + " — failure. Your trip attempt fails."), nil
 	}
@@ -4806,7 +4806,7 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + athletics bonus vs target Level+10.
+	// Skill check: 1d20 + athletics bonus vs target Hustle DC.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleDisarm: rolling d20: %w", err)
@@ -4814,9 +4814,9 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
-	dc := inst.Level + 10
+	dc := 10 + inst.Level + combat.AbilityMod(inst.Quickness) + skillRankBonus(inst.HustleRank)
 
-	detail := fmt.Sprintf("Disarm (athletics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Disarm (athletics Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + " — failure. Your disarm attempt fails."), nil
 	}
@@ -5081,7 +5081,7 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + acrobatics bonus vs target Level+10.
+	// Skill check: 1d20 + acrobatics bonus vs target Hustle DC.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleTumble: rolling d20: %w", err)
@@ -5089,9 +5089,9 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["acrobatics"])
 	total := roll + bonus
-	dc := inst.Level + 10
+	dc := 10 + inst.Level + combat.AbilityMod(inst.Quickness) + skillRankBonus(inst.HustleRank)
 
-	detail := fmt.Sprintf("Tumble (acrobatics DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Tumble (acrobatics Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 
 	if total >= dc {
 		// Success: move player 5 ft toward NPC.
