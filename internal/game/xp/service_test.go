@@ -242,6 +242,76 @@ func TestService_AwardSkillCheck_ReturnsGrantMessage(t *testing.T) {
 	assert.Contains(t, msgs[0], "parkour")
 }
 
+func TestService_AwardXPAmount_AwardsCorrectXP(t *testing.T) {
+	saver := &fakeProgressSaver{}
+	svc := xp.NewService(testCfg(), saver)
+	sess := testSess(1, 0, 10)
+
+	_, err := svc.AwardXPAmount(context.Background(), sess, 0, 25)
+	require.NoError(t, err)
+	assert.Equal(t, 25, sess.Experience, "expected 25 XP awarded")
+}
+
+func TestService_AwardXPAmount_ZeroXP_NoChange(t *testing.T) {
+	saver := &fakeProgressSaver{}
+	svc := xp.NewService(testCfg(), saver)
+	sess := testSess(1, 50, 10)
+
+	_, err := svc.AwardXPAmount(context.Background(), sess, 0, 0)
+	require.NoError(t, err)
+	assert.Equal(t, 50, sess.Experience, "0 XP award should not change experience")
+}
+
+func TestService_AwardXPAmount_SameAsAwardKill_WhenFullAmount(t *testing.T) {
+	// Verify AwardXPAmount with the full kill amount equals AwardKill behavior.
+	cfg := testCfg()
+	saver1 := &fakeProgressSaver{}
+	svc1 := xp.NewService(cfg, saver1)
+	sess1 := testSess(1, 0, 10)
+	_, err := svc1.AwardKill(context.Background(), sess1, 1, 0)
+	require.NoError(t, err)
+
+	saver2 := &fakeProgressSaver{}
+	svc2 := xp.NewService(cfg, saver2)
+	sess2 := testSess(1, 0, 10)
+	fullXP := cfg.Awards.KillXPPerNPCLevel * 1 // npcLevel=1
+	_, err = svc2.AwardXPAmount(context.Background(), sess2, 0, fullXP)
+	require.NoError(t, err)
+
+	assert.Equal(t, sess1.Experience, sess2.Experience, "AwardXPAmount(fullXP) should equal AwardKill")
+}
+
+// REQ-T-PROP-A (property, SWENG-5a): AwardXPAmount(0) never changes Experience.
+func TestProperty_AwardXPAmount_ZeroAwardNoChange(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		saver := &fakeProgressSaver{}
+		svc := xp.NewService(testCfg(), saver)
+		startXP := rapid.IntRange(0, 1000).Draw(rt, "startXP")
+		sess := testSess(1, startXP, 10)
+
+		_, err := svc.AwardXPAmount(context.Background(), sess, 0, 0)
+		require.NoError(rt, err)
+		require.Equal(rt, startXP, sess.Experience, "zero XP award must not change Experience")
+	})
+}
+
+// REQ-T-PROP-B (property, SWENG-5a): AwardXPAmount(n) increases Experience by exactly n
+// when no level-up boundary is crossed (startXP=0, xpAmount well below level threshold).
+func TestProperty_AwardXPAmount_PositiveAwardIncreasesExperience(t *testing.T) {
+	cfg := testCfg()
+	rapid.Check(t, func(rt *rapid.T) {
+		saver := &fakeProgressSaver{}
+		svc := xp.NewService(cfg, saver)
+		// xpAmount capped at 100 to stay safely below any level threshold.
+		xpAmount := rapid.IntRange(1, 100).Draw(rt, "xpAmount")
+		sess := testSess(1, 0, 10) // start with 0 XP
+
+		_, err := svc.AwardXPAmount(context.Background(), sess, 0, xpAmount)
+		require.NoError(rt, err)
+		require.Equal(rt, xpAmount, sess.Experience, "Experience must increase by exactly xpAmount")
+	})
+}
+
 func TestPropertyService_AwardRoomDiscovery_GrantMessageAlwaysFirst(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		saver := &fakeProgressSaver{}

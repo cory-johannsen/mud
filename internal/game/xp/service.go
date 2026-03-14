@@ -60,6 +60,16 @@ func (s *Service) AwardKill(ctx context.Context, sess *session.PlayerSession, np
 	return s.award(ctx, sess, characterID, npcLevel*s.cfg.Awards.KillXPPerNPCLevel)
 }
 
+// AwardXPAmount awards a pre-computed XP amount directly to a player.
+// Use this instead of AwardKill when splitting a kill reward across multiple
+// participants, to avoid re-multiplying by KillXPPerNPCLevel.
+//
+// Precondition: sess non-nil; xpAmount >= 0.
+// Postcondition: same as AwardKill — XP, level, HP updated in-place; persisted.
+func (s *Service) AwardXPAmount(ctx context.Context, sess *session.PlayerSession, characterID int64, xpAmount int) ([]string, error) {
+	return s.award(ctx, sess, characterID, xpAmount)
+}
+
 // AwardRoomDiscovery awards XP for entering a previously unseen room.
 // Always returns at least one message (the XP grant) prepended before any level-up messages.
 //
