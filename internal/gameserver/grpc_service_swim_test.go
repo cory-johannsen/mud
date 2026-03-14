@@ -39,8 +39,9 @@ func initSessionConditions(sess *session.PlayerSession) {
 }
 
 // newSwimWorld creates a world suitable for swim tests.
-// Room "room_water" has water_terrain=true and an east exit to "room_water_east".
-// Room "room_plain" is a plain room with no water property.
+//
+// Room "room_water" has Terrain="river" and a north exit (SwimDC=15) to "room_bank".
+// Room "room_plain" has no water terrain and no swim exits.
 //
 // Precondition: t must be non-nil.
 // Postcondition: Returns a world.Manager and session.Manager containing the above rooms.
@@ -55,22 +56,20 @@ func newSwimWorld(t *testing.T) (*world.Manager, *session.Manager) {
 			"room_water": {
 				ID:          "room_water",
 				ZoneID:      "test_swim",
-				Title:       "Underwater Cavern",
-				Description: "You are submerged in cool water.",
+				Title:       "River",
+				Description: "A rushing river.",
+				Terrain:     "river",
 				Exits: []world.Exit{
-					{Direction: world.East, TargetRoom: "room_water_east"},
+					{Direction: world.North, TargetRoom: "room_bank", SwimDC: 15},
 				},
-				Properties: map[string]string{
-					"water_terrain": "true",
-					"water_dc":      "12",
-				},
+				Properties: map[string]string{},
 			},
-			"room_water_east": {
-				ID:          "room_water_east",
+			"room_bank": {
+				ID:          "room_bank",
 				ZoneID:      "test_swim",
-				Title:       "Eastern Shore",
-				Description: "A rocky shore.",
-				Exits:       []world.Exit{},
+				Title:       "River Bank",
+				Description: "The river bank.",
+				Exits:       []world.Exit{{Direction: world.South, TargetRoom: "room_water"}},
 				Properties:  map[string]string{},
 			},
 			"room_plain": {
@@ -144,10 +143,64 @@ func newSwimSvcWithCombat(t *testing.T, roller *dice.Roller, condReg *condition.
 	return svc, sessMgr, npcMgr, combatHandler
 }
 
-// TestHandleSwim_RoomNotWater_NotSubmerged verifies that handleSwim returns "no water" when
-// the player is in a plain room with no water_terrain property and no submerged condition.
+// TestHandleSwim_NoDirection verifies that handleSwim with empty direction returns a usage error.
 //
-// Precondition: Player is in "room_plain" with no water_terrain and no conditions.
+// Precondition: Player exists; req.Direction == "".
+// Postcondition: Message event contains "direction".
+func TestHandleSwim_NoDirection(t *testing.T) {
+	condReg := makeTestConditionRegistryWithSubmerged()
+	svc, sessMgr := newSwimSvc(t, nil, condReg)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_swim_nodir",
+		Username:  "Alice",
+		CharName:  "Alice",
+		Role:      "player",
+		RoomID:    "room_water",
+		CurrentHP: 10,
+		MaxHP:     10,
+	})
+	require.NoError(t, err)
+
+	ev, err := svc.handleSwim("u_swim_nodir", &gamev1.SwimRequest{Direction: ""})
+	require.NoError(t, err)
+	require.NotNil(t, ev)
+	msgEvt := ev.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event")
+	assert.Contains(t, msgEvt.Content, "direction")
+}
+
+// TestHandleSwim_NoSwimmableExit verifies message when direction has no swim exit.
+//
+// Precondition: Player in room_water; direction "south" (no exit in that direction from room_water).
+// Postcondition: Message event contains "no water".
+func TestHandleSwim_NoSwimmableExit(t *testing.T) {
+	condReg := makeTestConditionRegistryWithSubmerged()
+	svc, sessMgr := newSwimSvc(t, nil, condReg)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_swim_noexit",
+		Username:  "Alice",
+		CharName:  "Alice",
+		Role:      "player",
+		RoomID:    "room_water",
+		CurrentHP: 10,
+		MaxHP:     10,
+	})
+	require.NoError(t, err)
+
+	ev, err := svc.handleSwim("u_swim_noexit", &gamev1.SwimRequest{Direction: "south"})
+	require.NoError(t, err)
+	require.NotNil(t, ev)
+	msgEvt := ev.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event")
+	assert.Contains(t, msgEvt.Content, "no water")
+}
+
+// TestHandleSwim_RoomNotWater_NotSubmerged verifies that handleSwim in a plain room with no
+// swim exit and no submerged condition returns "no water".
+//
+// Precondition: Player is in "room_plain" with no water terrain; direction "north" (no exit).
 // Postcondition: Message event contains "no water".
 func TestHandleSwim_RoomNotWater_NotSubmerged(t *testing.T) {
 	condReg := makeTestConditionRegistryWithSubmerged()
@@ -162,7 +215,7 @@ func TestHandleSwim_RoomNotWater_NotSubmerged(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	event, err := svc.handleSwim("u_swim_nowater", &gamev1.SwimRequest{})
+	event, err := svc.handleSwim("u_swim_nowater", &gamev1.SwimRequest{Direction: "north"})
 	require.NoError(t, err)
 	require.NotNil(t, event)
 	msgEvt := event.GetMessage()
@@ -170,15 +223,46 @@ func TestHandleSwim_RoomNotWater_NotSubmerged(t *testing.T) {
 	assert.Contains(t, msgEvt.Content, "no water")
 }
 
+// TestHandleSwim_Success verifies player moves to destination on high roll.
+//
+// Precondition: Player in room_water; direction "north"; SwimDC=15; roll=18 → success.
+// Postcondition: Player RoomID == "room_bank".
+func TestHandleSwim_Success(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	// val=17: Intn(20)=17 → roll=18; total=18 >= DC=15 → Success.
+	src := &fixedDiceSource{val: 17}
+	roller := dice.NewLoggedRoller(src, logger)
+	condReg := makeTestConditionRegistryWithSubmerged()
+	svc, sessMgr := newSwimSvc(t, roller, condReg)
+
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_swim_success",
+		Username:  "Alice",
+		CharName:  "Alice",
+		Role:      "player",
+		RoomID:    "room_water",
+		CurrentHP: 10,
+		MaxHP:     10,
+	})
+	require.NoError(t, err)
+
+	_, err = svc.handleSwim("u_swim_success", &gamev1.SwimRequest{Direction: "north"})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer("u_swim_success")
+	require.True(t, ok)
+	assert.Equal(t, "room_bank", sess.RoomID)
+}
+
 // TestHandleSwim_CritFailure verifies that a critical failure on the muscle check
 // applies the submerged condition and reduces player HP.
 //
-// Precondition: Player is in "room_water" (water_terrain=true, DC=12).
-// Dice fixed at val=0: roll=1, bonus=0, total=1; 1 < 12-10=2 → CritFailure.
+// Precondition: Player is in "room_water" (Terrain="river", SwimDC=15).
+// Dice fixed at val=0: roll=1, bonus=0, total=1; 1 < DC-10=5 → CritFailure.
 // Postcondition: Player HP decreased; submerged condition applied; message contains "pulled under".
 func TestHandleSwim_CritFailure(t *testing.T) {
 	logger := zaptest.NewLogger(t)
-	src := &fixedDiceSource{val: 0} // Intn(20)=0 → roll=1; 1 < DC-10=2 → CritFailure
+	src := &fixedDiceSource{val: 0} // Intn(20)=0 → roll=1; 1 < DC-10=5 → CritFailure
 	roller := dice.NewLoggedRoller(src, logger)
 	condReg := makeTestConditionRegistryWithSubmerged()
 
@@ -198,7 +282,7 @@ func TestHandleSwim_CritFailure(t *testing.T) {
 
 	hpBefore := sess.CurrentHP
 
-	event, err := svc.handleSwim("u_swim_cf", &gamev1.SwimRequest{})
+	event, err := svc.handleSwim("u_swim_cf", &gamev1.SwimRequest{Direction: "north"})
 	require.NoError(t, err)
 	require.NotNil(t, event)
 	msgEvt := event.GetMessage()
@@ -211,13 +295,40 @@ func TestHandleSwim_CritFailure(t *testing.T) {
 	assert.True(t, sess.Conditions.Has("submerged"), "player must have submerged condition after crit failure")
 }
 
+// TestHandleSwim_CritFailure_DrowningDamage verifies 1d6 drowning damage on crit fail.
+//
+// Precondition: Player in room_water; roll=1 (crit fail via val=0); d6 with val=0 → damage=1.
+// Postcondition: HP = 20 - 1 = 19.
+func TestHandleSwim_CritFailure_DrowningDamage(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 0} // d20=1 (crit fail), d6=1 (damage)
+	roller := dice.NewLoggedRoller(src, logger)
+	condReg := makeTestConditionRegistryWithSubmerged()
+	svc, sessMgr := newSwimSvc(t, roller, condReg)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_swim_dmg",
+		Username:  "Alice",
+		CharName:  "Alice",
+		Role:      "player",
+		RoomID:    "room_water",
+		CurrentHP: 20,
+		MaxHP:     20,
+	})
+	require.NoError(t, err)
+	initSessionConditions(sess)
+
+	_, err = svc.handleSwim("u_swim_dmg", &gamev1.SwimRequest{Direction: "north"})
+	require.NoError(t, err)
+
+	assert.Equal(t, 19, sess.CurrentHP) // 20 - 1 = 19
+}
+
 // TestHandleSwim_SubmergedSurface verifies that a player with the submerged condition
 // who succeeds the muscle check loses the submerged condition.
 //
-// Precondition: Player is in "room_plain" with submerged condition applied (no water_terrain needed when submerged).
-// Dice fixed at val=19: roll=20, bonus=0, total=20; DC=12; 20 >= 12+10=22? No, 20 >= 22 is false → Success (not CritSuccess).
-// Actually OutcomeFor: CritSuccess if total >= dc+10, Success if total >= dc.
-// val=19 → roll=20, total=20, dc=12: 20 >= 22 false, 20 >= 12 true → Success. Submerged clears.
+// Precondition: Player is in "room_plain" with submerged condition; direction "north" (no exit → dc=12 fallback).
+// Dice fixed at val=19: roll=20, total=20, dc=12 → Success. Submerged clears.
 // Postcondition: submerged condition removed; message contains "surface".
 func TestHandleSwim_SubmergedSurface(t *testing.T) {
 	logger := zaptest.NewLogger(t)
@@ -246,7 +357,7 @@ func TestHandleSwim_SubmergedSurface(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, sess.Conditions.Has("submerged"), "precondition: session must have submerged condition")
 
-	event, err := svc.handleSwim("u_swim_surface", &gamev1.SwimRequest{})
+	event, err := svc.handleSwim("u_swim_surface", &gamev1.SwimRequest{Direction: "north"})
 	require.NoError(t, err)
 	require.NotNil(t, event)
 	msgEvt := event.GetMessage()
@@ -254,6 +365,19 @@ func TestHandleSwim_SubmergedSurface(t *testing.T) {
 	assert.Contains(t, msgEvt.Content, "surface")
 
 	assert.False(t, sess.Conditions.Has("submerged"), "submerged condition must be removed on success")
+}
+
+// TestProperty_SwimDC_TerrainDefaults verifies terrain default DC table.
+//
+// Precondition: exit.SwimDC == 0; terrain in {sewer, river, ocean, flooded}.
+// Postcondition: swimDCForExit returns the expected DC for that terrain.
+func TestProperty_SwimDC_TerrainDefaults(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		terrain := rapid.SampledFrom([]string{"sewer", "river", "ocean", "flooded"}).Draw(rt, "terrain")
+		expected := map[string]int{"sewer": 10, "river": 15, "ocean": 20, "flooded": 12}[terrain]
+		got := swimDCForExit(world.Exit{SwimDC: 0}, terrain)
+		assert.Equal(rt, expected, got)
+	})
 }
 
 // TestSubmergedDrowning verifies that resolveAndAdvanceLocked applies 1d6 drowning damage

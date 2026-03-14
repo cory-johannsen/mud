@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
-	"strconv"
 	"sync"
 	"time"
 
@@ -6087,14 +6086,39 @@ func (s *GameServiceServer) handleClimb(uid string, req *gamev1.ClimbRequest) (*
 	}
 }
 
+// swimDCForExit returns the effective swim DC for an exit given the room terrain.
+//
+// Precondition: exit and terrain are valid values from the world model.
+// Postcondition: Returns exit.SwimDC if non-zero; otherwise returns terrain default; returns 0 if not swimmable.
+func swimDCForExit(exit world.Exit, terrain string) int {
+	if exit.SwimDC > 0 {
+		return exit.SwimDC
+	}
+	switch terrain {
+	case "sewer":
+		return 10
+	case "river":
+		return 15
+	case "ocean":
+		return 20
+	case "flooded":
+		return 12
+	}
+	return 0
+}
+
 // handleSwim processes a SwimRequest from the player.
 //
-// Precondition: uid is a valid connected player session.
-// Postcondition: Player moves on success; submerged condition applied on critical failure.
-func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*gamev1.ServerEvent, error) {
+// Precondition: uid is a valid connected player session; req.Direction is non-empty.
+// Postcondition: Player moves on success; submerged condition applied and 1d6 damage on critical failure.
+func (s *GameServiceServer) handleSwim(uid string, req *gamev1.SwimRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("session not found: %s", uid)
+	}
+
+	if req.GetDirection() == "" {
+		return messageEvent("Swim which direction?"), nil
 	}
 
 	room, ok := s.world.GetRoom(sess.RoomID)
@@ -6102,11 +6126,20 @@ func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*game
 		return messageEvent("Room not found."), nil
 	}
 
-	isWaterRoom := room.Properties["water_terrain"] == "true"
+	dir := world.Direction(req.GetDirection())
+	exit, found := room.ExitForDirection(dir)
+	dc := 0
+	if found {
+		dc = swimDCForExit(exit, room.Terrain)
+	}
+
 	isSubmerged := sess.Conditions != nil && sess.Conditions.Has("submerged")
 
-	if !isWaterRoom && !isSubmerged {
-		return messageEvent("There is no water here to swim in."), nil
+	if dc == 0 && !isSubmerged {
+		return messageEvent("There is no water here."), nil
+	}
+	if dc == 0 && isSubmerged {
+		dc = 12
 	}
 
 	// Spend AP if in combat.
@@ -6117,14 +6150,6 @@ func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*game
 		}
 		if err := s.combatH.SpendAP(uid, 2); err != nil {
 			return messageEvent("Not enough action points to swim."), nil
-		}
-	}
-
-	// Parse DC (default 12).
-	dc := 12
-	if dcStr, ok := room.Properties["water_dc"]; ok {
-		if parsed, err := strconv.Atoi(dcStr); err == nil {
-			dc = parsed
 		}
 	}
 
@@ -6145,36 +6170,35 @@ func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*game
 	switch outcome {
 	case combat.CritSuccess, combat.Success:
 		// Clear submerged if present.
-		if isSubmerged {
-			if sess.Conditions != nil {
-				sess.Conditions.Remove(uid, "submerged")
-			}
-			return messageEvent(fmt.Sprintf(
-				"You surface! (rolled %d+%d=%d vs DC %d)",
-				roll, bonus, total, dc,
-			)), nil
+		if isSubmerged && sess.Conditions != nil {
+			sess.Conditions.Remove(uid, "submerged")
 		}
-		// Move to first available exit in the room.
-		if len(room.Exits) > 0 {
-			if _, moveErr := s.worldH.MoveWithContext(uid, room.Exits[0].Direction); moveErr != nil {
+		if found {
+			if _, moveErr := s.worldH.MoveWithContext(uid, dir); moveErr != nil {
 				return messageEvent(fmt.Sprintf(
 					"You swim successfully (rolled %d+%d=%d vs DC %d) but cannot proceed: %s.",
 					roll, bonus, total, dc, moveErr.Error(),
 				)), nil
 			}
+		}
+		if isSubmerged {
 			return messageEvent(fmt.Sprintf(
-				"You swim through (rolled %d+%d=%d vs DC %d).",
-				roll, bonus, total, dc,
+				"You surface! (rolled %d+%d=%d vs DC %d)", roll, bonus, total, dc,
 			)), nil
 		}
+		destRoom, _ := s.world.GetRoom(exit.TargetRoom)
+		destTitle := exit.TargetRoom
+		if destRoom != nil {
+			destTitle = destRoom.Title
+		}
 		return messageEvent(fmt.Sprintf(
-			"You swim in place (rolled %d+%d=%d vs DC %d). No exit available.",
-			roll, bonus, total, dc,
+			"You swim through (rolled %d+%d=%d vs DC %d). You arrive at %s.",
+			roll, bonus, total, dc, destTitle,
 		)), nil
 
 	case combat.Failure:
 		return messageEvent(fmt.Sprintf(
-			"You fail to make progress (rolled %d+%d=%d vs DC %d).",
+			"You struggle against the current (rolled %d+%d=%d vs DC %d).",
 			roll, bonus, total, dc,
 		)), nil
 
@@ -6188,13 +6212,12 @@ func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*game
 		if sess.CurrentHP < 0 {
 			sess.CurrentHP = 0
 		}
-
 		msg := fmt.Sprintf(
 			"You are pulled under! (rolled %d+%d=%d vs DC %d) Taking %d drowning damage.",
 			roll, bonus, total, dc, dmg,
 		)
 		if s.condRegistry != nil {
-			if def, ok := s.condRegistry.Get("submerged"); ok && sess.Conditions != nil {
+			if def, condOk := s.condRegistry.Get("submerged"); condOk && sess.Conditions != nil {
 				_ = sess.Conditions.Apply(uid, def, 1, -1)
 				msg += " You are submerged."
 			}
