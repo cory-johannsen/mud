@@ -180,11 +180,11 @@ func TestNewInstanceWithResolver_NilResolver_NoACBonus(t *testing.T) {
 func TestNewInstance_DeceptionCopiedFromTemplate(t *testing.T) {
 	tmpl := &npc.Template{
 		ID: "test-npc", Name: "Test", Level: 1, MaxHP: 10, AC: 10,
-		Deception: 7,
+		Hustle: 7,
 	}
 	inst := npc.NewInstance("inst-1", tmpl, "room_a")
-	if inst.Deception != 7 {
-		t.Errorf("expected Deception=7, got %d", inst.Deception)
+	if inst.Hustle != 7 {
+		t.Errorf("expected Deception=7, got %d", inst.Hustle)
 	}
 }
 
@@ -193,8 +193,8 @@ func TestNewInstance_DeceptionDefaultsToZero(t *testing.T) {
 		ID: "test-npc2", Name: "Test2", Level: 1, MaxHP: 10, AC: 10,
 	}
 	inst := npc.NewInstance("inst-2", tmpl, "room_a")
-	if inst.Deception != 0 {
-		t.Errorf("expected Deception=0, got %d", inst.Deception)
+	if inst.Hustle != 0 {
+		t.Errorf("expected Deception=0, got %d", inst.Hustle)
 	}
 }
 

@@ -40,8 +40,8 @@ type Instance struct {
 	Perception int
 	// Stealth is the instance's stealth modifier.
 	Stealth int `yaml:"stealth"`
-	// Deception is the instance's deception skill modifier.
-	Deception int `yaml:"deception"`
+	// Hustle is the instance's hustle skill modifier.
+	Hustle int `yaml:"hustle"`
 	// AIDomain is the HTN domain ID copied from the template at spawn time.
 	AIDomain string
 	// Loot is the loot table copied from the template; nil means no loot.
@@ -159,7 +159,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		AC:            ac,
 		Level:         tmpl.Level,
 		Perception:    tmpl.Perception,
-		Deception:     tmpl.Deception,
+		Hustle:        tmpl.Hustle,
 		AIDomain:      tmpl.AIDomain,
 		Loot:          tmpl.Loot,
 		Taunts:        tmpl.Taunts,

@@ -250,7 +250,7 @@ func TestProperty_Motive_SuccessAlwaysRevealsHPTier(t *testing.T) {
 			MaxHP:     20,
 			AC:        13,
 			Perception: 2,
-			Deception: deception,
+			Hustle: deception,
 		}, roomID)
 		require.NoError(rt, err)
 

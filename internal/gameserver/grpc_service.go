@@ -4707,7 +4707,7 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is demoralized (-1 AC, -1 attack).", inst.Name())), nil
 }
 
-// handleGrapple performs an athletics skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
+// handleGrapple performs an muscle skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
 // On success, applies the grabbed condition (-2 AC) to the target combatant for the encounter.
 // Combat only; costs 1 AP.
 //
@@ -4741,20 +4741,20 @@ func (s *GameServiceServer) handleGrapple(uid string, req *gamev1.GrappleRequest
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + athletics bonus vs target Toughness DC. Toughness DC = 10 + level + AbilityMod(Brutality) + proficiency rank bonus.
+	// Skill check: 1d20 + muscle bonus vs target Toughness DC. Toughness DC = 10 + level + AbilityMod(Brutality) + proficiency rank bonus.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleGrapple: rolling d20: %w", err)
 	}
 	roll := rollResult.Total()
-	bonus := skillRankBonus(sess.Skills["athletics"])
+	bonus := skillRankBonus(sess.Skills["muscle"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Brutality) + skillRankBonus(inst.ToughnessRank)
 	sess.LastCheckRoll = roll
 	sess.LastCheckDC = dc
 	sess.LastCheckName = "grapple"
 
-	detail := fmt.Sprintf("Grapple (athletics Toughness DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Grapple (muscle Toughness DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + " — failure. Your grapple attempt fails."), nil
 	}
@@ -4768,7 +4768,7 @@ func (s *GameServiceServer) handleGrapple(uid string, req *gamev1.GrappleRequest
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is grabbed (flat-footed, -2 AC).", inst.Name())), nil
 }
 
-// handleTrip performs an athletics skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
+// handleTrip performs an muscle skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
 // On success, applies the prone condition (-2 attack) to the target combatant for the encounter.
 // Combat only; costs 1 AP.
 //
@@ -4802,20 +4802,20 @@ func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*ga
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + athletics bonus vs target Hustle DC. Hustle DC = 10 + level + AbilityMod(Quickness) + proficiency rank bonus.
+	// Skill check: 1d20 + muscle bonus vs target Hustle DC. Hustle DC = 10 + level + AbilityMod(Quickness) + proficiency rank bonus.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleTrip: rolling d20: %w", err)
 	}
 	roll := rollResult.Total()
-	bonus := skillRankBonus(sess.Skills["athletics"])
+	bonus := skillRankBonus(sess.Skills["muscle"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Quickness) + skillRankBonus(inst.HustleRank)
 	sess.LastCheckRoll = roll
 	sess.LastCheckDC = dc
 	sess.LastCheckName = "trip"
 
-	detail := fmt.Sprintf("Trip (athletics Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Trip (muscle Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + " — failure. Your trip attempt fails."), nil
 	}
@@ -4829,7 +4829,7 @@ func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*ga
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is knocked prone (-2 attack rolls).", inst.Name())), nil
 }
 
-// handleDisarm performs an athletics skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
+// handleDisarm performs an muscle skill check against the target NPC's Hustle DC (10 + level + AbilityMod(Quickness) + HustleRank bonus).
 // On success, removes the NPC's equipped weapon and drops it to the room floor.
 // Combat only; costs 1 AP.
 //
@@ -4863,20 +4863,20 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + athletics bonus vs target Hustle DC.
+	// Skill check: 1d20 + muscle bonus vs target Hustle DC.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleDisarm: rolling d20: %w", err)
 	}
 	roll := rollResult.Total()
-	bonus := skillRankBonus(sess.Skills["athletics"])
+	bonus := skillRankBonus(sess.Skills["muscle"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Quickness) + skillRankBonus(inst.HustleRank)
 	sess.LastCheckRoll = roll
 	sess.LastCheckDC = dc
 	sess.LastCheckName = "disarm"
 
-	detail := fmt.Sprintf("Disarm (athletics Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Disarm (muscle Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + " — failure. Your disarm attempt fails."), nil
 	}
@@ -4910,7 +4910,7 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is disarmed. The %s clatters to the floor.", inst.Name(), weaponName)), nil
 }
 
-// handleShove performs an athletics skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
+// handleShove performs an muscle skill check against the target NPC's Toughness DC (10 + level + AbilityMod(Brutality) + ToughnessRank bonus).
 // On success, the NPC is pushed 5ft; on critical success (beat DC by 10+), pushed 10ft.
 // Combat only; costs 1 AP.
 //
@@ -4944,20 +4944,20 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 		return errorEvent(err.Error()), nil
 	}
 
-	// Skill check: 1d20 + athletics bonus vs target Toughness DC. Toughness DC = 10 + level + AbilityMod(Brutality) + proficiency rank bonus.
+	// Skill check: 1d20 + muscle bonus vs target Toughness DC. Toughness DC = 10 + level + AbilityMod(Brutality) + proficiency rank bonus.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, fmt.Errorf("handleShove: rolling d20: %w", err)
 	}
 	roll := rollResult.Total()
-	bonus := skillRankBonus(sess.Skills["athletics"])
+	bonus := skillRankBonus(sess.Skills["muscle"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Brutality) + skillRankBonus(inst.ToughnessRank)
 	sess.LastCheckRoll = roll
 	sess.LastCheckDC = dc
 	sess.LastCheckName = "shove"
 
-	detail := fmt.Sprintf("Shove (athletics Toughness DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Shove (muscle Toughness DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + fmt.Sprintf(" — fail. You fail to shove %s.", inst.Name())), nil
 	}
@@ -5390,7 +5390,7 @@ func (s *GameServiceServer) handleSeek(uid string) (*gamev1.ServerEvent, error) 
 	return messageEvent(detail + fmt.Sprintf(" — success! You locate: %s.", strings.Join(revealed, ", "))), nil
 }
 
-// handleMotive performs an awareness skill check against the target NPC's Deception DC (10 + Deception).
+// handleMotive performs an awareness skill check against the target NPC's Hustle DC (10 + Hustle).
 // In combat: costs 1 AP; on success reveals the NPC's HP tier.
 // Out of combat: returns a stub message for future non-combat NPC extension.
 //
@@ -5430,12 +5430,12 @@ func (s *GameServiceServer) handleMotive(uid string, req *gamev1.MotiveRequest) 
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["awareness"])
 	total := roll + bonus
-	dc := 10 + inst.Deception
+	dc := 10 + inst.Hustle
 	sess.LastCheckRoll = roll
 	sess.LastCheckDC = dc
 	sess.LastCheckName = "motive"
 
-	detail := fmt.Sprintf("Motive (deception DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
+	detail := fmt.Sprintf("Motive (hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
 		return messageEvent(detail + fmt.Sprintf(" — failure. You can't get a read on %s.", inst.Name())), nil
 	}
@@ -5756,7 +5756,7 @@ func (s *GameServiceServer) handleDivert(uid string) (*gamev1.ServerEvent, error
 	return messageEvent(detail + " — success! You slip into the shadows while enemies are distracted."), nil
 }
 
-// handleEscape performs a max(athletics, acrobatics) skill check to escape the grabbed condition.
+// handleEscape performs a max(muscle, acrobatics) skill check to escape the grabbed condition.
 // DC is grabber's Level+14 if the grabber NPC is alive in the room, else 15.
 // Requires the player to have the grabbed condition.
 // Combat only; costs 1 AP.
@@ -5792,7 +5792,7 @@ func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error
 	}
 	roll := rollResult.Total()
 
-	ath := skillRankBonus(sess.Skills["athletics"])
+	ath := skillRankBonus(sess.Skills["muscle"])
 	acr := skillRankBonus(sess.Skills["acrobatics"])
 	bonus := ath
 	if acr > bonus {
@@ -6007,13 +6007,13 @@ func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*ga
 		}
 	}
 
-	// Roll athletics check.
+	// Roll muscle check.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, err
 	}
 	roll := rollResult.Total()
-	bonus := skillRankBonus(sess.Skills["athletics"])
+	bonus := skillRankBonus(sess.Skills["muscle"])
 	total := roll + bonus
 	sess.LastCheckRoll = roll
 	sess.LastCheckDC = dc
@@ -6117,13 +6117,13 @@ func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*game
 		}
 	}
 
-	// Roll athletics check.
+	// Roll muscle check.
 	rollResult, err := s.dice.RollExpr("1d20")
 	if err != nil {
 		return nil, err
 	}
 	roll := rollResult.Total()
-	bonus := skillRankBonus(sess.Skills["athletics"])
+	bonus := skillRankBonus(sess.Skills["muscle"])
 	total := roll + bonus
 	sess.LastCheckRoll = roll
 	sess.LastCheckDC = dc
