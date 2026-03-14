@@ -1255,6 +1255,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleMotive(uid, p.Motive)
 	case *gamev1.ClientMessage_Calm:
 		return s.handleCalm(uid, p.Calm)
+	case *gamev1.ClientMessage_HeroPoint:
+		return s.handleHeroPoint(uid, p.HeroPoint)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -4504,6 +4506,9 @@ func (s *GameServiceServer) handleFirstAid(uid string) (*gamev1.ServerEvent, err
 	bonus := skillRankBonus(sess.Skills["patch_job"])
 	total := roll + bonus
 	dc := 15
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "first_aid"
 
 	if total < dc {
 		msg := fmt.Sprintf("First aid check: rolled %d+%d=%d vs DC %d — failure. You fail to apply treatment.",
@@ -4591,6 +4596,9 @@ func (s *GameServiceServer) handleFeint(uid string, req *gamev1.FeintRequest) (*
 	bonus := skillRankBonus(sess.Skills["grift"])
 	total := roll + bonus
 	dc := inst.Perception
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "feint"
 
 	detail := fmt.Sprintf("Feint (grift DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -4649,6 +4657,9 @@ func (s *GameServiceServer) handleDemoralize(uid string, req *gamev1.DemoralizeR
 	bonus := skillRankBonus(sess.Skills["smooth_talk"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Savvy) + skillRankBonus(inst.CoolRank)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "demoralize"
 
 	detail := fmt.Sprintf("Demoralize (smooth_talk Cool DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -4711,6 +4722,9 @@ func (s *GameServiceServer) handleGrapple(uid string, req *gamev1.GrappleRequest
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Brutality) + skillRankBonus(inst.ToughnessRank)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "grapple"
 
 	detail := fmt.Sprintf("Grapple (athletics Toughness DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -4769,6 +4783,9 @@ func (s *GameServiceServer) handleTrip(uid string, req *gamev1.TripRequest) (*ga
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Quickness) + skillRankBonus(inst.HustleRank)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "trip"
 
 	detail := fmt.Sprintf("Trip (athletics Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -4827,6 +4844,9 @@ func (s *GameServiceServer) handleDisarm(uid string, req *gamev1.DisarmRequest) 
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Quickness) + skillRankBonus(inst.HustleRank)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "disarm"
 
 	detail := fmt.Sprintf("Disarm (athletics Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -4905,6 +4925,9 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Brutality) + skillRankBonus(inst.ToughnessRank)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "shove"
 
 	detail := fmt.Sprintf("Shove (athletics Toughness DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -5102,6 +5125,9 @@ func (s *GameServiceServer) handleTumble(uid string, req *gamev1.TumbleRequest) 
 	bonus := skillRankBonus(sess.Skills["acrobatics"])
 	total := roll + bonus
 	dc := 10 + inst.Level + combat.AbilityMod(inst.Quickness) + skillRankBonus(inst.HustleRank)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "tumble"
 
 	detail := fmt.Sprintf("Tumble (acrobatics Hustle DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 
@@ -5253,6 +5279,9 @@ func (s *GameServiceServer) handleHide(uid string) (*gamev1.ServerEvent, error) 
 	bonus := skillRankBonus(sess.Skills["stealth"])
 	total := roll + bonus
 	dc := s.maxNPCPerceptionInRoom(sess.RoomID)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "hide"
 
 	detail := fmt.Sprintf("Hide (stealth DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -5303,6 +5332,9 @@ func (s *GameServiceServer) handleSeek(uid string) (*gamev1.ServerEvent, error) 
 	bonus := skillRankBonus(sess.Skills["awareness"])
 	total := roll + bonus
 	dc := s.maxNPCStealthInRoom(sess.RoomID)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "seek"
 
 	detail := fmt.Sprintf("Seek (stealth DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -5371,6 +5403,9 @@ func (s *GameServiceServer) handleMotive(uid string, req *gamev1.MotiveRequest) 
 	bonus := skillRankBonus(sess.Skills["awareness"])
 	total := roll + bonus
 	dc := 10 + inst.Deception
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "motive"
 
 	detail := fmt.Sprintf("Motive (deception DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -5416,6 +5451,9 @@ func (s *GameServiceServer) handleCalm(uid string, _ *gamev1.CalmRequest) (*game
 	gritMod := combat.AbilityMod(sess.Abilities.Grit)
 	total := roll + gritMod
 	dc := 10 + int(sev)*4
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "calm"
 
 	detail := fmt.Sprintf("Calm (Grit DC %d): rolled %d+%d=%d", dc, roll, gritMod, total)
 	if total < dc {
@@ -5433,6 +5471,92 @@ func (s *GameServiceServer) handleCalm(uid string, _ *gamev1.CalmRequest) (*game
 		msg += " " + changes[0].Message
 	}
 	return messageEvent(msg), nil
+}
+
+// handleHeroPoint dispatches a hero point spend request to the appropriate sub-handler.
+//
+// Precondition: uid must be a valid player session; req must be non-nil.
+// Postcondition: Returns a ServerEvent or an error; delegates to handleHeroPointReroll
+// or handleHeroPointStabilize based on req.Subcommand.
+func (s *GameServiceServer) handleHeroPoint(uid string, req *gamev1.HeroPointRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	switch req.Subcommand {
+	case "reroll":
+		return s.handleHeroPointReroll(sess)
+	case "stabilize":
+		return s.handleHeroPointStabilize(sess)
+	default:
+		return errorEvent("Unknown heropoint subcommand. Use: heropoint reroll | heropoint stabilize"), nil
+	}
+}
+
+// handleHeroPointReroll spends 1 hero point to reroll the most recent ability check,
+// keeping whichever result is higher.
+//
+// Precondition: sess.HeroPoints >= 1; sess.LastCheckRoll != 0.
+// Postcondition: HeroPoints decremented; LastCheckRoll updated to winner; SaveHeroPoints called.
+func (s *GameServiceServer) handleHeroPointReroll(sess *session.PlayerSession) (*gamev1.ServerEvent, error) {
+	if sess.HeroPoints < 1 {
+		return errorEvent("You have no hero points remaining."), nil
+	}
+	if sess.LastCheckRoll == 0 {
+		return errorEvent("You have no recent check to reroll."), nil
+	}
+
+	if s.dice == nil {
+		return errorEvent("Dice roller unavailable."), nil
+	}
+	rollResult, err := s.dice.RollExpr("1d20")
+	if err != nil {
+		return nil, fmt.Errorf("handleHeroPointReroll: rolling d20: %w", err)
+	}
+	newRoll := rollResult.Total()
+	oldRoll := sess.LastCheckRoll
+
+	winner := oldRoll
+	if newRoll > oldRoll {
+		winner = newRoll
+	}
+
+	sess.HeroPoints--
+	sess.LastCheckRoll = winner
+
+	if s.charSaver != nil && sess.CharacterID != 0 {
+		if hpErr := s.charSaver.SaveHeroPoints(context.Background(), sess.CharacterID, sess.HeroPoints); hpErr != nil {
+			s.logger.Warn("handleHeroPointReroll: SaveHeroPoints failed", zap.Error(hpErr))
+		}
+	}
+
+	msg := fmt.Sprintf("You spend a hero point. Original roll: %d, New roll: %d — keeping %d.", oldRoll, newRoll, winner)
+	return messageEvent(msg), nil
+}
+
+// handleHeroPointStabilize spends 1 hero point to stabilize a dying player at 0 HP.
+//
+// Precondition: sess.HeroPoints >= 1; sess.Dead == true.
+// Postcondition: Dead cleared; CurrentHP set to 0; HeroPoints decremented; SaveHeroPoints called.
+func (s *GameServiceServer) handleHeroPointStabilize(sess *session.PlayerSession) (*gamev1.ServerEvent, error) {
+	if sess.HeroPoints < 1 {
+		return errorEvent("You have no hero points remaining."), nil
+	}
+	if !sess.Dead {
+		return errorEvent("You are not dying — stabilize requires being at death's door."), nil
+	}
+
+	sess.Dead = false
+	sess.CurrentHP = 0
+	sess.HeroPoints--
+
+	if s.charSaver != nil && sess.CharacterID != 0 {
+		if hpErr := s.charSaver.SaveHeroPoints(context.Background(), sess.CharacterID, sess.HeroPoints); hpErr != nil {
+			s.logger.Warn("handleHeroPointStabilize: SaveHeroPoints failed", zap.Error(hpErr))
+		}
+	}
+
+	return messageEvent("You spend a hero point, pulling back from the brink. You stabilize at 0 HP."), nil
 }
 
 // applyMentalChangesToSession applies mental state condition swaps directly to a session.
@@ -5530,6 +5654,9 @@ func (s *GameServiceServer) handleSneak(uid string) (*gamev1.ServerEvent, error)
 	bonus := skillRankBonus(sess.Skills["stealth"])
 	total := roll + bonus
 	dc := s.maxNPCPerceptionInRoom(sess.RoomID)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "sneak"
 
 	detail := fmt.Sprintf("Sneak (stealth DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -5575,6 +5702,9 @@ func (s *GameServiceServer) handleDivert(uid string) (*gamev1.ServerEvent, error
 	bonus := skillRankBonus(sess.Skills["grift"])
 	total := roll + bonus
 	dc := s.maxNPCPerceptionInRoom(sess.RoomID)
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "divert"
 
 	detail := fmt.Sprintf("Divert (grift DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -5651,6 +5781,10 @@ func (s *GameServiceServer) handleEscape(uid string) (*gamev1.ServerEvent, error
 			}
 		}
 	}
+
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "escape"
 
 	detail := fmt.Sprintf("Escape (DC %d): rolled %d+%d=%d", dc, roll, bonus, total)
 	if total < dc {
@@ -5837,6 +5971,9 @@ func (s *GameServiceServer) handleClimb(uid string, _ *gamev1.ClimbRequest) (*ga
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "climb"
 
 	outcome := combat.OutcomeFor(total, dc)
 
@@ -5944,6 +6081,9 @@ func (s *GameServiceServer) handleSwim(uid string, _ *gamev1.SwimRequest) (*game
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["athletics"])
 	total := roll + bonus
+	sess.LastCheckRoll = roll
+	sess.LastCheckDC = dc
+	sess.LastCheckName = "swim"
 
 	outcome := combat.OutcomeFor(total, dc)
 

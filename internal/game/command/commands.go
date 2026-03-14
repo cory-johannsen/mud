@@ -91,6 +91,7 @@ const (
 	HandlerClimb               = "climb"
 	HandlerSwim                = "swim"
 	HandlerCalm                = "calm"
+	HandlerHeroPoint           = "heropoint"
 )
 
 // Command defines a player-invocable command.
@@ -202,6 +203,7 @@ func BuiltinCommands() []Command {
 		{Name: "climb", Aliases: []string{"cl"}, Help: "Climb a climbable surface (athletics vs DC; costs 2 AP in combat).", Category: CategoryMovement, Handler: HandlerClimb},
 		{Name: "swim", Aliases: []string{"sm"}, Help: "Swim through water or surface when submerged (athletics vs DC; costs 2 AP in combat).", Category: CategoryMovement, Handler: HandlerSwim},
 		{Name: "calm", Help: "Attempt to calm your worst active mental state (Grit check; costs all AP in combat).", Category: CategoryCombat, Handler: HandlerCalm},
+		{Name: "heropoint", Aliases: []string{"hp"}, Help: "Spend a hero point (heropoint reroll | heropoint stabilize)", Category: CategoryCharacter, Handler: HandlerHeroPoint},
 	}
 }
 

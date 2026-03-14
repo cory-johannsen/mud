@@ -116,6 +116,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerSeek:               bridgeSeek,
 	command.HandlerMotive:             bridgeMotive,
 	command.HandlerCalm:               bridgeCalm,
+	command.HandlerHeroPoint:          bridgeHeroPoint,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1049,6 +1050,31 @@ func bridgeCalm(bctx *bridgeContext) (bridgeResult, error) {
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Calm{Calm: &gamev1.CalmRequest{}},
 	}}, nil
+}
+
+// bridgeHeroPoint parses the heropoint subcommand and sends a HeroPointRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID and parsed.Args.
+// Postcondition: Returns a non-nil msg containing a HeroPointRequest on success;
+// returns done=true with usage error on invalid subcommand.
+func bridgeHeroPoint(bctx *bridgeContext) (bridgeResult, error) {
+	result, err := command.HandleHeroPoint(bctx.parsed.Args)
+	if err != nil {
+		return bridgeResult{}, err
+	}
+	if result.Error != "" {
+		return writeErrorPrompt(bctx, result.Error)
+	}
+	return bridgeResult{
+		msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload: &gamev1.ClientMessage_HeroPoint{
+				HeroPoint: &gamev1.HeroPointRequest{
+					Subcommand: result.Subcommand,
+				},
+			},
+		},
+	}, nil
 }
 
 // bridgeMotive builds a MotiveRequest with the target name.

@@ -85,6 +85,7 @@ message ClientMessage {
     SwimRequest swim = 68;
     MotiveRequest motive = 69;
     CalmRequest calm = 70;
+    HeroPointRequest hero_point = 71;
   }
 }
 
@@ -804,6 +805,11 @@ message SwimRequest {}
 
 // CalmRequest asks the server to attempt calming the player's worst active mental state.
 message CalmRequest {}
+
+// HeroPointRequest asks the server to spend a hero point.
+message HeroPointRequest {
+  string subcommand = 1; // "reroll" or "stabilize"
+}
 
 // MotiveRequest asks the server to read an NPC's intentions (awareness vs Deception DC).
 message MotiveRequest {
