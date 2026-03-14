@@ -3,7 +3,6 @@ package gameserver
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -1623,6 +1622,8 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 			var forcedTarget string
 			switch forcedAction {
 			case "random_attack":
+				// Collect all alive combatants (any faction, including the acting player).
+				// Self-targeting is intentional — panic causes indiscriminate lashing out.
 				var targets []string
 				for _, combatant := range cbt.Combatants {
 					if !combatant.IsDead() {
@@ -1630,7 +1631,7 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 					}
 				}
 				if len(targets) > 0 {
-					forcedTarget = targets[rand.Intn(len(targets))]
+					forcedTarget = targets[h.dice.Src().Intn(len(targets))]
 				}
 			case "lowest_hp_attack":
 				lowestHP := int(^uint(0) >> 1) // MaxInt
@@ -1653,6 +1654,8 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 				msg = fmt.Sprintf("Panic grips you — you lash out wildly at %s!", forcedTarget)
 			case "lowest_hp_attack":
 				msg = fmt.Sprintf("Berserker rage drives you to destroy the weakest target — you attack %s!", forcedTarget)
+			default:
+				h.logger.Warn("unknown forced action type — no player notification sent", zap.String("forced_action", forcedAction), zap.String("uid", c.ID))
 			}
 			notifyEvt := &gamev1.ServerEvent{
 				Payload: &gamev1.ServerEvent_Message{
