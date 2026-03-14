@@ -928,9 +928,14 @@ func bridgeTrip(bctx *bridgeContext) (bridgeResult, error) {
 // Precondition: bctx must be non-nil with a valid reqID.
 // Postcondition: returns a non-nil msg containing a ClimbRequest; done is false.
 func bridgeClimb(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) == 0 {
+		return writeErrorPrompt(bctx, "Usage: climb <direction>")
+	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
-		Payload:   &gamev1.ClientMessage_Climb{Climb: &gamev1.ClimbRequest{}},
+		Payload: &gamev1.ClientMessage_Climb{Climb: &gamev1.ClimbRequest{
+			Direction: bctx.parsed.Args[0],
+		}},
 	}}, nil
 }
 
@@ -1097,9 +1102,14 @@ func bridgeMotive(bctx *bridgeContext) (bridgeResult, error) {
 // Precondition: bctx must be non-nil with a valid reqID.
 // Postcondition: returns a non-nil msg containing a SwimRequest; done is false.
 func bridgeSwim(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) == 0 {
+		return writeErrorPrompt(bctx, "Usage: swim <direction>")
+	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
-		Payload:   &gamev1.ClientMessage_Swim{Swim: &gamev1.SwimRequest{}},
+		Payload: &gamev1.ClientMessage_Swim{Swim: &gamev1.SwimRequest{
+			Direction: bctx.parsed.Args[0],
+		}},
 	}}, nil
 }
 

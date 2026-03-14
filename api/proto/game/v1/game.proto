@@ -86,6 +86,7 @@ message ClientMessage {
     MotiveRequest motive = 69;
     CalmRequest calm = 70;
     HeroPointRequest hero_point = 71;
+    DelayRequest delay = 72;
   }
 }
 
@@ -799,10 +800,14 @@ message TumbleRequest {
 message SeekRequest {}
 
 // ClimbRequest asks the server to attempt climbing a climbable surface.
-message ClimbRequest {}
+message ClimbRequest {
+  string direction = 1; // compass direction to climb (e.g. "up", "north")
+}
 
-// SwimRequest asks the server to attempt swimming or surfacing.
-message SwimRequest {}
+// SwimRequest asks the server to attempt swimming through a water exit.
+message SwimRequest {
+  string direction = 1; // compass direction to swim (e.g. "north", "east")
+}
 
 // CalmRequest asks the server to attempt calming the player's worst active mental state.
 message CalmRequest {}
@@ -811,6 +816,9 @@ message CalmRequest {}
 message HeroPointRequest {
   string subcommand = 1; // "reroll" or "stabilize"
 }
+
+// DelayRequest banks remaining AP for next round at cost of -2 AC.
+message DelayRequest {}
 
 // MotiveRequest asks the server to read an NPC's intentions (awareness vs Hustle DC).
 message MotiveRequest {
