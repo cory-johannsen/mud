@@ -2325,21 +2325,6 @@ func (h *CombatHandler) pushXPMessages(sess *session.PlayerSession, levelMsgs []
 	}
 }
 
-// firstLivingPlayer returns the session of the first living player in combat, or nil.
-//
-// Precondition: cbt must not be nil.
-// Postcondition: Returns a non-nil PlayerSession if a living player is found; nil otherwise.
-func (h *CombatHandler) firstLivingPlayer(cbt *combat.Combat) *session.PlayerSession {
-	for _, c := range cbt.Combatants {
-		if c.Kind == combat.KindPlayer && !c.IsDead() {
-			if sess, ok := h.sessions.GetPlayer(c.ID); ok {
-				return sess
-			}
-		}
-	}
-	return nil
-}
-
 // robPlayersLocked executes the robbery sequence when all players are defeated.
 // For each living NPC with RobPercent > 0, a fraction of each dead player's
 // remaining currency is transferred to the NPC's Currency wallet.
