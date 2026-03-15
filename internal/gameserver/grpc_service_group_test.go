@@ -412,6 +412,10 @@ func TestHandleUngroup_LeaderDisbands(t *testing.T) {
 	require.NotNil(t, evt)
 	assert.Equal(t, "You disbanded the group.", evt.GetMessage().GetContent())
 
+	// Note: push notifications to remaining members cannot be asserted in unit tests
+	// because sessions have no real gRPC stream attached. The notification logic is verified
+	// by integration tests and code inspection.
+
 	// Both members should have their GroupID cleared.
 	aliceSess, _ := sessMgr.GetPlayer("u_ul1")
 	assert.Empty(t, aliceSess.GroupID)
@@ -436,6 +440,10 @@ func TestHandleUngroup_NonLeaderLeaves(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 	assert.Equal(t, "You left the group.", evt.GetMessage().GetContent())
+
+	// Note: push notifications to remaining members cannot be asserted in unit tests
+	// because sessions have no real gRPC stream attached. The notification logic is verified
+	// by integration tests and code inspection.
 
 	// Bob's GroupID cleared, Alice's GroupID remains.
 	bobSess, _ := sessMgr.GetPlayer("u_unl2")
@@ -478,6 +486,10 @@ func TestHandleKick_Success(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 	assert.Equal(t, "You kicked Bob from the group.", evt.GetMessage().GetContent())
+
+	// Note: push notifications to target and remaining members cannot be asserted in unit tests
+	// because sessions have no real gRPC stream attached. The notification logic is verified
+	// by integration tests and code inspection.
 
 	// Bob's GroupID should be cleared.
 	assert.Empty(t, bobSess.GroupID)

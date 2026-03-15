@@ -2481,9 +2481,6 @@ func (s *GameServiceServer) handleKick(uid string, req *gamev1.KickRequest) (*ga
 	}
 
 	arg := strings.TrimSpace(req.GetPlayer())
-	if strings.EqualFold(arg, sess.CharName) {
-		return messageEvent("Use 'ungroup' to disband the group."), nil
-	}
 
 	// Find target among group members.
 	var targetSess *session.PlayerSession
@@ -2497,6 +2494,10 @@ func (s *GameServiceServer) handleKick(uid string, req *gamev1.KickRequest) (*ga
 	}
 	if targetSess == nil {
 		return messageEvent(fmt.Sprintf("%s is not in your group.", arg)), nil
+	}
+
+	if targetSess.UID == uid {
+		return messageEvent("Use 'ungroup' to disband the group."), nil
 	}
 
 	// Capture remaining UIDs BEFORE removal so we can notify them.
