@@ -6721,52 +6721,7 @@ func (s *GameServiceServer) handleJoin(uid string, _ *gamev1.JoinRequest) (*game
 	s.combatH.combatMu.Unlock()
 
 	// Build player combatant outside combatMu (RollInitiative modifies only the struct).
-	const dexMod = 1
-	var playerAC int
-	if s.combatH.invRegistry != nil {
-		defStats := sess.Equipment.ComputedDefenses(s.combatH.invRegistry, dexMod)
-		playerAC = 10 + defStats.ACBonus + defStats.EffectiveDex
-	} else {
-		playerAC = 10 + dexMod
-	}
-
-	playerCbt := &combat.Combatant{
-		ID:        sess.UID,
-		Kind:      combat.KindPlayer,
-		Name:      sess.CharName,
-		MaxHP:     sess.CurrentHP,
-		CurrentHP: sess.CurrentHP,
-		AC:        playerAC,
-		Level:     1,
-		DexMod:    dexMod,
-	}
-
-	s.combatH.loadoutsMu.Lock()
-	if lo, ok2 := s.combatH.loadouts[sess.UID]; ok2 {
-		playerCbt.Loadout = lo
-	}
-	s.combatH.loadoutsMu.Unlock()
-
-	weaponProfRank := "untrained"
-	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
-		cat := playerCbt.Loadout.MainHand.Def.ProficiencyCategory
-		if r, ok2 := sess.Proficiencies[cat]; ok2 {
-			weaponProfRank = r
-		}
-	}
-	playerCbt.WeaponProficiencyRank = weaponProfRank
-	if playerCbt.Loadout != nil && playerCbt.Loadout.MainHand != nil && playerCbt.Loadout.MainHand.Def != nil {
-		playerCbt.WeaponDamageType = playerCbt.Loadout.MainHand.Def.DamageType
-	}
-
-	playerCbt.Resistances = sess.Resistances
-	playerCbt.Weaknesses = sess.Weaknesses
-	playerCbt.GritMod = combat.AbilityMod(sess.Abilities.Grit)
-	playerCbt.QuicknessMod = combat.AbilityMod(sess.Abilities.Quickness)
-	playerCbt.SavvyMod = combat.AbilityMod(sess.Abilities.Savvy)
-	playerCbt.ToughnessRank = combat.DefaultSaveRank(sess.Proficiencies["toughness"])
-	playerCbt.HustleRank = combat.DefaultSaveRank(sess.Proficiencies["hustle"])
-	playerCbt.CoolRank = combat.DefaultSaveRank(sess.Proficiencies["cool"])
+	playerCbt := buildPlayerCombatant(sess, s.combatH)
 
 	// Roll initiative for just this player against existing combatants.
 	if s.dice != nil {

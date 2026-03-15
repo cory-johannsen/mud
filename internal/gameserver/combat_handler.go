@@ -1528,12 +1528,12 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	return events
 }
 
-// startCombatLocked initialises a new combat encounter for sess attacking inst.
-// Caller must hold combatMu.
+// buildPlayerCombatant constructs a *combat.Combatant from a player session, loading
+// equipment stats, loadout, proficiency ranks, resistances/weaknesses, and ability mods.
 //
-// Precondition: combatMu is held; sess and inst must be non-nil.
-// Postcondition: combat is registered in the engine; StartRound(3) is called.
-func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc.Instance) (*combat.Combat, []*gamev1.CombatEvent, error) {
+// Precondition: sess must be non-nil; h must be non-nil.
+// Postcondition: Returns a fully populated *combat.Combatant for the player.
+func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat.Combatant {
 	// Compute player AC from equipped armor. dexMod is a placeholder until character sheet stats are integrated.
 	const dexMod = 1
 	var playerAC int
@@ -1591,6 +1591,17 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	playerCbt.HustleRank = combat.DefaultSaveRank(sess.Proficiencies["hustle"])
 	playerCbt.CoolRank = combat.DefaultSaveRank(sess.Proficiencies["cool"])
 
+	return playerCbt
+}
+
+// startCombatLocked initialises a new combat encounter for sess attacking inst.
+// Caller must hold combatMu.
+//
+// Precondition: combatMu is held; sess and inst must be non-nil.
+// Postcondition: combat is registered in the engine; StartRound(3) is called.
+func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc.Instance) (*combat.Combat, []*gamev1.CombatEvent, error) {
+	playerCbt := buildPlayerCombatant(sess, h)
+
 	// Resolve NPC weapon name for combat narrative.
 	npcWeaponName := ""
 	if inst.WeaponID != "" && h.invRegistry != nil {
@@ -1633,6 +1644,58 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		return nil, nil, fmt.Errorf("starting combat: %w", err)
 	}
 	sess.Status = int32(2) // gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT
+
+	// Auto-join group members in the same room.
+	roomID := sess.RoomID
+	if group := h.sessions.GroupByUID(sess.UID); group != nil {
+		for _, memberUID := range group.MemberUIDs {
+			if memberUID == sess.UID {
+				continue
+			}
+			memberSess, ok := h.sessions.GetPlayer(memberUID)
+			if !ok {
+				continue
+			}
+			if memberSess.Status == statusInCombat {
+				continue
+			}
+			memberCbt := buildPlayerCombatant(memberSess, h)
+			combat.RollInitiative([]*combat.Combatant{memberCbt}, h.dice.Src())
+			if memberSess.RoomID == roomID {
+				if addErr := h.engine.AddCombatant(roomID, memberCbt); addErr != nil {
+					h.logger.Warn("auto-join group member failed",
+						zap.String("uid", memberUID),
+						zap.Error(addErr),
+					)
+					continue
+				}
+				memberSess.Status = statusInCombat
+				joinMsg := fmt.Sprintf("Your group entered combat! You join the fight (initiative %d).", memberCbt.Initiative)
+				joinEvt := &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_Message{
+						Message: &gamev1.MessageEvent{Content: joinMsg},
+					},
+				}
+				if memberSess.Entity != nil {
+					if data, marshalErr := proto.Marshal(joinEvt); marshalErr == nil {
+						_ = memberSess.Entity.Push(data)
+					}
+				}
+			} else {
+				notifyMsg := "Your group is under attack!"
+				notifyEvt := &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_Message{
+						Message: &gamev1.MessageEvent{Content: notifyMsg},
+					},
+				}
+				if memberSess.Entity != nil {
+					if data, marshalErr := proto.Marshal(notifyEvt); marshalErr == nil {
+						_ = memberSess.Entity.Push(data)
+					}
+				}
+			}
+		}
+	}
 
 	// Apply flat_footed to all NPC combatants at combat start (sucker_punch window).
 	if h.condRegistry != nil {
