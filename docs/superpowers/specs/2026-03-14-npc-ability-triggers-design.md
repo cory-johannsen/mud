@@ -32,7 +32,7 @@ CooldownRounds int `yaml:"cooldown_rounds,omitempty"`
 APCost int `yaml:"ap_cost,omitempty"`
 ```
 
-The new action string `"apply_mental_state"` is added alongside the existing values `"attack"`, `"strike"`, `"pass"`, `"flee"`.
+The new action string `"apply_mental_state"` is added alongside the existing values `"attack"`, `"strike"`, `"pass"`, `"flee"`. The `Action` field doc comment on `Operator` and the postcondition comment on `Validate()` MUST be updated to include `"apply_mental_state"` in the list of valid action strings.
 
 ### PlannedAction struct extension (`internal/game/ai/planner.go`)
 
@@ -87,7 +87,7 @@ func (c *Combat) RecordDamage(attackerUID string, amount int) {
 
 `RecordDamage` is called from the damage resolution callback in `resolveAndAdvanceLocked` alongside existing damage application, wherever the attacker UID and damage amount are both known.
 
-`DamageDealt` is per-combat-instance; it is naturally reset when a new `Combat` is created for a room.
+`DamageDealt` MUST be initialized to an empty `map[string]int` in the `StartCombat` constructor (added to the `Combat` struct literal alongside existing field initializations). It is per-combat-instance and naturally reset when a new `Combat` is created.
 
 ### YAML operator example
 
@@ -157,7 +157,8 @@ case "apply_mental_state":
     1. Resolve target player session by pa.Target selector:
        - "nearest_enemy"        → any living player combatant (first found)
        - "lowest_hp_enemy"      → living player with lowest CurrentHP
-       - "highest_damage_enemy" → living player with highest DamageDealt entry
+       - "highest_damage_enemy" → living player with highest DamageDealt entry;
+                                   tie-breaking: first in cbt.Combatants iteration order
 
     2. If no valid target: skip (no AP deducted, no cooldown set). Continue to next action.
 
@@ -247,8 +248,9 @@ NPCs without an `AIDomain` field use `legacyAutoQueueLocked` and never reach `ap
 - **REQ-T6** (example): NPC with non-empty `Taunts` → a taunt string is pushed to the targeted player's stream on ability use.
 - **REQ-T7** (example): NPC with empty `Taunts` → fallback message `"The <name> unsettles you."` pushed to targeted player.
 - **REQ-T8** (example): `apply_mental_state` with track=rage, severity=moderate → `applyMentalStateChanges` is called; target's rage condition is at ≥ moderate in `cbt.Conditions`.
-- **REQ-T9** (property): For any track ∈ {rage, despair, delirium} and severity ∈ {mild, moderate, severe}, and any initial track state, executing `apply_mental_state` via the full combat execution path leaves the severity in `cbt.Conditions` consistent with `mentalstate.Manager` (no divergence between the two state stores).
+- **REQ-T9** (property): For any track ∈ {rage, despair, delirium} and severity ∈ {mild, moderate, severe}, and any initial track state, executing `apply_mental_state` via the full combat execution path satisfies: `mentalStateMgr.CurrentSeverity(targetUID, track) == severity recorded in cbt.Conditions[targetUID]` for the corresponding condition ID (no divergence between the two state stores).
 - **REQ-T10** (example): Dead NPC combatant — `autoQueueNPCsLocked` skips dead NPCs; no ability fires.
 - **REQ-T11** (example): No valid target (all players dead or session inactive) → ability silently skipped; no AP deducted; no cooldown set; no push attempted.
 - **REQ-T12** (example): `AbilityCooldowns` nil at first use → map initialized before write; no panic.
-- **REQ-T13** (example): `RecordDamage` accumulates across multiple hits; `highest_damage_enemy` correctly identifies player with total highest damage after 3 rounds.
+- **REQ-T13** (example): `RecordDamage` accumulates across multiple hits in a single-threaded (combat-locked) context; `highest_damage_enemy` correctly identifies player with total highest damage after 3 rounds. Tie-breaking: equal-damage players — the one appearing first in `cbt.Combatants` is selected.
+- **REQ-T14** (example): `DamageDealt` is initialized (non-nil) in a newly-created `Combat` instance; `RecordDamage` does not panic on the first call.
