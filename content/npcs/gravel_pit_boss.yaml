@@ -6,7 +6,7 @@ max_hp: 48
 ac: 17
 rob_multiplier: 1.5
 perception: 8
-ai_domain: ganger_combat
+ai_domain: gravel_pit_boss_combat
 respawn_delay: "5m"
 abilities:
   brutality: 17

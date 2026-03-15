@@ -1,0 +1,56 @@
+domain:
+  id: cargo_cultist_combat
+  description: Combat behavior for cargo_cultist. Attacks and can trigger delirium conditions.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemy, potentially using ability
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: cargo_cultist_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: strike_and_ability
+      precondition: cargo_cultist_enemy_below_half
+      subtasks: [strike_enemy, cultist_unsettle]
+
+    - task: fight
+      id: attack_and_ability
+      precondition: cargo_cultist_has_enemy
+      subtasks: [attack_enemy, cultist_unsettle]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: cultist_unsettle
+      action: apply_mental_state
+      track: delirium
+      severity: moderate
+      target: nearest_enemy
+      cooldown_rounds: 5
+      ap_cost: 2

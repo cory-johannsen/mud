@@ -1,0 +1,56 @@
+domain:
+  id: bridge_troll_combat
+  description: Combat behavior for bridge_troll. Attacks and can trigger delirium conditions.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemy, potentially using ability
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: bridge_troll_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: strike_and_ability
+      precondition: bridge_troll_enemy_below_half
+      subtasks: [strike_enemy, troll_unsettle]
+
+    - task: fight
+      id: attack_and_ability
+      precondition: bridge_troll_has_enemy
+      subtasks: [attack_enemy, troll_unsettle]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: troll_unsettle
+      action: apply_mental_state
+      track: delirium
+      severity: moderate
+      target: lowest_hp_enemy
+      cooldown_rounds: 5
+      ap_cost: 2

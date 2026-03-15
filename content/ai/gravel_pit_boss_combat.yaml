@@ -1,0 +1,56 @@
+domain:
+  id: gravel_pit_boss_combat
+  description: Combat behavior for gravel_pit_boss. Attacks and can trigger despair conditions.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemy, potentially using ability
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: gravel_pit_boss_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: strike_and_ability
+      precondition: gravel_pit_boss_enemy_below_half
+      subtasks: [strike_enemy, pitboss_demoralize]
+
+    - task: fight
+      id: attack_and_ability
+      precondition: gravel_pit_boss_has_enemy
+      subtasks: [attack_enemy, pitboss_demoralize]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: pitboss_demoralize
+      action: apply_mental_state
+      track: despair
+      severity: moderate
+      target: lowest_hp_enemy
+      cooldown_rounds: 4
+      ap_cost: 2

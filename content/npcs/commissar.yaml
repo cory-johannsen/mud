@@ -8,7 +8,7 @@ max_hp: 42
 ac: 16
 rob_multiplier: 1.5
 perception: 9
-ai_domain: ganger_combat
+ai_domain: commissar_combat
 respawn_delay: "5m"
 abilities:
   brutality: 10

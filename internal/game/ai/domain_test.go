@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
@@ -198,6 +199,37 @@ domain:
 	}
 	if op.APCost != 1 {
 		t.Errorf("APCost: want 1, got %d", op.APCost)
+	}
+}
+
+func TestLoadDomains_AllNPCDomainsValid(t *testing.T) {
+	_, thisFile, _, _ := runtime.Caller(0)
+	repoRoot := filepath.Join(filepath.Dir(thisFile), "..", "..", "..")
+	contentDir := filepath.Join(repoRoot, "content", "ai")
+
+	domains, err := ai.LoadDomains(contentDir)
+	if err != nil {
+		t.Fatalf("LoadDomains: %v", err)
+	}
+
+	requiredDomains := []string{
+		"ganger_npc_combat", "highway_bandit_combat", "tarmac_raider_combat",
+		"mill_plain_thug_combat", "motel_raider_combat", "river_pirate_combat",
+		"strip_mall_scav_combat", "industrial_scav_combat", "outlet_scavenger_combat",
+		"scavenger_combat", "alberta_drifter_combat", "terminal_squatter_combat",
+		"cargo_cultist_combat", "lieutenant_combat", "brew_warlord_combat",
+		"gravel_pit_boss_combat", "commissar_combat", "bridge_troll_combat",
+	}
+
+	domainSet := make(map[string]bool, len(domains))
+	for _, d := range domains {
+		domainSet[d.ID] = true
+	}
+
+	for _, req := range requiredDomains {
+		if !domainSet[req] {
+			t.Errorf("missing domain: %q", req)
+		}
 	}
 }
 

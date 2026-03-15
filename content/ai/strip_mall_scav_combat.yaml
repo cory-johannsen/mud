@@ -1,0 +1,47 @@
+domain:
+  id: strip_mall_scav_combat
+  description: Combat behavior for strip_mall_scav. Cautious; uses ability when not outnumbered.
+
+  tasks:
+    - id: behave
+      description: Root task — fight cautiously or pass
+    - id: cautious_fight
+      description: Fight only when not outnumbered
+
+  methods:
+    - task: behave
+      id: cautious_combat
+      precondition: strip_mall_scav_has_enemy
+      subtasks: [cautious_fight]
+
+    - task: behave
+      id: idle
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: cautious_fight
+      id: fight_with_ability
+      precondition: strip_mall_scav_not_outnumbered
+      subtasks: [attack_enemy, scav_demoralize]
+
+    - task: cautious_fight
+      id: flee_if_outnumbered
+      precondition: ""
+      subtasks: [do_pass]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: scav_demoralize
+      action: apply_mental_state
+      track: despair
+      severity: mild
+      target: lowest_hp_enemy
+      cooldown_rounds: 3
+      ap_cost: 1

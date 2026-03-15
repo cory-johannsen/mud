@@ -1,0 +1,56 @@
+domain:
+  id: motel_raider_combat
+  description: Combat behavior for motel_raider. Attacks and can trigger despair conditions.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemy, potentially using ability
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: motel_raider_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: strike_and_ability
+      precondition: motel_raider_enemy_below_half
+      subtasks: [strike_enemy, motel_raider_intimidate]
+
+    - task: fight
+      id: attack_and_ability
+      precondition: motel_raider_has_enemy
+      subtasks: [attack_enemy, motel_raider_intimidate]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: motel_raider_intimidate
+      action: apply_mental_state
+      track: despair
+      severity: mild
+      target: nearest_enemy
+      cooldown_rounds: 3
+      ap_cost: 1

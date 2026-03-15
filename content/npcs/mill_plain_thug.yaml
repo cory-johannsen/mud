@@ -6,7 +6,7 @@ max_hp: 18
 ac: 13
 rob_multiplier: 1.0
 perception: 5
-ai_domain: ganger_combat
+ai_domain: mill_plain_thug_combat
 respawn_delay: "5m"
 abilities:
   brutality: 14

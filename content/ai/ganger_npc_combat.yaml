@@ -1,0 +1,56 @@
+domain:
+  id: ganger_npc_combat
+  description: Combat behavior for ganger. Attacks and can trigger rage conditions.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemy, potentially using ability
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: ganger_npc_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: strike_and_ability
+      precondition: ganger_npc_enemy_below_half
+      subtasks: [strike_enemy, ganger_taunt]
+
+    - task: fight
+      id: attack_and_ability
+      precondition: ganger_npc_has_enemy
+      subtasks: [attack_enemy, ganger_taunt]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: ganger_taunt
+      action: apply_mental_state
+      track: rage
+      severity: mild
+      target: highest_damage_enemy
+      cooldown_rounds: 3
+      ap_cost: 1

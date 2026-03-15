@@ -1,0 +1,56 @@
+domain:
+  id: lieutenant_combat
+  description: Combat behavior for lieutenant. Attacks and can trigger despair conditions.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemy, potentially using ability
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: lieutenant_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: strike_and_ability
+      precondition: lieutenant_enemy_below_half
+      subtasks: [strike_enemy, lt_intimidate]
+
+    - task: fight
+      id: attack_and_ability
+      precondition: lieutenant_has_enemy
+      subtasks: [attack_enemy, lt_intimidate]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: lt_intimidate
+      action: apply_mental_state
+      track: despair
+      severity: moderate
+      target: lowest_hp_enemy
+      cooldown_rounds: 4
+      ap_cost: 2

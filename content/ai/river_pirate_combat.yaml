@@ -1,0 +1,47 @@
+domain:
+  id: river_pirate_combat
+  description: Combat behavior for river_pirate. Cautious; uses ability when not outnumbered.
+
+  tasks:
+    - id: behave
+      description: Root task — fight cautiously or pass
+    - id: cautious_fight
+      description: Fight only when not outnumbered
+
+  methods:
+    - task: behave
+      id: cautious_combat
+      precondition: river_pirate_has_enemy
+      subtasks: [cautious_fight]
+
+    - task: behave
+      id: idle
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: cautious_fight
+      id: fight_with_ability
+      precondition: river_pirate_not_outnumbered
+      subtasks: [attack_enemy, pirate_unsettle]
+
+    - task: cautious_fight
+      id: flee_if_outnumbered
+      precondition: ""
+      subtasks: [do_pass]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: pirate_unsettle
+      action: apply_mental_state
+      track: delirium
+      severity: mild
+      target: nearest_enemy
+      cooldown_rounds: 4
+      ap_cost: 1

@@ -1,0 +1,56 @@
+domain:
+  id: commissar_combat
+  description: Combat behavior for commissar. Attacks and can trigger rage conditions.
+
+  tasks:
+    - id: behave
+      description: Root task — fight or idle
+    - id: fight
+      description: Engage enemy, potentially using ability
+
+  methods:
+    - task: behave
+      id: combat_mode
+      precondition: commissar_has_enemy
+      subtasks: [fight]
+
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: fight
+      id: strike_and_ability
+      precondition: commissar_enemy_below_half
+      subtasks: [strike_enemy, commissar_taunt]
+
+    - task: fight
+      id: attack_and_ability
+      precondition: commissar_has_enemy
+      subtasks: [attack_enemy, commissar_taunt]
+
+    - task: fight
+      id: attack_only
+      precondition: ""
+      subtasks: [attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: strike_enemy
+      action: strike
+      target: weakest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: commissar_taunt
+      action: apply_mental_state
+      track: rage
+      severity: moderate
+      target: highest_damage_enemy
+      cooldown_rounds: 4
+      ap_cost: 2
