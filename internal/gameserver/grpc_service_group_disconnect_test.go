@@ -37,6 +37,9 @@ func TestCleanupPlayer_InviteePendingInvite_InviteCleared(t *testing.T) {
 	svc.cleanupPlayer("invitee", "bob")
 
 	assert.Empty(t, invitee.PendingGroupInvite, "PendingGroupInvite must be cleared on disconnect")
+	// Note: the push notification to the leader ("X disconnected before responding to your invitation.")
+	// cannot be asserted in unit tests because player sessions have no real gRPC stream attached.
+	// The notification is verified by code inspection and integration tests.
 }
 
 // TestCleanupPlayer_NonLeaderDisconnect_LeaderGroupPreserved verifies that when a non-leader
