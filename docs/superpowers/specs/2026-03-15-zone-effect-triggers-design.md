@@ -88,27 +88,37 @@ for each living player combatant cbt:
 
 ### 2b: Effect application
 
-In `autoQueueNPCsLocked`, after decrementing cooldowns, iterate each living player combatant and apply room effects:
+In `autoQueueNPCsLocked`, after decrementing cooldowns, iterate each living player combatant and apply room effects. Room lookup uses the existing `h.worldMgr.GetRoom(roomID string) (*world.Room, bool)` API where `roomID` is the combat's `RoomID` field:
 
 ```
-room := worldMgr.Room(roomID, zoneID)
+room, ok := h.worldMgr.GetRoom(cbt.RoomID)
+if !ok or h.mentalStateMgr == nil: continue
+
 for each effect in room.Effects:
-    key := cbt.roomID + ":" + effect.Track
+    key := cbt.RoomID + ":" + effect.Track
     if sess.ZoneEffectCooldowns[key] > 0: continue  // immune
 
-    // Resolve Will save: d20 + GritMod vs effect.BaseDC
-    saveOutcome := ResolveSave("toughness", cbt, effect.BaseDC, src)
+    // Resolve Will save: d20 + GritMod vs effect.BaseDC (binary pass/fail; no proficiency bonus).
+    // This is a simple environmental check, not a combat save — proficiency does not apply.
+    gritMod := combat.AbilityMod(sess.Abilities.Grit)
+    roll := src.Intn(20) + 1
+    total := roll + gritMod
 
-    if saveOutcome == Failure or saveOutcome == CritFailure:
-        changes := mentalStateMgr.ApplyTrigger(cbt.ID, track, severity)
+    if total < effect.BaseDC:
+        changes := h.mentalStateMgr.ApplyTrigger(cbt.ID, track, severity)
         h.applyMentalStateChanges(cbt.ID, changes)
         // Broadcast narrative (reuse existing applyMentalStateChanges output)
+        // Failed saves do NOT set a cooldown — effect fires again next round.
     else:
         // Successful save — set cooldown immunity
         if sess.ZoneEffectCooldowns == nil:
             sess.ZoneEffectCooldowns = make(map[string]int64)
         sess.ZoneEffectCooldowns[key] = int64(effect.CooldownRounds)
 ```
+
+**Save resolution is binary (pass/fail) using `d20 + GritMod vs BaseDC`. No proficiency bonus. This is consistent with the out-of-combat path (Feature 3) — both use the same formula.**
+
+The cooldown decrement in 2a applies to all keys in `ZoneEffectCooldowns`, regardless of room. When a player moves to a new room, any leftover cooldowns from their old room naturally expire over time (decrement continues each combat round). This is intentional — a player cannot game immunity by quickly moving between rooms.
 
 Track/severity string parsing uses the same helpers as NPC ability triggers (`abilityTrack`, `abilitySeverity` in `combat_handler.go`).
 
@@ -118,23 +128,26 @@ Track/severity string parsing uses the same helpers as NPC ability triggers (`ab
 
 **Location:** `internal/gameserver/grpc_service.go` — `handleMove`
 
-After the player's `RoomID` is updated and the room view is fetched, check the destination room's effects:
+After the player's `RoomID` is updated and the room view is fetched, check the destination room's effects. Room lookup uses `s.worldMgr.GetRoom(newRoomID)`:
 
 ```
-room := worldMgr.Room(newRoomID, zoneID)
+room, ok := s.worldMgr.GetRoom(newRoomID)
+if !ok or s.mentalStateMgr == nil: skip effect check
+
 now := time.Now().Unix()
 for each effect in room.Effects:
     key := newRoomID + ":" + effect.Track
     if sess.ZoneEffectCooldowns != nil && sess.ZoneEffectCooldowns[key] > now:
         continue  // immune
 
-    // Resolve Will save: d20 + GritMod (no combatant — use session Abilities directly)
+    // Resolve Will save: d20 + GritMod vs effect.BaseDC (binary pass/fail; no proficiency bonus).
     gritMod := combat.AbilityMod(sess.Abilities.Grit)
-    roll := dice.Roll(1, 20, src)
+    roll := src.Intn(20) + 1
     total := roll + gritMod
     if total < effect.BaseDC:
-        changes := mentalStateMgr.ApplyTrigger(sess.UID, track, severity)
-        // Apply and send narrative to player's stream
+        changes := s.mentalStateMgr.ApplyTrigger(sess.UID, track, severity)
+        // Apply state changes and send narrative to player's stream via messageEvent
+        // Failed saves do NOT set a cooldown.
     else:
         if sess.ZoneEffectCooldowns == nil:
             sess.ZoneEffectCooldowns = make(map[string]int64)
@@ -169,13 +182,16 @@ The content author surveys `content/zones/` and applies effects to appropriate r
 
 ## Testing
 
-- **REQ-T1**: Living player combatant in a room with a despair effect: on `autoQueueNPCsLocked`, `ApplyTrigger` called; `ZoneEffectCooldowns["roomID:despair"]` set to `CooldownRounds`.
-- **REQ-T2**: Player with `ZoneEffectCooldowns["roomID:despair"] > 0`: effect skipped; no `ApplyTrigger` call.
-- **REQ-T3**: After N decrements equal to `CooldownRounds`, cooldown reaches 0; effect fires on next eligible round.
-- **REQ-T4**: Successful save in combat sets `ZoneEffectCooldowns[key] = CooldownRounds`; failed save does not set cooldown.
-- **REQ-T5**: `handleMove` to a room with a fear effect: save fails → `ApplyTrigger` called; narrative pushed to player stream.
-- **REQ-T6**: `handleMove` to a room with a fear effect: save succeeds → `ZoneEffectCooldowns[key]` set to `now + CooldownMinutes*60`; no trigger applied.
-- **REQ-T7**: NPC combatant in same room — effect loop skips NPCs entirely.
+- **REQ-T1**: Living player combatant in a room with a despair effect; fixed die source forces `total < BaseDC`: `ApplyTrigger` called with the correct track/severity; `ZoneEffectCooldowns["roomID:despair"]` remains 0 (failed saves do not set cooldown).
+- **REQ-T2**: Player with `ZoneEffectCooldowns["roomID:despair"] > 0`: effect loop skips that effect entirely; no `ApplyTrigger` call.
+- **REQ-T3**: After N decrements equal to `CooldownRounds`, `ZoneEffectCooldowns[key]` reaches 0; effect fires on next eligible round with a failing save.
+- **REQ-T4**: Successful save in combat (fixed die source forces `total >= BaseDC`) sets `ZoneEffectCooldowns[key] = CooldownRounds`; no `ApplyTrigger` called.
+- **REQ-T5**: `handleMove` to a room with a fear effect; save fails → `ApplyTrigger` called; narrative pushed to player stream; cooldown not set.
+- **REQ-T6**: `handleMove` to a room with a fear effect; save succeeds → `ZoneEffectCooldowns[key]` set to `now + CooldownMinutes*60`; no `ApplyTrigger` called.
+- **REQ-T7**: NPC combatant in same combat — effect loop iterates only player-kind combatants; no trigger applied for NPC.
 - **REQ-T8**: `ZoneEffectCooldowns` nil at first use → map initialized before write; no panic.
-- **REQ-T9** (property): For any track ∈ {rage, despair, delirium, fear} and any initial mental state, executing zone effect via full combat path satisfies: `mentalStateMgr.CurrentSeverity(uid, track)` matches the condition stored in `cbt.Conditions[uid]` (no divergence between the two state stores).
-- **REQ-T10**: Room with two effects (despair + delirium) — both checked independently each round; each has its own cooldown key.
+- **REQ-T9** (property): For any track ∈ {rage, despair, delirium, fear} and any initial mental state, executing zone effect trigger via full combat path satisfies: `mentalStateMgr.ApplyTrigger` return value is passed to `applyMentalStateChanges`; `sess.Conditions` and `mentalStateMgr` remain consistent (same condition IDs present in both).
+- **REQ-T10**: Room with two effects (despair + delirium) — both checked independently each round; each has its own key (`roomID:despair`, `roomID:delirium`); cooldowns are independent.
+- **REQ-T11**: Room with zero effects (`Effects` is empty) — loop is a no-op; `ZoneEffectCooldowns` unchanged.
+- **REQ-T12**: `mentalStateMgr == nil` in combat handler — effect check is skipped entirely; no panic.
+- **REQ-T13**: Cooldown decrement (2a) applies to all keys in `ZoneEffectCooldowns`; a key from a previously-visited room (`"old_room:despair"`) is also decremented — player cannot game immunity by room-swapping.
