@@ -38,8 +38,21 @@ type Method struct {
 // Precondition: ID and Action must be non-empty.
 type Operator struct {
 	ID     string `yaml:"id"`
-	Action string `yaml:"action"` // "attack", "pass", "strike", "flee"
+	Action string `yaml:"action"` // "attack", "pass", "strike", "flee", "apply_mental_state"
 	Target string `yaml:"target"` // "nearest_enemy", "weakest_enemy", "self", or literal name
+
+	// Track is the mental state track for apply_mental_state operators.
+	// One of "rage", "despair", "delirium". Empty string = not a mental state ability.
+	Track string `yaml:"track,omitempty"`
+
+	// Severity is the minimum severity to apply: "mild", "moderate", or "severe".
+	Severity string `yaml:"severity,omitempty"`
+
+	// CooldownRounds is the number of rounds before this operator can fire again.
+	CooldownRounds int `yaml:"cooldown_rounds,omitempty"`
+
+	// APCost is the AP consumed when this operator executes. Zero treated as 1.
+	APCost int `yaml:"ap_cost,omitempty"`
 }
 
 // Domain holds the full HTN domain loaded from a YAML file.

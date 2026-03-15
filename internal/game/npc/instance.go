@@ -95,6 +95,9 @@ type Instance struct {
 	Disposition string
 	// MotiveBonus is the +2 attack bonus granted by a motive crit fail; applied once then zeroed.
 	MotiveBonus int
+	// AbilityCooldowns maps operator ID → rounds remaining until usable again.
+	// Nil at spawn; initialized lazily on first write in applyPlanLocked.
+	AbilityCooldowns map[string]int
 }
 
 // Name returns the instance's current display name.

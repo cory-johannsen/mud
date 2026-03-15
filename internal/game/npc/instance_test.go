@@ -198,6 +198,20 @@ func TestNewInstance_HustleDefaultsToZero(t *testing.T) {
 	}
 }
 
+func TestInstance_AbilityCooldowns_LazyInit(t *testing.T) {
+	inst := &npc.Instance{}
+	if inst.AbilityCooldowns != nil {
+		t.Error("AbilityCooldowns should be nil at zero value")
+	}
+	count := 0
+	for range inst.AbilityCooldowns {
+		count++
+	}
+	if count != 0 {
+		t.Errorf("expected 0 iterations over nil map, got %d", count)
+	}
+}
+
 func TestManager_Spawn_AppliesArmorACBonus(t *testing.T) {
 	mgr := npc.NewManager()
 	mgr.SetArmorACResolver(func(armorID string) int {

@@ -15,8 +15,23 @@ type ScriptCaller interface {
 
 // PlannedAction is one primitive action produced by the planner.
 type PlannedAction struct {
-	Action string // "attack", "strike", "pass", "reload", etc.
+	Action string // "attack", "strike", "pass", "reload", "apply_mental_state", etc.
 	Target string // resolved target name/UID; empty for pass/reload
+
+	// OperatorID is the ID of the operator that produced this action.
+	OperatorID string
+
+	// Track is the mental state track for "apply_mental_state" actions.
+	Track string
+
+	// Severity is the severity level for "apply_mental_state" actions.
+	Severity string
+
+	// CooldownRounds is the cooldown to set after execution.
+	CooldownRounds int
+
+	// APCost is the AP consumed by this action. Zero means default (1).
+	APCost int
 }
 
 // Planner evaluates an HTN domain for a single NPC and produces an ordered
@@ -67,7 +82,15 @@ func (p *Planner) Plan(state *WorldState) ([]PlannedAction, error) {
 		// Primitive operator — resolve and emit.
 		if op, ok := p.domain.OperatorByID(current); ok {
 			target := state.ResolveTarget(op.Target)
-			result = append(result, PlannedAction{Action: op.Action, Target: target})
+			result = append(result, PlannedAction{
+				Action:         op.Action,
+				Target:         target,
+				OperatorID:     op.ID,
+				Track:          op.Track,
+				Severity:       op.Severity,
+				CooldownRounds: op.CooldownRounds,
+				APCost:         op.APCost,
+			})
 			continue
 		}
 

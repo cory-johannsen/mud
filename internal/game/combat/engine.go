@@ -41,6 +41,9 @@ type Combat struct {
 	// sessionGetter looks up a player session by UID.
 	// May be nil; when nil, passive feat checks are silently skipped.
 	sessionGetter func(uid string) (*session.PlayerSession, bool)
+	// DamageDealt maps combatant UID → total damage dealt this combat.
+	// Initialized in StartCombat. Used for highest_damage_enemy target selection.
+	DamageDealt map[string]int
 }
 
 // RoundConditionEvent records a condition applied or removed during round startup.
@@ -202,6 +205,14 @@ func (c *Combat) ScriptManager() *scripting.Manager {
 // Postcondition: Returns the zoneID string; empty string when no scripting is configured.
 func (c *Combat) ZoneID() string {
 	return c.zoneID
+}
+
+// RecordDamage adds amount to the running total for attackerUID.
+//
+// Precondition: DamageDealt must not be nil (guaranteed by StartCombat).
+// Postcondition: DamageDealt[attackerUID] is incremented by amount.
+func (c *Combat) RecordDamage(attackerUID string, amount int) {
+	c.DamageDealt[attackerUID] += amount
 }
 
 // realSrc wraps math/rand for production dice rolls.
@@ -389,6 +400,7 @@ func (e *Engine) StartCombat(roomID string, combatants []*Combatant, condRegistr
 		Combatants:   sorted,
 		ActionQueues: make(map[string]*ActionQueue),
 		Conditions:   make(map[string]*condition.ActiveSet),
+		DamageDealt:  make(map[string]int),
 		condRegistry: condRegistry,
 		scriptMgr:    scriptMgr,
 		zoneID:       zoneID,
