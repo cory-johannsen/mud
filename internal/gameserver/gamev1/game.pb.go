@@ -324,6 +324,12 @@ type ClientMessage struct {
 	//	*ClientMessage_Delay
 	//	*ClientMessage_Join
 	//	*ClientMessage_Decline
+	//	*ClientMessage_Group
+	//	*ClientMessage_Invite
+	//	*ClientMessage_AcceptGroup
+	//	*ClientMessage_DeclineGroup
+	//	*ClientMessage_Ungroup
+	//	*ClientMessage_Kick
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1030,6 +1036,60 @@ func (x *ClientMessage) GetDecline() *DeclineRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetGroup() *GroupRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Group); ok {
+			return x.Group
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetInvite() *InviteRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Invite); ok {
+			return x.Invite
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetAcceptGroup() *AcceptGroupRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_AcceptGroup); ok {
+			return x.AcceptGroup
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetDeclineGroup() *DeclineGroupRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_DeclineGroup); ok {
+			return x.DeclineGroup
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetUngroup() *UngroupRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Ungroup); ok {
+			return x.Ungroup
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetKick() *KickRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_Kick); ok {
+			return x.Kick
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -1326,6 +1386,30 @@ type ClientMessage_Decline struct {
 	Decline *DeclineRequest `protobuf:"bytes,74,opt,name=decline,proto3,oneof"`
 }
 
+type ClientMessage_Group struct {
+	Group *GroupRequest `protobuf:"bytes,75,opt,name=group,proto3,oneof"`
+}
+
+type ClientMessage_Invite struct {
+	Invite *InviteRequest `protobuf:"bytes,76,opt,name=invite,proto3,oneof"`
+}
+
+type ClientMessage_AcceptGroup struct {
+	AcceptGroup *AcceptGroupRequest `protobuf:"bytes,77,opt,name=accept_group,json=acceptGroup,proto3,oneof"`
+}
+
+type ClientMessage_DeclineGroup struct {
+	DeclineGroup *DeclineGroupRequest `protobuf:"bytes,78,opt,name=decline_group,json=declineGroup,proto3,oneof"`
+}
+
+type ClientMessage_Ungroup struct {
+	Ungroup *UngroupRequest `protobuf:"bytes,79,opt,name=ungroup,proto3,oneof"`
+}
+
+type ClientMessage_Kick struct {
+	Kick *KickRequest `protobuf:"bytes,80,opt,name=kick,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -1471,6 +1555,18 @@ func (*ClientMessage_Delay) isClientMessage_Payload() {}
 func (*ClientMessage_Join) isClientMessage_Payload() {}
 
 func (*ClientMessage_Decline) isClientMessage_Payload() {}
+
+func (*ClientMessage_Group) isClientMessage_Payload() {}
+
+func (*ClientMessage_Invite) isClientMessage_Payload() {}
+
+func (*ClientMessage_AcceptGroup) isClientMessage_Payload() {}
+
+func (*ClientMessage_DeclineGroup) isClientMessage_Payload() {}
+
+func (*ClientMessage_Ungroup) isClientMessage_Payload() {}
+
+func (*ClientMessage_Kick) isClientMessage_Payload() {}
 
 // ServerEvent wraps all server-to-client events.
 type ServerEvent struct {
@@ -7941,6 +8037,253 @@ func (*DeclineRequest) Descriptor() ([]byte, []int) {
 	return file_game_v1_game_proto_rawDescGZIP(), []int{109}
 }
 
+// GroupRequest asks the server to create a group or show group info.
+// args is optional; when non-empty it is treated as a player name to invite.
+type GroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Args          string                 `protobuf:"bytes,1,opt,name=args,proto3" json:"args,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GroupRequest) Reset() {
+	*x = GroupRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[110]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupRequest) ProtoMessage() {}
+
+func (x *GroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[110]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupRequest.ProtoReflect.Descriptor instead.
+func (*GroupRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{110}
+}
+
+func (x *GroupRequest) GetArgs() string {
+	if x != nil {
+		return x.Args
+	}
+	return ""
+}
+
+// InviteRequest asks the server to invite a player to the sender's group.
+type InviteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Player        string                 `protobuf:"bytes,1,opt,name=player,proto3" json:"player,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InviteRequest) Reset() {
+	*x = InviteRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[111]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InviteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InviteRequest) ProtoMessage() {}
+
+func (x *InviteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[111]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InviteRequest.ProtoReflect.Descriptor instead.
+func (*InviteRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{111}
+}
+
+func (x *InviteRequest) GetPlayer() string {
+	if x != nil {
+		return x.Player
+	}
+	return ""
+}
+
+// AcceptGroupRequest asks the server to accept a pending group invitation.
+type AcceptGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcceptGroupRequest) Reset() {
+	*x = AcceptGroupRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[112]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcceptGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcceptGroupRequest) ProtoMessage() {}
+
+func (x *AcceptGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[112]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcceptGroupRequest.ProtoReflect.Descriptor instead.
+func (*AcceptGroupRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{112}
+}
+
+// DeclineGroupRequest asks the server to decline a pending group invitation.
+type DeclineGroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeclineGroupRequest) Reset() {
+	*x = DeclineGroupRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[113]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeclineGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeclineGroupRequest) ProtoMessage() {}
+
+func (x *DeclineGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[113]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeclineGroupRequest.ProtoReflect.Descriptor instead.
+func (*DeclineGroupRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{113}
+}
+
+// UngroupRequest asks the server to leave (or disband) the sender's group.
+type UngroupRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UngroupRequest) Reset() {
+	*x = UngroupRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[114]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UngroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UngroupRequest) ProtoMessage() {}
+
+func (x *UngroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[114]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UngroupRequest.ProtoReflect.Descriptor instead.
+func (*UngroupRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{114}
+}
+
+// KickRequest asks the server to remove a player from the sender's group.
+type KickRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Player        string                 `protobuf:"bytes,1,opt,name=player,proto3" json:"player,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KickRequest) Reset() {
+	*x = KickRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[115]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KickRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KickRequest) ProtoMessage() {}
+
+func (x *KickRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[115]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KickRequest.ProtoReflect.Descriptor instead.
+func (*KickRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{115}
+}
+
+func (x *KickRequest) GetPlayer() string {
+	if x != nil {
+		return x.Player
+	}
+	return ""
+}
+
 // MotiveRequest asks the server to read an NPC's intentions (awareness vs Hustle DC).
 type MotiveRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -7951,7 +8294,7 @@ type MotiveRequest struct {
 
 func (x *MotiveRequest) Reset() {
 	*x = MotiveRequest{}
-	mi := &file_game_v1_game_proto_msgTypes[110]
+	mi := &file_game_v1_game_proto_msgTypes[116]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7963,7 +8306,7 @@ func (x *MotiveRequest) String() string {
 func (*MotiveRequest) ProtoMessage() {}
 
 func (x *MotiveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[110]
+	mi := &file_game_v1_game_proto_msgTypes[116]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7976,7 +8319,7 @@ func (x *MotiveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MotiveRequest.ProtoReflect.Descriptor instead.
 func (*MotiveRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{110}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{116}
 }
 
 func (x *MotiveRequest) GetTarget() string {
@@ -7998,7 +8341,7 @@ type GrantRequest struct {
 
 func (x *GrantRequest) Reset() {
 	*x = GrantRequest{}
-	mi := &file_game_v1_game_proto_msgTypes[111]
+	mi := &file_game_v1_game_proto_msgTypes[117]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8010,7 +8353,7 @@ func (x *GrantRequest) String() string {
 func (*GrantRequest) ProtoMessage() {}
 
 func (x *GrantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_game_v1_game_proto_msgTypes[111]
+	mi := &file_game_v1_game_proto_msgTypes[117]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8023,7 +8366,7 @@ func (x *GrantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GrantRequest.ProtoReflect.Descriptor instead.
 func (*GrantRequest) Descriptor() ([]byte, []int) {
-	return file_game_v1_game_proto_rawDescGZIP(), []int{111}
+	return file_game_v1_game_proto_rawDescGZIP(), []int{117}
 }
 
 func (x *GrantRequest) GetGrantType() string {
@@ -8051,7 +8394,7 @@ var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xc5\x1f\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\x8e\"\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -8139,7 +8482,13 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"hero_point\x18G \x01(\v2\x19.game.v1.HeroPointRequestH\x00R\theroPoint\x12-\n" +
 	"\x05delay\x18H \x01(\v2\x15.game.v1.DelayRequestH\x00R\x05delay\x12*\n" +
 	"\x04join\x18I \x01(\v2\x14.game.v1.JoinRequestH\x00R\x04join\x123\n" +
-	"\adecline\x18J \x01(\v2\x17.game.v1.DeclineRequestH\x00R\adeclineB\t\n" +
+	"\adecline\x18J \x01(\v2\x17.game.v1.DeclineRequestH\x00R\adecline\x12-\n" +
+	"\x05group\x18K \x01(\v2\x15.game.v1.GroupRequestH\x00R\x05group\x120\n" +
+	"\x06invite\x18L \x01(\v2\x16.game.v1.InviteRequestH\x00R\x06invite\x12@\n" +
+	"\faccept_group\x18M \x01(\v2\x1b.game.v1.AcceptGroupRequestH\x00R\vacceptGroup\x12C\n" +
+	"\rdecline_group\x18N \x01(\v2\x1c.game.v1.DeclineGroupRequestH\x00R\fdeclineGroup\x123\n" +
+	"\aungroup\x18O \x01(\v2\x17.game.v1.UngroupRequestH\x00R\aungroup\x12*\n" +
+	"\x04kick\x18P \x01(\v2\x14.game.v1.KickRequestH\x00R\x04kickB\t\n" +
 	"\apayload\"\xea\v\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
@@ -8588,7 +8937,16 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"subcommand\"\x0e\n" +
 	"\fDelayRequest\"\r\n" +
 	"\vJoinRequest\"\x10\n" +
-	"\x0eDeclineRequest\"'\n" +
+	"\x0eDeclineRequest\"\"\n" +
+	"\fGroupRequest\x12\x12\n" +
+	"\x04args\x18\x01 \x01(\tR\x04args\"'\n" +
+	"\rInviteRequest\x12\x16\n" +
+	"\x06player\x18\x01 \x01(\tR\x06player\"\x14\n" +
+	"\x12AcceptGroupRequest\"\x15\n" +
+	"\x13DeclineGroupRequest\"\x10\n" +
+	"\x0eUngroupRequest\"%\n" +
+	"\vKickRequest\x12\x16\n" +
+	"\x06player\x18\x01 \x01(\tR\x06player\"'\n" +
 	"\rMotiveRequest\x12\x16\n" +
 	"\x06target\x18\x01 \x01(\tR\x06target\"b\n" +
 	"\fGrantRequest\x12\x1d\n" +
@@ -8636,7 +8994,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 114)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 120)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -8752,10 +9110,16 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*DelayRequest)(nil),              // 111: game.v1.DelayRequest
 	(*JoinRequest)(nil),               // 112: game.v1.JoinRequest
 	(*DeclineRequest)(nil),            // 113: game.v1.DeclineRequest
-	(*MotiveRequest)(nil),             // 114: game.v1.MotiveRequest
-	(*GrantRequest)(nil),              // 115: game.v1.GrantRequest
-	nil,                               // 116: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 117: game.v1.CharacterSheetView.AccessoriesEntry
+	(*GroupRequest)(nil),              // 114: game.v1.GroupRequest
+	(*InviteRequest)(nil),             // 115: game.v1.InviteRequest
+	(*AcceptGroupRequest)(nil),        // 116: game.v1.AcceptGroupRequest
+	(*DeclineGroupRequest)(nil),       // 117: game.v1.DeclineGroupRequest
+	(*UngroupRequest)(nil),            // 118: game.v1.UngroupRequest
+	(*KickRequest)(nil),               // 119: game.v1.KickRequest
+	(*MotiveRequest)(nil),             // 120: game.v1.MotiveRequest
+	(*GrantRequest)(nil),              // 121: game.v1.GrantRequest
+	nil,                               // 122: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 123: game.v1.CharacterSheetView.AccessoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	7,   // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -8816,7 +9180,7 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	102, // 55: game.v1.ClientMessage.sneak:type_name -> game.v1.SneakRequest
 	103, // 56: game.v1.ClientMessage.divert:type_name -> game.v1.DivertRequest
 	104, // 57: game.v1.ClientMessage.escape:type_name -> game.v1.EscapeRequest
-	115, // 58: game.v1.ClientMessage.grant:type_name -> game.v1.GrantRequest
+	121, // 58: game.v1.ClientMessage.grant:type_name -> game.v1.GrantRequest
 	97,  // 59: game.v1.ClientMessage.disarm:type_name -> game.v1.DisarmRequest
 	98,  // 60: game.v1.ClientMessage.stride:type_name -> game.v1.StrideRequest
 	99,  // 61: game.v1.ClientMessage.shove:type_name -> game.v1.ShoveRequest
@@ -8825,70 +9189,76 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	106, // 64: game.v1.ClientMessage.seek:type_name -> game.v1.SeekRequest
 	107, // 65: game.v1.ClientMessage.climb:type_name -> game.v1.ClimbRequest
 	108, // 66: game.v1.ClientMessage.swim:type_name -> game.v1.SwimRequest
-	114, // 67: game.v1.ClientMessage.motive:type_name -> game.v1.MotiveRequest
+	120, // 67: game.v1.ClientMessage.motive:type_name -> game.v1.MotiveRequest
 	109, // 68: game.v1.ClientMessage.calm:type_name -> game.v1.CalmRequest
 	110, // 69: game.v1.ClientMessage.hero_point:type_name -> game.v1.HeroPointRequest
 	111, // 70: game.v1.ClientMessage.delay:type_name -> game.v1.DelayRequest
 	112, // 71: game.v1.ClientMessage.join:type_name -> game.v1.JoinRequest
 	113, // 72: game.v1.ClientMessage.decline:type_name -> game.v1.DeclineRequest
-	16,  // 73: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	18,  // 74: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	19,  // 75: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	20,  // 76: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	22,  // 77: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	23,  // 78: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	24,  // 79: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	26,  // 80: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	29,  // 81: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	63,  // 82: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	61,  // 83: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	62,  // 84: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	65,  // 85: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	60,  // 86: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
-	25,  // 87: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
-	81,  // 88: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
-	54,  // 89: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
-	57,  // 90: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
-	73,  // 91: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
-	78,  // 92: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
-	80,  // 93: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
-	76,  // 94: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
-	85,  // 95: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
-	6,   // 96: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
-	17,  // 97: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	27,  // 98: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	68,  // 99: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	49,  // 100: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	50,  // 101: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
-	0,   // 102: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,   // 103: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	21,  // 104: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
-	2,   // 105: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
-	17,  // 106: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	53,  // 107: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
-	56,  // 108: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
-	59,  // 109: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	3,   // 110: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	72,  // 111: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
-	75,  // 112: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
-	75,  // 113: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
-	72,  // 114: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	116, // 115: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	117, // 116: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
-	82,  // 117: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
-	82,  // 118: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
-	56,  // 119: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
-	72,  // 120: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
-	75,  // 121: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
-	84,  // 122: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
-	84,  // 123: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	4,   // 124: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	5,   // 125: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	125, // [125:126] is the sub-list for method output_type
-	124, // [124:125] is the sub-list for method input_type
-	124, // [124:124] is the sub-list for extension type_name
-	124, // [124:124] is the sub-list for extension extendee
-	0,   // [0:124] is the sub-list for field type_name
+	114, // 73: game.v1.ClientMessage.group:type_name -> game.v1.GroupRequest
+	115, // 74: game.v1.ClientMessage.invite:type_name -> game.v1.InviteRequest
+	116, // 75: game.v1.ClientMessage.accept_group:type_name -> game.v1.AcceptGroupRequest
+	117, // 76: game.v1.ClientMessage.decline_group:type_name -> game.v1.DeclineGroupRequest
+	118, // 77: game.v1.ClientMessage.ungroup:type_name -> game.v1.UngroupRequest
+	119, // 78: game.v1.ClientMessage.kick:type_name -> game.v1.KickRequest
+	16,  // 79: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	18,  // 80: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	19,  // 81: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	20,  // 82: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	22,  // 83: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	23,  // 84: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	24,  // 85: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	26,  // 86: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	29,  // 87: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	63,  // 88: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	61,  // 89: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	62,  // 90: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	65,  // 91: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	60,  // 92: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
+	25,  // 93: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
+	81,  // 94: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
+	54,  // 95: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
+	57,  // 96: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
+	73,  // 97: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
+	78,  // 98: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
+	80,  // 99: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
+	76,  // 100: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
+	85,  // 101: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
+	6,   // 102: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
+	17,  // 103: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	27,  // 104: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	68,  // 105: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	49,  // 106: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	50,  // 107: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
+	0,   // 108: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,   // 109: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	21,  // 110: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
+	2,   // 111: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
+	17,  // 112: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	53,  // 113: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
+	56,  // 114: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
+	59,  // 115: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	3,   // 116: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	72,  // 117: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
+	75,  // 118: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
+	75,  // 119: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
+	72,  // 120: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
+	122, // 121: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	123, // 122: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	82,  // 123: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
+	82,  // 124: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
+	56,  // 125: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
+	72,  // 126: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
+	75,  // 127: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
+	84,  // 128: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
+	84,  // 129: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
+	4,   // 130: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	5,   // 131: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	131, // [131:132] is the sub-list for method output_type
+	130, // [130:131] is the sub-list for method input_type
+	130, // [130:130] is the sub-list for extension type_name
+	130, // [130:130] is the sub-list for extension extendee
+	0,   // [0:130] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -8970,6 +9340,12 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_Delay)(nil),
 		(*ClientMessage_Join)(nil),
 		(*ClientMessage_Decline)(nil),
+		(*ClientMessage_Group)(nil),
+		(*ClientMessage_Invite)(nil),
+		(*ClientMessage_AcceptGroup)(nil),
+		(*ClientMessage_DeclineGroup)(nil),
+		(*ClientMessage_Ungroup)(nil),
+		(*ClientMessage_Kick)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[1].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -9003,7 +9379,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   114,
+			NumMessages:   120,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

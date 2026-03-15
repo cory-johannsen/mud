@@ -89,6 +89,12 @@ message ClientMessage {
     DelayRequest delay = 72;
     JoinRequest join = 73;
     DeclineRequest decline = 74;
+    GroupRequest group = 75;
+    InviteRequest invite = 76;
+    AcceptGroupRequest accept_group = 77;
+    DeclineGroupRequest decline_group = 78;
+    UngroupRequest ungroup = 79;
+    KickRequest kick = 80;
   }
 }
 
@@ -827,6 +833,25 @@ message JoinRequest {}
 
 // DeclineRequest asks the server to decline joining active combat.
 message DeclineRequest {}
+
+// GroupRequest asks the server to create a group or show group info.
+// args is optional; when non-empty it is treated as a player name to invite.
+message GroupRequest { string args = 1; }
+
+// InviteRequest asks the server to invite a player to the sender's group.
+message InviteRequest { string player = 1; }
+
+// AcceptGroupRequest asks the server to accept a pending group invitation.
+message AcceptGroupRequest {}
+
+// DeclineGroupRequest asks the server to decline a pending group invitation.
+message DeclineGroupRequest {}
+
+// UngroupRequest asks the server to leave (or disband) the sender's group.
+message UngroupRequest {}
+
+// KickRequest asks the server to remove a player from the sender's group.
+message KickRequest { string player = 1; }
 
 // MotiveRequest asks the server to read an NPC's intentions (awareness vs Hustle DC).
 message MotiveRequest {
