@@ -568,6 +568,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
 					targetUpdater(target.ID, target.CurrentHP)
+					if actor.Kind == KindPlayer && target.Kind == KindNPC {
+						cbt.RecordDamage(actor.ID, dmg)
+					}
 				}
 				applyAttackConditions(cbt, actor, target, r)
 				narrative := attackNarrative(actor.Name, "attacks", target.Name, r.WeaponName, r.Outcome, r.AttackTotal, dmg)
@@ -662,6 +665,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
 					targetUpdater(target.ID, target.CurrentHP)
+					if actor.Kind == KindPlayer && target.Kind == KindNPC {
+						cbt.RecordDamage(actor.ID, dmg1)
+					}
 				}
 				applyAttackConditions(cbt, actor, target, r1)
 				narrative1 := attackNarrative(actor.Name, "strikes", target.Name, r1.WeaponName, r1.Outcome, r1.AttackTotal, dmg1)
@@ -732,6 +738,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				if dmg2 > 0 {
 					target.ApplyDamage(dmg2)
 					targetUpdater(target.ID, target.CurrentHP)
+					if actor.Kind == KindPlayer && target.Kind == KindNPC {
+						cbt.RecordDamage(actor.ID, dmg2)
+					}
 				}
 				applyAttackConditions(cbt, actor, target, r2)
 				narrative2 := attackNarrative(actor.Name, "strikes", target.Name, r2.WeaponName, r2.Outcome, r2.AttackTotal, dmg2)
@@ -829,6 +838,9 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 		dmg = hookDamageRoll(cbt, actor, target, dmg)
 		if dmg > 0 {
 			target.ApplyDamage(dmg)
+			if actor.Kind == KindPlayer && target.Kind == KindNPC {
+				cbt.RecordDamage(actor.ID, dmg)
+			}
 		}
 		if weapon != nil && actor.Loadout != nil {
 			if eq := actor.Loadout.MainHand; eq != nil && eq.Magazine != nil {
@@ -907,6 +919,9 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 		dmg = hookDamageRoll(cbt, actor, target, dmg)
 		if dmg > 0 {
 			target.ApplyDamage(dmg)
+			if actor.Kind == KindPlayer && target.Kind == KindNPC {
+				cbt.RecordDamage(actor.ID, dmg)
+			}
 		}
 		if weapon != nil && actor.Loadout != nil {
 			if eq := actor.Loadout.MainHand; eq != nil && eq.Magazine != nil {
@@ -948,6 +963,9 @@ func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []
 		target := enemies[i]
 		if r.BaseDamage > 0 {
 			target.ApplyDamage(r.BaseDamage)
+			if actor.Kind == KindPlayer && target.Kind == KindNPC {
+				cbt.RecordDamage(actor.ID, r.BaseDamage)
+			}
 		}
 		events = append(events, RoundEvent{
 			ActionType: ActionThrow,

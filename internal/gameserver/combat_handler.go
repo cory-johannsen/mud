@@ -1912,6 +1912,20 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 //
 // Precondition: h.combatMu is held; cbt must not be nil.
 func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
+	// Decrement ability cooldowns for all living NPCs before planning.
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindNPC || c.IsDead() {
+			continue
+		}
+		if inst, ok := h.npcMgr.Get(c.ID); ok {
+			for k := range inst.AbilityCooldowns {
+				if inst.AbilityCooldowns[k] > 0 {
+					inst.AbilityCooldowns[k]--
+				}
+			}
+		}
+	}
+
 	// Fetch room once for NPC auto-cover checks.
 	var room *world.Room
 	if h.worldMgr != nil {
@@ -1982,6 +1996,77 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 			qa = combat.QueuedAction{Type: combat.ActionStrike, Target: a.Target}
 		case "pass":
 			qa = combat.QueuedAction{Type: combat.ActionPass}
+		case "apply_mental_state":
+			// Resolve target selector.
+			targetUID := h.resolveAbilityTarget(cbt, a.Target)
+			if targetUID == "" {
+				continue // no valid target; no AP deducted, no cooldown set
+			}
+
+			// Parse track and severity.
+			track, ok := abilityTrack(a.Track)
+			if !ok {
+				if h.logger != nil {
+					h.logger.Warn("apply_mental_state: unknown track", zap.String("track", a.Track))
+				}
+				continue
+			}
+			sev, ok := abilitySeverity(a.Severity)
+			if !ok {
+				if h.logger != nil {
+					h.logger.Warn("apply_mental_state: unknown severity", zap.String("severity", a.Severity))
+				}
+				continue
+			}
+
+			// Look up NPC instance; skip if not found.
+			inst, ok := h.npcMgr.Get(actor.ID)
+			if !ok {
+				if h.logger != nil {
+					h.logger.Warn("apply_mental_state: NPC instance not found", zap.String("id", actor.ID))
+				}
+				continue // no AP deducted
+			}
+
+			// Cooldown gate — reading a nil map returns zero value (safe).
+			if inst.AbilityCooldowns[a.OperatorID] > 0 {
+				continue // still on cooldown; no AP deducted
+			}
+
+			// Apply mental state trigger.
+			if h.mentalStateMgr != nil {
+				changes := h.mentalStateMgr.ApplyTrigger(targetUID, track, sev)
+				msgs := h.applyMentalStateChanges(targetUID, changes)
+				if targSess, ok := h.sessions.GetPlayer(targetUID); ok && targSess.Entity != nil {
+					for _, msg := range msgs {
+						_ = targSess.Entity.Push([]byte(msg + "\n"))
+					}
+				}
+			}
+
+			// Push taunt message to target.
+			taunt := h.pickTaunt(inst)
+			if targSess, ok := h.sessions.GetPlayer(targetUID); ok && targSess.Entity != nil {
+				_ = targSess.Entity.Push([]byte(taunt + "\n"))
+			}
+
+			// Set cooldown (lazy-initialize map on first write).
+			if inst.AbilityCooldowns == nil {
+				inst.AbilityCooldowns = make(map[string]int)
+			}
+			inst.AbilityCooldowns[a.OperatorID] = a.CooldownRounds
+
+			// Deduct AP: queue APCost pass actions (each costs 1 AP slot).
+			apCost := a.APCost
+			if apCost == 0 {
+				apCost = 1
+			}
+			for i := 0; i < apCost; i++ {
+				if err := cbt.QueueAction(actor.ID, combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+					return // AP budget exhausted
+				}
+			}
+			continue
 		default:
 			qa = combat.QueuedAction{Type: combat.ActionPass}
 		}
@@ -1989,6 +2074,84 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 			break // AP budget exhausted
 		}
 	}
+}
+
+// resolveAbilityTarget resolves a target selector to a living player UID.
+// Returns "" if no valid target exists.
+func (h *CombatHandler) resolveAbilityTarget(cbt *combat.Combat, selector string) string {
+	switch selector {
+	case "nearest_enemy":
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindPlayer && !c.IsDead() {
+				return c.ID
+			}
+		}
+	case "lowest_hp_enemy":
+		var best *combat.Combatant
+		for _, c := range cbt.Combatants {
+			if c.Kind != combat.KindPlayer || c.IsDead() {
+				continue
+			}
+			if best == nil || c.CurrentHP < best.CurrentHP {
+				best = c
+			}
+		}
+		if best != nil {
+			return best.ID
+		}
+	case "highest_damage_enemy":
+		var bestUID string
+		bestDmg := -1
+		for _, c := range cbt.Combatants {
+			if c.Kind != combat.KindPlayer || c.IsDead() {
+				continue
+			}
+			dmg := cbt.DamageDealt[c.ID]
+			if dmg > bestDmg {
+				bestUID = c.ID
+				bestDmg = dmg
+			}
+		}
+		return bestUID
+	}
+	return ""
+}
+
+// abilityTrack converts a string track name to a mentalstate.Track.
+func abilityTrack(s string) (mentalstate.Track, bool) {
+	switch s {
+	case "rage":
+		return mentalstate.TrackRage, true
+	case "despair":
+		return mentalstate.TrackDespair, true
+	case "delirium":
+		return mentalstate.TrackDelirium, true
+	case "fear":
+		return mentalstate.TrackFear, true
+	}
+	return 0, false
+}
+
+// abilitySeverity converts a string severity name to a mentalstate.Severity.
+func abilitySeverity(s string) (mentalstate.Severity, bool) {
+	switch s {
+	case "mild":
+		return mentalstate.SeverityMild, true
+	case "moderate":
+		return mentalstate.SeverityMod, true
+	case "severe":
+		return mentalstate.SeveritySevere, true
+	}
+	return 0, false
+}
+
+// pickTaunt returns a random taunt from inst.Taunts, or a generic fallback.
+func (h *CombatHandler) pickTaunt(inst *npc.Instance) string {
+	if len(inst.Taunts) == 0 {
+		return fmt.Sprintf("The %s unsettles you.", inst.Name())
+	}
+	idx := h.dice.Src().Intn(len(inst.Taunts))
+	return inst.Taunts[idx]
 }
 
 // legacyAutoQueueLocked queues ActionAttack for c targeting the first living player.
