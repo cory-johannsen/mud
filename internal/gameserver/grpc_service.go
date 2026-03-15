@@ -2229,19 +2229,6 @@ func (s *GameServiceServer) pushMessageToUID(uid, text string) {
 	}
 }
 
-// findPlayerByCharName returns the PlayerSession whose CharName matches name (case-insensitive).
-// Returns nil if no online session matches.
-func (s *GameServiceServer) findPlayerByCharName(name string) *session.PlayerSession {
-	lower := strings.ToLower(name)
-	var found *session.PlayerSession
-	s.sessions.ForEachPlayer(func(ps *session.PlayerSession) {
-		if strings.ToLower(ps.CharName) == lower {
-			found = ps
-		}
-	})
-	return found
-}
-
 // handleGroup handles the group command.
 //
 // Precondition: uid must identify an existing player session.
@@ -2286,7 +2273,7 @@ func (s *GameServiceServer) handleGroup(uid string, req *gamev1.GroupRequest) (*
 	if strings.EqualFold(targetName, caller.CharName) {
 		return messageEvent("You cannot invite yourself."), nil
 	}
-	target := s.findPlayerByCharName(targetName)
+	target := s.sessions.GetPlayerByCharNameCI(targetName)
 	if target == nil {
 		return messageEvent("Player not found."), nil
 	}
@@ -2298,7 +2285,7 @@ func (s *GameServiceServer) handleGroup(uid string, req *gamev1.GroupRequest) (*
 	}
 
 	g := s.sessions.CreateGroup(uid)
-	target.PendingGroupInvite = g.ID
+	s.sessions.SetPendingGroupInvite(target.UID, g.ID)
 	s.pushMessageToUID(target.UID, fmt.Sprintf(
 		"%s has invited you to join their group. (accept / decline)", caller.CharName,
 	))
@@ -2330,7 +2317,7 @@ func (s *GameServiceServer) handleInvite(uid string, req *gamev1.InviteRequest) 
 	if strings.EqualFold(targetName, caller.CharName) {
 		return messageEvent("You cannot invite yourself."), nil
 	}
-	target := s.findPlayerByCharName(targetName)
+	target := s.sessions.GetPlayerByCharNameCI(targetName)
 	if target == nil {
 		return messageEvent("Player not found."), nil
 	}
@@ -2344,7 +2331,7 @@ func (s *GameServiceServer) handleInvite(uid string, req *gamev1.InviteRequest) 
 		return messageEvent("Group is full (max 8 members)."), nil
 	}
 
-	target.PendingGroupInvite = g.ID
+	s.sessions.SetPendingGroupInvite(target.UID, g.ID)
 	s.pushMessageToUID(target.UID, fmt.Sprintf(
 		"%s has invited you to join their group. (accept / decline)", caller.CharName,
 	))
@@ -2368,15 +2355,15 @@ func (s *GameServiceServer) handleAcceptGroup(uid string, _ *gamev1.AcceptGroupR
 	groupID := caller.PendingGroupInvite
 	g, exists := s.sessions.GroupByID(groupID)
 	if !exists {
-		caller.PendingGroupInvite = ""
+		s.sessions.SetPendingGroupInvite(uid, "")
 		return messageEvent("That group no longer exists."), nil
 	}
 
 	if err := s.sessions.AddGroupMember(groupID, uid); err != nil {
-		caller.PendingGroupInvite = ""
+		s.sessions.SetPendingGroupInvite(uid, "")
 		return messageEvent("The group is full."), nil
 	}
-	caller.PendingGroupInvite = ""
+	s.sessions.SetPendingGroupInvite(uid, "")
 
 	// Notify existing members (all except the new joiner).
 	for _, memberUID := range g.MemberUIDs {
@@ -2408,7 +2395,7 @@ func (s *GameServiceServer) handleDeclineGroup(uid string, _ *gamev1.DeclineGrou
 		return messageEvent("You have no pending group invitation."), nil
 	}
 	groupID := caller.PendingGroupInvite
-	caller.PendingGroupInvite = ""
+	s.sessions.SetPendingGroupInvite(uid, "")
 
 	if g, exists := s.sessions.GroupByID(groupID); exists {
 		s.pushMessageToUID(g.LeaderUID, fmt.Sprintf(

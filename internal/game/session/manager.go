@@ -2,6 +2,7 @@ package session
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
@@ -376,6 +377,30 @@ func (m *Manager) GetPlayerByCharName(charName string) (*PlayerSession, bool) {
 		}
 	}
 	return nil, false
+}
+
+// GetPlayerByCharNameCI does a case-insensitive lookup for a player by CharName.
+// Returns nil if not found. Uses read lock.
+func (m *Manager) GetPlayerByCharNameCI(charName string) *PlayerSession {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	lower := strings.ToLower(charName)
+	for _, sess := range m.players {
+		if strings.ToLower(sess.CharName) == lower {
+			return sess
+		}
+	}
+	return nil
+}
+
+// SetPendingGroupInvite atomically sets or clears the PendingGroupInvite field for uid.
+// groupID "" clears the invite. Protected by mu.Lock().
+func (m *Manager) SetPendingGroupInvite(uid, groupID string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if sess, ok := m.players[uid]; ok {
+		sess.PendingGroupInvite = groupID
+	}
 }
 
 // PlayerCount returns the total number of connected players.
