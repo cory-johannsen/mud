@@ -2533,6 +2533,50 @@ func (s *GameServiceServer) cleanupPlayer(uid, username string) {
 	currentHP := sess.CurrentHP
 	charName := sess.CharName
 
+	// Clear pending group invite on disconnect.
+	if sess.PendingGroupInvite != "" {
+		if grp, ok := s.sessions.GroupByID(sess.PendingGroupInvite); ok {
+			s.pushMessageToUID(grp.LeaderUID, fmt.Sprintf(
+				"%s disconnected before responding to your invitation.", sess.CharName,
+			))
+		}
+		s.sessions.SetPendingGroupInvite(sess.UID, "")
+	}
+
+	// Handle group membership on disconnect.
+	if sess.GroupID != "" {
+		if grp, ok := s.sessions.GroupByID(sess.GroupID); ok {
+			if grp.LeaderUID == sess.UID {
+				// Leader disconnecting — copy members, disband, notify.
+				memberUIDs := make([]string, len(grp.MemberUIDs))
+				copy(memberUIDs, grp.MemberUIDs)
+				s.sessions.DisbandGroup(grp.ID)
+				for _, memberUID := range memberUIDs {
+					if memberUID == sess.UID {
+						continue
+					}
+					s.pushMessageToUID(memberUID, fmt.Sprintf(
+						"%s disconnected. The group has been disbanded.", sess.CharName,
+					))
+				}
+			} else {
+				// Non-leader disconnecting — remove from group, notify remaining.
+				remainingUIDs := make([]string, 0, len(grp.MemberUIDs))
+				for _, mUID := range grp.MemberUIDs {
+					if mUID != sess.UID {
+						remainingUIDs = append(remainingUIDs, mUID)
+					}
+				}
+				s.sessions.RemoveGroupMember(grp.ID, sess.UID)
+				for _, mUID := range remainingUIDs {
+					s.pushMessageToUID(mUID, fmt.Sprintf(
+						"%s disconnected and left the group.", sess.CharName,
+					))
+				}
+			}
+		}
+	}
+
 	if err := s.sessions.RemovePlayer(uid); err != nil {
 		s.logger.Warn("removing player on cleanup", zap.String("uid", uid), zap.Error(err))
 	}
