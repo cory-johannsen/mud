@@ -120,6 +120,12 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerHeroPoint:          bridgeHeroPoint,
 	command.HandlerJoin:               bridgeJoin,
 	command.HandlerDecline:            bridgeDecline,
+	command.HandlerGroup:              bridgeGroup,
+	command.HandlerInvite:             bridgeInvite,
+	command.HandlerAcceptGroup:        bridgeAcceptGroup,
+	command.HandlerDeclineGroup:       bridgeDeclineGroup,
+	command.HandlerUngroup:            bridgeUngroup,
+	command.HandlerKick:               bridgeKick,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1254,5 +1260,79 @@ func bridgeDecline(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Decline{Decline: &gamev1.DeclineRequest{}},
+	}}, nil
+}
+
+// bridgeGroup builds a GroupRequest message with optional args.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a GroupRequest.
+func bridgeGroup(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Group{Group: &gamev1.GroupRequest{Args: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeInvite builds an InviteRequest message with the target player name.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an InviteRequest.
+func bridgeInvite(bctx *bridgeContext) (bridgeResult, error) {
+	player := ""
+	if len(bctx.parsed.Args) > 0 {
+		player = bctx.parsed.Args[0]
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Invite{Invite: &gamev1.InviteRequest{Player: player}},
+	}}, nil
+}
+
+// bridgeAcceptGroup builds an AcceptGroupRequest message with no arguments.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an AcceptGroupRequest.
+func bridgeAcceptGroup(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_AcceptGroup{AcceptGroup: &gamev1.AcceptGroupRequest{}},
+	}}, nil
+}
+
+// bridgeDeclineGroup builds a DeclineGroupRequest message with no arguments.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a DeclineGroupRequest.
+func bridgeDeclineGroup(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_DeclineGroup{DeclineGroup: &gamev1.DeclineGroupRequest{}},
+	}}, nil
+}
+
+// bridgeUngroup builds an UngroupRequest message with no arguments.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an UngroupRequest.
+func bridgeUngroup(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Ungroup{Ungroup: &gamev1.UngroupRequest{}},
+	}}, nil
+}
+
+// bridgeKick builds a KickRequest message with the target player name.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a KickRequest.
+func bridgeKick(bctx *bridgeContext) (bridgeResult, error) {
+	player := ""
+	if len(bctx.parsed.Args) > 0 {
+		player = bctx.parsed.Args[0]
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Kick{Kick: &gamev1.KickRequest{Player: player}},
 	}}, nil
 }

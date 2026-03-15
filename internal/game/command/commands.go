@@ -95,6 +95,12 @@ const (
 	HandlerHeroPoint           = "heropoint"
 	HandlerJoin                = "join"
 	HandlerDecline             = "decline"
+	HandlerGroup               = "group"
+	HandlerInvite              = "invite"
+	HandlerAcceptGroup         = "acceptgroup"
+	HandlerDeclineGroup        = "declinegroup"
+	HandlerUngroup             = "ungroup"
+	HandlerKick                = "kick"
 )
 
 // Command defines a player-invocable command.
@@ -210,6 +216,12 @@ func BuiltinCommands() []Command {
 		{Name: "delay", Aliases: []string{"dl"}, Help: "Bank remaining AP (up to 2) for next round at cost of -2 AC. Combat only.", Category: CategoryCombat, Handler: HandlerDelay},
 		{Name: "join", Help: "Join active combat in the current room.", Category: CategoryCombat, Handler: HandlerJoin},
 		{Name: "decline", Help: "Decline to join active combat.", Category: CategoryCombat, Handler: HandlerDecline},
+		{Name: "group", Help: "Create a group or show group info. 'group' with no args shows current group.", Category: CategoryCommunication, Handler: HandlerGroup},
+		{Name: "invite", Help: "Invite a player to your group.", Category: CategoryCommunication, Handler: HandlerInvite},
+		{Name: "accept", Help: "Accept a pending group invitation.", Category: CategoryCommunication, Handler: HandlerAcceptGroup},
+		{Name: "gdecline", Help: "Decline a pending group invitation.", Category: CategoryCommunication, Handler: HandlerDeclineGroup},
+		{Name: "ungroup", Help: "Leave your group. Leaders disband the group for all members.", Category: CategoryCommunication, Handler: HandlerUngroup},
+		{Name: "kick", Help: "Kick a player from your group (leader only).", Category: CategoryCommunication, Handler: HandlerKick},
 	}
 }
 
