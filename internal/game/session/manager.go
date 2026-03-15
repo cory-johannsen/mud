@@ -7,6 +7,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/google/uuid"
 )
 
 // PlayerSession tracks a connected player's state.
@@ -106,6 +107,12 @@ type PlayerSession struct {
 	// PendingCombatJoin holds the RoomID of a combat the player has been invited to join.
 	// Empty string means no pending join offer. Protected by combatMu in the gameserver.
 	PendingCombatJoin string
+	// GroupID is the ID of the group this player belongs to.
+	// Empty string means not in a group. Protected by Manager.mu.
+	GroupID string
+	// PendingGroupInvite holds the groupID of a pending group invitation.
+	// Empty string means no pending invite. Protected by Manager.mu.
+	PendingGroupInvite string
 }
 
 // Manager tracks all active player sessions and room occupancy.
@@ -114,6 +121,7 @@ type Manager struct {
 	mu       sync.RWMutex
 	players  map[string]*PlayerSession  // uid → session
 	roomSets map[string]map[string]bool // roomID → set of UIDs
+	groups   map[string]*Group          // groupID → group
 }
 
 // NewManager creates an empty session Manager.
@@ -121,6 +129,7 @@ func NewManager() *Manager {
 	return &Manager{
 		players:  make(map[string]*PlayerSession),
 		roomSets: make(map[string]map[string]bool),
+		groups:   make(map[string]*Group),
 	}
 }
 
@@ -387,4 +396,127 @@ func (m *Manager) AllPlayers() []*PlayerSession {
 		out = append(out, sess)
 	}
 	return out
+}
+
+// CreateGroup creates a new group with leaderUID as the sole member and leader.
+//
+// Precondition: leaderUID must be non-empty.
+// Postcondition: Returns a non-nil *Group stored in the manager; sets leader session's GroupID if the session exists.
+func (m *Manager) CreateGroup(leaderUID string) *Group {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	id := uuid.New().String()
+	g := &Group{
+		ID:         id,
+		LeaderUID:  leaderUID,
+		MemberUIDs: []string{leaderUID},
+	}
+	m.groups[id] = g
+	if sess, ok := m.players[leaderUID]; ok {
+		sess.GroupID = id
+	}
+	return g
+}
+
+// DisbandGroup removes the group and clears GroupID on all member sessions.
+//
+// Postcondition: No-op if groupID is not found.
+func (m *Manager) DisbandGroup(groupID string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	g, ok := m.groups[groupID]
+	if !ok {
+		return
+	}
+	for _, uid := range g.MemberUIDs {
+		if sess, ok := m.players[uid]; ok {
+			sess.GroupID = ""
+		}
+	}
+	delete(m.groups, groupID)
+}
+
+// AddGroupMember appends uid to the group's MemberUIDs.
+//
+// Precondition: groupID must identify an existing group.
+// Postcondition: Returns an error if the group is not found, uid is already a member, or the group is at capacity (8).
+func (m *Manager) AddGroupMember(groupID, uid string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	g, ok := m.groups[groupID]
+	if !ok {
+		return fmt.Errorf("group not found")
+	}
+	for _, existing := range g.MemberUIDs {
+		if existing == uid {
+			return fmt.Errorf("already a member")
+		}
+	}
+	if len(g.MemberUIDs) >= 8 {
+		return fmt.Errorf("Group is full (max 8 members).")
+	}
+	g.MemberUIDs = append(g.MemberUIDs, uid)
+	if sess, ok := m.players[uid]; ok {
+		sess.GroupID = groupID
+	}
+	return nil
+}
+
+// RemoveGroupMember removes uid from the group's MemberUIDs and clears the session's GroupID.
+//
+// Postcondition: No-op if groupID is not found or uid is not a member. The group itself is not disbanded.
+func (m *Manager) RemoveGroupMember(groupID, uid string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	g, ok := m.groups[groupID]
+	if !ok {
+		return
+	}
+	filtered := g.MemberUIDs[:0]
+	for _, existing := range g.MemberUIDs {
+		if existing != uid {
+			filtered = append(filtered, existing)
+		}
+	}
+	g.MemberUIDs = filtered
+	if sess, ok := m.players[uid]; ok {
+		sess.GroupID = ""
+	}
+}
+
+// GroupByUID returns the group that contains uid, or nil if the player is not in any group.
+//
+// Postcondition: Returns nil if uid is not a member of any group.
+func (m *Manager) GroupByUID(uid string) *Group {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, g := range m.groups {
+		for _, member := range g.MemberUIDs {
+			if member == uid {
+				return g
+			}
+		}
+	}
+	return nil
+}
+
+// GroupByID returns the group with the given ID.
+//
+// Postcondition: Returns (group, true) if found, or (nil, false) otherwise.
+func (m *Manager) GroupByID(groupID string) (*Group, bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	g, ok := m.groups[groupID]
+	return g, ok
+}
+
+// ForEachPlayer calls fn once for each connected player session under a read lock.
+//
+// Postcondition: fn must not call any Manager method that acquires mu (would deadlock).
+func (m *Manager) ForEachPlayer(fn func(*PlayerSession)) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, sess := range m.players {
+		fn(sess)
+	}
 }
