@@ -1039,7 +1039,7 @@ func TestLoadDomains_AllNPCDomainsValid(t *testing.T) {
     }
 
     requiredDomains := []string{
-        "ganger_combat", "highway_bandit_combat", "tarmac_raider_combat",
+        "ganger_npc_combat", "highway_bandit_combat", "tarmac_raider_combat",
         "mill_plain_thug_combat", "motel_raider_combat", "river_pirate_combat",
         "strip_mall_scav_combat", "industrial_scav_combat", "outlet_scavenger_combat",
         "scavenger_combat", "alberta_drifter_combat", "terminal_squatter_combat",
@@ -1180,7 +1180,76 @@ Update `content/npcs/ganger.yaml`: change `ai_domain: ganger_combat` → `ai_dom
 | commissar.yaml | ganger_combat | commissar_combat.yaml | commissar.lua | commissar_combat |
 | bridge_troll.yaml | ganger_combat | bridge_troll_combat.yaml | bridge_troll.lua | bridge_troll_combat |
 
-**Important:** The Lua precondition function names must match the method `precondition:` strings in the YAML. Use `<npc_id>_has_enemy`, `<npc_id>_enemy_below_half`, `<npc_id>_not_outnumbered` consistently. For `scavenger_npc.lua`, use prefix `scavenger_npc_` to avoid collision with the existing `scavenger.lua` which defines `scavenger_has_enemy` and `scavenger_not_outnumbered` for the old domain. The new scavenger domain should use function names like `scavenger_npc_has_enemy`.
+**Important:** The Lua precondition function names must match the method `precondition:` strings in the YAML. Use `<npc_id>_has_enemy`, `<npc_id>_enemy_below_half`, `<npc_id>_not_outnumbered` consistently. **Exception: `scavenger`** — because `scavenger.lua` already defines `scavenger_has_enemy` and `scavenger_not_outnumbered` for the old domain, the new scavenger NPC files must use the `scavenger_npc_` prefix throughout. Below is the complete filled-in example for `scavenger`:
+
+`content/ai/scavenger_combat.yaml`:
+
+```yaml
+domain:
+  id: scavenger_combat
+  description: Combat behavior for scavenger. Cautious; uses ability when not outnumbered.
+
+  tasks:
+    - id: behave
+      description: Root task — fight cautiously or pass
+    - id: cautious_fight
+      description: Fight only when not outnumbered
+
+  methods:
+    - task: behave
+      id: cautious_combat
+      precondition: scavenger_npc_has_enemy
+      subtasks: [cautious_fight]
+
+    - task: behave
+      id: idle
+      precondition: ""
+      subtasks: [do_pass]
+
+    - task: cautious_fight
+      id: fight_with_ability
+      precondition: scavenger_npc_not_outnumbered
+      subtasks: [attack_enemy, scavenger_confuse]
+
+    - task: cautious_fight
+      id: flee_if_outnumbered
+      precondition: ""
+      subtasks: [do_pass]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+
+    - id: do_pass
+      action: pass
+      target: ""
+
+    - id: scavenger_confuse
+      action: apply_mental_state
+      track: delirium
+      severity: mild
+      target: nearest_enemy
+      cooldown_rounds: 4
+      ap_cost: 1
+```
+
+`content/scripts/ai/scavenger_npc.lua`:
+
+```lua
+-- scavenger_npc.lua: HTN preconditions for scavenger_combat domain.
+-- Uses scavenger_npc_ prefix to avoid collision with scavenger.lua.
+
+function scavenger_npc_has_enemy(uid)
+    return engine.combat.enemy_count(uid) > 0
+end
+
+function scavenger_npc_not_outnumbered(uid)
+    return engine.combat.ally_count(uid) >= engine.combat.enemy_count(uid)
+end
+```
+
+Update `content/npcs/scavenger.yaml`: change `ai_domain: scavenger_patrol` → `ai_domain: scavenger_combat`.
 
 - [ ] **Step 4: Run domain-load test to verify all domains found**
 
