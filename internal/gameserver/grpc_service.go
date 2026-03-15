@@ -1265,6 +1265,14 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleJoin(uid, p.Join)
 	case *gamev1.ClientMessage_Decline:
 		return s.handleDecline(uid, p.Decline)
+	case *gamev1.ClientMessage_Group:
+		return s.handleGroup(uid, p.Group)
+	case *gamev1.ClientMessage_Invite:
+		return s.handleInvite(uid, p.Invite)
+	case *gamev1.ClientMessage_AcceptGroup:
+		return s.handleAcceptGroup(uid, p.AcceptGroup)
+	case *gamev1.ClientMessage_DeclineGroup:
+		return s.handleDeclineGroup(uid, p.DeclineGroup)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -2195,6 +2203,219 @@ func (s *GameServiceServer) handleStatus(uid string, requestID string, stream ga
 		}
 	}
 	return nil
+}
+
+// pushMessageToUID sends a plain-text MessageEvent to a single player session identified by uid.
+//
+// Precondition: uid must be non-empty and the session must exist.
+// Postcondition: If the session exists and has a non-nil Entity, the message is pushed; errors are logged.
+func (s *GameServiceServer) pushMessageToUID(uid, text string) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return
+	}
+	evt := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{Content: text},
+		},
+	}
+	data, err := proto.Marshal(evt)
+	if err != nil {
+		s.logger.Error("pushMessageToUID: marshal failed", zap.String("uid", uid), zap.Error(err))
+		return
+	}
+	if pushErr := sess.Entity.Push(data); pushErr != nil {
+		s.logger.Warn("pushMessageToUID: push failed", zap.String("uid", uid), zap.Error(pushErr))
+	}
+}
+
+// findPlayerByCharName returns the PlayerSession whose CharName matches name (case-insensitive).
+// Returns nil if no online session matches.
+func (s *GameServiceServer) findPlayerByCharName(name string) *session.PlayerSession {
+	lower := strings.ToLower(name)
+	var found *session.PlayerSession
+	s.sessions.ForEachPlayer(func(ps *session.PlayerSession) {
+		if strings.ToLower(ps.CharName) == lower {
+			found = ps
+		}
+	})
+	return found
+}
+
+// handleGroup handles the group command.
+//
+// Precondition: uid must identify an existing player session.
+// Postcondition: Without args, displays group membership or an error. With args, creates a group and
+//
+//	sends an invitation to the named player, or returns an appropriate error message.
+func (s *GameServiceServer) handleGroup(uid string, req *gamev1.GroupRequest) (*gamev1.ServerEvent, error) {
+	caller, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	if req.Args == "" {
+		// Display current group membership.
+		if caller.GroupID == "" {
+			return messageEvent("You are not in a group."), nil
+		}
+		g, exists := s.sessions.GroupByID(caller.GroupID)
+		if !exists {
+			return messageEvent("You are not in a group."), nil
+		}
+		// Find leader name.
+		leaderName := g.LeaderUID
+		if leaderSess, ok := s.sessions.GetPlayer(g.LeaderUID); ok {
+			leaderName = leaderSess.CharName
+		}
+		var sb strings.Builder
+		fmt.Fprintf(&sb, "Group (leader: %s):", leaderName)
+		for _, memberUID := range g.MemberUIDs {
+			if ms, ok := s.sessions.GetPlayer(memberUID); ok {
+				fmt.Fprintf(&sb, "\n  %s", ms.CharName)
+			}
+		}
+		return messageEvent(sb.String()), nil
+	}
+
+	// Create group and invite the named player.
+	if caller.GroupID != "" {
+		return messageEvent("You are already in a group. Use 'ungroup' to leave first."), nil
+	}
+	targetName := req.Args
+	if strings.EqualFold(targetName, caller.CharName) {
+		return messageEvent("You cannot invite yourself."), nil
+	}
+	target := s.findPlayerByCharName(targetName)
+	if target == nil {
+		return messageEvent("Player not found."), nil
+	}
+	if target.GroupID != "" {
+		return messageEvent(fmt.Sprintf("%s is already in a group.", target.CharName)), nil
+	}
+	if target.PendingGroupInvite != "" {
+		return messageEvent(fmt.Sprintf("%s already has a pending group invitation.", target.CharName)), nil
+	}
+
+	g := s.sessions.CreateGroup(uid)
+	target.PendingGroupInvite = g.ID
+	s.pushMessageToUID(target.UID, fmt.Sprintf(
+		"%s has invited you to join their group. (accept / decline)", caller.CharName,
+	))
+	return messageEvent(fmt.Sprintf("You created a group and invited %s.", target.CharName)), nil
+}
+
+// handleInvite handles the invite command.
+//
+// Precondition: uid must identify an existing player session.
+// Postcondition: If all preconditions pass, the target player's PendingGroupInvite is set and they
+//
+//	receive a notification; the caller receives a confirmation message.
+func (s *GameServiceServer) handleInvite(uid string, req *gamev1.InviteRequest) (*gamev1.ServerEvent, error) {
+	caller, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if caller.GroupID == "" {
+		return messageEvent("You are not in a group."), nil
+	}
+	g, exists := s.sessions.GroupByID(caller.GroupID)
+	if !exists {
+		return messageEvent("You are not in a group."), nil
+	}
+	if g.LeaderUID != uid {
+		return messageEvent("Only the group leader can invite players."), nil
+	}
+	targetName := req.Player
+	if strings.EqualFold(targetName, caller.CharName) {
+		return messageEvent("You cannot invite yourself."), nil
+	}
+	target := s.findPlayerByCharName(targetName)
+	if target == nil {
+		return messageEvent("Player not found."), nil
+	}
+	if target.GroupID != "" {
+		return messageEvent(fmt.Sprintf("%s is already in a group.", target.CharName)), nil
+	}
+	if target.PendingGroupInvite != "" {
+		return messageEvent(fmt.Sprintf("%s already has a pending group invitation.", target.CharName)), nil
+	}
+	if len(g.MemberUIDs) >= 8 {
+		return messageEvent("Group is full (max 8 members)."), nil
+	}
+
+	target.PendingGroupInvite = g.ID
+	s.pushMessageToUID(target.UID, fmt.Sprintf(
+		"%s has invited you to join their group. (accept / decline)", caller.CharName,
+	))
+	return messageEvent(fmt.Sprintf("You invited %s to the group.", target.CharName)), nil
+}
+
+// handleAcceptGroup handles the accept command for group invitations.
+//
+// Precondition: uid must identify an existing player session.
+// Postcondition: If a valid pending invite exists, the player is added to the group, PendingGroupInvite
+//
+//	is cleared, existing members are notified, and a confirmation is returned.
+func (s *GameServiceServer) handleAcceptGroup(uid string, _ *gamev1.AcceptGroupRequest) (*gamev1.ServerEvent, error) {
+	caller, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if caller.PendingGroupInvite == "" {
+		return messageEvent("You have no pending group invitation."), nil
+	}
+	groupID := caller.PendingGroupInvite
+	g, exists := s.sessions.GroupByID(groupID)
+	if !exists {
+		caller.PendingGroupInvite = ""
+		return messageEvent("That group no longer exists."), nil
+	}
+
+	if err := s.sessions.AddGroupMember(groupID, uid); err != nil {
+		caller.PendingGroupInvite = ""
+		return messageEvent("The group is full."), nil
+	}
+	caller.PendingGroupInvite = ""
+
+	// Notify existing members (all except the new joiner).
+	for _, memberUID := range g.MemberUIDs {
+		if memberUID != uid {
+			s.pushMessageToUID(memberUID, fmt.Sprintf("%s joined the group.", caller.CharName))
+		}
+	}
+
+	// Find leader name for confirmation message.
+	leaderName := g.LeaderUID
+	if leaderSess, ok := s.sessions.GetPlayer(g.LeaderUID); ok {
+		leaderName = leaderSess.CharName
+	}
+	return messageEvent(fmt.Sprintf("You joined %s's group.", leaderName)), nil
+}
+
+// handleDeclineGroup handles the decline command for group invitations.
+//
+// Precondition: uid must identify an existing player session.
+// Postcondition: PendingGroupInvite is cleared; the group leader (if online) is notified; a
+//
+//	confirmation message is returned to the caller.
+func (s *GameServiceServer) handleDeclineGroup(uid string, _ *gamev1.DeclineGroupRequest) (*gamev1.ServerEvent, error) {
+	caller, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if caller.PendingGroupInvite == "" {
+		return messageEvent("You have no pending group invitation."), nil
+	}
+	groupID := caller.PendingGroupInvite
+	caller.PendingGroupInvite = ""
+
+	if g, exists := s.sessions.GroupByID(groupID); exists {
+		s.pushMessageToUID(g.LeaderUID, fmt.Sprintf(
+			"%s declined your group invitation.", caller.CharName,
+		))
+	}
+	return messageEvent("You declined the group invitation."), nil
 }
 
 // cleanupPlayer removes a player from the session manager, persists character state, and broadcasts departure.
