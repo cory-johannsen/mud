@@ -70,7 +70,8 @@ type Domain struct {
 //
 // Postcondition: nil return guarantees non-empty ID, at least one Task with non-empty ID,
 // all Method TaskIDs and IDs non-empty with non-empty Subtasks, all Operator IDs and Actions
-// non-empty, no duplicate IDs within any slice, and all cross-references are valid.
+// non-empty (valid action strings: "attack", "strike", "pass", "flee", "apply_mental_state"),
+// no duplicate IDs within any slice, and all cross-references are valid.
 func (d *Domain) Validate() error {
 	if d.ID == "" {
 		return errors.New("ai.Domain: ID must not be empty")
