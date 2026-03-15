@@ -392,3 +392,156 @@ func TestHandleAcceptGroup_GroupFull(t *testing.T) {
 	assert.Equal(t, "The group is full.", evt.GetMessage().GetContent())
 	assert.Empty(t, target.PendingGroupInvite)
 }
+
+// ---------------------------------------------------------------------------
+// handleUngroup tests
+// ---------------------------------------------------------------------------
+
+// TestHandleUngroup_LeaderDisbands: leader calls ungroup → all members' GroupID cleared,
+// group removed, leader sees "You disbanded the group.", other members see disband message.
+func TestHandleUngroup_LeaderDisbands(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u_ul1", "Alice")
+	bobSess := addGroupPlayer(t, sessMgr, "u_ul2", "Bob")
+
+	g := sessMgr.CreateGroup("u_ul1")
+	require.NoError(t, sessMgr.AddGroupMember(g.ID, "u_ul2"))
+
+	evt, err := svc.handleUngroup("u_ul1", &gamev1.UngroupRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Equal(t, "You disbanded the group.", evt.GetMessage().GetContent())
+
+	// Both members should have their GroupID cleared.
+	aliceSess, _ := sessMgr.GetPlayer("u_ul1")
+	assert.Empty(t, aliceSess.GroupID)
+	assert.Empty(t, bobSess.GroupID)
+
+	// Group should no longer exist.
+	_, exists := sessMgr.GroupByID(g.ID)
+	assert.False(t, exists)
+}
+
+// TestHandleUngroup_NonLeaderLeaves: non-leader calls ungroup → caller's GroupID cleared,
+// remaining members get "<name> left the group.", caller sees "You left the group."
+func TestHandleUngroup_NonLeaderLeaves(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	aliceSess := addGroupPlayer(t, sessMgr, "u_unl1", "Alice")
+	addGroupPlayer(t, sessMgr, "u_unl2", "Bob")
+
+	g := sessMgr.CreateGroup("u_unl1")
+	require.NoError(t, sessMgr.AddGroupMember(g.ID, "u_unl2"))
+
+	evt, err := svc.handleUngroup("u_unl2", &gamev1.UngroupRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Equal(t, "You left the group.", evt.GetMessage().GetContent())
+
+	// Bob's GroupID cleared, Alice's GroupID remains.
+	bobSess, _ := sessMgr.GetPlayer("u_unl2")
+	assert.Empty(t, bobSess.GroupID)
+	assert.NotEmpty(t, aliceSess.GroupID)
+
+	// Group should still exist with Alice.
+	grp, exists := sessMgr.GroupByID(g.ID)
+	require.True(t, exists)
+	assert.Len(t, grp.MemberUIDs, 1)
+	assert.Equal(t, "u_unl1", grp.MemberUIDs[0])
+}
+
+// TestHandleUngroup_NotInGroup: player not in group → "You are not in a group."
+func TestHandleUngroup_NotInGroup(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u_unig1", "Alice")
+
+	evt, err := svc.handleUngroup("u_unig1", &gamev1.UngroupRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Contains(t, evt.GetMessage().GetContent(), "not in a group")
+}
+
+// ---------------------------------------------------------------------------
+// handleKick tests
+// ---------------------------------------------------------------------------
+
+// TestHandleKick_Success: leader kicks member → target.GroupID cleared,
+// target removed from MemberUIDs, caller sees kick confirmation, target sees kick message.
+func TestHandleKick_Success(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u_ks1", "Alice")
+	bobSess := addGroupPlayer(t, sessMgr, "u_ks2", "Bob")
+
+	g := sessMgr.CreateGroup("u_ks1")
+	require.NoError(t, sessMgr.AddGroupMember(g.ID, "u_ks2"))
+
+	evt, err := svc.handleKick("u_ks1", &gamev1.KickRequest{Player: "Bob"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Equal(t, "You kicked Bob from the group.", evt.GetMessage().GetContent())
+
+	// Bob's GroupID should be cleared.
+	assert.Empty(t, bobSess.GroupID)
+
+	// Group should still exist with only Alice.
+	grp, exists := sessMgr.GroupByID(g.ID)
+	require.True(t, exists)
+	assert.Len(t, grp.MemberUIDs, 1)
+	assert.Equal(t, "u_ks1", grp.MemberUIDs[0])
+}
+
+// TestHandleKick_NotLeader: non-leader tries to kick → "Only the group leader can kick members."
+func TestHandleKick_NotLeader(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u_knl1", "Alice")
+	addGroupPlayer(t, sessMgr, "u_knl2", "Bob")
+	addGroupPlayer(t, sessMgr, "u_knl3", "Carol")
+
+	g := sessMgr.CreateGroup("u_knl1")
+	require.NoError(t, sessMgr.AddGroupMember(g.ID, "u_knl2"))
+	require.NoError(t, sessMgr.AddGroupMember(g.ID, "u_knl3"))
+
+	evt, err := svc.handleKick("u_knl2", &gamev1.KickRequest{Player: "Carol"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Equal(t, "Only the group leader can kick members.", evt.GetMessage().GetContent())
+}
+
+// TestHandleKick_TargetNotInGroup: target not in group → "<name> is not in your group."
+func TestHandleKick_TargetNotInGroup(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u_ktnig1", "Alice")
+	addGroupPlayer(t, sessMgr, "u_ktnig2", "Bob")
+
+	sessMgr.CreateGroup("u_ktnig1")
+
+	evt, err := svc.handleKick("u_ktnig1", &gamev1.KickRequest{Player: "Bob"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Contains(t, evt.GetMessage().GetContent(), "not in your group")
+}
+
+// TestHandleKick_SelfKick: leader tries to kick themselves → "Use 'ungroup' to disband the group."
+func TestHandleKick_SelfKick(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u_ksk1", "Alice")
+	addGroupPlayer(t, sessMgr, "u_ksk2", "Bob")
+
+	g := sessMgr.CreateGroup("u_ksk1")
+	require.NoError(t, sessMgr.AddGroupMember(g.ID, "u_ksk2"))
+
+	evt, err := svc.handleKick("u_ksk1", &gamev1.KickRequest{Player: "Alice"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Equal(t, "Use 'ungroup' to disband the group.", evt.GetMessage().GetContent())
+}
+
+// TestHandleKick_NotInGroup: caller not in group → "You are not in a group."
+func TestHandleKick_NotInGroup(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u_knig1", "Alice")
+
+	evt, err := svc.handleKick("u_knig1", &gamev1.KickRequest{Player: "Bob"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Contains(t, evt.GetMessage().GetContent(), "not in a group")
+}

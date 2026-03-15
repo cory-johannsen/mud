@@ -1273,6 +1273,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleAcceptGroup(uid, p.AcceptGroup)
 	case *gamev1.ClientMessage_DeclineGroup:
 		return s.handleDeclineGroup(uid, p.DeclineGroup)
+	case *gamev1.ClientMessage_Ungroup:
+		return s.handleUngroup(uid, p.Ungroup)
+	case *gamev1.ClientMessage_Kick:
+		return s.handleKick(uid, p.Kick)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -2403,6 +2407,115 @@ func (s *GameServiceServer) handleDeclineGroup(uid string, _ *gamev1.DeclineGrou
 		))
 	}
 	return messageEvent("You declined the group invitation."), nil
+}
+
+// handleUngroup handles the 'ungroup' command.
+// Non-leaders leave the group; the leader disbands it entirely.
+//
+// Precondition: uid must identify an existing player session.
+// Postcondition: Leader disbands group (all members' GroupID cleared, group removed);
+// non-leader's GroupID is cleared; remaining members and/or disbanded members are notified.
+func (s *GameServiceServer) handleUngroup(uid string, _ *gamev1.UngroupRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if sess.GroupID == "" {
+		return messageEvent("You are not in a group."), nil
+	}
+	group, exists := s.sessions.GroupByID(sess.GroupID)
+	if !exists {
+		sess.GroupID = ""
+		return messageEvent("You are not in a group."), nil
+	}
+
+	if group.LeaderUID == uid {
+		// Leader path: disband — copy MemberUIDs BEFORE DisbandGroup modifies the slice.
+		disbandMsg := fmt.Sprintf("The group has been disbanded by %s.", sess.CharName)
+		memberUIDs := make([]string, len(group.MemberUIDs))
+		copy(memberUIDs, group.MemberUIDs)
+		s.sessions.DisbandGroup(group.ID)
+		for _, memberUID := range memberUIDs {
+			if memberUID == uid {
+				continue
+			}
+			s.pushMessageToUID(memberUID, disbandMsg)
+		}
+		return messageEvent("You disbanded the group."), nil
+	}
+
+	// Non-leader path: leave — copy MemberUIDs BEFORE RemoveGroupMember modifies the slice.
+	memberUIDs := make([]string, len(group.MemberUIDs))
+	copy(memberUIDs, group.MemberUIDs)
+	s.sessions.RemoveGroupMember(group.ID, uid)
+	leftMsg := fmt.Sprintf("%s left the group.", sess.CharName)
+	for _, memberUID := range memberUIDs {
+		if memberUID == uid {
+			continue
+		}
+		s.pushMessageToUID(memberUID, leftMsg)
+	}
+	return messageEvent("You left the group."), nil
+}
+
+// handleKick handles the 'kick <player>' command.
+// Leader-only: removes a named member from the group.
+//
+// Precondition: uid must identify an existing player session; req.Player must be the target's CharName.
+// Postcondition: Target's GroupID is cleared and removed from MemberUIDs; target and remaining members are notified.
+func (s *GameServiceServer) handleKick(uid string, req *gamev1.KickRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if sess.GroupID == "" {
+		return messageEvent("You are not in a group."), nil
+	}
+	group, exists := s.sessions.GroupByID(sess.GroupID)
+	if !exists {
+		sess.GroupID = ""
+		return messageEvent("You are not in a group."), nil
+	}
+	if group.LeaderUID != uid {
+		return messageEvent("Only the group leader can kick members."), nil
+	}
+
+	arg := strings.TrimSpace(req.GetPlayer())
+	if strings.EqualFold(arg, sess.CharName) {
+		return messageEvent("Use 'ungroup' to disband the group."), nil
+	}
+
+	// Find target among group members.
+	var targetSess *session.PlayerSession
+	for _, memberUID := range group.MemberUIDs {
+		if mSess, ok2 := s.sessions.GetPlayer(memberUID); ok2 {
+			if strings.EqualFold(mSess.CharName, arg) {
+				targetSess = mSess
+				break
+			}
+		}
+	}
+	if targetSess == nil {
+		return messageEvent(fmt.Sprintf("%s is not in your group.", arg)), nil
+	}
+
+	// Capture remaining UIDs BEFORE removal so we can notify them.
+	remainingUIDs := make([]string, 0, len(group.MemberUIDs))
+	for _, memberUID := range group.MemberUIDs {
+		if memberUID != targetSess.UID {
+			remainingUIDs = append(remainingUIDs, memberUID)
+		}
+	}
+
+	s.sessions.RemoveGroupMember(group.ID, targetSess.UID)
+	s.pushMessageToUID(targetSess.UID, "You were kicked from the group.")
+
+	kickedMsg := fmt.Sprintf("%s was kicked from the group.", targetSess.CharName)
+	for _, memberUID := range remainingUIDs {
+		s.pushMessageToUID(memberUID, kickedMsg)
+	}
+
+	return messageEvent(fmt.Sprintf("You kicked %s from the group.", targetSess.CharName)), nil
 }
 
 // cleanupPlayer removes a player from the session manager, persists character state, and broadcasts departure.
