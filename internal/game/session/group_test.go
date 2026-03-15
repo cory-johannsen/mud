@@ -334,28 +334,37 @@ func TestProperty_NoDuplicateMemberUIDs(t *testing.T) {
 
 // TestProperty_ConcurrentGroupAccess_NoRace (REQ-T17): concurrent reads/writes must not race.
 func TestProperty_ConcurrentGroupAccess_NoRace(t *testing.T) {
-	mgr := NewManager()
-	for i := 0; i < 5; i++ {
-		addTestPlayer(t, mgr, fmt.Sprintf("uid-%d", i))
-	}
-	g := mgr.CreateGroup("uid-0")
+	rapid.Check(t, func(rt *rapid.T) {
+		numPlayers := rapid.IntRange(3, 8).Draw(rt, "numPlayers")
+		leaderIndices := make([]int, 20)
+		for i := range leaderIndices {
+			leaderIndices[i] = rapid.IntRange(0, numPlayers-1).Draw(rt, fmt.Sprintf("leader-%d", i))
+		}
 
-	var wg sync.WaitGroup
-	const goroutines = 20
-	wg.Add(goroutines)
-	for i := 0; i < goroutines; i++ {
-		i := i
-		go func() {
-			defer wg.Done()
-			if i%3 == 0 {
-				_ = mgr.GroupByUID("uid-0")
-			} else if i%3 == 1 {
-				_, _ = mgr.GroupByID(g.ID)
-			} else {
-				ng := mgr.CreateGroup(fmt.Sprintf("uid-%d", i%5))
-				mgr.DisbandGroup(ng.ID)
-			}
-		}()
-	}
-	wg.Wait()
+		mgr := NewManager()
+		for i := 0; i < numPlayers; i++ {
+			addTestPlayer(t, mgr, fmt.Sprintf("uid-%d", i))
+		}
+		g := mgr.CreateGroup("uid-0")
+
+		var wg sync.WaitGroup
+		const goroutines = 20
+		wg.Add(goroutines)
+		for i := 0; i < goroutines; i++ {
+			i := i
+			go func() {
+				defer wg.Done()
+				switch i % 3 {
+				case 0:
+					_ = mgr.GroupByUID("uid-0")
+				case 1:
+					_, _ = mgr.GroupByID(g.ID)
+				default:
+					ng := mgr.CreateGroup(fmt.Sprintf("uid-%d", leaderIndices[i]))
+					mgr.DisbandGroup(ng.ID)
+				}
+			}()
+		}
+		wg.Wait()
+	})
 }

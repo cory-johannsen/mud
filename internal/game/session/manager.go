@@ -472,7 +472,7 @@ func (m *Manager) RemoveGroupMember(groupID, uid string) {
 	if !ok {
 		return
 	}
-	filtered := g.MemberUIDs[:0]
+	filtered := make([]string, 0, len(g.MemberUIDs))
 	for _, existing := range g.MemberUIDs {
 		if existing != uid {
 			filtered = append(filtered, existing)
