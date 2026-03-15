@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -294,4 +295,100 @@ func TestHandleDeclineGroup_Success(t *testing.T) {
 	require.NotNil(t, resp)
 	assert.Contains(t, resp.GetMessage().Content, "declined")
 	assert.Empty(t, bobSess.PendingGroupInvite)
+	// Note: leader notification is delivered via session.Push, which writes to the player's
+	// gRPC stream. In unit tests there is no real stream attached to the session, so pushed
+	// messages to other players cannot be directly asserted here. Integration / e2e tests
+	// are required to verify that Alice receives the "Bob declined your group invitation." push.
+}
+
+// ---------------------------------------------------------------------------
+// handleInvite — additional scenario tests
+// ---------------------------------------------------------------------------
+
+// TestHandleInvite_SelfInvite verifies self-invite is rejected.
+func TestHandleInvite_SelfInvite(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u1_si", "Alice")
+	sessMgr.CreateGroup("u1_si")
+
+	evt, err := svc.handleInvite("u1_si", &gamev1.InviteRequest{Player: "Alice"})
+	require.NoError(t, err)
+	assert.Equal(t, "You cannot invite yourself.", evt.GetMessage().GetContent())
+}
+
+// TestHandleInvite_TargetNotOnline verifies that inviting an offline player returns "Player not found."
+func TestHandleInvite_TargetNotOnline(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u1_tno", "Alice")
+	sessMgr.CreateGroup("u1_tno")
+
+	evt, err := svc.handleInvite("u1_tno", &gamev1.InviteRequest{Player: "Ghost"})
+	require.NoError(t, err)
+	assert.Equal(t, "Player not found.", evt.GetMessage().GetContent())
+}
+
+// TestHandleInvite_TargetAlreadyInGroup verifies that inviting a player in a group is rejected.
+func TestHandleInvite_TargetAlreadyInGroup(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u1_taig", "Alice")
+	addGroupPlayer(t, sessMgr, "u2_taig", "Bob")
+	sessMgr.CreateGroup("u1_taig")
+	sessMgr.CreateGroup("u2_taig") // Bob creates his own group
+
+	evt, err := svc.handleInvite("u1_taig", &gamev1.InviteRequest{Player: "Bob"})
+	require.NoError(t, err)
+	assert.Equal(t, "Bob is already in a group.", evt.GetMessage().GetContent())
+}
+
+// TestHandleInvite_TargetHasPendingInvite verifies that inviting a player with a pending invite is rejected.
+func TestHandleInvite_TargetHasPendingInvite(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u1_thpi", "Alice")
+	target := addGroupPlayer(t, sessMgr, "u2_thpi", "Bob")
+	sessMgr.CreateGroup("u1_thpi")
+	target.PendingGroupInvite = "some-other-group"
+
+	evt, err := svc.handleInvite("u1_thpi", &gamev1.InviteRequest{Player: "Bob"})
+	require.NoError(t, err)
+	assert.Equal(t, "Bob already has a pending group invitation.", evt.GetMessage().GetContent())
+}
+
+// TestHandleInvite_Success verifies that a valid invite sets target.PendingGroupInvite.
+func TestHandleInvite_Success(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "u1_is", "Alice")
+	target := addGroupPlayer(t, sessMgr, "u2_is", "Bob")
+	group := sessMgr.CreateGroup("u1_is")
+
+	evt, err := svc.handleInvite("u1_is", &gamev1.InviteRequest{Player: "Bob"})
+	require.NoError(t, err)
+	assert.Equal(t, "You invited Bob to the group.", evt.GetMessage().GetContent())
+	assert.Equal(t, group.ID, target.PendingGroupInvite)
+}
+
+// ---------------------------------------------------------------------------
+// handleAcceptGroup — group-full path
+// ---------------------------------------------------------------------------
+
+// TestHandleAcceptGroup_GroupFull verifies that accept when group is at capacity clears invite.
+func TestHandleAcceptGroup_GroupFull(t *testing.T) {
+	svc, sessMgr := newGroupSvc(t)
+	addGroupPlayer(t, sessMgr, "leader_agf", "Leader")
+	group := sessMgr.CreateGroup("leader_agf")
+
+	// Fill group to 8 members (leader + 7 additional).
+	for i := 1; i <= 7; i++ {
+		uid := fmt.Sprintf("m%d_agf", i)
+		addGroupPlayer(t, sessMgr, uid, fmt.Sprintf("M%d", i))
+		require.NoError(t, sessMgr.AddGroupMember(group.ID, uid))
+	}
+
+	// Add a 9th player with a pending invite.
+	target := addGroupPlayer(t, sessMgr, "extra_agf", "Extra")
+	target.PendingGroupInvite = group.ID
+
+	evt, err := svc.handleAcceptGroup("extra_agf", &gamev1.AcceptGroupRequest{})
+	require.NoError(t, err)
+	assert.Equal(t, "The group is full.", evt.GetMessage().GetContent())
+	assert.Empty(t, target.PendingGroupInvite)
 }
