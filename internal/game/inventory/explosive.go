@@ -39,7 +39,15 @@ type ExplosiveDef struct {
 	SaveType   string   `yaml:"save_type"` // e.g. "reflex"
 	SaveDC     int      `yaml:"save_dc"`
 	Fuse       FuseType `yaml:"fuse"`
-	Traits     []string `yaml:"traits"`
+	// FriendlyFire controls whether this explosive damages allied combatants.
+	// When false (default), only enemy-kind combatants are targeted.
+	// When true, all living combatants except the thrower are targeted.
+	FriendlyFire bool `yaml:"friendly_fire,omitempty"`
+	// AoERadius is the blast radius in feet for AreaTypeBurst explosives.
+	// Stored for future position-based filtering; not actively used in target selection now.
+	// Zero means room-wide effect (current behavior).
+	AoERadius int      `yaml:"aoe_radius,omitempty"`
+	Traits    []string `yaml:"traits"`
 }
 
 // Validate checks that the ExplosiveDef satisfies its invariants.
