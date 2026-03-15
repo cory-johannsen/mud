@@ -213,12 +213,12 @@
   - rob for 5-30% of the player currency
   - percentage taken randomized at NPC creation weighted by NPC level and type
 - [ ] Multi-player combat
-  - [ ] Other players can join combat already in progress
-    - [ ] Combat join — when a player enters a room with active combat, offer to join; on joining, add player as a new combatant with a fresh initiative roll and full AP
-    - [ ] All players in a combat encounter share XP for the encounter (XP is divided equally among the players)
-      - [ ] Track participant list on Combat struct; on combat end divide total XP equally among all participants
-    - [ ] All players in a combat encounter share loot for the encounter (loot is divided equally among the players)
-      - [ ] Currency drops split equally; item drops distributed round-robin ordered by initiative roll
+  - [x] Other players can join combat already in progress
+    - [x] Combat join — when a player enters a room with active combat, offer to join; on joining, add player as a new combatant with a fresh initiative roll and full AP
+    - [x] All players in a combat encounter share XP for the encounter (XP is divided equally among the players)
+      - [x] Track participant list on Combat struct; on combat end divide total XP equally among all participants
+    - [x] All players in a combat encounter share loot for the encounter (loot is divided equally among the players)
+      - [x] Currency drops split equally; item drops distributed round-robin ordered by initiative roll
   - [ ] Players can form groups
     - [ ] Group data model — add Group struct (leader UID, member UIDs slice) stored in session manager; one group per player
     - [ ] Players in a group all automatically enter combat when any player initiates combat
@@ -317,6 +317,7 @@
       - [ ] Add a lore-appropriate job trainer NPC in Rustbucket Ridge
     - [ ] equipment repair and crafting
       - [ ] Repair NPC behavior — `repair <item>` command in repair NPC's room; pays credit cost proportional to item damage; restores item durability; requires item durability system
+- [ ] Persistent calendar
 - [x] Hero points
   - [x] Add `HeroPoints int` field to PlayerSession; award 1 point at session start and on milestone events (level up, boss kill, GM grant)
   - [x] `heropoint reroll` — re-roll the most recent skill or attack check and take the higher result; costs 1 hero point; unavailable if no recent check
