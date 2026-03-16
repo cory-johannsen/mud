@@ -33,7 +33,7 @@ func newDelaySvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,

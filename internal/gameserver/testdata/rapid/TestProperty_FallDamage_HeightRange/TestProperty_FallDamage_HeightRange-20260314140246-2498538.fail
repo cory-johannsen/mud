@@ -1,0 +1,23 @@
+# 2026/03/14 14:02:46.862641 [TestProperty_FallDamage_HeightRange] [rapid] draw height: 61
+# 2026/03/14 14:02:46.862644 [TestProperty_FallDamage_HeightRange] [rapid] draw dc: 10
+# 2026/03/14 14:02:46.862676 [TestProperty_FallDamage_HeightRange] 2026-03-14T14:02:46.862-0700	DEBUG	dice roll	{"expression": "1d20", "dice": [2], "modifier": 0, "total": 2}
+# 2026/03/14 14:02:46.862703 [TestProperty_FallDamage_HeightRange] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_climb_test.go:190
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_climb_test.go:142
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Not equal: 
+# 	            	expected: 994
+# 	            	actual  : 1000
+# 	Test:       	TestProperty_FallDamage_HeightRange
+# 
+v0.4.8#908940885946967814
+0xb915f512e8826
+0x18d1f6c238f997
+0x3d
+0x16f2445fc6cd79
+0x14131127934caa
+0x8

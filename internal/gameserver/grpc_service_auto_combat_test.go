@@ -35,7 +35,7 @@ func newAutoCombatSvc(t *testing.T) (*GameServiceServer, *session.Manager, *Comb
 		NewChatHandler(sessMgr),
 		logger,
 		nil, nil, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,

@@ -142,7 +142,7 @@ func testGRPCServerWithSaverFull(t *testing.T, saver CharacterSaver) (gamev1.Gam
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 	)
@@ -395,7 +395,7 @@ func testGRPCServerWithClassFeatures(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, nil, nil, nil, nil,
 		nil, nil,
 	)
@@ -511,7 +511,7 @@ func testGRPCServerWithFeatureChoices(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, fcRepo, nil, nil, nil,
 		nil, nil,
 	)

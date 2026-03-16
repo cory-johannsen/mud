@@ -156,7 +156,7 @@ func newUseEquipServerWithSkillChecks(
 	svc := NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger,
 		nil, roller, nil, nil, nil, nil,
-		nil, nil, mgr, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, mgr, nil, nil, nil, nil, nil, nil, nil, "",
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 	)

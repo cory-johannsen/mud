@@ -1,0 +1,26 @@
+# 2026/03/14 09:40:28.521935 [TestHandleGrant_XP_LevelUp_AwardsHeroPoint_Property] [rapid] draw xp_amount: 402
+# 2026/03/14 09:40:28.522014 [TestHandleGrant_XP_LevelUp_AwardsHeroPoint_Property] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_hero_point_levelup_test.go:141
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_hero_point_levelup_test.go:116
+# 	Error:      	"0" is not greater than or equal to "1"
+# 	Test:       	TestHandleGrant_XP_LevelUp_AwardsHeroPoint_Property
+# 	Messages:   	must award hero points on level-up
+# 2026/03/14 09:40:28.522042 [TestHandleGrant_XP_LevelUp_AwardsHeroPoint_Property] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_hero_point_levelup_test.go:142
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_hero_point_levelup_test.go:116
+# 	Error:      	"0" is not greater than or equal to "1"
+# 	Test:       	TestHandleGrant_XP_LevelUp_AwardsHeroPoint_Property
+# 	Messages:   	SaveHeroPoints must be called
+# 
+v0.4.8#5909726438444303306
+0x15839fb467a004
+0x377fe780979b8
+0x2

@@ -1,0 +1,24 @@
+# 2026/03/13 22:12:52.275966 [TestProperty_HandleTrip_HustleDC_Formula] [rapid] draw level: 14
+# 2026/03/13 22:12:52.275969 [TestProperty_HandleTrip_HustleDC_Formula] [rapid] draw quickness: 14
+# 2026/03/13 22:12:52.275970 [TestProperty_HandleTrip_HustleDC_Formula] [rapid] draw rank: "trained"
+# 2026/03/13 22:12:52.276071 [TestProperty_HandleTrip_HustleDC_Formula] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_trip_test.go:305
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_trip_test.go:265
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	"Trip (athletics DC 24): rolled 100+0=100 — success! Target is knocked prone (-2 attack rolls)." does not contain "DC 28"
+# 	Test:       	TestProperty_HandleTrip_HustleDC_Formula
+# 	Messages:   	message must include computed Hustle DC
+# 
+v0.4.8#14744362055008368622
+0xe65492a0c0c5a
+0x1214f07266ed6d
+0xd
+0x9155eef59ec4e
+0x118560a3e10d3a
+0xd
+0x34ba531f4e861
+0x1

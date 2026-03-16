@@ -1,0 +1,28 @@
+# 2026/03/13 22:20:21.858663 [TestProperty_HandleDemoralize_CoolDC_Formula] [rapid] draw level: 4
+# 2026/03/13 22:20:21.858666 [TestProperty_HandleDemoralize_CoolDC_Formula] [rapid] draw savvy: 16
+# 2026/03/13 22:20:21.858667 [TestProperty_HandleDemoralize_CoolDC_Formula] [rapid] draw rank: "trained"
+# 2026/03/13 22:20:21.858771 [TestProperty_HandleDemoralize_CoolDC_Formula] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_test.go:3122
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_test.go:3082
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	"Demoralize (smooth_talk DC 14): rolled 100+0=100 — success! Target is demoralized (-1 AC, -1 attack)." does not contain "DC 19"
+# 	Test:       	TestProperty_HandleDemoralize_CoolDC_Formula
+# 	Messages:   	message must include computed Cool DC
+# 
+v0.4.8#17466583099416559707
+0xe7281c4583471
+0x150470d4c75c0d
+0x14
+0x3
+0x10ec8af825cd5
+0xf47e718bc9b44
+0x19
+0x19
+0x1a
+0xf
+0x13395d6ec645d0
+0x1

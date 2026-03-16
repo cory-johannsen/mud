@@ -37,7 +37,7 @@ func newCombatSvcWithMentalMgr(t *testing.T, mentalMgr *mentalstate.Manager) (*G
 		NewChatHandler(sessMgr),
 		logger,
 		nil, nil, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,

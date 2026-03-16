@@ -1,0 +1,26 @@
+# 2026/03/13 22:05:13.108769 [TestProperty_HandleGrapple_ToughnessDC_Formula] [rapid] draw level: 16
+# 2026/03/13 22:05:13.108772 [TestProperty_HandleGrapple_ToughnessDC_Formula] [rapid] draw brutality: 7
+# 2026/03/13 22:05:13.108773 [TestProperty_HandleGrapple_ToughnessDC_Formula] [rapid] draw rank: ""
+# 2026/03/13 22:05:13.108880 [TestProperty_HandleGrapple_ToughnessDC_Formula] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_grapple_test.go:305
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_grapple_test.go:265
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	"Grapple (athletics DC 26): rolled 100+0=100 — success! Target is grabbed (flat-footed, -2 AC)." does not contain "DC 25"
+# 	Test:       	TestProperty_HandleGrapple_ToughnessDC_Formula
+# 	Messages:   	message must include computed Toughness DC
+# 
+v0.4.8#6267722120402056052
+0x19f26c6b12bc93
+0x107dc4f8306fa4
+0xf
+0x18f4a992ad5bb3
+0x14381385120d1c
+0x18
+0x6
+0x186a0a7e3130f9
+0x6
+0x0
