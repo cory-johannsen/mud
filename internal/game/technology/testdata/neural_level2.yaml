@@ -1,0 +1,13 @@
+id: arc_thought_fixture
+name: Arc Thought Fixture
+tradition: neural
+level: 2
+usage_type: innate
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+effects:
+  - type: damage
+    dice: 1d8
+    damage_type: neural

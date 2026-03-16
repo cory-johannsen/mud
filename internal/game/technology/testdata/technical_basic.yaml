@@ -1,0 +1,13 @@
+id: neural_shock_fixture
+name: Neural Shock Fixture
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+effects:
+  - type: damage
+    dice: 2d6
+    damage_type: energy

@@ -1,0 +1,12 @@
+id: mind_spike_fixture
+name: Mind Spike Fixture
+tradition: neural
+level: 1
+usage_type: spontaneous
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+effects:
+  - type: condition
+    condition_id: confused

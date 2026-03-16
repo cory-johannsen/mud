@@ -1,0 +1,13 @@
+id: acid_spray_fixture
+name: Acid Spray Fixture
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: all_enemies
+duration: instant
+effects:
+  - type: damage
+    dice: 1d6
+    damage_type: acid
