@@ -232,15 +232,16 @@
         - [x] Implement `invite <player>` — leader sends invitation; target receives a prompt to accept or decline; on accept, add to group
       - [x] kick (remove a player from the group)
         - [x] Implement `kick <player>` — leader only; removes the named player from the group and notifies them
-- [ ] Technology instead of magic.  
-  - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology, chemistry, and drug effects (there is no magic in Gunchete, only cyberpunk futurism).  
+- [x] Technology instead of magic.
+  - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology, chemistry, and drug effects (there is no magic in Gunchete, only cyberpunk futurism).
   - For the remainder of the features specification Technology refers to the combined effects of technological devices, chemistry, and drugs.
-  - [ ] Traditions of magic -> Types of technology / Substances
+  - [x] Technology data model — `TechnologyDef` type with `TechEffect` discriminated union; `Registry` with `Load`, `Get`, `All`, `ByTradition`, `ByTraditionAndLevel`, `ByUsageType`; seed content one per tradition; wired into `GameServiceServer`
+  - [x] Traditions of magic -> Types of technology / Substances
     - Use PF2E Traits, mapping to Gunchete lore as required
-    - [ ] Arcane -> Technical
-    - [ ] Divine -> Fanatic Doctrine
-    - [ ] Occult -> Neural
-    - [ ] Primal -> Bio-Synthetic
+    - [x] Arcane -> Technical
+    - [x] Divine -> Fanatic Doctrine
+    - [x] Occult -> Neural
+    - [x] Primal -> Bio-Synthetic
   - [ ] Archetype and Job define the technologies available for the player
     - [ ] Levelling up allows for additions and changes
     - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
