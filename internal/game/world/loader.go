@@ -55,6 +55,7 @@ type yamlRoom struct {
 	Spawns      []yamlRoomSpawn        `yaml:"spawns"`
 	Equipment   []yamlRoomEquipment    `yaml:"equipment"`
 	SkillChecks []skillcheck.TriggerDef `yaml:"skill_checks"`
+	Effects     []RoomEffect           `yaml:"effects"`
 	MapX        *int                   `yaml:"map_x"`
 	MapY        *int                   `yaml:"map_y"`
 }
@@ -163,6 +164,7 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 			Description: strings.TrimSpace(yr.Description),
 			Properties:  yr.Properties,
 			SkillChecks: yr.SkillChecks,
+			Effects:     yr.Effects,
 			MapX:        *yr.MapX,
 			MapY:        *yr.MapY,
 		}
