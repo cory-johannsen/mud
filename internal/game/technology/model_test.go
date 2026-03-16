@@ -1,0 +1,303 @@
+package technology_test
+
+import (
+	"testing"
+
+	"github.com/cory-johannsen/mud/internal/game/technology"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
+	"pgregory.net/rapid"
+)
+
+// validDef returns a minimal valid TechnologyDef.
+func validDef() *technology.TechnologyDef {
+	return &technology.TechnologyDef{
+		ID:        "test-tech",
+		Name:      "Test Technology",
+		Tradition: technology.TraditionTechnical,
+		Level:     1,
+		UsageType: technology.UsageCantrip,
+		Range:     technology.RangeSelf,
+		Targets:   technology.TargetsSingle,
+		Duration:  "instant",
+		Effects: []technology.TechEffect{
+			minimalEffect(technology.EffectUtility),
+		},
+	}
+}
+
+// minimalEffect returns a minimal valid TechEffect for the given type.
+func minimalEffect(t technology.EffectType) technology.TechEffect {
+	switch t {
+	case technology.EffectDamage:
+		return technology.TechEffect{Type: t, Dice: "1d6", DamageType: "fire"}
+	case technology.EffectHeal:
+		return technology.TechEffect{Type: t, Dice: "1d8"}
+	case technology.EffectCondition:
+		return technology.TechEffect{Type: t, ConditionID: "stunned"}
+	case technology.EffectSkillCheck:
+		return technology.TechEffect{Type: t, Skill: "perception", DC: 15}
+	case technology.EffectMovement:
+		return technology.TechEffect{Type: t, Distance: 10, Direction: "away"}
+	case technology.EffectZone:
+		return technology.TechEffect{Type: t, Radius: 10}
+	case technology.EffectSummon:
+		return technology.TechEffect{Type: t, NPCID: "drone", SummonRounds: 3}
+	case technology.EffectUtility:
+		return technology.TechEffect{Type: t, UtilityType: "unlock"}
+	case technology.EffectDrain:
+		return technology.TechEffect{Type: t, Dice: "1d4", Resource: "ap"}
+	default:
+		return technology.TechEffect{Type: t}
+	}
+}
+
+// REQ-T1: Validate rejects unknown Tradition string.
+func TestValidate_REQ_T1_UnknownTradition(t *testing.T) {
+	d := validDef()
+	d.Tradition = technology.Tradition("unknown_tradition")
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "unknown tradition")
+}
+
+// REQ-T2: Validate rejects Level < 1 or > 10.
+func TestValidate_REQ_T2_InvalidLevel(t *testing.T) {
+	t.Run("level_zero", func(t *testing.T) {
+		d := validDef()
+		d.Level = 0
+		err := d.Validate()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "level")
+	})
+	t.Run("level_eleven", func(t *testing.T) {
+		d := validDef()
+		d.Level = 11
+		err := d.Validate()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "level")
+	})
+	t.Run("level_negative", func(t *testing.T) {
+		d := validDef()
+		d.Level = -1
+		err := d.Validate()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "level")
+	})
+}
+
+// REQ-T3: Validate rejects empty Effects slice.
+func TestValidate_REQ_T3_EmptyEffects(t *testing.T) {
+	d := validDef()
+	d.Effects = nil
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "effects")
+}
+
+// REQ-T4: Validate rejects AmpedEffects non-empty with AmpedLevel == 0.
+func TestValidate_REQ_T4_AmpedEffectsWithoutAmpedLevel(t *testing.T) {
+	d := validDef()
+	d.AmpedEffects = []technology.TechEffect{minimalEffect(technology.EffectDamage)}
+	d.AmpedLevel = 0
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "amped_level")
+}
+
+// REQ-T5: Validate rejects AmpedLevel > 0 with empty AmpedEffects.
+func TestValidate_REQ_T5_AmpedLevelWithoutAmpedEffects(t *testing.T) {
+	d := validDef()
+	d.AmpedLevel = 3
+	d.AmpedEffects = nil
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "amped_effects")
+}
+
+// REQ-T6: Validate rejects skill_check effect with DC == 0.
+func TestValidate_REQ_T6_SkillCheckEffectDCZero(t *testing.T) {
+	d := validDef()
+	d.Effects = []technology.TechEffect{
+		{Type: technology.EffectSkillCheck, Skill: "stealth", DC: 0},
+	}
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "dc")
+}
+
+// REQ-T15: Validate rejects non-empty SaveType with SaveDC == 0.
+func TestValidate_REQ_T15_SaveTypeWithoutSaveDC(t *testing.T) {
+	d := validDef()
+	d.SaveType = "reflex"
+	d.SaveDC = 0
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "save_dc")
+}
+
+// REQ-T16: condition effect with no Duration is valid (parent Duration serves as fallback).
+func TestValidate_REQ_T16_ConditionEffectNoLocalDuration(t *testing.T) {
+	d := validDef()
+	d.Effects = []technology.TechEffect{
+		{Type: technology.EffectCondition, ConditionID: "blinded"},
+	}
+	err := d.Validate()
+	require.NoError(t, err)
+}
+
+// REQ-T13 (property): For any EffectType, a TechEffect with that type and valid required fields
+// marshals to YAML and unmarshals back with all set fields preserved.
+func TestProperty_REQ_T13_EffectYAMLRoundTrip(t *testing.T) {
+	allTypes := []technology.EffectType{
+		technology.EffectDamage,
+		technology.EffectHeal,
+		technology.EffectCondition,
+		technology.EffectSkillCheck,
+		technology.EffectMovement,
+		technology.EffectZone,
+		technology.EffectSummon,
+		technology.EffectUtility,
+		technology.EffectDrain,
+	}
+
+	rapid.Check(t, func(rt *rapid.T) {
+		// pick a random EffectType
+		idx := rapid.IntRange(0, len(allTypes)-1).Draw(rt, "type_idx")
+		effectType := allTypes[idx]
+		effect := minimalEffect(effectType)
+
+		data, err := yaml.Marshal(effect)
+		require.NoError(rt, err)
+
+		var got technology.TechEffect
+		err = yaml.Unmarshal(data, &got)
+		require.NoError(rt, err)
+
+		assert.Equal(rt, effect.Type, got.Type)
+		assert.Equal(rt, effect.Dice, got.Dice)
+		assert.Equal(rt, effect.DamageType, got.DamageType)
+		assert.Equal(rt, effect.Amount, got.Amount)
+		assert.Equal(rt, effect.Resource, got.Resource)
+		assert.Equal(rt, effect.ConditionID, got.ConditionID)
+		assert.Equal(rt, effect.Duration, got.Duration)
+		assert.Equal(rt, effect.Skill, got.Skill)
+		assert.Equal(rt, effect.DC, got.DC)
+		assert.Equal(rt, effect.Distance, got.Distance)
+		assert.Equal(rt, effect.Direction, got.Direction)
+		assert.Equal(rt, effect.Radius, got.Radius)
+		assert.Equal(rt, effect.NPCID, got.NPCID)
+		assert.Equal(rt, effect.SummonRounds, got.SummonRounds)
+		assert.Equal(rt, effect.UtilityType, got.UtilityType)
+	})
+}
+
+// REQ-T14 (property): For any combination of valid Tradition, Level [1-10], UsageType, Range,
+// Targets, a TechnologyDef with those fields, non-empty Duration, and one valid effect passes
+// Validate() and round-trips through YAML without data loss.
+func TestProperty_REQ_T14_TechnologyDefValidateAndRoundTrip(t *testing.T) {
+	traditions := []technology.Tradition{
+		technology.TraditionTechnical,
+		technology.TraditionFanaticDoctrine,
+		technology.TraditionNeural,
+		technology.TraditionBioSynthetic,
+	}
+	usageTypes := []technology.UsageType{
+		technology.UsageCantrip,
+		technology.UsagePrepared,
+		technology.UsageSpontaneous,
+		technology.UsageInnate,
+	}
+	ranges := []technology.Range{
+		technology.RangeSelf,
+		technology.RangeMelee,
+		technology.RangeRanged,
+		technology.RangeZone,
+	}
+	targetsList := []technology.Targets{
+		technology.TargetsSingle,
+		technology.TargetsAllEnemies,
+		technology.TargetsAllAllies,
+		technology.TargetsZone,
+	}
+
+	rapid.Check(t, func(rt *rapid.T) {
+		tradition := traditions[rapid.IntRange(0, len(traditions)-1).Draw(rt, "tradition")]
+		level := rapid.IntRange(1, 10).Draw(rt, "level")
+		usageType := usageTypes[rapid.IntRange(0, len(usageTypes)-1).Draw(rt, "usage_type")]
+		r := ranges[rapid.IntRange(0, len(ranges)-1).Draw(rt, "range")]
+		targets := targetsList[rapid.IntRange(0, len(targetsList)-1).Draw(rt, "targets")]
+
+		d := &technology.TechnologyDef{
+			ID:        "prop-test-id",
+			Name:      "Property Test Tech",
+			Tradition: tradition,
+			Level:     level,
+			UsageType: usageType,
+			Range:     r,
+			Targets:   targets,
+			Duration:  "1 round",
+			Effects:   []technology.TechEffect{minimalEffect(technology.EffectUtility)},
+		}
+
+		err := d.Validate()
+		require.NoError(rt, err)
+
+		data, err := yaml.Marshal(d)
+		require.NoError(rt, err)
+
+		var got technology.TechnologyDef
+		err = yaml.Unmarshal(data, &got)
+		require.NoError(rt, err)
+
+		assert.Equal(rt, d.ID, got.ID)
+		assert.Equal(rt, d.Name, got.Name)
+		assert.Equal(rt, d.Tradition, got.Tradition)
+		assert.Equal(rt, d.Level, got.Level)
+		assert.Equal(rt, d.UsageType, got.UsageType)
+		assert.Equal(rt, d.Range, got.Range)
+		assert.Equal(rt, d.Targets, got.Targets)
+		assert.Equal(rt, d.Duration, got.Duration)
+		assert.Len(rt, got.Effects, len(d.Effects))
+
+		err = got.Validate()
+		require.NoError(rt, err)
+	})
+}
+
+// Additional positive test: a fully valid def passes Validate.
+func TestValidate_ValidDef_Passes(t *testing.T) {
+	d := validDef()
+	err := d.Validate()
+	require.NoError(t, err)
+}
+
+// Additional test: skill_check effect with missing Skill is rejected.
+func TestValidate_SkillCheckEffectMissingSkill(t *testing.T) {
+	d := validDef()
+	d.Effects = []technology.TechEffect{
+		{Type: technology.EffectSkillCheck, Skill: "", DC: 15},
+	}
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "skill")
+}
+
+// Additional test: valid amped technology def passes Validate.
+func TestValidate_ValidAmpedDef_Passes(t *testing.T) {
+	d := validDef()
+	d.AmpedLevel = 5
+	d.AmpedEffects = []technology.TechEffect{minimalEffect(technology.EffectDamage)}
+	err := d.Validate()
+	require.NoError(t, err)
+}
+
+// Additional test: SaveType with SaveDC > 0 is valid.
+func TestValidate_SaveTypeWithSaveDC_Valid(t *testing.T) {
+	d := validDef()
+	d.SaveType = "fortitude"
+	d.SaveDC = 18
+	err := d.Validate()
+	require.NoError(t, err)
+}
