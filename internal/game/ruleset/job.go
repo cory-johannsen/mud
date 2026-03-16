@@ -66,7 +66,8 @@ type Job struct {
 	ClassFeatureGrants []string                             `yaml:"class_features"`
 	Features          []JobFeature                         `yaml:"features"`
 	Drawbacks         []JobDrawback                        `yaml:"drawbacks"`
-	StartingInventory *inventory.StartingLoadoutOverride   `yaml:"starting_inventory"`
+	StartingInventory  *inventory.StartingLoadoutOverride   `yaml:"starting_inventory"`
+	TechnologyGrants   *TechnologyGrants                    `yaml:"technology_grants,omitempty"`
 }
 
 // LoadJobs reads all .yaml files in dir and parses each as a Job.
@@ -87,6 +88,11 @@ func LoadJobs(dir string) ([]*Job, error) {
 		var j Job
 		if err := yaml.Unmarshal(data, &j); err != nil {
 			return nil, fmt.Errorf("parsing job file %s: %w", path, err)
+		}
+		if j.TechnologyGrants != nil {
+			if err := j.TechnologyGrants.Validate(); err != nil {
+				return nil, fmt.Errorf("job %q technology_grants: %w", j.ID, err)
+			}
 		}
 		jobs = append(jobs, &j)
 	}

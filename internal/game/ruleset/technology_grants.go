@@ -1,0 +1,106 @@
+package ruleset
+
+import "fmt"
+
+// TechnologyGrants defines all technology assignments a job provides at character creation.
+//
+// Precondition: nil TechnologyGrants is valid (job grants no technologies).
+// Postcondition: Validate() returns nil iff pool+fixed entries are sufficient for all slots.
+type TechnologyGrants struct {
+	Hardwired   []string           `yaml:"hardwired,omitempty"`
+	Prepared    *PreparedGrants    `yaml:"prepared,omitempty"`
+	Spontaneous *SpontaneousGrants `yaml:"spontaneous,omitempty"`
+}
+
+// PreparedGrants defines prepared technology slot allocation for a job.
+type PreparedGrants struct {
+	// SlotsByLevel maps technology level to number of prepared slots at that level.
+	SlotsByLevel map[int]int `yaml:"slots_by_level"`
+	// Fixed lists job-mandated prepared technologies (pre-fills slots; no player choice).
+	Fixed []PreparedEntry `yaml:"fixed,omitempty"`
+	// Pool lists technologies the player may choose to fill remaining slots.
+	Pool []PreparedEntry `yaml:"pool,omitempty"`
+}
+
+// PreparedEntry is a technology at a specific level for a prepared slot.
+type PreparedEntry struct {
+	ID    string `yaml:"id"`
+	Level int    `yaml:"level"`
+}
+
+// SpontaneousGrants defines spontaneous technology known-slot allocation for a job.
+// Uses are a shared daily pool per level (PF2E-faithful).
+type SpontaneousGrants struct {
+	// KnownByLevel maps technology level to number of techs known at that level.
+	KnownByLevel map[int]int `yaml:"known_by_level"`
+	// UsesByLevel maps technology level to shared daily uses at that level.
+	UsesByLevel map[int]int `yaml:"uses_by_level"`
+	// Fixed lists job-mandated spontaneous technologies (always known; no player choice).
+	Fixed []SpontaneousEntry `yaml:"fixed,omitempty"`
+	// Pool lists technologies the player may choose to fill remaining known slots.
+	Pool []SpontaneousEntry `yaml:"pool,omitempty"`
+}
+
+// SpontaneousEntry is a technology at a specific level for a spontaneous known slot.
+type SpontaneousEntry struct {
+	ID    string `yaml:"id"`
+	Level int    `yaml:"level"`
+}
+
+// InnateGrant defines a single innate technology granted by an archetype.
+type InnateGrant struct {
+	ID         string `yaml:"id"`
+	UsesPerDay int    `yaml:"uses_per_day"` // 0 = unlimited
+}
+
+// Validate returns an error if pool+fixed entries are insufficient to fill any slot level.
+// Precondition: g is not nil.
+func (g *TechnologyGrants) Validate() error {
+	if g.Prepared != nil {
+		for lvl, slots := range g.Prepared.SlotsByLevel {
+			fixed := countEntriesAtLevel(preparedToLeveled(g.Prepared.Fixed), lvl)
+			pool := countEntriesAtLevel(preparedToLeveled(g.Prepared.Pool), lvl)
+			if fixed+pool < slots {
+				return fmt.Errorf("prepared: level %d requires %d slots but only %d fixed+pool entries available", lvl, slots, fixed+pool)
+			}
+		}
+	}
+	if g.Spontaneous != nil {
+		for lvl, known := range g.Spontaneous.KnownByLevel {
+			fixed := countEntriesAtLevel(spontaneousToLeveled(g.Spontaneous.Fixed), lvl)
+			pool := countEntriesAtLevel(spontaneousToLeveled(g.Spontaneous.Pool), lvl)
+			if fixed+pool < known {
+				return fmt.Errorf("spontaneous: level %d requires %d known but only %d fixed+pool entries available", lvl, known, fixed+pool)
+			}
+		}
+	}
+	return nil
+}
+
+type leveledEntry struct{ level int }
+
+func preparedToLeveled(entries []PreparedEntry) []leveledEntry {
+	out := make([]leveledEntry, len(entries))
+	for i, e := range entries {
+		out[i] = leveledEntry{e.Level}
+	}
+	return out
+}
+
+func spontaneousToLeveled(entries []SpontaneousEntry) []leveledEntry {
+	out := make([]leveledEntry, len(entries))
+	for i, e := range entries {
+		out[i] = leveledEntry{e.Level}
+	}
+	return out
+}
+
+func countEntriesAtLevel(entries []leveledEntry, level int) int {
+	n := 0
+	for _, e := range entries {
+		if e.level == level {
+			n++
+		}
+	}
+	return n
+}
