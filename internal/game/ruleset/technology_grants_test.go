@@ -302,8 +302,8 @@ func TestProperty_LevelUpGrants_YAMLRoundTrip(t *testing.T) {
 	})
 }
 
-// REQ-LUT9: LoadJobs rejects a YAML file with an invalid level_up_grants entry;
-// error includes job ID and the failing character level.
+// REQ-LUT2, REQ-LUT9: LoadJobs rejects a YAML file with an invalid level_up_grants entry
+// (pool + fixed < slots_by_level); error includes job ID and the failing character level.
 func TestLoadJobs_RejectsInvalidLevelUpGrants(t *testing.T) {
 	// pool + fixed < slots_by_level for level 2 (0 pool + 0 fixed < 1 slot required)
 	src := `
