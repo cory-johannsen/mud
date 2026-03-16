@@ -180,7 +180,7 @@
       - [x] NPC cover strategy — `combat.strategy.use_cover: true` in NPC YAML causes NPC to auto-take best available cover at turn start
       - [x] Cover cleared on Stride/Step/Tumble (success path)
   - Area of Effect
-      - [ ] AoE attack type — add `aoe_radius int` field to weapon/ability YAML; on resolution apply damage roll to all combatants within radius in the current combat
+      - [x] AoE attack type — add `aoe_radius int` field to weapon/ability YAML; on resolution apply damage roll to all combatants within radius in the current combat
   - Attack of opportunity
       - [ ] See Reactive Strike under Reactions — Attack of Opportunity is implemented as Reactive Strike (NPC triggers a free Strike when a player in melee range uses a move action)
   - [x] Terrain types
@@ -199,7 +199,7 @@
       - [x] Calm command — `calm` (Grit check vs DC 10+severity×4; costs all AP in combat; success steps down worst active track)
       - [x] Forced action execution — Panicked/Psychotic (random attack any combatant), Berserker (attack lowest-HP combatant); overrides player pre-submitted actions each round
       - [x] NPC ability triggers for Rage, Despair, Delirium tracks
-      - [ ] Zone effect triggers for all tracks
+      - [x] Zone effect triggers for all tracks
   - [x] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
   - [x] Immobilized — prevent grabbed creatures from moving between rooms
   - [x] Sense Motive command — implement `motive <target>` (awareness vs Deception DC; in combat costs 1 AP and reveals NPC HP tier; out-of-combat behavior stubbed for non-combat NPC extension)
@@ -233,8 +233,8 @@
       - [x] kick (remove a player from the group)
         - [x] Implement `kick <player>` — leader only; removes the named player from the group and notifies them
 - [ ] Technology instead of magic.  
-  - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism).  
-  - For the remainder of the features specification Technology refers to the combined effects of both technological devices and drugs.
+  - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology, chemistry, and drug effects (there is no magic in Gunchete, only cyberpunk futurism).  
+  - For the remainder of the features specification Technology refers to the combined effects of technological devices, chemistry, and drugs.
   - [ ] Traditions of magic -> Types of technology / Substances
     - Use PF2E Traits, mapping to Gunchete lore as required
     - [ ] Arcane -> Technical
@@ -323,6 +323,9 @@
   - [x] `heropoint reroll` — re-roll the most recent skill or attack check and take the higher result; costs 1 hero point; unavailable if no recent check
   - [x] `heropoint stabilize` — when in a dying state, stabilize at 0 HP; costs 1 hero point
   - [x] Display current hero point count on the character sheet
+- [ ] Feat import
+  - Refer to docs/requirements/FEATS.md for a detailed listing of the feats requiring import
+  - Each Feat listed may need upgraded to fit into the Gunchete world
 - [ ] Job development
   - [ ] drawbacks - each job has 1-3 drawbacks that match the lore surrounding that job.  
   - [ ] advancement hierarchy - every job has multiple levels of specialization
