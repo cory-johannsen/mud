@@ -1,0 +1,13 @@
+id: battle_fervor
+name: Battle Fervor
+description: A surge of doctrinal conviction that sharpens combat focus.
+tradition: fanatic_doctrine
+level: 1
+usage_type: spontaneous
+action_cost: 1
+range: self
+targets: single
+duration: rounds:3
+effects:
+  - type: condition
+    condition_id: battle_fervor_active

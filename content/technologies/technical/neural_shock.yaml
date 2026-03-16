@@ -1,0 +1,19 @@
+id: neural_shock
+name: Neural Shock
+description: A targeted electromagnetic pulse that disrupts the target's nervous system.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: reflex
+save_dc: 15
+effects:
+  - type: damage
+    dice: 2d6
+    damage_type: energy
+  - type: condition
+    condition_id: stunned
+    duration: rounds:1

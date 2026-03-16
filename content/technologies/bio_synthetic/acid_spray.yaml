@@ -1,0 +1,18 @@
+id: acid_spray
+name: Acid Spray
+description: A bio-synthetic secretion that coats all nearby enemies in corrosive fluid.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: all_enemies
+duration: instant
+save_type: reflex
+save_dc: 14
+effects:
+  - type: damage
+    dice: 1d6
+    damage_type: acid
+  - type: zone
+    radius: 10

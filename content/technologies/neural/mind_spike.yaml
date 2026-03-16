@@ -1,0 +1,27 @@
+id: mind_spike
+name: Mind Spike
+description: A focused neural disruption that scrambles a target's cognition.
+tradition: neural
+level: 1
+usage_type: spontaneous
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: will
+save_dc: 15
+effects:
+  - type: damage
+    dice: 2d6
+    damage_type: neural
+  - type: condition
+    condition_id: confused
+    duration: rounds:1
+amped_level: 3
+amped_effects:
+  - type: damage
+    dice: 4d6
+    damage_type: neural
+  - type: condition
+    condition_id: confused
+    duration: rounds:2
