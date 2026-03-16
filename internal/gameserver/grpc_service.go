@@ -175,6 +175,10 @@ type GameServiceServer struct {
 	jobRegistry         *ruleset.JobRegistry
 	condRegistry        *condition.Registry
 	techRegistry        *technology.Registry
+	hardwiredTechRepo   HardwiredTechRepo
+	preparedTechRepo    PreparedTechRepo
+	spontaneousTechRepo SpontaneousTechRepo
+	innateTechRepo      InnateTechRepo
 	loadoutsDir         string
 	allSkills                   []*ruleset.Skill
 	characterSkillsRepo         CharacterSkillsRepository
@@ -240,6 +244,10 @@ func NewGameServiceServer(
 	jobRegistry *ruleset.JobRegistry,
 	condRegistry *condition.Registry,
 	techRegistry *technology.Registry,
+	hardwiredTechRepo   HardwiredTechRepo,
+	preparedTechRepo    PreparedTechRepo,
+	spontaneousTechRepo SpontaneousTechRepo,
+	innateTechRepo      InnateTechRepo,
 	loadoutsDir string,
 	allSkills []*ruleset.Skill,
 	characterSkillsRepo CharacterSkillsRepository,
@@ -280,6 +288,10 @@ func NewGameServiceServer(
 		jobRegistry:         jobRegistry,
 		condRegistry:        condRegistry,
 		techRegistry:        techRegistry,
+		hardwiredTechRepo:   hardwiredTechRepo,
+		preparedTechRepo:    preparedTechRepo,
+		spontaneousTechRepo: spontaneousTechRepo,
+		innateTechRepo:      innateTechRepo,
 		loadoutsDir:         loadoutsDir,
 		allSkills:                  allSkills,
 		characterSkillsRepo:        characterSkillsRepo,
@@ -942,6 +954,42 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			if saveErr := s.charSaver.SaveAbilities(stream.Context(), characterID, newAbilities); saveErr != nil {
 				s.logger.Warn("saving ability scores to DB", zap.Error(saveErr))
 			}
+		}
+	}
+
+	// Assign technologies at character creation (only if no slots yet assigned).
+	if s.hardwiredTechRepo != nil && s.jobRegistry != nil && characterID > 0 {
+		existingHW, hwCheckErr := s.hardwiredTechRepo.GetAll(stream.Context(), characterID)
+		if hwCheckErr == nil && len(existingHW) == 0 {
+			if job, ok := s.jobRegistry.Job(sess.Class); ok {
+				var archetype *ruleset.Archetype
+				if archetypeID := job.Archetype; archetypeID != "" {
+					archetype = s.archetypes[archetypeID]
+				}
+				promptFn := func(options []string) (string, error) {
+					choices := &ruleset.FeatureChoices{
+						Prompt:  "Choose a technology:",
+						Options: options,
+						Key:     "tech_choice",
+					}
+					return s.promptFeatureChoice(stream, "tech_choice", choices)
+				}
+				if assignErr := AssignTechnologies(stream.Context(), sess, characterID,
+					job, archetype, s.techRegistry, promptFn,
+					s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo,
+				); assignErr != nil {
+					s.logger.Warn("assigning technologies", zap.Int64("character_id", characterID), zap.Error(assignErr))
+				}
+			}
+		}
+	}
+
+	// Load persisted technology assignments for this session.
+	if s.hardwiredTechRepo != nil {
+		if techErr := LoadTechnologies(stream.Context(), sess, characterID,
+			s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo,
+		); techErr != nil {
+			s.logger.Warn("loading technologies", zap.Int64("character_id", characterID), zap.Error(techErr))
 		}
 	}
 

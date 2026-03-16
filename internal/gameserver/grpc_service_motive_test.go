@@ -39,7 +39,7 @@ func newMotiveSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,

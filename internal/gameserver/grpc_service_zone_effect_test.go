@@ -411,7 +411,7 @@ func newMentalStateSvc(t *testing.T, diceVal int) (*GameServiceServer, *session.
 		NewChatHandler(sessMgr),
 		zap.NewNop(),
 		nil, roller, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, condReg, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, nil, nil, nil, nil, nil, "",
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,

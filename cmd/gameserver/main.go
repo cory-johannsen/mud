@@ -222,6 +222,10 @@ func main() {
 		}
 	}
 	logger.Info("loaded technology definitions", zap.Int("count", len(techReg.All())))
+	hardwiredTechRepo := postgres.NewCharacterHardwiredTechRepository(pool.DB())
+	preparedTechRepo := postgres.NewCharacterPreparedTechRepository(pool.DB())
+	spontaneousTechRepo := postgres.NewCharacterSpontaneousTechRepository(pool.DB())
+	innateTechRepo := postgres.NewCharacterInnateTechRepository(pool.DB())
 
 	// Load inventory definitions.
 	invRegistry := inventory.NewRegistry()
@@ -562,7 +566,9 @@ func main() {
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
-		jobReg, condRegistry, techReg, *loadoutsDir,
+		jobReg, condRegistry, techReg,
+	hardwiredTechRepo, preparedTechRepo, spontaneousTechRepo, innateTechRepo,
+	*loadoutsDir,
 		allSkills, characterSkillsRepo, characterProficienciesRepo,
 		allFeats, featRegistry, characterFeatsRepo,
 		classFeatures, cfReg, characterClassFeaturesRepo,

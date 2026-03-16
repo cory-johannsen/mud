@@ -242,22 +242,22 @@
     - [x] Divine -> Fanatic Doctrine
     - [x] Occult -> Neural
     - [x] Primal -> Bio-Synthetic
-  - [ ] Archetype and Job define the technologies available for the player
+  - [x] Archetype and Job define the technologies available for the player — `TechnologyGrants` on `Job` and `InnateTechnologies` on `Archetype`; assigned at character creation via `AssignTechnologies`; loaded at login via `LoadTechnologies`; repos wired into `GameServiceServer`
     - [ ] Levelling up allows for additions and changes
     - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
-      - [ ] Cantrips -> unlimited use minor Technologies
-        - [ ] Fixed list per Job, no player adjustment 
+      - [x] Cantrips -> Hardwired Technologies (unlimited-use minor Technologies)
+        - [x] Fixed list per Job, no player adjustment
       - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
         - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
         - [ ] Fixed number of uses per Technology per level (i.e. 5 level 1, 3 level 2, 1 level 3)
         - [ ] Can be rearranged when resting
-        - [ ] Player gets to choose which new Technologies are learned with levelling up. 
+        - [ ] Level-up technology selection — player chooses new technologies when levelling up (prepared/spontaneous pool expands; player selects additions interactively)
       - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
         - [ ] Fixed list of Technologies per job level
         - [ ] Fixed number usages for each Technology level (resets with long rest)
         - [ ] Player gets to choose which new Technologies are learned with levelling up.
       - [ ] Heightened Spells -> Amped Technology
-        - Follows the PF2E rules 
+        - Follows the PF2E rules
       - [ ] Innate Technologies
 - [ ] Non-combat NPCs. Define the data model and behavior for the following NPCs and implement those specifically mentioned.
   - For those not mentioned generate one that lives in a room in Rustbucket Ridge and matches the lore. Multiple NPCs can occupy the same room.

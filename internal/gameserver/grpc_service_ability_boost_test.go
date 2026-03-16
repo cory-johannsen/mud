@@ -131,7 +131,7 @@ func testGRPCServerWithAbilityBoosts(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, jobReg, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, jobReg, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, boostsRepo, archetypes, regions,
 		nil, nil,
 	)
