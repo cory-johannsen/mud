@@ -326,3 +326,105 @@ func TestLoadTechnologies(t *testing.T) {
 	assert.Equal(t, map[int][]string{1: {"battle_fervor"}}, sess.SpontaneousTechs)
 	assert.Equal(t, map[string]*session.InnateSlot{"acid_spray": {MaxUses: 3}}, sess.InnateTechs)
 }
+
+// REQ-LUT3: LevelUpTechnologies appends hardwired IDs, deduplicating against existing
+func TestLevelUpTechnologies_HardwiredAppendAndDedup(t *testing.T) {
+	ctx := context.Background()
+	hw := &fakeHardwiredRepo{stored: []string{"existing_tech"}}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+	sess := &session.PlayerSession{HardwiredTechs: []string{"existing_tech"}}
+
+	grants := &ruleset.TechnologyGrants{
+		Hardwired: []string{"new_tech", "existing_tech"}, // existing_tech is a duplicate
+	}
+
+	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, noPrompt, hw, prep, spont, inn)
+	require.NoError(t, err)
+
+	// existing_tech should not be duplicated; new_tech appended
+	assert.Equal(t, []string{"existing_tech", "new_tech"}, sess.HardwiredTechs)
+	assert.Equal(t, []string{"existing_tech", "new_tech"}, hw.stored)
+}
+
+// REQ-LUT4: LevelUpTechnologies fills prepared slots after existing indices (no collision)
+func TestLevelUpTechnologies_PreparedSlotIndexOffset(t *testing.T) {
+	ctx := context.Background()
+	// Pre-populate 1 existing level-1 slot at index 0
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "original_tech"}},
+	}}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+	sess := &session.PlayerSession{
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "original_tech"}},
+		},
+	}
+
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 1},
+			Fixed:        []ruleset.PreparedEntry{{ID: "new_tech", Level: 1}},
+		},
+	}
+
+	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, noPrompt, hw, prep, spont, inn)
+	require.NoError(t, err)
+
+	// Level-1 slots: index 0 = original_tech, index 1 = new_tech
+	require.Len(t, sess.PreparedTechs[1], 2)
+	assert.Equal(t, "original_tech", sess.PreparedTechs[1][0].TechID)
+	assert.Equal(t, "new_tech", sess.PreparedTechs[1][1].TechID)
+
+	// Repo: index 0 unchanged, index 1 set to new_tech
+	require.Len(t, prep.slots[1], 2)
+	assert.Equal(t, "original_tech", prep.slots[1][0].TechID)
+	assert.Equal(t, "new_tech", prep.slots[1][1].TechID)
+}
+
+// REQ-LUT5: LevelUpTechnologies adds spontaneous techs without removing existing ones
+func TestLevelUpTechnologies_SpontaneousAppendsToExisting(t *testing.T) {
+	ctx := context.Background()
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{techs: map[int][]string{
+		1: {"existing_spont"},
+	}}
+	inn := &fakeInnateRepo{}
+	sess := &session.PlayerSession{
+		SpontaneousTechs: map[int][]string{
+			1: {"existing_spont"},
+		},
+	}
+
+	grants := &ruleset.TechnologyGrants{
+		Spontaneous: &ruleset.SpontaneousGrants{
+			KnownByLevel: map[int]int{1: 1},
+			Fixed:        []ruleset.SpontaneousEntry{{ID: "new_spont", Level: 1}},
+		},
+	}
+
+	err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, noPrompt, hw, prep, spont, inn)
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []string{"existing_spont", "new_spont"}, sess.SpontaneousTechs[1])
+	assert.ElementsMatch(t, []string{"existing_spont", "new_spont"}, spont.techs[1])
+}
+
+// REQ-LUT6: LevelUpTechnologies with nil grants is a no-op
+func TestLevelUpTechnologies_NilGrantsNoOp(t *testing.T) {
+	ctx := context.Background()
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+	sess := &session.PlayerSession{HardwiredTechs: []string{"existing"}}
+
+	err := gameserver.LevelUpTechnologies(ctx, sess, 1, nil, nil, noPrompt, hw, prep, spont, inn)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"existing"}, sess.HardwiredTechs)
+	assert.Nil(t, hw.stored) // SetAll never called
+}

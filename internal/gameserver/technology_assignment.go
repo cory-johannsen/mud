@@ -89,7 +89,7 @@ func AssignTechnologies(
 	if grants.Prepared != nil {
 		sess.PreparedTechs = make(map[int][]*session.PreparedSlot)
 		for lvl, slots := range grants.Prepared.SlotsByLevel {
-			chosen, err := fillFromPreparedPool(ctx, lvl, slots, grants.Prepared, techReg, promptFn, characterID, prepRepo)
+			chosen, err := fillFromPreparedPool(ctx, lvl, slots, 0, grants.Prepared, techReg, promptFn, characterID, prepRepo)
 			if err != nil {
 				return fmt.Errorf("AssignTechnologies prepared level %d: %w", lvl, err)
 			}
@@ -153,12 +153,100 @@ func LoadTechnologies(
 	return nil
 }
 
+// LevelUpTechnologies applies a technology grants delta to an existing character's session
+// and persists new slot assignments. Called once per character level gained.
+//
+// Precondition: grants must be nil or valid (validated at YAML load time).
+// Postcondition: If grants is nil, returns nil with no changes (no-op).
+// Otherwise sess and repos gain all new slots from grants; existing slots are unchanged.
+// promptFn may be nil — if nil, the first available pool option is auto-selected.
+func LevelUpTechnologies(
+	ctx context.Context,
+	sess *session.PlayerSession,
+	characterID int64,
+	grants *ruleset.TechnologyGrants,
+	techReg *technology.Registry,
+	promptFn TechPromptFn,
+	hwRepo HardwiredTechRepo,
+	prepRepo PreparedTechRepo,
+	spontRepo SpontaneousTechRepo,
+	innateRepo InnateTechRepo,
+) error {
+	if grants == nil {
+		return nil
+	}
+	// Use first-option fallback when no promptFn is provided (e.g., admin grant path).
+	if promptFn == nil {
+		promptFn = func(options []string) (string, error) {
+			if len(options) == 0 {
+				return "", nil
+			}
+			return options[0], nil
+		}
+	}
+
+	// Hardwired: append new IDs, skipping duplicates (map-based, order-preserving).
+	if len(grants.Hardwired) > 0 {
+		existing := make(map[string]bool, len(sess.HardwiredTechs))
+		for _, id := range sess.HardwiredTechs {
+			existing[id] = true
+		}
+		for _, id := range grants.Hardwired {
+			if !existing[id] {
+				sess.HardwiredTechs = append(sess.HardwiredTechs, id)
+				existing[id] = true
+			}
+		}
+		if err := hwRepo.SetAll(ctx, characterID, sess.HardwiredTechs); err != nil {
+			return fmt.Errorf("LevelUpTechnologies hardwired: %w", err)
+		}
+	}
+
+	// Prepared: fill new slots starting after existing slot indices.
+	// Existing slot slices are dense (no nil gaps), so len gives the correct next index.
+	if grants.Prepared != nil {
+		existingPrep, err := prepRepo.GetAll(ctx, characterID)
+		if err != nil {
+			return fmt.Errorf("LevelUpTechnologies prepared GetAll: %w", err)
+		}
+		if sess.PreparedTechs == nil {
+			sess.PreparedTechs = make(map[int][]*session.PreparedSlot)
+		}
+		for lvl, slots := range grants.Prepared.SlotsByLevel {
+			startIdx := len(existingPrep[lvl])
+			chosen, err := fillFromPreparedPool(ctx, lvl, slots, startIdx, grants.Prepared, techReg, promptFn, characterID, prepRepo)
+			if err != nil {
+				return fmt.Errorf("LevelUpTechnologies prepared level %d: %w", lvl, err)
+			}
+			sess.PreparedTechs[lvl] = append(sess.PreparedTechs[lvl], chosen...)
+		}
+	}
+
+	// Spontaneous: add new known techs without removing existing ones.
+	if grants.Spontaneous != nil {
+		if sess.SpontaneousTechs == nil {
+			sess.SpontaneousTechs = make(map[int][]string)
+		}
+		for lvl, known := range grants.Spontaneous.KnownByLevel {
+			chosen, err := fillFromSpontaneousPool(ctx, lvl, known, grants.Spontaneous, techReg, promptFn, characterID, spontRepo)
+			if err != nil {
+				return fmt.Errorf("LevelUpTechnologies spontaneous level %d: %w", lvl, err)
+			}
+			sess.SpontaneousTechs[lvl] = append(sess.SpontaneousTechs[lvl], chosen...)
+		}
+	}
+
+	// Innate: level-up grants do not assign innate technologies (archetype-only).
+
+	return nil
+}
+
 // fillFromPreparedPool fills prepared slots from fixed entries and optionally the pool.
 // Auto-assigns without prompt when len(pool at level) == open slots.
 // Precondition: open is assumed >= 0, guaranteed by TechnologyGrants.Validate().
 func fillFromPreparedPool(
 	ctx context.Context,
-	lvl, slots int,
+	lvl, slots, startIdx int,
 	grants *ruleset.PreparedGrants,
 	techReg *technology.Registry,
 	promptFn TechPromptFn,
@@ -166,7 +254,7 @@ func fillFromPreparedPool(
 	repo PreparedTechRepo,
 ) ([]*session.PreparedSlot, error) {
 	result := make([]*session.PreparedSlot, 0, slots)
-	idx := 0
+	idx := startIdx
 
 	// Pre-fill from fixed entries at this level.
 	for _, e := range grants.Fixed {
