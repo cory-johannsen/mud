@@ -185,6 +185,19 @@ func (t *TechnologyDef) Validate() error {
 	if t.AmpedLevel > 0 && len(t.AmpedEffects) == 0 {
 		return fmt.Errorf("amped_effects must be non-empty when amped_level > 0")
 	}
+	for i, e := range t.AmpedEffects {
+		if !validEffectTypes[e.Type] {
+			return fmt.Errorf("amped_effects[%d]: unknown type %q", i, e.Type)
+		}
+		if e.Type == EffectSkillCheck {
+			if e.Skill == "" {
+				return fmt.Errorf("amped_effects[%d]: skill_check effect requires skill", i)
+			}
+			if e.DC == 0 {
+				return fmt.Errorf("amped_effects[%d]: skill_check effect requires dc > 0", i)
+			}
+		}
+	}
 	if t.SaveType != "" && t.SaveDC == 0 {
 		return fmt.Errorf("save_dc must be > 0 when save_type is set")
 	}

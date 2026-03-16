@@ -293,6 +293,42 @@ func TestValidate_ValidAmpedDef_Passes(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// Additional test: amped effect with invalid type is rejected.
+func TestValidate_InvalidAmpedEffectType(t *testing.T) {
+	d := validDef()
+	d.AmpedLevel = 3
+	d.AmpedEffects = []technology.TechEffect{{Type: technology.EffectType("bad_type")}}
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "amped_effects")
+}
+
+// Additional test: amped skill_check effect with missing Skill is rejected.
+func TestValidate_InvalidAmpedEffectSkillCheckMissingSkill(t *testing.T) {
+	d := validDef()
+	d.AmpedLevel = 3
+	d.AmpedEffects = []technology.TechEffect{
+		{Type: technology.EffectSkillCheck, Skill: "", DC: 15},
+	}
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "amped_effects")
+	assert.Contains(t, err.Error(), "skill")
+}
+
+// Additional test: amped skill_check effect with DC == 0 is rejected.
+func TestValidate_InvalidAmpedEffectSkillCheckDCZero(t *testing.T) {
+	d := validDef()
+	d.AmpedLevel = 3
+	d.AmpedEffects = []technology.TechEffect{
+		{Type: technology.EffectSkillCheck, Skill: "stealth", DC: 0},
+	}
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "amped_effects")
+	assert.Contains(t, err.Error(), "dc")
+}
+
 // Additional test: SaveType with SaveDC > 0 is valid.
 func TestValidate_SaveTypeWithSaveDC_Valid(t *testing.T) {
 	d := validDef()
