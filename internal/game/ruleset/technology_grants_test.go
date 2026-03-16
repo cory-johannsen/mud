@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -294,17 +293,10 @@ func TestProperty_LevelUpGrants_YAMLRoundTrip(t *testing.T) {
 			if !ok {
 				rt.Fatalf("missing level %d after round-trip", lvl)
 			}
-			// Normalize nil and empty slice as equivalent for comparison purposes.
-			wantHW := g.Hardwired
-			gotHW := g2.Hardwired
-			if len(wantHW) == 0 {
-				wantHW = nil
-			}
-			if len(gotHW) == 0 {
-				gotHW = nil
-			}
-			if !reflect.DeepEqual(wantHW, gotHW) {
-				rt.Fatalf("hardwired mismatch at level %d: got %v want %v", lvl, g2.Hardwired, g.Hardwired)
+			if len(g.Hardwired) == 0 {
+				assert.Empty(rt, g2.Hardwired, "hardwired mismatch at level %d", lvl)
+			} else {
+				assert.Equal(rt, g.Hardwired, g2.Hardwired, "hardwired mismatch at level %d", lvl)
 			}
 		}
 	})

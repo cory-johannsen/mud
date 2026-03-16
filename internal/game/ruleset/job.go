@@ -53,21 +53,21 @@ type FeatGrants struct {
 //
 // Precondition: ID, Name, Archetype, KeyAbility, and HitPointsPerLevel must be non-zero after loading.
 type Job struct {
-	ID                string            `yaml:"id"`
-	Name              string            `yaml:"name"`
-	Archetype         string            `yaml:"archetype"`
-	Team              string            `yaml:"team"` // empty = all teams; "gun" or "machete" = exclusive
-	Description       string            `yaml:"description"`
-	KeyAbility        string            `yaml:"key_ability"`
-	HitPointsPerLevel int               `yaml:"hit_points_per_level"`
-	Proficiencies     map[string]string                    `yaml:"proficiencies"`
-	SkillGrants       *SkillGrants                         `yaml:"skills"`
-	FeatGrants         *FeatGrants                          `yaml:"feats"`
-	ClassFeatureGrants []string                             `yaml:"class_features"`
-	Features          []JobFeature                         `yaml:"features"`
-	Drawbacks         []JobDrawback                        `yaml:"drawbacks"`
-	StartingInventory  *inventory.StartingLoadoutOverride   `yaml:"starting_inventory"`
-	TechnologyGrants   *TechnologyGrants                    `yaml:"technology_grants,omitempty"`
+	ID                 string                             `yaml:"id"`
+	Name               string                             `yaml:"name"`
+	Archetype          string                             `yaml:"archetype"`
+	Team               string                             `yaml:"team"` // empty = all teams; "gun" or "machete" = exclusive
+	Description        string                             `yaml:"description"`
+	KeyAbility         string                             `yaml:"key_ability"`
+	HitPointsPerLevel  int                                `yaml:"hit_points_per_level"`
+	Proficiencies      map[string]string                  `yaml:"proficiencies"`
+	SkillGrants        *SkillGrants                       `yaml:"skills"`
+	FeatGrants         *FeatGrants                        `yaml:"feats"`
+	ClassFeatureGrants []string                           `yaml:"class_features"`
+	Features           []JobFeature                       `yaml:"features"`
+	Drawbacks          []JobDrawback                      `yaml:"drawbacks"`
+	StartingInventory  *inventory.StartingLoadoutOverride `yaml:"starting_inventory"`
+	TechnologyGrants   *TechnologyGrants                  `yaml:"technology_grants,omitempty"`
 	// LevelUpGrants maps character level to the technology grants gained at that level.
 	// Each entry is a delta — only new slots/techs added at that character level, not the
 	// full cumulative table.
