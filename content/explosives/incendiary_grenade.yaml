@@ -7,4 +7,6 @@ area_type: room
 save_type: reflex
 save_dc: 14
 fuse: immediate
+friendly_fire: false
+aoe_radius: 0
 traits: [thrown, limited_use]

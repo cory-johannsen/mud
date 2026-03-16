@@ -114,6 +114,11 @@ type PlayerSession struct {
 	// PendingGroupInvite holds the groupID of a pending group invitation.
 	// Empty string means no pending invite. Protected by Manager.mu.
 	PendingGroupInvite string
+	// ZoneEffectCooldowns maps "roomID:track" to an immunity value.
+	// In combat: value is rounds remaining (decremented each round; 0 = ready to fire).
+	// Out of combat: value is Unix timestamp (seconds) of expiry; 0 = ready to fire.
+	// Nil until first use; initialized lazily on first write.
+	ZoneEffectCooldowns map[string]int64
 }
 
 // Manager tracks all active player sessions and room occupancy.

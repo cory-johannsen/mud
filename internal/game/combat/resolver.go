@@ -159,10 +159,10 @@ func ResolveSave(saveType string, combatant *Combatant, dc int, src Source) Outc
 
 // ResolveExplosive resolves an explosive against all targets.
 //
-// Precondition: grenade and all targets must not be nil.
-// Postcondition: each target makes a Hustle save vs grenade.SaveDC;
+// Precondition: grenade and all targets must not be nil; effectiveDC >= 1.
+// Postcondition: each target makes a Hustle save vs effectiveDC;
 // damage scaled by save outcome; BaseDamage >= 0.
-func ResolveExplosive(grenade *inventory.ExplosiveDef, targets []*Combatant, src Source) []ExplosiveResult {
+func ResolveExplosive(grenade *inventory.ExplosiveDef, targets []*Combatant, effectiveDC int, src Source) []ExplosiveResult {
 	// Roll damage once for all targets.
 	dmgRoll, err := dice.RollExpr(grenade.DamageDice, src)
 	baseDmg := 0
@@ -175,7 +175,7 @@ func ResolveExplosive(grenade *inventory.ExplosiveDef, targets []*Combatant, src
 
 	results := make([]ExplosiveResult, 0, len(targets))
 	for _, target := range targets {
-		saveOutcome := ResolveSave("hustle", target, grenade.SaveDC, src)
+		saveOutcome := ResolveSave("hustle", target, effectiveDC, src)
 
 		var dmg int
 		switch saveOutcome {

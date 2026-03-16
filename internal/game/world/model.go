@@ -122,6 +122,28 @@ type RoomEquipmentConfig struct {
 	CoverHP           int    `yaml:"cover_hp"`
 }
 
+// RoomEffect declares a persistent mental-state aura for a room.
+// Effects fire on room entry and at the start of each combat round.
+// Save resolution is binary: d20 + GritMod vs BaseDC (no proficiency bonus).
+type RoomEffect struct {
+	// Track is the mental state track to trigger.
+	// One of "rage", "despair", "delirium", "fear".
+	Track string `yaml:"track"`
+
+	// Severity is the minimum severity to apply.
+	// One of "mild", "moderate", "severe".
+	Severity string `yaml:"severity"`
+
+	// BaseDC is the Grit save difficulty. Effective save: d20 + GritMod vs BaseDC.
+	BaseDC int `yaml:"base_dc"`
+
+	// CooldownRounds is rounds of immunity after a successful in-combat save.
+	CooldownRounds int `yaml:"cooldown_rounds"`
+
+	// CooldownMinutes is minutes of immunity after a successful out-of-combat save.
+	CooldownMinutes int `yaml:"cooldown_minutes"`
+}
+
 // Room represents a location in the game world.
 type Room struct {
 	// ID uniquely identifies this room within the zone.
@@ -146,6 +168,8 @@ type Room struct {
 	MapY int
 	// SkillChecks holds all trigger-based skill check definitions declared for this room.
 	SkillChecks []skillcheck.TriggerDef
+	// Effects lists persistent mental-state auras that apply to players in this room.
+	Effects []RoomEffect
 	// Terrain is an optional terrain type tag: rubble, cliff, wall, sewer, river, ocean, flooded.
 	Terrain string `yaml:"terrain"`
 }

@@ -941,6 +941,25 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 	return events
 }
 
+// explosiveTargetsOf returns living targets for an explosive based on its FriendlyFire flag.
+//
+// Precondition: cbt, actor, and grenade must be non-nil.
+// Postcondition: Returns all living non-actor combatants; if grenade.FriendlyFire is false,
+// only enemy-kind (different Kind from actor) combatants are returned.
+func explosiveTargetsOf(cbt *Combat, actor *Combatant, grenade *inventory.ExplosiveDef) []*Combatant {
+	var out []*Combatant
+	for _, c := range cbt.Combatants {
+		if c.IsDead() || c.ID == actor.ID {
+			continue
+		}
+		if !grenade.FriendlyFire && c.Kind == actor.Kind {
+			continue
+		}
+		out = append(out, c)
+	}
+	return out
+}
+
 // resolveThrow handles ActionThrow: explosive area effect against all living enemies.
 func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []RoundEvent {
 	if cbt.invRegistry == nil {
@@ -956,11 +975,12 @@ func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []
 		_, _ = cbt.scriptMgr.CallHook(cbt.zoneID, "on_explosive_throw",
 			lua.LString(actor.ID), lua.LString(qa.ExplosiveID))
 	}
-	enemies := livingEnemiesOf(cbt, actor)
-	results := ResolveExplosive(grenade, enemies, src)
+	targets := explosiveTargetsOf(cbt, actor, grenade)
+	effectiveDC := grenade.SaveDC + actor.Level
+	results := ResolveExplosive(grenade, targets, effectiveDC, src)
 	var events []RoundEvent
 	for i, r := range results {
-		target := enemies[i]
+		target := targets[i]
 		if r.BaseDamage > 0 {
 			target.ApplyDamage(r.BaseDamage)
 			if actor.Kind == KindPlayer && target.Kind == KindNPC {

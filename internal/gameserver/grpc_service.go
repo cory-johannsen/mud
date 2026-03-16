@@ -1383,6 +1383,11 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
+	// Apply out-of-combat zone effects for the new room.
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		s.applyRoomEffectsOnEntry(sess, uid, newRoom, time.Now().Unix())
+	}
+
 	// Record automap discovery for the new room.
 	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
 		zID := newRoom.ZoneID
@@ -1632,6 +1637,58 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 		}
 	}
 	return msgs
+}
+
+// applyRoomEffectsOnEntry applies zone effects for the given room to sess on room entry.
+//
+// Precondition: sess and room must not be nil; uid is the player UID; now is Unix timestamp seconds.
+// Postcondition: For each effect in room.Effects not currently on cooldown, resolves a binary
+// Will save (d20 + GritMod vs BaseDC).  On failure: ApplyTrigger is called and any narrative
+// message is pushed to the player stream; no cooldown is recorded.  On success:
+// ZoneEffectCooldowns[roomID:track] is set to now + CooldownMinutes*60.
+func (s *GameServiceServer) applyRoomEffectsOnEntry(
+	sess *session.PlayerSession, uid string, room *world.Room, now int64,
+) {
+	if s.mentalStateMgr == nil || len(room.Effects) == 0 {
+		return
+	}
+	for _, effect := range room.Effects {
+		key := room.ID + ":" + effect.Track
+		if sess.ZoneEffectCooldowns != nil && sess.ZoneEffectCooldowns[key] > now {
+			continue // immune: cooldown has not expired
+		}
+		track, trackOK := abilityTrack(effect.Track)
+		sev, sevOK := abilitySeverity(effect.Severity)
+		if !trackOK || !sevOK {
+			continue
+		}
+		gritMod := combat.AbilityMod(sess.Abilities.Grit)
+		var roll int
+		if s.dice != nil {
+			roll = s.dice.Src().Intn(20) + 1
+		} else {
+			roll = 10 // neutral fallback when no dice configured
+		}
+		total := roll + gritMod
+		if total < effect.BaseDC {
+			// Failed save: apply trigger and push narrative to player stream.
+			changes := s.mentalStateMgr.ApplyTrigger(uid, track, sev)
+			for _, ch := range changes {
+				if ch.Message != "" && sess.Entity != nil {
+					evt := messageEvent(ch.Message)
+					if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
+						_ = sess.Entity.Push(data)
+					}
+				}
+			}
+		} else {
+			// Successful save: record immunity cooldown.
+			if sess.ZoneEffectCooldowns == nil {
+				sess.ZoneEffectCooldowns = make(map[string]int64)
+			}
+			sess.ZoneEffectCooldowns[key] = now + int64(effect.CooldownMinutes)*60
+		}
+	}
 }
 
 // applyNPCSkillChecks fires on_greet skill check triggers for all NPCs in the room.

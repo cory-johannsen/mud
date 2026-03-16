@@ -359,6 +359,12 @@ zone:
     properties:
       lighting: dim
       atmosphere: stale
+    effects:
+      - track: fear
+        severity: mild
+        base_dc: 10
+        cooldown_rounds: 3
+        cooldown_minutes: 5
   - id: flats_motel_back_lot
     title: Motel Back Lot
     description: 'Behind the motel, a gravel lot is choked with stripped cars
@@ -537,6 +543,12 @@ zone:
     properties:
       lighting: exposed
       atmosphere: wind
+    effects:
+      - track: despair
+        severity: mild
+        base_dc: 11
+        cooldown_rounds: 3
+        cooldown_minutes: 5
   - id: flats_pawn_shop
     title: Ruined Pawn Shop
     description: 'The pawn shop''s steel security gate is bent open like a tin can.

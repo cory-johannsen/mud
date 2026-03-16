@@ -1926,6 +1926,66 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 		}
 	}
 
+	// Always decrement zone effect cooldowns for all living players each round
+	// (regardless of current room's effects — prevents gaming immunity by room-swapping).
+	if h.mentalStateMgr != nil && h.worldMgr != nil {
+		for _, c := range cbt.Combatants {
+			if c.Kind != combat.KindPlayer || c.IsDead() {
+				continue
+			}
+			sess, ok := h.sessions.GetPlayer(c.ID)
+			if !ok {
+				continue
+			}
+			for k := range sess.ZoneEffectCooldowns {
+				if sess.ZoneEffectCooldowns[k] > 0 {
+					sess.ZoneEffectCooldowns[k]--
+				}
+				if sess.ZoneEffectCooldowns[k] < 0 {
+					sess.ZoneEffectCooldowns[k] = 0
+				}
+			}
+		}
+		// Apply room effects only if current room has effects.
+		if zoneRoom, ok := h.worldMgr.GetRoom(cbt.RoomID); ok && len(zoneRoom.Effects) > 0 {
+			for _, c := range cbt.Combatants {
+				if c.Kind != combat.KindPlayer || c.IsDead() {
+					continue
+				}
+				sess, ok := h.sessions.GetPlayer(c.ID)
+				if !ok {
+					continue
+				}
+				// Check each room effect.
+				for _, effect := range zoneRoom.Effects {
+					key := cbt.RoomID + ":" + effect.Track
+					if sess.ZoneEffectCooldowns[key] > 0 {
+						continue // immune
+					}
+					track, trackOK := abilityTrack(effect.Track)
+					sev, sevOK := abilitySeverity(effect.Severity)
+					if !trackOK || !sevOK {
+						continue
+					}
+					// Binary Will save: d20 + GritMod vs BaseDC (no proficiency bonus).
+					roll := h.dice.Src().Intn(20) + 1
+					total := roll + c.GritMod
+					if total < effect.BaseDC {
+						// Failed save — apply trigger; no cooldown set.
+						changes := h.mentalStateMgr.ApplyTrigger(c.ID, track, sev)
+						h.applyMentalStateChanges(c.ID, changes)
+					} else {
+						// Successful save — set cooldown immunity.
+						if sess.ZoneEffectCooldowns == nil {
+							sess.ZoneEffectCooldowns = make(map[string]int64)
+						}
+						sess.ZoneEffectCooldowns[key] = int64(effect.CooldownRounds)
+					}
+				}
+			}
+		}
+	}
+
 	// Fetch room once for NPC auto-cover checks.
 	var room *world.Room
 	if h.worldMgr != nil {

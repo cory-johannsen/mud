@@ -219,19 +219,19 @@
       - [x] Track participant list on Combat struct; on combat end divide total XP equally among all participants
     - [x] All players in a combat encounter share loot for the encounter (loot is divided equally among the players)
       - [x] Currency drops split equally; item drops distributed round-robin ordered by initiative roll
-  - [ ] Players can form groups
-    - [ ] Group data model — add Group struct (leader UID, member UIDs slice) stored in session manager; one group per player
-    - [ ] Players in a group all automatically enter combat when any player initiates combat
-      - [ ] On combat start, check if initiating player is in a group; add all group members in the same room as combatants
-    - [ ] New group commands:
-      - [ ] group (create a group or list the members of the current group)
-        - [ ] Implement `group` — no args: display current group members and leader; with player name: create a new group and invite that player
-      - [ ] ungroup (leave the current group)
-        - [ ] Implement `ungroup` — remove self from group; if leader, disband the group and notify all members
-      - [ ] invite (invite a player to the group)
-        - [ ] Implement `invite <player>` — leader sends invitation; target receives a prompt to accept or decline; on accept, add to group
-      - [ ] kick (remove a player from the group)
-        - [ ] Implement `kick <player>` — leader only; removes the named player from the group and notifies them
+  - [x] Players can form groups
+    - [x] Group data model — add Group struct (leader UID, member UIDs slice) stored in session manager; one group per player
+    - [x] Players in a group all automatically enter combat when any player initiates combat
+      - [x] On combat start, check if initiating player is in a group; add all group members in the same room as combatants
+    - [x] New group commands:
+      - [x] group (create a group or list the members of the current group)
+        - [x] Implement `group` — no args: display current group members and leader; with player name: create a new group and invite that player
+      - [x] ungroup (leave the current group)
+        - [x] Implement `ungroup` — remove self from group; if leader, disband the group and notify all members
+      - [x] invite (invite a player to the group)
+        - [x] Implement `invite <player>` — leader sends invitation; target receives a prompt to accept or decline; on accept, add to group
+      - [x] kick (remove a player from the group)
+        - [x] Implement `kick <player>` — leader only; removes the named player from the group and notifies them
 - [ ] Technology instead of magic.  
   - The P2FE system of magic needs ported into Gunchete and mapped to a combination of high technology and drug effects (there is no magic in Gunchete, only cyberpunk futurism).  
   - For the remainder of the features specification Technology refers to the combined effects of both technological devices and drugs.

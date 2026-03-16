@@ -6,7 +6,8 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
-
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -107,4 +108,29 @@ func TestProperty_ExplosiveDef_ZeroSaveDCAlwaysInvalid(t *testing.T) {
 			rt.Fatal("zero SaveDC must always fail validation")
 		}
 	})
+}
+
+func TestExplosiveDef_FriendlyFire_DefaultFalse(t *testing.T) {
+	e := &inventory.ExplosiveDef{
+		ID:         "test_grenade",
+		Name:       "Test Grenade",
+		DamageDice: "2d6",
+		DamageType: "piercing",
+		SaveType:   "reflex",
+		SaveDC:     12,
+	}
+	require.NoError(t, e.Validate())
+	assert.False(t, e.FriendlyFire, "FriendlyFire should default false")
+	assert.Equal(t, 0, e.AoERadius, "AoERadius should default 0")
+}
+
+func TestExplosiveDef_FriendlyFire_ParsedFromYAML(t *testing.T) {
+	explosives, err := inventory.LoadExplosives("../../../content/explosives")
+	require.NoError(t, err)
+	require.NotEmpty(t, explosives)
+	for _, e := range explosives {
+		assert.False(t, e.FriendlyFire, "existing explosives should have friendly_fire: false")
+		assert.Equal(t, 0, e.AoERadius, "existing explosives should have aoe_radius: 0")
+		require.NoError(t, e.Validate())
+	}
 }
