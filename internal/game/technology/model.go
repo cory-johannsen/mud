@@ -75,17 +75,18 @@ var validEffectTypes = map[EffectType]bool{
 
 // TechEffect is one effect within a technology, discriminated by Type.
 // Only fields relevant to the given Type need be set; others are zero-valued.
+// The mappings below describe which fields are meaningful for each type —
+// Validate() enforces required fields only for skill_check; other type-specific
+// field constraints are advisory and enforced at resolution time.
 //
-// Type-to-required-fields mapping:
-//
-//	damage      — Dice or Amount (at least one); DamageType
-//	heal        — Dice or Amount (at least one)
-//	drain       — Dice or Amount (at least one); Resource ("hp" | "ap")
-//	condition   — ConditionID; Duration is optional (overrides parent duration if set)
-//	skill_check — Skill; DC (must be > 0; not omitted even if zero — use explicit value)
-//	movement    — Distance (> 0); Direction ("toward" | "away" | "teleport")
-//	zone        — Radius (> 0)
-//	summon      — NPCID; SummonRounds (> 0)
+//	damage      — Dice or Amount; DamageType
+//	heal        — Dice or Amount
+//	drain       — Dice or Amount; Resource ("hp" | "ap")
+//	condition   — ConditionID; Duration (optional, overrides parent if set)
+//	skill_check — Skill (non-empty); DC (> 0) — enforced by Validate()
+//	movement    — Distance; Direction ("toward" | "away" | "teleport")
+//	zone        — Radius
+//	summon      — NPCID; SummonRounds
 //	utility     — UtilityType ("unlock" | "reveal" | "hack")
 type TechEffect struct {
 	Type EffectType `yaml:"type"`
@@ -194,6 +195,8 @@ func validateEffect(e TechEffect, idx int) error {
 	if !validEffectTypes[e.Type] {
 		return fmt.Errorf("effects[%d]: unknown type %q", idx, e.Type)
 	}
+	// Only skill_check requires runtime-enforced field validation per the spec.
+	// Other per-type field constraints are enforced at resolution time.
 	if e.Type == EffectSkillCheck {
 		if e.Skill == "" {
 			return fmt.Errorf("effects[%d]: skill_check effect requires skill", idx)
