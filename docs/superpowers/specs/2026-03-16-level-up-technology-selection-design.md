@@ -31,7 +31,19 @@ Added to the existing `Job` struct alongside `TechnologyGrants`.
 
 ### Validation
 
-At YAML load time, each `TechnologyGrants` value in `LevelUpGrants` is validated with the existing `TechnologyGrants.Validate()` method. A validation error on any entry fails the entire job load (fail-fast, same as `TechnologyGrants` on the job).
+At YAML load time, `LoadJobs` iterates `LevelUpGrants` and calls `Validate()` on each entry. The loop runs after the existing `TechnologyGrants` validation:
+
+```go
+for charLevel, grants := range job.LevelUpGrants {
+    if err := grants.Validate(); err != nil {
+        return nil, fmt.Errorf("job %q level_up_grants[%d]: %w", job.ID, charLevel, err)
+    }
+}
+```
+
+A validation error on any entry fails the entire job load (fail-fast). Level keys must be positive integers (≥ 1); a key of 0 or negative is a validation error.
+
+`UsesByLevel` within a `level_up_grants` spontaneous entry is parsed but silently ignored at level-up time (use tracking is out of scope). It is not validated beyond the existing `TechnologyGrants.Validate()` rules.
 
 ### Example Job YAML
 
@@ -91,10 +103,10 @@ func LevelUpTechnologies(
 
 1. **Nil guard** — if `grants` is nil, return nil immediately (no-op).
 
-2. **Hardwired** — append any new IDs in `grants.Hardwired` to `sess.HardwiredTechs` (deduplicating against existing). Persist the updated full list via `hwRepo.SetAll`.
+2. **Hardwired** — append any new IDs in `grants.Hardwired` to `sess.HardwiredTechs`, skipping any ID already present in `sess.HardwiredTechs` (map-based deduplication, O(n)). Persist the updated full list via `hwRepo.SetAll`. The resulting slice order is: existing IDs first, then new IDs in the order they appear in `grants.Hardwired`.
 
 3. **Prepared** — for each level in `grants.Prepared.SlotsByLevel`:
-   - Determine the next available slot index for this level by calling `prepRepo.GetAll` and finding `len(existing[level])`.
+   - Determine the next available slot index for this level by calling `prepRepo.GetAll` and finding `len(existing[level])`. Existing slot slices are always dense (no nil gaps for prior levels), so `len` gives the correct next index.
    - Pre-fill from `grants.Prepared.Fixed` at this level (no prompt); persist via `prepRepo.Set` at the next indices.
    - For remaining open slots: auto-assign if `len(pool at level) == open`, otherwise prompt.
    - Persist each new slot via `prepRepo.Set`.
@@ -112,7 +124,14 @@ func LevelUpTechnologies(
 
 ## Feature 3: Gameserver wiring
 
-In `internal/gameserver/grpc_service.go`, find the XP award handler (the block that calls `xp.Service.Award()` or processes the result). After level-up is detected, apply grants for every level gained:
+In `internal/gameserver/grpc_service.go`, modify the `handleGrant` function (the XP award handler). Before calling `xp.Award`, capture the current level:
+
+```go
+oldLevel := target.Level
+result := s.xpService.Award(target, amount)
+```
+
+After level-up is detected, apply grants for every level gained. Errors are logged at Warn and do not abort the level-up (non-fatal, to avoid blocking game flow):
 
 ```go
 if result.LeveledUp && s.hardwiredTechRepo != nil && s.jobRegistry != nil {
@@ -155,12 +174,13 @@ All tests using TDD + property-based testing (SWENG-5, SWENG-5a).
 
 - **REQ-LUT1**: `Job` with `level_up_grants` YAML round-trips without data loss.
 - **REQ-LUT2**: `TechnologyGrants.Validate()` on a `level_up_grants` entry rejects `pool + fixed < slots_by_level` for any tech level.
-- **REQ-LUT3**: `LevelUpTechnologies` with a delta containing hardwired IDs appends them to existing session hardwired techs (does not replace).
-- **REQ-LUT4**: `LevelUpTechnologies` with a prepared delta fills new slots starting after existing slot indices (no index collision).
+- **REQ-LUT3**: `LevelUpTechnologies` with a delta containing hardwired IDs appends new IDs to existing session hardwired techs; IDs already present are skipped (no duplicates introduced).
+- **REQ-LUT4**: `LevelUpTechnologies` with a prepared delta fills new slots starting after existing slot indices; for any combination of N existing slots and M new slots at a given level, all resulting slot indices in the repo are unique.
 - **REQ-LUT5**: `LevelUpTechnologies` with a spontaneous delta adds new known techs without removing existing ones.
 - **REQ-LUT6**: `LevelUpTechnologies` with a nil `grants` argument returns nil and makes no changes (no-op).
-- **REQ-LUT7**: The gameserver applies `level_up_grants` for every level gained when a player skips levels (e.g., 2→4 applies grants for both level 3 and level 4 in order).
+- **REQ-LUT7**: The gameserver applies `level_up_grants` for every level gained in ascending level order when a player skips levels (e.g., 2→4 applies grants for level 3 then level 4).
 - **REQ-LUT8** (property): For any valid `level_up_grants` map, YAML marshal/unmarshal round-trip preserves all fields.
+- **REQ-LUT9**: `LoadJobs` rejects a YAML file with an invalid `level_up_grants` entry (e.g., pool + fixed < slots_by_level for any tech level); the error message includes the job ID and the failing character level.
 
 ---
 
