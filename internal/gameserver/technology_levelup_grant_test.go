@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -173,7 +174,7 @@ func TestHandleGrant_LevelUp_AppliesTechGrantsForEachLevel_Property(t *testing.T
 		levelGrants := make(map[int]*ruleset.TechnologyGrants)
 		expectedTechs := make([]string, 0, levelsGained)
 		for lvl := startLevel + 1; lvl <= targetLevel; lvl++ {
-			techID := "prop_tech_level_" + itoa(lvl)
+			techID := "prop_tech_level_" + strconv.Itoa(lvl)
 			levelGrants[lvl] = &ruleset.TechnologyGrants{Hardwired: []string{techID}}
 			expectedTechs = append(expectedTechs, techID)
 		}
@@ -213,23 +214,3 @@ func TestHandleGrant_LevelUp_AppliesTechGrantsForEachLevel_Property(t *testing.T
 	})
 }
 
-// itoa converts an int to its decimal string representation without importing strconv.
-func itoa(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	neg := false
-	if n < 0 {
-		neg = true
-		n = -n
-	}
-	buf := make([]byte, 0, 10)
-	for n > 0 {
-		buf = append([]byte{byte('0' + n%10)}, buf...)
-		n /= 10
-	}
-	if neg {
-		buf = append([]byte{'-'}, buf...)
-	}
-	return string(buf)
-}
