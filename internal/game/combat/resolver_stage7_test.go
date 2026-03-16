@@ -115,7 +115,7 @@ func TestResolveExplosive_AllTargetsDamaged(t *testing.T) {
 		makeCombatant("t2", 10, 1, 0, 0),
 	}
 
-	results := ResolveExplosive(grenade, targets, src)
+	results := ResolveExplosive(grenade, targets, grenade.SaveDC, src)
 
 	if len(results) != 2 {
 		t.Fatalf("expected 2 results, got %d", len(results))
@@ -138,7 +138,7 @@ func TestResolveExplosive_CritSuccessSave_ZeroDamage(t *testing.T) {
 		makeCombatant("t1", 10, 1, 0, 0),
 	}
 
-	results := ResolveExplosive(grenade, targets, src)
+	results := ResolveExplosive(grenade, targets, grenade.SaveDC, src)
 
 	if len(results) != 1 {
 		t.Fatalf("expected 1 result, got %d", len(results))
@@ -163,7 +163,7 @@ func TestProperty_ExplosiveDamage_NeverNegative(t *testing.T) {
 		grenade := makeTestGrenade("1d6", saveDC)
 		target := makeCombatant("t1", 10, 1, 0, 0)
 
-		results := ResolveExplosive(grenade, []*Combatant{target}, src)
+		results := ResolveExplosive(grenade, []*Combatant{target}, grenade.SaveDC, src)
 		if len(results) != 1 {
 			rt.Fatalf("expected 1 result, got %d", len(results))
 		}
