@@ -17,7 +17,7 @@ func validDef() *technology.TechnologyDef {
 		Name:      "Test Technology",
 		Tradition: technology.TraditionTechnical,
 		Level:     1,
-		UsageType: technology.UsageCantrip,
+		UsageType: technology.UsageHardwired,
 		Range:     technology.RangeSelf,
 		Targets:   technology.TargetsSingle,
 		Duration:  "instant",
@@ -204,7 +204,7 @@ func TestProperty_REQ_T14_TechnologyDefValidateAndRoundTrip(t *testing.T) {
 		technology.TraditionBioSynthetic,
 	}
 	usageTypes := []technology.UsageType{
-		technology.UsageCantrip,
+		technology.UsageHardwired,
 		technology.UsagePrepared,
 		technology.UsageSpontaneous,
 		technology.UsageInnate,
@@ -327,6 +327,19 @@ func TestValidate_InvalidAmpedEffectSkillCheckDCZero(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "amped_effects")
 	assert.Contains(t, err.Error(), "dc")
+}
+
+// REQ-TG1: UsageHardwired constant has value "hardwired"; "cantrip" is no longer valid
+func TestUsageHardwired_ConstantValue(t *testing.T) {
+	assert.Equal(t, technology.UsageType("hardwired"), technology.UsageHardwired)
+}
+
+func TestValidUsageTypes_NoCantripKey(t *testing.T) {
+	def := validDef()
+	def.UsageType = technology.UsageType("cantrip")
+	err := def.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "usage_type")
 }
 
 // Additional test: SaveType with SaveDC > 0 is valid.

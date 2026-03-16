@@ -21,14 +21,14 @@ var validTraditions = map[Tradition]bool{
 }
 
 const (
-	UsageCantrip     UsageType = "cantrip"
+	UsageHardwired   UsageType = "hardwired"
 	UsagePrepared    UsageType = "prepared"
 	UsageSpontaneous UsageType = "spontaneous"
 	UsageInnate      UsageType = "innate"
 )
 
 var validUsageTypes = map[UsageType]bool{
-	UsageCantrip: true, UsagePrepared: true,
+	UsageHardwired: true, UsagePrepared: true,
 	UsageSpontaneous: true, UsageInnate: true,
 }
 
