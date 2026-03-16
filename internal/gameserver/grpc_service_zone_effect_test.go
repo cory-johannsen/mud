@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -384,4 +385,135 @@ func TestProperty_ZoneEffect_Combat_AnyTrack(t *testing.T) {
 		assert.NotEqual(rt, mentalstate.SeverityNone, ch.mentalStateMgr.CurrentSeverity(uid, trackConst),
 			"ApplyTrigger must set non-zero severity for track %s after failed save", trackName)
 	})
+}
+
+// newMentalStateSvc creates a GameServiceServer wired with a real MentalStateManager.
+//
+// Precondition: t must be non-nil; diceVal is the fixed dice source value (roll = diceVal+1).
+// Postcondition: Returns non-nil svc and sessMgr.
+func newMentalStateSvc(t *testing.T, diceVal int) (*GameServiceServer, *session.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcMgr := npc.NewManager()
+	src := &fixedDiceSource{val: diceVal}
+	roller := dice.NewLoggedRoller(src, zap.NewNop())
+	mentalMgr := mentalstate.NewManager()
+	condReg := makeTestConditionRegistry()
+	combatHandler := NewCombatHandler(
+		combat.NewEngine(), npcMgr, sessMgr, roller,
+		func(_ string, _ []*gamev1.CombatEvent) {},
+		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, mentalMgr,
+	)
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		zap.NewNop(),
+		nil, roller, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, condReg, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		mentalMgr, nil,
+	)
+	return svc, sessMgr
+}
+
+// TestZoneEffect_Move_FailedSave_AppliesTrigger verifies that a failed Will save on room entry
+// applies the mental state trigger and does not set a cooldown.
+func TestZoneEffect_Move_FailedSave_AppliesTrigger(t *testing.T) {
+	// diceVal=0 → roll=1, GritMod=0 → total=1 < BaseDC 12 → fail.
+	svc, sessMgr := newMentalStateSvc(t, 0)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "p1", Username: "p1", CharName: "Alice",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Role: "player",
+	})
+	require.NoError(t, err)
+
+	room := &world.Room{
+		ID: "room_b",
+		Effects: []world.RoomEffect{{
+			Track: "fear", Severity: "mild",
+			BaseDC: 12, CooldownRounds: 3, CooldownMinutes: 5,
+		}},
+	}
+
+	svc.applyRoomEffectsOnEntry(sess, "p1", room, 0)
+
+	if sess.ZoneEffectCooldowns != nil {
+		assert.Zero(t, sess.ZoneEffectCooldowns["room_b:fear"], "failed save must not set cooldown")
+	}
+	assert.Equal(t, mentalstate.SeverityMild, svc.mentalStateMgr.CurrentSeverity("p1", mentalstate.TrackFear))
+}
+
+// TestZoneEffect_Move_SuccessfulSave_SetsCooldown verifies that a successful Will save on room entry
+// sets a cooldown and does not apply the mental state trigger.
+func TestZoneEffect_Move_SuccessfulSave_SetsCooldown(t *testing.T) {
+	// diceVal=19 → roll=20, GritMod=0 → total=20 >= BaseDC 12 → succeed.
+	svc, sessMgr := newMentalStateSvc(t, 19)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "p1", Username: "p1", CharName: "Alice",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Role: "player",
+	})
+	require.NoError(t, err)
+
+	room := &world.Room{
+		ID: "room_b",
+		Effects: []world.RoomEffect{{
+			Track: "fear", Severity: "mild",
+			BaseDC: 12, CooldownRounds: 3, CooldownMinutes: 5,
+		}},
+	}
+
+	now := int64(1000000)
+	svc.applyRoomEffectsOnEntry(sess, "p1", room, now)
+
+	require.NotNil(t, sess.ZoneEffectCooldowns)
+	expected := now + int64(5)*60
+	assert.Equal(t, expected, sess.ZoneEffectCooldowns["room_b:fear"],
+		"successful save: cooldown = now + CooldownMinutes*60")
+	assert.Equal(t, mentalstate.SeverityNone, svc.mentalStateMgr.CurrentSeverity("p1", mentalstate.TrackFear))
+}
+
+// TestZoneEffect_Move_TwoEffects_IndependentCooldowns verifies that two room effects
+// each set independent cooldown keys when both saves succeed.
+func TestZoneEffect_Move_TwoEffects_IndependentCooldowns(t *testing.T) {
+	// diceVal=19 → both saves succeed.
+	svc, sessMgr := newMentalStateSvc(t, 19)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "p1", Username: "p1", CharName: "Alice",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Role: "player",
+	})
+	require.NoError(t, err)
+
+	room := &world.Room{
+		ID: "room_b",
+		Effects: []world.RoomEffect{
+			{Track: "despair", Severity: "mild", BaseDC: 12, CooldownRounds: 3, CooldownMinutes: 5},
+			{Track: "delirium", Severity: "mild", BaseDC: 12, CooldownRounds: 4, CooldownMinutes: 10},
+		},
+	}
+
+	now := int64(1000000)
+	svc.applyRoomEffectsOnEntry(sess, "p1", room, now)
+
+	require.NotNil(t, sess.ZoneEffectCooldowns)
+	assert.Equal(t, now+int64(5)*60, sess.ZoneEffectCooldowns["room_b:despair"])
+	assert.Equal(t, now+int64(10)*60, sess.ZoneEffectCooldowns["room_b:delirium"])
+}
+
+// TestZoneEffect_Move_NoEffects_NoOp verifies that a room with no effects leaves session unchanged.
+func TestZoneEffect_Move_NoEffects_NoOp(t *testing.T) {
+	svc, sessMgr := newMentalStateSvc(t, 0)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "p1", Username: "p1", CharName: "Alice",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Role: "player",
+	})
+	require.NoError(t, err)
+
+	room := &world.Room{ID: "room_b", Effects: nil}
+	svc.applyRoomEffectsOnEntry(sess, "p1", room, 0)
+
+	assert.Nil(t, sess.ZoneEffectCooldowns)
 }
