@@ -119,6 +119,11 @@ type PlayerSession struct {
 	// Out of combat: value is Unix timestamp (seconds) of expiry; 0 = ready to fire.
 	// Nil until first use; initialized lazily on first write.
 	ZoneEffectCooldowns map[string]int64
+	// Technology slots — nil until loaded from DB at login.
+	HardwiredTechs   []string                // tech IDs; unlimited use
+	PreparedTechs    map[int][]*PreparedSlot  // slot level → ordered slots
+	SpontaneousTechs map[int][]string         // tech level → known tech IDs
+	InnateTechs      map[string]*InnateSlot   // tech_id → innate slot info
 }
 
 // Manager tracks all active player sessions and room occupancy.
