@@ -21,6 +21,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -173,6 +174,7 @@ type GameServiceServer struct {
 	logger       *zap.Logger
 	jobRegistry         *ruleset.JobRegistry
 	condRegistry        *condition.Registry
+	techRegistry        *technology.Registry
 	loadoutsDir         string
 	allSkills                   []*ruleset.Skill
 	characterSkillsRepo         CharacterSkillsRepository
@@ -237,6 +239,7 @@ func NewGameServiceServer(
 	clock *GameClock,
 	jobRegistry *ruleset.JobRegistry,
 	condRegistry *condition.Registry,
+	techRegistry *technology.Registry,
 	loadoutsDir string,
 	allSkills []*ruleset.Skill,
 	characterSkillsRepo CharacterSkillsRepository,
@@ -276,6 +279,7 @@ func NewGameServiceServer(
 		logger:              logger,
 		jobRegistry:         jobRegistry,
 		condRegistry:        condRegistry,
+		techRegistry:        techRegistry,
 		loadoutsDir:         loadoutsDir,
 		allSkills:                  allSkills,
 		characterSkillsRepo:        characterSkillsRepo,

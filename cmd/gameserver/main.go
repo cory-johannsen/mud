@@ -15,11 +15,14 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	"errors"
+
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -60,6 +63,7 @@ func main() {
 	archetypesDir := flag.String("archetypes-dir", "content/archetypes", "path to archetype YAML definitions directory")
 	regionsDir := flag.String("regions-dir", "content/regions", "path to region YAML definitions directory")
 	xpConfigFile := flag.String("xp-config", "content/xp_config.yaml", "path to XP configuration YAML file")
+	techContentDir := flag.String("tech-content-dir", "content/technologies", "path to technology YAML content directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -205,6 +209,19 @@ func main() {
 		condRegistry.Register(def)
 	}
 	logger.Info("loaded mental condition definitions", zap.Int("count", len(mentalCondRegistry.All())))
+
+	// Load technology definitions.
+	techReg, err := technology.Load(*techContentDir)
+	if err != nil {
+		var pathErr *os.PathError
+		if errors.As(err, &pathErr) && os.IsNotExist(pathErr.Err) {
+			log.Printf("WARN: technology content dir %q not found — starting with empty tech registry", *techContentDir)
+			techReg = technology.NewRegistry()
+		} else {
+			log.Fatalf("loading technology content: %v", err)
+		}
+	}
+	logger.Info("loaded technology definitions", zap.Int("count", len(techReg.All())))
 
 	// Load inventory definitions.
 	invRegistry := inventory.NewRegistry()
@@ -545,7 +562,7 @@ func main() {
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
-		jobReg, condRegistry, *loadoutsDir,
+		jobReg, condRegistry, techReg, *loadoutsDir,
 		allSkills, characterSkillsRepo, characterProficienciesRepo,
 		allFeats, featRegistry, characterFeatsRepo,
 		classFeatures, cfReg, characterClassFeaturesRepo,
