@@ -195,6 +195,12 @@ zone:
     properties:
       lighting: dim
       atmosphere: reverent
+    effects:
+      - track: rage
+        severity: mild
+        base_dc: 12
+        cooldown_rounds: 3
+        cooldown_minutes: 5
   - id: battle_the_commissariat
     title: The Commissariat
     description: 'The administrative nerve center of the collective occupies a
