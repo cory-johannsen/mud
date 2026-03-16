@@ -224,6 +224,34 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 		ALTER TABLE characters ADD COLUMN IF NOT EXISTS currency INTEGER NOT NULL DEFAULT 0;
 
 		ALTER TABLE characters ADD COLUMN IF NOT EXISTS hero_points INTEGER NOT NULL DEFAULT 0;
+
+		CREATE TABLE IF NOT EXISTS character_hardwired_technologies (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			tech_id      TEXT   NOT NULL,
+			PRIMARY KEY (character_id, tech_id)
+		);
+
+		CREATE TABLE IF NOT EXISTS character_prepared_technologies (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			slot_level   INT    NOT NULL,
+			slot_index   INT    NOT NULL,
+			tech_id      TEXT   NOT NULL,
+			PRIMARY KEY (character_id, slot_level, slot_index)
+		);
+
+		CREATE TABLE IF NOT EXISTS character_spontaneous_technologies (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			tech_id      TEXT   NOT NULL,
+			level        INT    NOT NULL,
+			PRIMARY KEY (character_id, tech_id)
+		);
+
+		CREATE TABLE IF NOT EXISTS character_innate_technologies (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			tech_id      TEXT   NOT NULL,
+			max_uses     INT    NOT NULL DEFAULT 0,
+			PRIMARY KEY (character_id, tech_id)
+		);
 	`)
 	return err
 }
