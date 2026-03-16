@@ -1,11 +1,11 @@
 CREATE TABLE character_hardwired_technologies (
-    character_id BIGINT NOT NULL,
+    character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
     tech_id      TEXT   NOT NULL,
     PRIMARY KEY (character_id, tech_id)
 );
 
 CREATE TABLE character_prepared_technologies (
-    character_id BIGINT NOT NULL,
+    character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
     slot_level   INT    NOT NULL,
     slot_index   INT    NOT NULL,
     tech_id      TEXT   NOT NULL,
@@ -13,14 +13,14 @@ CREATE TABLE character_prepared_technologies (
 );
 
 CREATE TABLE character_spontaneous_technologies (
-    character_id BIGINT NOT NULL,
+    character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
     tech_id      TEXT   NOT NULL,
     level        INT    NOT NULL,
     PRIMARY KEY (character_id, tech_id)
 );
 
 CREATE TABLE character_innate_technologies (
-    character_id BIGINT NOT NULL,
+    character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
     tech_id      TEXT   NOT NULL,
     max_uses     INT    NOT NULL DEFAULT 0,
     PRIMARY KEY (character_id, tech_id)

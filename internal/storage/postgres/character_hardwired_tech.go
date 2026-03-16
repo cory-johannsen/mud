@@ -59,7 +59,12 @@ func (r *CharacterHardwiredTechRepository) SetAll(ctx context.Context, character
 	); err != nil {
 		return fmt.Errorf("CharacterHardwiredTechRepository.SetAll delete: %w", err)
 	}
+	seen := make(map[string]struct{}, len(techIDs))
 	for _, id := range techIDs {
+		if _, dup := seen[id]; dup {
+			continue
+		}
+		seen[id] = struct{}{}
 		if _, err := tx.Exec(ctx,
 			`INSERT INTO character_hardwired_technologies (character_id, tech_id) VALUES ($1, $2)`,
 			characterID, id,

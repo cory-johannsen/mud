@@ -50,6 +50,15 @@ func TestPropertyCharacterHardwiredTechRepo_RoundTrip(t *testing.T) {
 		for i := range ids {
 			ids[i] = rapid.StringMatching(`[a-z_]{1,32}`).Draw(rt, "techID")
 		}
+		// Deduplicate expected values to match SetAll semantics.
+		seen := make(map[string]struct{}, len(ids))
+		unique := ids[:0:0]
+		for _, id := range ids {
+			if _, ok := seen[id]; !ok {
+				seen[id] = struct{}{}
+				unique = append(unique, id)
+			}
+		}
 		if err := repo.SetAll(ctx, ch.ID, ids); err != nil {
 			rt.Fatalf("SetAll: %v", err)
 		}
@@ -57,7 +66,7 @@ func TestPropertyCharacterHardwiredTechRepo_RoundTrip(t *testing.T) {
 		if err != nil {
 			rt.Fatalf("GetAll: %v", err)
 		}
-		assert.ElementsMatch(rt, ids, got)
+		assert.ElementsMatch(rt, unique, got)
 	})
 }
 
@@ -152,6 +161,19 @@ func TestCharacterSpontaneousTechRepo_Add_And_GetAll(t *testing.T) {
 	assert.ElementsMatch(t, []string{"battle_fervor", "acid_spray"}, got[1])
 }
 
+func TestCharacterSpontaneousTechRepo_DeleteAll(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+	repo := pgstore.NewCharacterSpontaneousTechRepository(sharedPool)
+
+	require.NoError(t, repo.Add(ctx, ch.ID, "battle_fervor", 1))
+	require.NoError(t, repo.DeleteAll(ctx, ch.ID))
+	got, err := repo.GetAll(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.Empty(t, got)
+}
+
 func TestPropertyCharacterSpontaneousTechRepo_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 	charRepo := pgstore.NewCharacterRepository(sharedPool)
@@ -198,6 +220,19 @@ func TestCharacterInnateTechRepo_Set_And_GetAll(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, &session.InnateSlot{MaxUses: 3}, got["acid_spray"])
 	assert.Equal(t, &session.InnateSlot{MaxUses: 0}, got["neural_shock"])
+}
+
+func TestCharacterInnateTechRepo_DeleteAll(t *testing.T) {
+	ctx := context.Background()
+	charRepo := pgstore.NewCharacterRepository(sharedPool)
+	ch := createTestCharacter(t, charRepo, ctx)
+	repo := pgstore.NewCharacterInnateTechRepository(sharedPool)
+
+	require.NoError(t, repo.Set(ctx, ch.ID, "neural_shock", 2))
+	require.NoError(t, repo.DeleteAll(ctx, ch.ID))
+	got, err := repo.GetAll(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.Empty(t, got)
 }
 
 func TestPropertyCharacterInnateTechRepo_RoundTrip(t *testing.T) {
