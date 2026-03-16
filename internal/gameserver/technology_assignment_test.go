@@ -2,10 +2,13 @@ package gameserver_test
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -73,6 +76,8 @@ func (r *fakeInnateRepo) Set(_ context.Context, _ int64, techID string, maxUses 
 func (r *fakeInnateRepo) DeleteAll(_ context.Context, _ int64) error { r.slots = nil; return nil }
 
 // noPrompt returns the first option automatically (for testing auto-assign paths).
+// Precondition: called only on test scenarios where auto-assign does not trigger the prompt;
+// the len(options) == 0 guard is a safety fallback.
 func noPrompt(options []string) (string, error) {
 	if len(options) == 0 {
 		return "", nil
@@ -195,6 +200,106 @@ func TestAssignTechnologies_SpontaneousAutoAssign(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, promptCalled, "prompt should not be called when pool == open slots")
 	assert.Equal(t, []string{"battle_fervor"}, sess.SpontaneousTechs[1])
+}
+
+// TestPropertyAssignTechnologies_HardwiredRoundTrip verifies that AssignTechnologies
+// followed by LoadTechnologies returns the identical hardwired IDs for any arbitrary input.
+func TestPropertyAssignTechnologies_HardwiredRoundTrip(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 10).Draw(rt, "n")
+		ids := make([]string, n)
+		for i := 0; i < n; i++ {
+			ids[i] = rapid.StringMatching(`[a-z_]{1,20}`).Draw(rt, fmt.Sprintf("id%d", i))
+		}
+		// deduplicate
+		seen := map[string]bool{}
+		unique := ids[:0]
+		for _, id := range ids {
+			if !seen[id] {
+				seen[id] = true
+				unique = append(unique, id)
+			}
+		}
+		ids = unique
+
+		hwRepo := &fakeHardwiredRepo{}
+		prepRepo := &fakePreparedRepo{}
+		spontRepo := &fakeSpontaneousRepo{}
+		innateRepo := &fakeInnateRepo{}
+		sess := &session.PlayerSession{}
+
+		job := &ruleset.Job{TechnologyGrants: &ruleset.TechnologyGrants{Hardwired: ids}}
+		arch := &ruleset.Archetype{}
+
+		err := gameserver.AssignTechnologies(context.Background(), sess, 1, job, arch, nil, noPrompt, hwRepo, prepRepo, spontRepo, innateRepo)
+		if err != nil {
+			rt.Fatalf("AssignTechnologies: %v", err)
+		}
+
+		sess2 := &session.PlayerSession{}
+		err = gameserver.LoadTechnologies(context.Background(), sess2, 1, hwRepo, prepRepo, spontRepo, innateRepo)
+		if err != nil {
+			rt.Fatalf("LoadTechnologies: %v", err)
+		}
+
+		if !reflect.DeepEqual(sess2.HardwiredTechs, ids) {
+			rt.Fatalf("round-trip mismatch: got %v want %v", sess2.HardwiredTechs, ids)
+		}
+	})
+}
+
+// TestPropertyAssignTechnologies_AutoAssignNeverPrompts verifies that when the pool size
+// exactly equals the open slot count, the promptFn is never invoked.
+func TestPropertyAssignTechnologies_AutoAssignNeverPrompts(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 5).Draw(rt, "n")
+		pool := make([]ruleset.PreparedEntry, n)
+		for i := 0; i < n; i++ {
+			pool[i] = ruleset.PreparedEntry{
+				ID:    rapid.StringMatching(`[a-z_]{1,20}`).Draw(rt, fmt.Sprintf("poolID%d", i)),
+				Level: 1,
+			}
+		}
+		// deduplicate pool by ID
+		seenPool := map[string]bool{}
+		uniquePool := pool[:0]
+		for _, e := range pool {
+			if !seenPool[e.ID] {
+				seenPool[e.ID] = true
+				uniquePool = append(uniquePool, e)
+			}
+		}
+		pool = uniquePool
+
+		promptCalled := false
+		trackingPrompt := func(options []string) (string, error) {
+			promptCalled = true
+			return options[0], nil
+		}
+
+		grants := &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: len(pool)},
+				Pool:         pool,
+			},
+		}
+		job := &ruleset.Job{TechnologyGrants: grants}
+		arch := &ruleset.Archetype{}
+
+		hwRepo := &fakeHardwiredRepo{}
+		prepRepo := &fakePreparedRepo{}
+		spontRepo := &fakeSpontaneousRepo{}
+		innateRepo := &fakeInnateRepo{}
+		sess := &session.PlayerSession{}
+
+		err := gameserver.AssignTechnologies(context.Background(), sess, 1, job, arch, nil, trackingPrompt, hwRepo, prepRepo, spontRepo, innateRepo)
+		if err != nil {
+			rt.Fatalf("AssignTechnologies: %v", err)
+		}
+		if promptCalled {
+			rt.Fatalf("promptFn was called but should not have been (auto-assign)")
+		}
+	})
 }
 
 // REQ-TG10: LoadTechnologies populates all four session fields from repos

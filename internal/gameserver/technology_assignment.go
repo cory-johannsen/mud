@@ -3,6 +3,7 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -154,6 +155,7 @@ func LoadTechnologies(
 
 // fillFromPreparedPool fills prepared slots from fixed entries and optionally the pool.
 // Auto-assigns without prompt when len(pool at level) == open slots.
+// Precondition: open is assumed >= 0, guaranteed by TechnologyGrants.Validate().
 func fillFromPreparedPool(
 	ctx context.Context,
 	lvl, slots int,
@@ -292,46 +294,53 @@ func fillFromSpontaneousPool(
 	return result, nil
 }
 
-func buildPreparedOptions(entries []ruleset.PreparedEntry, reg *technology.Registry) []string {
-	opts := make([]string, len(entries))
-	for i, e := range entries {
+// buildOptions formats a slice of tech IDs and levels into display option strings.
+// When a registry is provided and has an entry for the ID, the format is "id — description".
+// Otherwise the raw ID is used. The levels slice is kept for future use.
+func buildOptions(ids []string, levels []int, reg *technology.Registry) []string {
+	opts := make([]string, 0, len(ids))
+	for i, id := range ids {
+		_ = levels[i]
 		if reg != nil {
-			if def, ok := reg.Get(e.ID); ok {
-				opts[i] = fmt.Sprintf("%s \u2014 %s", def.ID, def.Description)
+			if def, ok := reg.Get(id); ok {
+				desc := def.Description
+				if desc == "" {
+					desc = def.Name
+				}
+				opts = append(opts, fmt.Sprintf("%s \u2014 %s", id, desc))
 				continue
 			}
 		}
-		opts[i] = e.ID
+		opts = append(opts, id)
 	}
 	return opts
+}
+
+func buildPreparedOptions(entries []ruleset.PreparedEntry, reg *technology.Registry) []string {
+	ids := make([]string, len(entries))
+	levels := make([]int, len(entries))
+	for i, e := range entries {
+		ids[i] = e.ID
+		levels[i] = e.Level
+	}
+	return buildOptions(ids, levels, reg)
 }
 
 func buildSpontaneousOptions(entries []ruleset.SpontaneousEntry, reg *technology.Registry) []string {
-	opts := make([]string, len(entries))
+	ids := make([]string, len(entries))
+	levels := make([]int, len(entries))
 	for i, e := range entries {
-		if reg != nil {
-			if def, ok := reg.Get(e.ID); ok {
-				opts[i] = fmt.Sprintf("%s \u2014 %s", def.ID, def.Description)
-				continue
-			}
-		}
-		opts[i] = e.ID
+		ids[i] = e.ID
+		levels[i] = e.Level
 	}
-	return opts
+	return buildOptions(ids, levels, reg)
 }
 
 // parseTechID extracts the tech ID from a display option string.
-// If the option contains " — " (em-dash), the part before it is the ID.
+// If the option contains " — " (em-dash with surrounding spaces), the part before it is the ID.
 func parseTechID(option string) string {
-	for i := 0; i < len(option)-2; i++ {
-		if option[i] == ' ' && option[i+1] == '\xe2' && i+3 < len(option) {
-			// Check for UTF-8 em-dash (U+2014 = 0xE2 0x80 0x94) followed by space
-			if option[i+1] == '\xe2' && option[i+2] == '\x80' && option[i+3] == '\x94' && i+4 < len(option) && option[i+4] == ' ' {
-				return option[:i]
-			}
-		}
-	}
-	return option
+	id, _, _ := strings.Cut(option, " \u2014 ")
+	return strings.TrimSpace(id)
 }
 
 func removePreparedByID(entries []ruleset.PreparedEntry, id string) []ruleset.PreparedEntry {
