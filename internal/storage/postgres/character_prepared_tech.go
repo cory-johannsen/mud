@@ -23,8 +23,9 @@ func NewCharacterPreparedTechRepository(db *pgxpool.Pool) *CharacterPreparedTech
 }
 
 // GetAll returns prepared slot assignments keyed by slot level.
-// Each level maps to an ordered slice indexed by slot_index.
-//
+// The returned slice for each level is indexed by slot_index (as stored).
+// If slot indices are non-contiguous, the slice will contain nil entries
+// at the missing indices. Callers must guard against nil slots.
 // Precondition: characterID > 0.
 // Postcondition: Returns a non-nil map (may be empty) and nil error on success.
 func (r *CharacterPreparedTechRepository) GetAll(ctx context.Context, characterID int64) (map[int][]*session.PreparedSlot, error) {

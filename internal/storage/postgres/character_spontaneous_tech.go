@@ -48,15 +48,15 @@ func (r *CharacterSpontaneousTechRepository) GetAll(ctx context.Context, charact
 	return result, rows.Err()
 }
 
-// Add inserts a known spontaneous tech. Duplicate inserts are silently ignored.
-//
+// Add inserts or updates a known spontaneous tech.
+// If the tech already exists for this character, the level is updated.
 // Precondition: characterID > 0; techID not empty; level > 0.
 // Postcondition: A row for (character_id, tech_id) exists with the given level.
 func (r *CharacterSpontaneousTechRepository) Add(ctx context.Context, characterID int64, techID string, level int) error {
 	_, err := r.db.Exec(ctx,
 		`INSERT INTO character_spontaneous_technologies (character_id, tech_id, level)
          VALUES ($1, $2, $3)
-         ON CONFLICT (character_id, tech_id) DO NOTHING`,
+         ON CONFLICT (character_id, tech_id) DO UPDATE SET level = EXCLUDED.level`,
 		characterID, techID, level,
 	)
 	if err != nil {
