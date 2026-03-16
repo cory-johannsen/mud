@@ -960,7 +960,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// Assign technologies at character creation (only if no slots yet assigned).
 	if s.hardwiredTechRepo != nil && s.jobRegistry != nil && characterID > 0 {
 		existingHW, hwCheckErr := s.hardwiredTechRepo.GetAll(stream.Context(), characterID)
-		if hwCheckErr == nil && len(existingHW) == 0 {
+		if hwCheckErr != nil {
+			s.logger.Warn("checking existing hardwired technologies", zap.Int64("character_id", characterID), zap.Error(hwCheckErr))
+		} else if len(existingHW) == 0 {
 			if job, ok := s.jobRegistry.Job(sess.Class); ok {
 				var archetype *ruleset.Archetype
 				if archetypeID := job.Archetype; archetypeID != "" {
@@ -985,7 +987,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	}
 
 	// Load persisted technology assignments for this session.
-	if s.hardwiredTechRepo != nil {
+	if s.hardwiredTechRepo != nil && characterID > 0 {
 		if techErr := LoadTechnologies(stream.Context(), sess, characterID,
 			s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo,
 		); techErr != nil {

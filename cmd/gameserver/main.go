@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -15,7 +16,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"errors"
 
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/ai"
@@ -567,8 +567,8 @@ func main() {
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock,
 		jobReg, condRegistry, techReg,
-	hardwiredTechRepo, preparedTechRepo, spontaneousTechRepo, innateTechRepo,
-	*loadoutsDir,
+		hardwiredTechRepo, preparedTechRepo, spontaneousTechRepo, innateTechRepo,
+		*loadoutsDir,
 		allSkills, characterSkillsRepo, characterProficienciesRepo,
 		allFeats, featRegistry, characterFeatsRepo,
 		classFeatures, cfReg, characterClassFeaturesRepo,
