@@ -251,7 +251,7 @@
       - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
         - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
         - [ ] Fixed number of uses per Technology per level (i.e. 5 level 1, 3 level 2, 1 level 3)
-        - [ ] Can be rearranged when resting
+        - [x] Can be rearranged when resting — `rest` command; `RearrangePreparedTechs` aggregates creation + level-up grants, clears and re-fills slots interactively
         - [ ] Level-up technology selection — player chooses new technologies when levelling up (prepared/spontaneous pool expands; player selects additions interactively)
       - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
         - [ ] Fixed list of Technologies per job level

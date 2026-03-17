@@ -126,6 +126,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerDeclineGroup:       bridgeDeclineGroup,
 	command.HandlerUngroup:            bridgeUngroup,
 	command.HandlerKick:               bridgeKick,
+	command.HandlerRest:               bridgeRest,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1334,5 +1335,16 @@ func bridgeKick(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Kick{Kick: &gamev1.KickRequest{Player: player}},
+	}}, nil
+}
+
+// bridgeRest builds a RestRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a RestRequest; done is false.
+func bridgeRest(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Rest{Rest: &gamev1.RestRequest{}},
 	}}, nil
 }

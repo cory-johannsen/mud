@@ -1144,6 +1144,22 @@ func (s *GameServiceServer) commandLoop(ctx context.Context, uid string, stream 
 			continue
 		}
 
+		// rest requires direct stream access for interactive tech prompts.
+		if _, ok := msg.Payload.(*gamev1.ClientMessage_Rest); ok {
+			if err := s.handleRest(uid, msg.RequestId, stream); err != nil {
+				errEvt := &gamev1.ServerEvent{
+					RequestId: msg.RequestId,
+					Payload: &gamev1.ServerEvent_Error{
+						Error: &gamev1.ErrorEvent{Message: err.Error()},
+					},
+				}
+				if sendErr := stream.Send(errEvt); sendErr != nil {
+					return fmt.Errorf("sending error: %w", sendErr)
+				}
+			}
+			continue
+		}
+
 		resp, err := s.dispatch(uid, msg)
 		if err == errQuit {
 			// Send Disconnected event then exit cleanly.
@@ -2333,6 +2349,63 @@ func (s *GameServiceServer) handleStatus(uid string, requestID string, stream ga
 		}
 	}
 	return nil
+}
+
+// handleRest processes the rest command for a player.
+// Called pre-dispatch because it requires direct stream access to prompt the player.
+//
+// Precondition: uid identifies a valid player session.
+// Postcondition: If not in combat, prepared tech slots are re-selected;
+// a confirmation or error message is sent to the player's stream.
+func (s *GameServiceServer) handleRest(uid string, requestID string, stream gamev1.GameService_SessionServer) error {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("handleRest: player %q not found", uid)
+	}
+
+	sendMsg := func(text string) error {
+		return stream.Send(&gamev1.ServerEvent{
+			RequestId: requestID,
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: text},
+			},
+		})
+	}
+
+	// Combat guard.
+	if sess.Status == int32(gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT) {
+		return sendMsg("You can't rest while in combat.")
+	}
+
+	// Job lookup.
+	if s.jobRegistry == nil {
+		return sendMsg("You rest briefly but have no technologies to rearrange.")
+	}
+	job, ok := s.jobRegistry.Job(sess.Class)
+	if !ok {
+		return sendMsg("You rest briefly but have no technologies to rearrange.")
+	}
+
+	// Build promptFn from the player's own stream.
+	promptFn := func(options []string) (string, error) {
+		choices := &ruleset.FeatureChoices{
+			Prompt:  "Choose a technology to prepare:",
+			Options: options,
+			Key:     "tech_choice",
+		}
+		return s.promptFeatureChoice(stream, "tech_choice", choices)
+	}
+
+	if err := RearrangePreparedTechs(context.Background(), sess, sess.CharacterID,
+		job, s.techRegistry, promptFn, s.preparedTechRepo,
+	); err != nil {
+		s.logger.Warn("handleRest: RearrangePreparedTechs failed",
+			zap.String("uid", uid),
+			zap.Error(err))
+		return sendMsg("Something went wrong preparing your technologies.")
+	}
+
+	return sendMsg("You finish your rest and your technologies are prepared.")
 }
 
 // pushMessageToUID sends a plain-text MessageEvent to a single player session identified by uid.

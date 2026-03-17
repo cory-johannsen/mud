@@ -95,8 +95,12 @@ message ClientMessage {
     DeclineGroupRequest decline_group = 78;
     UngroupRequest ungroup = 79;
     KickRequest kick = 80;
+    RestRequest rest = 81;
   }
 }
+
+// RestRequest asks the server to rest the player and rearrange prepared technology slots.
+message RestRequest {}
 
 // ServerEvent wraps all server-to-client events.
 message ServerEvent {
