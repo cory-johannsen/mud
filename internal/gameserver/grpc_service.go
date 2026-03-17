@@ -17,18 +17,18 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
-	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
-	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/dice"
-	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/game/xp"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -153,36 +153,36 @@ type CharacterFeatureChoicesRepository interface {
 // GameServiceServer implements the gRPC GameService with bidirectional streaming.
 type GameServiceServer struct {
 	gamev1.UnimplementedGameServiceServer
-	world        *world.Manager
-	sessions     *session.Manager
-	commands     *command.Registry
-	worldH       *WorldHandler
-	chatH        *ChatHandler
-	charSaver    CharacterSaver
-	dice         *dice.Roller
-	npcH         *NPCHandler
-	npcMgr       *npc.Manager
-	combatH      *CombatHandler
-	scriptMgr    *scripting.Manager
-	respawnMgr   *npc.RespawnManager
-	floorMgr     *inventory.FloorManager
-	roomEquipMgr *inventory.RoomEquipmentManager
-	automapRepo  *postgres.AutomapRepository
-	invRegistry  *inventory.Registry
-	accountAdmin AccountAdmin
-	clock        *GameClock
-	logger       *zap.Logger
-	jobRegistry         *ruleset.JobRegistry
-	condRegistry        *condition.Registry
-	techRegistry        *technology.Registry
-	hardwiredTechRepo   HardwiredTechRepo
-	preparedTechRepo    PreparedTechRepo
-	spontaneousTechRepo SpontaneousTechRepo
-	innateTechRepo      InnateTechRepo
-	loadoutsDir         string
-	allSkills                   []*ruleset.Skill
-	characterSkillsRepo         CharacterSkillsRepository
-	characterProficienciesRepo  CharacterProficienciesRepository
+	world                      *world.Manager
+	sessions                   *session.Manager
+	commands                   *command.Registry
+	worldH                     *WorldHandler
+	chatH                      *ChatHandler
+	charSaver                  CharacterSaver
+	dice                       *dice.Roller
+	npcH                       *NPCHandler
+	npcMgr                     *npc.Manager
+	combatH                    *CombatHandler
+	scriptMgr                  *scripting.Manager
+	respawnMgr                 *npc.RespawnManager
+	floorMgr                   *inventory.FloorManager
+	roomEquipMgr               *inventory.RoomEquipmentManager
+	automapRepo                *postgres.AutomapRepository
+	invRegistry                *inventory.Registry
+	accountAdmin               AccountAdmin
+	clock                      *GameClock
+	logger                     *zap.Logger
+	jobRegistry                *ruleset.JobRegistry
+	condRegistry               *condition.Registry
+	techRegistry               *technology.Registry
+	hardwiredTechRepo          HardwiredTechRepo
+	preparedTechRepo           PreparedTechRepo
+	spontaneousTechRepo        SpontaneousTechRepo
+	innateTechRepo             InnateTechRepo
+	loadoutsDir                string
+	allSkills                  []*ruleset.Skill
+	characterSkillsRepo        CharacterSkillsRepository
+	characterProficienciesRepo CharacterProficienciesRepository
 	allFeats                   []*ruleset.Feat
 	featRegistry               *ruleset.FeatRegistry
 	characterFeatsRepo         CharacterFeatsGetter
@@ -244,10 +244,10 @@ func NewGameServiceServer(
 	jobRegistry *ruleset.JobRegistry,
 	condRegistry *condition.Registry,
 	techRegistry *technology.Registry,
-	hardwiredTechRepo   HardwiredTechRepo,
-	preparedTechRepo    PreparedTechRepo,
+	hardwiredTechRepo HardwiredTechRepo,
+	preparedTechRepo PreparedTechRepo,
 	spontaneousTechRepo SpontaneousTechRepo,
-	innateTechRepo      InnateTechRepo,
+	innateTechRepo InnateTechRepo,
 	loadoutsDir string,
 	allSkills []*ruleset.Skill,
 	characterSkillsRepo CharacterSkillsRepository,
@@ -260,39 +260,39 @@ func NewGameServiceServer(
 	characterClassFeaturesRepo CharacterClassFeaturesGetter,
 	featureChoicesRepo CharacterFeatureChoicesRepository,
 	charAbilityBoostsRepo postgres.CharacterAbilityBoostsRepository,
-	archetypes     map[string]*ruleset.Archetype,
-	regions        map[string]*ruleset.Region,
+	archetypes map[string]*ruleset.Archetype,
+	regions map[string]*ruleset.Region,
 	mentalStateMgr *mentalstate.Manager,
-	actionH        *ActionHandler,
+	actionH *ActionHandler,
 ) *GameServiceServer {
 	s := &GameServiceServer{
-		world:               worldMgr,
-		sessions:            sessMgr,
-		commands:            cmdRegistry,
-		worldH:              worldHandler,
-		chatH:               chatHandler,
-		charSaver:           charSaver,
-		dice:                diceRoller,
-		npcH:                npcHandler,
-		npcMgr:              npcMgr,
-		combatH:             combatHandler,
-		scriptMgr:           scriptMgr,
-		respawnMgr:          respawnMgr,
-		floorMgr:            floorMgr,
-		roomEquipMgr:        roomEquipMgr,
-		automapRepo:         automapRepo,
-		invRegistry:         invRegistry,
-		accountAdmin:        accountAdmin,
-		clock:               clock,
-		logger:              logger,
-		jobRegistry:         jobRegistry,
-		condRegistry:        condRegistry,
-		techRegistry:        techRegistry,
-		hardwiredTechRepo:   hardwiredTechRepo,
-		preparedTechRepo:    preparedTechRepo,
-		spontaneousTechRepo: spontaneousTechRepo,
-		innateTechRepo:      innateTechRepo,
-		loadoutsDir:         loadoutsDir,
+		world:                      worldMgr,
+		sessions:                   sessMgr,
+		commands:                   cmdRegistry,
+		worldH:                     worldHandler,
+		chatH:                      chatHandler,
+		charSaver:                  charSaver,
+		dice:                       diceRoller,
+		npcH:                       npcHandler,
+		npcMgr:                     npcMgr,
+		combatH:                    combatHandler,
+		scriptMgr:                  scriptMgr,
+		respawnMgr:                 respawnMgr,
+		floorMgr:                   floorMgr,
+		roomEquipMgr:               roomEquipMgr,
+		automapRepo:                automapRepo,
+		invRegistry:                invRegistry,
+		accountAdmin:               accountAdmin,
+		clock:                      clock,
+		logger:                     logger,
+		jobRegistry:                jobRegistry,
+		condRegistry:               condRegistry,
+		techRegistry:               techRegistry,
+		hardwiredTechRepo:          hardwiredTechRepo,
+		preparedTechRepo:           preparedTechRepo,
+		spontaneousTechRepo:        spontaneousTechRepo,
+		innateTechRepo:             innateTechRepo,
+		loadoutsDir:                loadoutsDir,
 		allSkills:                  allSkills,
 		characterSkillsRepo:        characterSkillsRepo,
 		characterProficienciesRepo: characterProficienciesRepo,
@@ -599,7 +599,6 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					}
 				}
 			}
-
 
 			// Load persisted currency.
 			if savedCurrency, currErr := s.charSaver.LoadCurrency(stream.Context(), characterID); currErr != nil {
@@ -3346,19 +3345,19 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	}
 
 	view := &gamev1.CharacterSheetView{
-		Name:         sess.CharName,
-		Level:        int32(sess.Level),
-		CurrentHp:    int32(sess.CurrentHP),
-		MaxHp:        int32(sess.MaxHP),
-		Brutality:    int32(sess.Abilities.Brutality),
-		Grit:         int32(sess.Abilities.Grit),
-		Quickness:    int32(sess.Abilities.Quickness),
-		Reasoning:    int32(sess.Abilities.Reasoning),
-		Savvy:        int32(sess.Abilities.Savvy),
-		Flair:        int32(sess.Abilities.Flair),
-		Currency:     inventory.FormatRounds(sess.Currency),
-		Gender:       sess.Gender,
-		HeroPoints:   int32(sess.HeroPoints),
+		Name:       sess.CharName,
+		Level:      int32(sess.Level),
+		CurrentHp:  int32(sess.CurrentHP),
+		MaxHp:      int32(sess.MaxHP),
+		Brutality:  int32(sess.Abilities.Brutality),
+		Grit:       int32(sess.Abilities.Grit),
+		Quickness:  int32(sess.Abilities.Quickness),
+		Reasoning:  int32(sess.Abilities.Reasoning),
+		Savvy:      int32(sess.Abilities.Savvy),
+		Flair:      int32(sess.Abilities.Flair),
+		Currency:   inventory.FormatRounds(sess.Currency),
+		Gender:     sess.Gender,
+		HeroPoints: int32(sess.HeroPoints),
 	}
 
 	// Job info from registry.
@@ -6917,7 +6916,8 @@ func (s *GameServiceServer) handleSwim(uid string, req *gamev1.SwimRequest) (*ga
 //
 // Precondition: uid is a valid player in active combat with >= 1 AP remaining.
 // Postcondition: 1 AP spent; remaining AP banked (capped at 2) in sess.BankedAP;
-//   all AP zeroed; player combatant ACMod reduced by 2.
+//
+//	all AP zeroed; player combatant ACMod reduced by 2.
 func (s *GameServiceServer) handleDelay(uid string, _ *gamev1.DelayRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {

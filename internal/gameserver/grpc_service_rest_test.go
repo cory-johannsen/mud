@@ -2,12 +2,14 @@ package gameserver
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -76,6 +78,64 @@ func (r *fakePreparedRepoRest) Set(_ context.Context, _ int64, level, index int,
 func (r *fakePreparedRepoRest) DeleteAll(_ context.Context, _ int64) error {
 	r.slots = nil
 	return nil
+}
+
+// TestPropertyHandleRest_InCombat_NeverMutatesState verifies that handleRest never
+// mutates session prepared tech state when the player is in combat, regardless of
+// job/slot configuration (property, REQ-RAR6).
+func TestPropertyHandleRest_InCombat_NeverMutatesState(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		numSlots := rapid.IntRange(0, 3).Draw(rt, "numSlots")
+		sessMgr := session.NewManager()
+		svc := testMinimalService(t, sessMgr)
+
+		uid := fmt.Sprintf("player-prop-%d", rapid.IntRange(0, 9999).Draw(rt, "uid"))
+		_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID:      uid,
+			Username: uid,
+			CharName: uid,
+			RoomID:   "room_a",
+			Role:     "player",
+		})
+		if err != nil {
+			rt.Skip()
+		}
+
+		sess, ok := sessMgr.GetPlayer(uid)
+		if !ok {
+			rt.Skip()
+		}
+		sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT)
+		initial := make([]*session.PreparedSlot, numSlots)
+		for i := range initial {
+			initial[i] = &session.PreparedSlot{TechID: fmt.Sprintf("tech_%d", i)}
+		}
+		sess.PreparedTechs = map[int][]*session.PreparedSlot{1: initial}
+
+		prepRepo := &fakePreparedRepoRest{
+			slots: map[int][]*session.PreparedSlot{1: initial},
+		}
+		svc.SetPreparedTechRepo(prepRepo)
+
+		stream := &fakeSessionStream{}
+		_ = svc.handleRest(uid, "req", stream)
+
+		// State must be unchanged: repo slots still set (DeleteAll not called).
+		if numSlots > 0 {
+			if prepRepo.slots == nil {
+				rt.Fatalf("repo slots were deleted while in combat")
+			}
+			for i, slot := range prepRepo.slots[1] {
+				if slot.TechID != fmt.Sprintf("tech_%d", i) {
+					rt.Fatalf("slot %d mutated while in combat: got %q", i, slot.TechID)
+				}
+			}
+		}
+		// Exactly one message sent: the combat guard message.
+		if len(stream.sent) != 1 {
+			rt.Fatalf("expected 1 message sent, got %d", len(stream.sent))
+		}
+	})
 }
 
 // TestHandleRest_InCombat_Rejected verifies that handleRest rejects the request
