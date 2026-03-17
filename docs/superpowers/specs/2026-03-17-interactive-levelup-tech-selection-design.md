@@ -91,6 +91,37 @@ Add to `internal/game/session/manager.go` `PlayerSession` struct:
 PendingTechGrants map[int]*ruleset.TechnologyGrants
 ```
 
+**Import note:** `internal/game/session/manager.go` does not currently import `internal/game/ruleset`. Before adding this field, verify no import cycle exists (`ruleset` must not import `session`). A quick `grep -r "session" internal/game/ruleset/` confirms `ruleset` does not import `session`, so the import is safe.
+
+### Persistence: `character_pending_tech_levels` table
+
+`PendingBoosts` is persisted in `character_pending_boosts` and `PendingSkillIncreases` in a similar table. For consistency, pending tech levels must also survive server restarts.
+
+Persist only the **list of character levels** with pending grants (not the grants themselves — those are deterministically re-derived from `job.LevelUpGrants[lvl]` at login):
+
+New repo method on `ProgressRepo` interface in `internal/gameserver/grpc_service.go`:
+
+```go
+GetPendingTechLevels(ctx context.Context, id int64) ([]int, error)
+SetPendingTechLevels(ctx context.Context, id int64, levels []int) error
+```
+
+New DB table (migration in `internal/storage/postgres/testdata/`):
+
+```sql
+CREATE TABLE character_pending_tech_levels (
+    character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+    level        INT    NOT NULL,
+    PRIMARY KEY (character_id, level)
+);
+```
+
+**At level-up** (in `handleGrant`): when deferred grants are stored in `sess.PendingTechGrants[lvl]`, also call `progressRepo.SetPendingTechLevels(ctx, characterID, pendingLevels)` to persist the updated list.
+
+**At login** (in `Session`): load `GetPendingTechLevels` → reconstruct `sess.PendingTechGrants[lvl] = job.LevelUpGrants[lvl]` for each persisted level. If `job.LevelUpGrants[lvl]` is nil (job YAML changed), skip that level silently.
+
+**After resolution** (in `ResolvePendingTechGrants`): after clearing each entry from `sess.PendingTechGrants`, call `SetPendingTechLevels` to update the persisted list.
+
 ---
 
 ## Feature 4: `handleGrant` changes
@@ -228,7 +259,7 @@ func (s *GameServiceServer) handleSelectTech(uid string, requestID string, strea
         return s.promptFeatureChoice(stream, "tech_choice", choices)
     }
 
-    if err := ResolvePendingTechGrants(ctx, sess, sess.CharacterID,
+    if err := ResolvePendingTechGrants(stream.Context(), sess, sess.CharacterID,
         job, s.techRegistry, promptFn,
         s.hardwiredTechRepo, s.preparedTechRepo,
         s.spontaneousTechRepo, s.innateTechRepo,
@@ -287,6 +318,6 @@ All tests use TDD + property-based testing (SWENG-5, SWENG-5a).
 
 ## Constraints
 
-- No new DB tables — `PendingTechGrants` is in-memory session state only. Pending grants are re-derived at login if the server restarts (not persisted).
+- One new DB table (`character_pending_tech_levels`) and two new repo methods — consistent with how `PendingBoosts` and `PendingSkillIncreases` are persisted.
 - No new proto messages beyond `SelectTechRequest`.
 - Use count decrement is out of scope.
