@@ -243,7 +243,7 @@
     - [x] Occult -> Neural
     - [x] Primal -> Bio-Synthetic
   - [x] Archetype and Job define the technologies available for the player — `TechnologyGrants` on `Job` and `InnateTechnologies` on `Archetype`; assigned at character creation via `AssignTechnologies`; loaded at login via `LoadTechnologies`; repos wired into `GameServiceServer`
-    - [ ] Levelling up allows for additions and changes
+    - [x] Levelling up allows for additions and changes — hardwired grants auto-applied; prepared/spontaneous pool choices deferred to `PendingTechGrants`, resolved interactively at login or via `selecttech`
     - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
       - [x] Cantrips -> Hardwired Technologies (unlimited-use minor Technologies)
         - [x] Fixed list per Job, no player adjustment
