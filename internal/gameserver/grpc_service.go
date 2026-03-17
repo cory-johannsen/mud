@@ -3667,6 +3667,24 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.PendingBoosts = int32(sess.PendingBoosts)
 	view.PendingSkillIncreases = int32(sess.PendingSkillIncreases)
 	view.PendingTechSelections = int32(len(sess.PendingTechGrants))
+	// Prepared technology slots with expended state.
+	if len(sess.PreparedTechs) > 0 {
+		levels := make([]int, 0, len(sess.PreparedTechs))
+		for lvl := range sess.PreparedTechs {
+			levels = append(levels, lvl)
+		}
+		sort.Ints(levels)
+		for _, lvl := range levels {
+			for _, slot := range sess.PreparedTechs[lvl] {
+				if slot != nil {
+					view.PreparedSlots = append(view.PreparedSlots, &gamev1.PreparedSlotView{
+						TechId:   slot.TechID,
+						Expended: slot.Expended,
+					})
+				}
+			}
+		}
+	}
 	if s.xpSvc != nil {
 		cfg := s.xpSvc.Config()
 		if sess.Level < cfg.LevelCap {

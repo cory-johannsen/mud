@@ -250,7 +250,7 @@
         - [x] Level-up hardwired tech grants applied via `LevelUpTechnologies` for each level gained in ascending order (REQ-LUT7); admin `grant xp` path uses first-option auto-assign (no interactive prompt available)
       - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
         - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
-        - [ ] Prepared tech slot expending — each prepared slot is one use; `use <tech>` expends the first matching non-expended slot; `rest` restores all slots; expended state persisted in DB
+        - [x] Prepared tech slot expending — each prepared slot is one use; `use <tech>` expends the first matching non-expended slot; `rest` restores all slots; expended state persisted in DB
         - [ ] Prepared tech effect resolution — activating a tech applies its game effect (damage, condition, etc.); out of scope until effect system is defined
         - [x] Can be rearranged when resting — `rest` command; `RearrangePreparedTechs` aggregates creation + level-up grants, clears and re-fills slots interactively
         - [x] Level-up technology selection — player selects new prepared/spontaneous techs interactively at next login or via `selecttech`; auto-assigned grants notify in-console; persisted in `character_pending_tech_levels`
@@ -323,6 +323,7 @@
     - [ ] equipment repair and crafting
       - [ ] Repair NPC behavior — `repair <item>` command in repair NPC's room; pays credit cost proportional to item damage; restores item durability; requires item durability system
 - [ ] Persistent calendar
+- [ ] `use` command completion
 - [x] Hero points
   - [x] Add `HeroPoints int` field to PlayerSession; award 1 point at session start and on milestone events (level up, boss kill, GM grant)
   - [x] `heropoint reroll` — re-roll the most recent skill or attack check and take the higher result; costs 1 hero point; unavailable if no recent check

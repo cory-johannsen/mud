@@ -647,6 +647,12 @@ message UseResponse {
   repeated FeatEntry choices = 2;
 }
 
+// PreparedSlotView represents one prepared technology slot on the character sheet.
+message PreparedSlotView {
+    string tech_id  = 1;
+    bool   expended = 2;
+}
+
 // CharacterSheetView delivers the player's full character sheet.
 message CharacterSheetView {
     string name      = 1;
@@ -699,6 +705,7 @@ message CharacterSheetView {
     int32  awareness = 41; // static bonus: 10 + savvy_mod + awareness_proficiency_bonus
     int32  hero_points = 42; // current hero point count
     int32  pending_tech_selections = 43; // number of pending technology grant selections
+    repeated PreparedSlotView prepared_slots = 44; // prepared technology slots with expended state
 }
 
 // ResistanceEntry represents one player damage-type resistance or weakness.
