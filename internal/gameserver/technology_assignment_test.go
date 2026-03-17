@@ -27,7 +27,9 @@ func (r *fakeHardwiredRepo) SetAll(_ context.Context, _ int64, ids []string) err
 	return nil
 }
 
-type fakePreparedRepo struct{ slots map[int][]*session.PreparedSlot }
+type fakePreparedRepo struct {
+	slots map[int][]*session.PreparedSlot
+}
 
 func (r *fakePreparedRepo) GetAll(_ context.Context, _ int64) (map[int][]*session.PreparedSlot, error) {
 	return r.slots, nil
@@ -61,7 +63,9 @@ func (r *fakeSpontaneousRepo) DeleteAll(_ context.Context, _ int64) error {
 	return nil
 }
 
-type fakeInnateRepo struct{ slots map[string]*session.InnateSlot }
+type fakeInnateRepo struct {
+	slots map[string]*session.InnateSlot
+}
 
 func (r *fakeInnateRepo) GetAll(_ context.Context, _ int64) (map[string]*session.InnateSlot, error) {
 	return r.slots, nil
