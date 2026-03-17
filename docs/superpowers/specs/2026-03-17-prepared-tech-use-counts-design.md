@@ -78,10 +78,18 @@ func (r *CharacterPreparedTechRepository) SetExpended(ctx context.Context, chara
 }
 ```
 
-`GetAll` must be updated to scan the `expended` column:
+`GetAll` must be updated to select and scan the `expended` column. The SELECT query becomes:
+
+```sql
+SELECT slot_level, slot_index, tech_id, expended
+FROM character_prepared_technologies
+WHERE character_id = $1
+ORDER BY slot_level, slot_index
+```
+
+And the Scan call gains a fourth destination:
 
 ```go
-// existing Scan call gains expended:
 if err := rows.Scan(&level, &index, &techID, &expended); err != nil { ... }
 slot := &session.PreparedSlot{TechID: techID, Expended: expended}
 ```
