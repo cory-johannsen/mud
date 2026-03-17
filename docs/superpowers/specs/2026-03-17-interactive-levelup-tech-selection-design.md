@@ -60,8 +60,9 @@ New function in `internal/gameserver/technology_assignment.go`:
 // For each entry in sess.PendingTechGrants (ascending level order), calls LevelUpTechnologies
 // with a live promptFn. Removes each entry after successful resolution.
 //
-// Precondition: sess, promptFn, and all repos are non-nil.
+// Precondition: sess, promptFn, progressRepo, and all tech repos are non-nil.
 // Postcondition: sess.PendingTechGrants is empty on full success; partially cleared on error.
+// SetPendingTechLevels is called after each resolved entry to keep the DB in sync.
 func ResolvePendingTechGrants(
     ctx context.Context,
     sess *session.PlayerSession,
@@ -73,6 +74,7 @@ func ResolvePendingTechGrants(
     prepRepo PreparedTechRepo,
     spontRepo SpontaneousTechRepo,
     innateRepo InnateTechRepo,
+    progressRepo PendingTechLevelsRepo,
 ) error
 ```
 
@@ -99,7 +101,18 @@ PendingTechGrants map[int]*ruleset.TechnologyGrants
 
 Persist only the **list of character levels** with pending grants (not the grants themselves — those are deterministically re-derived from `job.LevelUpGrants[lvl]` at login):
 
-New repo method on `ProgressRepo` interface in `internal/gameserver/grpc_service.go`:
+New interface in `internal/gameserver/technology_assignment.go` (alongside the existing repo interfaces):
+
+```go
+// PendingTechLevelsRepo persists the list of character levels with unresolved
+// technology pool selections.
+type PendingTechLevelsRepo interface {
+    GetPendingTechLevels(ctx context.Context, characterID int64) ([]int, error)
+    SetPendingTechLevels(ctx context.Context, characterID int64, levels []int) error
+}
+```
+
+Add to `ProgressRepo` interface in `internal/gameserver/grpc_service.go`:
 
 ```go
 GetPendingTechLevels(ctx context.Context, id int64) ([]int, error)
@@ -159,6 +172,7 @@ if len(sess.PendingTechGrants) > 0 {
             job, s.techRegistry, promptFn,
             s.hardwiredTechRepo, s.preparedTechRepo,
             s.spontaneousTechRepo, s.innateTechRepo,
+            s.progressRepo,
         ); err != nil {
             s.logger.Warn("login: ResolvePendingTechGrants failed", zap.Error(err))
         }
@@ -263,6 +277,7 @@ func (s *GameServiceServer) handleSelectTech(uid string, requestID string, strea
         job, s.techRegistry, promptFn,
         s.hardwiredTechRepo, s.preparedTechRepo,
         s.spontaneousTechRepo, s.innateTechRepo,
+        s.progressRepo,
     ); err != nil {
         s.logger.Warn("handleSelectTech failed", zap.String("uid", uid), zap.Error(err))
         return sendMsg("Something went wrong selecting your technologies.")
