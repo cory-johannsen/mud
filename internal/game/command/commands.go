@@ -102,6 +102,7 @@ const (
 	HandlerUngroup            = "ungroup"
 	HandlerKick               = "kick"
 	HandlerRest               = "rest"
+	HandlerSelectTech         = "selecttech"
 )
 
 // Command defines a player-invocable command.
@@ -224,6 +225,7 @@ func BuiltinCommands() []Command {
 		{Name: "ungroup", Help: "Leave your group. Leaders disband the group for all members.", Category: CategoryCommunication, Handler: HandlerUngroup},
 		{Name: "kick", Help: "Kick a player from your group (leader only).", Category: CategoryCommunication, Handler: HandlerKick},
 		{Name: "rest", Help: "Rest to rearrange your prepared technology slots.", Category: CategoryCharacter, Handler: HandlerRest},
+		{Name: "selecttech", Help: "Select pending technology upgrades from levelling up.", Category: CategoryCharacter, Handler: HandlerSelectTech},
 	}
 }
 

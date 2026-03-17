@@ -127,6 +127,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerUngroup:            bridgeUngroup,
 	command.HandlerKick:               bridgeKick,
 	command.HandlerRest:               bridgeRest,
+	command.HandlerSelectTech:         bridgeSelectTech,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1335,6 +1336,17 @@ func bridgeKick(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Kick{Kick: &gamev1.KickRequest{Player: player}},
+	}}, nil
+}
+
+// bridgeSelectTech builds a SelectTechRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a SelectTechRequest; done is false.
+func bridgeSelectTech(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_SelectTech{SelectTech: &gamev1.SelectTechRequest{}},
 	}}, nil
 }
 

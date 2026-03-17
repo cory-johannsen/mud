@@ -252,7 +252,7 @@
         - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
         - [ ] Fixed number of uses per Technology per level (i.e. 5 level 1, 3 level 2, 1 level 3)
         - [x] Can be rearranged when resting — `rest` command; `RearrangePreparedTechs` aggregates creation + level-up grants, clears and re-fills slots interactively
-        - [ ] Level-up technology selection — player chooses new technologies when levelling up (prepared/spontaneous pool expands; player selects additions interactively)
+        - [x] Level-up technology selection — player selects new prepared/spontaneous techs interactively at next login or via `selecttech`; auto-assigned grants notify in-console; persisted in `character_pending_tech_levels`
       - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
         - [ ] Fixed list of Technologies per job level
         - [ ] Fixed number usages for each Technology level (resets with long rest)

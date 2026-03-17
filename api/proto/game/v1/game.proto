@@ -96,11 +96,15 @@ message ClientMessage {
     UngroupRequest ungroup = 79;
     KickRequest kick = 80;
     RestRequest rest = 81;
+    SelectTechRequest select_tech = 82;
   }
 }
 
 // RestRequest asks the server to rest the player and rearrange prepared technology slots.
 message RestRequest {}
+
+// SelectTechRequest asks the server to interactively assign pending technology grants.
+message SelectTechRequest {}
 
 // ServerEvent wraps all server-to-client events.
 message ServerEvent {
@@ -694,6 +698,7 @@ message CharacterSheetView {
     string gender = 40;
     int32  awareness = 41; // static bonus: 10 + savvy_mod + awareness_proficiency_bonus
     int32  hero_points = 42; // current hero point count
+    int32  pending_tech_selections = 43; // number of pending technology grant selections
 }
 
 // ResistanceEntry represents one player damage-type resistance or weakness.

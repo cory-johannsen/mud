@@ -1208,6 +1208,13 @@ func (s *GameServiceServer) commandLoop(ctx context.Context, uid string, stream 
 			continue
 		}
 
+		if _, ok := msg.Payload.(*gamev1.ClientMessage_SelectTech); ok {
+			if err := s.handleSelectTech(uid, msg.RequestId, stream); err != nil {
+				s.logger.Warn("handleSelectTech error", zap.String("uid", uid), zap.Error(err))
+			}
+			continue
+		}
+
 		resp, err := s.dispatch(uid, msg)
 		if err == errQuit {
 			// Send Disconnected event then exit cleanly.
@@ -2456,6 +2463,61 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 	return sendMsg("You finish your rest and your technologies are prepared.")
 }
 
+// handleSelectTech processes the selecttech command for a player.
+// Called pre-dispatch because it requires direct stream access to prompt the player.
+//
+// Precondition: uid identifies a valid player session.
+// Postcondition: If pending tech grants exist, they are resolved interactively;
+// a confirmation or error message is sent to the player's stream.
+func (s *GameServiceServer) handleSelectTech(uid string, requestID string, stream gamev1.GameService_SessionServer) error {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("handleSelectTech: player %q not found", uid)
+	}
+
+	sendMsg := func(text string) error {
+		return stream.Send(&gamev1.ServerEvent{
+			RequestId: requestID,
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: text},
+			},
+		})
+	}
+
+	if len(sess.PendingTechGrants) == 0 {
+		return sendMsg("You have no pending technology selections.")
+	}
+
+	if s.jobRegistry == nil {
+		return sendMsg("You have no pending technology selections.")
+	}
+	job, ok := s.jobRegistry.Job(sess.Class)
+	if !ok {
+		return sendMsg("You have no pending technology selections.")
+	}
+
+	promptFn := func(options []string) (string, error) {
+		choices := &ruleset.FeatureChoices{
+			Prompt:  "Choose a technology:",
+			Options: options,
+			Key:     "tech_choice",
+		}
+		return s.promptFeatureChoice(stream, "tech_choice", choices)
+	}
+
+	if err := ResolvePendingTechGrants(stream.Context(), sess, sess.CharacterID,
+		job, s.techRegistry, promptFn,
+		s.hardwiredTechRepo, s.preparedTechRepo,
+		s.spontaneousTechRepo, s.innateTechRepo,
+		s.progressRepo,
+	); err != nil {
+		s.logger.Warn("handleSelectTech failed", zap.String("uid", uid), zap.Error(err))
+		return sendMsg("Something went wrong selecting your technologies.")
+	}
+
+	return sendMsg("Your technology selections are complete.")
+}
+
 // pushMessageToUID sends a plain-text MessageEvent to a single player session identified by uid.
 //
 // Precondition: uid must be non-empty and the session must exist.
@@ -3604,6 +3666,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	view.Experience = int32(sess.Experience)
 	view.PendingBoosts = int32(sess.PendingBoosts)
 	view.PendingSkillIncreases = int32(sess.PendingSkillIncreases)
+	view.PendingTechSelections = int32(len(sess.PendingTechGrants))
 	if s.xpSvc != nil {
 		cfg := s.xpSvc.Config()
 		if sess.Level < cfg.LevelCap {
