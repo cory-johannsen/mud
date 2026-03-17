@@ -74,8 +74,8 @@ func (m *grantCharSaver) SaveCurrency(_ context.Context, _ int64, currency int) 
 	m.savedCurrency.Store(int64(currency))
 	return nil
 }
-func (m *grantCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error) { return 0, nil }
-func (m *grantCharSaver) SaveGender(_ context.Context, _ int64, _ string) error { return nil }
+func (m *grantCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error)   { return 0, nil }
+func (m *grantCharSaver) SaveGender(_ context.Context, _ int64, _ string) error  { return nil }
 func (m *grantCharSaver) SaveHeroPoints(_ context.Context, _ int64, _ int) error { return nil }
 func (m *grantCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 
@@ -84,10 +84,10 @@ func (m *grantCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, error)
 // Precondition: none.
 // Postcondition: SaveProgress and IncrementPendingSkillIncreases record call counts; all other methods no-op or return zero values.
 type grantProgressRepo struct {
-	saveProgressCalls              atomic.Int32
-	incrementSkillIncreasesCalls   atomic.Int32
-	incrementSkillIncreasesTotal   atomic.Int32
-	markSkillIncreasesInitCalls    atomic.Int32
+	saveProgressCalls            atomic.Int32
+	incrementSkillIncreasesCalls atomic.Int32
+	incrementSkillIncreasesTotal atomic.Int32
+	markSkillIncreasesInitCalls  atomic.Int32
 }
 
 func (m *grantProgressRepo) GetProgress(_ context.Context, _ int64) (int, int, int, int, error) {
@@ -110,6 +110,12 @@ func (m *grantProgressRepo) IsSkillIncreasesInitialized(_ context.Context, _ int
 }
 func (m *grantProgressRepo) MarkSkillIncreasesInitialized(_ context.Context, _ int64) error {
 	m.markSkillIncreasesInitCalls.Add(1)
+	return nil
+}
+func (m *grantProgressRepo) GetPendingTechLevels(_ context.Context, _ int64) ([]int, error) {
+	return nil, nil
+}
+func (m *grantProgressRepo) SetPendingTechLevels(_ context.Context, _ int64, _ []int) error {
 	return nil
 }
 func (m *grantProgressRepo) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error {

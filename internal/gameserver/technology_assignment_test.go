@@ -573,6 +573,22 @@ func TestRearrangePreparedTechs_EmptySession_NoOp(t *testing.T) {
 	assert.Equal(t, "db_slot", prep.slots[1][0].TechID, "repo must be unchanged on no-op")
 }
 
+// --- fakePendingTechLevelsRepo ---
+
+type fakePendingTechLevelsRepo struct {
+	levels       []int
+	setWasCalled bool
+}
+
+func (r *fakePendingTechLevelsRepo) GetPendingTechLevels(_ context.Context, _ int64) ([]int, error) {
+	return r.levels, nil
+}
+func (r *fakePendingTechLevelsRepo) SetPendingTechLevels(_ context.Context, _ int64, levels []int) error {
+	r.levels = levels
+	r.setWasCalled = true
+	return nil
+}
+
 // REQ-RAR5: Auto-assign fires when len(pool at level) == open slots; no prompt invoked.
 func TestRearrangePreparedTechs_AutoAssignNoPrompt(t *testing.T) {
 	ctx := context.Background()
@@ -604,4 +620,125 @@ func TestRearrangePreparedTechs_AutoAssignNoPrompt(t *testing.T) {
 	assert.False(t, promptCalled, "prompt must not be called when pool == open slots")
 	require.Len(t, sess.PreparedTechs[1], 1)
 	assert.Equal(t, "only_option", sess.PreparedTechs[1][0].TechID)
+}
+
+// REQ-ILT2: All-immediate grants (pool <= open slots) → deferred is nil.
+func TestPartitionTechGrants_AllImmediate(t *testing.T) {
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 2},
+			Fixed:        []ruleset.PreparedEntry{{ID: "fixed", Level: 1}},
+			Pool:         []ruleset.PreparedEntry{{ID: "only_pool", Level: 1}},
+		},
+	}
+	immediate, deferred := gameserver.PartitionTechGrants(grants)
+	assert.NotNil(t, immediate)
+	assert.Nil(t, deferred, "no player choice needed when pool <= open slots")
+}
+
+// REQ-ILT1 (partition): Pool > open slots → deferred is non-nil for that level.
+func TestPartitionTechGrants_DeferredWhenPoolExceedsSlots(t *testing.T) {
+	grants := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 1},
+			Pool: []ruleset.PreparedEntry{
+				{ID: "pool_a", Level: 1},
+				{ID: "pool_b", Level: 1},
+			},
+		},
+	}
+	immediate, deferred := gameserver.PartitionTechGrants(grants)
+	assert.Nil(t, immediate, "no immediate grants when no fixed/auto-assign at this level")
+	require.NotNil(t, deferred)
+	require.NotNil(t, deferred.Prepared)
+	assert.Equal(t, 1, deferred.Prepared.SlotsByLevel[1])
+}
+
+// REQ-ILT1: Hardwired entries always go to immediate.
+func TestPartitionTechGrants_HardwiredAlwaysImmediate(t *testing.T) {
+	grants := &ruleset.TechnologyGrants{
+		Hardwired: []string{"hw1", "hw2"},
+		Prepared: &ruleset.PreparedGrants{
+			SlotsByLevel: map[int]int{1: 1},
+			Pool: []ruleset.PreparedEntry{
+				{ID: "p1", Level: 1},
+				{ID: "p2", Level: 1},
+			},
+		},
+	}
+	immediate, deferred := gameserver.PartitionTechGrants(grants)
+	require.NotNil(t, immediate)
+	assert.Equal(t, []string{"hw1", "hw2"}, immediate.Hardwired)
+	require.NotNil(t, deferred)
+}
+
+// REQ-ILT5: ResolvePendingTechGrants prompts for each pending level in ascending order,
+// calls LevelUpTechnologies, and clears each entry.
+func TestResolvePendingTechGrants_ResolvesAndClears(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{}
+	hw := &fakeHardwiredRepo{}
+	spont := &fakeSpontaneousRepo{}
+	innate := &fakeInnateRepo{}
+	progressRepo := &fakePendingTechLevelsRepo{}
+
+	sess := &session.PlayerSession{
+		Level: 3,
+		PendingTechGrants: map[int]*ruleset.TechnologyGrants{
+			2: {Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool:         []ruleset.PreparedEntry{{ID: "level2_tech", Level: 1}},
+			}},
+		},
+	}
+	job := &ruleset.Job{
+		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
+			2: sess.PendingTechGrants[2],
+		},
+	}
+
+	err := gameserver.ResolvePendingTechGrants(ctx, sess, 1, job, nil, noPrompt, hw, prep, spont, innate, progressRepo)
+	require.NoError(t, err)
+	assert.Empty(t, sess.PendingTechGrants, "pending grants must be cleared after resolution")
+	assert.True(t, progressRepo.setWasCalled, "SetPendingTechLevels must be called after resolution")
+}
+
+// REQ-ILT7 (property): After ResolvePendingTechGrants, all chosen tech IDs are valid pool members.
+func TestPropertyResolvePendingTechGrants_ChosenFromPool(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		nPool := rapid.IntRange(1, 4).Draw(rt, "nPool")
+		pool := make([]ruleset.PreparedEntry, nPool)
+		for i := range pool {
+			pool[i] = ruleset.PreparedEntry{ID: fmt.Sprintf("tech_%d", i), Level: 1}
+		}
+		// Open slots = 1 (pool > open → was deferred)
+		grants := &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool:         pool,
+			},
+		}
+		sess := &session.PlayerSession{
+			Level:             5,
+			PendingTechGrants: map[int]*ruleset.TechnologyGrants{3: grants},
+		}
+		prep := &fakePreparedRepo{}
+		progressRepo := &fakePendingTechLevelsRepo{}
+
+		err := gameserver.ResolvePendingTechGrants(context.Background(), sess, 1,
+			&ruleset.Job{}, nil, noPrompt, &fakeHardwiredRepo{}, prep,
+			&fakeSpontaneousRepo{}, &fakeInnateRepo{}, progressRepo)
+		if err != nil {
+			rt.Fatalf("ResolvePendingTechGrants: %v", err)
+		}
+		validIDs := make(map[string]bool)
+		for _, e := range pool {
+			validIDs[e.ID] = true
+		}
+		for _, slot := range prep.slots[1] {
+			if !validIDs[slot.TechID] {
+				rt.Fatalf("chosen tech %q not in pool", slot.TechID)
+			}
+		}
+	})
 }

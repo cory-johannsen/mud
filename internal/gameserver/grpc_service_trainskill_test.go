@@ -28,7 +28,7 @@ import (
 // Postcondition: UpgradeSkill always returns upgradeErr; other methods succeed.
 type failingSkillsRepo struct {
 	stubSkillsRepo
-	upgradeErr  error
+	upgradeErr   error
 	upgradeCalls atomic.Int32
 }
 
@@ -42,9 +42,9 @@ func (r *failingSkillsRepo) UpgradeSkill(_ context.Context, _ int64, _, _ string
 // Precondition: none.
 // Postcondition: ConsumePendingSkillIncrease returns consumeErr if set; all other methods succeed with no-op.
 type mockProgressRepo struct {
-	consumeErr        error
-	consumeCalls      atomic.Int32
-	incrementCalls    atomic.Int32
+	consumeErr     error
+	consumeCalls   atomic.Int32
+	incrementCalls atomic.Int32
 }
 
 func (m *mockProgressRepo) GetProgress(_ context.Context, _ int64) (int, int, int, int, error) {
@@ -68,6 +68,12 @@ func (m *mockProgressRepo) IsSkillIncreasesInitialized(_ context.Context, _ int6
 	return true, nil
 }
 func (m *mockProgressRepo) MarkSkillIncreasesInitialized(_ context.Context, _ int64) error {
+	return nil
+}
+func (m *mockProgressRepo) GetPendingTechLevels(_ context.Context, _ int64) ([]int, error) {
+	return nil, nil
+}
+func (m *mockProgressRepo) SetPendingTechLevels(_ context.Context, _ int64, _ []int) error {
 	return nil
 }
 

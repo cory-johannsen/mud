@@ -3,6 +3,7 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -312,6 +313,180 @@ func RearrangePreparedTechs(
 			return fmt.Errorf("RearrangePreparedTechs level %d: %w", lvl, err)
 		}
 		sess.PreparedTechs[lvl] = chosen
+	}
+	return nil
+}
+
+// PartitionTechGrants splits grants into immediate (no player choice needed) and
+// deferred (pool > open slots, player must choose) parts.
+//
+// Precondition: grants is non-nil and valid.
+// Postcondition: immediate + deferred together cover all grants in the input.
+// Either return value may be nil if its category is empty.
+func PartitionTechGrants(grants *ruleset.TechnologyGrants) (immediate, deferred *ruleset.TechnologyGrants) {
+	var imm, def ruleset.TechnologyGrants
+
+	// Hardwired: always immediate.
+	if len(grants.Hardwired) > 0 {
+		imm.Hardwired = append(imm.Hardwired, grants.Hardwired...)
+	}
+
+	// Prepared: partition per tech level.
+	if grants.Prepared != nil {
+		for lvl, slots := range grants.Prepared.SlotsByLevel {
+			nFixed := 0
+			for _, e := range grants.Prepared.Fixed {
+				if e.Level == lvl {
+					nFixed++
+				}
+			}
+			nPool := 0
+			for _, e := range grants.Prepared.Pool {
+				if e.Level == lvl {
+					nPool++
+				}
+			}
+			open := slots - nFixed
+			if nPool <= open {
+				if imm.Prepared == nil {
+					imm.Prepared = &ruleset.PreparedGrants{SlotsByLevel: make(map[int]int)}
+				}
+				imm.Prepared.SlotsByLevel[lvl] = slots
+				for _, e := range grants.Prepared.Fixed {
+					if e.Level == lvl {
+						imm.Prepared.Fixed = append(imm.Prepared.Fixed, e)
+					}
+				}
+				for _, e := range grants.Prepared.Pool {
+					if e.Level == lvl {
+						imm.Prepared.Pool = append(imm.Prepared.Pool, e)
+					}
+				}
+			} else {
+				if def.Prepared == nil {
+					def.Prepared = &ruleset.PreparedGrants{SlotsByLevel: make(map[int]int)}
+				}
+				def.Prepared.SlotsByLevel[lvl] = slots
+				for _, e := range grants.Prepared.Fixed {
+					if e.Level == lvl {
+						def.Prepared.Fixed = append(def.Prepared.Fixed, e)
+					}
+				}
+				for _, e := range grants.Prepared.Pool {
+					if e.Level == lvl {
+						def.Prepared.Pool = append(def.Prepared.Pool, e)
+					}
+				}
+			}
+		}
+	}
+
+	// Spontaneous: partition per tech level.
+	if grants.Spontaneous != nil {
+		for lvl, known := range grants.Spontaneous.KnownByLevel {
+			nFixed := 0
+			for _, e := range grants.Spontaneous.Fixed {
+				if e.Level == lvl {
+					nFixed++
+				}
+			}
+			nPool := 0
+			for _, e := range grants.Spontaneous.Pool {
+				if e.Level == lvl {
+					nPool++
+				}
+			}
+			open := known - nFixed
+			if nPool <= open {
+				if imm.Spontaneous == nil {
+					imm.Spontaneous = &ruleset.SpontaneousGrants{KnownByLevel: make(map[int]int)}
+				}
+				imm.Spontaneous.KnownByLevel[lvl] = known
+				for _, e := range grants.Spontaneous.Fixed {
+					if e.Level == lvl {
+						imm.Spontaneous.Fixed = append(imm.Spontaneous.Fixed, e)
+					}
+				}
+				for _, e := range grants.Spontaneous.Pool {
+					if e.Level == lvl {
+						imm.Spontaneous.Pool = append(imm.Spontaneous.Pool, e)
+					}
+				}
+			} else {
+				if def.Spontaneous == nil {
+					def.Spontaneous = &ruleset.SpontaneousGrants{KnownByLevel: make(map[int]int)}
+				}
+				def.Spontaneous.KnownByLevel[lvl] = known
+				for _, e := range grants.Spontaneous.Fixed {
+					if e.Level == lvl {
+						def.Spontaneous.Fixed = append(def.Spontaneous.Fixed, e)
+					}
+				}
+				for _, e := range grants.Spontaneous.Pool {
+					if e.Level == lvl {
+						def.Spontaneous.Pool = append(def.Spontaneous.Pool, e)
+					}
+				}
+			}
+		}
+	}
+
+	if len(imm.Hardwired) > 0 || imm.Prepared != nil || imm.Spontaneous != nil {
+		immCopy := imm
+		immediate = &immCopy
+	}
+	if def.Prepared != nil || def.Spontaneous != nil {
+		defCopy := def
+		deferred = &defCopy
+	}
+	return
+}
+
+// ResolvePendingTechGrants interactively resolves all pending tech grants for a session.
+// For each entry in sess.PendingTechGrants (ascending level order), calls LevelUpTechnologies
+// with a live promptFn. Removes each entry after successful resolution.
+//
+// Precondition: sess, progressRepo, and all repos are non-nil.
+// Postcondition: sess.PendingTechGrants is empty on full success; partially cleared on error.
+// SetPendingTechLevels is called after each resolved entry to keep the DB in sync.
+func ResolvePendingTechGrants(
+	ctx context.Context,
+	sess *session.PlayerSession,
+	characterID int64,
+	job *ruleset.Job,
+	techReg *technology.Registry,
+	promptFn TechPromptFn,
+	hwRepo HardwiredTechRepo,
+	prepRepo PreparedTechRepo,
+	spontRepo SpontaneousTechRepo,
+	innateRepo InnateTechRepo,
+	progressRepo PendingTechLevelsRepo,
+) error {
+	if len(sess.PendingTechGrants) == 0 {
+		return nil
+	}
+	levels := make([]int, 0, len(sess.PendingTechGrants))
+	for lvl := range sess.PendingTechGrants {
+		levels = append(levels, lvl)
+	}
+	sort.Ints(levels)
+
+	for _, lvl := range levels {
+		grants := sess.PendingTechGrants[lvl]
+		if err := LevelUpTechnologies(ctx, sess, characterID, grants, techReg, promptFn,
+			hwRepo, prepRepo, spontRepo, innateRepo,
+		); err != nil {
+			return fmt.Errorf("ResolvePendingTechGrants level %d: %w", lvl, err)
+		}
+		delete(sess.PendingTechGrants, lvl)
+		remaining := make([]int, 0, len(sess.PendingTechGrants))
+		for k := range sess.PendingTechGrants {
+			remaining = append(remaining, k)
+		}
+		sort.Ints(remaining)
+		if err := progressRepo.SetPendingTechLevels(ctx, characterID, remaining); err != nil {
+			return fmt.Errorf("ResolvePendingTechGrants SetPendingTechLevels: %w", err)
+		}
 	}
 	return nil
 }
