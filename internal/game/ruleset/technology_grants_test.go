@@ -217,6 +217,116 @@ func TestProperty_TechnologyGrants_YAMLRoundTrip(t *testing.T) {
 	})
 }
 
+// REQ-LUT1: Job with level_up_grants YAML round-trips without data loss
+func TestJob_LevelUpGrants_RoundTrip(t *testing.T) {
+	src := `
+id: test_job
+name: Test Job
+archetype: aggressor
+level_up_grants:
+  3:
+    prepared:
+      slots_by_level:
+        2: 1
+      pool:
+        - id: arc_thought
+          level: 2
+        - id: mind_spike
+          level: 2
+  5:
+    spontaneous:
+      known_by_level:
+        2: 1
+      pool:
+        - id: acid_spray
+          level: 2
+`
+	var job ruleset.Job
+	require.NoError(t, yaml.Unmarshal([]byte(src), &job))
+
+	out, err := yaml.Marshal(&job)
+	require.NoError(t, err)
+
+	var job2 ruleset.Job
+	require.NoError(t, yaml.Unmarshal(out, &job2))
+
+	require.NotNil(t, job2.LevelUpGrants)
+	require.Contains(t, job2.LevelUpGrants, 3)
+	require.Contains(t, job2.LevelUpGrants, 5)
+	assert.NotNil(t, job2.LevelUpGrants[3].Prepared)
+	assert.Equal(t, 1, job2.LevelUpGrants[3].Prepared.SlotsByLevel[2])
+	assert.Len(t, job2.LevelUpGrants[3].Prepared.Pool, 2)
+	assert.NotNil(t, job2.LevelUpGrants[5].Spontaneous)
+	assert.Equal(t, 1, job2.LevelUpGrants[5].Spontaneous.KnownByLevel[2])
+}
+
+// REQ-LUT8 (property): For any valid level_up_grants map, YAML marshal/unmarshal preserves all fields
+func TestProperty_LevelUpGrants_YAMLRoundTrip(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 5).Draw(rt, "n")
+		grants := make(map[int]*ruleset.TechnologyGrants, n)
+		for i := 0; i < n; i++ {
+			charLevel := rapid.IntRange(1, 20).Draw(rt, fmt.Sprintf("level%d", i))
+			numHW := rapid.IntRange(0, 3).Draw(rt, fmt.Sprintf("nhw%d", i))
+			hw := make([]string, numHW)
+			for j := 0; j < numHW; j++ {
+				hw[j] = rapid.StringMatching(`[a-z_]{1,10}`).Draw(rt, fmt.Sprintf("hw%d_%d", i, j))
+			}
+			grants[charLevel] = &ruleset.TechnologyGrants{Hardwired: hw}
+		}
+		job := &ruleset.Job{
+			ID:            "prop_job",
+			Name:          "Prop Job",
+			LevelUpGrants: grants,
+		}
+
+		out, err := yaml.Marshal(job)
+		if err != nil {
+			rt.Fatalf("marshal: %v", err)
+		}
+		var job2 ruleset.Job
+		if err := yaml.Unmarshal(out, &job2); err != nil {
+			rt.Fatalf("unmarshal: %v", err)
+		}
+		for lvl, g := range grants {
+			g2, ok := job2.LevelUpGrants[lvl]
+			if !ok {
+				rt.Fatalf("missing level %d after round-trip", lvl)
+			}
+			if len(g.Hardwired) == 0 {
+				assert.Empty(rt, g2.Hardwired, "hardwired mismatch at level %d", lvl)
+			} else {
+				assert.Equal(rt, g.Hardwired, g2.Hardwired, "hardwired mismatch at level %d", lvl)
+			}
+		}
+	})
+}
+
+// REQ-LUT2, REQ-LUT9: LoadJobs rejects a YAML file with an invalid level_up_grants entry
+// (pool + fixed < slots_by_level); error includes job ID and the failing character level.
+func TestLoadJobs_RejectsInvalidLevelUpGrants(t *testing.T) {
+	// pool + fixed < slots_by_level for level 2 (0 pool + 0 fixed < 1 slot required)
+	src := `
+id: bad_job
+name: Bad Job
+archetype: aggressor
+level_up_grants:
+  3:
+    prepared:
+      slots_by_level:
+        2: 1
+      pool: []
+`
+	tmpDir := t.TempDir()
+	jobFile := filepath.Join(tmpDir, "jobs.yaml")
+	require.NoError(t, os.WriteFile(jobFile, []byte(src), 0644))
+
+	_, err := ruleset.LoadJobs(tmpDir)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "bad_job")
+	assert.Contains(t, err.Error(), "3")
+}
+
 // REQ-TG12 (load-time): LoadJobs returns error when technology_grants pool is insufficient
 func TestLoadJobs_RejectsInvalidTechnologyGrants(t *testing.T) {
 	dir := t.TempDir()

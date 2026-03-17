@@ -247,6 +247,7 @@
     - [ ] Spellbook/memorization needs to be mapped to a lore-friendly analog that preserves the underlying mechanic
       - [x] Cantrips -> Hardwired Technologies (unlimited-use minor Technologies)
         - [x] Fixed list per Job, no player adjustment
+        - [x] Level-up hardwired tech grants applied via `LevelUpTechnologies` for each level gained in ascending order (REQ-LUT7); admin `grant xp` path uses first-option auto-assign (no interactive prompt available)
       - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
         - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
         - [ ] Fixed number of uses per Technology per level (i.e. 5 level 1, 3 level 2, 1 level 3)

@@ -344,6 +344,21 @@ func (s *GameServiceServer) SetXPService(svc *xp.Service) {
 	s.xpSvc = svc
 }
 
+// SetJobRegistry injects a job registry for testing.
+func (s *GameServiceServer) SetJobRegistry(r *ruleset.JobRegistry) { s.jobRegistry = r }
+
+// SetHardwiredTechRepo injects a hardwired tech repo for testing.
+func (s *GameServiceServer) SetHardwiredTechRepo(r HardwiredTechRepo) { s.hardwiredTechRepo = r }
+
+// SetPreparedTechRepo injects a prepared tech repo for testing.
+func (s *GameServiceServer) SetPreparedTechRepo(r PreparedTechRepo) { s.preparedTechRepo = r }
+
+// SetSpontaneousTechRepo injects a spontaneous tech repo for testing.
+func (s *GameServiceServer) SetSpontaneousTechRepo(r SpontaneousTechRepo) { s.spontaneousTechRepo = r }
+
+// SetInnateTechRepo injects an innate tech repo for testing.
+func (s *GameServiceServer) SetInnateTechRepo(r InnateTechRepo) { s.innateTechRepo = r }
+
 // Session implements the bidirectional streaming RPC.
 // Flow:
 //  1. Wait for JoinWorldRequest
@@ -6435,6 +6450,7 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 	case "xp":
 		var levelMsgs []string
 		if s.xpSvc != nil {
+			oldLevel := target.Level
 			result := xp.Award(target.Level, target.Experience, amount, s.xpSvc.Config())
 			target.Experience = result.NewXP
 			target.Level = result.NewLevel
@@ -6474,6 +6490,30 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 					}
 				}
 				levelMsgs = append(levelMsgs, "You earned 1 hero point!")
+				// Apply technology level-up grants for each level gained (ascending order).
+				// handleGrant runs in the editor's stream context, not the target's, so
+				// interactive prompting is unavailable; LevelUpTechnologies uses first-option
+				// auto-assign when promptFn is nil.
+				if s.hardwiredTechRepo != nil && s.jobRegistry != nil && target.CharacterID > 0 {
+					if job, ok := s.jobRegistry.Job(target.Class); ok {
+						for lvl := oldLevel + 1; lvl <= result.NewLevel; lvl++ {
+							techGrants, hasGrants := job.LevelUpGrants[lvl]
+							if !hasGrants {
+								continue
+							}
+							if err := LevelUpTechnologies(ctx, target, target.CharacterID,
+								techGrants, s.techRegistry, nil,
+								s.hardwiredTechRepo, s.preparedTechRepo,
+								s.spontaneousTechRepo, s.innateTechRepo,
+							); err != nil {
+								s.logger.Warn("handleGrant: LevelUpTechnologies failed",
+									zap.Int64("character_id", target.CharacterID),
+									zap.Int("level", lvl),
+									zap.Error(err))
+							}
+						}
+					}
+				}
 			}
 		} else {
 			target.Experience += amount
