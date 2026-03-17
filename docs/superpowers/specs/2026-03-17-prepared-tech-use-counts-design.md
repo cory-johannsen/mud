@@ -61,14 +61,14 @@ Add to the `PreparedTechRepo` interface in `internal/gameserver/technology_assig
 SetExpended(ctx context.Context, characterID int64, level, index int, expended bool) error
 ```
 
-Add to `CharacterPreparedTechRepository` in `internal/storage/postgres/character_technologies.go`:
+Add to `CharacterPreparedTechRepository` in `internal/storage/postgres/character_prepared_tech.go`:
 
 ```go
 func (r *CharacterPreparedTechRepository) SetExpended(ctx context.Context, characterID int64, level, index int, expended bool) error {
     if characterID <= 0 {
         return fmt.Errorf("characterID must be > 0, got %d", characterID)
     }
-    _, err := r.pool.Exec(ctx,
+    _, err := r.db.Exec(ctx,
         `UPDATE character_prepared_technologies
             SET expended = $1
           WHERE character_id = $2 AND slot_level = $3 AND slot_index = $4`,
@@ -126,7 +126,9 @@ When `abilityID != ""` and no feat/class-feature matched:
 
 ## Feature 5: Character sheet
 
-Add `expended bool` to the proto `PreparedSlotView` message in `api/proto/game/v1/game.proto`:
+`PreparedSlotView` does not yet exist and `CharacterSheetView` has no prepared technology fields. This feature creates both.
+
+Add new proto message to `api/proto/game/v1/game.proto`:
 
 ```protobuf
 message PreparedSlotView {
@@ -135,7 +137,28 @@ message PreparedSlotView {
 }
 ```
 
-In the character sheet construction in `grpc_service.go`, populate `expended` from `slot.Expended`.
+Add to `CharacterSheetView` (using next available field number after 43):
+
+```protobuf
+repeated PreparedSlotView prepared_slots = 44;
+```
+
+Run `make proto` to regenerate.
+
+In the character sheet construction in `grpc_service.go` (in `handleChar` or equivalent), populate prepared slots:
+
+```go
+for level, slots := range sess.PreparedTechs {
+    for _, slot := range slots {
+        if slot != nil {
+            view.PreparedSlots = append(view.PreparedSlots, &gamev1.PreparedSlotView{
+                TechId:   slot.TechID,
+                Expended: slot.Expended,
+            })
+        }
+    }
+}
+```
 
 ---
 
@@ -164,6 +187,7 @@ All tests use TDD + property-based testing (SWENG-5, SWENG-5a).
 
 - One new DB migration (027) — `ALTER TABLE` to add `expended` column
 - One new repo method (`SetExpended`) — consistent with existing `PreparedTechRepo` pattern
-- `handleUse` extended in-place — no new command or proto message beyond `PreparedSlotView.expended`
+- `handleUse` extended in-place — no new command needed
+- One new proto message (`PreparedSlotView`) and one new field on `CharacterSheetView` (`prepared_slots`)
 - Effect resolution is out of scope
 - Spontaneous tech use counts are out of scope
