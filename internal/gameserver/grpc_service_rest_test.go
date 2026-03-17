@@ -79,6 +79,14 @@ func (r *fakePreparedRepoRest) DeleteAll(_ context.Context, _ int64) error {
 	r.slots = nil
 	return nil
 }
+func (r *fakePreparedRepoRest) SetExpended(_ context.Context, _ int64, level, index int, expended bool) error {
+	if r.slots != nil {
+		if slots, ok := r.slots[level]; ok && index < len(slots) && slots[index] != nil {
+			slots[index].Expended = expended
+		}
+	}
+	return nil
+}
 
 // TestPropertyHandleRest_InCombat_NeverMutatesState verifies that handleRest never
 // mutates session prepared tech state when the player is in combat, regardless of

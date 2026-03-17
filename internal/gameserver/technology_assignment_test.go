@@ -45,6 +45,14 @@ func (r *fakePreparedRepo) Set(_ context.Context, _ int64, level, index int, tec
 	return nil
 }
 func (r *fakePreparedRepo) DeleteAll(_ context.Context, _ int64) error { r.slots = nil; return nil }
+func (r *fakePreparedRepo) SetExpended(_ context.Context, _ int64, level, index int, expended bool) error {
+	if r.slots != nil {
+		if slots, ok := r.slots[level]; ok && index < len(slots) && slots[index] != nil {
+			slots[index].Expended = expended
+		}
+	}
+	return nil
+}
 
 type fakeSpontaneousRepo struct{ techs map[int][]string }
 

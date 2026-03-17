@@ -26,6 +26,11 @@ type PreparedTechRepo interface {
 	GetAll(ctx context.Context, characterID int64) (map[int][]*session.PreparedSlot, error)
 	Set(ctx context.Context, characterID int64, level, index int, techID string) error
 	DeleteAll(ctx context.Context, characterID int64) error
+	// SetExpended marks or unmarks a single prepared slot as expended.
+	//
+	// Precondition: characterID > 0; level >= 1; index >= 0.
+	// Postcondition: character_prepared_technologies row has expended = expended.
+	SetExpended(ctx context.Context, characterID int64, level, index int, expended bool) error
 }
 
 // SpontaneousTechRepo defines persistence for spontaneous technology known-slot assignments.

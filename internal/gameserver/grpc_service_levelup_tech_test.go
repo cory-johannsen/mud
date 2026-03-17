@@ -2,11 +2,13 @@ package gameserver
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 
@@ -89,6 +91,14 @@ func (r *prepRepoInternal) Set(_ context.Context, _ int64, level, index int, tec
 	return nil
 }
 func (r *prepRepoInternal) DeleteAll(_ context.Context, _ int64) error { r.slots = nil; return nil }
+func (r *prepRepoInternal) SetExpended(_ context.Context, _ int64, level, index int, expended bool) error {
+	if r.slots != nil {
+		if slots, ok := r.slots[level]; ok && index < len(slots) && slots[index] != nil {
+			slots[index].Expended = expended
+		}
+	}
+	return nil
+}
 
 // spontRepoInternal is a minimal SpontaneousTechRepo for internal tests.
 type spontRepoInternal struct{ techs map[int][]string }
@@ -349,13 +359,16 @@ func TestHandleGrant_LevelUp_AutoAssign_PushesNotification(t *testing.T) {
 
 	msgs := drainLevelUpEntityMessages(t, target)
 	found := false
+	var foundMsg string
 	for _, m := range msgs {
 		if strings.Contains(m, "auto-assigned") {
 			found = true
+			foundMsg = m
 			break
 		}
 	}
 	assert.True(t, found, "REQ-ILT3: at least one push message must contain 'auto-assigned'; got: %v", msgs)
+	assert.Contains(t, foundMsg, "notify_tech", "REQ-ILT3: auto-assigned notification must contain the tech ID; got: %q", foundMsg)
 }
 
 // TestHandleGrant_LevelUp_Deferred_PushesSelectTechNotification verifies REQ-ILT4:
@@ -401,4 +414,66 @@ func TestHandleGrant_LevelUp_Deferred_PushesSelectTechNotification(t *testing.T)
 		}
 	}
 	assert.True(t, found, "REQ-ILT4: at least one push message must contain 'selecttech'; got: %v", msgs)
+}
+
+// TestPropertyHandleGrant_LevelUp_PartitionInvariant verifies that for any grant configuration,
+// handleGrant either defers (pool > open slots) or auto-assigns (pool <= open slots), never both
+// for the same level.
+//
+// Precondition: pool size nPool >= 1; slot count nSlots >= 1; player starts at level 1 with enough XP to reach level 2.
+// Postcondition: PendingTechGrants is non-nil iff nPool > nSlots.
+func TestPropertyHandleGrant_LevelUp_PartitionInvariant(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		nPool := rapid.IntRange(1, 4).Draw(rt, "nPool")
+		nSlots := rapid.IntRange(1, 4).Draw(rt, "nSlots")
+
+		pool := make([]ruleset.PreparedEntry, nPool)
+		for i := range pool {
+			pool[i] = ruleset.PreparedEntry{ID: fmt.Sprintf("pool_tech_%d", i), Level: 1}
+		}
+
+		grants := &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: nSlots},
+				Pool:         pool,
+			},
+		}
+
+		pendingRepo := &fakePendingTechLevelsRepoInternal{}
+		hwRepo := &hwRepoInternal{}
+		prepRepo := &prepRepoInternal{}
+		spontRepo := &spontRepoInternal{}
+		innateRepo := &innateRepoInternal{}
+
+		uid := fmt.Sprintf("prop-player-%d", rapid.IntRange(0, 9999).Draw(rt, "uid"))
+		charName := fmt.Sprintf("PropChar%d", rapid.IntRange(0, 9999).Draw(rt, "charName"))
+
+		svc := buildLevelUpTechSvc(t, pendingRepo, hwRepo, prepRepo, spontRepo, innateRepo, grants)
+		addEditorForGrant(t, svc, "prop_editor_"+uid)
+		target := addTargetWithJobForLevelUp(t, svc, uid, charName)
+
+		_, err := svc.handleGrant("prop_editor_"+uid, &gamev1.GrantRequest{
+			GrantType: "xp",
+			CharName:  charName,
+			Amount:    500, // sufficient to reach level 2 (BaseXP=100 → level 2 needs 400 XP)
+		})
+		require.NoError(t, err)
+		if target.Level < 2 {
+			rt.Skip()
+		}
+
+		if nPool > nSlots {
+			// Deferred: PendingTechGrants must be populated for the new level.
+			if target.PendingTechGrants == nil || target.PendingTechGrants[2] == nil {
+				rt.Fatalf("nPool(%d) > nSlots(%d) but PendingTechGrants[2] is nil; PendingTechGrants=%v",
+					nPool, nSlots, target.PendingTechGrants)
+			}
+		} else {
+			// Immediate: PendingTechGrants must be empty for the new level.
+			if target.PendingTechGrants != nil && target.PendingTechGrants[2] != nil {
+				rt.Fatalf("nPool(%d) <= nSlots(%d) but PendingTechGrants[2] is non-nil; PendingTechGrants=%v",
+					nPool, nSlots, target.PendingTechGrants)
+			}
+		}
+	})
 }

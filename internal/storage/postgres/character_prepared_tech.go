@@ -30,7 +30,7 @@ func NewCharacterPreparedTechRepository(db *pgxpool.Pool) *CharacterPreparedTech
 // Postcondition: Returns a non-nil map (may be empty) and nil error on success.
 func (r *CharacterPreparedTechRepository) GetAll(ctx context.Context, characterID int64) (map[int][]*session.PreparedSlot, error) {
 	rows, err := r.db.Query(ctx,
-		`SELECT slot_level, slot_index, tech_id
+		`SELECT slot_level, slot_index, tech_id, expended
          FROM character_prepared_technologies
          WHERE character_id = $1
          ORDER BY slot_level, slot_index`,
@@ -44,13 +44,14 @@ func (r *CharacterPreparedTechRepository) GetAll(ctx context.Context, characterI
 	for rows.Next() {
 		var level, index int
 		var techID string
-		if err := rows.Scan(&level, &index, &techID); err != nil {
+		var expended bool
+		if err := rows.Scan(&level, &index, &techID, &expended); err != nil {
 			return nil, fmt.Errorf("CharacterPreparedTechRepository.GetAll scan: %w", err)
 		}
 		for len(result[level]) <= index {
 			result[level] = append(result[level], nil)
 		}
-		result[level][index] = &session.PreparedSlot{TechID: techID}
+		result[level][index] = &session.PreparedSlot{TechID: techID, Expended: expended}
 	}
 	return result, rows.Err()
 }
@@ -61,13 +62,33 @@ func (r *CharacterPreparedTechRepository) GetAll(ctx context.Context, characterI
 // Postcondition: Exactly one row exists for (character_id, slot_level, slot_index) with the given tech_id.
 func (r *CharacterPreparedTechRepository) Set(ctx context.Context, characterID int64, level, index int, techID string) error {
 	_, err := r.db.Exec(ctx,
-		`INSERT INTO character_prepared_technologies (character_id, slot_level, slot_index, tech_id)
-         VALUES ($1, $2, $3, $4)
-         ON CONFLICT (character_id, slot_level, slot_index) DO UPDATE SET tech_id = EXCLUDED.tech_id`,
+		`INSERT INTO character_prepared_technologies (character_id, slot_level, slot_index, tech_id, expended)
+         VALUES ($1, $2, $3, $4, FALSE)
+         ON CONFLICT (character_id, slot_level, slot_index) DO UPDATE SET tech_id = EXCLUDED.tech_id, expended = FALSE`,
 		characterID, level, index, techID,
 	)
 	if err != nil {
 		return fmt.Errorf("CharacterPreparedTechRepository.Set: %w", err)
+	}
+	return nil
+}
+
+// SetExpended marks or unmarks a single prepared slot as expended.
+//
+// Precondition: characterID > 0; level >= 1; index >= 0.
+// Postcondition: character_prepared_technologies row has expended = expended.
+func (r *CharacterPreparedTechRepository) SetExpended(ctx context.Context, characterID int64, level, index int, expended bool) error {
+	if characterID <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", characterID)
+	}
+	_, err := r.db.Exec(ctx,
+		`UPDATE character_prepared_technologies
+            SET expended = $1
+          WHERE character_id = $2 AND slot_level = $3 AND slot_index = $4`,
+		expended, characterID, level, index,
+	)
+	if err != nil {
+		return fmt.Errorf("CharacterPreparedTechRepository.SetExpended: %w", err)
 	}
 	return nil
 }
