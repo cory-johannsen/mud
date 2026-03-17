@@ -1,10 +1,13 @@
 package gameserver
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -31,6 +34,41 @@ func TestHandleSelectTech_NoPending_SendsNoPending(t *testing.T) {
 	msg := last.GetMessage()
 	require.NotNil(t, msg)
 	assert.Contains(t, msg.Content, "no pending")
+}
+
+// TestPropertyHandleSelectTech_NoPending_AlwaysSendsNoPendingMessage verifies that
+// handleSelectTech always sends "no pending" when PendingTechGrants is empty,
+// regardless of session state (SWENG-5a).
+func TestPropertyHandleSelectTech_NoPending_AlwaysSendsNoPendingMessage(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sessMgr := session.NewManager()
+		svc := testMinimalService(t, sessMgr)
+
+		uid := fmt.Sprintf("prop-selecttech-%d", rapid.IntRange(0, 9999).Draw(rt, "uid"))
+		_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+		})
+		if err != nil {
+			rt.Skip()
+		}
+
+		// PendingTechGrants is nil/empty — invariant: always returns no-pending message.
+		stream := &fakeSessionStream{}
+		if err := svc.handleSelectTech(uid, "req", stream); err != nil {
+			rt.Fatalf("handleSelectTech returned error: %v", err)
+		}
+		if len(stream.sent) == 0 {
+			rt.Fatalf("no messages sent")
+		}
+		last := stream.sent[len(stream.sent)-1]
+		msg := last.GetMessage()
+		if msg == nil {
+			rt.Fatalf("last sent event has no message payload")
+		}
+		if !strings.Contains(msg.Content, "no pending") {
+			rt.Fatalf("expected 'no pending' in message, got: %q", msg.Content)
+		}
+	})
 }
 
 // REQ-ILT9: CharacterSheetView reports pending tech selections count.
