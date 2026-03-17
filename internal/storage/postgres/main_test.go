@@ -236,6 +236,7 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			slot_level   INT    NOT NULL,
 			slot_index   INT    NOT NULL,
 			tech_id      TEXT   NOT NULL,
+			expended     BOOLEAN NOT NULL DEFAULT FALSE,
 			PRIMARY KEY (character_id, slot_level, slot_index)
 		);
 
