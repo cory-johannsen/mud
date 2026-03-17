@@ -1002,12 +1002,59 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
+	// Load pending tech levels from DB and reconstruct PendingTechGrants.
+	if sess.CharacterID > 0 && s.progressRepo != nil && s.jobRegistry != nil {
+		if pendingLevels, err := s.progressRepo.GetPendingTechLevels(stream.Context(), sess.CharacterID); err == nil {
+			if len(pendingLevels) > 0 {
+				if job, ok := s.jobRegistry.Job(sess.Class); ok {
+					if sess.PendingTechGrants == nil {
+						sess.PendingTechGrants = make(map[int]*ruleset.TechnologyGrants)
+					}
+					for _, lvl := range pendingLevels {
+						if grants, ok := job.LevelUpGrants[lvl]; ok && grants != nil {
+							_, deferred := PartitionTechGrants(grants)
+							if deferred != nil {
+								sess.PendingTechGrants[lvl] = deferred
+							}
+						}
+					}
+				}
+			}
+		} else {
+			s.logger.Warn("Session: GetPendingTechLevels failed", zap.Error(err))
+		}
+	}
+
 	// Load persisted technology assignments for this session.
 	if s.hardwiredTechRepo != nil && characterID > 0 {
 		if techErr := LoadTechnologies(stream.Context(), sess, characterID,
 			s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo,
 		); techErr != nil {
 			s.logger.Warn("loading technologies", zap.Int64("character_id", characterID), zap.Error(techErr))
+		}
+	}
+
+	// Resolve any pending technology selections interactively before the command loop.
+	// Like ability-boost prompts, this blocks on stream.Recv() so it must run before
+	// entity/clock goroutines are spawned.
+	if len(sess.PendingTechGrants) > 0 && s.jobRegistry != nil {
+		if job, ok := s.jobRegistry.Job(sess.Class); ok {
+			promptFn := func(options []string) (string, error) {
+				choices := &ruleset.FeatureChoices{
+					Prompt:  "Choose a technology:",
+					Options: options,
+					Key:     "tech_choice",
+				}
+				return s.promptFeatureChoice(stream, "tech_choice", choices)
+			}
+			if err := ResolvePendingTechGrants(stream.Context(), sess, characterID,
+				job, s.techRegistry, promptFn,
+				s.hardwiredTechRepo, s.preparedTechRepo,
+				s.spontaneousTechRepo, s.innateTechRepo,
+				s.progressRepo,
+			); err != nil {
+				s.logger.Warn("Session: ResolvePendingTechGrants failed", zap.Error(err))
+			}
 		}
 	}
 
@@ -6565,25 +6612,71 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 				}
 				levelMsgs = append(levelMsgs, "You earned 1 hero point!")
 				// Apply technology level-up grants for each level gained (ascending order).
-				// handleGrant runs in the editor's stream context, not the target's, so
-				// interactive prompting is unavailable; LevelUpTechnologies uses first-option
-				// auto-assign when promptFn is nil.
+				// Immediate grants (pool <= open slots) are auto-assigned and a notification is
+				// pushed to the target. Deferred grants (pool > open slots, player must choose)
+				// are stored in PendingTechGrants and persisted via progressRepo.
 				if s.hardwiredTechRepo != nil && s.jobRegistry != nil && target.CharacterID > 0 {
 					if job, ok := s.jobRegistry.Job(target.Class); ok {
+						if target.PendingTechGrants == nil {
+							target.PendingTechGrants = make(map[int]*ruleset.TechnologyGrants)
+						}
 						for lvl := oldLevel + 1; lvl <= result.NewLevel; lvl++ {
 							techGrants, hasGrants := job.LevelUpGrants[lvl]
 							if !hasGrants {
 								continue
 							}
-							if err := LevelUpTechnologies(ctx, target, target.CharacterID,
-								techGrants, s.techRegistry, nil,
-								s.hardwiredTechRepo, s.preparedTechRepo,
-								s.spontaneousTechRepo, s.innateTechRepo,
-							); err != nil {
-								s.logger.Warn("handleGrant: LevelUpTechnologies failed",
-									zap.Int64("character_id", target.CharacterID),
-									zap.Int("level", lvl),
-									zap.Error(err))
+							immediate, deferred := PartitionTechGrants(techGrants)
+							if immediate != nil {
+								hwBefore := append([]string{}, target.HardwiredTechs...)
+								prepBefore := snapshotPreparedTechIDs(target.PreparedTechs)
+								spontBefore := snapshotSpontaneousTechIDs(target.SpontaneousTechs)
+
+								if err := LevelUpTechnologies(ctx, target, target.CharacterID,
+									immediate, s.techRegistry, nil,
+									s.hardwiredTechRepo, s.preparedTechRepo,
+									s.spontaneousTechRepo, s.innateTechRepo,
+								); err != nil {
+									s.logger.Warn("handleGrant: LevelUpTechnologies failed",
+										zap.Int64("character_id", target.CharacterID),
+										zap.Int("level", lvl),
+										zap.Error(err))
+								}
+
+								for _, id := range newTechIDs(hwBefore, target.HardwiredTechs) {
+									notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
+									if data, mErr := proto.Marshal(notifMsg); mErr == nil {
+										_ = target.Entity.Push(data)
+									}
+								}
+								for _, id := range newTechIDsFromPrepared(prepBefore, target.PreparedTechs) {
+									notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
+									if data, mErr := proto.Marshal(notifMsg); mErr == nil {
+										_ = target.Entity.Push(data)
+									}
+								}
+								for _, id := range newTechIDsFromSpontaneous(spontBefore, target.SpontaneousTechs) {
+									notifMsg := messageEvent(fmt.Sprintf("You gained %s (auto-assigned).", id))
+									if data, mErr := proto.Marshal(notifMsg); mErr == nil {
+										_ = target.Entity.Push(data)
+									}
+								}
+							}
+							if deferred != nil {
+								target.PendingTechGrants[lvl] = deferred
+							}
+						}
+						if len(target.PendingTechGrants) > 0 && s.progressRepo != nil {
+							levels := make([]int, 0, len(target.PendingTechGrants))
+							for lvl := range target.PendingTechGrants {
+								levels = append(levels, lvl)
+							}
+							sort.Ints(levels)
+							if err := s.progressRepo.SetPendingTechLevels(ctx, target.CharacterID, levels); err != nil {
+								s.logger.Warn("handleGrant: SetPendingTechLevels failed", zap.Error(err))
+							}
+							selectNotif := messageEvent("You have pending technology selections! Type 'selecttech' to choose your technologies.")
+							if data, mErr := proto.Marshal(selectNotif); mErr == nil {
+								_ = target.Entity.Push(data)
 							}
 						}
 					}
