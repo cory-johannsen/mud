@@ -4536,7 +4536,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
 
-	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil {
+	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil {
 		return messageEvent("Ability data is not available."), nil
 	}
 
@@ -4586,6 +4586,26 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 	}
 
 	if abilityID == "" {
+		// Append non-expended prepared tech entries to active abilities list.
+		if len(sess.PreparedTechs) > 0 {
+			counts := make(map[string]int)
+			for _, slots := range sess.PreparedTechs {
+				for _, slot := range slots {
+					if slot != nil && !slot.Expended {
+						counts[slot.TechID]++
+					}
+				}
+			}
+			for techID, remaining := range counts {
+				active = append(active, &gamev1.FeatEntry{
+					FeatId:      techID,
+					Name:        techID,
+					Category:    "prepared_tech",
+					Active:      true,
+					Description: fmt.Sprintf("%d use(s) remaining", remaining),
+				})
+			}
+		}
 		// Return list of all active abilities for the client to prompt selection.
 		return &gamev1.ServerEvent{
 			Payload: &gamev1.ServerEvent_UseResponse{
@@ -4663,6 +4683,32 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 				}, nil
 			}
 		}
+	}
+	// Attempt prepared tech activation if no feat/class-feature matched.
+	if s.preparedTechRepo != nil && len(sess.PreparedTechs) > 0 {
+		levels := make([]int, 0, len(sess.PreparedTechs))
+		for lvl := range sess.PreparedTechs {
+			levels = append(levels, lvl)
+		}
+		sort.Ints(levels)
+		for _, lvl := range levels {
+			for idx, slot := range sess.PreparedTechs[lvl] {
+				if slot == nil || slot.TechID != abilityID || slot.Expended {
+					continue
+				}
+				// Found a non-expended slot — expend it.
+				if err := s.preparedTechRepo.SetExpended(ctx, sess.CharacterID, lvl, idx, true); err != nil {
+					s.logger.Warn("handleUse: SetExpended failed",
+						zap.String("uid", uid),
+						zap.String("techID", abilityID),
+						zap.Error(err))
+				}
+				sess.PreparedTechs[lvl][idx].Expended = true
+				return messageEvent(fmt.Sprintf("You activate %s.", abilityID)), nil
+			}
+		}
+		// No non-expended slot found for this tech ID.
+		return messageEvent(fmt.Sprintf("No prepared uses of %s remaining.", abilityID)), nil
 	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
 }
