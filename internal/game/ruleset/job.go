@@ -95,6 +95,14 @@ func LoadJobs(dir string) ([]*Job, error) {
 				return nil, fmt.Errorf("job %q technology_grants: %w", j.ID, err)
 			}
 		}
+		for charLevel, grants := range j.LevelUpGrants {
+			if charLevel < 1 {
+				return nil, fmt.Errorf("job %q level_up_grants: key %d must be >= 1", j.ID, charLevel)
+			}
+			if err := grants.Validate(); err != nil {
+				return nil, fmt.Errorf("job %q level_up_grants[%d]: %w", j.ID, charLevel, err)
+			}
+		}
 		jobs = append(jobs, &j)
 	}
 	return jobs, nil
