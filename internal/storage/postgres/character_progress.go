@@ -178,6 +178,63 @@ func (r *CharacterProgressRepository) MarkSkillIncreasesInitialized(ctx context.
 	return nil
 }
 
+// GetPendingTechLevels returns the list of character levels with unresolved
+// technology pool selections.
+//
+// Precondition: id > 0.
+// Postcondition: Returns all pending tech levels (may be empty slice).
+func (r *CharacterProgressRepository) GetPendingTechLevels(ctx context.Context, id int64) ([]int, error) {
+	if id <= 0 {
+		return nil, fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	rows, err := r.pool.Query(ctx,
+		`SELECT level FROM character_pending_tech_levels WHERE character_id = $1 ORDER BY level`, id,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("GetPendingTechLevels: %w", err)
+	}
+	defer rows.Close()
+	var levels []int
+	for rows.Next() {
+		var lvl int
+		if err := rows.Scan(&lvl); err != nil {
+			return nil, fmt.Errorf("GetPendingTechLevels scan: %w", err)
+		}
+		levels = append(levels, lvl)
+	}
+	return levels, rows.Err()
+}
+
+// SetPendingTechLevels replaces the stored pending tech levels for a character.
+// Pass an empty slice to clear all pending levels.
+//
+// Precondition: id > 0.
+// Postcondition: character_pending_tech_levels contains exactly the given levels.
+func (r *CharacterProgressRepository) SetPendingTechLevels(ctx context.Context, id int64, levels []int) error {
+	if id <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("SetPendingTechLevels begin: %w", err)
+	}
+	defer tx.Rollback(ctx)
+	if _, err := tx.Exec(ctx,
+		`DELETE FROM character_pending_tech_levels WHERE character_id = $1`, id,
+	); err != nil {
+		return fmt.Errorf("SetPendingTechLevels delete: %w", err)
+	}
+	for _, lvl := range levels {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO character_pending_tech_levels (character_id, level) VALUES ($1, $2)`,
+			id, lvl,
+		); err != nil {
+			return fmt.Errorf("SetPendingTechLevels insert level %d: %w", lvl, err)
+		}
+	}
+	return tx.Commit(ctx)
+}
+
 // ConsumePendingBoost decrements the pending boost count by 1 for a character.
 // Returns an error containing "no pending boosts" if the character has none.
 //

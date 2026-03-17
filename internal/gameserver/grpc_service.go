@@ -114,6 +114,8 @@ type ProgressRepository interface {
 	ConsumePendingSkillIncrease(ctx context.Context, id int64) error
 	IsSkillIncreasesInitialized(ctx context.Context, id int64) (bool, error)
 	MarkSkillIncreasesInitialized(ctx context.Context, id int64) error
+	GetPendingTechLevels(ctx context.Context, id int64) ([]int, error)
+	SetPendingTechLevels(ctx context.Context, id int64, levels []int) error
 }
 
 // CharacterProficienciesRepository persists per-character armor/weapon proficiency data.

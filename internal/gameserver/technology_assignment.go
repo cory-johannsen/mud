@@ -41,6 +41,13 @@ type InnateTechRepo interface {
 	DeleteAll(ctx context.Context, characterID int64) error
 }
 
+// PendingTechLevelsRepo persists the list of character levels with unresolved
+// technology pool selections.
+type PendingTechLevelsRepo interface {
+	GetPendingTechLevels(ctx context.Context, characterID int64) ([]int, error)
+	SetPendingTechLevels(ctx context.Context, characterID int64, levels []int) error
+}
+
 // AssignTechnologies assigns technologies from job and archetype grants to the session
 // and persists them. Called during character creation.
 //

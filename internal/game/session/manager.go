@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/google/uuid"
 )
 
@@ -121,9 +122,13 @@ type PlayerSession struct {
 	ZoneEffectCooldowns map[string]int64
 	// Technology slots — nil until loaded from DB at login.
 	HardwiredTechs   []string                // tech IDs; unlimited use
-	PreparedTechs    map[int][]*PreparedSlot  // slot level → ordered slots
-	SpontaneousTechs map[int][]string         // tech level → known tech IDs
-	InnateTechs      map[string]*InnateSlot   // tech_id → innate slot info
+	PreparedTechs    map[int][]*PreparedSlot // slot level → ordered slots
+	SpontaneousTechs map[int][]string        // tech level → known tech IDs
+	InnateTechs      map[string]*InnateSlot  // tech_id → innate slot info
+	// PendingTechGrants maps character level to the technology grants that require
+	// interactive player selection (pool > open slots). Populated at level-up;
+	// cleared by ResolvePendingTechGrants.
+	PendingTechGrants map[int]*ruleset.TechnologyGrants
 }
 
 // Manager tracks all active player sessions and room occupancy.
@@ -151,20 +156,20 @@ func NewManager() *Manager {
 // Precondition: CurrentHP and MaxHP must be >= 0.
 // Postcondition: RegionDisplayName, Class, and Level are informational and may be zero values.
 type AddPlayerOptions struct {
-	UID                  string
-	Username             string
-	CharName             string
-	CharacterID          int64
-	RoomID               string
-	CurrentHP            int
-	MaxHP                int
-	Abilities            character.AbilityScores
-	Role                 string
-	RegionDisplayName    string
-	Class                string
-	Level                int
-	DefaultCombatAction  string
-	Gender               string
+	UID                 string
+	Username            string
+	CharName            string
+	CharacterID         int64
+	RoomID              string
+	CurrentHP           int
+	MaxHP               int
+	Abilities           character.AbilityScores
+	Role                string
+	RegionDisplayName   string
+	Class               string
+	Level               int
+	DefaultCombatAction string
+	Gender              string
 }
 
 // AddPlayer registers a new player session in the given room.
