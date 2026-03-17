@@ -68,6 +68,7 @@ type Job struct {
 	Drawbacks          []JobDrawback                      `yaml:"drawbacks"`
 	StartingInventory  *inventory.StartingLoadoutOverride `yaml:"starting_inventory"`
 	TechnologyGrants   *TechnologyGrants                  `yaml:"technology_grants,omitempty"`
+	LevelUpGrants      map[int]*TechnologyGrants          `yaml:"level_up_grants,omitempty"`
 }
 
 // LoadJobs reads all .yaml files in dir and parses each as a Job.

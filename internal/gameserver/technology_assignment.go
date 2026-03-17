@@ -241,6 +241,74 @@ func LevelUpTechnologies(
 	return nil
 }
 
+// RearrangePreparedTechs deletes all existing prepared slots and re-fills them
+// by aggregating grants from job.TechnologyGrants and all job.LevelUpGrants
+// entries for levels 1..sess.Level.
+//
+// Precondition: sess, job, prepRepo are non-nil. promptFn must be non-nil.
+// Postcondition: sess.PreparedTechs and prepRepo reflect the re-selected slots.
+// If sess.PreparedTechs is empty or all level slot counts are zero, returns nil (no-op).
+func RearrangePreparedTechs(
+	ctx context.Context,
+	sess *session.PlayerSession,
+	characterID int64,
+	job *ruleset.Job,
+	techReg *technology.Registry,
+	promptFn TechPromptFn,
+	prepRepo PreparedTechRepo,
+) error {
+	// Build SlotsByLevel from session (source of truth for slot counts).
+	slotsByLevel := make(map[int]int)
+	for lvl, slots := range sess.PreparedTechs {
+		if len(slots) > 0 {
+			slotsByLevel[lvl] = len(slots)
+		}
+	}
+	// No-op guard must run before any mutation.
+	if len(slotsByLevel) == 0 {
+		return nil
+	}
+
+	// Aggregate Fixed and Pool from all applicable grants.
+	var allFixed []ruleset.PreparedEntry
+	var allPool []ruleset.PreparedEntry
+	if job.TechnologyGrants != nil && job.TechnologyGrants.Prepared != nil {
+		allFixed = append(allFixed, job.TechnologyGrants.Prepared.Fixed...)
+		allPool = append(allPool, job.TechnologyGrants.Prepared.Pool...)
+	}
+	for lvl, grants := range job.LevelUpGrants {
+		if lvl > sess.Level {
+			continue
+		}
+		if grants != nil && grants.Prepared != nil {
+			allFixed = append(allFixed, grants.Prepared.Fixed...)
+			allPool = append(allPool, grants.Prepared.Pool...)
+		}
+	}
+
+	merged := &ruleset.PreparedGrants{
+		SlotsByLevel: slotsByLevel,
+		Fixed:        allFixed,
+		Pool:         allPool,
+	}
+
+	// Clear existing slots before re-filling.
+	if err := prepRepo.DeleteAll(ctx, characterID); err != nil {
+		return fmt.Errorf("RearrangePreparedTechs DeleteAll: %w", err)
+	}
+	sess.PreparedTechs = make(map[int][]*session.PreparedSlot)
+
+	// Re-fill each level.
+	for lvl, slots := range slotsByLevel {
+		chosen, err := fillFromPreparedPool(ctx, lvl, slots, 0, merged, techReg, promptFn, characterID, prepRepo)
+		if err != nil {
+			return fmt.Errorf("RearrangePreparedTechs level %d: %w", lvl, err)
+		}
+		sess.PreparedTechs[lvl] = chosen
+	}
+	return nil
+}
+
 // fillFromPreparedPool fills prepared slots from fixed entries and optionally the pool.
 // Auto-assigns without prompt when len(pool at level) == open slots.
 // Precondition: open is assumed >= 0, guaranteed by TechnologyGrants.Validate().

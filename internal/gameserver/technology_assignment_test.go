@@ -428,3 +428,176 @@ func TestLevelUpTechnologies_NilGrantsNoOp(t *testing.T) {
 	assert.Equal(t, []string{"existing"}, sess.HardwiredTechs)
 	assert.Nil(t, hw.stored) // SetAll never called
 }
+
+// REQ-RAR1 (property): All chosen techs after RearrangePreparedTechs come from
+// the aggregated pool or fixed entries for their level.
+func TestPropertyRearrangePreparedTechs_ChosenFromPool(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		numFixed := rapid.IntRange(0, 2).Draw(rt, "numFixed")
+		numPool := rapid.IntRange(1, 3).Draw(rt, "numPool")
+		numSlots := numFixed + numPool
+
+		fixed := make([]ruleset.PreparedEntry, numFixed)
+		for i := 0; i < numFixed; i++ {
+			fixed[i] = ruleset.PreparedEntry{ID: fmt.Sprintf("fixed_%d", i), Level: 1}
+		}
+		pool := make([]ruleset.PreparedEntry, numPool)
+		for i := 0; i < numPool; i++ {
+			pool[i] = ruleset.PreparedEntry{ID: fmt.Sprintf("pool_%d", i), Level: 1}
+		}
+
+		existingSlots := make([]*session.PreparedSlot, numSlots)
+		for i := range existingSlots {
+			existingSlots[i] = &session.PreparedSlot{TechID: "old"}
+		}
+		prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{1: existingSlots}}
+		sess := &session.PlayerSession{
+			PreparedTechs: map[int][]*session.PreparedSlot{1: existingSlots},
+		}
+		job := &ruleset.Job{
+			TechnologyGrants: &ruleset.TechnologyGrants{
+				Prepared: &ruleset.PreparedGrants{
+					SlotsByLevel: map[int]int{1: numSlots},
+					Fixed:        fixed,
+					Pool:         pool,
+				},
+			},
+		}
+
+		err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, noPrompt, prep)
+		if err != nil {
+			rt.Fatalf("RearrangePreparedTechs: %v", err)
+		}
+
+		validIDs := make(map[string]bool)
+		for _, e := range fixed {
+			validIDs[e.ID] = true
+		}
+		for _, e := range pool {
+			validIDs[e.ID] = true
+		}
+		for _, slot := range sess.PreparedTechs[1] {
+			if !validIDs[slot.TechID] {
+				rt.Fatalf("tech %q not in valid set", slot.TechID)
+			}
+		}
+	})
+}
+
+// REQ-RAR2: Fixed entries occupy indices 0..n-1; pool selections follow at n..m-1.
+func TestRearrangePreparedTechs_FixedFirst(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "old1"}, {TechID: "old2"}},
+	}}
+	sess := &session.PlayerSession{
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "old1"}, {TechID: "old2"}},
+		},
+	}
+	job := &ruleset.Job{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 2},
+				Fixed:        []ruleset.PreparedEntry{{ID: "fixed_tech", Level: 1}},
+				Pool:         []ruleset.PreparedEntry{{ID: "pool_tech", Level: 1}},
+			},
+		},
+	}
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, noPrompt, prep)
+	require.NoError(t, err)
+	require.Len(t, sess.PreparedTechs[1], 2)
+	assert.Equal(t, "fixed_tech", sess.PreparedTechs[1][0].TechID, "fixed at index 0")
+	assert.Equal(t, "pool_tech", sess.PreparedTechs[1][1].TechID, "pool at index 1")
+}
+
+// REQ-RAR3: LevelUpGrants entries above sess.Level are excluded from the pool.
+// With level 3 excluded, the pool has exactly 1 entry for 1 slot → auto-assign fires.
+// If level 3 were included, pool would have 2 entries for 1 slot → prompt would fire.
+func TestRearrangePreparedTechs_LevelUpGrantsFiltered(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "old"}},
+	}}
+	sess := &session.PlayerSession{
+		Level: 2,
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "old"}},
+		},
+	}
+	job := &ruleset.Job{
+		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
+			2: {Prepared: &ruleset.PreparedGrants{
+				Pool: []ruleset.PreparedEntry{{ID: "level2_pool", Level: 1}},
+			}},
+			3: {Prepared: &ruleset.PreparedGrants{
+				Pool: []ruleset.PreparedEntry{{ID: "level3_pool", Level: 1}},
+			}},
+		},
+	}
+
+	promptCalled := false
+	promptFn := func(options []string) (string, error) {
+		promptCalled = true
+		return options[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, promptFn, prep)
+	require.NoError(t, err)
+
+	// Level3 excluded → pool has 1 entry for 1 slot → auto-assign, no prompt
+	assert.False(t, promptCalled, "auto-assign fires when level3 excluded (pool==open)")
+	require.Len(t, sess.PreparedTechs[1], 1)
+	assert.Equal(t, "level2_pool", sess.PreparedTechs[1][0].TechID)
+}
+
+// REQ-RAR4: Empty PreparedTechs is a no-op; DeleteAll is never called.
+func TestRearrangePreparedTechs_EmptySession_NoOp(t *testing.T) {
+	ctx := context.Background()
+	// Populate repo to detect if DeleteAll is called (DeleteAll sets slots=nil).
+	existingRepo := map[int][]*session.PreparedSlot{1: {{TechID: "db_slot"}}}
+	prep := &fakePreparedRepo{slots: existingRepo}
+	sess := &session.PlayerSession{} // no PreparedTechs
+
+	job := &ruleset.Job{} // no grants
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, noPrompt, prep)
+	require.NoError(t, err)
+	// Repo unchanged: DeleteAll was not called
+	assert.NotNil(t, prep.slots, "repo.slots must not be nil on no-op")
+	assert.Equal(t, "db_slot", prep.slots[1][0].TechID, "repo must be unchanged on no-op")
+}
+
+// REQ-RAR5: Auto-assign fires when len(pool at level) == open slots; no prompt invoked.
+func TestRearrangePreparedTechs_AutoAssignNoPrompt(t *testing.T) {
+	ctx := context.Background()
+	prep := &fakePreparedRepo{slots: map[int][]*session.PreparedSlot{
+		1: {{TechID: "old"}},
+	}}
+	sess := &session.PlayerSession{
+		PreparedTechs: map[int][]*session.PreparedSlot{
+			1: {{TechID: "old"}},
+		},
+	}
+	job := &ruleset.Job{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool:         []ruleset.PreparedEntry{{ID: "only_option", Level: 1}},
+			},
+		},
+	}
+
+	promptCalled := false
+	promptFn := func(options []string) (string, error) {
+		promptCalled = true
+		return options[0], nil
+	}
+
+	err := gameserver.RearrangePreparedTechs(ctx, sess, 1, job, nil, promptFn, prep)
+	require.NoError(t, err)
+	assert.False(t, promptCalled, "prompt must not be called when pool == open slots")
+	require.Len(t, sess.PreparedTechs[1], 1)
+	assert.Equal(t, "only_option", sess.PreparedTechs[1][0].TechID)
+}
