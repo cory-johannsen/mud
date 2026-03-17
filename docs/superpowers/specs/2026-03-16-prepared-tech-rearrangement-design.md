@@ -14,6 +14,8 @@ Add a `rest` command that allows a player to re-select which technologies fill t
 
 The prepared technology system (Technology Grants sprint, 2026-03-15) assigns slots at character creation via `AssignTechnologies` and appends new slots at level-up via `LevelUpTechnologies`. The `PreparedTechRepo` (`character_prepared_technologies` table) stores `(character_id, slot_level, slot_index, tech_id)` tuples. `fillFromPreparedPool` in `technology_assignment.go` already handles fixed pre-fill + pool prompt. This spec adds `RearrangePreparedTechs` and the `rest` command on top of that infrastructure.
 
+**Prerequisites:** The Level-Up Technology Selection sprint (2026-03-16) must be merged first, as this spec depends on `job.LevelUpGrants map[int]*TechnologyGrants` being present on the `Job` struct.
+
 ---
 
 ## Feature 1: `RearrangePreparedTechs` function
@@ -25,9 +27,9 @@ New function in `internal/gameserver/technology_assignment.go` alongside `LevelU
 // by aggregating grants from job.TechnologyGrants and all job.LevelUpGrants
 // entries for levels 1..sess.Level.
 //
-// Precondition: sess, job, prepRepo are non-nil.
+// Precondition: sess, job, prepRepo are non-nil. promptFn must be non-nil.
 // Postcondition: sess.PreparedTechs and prepRepo reflect the re-selected slots.
-// If the aggregated grants have no SlotsByLevel entries, returns nil (no-op).
+// If sess.PreparedTechs is empty or all level slot counts are zero, returns nil (no-op).
 func RearrangePreparedTechs(
     ctx context.Context,
     sess *session.PlayerSession,
@@ -46,11 +48,11 @@ Build a synthetic `PreparedGrants` by merging:
 - `job.LevelUpGrants[lvl].Prepared` for all `lvl` where `1 ≤ lvl ≤ sess.Level` (if non-nil)
 
 Merge rules:
-- `SlotsByLevel`: use `len(sess.PreparedTechs[level])` as the authoritative slot count per level (session is source of truth, not the grants)
+- `SlotsByLevel`: iterate `sess.PreparedTechs` keys; for each level key `l`, set `mergedSlotsByLevel[l] = len(sess.PreparedTechs[l])`. The session is the authoritative source of slot counts — do not sum from grants.
 - `Fixed`: concatenate all Fixed entries across all applicable grants
 - `Pool`: concatenate all Pool entries across all applicable grants (duplicates allowed — `fillFromPreparedPool` deduplicates by consuming chosen entries)
 
-If the merged `SlotsByLevel` is empty, return nil immediately (no-op).
+**No-op guard (runs before any mutation):** If `sess.PreparedTechs` is empty or has no levels with `len > 0`, return nil immediately without calling `DeleteAll`.
 
 ### Re-fill logic
 
@@ -94,8 +96,10 @@ message RestRequest {}
 
 Add to `ClientMessage` oneof:
 ```protobuf
-RestRequest rest = <next_field_number>;
+RestRequest rest = 57;
 ```
+
+(Current highest field number in `ClientMessage` oneof is `HideRequest hide = 56`. Verify before implementing and increment if new fields have been added.)
 
 Run `make proto`.
 
@@ -119,12 +123,12 @@ Register in `bridgeHandlerMap`: `game.HandlerRest: bridgeRest`.
 func (s *GameServiceServer) handleRest(
     ctx context.Context,
     sess *session.PlayerSession,
-    stream gamev1.GameService_StreamServer,
+    stream gamev1.GameService_SessionServer,
 ) error
 ```
 
 Behavior:
-1. **Combat guard**: if `sess.CombatStatus != gamev1.CombatStatus_NONE`, send message `"You can't rest while in combat."` and return nil.
+1. **Combat guard**: if `sess.Status == int32(gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT)`, send message `"You can't rest while in combat."` and return nil.
 2. **Job lookup**: look up `sess.Class` in `s.jobRegistry`. If not found or `s.jobRegistry == nil`, send message `"You rest briefly but have no technologies to rearrange."` and return nil.
 3. **promptFn**: construct from the player's own stream using `s.promptFeatureChoice`.
 4. **Call `RearrangePreparedTechs`**: pass `sess`, `sess.CharacterID`, job, `s.techRegistry`, promptFn, `s.preparedTechRepo`.
@@ -139,7 +143,7 @@ Wire into the `dispatch` type switch on `*gamev1.GameRequest_Rest`.
 
 All tests use TDD + property-based testing (SWENG-5, SWENG-5a).
 
-- **REQ-RAR1** (property): For any valid combination of creation grants and level-up grants, total slot count per level after `RearrangePreparedTechs` equals `len(sess.PreparedTechs[level])` before the call.
+- **REQ-RAR1** (property): For any valid combination of creation grants and level-up grants, after `RearrangePreparedTechs` all chosen tech IDs in `sess.PreparedTechs[level]` are members of the aggregated pool or fixed entries for that level.
 - **REQ-RAR2**: Fixed entries always occupy indices 0..n-1 at each level after rearrangement; pool selections follow at n..m-1.
 - **REQ-RAR3**: `LevelUpGrants` entries for levels above `sess.Level` are excluded from the pool; entries at or below `sess.Level` are included.
 - **REQ-RAR4**: Job with no prepared grants (nil `Prepared` in all applicable grants) → `RearrangePreparedTechs` is a no-op; `DeleteAll` is never called.
