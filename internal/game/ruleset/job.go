@@ -68,10 +68,6 @@ type Job struct {
 	Drawbacks          []JobDrawback                      `yaml:"drawbacks"`
 	StartingInventory  *inventory.StartingLoadoutOverride `yaml:"starting_inventory"`
 	TechnologyGrants   *TechnologyGrants                  `yaml:"technology_grants,omitempty"`
-	// LevelUpGrants maps character level to the technology grants gained at that level.
-	// Each entry is a delta — only new slots/techs added at that character level, not the
-	// full cumulative table.
-	LevelUpGrants map[int]*TechnologyGrants `yaml:"level_up_grants,omitempty"`
 }
 
 // LoadJobs reads all .yaml files in dir and parses each as a Job.
@@ -96,14 +92,6 @@ func LoadJobs(dir string) ([]*Job, error) {
 		if j.TechnologyGrants != nil {
 			if err := j.TechnologyGrants.Validate(); err != nil {
 				return nil, fmt.Errorf("job %q technology_grants: %w", j.ID, err)
-			}
-		}
-		for charLevel, grants := range j.LevelUpGrants {
-			if charLevel < 1 {
-				return nil, fmt.Errorf("job %q level_up_grants: level key %d must be >= 1", j.ID, charLevel)
-			}
-			if err := grants.Validate(); err != nil {
-				return nil, fmt.Errorf("job %q level_up_grants[%d]: %w", j.ID, charLevel, err)
 			}
 		}
 		jobs = append(jobs, &j)

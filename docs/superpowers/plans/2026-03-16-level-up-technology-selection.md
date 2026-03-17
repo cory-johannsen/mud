@@ -519,39 +519,73 @@ git commit -m "feat(gameserver): LevelUpTechnologies with startIdx offset, hardw
 ### Task 3: Wire `LevelUpTechnologies` into `handleGrant`
 
 **Files:**
-- Modify: `internal/gameserver/grpc_service.go`
-- Modify: `internal/gameserver/grpc_service_grant_test.go`
+- Modify: `internal/gameserver/grpc_service.go` — add setter methods; capture `oldLevel`; call `LevelUpTechnologies`
+- Create: `internal/gameserver/technology_levelup_grant_test.go` — REQ-LUT7 (package `gameserver_test`)
 - Modify: `docs/requirements/FEATURES.md`
 
-- [ ] **Step 1: Read the current `grpc_service_grant_test.go`**
+**Package note:** `grpc_service_grant_test.go` is `package gameserver` (internal), not `package gameserver_test`. The fake repo types (`fakeHardwiredRepo`, `fakePreparedRepo`, etc.) are defined in `technology_assignment_test.go` under `package gameserver_test`. To use them in the REQ-LUT7 test, the test must be in a **new file** `technology_levelup_grant_test.go` with `package gameserver_test`.
 
-```bash
-cat -n internal/gameserver/grpc_service_grant_test.go 2>&1 | head -80
+- [ ] **Step 1: Add setter methods to `grpc_service.go`**
+
+Locate the existing `SetXPService` setter in `internal/gameserver/grpc_service.go` (around line 343). Add five new setters immediately after it, following the same pattern:
+
+```go
+// SetJobRegistry injects a job registry for testing.
+func (s *GameServiceServer) SetJobRegistry(r *ruleset.JobRegistry) { s.jobRegistry = r }
+
+// SetHardwiredTechRepo injects a hardwired tech repo for testing.
+func (s *GameServiceServer) SetHardwiredTechRepo(r HardwiredTechRepo) { s.hardwiredTechRepo = r }
+
+// SetPreparedTechRepo injects a prepared tech repo for testing.
+func (s *GameServiceServer) SetPreparedTechRepo(r PreparedTechRepo) { s.preparedTechRepo = r }
+
+// SetSpontaneousTechRepo injects a spontaneous tech repo for testing.
+func (s *GameServiceServer) SetSpontaneousTechRepo(r SpontaneousTechRepo) { s.spontaneousTechRepo = r }
+
+// SetInnateTechRepo injects an innate tech repo for testing.
+func (s *GameServiceServer) SetInnateTechRepo(r InnateTechRepo) { s.innateTechRepo = r }
 ```
 
-Understand the existing test helper pattern (how `NewGameServiceServer` is called in grant tests) before writing new tests.
+Build to verify:
+
+```bash
+cd /home/cjohannsen/src/mud && go build ./internal/gameserver/... 2>&1
+```
+
+Expected: no errors.
 
 - [ ] **Step 2: Write failing test (REQ-LUT7)**
 
-Add a test to `internal/gameserver/grpc_service_grant_test.go` that verifies grants for both level 3 and level 4 are applied in order when a player goes from level 2 to level 4.
+Create a new file `internal/gameserver/technology_levelup_grant_test.go` with `package gameserver_test`. The fake repo types (`fakeHardwiredRepo`, `fakePreparedRepo`, `fakeSpontaneousRepo`, `fakeInnateRepo`, `noPrompt`) are already defined in `technology_assignment_test.go` in the same `gameserver_test` package, so do **not** redefine them.
 
-**Note:** The grant test uses a real or fake `GameServiceServer`. Look at the existing test structure and follow the same pattern. The test needs:
-- A `PlayerSession` at level 2 with `Class` set to a job that has `LevelUpGrants` for levels 3 and 4
-- A fake/mock job registry returning that job
-- Fake technology repos
-- An XP grant large enough to jump from level 2 to level 4
-
-If the existing grant tests don't use technology repos (they pass nil for those), you'll need to wire them in. Look for the `NewGameServiceServer(` call and insert the fake repos at the positions for `hardwiredTechRepo, preparedTechRepo, spontaneousTechRepo, innateTechRepo` (4th–7th arguments after `techRegistry`).
-
-The test assertion: after the grant, the session's `HardwiredTechs` contains IDs from both the level-3 and level-4 `LevelUpGrants` entries.
-
-Concrete test (adjust the `NewGameServiceServer` call to match the existing signature in this file):
+XP math: `testXPConfig()` uses BaseXP=100; level N requires N²×100 XP cumulative. To jump from level 2 to level 4: need 4²×100 = 1600 XP total; grant `Amount: 1600`.
 
 ```go
+package gameserver_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/xp"
+	"github.com/cory-johannsen/mud/internal/gameserver"
+)
+
+// REQ-LUT7: handleGrant applies level_up_grants for every level gained in ascending order
+// when a player skips levels (e.g., 2→4 applies grants for level 3 then level 4).
 func TestHandleGrant_LevelUp_AppliesTechGrantsForEachLevel(t *testing.T) {
+	ctx := context.Background()
+
 	// Build a job with LevelUpGrants for levels 3 and 4.
 	job := &ruleset.Job{
-		ID: "test_class",
+		ID:        "test_class",
+		Name:      "Test Class",
+		Archetype: "aggressor",
 		LevelUpGrants: map[int]*ruleset.TechnologyGrants{
 			3: {Hardwired: []string{"level3_tech"}},
 			4: {Hardwired: []string{"level4_tech"}},
@@ -560,50 +594,76 @@ func TestHandleGrant_LevelUp_AppliesTechGrantsForEachLevel(t *testing.T) {
 	jobReg := ruleset.NewJobRegistry()
 	jobReg.Register(job)
 
-	// Fake tech repos — these types are already defined in technology_assignment_test.go
-	// in the same package (gameserver_test), so they are available here without redeclaration.
+	// Fake tech repos — defined in technology_assignment_test.go (same package).
 	hwRepo := &fakeHardwiredRepo{}
 	prepRepo := &fakePreparedRepo{}
 	spontRepo := &fakeSpontaneousRepo{}
 	innateRepo := &fakeInnateRepo{}
 
-	// Use the existing test helper to build a GameServiceServer with this job registry.
-	// Adjust NewGameServiceServer arguments to include the four fake repos.
-	// Look at the existing test helpers in this file for the exact call pattern.
-	// ... (see existing tests for the exact NewGameServiceServer signature in tests) ...
+	// Build a server using the existing test helper.
+	svc := testServiceForGrant(t, grantTestOptions{})
+	svc.SetXPService(xp.NewService(testXPConfig(), &grantXPProgressSaver{}))
+	svc.SetJobRegistry(jobReg)
+	svc.SetHardwiredTechRepo(hwRepo)
+	svc.SetPreparedTechRepo(prepRepo)
+	svc.SetSpontaneousTechRepo(spontRepo)
+	svc.SetInnateTechRepo(innateRepo)
 
-	// Create a target player session at level 2.
-	targetSess := &session.PlayerSession{
-		UID:      "target",
-		CharName: "Target",
-		Class:    "test_class",
-		Level:    2,
-		Role:     "player",
+	// Register an editor (required by grant handler).
+	editorUID := addEditorForGrant(t, svc)
+
+	// Register a target at level 2 with CharacterID set (required for tech repo writes).
+	targetUID := addTargetForGrant(t, svc)
+	svc.Sessions()[targetUID].Level = 2
+	svc.Sessions()[targetUID].Class = "test_class"
+	svc.Sessions()[targetUID].CharacterID = 42
+
+	stream := newFakeGameStream(ctx, editorUID)
+
+	req := &gamev1.GameRequest{
+		Message: &gamev1.GameRequest_Grant{
+			Grant: &gamev1.GrantRequest{
+				GrantType: "xp",
+				CharName:  svc.Sessions()[targetUID].CharName,
+				Amount:    1600, // 4²×100 = 1600 → jumps level 2 → 4
+			},
+		},
 	}
-	// ... register target in server sessions ...
 
-	// Grant enough XP to jump from level 2 to level 4 (depends on BaseXP config).
-	// ... send GrantRequest{GrantType: "xp", CharName: "Target", Amount: <enough>} ...
+	err := svc.HandleStream(stream, req)
+	require.NoError(t, err)
 
-	// Assertions:
+	targetSess := svc.Sessions()[targetUID]
+	assert.Equal(t, 4, targetSess.Level)
 	assert.Contains(t, targetSess.HardwiredTechs, "level3_tech")
 	assert.Contains(t, targetSess.HardwiredTechs, "level4_tech")
-	// Verify ascending order: level3_tech before level4_tech
-	idx3 := slices.Index(targetSess.HardwiredTechs, "level3_tech")
-	idx4 := slices.Index(targetSess.HardwiredTechs, "level4_tech")
-	assert.Less(t, idx3, idx4)
+
+	// Verify ascending order: level3_tech before level4_tech.
+	idx3, idx4 := -1, -1
+	for i, id := range targetSess.HardwiredTechs {
+		if id == "level3_tech" {
+			idx3 = i
+		}
+		if id == "level4_tech" {
+			idx4 = i
+		}
+	}
+	assert.Greater(t, idx3, -1, "level3_tech must be present")
+	assert.Greater(t, idx4, -1, "level4_tech must be present")
+	assert.Less(t, idx3, idx4, "level3_tech must precede level4_tech")
 }
 ```
 
-**Important:** Before writing the test, read `internal/gameserver/grpc_service_grant_test.go` to understand:
-- The exact `NewGameServiceServer` argument order and which args are nil-able
-- How `PlayerSession` entities are registered into the server
-- How the XP config is set so you can compute "enough XP" to reach level 4 from level 2
-- Whether `fakeHardwiredTechRepo` etc. are already defined in a shared test helpers file or need to be added
+**Before writing this test,** read `internal/gameserver/grpc_service_grant_test.go` to confirm:
+- The exact signature of `testServiceForGrant` and `grantTestOptions`
+- The type of `svc` returned (to know if `SetJobRegistry` etc. are accessible)
+- The field name for the session map (e.g., `Sessions()` accessor or direct field)
+- The exact proto import path for `gamev1`
+- How `addEditorForGrant` and `addTargetForGrant` work
+- Whether `newFakeGameStream` or equivalent exists; adapt to the actual stream fake type used in tests
+- Whether `HandleStream` is the correct method name for dispatching a request
 
-If the fake repo types already exist in `technology_assignment_test.go` (package `gameserver_test`), they are available in `grpc_service_grant_test.go` as long as both files are in the same test package. Verify this — both files should declare `package gameserver_test`.
-
-Use `slices.Index` from `"slices"` (Go 1.21+) or manually find the index if the Go version is older.
+Adjust the test to match the actual helpers exactly. The structure above is a guide — the final code must compile and match the real API.
 
 - [ ] **Step 3: Run test to verify it fails**
 
@@ -611,22 +671,24 @@ Use `slices.Index` from `"slices"` (Go 1.21+) or manually find the index if the 
 cd /home/cjohannsen/src/mud && go test ./internal/gameserver/... -run "TestHandleGrant_LevelUp_AppliesTechGrantsForEachLevel" -v 2>&1 | tail -20
 ```
 
-Expected: FAIL or compile error (LevelUpTechnologies not yet called from handleGrant).
+Expected: FAIL or compile error (`LevelUpTechnologies` not yet called from `handleGrant`).
 
 - [ ] **Step 4: Wire `LevelUpTechnologies` into `handleGrant`**
 
-In `internal/gameserver/grpc_service.go`, find the `handleGrant` function (around line 6415). In the `case "xp":` branch, locate:
+In `internal/gameserver/grpc_service.go`, find `handleGrant` (around line 6415). Locate the `if s.xpSvc != nil {` block. Inside that block, find:
 
 ```go
 		result := xp.Award(target.Level, target.Experience, amount, s.xpSvc.Config())
 ```
 
-Change to (capture `oldLevel` before mutation):
+Add `oldLevel` capture **as the first statement inside `if s.xpSvc != nil {`**, before this line:
 
 ```go
 		oldLevel := target.Level
 		result := xp.Award(target.Level, target.Experience, amount, s.xpSvc.Config())
 ```
+
+**Critical:** `oldLevel` MUST be declared inside `if s.xpSvc != nil {`, not outside it — otherwise Go will report "declared and not used" when `s.xpSvc` is nil.
 
 Then find the end of the `if result.LeveledUp {` block:
 
@@ -635,13 +697,14 @@ Then find the end of the `if result.LeveledUp {` block:
 		}
 ```
 
-Add the technology level-up loop immediately after `levelMsgs = append(levelMsgs, "You earned 1 hero point!")` and before the closing `}`:
+Add the technology level-up loop immediately after `levelMsgs = append(levelMsgs, "You earned 1 hero point!")` and before the closing `}` of `if result.LeveledUp {`:
 
 ```go
 			levelMsgs = append(levelMsgs, "You earned 1 hero point!")
 			// Apply technology level-up grants for each level gained (ascending order).
 			// handleGrant runs in the editor's stream context, not the target's, so
-			// interactive prompting is unavailable; first-option auto-assign is used.
+			// interactive prompting is unavailable; LevelUpTechnologies uses first-option
+			// auto-assign when promptFn is nil.
 			if s.hardwiredTechRepo != nil && s.jobRegistry != nil && target.CharacterID > 0 {
 				if job, ok := s.jobRegistry.Job(target.Class); ok {
 					for lvl := oldLevel + 1; lvl <= result.NewLevel; lvl++ {
@@ -670,7 +733,7 @@ Add the technology level-up loop immediately after `levelMsgs = append(levelMsgs
 cd /home/cjohannsen/src/mud && go build ./internal/gameserver/... 2>&1
 ```
 
-Expected: no errors. If `oldLevel` is flagged as unused (because `s.xpSvc` may be nil), wrap the `oldLevel` capture inside the `if s.xpSvc != nil {` block.
+Expected: no errors.
 
 - [ ] **Step 6: Run the new test**
 
@@ -698,19 +761,7 @@ Expected: PASS, 0 failures across all packages.
 
 - [ ] **Step 9: Update FEATURES.md**
 
-In `docs/requirements/FEATURES.md`, find:
-
-```
-    - [ ] Levelling up allows for additions and changes
-```
-
-(or the equivalent line about level-up technology selection added in the previous sprint). Mark it complete. Also update the specific level-up bullet:
-
-```
-        - [ ] Level-up technology selection — player chooses new technologies when levelling up (prepared/spontaneous pool expands; player selects additions interactively)
-```
-
-to:
+In `docs/requirements/FEATURES.md`, find the level-up technology selection line and mark it complete:
 
 ```
         - [x] Level-up technology selection — player chooses new technologies when levelling up (prepared/spontaneous pool expands; player selects additions interactively via first-option auto-assign on admin-grant path)
@@ -719,7 +770,7 @@ to:
 - [ ] **Step 10: Commit**
 
 ```bash
-git add internal/gameserver/grpc_service.go internal/gameserver/grpc_service_grant_test.go docs/requirements/FEATURES.md
+git add internal/gameserver/grpc_service.go internal/gameserver/technology_levelup_grant_test.go docs/requirements/FEATURES.md
 git commit -m "feat(gameserver): wire LevelUpTechnologies into handleGrant; apply per-level tech grants in ascending order (REQ-LUT7)"
 ```
 

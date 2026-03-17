@@ -260,7 +260,9 @@
       - [ ] Heightened Spells -> Amped Technology
         - Follows the PF2E rules
       - [ ] Innate Technologies
-- [ ] Non-combat NPCs. Define the data model and behavior for the following NPCs and implement those specifically mentioned.
+- [ ] Long rest — full PF2E long rest equivalent: restore HP to max, reset spontaneous tech uses, allow prepared tech rearrangement
+- [ ] Non-combat NPCs.
+  - Define the data model and behavior for the following NPCs and implement those specifically mentioned.
   - For those not mentioned generate one that lives in a room in Rustbucket Ridge and matches the lore. Multiple NPCs can occupy the same room.
   - [ ] Non-combat NPC base data model — add `npc_type` field (merchant, guard, healer, quest_giver, hireling, banker, job_trainer) to NPC YAML; non-combat NPCs do not appear in combat initiative; they flee or cower when combat starts in their room
   - [ ] merchants
