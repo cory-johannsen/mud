@@ -98,7 +98,7 @@ Key fields (others are type-specific):
 - `ConditionID string` — condition registry ID (condition effects)
 - `Value int` — condition stack count
 - `Duration string` — "rounds:N" | "minutes:N" | "instant"
-- `Distance int`, `Direction string` — movement effects ("toward" | "away")
+- `Distance int`, `Direction string` — movement effects (`"toward"` | `"away"` | `"teleport"`); note: `"teleport"` is defined in the model but not yet handled by the resolver — it falls through silently, so any movement tech using `direction: teleport` will apply no movement effect
 - `UtilityType string`, `Description string` — utility effects
 
 ### `InnateSlot` (in `internal/game/session/technology.go`)
@@ -132,17 +132,18 @@ type InnateSlot struct {
 2. `grpc_service.go` dispatch routes to `handleUse(uid, abilityID, targetID, stream)`.
 3. `handleUse` loads the player's `*session.PlayerSession` from the session store.
 4. Looks up the tech in the registry: `s.techRegistry.Get(abilityID)`.
-5. Resolves target: if `tech.Targets == "self"` or `tech.Resolution == "none"`, target is nil; otherwise resolves `targetID` against active combat or returns an error.
+5. Resolves target: the target-resolution logic (determining whether a tech targets self, an enemy, or nobody) lives here in `handleUse`, not in the resolver. The resolved targets slice (zero or more `*combat.Combatant`) is then passed to the resolver.
 6. Dispatches by usage type to check and expend uses:
    - **hardwired**: always available — no slot check or decrement.
    - **prepared**: finds the slot in `sess.PreparedTechs[level]` where `!slot.Expended`; calls `prepRepo.SetExpended(...)`.
    - **spontaneous**: checks `sess.SpontaneousUsePools[level].Remaining > 0`; calls `spontUsePoolRepo.Decrement(...)`.
    - **innate**: checks `slot.MaxUses == 0` (unlimited) or `slot.UsesRemaining > 0`; if limited calls `innateRepo.Decrement(...)`; decrements `slot.UsesRemaining` in session.
 7. Calls `ResolveTechEffects(sess, techDef, targets, combatEngine, condRegistry, src)` in `tech_effect_resolver.go`.
-8. Resolver dispatches by `tech.Resolution`:
-   - **"save"**: calls `combat.ResolveSave(saveType, target, saveDC, src)` → outcome → selects tier → applies effects.
-   - **"attack"**: rolls 1d20 + `techAttackMod(sess, tech)` vs `target.AC` → CritHit/Hit/Miss → selects tier → applies effects.
-   - **"none"**: applies `Effects.OnApply` directly.
+8. Resolver checks target count first, then dispatches by `tech.Resolution`:
+   - **zero targets**: applies `Effects.OnApply` directly, regardless of `tech.Resolution`.
+   - **non-zero targets + "save"**: calls `combat.ResolveSave(saveType, target, saveDC, src)` → outcome → selects tier → applies effects.
+   - **non-zero targets + "attack"**: rolls 1d20 + `techAttackMod(sess, tech)` vs `target.AC` → CritHit/Hit/Miss → selects tier → applies effects.
+   - **non-zero targets + "none"**: applies `Effects.OnApply` directly.
 9. Effects applied per `TechEffect.Type`: damage decrements `target.CurrentHP` (floor 0); heal increments `sess.CurrentHP` (cap `MaxHP`); condition calls `condRegistry` + combat state; movement adjusts `target.Position`.
 10. Returns `UseResponse` as a `ServerEvent` MessageEvent with result lines joined by newline.
 
