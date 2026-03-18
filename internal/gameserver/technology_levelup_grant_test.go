@@ -85,6 +85,8 @@ func (r *lutInnateRepo) Set(_ context.Context, _ int64, techID string, maxUses i
 	return nil
 }
 func (r *lutInnateRepo) DeleteAll(_ context.Context, _ int64) error { r.slots = nil; return nil }
+func (r *lutInnateRepo) Decrement(_ context.Context, _ int64, _ string) error { return nil }
+func (r *lutInnateRepo) RestoreAll(_ context.Context, _ int64) error           { return nil }
 
 // ---------------------------------------------------------------------------
 // REQ-LUT7: handleGrant applies LevelUpTechnologies for each level gained in

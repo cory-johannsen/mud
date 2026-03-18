@@ -131,6 +131,8 @@ func (r *innateRepoInternal) Set(_ context.Context, _ int64, techID string, maxU
 	return nil
 }
 func (r *innateRepoInternal) DeleteAll(_ context.Context, _ int64) error { r.slots = nil; return nil }
+func (r *innateRepoInternal) Decrement(_ context.Context, _ int64, _ string) error { return nil }
+func (r *innateRepoInternal) RestoreAll(_ context.Context, _ int64) error           { return nil }
 
 // ---------------------------------------------------------------------------
 // Helpers

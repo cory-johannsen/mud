@@ -42,9 +42,25 @@ type SpontaneousTechRepo interface {
 
 // InnateTechRepo defines persistence for innate technology assignments.
 type InnateTechRepo interface {
+	// GetAll returns all innate slots for the character.
 	GetAll(ctx context.Context, characterID int64) (map[string]*session.InnateSlot, error)
+
+	// Set initializes or overwrites an innate slot entry.
+	// Postcondition: row (characterID, techID) has max_uses=maxUses, uses_remaining=maxUses.
+	// Precondition: only called at character creation or full re-assignment, never at login load.
 	Set(ctx context.Context, characterID int64, techID string, maxUses int) error
+
+	// DeleteAll removes all innate tech rows for the character.
 	DeleteAll(ctx context.Context, characterID int64) error
+
+	// Decrement atomically decrements uses_remaining by 1 if > 0.
+	// Precondition: caller has verified UsesRemaining > 0 in session before calling.
+	// Postcondition: uses_remaining = max(0, uses_remaining - 1).
+	Decrement(ctx context.Context, characterID int64, techID string) error
+
+	// RestoreAll sets uses_remaining = max_uses for all rows of this character.
+	// Postcondition: all innate slots are at maximum uses.
+	RestoreAll(ctx context.Context, characterID int64) error
 }
 
 // SpontaneousUsePoolRepo manages the daily use pool for spontaneous technologies.

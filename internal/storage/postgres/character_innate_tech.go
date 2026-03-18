@@ -28,7 +28,7 @@ func NewCharacterInnateTechRepository(db *pgxpool.Pool) *CharacterInnateTechRepo
 // Postcondition: Returns a non-nil map (may be empty) and nil error on success.
 func (r *CharacterInnateTechRepository) GetAll(ctx context.Context, characterID int64) (map[string]*session.InnateSlot, error) {
 	rows, err := r.db.Query(ctx,
-		`SELECT tech_id, max_uses
+		`SELECT tech_id, max_uses, uses_remaining
          FROM character_innate_technologies
          WHERE character_id = $1`,
 		characterID,
@@ -40,11 +40,11 @@ func (r *CharacterInnateTechRepository) GetAll(ctx context.Context, characterID 
 	result := make(map[string]*session.InnateSlot)
 	for rows.Next() {
 		var techID string
-		var maxUses int
-		if err := rows.Scan(&techID, &maxUses); err != nil {
+		var maxUses, usesRemaining int
+		if err := rows.Scan(&techID, &maxUses, &usesRemaining); err != nil {
 			return nil, fmt.Errorf("CharacterInnateTechRepository.GetAll scan: %w", err)
 		}
-		result[techID] = &session.InnateSlot{MaxUses: maxUses}
+		result[techID] = &session.InnateSlot{MaxUses: maxUses, UsesRemaining: usesRemaining}
 	}
 	return result, rows.Err()
 }
@@ -55,9 +55,10 @@ func (r *CharacterInnateTechRepository) GetAll(ctx context.Context, characterID 
 // Postcondition: Exactly one row exists for (character_id, tech_id) with the given max_uses.
 func (r *CharacterInnateTechRepository) Set(ctx context.Context, characterID int64, techID string, maxUses int) error {
 	_, err := r.db.Exec(ctx,
-		`INSERT INTO character_innate_technologies (character_id, tech_id, max_uses)
-         VALUES ($1, $2, $3)
-         ON CONFLICT (character_id, tech_id) DO UPDATE SET max_uses = EXCLUDED.max_uses`,
+		`INSERT INTO character_innate_technologies (character_id, tech_id, max_uses, uses_remaining)
+         VALUES ($1, $2, $3, $3)
+         ON CONFLICT (character_id, tech_id)
+         DO UPDATE SET max_uses = EXCLUDED.max_uses, uses_remaining = EXCLUDED.uses_remaining`,
 		characterID, techID, maxUses,
 	)
 	if err != nil {
@@ -76,6 +77,32 @@ func (r *CharacterInnateTechRepository) DeleteAll(ctx context.Context, character
 	)
 	if err != nil {
 		return fmt.Errorf("CharacterInnateTechRepository.DeleteAll: %w", err)
+	}
+	return nil
+}
+
+// Decrement atomically decrements uses_remaining by 1 if > 0.
+func (r *CharacterInnateTechRepository) Decrement(ctx context.Context, characterID int64, techID string) error {
+	_, err := r.db.Exec(ctx,
+		`UPDATE character_innate_technologies
+            SET uses_remaining = GREATEST(0, uses_remaining - 1)
+          WHERE character_id = $1 AND tech_id = $2`,
+		characterID, techID)
+	if err != nil {
+		return fmt.Errorf("CharacterInnateTechRepository.Decrement: %w", err)
+	}
+	return nil
+}
+
+// RestoreAll sets uses_remaining = max_uses for all rows of this character.
+func (r *CharacterInnateTechRepository) RestoreAll(ctx context.Context, characterID int64) error {
+	_, err := r.db.Exec(ctx,
+		`UPDATE character_innate_technologies
+            SET uses_remaining = max_uses
+          WHERE character_id = $1`,
+		characterID)
+	if err != nil {
+		return fmt.Errorf("CharacterInnateTechRepository.RestoreAll: %w", err)
 	}
 	return nil
 }

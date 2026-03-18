@@ -86,6 +86,8 @@ func (r *fakeInnateRepo) Set(_ context.Context, _ int64, techID string, maxUses 
 	return nil
 }
 func (r *fakeInnateRepo) DeleteAll(_ context.Context, _ int64) error { r.slots = nil; return nil }
+func (r *fakeInnateRepo) Decrement(_ context.Context, _ int64, _ string) error { return nil }
+func (r *fakeInnateRepo) RestoreAll(_ context.Context, _ int64) error           { return nil }
 
 // noPrompt returns the first option automatically (for testing auto-assign paths).
 // Precondition: called only on test scenarios where auto-assign does not trigger the prompt;
@@ -844,4 +846,81 @@ func TestAssignTechnologies_NilJobTechGrants_ArchetypeGrantsUsed(t *testing.T) {
 	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn, nil)
 	require.NoError(t, err)
 	assert.Len(t, sess.PreparedTechs[1], 1)
+}
+
+// REQ-SSL4 (property): LevelUpTechnologies calls promptFn exactly N times when pool > open slots.
+// All selected IDs come from the pool; no duplicates; session has exactly N entries at the level.
+func TestPropertyLevelUpTechnologies_SpontaneousPromptCount(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Generate pool size 2-6 and open slots strictly less than pool size.
+		nPool := rapid.IntRange(2, 6).Draw(rt, "nPool")
+		nOpen := rapid.IntRange(1, nPool-1).Draw(rt, "nOpen")
+
+		pool := make([]ruleset.SpontaneousEntry, nPool)
+		for i := range pool {
+			pool[i] = ruleset.SpontaneousEntry{ID: fmt.Sprintf("prop_tech_%d", i), Level: 1}
+		}
+
+		grants := &ruleset.TechnologyGrants{
+			Spontaneous: &ruleset.SpontaneousGrants{
+				KnownByLevel: map[int]int{1: nOpen},
+				// No Fixed entries — only prompt-chosen techs populate SpontaneousTechs[1].
+				Pool: pool,
+			},
+		}
+
+		sess := &session.PlayerSession{Level: 5}
+		spont := &fakeSpontaneousRepo{}
+		hw := &fakeHardwiredRepo{}
+		prep := &fakePreparedRepo{}
+		inn := &fakeInnateRepo{}
+
+		promptCallCount := 0
+		promptFn := func(options []string) (string, error) {
+			promptCallCount++
+			// Return the first option each time (greedy selection).
+			if len(options) == 0 {
+				return "", nil
+			}
+			return options[0], nil
+		}
+
+		ctx := context.Background()
+		err := gameserver.LevelUpTechnologies(ctx, sess, 1, grants, nil, promptFn, hw, prep, spont, inn, nil)
+		if err != nil {
+			rt.Fatalf("LevelUpTechnologies: %v", err)
+		}
+
+		// Invariant 1: promptFn called exactly nOpen times.
+		if promptCallCount != nOpen {
+			rt.Fatalf("expected promptFn called %d times, got %d", nOpen, promptCallCount)
+		}
+
+		chosen := sess.SpontaneousTechs[1]
+
+		// Invariant 2: exactly nOpen entries in session.
+		if len(chosen) != nOpen {
+			rt.Fatalf("expected %d entries in SpontaneousTechs[1], got %d", nOpen, len(chosen))
+		}
+
+		// Invariant 3: all IDs are from the pool.
+		validIDs := make(map[string]bool, nPool)
+		for _, e := range pool {
+			validIDs[e.ID] = true
+		}
+		for _, id := range chosen {
+			if !validIDs[id] {
+				rt.Fatalf("chosen tech %q not in pool", id)
+			}
+		}
+
+		// Invariant 4: no duplicates.
+		seen := make(map[string]bool, len(chosen))
+		for _, id := range chosen {
+			if seen[id] {
+				rt.Fatalf("duplicate tech ID %q in SpontaneousTechs[1]", id)
+			}
+			seen[id] = true
+		}
+	})
 }

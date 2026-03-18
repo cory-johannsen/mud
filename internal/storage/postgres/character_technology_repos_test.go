@@ -218,8 +218,8 @@ func TestCharacterInnateTechRepo_Set_And_GetAll(t *testing.T) {
 
 	got, err := repo.GetAll(ctx, ch.ID)
 	require.NoError(t, err)
-	assert.Equal(t, &session.InnateSlot{MaxUses: 3}, got["acid_spray"])
-	assert.Equal(t, &session.InnateSlot{MaxUses: 0}, got["neural_shock"])
+	assert.Equal(t, &session.InnateSlot{MaxUses: 3, UsesRemaining: 3}, got["acid_spray"])
+	assert.Equal(t, &session.InnateSlot{MaxUses: 0, UsesRemaining: 0}, got["neural_shock"])
 }
 
 func TestCharacterInnateTechRepo_DeleteAll(t *testing.T) {
