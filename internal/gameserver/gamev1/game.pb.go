@@ -6290,6 +6290,7 @@ func (x *InteractResponse) GetMessage() string {
 type UseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FeatId        string                 `protobuf:"bytes,1,opt,name=feat_id,json=featId,proto3" json:"feat_id,omitempty"`
+	Target        string                 `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6327,6 +6328,13 @@ func (*UseRequest) Descriptor() ([]byte, []int) {
 func (x *UseRequest) GetFeatId() string {
 	if x != nil {
 		return x.FeatId
+	}
+	return ""
+}
+
+func (x *UseRequest) GetTarget() string {
+	if x != nil {
+		return x.Target
 	}
 	return ""
 }
@@ -9132,10 +9140,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\",\n" +
 	"\x10InteractResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"%\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"=\n" +
 	"\n" +
 	"UseRequest\x12\x17\n" +
-	"\afeat_id\x18\x01 \x01(\tR\x06featId\"U\n" +
+	"\afeat_id\x18\x01 \x01(\tR\x06featId\x12\x16\n" +
+	"\x06target\x18\x02 \x01(\tR\x06target\"U\n" +
 	"\vUseResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12,\n" +
 	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"G\n" +

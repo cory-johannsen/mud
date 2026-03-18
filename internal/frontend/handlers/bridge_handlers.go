@@ -704,16 +704,26 @@ func bridgeInteract(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
-// bridgeUse builds a UseRequest for feat activation.
-// If no feat name is given, sends an empty feat_id to trigger listing.
+// bridgeUse builds a UseRequest for tech/feat activation.
+// args format: "<abilityID> [target]"
+// If no ability name given, sends empty feat_id to trigger listing.
 //
 // Precondition: bctx must be non-nil with a valid reqID.
-// Postcondition: returns a non-nil msg containing a UseRequest.
+// Postcondition: returns a non-nil msg containing a UseRequest with parsed feat_id and optional target.
 func bridgeUse(bctx *bridgeContext) (bridgeResult, error) {
-	featID := strings.TrimSpace(bctx.parsed.RawArgs)
+	parts := strings.Fields(bctx.parsed.RawArgs)
+	var featID, target string
+	if len(parts) >= 1 {
+		featID = parts[0]
+	}
+	if len(parts) >= 2 {
+		target = parts[1]
+	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
-		Payload:   &gamev1.ClientMessage_UseRequest{UseRequest: &gamev1.UseRequest{FeatId: featID}},
+		Payload: &gamev1.ClientMessage_UseRequest{
+			UseRequest: &gamev1.UseRequest{FeatId: featID, Target: target},
+		},
 	}}, nil
 }
 

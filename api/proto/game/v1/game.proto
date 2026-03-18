@@ -639,6 +639,7 @@ message InteractResponse {
 // An empty feat_id causes the server to return the list of available active feats.
 message UseRequest {
   string feat_id = 1;
+  string target  = 2;
 }
 
 // UseResponse carries the result of a feat activation or a list of active feats.
