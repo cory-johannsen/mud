@@ -361,38 +361,46 @@ Each tech-using job gets a `technology_grants` entry using the single available 
 
 ### Nerd jobs (9 jobs) — Technical tradition, prepared
 
-All nerd jobs:
+All nerd jobs (archetype contributes 2 slots at level 1; job must provide ≥ 2 pool entries):
 ```yaml
 technology_grants:
   prepared:
     pool:
       - id: neural_shock
         level: 1
+      - id: neural_shock
+        level: 1
 ```
 
-Exception — `engineer` gets 1 extra slot at level 1:
+Exception — `engineer` gets 1 extra slot at level 1 (merged total: 3 slots; job must provide 3 pool entries):
 ```yaml
 technology_grants:
   prepared:
     slots_by_level:
       1: 1
     pool:
+      - id: neural_shock
+        level: 1
+      - id: neural_shock
+        level: 1
       - id: neural_shock
         level: 1
 ```
 
 ### Zealot jobs (10 jobs) — Fanatic Doctrine tradition, prepared
 
-All zealot jobs:
+All zealot jobs (archetype contributes 2 slots at level 1; job must provide ≥ 2 pool entries):
 ```yaml
 technology_grants:
   prepared:
     pool:
       - id: battle_fervor
         level: 1
+      - id: battle_fervor
+        level: 1
 ```
 
-Exception — `medic` gets 1 extra slot:
+Exception — `medic` gets 1 extra slot (merged total: 3 slots; job must provide 3 pool entries):
 ```yaml
 technology_grants:
   prepared:
@@ -401,37 +409,47 @@ technology_grants:
     pool:
       - id: battle_fervor
         level: 1
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1
 ```
 
 ### Naturalist jobs (8 jobs) — Bio-Synthetic tradition, prepared
 
-All naturalist jobs:
+All naturalist jobs (archetype contributes 2 slots at level 1; job must provide ≥ 2 pool entries):
 ```yaml
 technology_grants:
   prepared:
     pool:
       - id: acid_spray
         level: 1
+      - id: acid_spray
+        level: 1
 ```
 
 ### Schemer jobs (8 jobs) — Neural tradition, prepared
 
-All schemer jobs:
+All schemer jobs (archetype contributes 2 slots at level 1; job must provide ≥ 2 pool entries):
 ```yaml
 technology_grants:
   prepared:
     pool:
       - id: mind_spike
         level: 1
+      - id: mind_spike
+        level: 1
 ```
 
 ### Influencer jobs (10 jobs) — Neural tradition, spontaneous
 
-All influencer jobs:
+All influencer jobs (archetype contributes known=2 at level 1; job must provide ≥ 2 pool entries):
 ```yaml
 technology_grants:
   spontaneous:
     pool:
+      - id: mind_spike
+        level: 1
       - id: mind_spike
         level: 1
 ```
