@@ -27,7 +27,7 @@ Out of scope: game logic (`internal/gameserver/`), gRPC transport, command dispa
 
 | File | Purpose |
 |------|---------|
-| `internal/frontend/telnet/screen.go` | `InitScreen`, `WriteRoom`, `WriteConsole`, `WritePromptSplit`, `appendRoomRedraw`, `wrapText`, scroll state |
+| `internal/frontend/telnet/screen.go` | `InitScreen`, `WriteRoom`, `WriteConsole`, `WritePromptSplit`, `appendRoomRedraw`, `wrapText` (internal) / `WrapText` (exported), scroll state |
 | `internal/frontend/telnet/conn.go` | `Conn` struct, NAWS parsing (`handleIAC`), `AwaitNAWS`, `ReadLineSplit`, `ResizeCh` |
 | `internal/frontend/telnet/ansi.go` | ANSI color constants, `Colorize`, `Colorf`, `StripANSI` |
 | `internal/frontend/handlers/text_renderer.go` | `RenderRoomView(rv, width, maxLines)`, `RenderCharacterSheet(csv, width)` |

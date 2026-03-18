@@ -27,6 +27,9 @@ positioning — no DECSTBM scroll regions are used.
 | Row  8  |                                        |
 | Row  9  |                                        |
 | Row 10  | (last room content row)                |
+<!-- Rows 8–10 represent overflow capacity. The room renderer fills rows
+     dynamically up to maxLines = RoomRegionRows (10). Rows appear empty only
+     when the room content is short — they are not permanently blank. -->
 +--------------------------------------------------+
 | Row 11  | ════════════════════════════ (divider) |
 +--------------------------------------------------+
@@ -96,7 +99,7 @@ graph TD
     GB --> TR[text_renderer.go<br/>RenderRoomView / RenderCharacterSheet]
     GB --> CO[conn.go<br/>NAWS / ReadLineSplit / ResizeCh]
     SC --> CO
-    SC --> AN[ansi.go<br/>Colorize / WrapText]
+    SC --> AN[ansi.go<br/>Colorize / Colorf / StripANSI]
     TR --> AN
     TR --> PB[gamev1 proto<br/>RoomView / CharacterSheetView]
     CO --> RF[RFC 854 / RFC 1073<br/>Telnet / NAWS]
