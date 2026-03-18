@@ -72,7 +72,7 @@ func TestHandleUse_PreparedTech_ExpendsSlot(t *testing.T) {
 	}
 	svc, sessMgr, uid := setupUseTechPlayer(t, prepRepo)
 
-	evt, err := svc.handleUse(uid, "shock_grenade")
+	evt, err := svc.handleUse(uid, "shock_grenade", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -95,7 +95,7 @@ func TestHandleUse_PreparedTech_AllExpended_ReturnsNoRemaining(t *testing.T) {
 	}
 	svc, _, uid := setupUseTechPlayer(t, prepRepo)
 
-	evt, err := svc.handleUse(uid, "shock_grenade")
+	evt, err := svc.handleUse(uid, "shock_grenade", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -114,7 +114,7 @@ func TestHandleUse_PreparedTech_NoSlotForTech_ReturnsNoRemaining(t *testing.T) {
 	}
 	svc, _, uid := setupUseTechPlayer(t, prepRepo)
 
-	evt, err := svc.handleUse(uid, "shock_grenade")
+	evt, err := svc.handleUse(uid, "shock_grenade", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -136,7 +136,7 @@ func TestHandleUse_NoArg_IncludesPreparedTechs(t *testing.T) {
 	}
 	svc, _, uid := setupUseTechPlayer(t, prepRepo)
 
-	evt, err := svc.handleUse(uid, "")
+	evt, err := svc.handleUse(uid, "", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -186,7 +186,7 @@ func TestPropertyHandleUse_PreparedTech_ExpendsExactly(t *testing.T) {
 
 		// Call use n times — all should succeed.
 		for i := 0; i < n; i++ {
-			evt, err := svc.handleUse(uid, "test_tech")
+			evt, err := svc.handleUse(uid, "test_tech", "")
 			if err != nil {
 				rt.Fatalf("call %d: unexpected error: %v", i, err)
 			}
@@ -196,7 +196,7 @@ func TestPropertyHandleUse_PreparedTech_ExpendsExactly(t *testing.T) {
 		}
 
 		// (N+1)th call must return "no remaining".
-		evt, err := svc.handleUse(uid, "test_tech")
+		evt, err := svc.handleUse(uid, "test_tech", "")
 		if err != nil {
 			rt.Fatalf("(n+1)th call: unexpected error: %v", err)
 		}

@@ -364,6 +364,9 @@ func (s *GameServiceServer) SetSpontaneousTechRepo(r SpontaneousTechRepo) { s.sp
 // SetInnateTechRepo injects an innate tech repo for testing.
 func (s *GameServiceServer) SetInnateTechRepo(r InnateTechRepo) { s.innateTechRepo = r }
 
+// SetTechRegistry replaces the server's technology registry. Used in tests.
+func (s *GameServiceServer) SetTechRegistry(r *technology.Registry) { s.techRegistry = r }
+
 // Session implements the bidirectional streaming RPC.
 // Flow:
 //  1. Wait for JoinWorldRequest
@@ -1344,7 +1347,7 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 	case *gamev1.ClientMessage_InteractRequest:
 		return s.handleInteract(uid, p.InteractRequest.InstanceId)
 	case *gamev1.ClientMessage_UseRequest:
-		return s.handleUse(uid, p.UseRequest.FeatId)
+		return s.handleUse(uid, p.UseRequest.FeatId, p.UseRequest.GetTarget())
 	case *gamev1.ClientMessage_Action:
 		return s.handleAction(uid, p.Action)
 	case *gamev1.ClientMessage_RaiseShield:
@@ -4600,7 +4603,7 @@ func (s *GameServiceServer) handleInteract(uid, instanceID string) (*gamev1.Serv
 //
 // Precondition: uid must resolve to an active session with a loaded character.
 // Postcondition: Returns a ServerEvent with UseResponse containing choices or an activation message.
-func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEvent, error) {
+func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
@@ -4823,7 +4826,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 						zap.Error(err))
 				}
 				sess.PreparedTechs[lvl][idx].Expended = true
-				return messageEvent(fmt.Sprintf("You activate %s.", abilityID)), nil
+				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID))
 			}
 		}
 		// No non-expended slot found for this tech ID.
@@ -4865,7 +4868,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 		}
 		pool.Remaining--
 		sess.SpontaneousUsePools[foundLevel] = pool
-		return messageEvent(fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel)), nil
+		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel))
 	}
 	// Innate tech activation
 	if s.innateTechRepo != nil {
@@ -4878,13 +4881,106 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 					return nil, fmt.Errorf("handleUse: decrement innate %s: %w", abilityID, err)
 				}
 				slot.UsesRemaining--
-				return messageEvent(fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining)), nil
+				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining))
 			}
-			return messageEvent(fmt.Sprintf("You activate %s.", abilityID)), nil
+			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID))
 		}
 		return messageEvent(fmt.Sprintf("You don't have innate tech %s.", abilityID)), nil
 	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
+}
+
+// resolveUseTarget returns the combat target for the given tech and targetID.
+//
+// Preconditions:
+//   - uid must correspond to a loaded session (not verified here — caller has already fetched sess).
+//   - tech must be non-nil.
+//
+// Postconditions:
+//   - Returns (nil, "") for self/utility/no-roll techs — target resolution skipped.
+//   - Returns (nil, errorMsg) when the caller has provided an invalid targetID or is not in combat.
+//   - Returns (*Combatant, "") when a valid target is resolved.
+func (s *GameServiceServer) resolveUseTarget(uid, targetID string, tech *technology.TechnologyDef) (*combat.Combatant, string) {
+	// Self-targeting and no-roll techs never need a target.
+	if tech.Targets == "self" || tech.Resolution == "" || tech.Resolution == "none" {
+		return nil, ""
+	}
+	if s.combatH == nil {
+		if targetID != "" {
+			return nil, "You are not in combat."
+		}
+		return nil, "Specify a target: use <tech> <target>"
+	}
+	cbt := s.combatH.ActiveCombatForPlayer(uid)
+	if cbt == nil {
+		if targetID != "" {
+			return nil, "You are not in combat."
+		}
+		return nil, "Specify a target: use <tech> <target>"
+	}
+	// In combat — find target.
+	if targetID == "" {
+		// Default: first living NPC combatant.
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindNPC && !c.IsDead() {
+				return c, ""
+			}
+		}
+		return nil, "No valid target in combat."
+	}
+	// Named target — case-insensitive prefix match.
+	lower := strings.ToLower(targetID)
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC && !c.IsDead() &&
+			strings.HasPrefix(strings.ToLower(c.Name), lower) {
+			return c, ""
+		}
+	}
+	return nil, fmt.Sprintf("No combatant named %q in this fight.", targetID)
+}
+
+// activateTechWithEffects resolves tech effects after a use has been expended.
+//
+// Preconditions:
+//   - sess must be non-nil.
+//   - uid must match sess.UID.
+//   - abilityID must be a valid tech ID known to s.techRegistry (or may be absent for legacy feats).
+//   - fallbackMsg is returned verbatim when s.techRegistry is nil or the tech is not registered.
+//
+// Postconditions:
+//   - If s.techRegistry is nil or the tech is not registered, falls back to fallbackMsg.
+//   - Returns a non-nil ServerEvent on success.
+func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string) (*gamev1.ServerEvent, error) {
+	if s.techRegistry == nil {
+		return messageEvent(fallbackMsg), nil
+	}
+	techDef, ok := s.techRegistry.Get(abilityID)
+	if !ok {
+		return messageEvent(fallbackMsg), nil
+	}
+	target, errMsg := s.resolveUseTarget(uid, targetID, techDef)
+	if errMsg != "" {
+		return messageEvent(errMsg), nil
+	}
+	var techTargets []*combat.Combatant
+	if techDef.Targets == technology.TargetsAllEnemies && s.combatH != nil { //nolint:gocritic
+		cbt := s.combatH.ActiveCombatForPlayer(uid)
+		if cbt != nil {
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindNPC && !c.IsDead() {
+					techTargets = append(techTargets, c)
+				}
+			}
+		}
+	} else if target != nil {
+		techTargets = []*combat.Combatant{target}
+	}
+	var cbt *combat.Combat
+	if s.combatH != nil {
+		cbt = s.combatH.ActiveCombatForPlayer(uid)
+	}
+	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{})
+	return messageEvent(strings.Join(msgs, "\n")), nil
 }
 
 // handleAction resolves a player-activated class feature action.

@@ -76,6 +76,15 @@ func (r *Registry) Get(id string) (*TechnologyDef, bool) {
 	return d, ok
 }
 
+// Register adds or replaces a TechnologyDef in the registry by its ID.
+// Intended for use in tests and programmatic registry population.
+//
+// Precondition: def must be non-nil.
+// Postcondition: def is retrievable via Get(def.ID).
+func (r *Registry) Register(def *TechnologyDef) {
+	r.byID[def.ID] = def
+}
+
 // All returns all loaded TechnologyDefs sorted by tradition ascending (lexicographic:
 // bio_synthetic < fanatic_doctrine < neural < technical), then level ascending, then ID ascending.
 func (r *Registry) All() []*TechnologyDef {

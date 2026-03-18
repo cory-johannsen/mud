@@ -1730,7 +1730,7 @@ func TestHandleUse_AppliesConditionWhenConditionIDSet(t *testing.T) {
 	require.NoError(t, err)
 	sess.Conditions = condition.NewActiveSet()
 
-	event, err := svc.handleUse("u_use_cond", "power-surge")
+	event, err := svc.handleUse("u_use_cond", "power-surge", "")
 	require.NoError(t, err)
 	require.NotNil(t, event)
 
@@ -1796,7 +1796,7 @@ func TestHandleUse_NoConditionAppliedWhenConditionIDEmpty(t *testing.T) {
 	require.NoError(t, err)
 	sess.Conditions = condition.NewActiveSet()
 
-	event, err := svc.handleUse("u_use_no_cond", "quick-strike")
+	event, err := svc.handleUse("u_use_no_cond", "quick-strike", "")
 	require.NoError(t, err)
 	require.NotNil(t, event)
 
@@ -1870,7 +1870,7 @@ func TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied(t *testing.T) {
 		}
 		sess.Conditions = condition.NewActiveSet()
 
-		_, err = svc.handleUse("prop_uid_use", "prop-feat")
+		_, err = svc.handleUse("prop_uid_use", "prop-feat", "")
 		if err != nil {
 			rt.Fatal("handleUse returned unexpected error:", err)
 		}

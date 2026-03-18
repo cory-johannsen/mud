@@ -86,7 +86,7 @@ func TestHandleUse_InnateActivation_DecrementsCalled(t *testing.T) {
 		"acid_spit": {MaxUses: 1, UsesRemaining: 1},
 	}
 
-	evt, err := svc.handleUse(uid, "acid_spit")
+	evt, err := svc.handleUse(uid, "acid_spit", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -109,7 +109,7 @@ func TestHandleUse_InnateExhausted_ReturnsNoUsesMessage(t *testing.T) {
 		"acid_spit": {MaxUses: 1, UsesRemaining: 0},
 	}
 
-	evt, err := svc.handleUse(uid, "acid_spit")
+	evt, err := svc.handleUse(uid, "acid_spit", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -127,7 +127,7 @@ func TestHandleUse_InnateNotKnown_ReturnsNotKnownMessage(t *testing.T) {
 	require.True(t, ok)
 	sess.InnateTechs = map[string]*session.InnateSlot{}
 
-	evt, err := svc.handleUse(uid, "acid_spit")
+	evt, err := svc.handleUse(uid, "acid_spit", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -148,7 +148,7 @@ func TestHandleUse_InnateUnlimited_NoDecrement(t *testing.T) {
 		"blackout_pulse": {MaxUses: 0, UsesRemaining: 0},
 	}
 
-	evt, err := svc.handleUse(uid, "blackout_pulse")
+	evt, err := svc.handleUse(uid, "blackout_pulse", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -170,7 +170,7 @@ func TestHandleUse_NoArg_ListsInnateTechs(t *testing.T) {
 		"pressure_burst": {MaxUses: 1, UsesRemaining: 0}, // exhausted — omit
 	}
 
-	evt, err := svc.handleUse(uid, "")
+	evt, err := svc.handleUse(uid, "", "")
 	require.NoError(t, err)
 	require.NotNil(t, evt)
 
@@ -206,7 +206,7 @@ func TestProperty_InnateActivation_DecrementsExactlyOnce(t *testing.T) {
 			"test_tech": {MaxUses: maxUses, UsesRemaining: usesRemaining},
 		}
 
-		evt, err := svc.handleUse(uid, "test_tech")
+		evt, err := svc.handleUse(uid, "test_tech", "")
 		if err != nil {
 			rt.Fatalf("handleUse failed: %v", err)
 		}
@@ -243,7 +243,7 @@ func TestProperty_InnateExhausted_NoDecrement(t *testing.T) {
 			"test_tech": {MaxUses: maxUses, UsesRemaining: 0},
 		}
 
-		evt, err := svc.handleUse(uid, "test_tech")
+		evt, err := svc.handleUse(uid, "test_tech", "")
 		if err != nil {
 			rt.Fatalf("handleUse failed: %v", err)
 		}
@@ -293,7 +293,7 @@ func TestProperty_InnateNoArgList_ExcludesExhausted(t *testing.T) {
 		}
 		sess.InnateTechs = slots
 
-		evt, err := svc.handleUse(uid, "")
+		evt, err := svc.handleUse(uid, "", "")
 		if err != nil {
 			rt.Fatalf("handleUse failed: %v", err)
 		}
