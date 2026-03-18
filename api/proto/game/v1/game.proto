@@ -707,6 +707,14 @@ message CharacterSheetView {
     int32  pending_tech_selections = 43; // number of pending technology grant selections
     repeated PreparedSlotView prepared_slots = 44; // prepared technology slots with expended state
     repeated SpontaneousUsePoolView spontaneous_use_pools = 45;
+    repeated InnateSlotView innate_slots = 46;
+}
+
+// InnateSlotView delivers the per-tech innate use slot state for the character sheet.
+message InnateSlotView {
+    string tech_id        = 1;
+    int32  uses_remaining = 2;
+    int32  max_uses       = 3;
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.

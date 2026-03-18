@@ -3731,6 +3731,14 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		})
 	}
 
+	for techID, slot := range sess.InnateTechs {
+		view.InnateSlots = append(view.InnateSlots, &gamev1.InnateSlotView{
+			TechId:        techID,
+			UsesRemaining: int32(slot.UsesRemaining),
+			MaxUses:       int32(slot.MaxUses),
+		})
+	}
+
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_CharacterSheet{CharacterSheet: view},
 	}, nil
