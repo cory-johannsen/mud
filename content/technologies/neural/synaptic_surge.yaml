@@ -1,0 +1,29 @@
+id: synaptic_surge
+name: Synaptic Surge
+description: Overwhelms a target's nervous system with a burst of pain signals.
+tradition: neural
+level: 1
+usage_type: spontaneous
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: will
+save_dc: 15
+effects:
+  - type: damage
+    dice: 2d4
+    damage_type: neural
+  - type: condition
+    condition_id: frightened
+    value: 1
+    duration: rounds:1
+amped_level: 3
+amped_effects:
+  - type: damage
+    dice: 4d4
+    damage_type: neural
+  - type: condition
+    condition_id: frightened
+    value: 2
+    duration: rounds:1

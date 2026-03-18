@@ -23,6 +23,15 @@ level_up_grants:
     spontaneous:
       uses_by_level:
         1: 1
+      known_by_level:
+        1: 1
+      pool:
+        - id: mind_spike
+          level: 1
+        - id: neural_static
+          level: 1
+        - id: synaptic_surge
+          level: 1
   4:
     spontaneous:
       uses_by_level:
@@ -31,3 +40,12 @@ level_up_grants:
     spontaneous:
       uses_by_level:
         1: 1
+      known_by_level:
+        1: 1
+      pool:
+        - id: mind_spike
+          level: 1
+        - id: neural_static
+          level: 1
+        - id: synaptic_surge
+          level: 1
