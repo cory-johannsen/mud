@@ -1460,6 +1460,8 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		Type:      gamev1.RoomEventType_ROOM_EVENT_TYPE_DEPART,
 		Direction: string(dir),
 	})
+	// Notify remaining players in source room via passive techs.
+	s.triggerPassiveTechsForRoom(result.OldRoomID)
 
 	// Broadcast arrival in new room
 	s.broadcastRoomEvent(result.View.RoomId, uid, &gamev1.RoomEvent{
@@ -1467,6 +1469,8 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		Type:      gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
 		Direction: string(dir.Opposite()),
 	})
+	// Notify all players in destination room via passive techs.
+	s.triggerPassiveTechsForRoom(result.View.RoomId)
 
 	if s.scriptMgr != nil {
 		if oldRoom, ok := s.world.GetRoom(result.OldRoomID); ok {
@@ -7592,6 +7596,58 @@ func (s *GameServiceServer) clearPendingJoinForRoom(roomID string) {
 				if data, err := proto.Marshal(evt); err == nil {
 					_ = sess.Entity.Push(data)
 				}
+			}
+		}
+	}
+}
+
+// triggerPassiveTechsForRoom fires all passive innate technologies for every player
+// currently in roomID.
+//
+// Precondition: roomID may be any string; nil or missing sessions are skipped silently.
+// Postcondition: Each player with a passive innate tech receives a push event on their
+// BridgeEntity. Players with nil Entity or techs absent from the registry are skipped
+// without error. Innate tech use counts are never decremented.
+func (s *GameServiceServer) triggerPassiveTechsForRoom(roomID string) {
+	if s.techRegistry == nil {
+		return
+	}
+	players := s.sessions.PlayersInRoomDetails(roomID)
+	for _, sess := range players {
+		if sess.Entity == nil {
+			continue
+		}
+		for techID := range sess.InnateTechs {
+			def, ok := s.techRegistry.Get(techID)
+			if !ok {
+				s.logger.Debug("passive tech not in registry", zap.String("techID", techID))
+				continue
+			}
+			if !def.Passive {
+				continue
+			}
+			evt, err := s.activateTechWithEffects(sess, sess.UID, techID, "", "")
+			if err != nil {
+				s.logger.Warn("passive tech activation error",
+					zap.String("uid", sess.UID),
+					zap.String("techID", techID),
+					zap.Error(err))
+				continue
+			}
+			if evt == nil {
+				continue
+			}
+			data, marshalErr := proto.Marshal(evt)
+			if marshalErr != nil {
+				s.logger.Warn("passive tech marshal error",
+					zap.String("uid", sess.UID),
+					zap.Error(marshalErr))
+				continue
+			}
+			if pushErr := sess.Entity.Push(data); pushErr != nil {
+				s.logger.Warn("pushing passive tech event",
+					zap.String("uid", sess.UID),
+					zap.Error(pushErr))
 			}
 		}
 	}
