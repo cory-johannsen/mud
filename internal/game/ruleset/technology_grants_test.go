@@ -439,9 +439,7 @@ func TestPropertyMergeGrants_HardwiredLengthIsSum(t *testing.T) {
 		a := &ruleset.TechnologyGrants{Hardwired: aHW}
 		b := &ruleset.TechnologyGrants{Hardwired: bHW}
 		result := ruleset.MergeGrants(a, b)
-		if len(result.Hardwired) != nA+nB {
-			rt.Fatalf("expected %d hardwired, got %d", nA+nB, len(result.Hardwired))
-		}
+		assert.Equal(rt, nA+nB, len(result.Hardwired))
 	})
 }
 
@@ -462,6 +460,10 @@ func TestMergeLevelUpGrants_KeysFromBothMaps(t *testing.T) {
 	assert.Contains(t, result, 4)
 	// Level 3 merged: y + z
 	assert.Len(t, result[3].Hardwired, 2)
+	// Level 2 is solo from a; verify content passed through unchanged.
+	assert.Equal(t, []string{"x"}, result[2].Hardwired)
+	// Level 4 is solo from b; verify content passed through unchanged.
+	assert.Equal(t, []string{"w"}, result[4].Hardwired)
 }
 
 func TestMergeLevelUpGrants_BothNil(t *testing.T) {

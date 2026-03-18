@@ -110,6 +110,7 @@ func countEntriesAtLevel(entries []leveledEntry, level int) int {
 //
 // Precondition: either or both arguments may be nil.
 // Postcondition: returned grant is the union of both; nil if both are nil.
+// When one argument is nil, the returned pointer aliases the other argument — callers must not mutate it.
 func MergeGrants(archetype, job *TechnologyGrants) *TechnologyGrants {
 	if archetype == nil && job == nil {
 		return nil
