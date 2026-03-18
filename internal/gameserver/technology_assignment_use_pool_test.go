@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -145,4 +146,84 @@ func TestLoadTechnologies_LoadsUsePools(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, session.UsePool{Remaining: 1, Max: 3}, sess.SpontaneousUsePools[2])
+}
+
+// TestAssignTechnologies_PoolProperty verifies for any uses count that AssignTechnologies
+// always sets sess.SpontaneousUsePools[1] to {Remaining: uses, Max: uses}.
+func TestAssignTechnologies_PoolProperty(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		uses := rapid.IntRange(0, 100).Draw(rt, "uses")
+		ctx := context.Background()
+		const charID int64 = 1
+
+		job := &ruleset.Job{
+			ID: "prop-job",
+			TechnologyGrants: &ruleset.TechnologyGrants{
+				Spontaneous: &ruleset.SpontaneousGrants{
+					KnownByLevel: map[int]int{1: 0},
+					UsesByLevel:  map[int]int{1: uses},
+				},
+			},
+		}
+		sess := &session.PlayerSession{}
+
+		hwRepo := &fakeHardwiredRepo{}
+		prepRepo := &fakePreparedRepo{}
+		spontRepo := &fakeSpontaneousRepo{}
+		innateRepo := &fakeInnateRepo{}
+		poolRepo := &fakeSpontaneousUsePoolRepo{}
+
+		if err := gameserver.AssignTechnologies(ctx, sess, charID, job, nil, nil, noPrompt,
+			hwRepo, prepRepo, spontRepo, innateRepo, poolRepo); err != nil {
+			rt.Fatalf("AssignTechnologies returned error: %v", err)
+		}
+
+		want := session.UsePool{Remaining: uses, Max: uses}
+		if got := sess.SpontaneousUsePools[1]; got != want {
+			rt.Errorf("sess.SpontaneousUsePools[1] = %+v, want %+v", got, want)
+		}
+	})
+}
+
+// TestLevelUpTechnologies_AdditiveProperty verifies that LevelUpTechnologies
+// additively increments existing pool entries for any valid inputs.
+func TestLevelUpTechnologies_AdditiveProperty(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		r := rapid.IntRange(0, 20).Draw(rt, "remaining")
+		m := rapid.IntRange(r, 30).Draw(rt, "max")
+		d := rapid.IntRange(0, 20).Draw(rt, "delta")
+
+		ctx := context.Background()
+		const charID int64 = 2
+
+		sess := &session.PlayerSession{
+			SpontaneousUsePools: map[int]session.UsePool{
+				1: {Remaining: r, Max: m},
+			},
+		}
+		levelGrants := &ruleset.TechnologyGrants{
+			Spontaneous: &ruleset.SpontaneousGrants{
+				KnownByLevel: map[int]int{},
+				UsesByLevel:  map[int]int{1: d},
+			},
+		}
+
+		hwRepo := &fakeHardwiredRepo{}
+		prepRepo := &fakePreparedRepo{}
+		spontRepo := &fakeSpontaneousRepo{}
+		innateRepo := &fakeInnateRepo{}
+		poolRepo := &fakeSpontaneousUsePoolRepo{
+			pools: map[int]session.UsePool{1: {Remaining: r, Max: m}},
+		}
+
+		if err := gameserver.LevelUpTechnologies(ctx, sess, charID, levelGrants, nil, noPrompt,
+			hwRepo, prepRepo, spontRepo, innateRepo, poolRepo); err != nil {
+			rt.Fatalf("LevelUpTechnologies returned error: %v", err)
+		}
+
+		want := session.UsePool{Remaining: r + d, Max: m + d}
+		if got := sess.SpontaneousUsePools[1]; got != want {
+			rt.Errorf("sess.SpontaneousUsePools[1] = %+v, want %+v", got, want)
+		}
+	})
 }

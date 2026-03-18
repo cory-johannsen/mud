@@ -162,9 +162,9 @@ func AssignTechnologies(
 		if sess.SpontaneousUsePools == nil {
 			sess.SpontaneousUsePools = make(map[int]session.UsePool)
 		}
-		if usePoolRepo != nil {
-			for level, uses := range grants.Spontaneous.UsesByLevel {
-				sess.SpontaneousUsePools[level] = session.UsePool{Remaining: uses, Max: uses}
+		for level, uses := range grants.Spontaneous.UsesByLevel {
+			sess.SpontaneousUsePools[level] = session.UsePool{Remaining: uses, Max: uses}
+			if usePoolRepo != nil {
 				if err := usePoolRepo.Set(ctx, characterID, level, uses, uses); err != nil {
 					return fmt.Errorf("AssignTechnologies: set spontaneous use pool level %d: %w", level, err)
 				}
@@ -307,15 +307,15 @@ func LevelUpTechnologies(
 			}
 			sess.SpontaneousTechs[lvl] = append(sess.SpontaneousTechs[lvl], chosen...)
 		}
-		if usePoolRepo != nil {
-			if sess.SpontaneousUsePools == nil {
-				sess.SpontaneousUsePools = make(map[int]session.UsePool)
-			}
-			for level, uses := range grants.Spontaneous.UsesByLevel {
-				existing := sess.SpontaneousUsePools[level]
-				newMax := existing.Max + uses
-				newRemaining := existing.Remaining + uses
-				sess.SpontaneousUsePools[level] = session.UsePool{Remaining: newRemaining, Max: newMax}
+		if sess.SpontaneousUsePools == nil {
+			sess.SpontaneousUsePools = make(map[int]session.UsePool)
+		}
+		for level, uses := range grants.Spontaneous.UsesByLevel {
+			existing := sess.SpontaneousUsePools[level]
+			newMax := existing.Max + uses
+			newRemaining := existing.Remaining + uses
+			sess.SpontaneousUsePools[level] = session.UsePool{Remaining: newRemaining, Max: newMax}
+			if usePoolRepo != nil {
 				if err := usePoolRepo.Set(ctx, characterID, level, newRemaining, newMax); err != nil {
 					return fmt.Errorf("LevelUpTechnologies: set spontaneous use pool level %d: %w", level, err)
 				}
