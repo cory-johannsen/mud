@@ -82,6 +82,8 @@ func (r *CharacterInnateTechRepository) DeleteAll(ctx context.Context, character
 }
 
 // Decrement atomically decrements uses_remaining by 1 if > 0.
+// A missing row (character_id, tech_id) is treated as a no-op (0 rows affected, no error).
+// Callers must verify the row exists and UsesRemaining > 0 in session before calling.
 func (r *CharacterInnateTechRepository) Decrement(ctx context.Context, characterID int64, techID string) error {
 	_, err := r.db.Exec(ctx,
 		`UPDATE character_innate_technologies
