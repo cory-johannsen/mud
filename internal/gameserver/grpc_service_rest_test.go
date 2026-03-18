@@ -11,6 +11,8 @@ import (
 	"google.golang.org/grpc/metadata"
 	"pgregory.net/rapid"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -239,4 +241,237 @@ func TestHandleRest_NotInCombat_Rearranges(t *testing.T) {
 	require.NotNil(t, sess.PreparedTechs[1])
 	require.Len(t, sess.PreparedTechs[1], 1)
 	assert.Equal(t, "new_tech", sess.PreparedTechs[1][0].TechID)
+}
+
+// fakeCharSaver records SaveState calls for test assertions.
+type fakeCharSaver struct {
+	saveStateCalls []saveStateCall
+	returnErr      error
+}
+
+type saveStateCall struct {
+	id        int64
+	location  string
+	currentHP int
+}
+
+// Implement the full CharacterSaver interface — only SaveState is under test;
+// all other methods return zero values.
+func (f *fakeCharSaver) GetByID(_ context.Context, _ int64) (*character.Character, error) {
+	return nil, nil
+}
+func (f *fakeCharSaver) SaveState(_ context.Context, id int64, location string, currentHP int) error {
+	f.saveStateCalls = append(f.saveStateCalls, saveStateCall{id, location, currentHP})
+	return f.returnErr
+}
+func (f *fakeCharSaver) LoadWeaponPresets(_ context.Context, _ int64, _ *inventory.Registry) (*inventory.LoadoutSet, error) {
+	return nil, nil
+}
+func (f *fakeCharSaver) SaveWeaponPresets(_ context.Context, _ int64, _ *inventory.LoadoutSet) error {
+	return nil
+}
+func (f *fakeCharSaver) LoadEquipment(_ context.Context, _ int64) (*inventory.Equipment, error) {
+	return nil, nil
+}
+func (f *fakeCharSaver) SaveEquipment(_ context.Context, _ int64, _ *inventory.Equipment) error {
+	return nil
+}
+func (f *fakeCharSaver) LoadInventory(_ context.Context, _ int64) ([]inventory.InventoryItem, error) {
+	return nil, nil
+}
+func (f *fakeCharSaver) SaveInventory(_ context.Context, _ int64, _ []inventory.InventoryItem) error {
+	return nil
+}
+func (f *fakeCharSaver) HasReceivedStartingInventory(_ context.Context, _ int64) (bool, error) {
+	return false, nil
+}
+func (f *fakeCharSaver) MarkStartingInventoryGranted(_ context.Context, _ int64) error { return nil }
+func (f *fakeCharSaver) SaveAbilities(_ context.Context, _ int64, _ character.AbilityScores) error {
+	return nil
+}
+func (f *fakeCharSaver) SaveProgress(_ context.Context, _ int64, _, _, _, _ int) error { return nil }
+func (f *fakeCharSaver) SaveDefaultCombatAction(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+func (f *fakeCharSaver) SaveCurrency(_ context.Context, _ int64, _ int) error { return nil }
+func (f *fakeCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (f *fakeCharSaver) SaveGender(_ context.Context, _ int64, _ string) error { return nil }
+func (f *fakeCharSaver) SaveHeroPoints(_ context.Context, _ int64, _ int) error { return nil }
+func (f *fakeCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+
+// REQ-LR1/LR2 (property): For any CurrentHP in [0, MaxHP], after rest,
+// sess.CurrentHP == sess.MaxHP and SaveState called once with MaxHP.
+func TestPropertyHandleRest_HPRestoredToMax(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		maxHP := rapid.IntRange(1, 50).Draw(rt, "maxHP")
+		currentHP := rapid.IntRange(0, maxHP).Draw(rt, "currentHP")
+
+		sessMgr := session.NewManager()
+		svc := testMinimalService(t, sessMgr)
+
+		charSaver := &fakeCharSaver{}
+		svc.SetCharSaver(charSaver)
+
+		uid := fmt.Sprintf("lr-prop-%d", rapid.IntRange(0, 9999).Draw(rt, "uid"))
+		_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+		})
+		if err != nil {
+			rt.Skip()
+		}
+		sess, ok := sessMgr.GetPlayer(uid)
+		if !ok {
+			rt.Skip()
+		}
+		sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+		sess.CurrentHP = currentHP
+		sess.MaxHP = maxHP
+
+		stream := &fakeSessionStream{}
+		_ = svc.handleRest(uid, "req", stream)
+
+		assert.Equal(rt, maxHP, sess.CurrentHP, "CurrentHP must equal MaxHP after rest")
+		require.Len(rt, charSaver.saveStateCalls, 1, "SaveState must be called exactly once")
+		assert.Equal(rt, maxHP, charSaver.saveStateCalls[0].currentHP, "SaveState called with MaxHP")
+	})
+}
+
+// REQ-LR4: Rest with nil charSaver succeeds; HP updated in memory.
+func TestHandleRest_NilCharSaver_HPRestoredInMemory(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+	// charSaver is nil by default in testMinimalService — do not set one.
+
+	uid := "lr-nil-saver"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	sess.CurrentHP = 3
+	sess.MaxHP = 20
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest(uid, "req", stream))
+	assert.Equal(t, 20, sess.CurrentHP)
+}
+
+// REQ-LR5: HP must NOT be modified when combat guard fires.
+func TestHandleRest_InCombat_HPUnchanged(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	uid := "lr-combat-hp"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT)
+	sess.CurrentHP = 5
+	sess.MaxHP = 20
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest(uid, "req", stream))
+	assert.Equal(t, 5, sess.CurrentHP, "HP must not change when in combat")
+	assert.Empty(t, charSaver.saveStateCalls, "SaveState must not be called when in combat")
+}
+
+// REQ-LR3: Success message contains "HP" and "prepared".
+func TestHandleRest_SuccessMessage_ContainsHP(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	uid := "lr-msg-hp"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	sess.CurrentHP = 5
+	sess.MaxHP = 20
+
+	// Give it a valid job so it reaches the final success message.
+	job := &ruleset.Job{
+		ID:   "test_job_msg",
+		Name: "Test Job Msg",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool:         []ruleset.PreparedEntry{{ID: "some_tech", Level: 1}},
+			},
+		},
+	}
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+	svc.SetJobRegistry(jobReg)
+	sess.Class = "test_job_msg"
+
+	prepRepo := &fakePreparedRepoRest{}
+	svc.SetPreparedTechRepo(prepRepo)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest(uid, "req", stream))
+
+	msg := lastMessage(stream)
+	assert.Contains(t, msg, "HP", "success message must mention HP")
+	assert.Contains(t, msg, "prepared", "success message must mention prepared technologies")
+}
+
+// REQ-LR3: Early-return message (no job) contains "HP".
+func TestHandleRest_NoJob_EarlyReturnMessageContainsHP(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+	// testMinimalService sets jobRegistry to nil — no job lookup will succeed.
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	uid := "lr-nojob-hp"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	sess.CurrentHP = 5
+	sess.MaxHP = 20
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest(uid, "req", stream))
+
+	msg := lastMessage(stream)
+	assert.Contains(t, msg, "HP", "early-return message must mention HP")
+}
+
+// REQ-LR2 error path: If SaveState returns an error, handleRest returns that error.
+func TestHandleRest_SaveStateError_ReturnsError(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+	charSaver := &fakeCharSaver{returnErr: fmt.Errorf("db error")}
+	svc.SetCharSaver(charSaver)
+
+	uid := "lr-save-err"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	sess.CurrentHP = 3
+	sess.MaxHP = 20
+
+	stream := &fakeSessionStream{}
+	err = svc.handleRest(uid, "req", stream)
+	require.Error(t, err, "handleRest must return error when SaveState fails")
 }

@@ -367,6 +367,11 @@ func (s *GameServiceServer) SetInnateTechRepo(r InnateTechRepo) { s.innateTechRe
 // SetTechRegistry replaces the server's technology registry. Used in tests.
 func (s *GameServiceServer) SetTechRegistry(r *technology.Registry) { s.techRegistry = r }
 
+// SetCharSaver sets the character saver (used in tests).
+func (s *GameServiceServer) SetCharSaver(cs CharacterSaver) {
+	s.charSaver = cs
+}
+
 // Session implements the bidirectional streaming RPC.
 // Flow:
 //  1. Wait for JoinWorldRequest
@@ -2439,7 +2444,17 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		return sendMsg("You can't rest while in combat.")
 	}
 
+	// REQ-LR1: Restore HP to maximum.
+	sess.CurrentHP = sess.MaxHP
+
 	ctx := context.Background()
+
+	// REQ-LR2: Persist HP to database.
+	if s.charSaver != nil {
+		if err := s.charSaver.SaveState(ctx, sess.CharacterID, sess.RoomID, sess.CurrentHP); err != nil {
+			return fmt.Errorf("handleRest: save HP: %w", err)
+		}
+	}
 
 	// Restore spontaneous use pools unconditionally (influencer characters).
 	if s.spontaneousUsePoolRepo != nil {
@@ -2467,11 +2482,11 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 
 	// Job lookup.
 	if s.jobRegistry == nil {
-		return sendMsg("You rest briefly but have no technologies to rearrange.")
+		return sendMsg("You rest and recover to full HP.")
 	}
 	job, ok := s.jobRegistry.Job(sess.Class)
 	if !ok {
-		return sendMsg("You rest briefly but have no technologies to rearrange.")
+		return sendMsg("You rest and recover to full HP.")
 	}
 
 	// Build promptFn from the player's own stream.
@@ -2493,7 +2508,7 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		return sendMsg("Something went wrong preparing your technologies.")
 	}
 
-	return sendMsg("You finish your rest and your technologies are prepared.")
+	return sendMsg("You finish your rest. HP restored to maximum and technologies prepared.")
 }
 
 // handleSelectTech processes the selecttech command for a player.
