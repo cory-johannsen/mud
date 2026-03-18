@@ -68,6 +68,7 @@ The following content types are loaded at startup. All are read from the `conten
 | XP Config | `content/xp_config.yaml` | `xp.Config` |
 | Loadouts | `content/loadouts/` | passed as directory path to `GameServiceServer` |
 | Scripts | `content/scripts/` | `scripting.Manager` (Lua VMs) |
+| Teams | `content/teams/` | exists in content/ and ruleset package but not wired into startup sequence |
 
 ---
 
@@ -123,6 +124,7 @@ type WeaponDef struct {
     RangeIncrement      int
     ProficiencyCategory string
     TeamAffinity        string
+    CrossTeamEffect     *CrossTeamEffect // nil = no side effect
 }
 ```
 
@@ -256,6 +258,7 @@ To add a new content type:
 - **Mutating a content definition struct** at runtime (e.g., `weaponDef.DamageDice = "..."` inside a handler). This violates PIPE-INV-1 and causes data races.
 - **Placing content YAML in an unexpected sub-directory** that does not match the CLI flag default path. The file is silently ignored (empty directories produce zero items without error for most loaders).
 - **Omitting `Validate()` in the loader.** Invalid field values (e.g., an unknown `FiringMode`) reach the registry and only fail at the first runtime use.
+- **`content/teams/` is not wired into the startup sequence.** `LoadTeams` exists in `internal/game/ruleset/team.go` but is not called from `main.go`. Team definitions (`gun.yaml`, `machete.yaml`) are present on disk but are not loaded at runtime.
 
 ---
 

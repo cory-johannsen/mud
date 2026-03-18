@@ -13,7 +13,7 @@ This system owns: parsing and validating YAML content files, populating in-memor
 - `/home/cjohannsen/src/mud/internal/game/condition/definition.go` — `LoadDirectory` returns `*Registry` of `ConditionDef` keyed by ID.
 - `/home/cjohannsen/src/mud/internal/game/technology/registry.go` — `Load(dir)` returns `*Registry`; `Get`, `ByTradition`, `ByUsageType` lookups.
 - `/home/cjohannsen/src/mud/internal/game/npc/template.go` — `LoadTemplates(dir)` returns `[]*Template`; NPC instances spawned into `npc.Manager` at startup.
-- `/home/cjohannsen/src/mud/content/` — root of all YAML content files; sub-directories: zones, npcs, conditions, weapons, items, explosives, armor, jobs, archetypes, regions, technologies, ai, loadouts, scripts.
+- `/home/cjohannsen/src/mud/content/` — root of all YAML content files; sub-directories: zones, npcs, conditions, weapons, items, explosives, armor, jobs, archetypes, regions, technologies, ai, loadouts, scripts, teams (teams: exists in content/ and ruleset package but not wired into startup sequence).
 
 ## Core Data Structures
 
@@ -50,7 +50,6 @@ type Room struct {
 type WeaponDef struct {
     ID                  string
     Name                string
-    Description         string
     DamageDice          string
     DamageType          string
     Kind                WeaponKind
@@ -62,6 +61,7 @@ type WeaponDef struct {
     RangeIncrement      int
     ProficiencyCategory string
     TeamAffinity        string
+    CrossTeamEffect     *CrossTeamEffect // nil = no side effect
 }
 ```
 
@@ -102,3 +102,4 @@ To add a new content type:
 - Mutating a content definition struct at runtime (e.g., setting a field on a `*WeaponDef`) — violates PIPE-INV-1 and causes data races under concurrent access.
 - Placing content YAML under a sub-directory that does not match the CLI flag default — the file will not be found in development but will silently succeed if the directory is empty (the loader returns zero items, not an error, for an empty directory in some types).
 - Skipping `Validate()` in the loader — invalid YAML (e.g., unknown firing mode) reaches the registry and fails only at the first runtime use.
+- `content/teams/` is not wired into the startup sequence — `LoadTeams` exists in `internal/game/ruleset/team.go` but is not called from `main.go`; team definitions (`gun.yaml`, `machete.yaml`) are present on disk but are not loaded at runtime.
