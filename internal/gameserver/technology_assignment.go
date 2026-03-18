@@ -98,9 +98,9 @@ type PendingTechLevelsRepo interface {
 // AssignTechnologies assigns technologies from job and archetype grants to the session
 // and persists them. Called during character creation.
 //
-// Precondition: sess, job, hwRepo, prepRepo, spontRepo, innateRepo are not nil.
+// Precondition: sess, hwRepo, prepRepo, spontRepo, innateRepo are not nil.
+// job, archetype, and region may be nil; nil values skip the corresponding grant blocks.
 // techReg may be nil (tech names/descriptions will not be shown in prompts).
-// archetype may be nil (innate technologies will not be assigned).
 // Postcondition: If both archetype.TechnologyGrants and job.TechnologyGrants are nil,
 // all session tech fields remain nil (innate assignment still proceeds).
 func AssignTechnologies(
@@ -118,7 +118,10 @@ func AssignTechnologies(
 	usePoolRepo SpontaneousUsePoolRepo,
 	region *ruleset.Region,
 ) error {
-	if job == nil && region == nil {
+	// Short-circuit if there is nothing to assign.
+	// Archetype innate grants are processed below regardless of job/region.
+	hasWork := job != nil || region != nil || (archetype != nil && len(archetype.InnateTechnologies) > 0)
+	if !hasWork {
 		return nil
 	}
 

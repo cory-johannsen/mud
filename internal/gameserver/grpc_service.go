@@ -998,7 +998,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				if assignErr := AssignTechnologies(stream.Context(), sess, characterID,
 					job, archetype, s.techRegistry, promptFn,
 					s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
-					s.regions[dbChar.Region],
+					s.regions[dbChar.Region], // nil if region not found; AssignTechnologies nil-guards internally
 				); assignErr != nil {
 					s.logger.Warn("assigning technologies", zap.Int64("character_id", characterID), zap.Error(assignErr))
 				}

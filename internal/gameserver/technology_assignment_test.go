@@ -877,6 +877,31 @@ func TestAssignTechnologies_RegionInnateGrant(t *testing.T) {
 	assert.Equal(t, 1, repoSlot.MaxUses)
 }
 
+func TestAssignTechnologies_ArchetypeInnateGrant_NoJobNoRegion(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+
+	archetype := &ruleset.Archetype{
+		ID: "test_archetype",
+		InnateTechnologies: []ruleset.InnateGrant{
+			{ID: "blackout_pulse", UsesPerDay: 0},
+		},
+	}
+
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+
+	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, archetype, nil, noPrompt, hw, prep, spont, inn, nil, nil)
+	require.NoError(t, err)
+
+	slot, ok := sess.InnateTechs["blackout_pulse"]
+	require.True(t, ok, "expected blackout_pulse in session InnateTechs from archetype")
+	assert.Equal(t, 0, slot.MaxUses)
+	assert.Equal(t, 0, slot.UsesRemaining)
+}
+
 // REQ-SSL4 (property): LevelUpTechnologies calls promptFn exactly N times when pool > open slots.
 // All selected IDs come from the pool; no duplicates; session has exactly N entries at the level.
 func TestPropertyLevelUpTechnologies_SpontaneousPromptCount(t *testing.T) {
