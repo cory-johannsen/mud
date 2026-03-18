@@ -255,9 +255,9 @@
         - [x] Can be rearranged when resting — `rest` command; `RearrangePreparedTechs` aggregates creation + level-up grants, clears and re-fills slots interactively
         - [x] Level-up technology selection — player selects new prepared/spontaneous techs interactively at next login or via `selecttech`; auto-assigned grants notify in-console; persisted in `character_pending_tech_levels`
       - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
-        - [ ] Fixed list of Technologies per job level
-        - [ ] Fixed number usages for each Technology level (resets with long rest)
-        - [ ] Player gets to choose which new Technologies are learned with levelling up.
+        - [x] Fixed list of Technologies per job level — job YAML pool entries; archetype slot progression; merged via `MergeGrants` (Phase 1)
+        - [x] Fixed number usages for each Technology level (resets with long rest) — `character_spontaneous_use_pools` table; `SpontaneousUsePoolRepo`; `use` decrements, `rest` restores (Sub-project A)
+        - [ ] Player gets to choose which new Technologies are learned with levelling up. (Sub-project B)
       - [ ] Heightened Spells -> Amped Technology
         - Follows the PF2E rules
       - [ ] Innate Technologies
