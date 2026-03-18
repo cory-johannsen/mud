@@ -75,7 +75,7 @@ sequenceDiagram
     participant Bridge as game_bridge.go (commandLoop)
     participant BH as bridge_handlers.go (bridge<Name>)
     participant Stream as gRPC Session stream
-    participant GS as grpc_service.go (dispatch)
+    participant GS as grpc_service.go (Session / dispatch)
     participant Logic as handle<Name>
 
     Player->>Conn: types command line
@@ -87,8 +87,9 @@ sequenceDiagram
     BH-->>Bridge: bridgeResult{msg: ...}
     Bridge->>Stream: stream.Send(ClientMessage)
     Stream->>GS: stream.Recv()
+    Note over GS: Most messages reach dispatch via the type switch.<br/>Commands needing direct stream access (handleStatus,<br/>handleRest, handleSelectTech) are intercepted by<br/>pre-dispatch if-guards at the top of Session instead.
     GS->>GS: dispatch type switch on ClientMessage.Payload
-    GS->>Logic: handle<Name>(sess, req)
+    GS->>Logic: handle<Name>(uid, req)
     Logic->>Logic: execute game logic
     Logic->>GS: return ServerEvent
     GS->>Stream: stream.Send(ServerEvent)
@@ -96,6 +97,9 @@ sequenceDiagram
     Bridge->>Conn: WriteRoom / WriteConsole / WritePromptSplit
     Conn->>Player: rendered ANSI text
 ```
+
+### Dispatch bypass pattern
+Most commands reach game logic through the `dispatch` type switch inside `Session`. Commands that require direct stream access cannot use `dispatch` and instead use pre-dispatch `if _, ok := msg.Payload.(type)` guards at the top of the `Session` method. Current examples: `handleStatus`, `handleRest`, `handleSelectTech`.
 
 ### Unknown command fallback
 If `registry.Resolve()` returns no match, `commandLoop` treats the input as a movement direction (custom exit name) and sends a `MoveRequest` directly, bypassing the bridge map entirely.
@@ -132,13 +136,13 @@ Adding a new command requires ALL of the following steps. Omitting any step is a
 
 **CMD-2:** Add `Command{Handler: HandlerFoo, Name: "foo", Aliases: []string{"f"}, Help: "...", Category: CategoryXxx}` to `BuiltinCommands()` in the same file
 
-**CMD-3:** Implement `HandleFoo(char, args) (string, error)` in `internal/game/command/foo.go` with full TDD coverage using property-based tests (SWENG-5, SWENG-5a)
+**CMD-3:** Implement `HandleFoo` in `internal/game/command/foo.go` with full TDD coverage using property-based tests (SWENG-5, SWENG-5a); signature varies — follow existing examples in `internal/game/command/` (e.g., `HandleEquip`, `HandleAction`, `HandleStrike`)
 
 **CMD-4:** Add `FooRequest` proto message to `api/proto/game/v1/game.proto` and add the variant to the `ClientMessage` oneof; run `make proto` to regenerate Go types
 
 **CMD-5:** Add `bridgeFoo` func to `internal/frontend/handlers/bridge_handlers.go` and register it as `command.HandlerFoo: bridgeFoo` in `bridgeHandlerMap`; `TestAllCommandHandlersAreWired` MUST pass
 
-**CMD-6:** Implement `handleFoo(sess *session, req *gamev1.FooRequest) *gamev1.ServerEvent` in `internal/gameserver/grpc_service.go` and add `case *gamev1.ClientMessage_Foo:` to the `dispatch` type switch
+**CMD-6:** Implement `func (s *GameServiceServer) handleFoo(uid string, req *gamev1.FooRequest) (*gamev1.ServerEvent, error)` in `internal/gameserver/grpc_service.go` and add `case *gamev1.ClientMessage_Foo:` to the `dispatch` type switch. If your handler requires direct stream access (rare), add a pre-dispatch guard at the top of the `Session` method instead of wiring into `dispatch`
 
 **CMD-7:** All steps complete; all tests pass (`make test`) before the command is considered done — a command registered in `BuiltinCommands()` but not wired end-to-end is a defect
 

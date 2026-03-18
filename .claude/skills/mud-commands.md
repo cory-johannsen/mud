@@ -66,7 +66,7 @@ switchCharacter bool                  // return ErrSwitchCharacter from commandL
 4. Dispatches to matching `bridge<Name>` func in `internal/frontend/handlers/bridge_handlers.go`
 5. Bridge func encodes proto `ClientMessage` oneof variant
 6. Sends over bidirectional gRPC `Session` stream to gameserver
-7. `internal/gameserver/grpc_service.go` `dispatch` type switch routes to `handle<Name>`
+7. `internal/gameserver/grpc_service.go` routes to `handle<Name>`: most commands go through the `dispatch` type switch, but commands requiring direct stream access (currently: `handleStatus`, `handleRest`, `handleSelectTech`) use pre-dispatch `if _, ok := msg.Payload.(type)` guards at the top of `Session` instead
 8. Handler executes game logic, builds `ServerEvent` oneof response
 9. Response streams back to frontend → rendered to telnet terminal
 
@@ -94,10 +94,10 @@ Adding a new command requires ALL of the following steps. Omitting any is a defe
 
 CMD-1: Add `HandlerFoo` constant to `internal/game/command/commands.go`
 CMD-2: Add `Command{Handler: HandlerFoo, Name: "foo", ...}` to `BuiltinCommands()` in the same file
-CMD-3: Implement `HandleFoo(char, args) (string, error)` in `internal/game/command/foo.go` with TDD coverage (SWENG-5, SWENG-5a)
+CMD-3: Implement `HandleFoo` in `internal/game/command/foo.go` with TDD coverage (SWENG-5, SWENG-5a); signature varies — follow existing examples in `internal/game/command/` (e.g., `HandleEquip`, `HandleAction`, `HandleStrike`)
 CMD-4: Add `FooRequest` proto message to `api/proto/game/v1/game.proto` and add to `ClientMessage` oneof; run `make proto`
 CMD-5: Add `bridgeFoo` func to `bridge_handlers.go` and register in `bridgeHandlerMap`; `TestAllCommandHandlersAreWired` MUST pass
-CMD-6: Implement `handleFoo` in `internal/gameserver/grpc_service.go` and wire into `dispatch` type switch
+CMD-6: Implement `func (s *GameServiceServer) handleFoo(uid string, req *gamev1.FooRequest) (*gamev1.ServerEvent, error)` in `internal/gameserver/grpc_service.go` and wire into the `dispatch` type switch. If your handler requires direct stream access (rare), add a pre-dispatch guard at the top of the `Session` method instead of wiring into `dispatch`
 CMD-7: All steps complete; all tests pass before command is considered done
 
 ## Common Pitfalls
