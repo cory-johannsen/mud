@@ -1,6 +1,6 @@
 # Character Architecture
 
-**As of:** 2026-03-18 (commit: b2cf45a4a505ee752e03f7e5d8910a2937134365)
+**As of:** 2026-03-18 (commit: a70c3c1)
 **Skill:** `.claude/skills/mud-character.md`
 **Requirements:** `docs/requirements/CHARACTERS.md`, `docs/requirements/SETTING.md`
 
