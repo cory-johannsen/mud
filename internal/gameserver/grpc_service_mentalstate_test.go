@@ -42,6 +42,7 @@ func newCombatSvcWithMentalMgr(t *testing.T, mentalMgr *mentalstate.Manager) (*G
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

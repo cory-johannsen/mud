@@ -36,6 +36,7 @@ func newStrideSvc(t *testing.T, combatHandler *CombatHandler) (*GameServiceServe
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -70,6 +71,7 @@ func newStrideSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -294,6 +296,7 @@ func newStrideSvcWithCombatAndRegistry(t *testing.T, reg *inventory.Registry) (*
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

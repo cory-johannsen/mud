@@ -577,6 +577,7 @@ func main() {
 		regionMap,
 		mentalMgr,
 		actionH,
+		postgres.NewCharacterSpontaneousUsePoolRepository(pool.DB()),
 	)
 
 	// Wire XP service with progress and skill-increase persistence.

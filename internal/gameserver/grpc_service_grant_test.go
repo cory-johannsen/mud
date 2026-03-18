@@ -154,6 +154,7 @@ func testServiceForGrant(t *testing.T, opts grantTestOptions) *GameServiceServer
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	svc.charSaver = opts.charSaver
 	svc.progressRepo = opts.progressRepo
@@ -179,6 +180,7 @@ func testMinimalService(t *testing.T, sessMgr *session.Manager) *GameServiceServ
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 }
 

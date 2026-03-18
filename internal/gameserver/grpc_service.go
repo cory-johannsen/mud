@@ -267,6 +267,7 @@ func NewGameServiceServer(
 	regions map[string]*ruleset.Region,
 	mentalStateMgr *mentalstate.Manager,
 	actionH *ActionHandler,
+	spontaneousUsePoolRepo SpontaneousUsePoolRepo,
 ) *GameServiceServer {
 	s := &GameServiceServer{
 		world:                      worldMgr,
@@ -311,6 +312,7 @@ func NewGameServiceServer(
 		regions:                    regions,
 		mentalStateMgr:             mentalStateMgr,
 		actionH:                    actionH,
+		spontaneousUsePoolRepo:     spontaneousUsePoolRepo,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {

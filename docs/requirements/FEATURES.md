@@ -261,6 +261,8 @@
       - [ ] Heightened Spells -> Amped Technology
         - Follows the PF2E rules
       - [ ] Innate Technologies
+    - [ ] Spell import from PF2E with translation into Gunchete
+      - [ ] Populate Archetype and Job yaml with options 
 - [ ] Long rest — full PF2E long rest equivalent: restore HP to max, reset spontaneous tech uses, allow prepared tech rearrangement
 - [ ] Non-combat NPCs.
   - Define the data model and behavior for the following NPCs and implement those specifically mentioned.

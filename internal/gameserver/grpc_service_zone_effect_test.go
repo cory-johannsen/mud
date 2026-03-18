@@ -416,6 +416,7 @@ func newMentalStateSvc(t *testing.T, diceVal int) (*GameServiceServer, *session.
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		mentalMgr, nil,
+		nil,
 	)
 	return svc, sessMgr
 }

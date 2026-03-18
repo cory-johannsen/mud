@@ -65,7 +65,7 @@ func (r *fakeSpontaneousUsePoolRepo) DeleteAll(_ context.Context, _ int64) error
 //
 // Precondition: t must be non-nil.
 // Postcondition: Returns a non-nil svc, sessMgr.
-func newSpontaneousSvc(t *testing.T) (*GameServiceServer, *session.Manager) {
+func newSpontaneousSvc(t *testing.T, repo SpontaneousUsePoolRepo) (*GameServiceServer, *session.Manager) {
 	t.Helper()
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
@@ -82,6 +82,7 @@ func newSpontaneousSvc(t *testing.T) (*GameServiceServer, *session.Manager) {
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		repo,
 	)
 	return svc, sessMgr
 }
@@ -121,9 +122,8 @@ func addSpontaneousPlayer(
 // Precondition: session has SpontaneousTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:2, Max:3}}.
 // Postcondition: message = "You activate mind_spike. (1 uses remaining at level 1.)"; pool.Remaining == 1.
 func TestHandleUse_SpontaneousActivation_REQ_SUC1(t *testing.T) {
-	svc, sessMgr := newSpontaneousSvc(t)
 	pools := map[int]session.UsePool{1: {Remaining: 2, Max: 3}}
-	svc.spontaneousUsePoolRepo = newFakeSpontaneousUsePoolRepo(pools)
+	svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(pools))
 
 	sess := addSpontaneousPlayer(t, sessMgr, "u_spont_1",
 		map[int][]string{1: {"mind_spike"}},
@@ -145,8 +145,7 @@ func TestHandleUse_SpontaneousActivation_REQ_SUC1(t *testing.T) {
 // Precondition: session has SpontaneousTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:0, Max:3}}.
 // Postcondition: message = "No level 1 uses remaining."
 func TestHandleUse_SpontaneousNoUsesRemaining_REQ_SUC2(t *testing.T) {
-	svc, sessMgr := newSpontaneousSvc(t)
-	svc.spontaneousUsePoolRepo = newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{})
+	svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{}))
 
 	addSpontaneousPlayer(t, sessMgr, "u_spont_2",
 		map[int][]string{1: {"mind_spike"}},
@@ -167,8 +166,7 @@ func TestHandleUse_SpontaneousNoUsesRemaining_REQ_SUC2(t *testing.T) {
 // Precondition: session has SpontaneousTechs = {1: ["mind_spike"]}.
 // Postcondition: message contains "You don't know unknown_tech."
 func TestHandleUse_SpontaneousUnknownTech_REQ_SUC3(t *testing.T) {
-	svc, sessMgr := newSpontaneousSvc(t)
-	svc.spontaneousUsePoolRepo = newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{})
+	svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{}))
 
 	addSpontaneousPlayer(t, sessMgr, "u_spont_3",
 		map[int][]string{1: {"mind_spike"}},
@@ -189,8 +187,7 @@ func TestHandleUse_SpontaneousUnknownTech_REQ_SUC3(t *testing.T) {
 // Precondition: session has SpontaneousTechs = {1: ["mind_spike"]}, SpontaneousUsePools = {1: UsePool{Remaining:2, Max:3}}.
 // Postcondition: UseResponse.Choices contains an entry with Description matching "mind_spike (2 uses remaining at level 1)".
 func TestHandleUse_ListMode_IncludesSpontaneous_REQ_SUC4(t *testing.T) {
-	svc, sessMgr := newSpontaneousSvc(t)
-	svc.spontaneousUsePoolRepo = newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{})
+	svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(map[int]session.UsePool{}))
 
 	addSpontaneousPlayer(t, sessMgr, "u_spont_4",
 		map[int][]string{1: {"mind_spike"}},
@@ -218,11 +215,9 @@ func TestHandleUse_ListMode_IncludesSpontaneous_REQ_SUC4(t *testing.T) {
 // Precondition: session has SpontaneousUsePools = {1: UsePool{Remaining:0, Max:3}}.
 // Postcondition: RestoreAll is called; sess.SpontaneousUsePools[1].Remaining == 3.
 func TestHandleRest_RestoresSpontaneousPools_REQ_SUC5(t *testing.T) {
-	svc, sessMgr := newSpontaneousSvc(t)
-
 	repoPools := map[int]session.UsePool{1: {Remaining: 0, Max: 3}}
 	repo := newFakeSpontaneousUsePoolRepo(repoPools)
-	svc.spontaneousUsePoolRepo = repo
+	svc, sessMgr := newSpontaneousSvc(t, repo)
 
 	// Set up a job registry so handleRest can pass the job lookup and reach pool restoration.
 	job := &ruleset.Job{ID: "influencer", Name: "Influencer"}
@@ -258,9 +253,8 @@ func TestHandleUse_SpontaneousProperty_REQ_SUC7(t *testing.T) {
 		n := rapid.IntRange(1, 5).Draw(rt, "n")
 		uid := rapid.StringMatching(`u_prop_[a-z]{4}`).Draw(rt, "uid")
 
-		svc, sessMgr := newSpontaneousSvc(t)
 		pools := map[int]session.UsePool{1: {Remaining: n, Max: n}}
-		svc.spontaneousUsePoolRepo = newFakeSpontaneousUsePoolRepo(pools)
+		svc, sessMgr := newSpontaneousSvc(t, newFakeSpontaneousUsePoolRepo(pools))
 
 		sess := addSpontaneousPlayer(t, sessMgr, uid,
 			map[int][]string{1: {"mind_spike"}},

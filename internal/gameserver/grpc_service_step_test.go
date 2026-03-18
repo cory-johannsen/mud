@@ -43,6 +43,7 @@ func newStepSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager, *
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -68,6 +69,7 @@ func newStepSvc(t *testing.T, combatHandler *CombatHandler) (*GameServiceServer,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr
 }

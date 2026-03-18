@@ -35,6 +35,7 @@ func newDisarmSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combat
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -67,6 +68,7 @@ func newDisarmSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

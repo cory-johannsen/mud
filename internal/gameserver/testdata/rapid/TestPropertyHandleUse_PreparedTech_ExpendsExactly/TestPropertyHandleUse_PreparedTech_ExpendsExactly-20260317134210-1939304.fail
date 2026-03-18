@@ -1,0 +1,11 @@
+# 2026/03/17 13:42:10.286994 [TestPropertyHandleUse_PreparedTech_ExpendsExactly] [rapid] draw n: 1
+# 2026/03/17 13:42:10.287032 [TestPropertyHandleUse_PreparedTech_ExpendsExactly] [rapid] draw uid: 0
+# 2026/03/17 13:42:10.287035 [TestPropertyHandleUse_PreparedTech_ExpendsExactly] (n+1)th call: expected 'No prepared uses', got: content:"Ability data is not available."
+# 
+v0.4.8#2275463734809558695
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

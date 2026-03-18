@@ -37,6 +37,7 @@ func newGrappleSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, comba
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -69,6 +70,7 @@ func newGrappleSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceSer
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

@@ -1,0 +1,17 @@
+# 2026/03/17 12:09:06.837609 [TestPropertyCharacterPreparedTechRepo_RoundTrip] [rapid] draw level: 1
+# 2026/03/17 12:09:06.837614 [TestPropertyCharacterPreparedTechRepo_RoundTrip] [rapid] draw index: 0
+# 2026/03/17 12:09:06.837621 [TestPropertyCharacterPreparedTechRepo_RoundTrip] [rapid] draw techID: "_"
+# 2026/03/17 12:09:06.837905 [TestPropertyCharacterPreparedTechRepo_RoundTrip] Set: CharacterPreparedTechRepository.Set: ERROR: column "expended" of relation "character_prepared_technologies" does not exist (SQLSTATE 42703)
+# 
+v0.4.8#2565200695678672529
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0

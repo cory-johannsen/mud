@@ -65,6 +65,7 @@ func newClimbSvc(t *testing.T, src dice.Source) (*GameServiceServer, *session.Ma
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -182,6 +183,7 @@ func TestProperty_FallDamage_HeightRange(t *testing.T) {
 			nil, nil, nil,
 			nil, nil, nil, nil, nil, nil, nil,
 			nil, nil,
+			nil,
 		)
 		_, addErr := sm.AddPlayer(session.AddPlayerOptions{
 			UID: "u", Username: "u", CharName: "u", Role: "player",

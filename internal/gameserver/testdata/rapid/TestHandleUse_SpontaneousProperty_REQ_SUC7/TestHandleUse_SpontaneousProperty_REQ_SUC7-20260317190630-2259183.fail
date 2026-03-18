@@ -1,0 +1,71 @@
+# 2026/03/17 19:06:30.624617 [TestHandleUse_SpontaneousProperty_REQ_SUC7] [rapid] draw n: 1
+# 2026/03/17 19:06:30.624630 [TestHandleUse_SpontaneousProperty_REQ_SUC7] [rapid] draw uid: "u_prop_dxik"
+# 2026/03/17 19:06:30.624710 [TestHandleUse_SpontaneousProperty_REQ_SUC7] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_spontaneous_use_test.go:236
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_spontaneous_use_test.go:218
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	"" does not contain "You activate mind_spike."
+# 	Test:       	TestHandleUse_SpontaneousProperty_REQ_SUC7
+# 2026/03/17 19:06:30.624733 [TestHandleUse_SpontaneousProperty_REQ_SUC7] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_spontaneous_use_test.go:239
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_spontaneous_use_test.go:218
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Not equal: 
+# 	            	expected: 0
+# 	            	actual  : 1
+# 	Test:       	TestHandleUse_SpontaneousProperty_REQ_SUC7
+# 2026/03/17 19:06:30.624767 [TestHandleUse_SpontaneousProperty_REQ_SUC7] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/grpc_service_spontaneous_use_test.go:244
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/grpc_service_spontaneous_use_test.go:218
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Not equal: 
+# 	            	expected: "No level 1 uses remaining."
+# 	            	actual  : ""
+# 	            	
+# 	            	Diff:
+# 	            	--- Expected
+# 	            	+++ Actual
+# 	            	@@ -1 +1 @@
+# 	            	-No level 1 uses remaining.
+# 	            	+
+# 	Test:       	TestHandleUse_SpontaneousProperty_REQ_SUC7
+# 
+v0.4.8#3676364668034956015
+0x10785c63919e5d
+0x1895c342574da0
+0x6
+0x7
+0x7
+0x0
+0x0
+0x4c2cfd08137a6
+0x0
+0x1749c3c95c8b27
+0x1d
+0x3
+0x138a68870583a
+0x0
+0x1d9d372f44afca
+0x1c
+0x17
+0x558279b1944e7
+0x0
+0x17937c12e8e986
+0x8
+0x1846d07eef083f
+0x0
+0x15f3dc673c45c6
+0xa
+0x161fa0aa25597d

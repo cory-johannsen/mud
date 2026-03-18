@@ -40,6 +40,7 @@ func newAutoCombatSvc(t *testing.T) (*GameServiceServer, *session.Manager, *Comb
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 	return svc, sessMgr, combatHandler
 }

@@ -105,6 +105,7 @@ func newMoveTestService(t *testing.T, worldMgr *world.Manager, sessMgr *session.
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 	)
 }
 
