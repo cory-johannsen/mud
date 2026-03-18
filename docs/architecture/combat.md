@@ -85,10 +85,10 @@ sequenceDiagram
     CH->>CH: sessions.GetPlayer(uid)
     CH->>CH: npcMgr.FindInRoom(roomID, target)
     alt no active combat
-        CH->>E: StartCombat(roomID, combatants, condRegistry, scriptMgr, zoneID)
+        CH->>CH: ordered = combat.RollInitiative(combatants, src)
+        CH->>E: StartCombat(roomID, ordered, condRegistry, scriptMgr, zoneID)
         E->>E: sortByInitiativeDesc + init ActiveSets
         E-->>CH: *Combat
-        CH->>C: RollInitiative(combatants, src)
         CH->>C: StartRound(3) — resets ActionQueues, ticks conditions
     end
     CH->>C: QueueAction(uid, ActionAttack{target})
@@ -131,9 +131,11 @@ graph TD
     C --> AQ[ActionQueue]
     C --> AS[condition.ActiveSet]
     AS --> CD[ConditionDef]
-    R[resolver.go] --> C
+    CH --> R[resolver.go]
+    CH --> I[initiative.go]
+    R --> C
     R --> DICE
-    I[initiative.go] --> C
+    I --> C
 ```
 
 ## Extension Points

@@ -63,6 +63,23 @@ type Combat struct {
 ### Combatant (`combat.go`)
 Key fields: `ID`, `Kind` (KindPlayer/KindNPC), `Name`, `MaxHP`, `CurrentHP`, `AC`, `Level`, `StrMod`, `DexMod`, `Initiative`, `InitiativeBonus`, `Dead`, `Loadout`, `WeaponProficiencyRank`, `WeaponDamageType`, `Resistances`, `Weaknesses`, `GritMod`/`QuicknessMod`/`SavvyMod`, `ToughnessRank`/`HustleRank`/`CoolRank`, `ACMod`, `AttackMod`, `Hidden`, `Position`, `CoverTier`.
 
+### ActionType constants (`action.go`)
+
+Player-queueable actions (each has an AP cost via `Cost()`):
+- `ActionAttack` — melee attack (1 AP)
+- `ActionStrike` — ranged/firearm attack (1 AP)
+- `ActionReload` — reload firearm (1 AP)
+- `ActionFireBurst` — burst-fire (2 AP)
+- `ActionFireAutomatic` — automatic fire (3 AP)
+- `ActionThrow` — thrown weapon/grenade (1 AP)
+- `ActionUseAbility` — ability activation; cost from `QueuedAction.AbilityCost`
+- `ActionStride` — move action (1 AP)
+- `ActionPass` — forfeit remaining AP; marks queue as submitted
+
+Informational-only constants (no AP cost, not queued by players — appear in event logs only):
+- `ActionCoverHit` — emitted when an attack hits cover instead of the target
+- `ActionCoverDestroy` — emitted when cover is destroyed by an attack
+
 ### ActionQueue (`action.go`)
 ```go
 type ActionQueue struct {
@@ -138,7 +155,6 @@ type ActiveCondition struct {
 - `Combat.Conditions` is initialized in `StartCombat` and `AddCombatant` for every combatant; no combatant may be present without a corresponding `ActiveSet`.
 - `Engine.StartCombat` returns an error if combat is already active in the room; callers must check.
 - `StartRound` resets `ACMod` and `AttackMod` to 0 at the start of each round (per-round modifiers do not carry over).
-- `sortByInitiativeDesc` uses a stable insertion sort; equal initiative preserves insertion order.
 
 ## Extension Points
 
@@ -171,3 +187,4 @@ Adding a new combat action requires ALL of the following steps (CMD-1 through CM
 - **Initiative bonus scope**: `InitiativeBonus` is only set for players who beat all NPCs. It is NOT applied automatically — `combat_handler.go` is responsible for propagating it to `AttackMod`/`ACMod` each round.
 - **Condition duration -1**: a `DurationRemaining` of -1 means permanent or until_save. `Tick` skips these. Passing 0 would cause immediate expiry.
 - **ResolveFirearmAttack vs ResolveAttack**: firearm attacks use `DexMod` and weapon `DamageDice`; melee attacks use `StrMod` and a 1d6 baseline. Use the wrong resolver and modifiers will be incorrect.
+- **sortByInitiativeDesc tie-breaking**: `sortByInitiativeDesc` uses a stable insertion sort; equal initiative preserves insertion order. This behavior is untested — if any re-sort elsewhere uses `>=` instead of `>` as the comparison, ties will silently break in a different order.
