@@ -6,10 +6,11 @@ type PreparedSlot struct {
 	Expended bool
 }
 
-// InnateSlot tracks an innate technology granted by an archetype.
+// InnateSlot tracks an innate technology granted by a region or archetype.
 // MaxUses == 0 means unlimited.
 type InnateSlot struct {
-	MaxUses int
+	MaxUses       int
+	UsesRemaining int
 }
 
 // UsePool tracks remaining and maximum daily uses for a spontaneous tech level.
