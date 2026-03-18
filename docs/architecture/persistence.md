@@ -1,6 +1,6 @@
 # Persistence Architecture
 
-<!-- commit: 525d1823035a157f2de7f516f2fa087983e9833b -->
+**As of:** 2026-03-18 (commit: 525d1823035a157f2de7f516f2fa087983e9833b)
 
 ## Overview
 

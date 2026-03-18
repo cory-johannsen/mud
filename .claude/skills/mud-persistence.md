@@ -90,8 +90,7 @@ type Pool struct { pool *pgxpool.Pool }
 3. A concrete `CharacterProgressRepository` in `internal/storage/postgres/` satisfies that interface.
 4. The implementation calls `pgxpool.Pool.Exec` or `QueryRow` with parameterized SQL (`$1`, `$2`, …) — no string interpolation.
 5. Row results are scanned directly into domain structs (e.g., `character.Character`, `session.InnateSlot`).
-6. Schema is managed by numbered migration files in `migrations/` — currently 58 files (029 migrations × up + down, plus any singles).
-7. Migrations are applied via `cmd/migrate/main.go` (using `golang-migrate/migrate`) invoked as `make migrate`.
+6. Schema is managed by numbered migration files in `migrations/` — currently 58 files (029 migrations × up + down, plus any singles) — and applied via `cmd/migrate/main.go` (using `golang-migrate/migrate`) invoked as `make migrate`.
 
 ## Invariants & Contracts
 
