@@ -1,4 +1,4 @@
-**As of:** 2026-03-18 (commit: 44636bd)
+**As of:** 2026-03-18 (commit: 5138fc4)
 
 # AI, Scripting, and NPC Lifecycle Architecture
 
@@ -22,7 +22,7 @@ Relevant requirements: `docs/requirements/AI.md` (AI-1 through AI-5, AI-11, AI-1
 
 ### Lua Scripting (`internal/scripting/`)
 
-The scripting package provides a per-zone GopherLua sandbox with no dependency on game domain packages. `NewSandboxedState` creates an LState with only the safe standard libraries loaded (`base`, `table`, `string`, `math`) and strips all dangerous globals (`dofile`, `loadfile`, `load`, `loadstring`, `collectgarbage`, `require`, `module`, `newproxy`, `setfenv`, `getfenv`). Execution is bounded by a `countingContext` that cancels the Lua VM's context after a configurable number of opcodes (default: 100,000), making the instruction limit exact and deterministic.
+The scripting package provides a per-zone GopherLua sandbox with no dependency on game domain packages. `NewSandboxedState` creates an LState with only the safe standard libraries loaded (`base`, `table`, `string`, `math`) and strips all dangerous globals (`dofile`, `loadfile`, `load`, `loadstring`, `collectgarbage`, `require`, `module`, `newproxy`, `setfenv`, `getfenv`, `_printregs`). Execution is bounded by a `countingContext` that cancels the Lua VM's context after a configurable number of opcodes (default: 100,000), making the instruction limit exact and deterministic.
 
 The `Manager` type maintains a `map[string]*zoneState` where each entry holds a dedicated LState and a per-zone mutex. `LoadZone` creates a sandboxed VM, registers all `engine.*` modules, then executes every `*.lua` file in the script directory in lexicographic order. `LoadGlobal` populates a reserved `"__global__"` VM used as a fallback when no zone-specific VM is registered for a hook call.
 
@@ -160,6 +160,7 @@ On the next zone tick after the respawn timer expires, `RespawnManager.Tick` dra
 - **Sandbox safety**: dangerous globals are nil'd in the LState before any user script loads. Instruction count is enforced by a counting context, not a goroutine timeout.
 - **NPC removal is atomic with respect to the room index**: `Manager.Remove` deletes from both `instances` and `roomSets` under the write lock. Respawn is scheduled only after removal completes.
 - **Population cap is checked before every respawn spawn**: `RespawnManager.Tick` and `PopulateRoom` both call `countInRoom` before calling `Spawn`.
+- **`"flee"` action is unimplemented in dispatch**: `domain.go`'s `Operator.Action` comment lists `"flee"` as a valid action, but `applyPlanLocked` in `combat_handler.go` has no case for it — it silently falls through to the `default: pass` branch. Do not add a `"flee"` action to NPC domain files without first implementing the dispatch case.
 
 ---
 

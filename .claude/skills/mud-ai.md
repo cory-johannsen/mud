@@ -56,7 +56,7 @@ type WorldState struct {
 
 // PlannedAction (internal/game/ai/planner.go)
 type PlannedAction struct {
-    Action         string // "attack", "strike", "pass", "apply_mental_state"
+    Action string // "attack", "strike", "pass", "reload", "apply_mental_state", etc.
     Target         string // resolved name/UID
     OperatorID     string
     Track          string // mental state track (rage/despair/delirium)
@@ -99,7 +99,7 @@ type Template struct {
 
 - **AI-INV-1**: Planner.Plan precondition: `state != nil && state.NPC != nil`; postcondition: returns `[]PlannedAction{}` (never nil) and never propagates Lua errors (treated as precondition-false).
 - **AI-INV-2**: Domain.Validate guarantees unique IDs within Tasks, Methods, and Operators; all Method subtasks must resolve to a valid Task ID or Operator ID before a Domain is accepted.
-- **AI-INV-3**: Lua sandbox invariant: only `base`, `table`, `string`, `math` stdlib are loaded; `dofile`, `loadfile`, `load`, `require`, `collectgarbage`, and `setfenv` are nil'd out before any user script runs.
+- **AI-INV-3**: Lua sandbox invariant: only `base`, `table`, `string`, `math` stdlib are loaded; `dofile`, `loadfile`, `load`, `loadstring`, `collectgarbage`, `require`, `module`, `newproxy`, `setfenv`, `getfenv`, and `_printregs` are nil'd out before any user script runs.
 - **AI-INV-4**: Instruction limit: each `CallHook` execution is bounded by the countingContext; when the opcode count reaches zero, the VM context cancels and the call returns `(LNil, nil)` — never a panic.
 - **AI-INV-5**: Per-zone LState serialization: each zone VM holds a `sync.Mutex`; all CallHook calls for a given zone serialize through it. Cross-zone calls never share an LState.
 - **AI-INV-6**: NPC state transitions: `IsDead()` ≡ `CurrentHP <= 0`. An Instance is removed from npcMgr.instances atomically before respawn is scheduled; there is no window where a dead Instance is in the room index.
@@ -130,3 +130,4 @@ type Template struct {
 - **Zero-delay respawn looping**: If `respawn_delay` is empty in both the RoomSpawn config and the Template, `Schedule` is a no-op. The NPC simply does not respawn — this is correct behavior, not a bug.
 - **Concurrent PopulateRoom + Tick**: RespawnManager's docstring explicitly states these must not be called concurrently with each other. PopulateRoom is startup-only; Tick is zone-tick-only. Never call PopulateRoom from a zone tick callback.
 - **Module callbacks are nil at test time**: Manager's injected callbacks (GetCombatant, ApplyCondition, etc.) are nil by default. Engine module functions guard against nil callbacks and return no-ops or LNil. Tests that exercise Lua scripts must inject stubs explicitly.
+- **`"flee"` action is unimplemented in dispatch**: `domain.go`'s `Operator.Action` comment lists `"flee"` as a valid action, but `applyPlanLocked` in `combat_handler.go` has no case for it — it silently falls through to the `default: pass` branch. Do not add a `"flee"` action to NPC domain files without first implementing the dispatch case.
