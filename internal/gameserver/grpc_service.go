@@ -2438,6 +2438,30 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 
 	ctx := context.Background()
 
+	// Restore spontaneous use pools unconditionally (influencer characters).
+	if s.spontaneousUsePoolRepo != nil {
+		if err := s.spontaneousUsePoolRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
+			return fmt.Errorf("handleRest: restore spontaneous use pools: %w", err)
+		}
+		pools, err := s.spontaneousUsePoolRepo.GetAll(ctx, sess.CharacterID)
+		if err != nil {
+			return fmt.Errorf("handleRest: reload spontaneous use pools: %w", err)
+		}
+		sess.SpontaneousUsePools = pools
+	}
+
+	// Restore innate tech use slots.
+	if s.innateTechRepo != nil {
+		if err := s.innateTechRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
+			return fmt.Errorf("handleRest: restore innate slots: %w", err)
+		}
+		innates, err := s.innateTechRepo.GetAll(ctx, sess.CharacterID)
+		if err != nil {
+			return fmt.Errorf("handleRest: reload innate slots: %w", err)
+		}
+		sess.InnateTechs = innates
+	}
+
 	// Job lookup.
 	if s.jobRegistry == nil {
 		return sendMsg("You rest briefly but have no technologies to rearrange.")
@@ -2464,18 +2488,6 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 			zap.String("uid", uid),
 			zap.Error(err))
 		return sendMsg("Something went wrong preparing your technologies.")
-	}
-
-	// Restore spontaneous use pools unconditionally (influencer characters).
-	if s.spontaneousUsePoolRepo != nil {
-		if err := s.spontaneousUsePoolRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
-			return fmt.Errorf("handleRest: restore spontaneous use pools: %w", err)
-		}
-		pools, err := s.spontaneousUsePoolRepo.GetAll(ctx, sess.CharacterID)
-		if err != nil {
-			return fmt.Errorf("handleRest: reload spontaneous use pools: %w", err)
-		}
-		sess.SpontaneousUsePools = pools
 	}
 
 	return sendMsg("You finish your rest and your technologies are prepared.")
@@ -4580,7 +4592,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
 
-	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil && s.spontaneousUsePoolRepo == nil && len(sess.SpontaneousTechs) == 0 {
+	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil && s.spontaneousUsePoolRepo == nil && s.innateTechRepo == nil && len(sess.SpontaneousTechs) == 0 && len(sess.InnateTechs) == 0 {
 		return messageEvent("Ability data is not available."), nil
 	}
 
@@ -4671,6 +4683,32 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 						Description: fmt.Sprintf("%s (%d uses remaining at level %d)", techID, pool.Remaining, l),
 					})
 				}
+			}
+		}
+		// Innate techs (no-arg list mode)
+		if len(sess.InnateTechs) > 0 {
+			innateIDs := make([]string, 0, len(sess.InnateTechs))
+			for id := range sess.InnateTechs {
+				innateIDs = append(innateIDs, id)
+			}
+			sort.Strings(innateIDs)
+			for _, id := range innateIDs {
+				slot := sess.InnateTechs[id]
+				var desc string
+				if slot.MaxUses == 0 {
+					desc = fmt.Sprintf("%s (unlimited)", id)
+				} else if slot.UsesRemaining > 0 {
+					desc = fmt.Sprintf("%s (%d uses remaining)", id, slot.UsesRemaining)
+				} else {
+					continue // exhausted — omit
+				}
+				active = append(active, &gamev1.FeatEntry{
+					FeatId:      id,
+					Name:        id,
+					Category:    "innate_tech",
+					Active:      true,
+					Description: desc,
+				})
 			}
 		}
 		// Return list of all active abilities for the client to prompt selection.
@@ -4814,6 +4852,23 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 		pool.Remaining--
 		sess.SpontaneousUsePools[foundLevel] = pool
 		return messageEvent(fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel)), nil
+	}
+	// Innate tech activation
+	if s.innateTechRepo != nil {
+		if slot, ok := sess.InnateTechs[abilityID]; ok {
+			if slot.MaxUses != 0 && slot.UsesRemaining <= 0 {
+				return messageEvent(fmt.Sprintf("No uses of %s remaining.", abilityID)), nil
+			}
+			if slot.MaxUses != 0 {
+				if err := s.innateTechRepo.Decrement(ctx, sess.CharacterID, abilityID); err != nil {
+					return nil, fmt.Errorf("handleUse: decrement innate %s: %w", abilityID, err)
+				}
+				slot.UsesRemaining--
+				return messageEvent(fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining)), nil
+			}
+			return messageEvent(fmt.Sprintf("You activate %s.", abilityID)), nil
+		}
+		return messageEvent(fmt.Sprintf("You don't have innate tech %s.", abilityID)), nil
 	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
 }
