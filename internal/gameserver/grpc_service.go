@@ -1469,7 +1469,10 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		Type:      gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
 		Direction: string(dir.Opposite()),
 	})
-	// Notify all players in destination room via passive techs.
+	// Notify all players in destination room via passive techs. This fires after
+	// the arrival broadcast (room occupancy is settled) but before Lua on_enter
+	// hooks, which is intentional — passive sensing observes physical presence,
+	// not script-driven events.
 	s.triggerPassiveTechsForRoom(result.View.RoomId)
 
 	if s.scriptMgr != nil {
@@ -7617,6 +7620,9 @@ func (s *GameServiceServer) triggerPassiveTechsForRoom(roomID string) {
 		if sess.Entity == nil {
 			continue
 		}
+		// NOTE: sess.InnateTechs is read without a per-session lock (consistent with
+		// how other handleX methods read session fields). A full session-level mutex
+		// would require broader refactoring outside the scope of this change.
 		for techID := range sess.InnateTechs {
 			def, ok := s.techRegistry.Get(techID)
 			if !ok {
@@ -7645,7 +7651,7 @@ func (s *GameServiceServer) triggerPassiveTechsForRoom(roomID string) {
 				continue
 			}
 			if pushErr := sess.Entity.Push(data); pushErr != nil {
-				s.logger.Warn("pushing passive tech event",
+				s.logger.Warn("error pushing passive tech event",
 					zap.String("uid", sess.UID),
 					zap.Error(pushErr))
 			}

@@ -55,16 +55,19 @@ func TestTriggerPassiveTechsForRoom_PassiveTechFires(t *testing.T) {
 	sess := addPlayerWithInnateTechs(t, sessMgr, "uid-passive", roomID, map[string]*session.InnateSlot{
 		"seismic_sense": {MaxUses: 0, UsesRemaining: 0},
 	})
-	// Entity is created by AddPlayer; consume events asynchronously so channel doesn't block.
+	// Record channel depth before firing; the passive tech must push exactly one event.
+	lenBefore := len(sess.Entity.Events())
+
+	svc.triggerPassiveTechsForRoom(roomID)
+
+	lenAfter := len(sess.Entity.Events())
+	assert.Greater(t, lenAfter, lenBefore, "passive tech must push at least one event to entity channel")
+
+	// Drain the entity channel so it doesn't block goroutine cleanup.
 	go func() {
 		for range sess.Entity.Events() {
 		}
 	}()
-
-	// Must not panic; the passive tech fires without error.
-	assert.NotPanics(t, func() {
-		svc.triggerPassiveTechsForRoom(roomID)
-	})
 }
 
 // REQ-PTM4: Non-passive innate tech must NOT produce a push event.
