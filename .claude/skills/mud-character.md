@@ -82,9 +82,9 @@ technology_grants:             # hardwired/prepared/spontaneous tech grants
   hardwired: [tech_id]
   prepared:
     slots_by_level: {1: 2}
-innate_technologies:           # innate tech grants [{id, max_uses}]
+innate_technologies:           # innate tech grants [{id, uses_per_day}]
   - id: tech_id
-    max_uses: 3
+    uses_per_day: 3
 level_up_grants:               # map[level → TechnologyGrants]
   2:
     prepared:
@@ -153,7 +153,7 @@ Player selects a job via `jobRegistry.JobsForTeamAndArchetype`. The job carries 
 - `BuildSkillsFromJob` returns a map with exactly `len(allSkillIDs)` entries.
 - `BuildFeatsFromJob` deduplicates feat IDs across fixed + chosen + generalChosen + skillChosen.
 - `ensureSkills`, `ensureFeats`, `ensureClassFeatures` are idempotent — they check for existing rows before prompting.
-- `handleLevelUp` MUST NOT mutate session state until both persistence calls succeed.
+- `handleLevelUp` logs warnings on `SaveAbilities` and `ConsumePendingBoost` failures but does not roll back session state — failure is logged and execution continues. Full atomicity is not currently enforced.
 - `AssignTechnologies` validates merged grants before any persistence write.
 
 ## Extension Points

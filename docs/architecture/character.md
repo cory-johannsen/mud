@@ -47,7 +47,7 @@ Fields sent at session join: `character_id`, `name`, `region`, `class`, `level`,
 
 ### Archetype YAML (content/archetypes/*.yaml)
 
-Required: `id`, `name`, `description`, `key_ability`, `hit_points_per_level`, `ability_boosts.fixed`, `ability_boosts.free`. Optional: `technology_grants`, `innate_technologies` ([]{id, max_uses}), `level_up_grants` (map[level → TechnologyGrants]).
+Required: `id`, `name`, `description`, `key_ability`, `hit_points_per_level`, `ability_boosts.fixed`, `ability_boosts.free`. Optional: `technology_grants`, `innate_technologies` ([]{id, uses_per_day}), `level_up_grants` (map[level → TechnologyGrants]).
 
 ### Job YAML (content/jobs/*.yaml)
 
@@ -111,7 +111,6 @@ graph TD
     TA --> DB
 
     B --> RS
-    B --> SESS
 
     YAML[content/archetypes/*.yaml<br/>content/jobs/*.yaml] --> RS
     PROTO[api/proto/game/v1/game.proto] --> GS
@@ -141,7 +140,7 @@ graph TD
 - `handleArchetypeSelection` in grpc_service.go is a stub. All real creation state is managed in the frontend `characterCreationFlow`.
 - HP uses the **job** `HitPointsPerLevel` even though the archetype YAML also carries that field. The archetype value is display-only in `RenderArchetypeMenu`.
 - Ability boost order in `ApplyAbilityBoosts` is fixed: archetype fixed → archetype free → region fixed → region free. Changing order alters final scores.
-- `handleLevelUp` MUST NOT mutate session state until both `SaveAbilities` and `ConsumePendingBoost` succeed.
+- `handleLevelUp` logs warnings on `SaveAbilities` and `ConsumePendingBoost` failures but does not roll back session state — failure is logged and execution continues. Full atomicity is not currently enforced.
 - `AssignTechnologies` short-circuits entirely when `job == nil && region == nil && len(archetype.InnateTechnologies) == 0`; passing a nil archetype for a character with innate grants will silently skip them.
 - `ensureSkills`, `ensureFeats`, `ensureClassFeatures` are idempotent and called for both new and existing characters — they check for existing DB rows before prompting.
 
