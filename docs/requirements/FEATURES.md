@@ -260,7 +260,10 @@
         - [x] Player gets to choose which new Technologies are learned with levelling up. (Sub-project B) — `neural_static` + `synaptic_surge` added; Influencer grants known tech at levels 3 and 5 with 3-tech pool; deferral + selection verified end-to-end (REQ-SSL1-4)
       - [ ] Heightened Spells -> Amped Technology
         - Follows the PF2E rules
-      - [ ] Innate Technologies
+      - [ ] Innate Technologies — region-based innate tech grants; per-tech daily uses; restore on rest; character sheet display
+        - [ ] Innate tech effect resolution — activating an innate tech applies its game effect (damage, condition, etc.); out of scope until effect system is defined
+        - [ ] `chrome_reflex` reaction trigger — integrate with Reactions system so it fires as a reaction rather than via `use` command; requires Reactions system
+        - [ ] Passive innate tech mechanics — `seismic_sense` (always-on tremorsense) and `moisture_reclaim` (always-on water extraction) should apply passively without `use` command; requires passive effect system
     - [ ] Spell import from PF2E with translation into Gunchete
       - [ ] Populate Archetype and Job yaml with options 
 - [ ] Long rest — full PF2E long rest equivalent: restore HP to max, reset spontaneous tech uses, allow prepared tech rearrangement
