@@ -4555,7 +4555,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
 
-	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil {
+	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil && s.spontaneousUsePoolRepo == nil && len(sess.SpontaneousTechs) == 0 {
 		return messageEvent("Ability data is not available."), nil
 	}
 
@@ -4623,6 +4623,29 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 					Active:      true,
 					Description: fmt.Sprintf("%d use(s) remaining", remaining),
 				})
+			}
+		}
+		// Append spontaneous tech entries with remaining use counts.
+		if len(sess.SpontaneousTechs) > 0 {
+			spontLevels := make([]int, 0, len(sess.SpontaneousTechs))
+			for l := range sess.SpontaneousTechs {
+				spontLevels = append(spontLevels, l)
+			}
+			sort.Ints(spontLevels)
+			for _, l := range spontLevels {
+				pool := sess.SpontaneousUsePools[l]
+				if pool.Remaining <= 0 {
+					continue
+				}
+				for _, techID := range sess.SpontaneousTechs[l] {
+					active = append(active, &gamev1.FeatEntry{
+						FeatId:      techID,
+						Name:        techID,
+						Category:    "spontaneous_tech",
+						Active:      true,
+						Description: fmt.Sprintf("%s (%d uses remaining at level %d)", techID, pool.Remaining, l),
+					})
+				}
 			}
 		}
 		// Return list of all active abilities for the client to prompt selection.
@@ -4728,6 +4751,44 @@ func (s *GameServiceServer) handleUse(uid, abilityID string) (*gamev1.ServerEven
 		}
 		// No non-expended slot found for this tech ID.
 		return messageEvent(fmt.Sprintf("No prepared uses of %s remaining.", abilityID)), nil
+	}
+	// Spontaneous tech lookup — only if no feat/class-feature/prepared-tech matched.
+	if len(sess.SpontaneousTechs) > 0 {
+		levels := make([]int, 0, len(sess.SpontaneousTechs))
+		for l := range sess.SpontaneousTechs {
+			levels = append(levels, l)
+		}
+		sort.Ints(levels)
+		foundLevel := -1
+		for _, l := range levels {
+			for _, tid := range sess.SpontaneousTechs[l] {
+				if tid == abilityID {
+					foundLevel = l
+					break
+				}
+			}
+			if foundLevel >= 0 {
+				break
+			}
+		}
+		if foundLevel < 0 {
+			return messageEvent(fmt.Sprintf("You don't know %s.", abilityID)), nil
+		}
+		pool := sess.SpontaneousUsePools[foundLevel]
+		if pool.Remaining <= 0 {
+			return messageEvent(fmt.Sprintf("No level %d uses remaining.", foundLevel)), nil
+		}
+		if s.spontaneousUsePoolRepo != nil {
+			if err := s.spontaneousUsePoolRepo.Decrement(ctx, sess.CharacterID, foundLevel); err != nil {
+				s.logger.Warn("handleUse: Decrement spontaneous pool failed",
+					zap.String("uid", uid),
+					zap.String("techID", abilityID),
+					zap.Error(err))
+			}
+		}
+		pool.Remaining--
+		sess.SpontaneousUsePools[foundLevel] = pool
+		return messageEvent(fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel)), nil
 	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
 }
