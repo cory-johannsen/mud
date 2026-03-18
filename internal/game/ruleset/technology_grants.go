@@ -47,7 +47,7 @@ type SpontaneousEntry struct {
 	Level int    `yaml:"level"`
 }
 
-// InnateGrant defines a single innate technology granted by an archetype.
+// InnateGrant defines a single innate technology granted by an archetype or region.
 type InnateGrant struct {
 	ID         string `yaml:"id"`
 	UsesPerDay int    `yaml:"uses_per_day"` // 0 = unlimited
