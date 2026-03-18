@@ -160,9 +160,14 @@ func techAttackMod(sess *session.PlayerSession, tech *technology.TechnologyDef) 
 }
 
 // abilityModifier returns the PF2E ability modifier for a score.
-// Formula: (score - 10) / 2, rounded toward negative infinity.
+// Formula: floor((score - 10) / 2). Go integer division truncates toward zero,
+// so negative odd differences require explicit floor adjustment.
 func abilityModifier(score int) int {
-	return (score - 10) / 2
+	diff := score - 10
+	if diff >= 0 {
+		return diff / 2
+	}
+	return (diff - 1) / 2
 }
 
 // applyEffects applies a slice of TechEffects and returns result messages.

@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -280,6 +281,18 @@ func TestProperty_REQ_TER22_AreaMessagesEqualTargetCount(t *testing.T) {
 		src := &deterministicSrc{val: 0}
 		msgs := ResolveTechEffects(sess, tech, targets, nil, nil, src)
 		assert.Equal(rt, n, len(msgs))
+	})
+}
+
+// TestProperty_AbilityModifier_MatchesFloorDiv verifies that abilityModifier
+// produces floor((score-10)/2) for all scores 1–20.
+func TestProperty_AbilityModifier_MatchesFloorDiv(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		score := rapid.IntRange(1, 20).Draw(rt, "score")
+		got := abilityModifier(score)
+		diff := score - 10
+		expected := int(math.Floor(float64(diff) / 2.0))
+		assert.Equal(rt, expected, got, "abilityModifier(%d)", score)
 	})
 }
 

@@ -4901,9 +4901,12 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 //   - Returns (nil, errorMsg) when the caller has provided an invalid targetID or is not in combat.
 //   - Returns (*Combatant, "") when a valid target is resolved.
 func (s *GameServiceServer) resolveUseTarget(uid, targetID string, tech *technology.TechnologyDef) (*combat.Combatant, string) {
-	// Self-targeting and no-roll techs never need a target.
+	// Self-targeting, no-roll, and area techs never need single-target resolution.
 	if tech.Targets == "self" || tech.Resolution == "" || tech.Resolution == "none" {
 		return nil, ""
+	}
+	if tech.Targets == technology.TargetsAllEnemies {
+		return nil, "" // area targeting — handled by activateTechWithEffects
 	}
 	if s.combatH == nil {
 		if targetID != "" {
@@ -4962,22 +4965,19 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 	if errMsg != "" {
 		return messageEvent(errMsg), nil
 	}
+	var cbt *combat.Combat
+	if s.combatH != nil {
+		cbt = s.combatH.ActiveCombatForPlayer(uid)
+	}
 	var techTargets []*combat.Combatant
-	if techDef.Targets == technology.TargetsAllEnemies && s.combatH != nil { //nolint:gocritic
-		cbt := s.combatH.ActiveCombatForPlayer(uid)
-		if cbt != nil {
-			for _, c := range cbt.Combatants {
-				if c.Kind == combat.KindNPC && !c.IsDead() {
-					techTargets = append(techTargets, c)
-				}
+	if techDef.Targets == technology.TargetsAllEnemies && cbt != nil { //nolint:gocritic
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindNPC && !c.IsDead() {
+				techTargets = append(techTargets, c)
 			}
 		}
 	} else if target != nil {
 		techTargets = []*combat.Combatant{target}
-	}
-	var cbt *combat.Combat
-	if s.combatH != nil {
-		cbt = s.combatH.ActiveCombatForPlayer(uid)
 	}
 	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{})
 	return messageEvent(strings.Join(msgs, "\n")), nil
