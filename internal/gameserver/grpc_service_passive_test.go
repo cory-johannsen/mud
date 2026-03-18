@@ -140,6 +140,45 @@ func TestTriggerPassiveTechsForRoom_TechNotInRegistrySkipped(t *testing.T) {
 	})
 }
 
+// TestTriggerPassiveTechsForRoom_DepartedPlayerExcluded verifies that a player who has
+// moved to a different room does NOT receive the source-room passive trigger (REQ-PTM5).
+func TestTriggerPassiveTechsForRoom_DepartedPlayerExcluded(t *testing.T) {
+	const (
+		uid      = "player-departed"
+		srcRoom  = "room_source_departed"
+		destRoom = "room_dest_departed"
+		techID   = "seismic_sense"
+	)
+
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	reg := technology.NewRegistry()
+	reg.Register(passiveTechDef(techID, true))
+	svc.SetTechRegistry(reg)
+
+	// Add player to source room with passive innate tech.
+	sess := addPlayerWithInnateTechs(t, sessMgr, uid, srcRoom, map[string]*session.InnateSlot{
+		techID: {MaxUses: 0, UsesRemaining: 0},
+	})
+
+	// Simulate player moving to destRoom — session manager updates their RoomID.
+	_, err := sessMgr.MovePlayer(uid, destRoom)
+	require.NoError(t, err)
+
+	// Snapshot channel length after the move; any prior buffered events are already present.
+	lenBefore := len(sess.Entity.Events())
+
+	// Fire passive trigger for the OLD (source) room.
+	// Because the player is now in destRoom, PlayersInRoomDetails(srcRoom) must not
+	// return them, so no new event should be pushed.
+	svc.triggerPassiveTechsForRoom(srcRoom)
+
+	lenAfter := len(sess.Entity.Events())
+	assert.Equal(t, lenBefore, lenAfter,
+		"departed player must not receive source-room passive trigger")
+}
+
 // REQ-PTM5: Property test — N players each with a passive innate tech must all receive
 // their passive tech trigger without panic.
 func TestPropertyTriggerPassiveTechsForRoom_AllPlayersReceiveEvent(t *testing.T) {
