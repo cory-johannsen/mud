@@ -209,6 +209,33 @@ func TestHandleUse_ListMode_IncludesSpontaneous_REQ_SUC4(t *testing.T) {
 	assert.True(t, found, "expected spontaneous tech entry in choices, got: %v", choices)
 }
 
+// TestHandleRest_RestoresSpontaneousPools_REQ_SUC5 verifies that handleRest restores all
+// spontaneous use pools to their Max values and updates the session.
+//
+// Precondition: session has SpontaneousUsePools = {1: UsePool{Remaining:0, Max:3}}.
+// Postcondition: RestoreAll is called; sess.SpontaneousUsePools[1].Remaining == 3.
+func TestHandleRest_RestoresSpontaneousPools_REQ_SUC5(t *testing.T) {
+	svc, sessMgr := newSpontaneousSvc(t)
+
+	repoPools := map[int]session.UsePool{1: {Remaining: 0, Max: 3}}
+	repo := newFakeSpontaneousUsePoolRepo(repoPools)
+	svc.spontaneousUsePoolRepo = repo
+
+	sess := addSpontaneousPlayer(t, sessMgr, "u_rest_1",
+		map[int][]string{},
+		map[int]session.UsePool{1: {Remaining: 0, Max: 3}},
+	)
+
+	stream := &fakeSessionStream{}
+	err := svc.handleRest(sess.UID, "req-rest-1", stream)
+	require.NoError(t, err)
+
+	// RestoreAll should have been called, so repo pools are restored.
+	assert.Equal(t, 3, repo.pools[1].Remaining)
+	// Session should reflect the restored pools.
+	assert.Equal(t, 3, sess.SpontaneousUsePools[1].Remaining)
+}
+
 // TestHandleUse_SpontaneousProperty_REQ_SUC7 is a property-based test verifying that
 // activating a spontaneous tech N times succeeds and the N+1th activation fails.
 //

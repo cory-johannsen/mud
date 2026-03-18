@@ -2433,6 +2433,26 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		return sendMsg("You can't rest while in combat.")
 	}
 
+	ctx := context.Background()
+
+	// Restore spontaneous use pools unconditionally (influencer characters).
+	if s.spontaneousUsePoolRepo != nil {
+		if err := s.spontaneousUsePoolRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
+			s.logger.Warn("handleRest: restore spontaneous use pools failed",
+				zap.String("uid", uid),
+				zap.Error(err))
+		} else {
+			pools, err := s.spontaneousUsePoolRepo.GetAll(ctx, sess.CharacterID)
+			if err != nil {
+				s.logger.Warn("handleRest: reload spontaneous use pools failed",
+					zap.String("uid", uid),
+					zap.Error(err))
+			} else {
+				sess.SpontaneousUsePools = pools
+			}
+		}
+	}
+
 	// Job lookup.
 	if s.jobRegistry == nil {
 		return sendMsg("You rest briefly but have no technologies to rearrange.")
@@ -2452,7 +2472,7 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		return s.promptFeatureChoice(stream, "tech_choice", choices)
 	}
 
-	if err := RearrangePreparedTechs(context.Background(), sess, sess.CharacterID,
+	if err := RearrangePreparedTechs(ctx, sess, sess.CharacterID,
 		job, s.techRegistry, promptFn, s.preparedTechRepo,
 	); err != nil {
 		s.logger.Warn("handleRest: RearrangePreparedTechs failed",
@@ -3692,6 +3712,14 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 			view.XpToNext = int32(xp.XPToLevel(sess.Level+1, cfg.BaseXP))
 		}
 		// If at level cap, XpToNext remains 0 (zero-value).
+	}
+
+	for level, pool := range sess.SpontaneousUsePools {
+		view.SpontaneousUsePools = append(view.SpontaneousUsePools, &gamev1.SpontaneousUsePoolView{
+			TechLevel:     int32(level),
+			UsesRemaining: int32(pool.Remaining),
+			MaxUses:       int32(pool.Max),
+		})
 	}
 
 	return &gamev1.ServerEvent{
