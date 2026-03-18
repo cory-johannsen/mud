@@ -187,6 +187,7 @@ func mergeSpontaneousGrants(a, b *SpontaneousGrants) *SpontaneousGrants {
 }
 
 // MergeLevelUpGrants merges two level-keyed grant maps key by key.
+// Used by level-up technology processing (Phase 2) to combine archetype and job level-up grants.
 //
 // Precondition: either or both arguments may be nil.
 // Postcondition: returned map contains all keys from both inputs;
