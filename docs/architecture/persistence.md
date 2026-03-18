@@ -53,7 +53,6 @@ graph TD
     end
 
     XP -->|"satisfied by"| PROG
-    XP -->|"satisfied by"| SKILL
 
     POOL --> ACCT
     POOL --> CHAR
@@ -131,8 +130,8 @@ sequenceDiagram
 
 ## Adding a New Table / Repo
 
-1. **Add migration file** — create `migrations/030_description.up.sql` and
-   `migrations/030_description.down.sql` (use the next sequential integer after 029).
+1. **Add migration file** — create `migrations/NNN_description.up.sql` and
+   `migrations/NNN_description.down.sql` where NNN is the next sequential integer after 029.
 2. **Add interface in game domain** — declare a minimal interface in the relevant
    `internal/game/<domain>/` package; method signatures MUST use only domain types.
 3. **Implement in postgres package** — create `internal/storage/postgres/<name>.go`
@@ -151,5 +150,6 @@ sequenceDiagram
 | PERS-INV-2 | Raw SQL MUST appear only in `internal/storage/postgres/` — never in game logic. |
 | PERS-INV-3 | All SQL MUST use parameterized placeholders (`$1`, `$2`, …). |
 | PERS-INV-4 | Committed migration files MUST NOT be edited; new behaviour requires a new file. |
-| PERS-INV-5 | Every repository constructor MUST accept a `*pgxpool.Pool` from `Pool.DB()`. |
-| PERS-INV-6 | `pgx.ErrNoRows` MUST be mapped to a domain sentinel error at the repo boundary. |
+| PERS-INV-5 | Current migration count is 58 files (029 numbered migrations × 2 files each). |
+| PERS-INV-6 | Every repository constructor MUST accept a `*pgxpool.Pool` from `Pool.DB()`. |
+| PERS-INV-7 | `pgx.ErrNoRows` MUST be mapped to a domain sentinel error at the repo boundary. |

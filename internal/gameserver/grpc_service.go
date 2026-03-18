@@ -2447,7 +2447,7 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 	// REQ-LR1: Restore HP to maximum.
 	sess.CurrentHP = sess.MaxHP
 
-	ctx := context.Background()
+	ctx := stream.Context()
 
 	// REQ-LR2: Persist HP to database.
 	if s.charSaver != nil {
