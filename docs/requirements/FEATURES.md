@@ -263,9 +263,10 @@
       - [x] Innate Technologies — region-based innate tech grants; per-tech daily uses; restore on rest; character sheet display (REQ-INN1–INN9, REQ-CONTENT1–2)
         - [x] Innate tech effect resolution — activating an innate tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution; REQ-TER1–22)
         - [ ] `chrome_reflex` reaction trigger — integrate with Reactions system so it fires as a reaction rather than via `use` command; requires Reactions system
-        - [ ] Passive innate tech mechanics — `seismic_sense` (always-on tremorsense) and `moisture_reclaim` (always-on water extraction) should apply passively without `use` command (Sub-project: Passive Tech Mechanics)
+        - [x] Passive innate tech mechanics — `seismic_sense` (always-on tremorsense) fires automatically on room entry/exit for all players in the room; `moisture_reclaim` remains explicit-activation per PF2E source (Sub-project: Passive Tech Mechanics; REQ-PTM1–PTM6)
     - [ ] Spell import from PF2E with translation into Gunchete
       - [ ] Populate Archetype and Job yaml with options 
+      - [ ] Effects should be a mixture of tech, chemicals/explosives, and drugs as appropriate for the source data and Gunchete lore.
 - [ ] refactor to use `wire` for dependency injection
 - [x] Long rest — full PF2E long rest equivalent: restore HP to max, reset spontaneous tech uses, allow prepared tech rearrangement (Sub-project: Long Rest; REQ-LR1–LR5)
 - [ ] Non-combat NPCs.
@@ -587,5 +588,6 @@
         - [ ] VIP Suite
           - [ ] Boss Fight
         - [ ] Lockers
+- [ ] web game client with admin interface
 - [ ] Game client built on `github.com/hajimehoshi/ebiten/v2` with direct GRPC stream communication.  Automatically built for Windows, Mac, Debian linux.
 - [ ] Documentation: architecture design with diagrams, deployment guide, implementer's guide, player's guide including in-game help integration
