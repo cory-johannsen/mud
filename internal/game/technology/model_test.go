@@ -433,6 +433,35 @@ func TestSeismicSense_IsPassive(t *testing.T) {
 	require.NoError(t, yaml.Unmarshal(data, &def))
 	assert.True(t, def.Passive)
 	assert.Equal(t, 0, def.ActionCost)
+	require.NoError(t, def.Validate(), "seismic_sense.yaml must pass full validation")
+}
+
+// REQ-PTM2 (property): For any ActionCost > 0, a passive TechnologyDef must fail Validate.
+// For ActionCost == 0, it must pass.
+func TestPropertyValidate_REQ_PTM2_PassiveActionCostConstraint(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		d := validDef()
+		d.Passive = true
+		d.ActionCost = rapid.IntRange(1, 10).Draw(rt, "actionCost")
+		err := d.Validate()
+		if err == nil {
+			rt.Fatalf("expected error for passive tech with action_cost=%d, got nil", d.ActionCost)
+		}
+	})
+}
+
+// REQ-PTM1 (property): A passive TechnologyDef with ActionCost == 0 must always pass Validate
+// (given an otherwise valid def).
+func TestPropertyValidate_REQ_PTM1_PassiveZeroActionCostAlwaysValid(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		d := validDef()
+		d.Passive = true
+		d.ActionCost = 0
+		err := d.Validate()
+		if err != nil {
+			rt.Fatalf("expected no error for passive tech with action_cost=0, got: %v", err)
+		}
+	})
 }
 
 // TieredEffects round-trip YAML test.
