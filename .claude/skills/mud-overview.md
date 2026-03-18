@@ -16,6 +16,7 @@ The ruleset is PF2E-derived (six ability scores: Brutality, Quickness, Grit, Rea
 |---|---|
 | `cmd/frontend/` | Telnet server binary entrypoint: loads ruleset content, wires auth handler, starts telnet acceptor |
 | `cmd/gameserver/` | gRPC game service binary entrypoint: loads world/content, wires all managers, serves gRPC |
+| `cmd/devserver/` | All-in-one development server: wires frontend + database without gRPC (local dev only) |
 | `cmd/migrate/` | Database migration binary |
 | `cmd/import-content/` | PF2E content importer binary |
 | `cmd/setrole/` | Admin role assignment utility binary |
@@ -24,7 +25,7 @@ The ruleset is PF2E-derived (six ability scores: Brutality, Quickness, Grit, Rea
 | `internal/frontend/telnet/` | Raw telnet acceptor, connection, screen renderer, color/ANSI utilities |
 | `internal/gameserver/` | gRPC service implementation, command dispatch, all sub-handlers (combat, world, chat, NPC, regen, etc.) |
 | `internal/game/` | Pure functional game domain: ai, character, combat, command, condition, dice, inventory, mentalstate, npc, ruleset, scripting, session, skillcheck, technology, world, xp |
-| `internal/game/ai/` | HTN (Hierarchical Task Network) planner, domain registry, zone tick manager |
+| `internal/game/ai/` | HTN (Hierarchical Task Network) planner, domain registry |
 | `internal/game/combat/` | PF2E combat engine: initiative, action points, attack resolution, MAP |
 | `internal/game/character/` | Character struct, ability scores, derived stats |
 | `internal/game/command/` | Command registry, builtin command list, handler constants, shortcut registration |
@@ -53,7 +54,7 @@ The ruleset is PF2E-derived (six ability scores: Brutality, Quickness, Grit, Rea
 - **Proto oneof for all messages**: `ClientMessage.payload` and `ServerEvent.payload` are proto3 oneof fields covering all ~80 client commands and ~25 server events. Wire format is bidirectional gRPC streaming (`rpc Session(stream ClientMessage) returns (stream ServerEvent)`).
 - **Property-based testing (rapid/v10)**: all new code uses `pgregory.net/rapid` for property-based tests (SWENG-5a). Postgres tests use testcontainers and run separately via `make test-postgres`.
 - **Lua scripting sandbox**: `internal/scripting.Manager` maintains per-zone and global gopher-lua VMs for condition scripts, weapon scripts, and AI precondition scripts. Instruction limits prevent runaway scripts.
-- **HTN AI planner**: NPCs run Hierarchical Task Network planning with YAML domain files and Lua preconditions. The zone tick manager fires AI ticks at a configurable interval (default 10s).
+- **HTN AI planner**: NPCs run Hierarchical Task Network planning with YAML domain files and Lua preconditions. The `ZoneTickManager` (in `internal/gameserver/zone_tick.go`) fires AI ticks at a configurable interval (default 10s).
 - **Game clock**: a goroutine advances the in-game hour and broadcasts `TimeOfDayEvent` to all connected sessions.
 
 ## Build & Deploy
@@ -106,7 +107,7 @@ The ruleset is PF2E-derived (six ability scores: Brutality, Quickness, Grit, Rea
 | `/home/cjohannsen/src/mud/internal/frontend/handlers/bridge_handlers.go` | `bridgeHandlerMap` — single source of truth for frontend command dispatch |
 | `/home/cjohannsen/src/mud/internal/frontend/handlers/game_bridge.go` | `commandLoop` — reads player input, dispatches via bridge map, handles server events |
 | `/home/cjohannsen/src/mud/internal/frontend/telnet/screen.go` | `WriteRoom`, `WriteConsole`, `WritePromptSplit`, `InitScreen` — split-screen terminal control |
-| `/home/cjohannsen/src/mud/internal/frontend/handlers/text_renderer.go` | `RenderRoomView(rv, width)`, `RenderCharacterSheet(csv, width)` — width-aware text rendering |
+| `/home/cjohannsen/src/mud/internal/frontend/handlers/text_renderer.go` | `RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string`, `RenderCharacterSheet(csv, width)` — width-aware text rendering |
 | `/home/cjohannsen/src/mud/internal/gameserver/grpc_service.go` | `GameServiceServer` — gRPC Session handler, dispatch type switch over `ClientMessage.payload` |
 | `/home/cjohannsen/src/mud/internal/gameserver/combat_handler.go` | PF2E combat resolution: initiative, attack, MAP, death, flee, conditions |
 | `/home/cjohannsen/src/mud/internal/gameserver/technology_assignment.go` | Technology slot assignment: hardwired/prepared/spontaneous/innate grant logic |

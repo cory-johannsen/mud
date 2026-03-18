@@ -18,6 +18,7 @@ All game content — zones, rooms, NPCs, weapons, armor, items, conditions, feat
 |---|---|
 | `cmd/frontend` | Telnet server entrypoint: config, content loading, auth wiring, telnet lifecycle |
 | `cmd/gameserver` | gRPC server entrypoint: world loading, manager wiring, gRPC lifecycle |
+| `cmd/devserver` | All-in-one development server: wires frontend + database without gRPC (local dev only) |
 | `cmd/migrate` | SQL schema migration runner |
 | `cmd/import-content` | PF2E data importer (one-shot content pipeline) |
 | `cmd/setrole` | Admin utility to set account role in database |
@@ -26,9 +27,9 @@ All game content — zones, rooms, NPCs, weapons, armor, items, conditions, feat
 | `internal/server` | `Lifecycle` manager — starts/stops named services in order, handles OS signals |
 | `internal/frontend/telnet` | `Acceptor`, `Conn`: raw telnet TCP accept loop, ANSI/color utilities, split-screen control |
 | `internal/frontend/handlers` | `AuthHandler` (login/char-select), `GameBridge` (command loop), `bridgeHandlerMap`, `TextRenderer` |
-| `internal/gameserver` | `GameServiceServer` gRPC impl; sub-handlers: `WorldHandler`, `ChatHandler`, `CombatHandler`, `NPCHandler`, `ActionHandler`, `RegenManager`, `ZoneTickManager`, `GameClock` |
+| `internal/gameserver` | `GameServiceServer` gRPC impl; sub-handlers: `WorldHandler`, `ChatHandler`, `CombatHandler`, `NPCHandler`, `ActionHandler`, `RegenManager`, `ZoneTickManager` (`zone_tick.go`), `GameClock` |
 | `internal/gameserver/gamev1` | Generated gRPC stubs and proto types (do not edit manually — run `make proto`) |
-| `internal/game/ai` | HTN planner (`Planner`), domain `Registry`, `ZoneTickManager` |
+| `internal/game/ai` | HTN planner (`Planner`), domain `Registry` |
 | `internal/game/character` | `Character` struct, `AbilityScores`, derived stat helpers |
 | `internal/game/combat` | `Engine`: initiative, action points, attack resolution, MAP, death/unconscious logic |
 | `internal/game/command` | `Registry`, `BuiltinCommands()`, `Handler*` constants, `RegisterShortcuts` |
@@ -134,8 +135,8 @@ graph TD
 ## Known Constraints & Pitfalls
 
 - NEVER use DECSTBM (scroll region) telnet sequences — causes coordinate offset bugs in TinTin++ due to DECOM mode. Use the explicit row-addressed write functions in `screen.go` instead.
-- The split-screen UI uses fixed row assignments: room region rows 1–8, divider row 9, console rows 10+, prompt row H (terminal height). Any resize handling must re-render via `RenderRoomView(rv, width)` using the stored `*gamev1.RoomView`, not a rendered string.
-- `RenderRoomView` and `RenderCharacterSheet` both require a `width int` parameter for terminal-width-aware wrapping and layout.
+- The split-screen UI uses fixed row assignments: room region rows 1–8, divider row 9, console rows 10+, prompt row H (terminal height). Any resize handling must re-render via `RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string` using the stored `*gamev1.RoomView`, not a rendered string.
+- `RenderRoomView` requires `width int` and `maxLines int` parameters; `RenderCharacterSheet` requires `width int` — both for terminal-width-aware wrapping and layout.
 - DB password must come from `.claude/rules/.env` only — never hardcode or read from memory.
 - Kubernetes namespace is `mud`, not `default`. Helm release name is `mud`. Use `make k8s-redeploy` for all deploys.
 - The command registry is built after class features are loaded (in `cmd/gameserver/main.go`) because `RegisterShortcuts` adds shortcut aliases from class feature `ActivateText`. Order matters.
