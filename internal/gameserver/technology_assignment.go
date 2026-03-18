@@ -47,6 +47,31 @@ type InnateTechRepo interface {
 	DeleteAll(ctx context.Context, characterID int64) error
 }
 
+// SpontaneousUsePoolRepo manages the daily use pool for spontaneous technologies.
+//
+// Precondition: characterID > 0; techLevel >= 1; uses >= 0.
+type SpontaneousUsePoolRepo interface {
+	// GetAll returns all use pools for the character.
+	// Postcondition: returned map contains one UsePool per initialized tech level.
+	GetAll(ctx context.Context, characterID int64) (map[int]session.UsePool, error)
+
+	// Set initializes or overwrites a pool entry.
+	// Postcondition: row (characterID, techLevel) has uses_remaining=usesRemaining, max_uses=maxUses.
+	Set(ctx context.Context, characterID int64, techLevel, usesRemaining, maxUses int) error
+
+	// Decrement atomically decrements uses_remaining by 1 if > 0.
+	// Precondition: caller has verified uses_remaining > 0 in session before calling.
+	// Postcondition: uses_remaining = max(0, uses_remaining - 1).
+	Decrement(ctx context.Context, characterID int64, techLevel int) error
+
+	// RestoreAll sets uses_remaining = max_uses for all rows of this character.
+	// Postcondition: all pools are at maximum.
+	RestoreAll(ctx context.Context, characterID int64) error
+
+	// DeleteAll removes all pool entries for the character.
+	DeleteAll(ctx context.Context, characterID int64) error
+}
+
 // PendingTechLevelsRepo persists the list of character levels with unresolved
 // technology pool selections.
 type PendingTechLevelsRepo interface {

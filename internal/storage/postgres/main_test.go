@@ -253,6 +253,14 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			max_uses     INT    NOT NULL DEFAULT 0,
 			PRIMARY KEY (character_id, tech_id)
 		);
+
+		CREATE TABLE IF NOT EXISTS character_spontaneous_use_pools (
+			character_id   BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			tech_level     INT    NOT NULL,
+			uses_remaining INT    NOT NULL DEFAULT 0,
+			max_uses       INT    NOT NULL DEFAULT 0,
+			PRIMARY KEY (character_id, tech_level)
+		);
 	`)
 	return err
 }

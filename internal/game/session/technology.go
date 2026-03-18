@@ -11,3 +11,9 @@ type PreparedSlot struct {
 type InnateSlot struct {
 	MaxUses int
 }
+
+// UsePool tracks remaining and maximum daily uses for a spontaneous tech level.
+type UsePool struct {
+	Remaining int
+	Max       int
+}

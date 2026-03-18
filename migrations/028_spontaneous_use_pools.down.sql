@@ -1,0 +1,1 @@
+DROP TABLE character_spontaneous_use_pools;
