@@ -11,13 +11,15 @@ import (
 //
 // Precondition: ID, Name, KeyAbility, and HitPointsPerLevel must be non-zero after loading.
 type Archetype struct {
-	ID                string `yaml:"id"`
-	Name              string `yaml:"name"`
-	Description       string `yaml:"description"`
-	KeyAbility        string `yaml:"key_ability"`
-	HitPointsPerLevel int                `yaml:"hit_points_per_level"`
-	AbilityBoosts      *AbilityBoostGrant `yaml:"ability_boosts"`
-	InnateTechnologies []InnateGrant      `yaml:"innate_technologies,omitempty"`
+	ID                 string                    `yaml:"id"`
+	Name               string                    `yaml:"name"`
+	Description        string                    `yaml:"description"`
+	KeyAbility         string                    `yaml:"key_ability"`
+	HitPointsPerLevel  int                       `yaml:"hit_points_per_level"`
+	AbilityBoosts      *AbilityBoostGrant        `yaml:"ability_boosts"`
+	InnateTechnologies []InnateGrant             `yaml:"innate_technologies,omitempty"`
+	TechnologyGrants   *TechnologyGrants         `yaml:"technology_grants,omitempty"`
+	LevelUpGrants      map[int]*TechnologyGrants `yaml:"level_up_grants,omitempty"`
 }
 
 // LoadArchetypes reads all .yaml files in dir and parses each as an Archetype.

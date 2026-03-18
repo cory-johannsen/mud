@@ -7,3 +7,25 @@ hit_points_per_level: 6
 ability_boosts:
   fixed: [reasoning, savvy]
   free: 2
+
+technology_grants:
+  prepared:
+    slots_by_level:
+      1: 2
+level_up_grants:
+  2:
+    prepared:
+      slots_by_level:
+        1: 1
+  3:
+    prepared:
+      slots_by_level:
+        1: 1
+  4:
+    prepared:
+      slots_by_level:
+        1: 1
+  5:
+    prepared:
+      slots_by_level:
+        1: 1

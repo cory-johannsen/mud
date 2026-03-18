@@ -7,3 +7,17 @@ hit_points_per_level: 10
 ability_boosts:
   fixed: [grit, brutality]
   free: 2
+
+technology_grants:
+  prepared:
+    slots_by_level:
+      1: 1
+level_up_grants:
+  3:
+    prepared:
+      slots_by_level:
+        1: 1
+  5:
+    prepared:
+      slots_by_level:
+        1: 1
