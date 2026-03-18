@@ -52,7 +52,7 @@ type InnateTechRepo interface {
 // Precondition: characterID > 0; techLevel >= 1; uses >= 0.
 type SpontaneousUsePoolRepo interface {
 	// GetAll returns all use pools for the character.
-	// Postcondition: returned map contains one UsePool per initialized tech level.
+	// Postcondition: returned map contains one UsePool per initialized tech level; returns an empty map (not nil) if no pools have been initialized.
 	GetAll(ctx context.Context, characterID int64) (map[int]session.UsePool, error)
 
 	// Set initializes or overwrites a pool entry.

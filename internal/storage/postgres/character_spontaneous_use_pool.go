@@ -41,7 +41,10 @@ func (r *CharacterSpontaneousUsePoolRepository) GetAll(ctx context.Context, char
 		}
 		result[techLevel] = session.UsePool{Remaining: usesRemaining, Max: maxUses}
 	}
-	return result, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("CharacterSpontaneousUsePoolRepository.GetAll rows: %w", err)
+	}
+	return result, nil
 }
 
 // Set initializes or overwrites a pool entry for the given character and tech level.

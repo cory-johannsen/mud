@@ -45,7 +45,10 @@ func TestSpontaneousUsePool_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetAll after Decrement: %v", err)
 	}
-	got2 := pools2[1]
+	got2, ok2 := pools2[1]
+	if !ok2 {
+		t.Fatalf("expected pool for level 1 after Decrement, got none")
+	}
 	if got2.Remaining != 2 {
 		t.Errorf("Remaining after Decrement: want 2, got %d", got2.Remaining)
 	}
@@ -60,10 +63,14 @@ func TestSpontaneousUsePool_DecrementBelowZero_Property(t *testing.T) {
 	ctx := context.Background()
 	pool := testDB(t)
 	charRepo := pgstore.NewCharacterRepository(pool)
+	ch := createTestCharacter(t, charRepo, ctx)
+	repo := pgstore.NewCharacterSpontaneousUsePoolRepository(pool)
 
 	rapid.Check(t, func(rt *rapid.T) {
-		ch := createTestCharacter(t, charRepo, ctx)
-		repo := pgstore.NewCharacterSpontaneousUsePoolRepository(pool)
+		// Clean up any prior pool state for this trial.
+		if err := repo.DeleteAll(ctx, ch.ID); err != nil {
+			rt.Fatalf("DeleteAll: %v", err)
+		}
 
 		n := rapid.IntRange(1, 10).Draw(rt, "maxUses")
 		calls := rapid.IntRange(0, 15).Draw(rt, "decrementCalls")
@@ -82,7 +89,10 @@ func TestSpontaneousUsePool_DecrementBelowZero_Property(t *testing.T) {
 		if err != nil {
 			rt.Fatalf("GetAll: %v", err)
 		}
-		got := pools[1]
+		got, ok := pools[1]
+		if !ok {
+			rt.Fatalf("expected pool for level 1, got none")
+		}
 
 		expected := n - calls
 		if expected < 0 {
