@@ -51,9 +51,10 @@ Adding a new player command requires ALL of the following steps. Omitting any st
 ## 6. System Requirements
 
 - SYSREQ-1: Agents MUST reference the markdown files in `/docs/requirements` for product definition
-- SYSREQ-2: Agents MUST update and maintain the markdown files in `/docs/requirements`as product requirements evolve.
+- SYSREQ-2: Agents MUST treat `docs/features/index.yaml` and the files in `docs/features/` as the canonical source of truth for product feature definitions and priority. When adding a new feature, agents MUST create `docs/features/<slug>.md` and add a corresponding entry to `docs/features/index.yaml`. The file `docs/requirements/FEATURES.md` is a deprecated redirect stub and MUST NOT be edited. All other files in `docs/requirements/` remain maintained per the original obligation: agents MUST update them as requirements evolve.
 - SYSREG-3: Agents MUST maintain architecture diagrams for all features and core systems.  Agents MUST update these diagrams to reflect changes.
-- SYSREQ-4: Agents MUST consult the `foundry-vtt-mcp` MCP server as the single source of truth for P2FE rules.
+- SYSREQ-4: Agents MUST reference the documents in `/docs/architecture/`
+- SYSREQ-5: Agents MUST consult the `foundry-vtt-mcp` MCP server as the single source of truth for P2FE rules.
 
 ## 7. Deployment
 - DEPLOY-1: Agents MUST use `make k8s-redploy` to deploy changes.
