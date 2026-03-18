@@ -750,3 +750,98 @@ func TestPropertyResolvePendingTechGrants_ChosenFromPool(t *testing.T) {
 		}
 	})
 }
+
+// REQ-JTG6: AssignTechnologies returns a wrapped error when merged grants fail Validate().
+// REQ-JTG7: AssignTechnologies calls Validate() on the merged result before processing
+//
+//	(also exercised by TestAssignTechnologies_ArchetypeSlots_JobPool_Merged on the success path).
+func TestAssignTechnologies_MergedGrantsValidationError(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+	// Archetype provides 3 slots but no pool.
+	arch := &ruleset.Archetype{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 3},
+			},
+		},
+	}
+	// Job provides only 1 pool entry — merged: 3 slots, 1 pool → invalid.
+	job := &ruleset.Job{
+		ID: "test_job",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				Pool: []ruleset.PreparedEntry{{ID: "neural_shock", Level: 1}},
+			},
+		},
+	}
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid merged grants")
+}
+
+// REQ-JTG3 integration: AssignTechnologies uses merged slot count (archetype + job).
+func TestAssignTechnologies_ArchetypeSlots_JobPool_Merged(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+	// Archetype: 2 prepared slots at level 1.
+	arch := &ruleset.Archetype{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 2},
+			},
+		},
+	}
+	// Job: 2 pool entries to satisfy 2 slots.
+	job := &ruleset.Job{
+		ID: "test_nerd_job",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				Pool: []ruleset.PreparedEntry{
+					{ID: "neural_shock", Level: 1},
+					{ID: "mind_spike", Level: 1},
+				},
+			},
+		},
+	}
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn)
+	require.NoError(t, err)
+	// 2 slots filled from pool (auto-assign since pool size == slots).
+	assert.Len(t, sess.PreparedTechs[1], 2)
+}
+
+// TestAssignTechnologies_NilJobTechGrants_ArchetypeGrantsUsed verifies that when
+// job.TechnologyGrants is nil but archetype.TechnologyGrants is non-nil, grants are processed.
+func TestAssignTechnologies_NilJobTechGrants_ArchetypeGrantsUsed(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+	// Archetype: 1 slot, 1 pool entry (valid merged grant).
+	arch := &ruleset.Archetype{
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool:         []ruleset.PreparedEntry{{ID: "neural_shock", Level: 1}},
+			},
+		},
+	}
+	// Job has no TechnologyGrants.
+	job := &ruleset.Job{ID: "no_grants_job"}
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn)
+	require.NoError(t, err)
+	assert.Len(t, sess.PreparedTechs[1], 1)
+}

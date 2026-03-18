@@ -60,7 +60,8 @@ type PendingTechLevelsRepo interface {
 // Precondition: sess, job, hwRepo, prepRepo, spontRepo, innateRepo are not nil.
 // techReg may be nil (tech names/descriptions will not be shown in prompts).
 // archetype may be nil (innate technologies will not be assigned).
-// Postcondition: If job.TechnologyGrants is nil, all session tech fields remain nil.
+// Postcondition: If both archetype.TechnologyGrants and job.TechnologyGrants are nil,
+// all session tech fields remain nil (innate assignment still proceeds).
 func AssignTechnologies(
 	ctx context.Context,
 	sess *session.PlayerSession,
@@ -74,13 +75,25 @@ func AssignTechnologies(
 	spontRepo SpontaneousTechRepo,
 	innateRepo InnateTechRepo,
 ) error {
-	if job == nil || job.TechnologyGrants == nil {
+	if job == nil {
 		return nil
 	}
-	grants := job.TechnologyGrants
+
+	var archetypeGrants *ruleset.TechnologyGrants
+	if archetype != nil {
+		archetypeGrants = archetype.TechnologyGrants
+	}
+	grants := ruleset.MergeGrants(archetypeGrants, job.TechnologyGrants)
+
+	// Validate merged grants before processing.
+	if grants != nil {
+		if err := grants.Validate(); err != nil {
+			return fmt.Errorf("AssignTechnologies: invalid merged grants for job %s: %w", job.ID, err)
+		}
+	}
 
 	// Hardwired
-	if len(grants.Hardwired) > 0 {
+	if grants != nil && len(grants.Hardwired) > 0 {
 		sess.HardwiredTechs = append([]string(nil), grants.Hardwired...)
 		if err := hwRepo.SetAll(ctx, characterID, sess.HardwiredTechs); err != nil {
 			return fmt.Errorf("AssignTechnologies hardwired: %w", err)
@@ -99,7 +112,7 @@ func AssignTechnologies(
 	}
 
 	// Prepared
-	if grants.Prepared != nil {
+	if grants != nil && grants.Prepared != nil {
 		sess.PreparedTechs = make(map[int][]*session.PreparedSlot)
 		for lvl, slots := range grants.Prepared.SlotsByLevel {
 			chosen, err := fillFromPreparedPool(ctx, lvl, slots, 0, grants.Prepared, techReg, promptFn, characterID, prepRepo)
@@ -111,7 +124,7 @@ func AssignTechnologies(
 	}
 
 	// Spontaneous
-	if grants.Spontaneous != nil {
+	if grants != nil && grants.Spontaneous != nil {
 		sess.SpontaneousTechs = make(map[int][]string)
 		for lvl, known := range grants.Spontaneous.KnownByLevel {
 			chosen, err := fillFromSpontaneousPool(ctx, lvl, known, grants.Spontaneous, techReg, promptFn, characterID, spontRepo)
