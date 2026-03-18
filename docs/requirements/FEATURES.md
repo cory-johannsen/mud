@@ -254,7 +254,7 @@
         - [x] Prepared tech effect resolution — activating a tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution; REQ-TER1–22)
         - [x] Can be rearranged when resting — `rest` command; `RearrangePreparedTechs` aggregates creation + level-up grants, clears and re-fills slots interactively
         - [x] Level-up technology selection — player selects new prepared/spontaneous techs interactively at next login or via `selecttech`; auto-assigned grants notify in-console; persisted in `character_pending_tech_levels`
-      - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
+      - [x] Spontaneous Spells ->  Technologies with a preset daily usage limit
         - [x] Fixed list of Technologies per job level — job YAML pool entries; archetype slot progression; merged via `MergeGrants` (Phase 1)
         - [x] Fixed number usages for each Technology level (resets with long rest) — `character_spontaneous_use_pools` table; `SpontaneousUsePoolRepo`; `use` decrements, `rest` restores (Sub-project A)
         - [x] Player gets to choose which new Technologies are learned with levelling up. (Sub-project B) — `neural_static` + `synaptic_surge` added; Influencer grants known tech at levels 3 and 5 with 3-tech pool; deferral + selection verified end-to-end (REQ-SSL1-4)
