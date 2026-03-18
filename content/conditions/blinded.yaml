@@ -1,0 +1,14 @@
+id: blinded
+name: Blinded
+description: You cannot see. You take a -4 penalty to all attack rolls and all targets are treated as hidden.
+duration_type: rounds
+max_stacks: 1
+attack_penalty: 4
+ac_penalty: 0
+speed_penalty: 0
+damage_bonus: 0
+ap_reduction: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

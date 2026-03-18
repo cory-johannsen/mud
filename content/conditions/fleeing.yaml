@@ -1,0 +1,15 @@
+id: fleeing
+name: Fleeing
+description: You must use all your actions to move away from the source of your fear. You cannot willingly approach the source.
+duration_type: rounds
+max_stacks: 1
+forced_action: flee
+attack_penalty: 0
+ac_penalty: 0
+speed_penalty: 0
+damage_bonus: 0
+ap_reduction: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

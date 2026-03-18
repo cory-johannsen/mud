@@ -164,6 +164,19 @@ func TestCoverConditionYAML(t *testing.T) {
 	}
 }
 
+// REQ-COND1: New conditions load without error.
+func TestNewConditions_LoadFromDirectory(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+
+	for _, id := range []string{"slowed", "immobilized", "blinded", "fleeing"} {
+		def, ok := reg.Get(id)
+		require.True(t, ok, "condition %q not found", id)
+		assert.NotEmpty(t, def.Name, "condition %q has empty name", id)
+		assert.NotEmpty(t, def.Description, "condition %q has empty description", id)
+	}
+}
+
 func TestPropertyRegistry_RegisterThenGet(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		id := rapid.StringMatching(`[a-z_]{3,12}`).Draw(t, "id")
