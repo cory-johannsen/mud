@@ -116,8 +116,9 @@ func AssignTechnologies(
 	spontRepo SpontaneousTechRepo,
 	innateRepo InnateTechRepo,
 	usePoolRepo SpontaneousUsePoolRepo,
+	region *ruleset.Region,
 ) error {
-	if job == nil {
+	if job == nil && region == nil {
 		return nil
 	}
 
@@ -125,12 +126,20 @@ func AssignTechnologies(
 	if archetype != nil {
 		archetypeGrants = archetype.TechnologyGrants
 	}
-	grants := ruleset.MergeGrants(archetypeGrants, job.TechnologyGrants)
+	var jobGrants *ruleset.TechnologyGrants
+	if job != nil {
+		jobGrants = job.TechnologyGrants
+	}
+	grants := ruleset.MergeGrants(archetypeGrants, jobGrants)
 
 	// Validate merged grants before processing.
 	if grants != nil {
 		if err := grants.Validate(); err != nil {
-			return fmt.Errorf("AssignTechnologies: invalid merged grants for job %s: %w", job.ID, err)
+			jobID := ""
+			if job != nil {
+				jobID = job.ID
+			}
+			return fmt.Errorf("AssignTechnologies: invalid merged grants for job %s: %w", jobID, err)
 		}
 	}
 
@@ -142,13 +151,36 @@ func AssignTechnologies(
 		}
 	}
 
+	// Innate: initialize map once before both archetype and region blocks
+	if sess.InnateTechs == nil {
+		if (archetype != nil && len(archetype.InnateTechnologies) > 0) ||
+			(region != nil && len(region.InnateTechnologies) > 0) {
+			sess.InnateTechs = make(map[string]*session.InnateSlot)
+		}
+	}
+
 	// Innate (from archetype)
-	if archetype != nil && len(archetype.InnateTechnologies) > 0 {
-		sess.InnateTechs = make(map[string]*session.InnateSlot)
+	if archetype != nil {
 		for _, grant := range archetype.InnateTechnologies {
-			sess.InnateTechs[grant.ID] = &session.InnateSlot{MaxUses: grant.UsesPerDay}
+			sess.InnateTechs[grant.ID] = &session.InnateSlot{
+				MaxUses:       grant.UsesPerDay,
+				UsesRemaining: grant.UsesPerDay,
+			}
 			if err := innateRepo.Set(ctx, characterID, grant.ID, grant.UsesPerDay); err != nil {
-				return fmt.Errorf("AssignTechnologies innate %s: %w", grant.ID, err)
+				return fmt.Errorf("AssignTechnologies innate (archetype) %s: %w", grant.ID, err)
+			}
+		}
+	}
+
+	// Innate (from region)
+	if region != nil {
+		for _, grant := range region.InnateTechnologies {
+			sess.InnateTechs[grant.ID] = &session.InnateSlot{
+				MaxUses:       grant.UsesPerDay,
+				UsesRemaining: grant.UsesPerDay,
+			}
+			if err := innateRepo.Set(ctx, characterID, grant.ID, grant.UsesPerDay); err != nil {
+				return fmt.Errorf("AssignTechnologies innate (region) %s: %w", grant.ID, err)
 			}
 		}
 	}

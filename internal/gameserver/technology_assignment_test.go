@@ -127,7 +127,7 @@ func TestAssignTechnologies_FullJob(t *testing.T) {
 	spont := &fakeSpontaneousRepo{}
 	inn := &fakeInnateRepo{}
 
-	err := gameserver.AssignTechnologies(ctx, sess, 1, job, archetype, nil, noPrompt, hw, prep, spont, inn, nil)
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, archetype, nil, noPrompt, hw, prep, spont, inn, nil, nil)
 	require.NoError(t, err)
 
 	assert.Equal(t, []string{"neural_shock"}, sess.HardwiredTechs)
@@ -149,7 +149,7 @@ func TestAssignTechnologies_NilGrants(t *testing.T) {
 	spont := &fakeSpontaneousRepo{}
 	inn := &fakeInnateRepo{}
 
-	err := gameserver.AssignTechnologies(ctx, sess, 1, job, archetype, nil, noPrompt, hw, prep, spont, inn, nil)
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, archetype, nil, noPrompt, hw, prep, spont, inn, nil, nil)
 	require.NoError(t, err)
 
 	assert.Nil(t, sess.HardwiredTechs)
@@ -180,7 +180,7 @@ func TestAssignTechnologies_PreparedAutoAssign(t *testing.T) {
 	spont := &fakeSpontaneousRepo{}
 	inn := &fakeInnateRepo{}
 
-	err := gameserver.AssignTechnologies(ctx, sess, 1, job, nil, nil, promptFn, hw, prep, spont, inn, nil)
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, nil, nil, promptFn, hw, prep, spont, inn, nil, nil)
 	require.NoError(t, err)
 	assert.False(t, promptCalled, "prompt should not be called when pool == open slots")
 	require.Len(t, sess.PreparedTechs[1], 1)
@@ -210,7 +210,7 @@ func TestAssignTechnologies_SpontaneousAutoAssign(t *testing.T) {
 	spont := &fakeSpontaneousRepo{}
 	inn := &fakeInnateRepo{}
 
-	err := gameserver.AssignTechnologies(ctx, sess, 1, job, nil, nil, promptFn, hw, prep, spont, inn, nil)
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, nil, nil, promptFn, hw, prep, spont, inn, nil, nil)
 	require.NoError(t, err)
 	assert.False(t, promptCalled, "prompt should not be called when pool == open slots")
 	assert.Equal(t, []string{"battle_fervor"}, sess.SpontaneousTechs[1])
@@ -245,7 +245,7 @@ func TestPropertyAssignTechnologies_HardwiredRoundTrip(t *testing.T) {
 		job := &ruleset.Job{TechnologyGrants: &ruleset.TechnologyGrants{Hardwired: ids}}
 		arch := &ruleset.Archetype{}
 
-		err := gameserver.AssignTechnologies(context.Background(), sess, 1, job, arch, nil, noPrompt, hwRepo, prepRepo, spontRepo, innateRepo, nil)
+		err := gameserver.AssignTechnologies(context.Background(), sess, 1, job, arch, nil, noPrompt, hwRepo, prepRepo, spontRepo, innateRepo, nil, nil)
 		if err != nil {
 			rt.Fatalf("AssignTechnologies: %v", err)
 		}
@@ -306,7 +306,7 @@ func TestPropertyAssignTechnologies_AutoAssignNeverPrompts(t *testing.T) {
 		innateRepo := &fakeInnateRepo{}
 		sess := &session.PlayerSession{}
 
-		err := gameserver.AssignTechnologies(context.Background(), sess, 1, job, arch, nil, trackingPrompt, hwRepo, prepRepo, spontRepo, innateRepo, nil)
+		err := gameserver.AssignTechnologies(context.Background(), sess, 1, job, arch, nil, trackingPrompt, hwRepo, prepRepo, spontRepo, innateRepo, nil, nil)
 		if err != nil {
 			rt.Fatalf("AssignTechnologies: %v", err)
 		}
@@ -782,7 +782,7 @@ func TestAssignTechnologies_MergedGrantsValidationError(t *testing.T) {
 	spont := &fakeSpontaneousRepo{}
 	inn := &fakeInnateRepo{}
 
-	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn, nil)
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn, nil, nil)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid merged grants")
 }
@@ -816,7 +816,7 @@ func TestAssignTechnologies_ArchetypeSlots_JobPool_Merged(t *testing.T) {
 	spont := &fakeSpontaneousRepo{}
 	inn := &fakeInnateRepo{}
 
-	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn, nil)
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn, nil, nil)
 	require.NoError(t, err)
 	// 2 slots filled from pool (auto-assign since pool size == slots).
 	assert.Len(t, sess.PreparedTechs[1], 2)
@@ -843,9 +843,38 @@ func TestAssignTechnologies_NilJobTechGrants_ArchetypeGrantsUsed(t *testing.T) {
 	spont := &fakeSpontaneousRepo{}
 	inn := &fakeInnateRepo{}
 
-	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn, nil)
+	err := gameserver.AssignTechnologies(ctx, sess, 1, job, arch, nil, noPrompt, hw, prep, spont, inn, nil, nil)
 	require.NoError(t, err)
 	assert.Len(t, sess.PreparedTechs[1], 1)
+}
+
+func TestAssignTechnologies_RegionInnateGrant(t *testing.T) {
+	ctx := context.Background()
+	sess := &session.PlayerSession{}
+
+	region := &ruleset.Region{
+		ID: "gresham_outskirts",
+		InnateTechnologies: []ruleset.InnateGrant{
+			{ID: "acid_spit", UsesPerDay: 1},
+		},
+	}
+
+	hw := &fakeHardwiredRepo{}
+	prep := &fakePreparedRepo{}
+	spont := &fakeSpontaneousRepo{}
+	inn := &fakeInnateRepo{}
+
+	err := gameserver.AssignTechnologies(ctx, sess, 1, nil, nil, nil, noPrompt, hw, prep, spont, inn, nil, region)
+	require.NoError(t, err)
+
+	slot, ok := sess.InnateTechs["acid_spit"]
+	require.True(t, ok, "expected acid_spit in session InnateTechs")
+	assert.Equal(t, 1, slot.MaxUses)
+	assert.Equal(t, 1, slot.UsesRemaining)
+
+	repoSlot, repoOk := inn.slots["acid_spit"]
+	require.True(t, repoOk, "expected acid_spit persisted to repo")
+	assert.Equal(t, 1, repoSlot.MaxUses)
 }
 
 // REQ-SSL4 (property): LevelUpTechnologies calls promptFn exactly N times when pool > open slots.

@@ -71,7 +71,7 @@ func TestAssignTechnologies_InitializesUsePools(t *testing.T) {
 	poolRepo := &fakeSpontaneousUsePoolRepo{}
 
 	err := gameserver.AssignTechnologies(ctx, sess, charID, job, nil, nil, noPrompt,
-		hwRepo, prepRepo, spontRepo, innateRepo, poolRepo)
+		hwRepo, prepRepo, spontRepo, innateRepo, poolRepo, nil)
 	require.NoError(t, err)
 
 	// Assert the session pool was set.
@@ -174,7 +174,7 @@ func TestAssignTechnologies_PoolProperty(t *testing.T) {
 		poolRepo := &fakeSpontaneousUsePoolRepo{}
 
 		if err := gameserver.AssignTechnologies(ctx, sess, charID, job, nil, nil, noPrompt,
-			hwRepo, prepRepo, spontRepo, innateRepo, poolRepo); err != nil {
+			hwRepo, prepRepo, spontRepo, innateRepo, poolRepo, nil); err != nil {
 			rt.Fatalf("AssignTechnologies returned error: %v", err)
 		}
 
