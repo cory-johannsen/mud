@@ -267,7 +267,7 @@
     - [ ] Spell import from PF2E with translation into Gunchete
       - [ ] Populate Archetype and Job yaml with options 
 - [ ] refactor to use `wire` for dependency injection
-- [ ] Long rest — full PF2E long rest equivalent: restore HP to max, reset spontaneous tech uses, allow prepared tech rearrangement (Sub-project: Long Rest)
+- [x] Long rest — full PF2E long rest equivalent: restore HP to max, reset spontaneous tech uses, allow prepared tech rearrangement (Sub-project: Long Rest; REQ-LR1–LR5)
 - [ ] Non-combat NPCs.
   - Define the data model and behavior for the following NPCs and implement those specifically mentioned.
   - For those not mentioned generate one that lives in a room in Rustbucket Ridge and matches the lore. Multiple NPCs can occupy the same room.
