@@ -121,6 +121,41 @@ type TechEffect struct {
 	UtilityType string `yaml:"utility_type,omitempty"` // unlock | reveal | hack
 }
 
+// TieredEffects holds per-outcome effect lists for a technology.
+// Only the tiers relevant to the tech's Resolution type need to be populated.
+//
+//	Save-based (resolution:"save"):   OnCritSuccess/OnSuccess/OnFailure/OnCritFailure
+//	Attack-based (resolution:"attack"): OnMiss/OnHit/OnCritHit
+//	No-roll (resolution:"none" or ""):  OnApply
+type TieredEffects struct {
+	// Save-based tiers
+	OnCritSuccess []TechEffect `yaml:"on_crit_success,omitempty"`
+	OnSuccess     []TechEffect `yaml:"on_success,omitempty"`
+	OnFailure     []TechEffect `yaml:"on_failure,omitempty"`
+	OnCritFailure []TechEffect `yaml:"on_crit_failure,omitempty"`
+	// Attack-based tiers
+	OnMiss    []TechEffect `yaml:"on_miss,omitempty"`
+	OnHit     []TechEffect `yaml:"on_hit,omitempty"`
+	OnCritHit []TechEffect `yaml:"on_crit_hit,omitempty"`
+	// No-roll
+	OnApply []TechEffect `yaml:"on_apply,omitempty"`
+}
+
+// AllEffects returns a flat slice of all TechEffect entries across all tiers.
+// Used for validation to check all contained effects are structurally valid.
+func (te TieredEffects) AllEffects() []TechEffect {
+	var all []TechEffect
+	all = append(all, te.OnCritSuccess...)
+	all = append(all, te.OnSuccess...)
+	all = append(all, te.OnFailure...)
+	all = append(all, te.OnCritFailure...)
+	all = append(all, te.OnMiss...)
+	all = append(all, te.OnHit...)
+	all = append(all, te.OnCritHit...)
+	all = append(all, te.OnApply...)
+	return all
+}
+
 // TechnologyDef defines a single technology — the game's analog of a PF2E spell.
 //
 // Precondition: ID, Name, Tradition, Level (1–10), UsageType, Range, Targets,
@@ -139,9 +174,10 @@ type TechnologyDef struct {
 	Duration    string    `yaml:"duration"`
 	SaveType    string    `yaml:"save_type,omitempty"`
 	SaveDC      int       `yaml:"save_dc,omitempty"`
-	Effects      []TechEffect `yaml:"effects"`
-	AmpedLevel   int          `yaml:"amped_level,omitempty"`
-	AmpedEffects []TechEffect `yaml:"amped_effects,omitempty"`
+	Resolution   string        `yaml:"resolution,omitempty"`   // "save" | "attack" | "none"
+	Effects      TieredEffects `yaml:"effects,omitempty"`
+	AmpedLevel   int           `yaml:"amped_level,omitempty"`
+	AmpedEffects TieredEffects `yaml:"amped_effects,omitempty"`
 }
 
 // Validate returns an error if any required field is missing or invalid.
@@ -172,35 +208,48 @@ func (t *TechnologyDef) Validate() error {
 	if t.Duration == "" {
 		return fmt.Errorf("duration must not be empty")
 	}
-	if len(t.Effects) == 0 {
+	// Validate Resolution/SaveType/SaveDC consistency.
+	switch t.Resolution {
+	case "", "none":
+		if t.SaveType != "" {
+			return fmt.Errorf("save_type must be empty when resolution is %q", t.Resolution)
+		}
+		if t.SaveDC != 0 {
+			return fmt.Errorf("save_dc must be 0 when resolution is %q", t.Resolution)
+		}
+	case "save":
+		if t.SaveType == "" {
+			return fmt.Errorf("save_type must be set when resolution is \"save\"")
+		}
+		if t.SaveDC == 0 {
+			return fmt.Errorf("save_dc must be > 0 when resolution is \"save\"")
+		}
+	case "attack":
+		if t.SaveType != "" {
+			return fmt.Errorf("save_type must be empty when resolution is \"attack\"")
+		}
+	default:
+		return fmt.Errorf("unknown resolution %q", t.Resolution)
+	}
+	// Validate all effects in all tiers.
+	if len(t.Effects.AllEffects()) == 0 {
 		return fmt.Errorf("effects must have at least one entry")
 	}
-	for i, e := range t.Effects {
+	for i, e := range t.Effects.AllEffects() {
 		if err := validateEffect(e, i); err != nil {
 			return err
 		}
 	}
-	if len(t.AmpedEffects) > 0 && t.AmpedLevel == 0 {
+	if len(t.AmpedEffects.AllEffects()) > 0 && t.AmpedLevel == 0 {
 		return fmt.Errorf("amped_level must be > 0 when amped_effects is non-empty")
 	}
-	if t.AmpedLevel > 0 && len(t.AmpedEffects) == 0 {
-		return fmt.Errorf("amped_effects must be non-empty when amped_level > 0")
+	if t.AmpedLevel > 0 && len(t.AmpedEffects.AllEffects()) == 0 {
+		return fmt.Errorf("amped_effects must have at least one effect when amped_level > 0")
 	}
-	for i, e := range t.AmpedEffects {
-		if !validEffectTypes[e.Type] {
-			return fmt.Errorf("amped_effects[%d]: unknown type %q", i, e.Type)
+	for i, e := range t.AmpedEffects.AllEffects() {
+		if err := validateEffect(e, i); err != nil {
+			return fmt.Errorf("amped_effects[%d]: %w", i, err)
 		}
-		if e.Type == EffectSkillCheck {
-			if e.Skill == "" {
-				return fmt.Errorf("amped_effects[%d]: skill_check effect requires skill", i)
-			}
-			if e.DC == 0 {
-				return fmt.Errorf("amped_effects[%d]: skill_check effect requires dc > 0", i)
-			}
-		}
-	}
-	if t.SaveType != "" && t.SaveDC == 0 {
-		return fmt.Errorf("save_dc must be > 0 when save_type is set")
 	}
 	return nil
 }
