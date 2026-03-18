@@ -3731,9 +3731,15 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		})
 	}
 
-	for techID, slot := range sess.InnateTechs {
+	innateIDs := make([]string, 0, len(sess.InnateTechs))
+	for id := range sess.InnateTechs {
+		innateIDs = append(innateIDs, id)
+	}
+	sort.Strings(innateIDs)
+	for _, id := range innateIDs {
+		slot := sess.InnateTechs[id]
 		view.InnateSlots = append(view.InnateSlots, &gamev1.InnateSlotView{
-			TechId:        techID,
+			TechId:        id,
 			UsesRemaining: int32(slot.UsesRemaining),
 			MaxUses:       int32(slot.MaxUses),
 		})
