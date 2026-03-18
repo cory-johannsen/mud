@@ -1,6 +1,6 @@
 # Combat Architecture
 
-**As of:** 2026-03-18 (commit: d20abee459532ebc8cf75cbbda7fc4bf6b7e7479))
+**As of:** 2026-03-18 (commit: ff59c22a6ac2c4f63f8dc1aed3230f3b7b0f66c1)
 **Skill:** `.claude/skills/mud-combat.md`
 **Requirements:** `docs/requirements/COMBAT.md`
 
