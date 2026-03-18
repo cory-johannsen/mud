@@ -350,3 +350,120 @@ technology_grants:
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "level 1")
 }
+
+// REQ-JTG1: MergeGrants(nil, nil) returns nil.
+func TestMergeGrants_BothNil(t *testing.T) {
+	assert.Nil(t, ruleset.MergeGrants(nil, nil))
+}
+
+// REQ-JTG2: MergeGrants with one nil returns the other unchanged.
+func TestMergeGrants_NilA_ReturnsBUnchanged(t *testing.T) {
+	b := &ruleset.TechnologyGrants{Hardwired: []string{"x"}}
+	result := ruleset.MergeGrants(nil, b)
+	require.NotNil(t, result)
+	assert.Equal(t, []string{"x"}, result.Hardwired)
+}
+
+func TestMergeGrants_NilB_ReturnsAUnchanged(t *testing.T) {
+	a := &ruleset.TechnologyGrants{Hardwired: []string{"x"}}
+	result := ruleset.MergeGrants(a, nil)
+	require.NotNil(t, result)
+	assert.Equal(t, []string{"x"}, result.Hardwired)
+}
+
+// REQ-JTG3: Slot counts are summed per level.
+func TestMergeGrants_PreparedSlotsSummed(t *testing.T) {
+	a := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{SlotsByLevel: map[int]int{1: 2}},
+	}
+	b := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{SlotsByLevel: map[int]int{1: 1}},
+	}
+	result := ruleset.MergeGrants(a, b)
+	require.NotNil(t, result.Prepared)
+	assert.Equal(t, 3, result.Prepared.SlotsByLevel[1])
+}
+
+func TestMergeGrants_SpontaneousKnownAndUsesSummed(t *testing.T) {
+	a := &ruleset.TechnologyGrants{
+		Spontaneous: &ruleset.SpontaneousGrants{
+			KnownByLevel: map[int]int{1: 2},
+			UsesByLevel:  map[int]int{1: 3},
+		},
+	}
+	b := &ruleset.TechnologyGrants{
+		Spontaneous: &ruleset.SpontaneousGrants{
+			KnownByLevel: map[int]int{1: 1},
+			UsesByLevel:  map[int]int{1: 2},
+		},
+	}
+	result := ruleset.MergeGrants(a, b)
+	require.NotNil(t, result.Spontaneous)
+	assert.Equal(t, 3, result.Spontaneous.KnownByLevel[1])
+	assert.Equal(t, 5, result.Spontaneous.UsesByLevel[1])
+}
+
+// REQ-JTG4: Fixed and pool are unioned.
+func TestMergeGrants_PreparedFixedAndPoolAreUnioned(t *testing.T) {
+	a := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			Fixed: []ruleset.PreparedEntry{{ID: "x", Level: 1}},
+			Pool:  []ruleset.PreparedEntry{{ID: "y", Level: 1}},
+		},
+	}
+	b := &ruleset.TechnologyGrants{
+		Prepared: &ruleset.PreparedGrants{
+			Fixed: []ruleset.PreparedEntry{{ID: "z", Level: 1}},
+			Pool:  []ruleset.PreparedEntry{{ID: "w", Level: 1}},
+		},
+	}
+	result := ruleset.MergeGrants(a, b)
+	require.NotNil(t, result.Prepared)
+	assert.Len(t, result.Prepared.Fixed, 2)
+	assert.Len(t, result.Prepared.Pool, 2)
+}
+
+// REQ-JTG5 (property): Merged hardwired length equals sum of both inputs.
+func TestPropertyMergeGrants_HardwiredLengthIsSum(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		nA := rapid.IntRange(0, 5).Draw(rt, "nA")
+		nB := rapid.IntRange(0, 5).Draw(rt, "nB")
+		aHW := make([]string, nA)
+		for i := range aHW {
+			aHW[i] = fmt.Sprintf("tech_a_%d", i)
+		}
+		bHW := make([]string, nB)
+		for i := range bHW {
+			bHW[i] = fmt.Sprintf("tech_b_%d", i)
+		}
+		a := &ruleset.TechnologyGrants{Hardwired: aHW}
+		b := &ruleset.TechnologyGrants{Hardwired: bHW}
+		result := ruleset.MergeGrants(a, b)
+		if len(result.Hardwired) != nA+nB {
+			rt.Fatalf("expected %d hardwired, got %d", nA+nB, len(result.Hardwired))
+		}
+	})
+}
+
+// REQ-JTG8: MergeLevelUpGrants merges maps key-by-key; solo keys pass through.
+func TestMergeLevelUpGrants_KeysFromBothMaps(t *testing.T) {
+	a := map[int]*ruleset.TechnologyGrants{
+		2: {Hardwired: []string{"x"}},
+		3: {Hardwired: []string{"y"}},
+	}
+	b := map[int]*ruleset.TechnologyGrants{
+		3: {Hardwired: []string{"z"}},
+		4: {Hardwired: []string{"w"}},
+	}
+	result := ruleset.MergeLevelUpGrants(a, b)
+	require.NotNil(t, result)
+	assert.Contains(t, result, 2)
+	assert.Contains(t, result, 3)
+	assert.Contains(t, result, 4)
+	// Level 3 merged: y + z
+	assert.Len(t, result[3].Hardwired, 2)
+}
+
+func TestMergeLevelUpGrants_BothNil(t *testing.T) {
+	assert.Nil(t, ruleset.MergeLevelUpGrants(nil, nil))
+}

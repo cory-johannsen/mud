@@ -104,3 +104,106 @@ func countEntriesAtLevel(entries []leveledEntry, level int) int {
 	}
 	return n
 }
+
+// MergeGrants combines archetype-level grants (slot progression) with job-level grants
+// (fixed techs, pool options, optional extra slots).
+//
+// Precondition: either or both arguments may be nil.
+// Postcondition: returned grant is the union of both; nil if both are nil.
+func MergeGrants(archetype, job *TechnologyGrants) *TechnologyGrants {
+	if archetype == nil && job == nil {
+		return nil
+	}
+	if archetype == nil {
+		return job
+	}
+	if job == nil {
+		return archetype
+	}
+	merged := &TechnologyGrants{}
+
+	// Hardwired: union
+	merged.Hardwired = append(append([]string(nil), archetype.Hardwired...), job.Hardwired...)
+
+	// Prepared: sum slots, union fixed and pool
+	if archetype.Prepared != nil || job.Prepared != nil {
+		merged.Prepared = mergePreparedGrants(archetype.Prepared, job.Prepared)
+	}
+
+	// Spontaneous: sum known/uses, union fixed and pool
+	if archetype.Spontaneous != nil || job.Spontaneous != nil {
+		merged.Spontaneous = mergeSpontaneousGrants(archetype.Spontaneous, job.Spontaneous)
+	}
+
+	return merged
+}
+
+func mergePreparedGrants(a, b *PreparedGrants) *PreparedGrants {
+	out := &PreparedGrants{SlotsByLevel: make(map[int]int)}
+	if a != nil {
+		for lvl, n := range a.SlotsByLevel {
+			out.SlotsByLevel[lvl] += n
+		}
+		out.Fixed = append(out.Fixed, a.Fixed...)
+		out.Pool = append(out.Pool, a.Pool...)
+	}
+	if b != nil {
+		for lvl, n := range b.SlotsByLevel {
+			out.SlotsByLevel[lvl] += n
+		}
+		out.Fixed = append(out.Fixed, b.Fixed...)
+		out.Pool = append(out.Pool, b.Pool...)
+	}
+	return out
+}
+
+func mergeSpontaneousGrants(a, b *SpontaneousGrants) *SpontaneousGrants {
+	out := &SpontaneousGrants{
+		KnownByLevel: make(map[int]int),
+		UsesByLevel:  make(map[int]int),
+	}
+	if a != nil {
+		for lvl, n := range a.KnownByLevel {
+			out.KnownByLevel[lvl] += n
+		}
+		for lvl, n := range a.UsesByLevel {
+			out.UsesByLevel[lvl] += n
+		}
+		out.Fixed = append(out.Fixed, a.Fixed...)
+		out.Pool = append(out.Pool, a.Pool...)
+	}
+	if b != nil {
+		for lvl, n := range b.KnownByLevel {
+			out.KnownByLevel[lvl] += n
+		}
+		for lvl, n := range b.UsesByLevel {
+			out.UsesByLevel[lvl] += n
+		}
+		out.Fixed = append(out.Fixed, b.Fixed...)
+		out.Pool = append(out.Pool, b.Pool...)
+	}
+	return out
+}
+
+// MergeLevelUpGrants merges two level-keyed grant maps key by key.
+//
+// Precondition: either or both arguments may be nil.
+// Postcondition: returned map contains all keys from both inputs;
+// keys present in both are merged via MergeGrants.
+func MergeLevelUpGrants(archetype, job map[int]*TechnologyGrants) map[int]*TechnologyGrants {
+	if len(archetype) == 0 && len(job) == 0 {
+		return nil
+	}
+	out := make(map[int]*TechnologyGrants)
+	for lvl, g := range archetype {
+		out[lvl] = g
+	}
+	for lvl, g := range job {
+		if existing, ok := out[lvl]; ok {
+			out[lvl] = MergeGrants(existing, g)
+		} else {
+			out[lvl] = g
+		}
+	}
+	return out
+}
