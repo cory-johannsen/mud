@@ -99,6 +99,7 @@ func AssignTechnologies(
 	prepRepo PreparedTechRepo,
 	spontRepo SpontaneousTechRepo,
 	innateRepo InnateTechRepo,
+	usePoolRepo SpontaneousUsePoolRepo,
 ) error {
 	if job == nil {
 		return nil
@@ -158,6 +159,17 @@ func AssignTechnologies(
 			}
 			sess.SpontaneousTechs[lvl] = chosen
 		}
+		if sess.SpontaneousUsePools == nil {
+			sess.SpontaneousUsePools = make(map[int]session.UsePool)
+		}
+		if usePoolRepo != nil {
+			for level, uses := range grants.Spontaneous.UsesByLevel {
+				sess.SpontaneousUsePools[level] = session.UsePool{Remaining: uses, Max: uses}
+				if err := usePoolRepo.Set(ctx, characterID, level, uses, uses); err != nil {
+					return fmt.Errorf("AssignTechnologies: set spontaneous use pool level %d: %w", level, err)
+				}
+			}
+		}
 	}
 
 	return nil
@@ -176,6 +188,7 @@ func LoadTechnologies(
 	prepRepo PreparedTechRepo,
 	spontRepo SpontaneousTechRepo,
 	innateRepo InnateTechRepo,
+	usePoolRepo SpontaneousUsePoolRepo,
 ) error {
 	hw, err := hwRepo.GetAll(ctx, characterID)
 	if err != nil {
@@ -194,6 +207,14 @@ func LoadTechnologies(
 		return fmt.Errorf("LoadTechnologies spontaneous: %w", err)
 	}
 	sess.SpontaneousTechs = spont
+
+	if usePoolRepo != nil {
+		pools, err := usePoolRepo.GetAll(ctx, characterID)
+		if err != nil {
+			return fmt.Errorf("LoadTechnologies: load spontaneous use pools: %w", err)
+		}
+		sess.SpontaneousUsePools = pools
+	}
 
 	innate, err := innateRepo.GetAll(ctx, characterID)
 	if err != nil {
@@ -222,6 +243,7 @@ func LevelUpTechnologies(
 	prepRepo PreparedTechRepo,
 	spontRepo SpontaneousTechRepo,
 	innateRepo InnateTechRepo,
+	usePoolRepo SpontaneousUsePoolRepo,
 ) error {
 	if grants == nil {
 		return nil
@@ -284,6 +306,20 @@ func LevelUpTechnologies(
 				return fmt.Errorf("LevelUpTechnologies spontaneous level %d: %w", lvl, err)
 			}
 			sess.SpontaneousTechs[lvl] = append(sess.SpontaneousTechs[lvl], chosen...)
+		}
+		if usePoolRepo != nil {
+			if sess.SpontaneousUsePools == nil {
+				sess.SpontaneousUsePools = make(map[int]session.UsePool)
+			}
+			for level, uses := range grants.Spontaneous.UsesByLevel {
+				existing := sess.SpontaneousUsePools[level]
+				newMax := existing.Max + uses
+				newRemaining := existing.Remaining + uses
+				sess.SpontaneousUsePools[level] = session.UsePool{Remaining: newRemaining, Max: newMax}
+				if err := usePoolRepo.Set(ctx, characterID, level, newRemaining, newMax); err != nil {
+					return fmt.Errorf("LevelUpTechnologies: set spontaneous use pool level %d: %w", level, err)
+				}
+			}
 		}
 	}
 
@@ -503,6 +539,7 @@ func ResolvePendingTechGrants(
 	prepRepo PreparedTechRepo,
 	spontRepo SpontaneousTechRepo,
 	innateRepo InnateTechRepo,
+	usePoolRepo SpontaneousUsePoolRepo,
 	progressRepo PendingTechLevelsRepo,
 ) error {
 	if len(sess.PendingTechGrants) == 0 {
@@ -517,7 +554,7 @@ func ResolvePendingTechGrants(
 	for _, lvl := range levels {
 		grants := sess.PendingTechGrants[lvl]
 		if err := LevelUpTechnologies(ctx, sess, characterID, grants, techReg, promptFn,
-			hwRepo, prepRepo, spontRepo, innateRepo,
+			hwRepo, prepRepo, spontRepo, innateRepo, usePoolRepo,
 		); err != nil {
 			return fmt.Errorf("ResolvePendingTechGrants level %d: %w", lvl, err)
 		}

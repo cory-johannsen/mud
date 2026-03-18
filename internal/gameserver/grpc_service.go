@@ -181,6 +181,7 @@ type GameServiceServer struct {
 	preparedTechRepo           PreparedTechRepo
 	spontaneousTechRepo        SpontaneousTechRepo
 	innateTechRepo             InnateTechRepo
+	spontaneousUsePoolRepo     SpontaneousUsePoolRepo
 	loadoutsDir                string
 	allSkills                  []*ruleset.Skill
 	characterSkillsRepo        CharacterSkillsRepository
@@ -994,7 +995,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				}
 				if assignErr := AssignTechnologies(stream.Context(), sess, characterID,
 					job, archetype, s.techRegistry, promptFn,
-					s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo,
+					s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 				); assignErr != nil {
 					s.logger.Warn("assigning technologies", zap.Int64("character_id", characterID), zap.Error(assignErr))
 				}
@@ -1028,7 +1029,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// Load persisted technology assignments for this session.
 	if s.hardwiredTechRepo != nil && characterID > 0 {
 		if techErr := LoadTechnologies(stream.Context(), sess, characterID,
-			s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo,
+			s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 		); techErr != nil {
 			s.logger.Warn("loading technologies", zap.Int64("character_id", characterID), zap.Error(techErr))
 		}
@@ -1050,7 +1051,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			if err := ResolvePendingTechGrants(stream.Context(), sess, characterID,
 				job, s.techRegistry, promptFn,
 				s.hardwiredTechRepo, s.preparedTechRepo,
-				s.spontaneousTechRepo, s.innateTechRepo,
+				s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 				s.progressRepo,
 			); err != nil {
 				s.logger.Warn("Session: ResolvePendingTechGrants failed", zap.Error(err))
@@ -2508,7 +2509,7 @@ func (s *GameServiceServer) handleSelectTech(uid string, requestID string, strea
 	if err := ResolvePendingTechGrants(stream.Context(), sess, sess.CharacterID,
 		job, s.techRegistry, promptFn,
 		s.hardwiredTechRepo, s.preparedTechRepo,
-		s.spontaneousTechRepo, s.innateTechRepo,
+		s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 		s.progressRepo,
 	); err != nil {
 		s.logger.Warn("handleSelectTech failed", zap.String("uid", uid), zap.Error(err))
@@ -6761,7 +6762,7 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 								if err := LevelUpTechnologies(ctx, target, target.CharacterID,
 									immediate, s.techRegistry, nil,
 									s.hardwiredTechRepo, s.preparedTechRepo,
-									s.spontaneousTechRepo, s.innateTechRepo,
+									s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
 								); err != nil {
 									s.logger.Warn("handleGrant: LevelUpTechnologies failed",
 										zap.Int64("character_id", target.CharacterID),
