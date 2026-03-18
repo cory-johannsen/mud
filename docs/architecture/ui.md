@@ -1,6 +1,8 @@
 # UI Architecture
 
-<!-- commit: c6e294d2af5dbdbf9f127a7718da5c46c553dbd6 -->
+**As of:** 2026-03-18 (commit: c6e294d2af5dbdbf9f127a7718da5c46c553dbd6)
+**Skill:** `.claude/skills/mud-ui.md`
+**Requirements:** `docs/requirements/NETWORKING.md`
 
 Cross-reference: [docs/requirements/NETWORKING.md](../requirements/NETWORKING.md)
 
