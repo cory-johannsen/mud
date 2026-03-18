@@ -4,7 +4,8 @@ description: Bone-conduction implants detect ground vibrations, revealing the mo
 tradition: technical
 level: 1
 usage_type: innate
-action_cost: 1
+action_cost: 0
+passive: true
 range: zone
 targets: single
 duration: rounds:1

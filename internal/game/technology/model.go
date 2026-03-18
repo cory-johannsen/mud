@@ -179,6 +179,9 @@ type TechnologyDef struct {
 	Effects      TieredEffects `yaml:"effects,omitempty"`
 	AmpedLevel   int           `yaml:"amped_level,omitempty"`
 	AmpedEffects TieredEffects `yaml:"amped_effects,omitempty"`
+	// Passive indicates this technology fires automatically on room state changes
+	// and requires no player action. When true, ActionCost must be 0.
+	Passive bool `yaml:"passive,omitempty"`
 }
 
 // Validate returns an error if any required field is missing or invalid.
@@ -199,6 +202,9 @@ func (t *TechnologyDef) Validate() error {
 	}
 	if !validUsageTypes[t.UsageType] {
 		return fmt.Errorf("unknown usage_type %q", t.UsageType)
+	}
+	if t.Passive && t.ActionCost != 0 {
+		return fmt.Errorf("passive technology %q must have action_cost 0, got %d", t.ID, t.ActionCost)
 	}
 	if !validRanges[t.Range] {
 		return fmt.Errorf("unknown range %q", t.Range)

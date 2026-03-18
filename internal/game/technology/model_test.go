@@ -1,6 +1,7 @@
 package technology_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/technology"
@@ -404,6 +405,34 @@ func TestValidate_REQ_TER4_AttackResolutionWithSaveTypeRejected(t *testing.T) {
 	err := d.Validate()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "save_type")
+}
+
+// REQ-PTM2: Passive: true + action_cost > 0 fails validation
+func TestValidate_REQ_PTM2_PassiveRequiresZeroActionCost(t *testing.T) {
+	d := validDef()
+	d.Passive = true
+	d.ActionCost = 1
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "passive")
+}
+
+// REQ-PTM1: Passive: true + action_cost == 0 passes validation
+func TestValidate_REQ_PTM1_PassiveWithZeroActionCostValid(t *testing.T) {
+	d := validDef()
+	d.Passive = true
+	d.ActionCost = 0
+	require.NoError(t, d.Validate())
+}
+
+// REQ-PTM1: YAML round-trip — seismic_sense has passive: true and action_cost: 0
+func TestSeismicSense_IsPassive(t *testing.T) {
+	data, err := os.ReadFile("../../../content/technologies/innate/seismic_sense.yaml")
+	require.NoError(t, err)
+	var def technology.TechnologyDef
+	require.NoError(t, yaml.Unmarshal(data, &def))
+	assert.True(t, def.Passive)
+	assert.Equal(t, 0, def.ActionCost)
 }
 
 // TieredEffects round-trip YAML test.
