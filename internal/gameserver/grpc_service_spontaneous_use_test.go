@@ -6,7 +6,8 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
-"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,7 +17,8 @@ import (
 
 // fakeSpontaneousUsePoolRepo is an in-memory stub implementing SpontaneousUsePoolRepo.
 type fakeSpontaneousUsePoolRepo struct {
-	pools map[int]session.UsePool
+	pools           map[int]session.UsePool
+	restoreAllCalled bool
 }
 
 func newFakeSpontaneousUsePoolRepo(pools map[int]session.UsePool) *fakeSpontaneousUsePoolRepo {
@@ -46,6 +48,7 @@ func (r *fakeSpontaneousUsePoolRepo) Decrement(_ context.Context, _ int64, techL
 }
 
 func (r *fakeSpontaneousUsePoolRepo) RestoreAll(_ context.Context, _ int64) error {
+	r.restoreAllCalled = true
 	for k, v := range r.pools {
 		v.Remaining = v.Max
 		r.pools[k] = v
@@ -221,15 +224,24 @@ func TestHandleRest_RestoresSpontaneousPools_REQ_SUC5(t *testing.T) {
 	repo := newFakeSpontaneousUsePoolRepo(repoPools)
 	svc.spontaneousUsePoolRepo = repo
 
+	// Set up a job registry so handleRest can pass the job lookup and reach pool restoration.
+	job := &ruleset.Job{ID: "influencer", Name: "Influencer"}
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+	svc.jobRegistry = jobReg
+
 	sess := addSpontaneousPlayer(t, sessMgr, "u_rest_1",
 		map[int][]string{},
 		map[int]session.UsePool{1: {Remaining: 0, Max: 3}},
 	)
+	sess.Class = "influencer"
 
 	stream := &fakeSessionStream{}
 	err := svc.handleRest(sess.UID, "req-rest-1", stream)
 	require.NoError(t, err)
 
+	// RestoreAll must have been explicitly called.
+	assert.True(t, repo.restoreAllCalled, "expected RestoreAll to be called")
 	// RestoreAll should have been called, so repo pools are restored.
 	assert.Equal(t, 3, repo.pools[1].Remaining)
 	// Session should reflect the restored pools.

@@ -2435,24 +2435,6 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 
 	ctx := context.Background()
 
-	// Restore spontaneous use pools unconditionally (influencer characters).
-	if s.spontaneousUsePoolRepo != nil {
-		if err := s.spontaneousUsePoolRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
-			s.logger.Warn("handleRest: restore spontaneous use pools failed",
-				zap.String("uid", uid),
-				zap.Error(err))
-		} else {
-			pools, err := s.spontaneousUsePoolRepo.GetAll(ctx, sess.CharacterID)
-			if err != nil {
-				s.logger.Warn("handleRest: reload spontaneous use pools failed",
-					zap.String("uid", uid),
-					zap.Error(err))
-			} else {
-				sess.SpontaneousUsePools = pools
-			}
-		}
-	}
-
 	// Job lookup.
 	if s.jobRegistry == nil {
 		return sendMsg("You rest briefly but have no technologies to rearrange.")
@@ -2479,6 +2461,18 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 			zap.String("uid", uid),
 			zap.Error(err))
 		return sendMsg("Something went wrong preparing your technologies.")
+	}
+
+	// Restore spontaneous use pools unconditionally (influencer characters).
+	if s.spontaneousUsePoolRepo != nil {
+		if err := s.spontaneousUsePoolRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
+			return fmt.Errorf("handleRest: restore spontaneous use pools: %w", err)
+		}
+		pools, err := s.spontaneousUsePoolRepo.GetAll(ctx, sess.CharacterID)
+		if err != nil {
+			return fmt.Errorf("handleRest: reload spontaneous use pools: %w", err)
+		}
+		sess.SpontaneousUsePools = pools
 	}
 
 	return sendMsg("You finish your rest and your technologies are prepared.")
