@@ -37,3 +37,11 @@ class_features:
   - street_tough
   - resilience
   - indoctrinate
+
+technology_grants:
+  prepared:
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

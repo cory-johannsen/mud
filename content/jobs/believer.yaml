@@ -37,3 +37,11 @@ class_features:
   - daily_prep
   - formulaic_mind
   - divine_insight
+
+technology_grants:
+  prepared:
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

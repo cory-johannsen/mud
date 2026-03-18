@@ -37,3 +37,11 @@ class_features:
   - command_attention
   - fast_talk
   - true_devotion
+
+technology_grants:
+  prepared:
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

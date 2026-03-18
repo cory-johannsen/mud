@@ -35,3 +35,11 @@ class_features:
   - predators_eye
   - zone_awareness
   - read_the_signs
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1
+      - id: acid_spray
+        level: 1

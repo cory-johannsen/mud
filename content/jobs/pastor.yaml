@@ -37,3 +37,11 @@ class_features:
   - daily_prep
   - formulaic_mind
   - shepherd
+
+technology_grants:
+  prepared:
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

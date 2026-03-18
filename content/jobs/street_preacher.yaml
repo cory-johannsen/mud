@@ -34,3 +34,11 @@ class_features:
   - predators_eye
   - zone_awareness
   - brimstone
+
+technology_grants:
+  prepared:
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

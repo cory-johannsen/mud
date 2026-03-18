@@ -35,3 +35,11 @@ class_features:
   - daily_prep
   - formulaic_mind
   - pure_product
+
+technology_grants:
+  prepared:
+    pool:
+      - id: neural_shock
+        level: 1
+      - id: neural_shock
+        level: 1

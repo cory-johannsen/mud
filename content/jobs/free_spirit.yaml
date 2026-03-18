@@ -35,3 +35,9 @@ class_features:
   - sucker_punch
   - slippery
   - off_the_grid
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1

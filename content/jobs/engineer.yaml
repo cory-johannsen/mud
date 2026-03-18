@@ -34,3 +34,15 @@ class_features:
   - daily_prep
   - formulaic_mind
   - jury_rig
+
+technology_grants:
+  prepared:
+    slots_by_level:
+      1: 1
+    pool:
+      - id: neural_shock
+        level: 1
+      - id: neural_shock
+        level: 1
+      - id: neural_shock
+        level: 1

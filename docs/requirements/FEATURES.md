@@ -249,7 +249,7 @@
         - [x] Fixed list per Job, no player adjustment
         - [x] Level-up hardwired tech grants applied via `LevelUpTechnologies` for each level gained in ascending order (REQ-LUT7); admin `grant xp` path uses first-option auto-assign (no interactive prompt available)
       - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
-        - [ ] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level)
+        - [x] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level) — Phase 1: slot progression on archetypes, pool entries on jobs; Phase 2 will expand tech library
         - [x] Prepared tech slot expending — each prepared slot is one use; `use <tech>` expends the first matching non-expended slot; `rest` restores all slots; expended state persisted in DB
         - [ ] Prepared tech effect resolution — activating a tech applies its game effect (damage, condition, etc.); out of scope until effect system is defined
         - [x] Can be rearranged when resting — `rest` command; `RearrangePreparedTechs` aggregates creation + level-up grants, clears and re-fills slots interactively
@@ -323,7 +323,9 @@
     - [ ] equipment repair and crafting
       - [ ] Repair NPC behavior — `repair <item>` command in repair NPC's room; pays credit cost proportional to item damage; restores item durability; requires item durability system
 - [ ] Persistent calendar
-- [ ] `use` command completion
+- [ ] `use` command expansion
+  - [ ] supports room equipment
+  - [ ] command completion
 - [x] Hero points
   - [x] Add `HeroPoints int` field to PlayerSession; award 1 point at session start and on milestone events (level up, boss kill, GM grant)
   - [x] `heropoint reroll` — re-roll the most recent skill or attack check and take the higher result; costs 1 hero point; unavailable if no recent check
@@ -376,6 +378,24 @@
         - cursed item removal will be developed later
     - equipment combination and interactions
     - equipment sets
+  - new equipment:
+    - consumables:
+      - Whore's Pasta - Team Gun
+        - Heals all damage and conditions instantly
+        - Has a chance to cause a transmissible disease
+        - Off-team penalty:
+          - Chance to cause disease increased
+          - Disease severity increased
+      - Poontangesca - Team Machete
+        - Heals all damage and conditions instantly
+        - Has a chance to cause a transmissible toxin
+        - Off-team penalty:
+            - Chance to cause toxin increased
+            - Toxin severity increased
+      - 4Loko - Team Machete
+      - Old English - Team Gun
+      - Penjamin Franklin
+      - 
 - [ ] Editor commands.  Players with the Editor role should be able to add and edit content in the game world.  Spawning NPCs, items, money, adding new zones, rooms, links, etc. Admins are also Editors since the roles are hierarchical.  A new category of commands should be created named Editor. roomequip is an Editor command.
 - [ ] Resting
   - [ ] motels

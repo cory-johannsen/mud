@@ -35,3 +35,11 @@ class_features:
   - sucker_punch
   - slippery
   - urban_camouflage
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1
+      - id: acid_spray
+        level: 1

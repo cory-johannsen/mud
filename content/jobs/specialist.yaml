@@ -37,3 +37,11 @@ class_features:
   - street_brawler
   - brutal_surge
   - field_specialist
+
+technology_grants:
+  prepared:
+    pool:
+      - id: neural_shock
+        level: 1
+      - id: neural_shock
+        level: 1

@@ -35,3 +35,11 @@ class_features:
   - command_attention
   - fast_talk
   - agitator
+
+technology_grants:
+  prepared:
+    pool:
+      - id: mind_spike
+        level: 1
+      - id: mind_spike
+        level: 1

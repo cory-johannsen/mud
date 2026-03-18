@@ -34,3 +34,11 @@ class_features:
   - sucker_punch
   - slippery
   - too_good_to_be_true
+
+technology_grants:
+  prepared:
+    pool:
+      - id: mind_spike
+        level: 1
+      - id: mind_spike
+        level: 1

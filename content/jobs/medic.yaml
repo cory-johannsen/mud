@@ -34,3 +34,15 @@ class_features:
   - street_tough
   - resilience
   - field_medicine
+
+technology_grants:
+  prepared:
+    slots_by_level:
+      1: 1
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

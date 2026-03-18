@@ -34,3 +34,11 @@ class_features:
   - command_attention
   - fast_talk
   - mesmerize
+
+technology_grants:
+  spontaneous:
+    pool:
+      - id: mind_spike
+        level: 1
+      - id: mind_spike
+        level: 1

@@ -37,3 +37,11 @@ class_features:
   - daily_prep
   - formulaic_mind
   - dealer_discount
+
+technology_grants:
+  prepared:
+    pool:
+      - id: mind_spike
+        level: 1
+      - id: mind_spike
+        level: 1

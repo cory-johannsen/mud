@@ -36,3 +36,9 @@ class_features:
   - predators_eye
   - zone_awareness
   - badge_and_gun
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1

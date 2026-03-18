@@ -37,3 +37,11 @@ class_features:
   - command_attention
   - fast_talk
   - trust_fund
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1
+      - id: acid_spray
+        level: 1

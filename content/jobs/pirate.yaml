@@ -36,3 +36,9 @@ class_features:
   - street_brawler
   - brutal_surge
   - boarding_action
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1

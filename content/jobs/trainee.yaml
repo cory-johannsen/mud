@@ -36,3 +36,11 @@ class_features:
   - street_brawler
   - brutal_surge
   - apprentice_strike
+
+technology_grants:
+  prepared:
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

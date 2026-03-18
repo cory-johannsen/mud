@@ -34,3 +34,11 @@ class_features:
   - street_tough
   - resilience
   - on_the_clock
+
+technology_grants:
+  prepared:
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

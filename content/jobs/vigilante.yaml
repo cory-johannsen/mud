@@ -39,3 +39,11 @@ class_features:
   - sucker_punch
   - slippery
   - double_life
+
+technology_grants:
+  prepared:
+    pool:
+      - id: battle_fervor
+        level: 1
+      - id: battle_fervor
+        level: 1

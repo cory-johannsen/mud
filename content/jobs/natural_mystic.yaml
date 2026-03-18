@@ -35,3 +35,11 @@ class_features:
   - daily_prep
   - formulaic_mind
   - nature_sense
+
+technology_grants:
+  prepared:
+    pool:
+      - id: neural_shock
+        level: 1
+      - id: neural_shock
+        level: 1

@@ -469,3 +469,38 @@ func TestMergeLevelUpGrants_KeysFromBothMaps(t *testing.T) {
 func TestMergeLevelUpGrants_BothNil(t *testing.T) {
 	assert.Nil(t, ruleset.MergeLevelUpGrants(nil, nil))
 }
+
+// TestAllTechJobsLoadAndMergeValid verifies that all job YAMLs with technology_grants,
+// when merged with their archetype's TechnologyGrants, produce valid grants.
+func TestAllTechJobsLoadAndMergeValid(t *testing.T) {
+	archetypes, err := ruleset.LoadArchetypes("../../../content/archetypes")
+	require.NoError(t, err)
+	archetypeMap := make(map[string]*ruleset.Archetype)
+	for _, a := range archetypes {
+		archetypeMap[a.ID] = a
+	}
+
+	jobs, err := ruleset.LoadJobs("../../../content/jobs")
+	require.NoError(t, err)
+
+	for _, job := range jobs {
+		if job.TechnologyGrants == nil {
+			continue // non-tech jobs: skip
+		}
+		arch, ok := archetypeMap[job.Archetype]
+		if !ok {
+			t.Errorf("job %s: archetype %q not found", job.ID, job.Archetype)
+			continue
+		}
+		var archetypeGrants *ruleset.TechnologyGrants
+		if arch != nil {
+			archetypeGrants = arch.TechnologyGrants
+		}
+		merged := ruleset.MergeGrants(archetypeGrants, job.TechnologyGrants)
+		if merged != nil {
+			if err := merged.Validate(); err != nil {
+				t.Errorf("job %s: merged grants invalid: %v", job.ID, err)
+			}
+		}
+	}
+}

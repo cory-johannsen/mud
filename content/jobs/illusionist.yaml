@@ -34,3 +34,11 @@ class_features:
   - predators_eye
   - zone_awareness
   - misdirection
+
+technology_grants:
+  prepared:
+    pool:
+      - id: mind_spike
+        level: 1
+      - id: mind_spike
+        level: 1

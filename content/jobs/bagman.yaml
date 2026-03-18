@@ -34,3 +34,9 @@ class_features:
   - predators_eye
   - zone_awareness
   - carrier
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1

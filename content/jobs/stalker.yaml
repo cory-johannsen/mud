@@ -35,3 +35,9 @@ class_features:
   - predators_eye
   - zone_awareness
   - shadow_step
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1

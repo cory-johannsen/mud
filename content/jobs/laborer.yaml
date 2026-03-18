@@ -35,3 +35,11 @@ class_features:
   - street_brawler
   - brutal_surge
   - back_of_a_truck
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1
+      - id: acid_spray
+        level: 1

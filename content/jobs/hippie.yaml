@@ -34,3 +34,11 @@ class_features:
   - daily_prep
   - formulaic_mind
   - natural_remedy
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1
+      - id: acid_spray
+        level: 1

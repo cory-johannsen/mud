@@ -35,3 +35,9 @@ class_features:
   - street_tough
   - resilience
   - evasive_maneuvers
+
+technology_grants:
+  prepared:
+    pool:
+      - id: acid_spray
+        level: 1

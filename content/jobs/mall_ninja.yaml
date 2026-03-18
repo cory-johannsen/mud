@@ -35,3 +35,11 @@ class_features:
   - street_brawler
   - brutal_surge
   - tacticool
+
+technology_grants:
+  prepared:
+    pool:
+      - id: mind_spike
+        level: 1
+      - id: mind_spike
+        level: 1
