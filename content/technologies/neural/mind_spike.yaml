@@ -8,20 +8,41 @@ action_cost: 2
 range: ranged
 targets: single
 duration: instant
-save_type: will
+resolution: save
+save_type: cool
 save_dc: 15
 effects:
-  - type: damage
-    dice: 2d6
-    damage_type: neural
-  - type: condition
-    condition_id: confused
-    duration: rounds:1
+  on_success:
+    - type: damage
+      dice: 1d3
+      damage_type: mental
+  on_failure:
+    - type: damage
+      dice: 1d6
+      damage_type: mental
+  on_crit_failure:
+    - type: damage
+      dice: 1d6
+      damage_type: mental
+    - type: condition
+      condition_id: stunned
+      value: 1
+      duration: rounds:1
 amped_level: 3
 amped_effects:
-  - type: damage
-    dice: 4d6
-    damage_type: neural
-  - type: condition
-    condition_id: confused
-    duration: rounds:2
+  on_success:
+    - type: damage
+      dice: 1d6
+      damage_type: mental
+  on_failure:
+    - type: damage
+      dice: 2d6
+      damage_type: mental
+  on_crit_failure:
+    - type: damage
+      dice: 2d6
+      damage_type: mental
+    - type: condition
+      condition_id: stunned
+      value: 1
+      duration: rounds:1

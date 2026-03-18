@@ -8,5 +8,8 @@ action_cost: 1
 range: self
 targets: single
 duration: instant
+resolution: none
 effects:
-  - type: utility
+  on_apply:
+    - type: utility
+      description: "Your condensation filters extract 2 gallons of potable water from the ambient air."

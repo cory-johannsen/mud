@@ -46,8 +46,10 @@ action_cost: 1
 range: self
 targets: single
 duration: instant
+resolution: none
 effects:
-  - type: utility
+  on_apply:
+    - type: utility
 `, id, i)
 			path := filepath.Join(innateDir, id+".yaml")
 			require.NoError(t, os.WriteFile(path, []byte(content), 0644))

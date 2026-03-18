@@ -7,7 +7,9 @@ action_cost: 2
 range: ranged
 targets: single
 duration: instant
+resolution: none
 effects:
-  - type: damage
-    dice: 2d6
-    damage_type: energy
+  on_apply:
+    - type: damage
+      dice: 2d6
+      damage_type: energy

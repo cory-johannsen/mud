@@ -119,6 +119,7 @@ type TechEffect struct {
 
 	// utility
 	UtilityType string `yaml:"utility_type,omitempty"` // unlock | reveal | hack
+	Description string `yaml:"description,omitempty"` // human-readable text for utility effects
 }
 
 // TieredEffects holds per-outcome effect lists for a technology.

@@ -6,7 +6,12 @@ level: 1
 usage_type: innate
 action_cost: 1
 range: zone
-targets: zone
+targets: all_enemies
 duration: rounds:1
+resolution: none
 effects:
-  - type: utility
+  on_apply:
+    - type: condition
+      condition_id: blinded
+      value: 1
+      duration: rounds:1

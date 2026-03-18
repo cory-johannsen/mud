@@ -5,8 +5,29 @@ tradition: technical
 level: 1
 usage_type: innate
 action_cost: 2
-range: ranged
-targets: zone
+range: zone
+targets: all_enemies
 duration: instant
+resolution: save
+save_type: toughness
+save_dc: 15
 effects:
-  - type: utility
+  on_success:
+    - type: utility
+      description: "The surge buffets you but you hold your ground."
+  on_failure:
+    - type: condition
+      condition_id: prone
+      value: 1
+      duration: rounds:1
+  on_crit_failure:
+    - type: damage
+      dice: 2d6
+      damage_type: bludgeoning
+    - type: condition
+      condition_id: prone
+      value: 1
+      duration: rounds:1
+    - type: movement
+      distance: 30
+      direction: away

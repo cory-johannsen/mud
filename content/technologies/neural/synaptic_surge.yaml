@@ -8,22 +8,51 @@ action_cost: 2
 range: ranged
 targets: single
 duration: instant
-save_type: will
+resolution: save
+save_type: cool
 save_dc: 15
 effects:
-  - type: damage
-    dice: 2d4
-    damage_type: neural
-  - type: condition
-    condition_id: frightened
-    value: 1
-    duration: rounds:1
+  on_success:
+    - type: condition
+      condition_id: frightened
+      value: 1
+      duration: rounds:1
+  on_failure:
+    - type: damage
+      dice: 2d4
+      damage_type: neural
+    - type: condition
+      condition_id: frightened
+      value: 2
+      duration: rounds:1
+  on_crit_failure:
+    - type: damage
+      dice: 4d4
+      damage_type: neural
+    - type: condition
+      condition_id: frightened
+      value: 3
+      duration: rounds:1
 amped_level: 3
 amped_effects:
-  - type: damage
-    dice: 4d4
-    damage_type: neural
-  - type: condition
-    condition_id: frightened
-    value: 2
-    duration: rounds:1
+  on_success:
+    - type: condition
+      condition_id: frightened
+      value: 1
+      duration: rounds:1
+  on_failure:
+    - type: damage
+      dice: 4d4
+      damage_type: neural
+    - type: condition
+      condition_id: frightened
+      value: 2
+      duration: rounds:1
+  on_crit_failure:
+    - type: damage
+      dice: 6d4
+      damage_type: neural
+    - type: condition
+      condition_id: frightened
+      value: 3
+      duration: rounds:1

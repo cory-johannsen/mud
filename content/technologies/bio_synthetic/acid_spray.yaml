@@ -8,11 +8,23 @@ action_cost: 2
 range: zone
 targets: all_enemies
 duration: instant
+resolution: save
 save_type: reflex
 save_dc: 14
 effects:
-  - type: damage
-    dice: 1d6
-    damage_type: acid
-  - type: zone
-    radius: 10
+  on_success:
+    - type: damage
+      dice: 1d3
+      damage_type: acid
+  on_failure:
+    - type: damage
+      dice: 1d6
+      damage_type: acid
+    - type: zone
+      radius: 10
+  on_crit_failure:
+    - type: damage
+      dice: 2d6
+      damage_type: acid
+    - type: zone
+      radius: 10

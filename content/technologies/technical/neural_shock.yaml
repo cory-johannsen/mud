@@ -8,12 +8,21 @@ action_cost: 2
 range: ranged
 targets: single
 duration: instant
+resolution: save
 save_type: reflex
 save_dc: 15
 effects:
-  - type: damage
-    dice: 2d6
-    damage_type: energy
-  - type: condition
-    condition_id: stunned
-    duration: rounds:1
+  on_failure:
+    - type: damage
+      dice: 2d6
+      damage_type: energy
+    - type: condition
+      condition_id: stunned
+      duration: rounds:1
+  on_crit_failure:
+    - type: damage
+      dice: 4d6
+      damage_type: energy
+    - type: condition
+      condition_id: stunned
+      duration: rounds:1

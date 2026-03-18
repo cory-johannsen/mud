@@ -5,8 +5,11 @@ tradition: technical
 level: 1
 usage_type: innate
 action_cost: 1
-range: ranged
-targets: zone
+range: zone
+targets: all_enemies
 duration: minutes:1
+resolution: none
 effects:
-  - type: utility
+  on_apply:
+    - type: utility
+      description: "Three hovering arc-light drones illuminate the area, shedding bright light in a wide radius."

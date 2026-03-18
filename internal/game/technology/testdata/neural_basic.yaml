@@ -7,6 +7,8 @@ action_cost: 2
 range: ranged
 targets: single
 duration: instant
+resolution: none
 effects:
-  - type: condition
-    condition_id: confused
+  on_apply:
+    - type: condition
+      condition_id: confused

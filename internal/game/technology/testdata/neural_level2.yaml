@@ -7,7 +7,9 @@ action_cost: 1
 range: ranged
 targets: single
 duration: instant
+resolution: none
 effects:
-  - type: damage
-    dice: 1d8
-    damage_type: neural
+  on_apply:
+    - type: damage
+      dice: 1d8
+      damage_type: neural

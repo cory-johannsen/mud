@@ -129,6 +129,37 @@ func TestByUsageType_CrossTraditionSortOrder(t *testing.T) {
 	assert.Equal(t, "mind_spike_fixture", spontaneous[1].ID)
 }
 
+// REQ-TER19: All 14 tech YAML files load without error after model change.
+func TestRegistry_REQ_TER19_AllTechsLoadAfterModelChange(t *testing.T) {
+	dirs := []string{
+		"../../../content/technologies/neural",
+		"../../../content/technologies/innate",
+	}
+	for _, dir := range dirs {
+		reg, err := technology.Load(dir)
+		require.NoError(t, err, "failed to load directory %q", dir)
+		assert.Greater(t, len(reg.All()), 0, "expected at least one tech in %q", dir)
+	}
+}
+
+// REQ-TER20: Each tech with resolution:"save" has save_type and save_dc > 0.
+func TestRegistry_REQ_TER20_SaveResolutionHasSaveTypeAndDC(t *testing.T) {
+	dirs := []string{
+		"../../../content/technologies/neural",
+		"../../../content/technologies/innate",
+	}
+	for _, dir := range dirs {
+		reg, err := technology.Load(dir)
+		require.NoError(t, err)
+		for _, tech := range reg.All() {
+			if tech.Resolution == "save" {
+				assert.NotEmpty(t, tech.SaveType, "tech %q: save resolution requires save_type", tech.ID)
+				assert.Greater(t, tech.SaveDC, 0, "tech %q: save resolution requires save_dc > 0", tech.ID)
+			}
+		}
+	}
+}
+
 // REQ-T12: Load with a malformed YAML file returns an error containing the file path;
 // no registry returned.
 func TestLoad_MalformedYAMLReturnsError(t *testing.T) {

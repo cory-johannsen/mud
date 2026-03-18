@@ -8,5 +8,19 @@ action_cost: 2
 range: ranged
 targets: single
 duration: instant
+resolution: attack
 effects:
-  - type: utility
+  on_hit:
+    - type: damage
+      dice: 3d6
+      damage_type: bludgeoning
+    - type: movement
+      distance: 5
+      direction: away
+  on_crit_hit:
+    - type: damage
+      dice: 6d6
+      damage_type: bludgeoning
+    - type: movement
+      distance: 10
+      direction: away

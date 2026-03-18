@@ -8,5 +8,13 @@ action_cost: 2
 range: ranged
 targets: single
 duration: instant
+resolution: attack
 effects:
-  - type: utility
+  on_hit:
+    - type: damage
+      dice: 1d6
+      damage_type: acid
+  on_crit_hit:
+    - type: damage
+      dice: 2d6
+      damage_type: acid

@@ -6,7 +6,28 @@ level: 1
 usage_type: innate
 action_cost: 2
 range: zone
-targets: zone
+targets: all_enemies
 duration: rounds:1
+resolution: save
+save_type: cool
+save_dc: 15
 effects:
-  - type: utility
+  on_success:
+    - type: condition
+      condition_id: frightened
+      value: 1
+      duration: rounds:1
+  on_failure:
+    - type: condition
+      condition_id: frightened
+      value: 2
+      duration: rounds:1
+  on_crit_failure:
+    - type: condition
+      condition_id: frightened
+      value: 2
+      duration: rounds:1
+    - type: condition
+      condition_id: fleeing
+      value: 1
+      duration: rounds:1

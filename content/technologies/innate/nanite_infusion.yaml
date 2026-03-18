@@ -5,8 +5,12 @@ tradition: bio_synthetic
 level: 1
 usage_type: innate
 action_cost: 2
-range: melee
+range: self
 targets: single
 duration: instant
+resolution: none
 effects:
-  - type: utility
+  on_apply:
+    - type: heal
+      dice: 1d8
+      amount: 8

@@ -6,7 +6,10 @@ level: 1
 usage_type: innate
 action_cost: 1
 range: zone
-targets: zone
+targets: single
 duration: rounds:1
+resolution: none
 effects:
-  - type: utility
+  on_apply:
+    - type: utility
+      description: "Your bone-conduction implants detect ground vibrations. You sense the movement of all creatures in the room through the floor."

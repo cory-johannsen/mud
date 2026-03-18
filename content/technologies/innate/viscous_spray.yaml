@@ -7,6 +7,23 @@ usage_type: innate
 action_cost: 2
 range: ranged
 targets: single
-duration: rounds:1
+duration: instant
+resolution: save
+save_type: hustle
+save_dc: 15
 effects:
-  - type: utility
+  on_success:
+    - type: condition
+      condition_id: slowed
+      value: 1
+      duration: rounds:1
+  on_failure:
+    - type: condition
+      condition_id: immobilized
+      value: 1
+      duration: rounds:1
+  on_crit_failure:
+    - type: condition
+      condition_id: immobilized
+      value: 1
+      duration: rounds:2
