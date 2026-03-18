@@ -1,6 +1,6 @@
 # System Architecture
 
-**As of:** 2026-03-18 (commit: f44b17b401baaa5c187b6f5c8eae52153f0b1d6b)
+**As of:** 2026-03-18 (commit: d1467887f360acb30142c0c25778a035fcb3384a)
 **Skill:** `.claude/skills/mud-overview.md`
 **Requirements:** docs/requirements/OVERVIEW.md, docs/requirements/FEATURES.md, docs/requirements/ARCHITECTURE.md
 
