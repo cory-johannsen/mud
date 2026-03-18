@@ -2,11 +2,13 @@ package gameserver
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/session"
 )
@@ -183,6 +185,144 @@ func TestHandleUse_NoArg_ListsInnateTechs(t *testing.T) {
 	assert.Contains(t, joined, "unlimited")
 	assert.Contains(t, joined, "acid_spit")
 	assert.NotContains(t, joined, "pressure_burst", "exhausted innate tech must not appear in list")
+}
+
+// Property: for MaxUses >= 1 and UsesRemaining in [1, MaxUses], activation
+// always decrements UsesRemaining by exactly 1 and calls Decrement exactly once.
+func TestProperty_InnateActivation_DecrementsExactlyOnce(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		maxUses := rapid.IntRange(1, 10).Draw(rt, "maxUses")
+		usesRemaining := rapid.IntRange(1, maxUses).Draw(rt, "usesRemaining")
+
+		repo := &innateRepoForGrpcTest{slots: map[string]*session.InnateSlot{
+			"test_tech": {MaxUses: maxUses, UsesRemaining: usesRemaining},
+		}}
+		svc, uid := innateTestService(t, repo)
+		sess, ok := svc.sessions.GetPlayer(uid)
+		if !ok {
+			rt.Skip()
+		}
+		sess.InnateTechs = map[string]*session.InnateSlot{
+			"test_tech": {MaxUses: maxUses, UsesRemaining: usesRemaining},
+		}
+
+		evt, err := svc.handleUse(uid, "test_tech")
+		if err != nil {
+			rt.Fatalf("handleUse failed: %v", err)
+		}
+		if evt == nil {
+			rt.Fatal("handleUse returned nil event")
+		}
+
+		// Must call Decrement exactly once
+		if len(repo.decremented) != 1 || repo.decremented[0] != "test_tech" {
+			rt.Errorf("expected Decrement called once for test_tech, got: %v", repo.decremented)
+		}
+		// Session UsesRemaining must decrease by 1
+		if sess.InnateTechs["test_tech"].UsesRemaining != usesRemaining-1 {
+			rt.Errorf("expected UsesRemaining=%d, got=%d", usesRemaining-1, sess.InnateTechs["test_tech"].UsesRemaining)
+		}
+	})
+}
+
+// Property: for MaxUses >= 1 and UsesRemaining == 0, exhausted message returned
+// and Decrement never called.
+func TestProperty_InnateExhausted_NoDecrement(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		maxUses := rapid.IntRange(1, 10).Draw(rt, "maxUses")
+
+		repo := &innateRepoForGrpcTest{slots: map[string]*session.InnateSlot{
+			"test_tech": {MaxUses: maxUses, UsesRemaining: 0},
+		}}
+		svc, uid := innateTestService(t, repo)
+		sess, ok := svc.sessions.GetPlayer(uid)
+		if !ok {
+			rt.Skip()
+		}
+		sess.InnateTechs = map[string]*session.InnateSlot{
+			"test_tech": {MaxUses: maxUses, UsesRemaining: 0},
+		}
+
+		evt, err := svc.handleUse(uid, "test_tech")
+		if err != nil {
+			rt.Fatalf("handleUse failed: %v", err)
+		}
+		if evt == nil {
+			rt.Fatal("handleUse returned nil event")
+		}
+
+		msg := evt.GetMessage().GetContent()
+		if !strings.Contains(msg, "No uses of test_tech remaining") {
+			rt.Errorf("expected exhausted message, got: %q", msg)
+		}
+		if len(repo.decremented) != 0 {
+			rt.Errorf("Decrement must not be called on exhausted tech, got: %v", repo.decremented)
+		}
+	})
+}
+
+// Property: no-arg list includes exactly techs where MaxUses==0 OR UsesRemaining>0.
+func TestProperty_InnateNoArgList_ExcludesExhausted(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Generate N distinct tech IDs with random slot states
+		n := rapid.IntRange(1, 5).Draw(rt, "n")
+
+		slots := make(map[string]*session.InnateSlot)
+		expectedIDs := make(map[string]bool)
+		for i := 0; i < n; i++ {
+			id := fmt.Sprintf("tech_%d", i)
+			maxUses := rapid.IntRange(0, 3).Draw(rt, fmt.Sprintf("maxUses_%d", i))
+			var remaining int
+			if maxUses == 0 {
+				remaining = 0 // unlimited
+				expectedIDs[id] = true
+			} else {
+				remaining = rapid.IntRange(0, maxUses).Draw(rt, fmt.Sprintf("remaining_%d", i))
+				if remaining > 0 {
+					expectedIDs[id] = true
+				}
+			}
+			slots[id] = &session.InnateSlot{MaxUses: maxUses, UsesRemaining: remaining}
+		}
+
+		repo := &innateRepoForGrpcTest{}
+		svc, uid := innateTestService(t, repo)
+		sess, ok := svc.sessions.GetPlayer(uid)
+		if !ok {
+			rt.Skip()
+		}
+		sess.InnateTechs = slots
+
+		evt, err := svc.handleUse(uid, "")
+		if err != nil {
+			rt.Fatalf("handleUse failed: %v", err)
+		}
+		if evt == nil {
+			rt.Fatal("handleUse returned nil event")
+		}
+
+		choices := evt.GetUseResponse().GetChoices()
+		listedIDs := make(map[string]bool)
+		for _, c := range choices {
+			// Only count innate_tech category entries
+			if c.GetCategory() == "innate_tech" {
+				listedIDs[c.GetFeatId()] = true
+			}
+		}
+
+		for id := range expectedIDs {
+			if !listedIDs[id] {
+				rt.Errorf("expected %q in list (MaxUses=%d, Remaining=%d), but not found",
+					id, slots[id].MaxUses, slots[id].UsesRemaining)
+			}
+		}
+		for id := range listedIDs {
+			if !expectedIDs[id] {
+				rt.Errorf("unexpected %q in list (MaxUses=%d, Remaining=%d)",
+					id, slots[id].MaxUses, slots[id].UsesRemaining)
+			}
+		}
+	})
 }
 
 // REQ-INN6: After rest, limited innate slots restored to max (session + DB RestoreAll called).
