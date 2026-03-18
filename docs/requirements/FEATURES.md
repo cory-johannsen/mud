@@ -251,21 +251,22 @@
       - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
         - [x] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level) — Phase 1: slot progression on archetypes, pool entries on jobs; Phase 2 will expand tech library
         - [x] Prepared tech slot expending — each prepared slot is one use; `use <tech>` expends the first matching non-expended slot; `rest` restores all slots; expended state persisted in DB
-        - [ ] Prepared tech effect resolution — activating a tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution)
+        - [x] Prepared tech effect resolution — activating a tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution; REQ-TER1–22)
         - [x] Can be rearranged when resting — `rest` command; `RearrangePreparedTechs` aggregates creation + level-up grants, clears and re-fills slots interactively
         - [x] Level-up technology selection — player selects new prepared/spontaneous techs interactively at next login or via `selecttech`; auto-assigned grants notify in-console; persisted in `character_pending_tech_levels`
       - [ ] Spontaneous Spells ->  Technologies with a preset daily usage limit
         - [x] Fixed list of Technologies per job level — job YAML pool entries; archetype slot progression; merged via `MergeGrants` (Phase 1)
         - [x] Fixed number usages for each Technology level (resets with long rest) — `character_spontaneous_use_pools` table; `SpontaneousUsePoolRepo`; `use` decrements, `rest` restores (Sub-project A)
         - [x] Player gets to choose which new Technologies are learned with levelling up. (Sub-project B) — `neural_static` + `synaptic_surge` added; Influencer grants known tech at levels 3 and 5 with 3-tech pool; deferral + selection verified end-to-end (REQ-SSL1-4)
-      - [ ] Spontaneous tech effect resolution — activating a spontaneous tech applies its game effect (Sub-project: Tech Effect Resolution)
+      - [x] Spontaneous tech effect resolution — activating a spontaneous tech applies its game effect (Sub-project: Tech Effect Resolution; REQ-TER1–22)
       - [ ] Heightened Spells -> Amped Technology — expend a higher-level spontaneous use slot to activate a tech at amped power level; uses `AmpedEffects` defined per tech (Sub-project: Amped Technology, depends on Tech Effect Resolution)
       - [x] Innate Technologies — region-based innate tech grants; per-tech daily uses; restore on rest; character sheet display (REQ-INN1–INN9, REQ-CONTENT1–2)
-        - [ ] Innate tech effect resolution — activating an innate tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution)
+        - [x] Innate tech effect resolution — activating an innate tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution; REQ-TER1–22)
         - [ ] `chrome_reflex` reaction trigger — integrate with Reactions system so it fires as a reaction rather than via `use` command; requires Reactions system
         - [ ] Passive innate tech mechanics — `seismic_sense` (always-on tremorsense) and `moisture_reclaim` (always-on water extraction) should apply passively without `use` command (Sub-project: Passive Tech Mechanics)
     - [ ] Spell import from PF2E with translation into Gunchete
       - [ ] Populate Archetype and Job yaml with options 
+- [ ] refactor to use `wire` for dependency injection
 - [ ] Long rest — full PF2E long rest equivalent: restore HP to max, reset spontaneous tech uses, allow prepared tech rearrangement (Sub-project: Long Rest)
 - [ ] Non-combat NPCs.
   - Define the data model and behavior for the following NPCs and implement those specifically mentioned.
