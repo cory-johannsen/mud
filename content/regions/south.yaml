@@ -18,3 +18,7 @@ traits:
 ability_boosts:
   fixed: [grit, brutality]
   free: 1
+
+innate_technologies:
+  - id: viscous_spray
+    uses_per_day: 1

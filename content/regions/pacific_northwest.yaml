@@ -19,3 +19,7 @@ traits:
 ability_boosts:
   fixed: [flair, quickness]
   free: 1
+
+innate_technologies:
+  - id: atmospheric_surge
+    uses_per_day: 1

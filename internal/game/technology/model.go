@@ -99,6 +99,7 @@ type TechEffect struct {
 
 	// condition
 	ConditionID string `yaml:"condition_id,omitempty"`
+	Value       int    `yaml:"value,omitempty"`    // condition severity (e.g. frightened 1, 2)
 	Duration    string `yaml:"duration,omitempty"` // overrides parent duration if set
 
 	// skill_check — DC must be > 0; yaml tag does NOT use omitempty so zero is preserved

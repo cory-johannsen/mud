@@ -16,3 +16,7 @@ traits:
 ability_boosts:
   fixed: [grit, quickness]
   free: 1
+
+innate_technologies:
+  - id: nanite_infusion
+    uses_per_day: 1

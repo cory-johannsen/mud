@@ -1,0 +1,12 @@
+id: pressure_burst
+name: Pressure Burst
+description: A pneumatic compression rig vents a focused blast that shoves targets and shatters brittle obstacles.
+tradition: technical
+level: 1
+usage_type: innate
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+effects:
+  - type: utility

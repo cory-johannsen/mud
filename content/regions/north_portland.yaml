@@ -16,3 +16,7 @@ traits:
 ability_boosts:
   fixed: [brutality, grit]
   free: 1
+
+innate_technologies:
+  - id: terror_broadcast
+    uses_per_day: 1

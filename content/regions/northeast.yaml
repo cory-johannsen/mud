@@ -20,3 +20,7 @@ traits:
 ability_boosts:
   fixed: [quickness, reasoning]
   free: 1
+
+innate_technologies:
+  - id: arc_lights
+    uses_per_day: 0

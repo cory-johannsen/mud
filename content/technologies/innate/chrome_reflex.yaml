@@ -1,0 +1,12 @@
+id: chrome_reflex
+name: Chrome Reflex
+description: A neural-augmented reflex burst that overrides the nervous system and forces a second attempt at a failed saving throw.
+tradition: neural
+level: 1
+usage_type: innate
+action_cost: 1
+range: self
+targets: single
+duration: instant
+effects:
+  - type: utility

@@ -1,0 +1,12 @@
+id: viscous_spray
+name: Viscous Spray
+description: A bio-synthetic adhesive secretion coats a target's joints and limbs, restraining movement.
+tradition: bio_synthetic
+level: 1
+usage_type: innate
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:1
+effects:
+  - type: utility

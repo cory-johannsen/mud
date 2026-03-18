@@ -1,0 +1,12 @@
+id: seismic_sense
+name: Seismic Sense
+description: Bone-conduction implants detect ground vibrations, revealing the movement of creatures through floors and walls.
+tradition: technical
+level: 1
+usage_type: innate
+action_cost: 1
+range: zone
+targets: zone
+duration: rounds:1
+effects:
+  - type: utility

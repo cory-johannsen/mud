@@ -1,0 +1,12 @@
+id: acid_spit
+name: Acid Spit
+description: A bio-synthetic gland secretes pressurized corrosive fluid at a single target.
+tradition: bio_synthetic
+level: 1
+usage_type: innate
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+effects:
+  - type: utility

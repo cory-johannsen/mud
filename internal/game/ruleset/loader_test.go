@@ -141,3 +141,12 @@ func TestLoadRegions_ActualContent(t *testing.T) {
 	}
 }
 
+
+func TestLoadRegions_AllHaveInnateGrant(t *testing.T) {
+	regions, err := ruleset.LoadRegions("../../../content/regions")
+	require.NoError(t, err)
+	require.NotEmpty(t, regions, "expected regions to be loaded from content/regions")
+	for _, r := range regions {
+		assert.Len(t, r.InnateTechnologies, 1, "region %q: expected exactly 1 innate grant", r.ID)
+	}
+}

@@ -1,0 +1,12 @@
+id: moisture_reclaim
+name: Moisture Reclaim
+description: Atmospheric condensation filters extract potable water from ambient humidity.
+tradition: bio_synthetic
+level: 1
+usage_type: innate
+action_cost: 1
+range: self
+targets: single
+duration: instant
+effects:
+  - type: utility

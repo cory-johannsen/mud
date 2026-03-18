@@ -1,0 +1,12 @@
+id: blackout_pulse
+name: Blackout Pulse
+description: Emits a localized EM burst that kills electronic lighting and blinds optical sensors in a small radius.
+tradition: technical
+level: 1
+usage_type: innate
+action_cost: 1
+range: zone
+targets: zone
+duration: rounds:1
+effects:
+  - type: utility
