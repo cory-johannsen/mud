@@ -365,13 +365,397 @@ These conditions are referenced by the techs above and do not yet exist in `cont
 
 ---
 
-## Pending Imports
+## Batch Import 2026-03-18
 
-Technologies not yet imported (no effect definitions):
+Automated import of PF2E level-1 spells via `cmd/import-content -format pf2e`. Source: pf2e-data compendium (`packs/pf2e/spells/spells/rank-1/`). All files localized into Gunchete cyberpunk aesthetic via Claude API. Technical tradition (arcane→technical) not yet imported.
 
-| Technology | Planned Sub-project | Notes |
-|---|---|---|
-| Any future archetype/job techs | To be determined | Reference this doc for save/tradition mapping |
+**Summary:** 367 tech files across 3 traditions (neural: 131, bio_synthetic: 143, fanatic_doctrine: 93).
+
+### neural (131 spells)
+
+| tech_id | Gunchete Name | PF2E Source | Resolution |
+|---------|---------------|-------------|------------|
+| `agitate_neural` | Synaptic Overload | Agitate | save |
+| `alarm_neural` | Neural Tripwire | Alarm | none |
+| `animate_rope_neural` | Kinetic Filament | Animate Rope | none |
+| `anticipate_peril_neural` | Threat Precognition | Anticipate Peril | none |
+| `approximate_neural` | Rapid Scan | Approximate | none |
+| `aqueous_blast_neural` | Hydro-Fist Strike | Aqueous Blast | attack |
+| `bane_neural` | Confidence Drain | Bane | save |
+| `befuddle_neural` | Cognitive Scramble | Befuddle | save |
+| `beseech_the_sphinx_neural` | Algorithmic Oracle Query | Beseech The Sphinx | none |
+| `biting_words` | Psychic Barb | Biting Words | attack |
+| `bless_neural` | Combat Sync | Bless | none |
+| `breadcrumbs_neural` | Neural Waypoint Trail | Breadcrumbs | none |
+| `bullhorn_neural` | Broadcast Amplifier | Bullhorn | none |
+| `carryall_neural` | Telekinetic Platform | Carryall | none |
+| `celestial_accord_neural` | Conflict Suppression Protocol | Celestial Accord | save |
+| `charm_neural` | Social Manipulation Wave | Charm | save |
+| `command_neural` | Compliance Impulse | Command | save |
+| `concordant_choir_neural` | Resonance Cascade | Concordant Choir | save |
+| `curse_of_recoil_neural` | Targeting Jinx | Curse Of Recoil | save |
+| `cycle_of_retribution_neural` | Feedback Loop Protocol | Cycle Of Retribution | save |
+| `daze_neural` | Cranial Shock | Daze | save |
+| `defended_by_spirits_neural` | Psionic Ward | Defended By Spirits | none |
+| `detect_alignment_neural` | Intent Scan | Detect Alignment | none |
+| `detect_magic_neural` | EM Field Scan | Detect Magic | none |
+| `detect_metal_neural` | Magnetic Resonance Scan | Detect Metal | none |
+| `disguise_magic_neural` | Signal Masking | Disguise Magic | none |
+| `dizzying_colors_neural` | Chromatic Seizure Burst | Dizzying Colors | save |
+| `dj_vu_neural` | Loop Lock | Dj Vu | save |
+| `draw_ire_neural` | Provocation Spike | Draw Ire | save |
+| `eat_fire_neural` | Thermal Absorption | Eat Fire | none |
+| `echoing_weapon_neural` | Phantom Strike Echo | Echoing Weapon | none |
+| `endure_neural` | Mental Fortitude Boost | Endure | none |
+| `enfeeble_neural` | Muscle Override | Enfeeble | save |
+| `equal_footing_neural` | Size Normalization Field | Equal Footing | save |
+| `exchange_image_neural` | Identity Swap Illusion | Exchange Image | save |
+| `fashionista_neural` | Holographic Wardrobe | Fashionista | none |
+| `fated_healing_neural` | Biofeedback Prediction | Fated Healing | none |
+| `fear_neural` | Terror Protocol | Fear | save |
+| `figment_neural` | Sensory Projection | Figment | none |
+| `flashy_disappearance_neural` | Smoke Screen Vanish | Flashy Disappearance | none |
+| `forbidding_ward_neural` | Threat Interposition Field | Forbidding Ward | none |
+| `force_barrage_neural` | Kinetic Bolt Volley | Force Barrage | none |
+| `forced_mercy_neural` | Restraint Frequency | Forced Mercy | save |
+| `friendfetch_neural` | Telekinetic Drag | Friendfetch | none |
+| `ghost_sound_neural` | Audio Ghost | Ghost Sound | none |
+| `glamorize_neural` | Minor Cosmetic Overlay | Glamorize | none |
+| `glowing_trail_neural` | Bioluminescent Trace | Glowing Trail | none |
+| `gravitational_pull_neural` | Gravity Spike | Gravitational Pull | save |
+| `grim_tendrils_neural` | Void Tendrils | Grim Tendrils | save |
+| `guidance_neural` | Tactical Insight | Guidance | none |
+| `haunting_hymn_neural` | Subliminal Screech | Haunting Hymn | save |
+| `helpful_steps_neural` | Kinetic Scaffold | Helpful Steps | none |
+| `ill_omen` | Bad Luck Injection | Ill Omen | save |
+| `illuminate_neural` | Light Source Activation | Illuminate | save |
+| `illusory_disguise_neural` | Holographic Disguise | Illusory Disguise | none |
+| `illusory_object_neural` | Persistent Hologram | Illusory Object | none |
+| `imprint_message` | Psychic Impression | Imprint Message | none |
+| `infectious_enthusiasm_neural` | Morale Contagion | Infectious Enthusiasm | save |
+| `inkshot_neural` | Toxic Ink Strike | Inkshot | attack |
+| `inside_ropes_neural` | Combat Data Feed | Inside Ropes | none |
+| `invisible_item_neural` | Cloaking Field | Invisible Item | none |
+| `invoke_true_name_neural` | Designation Protocol | Invoke True Name | none |
+| `item_facade_neural` | Object Disguise Field | Item Facade | none |
+| `join_pasts` | Memory Bridge | Join Pasts | none |
+| `kinetic_ram_neural` | Kinetic Impact Wave | Kinetic Ram | save |
+| `know_location_neural` | Location Anchor | Know Location | none |
+| `know_the_way_neural` | Internal Navigation System | Know The Way | none |
+| `liberating_command` | Break Free Signal | Liberating Command | none |
+| `light_neural` | Photon Emitter | Light | none |
+| `lock_neural` | Electromagnetic Lock | Lock | none |
+| `lose_the_path_neural` | Disorientation Pulse | Lose The Path | save |
+| `mending_neural` | Nanobot Repair Swarm | Mending | none |
+| `message_neural` | Subvocal Transmission | Message | none |
+| `message_rune_neural` | Stored Message Glyph | Message Rune | none |
+| `mind_spike` | Mind Spike | Mind Spike | save |
+| `mindlink_neural` | Neural Direct Link | Mindlink | none |
+| `musical_accompaniment_neural` | Sonic Rhythm Interface | Musical Accompaniment | none |
+| `mystic_armor_neural` | Force Shield | Mystic Armor | none |
+| `needle_darts_neural` | Needle Volley | Needle Darts | attack |
+| `neural_static` | Neural Static | Neural Static | save |
+| `nudge_the_odds_neural` | Probability Tweak | Nudge The Odds | none |
+| `object_reading` | Psychometric Scan | Object Reading | none |
+| `overselling_flourish_neural` | Dramatic Overclock | Overselling Flourish | save |
+| `penumbral_shroud_neural` | Shadow Shroud | Penumbral Shroud | save |
+| `pet_cache_neural` | Subspace Pocket | Pet Cache | none |
+| `phantasmal_minion_neural` | Phantom Construct | Phantasmal Minion | none |
+| `phantom_pain` | Pain Simulation | Phantom Pain | save |
+| `phase_bolt_neural` | Phase Strike | Phase Bolt | attack |
+| `pocket_library_neural` | Memory Archive Access | Pocket Library | none |
+| `prestidigitation_neural` | Minor Tech Cantrip | Prestidigitation | none |
+| `protect_companion_neural` | Shared Barrier Protocol | Protect Companion | none |
+| `protection_neural` | Hazard Resistance Shield | Protection | none |
+| `quick_sort_neural` | Auto-Sort Protocol | Quick Sort | none |
+| `rainbows_end_neural` | Prismatic Beam | Rainbows End | save |
+| `read_aura_neural` | Signature Reading | Read Aura | none |
+| `read_the_air_neural` | Social Dynamics Scan | Read The Air | none |
+| `reed_whistle_neural` | Resonance Whistle | Reed Whistle | none |
+| `restyle_neural` | Wardrobe Reconfiguration | Restyle | none |
+| `runic_body_neural` | Combat Skin Augment | Runic Body | none |
+| `runic_weapon_neural` | Weapon Enhancement Protocol | Runic Weapon | none |
+| `sanctuary_neural` | Non-Aggression Broadcast | Sanctuary | save |
+| `schadenfreude_neural` | Resilience Cascade | Schadenfreude | save |
+| `scorching_blast_neural` | Thermal Fist Blast | Scorching Blast | attack |
+| `seashell_of_stolen_sound_neural` | Sound Capture Trap | Seashell Of Stolen Sound | none |
+| `share_lore_neural` | Knowledge Transfer | Share Lore | none |
+| `shield_neural` | Neural Barrier | Shield | none |
+| `sigil_neural` | Personal Signature Tag | Sigil | none |
+| `signal_skyrocket_neural` | Flare Protocol | Signal Skyrocket | save |
+| `sleep_neural` | Neural Shutdown | Sleep | save |
+| `soothe` | Cognitive Stabilizer | Soothe | none |
+| `spirit_link_neural` | Life Link | Spirit Link | none |
+| `spirit_ward_neural` | Psionic Barrier | Spirit Ward | none |
+| `summon_fey_neural` | Cognitive Construct Deploy | Summon Fey | none |
+| `summon_instrument_neural` | Equipment Teleport | Summon Instrument | none |
+| `summon_undead_neural` | Revenant Protocol | Summon Undead | none |
+| `sure_strike_neural` | Targeting Lock | Sure Strike | none |
+| `synaptic_surge` | Synaptic Surge | Synaptic Surge | save |
+| `synchronize_neural` | Shared Frequency Marker | Synchronize | none |
+| `synchronize_steps_neural` | Neural Movement Sync | Synchronize Steps | none |
+| `tame_neural` | Behavioral Override | Tame | save |
+| `telekinetic_hand_neural` | Telekinetic Manipulator | Telekinetic Hand | none |
+| `telekinetic_projectile_neural` | Telekinetic Launch | Telekinetic Projectile | attack |
+| `thicket_of_knives_neural` | Phantom Blade Array | Thicket Of Knives | none |
+| `thoughtful_gift_neural` | Object Transfer | Thoughtful Gift | none |
+| `time_sense_neural` | Internal Chronometer | Time Sense | none |
+| `tremor_signs_neural` | Ground Wave Signal | Tremor Signs | none |
+| `unbroken_panoply_neural` | Emergency Repair Override | Unbroken Panoply | none |
+| `ventriloquism_neural` | Voice Rerouter | Ventriloquism | none |
+| `void_warp_neural` | Void Phase Shift | Void Warp | save |
+| `warp_step_neural` | Micro-Teleport | Warp Step | none |
+| `wash_your_luck_neural` | Fortune Reset Protocol | Wash Your Luck | none |
+
+### bio_synthetic (143 spells)
+
+| tech_id | Gunchete Name | PF2E Source | Resolution |
+|---------|---------------|-------------|------------|
+| `500_toads_bio_synthetic` | Spore Flood | 500 Toads | none |
+| `acid_splash_bio_synthetic` | Bio-Acid Spit | Acid Splash | attack |
+| `acid_spray` | Acid Spray | Acid Spray | save |
+| `acidic_burst_bio_synthetic` | Corrosive Burst | Acidic Burst | save |
+| `air_bubble_bio_synthetic` | Oxy-Filter | Air Bubble | none |
+| `airburst_bio_synthetic` | Pressure Wave | Airburst | save |
+| `alarm_bio_synthetic` | Chemical Perimeter Sensor | Alarm | none |
+| `animal_allies` | Bioengineered Scout Pack | Animal Allies | save |
+| `ant_haul_bio_synthetic` | Musculoskeletal Boost Injection | Ant Haul | none |
+| `approximate_bio_synthetic` | Chemical Census Sweep | Approximate | none |
+| `aqueous_blast_bio_synthetic` | Pressurized Fluid Fist | Aqueous Blast | attack |
+| `armor_of_thorn_and_claw` | Dermal Thorn Eruption | Armor Of Thorn And Claw | none |
+| `bramble_bush_bio_synthetic` | Spike Cluster Burst | Bramble Bush | save |
+| `breadcrumbs_bio_synthetic` | Pheromone Trail Marker | Breadcrumbs | none |
+| `breathe_fire_bio_synthetic` | Flammable Gland Spit | Breathe Fire | save |
+| `briny_bolt_bio_synthetic` | Saline Injection Bolt | Briny Bolt | attack |
+| `buffeting_winds` | Wind Burst Exhale | Buffeting Winds | save |
+| `buoyant_bubbles_bio_synthetic` | Hydrophobic Foam Coat | Buoyant Bubbles | save |
+| `camel_spit_bio_synthetic` | Modified Salivary Weapon | Camel Spit | attack |
+| `caustic_blast_bio_synthetic` | Acid Cluster Spray | Caustic Blast | save |
+| `charm_bio_synthetic` | Pheromone Influence Cloud | Charm | save |
+| `chilling_spray_bio_synthetic` | Cryogenic Gland Spray | Chilling Spray | save |
+| `cleanse_cuisine_bio_synthetic` | Contamination Neutralizer | Cleanse Cuisine | none |
+| `conductive_weapon_bio_synthetic` | Electroconductive Weapon Coating | Conductive Weapon | none |
+| `create_water_bio_synthetic` | Atmospheric Water Extraction | Create Water | none |
+| `deep_breath_bio_synthetic` | Extended Oxygen Reserve | Deep Breath | none |
+| `dehydrate_bio_synthetic` | Desiccation Enzyme Release | Dehydrate | save |
+| `detect_magic_bio_synthetic` | Bio-Energy Sensor Sweep | Detect Magic | none |
+| `detect_metal_bio_synthetic` | Metallic Compound Sensor | Detect Metal | none |
+| `detect_poison_bio_synthetic` | Toxin Detection Organ | Detect Poison | none |
+| `draw_moisture_bio_synthetic` | Moisture Siphon | Draw Moisture | none |
+| `eat_fire_bio_synthetic` | Thermal Conversion Organ | Eat Fire | none |
+| `electric_arc_bio_synthetic` | Bio-Electric Discharge | Electric Arc | save |
+| `elemental_counter_bio_synthetic` | Elemental Resistance Compound | Elemental Counter | none |
+| `elysian_whimsy_bio_synthetic` | Neurochemical Confusion Agent | Elysian Whimsy | save |
+| `equal_footing_bio_synthetic` | Size-Suppression Field | Equal Footing | save |
+| `fear_bio_synthetic` | Synthetic Cortisol Spike | Fear | save |
+| `fleet_step_bio_synthetic` | Adrenaline Sprint Injection | Fleet Step | none |
+| `flourishing_flora_bio_synthetic` | Rapid Growth Accelerant Deploy | Flourishing Flora | save |
+| `foraging_friends` | Trained Scout Animals Deploy | Foraging Friends | none |
+| `forge_bio_synthetic` | Bio-Fabrication Unit | Forge | save |
+| `frostbite_bio_synthetic` | Cryogenic Encasement Spray | Frostbite | save |
+| `funeral_flames_bio_synthetic` | Incendiary Weapon Coat | Funeral Flames | none |
+| `gale_blast_bio_synthetic` | Compressed Air Exhale | Gale Blast | save |
+| `gentle_landing_bio_synthetic` | Impact Cushion Foam Deploy | Gentle Landing | none |
+| `glamorize_bio_synthetic` | Cosmetic Compound Application | Glamorize | none |
+| `glass_shield_bio_synthetic` | Transparent Polymer Barrier | Glass Shield | save |
+| `glowing_trail_bio_synthetic` | Bioluminescent Track | Glowing Trail | none |
+| `goblin_pox_bio_synthetic` | Synthetic Pox Agent | Goblin Pox | save |
+| `gouging_claw_bio_synthetic` | Extrude Blade Claw | Gouging Claw | attack |
+| `grease_bio_synthetic` | Industrial Lubricant Spray | Grease | save |
+| `gritty_wheeze_bio_synthetic` | Desiccant Particle Exhale | Gritty Wheeze | save |
+| `guidance_bio_synthetic` | Bioscan Assist Signal | Guidance | none |
+| `gust_of_wind_bio_synthetic` | Lung-Powered Wind Blast | Gust Of Wind | save |
+| `heal_bio_synthetic` | Bio-Regeneration Pulse | Heal | save |
+| `healing_plaster` | Bio-Patch Compound | Healing Plaster | none |
+| `helpful_steps_bio_synthetic` | Emergent Vine Scaffold | Helpful Steps | none |
+| `hippocampus_retreat_bio_synthetic` | Aquatic Withdrawal Protocol | Hippocampus Retreat | attack |
+| `horizon_thunder_sphere_bio_synthetic` | Bio-Electric Thunder Ball | Horizon Thunder Sphere | save |
+| `hydraulic_push_bio_synthetic` | High-Pressure Fluid Blast | Hydraulic Push | attack |
+| `ignition_bio_synthetic` | Contact Igniter Compound | Ignition | attack |
+| `illuminate_bio_synthetic` | Remote Bioluminescence Activation | Illuminate | save |
+| `inkshot_bio_synthetic` | Ink Sac Spray | Inkshot | attack |
+| `inside_ropes_bio_synthetic` | Combat Analysis Gland | Inside Ropes | none |
+| `instant_pottery_bio_synthetic` | Rapid Organic Fabrication | Instant Pottery | none |
+| `interposing_earth_bio_synthetic` | Terrain Shield Reaction | Interposing Earth | save |
+| `invoke_true_name_bio_synthetic` | Biological Signature Lock | Invoke True Name | none |
+| `jump_bio_synthetic` | Leg Enhancement Burst | Jump | none |
+| `juvenile_companion` | Companion Revert Protocol | Juvenile Companion | none |
+| `know_location_bio_synthetic` | Pheromone Anchor Point | Know Location | none |
+| `know_the_way_bio_synthetic` | Biological Compass Calibration | Know The Way | none |
+| `leaden_steps_bio_synthetic` | Adhesion Enzyme Injection | Leaden Steps | save |
+| `light_bio_synthetic` | Bioluminescent Orb | Light | none |
+| `live_wire_bio_synthetic` | Electro-Filament Deploy | Live Wire | attack |
+| `lose_the_path_bio_synthetic` | Disorientation Pheromone Burst | Lose The Path | save |
+| `magic_stone_bio_synthetic` | Bio-Charged Projectile | Magic Stone | none |
+| `mending_bio_synthetic` | Rapid Bio-Repair | Mending | none |
+| `mud_pit_bio_synthetic` | Mud Pit | Mud Pit | none |
+| `mystic_armor_bio_synthetic` | Bio-Synthetic Skin Hardening | Mystic Armor | none |
+| `needle_darts_bio_synthetic` | Spine Launcher | Needle Darts | attack |
+| `negate_aroma_bio_synthetic` | Negate Aroma | Negate Aroma | none |
+| `nettleskin` | Nettleskin | Nettleskin | none |
+| `noxious_vapors_bio_synthetic` | Toxic Secretion Cloud | Noxious Vapors | save |
+| `personal_rain_cloud_bio_synthetic` | Moisture Generation Cloud | Personal Rain Cloud | save |
+| `pest_form_bio_synthetic` | Micro-Organism Form | Pest Form | none |
+| `pet_cache_bio_synthetic` | Biological Pocket Organ | Pet Cache | none |
+| `prestidigitation_bio_synthetic` | Minor Bio-Utility | Prestidigitation | none |
+| `protect_companion_bio_synthetic` | Shared Bio-Field Extension | Protect Companion | none |
+| `protector_tree` | Guardian Organism Deploy | Protector Tree | none |
+| `puff_of_poison_bio_synthetic` | Puff of Poison | Puff Of Poison | save |
+| `pummeling_rubble_bio_synthetic` | Pummeling Rubble | Pummeling Rubble | save |
+| `purifying_icicle_bio_synthetic` | Cryo-Purification Spike | Purifying Icicle | attack |
+| `putrefy_food_and_drink_bio_synthetic` | Rapid Decomposition Agent | Putrefy Food And Drink | none |
+| `quick_sort_bio_synthetic` | Bio-Manipulator Sort | Quick Sort | none |
+| `rainbows_end_bio_synthetic` | Prismatic Biochemical Beam | Rainbows End | save |
+| `ray_of_frost_bio_synthetic` | Cryo-Beam Secretion | Ray Of Frost | attack |
+| `read_aura_bio_synthetic` | Bio-Signature Scanner | Read Aura | none |
+| `reed_whistle_bio_synthetic` | Bio-Resonance Signal Device | Reed Whistle | none |
+| `restyle_bio_synthetic` | Textile Micro-Modification | Restyle | none |
+| `root_reading_bio_synthetic` | Organic Memory Scan | Root Reading | none |
+| `rousing_splash_bio_synthetic` | Stimulant Splash Compound | Rousing Splash | none |
+| `runic_body_bio_synthetic` | Combat Augmentation Activation | Runic Body | none |
+| `runic_weapon_bio_synthetic` | Weapon Bio-Enhancement Coat | Runic Weapon | none |
+| `sacred_beasts_bio_synthetic` | Sacred Beasts | Sacred Beasts | save |
+| `scatter_scree_bio_synthetic` | Debris Launch | Scatter Scree | save |
+| `scorching_blast_bio_synthetic` | Thermal Compound Fist | Scorching Blast | attack |
+| `scouring_sand_bio_synthetic` | Abrasive Particle Blast | Scouring Sand | save |
+| `seashell_of_stolen_sound_bio_synthetic` | Sound Capture Membrane | Seashell Of Stolen Sound | none |
+| `shattering_gem_bio_synthetic` | Shattering Gem | Shattering Gem | save |
+| `shielded_arm_bio_synthetic` | Exoskeletal Shield Extension | Shielded Arm | none |
+| `shillelagh` | Bio-Enhanced Club Strike | Shillelagh | none |
+| `shocking_grasp_bio_synthetic` | Bio-Electric Shock Touch | Shocking Grasp | attack |
+| `shockwave_bio_synthetic` | Shockwave | Shockwave | save |
+| `sigil_bio_synthetic` | Bio-Chemical Identifier Tag | Sigil | none |
+| `signal_skyrocket_bio_synthetic` | Bioluminescent Flare Launch | Signal Skyrocket | save |
+| `slashing_gust_bio_synthetic` | Blade Wind Exhale | Slashing Gust | attack |
+| `snowball_bio_synthetic` | Cryo-Gel Projectile | Snowball | attack |
+| `spider_sting_bio_synthetic` | Paralytic Toxin Strike | Spider Sting | save |
+| `spout_bio_synthetic` | High-Pressure Bio-Fluid Jet | Spout | save |
+| `stabilize_bio_synthetic` | Stabilize | Stabilize | none |
+| `summon_animal_bio_synthetic` | Summon Animal | Summon Animal | none |
+| `summon_fey_bio_synthetic` | Summon Fey | Summon Fey | none |
+| `summon_plant_or_fungus` | Summon Plant or Fungus | Summon Plant Or Fungus | none |
+| `swampcall` | Bog Environment Call | Swampcall | save |
+| `synchronize_bio_synthetic` | Pheromone Sync Beacon | Synchronize | none |
+| `tailwind_bio_synthetic` | Metabolic Speed Boost | Tailwind | none |
+| `take_root_bio_synthetic` | Root Anchor System | Take Root | none |
+| `tame_bio_synthetic` | Biochemical Calming Agent | Tame | save |
+| `tangle_vine_bio_synthetic` | Entanglement Vine Deploy | Tangle Vine | attack |
+| `tether_bio_synthetic` | Bio-Filament Tether | Tether | save |
+| `threefold_limb_bio_synthetic` | Triple Limb Strike Module | Threefold Limb | attack |
+| `thunderstrike_bio_synthetic` | Bio-Electric Thunder Discharge | Thunderstrike | save |
+| `timber_bio_synthetic` | Timber | Timber | save |
+| `tremor_signs_bio_synthetic` | Ground Vibration Signal | Tremor Signs | none |
+| `vanishing_tracks` | Track Erasure Compound | Vanishing Tracks | none |
+| `ventriloquism_bio_synthetic` | Voice Projection Organ | Ventriloquism | none |
+| `verdant_sprout` | Verdant Sprout | Verdant Sprout | none |
+| `verminous_lure` | Verminous Lure | Verminous Lure | save |
+| `vitality_lash_bio_synthetic` | Vitality Lash | Vitality Lash | save |
+| `wall_of_shrubs_bio_synthetic` | Wall of Shrubs | Wall Of Shrubs | none |
+| `weaken_earth_bio_synthetic` | Ground Destabilizer Compound | Weaken Earth | save |
+| `weave_wood_bio_synthetic` | Plant Matter Shaper | Weave Wood | none |
+| `wooden_fists_bio_synthetic` | Cellulose Reinforcement Inject | Wooden Fists | none |
+
+### fanatic_doctrine (93 spells)
+
+| tech_id | Gunchete Name | PF2E Source | Resolution |
+|---------|---------------|-------------|------------|
+| `admonishing_ray_fanatic_doctrine` | Corrective Beam | Admonishing Ray | attack |
+| `air_bubble_fanatic_doctrine` | Sacred Breath | Air Bubble | none |
+| `alarm_fanatic_doctrine` | Vigilance Ward | Alarm | none |
+| `ancient_dust_fanatic_doctrine` | Doctrine's Reckoning | Ancient Dust | save |
+| `approximate_fanatic_doctrine` | Doctrine's Census | Approximate | none |
+| `bane_fanatic_doctrine` | Doubt Curse | Bane | save |
+| `battle_fervor` | Battle Fervor | Battle Fervor | none |
+| `benediction` | Doctrine's Benediction | Benediction | none |
+| `beseech_the_sphinx_fanatic_doctrine` | Seek the Doctrine's Wisdom | Beseech The Sphinx | none |
+| `bless_fanatic_doctrine` | Strike True for the Doctrine | Bless | none |
+| `breadcrumbs_fanatic_doctrine` | Faith Trail Marking | Breadcrumbs | none |
+| `bullhorn_fanatic_doctrine` | Doctrine Proclamation Amplifier | Bullhorn | none |
+| `celestial_accord_fanatic_doctrine` | Forced Reconciliation Mandate | Celestial Accord | save |
+| `cleanse_cuisine_fanatic_doctrine` | Sacramental Purification | Cleanse Cuisine | none |
+| `command_fanatic_doctrine` | Doctrine Command | Command | save |
+| `concordant_choir_fanatic_doctrine` | Zealous Resonance Wave | Concordant Choir | save |
+| `create_water_fanatic_doctrine` | Doctrine's Provision | Create Water | none |
+| `curse_of_recoil_fanatic_doctrine` | Doctrine's Retribution Curse | Curse Of Recoil | save |
+| `cycle_of_retribution_fanatic_doctrine` | Retribution Protocol | Cycle Of Retribution | save |
+| `daze_fanatic_doctrine` | Doctrine's Rebuke | Daze | save |
+| `defended_by_spirits_fanatic_doctrine` | Martyr Guard | Defended By Spirits | none |
+| `detect_alignment_fanatic_doctrine` | Heretic Detection Sweep | Detect Alignment | none |
+| `detect_magic_fanatic_doctrine` | Forbidden Power Scan | Detect Magic | none |
+| `detect_metal_fanatic_doctrine` | Contraband Metal Detection | Detect Metal | none |
+| `detect_poison_fanatic_doctrine` | Toxin Purity Rite | Detect Poison | none |
+| `divine_lance` | Doctrine's Judgment Bolt | Divine Lance | attack |
+| `draw_moisture_fanatic_doctrine` | Doctrine's Desiccation | Draw Moisture | none |
+| `echoing_weapon_fanatic_doctrine` | Doctrine's Echo Strike | Echoing Weapon | none |
+| `elysian_whimsy_fanatic_doctrine` | Doctrine's Madness | Elysian Whimsy | save |
+| `enfeeble_fanatic_doctrine` | Weakness Curse | Enfeeble | save |
+| `fated_healing_fanatic_doctrine` | Foreseen Recovery | Fated Healing | none |
+| `fear_fanatic_doctrine` | The Doctrine's Wrath | Fear | save |
+| `flense_fanatic_doctrine` | Penitent's Stripping | Flense | attack |
+| `forbidding_ward_fanatic_doctrine` | Sanctuary Barrier | Forbidding Ward | none |
+| `forced_mercy_fanatic_doctrine` | Doctrine's Mercy Mandate | Forced Mercy | save |
+| `funeral_flames_fanatic_doctrine` | Martyr's Torch | Funeral Flames | none |
+| `glamorize_fanatic_doctrine` | Doctrine's Cosmetic Blessing | Glamorize | none |
+| `glowing_trail_fanatic_doctrine` | Doctrine's Luminous Path | Glowing Trail | none |
+| `guidance_fanatic_doctrine` | Doctrine's Guidance | Guidance | none |
+| `harm` | Doctrine's Harm | Harm | save |
+| `haunting_hymn_fanatic_doctrine` | Zealous War Hymn | Haunting Hymn | save |
+| `heal_fanatic_doctrine` | Doctrine's Healing Grace | Heal | save |
+| `helpful_steps_fanatic_doctrine` | Doctrine's Scaffold | Helpful Steps | none |
+| `illuminate_fanatic_doctrine` | Doctrine's Illumination | Illuminate | save |
+| `infuse_vitality` | Vital Doctrine Infusion | Infuse Vitality | none |
+| `inside_ropes_fanatic_doctrine` | Doctrine's Combat Revelation | Inside Ropes | none |
+| `invoke_true_name_fanatic_doctrine` | True Designation | Invoke True Name | none |
+| `know_location_fanatic_doctrine` | Doctrine's Waypoint | Know Location | none |
+| `know_the_way_fanatic_doctrine` | Doctrine's Direction | Know The Way | none |
+| `light_fanatic_doctrine` | Doctrine's Light | Light | none |
+| `lock_fanatic_doctrine` | Doctrine's Seal | Lock | none |
+| `magic_stone_fanatic_doctrine` | Doctrine's Stone | Magic Stone | none |
+| `malediction` | Doctrine's Curse | Malediction | save |
+| `mending_fanatic_doctrine` | Doctrine's Repair Rite | Mending | none |
+| `message_fanatic_doctrine` | Doctrine's Word | Message | none |
+| `mystic_armor_fanatic_doctrine` | Doctrine's Armor of Faith | Mystic Armor | none |
+| `necromancers_generosity_fanatic_doctrine` | Doctrine's Penance Transfer | Necromancers Generosity | none |
+| `needle_darts_fanatic_doctrine` | Doctrine's Judgment Darts | Needle Darts | attack |
+| `nudge_the_odds_fanatic_doctrine` | Doctrine's Fortune | Nudge The Odds | none |
+| `pet_cache_fanatic_doctrine` | Doctrine's Pocket | Pet Cache | none |
+| `prestidigitation_fanatic_doctrine` | Minor Doctrine Cantrip | Prestidigitation | none |
+| `protect_companion_fanatic_doctrine` | Shared Doctrine Shield | Protect Companion | none |
+| `protection_fanatic_doctrine` | Doctrine's Ward | Protection | none |
+| `purifying_icicle_fanatic_doctrine` | Doctrine's Purity Spike | Purifying Icicle | attack |
+| `putrefy_food_and_drink_fanatic_doctrine` | Doctrine's Contamination Curse | Putrefy Food And Drink | none |
+| `quick_sort_fanatic_doctrine` | Doctrine's Order | Quick Sort | none |
+| `rainbows_end_fanatic_doctrine` | Prismatic Doctrine Beam | Rainbows End | save |
+| `read_aura_fanatic_doctrine` | Doctrine's Aura Reading | Read Aura | none |
+| `read_the_air_fanatic_doctrine` | Social Doctrine Analysis | Read The Air | none |
+| `restyle_fanatic_doctrine` | Doctrine's Wardrobe Blessing | Restyle | none |
+| `rousing_splash_fanatic_doctrine` | Revival Blessing | Rousing Splash | none |
+| `runic_body_fanatic_doctrine` | Doctrine's Combat Rite | Runic Body | none |
+| `runic_weapon_fanatic_doctrine` | Doctrine's Weapon Blessing | Runic Weapon | none |
+| `sacred_beasts_fanatic_doctrine` | Doctrine's Sacred Creature Summon | Sacred Beasts | save |
+| `sanctuary_fanatic_doctrine` | Doctrine's Safe Passage | Sanctuary | save |
+| `schadenfreude_fanatic_doctrine` | Doctrine's Trial Response | Schadenfreude | save |
+| `shield_fanatic_doctrine` | Doctrine's Shield of Faith | Shield | none |
+| `shielded_arm_fanatic_doctrine` | Doctrine's Armguard | Shielded Arm | none |
+| `sigil_fanatic_doctrine` | Doctrine's Mark | Sigil | none |
+| `spirit_link_fanatic_doctrine` | Martyr Link | Spirit Link | none |
+| `spirit_ward_fanatic_doctrine` | Doctrine's Protective Ward | Spirit Ward | none |
+| `stabilize_fanatic_doctrine` | Emergency Doctrine Stabilization | Stabilize | none |
+| `summon_instrument_fanatic_doctrine` | Doctrine's Instrument Summon | Summon Instrument | none |
+| `summon_lesser_servitor` | Doctrine's Servitor Summon | Summon Lesser Servitor | none |
+| `summon_undead_fanatic_doctrine` | Doctrine's Resurrection Mandate | Summon Undead | none |
+| `synchronize_fanatic_doctrine` | Doctrine's Sync Mark | Synchronize | none |
+| `thoughtful_gift_fanatic_doctrine` | Doctrine's Delivery | Thoughtful Gift | none |
+| `torturous_trauma_fanatic_doctrine` | Doctrine's Punishment | Torturous Trauma | save |
+| `tremor_signs_fanatic_doctrine` | Doctrine Ground Signal | Tremor Signs | none |
+| `ventriloquism_fanatic_doctrine` | Voice of the Doctrine | Ventriloquism | none |
+| `vitality_lash_fanatic_doctrine` | Doctrine's Vitality Lash | Vitality Lash | save |
+| `void_warp_fanatic_doctrine` | Doctrine's Void Judgment | Void Warp | save |
+| `wash_your_luck_fanatic_doctrine` | Doctrine's Luck Cleansing | Wash Your Luck | none |
+
+### technical (0 spells — pending)
+
+Arcane tradition (arcane→technical) was not imported in the 2026-03-18 batch. To be imported in a future batch.
 
 ---
 
