@@ -1,12 +1,10 @@
 id: zephyr_slip_bio_synthetic
-name: Zephyr Slip
-description: |-
-    Trigger A creature enters a space within 5 feet of you.
+name: Pressure Dodge
+description: 'Trigger A creature enters a space within 5 feet of you.
 
-    An arresting breeze sweeps you up in an instant and moves you to safety. You Fly 15 feet directly away from the triggering creature.
 
-    Heightened (6th) You and one adjacent ally Fly up to 25 feet directly away from the triggering creature.
-    Heightened (8th) You and up to 5 allies within 30 feet Fly up to 25 feet directly away from the triggering creature.
+  A bio-generated pressure wave sweeps you up instantly and moves you to safety. All
+  mechanical effects remain identical to the base protocol.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -16,12 +14,14 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Trigger A creature enters a space within 5 feet of you.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature enters a space within 5 feet of you.
 
-            An arresting breeze sweeps you up in an instant and moves you to safety. You Fly 15 feet directly away from the triggering creature.
 
-            Heightene
+      An arresting breeze sweeps you up in an instant and moves you to safety. You
+      Fly 15 feet directly away from the triggering creature.
+
+
+      Heightene'

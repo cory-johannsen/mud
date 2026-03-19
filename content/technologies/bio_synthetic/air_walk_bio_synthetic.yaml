@@ -1,6 +1,8 @@
 id: air_walk_bio_synthetic
-name: Air Walk
-description: The target can walk on air as if it were solid ground. It can ascend and descend in this way at a maximum of a 45-degree angle.
+name: Atmospheric Strider
+description: The target's bio-synthetic leg modifications generate localized pressure
+  differentials, allowing it to walk on air as if it were solid ground. It can ascend
+  and descend in this way at a maximum of a 45-degree angle.
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -10,7 +12,8 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target can walk on air as if it were solid ground. It can ascend and descend in this way at a maximum of a 45-degree angle.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target can walk on air as if it were solid ground. It can ascend
+      and descend in this way at a maximum of a 45-degree angle.

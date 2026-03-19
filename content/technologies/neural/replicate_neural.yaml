@@ -1,10 +1,18 @@
 id: replicate_neural
-name: Replicate
-description: |-
-    You create an illusory magical double that physically looks and behaves very similarly to the target. This double is limited to moving, Interacting, speaking short sentences, and other similar basic tasks. It is unable to cast spells, attack, or use any complex skills.
-    The illusory duplicate is your minion. You can issue new commands to the double as part of Sustaining the Spell. You can command the duplicate telepathically as long as the spell lasts, provided it's within 1 mile of you. You can switch between using your own senses and the duplicate's senses with a single action, which has the concentrate trait. The illusory duplicate has the same statistics as the original creature, except it doesn't have any of the original's item bonuses, and it has one quarter of the original's Hit Points. If the double's Hit Points are reduced to 0, the spell ends.
+name: Digital Doppelganger
+description: 'You create a hard-light double that physically resembles and mimics
+  the target. This double is limited to moving, Interacting, speaking short sentences,
+  and other basic tasks. It is unable to cast spells, attack, or use any complex skills.
 
-    Heightened (+1) The maximum level of the target increases by 2.
+  The double is your minion. You can issue new commands as part of Sustaining the
+  Spell. You can command it telepathically within 1 mile. You can switch between your
+  own senses and the double''s with a single action, which has the concentrate trait.
+  The double has the same statistics as the original creature, except it doesn''t
+  have any item bonuses, and it has one quarter of the original''s Hit Points. If
+  the double''s Hit Points reach 0, the spell ends.
+
+
+  Heightened (+1) The maximum level of the target increases by 2.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -14,7 +22,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create an illusory magical double that physically looks and behaves very similarly to the target. This double is limited to moving, Interacting, speaking short sentences, and other similar basic t
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an illusory magical double that physically looks and behaves
+      very similarly to the target. This double is limited to moving, Interacting,
+      speaking short sentences, and other similar basic t

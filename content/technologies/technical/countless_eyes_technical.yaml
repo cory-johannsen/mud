@@ -1,8 +1,8 @@
 id: countless_eyes_technical
-name: Countless Eyes
-description: |-
-    Eyes form across the touched creature's body, allowing it to see in all directions at once. The subject can't be flanked for the spell's duration. In addition, when the subject succeeds when Seeking, it critically succeeds instead.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Countless Eyes]
+name: Panoramic Sensor Suite
+description: Micro-cameras deploy across the touched creature's body, providing full
+  360-degree visual coverage. The subject can't be flanked for the duration. When
+  the subject succeeds at Seeking, it critically succeeds instead.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -12,7 +12,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Eyes form across the touched creature's body, allowing it to see in all directions at once. The subject can't be flanked for the spell's duration. In addition, when the subject succeeds when Seeking,
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Eyes form across the touched creature's body, allowing it to see
+      in all directions at once. The subject can't be flanked for the spell's duration.
+      In addition, when the subject succeeds when Seeking,

@@ -1,6 +1,10 @@
 id: spell_immunity_neural
-name: Spell Immunity
-description: You ward a creature against the effects of a single spell. Choose a spell and name it aloud as part of the verbal component. Spell immunity attempts to counteract that spell whenever spell immunity's target is the target of the named spell or in that spell's area. Successfully counteracting a spell that targets an area or multiple targets with spell immunity negates the effects only for the target affected by spell immunity.
+name: Protocol Firewall
+description: You install a targeted countermeasure against a specific hostile effect.
+  Choose a spell and name it aloud as part of the verbal component. Protocol Firewall
+  attempts to counteract that spell whenever the target is affected by it. Successfully
+  counteracting an area or multi-target spell negates the effects only for the protected
+  target.
 tradition: neural
 level: 4
 usage_type: prepared
@@ -10,7 +14,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You ward a creature against the effects of a single spell. Choose a spell and name it aloud as part of the verbal component. Spell immunity attempts to counteract that spell whenever spell immunity's
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You ward a creature against the effects of a single spell. Choose
+      a spell and name it aloud as part of the verbal component. Spell immunity attempts
+      to counteract that spell whenever spell immunity's

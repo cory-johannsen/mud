@@ -1,6 +1,9 @@
 id: read_omens_neural
-name: Read Omens
-description: You peek into the future. Choose a particular goal or activity you plan to engage in within 1 week, or an event you expect might happen within 1 week. You learn a cryptic clue or piece of advice that could help with the chosen event, often in the form of a rhyme or omen.
+name: Probability Forecast
+description: You run predictive algorithms on near-future events. Choose a particular
+  goal or activity you plan to engage in within 1 week, or an event you expect might
+  happen within 1 week. You receive a cryptic data readout or predictive fragment
+  that could help with the chosen event.
 tradition: neural
 level: 4
 usage_type: prepared
@@ -10,7 +13,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You peek into the future. Choose a particular goal or activity you plan to engage in within 1 week, or an event you expect might happen within 1 week. You learn a cryptic clue or piece of advice that
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You peek into the future. Choose a particular goal or activity you
+      plan to engage in within 1 week, or an event you expect might happen within
+      1 week. You learn a cryptic clue or piece of advice that

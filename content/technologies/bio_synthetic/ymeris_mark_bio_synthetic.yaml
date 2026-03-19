@@ -1,12 +1,8 @@
 id: ymeris_mark_bio_synthetic
-name: Ymeri's Mark
-description: |-
-    You place the fiery mark of the Queen of the Inferno on the target, burning into the creature's very essence. The mark gives off a heat that only you can sense; as long as you're on the same plane as the target, you can sense the direction it's in. The target is @UUID[Compendium.pf2e.conditionitems.Item.Fatigued] and can't reduce the value of this condition normally.
-    You can detonate the mark at any point during its duration by Dismissing the spell. The rune explodes in a @Template[emanation|distance:10] centered on the target that deals 5d6 fire damage with a basic Reflex save. You choose whether the mark's target is included in the explosion.
-    When you cast the spell, the target attempts a Fortitude save to determine how long the mark lasts. If the spell's duration elapses, the rune doesn't detonate.Critical Success The target is unaffected.
-    Success The duration is 1 minute.
-    Failure The duration is 1 week.
-    Critical Failure The duration is unlimited.Heightened (+1) The damage increases by 2d6.
+name: Pyretic Brand
+description: You sear a bio-thermal brand into the target's tissue, burning into the
+  creature's very essence. The mark glows with searing heat. All mechanical effects
+  remain identical to the base protocol.
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -18,18 +14,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 5d3
-          damage_type: fire
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 5d6
-          damage_type: fire
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 10d6
-          damage_type: fire
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 5d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 5d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 10d6
+    damage_type: fire
+    dc: 0

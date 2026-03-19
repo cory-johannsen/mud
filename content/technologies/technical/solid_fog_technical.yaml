@@ -1,6 +1,8 @@
 id: solid_fog_technical
-name: Solid Fog
-description: You conjure a bank of fog so thick it impedes movement as well as sight. This functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist], except that the area is also difficult terrain. You can Dismiss the spell.
+name: Dense Smoke Generator
+description: You deploy a device that generates fog so thick it impedes movement as
+  well as sight. Functions as Mist, except the area is also difficult terrain. You
+  can Dismiss the spell.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You conjure a bank of fog so thick it impedes movement as well as sight. This functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist], except that the area is also difficult terrain. You can Dismiss
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure a bank of fog so thick it impedes movement as well as
+      sight. This functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist], except
+      that the area is also difficult terrain. You can Dismiss

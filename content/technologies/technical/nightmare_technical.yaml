@@ -1,12 +1,9 @@
 id: nightmare_technical
-name: Nightmare
-description: |-
-    You send disturbing nightmares to your target. The next time the target falls asleep, it must attempt a Will save. If you know the target only by name and have never met them, the target gets a +4 circumstance bonus to the Will save.
-
-    Critical Success The target suffers no adverse effects and is temporarily immune for 1 week.
-    Success The target experiences the nightmares but suffers no adverse effects other than unpleasant memories.
-    Failure The target experiences the nightmares and awakens @UUID[Compendium.pf2e.conditionitems.Item.Fatigued].
-    Critical Failure The target experiences the nightmares, awakens Fatigued, and is Drained 2 until it is no longer Fatigued.
+name: Sleep Cycle Jammer
+description: You deploy a device that transmits disturbing signals into the target's
+  dream-state buffer. Next time the target sleeps, it must attempt a Will save. All
+  mechanical effects (fatigued, drained, circumstance bonus) remain identical to the
+  base protocol.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -18,7 +15,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You send disturbing nightmares to your target. The next time the target falls asleep, it must attempt a Will save. If you know the target only by name and have never met them, the target gets a +4 cir
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You send disturbing nightmares to your target. The next time the
+      target falls asleep, it must attempt a Will save. If you know the target only
+      by name and have never met them, the target gets a +4 cir

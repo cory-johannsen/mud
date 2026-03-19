@@ -1,6 +1,10 @@
 id: reflected_beauty_fanatic_doctrine
-name: Reflected Beauty
-description: When you cast reflected beauty, choose a willing creature that's the same size as you and that you can see within 30 feet. The spell then disguises you with a realistic illusion, as if via @UUID[Compendium.pf2e.spells-srd.Item.Illusory Disguise] heightened to 3rd rank, but includes tactile and olfactory sensation in addition to visual and voice. The appearance of the illusion that disguises you includes any changes to sex characteristics or other aspects needed to match the target creature's heart's desire, allowing you to interact with them as the person they could be. If you're ever more than 30 feet from the subject you're reflecting, reflected beauty immediately ends. You can Dismiss this spell.
+name: Mirror of Devotion
+description: When you cast this protocol, choose a willing creature of the same size
+  within 30 feet. The spell disguises you with a realistic doctrinal illusion including
+  tactile and olfactory components. The appearance matches the target creature's heart's
+  desire. If you're ever more than 30 feet from the subject, the effect ends. You
+  can Dismiss this spell.
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -10,7 +14,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: When you cast reflected beauty, choose a willing creature that's the same size as you and that you can see within 30 feet. The spell then disguises you with a realistic illusion, as if via @UUID[Compe
+  on_apply:
+  - type: utility
+    dc: 0
+    description: When you cast reflected beauty, choose a willing creature that's
+      the same size as you and that you can see within 30 feet. The spell then disguises
+      you with a realistic illusion, as if via @UUID[Compe

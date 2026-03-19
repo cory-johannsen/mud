@@ -1,10 +1,14 @@
 id: replicate_technical
-name: Replicate
-description: |-
-    You create an illusory magical double that physically looks and behaves very similarly to the target. This double is limited to moving, Interacting, speaking short sentences, and other similar basic tasks. It is unable to cast spells, attack, or use any complex skills.
-    The illusory duplicate is your minion. You can issue new commands to the double as part of Sustaining the Spell. You can command the duplicate telepathically as long as the spell lasts, provided it's within 1 mile of you. You can switch between using your own senses and the duplicate's senses with a single action, which has the concentrate trait. The illusory duplicate has the same statistics as the original creature, except it doesn't have any of the original's item bonuses, and it has one quarter of the original's Hit Points. If the double's Hit Points are reduced to 0, the spell ends.
+name: Holographic Double
+description: 'You deploy a device that creates a hard-light double of the target.
+  The double can move, Interact, speak, and perform basic tasks but can''t cast spells,
+  attack, or use complex skills. It''s your minion. You can command it telepathically
+  within 1 mile. Switch between your senses and the double''s with a single action.
+  Same statistics as original except no item bonuses and 1/4 HP. At 0 HP, the spell
+  ends.
 
-    Heightened (+1) The maximum level of the target increases by 2.
+
+  Heightened (+1) Max target level +2.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -14,7 +18,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create an illusory magical double that physically looks and behaves very similarly to the target. This double is limited to moving, Interacting, speaking short sentences, and other similar basic t
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an illusory magical double that physically looks and behaves
+      very similarly to the target. This double is limited to moving, Interacting,
+      speaking short sentences, and other similar basic t

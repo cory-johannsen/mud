@@ -1,14 +1,13 @@
 id: aromatic_lure_technical
-name: Aromatic Lure
-description: |-
-    You override a target's olfactory senses, luring them to a specific location through tantalizing false scents. Select a single square within range that is not hazardous or occupied by a creature. The target is drawn to the selected location, becoming euphoric upon arrival. The target must attempt a Will save.
+name: Scent Decoy Projector
+description: 'You deploy a chemical dispersal device that hijacks a target''s olfactory
+  processing, luring them to a designated position through irresistible synthetic
+  scent patterns. Select a single square within range not hazardous or occupied. The
+  target is drawn there. The target must attempt a Will save. All mechanical effects
+  (Stupefied, movement, durations) remain identical to the base protocol.
 
-    Critical Success The target is unaffected.
-    Success The target is distracted by the tantalizing scents, becoming Stupefied 1 for 1 round.
-    Failure The target is Stupefied 2 and moves toward the selected location via the most direct route possible for 1 round, bypassing any obvious hazards and enemies in the way.
-    Critical Failure The target is Stupefied 4 and moves to the selected location via the most direct route possible for 1 round, bypassing any obvious hazards and enemies in the way. If the creature reaches the destination, it must remain in that location for [[/r 1d4 #rounds]]{1d4 rounds} but can otherwise act normally.
 
-    Heightened (+2) You target 1 additional creature, selecting a different square within range as their destination.
+  Heightened (+2) You target 1 additional creature with a different destination.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -20,7 +19,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You override a target's olfactory senses, luring them to a specific location through tantalizing false scents. Select a single square within range that is not hazardous or occupied by a creature. The
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You override a target's olfactory senses, luring them to a specific
+      location through tantalizing false scents. Select a single square within range
+      that is not hazardous or occupied by a creature. The

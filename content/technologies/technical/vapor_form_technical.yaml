@@ -1,8 +1,10 @@
 id: vapor_form_technical
-name: Vapor Form
-description: |-
-    The target transforms into a vaporous state. In this state, the target is amorphous. It loses any item bonus to AC and all other effects and bonuses from armor, and it uses its proficiency modifier for unarmored defense. It gains resistance 8 to physical damage and is immune to precision damage. It can't cast spells, activate items, or use actions that have the attack or manipulate trait. It gains a fly Speed of 10 feet and can slip through tiny cracks. The target can Dismiss the spell.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Vapor Form]
+name: Dispersal Field
+description: The target's body disperses into a vaporous state via molecular destabilization.
+  In this state, the target is amorphous, loses item bonus to AC, uses unarmored defense
+  proficiency, gains resistance 8 to physical damage, and is immune to precision damage.
+  Can't cast spells, activate items, or use attack/manipulate actions. Gains fly Speed
+  10 feet, can slip through tiny cracks. Can Dismiss.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -12,7 +14,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target transforms into a vaporous state. In this state, the target is amorphous. It loses any item bonus to AC and all other effects and bonuses from armor, and it uses its proficiency modifier fo
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target transforms into a vaporous state. In this state, the target
+      is amorphous. It loses any item bonus to AC and all other effects and bonuses
+      from armor, and it uses its proficiency modifier fo

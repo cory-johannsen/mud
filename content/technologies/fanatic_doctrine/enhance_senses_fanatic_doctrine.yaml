@@ -1,9 +1,11 @@
 id: enhance_senses_fanatic_doctrine
-name: Enhance Senses
-description: |-
-    You enhance the target's senses. The target gains low-light vision, and all of the target's imprecise senses have their distances doubled. If the target already has low-light vision, they gain darkvision.
+name: Heightened Awareness Rite
+description: 'You perform a doctrinal rite that sharpens the target''s senses. The
+  target gains low-light vision, and all of the target''s imprecise senses have their
+  distances doubled. If the target already has low-light vision, they gain darkvision.
 
-    Heightened (+2) The number of targets increases by 1.
+
+  Heightened (+2) The number of targets increases by 1.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -13,7 +15,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You enhance the target's senses. The target gains low-light vision, and all of the target's imprecise senses have their distances doubled. If the target already has low-light vision, they gain darkvis
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You enhance the target's senses. The target gains low-light vision,
+      and all of the target's imprecise senses have their distances doubled. If the
+      target already has low-light vision, they gain darkvis

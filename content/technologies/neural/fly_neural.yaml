@@ -1,10 +1,10 @@
 id: fly_neural
-name: Fly
-description: |-
-    The target can soar through the air, gaining a fly Speed equal to its Speed or 20 feet, whichever is greater.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fly]
+name: Grav-Lift Module
+description: 'The target activates anti-gravity propulsion, gaining a fly Speed equal
+  to its Speed or 20 feet, whichever is greater.
 
-    Heightened (7th) The duration increases to 1 hour.
+
+  Heightened (7th) The duration increases to 1 hour.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -14,11 +14,13 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            The target can soar through the air, gaining a fly Speed equal to its Speed or 20 feet, whichever is greater.
-            @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fly]
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target can soar through the air, gaining a fly Speed equal to
+      its Speed or 20 feet, whichever is greater.
 
-            Heightened (7th) The duration
+      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fly]
+
+
+      Heightened (7th) The duration'

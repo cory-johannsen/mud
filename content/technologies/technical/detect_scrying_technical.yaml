@@ -1,9 +1,11 @@
 id: detect_scrying_technical
-name: Detect Scrying
-description: |-
-    By reading trace auras, you detect the presence of scrying effects in the area. If detect scrying is higher rank than a scrying effect, you gain a glimpse of the scrying creature and learn its approximate distance and direction.
+name: Anti-Surveillance Scanner
+description: 'By analyzing trace EM signatures, you detect surveillance effects in
+  the area. If this protocol is higher rank than a surveillance effect, you glimpse
+  the observer and learn approximate distance and direction.
 
-    Heightened (6th) The duration is until the next time you make your daily preparations.
+
+  Heightened (6th) Duration until next daily preparations.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -13,7 +15,9 @@ targets: zone
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: By reading trace auras, you detect the presence of scrying effects in the area. If detect scrying is higher rank than a scrying effect, you gain a glimpse of the scrying creature and learn its approxi
+  on_apply:
+  - type: utility
+    dc: 0
+    description: By reading trace auras, you detect the presence of scrying effects
+      in the area. If detect scrying is higher rank than a scrying effect, you gain
+      a glimpse of the scrying creature and learn its approxi

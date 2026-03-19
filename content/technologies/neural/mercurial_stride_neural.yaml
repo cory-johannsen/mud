@@ -1,14 +1,25 @@
 id: mercurial_stride_neural
-name: Mercurial Stride
-description: |-
-    Your form ripples as you take on the fluidity and toxicity of quicksilver. You partially shift into a liquid metal form and Stride up to twice your speed. During this movement, you can pass through one creature's space—without needing to attempt a check to @UUID[Compendium.pf2e.actionspf2e.Item.Tumble Through]—by splitting into droplets of mercury and reforming on the other side, though you can't end your turn in such a space. Passing through a creature's space in this way exposes it to mercury poisoning, with a Fortitude save.
+name: Quicksilver Rush
+description: 'Your body destabilizes into liquid-metal form as you surge forward.
+  You partially shift into a metallic fluid state and Stride up to twice your speed.
+  During this movement, you can pass through one creature''s space by splitting into
+  droplets and reforming on the other side, though you can''t end your turn in such
+  a space. Passing through a creature''s space exposes it to heavy metal toxicity,
+  with a Fortitude save.
 
-    Critical Success The target is unaffected.
-    Success The target becomes Sickened 1.
-    Failure The target becomes Sickened 2 and takes @Damage[(@item.level+2)d6[poison]] damage.
-    Critical Failure The target becomes Sickened 2 and takes @Damage[((@item.level+2)*2)d6[poison]] damage.
 
-    Heightened (+1) The damage increases by 1d6 on a failure and 2d6 on a critical failure.
+  Critical Success The target is unaffected.
+
+  Success The target becomes Sickened 1.
+
+  Failure The target becomes Sickened 2 and takes @Damage[(@item.level+2)d6[poison]]
+  damage.
+
+  Critical Failure The target becomes Sickened 2 and takes @Damage[((@item.level+2)*2)d6[poison]]
+  damage.
+
+
+  Heightened (+1) The damage increases by 1d6 on a failure and 2d6 on a critical failure.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -20,18 +31,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 6d3
-          damage_type: poison
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 6d6
-          damage_type: poison
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 12d6
-          damage_type: poison
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 6d3
+    damage_type: poison
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: poison
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: poison
+    dc: 0

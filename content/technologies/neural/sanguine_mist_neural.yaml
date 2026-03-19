@@ -1,8 +1,17 @@
 id: sanguine_mist_neural
-name: Sanguine Mist
-description: |-
-    You unleash a cloud of foul, blood-sucking fog that drains the vitality from the living to bolster your own. Each living creature in the area when you Cast the Spell, aside from you, takes 6d6 void damage with a basic Fortitude save. Creatures in the area are @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the cloud become concealed to creatures within it.
-    The first time each round you Sustain this Spell on subsequent turns, living creatures in the area take an additional @Damage[(@item.rank -2)d6[void]] damage with another basic Fortitude save. You also gain temporary Hit Points equal to half the damage a single creature took when you Sustained the spell this turn; calculate these temporary Hit Points using the creature that took the most damage. You lose any remaining temporary Hit Points after 1 minute.Heightened (+1) The initial damage increases by 2d6 and the secondary damage increases by 1d6.
+name: Hemovore Cloud
+description: 'You unleash a cloud of nanoscale blood-harvesting drones that drain
+  vitality from the living. Each living creature in the area when you Cast the Spell,
+  aside from you, takes 6d6 void damage with a basic Fortitude save. Creatures in
+  the area are Concealed, and all creatures outside the cloud become concealed to
+  creatures within it.
+
+  The first time each round you Sustain this Spell, living creatures in the area take
+  an additional @Damage[(@item.rank -2)d6[void]] damage with another basic Fortitude
+  save. You also gain temporary Hit Points equal to half the damage a single creature
+  took when you Sustained the spell this turn; calculate using the creature that took
+  the most damage. You lose any remaining temporary Hit Points after 1 minute.Heightened
+  (+1) The initial damage increases by 2d6 and the secondary damage increases by 1d6.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -14,18 +23,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 6d3
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 6d6
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 12d6
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 6d3
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: void
+    dc: 0

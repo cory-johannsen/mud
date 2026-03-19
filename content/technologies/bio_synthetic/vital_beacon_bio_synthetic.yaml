@@ -1,8 +1,8 @@
 id: vital_beacon_bio_synthetic
-name: Vital Beacon
-description: |-
-    Vitality radiates outward from you, allowing others to supplicate and receive healing. Once per round, either you or an ally can use an Interact action to supplicate and lay hands upon you to regain Hit Points. Each time the beacon heals someone, it decreases in strength. It restores @Damage[(@item.rank)d10[healing,vitality]|shortLabel] Hit Points to the first creature, @Damage[(@item.rank)d8[healing,vitality]|shortLabel] Hit Points to the second, @Damage[(@item.rank)d6[healing,vitality]|shortLabel] Hit Points to the third, and @Damage[(@item.rank)d4[healing,vitality]|shortLabel] Hit Points to the fourth, after which the spell ends. You can have only one vital beacon active at a time.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Vital Beacon]Heightened (+1) The beacon restores one additional die of Hit Points each time it heals, using the same die size as the others for that step.
+name: Bio-Beacon Pulse
+description: Restorative energy radiates outward from you, allowing allies to receive
+  healing. Once per round, either you or an ally within range can recover Hit Points
+  as described by the base protocol.
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -12,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Vitality radiates outward from you, allowing others to supplicate and receive healing. Once per round, either you or an ally can use an Interact action to supplicate and lay hands upon you to regain H
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Vitality radiates outward from you, allowing others to supplicate
+      and receive healing. Once per round, either you or an ally can use an Interact
+      action to supplicate and lay hands upon you to regain H

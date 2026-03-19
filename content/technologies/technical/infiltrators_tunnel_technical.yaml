@@ -1,8 +1,9 @@
 id: infiltrators_tunnel_technical
-name: Infiltrator's Tunnel
-description: |-
-    It's best to know the ingress and egress points for any location you plan to rob. But it's even better to make your own! You create two portals. One appears on a flat surface you can touch, and the other appears on a different flat surface in range that you can see.
-    You can move through the portals as though they were adjacent to each other. Any other creature attempting to move through the portals must succeed at a Will saving throw or be teleported up to 30 feet away from their starting point to a random safe space determined by the GM.Heightened (6th) When you Cast the Spell, you can designate up to 5 other creatures to freely move between the portals.
+name: Spatial Bypass Unit
+description: You deploy a device that creates paired transit portals. One appears
+  on a surface you can touch, the other on a surface in range you can see. You move
+  through them as if adjacent. Others must succeed at a Will save or be randomly teleported
+  30 feet away.Heightened (6th) Designate up to 5 others to use the portals freely.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -14,7 +15,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: It's best to know the ingress and egress points for any location you plan to rob. But it's even better to make your own! You create two portals. One appears on a flat surface you can touch, and the ot
+  on_apply:
+  - type: utility
+    dc: 0
+    description: It's best to know the ingress and egress points for any location
+      you plan to rob. But it's even better to make your own! You create two portals.
+      One appears on a flat surface you can touch, and the ot

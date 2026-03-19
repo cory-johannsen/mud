@@ -1,20 +1,9 @@
 id: chromatic_ray_technical
-name: Chromatic Ray
-description: |-
-    You send out a ray of colored light streaming toward your enemy, with a magical effect depending on the ray's color. Make a spell attack roll. If you hit, roll [[/r 1d4]]{1d4} to see which beam you cast. If the ray deals damage, that damage is doubled on a critical hit. Any additional traits that apply to a ray are listed in parentheses just after the name of the color.
-
-    Red (fire) The ray deals @Damage[30[fire]] damage to the target.
-    Orange (acid) The ray deals @Damage[40[acid]] damage to the target.
-    Yellow (electricity) The ray deals @Damage[50[electricity]] damage to the target.
-    Green (poison) The ray deals @Damage[25[poison]] damage to the target, and the target must succeed at a Fortitude save or be Enfeebled 1 for 1 minute (Enfeebled 2 on a critical failure).
-
-
-    Heightened (6th) The damage for @Damage[40[fire]]{Red}, @Damage[50[acid]]{Orange}, @Damage[60[electricity]]{Yellow}, and @Damage[35[poison]]{Green} each increase by 10. Roll [[/r 1d8]]{1d8} to determine the ray's color, using the results for 1-4 above and the results for 5-8 below.
-
-    Blue The ray has the effect of the @UUID[Compendium.pf2e.spells-srd.Item.Petrify] spell. On a critical hit, the target is Clumsy 1 as long as it's @UUID[Compendium.pf2e.conditionitems.Item.Slowed] by the flesh to stone effect.
-    Indigo (emotion, incapacitation, mental) The ray has the effect of the @UUID[Compendium.pf2e.spells-srd.Item.Confusion] spell. On a critical hit, it has the effect of @UUID[Compendium.pf2e.spells-srd.Item.Warp Mind] instead.
-    Violet The target is @UUID[Compendium.pf2e.conditionitems.Item.Slowed] for 1 minute. It must also succeed at a will save or be teleported 120 feet directly away from you (if there isn't room for it to appear there, it appears in the nearest open space); this is a teleportation effect.
-    Intense Color The target is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] until the end of your next turn, or @UUID[Compendium.pf2e.conditionitems.Item.Blinded] if your attack roll was a critical hit. Roll again and add the effects of another color (rerolling results of 8).
+name: Variable Frequency Cannon
+description: You fire a beam of variable-frequency energy toward your target. Make
+  a spell attack roll. If you hit, roll [[/r 1d4]]{1d4} to determine the frequency.
+  All mechanical effects (damage by color, heightened effects) remain identical to
+  the base protocol.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -26,7 +15,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You send out a ray of colored light streaming toward your enemy, with a magical effect depending on the ray's color. Make a spell attack roll. If you hit, roll [[/r 1d4]]{1d4} to see which beam you ca
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You send out a ray of colored light streaming toward your enemy,
+      with a magical effect depending on the ray's color. Make a spell attack roll.
+      If you hit, roll [[/r 1d4]]{1d4} to see which beam you ca

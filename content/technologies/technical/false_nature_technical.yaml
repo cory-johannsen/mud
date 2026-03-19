@@ -1,6 +1,9 @@
 id: false_nature_technical
-name: False Nature
-description: You create an illusion that makes an object seem to be something entirely different. When you Cast this Spell, speak aloud a declarative statement that the target is a different, nonspecific object. Your statement can't presuppose any other facts. For instance, you could claim an object is "a stone" or "an antidote," but not "the Starstone" or "the antidote to the lethal poison you already drank." Creatures who previously observed the target receive an immediate Will save to disbelieve, but on a failure, the illusion temporarily rewrites their memory that the object was something different. A creature who failed their Will save, or didn't already see the item's original form, must Interact with the illusion as normal to receive a Perception check against the spell DC to disbelieve. When the spell ends, targets remember the object's true nature, even if they never disbelieved the spell.
+name: Object Disguise Projector
+description: You deploy a device that projects a holographic overlay making an object
+  appear to be something entirely different. When you activate it, state what the
+  object appears to be. All mechanical effects (saves, disbelief, memory alteration)
+  remain identical to the base protocol.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -12,7 +15,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create an illusion that makes an object seem to be something entirely different. When you Cast this Spell, speak aloud a declarative statement that the target is a different, nonspecific object. Y
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an illusion that makes an object seem to be something
+      entirely different. When you Cast this Spell, speak aloud a declarative statement
+      that the target is a different, nonspecific object. Y

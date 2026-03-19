@@ -1,6 +1,7 @@
 id: stonesense_technical
-name: Stonesense
-description: You gain tremorsense as an imprecise sense to a range of 100 feet, but you can only sense vibrations through natural stone (not masonry, adobe, or any other manufactured edifice).
+name: Seismic Sensor Array
+description: You deploy a device that grants tremorsense as an imprecise sense to
+  100 feet, but only through natural stone (not manufactured structures).
 tradition: technical
 level: 4
 usage_type: prepared
@@ -10,7 +11,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You gain tremorsense as an imprecise sense to a range of 100 feet, but you can only sense vibrations through natural stone (not masonry, adobe, or any other manufactured edifice).
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You gain tremorsense as an imprecise sense to a range of 100 feet,
+      but you can only sense vibrations through natural stone (not masonry, adobe,
+      or any other manufactured edifice).

@@ -1,13 +1,24 @@
 id: bestial_curse_neural
-name: Bestial Curse
-description: |-
-    You tap into the target's inner being and curse it to become a bestial version of itself. The effect is based on its Fortitude save.
-    Critical Success The target is unaffected.
-    Success The target's body gains minor bestial features. Its insides churn as they partially transform, causing it to be Clumsy 1 for 1 round. When it recovers from the clumsy condition, its features revert to normal, and the spell ends.
-    Failure The target transforms into a bestial form for 1 hour. The target becomes clumsy 1 and gains weakness 1 to silver. It gains a claw, hoof, horn, or jaws Strike (your choice) that uses the target's unarmed Strike statistics except that the damage type changes to bludgeoning, piercing, or slashing, as appropriate. Whenever the target attempts to use any manipulate action, it must succeed at a @Check[flat|dc:5] or the action is lost.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Bestial Curse (Failure)]
-    Critical Failure As failure, but the duration is unlimited.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Bestial Curse (Critical Failure)]
+name: Feral Regression
+description: 'You overload the target''s limbic system, triggering a neurochemical
+  cascade that forces devolution into a feral state. The effect is based on its Fortitude
+  save.
+
+  Critical Success The target is unaffected.
+
+  Success The target''s body gains minor feral features. Its motor cortex destabilizes
+  as neural pathways partially revert, causing it to be Clumsy 1 for 1 round. When
+  it recovers from the clumsy condition, its features revert to normal, and the effect
+  ends.
+
+  Failure The target transforms into a feral form for 1 hour. The target becomes clumsy
+  1 and gains weakness 1 to silver. It gains a claw, hoof, horn, or jaws Strike (your
+  choice) that uses the target''s unarmed Strike statistics except that the damage
+  type changes to bludgeoning, piercing, or slashing, as appropriate. Whenever the
+  target attempts to use any manipulate action, it must succeed at a @Check[flat|dc:5]
+  or the action is lost.
+
+  Critical Failure As failure, but the duration is unlimited.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -19,10 +30,12 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You tap into the target's inner being and curse it to become a bestial version of itself. The effect is based on its Fortitude save.
-            Critical Success The target is unaffected.
-            Success The target's bod
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You tap into the target''s inner being and curse it to become a
+      bestial version of itself. The effect is based on its Fortitude save.
+
+      Critical Success The target is unaffected.
+
+      Success The target''s bod'

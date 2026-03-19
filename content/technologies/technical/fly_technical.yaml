@@ -1,10 +1,10 @@
 id: fly_technical
-name: Fly
-description: |-
-    The target can soar through the air, gaining a fly Speed equal to its Speed or 20 feet, whichever is greater.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fly]
+name: Thruster Pack Mk4
+description: 'The target deploys an anti-gravity thruster system, gaining a fly Speed
+  equal to its Speed or 20 feet, whichever is greater.
 
-    Heightened (7th) The duration increases to 1 hour.
+
+  Heightened (7th) Duration increases to 1 hour.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -14,11 +14,13 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            The target can soar through the air, gaining a fly Speed equal to its Speed or 20 feet, whichever is greater.
-            @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fly]
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target can soar through the air, gaining a fly Speed equal to
+      its Speed or 20 feet, whichever is greater.
 
-            Heightened (7th) The duration
+      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fly]
+
+
+      Heightened (7th) The duration'

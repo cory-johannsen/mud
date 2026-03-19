@@ -1,6 +1,8 @@
 id: soft_landing_technical
-name: Soft Landing
-description: You create a magical field that buoys any creature or object falling into the area, providing a harmless landing from any height. As you generally fall 1,500 feet per round, you can cast this spell while you are falling to ensure a safe landing, provided you can see your landing point and it's within range.
+name: Inertial Dampening Field
+description: You deploy a kinetic absorption field that buoys any creature or object
+  falling into the area, providing a harmless landing from any height. You can activate
+  this while falling if you can see your landing point within range.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a magical field that buoys any creature or object falling into the area, providing a harmless landing from any height. As you generally fall 1,500 feet per round, you can cast this spell wh
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a magical field that buoys any creature or object falling
+      into the area, providing a harmless landing from any height. As you generally
+      fall 1,500 feet per round, you can cast this spell wh

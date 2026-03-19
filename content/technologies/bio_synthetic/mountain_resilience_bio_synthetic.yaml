@@ -1,12 +1,16 @@
 id: mountain_resilience_bio_synthetic
-name: Mountain Resilience
-description: |-
-    The target's skin hardens like the stone of a mountain face. It gains resistance 5 to physical damage, except adamantine. Each time the target is hit by a bludgeoning, piercing, or slashing attack, mountain resilience's duration decreases by 1 minute.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Mountain Resilience]
+name: Lithite Skin Graft
+description: 'The target''s skin hardens with a mineral-infused bio-synthetic coating.
+  It gains resistance 5 to physical damage, except adamantine. Each time the target
+  is hit by a bludgeoning, piercing, or slashing attack, the duration decreases by
+  1 minute.
 
-    Heightened (6th) The resistance increases to 10.
-    Heightened (8th) The resistance increases to 15.
-    Heightened (10th) The resistance increases to 20.
+
+  Heightened (6th) The resistance increases to 10.
+
+  Heightened (8th) The resistance increases to 15.
+
+  Heightened (10th) The resistance increases to 20.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -16,7 +20,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target's skin hardens like the stone of a mountain face. It gains resistance 5 to physical damage, except adamantine. Each time the target is hit by a bludgeoning, piercing, or slashing attack, mo
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target's skin hardens like the stone of a mountain face. It gains
+      resistance 5 to physical damage, except adamantine. Each time the target is
+      hit by a bludgeoning, piercing, or slashing attack, mo

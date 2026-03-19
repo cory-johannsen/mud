@@ -1,14 +1,12 @@
 id: confusion_technical
-name: Confusion
-description: |-
-    You befuddle your target with strange impulses, causing it to act randomly. The effects are determined by the target's Will save. You can Dismiss the spell.
+name: Logic Bomb
+description: 'You deploy a device that scrambles the target''s decision-making processes
+  with contradictory signals, causing random behavior. The effects are determined
+  by the target''s Will save. All mechanical effects (stunned, confused, duration)
+  remain identical to the base protocol.
 
-    Critical Success The target is unaffected.
-    Success The target babbles incoherently and is Stunned 1.
-    Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Confused] for 1 minute. It can attempt a new save at the end of each of its turns to end the confusion.
-    Critical Failure The target is Confused for 1 minute, with no save to end early.
 
-    Heightened (8th) You can target up to 10 creatures.
+  Heightened (8th) You can target up to 10 creatures.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -20,10 +18,12 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You befuddle your target with strange impulses, causing it to act randomly. The effects are determined by the target's Will save. You can Dismiss the spell.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You befuddle your target with strange impulses, causing it to act
+      randomly. The effects are determined by the target''s Will save. You can Dismiss
+      the spell.
 
-            Critical Success The target is unaffected.
+
+      Critical Success The target is unaffected.'

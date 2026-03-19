@@ -1,12 +1,18 @@
 id: spiritual_anamnesis_fanatic_doctrine
-name: Spiritual Anamnesis
-description: |-
-    Memories of a past life that seem incredibly real (and may even be) overwhelm the target's mind. This is especially disorienting for undead and creatures that have lived a previous life (such as celestials, fiends, monitors, and many other extraplanar creatures); if such creatures roll a critical success on their save, they get a success instead, and if they roll a failure, they get a critical failure instead.
+name: Past-Life Revelation
+description: 'Overwhelming memories of a past existence flood the target''s consciousness.
+  This is especially disorienting for undead and creatures that have lived previous
+  lives; if such creatures roll a critical success, they get a success instead, and
+  if they roll a failure, they get a critical failure instead.
 
-    Critical Success The creature is unaffected.
-    Success The creature is Slowed 1 for 1 round.
-    Failure The target is Slowed 1 for 1 minute and babbles about the visions, possibly providing information about what they saw.
-    Critical Failure As failure, but the target is also Stunned 3.
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is Slowed 1 for 1 round.
+
+  Failure The target is Slowed 1 for 1 minute and babbles about the visions.
+
+  Critical Failure As failure, but also Stunned 3.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -18,7 +24,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Memories of a past life that seem incredibly real (and may even be) overwhelm the target's mind. This is especially disorienting for undead and creatures that have lived a previous life (such as celes
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Memories of a past life that seem incredibly real (and may even be)
+      overwhelm the target's mind. This is especially disorienting for undead and
+      creatures that have lived a previous life (such as celes

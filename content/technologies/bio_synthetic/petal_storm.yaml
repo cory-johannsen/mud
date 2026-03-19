@@ -1,9 +1,13 @@
 id: petal_storm
-name: Petal Storm
-description: |-
-    You bring forth a cloud of razor-sharp flower petals that thrash violently in the wind. A creature that enters the storm or starts its turn in the storm is sliced by the razor-sharp edges of the petals. It takes 2d10 slashing damage with a basic Reflex save. A creature can take damage from the petals only once per round. At the end of the duration, the storm calms and the petals fall harmlessly to the ground.
+name: Razor Flora Storm
+description: 'You deploy a cloud of razor-sharp bio-synthetic leaf fragments that
+  thrash violently in turbulent air currents. A creature that enters the storm or
+  starts its turn in it takes 2d10 slashing damage with a basic Reflex save. A creature
+  can take damage from the storm only once per round. At the end of the duration,
+  the fragments decompose harmlessly.
 
-    Heightened (+2) The damage increases by 1d10.
+
+  Heightened (+2) The damage increases by 1d10.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -15,18 +19,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 2d6
-          damage_type: slashing
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 2d10
-          damage_type: slashing
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 4d10
-          damage_type: slashing
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 2d6
+    damage_type: slashing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d10
+    damage_type: slashing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d10
+    damage_type: slashing
+    dc: 0

@@ -1,18 +1,32 @@
 id: elephant_form
-name: Elephant Form
-description: |-
-    You channel the primal forces of nature to transform into a Large battle form, specifically that of a powerful and terrifying elephant or similar creature, such as a mammoth, mastodon, or anancus. This spell has the effects of @UUID[Compendium.pf2e.spells-srd.Item.Dinosaur Form], except you gain the following specific abilities instead of the form-specific abilities of dinosaur form.
+name: Pachyderm Graft
+description: 'You inject a rapid-acting mutagenic compound that transforms you into
+  a Large bio-synthetic combat form modeled on megafauna such as elephants, mammoths,
+  or mastodons. This protocol has the effects of Megafauna Graft, except you gain
+  the following specific abilities instead.
 
-    Speed 40 feet;
-    Melee 1 foot, Damage 2d8 bludgeoning.
-    Melee 1 trunk (reach 10 feet), Effect grabbing trunk;
-    Melee 1 tusk (reach 10 feet), Damage 2d6 piercing.
 
-    Grabbing Trunk A creature up to two sizes smaller that's hit by your trunk is @UUID[Compendium.pf2e.conditionitems.Item.Grabbed]. If you succeed at your @UUID[Compendium.pf2e.actionspf2e.Item.Grapple] check against a creature grabbed by your trunk, you can reposition the creature to another space within your trunk's reach.
+  Speed 40 feet;
 
-    Heightened (5th) Your elephant form is Huge; your trunk and tusk attacks have 15-foot reach, and your foot attack has 10-foot reach. You instead gain 20 temporary HP, an attack modifier of +18, a damage bonus of +6, double the damage dice, and Athletics +21.
-    Heightened (7th) Your elephant form is Gargantuan; your trunk and tusk attacks have 20-foot reach, and your foot attack has 15-foot reach. Your AC is 21 + your level and you instead gain 25 temporary HP, an attack modifier of +25, a damage bonus of +15, double the damage dice, and Athletics +25.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Elephant Form]
+  Melee 1 foot, Damage 2d8 bludgeoning.
+
+  Melee 1 trunk (reach 10 feet), Effect grabbing trunk;
+
+  Melee 1 tusk (reach 10 feet), Damage 2d6 piercing.
+
+
+  Grabbing Trunk A creature up to two sizes smaller hit by your trunk is Grabbed.
+  If you succeed at your Grapple check against a creature grabbed by your trunk, you
+  can reposition it to another space within your trunk''s reach.
+
+
+  Heightened (5th) Your form is Huge; trunk and tusk attacks have 15-foot reach, foot
+  attack has 10-foot reach. 20 temporary HP, attack modifier +18, damage bonus +6,
+  double damage dice, Athletics +21.
+
+  Heightened (7th) Your form is Gargantuan; trunk and tusk attacks have 20-foot reach,
+  foot attack has 15-foot reach. AC is 21 + your level, 25 temporary HP, attack modifier
+  +25, damage bonus +15, double damage dice, Athletics +25.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -22,7 +36,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You channel the primal forces of nature to transform into a Large battle form, specifically that of a powerful and terrifying elephant or similar creature, such as a mammoth, mastodon, or anancus. Thi
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You channel the primal forces of nature to transform into a Large
+      battle form, specifically that of a powerful and terrifying elephant or similar
+      creature, such as a mammoth, mastodon, or anancus. Thi

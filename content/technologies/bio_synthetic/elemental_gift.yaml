@@ -1,18 +1,12 @@
 id: elemental_gift
-name: Elemental Gift
-description: |-
-    An elemental force fills your target, granting the target the swiftness of air, the ruggedness of earth, the sting of fire, or the flexibility of water, depending on which element you choose. Choose an element when you Cast the Spell. The target gains the benefit of that element as described below, and this spell gains that trait's element.
+name: Elemental Infusion
+description: 'An elemental compound floods the target''s biology, granting enhanced
+  capabilities based on the chosen element. Choose an element when you activate the
+  protocol. Effects and statistics remain identical to the base protocol for each
+  element (air, earth, fire, metal, water, wood).
 
-    Air The target gains a +30-foot status bonus to its land Speed and gains a fly Speed equal to its land Speed without the status bonus.
-    Earth While on the ground, the target gets a +2 status bonus to Fortitude and Reflex saves against effects that would @UUID[Compendium.pf2e.actionspf2e.Item.Shove] or @UUID[Compendium.pf2e.actionspf2e.Item.Trip] it, and to saves against effects that would attempt to knock it @UUID[Compendium.pf2e.conditionitems.Item.Prone]. In addition, the ground adjacent to the target is difficult terrain, and the difficult terrain moves with the target, though the target ignores this difficult terrain with its own movement.
-    Fire The target's melee unarmed Strikes and melee weapon Strikes deal 1d6 persistent fire damage on a hit.
-    Metal The target's Strikes using a metal weapon or an unarmed attack deal an additional 1d4 electricity damage on a hit and get a +1 status bonus to the attack roll if the target is made of metal or wearing metal armor.
-    Water The target takes on a watery sheen, gaining resistance 5 to fire and a swim Speed equal to its land Speed.
-    Wood The target gains a number of temporary Hit Points equal to the spell's rank, then gains half that number of temporary HP at the start of each of its turns.
 
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Elemental Gift]
-
-    Heightened (8th) You can target up to 5 willing creatures.
+  Heightened (8th) You can target up to 5 willing creatures.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -24,7 +18,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: An elemental force fills your target, granting the target the swiftness of air, the ruggedness of earth, the sting of fire, or the flexibility of water, depending on which element you choose. Choose a
+  on_apply:
+  - type: utility
+    dc: 0
+    description: An elemental force fills your target, granting the target the swiftness
+      of air, the ruggedness of earth, the sting of fire, or the flexibility of water,
+      depending on which element you choose. Choose a

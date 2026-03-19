@@ -1,14 +1,8 @@
 id: divine_wrath
-name: Divine Wrath
-description: |-
-    You channel the fury of divinity against your foes. You deal 4d10 spirit damage to enemies in the area, depending on their Fortitude save.
-
-    Critical Success The creature is unaffected.
-    Success The creature takes half damage.
-    Failure The creature takes full damage and is Sickened 1.
-    Critical Failure The creature takes full damage and is Sickened 2; while it's sickened, it's also Slowed 1.
-
-    Heightened (+1) The damage increases by 1d10.
+name: Doctrinal Wrath
+description: You channel the fury of your ideology against enemies. You deal 4d10
+  spirit damage to enemies in the area, depending on their saves. All mechanical effects
+  remain identical to the base protocol.
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -20,18 +14,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d6
-          damage_type: spirit
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d10
-          damage_type: spirit
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d10
-          damage_type: spirit
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d6
+    damage_type: spirit
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d10
+    damage_type: spirit
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d10
+    damage_type: spirit
+    dc: 0

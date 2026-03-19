@@ -1,6 +1,7 @@
 id: holy_cascade
-name: Holy Cascade
-description: You call upon sacred energy to amplify a vial of @UUID[Compendium.pf2e.equipment-srd.Item.Holy Water], tossing it an incredible distance. It explodes in an enormous burst that deals 3d6 bludgeoning damage to creatures in the area from the cascade of water. The water deals an additional @Damage[((@item.level*2)-2)d6[spirit]] damage to creatures with the unholy trait in the area.Heightened (+1) The bludgeoning damage increases by 1d6, and the additional spirit damage increases by 2d6.
+name: Sacred Purge Burst
+description: You amplify a vial of sanctified chemical agent, tossing it an increment
+  further. All mechanical effects remain identical to the base protocol.
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -12,18 +13,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 3d3
-          damage_type: bludgeoning
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 3d6
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 6d6
-          damage_type: bludgeoning
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0

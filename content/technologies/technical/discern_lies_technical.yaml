@@ -1,6 +1,7 @@
 id: discern_lies_technical
-name: Discern Lies
-description: Falsehoods ring in your ears like discordant notes. You gain a +4 status bonus to Perception checks when someone Lies.
+name: Polygraph Module
+description: Biometric analysis hardware flags deception in real time. You gain a
+  +4 status bonus to Perception checks when someone Lies.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -10,7 +11,8 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Falsehoods ring in your ears like discordant notes. You gain a +4 status bonus to Perception checks when someone Lies.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Falsehoods ring in your ears like discordant notes. You gain a +4
+      status bonus to Perception checks when someone Lies.

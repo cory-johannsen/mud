@@ -1,11 +1,14 @@
 id: bridge_of_vines_technical
-name: Bridge of Vines
-description: |-
-    Vines sprout beneath your feet and extend away from you in a straight line up to 60 feet, forming a 10-foot-wide bridge that can cross over difficult terrain and low obstacles, as well as reach higher ground. The bridge has an AC equal to your spell DC, Hardness 10, and 20 Hit Points. It is immune to critical hits and precision damage. The bridge lasts either for the duration of the spell, until it is destroyed, or until you Dismiss the spell.
-    While the spell is active, you and your allies can use the bridge normally. If any other creatures attempt to use the bridge, the vines attempt to trip and entangle them. They must attempt a Reflex save against your spell DC.Critical Success The target is unaffected.
-    Success The target treats the length of the bridge as difficult terrain.
-    Failure As success, and the target is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].
-    Critical Failure As success, and the target is knocked prone and @UUID[Compendium.pf2e.conditionitems.Item.Grabbed] until it Escapes (with a DC equal to your spell DC) or the spell ends.Heightened (+1) The bridge's Hit Points increase by 10.
+name: Hardlight Bridge Mk4
+description: 'A hardlight projector beneath your feet extends a solid energy bridge
+  in a straight line up to 60 feet, forming a 10-foot-wide walkway. The bridge has
+  AC equal to your spell DC, Hardness 10, and 20 Hit Points. Immune to critical hits
+  and precision damage.
+
+  You and allies use it normally. Other creatures that attempt to cross face defensive
+  countermeasures. They must attempt a Reflex save. All mechanical effects (trip,
+  grab) remain identical to the base protocol.Heightened (+1) Hit Points increase
+  by 10.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -17,7 +20,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Vines sprout beneath your feet and extend away from you in a straight line up to 60 feet, forming a 10-foot-wide bridge that can cross over difficult terrain and low obstacles, as well as reach higher
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Vines sprout beneath your feet and extend away from you in a straight
+      line up to 60 feet, forming a 10-foot-wide bridge that can cross over difficult
+      terrain and low obstacles, as well as reach higher

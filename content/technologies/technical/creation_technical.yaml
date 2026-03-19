@@ -1,9 +1,11 @@
 id: creation_technical
-name: Creation
-description: |-
-    You conjure a temporary object from magical energy. It must consist of earthen or plant-derived matter (such as wood, paper, brick, or stone) and be 5 cubic feet or smaller. It can't rely on intricate artistry or complex moving parts, never fulfills a cost or the like, and can't be made of precious materials or materials with a rarity of uncommon or higher. It is obviously temporarily conjured, and thus can't be sold or passed off as a genuine item. The spell gains the appropriate trait for the item created, typically earth, plant, or wood.
+name: Rapid Fabrication Unit
+description: 'You deploy a fabrication device that assembles a temporary object from
+  available materials. It must be 5 cubic feet or smaller, can''t have complex moving
+  parts or be made of precious materials. It is obviously fabricated.
 
-    Heightened (5th) The item is metal and can include common minerals, like feldspar or quartz. The spell gains the metal trait if used to create a metal object
+
+  Heightened (5th) The item can be metal and include common minerals.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -13,7 +15,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You conjure a temporary object from magical energy. It must consist of earthen or plant-derived matter (such as wood, paper, brick, or stone) and be 5 cubic feet or smaller. It can't rely on intricate
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure a temporary object from magical energy. It must consist
+      of earthen or plant-derived matter (such as wood, paper, brick, or stone) and
+      be 5 cubic feet or smaller. It can't rely on intricate

@@ -1,8 +1,13 @@
 id: procyal_philosophy_neural
-name: Procyal Philosophy
-description: |-
-    The racoon-like visage of a sagacious procyal appears, dispensing helpful advice. The image appears floating next to the target. The image is just a floating magical manifestation and doesn't occupy any space. The procyal offers helpful suggestions, preparing to Aid the target as though the procyal had its own reaction. The procyal uses a bonus equal to your spell DC - 10 for its rolls to Aid.
-    On each of your turns, the procyal prepares to Aid its target again. You can use a free action, which has the concentrate trait, to redirect the procyal image to a different creature, changing the target of the spell. Otherwise, the procyal keeps aiding the same creature for the duration of the spell.
+name: Tactical AI Advisor
+description: 'A holographic tactical advisor appears, dispensing combat guidance.
+  The projection appears floating next to the target. It''s a floating digital manifestation
+  and doesn''t occupy any space. The advisor offers helpful suggestions, preparing
+  to Aid the target as though it had its own reaction. The advisor uses a bonus equal
+  to your spell DC - 10 for its rolls to Aid.
+
+  On each of your turns, the advisor prepares to Aid its target again. You can use
+  a free action, which has the concentrate trait, to redirect it to a different creature.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -12,7 +17,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The racoon-like visage of a sagacious procyal appears, dispensing helpful advice. The image appears floating next to the target. The image is just a floating magical manifestation and doesn't occupy a
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The racoon-like visage of a sagacious procyal appears, dispensing
+      helpful advice. The image appears floating next to the target. The image is
+      just a floating magical manifestation and doesn't occupy a

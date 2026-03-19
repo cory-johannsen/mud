@@ -1,10 +1,11 @@
 id: flicker_technical
-name: Flicker
-description: |-
-    You flicker quickly between your current plane and another. You gain resistance 5 to all damage, except force. At the end of each of your turns, you automatically teleport 10 feet in a random direction, as determined by the GM. You can Sustain the spell to teleport in this way.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Flicker]
+name: Phase Oscillator
+description: 'You activate a device that rapidly shifts you between dimensional frequencies.
+  You gain resistance 5 to all damage except force. At the end of each turn, you automatically
+  teleport 10 feet in a random direction. You can Sustain to teleport.
 
-    Heightened (+2) The resistance increases by 3.
+
+  Heightened (+2) Resistance increases by 3.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -14,7 +15,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You flicker quickly between your current plane and another. You gain resistance 5 to all damage, except force. At the end of each of your turns, you automatically teleport 10 feet in a random directio
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You flicker quickly between your current plane and another. You gain
+      resistance 5 to all damage, except force. At the end of each of your turns,
+      you automatically teleport 10 feet in a random directio

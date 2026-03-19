@@ -1,8 +1,12 @@
 id: peaceful_bubble_neural
-name: Peaceful Bubble
-description: |-
-    An opaque shell of drifting, iridescent runes covers the area, creating a bubble. You can choose to make the burst smaller, in 10-foot increments. The runes don't block travel, but those inside the bubble can't perceive those outside it and vice versa. Detection and scrying effects are likewise blocked.
-    Creatures sleeping within the bubble are immune to dreams sent by spells. Those sleeping 8 hours reduce their @UUID[Compendium.pf2e.conditionitems.Item.Doomed] condition by 2 instead of 1.
+name: Isolation Dome
+description: 'A shimmering shell of psionic interference covers the area, creating
+  a sealed zone. You can choose to make the burst smaller, in 10-foot increments.
+  The barrier doesn''t block travel, but those inside can''t perceive those outside
+  and vice versa. Detection and scanning effects are likewise blocked.
+
+  Creatures sleeping within the dome are immune to remotely transmitted nightmares.
+  Those sleeping 8 hours reduce their Doomed condition by 2 instead of 1.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -12,7 +16,9 @@ targets: zone
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: An opaque shell of drifting, iridescent runes covers the area, creating a bubble. You can choose to make the burst smaller, in 10-foot increments. The runes don't block travel, but those inside the bu
+  on_apply:
+  - type: utility
+    dc: 0
+    description: An opaque shell of drifting, iridescent runes covers the area, creating
+      a bubble. You can choose to make the burst smaller, in 10-foot increments. The
+      runes don't block travel, but those inside the bu

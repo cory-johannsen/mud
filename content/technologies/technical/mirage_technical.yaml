@@ -1,10 +1,11 @@
 id: mirage_technical
-name: Mirage
-description: |-
-    You create an illusion that causes natural terrain to look, sound, feel, and smell like a different kind of terrain. This doesn't disguise any structures or creatures in the area.
-    Any creature that touches the illusion or uses the @UUID[Compendium.pf2e.actionspf2e.Item.Seek] action to examine it can attempt to disbelieve your illusion.
+name: Terrain Hologram Unit
+description: 'You deploy a device that projects a holographic overlay making natural
+  terrain appear as a different kind. Doesn''t disguise structures or creatures. Any
+  creature that touches or Seeks can attempt to disbelieve.
 
-    Heightened (5th) Your image can also disguise structures or create illusory structures (but still doesn't disguise creatures).
+
+  Heightened (5th) Can also disguise or create illusory structures.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -14,9 +15,11 @@ targets: zone
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You create an illusion that causes natural terrain to look, sound, feel, and smell like a different kind of terrain. This doesn't disguise any structures or creatures in the area.
-            Any creature that to
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You create an illusion that causes natural terrain to look, sound,
+      feel, and smell like a different kind of terrain. This doesn''t disguise any
+      structures or creatures in the area.
+
+      Any creature that to'

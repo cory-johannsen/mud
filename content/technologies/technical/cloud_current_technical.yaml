@@ -1,8 +1,12 @@
 id: cloud_current_technical
-name: Cloud Current
-description: |-
-    Air and water vapor combine into a great cloud that funnels a powerful current within it. The eddies make the cloud appear from a distance to be a group of cloud dragons tumbling through the sky. The cloud is up to 30 feet wide, 30 feet tall, and 10 miles long. It runs parallel to the ground, and the nearest end of it must be within range and at least 100 feet above the ground. The current travels in a direction you choose when you Cast the Spell, and the travel Speed of creatures flying through the cloud in that direction is doubled. You can Dismiss the cloud.Heightened (6th) The duration is 8 hours, and the cloud can be up to 50 feet wide and 100 miles long.
-    Heightened (8th) As 6th, and travel speed is quadrupled.
+name: Jetstream Generator
+description: 'Air compression machinery creates a massive cloud corridor with a powerful
+  internal current. The cloud is up to 30 feet wide, 30 feet tall, and 10 miles long
+  at least 100 feet above ground. Travel Speed in the chosen direction is doubled.
+  You can Dismiss.Heightened (6th) Duration 8 hours, cloud up to 50 feet wide and
+  100 miles long.
+
+  Heightened (8th) As 6th, travel speed quadrupled.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -12,7 +16,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Air and water vapor combine into a great cloud that funnels a powerful current within it. The eddies make the cloud appear from a distance to be a group of cloud dragons tumbling through the sky. The
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Air and water vapor combine into a great cloud that funnels a powerful
+      current within it. The eddies make the cloud appear from a distance to be a
+      group of cloud dragons tumbling through the sky. The

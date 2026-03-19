@@ -1,6 +1,8 @@
 id: solid_fog_bio_synthetic
-name: Solid Fog
-description: You conjure a bank of fog so thick it impedes movement as well as sight. This functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist], except that the area is also difficult terrain. You can Dismiss the spell.
+name: Dense Spore Cloud
+description: You release a bank of bio-synthesized spores so thick it impedes movement
+  as well as sight. This functions as Mist, except the area is also difficult terrain.
+  You can Dismiss the spell.
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You conjure a bank of fog so thick it impedes movement as well as sight. This functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist], except that the area is also difficult terrain. You can Dismiss
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure a bank of fog so thick it impedes movement as well as
+      sight. This functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist], except
+      that the area is also difficult terrain. You can Dismiss

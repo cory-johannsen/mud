@@ -1,9 +1,10 @@
 id: filter_air_technical
-name: Filter Air
-description: |-
-    Trigger You're exposed to a poison or disease that has the inhaled trait, and you're aware of the exposure
-    Requirements You breathe air.You suck in a rough breath of air, and your body automatically filters out the harmful molecules that would infest your lungs. As you breathe for the duration of the spell, you get the outcome one degree of success higher on your saving throws against inhaled poisons and diseases.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Filter Air]
+name: Atmospheric Filtration Unit
+description: 'Trigger You''re exposed to an inhaled poison or disease.
+
+  You activate a compact atmospheric filtration device that scrubs harmful particles
+  from the air you breathe. For the duration, you get the outcome one degree of success
+  higher on saves against inhaled poisons and diseases.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -13,9 +14,11 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Trigger You're exposed to a poison or disease that has the inhaled trait, and you're aware of the exposure
-            Requirements You breathe air.You suck in a rough breath of air, and your body automatically f
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger You''re exposed to a poison or disease that has the inhaled
+      trait, and you''re aware of the exposure
+
+      Requirements You breathe air.You suck in a rough breath of air, and your body
+      automatically f'

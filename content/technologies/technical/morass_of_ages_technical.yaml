@@ -1,10 +1,9 @@
 id: morass_of_ages_technical
-name: Morass of Ages
-description: |-
-    You surround yourself in temporal eddies that draw out time for those around you, making every step feel like an eternity endured. A creature in the emanation, or that later enters the emanation, must attempt a Fortitude save. The creature attempts this save only once and uses the same effect for the duration of the spell. Each time you Sustain the Spell, you can choose to increase the emanation's radius by 5 feet, to a maximum of 60 feet.Critical Success The creature is unaffected.
-    Success Squares in the area are difficult terrain for the creature.
-    Failure Squares in the area are difficult terrain for the creature, and the creature is Slowed 1 when it starts its turn in the area.
-    Critical Failure As failure, plus the creature also becomes @UUID[Compendium.pf2e.conditionitems.Item.Restrained]. The creature can attempt to Escape against your spell DC to remove the restrained condition.
+name: Temporal Drag Projector
+description: You deploy a device that generates temporal distortion eddies, stretching
+  time for those around you. Each creature in the emanation must attempt a Fortitude
+  save. All mechanical effects (difficult terrain, slowed, restrained, expanding radius)
+  remain identical to the base protocol.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -16,7 +15,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You surround yourself in temporal eddies that draw out time for those around you, making every step feel like an eternity endured. A creature in the emanation, or that later enters the emanation, must
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You surround yourself in temporal eddies that draw out time for those
+      around you, making every step feel like an eternity endured. A creature in the
+      emanation, or that later enters the emanation, must

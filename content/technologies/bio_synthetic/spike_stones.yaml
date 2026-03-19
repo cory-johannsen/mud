@@ -1,9 +1,12 @@
 id: spike_stones
-name: Spike Stones
-description: |-
-    Long, sharp spikes of solid rock thrust up from the ground in the area. The area becomes difficult terrain and hazardous terrain. A creature that moves on the ground through the area takes 3 piercing damage for every square of that area it moves into.
+name: Lithic Spike Field
+description: 'Long, sharp spikes of bio-mineralized stone thrust up from the ground
+  in the area. The area becomes difficult terrain and hazardous terrain. A creature
+  that moves on the ground through the area takes 3 piercing damage for every square
+  it moves into.
 
-    Heightened (+1) Increase the damage by 1.
+
+  Heightened (+1) Increase the damage by 1.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -13,8 +16,8 @@ targets: zone
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: damage
-          dice: "3"
-          damage_type: piercing
-          dc: 0
+  on_apply:
+  - type: damage
+    dice: '3'
+    damage_type: piercing
+    dc: 0

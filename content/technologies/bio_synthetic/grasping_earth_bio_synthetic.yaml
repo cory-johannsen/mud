@@ -1,13 +1,22 @@
 id: grasping_earth_bio_synthetic
-name: Grasping Earth
-description: |-
-    Handlike protrusions of rock and soil grab and bury creatures. Each creature in the area when you cast the spell, and each creature that ends its turn in the area during the spell's duration, must attempt a Fortitude save. The first time each round you Sustain this spell, each creature still @UUID[Compendium.pf2e.conditionitems.Item.Grabbed] by the earth takes @Damage[1d6[bludgeoning]] damage, and each creature @UUID[Compendium.pf2e.conditionitems.Item.Restrained] by the earth takes @Damage[2d6[bludgeoning]] damage. A creature can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape], rolling against your spell DC.
+name: Lithic Tendrils
+description: 'Stone and soil protrusions grab and bury creatures. Each creature in
+  the area when you cast the spell, and each creature that ends its turn in the area,
+  must attempt a Fortitude save. The first time each round you Sustain, each creature
+  still Grabbed takes @Damage[1d6[bludgeoning]] damage, and each creature Restrained
+  takes @Damage[2d6[bludgeoning]] damage. A creature can attempt to Escape against
+  your spell DC.
 
-    Success The creature is unaffected.
-    Failure The creature is grabbed by the earth.
-    Critical Failure The creature is restrained by the earth.
 
-    Heightened (+2) The bludgeoning damage dealt when you Sustain this spell increases by 1d6 for grabbed creatures and 2d6 for restrained creatures.
+  Success The creature is unaffected.
+
+  Failure The creature is grabbed.
+
+  Critical Failure The creature is restrained.
+
+
+  Heightened (+2) The bludgeoning damage increases by 1d6 for grabbed creatures and
+  2d6 for restrained creatures.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -19,18 +28,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 1d3
-          damage_type: bludgeoning
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 1d6
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 2d6
-          damage_type: bludgeoning
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 1d3
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+    dc: 0

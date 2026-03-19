@@ -1,9 +1,14 @@
 id: movanic_glimmer_fanatic_doctrine
-name: Movanic Glimmer
-description: |-
-    You give the target animal a glimmer of awareness, not truly awakening it but allowing it to better understand its surroundings. The target gains a +2 status bonus to Perception checks and Will saves, and any Nature checks to Command the target Animal gain a +1 status bonus from its increased understanding. Additionally, if the target animal has the minion trait, it can take one action each turn even if its master doesn't use an action to Command it, which it can use to perform any basic action it knows. This doesn't prevent a target that was summoned from disappearing if its summoner doesn't Sustain the Spell, but does allow the target to perform one action before disappearing.
+name: Blessed Awareness
+description: 'You anoint the target animal with a doctrinal blessing that sharpens
+  its awareness without fully awakening it. The target gains a +2 status bonus to
+  Perception checks and Will saves, and Nature checks to Command the target gain a
+  +1 status bonus. Additionally, if the target has the minion trait, it can take one
+  action each turn even without a Command. All other effects remain identical to the
+  base protocol.
 
-    Heightened (8th) You can target up to 5 animals.
+
+  Heightened (8th) You can target up to 5 animals.'
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -15,7 +20,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You give the target animal a glimmer of awareness, not truly awakening it but allowing it to better understand its surroundings. The target gains a +2 status bonus to Perception checks and Will saves,
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You give the target animal a glimmer of awareness, not truly awakening
+      it but allowing it to better understand its surroundings. The target gains a
+      +2 status bonus to Perception checks and Will saves,

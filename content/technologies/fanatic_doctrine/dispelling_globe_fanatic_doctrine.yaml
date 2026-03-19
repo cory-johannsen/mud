@@ -1,9 +1,9 @@
 id: dispelling_globe_fanatic_doctrine
-name: Dispelling Globe
-description: |-
-    You create an immobile globe around yourself that attempts to counteract any spell from outside the globe whose area or targets enter into the globe, as if the globe were a @UUID[Compendium.pf2e.spells-srd.Item.Dispel Magic] spell 1 rank lower than its actual spell rank.
-    If the counteract attempt succeeds, it prevents only the portion of the spell that would have entered the globe (so if the spell also has targets outside the globe, or part of its area is beyond the globe, those targets or that area is affected normally).
-    You must form the sphere in an unbroken open space, so its edges don't pass through any creatures or objects, or the spell is lost (though creatures can enter the globe after the spell is cast).
+name: Sanctified Null Zone
+description: You invoke a stationary sphere of doctrinal protection that attempts
+  to counteract any hostile effect from outside the globe whose area or targets enter
+  into it, as if it were a Dispel effect 1 rank lower. All mechanical effects remain
+  identical to the base protocol.
 tradition: fanatic_doctrine
 level: 4
 usage_type: prepared
@@ -13,7 +13,9 @@ targets: zone
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create an immobile globe around yourself that attempts to counteract any spell from outside the globe whose area or targets enter into the globe, as if the globe were a @UUID[Compendium.pf2e.spell
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an immobile globe around yourself that attempts to counteract
+      any spell from outside the globe whose area or targets enter into the globe,
+      as if the globe were a @UUID[Compendium.pf2e.spell

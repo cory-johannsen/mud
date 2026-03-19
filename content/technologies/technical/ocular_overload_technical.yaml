@@ -1,8 +1,8 @@
 id: ocular_overload_technical
-name: Ocular Overload
-description: |-
-    Just as a creature is about to attack you, you assault them with jarring illusions, completely surrounding their eyes with blinding flashes of motion and color. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Overload Vision] reaction; once you use the reaction, the spell ends.
-    @Check[fortitude|name:Overload Vision|traits:illusion]
+name: Flash Overload Device
+description: Just as a creature attacks you, you activate a device that floods their
+  visual sensors with blinding cascades of data noise. You gain the Overload Vision
+  reaction; once used, the spell ends.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -12,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Just as a creature is about to attack you, you assault them with jarring illusions, completely surrounding their eyes with blinding flashes of motion and color. When the spell is complete, you gain th
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Just as a creature is about to attack you, you assault them with
+      jarring illusions, completely surrounding their eyes with blinding flashes of
+      motion and color. When the spell is complete, you gain th

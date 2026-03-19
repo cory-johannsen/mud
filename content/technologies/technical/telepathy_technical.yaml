@@ -1,9 +1,12 @@
 id: telepathy_technical
-name: Telepathy
-description: |-
-    You can communicate telepathically with creatures within 30 feet. Once you establish a connection by communicating with a creature, the communication is two-way. You can communicate only with creatures that share a language with you.
+name: Secure Comm Array
+description: 'You deploy a device that establishes a telepathic mesh network with
+  creatures within 30 feet. Once connected, communication is two-way. You can communicate
+  only with creatures that share a language.
 
-    Heightened (6th) You can communicate telepathically with creatures using shared mental imagery even if you don't share a language; telepathy loses the linguistic trait.
+
+  Heightened (6th) Communicate via shared mental imagery without shared language;
+  loses the linguistic trait.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -13,7 +16,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You can communicate telepathically with creatures within 30 feet. Once you establish a connection by communicating with a creature, the communication is two-way. You can communicate only with creature
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You can communicate telepathically with creatures within 30 feet.
+      Once you establish a connection by communicating with a creature, the communication
+      is two-way. You can communicate only with creature

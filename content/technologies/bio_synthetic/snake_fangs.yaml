@@ -1,10 +1,17 @@
 id: snake_fangs
-name: Snake Fangs
-description: |-
-    Your jaw unhinges as your teeth extend into wicked fangs. For the spell's duration, you gain a fangs unarmed attack. They're a finesse, grapple, unarmed attack that deals 1d8 piercing damage and an extra 2d10 poison damage. If you have a creature at least one size smaller than you @UUID[Compendium.pf2e.conditionitems.Item.Grabbed] with your fangs, you can use the @UUID[Compendium.pf2e.bestiary-ability-glossary-srd.Item.Swallow Whole] ability that deals @Damage[4d6[bludgeoning]] damage and has a Rupture value of 17. A swallowed creature is transported to an extraplanar space that resembles the inside of a snake's stomach, so when it gets free, it appears in a space adjacent to you. If you're killed or the spell ends, the swallowed creature is immediately freed.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Snake Fangs]
+name: Venom Fang Graft
+description: 'Your jaw restructures as bio-synthetic fangs extend from your gums.
+  For the duration, you gain a fangs unarmed attack. They''re a finesse, grapple,
+  unarmed attack that deals 1d8 piercing damage and an extra 2d10 poison damage. If
+  you have a creature at least one size smaller Grabbed with your fangs, you can use
+  the Swallow Whole ability that deals @Damage[4d6[bludgeoning]] damage and has a
+  Rupture value of 17. A swallowed creature is transported to an extraplanar bio-pocket;
+  when freed, it appears adjacent to you. If you''re killed or the spell ends, the
+  creature is immediately freed.
 
-    Heightened (+3) The extra poison damage of your fangs unarmed attack increases by 1d10, the damage dealt by the Swallow Whole ability increases by 6d6, and the Rupture value increases by 9.
+
+  Heightened (+3) The extra poison damage increases by 1d10, Swallow Whole damage
+  increases by 6d6, and Rupture value increases by 9.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -14,7 +21,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Your jaw unhinges as your teeth extend into wicked fangs. For the spell's duration, you gain a fangs unarmed attack. They're a finesse, grapple, unarmed attack that deals 1d8 piercing damage and an ex
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your jaw unhinges as your teeth extend into wicked fangs. For the
+      spell's duration, you gain a fangs unarmed attack. They're a finesse, grapple,
+      unarmed attack that deals 1d8 piercing damage and an ex

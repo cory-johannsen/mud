@@ -1,8 +1,8 @@
 id: ocular_overload_bio_synthetic
-name: Ocular Overload
-description: |-
-    Just as a creature is about to attack you, you assault them with jarring illusions, completely surrounding their eyes with blinding flashes of motion and color. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Overload Vision] reaction; once you use the reaction, the spell ends.
-    @Check[fortitude|name:Overload Vision|traits:illusion]
+name: Bioluminescent Flash
+description: Just as a creature is about to attack you, you blast them with a concentrated
+  burst of bio-synthetic light, flooding their optic nerves. When the spell is complete,
+  you gain the Overload Vision reaction; once you use the reaction, the spell ends.
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -12,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Just as a creature is about to attack you, you assault them with jarring illusions, completely surrounding their eyes with blinding flashes of motion and color. When the spell is complete, you gain th
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Just as a creature is about to attack you, you assault them with
+      jarring illusions, completely surrounding their eyes with blinding flashes of
+      motion and color. When the spell is complete, you gain th

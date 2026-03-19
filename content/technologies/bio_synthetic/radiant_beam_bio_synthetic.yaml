@@ -1,10 +1,14 @@
 id: radiant_beam_bio_synthetic
-name: Radiant Beam
-description: |-
-    You fire a beam of blinding light from your outstretched hands. The beam deals 5d10 spirit damage. On a failed saving throw, a creature becomes @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 round, or dazzled for 4 rounds on a critical failure.
-    If the light passes through an area of magical darkness or targets a creature affected by magical darkness, radiant beam attempts to counteract the darkness. If you need to determine whether the light passes through an area of darkness, draw a line between yourself and the target.
+name: Bioluminescent Beam
+description: 'You fire a concentrated beam of bio-synthesized radiant energy from
+  your hands. The beam deals 5d10 spirit damage. On a failed saving throw, a creature
+  becomes Dazzled for 1 round, or dazzled for 4 rounds on a critical failure.
 
-    Heightened (+1) The damage increases by 1d10.
+  If the beam passes through an area of artificial darkness or targets a creature
+  affected by such darkness, it attempts to counteract it.
+
+
+  Heightened (+1) The damage increases by 1d10.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -16,18 +20,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 5d6
-          damage_type: spirit
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 5d10
-          damage_type: spirit
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 10d10
-          damage_type: spirit
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 5d6
+    damage_type: spirit
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 5d10
+    damage_type: spirit
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 10d10
+    damage_type: spirit
+    dc: 0

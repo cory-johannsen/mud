@@ -1,12 +1,19 @@
 id: clownish_curse_neural
-name: Clownish Curse
-description: |-
-    You afflict the target with a curse that causes it to emit ridiculous noises as it moves. Furthermore, the target's hands and feet become awkward and uncoordinated, as though it were wearing oversized gloves and shoes.
+name: Malware Fumble Loop
+description: 'You inject corrupted motor-control firmware into the target''s cybernetics,
+  causing it to emit absurd error tones as it moves. Furthermore, the target''s hands
+  and feet malfunction with exaggerated, uncoordinated movements.
 
-    Critical Success The target is unaffected.
-    Success For 1 round, the target must roll twice and use the worse result whenever attempting an Acrobatics, Stealth, or Thievery check. If the target rolls a failure at an Acrobatics, Stealth, or Thievery check, it gets a critical failure instead.
-    Failure As success, but the effect is 1 hour.
-    Critical Failure As success, except the effect is permanent.
+
+  Critical Success The target is unaffected.
+
+  Success For 1 round, the target must roll twice and use the worse result whenever
+  attempting an Acrobatics, Stealth, or Thievery check. If the target rolls a failure
+  at an Acrobatics, Stealth, or Thievery check, it gets a critical failure instead.
+
+  Failure As success, but the effect is 1 hour.
+
+  Critical Failure As success, except the effect is permanent.'
 tradition: neural
 level: 4
 usage_type: prepared
@@ -18,7 +25,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You afflict the target with a curse that causes it to emit ridiculous noises as it moves. Furthermore, the target's hands and feet become awkward and uncoordinated, as though it were wearing oversized
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You afflict the target with a curse that causes it to emit ridiculous
+      noises as it moves. Furthermore, the target's hands and feet become awkward
+      and uncoordinated, as though it were wearing oversized

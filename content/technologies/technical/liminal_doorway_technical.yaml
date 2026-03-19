@@ -1,8 +1,11 @@
 id: liminal_doorway_technical
-name: Liminal Doorway
-description: |-
-    You draw a chalk doorway on an unbroken surface, which opens into an extradimensional space. Any creature treating the drawing as an actual door can Interact to touch the doorknob and pass through. The warped, chalk-drawn room beyond the door is 20 feet in width, depth, and height. The space is unadorned and empty, with chalk lines indicating the corners of the walls.
-    If the drawing is scrubbed away, the underlying surface is broken, or a creature attempts to enter the space that would put it over capacity, the space begins to collapse. The space ejects one creature at random each round, depositing it on the nearest open ground, until all creatures are returned outside.
+name: Pocket Dimension Hatch
+description: 'You deploy a device that opens a portal into an extradimensional space
+  on an unbroken surface. Any creature can Interact to enter. The space beyond is
+  20 feet in each dimension, empty with grid lines.
+
+  If the access point is disrupted or over-capacity is attempted, the space collapses,
+  ejecting one creature per round until empty.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -12,7 +15,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You draw a chalk doorway on an unbroken surface, which opens into an extradimensional space. Any creature treating the drawing as an actual door can Interact to touch the doorknob and pass through. Th
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You draw a chalk doorway on an unbroken surface, which opens into
+      an extradimensional space. Any creature treating the drawing as an actual door
+      can Interact to touch the doorknob and pass through. Th

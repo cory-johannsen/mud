@@ -1,12 +1,17 @@
 id: planar_tether_technical
-name: Planar Tether
-description: |-
-    You stitch the target to its current plane. While the target is affected by planar tether, the spell attempts to counteract any teleportation effect that would move the target, or any effect that would transport it to a different plane. Planar tether's duration is determined by the target's Will save.
+name: Dimensional Anchor Device
+description: 'You deploy a device that locks the target to its current dimensional
+  coordinates. It attempts to counteract any teleportation or planar transport affecting
+  the target. Duration determined by Will save.
 
-    Critical Success The target is unaffected.
-    Success The effect's duration is 1 minute.
-    Failure The effect's duration is 10 minutes.
-    Critical Failure The effect's duration is 1 hour.
+
+  Critical Success Unaffected.
+
+  Success 1 minute.
+
+  Failure 10 minutes.
+
+  Critical Failure 1 hour.'
 tradition: technical
 level: 4
 usage_type: prepared
@@ -18,7 +23,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You stitch the target to its current plane. While the target is affected by planar tether, the spell attempts to counteract any teleportation effect that would move the target, or any effect that woul
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You stitch the target to its current plane. While the target is affected
+      by planar tether, the spell attempts to counteract any teleportation effect
+      that would move the target, or any effect that woul

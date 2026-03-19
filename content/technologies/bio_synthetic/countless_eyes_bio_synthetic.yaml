@@ -1,8 +1,9 @@
 id: countless_eyes_bio_synthetic
-name: Countless Eyes
-description: |-
-    Eyes form across the touched creature's body, allowing it to see in all directions at once. The subject can't be flanked for the spell's duration. In addition, when the subject succeeds when Seeking, it critically succeeds instead.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Countless Eyes]
+name: Omni-Optic Growth
+description: Bio-synthetic optical organs form across the touched creature's body,
+  providing 360-degree visual coverage. The subject can't be flanked for the spell's
+  duration. In addition, when the subject succeeds when Seeking, it critically succeeds
+  instead.
 tradition: bio_synthetic
 level: 4
 usage_type: prepared
@@ -12,7 +13,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Eyes form across the touched creature's body, allowing it to see in all directions at once. The subject can't be flanked for the spell's duration. In addition, when the subject succeeds when Seeking,
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Eyes form across the touched creature's body, allowing it to see
+      in all directions at once. The subject can't be flanked for the spell's duration.
+      In addition, when the subject succeeds when Seeking,

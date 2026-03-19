@@ -1,10 +1,10 @@
 id: vampiric_maiden_technical
-name: Vampiric Maiden
-description: |-
-    A ghostly iron maiden snaps shut on the target and drains its vitality for your gain. This deals 4d4 piercing damage and 4d4 void damage, and the target must attempt a Fortitude save. You gain temporary Hit Points equal to the void damage the target takes (after applying resistances, weaknesses, and the like). You lose any remaining temporary Hit Points after 1 minute.Critical Success The target is unaffected.
-    Success The target takes half damage.
-    Failure The target is briefly trapped within the vampiric maiden. The target takes full damage and is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized] by the iron maiden for 1 round or until it uses an Interact action to extricate itself, whichever comes first.
-    Critical Failure The target takes double damage and is immobilized by the vampiric maiden for 1 round or until it Escapes (the DC is your spell DC), whichever comes first.Heightened (+1) The piercing and void damage increase by 1d4 each.
+name: Vitality Drain Cage
+description: You deploy a hard-light restraint cage that materializes around the target
+  and siphons its vitality for your gain. Deals 4d4 piercing and 4d4 void damage,
+  target attempts Fortitude save. You gain temporary HP equal to void damage taken.
+  All mechanical effects (immobilized, escape) remain identical.Heightened (+1) Piercing
+  and void damage +1d4 each.
 tradition: technical
 level: 4
 usage_type: prepared
@@ -16,30 +16,30 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: "4"
-          damage_type: piercing
-          dc: 0
-        - type: damage
-          dice: "4"
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d4
-          damage_type: piercing
-          dc: 0
-        - type: damage
-          dice: 4d4
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d4
-          damage_type: piercing
-          dc: 0
-        - type: damage
-          dice: 8d4
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: '4'
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: '4'
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 4d4
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d4
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 8d4
+    damage_type: void
+    dc: 0
