@@ -1,0 +1,31 @@
+id: live_wire_technical
+name: Exposed Conductor Line
+description: You create a length of electrified conductor wire in an area, dealing lightning damage to anything that crosses
+  it.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 1d4
+    damage_type: slashing
+    dc: 0
+  - type: damage
+    dice: 1d4
+    damage_type: electricity
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 2d4
+    damage_type: slashing
+    dc: 0
+  - type: damage
+    dice: 2d4
+    damage_type: electricity
+    dc: 0

@@ -1,0 +1,17 @@
+id: deep_breath_bio_synthetic
+name: Extended Oxygen Reserve
+description: You activate a biological oxygen storage organ, allowing you to hold your breath without loss from physical exertion.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You take an incredibly deep breath and can hold it for the spell's duration. You don't lose breath when hit,
+      but you do lose all the air you inhaled if you speak (including to Cast a Spell). This spel

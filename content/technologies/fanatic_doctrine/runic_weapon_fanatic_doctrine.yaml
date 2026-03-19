@@ -1,0 +1,18 @@
+id: runic_weapon_fanatic_doctrine
+name: Doctrine's Weapon Blessing
+description: You invoke a doctrinal weapon blessing, temporarily enhancing a weapon's striking properties in the Doctrine's
+  name.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The weapon glimmers with magic as temporary runes carve down its length. The target becomes a +1 striking
+      weapon, gaining a +1 item bonus to attack rolls and increasing the number of weapon damage dic

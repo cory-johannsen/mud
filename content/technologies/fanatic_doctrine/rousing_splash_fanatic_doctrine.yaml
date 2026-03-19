@@ -1,0 +1,17 @@
+id: rousing_splash_fanatic_doctrine
+name: Revival Blessing
+description: You splash the target with the Doctrine's sanctified water, reviving unconscious or stunned allies.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You cause a splash of cold water to descend on an ally's head, granting some temporary vigor. The target
+      gains 1d4 temporary Hit Points, which last for 1 minute. The target is then temporarily immune

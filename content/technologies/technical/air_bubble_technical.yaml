@@ -1,0 +1,20 @@
+id: air_bubble_technical
+name: Atmospheric Filter Bubble
+description: Triggered when a creature enters a breathable-atmosphere hazard. A sealed pocket of filtered, pressurized air
+  forms around the target's head, maintaining breathability until they return to safe conditions.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature within range enters an environment where it can''t breathe.
+
+      A bubble of pure air appears around the target''s head, allowing it to breathe normally. The effect ends as soon as
+      the tar'

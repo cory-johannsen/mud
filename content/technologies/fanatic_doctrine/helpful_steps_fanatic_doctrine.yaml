@@ -1,0 +1,18 @@
+id: helpful_steps_fanatic_doctrine
+name: Doctrine's Scaffold
+description: You invoke the Doctrine's provision, causing a staircase or ladder to manifest and provide access to elevated
+  positions.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call forth a ladder or staircase to help you reach greater heights. The ladder or staircase appears in
+      a space you designate and either stands freely or connects to a nearby wall if possible. You

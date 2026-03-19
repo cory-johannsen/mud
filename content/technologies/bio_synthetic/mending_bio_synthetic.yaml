@@ -1,0 +1,17 @@
+id: mending_bio_synthetic
+name: Rapid Bio-Repair
+description: You apply a bio-repair catalyst to a damaged item, accelerating material regeneration and restoring Hit Points.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You repair the target item. You restore 5 Hit Points per spell rank to the target, potentially removing the
+      @UUID[Compendium.pf2e.conditionitems.Item.Broken] condition if this repairs it past the item

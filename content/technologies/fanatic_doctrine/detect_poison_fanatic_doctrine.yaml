@@ -1,0 +1,17 @@
+id: detect_poison_fanatic_doctrine
+name: Toxin Purity Rite
+description: You perform a doctrinal purity rite, detecting whether a creature or substance carries poison or contamination.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You detect whether a creature is venomous or poisonous, or if an object is poison or has been poisoned. You
+      do not ascertain whether the target is poisonous in multiple ways, nor do you learn the type

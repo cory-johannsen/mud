@@ -1,0 +1,18 @@
+id: summon_lesser_servitor
+name: Doctrine's Servitor Summon
+description: You summon a lesser servitor of the Doctrine — an ideologically committed entity that fights and serves in its
+  name.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: While deities jealously guard their most powerful servants from the summoning spells of those who aren't
+      steeped in the faith, this spell allows you to conjure an inhabitant of the Outer Sphere with o

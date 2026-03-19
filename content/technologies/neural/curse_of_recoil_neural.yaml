@@ -1,0 +1,20 @@
+id: curse_of_recoil_neural
+name: Targeting Jinx
+description: Reaction — triggered when a nearby enemy prepares a ranged attack. You corrupt their targeting subroutine at
+  the last moment, imposing a misfire penalty.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: rounds:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Trigger An enemy you can see is about to make a ranged attack.You curse an enemy to suffer a kickback as
+      they make a ranged attack, potentially causing them to miss. The triggering enemy attempts a Wi

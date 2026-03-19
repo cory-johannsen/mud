@@ -1,0 +1,18 @@
+id: protector_tree
+name: Guardian Organism Deploy
+description: You rapidly grow a defensive organism from available organic material, creating a protective structure that shields
+  allies.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A Medium tree suddenly grows in an unoccupied square within range. The tree has AC 10 and 10 Hit Points.
+      Whenever an ally adjacent to the tree is hit by a Strike, the tree interposes its branches and

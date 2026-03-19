@@ -1,0 +1,30 @@
+id: gust_of_wind_technical
+name: Compressed Air Cannon
+description: You discharge a powerful blast of compressed air from a palm-mounted system, shoving creatures and objects in
+  its path.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 2d3
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: bludgeoning
+    dc: 0

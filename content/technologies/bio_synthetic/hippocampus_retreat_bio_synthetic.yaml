@@ -1,0 +1,23 @@
+id: hippocampus_retreat_bio_synthetic
+name: Aquatic Withdrawal Protocol
+description: 'Requirement: You must be submerged. You trigger an aquatic exit response, withdrawing at high speed through
+  the water.'
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: bludgeoning
+    dc: 0

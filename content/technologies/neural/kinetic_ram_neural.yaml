@@ -1,0 +1,20 @@
+id: kinetic_ram_neural
+name: Kinetic Impact Wave
+description: You compress kinetic energy into a focused point and release it as a targeted shockwave or radial concussion
+  burst.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Gathering kinetic energy, you either focus it in a straight line or disperse it as an encircling ripple.
+      Any creature targeted by this spell must succeed at a Fortitude saving throw or be pushed 10 fe

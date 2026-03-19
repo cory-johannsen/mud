@@ -1,0 +1,18 @@
+id: invoke_true_name_neural
+name: Designation Protocol
+description: You speak the target's unique cognitive identifier, establishing a resonance link that makes your protocols more
+  effective against them.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You speak the true name of a creature to more surely affect it with your magic. Until the end of the current
+      turn, the target is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] against your spell

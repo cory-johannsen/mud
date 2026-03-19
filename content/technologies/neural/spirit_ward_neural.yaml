@@ -1,0 +1,17 @@
+id: spirit_ward_neural
+name: Psionic Barrier
+description: You channel ambient psionic energy to create a ward that deflects supernatural attacks against the target.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You draw on nearby spiritual energy or on echoes of the spirits you've invoked throughout your life to temporarily
+      ward living flesh against dangerous spirits. You grant the target a +1 status bonus t

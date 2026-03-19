@@ -1,0 +1,19 @@
+id: seashell_of_stolen_sound_neural
+name: Sound Capture Trap
+description: Reaction — triggered when a creature makes a sound nearby. You capture and store that exact sound for later playback.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature within range begins to make a sound.
+
+      You store a sound in a seashell to use as you will: the last words of a loved one, a dragon''s mighty roar, the compromising
+      conversation between'

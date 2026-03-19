@@ -1,0 +1,17 @@
+id: liberating_command
+name: Break Free Signal
+description: You broadcast a liberation command to a restrained ally, giving them a bonus to escape.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call out a liberating cry, urging an ally to break free of an effect that holds them in place. If the
+      target is @UUID[Compendium.pf2e.conditionitems.Item.Grabbed], @UUID[Compendium.pf2e.conditioni

@@ -1,0 +1,21 @@
+id: eat_fire_bio_synthetic
+name: Thermal Conversion Organ
+description: Reaction — triggered when you would take fire damage. A thermal conversion organ absorbs and metabolizes the
+  heat energy.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 0
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger You would take fire damage.
+
+
+      You consume and ingest fire, making it less harmful to you. You gain resistance 5 to fire damage until the end of the
+      current turn. During the remaining duration o'

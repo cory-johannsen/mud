@@ -1,0 +1,17 @@
+id: thoughtful_gift_neural
+name: Object Transfer
+description: You teleport a small object from your hand directly to the hand of a target within range.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You teleport one object of light or negligible Bulk held in your hand to the target. The object appears instantly
+      in the target's hand if they have a free hand, or at their feet if they don't. The tar

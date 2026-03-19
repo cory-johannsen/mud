@@ -1,0 +1,20 @@
+id: celestial_accord_fanatic_doctrine
+name: Forced Reconciliation Mandate
+description: You invoke the Doctrine's mandate for order, compelling two combatants to stand down and address their conflict
+  without violence.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You intervene in a heated disagreement between two creatures, encouraging them to put aside their differences
+      and find some common ground. The emotional heat of the prior moment becomes only a memory.

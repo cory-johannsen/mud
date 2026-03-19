@@ -1,0 +1,19 @@
+id: dj_vu_technical
+name: Action Loop Hack
+description: You insert a loop glitch into the target's behavioral subroutines, forcing it to repeat its last action involuntarily.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:2
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You loop a thought process in the target's mind, forcing it to repeat a moment's worth of actions. The target
+      must attempt a Will save. If the target fails, whatever actions the target uses on its nex

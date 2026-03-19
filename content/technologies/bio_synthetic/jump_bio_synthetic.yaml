@@ -1,0 +1,17 @@
+id: jump_bio_synthetic
+name: Leg Enhancement Burst
+description: You activate a leg-enhancement protocol that channels bio-energy into a single powerful leap.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your legs surge with strength, ready to leap high and far. You jump 30 feet in any direction without touching
+      the ground. You must land on a space of solid ground within 30 feet of you, or else you fa

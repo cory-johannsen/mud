@@ -1,0 +1,17 @@
+id: summon_instrument_neural
+name: Equipment Teleport
+description: You telekinetically summon a stored instrument or tool from your inventory cache to your hands.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 3
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You materialize a @UUID[Compendium.pf2e.equipment-srd.Item.Musical Instrument (Handheld)] in your grasp.
+      The instrument is typical for its type, but it plays only for you. It vanishes when the spell e

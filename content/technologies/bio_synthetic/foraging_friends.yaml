@@ -1,0 +1,17 @@
+id: foraging_friends
+name: Trained Scout Animals Deploy
+description: You signal a trained pack of foraging animals, dispatching them to retrieve food, track quarry, or scout ahead.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Giving a cheerful whistle, you call forth a handful of small animals, such as birds or mice, to collect food
+      for you and your allies. The animals return 1 hour later with enough foraged goods to feed

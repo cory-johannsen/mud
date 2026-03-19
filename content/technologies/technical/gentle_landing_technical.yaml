@@ -1,0 +1,20 @@
+id: gentle_landing_technical
+name: Antigrav Cushion
+description: Reaction — triggered when a creature falls. You deploy a localized antigravity cushion, negating fall damage.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger a creature within range is falling
+
+
+      You raise a magical updraft to arrest a fall. The target''s fall slows to 60 feet per round, and the portion of the
+      fall during the spell''s duration doesn''t'

@@ -1,0 +1,20 @@
+id: bane_neural
+name: Confidence Drain
+description: You broadcast a low-frequency neural dampener that seeds self-doubt in every enemy mind nearby. Affected targets
+  suffer a -1 status penalty to attack rolls.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Will save or take a
+      –1 status penalty to attack rolls as long as they are in the area. Once per round on subseque

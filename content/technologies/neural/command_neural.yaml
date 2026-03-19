@@ -1,0 +1,19 @@
+id: command_neural
+name: Compliance Impulse
+description: You inject a single direct command into the target's motor cortex. It must resist or carry out the command immediately.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shout a command that's hard to ignore. You can command the target to approach you, run away (as if it
+      had the @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] condition), release what it's holdi

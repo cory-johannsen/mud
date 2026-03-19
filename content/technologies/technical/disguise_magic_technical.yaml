@@ -1,0 +1,18 @@
+id: disguise_magic_technical
+name: Signal Spoofing
+description: You alter an item's or tech's energy signature, making it register as a different type of technology to scanning
+  devices.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You alter how an item's or spell's magical aura appears to effects like detect magic. You can hide the auras
+      entirely, have an item register as a common item of lower level, or make a spell register a

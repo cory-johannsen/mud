@@ -1,0 +1,25 @@
+id: enfeeble_neural
+name: Muscle Override
+description: You disrupt the target's voluntary muscle control signals, dramatically reducing their physical strength.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You sap the target''s strength, depending on its Fortitude save.
+
+
+      Critical Success The target is unaffected.
+
+      Success The target is Enfeebled 1 until the start of your next turn.
+
+      Failure The target is E'

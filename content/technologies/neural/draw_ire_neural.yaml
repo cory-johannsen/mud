@@ -1,0 +1,30 @@
+id: draw_ire_neural
+name: Provocation Spike
+description: You broadcast a targeted provocation signal that enrages the target, compelling it to attack you above all other
+  priorities.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d6
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d10
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d10
+    damage_type: mental
+    dc: 0

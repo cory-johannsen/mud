@@ -1,0 +1,18 @@
+id: alarm_technical
+name: Perimeter Alert System
+description: You install an invisible motion-sensor network around an area, triggering a silent alert or audible alarm when
+  unauthorized targets cross the boundary.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You ward an area to alert you when creatures enter without your permission. When you cast alarm, select a
+      password. Whenever a Small or larger corporeal creature enters the spell's area without speaki

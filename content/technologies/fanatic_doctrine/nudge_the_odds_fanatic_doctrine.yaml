@@ -1,0 +1,17 @@
+id: nudge_the_odds_fanatic_doctrine
+name: Doctrine's Fortune
+description: You invoke the Doctrine's favor in games of chance, granting supernaturally good luck at dice and cards.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You bestow yourself supernaturally good luck at cards, dice, and other games of chance. You gain a +1 status
+      bonus to Games Lore checks to gamble, and if you roll a critical failure on such a check, y

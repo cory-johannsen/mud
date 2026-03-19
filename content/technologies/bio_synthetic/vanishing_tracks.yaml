@@ -1,0 +1,18 @@
+id: vanishing_tracks
+name: Track Erasure Compound
+description: You apply a chemical track-eraser compound to a target, destroying any traces they leave and making them impossible
+  to follow.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You obscure the tracks you leave behind. The DC of checks to Track you gains a +4 status bonus or is equal
+      to your spell DC, whichever results in a higher DC.Heightened (2nd) The duration increases to

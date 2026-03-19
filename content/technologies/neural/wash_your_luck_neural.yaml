@@ -1,0 +1,18 @@
+id: wash_your_luck_neural
+name: Fortune Reset Protocol
+description: You broadcast a psionic fortune-reset signal, clearing accumulated bad luck from a target and allowing them to
+  reroll a recent failure.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Some practitioners argue this spell literally washes your fortunes of all influences, malign or benign, while
+      others claim it simply cleanses your mind of obsessions about luck and destiny. You adjust

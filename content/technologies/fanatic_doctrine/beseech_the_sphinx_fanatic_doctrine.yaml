@@ -1,0 +1,17 @@
+id: beseech_the_sphinx_fanatic_doctrine
+name: Seek the Doctrine's Wisdom
+description: You consult the Doctrine's accumulated lore, seeking a flash of precognitive guidance for an upcoming skill challenge.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You look to the great Sphinx constellation, wisest of all cosmic guides and favored of Phimater, asking them
+      to lend their insight to the target. Choose one skill and one type of saving throw (Fortitu

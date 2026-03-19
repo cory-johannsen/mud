@@ -1,0 +1,22 @@
+id: overselling_flourish_neural
+name: Dramatic Overclock
+description: Reaction — triggered when you take damage. You use the pain as a performance trigger, overclock your reactions,
+  and gain a bonus action.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature damages you.
+
+      You make a grand spectacle out of getting hit. Enhanced by magic, this spectacle features sprays of blood, anguished
+      screams, or other theatrics that appear to result f'

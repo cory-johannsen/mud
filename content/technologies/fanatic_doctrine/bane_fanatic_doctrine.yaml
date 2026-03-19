@@ -1,0 +1,20 @@
+id: bane_fanatic_doctrine
+name: Doubt Curse
+description: You broadcast the Doctrine's condemnation over your enemies, filling their minds with corrosive self-doubt. Enemies
+  in the area suffer a -1 status penalty to attack rolls.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Will save or take a
+      –1 status penalty to attack rolls as long as they are in the area. Once per round on subseque

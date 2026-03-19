@@ -1,0 +1,17 @@
+id: defended_by_spirits_neural
+name: Psionic Ward
+description: You call on ambient psychic resonance to protect an ally, granting a small bonus to AC and saving throws.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d6
+    damage_type: spirit
+    dc: 0

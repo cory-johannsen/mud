@@ -1,0 +1,22 @@
+id: sacred_beasts_fanatic_doctrine
+name: Doctrine's Sacred Creature Summon
+description: You invoke the Doctrine's authority over its sacred animals, summoning one to fight or serve in your name.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Requirements You worship a deity.
+
+
+      You call out to the creatures of the wild favored by your deity. You quickly summon your deity''s sacred animal (or
+      a small swarm of them if the animal is usually Tin'

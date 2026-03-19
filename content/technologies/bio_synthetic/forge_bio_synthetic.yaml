@@ -1,0 +1,29 @@
+id: forge_bio_synthetic
+name: Bio-Fabrication Unit
+description: You deploy a compact bio-fabrication unit that rapidly grows or shapes organic material into functional objects.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: fire
+    dc: 0

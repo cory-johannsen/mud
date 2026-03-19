@@ -1,0 +1,20 @@
+id: gentle_landing_bio_synthetic
+name: Impact Cushion Foam Deploy
+description: Reaction — triggered when a creature falls. You fire a quick-deploy impact cushion foam, negating fall damage.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger a creature within range is falling
+
+
+      You raise a magical updraft to arrest a fall. The target''s fall slows to 60 feet per round, and the portion of the
+      fall during the spell''s duration doesn''t'

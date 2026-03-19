@@ -1,0 +1,18 @@
+id: spirit_link_neural
+name: Life Link
+description: You establish a neural bridge between yourself and the target. Any damage they take is partially rerouted through
+  you.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: '2'
+    damage_type: untyped
+    dc: 0

@@ -1,0 +1,23 @@
+id: biting_words
+name: Psychic Barb
+description: You lace your spoken words with psychic payload — each taunt lands as real pain. Make a psionic strike; on a
+  hit, your words deal sonic damage.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: sonic
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: sonic
+    dc: 0

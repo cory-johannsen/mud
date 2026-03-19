@@ -1,0 +1,20 @@
+id: forced_mercy_neural
+name: Restraint Frequency
+description: You inject a calming frequency into an attacker's aggression centers, causing their blows to pull at the last
+  moment.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You soften the target's blows, ensuring they avoid vital areas and cause no lasting harm. All physical damage
+      dealt by the target to living creatures becomes nonlethal and all persistent bleed damage

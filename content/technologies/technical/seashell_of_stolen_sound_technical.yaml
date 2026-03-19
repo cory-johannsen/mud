@@ -1,0 +1,19 @@
+id: seashell_of_stolen_sound_technical
+name: Sound Capture Device
+description: Reaction — triggered when a sound is made nearby. You capture and store the exact audio for later playback.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature within range begins to make a sound.
+
+      You store a sound in a seashell to use as you will: the last words of a loved one, a dragon''s mighty roar, the compromising
+      conversation between'

@@ -1,0 +1,17 @@
+id: shielded_arm_fanatic_doctrine
+name: Doctrine's Armguard
+description: You manifest a doctrinal energy armguard, providing additional AC.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Reinforcing veins of ore run through the target's arm, letting it ward off blows with its bare skin. It can
+      use the Raise a Shield action to instead raise its arm, gaining a +2 circumstance bonus to A

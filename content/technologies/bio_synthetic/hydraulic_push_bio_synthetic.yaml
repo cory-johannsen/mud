@@ -1,0 +1,23 @@
+id: hydraulic_push_bio_synthetic
+name: High-Pressure Fluid Blast
+description: You discharge a powerful high-pressure fluid blast from a bio-hydraulic system, shoving the target a significant
+  distance.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0

@@ -1,0 +1,18 @@
+id: beseech_the_sphinx_neural
+name: Algorithmic Oracle Query
+description: You ping an ancient cognitive network, seeking a flash of precognitive insight. If your query is granted, you
+  gain a brief advantage on your next skill check.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You look to the great Sphinx constellation, wisest of all cosmic guides and favored of Phimater, asking them
+      to lend their insight to the target. Choose one skill and one type of saving throw (Fortitu

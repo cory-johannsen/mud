@@ -1,0 +1,30 @@
+id: heal_bio_synthetic
+name: Bio-Regeneration Pulse
+description: You channel vital bio-energy into a target, accelerating cellular repair and restoring Hit Points. Can be delivered
+  at range or by touch.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d4
+    damage_type: vitality
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d8
+    damage_type: vitality
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: vitality
+    dc: 0

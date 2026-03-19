@@ -1,0 +1,23 @@
+id: aqueous_blast_technical
+name: Hydro Cannon
+description: You pressurize water into a high-velocity blast weapon. For the remainder of your turn, you can fire hydro-bursts
+  at targets within 30 feet as a strike action.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d8
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d8
+    damage_type: bludgeoning
+    dc: 0

@@ -1,0 +1,17 @@
+id: soothe
+name: Cognitive Stabilizer
+description: You calm the target's neural patterns, boosting their mental fortitude and healing minor psychological strain.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d10+4
+    damage_type: untyped
+    dc: 0

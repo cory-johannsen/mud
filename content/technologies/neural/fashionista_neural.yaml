@@ -1,0 +1,17 @@
+id: fashionista_neural
+name: Holographic Wardrobe
+description: You overlay a holographic image of elaborate attire on the target, making them appear ostentatiously dressed.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target's clothes are transformed into ostentatious attire that epitomizes high-end local fashion. No
+      details of the target's appearance transform other than their clothes, so their weapons or armo

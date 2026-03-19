@@ -1,0 +1,34 @@
+id: elysian_whimsy_bio_synthetic
+name: Neurochemical Confusion Agent
+description: You dose the target with a neurochemical confusion agent, causing random and unpredictable behavioral disruption.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You overwhelm the target with an unexpected and unpredictable desire if it fails a Will save. Roll [[/r
+      1d4]] to determine the spell''s effect.
+
+
+
+
+      1d4
+
+      Effect
+
+
+
+
+
+      1
+
+      The target feels a powerful urge to d'

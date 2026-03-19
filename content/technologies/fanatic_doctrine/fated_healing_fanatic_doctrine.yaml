@@ -1,0 +1,18 @@
+id: fated_healing_fanatic_doctrine
+name: Foreseen Recovery
+description: You read the Doctrine's will for the target's near future, granting them a brief saving throw bonus against incoming
+  harm.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:5
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d4
+    damage_type: untyped
+    dc: 0

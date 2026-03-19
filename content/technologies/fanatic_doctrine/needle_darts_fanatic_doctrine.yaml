@@ -1,0 +1,22 @@
+id: needle_darts_fanatic_doctrine
+name: Doctrine's Judgment Darts
+description: You manifest three needles of compressed doctrinal energy and launch them at targets within range.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 3d4
+    damage_type: piercing
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 6d4
+    damage_type: piercing
+    dc: 0

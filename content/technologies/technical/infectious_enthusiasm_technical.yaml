@@ -1,0 +1,19 @@
+id: infectious_enthusiasm_technical
+name: Group Morale Boost Broadcast
+description: You broadcast a morale-enhancement signal that spreads through allied receivers, boosting their performance metrics.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: rounds:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: With enchanted gusto, you encourage yourself to get things done and share your motivation with your allies.
+      You gain a +1 status bonus to your choice of attack rolls, Will saves, or Charisma-based ski

@@ -1,0 +1,17 @@
+id: time_sense_neural
+name: Internal Chronometer
+description: You achieve perfect time synchronization, knowing the exact time and duration of any interval with precision.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: When you Cast the Spell, you gain a perfect sense of time. You can learn exactly what time it is, down to
+      the second. You can instead choose to gain a perfect sense of the calendar if you have knowled

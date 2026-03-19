@@ -1,0 +1,20 @@
+id: celestial_accord_neural
+name: Conflict Suppression Protocol
+description: You push a calming neural signal into two arguing targets, suppressing their aggression reflex and forcing a
+  diplomatic pause.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You intervene in a heated disagreement between two creatures, encouraging them to put aside their differences
+      and find some common ground. The emotional heat of the prior moment becomes only a memory.

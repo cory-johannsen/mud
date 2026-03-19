@@ -1,0 +1,30 @@
+id: dehydrate_bio_synthetic
+name: Desiccation Enzyme Release
+description: You emit desiccation enzymes that rapidly drive moisture from biological tissue, dealing persistent fire damage
+  to creatures in the area.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: fire
+    dc: 0

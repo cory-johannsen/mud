@@ -1,0 +1,18 @@
+id: infuse_vitality
+name: Vital Doctrine Infusion
+description: You infuse a vial of liquid with the Doctrine's healing energy, creating a consumable that restores Hit Points
+  when drunk.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You empower attacks with vital energy. The number of targets is equal to the number of actions you spent
+      casting this spell. Each target's unarmed and weapon Strikes deal an extra 1d4 vitality damage.

@@ -1,0 +1,23 @@
+id: lose_the_path_neural
+name: Disorientation Pulse
+description: Reaction — triggered when a creature moves nearby. You flood their spatial awareness subroutines with false data,
+  scrambling their sense of direction.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature in range Strides
+
+
+      You surround a moving creature with lifelike illusions, shifting their perception of the terrain to subtly lead them
+      off course. The target must attempt a Will sav'

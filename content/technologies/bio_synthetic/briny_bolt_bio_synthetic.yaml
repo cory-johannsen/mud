@@ -1,0 +1,23 @@
+id: briny_bolt_bio_synthetic
+name: Saline Injection Bolt
+description: You fire a bolt of concentrated saline solution from a wrist injector. On a critical hit, the salt exposure blurs
+  and blinds.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: bludgeoning
+    dc: 0

@@ -1,0 +1,22 @@
+id: goblin_pox_bio_synthetic
+name: Synthetic Pox Agent
+description: You touch the target and transmit a synthesized pox agent that causes a debilitating disease progression.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a
+      Fortitude save.
+
+
+      Goblin Pox (disease) Level 1; Creatures that have the goblin trait and goblin'

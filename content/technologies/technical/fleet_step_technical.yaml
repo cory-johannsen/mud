@@ -1,0 +1,18 @@
+id: fleet_step_technical
+name: Velocity Overdrive
+description: You activate a speed-enhancement module, gaining a +30-foot status bonus to your movement Speed.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You gain a +30-foot status bonus to your Speed.
+
+      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fleet Step]'

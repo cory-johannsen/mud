@@ -1,0 +1,22 @@
+id: interposing_earth_bio_synthetic
+name: Terrain Shield Reaction
+description: Reaction — triggered when targeted by a strike. You trigger rapid growth or material emergence to interpose between
+  you and the attack.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 0
+range: self
+targets: single
+duration: rounds:3
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger You are the target of a Strike or would attempt a Reflex save against a damaging area effect.
+
+
+      You raise a flimsy barrier of earth to shield you from harm. This barrier is 1 inch thick, 5 feet'

@@ -1,0 +1,31 @@
+id: purifying_icicle_fanatic_doctrine
+name: Doctrine's Purity Spike
+description: You form a spike of the Doctrine's purifying frost energy, dealing cold damage and neutralizing toxins in the
+  target.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 1d6
+    damage_type: cold
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 2d6
+    damage_type: cold
+    dc: 0

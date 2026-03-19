@@ -1,0 +1,30 @@
+id: chilling_spray_bio_synthetic
+name: Cryogenic Gland Spray
+description: You activate a cryogenic chemical gland, spraying a cone of supercooled fluid that deals cold damage and may
+  freeze targets.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '2'
+    damage_type: cold
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: cold
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: cold
+    dc: 0

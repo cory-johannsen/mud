@@ -1,0 +1,29 @@
+id: heal_fanatic_doctrine
+name: Doctrine's Healing Grace
+description: You channel the Doctrine's vital energy, healing the living and restoring Hit Points to the faithful.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d4
+    damage_type: vitality
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d8
+    damage_type: vitality
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: vitality
+    dc: 0

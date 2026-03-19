@@ -1,0 +1,29 @@
+id: harm
+name: Doctrine's Harm
+description: You channel void energy in the Doctrine's name, dealing void damage to living targets or healing undead followers.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d4
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d8
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: void
+    dc: 0

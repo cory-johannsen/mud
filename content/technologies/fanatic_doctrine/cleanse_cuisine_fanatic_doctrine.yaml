@@ -1,0 +1,17 @@
+id: cleanse_cuisine_fanatic_doctrine
+name: Sacramental Purification
+description: You invoke the Doctrine's purifying rite over food and drink, neutralizing all toxins and consecrating the sustenance.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transform all food and beverages in the area into delicious fare, changing water into wine or another
+      fine beverage, or enhancing the food's taste and ingredients to make it a gourmet treat. You c

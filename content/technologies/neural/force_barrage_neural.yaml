@@ -1,0 +1,17 @@
+id: force_barrage_neural
+name: Kinetic Bolt Volley
+description: You fire one to three bolts of solidified kinetic force, each unerringly striking a target within range.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d4+1
+    damage_type: force
+    dc: 0

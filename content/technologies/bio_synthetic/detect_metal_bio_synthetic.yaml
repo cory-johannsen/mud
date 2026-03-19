@@ -1,0 +1,17 @@
+id: detect_metal_bio_synthetic
+name: Metallic Compound Sensor
+description: You activate a metallic compound detector, sensing the location and mass of metal objects within range.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You attune yourself to magnetic fields, becoming aware of the presence or absence of metallic objects, veins,
+      and deposits within the area. You can choose to ignore metal you're fully aware of, such a

@@ -1,0 +1,22 @@
+id: slashing_gust_bio_synthetic
+name: Blade Wind Exhale
+description: You exhale a cutting burst of air reinforced with bio-synthetic particles, dealing slashing damage in a cone.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d4
+    damage_type: slashing
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d4
+    damage_type: slashing
+    dc: 0

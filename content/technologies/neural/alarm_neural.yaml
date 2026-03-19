@@ -1,0 +1,19 @@
+id: alarm_neural
+name: Neural Tripwire
+description: You establish a psionic perimeter around an area. When an unauthorized mind crosses the boundary, the tripwire
+  triggers — sending you either a silent cognitive ping or broadcasting a sharp mental shriek audible to everyone in the zone.
+  Either response jolts you awake instantly.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You ward an area to alert you when creatures enter without your permission. When you cast alarm, select a
+      password. Whenever a Small or larger corporeal creature enters the spell's area without speaki

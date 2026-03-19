@@ -1,0 +1,17 @@
+id: draw_moisture_technical
+name: Moisture Extractor
+description: You activate a molecular moisture extraction device on an object, drawing out water content and drying it completely.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You draw water out of an object, possibly to clean up spills or quickly dry a soaked book or shirt. You draw
+      up to a pint of water from the object; this dries objects of less than 1 Bulk. The water co

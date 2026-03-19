@@ -1,0 +1,29 @@
+id: grim_tendrils_neural
+name: Void Tendrils
+description: Tendrils of psychic void energy lance from your fingertips, dealing void damage to everything in their path.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '2'
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: void
+    dc: 0

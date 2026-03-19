@@ -1,0 +1,18 @@
+id: message_rune_neural
+name: Stored Message Glyph
+description: You inscribe a data-glyph that stores up to 5 minutes of your voice, playing back to the first person who activates
+  it.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You record a message up to 5 minutes long and inscribe a special rune on any flat unattended surface or small
+      object within reach. The nature of the rune's appearance is up to you, but it's visible to

@@ -1,0 +1,23 @@
+id: admonishing_ray_technical
+name: Compliance Beam
+description: A focused beam of non-lethal electromagnetic energy bludgeons the target into submission. Choose blunt concussive
+  or sharp stinging frequency. Make a tech attack roll. Deals 2d6 bludgeoning damage.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: bludgeoning
+    dc: 0

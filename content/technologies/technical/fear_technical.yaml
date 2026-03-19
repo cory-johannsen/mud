@@ -1,0 +1,28 @@
+id: fear_technical
+name: Terror Broadcast
+description: You trigger the target's fight-or-flight response with a precisely calibrated fear signal broadcast directly
+  to their limbic systems.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You plant fear in the target; it must attempt a Will save.
+
+
+      Critical Success The target is unaffected.
+
+      Success The target is Frightened 1.
+
+      Failure The target is Frightened 2.
+
+      Critical Failure The targ'

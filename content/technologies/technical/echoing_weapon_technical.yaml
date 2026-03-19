@@ -1,0 +1,18 @@
+id: echoing_weapon_technical
+name: Weapon Echo Module
+description: You attach an echo-strike capacitor to a weapon. Each successful hit discharges a secondary phantom strike dealing
+  additional damage.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You channel magical energy into the target weapon, and the air around it faintly hums each time you strike
+      a blow, as the impact is absorbed into the weapon. If a creature is wielding the weapon at th

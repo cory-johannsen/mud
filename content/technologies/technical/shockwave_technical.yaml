@@ -1,0 +1,33 @@
+id: shockwave_technical
+name: Shockwave
+description: |-
+    You create a wave of energy that ripples through the earth. Terrestrial creatures in the affected area must attempt a Reflex save to avoid stumbling as the shockwave shakes the ground.Critical Success The creature is unaffected.
+    Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] until the start of its next turn.
+    Failure The creature falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+    Critical Failure As failure, plus the creature takes 1d6 bludgeoning damage.Heightened (+1) The area increases by 5 feet (to a 20-foot cone at 2nd rank, and so on).
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 1d3
+          damage_type: bludgeoning
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 1d6
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 2d6
+          damage_type: bludgeoning
+          dc: 0

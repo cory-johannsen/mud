@@ -1,0 +1,17 @@
+id: sure_strike_technical
+name: Target Lock
+description: You establish a firm targeting solution, granting advantage on your next attack roll.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The next time you make an attack roll before the end of your turn, roll it twice and use the better result.
+      The attack ignores circumstance penalties to the attack roll and any flat check required due

@@ -1,0 +1,17 @@
+id: join_pasts
+name: Memory Bridge
+description: You establish a direct neural link between two targets, letting them share and experience each other's memories.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: melee
+targets: single
+duration: rounds:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: With touches to the targets' foreheads, you bring them into mental communion. The targets can share thoughts
+      and experiences, but not words. When one target attempts to Recall Knowledge, the other can

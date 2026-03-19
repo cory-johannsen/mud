@@ -1,0 +1,17 @@
+id: fated_healing_neural
+name: Biofeedback Prediction
+description: You read the near-term biorhythm of a target, predicting incoming harm and granting a small healing bonus.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:5
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d4
+    damage_type: untyped
+    dc: 0

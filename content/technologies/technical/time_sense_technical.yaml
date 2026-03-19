@@ -1,0 +1,17 @@
+id: time_sense_technical
+name: Precision Chronometer
+description: You achieve atomic-clock synchronization, gaining perfect awareness of time passage with millisecond precision.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: When you Cast the Spell, you gain a perfect sense of time. You can learn exactly what time it is, down to
+      the second. You can instead choose to gain a perfect sense of the calendar if you have knowled

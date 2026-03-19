@@ -1,0 +1,19 @@
+id: summon_undead_fanatic_doctrine
+name: Doctrine's Resurrection Mandate
+description: You invoke the Doctrine's authority over the dead, reanimating a fallen entity under doctrinal directives.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You summon a creature that has the undead trait and whose level is -1 to fight for you.
+
+
+      Heightened As listed in the summon trait.'

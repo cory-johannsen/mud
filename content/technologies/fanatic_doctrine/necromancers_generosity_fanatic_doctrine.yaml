@@ -1,0 +1,17 @@
+id: necromancers_generosity_fanatic_doctrine
+name: Doctrine's Penance Transfer
+description: You transfer a poison or disease from one target to another, using doctrinal will to redirect the affliction.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d8+4
+    damage_type: untyped
+    dc: 0

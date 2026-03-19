@@ -1,0 +1,17 @@
+id: threefold_limb_technical
+name: Triple Strike Module
+description: You activate a triple-strike attack module that allows three simultaneous strikes in rapid succession.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You temporarily transform one of your limbs into water, taking the form of ice, liquid water, or steam as
+      you desire. Make a melee spell attack roll. On a hit, the target takes 2d6 damage; the type of

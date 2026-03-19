@@ -1,0 +1,20 @@
+id: charm_technical
+name: Social Override Protocol
+description: You broadcast a subtle electromagnetic signal that makes you seem trustworthy and appealing. The target must
+  resist with a Will save or treat you as a trusted contact.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: To the target, your words are honey and your visage seems bathed in a dreamy haze. It must attempt a Will
+      save, with a +4 circumstance bonus if you or your allies recently threatened it or used hostil

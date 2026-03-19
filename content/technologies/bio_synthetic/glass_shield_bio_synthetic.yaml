@@ -1,0 +1,29 @@
+id: glass_shield_bio_synthetic
+name: Transparent Polymer Barrier
+description: You extrude a pane of hardened transparent polymer as a physical shield that absorbs one hit before shattering.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '1'
+    damage_type: piercing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d4
+    damage_type: piercing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: piercing
+    dc: 0

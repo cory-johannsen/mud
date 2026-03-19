@@ -1,0 +1,23 @@
+id: aqueous_blast_neural
+name: Hydro-Fist Strike
+description: You condense water around your fist and drive kinetic hydro-bursts at nearby targets. Each burst is a melee psionic
+  strike.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d8
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d8
+    damage_type: bludgeoning
+    dc: 0

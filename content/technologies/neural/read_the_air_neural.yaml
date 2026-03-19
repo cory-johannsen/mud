@@ -1,0 +1,18 @@
+id: read_the_air_neural
+name: Social Dynamics Scan
+description: You perform a rapid behavioral analysis of a social encounter, gaining insight into the key players and their
+  intentions.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You take a deep breath as you survey a social situation, showing courtesy to all around you as your intuition
+      swiftly picks up clues about social contexts and unspoken assumptions of behavior. Your bo

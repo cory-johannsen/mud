@@ -1,0 +1,23 @@
+id: divine_lance
+name: Doctrine's Judgment Bolt
+description: You call down a bolt of the Doctrine's pure ideological energy, dealing damage aligned to your Doctrine's chosen
+  aspect.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d4
+    damage_type: spirit
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d4
+    damage_type: spirit
+    dc: 0

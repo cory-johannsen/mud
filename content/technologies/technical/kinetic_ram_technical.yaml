@@ -1,0 +1,19 @@
+id: kinetic_ram_technical
+name: Kinetic Impact Cannon
+description: You compress kinetic energy and release it as either a focused beam or a radial shockwave at your discretion.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Gathering kinetic energy, you either focus it in a straight line or disperse it as an encircling ripple.
+      Any creature targeted by this spell must succeed at a Fortitude saving throw or be pushed 10 fe

@@ -1,0 +1,18 @@
+id: root_reading_technical
+name: Organic Data Scan
+description: You scan organic material in a location, reading chemical signatures to learn about recent events or environmental
+  history.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You gain general insights into the immediate vicinity by sending your sense through the root systems of trees
+      and bushes. If there are any unnoticed Medium or larger creatures in the area, you learn o

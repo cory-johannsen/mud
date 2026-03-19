@@ -1,0 +1,29 @@
+id: vitality_lash_fanatic_doctrine
+name: Doctrine's Vitality Lash
+description: You lash the target with a whip of vital energy, dealing damage that can heal the faithful and harm the wicked.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 2d3
+    damage_type: vitality
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: vitality
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: vitality
+    dc: 0

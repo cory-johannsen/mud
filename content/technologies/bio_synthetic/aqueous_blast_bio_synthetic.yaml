@@ -1,0 +1,22 @@
+id: aqueous_blast_bio_synthetic
+name: Pressurized Fluid Fist
+description: You pressurize water from your bio-systems into a hydro-fist, delivering high-impact fluid bursts as melee strikes.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d8
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d8
+    damage_type: bludgeoning
+    dc: 0

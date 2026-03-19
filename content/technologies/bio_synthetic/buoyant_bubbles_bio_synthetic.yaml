@@ -1,0 +1,19 @@
+id: buoyant_bubbles_bio_synthetic
+name: Hydrophobic Foam Coat
+description: You coat the target in rapidly-setting hydrophobic bio-foam, providing sustained positive buoyancy in any liquid.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a thin layer of foamy bubbles that adhere to the target, causing it to float in water and similar
+      liquids. The target doesn't sink, even if it hasn't succeeded at a Swim check this round; a

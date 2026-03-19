@@ -1,0 +1,22 @@
+id: flense_fanatic_doctrine
+name: Penitent's Stripping
+description: You invoke the Doctrine's most severe penance rite, dealing devastating damage to the target's biological integrity.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: slashing
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: slashing
+    dc: 0

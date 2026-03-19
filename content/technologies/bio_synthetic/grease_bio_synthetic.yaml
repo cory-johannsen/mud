@@ -1,0 +1,23 @@
+id: grease_bio_synthetic
+name: Industrial Lubricant Spray
+description: You spray an area or target with bio-synthesized industrial lubricant, creating a slick surface that causes falls
+  or disarms.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You conjure grease, choosing an area or target.
+
+
+      Area [4 contiguous 5-foot squares] All solid ground in the area is covered with grease. Each creature standing on the
+      greasy surface must succeed at a'

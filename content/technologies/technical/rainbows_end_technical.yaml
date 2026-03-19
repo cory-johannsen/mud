@@ -1,0 +1,29 @@
+id: rainbows_end_technical
+name: Prismatic Beam Array
+description: You activate a multi-spectrum beam emitter, firing a beam of random elemental energy at the target.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '1'
+    damage_type: spirit
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d4
+    damage_type: spirit
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: spirit
+    dc: 0

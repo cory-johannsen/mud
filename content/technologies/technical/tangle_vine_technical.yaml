@@ -1,0 +1,19 @@
+id: tangle_vine_technical
+name: Snare Deploy
+description: You launch a tangle-wire snare at the target, entangling their limbs and restricting movement.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'A vine appears from thin air, flicking from your hand and lashing itself to the target. Attempt a spell
+      attack roll against the target.
+
+      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Tangle Vi'

@@ -1,0 +1,30 @@
+id: purifying_icicle_bio_synthetic
+name: Cryo-Purification Spike
+description: You form a spike of purified cryo-compound that deals cold damage and neutralizes toxins in the target's system.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 1d6
+    damage_type: cold
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 2d6
+    damage_type: cold
+    dc: 0

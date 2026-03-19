@@ -1,0 +1,17 @@
+id: lock_fanatic_doctrine
+name: Doctrine's Seal
+description: You invoke the Doctrine's authority to seal a door or container shut, held by doctrinal force.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target's latch mechanism clinks shut, held fast by unseen magical wards. When you magically lock a target,
+      you set an Athletics and Thievery DC to open it equal to your spell DC or the base lock D

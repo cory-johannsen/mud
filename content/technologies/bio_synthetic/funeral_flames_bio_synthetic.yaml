@@ -1,0 +1,17 @@
+id: funeral_flames_bio_synthetic
+name: Incendiary Weapon Coat
+description: You coat a weapon in a bio-synthesized incendiary compound, causing it to ignite and deal fire damage on strikes.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transform a bludgeon into a fearsome torch suited to casting undead into the afterlife. One end of the
+      weapon ignites, becoming wreathed in blue flame. While you wield the target weapon, it become

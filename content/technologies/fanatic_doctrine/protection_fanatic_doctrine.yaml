@@ -1,0 +1,20 @@
+id: protection_fanatic_doctrine
+name: Doctrine's Ward
+description: You tune the Doctrine's protection to resist the specific threat of one designated enemy, granting a +1 status
+  bonus against them.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You ward a creature against harm. The target gains a +1 status bonus to Armor Class and saving throws.
+
+
+      Heightened (3rd) You can choose to have the benefits also affect all your allies in a @Template['

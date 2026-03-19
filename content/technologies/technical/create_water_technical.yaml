@@ -1,0 +1,17 @@
+id: create_water_technical
+name: Atmospheric Water Condenser
+description: You activate a moisture condenser unit that extracts 2 gallons of clean water from ambient humidity.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: As you cup your hands, water begins to flow forth from them. You create 2 gallons of water. If no one drinks
+      it, it evaporates after 1 day.

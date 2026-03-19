@@ -1,0 +1,17 @@
+id: funeral_flames_fanatic_doctrine
+name: Martyr's Torch
+description: You sanctify a weapon with the Doctrine's funeral flame, causing it to burn with ideological fire on each strike.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transform a bludgeon into a fearsome torch suited to casting undead into the afterlife. One end of the
+      weapon ignites, becoming wreathed in blue flame. While you wield the target weapon, it become

@@ -1,0 +1,19 @@
+id: verdant_sprout
+name: Verdant Sprout
+description: |-
+    You imbue a single ordinary, inexpensive plant seed with primal energy and throw it onto a surface, where it gradually sprouts into a Medium plant. After 10 minutes, the plant is sturdy enough to provide standard cover, and its space is difficult terrain. The plant is laden with nutritious nuts or fruit sufficient to feed one Medium creature for a day. The plant has AC 10, Hardness 5, and 20 Hit Points.
+
+    Heightened (+1) You throw an additional seed, which grows into an additional plant within range.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You imbue a single ordinary, inexpensive plant seed with primal energy and throw it onto a surface, where it gradually sprouts into a Medium plant. After 10 minutes, the plant is sturdy enough to prov

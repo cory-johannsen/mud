@@ -1,0 +1,22 @@
+id: phase_bolt_neural
+name: Phase Strike
+description: You project a bolt of focused psionic energy that passes through non-living material to strike its target.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 3d4
+    damage_type: piercing
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 6d4
+    damage_type: piercing
+    dc: 0

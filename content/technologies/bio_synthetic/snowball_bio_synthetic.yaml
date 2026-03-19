@@ -1,0 +1,23 @@
+id: snowball_bio_synthetic
+name: Cryo-Gel Projectile
+description: You form and throw a compressed cryo-gel projectile that detonates on impact, dealing cold damage and slowing
+  targets.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d4
+    damage_type: cold
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d4
+    damage_type: cold
+    dc: 0

@@ -1,0 +1,17 @@
+id: defended_by_spirits_fanatic_doctrine
+name: Martyr Guard
+description: You call on the Doctrine's honored martyrs to protect the target, granting a small bonus to AC and saving throws.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d6
+    damage_type: spirit
+    dc: 0

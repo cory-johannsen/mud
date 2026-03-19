@@ -1,0 +1,17 @@
+id: flashy_disappearance_neural
+name: Smoke Screen Vanish
+description: You emit a burst of colored smoke from a concealed canister, using the visual distraction to vanish from sight.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a puff of colorful smoke that quickly disperses while you become temporarily @UUID[Compendium.pf2e.conditionitems.Item.Invisible].
+      You become @UUID[Compendium.pf2e.conditionitems.Item.Undet

@@ -1,0 +1,17 @@
+id: instant_pottery_bio_synthetic
+name: Rapid Organic Fabrication
+description: You apply a growth accelerant to organic material, rapidly shaping it into functional containers or structures.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You pull earthen material out of the environment, then shape it into one or more earthenware objects that,
+      in combination, can be up to light Bulk. Alternatively, you can cast this spell on objects pr

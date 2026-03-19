@@ -1,0 +1,20 @@
+id: sleep_neural
+name: Neural Shutdown
+description: You broadcast a deep sleep induction frequency into the minds of all targets in the area. Weaker minds succumb
+  immediately.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Each creature in the area becomes drowsy, possibly nodding off. A creature that falls @UUID[Compendium.pf2e.conditionitems.Item.Unconscious]
+      from this spell doesn't fall @UUID[Compendium.pf2e.conditio

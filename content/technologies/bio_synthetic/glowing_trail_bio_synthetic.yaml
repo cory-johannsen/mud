@@ -1,0 +1,17 @@
+id: glowing_trail_bio_synthetic
+name: Bioluminescent Track
+description: Your movement leaves a trail of bioluminescent compound behind, slowly fading after you pass.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your movements leave a vague glowing path behind you, like a misty echo of your presence. While your form
+      is not discernible, your size is. This path hangs in space and is not anchored to any surface,

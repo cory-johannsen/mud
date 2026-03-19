@@ -1,0 +1,18 @@
+id: armor_of_thorn_and_claw
+name: Dermal Thorn Eruption
+description: You trigger a rapid growth of bio-synthetic thorns and claws from your skin, shredding attackers who strike you
+  in melee.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: '1'
+    damage_type: piercing
+    dc: 0

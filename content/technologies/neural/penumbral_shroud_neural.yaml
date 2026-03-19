@@ -1,0 +1,20 @@
+id: penumbral_shroud_neural
+name: Shadow Shroud
+description: You wrap the target in a cloak of psychic shadow, reducing their visibility to others and penalizing their own
+  vision.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You envelop the target in a shroud of shadow. The target perceives light as one step lower than it actually
+      is (bright light becomes dim light, for example), affecting their ability to sense creatures

@@ -1,0 +1,17 @@
+id: read_aura_bio_synthetic
+name: Bio-Signature Scanner
+description: You scan an object or creature with bio-chemical sensors, identifying general bio-type or organic origin.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You focus on the target object, opening your mind to perceive magical auras. When the casting is complete,
+      you know whether that item is magical. You or anyone you advise about the aura gains a +2 cir

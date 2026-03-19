@@ -1,0 +1,17 @@
+id: detect_metal_neural
+name: Magnetic Resonance Scan
+description: You extend your sensory field to detect metallic objects and magnetic signatures in a cone ahead.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You attune yourself to magnetic fields, becoming aware of the presence or absence of metallic objects, veins,
+      and deposits within the area. You can choose to ignore metal you're fully aware of, such a

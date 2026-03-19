@@ -1,0 +1,21 @@
+id: eat_fire_neural
+name: Thermal Absorption
+description: Reaction — triggered when you would take fire damage. Your neural augments reroute the thermal energy, absorbing
+  the damage.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 0
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger You would take fire damage.
+
+
+      You consume and ingest fire, making it less harmful to you. You gain resistance 5 to fire damage until the end of the
+      current turn. During the remaining duration o'

@@ -1,0 +1,17 @@
+id: quick_sort_neural
+name: Auto-Sort Protocol
+description: You telekinetically organize a pile of items into sorted stacks or groups with a moment of concentration.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You magically sort a group of objects into neat stacks or piles. You can sort the objects in two different
+      ways. The first option is to separate them into different piles depending on an easily observ

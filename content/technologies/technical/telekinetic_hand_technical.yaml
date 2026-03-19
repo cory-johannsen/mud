@@ -1,0 +1,17 @@
+id: telekinetic_hand_technical
+name: Remote Manipulator Arm
+description: You project a precise remote manipulator field that functions as an invisible hand for fine or gross object manipulation.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a floating, magical hand, either invisible or ghostlike, that grasps the target object and levitates
+      it slowly up to 20 feet in any direction. When you Sustain the spell, you can move the o

@@ -1,0 +1,23 @@
+id: airburst_bio_synthetic
+name: Pressure Wave
+description: You release a concentrated burst of compressed gas. Unattended objects of 1 Bulk or less are hurled 5 feet away.
+  Larger creatures must resist the concussive force with a Fortitude save.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'A blast of wind wildly pushes everything nearby. Unattended objects of 1 Bulk or less are pushed 5 feet
+      away from you. Large or smaller creatures must attempt a Fortitude save.
+
+
+      Critical Success The c'

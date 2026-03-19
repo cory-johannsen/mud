@@ -1,0 +1,17 @@
+id: breadcrumbs_bio_synthetic
+name: Pheromone Trail Marker
+description: You coat the target in invisible pheromone trail markers, leaving a chemical track that others can follow.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You protect your target from going astray in hostile territory by tracking where it's already been, helping
+      it deduce where it still needs to go. The target leaves a glittering trail behind it that la

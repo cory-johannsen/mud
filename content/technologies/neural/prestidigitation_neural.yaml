@@ -1,0 +1,17 @@
+id: prestidigitation_neural
+name: Minor Tech Cantrip
+description: You perform simple micro-level technological manipulations — minor cleaning, lighting, warming, or cosmetic effects.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The simplest magic does your bidding. You can perform simple magical effects for as long as you Sustain the
+      spell. Each time you Sustain the spell, you can choose one of four options.Cook Cool, warm,

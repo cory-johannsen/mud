@@ -1,0 +1,17 @@
+id: illusory_object_neural
+name: Persistent Hologram
+description: You project a stationary visual hologram of an object — convincing to sight but with no physical presence.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an illusory visual image of a stationary object. The entire image must fit within the spell's
+      area. The object appears to animate naturally, but it doesn't make sounds or generate smells. F

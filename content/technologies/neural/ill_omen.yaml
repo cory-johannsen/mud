@@ -1,0 +1,22 @@
+id: ill_omen
+name: Bad Luck Injection
+description: You corrupt the target's decision-making subroutines, causing it to repeatedly fail on critical choices.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target is struck with misfortune, which throws it off balance. The target must attempt a Will save.
+
+      Success The target is unaffected.
+
+      Failure The first time during the duration that the target att'

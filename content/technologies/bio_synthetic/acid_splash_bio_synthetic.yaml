@@ -1,0 +1,31 @@
+id: acid_splash_bio_synthetic
+name: Bio-Acid Spit
+description: You spit a concentrated glob of bio-synthesized acid that splatters on impact. Make a tech attack. On a hit,
+  deal 1d6 acid damage plus 1 splash acid damage to nearby targets.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 1d6
+    damage_type: acid
+    dc: 0
+  - type: damage
+    dice: '1'
+    damage_type: acid
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: acid
+    dc: 0
+  - type: damage
+    dice: '1'
+    damage_type: acid
+    dc: 0

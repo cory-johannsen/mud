@@ -1,0 +1,21 @@
+id: equal_footing_neural
+name: Size Normalization Field
+description: You project a field that psychically equalizes the threat presence of two combatants, stripping size-based advantages.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You level the field between yourself and another creature, hampering its movements if it''s quicker than
+      you. The target attempts a Will save.Critical Success The target is unaffected.
+
+      Success The targ'

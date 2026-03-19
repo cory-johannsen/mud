@@ -1,0 +1,18 @@
+id: message_technical
+name: Encrypted Transmission
+description: You send a perfectly clear encrypted message directly to the target's audio receivers, bypassing distance and
+  interference.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You mouth words quietly, but instead of coming out of your mouth, they're transferred directly to the ears
+      of the target. While others can't hear your words any better than if you normally mouthed the

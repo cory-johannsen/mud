@@ -1,0 +1,16 @@
+id: temporary_tool
+name: Temporary Tool
+description: You conjure a temporary simple tool, such as a shovel or rope into your hands. It lasts until it's used for a single activity or for 1 minute, whichever comes first, after which it disappears. The tool is obviously temporarily conjured and thus can't be sold or passed off as a genuine item.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You conjure a temporary simple tool, such as a shovel or rope into your hands. It lasts until it's used for a single activity or for 1 minute, whichever comes first, after which it disappears. The too

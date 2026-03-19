@@ -1,0 +1,23 @@
+id: shocking_grasp_technical
+name: High-Voltage Touch
+description: You charge your hand with high-voltage current and deliver it on contact, dealing lightning damage that disrupts
+  metallic armor.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d12
+    damage_type: electricity
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d12
+    damage_type: electricity
+    dc: 0

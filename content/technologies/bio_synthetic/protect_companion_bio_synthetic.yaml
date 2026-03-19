@@ -1,0 +1,17 @@
+id: protect_companion_bio_synthetic
+name: Shared Bio-Field Extension
+description: You extend your bio-synthetic protective field to cover a nearby ally, granting them temporary AC protection.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You extend your aura, as a magical shield that protects your eidolon or minion. The target gains a +1 circumstance
+      bonus to AC until the start of your next turn. You gain the @UUID[Compendium.pf2e.act

@@ -1,0 +1,17 @@
+id: ventriloquism_neural
+name: Voice Rerouter
+description: You project your voice to appear as if it originates from a completely different location.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Whenever you speak or make any other sound vocally, you can make your vocalization seem to originate from
+      somewhere else within 60 feet, and you can change that apparent location freely as you vocaliz

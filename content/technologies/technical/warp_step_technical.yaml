@@ -1,0 +1,17 @@
+id: warp_step_technical
+name: Short-Range Teleport
+description: You execute a short-range spatial teleport, stepping instantly from one position to another nearby.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: When you walk, the earth warps beneath your feet—your steps extend, distance contracts, and everything is
+      just a little bit closer. You gain a +5-foot status bonus to your Speed until the end of you

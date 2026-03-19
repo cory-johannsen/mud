@@ -1,0 +1,30 @@
+id: gritty_wheeze_bio_synthetic
+name: Desiccant Particle Exhale
+description: You exhale a burst of desiccant particles, dealing persistent fire damage to biological targets caught in the
+  cone.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '2'
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: bludgeoning
+    dc: 0

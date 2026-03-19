@@ -1,0 +1,17 @@
+id: thoughtful_gift_fanatic_doctrine
+name: Doctrine's Delivery
+description: You teleport a small blessed object directly to a target's hands in the Doctrine's name.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You teleport one object of light or negligible Bulk held in your hand to the target. The object appears instantly
+      in the target's hand if they have a free hand, or at their feet if they don't. The tar

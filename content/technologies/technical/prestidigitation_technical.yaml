@@ -1,0 +1,17 @@
+id: prestidigitation_technical
+name: Minor Tech Utility
+description: You perform minor low-level technical manipulations — small heating, cooling, cleaning, or cosmetic effects.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The simplest magic does your bidding. You can perform simple magical effects for as long as you Sustain the
+      spell. Each time you Sustain the spell, you can choose one of four options.Cook Cool, warm,

@@ -1,0 +1,18 @@
+id: cleanse_cuisine_bio_synthetic
+name: Contamination Neutralizer
+description: You apply a broad-spectrum decontaminant compound to food and beverages in the area, neutralizing all toxins
+  and impurities.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transform all food and beverages in the area into delicious fare, changing water into wine or another
+      fine beverage, or enhancing the food's taste and ingredients to make it a gourmet treat. You c

@@ -1,0 +1,18 @@
+id: spirit_link_fanatic_doctrine
+name: Martyr Link
+description: You establish a doctrinal life-link between yourself and the target, rerouting a portion of their incoming damage
+  through you.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: '2'
+    damage_type: untyped
+    dc: 0

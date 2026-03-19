@@ -1,0 +1,42 @@
+id: ancient_dust_technical
+name: Void Particulate Grenade
+description: You deploy a grenade of void-charged particulate matter. Each creature in the blast zone takes void damage and
+  1 persistent void damage depending on their Fortitude save.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: '1'
+    damage_type: void
+    dc: 0
+  - type: damage
+    dice: '0'
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: '1'
+    damage_type: void
+    dc: 0
+  - type: damage
+    dice: '0'
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: '1'
+    damage_type: void
+    dc: 0
+  - type: damage
+    dice: '0'
+    damage_type: void
+    dc: 0

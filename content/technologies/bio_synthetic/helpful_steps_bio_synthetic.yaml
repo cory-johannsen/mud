@@ -1,0 +1,17 @@
+id: helpful_steps_bio_synthetic
+name: Emergent Vine Scaffold
+description: You trigger rapid vine or cable growth to form a climbable structure, providing access to elevated areas.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call forth a ladder or staircase to help you reach greater heights. The ladder or staircase appears in
+      a space you designate and either stands freely or connects to a nearby wall if possible. You

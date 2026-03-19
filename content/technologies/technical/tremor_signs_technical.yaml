@@ -1,0 +1,18 @@
+id: tremor_signs_technical
+name: Seismic Signal Transmitter
+description: You transmit coded vibration signals through the ground, sending a short message to anyone equipped to receive
+  them.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You send a series of tremors, no longer than a short sentence of speech, toward your target. If the target
+      is within range and connected to the same body of earth as you, the vibrations reach the targ

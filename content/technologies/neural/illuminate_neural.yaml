@@ -1,0 +1,19 @@
+id: illuminate_neural
+name: Light Source Activation
+description: You remotely trigger all non-active light sources in the area, bringing them to full brightness simultaneously.
+tradition: neural
+level: 1
+usage_type: prepared
+action_cost: 1
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You light all non-magical light sources in the area that use fire to provide their light—such as candles,
+      lamps, and sconces. You can choose to make the emanation smaller than its maximum, to any di

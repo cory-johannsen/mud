@@ -1,0 +1,20 @@
+id: schadenfreude_technical
+name: Failure-Response Boost
+description: Reaction — triggered when you critically fail a save. You convert the failure into a calibration event, temporarily
+  boosting your defensive systems.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Trigger You critically fail a saving throw against a foe's effect.You distract your enemy with their feeling
+      of smug pleasure when you fail catastrophically. They must attempt a Will save.Critical Suc

@@ -1,0 +1,32 @@
+id: timber_bio_synthetic
+name: Timber
+description: |-
+    You create a small dead tree in your space that falls over on anyone in its path, then immediately decomposes. Any creature in the area takes 2d4 bludgeoning damage, with a basic Reflex saving throw. A creature that critically fails its save is knocked for a loop, making it @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] until the end of its next turn.
+
+    Heightened (+1) The initial damage increases by 1d4.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: "2"
+          damage_type: bludgeoning
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d4
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d4
+          damage_type: bludgeoning
+          dc: 0

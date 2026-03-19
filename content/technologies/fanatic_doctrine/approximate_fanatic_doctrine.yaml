@@ -1,0 +1,22 @@
+id: approximate_fanatic_doctrine
+name: Doctrine's Census
+description: The Doctrine illuminates the area with analytical clarity. Name a type of object; you instantly receive an estimate
+  of how many are visible within the zone. The count rounds to the largest digit — the Doctrine deals in approximations, not
+  accountancy.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Area 1 cubic foot
+
+
+      Your magic quickly flows over an area to help you count and catalog. Name a particular type of object you are looking
+      for within the area. You gain an instant estimate of the quanti'

@@ -1,0 +1,30 @@
+id: signal_skyrocket_bio_synthetic
+name: Bioluminescent Flare Launch
+description: You launch a bioluminescent flare payload, illuminating the area and potentially disorienting those caught in
+  the blast.
+tradition: bio_synthetic
+level: 1
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d6
+    damage_type: sonic
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d10
+    damage_type: sonic
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d10
+    damage_type: sonic
+    dc: 0

@@ -1,0 +1,17 @@
+id: mystic_armor_fanatic_doctrine
+name: Doctrine's Armor of Faith
+description: You wrap yourself in a doctrinal force-barrier, gaining a bonus to AC and Dex saving throws.
+tradition: fanatic_doctrine
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You ward yourself with shimmering magical energy, gaining a +1 item bonus to AC and a maximum Dexterity modifier
+      of +5. While wearing mystic armor, you use your unarmored proficiency to calculate your

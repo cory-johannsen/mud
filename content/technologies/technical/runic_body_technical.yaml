@@ -1,0 +1,20 @@
+id: runic_body_technical
+name: Combat Implant Activation
+description: You activate built-in combat implants, making your unarmed strikes count as tech-enhanced weapons.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Glowing runes appear on the target''s body. All its unarmed attacks become +1 striking unarmed attacks,
+      gaining a +1 item bonus to attack rolls and increasing the number of damage dice to two.
+
+
+      Heighte'

@@ -1,0 +1,17 @@
+id: fashionista_technical
+name: Holographic Fashion Overlay
+description: You project a full-body holographic wardrobe overlay, making the target appear to wear elaborate or custom attire.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target's clothes are transformed into ostentatious attire that epitomizes high-end local fashion. No
+      details of the target's appearance transform other than their clothes, so their weapons or armo

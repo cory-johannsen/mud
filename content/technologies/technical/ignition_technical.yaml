@@ -1,0 +1,22 @@
+id: ignition_technical
+name: Igniter Strike
+description: You ignite an object or creature on contact, dealing fire damage and potentially setting them ablaze.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d4
+    damage_type: fire
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d4
+    damage_type: fire
+    dc: 0

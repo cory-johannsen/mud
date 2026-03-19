@@ -1,0 +1,22 @@
+id: phase_bolt_technical
+name: Phase-Through Round
+description: You fire a round engineered to pass through non-living material, striking its target regardless of physical barriers.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 3d4
+    damage_type: piercing
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 6d4
+    damage_type: piercing
+    dc: 0
