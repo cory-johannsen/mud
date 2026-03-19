@@ -153,15 +153,15 @@ func TestConvertSpell_DurationMapping(t *testing.T) {
 
 func TestConvertSpell_SaveTypeMapping(t *testing.T) {
 	cases := []struct {
-		saveValue string
-		wantSave  string
+		saveDescription string
+		wantSave        string
 	}{
-		{"Fortitude", "toughness"},
-		{"Reflex", "hustle"},
-		{"Will", "cool"},
+		{"The target must attempt a Fortitude save.", "toughness"},
+		{"The target must attempt a Reflex save.", "hustle"},
+		{"The target must attempt a Will save.", "cool"},
 	}
 	for _, tc := range cases {
-		spell := makeDamageSpell([]string{"arcane"}, "2", "30 feet", "", "instantaneous", tc.saveValue)
+		spell := makeSaveSpell([]string{"arcane"}, "2", "30 feet", "", "instantaneous", tc.saveDescription)
 		results, _, err := pf2e.ConvertSpell(spell)
 		require.NoError(t, err)
 		require.Len(t, results, 1)
@@ -174,7 +174,7 @@ func TestConvertSpell_SaveTypeMapping(t *testing.T) {
 func TestConvertSpell_AttackTrait_ResolutionAttack(t *testing.T) {
 	spell := makeSpellWithTraits([]string{"arcane"}, []string{"attack"},
 		"2", "30 feet", "", "instantaneous", "",
-		map[string]pf2e.SpellDamageEntry{"0": {Value: "2d6", Type: pf2e.SpellDamageType{Value: "fire"}}})
+		map[string]pf2e.SpellDamageEntry{"0": {Formula: "2d6", DamageType: "fire"}})
 	results, _, err := pf2e.ConvertSpell(spell)
 	require.NoError(t, err)
 	require.Len(t, results, 1)
@@ -184,7 +184,7 @@ func TestConvertSpell_AttackTrait_ResolutionAttack(t *testing.T) {
 }
 
 func TestConvertSpell_SaveBased_HalfStepDiceOnSuccess(t *testing.T) {
-	spell := makeDamageSpell([]string{"arcane"}, "2", "30 feet", "", "instantaneous", "Will")
+	spell := makeSaveSpell([]string{"arcane"}, "2", "30 feet", "", "instantaneous", "The target must attempt a Will save.")
 	results, _, err := pf2e.ConvertSpell(spell)
 	require.NoError(t, err)
 	require.Len(t, results, 1)
@@ -194,7 +194,7 @@ func TestConvertSpell_SaveBased_HalfStepDiceOnSuccess(t *testing.T) {
 }
 
 func TestConvertSpell_SaveBased_DoubleDiceOnCritFailure(t *testing.T) {
-	spell := makeDamageSpell([]string{"arcane"}, "2", "30 feet", "", "instantaneous", "Will")
+	spell := makeSaveSpell([]string{"arcane"}, "2", "30 feet", "", "instantaneous", "The target must attempt a Will save.")
 	results, _, err := pf2e.ConvertSpell(spell)
 	require.NoError(t, err)
 	require.Len(t, results, 1)
@@ -259,7 +259,6 @@ func TestPropertyConvertSpell_NoPanic(t *testing.T) {
 				Range:    pf2e.SpellRange{Value: rapid.SampledFrom([]string{"touch", "self", "30 feet", "60 feet", "20-foot burst", ""}).Draw(rt, "range")},
 				Target:   pf2e.SpellTarget{Value: rapid.SampledFrom([]string{"1 creature", "all enemies", "all allies", ""}).Draw(rt, "target")},
 				Duration: pf2e.SpellDuration{Value: rapid.SampledFrom([]string{"instantaneous", "instant", "1 round", "3 rounds", "1 minute", "sustained", "", "weird"}).Draw(rt, "duration")},
-				Save:     pf2e.SpellSave{Value: rapid.SampledFrom([]string{"Fortitude", "Reflex", "Will", ""}).Draw(rt, "save")},
 			},
 		}
 		_, _, _ = pf2e.ConvertSpell(spell)
@@ -269,24 +268,28 @@ func TestPropertyConvertSpell_NoPanic(t *testing.T) {
 func TestPropertyConvertSpell_AllResultsValidate(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		trad := rapid.SampledFrom([]string{"arcane", "divine", "occult", "primal"}).Draw(rt, "tradition")
-		save := rapid.SampledFrom([]string{"Fortitude", "Reflex", "Will", ""}).Draw(rt, "save")
+		saveDesc := rapid.SampledFrom([]string{
+			"The target must attempt a Fortitude save.",
+			"The target must attempt a Reflex save.",
+			"The target must attempt a Will save.",
+			"",
+		}).Draw(rt, "saveDesc")
 		var dmg map[string]pf2e.SpellDamageEntry
-		if save != "" {
+		if saveDesc != "" {
 			dmg = map[string]pf2e.SpellDamageEntry{
-				"0": {Value: "1d6", Type: pf2e.SpellDamageType{Value: "fire"}},
+				"0": {Formula: "1d6", DamageType: "fire"},
 			}
 		}
 		spell := &pf2e.PF2ESpell{
 			Name: rapid.StringMatching(`[a-zA-Z]{1,20}`).Draw(rt, "name"),
 			System: pf2e.SpellSystem{
-				Description: pf2e.SpellDescription{Value: "test"},
+				Description: pf2e.SpellDescription{Value: saveDesc},
 				Level:       pf2e.SpellLevel{Value: rapid.IntRange(1, 10).Draw(rt, "level")},
 				Traits:      pf2e.SpellTraits{Traditions: []string{trad}},
 				Time:        pf2e.SpellTime{Value: "2"},
 				Range:       pf2e.SpellRange{Value: "30 feet"},
 				Target:      pf2e.SpellTarget{Value: "1 creature"},
 				Duration:    pf2e.SpellDuration{Value: "instantaneous"},
-				Save:        pf2e.SpellSave{Value: save},
 				Damage:      dmg,
 			},
 		}
@@ -298,15 +301,33 @@ func TestPropertyConvertSpell_AllResultsValidate(t *testing.T) {
 	})
 }
 
-func makeDamageSpell(traditions []string, timeVal, rangeVal, targetVal, durationVal, saveVal string) *pf2e.PF2ESpell {
-	return makeSpellWithTraits(traditions, nil, timeVal, rangeVal, targetVal, durationVal, saveVal,
-		map[string]pf2e.SpellDamageEntry{"0": {Value: "1d6", Type: pf2e.SpellDamageType{Value: "fire"}}})
+// makeDamageSpell creates a test spell with 1d6 fire damage and no save (description-based).
+func makeDamageSpell(traditions []string, timeVal, rangeVal, targetVal, durationVal, _ string) *pf2e.PF2ESpell {
+	return makeSpellWithTraits(traditions, nil, timeVal, rangeVal, targetVal, durationVal, "",
+		map[string]pf2e.SpellDamageEntry{"0": {Formula: "1d6", DamageType: "fire"}})
 }
 
-func makeSpellWithTraits(traditions []string, traits []string, timeVal, rangeVal, targetVal, durationVal, saveVal string, damage map[string]pf2e.SpellDamageEntry) *pf2e.PF2ESpell {
-	if damage == nil && saveVal == "" {
+// makeSaveSpell creates a test spell with 1d6 fire damage and a description-embedded save.
+func makeSaveSpell(traditions []string, timeVal, rangeVal, targetVal, durationVal, description string) *pf2e.PF2ESpell {
+	return &pf2e.PF2ESpell{
+		Name: "Test Spell",
+		System: pf2e.SpellSystem{
+			Description: pf2e.SpellDescription{Value: description},
+			Level:       pf2e.SpellLevel{Value: 1},
+			Traits:      pf2e.SpellTraits{Traditions: traditions},
+			Time:        pf2e.SpellTime{Value: timeVal},
+			Range:       pf2e.SpellRange{Value: rangeVal},
+			Target:      pf2e.SpellTarget{Value: targetVal},
+			Duration:    pf2e.SpellDuration{Value: durationVal},
+			Damage:      map[string]pf2e.SpellDamageEntry{"0": {Formula: "1d6", DamageType: "fire"}},
+		},
+	}
+}
+
+func makeSpellWithTraits(traditions []string, traits []string, timeVal, rangeVal, targetVal, durationVal, _ string, damage map[string]pf2e.SpellDamageEntry) *pf2e.PF2ESpell {
+	if damage == nil {
 		damage = map[string]pf2e.SpellDamageEntry{
-			"0": {Value: "1d6", Type: pf2e.SpellDamageType{Value: "fire"}},
+			"0": {Formula: "1d6", DamageType: "fire"},
 		}
 	}
 	return &pf2e.PF2ESpell{
@@ -319,7 +340,6 @@ func makeSpellWithTraits(traditions []string, traits []string, timeVal, rangeVal
 			Range:       pf2e.SpellRange{Value: rangeVal},
 			Target:      pf2e.SpellTarget{Value: targetVal},
 			Duration:    pf2e.SpellDuration{Value: durationVal},
-			Save:        pf2e.SpellSave{Value: saveVal},
 			Damage:      damage,
 		},
 	}

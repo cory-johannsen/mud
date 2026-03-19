@@ -1,16 +1,16 @@
 {
-  "_id": "mindlink001",
+  "_id": "mindlink_test",
   "name": "Mind Link",
   "system": {
-    "description": { "value": "You form a mental link with a touched creature." },
-    "level": { "value": 2 },
-    "traits": { "value": ["mental"], "traditions": ["occult"] },
-    "time": { "value": "2" },
-    "range": { "value": "touch" },
-    "target": { "value": "1 creature" },
-    "area": { "value": "" },
-    "duration": { "value": "1 minute" },
-    "save": { "value": "" },
+    "description": {"value": "<p>You forge a mental link with the target.</p>"},
+    "level": {"value": 1},
+    "traits": {"value": ["concentrate","mental"], "traditions": ["occult"]},
+    "time": {"value": "2"},
+    "range": {"value": "touch"},
+    "target": {"value": "1 creature"},
+    "area": null,
+    "duration": {"value": "1 minute"},
+    "defense": {},
     "damage": {}
   }
 }

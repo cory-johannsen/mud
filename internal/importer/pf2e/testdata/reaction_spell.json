@@ -1,16 +1,18 @@
 {
-  "_id": "react001",
-  "name": "Shield",
+  "_id": "reaction_spell_test",
+  "name": "Shield Block",
   "system": {
-    "description": { "value": "You raise a shield." },
-    "level": { "value": 1 },
-    "traits": { "value": [], "traditions": ["arcane"] },
-    "time": { "value": "reaction" },
-    "range": { "value": "self" },
-    "target": { "value": "" },
-    "area": { "value": "" },
-    "duration": { "value": "instant" },
-    "save": { "value": "" },
-    "damage": { "0": { "value": "1d4", "type": { "value": "force" } } }
+    "description": {"value": "<p>You interpose your shield to block an attack.</p>"},
+    "level": {"value": 1},
+    "traits": {"value": ["attack","concentrate"], "traditions": ["arcane"]},
+    "time": {"value": "reaction"},
+    "range": {"value": ""},
+    "target": {"value": "1 creature"},
+    "area": null,
+    "duration": {"value": "instantaneous"},
+    "defense": {},
+    "damage": {
+      "0": {"formula": "1d6", "type": "physical"}
+    }
   }
 }

@@ -1,16 +1,18 @@
 {
-  "_id": "fireball001",
+  "_id": "fireball_test",
   "name": "Fireball",
   "system": {
-    "description": { "value": "A burst of flame erupts at a point you designate." },
-    "level": { "value": 3 },
-    "traits": { "value": ["fire", "attack"], "traditions": ["arcane", "primal"] },
-    "time": { "value": "2" },
-    "range": { "value": "500 feet" },
-    "target": { "value": "" },
-    "area": { "value": "20-foot burst" },
-    "duration": { "value": "instantaneous" },
-    "save": { "value": "" },
-    "damage": { "0": { "value": "6d6", "type": { "value": "fire" } } }
+    "description": {"value": "<p>A ball of fire detonates. Each creature in the area must attempt a basic Reflex save.</p><p><strong>Critical Success</strong> Unaffected.</p><p><strong>Success</strong> Half damage.</p><p><strong>Failure</strong> Full damage.</p><p><strong>Critical Failure</strong> Double damage.</p>"},
+    "level": {"value": 3},
+    "traits": {"value": ["concentrate","fire","manipulate"], "traditions": ["arcane","primal"]},
+    "time": {"value": "2"},
+    "range": {"value": "500 feet"},
+    "target": {"value": ""},
+    "area": {"type": "burst", "value": 20},
+    "duration": {"value": "instantaneous"},
+    "defense": {},
+    "damage": {
+      "0": {"formula": "6d6", "type": "fire"}
+    }
   }
 }

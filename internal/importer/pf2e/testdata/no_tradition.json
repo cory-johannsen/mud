@@ -1,16 +1,16 @@
 {
-  "_id": "notrad001",
-  "name": "Special Move",
+  "_id": "no_tradition_test",
+  "name": "Unknown Effect",
   "system": {
-    "description": { "value": "A special ability." },
-    "level": { "value": 1 },
-    "traits": { "value": [], "traditions": [] },
-    "time": { "value": "1" },
-    "range": { "value": "self" },
-    "target": { "value": "" },
-    "area": { "value": "" },
-    "duration": { "value": "instant" },
-    "save": { "value": "" },
+    "description": {"value": "<p>An unusual effect with no tradition.</p>"},
+    "level": {"value": 1},
+    "traits": {"value": [], "traditions": []},
+    "time": {"value": "2"},
+    "range": {"value": ""},
+    "target": {"value": ""},
+    "area": null,
+    "duration": {"value": "instantaneous"},
+    "defense": {},
     "damage": {}
   }
 }

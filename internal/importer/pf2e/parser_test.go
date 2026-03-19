@@ -22,6 +22,12 @@ func TestParseSpell_Fireball(t *testing.T) {
 	assert.Contains(t, spell.System.Traits.Traditions, "primal")
 	assert.Equal(t, "2", spell.System.Time.Value)
 	assert.Equal(t, "500 feet", spell.System.Range.Value)
+	require.NotNil(t, spell.System.Area)
+	assert.Equal(t, "burst", spell.System.Area.Type)
+	assert.Equal(t, 20, spell.System.Area.Value)
+	require.Contains(t, spell.System.Damage, "0")
+	assert.Equal(t, "6d6", spell.System.Damage["0"].Formula)
+	assert.Equal(t, "fire", spell.System.Damage["0"].DamageType)
 }
 
 func TestParseSpell_MindLink(t *testing.T) {
@@ -33,6 +39,7 @@ func TestParseSpell_MindLink(t *testing.T) {
 	assert.Equal(t, "touch", spell.System.Range.Value)
 	assert.Equal(t, "1 minute", spell.System.Duration.Value)
 	assert.Empty(t, spell.System.Damage)
+	assert.Nil(t, spell.System.Area)
 }
 
 func TestParseSpell_MalformedJSON_ReturnsError(t *testing.T) {

@@ -1,16 +1,18 @@
 {
-  "_id": "divine001",
+  "_id": "divine_single_test",
   "name": "Heal",
   "system": {
-    "description": { "value": "Positive energy heals the living." },
-    "level": { "value": 1 },
-    "traits": { "value": [], "traditions": ["divine"] },
-    "time": { "value": "2" },
-    "range": { "value": "touch" },
-    "target": { "value": "1 creature" },
-    "area": { "value": "" },
-    "duration": { "value": "instantaneous" },
-    "save": { "value": "" },
-    "damage": { "0": { "value": "1d8", "type": { "value": "positive" } } }
+    "description": {"value": "<p>Positive energy heals the living.</p>"},
+    "level": {"value": 1},
+    "traits": {"value": [], "traditions": ["divine"]},
+    "time": {"value": "2"},
+    "range": {"value": "touch"},
+    "target": {"value": "1 creature"},
+    "area": null,
+    "duration": {"value": "instantaneous"},
+    "defense": {},
+    "damage": {
+      "0": {"formula": "1d8", "type": "positive"}
+    }
   }
 }

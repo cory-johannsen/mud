@@ -20,6 +20,8 @@ var traditionMap = map[string]technology.Tradition{
 var feetRegexp = regexp.MustCompile(`^\d+\s*feet?$`)
 var roundsRegexp = regexp.MustCompile(`^(\d+)\s*rounds?$`)
 var diceRegexp = regexp.MustCompile(`^(\d+)d(\d+)$`)
+var htmlTagRegexp = regexp.MustCompile(`<[^>]+>`)
+var uuidRegexp = regexp.MustCompile(`@UUID\[[^\]]+\]\{([^}]+)\}`)
 
 var recognizedConditions = map[string]bool{
 	"slowed": true, "immobilized": true, "blinded": true,
@@ -58,7 +60,7 @@ func ConvertSpell(spell *PF2ESpell) ([]*importer.TechData, []string, error) {
 		warnings = append(warnings, acWarn)
 	}
 
-	rng, rngWarn := parseRange(spell.System.Range.Value, spell.System.Area.Value)
+	rng, rngWarn := parseRange(spell.System.Range.Value, spell.System.Area)
 	if rngWarn != "" {
 		warnings = append(warnings, rngWarn)
 	}
@@ -70,7 +72,7 @@ func ConvertSpell(spell *PF2ESpell) ([]*importer.TechData, []string, error) {
 		warnings = append(warnings, durWarn)
 	}
 
-	resolution, saveType, saveDC := parseResolution(spell.System.Save.Value, spell.System.Traits.Value)
+	resolution, saveType, saveDC := parseResolution(spell.System.Description.Value, spell.System.Traits.Value)
 
 	effects := buildEffects(spell, resolution, duration)
 
@@ -83,7 +85,7 @@ func ConvertSpell(spell *PF2ESpell) ([]*importer.TechData, []string, error) {
 		def := &technology.TechnologyDef{
 			ID:          id,
 			Name:        spell.Name,
-			Description: spell.System.Description.Value,
+			Description: stripHTML(spell.System.Description.Value),
 			Tradition:   trad,
 			Level:       spell.System.Level.Value,
 			UsageType:   technology.UsagePrepared,
@@ -104,6 +106,16 @@ func ConvertSpell(spell *PF2ESpell) ([]*importer.TechData, []string, error) {
 	return results, warnings, nil
 }
 
+func stripHTML(s string) string {
+	// Replace UUID links with their display text
+	s = uuidRegexp.ReplaceAllString(s, "$1")
+	// Strip remaining HTML tags
+	s = htmlTagRegexp.ReplaceAllString(s, "")
+	// Collapse whitespace
+	s = strings.TrimSpace(s)
+	return s
+}
+
 func parseActionCost(val, spellName string) (int, string) {
 	switch val {
 	case "1":
@@ -119,13 +131,16 @@ func parseActionCost(val, spellName string) (int, string) {
 	}
 }
 
-func parseRange(rangeVal, areaVal string) (technology.Range, string) {
-	rv := strings.ToLower(strings.TrimSpace(rangeVal))
-	av := strings.ToLower(strings.TrimSpace(areaVal))
-
-	if strings.Contains(av, "emanation") || strings.Contains(av, "burst") || strings.Contains(av, "cone") {
-		return technology.RangeZone, ""
+func parseRange(rangeVal string, area *SpellArea) (technology.Range, string) {
+	if area != nil {
+		at := strings.ToLower(area.Type)
+		if at == "emanation" || at == "burst" || at == "cone" {
+			return technology.RangeZone, ""
+		}
 	}
+
+	rv := strings.ToLower(strings.TrimSpace(rangeVal))
+
 	if strings.Contains(rv, "emanation") || strings.Contains(rv, "burst") || strings.Contains(rv, "cone") {
 		return technology.RangeZone, ""
 	}
@@ -171,9 +186,10 @@ func parseDuration(val, spellName string) (string, string) {
 	return "instant", fmt.Sprintf("spell %q: unrecognized duration %q; defaulting to instant", spellName, val)
 }
 
-func parseResolution(saveVal string, traits []string) (resolution, saveType string, saveDC int) {
-	if saveVal != "" {
-		return "save", mapSaveType(saveVal), 15
+func parseResolution(description string, traits []string) (resolution, saveType string, saveDC int) {
+	saveType, found := parseSaveFromDescription(description)
+	if found {
+		return "save", saveType, 15
 	}
 	for _, t := range traits {
 		if strings.ToLower(t) == "attack" {
@@ -183,17 +199,18 @@ func parseResolution(saveVal string, traits []string) (resolution, saveType stri
 	return "none", "", 0
 }
 
-func mapSaveType(pf2eSave string) string {
-	switch strings.ToLower(pf2eSave) {
-	case "fortitude":
-		return "toughness"
-	case "reflex":
-		return "hustle"
-	case "will":
-		return "cool"
-	default:
-		return strings.ToLower(pf2eSave)
+func parseSaveFromDescription(desc string) (saveType string, found bool) {
+	lower := strings.ToLower(desc)
+	if strings.Contains(lower, "will save") {
+		return "cool", true
 	}
+	if strings.Contains(lower, "fortitude save") {
+		return "toughness", true
+	}
+	if strings.Contains(lower, "reflex save") {
+		return "hustle", true
+	}
+	return "", false
 }
 
 func buildEffects(spell *PF2ESpell, resolution, duration string) technology.TieredEffects {
@@ -204,7 +221,7 @@ func buildEffects(spell *PF2ESpell, resolution, duration string) technology.Tier
 	allDirect := append(damageEffects, conditionEffects...)
 
 	if len(allDirect) == 0 {
-		desc := spell.System.Description.Value
+		desc := stripHTML(spell.System.Description.Value)
 		if len(desc) > 200 {
 			desc = strings.TrimSpace(desc[:200])
 		}
@@ -241,13 +258,13 @@ func buildDamageEffects(damage map[string]SpellDamageEntry) []technology.TechEff
 	var effects []technology.TechEffect
 	for _, k := range keys {
 		entry := damage[k]
-		if entry.Value == "" {
+		if entry.Formula == "" {
 			continue
 		}
 		effects = append(effects, technology.TechEffect{
 			Type:       technology.EffectDamage,
-			Dice:       entry.Value,
-			DamageType: entry.Type.Value,
+			Dice:       entry.Formula,
+			DamageType: entry.DamageType,
 		})
 	}
 	return effects
