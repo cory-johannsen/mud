@@ -25,6 +25,13 @@ to avoid duplicated research.
 │ Charisma       │ Flair              │ FLR          │
 └────────────────┴────────────────────┴──────────────┘
 
+### Spell Rank → Technology Type
+
+| PF2E Concept       | Gunchete Analog       | Notes                                                      |
+|--------------------|----------------------|------------------------------------------------------------|
+| Cantrip            | Hardwired Technology | Unlimited use; fixed per job; not selectable from a pool   |
+| Rank 1–10 spell    | Technology (leveled) | Prepared or spontaneous; selectable from archetype/job pool; rank = tech level |
+
 ## Class Mapping
 
 Gunchete replaces PF2E classes with **Archetypes** (broad role categories) and **Jobs** (specific
