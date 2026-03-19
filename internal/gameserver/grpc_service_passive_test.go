@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -224,4 +225,72 @@ func TestPropertyTriggerPassiveTechsForRoom_AllPlayersReceiveEvent(t *testing.T)
 			svc.triggerPassiveTechsForRoom(roomID)
 		})
 	})
+}
+
+// TestSeismicSense_PassiveActivation verifies end-to-end that:
+//   - Player 1 with seismic_sense innate tech receives a "[Seismic Sense]" push event.
+//   - Player 2 in the same room without seismic_sense receives NO event.
+//
+// REQ-PTM4, REQ-PTM5: passive techs fire only for the owning player; the RoomQuerier
+// (GameServiceServer.CreaturesInRoom) is wired through triggerPassiveTechsForRoom.
+func TestSeismicSense_PassiveActivation(t *testing.T) {
+	const (
+		roomID = "room_seismic_integration"
+		uid1   = "player-seismic-1"
+		uid2   = "player-seismic-2"
+	)
+
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	// Register seismic_sense as a passive tech with EffectTremorsense.
+	reg := technology.NewRegistry()
+	reg.Register(&technology.TechnologyDef{
+		ID:         "seismic_sense",
+		Name:       "Seismic Sense",
+		Passive:    true,
+		ActionCost: 0,
+		Effects:    technology.TieredEffects{OnApply: []technology.TechEffect{{Type: technology.EffectTremorsense}}},
+	})
+	svc.SetTechRegistry(reg)
+
+	// Player 1 has seismic_sense innate slot.
+	sess1 := addPlayerWithInnateTechs(t, sessMgr, uid1, roomID, map[string]*session.InnateSlot{
+		"seismic_sense": {MaxUses: 0, UsesRemaining: 0},
+	})
+
+	// Player 2 has no innate techs.
+	sess2 := addPlayerWithInnateTechs(t, sessMgr, uid2, roomID, map[string]*session.InnateSlot{})
+
+	// Drain sess2 events in background so no goroutine leak.
+	go func() {
+		for range sess2.Entity.Events() {
+		}
+	}()
+
+	lenBefore1 := len(sess1.Entity.Events())
+	lenBefore2 := len(sess2.Entity.Events())
+
+	svc.triggerPassiveTechsForRoom(roomID)
+
+	// Player 1 must receive at least one event containing "[Seismic Sense]".
+	lenAfter1 := len(sess1.Entity.Events())
+	require.Greater(t, lenAfter1, lenBefore1, "player1 with seismic_sense must receive an event")
+
+	// Drain and inspect player 1's new events.
+	found := false
+	for i := lenBefore1; i < lenAfter1; i++ {
+		select {
+		case raw := <-sess1.Entity.Events():
+			if strings.Contains(string(raw), "[Seismic Sense]") {
+				found = true
+			}
+		default:
+		}
+	}
+	assert.True(t, found, "player1 event must contain \"[Seismic Sense]\"")
+
+	// Player 2 must receive NO new event.
+	lenAfter2 := len(sess2.Entity.Events())
+	assert.Equal(t, lenBefore2, lenAfter2, "player2 without seismic_sense must not receive an event")
 }

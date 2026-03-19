@@ -7632,7 +7632,7 @@ func (s *GameServiceServer) triggerPassiveTechsForRoom(roomID string) {
 			if !def.Passive {
 				continue
 			}
-			evt, err := s.activateTechWithEffects(sess, sess.UID, techID, "", "", nil)
+			evt, err := s.activateTechWithEffects(sess, sess.UID, techID, "", "", s)
 			if err != nil {
 				s.logger.Warn("passive tech activation error",
 					zap.String("uid", sess.UID),
@@ -7657,4 +7657,32 @@ func (s *GameServiceServer) triggerPassiveTechsForRoom(roomID string) {
 			}
 		}
 	}
+}
+
+// CreaturesInRoom implements RoomQuerier for GameServiceServer.
+// It returns all players and NPCs currently in roomID.
+// The sensing player (sensingUID) is returned as CreatureInfo{Name: "you"}.
+//
+// Precondition: roomID and sensingUID are non-empty strings.
+// Postcondition: Returns one entry per creature; sensing player entry has Name="you".
+func (s *GameServiceServer) CreaturesInRoom(roomID, sensingUID string) []CreatureInfo {
+	var result []CreatureInfo
+
+	// Add NPC instances.
+	if s.npcH != nil {
+		for _, inst := range s.npcH.InstancesInRoom(roomID) {
+			result = append(result, CreatureInfo{Name: inst.Name(), Hidden: false})
+		}
+	}
+
+	// Add players.
+	for _, sess := range s.sessions.PlayersInRoomDetails(roomID) {
+		if sess.UID == sensingUID {
+			result = append(result, CreatureInfo{Name: "you", Hidden: false})
+		} else {
+			result = append(result, CreatureInfo{Name: sess.CharName, Hidden: false})
+		}
+	}
+
+	return result
 }
