@@ -38,7 +38,6 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - id: mind_spike
-        level: 1
-      - id: mind_spike
-        level: 1
+      - { id: read_the_air_neural, level: 1 }
+      - { id: message_neural, level: 1 }
+      - { id: protection_neural, level: 1 }

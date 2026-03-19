@@ -39,7 +39,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: mind_spike
-        level: 1
-      - id: mind_spike
-        level: 1
+      - { id: sure_strike_neural, level: 1 }
+      - { id: runic_weapon_neural, level: 1 }
+      - { id: needle_darts_neural, level: 1 }

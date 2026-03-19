@@ -42,7 +42,6 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - id: mind_spike
-        level: 1
-      - id: mind_spike
-        level: 1
+      - { id: protection_neural, level: 1 }
+      - { id: warp_step_neural, level: 1 }
+      - { id: sure_strike_neural, level: 1 }

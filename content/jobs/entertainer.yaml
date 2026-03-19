@@ -39,7 +39,6 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - id: mind_spike
-        level: 1
-      - id: mind_spike
-        level: 1
+      - { id: musical_accompaniment_neural, level: 1 }
+      - { id: figment_neural, level: 1 }
+      - { id: overselling_flourish_neural, level: 1 }

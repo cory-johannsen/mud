@@ -42,7 +42,6 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - id: mind_spike
-        level: 1
-      - id: mind_spike
-        level: 1
+      - { id: force_barrage_neural, level: 1 }
+      - { id: biting_words, level: 1 }
+      - { id: concordant_choir_neural, level: 1 }

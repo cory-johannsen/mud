@@ -38,7 +38,6 @@ class_features:
 technology_grants:
   spontaneous:
     pool:
-      - id: mind_spike
-        level: 1
-      - id: mind_spike
-        level: 1
+      - { id: phantom_pain, level: 1 }
+      - { id: ill_omen, level: 1 }
+      - { id: bane_neural, level: 1 }

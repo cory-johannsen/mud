@@ -39,7 +39,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: mind_spike
-        level: 1
-      - id: mind_spike
-        level: 1
+      - { id: agitate_neural, level: 1 }
+      - { id: draw_ire_neural, level: 1 }
+      - { id: dizzying_colors_neural, level: 1 }
