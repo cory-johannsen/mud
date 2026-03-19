@@ -8,6 +8,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/importer"
 	igomud "github.com/cory-johannsen/mud/internal/importer/gomud"
+	ipf2e "github.com/cory-johannsen/mud/internal/importer/pf2e"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
@@ -131,4 +132,40 @@ areas: []
 		assert.Equal(rt, n, len(entries),
 			"Run with %d zone file(s) must produce exactly %d output file(s)", n, n)
 	})
+}
+
+func TestImporter_RunTech_WritesFiles(t *testing.T) {
+	srcDir := t.TempDir()
+	// divine_single.json → tradition: fanatic_doctrine → id: heal
+	fixtureData, err := os.ReadFile(filepath.Join(
+		"..", "importer", "pf2e", "testdata", "divine_single.json",
+	))
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(filepath.Join(srcDir, "divine_single.json"), fixtureData, 0644))
+
+	outDir := t.TempDir()
+	src := ipf2e.NewTechSource()
+	imp := importer.NewTech(src)
+	err = imp.RunTech(srcDir, outDir, importer.NoopLocalizer{})
+	require.NoError(t, err)
+
+	outPath := filepath.Join(outDir, "fanatic_doctrine", "heal.yaml")
+	require.FileExists(t, outPath)
+}
+
+func TestImporter_RunTech_InvalidDefSkippedWithWarning(t *testing.T) {
+	srcDir := t.TempDir()
+	// level 0 is invalid per Validate()
+	badSpell := `{"_id":"bad","name":"Bad","system":{"description":{"value":"bad"},"level":{"value":0},"traits":{"value":[],"traditions":["arcane"]},"time":{"value":"2"},"range":{"value":"30 feet"},"target":{"value":"1 creature"},"area":{"value":""},"duration":{"value":"instantaneous"},"save":{"value":""},"damage":{"0":{"value":"1d6","type":{"value":"fire"}}}}}`
+	require.NoError(t, os.WriteFile(filepath.Join(srcDir, "bad.json"), []byte(badSpell), 0644))
+
+	outDir := t.TempDir()
+	src := ipf2e.NewTechSource()
+	imp := importer.NewTech(src)
+	err := imp.RunTech(srcDir, outDir, importer.NoopLocalizer{})
+	require.NoError(t, err)
+
+	entries, err := os.ReadDir(outDir)
+	require.NoError(t, err)
+	assert.Empty(t, entries)
 }
