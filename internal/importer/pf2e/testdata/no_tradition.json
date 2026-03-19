@@ -1,0 +1,16 @@
+{
+  "_id": "notrad001",
+  "name": "Special Move",
+  "system": {
+    "description": { "value": "A special ability." },
+    "level": { "value": 1 },
+    "traits": { "value": [], "traditions": [] },
+    "time": { "value": "1" },
+    "range": { "value": "self" },
+    "target": { "value": "" },
+    "area": { "value": "" },
+    "duration": { "value": "instant" },
+    "save": { "value": "" },
+    "damage": {}
+  }
+}

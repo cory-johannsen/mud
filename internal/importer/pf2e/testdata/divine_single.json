@@ -1,0 +1,16 @@
+{
+  "_id": "divine001",
+  "name": "Heal",
+  "system": {
+    "description": { "value": "Positive energy heals the living." },
+    "level": { "value": 1 },
+    "traits": { "value": [], "traditions": ["divine"] },
+    "time": { "value": "2" },
+    "range": { "value": "touch" },
+    "target": { "value": "1 creature" },
+    "area": { "value": "" },
+    "duration": { "value": "instantaneous" },
+    "save": { "value": "" },
+    "damage": { "0": { "value": "1d8", "type": { "value": "positive" } } }
+  }
+}

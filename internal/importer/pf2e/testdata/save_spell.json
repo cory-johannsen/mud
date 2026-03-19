@@ -1,0 +1,16 @@
+{
+  "_id": "save001",
+  "name": "Fear",
+  "system": {
+    "description": { "value": "You plant fear in the target." },
+    "level": { "value": 1 },
+    "traits": { "value": ["emotion", "mental", "frightened"], "traditions": ["divine", "occult"] },
+    "time": { "value": "2" },
+    "range": { "value": "30 feet" },
+    "target": { "value": "1 creature" },
+    "area": { "value": "" },
+    "duration": { "value": "1 round" },
+    "save": { "value": "Will" },
+    "damage": {}
+  }
+}
