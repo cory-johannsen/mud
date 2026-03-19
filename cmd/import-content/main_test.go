@@ -10,7 +10,7 @@ import (
 
 func TestCLI_LocalizeWithoutKey_ReturnsError(t *testing.T) {
 	os.Unsetenv("ANTHROPIC_API_KEY")
-	err := run([]string{"-format", "pf2e", "-source", t.TempDir(), "-output", t.TempDir(), "-localize"})
+	err := run([]string{"-format", "pf2e", "-source", t.TempDir(), "-output", t.TempDir(), "-localize=claude"})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "API key")
 }

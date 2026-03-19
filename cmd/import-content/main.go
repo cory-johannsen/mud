@@ -27,8 +27,8 @@ func run(args []string) error {
 	sourceDir := fs.String("source", "", "path to source asset directory")
 	outputDir := fs.String("output", "", "path to output directory (pf2e default: content/technologies/)")
 	startRoom := fs.String("start-room", "", "optional display-name override for zone start room (gomud only)")
-	localize := fs.Bool("localize", false, "enable Claude API lore localization (pf2e only)")
-	anthropicKey := fs.String("anthropic-key", "", "Anthropic API key (also read from ANTHROPIC_API_KEY env var)")
+	localize := fs.String("localize", "", "lore localization mode: static | claude (pf2e only)")
+	anthropicKey := fs.String("anthropic-key", "", "Anthropic API key for claude localizer (also read from ANTHROPIC_API_KEY env var)")
 
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -60,14 +60,19 @@ func run(args []string) error {
 			out = "content/technologies/"
 		}
 
-		var loc importer.Localizer = importer.NoopLocalizer{}
-		if *localize {
+		var loc importer.Localizer
+		switch *localize {
+		case "", "noop":
+			loc = importer.NoopLocalizer{}
+		case "static":
+			loc = importer.StaticLocalizer{}
+		case "claude":
 			key := *anthropicKey
 			if key == "" {
 				key = os.Getenv("ANTHROPIC_API_KEY")
 			}
 			if key == "" {
-				return errors.New("-localize requires an API key: set -anthropic-key or ANTHROPIC_API_KEY")
+				return errors.New("-localize=claude requires an API key: set -anthropic-key or ANTHROPIC_API_KEY")
 			}
 			repoRoot := findRepoRoot()
 			cl, err := importer.NewClaudeLocalizer(key, repoRoot)
@@ -75,6 +80,8 @@ func run(args []string) error {
 				return fmt.Errorf("creating Claude localizer: %w", err)
 			}
 			loc = cl
+		default:
+			return fmt.Errorf("unknown -localize value %q (supported: static, claude)", *localize)
 		}
 
 		src := ipf2e.NewTechSource()
