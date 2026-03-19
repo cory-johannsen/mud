@@ -40,7 +40,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: battle_fervor
-        level: 1
-      - id: battle_fervor
-        level: 1
+      - { id: admonishing_ray_fanatic_doctrine, level: 1 }
+      - { id: protect_companion_fanatic_doctrine, level: 1 }
+      - { id: shielded_arm_fanatic_doctrine, level: 1 }

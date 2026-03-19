@@ -41,7 +41,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: battle_fervor
-        level: 1
-      - id: battle_fervor
-        level: 1
+      - { id: bane_fanatic_doctrine, level: 1 }
+      - { id: alarm_fanatic_doctrine, level: 1 }
+      - { id: air_bubble_fanatic_doctrine, level: 1 }

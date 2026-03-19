@@ -40,9 +40,6 @@ technology_grants:
     slots_by_level:
       1: 1
     pool:
-      - id: battle_fervor
-        level: 1
-      - id: battle_fervor
-        level: 1
-      - id: battle_fervor
-        level: 1
+      - { id: rousing_splash_fanatic_doctrine, level: 1 }
+      - { id: stabilize_fanatic_doctrine, level: 1 }
+      - { id: necromancers_generosity_fanatic_doctrine, level: 1 }

@@ -38,7 +38,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: battle_fervor
-        level: 1
-      - id: battle_fervor
-        level: 1
+      - { id: battle_fervor, level: 1 }
+      - { id: torturous_trauma_fanatic_doctrine, level: 1 }
+      - { id: cycle_of_retribution_fanatic_doctrine, level: 1 }
