@@ -26,44 +26,46 @@ var _ importer.TechSource = (*PF2ETechSource)(nil)
 // Postcondition: returns all successfully converted TechData, accumulated warnings,
 // and nil error.
 func (s *PF2ETechSource) Load(sourceDir string) ([]*importer.TechData, []string, error) {
-	entries, err := os.ReadDir(sourceDir)
-	if err != nil {
-		return nil, nil, fmt.Errorf("reading source directory %s: %w", sourceDir, err)
-	}
-
 	var results []*importer.TechData
 	var warnings []string
 
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
+	err := filepath.WalkDir(sourceDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			warnings = append(warnings, fmt.Sprintf("walking %s: %v; skipping", path, err))
+			return nil
 		}
-		name := e.Name()
+		if d.IsDir() {
+			return nil
+		}
+		name := d.Name()
 		if !strings.HasSuffix(strings.ToLower(name), ".json") {
-			continue
+			return nil
 		}
 
-		path := filepath.Join(sourceDir, name)
-		data, err := os.ReadFile(path)
-		if err != nil {
-			warnings = append(warnings, fmt.Sprintf("reading %s: %v; skipping", name, err))
-			continue
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			warnings = append(warnings, fmt.Sprintf("reading %s: %v; skipping", name, readErr))
+			return nil
 		}
 
-		spell, err := ParseSpell(data)
-		if err != nil {
-			warnings = append(warnings, fmt.Sprintf("%s: parse error: %v; skipping", name, err))
-			continue
+		spell, parseErr := ParseSpell(data)
+		if parseErr != nil {
+			warnings = append(warnings, fmt.Sprintf("%s: parse error: %v; skipping", name, parseErr))
+			return nil
 		}
 
-		techData, convWarnings, err := ConvertSpell(spell)
+		techData, convWarnings, convErr := ConvertSpell(spell)
 		warnings = append(warnings, convWarnings...)
-		if err != nil {
-			warnings = append(warnings, fmt.Sprintf("%s: conversion error: %v; skipping", name, err))
-			continue
+		if convErr != nil {
+			warnings = append(warnings, fmt.Sprintf("%s: conversion error: %v; skipping", name, convErr))
+			return nil
 		}
 
 		results = append(results, techData...)
+		return nil
+	})
+	if err != nil {
+		return nil, nil, fmt.Errorf("walking source directory %s: %w", sourceDir, err)
 	}
 
 	return results, warnings, nil

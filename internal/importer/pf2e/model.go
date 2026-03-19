@@ -17,6 +17,7 @@ type SpellSystem struct {
 	Target      SpellTarget                 `json:"target"`
 	Area        *SpellArea                  `json:"area"`
 	Duration    SpellDuration               `json:"duration"`
+	Defense     SpellDefense                `json:"defense"`
 	Damage      map[string]SpellDamageEntry `json:"damage"`
 }
 
@@ -60,6 +61,17 @@ type SpellArea struct {
 // SpellDuration holds the duration string.
 type SpellDuration struct {
 	Value string `json:"value"`
+}
+
+// SpellDefense holds the defense/save data for a spell (nullable in JSON).
+type SpellDefense struct {
+	Save *SpellDefenseSave `json:"save"`
+}
+
+// SpellDefenseSave holds the save statistic for a defense-based spell.
+type SpellDefenseSave struct {
+	Basic     bool   `json:"basic"`
+	Statistic string `json:"statistic"`
 }
 
 // SpellDamageEntry holds a single damage component.

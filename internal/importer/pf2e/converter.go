@@ -72,7 +72,7 @@ func ConvertSpell(spell *PF2ESpell) ([]*importer.TechData, []string, error) {
 		warnings = append(warnings, durWarn)
 	}
 
-	resolution, saveType, saveDC := parseResolution(spell.System.Description.Value, spell.System.Traits.Value)
+	resolution, saveType, saveDC := parseResolution(spell.System.Defense, spell.System.Description.Value, spell.System.Traits.Value)
 
 	effects := buildEffects(spell, resolution, duration)
 
@@ -186,10 +186,14 @@ func parseDuration(val, spellName string) (string, string) {
 	return "instant", fmt.Sprintf("spell %q: unrecognized duration %q; defaulting to instant", spellName, val)
 }
 
-func parseResolution(description string, traits []string) (resolution, saveType string, saveDC int) {
-	saveType, found := parseSaveFromDescription(description)
-	if found {
-		return "save", saveType, 15
+func parseResolution(defense SpellDefense, description string, traits []string) (resolution, saveType string, saveDC int) {
+	// Prefer structured defense.save.statistic from file format.
+	if defense.Save != nil && defense.Save.Statistic != "" {
+		return "save", mapSaveType(defense.Save.Statistic), 15
+	}
+	// Fall back to parsing description HTML (MCP/live format has empty defense).
+	if st, found := parseSaveFromDescription(description); found {
+		return "save", st, 15
 	}
 	for _, t := range traits {
 		if strings.ToLower(t) == "attack" {
@@ -197,6 +201,19 @@ func parseResolution(description string, traits []string) (resolution, saveType 
 		}
 	}
 	return "none", "", 0
+}
+
+func mapSaveType(pf2eSave string) string {
+	switch strings.ToLower(pf2eSave) {
+	case "fortitude":
+		return "toughness"
+	case "reflex":
+		return "hustle"
+	case "will":
+		return "cool"
+	default:
+		return strings.ToLower(pf2eSave)
+	}
 }
 
 func parseSaveFromDescription(desc string) (saveType string, found bool) {
