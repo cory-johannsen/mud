@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -8,34 +9,93 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/importer"
 	"github.com/cory-johannsen/mud/internal/importer/gomud"
+	ipf2e "github.com/cory-johannsen/mud/internal/importer/pf2e"
 )
 
 func main() {
-	format := flag.String("format", "", "source format: gomud")
-	sourceDir := flag.String("source", "", "path to source asset directory")
-	outputDir := flag.String("output", "", "path to output zone directory")
-	startRoom := flag.String("start-room", "", "optional display-name override for zone start room")
-	flag.Parse()
-
-	if *format == "" || *sourceDir == "" || *outputDir == "" {
-		fmt.Fprintln(os.Stderr, "usage: import-content -format <fmt> -source <dir> -output <dir> [-start-room <name>]")
+	if err := run(os.Args[1:]); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+}
 
-	var src importer.Source
-	switch *format {
-	case "gomud":
-		src = gomud.NewSource()
-	default:
-		fmt.Fprintf(os.Stderr, "unknown format %q (supported: gomud)\n", *format)
-		os.Exit(1)
+// run is the testable entry point, accepting CLI args directly.
+func run(args []string) error {
+	fs := flag.NewFlagSet("import-content", flag.ContinueOnError)
+
+	format := fs.String("format", "", "source format: gomud | pf2e")
+	sourceDir := fs.String("source", "", "path to source asset directory")
+	outputDir := fs.String("output", "", "path to output directory (pf2e default: content/technologies/)")
+	startRoom := fs.String("start-room", "", "optional display-name override for zone start room (gomud only)")
+	localize := fs.Bool("localize", false, "enable Claude API lore localization (pf2e only)")
+	anthropicKey := fs.String("anthropic-key", "", "Anthropic API key (also read from ANTHROPIC_API_KEY env var)")
+
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+
+	if *format == "" {
+		return errors.New("usage: import-content -format <fmt> -source <dir> [-output <dir>]")
+	}
+	if *sourceDir == "" {
+		return errors.New("-source is required")
 	}
 
 	start := time.Now()
-	imp := importer.New(src)
-	if err := imp.Run(*sourceDir, *outputDir, *startRoom); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+
+	switch *format {
+	case "gomud":
+		if *outputDir == "" {
+			return errors.New("-output is required for format gomud")
+		}
+		src := gomud.NewSource()
+		imp := importer.New(src)
+		if err := imp.Run(*sourceDir, *outputDir, *startRoom); err != nil {
+			return err
+		}
+
+	case "pf2e":
+		out := *outputDir
+		if out == "" {
+			out = "content/technologies/"
+		}
+
+		var loc importer.Localizer = importer.NoopLocalizer{}
+		if *localize {
+			key := *anthropicKey
+			if key == "" {
+				key = os.Getenv("ANTHROPIC_API_KEY")
+			}
+			if key == "" {
+				return errors.New("-localize requires an API key: set -anthropic-key or ANTHROPIC_API_KEY")
+			}
+			repoRoot := findRepoRoot()
+			cl, err := importer.NewClaudeLocalizer(key, repoRoot)
+			if err != nil {
+				return fmt.Errorf("creating Claude localizer: %w", err)
+			}
+			loc = cl
+		}
+
+		src := ipf2e.NewTechSource()
+		imp := importer.NewTech(src)
+		if err := imp.RunTech(*sourceDir, out, loc); err != nil {
+			return err
+		}
+
+	default:
+		return fmt.Errorf("unknown format %q (supported: gomud, pf2e)", *format)
 	}
+
 	fmt.Printf("import complete in %s\n", time.Since(start).Round(time.Millisecond))
+	return nil
+}
+
+// findRepoRoot returns the current working directory as the repo root.
+func findRepoRoot() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "."
+	}
+	return dir
 }
