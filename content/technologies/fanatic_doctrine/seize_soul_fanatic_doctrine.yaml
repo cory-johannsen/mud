@@ -1,9 +1,9 @@
 id: seize_soul_fanatic_doctrine
-name: Seize Soul
-description: |-
-    You trap the target's soul in the item before the soul can pass on to the afterlife. The item used to contain the soul can be anything as long as it's of the appropriate value. The item has AC 16 and its normal Hardness and HP. Destroying (not just breaking) an item or counteracting seize soul releases the soul to the afterlife.
-    While the soul is in the item, the target can't be returned to life through any means, even powerful magic such as a @UUID[Compendium.pf2e.spells-srd.Item.Wish] ritual. If the item is destroyed or seize soul is counteracted on the item, the soul is freed. An item can't hold more than one soul, and any attempt wastes the spell.
-    You can also target an item that has had a soul trapped in it with a second casting of seize soul, which destroys the item and either releases the soul or relocates it to a different item, whichever you choose. This fails if the target is an artifact or the trapped soul is a creature of 19th level or higher.
+name: Soul Harvest Protocol
+description: You attempt to seize a target's soul in the name of your doctrine. The
+  target must attempt a Fortitude save. On a critical failure it dies instantly. On
+  a failure it is stunned 3 and takes 9d6+40 damage. On a success it takes 9d6+40.
+  The captured soul can be used as a power source or released.
 tradition: fanatic_doctrine
 level: 9
 usage_type: prepared
@@ -13,7 +13,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You trap the target's soul in the item before the soul can pass on to the afterlife. The item used to contain the soul can be anything as long as it's of the appropriate value. The item has AC 16 and
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You trap the target's soul in the item before the soul can pass on
+      to the afterlife. The item used to contain the soul can be anything as long
+      as it's of the appropriate value. The item has AC 16 and

@@ -1,12 +1,10 @@
 id: wails_of_the_damned_neural
-name: Wails of the Damned
-description: |-
-    You howl a lament of damned souls. Each living enemy in the area takes 8d10 void damage and must attempt a Fortitude save.
-
-    Critical Success The creature is unaffected.
-    Success The creature takes full damage.
-    Failure The creature takes full damage and is @UUID[Compendium.pf2e.conditionitems.Item.Drained] [[/r 1d4]].
-    Critical Failure The creature takes double damage and is Drained 4.
+name: Mass Terror Broadcast
+description: You broadcast a psychic terror signal across a wide area. All creatures
+  in a 60-foot emanation must attempt a Will save. On a failure, they take 10d10 mental
+  damage and become frightened 3. On a critical failure, they take double damage and
+  become frightened 4 and fleeing. On a success, they take half damage. Creatures
+  immune to mental effects are unaffected.
 tradition: neural
 level: 9
 usage_type: prepared
@@ -18,18 +16,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 8d6
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 8d10
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 16d10
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 8d6
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d10
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d10
+    damage_type: void
+    dc: 0

@@ -1,12 +1,9 @@
 id: unspeakable_shadow_neural
-name: Unspeakable Shadow
-description: |-
-    You alter a creature's shadow, transforming it into a terrifying monster out to devour the creature. The creature must attempt a Will save. A creature that has the frightened condition from unspeakable shadow must spend at least one of its actions each turn to either attack its shadow (making a Strike ineffectually) or flee from its shadow (using one action to move away as though it had the fleeing condition).
-
-    Critical Success The target is unaffected.
-    Success The target is Frightened 2.
-    Failure The target is Frightened 3. It can't reduce its frightened value below 1 for 1 minute.
-    Critical Failure The target is so afraid, it might instantly die. It must succeed at a Fortitude save or die; this saving throw has the incapacitation trait. If it succeeds at its save, the target is Frightened 4 and can't reduce its frightened value below 1 for 1 minute.
+name: Apex Shadow Protocol
+description: You manifest a living shadow construct of supreme potency. It appears
+  in an unoccupied space within 60 feet and follows your commands. It uses the statistics
+  of an unspeakable shadow. It acts on your initiative. When destroyed or when the
+  duration expires, it dissipates.
 tradition: neural
 level: 9
 usage_type: prepared
@@ -18,7 +15,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You alter a creature's shadow, transforming it into a terrifying monster out to devour the creature. The creature must attempt a Will save. A creature that has the frightened condition from unspeakabl
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You alter a creature's shadow, transforming it into a terrifying
+      monster out to devour the creature. The creature must attempt a Will save. A
+      creature that has the frightened condition from unspeakabl

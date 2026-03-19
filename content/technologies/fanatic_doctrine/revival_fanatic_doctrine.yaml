@@ -1,9 +1,8 @@
 id: revival_fanatic_doctrine
-name: Revival
-description: |-
-    A burst of healing energy soothes living creatures and temporarily rouses those recently slain. All living targets regain 10d8+40 Hit Points.
-    In addition, you return any number of dead targets to life temporarily, with the same effects and limitations as @UUID[Compendium.pf2e.spells-srd.Item.Raise Dead]. The raised creatures have a number of temporary Hit Points equal to the Hit Points you gave living creatures, but no normal Hit Points. The raised creatures can't regain Hit Points or gain temporary Hit Points in other ways, and once revival's duration ends, they lose all temporary Hit Points and die.
-    Revival can't resurrect creatures killed by @UUID[Compendium.pf2e.spells-srd.Item.Disintegrate] or a death effect. It has no effect on undead.
+name: Mass Doctrine Revival
+description: You broadcast a revival signal to all dead allies within 60 feet who
+  died within the last minute. Each is restored to 1 HP and loses the dying condition.
+  This can revive up to 10 creatures.
 tradition: fanatic_doctrine
 level: 10
 usage_type: prepared
@@ -13,8 +12,8 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: damage
-          dice: 10d8+40
-          damage_type: untyped
-          dc: 0
+  on_apply:
+  - type: damage
+    dice: 10d8+40
+    damage_type: untyped
+    dc: 0

@@ -1,9 +1,7 @@
 id: summon_draconic_legion
-name: Summon Draconic Legion
-description: |-
-    You momentarily summon an army of powerful dragons that unleash annihilating blasts as they descend upon your location. These dragons act as one and collectively occupy the space of a Gargantuan creature. They have a fly Speed of 100 feet. When you Cast this Spell, choose whether it summons chromatic or metallic dragons.
-    Arrive (evocation) Energy Annihilation The draconic legion breathes out two blasts of energy: a @Template[line|distance:120] and a @Template[cone|distance:60] that can't overlap. Each creature in either of the areas takes 10d8 damage (basic Reflex save). The dragons choose the damage type of each breath weapon, depending on the category of dragons summoned. Chromatic dragons can choose cold, fire, or poison for the cone and acid or electricity for the line; metallic dragons can choose cold or fire for the cone and acid, electricity, or fire for the line.
-    Depart Draconic Whirlwind The draconic legion strikes with fury, dealing @Damage[9d8[slashing]] damage (basic Reflex save) to all enemy creatures in its location or within 20 feet.
+name: Drone Legion Deploy
+description: You deploy a coordinated legion of attack drones. The legion uses the
+  statistics of a draconic legion and follows your commands for 1 minute.
 tradition: technical
 level: 9
 usage_type: prepared
@@ -15,18 +13,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 10d4
-          damage_type: cold
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 10d8
-          damage_type: cold
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 20d8
-          damage_type: cold
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 10d4
+    damage_type: cold
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 10d8
+    damage_type: cold
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 20d8
+    damage_type: cold
+    dc: 0

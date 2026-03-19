@@ -1,6 +1,8 @@
 id: manifestation_bio_synthetic
-name: Manifestation
-description: You spin secrets from the fundaments of magic, shaping them into a power with nearly unlimited potential. You duplicate a spell of 9th rank or lower of the tradition from which you cast manifestation, or a spell of 7th rank or lower from any tradition. Though you can normally choose only spells that are common or to which you have access, the GM might allow broader options.
+name: Apex Bio-Manifestation
+description: You grow a massive biological entity from your own biomass. The manifestation
+  has AC 40+, 300+ HP, and two actions per round following your commands. It persists
+  for 1 minute before being reabsorbed.
 tradition: bio_synthetic
 level: 10
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You spin secrets from the fundaments of magic, shaping them into a power with nearly unlimited potential. You duplicate a spell of 9th rank or lower of the tradition from which you cast manifestation,
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You spin secrets from the fundaments of magic, shaping them into
+      a power with nearly unlimited potential. You duplicate a spell of 9th rank or
+      lower of the tradition from which you cast manifestation,

@@ -1,6 +1,10 @@
 id: wrathful_storm
-name: Wrathful Storm
-description: 'A massive storm cloud forms in the air above the area, spreading rain and gales. The wind imposes a –4 circumstance penalty to physical ranged attacks. The air in the area is greater difficult terrain for flying creatures. When you Cast this Spell and the first time each round you Sustain it on subsequent rounds, you can choose one of the following storm effects. You can''t choose the same effect twice in a row.Blizzard The driving snow deals @Damage[4d8[cold]] damage to each creature in or below the storm with no save. Everything in or beneath the cloud is @UUID[Compendium.pf2e.conditionitems.Item.Concealed] by driving snow and any ground is difficult terrain.Hail Each creature in or below the storm takes @Damage[4d10[bludgeoning]] damage with a basic Fortitude save.Lightning Choose up to 10 creatures in or below the storm to be struck by lightning. Each of them takes @Damage[7d6[electricity]] damage with a basic Reflex save.Tornado A roughly cylindrical whirlwind appears in or below the cloud in a 30-foot radius. Each creature in the whirlwind is thrown 40 feet upward.@UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Wrathful Storm]Heightened (10th) The range increases to 2,000 feet and the cloud is a 1,000-foot burst.'
+name: Apex Storm Protocol
+description: You unleash a devastating storm of pure bio-electric fury. All creatures
+  in a 120-foot emanation take 10d6 electricity and 10d6 bludgeoning damage each round
+  for 1 minute (Reflex save for half). On a failure, they are also knocked prone.
+  The storm generates intense winds that make flight difficult (DC 30 Acrobatics check
+  to maintain flight).
 tradition: bio_synthetic
 level: 9
 usage_type: prepared
@@ -12,7 +16,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: A massive storm cloud forms in the air above the area, spreading rain and gales. The wind imposes a –4 circumstance penalty to physical ranged attacks. The air in the area is greater difficult terra
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A massive storm cloud forms in the air above the area, spreading
+      rain and gales. The wind imposes a –4 circumstance penalty to physical ranged
+      attacks. The air in the area is greater difficult terra

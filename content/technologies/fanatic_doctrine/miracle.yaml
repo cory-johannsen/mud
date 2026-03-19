@@ -1,14 +1,8 @@
 id: miracle
-name: Miracle
-description: |-
-    You request aid directly from your divine source. Your divine source always refuses a request out of line with its nature, and it might grant a different request (potentially more powerful or better fitting its nature) than the one you asked for. A casting of miracle can do any of the following things.
-
-    Duplicate any spell from the divine list of 9th rank or lower to which you have access.
-    Duplicate any spell from another spell list of 7th rank or lower. It must be common or you must have access.
-    Produce any effect whose power level is in line with the above effects.
-    Reverse certain effects that refer to the @UUID[Compendium.pf2e.spells-srd.Item.Wish] spell.
-
-    The GM might allow you to try using miracle to produce greater effects than these, but doing so may be dangerous, or the spell may have only a partial effect.
+name: Miracle Protocol
+description: You invoke a miracle from your doctrine. You can produce any divine effect
+  of 9th rank or lower, or a unique effect subject to GM approval. The miracle is
+  permanent unless you specify otherwise.
 tradition: fanatic_doctrine
 level: 10
 usage_type: prepared
@@ -18,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You request aid directly from your divine source. Your divine source always refuses a request out of line with its nature, and it might grant a different request (potentially more powerful or better f
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You request aid directly from your divine source. Your divine source
+      always refuses a request out of line with its nature, and it might grant a different
+      request (potentially more powerful or better f

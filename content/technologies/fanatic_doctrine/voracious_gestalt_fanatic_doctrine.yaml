@@ -1,8 +1,8 @@
 id: voracious_gestalt_fanatic_doctrine
-name: Voracious Gestalt
-description: |-
-    You create a powerful spirit entity that grows and builds strength by consuming the spirits of foes you both slay. When you Cast the Spell, the gestalt deals 14d6 void damage to all living creatures of your choice in the area, with a basic Fortitude save. Creatures you choose that end their turns in the area take @Damage[(@item.level -3)d6[void]] damage, with a basic Fortitude save.
-    At the end of each of your turns, if you killed a living creature during that turn or if the gestalt's damage killed a creature since the end of your prior turn, you add the slain creature's soul to the gestalt. The emanation's radius increases by 20 feet and the damage dealt by the aura increases by 1d6. (Note that this increase only happens once, even if you killed multiple living creatures that turn.) As normal for determining threat level, the GM determines if a creature is of significant enough threat to empower the gestalt; in general, a creature several levels below you rarely poses a significant threat.Heightened (10th) The initial damage increases to 16d6 and the aura's damage starts at 7d6 void damage.
+name: Doctrine Gestalt
+description: You create a psychic gestalt entity composed of doctrinal fervor. Each
+  creature it destroys makes it stronger (+2 attack/damage, 20 temp HP). It follows
+  your instructions for 1 minute.
 tradition: fanatic_doctrine
 level: 9
 usage_type: prepared
@@ -14,18 +14,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 14d3
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 14d6
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 28d6
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 14d3
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 14d6
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 28d6
+    damage_type: void
+    dc: 0

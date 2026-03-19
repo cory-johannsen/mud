@@ -1,6 +1,8 @@
 id: dragon_turret_bio_synthetic
-name: Dragon Turret
-description: 'Area (continued) an empty 10-foot radius, 50-foot-tall cylinderYou conjure forth a massive tower with a large dragon that''s bound to crawl its length. The dragon and the tower share the same space, and the dragon intercepts any attack targeting the tower. When the dragon dies, the tower crumbles. The dragon is immune to all conditions, has an AC of 40, a +30 modifier for all saving throws, and 250 Hit Points. When you Cast the Spell, and once per round when you Sustain it, the dragon unleashes its breath in a @Template[type:cone|distance:60], dealing 13d8 damage (basic Reflex save). The damage type depends on the tradition used to cast this spell: arcane force, divine spirit, occult mental, primal fire.'
+name: Apex Bio-Turret
+description: You grow an apex organic turret. The turret has AC 40, 200 HP, and attacks
+  one target per round with a +35 attack dealing 6d12+20 acid or fire damage (alternating).
+  It follows your targeting commands for 1 minute.
 tradition: bio_synthetic
 level: 10
 usage_type: prepared
@@ -12,18 +14,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 13d4
-          damage_type: untyped
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 13d8
-          damage_type: untyped
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 26d8
-          damage_type: untyped
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 13d4
+    damage_type: untyped
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 13d8
+    damage_type: untyped
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 26d8
+    damage_type: untyped
+    dc: 0

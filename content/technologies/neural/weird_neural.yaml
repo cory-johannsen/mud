@@ -1,12 +1,10 @@
 id: weird_neural
-name: Weird
-description: |-
-    You fill the targets' minds with terrifying images of fearsome creatures, each drawn from the targets' worst fears. Only the targets can see their assailants. Each target takes 16d6 mental damage and must attempt a Will save.
-
-    Critical Success The target is unaffected.
-    Success The target takes half damage and is Frightened 1.
-    Failure The target takes full damage and is Frightened 2.
-    Critical Failure The target is so afraid, it might instantly die. It must attempt a Fortitude saving throw. If the target succeeds, it takes double damage and is Frightened 2, and it's also @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] until the end of its next turn unless it critically succeeded. If it fails, it is reduced to 0 Hit Points and dies.
+name: Mass Nightmare Protocol
+description: You broadcast individualized nightmare constructs to all targets in a
+  30-foot burst within 120 feet. Each target must attempt a Will save. On a failure,
+  the target takes 16d6 mental damage and is frightened 4. On a critical failure,
+  it takes double damage and is paralyzed by terror. On a success, it takes half damage.
+  The nightmares persist as long as targets remain in the area.
 tradition: neural
 level: 9
 usage_type: prepared
@@ -18,18 +16,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 16d3
-          damage_type: mental
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 16d6
-          damage_type: mental
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 32d6
-          damage_type: mental
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 16d3
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 16d6
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 32d6
+    damage_type: mental
+    dc: 0

@@ -1,8 +1,10 @@
 id: metamorphosis_bio_synthetic
-name: Metamorphosis
-description: |-
-    Harnessing your mastery of transformative magic, you hide forms within forms. You transform yourself into any form you could choose with a polymorph spell in your spell repertoire or that you could prepare of 8th-rank or lower (including any 8th-rank or lower heightened versions of spells you know). You gain 40 temporary Hit Points rather than the amount normally granted by the form.
-    You can Sustain the spell to enter a new form you haven't used during this metamorphosis. This replenishes your temporary Hit Points from this spell.
+name: Apex Mutagenic Transform
+description: 'You undergo or inflict an apex mutagenic transformation, reshaping biology
+  at the fundamental level. If cast on yourself, you gain the benefits of a powerful
+  apex form of your choice for 1 hour: flight speed 60 feet, size Huge, +6 status
+  bonus to Strength, and natural attacks dealing 4d8+10 damage. If cast on a willing
+  or restrained target, you choose the transformation.'
 tradition: bio_synthetic
 level: 9
 usage_type: prepared
@@ -12,7 +14,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Harnessing your mastery of transformative magic, you hide forms within forms. You transform yourself into any form you could choose with a polymorph spell in your spell repertoire or that you could pr
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Harnessing your mastery of transformative magic, you hide forms within
+      forms. You transform yourself into any form you could choose with a polymorph
+      spell in your spell repertoire or that you could pr

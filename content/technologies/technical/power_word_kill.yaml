@@ -1,13 +1,8 @@
 id: power_word_kill
-name: Power Word Kill
-description: |-
-    You utter the most powerful arcane word of power. Once targeted, the target is then temporarily immune for 10 minutes. The effect of the spell depends on the target's level.
-    14th or Lower The target dies instantly.
-    15th If the target has 50 Hit Points or fewer, it dies instantly; otherwise, it drops to 0 Hit Points and becomes Dying 1, or increases its Dying condition by 1 if it's already Dying.
-    16th or Higher The target takes 50 damage; if this brings the target to 0 Hit Points, the target dies instantly.
-
-
-    Heightened (10th) The levels at which each outcome applies increase by 2.
+name: Kill Code
+description: You broadcast a kill code to a single target with 100 or fewer HP. If
+  the target has 100 HP or fewer, it dies instantly with no save. If it has more than
+  100 HP, it takes 50 force damage instead.
 tradition: technical
 level: 9
 usage_type: prepared
@@ -17,8 +12,8 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: damage
-          dice: "50"
-          damage_type: untyped
-          dc: 0
+  on_apply:
+  - type: damage
+    dice: '50'
+    damage_type: untyped
+    dc: 0

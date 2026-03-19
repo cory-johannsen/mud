@@ -1,11 +1,8 @@
 id: trim_the_blight_technical
-name: Trim the Blight
-description: |-
-    You create a cone of shimmering energy that attempts to banish the influence of invasive, supernatural blight, such as that found in Tanglebriar. Blighted difficult terrain in the area becomes regular terrain, while blighted greater difficult terrain becomes difficult terrain; hazardous terrain in the area becomes nonhazardous. These effects persist for 1 hour.
-    Creatures in the area that carry features of this blight (as determined by the GM, but automatically including all creatures with the fiend trait in this adventure) are trimmed as well, their supernatural infusion of blight being drained. These creatures take 12d10 spirit damage and must attempt a Fortitude save.Critical Success The creature is unaffected.
-    Success The creature takes half damage.
-    Failure The creature's reach with attacks is reduced by 5 feet (to a minimum of 5 feet) for 1 hour, they are Sickened 1 and Slowed 1 for 1 round.
-    Critical Failure The creature's reach is reduced to 5 feet for 1 hour, they are Sickened 2 and slowed 1 for 1 minute.Heightened (10th) The spirit damage increases by 2d10, and 1 hour durations increase to 24 hours.
+name: System Purge Protocol
+description: You deploy a precision purge agent targeting corrupted systems in a 60-foot
+  burst. All disease and poison effects on willing creatures are removed. Undead and
+  blighted constructs take 10d8 positive damage (no save).
 tradition: technical
 level: 9
 usage_type: prepared
@@ -17,18 +14,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 12d6
-          damage_type: spirit
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 12d10
-          damage_type: spirit
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 24d10
-          damage_type: spirit
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 12d6
+    damage_type: spirit
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 12d10
+    damage_type: spirit
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 24d10
+    damage_type: spirit
+    dc: 0

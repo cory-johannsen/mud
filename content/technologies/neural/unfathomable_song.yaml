@@ -1,10 +1,10 @@
 id: unfathomable_song
-name: Unfathomable Song
-description: |-
-    Fleeting notes of a strange and unnatural song fill the air, overtaking the mind. Each target must attempt a Will save when you cast the spell, and again the first time you Sustain this Spell each round. A creature needs to attempt only one save against the song each round, and you have to keep the same targets when you Sustain the Spell.Critical Success The target is unaffected, can't be affected on subsequent rounds, and is temporarily immune for 1 minute.
-    Success The target is unaffected this round, but it can be affected on subsequent rounds.
-    Failure Roll [[/r 1d4]] on the table below.
-    Critical Failure Roll [[/r 1d4+1]] on the table below.ResultEffect1The target is Frightened 22The target is @UUID[Compendium.pf2e.conditionitems.Item.Confused] for 1 round3The target is Stupefied 4 for 1 round4The target is @UUID[Compendium.pf2e.conditionitems.Item.Blinded] for 1 round5The target is @UUID[Compendium.pf2e.conditionitems.Item.Stunned] for 1 round and Stupefied 1 for an unlimited duration
+name: Cognitohazard Broadcast
+description: You broadcast a cognitohazardous signal that destabilizes cognition.
+  Each creature in a 60-foot emanation that can perceive the broadcast must attempt
+  a Will save at the start of each of your turns. On a failure, they become confused.
+  On a critical failure, they also take 6d8 mental damage. Creatures that succeed
+  are temporarily immune to this casting for 24 hours.
 tradition: neural
 level: 9
 usage_type: prepared
@@ -16,7 +16,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Fleeting notes of a strange and unnatural song fill the air, overtaking the mind. Each target must attempt a Will save when you cast the spell, and again the first time you Sustain this Spell each rou
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Fleeting notes of a strange and unnatural song fill the air, overtaking
+      the mind. Each target must attempt a Will save when you cast the spell, and
+      again the first time you Sustain this Spell each rou

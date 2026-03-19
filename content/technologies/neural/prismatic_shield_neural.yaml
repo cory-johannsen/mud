@@ -1,11 +1,10 @@
 id: prismatic_shield_neural
-name: Prismatic Shield
-description: |-
-    Shield-sized shards of multicolored light manifest in the air around you, each rotating quickly to intercept attacks.
-    Melee attacks against you impact a randomly colored shard, subjecting the attacker to a random effect from @UUID[Compendium.pf2e.spells-srd.Item.Prismatic Spray], with a saving throw of the type indicated in that spell.
-    The shards automatically block physical ranged attacks the size of a spear or smaller, such as arrows, bolts, and javelins. You gain a +2 circumstance bonus to your AC against attacks with larger ranged weapons.
-    Any spell that targets you requires the caster to succeed at a counteract check against your spell DC, or it fails to affect you.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Prismatic Shield]
+name: Spectrum Defense Array
+description: 'A shimmering multifrequency defense array surrounds you, cycling through
+  seven distinct protection protocols. Any creature that strikes you in melee or targets
+  you with a spell must attempt a Fortitude or Will save (your choice) or suffer a
+  random spectrum effect: paralysis, mental confusion, petrification, blindness, or
+  instant annihilation.'
 tradition: neural
 level: 9
 usage_type: prepared
@@ -15,9 +14,10 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Shield-sized shards of multicolored light manifest in the air around you, each rotating quickly to intercept attacks.
-            Melee attacks against you impact a randomly colored shard, subjecting the attacker
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Shield-sized shards of multicolored light manifest in the air around
+      you, each rotating quickly to intercept attacks.
+
+      Melee attacks against you impact a randomly colored shard, subjecting the attacker'

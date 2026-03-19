@@ -1,9 +1,9 @@
 id: summon_oliphaunt_of_jandelay_neural
-name: Summon Oliphaunt of Jandelay
-description: |-
-    You briefly summon the mythical Oliphaunt of Jandelay, unleashing a manifestation of pure destruction that obliterates everything unfortunate enough to stand in its path. The summoned Oliphaunt occupies the space of a Gargantuan creature. It has a Speed of 200 feet.
-    Arrive (force) Devastating Displacement Using hidden magics and long-lost techniques, you conjure an immense gate to Jandelay, compelling the Oliphaunt to step through. The Oliphaunt arrives in a @Template[type:burst|distance:60]. Each creature in the area takes @Damage[8d10[force]] damage (basic Reflex save). On a failure, the creature is also pushed 60 feet away from the Oliphaunt.
-    Depart Annihilating Trample The Oliphaunt becomes aware that it has been summoned to a world that isn't on the verge of annihilation. It summons another enormous gate to Jandelay 200 feet in front of it. The Oliphaunt then rages forward through the gate, crushing everything in its path, before closing the gate behind it and disappearing. The Oliphaunt creates an @Template[line|distance:200|width:80]{80-foot-wide path of devastation} that extends 200 feet. Each creature and vehicle in the area takes @Damage[8d8[bludgeoning]] damage (basic Fortitude save). A creature or vehicle reduced to 0 Hit Points is smashed into fine powder; its gear, passengers, and cargo remain. An unattended object in the area is destroyed unless it succeeds at a Fortitude save, regardless of Hardness, or unless it's an artifact or similarly hard to destroy. This trample automatically destroys any force effect, such as a wall of force.
+name: Apex Behemoth Summon
+description: You summon an apex-tier behemoth construct. It appears within 60 feet
+  and follows your commands for 1 minute using the statistics of an Oliphaunt of Jandelay.
+  Its mere appearance causes fear in all creatures within 120 feet (Will save vs frightened
+  4).
 tradition: neural
 level: 10
 usage_type: prepared
@@ -15,7 +15,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You briefly summon the mythical Oliphaunt of Jandelay, unleashing a manifestation of pure destruction that obliterates everything unfortunate enough to stand in its path. The summoned Oliphaunt occupi
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You briefly summon the mythical Oliphaunt of Jandelay, unleashing
+      a manifestation of pure destruction that obliterates everything unfortunate
+      enough to stand in its path. The summoned Oliphaunt occupi
