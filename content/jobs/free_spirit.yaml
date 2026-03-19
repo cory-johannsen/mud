@@ -39,5 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: buoyant_bubbles_bio_synthetic
+        level: 1
+      - id: gentle_landing_bio_synthetic
+        level: 1
+      - id: tailwind_bio_synthetic
         level: 1

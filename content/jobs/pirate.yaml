@@ -40,5 +40,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: briny_bolt_bio_synthetic
+        level: 1
+      - id: hydraulic_push_bio_synthetic
+        level: 1
+      - id: aqueous_blast_bio_synthetic
         level: 1

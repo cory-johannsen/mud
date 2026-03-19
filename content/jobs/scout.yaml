@@ -40,5 +40,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: breadcrumbs_bio_synthetic
+        level: 1
+      - id: approximate_bio_synthetic
+        level: 1
+      - id: pest_form_bio_synthetic
         level: 1

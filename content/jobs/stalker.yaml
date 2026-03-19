@@ -39,5 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: vanishing_tracks
+        level: 1
+      - id: breadcrumbs_bio_synthetic
+        level: 1
+      - id: alarm_bio_synthetic
         level: 1

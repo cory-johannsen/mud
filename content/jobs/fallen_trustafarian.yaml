@@ -41,7 +41,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: camel_spit_bio_synthetic
         level: 1
-      - id: acid_spray
+      - id: chilling_spray_bio_synthetic
+        level: 1
+      - id: airburst_bio_synthetic
         level: 1

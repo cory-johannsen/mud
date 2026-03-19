@@ -38,7 +38,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: foraging_friends
         level: 1
-      - id: acid_spray
+      - id: flourishing_flora_bio_synthetic
+        level: 1
+      - id: cleanse_cuisine_bio_synthetic
         level: 1

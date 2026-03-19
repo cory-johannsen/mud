@@ -38,5 +38,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: alarm_bio_synthetic
+        level: 1
+      - id: camel_spit_bio_synthetic
+        level: 1
+      - id: noxious_vapors_bio_synthetic
         level: 1

@@ -38,7 +38,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: armor_of_thorn_and_claw
         level: 1
-      - id: acid_spray
+      - id: animal_allies
+        level: 1
+      - id: nettleskin
         level: 1

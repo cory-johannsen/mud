@@ -39,5 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: airburst_bio_synthetic
+        level: 1
+      - id: gale_blast_bio_synthetic
+        level: 1
+      - id: personal_rain_cloud_bio_synthetic
         level: 1

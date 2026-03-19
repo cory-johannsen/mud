@@ -39,7 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: tame_bio_synthetic
         level: 1
-      - id: acid_spray
+      - id: animal_allies
+        level: 1
+      - id: foraging_friends
         level: 1

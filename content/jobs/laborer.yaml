@@ -39,7 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: weaken_earth_bio_synthetic
         level: 1
-      - id: acid_spray
+      - id: wooden_fists_bio_synthetic
+        level: 1
+      - id: shockwave_bio_synthetic
         level: 1

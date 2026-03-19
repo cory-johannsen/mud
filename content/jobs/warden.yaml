@@ -39,5 +39,9 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: acid_spray
+      - id: dehydrate_bio_synthetic
+        level: 1
+      - id: interposing_earth_bio_synthetic
+        level: 1
+      - id: tether_bio_synthetic
         level: 1
