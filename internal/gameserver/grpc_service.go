@@ -4848,7 +4848,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 						zap.Error(err))
 				}
 				sess.PreparedTechs[lvl][idx].Expended = true
-				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID))
+				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil)
 			}
 		}
 		// No non-expended slot found for this tech ID.
@@ -4890,7 +4890,7 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 		}
 		pool.Remaining--
 		sess.SpontaneousUsePools[foundLevel] = pool
-		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel))
+		return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining at level %d.)", abilityID, pool.Remaining, foundLevel), nil)
 	}
 	// Innate tech activation
 	if s.innateTechRepo != nil {
@@ -4903,9 +4903,9 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 					return nil, fmt.Errorf("handleUse: decrement innate %s: %w", abilityID, err)
 				}
 				slot.UsesRemaining--
-				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining))
+				return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s. (%d uses remaining.)", abilityID, slot.UsesRemaining), nil)
 			}
-			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID))
+			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil)
 		}
 		return messageEvent(fmt.Sprintf("You don't have innate tech %s.", abilityID)), nil
 	}
@@ -4975,7 +4975,7 @@ func (s *GameServiceServer) resolveUseTarget(uid, targetID string, tech *technol
 // Postconditions:
 //   - If s.techRegistry is nil or the tech is not registered, falls back to fallbackMsg.
 //   - Returns a non-nil ServerEvent on success.
-func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string) (*gamev1.ServerEvent, error) {
+func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession, uid, abilityID, targetID, fallbackMsg string, querier RoomQuerier) (*gamev1.ServerEvent, error) {
 	if s.techRegistry == nil {
 		return messageEvent(fallbackMsg), nil
 	}
@@ -5001,7 +5001,7 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 	} else if target != nil {
 		techTargets = []*combat.Combatant{target}
 	}
-	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{}, nil)
+	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{}, querier)
 	return messageEvent(strings.Join(msgs, "\n")), nil
 }
 
@@ -7632,7 +7632,7 @@ func (s *GameServiceServer) triggerPassiveTechsForRoom(roomID string) {
 			if !def.Passive {
 				continue
 			}
-			evt, err := s.activateTechWithEffects(sess, sess.UID, techID, "", "")
+			evt, err := s.activateTechWithEffects(sess, sess.UID, techID, "", "", nil)
 			if err != nil {
 				s.logger.Warn("passive tech activation error",
 					zap.String("uid", sess.UID),
