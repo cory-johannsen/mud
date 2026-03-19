@@ -367,9 +367,9 @@ These conditions are referenced by the techs above and do not yet exist in `cont
 
 ## Batch Import 2026-03-18
 
-Automated import of PF2E level-1 spells via `cmd/import-content -format pf2e`. Source: pf2e-data compendium (`packs/pf2e/spells/spells/rank-1/`). All files localized into Gunchete cyberpunk aesthetic via Claude API. Technical tradition (arcane→technical) not yet imported.
+Automated import of PF2E level-1 spells via `cmd/import-content -format pf2e`. Source: pf2e-data compendium (`packs/pf2e/spells/spells/rank-1/`). All files localized into Gunchete cyberpunk aesthetic.
 
-**Summary:** 367 tech files across 3 traditions (neural: 131, bio_synthetic: 143, fanatic_doctrine: 93).
+**Summary:** 487 tech files across 4 traditions (neural: 131, bio_synthetic: 143, fanatic_doctrine: 93, technical: 120).
 
 ### neural (131 spells)
 
@@ -753,9 +753,130 @@ Automated import of PF2E level-1 spells via `cmd/import-content -format pf2e`. S
 | `void_warp_fanatic_doctrine` | Doctrine's Void Judgment | Void Warp | save |
 | `wash_your_luck_fanatic_doctrine` | Doctrine's Luck Cleansing | Wash Your Luck | none |
 
-### technical (0 spells — pending)
+### technical (120 spells)
 
-Arcane tradition (arcane→technical) was not imported in the 2026-03-18 batch. To be imported in a future batch.
+| tech_id | Gunchete Name | PF2E Source | Resolution |
+|---------|---------------|-------------|------------|
+| `500_toads_technical` | Swarm Unit Deploy | 500 Toads | none |
+| `acidic_burst_technical` | Corrosive Payload | Acidic Burst | save |
+| `admonishing_ray_technical` | Compliance Beam | Admonishing Ray | attack |
+| `agitate_technical` | Feedback Overload | Agitate | save |
+| `air_bubble_technical` | Emergency Atmos Pack | Air Bubble | none |
+| `airburst_technical` | Concussive Drone Strike | Airburst | save |
+| `alarm_technical` | Perimeter Sensor Grid | Alarm | none |
+| `animate_rope_technical` | Servo-Cable Actuator | Animate Rope | none |
+| `ant_haul_technical` | Load-Bearing Exo-Frame | Ant Haul | none |
+| `anticipate_peril_technical` | Threat Prediction Algorithm | Anticipate Peril | none |
+| `aqueous_blast_technical` | Hydraulic Impact Round | Aqueous Blast | attack |
+| `befuddle_technical` | Cognitive Jam Signal | Befuddle | save |
+| `breadcrumbs_technical` | Route Logging Protocol | Breadcrumbs | none |
+| `breathe_fire_technical` | Incendiary Spray Unit | Breathe Fire | save |
+| `briny_bolt_technical` | Saline Projectile Round | Briny Bolt | attack |
+| `buoyant_bubbles_technical` | Hydrophobic Foam Coat | Buoyant Bubbles | save |
+| `camel_spit_technical` | Repellent Spray Launcher | Camel Spit | attack |
+| `carryall_technical` | Telekinetic Load Platform | Carryall | none |
+| `charm_technical` | Social Override Protocol | Charm | save |
+| `chilling_spray_technical` | Cryogenic Aerosol Burst | Chilling Spray | save |
+| `command_technical` | Authority Compliance Chip | Command | save |
+| `conductive_weapon_technical` | Electroconductive Coating | Conductive Weapon | none |
+| `create_water_technical` | Atmospheric Condenser | Create Water | none |
+| `dehydrate_technical` | Desiccant Pulse Emitter | Dehydrate | save |
+| `disguise_magic_technical` | Signal Masking Layer | Disguise Magic | none |
+| `dizzying_colors_technical` | Strobing Optical Disruptor | Dizzying Colors | save |
+| `dj_vu_technical` | Memory Loop Injection | Dj Vu | save |
+| `draw_ire_technical` | Threat Beacon Broadcast | Draw Ire | save |
+| `echoing_weapon_technical` | Kinetic Echo Amplifier | Echoing Weapon | none |
+| `elysian_whimsy_technical` | Behavioral Randomizer | Elysian Whimsy | save |
+| `endure_technical` | Metabolic Stabilizer Injection | Endure | none |
+| `enfeeble_technical` | Muscle Inhibitor Field | Enfeeble | save |
+| `equal_footing_technical` | Size Normalization Harness | Equal Footing | save |
+| `exchange_image_technical` | Holographic Identity Swap | Exchange Image | save |
+| `fashionista_technical` | Smart Wardrobe Interface | Fashionista | none |
+| `fear_technical` | Threat Assessment Override | Fear | save |
+| `flashy_disappearance_technical` | Smoke-Bang Exit Package | Flashy Disappearance | none |
+| `fleet_step_technical` | Mobility Boost Actuator | Fleet Step | none |
+| `flense_technical` | Ablative Strip Charge | Flense | attack |
+| `flourishing_flora_technical` | Rapid Growth Accelerant | Flourishing Flora | save |
+| `fold_metal` | Precision Metal Former | Fold Metal | none |
+| `force_barrage_technical` | Multi-Round Kinetic Volley | Force Barrage | none |
+| `forge_technical` | Rapid Fabrication Unit | Forge | save |
+| `friendfetch_technical` | Magnetic Tether Reel | Friendfetch | none |
+| `gentle_landing_technical` | Impact Absorption Foam | Gentle Landing | none |
+| `goblin_pox_technical` | Synthetic Pathogen Dispersal | Goblin Pox | save |
+| `gravitational_pull_technical` | Grav-Spike Projector | Gravitational Pull | save |
+| `grease_technical` | Lubricant Spray System | Grease | save |
+| `grim_tendrils_technical` | Void Tendril Projector | Grim Tendrils | save |
+| `gritty_wheeze_technical` | Particle Spray Grenade | Gritty Wheeze | save |
+| `gust_of_wind_technical` | High-Pressure Air Cannon | Gust Of Wind | save |
+| `helpful_steps_technical` | Deployable Step Scaffold | Helpful Steps | none |
+| `hippocampus_retreat_technical` | Aquatic Escape Thruster | Hippocampus Retreat | attack |
+| `horizon_thunder_sphere_technical` | Charged Ball Launcher | Horizon Thunder Sphere | save |
+| `hydraulic_push_technical` | High-Pressure Fluid Cannon | Hydraulic Push | attack |
+| `illusory_disguise_technical` | Full-Body Holographic Overlay | Illusory Disguise | none |
+| `illusory_object_technical` | Persistent Hard-Light Projection | Illusory Object | none |
+| `instant_pottery_technical` | Rapid Material Former | Instant Pottery | none |
+| `interposing_earth_technical` | Terrain Shield Actuator | Interposing Earth | save |
+| `invisible_item_technical` | Optical Cloaking Wrap | Invisible Item | none |
+| `item_facade_technical` | Object Holographic Skin | Item Facade | none |
+| `jump_technical` | Jump Jet Assist Pack | Jump | none |
+| `kinetic_ram_technical` | Kinetic Impact Projector | Kinetic Ram | save |
+| `leaden_steps_technical` | Magnetic Anchor System | Leaden Steps | save |
+| `lock_technical` | Electronic Deadbolt Override | Lock | none |
+| `mending_technical` | Nano-Repair Injector | Mending | none |
+| `message_rune_technical` | Embedded Comm Chip | Message Rune | none |
+| `mindlink_technical` | Neural Direct-Link Bridge | Mindlink | none |
+| `mud_pit_technical` | Terrain Destabilizer Charge | Mud Pit | none |
+| `mystic_armor_technical` | Force Field Emitter | Mystic Armor | none |
+| `necromancers_generosity_technical` | Biohazard Transfer Agent | Necromancers Generosity | none |
+| `negate_aroma_technical` | Scent Neutralization Spray | Negate Aroma | none |
+| `noxious_vapors_technical` | Toxic Gas Dispersal Canister | Noxious Vapors | save |
+| `nudge_the_odds_technical` | Luck Algorithm Adjustment | Nudge The Odds | none |
+| `overselling_flourish_technical` | Dramatic Overclock Effect | Overselling Flourish | save |
+| `penumbral_shroud_technical` | Darkfield Shroud | Penumbral Shroud | save |
+| `personal_rain_cloud_technical` | Targeted Precipitation Unit | Personal Rain Cloud | save |
+| `pest_form_technical` | Micro-Drone Disguise Shell | Pest Form | none |
+| `pet_cache_technical` | Subspace Storage Unit | Pet Cache | none |
+| `phantasmal_minion_technical` | Autonomous Holographic Decoy | Phantasmal Minion | none |
+| `pocket_library_technical` | Portable Data Archive | Pocket Library | none |
+| `pummeling_rubble_technical` | Debris Launch Barrage | Pummeling Rubble | save |
+| `quick_sort_technical` | Automated Sorting Algorithm | Quick Sort | none |
+| `rainbows_end_technical` | Prismatic Beam Array | Rainbows End | save |
+| `reed_whistle_technical` | Signal Tone Generator | Reed Whistle | none |
+| `restyle_technical` | Garment Nano-Actuator | Restyle | none |
+| `runic_body_technical` | Combat Augmentation Layer | Runic Body | none |
+| `runic_weapon_technical` | Weapon Enhancement Module | Runic Weapon | none |
+| `schadenfreude_technical` | Adversity Feedback Loop | Schadenfreude | save |
+| `scorching_blast_technical` | Thermal Plasma Fist | Scorching Blast | attack |
+| `scouring_sand_technical` | Abrasive Particle Cannon | Scouring Sand | save |
+| `seashell_of_stolen_sound_technical` | Sound Capture Device | Seashell Of Stolen Sound | none |
+| `share_lore_technical` | Data Package Transfer | Share Lore | none |
+| `shattering_gem_technical` | Resonance Shatter Charge | Shattering Gem | save |
+| `shielded_arm_technical` | Forearm Shield Extrusion | Shielded Arm | none |
+| `shocking_grasp_technical` | High-Voltage Contact Discharge | Shocking Grasp | attack |
+| `shockwave_technical` | Seismic Pulse Generator | Shockwave | save |
+| `signal_skyrocket_technical` | Flare Launcher | Signal Skyrocket | save |
+| `sleep_technical` | Soporific Aerosol Grenade | Sleep | save |
+| `snowball_technical` | Cryo-Gel Projectile | Snowball | attack |
+| `spider_sting_technical` | Paralytic Micro-Dart | Spider Sting | save |
+| `summon_animal_technical` | Trained Animal Deployment | Summon Animal | none |
+| `summon_construct` | Combat Drone Deploy | Summon Construct | none |
+| `summon_undead_technical` | Reanimation Protocol | Summon Undead | none |
+| `sure_strike_technical` | Targeting Precision Lock | Sure Strike | none |
+| `synchronize_steps_technical` | Movement Sync Protocol | Synchronize Steps | none |
+| `synchronize_technical` | Beacon Frequency Sync | Synchronize | none |
+| `tailwind_technical` | Slipstream Actuator | Tailwind | none |
+| `temporary_tool` | Rapid Fabrication Print | Temporary Tool | none |
+| `tether_technical` | Electrostatic Tether Line | Tether | save |
+| `thicket_of_knives_technical` | Blade Array Projector | Thicket Of Knives | none |
+| `thoughtful_gift_technical` | Object Transfer Launcher | Thoughtful Gift | none |
+| `threefold_limb_technical` | Triple Strike Actuator | Threefold Limb | attack |
+| `thunderstrike_technical` | EMP Thunder Discharge | Thunderstrike | save |
+| `unbroken_panoply_technical` | Emergency Repair Override | Unbroken Panoply | none |
+| `ventriloquism_technical` | Voice Projection Speaker | Ventriloquism | none |
+| `wall_of_shrubs_technical` | Deployable Terrain Wall | Wall Of Shrubs | none |
+| `weaken_earth_technical` | Ground Destabilizer Charge | Weaken Earth | save |
+| `weave_wood_technical` | Polymer Shaper Tool | Weave Wood | none |
+| `wooden_fists_technical` | Impact-Reinforced Gauntlets | Wooden Fists | none |
 
 ---
 

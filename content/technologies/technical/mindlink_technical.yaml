@@ -1,0 +1,17 @@
+id: mindlink_technical
+name: Neural Direct-Link Bridge
+description: Establish a direct neural communication channel between two linked augmentation systems.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You link your mind to the target's mind and mentally impart to that target an amount of information in an
+      instant that could otherwise be communicated in 10 minutes.

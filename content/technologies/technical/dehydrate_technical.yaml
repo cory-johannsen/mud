@@ -1,0 +1,29 @@
+id: dehydrate_technical
+name: Desiccant Pulse Emitter
+description: Emit a focused dehydration field that draws moisture from biological tissue.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_success:
+  - type: damage
+    dice: 1d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: fire
+    dc: 0

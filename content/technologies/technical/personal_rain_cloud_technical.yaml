@@ -1,0 +1,19 @@
+id: personal_rain_cloud_technical
+name: Targeted Precipitation Unit
+description: Position a micro-sprayer unit overhead that produces a localized rain effect.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure a 5-foot-wide rain cloud that follows the target wherever it goes. It stays roughly an arm's
+      length overhead, unless it must drift lower to fit under a ceiling. The cloud rains constantly

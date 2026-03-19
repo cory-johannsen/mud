@@ -1,0 +1,17 @@
+id: temporary_tool
+name: Rapid Fabrication Print
+description: Use a compact field printer to produce a temporary-use tool or component on demand.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You conjure a temporary simple tool, such as a shovel or rope into your hands. It lasts until it's used for
+      a single activity or for 1 minute, whichever comes first, after which it disappears. The too

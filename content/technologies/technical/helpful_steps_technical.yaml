@@ -1,0 +1,17 @@
+id: helpful_steps_technical
+name: Deployable Step Scaffold
+description: Rapidly extrude a lightweight scaffold structure providing footing across obstacles.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call forth a ladder or staircase to help you reach greater heights. The ladder or staircase appears in
+      a space you designate and either stands freely or connects to a nearby wall if possible. You

@@ -1,0 +1,22 @@
+id: aqueous_blast_technical
+name: Hydraulic Impact Round
+description: Fire a high-pressure water slug from a compact launcher, delivering blunt force at range.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d8
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d8
+    damage_type: bludgeoning
+    dc: 0

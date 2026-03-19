@@ -1,0 +1,22 @@
+id: goblin_pox_technical
+name: Synthetic Pathogen Dispersal
+description: Release a fast-spreading synthetic pathogen that causes debilitating sores and illness.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a
+      Fortitude save.
+
+
+      Goblin Pox (disease) Level 1; Creatures that have the goblin trait and goblin'

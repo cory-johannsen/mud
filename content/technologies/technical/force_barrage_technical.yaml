@@ -1,0 +1,17 @@
+id: force_barrage_technical
+name: Multi-Round Kinetic Volley
+description: Fire a rapid burst of kinetic impactors from a multi-barrel launcher.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: damage
+    dice: 1d4+1
+    damage_type: force
+    dc: 0

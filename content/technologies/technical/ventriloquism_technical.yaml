@@ -1,0 +1,17 @@
+id: ventriloquism_technical
+name: Voice Projection Speaker
+description: Route voice output through a remote speaker to project sound from any location.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Whenever you speak or make any other sound vocally, you can make your vocalization seem to originate from
+      somewhere else within 60 feet, and you can change that apparent location freely as you vocaliz

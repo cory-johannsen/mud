@@ -1,0 +1,17 @@
+id: friendfetch_technical
+name: Magnetic Tether Reel
+description: Fire a magnetic grapple that latches onto a target and reels them toward you.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shoot out ephemeral, telekinetic strands that drag each target directly toward you, stopping in the closest
+      unoccupied space to you in this path. This is forced movement.

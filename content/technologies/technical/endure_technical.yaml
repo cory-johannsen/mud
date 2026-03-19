@@ -1,0 +1,17 @@
+id: endure_technical
+name: Metabolic Stabilizer Injection
+description: Administer a rapid-acting compound that stabilizes vital signs and prevents debilitating conditions.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You invigorate the touched creature's mind and urge it to press on. You grant the touched creature 5 temporary
+      Hit Points that last for 1 minute.Heightened (+1) The temporary Hit Points increase by 5.

@@ -1,0 +1,17 @@
+id: pet_cache_technical
+name: Subspace Storage Unit
+description: Access a compressed-space storage module for deploying or retrieving a companion unit.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 1
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You open your cloak or create a gap with your hands, drawing the target into a pocket dimension just large
+      enough for its basic comfort. No other creature can enter this extradimensional space, and th

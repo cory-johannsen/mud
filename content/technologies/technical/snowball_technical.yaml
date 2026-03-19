@@ -1,0 +1,22 @@
+id: snowball_technical
+name: Cryo-Gel Projectile
+description: Fire a capsule of cryogenic gel that encases the target in fast-hardening ice.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+  on_hit:
+  - type: damage
+    dice: 2d4
+    damage_type: cold
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d4
+    damage_type: cold
+    dc: 0

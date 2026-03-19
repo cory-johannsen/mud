@@ -1,0 +1,19 @@
+id: tether_technical
+name: Electrostatic Tether Line
+description: Fire an electrostatic tether line that restrains a target at a fixed distance.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You use magical chains, vines, or other tethers to bind your target to you. The creature can still try to
+      @UUID[Compendium.pf2e.actionspf2e.Item.Escape], and it or others can break the tethers by atta

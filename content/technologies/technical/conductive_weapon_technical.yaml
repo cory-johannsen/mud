@@ -1,0 +1,17 @@
+id: conductive_weapon_technical
+name: Electroconductive Coating
+description: Apply a thin electroconductive layer to a weapon, causing it to discharge electricity on contact.
+tradition: technical
+level: 1
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You channel powerful electric current through the metal of a weapon, zapping anyone the item hits. The target
+      becomes a +1 shock weapon. If any target of an attack with the weapon is wearing metal arm
