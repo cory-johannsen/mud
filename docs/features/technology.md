@@ -36,6 +36,6 @@ Maps the PF2E magic system to Gunchete technology: traditions, prepared/spontane
         - [x] Innate tech effect resolution — activating an innate tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution; REQ-TER1–22)
         - [ ] `chrome_reflex` reaction trigger — integrate with Reactions system so it fires as a reaction rather than via `use` command; requires Reactions system
         - [ ] Passive innate tech mechanics — `seismic_sense` (always-on tremorsense) and `moisture_reclaim` (always-on water extraction) should apply passively without `use` command (Sub-project: Passive Tech Mechanics)
-    - [ ] Spell import from PF2E with translation into Gunchete
+    - [x] Spell import from PF2E with translation into Gunchete
       - [x] Populate Archetype and Job yaml with options
 - [ ] refactor to use `wire` for dependency injection

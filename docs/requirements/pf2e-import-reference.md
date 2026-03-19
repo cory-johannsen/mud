@@ -927,3 +927,59 @@ Automated import of PF2E level-1 spells via `cmd/import-content -format pf2e`. S
 6. Add an entry to this document under the appropriate tradition section
 7. Create the YAML file in `content/technologies/<tradition>/`
 8. If new condition IDs are needed, add to the "New Condition Files Required" table and create them
+
+---
+
+### Batch Import 2026-03-19 (Ranks 2–10)
+
+#### neural
+| Rank | Files |
+|------|-------|
+| 2 | 107 |
+| 3 | 92 |
+| 4 | 95 |
+| 5 | 73 |
+| 6 | 44 |
+| 7 | 36 |
+| 8 | 26 |
+| 9 | 22 |
+| 10 | 13 |
+
+#### bio_synthetic
+| Rank | Files |
+|------|-------|
+| 2 | 120 |
+| 3 | 82 |
+| 4 | 72 |
+| 5 | 63 |
+| 6 | 37 |
+| 7 | 27 |
+| 8 | 20 |
+| 9 | 16 |
+| 10 | 15 |
+
+#### fanatic_doctrine
+| Rank | Files |
+|------|-------|
+| 2 | 83 |
+| 3 | 55 |
+| 4 | 59 |
+| 5 | 52 |
+| 6 | 36 |
+| 7 | 26 |
+| 8 | 16 |
+| 9 | 15 |
+| 10 | 12 |
+
+#### technical
+| Rank | Files |
+|------|-------|
+| 2 | 132 |
+| 3 | 112 |
+| 4 | 103 |
+| 5 | 87 |
+| 6 | 57 |
+| 7 | 46 |
+| 8 | 34 |
+| 9 | 29 |
+| 10 | 13 |
