@@ -44,6 +44,19 @@ each Job corresponds to a PF2E multiclass archetype (dedication) that best captu
 | Schemer            | Witch, Oracle, Psychic, Thaumaturge            | Wis / Cha          | Savvy                | 6        |
 | Zealot             | Cleric, Champion, Monk                         | Wis / Str          | Grit                 | 8        |
 
+### Archetype → Technology Tradition
+
+| Gunchete Archetype | Technology Tradition | PF2E Magic Tradition |
+|--------------------|---------------------|----------------------|
+| Influencer         | neural              | occult               |
+| Schemer            | neural              | occult               |
+| Naturalist         | bio_synthetic       | primal               |
+| Drifter            | bio_synthetic       | primal               |
+| Zealot             | fanatic_doctrine    | divine               |
+| Nerd               | technical           | arcane               |
+| Aggressor          | none                | —                    |
+| Criminal           | none                | —                    |
+
 ### Job → PF2E Archetype (Multiclass Dedication)
 
 #### Aggressor Jobs
