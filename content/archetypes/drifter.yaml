@@ -57,34 +57,876 @@ level_up_grants:
     prepared:
       slots_by_level:
         2: 1
-      pool: []
+      pool:
+      - id: acid_arrow_bio_synthetic
+        level: 2
+      - id: acid_grip_bio_synthetic
+        level: 2
+      - id: advanced_scurvy_bio_synthetic
+        level: 2
+      - id: albatross_curse_bio_synthetic
+        level: 2
+      - id: allfood_bio_synthetic
+        level: 2
+      - id: animal_form
+        level: 2
+      - id: animal_messenger
+        level: 2
+      - id: ash_cloud_bio_synthetic
+        level: 2
+      - id: avenging_wildwood
+        level: 2
+      - id: banishing_touch_bio_synthetic
+        level: 2
+      - id: beemans_summons_bio_synthetic
+        level: 2
+      - id: blast_of_the_bellows_bio_synthetic
+        level: 2
+      - id: blazing_armory_bio_synthetic
+        level: 2
+      - id: blazing_blade_bio_synthetic
+        level: 2
+      - id: blazing_bolt_bio_synthetic
+        level: 2
+      - id: bone_spray_bio_synthetic
+        level: 2
+      - id: boneshaker_bio_synthetic
+        level: 2
+      - id: bralani_referendum_bio_synthetic
+        level: 2
+      - id: breath_of_drought
+        level: 2
+      - id: brine_dragon_bile_bio_synthetic
+        level: 2
+      - id: burrow_ward_bio_synthetic
+        level: 2
+      - id: buzzing_servants_bio_synthetic
+        level: 2
+      - id: cauterize_wounds_bio_synthetic
+        level: 2
+      - id: clad_in_metal_bio_synthetic
+        level: 2
+      - id: claws_of_the_otter_bio_synthetic
+        level: 2
+      - id: clawsong_bio_synthetic
+        level: 2
+      - id: cleanse_affliction_bio_synthetic
+        level: 2
+      - id: cleanse_air_bio_synthetic
+        level: 2
+      - id: clear_mind_bio_synthetic
+        level: 2
+      - id: create_food_bio_synthetic
+        level: 2
+      - id: dancing_shield_bio_synthetic
+        level: 2
+      - id: darkness_bio_synthetic
+        level: 2
+      - id: darkvision_bio_synthetic
+        level: 2
+      - id: deafness_bio_synthetic
+        level: 2
+      - id: dismantle_bio_synthetic
+        level: 2
+      - id: dispel_magic_bio_synthetic
+        level: 2
+      - id: elemental_zone_bio_synthetic
+        level: 2
+      - id: enhance_victuals_bio_synthetic
+        level: 2
+      - id: enlarge_bio_synthetic
+        level: 2
+      - id: entangling_flora_bio_synthetic
+        level: 2
+      - id: environmental_endurance_bio_synthetic
+        level: 2
+      - id: erase_trail
+        level: 2
+      - id: everlight_bio_synthetic
+        level: 2
+      - id: expeditious_excavation_bio_synthetic
+        level: 2
+      - id: exploding_earth_bio_synthetic
+        level: 2
+      - id: extract_poison_bio_synthetic
+        level: 2
+      - id: faerie_fire_bio_synthetic
+        level: 2
+      - id: falsify_heat_bio_synthetic
+        level: 2
+      - id: fear_the_sun_bio_synthetic
+        level: 2
+      - id: feast_of_ashes_bio_synthetic
+        level: 2
+      - id: feral_shades
+        level: 2
+      - id: final_sacrifice_bio_synthetic
+        level: 2
+      - id: fireproof_bio_synthetic
+        level: 2
+      - id: flame_wisp_bio_synthetic
+        level: 2
+      - id: floating_flame_bio_synthetic
+        level: 2
+      - id: frog_tongue
+        level: 2
+      - id: fungal_hyphae
+        level: 2
+      - id: fungal_infestation
+        level: 2
+      - id: gecko_grip_bio_synthetic
+        level: 2
+      - id: gentle_breeze_bio_synthetic
+        level: 2
+      - id: guiding_star_bio_synthetic
+        level: 2
+      - id: heat_metal_bio_synthetic
+        level: 2
+      - id: helpful_wood_spirits_bio_synthetic
+        level: 2
+      - id: hidebound_bio_synthetic
+        level: 2
+      - id: humanoid_form_bio_synthetic
+        level: 2
+      - id: ignite_fireworks_bio_synthetic
+        level: 2
+      - id: impart_empathy_bio_synthetic
+        level: 2
+      - id: instant_armor_bio_synthetic
+        level: 2
+      - id: iron_gut_bio_synthetic
+        level: 2
+      - id: lock_item_bio_synthetic
+        level: 2
+      - id: loose_times_arrow_bio_synthetic
+        level: 2
+      - id: magnetic_attraction_bio_synthetic
+        level: 2
+      - id: magnetic_repulsion_bio_synthetic
+        level: 2
+      - id: manifestation_of_spirits_bio_synthetic
+        level: 2
+      - id: marvelous_mount_bio_synthetic
+        level: 2
+      - id: mist_bio_synthetic
+        level: 2
+      - id: oaken_resilience_bio_synthetic
+        level: 2
+      - id: one_with_plants
+        level: 2
+      - id: pack_attack_bio_synthetic
+        level: 2
+      - id: pave_ground_bio_synthetic
+        level: 2
+      - id: peaceful_rest_bio_synthetic
+        level: 2
+      - id: propulsive_breeze_bio_synthetic
+        level: 2
+      - id: pyrefowl_rebuke_bio_synthetic
+        level: 2
+      - id: quench
+        level: 2
+      - id: radiant_field_bio_synthetic
+        level: 2
+      - id: rapid_adaptation
+        level: 2
+      - id: reapers_lantern_bio_synthetic
+        level: 2
+      - id: resist_energy_bio_synthetic
+        level: 2
+      - id: restoration_bio_synthetic
+        level: 2
+      - id: revealing_light_bio_synthetic
+        level: 2
+      - id: rime_slick_bio_synthetic
+        level: 2
+      - id: rubble_step_bio_synthetic
+        level: 2
+      - id: sea_surge_bio_synthetic
+        level: 2
+      - id: shape_wood_bio_synthetic
+        level: 2
+      - id: shatter_bio_synthetic
+        level: 2
+      - id: shrink_bio_synthetic
+        level: 2
+      - id: slough_skin_bio_synthetic
+        level: 2
+      - id: sound_body_bio_synthetic
+        level: 2
+      - id: speak_with_animals
+        level: 2
+      - id: splinter_volley_bio_synthetic
+        level: 2
+      - id: status_bio_synthetic
+        level: 2
+      - id: steel_fortifications_bio_synthetic
+        level: 2
+      - id: sticky_fire_bio_synthetic
+        level: 2
+      - id: sudden_blight_bio_synthetic
+        level: 2
+      - id: sudden_bolt_bio_synthetic
+        level: 2
+      - id: summon_elemental_bio_synthetic
+        level: 2
+      - id: summoners_precaution_bio_synthetic
+        level: 2
+      - id: summoners_visage_bio_synthetic
+        level: 2
+      - id: sure_footing_bio_synthetic
+        level: 2
+      - id: the_queens_rainbow_bio_synthetic
+        level: 2
+      - id: thermal_remedy_bio_synthetic
+        level: 2
+      - id: thundering_dominance_bio_synthetic
+        level: 2
+      - id: tremorsense_bio_synthetic
+        level: 2
+      - id: voice_on_the_breeze_bio_synthetic
+        level: 2
+      - id: vomit_swarm_bio_synthetic
+        level: 2
+      - id: water_breathing_bio_synthetic
+        level: 2
+      - id: water_walk_bio_synthetic
+        level: 2
+      - id: waterproof_bio_synthetic
+        level: 2
+      - id: web_bio_synthetic
+        level: 2
+      - id: worms_repast_bio_synthetic
+        level: 2
   5:
     prepared:
       slots_by_level:
         3: 1
-      pool: []
+      pool:
+      - id: animal_vision
+        level: 3
+      - id: antlion_trap
+        level: 3
+      - id: aqueous_orb_bio_synthetic
+        level: 3
+      - id: blastback_bio_synthetic
+        level: 3
+      - id: blazing_dive_bio_synthetic
+        level: 3
+      - id: blindness_bio_synthetic
+        level: 3
+      - id: blister_bomb_bio_synthetic
+        level: 3
+      - id: bone_flense_bio_synthetic
+        level: 3
+      - id: bottomless_stomach_bio_synthetic
+        level: 3
+      - id: casters_imposition_bio_synthetic
+        level: 3
+      - id: cave_fangs_bio_synthetic
+        level: 3
+      - id: cloud_dragons_cloak_bio_synthetic
+        level: 3
+      - id: conjured_conveyance_bio_synthetic
+        level: 3
+      - id: coral_scourge_bio_synthetic
+        level: 3
+      - id: cordyceps_command
+        level: 3
+      - id: crashing_wave_bio_synthetic
+        level: 3
+      - id: croak_voice_bio_synthetic
+        level: 3
+      - id: cup_of_dust_bio_synthetic
+        level: 3
+      - id: curse_of_lost_time_bio_synthetic
+        level: 3
+      - id: cyclone_rondo_bio_synthetic
+        level: 3
+      - id: days_weight_bio_synthetic
+        level: 3
+      - id: deep_sight_bio_synthetic
+        level: 3
+      - id: dive_and_breach_bio_synthetic
+        level: 3
+      - id: dividing_trench_bio_synthetic
+        level: 3
+      - id: eagles_cry_bio_synthetic
+        level: 3
+      - id: earthbind_bio_synthetic
+        level: 3
+      - id: elemental_absorption_bio_synthetic
+        level: 3
+      - id: elemental_annihilation_wave_bio_synthetic
+        level: 3
+      - id: envenom_companion
+        level: 3
+      - id: familiars_face_bio_synthetic
+        level: 3
+      - id: far_sight_bio_synthetic
+        level: 3
+      - id: feet_to_fins_bio_synthetic
+        level: 3
+      - id: fireball_bio_synthetic
+        level: 3
+      - id: gasping_marsh_bio_synthetic
+        level: 3
+      - id: glass_sand_bio_synthetic
+        level: 3
+      - id: haste_bio_synthetic
+        level: 3
+      - id: heatvision_bio_synthetic
+        level: 3
+      - id: holy_light_bio_synthetic
+        level: 3
+      - id: horde_of_underlings_bio_synthetic
+        level: 3
+      - id: ibexs_harvest_bio_synthetic
+        level: 3
+      - id: insect_form_bio_synthetic
+        level: 3
+      - id: life_connection_bio_synthetic
+        level: 3
+      - id: life_pact_bio_synthetic
+        level: 3
+      - id: lightning_bolt_bio_synthetic
+        level: 3
+      - id: lotus_walk_bio_synthetic
+        level: 3
+      - id: mad_monkeys
+        level: 3
+      - id: magnetic_acceleration_bio_synthetic
+        level: 3
+      - id: martyrs_intervention_bio_synthetic
+        level: 3
+      - id: mind_of_menace_bio_synthetic
+        level: 3
+      - id: moonlight_ray_bio_synthetic
+        level: 3
+      - id: moths_supper_bio_synthetic
+        level: 3
+      - id: one_with_stone_bio_synthetic
+        level: 3
+      - id: oneiric_mire_bio_synthetic
+        level: 3
+      - id: organsight_bio_synthetic
+        level: 3
+      - id: painted_scout_bio_synthetic
+        level: 3
+      - id: pillar_of_water_bio_synthetic
+        level: 3
+      - id: positive_attunement_bio_synthetic
+        level: 3
+      - id: primal_chorus
+        level: 3
+      - id: safe_passage_bio_synthetic
+        level: 3
+      - id: sand_form_bio_synthetic
+        level: 3
+      - id: scrying_ripples_bio_synthetic
+        level: 3
+      - id: shadow_spy_bio_synthetic
+        level: 3
+      - id: shifting_sand_bio_synthetic
+        level: 3
+      - id: show_the_way_bio_synthetic
+        level: 3
+      - id: slow_bio_synthetic
+        level: 3
+      - id: soothing_blossoms_bio_synthetic
+        level: 3
+      - id: speak_with_plants_bio_synthetic
+        level: 3
+      - id: stinking_cloud_bio_synthetic
+        level: 3
+      - id: strength_of_mind_bio_synthetic
+        level: 3
+      - id: tempest_cloak_bio_synthetic
+        level: 3
+      - id: the_four_hunters_bio_synthetic
+        level: 3
+      - id: threefold_aspect_bio_synthetic
+        level: 3
+      - id: travel_by_turtle_bio_synthetic
+        level: 3
+      - id: unseasonable_squall_bio_synthetic
+        level: 3
+      - id: veil_of_privacy_bio_synthetic
+        level: 3
+      - id: wall_of_radiance_bio_synthetic
+        level: 3
+      - id: wall_of_thorns_bio_synthetic
+        level: 3
+      - id: wall_of_water_bio_synthetic
+        level: 3
+      - id: wall_of_wind_bio_synthetic
+        level: 3
+      - id: warding_aggression_bio_synthetic
+        level: 3
+      - id: web_of_eyes_bio_synthetic
+        level: 3
+      - id: wooden_double_bio_synthetic
+        level: 3
   9:
     prepared:
       slots_by_level:
         4: 1
-      pool: []
+      pool:
+      - id: aerial_form_bio_synthetic
+        level: 4
+      - id: air_walk_bio_synthetic
+        level: 4
+      - id: airlift_bio_synthetic
+        level: 4
+      - id: bestial_curse_bio_synthetic
+        level: 4
+      - id: bloodspray_curse_bio_synthetic
+        level: 4
+      - id: bridge_of_vines_bio_synthetic
+        level: 4
+      - id: bursting_bloom_bio_synthetic
+        level: 4
+      - id: call_the_blood_bio_synthetic
+        level: 4
+      - id: cinder_swarm_bio_synthetic
+        level: 4
+      - id: cloak_of_light_bio_synthetic
+        level: 4
+      - id: cloud_current_bio_synthetic
+        level: 4
+      - id: compel_true_name_bio_synthetic
+        level: 4
+      - id: coral_eruption_bio_synthetic
+        level: 4
+      - id: countless_eyes_bio_synthetic
+        level: 4
+      - id: creation_bio_synthetic
+        level: 4
+      - id: deathless_march_bio_synthetic
+        level: 4
+      - id: dinosaur_form
+        level: 4
+      - id: draw_the_lightning_bio_synthetic
+        level: 4
+      - id: elemental_gift
+        level: 4
+      - id: elemental_sense_bio_synthetic
+        level: 4
+      - id: elephant_form
+        level: 4
+      - id: enhance_senses_bio_synthetic
+        level: 4
+      - id: fey_form_bio_synthetic
+        level: 4
+      - id: filter_air_bio_synthetic
+        level: 4
+      - id: fire_shield_bio_synthetic
+        level: 4
+      - id: fly_bio_synthetic
+        level: 4
+      - id: glass_form_bio_synthetic
+        level: 4
+      - id: grasp_of_the_deep_bio_synthetic
+        level: 4
+      - id: grasping_earth_bio_synthetic
+        level: 4
+      - id: hydraulic_torrent
+        level: 4
+      - id: ice_storm_bio_synthetic
+        level: 4
+      - id: lifedraining_roots_bio_synthetic
+        level: 4
+      - id: lifes_fresh_bloom_bio_synthetic
+        level: 4
+      - id: luring_wail_bio_synthetic
+        level: 4
+      - id: mirage_bio_synthetic
+        level: 4
+      - id: misty_memory_bio_synthetic
+        level: 4
+      - id: mountain_resilience_bio_synthetic
+        level: 4
+      - id: movanic_glimmer_bio_synthetic
+        level: 4
+      - id: murderous_vine
+        level: 4
+      - id: mutilate_bio_synthetic
+        level: 4
+      - id: ocular_overload_bio_synthetic
+        level: 4
+      - id: pest_swarm_bio_synthetic
+        level: 4
+      - id: petal_storm
+        level: 4
+      - id: phoenix_ward_bio_synthetic
+        level: 4
+      - id: radiant_beam_bio_synthetic
+        level: 4
+      - id: radiant_heart_of_devotion_bio_synthetic
+        level: 4
+      - id: ranages_circle_bio_synthetic
+        level: 4
+      - id: reflective_scales_bio_synthetic
+        level: 4
+      - id: rigid_form_bio_synthetic
+        level: 4
+      - id: rust_cloud_bio_synthetic
+        level: 4
+      - id: rusting_grasp
+        level: 4
+      - id: sacred_nimbus_bio_synthetic
+        level: 4
+      - id: shape_stone_bio_synthetic
+        level: 4
+      - id: sliding_blocks_bio_synthetic
+        level: 4
+      - id: snake_fangs
+        level: 4
+      - id: soft_landing_bio_synthetic
+        level: 4
+      - id: solid_fog_bio_synthetic
+        level: 4
+      - id: soothing_spring_bio_synthetic
+        level: 4
+      - id: spike_stones
+        level: 4
+      - id: stifling_stillness_bio_synthetic
+        level: 4
+      - id: stonesense_bio_synthetic
+        level: 4
+      - id: swarming_wasp_stings_bio_synthetic
+        level: 4
+      - id: tomorrows_dawn_bio_synthetic
+        level: 4
+      - id: tortoise_and_the_hare_bio_synthetic
+        level: 4
+      - id: tricksters_feathers_bio_synthetic
+        level: 4
+      - id: unfettered_movement_bio_synthetic
+        level: 4
+      - id: vapor_form_bio_synthetic
+        level: 4
+      - id: vital_beacon_bio_synthetic
+        level: 4
+      - id: wall_of_fire_bio_synthetic
+        level: 4
+      - id: weapon_storm_bio_synthetic
+        level: 4
+      - id: ymeris_mark_bio_synthetic
+        level: 4
+      - id: zephyr_slip_bio_synthetic
+        level: 4
   11:
     prepared:
       slots_by_level:
         5: 1
-      pool: []
+      pool:
+      - id: acid_storm_bio_synthetic
+        level: 5
+      - id: banishment_bio_synthetic
+        level: 5
+      - id: blackfingers_blades_bio_synthetic
+        level: 5
+      - id: blazing_fissure_bio_synthetic
+        level: 5
+      - id: blessing_of_defiance_bio_synthetic
+        level: 5
+      - id: blinding_foam_bio_synthetic
+        level: 5
+      - id: blister_bio_synthetic
+        level: 5
+      - id: boomerang_shot_bio_synthetic
+        level: 5
+      - id: chameleon_coat
+        level: 5
+      - id: cone_of_cold_bio_synthetic
+        level: 5
+      - id: confusing_cry_bio_synthetic
+        level: 5
+      - id: control_water_bio_synthetic
+        level: 5
+      - id: corrosive_muck_bio_synthetic
+        level: 5
+      - id: death_ward_bio_synthetic
+        level: 5
+      - id: desperate_repair_bio_synthetic
+        level: 5
+      - id: diadem_of_divine_radiance_bio_synthetic
+        level: 5
+      - id: domoras_defense_bio_synthetic
+        level: 5
+      - id: elemental_breath_bio_synthetic
+        level: 5
+      - id: elemental_form_bio_synthetic
+        level: 5
+      - id: engrave_memory_bio_synthetic
+        level: 5
+      - id: entwined_roots_bio_synthetic
+        level: 5
+      - id: fires_pathway_bio_synthetic
+        level: 5
+      - id: flame_dancer_bio_synthetic
+        level: 5
+      - id: flames_of_ego_bio_synthetic
+        level: 5
+      - id: flammable_fumes_bio_synthetic
+        level: 5
+      - id: flowing_strike_bio_synthetic
+        level: 5
+      - id: freezing_rain_bio_synthetic
+        level: 5
+      - id: geyser_bio_synthetic
+        level: 5
+      - id: glimmer_of_charm_bio_synthetic
+        level: 5
+      - id: grisly_growths_bio_synthetic
+        level: 5
+      - id: healing_well_bio_synthetic
+        level: 5
+      - id: howling_blizzard_bio_synthetic
+        level: 5
+      - id: impaling_spike_bio_synthetic
+        level: 5
+      - id: incendiary_fog_bio_synthetic
+        level: 5
+      - id: lashuntas_life_bubble_bio_synthetic
+        level: 5
+      - id: lightning_storm
+        level: 5
+      - id: magic_passage_bio_synthetic
+        level: 5
+      - id: mantle_of_the_frozen_heart_bio_synthetic
+        level: 5
+      - id: mantle_of_the_magma_heart_bio_synthetic
+        level: 5
+      - id: mantle_of_the_melting_heart_bio_synthetic
+        level: 5
+      - id: mantle_of_the_unwavering_heart_bio_synthetic
+        level: 5
+      - id: mariners_curse_bio_synthetic
+        level: 5
+      - id: moon_frenzy
+        level: 5
+      - id: natures_pathway
+        level: 5
+      - id: pillars_of_sand_bio_synthetic
+        level: 5
+      - id: plant_form
+        level: 5
+      - id: pressure_zone_bio_synthetic
+        level: 5
+      - id: ravening_maw_bio_synthetic
+        level: 5
+      - id: ritual_obstruction_bio_synthetic
+        level: 5
+      - id: sawtooth_terrain_bio_synthetic
+        level: 5
+      - id: speak_with_stones_bio_synthetic
+        level: 5
+      - id: stormburst
+        level: 5
+      - id: summon_dragon_bio_synthetic
+        level: 5
+      - id: summon_giant
+        level: 5
+      - id: summon_healing_servitor_bio_synthetic
+        level: 5
+      - id: temporary_glyph_bio_synthetic
+        level: 5
+      - id: toxic_cloud_bio_synthetic
+        level: 5
+      - id: transmute_rock_and_mud_bio_synthetic
+        level: 5
+      - id: wall_of_flesh_bio_synthetic
+        level: 5
+      - id: wall_of_ice_bio_synthetic
+        level: 5
+      - id: wall_of_stone_bio_synthetic
+        level: 5
+      - id: wisdom_of_the_winds_bio_synthetic
+        level: 5
+      - id: wyvern_sting_bio_synthetic
+        level: 5
   13:
     prepared:
       slots_by_level:
         6: 1
-      pool: []
+      pool:
+      - id: arrow_salvo_bio_synthetic
+        level: 6
+      - id: blanket_of_stars_bio_synthetic
+        level: 6
+      - id: blinding_fury_bio_synthetic
+        level: 6
+      - id: bounty_of_the_sky_bio_synthetic
+        level: 6
+      - id: catch_your_name_bio_synthetic
+        level: 6
+      - id: chain_lightning_bio_synthetic
+        level: 6
+      - id: crimson_breath_bio_synthetic
+        level: 6
+      - id: cursed_metamorphosis_bio_synthetic
+        level: 6
+      - id: dragon_form_bio_synthetic
+        level: 6
+      - id: earth_and_sky_bio_synthetic
+        level: 6
+      - id: elemental_confluence_bio_synthetic
+        level: 6
+      - id: explosive_barrage_bio_synthetic
+        level: 6
+      - id: field_of_life_bio_synthetic
+        level: 6
+      - id: field_of_razors_bio_synthetic
+        level: 6
+      - id: fire_seeds
+        level: 6
+      - id: flame_vortex_bio_synthetic
+        level: 6
+      - id: frost_pillar_bio_synthetic
+        level: 6
+      - id: frozen_fog_bio_synthetic
+        level: 6
+      - id: hags_fruit_bio_synthetic
+        level: 6
+      - id: halcyon_infusion_bio_synthetic
+        level: 6
+      - id: lignify_bio_synthetic
+        level: 6
+      - id: natures_reprisal
+        level: 6
+      - id: necrotize_bio_synthetic
+        level: 6
+      - id: personal_ocean_bio_synthetic
+        level: 6
+      - id: petrify_bio_synthetic
+        level: 6
+      - id: phantom_orchestra_bio_synthetic
+        level: 6
+      - id: purple_worm_sting_bio_synthetic
+        level: 6
+      - id: roses_thorns
+        level: 6
+      - id: scintillating_safeguard_bio_synthetic
+        level: 6
+      - id: stone_to_flesh_bio_synthetic
+        level: 6
+      - id: tanglecurse_bio_synthetic
+        level: 6
+      - id: tangling_creepers_bio_synthetic
+        level: 6
+      - id: tree_of_seasons
+        level: 6
+      - id: truesight_bio_synthetic
+        level: 6
+      - id: utter_destruction_bio_synthetic
+        level: 6
+      - id: vitrifying_blast_bio_synthetic
+        level: 6
+      - id: wall_of_metal_bio_synthetic
+        level: 6
   17:
     prepared:
       slots_by_level:
         7: 1
-      pool: []
+      pool:
+      - id: blightburn_blast_bio_synthetic
+        level: 7
+      - id: control_sand_bio_synthetic
+        level: 7
+      - id: corrosive_body_bio_synthetic
+        level: 7
+      - id: cosmic_form_bio_synthetic
+        level: 7
+      - id: dancing_fountain_bio_synthetic
+        level: 7
+      - id: eclipse_burst_bio_synthetic
+        level: 7
+      - id: energy_aegis_bio_synthetic
+        level: 7
+      - id: execute_bio_synthetic
+        level: 7
+      - id: fiery_body_bio_synthetic
+        level: 7
+      - id: final_fate_of_the_locust_host_bio_synthetic
+        level: 7
+      - id: frigid_flurry_bio_synthetic
+        level: 7
+      - id: heaving_earth_bio_synthetic
+        level: 7
+      - id: hungry_depths_bio_synthetic
+        level: 7
+      - id: interplanar_teleport_bio_synthetic
+        level: 7
+      - id: lifewood_cage_bio_synthetic
+        level: 7
+      - id: mask_of_terror_bio_synthetic
+        level: 7
+      - id: moonburst_bio_synthetic
+        level: 7
+      - id: pollen_pods_bio_synthetic
+        level: 7
+      - id: ray_of_corruption_bio_synthetic
+        level: 7
+      - id: regenerate_bio_synthetic
+        level: 7
+      - id: restore_ground_bio_synthetic
+        level: 7
+      - id: shock_to_the_system_bio_synthetic
+        level: 7
+      - id: summon_stampede
+        level: 7
+      - id: sunburst_bio_synthetic
+        level: 7
+      - id: unfettered_pack
+        level: 7
+      - id: vacuum_bio_synthetic
+        level: 7
+      - id: volcanic_eruption
+        level: 7
   19:
     prepared:
       slots_by_level:
         8: 1
-      pool: []
+      pool:
+      - id: all_is_one_one_is_all_bio_synthetic
+        level: 8
+      - id: arctic_rift_bio_synthetic
+        level: 8
+      - id: boil_blood_bio_synthetic
+        level: 8
+      - id: burning_blossoms_bio_synthetic
+        level: 8
+      - id: clone_companion
+        level: 8
+      - id: deluge_bio_synthetic
+        level: 8
+      - id: desiccate_bio_synthetic
+        level: 8
+      - id: earthquake_bio_synthetic
+        level: 8
+      - id: ferrous_form_bio_synthetic
+        level: 8
+      - id: migration
+        level: 8
+      - id: moment_of_renewal_bio_synthetic
+        level: 8
+      - id: monstrosity_form_bio_synthetic
+        level: 8
+      - id: part_the_mists_to_paradise_bio_synthetic
+        level: 8
+      - id: polar_ray_bio_synthetic
+        level: 8
+      - id: punishing_winds
+        level: 8
+      - id: rainbow_fumarole_bio_synthetic
+        level: 8
+      - id: summon_elemental_herald_bio_synthetic
+        level: 8
+      - id: summon_warden_of_the_wild
+        level: 8
+      - id: whirlpool_bio_synthetic
+        level: 8
+      - id: whirlwind
+        level: 8

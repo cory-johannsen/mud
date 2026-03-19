@@ -63,7 +63,271 @@ level_up_grants:
     prepared:
       slots_by_level:
         2: 2
-      pool: []
+      pool:
+      - id: acid_arrow_technical
+        level: 2
+      - id: acid_grip_technical
+        level: 2
+      - id: allfood_technical
+        level: 2
+      - id: animated_assault_technical
+        level: 2
+      - id: ash_cloud_technical
+        level: 2
+      - id: banishing_touch_technical
+        level: 2
+      - id: beemans_summons_technical
+        level: 2
+      - id: befitting_attire_technical
+        level: 2
+      - id: binding_muzzle_technical
+        level: 2
+      - id: blast_of_the_bellows_technical
+        level: 2
+      - id: blazing_armory_technical
+        level: 2
+      - id: blazing_bolt_technical
+        level: 2
+      - id: blood_duplicate_technical
+        level: 2
+      - id: blood_vendetta_technical
+        level: 2
+      - id: blur_technical
+        level: 2
+      - id: bone_spray_technical
+        level: 2
+      - id: boneshaker_technical
+        level: 2
+      - id: brine_dragon_bile_technical
+        level: 2
+      - id: burrow_ward_technical
+        level: 2
+      - id: buzzing_servants_technical
+        level: 2
+      - id: carrion_mire_technical
+        level: 2
+      - id: cauterize_wounds_technical
+        level: 2
+      - id: charitable_urge_technical
+        level: 2
+      - id: clad_in_metal_technical
+        level: 2
+      - id: cleanse_air_technical
+        level: 2
+      - id: confetti_cloud_technical
+        level: 2
+      - id: create_food_technical
+        level: 2
+      - id: dancing_shield_technical
+        level: 2
+      - id: darkness_technical
+        level: 2
+      - id: darkvision_technical
+        level: 2
+      - id: deafness_technical
+        level: 2
+      - id: dismantle_technical
+        level: 2
+      - id: dispel_magic_technical
+        level: 2
+      - id: elemental_zone_technical
+        level: 2
+      - id: embed_message_technical
+        level: 2
+      - id: empathic_link_technical
+        level: 2
+      - id: empty_pack_technical
+        level: 2
+      - id: enlarge_technical
+        level: 2
+      - id: entangling_flora_technical
+        level: 2
+      - id: environmental_endurance_technical
+        level: 2
+      - id: everlight_technical
+        level: 2
+      - id: expeditious_excavation_technical
+        level: 2
+      - id: exploding_earth_technical
+        level: 2
+      - id: extract_poison_technical
+        level: 2
+      - id: false_vitality_technical
+        level: 2
+      - id: falsify_heat_technical
+        level: 2
+      - id: farflung_fetch_technical
+        level: 2
+      - id: fear_the_sun_technical
+        level: 2
+      - id: feast_of_ashes_technical
+        level: 2
+      - id: final_sacrifice_technical
+        level: 2
+      - id: fireproof_technical
+        level: 2
+      - id: flame_wisp_technical
+        level: 2
+      - id: floating_flame_technical
+        level: 2
+      - id: gecko_grip_technical
+        level: 2
+      - id: ghostly_carrier_technical
+        level: 2
+      - id: heat_metal_technical
+        level: 2
+      - id: helpful_reload_technical
+        level: 2
+      - id: helpful_wood_spirits_technical
+        level: 2
+      - id: hidebound_technical
+        level: 2
+      - id: horrifying_blood_loss_technical
+        level: 2
+      - id: humanoid_form_technical
+        level: 2
+      - id: ignite_fireworks_technical
+        level: 2
+      - id: illusory_creature_technical
+        level: 2
+      - id: illusory_shroud_technical
+        level: 2
+      - id: impeccable_flow_technical
+        level: 2
+      - id: instant_armor_technical
+        level: 2
+      - id: invisibility_technical
+        level: 2
+      - id: iron_gut_technical
+        level: 2
+      - id: kgalaserkes_axes_technical
+        level: 2
+      - id: knock_technical
+        level: 2
+      - id: laughing_fit_technical
+        level: 2
+      - id: lock_item_technical
+        level: 2
+      - id: loose_times_arrow_technical
+        level: 2
+      - id: lucky_number_technical
+        level: 2
+      - id: magnetic_attraction_technical
+        level: 2
+      - id: magnetic_repulsion_technical
+        level: 2
+      - id: mark_of_blood_technical
+        level: 2
+      - id: marvelous_mount_technical
+        level: 2
+      - id: mental_map_technical
+        level: 2
+      - id: mind_games_technical
+        level: 2
+      - id: mirror_image_technical
+        level: 2
+      - id: mist_technical
+        level: 2
+      - id: noise_blast_technical
+        level: 2
+      - id: oaken_resilience_technical
+        level: 2
+      - id: osseous_cage_technical
+        level: 2
+      - id: pave_ground_technical
+        level: 2
+      - id: peaceful_rest_technical
+        level: 2
+      - id: penumbral_disguise_technical
+        level: 2
+      - id: persistent_servant_technical
+        level: 2
+      - id: phantasmal_treasure_technical
+        level: 2
+      - id: phantom_crowd_technical
+        level: 2
+      - id: propulsive_breeze_technical
+        level: 2
+      - id: pyrefowl_rebuke_technical
+        level: 2
+      - id: radiant_field_technical
+        level: 2
+      - id: resist_energy_technical
+        level: 2
+      - id: revealing_light_technical
+        level: 2
+      - id: rime_slick_technical
+        level: 2
+      - id: rubble_step_technical
+        level: 2
+      - id: sea_surge_technical
+        level: 2
+      - id: see_the_unseen_technical
+        level: 2
+      - id: shadow_zombie_technical
+        level: 2
+      - id: shape_wood_technical
+        level: 2
+      - id: shrink_technical
+        level: 2
+      - id: slough_skin_technical
+        level: 2
+      - id: splinter_volley_technical
+        level: 2
+      - id: spys_mark_technical
+        level: 2
+      - id: steel_fortifications_technical
+        level: 2
+      - id: sticky_fire_technical
+        level: 2
+      - id: stupefy_technical
+        level: 2
+      - id: sudden_bolt_technical
+        level: 2
+      - id: summon_elemental_technical
+        level: 2
+      - id: summoners_precaution_technical
+        level: 2
+      - id: summoners_visage_technical
+        level: 2
+      - id: swallow_light_technical
+        level: 2
+      - id: telekinetic_maneuver_technical
+        level: 2
+      - id: the_queens_rainbow_technical
+        level: 2
+      - id: thermal_remedy_technical
+        level: 2
+      - id: timely_tutor_technical
+        level: 2
+      - id: translate_technical
+        level: 2
+      - id: tremorsense_technical
+        level: 2
+      - id: umbral_extraction_technical
+        level: 2
+      - id: umbral_mindtheft_technical
+        level: 2
+      - id: veil_of_spirits_technical
+        level: 2
+      - id: vicious_jealousy_technical
+        level: 2
+      - id: voice_on_the_breeze_technical
+        level: 2
+      - id: vomit_swarm_technical
+        level: 2
+      - id: warping_pull
+        level: 2
+      - id: warriors_regret_technical
+        level: 2
+      - id: water_breathing_technical
+        level: 2
+      - id: water_walk_technical
+        level: 2
+      - id: waterproof_technical
+        level: 2
+      - id: web_technical
+        level: 2
   4:
     prepared:
       slots_by_level:
@@ -72,7 +336,231 @@ level_up_grants:
     prepared:
       slots_by_level:
         3: 2
-      pool: []
+      pool:
+      - id: agonizing_despair_technical
+        level: 3
+      - id: aqueous_orb_technical
+        level: 3
+      - id: bind_undead_technical
+        level: 3
+      - id: blastback_technical
+        level: 3
+      - id: blazing_dive_technical
+        level: 3
+      - id: blindness_technical
+        level: 3
+      - id: blister_bomb_technical
+        level: 3
+      - id: bone_flense_technical
+        level: 3
+      - id: bonewall_bulwark_technical
+        level: 3
+      - id: bottomless_stomach_technical
+        level: 3
+      - id: bracing_tendrils_technical
+        level: 3
+      - id: casters_imposition_technical
+        level: 3
+      - id: cave_fangs_technical
+        level: 3
+      - id: clairaudience_technical
+        level: 3
+      - id: cloud_dragons_cloak_technical
+        level: 3
+      - id: conjured_conveyance_technical
+        level: 3
+      - id: coral_scourge_technical
+        level: 3
+      - id: cozy_cabin_technical
+        level: 3
+      - id: crashing_wave_technical
+        level: 3
+      - id: croak_voice_technical
+        level: 3
+      - id: cup_of_dust_technical
+        level: 3
+      - id: curse_of_lost_time_technical
+        level: 3
+      - id: days_weight_technical
+        level: 3
+      - id: deep_sight_technical
+        level: 3
+      - id: disruptive_transfer_technical
+        level: 3
+      - id: distracting_chatter_technical
+        level: 3
+      - id: dive_and_breach_technical
+        level: 3
+      - id: dividing_trench_technical
+        level: 3
+      - id: dream_message_technical
+        level: 3
+      - id: eagles_cry_technical
+        level: 3
+      - id: earthbind_technical
+        level: 3
+      - id: echo_jump_technical
+        level: 3
+      - id: elemental_absorption_technical
+        level: 3
+      - id: elemental_annihilation_wave_technical
+        level: 3
+      - id: enthrall_technical
+        level: 3
+      - id: excise_lexicon_technical
+        level: 3
+      - id: familiars_face_technical
+        level: 3
+      - id: feet_to_fins_technical
+        level: 3
+      - id: fireball_technical
+        level: 3
+      - id: firework_blast
+        level: 3
+      - id: gasping_marsh_technical
+        level: 3
+      - id: ghostly_weapon_technical
+        level: 3
+      - id: glass_sand_technical
+        level: 3
+      - id: gravity_well_technical
+        level: 3
+      - id: haste_technical
+        level: 3
+      - id: heatvision_technical
+        level: 3
+      - id: horde_of_underlings_technical
+        level: 3
+      - id: hypnotize_technical
+        level: 3
+      - id: ibexs_harvest_technical
+        level: 3
+      - id: impending_doom_technical
+        level: 3
+      - id: insect_form_technical
+        level: 3
+      - id: instant_parade_technical
+        level: 3
+      - id: lashing_rope_technical
+        level: 3
+      - id: levitate_technical
+        level: 3
+      - id: lightning_bolt_technical
+        level: 3
+      - id: locate_technical
+        level: 3
+      - id: lotus_walk_technical
+        level: 3
+      - id: magical_fetters_technical
+        level: 3
+      - id: magnetic_acceleration_technical
+        level: 3
+      - id: mind_of_menace_technical
+        level: 3
+      - id: mind_reading_technical
+        level: 3
+      - id: nothing_up_my_sleeve_technical
+        level: 3
+      - id: noxious_metals
+        level: 3
+      - id: one_with_stone_technical
+        level: 3
+      - id: oneiric_mire_technical
+        level: 3
+      - id: ooze_form_technical
+        level: 3
+      - id: organsight_technical
+        level: 3
+      - id: overwhelming_memory_technical
+        level: 3
+      - id: paralyze_technical
+        level: 3
+      - id: perceive_the_threads_of_fate_technical
+        level: 3
+      - id: percussive_impact_technical
+        level: 3
+      - id: perseiss_precautions_technical
+        level: 3
+      - id: phantom_prison_technical
+        level: 3
+      - id: pillar_of_water_technical
+        level: 3
+      - id: pyrotechnics_technical
+        level: 3
+      - id: radiant_globe_technical
+        level: 3
+      - id: rally_point_technical
+        level: 3
+      - id: roaring_applause_technical
+        level: 3
+      - id: rouse_skeletons_technical
+        level: 3
+      - id: safe_passage_technical
+        level: 3
+      - id: sand_form_technical
+        level: 3
+      - id: scrying_ripples_technical
+        level: 3
+      - id: sea_of_thought_technical
+        level: 3
+      - id: secret_page_technical
+        level: 3
+      - id: shadow_projectile_technical
+        level: 3
+      - id: shared_invisibility_technical
+        level: 3
+      - id: shift_blame_technical
+        level: 3
+      - id: shifting_sand_technical
+        level: 3
+      - id: shrink_item
+        level: 3
+      - id: slow_technical
+        level: 3
+      - id: sparkleskin_technical
+        level: 3
+      - id: stinking_cloud_technical
+        level: 3
+      - id: tempest_cloak_technical
+        level: 3
+      - id: temporal_twin_technical
+        level: 3
+      - id: thief_of_fortune_technical
+        level: 3
+      - id: time_jump_technical
+        level: 3
+      - id: time_pocket_technical
+        level: 3
+      - id: trade_items_technical
+        level: 3
+      - id: transcribe_conflict_technical
+        level: 3
+      - id: travel_by_turtle_technical
+        level: 3
+      - id: unseasonable_squall_technical
+        level: 3
+      - id: vampiric_feast_technical
+        level: 3
+      - id: veil_of_privacy_technical
+        level: 3
+      - id: wall_of_radiance_technical
+        level: 3
+      - id: wall_of_shadow_technical
+        level: 3
+      - id: wall_of_thorns_technical
+        level: 3
+      - id: wall_of_virtue_technical
+        level: 3
+      - id: wall_of_water_technical
+        level: 3
+      - id: wall_of_wind_technical
+        level: 3
+      - id: warding_aggression_technical
+        level: 3
+      - id: web_of_eyes_technical
+        level: 3
+      - id: wooden_double_technical
+        level: 3
   6:
     prepared:
       slots_by_level:
@@ -81,7 +569,213 @@ level_up_grants:
     prepared:
       slots_by_level:
         4: 2
-      pool: []
+      pool:
+      - id: aerial_form_technical
+        level: 4
+      - id: airlift_technical
+        level: 4
+      - id: aromatic_lure_technical
+        level: 4
+      - id: bestial_curse_technical
+        level: 4
+      - id: bridge_of_vines_technical
+        level: 4
+      - id: call_the_blood_technical
+        level: 4
+      - id: channel_arrogance_technical
+        level: 4
+      - id: chromatic_armor_technical
+        level: 4
+      - id: chromatic_ray_technical
+        level: 4
+      - id: cinder_swarm_technical
+        level: 4
+      - id: clairvoyance_technical
+        level: 4
+      - id: cloud_current_technical
+        level: 4
+      - id: clownish_curse_technical
+        level: 4
+      - id: compel_true_name_technical
+        level: 4
+      - id: confusion_technical
+        level: 4
+      - id: containment_technical
+        level: 4
+      - id: coral_eruption_technical
+        level: 4
+      - id: countless_eyes_technical
+        level: 4
+      - id: creation_technical
+        level: 4
+      - id: daydreamers_curse_technical
+        level: 4
+      - id: deathless_march_technical
+        level: 4
+      - id: detect_creator_technical
+        level: 4
+      - id: detect_scrying_technical
+        level: 4
+      - id: discern_lies_technical
+        level: 4
+      - id: dispelling_globe_technical
+        level: 4
+      - id: draw_the_lightning_technical
+        level: 4
+      - id: dull_ambition_technical
+        level: 4
+      - id: elemental_sense_technical
+        level: 4
+      - id: enervation_technical
+        level: 4
+      - id: enhance_senses_technical
+        level: 4
+      - id: entangle_fate_technical
+        level: 4
+      - id: false_nature_technical
+        level: 4
+      - id: favorable_review_technical
+        level: 4
+      - id: filter_air_technical
+        level: 4
+      - id: fire_shield_technical
+        level: 4
+      - id: flicker_technical
+        level: 4
+      - id: fly_technical
+        level: 4
+      - id: forgotten_lines_technical
+        level: 4
+      - id: glass_form_technical
+        level: 4
+      - id: grasp_of_the_deep_technical
+        level: 4
+      - id: grasping_earth_technical
+        level: 4
+      - id: ice_storm_technical
+        level: 4
+      - id: infiltrators_tunnel_technical
+        level: 4
+      - id: invisibility_curtain_technical
+        level: 4
+      - id: it_is_written_technical
+        level: 4
+      - id: lifedraining_roots_technical
+        level: 4
+      - id: liminal_doorway_technical
+        level: 4
+      - id: magic_mailbox_technical
+        level: 4
+      - id: mantiss_grasp_technical
+        level: 4
+      - id: mercurial_stride_technical
+        level: 4
+      - id: mirage_technical
+        level: 4
+      - id: mirrors_misfortune_technical
+        level: 4
+      - id: misty_memory_technical
+        level: 4
+      - id: morass_of_ages_technical
+        level: 4
+      - id: mountain_resilience_technical
+        level: 4
+      - id: mutilate_technical
+        level: 4
+      - id: necrotic_radiation_technical
+        level: 4
+      - id: nightmare_technical
+        level: 4
+      - id: ocular_overload_technical
+        level: 4
+      - id: outcasts_curse_technical
+        level: 4
+      - id: peaceful_bubble_technical
+        level: 4
+      - id: pest_swarm_technical
+        level: 4
+      - id: phantasmal_killer_technical
+        level: 4
+      - id: planar_tether_technical
+        level: 4
+      - id: procyal_philosophy_technical
+        level: 4
+      - id: prophets_luck_technical
+        level: 4
+      - id: ranages_circle_technical
+        level: 4
+      - id: ravenous_portal_technical
+        level: 4
+      - id: rebounding_barrier_technical
+        level: 4
+      - id: reflective_scales_technical
+        level: 4
+      - id: replicate_technical
+        level: 4
+      - id: rigid_form_technical
+        level: 4
+      - id: rope_trick_technical
+        level: 4
+      - id: rust_cloud_technical
+        level: 4
+      - id: sages_curse_technical
+        level: 4
+      - id: sanguine_mist_technical
+        level: 4
+      - id: seal_fate_technical
+        level: 4
+      - id: shape_stone_technical
+        level: 4
+      - id: sliding_blocks_technical
+        level: 4
+      - id: soft_landing_technical
+        level: 4
+      - id: solid_fog_technical
+        level: 4
+      - id: spell_immunity_technical
+        level: 4
+      - id: steal_voice_technical
+        level: 4
+      - id: stifling_stillness_technical
+        level: 4
+      - id: stonesense_technical
+        level: 4
+      - id: suggestion_technical
+        level: 4
+      - id: swarming_wasp_stings_technical
+        level: 4
+      - id: telepathy_technical
+        level: 4
+      - id: translocate_technical
+        level: 4
+      - id: tricksters_feathers_technical
+        level: 4
+      - id: umbral_graft_technical
+        level: 4
+      - id: unfettered_movement_technical
+        level: 4
+      - id: vampiric_maiden_technical
+        level: 4
+      - id: vapor_form_technical
+        level: 4
+      - id: variable_gravity_technical
+        level: 4
+      - id: vision_of_beauty_technical
+        level: 4
+      - id: vision_of_death_technical
+        level: 4
+      - id: wall_of_fire_technical
+        level: 4
+      - id: wall_of_mirrors_technical
+        level: 4
+      - id: weapon_storm_technical
+        level: 4
+      - id: winning_streak_technical
+        level: 4
+      - id: ymeris_mark_technical
+        level: 4
+      - id: zephyr_slip_technical
+        level: 4
   8:
     prepared:
       slots_by_level:
@@ -90,7 +784,181 @@ level_up_grants:
     prepared:
       slots_by_level:
         5: 2
-      pool: []
+      pool:
+      - id: acid_storm_technical
+        level: 5
+      - id: ancestral_winds_technical
+        level: 5
+      - id: bandits_doom_technical
+        level: 5
+      - id: banishment_technical
+        level: 5
+      - id: belittling_boast_technical
+        level: 5
+      - id: black_tentacles_technical
+        level: 5
+      - id: blazing_fissure_technical
+        level: 5
+      - id: blind_eye_technical
+        level: 5
+      - id: blinding_bottle_technical
+        level: 5
+      - id: blinding_foam_technical
+        level: 5
+      - id: blink_charge_technical
+        level: 5
+      - id: blister_technical
+        level: 5
+      - id: blood_feast_technical
+        level: 5
+      - id: boomerang_shot_technical
+        level: 5
+      - id: chromatic_wall_technical
+        level: 5
+      - id: cloak_of_colors_technical
+        level: 5
+      - id: cone_of_cold_technical
+        level: 5
+      - id: control_water_technical
+        level: 5
+      - id: corrosive_muck_technical
+        level: 5
+      - id: desperate_repair_technical
+        level: 5
+      - id: diadem_of_divine_radiance_technical
+        level: 5
+      - id: domoras_defense_technical
+        level: 5
+      - id: drop_dead_technical
+        level: 5
+      - id: elemental_breath_technical
+        level: 5
+      - id: elemental_form_technical
+        level: 5
+      - id: engrave_memory_technical
+        level: 5
+      - id: entwined_roots_technical
+        level: 5
+      - id: etheric_shards_technical
+        level: 5
+      - id: false_vision_technical
+        level: 5
+      - id: fires_pathway_technical
+        level: 5
+      - id: flame_dancer_technical
+        level: 5
+      - id: flames_of_ego_technical
+        level: 5
+      - id: flammable_fumes_technical
+        level: 5
+      - id: flowing_strike_technical
+        level: 5
+      - id: forceful_hand_technical
+        level: 5
+      - id: freezing_rain_technical
+        level: 5
+      - id: geyser_technical
+        level: 5
+      - id: glimmer_of_charm_technical
+        level: 5
+      - id: grisly_growths_technical
+        level: 5
+      - id: hallucination_technical
+        level: 5
+      - id: howling_blizzard_technical
+        level: 5
+      - id: illusory_scene_technical
+        level: 5
+      - id: imaginary_lockbox_technical
+        level: 5
+      - id: impaling_spike_technical
+        level: 5
+      - id: incendiary_fog_technical
+        level: 5
+      - id: infectious_comedy_technical
+        level: 5
+      - id: instant_minefield_technical
+        level: 5
+      - id: invoke_spirits_technical
+        level: 5
+      - id: kings_castle_technical
+        level: 5
+      - id: lashuntas_life_bubble_technical
+        level: 5
+      - id: magic_passage_technical
+        level: 5
+      - id: mantle_of_the_frozen_heart_technical
+        level: 5
+      - id: mantle_of_the_magma_heart_technical
+        level: 5
+      - id: mantle_of_the_melting_heart_technical
+        level: 5
+      - id: mantle_of_the_unwavering_heart_technical
+        level: 5
+      - id: mariners_curse_technical
+        level: 5
+      - id: mind_probe_technical
+        level: 5
+      - id: mirror_malefactors_technical
+        level: 5
+      - id: pillars_of_sand_technical
+        level: 5
+      - id: pressure_zone_technical
+        level: 5
+      - id: quicken_time_technical
+        level: 5
+      - id: return_beacon_technical
+        level: 5
+      - id: rewinding_step_technical
+        level: 5
+      - id: ritual_obstruction_technical
+        level: 5
+      - id: sawtooth_terrain_technical
+        level: 5
+      - id: scouring_pulse_technical
+        level: 5
+      - id: scouting_eye_technical
+        level: 5
+      - id: secret_chest_technical
+        level: 5
+      - id: sending_technical
+        level: 5
+      - id: shadow_siphon_technical
+        level: 5
+      - id: shock_and_awe_technical
+        level: 5
+      - id: slither_technical
+        level: 5
+      - id: stagnate_time_technical
+        level: 5
+      - id: subconscious_suggestion_technical
+        level: 5
+      - id: summon_dragon_technical
+        level: 5
+      - id: telekinetic_haul_technical
+        level: 5
+      - id: telepathic_bond_technical
+        level: 5
+      - id: temporary_glyph_technical
+        level: 5
+      - id: toxic_cloud_technical
+        level: 5
+      - id: transmute_rock_and_mud_technical
+        level: 5
+      - id: truespeech_technical
+        level: 5
+      - id: umbral_journey_technical
+        level: 5
+      - id: wall_of_ice_technical
+        level: 5
+      - id: wall_of_stone_technical
+        level: 5
+      - id: wave_of_despair_technical
+        level: 5
+      - id: wisdom_of_the_winds_technical
+        level: 5
+      - id: wyvern_sting_technical
+        level: 5
   10:
     prepared:
       slots_by_level:
@@ -99,7 +967,121 @@ level_up_grants:
     prepared:
       slots_by_level:
         6: 2
-      pool: []
+      pool:
+      - id: arrow_salvo_technical
+        level: 6
+      - id: aura_of_the_unremarkable_technical
+        level: 6
+      - id: awaken_entropy_technical
+        level: 6
+      - id: boots_on_the_ground_technical
+        level: 6
+      - id: bound_in_death_technical
+        level: 6
+      - id: cast_into_time_technical
+        level: 6
+      - id: catch_your_name_technical
+        level: 6
+      - id: chain_lightning_technical
+        level: 6
+      - id: chromatic_image_technical
+        level: 6
+      - id: collective_transposition_technical
+        level: 6
+      - id: crimson_breath_technical
+        level: 6
+      - id: cursed_metamorphosis_technical
+        level: 6
+      - id: daemon_form_technical
+        level: 6
+      - id: demon_form_technical
+        level: 6
+      - id: devil_form_technical
+        level: 6
+      - id: disintegrate
+        level: 6
+      - id: dominate_technical
+        level: 6
+      - id: dragon_form_technical
+        level: 6
+      - id: earth_and_sky_technical
+        level: 6
+      - id: elemental_confluence_technical
+        level: 6
+      - id: explosive_barrage_technical
+        level: 6
+      - id: field_of_razors_technical
+        level: 6
+      - id: flame_vortex_technical
+        level: 6
+      - id: frost_pillar_technical
+        level: 6
+      - id: frozen_fog_technical
+        level: 6
+      - id: halcyon_infusion_technical
+        level: 6
+      - id: lignify_technical
+        level: 6
+      - id: mislead_technical
+        level: 6
+      - id: missed_cue_technical
+        level: 6
+      - id: necrotize_technical
+        level: 6
+      - id: never_mind_technical
+        level: 6
+      - id: personal_ocean_technical
+        level: 6
+      - id: petrify_technical
+        level: 6
+      - id: phantasmal_calamity_technical
+        level: 6
+      - id: phantom_orchestra_technical
+        level: 6
+      - id: poltergeists_fury_technical
+        level: 6
+      - id: purple_worm_sting_technical
+        level: 6
+      - id: ravenous_darkness_technical
+        level: 6
+      - id: repulsion_technical
+        level: 6
+      - id: scrying_technical
+        level: 6
+      - id: seize_identity_technical
+        level: 6
+      - id: siege_weapons_blessing_technical
+        level: 6
+      - id: skeleton_army_technical
+        level: 6
+      - id: spellwrack_technical
+        level: 6
+      - id: tangling_creepers_technical
+        level: 6
+      - id: teleport_technical
+        level: 6
+      - id: temporal_ward_technical
+        level: 6
+      - id: truesight_technical
+        level: 6
+      - id: unexpected_transposition_technical
+        level: 6
+      - id: utter_destruction_technical
+        level: 6
+      - id: vampiric_exsanguination_technical
+        level: 6
+      - id: vibrant_pattern_technical
+        level: 6
+      - id: vitrifying_blast_technical
+        level: 6
+      - id: wall_of_force_technical
+        level: 6
+      - id: wall_of_metal_technical
+        level: 6
+      - id: word_of_revision_technical
+        level: 6
+      - id: zero_gravity_technical
+        level: 6
   12:
     prepared:
       slots_by_level:
@@ -108,7 +1090,99 @@ level_up_grants:
     prepared:
       slots_by_level:
         7: 2
-      pool: []
+      pool:
+      - id: beheading_buzz_saw
+        level: 7
+      - id: blightburn_blast_technical
+        level: 7
+      - id: chrysopoetic_curse_technical
+        level: 7
+      - id: contingency
+        level: 7
+      - id: control_sand_technical
+        level: 7
+      - id: corrosive_body_technical
+        level: 7
+      - id: dancing_fountain_technical
+        level: 7
+      - id: devouring_void_technical
+        level: 7
+      - id: duplicate_foe_technical
+        level: 7
+      - id: eclipse_burst_technical
+        level: 7
+      - id: energy_aegis_technical
+        level: 7
+      - id: entrancing_eyes
+        level: 7
+      - id: fiery_body_technical
+        level: 7
+      - id: final_fate_of_the_locust_host_technical
+        level: 7
+      - id: frigid_flurry_technical
+        level: 7
+      - id: heaving_earth_technical
+        level: 7
+      - id: hungry_depths_technical
+        level: 7
+      - id: indolent_haze_technical
+        level: 7
+      - id: inexhaustible_cynicism_technical
+        level: 7
+      - id: interplanar_teleport_technical
+        level: 7
+      - id: leng_sting_technical
+        level: 7
+      - id: lifewood_cage_technical
+        level: 7
+      - id: loves_sacrifice_technical
+        level: 7
+      - id: mask_of_terror_technical
+        level: 7
+      - id: maze_of_locked_doors_technical
+        level: 7
+      - id: momentary_recovery_technical
+        level: 7
+      - id: planar_palace_technical
+        level: 7
+      - id: planar_seal_technical
+        level: 7
+      - id: pollen_pods_technical
+        level: 7
+      - id: power_word_blind
+        level: 7
+      - id: prismatic_armor_technical
+        level: 7
+      - id: prismatic_spray_technical
+        level: 7
+      - id: project_image_technical
+        level: 7
+      - id: recall_legacy_technical
+        level: 7
+      - id: restore_ground_technical
+        level: 7
+      - id: return_to_essence_technical
+        level: 7
+      - id: reverse_gravity_technical
+        level: 7
+      - id: shadow_raid_technical
+        level: 7
+      - id: spell_riposte_technical
+        level: 7
+      - id: spell_turning
+        level: 7
+      - id: telekinetic_bombardment_technical
+        level: 7
+      - id: tempest_of_shades_technical
+        level: 7
+      - id: time_beacon_technical
+        level: 7
+      - id: true_target_technical
+        level: 7
+      - id: vacuum_technical
+        level: 7
+      - id: warp_mind_technical
+        level: 7
   14:
     prepared:
       slots_by_level:
@@ -117,7 +1191,75 @@ level_up_grants:
     prepared:
       slots_by_level:
         8: 2
-      pool: []
+      pool:
+      - id: all_is_one_one_is_all_technical
+        level: 8
+      - id: antimagic_field_technical
+        level: 8
+      - id: arctic_rift_technical
+        level: 8
+      - id: boil_blood_technical
+        level: 8
+      - id: burning_blossoms_technical
+        level: 8
+      - id: clockwork_devotion
+        level: 8
+      - id: confusing_colors_technical
+        level: 8
+      - id: deluge_technical
+        level: 8
+      - id: desiccate_technical
+        level: 8
+      - id: disappearance_technical
+        level: 8
+      - id: dream_council_technical
+        level: 8
+      - id: earthquake_technical
+        level: 8
+      - id: falling_sky_technical
+        level: 8
+      - id: ferrous_form_technical
+        level: 8
+      - id: hidden_mind_technical
+        level: 8
+      - id: mimic_spell_technical
+        level: 8
+      - id: monstrosity_form_technical
+        level: 8
+      - id: part_the_mists_to_paradise_technical
+        level: 8
+      - id: pinpoint_technical
+        level: 8
+      - id: polar_ray_technical
+        level: 8
+      - id: power_word_stun
+        level: 8
+      - id: prismatic_wall_technical
+        level: 8
+      - id: prying_survey_technical
+        level: 8
+      - id: quandary_technical
+        level: 8
+      - id: rainbow_fumarole_technical
+        level: 8
+      - id: sudden_transposition_technical
+        level: 8
+      - id: summon_archmage
+        level: 8
+      - id: summon_elemental_herald_technical
+        level: 8
+      - id: summon_irii_technical
+        level: 8
+      - id: take_your_places_technical
+        level: 8
+      - id: uncontrollable_dance_technical
+        level: 8
+      - id: undermine_reality_technical
+        level: 8
+      - id: unrelenting_observation_technical
+        level: 8
+      - id: whirlpool_technical
+        level: 8
   16:
     prepared:
       slots_by_level:
@@ -126,7 +1268,65 @@ level_up_grants:
     prepared:
       slots_by_level:
         9: 2
-      pool: []
+      pool:
+      - id: astral_labyrinth_technical
+        level: 9
+      - id: beseech_arcanotheign_technical
+        level: 9
+      - id: bilocation_technical
+        level: 9
+      - id: call_fluxwraith_technical
+        level: 9
+      - id: detonate_magic_technical
+        level: 9
+      - id: dimensional_excision_technical
+        level: 9
+      - id: disjunction_technical
+        level: 9
+      - id: divinity_leech_technical
+        level: 9
+      - id: falling_stars_technical
+        level: 9
+      - id: foresight_technical
+        level: 9
+      - id: forest_of_gates_technical
+        level: 9
+      - id: implosion_technical
+        level: 9
+      - id: linnorm_sting_technical
+        level: 9
+      - id: magnetic_dominion_technical
+        level: 9
+      - id: massacre_technical
+        level: 9
+      - id: metamorphosis_technical
+        level: 9
+      - id: phantasmagoria_technical
+        level: 9
+      - id: power_word_kill
+        level: 9
+      - id: prismatic_shield_technical
+        level: 9
+      - id: prismatic_sphere_technical
+        level: 9
+      - id: proliferating_eyes_technical
+        level: 9
+      - id: resplendent_mansion_technical
+        level: 9
+      - id: summon_ancient_fleshforged_technical
+        level: 9
+      - id: summon_draconic_legion
+        level: 9
+      - id: telepathic_demand_technical
+        level: 9
+      - id: trim_the_blight_technical
+        level: 9
+      - id: unspeakable_shadow_technical
+        level: 9
+      - id: upheaval_technical
+        level: 9
+      - id: weird_technical
+        level: 9
   18:
     prepared:
       slots_by_level:
@@ -135,7 +1335,33 @@ level_up_grants:
     prepared:
       slots_by_level:
         10: 2
-      pool: []
+      pool:
+      - id: cataclysm_technical
+        level: 10
+      - id: conquering_soldiers_technical
+        level: 10
+      - id: dragon_turret_technical
+        level: 10
+      - id: fated_confrontation_technical
+        level: 10
+      - id: freeze_time_technical
+        level: 10
+      - id: gate_technical
+        level: 10
+      - id: indestructibility_technical
+        level: 10
+      - id: jassims_allegiance_technical
+        level: 10
+      - id: manifestation_technical
+        level: 10
+      - id: nullify_technical
+        level: 10
+      - id: remake_technical
+        level: 10
+      - id: shadow_army_technical
+        level: 10
+      - id: summon_oliphaunt_of_jandelay_technical
+        level: 10
   20:
     prepared:
       slots_by_level:
