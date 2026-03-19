@@ -18,7 +18,8 @@
 - AGENT-7: Agents MUST NOT allow any single operation to exceed 3 minutes in duration.
 - AGENT-8: Agents MUST output the command and its progress immediately when running commands.
 - AGENT-9: Agents MUST subdivide large tasks into smaller, manageable steps to prevent loss of work.
-    - AGENT-9: Agents MUST record all work for each task step to allow work to resume.
+- AGENT-10: Agents MUST record all work for each task step to allow work to resume.
+- AGENT-11: Agents MUST update the subject of any in-progress Claude Code task to include a `[N%]` completion indicator, updating it as progress is made. The subject field is the only task field visible in the Claude Code UI.
 
 ## 3. Software Engineering Best Practices
 
@@ -36,27 +37,11 @@
 - GO-2: Go development MUST use the `mise` installed toolchain.
 - GO-3: Go development MUST use go modules.
 
-## 5. Adding a New Game Command
-
-Adding a new player command requires ALL of the following steps. Omitting any step is a defect.
-
-- CMD-1: A `Handler<Name>` constant MUST be added to `internal/game/command/commands.go`.
-- CMD-2: A `Command{...}` entry referencing the new constant MUST be appended to `BuiltinCommands()` in `internal/game/command/commands.go`.
-- CMD-3: A `Handle<Name>` function MUST be implemented in `internal/game/command/<name>.go` with full TDD coverage (SWENG-5, SWENG-5a).
-- CMD-4: A proto request message MUST be added to `api/proto/game/v1/game.proto` and the message MUST be added to the `ClientMessage` oneof. `make proto` MUST be run to regenerate.
-- CMD-5: A `bridge<Name>` function MUST be added to `internal/frontend/handlers/bridge_handlers.go` and registered in `bridgeHandlerMap`. The test `TestAllCommandHandlersAreWired` MUST pass.
-- CMD-6: A `handleName` function MUST be implemented in `internal/gameserver/grpc_service.go` and wired into the `dispatch` type switch.
-- CMD-7: All steps MUST be completed and all tests MUST pass before the command is considered done. A command that is registered in `BuiltinCommands()` but not wired end-to-end is a defect.
-
-## 6. System Requirements
+## 5. System Requirements
 
 - SYSREQ-1: Agents MUST reference the markdown files in `/docs/requirements` for product definition
 - SYSREQ-2: Agents MUST treat `docs/features/index.yaml` and the files in `docs/features/` as the canonical source of truth for product feature definitions and priority. When adding a new feature, agents MUST create `docs/features/<slug>.md` and add a corresponding entry to `docs/features/index.yaml`. The file `docs/requirements/FEATURES.md` is a deprecated redirect stub and MUST NOT be edited. All other files in `docs/requirements/` remain maintained per the original obligation: agents MUST update them as requirements evolve.
 - SYSREG-3: Agents MUST maintain architecture diagrams for all features and core systems.  Agents MUST update these diagrams to reflect changes.
 - SYSREQ-4: Agents MUST reference the documents in `/docs/architecture/`
-- SYSREQ-5: Agents MUST consult the `foundry-vtt-mcp` MCP server as the single source of truth for P2FE rules.
-
-## 7. Deployment
-- DEPLOY-1: Agents MUST use `make k8s-redploy` to deploy changes.
-  - DEPLOY-1a: Agents MUST build and push the container images before deploying
-- DEPLOY-2: Agents MUST reference `.claude/rules/.env` for the database password
+- SYSREQ-5: Agents MUST use `vendor/pf2e-data` as the primary source of truth for PF2E rules, and MUST consult the `foundry-vtt-mcp` MCP server only as a secondary source.
+- SYSREQ-6: Before any task that requires PF2E rules data, agents MUST verify that `vendor/pf2e-data` exists. If it is missing, agents MUST clone it with: `git clone --filter=blob:none --branch v13-dev https://github.com/foundryvtt/pf2e vendor/pf2e-data`
