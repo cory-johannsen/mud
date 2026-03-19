@@ -20,6 +20,7 @@
 - AGENT-9: Agents MUST subdivide large tasks into smaller, manageable steps to prevent loss of work.
 - AGENT-10: Agents MUST record all work for each task step to allow work to resume.
 - AGENT-11: Agents MUST update the subject of any in-progress Claude Code task to include a `[N%]` completion indicator, updating it as progress is made. The subject field is the only task field visible in the Claude Code UI.
+- AGENT-12: Background subagents (launched with `run_in_background: true`) do NOT have access to task tools. The controller agent MUST periodically poll background agent output files and manually update task subjects with current progress percentages using TaskUpdate.
 
 ## 3. Software Engineering Best Practices
 
