@@ -1,0 +1,75 @@
+# New Zones
+
+Adds Clown Camp, SteamPDX, The Velvet Rope, and Club Privata as new explorable zones.
+
+## Requirements
+
+- New zones
+  - All NPCs are clowns
+  - All NPCs are aggressive
+  - All rooms in zone are Dangerous
+  - [ ] Clown Camp
+    - [ ] Continuous zone effects: delirium, fear
+    - [ ] Locations
+      - [ ] The Empty Theater
+      - [ ] Coat check
+      - [ ] The Changing Rooms
+      - [ ] Backstage
+      - [ ] The Stage
+        - [ ] Boss Fight: Just Clownin'!
+  - [ ] SteamPDX
+    - All NPCs are male
+      - All NPCs have a high probability attempt to seduce male players
+        - On failure to seduce NPCs become aggressive
+    - All NPCs are aggressive to non-male players
+    - All rooms in zone are Dangerous
+    - [ ] Continuous zone effects: horror, nausea, reduced visibility
+    - [ ] Locations
+      - [ ] Parking Lot
+      - [ ] Lobby
+      - [ ] Locker Room
+      - [ ] Showers
+      - [ ] Sauna
+      - [ ] Hot tub
+      - [ ] Glory Hole
+        - [ ] Boss Fight: The Big 3
+  - [ ] The Velvet Rope
+    - All NPCs have a high probability attempt to seduce the player
+      - On failure to seduce NPCs become aggressive
+    - All rooms in zone are Sketchy unless otherwise indicated
+    - [ ] continuous zone effects: temptation, revulsion, difficult terrain (lube)
+    - [ ] Locations
+      - [ ] The Buffet
+      - [ ] The "Play" Rooms
+        - [ ] The Strangers
+        - [ ] The Spit Roast
+        - [ ] The Pineapple Room
+          - This room is Dangerous
+      - [ ] "Party" Theater
+        - This room is Dangerous
+        - [ ] Boss Fight: Gangbang!
+  - [ ] Club Privata
+    - [ ] continuous zone effect: sonic assault (bad techno)
+    - [ ] Locations
+      - [ ] First Floor
+        - [ ] Bar
+        - [ ] Dance floor
+        - [ ] Dining area
+        - [ ] Couple's lounge
+        - [ ] Seating area
+        - [ ] Lockers & Showers
+        - [ ] Restrooms
+      - [ ] Second Floor
+        - [ ] Private Rooms
+        - [ ] Bottle service area
+        - [ ] Dance pole
+        - [ ] Mezzanine
+        - [ ] Seating area
+        - [ ] Restrooms
+      - [ ] Third Floor
+        - [ ] Public play area
+        - [ ] Couple's lounge with private rooms
+        - [ ] Bar & Restrooms
+        - [ ] VIP Suite
+          - [ ] Boss Fight
+        - [ ] Lockers
