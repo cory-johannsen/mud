@@ -1,14 +1,24 @@
 id: entrancing_eyes
-name: Entrancing Eyes
-description: |-
-    Your eyes glow with an entrancing radiance that captivates those who meet your gaze. Any creature that ends its turn within the emanation must attempt a Will save.
+name: Hypno-Optic Projector
+description: 'Your eyes glow with an entrancing light that beguiles those who meet
+  your gaze. Any creature that ends its turn within the emanation must attempt a Will
+  save.
 
-    Critical Success The target is unaffected and becomes immune to this particular casting of the spell.
-    Success The target is unaffected.
-    Failure Until the end of its next turn, the target is Stupefied 2 and @UUID[Compendium.pf2e.conditionitems.Item.Fascinated].
-    Critical Failure Until the end of its next turn, the target is Stupefied 4, Fascinated, and can't take reactions. In addition, all creatures and objects other than you are @UUID[Compendium.pf2e.conditionitems.Item.Concealed] from the target.
 
-    During any round you Sustain the Spell, you can use a single action, which has the manipulate trait, to focus your entrancing eyes on a single creature you can see within 30 feet. This creature must immediately make a Will save against the spell as if it were ending its turn in the emanation. If the creature was already Fascinated by your entrancing eyes before its save, a failed save causes it to be @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed] for 1 round. You can't use this action to focus on the same creature more than once per round.
+  Critical Success The creature is unaffected and is then temporarily immune for 24
+  hours.
+
+  Success The creature is unaffected and is then temporarily immune for 1 minute.
+
+  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Fascinated] until
+  the end of its next turn.
+
+  Critical Failure The creature is fascinated until the end of its next turn and is
+  then Stunned 1.
+
+
+  Once a creature succeeds or critically succeeds at its saving throw, it is temporarily
+  immune to your hypno-optic projector for 24 hours.'
 tradition: technical
 level: 7
 usage_type: prepared
@@ -20,10 +30,12 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Your eyes glow with an entrancing radiance that captivates those who meet your gaze. Any creature that ends its turn within the emanation must attempt a Will save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Your eyes glow with an entrancing radiance that captivates those
+      who meet your gaze. Any creature that ends its turn within the emanation must
+      attempt a Will save.
 
-            Critical Success The target is unaf
+
+      Critical Success The target is unaf'

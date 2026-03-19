@@ -1,11 +1,25 @@
 id: seize_identity_neural
-name: Seize Identity
-description: |-
-    With a gleeful cackle, you seize an individual's voice and swallow it. For the duration, you look and sound like the target, and the target can't speak. The effects depend on the result of the target's Will saving throw.Critical Success The creature is unaffected.
-    Success You take on the target's appearance, with the same effects of a 3rd-rank @UUID[Compendium.pf2e.spells-srd.Item.Illusory Disguise] spell, and the target can't speak, with the same effects of a 2nd-rank @UUID[Compendium.pf2e.spells-srd.Item.Silence] spell.
-    Failure As success, but the target also takes 4d6 mental damage from the transformation.
-    Critical Failure As success, but the target also takes 8d6 mental damage from the transformation.
-    The first time each round you Sustain this spell after you cast this spell, the target ages rapidly, taking @Damage[(ternary(gte(@item.rank,9),3,2))d8[void]] damage (@Check[will|basic] save). On a failure, the target also becomes Enfeebled 1 or increases the value of its enfeebled condition by 1.Heightened (9th) The mental damage increases by 4d6, and the void damage increases by 1d8.
+name: Identity Theft Protocol
+description: 'With a burst of psychic intrusion, you hijack an individual''s voice
+  pattern and biometric signature. For the duration, you look and sound like the target,
+  and the target can''t speak. The effects depend on the result of the target''s Will
+  saving throw.Critical Success The creature is unaffected.
+
+  Success You take on the target''s appearance, with the same effects of a 3rd-rank
+  @UUID[Compendium.pf2e.spells-srd.Item.Illusory Disguise] spell, and the target can''t
+  speak, with the same effects of a 2nd-rank @UUID[Compendium.pf2e.spells-srd.Item.Silence]
+  spell.
+
+  Failure As success, but the target also takes 4d6 mental damage from the transformation.
+
+  Critical Failure As success, but the target also takes 8d6 mental damage from the
+  transformation.
+
+  The first time each round you Sustain this spell after you cast this spell, the
+  target''s neural pathways degrade rapidly, taking @Damage[(ternary(gte(@item.rank,9),3,2))d8[void]]
+  damage (@Check[will|basic] save). On a failure, the target also becomes Enfeebled
+  1 or increases the value of its enfeebled condition by 1.Heightened (9th) The mental
+  damage increases by 4d6, and the void damage increases by 1d8.'
 tradition: neural
 level: 6
 usage_type: prepared
@@ -17,18 +31,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d3
-          damage_type: mental
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d6
-          damage_type: mental
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d6
-          damage_type: mental
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d3
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: mental
+    dc: 0

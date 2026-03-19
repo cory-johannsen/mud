@@ -1,12 +1,25 @@
 id: maze_of_locked_doors_technical
-name: Maze of Locked Doors
-description: |-
-    The target of your spell is drawn into a long, twisting, extradimensional hallway blocked at 30-foot intervals with high-grade duskwood doors (Hardness 20, HP 80, BT 40, @Check[athletics|dc:30|name:Force Open Duskwood Door|traits:action:force-open] to Force Open) secured with @UUID[Compendium.pf2e.equipment-srd.Item.Lock (Average)] (@Check[thievery|dc:25|name:Pick Maze Lock|traits:action:pick-a-lock], 4 successful checks required). A creature trapped within this hallway can escape only when the spell expires, or when they successfully pass through the number of doors determined by their save, either by breaking through the doors or picking the locks (or any combination of these, if the target must pass through multiple doors to escape). Teleportation effects of 6th level or lower are automatically suppressed within the extradimensional hallway; higher-level teleportation effects require the caster to succeed at a counteract check against your spell DC or they fail.
+name: Recursive Security Maze
+description: 'The target is pulled into a recursive virtual security system—a long,
+  twisting, extradimensional hallway blocked at 30-foot intervals with high-grade
+  reinforced doors (Hardness 20, HP 80, BT 40, @Check[athletics|dc:30|name:Force Open
+  Security Door|traits:action:force-open] to Force Open) secured with @UUID[Compendium.pf2e.equipment-srd.Item.Lock
+  (Average)] (@Check[thievery|dc:25|name:Hack Security Lock|traits:action:pick-a-lock],
+  4 successful checks required). A creature trapped within this system can escape
+  only when the tech expires, or when they successfully pass through the number of
+  doors determined by their save, either by breaking through the doors or hacking
+  the locks. Teleportation effects of 6th level or lower are automatically suppressed
+  within the virtual space; higher-level effects require a counteract check against
+  your tech DC or they fail.
 
-    Critical Success The target is unaffected.
-    Success The target is trapped for 1 round, or until it bypasses 1 door.
-    Failure The target is trapped for 1 minute, or until it bypasses 2 doors.
-    Critical Failure The target is trapped for 10 minutes, or until it bypasses 3 doors.
+
+  Critical Success The target is unaffected.
+
+  Success The target is trapped for 1 round, or until it bypasses 1 door.
+
+  Failure The target is trapped for 1 minute, or until it bypasses 2 doors.
+
+  Critical Failure The target is trapped for 10 minutes, or until it bypasses 3 doors.'
 tradition: technical
 level: 7
 usage_type: prepared
@@ -18,7 +31,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target of your spell is drawn into a long, twisting, extradimensional hallway blocked at 30-foot intervals with high-grade duskwood doors (Hardness 20, HP 80, BT 40, @Check[athletics|dc:30|name:Fo
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target of your spell is drawn into a long, twisting, extradimensional
+      hallway blocked at 30-foot intervals with high-grade duskwood doors (Hardness
+      20, HP 80, BT 40, @Check[athletics|dc:30|name:Fo

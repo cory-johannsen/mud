@@ -1,9 +1,14 @@
 id: desiccate_bio_synthetic
-name: Desiccate
-description: |-
-    You pull the moisture from the targets' bodies, dealing 10d10 void damage. Creatures made of water (such as water elementals) and plant creatures use the outcome for one degree of success worse than the result of their saving throw. Creatures whose bodies contain no significant moisture (such as earth elementals) are immune to desiccate.
+name: Total Dehydration Beam
+description: 'You activate a bio-synthetic organ that pulls the moisture from the
+  targets'' bodies at the cellular level, dealing 10d10 void damage. Creatures made
+  of water (such as water elementals) and plant creatures use the outcome for one
+  degree of success worse than the result of their saving throw. Creatures whose bodies
+  contain no significant moisture (such as earth elementals) are immune to total dehydration
+  beam.
 
-    Heightened (+1) The damage increases by 1d10.
+
+  Heightened (+1) The damage increases by 1d10.'
 tradition: bio_synthetic
 level: 8
 usage_type: prepared
@@ -15,18 +20,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 10d6
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 10d10
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 20d10
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 10d6
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 10d10
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 20d10
+    damage_type: void
+    dc: 0

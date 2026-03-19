@@ -1,10 +1,18 @@
 id: sudden_transposition_neural
-name: Sudden Transposition
-description: |-
-    You wrench the targets off their feet, forcefully teleporting them within the area. The creatures must each be able to fit in their new space, and their positions must be unoccupied, entirely within the area, and in your line of sight. Each target attempts a Fortitude save.Critical Success The target can teleport if it wants, but it chooses the destination within the area.
-    Success The target is unaffected.
-    Failure You teleport the target and choose its destination; the target takes 10d10 bludgeoning damage.
-    Critical Failure You teleport the target and choose its destination; the target takes @Damage[20d10[bludgeoning]] damage and is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+name: Forced Teleport Scramble
+description: 'You psychokinetically wrench the targets off their feet, forcefully
+  teleporting them within the area. The creatures must each be able to fit in their
+  new space, and their positions must be unoccupied, entirely within the area, and
+  in your line of sight. Each target attempts a Fortitude save.Critical Success The
+  target can teleport if it wants, but it chooses the destination within the area.
+
+  Success The target is unaffected.
+
+  Failure You teleport the target and choose its destination; the target takes 10d10
+  bludgeoning damage.
+
+  Critical Failure You teleport the target and choose its destination; the target
+  takes @Damage[20d10[bludgeoning]] damage and is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].'
 tradition: neural
 level: 8
 usage_type: prepared
@@ -16,18 +24,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 10d6
-          damage_type: bludgeoning
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 10d10
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 20d10
-          damage_type: bludgeoning
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 10d6
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 10d10
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 20d10
+    damage_type: bludgeoning
+    dc: 0

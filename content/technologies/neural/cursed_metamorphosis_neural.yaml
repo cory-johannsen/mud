@@ -1,10 +1,19 @@
 id: cursed_metamorphosis_neural
-name: Cursed Metamorphosis
-description: |-
-    You transform the target creature into a harmless animal appropriate to the area, with effects based on its Fortitude save.Critical Success The target is unaffected.
-    Success The target's body gains minor features of the harmless animal. Its insides churn as they partially transform, causing it to be Sickened 1. When it recovers from the sickened condition, its features revert to normal.
-    Failure The target transforms for 1 minute but keeps its mind. If it spends all its actions on its turn concentrating on its original form, it can attempt a @Check[will] save to end the effect immediately.
-    Critical Failure The target is transformed into the chosen harmless animal, body and mind, for an unlimited duration.
+name: Forced Devolution
+description: 'You overwrite the target creature''s genetic expression, regressing
+  it into a harmless organism appropriate to the area, with effects based on its Fortitude
+  save.Critical Success The target is unaffected.
+
+  Success The target''s body gains minor features of the harmless organism. Its insides
+  churn as they partially transform, causing it to be Sickened 1. When it recovers
+  from the sickened condition, its features revert to normal.
+
+  Failure The target transforms for 1 minute but keeps its mind. If it spends all
+  its actions on its turn concentrating on its original form, it can attempt a @Check[will]
+  save to end the effect immediately.
+
+  Critical Failure The target is transformed into the chosen harmless organism, body
+  and mind, for an unlimited duration.'
 tradition: neural
 level: 6
 usage_type: prepared
@@ -16,9 +25,11 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You transform the target creature into a harmless animal appropriate to the area, with effects based on its Fortitude save.Critical Success The target is unaffected.
-            Success The target's body gains mi
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You transform the target creature into a harmless animal appropriate
+      to the area, with effects based on its Fortitude save.Critical Success The target
+      is unaffected.
+
+      Success The target''s body gains mi'

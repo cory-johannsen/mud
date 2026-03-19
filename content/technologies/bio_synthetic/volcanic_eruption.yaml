@@ -1,17 +1,35 @@
 id: volcanic_eruption
-name: Volcanic Eruption
-description: |-
-    Area 5-foot radius, 80-foot-tall cylinder
+name: Magma Vent Rupture
+description: 'Area 5-foot radius, 80-foot-tall cylinder
 
-    The ground opens up, spraying a column of lava high into the air in a vertical cylinder, dealing 14d6 fire damage to creatures in the area. The lava rapidly cools and encases creatures in the area. A creature encased in rock is Clumsy 1 and takes a –10-foot status penalty to its Speeds. All normal terrain is difficult terrain to a flying creature, and such creatures immediately descend 20 feet the moment they're encased, but they don't take damage from this fall. A creature encased in rock can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against your spell DC to end the effect. Otherwise, the creature remains encased until it takes a total of 50 damage, freeing it from the rock. Additionally, creatures in the area and those within 5 feet of the lava column automatically take @Damage[(@item.rank -4)d6[fire]] damage from the intense heat, regardless of the results of their saving throws.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Volcanic Eruption]
 
-    Critical Success The creature is unaffected.
-    Success The creature takes half damage.
-    Failure The creature takes full damage and is encased.
-    Critical Failure The creature takes double damage and is encased.
+  The ground cracks open, spraying a column of superheated bio-synthetic magma high
+  into the air in a vertical cylinder, dealing 14d6 fire damage to creatures in the
+  area. The magma rapidly cools and encases creatures in rock-like slag. A creature
+  encased in slag is Clumsy 1 and takes a -10-foot status penalty to its Speeds. All
+  normal terrain is difficult terrain to a flying creature, and such creatures immediately
+  descend 20 feet the moment they''re encased, but they don''t take damage from this
+  fall. A creature encased in slag can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape]
+  against your tech DC to end the effect. Otherwise, the creature remains encased
+  until it takes a total of 50 damage, freeing it from the slag. Additionally, creatures
+  in the area and those within 5 feet of the magma column automatically take @Damage[(@item.rank
+  -4)d6[fire]] damage from the intense heat, regardless of the results of their saving
+  throws.
 
-    Heightened (+1) The damage in the area increases by 2d6, and the damage from the intense heat increases by 1d6.
+  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Volcanic Eruption]
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes half damage.
+
+  Failure The creature takes full damage and is encased.
+
+  Critical Failure The creature takes double damage and is encased.
+
+
+  Heightened (+1) The damage in the area increases by 2d6, and the damage from the
+  intense heat increases by 1d6.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared
@@ -23,18 +41,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 14d3
-          damage_type: fire
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 14d6
-          damage_type: fire
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 28d6
-          damage_type: fire
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 14d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 14d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 28d6
+    damage_type: fire
+    dc: 0

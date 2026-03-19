@@ -1,6 +1,12 @@
 id: frost_pillar_technical
-name: Frost Pillar
-description: Ice crystallizes around a creature, imprisoning it within an icy pillar. On a successful saving throw, the creature is pushed to an adjacent space of its choice; otherwise, it's frozen inside the pillar and becomes @UUID[Compendium.pf2e.conditionitems.Item.Restrained] as its body can barely move within the ice. The ice has AC 10, Hardness 10, and 60 Hit Points; it's immune to critical hits, cold damage, and precision damage, and it has weakness 15 to fire. If the ice is destroyed, the creature within is freed and the spell immediately ends.
+name: Cryo-Lock Column
+description: Rapid-freeze technology crystallizes around a creature, imprisoning it
+  within a cryogenic column. On a successful saving throw, the creature is pushed
+  to an adjacent space of its choice; otherwise, it's frozen inside the column and
+  becomes @UUID[Compendium.pf2e.conditionitems.Item.Restrained]. The ice has AC 10,
+  Hardness 10, and 60 Hit Points; it's immune to critical hits, cold damage, and precision
+  damage, and it has weakness 15 to fire. If the ice is destroyed, the creature within
+  is freed and the spell immediately ends.
 tradition: technical
 level: 6
 usage_type: prepared
@@ -12,7 +18,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Ice crystallizes around a creature, imprisoning it within an icy pillar. On a successful saving throw, the creature is pushed to an adjacent space of its choice; otherwise, it's frozen inside the pill
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Ice crystallizes around a creature, imprisoning it within an icy
+      pillar. On a successful saving throw, the creature is pushed to an adjacent
+      space of its choice; otherwise, it's frozen inside the pill

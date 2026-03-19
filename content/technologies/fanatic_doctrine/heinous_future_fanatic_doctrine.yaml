@@ -1,12 +1,20 @@
 id: heinous_future_fanatic_doctrine
-name: Heinous Future
-description: |-
-    You hold up a fractured mirror to the target, and in that mirror it sees a thing that may yet come to pass—a ghastly foretelling that the target instinctively knows is eerily possible. It's not a guaranteed thing, just a dreadful possibility, but it haunts the target's thoughts all the same.
+name: Prophecy of Damnation
+description: 'You force the target to witness a doctrinal prophecy of their most likely
+  damnation—a ghastly foretelling that the target instinctively knows is eerily possible.
+  It''s not a guaranteed outcome, just a dreadful probability, but it haunts the target''s
+  mind all the same.
 
-    Critical Success The target is unaffected.
-    Success The target is Slowed 1 and Stupefied 1 for 1 round.
-    Failure The target is slowed 1 and stupefied 1 until it next gets eight hours of rest.
-    Critical Failure The target is Slowed 2 and Stupefied 2, decreasing these conditions by 1 for each eight hours of rest it gets.
+
+  Critical Success The target is unaffected.
+
+  Success The target is Slowed 1 and Stupefied 1 for 1 round.
+
+  Failure The target is slowed 1 and stupefied 1 until it next gets eight hours of
+  rest.
+
+  Critical Failure The target is Slowed 2 and Stupefied 2, decreasing these conditions
+  by 1 for each eight hours of rest it gets.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared
@@ -18,7 +26,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You hold up a fractured mirror to the target, and in that mirror it sees a thing that may yet come to pass—a ghastly foretelling that the target instinctively knows is eerily possible. It's not a gu
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You hold up a fractured mirror to the target, and in that mirror
+      it sees a thing that may yet come to pass—a ghastly foretelling that the target
+      instinctively knows is eerily possible. It's not a gu

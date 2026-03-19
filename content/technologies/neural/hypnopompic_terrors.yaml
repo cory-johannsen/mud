@@ -1,12 +1,21 @@
 id: hypnopompic_terrors
-name: Hypnopompic Terrors
-description: |-
-    You send a wave of nightmarish visions crashing over your targets, leaving them paralyzed by fear. These visions inflict real wounds on vulnerable targets, dealing 6d12 mental damage. If you target a sleeping creature, it wakes up as it attempts the save but takes one degree of success worse than the result it rolled on its save.
+name: Waking Nightmare Hack
+description: 'You broadcast a wave of terrifying combat simulations directly into
+  targets'' neural implants, leaving them paralyzed by synthetic fear. These visions
+  inflict real neurological damage on vulnerable targets, dealing 6d12 mental damage.
+  If you target a sleeping creature, it wakes up as it attempts the save but takes
+  one degree of success worse than the result it rolled on its save.
 
-    Critical Success The target is unaffected.
-    Success The target is Frightened 2 and takes half the mental damage.
-    Failure The target is frightened 2, is @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed] for 1 round, and takes the full mental damage.
-    Critical Failure The target is frightened 2, is paralyzed for 2 rounds, and takes double the mental damage.
+
+  Critical Success The target is unaffected.
+
+  Success The target is Frightened 2 and takes half the mental damage.
+
+  Failure The target is frightened 2, is @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed]
+  for 1 round, and takes the full mental damage.
+
+  Critical Failure The target is frightened 2, is paralyzed for 2 rounds, and takes
+  double the mental damage.'
 tradition: neural
 level: 8
 usage_type: prepared
@@ -18,18 +27,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 6d8
-          damage_type: mental
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 6d12
-          damage_type: mental
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 12d12
-          damage_type: mental
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 6d8
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d12
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d12
+    damage_type: mental
+    dc: 0

@@ -1,12 +1,27 @@
 id: ferrous_form_bio_synthetic
-name: Ferrous Form
-description: |-
-    Your body transforms entirely into flexible iron. You gain resistance 10 to physical damage, except adamantine. You're immune to death effects, disease, drained, @UUID[Compendium.pf2e.conditionitems.Item.Fatigued], healing, nonlethal attacks, @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed], poison, sickened, vitality, and void; any of those conditions you had when the spell is cast are suspended until the spell ends, then return with their remaining duration when the spell ends. While made of iron, you're subject to rusting effects like the @UUID[Compendium.pf2e.spells-srd.Item.Rust Cloud] spell.
-    Your fist Strikes have a 1d10 damage die, and your metal spells deal one additional die of damage (of the same damage die and damage type the spell uses). You can cast @UUID[Compendium.pf2e.spells-srd.Item.Needle Darts] as an innate spell; the casting is reduced from 2 actions to 1.
-    In this form, you don't need to breathe. Your Bulk doubles (to 6 if you're Small or 12 if you're Medium), and you become too dense to Swim in water, automatically sinking to the bottom. You can Dismiss the spell.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Ferrous Form]
+name: Liquid Metal Metamorphosis
+description: 'Your body transforms entirely into flexible bio-synthetic iron through
+  an extreme mutagenic process. You gain resistance 10 to physical damage, except
+  adamantine. You''re immune to death effects, disease, drained, @UUID[Compendium.pf2e.conditionitems.Item.Fatigued],
+  healing, nonlethal attacks, @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed],
+  poison, sickened, vitality, and void; any of those conditions you had when the tech
+  is activated are suspended until the tech ends, then return with their remaining
+  duration when the tech ends. While made of iron, you''re subject to rusting effects
+  like the @UUID[Compendium.pf2e.spells-srd.Item.Rust Cloud] spell.
 
-    Heightened (9th) The resistance increases to 15.
+  Your fist Strikes have a 1d10 damage die, and your metal tech deals one additional
+  die of damage (of the same damage die and damage type the tech uses). You can cast
+  @UUID[Compendium.pf2e.spells-srd.Item.Needle Darts] as an innate spell; the casting
+  is reduced from 2 actions to 1.
+
+  In this form, you don''t need to breathe. Your Bulk doubles (to 6 if you''re Small
+  or 12 if you''re Medium), and you become too dense to Swim in water, automatically
+  sinking to the bottom. You can Dismiss the tech.
+
+  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Ferrous Form]
+
+
+  Heightened (9th) The resistance increases to 15.'
 tradition: bio_synthetic
 level: 8
 usage_type: prepared
@@ -16,7 +31,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Your body transforms entirely into flexible iron. You gain resistance 10 to physical damage, except adamantine. You're immune to death effects, disease, drained, @UUID[Compendium.pf2e.conditionitems.I
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your body transforms entirely into flexible iron. You gain resistance
+      10 to physical damage, except adamantine. You're immune to death effects, disease,
+      drained, @UUID[Compendium.pf2e.conditionitems.I

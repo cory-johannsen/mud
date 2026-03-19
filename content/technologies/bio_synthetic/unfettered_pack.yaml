@@ -1,9 +1,13 @@
 id: unfettered_pack
-name: Unfettered Pack
-description: |-
-    You free those who travel alongside you from environmental hindrances. Targets don't take circumstance penalties to Speed from vegetation, rubble, winds, or other properties of the environment, and they ignore difficult terrain from such environmental properties.
+name: Terrain Bypass Protocol
+description: 'You free those who travel alongside you from environmental hindrances.
+  Targets don''t take circumstance penalties to Speed from vegetation, rubble, winds,
+  or other properties of the environment, and they ignore difficult terrain from such
+  environmental properties.
 
-    Heightened (9th) The targets also ignore greater difficult terrain from environmental properties.
+
+  Heightened (9th) The targets also ignore greater difficult terrain from environmental
+  properties.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared
@@ -13,7 +17,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You free those who travel alongside you from environmental hindrances. Targets don't take circumstance penalties to Speed from vegetation, rubble, winds, or other properties of the environment, and th
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You free those who travel alongside you from environmental hindrances.
+      Targets don't take circumstance penalties to Speed from vegetation, rubble,
+      winds, or other properties of the environment, and th

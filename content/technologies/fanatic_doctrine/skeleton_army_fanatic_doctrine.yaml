@@ -1,9 +1,18 @@
 id: skeleton_army_fanatic_doctrine
-name: Skeleton Army
-description: |-
-    With a fistful of compressed bones, you summon a legion of skeletal hulks to fight in your war, refusing to let them rest until they've given up their last inches of usefulness to your cause. The undead army occupies the space of a Huge creature and has a Speed of 40 feet.
-    Arrive Bone March The skeletal hulks rise from the dirt, slashing through your enemies and attacking with their dirt-encrusted, bony hands. Enemies within a 20-foot emanation take 4d8 slashing damage (basic Reflex save). On a critical failure, a creature also take @Damage[2d8[persistent,bleed]] damage.
-    Depart Tossed Heads Before crumpling into a pile of bones, the skeleton army removes their skulls and throws them at the enemy lines, chattering and howling, dealing 6d6 piercing damage to enemies in a 20-foot burst (basic Reflex save) within 30 feet. On a critical failure, a creature is also Frightened 2.
+name: Undead Zealot Legion
+description: 'You raise a legion of fanatical undead warriors to fight in your holy
+  war. The undead army occupies the space of a Huge creature and has a Speed of 40
+  feet.
+
+  Arrive Bone March The zealot legion rises from the ground, slashing through your
+  enemies with fervent fury. Enemies within a 20-foot emanation take 4d8 slashing
+  damage (basic Reflex save). On a critical failure, a creature also take @Damage[2d8[persistent,bleed]]
+  damage.
+
+  Depart Tossed Heads Before collapsing, the zealot legion launches skull projectiles
+  at the enemy lines, dealing 6d6 piercing damage to enemies in a 20-foot burst (basic
+  Reflex save) within 30 feet. On a critical failure, a creature is also Frightened
+  2.'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared
@@ -15,7 +24,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: With a fistful of compressed bones, you summon a legion of skeletal hulks to fight in your war, refusing to let them rest until they've given up their last inches of usefulness to your cause. The unde
+  on_apply:
+  - type: utility
+    dc: 0
+    description: With a fistful of compressed bones, you summon a legion of skeletal
+      hulks to fight in your war, refusing to let them rest until they've given up
+      their last inches of usefulness to your cause. The unde

@@ -1,6 +1,12 @@
 id: siege_weapons_blessing_neural
-name: Siege Weapon's Blessing
-description: You trace a magic rune onto the body of a siege weapon, calling upon fate or your faith to guide the attacks your allies make with this machine. For the spell's duration, any skill checks attempted to Load the siege weapon can be rolled twice, taking the better result; these skill checks gain the fortune trait. In addition, any saving throws attempted by creatures caught in the siege weapon's Launch area must be rolled twice, taking the worse result; these saving throws gain the misfortune trait.Heightened (9th) The duration is 8 hours.
+name: Targeting Override Hack
+description: You psychically interface with a siege weapon's targeting systems, enhancing
+  accuracy through neural guidance. For the spell's duration, any skill checks attempted
+  to Load the siege weapon can be rolled twice, taking the better result; these skill
+  checks gain the fortune trait. In addition, any saving throws attempted by creatures
+  caught in the siege weapon's Launch area must be rolled twice, taking the worse
+  result; these saving throws gain the misfortune trait.Heightened (9th) The duration
+  is 8 hours.
 tradition: neural
 level: 6
 usage_type: prepared
@@ -10,7 +16,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You trace a magic rune onto the body of a siege weapon, calling upon fate or your faith to guide the attacks your allies make with this machine. For the spell's duration, any skill checks attempted to
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You trace a magic rune onto the body of a siege weapon, calling upon
+      fate or your faith to guide the attacks your allies make with this machine.
+      For the spell's duration, any skill checks attempted to

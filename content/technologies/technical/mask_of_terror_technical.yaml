@@ -1,13 +1,23 @@
 id: mask_of_terror_technical
-name: Mask of Terror
-description: |-
-    The target appears to be a gruesome and terrifying creature. The effect is unique to each observer, so a human viewing the target might see a demon with bloody fangs, but a demon observing the target might see a glowing angelic visage.
-    When any creature attempts a hostile action against the target, the creature must attempt a Will save. It is then temporarily immune until the end of its next turn.
-    Success The creature is unaffected.
-    Failure The creature becomes Frightened 2 before using its action.
-    Critical Failure The creature becomes Frightened 2, and its action fails and is wasted.
+name: Holographic Terror Mask
+description: 'The target projects a holographic overlay that appears as a gruesome
+  and terrifying entity to each observer. One person might see a rogue combat mech,
+  while another might see a glitching horror from a VR nightmare.
 
-    Heightened (8th) You can target up to 5 creatures. If a creature uses a hostile action or reaction that affects multiple targets simultaneously, it needs to attempt only one save against mask of terror.
+  When any creature attempts a hostile action against the target, the creature must
+  attempt a Will save. It is then temporarily immune until the end of its next turn.
+
+  Success The creature is unaffected.
+
+  Failure The creature becomes Frightened 2 before using its action.
+
+  Critical Failure The creature becomes Frightened 2, and its action fails and is
+  wasted.
+
+
+  Heightened (8th) You can target up to 5 creatures. If a creature uses a hostile
+  action or reaction that affects multiple targets simultaneously, it needs to attempt
+  only one save against the holographic terror.'
 tradition: technical
 level: 7
 usage_type: prepared
@@ -19,7 +29,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target appears to be a gruesome and terrifying creature. The effect is unique to each observer, so a human viewing the target might see a demon with bloody fangs, but a demon observing the target
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target appears to be a gruesome and terrifying creature. The
+      effect is unique to each observer, so a human viewing the target might see a
+      demon with bloody fangs, but a demon observing the target

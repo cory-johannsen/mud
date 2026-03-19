@@ -1,10 +1,22 @@
 id: prying_survey_neural
-name: Prying Survey
-description: |-
-    You create eight invisible, floating eyes, each about 3 inches in diameter, that scan the area around you, transmitting rough impressions of the environment. The eyes constantly examine and send you summaries of their findings. They are solid and can't move through barriers, and they don't follow routes that they fail to find while Searching. Any damage to an eye destroys it. When all eyes are destroyed, the spell ends.
-    As a single action, which has the concentrate trait, you can concentrate on a location within the area that an eye can reach. An eye travels to that location, and you Seek visually as if you were there. As an exploration activity, you can travel at half speed while continuing to concentrate on the eyes to gain the benefits of both the Scout and Search activities. With the eyes, you can check everything even if you are traveling faster than 300 feet per minute. The eyes use your Perception modifier. You can have only one prying survey in effect at a time.
+name: Omnidirectional Spy Drones
+description: 'You deploy eight invisible micro-drones, each about 3 inches in diameter,
+  that scan the area around you, transmitting rough impressions of the environment.
+  The drones constantly examine and send you summaries of their findings. They are
+  solid and can''t move through barriers, and they don''t follow routes that they
+  fail to find while Searching. Any damage to a drone destroys it. When all drones
+  are destroyed, the tech ends.
 
-    Heightened (10th) The area increases to a 500-foot emanation.
+  As a single action, which has the concentrate trait, you can concentrate on a location
+  within the area that a drone can reach. A drone travels to that location, and you
+  Seek visually as if you were there. As an exploration activity, you can travel at
+  half speed while continuing to concentrate on the drones to gain the benefits of
+  both the Scout and Search activities. With the drones, you can check everything
+  even if you are traveling faster than 300 feet per minute. The drones use your Perception
+  modifier. You can have only one set of spy drones in effect at a time.
+
+
+  Heightened (10th) The area increases to a 500-foot emanation.'
 tradition: neural
 level: 8
 usage_type: prepared
@@ -14,7 +26,9 @@ targets: zone
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create eight invisible, floating eyes, each about 3 inches in diameter, that scan the area around you, transmitting rough impressions of the environment. The eyes constantly examine and send you s
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create eight invisible, floating eyes, each about 3 inches in
+      diameter, that scan the area around you, transmitting rough impressions of the
+      environment. The eyes constantly examine and send you s

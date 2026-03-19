@@ -1,10 +1,19 @@
 id: utter_destruction_bio_synthetic
-name: Utter Destruction
-description: |-
-    You screech with an unearthly voice made of destructive energy, smashing everything that lies before you. Creatures in the area take 4d8 sonic damage and 4d8 void damage. Each creature must attempt a Fortitude save. Unattended objects of Hardness 5 or less in the area of effect are destroyed.Critical Success The creature takes half damage.
-    Success The creature takes half damage and is @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 round.
-    Failure The creature takes full damage and is deafened for 1 minute.
-    Critical Failure The creature takes double damage and is permanently deafened.Heightened (+1) The sonic and void damage each increase by 1d8. The Hardness threshold of items destroyed by the spell increases by 1.
+name: Sonic Dissolution Wave
+description: 'You emit a devastating bio-resonant shriek of destructive energy, dissolving
+  organic and inorganic matter in its path. Creatures in the area take 4d8 sonic damage
+  and 4d8 void damage. Each creature must attempt a Fortitude save. Unattended objects
+  of Hardness 5 or less in the area of effect are destroyed.Critical Success The creature
+  takes half damage.
+
+  Success The creature takes half damage and is @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
+  for 1 round.
+
+  Failure The creature takes full damage and is deafened for 1 minute.
+
+  Critical Failure The creature takes double damage and is permanently deafened.Heightened
+  (+1) The sonic and void damage each increase by 1d8. The Hardness threshold of items
+  destroyed by the spell increases by 1.'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared
@@ -16,30 +25,30 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d4
-          damage_type: sonic
-          dc: 0
-        - type: damage
-          dice: 4d4
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d8
-          damage_type: sonic
-          dc: 0
-        - type: damage
-          dice: 4d8
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d8
-          damage_type: sonic
-          dc: 0
-        - type: damage
-          dice: 8d8
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d4
+    damage_type: sonic
+    dc: 0
+  - type: damage
+    dice: 4d4
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d8
+    damage_type: sonic
+    dc: 0
+  - type: damage
+    dice: 4d8
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d8
+    damage_type: sonic
+    dc: 0
+  - type: damage
+    dice: 8d8
+    damage_type: void
+    dc: 0

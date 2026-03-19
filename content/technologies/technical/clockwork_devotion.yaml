@@ -1,9 +1,17 @@
 id: clockwork_devotion
-name: Clockwork Devotion
-description: |-
-    You toss a handful of magical cogs before you, summoning a battalion of clockwork soldiers to fight your enemies. The clockwork soldiers occupy the space of a Huge creature and have a Speed of 60 feet.
-    Arrive Clockwork Assault Clockwork soldiers slash at your enemies with their halberds, dealing 4d10 slashing damage (basic Reflex save) to all enemy creatures in its location or within 15 feet.
-    Depart (fire) Ticking Bomb The clockwork soldiers freeze abruptly before exploding into a mass of flying cogs and metal shrapnel, dealing 4d8 slashing damage and 4d8 fire damage in a 30-foot emanation (basic Reflex save). On a critical failure, a creature takes an additional @Damage[2d8[persistent,fire]] damage.
+name: Combat Drone Battalion
+description: 'You deploy a crate of pre-programmed combat drones that activate and
+  form a fighting formation. The drone battalion occupies the space of a Huge creature
+  and has a Speed of 60 feet.
+
+  Arrive Clockwork Assault Combat drones slash at your enemies with their integrated
+  blades, dealing 4d10 slashing damage (basic Reflex save) to all enemy creatures
+  in its location or within 15 feet.
+
+  Depart (fire) Ticking Bomb The drones freeze abruptly before self-destructing in
+  a mass of flying shrapnel and thermite, dealing 4d8 slashing damage and 4d8 fire
+  damage in a 30-foot emanation (basic Reflex save). On a critical failure, a creature
+  takes an additional @Damage[2d8[persistent,fire]] damage.'
 tradition: technical
 level: 8
 usage_type: prepared
@@ -15,7 +23,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You toss a handful of magical cogs before you, summoning a battalion of clockwork soldiers to fight your enemies. The clockwork soldiers occupy the space of a Huge creature and have a Speed of 60 feet
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You toss a handful of magical cogs before you, summoning a battalion
+      of clockwork soldiers to fight your enemies. The clockwork soldiers occupy the
+      space of a Huge creature and have a Speed of 60 feet

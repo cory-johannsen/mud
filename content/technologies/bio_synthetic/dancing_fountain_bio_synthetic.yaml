@@ -1,13 +1,29 @@
 id: dancing_fountain_bio_synthetic
-name: Dancing Fountain
-description: |-
-    Area 30-foot burst centered on you
+name: Hydro-Burst Array
+description: 'Area 30-foot burst centered on you
 
-    Tapping the ground, you create a shallow pool of water that spreads over the affected area, and majestic sprays, jets, and mists of water erupt forth in a dazzling water show. When you Cast the Spell, and the first time each round you Sustain the spell, you can command the fountain to use one of the following displays, which is accompanied by a loud burst of music. The dancing fountain is somewhat fickle in its desire for novelty, meaning it can't be commanded to use the same display on two consecutive turns.
 
-    Chasing Jets A series of vertical jets shoot up in a chase sequence, forcing one creature within the fountain to move 15 feet in a direction of your choice unless it succeeds at a Reflex save against your spell DC. The fountain can't make a creature move outside its area.
-    Flashing Spray Diffuse fog fills the area of the emanation. All creatures within the fountain become @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the fountain become concealed to creatures within it. The spray persists until the beginning of your next turn.
-    Power Rings The fountain blasts a series of rings of water into the air that land with a crash in a @Template[burst|distance:10] centered on a location of your choice within the fountain. The falling torrent deals @Damage[10d6[bludgeoning]] damage to all creatures within the burst (basic Reflex).
+  Slamming the ground, you rupture underground water mains and biological fluid reservoirs,
+  sending majestic sprays, jets, and pressurized mists erupting forth. When you activate
+  the tech, and the first time each round you Sustain it, you can command the array
+  to use one of the following displays. The array can''t be commanded to use the same
+  display on two consecutive turns.
+
+
+  Chasing Jets A series of vertical jets shoot up in a chase sequence, forcing one
+  creature within the array to move 15 feet in a direction of your choice unless it
+  succeeds at a Reflex save against your tech DC. The array can''t make a creature
+  move outside its area.
+
+  Flashing Spray Diffuse bio-mist fills the area. All creatures within the array become
+  @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside
+  the array become concealed to creatures within it. The spray persists until the
+  beginning of your next turn.
+
+  Power Rings The array blasts a series of pressurized water rings into the air that
+  land with a crash in a @Template[burst|distance:10] centered on a location of your
+  choice within the array. The falling torrent deals @Damage[10d6[bludgeoning]] damage
+  to all creatures within the burst (basic Reflex).'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared
@@ -19,18 +35,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 10d3
-          damage_type: bludgeoning
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 10d6
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 20d6
-          damage_type: bludgeoning
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 10d3
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 10d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 20d6
+    damage_type: bludgeoning
+    dc: 0

@@ -1,6 +1,12 @@
 id: pinpoint_technical
-name: Pinpoint
-description: You learn the name of the target's exact location (including the building, community, and country) and plane of existence. You can target a creature only if you've seen it in person, have one of its significant belongings, or have a piece of its body, such as a lock of hair. To target an object, you must have touched it or have a fragment of it. Pinpoint automatically overcomes protections against detection of lower rank than this spell, even if they would normally have a chance to block it.
+name: Global Tracking Satellite
+description: You learn the name of the target's exact location (including the building,
+  community, and country) and plane of existence. You can target a creature only if
+  you've seen it in person, have one of its significant belongings, or have a piece
+  of its body, such as a lock of hair. To target an object, you must have touched
+  it or have a fragment of it. Global tracking satellite automatically overcomes protections
+  against detection of lower rank than this tech, even if they would normally have
+  a chance to block it.
 tradition: technical
 level: 8
 usage_type: prepared
@@ -10,7 +16,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You learn the name of the target's exact location (including the building, community, and country) and plane of existence. You can target a creature only if you've seen it in person, have one of its s
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You learn the name of the target's exact location (including the
+      building, community, and country) and plane of existence. You can target a creature
+      only if you've seen it in person, have one of its s

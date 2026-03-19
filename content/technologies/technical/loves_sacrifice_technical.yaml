@@ -1,9 +1,21 @@
 id: loves_sacrifice_technical
-name: Love's Sacrifice
-description: |-
-    Trigger You take damage that would reduce you to 0 Hit Points.You cry out for aid, and a creature near you feels compelled to throw itself in front of the threat as the ultimate expression of their love. A target that genuinely loves the caster without magical compulsion, at their player's or the GM's discretion, fails the save.Critical Success The target is unaffected.
-    Success The creature moves adjacent to you, moving further than its Speed if necessary as the magic compels it to exceed its limits. It takes half the damage you would have taken, while you take the rest. If you would be reduced to 0 Hit Points, you're reduced to 1 instead.
-    Failure As success, except they take the full damage. If the damage reduces them to 0 Hit Points, they immediately die; this is a death effect.PFS Note: This spell can only be cast on a friendly NPC with GM approval, and on a PC with their player's approval.
+name: Override Loyalty Circuit
+description: 'Trigger You take damage that would reduce you to 0 Hit Points.
+
+  You broadcast an emergency override signal, and a creature near you feels compelled
+  to throw itself in front of the threat. A target that genuinely cares about the
+  caster without technological compulsion, at their player''s or the GM''s discretion,
+  fails the save.Critical Success The target is unaffected.
+
+  Success The creature moves adjacent to you, moving further than its Speed if necessary
+  as the override compels it to exceed its limits. It takes half the damage you would
+  have taken, while you take the rest. If you would be reduced to 0 Hit Points, you''re
+  reduced to 1 instead.
+
+  Failure As success, except they take the full damage. If the damage reduces them
+  to 0 Hit Points, they immediately die; this is a death effect.PFS Note: This tech
+  can only be activated on a friendly NPC with GM approval, and on a PC with their
+  player''s approval.'
 tradition: technical
 level: 7
 usage_type: prepared
@@ -15,7 +27,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Trigger You take damage that would reduce you to 0 Hit Points.You cry out for aid, and a creature near you feels compelled to throw itself in front of the threat as the ultimate expression of their lo
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Trigger You take damage that would reduce you to 0 Hit Points.You
+      cry out for aid, and a creature near you feels compelled to throw itself in
+      front of the threat as the ultimate expression of their lo

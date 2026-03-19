@@ -1,11 +1,22 @@
 id: ray_of_corruption_fanatic_doctrine
-name: Ray of Corruption
-description: |-
-    You unleash a sickly gray beam of toxic spores at your target. Make a spell attack against the target. If you hit a non-magical object that's made of organic material (such as a tree, wooden house, or massive skull), it melts away into a foul-smelling sludge. A single casting can destroy no more than a 10-foot cube of matter.
-    If you hit a creature, it takes 6d12 poison damage and 6d12 spirit damage with a basic Fortitude save. If you critically hit, the target gets a result one degree of success worse than the outcome of its Fortitude save.Critical Success The target is unaffected.
-    Success The target takes half damage.
-    Failure The target takes full damage. Fungal tendrils swiftly digest the body and reduce it to sludge—the target takes @Damage[2d12[persistent,acid]] damage.
-    Critical Failure As failure, but the target takes double damage, plus @Damage[4d12[persistent,acid]] damage.Heightened (+1) The poison damage and spirit damage each increase by 1d12.
+name: Condemnation Beam
+description: 'You unleash a sickly gray beam of doctrinal corruption at your target.
+  Make a tech attack against the target. If you hit a non-synthetic object made of
+  organic material (such as wood or bone), it decomposes into foul-smelling sludge.
+  A single activation can destroy no more than a 10-foot cube of matter.
+
+  If you hit a creature, it takes 6d12 poison damage and 6d12 spirit damage with a
+  basic Fortitude save. If you critically hit, the target gets a result one degree
+  of success worse than the outcome of its Fortitude save.Critical Success The target
+  is unaffected.
+
+  Success The target takes half damage.
+
+  Failure The target takes full damage. Corrupting tendrils swiftly consume the body—the
+  target takes @Damage[2d12[persistent,acid]] damage.
+
+  Critical Failure As failure, but the target takes double damage, plus @Damage[4d12[persistent,acid]]
+  damage.Heightened (+1) The poison damage and spirit damage each increase by 1d12.'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared
@@ -17,30 +28,30 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 6d8
-          damage_type: spirit
-          dc: 0
-        - type: damage
-          dice: 6d8
-          damage_type: poison
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 6d12
-          damage_type: spirit
-          dc: 0
-        - type: damage
-          dice: 6d12
-          damage_type: poison
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 12d12
-          damage_type: spirit
-          dc: 0
-        - type: damage
-          dice: 12d12
-          damage_type: poison
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 6d8
+    damage_type: spirit
+    dc: 0
+  - type: damage
+    dice: 6d8
+    damage_type: poison
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d12
+    damage_type: spirit
+    dc: 0
+  - type: damage
+    dice: 6d12
+    damage_type: poison
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d12
+    damage_type: spirit
+    dc: 0
+  - type: damage
+    dice: 12d12
+    damage_type: poison
+    dc: 0

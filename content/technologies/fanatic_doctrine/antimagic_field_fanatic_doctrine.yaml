@@ -1,8 +1,22 @@
 id: antimagic_field_fanatic_doctrine
-name: Antimagic Field
-description: |-
-    You repel all magic from the target area, preventing spells and other magic from functioning. Spells can't penetrate the area, magic items cease to function within it, and no one inside can cast spells or use magic abilities, including yourself. Likewise, spells - such as @UUID[Compendium.pf2e.spells-srd.Item.Dispel Magic] - can't affect the field itself unless they are of a higher level. Magic effects resume the moment they pass outside the field. For example, a ray fired from one side of the field could target a creature on the other side (as long as caster and target are both outside the field). A summoned creature winks out of existence but reappears if the field moves or ends. Invested magic items cease to function, but they remain invested and resume functioning when they exit the field; the ability boost from an apex item isn't suppressed within the field. Spells of a higher rank than the antimagic field overcome its effects, and can even be cast by a creature within the field.
-    The field disrupts only magic, so a +3 longsword still functions as a longsword. Magically created creatures (such as golems) function normally within an antimagic field.
+name: Doctrinal Null Zone
+description: 'You project a zone of absolute doctrinal purity that repels all outside
+  technology from the target area, preventing tech and other powers from functioning.
+  Tech can''t penetrate the area, augmented implants cease to function within it,
+  and no one inside can activate tech abilities, including yourself. Likewise, countermeasures
+  - such as @UUID[Compendium.pf2e.spells-srd.Item.Dispel Magic] - can''t affect the
+  field itself unless they are of a higher level. Tech effects resume the moment they
+  pass outside the field. For example, a beam fired from one side of the field could
+  target a creature on the other side (as long as caster and target are both outside
+  the field). A summoned construct winks out of existence but reappears if the field
+  moves or ends. Invested tech items cease to function, but they remain invested and
+  resume functioning when they exit the field; the ability boost from an apex item
+  isn''t suppressed within the field. Tech of a higher rank than the null zone overcomes
+  its effects, and can even be activated by a creature within the field.
+
+  The field disrupts only technology, so a +3 longsword still functions as a longsword.
+  Artificially created constructs (such as golems) function normally within a doctrinal
+  null zone.'
 tradition: fanatic_doctrine
 level: 8
 usage_type: prepared
@@ -12,7 +26,9 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You repel all magic from the target area, preventing spells and other magic from functioning. Spells can't penetrate the area, magic items cease to function within it, and no one inside can cast spell
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You repel all magic from the target area, preventing spells and other
+      magic from functioning. Spells can't penetrate the area, magic items cease to
+      function within it, and no one inside can cast spell

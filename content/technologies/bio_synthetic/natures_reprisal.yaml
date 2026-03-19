@@ -1,9 +1,13 @@
 id: natures_reprisal
-name: Nature's Reprisal
-description: |-
-    The plant life within the area begins to writhe and lash out against your enemies as you call upon nature to impede your foes. To your enemies, the area becomes difficult terrain, and areas that were naturally difficult terrain due to plants become greater difficult terrain as well as hazardous terrain, dealing 6 poison damage to an enemy each time it enters an affected square.
+name: Hostile Flora Uprising
+description: 'The plant life within the area begins to writhe and lash out against
+  your enemies as you trigger aggressive growth hormones. To your enemies, the area
+  becomes difficult terrain, and areas that were naturally difficult terrain due to
+  plants become greater difficult terrain as well as hazardous terrain, dealing 6
+  poison damage to an enemy each time it enters an affected square.
 
-    Heightened (+1) The poison damage of the hazardous terrain increases by 1.
+
+  Heightened (+1) The poison damage of the hazardous terrain increases by 1.'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared
@@ -13,8 +17,8 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: damage
-          dice: "6"
-          damage_type: poison
-          dc: 0
+  on_apply:
+  - type: damage
+    dice: '6'
+    damage_type: poison
+    dc: 0

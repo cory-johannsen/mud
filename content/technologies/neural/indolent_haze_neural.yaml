@@ -1,10 +1,25 @@
 id: indolent_haze_neural
-name: Indolent Haze
-description: |-
-    The faint scent of poppies and a soothing calm fill the area, urging creatures to lay down and take a rest, to do nothing at all, ever again. Creatures in the area when you Cast the Spell must attempt a Will save. Creatures who end their turn in the area must also attempt the save. You can Dismiss the spell.Critical Success The creature is unaffected.
-    Success The creature lies down to rest, becoming @UUID[Compendium.pf2e.conditionitems.Item.Prone]. If they were already prone, they instead drift off to sleep, becoming @UUID[Compendium.pf2e.conditionitems.Item.Unconscious].
-    Failure As success, except that the creature is so happy lying down that they cannot attempt to Stand or otherwise maneuver themself off of the ground on their next turn, though they can @UUID[Compendium.pf2e.actionspf2e.Item.Crawl] (potentially to escape the spell's area).
-    Critical Failure The creature immediately lies down and drifts off to sleep, becoming prone and unconscious. Any creature in the area who is already unconscious when you Cast the Spell (or whose turn ends in the spell's area while they are unconscious) takes 6d4 spirit damage as their life force is drained away through their dreams. This damage does not automatically wake them.Heightened (+1) The spirit damage increases by 2d4.
+name: Neural Sedation Cloud
+description: 'A faint chemical haze and soothing subliminal signals fill the area,
+  urging creatures to lie down and surrender consciousness. Creatures in the area
+  when you activate the tech must attempt a Will save. Creatures who end their turn
+  in the area must also attempt the save. You can Dismiss the effect.Critical Success
+  The creature is unaffected.
+
+  Success The creature lies down to rest, becoming @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+  If they were already prone, they instead drift off, becoming @UUID[Compendium.pf2e.conditionitems.Item.Unconscious].
+
+  Failure As success, except that the creature is so sedated lying down that they
+  cannot attempt to Stand or otherwise maneuver themself off of the ground on their
+  next turn, though they can @UUID[Compendium.pf2e.actionspf2e.Item.Crawl] (potentially
+  to escape the area).
+
+  Critical Failure The creature immediately lies down and drifts off, becoming prone
+  and unconscious. Any creature in the area who is already unconscious when you activate
+  the tech (or whose turn ends in the area while they are unconscious) takes 6d4 spirit
+  damage as their life force is drained away through subliminal neural extraction.
+  This damage does not automatically wake them.Heightened (+1) The spirit damage increases
+  by 2d4.'
 tradition: neural
 level: 7
 usage_type: prepared
@@ -16,18 +31,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: "6"
-          damage_type: spirit
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 6d4
-          damage_type: spirit
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 12d4
-          damage_type: spirit
-          dc: 0
+  on_success:
+  - type: damage
+    dice: '6'
+    damage_type: spirit
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d4
+    damage_type: spirit
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d4
+    damage_type: spirit
+    dc: 0

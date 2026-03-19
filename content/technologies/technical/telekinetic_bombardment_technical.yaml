@@ -1,10 +1,21 @@
 id: telekinetic_bombardment_technical
-name: Telekinetic Bombardment
-description: |-
-    You grasp a piece of the landscape—such as a tree, carriage, or piece of masonry—and lob it in your foe's direction. Your missile crashes down in either a @Template[type:burst|distance:10] (for most missiles) or a @Template[type:line|distance:30] (for something long and tall, like a tree or a ship's mast), dealing @Damage[14d6[bludgeoning]|options:area-damage] damage and turning its area into difficult terrain as it breaks into rubble. All creatures in the area must attempt a Reflex save. If the area is a line, it doesn't have to start from your square but can instead start anywhere in range, as long as the entire area remains within range.Critical Success The creature is unaffected.
-    Success The creature takes half damage.
-    Failure The creature takes full damage and is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].
-    Critical Failure The creature takes double damage, is knocked prone, and is Stunned 1.Heightened (+1) The damage increases by 2d6.
+name: Railgun Debris Barrage
+description: 'You electromagnetically grasp a piece of the environment—such as a wrecked
+  vehicle, dumpster, or chunk of concrete—and launch it at your foes. Your projectile
+  crashes down in either a @Template[type:burst|distance:10] (for most projectiles)
+  or a @Template[type:line|distance:30] (for something long, like a streetlamp or
+  steel beam), dealing @Damage[14d6[bludgeoning]|options:area-damage] damage and turning
+  its area into difficult terrain as it breaks into rubble. All creatures in the area
+  must attempt a Reflex save. If the area is a line, it doesn''t have to start from
+  your square but can instead start anywhere in range, as long as the entire area
+  remains within range.Critical Success The creature is unaffected.
+
+  Success The creature takes half damage.
+
+  Failure The creature takes full damage and is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+
+  Critical Failure The creature takes double damage, is knocked prone, and is Stunned
+  1.Heightened (+1) The damage increases by 2d6.'
 tradition: technical
 level: 7
 usage_type: prepared
@@ -16,18 +27,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 14d3
-          damage_type: bludgeoning
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 14d6
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 28d6
-          damage_type: bludgeoning
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 14d3
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 14d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 28d6
+    damage_type: bludgeoning
+    dc: 0

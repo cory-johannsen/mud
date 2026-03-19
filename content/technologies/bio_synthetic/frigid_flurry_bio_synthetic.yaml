@@ -1,9 +1,16 @@
 id: frigid_flurry_bio_synthetic
-name: Frigid Flurry
-description: |-
-    You place a palm to your lips and exhale a cold breath, whipping up a gust of wind that freezes the air's ambient moisture into a flurry of jagged shards. The flurry deals 9d6 cold damage and 9d6 slashing damage to all foes, with a basic Reflex save, but the gust flows harmlessly around your allies. The wind then picks you up and carries you to the other end of the area; though your movement within the gust can still trigger reactions, the storm of ice crystals prevents you from being affected by any effects, except for those that would counteract the spell's magic or that the GM decides would affect snow.
+name: Cryogenic Shrapnel Burst
+description: 'You exhale a cryo-breath, whipping up a gust of supercooled wind that
+  flash-freezes ambient moisture into a flurry of jagged ice shards. The flurry deals
+  9d6 cold damage and 9d6 slashing damage to all foes, with a basic Reflex save, but
+  the gust flows harmlessly around your allies. The wind then picks you up and carries
+  you to the other end of the area; though your movement within the gust can still
+  trigger reactions, the storm of ice crystals prevents you from being affected by
+  any effects, except for those that would counteract the tech or that the GM decides
+  would affect snow.
 
-    Heightened (+1) The cold and slashing damage each increase by 1d6.
+
+  Heightened (+1) The cold and slashing damage each increase by 1d6.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared
@@ -15,30 +22,30 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 9d3
-          damage_type: cold
-          dc: 0
-        - type: damage
-          dice: 9d3
-          damage_type: slashing
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 9d6
-          damage_type: cold
-          dc: 0
-        - type: damage
-          dice: 9d6
-          damage_type: slashing
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 18d6
-          damage_type: cold
-          dc: 0
-        - type: damage
-          dice: 18d6
-          damage_type: slashing
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 9d3
+    damage_type: cold
+    dc: 0
+  - type: damage
+    dice: 9d3
+    damage_type: slashing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 9d6
+    damage_type: cold
+    dc: 0
+  - type: damage
+    dice: 9d6
+    damage_type: slashing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 18d6
+    damage_type: cold
+    dc: 0
+  - type: damage
+    dice: 18d6
+    damage_type: slashing
+    dc: 0

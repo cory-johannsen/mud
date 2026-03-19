@@ -1,6 +1,9 @@
 id: lure_dream
-name: Lure Dream
-description: You reach out to the dream realm, beckoning an animate dream to your side. This works like @UUID[Compendium.pf2e.spells-srd.Item.Summon Animal], except you summon an @UUID[Compendium.pf2e.pathfinder-monster-core-2.Actor.Animate Dream].
+name: Subconscious Lure
+description: You reach into the dream-state data layer, beckoning a psychic construct
+  to your side. This works like @UUID[Compendium.pf2e.spells-srd.Item.Summon Animal],
+  except you summon an @UUID[Compendium.pf2e.pathfinder-monster-core-2.Actor.Animate
+  Dream].
 tradition: neural
 level: 6
 usage_type: prepared
@@ -10,7 +13,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You reach out to the dream realm, beckoning an animate dream to your side. This works like @UUID[Compendium.pf2e.spells-srd.Item.Summon Animal], except you summon an @UUID[Compendium.pf2e.pathfinder-m
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You reach out to the dream realm, beckoning an animate dream to your
+      side. This works like @UUID[Compendium.pf2e.spells-srd.Item.Summon Animal],
+      except you summon an @UUID[Compendium.pf2e.pathfinder-m

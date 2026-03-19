@@ -1,9 +1,19 @@
 id: mimic_spell_neural
-name: Mimic Spell
-description: |-
-    Trigger A creature you're aware of within range Casts a Spell of the same tradition as mimic spell and of the same or lower rank.You learn the secrets of a spell just by watching someone else cast it. Attempt to counteract the spell cast by the triggering creature. If the spell would be counteracted, you instead gain the ability to Cast that Spell without expending a slot.
-    On your next turn, you spend the same number of actions to Cast the Spell as the triggering creature, but you choose the targets (if any) and use your spell attack modifier or spell DC as appropriate. The spell is heightened to the same rank as mimic spell. The mimicked spell is of the same tradition as the spells you normally cast.
-    If you don't Cast the mimicked Spell by the end of your next turn, it is lost, unless you Sustain the knowledge of it. You can Sustain this knowledge for up to 1 minute, after which it is lost.
+name: Tech Duplication Hack
+description: 'Trigger A creature you''re aware of within range activates a tech of
+  the same tradition as this tech and of the same or lower rank.You reverse-engineer
+  the secrets of a tech just by observing someone else activate it. Attempt to counteract
+  the tech activated by the triggering creature. If the tech would be counteracted,
+  you instead gain the ability to activate that tech without expending a slot.
+
+  On your next turn, you spend the same number of actions to activate the tech as
+  the triggering creature, but you choose the targets (if any) and use your tech attack
+  modifier or tech DC as appropriate. The tech is heightened to the same rank as this
+  tech. The duplicated tech is of the same tradition as the tech you normally use.
+
+  If you don''t activate the duplicated tech by the end of your next turn, it is lost,
+  unless you Sustain the knowledge of it. You can Sustain this knowledge for up to
+  1 minute, after which it is lost.'
 tradition: neural
 level: 8
 usage_type: prepared
@@ -13,7 +23,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Trigger A creature you're aware of within range Casts a Spell of the same tradition as mimic spell and of the same or lower rank.You learn the secrets of a spell just by watching someone else cast it.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Trigger A creature you're aware of within range Casts a Spell of
+      the same tradition as mimic spell and of the same or lower rank.You learn the
+      secrets of a spell just by watching someone else cast it.

@@ -1,8 +1,21 @@
 id: lifewood_cage_bio_synthetic
-name: Lifewood Cage
-description: |-
-    You create an immobile, @UUID[Compendium.pf2e.conditionitems.Item.Invisible] prison of hardened wood suffused with vital energy from the Forge of Creation. The cage is a 20-foot cube made of wooden branches, each a half inch thick and a half inch apart. Each creature in the area where you create the cage must attempt a Reflex save. If such a creature fails, it becomes trapped inside the cage. If it succeeds, it's pushed outside the cage into a space of its choice. If a creature in the area is too big to fit inside the prison, the spell automatically fails.
-    The cage has AC 10, Hardness 20, and 40 Hit Points, and it's immune to critical hits and precision damage, though it has weakness 5 to void damage. A creature capable of passing through the space between the bars (typically a Tiny creature) can leave; all others are confined within. The vitality energy suffusing the wood prevents incorporeal undead creatures from passing through the beams. Attacks with a weapon too large to fit between the bars can't pass through the cage, and the bars provide standard cover even against attacks that can pass through the gaps. Spells and most area effects (such as dragon breath) can pass through the cage uninhibited.
+name: Bioprison Growth
+description: 'You grow an immobile, @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+  prison of hardened bio-organic material suffused with vital energy. The cage is
+  a 20-foot cube made of reinforced fibrous branches, each a half inch thick and a
+  half inch apart. Each creature in the area where you create the cage must attempt
+  a Reflex save. If such a creature fails, it becomes trapped inside the cage. If
+  it succeeds, it''s pushed outside the cage into a space of its choice. If a creature
+  in the area is too big to fit inside the prison, the tech automatically fails.
+
+  The cage has AC 10, Hardness 20, and 40 Hit Points, and it''s immune to critical
+  hits and precision damage, though it has weakness 5 to void damage. A creature capable
+  of passing through the space between the bars (typically a Tiny creature) can leave;
+  all others are confined within. The vital energy suffusing the material prevents
+  incorporeal undead creatures from passing through the bars. Attacks with a weapon
+  too large to fit between the bars can''t pass through the cage, and the bars provide
+  standard cover even against attacks that can pass through the gaps. Area effects
+  can pass through the cage uninhibited.'
 tradition: bio_synthetic
 level: 7
 usage_type: prepared
@@ -14,7 +27,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create an immobile, @UUID[Compendium.pf2e.conditionitems.Item.Invisible] prison of hardened wood suffused with vital energy from the Forge of Creation. The cage is a 20-foot cube made of wooden br
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an immobile, @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+      prison of hardened wood suffused with vital energy from the Forge of Creation.
+      The cage is a 20-foot cube made of wooden br

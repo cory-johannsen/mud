@@ -1,9 +1,12 @@
 id: arrow_salvo_technical
-name: Arrow Salvo
-description: |-
-    You conjure an immense wooden bow that launches a salvo of massive arrows at all nearby enemies. All creatures in the affected area take 8d10 piercing damage, with a basic Reflex save. On a critical failure, the target is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone] from the force of the impact.
+name: Railgun Volley
+description: 'You deploy an automated railgun platform that fires a salvo of ferromagnetic
+  projectiles at all nearby enemies. All creatures in the affected area take 8d10
+  piercing damage, with a basic Reflex save. On a critical failure, the target is
+  knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone] from the force of the impact.
 
-    Heightened (+1) Increase the damage by 1d10.
+
+  Heightened (+1) Increase the damage by 1d10.'
 tradition: technical
 level: 6
 usage_type: prepared
@@ -15,18 +18,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 8d6
-          damage_type: piercing
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 8d10
-          damage_type: piercing
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 16d10
-          damage_type: piercing
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 8d6
+    damage_type: piercing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 8d10
+    damage_type: piercing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 16d10
+    damage_type: piercing
+    dc: 0

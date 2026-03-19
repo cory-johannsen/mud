@@ -1,10 +1,13 @@
 id: energy_aegis_neural
-name: Energy Aegis
-description: |-
-    You protect the target with a powerful, long-lasting energy barrier. The target gains resistance 5 to acid, cold, electricity, fire, force, sonic, vitality, and void damage.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Energy Aegis]
+name: Omni-Resistance Shield
+description: 'You protect the target with a powerful, long-lasting energy barrier
+  projected from a neural implant. The target gains resistance 5 to acid, cold, electricity,
+  fire, force, sonic, vitality, and void damage.
 
-    Heightened (9th) The resistances increase to 10.
+  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Energy Aegis]
+
+
+  Heightened (9th) The resistances increase to 10.'
 tradition: neural
 level: 7
 usage_type: prepared
@@ -14,9 +17,11 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You protect the target with a powerful, long-lasting energy barrier. The target gains resistance 5 to acid, cold, electricity, fire, force, sonic, vitality, and void damage.
-            @UUID[Compendium.pf2e.spel
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You protect the target with a powerful, long-lasting energy barrier.
+      The target gains resistance 5 to acid, cold, electricity, fire, force, sonic,
+      vitality, and void damage.
+
+      @UUID[Compendium.pf2e.spel'

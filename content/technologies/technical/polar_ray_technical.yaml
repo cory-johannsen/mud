@@ -1,12 +1,15 @@
 id: polar_ray_technical
-name: Polar Ray
-description: |-
-    You fire a blue-white ray of freezing air and sleet that deals 10d8 cold damage. Make a spell attack roll against the target.
+name: Absolute Zero Cannon
+description: 'You fire a blue-white beam of cryogenic energy from a zero-point energy
+  cannon that deals 10d8 cold damage. Make a spell attack roll against the target.
 
-    Critical Success The target takes double damage and is Drained 2
-    Success The target takes full damage and is Drained 2
 
-    Heightened (+1) The damage increases by 2d8
+  Critical Success The target takes double damage and is Drained 2
+
+  Success The target takes full damage and is Drained 2
+
+
+  Heightened (+1) The damage increases by 2d8'
 tradition: technical
 level: 8
 usage_type: prepared
@@ -16,13 +19,13 @@ targets: single
 duration: instant
 resolution: attack
 effects:
-    on_hit:
-        - type: damage
-          dice: 10d8
-          damage_type: cold
-          dc: 0
-    on_crit_hit:
-        - type: damage
-          dice: 20d8
-          damage_type: cold
-          dc: 0
+  on_hit:
+  - type: damage
+    dice: 10d8
+    damage_type: cold
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 20d8
+    damage_type: cold
+    dc: 0

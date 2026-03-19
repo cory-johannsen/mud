@@ -1,11 +1,23 @@
 id: tree_of_seasons
-name: Tree of Seasons
-description: |-
-    You cause a Small tree to instantly sprout in an unoccupied space on the ground. Four seedpods grow from the tree, each filled with the magic of a different one of the four seasons. A creature can Interact to pluck one of the pods, and can then either throw it up to 30 feet as part of the same action or do so with a separate Interact action later. When thrown, a pod explodes in a @Template[burst|distance:5], dealing 6d6 damage with a basic Reflex save against your spell DC. The damage type depends on the season of the pod: electricity for spring, fire for summer, poison for autumn, or cold for winter. When the spell ends, the tree withers away and any remaining pods rot, leaving behind non-magical seeds.
-    @Damage[(@item.level)d6[cold]]
-    @Damage[(@item.level)d6[electricity]]
-    @Damage[(@item.level)d6[fire]]
-    @Damage[(@item.level)d6[poison]]Heightened (+1) The burst's damage increases by 1d6.
+name: Quad-Agent Dispensary
+description: 'You cause a Small bio-organic dispensary to instantly sprout in an unoccupied
+  space on the ground. Four compound pods grow from the dispensary, each filled with
+  a different reactive agent. A creature can Interact to pluck one of the pods, and
+  can then either throw it up to 30 feet as part of the same action or do so with
+  a separate Interact action later. When thrown, a pod explodes in a @Template[burst|distance:5],
+  dealing 6d6 damage with a basic Reflex save against your spell DC. The damage type
+  depends on the compound: electricity for the ionized agent, fire for the thermal
+  agent, poison for the toxic agent, or cold for the cryogenic agent. When the spell
+  ends, the dispensary withers away and any remaining pods decompose.
+
+  @Damage[(@item.level)d6[cold]]
+
+  @Damage[(@item.level)d6[electricity]]
+
+  @Damage[(@item.level)d6[fire]]
+
+  @Damage[(@item.level)d6[poison]]Heightened (+1) The burst''s damage increases by
+  1d6.'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared
@@ -17,7 +29,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You cause a Small tree to instantly sprout in an unoccupied space on the ground. Four seedpods grow from the tree, each filled with the magic of a different one of the four seasons. A creature can Int
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You cause a Small tree to instantly sprout in an unoccupied space
+      on the ground. Four seedpods grow from the tree, each filled with the magic
+      of a different one of the four seasons. A creature can Int

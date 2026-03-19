@@ -1,9 +1,13 @@
 id: disintegrate
-name: Disintegrate
-description: |-
-    A black tracer bolt flies toward your target, and upon making contact intensifies into a powerful destructive beam. Make a spell attack against the target. If you hit an object or force construct (such as a wall of force), it's destroyed with no save unless it's an artifact or similarly powerful. A single casting can destroy no more than a 10-foot cube of matter. If you hit a creature, it takes 12d10 damage (no damage type) with a basic Fortitude save. If you critically hit, the target gets a result one degree of success worse than the outcome of its Fortitude save. A creature reduced to 0 HP is blasted to fine powder; its gear remains.
+name: Disintegration Beam
+description: 'You fire a beam of concentrated energy that disassembles matter at the
+  molecular level. You must succeed at a spell attack roll. On a hit, the target takes
+  12d10 damage (doubled on a critical hit). A creature reduced to 0 HP by this spell
+  is completely destroyed, leaving only a fine dust. An object you hit is destroyed
+  if it has a Hardness of 40 or less.
 
-    Heightened (+1) The damage increases by 2d10.
+
+  Heightened (+1) The damage increases by 2d10.'
 tradition: technical
 level: 6
 usage_type: prepared
@@ -15,18 +19,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 12d6
-          damage_type: untyped
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 12d10
-          damage_type: untyped
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 24d10
-          damage_type: untyped
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 12d6
+    damage_type: untyped
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 12d10
+    damage_type: untyped
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 24d10
+    damage_type: untyped
+    dc: 0

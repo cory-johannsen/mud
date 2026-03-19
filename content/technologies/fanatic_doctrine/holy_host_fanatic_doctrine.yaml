@@ -1,8 +1,57 @@
 id: holy_host_fanatic_doctrine
-name: Holy Host
-description: |-
-    In stories, armies with just and righteous causes win with little difficulty, conquering unholy legions. However, many holy armies know that an extra hand never hurts in the fight to exterminate cruelty and unholy forces, and they might call upon the assistance of a holy army. The holy army occupies the space of a Huge creature. When you Cast this Spell, choose one of the holy militaries below to summon.Agathions Speed 30 feetArrive (fire) Pranks for All A squadron of procyals arrives, eager to see your enemies learn their lesson in this fight. All enemies in a @Template[cone|distance:60] take @Damage[8d6[fire]|options:area-damage|traits:fire] damage (@Check[reflex|basic|options:area-effect|traits:fire] save) as the procyals bombard them with popping firecrackersDepart Parting Lesson (emotion, mental) The procyals laugh uproariously as they leave, each throwing out a piece of unrelated advice to a nearby enemy. Enemies in a @Template[type:emanation|distance:20] take @Damage[4d6[mental]|options:area-damage|traits:emotion,mental] damage (@Check[will|basic|options:area-effect,inflicts:stunned|traits:emotion,mental] save). On a failure, a creature is also Stunned 1. On a critical failure, they're Stunned 2.Angels Speed 30 feet, fly 40 feetArrive (spirit) Flaming Truth A legion of balisses arrive in a burst of holy flame, dealing @Damage[8d6[spirit]|options:area-damage] damage to all creatures in a @Template[type:emanation|distance:20] with a @Check[fortitude|basic|options:area-effect,inflicts:blinded|traits:spirit] save. On a critical failure, a creature is also @UUID[Compendium.pf2e.conditionitems.Item.Blinded] for 1 roundDepart Hidden Departure With a plume of smoke, the balisses vanish, spreading a thick cloud of smoke in a @Template[type:emanation|distance:10]. All creatures within the smoke are @UUID[Compendium.pf2e.conditionitems.Item.Concealed]. Unholy creatures within the smoke are Enfeebled 2, and holy creatures within the smoke gain the effects of truesight and ignore the concealment granted by the smoke.Archons Speed 30 feet, fly 60 feetArrive (spirit) Justice Prevails A battalion of aesras, also known as legion archons, swoop in to provide assistance. Enemies within a @Template[type:cone|distance:60] take @Damage[8d6[spirit]|options:area-damage] damage (@Check[reflex|basic|options:area-effect|traits:spirit] save)Depart (fire) Eyes of Judgment With one final examination of the battlefield, the aesras take their leave, but not before bringing down their fiery swords to create a corridor of sacred flame. Enemies in a @Template[type:line|distance:60] take @Damage[4d6[slashing],2d6[persistent,fire]|options:area-damage] damage (@Check[reflex|basic|options:area-effect|traits:fire] save).Azatas Speed 30 feet, fly 80 feetArrive (auditory, sonic) Inspiring Song Kanya muses arrive to embolden your allies while pushing back your foes. Enemies in a @Template[type:emanation|distance:20] take @Damage[6d6[sonic]|options:area-damage|traits:auditory,sonic] damage (@Check[fortitude|basic|options:area-effect,forced-movement|traits:auditory,sonic] save). A creature that fails the save is also pushed 10 feet away from the kanyas. Allies in the emanation gain a +2 status bonus to attack rolls and saving throws, as well as +4 status bonus to damage rolls for the duration of the spellDepart (emotion, fear, mental) Booming Finale With a thunderous chord that stirs the hearts of your forces, the kanyas depart. Enemies in a @Template[type:cone|distance:60] must attempt a @Check[will|options:area-effect,inflicts:deafened,inflicts:frightened|traits:emotion,fear,mental] save. On a failure, they're Frightened 2, and on a critical failure, they're Frightened 3 and @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 round. Allies in this cone regain @Damage[(4d10+16)[healing]|traits:emotion,fear,mental] Hit Points.Garudas Speed 25 feet, fly 60 feetArrive Swooping Dive A battalion of garudas sweep through enemy lines, dealing @Damage[6d10[slashing]|options:area-damage] damage to enemies in a @Template[line|distance:120] (@Check[reflex|basic|options:area-effect] save)Depart Winds of Freedom The garudas flap their wings in tandem, focusing on a @Template[burst|distance:20] within 60 feet of them. All allies in that area gain a +1 circumstance bonus to all skill checks and DCs for 1 round, and enemies must succeed a @Check[reflex|options:area-effect,inflicts:prone] save or be knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].@UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Holy Host (Azata)]
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Holy Host (Garuda)]
+name: Zealot Legion Summon
+description: 'In the sprawl, zealot strike forces with unwavering conviction cut through
+  heresy with ruthless efficiency. However, even devoted zealots know that reinforcements
+  never hurt in a crusade, and they might call upon the assistance of a zealot legion.
+  The legion occupies the space of a Huge creature. When you activate this tech, choose
+  one of the zealot divisions below to summon.Agathions Speed 30 feetArrive (fire)
+  Pranks for All A squadron of procyals arrives, eager to see your enemies learn their
+  lesson in this fight. All enemies in a @Template[cone|distance:60] take @Damage[8d6[fire]|options:area-damage|traits:fire]
+  damage (@Check[reflex|basic|options:area-effect|traits:fire] save) as the procyals
+  bombard them with popping firecrackersDepart Parting Lesson (emotion, mental) The
+  procyals laugh uproariously as they leave, each throwing out a piece of unrelated
+  advice to a nearby enemy. Enemies in a @Template[type:emanation|distance:20] take
+  @Damage[4d6[mental]|options:area-damage|traits:emotion,mental] damage (@Check[will|basic|options:area-effect,inflicts:stunned|traits:emotion,mental]
+  save). On a failure, a creature is also Stunned 1. On a critical failure, they''re
+  Stunned 2.Angels Speed 30 feet, fly 40 feetArrive (spirit) Flaming Truth A legion
+  of balisses arrive in a burst of holy flame, dealing @Damage[8d6[spirit]|options:area-damage]
+  damage to all creatures in a @Template[type:emanation|distance:20] with a @Check[fortitude|basic|options:area-effect,inflicts:blinded|traits:spirit]
+  save. On a critical failure, a creature is also @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
+  for 1 roundDepart Hidden Departure With a plume of smoke, the balisses vanish, spreading
+  a thick cloud of smoke in a @Template[type:emanation|distance:10]. All creatures
+  within the smoke are @UUID[Compendium.pf2e.conditionitems.Item.Concealed]. Unholy
+  creatures within the smoke are Enfeebled 2, and holy creatures within the smoke
+  gain the effects of truesight and ignore the concealment granted by the smoke.Archons
+  Speed 30 feet, fly 60 feetArrive (spirit) Justice Prevails A battalion of aesras,
+  also known as legion archons, swoop in to provide assistance. Enemies within a @Template[type:cone|distance:60]
+  take @Damage[8d6[spirit]|options:area-damage] damage (@Check[reflex|basic|options:area-effect|traits:spirit]
+  save)Depart (fire) Eyes of Judgment With one final examination of the battlefield,
+  the aesras take their leave, but not before bringing down their fiery swords to
+  create a corridor of sacred flame. Enemies in a @Template[type:line|distance:60]
+  take @Damage[4d6[slashing],2d6[persistent,fire]|options:area-damage] damage (@Check[reflex|basic|options:area-effect|traits:fire]
+  save).Azatas Speed 30 feet, fly 80 feetArrive (auditory, sonic) Inspiring Song Kanya
+  muses arrive to embolden your allies while pushing back your foes. Enemies in a
+  @Template[type:emanation|distance:20] take @Damage[6d6[sonic]|options:area-damage|traits:auditory,sonic]
+  damage (@Check[fortitude|basic|options:area-effect,forced-movement|traits:auditory,sonic]
+  save). A creature that fails the save is also pushed 10 feet away from the kanyas.
+  Allies in the emanation gain a +2 status bonus to attack rolls and saving throws,
+  as well as +4 status bonus to damage rolls for the duration of the spellDepart (emotion,
+  fear, mental) Booming Finale With a thunderous chord that stirs the hearts of your
+  forces, the kanyas depart. Enemies in a @Template[type:cone|distance:60] must attempt
+  a @Check[will|options:area-effect,inflicts:deafened,inflicts:frightened|traits:emotion,fear,mental]
+  save. On a failure, they''re Frightened 2, and on a critical failure, they''re Frightened
+  3 and @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 round. Allies in
+  this cone regain @Damage[(4d10+16)[healing]|traits:emotion,fear,mental] Hit Points.Garudas
+  Speed 25 feet, fly 60 feetArrive Swooping Dive A battalion of garudas sweep through
+  enemy lines, dealing @Damage[6d10[slashing]|options:area-damage] damage to enemies
+  in a @Template[line|distance:120] (@Check[reflex|basic|options:area-effect] save)Depart
+  Winds of Freedom The garudas flap their wings in tandem, focusing on a @Template[burst|distance:20]
+  within 60 feet of them. All allies in that area gain a +1 circumstance bonus to
+  all skill checks and DCs for 1 round, and enemies must succeed a @Check[reflex|options:area-effect,inflicts:prone]
+  save or be knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].@UUID[Compendium.pf2e.spell-effects.Item.Spell
+  Effect: Holy Host (Azata)]
+
+  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Holy Host (Garuda)]'
 tradition: fanatic_doctrine
 level: 8
 usage_type: prepared
@@ -12,7 +61,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: In stories, armies with just and righteous causes win with little difficulty, conquering unholy legions. However, many holy armies know that an extra hand never hurts in the fight to exterminate cruel
+  on_apply:
+  - type: utility
+    dc: 0
+    description: In stories, armies with just and righteous causes win with little
+      difficulty, conquering unholy legions. However, many holy armies know that an
+      extra hand never hurts in the fight to exterminate cruel
