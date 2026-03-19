@@ -1,39 +1,62 @@
 id: schemer
 name: Schemer
-description: "Knowledge is power, and Schemers collect both. Through chemical mastery, psychological manipulation, and forbidden insight, they bend situations — and people — to their will."
+description: Knowledge is power, and Schemers collect both. Through chemical mastery,
+  psychological manipulation, and forbidden insight, they bend situations — and people
+  — to their will.
 key_ability: savvy
 hit_points_per_level: 6
-
 ability_boosts:
-  fixed: [savvy, flair]
+  fixed:
+  - savvy
+  - flair
   free: 2
-
 technology_grants:
   prepared:
     slots_by_level:
       1: 2
     pool:
-      - { id: fear_neural, level: 1 }
-      - { id: daze_neural, level: 1 }
-      - { id: haunting_hymn_neural, level: 1 }
-      - { id: grim_tendrils_neural, level: 1 }
-      - { id: telekinetic_projectile_neural, level: 1 }
-      - { id: sleep_neural, level: 1 }
-      - { id: charm_neural, level: 1 }
-      - { id: command_neural, level: 1 }
-      - { id: enfeeble_neural, level: 1 }
-      - { id: lose_the_path_neural, level: 1 }
-      - { id: void_warp_neural, level: 1 }
-      - { id: illusory_disguise_neural, level: 1 }
-      - { id: illusory_object_neural, level: 1 }
-      - { id: ghost_sound_neural, level: 1 }
-      - { id: penumbral_shroud_neural, level: 1 }
-      - { id: soothe, level: 1 }
-      - { id: sanctuary_neural, level: 1 }
-      - { id: shield_neural, level: 1 }
-      - { id: mindlink_neural, level: 1 }
-      - { id: detect_magic_neural, level: 1 }
-      - { id: read_aura_neural, level: 1 }
+    - id: fear_neural
+      level: 1
+    - id: daze_neural
+      level: 1
+    - id: haunting_hymn_neural
+      level: 1
+    - id: grim_tendrils_neural
+      level: 1
+    - id: telekinetic_projectile_neural
+      level: 1
+    - id: sleep_neural
+      level: 1
+    - id: charm_neural
+      level: 1
+    - id: command_neural
+      level: 1
+    - id: enfeeble_neural
+      level: 1
+    - id: lose_the_path_neural
+      level: 1
+    - id: void_warp_neural
+      level: 1
+    - id: illusory_disguise_neural
+      level: 1
+    - id: illusory_object_neural
+      level: 1
+    - id: ghost_sound_neural
+      level: 1
+    - id: penumbral_shroud_neural
+      level: 1
+    - id: soothe
+      level: 1
+    - id: sanctuary_neural
+      level: 1
+    - id: shield_neural
+      level: 1
+    - id: mindlink_neural
+      level: 1
+    - id: detect_magic_neural
+      level: 1
+    - id: read_aura_neural
+      level: 1
 level_up_grants:
   2:
     prepared:
@@ -42,12 +65,81 @@ level_up_grants:
   3:
     prepared:
       slots_by_level:
-        1: 1
+        2: 2
+      pool: []
   4:
     prepared:
       slots_by_level:
-        1: 1
+        2: 1
   5:
     prepared:
       slots_by_level:
-        1: 1
+        3: 2
+      pool: []
+  6:
+    prepared:
+      slots_by_level:
+        3: 1
+  7:
+    prepared:
+      slots_by_level:
+        4: 2
+      pool: []
+  8:
+    prepared:
+      slots_by_level:
+        4: 1
+  9:
+    prepared:
+      slots_by_level:
+        5: 2
+      pool: []
+  10:
+    prepared:
+      slots_by_level:
+        5: 1
+  11:
+    prepared:
+      slots_by_level:
+        6: 2
+      pool: []
+  12:
+    prepared:
+      slots_by_level:
+        6: 1
+  13:
+    prepared:
+      slots_by_level:
+        7: 2
+      pool: []
+  14:
+    prepared:
+      slots_by_level:
+        7: 1
+  15:
+    prepared:
+      slots_by_level:
+        8: 2
+      pool: []
+  16:
+    prepared:
+      slots_by_level:
+        8: 1
+  17:
+    prepared:
+      slots_by_level:
+        9: 2
+      pool: []
+  18:
+    prepared:
+      slots_by_level:
+        9: 1
+  19:
+    prepared:
+      slots_by_level:
+        10: 2
+      pool: []
+  20:
+    prepared:
+      slots_by_level:
+        10: 1

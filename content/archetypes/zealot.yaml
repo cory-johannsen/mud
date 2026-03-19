@@ -1,38 +1,60 @@
 id: zealot
 name: Zealot
-description: "True believers and community enforcers. Zealots draw power from conviction — religious, political, or tribal — and use it to protect their flock and punish the wicked."
+description: True believers and community enforcers. Zealots draw power from conviction
+  — religious, political, or tribal — and use it to protect their flock and punish
+  the wicked.
 key_ability: grit
 hit_points_per_level: 8
-
 ability_boosts:
-  fixed: [grit, flair]
+  fixed:
+  - grit
+  - flair
   free: 2
-
 technology_grants:
   prepared:
     slots_by_level:
       1: 2
     pool:
-      - { id: divine_lance, level: 1 }
-      - { id: harm, level: 1 }
-      - { id: haunting_hymn_fanatic_doctrine, level: 1 }
-      - { id: ancient_dust_fanatic_doctrine, level: 1 }
-      - { id: vitality_lash_fanatic_doctrine, level: 1 }
-      - { id: command_fanatic_doctrine, level: 1 }
-      - { id: fear_fanatic_doctrine, level: 1 }
-      - { id: daze_fanatic_doctrine, level: 1 }
-      - { id: malediction, level: 1 }
-      - { id: enfeeble_fanatic_doctrine, level: 1 }
-      - { id: heal_fanatic_doctrine, level: 1 }
-      - { id: bless_fanatic_doctrine, level: 1 }
-      - { id: benediction, level: 1 }
-      - { id: spirit_link_fanatic_doctrine, level: 1 }
-      - { id: infuse_vitality, level: 1 }
-      - { id: detect_alignment_fanatic_doctrine, level: 1 }
-      - { id: detect_magic_fanatic_doctrine, level: 1 }
-      - { id: light_fanatic_doctrine, level: 1 }
-      - { id: guidance_fanatic_doctrine, level: 1 }
-      - { id: sanctuary_fanatic_doctrine, level: 1 }
+    - id: divine_lance
+      level: 1
+    - id: harm
+      level: 1
+    - id: haunting_hymn_fanatic_doctrine
+      level: 1
+    - id: ancient_dust_fanatic_doctrine
+      level: 1
+    - id: vitality_lash_fanatic_doctrine
+      level: 1
+    - id: command_fanatic_doctrine
+      level: 1
+    - id: fear_fanatic_doctrine
+      level: 1
+    - id: daze_fanatic_doctrine
+      level: 1
+    - id: malediction
+      level: 1
+    - id: enfeeble_fanatic_doctrine
+      level: 1
+    - id: heal_fanatic_doctrine
+      level: 1
+    - id: bless_fanatic_doctrine
+      level: 1
+    - id: benediction
+      level: 1
+    - id: spirit_link_fanatic_doctrine
+      level: 1
+    - id: infuse_vitality
+      level: 1
+    - id: detect_alignment_fanatic_doctrine
+      level: 1
+    - id: detect_magic_fanatic_doctrine
+      level: 1
+    - id: light_fanatic_doctrine
+      level: 1
+    - id: guidance_fanatic_doctrine
+      level: 1
+    - id: sanctuary_fanatic_doctrine
+      level: 1
 level_up_grants:
   2:
     prepared:
@@ -41,12 +63,81 @@ level_up_grants:
   3:
     prepared:
       slots_by_level:
-        1: 1
+        2: 2
+      pool: []
   4:
     prepared:
       slots_by_level:
-        1: 1
+        2: 1
   5:
     prepared:
       slots_by_level:
-        1: 1
+        3: 2
+      pool: []
+  6:
+    prepared:
+      slots_by_level:
+        3: 1
+  7:
+    prepared:
+      slots_by_level:
+        4: 2
+      pool: []
+  8:
+    prepared:
+      slots_by_level:
+        4: 1
+  9:
+    prepared:
+      slots_by_level:
+        5: 2
+      pool: []
+  10:
+    prepared:
+      slots_by_level:
+        5: 1
+  11:
+    prepared:
+      slots_by_level:
+        6: 2
+      pool: []
+  12:
+    prepared:
+      slots_by_level:
+        6: 1
+  13:
+    prepared:
+      slots_by_level:
+        7: 2
+      pool: []
+  14:
+    prepared:
+      slots_by_level:
+        7: 1
+  15:
+    prepared:
+      slots_by_level:
+        8: 2
+      pool: []
+  16:
+    prepared:
+      slots_by_level:
+        8: 1
+  17:
+    prepared:
+      slots_by_level:
+        9: 2
+      pool: []
+  18:
+    prepared:
+      slots_by_level:
+        9: 1
+  19:
+    prepared:
+      slots_by_level:
+        10: 2
+      pool: []
+  20:
+    prepared:
+      slots_by_level:
+        10: 1

@@ -1,13 +1,14 @@
 id: influencer
 name: Influencer
-description: "Pay attention to me. Influencers shape the world through personality, persuasion, and the power of narrative."
+description: Pay attention to me. Influencers shape the world through personality,
+  persuasion, and the power of narrative.
 key_ability: flair
 hit_points_per_level: 8
-
 ability_boosts:
-  fixed: [flair, savvy]
+  fixed:
+  - flair
+  - savvy
   free: 2
-
 technology_grants:
   spontaneous:
     known_by_level:
@@ -15,27 +16,48 @@ technology_grants:
     uses_by_level:
       1: 2
     pool:
-      - { id: fear_neural, level: 1 }
-      - { id: daze_neural, level: 1 }
-      - { id: haunting_hymn_neural, level: 1 }
-      - { id: grim_tendrils_neural, level: 1 }
-      - { id: telekinetic_projectile_neural, level: 1 }
-      - { id: sleep_neural, level: 1 }
-      - { id: charm_neural, level: 1 }
-      - { id: command_neural, level: 1 }
-      - { id: enfeeble_neural, level: 1 }
-      - { id: lose_the_path_neural, level: 1 }
-      - { id: void_warp_neural, level: 1 }
-      - { id: illusory_disguise_neural, level: 1 }
-      - { id: illusory_object_neural, level: 1 }
-      - { id: ghost_sound_neural, level: 1 }
-      - { id: penumbral_shroud_neural, level: 1 }
-      - { id: soothe, level: 1 }
-      - { id: sanctuary_neural, level: 1 }
-      - { id: shield_neural, level: 1 }
-      - { id: mindlink_neural, level: 1 }
-      - { id: detect_magic_neural, level: 1 }
-      - { id: read_aura_neural, level: 1 }
+    - id: fear_neural
+      level: 1
+    - id: daze_neural
+      level: 1
+    - id: haunting_hymn_neural
+      level: 1
+    - id: grim_tendrils_neural
+      level: 1
+    - id: telekinetic_projectile_neural
+      level: 1
+    - id: sleep_neural
+      level: 1
+    - id: charm_neural
+      level: 1
+    - id: command_neural
+      level: 1
+    - id: enfeeble_neural
+      level: 1
+    - id: lose_the_path_neural
+      level: 1
+    - id: void_warp_neural
+      level: 1
+    - id: illusory_disguise_neural
+      level: 1
+    - id: illusory_object_neural
+      level: 1
+    - id: ghost_sound_neural
+      level: 1
+    - id: penumbral_shroud_neural
+      level: 1
+    - id: soothe
+      level: 1
+    - id: sanctuary_neural
+      level: 1
+    - id: shield_neural
+      level: 1
+    - id: mindlink_neural
+      level: 1
+    - id: detect_magic_neural
+      level: 1
+    - id: read_aura_neural
+      level: 1
 level_up_grants:
   2:
     spontaneous:
@@ -43,31 +65,100 @@ level_up_grants:
         1: 1
   3:
     spontaneous:
-      uses_by_level:
-        1: 1
       known_by_level:
-        1: 1
-      pool:
-        - id: mind_spike
-          level: 1
-        - id: neural_static
-          level: 1
-        - id: synaptic_surge
-          level: 1
+        2: 2
+      uses_by_level:
+        2: 2
+      pool: []
   4:
     spontaneous:
       uses_by_level:
-        1: 1
+        2: 1
   5:
     spontaneous:
-      uses_by_level:
-        1: 1
       known_by_level:
-        1: 1
-      pool:
-        - id: mind_spike
-          level: 1
-        - id: neural_static
-          level: 1
-        - id: synaptic_surge
-          level: 1
+        3: 2
+      uses_by_level:
+        3: 2
+      pool: []
+  6:
+    spontaneous:
+      uses_by_level:
+        3: 1
+  7:
+    spontaneous:
+      known_by_level:
+        4: 2
+      uses_by_level:
+        4: 2
+      pool: []
+  8:
+    spontaneous:
+      uses_by_level:
+        4: 1
+  9:
+    spontaneous:
+      known_by_level:
+        5: 2
+      uses_by_level:
+        5: 2
+      pool: []
+  10:
+    spontaneous:
+      uses_by_level:
+        5: 1
+  11:
+    spontaneous:
+      known_by_level:
+        6: 2
+      uses_by_level:
+        6: 2
+      pool: []
+  12:
+    spontaneous:
+      uses_by_level:
+        6: 1
+  13:
+    spontaneous:
+      known_by_level:
+        7: 2
+      uses_by_level:
+        7: 2
+      pool: []
+  14:
+    spontaneous:
+      uses_by_level:
+        7: 1
+  15:
+    spontaneous:
+      known_by_level:
+        8: 2
+      uses_by_level:
+        8: 2
+      pool: []
+  16:
+    spontaneous:
+      uses_by_level:
+        8: 1
+  17:
+    spontaneous:
+      known_by_level:
+        9: 2
+      uses_by_level:
+        9: 2
+      pool: []
+  18:
+    spontaneous:
+      uses_by_level:
+        9: 1
+  19:
+    spontaneous:
+      known_by_level:
+        10: 2
+      uses_by_level:
+        10: 2
+      pool: []
+  20:
+    spontaneous:
+      uses_by_level:
+        10: 1
