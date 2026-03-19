@@ -1,0 +1,65 @@
+# Advanced Combat
+
+Extends the base combat system with reactions, distance, cover, area of effect, fleeing, mental state, terrain, and seeking.
+
+## Requirements
+
+- [ ] Advanced combat mechanics
+  - Reactions
+      - [x] Reactive Strike (Attack of Opportunity) — NPC triggers a Strike when a player in melee range moves or uses Step; required before Step and Tumble Through are meaningful
+  - Distance
+      - Measures the distance from the player to the target
+      - Maximum distance 100ft
+      - Minimum distance 5ft
+      - Distance is measurement in 5ft increments
+      - Combat begins with the players at 25ft distance from the enemy
+        - The player may specify an alternate initial distance
+    - The player may not initiate combat with a starting distance less than 15ft unless using a skill or feat that allows this
+        - NPCs always start at distance 0
+      - [x] Add `Distance int` field to Combat struct (in 5ft increments); initialize to 25 for player-initiated combat
+      - [x] Stride command — implement `stride` (1 AP; moves 25ft toward or away from target; display updated distance; required before range enforcement)
+      - [x] Range enforcement — modify attack resolution to check weapon range band vs combat distance; melee fails beyond 5ft; ranged attacks have accuracy penalties by range band
+  - Movement
+      - Players and NPCs can move towards or away from each other using PF2E movement rules, including action point costs
+      - [x] Positional tracking — track each combatant's position within a room in 5ft increments; required for Shove, Step, and Tumble Through
+      - [x] Shove command — implement `shove <target>` (Athletics vs Fortitude DC; on success push target 5ft away; requires positional tracking)
+      - [x] Step command — implement `step <direction>` (move 5ft without triggering Reactive Strike; requires positional tracking and Reactions)
+      - [x] Tumble Through command — implement `tumble <target>` (Acrobatics vs Reflex DC; on success move through enemy space without triggering Reactive Strike; requires positional tracking)
+  - Range
+      - Melee: 5ft
+      - Short: 10-25ft
+      - Long: 30-50ft
+      - Extreme: 55+ ft
+  - Cover
+      - Room equipment may serve as cover
+        - Whether equipment may be used as cover (and what kind of cover it provides) should be stored in the yaml for the room
+      - Cover uses the PF2E rules
+      - [x] Add `cover_tier`, `cover_destructible`, and `cover_hp` fields to room equipment YAML; loaded by the room system
+      - [x] Three-tier PF2E cover: Lesser (+1 AC/Stealth), Standard (+2), Greater (+4); conditions applied via condition system
+      - [x] Cover destruction — crossfire degradation (missed attacks that would hit without cover decrement cover HP); on destruction conditions cleared from all users; ActionCoverHit/ActionCoverDestroy events emitted
+      - [x] NPC cover strategy — `combat.strategy.use_cover: true` in NPC YAML causes NPC to auto-take best available cover at turn start
+      - [x] Cover cleared on Stride/Step/Tumble (success path)
+  - Area of Effect
+      - [x] AoE attack type — add `aoe_radius int` field to weapon/ability YAML; on resolution apply damage roll to all combatants within radius in the current combat
+  - Attack of opportunity
+      - [ ] See Reactive Strike under Reactions — Attack of Opportunity is implemented as Reactive Strike (NPC triggers a free Strike when a player in melee range uses a move action)
+  - [x] Terrain types
+      - [x] Climbable surfaces — `climb` command, Athletics vs DC, 4-tier outcomes, falling damage + prone on crit fail
+      - [x] Water terrain — `swim` command, Athletics vs DC, 4-tier outcomes, drowning damage + submerged condition on crit fail
+  - Fleeing
+      - Pursuit
+      - [x] Flee command — implement `flee` (costs all remaining AP; Athletics or Acrobatics check vs highest NPC Athletics DC in room; on success combat ends and player moves to a random adjacent room)
+      - [x] Pursuit — on flee failure, each NPC makes a separate Athletics check; on NPC success the NPC follows the player to the adjacent room and re-initiates combat
+  - Mental state
+      - [x] Mental state system — MentalStateManager with four independent tracks (Fear, Rage, Despair, Delirium), three severity levels each, duration-based escalation, auto-recovery for level 1 states
+      - [x] Fear track — Uneasy (skill penalty) → Panicked → Psychotic; triggered by HP ≤ 25%; escalates over rounds
+      - [x] Rage track — Irritated (+dmg/-AC) → Enraged (flee restricted) → Berserker; triggered by NPC abilities (future)
+      - [x] Despair track — Discouraged (-1 AP) → Despairing (-2 AP) → Catatonic (skip turn); triggered by NPC abilities (future)
+      - [x] Delirium track — Confused (-atk) → Delirious (-atk) → Hallucinatory (-atk, skip turn); triggered by toxins/zones (future)
+      - [x] Calm command — `calm` (Grit check vs DC 10+severity×4; costs all AP in combat; success steps down worst active track)
+      - [x] Forced action execution — Panicked/Psychotic (random attack any combatant), Berserker (attack lowest-HP combatant); overrides player pre-submitted actions each round
+      - [x] NPC ability triggers for Rage, Despair, Delirium tracks
+      - [x] Zone effect triggers for all tracks
+  - [x] Seek command — implement `seek` (Perception check vs highest NPC Stealth in room; reveals any Hidden NPCs to the player for one round; requires NPC Hidden state in combat)
+  - [x] Immobilized — prevent grabbed creatures from moving between rooms
+  - [x] Sense Motive command — implement `motive <target>` (awareness vs Deception DC; in combat costs 1 AP and reveals NPC HP tier; out-of-combat behavior stubbed for non-combat NPC extension)
