@@ -65,12 +65,14 @@ const (
 	EffectSummon     EffectType = "summon"
 	EffectUtility    EffectType = "utility"
 	EffectDrain      EffectType = "drain"
+	EffectTremorsense EffectType = "tremorsense"
 )
 
 var validEffectTypes = map[EffectType]bool{
 	EffectDamage: true, EffectHeal: true, EffectCondition: true,
 	EffectSkillCheck: true, EffectMovement: true, EffectZone: true,
 	EffectSummon: true, EffectUtility: true, EffectDrain: true,
+	EffectTremorsense: true,
 }
 
 // TechEffect is one effect within a technology, discriminated by Type.
