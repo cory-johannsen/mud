@@ -394,6 +394,8 @@ func RearrangePreparedTechs(
 	techReg *technology.Registry,
 	promptFn TechPromptFn,
 	prepRepo PreparedTechRepo,
+	sendFn func(string),
+	flavor technology.TraditionFlavor,
 ) error {
 	// Build SlotsByLevel from session (source of truth for slot counts).
 	slotsByLevel := make(map[int]int)
@@ -406,6 +408,14 @@ func RearrangePreparedTechs(
 	if len(slotsByLevel) == 0 {
 		return nil
 	}
+
+	send := func(msg string) {
+		if sendFn != nil {
+			sendFn(msg)
+		}
+	}
+
+	send(fmt.Sprintf("%sing %s...", flavor.PrepVerb, flavor.LoadoutTitle))
 
 	// Aggregate Fixed and Pool from all applicable grants.
 	var allFixed []ruleset.PreparedEntry
@@ -438,7 +448,7 @@ func RearrangePreparedTechs(
 
 	// Re-fill each level.
 	for lvl, slots := range slotsByLevel {
-		chosen, err := fillFromPreparedPool(ctx, lvl, slots, 0, merged, techReg, promptFn, characterID, prepRepo)
+		chosen, err := fillFromPreparedPoolWithSend(ctx, lvl, slots, 0, merged, techReg, promptFn, characterID, prepRepo, send, flavor)
 		if err != nil {
 			return fmt.Errorf("RearrangePreparedTechs level %d: %w", lvl, err)
 		}
@@ -620,6 +630,89 @@ func ResolvePendingTechGrants(
 		}
 	}
 	return nil
+}
+
+// fillFromPreparedPoolWithSend fills prepared slots like fillFromPreparedPool but emits
+// per-slot progress messages via send using the provided flavor strings.
+// Precondition: send is non-nil; flavor fields are used for SlotNoun display.
+func fillFromPreparedPoolWithSend(
+	ctx context.Context,
+	lvl, slots, startIdx int,
+	grants *ruleset.PreparedGrants,
+	techReg *technology.Registry,
+	promptFn TechPromptFn,
+	characterID int64,
+	repo PreparedTechRepo,
+	send func(string),
+	flavor technology.TraditionFlavor,
+) ([]*session.PreparedSlot, error) {
+	result := make([]*session.PreparedSlot, 0, slots)
+	idx := startIdx
+
+	// Pre-fill from fixed entries at this level.
+	for _, e := range grants.Fixed {
+		if e.Level == lvl {
+			slotNum := idx - startIdx + 1
+			send(fmt.Sprintf("Level %d, %s %d (fixed): %s", lvl, flavor.SlotNoun, slotNum, e.ID))
+			slot := &session.PreparedSlot{TechID: e.ID}
+			result = append(result, slot)
+			if err := repo.Set(ctx, characterID, lvl, idx, e.ID); err != nil {
+				return nil, err
+			}
+			idx++
+		}
+	}
+
+	open := slots - len(result)
+	if open <= 0 {
+		return result, nil
+	}
+
+	// Collect pool entries at this level.
+	var pool []ruleset.PreparedEntry
+	for _, e := range grants.Pool {
+		if e.Level == lvl {
+			pool = append(pool, e)
+		}
+	}
+
+	if len(pool) == open {
+		// Auto-assign without prompt.
+		for _, e := range pool {
+			slotNum := idx - startIdx + 1
+			send(fmt.Sprintf("Level %d, %s %d (fixed): %s", lvl, flavor.SlotNoun, slotNum, e.ID))
+			slot := &session.PreparedSlot{TechID: e.ID}
+			result = append(result, slot)
+			if err := repo.Set(ctx, characterID, lvl, idx, e.ID); err != nil {
+				return nil, err
+			}
+			idx++
+		}
+		return result, nil
+	}
+
+	// Prompt player to choose from pool.
+	remaining := make([]ruleset.PreparedEntry, len(pool))
+	copy(remaining, pool)
+	for open > 0 {
+		slotNum := idx - startIdx + 1
+		send(fmt.Sprintf("Level %d, %s %d: choose from pool", lvl, flavor.SlotNoun, slotNum))
+		options := buildPreparedOptions(remaining, techReg)
+		chosen, err := promptFn(options)
+		if err != nil {
+			return nil, err
+		}
+		techID := parseTechID(chosen)
+		slot := &session.PreparedSlot{TechID: techID}
+		result = append(result, slot)
+		if err := repo.Set(ctx, characterID, lvl, idx, techID); err != nil {
+			return nil, err
+		}
+		idx++
+		remaining = removePreparedByID(remaining, techID)
+		open--
+	}
+	return result, nil
 }
 
 // fillFromPreparedPool fills prepared slots from fixed entries and optionally the pool.

@@ -2507,7 +2507,7 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 	}
 
 	if err := RearrangePreparedTechs(ctx, sess, sess.CharacterID,
-		job, s.techRegistry, promptFn, s.preparedTechRepo,
+		job, s.techRegistry, promptFn, s.preparedTechRepo, nil, technology.TraditionFlavor{},
 	); err != nil {
 		s.logger.Warn("handleRest: RearrangePreparedTechs failed",
 			zap.String("uid", uid),
