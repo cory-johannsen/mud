@@ -32,6 +32,23 @@ to avoid duplicated research.
 | Cantrip            | Hardwired Technology | Unlimited use; fixed per job; not selectable from a pool   |
 | Rank 1–10 spell    | Technology (leveled) | Prepared or spontaneous; selectable from archetype/job pool; rank = tech level |
 
+### Spell Rank Unlock → Job Level
+
+Technology slot ranks unlock based on **job level** (not character level). Characters may hold multiple jobs; each job levels independently. Max job level is 20.
+
+| Tech Rank | Job Level Required |
+|-----------|--------------------|
+| 1         | 1                  |
+| 2         | 3                  |
+| 3         | 5                  |
+| 4         | 7                  |
+| 5         | 9                  |
+| 6         | 11                 |
+| 7         | 13                 |
+| 8         | 15                 |
+| 9         | 17                 |
+| 10        | 19                 |
+
 ## Class Mapping
 
 Gunchete replaces PF2E classes with **Archetypes** (broad role categories) and **Jobs** (specific
