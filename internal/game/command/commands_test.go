@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRegisterShortcuts_NoDuplicates(t *testing.T) {
@@ -88,5 +90,16 @@ func TestHandlerAction_InBuiltinCommands(t *testing.T) {
 	}
 	if !found {
 		t.Error("HandlerAction not found in BuiltinCommands")
+	}
+}
+
+func TestLoadoutAliases(t *testing.T) {
+	reg := DefaultRegistry()
+	for _, alias := range []string{"lo", "prep", "kit"} {
+		t.Run(alias, func(t *testing.T) {
+			cmd, ok := reg.Resolve(alias)
+			require.True(t, ok, "alias %q not found", alias)
+			assert.Equal(t, HandlerLoadout, cmd.Handler)
+		})
 	}
 }
