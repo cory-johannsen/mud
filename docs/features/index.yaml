@@ -5,6 +5,7 @@ features:
     priority: 10
     category: combat
     file: docs/features/actions.md
+    effort: "not defined"
 
   - slug: console-notifications
     name: Console Notifications
@@ -12,6 +13,7 @@ features:
     priority: 20
     category: ui
     file: docs/features/completed-items.md
+    effort: "-"
 
   - slug: todo-list
     name: TODO List
@@ -19,6 +21,7 @@ features:
     priority: 30
     category: meta
     file: docs/features/housekeeping.md
+    effort: "-"
 
   - slug: player-gender
     name: Player Gender
@@ -26,6 +29,7 @@ features:
     priority: 40
     category: character
     file: docs/features/player-gender.md
+    effort: "-"
 
   - slug: trainskill-persistence
     name: Trainskill Persistence
@@ -33,6 +37,7 @@ features:
     priority: 50
     category: meta
     file: docs/features/housekeeping.md
+    effort: "-"
 
   - slug: grant-editor-command
     name: Grant Editor Command
@@ -40,6 +45,7 @@ features:
     priority: 60
     category: meta
     file: docs/features/housekeeping.md
+    effort: "-"
 
   - slug: room-display
     name: Room Display
@@ -47,6 +53,7 @@ features:
     priority: 70
     category: ui
     file: docs/features/room-display.md
+    effort: "-"
 
   - slug: perception
     name: Perception / Awareness
@@ -54,6 +61,7 @@ features:
     priority: 80
     category: character
     file: docs/features/perception.md
+    effort: "-"
 
   - slug: npc-equipment
     name: NPC Equipment
@@ -61,6 +69,7 @@ features:
     priority: 90
     category: world
     file: docs/features/npc-equipment.md
+    effort: "-"
 
   - slug: disarm-action
     name: Disarm Action
@@ -68,6 +77,7 @@ features:
     priority: 91
     category: combat
     file: docs/features/npc-equipment.md
+    effort: "-"
 
   - slug: advanced-combat
     name: Advanced Combat Mechanics
@@ -75,6 +85,7 @@ features:
     priority: 100
     category: combat
     file: docs/features/advanced-combat.md
+    effort: "not defined"
 
   - slug: player-prompt-mental-state
     name: Player Prompt Mental State
@@ -82,6 +93,7 @@ features:
     priority: 110
     category: ui
     file: docs/features/completed-items.md
+    effort: "-"
 
   - slug: room-mental-state
     name: Room Section Mental State
@@ -89,6 +101,7 @@ features:
     priority: 120
     category: ui
     file: docs/features/completed-items.md
+    effort: "-"
 
   - slug: map-legend-2col
     name: Map/Legend 2-Column View
@@ -96,6 +109,7 @@ features:
     priority: 130
     category: ui
     file: docs/features/completed-items.md
+    effort: "-"
 
   - slug: replace-level10
     name: Replace Level+10 DCs
@@ -103,6 +117,7 @@ features:
     priority: 140
     category: combat
     file: docs/features/completed-items.md
+    effort: "-"
 
   - slug: npcs-rob-player
     name: NPCs Rob Player
@@ -110,6 +125,7 @@ features:
     priority: 150
     category: world
     file: docs/features/completed-items.md
+    effort: "-"
 
   - slug: multiplayer-combat
     name: Multi-Player Combat
@@ -117,6 +133,7 @@ features:
     priority: 160
     category: combat
     file: docs/features/multiplayer-combat.md
+    effort: "not defined"
 
   - slug: technology
     name: Technology
@@ -124,6 +141,7 @@ features:
     priority: 170
     category: technology
     file: docs/features/technology.md
+    effort: "not defined"
 
   - slug: wire-refactor
     name: Wire Dependency Injection Refactor
@@ -131,6 +149,7 @@ features:
     priority: 180
     category: meta
     file: docs/features/housekeeping.md
+    effort: "not defined"
 
   - slug: long-rest
     name: Long Rest
@@ -138,6 +157,7 @@ features:
     priority: 190
     category: character
     file: docs/features/long-rest.md
+    effort: "-"
 
   - slug: non-combat-npcs
     name: Non-Combat NPCs
@@ -145,6 +165,7 @@ features:
     priority: 200
     category: world
     file: docs/features/non-combat-npcs.md
+    effort: "not defined"
     dependencies:
       - room-danger-levels
 
@@ -154,6 +175,7 @@ features:
     priority: 210
     category: world
     file: docs/features/persistent-calendar.md
+    effort: "not defined"
 
   - slug: use-command
     name: Use Command Expansion
@@ -161,6 +183,7 @@ features:
     priority: 220
     category: ui
     file: docs/features/use-command.md
+    effort: "not defined"
 
   - slug: hero-points
     name: Hero Points
@@ -168,6 +191,7 @@ features:
     priority: 230
     category: character
     file: docs/features/hero-points.md
+    effort: "-"
 
   - slug: feat-import
     name: Feat Import
@@ -175,6 +199,7 @@ features:
     priority: 240
     category: character
     file: docs/features/feat-import.md
+    effort: "not defined"
 
   - slug: job-development
     name: Job Development
@@ -182,6 +207,7 @@ features:
     priority: 250
     category: character
     file: docs/features/job-development.md
+    effort: "not defined"
 
   - slug: equipment-mechanics
     name: Equipment Mechanics Expansion
@@ -189,6 +215,7 @@ features:
     priority: 260
     category: world
     file: docs/features/equipment-mechanics.md
+    effort: "not defined"
 
   - slug: editor-commands
     name: Editor Commands
@@ -196,6 +223,7 @@ features:
     priority: 270
     category: meta
     file: docs/features/editor-commands.md
+    effort: "not defined"
 
   - slug: resting
     name: Resting
@@ -203,6 +231,7 @@ features:
     priority: 280
     category: world
     file: docs/features/resting.md
+    effort: "not defined"
 
   - slug: map-poi
     name: Map Points of Interest
@@ -210,6 +239,7 @@ features:
     priority: 290
     category: ui
     file: docs/features/map-poi.md
+    effort: "not defined"
 
   - slug: room-danger-levels
     name: Room Danger Levels
@@ -217,6 +247,7 @@ features:
     priority: 300
     category: world
     file: docs/features/room-danger-levels.md
+    effort: "not defined"
 
   - slug: non-combat-npcs-all-zones
     name: Non-Combat NPCs — All Zones
@@ -224,6 +255,7 @@ features:
     priority: 301
     category: world
     file: docs/features/non-combat-npcs.md
+    effort: "not defined"
     dependencies:
       - non-combat-npcs
 
@@ -233,6 +265,7 @@ features:
     priority: 310
     category: world
     file: docs/features/npc-behaviors.md
+    effort: "not defined"
 
   - slug: npcs-named
     name: Named NPCs (Wayne/Dwayne/Jennifer Dawg)
@@ -240,6 +273,7 @@ features:
     priority: 320
     category: world
     file: docs/features/npcs-named.md
+    effort: "not defined"
 
   - slug: world-map
     name: World Map / Fast Travel
@@ -247,6 +281,7 @@ features:
     priority: 330
     category: ui
     file: docs/features/world-map.md
+    effort: "not defined"
 
   - slug: non-human-npcs
     name: Non-Human NPCs
@@ -254,6 +289,7 @@ features:
     priority: 340
     category: world
     file: docs/features/non-human-npcs.md
+    effort: "not defined"
 
   - slug: advanced-health
     name: Advanced Health Effects
@@ -261,6 +297,7 @@ features:
     priority: 350
     category: character
     file: docs/features/advanced-health.md
+    effort: "not defined"
 
   - slug: advanced-enemies
     name: Advanced Enemies
@@ -268,6 +305,7 @@ features:
     priority: 360
     category: world
     file: docs/features/advanced-enemies.md
+    effort: "not defined"
     dependencies:
       - advanced-combat
 
@@ -277,6 +315,7 @@ features:
     priority: 370
     category: world
     file: docs/features/quests.md
+    effort: "not defined"
 
   - slug: factions
     name: Factions and Allegiances
@@ -284,6 +323,7 @@ features:
     priority: 380
     category: world
     file: docs/features/factions.md
+    effort: "not defined"
 
   - slug: crafting
     name: Crafting
@@ -291,6 +331,7 @@ features:
     priority: 390
     category: world
     file: docs/features/crafting.md
+    effort: "not defined"
 
   - slug: traps
     name: Traps
@@ -298,6 +339,7 @@ features:
     priority: 400
     category: world
     file: docs/features/traps.md
+    effort: "not defined"
 
   - slug: zones-new
     name: New Zones
@@ -305,6 +347,7 @@ features:
     priority: 410
     category: world
     file: docs/features/zones-new.md
+    effort: "not defined"
 
   - slug: web-client
     name: Web Game Client
@@ -312,6 +355,7 @@ features:
     priority: 420
     category: ui
     file: docs/features/web-client.md
+    effort: "not defined"
 
   - slug: game-client-ebiten
     name: Ebiten Game Client
@@ -319,6 +363,7 @@ features:
     priority: 430
     category: ui
     file: docs/features/game-client-ebiten.md
+    effort: "not defined"
 
   - slug: documentation
     name: Documentation
@@ -326,3 +371,4 @@ features:
     priority: 440
     category: meta
     file: docs/features/documentation.md
+    effort: "not defined"
