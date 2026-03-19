@@ -1,5 +1,7 @@
 package importer
 
+import "github.com/cory-johannsen/mud/internal/game/technology"
+
 // ZoneData is the common intermediate format produced by all Source
 // implementations. Its YAML tags match the project's zone file schema exactly,
 // so it can be marshalled directly and validated by world.LoadZoneFromBytes.
@@ -44,4 +46,20 @@ type ExitSpec struct {
 // Postcondition: returns at least one ZoneData, or a non-nil error.
 type Source interface {
 	Load(sourceDir, startRoom string) ([]*ZoneData, error)
+}
+
+// TechData is the intermediate format for a single converted technology.
+// Tradition names the output subdirectory (e.g. "neural", "technical").
+type TechData struct {
+	Def       *technology.TechnologyDef
+	Tradition string
+}
+
+// TechSource loads TechData from a format-specific source directory.
+//
+// Precondition: sourceDir must exist and contain the expected layout.
+// Postcondition: returns TechData entries, a (possibly empty) warning slice,
+// and nil error on success; non-nil error on fatal failure.
+type TechSource interface {
+	Load(sourceDir string) ([]*TechData, []string, error)
 }
