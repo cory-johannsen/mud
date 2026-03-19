@@ -345,37 +345,29 @@ func TestFormatTremorsenseOutput_TableDriven(t *testing.T) {
 }
 
 func genCreatureInfo(t *rapid.T) CreatureInfo {
-	// Names must not contain ", " to avoid splitting ambiguity in the PBT output check.
-	name := rapid.StringMatching(`[^,]{1,20}`).Draw(t, "name")
 	return CreatureInfo{
-		Name:   name,
+		Name:   rapid.StringN(1, 20, -1).Draw(t, "name"),
 		Hidden: rapid.Bool().Draw(t, "hidden"),
 	}
 }
 
 func TestProperty_FormatTremorsenseOutput_HiddenSuffix(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
-		creatures := rapid.SliceOfN(rapid.Custom(genCreatureInfo), 1, -1).Draw(t, "creatures")
+		creatures := rapid.SliceOfN(rapid.Custom(genCreatureInfo), 1, 10).Draw(t, "creatures")
 		output := FormatTremorsenseOutput(creatures)
-		// Split on the known prefix to get the parts section.
-		const prefix = "[Seismic Sense] Creatures detected in this room: "
-		assert.True(t, strings.HasPrefix(output, prefix), "output must begin with seismic sense prefix")
-		parts := strings.Split(strings.TrimPrefix(output, prefix), ", ")
-		// Build a set of parts for O(1) exact lookup.
-		partSet := make(map[string]bool, len(parts))
-		for _, p := range parts {
-			partSet[p] = true
-		}
+
+		// Build expected output independently using the spec's mandated logic:
+		// hidden creatures are suffixed with " (concealed)", joined by ", ".
+		parts := make([]string, len(creatures))
 		for i, c := range creatures {
 			if c.Hidden {
-				assert.True(t, partSet[c.Name+" (concealed)"],
-					"hidden creature[%d] %q must appear as exact part with (concealed) suffix", i, c.Name)
+				parts[i] = c.Name + " (concealed)"
 			} else {
-				assert.True(t, partSet[c.Name],
-					"visible creature[%d] %q must appear as exact part without (concealed) suffix", i, c.Name)
-				assert.False(t, partSet[c.Name+" (concealed)"],
-					"visible creature[%d] %q must NOT appear with (concealed) suffix", i, c.Name)
+				parts[i] = c.Name
 			}
 		}
+		expected := "[Seismic Sense] Creatures detected in this room: " + strings.Join(parts, ", ")
+		assert.Equal(t, expected, output,
+			"FormatTremorsenseOutput must suffix hidden creatures with (concealed) and leave visible ones unsuffixed")
 	})
 }
