@@ -1,12 +1,17 @@
 id: blindness_bio_synthetic
-name: Blindness
-description: |-
-    You blind the target. The effect is determined by the target's Fortitude save. The target then becomes temporarily immune for 1 minute.
+name: Retinal Dissolve
+description: 'You spray a targeted enzyme that dissolves the target''s retinal cells.
+  The effect is determined by the target''s Fortitude save. The target then becomes
+  temporarily immune for 1 minute.
 
-    Critical Success The target is unaffected.
-    Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Blinded] until its next turn begins.
-    Failure The target is Blinded for 1 minute.
-    Critical Failure The target is Blinded permanently.
+
+  Critical Success The target is unaffected.
+
+  Success The target is Dazzled for 1 round.
+
+  Failure The target is Blinded for 1 minute.
+
+  Critical Failure The target is Blinded with no duration (must be healed).'
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -18,11 +23,13 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You blind the target. The effect is determined by the target's Fortitude save. The target then becomes temporarily immune for 1 minute.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You blind the target. The effect is determined by the target''s
+      Fortitude save. The target then becomes temporarily immune for 1 minute.
 
-            Critical Success The target is unaffected.
-            Success The target i
+
+      Critical Success The target is unaffected.
+
+      Success The target i'

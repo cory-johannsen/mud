@@ -1,11 +1,10 @@
 id: wooden_double_bio_synthetic
-name: Wooden Double
-description: |-
-    Trigger You're critically hit by a damage-dealing effect or a Strike.
+name: Chitin Decoy
+description: 'Trigger You''re critically hit by a damage-dealing effect or a Strike.
 
-    A wooden double appears out of nowhere and takes the blow in your place. Take a Step action. A wooden block of your size and roughly shaped like you appears in the space you left and absorbs the hit. This block has Hardness 5 and 20 Hit Points. If the wooden block is destroyed, you take any excess damage that the block didn't absorb. After taking the blow, the wooden block collapses into a pile of splinters and dust.
 
-    Heightened (+1) The block's Hit Points increase by 10.
+  A chitin shell duplicate erupts from your body to absorb the blow. You take half
+  the triggering damage instead of the full critical hit damage.'
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -15,10 +14,11 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Trigger You're critically hit by a damage-dealing effect or a Strike.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger You''re critically hit by a damage-dealing effect or a Strike.
 
-            A wooden double appears out of nowhere and takes the blow in your place. Take a Step action. A wooden block of your size and roug
+
+      A wooden double appears out of nowhere and takes the blow in your place. Take
+      a Step action. A wooden block of your size and roug'

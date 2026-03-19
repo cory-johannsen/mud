@@ -1,6 +1,8 @@
 id: echo_jump_technical
-name: Echo Jump
-description: You teleport to an unoccupied space within range, leaving behind a faint echo of your form that explodes with magical force. Each creature within a 10-foot emanation from your previous location takes 4d8 force damage.Heightened (+2) The range increases by 10 feet, and the damage increases by 3d8.
+name: Flashpoint Teleport
+description: You teleport to an unoccupied space within range, leaving a detonation
+  charge at your departure point. Each creature within a 10-foot burst takes 3d6 force
+  damage with a basic Reflex save.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -12,18 +14,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d4
-          damage_type: force
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d8
-          damage_type: force
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d8
-          damage_type: force
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d4
+    damage_type: force
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d8
+    damage_type: force
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d8
+    damage_type: force
+    dc: 0

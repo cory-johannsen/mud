@@ -1,9 +1,10 @@
 id: cloud_dragons_cloak_bio_synthetic
-name: Cloud Dragon's Cloak
-description: |-
-    Trigger You or an ally in range is targeted by a ranged attack.
+name: Spore Screen
+description: 'Trigger You or an ally in range is targeted by a ranged attack.
 
-    A cloud of mist enshrouds the target, appearing much like the deflecting clouds created by cloud dragons. The target is treated as @UUID[Compendium.pf2e.conditionitems.Item.Hidden] for the purposes of resolving the triggering attack (so normally the attacker must succeed at a @Check[flat|dc:11] to target it) and all ranged attacks against it for the duration.
+
+  A cloud of dense spores erupts around the target, providing concealment. The triggering
+  attack takes a -2 circumstance penalty.'
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -13,10 +14,11 @@ targets: single
 duration: rounds:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Trigger You or an ally in range is targeted by a ranged attack.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger You or an ally in range is targeted by a ranged attack.
 
-            A cloud of mist enshrouds the target, appearing much like the deflecting clouds created by cloud dragons. The target is treated as @UUI
+
+      A cloud of mist enshrouds the target, appearing much like the deflecting clouds
+      created by cloud dragons. The target is treated as @UUI'

@@ -1,12 +1,7 @@
 id: earthbind_technical
-name: Earthbind
-description: |-
-    Using the weight of earth, you hamper a target's flight, with effects based on its Fortitude save. If the creature reaches the ground safely, it doesn't take falling damage.
-
-    Critical Success The target is unaffected.
-    Success The target falls safely up to 120 feet.
-    Failure The target falls safely up to 120 feet. If it hits the ground, it can't Fly, levitate, or otherwise leave the ground for 1 round.
-    Critical Failure The target falls safely up to 120 feet. If it hits the ground, it can't Fly, levitate, or otherwise leave the ground for 1 minute.
+name: Gravity Tether
+description: You deploy a gravity tether that increases the target's effective weight,
+  hampering flight. Effects are based on its Fortitude save.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -18,10 +13,12 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Using the weight of earth, you hamper a target's flight, with effects based on its Fortitude save. If the creature reaches the ground safely, it doesn't take falling damage.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Using the weight of earth, you hamper a target''s flight, with effects
+      based on its Fortitude save. If the creature reaches the ground safely, it doesn''t
+      take falling damage.
 
-            Critical Success The targ
+
+      Critical Success The targ'

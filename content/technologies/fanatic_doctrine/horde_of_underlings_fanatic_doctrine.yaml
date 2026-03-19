@@ -1,8 +1,7 @@
 id: horde_of_underlings_fanatic_doctrine
-name: Horde of Underlings
-description: |-
-    You summon six underlings, such as skeletons or kobolds. When you cast this spell, you decide what kind of creatures they are, if they're Small or Medium, and whether they deal bludgeoning, piercing, or slashing damage (choose once and applying it to all underlings). Each underling has 1 Hit Point, 5 AC, and automatically fails all saving throws. Each underling appears in an unoccupied square of your choice within the area. The underlings don't block movement, but they are difficult terrain for creatures other than you.
-    Each underling attacks one enemy adjacent to it (if any), automatically dealing 1d4 damage of the chosen type. The first time you Sustain the spell on each subsequent round, each underling moves 20 feet toward the nearest enemy. If an underling ends its movement adjacent to an enemy, it damages that enemy as described above.Heightened (+1) The number of underlings increases by 2
+name: Zealot Conscripts
+description: You summon six doctrinal conscripts. They're Small or Medium, occupy
+  space, and can flank. Each is destroyed by any amount of damage.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -12,8 +11,8 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: damage
-          dice: 1d4
-          damage_type: untyped
-          dc: 0
+  on_apply:
+  - type: damage
+    dice: 1d4
+    damage_type: untyped
+    dc: 0

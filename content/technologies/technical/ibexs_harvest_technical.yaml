@@ -1,11 +1,8 @@
 id: ibexs_harvest_technical
-name: Ibex's Harvest
-description: |-
-    In the tale "Ibex's Harvest," Ibex turns from the path of a warrior to the path of a farmer, building up their community by working hard and sharing a bountiful harvest not just with their humanoid neighbors but also with their animal neighbors. Ibex initially focuses on distributing equally among the animals but learns that true equality requires knowing what each being needs. The number of actions you spend when Casting this Spell and telling the story determine its targets and effects.
-    1 You give a brief description of Ibex's first bounty. One willing target you can touch gains 10 temporary Hit Points that last 1 minute.
-    2 You tell the tale of how Ibex shared their harvest equally between Hippo and Ant. Two willing targets within 20 feet each gain 10 temporary Hit Points that last 1 minute.
-    3 You impart Ibex's lesson about how to prevent others from taking advantage of generosity. All creatures within a 10-foot emanation are affected by the tale. Choose one creature in the emanation to take 2d8 mental (basic Will save), while each other creature in the emanation gains 5 temporary Hit Points that last 1 minute.Heightened (+1) The temporary Hit Points increase by 3 and the mental damage for the 3-action version increases by 1d8.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Ibex's Harvests]
+name: Field Repair Kit
+description: You deploy automated repair drones that service nearby allies. Allies
+  in the area regain 2d8 Hit Points and gain a +1 status bonus to Fortitude saves
+  for 1 minute.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -17,18 +14,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 2d4
-          damage_type: mental
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 2d8
-          damage_type: mental
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 4d8
-          damage_type: mental
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 2d4
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d8
+    damage_type: mental
+    dc: 0

@@ -1,11 +1,8 @@
 id: unseasonable_squall_bio_synthetic
-name: Unseasonable Squall
-description: |-
-    You issue a blast of sudden wind that ripples outward from the center of the burst. The wind extinguishes small non-magical fires, disperses fog and mist, scatters objects of light Bulk or less, and pushes unsecured objects of 1 Bulk or less 5 feet away from the spell's origin point. Each Medium or smaller creature in the area when you Cast the Spell or that moves into spell's area must attempt a Fortitude saving throw.
-
-    Success The creature is unaffected.
-    Failure The creature is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]. If the creature was Flying, it gets a critical failure instead.
-    Critical Failure The creature is pushed 30 feet away from the center of the burst, is knocked Prone, and takes 2d6 bludgeoning damage.
+name: Pressure Blast
+description: You expel a blast of compressed bio-gas from your lungs. The blast extinguishes
+  small fires, disperses gas clouds, and pushes creatures away. Each creature in the
+  area must attempt a Reflex save or be pushed 10 feet.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -17,7 +14,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You issue a blast of sudden wind that ripples outward from the center of the burst. The wind extinguishes small non-magical fires, disperses fog and mist, scatters objects of light Bulk or less, and p
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You issue a blast of sudden wind that ripples outward from the center
+      of the burst. The wind extinguishes small non-magical fires, disperses fog and
+      mist, scatters objects of light Bulk or less, and p

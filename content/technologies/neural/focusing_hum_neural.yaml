@@ -1,6 +1,8 @@
 id: focusing_hum_neural
-name: Focusing Hum
-description: You infuse the air around you with a sustained hum that allows creatures within it to resist distractions. The DC of any flat check to Cast a Spell while stupefied for creatures within the area is 2 lower. @UUID[Compendium.pf2e.conditionitems.Item.Confused] creatures in the area don't attack anyone, including themselves, and instead lose the ability to speak coherently. You take a -2 penalty to Stealth checks to @UUID[Compendium.pf2e.actionspf2e.Item.Hide] and @UUID[Compendium.pf2e.actionspf2e.Item.Sneak].
+name: Signal Stabilizer
+description: You infuse the area with a steady neural carrier wave that helps nearby
+  operatives resist interference. The DC of any flat check to activate tech while
+  in this area is reduced by 2 for the duration.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You infuse the air around you with a sustained hum that allows creatures within it to resist distractions. The DC of any flat check to Cast a Spell while stupefied for creatures within the area is 2 l
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You infuse the air around you with a sustained hum that allows creatures
+      within it to resist distractions. The DC of any flat check to Cast a Spell while
+      stupefied for creatures within the area is 2 l

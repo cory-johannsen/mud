@@ -1,8 +1,8 @@
 id: tempest_cloak_bio_synthetic
-name: Tempest Cloak
-description: |-
-    You shroud one creature in a cloak of fierce, howling winds, shielding it from attacks and making it difficult to approach. The twisting shield of wind creates difficult terrain in a @Template[burst|distance:5] surrounding the target. The target also gains a +2 circumstance bonus to its AC against physical ranged attacks, such as attacks made with bows, javelins, or slings. In addition, the sound of the swirling storms makes it easier for the target to ignore anything it doesn't want to hear, granting the target a +2 circumstance bonus to all defenses against auditory effects.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Tempest Cloak]
+name: Windshear Membrane
+description: You grow a membrane of vibrating tissue around the target that generates
+  fierce localized winds. The cloak grants a +1 circumstance bonus to AC against ranged
+  attacks and pushes creatures that end their turn adjacent 5 feet away.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -12,7 +12,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You shroud one creature in a cloak of fierce, howling winds, shielding it from attacks and making it difficult to approach. The twisting shield of wind creates difficult terrain in a @Template[burst|d
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shroud one creature in a cloak of fierce, howling winds, shielding
+      it from attacks and making it difficult to approach. The twisting shield of
+      wind creates difficult terrain in a @Template[burst|d

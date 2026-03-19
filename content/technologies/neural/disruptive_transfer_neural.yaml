@@ -1,6 +1,8 @@
 id: disruptive_transfer_neural
-name: Disruptive Transfer
-description: Using Venorium Blorm's formulas, you calculate a path through space. Teleport to an empty square you can see within range. Creatures adjacent to your initial location witness an array of overlapping destinations. Each of them must succeed at a Will save or become @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 minute.
+name: Glitch Teleport
+description: Using forbidden neural calculations, you phase through local space. Teleport
+  to an empty square you can see within range. Creatures adjacent to your original
+  position take 2d6 force damage.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -12,7 +14,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Using Venorium Blorm's formulas, you calculate a path through space. Teleport to an empty square you can see within range. Creatures adjacent to your initial location witness an array of overlapping d
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Using Venorium Blorm's formulas, you calculate a path through space.
+      Teleport to an empty square you can see within range. Creatures adjacent to
+      your initial location witness an array of overlapping d

@@ -1,6 +1,8 @@
 id: sea_of_thought_technical
-name: Sea of Thought
-description: You cover the area in a sloshing torrent of semi-solidified thought, roughly ankle high. The area becomes difficult terrain, similarly to a shallow bog. Each round that a creature starts its turn in the area, it must attempt a Fortitude save against the shifting waves of thought. On a failure, it takes a –10-foot circumstance penalty to its Speeds until it leaves the area, and on a critical failure, it is also knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].Heightened (+1) The radius of the spell's area increases by 5 feet.
+name: Static Floor
+description: You electrify the floor with a low-level current. The area becomes difficult
+  terrain. Creatures entering or starting their turn there take 2d6 electricity damage
+  with a basic Reflex save.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -12,7 +14,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You cover the area in a sloshing torrent of semi-solidified thought, roughly ankle high. The area becomes difficult terrain, similarly to a shallow bog. Each round that a creature starts its turn in t
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You cover the area in a sloshing torrent of semi-solidified thought,
+      roughly ankle high. The area becomes difficult terrain, similarly to a shallow
+      bog. Each round that a creature starts its turn in t

@@ -1,8 +1,8 @@
 id: mind_of_menace_fanatic_doctrine
-name: Mind of Menace
-description: |-
-    This spell wards against those who attempt to subvert your mind and turns mental magic back on them. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Fight with Fear] reaction; once you use the reaction, the spell ends.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Mind of Menace]
+name: Zealot Counterstrike
+description: Your doctrinal conviction creates a psychic ward that punishes mental
+  intrusions. When a creature fails to affect you with a mental effect, it takes 3d6
+  mental damage from doctrinal feedback.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -14,7 +14,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: This spell wards against those who attempt to subvert your mind and turns mental magic back on them. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Fight with Fear] re
+  on_apply:
+  - type: utility
+    dc: 0
+    description: This spell wards against those who attempt to subvert your mind and
+      turns mental magic back on them. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Fight
+      with Fear] re

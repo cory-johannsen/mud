@@ -1,12 +1,8 @@
 id: stinking_cloud_technical
-name: Stinking Cloud
-description: |-
-    You create a cloud of putrid mist in the area. The cloud functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist] except it sickens creatures that end their turns within the cloud. (The @UUID[Compendium.pf2e.conditionitems.Item.Concealed] condition is not a poison effect.)
-
-    Critical Success The creature is unaffected.
-    Success The creature is Sickened 1.
-    Failure The creature is Sickened 1 and Slowed 1 while in the cloud.
-    Critical Failure The creature is Sickened 2 and Slowed 1 until it leaves the cloud.
+name: Tear Gas Canister
+description: You deploy a canister that fills the area with choking tear gas. The
+  cloud functions as fog but also sickens creatures that end their turn inside it
+  on a failed Fortitude save.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -18,7 +14,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a cloud of putrid mist in the area. The cloud functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist] except it sickens creatures that end their turns within the cloud. (The @UUID[Compendi
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a cloud of putrid mist in the area. The cloud functions
+      as @UUID[Compendium.pf2e.spells-srd.Item.Mist] except it sickens creatures that
+      end their turns within the cloud. (The @UUID[Compendi

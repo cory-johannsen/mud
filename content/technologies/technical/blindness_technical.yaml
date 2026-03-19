@@ -1,12 +1,8 @@
 id: blindness_technical
-name: Blindness
-description: |-
-    You blind the target. The effect is determined by the target's Fortitude save. The target then becomes temporarily immune for 1 minute.
-
-    Critical Success The target is unaffected.
-    Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Blinded] until its next turn begins.
-    Failure The target is Blinded for 1 minute.
-    Critical Failure The target is Blinded permanently.
+name: Optic Scrambler
+description: You deploy a targeted EM pulse that fries the target's visual processing.
+  The effect is determined by the target's Fortitude save. The target becomes temporarily
+  immune for 1 minute.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -18,11 +14,13 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You blind the target. The effect is determined by the target's Fortitude save. The target then becomes temporarily immune for 1 minute.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You blind the target. The effect is determined by the target''s
+      Fortitude save. The target then becomes temporarily immune for 1 minute.
 
-            Critical Success The target is unaffected.
-            Success The target i
+
+      Critical Success The target is unaffected.
+
+      Success The target i'

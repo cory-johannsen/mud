@@ -1,10 +1,8 @@
 id: haste_technical
-name: Haste
-description: |-
-    Magic empowers the target to act faster. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened] condition and can use the extra action each round only for Strike and Stride actions.
-
-    Heightened (7th) You can target up to 6 creatures.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Haste]
+name: Overclock Module
+description: You overclock the target's systems, dramatically increasing processing
+  speed and reaction time. It gains the Quickened condition; the extra action can
+  be used to Strike, Stride, or Step.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -14,10 +12,12 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Magic empowers the target to act faster. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened] condition and can use the extra action each round only for Strike and Stride actions.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Magic empowers the target to act faster. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened]
+      condition and can use the extra action each round only for Strike and Stride
+      actions.
 
-            Height
+
+      Height'

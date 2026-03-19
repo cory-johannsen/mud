@@ -1,6 +1,8 @@
 id: claim_curse_fanatic_doctrine
-name: Claim Curse
-description: By burning threads of fate around a target and then retying them to yourself instead, you temporarily draw their curse to you and offer them brief succor from the worst of its effects. Choose a curse affecting the target that you don't already have. For 5 minutes, you are affected by the curse (at the same stage as the target, if applicable), and the target isn't. When the duration ends, the curse's effects return to the target as normal.
+name: Martyrdom Transfer
+description: Through ritualistic self-sacrifice, you draw the target's affliction
+  onto yourself. The target is freed from a single curse for the spell's duration,
+  but you bear it instead.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: By burning threads of fate around a target and then retying them to yourself instead, you temporarily draw their curse to you and offer them brief succor from the worst of its effects. Choose a curse
+  on_apply:
+  - type: utility
+    dc: 0
+    description: By burning threads of fate around a target and then retying them
+      to yourself instead, you temporarily draw their curse to you and offer them
+      brief succor from the worst of its effects. Choose a curse

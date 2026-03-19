@@ -1,9 +1,8 @@
 id: vampiric_feast_technical
-name: Vampiric Feast
-description: |-
-    Your touch leeches the lifeblood out of a target to empower yourself. You deal 6d6 void damage to the target. You gain temporary Hit Points equal to half the void damage the target takes (after applying resistances and the like). You lose any remaining temporary Hit Points after 1 minute.
-
-    Heightened (+1) The damage increases by 2d6.
+name: Energy Siphon
+description: Your device drains bio-electric energy from the target. You deal 6d6
+  void damage. You gain temporary Hit Points equal to half the damage dealt. Heightened
+  (+1) Damage increases by 2d6.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -15,18 +14,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 6d3
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 6d6
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 12d6
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 6d3
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d6
+    damage_type: void
+    dc: 0

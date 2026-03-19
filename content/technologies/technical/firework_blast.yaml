@@ -1,12 +1,8 @@
 id: firework_blast
-name: Firework Blast
-description: |-
-    You create a massive display of loud and colorful explosions. The explosions deal 4d6 fire damage. Creatures that fail their saves must attempt an additional @Check[fortitude] save. Creatures that critically fail their saves take a -2 circumstance penalty to this Fortitude save.
-    Success The creature is unaffected.
-    Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Blinded] and @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 round.
-    Critical Failure The creature is blinded for 1 round and @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] and deafened for 1 minute.
-
-    Heightened (+1) The damage increases by 2d6.
+name: Flashbang Salvo
+description: You launch a salvo of flashbang charges that explode in a dazzling display.
+  The explosions deal 4d6 fire damage. Creatures that fail their saves must attempt
+  an additional Fortitude save or be Dazzled.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -18,18 +14,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d3
-          damage_type: fire
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d6
-          damage_type: fire
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d6
-          damage_type: fire
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: fire
+    dc: 0

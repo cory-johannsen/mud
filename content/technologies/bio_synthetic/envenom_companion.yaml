@@ -1,10 +1,8 @@
 id: envenom_companion
-name: Envenom Companion
-description: |-
-    You envenom your companion or eidolon's attacks, which drip with highly toxic venom for the spell's duration. The first time each round the target hits a creature with an unarmed Strike that deals piercing or slashing damage, that Strike deals an additional 1d8 poison damage. A creature that is damaged by this poison must attempt a Fortitude save. On a failure, it's also Clumsy 1 for 1 round. This spell can't target familiars.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Envenom Companion]
-
-    Heightened (+3) The poison damage increases by 1d8 and the clumsy value imposed on a failed save increases by 1.
+name: Toxin Graft
+description: You envenom your companion's natural weapons, which drip with synthesized
+  venom for the duration. The first time each round the target hits a creature with
+  an unarmed Strike, the struck creature takes 1d6 persistent poison damage.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -16,7 +14,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You envenom your companion or eidolon's attacks, which drip with highly toxic venom for the spell's duration. The first time each round the target hits a creature with an unarmed Strike that deals pie
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You envenom your companion or eidolon's attacks, which drip with
+      highly toxic venom for the spell's duration. The first time each round the target
+      hits a creature with an unarmed Strike that deals pie

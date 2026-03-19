@@ -1,11 +1,11 @@
 id: blastback_bio_synthetic
-name: Blastback
-description: |-
-    Trigger You fall more than 10 feet.
+name: Impact Discharge
+description: 'Trigger You fall more than 10 feet.
 
-    You hit the ground with a shuddering boom, propelling the force of your fall out in a wave. You take no damage from the fall as the displaced air allows you to land gently, but all other creatures in the spell's area take 6d4 bludgeoning damage. Creatures that fail their save are also pushed back 5 feet.
 
-    Heightened (+2) The emanation increases by 10 feet, and the damage increases by 1d4.
+  You convert the kinetic energy of your fall into a bio-electric shockwave. You take
+  no damage from the fall. Creatures within 10 feet take 3d6 bludgeoning damage with
+  a basic Reflex save.'
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -17,18 +17,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: "6"
-          damage_type: bludgeoning
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 6d4
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 12d4
-          damage_type: bludgeoning
-          dc: 0
+  on_success:
+  - type: damage
+    dice: '6'
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 6d4
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 12d4
+    damage_type: bludgeoning
+    dc: 0

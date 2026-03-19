@@ -1,10 +1,8 @@
 id: casters_imposition_bio_synthetic
-name: Caster's Imposition
-description: |-
-    A magical interference prevents the target from contributing to any form of cooperative spellcasting. On a failed save, the target can't participate in any ritual unless they can cast the ritual alone, and they can't access any spells provided by a coven or similar cooperative ability.
-
-    Heightened (4th) Increase the duration to 1 hour.
-    Heightened (5th) Increase the duration to 1 day.
+name: Pheromone Jammer
+description: A disruptive chemical signal prevents the target from coordinating with
+  allies for cooperative bio-tech activation. On a failed save, the target can't participate
+  in group activities for the duration.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -16,7 +14,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: A magical interference prevents the target from contributing to any form of cooperative spellcasting. On a failed save, the target can't participate in any ritual unless they can cast the ritual alone
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A magical interference prevents the target from contributing to any
+      form of cooperative spellcasting. On a failed save, the target can't participate
+      in any ritual unless they can cast the ritual alone

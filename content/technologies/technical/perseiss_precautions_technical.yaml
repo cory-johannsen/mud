@@ -1,8 +1,7 @@
 id: perseiss_precautions_technical
-name: Perseis's Precautions
-description: |-
-    Leaving nothing to chance, you weave divinatory precautions against an ambush, alerting the target to danger. Once during the duration of this spell, the target can roll one Perception, Arcana, Crafting, Lore, Occultism, or Society initiative roll twice and take the better result, after which the spell ends.
-    The strain of staying so prepared is too much for a mind to handle for long; the target is temporarily immune to this spell for 24 hours once the spell ends, whether they used the initiative benefit or not.
+name: Early Warning System
+description: You deploy predictive threat-detection algorithms. Once during the duration,
+  when you would be Surprised, you can act normally instead.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -12,7 +11,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Leaving nothing to chance, you weave divinatory precautions against an ambush, alerting the target to danger. Once during the duration of this spell, the target can roll one Perception, Arcana, Crafti
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Leaving nothing to chance, you weave divinatory precautions against
+      an ambush, alerting the target to danger. Once during the duration of this spell,
+      the target can roll one Perception, Arcana, Crafti

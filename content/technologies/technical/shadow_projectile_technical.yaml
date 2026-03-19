@@ -1,15 +1,8 @@
 id: shadow_projectile_technical
-name: Shadow Projectile
-description: |-
-    Trigger An ally within 20 feet of you makes a ranged attack roll.
-    You create an illusory duplicate of your ally's ranged attack to confuse your opponents. You launch an illusory double of your ally's projectile or spell at the same target, leaving the enemy unsure which attack to avoid. The target takes 3d8 mental damage, depending on its Will save. Regardless of the result of its save, it's temporarily immune to shadow projectile spells for 1 hour.
-
-    Critical Success The creature is unaffected.
-    Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] against the triggering attack.
-    Failure The creature is off-guard against the triggering attack and takes full damage from your illusory projectile.
-    Critical Failure As failure, but double damage.
-
-    Heightened (+2) The damage increases by 1d8.
+name: Ghost Round
+description: Trigger An ally within 20 feet makes a ranged attack roll. You deploy
+  a holographic duplicate of the attack. The target is Flat-Footed against the triggering
+  attack.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -21,18 +14,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 3d4
-          damage_type: mental
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 3d8
-          damage_type: mental
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 6d8
-          damage_type: mental
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 3d4
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d8
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d8
+    damage_type: mental
+    dc: 0

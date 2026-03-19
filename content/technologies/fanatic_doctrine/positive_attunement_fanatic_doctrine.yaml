@@ -1,15 +1,7 @@
 id: positive_attunement_fanatic_doctrine
-name: Positive Attunement
-description: |-
-    You attune a creature to the Forge of Creation, connecting its life force without fully transporting it. The creature's appearance becomes more brightly colored. If the creature is living, it heals 1d8 Hit Points immediately and at the end of each of your turns. Effects that increase healing only increase the initial healing.
-    If the creature is undead or has void healing, it instead takes 1d8 vitality damage, depending on the result of its Will save.
-
-    Critical Success The creature is unaffected.
-    Success The creature is damaged once and the spell ends.
-    Failure The creature is damaged immediately and at the end of each of your turns (so twice in the round you Cast the Spell).
-    Critical Failure As failure, and the damage is doubled.
-
-    Heightened (+3) The damage and healing each increase by 1d8.
+name: Vital Blessing
+description: You channel doctrinal healing energy into the target, enhancing their
+  cellular regeneration. The target gains fast healing 2 for the duration.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -21,18 +13,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 1d4
-          damage_type: untyped
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 1d8
-          damage_type: untyped
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 2d8
-          damage_type: untyped
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 1d4
+    damage_type: untyped
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d8
+    damage_type: untyped
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: untyped
+    dc: 0

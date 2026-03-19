@@ -1,14 +1,8 @@
 id: antlion_trap
-name: Antlion Trap
-description: |-
-    You transmute the ground into a conical pit trap of loose sand that becomes difficult terrain for the duration. A creature or unsecured object that enters the sand or starts its turn in the sand is moved toward the center, depending on the result of its Reflex save. This is forced movement. If there isn't enough space near the center of the pit, affected creatures and objects move as far as they can without being blocked, up to the amount set by their saving throw outcomes.
-
-    Critical Success The creature is unaffected.
-    Success The creature moves 5 feet toward the center.
-    Failure The creature moves 10 feet toward the center.
-    Critical Failure As failure, and the creature becomes @UUID[Compendium.pf2e.conditionitems.Item.Immobilized] in the pit. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against your spell DC.
-
-    Heightened (+2) Increase the area of the spell and the amount a creature moves on a failure by 5 feet.
+name: Sinkhole Gland
+description: You secrete a chemical compound that liquefies the ground into a conical
+  pit trap of loose substrate. The area becomes difficult terrain for the duration.
+  A creature that enters the area must attempt a Reflex save or fall to the bottom.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -20,7 +14,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You transmute the ground into a conical pit trap of loose sand that becomes difficult terrain for the duration. A creature or unsecured object that enters the sand or starts its turn in the sand is mo
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You transmute the ground into a conical pit trap of loose sand that
+      becomes difficult terrain for the duration. A creature or unsecured object that
+      enters the sand or starts its turn in the sand is mo

@@ -1,14 +1,8 @@
 id: distracting_chatter_neural
-name: Distracting Chatter
-description: |-
-    You bombard a target with distracting auditory illusions, surrounding them with a tumultuous cacophony of overlapping speech, whispers, screams, and muttering. The target is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard], takes a -2 status penalty to purely auditory Perception checks, and must succeed at a @Check[flat|dc:5] to use auditory abilities or verbal spell components. Similarly, a creature who attempts to affect the target with an auditory effect must succeed at a @Check[flat|dc:5] or the attempt fails. The duration depends on the target's Will save.
-
-    Critical Success The creature is unaffected.
-    Success The duration is 1 round.
-    Failure The duration is 3 rounds.
-    Critical Failure The duration is 1 minute.
-
-    Heightened (7th) You can target up to five creatures.
+name: White Noise Assault
+description: You bombard a target with overlapping psychic transmissions, surrounding
+  them with a cacophony of fragmented data streams, corrupted audio, and phantom voices
+  that make concentration nearly impossible.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -20,7 +14,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You bombard a target with distracting auditory illusions, surrounding them with a tumultuous cacophony of overlapping speech, whispers, screams, and muttering. The target is @UUID[Compendium.pf2e.cond
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You bombard a target with distracting auditory illusions, surrounding
+      them with a tumultuous cacophony of overlapping speech, whispers, screams, and
+      muttering. The target is @UUID[Compendium.pf2e.cond

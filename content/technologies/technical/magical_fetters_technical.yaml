@@ -1,12 +1,8 @@
 id: magical_fetters_technical
-name: Magical Fetters
-description: |-
-    Ghostly manacles launch from your outstretched hand and clasp around the target's limbs, impeding its movements. The target must attempt a Reflex save.
-
-    Critical Success The target is unaffected.
-    Success The target is Clumsy 1 and takes a –10-foot status penalty to its Speed for 1 round.
-    Failure The target is clumsy 3 and takes a –10-foot status penalty to its Speed for 1 minute.
-    Critical Failure As failure, but the target is also Slowed 1 for the duration.
+name: Mag-Lock Restraints
+description: Electromagnetic restraints launch from your device and clamp around the
+  target's limbs. The target must attempt a Reflex save or become Immobilized. It
+  can Escape against your spell DC.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -18,11 +14,14 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Ghostly manacles launch from your outstretched hand and clasp around the target's limbs, impeding its movements. The target must attempt a Reflex save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Ghostly manacles launch from your outstretched hand and clasp around
+      the target''s limbs, impeding its movements. The target must attempt a Reflex
+      save.
 
-            Critical Success The target is unaffected.
-            Succ
+
+      Critical Success The target is unaffected.
+
+      Succ'

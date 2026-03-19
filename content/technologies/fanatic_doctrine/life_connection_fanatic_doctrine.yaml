@@ -1,8 +1,8 @@
 id: life_connection_fanatic_doctrine
-name: Life Connection
-description: |-
-    When you cast this spell, you place a failsafe deep within the life force of the target. You can sense when the target takes damage, provided you're within 1 mile of one another. A creature can be part of no more than one life connection simultaneously. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Defend Life] reaction; once you use the reaction, the spell ends.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Life Connection]
+name: Faithful Bond
+description: You place a doctrinal monitor within the target's life force. You can
+  sense when the target takes damage within 1 mile. If the target drops to half HP,
+  you are alerted.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -12,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: When you cast this spell, you place a failsafe deep within the life force of the target. You can sense when the target takes damage, provided you're within 1 mile of one another. A creature can be par
+  on_apply:
+  - type: utility
+    dc: 0
+    description: When you cast this spell, you place a failsafe deep within the life
+      force of the target. You can sense when the target takes damage, provided you're
+      within 1 mile of one another. A creature can be par

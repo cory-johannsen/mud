@@ -1,9 +1,10 @@
 id: lightning_bolt_technical
-name: Lightning Bolt
-description: |-
-    A bolt of lightning strikes outward from your hand, dealing 4d12 electricity damage.
+name: Rail Lance
+description: 'You fire a magnetically accelerated projectile that tears through everything
+  in its path, dealing 4d12 electricity damage.
 
-    Heightened (+1) The damage increases by 1d12.
+
+  Heightened (+1) The damage increases by 1d12.'
 tradition: technical
 level: 3
 usage_type: prepared
@@ -15,18 +16,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d8
-          damage_type: electricity
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d12
-          damage_type: electricity
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d12
-          damage_type: electricity
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d8
+    damage_type: electricity
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d12
+    damage_type: electricity
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d12
+    damage_type: electricity
+    dc: 0

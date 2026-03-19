@@ -1,10 +1,11 @@
 id: martyrs_intervention_fanatic_doctrine
-name: Martyr's Intervention
-description: |-
-    Trigger A creature within range would take damage that reduces it to 0 Hit Points
-    Requirements You don't have the wounded condition.
+name: Sacrificial Intercept
+description: 'Trigger A creature within range would take damage that reduces it to
+  0 Hit Points Requirements You don''t have the wounded condition.
 
-    You shield a creature in dire need with your own life force, taking the harm upon yourself to save their life. The target is reduced to 1 Hit Point instead of 0 Hit Points. All remaining damage that was prevented from harming the target creature is instead dealt to you. Both you and the target become Wounded 1; targets who are already wounded increased their wounded value by 1.
+
+  You interpose yourself as a doctrinal sacrifice, taking all the damage instead.
+  This damage can''t be reduced.'
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -14,11 +15,13 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Trigger A creature within range would take damage that reduces it to 0 Hit Points
-            Requirements You don't have the wounded condition.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature within range would take damage that reduces it
+      to 0 Hit Points
 
-            You shield a creature in dire need with your own life force, takin
+      Requirements You don''t have the wounded condition.
+
+
+      You shield a creature in dire need with your own life force, takin'

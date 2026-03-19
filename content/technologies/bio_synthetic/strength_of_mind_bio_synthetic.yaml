@@ -1,8 +1,8 @@
 id: strength_of_mind_bio_synthetic
-name: Strength of Mind
-description: |-
-    You bolster your ally with reminders of their physical prowess, granting them additional defenses against harmful mental effects. The target gains a +1 status bonus to saving throws against mental effects and against effects that hinder movement (including those that reduce Speed or apply the @UUID[Compendium.pf2e.conditionitems.Item.Grabbed], @UUID[Compendium.pf2e.conditionitems.Item.Immobilized], or @UUID[Compendium.pf2e.conditionitems.Item.Restrained] conditions). This bonus increases to +2 if the source of the effect has the fear trait.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Strength of Mind]
+name: Endorphin Boost
+description: You inject the ally with synthetic endorphins that bolster mental resilience.
+  The target gains a +2 status bonus to Will saves against mental effects for the
+  duration.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -12,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You bolster your ally with reminders of their physical prowess, granting them additional defenses against harmful mental effects. The target gains a +1 status bonus to saving throws against mental eff
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You bolster your ally with reminders of their physical prowess, granting
+      them additional defenses against harmful mental effects. The target gains a
+      +1 status bonus to saving throws against mental eff

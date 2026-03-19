@@ -1,6 +1,8 @@
 id: shared_invisibility_neural
-name: Shared Invisibility
-description: You and all targets are @UUID[Compendium.pf2e.conditionitems.Item.Invisible] except to each other as long as the targets remain within the emanation. If a creature made invisible by this spell leaves the spell's area, it becomes visible and remains so even if it returns to the spell's area. If any creature made invisible by this spell uses a hostile action, the spell ends after the hostile action is completed.Heightened (5th) The targets increase to you and up to 10 willing creatures. The duration increases to 1 hour.
+name: Group Cloak Field
+description: You and all targets become invisible to outside observers as long as
+  the targets remain within a 10-foot emanation. If any target makes a hostile action,
+  the effect ends for that creature only.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: zone
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You and all targets are @UUID[Compendium.pf2e.conditionitems.Item.Invisible] except to each other as long as the targets remain within the emanation. If a creature made invisible by this spell leaves
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You and all targets are @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+      except to each other as long as the targets remain within the emanation. If
+      a creature made invisible by this spell leaves

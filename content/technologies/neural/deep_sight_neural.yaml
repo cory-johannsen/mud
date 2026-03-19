@@ -1,10 +1,8 @@
 id: deep_sight_neural
-name: Deep Sight
-description: |-
-    Your eyes darken until they become entirely pitch black. You grant yourself the ability to see in the darkness. You gain darkvision. If you already have darkvision, you gain greater darkvision.
-
-    Heightened (7th) The duration is until the next time you make daily preparations.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Deep Sight]
+name: Low-Light Implant
+description: Your optic nerves reconfigure, granting enhanced vision in darkness.
+  You gain darkvision. If you already have darkvision, you gain greater darkvision
+  instead for the duration.
 tradition: neural
 level: 3
 usage_type: prepared
@@ -14,10 +12,12 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Your eyes darken until they become entirely pitch black. You grant yourself the ability to see in the darkness. You gain darkvision. If you already have darkvision, you gain greater darkvision.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Your eyes darken until they become entirely pitch black. You grant
+      yourself the ability to see in the darkness. You gain darkvision. If you already
+      have darkvision, you gain greater darkvision.
 
-            Heigh
+
+      Heigh'

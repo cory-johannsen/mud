@@ -1,9 +1,8 @@
 id: sparkleskin_fanatic_doctrine
-name: Sparkleskin
-description: |-
-    You coat a creature's body in a layer of brilliantly sparkling glitter. The target gains a +2 status bonus on Deception checks to @UUID[Compendium.pf2e.actionspf2e.Item.Create a Diversion] and to @UUID[Compendium.pf2e.actionspf2e.Item.Feint], and on Performance checks to @UUID[Compendium.pf2e.actionspf2e.Item.Perform] that have the visual trait. When the target take damage, glitter bursts out of its wound in a @Template[emanation|distance:5]. Creatures in the area must attempt a Fortitude save.
-    Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 round.
-    Critical Failure The creature is dazzled for 3 rounds.
+name: Hallowed Sheen
+description: You coat the target in a layer of shimmering doctrinal compound. The
+  target gains a +2 status bonus on Deception checks to Feint and a +1 circumstance
+  bonus to AC against Dazzled attackers.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -15,7 +14,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You coat a creature's body in a layer of brilliantly sparkling glitter. The target gains a +2 status bonus on Deception checks to @UUID[Compendium.pf2e.actionspf2e.Item.Create a Diversion] and to @UUI
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You coat a creature's body in a layer of brilliantly sparkling glitter.
+      The target gains a +2 status bonus on Deception checks to @UUID[Compendium.pf2e.actionspf2e.Item.Create
+      a Diversion] and to @UUI

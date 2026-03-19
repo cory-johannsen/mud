@@ -1,6 +1,8 @@
 id: shadow_spy_bio_synthetic
-name: Shadow Spy
-description: You mix blood, soil, and shadow together to form a half-real homunculus in the shape of a crow, sparrow, or other bird. You then command the bird to fly to a location within range and observe all around it. The bird has the statistics of a @UUID[Compendium.pf2e.pathfinder-monster-core.Actor.Homunculus], save that it has all of your senses and shares your Perception modifier. Once the spell's duration elapses or upon a trigger you set (which must be fairly simple—"at dusk" or "when the judge leaves"), the bird flies to your location. If you wring its neck and drink its blood, you learn all that it saw since its creation.
+name: Recon Organism
+description: You grow a small bio-synthetic scout creature from organic debris. You
+  command it to fly or crawl to a location within 1 mile. It has AC 18 and 1 HP. You
+  can perceive through its senses.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You mix blood, soil, and shadow together to form a half-real homunculus in the shape of a crow, sparrow, or other bird. You then command the bird to fly to a location within range and observe all arou
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You mix blood, soil, and shadow together to form a half-real homunculus
+      in the shape of a crow, sparrow, or other bird. You then command the bird to
+      fly to a location within range and observe all arou

@@ -1,6 +1,8 @@
 id: pillar_of_water_bio_synthetic
-name: Pillar of Water
-description: You create a large, self-contained cylinder of still, clear fresh water. You choose the radius and height of the pillar, to a maximum radius of 15 feet and a maximum height of 60 feet. Creatures inside the pillar can @UUID[Compendium.pf2e.actionspf2e.Item.Swim] through the water as normal (@Check[athletics|traits:action:swim|dc:10]), or if the spell was cast on solid ground, walk along the bottom (which is difficult terrain). Any creature that exits the pillar falls or lands accordingly.
+name: Bio-Fluid Column
+description: You create a large cylinder of contained bio-fluid. You choose the radius
+  and height, to a maximum radius of 15 feet and height of 40 feet. Creatures inside
+  can breathe normally but treat the area as underwater.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a large, self-contained cylinder of still, clear fresh water. You choose the radius and height of the pillar, to a maximum radius of 15 feet and a maximum height of 60 feet. Creatures insid
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a large, self-contained cylinder of still, clear fresh
+      water. You choose the radius and height of the pillar, to a maximum radius of
+      15 feet and a maximum height of 60 feet. Creatures insid

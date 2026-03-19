@@ -1,10 +1,8 @@
 id: moonlight_ray_fanatic_doctrine
-name: Moonlight Ray
-description: |-
-    You unleash a holy beam of freezing moonlight. Make a ranged spell attack. The ray deals 5d6 cold damage; if the target has the unholy trait, you deal an extra 5d6 spirit damage.
-    Moonlight ray's cold damage is silver damage for the purposes of weaknesses, resistances, and the like.Critical Success The target takes double cold damage, as well as double spirit damage if a fiend or undead.
-    Success The target takes full damage.
-    If the light passes through an area of magical darkness or targets a creature affected by magical darkness, moonlight ray attempts to counteract the darkness. If you need to determine whether the light passes through an area of darkness, draw a line between yourself and the spell's target.Heightened (+1) The cold damage increases by 2d6, and the spirit damage against fiends and undead increases by 2d6.
+name: Judgment Beam
+description: You fire a beam of cold doctrinal light. Make a ranged spell attack.
+  The beam deals 5d6 cold damage; if the target has the unholy trait, you deal 5d6
+  holy damage instead.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared
@@ -14,13 +12,13 @@ targets: single
 duration: instant
 resolution: attack
 effects:
-    on_hit:
-        - type: damage
-          dice: 5d6
-          damage_type: cold
-          dc: 0
-    on_crit_hit:
-        - type: damage
-          dice: 10d6
-          damage_type: cold
-          dc: 0
+  on_hit:
+  - type: damage
+    dice: 5d6
+    damage_type: cold
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 10d6
+    damage_type: cold
+    dc: 0
