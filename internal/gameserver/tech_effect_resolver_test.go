@@ -79,7 +79,7 @@ func TestResolveTechEffects_REQ_TER5_SaveFailureAppliesOnFailure(t *testing.T) {
 	}, nil)
 	src := &deterministicSrc{val: 0} // roll=1, fails DC=15
 
-	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src)
+	msgs := ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
 
 	require.NotEmpty(t, msgs)
 	assert.Less(t, target.CurrentHP, 30, "expected damage applied on failure")
@@ -95,7 +95,7 @@ func TestResolveTechEffects_REQ_TER7_DamageReducesHP(t *testing.T) {
 	)
 	src := &deterministicSrc{val: 10} // roll=11 vs AC=1 → hit
 
-	ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src)
+	ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
 
 	assert.GreaterOrEqual(t, target.CurrentHP, 0, "HP never below 0")
 	assert.Less(t, target.CurrentHP, 5, "HP should be reduced")
@@ -117,7 +117,7 @@ func TestResolveTechEffects_REQ_TER8_HealIncreasesHP(t *testing.T) {
 	}
 	src := &deterministicSrc{val: 7} // d8 → 8
 
-	ResolveTechEffects(sess, tech, nil, nil, nil, src)
+	ResolveTechEffects(sess, tech, nil, nil, nil, src, nil)
 
 	assert.LessOrEqual(t, sess.CurrentHP, sess.MaxHP, "HP never above MaxHP")
 	assert.Greater(t, sess.CurrentHP, 10, "HP should have increased")
@@ -136,7 +136,7 @@ func TestResolveTechEffects_REQ_TER10_MovementPushesTarget(t *testing.T) {
 	)
 	src := &deterministicSrc{val: 10} // hit
 
-	ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src)
+	ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
 
 	assert.Equal(t, 30, target.Position, "target pushed 5 ft away from 25 → 30")
 }
@@ -152,7 +152,7 @@ func TestResolveTechEffects_REQ_TER11_AttackMissNoEffects(t *testing.T) {
 	src := &deterministicSrc{val: 0} // roll=1 vs AC=25 → miss
 
 	before := target.CurrentHP
-	ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src)
+	ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
 
 	assert.Equal(t, before, target.CurrentHP, "no damage on miss")
 }
@@ -180,7 +180,7 @@ func TestProperty_REQ_TER12_CritSuccessTierNotAppliedOnFailure(t *testing.T) {
 			},
 		}
 		before := target.CurrentHP
-		ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src)
+		ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
 		dmg := before - target.CurrentHP
 		assert.LessOrEqual(rt, dmg, 4, "only OnFailure 1d4 should apply, not OnCritSuccess 10d10")
 	})
@@ -203,7 +203,7 @@ func TestProperty_REQ_TER13_DamageWithinDiceBounds(t *testing.T) {
 		src := &deterministicSrc{val: 10} // always hit
 		before := target.CurrentHP
 
-		ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src)
+		ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
 
 		dmg := before - target.CurrentHP
 		minDmg := numDice + flat
@@ -225,7 +225,7 @@ func TestProperty_REQ_TER14_HPNeverNegative(t *testing.T) {
 		)
 		src := &deterministicSrc{val: 15}
 
-		ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src)
+		ResolveTechEffects(sess, tech, []*combat.Combatant{target}, nil, nil, src, nil)
 		assert.GreaterOrEqual(rt, target.CurrentHP, 0, "HP must not go negative")
 	})
 }
@@ -251,7 +251,7 @@ func TestResolveTechEffects_REQ_TER21_AreaTargetingAppliesToAll(t *testing.T) {
 	}
 	src := &deterministicSrc{val: 0} // all fail
 
-	msgs := ResolveTechEffects(sess, tech, targets, nil, nil, src)
+	msgs := ResolveTechEffects(sess, tech, targets, nil, nil, src, nil)
 
 	for _, tgt := range targets {
 		assert.Less(t, tgt.CurrentHP, 30, "all targets should take damage")
@@ -280,7 +280,7 @@ func TestProperty_REQ_TER22_AreaMessagesEqualTargetCount(t *testing.T) {
 			},
 		}
 		src := &deterministicSrc{val: 0}
-		msgs := ResolveTechEffects(sess, tech, targets, nil, nil, src)
+		msgs := ResolveTechEffects(sess, tech, targets, nil, nil, src, nil)
 		assert.Equal(rt, n, len(msgs))
 	})
 }
@@ -342,6 +342,45 @@ func TestFormatTremorsenseOutput_TableDriven(t *testing.T) {
 			assert.Equal(t, tc.expected, got)
 		})
 	}
+}
+
+func TestResolveTechEffects_TremorsenseNilQuerier_ReturnsEmpty(t *testing.T) {
+	sess := &session.PlayerSession{UID: "u1", RoomID: "room1"}
+	tech := &technology.TechnologyDef{
+		ID:         "seismic_sense",
+		Passive:    true,
+		ActionCost: 0,
+		Resolution: "",
+		Effects: technology.TieredEffects{
+			OnApply: []technology.TechEffect{
+				{Type: technology.EffectTremorsense},
+			},
+		},
+	}
+	msgs := ResolveTechEffects(sess, tech, nil, nil, nil, &deterministicSrc{val: 1}, nil)
+	assert.Empty(t, msgs, "nil querier tremorsense should produce no messages")
+}
+
+func TestResolveTechEffects_TremorsenseWithQuerier_ReturnsCreatureList(t *testing.T) {
+	sess := &session.PlayerSession{UID: "u1", RoomID: "room1"}
+	tech := &technology.TechnologyDef{
+		ID:         "seismic_sense",
+		Passive:    true,
+		ActionCost: 0,
+		Resolution: "",
+		Effects: technology.TieredEffects{
+			OnApply: []technology.TechEffect{
+				{Type: technology.EffectTremorsense},
+			},
+		},
+	}
+	q := &mockRoomQuerier{creatures: []CreatureInfo{
+		{Name: "Guard", Hidden: false},
+		{Name: "you", Hidden: false},
+	}}
+	msgs := ResolveTechEffects(sess, tech, nil, nil, nil, &deterministicSrc{val: 1}, q)
+	require.Len(t, msgs, 1)
+	assert.Equal(t, "[Seismic Sense] Creatures detected in this room: Guard, you", msgs[0])
 }
 
 func genCreatureInfo(t *rapid.T) CreatureInfo {

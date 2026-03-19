@@ -63,7 +63,7 @@ func (a diceSrcAdapter) Intn(n int) int { return a.src.Intn(n) }
 //   - src must be non-nil (satisfies combat.Source: Intn method).
 //
 // Postconditions:
-//   - Returns at least one message.
+//   - Returns zero or more non-empty messages.
 //   - target.CurrentHP and sess.CurrentHP never go below 0.
 //   - sess.CurrentHP never exceeds sess.MaxHP.
 func ResolveTechEffects(
@@ -73,13 +73,10 @@ func ResolveTechEffects(
 	cbt *combat.Combat,
 	condRegistry *condition.Registry,
 	src combat.Source,
+	querier RoomQuerier,
 ) []string {
 	if len(targets) == 0 {
-		msgs := applyEffects(sess, tech.Effects.OnApply, nil, cbt, condRegistry, src)
-		if len(msgs) == 0 {
-			msgs = append(msgs, "No effect.")
-		}
-		return msgs
+		return applyEffects(sess, tech.Effects.OnApply, nil, cbt, condRegistry, src, querier)
 	}
 
 	var msgs []string
@@ -99,25 +96,14 @@ func ResolveTechEffects(
 			label = ""
 		}
 
-		effectMsgs := applyEffects(sess, tier, target, cbt, condRegistry, src)
-		if len(effectMsgs) == 0 {
+		effectMsgs := applyEffects(sess, tier, target, cbt, condRegistry, src, querier)
+		for _, m := range effectMsgs {
 			if label != "" {
-				msgs = append(msgs, label+"No effect.")
+				msgs = append(msgs, label+m)
 			} else {
-				msgs = append(msgs, "No effect.")
-			}
-		} else {
-			for _, m := range effectMsgs {
-				if label != "" {
-					msgs = append(msgs, label+m)
-				} else {
-					msgs = append(msgs, m)
-				}
+				msgs = append(msgs, m)
 			}
 		}
-	}
-	if len(msgs) == 0 {
-		msgs = append(msgs, "Nothing happens.")
 	}
 	return msgs
 }
@@ -209,10 +195,11 @@ func applyEffects(
 	cbt *combat.Combat,
 	condRegistry *condition.Registry,
 	src combat.Source,
+	querier RoomQuerier,
 ) []string {
 	var msgs []string
 	for _, e := range effects {
-		msg := applyEffect(sess, e, target, cbt, condRegistry, src)
+		msg := applyEffect(sess, e, target, cbt, condRegistry, src, querier)
 		if msg != "" {
 			msgs = append(msgs, msg)
 		}
@@ -228,6 +215,7 @@ func applyEffect(
 	cbt *combat.Combat,
 	condRegistry *condition.Registry,
 	src combat.Source,
+	querier RoomQuerier,
 ) string {
 	switch e.Type {
 	case technology.EffectDamage:
@@ -298,6 +286,13 @@ func applyEffect(
 			return fmt.Sprintf("Utility effect: %s.", e.UtilityType)
 		}
 		return ""
+
+	case technology.EffectTremorsense:
+		if querier == nil {
+			return ""
+		}
+		creatures := querier.CreaturesInRoom(sess.RoomID, sess.UID)
+		return FormatTremorsenseOutput(creatures)
 
 	default:
 		return ""

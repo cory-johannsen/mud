@@ -5001,7 +5001,7 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 	} else if target != nil {
 		techTargets = []*combat.Combatant{target}
 	}
-	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{})
+	msgs := ResolveTechEffects(sess, techDef, techTargets, cbt, s.condRegistry, globalRandSrc{}, nil)
 	return messageEvent(strings.Join(msgs, "\n")), nil
 }
 
