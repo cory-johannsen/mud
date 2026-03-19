@@ -8,6 +8,162 @@ to avoid duplicated research.
 
 ## Conversion Rules
 
+### Attribute Mapping
+┌────────────────┬────────────────────┬──────────────┐
+│ PF2E Attribute │ Gunchete Attribute │ Abbreviation │
+├────────────────┼────────────────────┼──────────────┤
+│ Strength       │ Brutality          │ BRT          │
+├────────────────┼────────────────────┼──────────────┤
+│ Constitution   │ Grit               │ GRT          │
+├────────────────┼────────────────────┼──────────────┤
+│ Dexterity      │ Quickness          │ QCK          │
+├────────────────┼────────────────────┼──────────────┤
+│ Intelligence   │ Reasoning          │ RSN          │
+├────────────────┼────────────────────┼──────────────┤
+│ Wisdom         │ Savvy              │ SVY          │
+├────────────────┼────────────────────┼──────────────┤
+│ Charisma       │ Flair              │ FLR          │
+└────────────────┴────────────────────┴──────────────┘
+
+## Class Mapping
+
+Gunchete replaces PF2E classes with **Archetypes** (broad role categories) and **Jobs** (specific
+specializations within an archetype). Each Archetype corresponds to one or more PF2E base classes;
+each Job corresponds to a PF2E multiclass archetype (dedication) that best captures its flavor.
+
+### Archetype → PF2E Class
+
+| Gunchete Archetype | PF2E Base Class(es)                            | Key Ability (PF2E) | Gunchete Key Ability | HP/Level |
+|--------------------|------------------------------------------------|--------------------|----------------------|----------|
+| Aggressor          | Fighter, Barbarian                             | Str                | Brutality            | 10       |
+| Criminal           | Rogue, Swashbuckler                            | Dex                | Quickness            | 8        |
+| Drifter            | Ranger, Gunslinger                             | Str / Dex          | Grit                 | 10       |
+| Influencer         | Bard, Sorcerer                                 | Cha                | Flair                | 8        |
+| Naturalist         | Druid, Ranger                                  | Wis / Con          | Reasoning            | 8        |
+| Nerd               | Wizard, Alchemist, Investigator, Inventor      | Int                | Reasoning            | 6        |
+| Schemer            | Witch, Oracle, Psychic, Thaumaturge            | Wis / Cha          | Savvy                | 6        |
+| Zealot             | Cleric, Champion, Monk                         | Wis / Str          | Grit                 | 8        |
+
+### Job → PF2E Archetype (Multiclass Dedication)
+
+#### Aggressor Jobs
+
+| Gunchete Job      | PF2E Archetype | Rationale                                      |
+|-------------------|---------------|------------------------------------------------|
+| boot_machete      | Fighter        | Melee weapon specialist                        |
+| boot_gun          | Gunslinger     | Firearm entry-level combat                     |
+| goon              | Fighter        | Generic hired muscle, weapon proficiency focus |
+| grunt             | Fighter        | Disciplined frontline combatant                |
+| muscle            | Fighter        | Pure physical intimidation and melee           |
+| thug              | Fighter        | Street-level weapon fighter                    |
+| gangster          | Fighter        | Urban combat tactician                         |
+| mercenary         | Fighter        | Professional soldier-for-hire                  |
+| soldier           | Fighter        | Military training and tactics                  |
+| street_fighter    | Barbarian      | Unrestrained brawler, rage-fueled              |
+| beat_down_artist  | Barbarian      | Brutal beatdown focus, instinct barbarian      |
+| roid_rager        | Barbarian      | Chem-enhanced rage, Giant Instinct barbarian   |
+
+#### Criminal Jobs
+
+| Gunchete Job     | PF2E Archetype | Rationale                                       |
+|------------------|---------------|-------------------------------------------------|
+| thief            | Rogue          | Core sneak/steal skill set                     |
+| car_jacker       | Rogue          | Opportunistic theft, mobility focus            |
+| smuggler         | Rogue          | Contraband and deception, Mastermind racket    |
+| contract_killer  | Rogue          | Precision strikes, Assassin racket             |
+| tomb_raider      | Rogue          | Trap navigation, exploration skills            |
+| beggar           | Rogue          | Social manipulation, Scoundrel racket          |
+| hanger_on        | Rogue          | Opportunistic follower, low-level rackets      |
+| hooker           | Bard           | Social transaction, Polymath / Maestro muse    |
+| gambler          | Swashbuckler   | Risk-taking panache, calculated daring         |
+
+#### Drifter Jobs
+
+| Gunchete Job | PF2E Archetype | Rationale                                          |
+|--------------|---------------|----------------------------------------------------|
+| scout        | Ranger         | Wilderness/urban recon, Hunt Prey                 |
+| tracker      | Ranger         | Quarry pursuit, Flurry edge                       |
+| stalker      | Ranger         | Stealthy predation, Precision edge                |
+| warden       | Ranger         | Territory protection, Outwit edge                 |
+| exterminator | Ranger         | Quarry eradication, vermin as prey               |
+| cop          | Fighter        | Disciplined law enforcement, weapon proficiency   |
+| driver       | Gunslinger     | Vehicle/firearm synergy, Drifter Way             |
+| pilot        | Gunslinger     | Ranged precision, Drifter / Vanguard Way         |
+| pirate       | Swashbuckler   | Daring nautical fighter, Fencing / Gymnast style |
+| free_spirit  | Monk           | Unencumbered movement, Ki focus / Stunning Fist  |
+| psychopath   | Barbarian      | Uncontrolled aggression, Fury Instinct            |
+| bagman       | Rogue          | Courier/fixer, Thief racket                      |
+
+#### Influencer Jobs
+
+| Gunchete Job  | PF2E Archetype | Rationale                                           |
+|---------------|---------------|-----------------------------------------------------|
+| entertainer   | Bard           | Performance-based inspiration, Maestro muse        |
+| exotic_dancer | Bard           | Captivation and distraction, Maestro muse          |
+| schmoozer     | Bard           | Social skill mastery, Polymath muse                |
+| politician    | Bard           | Mass persuasion, Polymath muse                     |
+| karen         | Bard           | Entitled authority projection, Maestro muse        |
+| libertarian   | Bard           | Ideological rhetoric, Polymath muse                |
+| bureaucrat    | Bard           | Procedural control, Polymath muse                  |
+| anarchist     | Bard           | Disruptive social influence, Warrior muse          |
+| antifa        | Champion       | Cause-driven militant, Liberator cause             |
+| extortionist  | Rogue          | Leverage and threat, Scoundrel racket              |
+
+#### Naturalist Jobs
+
+| Gunchete Job        | PF2E Archetype | Rationale                                      |
+|---------------------|---------------|------------------------------------------------|
+| hippie              | Druid          | Nature harmony, Wild order                    |
+| freegan             | Druid          | Scavenging ecology, Wild / Leaf order         |
+| hobo                | Druid          | Wandering naturalist, Wild order              |
+| fallen_trustafarian | Druid          | Reluctant wilderness survivor, Leaf order     |
+| rancher             | Druid          | Livestock and land stewardship, Animal order  |
+| laborer             | Druid          | Land-working physicality, Stone order         |
+| tracker             | Ranger         | Quarry pursuit (shared with Drifter)          |
+| exterminator        | Ranger         | Vermin eradication (shared with Drifter)      |
+
+#### Nerd Jobs
+
+| Gunchete Job   | PF2E Archetype | Rationale                                          |
+|----------------|---------------|----------------------------------------------------|
+| engineer       | Inventor       | Device construction, Construct innovation         |
+| grease_monkey  | Inventor       | Vehicle/gear repair, Weapon innovation            |
+| maker          | Inventor       | General fabrication, Armor/Weapon innovation      |
+| cooker         | Alchemist      | Substance synthesis, Bomber / Chirurgeon research |
+| dealer         | Alchemist      | Elixir/compound distribution, Mutagenist research |
+| narcomancer    | Alchemist      | Toxin/stimulant mastery, Toxicologist research    |
+| detective      | Investigator   | Devise a Stratagem, Empiricism methodology        |
+| journalist     | Investigator   | Information gathering, Interrogation methodology  |
+| narc           | Investigator   | Undercover intelligence, Interrogation / Empiricism|
+| hoarder        | Wizard         | Knowledge accumulation, Universalist school       |
+| specialist     | Wizard         | Deep field expertise, specialist school           |
+| natural_mystic | Witch          | Intuitive knowledge, Nature patron                |
+
+#### Schemer Jobs
+
+| Gunchete Job  | PF2E Archetype | Rationale                                           |
+|---------------|---------------|-----------------------------------------------------|
+| illusionist   | Witch          | Deception and illusion, Deception patron           |
+| shit_stirrer  | Oracle         | Chaos-driven revelation, Tempest mystery           |
+| mall_ninja    | Swashbuckler   | Overconfident style, Gymnast / Fencing style       |
+| grifter       | Rogue          | Long con and deception, Mastermind racket          |
+| salesman      | Bard           | Silver-tongued persuasion, Polymath muse           |
+
+#### Zealot Jobs
+
+| Gunchete Job    | PF2E Archetype | Rationale                                         |
+|-----------------|---------------|---------------------------------------------------|
+| pastor          | Cleric         | Spiritual guidance and healing, Healing doctrine  |
+| street_preacher | Cleric         | Militant evangelism, Zeal doctrine               |
+| medic           | Cleric         | Field healing and triage, Healing doctrine        |
+| believer        | Cleric         | Devout follower, Cloistered cleric                |
+| trainee         | Cleric         | Initiate rank, Cloistered cleric                  |
+| follower        | Cleric         | Rank-and-file faithful, Warpriest doctrine        |
+| cult_leader     | Oracle         | Apocalyptic prophecy, Ancestors / Cosmos mystery  |
+| guard           | Champion       | Protective oath, Paladin / Liberator cause        |
+| hired_help      | Champion       | Cause-for-pay, Desecrator / Paladin cause         |
+| vigilante       | Champion       | Self-appointed justice, Liberator cause           |
+
 ### Save Type Mapping
 
 | PF2E Save | Gunchete Save | Ability Score | Rationale |
@@ -26,7 +182,7 @@ accepts `"toughness"`, `"hustle"`, and `"cool"` — use those strings exactly.
 | Occult        | `neural`            | Mind/nervous system effects |
 | Primal        | `bio_synthetic`     | Biological / organic tech |
 | Arcane        | `technical`         | Mechanical / electronic tech |
-| Divine        | `technical`         | No direct analog; use technical |
+| Divine        | `fanatic_doctrine`  | Zealot archetype analog; doctrine/faith-based effects |
 
 ### Effect Tier Names
 
