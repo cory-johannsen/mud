@@ -1,0 +1,19 @@
+id: belittling_boast_fanatic_doctrine
+name: Belittling Boast
+description: |-
+    You boast about your skills or combat prowess, bolstering your own abilities and belittling your opponents. Select one of the following to boast about: melee attack rolls, ranged attack rolls, spell attack rolls, or a single skill. Attempt an Intimidation check to @UUID[Compendium.pf2e.actionspf2e.Item.Demoralize] all enemies within 30 feet. Each creature that becomes @UUID[Compendium.pf2e.conditionitems.Item.Frightened] additionally takes a -1 circumstance penalty to the attack roll or skill you boasted about for 1 minute. If at least one creature becomes frightened, you gain a +1 status penalty to the attack roll or skill you boasted about for 1 minute.
+
+    Heightened (8th) The bonus and penalty increase to 2.
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: 'You boast about your skills or combat prowess, bolstering your own abilities and belittling your opponents. Select one of the following to boast about: melee attack rolls, ranged attack rolls, spell a'

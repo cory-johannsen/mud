@@ -1,0 +1,21 @@
+id: fates_travels_fanatic_doctrine
+name: Fate's Travels
+description: |-
+    You get a vision of the creature when it was alive, and its last 10 minutes of travel. This vision gives you a clear impression of the route it took and locations it visited, if any, but not any creatures or hazards in those areas. This information is enough to automatically succeed at Tracking the creature over that distance.
+
+    Heightened (6th) Your vision covers the creature's last hour of travel, and you gain an impression of the hazards, creature types, and number of creatures it encountered along the way, as well as a clear impression of how it died.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You get a vision of the creature when it was alive, and its last 10 minutes of travel. This vision gives you a clear impression of the route it took and locations it visited, if any, but not any creat

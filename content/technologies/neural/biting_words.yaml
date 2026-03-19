@@ -1,7 +1,10 @@
 id: biting_words
-name: Psychic Barb
-description: You lace your spoken words with psychic payload — each taunt lands as real pain. Make a psionic strike; on a
-  hit, your words deal sonic damage.
+name: Biting Words
+description: |-
+    You entwine magic with your voice, causing your taunts and jibes to physically harm your enemies. You can attack with your words once when you finish Casting the Spell, and can repeat the attack once on each of your subsequent turns by taking a single action, which has the attack, concentrate, and linguistic traits. After your third attack total, the spell ends.
+    When you attack with biting words, make a ranged spell attack roll against a creature within 30 feet, dealing 2d6 sonic damage if you hit (or double damage on a critical hit).
+
+    Heightened (+1) The damage increases by 2d6.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -11,13 +14,13 @@ targets: single
 duration: minutes:1
 resolution: attack
 effects:
-  on_hit:
-  - type: damage
-    dice: 2d6
-    damage_type: sonic
-    dc: 0
-  on_crit_hit:
-  - type: damage
-    dice: 4d6
-    damage_type: sonic
-    dc: 0
+    on_hit:
+        - type: damage
+          dice: 2d6
+          damage_type: sonic
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 4d6
+          damage_type: sonic
+          dc: 0

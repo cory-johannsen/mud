@@ -1,0 +1,16 @@
+id: soft_landing_neural
+name: Soft Landing
+description: You create a magical field that buoys any creature or object falling into the area, providing a harmless landing from any height. As you generally fall 1,500 feet per round, you can cast this spell while you are falling to ensure a safe landing, provided you can see your landing point and it's within range.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You create a magical field that buoys any creature or object falling into the area, providing a harmless landing from any height. As you generally fall 1,500 feet per round, you can cast this spell wh

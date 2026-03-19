@@ -1,0 +1,16 @@
+id: blood_duplicate_neural
+name: Blood Duplicate
+description: This spell deals you 1 piercing damage as you shape a magical duplicate of the target from your blood; you can't cast this spell if you don't have blood. This spell can't duplicate an item made of precious materials, or materials with a rarity of uncommon or higher. If you're ever more than 5 feet from the duplicate, the spell's duration immediately ends. The Perception DC to recognize the duplicate as false using any sense except touch is equal to 10 + your spellcasting ability modifier + your Crafting proficiency bonus. The item feels wet and obviously fake to the touch. When the spell ends, the item collapses into a puddle of blood that quickly evaporates.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: This spell deals you 1 piercing damage as you shape a magical duplicate of the target from your blood; you can't cast this spell if you don't have blood. This spell can't duplicate an item made of pre

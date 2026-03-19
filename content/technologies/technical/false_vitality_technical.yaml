@@ -1,0 +1,24 @@
+id: false_vitality_technical
+name: False Vitality
+description: |-
+    You augment your flesh with the energies typically used to manipulate the undead. You gain 10 temporary Hit Points.
+
+    Heightened (+1) The temporary Hit Points increase by 3.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: False Vitality]
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You augment your flesh with the energies typically used to manipulate the undead. You gain 10 temporary Hit Points.
+
+            Heightened (+1) The temporary Hit Points increase by 3.
+            @UUID[Compendium.pf2e.spell

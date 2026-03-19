@@ -1,0 +1,37 @@
+id: impaling_spike_technical
+name: Impaling Spike
+description: |-
+    You conjure a spike that thrusts up from the earth beneath a target creature, potentially impaling it. The spike is made of cold iron and deals 8d6 piercing damage. The target must attempt a Reflex save.
+
+    Critical Success The target dodges the spike and is unaffected.
+    Success The target is struck by the spike and takes half damage.
+    Failure The target is impaled through a leg or another nonvital body part. The creature takes full damage and, if it's standing on solid ground, becomes @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] (the DC is your spell DC). While it remains impaled, it takes damage from any weakness to cold iron it has at the end of each of its turns.
+    Critical Failure As failure, but the creature is impaled through a vital organ or its center of mass, taking double damage, and it is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] as long as it's impaled.
+
+    Heightened (+1) The damage increases by 2d6.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 8d3
+          damage_type: piercing
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: piercing
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 16d6
+          damage_type: piercing
+          dc: 0

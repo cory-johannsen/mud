@@ -1,0 +1,16 @@
+id: loose_times_arrow_technical
+name: Loose Time's Arrow
+description: You pluck the time stream like a bow—pull one string back, release, and watch a creature fly. All affected targets are @UUID[Compendium.pf2e.conditionitems.Item.Quickened]. They can use the extra action only to Step or Stride.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You pluck the time stream like a bow—pull one string back, release, and watch a creature fly. All affected targets are @UUID[Compendium.pf2e.conditionitems.Item.Quickened]. They can use the extra ac

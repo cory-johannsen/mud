@@ -1,7 +1,9 @@
 id: animal_allies
-name: Bioengineered Scout Pack
-description: You release a swarm of engineered micro-animals — insects, rodents, or birds — that can trigger traps and serve
-  as scouts in the area.
+name: Animal Allies
+description: |-
+    You summon tiny, ordinary animals from the environment, such as insects, birds, or fish, to quickly lash out at nearby foes. The animals swarm around the creatures in the area, dealing each of them 3d4 piercing damage with a basic Reflex save.
+
+    Heightened (+1) The damage increases by 3d4
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -13,18 +15,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-  on_success:
-  - type: damage
-    dice: '3'
-    damage_type: piercing
-    dc: 0
-  on_failure:
-  - type: damage
-    dice: 3d4
-    damage_type: piercing
-    dc: 0
-  on_crit_failure:
-  - type: damage
-    dice: 6d4
-    damage_type: piercing
-    dc: 0
+    on_success:
+        - type: damage
+          dice: "3"
+          damage_type: piercing
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 3d4
+          damage_type: piercing
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 6d4
+          damage_type: piercing
+          dc: 0

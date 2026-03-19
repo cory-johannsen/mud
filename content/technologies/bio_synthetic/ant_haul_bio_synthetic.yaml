@@ -1,7 +1,8 @@
 id: ant_haul_bio_synthetic
-name: Musculoskeletal Boost Injection
-description: You inject a targeted compound that enhances the musculature and skeletal frame of the target, dramatically increasing
-  their carrying capacity.
+name: Ant Haul
+description: |-
+    You reinforce the target's musculoskeletal system to bear more weight. The target can carry 3 more Bulk than normal before becoming @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and up to a maximum of 6 more Bulk.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Ant Haul]
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -11,8 +12,7 @@ targets: single
 duration: instant
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You reinforce the target's musculoskeletal system to bear more weight. The target can carry 3 more Bulk than
-      normal before becoming @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and up to a ma
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You reinforce the target's musculoskeletal system to bear more weight. The target can carry 3 more Bulk than normal before becoming @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and up to a ma

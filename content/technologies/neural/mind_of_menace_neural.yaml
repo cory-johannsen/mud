@@ -1,0 +1,20 @@
+id: mind_of_menace_neural
+name: Mind of Menace
+description: |-
+    This spell wards against those who attempt to subvert your mind and turns mental magic back on them. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Fight with Fear] reaction; once you use the reaction, the spell ends.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Mind of Menace]
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: This spell wards against those who attempt to subvert your mind and turns mental magic back on them. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Fight with Fear] re

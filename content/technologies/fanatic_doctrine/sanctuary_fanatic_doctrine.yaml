@@ -1,7 +1,12 @@
 id: sanctuary_fanatic_doctrine
-name: Doctrine's Safe Passage
-description: You broadcast a protection signal around a target in the Doctrine's name, causing enemies to hesitate before
-  attacking.
+name: Sanctuary
+description: |-
+    You ward a creature with protective energy that deters attacks. Creatures attempting to attack the target must attempt a Will save each time. If the target uses a hostile action, the spell ends.
+
+    Critical Success Sanctuary ends.
+    Success The creature can attempt its attack and any other attacks against the target this turn.
+    Failure The creature can't attack the target and wastes the action. It can't attempt further attacks against the target this turn.
+    Critical Failure The creature wastes the action and can't attempt to attack the target for the rest of sanctuary's duration.
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -13,11 +18,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'You ward a creature with protective energy that deters attacks. Creatures attempting to attack the target
-      must attempt a Will save each time. If the target uses a hostile action, the spell ends.
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You ward a creature with protective energy that deters attacks. Creatures attempting to attack the target must attempt a Will save each time. If the target uses a hostile action, the spell ends.
 
-
-      Crit'
+            Crit

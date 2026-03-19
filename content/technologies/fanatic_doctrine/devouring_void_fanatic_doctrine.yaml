@@ -1,0 +1,29 @@
+id: devouring_void_fanatic_doctrine
+name: Devouring Void
+description: Countless tears in space appear in the area, like hungry mouths. When the spell is cast and the first time each round it's sustained, living creatures in its area take 7d8 void damage (basic Fortitude save). A living creature using a move action to leave the area must succeed at a @Check[reflex] save or their action is disrupted at the edge of the area.Heightened (+1) The void damage increases by 1d8.
+tradition: fanatic_doctrine
+level: 7
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 7d4
+          damage_type: void
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 7d8
+          damage_type: void
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 14d8
+          damage_type: void
+          dc: 0

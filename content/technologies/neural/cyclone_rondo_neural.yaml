@@ -1,0 +1,33 @@
+id: cyclone_rondo_neural
+name: Cyclone Rondo
+description: |-
+    Playing or singing melodies discovered by the ancient Shory, you call up a whirlwind. When the whirlwind appears, each creature in its area must attempt a Reflex save or be knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]. The area of the whirlwind is difficult terrain.
+    The whirlwind grows harsher when you Sustain the Spell, moving up to 10 feet within your range and dealing each creature whose space it enters or passes through 4d6 damage with a basic Reflex save.
+
+    Heightened (+1) The damage increases by 1d6.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 4d3
+          damage_type: untyped
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 4d6
+          damage_type: untyped
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: untyped
+          dc: 0

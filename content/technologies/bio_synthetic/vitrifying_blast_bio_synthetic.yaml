@@ -1,0 +1,38 @@
+id: vitrifying_blast_bio_synthetic
+name: Vitrifying Blast
+description: |-
+    You launch a cone of glass shards, which embed in creatures to turn them partially to glass. The shards deal 8d6 piercing damage to creatures in the area, based on each creature's saving throw.
+
+    Critical Success The target is unaffected.
+    Success The target takes half damage and gains weakness 3 to sonic and bludgeoning damage for 1 round.
+    Failure The target takes full damage, is Slowed 1, and gains weakness to sonic and bludgeoning damage. The weakness is equal to 3 × the slowed value it has from this spell. The target must attempt a Fortitude save at the end of each of its turns; this ongoing save has the incapacitation trait. On a failed save, the creature's slowed value increases by 1 (or by 2 on a critical failure), to a maximum of Slowed 3. A successful save reduces the creature's slowed value by 1 (or by 2 on a critical success). If the creature ends its turn with a slowed value of 0, the effect ends.
+    Critical Failure As failure, but the target is initially Slowed 2.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Vitrifying Blast]
+
+    Heightened (+1) The damage increases by 1d6.
+tradition: bio_synthetic
+level: 6
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 8d3
+          damage_type: piercing
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: piercing
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 16d6
+          damage_type: piercing
+          dc: 0

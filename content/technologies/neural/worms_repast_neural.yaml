@@ -1,0 +1,33 @@
+id: worms_repast_neural
+name: Worm's Repast
+description: |-
+    Gnawing worms materialize within the flesh of the target creature, dealing 4d6 piercing damage and @Damage[floor(@item.level/2)d6[persistent,piercing]] damage. If the target is a non-skeletal corporeal undead creature, you deal an extra @Damage[floor((@item.level/2)+1)d6[persistent,piercing]] damage. The target must attempt a Fortitude save.Critical Success The worms writhe away harmlessly and the target takes no damage.
+    Success The target takes full initial damage but no persistent damage, and the spell ends immediately.
+    Failure The target takes full initial and persistent damage and is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard] due to the pain for as long as it takes persistent damage.
+    Critical Failure As failure, but the target takes double the initial damage and is also Slowed 1 by the pain for as long as it takes persistent damage.Heightened (+2) The initial and persistent damage increase by 2d6 and 1d6, respectively
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 4d3
+          damage_type: piercing
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 4d6
+          damage_type: piercing
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: piercing
+          dc: 0

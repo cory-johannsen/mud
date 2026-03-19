@@ -1,0 +1,25 @@
+id: darkvision_technical
+name: Darkvision
+description: |-
+    You grant yourself supernatural sight in areas of darkness. You gain Darkvision.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Darkvision]
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Darkvision (24 hours)]
+
+    Heightened (3rd) The spell's range is touch and it targets 1 willing creature.
+    Heightened (5th) The spell's range is touch and it targets 1 willing creature. The duration is until the next time you make your daily preparations.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You grant yourself supernatural sight in areas of darkness. You gain Darkvision.
+            @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Darkvision]
+            @UUID[Compendium.pf2e.spell-effects.Item.Spell Effec

@@ -1,0 +1,37 @@
+id: impending_doom_neural
+name: Impending Doom
+description: |-
+    You sift through myriad potential futures, seize upon one potential moment in which the target meets a particularly gruesome and fatal end, and then show it a vision of its impending demise. The intense mental vision grows more and more terrifying to the target as the doom grows closer, and it takes 3 rounds to reach its conclusion. The target must attempt a Will saving throw to determine the effects. At the end of the spell's duration, if the target was affected, the target witnesses its death and takes 6d6 mental damage.
+
+    Critical Success The creature is unaffected.
+    Success The creature is unaffected for 1 round. On the second round, it becomes @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard]. Finally, on the third round, it becomes Frightened 1. At the end of the third round, it takes half damage.
+    Failure The creature is immediately off-guard. On the second round, it becomes Frightened 2. Finally, on the third round, it also becomes Stunned 1. At the end of the third round, the creature takes full damage.
+    Critical Failure The creature is immediately off-guard and Frightened 3. On the second round, it becomes stunned 1. Finally, on the third round, it also becomes @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed]. At the end of the third round, the creature takes double damage.
+
+    Heightened (+1) The damage increases by 2d6.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: rounds:3
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 6d3
+          damage_type: mental
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 6d6
+          damage_type: mental
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 12d6
+          damage_type: mental
+          dc: 0

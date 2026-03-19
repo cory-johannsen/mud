@@ -1,0 +1,23 @@
+id: helpful_reload_fanatic_doctrine
+name: Helpful Reload
+description: |-
+    Trigger One of your allies makes a ranged Strike with a weapon with a reload of 1 or less
+    Requirements Your ally has more ammunition for their ranged weapon available.With a quick gesture, you reload your ally's weapon, allowing them to focus on fighting the enemy. You reload their weapon with a piece of mundane ammunition from the triggering creature's inventory.Heightened (4th) You reload your ally's weapon and grant them a +1 status bonus to their next Strike with this weapon.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Helpful Reload]
+    Heightened (6th) You reload your ally's weapon with the ammunition of their choice from their inventory. Your ally gains a +1 status bonus to their next Strike with this weapon.
+    Heightened (8th) The spell no longer requires your ally to have appropriate ammunition available. You summon a single piece of common magical ammunition of 10th level or lower to reload your ally's weapon with. Your ally gains a +1 status bonus to their next Strike with this weapon.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Trigger One of your allies makes a ranged Strike with a weapon with a reload of 1 or less
+            Requirements Your ally has more ammunition for their ranged weapon available.With a quick gesture, you reload

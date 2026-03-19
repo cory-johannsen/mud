@@ -1,7 +1,13 @@
 id: lose_the_path_neural
-name: Disorientation Pulse
-description: Reaction — triggered when a creature moves nearby. You flood their spatial awareness subroutines with false data,
-  scrambling their sense of direction.
+name: Lose the Path
+description: |-
+    Trigger A creature in range Strides
+
+    You surround a moving creature with lifelike illusions, shifting their perception of the terrain to subtly lead them off course. The target must attempt a Will save. Regardless of the result, the creature is immune to lose the path for 1 hour.
+
+    Success The creature is unaffected.
+    Failure The creature treats all squares as difficult terrain for its Stride.
+    Critical Failure As failure, except that you determine where the target moves during the Stride, though you can't move it into hazardous terrain or to a place it can't stand.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -13,11 +19,10 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'Trigger A creature in range Strides
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Trigger A creature in range Strides
 
-
-      You surround a moving creature with lifelike illusions, shifting their perception of the terrain to subtly lead them
-      off course. The target must attempt a Will sav'
+            You surround a moving creature with lifelike illusions, shifting their perception of the terrain to subtly lead them off course. The target must attempt a Will sav

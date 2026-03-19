@@ -1,6 +1,10 @@
 id: mending_fanatic_doctrine
-name: Doctrine's Repair Rite
-description: You perform a doctrinal repair rite over a damaged object, restoring its integrity and Hit Points.
+name: Mending
+description: |-
+    You repair the target item. You restore 5 Hit Points per spell rank to the target, potentially removing the @UUID[Compendium.pf2e.conditionitems.Item.Broken] condition if this repairs it past the item's Broken Threshold. You can't replace lost pieces or repair an object that's been completely destroyed.
+
+    Heightened (2nd) You can target a non-magical object of 1 Bulk or less.
+    Heightened (3rd) You can target a non-magical object of 2 Bulk or less, or a magical object of 1 Bulk or less.
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -10,8 +14,7 @@ targets: single
 duration: instant
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You repair the target item. You restore 5 Hit Points per spell rank to the target, potentially removing the
-      @UUID[Compendium.pf2e.conditionitems.Item.Broken] condition if this repairs it past the item
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You repair the target item. You restore 5 Hit Points per spell rank to the target, potentially removing the @UUID[Compendium.pf2e.conditionitems.Item.Broken] condition if this repairs it past the item

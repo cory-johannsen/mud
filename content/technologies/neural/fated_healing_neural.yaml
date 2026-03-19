@@ -1,6 +1,6 @@
 id: fated_healing_neural
-name: Biofeedback Prediction
-description: You read the near-term biorhythm of a target, predicting incoming harm and granting a small healing bonus.
+name: Fated Healing
+description: You speak about the consequences of actions people take against each other and how it's possible to break cycles of violence simply by making a different choice. The targets regain 1d4 Hit Points at the end of each of their own turns while the spell is in effect. If a target uses a hostile action against the other target, the spell ends for the target that used the hostile action.Heightened (+1) The targets regain an additional 1d4 Hit Points at the end of their own turns.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -10,8 +10,8 @@ targets: single
 duration: rounds:5
 resolution: none
 effects:
-  on_apply:
-  - type: damage
-    dice: 1d4
-    damage_type: untyped
-    dc: 0
+    on_apply:
+        - type: damage
+          dice: 1d4
+          damage_type: untyped
+          dc: 0

@@ -1,7 +1,12 @@
 id: gust_of_wind_bio_synthetic
-name: Lung-Powered Wind Blast
-description: You discharge a powerful blast of air from modified respiratory systems, shoving creatures and objects in its
-  path.
+name: Gust of Wind
+description: |-
+    A violent wind issues forth from your palm, blowing from the point where you are when you Cast the Spell to the line's opposite end. The wind extinguishes small non-magical fires, disperses fog and mist, blows objects of light Bulk or less around, and pushes larger objects. Large or smaller creatures in the area must attempt a Fortitude save. Large or smaller creatures that later move into the gust must attempt the save on entering.
+
+    Critical Success The creature is unaffected.
+    Success The creature can't move against the wind.
+    Failure The creature is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]. If it was flying, it takes the effects of critical failure instead.
+    Critical Failure The creature is pushed 30 feet in the wind's direction, knocked prone, and takes 2d6 bludgeoning damage.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -13,18 +18,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_success:
-  - type: damage
-    dice: 2d3
-    damage_type: bludgeoning
-    dc: 0
-  on_failure:
-  - type: damage
-    dice: 2d6
-    damage_type: bludgeoning
-    dc: 0
-  on_crit_failure:
-  - type: damage
-    dice: 4d6
-    damage_type: bludgeoning
-    dc: 0
+    on_success:
+        - type: damage
+          dice: 2d3
+          damage_type: bludgeoning
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d6
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d6
+          damage_type: bludgeoning
+          dc: 0

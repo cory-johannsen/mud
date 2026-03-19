@@ -1,0 +1,29 @@
+id: final_sacrifice_neural
+name: Final Sacrifice
+description: You channel disruptive energies through the bond between you and your minion, causing it to violently explode. The target is immediately slain, and the explosion deals 6d6 fire damage to creatures within 20 feet of it with a basic Reflex save. If the target has the cold or water trait, the spell deals cold damage and has the cold trait instead of the fire trait. Attempting to cast this spell targeting a creature that you temporarily seized control of, such as an undead commanded by bind undead, automatically fails and breaks the controlling effect.Heightened (+1) The damage increases by 2d6.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 6d3
+          damage_type: fire
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 6d6
+          damage_type: fire
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 12d6
+          damage_type: fire
+          dc: 0

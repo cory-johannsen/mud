@@ -1,0 +1,19 @@
+id: erase_trail
+name: Erase Trail
+description: |-
+    You drastically reduce all signs of one specific creature's passage from the area, including footprints, handprints, dirt, and minor changes caused to the surrounding environment, like the bending of grass. The DC of checks to @UUID[Compendium.pf2e.actionspf2e.Item.Seek] or @UUID[Compendium.pf2e.actionspf2e.Item.Search] and discover such signs within the area gains a +4 status bonus or is equal to your spell DC, whichever is higher. This spell doesn't repair objects the creature damaged, return slain creatures to life, or remove objects or garbage left behind. It also doesn't prevent others from noticing that the creature's trail ends or begins abruptly outside the area. Finally, this spell doesn't hide the creature from sight or prevent them from leaving new signs of their presence after this spell is cast.
+
+    Heightened (+2) The range increases by 100 feet, the area increases by 20 feet, and you can remove all signs of 1 additional creature's passage from the area.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You drastically reduce all signs of one specific creature's passage from the area, including footprints, handprints, dirt, and minor changes caused to the surrounding environment, like the bending of

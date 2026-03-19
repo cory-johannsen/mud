@@ -1,7 +1,8 @@
 id: air_bubble_bio_synthetic
-name: Oxy-Filter
-description: Triggered when a creature enters a breathable-atmosphere hazard. A bubble of filtered, oxygenated air materializes
-  around the target's head, providing breathable atmosphere until they return to a safe environment.
+name: Air Bubble
+description: |-
+    Trigger A creature within range enters an environment where it can't breathe.
+    A bubble of pure air appears around the target's head, allowing it to breathe normally. The effect ends as soon as the target returns to an environment where it can breathe normally.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -11,10 +12,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'Trigger A creature within range enters an environment where it can''t breathe.
-
-      A bubble of pure air appears around the target''s head, allowing it to breathe normally. The effect ends as soon as
-      the tar'
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Trigger A creature within range enters an environment where it can't breathe.
+            A bubble of pure air appears around the target's head, allowing it to breathe normally. The effect ends as soon as the tar

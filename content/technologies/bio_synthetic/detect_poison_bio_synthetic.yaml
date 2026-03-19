@@ -1,7 +1,9 @@
 id: detect_poison_bio_synthetic
-name: Toxin Detection Organ
-description: You activate a specialized detection organ, identifying whether a creature or substance carries venom or poisonous
-  compounds.
+name: Detect Poison
+description: |-
+    You detect whether a creature is venomous or poisonous, or if an object is poison or has been poisoned. You do not ascertain whether the target is poisonous in multiple ways, nor do you learn the type or types of poison. Certain substances, like lead and alcohol, are poisons and so mask other poisons.
+
+    Heightened (2nd) You learn the number and types of poison.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -11,8 +13,7 @@ targets: single
 duration: instant
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You detect whether a creature is venomous or poisonous, or if an object is poison or has been poisoned. You
-      do not ascertain whether the target is poisonous in multiple ways, nor do you learn the type
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You detect whether a creature is venomous or poisonous, or if an object is poison or has been poisoned. You do not ascertain whether the target is poisonous in multiple ways, nor do you learn the type

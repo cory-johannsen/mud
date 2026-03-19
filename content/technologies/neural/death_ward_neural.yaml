@@ -1,0 +1,21 @@
+id: death_ward_neural
+name: Death Ward
+description: |-
+    You shield a creature from the ravages of void energy.
+    It receives a +4 status bonus to saves against death and void effects, gains void resistance 10, and suppresses the effects of the @UUID[Compendium.pf2e.conditionitems.Item.Doomed] condition.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Death Ward]
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You shield a creature from the ravages of void energy.
+            It receives a +4 status bonus to saves against death and void effects, gains void resistance 10, and suppresses the effects of the @UUID[Compendi

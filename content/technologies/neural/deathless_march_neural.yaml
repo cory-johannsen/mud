@@ -1,0 +1,25 @@
+id: deathless_march_neural
+name: Deathless March
+description: |-
+    You chant a marching song of Yled to empower the undead and terrify the living. Undead creatures within the area gain the @UUID[Compendium.pf2e.conditionitems.Item.Quickened] condition for 1 minute, which they can use only to Stride.
+    Living creatures in the area must attempt a Will save. This gains the emotion, fear, and mental traits for living creatures.
+
+    Critical Success The creature is unaffected.
+    Success The creature is Frightened 1.
+    Failure The creature is Frightened 2.
+    Critical Failure The creature is Frightened 3 and @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed] for 1 round.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You chant a marching song of Yled to empower the undead and terrify the living. Undead creatures within the area gain the @UUID[Compendium.pf2e.conditionitems.Item.Quickened] condition for 1 minute, w

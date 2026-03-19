@@ -1,7 +1,9 @@
 id: bane_neural
-name: Confidence Drain
-description: You broadcast a low-frequency neural dampener that seeds self-doubt in every enemy mind nearby. Affected targets
-  suffer a -1 status penalty to attack rolls.
+name: Bane
+description: |-
+    You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Will save or take a –1 status penalty to attack rolls as long as they are in the area. Once per round on subsequent turns, you can Sustain the spell to increase the emanation's radius by 10 feet and force enemies in the area that weren't yet affected to attempt another saving throw.
+    Bane can counteract @UUID[Compendium.pf2e.spells-srd.Item.Bless].
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Bane]
 tradition: neural
 level: 1
 usage_type: prepared
@@ -13,8 +15,7 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Will save or take a
-      –1 status penalty to attack rolls as long as they are in the area. Once per round on subseque
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You fill the minds of your enemies with doubt. Enemies in the area must succeed at a Will save or take a –1 status penalty to attack rolls as long as they are in the area. Once per round on subseque

@@ -1,0 +1,16 @@
+id: telepathic_bond_technical
+name: Telepathic Bond
+description: The targets can communicate telepathically with any or all of the other targets from any point on the same planet.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: The targets can communicate telepathically with any or all of the other targets from any point on the same planet.

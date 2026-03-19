@@ -1,0 +1,16 @@
+id: discern_lies_fanatic_doctrine
+name: Discern Lies
+description: Falsehoods ring in your ears like discordant notes. You gain a +4 status bonus to Perception checks when someone Lies.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Falsehoods ring in your ears like discordant notes. You gain a +4 status bonus to Perception checks when someone Lies.

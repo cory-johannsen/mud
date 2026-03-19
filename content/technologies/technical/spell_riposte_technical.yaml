@@ -1,0 +1,16 @@
+id: spell_riposte_technical
+name: Spell Riposte
+description: Trigger You're the target of a spell you're aware of.You attempt to counteract the triggering spell. If the spell would be counteracted, it instead continues with the caster as a target instead of you. Spell riposte can't affect spells that aren't targeted (such as area spells).
+tradition: technical
+level: 7
+usage_type: prepared
+action_cost: 0
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Trigger You're the target of a spell you're aware of.You attempt to counteract the triggering spell. If the spell would be counteracted, it instead continues with the caster as a target instead of you

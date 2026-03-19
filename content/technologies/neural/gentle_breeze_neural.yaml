@@ -1,0 +1,20 @@
+id: gentle_breeze_neural
+name: Gentle Breeze
+description: |-
+    A light, soothing breeze flows through the area, making it easier to rest and recover. Medicine checks attempted to benefit living creatures in the area get a +2 status bonus. Any living creature in the area also gets a +2 status bonus to saving throws against afflictions and, if it remains within the area for the full duration, regains 10 Hit Points. In addition, the cool breeze reduces the temperature effects of heat by one step for any creature in the area.
+
+    Heightened (+2) The healing increases by 10 Hit Points.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: damage
+          dice: "10"
+          damage_type: untyped
+          dc: 0

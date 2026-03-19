@@ -1,0 +1,23 @@
+id: divinity_leech_neural
+name: Divinity Leech
+description: |-
+    You disrupt the connection between a divine caster or deific servitor and their deity, blocking their use of divine power. If the target fails its save, it is @UUID[Compendium.pf2e.conditionitems.Item.Fatigued].
+    For the spell's duration, whenever the target casts a divine spell, you regain @Damage[6d6[healing]] Hit Points and the target must attempt another Will save with the following effects.Critical Success The target is unaffected.
+    Success Each target of the divine spell has an outcome one degree of success better than the result it rolled.
+    Failure The divine spell is lost and target is Stunned 1.
+    Critical Failure As failure, but the target is @UUID[Compendium.pf2e.conditionitems.Item.Stunned] for 1 round.
+tradition: neural
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You disrupt the connection between a divine caster or deific servitor and their deity, blocking their use of divine power. If the target fails its save, it is @UUID[Compendium.pf2e.conditionitems.Item

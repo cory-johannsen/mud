@@ -1,0 +1,18 @@
+id: radiant_globe_technical
+name: Radiant Globe
+description: You create a dome of brilliant light that destroys projectiles attempting to pass through it. Ammunition from physical ranged attacks—such as arrows, bolts, sling bullets, and other objects of similar size—is destroyed in a flash of light when it passes into or out of the globe's area. Attackers targeting creatures or objects through the globe's surface with physical ranged attacks must succeed at a Fortitude save or become @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 round (@UUID[Compendium.pf2e.conditionitems.Item.Blinded] for 1 round on a critical failure).
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You create a dome of brilliant light that destroys projectiles attempting to pass through it. Ammunition from physical ranged attacks—such as arrows, bolts, sling bullets, and other objects of simil

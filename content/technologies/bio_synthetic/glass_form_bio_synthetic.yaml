@@ -1,0 +1,20 @@
+id: glass_form_bio_synthetic
+name: Glass Form
+description: |-
+    You grant the target properties of dull, transparent glass. The target becomes @UUID[Compendium.pf2e.conditionitems.Item.Concealed], has no scent, and can't bleed. They gain resistance 5 to acid, cold, electricity, and piercing damage and weakness 5 to sonic and bludgeoning damage. A creature in this form is affected by the shatter spell as though the creature were an unattended object. Each time the target takes damage to which the spell grants resistance or weakness, reduce the duration by 1 minute.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Glass Form]
+
+    Heightened (+2) The resistances and weaknesses increase by 5.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You grant the target properties of dull, transparent glass. The target becomes @UUID[Compendium.pf2e.conditionitems.Item.Concealed], has no scent, and can't bleed. They gain resistance 5 to acid, cold

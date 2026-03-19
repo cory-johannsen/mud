@@ -1,0 +1,18 @@
+id: ghostly_weapon_neural
+name: Ghostly Weapon
+description: |-
+    The target weapon becomes translucent and ghostly, and it can affect material and incorporeal creatures and objects. It gains the effects of the @UUID[Compendium.pf2e.equipment-srd.Item.Ghost Touch] property rune, meaning it is magical if it wasn't already, is especially effective against incorporeal creatures, and can be wielded by a corporeal or incorporeal creature.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Ghostly Weapon]
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: The target weapon becomes translucent and ghostly, and it can affect material and incorporeal creatures and objects. It gains the effects of the @UUID[Compendium.pf2e.equipment-srd.Item.Ghost Touch] p

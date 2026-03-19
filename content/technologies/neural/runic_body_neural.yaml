@@ -1,6 +1,11 @@
 id: runic_body_neural
-name: Combat Skin Augment
-description: You activate bio-synthetic combat dermal overlays, making your unarmed strikes count as augmented weapons.
+name: Runic Body
+description: |-
+    Glowing runes appear on the target's body. All its unarmed attacks become +1 striking unarmed attacks, gaining a +1 item bonus to attack rolls and increasing the number of damage dice to two.
+
+    Heightened (6th) The unarmed attacks are +2 greater striking.
+    Heightened (9th) The unarmed attacks are +3 major striking.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Runic Body]
 tradition: neural
 level: 1
 usage_type: prepared
@@ -10,11 +15,10 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'Glowing runes appear on the target''s body. All its unarmed attacks become +1 striking unarmed attacks,
-      gaining a +1 item bonus to attack rolls and increasing the number of damage dice to two.
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Glowing runes appear on the target's body. All its unarmed attacks become +1 striking unarmed attacks, gaining a +1 item bonus to attack rolls and increasing the number of damage dice to two.
 
-
-      Heighte'
+            Heighte

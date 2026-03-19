@@ -1,0 +1,33 @@
+id: call_the_blood_bio_synthetic
+name: Call The Blood
+description: |-
+    With a word and gesture, you cause streams of blood to erupt from the target's mouth, nostrils, ears, or other facial openings and come rushing into your mouth. You deal 8d4 void damage to the target.
+    If the target takes damage, its blood flows into your mouth. If you're a living creature and don't have void healing, you're Sickened 2. If you're undead (or living but have void healing), you can choose to either gain temporary Hit Points equal to half of the void damage the target takes (after applying resistance and the like) and become @UUID[Compendium.pf2e.conditionitems.Item.Quickened] for 1 round, or forgo the temporary Hit Points and become quickened for 1 minute. You can use this extra action only to Step, Stride, or Strike. You lose any remaining temporary Hit Points after 1 minute.
+
+    Heightened (+1) The damage increases by 2d4.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: "8"
+          damage_type: void
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 8d4
+          damage_type: void
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 16d4
+          damage_type: void
+          dc: 0

@@ -1,6 +1,6 @@
 id: defended_by_spirits_fanatic_doctrine
-name: Martyr Guard
-description: You call on the Doctrine's honored martyrs to protect the target, granting a small bonus to AC and saving throws.
+name: Defended by Spirits
+description: You entreat a spirit or the spiritual energies in your location to surround and protect an ally from an certain foe. Each time the enemy attacks and damages the ally, the enemy takes 1d6 spirit damage. The enemy is aware of these spirits and has a general sense that attacking the ally will draw the spirits' ire.Heightened (+2) The damage increases by 1d6.
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -10,8 +10,8 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-  on_apply:
-  - type: damage
-    dice: 1d6
-    damage_type: spirit
-    dc: 0
+    on_apply:
+        - type: damage
+          dice: 1d6
+          damage_type: spirit
+          dc: 0

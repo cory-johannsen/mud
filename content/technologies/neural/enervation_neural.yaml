@@ -1,0 +1,22 @@
+id: enervation_neural
+name: Enervation
+description: |-
+    Extending a finger, you fire a beam of void energy that weakens the life force of any creature it touches. Each living creature in the line must attempt a Fortitude save.Critical Success The creature is unaffected.
+    Success The creature takes @Damage[(floor(@item.rank/2))d8[persistent,void]] damage.
+    Failure The creature takes @Damage[(floor(@item.rank/2)*2)d8[persistent,void]] damage and becomes Drained 1.
+    Critical Failure The creature takes @Damage[(floor(@item.rank/2)*2)d8[persistent,void]] damage and becomes Drained 2 and Doomed 1.Heightened (+2) The persistent void damage increases by 1d8 on a success, or by 2d8 on a failure or critical failure.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Extending a finger, you fire a beam of void energy that weakens the life force of any creature it touches. Each living creature in the line must attempt a Fortitude save.Critical Success The creature

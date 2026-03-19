@@ -1,0 +1,20 @@
+id: radiant_field_fanatic_doctrine
+name: Radiant Field
+description: |-
+    You create an area of bright light. Creatures with @UUID[Compendium.pf2e.bestiary-ability-glossary-srd.Item.Light Blindness] that are @UUID[Compendium.pf2e.conditionitems.Item.Blinded] by radiant field and remain in the area must attempt a Fortitude save at the start of their turns. On a failure, a creature remains blinded for 1 round; this is an incapacitation effect.
+    This spell also suppresses magical darkness of your radiant field spell's rank or lower.Heightened (4th) Creatures seen through the area are @UUID[Compendium.pf2e.conditionitems.Item.Concealed] to creatures outside the area. Creatures with light blindness can continue to be blinded by the field as long as the field is visible, even when outside of the field.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You create an area of bright light. Creatures with @UUID[Compendium.pf2e.bestiary-ability-glossary-srd.Item.Light Blindness] that are @UUID[Compendium.pf2e.conditionitems.Item.Blinded] by radiant fiel

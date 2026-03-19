@@ -1,0 +1,16 @@
+id: summon_irii_neural
+name: Summon Irii
+description: You cast your spell, whisper your words of power, and find that an irii is already here—indeed, they've always been here, and always were, and always will be. The temporal being occupies the space of a Medium creature and has a Speed of 60 feet and a fly Speed of 60 feet. When you Cast this Spell, choose whether it summons a fate irii or a fortune irii.Fate The fate stands before you with its stained-glass wings and animal-headed gaze, floating eyes circling about it.Arrive (fortune, prediction) Decree the Immutability of Time While within 30 feet of the fate, you and your allies who roll below 10 on a d20 for an attack roll, Perception check, saving throw, or skill check get a 10 instead.Depart (misfortune, prediction) Observe the Inevitability of Destiny Each enemy within a @Template[type:emanation|distance:30] must attempt a @Check[will|options:area-effect|traits:misfortune,prediction] save. If a creature fails its save, until the end of its next turn, any time it rolls above 10 on a d20 for an attack roll, Perception check, saving throw, or skill check, it gets a 10 instead.Fortune The fortune stands before you with its golden horns and moth-scale wings, a sly smirk on its elfin face.Arrive (fortune, prediction) Decree the Chaos of Infinity While within 30 feet of the fortune, you and your allies roll twice and take the higher roll on all damage rolls, Perception checks, and saving throws.Depart (misfortune, prediction) Sunder Eternity's Authority Each enemy within a @Template[type:emanation|distance:30] must attempt a @Check[will|options:area-effect|traits:misfortune,prediction] save. A creature that fails its save must roll twice and take the lower result on all damage rolls, Perception checks, and saving throws until the end of its next turn.
+tradition: neural
+level: 8
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You cast your spell, whisper your words of power, and find that an irii is already here—indeed, they've always been here, and always were, and always will be. The temporal being occupies the space o

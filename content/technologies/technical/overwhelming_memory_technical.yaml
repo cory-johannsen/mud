@@ -1,0 +1,22 @@
+id: overwhelming_memory_technical
+name: Overwhelming Memory
+description: |-
+    You cause the target to recall a specific type of memory you choose from the list below, bringing it to the forefront of their mind with perfect clarity.Gleeful The memory makes the target laugh uncontrollably. They can't use reactions.Romantic The creature is consumed with their love for another. They are @UUID[Compendium.pf2e.conditionitems.Item.Fascinated] by the memory.Terrifying The creature is filled with terror and is Frightened 1.Tragic The creature is overwhelmed with sorrow. They are @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] from the tears in their eyes.The target must attempt a Will save.Critical Success The target is unaffected.
+    Success The target is affected by the memory until the beginning of your next turn.
+    Failure The target is affected by the memory until the beginning of your next turn and Stupefied 2 for the spell's duration.
+    Critical Failure As failure, but the target is Stupefied 3 for the spell's duration.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You cause the target to recall a specific type of memory you choose from the list below, bringing it to the forefront of their mind with perfect clarity.Gleeful The memory makes the target laugh uncon

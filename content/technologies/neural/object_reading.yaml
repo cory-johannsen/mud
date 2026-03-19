@@ -1,6 +1,13 @@
 id: object_reading
-name: Psychometric Scan
-description: You place your hand on an object and read the residual psychic impressions left by its previous users.
+name: Object Reading
+description: |-
+    You place a hand on an object to learn a piece of information about an emotional event that occurred involving the object within the past week, determined by the GM. If you cast object reading on the same item multiple times, you can either concentrate on a single event to gain additional pieces of information about that event, or you can gain a piece of information about another emotional event in the applicable time frame.
+
+    Heightened (2nd) You can learn about an event that occurred within the last month.
+    Heightened (4th) You can learn about an event that occurred within the last year.
+    Heightened (6th) You can learn about an event that occurred within the last decade.
+    Heightened (8th) You can learn about an event that occurred within the last century.
+    Heightened (9th) You can learn about an event that occurred within the entirety of the object's history.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -10,8 +17,7 @@ targets: single
 duration: instant
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You place a hand on an object to learn a piece of information about an emotional event that occurred involving
-      the object within the past week, determined by the GM. If you cast object reading on the
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You place a hand on an object to learn a piece of information about an emotional event that occurred involving the object within the past week, determined by the GM. If you cast object reading on the

@@ -1,0 +1,29 @@
+id: sudden_blight_bio_synthetic
+name: Sudden Blight
+description: You accelerate the processes of decay in the area. Each living creature in the area takes 2d10 void damage with a basic Fortitude save. A creature afflicted by a disease takes a –2 circumstance penalty to this save. You can also direct the blight to rot all Small and Tiny non-creature plants in the area, eliminating non-magical undergrowth and any resulting difficult terrain, cover, and concealment. Sudden blight attempts to counteract any magical effect on the plants before withering them.Heightened (+1) The damage increases by 1d10.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 2d6
+          damage_type: void
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d10
+          damage_type: void
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d10
+          damage_type: void
+          dc: 0

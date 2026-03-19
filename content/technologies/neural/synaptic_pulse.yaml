@@ -1,0 +1,28 @@
+id: synaptic_pulse
+name: Synaptic Pulse
+description: |-
+    You emit a pulsating mental blast that penetrates the minds of all enemies in the area. Each enemy in the area must attempt a Will save.
+
+    Critical Success The creature is unaffected.
+    Success The creature is Stunned 1.
+    Failure The creature is Stunned 2.
+    Critical Failure The creature is Stunned for 1 round.
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: rounds:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You emit a pulsating mental blast that penetrates the minds of all enemies in the area. Each enemy in the area must attempt a Will save.
+
+            Critical Success The creature is unaffected.
+            Success The creat

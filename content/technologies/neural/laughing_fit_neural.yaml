@@ -1,0 +1,28 @@
+id: laughing_fit_neural
+name: Laughing Fit
+description: |-
+    The target is overtaken with uncontrollable laughter. It must attempt a Will save.
+
+    Critical Success The target is unaffected.
+    Success The target is plagued with uncontrollable laughter. It can't use reactions.
+    Failure The target is Slowed 1 and can't use reactions.
+    Critical Failure The target falls @UUID[Compendium.pf2e.conditionitems.Item.Prone] and can't use actions or reactions for 1 round. It then takes the effects of a failure.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            The target is overtaken with uncontrollable laughter. It must attempt a Will save.
+
+            Critical Success The target is unaffected.
+            Success The target is plagued with uncontrollable laughter. It can't use

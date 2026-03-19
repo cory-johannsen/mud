@@ -1,0 +1,37 @@
+id: noxious_metals
+name: Noxious Metals
+description: |-
+    This spell forces toxic metal to coalesce on the skin or surface of all living creatures in the area, dealing 4d6 poison damage with a basic Fortitude save. Any creature that has the plant trait, has the wood trait, or has an anathema toward metal, takes the following effects depending on the result of that Fortitude save.
+
+    Critical Success The creature suffers no additional effects.
+    Success The creature takes @Damage[1[persistent,poison]] damage and is Sickened 1 as long as it takes this persistent damage.
+    Failure As success, except @Damage[1d4[persistent,poison]] damage and Sickened 2.
+    Critical Failure As success, except @Damage[1d8[persistent,poison]] damage and Sickened 3.
+
+    Heightened (+1) The initial poison damage increases by 2d6.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 4d3
+          damage_type: poison
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 4d6
+          damage_type: poison
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: poison
+          dc: 0

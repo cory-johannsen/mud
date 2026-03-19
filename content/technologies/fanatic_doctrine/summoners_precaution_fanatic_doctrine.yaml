@@ -1,0 +1,16 @@
+id: summoners_precaution_fanatic_doctrine
+name: Summoner's Precaution
+description: You create a buffer in the link between yourself and your eidolon in order to prevent you from falling alongside your bonded ally. You gain the @UUID[Compendium.pf2e.actionspf2e.Item.Sever Conduit] reaction; after using it, the spell ends.
+tradition: fanatic_doctrine
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You create a buffer in the link between yourself and your eidolon in order to prevent you from falling alongside your bonded ally. You gain the @UUID[Compendium.pf2e.actionspf2e.Item.Sever Conduit] re

@@ -1,0 +1,24 @@
+id: luring_wail_bio_synthetic
+name: Luring Wail
+description: |-
+    You emit a plaintive cry to lure your enemies closer. Each creature in the emanation that can hear you must attempt a Will save. If you speak a creature's name as part of the casting of the spell, that creature takes a –2 circumstance penalty to its saving throw. Each creature that enters the area on its turn must attempt a save. If you attack or take a hostile action, the @UUID[Compendium.pf2e.conditionitems.Item.Fascinated] condition ends only for the creature that's attacked.
+
+    Critical Success The creature is unaffected.
+    Success The creature is Slowed 1 for 1 round.
+    Failure The creature becomes fascinated and compelled to move toward the sound of your cry on its turn. As long as it is in the emanation and can hear, it must spend at least one of its actions on each of its turns to move closer to you.
+    Critical Failure As failure, but the creature must spend all its actions moving toward the sound. Additionally, the creature is @UUID[Compendium.pf2e.conditionitems.Item.Off-Guard].
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You emit a plaintive cry to lure your enemies closer. Each creature in the emanation that can hear you must attempt a Will save. If you speak a creature's name as part of the casting of the spell, tha

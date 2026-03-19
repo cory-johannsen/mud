@@ -1,7 +1,13 @@
 id: snowball_bio_synthetic
-name: Cryo-Gel Projectile
-description: You form and throw a compressed cryo-gel projectile that detonates on impact, dealing cold damage and slowing
-  targets.
+name: Snowball
+description: |-
+    You throw a magically propelled and chilled ball of dense snow. The target takes 2d4 cold damage and potentially other effects, depending on the result of your spell attack roll.
+
+    Critical Success The target takes double damage and a –10-foot status penalty to its Speeds for 1 round.
+    Success The target takes full damage and a –5-foot status penalty to its Speeds for 1 round.
+    Failure No effect.
+
+    Heightened (+1) The damage increases by 2d4.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -11,13 +17,13 @@ targets: single
 duration: instant
 resolution: attack
 effects:
-  on_hit:
-  - type: damage
-    dice: 2d4
-    damage_type: cold
-    dc: 0
-  on_crit_hit:
-  - type: damage
-    dice: 4d4
-    damage_type: cold
-    dc: 0
+    on_hit:
+        - type: damage
+          dice: 2d4
+          damage_type: cold
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 4d4
+          damage_type: cold
+          dc: 0

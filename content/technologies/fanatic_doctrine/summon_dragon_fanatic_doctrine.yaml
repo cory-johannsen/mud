@@ -1,0 +1,19 @@
+id: summon_dragon_fanatic_doctrine
+name: Summon Dragon
+description: |-
+    You summon a creature that has the dragon trait and whose level is 5 or lower to fight for you. If the dragon has a magical tradition trait (arcane, divine, occult, or primal), you can summon it only if you're using that tradition to cast summon dragon.
+
+    Heightened As listed in the summon trait.
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You summon a creature that has the dragon trait and whose level is 5 or lower to fight for you. If the dragon has a magical tradition trait (arcane, divine, occult, or primal), you can summon it only

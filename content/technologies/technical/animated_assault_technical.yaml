@@ -1,0 +1,29 @@
+id: animated_assault_technical
+name: Animated Assault
+description: You use your mind to manipulate unattended objects in the area, temporarily animating them to attack. The objects hover in the air, then hurl themselves at nearby creatures in a chaotic flurry of debris. This assault deals 2d10 bludgeoning damage (basic Reflex save) to each creature in the area. On subsequent rounds, the first time each round you Sustain this Spell, it deals @Damage[(floor(@item.level/2))d10[bludgeoning]] damage (basic Reflex save) to each creature in the area.Heightened (+2) The initial damage increases by 2d10 and the subsequent damage increases by 1d10.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 2d6
+          damage_type: bludgeoning
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d10
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d10
+          damage_type: bludgeoning
+          dc: 0

@@ -1,0 +1,16 @@
+id: solid_fog_technical
+name: Solid Fog
+description: You conjure a bank of fog so thick it impedes movement as well as sight. This functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist], except that the area is also difficult terrain. You can Dismiss the spell.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You conjure a bank of fog so thick it impedes movement as well as sight. This functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist], except that the area is also difficult terrain. You can Dismiss

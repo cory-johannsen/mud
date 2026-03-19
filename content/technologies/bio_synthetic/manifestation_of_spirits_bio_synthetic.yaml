@@ -1,0 +1,22 @@
+id: manifestation_of_spirits_bio_synthetic
+name: Manifestation of Spirits
+description: |-
+    You open the target's eyes to the plethora of spirits surrounding it—and it sees all these spirits as menacing and powerful. The target must attempt a Will save.Critical Success The target is unaffected.
+    Success The target believes every spirit it sees is an imminent threat. It's Stupefied 3 for 1 round.
+    Failure As success, but the effect lasts 1 minute.
+    Critical Failure As failure, and the target becomes @UUID[Compendium.pf2e.conditionitems.Item.Confused] for 1 round.Heightened (6th) You can target up to 5 creatures.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You open the target's eyes to the plethora of spirits surrounding it—and it sees all these spirits as menacing and powerful. The target must attempt a Will save.Critical Success The target is unaffe

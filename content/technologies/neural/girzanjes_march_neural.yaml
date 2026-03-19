@@ -1,0 +1,23 @@
+id: girzanjes_march_neural
+name: Girzanje's March
+description: |-
+    You sing a prayer for war, inspiring valor in allies who hear your song. Allied creatures who can hear and understand you gain a +1 status bonus to attack rolls, Fortitude saves, and Will saves against mental effects.
+
+    Heightened (7th) The status bonus increases to +2.
+    Heightened (10th) The status bonus increases to +3.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Girzanje's March]
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You sing a prayer for war, inspiring valor in allies who hear your song. Allied creatures who can hear and understand you gain a +1 status bonus to attack rolls, Fortitude saves, and Will saves agains

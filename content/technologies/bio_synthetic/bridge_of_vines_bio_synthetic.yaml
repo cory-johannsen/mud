@@ -1,0 +1,23 @@
+id: bridge_of_vines_bio_synthetic
+name: Bridge of Vines
+description: |-
+    Vines sprout beneath your feet and extend away from you in a straight line up to 60 feet, forming a 10-foot-wide bridge that can cross over difficult terrain and low obstacles, as well as reach higher ground. The bridge has an AC equal to your spell DC, Hardness 10, and 20 Hit Points. It is immune to critical hits and precision damage. The bridge lasts either for the duration of the spell, until it is destroyed, or until you Dismiss the spell.
+    While the spell is active, you and your allies can use the bridge normally. If any other creatures attempt to use the bridge, the vines attempt to trip and entangle them. They must attempt a Reflex save against your spell DC.Critical Success The target is unaffected.
+    Success The target treats the length of the bridge as difficult terrain.
+    Failure As success, and the target is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+    Critical Failure As success, and the target is knocked prone and @UUID[Compendium.pf2e.conditionitems.Item.Grabbed] until it Escapes (with a DC equal to your spell DC) or the spell ends.Heightened (+1) The bridge's Hit Points increase by 10.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Vines sprout beneath your feet and extend away from you in a straight line up to 60 feet, forming a 10-foot-wide bridge that can cross over difficult terrain and low obstacles, as well as reach higher

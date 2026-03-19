@@ -1,7 +1,12 @@
 id: wooden_fists_bio_synthetic
-name: Cellulose Reinforcement Inject
-description: You inject a cellulose hardening compound into your hands, making your unarmed strikes deal bludgeoning damage
-  like a wooden club.
+name: Wooden Fists
+description: |-
+    Your arms and hands swell with new growth, transforming into tree trunks twice as big as their current size. Your fists deal 1d6 bludgeoning damage, lose the nonlethal trait, and have reach.
+
+    Heightened (3rd) Your fists gain the magical trait and become a striking weapon, increasing the damage your fists deal to 2d6 bludgeoning.
+    Heightened (7th) Your fists gain the magical trait and become a greater striking weapon, increasing the damage your fists deal to 3d6 bludgeoning. The duration is 10 minutes.
+    Heightened (9th) Your fists gain the magical trait and become a major striking weapon, increasing the damage your fists deal to 4d6 bludgeoning. The duration is 1 hour.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Wooden Fists]
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -11,11 +16,10 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: 'Your arms and hands swell with new growth, transforming into tree trunks twice as big as their current size.
-      Your fists deal 1d6 bludgeoning damage, lose the nonlethal trait, and have reach.
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Your arms and hands swell with new growth, transforming into tree trunks twice as big as their current size. Your fists deal 1d6 bludgeoning damage, lose the nonlethal trait, and have reach.
 
-
-      Heighten'
+            Heighten

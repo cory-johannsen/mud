@@ -1,0 +1,20 @@
+id: thundering_dominance_bio_synthetic
+name: Thundering Dominance
+description: |-
+    You shroud the target in a powerful predatory aura and amplify its vocalizations. It gains a +1 status bonus to Intimidation checks. Once during this spell's duration, it can take the @UUID[Compendium.pf2e.actionspf2e.Item.Thundering Roar] action.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Thundering Dominance]
+
+    Heightened (+2) The status bonus to Intimidation checks increases by 1 (to a maximum of a +4 status bonus for an 8th-rank spell), and the damage from the roar increases by 2d8.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You shroud the target in a powerful predatory aura and amplify its vocalizations. It gains a +1 status bonus to Intimidation checks. Once during this spell's duration, it can take the @UUID[Compendium

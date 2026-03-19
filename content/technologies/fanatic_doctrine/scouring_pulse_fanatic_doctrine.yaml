@@ -1,0 +1,29 @@
+id: scouring_pulse_fanatic_doctrine
+name: Scouring Pulse
+description: 'Area 10-foot radius, 60-foot-tall cylinderYou inundate the area with concentrated vitality energy, which scours away the stain of undeath. Each creature in the area takes 6d8 vitality damage and must attempt a basic Reflex save. Creatures that fail the save also take @Damage[(ternary(gte(@item.level,5),1,2))d8[persistent,vitality]] damage. Creatures that take persistent vitality damage from scouring pulse are wreathed in a heatless halo of light. They emit bright light in a 5-foot radius preventing them from being @UUID[Compendium.pf2e.conditionitems.Item.Concealed]; if the creature is @UUID[Compendium.pf2e.conditionitems.Item.Invisible], they''re concealed while affected by scouring pulse, rather than being undetected.Heightened (8th) The vitality damage increases to 9d8 damage, and the persistent vitality damage increases to 2d8 persistent vitality damage. Creatures remain suffused in light for [[/r 1d4 #Rounds]]{1d4 additional rounds} after removing the persistent vitality damage.'
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 6d4
+          damage_type: vitality
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 6d8
+          damage_type: vitality
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 12d8
+          damage_type: vitality
+          dc: 0

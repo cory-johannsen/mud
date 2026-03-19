@@ -1,6 +1,9 @@
 id: buffeting_winds
-name: Wind Burst Exhale
-description: You release a concentrated burst of air from a modified lung system, buffeting nearby targets.
+name: Buffeting Winds
+description: |-
+    You release a quick burst of wind that batters your living opponents without causing them lasting harm, while also blowing undead away. The wind deals 2d4 bludgeoning damage, which is nonlethal against living creatures. Against undead, the winds are more vicious, and the spell loses the nonlethal trait against such creatures. Each creature in the area must attempt a basic Reflex save. On a failure, undead creatures are also knocked back 5 feet (or 10 feet on a critical failure).
+
+    Heightened (+1) The damage increases by 2d4.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -12,18 +15,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-  on_success:
-  - type: damage
-    dice: '2'
-    damage_type: bludgeoning
-    dc: 0
-  on_failure:
-  - type: damage
-    dice: 2d4
-    damage_type: bludgeoning
-    dc: 0
-  on_crit_failure:
-  - type: damage
-    dice: 4d4
-    damage_type: bludgeoning
-    dc: 0
+    on_success:
+        - type: damage
+          dice: "2"
+          damage_type: bludgeoning
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d4
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d4
+          damage_type: bludgeoning
+          dc: 0

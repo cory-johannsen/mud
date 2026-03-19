@@ -1,0 +1,21 @@
+id: fire_shield_technical
+name: Fire Shield
+description: |-
+    You create a hovering shield made of fire. As long as the shield persists, its heat grants you cold resistance 5 and makes you immune to mild and severe environmental cold. You can Raise a Shield with the fire shield as a normal shield to gain a +1 circumstance bonus to AC. You can use the Shield Block reaction with the fire shield, which has Hardness 10, is immune to fire, and has 40 HP (with no Broken Threshold), and its Hardness is halved against effects that have the water trait. If you Shield Block a melee attack that is either an unarmed attack or made by an adjacent attacker, the attacker takes 2d6 fire damage.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fire Shield]
+
+    Heightened (+2) The cold resistance increases by 5, the HP increase by 10, and the fire damage increases by 1d6.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: damage
+          dice: 2d6
+          damage_type: fire
+          dc: 0

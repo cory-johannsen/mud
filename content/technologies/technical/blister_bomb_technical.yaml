@@ -1,0 +1,26 @@
+id: blister_bomb_technical
+name: Blister Bomb
+description: |-
+    You launch a small bomb enchanted with a fast-acting skin disease at your foes, causing their skin to break out in horrible bleeding sores. All creatures in the area of the burst must attempt a Fortitude save.Critical Success The creature is unaffected and is immune to blister pox for 1 week.
+    Success The creature is Sickened 2.
+    Failure The creature is afflicted with blister pox at stage 1.
+    Critical Failure The creature is afflicted with blister pox at stage 2.Blister Pox (disease) Level 5; A creature can't reduce its sickened value below 1 while it's taking persistent bleed damage from blister pox
+    Stage 1 sickened 2 (1 round)
+    Stage 2 sickened 2 and 1d6 persistent bleed damage (1 round)
+    Stage 3 sickened 2 and 2d6 persistent bleed damage (1 round)
+    Stage 4 Sickened 3 and 2d6 persistent bleed damage (1 day)
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You launch a small bomb enchanted with a fast-acting skin disease at your foes, causing their skin to break out in horrible bleeding sores. All creatures in the area of the burst must attempt a Fortit

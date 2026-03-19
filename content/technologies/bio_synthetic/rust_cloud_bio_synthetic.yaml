@@ -1,0 +1,33 @@
+id: rust_cloud_bio_synthetic
+name: Rust Cloud
+description: |-
+    Red-blown flecks of rust jitter in the air, forming a cloud of agitated particles. All creatures within the cloud become @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the cloud become concealed to creatures within it. The cloud deals 5d10 slashing damage to any creature that starts its turn in the area, with a basic Fortitude save.
+    Metal that rusts off of a creature adds to the cloud. When a metal creature takes damage from the cloud, the cloud's area increases by 5 feet (to a maximum of a @Template[burst|distance:40]), and the creature starts to rust, taking @Damage[(floor(@item.level/2)-1)d4[persistent,slashing]] damage. You can Dismiss the cloud.
+
+    Heightened (+2) The cloud's slashing damage increases by 1d10 and the persistent damage increases by 1d4.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 5d6
+          damage_type: slashing
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 5d10
+          damage_type: slashing
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 10d10
+          damage_type: slashing
+          dc: 0

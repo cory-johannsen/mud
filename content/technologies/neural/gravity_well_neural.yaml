@@ -1,0 +1,24 @@
+id: gravity_well_neural
+name: Gravity Well
+description: |-
+    You create a sphere of altered gravity. All creatures and unsecured objects in the area move towards the center, depending on their Reflex saving throws. This follows the rules for forced movement. If there's not enough space near the center of the sphere, creatures and objects nearer to the center move first, and others move as far as they can without being blocked, up to the amount set by their saving throw outcomes.
+
+    Critical Success The creature is unaffected.
+    Success The creature moves 5 feet toward the center.
+    Failure The creature moves 15 feet toward the center.
+    Critical Failure The creature moves 30 feet toward the center.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You create a sphere of altered gravity. All creatures and unsecured objects in the area move towards the center, depending on their Reflex saving throws. This follows the rules for forced movement. If

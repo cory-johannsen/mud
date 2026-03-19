@@ -1,0 +1,33 @@
+id: blinding_foam_technical
+name: Blinding Foam
+description: |-
+    You spray a colorful, caustic foam into the target's eyes, which clings to their face. Make a spell attack roll. If you hit, you deal 5d10 acid damage and 1d6 persistent acid damage, and the target is @UUID[Compendium.pf2e.conditionitems.Item.Blinded] for the duration. The foam can be removed with 3 Interact actions, which ends the persistent acid damage. These Interact actions don't need to be consecutive. When the target's persistent acid damage ends, the spell automatically ends.
+
+    Heightened (8th) The initial damage increases to 9d10, and the persistent acid damage increases to 2d6.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: attack
+effects:
+    on_hit:
+        - type: damage
+          dice: 5d10
+          damage_type: acid
+          dc: 0
+        - type: damage
+          dice: 1d6
+          damage_type: acid
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 10d10
+          damage_type: acid
+          dc: 0
+        - type: damage
+          dice: 2d6
+          damage_type: acid
+          dc: 0

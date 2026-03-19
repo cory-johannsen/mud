@@ -1,0 +1,44 @@
+id: bone_spray_bio_synthetic
+name: Bone Spray
+description: |-
+    You fire a torrent of jagged bone shards from your hands, dealing 2d10 piercing damage and 1 persistent bleed damage to all creatures in the area.
+
+    Heightened (+1) The piercing damage increases by 1d10 and the persistent bleed damage increases by 1.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 2d6
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: "1"
+          damage_type: bleed
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d10
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: "1"
+          damage_type: bleed
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d10
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: "1"
+          damage_type: bleed
+          dc: 0

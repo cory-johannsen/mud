@@ -1,0 +1,29 @@
+id: sacred_nimbus_fanatic_doctrine
+name: Sacred Nimbus
+description: You summon a small, fluffy white nimbus cloud that floats 10 feet above the ground and rains down pleasantly warm sanctified water. The rain deals 5d6 spirit damage to fiends, undead, and creatures that have a weakness to spirit damage in the area at the end of your turn. When you Sustain the spell, you can move the cloud at a fly speed of 15 feet to anywhere in the spell's range. The water dissipates as it makes contact with any creatures or surfaces, leaving only a bit of humidity in its place.Heightened (+1) The damage increases by 1d6.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 5d3
+          damage_type: spirit
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 5d6
+          damage_type: spirit
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 10d6
+          damage_type: spirit
+          dc: 0

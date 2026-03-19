@@ -1,6 +1,10 @@
 id: gravitational_pull_neural
-name: Gravity Spike
-description: You generate a momentary gravity well, yanking the target toward you. They must resist or be pulled off-balance.
+name: Gravitational Pull
+description: |-
+    By suddenly altering gravity, you pull the target toward you. The target is pulled 10 feet closer to you unless it succeeds at a Fortitude save. On a critical failure, it's also knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]. The effects of this spell change depending on the number of actions you spend when you Cast this Spell.
+    1 (somatic) The spell targets one creature.
+    2 (somatic, verbal) The spell targets one creature and pulls the target 20 feet instead of 10.
+    3 (material, somatic, verbal) The spell targets up to 5 creatures.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -12,8 +16,7 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: By suddenly altering gravity, you pull the target toward you. The target is pulled 10 feet closer to you
-      unless it succeeds at a Fortitude save. On a critical failure, it's also knocked @UUID[Compendi
+    on_apply:
+        - type: utility
+          dc: 0
+          description: By suddenly altering gravity, you pull the target toward you. The target is pulled 10 feet closer to you unless it succeeds at a Fortitude save. On a critical failure, it's also knocked @UUID[Compendi

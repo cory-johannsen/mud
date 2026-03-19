@@ -1,7 +1,12 @@
 id: admonishing_ray_fanatic_doctrine
-name: Corrective Beam
-description: The Doctrine's judgment manifests as a beam of focused disciplinary energy. Choose concussive or stinging delivery.
-  Make a tech attack roll. Deals 2d6 bludgeoning damage — pain without lasting harm, as the Doctrine demands.
+name: Admonishing Ray
+description: |-
+    A ray of energy bludgeons your target into submission without causing lasting harm. When you cast this spell, you choose whether the ray feels like a strong punch or slap. Make a spell attack roll. The ray deals 2d6 bludgeoning damage.
+
+    Critical Success The target takes double damage.
+    Success The target takes full damage.
+
+    Heightened (+1) The damage increases by 2d6.
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -11,13 +16,13 @@ targets: single
 duration: instant
 resolution: attack
 effects:
-  on_hit:
-  - type: damage
-    dice: 2d6
-    damage_type: bludgeoning
-    dc: 0
-  on_crit_hit:
-  - type: damage
-    dice: 4d6
-    damage_type: bludgeoning
-    dc: 0
+    on_hit:
+        - type: damage
+          dice: 2d6
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 4d6
+          damage_type: bludgeoning
+          dc: 0

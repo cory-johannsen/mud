@@ -1,0 +1,20 @@
+id: shrink_bio_synthetic
+name: Shrink
+description: |-
+    You warp space to make a creature smaller. The target shrinks to become Tiny in size. Its equipment shrinks with it but returns to its original size if removed. The creature's reach changes to 0 feet. This spell has no effect on a Tiny creature.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Shrink]
+
+    Heightened (6th) The spell can target up to 10 creatures.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You warp space to make a creature smaller. The target shrinks to become Tiny in size. Its equipment shrinks with it but returns to its original size if removed. The creature's reach changes to 0 feet.

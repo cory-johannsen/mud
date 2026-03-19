@@ -1,6 +1,10 @@
 id: soothe
-name: Cognitive Stabilizer
-description: You calm the target's neural patterns, boosting their mental fortitude and healing minor psychological strain.
+name: Soothe
+description: |-
+    You grace the target's mind, boosting its mental defenses and healing its wounds. The target regains 1d10+4 Hit Points when you Cast the Spell and gains a +2 status bonus to saves against mental effects for the duration.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Soothe]
+
+    Heightened (+1) The amount of healing increases by 1d10+4.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -10,8 +14,8 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-  on_apply:
-  - type: damage
-    dice: 1d10+4
-    damage_type: untyped
-    dc: 0
+    on_apply:
+        - type: damage
+          dice: 1d10+4
+          damage_type: untyped
+          dc: 0

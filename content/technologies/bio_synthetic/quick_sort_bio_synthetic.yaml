@@ -1,6 +1,10 @@
 id: quick_sort_bio_synthetic
-name: Bio-Manipulator Sort
-description: You extend bio-synthetic manipulators to rapidly sort and organize a collection of objects into classified groups.
+name: Quick Sort
+description: |-
+    You magically sort a group of objects into neat stacks or piles. You can sort the objects in two different ways. The first option is to separate them into different piles depending on an easily observed factor, such as color or shape. Alternatively, you can sort the objects into ordered stacks depending on a clearly indicated notation, such as a page number, title, or date. The objects sort themselves throughout the duration, though it takes less time per object to sort a smaller number of objects, down to a single round for 30 or fewer objects.
+
+    Heightened (3rd) The spell can sort up to 400 objects in a minute, or 60 objects in a round.
+    Heightened (5th) The spell can sort up to 800 objects in a minute, or 120 objects in a round.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -10,8 +14,7 @@ targets: single
 duration: instant
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You magically sort a group of objects into neat stacks or piles. You can sort the objects in two different
-      ways. The first option is to separate them into different piles depending on an easily observ
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You magically sort a group of objects into neat stacks or piles. You can sort the objects in two different ways. The first option is to separate them into different piles depending on an easily observ

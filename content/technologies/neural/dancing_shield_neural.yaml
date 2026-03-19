@@ -1,0 +1,20 @@
+id: dancing_shield_neural
+name: Dancing Shield
+description: |-
+    You levitate the touched shield and send it to orbit around a creature. When you Cast the Spell and Sustain it, the shield uses the Raise a Shield action to protect the target creature.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Dancing Shield]Heightened (4th) If you have the @UUID[Compendium.pf2e.feats-srd.Item.Shield Block] reaction, you can use your reaction to have the target shield use Shield Block when the target creature would take damage from a physical attack, in addition to the usual trigger. In this case, Shield Block protects the target creature, rather than you. Since the shield is using Shield Block and not you, additional effects or abilities that normally apply when you Shield Block don't apply.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You levitate the touched shield and send it to orbit around a creature. When you Cast the Spell and Sustain it, the shield uses the Raise a Shield action to protect the target creature.
+            @UUID[Compendi

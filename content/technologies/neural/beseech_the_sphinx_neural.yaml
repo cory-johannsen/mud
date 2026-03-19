@@ -1,7 +1,9 @@
 id: beseech_the_sphinx_neural
-name: Algorithmic Oracle Query
-description: You ping an ancient cognitive network, seeking a flash of precognitive insight. If your query is granted, you
-  gain a brief advantage on your next skill check.
+name: Beseech the Sphinx
+description: |-
+    You look to the great Sphinx constellation, wisest of all cosmic guides and favored of Phimater, asking them to lend their insight to the target. Choose one skill and one type of saving throw (Fortitude, Reflex, or Will). The target gains a +1 status bonus to those skill checks and saving throws for the duration.Heightened (4th) The status bonus increases to +2.
+    Heightened (7th) The status bonus increases to +3.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Beseech the Sphinx]
 tradition: neural
 level: 1
 usage_type: prepared
@@ -11,8 +13,7 @@ targets: single
 duration: instant
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You look to the great Sphinx constellation, wisest of all cosmic guides and favored of Phimater, asking them
-      to lend their insight to the target. Choose one skill and one type of saving throw (Fortitu
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You look to the great Sphinx constellation, wisest of all cosmic guides and favored of Phimater, asking them to lend their insight to the target. Choose one skill and one type of saving throw (Fortitu

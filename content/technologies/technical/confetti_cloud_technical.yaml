@@ -1,0 +1,21 @@
+id: confetti_cloud_technical
+name: Confetti Cloud
+description: |-
+    You conjure a dense storm of swirling confetti. All creatures within the area of the confetti become @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the storm become concealed to creatures within it. Additionally, creatures in the area of the confetti continually hear the raucous sounds of a party or festival and take a –2 circumstance penalty on Perception checks to hear. The number of actions you spend when Casting this Spell determines its area. You can Dismiss the spell.
+
+    1 (somatic) The spell's area is a @Template[burst|distance:5].
+    2 (somatic, verbal) The spell's area is a @Template[burst|distance:10].
+    3 (material, somatic, verbal) The spell's area is a @Template[burst|distance:15].
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You conjure a dense storm of swirling confetti. All creatures within the area of the confetti become @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the storm become co

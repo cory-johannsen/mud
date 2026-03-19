@@ -1,0 +1,37 @@
+id: bandits_doom_neural
+name: Bandit's Doom
+description: |-
+    You ward the target item against those who would steal it. When a creature attempts to take the target into its possession, it takes 8d8 mental damage and is doomed, depending on the result of its Will save. The spell then ends. You can choose up to 10 creatures when you cast this spell; if you do, those creatures can take the target item without triggering the ward. You can only have one bandit's doom active at a time. If you cast the spell again, the newer casting supersedes the older.
+
+    Critical Success The creature is unaffected.
+    Success The creature takes half damage and is Doomed 1.
+    Failure The creature takes full damage and is Doomed 2.
+    Critical Failure The creature takes double damage and is Doomed 3.
+
+    Heightened (+2) The damage increases by 2d8.
+tradition: neural
+level: 5
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 8d4
+          damage_type: mental
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 8d8
+          damage_type: mental
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 16d8
+          damage_type: mental
+          dc: 0

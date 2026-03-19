@@ -1,0 +1,22 @@
+id: drop_dead_fanatic_doctrine
+name: Drop Dead
+description: |-
+    Trigger A creature within range is hit by an attack from an enemy.
+
+    The target appears to fall down dead, though it actually turns @UUID[Compendium.pf2e.conditionitems.Item.Invisible]. Its illusory corpse remains where it fell, complete with a believable fatal wound. This illusion looks and feels like a dead body. If the target's death seems absurd—for instance, a barbarian at full health appears to be slain by 2 damage—the GM can grant the attacker an immediate @Check[perception] check to disbelieve the illusion. If the target uses hostile actions, the spell ends. This ends the entire spell, so the illusory corpse disappears too.Heightened (7th) The spell doesn't end if the target uses a hostile action.
+tradition: fanatic_doctrine
+level: 5
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Trigger A creature within range is hit by an attack from an enemy.
+
+            The target appears to fall down dead, though it actually turns @UUID[Compendium.pf2e.conditionitems.Item.Invisible]. Its illusory co

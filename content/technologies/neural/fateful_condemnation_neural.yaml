@@ -1,0 +1,33 @@
+id: fateful_condemnation_neural
+name: Fateful Condemnation
+description: |-
+    You draw upon the target's negative fate, causing this lingering destiny to afflict it and its nearby allies with the unintended consequences of its past lives. Spiritual echoes of the target's past lives instill overwhelming feelings of doubt, regret, and despair into the minds of the target and its nearby allies. The effects depend on the target's Will save, with the following results.Critical Success The creature is unaffected.
+    Success The creature takes 4d6 mental damage, and then an aura of shimmering mist with a @Template[emanation|distance:10] surrounds the creature. This mist isn't dense enough to affect sight, but it does cause the creature and any of its allies in the aura to take a –1 status penalty to all skill checks.
+    Failure As success, but the creature takes an initial 8d6 mental damage and is then Slowed 1 for the duration of the effect.
+    Critical Failure As success, but the creature takes an initial 16d6 mental damage, then is slowed 1 for the duration of the effect. Any of the target's allies who begin their turn in the @Template[emanation|distance:10] is slowed 1 for 1 round.
+tradition: neural
+level: 6
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 8d3
+          damage_type: mental
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: mental
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 16d6
+          damage_type: mental
+          dc: 0

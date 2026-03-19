@@ -1,0 +1,26 @@
+id: outcasts_curse_technical
+name: Outcast's Curse
+description: |-
+    You afflict the target with a curse that makes its presence abrasive and off-putting. The target must attempt a Will save.Critical Success The target is unaffected.
+    Success For 10 minutes, the target must roll twice and use the worse result whenever attempting a Deception, Diplomacy, Intimidation, or Performance check, and creatures they encounter have an initial attitude toward them of one step worse (for instance, @UUID[Compendium.pf2e.conditionitems.Item.Unfriendly] instead of @UUID[Compendium.pf2e.conditionitems.Item.Indifferent]).
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Outcast's Curse (Success)]
+    Failure As success, but the effect is permanent.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Outcast's Curse (Failure)]
+    Critical Failure As failure, and creatures that the target encounters have an initial attitude toward them of two steps worse.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You afflict the target with a curse that makes its presence abrasive and off-putting. The target must attempt a Will save.Critical Success The target is unaffected.
+            Success For 10 minutes, the target

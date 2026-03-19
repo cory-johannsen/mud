@@ -1,0 +1,18 @@
+id: carrion_mire_technical
+name: Carrion Mire
+description: The ground opens into a seemingly endless mass of corpse limbs, grasping at all creatures within the area to drag them down. Creatures in the area when the spell is cast or beginning their turn in the area must succeed at a Reflex save or fall @UUID[Compendium.pf2e.conditionitems.Item.Prone]. When a creature in the spell's area would be healed by a vitality effect, the carrion mire attempts to counteract that effect, preventing that healing but not otherwise preventing the effect if it's counteracted.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: The ground opens into a seemingly endless mass of corpse limbs, grasping at all creatures within the area to drag them down. Creatures in the area when the spell is cast or beginning their turn in the

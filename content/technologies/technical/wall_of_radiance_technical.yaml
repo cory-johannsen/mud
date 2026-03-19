@@ -1,0 +1,29 @@
+id: wall_of_radiance_technical
+name: Wall of Radiance
+description: You create a thin wall of brilliant light in a straight line up to 60 feet long and 10 feet high. You must create the wall in an unbroken open space so its edges don't pass through any creatures or objects, or the spell is lost. The wall stands vertically and, if you wish, can be of a shorter length or height. Creatures adjacent to the wall are @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]. Creatures that move through the wall take 2d6 fire damage (basic Fortitude save) as the concentrated light burns them.Heightened (4th) The light makes it difficult to discern creatures on the other side. Creatures are @UUID[Compendium.pf2e.conditionitems.Item.Concealed] to other creatures on the opposite side of the wall from them. The fire damage increases to 3d6.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 2d3
+          damage_type: fire
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d6
+          damage_type: fire
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d6
+          damage_type: fire
+          dc: 0

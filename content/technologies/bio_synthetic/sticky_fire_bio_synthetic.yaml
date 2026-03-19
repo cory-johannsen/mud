@@ -1,0 +1,30 @@
+id: sticky_fire_bio_synthetic
+name: Sticky Fire
+description: You send a bubble of viscous liquid that sparks into flame. Make a spell attack roll against the target's AC, dealing 1d8 fire damage and 1d8 persistent fire damage on a hit. The target is Enfeebled 1 until they recover from their persistent fire damage.Heightened (+2) The initial and persistent fire damage increase by 1d8.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+    on_hit:
+        - type: damage
+          dice: 1d8
+          damage_type: fire
+          dc: 0
+        - type: damage
+          dice: 1d8
+          damage_type: fire
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 2d8
+          damage_type: fire
+          dc: 0
+        - type: damage
+          dice: 2d8
+          damage_type: fire
+          dc: 0

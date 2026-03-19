@@ -1,0 +1,28 @@
+id: deafness_bio_synthetic
+name: Deafness
+description: |-
+    The target loses hearing; it must attempt a Fortitude save. The target is then temporarily immune for 1 minute.
+
+    Critical Success The target is unaffected.
+    Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 round.
+    Failure The target is Deafened for 10 minutes.
+    Critical Failure The target is Deafened permanently.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            The target loses hearing; it must attempt a Fortitude save. The target is then temporarily immune for 1 minute.
+
+            Critical Success The target is unaffected.
+            Success The target is @UUID[Compendium.pf2e.

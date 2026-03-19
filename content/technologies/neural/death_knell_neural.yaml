@@ -1,0 +1,24 @@
+id: death_knell_neural
+name: Death Knell
+description: |-
+    You snuff the life out of a creature on the brink of death. The target must attempt a Will save. If this kills it, you gain 10 temporary HP and a +1 status bonus to attack and damage rolls for 10 minutes.
+
+    Critical Success The target is unaffected.
+    Success The target's @UUID[Compendium.pf2e.conditionitems.Item.Dying] value increases by 1.
+    Failure The target dies.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Death Knell]
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You snuff the life out of a creature on the brink of death. The target must attempt a Will save. If this kills it, you gain 10 temporary HP and a +1 status bonus to attack and damage rolls for 10 minu

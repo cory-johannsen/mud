@@ -1,0 +1,18 @@
+id: lucky_number_technical
+name: Lucky Number
+description: |-
+    When you Cast this Spell, roll 1d20 and make a note of the result. You gain the @UUID[Compendium.pf2e.actionspf2e.Item.That's My Number] reaction; once you use the reaction, the spell ends, and you become temporarily immune to lucky number until the next time you make your daily preparations.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Lucky Number]
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: When you Cast this Spell, roll 1d20 and make a note of the result. You gain the @UUID[Compendium.pf2e.actionspf2e.Item.That's My Number] reaction; once you use the reaction, the spell ends, and you be

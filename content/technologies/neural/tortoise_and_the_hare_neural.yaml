@@ -1,0 +1,24 @@
+id: tortoise_and_the_hare_neural
+name: Tortoise and the Hare
+description: |-
+    You prove that slow and steady doesn't always win the race by turning a foe into a proverbial tortoise and yourself or an ally into a hare, siphoning some of the foe's speed and granting it to the other target. The effects depend on the foe's Fortitude save.
+
+    Critical Success The targets are unaffected.
+    Success The foe is Slowed 1 for 1 round, and the other target is unaffected.
+    Failure The foe is slowed 1 for 3 rounds and the other target is @UUID[Compendium.pf2e.conditionitems.Item.Quickened] for 1 round. It can use the extra action to Step, Stride, or Strike.
+    Critical Failure The foe is slowed 1 for 3 minutes and the other target is quickened for 1 minute. It can use the extra action to Step, Stride, or Strike.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You prove that slow and steady doesn't always win the race by turning a foe into a proverbial tortoise and yourself or an ally into a hare, siphoning some of the foe's speed and granting it to the oth

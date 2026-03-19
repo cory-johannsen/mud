@@ -1,0 +1,16 @@
+id: indestructibility_bio_synthetic
+name: Indestructibility
+description: You sever yourself from cause and effect. For the duration of the spell, you are immune to any effect or damage that would harm you, excluding effects caused by artifacts, deific power, and similarly powerful sources. You can selectively allow yourself to be affected by anything you're willing to have affect you.
+tradition: bio_synthetic
+level: 10
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You sever yourself from cause and effect. For the duration of the spell, you are immune to any effect or damage that would harm you, excluding effects caused by artifacts, deific power, and similarly

@@ -1,0 +1,49 @@
+id: blazing_fissure_technical
+name: Blazing Fissure
+description: |-
+    A thin crack rips through the earth, erupting with magma, then swiftly seals up. Each creature along the line and on solid ground takes 4d6 bludgeoning damage and 6d6 fire damage with a Reflex save.
+
+    Critical Success The creature is unaffected.
+    Success The creature takes half damage.
+    Failure The creature takes full damage, and it falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+    Critical Failure The target takes double damage, and it falls prone.
+
+    Heightened (+1) The damage increases by 1d6 bludgeoning and 1d6 fire
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 4d3
+          damage_type: bludgeoning
+          dc: 0
+        - type: damage
+          dice: 6d3
+          damage_type: fire
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 4d6
+          damage_type: bludgeoning
+          dc: 0
+        - type: damage
+          dice: 6d6
+          damage_type: fire
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: bludgeoning
+          dc: 0
+        - type: damage
+          dice: 12d6
+          damage_type: fire
+          dc: 0

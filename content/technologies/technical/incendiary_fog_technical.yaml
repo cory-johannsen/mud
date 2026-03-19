@@ -1,0 +1,29 @@
+id: incendiary_fog_technical
+name: Incendiary Fog
+description: You summon a cloud of flammable black dust. The cloud functions as @UUID[Compendium.pf2e.spells-srd.Item.Mist]. If any open flame or fire effect is within the spell's area when it's cast, or later enters or occurs within the area, the cloud ignites. Creatures in the cloud take @Damage[10d6[fire]] damage (basic Reflex save), and the spell ends.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 10d3
+          damage_type: fire
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 10d6
+          damage_type: fire
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 20d6
+          damage_type: fire
+          dc: 0

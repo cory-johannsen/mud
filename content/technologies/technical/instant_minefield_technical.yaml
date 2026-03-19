@@ -1,0 +1,43 @@
+id: instant_minefield_technical
+name: Instant Minefield
+description: |-
+    You create several hidden mines throughout the area that explode when stepped on. Choose up to 6 unoccupied squares within range. A mine appears in each chosen square, visible only to you and your allies. A mine can't be targeted and isn't affected by area effects, but if it hasn't been triggered by the end of the spell's duration, it dissipates harmlessly. A creature that can see @UUID[Compendium.pf2e.conditionitems.Item.Invisible] creatures and objects can see the mines. A creature can also attempt a Perception check against your spell DC to [[/act seek]] to find an invisible mine.
+    A creature who enters a square with an invisible mine triggers it, causing an explosion that deals 3d6 fire damage and 3d6 piercing damage (basic Reflex save) to the creature and every creature in a @Template[emanation|distance:5] from the mine's square.Heightened (+1) The fire damage and piercing damage dealt by a mine each increase by 1d6.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 3d3
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: 3d3
+          damage_type: fire
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 3d6
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: 3d6
+          damage_type: fire
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 6d6
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: 6d6
+          damage_type: fire
+          dc: 0

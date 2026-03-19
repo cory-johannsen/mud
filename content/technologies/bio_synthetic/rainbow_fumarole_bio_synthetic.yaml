@@ -1,0 +1,20 @@
+id: rainbow_fumarole_bio_synthetic
+name: Rainbow Fumarole
+description: |-
+    Area 20-foot radius, 60-foot-tall cylinderMulti-hued flames break through cracks in the ground, reaching high into the sky and giving off dangerous fumes. When you cast the spell, roll 1d8 on the table below to determine the effects of the fumarole.
+    Any creature caught inside the area of rainbow fumarole when you cast it takes the indicated damage with a basic Reflex save and, on a failure, takes any added effect listed. Creatures must also attempt a saving throw when they move through the spell's area or end their turn in it. Squares within the area of the rainbow fumarole are difficult terrain.[[/r 1d8]]{d8}ColorDamageAdded Effect1Red@Damage[50[fire],2d6[persistent,fire]]{50 fire plus 2d6 persistent fire}—2Orange@Damage[50[fire]]Knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]3Yellow@Damage[30[fire],20[bludgeoning]]{30 fire plus 20 bludgeoning}Pushed 10 feet4Green@Damage[20[fire],20[acid]]{20 fire plus 20 acid}Sickened 25Blue@Damage[30[fire]]@UUID[Compendium.pf2e.conditionitems.Item.Paralyzed] for 1 round6Indigo@Damage[30[fire]]@UUID[Compendium.pf2e.conditionitems.Item.Confused] for 1 minute7Violet@Damage[30[fire]]Slowed 1 for 1 minute8AllChoose the color for each affected creature and use that color's damage and added effect; if a creature is affected again, you can choose a different color.—
+tradition: bio_synthetic
+level: 8
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Area 20-foot radius, 60-foot-tall cylinderMulti-hued flames break through cracks in the ground, reaching high into the sky and giving off dangerous fumes. When you cast the spell, roll 1d8 on the tabl

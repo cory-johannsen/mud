@@ -1,0 +1,23 @@
+id: haste_technical
+name: Haste
+description: |-
+    Magic empowers the target to act faster. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened] condition and can use the extra action each round only for Strike and Stride actions.
+
+    Heightened (7th) You can target up to 6 creatures.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Haste]
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Magic empowers the target to act faster. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Quickened] condition and can use the extra action each round only for Strike and Stride actions.
+
+            Height

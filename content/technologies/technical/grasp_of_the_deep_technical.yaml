@@ -1,0 +1,37 @@
+id: grasp_of_the_deep_technical
+name: Grasp of the Deep
+description: |-
+    You grip one target with the phantasmal pressure of the deep sea, disorienting and crushing its lungs and joints. The target takes 6d6 bludgeoning damage and other effects, depending on its Will saving throw.
+
+    Critical Success The creature is unaffected.
+    Success The target takes half damage.
+    Failure The target takes full damage, and feels as though it's being crushed. The target also becomes @UUID[Compendium.pf2e.conditionitems.Item.Grabbed], but it can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] with an Escape DC equal to your spell DC.
+    Critical Failure As failure, but the target takes double damage.
+
+    Heightened (6th) You can target up to 5 creatures.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 6d3
+          damage_type: bludgeoning
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 6d6
+          damage_type: bludgeoning
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 12d6
+          damage_type: bludgeoning
+          dc: 0

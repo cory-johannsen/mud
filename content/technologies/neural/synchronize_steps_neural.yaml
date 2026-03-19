@@ -1,6 +1,9 @@
 id: synchronize_steps_neural
-name: Neural Movement Sync
-description: You link two targets' motor patterns, allowing them to mirror each other's movements precisely.
+name: Synchronize Steps
+description: |-
+    You link the minds of two targets, enabling them to move in tandem. When one of the targets Steps, the other target can use a reaction to Step. When one of the targets Strides, the other target can use a reaction to Stride.
+
+    Heightened (5th) The range increases to 60 feet, and you can target up to 10 willing creatures.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -10,8 +13,7 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You link the minds of two targets, enabling them to move in tandem. When one of the targets Steps, the other
-      target can use a reaction to Step. When one of the targets Strides, the other target can us
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You link the minds of two targets, enabling them to move in tandem. When one of the targets Steps, the other target can use a reaction to Step. When one of the targets Strides, the other target can us

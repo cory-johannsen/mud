@@ -1,7 +1,11 @@
 id: runic_weapon_neural
-name: Weapon Enhancement Protocol
-description: You encode temporary enhancement runes into a weapon, granting it tech-augmented striking properties for a brief
-  time.
+name: Runic Weapon
+description: |-
+    The weapon glimmers with magic as temporary runes carve down its length. The target becomes a +1 striking weapon, gaining a +1 item bonus to attack rolls and increasing the number of weapon damage dice to two.
+
+    Heightened (6th) The weapon is +2 greater striking.
+    Heightened (9th) The weapon is +3 major striking.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Runic Weapon]
 tradition: neural
 level: 1
 usage_type: prepared
@@ -11,8 +15,7 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: The weapon glimmers with magic as temporary runes carve down its length. The target becomes a +1 striking
-      weapon, gaining a +1 item bonus to attack rolls and increasing the number of weapon damage dic
+    on_apply:
+        - type: utility
+          dc: 0
+          description: The weapon glimmers with magic as temporary runes carve down its length. The target becomes a +1 striking weapon, gaining a +1 item bonus to attack rolls and increasing the number of weapon damage dic

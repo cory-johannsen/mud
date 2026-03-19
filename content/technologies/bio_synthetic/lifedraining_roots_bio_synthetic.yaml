@@ -1,0 +1,32 @@
+id: lifedraining_roots_bio_synthetic
+name: Life-Draining Roots
+description: |-
+    Thorny roots erupt from your hands in a tangled cascade, puncturing creatures in the way of their growth and revitalizing you. You deal 8d6 piercing damage to creatures in the line (basic Reflex save). You gain 1d4 temporary Hit Points for every living creature in the line, as the roots transfer nutrients from those damaged into you. The temporary Hit Points last for 1 minute.
+
+    Heightened (+1) The damage increases by 2d6.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 8d3
+          damage_type: piercing
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: piercing
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 16d6
+          damage_type: piercing
+          dc: 0

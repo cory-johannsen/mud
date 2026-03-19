@@ -1,7 +1,10 @@
 id: detect_alignment_fanatic_doctrine
-name: Heretic Detection Sweep
-description: You broadcast the Doctrine's ideological sensors, detecting the general disposition — faithful, neutral, or heretical
-  — of creatures in range.
+name: Detect Alignment
+description: |-
+    Your eyes glow as you sense aligned auras. Choose chaotic, evil, good, or lawful. You detect auras of that alignment. You receive no information beyond presence or absence. You can choose not to detect creatures or effects you're aware have that alignment.
+    Only creatures of 6th level or higher-unless divine spellcasters, undead, or beings from the Outer Sphere-have alignment auras.
+
+    Heightened (2nd) You learn each aura's location and strength.
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -11,8 +14,7 @@ targets: zone
 duration: instant
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: Your eyes glow as you sense aligned auras. Choose chaotic, evil, good, or lawful. You detect auras of that
-      alignment. You receive no information beyond presence or absence. You can choose not to detec
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Your eyes glow as you sense aligned auras. Choose chaotic, evil, good, or lawful. You detect auras of that alignment. You receive no information beyond presence or absence. You can choose not to detec

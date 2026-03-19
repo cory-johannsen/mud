@@ -1,0 +1,20 @@
+id: desperate_repair_technical
+name: Desperate Repair
+description: |-
+    Trigger A shield within range would be reduced to 0 Hit Points by a damaging effect
+    Requirements The triggering shield had more than 1 Hit Point before taking damage.You hold a shield together with the power of your magic, forcing wood and steel to fuse back together. The shield remains at 1 Hit Point and isn't destroyed. Its construction is weakened until someone takes the time to repair it, preventing desperate repair or a similar ability from saving the same shield until your next daily preparations.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Trigger A shield within range would be reduced to 0 Hit Points by a damaging effect
+            Requirements The triggering shield had more than 1 Hit Point before taking damage.You hold a shield together with th

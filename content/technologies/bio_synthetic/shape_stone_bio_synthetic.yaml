@@ -1,0 +1,23 @@
+id: shape_stone_bio_synthetic
+name: Shape Stone
+description: |-
+    You shape the stone into a rough shape of your choice. The shaping process is too crude to produce intricate parts, fine details, moving pieces, or the like. Any creatures standing atop the stone when you reshape it must each attempt a Reflex save or Acrobatics check.
+
+    Success The creature is unaffected.
+    Failure The creature falls @UUID[Compendium.pf2e.conditionitems.Item.Prone] atop the stone.
+    Critical Failure The creature falls off the stone (if applicable) and lands Prone.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You shape the stone into a rough shape of your choice. The shaping process is too crude to produce intricate parts, fine details, moving pieces, or the like. Any creatures standing atop the stone when

@@ -1,0 +1,27 @@
+id: brine_dragon_bile_technical
+name: Brine Dragon Bile
+description: |-
+    Trigger A creature within range takes damage from a slashing or piercing attack, or one that inflicts persistent bleed damage.
+
+    You spit a glob of caustic saltwater that stings the wounds of the creature. Make a ranged spell attack against the triggering creature's AC. On a hit, salt scours its open wound, dealing 2d6 persistent acid damage.
+
+    Heightened (+2) The persistent damage increases by 2d6.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+    on_hit:
+        - type: damage
+          dice: 2d6
+          damage_type: acid
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 4d6
+          damage_type: acid
+          dc: 0

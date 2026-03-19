@@ -1,0 +1,44 @@
+id: swallow_light_technical
+name: Swallow Light
+description: |-
+    You draw magical light into your open mouth, consuming it and turning its essence into fuel for a gout of life-draining shadows. Attempt a counteract check against the light effect. If you successfully counteract it, you gain a breath weapon of chilling shadows you can use until the spell ends. Exhaling the breath is a two-action activity. The breath weapon is a 15-foot cone and deals 1d6 cold damage plus 1d6 void damage. Creatures in the area can attempt a basic Reflex save against your spell DC. Once activated, you can't use the breath weapon again for [[/r 1d4 #Rounds]] rounds.
+
+    Heightened (+2) Increase the damage of the breath weapon by 1d6 cold damage and 1d6 void damage.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 1d3
+          damage_type: cold
+          dc: 0
+        - type: damage
+          dice: 1d3
+          damage_type: void
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 1d6
+          damage_type: cold
+          dc: 0
+        - type: damage
+          dice: 1d6
+          damage_type: void
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 2d6
+          damage_type: cold
+          dc: 0
+        - type: damage
+          dice: 2d6
+          damage_type: void
+          dc: 0

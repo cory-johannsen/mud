@@ -1,0 +1,24 @@
+id: annunciation_of_the_outer_gate_neural
+name: Annunciation of the Outer Gate
+description: |-
+    You announce yourself in the name of certain grim pacts that predate mortal life. This is not a compulsion, but rather an invitation of sorts. The invitation is understood by creatures in the area with telepathy and any who understand Aklo, Chthonian, Empyrean, Fey, or Utopian.
+    Those who accept the invitation cannot take hostile action against others who agreed until 10 minutes pass and can communicate telepathically with them during that time. This effect ends immediately if any hostile action is taken against a creature that agreed.
+    Those creatures who decline the choice or do not understand it must attempt a Will save.Critical Success Nothing happens.
+    Success The creature is Frightened 1. If it understood the invitation, its frightened status doesn't decrease at the end of any turn in which it damaged a creature that agreed to the invitation.
+    Failure As success, but the creature is Frightened 2.
+    Critical Failure As success, but the creature is Frightened 3.
+tradition: neural
+level: 3
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You announce yourself in the name of certain grim pacts that predate mortal life. This is not a compulsion, but rather an invitation of sorts. The invitation is understood by creatures in the area wit

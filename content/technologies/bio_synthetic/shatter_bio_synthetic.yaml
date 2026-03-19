@@ -1,0 +1,20 @@
+id: shatter_bio_synthetic
+name: Shatter
+description: |-
+    A high-frequency sonic attack shatters a nearby object. You deal 2d10 sonic damage to the object, ignoring the object's Hardness if it is 4 or lower.
+
+    Heightened (+1) The damage increases by 1d10, and the Hardness the spell ignores increases by 2.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: damage
+          dice: 2d10
+          damage_type: sonic
+          dc: 0

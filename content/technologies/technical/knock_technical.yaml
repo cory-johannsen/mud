@@ -1,0 +1,19 @@
+id: knock_technical
+name: Knock
+description: |-
+    You make the target easier to open. Knock grants a +4 status bonus to any creature that tries to open the target door, lock, or container with an Athletics or a Thievery check. You can attempt a Thievery check to open the target as part of casting knock, and you add your level even if you're untrained.
+    Knock counteracts @UUID[Compendium.pf2e.spells-srd.Item.Lock].
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Knock]
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You make the target easier to open. Knock grants a +4 status bonus to any creature that tries to open the target door, lock, or container with an Athletics or a Thievery check. You can attempt a Thiev

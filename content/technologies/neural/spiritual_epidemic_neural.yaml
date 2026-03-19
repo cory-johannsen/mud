@@ -1,0 +1,22 @@
+id: spiritual_epidemic_neural
+name: Spiritual Epidemic
+description: |-
+    You curse the target, sapping its spirit and leaving a contagious trap in its essence. The target must attempt a Will save. Any creature that casts a divine or occult spell on the target while it's affected is targeted by spiritual epidemic and must also attempt a Will save. The curse continues to spread in this way.Critical Success The target is unaffected.
+    Success The target is Enfeebled 2 and Stupefied 2 for 1 round.
+    Failure The target is enfeebled 2 and stupefied 2 for 1 minute and Enfeebled 1 and Stupefied 1 permanently.
+    Critical Failure The target is Enfeebled 3 and Stupefied 3 for 1 minute and enfeebled 2 and stupefied 2 permanently.
+tradition: neural
+level: 8
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You curse the target, sapping its spirit and leaving a contagious trap in its essence. The target must attempt a Will save. Any creature that casts a divine or occult spell on the target while it's af

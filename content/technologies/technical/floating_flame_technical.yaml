@@ -1,0 +1,32 @@
+id: floating_flame_technical
+name: Floating Flame
+description: |-
+    You create a fire that burns without fuel and moves to your commands. The flame deals 3d6 fire damage to each creature in the square in which it appears, with a basic Reflex save. When you Sustain this spell, you can levitate the flame up to 10 feet. It then deals damage to each creature whose space it shared at any point during its flight. This uses the same damage and save, and you roll the damage once each time you Sustain. A given creature can take damage from floating flame only once per round.
+
+    Heightened (+1) The damage increases by 1d6.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 3d3
+          damage_type: fire
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 3d6
+          damage_type: fire
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 6d6
+          damage_type: fire
+          dc: 0

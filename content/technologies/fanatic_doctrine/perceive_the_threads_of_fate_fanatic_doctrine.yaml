@@ -1,0 +1,18 @@
+id: perceive_the_threads_of_fate_fanatic_doctrine
+name: Perceive the Threads of Fate
+description: |-
+    You open your mind to the grand design of existence, enabling you to view the threads of fate in all their complex, tangled glory. You attempt Perception checks and Reflex saving throws at mythic proficiency for the duration.
+    You can Sustain the spell once per round to untangle these threads. When you do, if your next action requires you to attempt an attack roll or skill check, you roll this check twice and use the higher result. You can untangle the threads of fate up to three times. After the third time, the spell ends.
+tradition: fanatic_doctrine
+level: 3
+usage_type: prepared
+action_cost: 1
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You open your mind to the grand design of existence, enabling you to view the threads of fate in all their complex, tangled glory. You attempt Perception checks and Reflex saving throws at mythic prof

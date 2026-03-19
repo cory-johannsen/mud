@@ -1,6 +1,8 @@
 id: share_lore_neural
-name: Knowledge Transfer
-description: You transmit a specific skill set or knowledge package directly to target minds, granting them temporary proficiency.
+name: Share Lore
+description: |-
+    You share your knowledge with the touched creatures. Choose one Lore skill in which you're trained. The targets become trained in that Lore skill for the duration of the spell.Heightened (3rd) The duration of the spell is 1 hour, and you can target up to five creatures.
+    Heightened (5th) The duration of the spell is 8 hours, you can target up to five creatures, and you can share up to two Lore skills in which you're trained.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -10,8 +12,7 @@ targets: single
 duration: instant
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You share your knowledge with the touched creatures. Choose one Lore skill in which you're trained. The targets
-      become trained in that Lore skill for the duration of the spell.Heightened (3rd) The dur
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You share your knowledge with the touched creatures. Choose one Lore skill in which you're trained. The targets become trained in that Lore skill for the duration of the spell.Heightened (3rd) The dur

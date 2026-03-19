@@ -1,0 +1,30 @@
+id: percussive_impact_technical
+name: Percussive Impact
+description: You lob a compressed ball of sound at a foe. The ball explodes on impact, unleashing a powerful blast of sound. Make a spell attack roll. If you hit, you deal 4d8 bludgeoning damage plus 1d4 sonic splash damage. On a critical success, the target is also @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 round.Heightened (+2) The bludgeoning damages increases by 4d8, the sonic splash damage increases by 1d4, and the duration of the deafened condition increases by 2 rounds.
+tradition: technical
+level: 3
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: attack
+effects:
+    on_hit:
+        - type: damage
+          dice: 4d8
+          damage_type: bludgeoning
+          dc: 0
+        - type: damage
+          dice: 1d4
+          damage_type: sonic
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 8d8
+          damage_type: bludgeoning
+          dc: 0
+        - type: damage
+          dice: 2d4
+          damage_type: sonic
+          dc: 0

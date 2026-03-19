@@ -1,0 +1,33 @@
+id: arctic_rift_bio_synthetic
+name: Arctic Rift
+description: |-
+    A jagged crack opens in the air, dealing 12d8 cold damage as it draws away warmth. Each creature along the rift must attempt a Fortitude save.Critical Success The creature is unaffected.
+    Success The creature takes half damage.
+    Failure The creature takes full damage and is Slowed 1 until the start of your next turn.
+    Critical Failure The creature takes double damage, is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized] by a layer of ice, and is slowed 1 as long as it's immobilized. The ice is an object with 60 Hit Points, Hardness 5, immunity to cold damage, and vulnerability 10 to fire. It has object immunities and is destroyed if the target Escapes.Heightened (+1) The damage increases by 1d8 and the ice's Hit Points increase by 5.
+tradition: bio_synthetic
+level: 8
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: instant
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 12d4
+          damage_type: cold
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 12d8
+          damage_type: cold
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 24d8
+          damage_type: cold
+          dc: 0

@@ -1,0 +1,37 @@
+id: dirge_of_remembrance_fanatic_doctrine
+name: Dirge of Remembrance
+description: |-
+    You sing a funereal dirge to force restless spirits to fully manifest in the Material Plane. Each incorporeal creature in the area takes 4d10 sonic damage (this damage bypasses its resistances) depending on the result of its Will save.
+
+    Critical Success The creature is unaffected.
+    Success The creature takes half damage.
+    Failure The creature takes full damage and becomes semi-corporeal until the spell ends. All attacks against it get the benefit of a ghost touch rune.
+    Critical Failure As failure, but double damage.
+
+    Heightened (+1) The damage increases by 1d10.
+tradition: fanatic_doctrine
+level: 4
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 4d6
+          damage_type: sonic
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 4d10
+          damage_type: sonic
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 8d10
+          damage_type: sonic
+          dc: 0

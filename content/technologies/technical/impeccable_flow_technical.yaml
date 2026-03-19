@@ -1,0 +1,19 @@
+id: impeccable_flow_technical
+name: Impeccable Flow
+description: |-
+    You attune yourself to an underlying cosmic order to the world. While you remain in tune with this power, you gain a +1 status bonus to Perception checks, saving throws, and skill checks. If you critically fail any check while under the effects of this spell, the bonus ends and you instead have a -1 status penalty to all checks for the remaining duration.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Impeccable Flow]Heightened (5th) The status bonus increases to +2.
+    Heightened (8th) The status bonus increases to +3.Note: The automation for the critical failure effect defaults to 10 rounds and must be altered manually.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You attune yourself to an underlying cosmic order to the world. While you remain in tune with this power, you gain a +1 status bonus to Perception checks, saving throws, and skill checks. If you criti

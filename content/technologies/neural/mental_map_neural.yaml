@@ -1,0 +1,22 @@
+id: mental_map_neural
+name: Mental Map
+description: |-
+    You glean detailed information about a specific place visited by a creature directly from its mind, unless it fends you off with a Will save. The target can choose to fail the save.Success The target is unaffected.
+    Failure You gain critical information about the place in question, granting you a +2 circumstance bonus to Survival checks while in the location and any skill checks to Recall Knowledge about the location for the next 24 hours.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Mental Map]
+    Critical Failure As failure, but you can erase all knowledge of the location from the target for 24 hours if desired.
+tradition: neural
+level: 2
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You glean detailed information about a specific place visited by a creature directly from its mind, unless it fends you off with a Will save. The target can choose to fail the save.Success The target

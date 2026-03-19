@@ -1,0 +1,18 @@
+id: buzzing_servants_bio_synthetic
+name: Buzzing Servants
+description: |-
+    You summon a swarm of bees from the city of Axis that rapidly constructs geometric shapes from wax. The bees appear in an unoccupied square, building a structure of hexagons, squares, and decagons that fill the space. The wax shape has a Hardness of 10 and 40 Hit Points but also decays over 24 hours.
+    When you Sustain the spell, you can choose another unoccupied square in range that the bees move to and fill with wax shapes. Any amount of area or splash damage to the square they're present in kills the bees, ending further construction.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You summon a swarm of bees from the city of Axis that rapidly constructs geometric shapes from wax. The bees appear in an unoccupied square, building a structure of hexagons, squares, and decagons tha

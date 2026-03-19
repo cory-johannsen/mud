@@ -1,0 +1,46 @@
+id: ancestral_winds_technical
+name: Ancestral Winds
+description: |-
+    You call on the same energies that manifest ancestor storms, summoning wailing spirits to terrorize your foes. Living creatures in the area take 5d6 void damage and 1d6 mental damage and must attempt a Will save. Nonliving creatures are immune to this spell's effects.Critical Success The creature is unaffected.
+    Success The creature takes half damage and is Frightened 1.
+    Failure The creature takes full damage and is Frightened 2.
+    Critical Failure As failure, but the creature takes double damage and is Stunned 1.
+    The first time each round you Sustain the spell, you can move the area up to 30 feet within the range of the spell. Living creatures in the new area must attempt saves with the same effects as above.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 1d3
+          damage_type: mental
+          dc: 0
+        - type: damage
+          dice: 5d3
+          damage_type: void
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 1d6
+          damage_type: mental
+          dc: 0
+        - type: damage
+          dice: 5d6
+          damage_type: void
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 2d6
+          damage_type: mental
+          dc: 0
+        - type: damage
+          dice: 10d6
+          damage_type: void
+          dc: 0

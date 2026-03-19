@@ -1,0 +1,35 @@
+id: moonburst_bio_synthetic
+name: Moonburst
+description: |-
+    A powerful globe of chilling moonlight explodes in the area, dealing 8d10 cold damage to all creatures in the area, plus an additional @Damage[(@item.rank+1)d10[vitality]] damage to undead creatures.
+    Moonburst's cold damage is silver damage for the purposes of weaknesses, resistances, and the like. Each creature and object in the area must attempt a Reflex save.Critical Success The creature is unaffected.
+    Success The creature takes half damage.
+    Failure The creature takes full damage.
+    Critical Failure The creature takes full damage and becomes @UUID[Compendium.pf2e.conditionitems.Item.Blinded] permanently.
+    If the globe overlaps with an area of magical darkness, moonburst attempts to counteract the darkness effect.Heightened (+1) The cold damage increases by 1d10, and the vitality damage against undead increases by 1d10.
+tradition: bio_synthetic
+level: 7
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 8d6
+          damage_type: cold
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 8d10
+          damage_type: cold
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 16d10
+          damage_type: cold
+          dc: 0

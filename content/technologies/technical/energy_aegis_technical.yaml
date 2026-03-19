@@ -1,0 +1,22 @@
+id: energy_aegis_technical
+name: Energy Aegis
+description: |-
+    You protect the target with a powerful, long-lasting energy barrier. The target gains resistance 5 to acid, cold, electricity, fire, force, sonic, vitality, and void damage.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Energy Aegis]
+
+    Heightened (9th) The resistances increase to 10.
+tradition: technical
+level: 7
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You protect the target with a powerful, long-lasting energy barrier. The target gains resistance 5 to acid, cold, electricity, fire, force, sonic, vitality, and void damage.
+            @UUID[Compendium.pf2e.spel

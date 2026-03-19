@@ -1,6 +1,9 @@
 id: breathe_fire_bio_synthetic
-name: Flammable Gland Spit
-description: You activate a modified chemical gland that mixes and ignites accelerants, spitting a cone of fire.
+name: Breathe Fire
+description: |-
+    A gout of flame sprays from your mouth. You deal 2d6 fire damage to creatures in the area with a basic Reflex save.
+
+    Heightened (+1) The damage increases by 2d6.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared
@@ -12,18 +15,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-  on_success:
-  - type: damage
-    dice: 2d3
-    damage_type: fire
-    dc: 0
-  on_failure:
-  - type: damage
-    dice: 2d6
-    damage_type: fire
-    dc: 0
-  on_crit_failure:
-  - type: damage
-    dice: 4d6
-    damage_type: fire
-    dc: 0
+    on_success:
+        - type: damage
+          dice: 2d3
+          damage_type: fire
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d6
+          damage_type: fire
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d6
+          damage_type: fire
+          dc: 0

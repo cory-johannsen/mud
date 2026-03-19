@@ -1,0 +1,27 @@
+id: mind_games_technical
+name: Mind Games
+description: |-
+    You lock minds with the target, trying to mentally subdue them. The target must attempt a Will save. Each time you Sustain this Spell, the target attempts another Will save.
+
+    Critical Success You are Stunned 1 and the spell ends.
+    Success The target is unaffected.
+    Failure The target is stunned 1.
+    Critical Failure The target is Stunned 2.
+tradition: technical
+level: 2
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            You lock minds with the target, trying to mentally subdue them. The target must attempt a Will save. Each time you Sustain this Spell, the target attempts another Will save.
+
+            Critical Success You are

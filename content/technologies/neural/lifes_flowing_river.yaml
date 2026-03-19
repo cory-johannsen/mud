@@ -1,0 +1,22 @@
+id: lifes_flowing_river
+name: Life's Flowing River
+description: |-
+    You create a flowing river of ghostly water and that sheds dim light for 10 feet on each side. The river begins in an adjacent square to you and extends in a straight 5-foot path to its maximum range or until it hits a solid barrier, whichever comes first. A creature that begins its turn in the glowing waters of the river or who enters one of the river's spaces must attempt a Will save. If the creature is undead or a nindoru, it takes @Damage[4d6[mental]] damage, modified by the result of their Will save.Critical Success The creature ignores the river's effects until the start of its next turn. If the creature is undead or a nindoru, it takes no damage.
+    Success The creature treats all squares occupied by the river as difficult terrain until the start of its next turn. If the creature is undead or a nindoru, it takes half damage.
+    Failure As success, but the creature is also knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]. If the creature is undead or a nindoru, it takes full damage.
+    Critical Failure As failure, but the creature is pushed 20 feet along the river's path in the direction of flow. If the creature is undead or a nindoru, it takes double mental damage.Heightened (+1) The mental damage increases by 1d6.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 3
+range: ranged
+targets: single
+duration: minutes:1
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You create a flowing river of ghostly water and that sheds dim light for 10 feet on each side. The river begins in an adjacent square to you and extends in a straight 5-foot path to its maximum range

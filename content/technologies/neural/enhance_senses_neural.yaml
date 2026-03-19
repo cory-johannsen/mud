@@ -1,0 +1,19 @@
+id: enhance_senses_neural
+name: Enhance Senses
+description: |-
+    You enhance the target's senses. The target gains low-light vision, and all of the target's imprecise senses have their distances doubled. If the target already has low-light vision, they gain darkvision.
+
+    Heightened (+2) The number of targets increases by 1.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You enhance the target's senses. The target gains low-light vision, and all of the target's imprecise senses have their distances doubled. If the target already has low-light vision, they gain darkvis

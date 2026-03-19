@@ -1,0 +1,26 @@
+id: vision_of_beauty_technical
+name: Vision of Beauty
+description: |-
+    You create a phantasmal image of the most beautiful creature imaginable to the target at a location somewhere within the spell's range. Only the spell's target can see the beauty, though you can see the vague shape of the illusion as it manifests. The effect of the vision is based on the outcome of the target's Will save.
+
+    Critical Success The target is unaffected.
+    Success The target is intrigued by the vision, becoming Stupefied 1 for 1 round.
+    Failure The target is entranced by the vision, becoming stupefied 1 for 1 round and moving toward the image's location via the most direct route possible for 1 round, bypassing any obvious hazards and enemies in the way. The target is then @UUID[Compendium.pf2e.conditionitems.Item.Fascinated] by the illusion for 1 round.
+    Critical Failure As failure, except the target is Stupefied 2 and becomes fascinated by the illusion for 1 minute instead of 1 round.
+
+    Heightened (+2) You can target an additional creature in range.
+tradition: technical
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+save_type: cool
+save_dc: 15
+resolution: save
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You create a phantasmal image of the most beautiful creature imaginable to the target at a location somewhere within the spell's range. Only the spell's target can see the beauty, though you can see t

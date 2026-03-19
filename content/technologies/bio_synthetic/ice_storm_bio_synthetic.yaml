@@ -1,0 +1,41 @@
+id: ice_storm_bio_synthetic
+name: Ice Storm
+description: You create a gray storm cloud that pelts creatures with an icy deluge. When you Cast the Spell, a burst of magical hail deals 2d8 bludgeoning damage and 2d8 cold damage to each creature in the area below the cloud (basic Reflex save). Snow and sleet continue to rain down in the area for the remainder of the spell's duration, making the area difficult terrain. Any creature that ends its turn in the storm takes @Damage[(floor(@item.level/2))[cold]] damage. If you Cast this Spell outdoors, you can create two nonoverlapping clouds instead of one. As normal, if a Large or larger creature is in both clouds, it still only takes the initial damage once and the continuing damage once per turn.Heightened (+2) The initial bludgeoning damage and cold damage increase by 1d8 each, and the cold damage creatures take at the end of their turns increases by 1.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 3
+range: zone
+targets: zone
+duration: minutes:1
+save_type: hustle
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 2d4
+          damage_type: bludgeoning
+          dc: 0
+        - type: damage
+          dice: 2d4
+          damage_type: cold
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 2d8
+          damage_type: bludgeoning
+          dc: 0
+        - type: damage
+          dice: 2d8
+          damage_type: cold
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 4d8
+          damage_type: bludgeoning
+          dc: 0
+        - type: damage
+          dice: 4d8
+          damage_type: cold
+          dc: 0

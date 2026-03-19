@@ -1,6 +1,8 @@
 id: dj_vu_neural
-name: Loop Lock
-description: You trap the target in a repeating cognitive loop, forcing it to re-execute the same action it just completed.
+name: Déjà Vu
+description: |-
+    You loop a thought process in the target's mind, forcing it to repeat a moment's worth of actions. The target must attempt a Will save. If the target fails, whatever actions the target uses on its next turn, it must repeat on its following turn. The actions must be repeated in the same order and as close to the same specifics as possible. For example, if the target makes an attack, it must repeat the attack against the same creature, if possible, and if the target moves, it must move the same distance and direction, if possible, on its next turn.
+    If the target can't repeat an action, such as Casting a Spell that has been exhausted or needing to target a creature that has died, it can act as it chooses for that action but becomes Stupefied 1 until the end of its turn.
 tradition: neural
 level: 1
 usage_type: prepared
@@ -12,8 +14,7 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You loop a thought process in the target's mind, forcing it to repeat a moment's worth of actions. The target
-      must attempt a Will save. If the target fails, whatever actions the target uses on its nex
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You loop a thought process in the target's mind, forcing it to repeat a moment's worth of actions. The target must attempt a Will save. If the target fails, whatever actions the target uses on its nex

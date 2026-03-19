@@ -1,7 +1,12 @@
 id: celestial_accord_neural
-name: Conflict Suppression Protocol
-description: You push a calming neural signal into two arguing targets, suppressing their aggression reflex and forcing a
-  diplomatic pause.
+name: Celestial Accord
+description: |-
+    You intervene in a heated disagreement between two creatures, encouraging them to put aside their differences and find some common ground. The emotional heat of the prior moment becomes only a memory. Each target must make a Will save. A creature currently engaged in combat can't get a result worse than success, and a target that is subject to hostility from any other creature ceases to be affected by celestial accord.
+
+    Critical Success The creature is unaffected.
+    Success The creature is filled with doubt about its own intentions and feels an urge to cooperate with the other. It has a -2 status penalty to attack rolls against the other target for 1 round.
+    Failure The creature can't make hostile actions against the other target and its attitude toward the other target improves to indifferent for the spell's duration.
+    Critical Failure As failure, but the creature's attitude toward the other target improves to friendly for the duration and is indifferent thereafter (until something happens to change that attitude normally).
 tradition: neural
 level: 1
 usage_type: prepared
@@ -13,8 +18,7 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: You intervene in a heated disagreement between two creatures, encouraging them to put aside their differences
-      and find some common ground. The emotional heat of the prior moment becomes only a memory.
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You intervene in a heated disagreement between two creatures, encouraging them to put aside their differences and find some common ground. The emotional heat of the prior moment becomes only a memory.

@@ -1,0 +1,49 @@
+id: bursting_bloom_neural
+name: Bursting Bloom
+description: |-
+    You cause a rose bush to sprout from the chest of a foe, bursting out of its body and wrapping it in thorned vines. The target takes 6d6 piercing damage and 1d6 persistent bleed damage and must attempt a Fortitude save. When the target is no longer taking persistent bleed damage and is no longer encumbered, the rose bush withers away to nothing.
+
+    Critical Success The creature is unaffected.
+    Success The creature takes half damage and no persistent damage.
+    Failure The creature takes full damage and persistent damage and is @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] for 4 rounds.
+    Critical Failure The creature takes double damage and persistent damage and is encumbered for 1 minute.
+
+    Heightened (+2) The initial damage increases by 3d6, and the persistent bleed damage increases by 1d6.
+tradition: neural
+level: 4
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 6d3
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: 1d3
+          damage_type: bleed
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 6d6
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: 1d6
+          damage_type: bleed
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 12d6
+          damage_type: piercing
+          dc: 0
+        - type: damage
+          dice: 2d6
+          damage_type: bleed
+          dc: 0

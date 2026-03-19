@@ -1,0 +1,20 @@
+id: flame_wisp_bio_synthetic
+name: Flame Wisp
+description: |-
+    Three faintly glowing wisps of fire float around your head. Each time you hit a creature with a Strike, one of the wisps goes hurtling towards that creature, dealing 1d4 fire damage. If you Cast a Spell with the fire trait while you have fewer than three wisps, a new wisp appears.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Flame Wisp]
+
+    Heightened (+2) The damage increases by 1d4.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Three faintly glowing wisps of fire float around your head. Each time you hit a creature with a Strike, one of the wisps goes hurtling towards that creature, dealing 1d4 fire damage. If you Cast a Spe

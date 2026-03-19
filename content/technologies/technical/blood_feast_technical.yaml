@@ -1,0 +1,26 @@
+id: blood_feast_technical
+name: Blood Feast
+description: |-
+    Your head splits vertically into an enormous maw, which feasts upon the target's blood, dealing 12d6 piercing damage, depending on your spell attack roll. After the spell, your head sews back together as if it had never split apart. You gain temporary Hit Points for 1 minute equal to half the piercing damage the target takes.
+    If you are a gug, increase the piercing damage by 2d6 and increase the Persistent Bleed Damage you deal on a critical hit by 1d8. This spell doesn't alter a gug's appearance.Critical Success The creature takes double damage and @Damage[(@item.rank - 4)d8[bleed]].
+    Success The creature takes full damage.
+    Failure You miss and the creature takes no damage.Heightened (+1) The piercing damage increases by 2d6, and the Persistent Bleed Damage on a critical increases by 1.
+tradition: technical
+level: 5
+usage_type: prepared
+action_cost: 2
+range: melee
+targets: single
+duration: instant
+resolution: attack
+effects:
+    on_hit:
+        - type: damage
+          dice: 12d6
+          damage_type: piercing
+          dc: 0
+    on_crit_hit:
+        - type: damage
+          dice: 24d6
+          damage_type: piercing
+          dc: 0

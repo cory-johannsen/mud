@@ -1,7 +1,9 @@
 id: benediction
-name: Doctrine's Benediction
-description: You invoke a doctrinal blessing over nearby allies, granting them a +1 status bonus to AC against attacks from
-  followers of rival ideologies.
+name: Benediction
+description: |-
+    Divine protection helps protect your companions. You and your allies gain a +1 status bonus to AC while within the emanation. Once per round on subsequent turns, you can Sustain the spell to increase the emanation's radius by 10 feet.
+    Benediction can counteract malediction.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Benediction]
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -11,8 +13,7 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-  on_apply:
-  - type: utility
-    dc: 0
-    description: Divine protection helps protect your companions. You and your allies gain a +1 status bonus to AC while within
-      the emanation. Once per round on subsequent turns, you can Sustain the spell to increase
+    on_apply:
+        - type: utility
+          dc: 0
+          description: Divine protection helps protect your companions. You and your allies gain a +1 status bonus to AC while within the emanation. Once per round on subsequent turns, you can Sustain the spell to increase

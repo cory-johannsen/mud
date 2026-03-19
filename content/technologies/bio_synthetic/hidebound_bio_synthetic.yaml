@@ -1,0 +1,25 @@
+id: hidebound_bio_synthetic
+name: Hidebound
+description: |-
+    Trigger A creature within range is hit with a Strike that deals physical damage.
+
+    The target's skin erupts in thick hide or dense scales. It gains resistance 5 to physical damage, except adamantine, until the beginning of its next turn.
+    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Hidebound]
+
+    Heightened (+2) The resistance increases by 3.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 0
+range: ranged
+targets: single
+duration: rounds:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: |-
+            Trigger A creature within range is hit with a Strike that deals physical damage.
+
+            The target's skin erupts in thick hide or dense scales. It gains resistance 5 to physical damage, except adamantine, u

@@ -1,0 +1,22 @@
+id: cleanse_air_bio_synthetic
+name: Cleanse Air
+description: |-
+    You purify the air in the area, making it clean and breathable. The spell immediately removes inhaled poisons, pollution, and similar contaminants from the air. For the remaining duration, the spell prevents any further contamination from altering air in the area, including keeping toxic air bordering the area from coming inside. (This doesn't prevent contaminants from coming in after the spell ends.) This spell doesn't create air, so casting it underwater wouldn't create breathable air, nor would it affect any toxins within air suspended in the water
+
+    Heightened (3rd) The area increases to 60 feet.
+    Heightened (4th) The area increases to 120 feet.
+    Heightened (6th) The area increases to 500 feet.
+    Heightened (9th) The area increases to 1 mile.
+tradition: bio_synthetic
+level: 2
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: minutes:1
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You purify the air in the area, making it clean and breathable. The spell immediately removes inhaled poisons, pollution, and similar contaminants from the air. For the remaining duration, the spell p

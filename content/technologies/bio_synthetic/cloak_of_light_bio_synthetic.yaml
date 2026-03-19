@@ -1,0 +1,29 @@
+id: cloak_of_light_bio_synthetic
+name: Cloak of Light
+description: You surround yourself in holy light that restores the living and rebuffs undead. You glow with bright light in a 30-foot radius and dim light to the next 30 feet. Living creatures that begin their turn adjacent to you recover 4d6 Hit Points. Undead creatures that begin their turn adjacent to you take 4d6 vitality damage (basic Fortitude save).Heightened (+2) The healing increases by 2d6, and the damage to undead increases by 2d6.
+tradition: bio_synthetic
+level: 4
+usage_type: prepared
+action_cost: 2
+range: self
+targets: single
+duration: minutes:1
+save_type: toughness
+save_dc: 15
+resolution: save
+effects:
+    on_success:
+        - type: damage
+          dice: 4d3
+          damage_type: vitality
+          dc: 0
+    on_failure:
+        - type: damage
+          dice: 4d6
+          damage_type: vitality
+          dc: 0
+    on_crit_failure:
+        - type: damage
+          dice: 8d6
+          damage_type: vitality
+          dc: 0

@@ -1,0 +1,16 @@
+id: planar_seal_technical
+name: Planar Seal
+description: You create a visible magical barrier that attempts to counteract teleportation effects and planar travel into or out of the area, including items that allow access to extradimensional spaces. Planar seal tries to counteract any attempt to summon a creature into the area but doesn't stop the creature from departing when the summoning ends.
+tradition: technical
+level: 7
+usage_type: prepared
+action_cost: 2
+range: zone
+targets: zone
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You create a visible magical barrier that attempts to counteract teleportation effects and planar travel into or out of the area, including items that allow access to extradimensional spaces. Planar s

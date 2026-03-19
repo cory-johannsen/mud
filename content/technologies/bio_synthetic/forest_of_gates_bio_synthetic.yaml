@@ -1,0 +1,20 @@
+id: forest_of_gates_bio_synthetic
+name: Forest of Gates
+description: |-
+    You transport yourself and your allies to a peaceful extraplanar realm of towering trees, each of which holds a misty gateway to another location. When you Cast this Spell, you choose a specific destination within 1,000 miles that you can identify by its position relative to your starting position and by its appearance (or other identifying features). Incorrect knowledge of the location causes the spell to fail. You and your allies walk for 1 hour through the forest, and each of you regains Hit Points and reduces the value of any doomed or drained condition as if you'd taken a full night's rest. At the end of the journey, you attempt a @Check[arcana|dc:40|showDC:all] or @Check[nature|dc:40|showDC:all] check to find the correct gate to your desired location.Critical Success You and your allies arrive within 1,000 feet of your desired location.
+    Success You and your allies arrive within 1 mile of your desired location.
+    Failure You and your allies arrive within 10 miles of your desired location.
+    Critical Failure You and your allies exit the forest within 1 mile of your original location.
+tradition: bio_synthetic
+level: 9
+usage_type: prepared
+action_cost: 2
+range: ranged
+targets: single
+duration: instant
+resolution: none
+effects:
+    on_apply:
+        - type: utility
+          dc: 0
+          description: You transport yourself and your allies to a peaceful extraplanar realm of towering trees, each of which holds a misty gateway to another location. When you Cast this Spell, you choose a specific desti
