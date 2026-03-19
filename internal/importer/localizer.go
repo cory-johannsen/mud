@@ -143,10 +143,12 @@ func loadTechSamples(techDir string) (string, error) {
 		}
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return nil // skip unreadable files
+			fmt.Fprintf(os.Stderr, "WARNING: loadTechSamples: reading %s: %v; skipping\n", path, err)
+			return nil
 		}
 		var def technology.TechnologyDef
 		if err := yaml.Unmarshal(data, &def); err != nil {
+			fmt.Fprintf(os.Stderr, "WARNING: loadTechSamples: parsing %s: %v; skipping\n", path, err)
 			return nil
 		}
 		samples = append(samples, fmt.Sprintf("%s: %s", def.Name, def.Description))
