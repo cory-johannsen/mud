@@ -12,6 +12,28 @@ technology_grants:
   prepared:
     slots_by_level:
       1: 2
+    pool:
+      - { id: fear_neural, level: 1 }
+      - { id: daze_neural, level: 1 }
+      - { id: haunting_hymn_neural, level: 1 }
+      - { id: grim_tendrils_neural, level: 1 }
+      - { id: telekinetic_projectile_neural, level: 1 }
+      - { id: sleep_neural, level: 1 }
+      - { id: charm_neural, level: 1 }
+      - { id: command_neural, level: 1 }
+      - { id: enfeeble_neural, level: 1 }
+      - { id: lose_the_path_neural, level: 1 }
+      - { id: void_warp_neural, level: 1 }
+      - { id: illusory_disguise_neural, level: 1 }
+      - { id: illusory_object_neural, level: 1 }
+      - { id: ghost_sound_neural, level: 1 }
+      - { id: penumbral_shroud_neural, level: 1 }
+      - { id: soothe, level: 1 }
+      - { id: sanctuary_neural, level: 1 }
+      - { id: shield_neural, level: 1 }
+      - { id: mindlink_neural, level: 1 }
+      - { id: detect_magic_neural, level: 1 }
+      - { id: read_aura_neural, level: 1 }
 level_up_grants:
   2:
     prepared:

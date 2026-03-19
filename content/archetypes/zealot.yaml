@@ -12,6 +12,27 @@ technology_grants:
   prepared:
     slots_by_level:
       1: 2
+    pool:
+      - { id: divine_lance, level: 1 }
+      - { id: harm, level: 1 }
+      - { id: haunting_hymn_fanatic_doctrine, level: 1 }
+      - { id: ancient_dust_fanatic_doctrine, level: 1 }
+      - { id: vitality_lash_fanatic_doctrine, level: 1 }
+      - { id: command_fanatic_doctrine, level: 1 }
+      - { id: fear_fanatic_doctrine, level: 1 }
+      - { id: daze_fanatic_doctrine, level: 1 }
+      - { id: malediction, level: 1 }
+      - { id: enfeeble_fanatic_doctrine, level: 1 }
+      - { id: heal_fanatic_doctrine, level: 1 }
+      - { id: bless_fanatic_doctrine, level: 1 }
+      - { id: benediction, level: 1 }
+      - { id: spirit_link_fanatic_doctrine, level: 1 }
+      - { id: infuse_vitality, level: 1 }
+      - { id: detect_alignment_fanatic_doctrine, level: 1 }
+      - { id: detect_magic_fanatic_doctrine, level: 1 }
+      - { id: light_fanatic_doctrine, level: 1 }
+      - { id: guidance_fanatic_doctrine, level: 1 }
+      - { id: sanctuary_fanatic_doctrine, level: 1 }
 level_up_grants:
   2:
     prepared:

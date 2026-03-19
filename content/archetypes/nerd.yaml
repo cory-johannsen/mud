@@ -12,6 +12,27 @@ technology_grants:
   prepared:
     slots_by_level:
       1: 2
+    pool:
+      - { id: force_barrage_technical, level: 1 }
+      - { id: scorching_blast_technical, level: 1 }
+      - { id: shocking_grasp_technical, level: 1 }
+      - { id: thunderstrike_technical, level: 1 }
+      - { id: snowball_technical, level: 1 }
+      - { id: sleep_technical, level: 1 }
+      - { id: grease_technical, level: 1 }
+      - { id: leaden_steps_technical, level: 1 }
+      - { id: enfeeble_technical, level: 1 }
+      - { id: gravitational_pull_technical, level: 1 }
+      - { id: mystic_armor_technical, level: 1 }
+      - { id: runic_weapon_technical, level: 1 }
+      - { id: shielded_arm_technical, level: 1 }
+      - { id: mending_technical, level: 1 }
+      - { id: anticipate_peril_technical, level: 1 }
+      - { id: illusory_disguise_technical, level: 1 }
+      - { id: invisible_item_technical, level: 1 }
+      - { id: lock_technical, level: 1 }
+      - { id: alarm_technical, level: 1 }
+      - { id: pocket_library_technical, level: 1 }
 level_up_grants:
   2:
     prepared:

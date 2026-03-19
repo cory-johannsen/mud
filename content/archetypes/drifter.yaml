@@ -12,6 +12,26 @@ technology_grants:
   prepared:
     slots_by_level:
       1: 1
+    pool:
+      - { id: electric_arc_bio_synthetic, level: 1 }
+      - { id: acid_splash_bio_synthetic, level: 1 }
+      - { id: breathe_fire_bio_synthetic, level: 1 }
+      - { id: gouging_claw_bio_synthetic, level: 1 }
+      - { id: thunderstrike_bio_synthetic, level: 1 }
+      - { id: tangle_vine_bio_synthetic, level: 1 }
+      - { id: gust_of_wind_bio_synthetic, level: 1 }
+      - { id: leaden_steps_bio_synthetic, level: 1 }
+      - { id: grease_bio_synthetic, level: 1 }
+      - { id: bramble_bush_bio_synthetic, level: 1 }
+      - { id: heal_bio_synthetic, level: 1 }
+      - { id: stabilize_bio_synthetic, level: 1 }
+      - { id: runic_weapon_bio_synthetic, level: 1 }
+      - { id: shielded_arm_bio_synthetic, level: 1 }
+      - { id: detect_poison_bio_synthetic, level: 1 }
+      - { id: create_water_bio_synthetic, level: 1 }
+      - { id: jump_bio_synthetic, level: 1 }
+      - { id: ant_haul_bio_synthetic, level: 1 }
+      - { id: fleet_step_bio_synthetic, level: 1 }
 level_up_grants:
   3:
     prepared:
