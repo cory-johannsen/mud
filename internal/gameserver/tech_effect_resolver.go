@@ -12,6 +12,37 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/technology"
 )
 
+// RoomQuerier provides creature presence information for a room.
+// The sensingUID identifies the player activating the tremorsense effect,
+// whose entry is returned as CreatureInfo{Name: "you"}.
+type RoomQuerier interface {
+	CreaturesInRoom(roomID, sensingUID string) []CreatureInfo
+}
+
+// CreatureInfo describes a creature present in a room for tremorsense output.
+type CreatureInfo struct {
+	Name   string
+	Hidden bool
+}
+
+// FormatTremorsenseOutput formats a []CreatureInfo into a [Seismic Sense] message.
+// Hidden creatures are suffixed with " (concealed)".
+// Returns a no-creatures message if the slice is empty.
+func FormatTremorsenseOutput(creatures []CreatureInfo) string {
+	if len(creatures) == 0 {
+		return "[Seismic Sense] No creatures detected."
+	}
+	parts := make([]string, len(creatures))
+	for i, c := range creatures {
+		if c.Hidden {
+			parts[i] = c.Name + " (concealed)"
+		} else {
+			parts[i] = c.Name
+		}
+	}
+	return "[Seismic Sense] Creatures detected in this room: " + strings.Join(parts, ", ")
+}
+
 // diceSrcAdapter wraps a combat.Source so it satisfies dice.Source.
 // Both interfaces require Intn(int) int — this adapter is structurally redundant
 // but required because Go does not unify separately-defined identical interfaces.

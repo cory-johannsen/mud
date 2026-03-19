@@ -3,6 +3,7 @@ package gameserver
 import (
 	"fmt"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -298,3 +299,83 @@ func TestProperty_AbilityModifier_MatchesFloorDiv(t *testing.T) {
 
 // Compile-time check that deterministicSrc satisfies condition.Registry usage (unused var suppresses lint).
 var _ *condition.Registry = nil
+
+// mockRoomQuerier is a test double for RoomQuerier. Defined here (Tasks 4 and 6 reuse it — same package).
+type mockRoomQuerier struct{ creatures []CreatureInfo }
+
+func (m *mockRoomQuerier) CreaturesInRoom(_, _ string) []CreatureInfo { return m.creatures }
+
+func TestFormatTremorsenseOutput_TableDriven(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    []CreatureInfo
+		expected string
+	}{
+		{
+			name:     "empty slice returns no-creatures message",
+			input:    []CreatureInfo{},
+			expected: "[Seismic Sense] No creatures detected.",
+		},
+		{
+			name:     "single visible creature",
+			input:    []CreatureInfo{{Name: "Guard", Hidden: false}},
+			expected: "[Seismic Sense] Creatures detected in this room: Guard",
+		},
+		{
+			name:     "single hidden creature",
+			input:    []CreatureInfo{{Name: "Assassin", Hidden: true}},
+			expected: "[Seismic Sense] Creatures detected in this room: Assassin (concealed)",
+		},
+		{
+			name: "mixed visible and hidden",
+			input: []CreatureInfo{
+				{Name: "Guard", Hidden: false},
+				{Name: "Assassin", Hidden: true},
+				{Name: "you", Hidden: false},
+			},
+			expected: "[Seismic Sense] Creatures detected in this room: Guard, Assassin (concealed), you",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := FormatTremorsenseOutput(tc.input)
+			assert.Equal(t, tc.expected, got)
+		})
+	}
+}
+
+func genCreatureInfo(t *rapid.T) CreatureInfo {
+	// Names must not contain ", " to avoid splitting ambiguity in the PBT output check.
+	name := rapid.StringMatching(`[^,]{1,20}`).Draw(t, "name")
+	return CreatureInfo{
+		Name:   name,
+		Hidden: rapid.Bool().Draw(t, "hidden"),
+	}
+}
+
+func TestProperty_FormatTremorsenseOutput_HiddenSuffix(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		creatures := rapid.SliceOfN(rapid.Custom(genCreatureInfo), 1, -1).Draw(t, "creatures")
+		output := FormatTremorsenseOutput(creatures)
+		// Split on the known prefix to get the parts section.
+		const prefix = "[Seismic Sense] Creatures detected in this room: "
+		assert.True(t, strings.HasPrefix(output, prefix), "output must begin with seismic sense prefix")
+		parts := strings.Split(strings.TrimPrefix(output, prefix), ", ")
+		// Build a set of parts for O(1) exact lookup.
+		partSet := make(map[string]bool, len(parts))
+		for _, p := range parts {
+			partSet[p] = true
+		}
+		for i, c := range creatures {
+			if c.Hidden {
+				assert.True(t, partSet[c.Name+" (concealed)"],
+					"hidden creature[%d] %q must appear as exact part with (concealed) suffix", i, c.Name)
+			} else {
+				assert.True(t, partSet[c.Name],
+					"visible creature[%d] %q must appear as exact part without (concealed) suffix", i, c.Name)
+				assert.False(t, partSet[c.Name+" (concealed)"],
+					"visible creature[%d] %q must NOT appear with (concealed) suffix", i, c.Name)
+			}
+		}
+	})
+}
