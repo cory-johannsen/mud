@@ -1,13 +1,15 @@
 id: albatross_curse_neural
-name: Albatross Curse
-description: |-
-    You create a spectral albatross, a guiding bird for sailors, to hover around the target. You and allies within 30 feet of the target gain a +1 circumstance bonus to attacks against the target. The target creature can spend an action to Strike the albatross, which automatically succeeds and kills it. The target must then attempt a Will save against your spell DC.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Albatross Curse]Critical Success The target is unaffected.
-    Success The guilt of slaughtering a bird of good fortune weighs on the target's mind. The target is Stupefied 1 for 1 round.
-    Failure The albatross hangs around a cord from the target's neck (or closest equivalent) for 1 minute, cursing them for their transgression. During this time, the target must roll twice and take the worse result on their next Will save, after which the albatross disappears.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Albatross Curse (Failure)]
-    Critical Failure As failure, but the duration is 1 hour.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Albatross Curse (Critical Failure)]
+name: Hex Tracker
+description: 'You install a psychic tracking beacon that hovers in the target''s neural
+  field. You and allies within 30 feet of the target gain a +1 circumstance bonus
+  to attacks against the target. The target takes a -1 circumstance penalty to Survival,
+  Nature, and Lore checks to navigate or determine direction, and gains a +1 circumstance
+  penalty to DCs of its saving throws against weather events. You can Dismiss the
+  spell.
+
+
+  Heightened (4th) The penalty to checks increases to -2 and you and allies gain a
+  +2 circumstance bonus to attacks against the target.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -19,7 +21,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a spectral albatross, a guiding bird for sailors, to hover around the target. You and allies within 30 feet of the target gain a +1 circumstance bonus to attacks against the target. The tar
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a spectral albatross, a guiding bird for sailors, to hover
+      around the target. You and allies within 30 feet of the target gain a +1 circumstance
+      bonus to attacks against the target. The tar

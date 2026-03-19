@@ -1,11 +1,8 @@
 id: tremorsense_neural
-name: Tremorsense
-description: |-
-    You become aware of vibrations in the ground around you. You gain tremorsense as an imprecise sense with a range of 30 feet. As normal for tremorsense, you can detect a creature only if it's on the same surface as you and only if the subject is moving along (or burrowing through) the surface.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Tremorsense]
-
-    Heightened (3rd) The spell's duration is 1 hour.
-    Heightened (5th) The spell's duration is 8 hours.
+name: Seismic Sense
+description: You grant the target psychic sensitivity to vibrations. The target gains
+  tremorsense out to 30 feet for the duration, allowing it to sense creatures and
+  objects in contact with the same surface.
 tradition: neural
 level: 2
 usage_type: prepared
@@ -15,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You become aware of vibrations in the ground around you. You gain tremorsense as an imprecise sense with a range of 30 feet. As normal for tremorsense, you can detect a creature only if it's on the sa
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You become aware of vibrations in the ground around you. You gain
+      tremorsense as an imprecise sense with a range of 30 feet. As normal for tremorsense,
+      you can detect a creature only if it's on the sa

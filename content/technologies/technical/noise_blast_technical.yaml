@@ -1,14 +1,21 @@
 id: noise_blast_technical
-name: Noise Blast
-description: |-
-    A cacophonous noise blasts out, dealing 2d10 sonic damage. Each creature must attempt a Fortitude save.
+name: Sonic Cannon
+description: 'You fire a directed sonic blast into the area. Each creature in the
+  area takes 2d10 sonic damage and must attempt a Fortitude save.
 
-    Critical Success The creature is unaffected.
-    Success The creature takes half damage.
-    Failure The creature takes full damage and is @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 round.
-    Critical Failure The creature takes double damage, is deafened for 1 minute, and is Stunned 1.
 
-    Heightened (+1) The damage increases by 1d10.
+  Critical Success The creature is unaffected.
+
+  Success The creature takes half damage.
+
+  Failure The creature takes full damage and is @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
+  for 1 round.
+
+  Critical Failure The creature takes double damage and is @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
+  for 1 minute.
+
+
+  Heightened (+1) The damage increases by 1d10.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -20,18 +27,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 2d6
-          damage_type: sonic
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 2d10
-          damage_type: sonic
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 4d10
-          damage_type: sonic
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 2d6
+    damage_type: sonic
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d10
+    damage_type: sonic
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d10
+    damage_type: sonic
+    dc: 0

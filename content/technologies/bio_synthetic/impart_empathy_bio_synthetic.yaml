@@ -1,9 +1,8 @@
 id: impart_empathy_bio_synthetic
-name: Impart Empathy
-description: |-
-    You expand the target's ability to understand social cues that are normally beyond its comprehension. Any creature to which the target isn't unfriendly or hostile can use Diplomacy to @UUID[Compendium.pf2e.actionspf2e.Item.Make an Impression] on it and to make very simple Requests of it. This doesn't render the animal any more inclined to help than it otherwise would be.
-
-    Heightened (4th) The spell can also target plants and fungi.
+name: Pheromone Signal
+description: You release bio-synthetic pheromones that convey a specific emotion to
+  the target. The target must attempt a Will save. On a failure, the target feels
+  the emotion strongly for 1 minute, which can affect its behavior at the GM's discretion.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -15,7 +14,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You expand the target's ability to understand social cues that are normally beyond its comprehension. Any creature to which the target isn't unfriendly or hostile can use Diplomacy to @UUID[Compendium
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You expand the target's ability to understand social cues that are
+      normally beyond its comprehension. Any creature to which the target isn't unfriendly
+      or hostile can use Diplomacy to @UUID[Compendium

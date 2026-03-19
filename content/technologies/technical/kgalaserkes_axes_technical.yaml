@@ -1,10 +1,12 @@
 id: kgalaserkes_axes_technical
-name: Kgalaserke's Axes
-description: |-
-    The folklore and tales surrounding the legendary hero Kgalaserke are so widespread and well known that a hundred lifetimes would not be enough to have accomplished everything she is reputed to have done. Nevertheless, the stories all contain a unifying theme of her martial prowess despite the odds being stacked against her.
-    1 You briefly describe Kgalaserke's signature axes and how she came to receive them. The target gains a +1 status bonus to attack rolls for the spell's duration.
-    2 You revel in a tale of Kgalaserke striking down a foe after a struggle. For the spell's duration, when the target is damaged by a creature's attack, the target gains a +2 circumstance bonus to damage against that creature for 1 round.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Kgalaserke's Axes]
+name: Orbital Blades
+description: 'You deploy two precision-guided blades that orbit your body on magnetic
+  rails. When you Cast or Sustain the Spell, you can make a ranged spell attack with
+  one of the blades against a target within 60 feet, dealing 2d6 slashing damage on
+  a hit. Each blade can be used once per round.
+
+
+  Heightened (+2) The damage increases by 1d6.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -14,7 +16,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The folklore and tales surrounding the legendary hero Kgalaserke are so widespread and well known that a hundred lifetimes would not be enough to have accomplished everything she is reputed to have do
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The folklore and tales surrounding the legendary hero Kgalaserke
+      are so widespread and well known that a hundred lifetimes would not be enough
+      to have accomplished everything she is reputed to have do

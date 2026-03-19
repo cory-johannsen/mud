@@ -1,10 +1,20 @@
 id: fear_the_sun_fanatic_doctrine
-name: Fear the Sun
-description: |-
-    You cause the creature's vision to become particularly sensitive. The creature must attempt a Fortitude save. The creature is then temporarily immune for 1 minute.Critical Success The creature is unaffected.
-    Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 round.
-    Failure The creature is dazzled for 1 minute.
-    Critical Failure The creature gains @UUID[Compendium.pf2e.bestiary-ability-glossary-srd.Item.Light Blindness] for 1 minute. If the creature is already exposed to bright light, it immediately becomes @UUID[Compendium.pf2e.conditionitems.Item.Blinded] until the end of its next turn, as it isn't acclimated to its newly acquired light blindness.Heightened (6th) You can target up to 10 creatures.
+name: Light Aversion Rite
+description: 'You invoke a doctrinal curse that makes the target abhor light. The
+  target must attempt a Will save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened] 1.
+
+  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened] 2
+  and must spend at least 1 action on its next turn moving away from the nearest source
+  of bright light.
+
+  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Frightened]
+  3 and is @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] from all bright light
+  sources for 1 round.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -16,7 +26,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You cause the creature's vision to become particularly sensitive. The creature must attempt a Fortitude save. The creature is then temporarily immune for 1 minute.Critical Success The creature is unaf
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You cause the creature's vision to become particularly sensitive.
+      The creature must attempt a Fortitude save. The creature is then temporarily
+      immune for 1 minute.Critical Success The creature is unaf

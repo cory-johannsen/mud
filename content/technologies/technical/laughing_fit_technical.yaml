@@ -1,12 +1,22 @@
 id: laughing_fit_technical
-name: Laughing Fit
-description: |-
-    The target is overtaken with uncontrollable laughter. It must attempt a Will save.
+name: Euphoria Injector
+description: 'You deploy a chemical agent that induces uncontrollable laughter. The
+  target must attempt a Will save.
 
-    Critical Success The target is unaffected.
-    Success The target is plagued with uncontrollable laughter. It can't use reactions.
-    Failure The target is Slowed 1 and can't use reactions.
-    Critical Failure The target falls @UUID[Compendium.pf2e.conditionitems.Item.Prone] and can't use actions or reactions for 1 round. It then takes the effects of a failure.
+
+  Critical Success The target is unaffected.
+
+  Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Slowed] 1 for 1
+  round.
+
+  Failure The target is unable to take reactions and is @UUID[Compendium.pf2e.conditionitems.Item.Slowed]
+  1 for 1 minute. It can attempt a new Will save at the end of each of its turns to
+  end the effect.
+
+  Critical Failure The target falls @UUID[Compendium.pf2e.conditionitems.Item.Prone]
+  and can''t stand for 1 round. It''s unable to take reactions and is @UUID[Compendium.pf2e.conditionitems.Item.Slowed]
+  1 for 1 minute, and it can attempt a new Will save at the end of each of its turns
+  to end the effect.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -18,11 +28,13 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            The target is overtaken with uncontrollable laughter. It must attempt a Will save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target is overtaken with uncontrollable laughter. It must attempt
+      a Will save.
 
-            Critical Success The target is unaffected.
-            Success The target is plagued with uncontrollable laughter. It can't use
+
+      Critical Success The target is unaffected.
+
+      Success The target is plagued with uncontrollable laughter. It can''t use'

@@ -1,9 +1,8 @@
 id: pack_attack_neural
-name: Pack Attack
-description: |-
-    You and one other target gain an uncanny coordination that helps you take down foes. You and the other target flank any enemy to which you are both adjacent, whether or not you are on opposite sides of the enemy's space.
-
-    Heightened (5th) The spell can target you and up to 4 willing creatures touched.
+name: Swarm Tactics
+description: You psychically coordinate the target and its nearby allies. For the
+  duration, the target gains a +1 status bonus to attack rolls against a creature
+  that is within reach of at least one of the target's allies.
 tradition: neural
 level: 2
 usage_type: prepared
@@ -13,7 +12,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You and one other target gain an uncanny coordination that helps you take down foes. You and the other target flank any enemy to which you are both adjacent, whether or not you are on opposite sides o
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You and one other target gain an uncanny coordination that helps
+      you take down foes. You and the other target flank any enemy to which you are
+      both adjacent, whether or not you are on opposite sides o

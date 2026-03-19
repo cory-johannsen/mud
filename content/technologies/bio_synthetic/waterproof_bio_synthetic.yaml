@@ -1,10 +1,7 @@
 id: waterproof_bio_synthetic
-name: Waterproof
-description: |-
-    You prevent the target item from taking on water or becoming wet for the duration of the spell. The hydrophobic properties of the spell also grant resistance 10 to acid and a +2 bonus to saves and DCs against damaging effects with the water or acid traits.
-
-    Heightened (4th) The duration is 1 day.
-    Heightened (8th) The duration is unlimited.
+name: Hydrophobic Membrane
+description: You coat the target in a bio-synthetic hydrophobic membrane. The target
+  and its equipment are completely waterproof for the duration.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -14,7 +11,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You prevent the target item from taking on water or becoming wet for the duration of the spell. The hydrophobic properties of the spell also grant resistance 10 to acid and a +2 bonus to saves and DCs
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You prevent the target item from taking on water or becoming wet
+      for the duration of the spell. The hydrophobic properties of the spell also
+      grant resistance 10 to acid and a +2 bonus to saves and DCs

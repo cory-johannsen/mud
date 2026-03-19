@@ -1,10 +1,18 @@
 id: thundering_dominance_neural
-name: Thundering Dominance
-description: |-
-    You shroud the target in a powerful predatory aura and amplify its vocalizations. It gains a +1 status bonus to Intimidation checks. Once during this spell's duration, it can take the @UUID[Compendium.pf2e.actionspf2e.Item.Thundering Roar] action.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Thundering Dominance]
+name: Alpha Override
+description: 'You psychically assert dominance over the target creature. The target
+  must attempt a Will save.
 
-    Heightened (+2) The status bonus to Intimidation checks increases by 1 (to a maximum of a +4 status bonus for an 8th-rank spell), and the damage from the roar increases by 2d8.
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes a -1 status penalty to attack rolls against you for 1
+  round.
+
+  Failure The creature can''t attack you for 1 round unless you attack it first.
+
+  Critical Failure The creature can''t attack you for 1 minute unless you attack it
+  first.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -14,7 +22,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You shroud the target in a powerful predatory aura and amplify its vocalizations. It gains a +1 status bonus to Intimidation checks. Once during this spell's duration, it can take the @UUID[Compendium
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shroud the target in a powerful predatory aura and amplify its
+      vocalizations. It gains a +1 status bonus to Intimidation checks. Once during
+      this spell's duration, it can take the @UUID[Compendium

@@ -1,8 +1,11 @@
 id: cauterize_wounds_bio_synthetic
-name: Cauterize Wounds
-description: |-
-    You seal bleeding wounds with fire. Any target that has persistent bleed damage can choose to take @Damage[1[fire]|immutable:true] damage. If it does, it can attempt to recover from its persistent bleed damage, with the lower DC for particularly effective assistance. During the spell's duration, you can use a single action, which has the concentrate trait, to repeat this effect for one target of the spell.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Cauterize Wounds]
+name: Bio-Seal
+description: 'You produce an intense localized heat from your hands that cauterizes
+  the target''s wounds. The target regains 2d8 HP. If the target has persistent bleed
+  damage, you can attempt to remove it (flat check DC 10).
+
+
+  Heightened (+1) The healing increases by 1d8.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -12,7 +15,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You seal bleeding wounds with fire. Any target that has persistent bleed damage can choose to take @Damage[1[fire]|immutable:true] damage. If it does, it can attempt to recover from its persistent ble
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You seal bleeding wounds with fire. Any target that has persistent
+      bleed damage can choose to take @Damage[1[fire]|immutable:true] damage. If it
+      does, it can attempt to recover from its persistent ble

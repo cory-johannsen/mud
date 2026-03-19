@@ -1,11 +1,11 @@
 id: brine_dragon_bile_technical
-name: Brine Dragon Bile
-description: |-
-    Trigger A creature within range takes damage from a slashing or piercing attack, or one that inflicts persistent bleed damage.
+name: Acid Spray Nozzle
+description: 'You fire a stream of concentrated acid from a pressurized nozzle. Make
+  a spell attack. On a hit, you deal 3d6 acid damage. On a critical hit, the target
+  is also @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 1.
 
-    You spit a glob of caustic saltwater that stings the wounds of the creature. Make a ranged spell attack against the triggering creature's AC. On a hit, salt scours its open wound, dealing 2d6 persistent acid damage.
 
-    Heightened (+2) The persistent damage increases by 2d6.
+  Heightened (+1) The damage increases by 1d6.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -15,13 +15,13 @@ targets: single
 duration: instant
 resolution: attack
 effects:
-    on_hit:
-        - type: damage
-          dice: 2d6
-          damage_type: acid
-          dc: 0
-    on_crit_hit:
-        - type: damage
-          dice: 4d6
-          damage_type: acid
-          dc: 0
+  on_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: acid
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 4d6
+    damage_type: acid
+    dc: 0

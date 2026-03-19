@@ -1,10 +1,11 @@
 id: embed_message_technical
-name: Embed Message
-description: |-
-    You specify a trigger and a message up to 25 words long. When the specified trigger occurs within 30 feet of the target, illusory text of your message circles the target accompanied by a disembodied voice. You can choose a language you know for the text and speech, and can choose what the voice sounds like. Once the message is completed, the spell ends.
+name: Delayed Transmission
+description: 'You embed an encrypted message into the target''s communication implant
+  that surfaces under specific conditions. You speak a message of 25 words or fewer
+  and designate a trigger. When the trigger occurs, the target receives the message.
 
-    Heightened (4th) You can add a simple sensory component to emphasize the message, such as an odor, visual effect, or physical sensation. This addition is obviously illusory and part of the message, lasting only while the message is being read.
-    Heightened (6th) As 4th rank, but you can choose how many times the spell repeats the message before it ends; there is no limit to the number of repetitions.
+
+  Heightened (3rd) The message can be up to 50 words.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -14,7 +15,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You specify a trigger and a message up to 25 words long. When the specified trigger occurs within 30 feet of the target, illusory text of your message circles the target accompanied by a disembodied v
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You specify a trigger and a message up to 25 words long. When the
+      specified trigger occurs within 30 feet of the target, illusory text of your
+      message circles the target accompanied by a disembodied v

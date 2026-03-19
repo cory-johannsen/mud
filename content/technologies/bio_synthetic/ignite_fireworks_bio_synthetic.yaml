@@ -1,14 +1,12 @@
 id: ignite_fireworks_bio_synthetic
-name: Ignite Fireworks
-description: |-
-    A brilliant and clamorous display of sparks and colorful fireworks explode around your enemies, dealing 1d8 fire damage and 1d8 sonic damage to creatures within a 10-foot burst. All creatures in the area must attempt a Reflex save.
+name: Bio-Flare Burst
+description: 'You launch bio-luminescent organisms that explode in a brilliant display.
+  Each creature in a @Template[burst|distance:10] takes 1d8 fire damage and 1d8 sonic
+  damage with a basic Reflex save. On a failure, a creature is also @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]
+  for 1 round.
 
-    Critical Success The creature is unaffected.
-    Success The creature takes half damage and is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 round.
-    Failure The creature takes full damage and is dazzled for 3 rounds.
-    Critical Failure The creature takes double damage, takes @Damage[1d4[persistent,fire]] damage, and is dazzled for 1 minute.
 
-    Heightened (+2) The initial fire damage increases by 1d8, the sonic damage increases by 1d8, and the persistent fire damage a creature takes on a critical failure increases by 1d4.
+  Heightened (+1) The fire and sonic damage each increase by 1d8.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -20,30 +18,30 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 1d4
-          damage_type: fire
-          dc: 0
-        - type: damage
-          dice: 1d4
-          damage_type: sonic
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 1d8
-          damage_type: fire
-          dc: 0
-        - type: damage
-          dice: 1d8
-          damage_type: sonic
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 2d8
-          damage_type: fire
-          dc: 0
-        - type: damage
-          dice: 2d8
-          damage_type: sonic
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 1d4
+    damage_type: fire
+    dc: 0
+  - type: damage
+    dice: 1d4
+    damage_type: sonic
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d8
+    damage_type: fire
+    dc: 0
+  - type: damage
+    dice: 1d8
+    damage_type: sonic
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: fire
+    dc: 0
+  - type: damage
+    dice: 2d8
+    damage_type: sonic
+    dc: 0

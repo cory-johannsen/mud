@@ -1,8 +1,12 @@
 id: timely_tutor_neural
-name: Timely Tutor
-description: |-
-    You serve as an astral connection between your eidolon or familiar and the Akashic Record-a demiplane consisting of a comprehensive psychic library-then turn to the creature for advice. If you cast this spell on your familiar, your familiar adds your spellcasting ability modifier on checks to Recall Knowledge with the Lore skill of your choice, much like it does for Acrobatics and Stealth. Your familiar must have the speech familiar ability in order to share any information it learns with you. If you cast this spell on your eidolon, it instead becomes trained in the Lore skill.
-    If you lose physical contact with the target, its connection to the Akashic Record is severed and timely tutor immediately ends.
+name: Skillsoft Upload
+description: 'You psychically download skill knowledge into the target''s mind. The
+  target becomes trained in a skill of your choice for the duration. If the target
+  is already trained, it instead gains a +1 status bonus to that skill.
+
+
+  Heightened (4th) The target becomes expert in the chosen skill for the duration
+  if it was already trained.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -12,7 +16,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You serve as an astral connection between your eidolon or familiar and the Akashic Record-a demiplane consisting of a comprehensive psychic library-then turn to the creature for advice. If you cast th
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You serve as an astral connection between your eidolon or familiar
+      and the Akashic Record-a demiplane consisting of a comprehensive psychic library-then
+      turn to the creature for advice. If you cast th

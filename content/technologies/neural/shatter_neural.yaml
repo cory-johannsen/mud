@@ -1,9 +1,12 @@
 id: shatter_neural
-name: Shatter
-description: |-
-    A high-frequency sonic attack shatters a nearby object. You deal 2d10 sonic damage to the object, ignoring the object's Hardness if it is 4 or lower.
+name: Resonance Shatter
+description: 'You psychically vibrate the target object at its resonant frequency.
+  The target takes 5d10 sonic damage. If the target is attended by a creature, that
+  creature can attempt a basic Fortitude save; on a success the object takes half
+  damage.
 
-    Heightened (+1) The damage increases by 1d10, and the Hardness the spell ignores increases by 2.
+
+  Heightened (+1) The damage increases by 2d10.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -13,8 +16,8 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: damage
-          dice: 2d10
-          damage_type: sonic
-          dc: 0
+  on_apply:
+  - type: damage
+    dice: 2d10
+    damage_type: sonic
+    dc: 0

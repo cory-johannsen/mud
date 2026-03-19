@@ -1,8 +1,16 @@
 id: warping_pull
-name: Warping Pull
-description: |-
-    Trigger An effect would deal damage to an ally within range.You get an ally out of danger with a teleporting pull. You teleport the target to an unoccupied square up to 10 feet closer to you. The target gains resistance 5 to all damage against the triggering effect.Heightened (+2) The resistance increases by 5.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Warping Pull]
+name: Gravity Well
+description: 'You deploy a localized gravity distortion that pulls the target toward
+  you. The target must attempt a Fortitude save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is pulled 5 feet toward you.
+
+  Failure The creature is pulled 10 feet toward you.
+
+  Critical Failure The creature is pulled 15 feet toward you and falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -12,7 +20,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Trigger An effect would deal damage to an ally within range.You get an ally out of danger with a teleporting pull. You teleport the target to an unoccupied square up to 10 feet closer to you. The targ
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Trigger An effect would deal damage to an ally within range.You get
+      an ally out of danger with a teleporting pull. You teleport the target to an
+      unoccupied square up to 10 feet closer to you. The targ

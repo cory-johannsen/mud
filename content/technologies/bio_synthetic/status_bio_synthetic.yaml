@@ -1,9 +1,8 @@
 id: status_bio_synthetic
-name: Status
-description: |-
-    As long as you and the target are on the same plane of existence and both alive, you remain aware of its present state. You know the target's direction from you, distance from you, and any conditions affecting it.
-
-    Heightened (4th) The spell's range increases to 30 feet, and you can target up to 10 creatures.
+name: Symbiotic Monitor
+description: You establish a bio-synthetic link that monitors the target's condition.
+  For the duration, you know the target's current HP, any conditions affecting it,
+  and its general emotional state. You also know its direction and distance from you.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -13,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: As long as you and the target are on the same plane of existence and both alive, you remain aware of its present state. You know the target's direction from you, distance from you, and any conditions
+  on_apply:
+  - type: utility
+    dc: 0
+    description: As long as you and the target are on the same plane of existence
+      and both alive, you remain aware of its present state. You know the target's
+      direction from you, distance from you, and any conditions

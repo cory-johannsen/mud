@@ -1,10 +1,8 @@
 id: enhance_victuals_bio_synthetic
-name: Enhance Victuals
-description: |-
-    You transform the target into delicious fare, changing water into wine or another fine beverage or enhancing the food's taste and ingredients to make it a gourmet treat.
-    Prior to the transformation, the spell attempts to counteract any poisons in the food or water. The food turns back to normal if not consumed before the duration expires, though any poisons that were counteracted are still gone.
-
-    Heightened (+1) The number of gallons of water you can target increases by 1, or the number of pounds of food you can target increases by 5.
+name: Nutrient Boost
+description: You bio-enhance food or water, increasing its nutritional value. You
+  can enhance up to 1 gallon of water or 5 portions of food. Enhanced food grants
+  1d8 temporary HP to those who consume it, lasting 1 hour.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -14,9 +12,11 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You transform the target into delicious fare, changing water into wine or another fine beverage or enhancing the food's taste and ingredients to make it a gourmet treat.
-            Prior to the transformation, t
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You transform the target into delicious fare, changing water into
+      wine or another fine beverage or enhancing the food''s taste and ingredients
+      to make it a gourmet treat.
+
+      Prior to the transformation, t'

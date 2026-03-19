@@ -1,13 +1,19 @@
 id: calm_neural
-name: Calm
-description: |-
-    You forcibly calm creatures in the area, soothing them into a nonviolent state; each creature must attempt a Will save.
+name: Pacification Wave
+description: 'You broadcast a calming neural signal that suppresses hostile impulses.
+  Each creature in the area must attempt a Will save.
 
-    Critical Success The creature is unaffected.
-    Success Calming urges impose a -1 status penalty to the creature's attack rolls.
-    Failure Any emotion effects that would affect the creature are suppressed and the creature can't use hostile actions. If the target is subject to hostility from any other creature, it ceases to be affected by calm.
-    Critical Failure As failure, but hostility doesn't end the effect.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Calm]
+
+  Critical Success The creature is unaffected.
+
+  Success Calming urges linger in the creature''s mind. It can''t use hostile actions
+  for 1 round, though this ends if the creature is attacked.
+
+  Failure The creature can''t use hostile actions for 1 minute, though this ends if
+  the creature is attacked.
+
+  Critical Failure The creature can''t use hostile actions for 1 minute, and this
+  doesn''t end if the creature is attacked.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -19,11 +25,13 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You forcibly calm creatures in the area, soothing them into a nonviolent state; each creature must attempt a Will save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You forcibly calm creatures in the area, soothing them into a nonviolent
+      state; each creature must attempt a Will save.
 
-            Critical Success The creature is unaffected.
-            Success Calming urges impose a -1
+
+      Critical Success The creature is unaffected.
+
+      Success Calming urges impose a -1'

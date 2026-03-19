@@ -1,14 +1,20 @@
 id: vicious_jealousy_neural
-name: Vicious Jealousy
-description: |-
-    The target is overcome by deep jealousy and resentment that twists its mind against other creatures. It must attempt a Will save.
+name: Envy Virus
+description: 'You infect the target with psychic jealousy toward a creature you specify.
+  The target must attempt a Will save.
 
-    Critical Success The target is unaffected.
-    Success For 1 round, the target no longer treats anyone as its allies. The spell then ends.
-    Failure The target no longer treats anyone as its allies. The target can't take the @UUID[Compendium.pf2e.actionspf2e.Item.Aid] reaction or any action that would directly benefit another creature, such as casting a beneficial spell on them, though it can still take actions that indirectly benefit other creatures, such as fighting the same foes.
-    Critical Failure As failure, and whenever the target starts its turn within reach of a creature it previously considered an ally, it must spend its first action on its turn to berate the creature or otherwise wave it away.
 
-    Heightened (4th) You can target up to 10 creatures.
+  Critical Success The creature is unaffected.
+
+  Success The creature takes a -1 status penalty to checks involving the specified
+  creature for 1 round.
+
+  Failure The creature is compelled to outperform or undermine the specified creature
+  for 1 minute, taking a -2 status penalty to checks that don''t involve competing
+  with or sabotaging the target of its jealousy.
+
+  Critical Failure As failure, and the creature must spend at least 1 action per turn
+  targeting the creature it envies.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -20,11 +26,13 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            The target is overcome by deep jealousy and resentment that twists its mind against other creatures. It must attempt a Will save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target is overcome by deep jealousy and resentment that twists
+      its mind against other creatures. It must attempt a Will save.
 
-            Critical Success The target is unaffected.
-            Success For 1 round, the t
+
+      Critical Success The target is unaffected.
+
+      Success For 1 round, the t'

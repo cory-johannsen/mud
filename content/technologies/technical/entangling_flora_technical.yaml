@@ -1,8 +1,20 @@
 id: entangling_flora_technical
-name: Entangling Flora
-description: |-
-    Plants and fungi burst out or quickly grow, entangling creatures. All surfaces in the area are difficult terrain. Each round that a creature starts its turn in the area, it must attempt a Reflex save. On a failure, it takes a –10-foot circumstance penalty to its Speeds until it leaves the area, and on a critical failure, it's also @UUID[Compendium.pf2e.conditionitems.Item.Immobilized] for 1 round. Creatures can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] to remove these effects.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Entangling Flora]
+name: Cable Snare
+description: 'You deploy grappling cables that erupt from the ground, entangling creatures.
+  Each creature in the area must attempt a Reflex save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes a -5-foot circumstance penalty to its Speeds for 1 round.
+
+  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized] for
+  1 round. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against
+  your spell DC.
+
+  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]
+  for 1 minute. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against
+  your spell DC.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -14,7 +26,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Plants and fungi burst out or quickly grow, entangling creatures. All surfaces in the area are difficult terrain. Each round that a creature starts its turn in the area, it must attempt a Reflex save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Plants and fungi burst out or quickly grow, entangling creatures.
+      All surfaces in the area are difficult terrain. Each round that a creature starts
+      its turn in the area, it must attempt a Reflex save.

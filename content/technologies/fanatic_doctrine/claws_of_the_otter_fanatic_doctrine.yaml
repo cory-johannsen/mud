@@ -1,10 +1,8 @@
 id: claws_of_the_otter_fanatic_doctrine
-name: Claws of the Otter
-description: |-
-    Webbing grows between your fingers and your nails extend into vicious claws. For the spell's duration, you gain a +1 status bonus to Athletics checks to Swim and you gain a claws unarmed attack. They're an agile, finesse, unarmed attack that deals 1d4 slashing damage and an additional 1d6 cold damage.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Claws of the Otter]
-
-    Heightened (+3) The additional cold damage increases by 1d6.
+name: Blessed Talons
+description: You invoke doctrinal blessings to grant the target sacred claws. The
+  target gains a claw unarmed attack that deals 1d6 slashing damage and a swim Speed
+  of 15 feet for the duration.
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -14,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Webbing grows between your fingers and your nails extend into vicious claws. For the spell's duration, you gain a +1 status bonus to Athletics checks to Swim and you gain a claws unarmed attack. They'
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Webbing grows between your fingers and your nails extend into vicious
+      claws. For the spell's duration, you gain a +1 status bonus to Athletics checks
+      to Swim and you gain a claws unarmed attack. They'

@@ -1,11 +1,16 @@
 id: sea_surge_technical
-name: Sea Surge
-description: |-
-    You slap or stomp on a nearby solid or liquid surface, sending a surge of water rushing away from you. The water forms a flat, 5-foot-thick, 10-foot-high wall of water between 5 and 15 feet wide (you decide). It moves 60 feet in a direction of your choice along the struck surface, extinguishing all non-magical fires, carrying along unattended objects of 1 Bulk or less, and pushing larger objects. The wave moves another 60 feet in the same direction at the start of your next turn, then vanishes. Large or smaller creatures in the area or that enter the area the wave moves through must attempt a Fortitude save.
+name: Hydraulic Cannon
+description: 'You fire a pressurized water cannon in a wide arc. Each creature in
+  a @Template[cone|distance:30] must attempt a Fortitude save.
 
-    Success The creature is unaffected.
-    Failure The creature is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]. If the creature was Swimming, it gets a critical failure instead.
-    Critical Failure The creature is pushed 20 feet in the wave's direction, is knocked Prone, and takes 3d6 bludgeoning damage.
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is pushed 5 feet.
+
+  Failure The creature is pushed 10 feet and falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+
+  Critical Failure The creature is pushed 20 feet and falls @UUID[Compendium.pf2e.conditionitems.Item.Prone].'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -17,18 +22,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 3d3
-          damage_type: bludgeoning
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 3d6
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 6d6
-          damage_type: bludgeoning
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0

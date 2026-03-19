@@ -1,10 +1,17 @@
 id: the_parrots_whisper_neural
-name: The Parrot's Whisper
-description: |-
-    You call forth an echo of the gossiping parrot from the tale of the Witch and the Weaver to whisper the secrets of a creature you can see within range. The garrulous parrot is known to chatter on for some time while deciphering the information you seek. The target must attempt a Will saving throw.Critical Success The parrot chatters about various random topics for 1 round and reveals no relevant information.
-    Success The parrot tells you the target's highest weakness at the start of your next turn. In the meantime, the parrot chatters about various random topics.
-    Failure The parrot tells you the target's highest weakness immediately, but sticks around for 1 round to chatter.
-    Critical Failure The parrot tells you the target's highest weakness immediately, and you can ask the parrot one question about the target creature. You might need to collaborate with the GM to narrow down the question. At the start of your next turn, the parrot answers the question truthfully.
+name: Echo Siphon
+description: 'You psychically steal the last words spoken by the target. You hear
+  the last sentence the target spoke and the target must attempt a Will save.
+
+
+  Critical Success The target is unaffected and knows you tried to read its mind.
+
+  Success You hear the last sentence the target spoke.
+
+  Failure As success, and the target forgets it spoke those words.
+
+  Critical Failure As failure, and you can choose to implant different words as the
+  target''s memory of what it said.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -16,7 +23,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You call forth an echo of the gossiping parrot from the tale of the Witch and the Weaver to whisper the secrets of a creature you can see within range. The garrulous parrot is known to chatter on for
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call forth an echo of the gossiping parrot from the tale of the
+      Witch and the Weaver to whisper the secrets of a creature you can see within
+      range. The garrulous parrot is known to chatter on for

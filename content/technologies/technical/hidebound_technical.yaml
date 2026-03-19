@@ -1,12 +1,8 @@
 id: hidebound_technical
-name: Hidebound
-description: |-
-    Trigger A creature within range is hit with a Strike that deals physical damage.
-
-    The target's skin erupts in thick hide or dense scales. It gains resistance 5 to physical damage, except adamantine, until the beginning of its next turn.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Hidebound]
-
-    Heightened (+2) The resistance increases by 3.
+name: Ballistic Weave
+description: You deploy a ballistic fiber weave that hardens the target's outer layer.
+  The target gains a +1 item bonus to AC but takes a -2 status penalty to Reflex saves
+  for the duration.
 tradition: technical
 level: 2
 usage_type: prepared
@@ -16,10 +12,12 @@ targets: single
 duration: rounds:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Trigger A creature within range is hit with a Strike that deals physical damage.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Trigger A creature within range is hit with a Strike that deals
+      physical damage.
 
-            The target's skin erupts in thick hide or dense scales. It gains resistance 5 to physical damage, except adamantine, u
+
+      The target''s skin erupts in thick hide or dense scales. It gains resistance
+      5 to physical damage, except adamantine, u'

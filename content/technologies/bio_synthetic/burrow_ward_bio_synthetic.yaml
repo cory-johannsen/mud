@@ -1,9 +1,7 @@
 id: burrow_ward_bio_synthetic
-name: Burrow Ward
-description: |-
-    You solidify the earth around you, hindering burrowing creatures. Creatures that can't burrow through stone can't burrow through the area. Such creatures already underground within the area must succeed at a Fortitude save or be ejected from the area toward the surface. Those who succeed are forced out of the area but can remain underground. Creatures that can burrow through stone treat the area as difficult terrain.
-
-    Heightened (5th) You create a @Template[emanation|distance:30].
+name: Tremor Seal
+description: You harden the ground with bio-synthetic compounds, preventing burrowing.
+  Creatures can't burrow into, through, or out of the affected area for the duration.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -15,7 +13,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You solidify the earth around you, hindering burrowing creatures. Creatures that can't burrow through stone can't burrow through the area. Such creatures already underground within the area must succe
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You solidify the earth around you, hindering burrowing creatures.
+      Creatures that can't burrow through stone can't burrow through the area. Such
+      creatures already underground within the area must succe

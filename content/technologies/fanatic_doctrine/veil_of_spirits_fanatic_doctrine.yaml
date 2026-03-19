@@ -1,11 +1,8 @@
 id: veil_of_spirits_fanatic_doctrine
-name: Veil of Spirits
-description: |-
-    You draw on the essence of spiritual energy surrounding you to manifest a misty veil. When a creature that isn't immune to spirit damage begins its turn within the area, it must attempt a Reflex save. You can Dismiss the veil.Critical Success The creature is unaffected.
-    Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] until the beginning of its next turn.
-    Failure The creature is dazzled and gains a weakness to spirit damage equal to half your level until the beginning of its next turn as spiritual energy clings to it. A creature with spiritsense can't use that imprecise sense while it's dazzled in this way.
-    Critical Failure As failure, but the weakness is equal to your level.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Veil of Spirits]
+name: Martyr's Veil
+description: You surround yourself with projections of doctrinal martyrs. Any creature
+  that ends its turn adjacent to you takes 1d6 void damage and 1d6 mental damage.
+  The spirits also grant you concealment against ranged attacks.
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -17,7 +14,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You draw on the essence of spiritual energy surrounding you to manifest a misty veil. When a creature that isn't immune to spirit damage begins its turn within the area, it must attempt a Reflex save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You draw on the essence of spiritual energy surrounding you to manifest
+      a misty veil. When a creature that isn't immune to spirit damage begins its
+      turn within the area, it must attempt a Reflex save.

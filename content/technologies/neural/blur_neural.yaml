@@ -1,6 +1,9 @@
 id: blur_neural
-name: Blur
-description: The target's form appears blurry. It becomes @UUID[Compendium.pf2e.conditionitems.Item.Concealed]. As the nature of this effect still leaves the target's location obvious, the target can't use this concealment to Hide or Sneak.
+name: Signal Scramble
+description: The target's form appears distorted by neural interference. It becomes
+  @UUID[Compendium.pf2e.conditionitems.Item.Concealed]. As the nature of this effect
+  still leaves the target's location obvious, the target can't use this concealment
+  to Hide or Sneak.
 tradition: neural
 level: 2
 usage_type: prepared
@@ -10,7 +13,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target's form appears blurry. It becomes @UUID[Compendium.pf2e.conditionitems.Item.Concealed]. As the nature of this effect still leaves the target's location obvious, the target can't use this co
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target's form appears blurry. It becomes @UUID[Compendium.pf2e.conditionitems.Item.Concealed].
+      As the nature of this effect still leaves the target's location obvious, the
+      target can't use this co

@@ -1,12 +1,18 @@
 id: brand_the_impenitent
-name: Brand the Impenitent
-description: |-
-    You brand the target with an ethereal copy of your deity's religious symbol. This brand can't be hidden, but it is visible only to followers of your faith, who see it as clearly as a lit torch. Followers of your faith ignore the target's @UUID[Compendium.pf2e.conditionitems.Item.Concealed] condition, if any, and the target gains a -1 status penalty to AC against attacks by followers of your faith. If the target is a follower of your deity in good standing, the spell fails.
+name: Heretic's Mark
+description: 'You brand the target with a mark of doctrinal condemnation. The target
+  must attempt a Will save.
 
-    Critical Success The target is unaffected.
-    Success The spell lasts for 1 round.
-    Failure The spell lasts for 1 minute.
-    Critical Failure The spell has an unlimited duration.
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes 2d6 fire damage.
+
+  Failure The creature takes 4d6 fire damage and is marked. While marked, it takes
+  a -1 status penalty to Deception and Diplomacy checks.
+
+  Critical Failure The creature takes 4d6 fire damage and is marked for 1 month. While
+  marked, it takes a -2 status penalty to Deception and Diplomacy checks.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -18,7 +24,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You brand the target with an ethereal copy of your deity's religious symbol. This brand can't be hidden, but it is visible only to followers of your faith, who see it as clearly as a lit torch. Follow
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You brand the target with an ethereal copy of your deity's religious
+      symbol. This brand can't be hidden, but it is visible only to followers of your
+      faith, who see it as clearly as a lit torch. Follow

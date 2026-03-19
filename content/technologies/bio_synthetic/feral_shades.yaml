@@ -1,9 +1,8 @@
 id: feral_shades
-name: Feral Shades
-description: |-
-    A wave of gray mist formed of void energy spills out from your outstretched hand, briefly taking the shape of a pack of predatory animals that set viciously on your foes. You deal 2d4 slashing damage and 2d4 void damage to creatures in the area. The shades set upon the vulnerable with greater ferocity: prone creatures or those taking persistent bleed damage take a -2 status penalty to the save.
-
-    Heightened (+1) The slashing damage and the void damage each increase by 1d4.
+name: Shadow Predators
+description: You grow bio-synthetic predators from ambient shadows. The shades attack
+  creatures you designate, making Strikes using your spell attack modifier and dealing
+  2d6 slashing damage on a hit. You can command them when you Sustain the spell.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -15,30 +14,30 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: "2"
-          damage_type: slashing
-          dc: 0
-        - type: damage
-          dice: "2"
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 2d4
-          damage_type: slashing
-          dc: 0
-        - type: damage
-          dice: 2d4
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 4d4
-          damage_type: slashing
-          dc: 0
-        - type: damage
-          dice: 4d4
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: '2'
+    damage_type: slashing
+    dc: 0
+  - type: damage
+    dice: '2'
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: slashing
+    dc: 0
+  - type: damage
+    dice: 2d4
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: slashing
+    dc: 0
+  - type: damage
+    dice: 4d4
+    damage_type: void
+    dc: 0

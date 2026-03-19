@@ -1,14 +1,18 @@
 id: warriors_regret_neural
-name: Warrior's Regret
-description: |-
-    Regret eats away at the target's mind, punishing it for its violence until it ceases its hostility. The target must attempt a Will save.
+name: Combat Remorse
+description: 'You fill the target with psychic regret over its violent actions. The
+  target must attempt a Will save.
 
-    Critical Success The target is unaffected.
-    Success At the end of its next turn, the target takes 1d8 damage per different creature it intentionally damaged on that turn (1d8 if it damaged one creature, 2d8 if it damaged two different creatures, and so on). The maximum is 4d8 if it damaged 4 different creatures.
-    Failure As success, except the curse damages the target at the end of each of its turns and lasts until the target spends a complete round without intentionally damaging another creature.
-    Critical Failure As success, except the curse damages the target at the end of each of its turns and lasts until the target spends 24 hours atoning for its perceived sins.
 
-    Heightened (+2) The amount of mental damage the target takes for each creature it damaged that turn increases by 1d8, and the maximum damage the target can take per turn increases by 4d8.
+  Critical Success The creature is unaffected.
+
+  Success The creature takes a -1 status penalty to attack rolls for 1 round.
+
+  Failure The creature takes a -2 status penalty to attack rolls for 1 minute. It
+  can attempt a new Will save at the end of each of its turns.
+
+  Critical Failure As failure, and the creature is also @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
+  1.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -20,18 +24,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 1d4
-          damage_type: untyped
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 1d8
-          damage_type: untyped
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 2d8
-          damage_type: untyped
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 1d4
+    damage_type: untyped
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d8
+    damage_type: untyped
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d8
+    damage_type: untyped
+    dc: 0

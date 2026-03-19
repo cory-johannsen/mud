@@ -1,6 +1,13 @@
 id: acid_arrow_technical
-name: Acid Arrow
-description: You conjure an arrow of acid that keeps corroding the target after it hits. Make a spell attack against the target. On a hit, you deal 3d8 acid damage plus @Damage[(floor(@item.rank/2))d6[persistent,acid]] damage. On a critical hit, double the initial damage, but not the persistent damage.Heightened (+2) The initial damage increases by 2d8, and the persistent acid damage increases by 1d6.
+name: Corrosive Projectile
+description: 'You fire a precision-guided acid projectile that continues corroding
+  the target. Make a spell attack against the target. On a hit, you deal 3d8 acid
+  damage plus @Damage[(floor(@item.rank/2))d6[persistent,acid]] damage. On a critical
+  hit, double the initial damage, but not the persistent damage.
+
+
+  Heightened (+2) The initial damage increases by 2d8, and the persistent acid damage
+  increases by 1d6.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -10,13 +17,13 @@ targets: single
 duration: instant
 resolution: attack
 effects:
-    on_hit:
-        - type: damage
-          dice: 3d8
-          damage_type: acid
-          dc: 0
-    on_crit_hit:
-        - type: damage
-          dice: 6d8
-          damage_type: acid
-          dc: 0
+  on_hit:
+  - type: damage
+    dice: 3d8
+    damage_type: acid
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 6d8
+    damage_type: acid
+    dc: 0

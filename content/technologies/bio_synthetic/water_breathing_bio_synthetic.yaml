@@ -1,10 +1,7 @@
 id: water_breathing_bio_synthetic
-name: Water Breathing
-description: |-
-    The targets can breathe underwater.
-
-    Heightened (3rd) The duration increases to 8 hours.
-    Heightened (4th) The duration increases to until your next daily preparations.
+name: Gill Mutation
+description: You induce temporary gill formation in the targets. The targets can breathe
+  underwater for the duration. They retain the ability to breathe air.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -14,11 +11,12 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            The targets can breathe underwater.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The targets can breathe underwater.
 
-            Heightened (3rd) The duration increases to 8 hours.
-            Heightened (4th) The duration increases to until your next daily preparations.
+
+      Heightened (3rd) The duration increases to 8 hours.
+
+      Heightened (4th) The duration increases to until your next daily preparations.'

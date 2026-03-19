@@ -1,10 +1,13 @@
 id: environmental_endurance_bio_synthetic
-name: Environmental Endurance
-description: |-
-    You shield the target against dangerous temperatures. Choose severe cold or heat. The target is protected from the temperature you chose (but not extreme cold or heat).
+name: Climate Adaptation
+description: 'You trigger bio-synthetic adaptation in the target, allowing it to withstand
+  extreme temperatures. The target gains cold resistance 2 and fire resistance 2,
+  and can exist comfortably in temperatures between -20 and 120 degrees Fahrenheit.
 
-    Heightened (3rd) The target is protected from severe cold and severe heat.
-    Heightened (5th) The target is protected from severe cold, severe heat, extreme cold, and extreme heat.
+
+  Heightened (3rd) The resistances increase to 5.
+
+  Heightened (5th) The resistances increase to 10.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -14,10 +17,12 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You shield the target against dangerous temperatures. Choose severe cold or heat. The target is protected from the temperature you chose (but not extreme cold or heat).
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You shield the target against dangerous temperatures. Choose severe
+      cold or heat. The target is protected from the temperature you chose (but not
+      extreme cold or heat).
 
-            Heightened (3rd) The target is
+
+      Heightened (3rd) The target is'

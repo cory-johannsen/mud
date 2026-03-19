@@ -1,12 +1,18 @@
 id: death_knell_neural
-name: Death Knell
-description: |-
-    You snuff the life out of a creature on the brink of death. The target must attempt a Will save. If this kills it, you gain 10 temporary HP and a +1 status bonus to attack and damage rolls for 10 minutes.
+name: Neural Terminus
+description: 'You snuff out the consciousness of a creature on the brink of death
+  via psychic override. The target must attempt a Will save. If this kills it, you
+  gain 10 temporary HP and a +1 status bonus to attack and damage rolls for 10 minutes.
 
-    Critical Success The target is unaffected.
-    Success The target's @UUID[Compendium.pf2e.conditionitems.Item.Dying] value increases by 1.
-    Failure The target dies.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Death Knell]
+
+  Critical Success The target is unaffected.
+
+  Success The target takes 2d6 mental damage.
+
+  Failure The target takes 4d6 mental damage. If this reduces the creature to 0 HP,
+  it dies.
+
+  Critical Failure The target dies.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -18,7 +24,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You snuff the life out of a creature on the brink of death. The target must attempt a Will save. If this kills it, you gain 10 temporary HP and a +1 status bonus to attack and damage rolls for 10 minu
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You snuff the life out of a creature on the brink of death. The target
+      must attempt a Will save. If this kills it, you gain 10 temporary HP and a +1
+      status bonus to attack and damage rolls for 10 minu

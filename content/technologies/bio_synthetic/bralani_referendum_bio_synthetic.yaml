@@ -1,9 +1,11 @@
 id: bralani_referendum_bio_synthetic
-name: Bralani Referendum
-description: |-
-    You enforce fair play with punishing zephyrs. When you Cast this Spell, choose one condition from among @UUID[Compendium.pf2e.conditionitems.Item.Clumsy], @UUID[Compendium.pf2e.conditionitems.Item.Drained], @UUID[Compendium.pf2e.conditionitems.Item.Enfeebled], or @UUID[Compendium.pf2e.conditionitems.Item.Stupefied]. When a creature in the area inflicts the chosen condition, they take 2d6 slashing damage with a basic Fortitude save. A creature can't take this damage more than once per round. You can Dismiss the spell.
+name: Gale Burst
+description: 'You unleash a blast of compressed bio-gas. Each creature in the area
+  takes 3d6 bludgeoning damage with a basic Reflex save and is pushed 5 feet on a
+  failure (10 feet on a critical failure).
 
-    Heightened (+2) Choose one more condition. The slashing damage when a creature inflicts any of the chosen conditions increases by 2d6.
+
+  Heightened (+1) The damage increases by 1d6.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -15,18 +17,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 2d3
-          damage_type: slashing
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 2d6
-          damage_type: slashing
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 4d6
-          damage_type: slashing
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 2d3
+    damage_type: slashing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: slashing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: slashing
+    dc: 0

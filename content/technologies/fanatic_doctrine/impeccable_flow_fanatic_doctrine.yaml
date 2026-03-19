@@ -1,9 +1,10 @@
 id: impeccable_flow_fanatic_doctrine
-name: Impeccable Flow
-description: |-
-    You attune yourself to an underlying cosmic order to the world. While you remain in tune with this power, you gain a +1 status bonus to Perception checks, saving throws, and skill checks. If you critically fail any check while under the effects of this spell, the bonus ends and you instead have a -1 status penalty to all checks for the remaining duration.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Impeccable Flow]Heightened (5th) The status bonus increases to +2.
-    Heightened (8th) The status bonus increases to +3.Note: The automation for the critical failure effect defaults to 10 rounds and must be altered manually.
+name: Sacred Flow
+description: 'You invoke a doctrinal protocol of perfect movement. The target gains
+  a +2 status bonus to Acrobatics checks and ignores difficult terrain for the duration.
+
+
+  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Impeccable Flow]'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -13,7 +14,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You attune yourself to an underlying cosmic order to the world. While you remain in tune with this power, you gain a +1 status bonus to Perception checks, saving throws, and skill checks. If you criti
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You attune yourself to an underlying cosmic order to the world. While
+      you remain in tune with this power, you gain a +1 status bonus to Perception
+      checks, saving throws, and skill checks. If you criti

@@ -1,6 +1,8 @@
 id: summoners_precaution_neural
-name: Summoner's Precaution
-description: You create a buffer in the link between yourself and your eidolon in order to prevent you from falling alongside your bonded ally. You gain the @UUID[Compendium.pf2e.actionspf2e.Item.Sever Conduit] reaction; after using it, the spell ends.
+name: Eidolon Safeguard
+description: You psychically shield your eidolon from catastrophe. For the duration,
+  when your eidolon would be reduced to 0 HP, you can use a reaction to instead have
+  it reduced to 1 HP. This can only occur once, after which the spell ends.
 tradition: neural
 level: 2
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a buffer in the link between yourself and your eidolon in order to prevent you from falling alongside your bonded ally. You gain the @UUID[Compendium.pf2e.actionspf2e.Item.Sever Conduit] re
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a buffer in the link between yourself and your eidolon
+      in order to prevent you from falling alongside your bonded ally. You gain the
+      @UUID[Compendium.pf2e.actionspf2e.Item.Sever Conduit] re

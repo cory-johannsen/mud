@@ -1,6 +1,8 @@
 id: mist_technical
-name: Mist
-description: You call forth a cloud of mist. All creatures within the mist become @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the mist become concealed to creatures within it. You can Dismiss the cloud.
+name: Fog Emitter
+description: You deploy a fog-generating device that fills the area. The mist makes
+  all creatures within it @UUID[Compendium.pf2e.conditionitems.Item.Concealed]. A
+  strong wind disperses the mist.
 tradition: technical
 level: 2
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You call forth a cloud of mist. All creatures within the mist become @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside the mist become concealed to creatures within it. Y
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You call forth a cloud of mist. All creatures within the mist become
+      @UUID[Compendium.pf2e.conditionitems.Item.Concealed], and all creatures outside
+      the mist become concealed to creatures within it. Y

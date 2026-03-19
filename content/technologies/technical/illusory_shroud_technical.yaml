@@ -1,8 +1,9 @@
 id: illusory_shroud_technical
-name: Illusory Shroud
-description: |-
-    You shroud the target in subtle illusions that make it difficult to detect. The target gains a +1 status bonus to Stealth checks to @UUID[Compendium.pf2e.actionspf2e.Item.Hide] or @UUID[Compendium.pf2e.actionspf2e.Item.Sneak]. For the duration, the target can become @UUID[Compendium.pf2e.conditionitems.Item.Hidden] to a creature even if they don't have cover and aren't otherwise @UUID[Compendium.pf2e.conditionitems.Item.Concealed] from that creature. Even if the target isn't concealed or doesn't have cover or greater cover at the end of a Sneak action, the target isn't automatically observed.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Illusory Shroud]
+name: Displacement Field
+description: You wrap the target in a holographic displacement field that makes it
+  appear slightly offset from its true position. The target gains a +1 status bonus
+  to AC and can attempt to Hide even without cover or concealment, using your spell
+  DC as its Stealth DC.
 tradition: technical
 level: 2
 usage_type: prepared
@@ -12,7 +13,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You shroud the target in subtle illusions that make it difficult to detect. The target gains a +1 status bonus to Stealth checks to @UUID[Compendium.pf2e.actionspf2e.Item.Hide] or @UUID[Compendium.pf2
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You shroud the target in subtle illusions that make it difficult
+      to detect. The target gains a +1 status bonus to Stealth checks to @UUID[Compendium.pf2e.actionspf2e.Item.Hide]
+      or @UUID[Compendium.pf2

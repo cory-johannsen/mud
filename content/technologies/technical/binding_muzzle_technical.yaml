@@ -1,14 +1,18 @@
 id: binding_muzzle_technical
-name: Binding Muzzle
-description: |-
-    A shimmering muzzle of pure magical force clamps the target's mouth shut. The target can attempt a Fortitude save to resist the muzzle. For targets with more than one mouth, the caster must target a single mouth.
+name: Jaw Clamp
+description: 'A precision-engineered force clamp locks the target''s mouth shut. The
+  target can attempt a Fortitude save to resist.
 
-    Critical Success The target is unaffected.
-    Success For 1 round, the target can't use jaws Strikes, Breath Weapons, or any other attack that originates from the mouth, nor can they imbibe anything, including potions, mutagens, and elixirs.
-    Failure As success, but the effect lasts 1 minute, and they must succeed at a @Check[flat|dc:11] to Cast a Spell with verbal components.
-    Critical Failure As success, but the effect lasts 1 minute and the target can't speak.
 
-    Heightened (5th) You can target up to 5 creatures.
+  Critical Success The target is unaffected.
+
+  Success The target takes a -1 status penalty to attack rolls with its jaws or fangs
+  until the start of your next turn.
+
+  Failure The target can''t make Strikes with its jaws or fangs for 1 round.
+
+  Critical Failure The target can''t make Strikes with its jaws or fangs for 1 minute
+  and can''t speak or use verbal components.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -20,7 +24,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: A shimmering muzzle of pure magical force clamps the target's mouth shut. The target can attempt a Fortitude save to resist the muzzle. For targets with more than one mouth, the caster must target a s
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A shimmering muzzle of pure magical force clamps the target's mouth
+      shut. The target can attempt a Fortitude save to resist the muzzle. For targets
+      with more than one mouth, the caster must target a s

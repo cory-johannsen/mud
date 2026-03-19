@@ -1,11 +1,13 @@
 id: resist_energy_fanatic_doctrine
-name: Resist Energy
-description: |-
-    A shield of elemental energy protects a creature against one type of energy damage. Choose acid, cold, electricity, fire, or sonic damage. The target and its gear gain resistance 5 against the damage type you chose.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Resist Energy]
+name: Sacred Resistance
+description: 'You invoke doctrinal protection against a type of energy. Choose acid,
+  cold, electricity, fire, or sonic. The target gains resistance 5 to that energy
+  type for the duration.
 
-    Heightened (4th) The resistance increases to 10, and you can target up to two creatures.
-    Heightened (7th) The resistance increases to 15, and you can target up to five creatures.
+
+  Heightened (4th) The resistance increases to 10.
+
+  Heightened (7th) The resistance increases to 15.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -15,7 +17,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: A shield of elemental energy protects a creature against one type of energy damage. Choose acid, cold, electricity, fire, or sonic damage. The target and its gear gain resistance 5 against the damage
+  on_apply:
+  - type: utility
+    dc: 0
+    description: A shield of elemental energy protects a creature against one type
+      of energy damage. Choose acid, cold, electricity, fire, or sonic damage. The
+      target and its gear gain resistance 5 against the damage

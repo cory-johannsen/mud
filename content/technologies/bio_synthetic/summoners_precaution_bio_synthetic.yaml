@@ -1,6 +1,8 @@
 id: summoners_precaution_bio_synthetic
-name: Summoner's Precaution
-description: You create a buffer in the link between yourself and your eidolon in order to prevent you from falling alongside your bonded ally. You gain the @UUID[Compendium.pf2e.actionspf2e.Item.Sever Conduit] reaction; after using it, the spell ends.
+name: Eidolon Failsafe
+description: You establish a bio-synthetic failsafe for your eidolon. For the duration,
+  when your eidolon would be reduced to 0 HP, you can use a reaction to instead have
+  it reduced to 1 HP. This can only occur once, after which the spell ends.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a buffer in the link between yourself and your eidolon in order to prevent you from falling alongside your bonded ally. You gain the @UUID[Compendium.pf2e.actionspf2e.Item.Sever Conduit] re
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a buffer in the link between yourself and your eidolon
+      in order to prevent you from falling alongside your bonded ally. You gain the
+      @UUID[Compendium.pf2e.actionspf2e.Item.Sever Conduit] re

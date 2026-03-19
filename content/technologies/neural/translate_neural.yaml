@@ -1,10 +1,7 @@
 id: translate_neural
-name: Translate
-description: |-
-    The target can understand the meaning of a single language it is hearing or reading when you cast the spell. This doesn't let it understand codes, language couched in metaphor, and the like (subject to GM discretion). If the target can hear multiple languages and knows that, it can choose which language to understand; otherwise, choose one of the languages randomly.
-
-    Heightened (3rd) The target can also speak the language.
-    Heightened (4th) You can target up to 10 creatures, and targets can also speak the language.
+name: Neural Translator
+description: You psychically enable the target to understand and speak one language
+  you know for the duration. The target can both comprehend and produce the language.
 tradition: neural
 level: 2
 usage_type: prepared
@@ -14,7 +11,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target can understand the meaning of a single language it is hearing or reading when you cast the spell. This doesn't let it understand codes, language couched in metaphor, and the like (subject t
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target can understand the meaning of a single language it is
+      hearing or reading when you cast the spell. This doesn't let it understand codes,
+      language couched in metaphor, and the like (subject t

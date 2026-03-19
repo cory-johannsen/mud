@@ -1,10 +1,11 @@
 id: inner_radiance_torrent_fanatic_doctrine
-name: Inner Radiance Torrent
-description: |-
-    You gradually manifest your spiritual energy into your cupped hands before firing off a storm of bolts and beams that deal 4d4 force damage to all creatures in a 60-foot line. Creatures in the area must attempt a basic Reflex save. On a critical failure, they're also blinded for 1 round. The number of actions you spend when Casting this Spell determines the area. If the line passes through an area of magical darkness or targets a creature affected by magical darkness, inner radiance torrent attempts to counteract the darkness.
-    2 (somatic, verbal) The line is 60 feet long.
-    3 (material, somatic, verbal) The line is @Template[line|distance:120]{120 feet} long.
-    Two Rounds The line is 120 feet long. If you spend 3 actions casting the spell, you can avoid finishing the spell and spend another 3 actions on your next turn to empower the spell even further. If you choose to do so, the damage dealt by this spell increases by 4d4, and you enter a shining state for 1 minute, causing you to glow with light and deal @Damage[1[force]] damage to creatures that end their turn adjacent to you.Heightened (+1) The initial damage, as well as the additional damage for the 2-round casting time, each increase by 2d4, and the damage to adjacent creatures dealt while in your shining state increases by 1.
+name: Devotional Cascade
+description: 'You channel a torrent of doctrinal energy in a @Template[line|distance:60].
+  Each creature in the line must attempt a basic Reflex save. You deal 2d4 fire damage
+  plus 2d4 spirit damage.
+
+
+  Heightened (+1) The fire damage and spirit damage each increase by 1d4.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -16,18 +17,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: "4"
-          damage_type: force
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d4
-          damage_type: force
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d4
-          damage_type: force
-          dc: 0
+  on_success:
+  - type: damage
+    dice: '4'
+    damage_type: force
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: force
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d4
+    damage_type: force
+    dc: 0

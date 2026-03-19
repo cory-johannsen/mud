@@ -1,12 +1,17 @@
 id: banishing_touch_technical
-name: Banishing Touch
-description: |-
-    Your touch projects a surge of magic that launches your target safely away. Make a melee spell attack at mythic proficiency against your target's AC. If you hit, you deal 1d6 bludgeoning damage, and you launch the target into the air and away from you; the target takes falling damage as normal. The number of actions you spend while Casting the Spell determines the damage dealt by your touch and how far the target is launched.
-    1 The target is launched 10 feet into the air and knocked back 10 feet.
-    2 Your touch deals 2d6 bludgeoning damage instead. The target is launched 20 feet into the air and pushed back 10 feet.
-    3 Your touch deals 2d6 bludgeoning damage instead. The target is launched 30 feet into the air and pushed back 20 feet.Heightened (4th) The initial damage increases by 1d6, and all distances increase by 10 feet for the 1-action version or 20 feet for the 2- and 3-action versions.
-    Heightened (6th) The initial damage increases by 2d6, and all distances increase by 20 feet for the 1-action version or 60 feet for the 2- and 3-action versions.
-    Heightened (8th) The initial damage increases by 3d6, and all distances increase by 30 feet for the 1-action version or 100 feet for the 2- and 3-action versions.
+name: Repulsor Gauntlet
+description: 'Your gauntlet projects a repulsion field that launches the target away.
+  Make a melee spell attack at mythic proficiency. The target must attempt a Fortitude
+  save.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target is pushed 10 feet.
+
+  Failure The target is pushed 20 feet.
+
+  Critical Failure The target is pushed 40 feet.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -16,13 +21,13 @@ targets: single
 duration: instant
 resolution: attack
 effects:
-    on_hit:
-        - type: damage
-          dice: 1d6
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_hit:
-        - type: damage
-          dice: 2d6
-          damage_type: bludgeoning
-          dc: 0
+  on_hit:
+  - type: damage
+    dice: 1d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+    dc: 0

@@ -1,9 +1,11 @@
 id: exploding_earth_technical
-name: Exploding Earth
-description: |-
-    You throw a hard-packed ball of earth and stone at a creature, and the projectile explodes upon impact. Attempt a spell attack against the target's AC. If you hit, you deal 4d6 bludgeoning damage plus 1d6 bludgeoning splash damage. On a critical hit, double the initial damage, but not the splash damage, and the target you hit must succeed at a Fortitude saving throw or fall @UUID[Compendium.pf2e.conditionitems.Item.Prone].
+name: Ground Charge
+description: 'You detonate subsurface charges that erupt from the ground. Each creature
+  in the area takes 3d6 bludgeoning damage with a basic Reflex save. The area becomes
+  difficult terrain.
 
-    Heightened (+2) The damage increases by 2d6, and the splash damage increases by 1d6.
+
+  Heightened (+1) The damage increases by 1d6.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -15,30 +17,30 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d3
-          damage_type: bludgeoning
-          dc: 0
-        - type: damage
-          dice: 1d3
-          damage_type: bludgeoning
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d6
-          damage_type: bludgeoning
-          dc: 0
-        - type: damage
-          dice: 1d6
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d6
-          damage_type: bludgeoning
-          dc: 0
-        - type: damage
-          dice: 2d6
-          damage_type: bludgeoning
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d3
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 1d3
+    damage_type: bludgeoning
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 1d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d6
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 2d6
+    damage_type: bludgeoning
+    dc: 0

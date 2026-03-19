@@ -1,12 +1,19 @@
 id: deafness_technical
-name: Deafness
-description: |-
-    The target loses hearing; it must attempt a Fortitude save. The target is then temporarily immune for 1 minute.
+name: Acoustic Jammer
+description: 'You deploy an acoustic jammer that destroys the target''s hearing. The
+  target must attempt a Fortitude save.
 
-    Critical Success The target is unaffected.
-    Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1 round.
-    Failure The target is Deafened for 10 minutes.
-    Critical Failure The target is Deafened permanently.
+
+  Critical Success The target is unaffected.
+
+  Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 1
+  round.
+
+  Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Deafened] for 10
+  minutes.
+
+  Critical Failure The target is @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
+  permanently.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -18,11 +25,13 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            The target loses hearing; it must attempt a Fortitude save. The target is then temporarily immune for 1 minute.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'The target loses hearing; it must attempt a Fortitude save. The
+      target is then temporarily immune for 1 minute.
 
-            Critical Success The target is unaffected.
-            Success The target is @UUID[Compendium.pf2e.
+
+      Critical Success The target is unaffected.
+
+      Success The target is @UUID[Compendium.pf2e.'

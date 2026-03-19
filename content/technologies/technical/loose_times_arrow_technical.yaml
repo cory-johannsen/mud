@@ -1,6 +1,9 @@
 id: loose_times_arrow_technical
-name: Loose Time's Arrow
-description: You pluck the time stream like a bow—pull one string back, release, and watch a creature fly. All affected targets are @UUID[Compendium.pf2e.conditionitems.Item.Quickened]. They can use the extra action only to Step or Stride.
+name: Temporal Shift
+description: You deploy a temporal displacement device that causes the target to phase
+  out of time. The target disappears and then reappears in the same space (or the
+  nearest unoccupied space) at the beginning of your next turn. It can't act while
+  displaced. When it returns, it's unharmed.
 tradition: technical
 level: 2
 usage_type: prepared
@@ -10,7 +13,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You pluck the time stream like a bow—pull one string back, release, and watch a creature fly. All affected targets are @UUID[Compendium.pf2e.conditionitems.Item.Quickened]. They can use the extra ac
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You pluck the time stream like a bow—pull one string back, release,
+      and watch a creature fly. All affected targets are @UUID[Compendium.pf2e.conditionitems.Item.Quickened].
+      They can use the extra ac

@@ -1,10 +1,12 @@
 id: silence_neural
-name: Silence
-description: |-
-    The target makes no sound, preventing creatures from noticing it using hearing alone. The target can't use sonic attacks, nor can it use actions with the auditory trait. This prevents it from casting spells due to the magical words involved in casting, with the exception of subtle spells.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Silence]
+name: Dead Channel
+description: 'You create a psychic dead zone where no sound exists. The target becomes
+  @UUID[Compendium.pf2e.conditionitems.Item.Deafened] and can''t produce sound for
+  the duration. This prevents verbal spellcasting within the silence.
 
-    Heightened (4th) The spell creates an aura in a 10-foot emanation around the touched creature, silencing all sound in or passing through it. While within the aura, creatures are subject to the same effects as the target. Depending upon the position of the effect, a creature might notice the lack of sound reaching it (blocking off the noise coming from a party, for example).
+
+  Heightened (4th) You can target a @Template[burst|distance:10] instead of a single
+  creature. All sound is suppressed in the area.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -14,7 +16,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target makes no sound, preventing creatures from noticing it using hearing alone. The target can't use sonic attacks, nor can it use actions with the auditory trait. This prevents it from casting
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target makes no sound, preventing creatures from noticing it
+      using hearing alone. The target can't use sonic attacks, nor can it use actions
+      with the auditory trait. This prevents it from casting

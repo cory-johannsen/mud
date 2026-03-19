@@ -1,11 +1,11 @@
 id: blazing_blade_fanatic_doctrine
-name: Blazing Blade
-description: |-
-    A scimitar-shaped beam of fiery light springs from your free hand. While the spell lasts, you can use a single action, which has the attack and concentrate traits, to burn your foes with the blazing blade. When you do, make a spell attack roll. On a success, the blazing blade deals 1d6 fire damage plus 1d6 spirit damage plus your spellcasting ability modifier. On a critical success, it deals double the usual damage.
+name: Purifying Edge
+description: 'You anoint the target weapon with sacred fire. The weapon deals an additional
+  1d6 fire damage on a successful Strike. On a critical hit, the target also takes
+  @Damage[1d10[persistent,fire]] damage.
 
-    Heightened (4th) The blade's fire damage increases to 2d6. On a critical success, the target takes @Damage[(ternary(gte(@item.level,8),3,ternary(gte(@item.level,6),2,1)))d6[persistent,spirit]] damage.
-    Heightened (6th) The blade's fire damage increases to 3d6. On a critical success, the target takes 2d6 persistent spirit damage.
-    Heightened (8th) The blade's fire damage increases to 4d6. On a critical success, the target takes 3d6 persistent spirit damage.
+
+  Heightened (+2) The fire damage increases by 1d6.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -15,21 +15,21 @@ targets: single
 duration: minutes:1
 resolution: attack
 effects:
-    on_hit:
-        - type: damage
-          dice: 1d6
-          damage_type: fire
-          dc: 0
-        - type: damage
-          dice: 1d6
-          damage_type: spirit
-          dc: 0
-    on_crit_hit:
-        - type: damage
-          dice: 2d6
-          damage_type: fire
-          dc: 0
-        - type: damage
-          dice: 2d6
-          damage_type: spirit
-          dc: 0
+  on_hit:
+  - type: damage
+    dice: 1d6
+    damage_type: fire
+    dc: 0
+  - type: damage
+    dice: 1d6
+    damage_type: spirit
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 2d6
+    damage_type: fire
+    dc: 0
+  - type: damage
+    dice: 2d6
+    damage_type: spirit
+    dc: 0

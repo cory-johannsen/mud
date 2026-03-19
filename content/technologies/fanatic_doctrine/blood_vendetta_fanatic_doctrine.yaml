@@ -1,17 +1,26 @@
 id: blood_vendetta_fanatic_doctrine
-name: Blood Vendetta
-description: |-
-    Requirements You can bleed.
-    Trigger A creature deals piercing, slashing, or persistent bleed damage to you.
+name: Martyr's Retribution
+description: 'Requirements You can bleed.
 
-    You curse the target, punishing it for having the audacity to spill your blood. The target takes 2d6 persistent bleed damage and must attempt a Will save.
+  Trigger A creature deals piercing, slashing, or persistent bleed damage to you.
 
-    Critical Success The target is unaffected.
-    Success The target takes half the persistent bleed damage.
-    Failure The target takes the full persistent bleed damage. Until the bleeding stops, the target has weakness 1 to piercing and slashing damage. @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Blood Vendetta (Failure)]
-    Critical Failure As failure, but the target takes double the persistent bleed damage.
 
-    Heightened (+2) The persistent bleed damage increases by 2d6.
+  You channel doctrinal retribution against the creature that shed your blood. It
+  must attempt a Will save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes 2d6 mental damage.
+
+  Failure The creature takes 4d6 mental damage and is @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
+  1.
+
+  Critical Failure The creature takes 4d6 mental damage and is @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
+  2.
+
+
+  Heightened (+2) The mental damage increases by 2d6 on a failure and critical failure.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -23,18 +32,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 2d3
-          damage_type: bleed
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 2d6
-          damage_type: bleed
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 4d6
-          damage_type: bleed
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 2d3
+    damage_type: bleed
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: bleed
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: bleed
+    dc: 0

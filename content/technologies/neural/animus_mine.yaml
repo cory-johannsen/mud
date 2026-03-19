@@ -1,10 +1,13 @@
 id: animus_mine
-name: Animus Mine
-description: |-
-    You implant a mental mine within your psyche that detonates against anyone attempting to magically manipulate your thoughts. You can Sustain the spell to suppress the effects of the mine for 1 round to allow someone to safely use a mental effect on you. You can Dismiss the spell. The first creature that uses a magical mental effect against you triggers the animus mine, causing the spell to end. The animus mine deals 4d8 mental damage to the triggering creature, which must attempt a Will save.Critical Success The creature is unaffected.
-    Success The creature takes half damage.
-    Failure The creature takes full damage and is Stunned 1.
-    Critical Failure The creature takes double damage and is stunned 1. You're unaffected by the triggering mental effect.Heightened (+1) The damage increases by 2d8.
+name: Psychic Tripwire
+description: 'You implant a neural mine within your psyche that detonates against
+  anyone attempting to hack your thoughts. You gain the following reaction for the
+  duration: Neural Detonation [reaction] Trigger A creature targets you with a mental
+  effect; Effect You deal 4d8 mental damage to the triggering creature with a basic
+  Will save against your spell DC. After the mine detonates, the spell ends.
+
+
+  Heightened (+2) The damage increases by 2d8.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -16,18 +19,18 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d4
-          damage_type: mental
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d8
-          damage_type: mental
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d8
-          damage_type: mental
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d4
+    damage_type: mental
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d8
+    damage_type: mental
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d8
+    damage_type: mental
+    dc: 0

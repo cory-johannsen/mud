@@ -1,13 +1,8 @@
 id: falsify_heat_technical
-name: Falsify Heat
-description: |-
-    You veil the signs of the fires of vitality, altering the target's apparent body temperature. This illusion applies to all senses, and a creature that touches the target can attempt to disbelieve the illusion. You can Dismiss the spell. Choose an illusory body temperature when you cast the spell.
-
-    Moderate The target's body temperature appears the same as the surrounding environment, giving the target a +2 circumstance bonus to Deception checks to Impersonate an undead, a cold-blooded creature, or an inanimate object (such as a corpse). The target is also @UUID[Compendium.pf2e.conditionitems.Item.Invisible] to heatvision and other abilities that sense heat similarly.
-    Warm The target appears to emit substantial body heat, gaining a +2 circumstance bonus to Deception checks to Impersonate a warm-blooded creature.
-
-
-    Heightened (4th) You can target up to 10 creatures, and you can choose a different body temperature for each of them.
+name: Thermal Masker
+description: You deploy a device that alters the target's thermal signature. The target
+  appears to have a different temperature to any sense that detects heat. You can
+  make the target appear hotter, colder, or the same temperature as its surroundings.
 tradition: technical
 level: 2
 usage_type: prepared
@@ -17,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You veil the signs of the fires of vitality, altering the target's apparent body temperature. This illusion applies to all senses, and a creature that touches the target can attempt to disbelieve the
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You veil the signs of the fires of vitality, altering the target's
+      apparent body temperature. This illusion applies to all senses, and a creature
+      that touches the target can attempt to disbelieve the

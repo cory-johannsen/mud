@@ -1,12 +1,11 @@
 id: blast_of_the_bellows_bio_synthetic
-name: Blast of the Bellows
-description: |-
-    You create a churning eddy of warm air that makes it difficult to fly within the area. This area is difficult terrain for flying creatures. Each time a flying creature enters the area or ends its turn there, it must attempt an Acrobatics check to @UUID[Compendium.pf2e.actionspf2e.Item.Maneuver in Flight].
-    Success The creature is unaffected.
-    Failure The creature descends 30 feet.
-    Critical Failure The creature descends 60 feet.
+name: Pressurized Expulsion
+description: 'You expel a blast of superheated bio-gas from your lungs. You deal 4d6
+  fire damage in a @Template[cone|distance:30]. Each creature in the area must attempt
+  a basic Reflex save.
 
-    Heightened (4th) The duration increases to 10 minutes.
+
+  Heightened (+1) The damage increases by 2d6.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -16,7 +15,9 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a churning eddy of warm air that makes it difficult to fly within the area. This area is difficult terrain for flying creatures. Each time a flying creature enters the area or ends its turn
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a churning eddy of warm air that makes it difficult to
+      fly within the area. This area is difficult terrain for flying creatures. Each
+      time a flying creature enters the area or ends its turn

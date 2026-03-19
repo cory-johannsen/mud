@@ -1,6 +1,8 @@
 id: speak_with_animals
-name: Speak with Animals
-description: You can ask questions of, receive answers from, and use the Diplomacy skill with animals. The spell doesn't make them more friendly than normal. Cunning animals are likely to be terse and evasive, while less intelligent ones often make inane comments.
+name: Fauna Interface
+description: You establish a bio-synthetic communication link with animals. You can
+  ask questions of and receive answers from animals for the duration. The animals'
+  responses are limited by their intelligence and perceptions.
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You can ask questions of, receive answers from, and use the Diplomacy skill with animals. The spell doesn't make them more friendly than normal. Cunning animals are likely to be terse and evasive, whi
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You can ask questions of, receive answers from, and use the Diplomacy
+      skill with animals. The spell doesn't make them more friendly than normal. Cunning
+      animals are likely to be terse and evasive, whi

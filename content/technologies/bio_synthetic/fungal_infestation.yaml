@@ -1,11 +1,18 @@
 id: fungal_infestation
-name: Fungal Infestation
-description: |-
-    Toxic spores swarm over creatures in the area, causing them to erupt in grotesque fungal growths. These noxious growths deal 2d6 persistent poison damage, and each creature must attempt a Fortitude save.Critical Success The creature is unaffected.
-    Success The target takes half the persistent poison damage.
-    Failure The target takes the full persistent poison damage. While it's taking this persistent poison damage, it has weakness 1 to fire and weakness 1 to slashing.
-    Critical Failure As failure, but double the persistent poison damage. While it's taking this persistent poison damage, it has weakness 2 to fire and weakness 2 to slashing.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fungal Infestation]Heightened (+2) The persistent damage increases by 2d6, and the weakness increases by 1, or by 2 on a critical failure.
+name: Spore Infection
+description: 'You launch a cluster of mutagenic spores at the target. The target must
+  attempt a Fortitude save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature takes 2d6 poison damage.
+
+  Failure The creature takes 4d6 poison damage and is @UUID[Compendium.pf2e.conditionitems.Item.Clumsy]
+  1 for 1 minute.
+
+  Critical Failure The creature takes 4d6 poison damage and is @UUID[Compendium.pf2e.conditionitems.Item.Clumsy]
+  2 for 1 minute. Fungal growths sprout from its body.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -17,18 +24,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 2d3
-          damage_type: poison
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 2d6
-          damage_type: poison
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 4d6
-          damage_type: poison
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 2d3
+    damage_type: poison
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: poison
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d6
+    damage_type: poison
+    dc: 0

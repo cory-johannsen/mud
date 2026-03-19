@@ -1,9 +1,11 @@
 id: coiling_dance_fanatic_doctrine
-name: Coiling Dance
-description: |-
-    You perform a dance that seeks to pass on the knowledge and wisdom of a naga. Your allies in the area are filled with sacred energy, making their spells and attacks holy. Creatures or effects that would be unholy don't gain this benefit
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Coiling Dance]
-    When you cast or Sustain this spell, you can choose an ally in the area that's @UUID[Compendium.pf2e.conditionitems.Item.Grabbed], @UUID[Compendium.pf2e.conditionitems.Item.Immobilized], or @UUID[Compendium.pf2e.conditionitems.Item.Restrained]. They can immediately use a reaction to @UUID[Compendium.pf2e.actionspf2e.Item.Escape]; they can use your Occultism or Religion modifier for the check instead of their unarmed attack, Acrobatics, or Athletics modifier if that would be better.
+name: Sacred Evasion
+description: 'You invoke a doctrinal movement protocol that guides the target in evasive
+  patterns. The target gains a +1 status bonus to AC and Reflex saves and a +5-foot
+  status bonus to Speed for the duration.
+
+
+  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Coiling Dance]'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -13,7 +15,9 @@ targets: zone
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You perform a dance that seeks to pass on the knowledge and wisdom of a naga. Your allies in the area are filled with sacred energy, making their spells and attacks holy. Creatures or effects that wou
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You perform a dance that seeks to pass on the knowledge and wisdom
+      of a naga. Your allies in the area are filled with sacred energy, making their
+      spells and attacks holy. Creatures or effects that wou

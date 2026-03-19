@@ -1,10 +1,10 @@
 id: see_the_unseen_neural
-name: See the Unseen
-description: |-
-    Your gaze pierces through illusions and finds @UUID[Compendium.pf2e.conditionitems.Item.Invisible] creatures and spirits. You can see invisible creatures as though they weren't invisible, although their features are blurred, making them @UUID[Compendium.pf2e.conditionitems.Item.Concealed] and difficult to identify. You can also see incorporeal creatures, like ghosts, phased through an object from within 10 feet of an object's surface as blurry shapes seen through those objects. Subtler clues also grant you a +2 status bonus to checks you make to disbelieve illusions.
-
-    Heightened (5th) This spell has a duration of 8 hours.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: See the Unseen]
+name: Spectral Scanner
+description: You gain psychic sight that reveals the invisible and ethereal. You can
+  see @UUID[Compendium.pf2e.conditionitems.Item.Invisible] creatures and objects as
+  translucent shapes, making them @UUID[Compendium.pf2e.conditionitems.Item.Concealed]
+  to you instead of @UUID[Compendium.pf2e.conditionitems.Item.Undetected]. You can
+  also see ethereal creatures and objects.
 tradition: neural
 level: 2
 usage_type: prepared
@@ -14,7 +14,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Your gaze pierces through illusions and finds @UUID[Compendium.pf2e.conditionitems.Item.Invisible] creatures and spirits. You can see invisible creatures as though they weren't invisible, although the
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Your gaze pierces through illusions and finds @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
+      creatures and spirits. You can see invisible creatures as though they weren't
+      invisible, although the

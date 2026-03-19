@@ -1,8 +1,19 @@
 id: radiant_field_technical
-name: Radiant Field
-description: |-
-    You create an area of bright light. Creatures with @UUID[Compendium.pf2e.bestiary-ability-glossary-srd.Item.Light Blindness] that are @UUID[Compendium.pf2e.conditionitems.Item.Blinded] by radiant field and remain in the area must attempt a Fortitude save at the start of their turns. On a failure, a creature remains blinded for 1 round; this is an incapacitation effect.
-    This spell also suppresses magical darkness of your radiant field spell's rank or lower.Heightened (4th) Creatures seen through the area are @UUID[Compendium.pf2e.conditionitems.Item.Concealed] to creatures outside the area. Creatures with light blindness can continue to be blinded by the field as long as the field is visible, even when outside of the field.
+name: Flashbang Zone
+description: 'You deploy flash emitters that fill the area with blinding light. Each
+  creature in the area must attempt a Fortitude save.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1
+  round.
+
+  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1
+  minute.
+
+  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
+  for 1 round, then @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] for 1 minute.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -14,7 +25,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create an area of bright light. Creatures with @UUID[Compendium.pf2e.bestiary-ability-glossary-srd.Item.Light Blindness] that are @UUID[Compendium.pf2e.conditionitems.Item.Blinded] by radiant fiel
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an area of bright light. Creatures with @UUID[Compendium.pf2e.bestiary-ability-glossary-srd.Item.Light
+      Blindness] that are @UUID[Compendium.pf2e.conditionitems.Item.Blinded] by radiant
+      fiel

@@ -1,9 +1,7 @@
 id: water_walk_technical
-name: Water Walk
-description: |-
-    The target can walk on the surface of water and other liquids without falling through. It can go underwater if it wishes, but in that case it must Swim normally. This spell doesn't grant the ability to breathe underwater.
-
-    Heightened (4th) The spell's range increases to 30 feet, the duration increases to 1 hour, and you can target up to 10 creatures.
+name: Surface Walker
+description: You deploy surface-tension amplifiers on the targets' feet. The targets
+  can walk on water as if it were solid ground for the duration.
 tradition: technical
 level: 2
 usage_type: prepared
@@ -13,7 +11,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target can walk on the surface of water and other liquids without falling through. It can go underwater if it wishes, but in that case it must Swim normally. This spell doesn't grant the ability t
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target can walk on the surface of water and other liquids without
+      falling through. It can go underwater if it wishes, but in that case it must
+      Swim normally. This spell doesn't grant the ability t

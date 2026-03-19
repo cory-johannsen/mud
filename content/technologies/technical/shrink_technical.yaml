@@ -1,10 +1,12 @@
 id: shrink_technical
-name: Shrink
-description: |-
-    You warp space to make a creature smaller. The target shrinks to become Tiny in size. Its equipment shrinks with it but returns to its original size if removed. The creature's reach changes to 0 feet. This spell has no effect on a Tiny creature.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Shrink]
+name: Miniaturizer
+description: 'You deploy a size-reduction field on the target. The target shrinks
+  to Tiny size. Its equipment shrinks with it but returns to normal size if removed.
+  The target gains a +2 status bonus to Stealth and a +4 bonus to Dexterity-based
+  AC, but its reach decreases and its damage with physical attacks is reduced.
 
-    Heightened (6th) The spell can target up to 10 creatures.
+
+  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Shrink]'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -14,7 +16,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You warp space to make a creature smaller. The target shrinks to become Tiny in size. Its equipment shrinks with it but returns to its original size if removed. The creature's reach changes to 0 feet.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You warp space to make a creature smaller. The target shrinks to
+      become Tiny in size. Its equipment shrinks with it but returns to its original
+      size if removed. The creature's reach changes to 0 feet.

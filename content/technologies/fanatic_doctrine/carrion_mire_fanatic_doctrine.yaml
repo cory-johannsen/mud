@@ -1,6 +1,18 @@
 id: carrion_mire_fanatic_doctrine
-name: Carrion Mire
-description: The ground opens into a seemingly endless mass of corpse limbs, grasping at all creatures within the area to drag them down. Creatures in the area when the spell is cast or beginning their turn in the area must succeed at a Reflex save or fall @UUID[Compendium.pf2e.conditionitems.Item.Prone]. When a creature in the spell's area would be healed by a vitality effect, the carrion mire attempts to counteract that effect, preventing that healing but not otherwise preventing the effect if it's counteracted.
+name: Profane Corruption
+description: 'You curse the area with doctrinal pollution that rots flesh. Creatures
+  in the area when you cast the spell and creatures that enter the area must attempt
+  Fortitude saves.
+
+
+  Critical Success The creature is unaffected.
+
+  Success The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 1.
+
+  Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened] 2.
+
+  Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
+  2 and @UUID[Compendium.pf2e.conditionitems.Item.Slowed] 1 for 1 round.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -12,7 +24,9 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The ground opens into a seemingly endless mass of corpse limbs, grasping at all creatures within the area to drag them down. Creatures in the area when the spell is cast or beginning their turn in the
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The ground opens into a seemingly endless mass of corpse limbs, grasping
+      at all creatures within the area to drag them down. Creatures in the area when
+      the spell is cast or beginning their turn in the

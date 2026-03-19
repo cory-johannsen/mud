@@ -1,12 +1,21 @@
 id: paranoia
-name: Paranoia
-description: |-
-    You cause the target to see all other creatures as dire threats. The target is stricken by intense paranoia toward all creatures around it and must attempt a Will save.
-    Critical Success The target is unaffected.
-    Success The target believes everyone it sees is a potential threat. It becomes @UUID[Compendium.pf2e.conditionitems.Item.Unfriendly] to all creatures to which it wasn't already hostile, even those that were previously allies. It treats no one as an ally. The spell ends after 1 round.
-    Failure As success, but the effect lasts 1 minute.
-    Critical Failure As failure, except the target believes that everyone it sees is a mortal enemy. It uses its reactions and free actions against everyone, regardless of whether they were previously its allies, as determined by the GM. It otherwise acts as rationally as it normally does and likely prefers to attack creatures that are actively attacking or hindering it over those leaving it alone.
-    Heightened (6th) You can target up to 5 creatures.
+name: Paranoia Protocol
+description: 'You flood the target''s mind with psychic signals that make everyone
+  appear hostile. The target must attempt a Will save.
+
+
+  Critical Success The target is unaffected.
+
+  Success The target believes one creature of your choice is a disguised enemy for
+  1 round.
+
+  Failure The target believes all other creatures are enemies for 1 minute. It doesn''t
+  necessarily attack, but it won''t accept aid, takes hostile actions against those
+  who provoke it, and so on. It can attempt a new Will save at the end of each of
+  its turns.
+
+  Critical Failure As failure, but the target actively attacks all creatures near
+  it to the best of its ability.'
 tradition: neural
 level: 2
 usage_type: prepared
@@ -18,9 +27,11 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You cause the target to see all other creatures as dire threats. The target is stricken by intense paranoia toward all creatures around it and must attempt a Will save.
-            Critical Success The target is
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You cause the target to see all other creatures as dire threats.
+      The target is stricken by intense paranoia toward all creatures around it and
+      must attempt a Will save.
+
+      Critical Success The target is'

@@ -1,6 +1,11 @@
 id: pyrefowl_rebuke_technical
-name: Pyrefowl Rebuke
-description: Trigger A creature within 10 feet of you Strikes and deals damage to you.Fiery wings briefly envelop your arms, and with a swift wingbeat, you flutter away from your attacker in a shower of searing sparks. You deal 1d6 fire damage to the triggering creature, with a basic Reflex save, and Fly up to 10 feet in a straight line directly away from it. If the creature critically fails its saving throw, your movement does not provoke reactions from it, and it's @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] until the end of its next turn.Heightened (+2) The damage increases by 1d6, and the maximum distance you can Fly increases by 5 feet.
+name: Thermal Countermeasure
+description: 'When a creature damages you with fire, you can deploy a retaliatory
+  thermal burst. The triggering creature takes 4d6 fire damage with a basic Reflex
+  save.
+
+
+  Heightened (+1) The damage increases by 2d6.'
 tradition: technical
 level: 2
 usage_type: prepared
@@ -12,18 +17,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 1d3
-          damage_type: fire
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 1d6
-          damage_type: fire
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 2d6
-          damage_type: fire
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 1d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 1d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 2d6
+    damage_type: fire
+    dc: 0

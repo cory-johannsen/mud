@@ -1,9 +1,13 @@
 id: summon_elemental_bio_synthetic
-name: Summon Elemental
-description: |-
-    You summon a creature that has the elemental trait and whose level is 1 or lower to fight for you.
+name: Summon Organism
+description: 'You grow a bio-synthetic elemental organism from raw materials. The
+  creature fights for you and acts on your turn. It uses the statistics of a 2nd-level
+  or lower elemental creature.
 
-    Heightened As listed in the summon trait.
+
+  Heightened (3rd) The maximum level of the summoned creature is 3.
+
+  Heightened (4th) The maximum level is 5.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared
@@ -13,10 +17,11 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You summon a creature that has the elemental trait and whose level is 1 or lower to fight for you.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You summon a creature that has the elemental trait and whose level
+      is 1 or lower to fight for you.
 
-            Heightened As listed in the summon trait.
+
+      Heightened As listed in the summon trait.'

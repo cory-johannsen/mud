@@ -1,12 +1,14 @@
 id: darkvision_fanatic_doctrine
-name: Darkvision
-description: |-
-    You grant yourself supernatural sight in areas of darkness. You gain Darkvision.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Darkvision]
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Darkvision (24 hours)]
+name: Sacred Night Sight
+description: 'You invoke a blessing of dark-sight upon the target. The target gains
+  darkvision for the duration.
 
-    Heightened (3rd) The spell's range is touch and it targets 1 willing creature.
-    Heightened (5th) The spell's range is touch and it targets 1 willing creature. The duration is until the next time you make your daily preparations.
+
+  Heightened (3rd) The spell''s range is touch and the target changes to 1 willing
+  creature.
+
+  Heightened (4th) The spell''s range changes to 30 feet, and you can target up to
+  2 willing creatures.'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared
@@ -16,10 +18,12 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You grant yourself supernatural sight in areas of darkness. You gain Darkvision.
-            @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Darkvision]
-            @UUID[Compendium.pf2e.spell-effects.Item.Spell Effec
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You grant yourself supernatural sight in areas of darkness. You
+      gain Darkvision.
+
+      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Darkvision]
+
+      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effec'

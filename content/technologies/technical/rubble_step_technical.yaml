@@ -1,9 +1,7 @@
 id: rubble_step_technical
-name: Rubble Step
-description: |-
-    The target leaves behind a trail of shifting rubble that typically consists of stones, but you could choose another earthen material, such as loose sand or soil. For 2 rounds, when the target willingly moves out of a space, and if the target is in contact with the ground, the ground in that space becomes difficult terrain. The difficult terrain remains for the spell's duration.
-
-    Heightened (4th) The target leaves difficult terrain behind for 1 minute instead of two rounds, and the spell's duration is 10 minutes.
+name: Debris Field
+description: You scatter mechanical debris across the ground. The area becomes difficult
+  terrain for the duration.
 tradition: technical
 level: 2
 usage_type: prepared
@@ -13,7 +11,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: The target leaves behind a trail of shifting rubble that typically consists of stones, but you could choose another earthen material, such as loose sand or soil. For 2 rounds, when the target willingl
+  on_apply:
+  - type: utility
+    dc: 0
+    description: The target leaves behind a trail of shifting rubble that typically
+      consists of stones, but you could choose another earthen material, such as loose
+      sand or soil. For 2 rounds, when the target willingl
