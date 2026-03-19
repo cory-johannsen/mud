@@ -1,0 +1,16 @@
+{
+  "_id": "mindlink001",
+  "name": "Mind Link",
+  "system": {
+    "description": { "value": "You form a mental link with a touched creature." },
+    "level": { "value": 2 },
+    "traits": { "value": ["mental"], "traditions": ["occult"] },
+    "time": { "value": "2" },
+    "range": { "value": "touch" },
+    "target": { "value": "1 creature" },
+    "area": { "value": "" },
+    "duration": { "value": "1 minute" },
+    "save": { "value": "" },
+    "damage": {}
+  }
+}

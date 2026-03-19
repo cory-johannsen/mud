@@ -1,0 +1,16 @@
+{
+  "_id": "fireball001",
+  "name": "Fireball",
+  "system": {
+    "description": { "value": "A burst of flame erupts at a point you designate." },
+    "level": { "value": 3 },
+    "traits": { "value": ["fire", "attack"], "traditions": ["arcane", "primal"] },
+    "time": { "value": "2" },
+    "range": { "value": "500 feet" },
+    "target": { "value": "" },
+    "area": { "value": "20-foot burst" },
+    "duration": { "value": "instantaneous" },
+    "save": { "value": "" },
+    "damage": { "0": { "value": "6d6", "type": { "value": "fire" } } }
+  }
+}
