@@ -38,7 +38,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: neural_shock
-        level: 1
-      - id: neural_shock
-        level: 1
+      - { id: carryall_technical, level: 1 }
+      - { id: pet_cache_technical, level: 1 }
+      - { id: ant_haul_technical, level: 1 }

@@ -39,7 +39,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: neural_shock
-        level: 1
-      - id: neural_shock
-        level: 1
+      - { id: summon_animal_technical, level: 1 }
+      - { id: flourishing_flora_technical, level: 1 }
+      - { id: weave_wood_technical, level: 1 }

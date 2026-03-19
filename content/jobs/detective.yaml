@@ -38,7 +38,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: neural_shock
-        level: 1
-      - id: neural_shock
-        level: 1
+      - { id: seashell_of_stolen_sound_technical, level: 1 }
+      - { id: mindlink_technical, level: 1 }
+      - { id: dj_vu_technical, level: 1 }

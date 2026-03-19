@@ -41,7 +41,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: neural_shock
-        level: 1
-      - id: neural_shock
-        level: 1
+      - { id: sure_strike_technical, level: 1 }
+      - { id: runic_body_technical, level: 1 }
+      - { id: echoing_weapon_technical, level: 1 }

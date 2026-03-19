@@ -40,9 +40,6 @@ technology_grants:
     slots_by_level:
       1: 1
     pool:
-      - id: neural_shock
-        level: 1
-      - id: neural_shock
-        level: 1
-      - id: neural_shock
-        level: 1
+      - { id: forge_technical, level: 1 }
+      - { id: conductive_weapon_technical, level: 1 }
+      - { id: animate_rope_technical, level: 1 }

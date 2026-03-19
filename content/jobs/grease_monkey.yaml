@@ -38,7 +38,6 @@ class_features:
 technology_grants:
   prepared:
     pool:
-      - id: neural_shock
-        level: 1
-      - id: neural_shock
-        level: 1
+      - { id: fold_metal, level: 1 }
+      - { id: temporary_tool, level: 1 }
+      - { id: endure_technical, level: 1 }
