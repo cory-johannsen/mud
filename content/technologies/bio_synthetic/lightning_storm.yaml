@@ -1,9 +1,13 @@
 id: lightning_storm
-name: Lightning Storm
-description: |-
-    You create a black, rumbling storm cloud and call down one lightning bolt within the spell's area. The bolt is a vertical line from the top of the storm cloud to the ground below, dealing 4d12 electricity damage to creatures in the line (basic Reflex save). On subsequent rounds, the first time you Sustain the Spell each round, you can call another lightning bolt within the area. If you Cast this Spell outdoors, you can create two non-overlapping clouds instead of one, though you can still call down only one bolt per turn.
+name: Ion Storm
+description: 'You deploy an atmospheric ionization device that calls down a lightning
+  bolt within the tech''s area. The bolt is a vertical line from the top of the storm
+  to the ground below, dealing 4d12 electricity damage to creatures in the line (basic
+  Reflex save). On subsequent rounds, the first time you Sustain the tech each round,
+  you call down another bolt.
 
-    Heightened (+2) The damage of each bolt increases by 1d12.
+
+  Heightened (+1) The damage of each bolt increases by 1d12.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared
@@ -15,18 +19,18 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 4d8
-          damage_type: electricity
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 4d12
-          damage_type: electricity
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 8d12
-          damage_type: electricity
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 4d8
+    damage_type: electricity
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 4d12
+    damage_type: electricity
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 8d12
+    damage_type: electricity
+    dc: 0

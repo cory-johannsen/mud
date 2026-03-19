@@ -1,9 +1,8 @@
 id: death_ward_fanatic_doctrine
-name: Death Ward
-description: |-
-    You shield a creature from the ravages of void energy.
-    It receives a +4 status bonus to saves against death and void effects, gains void resistance 10, and suppresses the effects of the @UUID[Compendium.pf2e.conditionitems.Item.Doomed] condition.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Death Ward]
+name: Sacred Shield
+description: You invoke doctrinal protection against entropy and death. The target
+  receives a +4 status bonus to saves against death and void effects, gains void resistance
+  10, and suppresses the effects of the Doomed condition.
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared
@@ -13,9 +12,10 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You shield a creature from the ravages of void energy.
-            It receives a +4 status bonus to saves against death and void effects, gains void resistance 10, and suppresses the effects of the @UUID[Compendi
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You shield a creature from the ravages of void energy.
+
+      It receives a +4 status bonus to saves against death and void effects, gains
+      void resistance 10, and suppresses the effects of the @UUID[Compendi'

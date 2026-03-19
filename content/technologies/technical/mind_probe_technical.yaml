@@ -1,10 +1,15 @@
 id: mind_probe_technical
-name: Mind Probe
-description: |-
-    You cast your thoughts through a creature's mind, sifting for information. You access the target's memories and knowledge unless it fends you off with a Will save.
-    Success The target is unaffected.
-    Failure Each round of the spell's duration, you can Sustain the spell to ask a different question and attempt to uncover the answer. For each question, the target can attempt a Deception check against your spell DC; if the target succeeds, you don't learn the answer, and on a critical success, the target gives you a false answer that you believe is truthful Once you've asked the target a given question, asking it again, even with a separate casting of mind probe, produces the same result.
-    Critical Failure As failure, and the target takes a –4 circumstance penalty to Deception checks against your questions.
+name: Neural Extraction
+description: 'You deploy a neural scanning device to extract information from a creature''s
+  mind. You access the target''s memories unless it resists with a Will save.
+
+  Success The target is unaffected.
+
+  Failure Each round you Sustain, you can ask a question and attempt another Will
+  save. On failure, you discover the answer.
+
+  Critical Failure As failure, and the target takes a -2 circumstance penalty to Will
+  saves against this tech.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -16,10 +21,13 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You cast your thoughts through a creature's mind, sifting for information. You access the target's memories and knowledge unless it fends you off with a Will save.
-            Success The target is unaffected.
-            Fa
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You cast your thoughts through a creature''s mind, sifting for information.
+      You access the target''s memories and knowledge unless it fends you off with
+      a Will save.
+
+      Success The target is unaffected.
+
+      Fa'

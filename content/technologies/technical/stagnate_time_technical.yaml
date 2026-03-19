@@ -1,9 +1,13 @@
 id: stagnate_time_technical
-name: Stagnate Time
-description: |-
-    You examine the time stream in a particular area, then proceed to stick a few metaphorical pins into it, thickening and slowing down the flow of time until it rumbles along like a river of molasses. Any creature that begins its turn in the area must attempt a Will save.Success The creature is unaffected.
-    Failure The creature is Slowed 1 this turn.
-    Critical Failure The creature is Slowed 2 this turn.
+name: Temporal Dampener
+description: 'You activate a temporal dampening field that slows the flow of time
+  in the area. Any creature that begins its turn in the area must attempt a Will save.
+
+  Success Unaffected.
+
+  Failure Slowed 1 for 1 round.
+
+  Critical Failure Slowed 2 for 1 round.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -15,7 +19,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You examine the time stream in a particular area, then proceed to stick a few metaphorical pins into it, thickening and slowing down the flow of time until it rumbles along like a river of molasses. A
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You examine the time stream in a particular area, then proceed to
+      stick a few metaphorical pins into it, thickening and slowing down the flow
+      of time until it rumbles along like a river of molasses. A

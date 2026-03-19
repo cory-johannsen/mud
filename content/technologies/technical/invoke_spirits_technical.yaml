@@ -1,10 +1,11 @@
 id: invoke_spirits_technical
-name: Invoke Spirits
-description: |-
-    Ragged apparitions of the dead rise to stalk the living. They deal 2d4 mental damage and 2d4 void damage to each living creature in the area, with a basic Will save. Additionally, creatures that critically fail the save are Frightened 2 and are @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] for 1 round.
-    On subsequent rounds, the first time you Sustain the Spell each round, you can move the area up to 30 feet within the range of the spell. Living creatures in the new area must attempt saves with the same effects as above, except that critically failing doesn't make them flee.
+name: EM Phantom Array
+description: 'Electromagnetic phantoms manifest to assault the living. They deal 2d4
+  mental damage and 2d4 void damage to each living creature in the area, with a basic
+  Will save. Creatures that critically fail are Frightened 2 and Fleeing for 1 round.
 
-    Heightened (+2) The mental damage and void damage each increase by 1d4.
+
+  Heightened (+2) The mental and void damage each increase by 1d4.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -16,30 +17,30 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: "2"
-          damage_type: mental
-          dc: 0
-        - type: damage
-          dice: "2"
-          damage_type: void
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 2d4
-          damage_type: mental
-          dc: 0
-        - type: damage
-          dice: 2d4
-          damage_type: void
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 4d4
-          damage_type: mental
-          dc: 0
-        - type: damage
-          dice: 4d4
-          damage_type: void
-          dc: 0
+  on_success:
+  - type: damage
+    dice: '2'
+    damage_type: mental
+    dc: 0
+  - type: damage
+    dice: '2'
+    damage_type: void
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 2d4
+    damage_type: mental
+    dc: 0
+  - type: damage
+    dice: 2d4
+    damage_type: void
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 4d4
+    damage_type: mental
+    dc: 0
+  - type: damage
+    dice: 4d4
+    damage_type: void
+    dc: 0

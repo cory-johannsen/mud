@@ -1,9 +1,11 @@
 id: summon_fiend
-name: Summon Fiend
-description: |-
-    You summon a creature that has the fiend trait and whose level is 5 or lower to fight for you. The GM might determine your deity restricts the specific types of fiends you can summon in certain cases. For instance, archdevils typically allow their followers to summon devils, but not other fiends.
+name: Summon Wraith
+description: 'You summon a creature that has the fiend trait and whose level is 5
+  or lower to fight for you. Your doctrine may restrict the specific types you can
+  summon.
 
-    Heightened As listed in the summon trait.
+
+  Heightened As listed in the summon trait.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared
@@ -13,7 +15,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You summon a creature that has the fiend trait and whose level is 5 or lower to fight for you. The GM might determine your deity restricts the specific types of fiends you can summon in certain cases.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You summon a creature that has the fiend trait and whose level is
+      5 or lower to fight for you. The GM might determine your deity restricts the
+      specific types of fiends you can summon in certain cases.

@@ -1,13 +1,12 @@
 id: slither_technical
-name: Slither
-description: |-
-    A mass of snakes made of shadow rise up to capture creatures in the area. Each creature in the area when you Cast the Spell takes @Damage[3d6[piercing]] damage and @Damage[1d6[persistent,poison]] damage from a biting snake, and it's @UUID[Compendium.pf2e.conditionitems.Item.Grabbed] or @UUID[Compendium.pf2e.conditionitems.Item.Restrained] depending on its Reflex save. A creature that ends its turn in the area must also attempt this save, even if it's already grabbed or restrained by the snakes. You can Dismiss the spell.
+name: Cable Serpents
+description: 'Mechanized serpentine cables rise up to capture creatures in the area.
+  Each creature takes 3d6 piercing damage and 1d6 persistent poison damage from electrified
+  contacts, and is Grabbed or Restrained (your choice). A creature can Escape against
+  your spell DC.
 
-    Success The creature is unaffected.
-    Failure The creature takes full damage and is grabbed by a snake. The snakes' @UUID[Compendium.pf2e.actionspf2e.Item.Escape] DC is equal to your spell DC. A creature can attack a snake to release the creature. A snake's AC is equal to your spell DC, and it's destroyed if it takes 12 or more damage at once. New snakes continually regrow as long as the spell lasts, so destroying snakes doesn't prevent slither from capturing more creatures.
-    Critical Failure As failure, but the creature takes double damage and is restrained by a snake.
 
-    Heightened (+2) The persistent poison damage increases by 1d6 and snake HP increases by 6.
+  Heightened (+2) The piercing and persistent damage each increase by 1d6.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -19,30 +18,30 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 3d3
-          damage_type: piercing
-          dc: 0
-        - type: damage
-          dice: 1d3
-          damage_type: poison
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 3d6
-          damage_type: piercing
-          dc: 0
-        - type: damage
-          dice: 1d6
-          damage_type: poison
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 6d6
-          damage_type: piercing
-          dc: 0
-        - type: damage
-          dice: 2d6
-          damage_type: poison
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 1d3
+    damage_type: poison
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 1d6
+    damage_type: poison
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: piercing
+    dc: 0
+  - type: damage
+    dice: 2d6
+    damage_type: poison
+    dc: 0

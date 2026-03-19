@@ -1,12 +1,12 @@
 id: blessing_of_defiance_bio_synthetic
-name: Blessing of Defiance
-description: |-
-    Channeling forth the power to persevere in the face of adversity, you grant the target the means to deny danger and avoid dire harm. Choose one saving throw: Fortitude, Reflex, or Will. The target gets a +4 status bonus to that saving throw for 1 round. The potency and number of targets of this blessing depend on how many actions you spend when Casting the Spell.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Blessing of Defiance]
+name: Adrenal Override
+description: 'You inject the target with a cocktail of bio-synthetic combat stimulants
+  that dramatically heighten one aspect of their resilience. Choose one saving throw:
+  Fortitude, Reflex, or Will. The target gets a +4 status bonus to that saving throw
+  for 1 round. The potency and number of targets increases at higher ranks.
 
-    1 (somatic) The spell targets you or one willing ally within range.
-    2 (verbal) The spell targets you or one willing ally within range. If you choose Fortitude, the target gains resistance 15 to poison. If you choose Reflex, the target gains a +15-foot status bonus to its Speeds. If you choose Will, the target gains resistance 15 to mental damage.
-    3 (verbal) The spell targets you and all willing allies within 30 feet.
+
+  Heightened (7th) You can target up to 6 creatures, and the bonus lasts for 1 minute.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared
@@ -16,7 +16,9 @@ targets: single
 duration: rounds:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: 'Channeling forth the power to persevere in the face of adversity, you grant the target the means to deny danger and avoid dire harm. Choose one saving throw: Fortitude, Reflex, or Will. The target get'
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Channeling forth the power to persevere in the face of adversity,
+      you grant the target the means to deny danger and avoid dire harm. Choose one
+      saving throw: Fortitude, Reflex, or Will. The target get'

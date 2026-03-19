@@ -1,8 +1,20 @@
 id: black_tentacles_neural
-name: Black Tentacles
-description: |-
-    Area 20-foot burst adjacent to a flat surfaceOily black tentacles rise up and attempt to capture creatures in the area. Make spell attack rolls against the Fortitude DC of each creature in the area. Any creature you succeed against is @UUID[Compendium.pf2e.conditionitems.Item.Grabbed] and takes 3d6 bludgeoning damage. Whenever a creature ends its turn in the area, the tentacles attempt to grab that creature if they haven't already, and they deal @Damage[1d6[bludgeoning]] damage to any creature already Grabbed.
-    The tentacles' Escape DC is equal to your spell DC. A creature can attack a tentacle in an attempt to release its grip. Its AC is equal to your spell DC, and it is destroyed if it takes 12 or more damage. Even if destroyed, additional tentacles continue to grow in the area until the duration ends. You can Dismiss the spell.
+name: Neural Tendrils
+description: 'Area 20-foot burst adjacent to a flat surface
+
+  Writhing tendrils of psychic energy rise up and attempt to ensnare creatures in
+  the area. Make spell attack rolls against the Fortitude DC of each creature in the
+  area. Any creature you succeed against is Grabbed and takes 3d6 bludgeoning damage.
+  On a critical success, it is also Restrained. A creature can attempt to Escape against
+  your spell DC.
+
+
+  Each round you Sustain the tech, each creature grabbed or restrained by the tendrils
+  takes 1d6 bludgeoning damage.
+
+
+  Heightened (+2) The initial damage increases by 1d6, and the ongoing damage increases
+  by 1d6.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -12,13 +24,13 @@ targets: zone
 duration: minutes:1
 resolution: attack
 effects:
-    on_hit:
-        - type: damage
-          dice: 3d6
-          damage_type: bludgeoning
-          dc: 0
-    on_crit_hit:
-        - type: damage
-          dice: 6d6
-          damage_type: bludgeoning
-          dc: 0
+  on_hit:
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  on_crit_hit:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0

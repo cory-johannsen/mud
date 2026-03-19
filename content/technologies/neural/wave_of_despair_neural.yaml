@@ -1,14 +1,18 @@
 id: wave_of_despair_neural
-name: Wave of Despair
-description: |-
-    You inflict despair on creatures in the area. The effects for each creature are determined by its Will save.
+name: Despair Wave
+description: 'You broadcast a neural frequency that induces crushing hopelessness
+  in creatures in the area. The effects for each creature are determined by its Will
+  save.
 
-    Critical Success The creature is unaffected.
-    Success For 1 round, the creature can't use reactions and must attempt another save at the start of its turn; on a failure, it is Slowed 1 for that turn as it sobs uncontrollably.
-    Failure As success, but the duration is 1 minute.
-    Critical Failure As failure, and the creature is automatically slowed 1 for 1 minute.
 
-    Heightened (7th) The area increases to a 60-foot cone.
+  Critical Success The creature is unaffected.
+
+  Success For 1 round, the creature can''t use reactions and must attempt another
+  save at the start of its turn; on a failure, it is Slowed 1 for that turn.
+
+  Failure The creature is Slowed 1 for 1 minute and can''t use reactions.
+
+  Critical Failure The creature is Slowed 2 for 1 minute and can''t use reactions.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -20,11 +24,13 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You inflict despair on creatures in the area. The effects for each creature are determined by its Will save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You inflict despair on creatures in the area. The effects for each
+      creature are determined by its Will save.
 
-            Critical Success The creature is unaffected.
-            Success For 1 round, the creature can't use r
+
+      Critical Success The creature is unaffected.
+
+      Success For 1 round, the creature can''t use r'

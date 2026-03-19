@@ -1,8 +1,14 @@
 id: imaginary_lockbox_neural
-name: Imaginary Lockbox
-description: |-
-    You turn a container and its contents into an imaginary form stored in your mind that only you can see and interact with. The container's physical properties—the material from which it's made, any locks, or other features—are irrelevant to the casting of this spell, but the container can't contain any creatures. The container has no Bulk, and you can visualize everything inside it.
-    You can retrieve an item from the lockbox as an activity that takes 3 actions and has the concentrate and manipulate traits. Putting items back isn't possible. You can Dismiss the spell. When the spell ends, the container returns to its normal state, either appearing in your hands if it can fit there or on the ground adjacent to you if not.
+name: Neural Cache
+description: 'You transfer a container and its contents into a psychic construct stored
+  in your mind that only you can perceive and interact with. The container''s physical
+  properties are irrelevant to this tech, but the container can''t contain any creatures.
+  When you wish to retrieve the container, you spend a single action with the concentrate
+  trait to return it to the physical world in an adjacent space.
+
+
+  If you die while storing a neural cache, the container reappears in the nearest
+  unoccupied space.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -12,7 +18,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You turn a container and its contents into an imaginary form stored in your mind that only you can see and interact with. The container's physical properties—the material from which it's made, any l
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You turn a container and its contents into an imaginary form stored
+      in your mind that only you can see and interact with. The container's physical
+      properties—the material from which it's made, any l

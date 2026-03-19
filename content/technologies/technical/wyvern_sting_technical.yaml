@@ -1,14 +1,16 @@
 id: wyvern_sting_technical
-name: Wyvern Sting
-description: |-
-    You duplicate the venomous sting of a wyvern. You deal 3d4 piercing damage to the touched creature and afflict it with wyvern venom. If the target takes piercing damage, they must attempt a Fortitude save.Critical Success The target is unaffected.
-    Success The target takes @Damage[5d6[poison]] damage.
-    Failure The target is afflicted with Wyvern Venom at stage 1.
-    Critical Failure The target is afflicted with wyvern venom at stage 2.Wyvern Venom (poison) Level 9
-    Maximum Duration 6 rounds
-    Stage 1 @Damage[5d6[poison]] damage (1 round)
-    Stage 2 @Damage[6d6[poison]] damage (1 round)
-    Stage 3 @Damage[8d6[poison]] damage (1 round)
+name: Venom Injector
+description: 'You deploy a pneumatic venom delivery system. You deal 3d4 piercing
+  damage to the touched creature and afflict it with synthetic wyvern-class toxin.
+  If the target takes piercing damage, they must attempt a Fortitude save.
+
+  Critical Success Unaffected.
+
+  Success 5d6 poison damage.
+
+  Failure 7d6 poison damage and Clumsy 2 for 1 round.
+
+  Critical Failure 10d6 poison damage and Clumsy 2 for 1 minute.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -20,18 +22,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: "3"
-          damage_type: piercing
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 3d4
-          damage_type: piercing
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 6d4
-          damage_type: piercing
-          dc: 0
+  on_success:
+  - type: damage
+    dice: '3'
+    damage_type: piercing
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d4
+    damage_type: piercing
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d4
+    damage_type: piercing
+    dc: 0

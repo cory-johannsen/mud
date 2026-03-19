@@ -1,12 +1,19 @@
 id: mariners_curse_neural
-name: Mariner's Curse
-description: |-
-    You afflict the target with the curse of the roiling, unforgiving sea. The target must attempt a Will save.
+name: System Corruption
+description: 'You afflict the target with a debilitating system corruption that causes
+  increasing nausea and disorientation. The target must attempt a Will save.
 
-    Critical Success The target is unaffected.
-    Success The target becomes Sickened 1. Reducing its sickened condition to 0 ends the curse.
-    Failure The target becomes sickened 1 and can't reduce its sickened condition below 1 while the curse remains. The curse can be lifted by 4th-rank @UUID[Compendium.pf2e.spells-srd.Item.Cleanse Affliction] or similar magic. Whenever the target is sickened and on the water at least a mile from shore, it is also Slowed 1.
-    Critical Failure As failure, but the target becomes Sickened 2.
+
+  Critical Success The target is unaffected.
+
+  Success The target becomes Sickened 1. Reducing its sickened condition to 0 ends
+  the curse.
+
+  Failure The target becomes sickened 1 and can''t reduce its sickened condition below
+  1 while the curse remains.
+
+  Critical Failure The target becomes sickened 2 and can''t reduce its sickened condition
+  below 1 while the curse remains.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -18,11 +25,13 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            You afflict the target with the curse of the roiling, unforgiving sea. The target must attempt a Will save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'You afflict the target with the curse of the roiling, unforgiving
+      sea. The target must attempt a Will save.
 
-            Critical Success The target is unaffected.
-            Success The target becomes Sickened 1. Reducing
+
+      Critical Success The target is unaffected.
+
+      Success The target becomes Sickened 1. Reducing'

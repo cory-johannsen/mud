@@ -1,6 +1,8 @@
 id: telekinetic_haul_neural
-name: Telekinetic Haul
-description: You move the target up to 20 feet, potentially suspending it in midair. When you Sustain the Spell, you can do so again, or you can shift your telekinetic focus to a different eligible target within range, moving it instead.
+name: Mass Telekinesis
+description: You move the target up to 20 feet, potentially suspending it in midair.
+  When you Sustain the tech, you can do so again, or you can shift your telekinetic
+  focus to a different eligible target within range, moving it instead.
 tradition: neural
 level: 5
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You move the target up to 20 feet, potentially suspending it in midair. When you Sustain the Spell, you can do so again, or you can shift your telekinetic focus to a different eligible target within r
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You move the target up to 20 feet, potentially suspending it in midair.
+      When you Sustain the Spell, you can do so again, or you can shift your telekinetic
+      focus to a different eligible target within r

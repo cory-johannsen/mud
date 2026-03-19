@@ -1,16 +1,14 @@
 id: geyser_bio_synthetic
-name: Geyser
-description: |-
-    Area 10-foot radius, 50-foot-tall cylinder
+name: Chemical Geyser
+description: 'Area 10-foot radius, 50-foot-tall cylinder
 
-    A powerful geyser blasts up from the ground, potentially pushing creatures on top of it into the air. The bottom of this spell's area must be on solid ground. Each creature in the area takes 3d6 bludgeoning damage and 4d6 fire damage, with a Reflex save. A creature pushed into the air by the geyser can't be pushed beyond the top of the geyser. After being pushed into the air, a creature falls unless it's flying or has some other means of staying aloft, taking falling damage (normally equal to half the distance it fell). After the geyser erupts, its area is filled with a cloud of steam for 1 round. All creatures in the steam are concealed, and all creatures outside the steam are concealed to creatures within it.
+  A powerful geyser of superheated chemical compound blasts up from the ground. The
+  bottom of this tech''s area must be on solid ground. Each creature in the area takes
+  3d6 bludgeoning damage and 4d6 fire damage, with a Reflex save. A creature that
+  fails is also pushed to the top of the geyser.
 
-    Critical Success The creature is unaffected.
-    Success The creature takes half damage and isn't pushed into the air.
-    Failure The creature takes full damage and is pushed 20 feet into the air. (@Damage[10[bludgeoning]|options:fall-damage] damage)
-    Critical Failure The creature takes double damage and is pushed 40 feet into the air. (@Damage[20[bludgeoning]|options:fall-damage] damage)
 
-    Heightened (+1) The damage increases by 1d6 bludgeoning and 1d6 fire.
+  Heightened (+2) The fire damage increases by 2d6.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared
@@ -22,30 +20,30 @@ save_type: hustle
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 3d3
-          damage_type: bludgeoning
-          dc: 0
-        - type: damage
-          dice: 4d3
-          damage_type: fire
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 3d6
-          damage_type: bludgeoning
-          dc: 0
-        - type: damage
-          dice: 4d6
-          damage_type: fire
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 6d6
-          damage_type: bludgeoning
-          dc: 0
-        - type: damage
-          dice: 8d6
-          damage_type: fire
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 3d3
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 4d3
+    damage_type: fire
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 3d6
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 4d6
+    damage_type: fire
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 6d6
+    damage_type: bludgeoning
+    dc: 0
+  - type: damage
+    dice: 8d6
+    damage_type: fire
+    dc: 0

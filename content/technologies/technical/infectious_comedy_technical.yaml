@@ -1,12 +1,20 @@
 id: infectious_comedy_technical
-name: Infectious Comedy
-description: |-
-    You tell a magical joke and infect a target with laughter that spreads to those nearby. The first time you Sustain the Spell each round, you can target another creature you can see that is within 30 feet of an affected target. The new target need not be able to see or hear the affected target, as the humor spreads magically. You can't target the same creature more than once with this spell.
+name: Viral Meme Weapon
+description: 'You broadcast a psycho-active data meme that infects a target with uncontrollable
+  laughter, spreading to those nearby. The first time you Sustain each round, you
+  can target another creature within 30 feet of an affected target.
 
-    Critical Success The target is unaffected.
-    Success The target begins giggling and can't use reactions.
-    Failure The target is Slowed 1 and can't use reactions.
-    Critical Failure The target falls @UUID[Compendium.pf2e.conditionitems.Item.Prone] and can't use actions or reactions for 1 round. It then suffers the failure effect.
+
+  Each target must attempt a Will save.
+
+
+  Critical Success Unaffected and immune for 1 hour.
+
+  Success Unaffected.
+
+  Failure Slowed 1 and can''t use reactions.
+
+  Critical Failure Falls Prone, Slowed 1, and can''t use reactions.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -18,7 +26,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You tell a magical joke and infect a target with laughter that spreads to those nearby. The first time you Sustain the Spell each round, you can target another creature you can see that is within 30 f
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You tell a magical joke and infect a target with laughter that spreads
+      to those nearby. The first time you Sustain the Spell each round, you can target
+      another creature you can see that is within 30 f

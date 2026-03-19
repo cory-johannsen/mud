@@ -1,14 +1,21 @@
 id: blister_bio_synthetic
-name: Blister
-description: |-
-    You point at a target in range, and its skin grows searing blisters filled with caustic fluid. The target must attempt a Fortitude save.
+name: Chemical Blisters
+description: 'You point at a target in range, triggering a chemical reaction beneath
+  their skin that produces searing blisters filled with caustic fluid. The target
+  must attempt a Fortitude save.
 
-    Critical Success The target is unaffected.
-    Success The target grows one blister. You can spend a single action, which has the concentrate trait, to pop a blister. The target and each creature in a @Template[cone|distance:15] originating from the target takes 7d6 acid damage (basic Fortitude save). You choose the direction of the cone, which can't include the target. When no blisters are left, the spell ends.
-    Failure As success, but the target grows two blisters.
-    Critical Failure As success, but the target grows four blisters.
 
-    Heightened (+1) The damage of a popped blister increases by 1d6.
+  Critical Success The target is unaffected.
+
+  Success The target grows one blister. You can spend a single action, which has the
+  concentrate trait, to pop a blister. When you do, the target takes 2d6 acid damage.
+
+  Failure The target grows two blisters.
+
+  Critical Failure The target grows three blisters.
+
+
+  Heightened (+2) The damage per blister increases by 1d6.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared
@@ -20,18 +27,18 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_success:
-        - type: damage
-          dice: 7d3
-          damage_type: acid
-          dc: 0
-    on_failure:
-        - type: damage
-          dice: 7d6
-          damage_type: acid
-          dc: 0
-    on_crit_failure:
-        - type: damage
-          dice: 14d6
-          damage_type: acid
-          dc: 0
+  on_success:
+  - type: damage
+    dice: 7d3
+    damage_type: acid
+    dc: 0
+  on_failure:
+  - type: damage
+    dice: 7d6
+    damage_type: acid
+    dc: 0
+  on_crit_failure:
+  - type: damage
+    dice: 14d6
+    damage_type: acid
+    dc: 0

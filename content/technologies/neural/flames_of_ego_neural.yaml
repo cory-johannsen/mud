@@ -1,12 +1,19 @@
 id: flames_of_ego_neural
-name: Flames of Ego
-description: |-
-    Elegant flames of incredible beauty coruscate across the target's body, creating overconfidence and carelessness. The target attempts a Will save.
+name: Narcissistic Feedback
+description: 'Elegant holographic flames coruscate across the target''s body, overwriting
+  their threat-assessment software with overconfidence. The target attempts a Will
+  save.
 
-    Critical Success The target is unaffected.
-    Success The target sheds bright light in a @Template[emanation|distance:20] (and dim light to the next 40 feet) and becomes @UUID[Compendium.pf2e.conditionitems.Item.Fascinated] with itself for 1 round. It must spend at least 1 action on its turn on a taunting display of arrogance or overconfidence. Using actions that include such a display—such as using @UUID[Compendium.pf2e.actionspf2e.Item.Perform] to show off—count toward this requirement.
-    Failure As success, but the duration is 1 minute and the target can't act hostile toward a creature until that creature acts hostile toward the target.
-    Critical Failure As failure, except the target must spend at least 2 actions on its turn on a taunting display of arrogance or overconfidence.
+
+  Critical Success The target is unaffected.
+
+  Success The target sheds bright light in a 20-foot emanation (and dim light to the
+  next 40 feet) and becomes Dazzled for 1 round.
+
+  Failure The target sheds light as on a success, is Dazzled for 1 minute, and takes
+  a -2 status penalty to AC for the duration.
+
+  Critical Failure As failure, and the target is also Fascinated by itself.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -18,11 +25,13 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Elegant flames of incredible beauty coruscate across the target's body, creating overconfidence and carelessness. The target attempts a Will save.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Elegant flames of incredible beauty coruscate across the target''s
+      body, creating overconfidence and carelessness. The target attempts a Will save.
 
-            Critical Success The target is unaffected.
-            Success T
+
+      Critical Success The target is unaffected.
+
+      Success T'

@@ -1,10 +1,14 @@
 id: flame_dancer_neural
-name: Flame Dancer
-description: |-
-    Fire encircles the target's hands and feet, and its eyes and hair catch ablaze. The target's unarmed Strikes deal an additional 2d6 fire damage. Critical hits with these Strikes also deal 2d4 persistent fire damage. Additionally, when the target attempts to @UUID[Compendium.pf2e.actionspf2e.Item.Demoralize] a foe, they can use Performance instead of Intimidation; when using Performance to Demoralize, the action loses the auditory trait but gains the visual trait, and the target doesn't take a penalty when attempting to Demoralize a creature that doesn't understand its language.
+name: Thermal Combat Rig
+description: 'Superheated plasma encircles the target''s hands and feet, and their
+  optics glow with thermal energy. The target''s unarmed Strikes deal an additional
+  2d6 fire damage. Critical hits with these Strikes also deal 2d4 persistent fire
+  damage. Additionally, when the target attempts to Demoralize, on a success the target
+  of Demoralize also takes 1d4 fire damage.
 
-    Heightened (7th) The fire damage increases to 3d6, and the persistent fire damage increases to 3d4. If the target gets a critical success on a Demoralize check using Performance, the target of the Demoralize check becomes @UUID[Compendium.pf2e.conditionitems.Item.Fleeing] from the target of flame dancer for 1 round.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Flame Dancer]
+
+  Heightened (+2) The fire damage on Strikes increases by 1d6 and the Demoralize fire
+  damage increases by 1d4.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -14,7 +18,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Fire encircles the target's hands and feet, and its eyes and hair catch ablaze. The target's unarmed Strikes deal an additional 2d6 fire damage. Critical hits with these Strikes also deal 2d4 persiste
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Fire encircles the target's hands and feet, and its eyes and hair
+      catch ablaze. The target's unarmed Strikes deal an additional 2d6 fire damage.
+      Critical hits with these Strikes also deal 2d4 persiste

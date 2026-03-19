@@ -1,6 +1,11 @@
 id: mantle_of_the_melting_heart_technical
-name: Mantle of the Melting Heart
-description: 'You bathe yourself in a mantle of liquid metal, gilding your skin and armor with an oily sheen. Upon Casting this Spell, pick two of the options below. As a single action, which has the concentrate trait, you can change one of your chosen abilities to a different option from the list.Copper Core You draw electricity toward you, then disperse it. You gain resistance 10 to electricity. All electricity effects within 30 feet of you must succeed at a counteract check against your spell DC or target you and only you.Golden Flesh Your body gains the chemical inertness of gold, barely reacting to substances that would otherwise greatly disturb your physiology. You become immune to poison and disease and gain a +2 circumstance bonus to your checks against any poison and disease effects currently affecting you.Reactive Touch Your touch reacts easily with other metals. Any metal that touches you or that you touch takes @Damage[2d6[acid]] damage that bypasses Hardness.Weighted Grasp Your arms become long cables, your fists heavy as anchors. You gain a cabled fist unarmed attack with the disarm, finesse, reach, and trip traits and that''s in the flail group. Your cabled fist deals 1d4 bludgeoning damage plus an additional 1d6 poison damage and Grab.@UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Mantle of the Melting Heart]'
+name: Alloy Hardsuit
+description: 'You activate a liquid-metal hardsuit, gilding your body with an adaptive
+  alloy sheen. Upon activating this tech, pick two options. As a single action with
+  the concentrate trait, you can swap one ability.
+
+
+  The specific ability options remain as listed in the base tech.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -10,7 +15,9 @@ targets: single
 duration: minutes:1
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You bathe yourself in a mantle of liquid metal, gilding your skin and armor with an oily sheen. Upon Casting this Spell, pick two of the options below. As a single action, which has the concentrate tr
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You bathe yourself in a mantle of liquid metal, gilding your skin
+      and armor with an oily sheen. Upon Casting this Spell, pick two of the options
+      below. As a single action, which has the concentrate tr

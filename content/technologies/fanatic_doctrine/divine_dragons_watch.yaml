@@ -1,9 +1,12 @@
 id: divine_dragons_watch
-name: Divine Dragon's Watch
-description: |-
-    You summon an invisible divine draconic spirit to watch over your target. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Dragon's Protection] reaction; once you use the reaction, the spell ends.Dragon's Protection R (concentrate, sanctified, spirit)
-    @Embed[Compendium.pf2e.actionspf2e.Item.Zt9bo3FYLQihmpAz inline]Heightened (+1) The damage increases by 1d4.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effects: Divine Dragon's Watch]
+name: Guardian Protocol
+description: 'You invoke an invisible guardian construct bound by doctrine to watch
+  over your target. When the tech is complete, you gain the Dragon''s Protection reaction;
+  once you use the reaction, the tech ends.
+
+
+  Dragon''s Protection allows you to grant the target a +2 circumstance bonus to AC
+  against one attack, or to negate damage from one attack up to 20 Hit Points.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared
@@ -13,7 +16,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You summon an invisible divine draconic spirit to watch over your target. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Dragon's Protection] reaction; once you use th
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You summon an invisible divine draconic spirit to watch over your
+      target. When the spell is complete, you gain the @UUID[Compendium.pf2e.actionspf2e.Item.Dragon's
+      Protection] reaction; once you use th

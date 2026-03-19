@@ -1,6 +1,9 @@
 id: umbral_journey_technical
-name: Umbral Journey
-description: You move partially into the Netherworld, using its warped nature to speed your travels. Each hour, you cover roughly as much ground as you normally would in 3 days. The landmarks are vague and symbolic rather than concrete, leaving you within a mile of your intended destination when you Dismiss the spell or its duration ends.
+name: Shadow Transit
+description: You shift partially into a dimensional shadow-state, using compressed
+  spatial topology to speed your travels. Each hour, you cover roughly as much ground
+  as you normally would in 3 days. You arrive within a mile of your intended destination
+  when you Dismiss the tech or it ends.
 tradition: technical
 level: 5
 usage_type: prepared
@@ -10,7 +13,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You move partially into the Netherworld, using its warped nature to speed your travels. Each hour, you cover roughly as much ground as you normally would in 3 days. The landmarks are vague and symboli
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You move partially into the Netherworld, using its warped nature
+      to speed your travels. Each hour, you cover roughly as much ground as you normally
+      would in 3 days. The landmarks are vague and symboli

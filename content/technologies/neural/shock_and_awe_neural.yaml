@@ -1,10 +1,16 @@
 id: shock_and_awe_neural
-name: Shock and Awe
-description: |-
-    You create the illusion of cannons exploding, bullets and arrows flying, and magical ballistics firing, as an overwhelming torrent of information, both visual and auditory. Enemies in the area must attempt a Will save.Critical Success The enemy is unaffected.
-    Success The target is Frightened 1.
-    Failure The enemy is Frightened 2 and Stunned 1.
-    Critical Failure The enemy is Frightened 3 and Stunned 2.
+name: Sensory Overload
+description: 'You project a barrage of simulated explosions, gunfire, and weapon discharges
+  as an overwhelming torrent of sensory data. Enemies in the area must attempt a Will
+  save.
+
+  Critical Success The enemy is unaffected.
+
+  Success The target is Frightened 1.
+
+  Failure The target is Frightened 2.
+
+  Critical Failure The target is Frightened 3 and Fleeing for 1 round.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -16,7 +22,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create the illusion of cannons exploding, bullets and arrows flying, and magical ballistics firing, as an overwhelming torrent of information, both visual and auditory. Enemies in the area must at
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create the illusion of cannons exploding, bullets and arrows
+      flying, and magical ballistics firing, as an overwhelming torrent of information,
+      both visual and auditory. Enemies in the area must at

@@ -1,14 +1,18 @@
 id: subconscious_suggestion_technical
-name: Subconscious Suggestion
-description: |-
-    You implant a subconscious suggestion deep within the target's mind for them to follow when a trigger you specify occurs. You suggest a course of action to the target. Your directive must be phrased in such a way as to seem like a logical course of action to the target, and it can't be self-destructive or obviously against the target's self-interest. The target must attempt a Will save.
+name: Subliminal Implant
+description: 'You implant a subliminal directive in the target''s mind for them to
+  follow when a trigger you specify occurs. Your directive must seem like a logical
+  course of action and can''t be self-destructive. The target must attempt a Will
+  save.
 
-    Critical Success The target is unaffected and knows you tried to control it.
-    Success The target is unaffected and thinks you were talking to them normally, not casting a spell on them.
-    Failure The suggestion remains in the target's subconscious until the next time you prepare. If the trigger occurs before then, the target immediately follows your suggestion. The effect has a duration of 1 minute, or until the target has completed a finite suggestion or the suggestion becomes self-destructive or has other obvious negative effects.
-    Critical Failure As failure, but the duration is 1 hour.
 
-    Heightened (9th) You can target up to 10 creatures.
+  Critical Success Unaffected and aware of the attempt.
+
+  Success Unaffected.
+
+  Failure Follows the directive when triggered.
+
+  Critical Failure As failure, and unaware of the implant.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -20,7 +24,9 @@ save_type: cool
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You implant a subconscious suggestion deep within the target's mind for them to follow when a trigger you specify occurs. You suggest a course of action to the target. Your directive must be phrased i
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You implant a subconscious suggestion deep within the target's mind
+      for them to follow when a trigger you specify occurs. You suggest a course of
+      action to the target. Your directive must be phrased i

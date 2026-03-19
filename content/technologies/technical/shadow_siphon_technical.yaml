@@ -1,6 +1,10 @@
 id: shadow_siphon_technical
-name: Shadow Siphon
-description: Trigger A spell or magical effect deals damage.Exchanging material energy with that of the Shadow Plane, you transform the triggering spell into a partially illusory version of itself. Attempt to counteract the target spell. If the attempt is successful, any creatures that would be damaged by the spell instead take only half as much damage, but the spell otherwise works as normal. Treat shadow siphon's counteract rank as 2 higher for this attempt.
+name: Damage Absorber
+description: 'Trigger A spell or tech effect deals damage.
+
+  You activate a damage absorption field that partially converts the triggering effect''s
+  energy into harmless emissions. Attempt to counteract the target effect. If successful,
+  any creatures that would be damaged take only half damage.'
 tradition: technical
 level: 5
 usage_type: prepared
@@ -10,7 +14,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Trigger A spell or magical effect deals damage.Exchanging material energy with that of the Shadow Plane, you transform the triggering spell into a partially illusory version of itself. Attempt to coun
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Trigger A spell or magical effect deals damage.Exchanging material
+      energy with that of the Shadow Plane, you transform the triggering spell into
+      a partially illusory version of itself. Attempt to coun

@@ -1,9 +1,13 @@
 id: lashuntas_life_bubble_fanatic_doctrine
-name: Lashunta's Life Bubble
-description: |-
-    You create a replenishing protective bubble of fresh, temperate air around the target. The shell of air enables the target to breathe even underwater or in a vacuum, protects from severe cold and heat, and grants a +1 status bonus to the target's saves against inhaled dangers such as inhaled poisons and @UUID[Compendium.pf2e.spells-srd.Item.Toxic Cloud].
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Lashunta's Life Bubble]Heightened (6th) The bubble lasts until your next preparation.
-    Heightened (8th) The bubble lasts until your next preparation, protects against extreme cold and heat, and grants a +2 status bonus instead of +1.
+name: Sacred Atmosphere
+description: 'You create a protective bubble of sanctified air around the target.
+  The bubble enables the target to breathe even underwater or in a vacuum, protects
+  from severe cold and heat, and grants a +1 status bonus to saves against inhaled
+  dangers.
+
+
+  Heightened (7th) The status bonus increases to +2, and the bubble also grants resistance
+  5 to cold and fire.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared
@@ -13,7 +17,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create a replenishing protective bubble of fresh, temperate air around the target. The shell of air enables the target to breathe even underwater or in a vacuum, protects from severe cold and heat
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create a replenishing protective bubble of fresh, temperate air
+      around the target. The shell of air enables the target to breathe even underwater
+      or in a vacuum, protects from severe cold and heat

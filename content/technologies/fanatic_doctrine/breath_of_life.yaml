@@ -1,11 +1,15 @@
 id: breath_of_life
-name: Breath of Life
-description: |-
-    Trigger A living creature within range would die.
+name: Emergency Revival
+description: 'Trigger A living creature within range would die.
 
-    Your blessing revives a creature at the moment of its death. You prevent the target from dying and restore 5d8 Hit Points to the target. You can't use breath of life if the triggering effect was a death effect or an effect that leaves no remains, such as @UUID[Compendium.pf2e.spells-srd.Item.Disintegrate]
 
-    Heightened (+2) The healing increases by 1d8.
+  Your doctrinal blessing revives a creature at the moment of its death. You prevent
+  the target from dying and restore 5d8 Hit Points to the target. You can''t use emergency
+  revival if the triggering effect was a death effect or an effect that leaves no
+  remains.
+
+
+  Heightened (+2) The healing increases by 1d8.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared
@@ -15,8 +19,8 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: damage
-          dice: 5d8
-          damage_type: untyped
-          dc: 0
+  on_apply:
+  - type: damage
+    dice: 5d8
+    damage_type: untyped
+    dc: 0

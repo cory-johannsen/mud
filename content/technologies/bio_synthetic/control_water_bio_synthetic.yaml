@@ -1,6 +1,13 @@
 id: control_water_bio_synthetic
-name: Control Water
-description: Area 50 feet long by 50 feet wideBy imposing your will upon the water, you can raise or lower the level of water in the chosen area by 10 feet. Creatures that have the water trait and that are in the area when you Cast the Spell must attempt a Fortitude save, with the effects of the @UUID[Compendium.pf2e.spells-srd.Item.Slow] spell.
+name: Hydro Control
+description: 'Area 50 feet long by 50 feet wide
+
+  Using bio-synthetic osmotic manipulation, you raise or lower the level of water
+  in the chosen area by 10 feet. Creatures that have the water trait in the area must
+  attempt a Fortitude save.
+
+
+  Heightened (+2) You can raise or lower the water by an additional 10 feet.'
 tradition: bio_synthetic
 level: 5
 usage_type: prepared
@@ -12,7 +19,9 @@ save_type: toughness
 save_dc: 15
 resolution: save
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: Area 50 feet long by 50 feet wideBy imposing your will upon the water, you can raise or lower the level of water in the chosen area by 10 feet. Creatures that have the water trait and that are in the
+  on_apply:
+  - type: utility
+    dc: 0
+    description: Area 50 feet long by 50 feet wideBy imposing your will upon the water,
+      you can raise or lower the level of water in the chosen area by 10 feet. Creatures
+      that have the water trait and that are in the

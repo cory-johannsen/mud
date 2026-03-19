@@ -1,6 +1,10 @@
 id: dreaming_potential
-name: Dreaming Potential
-description: You draw the target into a lucid dream where it can explore the endless possibilities of its own potential within the everchanging backdrop of its dreamscape. If it sleeps the full 8 hours uninterrupted, when it wakes, it counts as having spent a day of downtime retraining, though it can't use dreaming potential for any retraining that would require either an instructor or specialized knowledge it can't access within the dream.
+name: Sleep Learning
+description: You connect the target to a neural learning matrix that operates during
+  sleep, allowing them to explore accelerated training scenarios in a virtual dreamscape.
+  If the target sleeps the full 8 hours uninterrupted, when it wakes, it counts as
+  having spent a day of downtime retraining, though it can't use sleep learning for
+  any retraining that would require a teacher or significant downtime resources.
 tradition: neural
 level: 5
 usage_type: prepared
@@ -10,7 +14,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You draw the target into a lucid dream where it can explore the endless possibilities of its own potential within the everchanging backdrop of its dreamscape. If it sleeps the full 8 hours uninterrupt
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You draw the target into a lucid dream where it can explore the endless
+      possibilities of its own potential within the everchanging backdrop of its dreamscape.
+      If it sleeps the full 8 hours uninterrupt

@@ -1,6 +1,8 @@
 id: kings_castle_technical
-name: King's Castle
-description: You and a willing creature swap places. You appear in the target's former space, and the target appears in your former space. You and your target must each be able to fit in the new spaces within range; otherwise, the spell fails.
+name: Transposition Matrix
+description: You and a willing creature swap positions via a short-range matter transporter.
+  You appear in the target's former space, and the target appears in yours. Both must
+  fit in the new spaces; otherwise, the tech fails.
 tradition: technical
 level: 5
 usage_type: prepared
@@ -10,7 +12,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You and a willing creature swap places. You appear in the target's former space, and the target appears in your former space. You and your target must each be able to fit in the new spaces within rang
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You and a willing creature swap places. You appear in the target's
+      former space, and the target appears in your former space. You and your target
+      must each be able to fit in the new spaces within rang

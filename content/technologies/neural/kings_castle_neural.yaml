@@ -1,6 +1,9 @@
 id: kings_castle_neural
-name: King's Castle
-description: You and a willing creature swap places. You appear in the target's former space, and the target appears in your former space. You and your target must each be able to fit in the new spaces within range; otherwise, the spell fails.
+name: Position Swap
+description: You and a willing creature swap positions via a momentary dimensional
+  shortcut. You appear in the target's former space, and the target appears in your
+  former space. You and your target must each be able to fit in the new spaces within
+  range; otherwise, the tech fails.
 tradition: neural
 level: 5
 usage_type: prepared
@@ -10,7 +13,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You and a willing creature swap places. You appear in the target's former space, and the target appears in your former space. You and your target must each be able to fit in the new spaces within rang
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You and a willing creature swap places. You appear in the target's
+      former space, and the target appears in your former space. You and your target
+      must each be able to fit in the new spaces within rang

@@ -1,6 +1,7 @@
 id: sending_neural
-name: Sending
-description: You send the creature a mental message of 25 words or fewer, and it can respond immediately with its own message of 25 words or fewer.
+name: Direct Message
+description: You send the creature a neural message of 25 words or fewer, and it can
+  respond immediately with its own message of 25 words or fewer.
 tradition: neural
 level: 5
 usage_type: prepared
@@ -10,7 +11,8 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You send the creature a mental message of 25 words or fewer, and it can respond immediately with its own message of 25 words or fewer.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You send the creature a mental message of 25 words or fewer, and
+      it can respond immediately with its own message of 25 words or fewer.

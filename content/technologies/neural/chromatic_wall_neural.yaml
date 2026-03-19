@@ -1,21 +1,36 @@
 id: chromatic_wall_neural
-name: Chromatic Wall
-description: |-
-    You create an opaque wall of light in a single vibrant color. The wall is straight and vertical, stretching 60 feet long and 30 feet high. If the wall would pass through a creature, the spell is lost. The wall sheds bright light for 20 feet on each side, and dim light for the next 20 feet. You can ignore the wall's effects.
-    Roll [[/r 1d4]] to determine the color of the wall. Each color has a particular effect on items, effects, or creatures that attempt to pass through. Chromatic wall can't be counteracted normally; rather, each color is automatically counteracted when targeted by a specific spell, even if that spell's rank is lower than that of chromatic wall.
+name: Spectrum Barrier
+description: 'You project a hardlight barrier in a single vibrant frequency. The wall
+  is straight and vertical, stretching 60 feet long and 30 feet high. If the wall
+  would pass through a creature, the tech fails. The wall sheds bright light for 20
+  feet on each side, and dim light for the next 20 feet. You can ignore the wall''s
+  effects.
 
-    Red The wall destroys ranged weapon ammunition (such as arrows and crossbow bolts) that would pass through, and it deals @Damage[20[fire]] damage to anyone passing through, with a @Check[reflex|against:spell|basic] save. @UUID[Compendium.pf2e.spells-srd.Item.Cone of Cold] can counteract a red chromatic wall.
-    Orange The wall destroys thrown weapons that would pass through, and it deals @Damage[25[acid]] damage to anyone passing through, with a @Check[reflex|against:spell|basic] save. @UUID[Compendium.pf2e.spells-srd.Item.Gust of Wind] can counteract an orange chromatic wall.
-    Yellow The wall stops acid, cold, electricity, fire, force, sonic, vitality, and void effects from passing through, and it deals @Damage[30[electricity]] damage to anyone passing through, with a @Check[reflex|against:spell|basic] save. @UUID[Compendium.pf2e.spells-srd.Item.Disintegrate] can counteract a yellow chromatic wall.
-    Green The wall stops toxins, gases, and breath weapons from passing through. It deals @Damage[10[poison]] damage to anyone passing through and makes them Enfeebled 1 for 1 minute. A @Check[fortitude|against:spell|basic] save reduces the damage and negates the Enfeebled condition on a success. @UUID[Compendium.pf2e.spells-srd.Item.Magic Passage] can counteract a green chromatic wall.
+  Roll [[/r 1d4]] to determine the frequency of the wall. Each frequency has a particular
+  effect on items, effects, or creatures that attempt to pass through. Spectrum barrier
+  can''t be counteracted normally; rather, each frequency is automatically counteracted
+  when targeted by a specific tech, even if that tech''s rank is lower.
 
 
-    Heightened (7th) The spell's duration increases to 1 hour. Roll [[/r 1d8]] to determine the wall's color; the results for 5-8 are below. A @Damage[30[fire]]{red}, @Damage[35[acid]]{orange}, @Damage[40[electricity]]{yellow}, or @Damage[20[poison]]{green} wall deals an extra 10 damage.
+  Red The wall destroys ranged weapon ammunition that would pass through, and it deals
+  20 fire damage to anyone passing through, with a basic Reflex save.
 
-    Blue The wall stops auditory, petrification, sonic and visual effects from passing through, and creatures passing through are subject to the effects of @UUID[Compendium.pf2e.spells-srd.Item.Petrify]. @UUID[Compendium.pf2e.spells-srd.Item.Force Barrage] can counteract a blue chromatic wall.
-    Indigo The wall stops divination and mental effects from passing through, and those passing through are subject to the effects of @UUID[Compendium.pf2e.spells-srd.Item.Warp Mind]. @UUID[Compendium.pf2e.spells-srd.Item.Holy Light] can counteract an indigo chromatic wall.
-    Violet The wall prevents spells from targeting the other side (area effects still cross as normal). Creatures passing through must succeed at a @Check[will|against:spell] save or they are Slowed 1 for 1 minute; on a critical failure, the creature is instead sent to another plane, with the effect of @UUID[Compendium.pf2e.spells-srd.Item.Interplanar Teleport]. @UUID[Compendium.pf2e.spells-srd.Item.Dispel Magic] can counteract a violet chromatic wall.
-    Reroll, and creatures that pass through the wall take a -2 circumstance penalty to their saves.
+  Orange The wall destroys thrown weapons that would pass through, and it deals 25
+  acid damage to anyone passing through, with a basic Reflex save.
+
+  Yellow The wall stops acid, cold, electricity, fire, force, sonic, vitality, and
+  void effects from passing through, and it deals 30 electricity damage to anyone
+  passing through, with a basic Reflex save.
+
+  Green The wall stops toxins, gases, and breath weapons from passing through. It
+  deals 10 poison damage to anyone passing through and makes them Enfeebled 1 for
+  1 minute. A basic Fortitude save reduces the damage and negates the Enfeebled condition
+  on a success.
+
+
+  Heightened (7th) The tech''s duration increases to 1 hour. Roll [[/r 1d8]] to determine
+  the wall''s frequency; results for 5-8 are additional options. Red, orange, yellow,
+  or green walls deal an extra 10 damage.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -25,7 +40,9 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: You create an opaque wall of light in a single vibrant color. The wall is straight and vertical, stretching 60 feet long and 30 feet high. If the wall would pass through a creature, the spell is lost.
+  on_apply:
+  - type: utility
+    dc: 0
+    description: You create an opaque wall of light in a single vibrant color. The
+      wall is straight and vertical, stretching 60 feet long and 30 feet high. If
+      the wall would pass through a creature, the spell is lost.

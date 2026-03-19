@@ -1,8 +1,13 @@
 id: shadow_blast_neural
-name: Shadow Blast
-description: |-
-    Area varies
-    Defense @Check[reflex|basic|options:area-effect] or @Check[will|basic|options:area-effect] (target's choice)You shape the shadow substance of the Netherworld into a blast. Choose @Damage[(@item.rank+1)d8[acid]|options:area-damage], @Damage[(@item.rank+1)d8[bludgeoning]|options:area-damage], @Damage[(@item.rank+1)d8[cold]|options:area-damage], @Damage[(@item.rank+1)d8[electricity]|options:area-damage], @Damage[(@item.rank+1)d8[fire]|options:area-damage], @Damage[(@item.rank+1)d8[force]|options:area-damage], @Damage[(@item.rank+1)d8[piercing]|options:area-damage], @Damage[(@item.rank+1)d8[slashing]|options:area-damage], @Damage[(@item.rank+1)d8[sonic]|options:area-damage], or @Damage[(@item.rank+1)d8[spirit]|options:area-damage] damage, and choose a @Template[cone|distance:30], a @Template[burst|distance:15] within 120 feet, or a @Template[line|distance:50]. The blast deals 6d8 damage of the type you chose to each creature in the area.Heightened (+1) The damage increases by 1d8.
+name: Dark Matter Blast
+description: 'Area varies | Defense basic Reflex or basic Will (target''s choice)
+
+  You weaponize shadow-state matter into a devastating blast. Choose acid, bludgeoning,
+  cold, electricity, fire, piercing, poison, or slashing damage. You deal damage of
+  the chosen type equal to (spell rank +1)d8 to each creature in the area.
+
+
+  Heightened (+1) The damage increases by 1d8.'
 tradition: neural
 level: 5
 usage_type: prepared
@@ -12,9 +17,11 @@ targets: single
 duration: instant
 resolution: none
 effects:
-    on_apply:
-        - type: utility
-          dc: 0
-          description: |-
-            Area varies
-            Defense @Check[reflex|basic|options:area-effect] or @Check[will|basic|options:area-effect] (target's choice)You shape the shadow substance of the Netherworld into a blast. Choose @Damage[(
+  on_apply:
+  - type: utility
+    dc: 0
+    description: 'Area varies
+
+      Defense @Check[reflex|basic|options:area-effect] or @Check[will|basic|options:area-effect]
+      (target''s choice)You shape the shadow substance of the Netherworld into a blast.
+      Choose @Damage[('
