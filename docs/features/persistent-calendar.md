@@ -4,4 +4,4 @@ An in-game calendar that advances with time, driving time-of-day and seasonal ev
 
 ## Requirements
 
-- [ ] Persistent calendar
+- [x] Persistent calendar
