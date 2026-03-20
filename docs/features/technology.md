@@ -20,7 +20,7 @@ Maps the PF2E magic system to Gunchete technology: traditions, prepared/spontane
       - [x] Cantrips -> Hardwired Technologies (unlimited-use minor Technologies)
         - [x] Fixed list per Job, no player adjustment
         - [x] Level-up hardwired tech grants applied via `LevelUpTechnologies` for each level gained in ascending order (REQ-LUT7); admin `grant xp` path uses first-option auto-assign (no interactive prompt available)
-      - [ ] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
+      - [x] Prepared Spells -> Preparation (loading ammunition, tuning an energy weapon, mixing a drug cocktail)
         - [x] Fixed list of Technologies per job level, increases with level (higher level Technology slots and higher Job level) — Phase 1: slot progression on archetypes, pool entries on jobs; Phase 2 will expand tech library
         - [x] Prepared tech slot expending — each prepared slot is one use; `use <tech>` expends the first matching non-expended slot; `rest` restores all slots; expended state persisted in DB
         - [x] Prepared tech effect resolution — activating a tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution; REQ-TER1–22)
