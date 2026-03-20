@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
+	yaml3 "gopkg.in/yaml.v3"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
@@ -143,7 +144,7 @@ func TestCoverConditionYAML(t *testing.T) {
 				t.Fatalf("reading %s: %v", path, err)
 			}
 			var def condition.ConditionDef
-			dec := yaml.NewDecoder(bytes.NewReader(data))
+			dec := yaml3.NewDecoder(bytes.NewReader(data))
 			dec.KnownFields(true)
 			if err := dec.Decode(&def); err != nil {
 				t.Fatalf("parsing %s: %v", path, err)
@@ -174,6 +175,33 @@ func TestNewConditions_LoadFromDirectory(t *testing.T) {
 		require.True(t, ok, "condition %q not found", id)
 		assert.NotEmpty(t, def.Name, "condition %q has empty name", id)
 		assert.NotEmpty(t, def.Description, "condition %q has empty description", id)
+	}
+}
+
+func TestConditionDef_AttackBonus_YAMLRoundTrip(t *testing.T) {
+	yml := `
+id: test_bonus
+name: Test Bonus
+description: grants attack bonus
+duration_type: rounds
+max_stacks: 0
+attack_bonus: 3
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
+`
+	var def condition.ConditionDef
+	dec := yaml3.NewDecoder(strings.NewReader(yml))
+	dec.KnownFields(true)
+	if err := dec.Decode(&def); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if def.AttackBonus != 3 {
+		t.Errorf("expected AttackBonus=3, got %d", def.AttackBonus)
 	}
 }
 

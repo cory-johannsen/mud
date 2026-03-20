@@ -75,7 +75,28 @@ func TestStunnedAPReduction_NoStunned_Zero(t *testing.T) {
 	assert.Equal(t, 0, condition.StunnedAPReduction(s))
 }
 
-func TestPropertyAttackBonus_AlwaysNonPositive(t *testing.T) {
+func TestAttackBonus_NilActiveSet_ReturnsZero(t *testing.T) {
+	result := condition.AttackBonus(nil)
+	if result != 0 {
+		t.Errorf("expected 0 for nil ActiveSet, got %d", result)
+	}
+}
+
+func TestAttackBonus_WithBonus_ReturnsPositive(t *testing.T) {
+	s := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "aided", Name: "Aided", DurationType: "rounds", MaxStacks: 0, AttackBonus: 2}
+	require.NoError(t, s.Apply("testuid", def, 1, 1))
+	assert.Equal(t, 2, condition.AttackBonus(s))
+}
+
+func TestAttackBonus_PenaltyAndBonus_Net(t *testing.T) {
+	s := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "feared", Name: "Feared", DurationType: "rounds", MaxStacks: 0, AttackPenalty: 1}
+	require.NoError(t, s.Apply("testuid", def, 1, 1))
+	assert.Equal(t, -1, condition.AttackBonus(s))
+}
+
+func TestPropertyAttackBonus_PenaltyOnlyIsNonPositive(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		penalty := rapid.IntRange(0, 10).Draw(t, "penalty")
 		stacks := rapid.IntRange(1, 4).Draw(t, "stacks")
@@ -83,7 +104,7 @@ func TestPropertyAttackBonus_AlwaysNonPositive(t *testing.T) {
 		def := &condition.ConditionDef{ID: "test", Name: "Test", DurationType: "permanent", MaxStacks: 4, AttackPenalty: penalty}
 		require.NoError(t, s.Apply("testuid", def, stacks, -1))
 		bonus := condition.AttackBonus(s)
-		assert.LessOrEqual(t, bonus, 0, "AttackBonus must always be <= 0")
+		assert.LessOrEqual(t, bonus, 0, "AttackBonus with only penalties must be <= 0")
 	})
 }
 

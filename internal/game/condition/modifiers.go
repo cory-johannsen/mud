@@ -1,15 +1,23 @@
 package condition
 
 // AttackBonus returns the net attack roll modifier from all active conditions.
-// For stackable conditions (e.g. frightened), the penalty is multiplied by
-// the current stack count (frightened 2 = -2 to attack).
+// Positive AttackBonus on a condition adds to the total (buff); positive AttackPenalty
+// subtracts from the total (debuff). For stackable conditions, values are multiplied
+// by the current stack count.
 //
-// Postcondition: Returns <= 0.
+// Precondition: s may be nil.
+// Postcondition: Returns the net modifier; may be positive when attack bonuses are active.
 func AttackBonus(s *ActiveSet) int {
+	if s == nil {
+		return 0
+	}
 	total := 0
 	for _, ac := range s.conditions {
 		if ac.Def.AttackPenalty > 0 {
 			total -= ac.Def.AttackPenalty * ac.Stacks
+		}
+		if ac.Def.AttackBonus > 0 {
+			total += ac.Def.AttackBonus * ac.Stacks
 		}
 	}
 	return total

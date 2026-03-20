@@ -19,6 +19,7 @@ type ConditionDef struct {
 	DurationType    string   `yaml:"duration_type"` // "rounds" | "until_save" | "permanent"
 	MaxStacks       int      `yaml:"max_stacks"`    // 0 = unstackable
 	AttackPenalty   int      `yaml:"attack_penalty"`
+	AttackBonus     int      `yaml:"attack_bonus"`   // positive = bonus to attack rolls
 	ACPenalty       int      `yaml:"ac_penalty"`
 	SpeedPenalty    int      `yaml:"speed_penalty"`
 	DamageBonus     int      `yaml:"damage_bonus"`   // positive = bonus to damage rolls
