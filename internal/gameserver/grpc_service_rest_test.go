@@ -453,6 +453,54 @@ func TestHandleRest_NoJob_EarlyReturnMessageContainsHP(t *testing.T) {
 	assert.Contains(t, msg, "HP", "early-return message must mention HP")
 }
 
+// REQ-LF9: Completion message uses flavor RestMessage for the player's class.
+func TestHandleRest_CompletionMessage_UsesFlavorRestMessage(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+	charSaver := &fakeCharSaver{}
+	svc.SetCharSaver(charSaver)
+
+	uid := "lf9-flavor-msg"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      uid,
+		Username: uid,
+		CharName: uid,
+		RoomID:   "room_a",
+		Role:     "player",
+		Level:    1,
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	sess.Class = "nerd" // DominantTradition("nerd") == "technical"; FlavorFor("technical").RestMessage == "Field loadout configured."
+	sess.CurrentHP = 5
+	sess.MaxHP = 20
+
+	job := &ruleset.Job{
+		ID:   "nerd",
+		Name: "Nerd",
+		TechnologyGrants: &ruleset.TechnologyGrants{
+			Prepared: &ruleset.PreparedGrants{
+				SlotsByLevel: map[int]int{1: 1},
+				Pool:         []ruleset.PreparedEntry{{ID: "some_tech", Level: 1}},
+			},
+		},
+	}
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(job)
+	svc.SetJobRegistry(jobReg)
+
+	prepRepo := &fakePreparedRepoRest{}
+	svc.SetPreparedTechRepo(prepRepo)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest(uid, "req", stream))
+
+	msg := lastMessage(stream)
+	assert.Equal(t, "You finish your rest. HP restored to maximum. Field loadout configured.", msg)
+}
+
 // REQ-LR2 error path: If SaveState returns an error, handleRest returns that error.
 func TestHandleRest_SaveStateError_ReturnsError(t *testing.T) {
 	sessMgr := session.NewManager()

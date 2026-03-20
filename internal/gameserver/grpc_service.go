@@ -2506,8 +2506,13 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		return s.promptFeatureChoice(stream, "tech_choice", choices)
 	}
 
+	restFlavor := technology.FlavorFor(technology.DominantTradition(sess.Class))
+	sendFn := func(text string) {
+		_ = sendMsg(text)
+	}
 	if err := RearrangePreparedTechs(ctx, sess, sess.CharacterID,
-		job, s.techRegistry, promptFn, s.preparedTechRepo, nil, technology.TraditionFlavor{},
+		job, s.techRegistry, promptFn, s.preparedTechRepo,
+		sendFn, restFlavor,
 	); err != nil {
 		s.logger.Warn("handleRest: RearrangePreparedTechs failed",
 			zap.String("uid", uid),
@@ -2515,7 +2520,7 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		return sendMsg("Something went wrong preparing your technologies.")
 	}
 
-	return sendMsg("You finish your rest. HP restored to maximum and technologies prepared.")
+	return sendMsg(fmt.Sprintf("You finish your rest. HP restored to maximum. %s", restFlavor.RestMessage))
 }
 
 // handleSelectTech processes the selecttech command for a player.
@@ -3447,7 +3452,14 @@ func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	return messageEvent(command.HandleLoadout(sess, req.GetArg())), nil
+	arg := req.GetArg()
+	if arg != "" {
+		return messageEvent(command.HandleLoadout(sess, arg)), nil
+	}
+	flavor := technology.FlavorFor(technology.DominantTradition(sess.Class))
+	weaponSection := command.HandleLoadout(sess, "")
+	prepSection := technology.FormatPreparedTechs(sess.PreparedTechs, flavor)
+	return messageEvent(weaponSection + "\n\n" + prepSection), nil
 }
 
 // handleUnequip removes the item in the given slot and returns it to the backpack.

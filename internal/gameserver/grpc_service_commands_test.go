@@ -15,6 +15,30 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// TestHandleLoadout_NoArg_CombinesSections verifies that handleLoadout with an empty arg
+// returns a combined message containing both the weapon preset section and the prepared
+// tech section, separated by a blank line.
+//
+// Precondition: Player session has a non-nil LoadoutSet, non-empty PreparedTechs, and Class set.
+// Postcondition: Returns a ServerEvent whose content contains "\n\n" and "[Field Loadout]".
+func TestHandleLoadout_NoArg_CombinesSections(t *testing.T) {
+	svc := newLoadoutServer(t, "u_combined")
+	sess, ok := svc.sessions.GetPlayer("u_combined")
+	require.True(t, ok)
+	sess.Class = "nerd"
+	sess.PreparedTechs = map[int][]*session.PreparedSlot{
+		1: {{TechID: "arc_flash", Expended: false}},
+	}
+
+	evt, err := svc.handleLoadout("u_combined", &gamev1.LoadoutRequest{Arg: ""})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	msg := evt.GetMessage()
+	require.NotNil(t, msg)
+	assert.Contains(t, msg.Content, "\n\n", "combined sections must be separated by blank line")
+	assert.Contains(t, msg.Content, "[Field Loadout]", "nerd class must produce Field Loadout section header")
+}
+
 // newLoadoutServer creates a GameServiceServer with a default loadout-aware session.
 //
 // Precondition: t must be non-nil.
