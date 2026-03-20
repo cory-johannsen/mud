@@ -187,7 +187,7 @@ features:
 
   - slug: persistent-calendar
     name: Persistent Calendar
-    status: planned
+    status: done
     priority: 230
     category: world
     file: docs/features/persistent-calendar.md
