@@ -97,6 +97,7 @@ message ClientMessage {
     KickRequest kick = 80;
     RestRequest rest = 81;
     SelectTechRequest select_tech = 82;
+    AidRequest aid = 83;
   }
 }
 
@@ -105,6 +106,11 @@ message RestRequest {}
 
 // SelectTechRequest asks the server to interactively assign pending technology grants.
 message SelectTechRequest {}
+
+// AidRequest asks the server to queue an Aid action targeting the named ally.
+message AidRequest {
+  string target = 1;
+}
 
 // ServerEvent wraps all server-to-client events.
 message ServerEvent {
