@@ -47,7 +47,7 @@ When `tech.AmpedLevel > 0` and `slotLevel >= tech.AmpedLevel`, `TechAtSlotLevel`
 Unit tests in `internal/game/technology/model_test.go` MUST cover: `slotLevel < tech.AmpedLevel` returns original, `slotLevel == tech.AmpedLevel` returns copy with amped effects, `slotLevel > tech.AmpedLevel` returns copy with amped effects, `tech.AmpedLevel == 0` always returns original regardless of `slotLevel`.
 
 ### REQ-AMP5
-The spontaneous-tech branch of `handleUse` in `internal/gameserver/grpc_service.go` MUST parse an optional third whitespace-separated token from the command arg as an integer `slotLevel`. This parsing MUST only occur when `tech.UsageType == UsageTypeSpontaneous && tech.AmpedLevel > 0`. All other usage paths MUST be unaffected.
+The spontaneous-tech branch of `handleUse` in `internal/gameserver/grpc_service.go` MUST parse an optional level token from the command arg as an integer `slotLevel`. This parsing MUST only occur when `tech.UsageType == UsageTypeSpontaneous && tech.AmpedLevel > 0`. All other usage paths MUST be unaffected. Token disambiguation: after splitting the arg on whitespace, any token that parses as a positive integer is treated as `slotLevel`; the remaining token (if any) is treated as `targetID`. NPC/entity names are never bare integers, so this is unambiguous.
 
 ### REQ-AMP6
 If the third token is present but cannot be parsed as a positive integer, `handleUse` MUST return an error event: `"Invalid level: <token>."`.
@@ -59,16 +59,16 @@ If `slotLevel < tech.Level`, `handleUse` MUST return an error event: `"Cannot us
 If `pool[slotLevel].Remaining == 0`, `handleUse` MUST return an error event: `"No level-<slotLevel> uses remaining."`.
 
 ### REQ-AMP9
-When `tech.UsageType == UsageTypeSpontaneous && tech.AmpedLevel > 0` and no level token is provided, `handleUse` MUST prompt the player using `promptFeatureChoice` with the message `"Use at what level?"` and options listing every level `L` where `L >= tech.Level` and `pool[L].Remaining > 0`, formatted as `"<L> (<remaining> remaining)"`. If exactly one valid option exists, `handleUse` MUST auto-select it without prompting.
+When `tech.UsageType == UsageTypeSpontaneous && tech.AmpedLevel > 0` and no level token is provided, `handleUse` MUST build the set of valid levels by iterating over all keys in `sess.SpontaneousUsePools` where `L >= tech.Level` and `pool[L].Remaining > 0`. If this set is empty, `handleUse` MUST return an error event: `"No uses remaining at any level."`. If exactly one valid level exists, `handleUse` MUST auto-select it without prompting. Otherwise, `handleUse` MUST prompt the player using `promptFeatureChoice` with the message `"Use at what level?"` and options formatted as `"<L> (<remaining> remaining)"` in ascending level order.
 
 ### REQ-AMP10
 After determining `slotLevel`, `handleUse` MUST decrement `pool[slotLevel]` (not `pool[tech.Level]`). The decrement MUST use `spontaneousUsePoolRepo.Decrement(ctx, sess.CharacterID, slotLevel)` and update `sess.SpontaneousUsePools[slotLevel]`.
 
 ### REQ-AMP11
-`handleUse` MUST call `TechAtSlotLevel(tech, slotLevel)` to obtain `resolvedTech`, then pass `resolvedTech.ID` to `activateTechWithEffects`. The resolved tech's effects determine what fires; `activateTechWithEffects` and `ResolveTechEffects` receive no new parameters.
+`handleUse` MUST call `TechAtSlotLevel(tech, slotLevel)` to obtain `resolvedTech`. Because `activateTechWithEffects` re-fetches the tech definition from the registry by ID, the amped branch MUST NOT call `activateTechWithEffects`. Instead it MUST inline the equivalent activation: resolve the combat target via `s.resolveUseTarget`, build `techTargets`, call `ResolveTechEffects(sess, resolvedTech, techTargets, cbt, s.condRegistry, globalRandSrc{}, nil)` directly, and return the resulting messages as a `messageEvent`. `activateTechWithEffects` and `ResolveTechEffects` signatures MUST NOT change.
 
 ### REQ-AMP12
-The fallback message passed to `activateTechWithEffects` MUST include the remaining uses at `slotLevel` after decrement, e.g. `"<tech.Name> activated. Level-<slotLevel> uses remaining: <N>."`.
+After decrement, the response event MUST include a line `"<tech.Name> activated. Level-<slotLevel> uses remaining: <N>."` prepended to any effect messages, where `<N>` is `sess.SpontaneousUsePools[slotLevel].Remaining` after the decrement.
 
 ### REQ-AMP13
 `go test ./internal/game/technology/... ./internal/gameserver/...` MUST pass after all changes are applied.
@@ -81,13 +81,14 @@ The fallback message passed to `activateTechWithEffects` MUST include the remain
 
 ```
 handleUse (spontaneous + AmpedLevel > 0 branch only)
-  └─ parse slotLevel from 3rd arg token (or prompt if omitted)
+  └─ parse slotLevel from integer token in args (or prompt if omitted)
   └─ validate: slotLevel >= tech.Level, pool[slotLevel].Remaining > 0
   └─ resolvedTech := TechAtSlotLevel(tech, slotLevel)
   └─ spontaneousUsePoolRepo.Decrement(ctx, characterID, slotLevel)
   └─ sess.SpontaneousUsePools[slotLevel].Remaining--
-  └─ activateTechWithEffects(sess, uid, resolvedTech.ID, targetID, fallbackMsg, nil)
-       └─ ResolveTechEffects(sess, resolvedTech, ...)  ← sees amped Effects if amped
+  └─ target := s.resolveUseTarget(uid, targetID, resolvedTech)
+  └─ msgs := ResolveTechEffects(sess, resolvedTech, techTargets, cbt, condRegistry, src, nil)
+  └─ return messageEvent(activationLine + "\n" + strings.Join(msgs, "\n"))
 ```
 
 ### New Function Signature
@@ -111,5 +112,5 @@ func TechAtSlotLevel(tech *TechnologyDef, slotLevel int) *TechnologyDef
 |------|--------|
 | `internal/game/technology/model.go` | Add `TechAtSlotLevel` |
 | `internal/game/technology/model_test.go` | Add unit tests for `TechAtSlotLevel` (REQ-AMP4) |
-| `internal/gameserver/grpc_service.go` | Extend spontaneous branch of `handleUse`: level parsing, prompt, `TechAtSlotLevel`, decrement at `slotLevel` |
+| `internal/gameserver/grpc_service.go` | Extend spontaneous branch of `handleUse`: level parsing, prompt, `TechAtSlotLevel`, decrement at `slotLevel`, inline activation via `ResolveTechEffects` |
 | `internal/gameserver/grpc_service_test.go` (or new file) | Integration tests: explicit amp, below-threshold base effects, depleted slot error, invalid token error, non-spontaneous ignores level |
