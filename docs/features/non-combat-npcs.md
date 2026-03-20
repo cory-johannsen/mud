@@ -1,69 +1,60 @@
 # Non-Combat NPCs
 
-Defines the data model, behavior, and content for non-combat NPC types in the game world.
+Eight non-combat NPC types with type-specific config, HTN personality system, and Rustbucket Ridge named instances. See `docs/superpowers/specs/2026-03-20-non-combat-npcs-design.md` for the full design spec.
 
-## Non-Combat NPCs
+## Requirements
 
-- [ ] Non-combat NPCs.
-  - Define the data model and behavior for the following NPCs and implement those specifically mentioned.
-  - For those not mentioned generate one that lives in a room in Rustbucket Ridge and matches the lore. Multiple NPCs can occupy the same room.
-  - [ ] Non-combat NPC base data model — add `npc_type` field (merchant, guard, healer, quest_giver, hireling, banker, job_trainer) to NPC YAML; non-combat NPCs do not appear in combat initiative; they flee or cower when combat starts in their room
-  - [ ] merchants
-      - types:
-        - [ ] weapons
-          - Sergeant Mack in Last Stand Lodge, Rustbucket Ridge
-        - [ ] armor
-        - [ ] rings and neck equipment
-        - [ ] consumables
-          - Slick Sally in the Rusty Oasis, Rustbucket Ridge
-          - Whiskey Joe in The Bottle Shack, Rustbucket Ridge
-          - Old Rusty in The Heap, Rustbucket Ridge
-          - Herb in The Green Hell, Rustbucket Ridge
-        - [ ] maps - sells maps to other zones
-        - [ ] technology - sells Technology
-        - [ ] drugs - sells Drugs and other Technological substances
-      - Each merchant has a budget with which to purchase items from players
-      - Each merchant has a profit margin they apply to the items they buy and sell
-      - Purchasing items from a merchant should provide players with the necessary skills to attempt to negotiate
-          - Critical success: provides a substantial discount or bonus on the transaction
-          - Success: provides a discount or bonus on the transactions
-          - Failure: No effect
-          - Critical failure: adds a penalty to on the transactions
-      - [ ] Merchant YAML schema — add `inventory` (list of item IDs with stock quantities and base prices), `sell_margin` (markup multiplier), `buy_margin` (fraction of item value paid to player), `budget` (max credits available to buy from players)
-      - [ ] `buy <item> [qty]` command — available in rooms with a merchant NPC; deducts credits from player, adds item to inventory
-      - [ ] `sell <item> [qty]` command — available in rooms with a merchant NPC; pays player `buy_margin × item value`; checks merchant budget
-      - [ ] `browse` command — list merchant's inventory with current prices
-      - [ ] Negotiate skill check — player may use `negotiate` before a buy/sell; smooth_talk or grift vs merchant Perception DC; critical success: ±20% price; success: ±10%; failure: no effect; critical failure: +10% penalty applied
-      - [ ] Add named merchant NPCs: Sergeant Mack (weapons, Last Stand Lodge), Slick Sally (consumables, Rusty Oasis), Whiskey Joe (consumables, Bottle Shack), Old Rusty (consumables, The Heap), Herb (consumables, The Green Hell)
-    - [ ] guards
-      - [ ] Guard behavior — guards are present in Safe rooms; they attack players with a Wanted flag; they do not initiate combat with non-Wanted players; if combat occurs in a Safe room they target the aggressor
-      - [ ] Add a lore-appropriate guard NPC in a Safe room in Rustbucket Ridge
-    - [ ] healers
-        - Clutch in The Tinker's Den, Rustbucket Ridge
-        - Tina Wires in Junker's Dream, Rustbucket Ridge
-      - [ ] Healer behavior — players may `heal` in a healer's room for a credit cost; full heal or partial heal at a per-HP rate; healer has a daily capacity
-      - [ ] Add Clutch (The Tinker's Den) and Tina Wires (Junker's Dream) NPC YAML files
-    - [ ] quest givers
-        - Gail "Grinder" Graves in Scrapshack 23, Rustbucket Ridge
-      - [ ] Quest giver behavior — `talk <npc>` offers available quests; on quest completion player receives XP and item/credit reward; requires Quest system
-      - [ ] Add Gail "Grinder" Graves NPC YAML (Scrapshack 23); wire to a starter quest once Quest system exists
-    - [ ] hirelings
-      - [ ] Hireling behavior — `hire <npc>` for a daily credit cost; hireling follows the player between rooms and joins combat as an AI-controlled combatant; `dismiss` releases the hireling
-      - [ ] Add a lore-appropriate hireling NPC in Rustbucket Ridge
-    - [ ] bankers
-      - [ ] Banker behavior — `deposit <amount>` and `withdraw <amount>` commands available in banker's room; credit stash persists on character separate from carried credits; display stash balance in `inventory`
-      - [ ] Add a lore-appropriate banker NPC in a Safe room in Rustbucket Ridge
-    - [ ] job trainers - allow players to learn new jobs once they meet the requirements.
-      - Each job has minimum requirements
-      - Each player has exactly one active Job.
-        - The Active Job is the one that earns XP.
-        - Inactive Jobs do not earn XP, but the player may still use the feats and proficiencies they provide
-        - A command must exist to allow the player to view their Jobs and select which one is Active
-      - [ ] Job trainer behavior — `train <job>` command in trainer's room; checks player meets job prerequisites; deducts training credit cost; adds job to player's job list
-      - [ ] `jobs` command — list player's active and inactive jobs; `setjob <job>` switches the active job
-      - [ ] Add a lore-appropriate job trainer NPC in Rustbucket Ridge
-    - [ ] equipment repair and crafting
+- [ ] Base data model
+  - REQ-NPC-1: NPCs with no `npc_type` MUST default to `"combat"` at load time.
+  - REQ-NPC-2: Type-specific config sub-struct MUST be non-nil at load time; mismatch MUST be fatal load error.
+  - REQ-NPC-2a: `Template.Validate()` MUST verify all referenced skill IDs exist in the skill registry.
+  - REQ-NPC-3: Non-combat NPCs MUST NOT be added to the combat initiative order (guards excepted when engaging per Section 3).
+  - REQ-NPC-4: Non-combat NPCs MUST NOT be valid attack targets (guards excepted when engaging per Section 3).
+  - [ ] HTN personality system (cowardly/brave/neutral/opportunistic presets)
+  - [ ] Flee/cower behavior on combat start
+- [ ] Merchant
+  - REQ-NPC-5: `negotiate` MUST only be usable once per merchant room visit.
+  - REQ-NPC-5a: Negotiate price modifier MUST be stored on player room session state, cleared on room exit.
+  - REQ-NPC-5b: WantedLevel 1 surcharge applied before negotiate modifier; not applied to negotiate roll.
+  - REQ-NPC-12: Merchant runtime state MUST be persisted and restored on restart; YAML values apply only at first initialization.
+  - REQ-NPC-13: `ReplenishConfig` MUST satisfy `0 < MinHours <= MaxHours <= 24`.
+  - [ ] `browse`, `buy`, `sell`, `negotiate` commands
+  - [ ] Named NPCs: Sergeant Mack (weapons, Last Stand Lodge), Slick Sally, Whiskey Joe, Old Rusty, Herb (consumables)
+- [ ] Guard
+  - REQ-NPC-6: On Safe room second violation, all guards present MUST enter initiative and target the aggressor.
+  - REQ-NPC-7: Guards MUST check WantedLevel on room entry and on WantedLevel change events.
+  - [ ] WantedThreshold-configurable aggression table
+  - [ ] Named NPC: one lore-appropriate guard in a Safe room in Rustbucket Ridge
+- [ ] Healer
+  - REQ-NPC-16: `CapacityUsed` MUST reset to 0 on daily tick; restored from DB on restart.
+  - [ ] `heal` and `heal <amount>` commands
+  - [ ] Named NPCs: Clutch (The Tinker's Den), Tina Wires (Junker's Dream)
+- [ ] Quest Giver
+  - REQ-NPC-18: `PlaceholderDialog` MUST contain at least one entry.
+  - [ ] `talk <npc>` command with placeholder dialog
+  - [ ] Named NPC: Gail "Grinder" Graves (Scrapshack 23)
+- [ ] Hireling
+  - REQ-NPC-8: Hirelings MUST be combat allies; MUST NOT be targetable by player's own attacks.
+  - REQ-NPC-15: Hireling binding MUST be atomic check-and-set.
+  - [ ] `hire <npc>` and `dismiss` commands
+  - [ ] Zone follow tracking with `MaxFollowZones` limit
+  - [ ] Named NPC: one lore-appropriate hireling in Rustbucket Ridge
+- [ ] Banker
+  - REQ-NPC-14: Deposit and withdrawal MUST use `CurrentRate` at command execution time.
+  - [ ] Global stash (`StashBalance` on player character)
+  - [ ] `deposit`, `withdraw`, `balance` commands
+  - [ ] Named NPC: one lore-appropriate banker in a Safe room in Rustbucket Ridge
+- [ ] Job Trainer
+  - REQ-NPC-9: Players MUST have exactly one active job after their first job is trained.
+  - REQ-NPC-10: Active job MUST earn XP; inactive jobs MUST NOT.
+  - REQ-NPC-11: Inactive jobs MUST still provide feats and proficiencies.
+  - REQ-NPC-17: `setjob` MUST be available from any room.
+  - [ ] `train <job>`, `jobs`, `setjob <job>` commands
+  - [ ] JobPrerequisites (level, job level, attributes, skill ranks, required jobs)
+  - [ ] Named NPC: one lore-appropriate job trainer in Rustbucket Ridge
+- [ ] Crafter (stub)
+  - [ ] `npc_type: "crafter"` declared; full behavior deferred to `crafting` feature
 
 ## Non-Combat NPCs — All Zones
 
-  - [ ] Every zone must have a lore appropriate instance of each non-combat NPC type that lives in a Safe room.  Multiple NPCs can live in the same room.
+- [ ] Every zone MUST have a lore-appropriate instance of each non-combat NPC type in a Safe room (`non-combat-npcs-all-zones` feature).

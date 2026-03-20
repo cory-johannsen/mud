@@ -1,37 +1,32 @@
 # Room Danger Levels
 
-Rooms are classified as Safe, Sketchy, Dangerous, or All Out War, with color-coded display on map and room view.
+Rooms are classified as Safe, Sketchy, Dangerous, or All Out War. Danger level drives combat rules, trap probabilities, NPC behavior, and map display. See `docs/superpowers/specs/2026-03-20-room-danger-levels-design.md` for the full design spec.
 
 ## Requirements
 
 - [ ] Room danger levels
-  - Rooms are classified as Safe, Sketchy, Dangerous, All Out War
-    - Safe rooms contain no aggressive NPCs, only non-combat NPCs.
-      - Combat is disabled in Safe zones.
-    - Sketchy rooms contain non-Combat NPCs and combat NPCs
-      - Combat is enabled in Sketchy rooms
-      - Combat can only be initiated by players in Sketchy rooms, not by NPCs
-      - Sketchy rooms may contain cover
-        - Cover can not be destroyed in Sketchy rooms
-        - Cover has a low chance of being trapped in Sketchy rooms
-      - Sketchy rooms do not contain room traps
-      - Sketchy rooms have a low chance of traps on room equipment
-    - Dangerous rooms contain non-Combat NPCs and combat NPCs
-      - Combat is enabled in Dangerous rooms
-      - Combat can only be initiated by anyone in a Dangerous room
-      - Non-combat NPCs flee combat if engaged
-      - Dangerous rooms may contain cover
-        - Cover can be destroyed in Dangerous rooms
-        - Cover has a high chance to be trapped in Dangerous rooms
-      - Combat rooms have a moderate change to contain room traps
-      - Combat rooms have a moderate chance to contain traps on room equipment
-    - All Out War rooms contain only combat NPCs
-      - Combat is enabled in All Out War rooms
-      - Combat NPCs attack on sight in an All Out War room
-      - All Out War rooms may contain cover
-        - Cover can be destroyed in All Out War rooms
-        - Cover has a high chance to be trapped in All Out War rooms
-      - Combat rooms have a high chance to contain room traps
-      - Combat rooms have a high chance to contain traps on room equipment
-  - The safely level of a room should be included in the room description, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
-  - The safely level of a room should be included in the map, color coded to the safety level. Safe is Green, Sketchy is yellow, Dangerous is orange, All Out War is red.
+  - [x] DangerLevel enum: Safe, Sketchy, Dangerous, AllOutWar
+    - REQ-DL-1: Zones MUST declare a `danger_level` field; rooms MAY override it.
+  - [ ] Combat enforcement per danger level:
+    - Safe: No combat. First violation = warning. Second violation = WantedLevel++ + guard initiates combat.
+      - REQ-DL-2: Safe room second violation MUST increment WantedLevel and trigger guard combat.
+    - Sketchy: Players may initiate combat; NPCs do not initiate.
+    - Dangerous: All parties may initiate combat.
+    - All Out War: Combat NPCs attack on sight.
+  - [ ] WantedLevel system (5 levels):
+    - 0=None, 1=Flagged, 2=Burned, 3=Hunted, 4=D.O.S.
+    - REQ-DL-3: WantedLevel MUST decay by 1 level per in-game day when no new violations occur.
+    - REQ-DL-4: Active clearing (bribe, quest, surrender) MUST be handled by the `wanted-clearing` feature.
+    - REQ-DL-5: WantedLevel 1 MUST cause merchants to add a 10% surcharge to all transactions.
+    - REQ-DL-6: WantedLevel 2+ MUST cause guards to initiate combat to detain.
+    - REQ-DL-7: WantedLevel 3-4 MUST cause guards to attack on sight.
+  - [ ] Trap probabilities by danger level:
+    - Safe: 0% room trap / 0% cover trap
+    - Sketchy: 0% room trap / 15% cover trap
+    - Dangerous: 35% room trap / 50% cover trap
+    - All Out War: 60% room trap / 75% cover trap
+    - REQ-DL-8: Zone YAML MAY override default trap probabilities.
+  - [ ] Map display:
+    - REQ-DL-9: Room map cells MUST be color-coded by danger level (Safe=green, Sketchy=yellow, Dangerous=orange, AllOutWar=red).
+    - REQ-DL-10: Unexplored rooms MUST display as light gray. Explored state MUST be tracked per player on the character record.
+  - [ ] Cover display: items usable as cover MUST include cover tier info in room equipment descriptions.
