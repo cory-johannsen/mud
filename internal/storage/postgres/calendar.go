@@ -41,6 +41,12 @@ func (r *CalendarRepo) Load() (day, month int, err error) {
 //
 // Precondition: day in [1,31], month in [1,12].
 func (r *CalendarRepo) Save(day, month int) error {
+	if day < 1 || day > 31 {
+		return fmt.Errorf("calendar save: day %d out of range [1,31]", day)
+	}
+	if month < 1 || month > 12 {
+		return fmt.Errorf("calendar save: month %d out of range [1,12]", month)
+	}
 	_, err := r.db.Exec(context.Background(), `
 		INSERT INTO world_calendar (id, day, month)
 		VALUES (1, $1, $2)
