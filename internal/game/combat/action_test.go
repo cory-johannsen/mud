@@ -302,3 +302,25 @@ func TestProperty_ClearActions_AlwaysRestoresMaxPoints(t *testing.T) {
 		assert.False(rt, q.IsSubmitted(), "IsSubmitted must be false after ClearActions")
 	})
 }
+
+func TestActionAid_Cost(t *testing.T) {
+	if combat.ActionAid.Cost() != 2 {
+		t.Errorf("expected ActionAid.Cost()=2, got %d", combat.ActionAid.Cost())
+	}
+}
+
+func TestActionAid_String(t *testing.T) {
+	if combat.ActionAid.String() != "aid" {
+		t.Errorf("expected ActionAid.String()=%q, got %q", "aid", combat.ActionAid.String())
+	}
+}
+
+func TestQueuedAction_AidTarget(t *testing.T) {
+	q := combat.QueuedAction{Type: combat.ActionAid, Target: "Bob"}
+	if q.Target != "Bob" {
+		t.Errorf("expected Target=%q, got %q", "Bob", q.Target)
+	}
+	if q.Type != combat.ActionAid {
+		t.Errorf("expected Type=ActionAid")
+	}
+}

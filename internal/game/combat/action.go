@@ -19,6 +19,7 @@ const (
 	ActionStride                          // costs 1 AP; move 25ft toward or away from target
 	ActionCoverHit                        // informational: attack absorbed by cover
 	ActionCoverDestroy                    // informational: cover object destroyed
+	ActionAid                             // costs 2 AP; aid an ally
 )
 
 // Cost returns the action point cost for the ActionType.
@@ -45,6 +46,8 @@ func (a ActionType) Cost() int {
 		return 0 // cost comes from QueuedAction.AbilityCost
 	case ActionStride:
 		return 1
+	case ActionAid:
+		return 2
 	default:
 		// ActionUnknown and any unrecognized values have cost 0.
 		return 0
@@ -53,7 +56,7 @@ func (a ActionType) Cost() int {
 
 // String returns the human-readable name of the ActionType.
 // Postcondition: returns "attack", "strike", "pass", "reload", "burst",
-// "automatic", "throw", or "unknown".
+// "automatic", "throw", "use_ability", "stride", "aid", or "unknown".
 func (a ActionType) String() string {
 	switch a {
 	case ActionAttack:
@@ -74,6 +77,8 @@ func (a ActionType) String() string {
 		return "use_ability"
 	case ActionStride:
 		return "stride"
+	case ActionAid:
+		return "aid"
 	default:
 		return "unknown"
 	}
