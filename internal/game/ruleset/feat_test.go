@@ -3,10 +3,11 @@ package ruleset_test
 import (
 	"testing"
 
-	"github.com/cory-johannsen/mud/internal/game/reaction"
-	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/cory-johannsen/mud/internal/game/reaction"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 )
 
 func TestLoadFeats_ParsesAllFeats(t *testing.T) {

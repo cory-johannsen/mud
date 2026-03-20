@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"gopkg.in/yaml.v3"
+
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
 
 // Feat defines one Gunchete feat and its P2FE equivalent.

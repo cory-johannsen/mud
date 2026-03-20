@@ -242,8 +242,8 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		Gender:              opts.Gender,
 		Entity:              entity,
 		// Status 1 = IDLE: newly connected players are idle by default.
-		Status:         1,
-		AutomapCache:   make(map[string]map[string]bool),
+		Status:             1,
+		AutomapCache:       make(map[string]map[string]bool),
 		FeatureChoices:     make(map[string]map[string]string),
 		ReactionsRemaining: 1,
 		Reactions:          reaction.NewReactionRegistry(),
