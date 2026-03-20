@@ -24,8 +24,10 @@ func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int, dt gameserver.
 		dateStr := gameserver.FormatDate(dt.Month, dt.Day)
 		periodStr := string(dt.Hour.Period())
 		hourStr := dt.Hour.String()
-		header := fmt.Sprintf("%s \u2014 %s %s %s", rv.Title, dateStr, periodStr, hourStr)
-		lines = append(lines, telnet.Colorize(telnet.BrightYellow, header))
+		header := telnet.Colorize(telnet.BrightYellow, rv.Title) +
+			telnet.Colorize(telnet.BrightYellow, " \u2014 ") +
+			telnet.Colorize(telnet.BrightCyan, fmt.Sprintf("%s %s %s", dateStr, periodStr, hourStr))
+		lines = append(lines, header)
 	}
 	if rv.Description != "" {
 		if width > 0 {
