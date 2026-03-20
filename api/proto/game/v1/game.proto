@@ -285,6 +285,8 @@ message Disconnected {
 message TimeOfDayEvent {
   int32  hour   = 1;
   string period = 2;
+  int32  day    = 3;
+  int32  month  = 4;
 }
 
 // CharacterInfo is sent to the client on session join to display character stats.

@@ -174,6 +174,7 @@ type GameServiceServer struct {
 	invRegistry                *inventory.Registry
 	accountAdmin               AccountAdmin
 	clock                      *GameClock
+	calendar                   *GameCalendar
 	logger                     *zap.Logger
 	jobRegistry                *ruleset.JobRegistry
 	condRegistry               *condition.Registry
@@ -212,6 +213,7 @@ type GameServiceServer struct {
 // roomEquipMgr may be nil (room equipment will not be shown in look).
 // invRegistry may be nil (item name resolution will fall back to ItemDefID).
 // clock may be nil (time-of-day events will not be broadcast to sessions).
+// calendar may be nil (time-of-day events will not include day/month).
 // jobRegistry may be nil (team affinity effects will not be applied on wear).
 // condRegistry may be nil (cross-team condition effects will be skipped).
 // loadoutsDir is the path to the archetype loadout YAML directory; empty disables starting inventory grants.
@@ -245,6 +247,7 @@ func NewGameServiceServer(
 	invRegistry *inventory.Registry,
 	accountAdmin AccountAdmin,
 	clock *GameClock,
+	calendar *GameCalendar,
 	jobRegistry *ruleset.JobRegistry,
 	condRegistry *condition.Registry,
 	techRegistry *technology.Registry,
@@ -289,6 +292,7 @@ func NewGameServiceServer(
 		invRegistry:                invRegistry,
 		accountAdmin:               accountAdmin,
 		clock:                      clock,
+		calendar:                   calendar,
 		logger:                     logger,
 		jobRegistry:                jobRegistry,
 		condRegistry:               condRegistry,
@@ -1098,12 +1102,12 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// REQ-RXN20: build and store the interactive reaction callback.
 	sess.ReactionFn = s.buildReactionCallback(uid, sess, stream)
 
-	// Subscribe to game clock ticks for this session (nil-safe: clock may be nil).
-	var clockCh chan GameHour
-	if s.clock != nil {
-		clockCh = make(chan GameHour, 2)
-		s.clock.Subscribe(clockCh)
-		defer s.clock.Unsubscribe(clockCh)
+	// Subscribe to calendar ticks for this session (nil-safe: calendar may be nil).
+	var calCh chan GameDateTime
+	if s.calendar != nil {
+		calCh = make(chan GameDateTime, 2)
+		s.calendar.Subscribe(calCh)
+		defer s.calendar.Unsubscribe(calCh)
 	}
 
 	// Step 3: Spawn goroutine to forward entity events to stream
@@ -1117,27 +1121,29 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		s.forwardEvents(ctx, sess.Entity, stream)
 	}()
 
-	// Spawn goroutine to forward game clock ticks to stream as TimeOfDayEvents.
+	// Spawn goroutine to forward calendar ticks to stream as TimeOfDayEvents.
 	// When the period changes (e.g., Dawn→Morning), also push an updated RoomView
 	// through the entity channel so the room display reflects the new flavor text.
-	// Only launched when a clock is configured.
-	if clockCh != nil {
+	// Only launched when a calendar is configured.
+	if calCh != nil {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			lastPeriod := TimePeriod(roomView.GetPeriod())
 			for {
 				select {
-				case h, ok := <-clockCh:
+				case dt, ok := <-calCh:
 					if !ok {
 						return
 					}
-					period := h.Period()
+					period := dt.Hour.Period()
 					evt := &gamev1.ServerEvent{
 						Payload: &gamev1.ServerEvent_TimeOfDay{
 							TimeOfDay: &gamev1.TimeOfDayEvent{
-								Hour:   int32(h),
+								Hour:   int32(dt.Hour),
 								Period: string(period),
+								Day:    int32(dt.Day),
+								Month:  int32(dt.Month),
 							},
 						},
 					}

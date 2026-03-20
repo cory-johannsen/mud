@@ -3211,6 +3211,8 @@ type TimeOfDayEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Hour          int32                  `protobuf:"varint,1,opt,name=hour,proto3" json:"hour,omitempty"`
 	Period        string                 `protobuf:"bytes,2,opt,name=period,proto3" json:"period,omitempty"`
+	Day           int32                  `protobuf:"varint,3,opt,name=day,proto3" json:"day,omitempty"`
+	Month         int32                  `protobuf:"varint,4,opt,name=month,proto3" json:"month,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3257,6 +3259,20 @@ func (x *TimeOfDayEvent) GetPeriod() string {
 		return x.Period
 	}
 	return ""
+}
+
+func (x *TimeOfDayEvent) GetDay() int32 {
+	if x != nil {
+		return x.Day
+	}
+	return 0
+}
+
+func (x *TimeOfDayEvent) GetMonth() int32 {
+	if x != nil {
+		return x.Month
+	}
+	return 0
 }
 
 // CharacterInfo is sent to the client on session join to display character stats.
@@ -8925,10 +8941,12 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"ErrorEvent\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"&\n" +
 	"\fDisconnected\x12\x16\n" +
-	"\x06reason\x18\x01 \x01(\tR\x06reason\"<\n" +
+	"\x06reason\x18\x01 \x01(\tR\x06reason\"d\n" +
 	"\x0eTimeOfDayEvent\x12\x12\n" +
 	"\x04hour\x18\x01 \x01(\x05R\x04hour\x12\x16\n" +
-	"\x06period\x18\x02 \x01(\tR\x06period\"\xfa\x02\n" +
+	"\x06period\x18\x02 \x01(\tR\x06period\x12\x10\n" +
+	"\x03day\x18\x03 \x01(\x05R\x03day\x12\x14\n" +
+	"\x05month\x18\x04 \x01(\x05R\x05month\"\xfa\x02\n" +
 	"\rCharacterInfo\x12!\n" +
 	"\fcharacter_id\x18\x01 \x01(\x03R\vcharacterId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
