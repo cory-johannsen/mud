@@ -279,3 +279,19 @@ func validateEffect(e TechEffect, idx int) error {
 	}
 	return nil
 }
+
+// TechAtSlotLevel returns the tech definition to use when activating at the given slot level.
+// When slotLevel >= tech.AmpedLevel and AmpedLevel > 0, returns a shallow copy of tech
+// with Effects replaced by AmpedEffects.
+// Otherwise returns tech unchanged.
+//
+// Precondition: tech is non-nil; slotLevel >= 0.
+// Postcondition: the original tech is never mutated.
+func TechAtSlotLevel(tech *TechnologyDef, slotLevel int) *TechnologyDef {
+	if tech.AmpedLevel > 0 && slotLevel >= tech.AmpedLevel {
+		copy := *tech
+		copy.Effects = tech.AmpedEffects
+		return &copy
+	}
+	return tech
+}

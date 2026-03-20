@@ -491,3 +491,57 @@ effects:
 	assert.Len(t, def.Effects.OnCritFailure, 1)
 	assert.Equal(t, technology.EffectCondition, def.Effects.OnCritFailure[0].Type)
 }
+
+// REQ-AMP1–4: TechAtSlotLevel selects amped or base effects by slot level.
+func TestTechAtSlotLevel(t *testing.T) {
+	baseEffects := technology.TieredEffects{
+		OnApply: []technology.TechEffect{{Type: technology.EffectUtility, UtilityType: "base"}},
+	}
+	ampedEffects := technology.TieredEffects{
+		OnApply: []technology.TechEffect{{Type: technology.EffectUtility, UtilityType: "amped"}},
+	}
+	tech := &technology.TechnologyDef{
+		ID:           "test_tech",
+		Name:         "Test Tech",
+		Level:        1,
+		AmpedLevel:   3,
+		Effects:      baseEffects,
+		AmpedEffects: ampedEffects,
+	}
+
+	t.Run("below amped level returns original", func(t *testing.T) {
+		result := technology.TechAtSlotLevel(tech, 2)
+		assert.Same(t, tech, result, "must return original pointer, not a copy")
+		assert.Equal(t, "base", result.Effects.OnApply[0].UtilityType)
+	})
+
+	t.Run("at amped level returns copy with amped effects", func(t *testing.T) {
+		result := technology.TechAtSlotLevel(tech, 3)
+		assert.NotSame(t, tech, result, "must return a copy, not the original")
+		assert.Equal(t, "amped", result.Effects.OnApply[0].UtilityType)
+	})
+
+	t.Run("above amped level returns copy with amped effects", func(t *testing.T) {
+		result := technology.TechAtSlotLevel(tech, 5)
+		assert.NotSame(t, tech, result)
+		assert.Equal(t, "amped", result.Effects.OnApply[0].UtilityType)
+	})
+
+	t.Run("zero amped level always returns original", func(t *testing.T) {
+		noAmp := &technology.TechnologyDef{
+			ID:      "plain",
+			Level:   1,
+			Effects: baseEffects,
+		}
+		for _, level := range []int{0, 1, 5, 99} {
+			result := technology.TechAtSlotLevel(noAmp, level)
+			assert.Same(t, noAmp, result, "level %d: must return original when AmpedLevel==0")
+		}
+	})
+
+	t.Run("original is never mutated", func(t *testing.T) {
+		result := technology.TechAtSlotLevel(tech, 3)
+		result.Effects = technology.TieredEffects{}
+		assert.Equal(t, "base", tech.Effects.OnApply[0].UtilityType, "original must be unchanged")
+	})
+}
