@@ -603,11 +603,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if target.Kind == KindPlayer {
 						for _, c := range cbt.Combatants {
 							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
-								dmgCopy := dmg
 								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
 									TriggerUID:    c.ID,
 									SourceUID:     actor.ID,
-									DamagePending: &dmgCopy,
+									DamagePending: nil,
 								})
 							}
 						}
@@ -721,11 +720,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if target.Kind == KindPlayer {
 						for _, c := range cbt.Combatants {
 							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
-								dmgCopy1 := dmg1
 								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
 									TriggerUID:    c.ID,
 									SourceUID:     actor.ID,
-									DamagePending: &dmgCopy1,
+									DamagePending: nil,
 								})
 							}
 						}
@@ -815,11 +813,10 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					if target.Kind == KindPlayer {
 						for _, c := range cbt.Combatants {
 							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
-								dmgCopy2 := dmg2
 								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
 									TriggerUID:    c.ID,
 									SourceUID:     actor.ID,
-									DamagePending: &dmgCopy2,
+									DamagePending: nil,
 								})
 							}
 						}
@@ -840,9 +837,9 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 			case ActionReload:
 				events = append(events, resolveReload(cbt, actor, action))
 			case ActionFireBurst:
-				events = append(events, resolveFireBurst(cbt, actor, action, src, coverDegrader)...)
+				events = append(events, resolveFireBurst(cbt, actor, action, src, coverDegrader, fireReaction)...)
 			case ActionFireAutomatic:
-				events = append(events, resolveFireAutomatic(cbt, actor, action, src, coverDegrader)...)
+				events = append(events, resolveFireAutomatic(cbt, actor, action, src, coverDegrader, fireReaction)...)
 			case ActionThrow:
 				events = append(events, resolveThrow(cbt, actor, action, src, fireReaction)...)
 			}
@@ -870,7 +867,7 @@ func resolveReload(cbt *Combat, actor *Combatant, qa QueuedAction) RoundEvent {
 
 // resolveFireBurst handles ActionFireBurst: two ranged attacks against the same target.
 // coverDegrader is called when a shot misses the target but would have hit without cover; may be nil.
-func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool) []RoundEvent {
+func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool, fireReaction func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext)) []RoundEvent {
 	target := findCombatantByNameOrID(cbt, qa.Target)
 	if target == nil || target.IsDead() {
 		return []RoundEvent{{ActionType: ActionFireBurst, ActorID: actor.ID, ActorName: actor.Name,
@@ -919,10 +916,30 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 		}
 		dmg := result.EffectiveDamage()
 		dmg = hookDamageRoll(cbt, actor, target, dmg)
+		// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
+		if target.Kind == KindPlayer && dmg > 0 {
+			fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+				TriggerUID:    target.ID,
+				SourceUID:     actor.ID,
+				DamagePending: &dmg,
+			})
+		}
 		if dmg > 0 {
 			target.ApplyDamage(dmg)
 			if actor.Kind == KindPlayer && target.Kind == KindNPC {
 				cbt.RecordDamage(actor.ID, dmg)
+			}
+			// REQ-RXN19: TriggerOnAllyDamaged fires for other players when a player ally takes damage.
+			if target.Kind == KindPlayer {
+				for _, c := range cbt.Combatants {
+					if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
+						fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+							TriggerUID:    c.ID,
+							SourceUID:     actor.ID,
+							DamagePending: nil,
+						})
+					}
+				}
 			}
 		}
 		if weapon != nil && actor.Loadout != nil {
@@ -947,7 +964,7 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 
 // resolveFireAutomatic handles ActionFireAutomatic: one attack against each living enemy (up to 3).
 // coverDegrader is called when a shot misses a target but would have hit without cover; may be nil.
-func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool) []RoundEvent {
+func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, coverDegrader func(roomID, equipID string) bool, fireReaction func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext)) []RoundEvent {
 	enemies := livingEnemiesOf(cbt, actor)
 	if len(enemies) == 0 {
 		return []RoundEvent{{ActionType: ActionFireAutomatic, ActorID: actor.ID, ActorName: actor.Name,
@@ -1000,10 +1017,30 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 		}
 		dmg := result.EffectiveDamage()
 		dmg = hookDamageRoll(cbt, actor, target, dmg)
+		// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
+		if target.Kind == KindPlayer && dmg > 0 {
+			fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+				TriggerUID:    target.ID,
+				SourceUID:     actor.ID,
+				DamagePending: &dmg,
+			})
+		}
 		if dmg > 0 {
 			target.ApplyDamage(dmg)
 			if actor.Kind == KindPlayer && target.Kind == KindNPC {
 				cbt.RecordDamage(actor.ID, dmg)
+			}
+			// REQ-RXN19: TriggerOnAllyDamaged fires for other players when a player ally takes damage.
+			if target.Kind == KindPlayer {
+				for _, c := range cbt.Combatants {
+					if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
+						fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+							TriggerUID:    c.ID,
+							SourceUID:     actor.ID,
+							DamagePending: nil,
+						})
+					}
+				}
 			}
 		}
 		if weapon != nil && actor.Loadout != nil {

@@ -18,6 +18,7 @@ const (
 	// Fire point deferred to sub-project 2.
 	TriggerOnConditionApplied ReactionTriggerType = "on_condition_applied"
 	// TriggerOnAllyDamaged fires when a player ally takes damage in the same combat.
+	// Informational only: damage has already been applied; DamagePending is always nil.
 	TriggerOnAllyDamaged ReactionTriggerType = "on_ally_damaged"
 	// TriggerOnFall fires when the player would fall. Fire point deferred to a future feature.
 	TriggerOnFall ReactionTriggerType = "on_fall"
