@@ -884,3 +884,142 @@ func TestResolveRound_ReactionFn_CalledOnDamageTaken(t *testing.T) {
 		t.Error("expected reactionFn to be called with TriggerOnDamageTaken for player target")
 	}
 }
+
+// makeAidCombat returns a Combat with three combatants (p1=Alice, p2=Bob, n1=Ganger)
+// and aid-related conditions registered.
+// p1 has GritMod=10 so with fixedSrc{19}: d20=20, total=20+10=30 → critical_success.
+func makeAidCombat(t *testing.T) *combat.Combat {
+	t.Helper()
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "prone", Name: "Prone", DurationType: "permanent", MaxStacks: 0, AttackPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "flat_footed", Name: "Flat-Footed", DurationType: "rounds", MaxStacks: 0, ACPenalty: 2})
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "stunned", Name: "Stunned", DurationType: "rounds", MaxStacks: 3})
+	reg.Register(&condition.ConditionDef{ID: "aided_strong", Name: "Aided (Strong)", DurationType: "rounds", MaxStacks: 0, AttackBonus: 3})
+	reg.Register(&condition.ConditionDef{ID: "aided", Name: "Aided", DurationType: "rounds", MaxStacks: 0, AttackBonus: 2})
+	reg.Register(&condition.ConditionDef{ID: "aided_penalty", Name: "Aided (Penalty)", DurationType: "rounds", MaxStacks: 0, AttackPenalty: 1})
+
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1, GritMod: 10},
+		{ID: "p2", Kind: combat.KindPlayer, Name: "Bob", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", MaxHP: 18, CurrentHP: 18, AC: 12, Level: 1, StrMod: 1, DexMod: 0},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+	_ = cbt.StartRound(3)
+	return cbt
+}
+
+// TestProperty_AidOutcome_Bands: AidOutcome maps totals to the correct DC-20 bands.
+func TestProperty_AidOutcome_Bands(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		total := rapid.IntRange(-100, 100).Draw(rt, "total")
+		outcome := combat.AidOutcome(total)
+		switch {
+		case total <= 9:
+			if outcome != "critical_failure" {
+				rt.Fatalf("total=%d: expected critical_failure, got %q", total, outcome)
+			}
+		case total <= 19:
+			if outcome != "failure" {
+				rt.Fatalf("total=%d: expected failure, got %q", total, outcome)
+			}
+		case total <= 29:
+			if outcome != "success" {
+				rt.Fatalf("total=%d: expected success, got %q", total, outcome)
+			}
+		default:
+			if outcome != "critical_success" {
+				rt.Fatalf("total=%d: expected critical_success, got %q", total, outcome)
+			}
+		}
+	})
+}
+
+// TestResolveRound_ActionAid_CriticalSuccess: p1 (GritMod=10) aids Bob with fixedSrc{19};
+// d20=20, total=30 → critical_success; "aided_strong" applied to p2; narrative contains "critical aid".
+func TestResolveRound_ActionAid_CriticalSuccess(t *testing.T) {
+	cbt := makeAidCombat(t)
+	// val=19 → d20=20, GritMod=10, total=30 → critical_success
+	src := fixedSrc{val: 19}
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAid, Target: "Bob"}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+	if err := cbt.QueueAction("p2", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction p2: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+
+	var aidEv *combat.RoundEvent
+	for i := range events {
+		if events[i].ActionType == combat.ActionAid && events[i].ActorID == "p1" {
+			aidEv = &events[i]
+		}
+	}
+	if aidEv == nil {
+		t.Fatal("no ActionAid event found for p1")
+	}
+	if !containsSubstring(aidEv.Narrative, "critical aid") {
+		t.Errorf("expected narrative to contain %q, got %q", "critical aid", aidEv.Narrative)
+	}
+	if aidEv.TargetID != "p2" {
+		t.Errorf("expected TargetID=p2, got %q", aidEv.TargetID)
+	}
+
+	// Verify aided_strong condition was applied to p2.
+	p2Conditions := cbt.Conditions["p2"]
+	if p2Conditions == nil || !p2Conditions.Has("aided_strong") {
+		t.Error("expected aided_strong condition applied to p2")
+	}
+}
+
+// TestResolveRound_ActionAid_TargetDeadAtResolution: aid against a dead target emits
+// "already down" narrative and does NOT apply any aided_* condition.
+func TestResolveRound_ActionAid_TargetDeadAtResolution(t *testing.T) {
+	cbt := makeAidCombat(t)
+	// Bob is already down (players use Dead flag for IsDead()).
+	cbt.Combatants[1].Dead = true
+
+	src := fixedSrc{val: 19}
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAid, Target: "Bob"}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+
+	var aidEv *combat.RoundEvent
+	for i := range events {
+		if events[i].ActionType == combat.ActionAid && events[i].ActorID == "p1" {
+			aidEv = &events[i]
+		}
+	}
+	if aidEv == nil {
+		t.Fatal("no ActionAid event found for p1")
+	}
+	if !containsSubstring(aidEv.Narrative, "already down") {
+		t.Errorf("expected narrative to contain %q, got %q", "already down", aidEv.Narrative)
+	}
+
+	// No aided_* condition must be applied.
+	p2Conditions := cbt.Conditions["p2"]
+	if p2Conditions != nil {
+		for _, condID := range []string{"aided_strong", "aided", "aided_penalty"} {
+			if p2Conditions.Has(condID) {
+				t.Errorf("expected no %s condition on p2 when target was dead", condID)
+			}
+		}
+	}
+}

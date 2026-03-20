@@ -334,6 +334,24 @@ func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Sourc
 	return bonus
 }
 
+// AidOutcome classifies an Aid roll total into one of four DC 20 outcome bands.
+//
+// Precondition: total is the sum of d20 + best ability modifier.
+// Postcondition: Returns "critical_success" (>=30), "success" (20-29),
+// "failure" (10-19), or "critical_failure" (<=9).
+func AidOutcome(total int) string {
+	switch {
+	case total >= 30:
+		return "critical_success"
+	case total >= 20:
+		return "success"
+	case total >= 10:
+		return "failure"
+	default:
+		return "critical_failure"
+	}
+}
+
 // ResolveRound processes all queued actions for cbt in Combatants order (initiative-sorted).
 // For each living combatant, iterates their QueuedActions():
 //   - ActionAttack: one ResolveAttack call; damage applied to target combatant; targetUpdater called.
@@ -842,6 +860,48 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				events = append(events, resolveFireAutomatic(cbt, actor, action, src, coverDegrader, fireReaction)...)
 			case ActionThrow:
 				events = append(events, resolveThrow(cbt, actor, action, src, fireReaction)...)
+			case ActionAid:
+				target := findCombatantByNameOrID(cbt, action.Target)
+				if target == nil || target.IsDead() {
+					events = append(events, RoundEvent{
+						ActionType: ActionAid,
+						ActorID:    actor.ID,
+						ActorName:  actor.Name,
+						Narrative:  fmt.Sprintf("%s tries to aid but %s is already down.", actor.Name, action.Target),
+					})
+					continue
+				}
+				d20 := src.Intn(20) + 1
+				bestMod := actor.GritMod
+				if actor.QuicknessMod > bestMod {
+					bestMod = actor.QuicknessMod
+				}
+				if actor.SavvyMod > bestMod {
+					bestMod = actor.SavvyMod
+				}
+				total := d20 + bestMod
+				outcome := AidOutcome(total)
+				var narrative string
+				switch outcome {
+				case "critical_success":
+					applyConditionIfAllowed(cbt, target.ID, "aided_strong", 1, 1)
+					narrative = fmt.Sprintf("%s provides critical aid to %s (total %d)!", actor.Name, target.Name, total)
+				case "success":
+					applyConditionIfAllowed(cbt, target.ID, "aided", 1, 1)
+					narrative = fmt.Sprintf("%s aids %s (total %d).", actor.Name, target.Name, total)
+				case "failure":
+					narrative = fmt.Sprintf("%s fails to aid %s (total %d).", actor.Name, target.Name, total)
+				case "critical_failure":
+					applyConditionIfAllowed(cbt, target.ID, "aided_penalty", 1, 1)
+					narrative = fmt.Sprintf("%s fumbles the aid attempt on %s (total %d)!", actor.Name, target.Name, total)
+				}
+				events = append(events, RoundEvent{
+					ActionType: ActionAid,
+					ActorID:    actor.ID,
+					ActorName:  actor.Name,
+					TargetID:   target.ID,
+					Narrative:  narrative,
+				})
 			}
 		}
 	}
