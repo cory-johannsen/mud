@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gameserver "github.com/cory-johannsen/mud/internal/gameserver"
@@ -25,6 +26,44 @@ func TestCheckReactionRequirement_NoneString_ReturnsTrue(t *testing.T) {
 // REQ-RXN24: wielding_melee_weapon returns false when no loadout is set.
 func TestCheckReactionRequirement_WieldingMeleeWeapon_FalseWhenNoLoadout(t *testing.T) {
 	sess := &session.PlayerSession{} // LoadoutSet field is nil
+	assert.False(t, gameserver.CheckReactionRequirement(sess, "wielding_melee_weapon"))
+}
+
+// REQ-RXN27: wielding_melee_weapon returns true when a melee weapon is equipped in the main hand.
+func TestCheckReactionRequirement_WieldingMeleeWeapon_TrueWhenMeleeEquipped(t *testing.T) {
+	def := &inventory.WeaponDef{
+		ID:                  "shortsword",
+		Name:                "Shortsword",
+		DamageDice:          "1d6",
+		DamageType:          "piercing",
+		RangeIncrement:      0, // melee
+		Kind:                inventory.WeaponKindOneHanded,
+		ProficiencyCategory: "martial_weapons",
+	}
+	ls := inventory.NewLoadoutSet()
+	if err := ls.ActivePreset().EquipMainHand(def); err != nil {
+		t.Fatalf("EquipMainHand failed: %v", err)
+	}
+	sess := &session.PlayerSession{LoadoutSet: ls}
+	assert.True(t, gameserver.CheckReactionRequirement(sess, "wielding_melee_weapon"))
+}
+
+// REQ-RXN27: wielding_melee_weapon returns false when a ranged weapon is equipped in the main hand.
+func TestCheckReactionRequirement_WieldingMeleeWeapon_FalseWhenRangedEquipped(t *testing.T) {
+	def := &inventory.WeaponDef{
+		ID:                  "shortbow",
+		Name:                "Shortbow",
+		DamageDice:          "1d6",
+		DamageType:          "piercing",
+		RangeIncrement:      30, // ranged
+		Kind:                inventory.WeaponKindTwoHanded,
+		ProficiencyCategory: "martial_ranged",
+	}
+	ls := inventory.NewLoadoutSet()
+	if err := ls.ActivePreset().EquipMainHand(def); err != nil {
+		t.Fatalf("EquipMainHand failed: %v", err)
+	}
+	sess := &session.PlayerSession{LoadoutSet: ls}
 	assert.False(t, gameserver.CheckReactionRequirement(sess, "wielding_melee_weapon"))
 }
 
