@@ -13,7 +13,7 @@ Allow players to expend a higher-level spontaneous use slot when activating a sp
 
 ## Scope
 
-In scope: `TechAtSlotLevel` helper, `use <tech> [target] [level]` syntax extension for spontaneous techs, slot-level prompt when level is omitted on an ampable tech, decrementing the correct slot-level pool.
+In scope: `TechAtSlotLevel` helper, `use <tech> [target] [level]` syntax extension for spontaneous techs, slot-level prompt when level is omitted on an ampable tech, decrementing the correct slot-level pool, adding `stream` parameter to `handleUse` to enable interactive prompting.
 
 Out of scope: multiple amp tiers (only one `amped_level` / `amped_effects` pair per tech), amping prepared or innate techs, changes to `activateTechWithEffects`, `ResolveTechEffects`, or any repo interface.
 
@@ -47,7 +47,10 @@ When `tech.AmpedLevel > 0` and `slotLevel >= tech.AmpedLevel`, `TechAtSlotLevel`
 Unit tests in `internal/game/technology/model_test.go` MUST cover: `slotLevel < tech.AmpedLevel` returns original, `slotLevel == tech.AmpedLevel` returns copy with amped effects, `slotLevel > tech.AmpedLevel` returns copy with amped effects, `tech.AmpedLevel == 0` always returns original regardless of `slotLevel`.
 
 ### REQ-AMP5
-The spontaneous-tech branch of `handleUse` in `internal/gameserver/grpc_service.go` MUST parse an optional level token from the command arg as an integer `slotLevel`. This parsing MUST only occur when `tech.UsageType == UsageTypeSpontaneous && tech.AmpedLevel > 0`. All other usage paths MUST be unaffected. Token disambiguation: after splitting the arg on whitespace, any token that parses as a positive integer is treated as `slotLevel`; the remaining token (if any) is treated as `targetID`. NPC/entity names are never bare integers, so this is unambiguous.
+`handleUse` MUST be extended to accept `stream gamev1.GameService_SessionServer` as a new parameter after the existing parameters `(uid, abilityID, targetID string)`. All existing call sites MUST be updated to pass the stream. This enables interactive level prompting via `promptFeatureChoice`.
+
+### REQ-AMP5A
+The spontaneous-tech branch of `handleUse` MUST parse an optional level token from the command arg as an integer `slotLevel`. This parsing MUST only occur when `tech.UsageType == UsageTypeSpontaneous && tech.AmpedLevel > 0`. All other usage paths MUST be unaffected. Token disambiguation: after splitting the arg on whitespace, any token that parses as a positive integer is treated as `slotLevel`; the remaining token (if any) is treated as `targetID`. NPC/entity names are never bare integers, so this is unambiguous. If two integer tokens are present in the arg, `handleUse` MUST return an error event: `"Invalid arguments: specify at most one level."`.
 
 ### REQ-AMP6
 If the third token is present but cannot be parsed as a positive integer, `handleUse` MUST return an error event: `"Invalid level: <token>."`.
@@ -59,7 +62,7 @@ If `slotLevel < tech.Level`, `handleUse` MUST return an error event: `"Cannot us
 If `pool[slotLevel].Remaining == 0`, `handleUse` MUST return an error event: `"No level-<slotLevel> uses remaining."`.
 
 ### REQ-AMP9
-When `tech.UsageType == UsageTypeSpontaneous && tech.AmpedLevel > 0` and no level token is provided, `handleUse` MUST build the set of valid levels by iterating over all keys in `sess.SpontaneousUsePools` where `L >= tech.Level` and `pool[L].Remaining > 0`. If this set is empty, `handleUse` MUST return an error event: `"No uses remaining at any level."`. If exactly one valid level exists, `handleUse` MUST auto-select it without prompting. Otherwise, `handleUse` MUST prompt the player using `promptFeatureChoice` with the message `"Use at what level?"` and options formatted as `"<L> (<remaining> remaining)"` in ascending level order.
+When `tech.UsageType == UsageTypeSpontaneous && tech.AmpedLevel > 0` and no level token is provided, `handleUse` MUST build the set of valid levels by sorting all keys in `sess.SpontaneousUsePools` in ascending order and filtering to those where `L >= tech.Level` and `pool[L].Remaining > 0`. If this set is empty, `handleUse` MUST return an error event: `"No uses remaining at any level."`. If exactly one valid level exists, `handleUse` MUST auto-select it without prompting. Otherwise, `handleUse` MUST prompt the player using `promptFeatureChoice` (via the `stream` parameter added in REQ-AMP5) with the message `"Use at what level?"` and options formatted as `"<L> (<remaining> remaining)"` in ascending level order.
 
 ### REQ-AMP10
 After determining `slotLevel`, `handleUse` MUST decrement `pool[slotLevel]` (not `pool[tech.Level]`). The decrement MUST use `spontaneousUsePoolRepo.Decrement(ctx, sess.CharacterID, slotLevel)` and update `sess.SpontaneousUsePools[slotLevel]`.
@@ -112,5 +115,5 @@ func TechAtSlotLevel(tech *TechnologyDef, slotLevel int) *TechnologyDef
 |------|--------|
 | `internal/game/technology/model.go` | Add `TechAtSlotLevel` |
 | `internal/game/technology/model_test.go` | Add unit tests for `TechAtSlotLevel` (REQ-AMP4) |
-| `internal/gameserver/grpc_service.go` | Extend spontaneous branch of `handleUse`: level parsing, prompt, `TechAtSlotLevel`, decrement at `slotLevel`, inline activation via `ResolveTechEffects` |
+| `internal/gameserver/grpc_service.go` | Add `stream` param to `handleUse`; extend spontaneous branch: level parsing, prompt, `TechAtSlotLevel`, decrement at `slotLevel`, inline activation via `ResolveTechEffects` |
 | `internal/gameserver/grpc_service_test.go` (or new file) | Integration tests: explicit amp, below-threshold base effects, depleted slot error, invalid token error, non-spontaneous ignores level |
