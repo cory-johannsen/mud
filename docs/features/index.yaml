@@ -107,11 +107,11 @@ features:
 
   - slug: advanced-combat
     name: Advanced Combat Mechanics
-    status: in_progress
+    status: done
     priority: 130
     category: combat
     file: docs/features/advanced-combat.md
-    effort: "L"
+    effort: "-"
 
   - slug: player-prompt-mental-state
     name: Player Prompt Mental State
@@ -155,11 +155,11 @@ features:
 
   - slug: multiplayer-combat
     name: Multi-Player Combat
-    status: in_progress
+    status: done
     priority: 190
     category: combat
     file: docs/features/multiplayer-combat.md
-    effort: "not defined"
+    effort: "-"
 
   - slug: technology
     name: Technology
@@ -192,6 +192,28 @@ features:
     category: world
     file: docs/features/persistent-calendar.md
     effort: "-"
+
+  - slug: exploration
+    name: Exploration Mode
+    status: planned
+    priority: 235
+    category: world
+    file: docs/features/exploration.md
+    effort: "not defined"
+    dependencies:
+      - actions
+      - persistent-calendar
+
+  - slug: downtime
+    name: Downtime
+    status: planned
+    priority: 237
+    category: world
+    file: docs/features/downtime.md
+    effort: "not defined"
+    dependencies:
+      - actions
+      - persistent-calendar
 
   - slug: use-command
     name: Use Command Expansion

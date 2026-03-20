@@ -4,7 +4,7 @@ Allows multiple players to join, share XP and loot, and form groups that enter c
 
 ## Requirements
 
-- [ ] Multi-player combat
+- [x] Multi-player combat
   - [x] Other players can join combat already in progress
     - [x] Combat join — when a player enters a room with active combat, offer to join; on joining, add player as a new combatant with a fresh initiative roll and full AP
     - [x] All players in a combat encounter share XP for the encounter (XP is divided equally among the players)
