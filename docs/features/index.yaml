@@ -5,7 +5,7 @@ features:
     priority: 10
     category: world
     file: docs/features/room-danger-levels.md
-    effort: "not defined"
+    effort: "M"  # danger level data model, room/map display, NPC behavior rules per zone type
 
   - slug: non-combat-npcs
     name: Non-Combat NPCs
@@ -13,17 +13,31 @@ features:
     priority: 20
     category: world
     file: docs/features/non-combat-npcs.md
-    effort: "not defined"
+    effort: "XL"  # 7 NPC types (merchant/guard/healer/quest-giver/hireling/banker/job-trainer), buy/sell/browse/negotiate commands, named NPCs, flee/cower behavior
     dependencies:
       - room-danger-levels
+
+  - slug: wanted-clearing
+    name: Wanted Level Clearing
+    status: planned
+    priority: 25
+    category: world
+    file: docs/features/wanted-clearing.md
+    effort: "S"  # bribe, quest-based, and surrender methods for active Wanted level reduction
+    dependencies:
+      - room-danger-levels
+      - non-combat-npcs
 
   - slug: resting
     name: Resting
     status: planned
-    priority: 30
+    priority: 238
     category: world
     file: docs/features/resting.md
-    effort: "not defined"
+    effort: "S"  # motels and camping with gear requirements; zone safety enforcement
+    dependencies:
+      - room-danger-levels  # needs safe-room concept
+      - exploration          # "exploration only, not allowed in safe rooms"
 
   - slug: actions
     name: Actions
@@ -31,7 +45,7 @@ features:
     priority: 40
     category: combat
     file: docs/features/actions.md
-    effort: "not defined"
+    effort: "XL"  # remaining: Climb/Swim/Sense Motive/Delay/Aid/Ready, all Exploration modes, all Downtime actions, Gear actions (activate/repair/affix/swap)
 
   - slug: console-notifications
     name: Console Notifications
@@ -175,7 +189,7 @@ features:
     priority: 210
     category: meta
     file: docs/features/wire-refactor.md
-    effort: "not defined"
+    effort: "M"  # replace manual GameServiceServer wiring with wire-generated providers; all tests must pass
 
   - slug: long-rest
     name: Long Rest
@@ -199,7 +213,7 @@ features:
     priority: 235
     category: world
     file: docs/features/exploration.md
-    effort: "not defined"
+    effort: "M"  # explore command, 7 exploration modes with room-entry and combat-start triggers; some modes require multi-player party
     dependencies:
       - actions
       - persistent-calendar
@@ -210,7 +224,7 @@ features:
     priority: 237
     category: world
     file: docs/features/downtime.md
-    effort: "not defined"
+    effort: "L"  # downtime mode command, 8 activities (earn income/craft/retrain/treat disease/subsist/forgery/long rest/refocus), calendar advancement integration
     dependencies:
       - actions
       - persistent-calendar
@@ -221,7 +235,7 @@ features:
     priority: 242
     category: combat
     file: docs/features/ready-action.md
-    effort: "not defined"
+    effort: "M"  # 2AP ready command, trigger evaluation engine during round resolution, 3 triggers × 3 readied actions
     dependencies:
       - actions
 
@@ -231,7 +245,7 @@ features:
     priority: 240
     category: ui
     file: docs/features/use-command.md
-    effort: "not defined"
+    effort: "S"  # extend use command to room equipment; add command completion
 
   - slug: hero-points
     name: Hero Points
@@ -247,7 +261,7 @@ features:
     priority: 260
     category: character
     file: docs/features/feat-import.md
-    effort: "not defined"
+    effort: "XL"  # import and adapt all PF2E feats to Gunchete world; see docs/requirements/FEATS.md for full listing
 
   - slug: job-development
     name: Job Development
@@ -255,7 +269,7 @@ features:
     priority: 270
     category: character
     file: docs/features/job-development.md
-    effort: "not defined"
+    effort: "XL"  # drawbacks for 52 jobs; Specialist+Expert tiers with cumulative attribute/feat/proficiency/skill sets; multi-job combinations
 
   - slug: equipment-mechanics
     name: Equipment Mechanics Expansion
@@ -263,7 +277,7 @@ features:
     priority: 280
     category: world
     file: docs/features/equipment-mechanics.md
-    effort: "not defined"
+    effort: "XL"  # durability/repair, 5 rarity tiers, tuned/defective/cursed items, equipment sets, interactions, new consumables
 
   - slug: editor-commands
     name: Editor Commands
@@ -271,7 +285,7 @@ features:
     priority: 290
     category: meta
     file: docs/features/editor-commands.md
-    effort: "not defined"
+    effort: "M"  # Editor role enforcement, commands to spawn NPCs/items/money, add zones/rooms/links; Editor command category
 
   - slug: map-poi
     name: Map Points of Interest
@@ -279,7 +293,7 @@ features:
     priority: 300
     category: ui
     file: docs/features/map-poi.md
-    effort: "not defined"
+    effort: "S"  # color-coded POI symbols on map/legend for non-combat NPCs and room equipment; only shown after room is explored
 
   - slug: non-combat-npcs-all-zones
     name: Non-Combat NPCs — All Zones
@@ -287,7 +301,7 @@ features:
     priority: 310
     category: world
     file: docs/features/non-combat-npcs.md
-    effort: "not defined"
+    effort: "M"  # one lore-appropriate instance of each NPC type per zone in a Safe room; content/data work per zone
     dependencies:
       - non-combat-npcs
 
@@ -297,7 +311,7 @@ features:
     priority: 320
     category: world
     file: docs/features/npc-behaviors.md
-    effort: "not defined"
+    effort: "XL"  # dialog templates/generators, daily patterns, aggressiveness model, combat AI (actions/reactions/strategy/stealth), map movement and fencing
 
   - slug: npcs-named
     name: Named NPCs (Wayne/Dwayne/Jennifer Dawg)
@@ -305,7 +319,7 @@ features:
     priority: 330
     category: world
     file: docs/features/npcs-named.md
-    effort: "not defined"
+    effort: "XS"  # 3 named NPC YAML entries with lore-appropriate placement
 
   - slug: world-map
     name: World Map / Fast Travel
@@ -313,7 +327,7 @@ features:
     priority: 340
     category: ui
     file: docs/features/world-map.md
-    effort: "not defined"
+    effort: "L"  # world-level map rendering, zone discovery tracking, fast travel command with travel time
 
   - slug: non-human-npcs
     name: Non-Human NPCs
@@ -321,7 +335,7 @@ features:
     priority: 350
     category: world
     file: docs/features/non-human-npcs.md
-    effort: "not defined"
+    effort: "M"  # animals, robots, machines as NPC types; unique behaviors/stats per type
 
   - slug: advanced-health
     name: Advanced Health Effects
@@ -329,7 +343,7 @@ features:
     priority: 360
     category: character
     file: docs/features/advanced-health.md
-    effort: "not defined"
+    effort: "L"  # drug/alcohol/medicine/poison/toxin effect system with addiction and recovery state machine
 
   - slug: advanced-enemies
     name: Advanced Enemies
@@ -337,7 +351,7 @@ features:
     priority: 370
     category: world
     file: docs/features/advanced-enemies.md
-    effort: "not defined"
+    effort: "XL"  # 5 difficulty tiers, tag/feat systems with allow/deny lists, XP/loot scaling, boss rooms with hazards/traps/minions/abilities
     dependencies:
       - advanced-combat
 
@@ -347,7 +361,7 @@ features:
     priority: 380
     category: world
     file: docs/features/quests.md
-    effort: "not defined"
+    effort: "XL"  # full quest system: objectives, progress tracking, NPC wiring, XP/item rewards (spec not yet written)
 
   - slug: factions
     name: Factions and Allegiances
@@ -355,23 +369,25 @@ features:
     priority: 390
     category: world
     file: docs/features/factions.md
-    effort: "not defined"
+    effort: "XL"  # faction data model, reputation/allegiance tracking, economies/exchange rates, faction-gated items/quests/zones
 
   - slug: crafting
     name: Crafting
     status: planned
-    priority: 400
+    priority: 236
     category: world
     file: docs/features/crafting.md
-    effort: "not defined"
+    effort: "L"  # recipe data model, material inventory, Crafting skill checks, downtime-day costs, item production (spec not yet written)
+    # priority: moved before downtime (237); downtime's Craft activity requires crafting system (recipe data + material inventory)
 
   - slug: traps
     name: Traps
     status: planned
-    priority: 410
+    priority: 15
     category: world
     file: docs/features/traps.md
-    effort: "not defined"
+    effort: "M"  # 6 trap types (mines/pits/bear traps/trip wires/pressure plates/honkeypots); trigger/detect/disarm mechanics
+    # priority: moved before room-danger-levels (10→15 ordering); room-danger-levels defines per-zone trap probabilities which require traps to be implemented
 
   - slug: zones-new
     name: New Zones
@@ -379,7 +395,7 @@ features:
     priority: 420
     category: world
     file: docs/features/zones-new.md
-    effort: "not defined"
+    effort: "XXL"  # 4 zones (Clown Camp, SteamPDX, The Velvet Rope, Club Privata); ~30 rooms total; zone effects, unique NPC behaviors, 4 boss fights
 
   - slug: web-client
     name: Web Game Client
@@ -387,7 +403,7 @@ features:
     priority: 430
     category: ui
     file: docs/features/web-client.md
-    effort: "not defined"
+    effort: "XXL"  # full browser-based client with integrated admin interface; new frontend replacing or alongside telnet
 
   - slug: game-client-ebiten
     name: Ebiten Game Client
@@ -395,7 +411,7 @@ features:
     priority: 440
     category: ui
     file: docs/features/game-client-ebiten.md
-    effort: "not defined"
+    effort: "XXL"  # native cross-platform client (Windows/Mac/Linux) over gRPC; new game engine layer
 
   - slug: documentation
     name: Documentation
@@ -403,4 +419,4 @@ features:
     priority: 450
     category: meta
     file: docs/features/documentation.md
-    effort: "not defined"
+    effort: "L"  # architecture diagrams, deployment guide, implementer's guide, player's guide with in-game help integration
