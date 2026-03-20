@@ -65,3 +65,20 @@ func TestCalendarRepo_Property_RoundTrip(t *testing.T) {
 		assert.Equal(rt, month, gotMonth)
 	})
 }
+
+func TestCalendarRepo_Save_RejectsOutOfRange(t *testing.T) {
+	db := testDB(t)
+	repo := pgstore.NewCalendarRepo(db)
+	cases := []struct {
+		day, month int
+	}{
+		{0, 1},
+		{32, 1},
+		{1, 0},
+		{1, 13},
+	}
+	for _, c := range cases {
+		err := repo.Save(c.day, c.month)
+		assert.Error(t, err, "Save(%d, %d) should return error", c.day, c.month)
+	}
+}
