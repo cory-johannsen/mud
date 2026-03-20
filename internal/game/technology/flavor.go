@@ -12,6 +12,7 @@ import (
 type TraditionFlavor struct {
 	LoadoutTitle string
 	PrepVerb     string
+	PrepGerund   string // gerund form of PrepVerb, e.g. "Configuring"
 	SlotNoun     string
 	RestMessage  string
 }
@@ -19,6 +20,7 @@ type TraditionFlavor struct {
 var fallbackFlavor = TraditionFlavor{
 	LoadoutTitle: "Loadout",
 	PrepVerb:     "Prepare",
+	PrepGerund:   "Preparing",
 	SlotNoun:     "slot",
 	RestMessage:  "Technologies prepared.",
 }
@@ -27,24 +29,28 @@ var traditionFlavors = map[string]TraditionFlavor{
 	"technical": {
 		LoadoutTitle: "Field Loadout",
 		PrepVerb:     "Configure",
+		PrepGerund:   "Configuring",
 		SlotNoun:     "slot",
 		RestMessage:  "Field loadout configured.",
 	},
 	"bio_synthetic": {
 		LoadoutTitle: "Chem Kit",
 		PrepVerb:     "Mix",
+		PrepGerund:   "Mixing",
 		SlotNoun:     "dose",
 		RestMessage:  "Chem kit mixed.",
 	},
 	"neural": {
 		LoadoutTitle: "Neural Profile",
 		PrepVerb:     "Queue",
+		PrepGerund:   "Queuing",
 		SlotNoun:     "routine",
 		RestMessage:  "Neural profile written.",
 	},
 	"fanatic_doctrine": {
 		LoadoutTitle: "Doctrine",
 		PrepVerb:     "Prepare",
+		PrepGerund:   "Preparing",
 		SlotNoun:     "rite",
 		RestMessage:  "Doctrine prepared.",
 	},

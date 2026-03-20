@@ -923,6 +923,7 @@ func TestRearrangePreparedTechs_SendFn_OpeningMessage(t *testing.T) {
 	flavor := technology.TraditionFlavor{
 		LoadoutTitle: "Field Loadout",
 		PrepVerb:     "Configure",
+		PrepGerund:   "Configuring",
 		SlotNoun:     "slot",
 		RestMessage:  "Field loadout configured.",
 	}
@@ -933,7 +934,7 @@ func TestRearrangePreparedTechs_SendFn_OpeningMessage(t *testing.T) {
 	err := gameserver.RearrangePreparedTechs(context.Background(), sess, 1, job, nil, noPrompt, prep, sendFn, flavor)
 	require.NoError(t, err)
 	require.NotEmpty(t, messages, "sendFn must have been called")
-	assert.Equal(t, "Configureing Field Loadout...", messages[0], "first message must be the opening progress message")
+	assert.Equal(t, "Configuring Field Loadout...", messages[0], "first message must be the opening progress message")
 }
 
 // REQ-LF8: RearrangePreparedTechs emits per-slot sendFn messages.
@@ -964,6 +965,7 @@ func TestRearrangePreparedTechs_SendFn_SlotMessages(t *testing.T) {
 	flavor := technology.TraditionFlavor{
 		LoadoutTitle: "Chem Kit",
 		PrepVerb:     "Mix",
+		PrepGerund:   "Mixing",
 		SlotNoun:     "dose",
 		RestMessage:  "Chem kit mixed.",
 	}

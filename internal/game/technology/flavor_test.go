@@ -17,12 +17,12 @@ func TestFlavorFor(t *testing.T) {
 		tradition string
 		want      technology.TraditionFlavor
 	}{
-		{"technical", technology.TraditionFlavor{LoadoutTitle: "Field Loadout", PrepVerb: "Configure", SlotNoun: "slot", RestMessage: "Field loadout configured."}},
-		{"bio_synthetic", technology.TraditionFlavor{LoadoutTitle: "Chem Kit", PrepVerb: "Mix", SlotNoun: "dose", RestMessage: "Chem kit mixed."}},
-		{"neural", technology.TraditionFlavor{LoadoutTitle: "Neural Profile", PrepVerb: "Queue", SlotNoun: "routine", RestMessage: "Neural profile written."}},
-		{"fanatic_doctrine", technology.TraditionFlavor{LoadoutTitle: "Doctrine", PrepVerb: "Prepare", SlotNoun: "rite", RestMessage: "Doctrine prepared."}},
-		{"", technology.TraditionFlavor{LoadoutTitle: "Loadout", PrepVerb: "Prepare", SlotNoun: "slot", RestMessage: "Technologies prepared."}},
-		{"unknown", technology.TraditionFlavor{LoadoutTitle: "Loadout", PrepVerb: "Prepare", SlotNoun: "slot", RestMessage: "Technologies prepared."}},
+		{"technical", technology.TraditionFlavor{LoadoutTitle: "Field Loadout", PrepVerb: "Configure", PrepGerund: "Configuring", SlotNoun: "slot", RestMessage: "Field loadout configured."}},
+		{"bio_synthetic", technology.TraditionFlavor{LoadoutTitle: "Chem Kit", PrepVerb: "Mix", PrepGerund: "Mixing", SlotNoun: "dose", RestMessage: "Chem kit mixed."}},
+		{"neural", technology.TraditionFlavor{LoadoutTitle: "Neural Profile", PrepVerb: "Queue", PrepGerund: "Queuing", SlotNoun: "routine", RestMessage: "Neural profile written."}},
+		{"fanatic_doctrine", technology.TraditionFlavor{LoadoutTitle: "Doctrine", PrepVerb: "Prepare", PrepGerund: "Preparing", SlotNoun: "rite", RestMessage: "Doctrine prepared."}},
+		{"", technology.TraditionFlavor{LoadoutTitle: "Loadout", PrepVerb: "Prepare", PrepGerund: "Preparing", SlotNoun: "slot", RestMessage: "Technologies prepared."}},
+		{"unknown", technology.TraditionFlavor{LoadoutTitle: "Loadout", PrepVerb: "Prepare", PrepGerund: "Preparing", SlotNoun: "slot", RestMessage: "Technologies prepared."}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.tradition, func(t *testing.T) {

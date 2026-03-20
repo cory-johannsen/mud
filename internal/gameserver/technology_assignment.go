@@ -415,7 +415,7 @@ func RearrangePreparedTechs(
 		}
 	}
 
-	send(fmt.Sprintf("%sing %s...", flavor.PrepVerb, flavor.LoadoutTitle))
+	send(fmt.Sprintf("%s %s...", flavor.PrepGerund, flavor.LoadoutTitle))
 
 	// Aggregate Fixed and Pool from all applicable grants.
 	var allFixed []ruleset.PreparedEntry
@@ -680,7 +680,7 @@ func fillFromPreparedPoolWithSend(
 		// Auto-assign without prompt.
 		for _, e := range pool {
 			slotNum := idx - startIdx + 1
-			send(fmt.Sprintf("Level %d, %s %d (fixed): %s", lvl, flavor.SlotNoun, slotNum, e.ID))
+			send(fmt.Sprintf("Level %d, %s %d: %s", lvl, flavor.SlotNoun, slotNum, e.ID))
 			slot := &session.PreparedSlot{TechID: e.ID}
 			result = append(result, slot)
 			if err := repo.Set(ctx, characterID, lvl, idx, e.ID); err != nil {
