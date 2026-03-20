@@ -1013,13 +1013,17 @@ func TestResolveRound_ActionAid_TargetDeadAtResolution(t *testing.T) {
 		t.Errorf("expected narrative to contain %q, got %q", "already down", aidEv.Narrative)
 	}
 
-	// No aided_* condition must be applied.
+	// No aided_* condition must be applied to p2 when the target was already dead.
+	// StartCombat always initializes a non-nil ActiveSet for every combatant, so
+	// p2Conditions is guaranteed non-nil here. The nil guard was removed intentionally:
+	// if the map entry were absent the loop would panic, surfacing a regression in
+	// combat initialization rather than silently skipping the assertion.  This makes
+	// the check non-vacuous — if a buggy code path called ApplyCondition("p2", …) for
+	// a dead target, Has() would return true and the test would fail.
 	p2Conditions := cbt.Conditions["p2"]
-	if p2Conditions != nil {
-		for _, condID := range []string{"aided_strong", "aided", "aided_penalty"} {
-			if p2Conditions.Has(condID) {
-				t.Errorf("expected no %s condition on p2 when target was dead", condID)
-			}
+	for _, condID := range []string{"aided_strong", "aided", "aided_penalty"} {
+		if p2Conditions.Has(condID) {
+			t.Errorf("expected no %s condition on p2 when target was dead", condID)
 		}
 	}
 }
