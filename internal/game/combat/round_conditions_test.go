@@ -30,7 +30,7 @@ func TestResolveRound_CritFailure_ProneApplied(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
-	_ = combat.ResolveRound(cbt, &fixedSrc{val: 0}, nil)
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 0}, nil, nil)
 	assert.True(t, cbt.HasCondition("p1", "prone"), "attacker must be prone after crit failure")
 }
 
@@ -41,7 +41,7 @@ func TestResolveRound_CritSuccess_FlatFootedApplied(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
-	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil)
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil, nil)
 	assert.True(t, cbt.HasCondition("n1", "flat_footed"), "target must be flat-footed after crit success")
 }
 
@@ -54,7 +54,7 @@ func TestResolveRound_PlayerZeroHP_DyingApplied(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Alice"}))
 	// Intn(20)=19 → d20=20, NPC mods=3 → total=23 vs AC=1 → CritSuccess (23 >= 1+10=11)
-	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil)
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil, nil)
 	assert.True(t, cbt.HasCondition("p1", "dying"), "player at 0 HP must get dying condition")
 	assert.False(t, cbt.Combatants[0].IsDead(), "player must NOT be immediately dead — dying chain handles this")
 }
@@ -67,7 +67,7 @@ func TestResolveRound_NPCZeroHP_NoDyingCondition(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 	// Intn(20)=19 → crit success on Ganger → double damage kills it
-	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil)
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil, nil)
 	assert.True(t, cbt.Combatants[1].IsDead(), "NPC must die at 0 HP")
 	assert.False(t, cbt.HasCondition("n1", "dying"), "NPCs must NOT get dying condition — they just die")
 }
@@ -82,7 +82,7 @@ func TestResolveRound_PlayerZeroHP_DyingStacksIncludeWounded(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Alice"}))
 	// Intn(20)=19 → crit success → double damage kills player
-	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil)
+	_ = combat.ResolveRound(cbt, &fixedSrc{val: 19}, nil, nil)
 	assert.True(t, cbt.HasCondition("p1", "dying"))
 	assert.Equal(t, 3, cbt.DyingStacks("p1"), "dying stacks must be 1 + wounded(2) = 3")
 }
@@ -95,7 +95,7 @@ func TestResolveRound_AttackModifiers_ProneReducesRoll(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 	// Intn(20)=5 → d20=6, base mods = StrMod(2) + CombatProficiencyBonus(1,"trained")=3 → mods=5, prone=-2 → total = 6+5-2 = 9
-	events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil)
+	events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
 	var attackEvent *combat.RoundEvent
 	for i := range events {
 		if events[i].AttackResult != nil && events[i].ActorID == "p1" {

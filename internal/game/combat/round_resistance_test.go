@@ -53,7 +53,7 @@ func TestResolveRound_Resistance_NarrativeContainsResisted(t *testing.T) {
 	_ = npcID
 	err := cbt.QueueAction(playerID, combat.QueuedAction{Type: combat.ActionAttack, Target: "NPC"})
 	require.NoError(t, err)
-	events := combat.ResolveRound(cbt, src, nil)
+	events := combat.ResolveRound(cbt, src, nil, nil)
 	require.NotEmpty(t, events)
 	found := false
 	for _, e := range events {
@@ -71,7 +71,7 @@ func TestResolveRound_Weakness_NarrativeContainsWeak(t *testing.T) {
 	_ = npcID
 	err := cbt.QueueAction(playerID, combat.QueuedAction{Type: combat.ActionAttack, Target: "NPC"})
 	require.NoError(t, err)
-	events := combat.ResolveRound(cbt, src, nil)
+	events := combat.ResolveRound(cbt, src, nil, nil)
 	require.NotEmpty(t, events)
 	found := false
 	for _, e := range events {
@@ -88,7 +88,7 @@ func TestResolveRound_Resistance_MinZero(t *testing.T) {
 	cbt, playerID, npcID := makeResistanceCombat(t, "piercing", map[string]int{"piercing": 1000}, nil)
 	err := cbt.QueueAction(playerID, combat.QueuedAction{Type: combat.ActionAttack, Target: "NPC"})
 	require.NoError(t, err)
-	combat.ResolveRound(cbt, src, nil)
+	combat.ResolveRound(cbt, src, nil, nil)
 	npc := findCombatantInCbt(cbt, npcID)
 	require.NotNil(t, npc)
 	assert.GreaterOrEqual(t, npc.CurrentHP, 0, "HP must not go below 0")
@@ -101,7 +101,7 @@ func TestResolveRound_NoResistance_UnchangedDamage(t *testing.T) {
 	cbt, playerID, npcID := makeResistanceCombat(t, "fire", map[string]int{"piercing": 5}, nil)
 	err := cbt.QueueAction(playerID, combat.QueuedAction{Type: combat.ActionAttack, Target: "NPC"})
 	require.NoError(t, err)
-	combat.ResolveRound(cbt, src, nil)
+	combat.ResolveRound(cbt, src, nil, nil)
 	npc := findCombatantInCbt(cbt, npcID)
 	require.NotNil(t, npc)
 	// NPC should have taken normal damage (no resistance to fire)

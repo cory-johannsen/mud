@@ -56,7 +56,7 @@ func TestResolveRound_ActionStride_Toward_IncreasesPosition(t *testing.T) {
 	_ = cbt.StartRound(3)
 	_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStride, Direction: "toward"})
 	_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
-	_ = combat.ResolveRound(cbt, src, func(id string, hp int) {})
+	_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil)
 	assert.Equal(t, 25, p1.Position, "player.Position should be 25 after striding toward from 0")
 }
 
@@ -73,6 +73,6 @@ func TestResolveRound_ActionStride_Away_DecreasesPosition(t *testing.T) {
 	_ = cbt.StartRound(3)
 	_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionStride, Direction: "away"})
 	_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
-	_ = combat.ResolveRound(cbt, src, func(id string, hp int) {})
+	_ = combat.ResolveRound(cbt, src, func(id string, hp int) {}, nil)
 	assert.Equal(t, 0, p1.Position, "player.Position should be 0 after striding away from 25")
 }

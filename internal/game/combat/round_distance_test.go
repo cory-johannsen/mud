@@ -56,7 +56,7 @@ func TestRangeEnforcement_MeleeAttack_BeyondMeleeRange_Misses(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {})
+	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
 
 	var found bool
 	for _, e := range events {
@@ -81,7 +81,7 @@ func TestRangeEnforcement_MeleeAttack_AtMeleeRange_CanResolve(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {})
+	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
 
 	for _, e := range events {
 		if e.ActorID == "p1" && e.ActionType == combat.ActionAttack {
@@ -122,7 +122,7 @@ func TestRangeEnforcement_Property_MeleeAlwaysMissesIfDistanceOver5(t *testing.T
 
 		// val=18 → would hit any AC if not blocked by range.
 		src := fixedSrcDist{val: 18}
-		events := combat.ResolveRound(cbt, src, func(_ string, _ int) {})
+		events := combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
 
 		for _, e := range events {
 			if e.ActorID == "p1" && e.ActionType == combat.ActionAttack {
@@ -174,7 +174,7 @@ func TestRangeEnforcement_RangedWeapon_ExtremeRange_Misses(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 	src := fixedSrcDist{val: 18}
-	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {})
+	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
 
 	var found bool
 	for _, e := range events {
@@ -226,7 +226,7 @@ func TestRangeEnforcement_RangedWeapon_WithinRange_CanResolve(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
 	src := fixedSrcDist{val: 18}
-	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {})
+	events := combat.ResolveRound(cbt, src, func(_ string, _ int) {}, nil)
 
 	for _, e := range events {
 		if e.ActorID == "p1" && e.ActionType == combat.ActionAttack {

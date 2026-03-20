@@ -87,8 +87,8 @@ func TestApplyPassiveFeats_SuckerPunch_OnGrabbed(t *testing.T) {
 		t.Fatalf("QueueAction n1 without: %v", err)
 	}
 
-	combat.ResolveRound(cbtWith, src, noopUpdater)
-	combat.ResolveRound(cbtWithout, src, noopUpdater)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -119,8 +119,8 @@ func TestApplyPassiveFeats_SuckerPunch_OnHidden(t *testing.T) {
 		t.Fatalf("QueueAction n1 without: %v", err)
 	}
 
-	combat.ResolveRound(cbtWith, src, noopUpdater)
-	combat.ResolveRound(cbtWithout, src, noopUpdater)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -156,8 +156,8 @@ func TestApplyPassiveFeats_SuckerPunch_StillTriggersOnFlatFooted(t *testing.T) {
 		t.Fatalf("QueueAction n1 without: %v", err)
 	}
 
-	combat.ResolveRound(cbtWith, src, noopUpdater)
-	combat.ResolveRound(cbtWithout, src, noopUpdater)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -187,8 +187,8 @@ func TestApplyPassiveFeats_SuckerPunch_NotTriggeredIfNoCondition(t *testing.T) {
 		t.Fatalf("QueueAction n1 without: %v", err)
 	}
 
-	combat.ResolveRound(cbtWith, src, noopUpdater)
-	combat.ResolveRound(cbtWithout, src, noopUpdater)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -246,7 +246,7 @@ func TestApplyPassiveFeats_SuckerPunch_HiddenClearedEvenOnMiss(t *testing.T) {
 	}
 
 	initialHP := cbt.Combatants[1].CurrentHP
-	combat.ResolveRound(cbt, src, noopUpdater)
+	combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	// No damage on miss — HP unchanged.
 	if cbt.Combatants[1].CurrentHP != initialHP {
@@ -291,8 +291,8 @@ func TestResolveRound_SuckerPunch_HiddenStrikeFirstOnlyTriggersSneak(t *testing.
 	initialHPHidden := cbtHidden.Combatants[1].CurrentHP
 	initialHPVisible := cbtVisible.Combatants[1].CurrentHP
 
-	combat.ResolveRound(cbtHidden, src, noopUpdater)
-	combat.ResolveRound(cbtVisible, src, noopUpdater)
+	combat.ResolveRound(cbtHidden, src, noopUpdater, nil)
+	combat.ResolveRound(cbtVisible, src, noopUpdater, nil)
 
 	finalHPHidden := cbtHidden.Combatants[1].CurrentHP
 	finalHPVisible := cbtVisible.Combatants[1].CurrentHP
@@ -339,7 +339,7 @@ func TestProperty_SuckerPunch_Extended_DamageNonNegative(t *testing.T) {
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 
-		combat.ResolveRound(cbt, src, noopUpdater)
+		combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 		finalHP := cbt.Combatants[1].CurrentHP
 		if finalHP > initialHP {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
 )
 
@@ -52,7 +53,7 @@ func TestResolveRound_AllPass(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -80,7 +81,7 @@ func TestResolveRound_AttackHits(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	var attackEv *combat.RoundEvent
 	for i := range events {
@@ -121,7 +122,7 @@ func TestResolveRound_AttackKills(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	combat.ResolveRound(cbt, src, updater)
+	combat.ResolveRound(cbt, src, updater, nil)
 
 	if cbt.Combatants[1].CurrentHP != 0 {
 		t.Errorf("expected Ganger HP=0, got %d", cbt.Combatants[1].CurrentHP)
@@ -146,7 +147,7 @@ func TestResolveRound_Strike_TwoAttacks(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	strikeCount := 0
 	for _, ev := range events {
@@ -172,7 +173,7 @@ func TestResolveRound_Strike_MAPPenalty(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	var strikeEvents []combat.RoundEvent
 	for _, ev := range events {
@@ -208,7 +209,7 @@ func TestResolveRound_DeadCombatantSkipped(t *testing.T) {
 	}
 	// n1 is dead; StartRound already excluded it from ActionQueues, so no queue action needed.
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	for _, ev := range events {
 		if ev.ActorID == "n1" {
@@ -230,7 +231,7 @@ func TestResolveRound_Strike_TargetDeadAtStart(t *testing.T) {
 		t.Fatalf("QueueAction p1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	var strikeEvents []combat.RoundEvent
 	for _, ev := range events {
@@ -324,8 +325,8 @@ func TestResolveRound_ConditionDamageBonusApplied_Attack(t *testing.T) {
 		t.Fatalf("QueueAction n1 (ref): %v", err)
 	}
 
-	combat.ResolveRound(cbt, src, noopUpdater)
-	combat.ResolveRound(cbtRef, src, noopUpdater)
+	combat.ResolveRound(cbt, src, noopUpdater, nil)
+	combat.ResolveRound(cbtRef, src, noopUpdater, nil)
 
 	gangerWithBonus := cbt.Combatants[1].CurrentHP
 	gangerNoBonus := cbtRef.Combatants[1].CurrentHP
@@ -403,8 +404,8 @@ func TestResolveRound_ConditionDamageBonusApplied_Strike(t *testing.T) {
 		t.Fatalf("QueueAction n1 (ref): %v", err)
 	}
 
-	combat.ResolveRound(cbt, src, noopUpdater)
-	combat.ResolveRound(cbtRef, src, noopUpdater)
+	combat.ResolveRound(cbt, src, noopUpdater, nil)
+	combat.ResolveRound(cbtRef, src, noopUpdater, nil)
 
 	gangerWithBonus := cbt.Combatants[1].CurrentHP
 	gangerNoBonus := cbtRef.Combatants[1].CurrentHP
@@ -450,7 +451,7 @@ func TestProperty_ResolveRound_DamageBonusNeverNegatesHit(t *testing.T) {
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 
 		initialHP := cbt.Combatants[1].CurrentHP
-		combat.ResolveRound(cbt, src, noopUpdater)
+		combat.ResolveRound(cbt, src, noopUpdater, nil)
 		finalHP := cbt.Combatants[1].CurrentHP
 
 		if finalHP > initialHP {
@@ -527,8 +528,8 @@ func TestResolveRound_SuckerPunch_FlatFooted_AddsDamage(t *testing.T) {
 		t.Fatalf("QueueAction n1 without: %v", err)
 	}
 
-	combat.ResolveRound(cbtWith, src, noopUpdater)
-	combat.ResolveRound(cbtWithout, src, noopUpdater)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -560,8 +561,8 @@ func TestResolveRound_SuckerPunch_NotFlatFooted_NoBonus(t *testing.T) {
 		t.Fatalf("QueueAction n1 without: %v", err)
 	}
 
-	combat.ResolveRound(cbtWith, src, noopUpdater)
-	combat.ResolveRound(cbtWithout, src, noopUpdater)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -588,7 +589,7 @@ func TestProperty_SuckerPunch_DamageNonNegative(t *testing.T) {
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 
-		combat.ResolveRound(cbt, src, noopUpdater)
+		combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 		finalHP := cbt.Combatants[1].CurrentHP
 		if finalHP > initialHP {
@@ -659,8 +660,8 @@ func TestResolveRound_PredatorsEye_MatchingType_AddsDamage(t *testing.T) {
 		t.Fatalf("QueueAction n1 without: %v", err)
 	}
 
-	combat.ResolveRound(cbtWith, src, noopUpdater)
-	combat.ResolveRound(cbtWithout, src, noopUpdater)
+	combat.ResolveRound(cbtWith, src, noopUpdater, nil)
+	combat.ResolveRound(cbtWithout, src, noopUpdater, nil)
 
 	hpWith := cbtWith.Combatants[1].CurrentHP
 	hpWithout := cbtWithout.Combatants[1].CurrentHP
@@ -693,8 +694,8 @@ func TestResolveRound_PredatorsEye_NonMatchingType_NoBonus(t *testing.T) {
 		t.Fatalf("QueueAction n1 no feat: %v", err)
 	}
 
-	combat.ResolveRound(cbtFeat, src, noopUpdater)
-	combat.ResolveRound(cbtNoFeat, src, noopUpdater)
+	combat.ResolveRound(cbtFeat, src, noopUpdater, nil)
+	combat.ResolveRound(cbtNoFeat, src, noopUpdater, nil)
 
 	hpFeat := cbtFeat.Combatants[1].CurrentHP
 	hpNoFeat := cbtNoFeat.Combatants[1].CurrentHP
@@ -727,8 +728,8 @@ func TestResolveRound_PredatorsEye_EmptyFavoredTarget_NoBonus(t *testing.T) {
 		t.Fatalf("QueueAction n1 no feat: %v", err)
 	}
 
-	combat.ResolveRound(cbtFeat, src, noopUpdater)
-	combat.ResolveRound(cbtNoFeat, src, noopUpdater)
+	combat.ResolveRound(cbtFeat, src, noopUpdater, nil)
+	combat.ResolveRound(cbtNoFeat, src, noopUpdater, nil)
 
 	hpFeat := cbtFeat.Combatants[1].CurrentHP
 	hpNoFeat := cbtNoFeat.Combatants[1].CurrentHP
@@ -756,7 +757,7 @@ func TestProperty_PredatorsEye_DamageNonNegative(t *testing.T) {
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 
-		combat.ResolveRound(cbt, src, noopUpdater)
+		combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 		finalHP := cbt.Combatants[1].CurrentHP
 		if finalHP > initialHP {
@@ -799,7 +800,7 @@ func TestResolveRound_InitiativeBonus(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	var attackEv *combat.RoundEvent
 	for i := range events {
@@ -830,7 +831,7 @@ func TestPropertyResolveRound_DamageNeverExceedsStartingHP(t *testing.T) {
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Ganger"})
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass})
 
-		combat.ResolveRound(cbt, src, noopUpdater)
+		combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 		for _, c := range cbt.Combatants {
 			if c.CurrentHP < 0 {
@@ -838,4 +839,48 @@ func TestPropertyResolveRound_DamageNeverExceedsStartingHP(t *testing.T) {
 			}
 		}
 	})
+}
+
+// TestResolveRound_NilReactionFn_NoPanic: passing nil for reactionFn must not panic.
+// REQ-RXN18: nil reactionFn must not panic.
+func TestResolveRound_NilReactionFn_NoPanic(t *testing.T) {
+	cbt := makeRoundCombat(t)
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+	src := fixedSrc{val: 0}
+	// Must not panic when reactionFn is nil.
+	_ = combat.ResolveRound(cbt, src, noopUpdater, nil)
+}
+
+// TestResolveRound_ReactionFn_CalledOnDamageTaken: reactionFn must be called with
+// TriggerOnDamageTaken when an NPC attacks a player and deals damage.
+func TestResolveRound_ReactionFn_CalledOnDamageTaken(t *testing.T) {
+	cbt := makeRoundCombat(t)
+	// NPC attacks player; val=19 guarantees CritSuccess hit.
+	src := fixedSrc{val: 19}
+
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Alice"}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+
+	called := false
+	fn := reaction.ReactionCallback(func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+		if uid == "p1" && trigger == reaction.TriggerOnDamageTaken {
+			called = true
+		}
+		return false, nil
+	})
+
+	_ = combat.ResolveRound(cbt, src, noopUpdater, fn)
+
+	if !called {
+		t.Error("expected reactionFn to be called with TriggerOnDamageTaken for player target")
+	}
 }

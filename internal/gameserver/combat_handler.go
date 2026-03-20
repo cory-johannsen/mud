@@ -13,6 +13,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -1370,13 +1371,23 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 		return destroyed
 	}
-	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, coverDegrader)
+	// Build a per-round dispatch wrapper: for each player in this combat, call their stored ReactionFn.
+	reactionFn := reaction.ReactionCallback(func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+		if sess, ok := h.sessions.GetPlayer(uid); ok && sess.ReactionFn != nil {
+			return sess.ReactionFn(uid, trigger, ctx)
+		}
+		return false, nil
+	})
+	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
 
 	// Reset per-round loadout swap flag for all players in this combat.
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindPlayer {
 			if sess, found := h.sessions.GetPlayer(c.ID); found && sess.LoadoutSet != nil {
 				sess.LoadoutSet.ResetRound()
+			}
+			if sess, found := h.sessions.GetPlayer(c.ID); found {
+				sess.ReactionsRemaining = 1
 			}
 		}
 	}

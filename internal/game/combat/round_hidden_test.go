@@ -63,7 +63,7 @@ func TestResolveRound_HiddenFlatCheckFail_MissesAttack(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	// Find the NPC attack event.
 	var npcEvent *combat.RoundEvent
@@ -114,7 +114,7 @@ func TestResolveRound_HiddenFlatCheckPass_HitsNormally(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	// Find the NPC attack event.
 	var npcEvent *combat.RoundEvent
@@ -164,7 +164,7 @@ func TestResolveRound_HiddenClearedAfterNPCAttack(t *testing.T) {
 				t.Fatalf("QueueAction n1: %v", err)
 			}
 
-			combat.ResolveRound(cbt, src, noopUpdater)
+			combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 			if player.Hidden {
 				t.Errorf("expected player.Hidden=false after NPC targeted player (flatRollVal=%d)", val)
@@ -191,7 +191,7 @@ func TestResolveRound_HiddenFlatCheck_StrikeSkipsBothOnFail(t *testing.T) {
 		t.Fatalf("QueueAction n1: %v", err)
 	}
 
-	events := combat.ResolveRound(cbt, src, noopUpdater)
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 	// Count NPC Strike events.
 	var npcStrikeEvents []combat.RoundEvent
@@ -229,7 +229,7 @@ func TestPropertyResolveRound_HiddenFlatCheck_NeverDamageOnFail(t *testing.T) {
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass})
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Alice"})
 
-		combat.ResolveRound(cbt, src, noopUpdater)
+		combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 		if player.CurrentHP != initialHP {
 			rt.Errorf("flatRollVal=%d (flat check=%d ≤ 10): expected no damage, got initialHP=%d finalHP=%d",
@@ -255,7 +255,7 @@ func TestPropertyResolveRound_HiddenFlatCheck_StrikeNeverDamageOnFail(t *testing
 		_ = cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass})
 		_ = cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionStrike, Target: "Alice"})
 
-		combat.ResolveRound(cbt, src, noopUpdater)
+		combat.ResolveRound(cbt, src, noopUpdater, nil)
 
 		if player.CurrentHP != initialHP {
 			rt.Errorf("flatRollVal=%d (flat check=%d ≤ 10): expected no damage from Strike, got initialHP=%d finalHP=%d",

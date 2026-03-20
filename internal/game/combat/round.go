@@ -8,6 +8,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 )
 
 // CheckReactiveStrikes returns attack events from all NPCs that are adjacent
@@ -357,13 +358,19 @@ func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Sourc
 // coverDegrader(roomID, equipID) is called when an attack misses the target but would have
 // hit without the cover penalty (i.e., the cover absorbed the shot). Returns true when the
 // cover is destroyed. May be nil (no-op; treated as always returning false).
-func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int), coverDegraderArgs ...func(roomID, equipID string) bool) []RoundEvent {
+func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int), reactionFn reaction.ReactionCallback, coverDegraderArgs ...func(roomID, equipID string) bool) []RoundEvent {
 	if targetUpdater == nil {
 		targetUpdater = func(id string, hp int) {}
 	}
 	coverDegrader := func(roomID, equipID string) bool { return false }
 	if len(coverDegraderArgs) > 0 && coverDegraderArgs[0] != nil {
 		coverDegrader = coverDegraderArgs[0]
+	}
+	fireReaction := func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) {
+		if reactionFn == nil {
+			return
+		}
+		_, _ = reactionFn(uid, trigger, ctx)
 	}
 
 	var events []RoundEvent
@@ -415,6 +422,19 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 							actor.Position = 0
 						} else {
 							actor.Position -= 25
+						}
+					}
+				}
+				// REQ-RXN19: TriggerOnEnemyMoveAdjacent fires when an NPC moves into melee range of a player.
+				if actor.Kind == KindNPC {
+					for _, c := range cbt.Combatants {
+						if c.Kind == KindPlayer && !c.IsDead() {
+							if posDist(actor.Position, c.Position) <= 5 {
+								fireReaction(c.ID, reaction.TriggerOnEnemyMoveAdjacent, reaction.ReactionContext{
+									TriggerUID: c.ID,
+									SourceUID:  actor.ID,
+								})
+							}
 						}
 					}
 				}
@@ -565,11 +585,32 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg += applyPassiveFeats(cbt, actor, target, dmg, src)
 				dmg = hookDamageRoll(cbt, actor, target, dmg)
 				dmg, rwAnnotations := applyResistanceWeakness(target, r.DamageType, dmg)
+				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
+				if target.Kind == KindPlayer && dmg > 0 {
+					fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+						TriggerUID:    target.ID,
+						SourceUID:     actor.ID,
+						DamagePending: &dmg,
+					})
+				}
 				if dmg > 0 {
 					target.ApplyDamage(dmg)
 					targetUpdater(target.ID, target.CurrentHP)
 					if actor.Kind == KindPlayer && target.Kind == KindNPC {
 						cbt.RecordDamage(actor.ID, dmg)
+					}
+					// REQ-RXN19: TriggerOnAllyDamaged fires for other players when a player ally takes damage.
+					if target.Kind == KindPlayer {
+						for _, c := range cbt.Combatants {
+							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
+								dmgCopy := dmg
+								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+									TriggerUID:    c.ID,
+									SourceUID:     actor.ID,
+									DamagePending: &dmgCopy,
+								})
+							}
+						}
 					}
 				}
 				applyAttackConditions(cbt, actor, target, r)
@@ -662,11 +703,32 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
 				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
 				dmg1, rwAnnotations1 := applyResistanceWeakness(target, r1.DamageType, dmg1)
+				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
+				if target.Kind == KindPlayer && dmg1 > 0 {
+					fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+						TriggerUID:    target.ID,
+						SourceUID:     actor.ID,
+						DamagePending: &dmg1,
+					})
+				}
 				if dmg1 > 0 {
 					target.ApplyDamage(dmg1)
 					targetUpdater(target.ID, target.CurrentHP)
 					if actor.Kind == KindPlayer && target.Kind == KindNPC {
 						cbt.RecordDamage(actor.ID, dmg1)
+					}
+					// REQ-RXN19: TriggerOnAllyDamaged fires for other players when a player ally takes damage.
+					if target.Kind == KindPlayer {
+						for _, c := range cbt.Combatants {
+							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
+								dmgCopy1 := dmg1
+								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+									TriggerUID:    c.ID,
+									SourceUID:     actor.ID,
+									DamagePending: &dmgCopy1,
+								})
+							}
+						}
 					}
 				}
 				applyAttackConditions(cbt, actor, target, r1)
@@ -735,11 +797,32 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)
 				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
 				dmg2, rwAnnotations2 := applyResistanceWeakness(target, r2.DamageType, dmg2)
+				// REQ-RXN19: TriggerOnDamageTaken fires before damage is applied so reduce_damage can modify it.
+				if target.Kind == KindPlayer && dmg2 > 0 {
+					fireReaction(target.ID, reaction.TriggerOnDamageTaken, reaction.ReactionContext{
+						TriggerUID:    target.ID,
+						SourceUID:     actor.ID,
+						DamagePending: &dmg2,
+					})
+				}
 				if dmg2 > 0 {
 					target.ApplyDamage(dmg2)
 					targetUpdater(target.ID, target.CurrentHP)
 					if actor.Kind == KindPlayer && target.Kind == KindNPC {
 						cbt.RecordDamage(actor.ID, dmg2)
+					}
+					// REQ-RXN19: TriggerOnAllyDamaged fires for other players when a player ally takes damage.
+					if target.Kind == KindPlayer {
+						for _, c := range cbt.Combatants {
+							if c.Kind == KindPlayer && c.ID != target.ID && !c.IsDead() {
+								dmgCopy2 := dmg2
+								fireReaction(c.ID, reaction.TriggerOnAllyDamaged, reaction.ReactionContext{
+									TriggerUID:    c.ID,
+									SourceUID:     actor.ID,
+									DamagePending: &dmgCopy2,
+								})
+							}
+						}
 					}
 				}
 				applyAttackConditions(cbt, actor, target, r2)
@@ -761,7 +844,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 			case ActionFireAutomatic:
 				events = append(events, resolveFireAutomatic(cbt, actor, action, src, coverDegrader)...)
 			case ActionThrow:
-				events = append(events, resolveThrow(cbt, actor, action, src)...)
+				events = append(events, resolveThrow(cbt, actor, action, src, fireReaction)...)
 			}
 		}
 	}
@@ -961,7 +1044,7 @@ func explosiveTargetsOf(cbt *Combat, actor *Combatant, grenade *inventory.Explos
 }
 
 // resolveThrow handles ActionThrow: explosive area effect against all living enemies.
-func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []RoundEvent {
+func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source, fireReaction func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext)) []RoundEvent {
 	if cbt.invRegistry == nil {
 		return []RoundEvent{{ActionType: ActionThrow, ActorID: actor.ID, ActorName: actor.Name,
 			Narrative: fmt.Sprintf("%s fumbles the throw.", actor.Name)}}
@@ -981,6 +1064,21 @@ func resolveThrow(cbt *Combat, actor *Combatant, qa QueuedAction, src Source) []
 	var events []RoundEvent
 	for i, r := range results {
 		target := targets[i]
+		// REQ-RXN19: TriggerOnSaveFail / TriggerOnSaveCritFail for explosive saves.
+		if target.Kind == KindPlayer {
+			switch r.SaveResult {
+			case Failure:
+				fireReaction(target.ID, reaction.TriggerOnSaveFail, reaction.ReactionContext{
+					TriggerUID: target.ID,
+					SourceUID:  actor.ID,
+				})
+			case CritFailure:
+				fireReaction(target.ID, reaction.TriggerOnSaveCritFail, reaction.ReactionContext{
+					TriggerUID: target.ID,
+					SourceUID:  actor.ID,
+				})
+			}
+		}
 		if r.BaseDamage > 0 {
 			target.ApplyDamage(r.BaseDamage)
 			if actor.Kind == KindPlayer && target.Kind == KindNPC {

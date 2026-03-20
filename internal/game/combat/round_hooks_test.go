@@ -64,7 +64,7 @@ func TestResolveRound_AttackRollHook_ForcesHit(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Bob"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil)
+	events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
 	require.NotEmpty(t, events)
 
 	hitFound := false
@@ -98,7 +98,7 @@ func TestResolveRound_DamageRollHook_OverridesDamage(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Bob"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil)
+	combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
 
 	for _, c := range cbt.Combatants {
 		if c.ID == "n1" {
@@ -127,7 +127,7 @@ func TestResolveRound_ConditionApplyHook_CancelsCondition(t *testing.T) {
 	require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Bob"}))
 	require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-	combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil)
+	combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
 
 	assert.False(t, cbt.HasCondition("n1", "flat_footed"),
 		"on_condition_apply returning false must cancel flat_footed application")
@@ -147,7 +147,7 @@ func TestProperty_AttackRollHook_OutcomeMatchesHookValue(t *testing.T) {
 		require.NoError(t, cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Bob"}))
 		require.NoError(t, cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionPass}))
 
-		events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil)
+		events := combat.ResolveRound(cbt, &fixedSrc{val: 5}, nil, nil)
 
 		// Bob's AC = 30; hookVal in [1,50], so hookVal < 30 = miss, hookVal >= 30 = hit
 		for _, e := range events {
