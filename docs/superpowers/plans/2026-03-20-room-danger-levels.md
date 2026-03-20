@@ -1226,79 +1226,12 @@ git commit -m "feat(gameserver): add CheckSafeViolation enforcement"
 ## Task 10: Calendar decay hook
 
 **Files:**
+- Create: `internal/gameserver/wanted_decay_test.go`
 - Create: `internal/gameserver/wanted_decay.go`
 
 ### Steps
 
-- [ ] Create `internal/gameserver/wanted_decay.go`:
-
-```go
-package gameserver
-
-import (
-	"context"
-
-	"github.com/cory-johannsen/mud/internal/game/session"
-	"go.uber.org/zap"
-)
-
-// SessionLister provides read access to all online player sessions.
-type SessionLister interface {
-	AllPlayers() []*session.PlayerSession
-}
-
-// StartWantedDecay subscribes to the calendar and decrements WantedLevel
-// for all online players once per in-game day.
-// It MUST be called after GameServiceServer is fully initialized.
-// Precondition: cal MUST NOT be nil.
-// Returns a stop function; call it to unsubscribe and stop the goroutine.
-func StartWantedDecay(cal *GameCalendar, sessions SessionLister, wantedRepo WantedSaver, logger *zap.Logger) func() {
-	ch := make(chan GameDateTime, 4)
-	cal.Subscribe(ch)
-	var lastDecayDay int
-	stop := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case dt := <-ch:
-				if dt.Day == lastDecayDay {
-					continue
-				}
-				lastDecayDay = dt.Day
-				decayWantedLevels(sessions, wantedRepo, dt.Day, logger)
-			case <-stop:
-				cal.Unsubscribe(ch)
-				return
-			}
-		}
-	}()
-	return func() { close(stop) }
-}
-
-func decayWantedLevels(sessions SessionLister, wantedRepo WantedSaver, currentDay int, logger *zap.Logger) {
-	for _, sess := range sessions.AllPlayers() {
-		for zoneID, level := range sess.WantedLevel {
-			if level <= 0 {
-				continue
-			}
-			if sess.LastViolationDay[zoneID] >= currentDay {
-				continue // violated today or in the future; no decay
-			}
-			newLevel := level - 1
-			sess.WantedLevel[zoneID] = newLevel
-			if err := wantedRepo.Upsert(context.Background(), sess.CharacterID, zoneID, newLevel); err != nil {
-				logger.Warn("failed to persist wanted decay",
-					zap.String("uid", sess.UID),
-					zap.String("zone", zoneID),
-					zap.Error(err),
-				)
-			}
-		}
-	}
-}
-```
-
-- [ ] Write tests for `decayWantedLevels` first. Create `internal/gameserver/wanted_decay_test.go`.
+- [ ] Write `internal/gameserver/wanted_decay_test.go` with the failing tests first.
 
 Note: `decayWantedLevels` is an unexported function, so these tests use `package gameserver` (same-package). They are pure function tests — no DB or calendar required.
 
@@ -1394,21 +1327,89 @@ func TestDecayWantedLevels_NoDecayWhenViolatedToday(t *testing.T) {
 }
 ```
 
-- [ ] Run the decay tests (must fail before implementation, pass after):
+- [ ] Run the decay tests to verify they fail (implementation does not exist yet):
 
 ```
 go test ./internal/gameserver/... -run TestDecayWantedLevels -v
 ```
 
-Expected output after implementation: both tests PASS.
+Expected output: compilation error or test failures — `decayWantedLevels` is undefined.
 
-- [ ] Verify the code compiles (no test file required for this task; the enforcement tests already exercise the WantedSaver interface):
+- [ ] Create `internal/gameserver/wanted_decay.go`:
+
+```go
+package gameserver
+
+import (
+	"context"
+
+	"github.com/cory-johannsen/mud/internal/game/session"
+	"go.uber.org/zap"
+)
+
+// SessionLister provides read access to all online player sessions.
+type SessionLister interface {
+	AllPlayers() []*session.PlayerSession
+}
+
+// StartWantedDecay subscribes to the calendar and decrements WantedLevel
+// for all online players once per in-game day.
+// It MUST be called after GameServiceServer is fully initialized.
+// Precondition: cal MUST NOT be nil.
+// Returns a stop function; call it to unsubscribe and stop the goroutine.
+func StartWantedDecay(cal *GameCalendar, sessions SessionLister, wantedRepo WantedSaver, logger *zap.Logger) func() {
+	ch := make(chan GameDateTime, 4)
+	cal.Subscribe(ch)
+	var lastDecayDay int
+	stop := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case dt := <-ch:
+				if dt.Day == lastDecayDay {
+					continue
+				}
+				lastDecayDay = dt.Day
+				decayWantedLevels(sessions, wantedRepo, dt.Day, logger)
+			case <-stop:
+				cal.Unsubscribe(ch)
+				return
+			}
+		}
+	}()
+	return func() { close(stop) }
+}
+
+func decayWantedLevels(sessions SessionLister, wantedRepo WantedSaver, currentDay int, logger *zap.Logger) {
+	for _, sess := range sessions.AllPlayers() {
+		for zoneID, level := range sess.WantedLevel {
+			if level <= 0 {
+				continue
+			}
+			if sess.LastViolationDay[zoneID] >= currentDay {
+				continue // violated today or in the future; no decay
+			}
+			newLevel := level - 1
+			sess.WantedLevel[zoneID] = newLevel
+			if err := wantedRepo.Upsert(context.Background(), sess.CharacterID, zoneID, newLevel); err != nil {
+				logger.Warn("failed to persist wanted decay",
+					zap.String("uid", sess.UID),
+					zap.String("zone", zoneID),
+					zap.Error(err),
+				)
+			}
+		}
+	}
+}
+```
+
+- [ ] Run the decay tests to verify they pass:
 
 ```
-go build ./internal/gameserver/...
+go test ./internal/gameserver/... -run TestDecayWantedLevels -v
 ```
 
-Expected output: no errors.
+Expected output: both `TestDecayWantedLevels_DecaysWhenNoViolationToday` and `TestDecayWantedLevels_NoDecayWhenViolatedToday` PASS.
 
 - [ ] Wire `StartWantedDecay` into the server startup in `internal/gameserver/grpc_service.go`.
 
@@ -1452,7 +1453,7 @@ Note: If `wantedRepo` is nil (e.g., in tests), guard with `if s.wantedRepo != ni
 - [ ] Commit:
 
 ```
-git add internal/gameserver/wanted_decay.go internal/gameserver/grpc_service.go
+git add internal/gameserver/wanted_decay.go internal/gameserver/wanted_decay_test.go internal/gameserver/grpc_service.go
 git commit -m "feat(gameserver): add calendar-driven WantedLevel decay"
 ```
 
