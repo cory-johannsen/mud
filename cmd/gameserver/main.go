@@ -38,17 +38,6 @@ import (
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
-// calendarWarnLogger adapts *zap.SugaredLogger to the interface{ Warn(string, ...any) }
-// required by GameCalendar.SetLogger.
-type calendarWarnLogger struct{ s interface{ Warn(...interface{}) } }
-
-func (l calendarWarnLogger) Warn(msg string, args ...any) {
-	iargs := make([]interface{}, len(args))
-	for i, a := range args {
-		iargs[i] = a
-	}
-	l.s.Warn(append([]interface{}{msg}, iargs...)...)
-}
 
 func main() {
 	start := time.Now()
@@ -542,7 +531,7 @@ func main() {
 		logger.Fatal("loading calendar state", zap.Error(err))
 	}
 	gameCalendar := gameserver.NewGameCalendar(gameClock, calDay, calMonth, calendarRepo)
-	gameCalendar.SetLogger(calendarWarnLogger{logger.Sugar()})
+	gameCalendar.SetLogger(logger.Sugar())
 	stopCalendar := gameCalendar.Start()
 	defer stopCalendar()
 
@@ -587,7 +576,7 @@ func main() {
 	// Create gRPC service
 	grpcService = gameserver.NewGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameClock, gameCalendar,
+		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameCalendar,
 		jobReg, condRegistry, techReg,
 		hardwiredTechRepo, preparedTechRepo, spontaneousTechRepo, innateTechRepo,
 		*loadoutsDir,

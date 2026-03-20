@@ -77,7 +77,7 @@ func newSpontaneousSvc(t *testing.T, repo SpontaneousUsePoolRepo) (*GameServiceS
 		NewChatHandler(sessMgr),
 		logger,
 		nil, nil, nil, npcMgr, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil,
 		nil, nil, nil,

@@ -102,7 +102,7 @@ func newMoveTestService(t *testing.T, worldMgr *world.Manager, sessMgr *session.
 		command.DefaultRegistry(),
 		wh, ch, logger,
 		nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,

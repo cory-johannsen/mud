@@ -57,7 +57,7 @@ type GameCalendar struct {
 	day         int
 	month       int
 	repo        CalendarRepo
-	logger      interface{ Warn(string, ...any) }
+	logger      interface{ Warnw(string, ...interface{}) }
 	subscribers map[chan<- GameDateTime]struct{}
 }
 
@@ -88,7 +88,7 @@ func NewGameCalendar(clock *GameClock, day, month int, repo CalendarRepo) *GameC
 }
 
 // SetLogger attaches a warn-level logger for Save failures. Optional.
-func (c *GameCalendar) SetLogger(l interface{ Warn(string, ...any) }) {
+func (c *GameCalendar) SetLogger(l interface{ Warnw(string, ...interface{}) }) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.logger = l
@@ -152,7 +152,7 @@ func (c *GameCalendar) Start() (stop func()) {
 					logger := c.logger
 					c.mu.Unlock()
 					if err := repo.Save(day, month); err != nil && logger != nil {
-						logger.Warn("GameCalendar: failed to save day/month", "error", err)
+						logger.Warnw("GameCalendar: failed to save day/month", "error", err)
 					}
 					c.mu.Lock()
 				}

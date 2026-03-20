@@ -33,7 +33,7 @@ func newJoinSvc(t *testing.T) (*GameServiceServer, *session.Manager, *CombatHand
 		NewChatHandler(sessMgr),
 		logger,
 		nil, nil, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil,
 		nil, nil, nil,

@@ -173,7 +173,6 @@ type GameServiceServer struct {
 	automapRepo                *postgres.AutomapRepository
 	invRegistry                *inventory.Registry
 	accountAdmin               AccountAdmin
-	clock                      *GameClock
 	calendar                   *GameCalendar
 	logger                     *zap.Logger
 	jobRegistry                *ruleset.JobRegistry
@@ -212,7 +211,6 @@ type GameServiceServer struct {
 // floorMgr may be nil (inventory get/drop will return errors).
 // roomEquipMgr may be nil (room equipment will not be shown in look).
 // invRegistry may be nil (item name resolution will fall back to ItemDefID).
-// clock may be nil (time-of-day events will not be broadcast to sessions).
 // calendar may be nil (time-of-day events will not include day/month).
 // jobRegistry may be nil (team affinity effects will not be applied on wear).
 // condRegistry may be nil (cross-team condition effects will be skipped).
@@ -246,7 +244,6 @@ func NewGameServiceServer(
 	automapRepo *postgres.AutomapRepository,
 	invRegistry *inventory.Registry,
 	accountAdmin AccountAdmin,
-	clock *GameClock,
 	calendar *GameCalendar,
 	jobRegistry *ruleset.JobRegistry,
 	condRegistry *condition.Registry,
@@ -291,7 +288,6 @@ func NewGameServiceServer(
 		automapRepo:                automapRepo,
 		invRegistry:                invRegistry,
 		accountAdmin:               accountAdmin,
-		clock:                      clock,
 		calendar:                   calendar,
 		logger:                     logger,
 		jobRegistry:                jobRegistry,

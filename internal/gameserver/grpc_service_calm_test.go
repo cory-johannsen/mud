@@ -39,7 +39,7 @@ func newCalmSvc(t *testing.T, mentalMgr *mentalstate.Manager, roller *dice.Rolle
 		NewChatHandler(sessMgr),
 		logger,
 		nil, roller, nil, npcMgr, combatHandler, nil,
-		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
 		nil, nil, condReg, nil, nil, nil, nil, nil, "",
 		nil, nil, nil,
 		nil, nil, nil,
