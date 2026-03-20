@@ -1,7 +1,7 @@
 # Feat Import — Design Spec
 
 **Date:** 2026-03-20
-**Status:** Draft
+**Status:** Approved
 **Feature:** `feat-import` (priority 260)
 **Dependencies:** none
 
@@ -123,11 +123,11 @@ Status key: **Covered** = existing feat already maps this PF2E feat; **Gap** = n
 
 | PF2E Name | Level | Status | Gunchete ID | Gunchete Name | Notes |
 |---|---|---|---|---|---|
-| Cat Fall | 1 | Covered | cat_fall | Fall Breaker | Direct map |
+| Cat Fall | 1 | Covered | fall_breaker | Fall Breaker | Direct map |
 | Quick Squeeze | 1 | Covered | quick_squeeze | Squeeze Through | Direct map |
 | Steady Balance | 1 | Covered | steady_balance | Street Footing | Direct map |
 | Assurance (Acrobatics) | 1 | Covered | assurance_parkour | Assurance (Parkour) | Direct map |
-| Acrobatic Performer | 1 | Gap | stunt_performance | Stunt Performance | Use parkour/stunts in performance |
+| Acrobatic Performer | 1 | Gap | acrobatic_performer | Acrobatic Performer | Incorporate acrobatic stunts into parkour-based performance; parkour skill feat |
 | Nimble Crawl | 2 | Gap | fast_crawl | Fast Crawl | Crawl faster without penalty |
 | Powerful Leap | 2 | Gap | power_jump | Power Jump | Jump higher and farther |
 | Rapid Mantel | 2 | Gap | quick_vault | Quick Vault | Pull yourself onto ledges quickly |
@@ -320,7 +320,7 @@ Status key: **Covered** = existing feat already maps this PF2E feat; **Gap** = n
 | PF2E Name | Level | Status | Gunchete ID | Gunchete Name | Notes |
 |---|---|---|---|---|---|
 | Experienced Tracker | 1 | Covered | trail_reader | Trail Reader | Direct map |
-| Forager | 1 | Covered | scavenger_eye | Scavenger's Eye | Direct map |
+| Forager | 1 | Covered | scavengers_eye | Scavenger's Eye | Direct map |
 | Survey Wildlife | 1 | Covered | zone_survey | Zone Survey | Direct map |
 | Terrain Expertise | 1 | Covered | zone_expertise | Zone Expertise | Direct map |
 | Assurance (Survival) | 1 | Covered | assurance_scavenging | Assurance (Scavenging) | Direct map |
@@ -395,7 +395,7 @@ Status key: **Covered** = existing feat already maps this PF2E feat; **Gap** = n
 | Impressive Performance | 1 | Covered | rep_play | Rep Play | Direct map |
 | Virtuosic Performer | 1 | Covered | signature_style | Signature Style | Direct map |
 | Assurance (Performance) | 1 | Covered | assurance_rep | Assurance (Rep) | Direct map |
-| Acrobatic Performer (Rep) | 1 | Gap | stunt_performance | Stunt Performance | Incorporate physical stunts into performance; NOTE: shared ID with parkour entry — treat as multi-skill feat |
+| Acrobatic Performer (Rep) | 1 | Gap | stunt_rep | Stunt Rep | Use physical stunts and acrobatics to enhance stage performance; rep skill feat distinct from parkour's acrobatic_performer |
 | Vicious Critique (Performance) | 1 | Gap | vicious_critique_rep | Vicious Critique (Rep) | Demoralize with scathing criticism via Performance |
 | Distracting Performance (Rep) | 2 | Gap | stage_diversion | Stage Diversion | Use performance to distract observers; Performance version |
 | Triumphant Boast | 2 | Gap | winners_speech | Winner's Speech | Inspire allies after a victory |
@@ -477,11 +477,13 @@ The `pf2e` field records the source PF2E feat name for traceability. It is not u
 
 Adding a new feat requires only a YAML entry — no code changes. The registry auto-indexes on load.
 
+The primary runtime access path for skill feats is `FeatRegistry.SkillFeatsForTrainedSkills(trained map[string]string)`, called during `ensureFeats` in character creation. It returns the union of all feat pools for skills where the player's proficiency is `"trained"` or better. A new skill feat added to `content/feats.yaml` with the correct `skill` field will automatically appear in this pool without any code changes.
+
 **Extension Point:**
 
 1. Add entry to `content/feats.yaml` in the appropriate section.
 2. Set `category`, `skill` (if skill feat), `pf2e` (source name), `active` (true if player-triggered), `description` (Gunchete-flavored).
-3. Restart server — feat is immediately available in the registry.
+3. Restart server — feat is immediately available via `SkillFeatsForTrainedSkills` and all registry indexes.
 
 ---
 
