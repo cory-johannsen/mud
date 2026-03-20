@@ -132,6 +132,21 @@ graph TD
 - **New HTN AI task**: add a compound or primitive task to a domain YAML file under `content/ai/`, with optional Lua precondition scripts in `content/scripts/ai/`.
 - **New technology effect type**: define the effect type in `internal/game/technology`, handle it in `internal/gameserver/tech_effect_resolver.go`.
 
+## In-Game Time
+
+The game clock runs at **1 real-world minute = 1 in-game hour**, giving a full 24-hour in-game day every 24 real minutes. The `GameClock` singleton goroutine in `internal/gameserver` advances the hour (0–23) every real minute and broadcasts a `TimeOfDayEvent` to all active sessions.
+
+All timed game mechanics (detention duration, merchant replenishment, WantedLevel decay, healer capacity reset, banker rate recalculation) are expressed in **in-game hours/minutes** and evaluated against the game clock — not wall-clock time. Feature specs that say "1 in-game hour" mean 1 real minute of elapsed play time.
+
+Conversion reference:
+
+| In-game duration | Real time |
+|---|---|
+| 30 in-game minutes | 30 real seconds |
+| 1 in-game hour | 1 real minute |
+| 8 in-game hours | 8 real minutes |
+| 1 in-game day (24h) | 24 real minutes |
+
 ## Known Constraints & Pitfalls
 
 - NEVER use DECSTBM (scroll region) telnet sequences — causes coordinate offset bugs in TinTin++ due to DECOM mode. Use the explicit row-addressed write functions in `screen.go` instead.
