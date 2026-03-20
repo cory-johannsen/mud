@@ -73,7 +73,7 @@ reaction:
 ## Reaction Economy
 
 ### REQ-RXN8
-`PlayerSession` in `internal/game/session/session.go` MUST gain an `int` field `ReactionsRemaining`.
+`PlayerSession` in `internal/game/session/manager.go` MUST gain an `int` field `ReactionsRemaining`.
 
 ### REQ-RXN9
 At the start of each round, before any combatant actions are resolved, `ReactionsRemaining` MUST be set to 1 for every player in the combat. This reset MUST occur immediately after the `combat.ResolveRound` call in `internal/gameserver/combat_handler.go` (line ~1373), in the same loop that resets per-round state for all player combatants (the loop following `ResolveRound` that already calls `sess.LoadoutSet.ResetRound()`).
@@ -233,7 +233,7 @@ Integration tests in `internal/gameserver/grpc_service_reaction_test.go` MUST co
 | `internal/game/reaction/trigger_test.go` | New: unit tests |
 | `internal/game/ruleset/feat.go` | Add `Reaction *ReactionDef` field to `Feat` struct |
 | `internal/game/technology/model.go` | Add `Reaction *ReactionDef` field |
-| `internal/game/session/session.go` | Add `ReactionsRemaining int`, `Reactions *ReactionRegistry` |
+| `internal/game/session/manager.go` | Add `ReactionsRemaining int`, `Reactions *ReactionRegistry` |
 | `internal/game/combat/round.go` | Add `reactionFn ReactionCallback` param to `ResolveRound`; add 6 trigger fire points |
 | `internal/gameserver/reaction_handler.go` | New: `checkReactionRequirement`, `applyReactionEffect`, reaction callback constructor |
 | `internal/gameserver/reaction_handler_test.go` | New: unit tests |
