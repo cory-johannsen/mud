@@ -1071,6 +1071,31 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
+	// REQ-RXN15: register reactions from feats.
+	if s.characterFeatsRepo != nil && s.featRegistry != nil && characterID > 0 {
+		if featIDs, featErr := s.characterFeatsRepo.GetAll(stream.Context(), characterID); featErr == nil {
+			for _, id := range featIDs {
+				f, ok := s.featRegistry.Feat(id)
+				if !ok || f.Reaction == nil {
+					continue
+				}
+				sess.Reactions.Register(uid, id, f.Name, *f.Reaction)
+			}
+		}
+	}
+
+	// REQ-RXN15: register reactions from innate techs.
+	if s.techRegistry != nil {
+		for techID := range sess.InnateTechs {
+			if techDef, ok := s.techRegistry.Get(techID); ok && techDef.Reaction != nil {
+				sess.Reactions.Register(uid, techID, techDef.Name, *techDef.Reaction)
+			}
+		}
+	}
+
+	// REQ-RXN20: build and store the interactive reaction callback.
+	sess.ReactionFn = s.buildReactionCallback(uid, sess, stream)
+
 	// Subscribe to game clock ticks for this session (nil-safe: clock may be nil).
 	var clockCh chan GameHour
 	if s.clock != nil {
