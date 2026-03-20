@@ -39,7 +39,7 @@ PF2E combat and exploration actions, including archetype/job actions and full PF
         - [x] Seek — Perception check to detect hidden creatures/objects
         - [ ] Sense Motive — Perception vs Deception to detect lies/intent
         - [x] Escape — Max(athletics, acrobatics) vs grabber DC; success removes grabbed condition
-        - [ ] Delay — forfeit initiative position to act later in round
+        - [x] Delay — forfeit initiative position to act later in round
       - Stealth & Deception Actions
         - [x] Feint — Deception vs target Perception DC; apply flat_footed (-2 AC) for 1 round
         - [x] Demoralize — Intimidation vs target Will DC; apply frightened (-1 attack, -1 AC) for encounter
@@ -51,7 +51,7 @@ PF2E combat and exploration actions, including archetype/job actions and full PF
         - [x] First Aid [2A] — patch_job vs DC 15; success heals 2d8+4 HP
     - [ ] General
       - Aid: Spend an action on your turn to prepare; use your Reaction to give an ally a bonus.
-        - [ ] Aid command — implement `aid <target>` (2-action: prepare on your turn, then Reaction to give ally +2 circumstance bonus on their next check; requires multi-player combat and Reactions)
+        - [x] Aid command — implement `aid <target>` (2-action: prepare on your turn, then Reaction to give ally +2 circumstance bonus on their next check; requires multi-player combat and Reactions)
       - Ready [2A]: Set a trigger to take a single action as a Reaction later.
         - [ ] Ready command — implement `ready <action> when <trigger>` (costs 2 AP; stores a pending Reaction that fires when trigger condition is met during the round; requires Reactions and initiative trigger system)
       - Hero Point: Spend a point to reroll a check or (if dying) to stabilize at 0 HP.
@@ -96,4 +96,4 @@ PF2E combat and exploration actions, including archetype/job actions and full PF
       - Affix a Precious Material: Add specialized materials to gear.
         - [ ] Affix Material command — implement `affix <material> <item>` (Crafting check vs material DC; permanently upgrades item with material properties; requires precious material item type and item upgrade slots in item YAML)
       - Swap [1A]: A Remaster addition—you can put away one item and draw another in a single action.
-        - [ ] Swap command — implement `swap <slot> <item>` (costs 1 AP in combat; swaps the item in a given equipped slot with another item in inventory; requires equipped slot tracking and in-combat item management)
+        - [x] Swap command — implement `swap <slot> <item>` (costs 1 AP in combat; swaps the item in a given equipped slot with another item in inventory; requires equipped slot tracking and in-combat item management)
