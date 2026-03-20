@@ -9,7 +9,10 @@ range: self
 targets: single
 duration: instant
 resolution: none
-effects:
-  on_apply:
-    - type: utility
-      description: "Your chrome-augmented nervous system fires. You feel a momentary surge of neural clarity."
+reaction:
+  triggers:
+    - on_save_fail
+    - on_save_crit_fail
+  effect:
+    type: reroll_save
+    keep: better

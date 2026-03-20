@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -544,4 +545,22 @@ func TestTechAtSlotLevel(t *testing.T) {
 		result.Effects = technology.TieredEffects{}
 		assert.Equal(t, "base", tech.Effects.OnApply[0].UtilityType, "original must be unchanged")
 	})
+}
+
+// REQ-CRX10: chrome_reflex.yaml loads correctly with both reaction triggers.
+func TestChromeReflex_YAMLLoad_HasReactionDef(t *testing.T) {
+	data, err := os.ReadFile("../../../content/technologies/innate/chrome_reflex.yaml")
+	require.NoError(t, err)
+
+	var def technology.TechnologyDef
+	err = yaml.Unmarshal(data, &def)
+	require.NoError(t, err)
+
+	require.NotNil(t, def.Reaction, "chrome_reflex must have a Reaction definition")
+	assert.Contains(t, def.Reaction.Triggers, reaction.TriggerOnSaveFail,
+		"chrome_reflex must trigger on save fail")
+	assert.Contains(t, def.Reaction.Triggers, reaction.TriggerOnSaveCritFail,
+		"chrome_reflex must trigger on save crit fail")
+	assert.Equal(t, reaction.ReactionEffectRerollSave, def.Reaction.Effect.Type)
+	assert.Equal(t, "better", def.Reaction.Effect.Keep)
 }

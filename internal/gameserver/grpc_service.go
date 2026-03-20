@@ -4966,6 +4966,12 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 	// Innate tech activation
 	if s.innateTechRepo != nil {
 		if slot, ok := sess.InnateTechs[abilityID]; ok {
+			// REQ-CRX6: block manual use for techs that fire as reactions.
+			if s.techRegistry != nil {
+				if techDef, ok := s.techRegistry.Get(abilityID); ok && techDef.Reaction != nil {
+					return messageEvent(fmt.Sprintf("%s fires automatically as a reaction and cannot be activated manually.", techDef.Name)), nil
+				}
+			}
 			if slot.MaxUses != 0 && slot.UsesRemaining <= 0 {
 				return messageEvent(fmt.Sprintf("No uses of %s remaining.", abilityID)), nil
 			}

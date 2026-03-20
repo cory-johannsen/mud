@@ -248,7 +248,8 @@ func (t *TechnologyDef) Validate() error {
 		return fmt.Errorf("unknown resolution %q", t.Resolution)
 	}
 	// Validate all effects in all tiers.
-	if len(t.Effects.AllEffects()) == 0 {
+	// REQ-CRX6: reaction-only techs (Reaction != nil) do not require effects.
+	if len(t.Effects.AllEffects()) == 0 && t.Reaction == nil {
 		return fmt.Errorf("effects must have at least one entry")
 	}
 	for i, e := range t.Effects.AllEffects() {

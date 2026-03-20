@@ -10,7 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 )
 
 // innateRepoForGrpcTest implements InnateTechRepo for innate tech grpc tests.
@@ -344,4 +346,55 @@ func TestHandleRest_RestoresInnateSlots(t *testing.T) {
 
 	assert.Equal(t, 1, repo.restoreAllCalled, "RestoreAll must be called once on rest")
 	assert.Equal(t, 1, sess.InnateTechs["acid_spit"].UsesRemaining, "session slot must be restored")
+}
+
+// REQ-CRX6: use <tech> is blocked for reaction-bearing techs.
+func TestHandleUse_ReactionTech_BlocksActivation(t *testing.T) {
+	repo := &innateRepoForGrpcTest{slots: map[string]*session.InnateSlot{
+		"chrome_reflex": {MaxUses: 1, UsesRemaining: 1},
+	}}
+	svc, uid := innateTestService(t, repo)
+
+	// Build a registry with chrome_reflex having a Reaction.
+	reg := technology.NewRegistry()
+	reg.Register(&technology.TechnologyDef{
+		ID:        "chrome_reflex",
+		Name:      "Chrome Reflex",
+		Tradition: technology.TraditionNeural,
+		Level:     1,
+		UsageType: technology.UsageInnate,
+		Range:     technology.RangeSelf,
+		Targets:   technology.TargetsSingle,
+		Duration:  "instant",
+		Resolution: "none",
+		Reaction: &reaction.ReactionDef{
+			Triggers: []reaction.ReactionTriggerType{
+				reaction.TriggerOnSaveFail,
+				reaction.TriggerOnSaveCritFail,
+			},
+			Effect: reaction.ReactionEffect{
+				Type: reaction.ReactionEffectRerollSave,
+				Keep: "better",
+			},
+		},
+		Effects: technology.TieredEffects{
+			OnApply: []technology.TechEffect{{Type: technology.EffectUtility, UtilityType: "reaction_placeholder"}},
+		},
+	})
+	svc.SetTechRegistry(reg)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.InnateTechs = map[string]*session.InnateSlot{
+		"chrome_reflex": {MaxUses: 1, UsesRemaining: 1},
+	}
+
+	evt, err := svc.handleUse(uid, "chrome_reflex", "")
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage().GetContent()
+	assert.Contains(t, msg, "fires automatically as a reaction", "expected reaction block message")
+	assert.Empty(t, repo.decremented, "Decrement must NOT be called for reaction tech")
+	assert.Equal(t, 1, sess.InnateTechs["chrome_reflex"].UsesRemaining, "uses must not be decremented")
 }
