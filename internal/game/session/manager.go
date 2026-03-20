@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/google/uuid"
 )
@@ -132,6 +133,15 @@ type PlayerSession struct {
 	// interactive player selection (pool > open slots). Populated at level-up;
 	// cleared by ResolvePendingTechGrants.
 	PendingTechGrants map[int]*ruleset.TechnologyGrants
+	// ReactionsRemaining is the number of reactions available this round. Resets to 1 each round.
+	// Not persisted. In-session only.
+	ReactionsRemaining int
+	// Reactions holds all registered reactions for this player, indexed by trigger type.
+	// Initialised to NewReactionRegistry() at session creation.
+	Reactions *reaction.ReactionRegistry
+	// ReactionFn is the per-session reaction callback, set by the session handler after login.
+	// Captures the player's gRPC stream for interactive prompting.
+	ReactionFn reaction.ReactionCallback
 }
 
 // Manager tracks all active player sessions and room occupancy.
@@ -234,7 +244,9 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		// Status 1 = IDLE: newly connected players are idle by default.
 		Status:         1,
 		AutomapCache:   make(map[string]map[string]bool),
-		FeatureChoices: make(map[string]map[string]string),
+		FeatureChoices:     make(map[string]map[string]string),
+		ReactionsRemaining: 1,
+		Reactions:          reaction.NewReactionRegistry(),
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)

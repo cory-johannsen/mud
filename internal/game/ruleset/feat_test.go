@@ -3,7 +3,10 @@ package ruleset_test
 import (
 	"testing"
 
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLoadFeats_ParsesAllFeats(t *testing.T) {
@@ -83,4 +86,42 @@ func TestFeatRegistry_BySkill(t *testing.T) {
 	if len(parkour) == 0 {
 		t.Error("expected parkour skill feats")
 	}
+}
+
+func TestFeat_YAML_WithReactionBlock(t *testing.T) {
+	yml := `
+feats:
+- id: reactive_strike
+  name: Reactive Strike
+  category: combat
+  reaction:
+    trigger: on_enemy_move_adjacent
+    requirement: wielding_melee_weapon
+    effect:
+      type: strike
+      target: trigger_source
+`
+	feats, err := ruleset.LoadFeatsFromBytes([]byte(yml))
+	require.NoError(t, err)
+	require.Len(t, feats, 1)
+	f := feats[0]
+	assert.Equal(t, "reactive_strike", f.ID)
+	require.NotNil(t, f.Reaction)
+	assert.Equal(t, reaction.TriggerOnEnemyMoveAdjacent, f.Reaction.Trigger)
+	assert.Equal(t, "wielding_melee_weapon", f.Reaction.Requirement)
+	assert.Equal(t, reaction.ReactionEffectStrike, f.Reaction.Effect.Type)
+	assert.Equal(t, "trigger_source", f.Reaction.Effect.Target)
+}
+
+func TestFeat_YAML_WithoutReaction_NilReactionField(t *testing.T) {
+	yml := `
+feats:
+- id: sucker_punch
+  name: Sucker Punch
+  category: combat
+`
+	feats, err := ruleset.LoadFeatsFromBytes([]byte(yml))
+	require.NoError(t, err)
+	require.Len(t, feats, 1)
+	assert.Nil(t, feats[0].Reaction)
 }

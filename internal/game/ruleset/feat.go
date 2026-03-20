@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"gopkg.in/yaml.v3"
 )
 
@@ -24,6 +25,9 @@ type Feat struct {
 	ConditionID  string          `yaml:"condition_id"` // optional; non-empty means Use applies this condition
 	Description  string          `yaml:"description"`
 	Choices      *FeatureChoices `yaml:"choices"`
+	// Reaction declares this feat as a player reaction with the given trigger and effect.
+	// Nil means this feat is not a reaction.
+	Reaction *reaction.ReactionDef `yaml:"reaction,omitempty"`
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.

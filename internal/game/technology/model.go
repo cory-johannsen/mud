@@ -1,6 +1,10 @@
 package technology
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/cory-johannsen/mud/internal/game/reaction"
+)
 
 type Tradition string
 type UsageType string
@@ -184,6 +188,9 @@ type TechnologyDef struct {
 	// Passive indicates this technology fires automatically on room state changes
 	// and requires no player action. When true, ActionCost must be 0.
 	Passive bool `yaml:"passive,omitempty"`
+	// Reaction declares this tech as a player reaction with the given trigger and effect.
+	// Only applicable to innate techs. Nil means this tech is not a reaction.
+	Reaction *reaction.ReactionDef `yaml:"reaction,omitempty"`
 }
 
 // Validate returns an error if any required field is missing or invalid.
