@@ -103,6 +103,7 @@ const (
 	HandlerKick               = "kick"
 	HandlerRest               = "rest"
 	HandlerSelectTech         = "selecttech"
+	HandlerAid                = "aid"
 )
 
 // Command defines a player-invocable command.
@@ -195,7 +196,7 @@ func BuiltinCommands() []Command {
 		{Name: "action", Aliases: []string{"act"}, Help: "Activate an archetype or job action. Usage: action [name] [target]", Category: CategoryCombat, Handler: HandlerAction},
 		{Name: "raise", Aliases: []string{"rs"}, Help: "Raise your shield (+2 AC until start of next turn). Requires a shield in the off-hand slot.", Category: CategoryCombat, Handler: HandlerRaiseShield},
 		{Name: "cover", Aliases: []string{"tc"}, Help: "Take cover (+2 AC for the encounter). Costs 1 AP in combat.", Category: CategoryCombat, Handler: HandlerTakeCover},
-		{Name: "aid", Aliases: []string{"fa"}, Help: "Apply first aid (patch_job DC 15; success heals 2d8+4 HP). Costs 2 AP in combat.", Category: CategoryCombat, Handler: HandlerFirstAid},
+		{Name: "aid", Aliases: []string{"fa"}, Help: "Aid an ally (DC 20 check; crit +3, success +2, fail 0, crit fail -1 to ally attack). Costs 2 AP.", Category: CategoryCombat, Handler: HandlerAid},
 		{Name: "feint", Aliases: nil, Help: "Feint against a target (grift vs Perception DC; success applies flat_footed -2 AC for 1 round). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerFeint},
 		{Name: "demoralize", Aliases: []string{"dem"}, Help: "Demoralize a target (smooth_talk vs Level+10 DC; success applies -1 AC and -1 attack for the encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDemoralize},
 		{Name: "grapple", Aliases: []string{"grp"}, Help: "Grapple a target (muscle vs Level+10 DC; success applies grabbed condition, target is -2 AC for encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerGrapple},
