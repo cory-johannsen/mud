@@ -35,26 +35,22 @@ func NewReactionRegistry() *ReactionRegistry {
 // If def.Triggers is empty, Register is a no-op (REQ-CRX2).
 func (r *ReactionRegistry) Register(uid, featID, featName string, def ReactionDef) {
 	for _, trigger := range def.Triggers {
+		entry := PlayerReaction{
+			UID:      uid,
+			Feat:     featID,
+			FeatName: featName,
+			Def:      def,
+		}
 		found := false
 		for i := range r.byTrigger[trigger] {
 			if r.byTrigger[trigger][i].UID == uid {
-				r.byTrigger[trigger][i] = PlayerReaction{
-					UID:      uid,
-					Feat:     featID,
-					FeatName: featName,
-					Def:      def,
-				}
+				r.byTrigger[trigger][i] = entry
 				found = true
 				break
 			}
 		}
 		if !found {
-			r.byTrigger[trigger] = append(r.byTrigger[trigger], PlayerReaction{
-				UID:      uid,
-				Feat:     featID,
-				FeatName: featName,
-				Def:      def,
-			})
+			r.byTrigger[trigger] = append(r.byTrigger[trigger], entry)
 		}
 	}
 }

@@ -96,8 +96,10 @@ func TestReactionRegistry_MultiTrigger_BothRetrievable(t *testing.T) {
 	assert.Equal(t, "chrome_reflex", result2.Feat)
 }
 
-// REQ-CRX9: Spending reaction on save_fail prevents crit_fail from firing in same round.
-func TestReactionRegistry_CrossTrigger_OnlyOneFiresPerRound(t *testing.T) {
+// TestReactionRegistry_CrossTrigger_BothTriggersRegistered verifies that a multi-trigger
+// ReactionDef registers entries for all specified triggers. The single-reaction-per-round
+// invariant is enforced by ReactionsRemaining in the callback layer, not the registry.
+func TestReactionRegistry_CrossTrigger_BothTriggersRegistered(t *testing.T) {
 	reg := reaction.NewReactionRegistry()
 	def := reaction.ReactionDef{
 		Triggers: []reaction.ReactionTriggerType{
@@ -108,16 +110,14 @@ func TestReactionRegistry_CrossTrigger_OnlyOneFiresPerRound(t *testing.T) {
 	}
 	reg.Register("uid1", "chrome_reflex", "Chrome Reflex", def)
 
-	reactionsRemaining := 1
+	// Both trigger types must be independently retrievable from the registry.
+	result1 := reg.Get("uid1", reaction.TriggerOnSaveFail)
+	require.NotNil(t, result1, "registry must have entry for TriggerOnSaveFail")
+	assert.Equal(t, "chrome_reflex", result1.Feat)
 
-	pr1 := reg.Get("uid1", reaction.TriggerOnSaveFail)
-	require.NotNil(t, pr1)
-	assert.Greater(t, reactionsRemaining, 0)
-	reactionsRemaining--
-
-	pr2 := reg.Get("uid1", reaction.TriggerOnSaveCritFail)
-	require.NotNil(t, pr2, "reaction is registered for crit fail too")
-	assert.Equal(t, 0, reactionsRemaining, "no reactions remaining after spending on save_fail")
+	result2 := reg.Get("uid1", reaction.TriggerOnSaveCritFail)
+	require.NotNil(t, result2, "registry must have entry for TriggerOnSaveCritFail")
+	assert.Equal(t, "chrome_reflex", result2.Feat)
 }
 
 // REQ-CRX2: Register with empty Triggers is a no-op.
