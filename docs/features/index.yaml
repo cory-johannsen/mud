@@ -163,11 +163,11 @@ features:
 
   - slug: technology
     name: Technology
-    status: in_progress
+    status: done
     priority: 200
     category: technology
     file: docs/features/technology.md
-    effort: "not defined"
+    effort: "-"
 
   - slug: wire-refactor
     name: Wire Dependency Injection Refactor
