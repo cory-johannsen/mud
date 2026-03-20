@@ -1,198 +1,191 @@
 # Room Danger Levels — Design Spec
 
 **Date:** 2026-03-20
-**Status:** Approved
-**Feature:** `room-danger-levels` (priority 10)
+**Goal:** Define the data model, package API, enforcement logic, trap probability integration, and map display for the Room Danger Levels feature.
 
 ---
 
-## Overview
+## Requirements
 
-Rooms and zones are classified by danger level: Safe, Sketchy, Dangerous, or All Out War. Danger level governs combat initiation rules, NPC behavior, cover availability, and map/room display. It also drives the Wanted system, which tracks player notoriety and modifies NPC responses across all zone types.
+- REQ-DL-1: Zones MUST declare a `danger_level` field; rooms MAY override it.
+- REQ-DL-2: Safe room second violation MUST increment WantedLevel and trigger guard combat.
+- REQ-DL-3: WantedLevel MUST decay by 1 level per in-game day when no new violations occur.
+- REQ-DL-4: Active clearing is handled by the `wanted-clearing` feature and is out of scope here.
+- REQ-DL-5: WantedLevel 1 MUST cause merchants to add a 10% surcharge (out of scope — no merchants yet).
+- REQ-DL-6: WantedLevel 2+ MUST cause guards to initiate combat to detain.
+- REQ-DL-7: WantedLevel 3-4 MUST cause guards to attack on sight.
+- REQ-DL-8: Zone YAML MAY override default trap probabilities.
+- REQ-DL-9: Map cells MUST be color-coded by danger level.
+- REQ-DL-10: Unexplored rooms MUST display as light gray; explored state is tracked per player.
 
 ---
 
 ## 1. Data Model
 
-### DangerLevel Enum
+### DangerLevel Type
 
-Four values (stored as lowercase strings in YAML):
+A `DangerLevel` typed string is defined in `internal/game/danger/level.go` with four constants:
 
-| Value | Display Name |
-|-------|-------------|
-| `safe` | Safe |
-| `sketchy` | Sketchy |
-| `dangerous` | Dangerous |
-| `all_out_war` | All Out War |
+| Constant | Value |
+|----------|-------|
+| `DangerLevelSafe` | `"safe"` |
+| `DangerLevelSketchy` | `"sketchy"` |
+| `DangerLevelDangerous` | `"dangerous"` |
+| `DangerLevelAllOutWar` | `"all_out_war"` |
 
-### YAML Schema
+`EffectiveDangerLevel(zoneDanger, roomDanger string) DangerLevel` returns the room override if set, otherwise returns the zone default.
 
-`danger_level` is a **required** top-level field on zones. A zone YAML missing `danger_level` MUST be treated as a fatal load error. It is **optional** on rooms; rooms without the field inherit the zone value at load time.
+### Zone and Room YAML Fields
 
-```yaml
-# Zone level — required
-zone:
-  id: rustbucket_ridge
-  name: Rustbucket Ridge
-  danger_level: sketchy      # default for all rooms in zone
-  rooms:
-    - id: last_stand_lodge
-      title: Last Stand Lodge
-      danger_level: safe     # overrides zone default for this room
-    - id: the_heap
-      title: The Heap
-                             # inherits zone default (sketchy)
+Per REQ-DL-1, `Zone` gains a required `danger_level string` YAML field. `Room` gains an optional `danger_level string` override field (same field name). Rooms without the field inherit the zone value via `EffectiveDangerLevel`.
+
+Trap probability overrides (REQ-DL-8):
+
+- `room_trap_chance int` — optional; 0 means use the danger level default.
+- `cover_trap_chance int` — optional; 0 means use the danger level default.
+
+Default trap probabilities by danger level:
+
+| Danger Level | Room Trap Chance | Cover Trap Chance |
+|--------------|-----------------|------------------|
+| Safe | 0% | 0% |
+| Sketchy | 0% | 15% |
+| Dangerous | 35% | 50% |
+| All Out War | 60% | 75% |
+
+### WantedLevel
+
+Per-player per-zone notoriety, stored as 5 discrete levels (0 = None through 4 = D.O.S.):
+
+| Level | Name |
+|-------|------|
+| 0 | None |
+| 1 | Flagged |
+| 2 | Burned |
+| 3 | Hunted |
+| 4 | D.O.S. |
+
+WantedLevel is persisted in a new `character_wanted_levels(character_id, zone_id, wanted_level)` database table and cached in `PlayerSession.WantedLevel map[string]int` (key = zone_id).
+
+### Safe Room Violations
+
+`PlayerSession.SafeViolations map[string]int` (key = zone_id) tracks per-player per-zone unsafe combat attempts. This counter resets when WantedLevel increments for that zone.
+
+### WantedLevel Decay
+
+Per REQ-DL-3, WantedLevel decays by 1 level per in-game day when no new violations occurred. Decay is driven by a Persistent Calendar hook.
+
+---
+
+## 2. `danger` Package API
+
+The `danger` package lives in `internal/game/danger/` and contains only pure functions with no state.
+
+```go
+func EffectiveDangerLevel(zoneDanger, roomDanger string) DangerLevel
+func CanInitiateCombat(level DangerLevel, initiator string) bool
+func RollRoomTrap(level DangerLevel, overridePct int, rng Roller) bool
+func RollCoverTrap(level DangerLevel, overridePct int, rng Roller) bool
 ```
 
-### Go Structs
+The `Roller` interface is defined as:
 
-- `Zone` gains field: `DangerLevel DangerLevel`
-- `Room` gains field: `DangerLevel DangerLevel`
-- Populated at zone load time: if a room's YAML `danger_level` field is empty, the room inherits the zone's value. A zone with an empty `danger_level` is a fatal load error.
-- An unknown `DangerLevel` string value (not one of the four valid values) MUST be a fatal load error.
-- `Zone.Validate()` MUST be updated to enforce this.
-
----
-
-## 2. Combat Enforcement
-
-Rules are enforced at **action resolution time** (not command parse time), so the attempt is logged before rejection.
-
-### Per-Zone Rules
-
-| Zone Type | Player initiates combat | NPC initiates combat |
-|-----------|------------------------|---------------------|
-| Safe | Blocked (see violation flow) | Never |
-| Sketchy | Allowed | Never (unless WantedLevel overrides — see Section 3) |
-| Dangerous | Allowed | Allowed |
-| All Out War | Allowed | Allowed — attack on sight |
-
-### Safe Room Violation Flow
-
-A per-session, per-room violation counter is tracked on the player session (not persisted):
-
-- REQ-DL-1: On the **first** attempt to initiate combat in a Safe room, the action MUST be rejected with a warning message. The violation counter for that room MUST be incremented.
-- REQ-DL-2: On the **second** attempt in the same room within the same session, the action MUST be rejected, the player's `WantedLevel` MUST be incremented by 1 (capped at 4), and any guards currently present in the room MUST immediately enter combat with the player. If no guards are present at that moment, `WantedLevel` still increments. Guards that enter the room after the violation event do NOT retroactively trigger combat; guard engagement is evaluated only at violation time.
-- REQ-DL-3: The violation counter MUST reset when the player exits the room.
-
-### All Out War — Attack on Sight
-
-- REQ-DL-4: When a player enters an All Out War room, all combat-capable NPCs in the room MUST immediately initiate combat. This check occurs on room entry, not on a periodic tick.
-
----
-
-## 3. Wanted System
-
-### WantedLevel Field
-
-`WantedLevel` is an integer 0–4 stored on the player character and persisted to the database.
-
-### Levels
-
-| Level | Name | NPC Behavior |
-|-------|------|-------------|
-| 0 | None | Normal interactions |
-| 1 | Flagged | Guards watch the player; merchants add a 10% surcharge to all transactions |
-| 2 | Burned | Guards detain (initiate combat with) the player on sight in Safe rooms |
-| 3 | Hunted | Guards attack on sight in Safe rooms; combat-capable NPCs (those that can participate in combat, as opposed to non-combat NPCs defined in the `non-combat-npcs` feature) engage on sight in Sketchy rooms, overriding the normal Sketchy no-NPC-initiation rule |
-| 4 | D.O.S. | All combat-capable NPCs attack the player on sight, regardless of zone type |
-
-*D.O.S. = Dead on Sight. Cyberpunk nod to denial-of-service — the player has been flagged for termination.*
-
-**WantedLevel 3+ and Sketchy zones:** At WantedLevel 3 or higher, combat-capable NPCs in Sketchy rooms MUST initiate combat on sight. This explicitly overrides the standard Sketchy rule that NPCs never initiate combat.
-
-**WantedLevel 4 and further offenses:** When a player at WantedLevel 4 commits an additional offense in a Safe room, the action is still rejected, a message informs the player that their bounty cannot get any worse, and guards present enter combat as normal per REQ-DL-2. WantedLevel remains at 4.
-
-### Decay
-
-- REQ-DL-5: On each daily calendar tick, if `WantedLevel` was not incremented during the preceding in-game day, `WantedLevel` MUST be decremented by 1.
-- REQ-DL-6: `WantedLevel` MUST NOT decay below 0.
-
-### Active Clearing
-
-Active clearing methods (bribe, surrender, quest) are out of scope for this feature. They are defined in the `wanted-clearing` feature (priority 25), which depends on `non-combat-npcs`.
-
-### Offenses
-
-- REQ-DL-7: A second combat attempt in a Safe room MUST increment `WantedLevel` by 1, capped at 4.
-- Additional offense triggers are defined in downstream feature specs (e.g., stealing from a merchant).
-
----
-
-## 4. Display
-
-### Room View
-
-A color-coded danger level badge is displayed in the room header, on the same line as the room title or immediately below it:
-
-```
-[ Pioneer Courthouse Square ]  ◈ DANGEROUS
+```go
+type Roller interface {
+    Roll(max int) int
+}
 ```
 
-| Level | Color |
-|-------|-------|
-| Safe | Bright green |
-| Sketchy | Yellow |
-| Dangerous | Orange |
-| All Out War | Red |
+Production code uses `math/rand`. Tests inject a deterministic source.
 
-The badge uses the existing ANSI color system.
+`CanInitiateCombat` behavior by danger level:
 
-### Zone Map — Explored Room Tracking
+| Danger Level | player | npc |
+|--------------|--------|-----|
+| safe | false | false |
+| sketchy | true | false |
+| dangerous | true | true |
+| all_out_war | true | true (attack on sight) |
 
-Room danger level is only revealed once a player has entered a room. A new `ExploredRooms` field (type `map[string]bool`, keyed by `zoneID/roomID`) is added to the player character and persisted to the database. On every room entry event, the room is added to `ExploredRooms`. Key construction MUST use a named helper function (e.g., `exploredRoomKey(zoneID, roomID string) string`) that asserts both components are non-empty, preventing silent map pollution from zero-value IDs.
-
-- REQ-DL-8: Unexplored rooms (not present in `ExploredRooms`) MUST render in light gray on the zone map, regardless of actual danger level.
-- REQ-DL-9: Explored rooms MUST render in their danger-level color on the zone map.
-
-### Cover Items
-
-Cover is implemented via `cover_tier` on `RoomEquipmentConfig` (values: `"lesser"`, `"standard"`, `"greater"`, or `""`).
-
-- REQ-DL-10: At render time, the room equipment listing MUST display a `[cover]` tag for any equipment entry whose `cover_tier` is non-empty. This tag MUST be derived from `CoverTier != ""` at render time — it is not stored as literal text on the item definition. If this tag is already rendered, no change is required; the implementation MUST verify and add it where missing.
+`CheckSafeViolation` is NOT in the `danger` package. It lives in the enforcement layer (see Section 3).
 
 ---
 
-## 5. Cover Reference
+## 3. NPC Combat Enforcement
 
-Cover is an existing mechanic. Danger level governs cover behavior as follows (no new cover implementation required):
+`CheckSafeViolation(sess, zoneID, combatH)` is defined in `internal/gameserver/enforcement.go`:
 
-| Zone Type | Cover present? | Cover destructible? |
-|-----------|---------------|---------------------|
-| Safe | No | N/A |
-| Sketchy | Possible | No |
-| Dangerous | Possible | Yes |
-| All Out War | Possible | Yes |
+1. If the effective danger level is not `safe`, this function is a no-op.
+2. `sess.SafeViolations[zoneID]++`
+3. If violations == 1: emit a warning message and block the attack.
+4. If violations >= 2 (REQ-DL-2): `sess.WantedLevel[zoneID]++`, reset `sess.SafeViolations[zoneID] = 0`, call `combatH.InitiateGuardCombat(uid, zoneID)`.
 
-**Safe rooms and cover:** The `take_cover` command MUST be rejected in Safe rooms at runtime (cover items may technically be present in room equipment data, but the action is unavailable because Safe rooms disable combat). No load-time validation is required for this case.
+WantedLevel NPC effects:
 
-Cover trap probability per zone type is defined in the `traps` feature spec (priority 15).
+- WantedLevel 2+ (REQ-DL-6): Guards call `InitiateGuardCombat` when the player enters a room.
+- WantedLevel 3-4 (REQ-DL-7): Same as WantedLevel 2+; guards attack on sight.
 
-The cover mechanic documentation MUST be updated to describe per-zone destructibility behavior if not already documented.
+`InitiateGuardCombat(uid, zoneID string)` on `CombatHandler` finds guard NPCs in the player's current room and starts combat with them. This function is a no-op if no guards are present.
 
----
-
-## 6. Out of Scope
-
-The following are explicitly deferred to other features:
-
-- Active Wanted clearing (bribe, surrender, quest) → `wanted-clearing` feature
-- Non-combat NPC flee/cower behavior → `non-combat-npcs` feature
-- Guard NPC implementation → `non-combat-npcs` feature
-- Trap probability per zone type → `traps` feature
-- Cover mechanic implementation → already done
+WantedLevel decay is hooked into the calendar tick handler. On each in-game day: decrement WantedLevel by 1 for each zone where `WantedLevel > 0` and no new violations occurred that day (REQ-DL-3).
 
 ---
 
-## Requirements Summary
+## 4. Trap Probability Enforcement
 
-- REQ-DL-1: First combat attempt in a Safe room MUST be rejected with a warning message; violation counter incremented.
-- REQ-DL-2: Second combat attempt in a Safe room MUST be rejected; WantedLevel incremented (capped at 4); guards present at that moment enter combat. Guards arriving later do NOT retroactively engage.
-- REQ-DL-3: Violation counter MUST reset on room exit.
-- REQ-DL-4: Entering an All Out War room MUST trigger immediate NPC combat initiation on room entry.
-- REQ-DL-5: On each daily tick, if WantedLevel was not incremented in the preceding day, it MUST be decremented by 1.
-- REQ-DL-6: WantedLevel MUST NOT decay below 0.
-- REQ-DL-7: Second Safe room combat attempt MUST increment WantedLevel by 1, capped at 4.
-- REQ-DL-8: Unexplored map rooms MUST render in light gray.
-- REQ-DL-9: Explored map rooms MUST render in danger-level color.
-- REQ-DL-10: Room equipment with non-empty `cover_tier` MUST display a `[cover]` tag in the room equipment listing, derived at render time.
+Zone and Room YAML fields `room_trap_chance int` and `cover_trap_chance int` are optional overrides. A value of 0 means use the danger level defaults (REQ-DL-8).
+
+Roll sites:
+
+- **Room trap:** Called in `handleMove` after the player enters the room, before the room description is sent. If the roll returns true, emit `// TODO(traps): trigger trap`.
+- **Cover trap:** Called in `handleUse` when the player uses or examines cover equipment. If the roll returns true, emit `// TODO(traps): trigger trap`.
+
+Cover tier display: Room equipment descriptions append `[Cover: light/medium/heavy]` based on the item's cover tier field. This is a display-only change to `RenderRoomView`.
+
+---
+
+## 5. Map Display and Architecture Documentation
+
+`MapTile` proto gains a `danger_level string` field. `handleMap` populates it from the room's effective danger level.
+
+`RenderMap()` color-codes cells using ANSI escape codes:
+
+| Danger Level | Color | ANSI Code |
+|--------------|-------|-----------|
+| safe | Green | `\033[32m` |
+| sketchy | Yellow | `\033[33m` |
+| dangerous | Orange | `\033[38;5;208m` |
+| all_out_war | Red | `\033[31m` |
+| unexplored | Light Gray | `\033[37m` |
+
+Per REQ-DL-10, unexplored rooms MUST display as light gray regardless of their actual danger level.
+
+A new architecture document MUST be created at `docs/architecture/map-system.md` documenting:
+
+- `character_map_rooms` DB table schema
+- `AutomapRepository` (Insert/LoadAll)
+- `PlayerSession.AutomapCache` structure
+- `MapTile` proto fields
+- `handleMap`/`handleMove` discovery flow
+- `RenderMap()` rendering pipeline
+- Danger-level color coding
+
+---
+
+## File Map
+
+| File | Change |
+|------|--------|
+| `internal/game/danger/level.go` | New — DangerLevel type, constants, EffectiveDangerLevel |
+| `internal/game/danger/combat.go` | New — CanInitiateCombat |
+| `internal/game/danger/trap.go` | New — RollRoomTrap, RollCoverTrap, Roller interface |
+| `internal/game/world/model.go` | Add DangerLevel, trap override fields to Zone + Room |
+| `internal/game/session/manager.go` | Add WantedLevel, SafeViolations to PlayerSession |
+| `internal/storage/postgres/wanted.go` | New — WantedRepository (upsert/load) |
+| `internal/gameserver/enforcement.go` | New — CheckSafeViolation, calendar decay hook wiring |
+| `internal/gameserver/combat_handler.go` | Add InitiateGuardCombat |
+| `internal/gameserver/grpc_service.go` | Wire enforcement into handleMove, handleAttack |
+| `api/proto/game/v1/game.proto` | Add danger_level to MapTile |
+| `internal/frontend/handlers/text_renderer.go` | Color-code map cells by danger level |
+| `content/zones/**/*.yaml` | Add danger_level to all zone YAML files |
+| `docs/architecture/map-system.md` | New — map system architecture doc |
