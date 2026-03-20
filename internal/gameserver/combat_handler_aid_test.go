@@ -1,7 +1,7 @@
 package gameserver
 
 import (
-	"sync"
+	"strings"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
@@ -72,15 +72,7 @@ func TestCombatHandler_Aid_SelfTargeting(t *testing.T) {
 // TestCombatHandler_Aid_AllyNotInCombat verifies that Aid returns an error when the named ally
 // is not a combatant in the actor's active combat.
 func TestCombatHandler_Aid_AllyNotInCombat(t *testing.T) {
-	var mu sync.Mutex
-	var broadcasts [][]*gamev1.CombatEvent
-	broadcastFn := func(_ string, events []*gamev1.CombatEvent) {
-		mu.Lock()
-		defer mu.Unlock()
-		broadcasts = append(broadcasts, events)
-	}
-
-	h := makeCombatHandler(t, broadcastFn)
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
 	const roomID = "room-aid-3"
 	const otherRoomID = "room-aid-3b"
 	spawnTestNPC(t, h.npcMgr, roomID)
@@ -165,6 +157,94 @@ func TestCombatHandler_Aid_Success(t *testing.T) {
 		t.Fatalf("Aid returned unexpected error: %v", err)
 	}
 	if len(events) == 0 {
-		t.Error("expected at least one event from Aid; got none")
+		t.Fatal("expected at least one event from Aid; got none")
+	}
+	if events[0].Type != gamev1.CombatEventType_COMBAT_EVENT_TYPE_CONDITION {
+		t.Errorf("expected event type CONDITION; got %v", events[0].Type)
+	}
+	if events[0].Attacker != "Alice" {
+		t.Errorf("expected Attacker %q; got %q", "Alice", events[0].Attacker)
+	}
+	if events[0].Target != "Bob" {
+		t.Errorf("expected Target %q; got %q", "Bob", events[0].Target)
+	}
+	if !strings.Contains(events[0].Narrative, "Alice") || !strings.Contains(events[0].Narrative, "Bob") {
+		t.Errorf("expected Narrative to contain %q and %q; got %q", "Alice", "Bob", events[0].Narrative)
+	}
+}
+
+// TestCombatHandler_Aid_CaseInsensitive verifies that Aid succeeds when allyName is supplied
+// in a different case than the combatant's canonical Name.
+func TestCombatHandler_Aid_CaseInsensitive(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const roomID = "room-aid-6"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayerNamed(t, h.sessions, "player-aid-6a", roomID, "Alice")
+	addTestPlayerNamed(t, h.sessions, "player-aid-6b", roomID, "Bob")
+
+	_, err := h.Attack("player-aid-6a", "Goblin")
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+	defer h.cancelTimer(roomID)
+
+	bobCbt := &combat.Combatant{
+		ID:        "player-aid-6b",
+		Kind:      combat.KindPlayer,
+		Name:      "Bob",
+		MaxHP:     10,
+		CurrentHP: 10,
+		AC:        10,
+		Level:     1,
+	}
+	if addErr := h.engine.AddCombatant(roomID, bobCbt); addErr != nil {
+		t.Fatalf("AddCombatant Bob: %v", addErr)
+	}
+
+	// Supply lowercase "bob" — Aid must resolve case-insensitively.
+	events, err := h.Aid("player-aid-6a", "bob")
+	if err != nil {
+		t.Fatalf("Aid with lowercase name returned unexpected error: %v", err)
+	}
+	if len(events) == 0 {
+		t.Fatal("expected at least one event from Aid; got none")
+	}
+	if events[0].Target != "Bob" {
+		t.Errorf("expected canonical Target %q; got %q", "Bob", events[0].Target)
+	}
+}
+
+// TestCombatHandler_Aid_DeadAlly verifies that Aid returns an error when the named ally is dead.
+func TestCombatHandler_Aid_DeadAlly(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	const roomID = "room-aid-7"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayerNamed(t, h.sessions, "player-aid-7a", roomID, "Alice")
+	addTestPlayerNamed(t, h.sessions, "player-aid-7b", roomID, "Bob")
+
+	_, err := h.Attack("player-aid-7a", "Goblin")
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+	defer h.cancelTimer(roomID)
+
+	// Add Bob as a dead combatant (Dead flag set; for players IsDead() checks Dead, not HP).
+	bobCbt := &combat.Combatant{
+		ID:        "player-aid-7b",
+		Kind:      combat.KindPlayer,
+		Name:      "Bob",
+		MaxHP:     10,
+		CurrentHP: 0,
+		AC:        10,
+		Level:     1,
+		Dead:      true,
+	}
+	if addErr := h.engine.AddCombatant(roomID, bobCbt); addErr != nil {
+		t.Fatalf("AddCombatant Bob: %v", addErr)
+	}
+
+	_, err = h.Aid("player-aid-7a", "Bob")
+	if err == nil {
+		t.Fatal("expected error when targeting a dead ally; got nil")
 	}
 }

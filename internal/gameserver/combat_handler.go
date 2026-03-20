@@ -312,7 +312,7 @@ func (h *CombatHandler) Strike(uid, target string) ([]*gamev1.CombatEvent, error
 //
 // Precondition: uid must be a valid connected player in active combat.
 // Precondition: allyName must be non-empty, must match a living player combatant in the same
-// combat (case-insensitive, by Name), and must not match the actor's own CharName.
+// combat (case-insensitive, by Name), and must not match the actor's own CharName or UID.
 // Postcondition: Returns a confirmation CombatEvent and nil error on success.
 func (h *CombatHandler) Aid(uid, allyName string) ([]*gamev1.CombatEvent, error) {
 	if allyName == "" {
@@ -338,26 +338,26 @@ func (h *CombatHandler) Aid(uid, allyName string) ([]*gamev1.CombatEvent, error)
 	}
 
 	// Find the ally: must be a living player combatant in this combat.
-	var allyName_ string
+	var canonicalName string
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindPlayer && strings.EqualFold(c.Name, allyName) && !c.IsDead() {
-			allyName_ = c.Name
+			canonicalName = c.Name
 			break
 		}
 	}
-	if allyName_ == "" {
+	if canonicalName == "" {
 		return nil, fmt.Errorf("no living ally named %q found in this combat", allyName)
 	}
 
-	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionAid, Target: allyName_}); err != nil {
+	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionAid, Target: canonicalName}); err != nil {
 		return nil, fmt.Errorf("queuing aid: %w", err)
 	}
 
 	confirmEvent := &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_CONDITION,
 		Attacker:  sess.CharName,
-		Target:    allyName_,
-		Narrative: fmt.Sprintf("%s prepares to aid %s.", sess.CharName, allyName_),
+		Target:    canonicalName,
+		Narrative: fmt.Sprintf("%s prepares to aid %s.", sess.CharName, canonicalName),
 	}
 
 	if cbt.AllActionsSubmitted() {
