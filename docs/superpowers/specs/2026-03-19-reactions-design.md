@@ -15,7 +15,7 @@ Sub-project 2 (Initial Reactions: Reactive Strike, chrome_reflex) and Sub-projec
 
 ## Scope
 
-In scope: `ReactionDef` on `FeatDef` and `TechnologyDef`, `ReactionTriggerType` enum, `ReactionRegistry` on session, `ReactionsRemaining` on session, `ReactionCallback` parameter on `ResolveRound`, prompt-and-execute flow, reaction effect types (`reroll_save`, `strike`, `reduce_damage`), reset at round start, all callers of `ResolveRound` updated to pass `nil`.
+In scope: `ReactionDef` on `Feat` and `TechnologyDef`, `ReactionTriggerType` enum, `ReactionRegistry` on session, `ReactionsRemaining` on session, `ReactionCallback` parameter on `ResolveRound`, prompt-and-execute flow, reaction effect types (`reroll_save`, `strike`, `reduce_damage`), reset at round start, all callers of `ResolveRound` updated to pass `nil`. `TriggerOnFall` is defined in the enum but has no fire point in this sub-project (deferred to a future fall-damage feature).
 
 Out of scope: NPC reactions (Advanced Enemies), sub-project 2 content (Reactive Strike, chrome_reflex), sub-project 3 content (Shield Block, Grab an Edge, etc.), persistence of reactions, multiple reactions per round.
 
@@ -50,13 +50,13 @@ type ReactionDef struct {
 ```
 
 ### REQ-RXN5
-`FeatDef` in `internal/game/feat/model.go` MUST gain an optional `Reaction *ReactionDef` field tagged `yaml:"reaction,omitempty"`.
+`Feat` in `internal/game/ruleset/feat.go` MUST gain an optional `Reaction *ReactionDef` field tagged `yaml:"reaction,omitempty"`.
 
 ### REQ-RXN6
 `TechnologyDef` in `internal/game/technology/model.go` MUST gain an optional `Reaction *ReactionDef` field tagged `yaml:"reaction,omitempty"`. This enables innate techs like `chrome_reflex` to declare reactions.
 
 ### REQ-RXN7
-YAML feat files may declare a `reaction` block. Example:
+YAML feat files MAY declare a `reaction` block. Example:
 ```yaml
 id: reactive_strike
 name: Reactive Strike
@@ -76,7 +76,7 @@ reaction:
 `PlayerSession` in `internal/game/session/session.go` MUST gain an `int` field `ReactionsRemaining`.
 
 ### REQ-RXN9
-At the start of each round, before any combatant actions are resolved, `ReactionsRemaining` MUST be set to 1 for every player in the combat. This reset MUST occur in the same location as AP reset.
+At the start of each round, before any combatant actions are resolved, `ReactionsRemaining` MUST be set to 1 for every player in the combat. This reset MUST occur immediately after the `combat.ResolveRound` call in `internal/gameserver/combat_handler.go` (line ~1373), in the same loop that resets per-round state for all player combatants (the loop following `ResolveRound` that already calls `sess.LoadoutSet.ResetRound()`).
 
 ### REQ-RXN10
 When a reaction is spent, `ReactionsRemaining` MUST be decremented by 1. `ReactionsRemaining` MUST NOT go below 0.
@@ -138,7 +138,11 @@ type ReactionCallback func(uid string, trigger ReactionTriggerType, ctx Reaction
 ```
 
 ### REQ-RXN18
-`Combat.ResolveRound` in `internal/game/combat/round.go` MUST accept a new final parameter `reactionFn ReactionCallback`. A nil `reactionFn` MUST be treated as a no-op (no panic). All existing callers of `ResolveRound` MUST be updated to pass `nil`.
+`ResolveRound` in `internal/game/combat/round.go` MUST accept `reactionFn ReactionCallback` as a new parameter inserted **before** the existing variadic `coverDegraderArgs` parameter (Go requires non-variadic parameters before variadic ones). The updated signature MUST be:
+```go
+func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int), reactionFn ReactionCallback, coverDegraderArgs ...func(roomID, equipID string) bool) []RoundEvent
+```
+A nil `reactionFn` MUST be treated as a no-op (no panic). All existing callers of `ResolveRound` MUST be updated to pass `nil` for `reactionFn`.
 
 ### REQ-RXN19
 At each trigger fire point, `ResolveRound` (or its callees) MUST call `reactionFn(uid, trigger, ctx)` when `reactionFn != nil`. Fire points:
@@ -150,7 +154,7 @@ At each trigger fire point, `ResolveRound` (or its callees) MUST call `reactionF
 | `TriggerOnEnemyMoveAdjacent` | After NPC move action brings them into melee range of player |
 | `TriggerOnConditionApplied` | Inside condition application, before condition takes effect |
 | `TriggerOnAllyDamaged` | After an ally's `ApplyDamage` completes |
-| `TriggerOnFall` | When fall damage would be applied |
+| `TriggerOnFall` | **Deferred** — no fire point in this sub-project; fall damage mechanics are a future feature |
 
 ---
 
@@ -161,7 +165,7 @@ The session handler MUST construct the `ReactionCallback` closure before calling
 1. Check `sess.ReactionsRemaining > 0` — if not, return `false, nil`
 2. Call `sess.Reactions.Get(uid, trigger)` — if nil, return `false, nil`
 3. Check requirement via `checkReactionRequirement(sess, reaction.Def.Requirement)` — if not met, return `false, nil`
-4. Prompt the player: `"Use reaction: <feat.Name>? (yes/no)"` via `promptFeatureChoice`
+4. Prompt the player using `s.promptFeatureChoice(stream, "reaction", &ruleset.FeatureChoices{Key: "reaction", Prompt: <message per REQ-RXN23>, Options: []string{"yes", "no"}})`
 5. If player responds `"no"`, return `false, nil`
 6. Decrement `sess.ReactionsRemaining`
 7. Call `applyReactionEffect(sess, reaction.Def.Effect, ctx)`
@@ -227,7 +231,7 @@ Integration tests in `internal/gameserver/grpc_service_reaction_test.go` MUST co
 | `internal/game/reaction/registry.go` | New: `ReactionRegistry`, `PlayerReaction`, `NewReactionRegistry`, `Register`, `Get` |
 | `internal/game/reaction/registry_test.go` | New: unit tests |
 | `internal/game/reaction/trigger_test.go` | New: unit tests |
-| `internal/game/feat/model.go` | Add `Reaction *ReactionDef` field |
+| `internal/game/ruleset/feat.go` | Add `Reaction *ReactionDef` field to `Feat` struct |
 | `internal/game/technology/model.go` | Add `Reaction *ReactionDef` field |
 | `internal/game/session/session.go` | Add `ReactionsRemaining int`, `Reactions *ReactionRegistry` |
 | `internal/game/combat/round.go` | Add `reactionFn ReactionCallback` param to `ResolveRound`; add 6 trigger fire points |
