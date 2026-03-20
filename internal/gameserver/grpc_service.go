@@ -1432,6 +1432,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleTrip(uid, p.Trip)
 	case *gamev1.ClientMessage_Delay:
 		return s.handleDelay(uid, p.Delay)
+	case *gamev1.ClientMessage_Aid:
+		return s.handleAid(uid, p.Aid)
 	case *gamev1.ClientMessage_Disarm:
 		return s.handleDisarm(uid, p.Disarm)
 	case *gamev1.ClientMessage_Stride:
@@ -7702,6 +7704,47 @@ func (s *GameServiceServer) handleDelay(uid string, _ *gamev1.DelayRequest) (*ga
 	return messageEvent(fmt.Sprintf(
 		"You delay, banking %d AP for next round. You are exposed (-2 AC).", banked,
 	)), nil
+}
+
+// handleAid queues an Aid action for the player targeting the named ally.
+//
+// Precondition: uid must identify a valid player session.
+// Postcondition: Out-of-combat returns informational message; empty target returns
+// informational message; in-combat with valid target delegates to CombatHandler.Aid.
+func (s *GameServiceServer) handleAid(uid string, req *gamev1.AidRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("session not found: %s", uid)
+	}
+
+	if sess.Status != statusInCombat {
+		return messageEvent("Aid is only valid in combat."), nil
+	}
+
+	target := req.GetTarget()
+	if target == "" {
+		return messageEvent("Please specify an ally name: aid <ally>"), nil
+	}
+
+	if s.combatH == nil {
+		return errorEvent("Combat handler unavailable."), nil
+	}
+
+	events, err := s.combatH.Aid(uid, target)
+	if err != nil {
+		return messageEvent(err.Error()), nil
+	}
+	if len(events) == 0 {
+		return nil, nil
+	}
+	if sesso, ok2 := s.sessions.GetPlayer(uid); ok2 {
+		for _, evt := range events[1:] {
+			s.broadcastCombatEvent(sesso.RoomID, uid, evt)
+		}
+	}
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},
+	}, nil
 }
 
 // handleJoin joins an active combat in the player's pending room.
