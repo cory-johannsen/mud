@@ -377,9 +377,6 @@ func TestHandleUse_ReactionTech_BlocksActivation(t *testing.T) {
 				Keep: "better",
 			},
 		},
-		Effects: technology.TieredEffects{
-			OnApply: []technology.TechEffect{{Type: technology.EffectUtility, UtilityType: "reaction_placeholder"}},
-		},
 	})
 	svc.SetTechRegistry(reg)
 
