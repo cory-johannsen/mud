@@ -1,0 +1,15 @@
+id: aided_penalty
+name: Aided (Fumble)
+description: |
+  Misguided assistance throws off your next attack; -1 to your next attack roll this round.
+duration_type: rounds
+max_stacks: 0
+attack_bonus: 0
+attack_penalty: 1
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+restrict_actions: []
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

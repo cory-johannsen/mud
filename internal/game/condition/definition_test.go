@@ -216,3 +216,31 @@ func TestPropertyRegistry_RegisterThenGet(t *testing.T) {
 		assert.Equal(t, def, got)
 	})
 }
+
+func TestLoadDirectory_AidedConditionsPresent(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+
+	cases := []struct {
+		id           string
+		wantBonus    int
+		wantPenalty  int
+		wantDuration string
+	}{
+		{"aided_strong", 3, 0, "rounds"},
+		{"aided", 2, 0, "rounds"},
+		{"aided_penalty", 0, 1, "rounds"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.id, func(t *testing.T) {
+			def, ok := reg.Get(tc.id)
+			require.True(t, ok, "condition %q must be present", tc.id)
+			assert.Equal(t, tc.id, def.ID)
+			assert.Equal(t, tc.wantBonus, def.AttackBonus, "AttackBonus mismatch")
+			assert.Equal(t, tc.wantPenalty, def.AttackPenalty, "AttackPenalty mismatch")
+			assert.Equal(t, tc.wantDuration, def.DurationType, "DurationType mismatch")
+			assert.Equal(t, 0, def.MaxStacks, "MaxStacks must be 0")
+		})
+	}
+}
