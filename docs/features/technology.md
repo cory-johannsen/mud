@@ -34,7 +34,7 @@ Maps the PF2E magic system to Gunchete technology: traditions, prepared/spontane
       - [x] Heightened Spells -> Amped Technology — expend a higher-level spontaneous use slot to activate a tech at amped power level; uses `AmpedEffects` defined per tech (Sub-project: Amped Technology, depends on Tech Effect Resolution)
       - [x] Innate Technologies — region-based innate tech grants; per-tech daily uses; restore on rest; character sheet display (REQ-INN1–INN9, REQ-CONTENT1–2)
         - [x] Innate tech effect resolution — activating an innate tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution; REQ-TER1–22)
-        - [ ] `chrome_reflex` reaction trigger — integrate with Reactions system so it fires as a reaction rather than via `use` command; requires Reactions system
+        - [x] `chrome_reflex` reaction trigger — integrate with Reactions system so it fires as a reaction rather than via `use` command; requires Reactions system
         - [x] Passive innate tech mechanics — `seismic_sense` (always-on tremorsense) applies passively without `use` command; `moisture_reclaim` cantrip refactor is a separate sub-project
     - [x] Spell import from PF2E with translation into Gunchete
       - [x] Populate Archetype and Job yaml with options
