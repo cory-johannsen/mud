@@ -138,7 +138,7 @@ message AidRequest {
 - `id: aided_strong`
 - `name: Aided (Strong)`
 - `description`: states +3 to attack rolls for 1 round
-- `duration_type: round`
+- `duration_type: rounds`
 - `max_stacks: 0` (non-stacking)
 - `attack_bonus: 3` (positive = bonus per REQ-ACT0c)
 - `attack_penalty: 0`, `ac_penalty: 0`, `damage_bonus: 0`, `speed_penalty: 0`
@@ -150,7 +150,7 @@ message AidRequest {
 - `id: aided`
 - `name: Aided`
 - `description`: states +2 to attack rolls for 1 round
-- `duration_type: round`
+- `duration_type: rounds`
 - `max_stacks: 0`
 - `attack_bonus: 2`
 - `attack_penalty: 0`, `ac_penalty: 0`, `damage_bonus: 0`, `speed_penalty: 0`
@@ -162,7 +162,7 @@ message AidRequest {
 - `id: aided_penalty`
 - `name: Aided (Fumble)`
 - `description`: states -1 to attack rolls for 1 round (misguided assistance)
-- `duration_type: round`
+- `duration_type: rounds`
 - `max_stacks: 0`
 - `attack_penalty: 1` (positive = penalty per REQ-ACT0c)
 - `attack_bonus: 0`, `ac_penalty: 0`, `damage_bonus: 0`, `speed_penalty: 0`
