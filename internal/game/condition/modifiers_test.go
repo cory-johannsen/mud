@@ -89,7 +89,7 @@ func TestAttackBonus_WithBonus_ReturnsPositive(t *testing.T) {
 	assert.Equal(t, 2, condition.AttackBonus(s))
 }
 
-func TestAttackBonus_PenaltyAndBonus_Net(t *testing.T) {
+func TestAttackBonus_PenaltyOnly_ReturnsNegative(t *testing.T) {
 	s := condition.NewActiveSet()
 	def := &condition.ConditionDef{ID: "feared", Name: "Feared", DurationType: "rounds", MaxStacks: 0, AttackPenalty: 1}
 	require.NoError(t, s.Apply("testuid", def, 1, 1))
