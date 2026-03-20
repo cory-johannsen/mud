@@ -22,10 +22,10 @@ Out of scope: other reaction-bearing feats or techs (Sub-project 3); NPC reactio
 ## Data Model
 
 ### REQ-CRX1
-`ReactionDef` in `internal/game/reaction/trigger.go` MUST replace the `Trigger ReactionTriggerType` field with `Triggers []ReactionTriggerType` tagged `yaml:"triggers"`. The singular `Trigger` field MUST be removed.
+`ReactionDef` in `internal/game/reaction/trigger.go` MUST replace the `Trigger ReactionTriggerType` field with `Triggers []ReactionTriggerType` tagged `yaml:"triggers"`. The singular `Trigger` field MUST be removed. No production YAML files used the `trigger:` (singular) key prior to this change — all test fixtures using `Trigger:` struct literals MUST be updated to `Triggers:` (slice).
 
 ### REQ-CRX2
-`ReactionDef.Triggers` MUST contain at least one entry. A `ReactionDef` with an empty `Triggers` slice is invalid and MUST be treated as having no registered triggers (no-op at registration time).
+`ReactionDef.Triggers` MUST contain at least one entry. A `ReactionDef` with an empty `Triggers` slice is invalid and MUST be treated as having no registered triggers: `Register` MUST silently return without error and without inserting any entries.
 
 ### REQ-CRX3
 `content/technologies/innate/chrome_reflex.yaml` MUST gain a `reaction:` block:
@@ -39,7 +39,7 @@ reaction:
     keep: better
 ```
 
-The existing `effects.on_apply` utility entry MAY be removed since chrome_reflex no longer has a manual activation path.
+The existing `effects.on_apply` utility entry MUST be removed since chrome_reflex no longer has a manual activation path and the entry is dead code.
 
 ---
 
@@ -56,7 +56,7 @@ Because `ReactionsRemaining` is checked before any reaction fires, a player can 
 ## Use Command Block
 
 ### REQ-CRX6
-In `internal/gameserver/grpc_service.go`, inside the innate tech activation path (`handleUse` or equivalent), after looking up the `TechnologyDef` for the requested tech ID, MUST check whether `techDef.Reaction != nil`. If so, MUST send the player an informational message:
+In `internal/gameserver/grpc_service.go`, inside the branch that handles `use <tech>` for innate techs (the block beginning `if slot, ok := sess.InnateTechs[abilityID]; ok`), after looking up the `TechnologyDef` for the requested tech ID, MUST check whether `techDef.Reaction != nil`. If so, MUST send the player an informational message:
 
 > `"<tech name> fires automatically as a reaction and cannot be activated manually."`
 
@@ -77,7 +77,7 @@ The existing login loop that iterates `sess.InnateTechs` and calls `sess.Reactio
 Unit tests in `internal/game/reaction/trigger_test.go` MUST be updated to use `Triggers []ReactionTriggerType` (replacing `Trigger`). YAML round-trip tests MUST verify that a `ReactionDef` with two triggers marshals and unmarshals correctly.
 
 ### REQ-CRX9
-Unit tests in `internal/game/reaction/registry_test.go` MUST be updated to pass `Triggers` in `ReactionDef` literals. A new test MUST verify that `Register` with two triggers produces entries retrievable by both trigger types for the same UID.
+Unit tests in `internal/game/reaction/registry_test.go` MUST be updated to pass `Triggers` in `ReactionDef` literals. A new test MUST verify that `Register` with two triggers produces entries retrievable by both trigger types for the same UID. A new test MUST verify that spending a reaction for `TriggerOnSaveFail` (decrementing `ReactionsRemaining` to 0) prevents a subsequent `TriggerOnSaveCritFail` from firing for the same player in the same round.
 
 ### REQ-CRX10
 A unit test MUST verify that `chrome_reflex.yaml` loads without error and that the parsed `TechnologyDef.Reaction` is non-nil with `Triggers` containing both `TriggerOnSaveFail` and `TriggerOnSaveCritFail`.
@@ -103,6 +103,7 @@ A unit test or integration test MUST verify that attempting to `use chrome_refle
 | `content/technologies/innate/chrome_reflex.yaml` | Add `reaction:` block |
 | `internal/gameserver/grpc_service.go` | Block `use` activation for reaction techs (REQ-CRX6) |
 | `internal/gameserver/reaction_handler_test.go` | Update any `Trigger` field references |
+| `internal/game/ruleset/feat_test.go` | Update `f.Reaction.Trigger` reference to `f.Reaction.Triggers` |
 
 ### Data Flow
 
