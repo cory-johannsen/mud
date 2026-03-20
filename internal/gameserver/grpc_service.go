@@ -3515,6 +3515,13 @@ func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest
 	}
 	arg := req.GetArg()
 	if arg != "" {
+		if sess.Status == statusInCombat {
+			if s.combatH != nil {
+				if err := s.combatH.SpendAP(uid, 1); err != nil {
+					return messageEvent("Not enough AP to swap loadouts."), nil
+				}
+			}
+		}
 		return messageEvent(command.HandleLoadout(sess, arg)), nil
 	}
 	flavor := technology.FlavorFor(technology.DominantTradition(sess.Class))
