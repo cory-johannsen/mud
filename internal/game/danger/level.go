@@ -12,7 +12,8 @@ const (
 
 // EffectiveDangerLevel returns roomDanger if non-empty, else zoneDanger.
 // Precondition: zoneDanger MUST be a valid DangerLevel string.
-// Postcondition: returns the effective DangerLevel for the room.
+// Postcondition: returns DangerLevel(roomDanger) if roomDanger is non-empty, else DangerLevel(zoneDanger).
+// Invalid strings are passed through as-is without validation (caller's responsibility per precondition).
 func EffectiveDangerLevel(zoneDanger, roomDanger string) DangerLevel {
 	if roomDanger != "" {
 		return DangerLevel(roomDanger)

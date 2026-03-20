@@ -43,6 +43,12 @@ func TestEffectiveDangerLevel(t *testing.T) {
 			roomDanger: "sketchy",
 			want:       danger.Sketchy,
 		},
+		{
+			name:       "invalid zone value passes through",
+			zoneDanger: "invalid_level",
+			roomDanger: "",
+			want:       danger.DangerLevel("invalid_level"),
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
