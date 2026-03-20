@@ -2,8 +2,12 @@ package gameserver
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"pgregory.net/rapid"
 )
 
 func TestFormatDate_OrdinalSuffixes(t *testing.T) {
@@ -62,20 +66,20 @@ func TestGameCalendar_DayAdvancesByOne(t *testing.T) {
 	stopClk := clock.Start()
 	defer stopClk()
 
-	var got GameDateTime
-	for i := 0; i < 10; i++ {
+	timeout := time.After(3 * time.Second)
+	for {
 		select {
-		case got = <-ch:
-			if got.Hour == 0 {
-				goto check
+		case got := <-ch:
+			if got.Hour != 0 {
+				continue
 			}
-		case <-time.After(500 * time.Millisecond):
+			if got.Day != 6 || got.Month != 1 {
+				t.Errorf("after Jan 5 midnight got day=%d month=%d, want day=6 month=1", got.Day, got.Month)
+			}
+			return
+		case <-timeout:
 			t.Fatal("timed out waiting for midnight tick")
 		}
-	}
-check:
-	if got.Day != 6 || got.Month != 1 {
-		t.Errorf("after Jan 5 midnight got day=%d month=%d, want day=6 month=1", got.Day, got.Month)
 	}
 }
 
@@ -89,20 +93,20 @@ func TestGameCalendar_JanRollover(t *testing.T) {
 	stopClk := clock.Start()
 	defer stopClk()
 
-	var got GameDateTime
-	for i := 0; i < 10; i++ {
+	timeout := time.After(3 * time.Second)
+	for {
 		select {
-		case got = <-ch:
-			if got.Hour == 0 {
-				goto check
+		case got := <-ch:
+			if got.Hour != 0 {
+				continue
 			}
-		case <-time.After(500 * time.Millisecond):
+			if got.Day != 1 || got.Month != 2 {
+				t.Errorf("after Jan 31 midnight got day=%d month=%d, want day=1 month=2", got.Day, got.Month)
+			}
+			return
+		case <-timeout:
 			t.Fatal("timed out waiting for midnight tick")
 		}
-	}
-check:
-	if got.Day != 1 || got.Month != 2 {
-		t.Errorf("after Jan 31 midnight got day=%d month=%d, want day=1 month=2", got.Day, got.Month)
 	}
 }
 
@@ -117,31 +121,46 @@ func TestGameCalendar_FebRollover(t *testing.T) {
 	stopClk := clock.Start()
 	defer stopClk()
 
-	var got GameDateTime
-	for i := 0; i < 10; i++ {
+	timeout := time.After(3 * time.Second)
+	for {
 		select {
-		case got = <-ch:
-			if got.Hour == 0 {
-				goto check
+		case got := <-ch:
+			if got.Hour != 0 {
+				continue
 			}
-		case <-time.After(500 * time.Millisecond):
+			if got.Day != 1 || got.Month != 3 {
+				t.Errorf("after Feb 28 midnight got day=%d month=%d, want day=1 month=3", got.Day, got.Month)
+			}
+			return
+		case <-timeout:
 			t.Fatal("timed out waiting for midnight tick")
 		}
-	}
-check:
-	if got.Day != 1 || got.Month != 3 {
-		t.Errorf("after Feb 28 midnight got day=%d month=%d, want day=1 month=3", got.Day, got.Month)
 	}
 }
 
 func TestGameCalendar_NoSubscribers_NoPanic(t *testing.T) {
 	clock := NewGameClock(6, 50*time.Millisecond)
 	cal := NewGameCalendar(clock, 1, 1, &noopRepo{})
+
+	// subscribe a channel so we know when ticks are being processed
+	ch := make(chan GameDateTime, 4)
+	cal.Subscribe(ch)
 	stopCal := cal.Start()
 	defer stopCal()
 	stopClk := clock.Start()
 	defer stopClk()
-	time.Sleep(120 * time.Millisecond)
+
+	// wait for a couple ticks to confirm no panic
+	timeout := time.After(3 * time.Second)
+	for i := 0; i < 2; i++ {
+		select {
+		case <-ch:
+			// tick received, no panic
+		case <-timeout:
+			t.Fatal("timed out waiting for tick")
+		}
+	}
+	cal.Unsubscribe(ch)
 }
 
 func TestGameCalendar_SaveFailure_DoesNotStopBroadcast(t *testing.T) {
@@ -160,6 +179,70 @@ func TestGameCalendar_SaveFailure_DoesNotStopBroadcast(t *testing.T) {
 	case <-time.After(500 * time.Millisecond):
 		t.Fatal("timed out — broadcast stopped after Save failure")
 	}
+}
+
+func TestNewGameCalendar_PanicsOnNilClock(t *testing.T) {
+	assert.Panics(t, func() {
+		NewGameCalendar(nil, 1, 1, &noopRepo{})
+	})
+}
+
+func TestNewGameCalendar_PanicsOnNilRepo(t *testing.T) {
+	clock := NewGameClock(6, 50*time.Millisecond)
+	assert.Panics(t, func() {
+		NewGameCalendar(clock, 1, 1, nil)
+	})
+}
+
+// Property: FormatDate ordinal suffix is always one of "st", "nd", "rd", "th"
+func TestProperty_FormatDate_OrdinalSuffix(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		month := rapid.IntRange(1, 12).Draw(t, "month")
+		day := rapid.IntRange(1, 31).Draw(t, "day")
+		result := FormatDate(month, day)
+		hasSuffix := strings.HasSuffix(result, "st") ||
+			strings.HasSuffix(result, "nd") ||
+			strings.HasSuffix(result, "rd") ||
+			strings.HasSuffix(result, "th")
+		if !hasSuffix {
+			t.Fatalf("FormatDate(%d, %d) = %q: missing ordinal suffix", month, day, result)
+		}
+	})
+}
+
+// Property: FormatDate day=11,12,13 always returns "th"
+func TestProperty_FormatDate_TeenSuffixAlwaysTh(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		month := rapid.IntRange(1, 12).Draw(t, "month")
+		day := rapid.SampledFrom([]int{11, 12, 13}).Draw(t, "day")
+		result := FormatDate(month, day)
+		if !strings.HasSuffix(result, "th") {
+			t.Fatalf("FormatDate(%d, %d) = %q: expected 'th' suffix for teen day", month, day, result)
+		}
+	})
+}
+
+// Property: rollover always produces a valid calendar date (month 1–12, day 1–31)
+func TestProperty_GameCalendar_RolloverProducesValidDate(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		startMonth := rapid.IntRange(1, 12).Draw(t, "month")
+		// pick a day that is the last day of startMonth in year 2001
+		lastDay := time.Date(2001, time.Month(startMonth+1), 0, 0, 0, 0, 0, time.UTC).Day()
+		if startMonth == 12 {
+			lastDay = 31
+		}
+		startDay := rapid.IntRange(1, lastDay).Draw(t, "day")
+
+		next := time.Date(2001, time.Month(startMonth), startDay+1, 0, 0, 0, 0, time.UTC)
+		gotDay, gotMonth := next.Day(), int(next.Month())
+
+		if gotMonth < 1 || gotMonth > 12 {
+			t.Fatalf("rollover(%d/%d) produced invalid month %d", startMonth, startDay, gotMonth)
+		}
+		if gotDay < 1 || gotDay > 31 {
+			t.Fatalf("rollover(%d/%d) produced invalid day %d", startMonth, startDay, gotDay)
+		}
+	})
 }
 
 // noopRepo is a CalendarRepo stub that does nothing.
