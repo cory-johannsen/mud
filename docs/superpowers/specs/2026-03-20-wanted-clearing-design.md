@@ -1,7 +1,7 @@
 # Wanted Level Clearing — Design Spec
 
 **Date:** 2026-03-20
-**Status:** Draft
+**Status:** Approved
 **Feature:** `wanted-clearing` (priority 25)
 **Dependencies:** `room-danger-levels`, `non-combat-npcs`
 
@@ -177,6 +177,8 @@ On detention completion: WantedLevel decrements by 1; `detained` condition is re
 
 - REQ-WC-12: `surrender` MUST fail with a message if no guard is present in the room.
 - REQ-WC-13: `surrender` MUST fail with a message if the player's WantedLevel is 0 (None).
+
+Note: `surrender` and `bribe` are blocked while the player is detained because `prevents_commands: true` on the `detained` condition prevents all command input. No additional guard is needed.
 - REQ-WC-14: Detention duration MUST be evaluated against the in-game clock (1 real minute = 1 in-game hour per `docs/architecture/overview.md`), not wall-clock time.
 - REQ-WC-14a: `DetainedUntil` MUST be persisted to the database and restored on player reconnect. Detention MUST continue advancing against the game clock while the player is offline.
 - REQ-WC-14b: If detention expires while the player is offline, it MUST complete normally (WantedLevel decrements, `detained` removed) the next time the player connects.
@@ -234,6 +236,7 @@ Fixers are valid quest-givers for record-clearing quests. The `talk <fixer>` com
 - REQ-WC-1: `FixerConfig.NPCVariance` MUST be > 0; zero or negative MUST be a fatal load error.
 - REQ-WC-2: `FixerConfig.MaxWantedLevel` MUST be in range 1–4; out-of-range MUST be a fatal load error.
 - REQ-WC-2a: `FixerConfig.BaseCosts` MUST contain all keys 1–4 with positive values; violations MUST be fatal load errors.
+- REQ-WC-2b: `GuardConfig.MaxBribeWantedLevel` MUST be in range 1–4 when `Bribeable` is true. Out-of-range values MUST be a fatal load error.
 - REQ-WC-3: Fixers MUST default to `flee` on combat start and MUST NOT enter the initiative order.
 - REQ-WC-4: The `change_rep` command MUST NOT be implemented in this feature; reserved for `factions`.
 - REQ-WC-5: `bribe` MUST fail if the player's WantedLevel is 0.
