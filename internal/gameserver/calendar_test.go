@@ -194,6 +194,26 @@ func TestNewGameCalendar_PanicsOnNilRepo(t *testing.T) {
 	})
 }
 
+func TestNewGameCalendar_PanicsOnInvalidDay(t *testing.T) {
+	clock := NewGameClock(6, 50*time.Millisecond)
+	assert.Panics(t, func() {
+		NewGameCalendar(clock, 0, 1, &noopRepo{})
+	}, "day=0 should panic")
+	assert.Panics(t, func() {
+		NewGameCalendar(clock, 32, 1, &noopRepo{})
+	}, "day=32 should panic")
+}
+
+func TestNewGameCalendar_PanicsOnInvalidMonth(t *testing.T) {
+	clock := NewGameClock(6, 50*time.Millisecond)
+	assert.Panics(t, func() {
+		NewGameCalendar(clock, 1, 0, &noopRepo{})
+	}, "month=0 should panic")
+	assert.Panics(t, func() {
+		NewGameCalendar(clock, 1, 13, &noopRepo{})
+	}, "month=13 should panic")
+}
+
 // Property: FormatDate ordinal suffix is always one of "st", "nd", "rd", "th"
 func TestProperty_FormatDate_OrdinalSuffix(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
