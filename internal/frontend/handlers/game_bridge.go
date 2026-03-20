@@ -19,6 +19,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/gameserver"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
@@ -246,7 +247,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	}
 	if rv := resp.GetRoomView(); rv != nil {
 		w, _ := conn.Dimensions()
-		renderedRoom := RenderRoomView(rv, w, telnet.RoomRegionRows)
+		renderedRoom := RenderRoomView(rv, w, telnet.RoomRegionRows, gameserver.GameDateTime{})
 		if conn.IsSplitScreen() {
 			_ = conn.WriteRoom(renderedRoom)
 		} else {
@@ -592,7 +593,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					continue
 				}
 				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil {
-					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows))
+					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, gameserver.GameDateTime{}))
 				}
 				_ = conn.WritePromptSplit(buildPrompt())
 			}
@@ -629,7 +630,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
 			}
 			w, _ := conn.Dimensions()
-			text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows)
+			text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, gameserver.GameDateTime{})
 			lastRoomView.Store(p.RoomView)
 		case *gamev1.ServerEvent_Message:
 			period := ""

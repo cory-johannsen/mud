@@ -10,8 +10,11 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/gameserver"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
+
+var testDT = gameserver.GameDateTime{Hour: 7, Day: 1, Month: 1}
 
 func TestRenderRoomView(t *testing.T) {
 	rv := &gamev1.RoomView{
@@ -25,7 +28,7 @@ func TestRenderRoomView(t *testing.T) {
 		Players: []string{"Bob"},
 	}
 
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	stripped := telnet.StripANSI(rendered)
 
 	assert.Contains(t, stripped, "Test Room")
@@ -42,7 +45,7 @@ func TestRenderRoomView_ExitsLabelInline(t *testing.T) {
 			{Direction: "north", TargetTitle: "Alley"},
 		},
 	}
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	lines := strings.Split(strings.TrimRight(rendered, "\r\n"), "\r\n")
 	var exitsLine string
 	for _, l := range lines {
@@ -65,7 +68,7 @@ func TestRenderRoomView_ExitsFourPerRow(t *testing.T) {
 			{Direction: "up"},
 		},
 	}
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	// Count lines that contain exit directions after the label
 	exitDirs := map[string]bool{"north": true, "south": true, "east": true, "west": true, "up": true}
 	var exitRowCount int
@@ -105,7 +108,7 @@ func TestRenderRoomView_NoExitsNoPlayers(t *testing.T) {
 		Description: "Nothing here.",
 	}
 
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	stripped := telnet.StripANSI(rendered)
 
 	assert.Contains(t, stripped, "Empty Room")
@@ -364,30 +367,29 @@ func TestRenderRoomView_WithTimeFields_DescriptionPreserved(t *testing.T) {
 		Hour:        17,
 	}
 	// Use a wide width so the description is not wrapped and appears verbatim.
-	rendered := RenderRoomView(rv, 200, 0)
+	dt := gameserver.GameDateTime{Hour: 17, Day: 1, Month: 1}
+	rendered := RenderRoomView(rv, 200, 0, dt)
 	stripped := telnet.StripANSI(rendered)
 	if !strings.Contains(stripped, description) {
 		t.Errorf("expected description in render, got %q", stripped)
 	}
 }
 
-func TestRenderRoomView_TimeFields_NoExtraOutput(t *testing.T) {
-	// Verify that Hour and Period fields don't add unexpected content
-	rv1 := &gamev1.RoomView{
-		RoomId:      "room1",
-		Title:       "A Room",
-		Description: "A description.",
+func TestRenderRoomView_DateTimeInHeader(t *testing.T) {
+	rv := &gamev1.RoomView{
+		Title:       "Test Room",
+		Description: "A plain room.",
 	}
-	rv2 := &gamev1.RoomView{
-		RoomId:      "room1",
-		Title:       "A Room",
-		Description: "A description.",
-		Period:      "Dusk",
-		Hour:        17,
+	dt := gameserver.GameDateTime{Hour: 7, Day: 15, Month: 6}
+	rendered := RenderRoomView(rv, 80, 0, dt)
+	if !strings.Contains(rendered, "June 15th") {
+		t.Errorf("room header must contain date, got:\n%s", rendered)
 	}
-	// RenderRoomView should produce the same output regardless of Hour/Period
-	if RenderRoomView(rv1, 80, 0) != RenderRoomView(rv2, 80, 0) {
-		t.Error("RenderRoomView should not include Hour/Period fields in output")
+	if !strings.Contains(rendered, "Morning") {
+		t.Errorf("room header must contain period, got:\n%s", rendered)
+	}
+	if !strings.Contains(rendered, "07:00") {
+		t.Errorf("room header must contain hour, got:\n%s", rendered)
 	}
 }
 
@@ -860,7 +862,7 @@ func TestRenderRoomView_NPCsLabelled(t *testing.T) {
 			{Name: "Ganger A", HealthDescription: "unharmed"},
 		},
 	}
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	stripped := telnet.StripANSI(rendered)
 	assert.Contains(t, stripped, "NPCs:")
 	for _, line := range strings.Split(stripped, "\r\n") {
@@ -880,7 +882,7 @@ func TestRenderRoomView_NPCsTwoColumns(t *testing.T) {
 			{Name: "Ganger C", HealthDescription: "unharmed"},
 		},
 	}
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	stripped := telnet.StripANSI(rendered)
 	var npcLines []string
 	for _, l := range strings.Split(strings.TrimRight(stripped, "\r\n"), "\r\n") {
@@ -901,7 +903,7 @@ func TestRenderRoomView_NPCsFightingTarget(t *testing.T) {
 			{Name: "Ganger A", HealthDescription: "unharmed", FightingTarget: "alice"},
 		},
 	}
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	stripped := telnet.StripANSI(rendered)
 	assert.Contains(t, stripped, "fighting alice")
 }
@@ -911,7 +913,7 @@ func TestRenderRoomView_EquipmentLabelled(t *testing.T) {
 		Title:     "Test Room",
 		Equipment: []*gamev1.RoomEquipmentItem{{Name: "Crate"}},
 	}
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	stripped := telnet.StripANSI(rendered)
 	for _, l := range strings.Split(stripped, "\r\n") {
 		if strings.Contains(l, "Items:") {
@@ -929,7 +931,7 @@ func TestRenderRoomView_EquipmentFourColumns(t *testing.T) {
 			{Name: "A"}, {Name: "B"}, {Name: "C"}, {Name: "D"}, {Name: "E"},
 		},
 	}
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	stripped := telnet.StripANSI(rendered)
 	var itemLines []string
 	inItems := false
@@ -957,7 +959,7 @@ func TestRenderRoomView_EquipmentAfterExitsBeforeNPCs(t *testing.T) {
 		Equipment: []*gamev1.RoomEquipmentItem{{Name: "Crate"}},
 		Npcs:      []*gamev1.NpcInfo{{Name: "Ganger A", HealthDescription: "unharmed"}},
 	}
-	rendered := RenderRoomView(rv, 80, 0)
+	rendered := RenderRoomView(rv, 80, 0, testDT)
 	stripped := telnet.StripANSI(rendered)
 	lines := strings.Split(strings.TrimRight(stripped, "\r\n"), "\r\n")
 	exitIdx, equipIdx, npcIdx := -1, -1, -1

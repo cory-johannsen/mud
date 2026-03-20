@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/gameserver"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -15,12 +16,16 @@ import (
 // limit so the output never overflows the pinned room region.
 // Postcondition: Returns a multi-line ANSI-colored string of at most maxLines
 // rows suitable for WriteRoom.
-func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int) string {
+func RenderRoomView(rv *gamev1.RoomView, width int, maxLines int, dt gameserver.GameDateTime) string {
 	// Collect all lines in priority order, then trim to maxLines.
 	var lines []string
 
 	if rv.Title != "" {
-		lines = append(lines, telnet.Colorize(telnet.BrightYellow, rv.Title))
+		dateStr := gameserver.FormatDate(dt.Month, dt.Day)
+		periodStr := string(dt.Hour.Period())
+		hourStr := dt.Hour.String()
+		header := fmt.Sprintf("%s \u2014 %s %s %s", rv.Title, dateStr, periodStr, hourStr)
+		lines = append(lines, telnet.Colorize(telnet.BrightYellow, header))
 	}
 	if rv.Description != "" {
 		if width > 0 {
