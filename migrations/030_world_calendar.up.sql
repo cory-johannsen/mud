@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS world_calendar (
+    id    INTEGER PRIMARY KEY DEFAULT 1,
+    day   INTEGER NOT NULL,
+    month INTEGER NOT NULL
+);

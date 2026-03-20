@@ -262,6 +262,12 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			max_uses       INT    NOT NULL DEFAULT 0,
 			PRIMARY KEY (character_id, tech_level)
 		);
+
+		CREATE TABLE IF NOT EXISTS world_calendar (
+			id    INTEGER PRIMARY KEY DEFAULT 1,
+			day   INTEGER NOT NULL,
+			month INTEGER NOT NULL
+		);
 	`)
 	return err
 }
