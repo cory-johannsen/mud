@@ -215,6 +215,16 @@ features:
       - actions
       - persistent-calendar
 
+  - slug: ready-action
+    name: Ready Action
+    status: planned
+    priority: 242
+    category: combat
+    file: docs/features/ready-action.md
+    effort: "not defined"
+    dependencies:
+      - actions
+
   - slug: use-command
     name: Use Command Expansion
     status: planned
