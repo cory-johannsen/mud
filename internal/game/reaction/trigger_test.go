@@ -27,7 +27,7 @@ func TestReactionTriggerType_AllValuesNonEmpty(t *testing.T) {
 
 func TestReactionDef_YAMLRoundTrip(t *testing.T) {
 	original := reaction.ReactionDef{
-		Trigger:     reaction.TriggerOnSaveFail,
+		Triggers:    []reaction.ReactionTriggerType{reaction.TriggerOnSaveFail},
 		Requirement: "wielding_melee_weapon",
 		Effect: reaction.ReactionEffect{
 			Type: reaction.ReactionEffectRerollSave,
@@ -46,10 +46,32 @@ func TestReactionDef_YAMLRoundTrip(t *testing.T) {
 
 func TestReactionDef_YAMLRoundTrip_NoRequirement(t *testing.T) {
 	original := reaction.ReactionDef{
-		Trigger: reaction.TriggerOnEnemyMoveAdjacent,
+		Triggers: []reaction.ReactionTriggerType{reaction.TriggerOnEnemyMoveAdjacent},
 		Effect: reaction.ReactionEffect{
 			Type:   reaction.ReactionEffectStrike,
 			Target: "trigger_source",
+		},
+	}
+	data, err := yaml.Marshal(original)
+	require.NoError(t, err)
+
+	var decoded reaction.ReactionDef
+	err = yaml.Unmarshal(data, &decoded)
+	require.NoError(t, err)
+
+	assert.Equal(t, original, decoded)
+}
+
+// REQ-CRX8: multi-trigger YAML round-trip.
+func TestReactionDef_YAMLRoundTrip_MultiTrigger(t *testing.T) {
+	original := reaction.ReactionDef{
+		Triggers: []reaction.ReactionTriggerType{
+			reaction.TriggerOnSaveFail,
+			reaction.TriggerOnSaveCritFail,
+		},
+		Effect: reaction.ReactionEffect{
+			Type: reaction.ReactionEffectRerollSave,
+			Keep: "better",
 		},
 	}
 	data, err := yaml.Marshal(original)

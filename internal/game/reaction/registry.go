@@ -30,26 +30,33 @@ func NewReactionRegistry() *ReactionRegistry {
 
 // Register adds a reaction for the given player and feat.
 // featName is the human-readable display name used in prompts.
+// One PlayerReaction entry is created per trigger in def.Triggers.
 // If an entry with the same UID and trigger already exists, it is updated in-place.
+// If def.Triggers is empty, Register is a no-op (REQ-CRX2).
 func (r *ReactionRegistry) Register(uid, featID, featName string, def ReactionDef) {
-	for i := range r.byTrigger[def.Trigger] {
-		if r.byTrigger[def.Trigger][i].UID == uid {
-			// Update in-place to prevent stale duplicates.
-			r.byTrigger[def.Trigger][i] = PlayerReaction{
+	for _, trigger := range def.Triggers {
+		found := false
+		for i := range r.byTrigger[trigger] {
+			if r.byTrigger[trigger][i].UID == uid {
+				r.byTrigger[trigger][i] = PlayerReaction{
+					UID:      uid,
+					Feat:     featID,
+					FeatName: featName,
+					Def:      def,
+				}
+				found = true
+				break
+			}
+		}
+		if !found {
+			r.byTrigger[trigger] = append(r.byTrigger[trigger], PlayerReaction{
 				UID:      uid,
 				Feat:     featID,
 				FeatName: featName,
 				Def:      def,
-			}
-			return
+			})
 		}
 	}
-	r.byTrigger[def.Trigger] = append(r.byTrigger[def.Trigger], PlayerReaction{
-		UID:      uid,
-		Feat:     featID,
-		FeatName: featName,
-		Def:      def,
-	})
 }
 
 // Get returns the first registered reaction for uid and trigger, or nil if none.

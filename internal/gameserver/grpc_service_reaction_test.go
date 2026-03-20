@@ -62,8 +62,8 @@ func TestReactionCallback_SkipsWhenNoReactionsRemaining(t *testing.T) {
 		Reactions:          reaction.NewReactionRegistry(),
 	}
 	def := reaction.ReactionDef{
-		Trigger: reaction.TriggerOnDamageTaken,
-		Effect:  reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage},
+		Triggers: []reaction.ReactionTriggerType{reaction.TriggerOnDamageTaken},
+		Effect:   reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage},
 	}
 	sess.Reactions.Register("rxn-skip", "test_feat", "Test Feat", def)
 
@@ -93,8 +93,8 @@ func TestReactionCallback_SecondTriggerSkipped_WhenReactionSpent(t *testing.T) {
 		Reactions:          reaction.NewReactionRegistry(),
 	}
 	def := reaction.ReactionDef{
-		Trigger: reaction.TriggerOnDamageTaken,
-		Effect:  reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage},
+		Triggers: []reaction.ReactionTriggerType{reaction.TriggerOnDamageTaken},
+		Effect:   reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage},
 	}
 	sess.Reactions.Register("rxn-spent", "test_feat", "Test Feat", def)
 

@@ -96,7 +96,8 @@ feats:
   name: Reactive Strike
   category: combat
   reaction:
-    trigger: on_enemy_move_adjacent
+    triggers:
+      - on_enemy_move_adjacent
     requirement: wielding_melee_weapon
     effect:
       type: strike
@@ -108,7 +109,8 @@ feats:
 	f := feats[0]
 	assert.Equal(t, "reactive_strike", f.ID)
 	require.NotNil(t, f.Reaction)
-	assert.Equal(t, reaction.TriggerOnEnemyMoveAdjacent, f.Reaction.Trigger)
+	require.Len(t, f.Reaction.Triggers, 1)
+	assert.Equal(t, reaction.TriggerOnEnemyMoveAdjacent, f.Reaction.Triggers[0])
 	assert.Equal(t, "wielding_melee_weapon", f.Reaction.Requirement)
 	assert.Equal(t, reaction.ReactionEffectStrike, f.Reaction.Effect.Type)
 	assert.Equal(t, "trigger_source", f.Reaction.Effect.Target)

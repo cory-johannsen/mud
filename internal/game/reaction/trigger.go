@@ -48,8 +48,9 @@ type ReactionEffect struct {
 
 // ReactionDef is the reaction declaration embedded in a Feat or TechnologyDef YAML.
 type ReactionDef struct {
-	// Trigger is the combat event that can fire this reaction.
-	Trigger ReactionTriggerType `yaml:"trigger"`
+	// Triggers lists the combat events that can fire this reaction.
+	// Must contain at least one entry. An empty slice is a no-op at registration time.
+	Triggers []ReactionTriggerType `yaml:"triggers"`
 	// Requirement is an optional predicate the player must satisfy (e.g. "wielding_melee_weapon").
 	// Empty string means no requirement.
 	Requirement string `yaml:"requirement,omitempty"`
