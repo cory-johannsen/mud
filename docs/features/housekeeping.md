@@ -24,7 +24,3 @@ Project maintenance and tech-debt items tracked as top-level features.
     - [x] money: grants a player currency
   - [x] Accepts a character name (target must be online)
   - [x] Accepts the amount as an argument (must be > 0)
-
-## Wire Dependency Injection Refactor
-
-- [ ] refactor to use `wire` for dependency injection

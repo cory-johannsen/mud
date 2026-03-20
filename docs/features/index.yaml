@@ -174,7 +174,7 @@ features:
     status: planned
     priority: 210
     category: meta
-    file: docs/features/housekeeping.md
+    file: docs/features/wire-refactor.md
     effort: "not defined"
 
   - slug: long-rest
