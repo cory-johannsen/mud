@@ -38,4 +38,3 @@ Maps the PF2E magic system to Gunchete technology: traditions, prepared/spontane
         - [x] Passive innate tech mechanics — `seismic_sense` (always-on tremorsense) applies passively without `use` command; `moisture_reclaim` cantrip refactor is a separate sub-project
     - [x] Spell import from PF2E with translation into Gunchete
       - [x] Populate Archetype and Job yaml with options
-- [ ] refactor to use `wire` for dependency injection
