@@ -30,29 +30,11 @@ var ErrSwitchCharacter = errors.New("switch character")
 
 // BuildPrompt constructs the colored telnet prompt string.
 //
-// Precondition: maxHP > 0; name, period, and hour must be non-empty.
+// Precondition: maxHP > 0; name must be non-empty.
 // Postcondition: Returns a non-empty string ending with "> ".
-func BuildPrompt(name, period, hour string, currentHP, maxHP int32, conditions []string) string {
+func BuildPrompt(name string, currentHP, maxHP int32, conditions []string) string {
 	// Name segment
 	nameSeg := telnet.Colorf(telnet.BrightCyan, "[%s]", name)
-
-	// Time segment — color by period
-	var timeColor string
-	switch period {
-	case "Dawn":
-		timeColor = telnet.Yellow
-	case "Morning":
-		timeColor = telnet.BrightYellow
-	case "Afternoon":
-		timeColor = telnet.White
-	case "Dusk":
-		timeColor = telnet.BrightRed
-	case "Evening":
-		timeColor = telnet.Magenta
-	default: // Night, Midnight, Late Night
-		timeColor = telnet.Blue
-	}
-	timeSeg := telnet.Colorf(timeColor, "[%s %s]", period, hour)
 
 	// HP segment — color by percentage
 	if maxHP <= 0 {
@@ -76,7 +58,7 @@ func BuildPrompt(name, period, hour string, currentHP, maxHP int32, conditions [
 		condSegs = append(condSegs, telnet.Colorf(telnet.BrightMagenta, "[%s]", c))
 	}
 
-	parts := []string{nameSeg, timeSeg, hpSeg}
+	parts := []string{nameSeg, hpSeg}
 	parts = append(parts, condSegs...)
 	return strings.Join(parts, " ") + "> "
 }
@@ -189,6 +171,10 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	var currentTime atomic.Value
 	currentTime.Store(&gamev1.TimeOfDayEvent{Hour: 6, Period: "Dawn"})
 
+	// Initialize GameDateTime state: default to Hour=6, Day=1, Month=1.
+	var currentDT atomic.Value
+	currentDT.Store(&gameserver.GameDateTime{Hour: 6, Day: 1, Month: 1})
+
 	// Initialize HP tracking from character data.
 	var currentHP atomic.Int32
 	var maxHP atomic.Int32
@@ -205,7 +191,6 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	activeConditions := make(map[string]string)
 
 	buildCurrentPrompt := func() string {
-		tod := currentTime.Load().(*gamev1.TimeOfDayEvent)
 		condMu.Lock()
 		sortedIDs := slices.Sorted(maps.Keys(activeConditions))
 		names := make([]string, 0, len(sortedIDs))
@@ -213,7 +198,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 			names = append(names, activeConditions[id])
 		}
 		condMu.Unlock()
-		return BuildPrompt(char.Name, tod.Period, fmt.Sprintf("%02d:00", tod.Hour), currentHP.Load(), maxHP.Load(), names)
+		return BuildPrompt(char.Name, currentHP.Load(), maxHP.Load(), names)
 	}
 
 	// Initialize split-screen now that the game session is starting.
@@ -247,7 +232,17 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	}
 	if rv := resp.GetRoomView(); rv != nil {
 		w, _ := conn.Dimensions()
-		renderedRoom := RenderRoomView(rv, w, telnet.RoomRegionRows, gameserver.GameDateTime{})
+		// Seed time-of-day and date from first room view if available.
+		if rv.GetPeriod() != "" {
+			currentTime.Store(&gamev1.TimeOfDayEvent{Hour: rv.GetHour(), Period: rv.GetPeriod()})
+			currentDT.Store(&gameserver.GameDateTime{
+				Hour:  gameserver.GameHour(rv.GetHour()),
+				Day:   1,
+				Month: 1,
+			})
+		}
+		dt := currentDT.Load().(*gameserver.GameDateTime)
+		renderedRoom := RenderRoomView(rv, w, telnet.RoomRegionRows, *dt)
 		if conn.IsSplitScreen() {
 			_ = conn.WriteRoom(renderedRoom)
 		} else {
@@ -256,10 +251,6 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		// Seed lastRoomView so the resize handler can redraw the room region
 		// without waiting for the next move/look.
 		lastRoomView.Store(rv)
-		// Seed time-of-day from first room view if available.
-		if rv.GetPeriod() != "" {
-			currentTime.Store(&gamev1.TimeOfDayEvent{Hour: rv.GetHour(), Period: rv.GetPeriod()})
-		}
 	}
 
 	// Write initial prompt
@@ -335,7 +326,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentHP, &maxHP, &lastRoomView, buildCurrentPrompt, &condMu, activeConditions)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &lastRoomView, buildCurrentPrompt, &condMu, activeConditions)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
@@ -551,12 +542,12 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // forwardServerEvents reads ServerEvents from the gRPC stream and writes
 // rendered text to the Telnet connection.
 //
-// Precondition: stream must be open; charName must be non-empty; currentRoom, currentTime, currentHP, maxHP must be non-nil; buildPrompt must be non-nil.
+// Precondition: stream must be open; charName must be non-empty; currentRoom, currentTime, currentDT, currentHP, maxHP must be non-nil; buildPrompt must be non-nil.
 // Postcondition: Returns when ctx is done, stream closes, or a disconnect event is received.
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
-// Side-effect: currentTime is updated from TimeOfDayEvent or RoomView events.
+// Side-effect: currentTime and currentDT are updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP and maxHP are updated from CharacterInfo events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string, condMu *sync.Mutex, activeConditions map[string]string) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string, condMu *sync.Mutex, activeConditions map[string]string) {
 	// Pump stream.Recv() into a channel so it can participate in a proper
 	// select alongside resize events and the prompt-refresh ticker.
 	type recvResult struct {
@@ -593,7 +584,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					continue
 				}
 				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil {
-					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, gameserver.GameDateTime{}))
+					dt := currentDT.Load().(*gameserver.GameDateTime)
+					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt))
 				}
 				_ = conn.WritePromptSplit(buildPrompt())
 			}
@@ -616,6 +608,12 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			switch p := resp.Payload.(type) {
 		case *gamev1.ServerEvent_TimeOfDay:
 			currentTime.Store(p.TimeOfDay)
+			dt := &gameserver.GameDateTime{
+				Hour:  gameserver.GameHour(p.TimeOfDay.GetHour()),
+				Day:   int(p.TimeOfDay.GetDay()),
+				Month: int(p.TimeOfDay.GetMonth()),
+			}
+			currentDT.Store(dt)
 			if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(buildPrompt())
 			} else {
@@ -628,9 +626,17 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			}
 			if p.RoomView.GetPeriod() != "" {
 				currentTime.Store(&gamev1.TimeOfDayEvent{Hour: p.RoomView.GetHour(), Period: p.RoomView.GetPeriod()})
+				if existing, ok := currentDT.Load().(*gameserver.GameDateTime); ok && existing != nil {
+					currentDT.Store(&gameserver.GameDateTime{
+						Hour:  gameserver.GameHour(p.RoomView.GetHour()),
+						Day:   existing.Day,
+						Month: existing.Month,
+					})
+				}
 			}
 			w, _ := conn.Dimensions()
-			text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, gameserver.GameDateTime{})
+			rvDT := currentDT.Load().(*gameserver.GameDateTime)
+			text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, *rvDT)
 			lastRoomView.Store(p.RoomView)
 		case *gamev1.ServerEvent_Message:
 			period := ""

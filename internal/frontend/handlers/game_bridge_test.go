@@ -17,7 +17,7 @@ import (
 )
 
 func TestBuildPrompt_Format(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", "Dusk", "17:00", 45, 60, nil)
+	got := handlers.BuildPrompt("Thorald", 45, 60, nil)
 	// Must end with "> "
 	if !strings.HasSuffix(got, "> ") {
 		t.Errorf("prompt must end with '> ', got %q", got)
@@ -26,62 +26,44 @@ func TestBuildPrompt_Format(t *testing.T) {
 	if !strings.Contains(got, "Thorald") {
 		t.Errorf("prompt must contain character name, got %q", got)
 	}
-	// Must contain period
-	if !strings.Contains(got, "Dusk") {
-		t.Errorf("prompt must contain period, got %q", got)
-	}
-	// Must contain hour
-	if !strings.Contains(got, "17:00") {
-		t.Errorf("prompt must contain hour, got %q", got)
-	}
 }
 
 func TestBuildPrompt_HealthColors(t *testing.T) {
 	// Full health >= 75% — contains hp fraction
-	got := handlers.BuildPrompt("Thorald", "Dusk", "17:00", 60, 60, nil)
+	got := handlers.BuildPrompt("Thorald", 60, 60, nil)
 	if !strings.Contains(got, "60/60hp") {
 		t.Errorf("expected 60/60hp in prompt, got %q", got)
 	}
 	// Wounded ~40%
-	got = handlers.BuildPrompt("Thorald", "Morning", "09:00", 24, 60, nil)
+	got = handlers.BuildPrompt("Thorald", 24, 60, nil)
 	if !strings.Contains(got, "24/60hp") {
 		t.Errorf("expected 24/60hp in prompt, got %q", got)
 	}
 	// Critical <40%
-	got = handlers.BuildPrompt("Thorald", "Night", "22:00", 10, 60, nil)
+	got = handlers.BuildPrompt("Thorald", 10, 60, nil)
 	if !strings.Contains(got, "10/60hp") {
 		t.Errorf("expected 10/60hp in prompt, got %q", got)
 	}
 }
 
 func TestBuildPrompt_AllPeriods(t *testing.T) {
-	periods := []string{
-		"Midnight", "Late Night", "Dawn", "Morning",
-		"Afternoon", "Dusk", "Evening", "Night",
+	// Period is no longer shown in prompt; verify basic prompt format is stable.
+	got := handlers.BuildPrompt("X", 10, 10, nil)
+	if got == "" {
+		t.Error("BuildPrompt returned empty string")
 	}
-	for _, p := range periods {
-		got := handlers.BuildPrompt("X", p, "00:00", 10, 10, nil)
-		if got == "" {
-			t.Errorf("BuildPrompt returned empty for period %q", p)
-		}
-		if !strings.HasSuffix(got, "> ") {
-			t.Errorf("prompt for period %q must end with '> '", p)
-		}
+	if !strings.HasSuffix(got, "> ") {
+		t.Errorf("prompt must end with '> ', got %q", got)
 	}
 }
 
 func TestProperty_BuildPrompt_AlwaysEndsWithPromptSuffix(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		name := rapid.StringMatching(`[A-Za-z]{1,20}`).Draw(rt, "name")
-		period := rapid.SampledFrom([]string{
-			"Midnight", "Late Night", "Dawn", "Morning",
-			"Afternoon", "Dusk", "Evening", "Night",
-		}).Draw(rt, "period")
-		hour := rapid.StringMatching(`[0-9]{2}:[0-9]{2}`).Draw(rt, "hour")
 		maxHP := rapid.Int32Range(1, 1000).Draw(rt, "maxHP")
 		currentHP := rapid.Int32Range(0, maxHP).Draw(rt, "currentHP")
 
-		got := handlers.BuildPrompt(name, period, hour, currentHP, maxHP, nil)
+		got := handlers.BuildPrompt(name, currentHP, maxHP, nil)
 		if !strings.HasSuffix(got, "> ") {
 			rt.Errorf("BuildPrompt must end with '> ', got %q", got)
 		}
@@ -298,20 +280,20 @@ func TestProperty_IdleMonitor_ActivePlayerNeverDisconnected(t *testing.T) {
 }
 
 func TestBuildPrompt_NoConditions_FormatUnchanged(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", "Morning", "09:00", 50, 60, nil)
+	got := handlers.BuildPrompt("Thorald", 50, 60, nil)
 	if !strings.HasSuffix(got, "> ") {
 		t.Errorf("prompt must end with '> ', got %q", got)
 	}
 	// Strip ANSI codes before counting brackets to avoid false positives from escape sequences.
 	stripped := telnet.StripANSI(got)
-	// Should have exactly 3 bracket groups: [Name], [Period Hour], [HP/MaxHPhp]
-	if strings.Count(stripped, "[") != 3 {
-		t.Errorf("expected exactly 3 bracket groups (no conditions), got %q", stripped)
+	// Should have exactly 2 bracket groups: [Name], [HP/MaxHPhp]
+	if strings.Count(stripped, "[") != 2 {
+		t.Errorf("expected exactly 2 bracket groups (no conditions), got %q", stripped)
 	}
 }
 
 func TestBuildPrompt_OneCondition(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", "Morning", "09:00", 50, 60, []string{"Panicked"})
+	got := handlers.BuildPrompt("Thorald", 50, 60, []string{"Panicked"})
 	if !strings.Contains(got, "[Panicked]") {
 		t.Errorf("expected [Panicked] in prompt, got %q", got)
 	}
@@ -321,7 +303,7 @@ func TestBuildPrompt_OneCondition(t *testing.T) {
 }
 
 func TestBuildPrompt_MultipleConditions(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", "Morning", "09:00", 50, 60, []string{"Panicked", "Grabbed"})
+	got := handlers.BuildPrompt("Thorald", 50, 60, []string{"Panicked", "Grabbed"})
 	wantPanicked := telnet.Colorf(telnet.BrightMagenta, "[Panicked]")
 	wantGrabbed := telnet.Colorf(telnet.BrightMagenta, "[Grabbed]")
 	if !strings.Contains(got, wantPanicked) {
@@ -350,11 +332,10 @@ func TestProperty_BuildPrompt_ConditionsAllPresent(t *testing.T) {
 		}
 
 		name := rapid.StringMatching(`[A-Za-z]{1,10}`).Draw(rt, "name")
-		period := rapid.SampledFrom([]string{"Morning", "Night", "Dawn"}).Draw(rt, "period")
 		maxHP := rapid.Int32Range(1, 100).Draw(rt, "maxHP")
 		curHP := rapid.Int32Range(0, maxHP).Draw(rt, "curHP")
 
-		got := handlers.BuildPrompt(name, period, "08:00", curHP, maxHP, uniqueConds)
+		got := handlers.BuildPrompt(name, curHP, maxHP, uniqueConds)
 		// Each unique condition name must appear exactly once.
 		for c := range seen {
 			want := telnet.Colorf(telnet.BrightMagenta, "[%s]", c)
@@ -382,7 +363,7 @@ func TestBuildPrompt_ConditionAppliedThenRemoved(t *testing.T) {
 			names = append(names, activeConditions[id])
 		}
 		condMu.Unlock()
-		return handlers.BuildPrompt("Hero", "Morning", "08:00", 10, 10, names)
+		return handlers.BuildPrompt("Hero", 10, 10, names)
 	}
 
 	// Before any condition: no condition in prompt.
