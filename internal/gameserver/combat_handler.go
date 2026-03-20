@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strings"
 	"sync"
 	"time"
 
@@ -302,6 +303,66 @@ func (h *CombatHandler) Strike(uid, target string) ([]*gamev1.CombatEvent, error
 		h.stopTimerLocked(sess.RoomID)
 		h.resolveAndAdvanceLocked(sess.RoomID, cbt)
 		return []*gamev1.CombatEvent{confirmEvent}, nil
+	}
+
+	return []*gamev1.CombatEvent{confirmEvent}, nil
+}
+
+// Aid queues an ActionAid for the combatant identified by uid targeting allyName.
+//
+// Precondition: uid must be a valid connected player in active combat.
+// Precondition: allyName must be non-empty, must match a living player combatant in the same
+// combat (case-insensitive, by Name), and must not match the actor's own CharName.
+// Postcondition: Returns a confirmation CombatEvent and nil error on success.
+func (h *CombatHandler) Aid(uid, allyName string) ([]*gamev1.CombatEvent, error) {
+	if allyName == "" {
+		return nil, fmt.Errorf("ally name must not be empty")
+	}
+
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// Self-targeting check.
+	if strings.EqualFold(allyName, sess.CharName) || allyName == uid {
+		return nil, fmt.Errorf("you cannot aid yourself")
+	}
+
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(sess.RoomID)
+	if !ok {
+		return nil, fmt.Errorf("you are not in active combat")
+	}
+
+	// Find the ally: must be a living player combatant in this combat.
+	var allyName_ string
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindPlayer && strings.EqualFold(c.Name, allyName) && !c.IsDead() {
+			allyName_ = c.Name
+			break
+		}
+	}
+	if allyName_ == "" {
+		return nil, fmt.Errorf("no living ally named %q found in this combat", allyName)
+	}
+
+	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionAid, Target: allyName_}); err != nil {
+		return nil, fmt.Errorf("queuing aid: %w", err)
+	}
+
+	confirmEvent := &gamev1.CombatEvent{
+		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_CONDITION,
+		Attacker:  sess.CharName,
+		Target:    allyName_,
+		Narrative: fmt.Sprintf("%s prepares to aid %s.", sess.CharName, allyName_),
+	}
+
+	if cbt.AllActionsSubmitted() {
+		h.stopTimerLocked(sess.RoomID)
+		h.resolveAndAdvanceLocked(sess.RoomID, cbt)
 	}
 
 	return []*gamev1.CombatEvent{confirmEvent}, nil
