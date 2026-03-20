@@ -31,7 +31,7 @@ Maps the PF2E magic system to Gunchete technology: traditions, prepared/spontane
         - [x] Fixed number usages for each Technology level (resets with long rest) — `character_spontaneous_use_pools` table; `SpontaneousUsePoolRepo`; `use` decrements, `rest` restores (Sub-project A)
         - [x] Player gets to choose which new Technologies are learned with levelling up. (Sub-project B) — `neural_static` + `synaptic_surge` added; Influencer grants known tech at levels 3 and 5 with 3-tech pool; deferral + selection verified end-to-end (REQ-SSL1-4)
       - [x] Spontaneous tech effect resolution — activating a spontaneous tech applies its game effect (Sub-project: Tech Effect Resolution; REQ-TER1–22)
-      - [ ] Heightened Spells -> Amped Technology — expend a higher-level spontaneous use slot to activate a tech at amped power level; uses `AmpedEffects` defined per tech (Sub-project: Amped Technology, depends on Tech Effect Resolution)
+      - [x] Heightened Spells -> Amped Technology — expend a higher-level spontaneous use slot to activate a tech at amped power level; uses `AmpedEffects` defined per tech (Sub-project: Amped Technology, depends on Tech Effect Resolution)
       - [x] Innate Technologies — region-based innate tech grants; per-tech daily uses; restore on rest; character sheet display (REQ-INN1–INN9, REQ-CONTENT1–2)
         - [x] Innate tech effect resolution — activating an innate tech applies its game effect (damage, condition, etc.) (Sub-project: Tech Effect Resolution; REQ-TER1–22)
         - [ ] `chrome_reflex` reaction trigger — integrate with Reactions system so it fires as a reaction rather than via `use` command; requires Reactions system

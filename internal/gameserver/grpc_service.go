@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
@@ -1220,7 +1221,38 @@ func (s *GameServiceServer) commandLoop(ctx context.Context, uid string, stream 
 			continue
 		}
 
-		if _, ok := msg.Payload.(*gamev1.ClientMessage_SelectTech); ok {
+		// Pre-dispatch: intercept UseRequest for spontaneous techs with AmpedEffects.
+	if p, ok := msg.Payload.(*gamev1.ClientMessage_UseRequest); ok {
+		techID := p.UseRequest.GetFeatId()
+		if s.techRegistry != nil {
+			if techDef, found := s.techRegistry.Get(techID); found &&
+				techDef.UsageType == technology.UsageSpontaneous &&
+				techDef.AmpedLevel > 0 {
+				resp, err := s.handleAmpedUse(uid, p.UseRequest, stream)
+				if err != nil {
+					errEvt := &gamev1.ServerEvent{
+						RequestId: msg.RequestId,
+						Payload: &gamev1.ServerEvent_Error{
+							Error: &gamev1.ErrorEvent{Message: err.Error()},
+						},
+					}
+					if sendErr := stream.Send(errEvt); sendErr != nil {
+						return fmt.Errorf("sending amped-use error: %w", sendErr)
+					}
+					continue
+				}
+				if resp != nil {
+					resp.RequestId = msg.RequestId
+					if sendErr := stream.Send(resp); sendErr != nil {
+						return sendErr
+					}
+				}
+				continue
+			}
+		}
+	}
+
+	if _, ok := msg.Payload.(*gamev1.ClientMessage_SelectTech); ok {
 			if err := s.handleSelectTech(uid, msg.RequestId, stream); err != nil {
 				s.logger.Warn("handleSelectTech error", zap.String("uid", uid), zap.Error(err))
 			}
@@ -4922,6 +4954,167 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 		return messageEvent(fmt.Sprintf("You don't have innate tech %s.", abilityID)), nil
 	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
+}
+
+// handleAmpedUse activates a spontaneous tech that has amped_effects defined,
+// prompting the player to select a slot level when one is not provided in the arg.
+// Called from the Session handler (pre-dispatch) when the UseRequest targets
+// a spontaneous tech with AmpedLevel > 0.
+//
+// Precondition: tech is non-nil, tech.UsageType == UsageSpontaneous, tech.AmpedLevel > 0.
+// Postcondition: the selected slot-level pool is decremented; resolved tech effects are applied.
+func (s *GameServiceServer) handleAmpedUse(
+	uid string,
+	req *gamev1.UseRequest,
+	stream gamev1.GameService_SessionServer,
+) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+
+	abilityID := req.GetFeatId()
+	arg := req.GetTarget() // "targetID [level]" or "level" or ""
+
+	// Fetch tech definition.
+	techDef, ok := s.techRegistry.Get(abilityID)
+	if !ok {
+		return messageEvent(fmt.Sprintf("Unknown tech: %s.", abilityID)), nil
+	}
+
+	// Find which level this tech lives at in the player's spontaneous pool.
+	foundLevel := -1
+	levels := make([]int, 0, len(sess.SpontaneousTechs))
+	for l := range sess.SpontaneousTechs {
+		levels = append(levels, l)
+	}
+	sort.Ints(levels)
+	for _, l := range levels {
+		for _, tid := range sess.SpontaneousTechs[l] {
+			if tid == abilityID {
+				foundLevel = l
+				break
+			}
+		}
+		if foundLevel >= 0 {
+			break
+		}
+	}
+	if foundLevel < 0 {
+		return messageEvent(fmt.Sprintf("You don't know %s.", abilityID)), nil
+	}
+
+	// Parse tokens: disambiguate targetID from slotLevel.
+	// Any positive-integer token is treated as slotLevel; the rest is targetID.
+	// A token starting with a digit but failing positive-int parsing → "Invalid level: <token>."
+	tokens := strings.Fields(arg)
+	targetID := ""
+	slotLevel := 0
+	intCount := 0
+	for _, tok := range tokens {
+		if n, err := strconv.Atoi(tok); err == nil && n > 0 {
+			intCount++
+			slotLevel = n
+		} else if len(tok) > 0 && tok[0] >= '0' && tok[0] <= '9' {
+			return messageEvent(fmt.Sprintf("Invalid level: %s.", tok)), nil
+		} else {
+			if targetID != "" {
+				targetID += " "
+			}
+			targetID += tok
+		}
+	}
+	if intCount > 1 {
+		return messageEvent("Invalid arguments: specify at most one level."), nil
+	}
+
+	if slotLevel != 0 {
+		// Validate explicit level.
+		if slotLevel < techDef.Level {
+			return messageEvent(fmt.Sprintf("Cannot use %s below its native level (%d).", techDef.ID, techDef.Level)), nil
+		}
+		pool := sess.SpontaneousUsePools[slotLevel]
+		if pool.Remaining <= 0 {
+			return messageEvent(fmt.Sprintf("No level-%d uses remaining.", slotLevel)), nil
+		}
+	} else {
+		// No explicit level — build list of valid levels from sess.SpontaneousUsePools.
+		poolLevels := make([]int, 0, len(sess.SpontaneousUsePools))
+		for l := range sess.SpontaneousUsePools {
+			poolLevels = append(poolLevels, l)
+		}
+		sort.Ints(poolLevels)
+		var validOptions []string
+		var validLevels []int
+		for _, l := range poolLevels {
+			if l >= techDef.Level && sess.SpontaneousUsePools[l].Remaining > 0 {
+				validOptions = append(validOptions, fmt.Sprintf("%d (%d remaining)", l, sess.SpontaneousUsePools[l].Remaining))
+				validLevels = append(validLevels, l)
+			}
+		}
+		if len(validLevels) == 0 {
+			return messageEvent("No uses remaining at any level."), nil
+		}
+		if len(validLevels) == 1 {
+			slotLevel = validLevels[0]
+		} else {
+			choices := &ruleset.FeatureChoices{
+				Key:     "slot_level",
+				Prompt:  "Use at what level?",
+				Options: validOptions,
+			}
+			chosen, err := s.promptFeatureChoice(stream, "slot_level", choices)
+			if err != nil {
+				return nil, fmt.Errorf("handleAmpedUse: prompt: %w", err)
+			}
+			if n, err2 := strconv.Atoi(strings.Fields(chosen)[0]); err2 == nil {
+				slotLevel = n
+			} else {
+				return messageEvent("Invalid level selection."), nil
+			}
+		}
+	}
+
+	// Decrement the selected slot-level pool.
+	ctx := context.Background()
+	if s.spontaneousUsePoolRepo != nil {
+		if err := s.spontaneousUsePoolRepo.Decrement(ctx, sess.CharacterID, slotLevel); err != nil {
+			s.logger.Warn("handleAmpedUse: Decrement spontaneous pool failed",
+				zap.String("uid", uid),
+				zap.String("techID", abilityID),
+				zap.Error(err))
+		}
+	}
+	pool := sess.SpontaneousUsePools[slotLevel]
+	pool.Remaining--
+	sess.SpontaneousUsePools[slotLevel] = pool
+
+	// Resolve tech (amped or base) and activate inline (avoids registry re-fetch).
+	resolvedTech := technology.TechAtSlotLevel(techDef, slotLevel)
+
+	target, errMsg := s.resolveUseTarget(uid, targetID, resolvedTech)
+	if errMsg != "" {
+		return messageEvent(errMsg), nil
+	}
+	var cbt *combat.Combat
+	if s.combatH != nil {
+		cbt = s.combatH.ActiveCombatForPlayer(uid)
+	}
+	var techTargets []*combat.Combatant
+	if resolvedTech.Targets == technology.TargetsAllEnemies && cbt != nil {
+		for _, c := range cbt.Combatants {
+			if c.Kind == combat.KindNPC && !c.IsDead() {
+				techTargets = append(techTargets, c)
+			}
+		}
+	} else if target != nil {
+		techTargets = []*combat.Combatant{target}
+	}
+
+	activationLine := fmt.Sprintf("%s activated. Level-%d uses remaining: %d.", resolvedTech.Name, slotLevel, pool.Remaining)
+	msgs := ResolveTechEffects(sess, resolvedTech, techTargets, cbt, s.condRegistry, globalRandSrc{}, nil)
+	allMsgs := append([]string{activationLine}, msgs...)
+	return messageEvent(strings.Join(allMsgs, "\n")), nil
 }
 
 // resolveUseTarget returns the combat target for the given tech and targetID.
