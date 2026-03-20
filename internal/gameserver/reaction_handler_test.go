@@ -91,7 +91,10 @@ func TestApplyReactionEffect_RerollSave_NilSaveOutcome_Noop(t *testing.T) {
 	})
 }
 
-// REQ-RXN22: reduce_damage clamps at 0.
+// TestApplyReactionEffect_ReduceDamage_ClampsAtZero verifies nil-safety and the zero-damage floor.
+// Note: shieldHardness() returns 0 until WeaponDef.Hardness is modeled. This test only exercises
+// the nil DamagePending guard and the >= 0 clamp when hardness is 0.
+// TODO: add positive hardness test when WeaponDef.Hardness is added.
 func TestApplyReactionEffect_ReduceDamage_ClampsAtZero(t *testing.T) {
 	pending := 2
 	ctx := reaction.ReactionContext{DamagePending: &pending}
@@ -111,11 +114,3 @@ func TestApplyReactionEffect_ReduceDamage_NilDamagePending_Noop(t *testing.T) {
 	})
 }
 
-// REQ-RXN10: ReactionsRemaining never goes below 0 when guarded correctly.
-func TestReactionsRemaining_NeverGoesNegative(t *testing.T) {
-	sess := &session.PlayerSession{ReactionsRemaining: 0}
-	if sess.ReactionsRemaining > 0 {
-		sess.ReactionsRemaining--
-	}
-	assert.Equal(t, 0, sess.ReactionsRemaining)
-}

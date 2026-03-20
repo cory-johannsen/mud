@@ -1073,7 +1073,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 
 	// REQ-RXN15: register reactions from feats.
 	if s.characterFeatsRepo != nil && s.featRegistry != nil && characterID > 0 {
-		if featIDs, featErr := s.characterFeatsRepo.GetAll(stream.Context(), characterID); featErr == nil {
+		if featIDs, featErr := s.characterFeatsRepo.GetAll(stream.Context(), characterID); featErr != nil {
+			s.logger.Warn("Session: failed to load character feats for reaction registration", zap.Error(featErr))
+		} else {
 			for _, id := range featIDs {
 				f, ok := s.featRegistry.Feat(id)
 				if !ok || f.Reaction == nil {

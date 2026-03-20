@@ -53,7 +53,14 @@ func ApplyReactionEffect(sess *session.PlayerSession, effect reaction.ReactionEf
 		if ctx.SaveOutcome == nil {
 			return
 		}
-		reroll := rand.Intn(4) // 0=CritSuccess, 1=Success, 2=Failure, 3=CritFailure
+		// Only "better" (or empty, defaulting to "better") keep strategy is supported.
+		// Unknown values are treated as no-op to avoid silent data contract violations.
+		if effect.Keep != "" && effect.Keep != "better" {
+			return
+		}
+		// Reroll: generate new outcome in [0,3]. Keep the better (lower) value.
+		// 0=CritSuccess, 1=Success, 2=Failure, 3=CritFailure.
+		reroll := rand.Intn(4)
 		if reroll < *ctx.SaveOutcome {
 			*ctx.SaveOutcome = reroll
 		}
@@ -135,6 +142,10 @@ func (s *GameServiceServer) buildReactionCallback(
 		}
 
 		sess.ReactionsRemaining--
+		// ctx is passed by value but DamagePending and SaveOutcome are pointers into the caller's
+		// data. ApplyReactionEffect mutates through these pointers, so effects propagate to the
+		// caller. Any future effect that assigns a new pointer field rather than dereferencing
+		// must pass ctx by pointer instead.
 		ApplyReactionEffect(sess, pr.Def.Effect, &ctx)
 		return true, nil
 	}
