@@ -34,6 +34,22 @@
 **Steps:** Browse technology items and ability descriptions; observe magic/PF2E save language.
 **Fix:**
 
+### BUG-6: Technology selection displays technology ID instead of display name
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** During character creation, the technology selection prompt displays the raw technology ID (e.g. `bio_synthetic`) instead of the human-readable display name (e.g. `Bio-Synthetic`).
+**Steps:** Create a new character and reach the technology selection step; observe the technology list shows internal IDs rather than display names.
+**Fix:**
+
+### BUG-7: `switch` command does not clear console scrollback buffer
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The `switch` command does not clear the console scrollback buffer when switching characters, leaving previous session output visible.
+**Steps:** Play as one character, run `switch`, observe that prior console output remains in the scrollback buffer.
+**Fix:**
+
 ### BUG-2: eq command displays armor item IDs instead of names
 **Severity:** medium
 **Status:** open
