@@ -15,7 +15,7 @@ func TestHandleRemoveArmor_RemovesEquippedSlot(t *testing.T) {
 	reg := inventory.NewRegistry()
 	armorDef := &inventory.ArmorDef{ID: "boots", Name: "Boots", Slot: inventory.SlotFeet, Group: "leather"}
 	require.NoError(t, reg.RegisterArmor(armorDef))
-	itemDef := &inventory.ItemDef{ID: "boots_item", Name: "Boots", Kind: "armor", ArmorRef: "boots", Weight: 1}
+	itemDef := &inventory.ItemDef{ID: "boots_item", Name: "Boots", Kind: "armor", ArmorRef: "boots", Weight: 1, MaxStack: 1}
 	require.NoError(t, reg.RegisterItem(itemDef))
 
 	sess := makeWearSession(t, reg)

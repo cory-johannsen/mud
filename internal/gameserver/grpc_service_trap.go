@@ -215,7 +215,7 @@ func isTrapTargeted(playerRegion string, targetRegions []string) bool {
 func (s *GameServiceServer) fireConsumableTrapOnCombatant(
 	target *combat.Combatant,
 	tmpl *trap.TrapTemplate,
-	instanceID, dangerLevel string,
+	instanceID, dangerLevel, roomID string,
 ) {
 	result, err := trap.ResolveTrigger(tmpl, dangerLevel, s.trapTemplates)
 	if err != nil {
@@ -246,15 +246,8 @@ func (s *GameServiceServer) fireConsumableTrapOnCombatant(
 	}
 
 	// NPC target: broadcast to all players in the same room.
-	// Extract roomID from instanceID format: "zoneID/roomID/kind/trapID"
-	// This must stay in sync with trap.TrapInstanceID format.
-	parts := strings.SplitN(instanceID, "/", 4)
-	if len(parts) < 2 {
-		return
-	}
-	trapRoomID := parts[1]
 	for _, p := range s.sessions.AllPlayers() {
-		if p.RoomID == trapRoomID {
+		if p.RoomID == roomID {
 			pushMessage(p, fmt.Sprintf("A %s catches %s! (%d damage)", tmpl.Name, target.Name, dmg))
 		}
 	}
@@ -320,7 +313,7 @@ func (s *GameServiceServer) checkConsumableTraps(roomID, movedCombatantID string
 
 		// Trap fires. Multiple overlapping traps all fire independently.
 		if tmpl.BlastRadiusFt == 0 {
-			s.fireConsumableTrapOnCombatant(mover, tmpl, instanceID, dangerLevel)
+			s.fireConsumableTrapOnCombatant(mover, tmpl, instanceID, dangerLevel, roomID)
 		} else {
 			for _, c := range combatants {
 				d := c.Position - inst.DeployPosition
@@ -328,7 +321,7 @@ func (s *GameServiceServer) checkConsumableTraps(roomID, movedCombatantID string
 					d = -d
 				}
 				if d <= tmpl.BlastRadiusFt {
-					s.fireConsumableTrapOnCombatant(c, tmpl, instanceID, dangerLevel)
+					s.fireConsumableTrapOnCombatant(c, tmpl, instanceID, dangerLevel, roomID)
 				}
 			}
 		}
