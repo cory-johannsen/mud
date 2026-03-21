@@ -390,6 +390,16 @@ features:
     file: docs/features/factions.md
     effort: "XL"  # faction data model, reputation/allegiance tracking, economies/exchange rates, faction-gated items/quests/zones
 
+  - slug: focus-points
+    name: Focus Points
+    status: planned
+    priority: 233
+    category: character
+    file: docs/features/focus-points.md
+    effort: "M"  # Focus Point pool on character; max pool from class features/feats; spend on focus technologies; restore via Recalibrate downtime activity
+    dependencies:
+      - actions
+
   - slug: crafting
     name: Crafting
     status: planned
