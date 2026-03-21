@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/trap"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -329,16 +330,56 @@ func (s *GameServiceServer) checkConsumableTraps(roomID, movedCombatantID string
 	}
 }
 
-// WireConsumableTrapTrigger connects the combat movement callback to consumable trap checking.
+// checkEnemyEntersReadyTrigger fires the TriggerOnEnemyEntersRoom fire point for all players
+// in the same room who have ReadiedTrigger == "enemy_enters" and whose mover is an NPC (enemy).
+//
+// Precondition: movedCombatantID must be non-empty; s.combatH and s.sessions must be non-nil.
+// Postcondition: ReactionFn is invoked for each player with a matching readied trigger; no-op if mover is a player.
+func (s *GameServiceServer) checkEnemyEntersReadyTrigger(roomID, movedCombatantID string) {
+	if s.combatH == nil {
+		return
+	}
+	combatants := s.combatH.CombatantsInRoom(roomID)
+	if len(combatants) == 0 {
+		return
+	}
+
+	// Confirm the mover is an NPC (enemy). If the mover is a player, no trigger fires.
+	moverIsEnemy := false
+	for _, c := range combatants {
+		if c.ID == movedCombatantID && c.Kind == combat.KindNPC {
+			moverIsEnemy = true
+			break
+		}
+	}
+	if !moverIsEnemy {
+		return
+	}
+
+	// Fire the trigger for every player session in the room with a matching readied trigger.
+	ctx := reaction.ReactionContext{}
+	for _, p := range s.sessions.AllPlayers() {
+		if p.RoomID != roomID || p.ReadiedTrigger != "enemy_enters" || p.ReactionFn == nil {
+			continue
+		}
+		_, _ = p.ReactionFn(p.UID, reaction.TriggerOnEnemyEntersRoom, ctx)
+	}
+}
+
+// WireConsumableTrapTrigger connects the combat movement callback to consumable trap checking
+// and to the enemy_enters ready-action fire point (REQ-RA-7).
 //
 // Precondition: s.combatH must be non-nil; call after NewGameServiceServer.
-// Postcondition: CombatHandler will invoke checkConsumableTraps on every combatant movement event.
+// Postcondition: CombatHandler will invoke checkConsumableTraps and checkEnemyEntersReadyTrigger
+//
+//	on every combatant movement event.
 func (s *GameServiceServer) WireConsumableTrapTrigger() {
 	if s.combatH == nil {
 		return
 	}
 	s.combatH.SetOnCombatantMoved(func(roomID, movedCombatantID string) {
 		s.checkConsumableTraps(roomID, movedCombatantID)
+		s.checkEnemyEntersReadyTrigger(roomID, movedCombatantID)
 	})
 }
 

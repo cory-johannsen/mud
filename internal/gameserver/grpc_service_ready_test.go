@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/stretchr/testify/assert"
@@ -190,4 +191,87 @@ func TestHandleReady_Success(t *testing.T) {
 	assert.Equal(t, "enemy_enters", sess.ReadiedTrigger, "ReadiedTrigger must be set to the requested trigger")
 	assert.Equal(t, "strike", sess.ReadiedAction, "ReadiedAction must be set to the requested action")
 	assert.Equal(t, apBefore-2, combatHandler.RemainingAP("rp6"), "readying an action must cost 2 AP")
+}
+
+// TestCheckEnemyEntersReadyTrigger_FiresForWaitingPlayer verifies that checkEnemyEntersReadyTrigger
+// invokes ReactionFn with TriggerOnEnemyEntersRoom for a player whose ReadiedTrigger == "enemy_enters"
+// when an NPC combatant is the mover (REQ-RA-7).
+func TestCheckEnemyEntersReadyTrigger_FiresForWaitingPlayer(t *testing.T) {
+	svc, combatHandler := makeReadySvc(t)
+
+	// Set up: one player ("rp7") in combat in room_a against an NPC.
+	npcMgr := svc.npcMgr
+	npcInst, err := npcMgr.Spawn(&npc.Template{
+		ID: "guard-enters", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
+	}, "room_a")
+	require.NoError(t, err)
+
+	waiterSess, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "rp7", Username: "rp7", CharName: "rp7", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	waiterSess.Status = statusInCombat
+	_, err = combatHandler.Attack("rp7", "Guard")
+	require.NoError(t, err)
+	combatHandler.cancelTimer("room_a")
+
+	// Set readied trigger on waiter.
+	waiterSess.ReadiedTrigger = "enemy_enters"
+	waiterSess.ReadiedAction = "raise_shield"
+
+	// Capture whether ReactionFn was called and with which trigger.
+	var capturedTrigger reaction.ReactionTriggerType
+	waiterSess.ReactionFn = func(uid string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
+		capturedTrigger = trigger
+		return true, nil
+	}
+
+	// Call the fire point with the NPC as the mover.
+	svc.checkEnemyEntersReadyTrigger("room_a", npcInst.ID)
+
+	assert.Equal(t, reaction.TriggerOnEnemyEntersRoom, capturedTrigger, "ReactionFn must be invoked with TriggerOnEnemyEntersRoom")
+}
+
+// TestCheckEnemyEntersReadyTrigger_NoFireForPlayerMover verifies that the trigger does NOT fire
+// when the mover is a player (not an enemy).
+func TestCheckEnemyEntersReadyTrigger_NoFireForPlayerMover(t *testing.T) {
+	svc, combatHandler := makeReadySvc(t)
+
+	npcMgr := svc.npcMgr
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "guard-nomove", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
+	}, "room_a")
+	require.NoError(t, err)
+
+	waiterSess, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "rp8", Username: "rp8", CharName: "rp8", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	waiterSess.Status = statusInCombat
+	_, err = combatHandler.Attack("rp8", "Guard")
+	require.NoError(t, err)
+	combatHandler.cancelTimer("room_a")
+
+	waiterSess.ReadiedTrigger = "enemy_enters"
+	called := false
+	waiterSess.ReactionFn = func(_ string, _ reaction.ReactionTriggerType, _ reaction.ReactionContext) (bool, error) {
+		called = true
+		return true, nil
+	}
+
+	// Player "rp8" is the mover (KindPlayer) — trigger must NOT fire.
+	svc.checkEnemyEntersReadyTrigger("room_a", "rp8")
+
+	assert.False(t, called, "ReactionFn must NOT fire when the mover is a player")
+}
+
+// TestCheckEnemyEntersReadyTrigger_NilCombat verifies no panic when no combat is active.
+func TestCheckEnemyEntersReadyTrigger_NilCombat(t *testing.T) {
+	svc, _ := makeReadySvc(t)
+	// No combat in room_b — must not panic.
+	assert.NotPanics(t, func() {
+		svc.checkEnemyEntersReadyTrigger("room_b", "nonexistent")
+	})
 }

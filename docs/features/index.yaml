@@ -250,7 +250,7 @@ features:
 
   - slug: ready-action
     name: Ready Action
-    status: planned
+    status: complete
     priority: 242
     category: combat
     file: docs/features/ready-action.md
