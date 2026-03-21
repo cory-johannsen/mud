@@ -101,7 +101,7 @@ func spawnTestNPC(t *testing.T, npcMgr *npc.Manager, roomID string) *npc.Instanc
 		Level:      1,
 		MaxHP:      20,
 		AC:         13,
-		Perception: 2,
+		Awareness: 2,
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)
 	if err != nil {
@@ -935,7 +935,7 @@ func TestProperty_OnCombatEnd_CallbackAlwaysReceivesRoomID(t *testing.T) {
 
 		// Spawn NPC inline (rapid.T is not *testing.T).
 		tmpl := &npc.Template{
-			ID: "goblin-prop", Name: "GoblinProp", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+			ID: "goblin-prop", Name: "GoblinProp", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		}
 		inst, err := h.npcMgr.Spawn(tmpl, roomID)
 		if err != nil {
@@ -1594,7 +1594,7 @@ func TestGetCombatant_TargetNotInCombat(t *testing.T) {
 
 	const roomID = "room_gcomb_miss"
 	_, err := h.npcMgr.Spawn(&npc.Template{
-		ID: "orc-gcomb-miss", Name: "Orc", Level: 1, MaxHP: 20, AC: 12, Perception: 10,
+		ID: "orc-gcomb-miss", Name: "Orc", Level: 1, MaxHP: 20, AC: 12, Awareness: 10,
 	}, roomID)
 	if err != nil {
 		t.Fatalf("Spawn: %v", err)
@@ -1633,7 +1633,7 @@ func TestGetCombatant_Found(t *testing.T) {
 
 	const roomID = "room_gcomb_found"
 	inst, err := h.npcMgr.Spawn(&npc.Template{
-		ID: "troll-gcomb", Name: "Troll", Level: 2, MaxHP: 30, AC: 14, Perception: 10,
+		ID: "troll-gcomb", Name: "Troll", Level: 2, MaxHP: 30, AC: 14, Awareness: 10,
 	}, roomID)
 	if err != nil {
 		t.Fatalf("Spawn: %v", err)

@@ -125,7 +125,7 @@ func TestProperty_TryTaunt_NeverTauntsWithinCooldown(t *testing.T) {
 
 func TestNewInstance_PicksWeaponFromTable(t *testing.T) {
 	tmpl := &npc.Template{
-		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Awareness: 4,
 		Weapon: []npc.EquipmentEntry{
 			{ID: "cheap_blade", Weight: 1},
 		},
@@ -136,7 +136,7 @@ func TestNewInstance_PicksWeaponFromTable(t *testing.T) {
 
 func TestNewInstance_NoWeapon_EmptyWeaponID(t *testing.T) {
 	tmpl := &npc.Template{
-		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Awareness: 4,
 	}
 	inst := npc.NewInstance("id1", tmpl, "room1")
 	assert.Empty(t, inst.WeaponID)
@@ -144,7 +144,7 @@ func TestNewInstance_NoWeapon_EmptyWeaponID(t *testing.T) {
 
 func TestNewInstanceWithResolver_ArmorACBonusAddedToBase(t *testing.T) {
 	tmpl := &npc.Template{
-		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Awareness: 4,
 		Armor: []npc.EquipmentEntry{{ID: "test_armor", Weight: 1}},
 	}
 	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", func(armorID string) int {
@@ -159,7 +159,7 @@ func TestNewInstanceWithResolver_ArmorACBonusAddedToBase(t *testing.T) {
 
 func TestNewInstanceWithResolver_NoArmor_ACUnchanged(t *testing.T) {
 	tmpl := &npc.Template{
-		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Awareness: 4,
 	}
 	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil)
 	assert.Empty(t, inst.ArmorID)
@@ -169,7 +169,7 @@ func TestNewInstanceWithResolver_NoArmor_ACUnchanged(t *testing.T) {
 func TestNewInstanceWithResolver_NilResolver_NoACBonus(t *testing.T) {
 	// Even with an armor entry, nil resolver means no AC adjustment.
 	tmpl := &npc.Template{
-		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Awareness: 4,
 		Armor: []npc.EquipmentEntry{{ID: "leather_jacket", Weight: 1}},
 	}
 	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil)
@@ -221,7 +221,7 @@ func TestManager_Spawn_AppliesArmorACBonus(t *testing.T) {
 		return 0
 	})
 	tmpl := &npc.Template{
-		ID: "guard", Name: "Guard", Level: 1, MaxHP: 10, AC: 12, Perception: 4,
+		ID: "guard", Name: "Guard", Level: 1, MaxHP: 10, AC: 12, Awareness: 4,
 		Armor: []npc.EquipmentEntry{{ID: "leather_jacket", Weight: 1}},
 	}
 	inst, err := mgr.Spawn(tmpl, "room1")

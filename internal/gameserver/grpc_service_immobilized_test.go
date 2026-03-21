@@ -52,6 +52,7 @@ func newImmobilizedMoveSvc(t *testing.T) (*GameServiceServer, *session.Manager) 
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -82,6 +83,7 @@ func newImmobilizedFleeSvc(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -176,7 +178,7 @@ func TestHandleFlee_GrabbedBlocked(t *testing.T) {
 
 	// Spawn NPC and start combat.
 	tmpl := &npc.Template{
-		ID: "ganger-imm", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Perception: 10,
+		ID: "ganger-imm", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Awareness: 10,
 	}
 	_, err = npcMgr.Spawn(tmpl, "room_a")
 	require.NoError(t, err)

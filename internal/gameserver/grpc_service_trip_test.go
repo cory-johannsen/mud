@@ -39,6 +39,7 @@ func newTripSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatHa
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -72,6 +73,7 @@ func newTripSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -153,7 +155,7 @@ func TestHandleTrip_TargetNotFound(t *testing.T) {
 
 	const roomID = "room_trp_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-trp-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-trp-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -196,7 +198,7 @@ func TestHandleTrip_RollBelowDC_Failure(t *testing.T) {
 
 	const roomID = "room_trp_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "bandit-trp-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "bandit-trp-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -234,7 +236,7 @@ func TestHandleTrip_RollAboveDC_Success(t *testing.T) {
 
 	const roomID = "room_trp_ra"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-trp-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "ganger-trp-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -280,7 +282,7 @@ func TestProperty_HandleTrip_HustleDC_Formula(t *testing.T) {
 
 		tmpl := &npc.Template{
 			ID: fmt.Sprintf("trip-prop-%d-%d", level, quickness), Name: "Target", Level: level,
-			MaxHP: 20, AC: 13, Perception: 5,
+			MaxHP: 20, AC: 13, Awareness: 5,
 			Abilities:  npc.Abilities{Brutality: 10, Quickness: quickness, Savvy: 10},
 			HustleRank: rank,
 		}

@@ -97,7 +97,7 @@ func newCoverSvc(t *testing.T, worldMgr *world.Manager, sessMgr *session.Manager
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
-		nil,
+		nil, nil,
 	)
 }
 
@@ -134,7 +134,7 @@ func newCoverSvcWithCombatTB(t *testing.T, worldMgr *world.Manager, sessMgr *ses
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
-		nil,
+		nil, nil,
 	)
 	return svc, npcMgr, combatHandler
 }
@@ -159,7 +159,7 @@ func TestMaxNPCStealthInRoomWithCoverBonus(t *testing.T) {
 
 		const roomID = "room_cover"
 		inst, err := npcMgr.Spawn(&npc.Template{
-			ID: "stalker-cover-stealth", Name: "Stalker", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+			ID: "stalker-cover-stealth", Name: "Stalker", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		}, roomID)
 		if err != nil {
 			rt.Fatalf("Spawn: %v", err)
@@ -476,12 +476,12 @@ func TestHandleTakeCover_InCombat_SpendAP(t *testing.T) {
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
-		nil,
+		nil, nil,
 	)
 
 	const roomID = "room_cover"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "guard-cover-ap", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "guard-cover-ap", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -553,6 +553,7 @@ func newCombatSvcWithCover(t *testing.T, worldMgr *world.Manager, sessMgr *sessi
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, combatHandler
 }
@@ -612,7 +613,7 @@ func TestStrideRemovesCoverCondition(t *testing.T) {
 		condReg := makeCoverConditionRegistry()
 		npcMgr := npc.NewManager()
 		_, err := npcMgr.Spawn(&npc.Template{
-			ID: "guard-stride-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+			ID: "guard-stride-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		}, "room_cover")
 		require.NoError(t, err)
 
@@ -636,6 +637,7 @@ func TestStrideRemovesCoverCondition(t *testing.T) {
 			nil, nil, nil,
 			nil, nil, nil, nil, nil, nil, nil,
 			nil, nil,
+			nil,
 			nil,
 		)
 
@@ -674,7 +676,7 @@ func TestStepRemovesCoverCondition(t *testing.T) {
 		condReg := makeCoverConditionRegistry()
 		npcMgr := npc.NewManager()
 		_, err := npcMgr.Spawn(&npc.Template{
-			ID: "guard-step-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+			ID: "guard-step-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		}, "room_cover")
 		require.NoError(t, err)
 
@@ -698,6 +700,7 @@ func TestStepRemovesCoverCondition(t *testing.T) {
 			nil, nil, nil,
 			nil, nil, nil, nil, nil, nil, nil,
 			nil, nil,
+			nil,
 			nil,
 		)
 
@@ -736,7 +739,7 @@ func TestTumbleSuccessRemovesCoverCondition(t *testing.T) {
 		condReg := makeCoverConditionRegistry()
 		npcMgr := npc.NewManager()
 		_, err := npcMgr.Spawn(&npc.Template{
-			ID: "guard-tumble-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+			ID: "guard-tumble-cover", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		}, "room_cover")
 		require.NoError(t, err)
 
@@ -761,6 +764,7 @@ func TestTumbleSuccessRemovesCoverCondition(t *testing.T) {
 			nil, nil, nil,
 			nil, nil, nil, nil, nil, nil, nil,
 			nil, nil,
+			nil,
 			nil,
 		)
 		// Wire the fixed-source roller into the service.

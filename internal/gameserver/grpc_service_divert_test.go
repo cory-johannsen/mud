@@ -37,6 +37,7 @@ func newDivertSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combat
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -66,6 +67,7 @@ func newDivertSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -105,7 +107,7 @@ func TestHandleDivert_SpendAPFail(t *testing.T) {
 
 	const roomID = "room_div_ap"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "thug-div-ap", Name: "Thug", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "thug-div-ap", Name: "Thug", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -142,7 +144,7 @@ func TestHandleDivert_RollBelow_Failure(t *testing.T) {
 
 	const roomID = "room_div_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "lookout-div-rb", Name: "Lookout", Level: 1, MaxHP: 20, AC: 13, Perception: 12,
+		ID: "lookout-div-rb", Name: "Lookout", Level: 1, MaxHP: 20, AC: 13, Awareness: 12,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -179,7 +181,7 @@ func TestHandleDivert_RollAbove_Success(t *testing.T) {
 
 	const roomID = "room_div_ra"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "sentry-div-ra", Name: "Sentry", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "sentry-div-ra", Name: "Sentry", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 

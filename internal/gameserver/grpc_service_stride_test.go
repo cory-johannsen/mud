@@ -38,6 +38,7 @@ func newStrideSvc(t *testing.T, combatHandler *CombatHandler) (*GameServiceServe
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -73,6 +74,7 @@ func newStrideSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -112,7 +114,7 @@ func TestHandleStride_TowardIncreasesPosition(t *testing.T) {
 
 	const roomID = "room_str_tr"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-str-tr", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-str-tr", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -155,7 +157,7 @@ func TestHandleStride_AwayDecreasesPosition(t *testing.T) {
 
 	const roomID = "room_str_ai"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-str-ai", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-str-ai", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -197,7 +199,7 @@ func TestHandleStride_AwayFlooredAtZero(t *testing.T) {
 
 	const roomID = "room_str_cm"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-str-cm", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-str-cm", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -237,7 +239,7 @@ func TestHandleStride_DefaultDirectionIsToward(t *testing.T) {
 
 	const roomID = "room_str_cx"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-str-cx", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-str-cx", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -300,6 +302,7 @@ func newStrideSvcWithCombatAndRegistry(t *testing.T, reg *inventory.Registry) (*
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -314,7 +317,7 @@ func TestNPCAutoStride_MeleeNPC_ClosesDistance(t *testing.T) {
 
 	const roomID = "room_npc_melee_stride"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-melee-stride", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-melee-stride", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -371,7 +374,7 @@ func TestNPCAutoStride_RangedNPC_DoesNotStride(t *testing.T) {
 
 	const roomID = "room_npc_ranged_stride"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "archer-ranged-stride", Name: "Archer", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "archer-ranged-stride", Name: "Archer", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 	// Assign the ranged weapon to the NPC instance directly.
@@ -419,7 +422,7 @@ func TestHandleStride_ReactiveStrike(t *testing.T) {
 
 	const roomID = "room_str_rs"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-str-rs", Name: "Goblin", Level: 1, MaxHP: 20, AC: 10, Perception: 2,
+		ID: "goblin-str-rs", Name: "Goblin", Level: 1, MaxHP: 20, AC: 10, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 

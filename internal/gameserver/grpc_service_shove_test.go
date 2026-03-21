@@ -37,6 +37,7 @@ func newShoveSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatH
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -70,6 +71,7 @@ func newShoveSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -151,7 +153,7 @@ func TestHandleShove_TargetNotFound(t *testing.T) {
 
 	const roomID = "room_shv_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-shv-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-shv-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -194,7 +196,7 @@ func TestHandleShove_Failure(t *testing.T) {
 
 	const roomID = "room_shv_fail"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "bandit-shv-fail", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "bandit-shv-fail", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -240,7 +242,7 @@ func TestHandleShove_Success(t *testing.T) {
 
 	const roomID = "room_shv_succ"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-shv-succ", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "ganger-shv-succ", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -286,7 +288,7 @@ func TestHandleShove_CriticalSuccess(t *testing.T) {
 
 	const roomID = "room_shv_crit"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-shv-crit", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "ganger-shv-crit", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)

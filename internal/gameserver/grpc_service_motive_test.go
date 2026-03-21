@@ -46,6 +46,7 @@ func newMotiveSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -110,7 +111,7 @@ func TestHandleMotive_TargetNotFound(t *testing.T) {
 
 	const roomID = "room_mot_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-mot-tnf", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "ganger-mot-tnf", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -208,7 +209,7 @@ func TestHandleMotive_OutOfCombat_Success(t *testing.T) {
 
 	const roomID = "room_mot_oc_succ"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-mot-oc-succ", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "ganger-mot-oc-succ", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Hustle: 0, Disposition: "neutral",
 	}, roomID)
 	require.NoError(t, err)
@@ -249,7 +250,7 @@ func TestHandleMotive_OutOfCombat_CritFailure_FlipsDisposition(t *testing.T) {
 
 	const roomID = "room_mot_oc_cf"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-mot-oc-cf", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "ganger-mot-oc-cf", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Hustle: 5, Disposition: "neutral",
 	}, roomID)
 	require.NoError(t, err)
@@ -287,7 +288,7 @@ func TestHandleMotive_InCombat_Success_RevealsNextAction(t *testing.T) {
 
 	const roomID = "room_mot_ic_succ"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-mot-ic-succ", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "ganger-mot-ic-succ", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Hustle: 0,
 	}, roomID)
 	require.NoError(t, err)
@@ -327,7 +328,7 @@ func TestHandleMotive_InCombat_CritFailure_SetsMotiveBonus(t *testing.T) {
 
 	const roomID = "room_mot_ic_cf"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-mot-ic-cf", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "ganger-mot-ic-cf", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Hustle: 5,
 	}, roomID)
 	require.NoError(t, err)
@@ -367,7 +368,7 @@ func TestHandleMotive_InCombat_Failure(t *testing.T) {
 
 	const roomID = "room_mot_ic_fail"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-mot-ic-fail", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "ganger-mot-ic-fail", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -408,7 +409,7 @@ func TestHandleMotive_InCombat_CritSuccess_RevealsAbilities(t *testing.T) {
 
 	const roomID = "room_mot_ic_cs"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-mot-ic-cs", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "ganger-mot-ic-cs", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Hustle:           0,
 		SpecialAbilities: []string{"Rage"},
 	}, roomID)
@@ -466,7 +467,7 @@ func TestProperty_Motive_InCombat_SuccessAlwaysRevealsNextAction(t *testing.T) {
 			Level:      1,
 			MaxHP:      20,
 			AC:         13,
-			Perception: 2,
+			Awareness: 2,
 			Hustle:     hustle,
 		}, roomID)
 		require.NoError(rt, err)

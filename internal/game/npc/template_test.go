@@ -399,7 +399,7 @@ rob_multiplier: 1.5
 // Postcondition: inst.RobPercent == 0.
 func TestInstance_RobPercent_ZeroWhenMultiplierZero(t *testing.T) {
 	tmpl := &npc.Template{
-		ID: "t1", Name: "T", Level: 5, MaxHP: 10, AC: 10, Perception: 0,
+		ID: "t1", Name: "T", Level: 5, MaxHP: 10, AC: 10, Awareness: 0,
 		RobMultiplier: 0.0,
 	}
 	inst := npc.NewInstance("i1", tmpl, "room1")
@@ -417,7 +417,7 @@ func TestProperty_Instance_RobPercent_InRange(t *testing.T) {
 		multiplier := rapid.Float64Range(0.1, 3.0).Draw(rt, "multiplier")
 
 		tmpl := &npc.Template{
-			ID: "prop-rob", Name: "T", Level: level, MaxHP: 10, AC: 10, Perception: 0,
+			ID: "prop-rob", Name: "T", Level: level, MaxHP: 10, AC: 10, Awareness: 0,
 			RobMultiplier: multiplier,
 		}
 		inst := npc.NewInstance(fmt.Sprintf("i-%d", level), tmpl, "room1")
@@ -436,7 +436,7 @@ func TestProperty_Instance_RobPercent_InRange(t *testing.T) {
 // Postcondition: instance fields equal template values.
 func TestInstance_SaveFields_CopiedFromTemplate(t *testing.T) {
 	tmpl := &npc.Template{
-		ID: "t1", Name: "T", Level: 1, MaxHP: 10, AC: 10, Perception: 0,
+		ID: "t1", Name: "T", Level: 1, MaxHP: 10, AC: 10, Awareness: 0,
 		Abilities:     npc.Abilities{Brutality: 14, Quickness: 12, Savvy: 8},
 		ToughnessRank: "trained",
 		HustleRank:    "expert",

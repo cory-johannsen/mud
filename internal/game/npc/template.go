@@ -47,7 +47,7 @@ type Template struct {
 	Level       int       `yaml:"level"`
 	MaxHP       int       `yaml:"max_hp"`
 	AC          int       `yaml:"ac"`
-	Perception  int       `yaml:"perception"`
+	Awareness   int       `yaml:"awareness"`
 	// Hustle is the NPC's hustle skill modifier, used as the DC for the motive command.
 	// Zero means untrained. Loaded from YAML field "hustle".
 	Hustle   int       `yaml:"hustle"`

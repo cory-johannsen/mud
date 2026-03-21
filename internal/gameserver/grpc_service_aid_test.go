@@ -145,7 +145,7 @@ func TestHandleAid_SelfTarget(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newAidSvcWithCombat(t, roller)
 
 	_, spawnErr := npcMgr.Spawn(&npc.Template{
-		ID: "self-guard", Name: "SelfGuard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "self-guard", Name: "SelfGuard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, "room_aid_self")
 	require.NoError(t, spawnErr)
 
@@ -175,7 +175,7 @@ func TestHandleAid_UnknownAlly(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newAidSvcWithCombat(t, roller)
 
 	_, spawnErr := npcMgr.Spawn(&npc.Template{
-		ID: "unk-guard", Name: "UnkGuard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "unk-guard", Name: "UnkGuard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, "room_aid_unk")
 	require.NoError(t, spawnErr)
 

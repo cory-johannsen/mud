@@ -3497,7 +3497,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 			Kind:       "npc",
 			HP:         inst.CurrentHP,
 			MaxHP:      inst.MaxHP,
-			Perception: inst.Perception,
+			Perception: inst.Awareness,
 			ZoneID:     zoneID,
 			RoomID:     inst.RoomID,
 		},
@@ -5995,7 +5995,7 @@ func (s *GameServiceServer) handleFeint(uid string, req *gamev1.FeintRequest) (*
 	roll := rollResult.Total()
 	bonus := skillRankBonus(sess.Skills["grift"])
 	total := roll + bonus
-	dc := inst.Perception
+	dc := inst.Awareness
 	sess.LastCheckRoll = roll
 	sess.LastCheckDC = dc
 	sess.LastCheckName = "feint"
@@ -6603,8 +6603,8 @@ func (s *GameServiceServer) maxNPCPerceptionInRoom(roomID string) int {
 	insts := s.npcMgr.InstancesInRoom(roomID)
 	max := 10
 	for _, inst := range insts {
-		if !inst.IsDead() && inst.Perception > max {
-			max = inst.Perception
+		if !inst.IsDead() && inst.Awareness > max {
+			max = inst.Awareness
 		}
 	}
 	return max

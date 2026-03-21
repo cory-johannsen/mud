@@ -84,7 +84,7 @@ func TestCombatHandler_LootGeneration_CurrencyAndItems(t *testing.T) {
 		Level:        1,
 		MaxHP:        1, // dies in one hit
 		AC:           1, // very low so player always hits
-		Perception:   2,
+		Awareness: 2,
 		RespawnDelay: "1m",
 		Loot: &npc.LootTable{
 			Currency: &npc.CurrencyDrop{Min: 100, Max: 100},
@@ -149,7 +149,7 @@ func TestCombatHandler_LootGeneration_NilFloorMgr_NoPanic(t *testing.T) {
 		Level:        1,
 		MaxHP:        1,
 		AC:           1,
-		Perception:   2,
+		Awareness: 2,
 		RespawnDelay: "1m",
 		Loot: &npc.LootTable{
 			Currency: &npc.CurrencyDrop{Min: 50, Max: 50},
@@ -210,7 +210,7 @@ func TestCombatHandler_NoLootTable_NoEffect(t *testing.T) {
 		Level:      1,
 		MaxHP:      1,
 		AC:         1,
-		Perception: 2,
+		Awareness: 2,
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)
 	require.NoError(t, err)

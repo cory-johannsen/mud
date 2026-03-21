@@ -37,6 +37,7 @@ func newEscapeSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combat
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -66,6 +67,7 @@ func newEscapeSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -124,7 +126,7 @@ func TestHandleEscape_SpendAPFail(t *testing.T) {
 
 	const roomID = "room_esc_ap"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "brute-esc-ap", Name: "Brute", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "brute-esc-ap", Name: "Brute", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -169,7 +171,7 @@ func TestHandleEscape_RollBelow_StillGrabbed(t *testing.T) {
 
 	const roomID = "room_esc_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ogre-esc-rb", Name: "Ogre", Level: 1, MaxHP: 30, AC: 14, Perception: 3,
+		ID: "ogre-esc-rb", Name: "Ogre", Level: 1, MaxHP: 30, AC: 14, Awareness: 3,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -213,7 +215,7 @@ func TestHandleEscape_RollAbove_Success(t *testing.T) {
 
 	const roomID = "room_esc_ra"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "troll-esc-ra", Name: "Troll", Level: 1, MaxHP: 30, AC: 14, Perception: 3,
+		ID: "troll-esc-ra", Name: "Troll", Level: 1, MaxHP: 30, AC: 14, Awareness: 3,
 	}, roomID)
 	require.NoError(t, err)
 

@@ -47,7 +47,7 @@ func TestRob_PlayerDefeated_NPCReceivesCurrency(t *testing.T) {
 	const roomID = "room_rob_pdn"
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "bandit-rob-pdn", Name: "Bandit", Level: 1, MaxHP: 30, AC: 13,
-		Perception: 2, RobMultiplier: 1.0,
+		Awareness: 2, RobMultiplier: 1.0,
 	}, roomID)
 	require.NoError(t, err)
 	inst.RobPercent = 20.0
@@ -93,7 +93,7 @@ func TestRob_BrokePlayer_NoRob(t *testing.T) {
 	const roomID = "room_rob_broke"
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "bandit-broke", Name: "BrokeRobber", Level: 1, MaxHP: 30, AC: 13,
-		Perception: 2, RobMultiplier: 1.0,
+		Awareness: 2, RobMultiplier: 1.0,
 	}, roomID)
 	require.NoError(t, err)
 	inst.RobPercent = 20.0
@@ -138,14 +138,14 @@ func TestRob_MultipleNPCs_SequentialDeduction(t *testing.T) {
 	const roomID = "room_rob_multi"
 	instA, err := npcMgr.Spawn(&npc.Template{
 		ID: "banditA-rob", Name: "BanditA", Level: 1, MaxHP: 30, AC: 13,
-		Perception: 2, RobMultiplier: 1.0,
+		Awareness: 2, RobMultiplier: 1.0,
 	}, roomID)
 	require.NoError(t, err)
 	instA.RobPercent = 20.0
 
 	instB, err := npcMgr.Spawn(&npc.Template{
 		ID: "banditB-rob", Name: "BanditB", Level: 1, MaxHP: 30, AC: 13,
-		Perception: 2, RobMultiplier: 1.0,
+		Awareness: 2, RobMultiplier: 1.0,
 	}, roomID)
 	require.NoError(t, err)
 	instB.RobPercent = 20.0
@@ -201,7 +201,7 @@ func TestRob_NonRobNPC_NoEffect(t *testing.T) {
 	const roomID = "room_rob_nonrob"
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "goblin-nonrob", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13,
-		Perception: 2, RobMultiplier: 0.0,
+		Awareness: 2, RobMultiplier: 0.0,
 	}, roomID)
 	require.NoError(t, err)
 	assert.Equal(t, 0.0, inst.RobPercent)
@@ -254,7 +254,7 @@ func TestProperty_Rob_CurrencyConserved(t *testing.T) {
 
 		inst, err := npcMgr.Spawn(&npc.Template{
 			ID: "robber-" + roomID, Name: "Robber", Level: 1, MaxHP: 30, AC: 13,
-			Perception: 2, RobMultiplier: 1.0,
+			Awareness: 2, RobMultiplier: 1.0,
 		}, roomID)
 		require.NoError(rt, err)
 		inst.RobPercent = robPercent
@@ -310,7 +310,7 @@ func TestRob_LootPayoutIncludesRobCurrency(t *testing.T) {
 	}
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "lootboss-rob", Name: "LootBoss", Level: 1, MaxHP: 30, AC: 13,
-		Perception: 2, Loot: &loot,
+		Awareness: 2, Loot: &loot,
 	}, roomID)
 	require.NoError(t, err)
 	inst.Currency = 25
@@ -356,7 +356,7 @@ func TestRob_NoLootTable_RobWalletPaidOut(t *testing.T) {
 	const roomID = "room_rob_noloot"
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "mugger-noloot", Name: "Mugger", Level: 1, MaxHP: 30, AC: 13,
-		Perception: 2,
+		Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 	inst.Currency = 40
@@ -401,7 +401,7 @@ func TestRob_DeadNPC_DoesNotRob(t *testing.T) {
 	const roomID = "room_rob_dead_npc"
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "robber-dead", Name: "DeadRobber", Level: 3, MaxHP: 10, AC: 10,
-		Perception: 0,
+		Awareness: 0,
 	}, roomID)
 	require.NoError(t, err)
 	inst.RobPercent = 20.0

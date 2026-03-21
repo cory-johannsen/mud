@@ -37,6 +37,7 @@ func newSneakSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatH
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -66,6 +67,7 @@ func newSneakSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -124,7 +126,7 @@ func TestHandleSneak_RollBelow_RemovesHidden(t *testing.T) {
 
 	const roomID = "room_snk_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "watcher-snk-rb", Name: "Watcher", Level: 1, MaxHP: 20, AC: 13, Perception: 12,
+		ID: "watcher-snk-rb", Name: "Watcher", Level: 1, MaxHP: 20, AC: 13, Awareness: 12,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -176,7 +178,7 @@ func TestHandleSneak_RollAbove_MaintainsHidden(t *testing.T) {
 
 	const roomID = "room_snk_ra"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "spy-snk-ra", Name: "Spy", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "spy-snk-ra", Name: "Spy", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 

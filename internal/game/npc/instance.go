@@ -36,8 +36,8 @@ type Instance struct {
 	AC int
 	// Level is the instance's level.
 	Level int
-	// Perception is the instance's perception modifier.
-	Perception int
+	// Awareness is the instance's awareness modifier.
+	Awareness int
 	// Stealth is the instance's stealth modifier.
 	Stealth int `yaml:"stealth"`
 	// Hustle is the instance's hustle skill modifier.
@@ -167,7 +167,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		MaxHP:         tmpl.MaxHP,
 		AC:            ac,
 		Level:         tmpl.Level,
-		Perception:    tmpl.Perception,
+		Awareness:     tmpl.Awareness,
 		Hustle:        tmpl.Hustle,
 		AIDomain:      tmpl.AIDomain,
 		Loot:          tmpl.Loot,

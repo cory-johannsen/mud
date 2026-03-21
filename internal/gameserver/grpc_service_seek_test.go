@@ -41,6 +41,7 @@ func newSeekSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -63,6 +64,7 @@ func TestHandleSeek_NoSession(t *testing.T) {
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	event, err := svc.handleSeek("unknown_seek_uid")
@@ -89,6 +91,7 @@ func TestHandleSeek_NotInCombat(t *testing.T) {
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID: "u_seek_nc", Username: "Scout", CharName: "Scout", RoomID: "room_seek_nc", Role: "player",
@@ -113,7 +116,7 @@ func TestHandleSeek_NoHiddenNPCs(t *testing.T) {
 
 	const roomID = "room_seek_noh"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "guard-seek-noh", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "guard-seek-noh", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -148,7 +151,7 @@ func TestHandleSeek_Success(t *testing.T) {
 
 	const roomID = "room_seek_suc"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "shadow-seek-suc", Name: "Shadow", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "shadow-seek-suc", Name: "Shadow", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -199,7 +202,7 @@ func TestHandleSeek_Failure(t *testing.T) {
 
 	const roomID = "room_seek_fail"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "lurker-seek-fail", Name: "Lurker", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "lurker-seek-fail", Name: "Lurker", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 

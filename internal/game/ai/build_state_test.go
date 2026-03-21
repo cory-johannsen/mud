@@ -16,7 +16,7 @@ func TestBuildCombatWorldState_PopulatesCombatants(t *testing.T) {
 			{ID: "n1", Kind: combat.KindNPC, Name: "Ganger", CurrentHP: 15, MaxHP: 18, AC: 14},
 		},
 	}
-	inst := npc.NewInstance("n1", &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 18, AC: 14, Perception: 5}, "pioneer_square")
+	inst := npc.NewInstance("n1", &npc.Template{ID: "ganger", Name: "Ganger", Level: 1, MaxHP: 18, AC: 14, Awareness: 5}, "pioneer_square")
 	inst.CurrentHP = 15
 	ws := ai.BuildCombatWorldState(cbt, inst, "downtown")
 	if ws.NPC.UID != "n1" {

@@ -39,6 +39,7 @@ func newGrappleSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, comba
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -72,6 +73,7 @@ func newGrappleSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceSer
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -153,7 +155,7 @@ func TestHandleGrapple_TargetNotFound(t *testing.T) {
 
 	const roomID = "room_grp_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-grp-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-grp-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -196,7 +198,7 @@ func TestHandleGrapple_RollBelowDC_Failure(t *testing.T) {
 
 	const roomID = "room_grp_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "bandit-grp-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "bandit-grp-rb", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -234,7 +236,7 @@ func TestHandleGrapple_RollAboveDC_Success(t *testing.T) {
 
 	const roomID = "room_grp_ra"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-grp-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "ganger-grp-ra", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -280,7 +282,7 @@ func TestProperty_HandleGrapple_ToughnessDC_Formula(t *testing.T) {
 
 		tmpl := &npc.Template{
 			ID: fmt.Sprintf("grp-prop-%d-%d", level, brutality), Name: "Target", Level: level,
-			MaxHP: 20, AC: 13, Perception: 5,
+			MaxHP: 20, AC: 13, Awareness: 5,
 			Abilities:     npc.Abilities{Brutality: brutality, Quickness: 10, Savvy: 10},
 			ToughnessRank: rank,
 		}

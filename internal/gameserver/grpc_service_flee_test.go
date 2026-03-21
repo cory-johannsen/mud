@@ -47,6 +47,7 @@ func newFleeSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, worldMgr, sessMgr, npcMgr, combatHandler
 }
@@ -95,7 +96,7 @@ func TestHandleFlee_NotEnoughAP(t *testing.T) {
 
 	const roomID = "room_a"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-flee-ap", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Perception: 2,
+		ID: "ganger-flee-ap", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -128,7 +129,7 @@ func TestHandleFlee_Failure(t *testing.T) {
 
 	const roomID = "room_a"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-flee-fail", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Perception: 4,
+		ID: "ganger-flee-fail", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Awareness: 4,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -185,6 +186,7 @@ func TestHandleFlee_Success_NoValidExits(t *testing.T) {
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	sessMgr := lockedSessMgr
 	npcMgr := lockedNPCMgr
@@ -194,7 +196,7 @@ func TestHandleFlee_Success_NoValidExits(t *testing.T) {
 	const lockedRoomID = "room_locked"
 
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-flee-lock", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Perception: 2,
+		ID: "ganger-flee-lock", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Awareness: 2,
 	}, lockedRoomID)
 	require.NoError(t, err)
 
@@ -236,8 +238,8 @@ func TestHandleFlee_Success_NPCPursues(t *testing.T) {
 
 	const roomID = "room_a"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		// Perception: 10 → StrMod=0; pursuitTotal=20+0=20 >= playerTotal=20 → pursues.
-		ID: "ganger-flee-pursue", Name: "Pursuer", Level: 1, MaxHP: 20, AC: 12, Perception: 10,
+		// Awareness: 10 → StrMod=0; pursuitTotal=20+0=20 >= playerTotal=20 → pursues.
+		ID: "ganger-flee-pursue", Name: "Pursuer", Level: 1, MaxHP: 20, AC: 12, Awareness: 10,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -284,7 +286,7 @@ func TestHandleFlee_Success_NPCFails(t *testing.T) {
 
 	const roomID = "room_a"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-flee-nopursue", Name: "Slowpoke", Level: 1, MaxHP: 20, AC: 12, Perception: 2,
+		ID: "ganger-flee-nopursue", Name: "Slowpoke", Level: 1, MaxHP: 20, AC: 12, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -329,7 +331,7 @@ func TestHandleFlee_Success_OriginalCombatEnds(t *testing.T) {
 
 	const roomID = "room_a"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-flee-endcbt", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Perception: 2,
+		ID: "ganger-flee-endcbt", Name: "Ganger", Level: 1, MaxHP: 20, AC: 12, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -371,7 +373,7 @@ func TestProperty_Flee_SkillCheckBoundary(t *testing.T) {
 		// matching the dc := 10 + npcStrMod computation above.
 		_, spawnErr := npcMgr.Spawn(&npc.Template{
 			ID: "prop-npc-" + roomID, Name: "PropNPC", Level: 1,
-			MaxHP: 10, AC: 12, Perception: npcStrMod*2 + 10,
+			MaxHP: 10, AC: 12, Awareness: npcStrMod*2 + 10,
 		}, roomID)
 		if spawnErr != nil {
 			rt.Skip()
@@ -423,7 +425,7 @@ func TestProperty_Pursuit_RollOutcome(t *testing.T) {
 		uid := "prop-pursue-uid-" + suffix
 		inst, spawnErr := npcMgr.Spawn(&npc.Template{
 			ID: npcID, Name: "Pursuer", Level: 1,
-			MaxHP: 10, AC: 12, Perception: 10, // Perception:10 → StrMod=0; DC=10; fleeRoll≥11 always succeeds
+			MaxHP: 10, AC: 12, Awareness: 10, // Perception:10 → StrMod=0; DC=10; fleeRoll≥11 always succeeds
 		}, roomID)
 		if spawnErr != nil {
 			rt.Skip()
@@ -480,7 +482,7 @@ func TestProperty_Flee_ExitSelection(t *testing.T) {
 		uid := "prop-exit-uid-" + suffix
 		_, spawnErr := npcMgr.Spawn(&npc.Template{
 			ID: npcID, Name: "Blocker", Level: 1,
-			MaxHP: 10, AC: 12, Perception: 0,
+			MaxHP: 10, AC: 12, Awareness: 0,
 		}, roomID)
 		if spawnErr != nil {
 			rt.Skip()

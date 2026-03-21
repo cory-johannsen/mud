@@ -91,7 +91,7 @@ func spawnHTNTestNPC(t *testing.T, npcMgr *npc.Manager, roomID, domainID string)
 		Level:      1,
 		MaxHP:      20,
 		AC:         13,
-		Perception: 2,
+		Awareness: 2,
 		AIDomain:   domainID,
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)

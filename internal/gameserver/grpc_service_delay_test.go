@@ -40,6 +40,7 @@ func newDelaySvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -52,7 +53,7 @@ func newDelaySvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 func setupDelayPlayer(t testing.TB, uid, roomID, npcName string, sessMgr *session.Manager, npcMgr *npc.Manager, combatHandler *CombatHandler) *session.PlayerSession {
 	t.Helper()
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: uid + "-guard", Name: npcName, Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: uid + "-guard", Name: npcName, Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 	sess, addErr := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -136,7 +137,7 @@ func TestProperty_BankedAP_Formula(t *testing.T) {
 		const uid = "dl_prop"
 		const roomID = "room_dl_prop"
 		_, spawnErr := npcMgr.Spawn(&npc.Template{
-			ID: uid + "-guard", Name: "Bandit", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+			ID: uid + "-guard", Name: "Bandit", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		}, roomID)
 		require.NoError(rt, spawnErr)
 		sess, addErr := sessMgr.AddPlayer(session.AddPlayerOptions{

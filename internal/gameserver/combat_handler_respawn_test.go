@@ -84,7 +84,7 @@ func spawnRespawnTestNPC(t *testing.T, npcMgr *npc.Manager, roomID, templateID s
 		Level:        1,
 		MaxHP:        maxHP,
 		AC:           1,  // very low AC so player attacks always hit
-		Perception:   20, // high Perception → StrMod +5 so NPC reliably hits player AC 12
+		Awareness: 20, // high Perception → StrMod +5 so NPC reliably hits player AC 12
 		RespawnDelay: "1m",
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)
@@ -162,7 +162,7 @@ func TestCombatHandler_NPCDiedInCombat_RemovedFromManager(t *testing.T) {
 	// (exercises the full code path).
 	tmpl := &npc.Template{
 		ID: "ganger", Name: "Ganger", Level: 1,
-		MaxHP: 1, AC: 1, Perception: 2, RespawnDelay: "1m",
+		MaxHP: 1, AC: 1, Awareness: 2, RespawnDelay: "1m",
 	}
 	spawns := map[string][]npc.RoomSpawn{
 		"room-respawn-1": {{TemplateID: "ganger", Max: 1, RespawnDelay: time.Minute}},

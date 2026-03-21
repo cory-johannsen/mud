@@ -37,6 +37,7 @@ func newDisarmSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combat
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -70,6 +71,7 @@ func newDisarmSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -139,7 +141,7 @@ func TestHandleDisarm_TargetNotFound(t *testing.T) {
 
 	const roomID = "room_dis_tnf"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-dis-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-dis-tnf", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -182,7 +184,7 @@ func TestHandleDisarm_RollFailure_NoArmChange(t *testing.T) {
 
 	const roomID = "room_dis_rf"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "bandit-dis-rf", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "bandit-dis-rf", Name: "Bandit", Level: 5, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -224,7 +226,7 @@ func TestHandleDisarm_RollSuccess_WeaponCleared(t *testing.T) {
 
 	const roomID = "room_dis_rs"
 	inst, err := npcMgr.Spawn(&npc.Template{
-		ID: "ganger-dis-rs", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "ganger-dis-rs", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)
@@ -266,7 +268,7 @@ func TestHandleDisarm_RollSuccess_NPCNoWeapon(t *testing.T) {
 
 	const roomID = "room_dis_nw"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "peasant-dis-nw", Name: "Peasant", Level: 1, MaxHP: 10, AC: 10, Perception: 1,
+		ID: "peasant-dis-nw", Name: "Peasant", Level: 1, MaxHP: 10, AC: 10, Awareness: 1,
 		Abilities: npc.Abilities{Brutality: 10, Quickness: 10, Savvy: 10},
 	}, roomID)
 	require.NoError(t, err)

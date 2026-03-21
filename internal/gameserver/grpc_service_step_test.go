@@ -45,6 +45,7 @@ func newStepSvcWithCombat(t *testing.T) (*GameServiceServer, *session.Manager, *
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -71,6 +72,7 @@ func newStepSvc(t *testing.T, combatHandler *CombatHandler) (*GameServiceServer,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr
@@ -110,7 +112,7 @@ func TestHandleStep_TowardIncreasesPositionBy5(t *testing.T) {
 
 	const roomID = "room_step_tr"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-step-tr", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-step-tr", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -152,7 +154,7 @@ func TestHandleStep_AwayDecreasesPositionBy5(t *testing.T) {
 
 	const roomID = "room_step_ai"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-step-ai", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-step-ai", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -194,7 +196,7 @@ func TestHandleStep_AwayFlooredAtZero(t *testing.T) {
 
 	const roomID = "room_step_fz"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-step-fz", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-step-fz", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -235,7 +237,7 @@ func TestHandleStep_NoReactiveStrikes(t *testing.T) {
 
 	const roomID = "room_step_rs"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-step-rs", Name: "Goblin", Level: 1, MaxHP: 20, AC: 10, Perception: 2,
+		ID: "goblin-step-rs", Name: "Goblin", Level: 1, MaxHP: 20, AC: 10, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -285,7 +287,7 @@ func TestHandleStep_MessageContainsDistance(t *testing.T) {
 
 	const roomID = "room_step_dist"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "goblin-step-dist", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "goblin-step-dist", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 

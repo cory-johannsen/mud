@@ -17,7 +17,7 @@ func spawnTypedNPC(t *testing.T, npcMgr *npc.Manager, roomID, npcType string) *n
 		Level:      1,
 		MaxHP:      20,
 		AC:         13,
-		Perception: 2,
+		Awareness: 2,
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)
 	if err != nil {

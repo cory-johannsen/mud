@@ -67,7 +67,7 @@ func spawnAutoQueueNPC(t *testing.T, npcMgr *npc.Manager, roomID, name string) *
 		Level:      1,
 		MaxHP:      20,
 		AC:         13,
-		Perception: 2,
+		Awareness: 2,
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)
 	if err != nil {
@@ -303,7 +303,7 @@ func TestAutoQueuePlayers_Property(t *testing.T) {
 		h := NewCombatHandler(engine, npcMgr, sessMgr, roller, broadcastFn, 10*time.Second, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil)
 
 		tmpl := &npc.Template{
-			ID: "prop-goblin", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+			ID: "prop-goblin", Name: "Goblin", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		}
 		_, err := npcMgr.Spawn(tmpl, roomID)
 		if err != nil {

@@ -53,7 +53,7 @@ func newLoadoutSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceSer
 func setupLoadoutPlayer(t testing.TB, uid, roomID, npcName string, sessMgr *session.Manager, npcMgr *npc.Manager, combatHandler *CombatHandler) *session.PlayerSession {
 	t.Helper()
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: uid + "-guard", Name: npcName, Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: uid + "-guard", Name: npcName, Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 	sess, addErr := sessMgr.AddPlayer(session.AddPlayerOptions{

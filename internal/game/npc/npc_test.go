@@ -19,7 +19,7 @@ description: A street tough with a scar across his cheek.
 level: 1
 max_hp: 18
 ac: 14
-perception: 5
+awareness: 5
 abilities:
   brutality: 14
   quickness: 12
@@ -40,7 +40,7 @@ abilities:
 	assert.Equal(t, 1, tmpl.Level)
 	assert.Equal(t, 18, tmpl.MaxHP)
 	assert.Equal(t, 14, tmpl.AC)
-	assert.Equal(t, 5, tmpl.Perception)
+	assert.Equal(t, 5, tmpl.Awareness)
 	assert.Equal(t, 14, tmpl.Abilities.Brutality)
 }
 
@@ -137,7 +137,7 @@ func TestNewInstance_SetsFieldsFromTemplate(t *testing.T) {
 		Level:       1,
 		MaxHP:       18,
 		AC:          14,
-		Perception:  5,
+		Awareness:   5,
 	}
 
 	inst := npc.NewInstance("inst-1", tmpl, "room-alley")

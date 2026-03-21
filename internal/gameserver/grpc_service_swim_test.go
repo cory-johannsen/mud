@@ -110,6 +110,7 @@ func newSwimSvc(t *testing.T, roller *dice.Roller, condReg *condition.Registry) 
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -142,6 +143,7 @@ func newSwimSvcWithCombat(t *testing.T, roller *dice.Roller, condReg *condition.
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -400,7 +402,7 @@ func TestSubmergedDrowning(t *testing.T) {
 
 	const roomID = "room_water"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "bandit-drown", Name: "Bandit", Level: 1, MaxHP: 30, AC: 10, Perception: 0,
+		ID: "bandit-drown", Name: "Bandit", Level: 1, MaxHP: 30, AC: 10, Awareness: 0,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -460,7 +462,7 @@ func TestProperty_SubmergedDrowning_HPAlwaysDecreases(t *testing.T) {
 
 		const roomID = "room_water"
 		_, err := npcMgr.Spawn(&npc.Template{
-			ID: "bandit-prop-drown", Name: "Bandit", Level: 1, MaxHP: 30, AC: 10, Perception: 0,
+			ID: "bandit-prop-drown", Name: "Bandit", Level: 1, MaxHP: 30, AC: 10, Awareness: 0,
 		}, roomID)
 		require.NoError(t, err)
 
@@ -515,7 +517,7 @@ func TestHandleSwim_BlocksAttackWhenSubmerged(t *testing.T) {
 
 	const roomID = "room_water"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "bandit-swim-block", Name: "Bandit", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "bandit-swim-block", Name: "Bandit", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -564,7 +566,7 @@ func TestHandleSwim_BlocksAllAttacksWhenSubmerged(t *testing.T) {
 
 	const roomID = "room_water"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "bandit-all-block", Name: "Bandit", Level: 1, MaxHP: 20, AC: 13, Perception: 2,
+		ID: "bandit-all-block", Name: "Bandit", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 	}, roomID)
 	require.NoError(t, err)
 

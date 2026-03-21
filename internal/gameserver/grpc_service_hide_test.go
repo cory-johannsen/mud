@@ -37,6 +37,7 @@ func newHideSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatHa
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
 	)
 	return svc, sessMgr
 }
@@ -66,6 +67,7 @@ func newHideSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
+		nil,
 		nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
@@ -105,7 +107,7 @@ func TestHandleHide_SpendAPFail(t *testing.T) {
 
 	const roomID = "room_hide_ap"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "guard-hide-ap", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "guard-hide-ap", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -142,7 +144,7 @@ func TestHandleHide_RollBelow_Failure(t *testing.T) {
 
 	const roomID = "room_hide_rb"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "scout-hide-rb", Name: "Scout", Level: 1, MaxHP: 20, AC: 13, Perception: 12,
+		ID: "scout-hide-rb", Name: "Scout", Level: 1, MaxHP: 20, AC: 13, Awareness: 12,
 	}, roomID)
 	require.NoError(t, err)
 
@@ -184,7 +186,7 @@ func TestHandleHide_RollAbove_Success(t *testing.T) {
 
 	const roomID = "room_hide_ra"
 	_, err := npcMgr.Spawn(&npc.Template{
-		ID: "patrol-hide-ra", Name: "Patrol", Level: 1, MaxHP: 20, AC: 13, Perception: 5,
+		ID: "patrol-hide-ra", Name: "Patrol", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
 	}, roomID)
 	require.NoError(t, err)
 
