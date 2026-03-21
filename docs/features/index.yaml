@@ -53,7 +53,7 @@ features:
     priority: 40
     category: combat
     file: docs/features/actions.md
-    effort: "XL"  # remaining: Climb/Swim/Sense Motive/Delay/Aid/Ready, all Exploration modes, all Downtime actions, Gear actions (activate/repair/affix/swap)
+    effort: "XL"  # remaining: Climb/Swim/Sense Motive/Delay/Ready, all Exploration modes, all Downtime actions, Gear actions (activate/repair/affix)
 
   - slug: console-notifications
     name: Console Notifications
