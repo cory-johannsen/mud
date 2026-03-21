@@ -590,6 +590,7 @@ func main() {
 		mentalMgr,
 		actionH,
 		postgres.NewCharacterSpontaneousUsePoolRepository(pool.DB()),
+		postgres.NewWantedRepository(pool.DB()),
 	)
 
 	// Wire XP service with progress and skill-increase persistence.
@@ -620,6 +621,10 @@ func main() {
 	// Start zone AI ticks.
 	zm := gameserver.NewZoneTickManager(*aiTickInterval)
 	grpcService.StartZoneTicks(ctx, zm, aiRegistry)
+
+	// Start calendar-driven WantedLevel decay.
+	grpcService.StartWantedDecayHook()
+	defer grpcService.StopWantedDecayHook()
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer()

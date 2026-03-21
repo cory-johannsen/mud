@@ -202,6 +202,7 @@ type GameServiceServer struct {
 	mentalStateMgr             *mentalstate.Manager
 	actionH                    *ActionHandler
 	wantedRepo                 *postgres.WantedRepository
+	stopWantedDecay            func()
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -556,6 +557,16 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					s.logger.Warn("persisting spawn room discovery", zap.Error(err))
 				}
 			}
+		}
+	}
+
+	// Load persisted wanted levels.
+	if s.wantedRepo != nil {
+		wantedLevels, wantedErr := s.wantedRepo.Load(stream.Context(), sess.CharacterID)
+		if wantedErr != nil {
+			s.logger.Warn("failed to load wanted levels", zap.Int64("characterID", sess.CharacterID), zap.Error(wantedErr))
+		} else {
+			sess.WantedLevel = wantedLevels
 		}
 	}
 
@@ -3364,6 +3375,26 @@ func (s *GameServiceServer) StartZoneTicks(ctx context.Context, zm *ZoneTickMana
 		})
 	}
 	zm.Start(ctx)
+}
+
+// StartWantedDecayHook subscribes to the calendar and begins once-per-day
+// WantedLevel decay for all online players.
+//
+// Precondition: MUST be called after NewGameServiceServer.
+// Postcondition: decay goroutine runs until StopWantedDecayHook is called.
+func (s *GameServiceServer) StartWantedDecayHook() {
+	if s.calendar != nil && s.wantedRepo != nil {
+		s.stopWantedDecay = StartWantedDecay(s.calendar, s.sessions, s.wantedRepo, s.logger)
+	}
+}
+
+// StopWantedDecayHook unsubscribes from the calendar and stops the decay goroutine.
+//
+// Postcondition: safe to call when StartWantedDecayHook was never called or calendar/wantedRepo was nil.
+func (s *GameServiceServer) StopWantedDecayHook() {
+	if s.stopWantedDecay != nil {
+		s.stopWantedDecay()
+	}
 }
 
 // tickZone executes one game tick for the given zone, advancing NPC AI and
