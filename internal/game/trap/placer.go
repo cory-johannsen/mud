@@ -39,13 +39,26 @@ func selectFromPool(pool []world.TrapPoolEntry, rng *rand.Rand) string {
 	return pool[len(pool)-1].Template
 }
 
+// SelectFromPool is the exported form of selectFromPool, used in tests.
+func SelectFromPool(pool []world.TrapPoolEntry, rng *rand.Rand) string {
+	return selectFromPool(pool, rng)
+}
+
 // PlaceTraps procedurally populates TrapManager with traps for zone.
 // Static room/equipment traps (from zone YAML) are registered first and never overwritten (REQ-TR-9).
 // Procedurally placed traps use one_shot or auto reset mode only (REQ-TR-10).
 //
 // Precondition: zone, templates, mgr, and rng must be non-nil.
 // Precondition: defaultPool is the fallback pool from content/traps/defaults.yaml.
+// Precondition: This function is NOT safe to call twice on the same zone struct.
+//
+//	Procedurally selected cover traps are written back to eq.TrapTemplate on the zone's
+//	Equipment slice. A second call would treat those procedural traps as static (REQ-TR-9 guard).
+//	Callers must reconstruct or deep-copy the zone before calling again.
+//
 // Postcondition: All trap instances in the zone are registered in mgr, Armed=true.
+//
+//	eq.TrapTemplate on Equipment items may be mutated for procedurally placed cover traps.
 func PlaceTraps(zone *world.Zone, templates map[string]*TrapTemplate, defaultPool []world.TrapPoolEntry, mgr *TrapManager, rng *rand.Rand) {
 	// Determine effective pool for this zone.
 	activePool := defaultPool
