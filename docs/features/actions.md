@@ -14,30 +14,30 @@ PF2E combat and exploration actions, including archetype/job actions and full PF
       - [x] Schemer: `setup` (active), `smooth_operator` (passive)
       - [x] Zealot: `lay_hands` (active), `true_believer` (passive)
     - [x] Each Job has at least 1 unique action (52 jobs across all archetypes)
-  - [ ] Full import of all PF2E actions
-    - [ ] Combat
+  - [x] Full import of all PF2E actions
+    - [x] Combat
       - Basic Actions (Everyone can do these)
-        - Stride [1A]: Move up to your Speed.
-        - Strike [1A]: Attack with a weapon or unarmed strike.
-        - Step [1A]: Move 5 feet without triggering Reactions (like Reactive Strike).
-        - Interact [1A]: Draw/stow a weapon, open a door, or Swap a held item.
+        - [x] Stride [1A]: Move up to your Speed.
+        - [x] Strike [1A]: Attack with a weapon or unarmed strike.
+        - [x] Step [1A]: Move 5 feet without triggering Reactions (like Reactive Strike).
+        - [x] Interact [1A]: Draw/stow a weapon, open a door, or Swap a held item.
         - [x] Raise a Shield [1A]: Gain the shield's AC bonus until your next turn.
         - [x] Take Cover [1A]: Gain or improve cover bonuses (+2 AC).
-        - Seek [1A]: Look for hidden enemies or objects (Perception).
-        - Sense Motive [1A]: Check if a creature is lying or behaving oddly.
-        - Escape [1A]: Attempt to break free from being grabbed or restrained.
-        - Delay [0A]: Move your entire turn to later in the initiative order.
+        - [x] Seek [1A]: Look for hidden enemies or objects (Perception).
+        - [x] Sense Motive [1A]: Check if a creature is lying or behaving oddly.
+        - [x] Escape [1A]: Attempt to break free from being grabbed or restrained.
+        - [x] Delay [0A]: Move your entire turn to later in the initiative order.
       - Athletics Actions
         - [x] Grapple — Athletics vs Level+10 DC; success applies grabbed condition (-2 AC, flat-footed)
         - [x] Shove — Athletics vs Fortitude DC; push target 5 ft
         - [x] Trip — Athletics vs Level+10 DC; success applies prone condition (-2 attack rolls)
         - [x] Disarm — Athletics vs Reflex DC; knock weapon from target
-        - [ ] Climb — Athletics check vs surface DC; vertical movement
-        - [ ] Swim — Athletics check vs current DC; water movement
+        - [x] Climb — Athletics check vs surface DC; vertical movement
+        - [x] Swim — Athletics check vs current DC; water movement
       - Tactical Actions
         - [x] Step — move 5 ft without triggering reactions
         - [x] Seek — Perception check to detect hidden creatures/objects
-        - [ ] Sense Motive — Perception vs Deception to detect lies/intent
+        - [x] Sense Motive — Perception vs Deception to detect lies/intent
         - [x] Escape — Max(athletics, acrobatics) vs grabber DC; success removes grabbed condition
         - [x] Delay — forfeit initiative position to act later in round
       - Stealth & Deception Actions
@@ -49,13 +49,13 @@ PF2E combat and exploration actions, including archetype/job actions and full PF
         - [x] Tumble Through — Acrobatics vs Reflex DC; move through enemy space
       - Medicine Actions
         - [x] First Aid [2A] — patch_job vs DC 15; success heals 2d8+4 HP
-    - [ ] General
+    - [x] General
       - Aid: Spend an action on your turn to prepare; use your Reaction to give an ally a bonus.
         - [x] Aid command — implement `aid <target>` (2-action: prepare on your turn, then Reaction to give ally +2 circumstance bonus on their next check; requires multi-player combat and Reactions)
       - Ready [2A]: Set a trigger to take a single action as a Reaction later.
-        - [ ] Ready command — implement `ready <action> when <trigger>` (costs 2 AP; stores a pending Reaction that fires when trigger condition is met during the round; requires Reactions and initiative trigger system)
+        - [x] Ready command — implement `ready <action> when <trigger>` (costs 2 AP; stores a pending Reaction that fires when trigger condition is met during the round; requires Reactions and initiative trigger system)
       - Hero Point: Spend a point to reroll a check or (if dying) to stabilize at 0 HP.
-        - [ ] Hero Point system — track hero points per player (awarded by GM or on milestone); implement `heropoint` command to spend a point to reroll the last check or stabilize at 0 HP when dying; requires hero point award events and dying/stabilize state
+        - [x] Hero Point system — track hero points per player (awarded by GM or on milestone); implement `heropoint` command to spend a point to reroll the last check or stabilize at 0 HP when dying; requires hero point award events and dying/stabilize state
     - [ ] Exploration
       - Avoid Notice: Use Stealth to roll for initiative and start the fight hidden.
         - [ ] Avoid Notice mode — player may declare `avoid notice` during exploration; on combat start, roll Stealth vs NPC Perception for initiative and apply hidden condition if successful; requires exploration mode tracking
