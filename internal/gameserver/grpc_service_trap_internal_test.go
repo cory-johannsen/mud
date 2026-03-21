@@ -3,13 +3,18 @@ package gameserver
 import (
 	"testing"
 
+	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/trap"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
+	"pgregory.net/rapid"
 )
 
 // makeTrapSvc returns a minimal GameServiceServer with trapMgr and trapTemplates wired.
@@ -371,4 +376,244 @@ func TestHandleDisarmTrap_NotDetected(t *testing.T) {
 		t.Error("undetected trap should remain armed")
 	}
 	_ = ev
+}
+
+// TestCheckConsumableTraps_SkipsNonConsumable verifies that checkConsumableTraps ignores
+// world traps (IsConsumable=false) and leaves them armed.
+func TestCheckConsumableTraps_SkipsNonConsumable(t *testing.T) {
+	svc, trapMgr := makeTrapSvc(t)
+
+	mineTmpl := &trap.TrapTemplate{
+		ID: "mine_ent", Name: "Mine",
+		Trigger: trap.TriggerEntry, TriggerRangeFt: 5, ResetMode: trap.ResetOneShot,
+		Payload: &trap.TrapPayload{Type: "mine"},
+	}
+	svc.trapTemplates["mine_ent"] = mineTmpl
+
+	// Add as a WORLD trap (not consumable) — checkConsumableTraps must skip it.
+	instanceID := trap.TrapInstanceID("test", "room_a", "room", "world-mine")
+	trapMgr.AddTrap(instanceID, "mine_ent", true)
+
+	svc.checkConsumableTraps("room_a", "any-combatant")
+	inst, ok := trapMgr.GetTrap(instanceID)
+	require.True(t, ok)
+	assert.True(t, inst.Armed, "world trap must not be fired by checkConsumableTraps")
+}
+
+// TestCheckConsumableTraps_NoActiveCombat_NoPanic verifies that checkConsumableTraps
+// returns safely when no active combat is present for the room.
+func TestCheckConsumableTraps_NoActiveCombat_NoPanic(t *testing.T) {
+	svc, trapMgr := makeTrapSvc(t)
+	mineTmpl := &trap.TrapTemplate{
+		ID: "mine_nc", Name: "Mine", TriggerRangeFt: 5, ResetMode: trap.ResetOneShot,
+		Payload: &trap.TrapPayload{Type: "mine"},
+	}
+	svc.trapTemplates["mine_nc"] = mineTmpl
+	instanceID := trap.TrapInstanceID("test", "room_a", trap.TrapKindConsumable, "nc-1")
+	require.NoError(t, trapMgr.AddConsumableTrap(instanceID, mineTmpl, 0))
+
+	// No active combat — must return without panic.
+	assert.NotPanics(t, func() {
+		svc.checkConsumableTraps("room_a", "combatant-x")
+	})
+	// Trap remains armed (no combat to resolve position).
+	inst, ok := trapMgr.GetTrap(instanceID)
+	require.True(t, ok)
+	assert.True(t, inst.Armed)
+}
+
+// REQ-CTR-12: Deployed consumable trap must be disarmable via the existing disarm command.
+func TestConsumableTrap_DisarmableViaExistingPath(t *testing.T) {
+	svc, trapMgr := makeTrapSvc(t)
+	mineTmpl := &trap.TrapTemplate{
+		ID: "mine_dis", Name: "Mine", TriggerRangeFt: 5, DisableDC: 15,
+		ResetMode: trap.ResetOneShot,
+		Payload:   &trap.TrapPayload{Type: "mine"},
+	}
+	svc.trapTemplates["mine_dis"] = mineTmpl
+
+	instanceID := trap.TrapInstanceID("test", "room_a", trap.TrapKindConsumable, "dis-1")
+	require.NoError(t, trapMgr.AddConsumableTrap(instanceID, mineTmpl, 5))
+
+	trapMgr.MarkDetected("disarmer", instanceID)
+	assert.True(t, trapMgr.IsDetected("disarmer", instanceID))
+
+	trapMgr.Disarm(instanceID)
+	inst, ok := trapMgr.GetTrap(instanceID)
+	require.True(t, ok)
+	assert.False(t, inst.Armed, "consumable trap must be disarmable via Disarm()")
+}
+
+// REQ-CTR-11: Out-of-combat consumable trap fires on next room entry.
+func TestConsumableTrap_OutOfCombat_FiresOnRoomEntry(t *testing.T) {
+	svc, trapMgr := makeTrapSvc(t)
+
+	mineTmpl := &trap.TrapTemplate{
+		ID: "mine_ooc", Name: "Mine",
+		Trigger: trap.TriggerEntry, TriggerRangeFt: 5,
+		ResetMode: trap.ResetOneShot,
+		Payload:   &trap.TrapPayload{Type: "mine", Damage: "1d4"},
+	}
+	svc.trapTemplates["mine_ooc"] = mineTmpl
+
+	instanceID := trap.TrapInstanceID("test", "room_a", trap.TrapKindConsumable, "ooc-1")
+	require.NoError(t, trapMgr.AddConsumableTrap(instanceID, mineTmpl, 0))
+
+	sess, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "ooc_victim", Username: "ooc_victim", CharName: "ooc_victim", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+
+	room, ok := svc.world.GetRoom("room_a")
+	require.True(t, ok, "room_a must exist in test world")
+
+	svc.checkEntryTraps("ooc_victim", sess, room)
+
+	inst, ok := trapMgr.GetTrap(instanceID)
+	require.True(t, ok)
+	assert.False(t, inst.Armed, "one-shot consumable trap must disarm after firing on room entry")
+}
+
+// REQ-CTR-7: Multiple overlapping consumable traps must all fire independently.
+func TestCheckConsumableTraps_MultipleOverlapping_AllFire(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	roller := dice.NewLoggedRoller(&fixedDiceSource{val: 10}, logger)
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcMgr := npc.NewManager()
+	combatHandler := NewCombatHandler(
+		combat.NewEngine(), npcMgr, sessMgr, roller,
+		func(_ string, _ []*gamev1.CombatEvent) {},
+		testRoundDuration, makeTestConditionRegistry(),
+		nil, nil, nil, nil, nil, nil, nil,
+	)
+	trapMgr := trap.NewTrapManager()
+	mineTmpl := &trap.TrapTemplate{
+		ID: "mine_multi", Name: "Mine",
+		TriggerRangeFt: 5, BlastRadiusFt: 0, ResetMode: trap.ResetOneShot,
+		Payload: &trap.TrapPayload{Type: "mine"},
+	}
+	tmplMap := map[string]*trap.TrapTemplate{"mine_multi": mineTmpl}
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr, nil,
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		zaptest.NewLogger(t),
+		nil, roller, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		trapMgr, tmplMap,
+	)
+
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "guard-multi", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
+	}, "room_a")
+	require.NoError(t, err)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "multi_mover", Username: "multi_mover", CharName: "multi_mover", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+	sess.Status = statusInCombat
+	_, err = combatHandler.Attack("multi_mover", "Guard")
+	require.NoError(t, err)
+	combatHandler.cancelTimer("room_a")
+
+	id1 := trap.TrapInstanceID("test", "room_a", trap.TrapKindConsumable, "multi-1")
+	id2 := trap.TrapInstanceID("test", "room_a", trap.TrapKindConsumable, "multi-2")
+	require.NoError(t, trapMgr.AddConsumableTrap(id1, mineTmpl, 0))
+	require.NoError(t, trapMgr.AddConsumableTrap(id2, mineTmpl, 0))
+
+	svc.checkConsumableTraps("room_a", "multi_mover")
+
+	inst1, ok1 := trapMgr.GetTrap(id1)
+	inst2, ok2 := trapMgr.GetTrap(id2)
+	require.True(t, ok1)
+	require.True(t, ok2)
+	assert.False(t, inst1.Armed, "first overlapping trap must be disarmed (fired)")
+	assert.False(t, inst2.Armed, "second overlapping trap must be disarmed independently (fired)")
+}
+
+// REQ-CTR-9: Blast-radius trap fires on all combatants within radius.
+// REQ-CTR-10: Blast-radius trap is one-shot and must be disarmed after firing.
+func TestCheckConsumableTraps_BlastRadius_DisarmsAfterFiring(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	roller := dice.NewLoggedRoller(&fixedDiceSource{val: 10}, logger)
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcMgr := npc.NewManager()
+	combatHandler := NewCombatHandler(
+		combat.NewEngine(), npcMgr, sessMgr, roller,
+		func(_ string, _ []*gamev1.CombatEvent) {},
+		testRoundDuration, makeTestConditionRegistry(),
+		nil, nil, nil, nil, nil, nil, nil,
+	)
+	trapMgr := trap.NewTrapManager()
+	mineTmpl := &trap.TrapTemplate{
+		ID: "mine_blast", Name: "Mine",
+		TriggerRangeFt: 5, BlastRadiusFt: 10, ResetMode: trap.ResetOneShot,
+		Payload: &trap.TrapPayload{Type: "mine"},
+	}
+	tmplMap := map[string]*trap.TrapTemplate{"mine_blast": mineTmpl}
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr, nil,
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		zaptest.NewLogger(t),
+		nil, roller, nil, npcMgr, combatHandler, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		trapMgr, tmplMap,
+	)
+
+	_, err := npcMgr.Spawn(&npc.Template{
+		ID: "guard-blast", Name: "Guard", Level: 1, MaxHP: 20, AC: 13, Awareness: 5,
+	}, "room_a")
+	require.NoError(t, err)
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "blast_mover", Username: "blast_mover", CharName: "blast_mover", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+	sess.Status = statusInCombat
+	_, err = combatHandler.Attack("blast_mover", "Guard")
+	require.NoError(t, err)
+	combatHandler.cancelTimer("room_a")
+
+	instanceID := trap.TrapInstanceID("test", "room_a", trap.TrapKindConsumable, "blast-1")
+	require.NoError(t, trapMgr.AddConsumableTrap(instanceID, mineTmpl, 0))
+
+	svc.checkConsumableTraps("room_a", "blast_mover")
+
+	inst, ok := trapMgr.GetTrap(instanceID)
+	require.True(t, ok)
+	assert.False(t, inst.Armed, "blast-radius trap must be disarmed after firing (REQ-CTR-10)")
+}
+
+// TestProperty_CheckConsumableTraps_NoPanicWithArbitraryInputs verifies that
+// checkConsumableTraps never panics regardless of room or combatant IDs.
+func TestProperty_CheckConsumableTraps_NoPanicWithArbitraryInputs(t *testing.T) {
+	// Build the service once outside the rapid loop (rapid.T is not *testing.T).
+	svc, _ := makeTrapSvc(t)
+	rapid.Check(t, func(rt *rapid.T) {
+		roomID := rapid.SampledFrom([]string{"room_a", "room_b", "nonexistent"}).Draw(rt, "room")
+		uid := rapid.StringN(1, 20, -1).Draw(rt, "uid")
+		assert.NotPanics(t, func() {
+			svc.checkConsumableTraps(roomID, uid)
+		})
+	})
 }

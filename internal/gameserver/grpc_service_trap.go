@@ -207,6 +207,145 @@ func isTrapTargeted(playerRegion string, targetRegions []string) bool {
 	return false
 }
 
+// fireConsumableTrapOnCombatant applies a consumable trap's payload to a single combat.Combatant.
+// Handles both player and NPC targets. Does NOT call trapMgr.Disarm — caller is responsible.
+//
+// Precondition: target, tmpl must be non-nil; instanceID and dangerLevel must be non-empty.
+// Postcondition: Damage applied and message sent; trap state unchanged (caller disarms).
+func (s *GameServiceServer) fireConsumableTrapOnCombatant(
+	target *combat.Combatant,
+	tmpl *trap.TrapTemplate,
+	instanceID, dangerLevel string,
+) {
+	result, err := trap.ResolveTrigger(tmpl, dangerLevel, s.trapTemplates)
+	if err != nil {
+		return
+	}
+	dmg := 0
+	if result.DamageDice != "" && s.dice != nil {
+		rolled, rollErr := s.dice.RollExpr(result.DamageDice)
+		if rollErr == nil {
+			dmg = rolled.Total()
+		}
+		if dmg < 0 {
+			dmg = 0
+		}
+	}
+	target.ApplyDamage(dmg)
+
+	// Player target: apply condition + send personal message.
+	if sess, ok := s.sessions.GetPlayer(target.ID); ok {
+		if result.ConditionID != "" && s.condRegistry != nil && sess.Conditions != nil {
+			if condDef, condOk := s.condRegistry.Get(result.ConditionID); condOk {
+				_ = sess.Conditions.Apply(target.ID, condDef, 1, -1)
+			}
+		}
+		pushMessage(sess, fmt.Sprintf("A %s triggers on you! (%d damage)", tmpl.Name, dmg))
+		return
+	}
+
+	// NPC target: broadcast to all players in the same room.
+	parts := strings.SplitN(instanceID, "/", 4)
+	if len(parts) < 2 {
+		return
+	}
+	trapRoomID := parts[1]
+	for _, p := range s.sessions.AllPlayers() {
+		if p.RoomID == trapRoomID {
+			pushMessage(p, fmt.Sprintf("A %s catches %s! (%d damage)", tmpl.Name, target.Name, dmg))
+		}
+	}
+}
+
+// checkConsumableTraps checks all armed consumable traps in the room against the moving combatant.
+// Returns early if the combatant is not found in active combat.
+//
+// Precondition: s.trapMgr and s.trapTemplates must be non-nil (checked internally).
+// Postcondition: All consumable traps within trigger range fire against the mover (or blast targets); disarmed after firing.
+func (s *GameServiceServer) checkConsumableTraps(roomID, movedCombatantID string) {
+	if s.trapMgr == nil || s.trapTemplates == nil {
+		return
+	}
+	room, ok := s.world.GetRoom(roomID)
+	if !ok {
+		return
+	}
+	zone, ok := s.world.GetZone(room.ZoneID)
+	if !ok {
+		return
+	}
+	dangerLevel := room.DangerLevel
+	if dangerLevel == "" {
+		dangerLevel = zone.DangerLevel
+	}
+
+	// Find the moving combatant. If not in active combat, return early.
+	if s.combatH == nil {
+		return
+	}
+	combatants := s.combatH.CombatantsInRoom(roomID)
+	var mover *combat.Combatant
+	for _, c := range combatants {
+		if c.ID == movedCombatantID {
+			mover = c
+			break
+		}
+	}
+	if mover == nil {
+		return
+	}
+	movedPos := mover.Position
+
+	instanceIDs := s.trapMgr.TrapsForRoom(zone.ID, roomID)
+	for _, instanceID := range instanceIDs {
+		inst, ok := s.trapMgr.GetTrap(instanceID)
+		if !ok || !inst.Armed || !inst.IsConsumable {
+			continue
+		}
+		tmpl, ok := s.trapTemplates[inst.TemplateID]
+		if !ok {
+			continue
+		}
+
+		dist := movedPos - inst.DeployPosition
+		if dist < 0 {
+			dist = -dist
+		}
+		if dist > trap.EffectiveTriggerRange(tmpl) {
+			continue
+		}
+
+		// Trap fires. Multiple overlapping traps all fire independently.
+		if tmpl.BlastRadiusFt == 0 {
+			s.fireConsumableTrapOnCombatant(mover, tmpl, instanceID, dangerLevel)
+		} else {
+			for _, c := range combatants {
+				d := c.Position - inst.DeployPosition
+				if d < 0 {
+					d = -d
+				}
+				if d <= tmpl.BlastRadiusFt {
+					s.fireConsumableTrapOnCombatant(c, tmpl, instanceID, dangerLevel)
+				}
+			}
+		}
+		s.trapMgr.Disarm(instanceID) // always one-shot (REQ-CTR-10)
+	}
+}
+
+// WireConsumableTrapTrigger connects the combat movement callback to consumable trap checking.
+//
+// Precondition: s.combatH must be non-nil; call after NewGameServiceServer.
+// Postcondition: CombatHandler will invoke checkConsumableTraps on every combatant movement event.
+func (s *GameServiceServer) WireConsumableTrapTrigger() {
+	if s.combatH == nil {
+		return
+	}
+	s.combatH.SetOnCombatantMoved(func(roomID, movedCombatantID string) {
+		s.checkConsumableTraps(roomID, movedCombatantID)
+	})
+}
+
 // checkPressurePlateTraps fires all armed pressure_plate traps in room for the given player.
 // Only called during combat (caller's responsibility to check).
 //
