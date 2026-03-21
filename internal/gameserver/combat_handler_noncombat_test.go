@@ -7,52 +7,11 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
-	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 )
-
-// newNonCombatWorld creates a minimal world for non-combat NPC target tests.
-//
-// Precondition: t is non-nil.
-// Postcondition: Returns a world.Manager with zone "nc_zone" containing "nc_room1" and "nc_room2".
-func newNonCombatWorld(t *testing.T) *world.Manager {
-	t.Helper()
-	zone := &world.Zone{
-		ID:          "nc_zone",
-		Name:        "NCZone",
-		Description: "Test zone for non-combat NPC targeting",
-		DangerLevel: "risky",
-		StartRoom:   "nc_room1",
-		Rooms: map[string]*world.Room{
-			"nc_room1": {
-				ID:          "nc_room1",
-				ZoneID:      "nc_zone",
-				Title:       "Market",
-				Description: "A busy market.",
-				Exits: []world.Exit{
-					{Direction: world.North, TargetRoom: "nc_room2"},
-				},
-				Properties: map[string]string{},
-			},
-			"nc_room2": {
-				ID:          "nc_room2",
-				ZoneID:      "nc_zone",
-				Title:       "Back Alley",
-				Description: "A dark back alley.",
-				Exits: []world.Exit{
-					{Direction: world.South, TargetRoom: "nc_room1"},
-				},
-				Properties: map[string]string{},
-			},
-		},
-	}
-	wm, err := world.NewManager([]*world.Zone{zone})
-	require.NoError(t, err)
-	return wm
-}
 
 // newNonCombatCombatHandler builds a CombatHandler and session.Manager for non-combat NPC tests.
 //
@@ -60,8 +19,6 @@ func newNonCombatWorld(t *testing.T) *world.Manager {
 // Postcondition: Returns non-nil CombatHandler and session.Manager.
 func newNonCombatCombatHandler(t *testing.T, npcMgr *npc.Manager) (*CombatHandler, *session.Manager) {
 	t.Helper()
-	logger := zaptest.NewLogger(t)
-	_ = logger
 	sessMgr := session.NewManager()
 	roller := dice.NewLoggedRoller(&fixedDiceSource{val: 10}, zaptest.NewLogger(t))
 	condReg := makeTestConditionRegistry()
