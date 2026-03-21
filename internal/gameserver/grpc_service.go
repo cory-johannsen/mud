@@ -1554,6 +1554,12 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleHeal(uid, p.Heal)
 	case *gamev1.ClientMessage_HealAmount:
 		return s.handleHealAmount(uid, p.HealAmount)
+	case *gamev1.ClientMessage_TrainJob:
+		return s.handleTrainJob(uid, p.TrainJob)
+	case *gamev1.ClientMessage_ListJobs:
+		return s.handleListJobs(uid, p.ListJobs)
+	case *gamev1.ClientMessage_SetJob:
+		return s.handleSetJob(uid, p.SetJob)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
