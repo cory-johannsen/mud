@@ -9,7 +9,7 @@ features:
 
   - slug: room-danger-levels
     name: Room Danger Levels
-    status: planned
+    status: complete
     priority: 10
     category: world
     file: docs/features/room-danger-levels.md
