@@ -1,0 +1,14 @@
+id: tina_wires
+name: Tina Wires
+npc_type: healer
+description: >
+  A lanky technician with a neural-lace visible at her temple, Tina runs a no-questions-asked
+  patching service out of Junker's Dream. Her prices are fair; her bedside manner is not.
+max_hp: 18
+ac: 10
+level: 3
+awareness: 3
+personality: neutral
+healer:
+  price_per_hp: 3
+  daily_capacity: 120

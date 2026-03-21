@@ -1,0 +1,28 @@
+id: rio_wrench
+name: Rio Wrench
+npc_type: job_trainer
+description: >
+  A weathered veteran of Rustbucket Ridge with callused hands and a knowing squint.
+  Rio has worked every trade worth working in the scrap district and will teach the
+  willing — for the right price.
+max_hp: 30
+ac: 12
+level: 5
+awareness: 5
+personality: neutral
+job_trainer:
+  offered_jobs:
+    - job_id: scavenger
+      training_cost: 150
+      prerequisites:
+        min_level: 1
+    - job_id: drifter
+      training_cost: 250
+      prerequisites:
+        min_level: 2
+    - job_id: enforcer
+      training_cost: 350
+      prerequisites:
+        min_level: 3
+        min_job_level:
+          scavenger: 2
