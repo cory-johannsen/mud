@@ -201,6 +201,7 @@ type GameServiceServer struct {
 	progressRepo               ProgressRepository
 	mentalStateMgr             *mentalstate.Manager
 	actionH                    *ActionHandler
+	wantedRepo                 *postgres.WantedRepository
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -269,6 +270,7 @@ func NewGameServiceServer(
 	mentalStateMgr *mentalstate.Manager,
 	actionH *ActionHandler,
 	spontaneousUsePoolRepo SpontaneousUsePoolRepo,
+	wantedRepo *postgres.WantedRepository,
 ) *GameServiceServer {
 	s := &GameServiceServer{
 		world:                      worldMgr,
@@ -314,6 +316,7 @@ func NewGameServiceServer(
 		mentalStateMgr:             mentalStateMgr,
 		actionH:                    actionH,
 		spontaneousUsePoolRepo:     spontaneousUsePoolRepo,
+		wantedRepo:                 wantedRepo,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
