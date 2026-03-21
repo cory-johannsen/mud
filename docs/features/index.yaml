@@ -308,6 +308,8 @@ features:
     priority: 280
     category: world
     file: docs/features/equipment-mechanics.md
+    dependencies:
+      - actions  # Gear actions (Activate Item, Repair, Affix Material) require equipment-mechanics data model
     effort: "XL"  # durability/repair, 5 rarity tiers, tuned/defective/cursed items, equipment sets, interactions, new consumables
 
   - slug: editor-commands

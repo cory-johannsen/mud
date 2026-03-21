@@ -88,12 +88,12 @@ PF2E combat and exploration actions, including archetype/job actions and full PF
         - [ ] Create Forgery command — implement `forgery <document>` (Society check vs DC; costs downtime days; produces a forged document item used in quests or social encounters; requires document item type and downtime time-tracking)
       - Long-Term Rest: Spend 24 hours to recover double your level in HP.
         - [ ] Long-Term Rest command — implement `longrest` (unavailable in combat or dangerous rooms; costs 24 in-game hours; heals 2×level HP and removes minor conditions; requires in-game time tracking and Resting/safe-room enforcement)
-    - [ ] Gear
+    - [ ] Gear (blocked by `equipment-mechanics`)
       - Activate an Item: Varies (1-3 actions). Used for potions, wands, and magic gear.
-        - [ ] Activate Item command — implement `activate <item>` (reads activation cost from item YAML; triggers item's effect; requires activatable item type with action cost and effect definition in item YAML)
+        - [ ] Activate Item command — implement `activate <item>` (reads activation cost from item YAML; triggers item's effect; **requires `equipment-mechanics`: activatable item type with action cost and effect definition**)
       - Repair: Spend 10 minutes (with a Repair Kit) to fix a damaged item.
-        - [ ] Repair command — implement `repair <item>` (Crafting check vs item Hardness DC; costs 10 in-game minutes and a Repair Kit consumable; restores item to functioning; requires item durability/broken state and Repair Kit item type)
+        - [ ] Repair command — implement `repair <item>` (Crafting check vs item Hardness DC; costs 10 in-game minutes and a Repair Kit consumable; restores item to functioning; **requires `equipment-mechanics`: item durability/broken state and Repair Kit item type**)
       - Affix a Precious Material: Add specialized materials to gear.
-        - [ ] Affix Material command — implement `affix <material> <item>` (Crafting check vs material DC; permanently upgrades item with material properties; requires precious material item type and item upgrade slots in item YAML)
+        - [ ] Affix Material command — implement `affix <material> <item>` (Crafting check vs material DC; permanently upgrades item with material properties; **requires `equipment-mechanics`: precious material item type and item upgrade slots**)
       - Swap [1A]: A Remaster addition—you can put away one item and draw another in a single action.
         - [x] Swap command — implement `swap <slot> <item>` (costs 1 AP in combat; swaps the item in a given equipped slot with another item in inventory; requires equipped slot tracking and in-combat item management)
