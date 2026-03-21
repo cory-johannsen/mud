@@ -9,6 +9,28 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// ansiReset is the ANSI escape sequence to reset all terminal attributes.
+const ansiReset = "\033[0m"
+
+// DangerColor returns the ANSI color escape for a danger level.
+// Unexplored rooms (empty or unknown danger level) return light gray.
+// Precondition: dangerLevel is a DangerLevel string or empty.
+// Postcondition: returns an ANSI escape sequence string, never empty.
+func DangerColor(dangerLevel string) string {
+	switch dangerLevel {
+	case "safe":
+		return "\033[32m" // green
+	case "sketchy":
+		return "\033[33m" // yellow
+	case "dangerous":
+		return "\033[38;5;208m" // orange
+	case "all_out_war":
+		return "\033[31m" // red
+	default:
+		return "\033[37m" // light gray
+	}
+}
+
 // RenderRoomView formats a RoomView as colored Telnet text, capped at maxLines rows.
 //
 // Precondition: width > 0 for word-wrapping and column layout; if width <= 0
@@ -1078,10 +1100,11 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 				sb.WriteString("    ")
 			} else {
 				num := numByCoord[[2]int32{x, y}]
+				color := DangerColor(t.DangerLevel)
 				if t.Current {
-					sb.WriteString(fmt.Sprintf("<%2d>", num))
+					sb.WriteString(fmt.Sprintf("%s<%2d>%s", color, num, ansiReset))
 				} else {
-					sb.WriteString(fmt.Sprintf("[%2d]", num))
+					sb.WriteString(fmt.Sprintf("%s[%2d]%s", color, num, ansiReset))
 				}
 			}
 				// East connector:
