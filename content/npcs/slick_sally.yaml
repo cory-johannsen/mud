@@ -1,0 +1,34 @@
+id: slick_sally
+name: Slick Sally
+npc_type: merchant
+description: >
+  A sharp-tongued trader. Her stall at the Rusty Oasis is stocked with every
+  consumable a scavenger could need.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+merchant:
+  merchant_type: consumables
+  sell_margin: 1.2
+  buy_margin: 0.4
+  budget: 1000
+  inventory:
+    - item_id: stim_pack
+      base_price: 50
+      init_stock: 8
+      max_stock: 12
+    - item_id: rad_tabs
+      base_price: 30
+      init_stock: 10
+      max_stock: 15
+    - item_id: dirty_water
+      base_price: 10
+      init_stock: 20
+      max_stock: 30
+  replenish_rate:
+    min_hours: 4
+    max_hours: 8
+    stock_refill: 3
+    budget_refill: 200

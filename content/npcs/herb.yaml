@@ -1,0 +1,34 @@
+id: herb
+name: Herb
+npc_type: merchant
+description: >
+  A former combat medic who now peddles salvaged medical supplies out of a
+  corrugated metal shack called The Green Hell.
+max_hp: 30
+ac: 12
+level: 4
+awareness: 4
+personality: cowardly
+merchant:
+  merchant_type: consumables
+  sell_margin: 1.3
+  buy_margin: 0.45
+  budget: 1500
+  inventory:
+    - item_id: stim_pack
+      base_price: 50
+      init_stock: 10
+      max_stock: 20
+    - item_id: trauma_kit
+      base_price: 200
+      init_stock: 3
+      max_stock: 5
+    - item_id: anti_rad_serum
+      base_price: 120
+      init_stock: 5
+      max_stock: 8
+  replenish_rate:
+    min_hours: 6
+    max_hours: 12
+    stock_refill: 2
+    budget_refill: 300

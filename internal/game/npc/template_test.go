@@ -572,11 +572,16 @@ guard:
 // TestProperty_AllExistingNPCTemplatesStillLoad verifies that adding NPCType/Validate changes
 // does not break any existing NPC YAML file. Reads all *.yaml in content/npcs/.
 func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
+	validTypes := map[string]bool{
+		"combat": true, "merchant": true, "guard": true, "healer": true,
+		"quest_giver": true, "hireling": true, "banker": true,
+		"job_trainer": true, "crafter": true,
+	}
 	templates, err := npc.LoadTemplates("../../../content/npcs")
 	require.NoError(t, err, "all existing NPC templates must still load after Validate() changes")
 	assert.NotEmpty(t, templates, "expected at least one template in content/npcs/")
 	for _, tmpl := range templates {
-		assert.Equal(t, "combat", tmpl.NPCType,
-			"existing NPC %q must default to npc_type 'combat'", tmpl.ID)
+		assert.True(t, validTypes[tmpl.NPCType],
+			"existing NPC %q must have a valid npc_type, got %q", tmpl.ID, tmpl.NPCType)
 	}
 }

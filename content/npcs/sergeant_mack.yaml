@@ -1,0 +1,34 @@
+id: sergeant_mack
+name: Sergeant Mack
+npc_type: merchant
+description: >
+  A grizzled veteran with a jaw like a steel trap. He runs the armory out of
+  Last Stand Lodge with military efficiency.
+max_hp: 40
+ac: 14
+level: 5
+awareness: 4
+personality: cowardly
+merchant:
+  merchant_type: weapons
+  sell_margin: 1.25
+  buy_margin: 0.45
+  budget: 2000
+  inventory:
+    - item_id: combat_knife
+      base_price: 80
+      init_stock: 5
+      max_stock: 8
+    - item_id: sawed_off_shotgun
+      base_price: 350
+      init_stock: 2
+      max_stock: 4
+    - item_id: pipe_pistol
+      base_price: 150
+      init_stock: 3
+      max_stock: 5
+  replenish_rate:
+    min_hours: 6
+    max_hours: 12
+    stock_refill: 1
+    budget_refill: 500

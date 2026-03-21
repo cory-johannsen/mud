@@ -1,0 +1,15 @@
+id: vera_coldcoin
+name: Vera Coldcoin
+npc_type: banker
+description: >
+  A thin woman in a crisp shirt who looks absurdly out of place in Rustbucket Ridge.
+  She operates a reinforced strongbox out of a Safe room and speaks exclusively in numbers.
+max_hp: 15
+ac: 10
+level: 3
+awareness: 3
+personality: cowardly
+banker:
+  zone_id: rustbucket_ridge
+  base_rate: 0.92
+  rate_variance: 0.05

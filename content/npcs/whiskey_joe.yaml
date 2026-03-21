@@ -1,0 +1,34 @@
+id: whiskey_joe
+name: Whiskey Joe
+npc_type: merchant
+description: >
+  A barrel-chested man who smells permanently of fermented cactus juice.
+  The Bottle Shack is his kingdom.
+max_hp: 25
+ac: 10
+level: 2
+awareness: 2
+personality: cowardly
+merchant:
+  merchant_type: consumables
+  sell_margin: 1.15
+  buy_margin: 0.35
+  budget: 600
+  inventory:
+    - item_id: rotgut_booze
+      base_price: 15
+      init_stock: 20
+      max_stock: 30
+    - item_id: stim_pack
+      base_price: 50
+      init_stock: 4
+      max_stock: 8
+    - item_id: packaged_food
+      base_price: 20
+      init_stock: 10
+      max_stock: 15
+  replenish_rate:
+    min_hours: 8
+    max_hours: 16
+    stock_refill: 2
+    budget_refill: 100
