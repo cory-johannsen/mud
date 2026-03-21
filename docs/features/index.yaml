@@ -1,4 +1,12 @@
 features:
+  - slug: npc-awareness
+    name: NPC Awareness Terminology Alignment
+    status: planned
+    priority: 5
+    category: world
+    file: docs/features/npc-awareness.md
+    effort: "S"  # rename perception→awareness on Template/Instance/YAML/code/docs; no behavior change
+
   - slug: room-danger-levels
     name: Room Danger Levels
     status: planned
