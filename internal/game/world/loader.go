@@ -25,6 +25,9 @@ type yamlZone struct {
 	ScriptDir              string     `yaml:"script_dir"`
 	ScriptInstructionLimit int        `yaml:"script_instruction_limit"`
 	Rooms                  []yamlRoom `yaml:"rooms"`
+	DangerLevel            string     `yaml:"danger_level"`
+	RoomTrapChance         *int       `yaml:"room_trap_chance,omitempty"`
+	CoverTrapChance        *int       `yaml:"cover_trap_chance,omitempty"`
 }
 
 // yamlRoomSpawn is the YAML representation of a room spawn config.
@@ -47,17 +50,20 @@ type yamlRoomEquipment struct {
 
 // yamlRoom is the YAML representation of a room.
 type yamlRoom struct {
-	ID          string                 `yaml:"id"`
-	Title       string                 `yaml:"title"`
-	Description string                 `yaml:"description"`
-	Exits       []yamlExit             `yaml:"exits"`
-	Properties  map[string]string      `yaml:"properties"`
-	Spawns      []yamlRoomSpawn        `yaml:"spawns"`
-	Equipment   []yamlRoomEquipment    `yaml:"equipment"`
-	SkillChecks []skillcheck.TriggerDef `yaml:"skill_checks"`
-	Effects     []RoomEffect           `yaml:"effects"`
-	MapX        *int                   `yaml:"map_x"`
-	MapY        *int                   `yaml:"map_y"`
+	ID              string                  `yaml:"id"`
+	Title           string                  `yaml:"title"`
+	Description     string                  `yaml:"description"`
+	Exits           []yamlExit              `yaml:"exits"`
+	Properties      map[string]string       `yaml:"properties"`
+	Spawns          []yamlRoomSpawn         `yaml:"spawns"`
+	Equipment       []yamlRoomEquipment     `yaml:"equipment"`
+	SkillChecks     []skillcheck.TriggerDef `yaml:"skill_checks"`
+	Effects         []RoomEffect            `yaml:"effects"`
+	MapX            *int                    `yaml:"map_x"`
+	MapY            *int                    `yaml:"map_y"`
+	DangerLevel     string                  `yaml:"danger_level,omitempty"`
+	RoomTrapChance  *int                    `yaml:"room_trap_chance,omitempty"`
+	CoverTrapChance *int                    `yaml:"cover_trap_chance,omitempty"`
 }
 
 // yamlExit is the YAML representation of an exit.
@@ -148,6 +154,9 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 		ScriptDir:              yz.ScriptDir,
 		ScriptInstructionLimit: yz.ScriptInstructionLimit,
 		Rooms:                  make(map[string]*Room, len(yz.Rooms)),
+		DangerLevel:            yz.DangerLevel,
+		RoomTrapChance:         yz.RoomTrapChance,
+		CoverTrapChance:        yz.CoverTrapChance,
 	}
 
 	for _, yr := range yz.Rooms {
@@ -158,15 +167,18 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 			return nil, fmt.Errorf("zone %q: room %q: missing required field map_y", yz.ID, yr.ID)
 		}
 		room := &Room{
-			ID:          yr.ID,
-			ZoneID:      yz.ID,
-			Title:       yr.Title,
-			Description: strings.TrimSpace(yr.Description),
-			Properties:  yr.Properties,
-			SkillChecks: yr.SkillChecks,
-			Effects:     yr.Effects,
-			MapX:        *yr.MapX,
-			MapY:        *yr.MapY,
+			ID:              yr.ID,
+			ZoneID:          yz.ID,
+			Title:           yr.Title,
+			Description:     strings.TrimSpace(yr.Description),
+			Properties:      yr.Properties,
+			SkillChecks:     yr.SkillChecks,
+			Effects:         yr.Effects,
+			MapX:            *yr.MapX,
+			MapY:            *yr.MapY,
+			DangerLevel:     yr.DangerLevel,
+			RoomTrapChance:  yr.RoomTrapChance,
+			CoverTrapChance: yr.CoverTrapChance,
 		}
 		if room.Properties == nil {
 			room.Properties = make(map[string]string)
