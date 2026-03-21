@@ -497,17 +497,34 @@ Jobs: make(map[string]int),
 
 (ActiveJobID defaults to `""` automatically.)
 
-- [ ] **3d. Run tests** — verify they pass:
+- [ ] **3d. Verify feat/proficiency grant logic iterates all jobs (REQ-NPC-11):**
+
+  Search for the feat/proficiency grant calculation in the codebase:
+  ```bash
+  grep -rn "feat\|proficiency\|Proficiency" /home/cjohannsen/src/mud/internal/game/ --include="*.go" | grep -v "_test.go" | head -20
+  ```
+
+  Examine the grant logic and determine whether it already iterates over **all** jobs in `sess.Jobs` (not just `sess.ActiveJobID`).
+
+  - **If it already iterates all jobs in `sess.Jobs`:** document the finding inline here with the file + function name so the implementer can confirm it. No code change is required.
+  - **If it only looks at `ActiveJobID`:** note the exact change required (loop over `sess.Jobs` instead of using `sess.ActiveJobID` when computing feats/proficiencies) and add a failing test in the appropriate test file, then implement the fix and verify the test passes.
+
+  Write a test (or confirm an existing test covers this) verifying that a player with two jobs — one active, one inactive — receives feats/proficiencies from **both** jobs. Run to confirm:
+  ```bash
+  mise exec -- go test ./internal/game/... -run "TestFeat.*AllJobs\|TestProficiency.*Jobs\|TestJob.*Proficiency" -v 2>&1 | tail -10
+  ```
+
+- [ ] **3e. Run tests** — verify they pass:
   ```sh
   mise exec -- go test ./internal/game/session/... -run "TestAddPlayer_JobsInitialized|TestPlayerSession_Jobs" -v 2>&1 | tail -10
   ```
 
-- [ ] **3e. Run full session test suite** to confirm no regressions:
+- [ ] **3f. Run full session test suite** to confirm no regressions:
   ```sh
   mise exec -- go test ./internal/game/session/... 2>&1 | tail -5
   ```
 
-- [ ] **3f. Commit:**
+- [ ] **3g. Commit:**
   ```sh
   git add internal/game/session/manager.go internal/game/session/manager_jobs_test.go
   git commit -m "feat: add Jobs and ActiveJobID fields to PlayerSession"
@@ -587,20 +604,28 @@ Add to `ClientMessage.oneof payload` after field 93 (`stash_balance = 93`):
 
 ### Steps
 
-- [ ] **5a. Add** `healerRuntimeStates map[string]*npc.HealerRuntimeState` to `GameServiceServer` struct in `internal/gameserver/grpc_service.go` after the `bankerRuntimeStates` field:
+- [ ] **5a. Write failing tests** in `internal/gameserver/grpc_service_healer_test.go` (TDD — test file MUST exist and MUST fail before implementation):
+
+  Create the file `internal/gameserver/grpc_service_healer_test.go` with stub tests for `handleHeal` and `handleHealAmount`. These tests will fail to compile until the handlers are implemented in step 5d. The full test body is given in Task 6 step 6d — copy that content here. Then run to verify they fail:
+  ```sh
+  mise exec -- go test ./internal/gameserver/... -run "TestHandleHeal|TestHandleHealAmount" -v 2>&1 | head -20
+  ```
+  Expected: compilation error or test failures because `handleHeal` and `handleHealAmount` do not exist yet.
+
+- [ ] **5b. Add** `healerRuntimeStates map[string]*npc.HealerRuntimeState` to `GameServiceServer` struct in `internal/gameserver/grpc_service.go` after the `bankerRuntimeStates` field:
 
 ```go
 // healerRuntimeStates maps NPC instance ID to active healer runtime state.
 healerRuntimeStates map[string]*npc.HealerRuntimeState
 ```
 
-- [ ] **5b. Initialize** the map in `NewGameServiceServer` alongside `bankerRuntimeStates`:
+- [ ] **5c. Initialize** the map in `NewGameServiceServer` alongside `bankerRuntimeStates`:
 
 ```go
 s.healerRuntimeStates = make(map[string]*npc.HealerRuntimeState)
 ```
 
-- [ ] **5c. Create** `internal/gameserver/grpc_service_healer.go`:
+- [ ] **5d. Create** `internal/gameserver/grpc_service_healer.go`:
 
 ```go
 package gameserver
@@ -767,20 +792,22 @@ func (s *GameServiceServer) handleHealAmount(uid string, req *gamev1.HealAmountR
 }
 ```
 
-- [ ] **5d. Verify compilation:**
+- [ ] **5e. Verify compilation:**
   ```sh
   mise exec -- go build ./internal/gameserver/... 2>&1 | head -20
   ```
 
-- [ ] **5e. Commit:**
+- [ ] **5f. Commit:**
   ```sh
-  git add internal/gameserver/grpc_service.go internal/gameserver/grpc_service_healer.go
+  git add internal/gameserver/grpc_service.go internal/gameserver/grpc_service_healer.go internal/gameserver/grpc_service_healer_test.go
   git commit -m "feat: add healer runtime state infrastructure and handleHeal/handleHealAmount handlers"
   ```
 
 ---
 
 ## Task 6 — Healer dispatch + daily tick reset
+
+> **Note (REQ-NPC-16):** DB persistence of `CapacityUsed` across server restarts is **deferred to a future persistence sub-project**, following the identical pattern used for `MerchantRuntimeState` and `BankerRuntimeState`. The `tickHealerCapacity` function (step 6b) satisfies the daily-reset half of REQ-NPC-16. The DB-restore half MUST be tracked as a follow-up task in the persistence sub-project.
 
 **Estimated time:** 5 minutes
 
@@ -821,129 +848,17 @@ if dt.Hour == 0 {
 }
 ```
 
-- [ ] **6d. Write failing tests** in `internal/gameserver/grpc_service_healer_test.go`:
-
-```go
-package gameserver
-
-import (
-    "testing"
-    "time"
-
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/require"
-
-    "github.com/cory-johannsen/mud/internal/game/npc"
-    "github.com/cory-johannsen/mud/internal/game/session"
-    gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
-)
-
-// newHealerTestServer builds a GameServiceServer with a real healer NPC in room_a.
-func newHealerTestServer(t *testing.T) (*GameServiceServer, string, *npc.Instance) {
-    t.Helper()
-    worldMgr, sessMgr := testWorldAndSession(t)
-    npcManager := npc.NewManager()
-    svc := testServiceWithNPCMgr(t, worldMgr, sessMgr, npcManager)
-
-    uid := "heal_u1"
-    _, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
-        UID: uid, Username: "heal_user", CharName: "HealChar",
-        RoomID: "room_a", CurrentHP: 60, MaxHP: 100, Role: "player",
-    })
-    require.NoError(t, err)
-    sess, _ := svc.sessions.GetPlayer(uid)
-    sess.Currency = 500
-
-    tmpl := &npc.Template{
-        ID: "test_healer", Name: "Clutch", NPCType: "healer",
-        Level: 3, MaxHP: 20, AC: 10,
-        Healer: &npc.HealerConfig{PricePerHP: 5, DailyCapacity: 100},
-    }
-    inst, err := npcManager.Spawn(tmpl, "room_a")
-    require.NoError(t, err)
-    return svc, uid, inst
-}
-
-func TestHandleHeal_FullHeal(t *testing.T) {
-    svc, uid, _ := newHealerTestServer(t)
-    evt, err := svc.handleHeal(uid, &gamev1.HealRequest{NpcName: "Clutch"})
-    require.NoError(t, err)
-    assert.Contains(t, evt.GetMessage().GetText(), "100/100")
-    sess, _ := svc.sessions.GetPlayer(uid)
-    assert.Equal(t, 100, sess.CurrentHP)
-    assert.Equal(t, 300, sess.Currency) // 500 - 5×40
-}
-
-func TestHandleHeal_AlreadyFullHP(t *testing.T) {
-    svc, uid, _ := newHealerTestServer(t)
-    sess, _ := svc.sessions.GetPlayer(uid)
-    sess.CurrentHP = 100
-    evt, err := svc.handleHeal(uid, &gamev1.HealRequest{NpcName: "Clutch"})
-    require.NoError(t, err)
-    assert.Contains(t, evt.GetMessage().GetText(), "full health")
-}
-
-func TestHandleHeal_InsufficientCredits(t *testing.T) {
-    svc, uid, _ := newHealerTestServer(t)
-    sess, _ := svc.sessions.GetPlayer(uid)
-    sess.Currency = 10 // need 200 (40 HP × 5)
-    evt, err := svc.handleHeal(uid, &gamev1.HealRequest{NpcName: "Clutch"})
-    require.NoError(t, err)
-    assert.Contains(t, evt.GetMessage().GetText(), "credits")
-}
-
-func TestHandleHeal_CapacityExhausted(t *testing.T) {
-    svc, uid, inst := newHealerTestServer(t)
-    svc.healerRuntimeStates[inst.ID] = &npc.HealerRuntimeState{CapacityUsed: 100}
-    evt, err := svc.handleHeal(uid, &gamev1.HealRequest{NpcName: "Clutch"})
-    require.NoError(t, err)
-    assert.Contains(t, evt.GetMessage().GetText(), "capacity")
-}
-
-func TestHandleHealAmount_PartialHeal(t *testing.T) {
-    svc, uid, _ := newHealerTestServer(t)
-    evt, err := svc.handleHealAmount(uid, &gamev1.HealAmountRequest{NpcName: "Clutch", Amount: 10})
-    require.NoError(t, err)
-    assert.Contains(t, evt.GetMessage().GetText(), "70/100")
-    sess, _ := svc.sessions.GetPlayer(uid)
-    assert.Equal(t, 70, sess.CurrentHP)
-    assert.Equal(t, 450, sess.Currency) // 500 - 5×10
-}
-
-func TestTickHealerCapacity_ResetsCapacityUsed(t *testing.T) {
-    svc, _, inst := newHealerTestServer(t)
-    svc.initHealerRuntimeState(inst)
-    svc.healerRuntimeStates[inst.ID] = &npc.HealerRuntimeState{CapacityUsed: 75}
-    svc.tickHealerCapacity()
-    assert.Equal(t, 0, svc.healerRuntimeStates[inst.ID].CapacityUsed)
-}
-
-func TestProperty_HandleHeal_NeverExceedsMaxHP(t *testing.T) {
-    // Property: after any heal, CurrentHP <= MaxHP.
-    svc, uid, _ := newHealerTestServer(t)
-    sess, _ := svc.sessions.GetPlayer(uid)
-    for _, startHP := range []int{0, 1, 50, 99, 100} {
-        sess.CurrentHP = startHP
-        sess.Currency = 99999
-        svc.healerRuntimeStates = make(map[string]*npc.HealerRuntimeState)
-        _, _ = svc.handleHeal(uid, &gamev1.HealRequest{NpcName: "Clutch"})
-        assert.LessOrEqual(t, sess.CurrentHP, sess.MaxHP,
-            "CurrentHP must not exceed MaxHP after heal, startHP=%d", startHP)
-    }
-}
-```
-
-- [ ] **6e. Run tests** — verify they pass:
+- [ ] **6d. Run tests** — verify they pass (tests were written in Task 5a; they should now pass with handlers wired):
   ```sh
   mise exec -- go test ./internal/gameserver/... -run "TestHandleHeal|TestHandleHealAmount|TestTickHealerCapacity|TestProperty_HandleHeal" -v 2>&1 | tail -20
   ```
 
-- [ ] **6f. Run full test suite:**
+- [ ] **6e. Run full test suite:**
   ```sh
   mise exec -- go test ./... 2>&1 | tail -10
   ```
 
-- [ ] **6g. Commit:**
+- [ ] **6f. Commit:**
   ```sh
   git add internal/gameserver/grpc_service.go internal/gameserver/grpc_service_npc_ticks.go internal/gameserver/grpc_service_healer.go internal/gameserver/grpc_service_healer_test.go
   git commit -m "feat: wire healer command dispatch and daily capacity tick reset"
@@ -957,7 +872,29 @@ func TestProperty_HandleHeal_NeverExceedsMaxHP(t *testing.T) {
 
 ### Steps
 
-- [ ] **7a. Write failing tests** in `internal/gameserver/grpc_service_job_trainer_test.go`:
+- [ ] **7a. Verify XP handler gates on ActiveJobID (REQ-NPC-10):**
+
+  Search for the XP award handler in the codebase:
+  ```bash
+  grep -rn "XP\|xp\|experience\|Experience" /home/cjohannsen/src/mud/internal/game/ --include="*.go" | grep -v "_test.go" | head -20
+  ```
+
+  Examine the handler(s) found and determine whether they already gate XP awards on `ActiveJobID` / `Jobs` map (i.e. only the active job receives XP on a kill event).
+
+  - **If the gating already exists:** document the finding inline here with the file + function name so the implementer can confirm it.
+  - **If the gating does NOT exist:** add a small implementation step to the handler that checks `sess.ActiveJobID != ""` before awarding XP to a job, then proceed to the test below.
+
+  Either way, write a failing test (in the appropriate `_test.go` file for the XP handler) that verifies an **inactive job does NOT receive XP on a kill event**. Run the test to confirm it fails before implementing:
+  ```bash
+  mise exec -- go test ./internal/game/... -run "TestXP.*InactiveJob\|TestKill.*XP\|TestAwardXP" -v 2>&1 | head -20
+  ```
+
+  After implementing (or confirming existing gating), run the test again to confirm it passes:
+  ```bash
+  mise exec -- go test ./internal/game/... -run "TestXP.*InactiveJob\|TestKill.*XP\|TestAwardXP" -v 2>&1 | tail -10
+  ```
+
+- [ ] **7b. Write failing tests** in `internal/gameserver/grpc_service_job_trainer_test.go`:
 
 ```go
 package gameserver
@@ -1086,12 +1023,12 @@ func TestHandleSetJob_NotHeld(t *testing.T) {
 }
 ```
 
-- [ ] **7b. Run tests** — verify they fail:
+- [ ] **7c. Run tests** — verify they fail:
   ```sh
   mise exec -- go test ./internal/gameserver/... -run "TestHandleTrain|TestHandleListJobs|TestHandleSetJob" -v 2>&1 | head -20
   ```
 
-- [ ] **7c. Create** `internal/gameserver/grpc_service_job_trainer.go`:
+- [ ] **7d. Create** `internal/gameserver/grpc_service_job_trainer.go`:
 
 ```go
 package gameserver
@@ -1244,7 +1181,7 @@ func formatJobList(jobs map[string]int, activeID string) string {
 }
 ```
 
-- [ ] **7d. Add dispatch cases** in `internal/gameserver/grpc_service.go` after the heal cases:
+- [ ] **7e. Add dispatch cases** in `internal/gameserver/grpc_service.go` after the heal cases:
 
 ```go
 case *gamev1.ClientMessage_TrainJob:
@@ -1255,17 +1192,17 @@ case *gamev1.ClientMessage_SetJob:
     return s.handleSetJob(uid, p.SetJob)
 ```
 
-- [ ] **7e. Run tests** — verify they pass:
+- [ ] **7f. Run tests** — verify they pass:
   ```sh
   mise exec -- go test ./internal/gameserver/... -run "TestHandleTrain|TestHandleListJobs|TestHandleSetJob" -v 2>&1 | tail -20
   ```
 
-- [ ] **7f. Run full test suite:**
+- [ ] **7g. Run full test suite:**
   ```sh
   mise exec -- go test ./... 2>&1 | tail -10
   ```
 
-- [ ] **7g. Commit:**
+- [ ] **7h. Commit:**
   ```sh
   git add internal/gameserver/grpc_service.go internal/gameserver/grpc_service_job_trainer.go internal/gameserver/grpc_service_job_trainer_test.go
   git commit -m "feat: implement job trainer commands (train, jobs, setjob)"
@@ -1531,9 +1468,9 @@ func (t *Template) ValidateWithSkills(knownSkills map[string]bool) error {
 |-------------|------|
 | REQ-NPC-2a: ValidateWithSkills for skill registry | Task 10 |
 | REQ-NPC-9: Exactly one active job after first train | Task 7c (`if sess.ActiveJobID == ""`) |
-| REQ-NPC-10: Active job earns XP (field set) | Task 3 (`ActiveJobID`) |
-| REQ-NPC-11: Inactive jobs still provide feats/proficiencies | Session field `Jobs` map (Task 3); enforcement is in XP handler (pre-existing) |
-| REQ-NPC-16: CapacityUsed resets on daily tick; restored from DB on restart | Task 6b (`tickHealerCapacity`); DB restore note: `initHealerRuntimeState` checks for existing state first |
+| REQ-NPC-10: Active job earns XP (field set) | Task 3 (`ActiveJobID`); Task 7a: verify XP handler gates on `ActiveJobID`; implement gating + test if absent |
+| REQ-NPC-11: Inactive jobs still provide feats/proficiencies | Session field `Jobs` map (Task 3); Task 3d: verify grant logic iterates all `sess.Jobs` (not just `ActiveJobID`); implement gating if absent |
+| REQ-NPC-16: CapacityUsed resets on daily tick; restored from DB on restart | Task 6b: reset on daily tick ✅; DB restore: deferred to persistence sub-project (same as merchant/banker) |
 | REQ-NPC-17: `setjob` available from any room | Task 7c (`handleSetJob` does not check room) |
 
 ---
