@@ -50,6 +50,14 @@
 **Steps:** Play as one character, run `switch`, observe that prior console output remains in the scrollback buffer.
 **Fix:**
 
+### BUG-8: `smooth_talk` XP reward message displays skill ID instead of display name
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** The XP reward message shown after a successful `smooth_talk` action displays the raw skill ID (e.g. `smooth_talk`) instead of the human-readable display name.
+**Steps:** Use `smooth_talk` successfully; observe the XP reward message shows the skill ID.
+**Fix:**
+
 ### BUG-2: eq command displays armor item IDs instead of names
 **Severity:** medium
 **Status:** open
