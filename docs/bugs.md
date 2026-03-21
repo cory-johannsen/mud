@@ -65,3 +65,13 @@
 **Description:** The `eq` command displays armor slots using the item definition ID (e.g. `tactical_boots`) instead of the human-readable item name (e.g. `Tactical Boots`).
 **Steps:** Equip any armor item and run `eq`; observe armor slot values show raw IDs.
 **Fix:**
+
+## World
+
+### BUG-9: rustbucket_ridge — scorchside_camp illegally overlaps the_embers_edge
+**Severity:** high
+**Status:** open
+**Category:** World
+**Description:** In the `rustbucket_ridge` zone, `scorchside_camp` has an illegal map placement that overlaps with `the_embers_edge`. `scorchside_camp` should be moved south to connect to `smokers_den` instead.
+**Steps:** View the rustbucket_ridge zone map; observe scorchside_camp placement conflicts with the_embers_edge.
+**Fix:**
