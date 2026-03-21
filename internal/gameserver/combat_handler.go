@@ -324,6 +324,13 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 		return nil, fmt.Errorf("%s is already dead", inst.Name())
 	}
 
+	// REQ-NPC-4: non-combat NPCs cannot be attacked directly.
+	// Guards enter combat via their own engage behavior (sub-project 4).
+	// Hirelings are combat participants (sub-project 4).
+	if inst.NPCType != "" && inst.NPCType != "combat" && inst.NPCType != "guard" && inst.NPCType != "hireling" {
+		return nil, fmt.Errorf("%s is not a valid combat target", inst.Name())
+	}
+
 	h.combatMu.Lock()
 	defer h.combatMu.Unlock()
 
