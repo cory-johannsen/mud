@@ -195,3 +195,89 @@ func isTrapTargeted(playerRegion string, targetRegions []string) bool {
 	}
 	return false
 }
+
+// checkPressurePlateTraps fires all armed pressure_plate traps in room for the given player.
+// Only called during combat (caller's responsibility to check).
+//
+// Precondition: s.trapMgr and s.trapTemplates must be non-nil (caller checks).
+// Postcondition: All armed pressure_plate traps in room are fired against player.
+func (s *GameServiceServer) checkPressurePlateTraps(uid string, sess *session.PlayerSession, room *world.Room) {
+	if s.trapMgr == nil || s.trapTemplates == nil {
+		return
+	}
+	zone, ok := s.world.GetZone(room.ZoneID)
+	if !ok {
+		return
+	}
+	dangerLevel := room.DangerLevel
+	if dangerLevel == "" {
+		dangerLevel = zone.DangerLevel
+	}
+	for i := range room.Equipment {
+		eq := &room.Equipment[i]
+		if eq.TrapTemplate == "" {
+			continue
+		}
+		tmpl, ok := s.trapTemplates[eq.TrapTemplate]
+		if !ok || tmpl.Trigger != trap.TriggerPressurePlate {
+			continue
+		}
+		instanceID := trap.TrapInstanceID(zone.ID, room.ID, "equip", eq.Description)
+		state, ok := s.trapMgr.GetTrap(instanceID)
+		if !ok || !state.Armed {
+			continue
+		}
+		s.fireTrap(uid, sess, tmpl, instanceID, dangerLevel, false)
+	}
+}
+
+// WireCoverCrossfireTrap registers a callback on the CombatHandler that fires armed
+// traps on cover equipment when an attack misses due to cover (crossfire mechanic).
+//
+// Precondition: s.combatH must be non-nil; call after NewGameServiceServer.
+// Postcondition: CombatHandler will call s.checkCoverCrossfireTrap on every cover hit.
+func (s *GameServiceServer) WireCoverCrossfireTrap() {
+	if s.combatH == nil {
+		return
+	}
+	s.combatH.SetOnCoverHit(func(roomID, attackerID, coverEquipID string) {
+		if s.trapMgr == nil || s.trapTemplates == nil {
+			return
+		}
+		// Only fire for player attackers (NPCs can't have PlayerSession).
+		attackerSess, ok := s.sessions.GetPlayer(attackerID)
+		if !ok {
+			return
+		}
+		room, ok := s.world.GetRoom(roomID)
+		if !ok {
+			return
+		}
+		zone, ok := s.world.GetZone(room.ZoneID)
+		if !ok {
+			return
+		}
+		dangerLevel := room.DangerLevel
+		if dangerLevel == "" {
+			dangerLevel = zone.DangerLevel
+		}
+		for i := range room.Equipment {
+			eq := &room.Equipment[i]
+			if eq.ItemID != coverEquipID || eq.TrapTemplate == "" {
+				continue
+			}
+			tmpl, ok := s.trapTemplates[eq.TrapTemplate]
+			if !ok {
+				continue
+			}
+			instanceID := trap.TrapInstanceID(zone.ID, roomID, "equip", eq.Description)
+			state, ok := s.trapMgr.GetTrap(instanceID)
+			if !ok || !state.Armed {
+				continue
+			}
+			// Cover crossfire: fire against the attacker only (not AoE).
+			s.fireTrap(attackerID, attackerSess, tmpl, instanceID, dangerLevel, false)
+			break
+		}
+	})
+}

@@ -53,7 +53,8 @@ type CombatHandler struct {
 	aiRegistry    *ai.Registry
 	respawnMgr    *npc.RespawnManager
 	floorMgr      *inventory.FloorManager
-	onCombatEndFn  func(roomID string)    // optional; called after combat ends; may be nil
+	onCombatEndFn  func(roomID string)                            // optional; called after combat ends; may be nil
+	onCoverHit     func(roomID, attackerID, coverEquipID string) // optional; called on cover crossfire; may be nil
 	xpSvc          *xp.Service            // optional; awards kill XP on NPC death; may be nil
 	currencySaver  CurrencySaver          // optional; persists currency after loot award; may be nil
 	mentalStateMgr *mentalstate.Manager   // optional; manages mental state conditions; may be nil
@@ -204,6 +205,13 @@ func (h *CombatHandler) SetLogger(logger *zap.Logger) {
 // Postcondition: fn is called with the roomID of the ended combat.
 func (h *CombatHandler) SetOnCombatEnd(fn func(roomID string)) {
 	h.onCombatEndFn = fn
+}
+
+// SetOnCoverHit registers a callback that fires when an attack misses due to cover.
+// The callback receives the room ID, attacker ID, and cover equipment ID.
+// The callback may be nil; if so, no action is taken.
+func (h *CombatHandler) SetOnCoverHit(fn func(roomID, attackerID, coverEquipID string)) {
+	h.onCoverHit = fn
 }
 
 // InitiateGuardCombat finds guard NPCs in the player's current room and starts
@@ -1485,6 +1493,15 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		return false, nil
 	})
 	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
+
+	// Fire cover crossfire trap callbacks for ActionCoverHit events.
+	if h.onCoverHit != nil {
+		for _, ev := range roundEvents {
+			if ev.ActionType == combat.ActionCoverHit {
+				h.onCoverHit(cbt.RoomID, ev.ActorID, ev.CoverEquipmentID)
+			}
+		}
+	}
 
 	// Reset per-round loadout swap flag for all players in this combat.
 	for _, c := range cbt.Combatants {

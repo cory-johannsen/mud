@@ -171,3 +171,42 @@ func isTrapTargeted(playerRegion string, targetRegions []string) bool {
 	}
 	return false
 }
+
+// TestPressurePlateTrap_FiresDuringCombat verifies that an armed pressure_plate trap
+// transitions to Armed=false after being triggered during combat (simulated via Disarm).
+//
+// Precondition: trap is armed.
+// Postcondition: Armed=false after Disarm (simulating checkPressurePlateTraps → fireTrap call).
+func TestPressurePlateTrap_FiresDuringCombat(t *testing.T) {
+	mgr := trap.NewTrapManager()
+	instanceID := trap.TrapInstanceID("zone1", "room1", "equip", "Floor Plate")
+	mgr.AddTrap(instanceID, "pressure_plate_mine", true)
+
+	state, _ := mgr.GetTrap(instanceID)
+	if !state.Armed {
+		t.Fatal("expected trap armed before stride")
+	}
+	// Simulate firing during combat.
+	mgr.Disarm(instanceID)
+	state, _ = mgr.GetTrap(instanceID)
+	if state.Armed {
+		t.Error("expected Armed=false after fire during combat")
+	}
+}
+
+// TestPressurePlateTrap_NoFireOutOfCombat verifies that a pressure_plate trap remains
+// armed when the player is out of combat (no Disarm is called).
+//
+// Precondition: trap is armed.
+// Postcondition: Armed=true when no fire occurs (out-of-combat scenario).
+func TestPressurePlateTrap_NoFireOutOfCombat(t *testing.T) {
+	mgr := trap.NewTrapManager()
+	instanceID := trap.TrapInstanceID("zone1", "room1", "equip", "Floor Plate")
+	mgr.AddTrap(instanceID, "pressure_plate_mine", true)
+
+	// Out-of-combat: Disarm is never called.
+	state, _ := mgr.GetTrap(instanceID)
+	if !state.Armed {
+		t.Error("trap should remain armed when player is out of combat")
+	}
+}

@@ -141,8 +141,11 @@ type RoundEvent struct {
 	ActorName    string
 	// TargetID is the combatant ID of the target, when applicable (e.g. reactive strikes).
 	// Empty for non-targeted actions such as pass or stride.
-	TargetID  string
-	Narrative string
+	TargetID string
+	// CoverEquipmentID is the item ID of the cover equipment hit in an ActionCoverHit event.
+	// Empty for all other event types.
+	CoverEquipmentID string
+	Narrative        string
 }
 
 // findCombatantByName returns the first Combatant in cbt whose Name matches name, or nil.
@@ -579,13 +582,15 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					target.CoverTier != "" && target.CoverEquipmentID != "" {
 					attackWithoutCoverPenalty := r.AttackTotal - acBonus // acBonus <= 0, so this raises the effective roll
 					if attackWithoutCoverPenalty >= effectiveAC {
-						destroyed := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						coverEquipID := target.CoverEquipmentID
+						destroyed := coverDegrader(cbt.RoomID, coverEquipID)
 						events = append(events, RoundEvent{
-							ActionType: ActionCoverHit,
-							ActorID:    actor.ID,
-							ActorName:  actor.Name,
-							TargetID:   target.ID,
-							Narrative:  fmt.Sprintf("%s's attack hits %s's cover!", actor.Name, target.Name),
+							ActionType:       ActionCoverHit,
+							ActorID:          actor.ID,
+							ActorName:        actor.Name,
+							TargetID:         target.ID,
+							CoverEquipmentID: coverEquipID,
+							Narrative:        fmt.Sprintf("%s's attack hits %s's cover!", actor.Name, target.Name),
 						})
 						if destroyed {
 							events = append(events, RoundEvent{
@@ -696,13 +701,15 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					target.CoverTier != "" && target.CoverEquipmentID != "" {
 					attackWithoutCoverPenalty1 := r1.AttackTotal - acBonus1
 					if attackWithoutCoverPenalty1 >= effectiveAC1 {
-						destroyed1 := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						coverEquipID1 := target.CoverEquipmentID
+						destroyed1 := coverDegrader(cbt.RoomID, coverEquipID1)
 						events = append(events, RoundEvent{
-							ActionType: ActionCoverHit,
-							ActorID:    actor.ID,
-							ActorName:  actor.Name,
-							TargetID:   target.ID,
-							Narrative:  fmt.Sprintf("%s's strike hits %s's cover!", actor.Name, target.Name),
+							ActionType:       ActionCoverHit,
+							ActorID:          actor.ID,
+							ActorName:        actor.Name,
+							TargetID:         target.ID,
+							CoverEquipmentID: coverEquipID1,
+							Narrative:        fmt.Sprintf("%s's strike hits %s's cover!", actor.Name, target.Name),
 						})
 						if destroyed1 {
 							events = append(events, RoundEvent{
@@ -789,13 +796,15 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					target.CoverTier != "" && target.CoverEquipmentID != "" {
 					attackWithoutCoverPenalty2 := r2.AttackTotal - acBonus2
 					if attackWithoutCoverPenalty2 >= effectiveAC2 {
-						destroyed2 := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+						coverEquipID2 := target.CoverEquipmentID
+						destroyed2 := coverDegrader(cbt.RoomID, coverEquipID2)
 						events = append(events, RoundEvent{
-							ActionType: ActionCoverHit,
-							ActorID:    actor.ID,
-							ActorName:  actor.Name,
-							TargetID:   target.ID,
-							Narrative:  fmt.Sprintf("%s's strike hits %s's cover!", actor.Name, target.Name),
+							ActionType:       ActionCoverHit,
+							ActorID:          actor.ID,
+							ActorName:        actor.Name,
+							TargetID:         target.ID,
+							CoverEquipmentID: coverEquipID2,
+							Narrative:        fmt.Sprintf("%s's strike hits %s's cover!", actor.Name, target.Name),
 						})
 						if destroyed2 {
 							events = append(events, RoundEvent{
@@ -955,13 +964,15 @@ func resolveFireBurst(cbt *Combat, actor *Combatant, qa QueuedAction, src Source
 			target.CoverTier != "" && target.CoverEquipmentID != "" {
 			attackWithoutCoverPenalty := result.AttackTotal - acBonus
 			if attackWithoutCoverPenalty >= effectiveAC {
-				destroyed := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+				coverEquipIDBurst := target.CoverEquipmentID
+				destroyed := coverDegrader(cbt.RoomID, coverEquipIDBurst)
 				events = append(events, RoundEvent{
-					ActionType: ActionCoverHit,
-					ActorID:    actor.ID,
-					ActorName:  actor.Name,
-					TargetID:   target.ID,
-					Narrative:  fmt.Sprintf("%s's burst fire hits %s's cover!", actor.Name, target.Name),
+					ActionType:       ActionCoverHit,
+					ActorID:          actor.ID,
+					ActorName:        actor.Name,
+					TargetID:         target.ID,
+					CoverEquipmentID: coverEquipIDBurst,
+					Narrative:        fmt.Sprintf("%s's burst fire hits %s's cover!", actor.Name, target.Name),
 				})
 				if destroyed {
 					events = append(events, RoundEvent{
@@ -1056,13 +1067,15 @@ func resolveFireAutomatic(cbt *Combat, actor *Combatant, qa QueuedAction, src So
 			target.CoverTier != "" && target.CoverEquipmentID != "" {
 			attackWithoutCoverPenalty := result.AttackTotal - acBonus
 			if attackWithoutCoverPenalty >= effectiveAC {
-				destroyed := coverDegrader(cbt.RoomID, target.CoverEquipmentID)
+				coverEquipIDAutomatic := target.CoverEquipmentID
+				destroyed := coverDegrader(cbt.RoomID, coverEquipIDAutomatic)
 				events = append(events, RoundEvent{
-					ActionType: ActionCoverHit,
-					ActorID:    actor.ID,
-					ActorName:  actor.Name,
-					TargetID:   target.ID,
-					Narrative:  fmt.Sprintf("%s's automatic fire hits %s's cover!", actor.Name, target.Name),
+					ActionType:       ActionCoverHit,
+					ActorID:          actor.ID,
+					ActorName:        actor.Name,
+					TargetID:         target.ID,
+					CoverEquipmentID: coverEquipIDAutomatic,
+					Narrative:        fmt.Sprintf("%s's automatic fire hits %s's cover!", actor.Name, target.Name),
 				})
 				if destroyed {
 					events = append(events, RoundEvent{
