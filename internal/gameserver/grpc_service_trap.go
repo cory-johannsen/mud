@@ -573,5 +573,23 @@ func (s *GameServiceServer) findDetectedTrap(uid string, sess *session.PlayerSes
 			return instanceID, tmpl
 		}
 	}
+	// Also search consumable traps armed via TrapManager (REQ-CTR-12).
+	for _, instanceID := range s.trapMgr.TrapsForRoom(zoneID, room.ID) {
+		inst, ok := s.trapMgr.GetTrap(instanceID)
+		if !ok || !inst.Armed || !inst.IsConsumable {
+			continue
+		}
+		if !s.trapMgr.IsDetected(uid, instanceID) {
+			continue
+		}
+		tmpl, ok := s.trapTemplates[inst.TemplateID]
+		if !ok {
+			continue
+		}
+		candidate := strings.ToLower(tmpl.Name)
+		if lowerName == candidate {
+			return instanceID, tmpl
+		}
+	}
 	return "", nil
 }

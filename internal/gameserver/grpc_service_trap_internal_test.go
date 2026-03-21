@@ -422,9 +422,13 @@ func TestCheckConsumableTraps_NoActiveCombat_NoPanic(t *testing.T) {
 	assert.True(t, inst.Armed)
 }
 
-// REQ-CTR-12: Deployed consumable trap must be disarmable via the existing disarm command.
+// REQ-CTR-12: Deployed consumable trap must be disarmable via the existing disarm command path.
+// Verifies that findDetectedTrap locates consumable traps so handleDisarmTrap can disarm them.
 func TestConsumableTrap_DisarmableViaExistingPath(t *testing.T) {
 	svc, trapMgr := makeTrapSvc(t)
+	// Wire fixed-high dice so Thievery check always succeeds (roll 20 >= DisableDC 15).
+	svc.dice = dice.NewLoggedRoller(&fixedDiceSource{val: 19}, zaptest.NewLogger(t))
+
 	mineTmpl := &trap.TrapTemplate{
 		ID: "mine_dis", Name: "Mine", TriggerRangeFt: 5, DisableDC: 15,
 		ResetMode: trap.ResetOneShot,
@@ -435,13 +439,25 @@ func TestConsumableTrap_DisarmableViaExistingPath(t *testing.T) {
 	instanceID := trap.TrapInstanceID("test", "room_a", trap.TrapKindConsumable, "dis-1")
 	require.NoError(t, trapMgr.AddConsumableTrap(instanceID, mineTmpl, 5))
 
-	trapMgr.MarkDetected("disarmer", instanceID)
-	assert.True(t, trapMgr.IsDetected("disarmer", instanceID))
+	// Add player session in room_a so handleDisarmTrap can look up the session and room.
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "disarmer", Username: "disarmer", CharName: "disarmer", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
 
-	trapMgr.Disarm(instanceID)
+	// Mark the trap detected so findDetectedTrap can return it.
+	trapMgr.MarkDetected("disarmer", instanceID)
+	require.True(t, trapMgr.IsDetected("disarmer", instanceID))
+
+	// Invoke the actual disarm path (REQ-CTR-12: consumable trap must be found + disarmed).
+	ev, err := svc.handleDisarmTrap("disarmer", &gamev1.DisarmTrapRequest{TrapName: "mine"})
+	require.NoError(t, err)
+	_ = ev
+
 	inst, ok := trapMgr.GetTrap(instanceID)
 	require.True(t, ok)
-	assert.False(t, inst.Armed, "consumable trap must be disarmable via Disarm()")
+	assert.False(t, inst.Armed, "consumable trap must be disarmable via handleDisarmTrap")
 }
 
 // REQ-CTR-11: Out-of-combat consumable trap fires on next room entry.
@@ -559,7 +575,7 @@ func TestCheckConsumableTraps_BlastRadius_DisarmsAfterFiring(t *testing.T) {
 	mineTmpl := &trap.TrapTemplate{
 		ID: "mine_blast", Name: "Mine",
 		TriggerRangeFt: 5, BlastRadiusFt: 10, ResetMode: trap.ResetOneShot,
-		Payload: &trap.TrapPayload{Type: "mine"},
+		Payload: &trap.TrapPayload{Type: "mine", Damage: "1d6"},
 	}
 	tmplMap := map[string]*trap.TrapTemplate{"mine_blast": mineTmpl}
 	svc := NewGameServiceServer(
@@ -602,6 +618,18 @@ func TestCheckConsumableTraps_BlastRadius_DisarmsAfterFiring(t *testing.T) {
 	inst, ok := trapMgr.GetTrap(instanceID)
 	require.True(t, ok)
 	assert.False(t, inst.Armed, "blast-radius trap must be disarmed after firing (REQ-CTR-10)")
+
+	// REQ-CTR-9: Verify player combatant actually took damage from the blast.
+	combatants := combatHandler.CombatantsInRoom("room_a")
+	var moverCbt *combat.Combatant
+	for _, c := range combatants {
+		if c.ID == "blast_mover" {
+			moverCbt = c
+			break
+		}
+	}
+	require.NotNil(t, moverCbt, "blast_mover combatant must exist in room_a")
+	assert.Less(t, moverCbt.CurrentHP, 10, "blast should reduce player combatant HP within blast radius (REQ-CTR-9)")
 }
 
 // TestProperty_CheckConsumableTraps_NoPanicWithArbitraryInputs verifies that
