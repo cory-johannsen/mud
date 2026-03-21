@@ -336,6 +336,16 @@ features:
     dependencies:
       - non-combat-npcs
 
+  - slug: zone-content-expansion
+    name: Zone Content Expansion
+    status: planned
+    priority: 315
+    category: world
+    file: docs/features/zone-content-expansion.md
+    effort: "XL"  # additional rooms per zone, per-room danger level variation, diversified combat NPC types, improved NPC distribution
+    dependencies:
+      - non-combat-npcs-all-zones
+
   - slug: npc-behaviors
     name: Per-NPC Custom Behaviors
     status: planned
