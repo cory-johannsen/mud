@@ -198,6 +198,78 @@ type JobPrerequisites struct {
 	RequiredJobs  []string          `yaml:"required_jobs,omitempty"`
 }
 
+// proficiencyRank maps a rank name to a comparable integer.
+// Higher integer = higher rank. Unknown → 0.
+func proficiencyRank(rank string) int {
+	switch rank {
+	case "trained":
+		return 1
+	case "expert":
+		return 2
+	case "master":
+		return 3
+	case "legendary":
+		return 4
+	default:
+		return 0
+	}
+}
+
+// Validate checks that all skill IDs referenced in MinSkillRanks exist in the
+// provided skill registry. Returns an error naming the first unknown skill ID.
+//
+// REQ-NPC-2a: unknown skill IDs MUST be a fatal load error.
+//
+// Precondition: knownSkills may be nil (treated as empty set, all IDs unknown).
+// Postcondition: Returns nil iff all referenced skill IDs are present in knownSkills.
+func (c *JobTrainerConfig) Validate(knownSkills map[string]bool) error {
+	for _, job := range c.OfferedJobs {
+		for skillID := range job.Prerequisites.MinSkillRanks {
+			if !knownSkills[skillID] {
+				return fmt.Errorf("job_trainer: unknown skill ID %q in job %q prerequisites", skillID, job.JobID)
+			}
+		}
+	}
+	return nil
+}
+
+// CheckJobPrerequisites validates all prerequisites for training a job.
+// Returns the first unmet prerequisite as a descriptive error, or nil.
+//
+// Precondition: job, playerJobs, playerAttrs, playerSkills must not be nil (pass empty maps, not nil).
+// Postcondition: Returns nil iff all prerequisites are satisfied and the player does not already hold the job.
+func CheckJobPrerequisites(job TrainableJob, playerLevel int, playerJobs map[string]int, playerAttrs map[string]int, playerSkills map[string]string) error {
+	if _, has := playerJobs[job.JobID]; has {
+		return fmt.Errorf("you have already trained %q", job.JobID)
+	}
+	p := job.Prerequisites
+	if p.MinLevel > 0 && playerLevel < p.MinLevel {
+		return fmt.Errorf("you must be at least level %d (you are level %d)", p.MinLevel, playerLevel)
+	}
+	for reqJob := range p.MinJobLevel {
+		lvl, has := playerJobs[reqJob]
+		if !has || lvl < p.MinJobLevel[reqJob] {
+			return fmt.Errorf("you must have %q at level %d", reqJob, p.MinJobLevel[reqJob])
+		}
+	}
+	for attr, minVal := range p.MinAttributes {
+		if playerAttrs[attr] < minVal {
+			return fmt.Errorf("you need %s %d (you have %d)", attr, minVal, playerAttrs[attr])
+		}
+	}
+	for skillID, minRank := range p.MinSkillRanks {
+		if proficiencyRank(playerSkills[skillID]) < proficiencyRank(minRank) {
+			return fmt.Errorf("you need skill %q at rank %q (you have %q)", skillID, minRank, playerSkills[skillID])
+		}
+	}
+	for _, reqJob := range p.RequiredJobs {
+		if _, has := playerJobs[reqJob]; !has {
+			return fmt.Errorf("you must have trained %q first", reqJob)
+		}
+	}
+	return nil
+}
+
 // ---- Crafter (stub) ----
 
 // CrafterConfig is intentionally empty until the crafting feature spec is written.

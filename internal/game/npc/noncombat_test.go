@@ -136,3 +136,111 @@ func TestProperty_ComputeHealCost_NeverNegative(t *testing.T) {
 		}
 	})
 }
+
+// TestJobTrainerConfig_Validate_UnknownSkill verifies unknown skill ID is a fatal error.
+func TestJobTrainerConfig_Validate_UnknownSkill(t *testing.T) {
+	cfg := &JobTrainerConfig{
+		OfferedJobs: []TrainableJob{
+			{
+				JobID: "scavenger", TrainingCost: 100,
+				Prerequisites: JobPrerequisites{
+					MinSkillRanks: map[string]string{"ghost_skill_xyz": "trained"},
+				},
+			},
+		},
+	}
+	knownSkills := map[string]bool{"smooth_talk": true, "hustle": true}
+	err := cfg.Validate(knownSkills)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "ghost_skill_xyz")
+}
+
+// TestJobTrainerConfig_Validate_ValidSkill verifies known skill passes.
+func TestJobTrainerConfig_Validate_ValidSkill(t *testing.T) {
+	cfg := &JobTrainerConfig{
+		OfferedJobs: []TrainableJob{
+			{
+				JobID: "scavenger", TrainingCost: 100,
+				Prerequisites: JobPrerequisites{
+					MinSkillRanks: map[string]string{"smooth_talk": "trained"},
+				},
+			},
+		},
+	}
+	knownSkills := map[string]bool{"smooth_talk": true}
+	err := cfg.Validate(knownSkills)
+	assert.NoError(t, err)
+}
+
+// TestJobTrainerConfig_Validate_EmptyOfferedJobs allows empty job list.
+func TestJobTrainerConfig_Validate_EmptyOfferedJobs(t *testing.T) {
+	cfg := &JobTrainerConfig{OfferedJobs: nil}
+	err := cfg.Validate(map[string]bool{})
+	assert.NoError(t, err)
+}
+
+// TestCheckJobPrerequisites_MinLevel verifies level gate.
+func TestCheckJobPrerequisites_MinLevel(t *testing.T) {
+	job := TrainableJob{
+		JobID: "infiltrator", TrainingCost: 200,
+		Prerequisites: JobPrerequisites{MinLevel: 5},
+	}
+	playerLevel := 3
+	playerJobs := map[string]int{}
+	playerAttrs := map[string]int{}
+	playerSkills := map[string]string{}
+	err := CheckJobPrerequisites(job, playerLevel, playerJobs, playerAttrs, playerSkills)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "level 5")
+}
+
+// TestCheckJobPrerequisites_AlreadyHasJob verifies duplicate job error.
+func TestCheckJobPrerequisites_AlreadyHasJob(t *testing.T) {
+	job := TrainableJob{JobID: "scavenger", TrainingCost: 100}
+	playerJobs := map[string]int{"scavenger": 2}
+	err := CheckJobPrerequisites(job, 1, playerJobs, nil, nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "already trained")
+}
+
+// TestCheckJobPrerequisites_RequiredJobMissing verifies required job gate.
+func TestCheckJobPrerequisites_RequiredJobMissing(t *testing.T) {
+	job := TrainableJob{
+		JobID: "veteran", TrainingCost: 300,
+		Prerequisites: JobPrerequisites{RequiredJobs: []string{"soldier"}},
+	}
+	err := CheckJobPrerequisites(job, 10, map[string]int{}, nil, nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "soldier")
+}
+
+// TestCheckJobPrerequisites_MinSkillRank verifies skill rank gate.
+func TestCheckJobPrerequisites_MinSkillRank(t *testing.T) {
+	job := TrainableJob{
+		JobID: "infiltrator", TrainingCost: 150,
+		Prerequisites: JobPrerequisites{
+			MinSkillRanks: map[string]string{"sneak": "expert"},
+		},
+	}
+	err := CheckJobPrerequisites(job, 5, map[string]int{}, nil, map[string]string{"sneak": "trained"})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "sneak")
+}
+
+// TestCheckJobPrerequisites_AllMet verifies no error when all prerequisites are met.
+func TestCheckJobPrerequisites_AllMet(t *testing.T) {
+	job := TrainableJob{
+		JobID: "infiltrator", TrainingCost: 150,
+		Prerequisites: JobPrerequisites{
+			MinLevel:      3,
+			RequiredJobs:  []string{"scavenger"},
+			MinSkillRanks: map[string]string{"sneak": "trained"},
+		},
+	}
+	err := CheckJobPrerequisites(job, 5,
+		map[string]int{"scavenger": 2},
+		nil,
+		map[string]string{"sneak": "expert"},
+	)
+	assert.NoError(t, err)
+}
