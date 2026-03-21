@@ -1,6 +1,6 @@
 # Non-Combat NPCs
 
-Eight non-combat NPC types with type-specific config, HTN personality system, and Rustbucket Ridge named instances. See `docs/superpowers/specs/2026-03-20-non-combat-npcs-design.md` for the full design spec.
+Nine non-combat NPC types with type-specific config, HTN personality system, and Rustbucket Ridge named instances. See `docs/superpowers/specs/2026-03-20-non-combat-npcs-design.md` for the full design spec. The `fixer` type and guard bribe fields are defined in `docs/superpowers/specs/2026-03-20-wanted-clearing-design.md`.
 
 ## Requirements
 
@@ -23,7 +23,11 @@ Eight non-combat NPC types with type-specific config, HTN personality system, an
 - [ ] Guard
   - REQ-NPC-6: On Safe room second violation, all guards present MUST enter initiative and target the aggressor.
   - REQ-NPC-7: Guards MUST check WantedLevel on room entry and on WantedLevel change events.
+  - REQ-WC-2b: `GuardConfig.MaxBribeWantedLevel` MUST be in range 1–4 when `Bribeable` is true; fatal load error otherwise.
   - [ ] WantedThreshold-configurable aggression table
+  - [ ] `GuardConfig.Bribeable bool` field (default: false)
+  - [ ] `GuardConfig.MaxBribeWantedLevel int` field (default: 2)
+  - [ ] `GuardConfig.BaseCosts map[int]int` field for bribeable guards (all keys 1–4, positive values)
   - [ ] Named NPC: one lore-appropriate guard in a Safe room in Rustbucket Ridge
 - [ ] Healer
   - REQ-NPC-16: `CapacityUsed` MUST reset to 0 on daily tick; restored from DB on restart.
@@ -54,6 +58,15 @@ Eight non-combat NPC types with type-specific config, HTN personality system, an
   - [ ] Named NPC: one lore-appropriate job trainer in Rustbucket Ridge
 - [ ] Crafter (stub)
   - [ ] `npc_type: "crafter"` declared; full behavior deferred to `crafting` feature
+- [ ] Fixer (from `wanted-clearing` feature)
+  - REQ-WC-1: `FixerConfig.NPCVariance` MUST be > 0; fatal load error otherwise.
+  - REQ-WC-2: `FixerConfig.MaxWantedLevel` MUST be in range 1–4; fatal load error otherwise.
+  - REQ-WC-2a: `FixerConfig.BaseCosts` MUST contain all keys 1–4 with positive values; fatal load error otherwise.
+  - REQ-WC-3: Fixers MUST default to `flee` on combat start; MUST NOT enter initiative order.
+  - [ ] `Fixer *FixerConfig` field added to NPC Template struct
+  - [ ] `fixer → flee` added to personality default table
+  - [ ] `Template.Validate()` updated to recognize `"fixer"` type
+  - [ ] Named NPC: one lore-appropriate fixer in Rustbucket Ridge
 
 ## Non-Combat NPCs — All Zones
 
