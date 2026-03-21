@@ -27,12 +27,12 @@ Faction definitions live in `content/factions/*.yaml`. Each file defines one fac
 
 ### 1.2 Faction Config
 
-- REQ-FA-6: A `FactionConfig` struct MUST be loaded from `content/faction_config.yaml` with fields `RepPerNPCLevel int` (YAML: `rep_per_npc_level`) and `RepPerFixerService int` (YAML: `rep_per_fixer_service`). Both values MUST be > 0; a fatal startup error MUST be raised otherwise.
+- REQ-FA-6: A `FactionConfig` struct MUST be loaded from `content/faction_config.yaml` with fields `RepPerNPCLevel int` (YAML: `rep_per_npc_level`), `RepPerFixerService int` (YAML: `rep_per_fixer_service`), and `RepChangeCosts map[int]int` (YAML: `rep_change_costs`; keyed by 1-based tier index 1–4, representing the credit cost to use `change_rep` from each tier). All fields MUST be > 0 for every entry; a fatal startup error MUST be raised if any value is missing or <= 0.
 
 ### 1.3 Faction Registry
 
 - REQ-FA-7: `FactionRegistry` MUST be a `map[string]*FactionDef` loaded from `content/factions/` at server startup and injected into `GameServiceServer`.
-- REQ-FA-8: `FactionRegistry.Validate()` at startup MUST cross-check: all `ZoneID` values exist in the world zone set; all `HostileFactions` IDs exist in `FactionRegistry`; all `ExclusiveItems[].ItemIDs` exist in `ItemRegistry`; all `GatedRooms[].RoomID` values exist in the world room set; all `MinTierID` values on `GatedRooms` reference a valid tier ID within the faction. Any unknown reference MUST cause a fatal startup error.
+- REQ-FA-8: `FactionRegistry.Validate()` at startup MUST cross-check: all `ZoneID` values exist in the world zone set; all `HostileFactions` IDs exist in `FactionRegistry`; all `ExclusiveItems[].ItemIDs` exist in `ItemRegistry`; all item IDs across all factions' `ExclusiveItems` lists are unique globally (an item ID MUST NOT appear in more than one faction's exclusive list — this is a fatal startup error); all `GatedRooms[].RoomID` values exist in the world room set; every `GatedRooms` entry MUST be in a zone whose `FactionID` is non-empty (a gated room in an unowned zone is a fatal startup error); all `MinTierID` values on `GatedRooms` reference a valid tier ID within the faction. Any unknown reference or invariant violation MUST cause a fatal startup error.
 
 ### 1.4 Runtime Types
 
@@ -62,7 +62,7 @@ The `faction.Service` package at `internal/game/faction/` MUST provide:
 ### 3.1 Earning Rep
 
 - REQ-FA-20: Killing an NPC whose `FactionID` is hostile to the player's faction MUST award rep to the player's own faction: `amount = npc.Level * FactionConfig.RepPerNPCLevel`. The NPC death handler MUST call `faction.Service.AwardRep(ctx, sess, characterID, sess.FactionID, amount)` when `IsHostile(npc.FactionID, sess.FactionID)` is true.
-- REQ-FA-21: `QuestRewards` MUST gain an optional `FactionRepXP int` field (YAML: `faction_rep_xp`; default 0). `quest.Service.Complete` MUST call `faction.Service.AwardRep` with the player's `FactionID` and the quest's `FactionRepXP` value when non-zero.
+- REQ-FA-21: `QuestRewards` MUST gain an optional `FactionRepXP int` field (YAML: `faction_rep_xp`; default 0). This field MUST be added to the `QuestRewards` struct defined in REQ-QU-3 of the quests spec; the quests spec MUST be amended before factions is implemented. `quest.Service.Complete` MUST call `faction.Service.AwardRep` with the player's `FactionID` and the quest's `FactionRepXP` value when non-zero.
 
 ### 3.2 Rep Persistence
 
@@ -99,20 +99,20 @@ The `faction.Service` package at `internal/game/faction/` MUST provide:
 
 ### 5.1 Price Discounts
 
-- REQ-FA-32: When a merchant NPC has `FactionID` matching `sess.FactionID`, the buy handler MUST apply the faction discount: `finalPrice = int(math.Ceil(float64(baseCost * merchantMargin) * (1.0 - faction.DiscountFor(sess.FactionID, rep))))`.
-- REQ-FA-33: Players whose `FactionID` does not match the merchant's `FactionID` and are not hostile pay full price (`merchantMargin` only, no discount applied).
+- REQ-FA-32: When a merchant NPC has `FactionID` matching `sess.FactionID`, the buy handler MUST apply the faction discount using the same rounding convention as `ComputeBuyPrice` (floor): `finalPrice = int(math.Floor(float64(baseCost) * merchantMargin * (1.0 - faction.DiscountFor(sess.FactionID, rep))))`, where `baseCost int` is the item's base price and `merchantMargin float64` is the NPC's sell margin.
+- REQ-FA-33: Players whose `FactionID` does not match the merchant's `FactionID` and are not hostile MUST pay full price (`merchantMargin` only, no discount applied).
 
 ### 5.2 `change_rep` Command
 
 - REQ-FA-34: The `change_rep <faction>` command MUST be handled by the `talk <npc>` flow when the NPC is a Fixer (`NPCType == "fixer"`). The Fixer displays faction rep services alongside wanted-clearing services.
-- REQ-FA-35: The cost of `change_rep` MUST use the FixerConfig formula: `cost = FixerConfig.BaseCosts[currentTierIndex] * FixerConfig.NPCVariance * ZoneMultiplier`, where `currentTierIndex` is the 1-based index of the player's current tier (1=Outsider, 2=second tier, 3=third tier, 4=max tier). A player already at max tier MUST receive `"You've reached the highest standing with your faction."` and the service MUST be unavailable.
-- REQ-FA-36: On successful `change_rep` payment, `faction.Service.AwardRep` MUST be called with `FactionConfig.RepPerFixerService` rep. The awarded amount MUST NOT raise the player's rep above `(nextTier.MinRep - 1)` if a next tier exists, preventing tier-skipping via fixer services.
+- REQ-FA-35: The cost of `change_rep` MUST be computed as: `cost = int(math.Floor(float64(FactionConfig.RepChangeCosts[currentTierIndex]) * FixerConfig.NPCVariance * ZoneMultiplier))`, where `currentTierIndex` is the 1-based index of the player's current tier within their faction (1=first tier, 4=max tier), `FactionConfig.RepChangeCosts` is keyed by this index, `FixerConfig.NPCVariance` is the per-NPC float64 multiplier from the wanted-clearing spec, and `ZoneMultiplier` is the zone danger-level multiplier also used by `wanted-clearing`. `FactionConfig.RepChangeCosts` is used instead of `FixerConfig.BaseCosts` to avoid semantic overloading of the wanted-clearing cost map. A player already at max tier MUST receive `"You've reached the highest standing with your faction."` and the service MUST be unavailable.
+- REQ-FA-36: On successful `change_rep` payment, `faction.Service.AwardRep` MUST be called with `FactionConfig.RepPerFixerService` rep. If a next tier exists and awarding the full amount would raise rep to `>= nextTier.MinRep`, the actual awarded amount MUST be capped at `max(0, nextTier.MinRep - 1 - currentRep)` (partial award to cap, not service refusal). The service is only refused entirely at max tier per REQ-FA-35.
 
 ---
 
 ## 6. `faction` Command
 
-- REQ-FA-37: The `faction` command (no subcommand) MUST display the player's faction name, current tier label, rep score, rep required for next tier (or `"Max tier reached"` if at Exalted/Iron/Edge), and active perks (discount percentage and any unlocked gated rooms).
+- REQ-FA-37: The `faction` command (no subcommand) MUST display the player's faction name, current tier label (sourced from `FactionTier.Label`), rep score, rep required for next tier (or `"Max tier reached"` if the player is at the last tier), and active perks (discount percentage and any unlocked gated rooms).
 - REQ-FA-38: `faction info <id>` MUST display the faction's name, zone, tier names with their `min_rep` thresholds and price discounts.
 - REQ-FA-39: `faction standing` MUST display the player's rep and tier label for every faction ID present in `sess.FactionRep`, annotating hostile factions with `(hostile)`.
 
@@ -125,9 +125,9 @@ The `faction.Service` package at `internal/game/faction/` MUST provide:
 - REQ-FA-3: `FactionExclusiveItems` MUST have exported fields: `TierID`, `ItemIDs`.
 - REQ-FA-4: `FactionGatedRoom` MUST have exported fields: `RoomID`, `MinTierID`.
 - REQ-FA-5: `FactionDef.Validate()` MUST reject invalid tier counts, non-zero first tier MinRep, non-increasing MinRep, out-of-range PriceDiscount, and invalid TierID references.
-- REQ-FA-6: `FactionConfig` loaded from `content/faction_config.yaml`; both fields MUST be > 0.
+- REQ-FA-6: `FactionConfig` loaded from `content/faction_config.yaml`; all fields including `RepChangeCosts map[int]int` (keyed 1–4 by tier index) MUST be > 0; fatal startup error otherwise.
 - REQ-FA-7: `FactionRegistry` loaded from `content/factions/` at startup, injected into `GameServiceServer`.
-- REQ-FA-8: Startup cross-validation of all faction definition references; unknown references are fatal errors.
+- REQ-FA-8: Startup cross-validation: unknown references fatal; exclusive item IDs globally unique across all factions; gated rooms must be in zones with non-empty `FactionID`.
 - REQ-FA-9: `PlayerSession` gains `FactionID string` and `FactionRep map[string]int`.
 - REQ-FA-10: `npc.Template` gains `FactionID string` (YAML: `faction_id`).
 - REQ-FA-11: `SpawnInstance` MUST propagate `FactionID` from template to instance.
@@ -140,7 +140,7 @@ The `faction.Service` package at `internal/game/faction/` MUST provide:
 - REQ-FA-18: `CanEnterRoom` returns false when room is gated and player's faction/tier is insufficient.
 - REQ-FA-19: `CanBuyItem` returns false for exclusive items the player's tier has not yet unlocked.
 - REQ-FA-20: Enemy NPC kill awards rep to player's faction; amount = `npc.Level * RepPerNPCLevel`.
-- REQ-FA-21: `QuestRewards` gains `FactionRepXP int`; `quest.Service.Complete` calls `AwardRep` when non-zero.
+- REQ-FA-21: `QuestRewards` gains `FactionRepXP int` (amends REQ-QU-3); `quest.Service.Complete` calls `AwardRep` when non-zero.
 - REQ-FA-22: `character_faction_rep` table with PK `(character_id, faction_id)`.
 - REQ-FA-23: `FactionRepository` interface with `SaveRep` and `LoadRep`.
 - REQ-FA-24: `LoadRep` called at login; absent rows = 0 rep.
@@ -151,11 +151,11 @@ The `faction.Service` package at `internal/game/faction/` MUST provide:
 - REQ-FA-29: Blocked room entry sends `"Only <TierLabel> members of <FactionName> may enter here."`.
 - REQ-FA-30: Blocked item purchase sends `"You need to be a <TierLabel> of <FactionName> to buy that."`.
 - REQ-FA-31: Merchant `list` shows gated items with `[<TierLabel>]` suffix.
-- REQ-FA-32: Faction merchant buy price applies `(1.0 - discount)` multiplier for allied players.
-- REQ-FA-33: Non-hostile non-allied players pay full price (no discount).
+- REQ-FA-32: Faction merchant discount applied as `floor(float64(baseCost) * merchantMargin * (1 - discount))`; same rounding convention as `ComputeBuyPrice`.
+- REQ-FA-33: Non-hostile non-allied players MUST pay full price (no discount).
 - REQ-FA-34: `change_rep <faction>` handled via Fixer NPC `talk` flow.
-- REQ-FA-35: `change_rep` cost uses FixerConfig formula; max-tier players receive unavailability message.
+- REQ-FA-35: `change_rep` cost uses `FactionConfig.RepChangeCosts[tierIndex] * FixerConfig.NPCVariance * ZoneMultiplier` (floor, not BaseCosts); unavailable at max tier.
 - REQ-FA-36: `change_rep` rep award capped at `nextTier.MinRep - 1` to prevent tier-skipping.
-- REQ-FA-37: `faction` shows player's faction, tier, rep, progress to next tier, and active perks.
+- REQ-FA-37: `faction` shows player's faction, tier label (from `FactionTier.Label`), rep, progress to next tier (or `"Max tier reached"`), and active perks.
 - REQ-FA-38: `faction info <id>` shows faction name, zone, tier names with thresholds and discounts.
 - REQ-FA-39: `faction standing` shows rep and tier for all factions in `sess.FactionRep`; hostile factions annotated.
