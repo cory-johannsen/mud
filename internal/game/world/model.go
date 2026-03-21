@@ -172,6 +172,15 @@ type Room struct {
 	Effects []RoomEffect
 	// Terrain is an optional terrain type tag: rubble, cliff, wall, sewer, river, ocean, flooded.
 	Terrain string `yaml:"terrain"`
+	// DangerLevel overrides the zone's danger level for this specific room.
+	// Empty string means inherit from the zone.
+	DangerLevel string `yaml:"danger_level,omitempty"`
+	// RoomTrapChance overrides the zone's room trap chance for this specific room.
+	// nil means inherit from the zone.
+	RoomTrapChance *int `yaml:"room_trap_chance,omitempty"`
+	// CoverTrapChance overrides the zone's cover trap chance for this specific room.
+	// nil means inherit from the zone.
+	CoverTrapChance *int `yaml:"cover_trap_chance,omitempty"`
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.
@@ -216,6 +225,15 @@ type Zone struct {
 	// ScriptInstructionLimit overrides DefaultInstructionLimit for this zone's VM.
 	// 0 = use DefaultInstructionLimit.
 	ScriptInstructionLimit int
+	// DangerLevel sets the default danger level for all rooms in this zone.
+	// One of "safe", "risky", "dangerous", "deadly", or "" (unset).
+	DangerLevel string `yaml:"danger_level"`
+	// RoomTrapChance sets the default percentage chance (0-100) that a room in
+	// this zone contains a trap. nil means no trap chance configured.
+	RoomTrapChance *int `yaml:"room_trap_chance,omitempty"`
+	// CoverTrapChance sets the default percentage chance (0-100) that cover
+	// objects in this zone contain a trap. nil means no trap chance configured.
+	CoverTrapChance *int `yaml:"cover_trap_chance,omitempty"`
 }
 
 // ExternalExitTargets returns exit targets that reference rooms outside this zone.
