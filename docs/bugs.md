@@ -2,6 +2,14 @@
 
 ## UI
 
+### BUG-4: Room section does not display zone name
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The room display section does not show the name of the current zone, leaving players without zone context when navigating.
+**Steps:** Enter any room and observe the room display; no zone name is shown.
+**Fix:**
+
 ### BUG-1: Technology selection list — poor text alignment at login
 **Severity:** medium
 **Status:** open
