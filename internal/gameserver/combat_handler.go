@@ -1564,8 +1564,16 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 					sess.LoadoutSet.ResetRound()
 				}
 				// REQ-READY-1: Clear readied action at end of every round; notify player if it expired unfired.
-				if sess.ReadiedTrigger != "" {
+				if sess.ReadiedTrigger != "" && sess.Entity != nil {
 					actionName := sess.ReadiedAction
+					switch actionName {
+					case "raise_shield":
+						actionName = "Raise Shield"
+					case "step":
+						actionName = "Step"
+					case "strike":
+						actionName = "Strike"
+					}
 					evt := &gamev1.ServerEvent{
 						Payload: &gamev1.ServerEvent_Message{
 							Message: &gamev1.MessageEvent{Content: "Your readied " + actionName + " expires. (No refund.)"},

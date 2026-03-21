@@ -19,6 +19,7 @@ func TestReactionTriggerType_AllValuesNonEmpty(t *testing.T) {
 		reaction.TriggerOnConditionApplied,
 		reaction.TriggerOnAllyDamaged,
 		reaction.TriggerOnFall,
+		reaction.TriggerOnEnemyEntersRoom,
 	}
 	for _, t2 := range triggers {
 		assert.NotEmpty(t, string(t2))
