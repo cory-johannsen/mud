@@ -40,6 +40,12 @@ func StartWantedDecay(cal *GameCalendar, sessions SessionLister, wantedRepo Want
 	return func() { close(stop) }
 }
 
+// decayWantedLevels decrements WantedLevel by 1 for each zone where the player
+// has not violated safe-room rules on or after currentDay.
+//
+// Precondition: sessions and wantedRepo MUST NOT be nil; currentDay MUST be >= 0.
+// Postcondition: each online player's WantedLevel is decremented by 1 for zones
+// not violated on currentDay; changes are persisted via wantedRepo.Upsert.
 func decayWantedLevels(sessions SessionLister, wantedRepo WantedSaver, currentDay int, logger *zap.Logger) {
 	for _, sess := range sessions.AllPlayers() {
 		for zoneID, level := range sess.WantedLevel {
