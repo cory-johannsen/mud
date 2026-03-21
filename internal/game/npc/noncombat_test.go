@@ -58,3 +58,81 @@ func TestProperty_ReplenishConfig_InvalidRangeAlwaysErrors(t *testing.T) {
 		}
 	})
 }
+
+// TestComputeHealCost_FullHeal checks cost = PricePerHP × (MaxHP - CurrentHP).
+func TestComputeHealCost_FullHeal(t *testing.T) {
+	cfg := &HealerConfig{PricePerHP: 5, DailyCapacity: 100}
+	cost := ComputeHealCost(cfg, 60, 100) // missing 40 HP
+	assert.Equal(t, 200, cost)
+}
+
+// TestComputeHealCost_PartialHeal checks cost = PricePerHP × amount.
+func TestComputeHealCost_PartialHeal(t *testing.T) {
+	cfg := &HealerConfig{PricePerHP: 3, DailyCapacity: 100}
+	cost := ComputeHealCost(cfg, 0, 10) // not used; amount-based
+	_ = cost
+	partialCost := ComputeHealAmountCost(cfg, 15)
+	assert.Equal(t, 45, partialCost)
+}
+
+// TestCheckHealPrerequisites_InsufficientCredits verifies error when credits < cost.
+func TestCheckHealPrerequisites_InsufficientCredits(t *testing.T) {
+	cfg := &HealerConfig{PricePerHP: 10, DailyCapacity: 50}
+	state := &HealerRuntimeState{CapacityUsed: 0}
+	err := CheckHealPrerequisites(cfg, state, 50 /*current*/, 100 /*max*/, 400 /*credits*/)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "credits")
+}
+
+// TestCheckHealPrerequisites_CapacityExhausted verifies error when capacity is full.
+func TestCheckHealPrerequisites_CapacityExhausted(t *testing.T) {
+	cfg := &HealerConfig{PricePerHP: 1, DailyCapacity: 10}
+	state := &HealerRuntimeState{CapacityUsed: 10}
+	err := CheckHealPrerequisites(cfg, state, 80, 100, 9999)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "capacity")
+}
+
+// TestCheckHealPrerequisites_AlreadyFullHP verifies error when player is at full HP.
+func TestCheckHealPrerequisites_AlreadyFullHP(t *testing.T) {
+	cfg := &HealerConfig{PricePerHP: 5, DailyCapacity: 100}
+	state := &HealerRuntimeState{CapacityUsed: 0}
+	err := CheckHealPrerequisites(cfg, state, 100, 100, 9999)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "full health")
+}
+
+// TestApplyHeal_FullHeal verifies HP restored to MaxHP.
+func TestApplyHeal_FullHeal(t *testing.T) {
+	cfg := &HealerConfig{PricePerHP: 5, DailyCapacity: 100}
+	state := &HealerRuntimeState{CapacityUsed: 0}
+	newHP, cost, newUsed := ApplyHeal(cfg, state, 60, 100, 100 /*available capacity remains*/)
+	assert.Equal(t, 100, newHP)
+	assert.Equal(t, 200, cost)
+	assert.Equal(t, 40, newUsed)
+}
+
+// TestApplyHeal_CapacityLimited verifies heal is capped at remaining capacity.
+func TestApplyHeal_CapacityLimited(t *testing.T) {
+	cfg := &HealerConfig{PricePerHP: 2, DailyCapacity: 50}
+	state := &HealerRuntimeState{CapacityUsed: 45}
+	// remaining capacity = 5; player missing = 40 HP
+	newHP, cost, newUsed := ApplyHeal(cfg, state, 60, 100, 5)
+	assert.Equal(t, 65, newHP)  // 60 + 5
+	assert.Equal(t, 10, cost)   // 2 × 5
+	assert.Equal(t, 50, newUsed)
+}
+
+// TestProperty_ComputeHealCost_NeverNegative property test.
+func TestProperty_ComputeHealCost_NeverNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		pricePerHP := rapid.IntRange(1, 100).Draw(rt, "price")
+		current := rapid.IntRange(0, 1000).Draw(rt, "current")
+		max := rapid.IntRange(current, 1000).Draw(rt, "max")
+		cfg := &HealerConfig{PricePerHP: pricePerHP, DailyCapacity: 9999}
+		cost := ComputeHealCost(cfg, current, max)
+		if cost < 0 {
+			rt.Fatalf("ComputeHealCost must be >= 0, got %d", cost)
+		}
+	})
+}

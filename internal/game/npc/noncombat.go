@@ -77,6 +77,63 @@ type HealerRuntimeState struct {
 	CapacityUsed int
 }
 
+// ComputeHealCost returns the credit cost to restore a player from currentHP to maxHP.
+//
+// Precondition: cfg must not be nil; currentHP <= maxHP; both >= 0.
+// Postcondition: Returns cfg.PricePerHP × (maxHP - currentHP).
+func ComputeHealCost(cfg *HealerConfig, currentHP, maxHP int) int {
+	return cfg.PricePerHP * (maxHP - currentHP)
+}
+
+// ComputeHealAmountCost returns the credit cost to restore exactly amount HP.
+//
+// Precondition: cfg must not be nil; amount >= 0.
+// Postcondition: Returns cfg.PricePerHP × amount.
+func ComputeHealAmountCost(cfg *HealerConfig, amount int) int {
+	return cfg.PricePerHP * amount
+}
+
+// CheckHealPrerequisites validates whether a full-heal is allowed.
+// Returns a descriptive error if the player is already at full health,
+// capacity is exhausted, or the player cannot afford the cost.
+//
+// Precondition: cfg and state must not be nil; currentHP <= maxHP; credits >= 0.
+// Postcondition: Returns nil iff heal is allowed.
+func CheckHealPrerequisites(cfg *HealerConfig, state *HealerRuntimeState, currentHP, maxHP, credits int) error {
+	if currentHP >= maxHP {
+		return fmt.Errorf("you are already at full health")
+	}
+	remaining := cfg.DailyCapacity - state.CapacityUsed
+	if remaining <= 0 {
+		return fmt.Errorf("%s has exhausted their daily healing capacity", "the healer")
+	}
+	healAmount := maxHP - currentHP
+	if healAmount > remaining {
+		healAmount = remaining
+	}
+	cost := cfg.PricePerHP * healAmount
+	if credits < cost {
+		return fmt.Errorf("you need %d credits but only have %d", cost, credits)
+	}
+	return nil
+}
+
+// ApplyHeal computes the result of healing a player, capped at availableCapacity.
+// Returns (newHP, creditCost, newCapacityUsed).
+//
+// Precondition: cfg and state must not be nil; currentHP <= maxHP; availableCapacity >= 0.
+// Postcondition: newHP <= maxHP; creditCost = cfg.PricePerHP × healAmount;
+// newCapacityUsed = state.CapacityUsed + healAmount.
+func ApplyHeal(cfg *HealerConfig, state *HealerRuntimeState, currentHP, maxHP, availableCapacity int) (newHP, creditCost, newCapacityUsed int) {
+	missing := maxHP - currentHP
+	healAmount := missing
+	if healAmount > availableCapacity {
+		healAmount = availableCapacity
+	}
+	cost := cfg.PricePerHP * healAmount
+	return currentHP + healAmount, cost, state.CapacityUsed + healAmount
+}
+
 // ---- Quest Giver ----
 
 // QuestGiverConfig holds the static configuration for a quest giver NPC.
