@@ -331,7 +331,7 @@ features:
     status: planned
     priority: 310
     category: world
-    file: docs/features/non-combat-npcs.md
+    file: docs/features/non-combat-npcs-all-zones.md
     effort: "M"  # one lore-appropriate instance of each NPC type per zone in a Safe room; content/data work per zone
     dependencies:
       - non-combat-npcs
