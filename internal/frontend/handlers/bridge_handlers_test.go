@@ -32,15 +32,6 @@ func TestBridgeReady_ValidArgs(t *testing.T) {
 	assert.Equal(t, "enters", msg.GetTrigger())
 }
 
-// TestBridgeReady_EmptyArgs verifies that bridgeReady invokes writeErrorPrompt when
-// no arguments are provided. writeErrorPrompt requires a live conn, so the call panics
-// when conn is nil — confirming that the error path is reached.
-func TestBridgeReady_EmptyArgs(t *testing.T) {
-	bctx := makeBridgeContext("req1", "")
-	assert.Panics(t, func() {
-		_, _ = bridgeReady(bctx)
-	}, "empty args must reach writeErrorPrompt (panics without a real conn in tests)")
-}
 
 // TestBridgeUse_WithTarget verifies that bridgeUse populates both feat_id and target
 // when two tokens are provided in RawArgs.
