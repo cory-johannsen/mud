@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -131,4 +132,63 @@ func TestHandleSetJob_NotHeld(t *testing.T) {
 	evt, err := svc.handleSetJob(uid, &gamev1.SetJobRequest{JobId: "infiltrator"})
 	require.NoError(t, err)
 	assert.Contains(t, evt.GetMessage().Content, "not trained")
+}
+
+// TestProperty_HandleTrainJob_CurrencyNeverNegative verifies that training a job
+// never results in negative currency for the player.
+//
+// Precondition: player has some currency (0 to 1000).
+// Postcondition: currency is never negative after any train attempt.
+func TestProperty_HandleTrainJob_CurrencyNeverNegative(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, uid := newJobTrainerTestServer(t)
+		sess, _ := svc.sessions.GetPlayer(uid)
+		sess.Currency = rapid.IntRange(0, 1000).Draw(rt, "currency")
+		_, _ = svc.handleTrainJob(uid, &gamev1.TrainJobRequest{NpcName: "Rio Wrench", JobId: "scavenger"})
+		sess, _ = svc.sessions.GetPlayer(uid)
+		if sess.Currency < 0 {
+			rt.Fatalf("currency went negative: %d", sess.Currency)
+		}
+	})
+}
+
+// TestProperty_HandleTrainJob_ActiveJobAlwaysInJobs verifies that after any training
+// session, ActiveJobID is always a key present in sess.Jobs (or empty).
+//
+// Precondition: player may or may not already have jobs.
+// Postcondition: ActiveJobID is either empty or a valid key in sess.Jobs.
+func TestProperty_HandleTrainJob_ActiveJobAlwaysInJobs(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, uid := newJobTrainerTestServer(t)
+		sess, _ := svc.sessions.GetPlayer(uid)
+		sess.Currency = 1000
+		_, _ = svc.handleTrainJob(uid, &gamev1.TrainJobRequest{NpcName: "Rio Wrench", JobId: "scavenger"})
+		sess, _ = svc.sessions.GetPlayer(uid)
+		if sess.ActiveJobID != "" {
+			if _, ok := sess.Jobs[sess.ActiveJobID]; !ok {
+				rt.Fatalf("ActiveJobID %q not in Jobs map %v", sess.ActiveJobID, sess.Jobs)
+			}
+		}
+	})
+}
+
+// TestProperty_HandleListJobs_NeverPanics verifies handleListJobs never panics
+// for any session state.
+//
+// Precondition: player may have any combination of jobs.
+// Postcondition: returns without panic.
+func TestProperty_HandleListJobs_NeverPanics(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, uid := newJobTrainerTestServer(t)
+		sess, _ := svc.sessions.GetPlayer(uid)
+		numJobs := rapid.IntRange(0, 5).Draw(rt, "numJobs")
+		jobIDs := []string{"scavenger", "infiltrator", "bruiser", "medic", "tech"}
+		for i := 0; i < numJobs && i < len(jobIDs); i++ {
+			sess.Jobs[jobIDs[i]] = rapid.IntRange(1, 10).Draw(rt, "level")
+		}
+		if numJobs > 0 {
+			sess.ActiveJobID = jobIDs[0]
+		}
+		_, _ = svc.handleListJobs(uid, &gamev1.ListJobsRequest{})
+	})
 }

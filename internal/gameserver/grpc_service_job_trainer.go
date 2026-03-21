@@ -145,7 +145,7 @@ func formatJobList(jobs map[string]int, activeID string) string {
 	for _, id := range ids {
 		entry := fmt.Sprintf("%s(L%d)", id, jobs[id])
 		if id == activeID {
-			entry += "*"
+			entry += " [active]"
 		}
 		parts = append(parts, entry)
 	}
