@@ -270,13 +270,15 @@ func (h *CombatHandler) CombatantsInRoom(roomID string) []*combat.Combatant {
 }
 
 // InitiateGuardCombat finds guard NPCs in the player's current room and starts
-// combat against the player. wantedLevel distinguishes detain (2) from kill (3-4).
-// If no guard NPCs are present in the room, this is a no-op.
+// combat against the player. Only guards whose WantedThreshold (default 2) is
+// <= wantedLevel are engaged. wantedLevel distinguishes detain (2) from kill (3-4).
+// If no eligible guard NPCs are present in the room, this is a no-op.
 //
 // Precondition: uid MUST be a valid player UID; wantedLevel MUST be in [2, 4].
-// Postcondition: if the player session exists and guard NPCs are present in the room,
-// broadcastFn is called with a narrative CombatEvent and h.Attack is invoked for each guard.
-// If the player session is not found or no guards are present, this is a no-op.
+// Postcondition: if the player session exists and eligible guard NPCs are present,
+// broadcastFn is called with a narrative CombatEvent and h.Attack is invoked for each
+// eligible guard. If the player session is not found or no eligible guards are present,
+// this is a no-op.
 func (h *CombatHandler) InitiateGuardCombat(uid, zoneID string, wantedLevel int) {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
@@ -285,7 +287,14 @@ func (h *CombatHandler) InitiateGuardCombat(uid, zoneID string, wantedLevel int)
 	npcs := h.npcMgr.InstancesInRoom(sess.RoomID)
 	var guardIDs []string
 	for _, n := range npcs {
-		if n.Type == "guard" {
+		if n.NPCType != "guard" {
+			continue
+		}
+		threshold := 2
+		if tmpl := h.npcMgr.TemplateByID(n.TemplateID); tmpl != nil && tmpl.Guard != nil && tmpl.Guard.WantedThreshold > 0 {
+			threshold = tmpl.Guard.WantedThreshold
+		}
+		if wantedLevel >= threshold {
 			guardIDs = append(guardIDs, n.ID)
 		}
 	}

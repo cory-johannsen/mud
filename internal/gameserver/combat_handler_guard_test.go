@@ -11,12 +11,13 @@ import (
 func spawnTypedNPC(t *testing.T, npcMgr *npc.Manager, roomID, npcType string) *npc.Instance {
 	t.Helper()
 	tmpl := &npc.Template{
-		ID:         npcType + "-tmpl",
-		Name:       "Guard",
-		Type:       npcType,
-		Level:      1,
-		MaxHP:      20,
-		AC:         13,
+		ID:      npcType + "-tmpl",
+		Name:    "Guard",
+		Type:    npcType,
+		NPCType: npcType,
+		Level:   1,
+		MaxHP:   20,
+		AC:      13,
 		Awareness: 2,
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)
@@ -103,5 +104,95 @@ func TestInitiateGuardCombat_UnknownPlayer_NoOp(t *testing.T) {
 
 	if broadcastCalled {
 		t.Fatal("expected broadcastFn NOT to be called for unknown player; it was called")
+	}
+}
+
+// TestInitiateGuardCombat_RespectsWantedThreshold verifies that a guard with
+// WantedThreshold=3 does NOT engage a player with WantedLevel=2.
+func TestInitiateGuardCombat_RespectsWantedThreshold(t *testing.T) {
+	var broadcastCalled bool
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {
+		broadcastCalled = true
+	})
+
+	const roomID = "room-guard-thresh-1"
+	tmpl := &npc.Template{
+		ID:      "strict_guard",
+		Name:    "Strict Guard",
+		NPCType: "guard",
+		Level:   3,
+		MaxHP:   40,
+		AC:      14,
+		Guard:   &npc.GuardConfig{WantedThreshold: 3},
+	}
+	_, err := h.npcMgr.Spawn(tmpl, roomID)
+	if err != nil {
+		t.Fatalf("Spawn: %v", err)
+	}
+	addTestPlayerNamed(t, h.sessions, "player-thresh-1", roomID, "Tester")
+
+	h.InitiateGuardCombat("player-thresh-1", "zone-1", 2) // below threshold
+	if broadcastCalled {
+		t.Fatal("guard with WantedThreshold=3 must NOT engage at wantedLevel=2")
+	}
+}
+
+// TestInitiateGuardCombat_EngagesAtThreshold verifies a guard with WantedThreshold=3
+// engages at wantedLevel=3.
+func TestInitiateGuardCombat_EngagesAtThreshold(t *testing.T) {
+	var broadcastCalled bool
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {
+		broadcastCalled = true
+	})
+
+	const roomID = "room-guard-thresh-2"
+	tmpl := &npc.Template{
+		ID:      "strict_guard2",
+		Name:    "Strict Guard 2",
+		NPCType: "guard",
+		Level:   3,
+		MaxHP:   40,
+		AC:      14,
+		Guard:   &npc.GuardConfig{WantedThreshold: 3},
+	}
+	_, err := h.npcMgr.Spawn(tmpl, roomID)
+	if err != nil {
+		t.Fatalf("Spawn: %v", err)
+	}
+	addTestPlayerNamed(t, h.sessions, "player-thresh-2", roomID, "Tester2")
+
+	h.InitiateGuardCombat("player-thresh-2", "zone-1", 3) // at threshold
+	if !broadcastCalled {
+		t.Fatal("guard with WantedThreshold=3 must engage at wantedLevel=3")
+	}
+}
+
+// TestInitiateGuardCombat_DefaultThreshold verifies a guard with WantedThreshold=0
+// uses the default threshold of 2.
+func TestInitiateGuardCombat_DefaultThreshold(t *testing.T) {
+	var broadcastCalled bool
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {
+		broadcastCalled = true
+	})
+
+	const roomID = "room-guard-thresh-3"
+	tmpl := &npc.Template{
+		ID:      "default_guard",
+		Name:    "Default Guard",
+		NPCType: "guard",
+		Level:   2,
+		MaxHP:   30,
+		AC:      12,
+		Guard:   &npc.GuardConfig{WantedThreshold: 0}, // default → 2
+	}
+	_, err := h.npcMgr.Spawn(tmpl, roomID)
+	if err != nil {
+		t.Fatalf("Spawn: %v", err)
+	}
+	addTestPlayerNamed(t, h.sessions, "player-thresh-3", roomID, "Tester3")
+
+	h.InitiateGuardCombat("player-thresh-3", "zone-1", 2) // should engage (default threshold = 2)
+	if !broadcastCalled {
+		t.Fatal("guard with default WantedThreshold must engage at wantedLevel=2")
 	}
 }

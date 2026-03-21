@@ -1752,6 +1752,14 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		wantedLevel := sess.WantedLevel[newRoom.ZoneID]
 		if wantedLevel >= 2 && s.combatH != nil {
 			s.combatH.InitiateGuardCombat(uid, newRoom.ZoneID, wantedLevel)
+		} else if wantedLevel == 1 && s.npcMgr != nil {
+			// WantedLevel 1: guards watch and warn without engaging.
+			for _, inst := range s.npcMgr.InstancesInRoom(newRoom.ID) {
+				if inst.NPCType == "guard" {
+					s.pushMessageToUID(uid, fmt.Sprintf("%s eyes you suspiciously. \"We're watching you.\"", inst.Name()))
+					break
+				}
+			}
 		}
 	}
 
