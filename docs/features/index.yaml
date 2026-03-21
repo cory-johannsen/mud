@@ -1,7 +1,7 @@
 features:
   - slug: npc-awareness
     name: NPC Awareness Terminology Alignment
-    status: planned
+    status: complete
     priority: 5
     category: world
     file: docs/features/npc-awareness.md
