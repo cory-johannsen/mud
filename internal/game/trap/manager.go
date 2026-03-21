@@ -74,6 +74,10 @@ func (m *TrapManager) AddTrap(instanceID, templateID string, armed bool) {
 // GetTrap returns the instance state for the given instanceID.
 //
 // Postcondition: Returns (state, true) if found; (nil, false) otherwise.
+// The returned pointer is live; callers that read fields after this method returns
+// must not race with concurrent Disarm or AddTrap calls. Mutation via the
+// returned pointer (e.g. state.BeingDisarmed = true) is the caller's responsibility
+// to synchronize externally if needed.
 func (m *TrapManager) GetTrap(instanceID string) (*TrapInstanceState, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -81,11 +85,11 @@ func (m *TrapManager) GetTrap(instanceID string) (*TrapInstanceState, bool) {
 	return s, ok
 }
 
-// Disarm permanently disarms and removes a one-shot trap, or marks an auto/manual
-// trap as disarmed (Armed=false) in place.
+// Disarm marks a trap as disarmed (Armed=false) regardless of reset mode.
+// One-shot lifecycle removal is handled separately by the PlaceTraps reset flow.
 //
-// Precondition: instanceID must reference an existing trap.
-// Postcondition: Armed is false; BeingDisarmed is cleared.
+// Precondition: instanceID should reference an existing trap (no-op if not found).
+// Postcondition: Armed is false; BeingDisarmed is cleared. The trap entry remains in the map.
 func (m *TrapManager) Disarm(instanceID string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
