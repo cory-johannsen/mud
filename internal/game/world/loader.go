@@ -96,12 +96,6 @@ type yamlExit struct {
 	Hidden    bool   `yaml:"hidden"`
 }
 
-// LoadZone reads and validates a single zone YAML file.
-// It is an alias for LoadZoneFromFile.
-func LoadZone(path string) (*Zone, error) {
-	return LoadZoneFromFile(path)
-}
-
 // LoadZoneFromFile reads and validates a single zone YAML file.
 //
 // Precondition: path must point to a valid YAML zone file.
@@ -249,8 +243,8 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 				Immovable:    e.Immovable,
 				Script:       e.Script,
 				SkillChecks:  e.SkillChecks,
+				TrapTemplate: e.TrapTemplate,
 			}
-			eq.TrapTemplate = e.TrapTemplate
 			room.Equipment = append(room.Equipment, eq)
 		}
 		for _, yt := range yr.Traps {

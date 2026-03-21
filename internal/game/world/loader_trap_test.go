@@ -46,9 +46,9 @@ func TestLoadZone_WithTraps(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "zone.yaml"), []byte(trapZoneYAML), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	zone, err := world.LoadZone(filepath.Join(dir, "zone.yaml"))
+	zone, err := world.LoadZoneFromFile(filepath.Join(dir, "zone.yaml"))
 	if err != nil {
-		t.Fatalf("LoadZone: %v", err)
+		t.Fatalf("LoadZoneFromFile: %v", err)
 	}
 	room, ok := zone.Rooms["room1"]
 	if !ok {
@@ -69,6 +69,9 @@ func TestLoadZone_WithTraps(t *testing.T) {
 	if zone.TrapProbabilities.RoomTrapChance == nil || *zone.TrapProbabilities.RoomTrapChance != 0.4 {
 		t.Errorf("RoomTrapChance: expected 0.4")
 	}
+	if zone.TrapProbabilities.CoverTrapChance == nil || *zone.TrapProbabilities.CoverTrapChance != 0.6 {
+		t.Errorf("CoverTrapChance: expected 0.6")
+	}
 	if len(zone.TrapProbabilities.TrapPool) != 2 {
 		t.Errorf("TrapPool: expected 2 entries, got %d", len(zone.TrapProbabilities.TrapPool))
 	}
@@ -79,9 +82,9 @@ func TestLoadZone_EquipmentTrapTemplate(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "zone.yaml"), []byte(trapZoneYAML), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	zone, err := world.LoadZone(filepath.Join(dir, "zone.yaml"))
+	zone, err := world.LoadZoneFromFile(filepath.Join(dir, "zone.yaml"))
 	if err != nil {
-		t.Fatalf("LoadZone: %v", err)
+		t.Fatalf("LoadZoneFromFile: %v", err)
 	}
 	room := zone.Rooms["room1"]
 	if len(room.Equipment) == 0 {

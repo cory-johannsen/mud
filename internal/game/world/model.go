@@ -195,7 +195,7 @@ type Room struct {
 	CoverTrapChance *int `yaml:"cover_trap_chance,omitempty"`
 	// Traps lists statically declared traps for this room.
 	// Procedurally placed traps are managed by the TrapManager at runtime.
-	Traps []RoomTrapConfig
+	Traps []RoomTrapConfig `yaml:"traps,omitempty"`
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.
