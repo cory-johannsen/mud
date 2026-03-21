@@ -92,6 +92,28 @@ type Template struct {
 	// Disposition sets the initial NPC disposition: "hostile","wary","neutral","friendly".
 	// Empty string defaults to "hostile" at spawn.
 	Disposition string `yaml:"disposition"`
+
+	// NPCType classifies the NPC's role.
+	// Valid values: "combat", "merchant", "guard", "healer", "quest_giver",
+	// "hireling", "banker", "job_trainer", "crafter".
+	// Defaults to "combat" at load time if absent (REQ-NPC-1).
+	NPCType string `yaml:"npc_type"`
+
+	// Personality names the HTN preset governing non-combat flee/cower behavior.
+	// Valid values: "cowardly" (always flee), "brave" (always cower),
+	// "neutral" (use type default), "opportunistic" (use type default).
+	// Empty string also falls through to the type default.
+	Personality string `yaml:"personality"`
+
+	// Type-specific config — at most one is non-nil for a given NPC.
+	Merchant   *MerchantConfig   `yaml:"merchant,omitempty"`
+	Guard      *GuardConfig      `yaml:"guard,omitempty"`
+	Healer     *HealerConfig     `yaml:"healer,omitempty"`
+	QuestGiver *QuestGiverConfig `yaml:"quest_giver,omitempty"`
+	Hireling   *HirelingConfig   `yaml:"hireling,omitempty"`
+	Banker     *BankerConfig     `yaml:"banker,omitempty"`
+	JobTrainer *JobTrainerConfig `yaml:"job_trainer,omitempty"`
+	Crafter    *CrafterConfig    `yaml:"crafter,omitempty"`
 }
 
 // Validate checks that the template satisfies basic invariants.
@@ -136,6 +158,65 @@ func (t *Template) Validate() error {
 			return fmt.Errorf("npc template %q: %w", t.ID, err)
 		}
 	}
+
+	// REQ-NPC-1: default NPCType to "combat".
+	if t.NPCType == "" {
+		t.NPCType = "combat"
+	}
+
+	// Validate NPCType value and corresponding config struct (REQ-NPC-2).
+	validTypes := map[string]bool{
+		"combat": true, "merchant": true, "guard": true, "healer": true,
+		"quest_giver": true, "hireling": true, "banker": true,
+		"job_trainer": true, "crafter": true,
+	}
+	if !validTypes[t.NPCType] {
+		return fmt.Errorf("npc template %q: unknown npc_type %q", t.ID, t.NPCType)
+	}
+
+	switch t.NPCType {
+	case "combat":
+		// no config struct required
+	case "merchant":
+		if t.Merchant == nil {
+			return fmt.Errorf("npc template %q: npc_type 'merchant' requires a merchant: config block", t.ID)
+		}
+		if err := t.Merchant.ReplenishRate.Validate(); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
+	case "guard":
+		if t.Guard == nil {
+			return fmt.Errorf("npc template %q: npc_type 'guard' requires a guard: config block", t.ID)
+		}
+	case "healer":
+		if t.Healer == nil {
+			return fmt.Errorf("npc template %q: npc_type 'healer' requires a healer: config block", t.ID)
+		}
+	case "quest_giver":
+		if t.QuestGiver == nil {
+			return fmt.Errorf("npc template %q: npc_type 'quest_giver' requires a quest_giver: config block", t.ID)
+		}
+		if err := t.QuestGiver.Validate(); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
+	case "hireling":
+		if t.Hireling == nil {
+			return fmt.Errorf("npc template %q: npc_type 'hireling' requires a hireling: config block", t.ID)
+		}
+	case "banker":
+		if t.Banker == nil {
+			return fmt.Errorf("npc template %q: npc_type 'banker' requires a banker: config block", t.ID)
+		}
+	case "job_trainer":
+		if t.JobTrainer == nil {
+			return fmt.Errorf("npc template %q: npc_type 'job_trainer' requires a job_trainer: config block", t.ID)
+		}
+	case "crafter":
+		if t.Crafter == nil {
+			return fmt.Errorf("npc template %q: npc_type 'crafter' requires an explicit crafter: {} config block", t.ID)
+		}
+	}
+
 	return nil
 }
 

@@ -450,3 +450,133 @@ func TestInstance_SaveFields_CopiedFromTemplate(t *testing.T) {
 	assert.Equal(t, "expert", inst.HustleRank)
 	assert.Equal(t, "master", inst.CoolRank)
 }
+
+func TestTemplate_DefaultNPCType(t *testing.T) {
+	data := []byte(`id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 12
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, "combat", tmpl.NPCType, "missing npc_type must default to 'combat'")
+}
+
+func TestTemplate_MerchantRequiresMerchantConfig(t *testing.T) {
+	data := []byte(`id: test_merchant
+name: Test Merchant
+level: 1
+max_hp: 10
+ac: 12
+npc_type: merchant
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "merchant npc_type without merchant config must error")
+}
+
+func TestTemplate_MerchantWithConfigLoads(t *testing.T) {
+	data := []byte(`id: test_merchant
+name: Test Merchant
+level: 1
+max_hp: 10
+ac: 12
+npc_type: merchant
+merchant:
+  merchant_type: consumables
+  sell_margin: 1.2
+  buy_margin: 0.6
+  budget: 500
+  replenish_rate:
+    min_hours: 4
+    max_hours: 8
+    stock_refill: 1
+    budget_refill: 200
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, "merchant", tmpl.NPCType)
+	require.NotNil(t, tmpl.Merchant)
+	assert.Equal(t, "consumables", tmpl.Merchant.MerchantType)
+}
+
+func TestTemplate_QuestGiverEmptyDialogErrors(t *testing.T) {
+	data := []byte(`id: test_qg
+name: Test Quest Giver
+level: 1
+max_hp: 10
+ac: 12
+npc_type: quest_giver
+quest_giver:
+  placeholder_dialog: []
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "quest_giver with empty placeholder_dialog must error")
+}
+
+func TestTemplate_CrafterRequiresExplicitConfig(t *testing.T) {
+	data := []byte(`id: test_crafter
+name: Test Crafter
+level: 1
+max_hp: 10
+ac: 12
+npc_type: crafter
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "crafter npc_type without explicit crafter: {} must error")
+}
+
+func TestTemplate_CrafterWithEmptyBlockLoads(t *testing.T) {
+	data := []byte(`id: test_crafter
+name: Test Crafter
+level: 1
+max_hp: 10
+ac: 12
+npc_type: crafter
+crafter: {}
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, "crafter", tmpl.NPCType)
+	require.NotNil(t, tmpl.Crafter)
+}
+
+func TestTemplate_UnknownNPCTypeErrors(t *testing.T) {
+	data := []byte(`id: test_bad
+name: Bad NPC
+level: 1
+max_hp: 10
+ac: 12
+npc_type: wizard
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "unknown npc_type must error")
+}
+
+func TestTemplate_PersonalityPreserved(t *testing.T) {
+	data := []byte(`id: test_guard
+name: Test Guard
+level: 2
+max_hp: 20
+ac: 14
+npc_type: guard
+personality: brave
+guard:
+  wanted_threshold: 2
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, "brave", tmpl.Personality, "personality must be preserved from YAML")
+}
+
+// TestProperty_AllExistingNPCTemplatesStillLoad verifies that adding NPCType/Validate changes
+// does not break any existing NPC YAML file. Reads all *.yaml in content/npcs/.
+func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
+	templates, err := npc.LoadTemplates("../../../content/npcs")
+	require.NoError(t, err, "all existing NPC templates must still load after Validate() changes")
+	assert.NotEmpty(t, templates, "expected at least one template in content/npcs/")
+	for _, tmpl := range templates {
+		assert.Equal(t, "combat", tmpl.NPCType,
+			"existing NPC %q must default to npc_type 'combat'", tmpl.ID)
+	}
+}
