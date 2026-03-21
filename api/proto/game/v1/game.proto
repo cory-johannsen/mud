@@ -101,6 +101,13 @@ message ClientMessage {
     DisarmTrapRequest disarm_trap = 84;
     DeployTrapRequest deploy_trap = 85;
     ReadyRequest ready = 86;
+    BrowseRequest        browse         = 87;
+    BuyRequest           buy            = 88;
+    SellRequest          sell           = 89;
+    NegotiateRequest     negotiate      = 90;
+    StashDepositRequest  stash_deposit  = 91;
+    StashWithdrawRequest stash_withdraw = 92;
+    StashBalanceRequest  stash_balance  = 93;
   }
 }
 
@@ -125,6 +132,49 @@ message DisarmTrapRequest {
 message ReadyRequest {
   string action = 1;   // "strike" | "step" | "shield"
   string trigger = 2;  // "enters" | "attacks" | "ally"
+}
+
+// BrowseRequest lists a merchant's inventory with current prices and stock.
+message BrowseRequest {
+  string npc_name = 1;
+}
+
+// BuyRequest purchases an item from a merchant.
+message BuyRequest {
+  string npc_name = 1;
+  string item_id  = 2;
+  int32  quantity = 3;
+}
+
+// SellRequest sells an item to a merchant.
+message SellRequest {
+  string npc_name = 1;
+  string item_id  = 2;
+  int32  quantity = 3;
+}
+
+// NegotiateRequest attempts a skill check to earn a session-scoped price modifier.
+message NegotiateRequest {
+  string npc_name = 1;
+  // skill is "smooth_talk" or "grift". Defaults to "smooth_talk" if empty.
+  string skill    = 2;
+}
+
+// StashDepositRequest deposits carried credits into the global stash.
+message StashDepositRequest {
+  string npc_name = 1;
+  int32  amount   = 2;
+}
+
+// StashWithdrawRequest withdraws from the global stash to carried credits.
+message StashWithdrawRequest {
+  string npc_name = 1;
+  int32  amount   = 2;
+}
+
+// StashBalanceRequest queries stash balance and current exchange rate.
+message StashBalanceRequest {
+  string npc_name = 1;
 }
 
 // DeployTrapRequest asks the server to arm a trap item at the player's current position.
