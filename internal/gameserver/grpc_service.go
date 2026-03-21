@@ -4329,28 +4329,7 @@ func (s *GameServiceServer) handleUseEquipment(uid, instanceID string) (*gamev1.
 	}
 	// Interaction trap: fire if this equipment has an armed interaction-trigger trap.
 	if s.trapMgr != nil && s.trapTemplates != nil && roomOk {
-		for i := range room.Equipment {
-			eq := &room.Equipment[i]
-			if eq.TrapTemplate == "" || eq.ItemID != instanceID {
-				continue
-			}
-			tmpl, ok := s.trapTemplates[eq.TrapTemplate]
-			if !ok || tmpl.Trigger != trap.TriggerInteraction {
-				continue
-			}
-			zoneID2 := room.ZoneID
-			if zone2, ok2 := s.world.GetZone(zoneID2); ok2 {
-				dangerLevel := room.DangerLevel
-				if dangerLevel == "" {
-					dangerLevel = zone2.DangerLevel
-				}
-				iid := trap.TrapInstanceID(zone2.ID, room.ID, "equip", eq.Description)
-				if state, exists := s.trapMgr.GetTrap(iid); exists && state.Armed {
-					s.fireTrap(uid, sess, tmpl, iid, dangerLevel, false)
-				}
-			}
-			break
-		}
+		s.checkInteractionTrap(uid, sess, room, instanceID)
 	}
 	return messageEvent(msg), nil
 }

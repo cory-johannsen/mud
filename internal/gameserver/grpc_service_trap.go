@@ -205,6 +205,10 @@ func (s *GameServiceServer) checkPressurePlateTraps(uid string, sess *session.Pl
 	if s.trapMgr == nil || s.trapTemplates == nil {
 		return
 	}
+	// Only fire during combat — callers must ensure this, but guard defensively.
+	if sess.Status != statusInCombat {
+		return
+	}
 	zone, ok := s.world.GetZone(room.ZoneID)
 	if !ok {
 		return
@@ -235,7 +239,8 @@ func (s *GameServiceServer) checkPressurePlateTraps(uid string, sess *session.Pl
 // traps on cover equipment when an attack misses due to cover (crossfire mechanic).
 //
 // Precondition: s.combatH must be non-nil; call after NewGameServiceServer.
-// Postcondition: CombatHandler will call s.checkCoverCrossfireTrap on every cover hit.
+// Postcondition: CombatHandler will fire an armed trap on cover equipment when
+//   an attack misses due to cover and the cover item has TrapTemplate set.
 func (s *GameServiceServer) WireCoverCrossfireTrap() {
 	if s.combatH == nil {
 		return
@@ -280,4 +285,39 @@ func (s *GameServiceServer) WireCoverCrossfireTrap() {
 			break
 		}
 	})
+}
+
+// checkInteractionTrap fires an armed interaction-trigger trap on the given equipment item.
+//
+// Precondition: s.trapMgr and s.trapTemplates must be non-nil; room and uid must be valid.
+// Postcondition: Fires the trap if armed and triggered by interaction.
+func (s *GameServiceServer) checkInteractionTrap(uid string, sess *session.PlayerSession, room *world.Room, equipItemID string) {
+	if s.trapMgr == nil || s.trapTemplates == nil {
+		return
+	}
+	zone, ok := s.world.GetZone(room.ZoneID)
+	if !ok {
+		return
+	}
+	dangerLevel := room.DangerLevel
+	if dangerLevel == "" {
+		dangerLevel = zone.DangerLevel
+	}
+	for i := range room.Equipment {
+		eq := &room.Equipment[i]
+		if eq.ItemID != equipItemID || eq.TrapTemplate == "" {
+			continue
+		}
+		tmpl, ok := s.trapTemplates[eq.TrapTemplate]
+		if !ok || tmpl.Trigger != trap.TriggerInteraction {
+			continue
+		}
+		instanceID := trap.TrapInstanceID(zone.ID, room.ID, "equip", eq.Description)
+		state, stateOk := s.trapMgr.GetTrap(instanceID)
+		if !stateOk || !state.Armed {
+			continue
+		}
+		s.fireTrap(uid, sess, tmpl, instanceID, dangerLevel, false)
+		break
+	}
 }
