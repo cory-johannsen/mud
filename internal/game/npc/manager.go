@@ -12,6 +12,7 @@ import (
 type Manager struct {
 	mu              sync.RWMutex
 	instances       map[string]*Instance       // instanceID → Instance
+	templates       map[string]*Template       // templateID → Template
 	roomSets        map[string]map[string]bool // roomID → set of instanceIDs
 	counter         atomic.Uint64
 	armorACResolver func(string) int
@@ -21,6 +22,7 @@ type Manager struct {
 func NewManager() *Manager {
 	return &Manager{
 		instances: make(map[string]*Instance),
+		templates: make(map[string]*Template),
 		roomSets:  make(map[string]map[string]bool),
 	}
 }
@@ -81,6 +83,7 @@ func (m *Manager) Spawn(tmpl *Template, roomID string) (*Instance, error) {
 	}
 
 	m.instances[id] = inst
+	m.templates[tmpl.ID] = tmpl
 	if m.roomSets[roomID] == nil {
 		m.roomSets[roomID] = make(map[string]bool)
 	}
@@ -206,6 +209,26 @@ func (m *Manager) Move(id, newRoomID string) error {
 	m.roomSets[newRoomID][id] = true
 
 	return nil
+}
+
+// TemplateByID returns the Template registered under id, or nil if not found.
+//
+// Precondition: id must be non-empty.
+// Postcondition: Returns nil if id is not registered.
+func (m *Manager) TemplateByID(id string) *Template {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.templates[id]
+}
+
+// InstanceByID returns the live Instance with the given ID, or nil if not found.
+//
+// Precondition: id must be non-empty.
+// Postcondition: Returns nil if id is not registered.
+func (m *Manager) InstanceByID(id string) *Instance {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.instances[id]
 }
 
 // FindInRoom returns the first instance in roomID whose Name has target as a
