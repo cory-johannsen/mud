@@ -1533,6 +1533,20 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleUngroup(uid, p.Ungroup)
 	case *gamev1.ClientMessage_Kick:
 		return s.handleKick(uid, p.Kick)
+	case *gamev1.ClientMessage_Browse:
+		return s.handleBrowse(uid, p.Browse)
+	case *gamev1.ClientMessage_Buy:
+		return s.handleBuy(uid, p.Buy)
+	case *gamev1.ClientMessage_Sell:
+		return s.handleSell(uid, p.Sell)
+	case *gamev1.ClientMessage_Negotiate:
+		return s.handleNegotiate(uid, p.Negotiate)
+	case *gamev1.ClientMessage_StashDeposit:
+		return s.handleStashDeposit(uid, p.StashDeposit)
+	case *gamev1.ClientMessage_StashWithdraw:
+		return s.handleStashWithdraw(uid, p.StashWithdraw)
+	case *gamev1.ClientMessage_StashBalance:
+		return s.handleStashBalance(uid, p.StashBalance)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1765,6 +1779,9 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 
 	// Combat join trigger — prompt the player if entering a room with active combat.
 	s.notifyCombatJoinIfEligible(sess, result.View.RoomId)
+
+	// Clear any active negotiate state: modifiers must not persist across rooms. REQ-NPC-5a.
+	s.clearNegotiateState(sess)
 
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: result.View},

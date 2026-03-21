@@ -166,6 +166,20 @@ func TestHandleNegotiate_CoweringMerchantBlocked(t *testing.T) {
 	assert.Contains(t, evt.GetMessage().Content, "cower")
 }
 
+func TestNegotiateModifier_ClearedOnRoomTransition(t *testing.T) {
+	svc, uid, _ := newMerchantTestServer(t)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.NegotiateModifier = 0.2
+	sess.NegotiatedMerchantID = "some-merchant-id"
+
+	svc.clearNegotiateState(sess)
+
+	assert.Equal(t, 0.0, sess.NegotiateModifier)
+	assert.Equal(t, "", sess.NegotiatedMerchantID)
+}
+
 func TestProperty_HandleBrowse_NeverPanics(t *testing.T) {
 	svc, uid, _ := newMerchantTestServer(t)
 	rapid.Check(t, func(rt *rapid.T) {
