@@ -3,10 +3,12 @@ package gameserver
 import (
 	"testing"
 
+	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/trap"
 	"github.com/cory-johannsen/mud/internal/game/world"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"go.uber.org/zap/zaptest"
 )
 
@@ -179,4 +181,142 @@ func TestCheckInteractionTrap_NoFireWrongTrigger(t *testing.T) {
 	if !state.Armed {
 		t.Error("pressure plate trap should NOT fire via checkInteractionTrap (wrong trigger type)")
 	}
+}
+
+// makeTrapSvcWithDisarmTemplates returns a GameServiceServer with templates suitable
+// for disarm testing: a trap with DisableDC=15 and a mine for blast testing.
+// The world has zone "test" / room "room_a" with Equipment pre-populated for the bear trap.
+func makeTrapSvcWithDisarmTemplates(t *testing.T) (*GameServiceServer, *trap.TrapManager) {
+	t.Helper()
+	zone := &world.Zone{
+		ID:          "test",
+		Name:        "Test",
+		Description: "Test zone",
+		StartRoom:   "room_a",
+		Rooms: map[string]*world.Room{
+			"room_a": {
+				ID:          "room_a",
+				ZoneID:      "test",
+				Title:       "Room A",
+				Description: "The first room.",
+				Equipment: []world.RoomEquipmentConfig{
+					{ItemID: "cabinet_01", Description: "Metal Cabinet", TrapTemplate: "bear_trap_disarm"},
+				},
+				Properties: map[string]string{},
+			},
+		},
+	}
+	worldMgr, err := world.NewManager([]*world.Zone{zone})
+	if err != nil {
+		t.Fatalf("failed to create world manager: %v", err)
+	}
+	sessMgr := session.NewManager()
+	mgr := trap.NewTrapManager()
+	tmplMap := map[string]*trap.TrapTemplate{
+		"bear_trap_disarm": {
+			ID:        "bear_trap_disarm",
+			Name:      "Bear Trap",
+			Trigger:   trap.TriggerInteraction,
+			DisableDC: 15,
+			Payload:   &trap.TrapPayload{Type: "bear_trap"},
+		},
+		"mine_disarm": {
+			ID:        "mine_disarm",
+			Name:      "Mine",
+			Trigger:   trap.TriggerEntry,
+			DisableDC: 10,
+			Payload:   &trap.TrapPayload{Type: "mine"},
+		},
+	}
+	svc := NewGameServiceServer(
+		worldMgr, sessMgr,
+		nil,
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		zaptest.NewLogger(t),
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		mgr, tmplMap,
+	)
+	return svc, mgr
+}
+
+// TestHandleDisarmTrap_SuccessPath exercises the success branch of handleDisarmTrap.
+// Uses a fixed dice source (always rolls 20) so total >> DisableDC.
+//
+// Precondition: trap is armed and detected; dice always roll 20.
+// Postcondition: trap Armed=false after successful disarm.
+func TestHandleDisarmTrap_SuccessPath(t *testing.T) {
+	svc, mgr := makeTrapSvcWithDisarmTemplates(t)
+
+	// Wire a fixed-high dice so the roll always succeeds (1d20 → 20 >= DC 15).
+	svc.dice = dice.NewLoggedRoller(&fixedDiceSource{val: 19}, zaptest.NewLogger(t))
+
+	instanceID := trap.TrapInstanceID("test", "room_a", "equip", "Metal Cabinet")
+	mgr.AddTrap(instanceID, "bear_trap_disarm", true)
+	mgr.MarkDetected("p1", instanceID)
+
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "p1", Username: "p1", CharName: "p1", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ev, err := svc.handleDisarmTrap("p1", &gamev1.DisarmTrapRequest{TrapName: "bear trap"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Verify trap is now disarmed.
+	state, ok := mgr.GetTrap(instanceID)
+	if !ok {
+		t.Fatal("trap should still exist after successful disarm")
+	}
+	if state.Armed {
+		t.Error("expected trap Armed=false after successful disarm")
+	}
+	_ = ev
+}
+
+// TestHandleDisarmTrap_NotDetected verifies that a trap the player hasn't detected
+// cannot be disarmed.
+//
+// Precondition: trap is armed but NOT detected by the player.
+// Postcondition: trap Armed=true (unchanged); response indicates trap not found.
+func TestHandleDisarmTrap_NotDetected(t *testing.T) {
+	svc, mgr := makeTrapSvcWithDisarmTemplates(t)
+	svc.dice = dice.NewLoggedRoller(&fixedDiceSource{val: 19}, zaptest.NewLogger(t))
+
+	instanceID := trap.TrapInstanceID("test", "room_a", "equip", "Metal Cabinet")
+	mgr.AddTrap(instanceID, "bear_trap_disarm", true)
+	// NOTE: MarkDetected is NOT called — trap is undetected.
+
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "p1", Username: "p1", CharName: "p1", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ev, err := svc.handleDisarmTrap("p1", &gamev1.DisarmTrapRequest{TrapName: "bear trap"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Trap should still be armed — findDetectedTrap returns "" for undetected traps.
+	state, _ := mgr.GetTrap(instanceID)
+	if !state.Armed {
+		t.Error("undetected trap should remain armed")
+	}
+	_ = ev
 }

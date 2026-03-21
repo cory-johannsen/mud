@@ -358,11 +358,12 @@ func (s *GameServiceServer) handleDisarmTrap(uid string, req *gamev1.DisarmTrapR
 	dc := tmpl.DisableDC + scaling.DisableDCBonus
 	abilityScore := s.abilityScoreForSkill(sess, "thievery")
 	amod := abilityModFrom(abilityScore)
-	var roll int
+	roll := 10 // fallback when no dice configured
 	if s.dice != nil {
-		roll = s.dice.Src().Intn(20) + 1
-	} else {
-		roll = 10
+		result, rollErr := s.dice.RollExpr("1d20")
+		if rollErr == nil {
+			roll = result.Total()
+		}
 	}
 	total := roll + amod
 
@@ -401,6 +402,24 @@ func (s *GameServiceServer) findDetectedTrap(uid string, sess *session.PlayerSes
 		candidate := strings.ToLower(tmpl.Name)
 		withLocation := candidate + " near " + strings.ToLower(eq.Description)
 		if lowerName == candidate || lowerName == withLocation {
+			return instanceID, tmpl
+		}
+	}
+	// Also search room-level traps (position="room").
+	for _, rtc := range room.Traps {
+		if rtc.Position != "room" {
+			continue
+		}
+		tmpl, ok := s.trapTemplates[rtc.TemplateID]
+		if !ok {
+			continue
+		}
+		instanceID := trap.TrapInstanceID(zoneID, room.ID, "room", rtc.TemplateID)
+		if !s.trapMgr.IsDetected(uid, instanceID) {
+			continue
+		}
+		candidate := strings.ToLower(tmpl.Name)
+		if lowerName == candidate {
 			return instanceID, tmpl
 		}
 	}
