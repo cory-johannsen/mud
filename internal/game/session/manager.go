@@ -121,6 +121,15 @@ type PlayerSession struct {
 	// Out of combat: value is Unix timestamp (seconds) of expiry; 0 = ready to fire.
 	// Nil until first use; initialized lazily on first write.
 	ZoneEffectCooldowns map[string]int64
+	// WantedLevel maps zone_id to the player's current wanted level (0–4) in that zone.
+	// Initialized at session creation; 0 means no wanted status.
+	WantedLevel map[string]int
+	// SafeViolations maps zone_id to the number of safe-zone violations in the current
+	// WantedLevel cycle for that zone.
+	SafeViolations map[string]int
+	// LastViolationDay maps zone_id to the in-game day on which the last violation occurred.
+	// Used for decay calculations.
+	LastViolationDay map[string]int
 	// Technology slots — nil until loaded from DB at login.
 	HardwiredTechs   []string                // tech IDs; unlimited use
 	PreparedTechs    map[int][]*PreparedSlot // slot level → ordered slots
@@ -247,6 +256,9 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		FeatureChoices:     make(map[string]map[string]string),
 		ReactionsRemaining: 1,
 		Reactions:          reaction.NewReactionRegistry(),
+		WantedLevel:        make(map[string]int),
+		SafeViolations:     make(map[string]int),
+		LastViolationDay:   make(map[string]int),
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)
