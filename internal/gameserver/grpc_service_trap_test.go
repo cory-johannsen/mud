@@ -95,25 +95,6 @@ func TestHandleDisarmTrap_FailureBy5_TrapRemainsArmedUntilFire(t *testing.T) {
 	}
 }
 
-// TestHonkeypot_OnlyTargetedRegionTriggers verifies isTrapTargeted logic:
-// a player whose region is not in target_regions must not be considered targeted.
-func TestHonkeypot_OnlyTargetedRegionTriggers(t *testing.T) {
-	targeted := []string{"lake_oswego", "pearl_district"}
-
-	// Targeted player.
-	if !isTrapTargeted("lake_oswego", targeted) {
-		t.Error("lake_oswego should be targeted")
-	}
-	// Non-targeted player.
-	if isTrapTargeted("beaverton", targeted) {
-		t.Error("beaverton should not be targeted")
-	}
-	// Empty region never matches.
-	if isTrapTargeted("", targeted) {
-		t.Error("empty region should not be targeted")
-	}
-}
-
 // TestProperty_TrapsForRoom_EnumeratesBothKinds verifies that TrapsForRoom returns
 // trap IDs for both room-level and equipment-level traps.
 func TestProperty_TrapsForRoom_EnumeratesBothKinds(t *testing.T) {
@@ -159,17 +140,6 @@ func TestProperty_Detection_PlayerIsolation(t *testing.T) {
 			rt.Error("uid1 detection should persist")
 		}
 	})
-}
-
-// isTrapTargeted is duplicated here for white-box testing since the function is unexported.
-// It mirrors the logic in grpc_service_trap.go exactly.
-func isTrapTargeted(playerRegion string, targetRegions []string) bool {
-	for _, r := range targetRegions {
-		if r == playerRegion {
-			return true
-		}
-	}
-	return false
 }
 
 // TestPressurePlateTrap_FiresDuringCombat verifies that an armed pressure_plate trap

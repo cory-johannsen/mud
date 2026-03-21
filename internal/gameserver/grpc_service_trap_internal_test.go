@@ -183,6 +183,58 @@ func TestCheckInteractionTrap_NoFireWrongTrigger(t *testing.T) {
 	}
 }
 
+// TestCheckEntryTraps_HonkeypotRegionGating verifies that a TriggerRegion (honkeypot) trap
+// fires only for a player whose home region is in TargetRegions, and does NOT fire for a
+// player whose region is absent from that list.
+//
+// Precondition: trap is armed; TriggerAction == "entry"; TargetRegions == ["lake_oswego"].
+// Postcondition: non-targeted player leaves Armed=true; targeted player leaves Armed=false.
+func TestCheckEntryTraps_HonkeypotRegionGating(t *testing.T) {
+	svc, mgr := makeTrapSvc(t)
+
+	// Add a TriggerRegion template to the service's trapTemplates map.
+	svc.trapTemplates["honkeypot_test"] = &trap.TrapTemplate{
+		ID:            "honkeypot_test",
+		Name:          "Test Honkeypot",
+		Trigger:       trap.TriggerRegion,
+		TriggerAction: "entry",
+		TargetRegions: []string{"lake_oswego"},
+		ResetMode:     trap.ResetOneShot,
+		Payload:       &trap.TrapPayload{Type: "honkeypot"},
+	}
+
+	room := &world.Room{
+		ID:     "room_a",
+		ZoneID: "test",
+	}
+	instanceID := trap.TrapInstanceID("test", "room_a", "room", "honkeypot_test")
+	mgr.AddTrap(instanceID, "honkeypot_test", true)
+
+	// Non-targeted player (region "beaverton"): trap must NOT fire.
+	sess1 := &session.PlayerSession{UID: "uid1", RoomID: "room_a", Region: "beaverton"}
+	svc.checkEntryTraps("uid1", sess1, room)
+
+	state, ok := mgr.GetTrap(instanceID)
+	if !ok {
+		t.Fatal("trap should still exist after non-targeted player entry")
+	}
+	if !state.Armed {
+		t.Error("non-targeted player must not trigger honkeypot: trap should remain armed")
+	}
+
+	// Targeted player (region "lake_oswego"): trap MUST fire and be disarmed.
+	sess2 := &session.PlayerSession{UID: "uid2", RoomID: "room_a", Region: "lake_oswego"}
+	svc.checkEntryTraps("uid2", sess2, room)
+
+	state2, ok2 := mgr.GetTrap(instanceID)
+	if !ok2 {
+		t.Fatal("trap should still exist after targeted player entry")
+	}
+	if state2.Armed {
+		t.Error("targeted player must trigger honkeypot: trap should be disarmed (Armed=false)")
+	}
+}
+
 // makeTrapSvcWithDisarmTemplates returns a GameServiceServer with templates suitable
 // for disarm testing: a trap with DisableDC=15 and a mine for blast testing.
 // The world has zone "test" / room "room_a" with Equipment pre-populated for the bear trap.
