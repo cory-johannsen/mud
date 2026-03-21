@@ -232,10 +232,21 @@ features:
     priority: 237
     category: world
     file: docs/features/downtime.md
-    effort: "L"  # downtime mode command, 8 activities (earn income/craft/retrain/treat disease/subsist/forgery/long rest/refocus), calendar advancement integration
+    effort: "L"  # downtime command, 15 activities, real-time clock based, busy state, offline continuation
     dependencies:
       - actions
       - persistent-calendar
+      - crafting
+
+  - slug: downtime-queue
+    name: Downtime Activity Queue
+    status: planned
+    priority: 238
+    category: world
+    file: docs/features/downtime-queue.md
+    effort: "M"  # queue multiple downtime activities; auto-start next on completion; DB-backed queue per player
+    dependencies:
+      - downtime
 
   - slug: ready-action
     name: Ready Action
