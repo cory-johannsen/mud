@@ -10,6 +10,14 @@
 **Steps:** Log in and reach the technology selection prompt; observe the list of technologies with multi-line descriptions.
 **Fix:**
 
+### BUG-3: ne_portland zone — ne_prescott_street and ne_cully_road isolated from rest of map
+**Severity:** high
+**Status:** open
+**Category:** World
+**Description:** In the `ne_portland` zone, `ne_prescott_street` and `ne_cully_road` are connected to each other but have no exits linking them to the rest of the zone map, making them unreachable.
+**Steps:** View the ne_portland zone map; observe the two isolated rooms.
+**Fix:**
+
 ### BUG-2: eq command displays armor item IDs instead of names
 **Severity:** medium
 **Status:** open
