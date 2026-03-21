@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"math/rand"
 	"strings"
 	"sync"
 	"time"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
@@ -1015,6 +1017,7 @@ func (h *CombatHandler) Flee(uid string) ([]*gamev1.CombatEvent, bool, error) {
 	if !cbt.HasLivingPlayers() {
 		h.stopTimerLocked(origRoomID)
 		h.engine.EndCombat(origRoomID)
+		h.clearCoweringNPCsLocked(origRoomID)
 		if h.onCombatEndFn != nil {
 			fn := h.onCombatEndFn
 			rid := origRoomID
@@ -1651,6 +1654,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		h.broadcastFn(roomID, events)
 		h.removeDeadNPCsLocked(cbt)
 		h.engine.EndCombat(roomID)
+		h.clearCoweringNPCsLocked(roomID)
 		if h.onCombatEndFn != nil {
 			h.onCombatEndFn(roomID)
 		}
@@ -1961,7 +1965,115 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		Narrative: fmt.Sprintf("Round %d begins! Turn order: %v", cbt.Round, turnOrder),
 	})
 
+	// Trigger flee/cower for all non-combat NPCs in the room.
+	h.applyCombatStartBehaviorsLocked(sess.RoomID)
+
 	return cbt, events, nil
+}
+
+// defaultCombatResponse returns "flee", "cower", or "engage" for a non-combat NPC.
+//
+// Personality "cowardly" always maps to "flee"; "brave" always maps to "cower".
+// "neutral", "opportunistic", and empty all fall through to the type-specific default.
+//
+// Type defaults:
+//
+//	merchant, quest_giver, job_trainer → "cower"
+//	healer, banker, crafter           → "flee"
+//	guard                             → "engage"
+//	hireling                          → "engage"
+func defaultCombatResponse(npcType, personality string) string {
+	switch personality {
+	case "cowardly":
+		return "flee"
+	case "brave":
+		return "cower"
+	// "neutral", "opportunistic", and "" fall through to type default.
+	}
+	switch npcType {
+	case "merchant", "quest_giver", "job_trainer":
+		return "cower"
+	case "healer", "banker", "crafter":
+		return "flee"
+	case "guard":
+		return "engage"
+	case "hireling":
+		return "engage"
+	default:
+		return "cower"
+	}
+}
+
+// applyCombatStartBehaviorsLocked fires flee/cower for all non-combat NPCs in roomID
+// when combat starts. Must be called with h.combatMu already held.
+//
+// Precondition: combatMu is held; roomID is non-empty.
+// Postcondition: Each non-combat NPC in roomID is either moved to an adjacent room or has Cowering set to true.
+func (h *CombatHandler) applyCombatStartBehaviorsLocked(roomID string) {
+	var room *world.Room
+	if h.worldMgr != nil {
+		r, ok := h.worldMgr.GetRoom(roomID)
+		if ok {
+			room = r
+		}
+	}
+	for _, inst := range h.npcMgr.InstancesInRoom(roomID) {
+		if inst.NPCType == "" || inst.NPCType == "combat" || inst.NPCType == "guard" || inst.NPCType == "hireling" {
+			continue
+		}
+		switch defaultCombatResponse(inst.NPCType, inst.Personality) {
+		case "flee":
+			if room != nil {
+				h.fleeNPCLocked(inst, room)
+			} else {
+				inst.Cowering = true
+			}
+		default: // "cower"
+			inst.Cowering = true
+		}
+	}
+}
+
+// fleeNPCLocked moves inst to a random valid adjacent room.
+// A valid exit is non-hidden, non-locked, and does not lead to an AllOutWar room.
+// Falls back to cower if no valid exits exist.
+// Must be called with h.combatMu held.
+//
+// Precondition: combatMu is held; inst and room are non-nil.
+// Postcondition: inst is moved to a valid adjacent room, or inst.Cowering is set to true.
+func (h *CombatHandler) fleeNPCLocked(inst *npc.Instance, room *world.Room) {
+	var validExits []world.Exit
+	for _, exit := range room.Exits {
+		if exit.Hidden || exit.Locked {
+			continue
+		}
+		if dest, ok := h.worldMgr.GetRoom(exit.TargetRoom); ok {
+			dl := danger.EffectiveDangerLevel(dest.ZoneID, dest.DangerLevel)
+			if dl == danger.AllOutWar {
+				continue
+			}
+		}
+		validExits = append(validExits, exit)
+	}
+	if len(validExits) == 0 {
+		inst.Cowering = true
+		return
+	}
+	target := validExits[rand.Intn(len(validExits))]
+	_ = h.npcMgr.Move(inst.ID, target.TargetRoom)
+}
+
+// clearCoweringNPCsLocked resets the Cowering flag for all NPCs in roomID.
+// Must be called when combat in roomID ends.
+//
+// Precondition: combatMu is held; roomID is non-empty.
+// Postcondition: All NPCs in roomID have Cowering set to false.
+func (h *CombatHandler) clearCoweringNPCsLocked(roomID string) {
+	for _, inst := range h.npcMgr.InstancesInRoom(roomID) {
+		if inst.Cowering {
+			inst.Cowering = false
+		}
+	}
 }
 
 // autoQueuePlayersLocked queues default actions for all living players in cbt
