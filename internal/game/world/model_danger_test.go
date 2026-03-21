@@ -75,3 +75,24 @@ cover_tier: heavy
 		t.Errorf("RoomEquipmentConfig.CoverTier = %q; want %q", rec.CoverTier, "heavy")
 	}
 }
+
+func TestZoneCoverTrapChanceYAMLRoundTrip(t *testing.T) {
+	coverChance := 30
+	input := `
+id: test_zone2
+name: Test Zone 2
+description: Another test zone
+danger_level: all_out_war
+cover_trap_chance: 30
+`
+	var z world.Zone
+	if err := yaml.Unmarshal([]byte(input), &z); err != nil {
+		t.Fatalf("unmarshal Zone: %v", err)
+	}
+	if z.CoverTrapChance == nil {
+		t.Fatal("Zone.CoverTrapChance is nil; want non-nil")
+	}
+	if *z.CoverTrapChance != coverChance {
+		t.Errorf("Zone.CoverTrapChance = %d; want %d", *z.CoverTrapChance, coverChance)
+	}
+}

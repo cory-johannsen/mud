@@ -114,7 +114,7 @@ type RoomEquipmentConfig struct {
 	SkillChecks  []skillcheck.TriggerDef // skill check triggers fired on_use
 	// CoverTier specifies the cover tier this equipment provides: "lesser", "standard",
 	// "greater", or "" (no cover). Only meaningful when Immovable is true.
-	CoverTier         string `yaml:"cover_tier"`
+	CoverTier         string `yaml:"cover_tier,omitempty"`
 	// CoverDestructible indicates whether this cover object can be degraded and destroyed.
 	CoverDestructible bool   `yaml:"cover_destructible"`
 	// CoverHP is the number of hits this cover object can absorb before being destroyed.
