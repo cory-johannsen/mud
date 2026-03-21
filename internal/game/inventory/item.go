@@ -16,6 +16,7 @@ const (
 	KindConsumable = "consumable"
 	KindJunk       = "junk"
 	KindArmor      = "armor"
+	KindTrap       = "trap"
 )
 
 // validKinds is the set of valid ItemDef kinds.
@@ -25,6 +26,7 @@ var validKinds = map[string]bool{
 	KindConsumable: true,
 	KindJunk:       true,
 	KindArmor:      true,
+	KindTrap:       true,
 }
 
 // ItemDef defines the static properties of an inventory item loaded from YAML.
@@ -36,8 +38,9 @@ type ItemDef struct {
 	Weight       float64 `yaml:"weight"`
 	WeaponRef    string  `yaml:"weapon_ref"`
 	ArmorRef     string  `yaml:"armor_ref"`    // references an ArmorDef ID; set when Kind == "armor"
-	ExplosiveRef string  `yaml:"explosive_ref"`
-	Stackable    bool    `yaml:"stackable"`
+	ExplosiveRef    string  `yaml:"explosive_ref"`
+	TrapTemplateRef string  `yaml:"trap_template_ref"` // references a TrapTemplate ID; set when Kind == "trap"
+	Stackable       bool    `yaml:"stackable"`
 	MaxStack     int     `yaml:"max_stack"`
 	Value        int     `yaml:"value"`
 }
@@ -55,7 +58,7 @@ func (d *ItemDef) Validate() error {
 		errs = append(errs, errors.New("Name must not be empty"))
 	}
 	if !validKinds[d.Kind] {
-		errs = append(errs, fmt.Errorf("Kind must be one of weapon, explosive, consumable, junk, armor; got %q", d.Kind))
+		errs = append(errs, fmt.Errorf("Kind must be one of weapon, explosive, consumable, junk, armor, trap; got %q", d.Kind))
 	}
 	if d.MaxStack < 1 {
 		errs = append(errs, errors.New("MaxStack must be >= 1"))
@@ -71,6 +74,9 @@ func (d *ItemDef) Validate() error {
 	}
 	if d.Kind == KindArmor && d.ArmorRef == "" {
 		errs = append(errs, errors.New("ArmorRef is required when Kind is armor"))
+	}
+	if d.Kind == KindTrap && d.TrapTemplateRef == "" {
+		errs = append(errs, fmt.Errorf("item %q: TrapTemplateRef is required when Kind is %q", d.ID, KindTrap))
 	}
 	if len(errs) > 0 {
 		return fmt.Errorf("item validation failed: %v", errs)

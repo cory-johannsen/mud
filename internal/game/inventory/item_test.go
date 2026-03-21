@@ -238,6 +238,65 @@ func TestRegistry_Item_NotFound(t *testing.T) {
 	}
 }
 
+func TestKindTrap_Constant(t *testing.T) {
+	if inventory.KindTrap != "trap" {
+		t.Fatalf("expected KindTrap == %q, got %q", "trap", inventory.KindTrap)
+	}
+}
+
+func TestItemDef_TrapTemplateRef_Field(t *testing.T) {
+	item := &inventory.ItemDef{
+		ID:              "deployable_mine",
+		Name:            "Deployable Mine",
+		Kind:            inventory.KindTrap,
+		TrapTemplateRef: "mine",
+		Weight:          2.0,
+		Stackable:       true,
+		MaxStack:        5,
+		Value:           300,
+	}
+	if item.TrapTemplateRef != "mine" {
+		t.Fatalf("expected TrapTemplateRef == %q, got %q", "mine", item.TrapTemplateRef)
+	}
+}
+
+func TestRegistry_RegisterItem_TrapKind_RequiresTrapTemplateRef(t *testing.T) {
+	reg := inventory.NewRegistry()
+	err := reg.RegisterItem(&inventory.ItemDef{
+		ID:   "bad_trap",
+		Name: "Bad Trap",
+		Kind: inventory.KindTrap,
+		// TrapTemplateRef intentionally missing — must fail
+	})
+	if err == nil {
+		t.Fatal("expected error for empty TrapTemplateRef with kind=trap, got nil")
+	}
+}
+
+func TestRegistry_RegisterItem_TrapKind_ValidRef(t *testing.T) {
+	reg := inventory.NewRegistry()
+	err := reg.RegisterItem(&inventory.ItemDef{
+		ID:              "good_trap",
+		Name:            "Good Trap",
+		Kind:            inventory.KindTrap,
+		TrapTemplateRef: "mine",
+		Weight:          1.0,
+		Stackable:       true,
+		MaxStack:        5,
+		Value:           100,
+	})
+	if err != nil {
+		t.Fatalf("expected no error for valid trap item, got: %v", err)
+	}
+	item, ok := reg.Item("good_trap")
+	if !ok {
+		t.Fatal("expected good_trap to be found in registry")
+	}
+	if item.TrapTemplateRef != "mine" {
+		t.Fatalf("expected TrapTemplateRef == %q, got %q", "mine", item.TrapTemplateRef)
+	}
+}
+
 func TestProperty_ItemDef_ValidKind_AcceptsAll(t *testing.T) {
 	kinds := []string{
 		inventory.KindWeapon,

@@ -59,10 +59,13 @@ func (r *Registry) Explosive(id string) *ExplosiveDef {
 // RegisterItem adds d to the registry.
 //
 // Precondition:  d must not be nil.
-// Postcondition: Item(d.ID) returns (d, true); returns error if d.ID already registered.
+// Postcondition: Item(d.ID) returns (d, true); returns error if d.ID already registered or fails validation.
 func (r *Registry) RegisterItem(d *ItemDef) error {
 	if _, exists := r.items[d.ID]; exists {
 		return fmt.Errorf("inventory: Registry.RegisterItem: item ID %q already registered", d.ID)
+	}
+	if err := d.Validate(); err != nil {
+		return fmt.Errorf("inventory: Registry.RegisterItem: %w", err)
 	}
 	r.items[d.ID] = d
 	return nil
