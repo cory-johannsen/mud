@@ -7836,10 +7836,8 @@ func (s *GameServiceServer) handleAid(uid string, req *gamev1.AidRequest) (*game
 	if len(events) == 0 {
 		return nil, nil
 	}
-	if sesso, ok2 := s.sessions.GetPlayer(uid); ok2 {
-		for _, evt := range events[1:] {
-			s.broadcastCombatEvent(sesso.RoomID, uid, evt)
-		}
+	for _, evt := range events[1:] {
+		s.broadcastCombatEvent(sess.RoomID, uid, evt)
 	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: events[0]},

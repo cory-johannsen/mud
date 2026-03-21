@@ -351,6 +351,14 @@ func (h *CombatHandler) Strike(uid, target string) ([]*gamev1.CombatEvent, error
 // Precondition: allyName must be non-empty, must match a living player combatant in the same
 // combat (case-insensitive, by Name), and must not match the actor's own CharName or UID.
 // Postcondition: Returns a confirmation CombatEvent and nil error on success.
+// Aid queues an Aid action for uid targeting allyName in the current combat round.
+//
+// Precondition: uid must identify a valid player session in active combat; allyName
+// must be non-empty and must not equal the player's own name or uid.
+// Postcondition: On success returns a slice containing exactly one confirmation
+// CombatEvent and the action is queued for resolution at end of round; allyName
+// receives an aided condition bonus when the round resolves. On failure returns
+// a non-nil error and an empty slice.
 func (h *CombatHandler) Aid(uid, allyName string) ([]*gamev1.CombatEvent, error) {
 	if allyName == "" {
 		return nil, fmt.Errorf("ally name must not be empty")
