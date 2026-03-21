@@ -62,6 +62,10 @@ func TestReactionDef_YAMLRoundTrip_NoRequirement(t *testing.T) {
 	assert.Equal(t, original, decoded)
 }
 
+func TestTriggerOnEnemyEntersRoom_Exists(t *testing.T) {
+	assert.Equal(t, reaction.ReactionTriggerType("on_enemy_enters_room"), reaction.TriggerOnEnemyEntersRoom)
+}
+
 // REQ-CRX8: multi-trigger YAML round-trip.
 func TestReactionDef_YAMLRoundTrip_MultiTrigger(t *testing.T) {
 	original := reaction.ReactionDef{

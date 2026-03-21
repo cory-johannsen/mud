@@ -20,6 +20,9 @@ const (
 	// TriggerOnAllyDamaged fires when a player ally takes damage in the same combat.
 	// Informational only: damage has already been applied; DamagePending is always nil.
 	TriggerOnAllyDamaged ReactionTriggerType = "on_ally_damaged"
+	// TriggerOnEnemyEntersRoom fires when an NPC combatant moves in the player's current room.
+	// Fire point: after consumable trap evaluation in the onCombatantMoved callback (REQ-READY-15).
+	TriggerOnEnemyEntersRoom ReactionTriggerType = "on_enemy_enters_room"
 	// TriggerOnFall fires when the player would fall. Fire point deferred to a future feature.
 	TriggerOnFall ReactionTriggerType = "on_fall"
 )

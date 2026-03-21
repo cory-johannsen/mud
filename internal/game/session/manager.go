@@ -161,6 +161,14 @@ type PlayerSession struct {
 	// ReactionFn is the per-session reaction callback, set by the session handler after login.
 	// Captures the player's gRPC stream for interactive prompting.
 	ReactionFn reaction.ReactionCallback
+	// ReadiedTrigger is the trigger alias this player is waiting for ("enemy_enters",
+	// "enemy_attacks_me", "ally_attacked"). Empty string means no readied action this round.
+	// Not persisted. In-session only.
+	ReadiedTrigger string
+	// ReadiedAction is the action to execute when ReadiedTrigger fires
+	// ("strike", "step", "raise_shield"). Empty when ReadiedTrigger is empty.
+	// Not persisted. In-session only.
+	ReadiedAction string
 }
 
 // Manager tracks all active player sessions and room occupancy.

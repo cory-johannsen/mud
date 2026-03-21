@@ -1563,6 +1563,19 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 				if sess.LoadoutSet != nil {
 					sess.LoadoutSet.ResetRound()
 				}
+				// REQ-READY-1: Clear readied action at end of every round; notify player if it expired unfired.
+				if sess.ReadiedTrigger != "" {
+					actionName := sess.ReadiedAction
+					evt := &gamev1.ServerEvent{
+						Payload: &gamev1.ServerEvent_Message{
+							Message: &gamev1.MessageEvent{Content: "Your readied " + actionName + " expires. (No refund.)"},
+						},
+					}
+					if data, err := proto.Marshal(evt); err == nil {
+						_ = sess.Entity.Push(data)
+					}
+				}
+				clearReadiedAction(sess)
 				sess.ReactionsRemaining = 1
 			}
 		}
@@ -3111,4 +3124,11 @@ func (h *CombatHandler) Status(uid string) ([]*condition.ActiveCondition, error)
 		return nil, nil // no combat active; return empty
 	}
 	return cbt.GetConditions(uid), nil
+}
+
+// clearReadiedAction clears ReadiedTrigger and ReadiedAction on a session.
+// Called at end-of-round to enforce REQ-READY-1.
+func clearReadiedAction(sess *session.PlayerSession) {
+	sess.ReadiedTrigger = ""
+	sess.ReadiedAction = ""
 }
