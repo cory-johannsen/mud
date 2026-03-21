@@ -188,6 +188,9 @@ func (t *Template) Validate() error {
 		if t.Guard == nil {
 			return fmt.Errorf("npc template %q: npc_type 'guard' requires a guard: config block", t.ID)
 		}
+		if err := t.Guard.Validate(); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
 	case "healer":
 		if t.Healer == nil {
 			return fmt.Errorf("npc template %q: npc_type 'healer' requires a healer: config block", t.ID)

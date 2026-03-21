@@ -244,3 +244,77 @@ func TestCheckJobPrerequisites_AllMet(t *testing.T) {
 	)
 	assert.NoError(t, err)
 }
+
+// TestGuardConfig_Validate_BribeableWithoutMaxLevel verifies fatal error when
+// Bribeable is true and MaxBribeWantedLevel is zero (default).
+//
+// REQ-WC-2b: MaxBribeWantedLevel MUST be in range 1-4 when Bribeable is true.
+func TestGuardConfig_Validate_BribeableWithoutMaxLevel(t *testing.T) {
+	cfg := &GuardConfig{
+		WantedThreshold:     2,
+		Bribeable:           true,
+		MaxBribeWantedLevel: 0, // invalid
+	}
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "max_bribe_wanted_level")
+}
+
+// TestGuardConfig_Validate_BribeableMaxLevelOutOfRange verifies fatal error when
+// MaxBribeWantedLevel is 5.
+func TestGuardConfig_Validate_BribeableMaxLevelOutOfRange(t *testing.T) {
+	cfg := &GuardConfig{
+		WantedThreshold:     2,
+		Bribeable:           true,
+		MaxBribeWantedLevel: 5,
+		BaseCosts:           map[int]int{1: 100, 2: 200, 3: 300, 4: 400},
+	}
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "max_bribe_wanted_level")
+}
+
+// TestGuardConfig_Validate_BribeableMissingBaseCostKey verifies fatal error when
+// BaseCosts is missing a required key.
+func TestGuardConfig_Validate_BribeableMissingBaseCostKey(t *testing.T) {
+	cfg := &GuardConfig{
+		WantedThreshold:     2,
+		Bribeable:           true,
+		MaxBribeWantedLevel: 2,
+		BaseCosts:           map[int]int{1: 100, 2: 200, 3: 300}, // missing key 4
+	}
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "base_costs")
+}
+
+// TestGuardConfig_Validate_BribeableZeroBaseCostValue verifies fatal error when
+// a BaseCosts value is zero or negative.
+func TestGuardConfig_Validate_BribeableZeroBaseCostValue(t *testing.T) {
+	cfg := &GuardConfig{
+		WantedThreshold:     2,
+		Bribeable:           true,
+		MaxBribeWantedLevel: 2,
+		BaseCosts:           map[int]int{1: 100, 2: 0, 3: 300, 4: 400},
+	}
+	err := cfg.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "base_costs")
+}
+
+// TestGuardConfig_Validate_ValidBribeable verifies no error for a valid bribeable config.
+func TestGuardConfig_Validate_ValidBribeable(t *testing.T) {
+	cfg := &GuardConfig{
+		WantedThreshold:     2,
+		Bribeable:           true,
+		MaxBribeWantedLevel: 2,
+		BaseCosts:           map[int]int{1: 100, 2: 200, 3: 300, 4: 400},
+	}
+	assert.NoError(t, cfg.Validate())
+}
+
+// TestGuardConfig_Validate_NonBribeableNoBases verifies no error for non-bribeable guard.
+func TestGuardConfig_Validate_NonBribeableNoBases(t *testing.T) {
+	cfg := &GuardConfig{WantedThreshold: 2}
+	assert.NoError(t, cfg.Validate())
+}

@@ -612,6 +612,37 @@ func TestTemplate_ValidateWithSkills_KnownSkill(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// TestTemplate_Validate_BribeableGuard_Invalid verifies fatal error for invalid bribeable guard.
+func TestTemplate_Validate_BribeableGuard_Invalid(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "bad_guard", Name: "Bad Guard", NPCType: "guard",
+		Level: 2, MaxHP: 30, AC: 14,
+		Guard: &npc.GuardConfig{
+			WantedThreshold:     2,
+			Bribeable:           true,
+			MaxBribeWantedLevel: 0, // invalid
+		},
+	}
+	err := tmpl.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "max_bribe_wanted_level")
+}
+
+// TestTemplate_Validate_BribeableGuard_Valid verifies valid bribeable guard passes.
+func TestTemplate_Validate_BribeableGuard_Valid(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "good_guard", Name: "Good Guard", NPCType: "guard",
+		Level: 2, MaxHP: 30, AC: 14,
+		Guard: &npc.GuardConfig{
+			WantedThreshold:     2,
+			Bribeable:           true,
+			MaxBribeWantedLevel: 2,
+			BaseCosts:           map[int]int{1: 100, 2: 200, 3: 300, 4: 400},
+		},
+	}
+	assert.NoError(t, tmpl.Validate())
+}
+
 // TestProperty_AllExistingNPCTemplatesStillLoad verifies that adding NPCType/Validate changes
 // does not break any existing NPC YAML file. Reads all *.yaml in content/npcs/.
 func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {

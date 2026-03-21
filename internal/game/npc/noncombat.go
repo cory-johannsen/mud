@@ -62,6 +62,39 @@ type MerchantRuntimeState struct {
 type GuardConfig struct {
 	WantedThreshold int    `yaml:"wanted_threshold"`
 	PatrolRoom      string `yaml:"patrol_room,omitempty"`
+	// Bribeable indicates whether this guard can be bribed to ignore a Wanted level.
+	// REQ-WC-2b: when Bribeable is true, MaxBribeWantedLevel MUST be in range 1-4.
+	Bribeable bool `yaml:"bribeable"`
+	// MaxBribeWantedLevel is the highest WantedLevel this guard will accept a bribe for.
+	// Required when Bribeable is true.
+	MaxBribeWantedLevel int `yaml:"max_bribe_wanted_level"`
+	// BaseCosts maps WantedLevel (1-4) to the base bribe cost in credits.
+	// Required when Bribeable is true. All keys 1-4 must be present with positive values.
+	BaseCosts map[int]int `yaml:"base_costs,omitempty"`
+}
+
+// Validate checks REQ-WC-2b: when Bribeable is true, MaxBribeWantedLevel must be
+// in range 1-4 and BaseCosts must contain all keys 1-4 with positive values.
+//
+// Precondition: cfg must not be nil.
+// Postcondition: Returns nil iff all bribeable constraints are satisfied.
+func (cfg *GuardConfig) Validate() error {
+	if !cfg.Bribeable {
+		return nil
+	}
+	if cfg.MaxBribeWantedLevel < 1 || cfg.MaxBribeWantedLevel > 4 {
+		return fmt.Errorf("guard: max_bribe_wanted_level must be in range 1-4 when bribeable (got %d)", cfg.MaxBribeWantedLevel)
+	}
+	for _, level := range []int{1, 2, 3, 4} {
+		cost, ok := cfg.BaseCosts[level]
+		if !ok {
+			return fmt.Errorf("guard: base_costs must contain key %d when bribeable", level)
+		}
+		if cost <= 0 {
+			return fmt.Errorf("guard: base_costs[%d] must be positive (got %d)", level, cost)
+		}
+	}
+	return nil
 }
 
 // ---- Healer ----
