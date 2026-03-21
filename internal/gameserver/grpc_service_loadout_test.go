@@ -119,6 +119,26 @@ func TestHandleLoadout_InCombat_WithAP(t *testing.T) {
 	assert.Equal(t, remaining-1, combatHandler.RemainingAP("lo_ap"), "exactly 1 AP must be deducted")
 }
 
+// TestHandleLoadout_InCombat_EmptyArg verifies that calling handleLoadout in combat with
+// an empty arg (display only) does NOT deduct any AP.
+//
+// Precondition: Player "lo_empty" in combat with ≥1 AP remaining; Arg is "".
+// Postcondition: AP is unchanged; event contains loadout display text (no swap message).
+func TestHandleLoadout_InCombat_EmptyArg(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	roller := dice.NewLoggedRoller(&fixedDiceSource{val: 10}, logger)
+	svc, sessMgr, npcMgr, combatHandler := newLoadoutSvcWithCombat(t, roller)
+	_ = setupLoadoutPlayer(t, "lo_empty", "room_lo_empty", "Thug", sessMgr, npcMgr, combatHandler)
+
+	apBefore := combatHandler.RemainingAP("lo_empty")
+	require.GreaterOrEqual(t, apBefore, 1, "expected at least 1 AP")
+
+	ev, err := svc.handleLoadout("lo_empty", &gamev1.LoadoutRequest{Arg: ""})
+	require.NoError(t, err)
+	require.NotNil(t, ev)
+	assert.Equal(t, apBefore, combatHandler.RemainingAP("lo_empty"), "AP must not be deducted for empty-arg (display) call")
+}
+
 // TestHandleLoadout_OutOfCombat_NoAPCheck verifies that swapping a loadout preset outside
 // of combat succeeds without any AP check, even when combatH would report 0 AP.
 //
