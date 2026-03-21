@@ -1666,7 +1666,7 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
-	// Room trap roll: trigger environmental hazard on entry when danger warrants it.
+	// Room trap roll and wanted-level guard check on room entry.
 	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
 		if newZone, zoneOK := s.world.GetZone(newRoom.ZoneID); zoneOK {
 			effectiveLevel := danger.EffectiveDangerLevel(newZone.DangerLevel, newRoom.DangerLevel)
@@ -1690,10 +1690,7 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 				}
 			}
 		}
-	}
-
-	// Wanted-level guard check: initiate guard combat if player is wanted in this zone.
-	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		// Wanted-level guard check: initiate guard combat if player is wanted in this zone.
 		wantedLevel := sess.WantedLevel[newRoom.ZoneID]
 		if wantedLevel >= 2 && s.combatH != nil {
 			s.combatH.InitiateGuardCombat(uid, newRoom.ZoneID, wantedLevel)

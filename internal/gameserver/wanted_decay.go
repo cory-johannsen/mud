@@ -44,6 +44,9 @@ func StartWantedDecay(cal *GameCalendar, sessions SessionLister, wantedRepo Want
 // has not violated safe-room rules on or after currentDay.
 //
 // Precondition: sessions and wantedRepo MUST NOT be nil; currentDay MUST be >= 0.
+// Precondition: callers MUST ensure no concurrent writes to PlayerSession.WantedLevel
+// or PlayerSession.LastViolationDay occur during this call (consistent with the
+// existing single-writer-per-session convention used by the gRPC handler layer).
 // Postcondition: each online player's WantedLevel is decremented by 1 for zones
 // not violated on currentDay; changes are persisted via wantedRepo.Upsert.
 func decayWantedLevels(sessions SessionLister, wantedRepo WantedSaver, currentDay int, logger *zap.Logger) {
