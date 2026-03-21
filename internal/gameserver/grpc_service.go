@@ -211,6 +211,8 @@ type GameServiceServer struct {
 	merchantRuntimeStates map[string]*npc.MerchantRuntimeState
 	// bankerRuntimeStates maps NPC instance ID to active banker runtime state.
 	bankerRuntimeStates map[string]*npc.BankerRuntimeState
+	// healerRuntimeStates maps NPC instance ID to active healer runtime state.
+	healerRuntimeStates map[string]*npc.HealerRuntimeState
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -349,6 +351,7 @@ func NewGameServiceServer(
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
+	s.healerRuntimeStates = make(map[string]*npc.HealerRuntimeState)
 	s.WireCoverCrossfireTrap()
 	s.WireConsumableTrapTrigger()
 	return s
