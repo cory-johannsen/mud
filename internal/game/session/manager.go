@@ -178,6 +178,13 @@ type PlayerSession struct {
 	NegotiatedMerchantID string
 	// StashBalance is the player's global stash credit balance, accessible at any banker.
 	StashBalance int
+	// Jobs maps job_id to the player's current level in that job.
+	// Initialized to an empty map at session creation.
+	// REQ-NPC-9: players acquire jobs via training; REQ-NPC-11: all held jobs grant feats/proficiencies.
+	Jobs map[string]int
+	// ActiveJobID is the currently active job that earns XP (REQ-NPC-10).
+	// Empty string means no active job. Set to the first trained job automatically (REQ-NPC-9).
+	ActiveJobID string
 }
 
 // Manager tracks all active player sessions and room occupancy.
@@ -286,6 +293,7 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		WantedLevel:        make(map[string]int),
 		SafeViolations:     make(map[string]int),
 		LastViolationDay:   make(map[string]int),
+		Jobs:               make(map[string]int),
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)
