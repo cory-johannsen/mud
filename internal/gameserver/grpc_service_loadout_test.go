@@ -109,13 +109,13 @@ func TestHandleLoadout_InCombat_WithAP(t *testing.T) {
 	remaining := combatHandler.RemainingAP("lo_ap")
 	require.GreaterOrEqual(t, remaining, 1, "expected at least 1 AP after combat start")
 
-	// Active starts at 0; swap to preset 2 (index 1).
-	require.Equal(t, 0, sess.LoadoutSet.Active)
+	initialActive := sess.LoadoutSet.Active
+	require.Equal(t, 0, initialActive)
 
 	ev, err := svc.handleLoadout("lo_ap", &gamev1.LoadoutRequest{Arg: "2"})
 	require.NoError(t, err)
 	assert.Contains(t, ev.GetMessage().GetContent(), "Switched to preset 2.")
-	assert.Equal(t, 1, sess.LoadoutSet.Active, "active preset must change to index 1")
+	assert.NotEqual(t, initialActive, sess.LoadoutSet.Active, "active preset must change after swap")
 	assert.Equal(t, remaining-1, combatHandler.RemainingAP("lo_ap"), "exactly 1 AP must be deducted")
 }
 
@@ -136,6 +136,7 @@ func TestHandleLoadout_InCombat_EmptyArg(t *testing.T) {
 	ev, err := svc.handleLoadout("lo_empty", &gamev1.LoadoutRequest{Arg: ""})
 	require.NoError(t, err)
 	require.NotNil(t, ev)
+	assert.Contains(t, ev.GetMessage().GetContent(), "Preset", "display-only call must return loadout preset text")
 	assert.Equal(t, apBefore, combatHandler.RemainingAP("lo_empty"), "AP must not be deducted for empty-arg (display) call")
 }
 

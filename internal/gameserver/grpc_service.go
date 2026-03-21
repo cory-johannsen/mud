@@ -3601,7 +3601,12 @@ func (s *GameServiceServer) handleBalance(uid string) (*gamev1.ServerEvent, erro
 // handleLoadout displays or swaps weapon presets for the player.
 //
 // Precondition: uid must be a valid connected player with a non-nil LoadoutSet.
+// Precondition: s.combatH must be non-nil whenever any player may be statusInCombat;
+// if s.combatH is nil and a player is in combat, the AP gate is silently skipped.
 // Postcondition: Returns a ServerEvent with the loadout display or swap result.
+// Postcondition: If req.Arg is non-empty and sess.Status == statusInCombat and
+// s.combatH is non-nil, exactly 1 AP is deducted before the swap; if AP is
+// insufficient the swap is aborted and an error message is returned.
 func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
