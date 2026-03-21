@@ -33,6 +33,7 @@ character_downtime (
     character_id      bigint PRIMARY KEY REFERENCES characters(id),
     activity_id       text        NOT NULL,
     completes_at      timestamptz NOT NULL,
+    room_id           text        NOT NULL,  -- room ID where activity was started; used for reconnect tag validation
     activity_metadata jsonb
 )
 ```
