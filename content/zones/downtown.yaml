@@ -1,5 +1,6 @@
 zone:
   id: downtown
+  danger_level: sketchy
   name: Downtown Portland
   description: The shattered remains of Portland's urban core, where rain-slicked rubble and rusting infrastructure form the
     bones of a dead civilization.

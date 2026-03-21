@@ -1,5 +1,6 @@
 zone:
   id: battleground
+  danger_level: all_out_war
   script_dir: content/scripts/zones/battleground
   name: Battleground Socialist Collective
   description: A fortified commune carved from the ruins of old Battleground, where collective labor and ideological discipline
@@ -300,6 +301,7 @@ zone:
       lighting: dim
       atmosphere: secure
   - id: battle_infirmary
+    danger_level: safe
     title: The Infirmary
     description: 'A converted dental office serves as the collective''s medical
 

@@ -1,5 +1,6 @@
 zone:
   id: se_industrial
+  danger_level: dangerous
   script_dir: content/scripts/zones/se_industrial
   name: Southeast Industrial
   description: Portland's industrial underbelly — a maze of rusting warehouses, abandoned docks, and skeletal cranes. Rain

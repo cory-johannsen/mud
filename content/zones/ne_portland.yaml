@@ -1,5 +1,6 @@
 zone:
   id: ne_portland
+  danger_level: sketchy
   script_dir: content/scripts/zones/ne_portland
   name: Northeast Portland
   description: The old neighborhoods of Northeast Portland have devolved into a patchwork of bike-courier territories, fortified

@@ -1,5 +1,6 @@
 zone:
   id: rustbucket_ridge
+  danger_level: dangerous
   script_dir: content/scripts/zones/rustbucket_ridge
   name: Rustbucket Ridge
   description: "From the outside, Rustbucket Ridge looks like a place forgotten by time and society, \nwhere hope rusts just\

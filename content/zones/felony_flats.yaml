@@ -1,5 +1,6 @@
 zone:
   id: felony_flats
+  danger_level: dangerous
   script_dir: content/scripts/zones/felony_flats
   name: Felony Flats
   description: The sprawl of SE 82nd Avenue and its surrounding blocks — a wasteland of burned-out strip malls, fortified
@@ -270,6 +271,7 @@ zone:
       lighting: overcast
       atmosphere: smoke
   - id: flats_jade_district
+    danger_level: safe
     title: Jade District
     description: 'The old Jade District still clings to life. Food stalls built
 
