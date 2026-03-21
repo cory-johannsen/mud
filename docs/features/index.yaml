@@ -412,7 +412,7 @@ features:
 
   - slug: traps
     name: Traps
-    status: planned
+    status: complete
     priority: 15
     category: world
     file: docs/features/traps.md

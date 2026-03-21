@@ -59,14 +59,25 @@ func (s *GameServiceServer) checkEntryTraps(uid string, sess *session.PlayerSess
 	// TriggerRegion (honkeypot): only fire if the player's home region is targeted.
 	// TriggerEntry: always fire on room entry.
 
-	// Fire armed entry-trigger traps.
+	// Fire armed entry-trigger and region-trigger (Honkeypot) traps.
 	for _, instanceID := range allInstanceIDs {
 		state, ok := s.trapMgr.GetTrap(instanceID)
 		if !ok || !state.Armed {
 			continue
 		}
 		tmpl, ok := s.trapTemplates[state.TemplateID]
-		if !ok || tmpl.Trigger != trap.TriggerEntry {
+		if !ok {
+			continue
+		}
+		switch tmpl.Trigger {
+		case trap.TriggerEntry:
+			// Always fire on room entry.
+		case trap.TriggerRegion:
+			// REQ-TR-1: Only fire Honkeypot if TriggerAction=="entry" and player region is targeted.
+			if tmpl.TriggerAction != "entry" || !isTrapTargeted(sess.Region, tmpl.TargetRegions) {
+				continue
+			}
+		default:
 			continue
 		}
 		s.fireTrap(uid, sess, tmpl, instanceID, dangerLevel, false)
