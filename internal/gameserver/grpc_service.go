@@ -344,6 +344,7 @@ func NewGameServiceServer(
 		s.worldH.SetCombatHandler(s.combatH)
 	}
 	s.WireCoverCrossfireTrap()
+	s.WireConsumableTrapTrigger()
 	return s
 }
 
@@ -1464,6 +1465,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleAid(uid, p.Aid)
 	case *gamev1.ClientMessage_DisarmTrap:
 		return s.handleDisarmTrap(uid, p.DisarmTrap)
+	case *gamev1.ClientMessage_DeployTrap:
+		return s.handleDeployTrap(uid, p.DeployTrap)
 	case *gamev1.ClientMessage_Disarm:
 		return s.handleDisarm(uid, p.Disarm)
 	case *gamev1.ClientMessage_Stride:

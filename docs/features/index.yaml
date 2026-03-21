@@ -432,7 +432,7 @@ features:
 
   - slug: consumable-traps
     name: Consumable Traps
-    status: planned
+    status: complete
     priority: 16
     category: combat
     file: docs/features/consumable-traps.md
