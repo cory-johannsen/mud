@@ -36,6 +36,11 @@ func combineDice(base, bonus string) string {
 	return base + "+" + bonus
 }
 
+// CombineDice is the exported form of combineDice, used in tests.
+func CombineDice(base, bonus string) string {
+	return combineDice(base, bonus)
+}
+
 // ResolveTrigger computes the TriggerResult for tmpl at dangerLevel.
 // For Pressure Plate templates, resolution delegates to the linked payload_template.
 //

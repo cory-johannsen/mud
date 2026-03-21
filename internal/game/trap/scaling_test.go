@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/trap"
+	"pgregory.net/rapid"
 )
 
 func TestScalingFor_GlobalDefaults(t *testing.T) {
@@ -77,11 +78,10 @@ func TestScalingFor_PerTemplateOverride(t *testing.T) {
 	}
 }
 
-func TestScalingFor_HonkeypotIgnoresDamageBonus(t *testing.T) {
-	// REQ-TR-15: damage_bonus is silently ignored for payload types with no damage field.
-	// ScalingFor itself does NOT filter — ResolveTrigger handles that.
-	// This test verifies that ScalingFor still RETURNS a DamageDice value,
-	// confirming that filtering must happen in payload resolution, not here.
+func TestScalingFor_ReturnsGlobalDefaultRegardlessOfPayloadType(t *testing.T) {
+	// ScalingFor returns global defaults regardless of payload type — filtering is ResolveTrigger's job.
+	// This test verifies that ScalingFor still RETURNS a DamageDice value even for payload types
+	// that do not use damage, confirming that filtering must happen in payload resolution, not here.
 	tmpl := &trap.TrapTemplate{
 		ID: "honkeypot_charmer",
 		Payload: &trap.TrapPayload{
@@ -96,4 +96,46 @@ func TestScalingFor_HonkeypotIgnoresDamageBonus(t *testing.T) {
 	if got.DamageDice != "1d6" {
 		t.Errorf("expected DamageDice=1d6 from global default, got %q", got.DamageDice)
 	}
+}
+
+func TestScalingFor_Property_OverrideTakesPriority(t *testing.T) {
+	// Property: when a per-template override exists for a level, it always takes priority over global defaults.
+	rapid.Check(t, func(rt *rapid.T) {
+		bonusDamage := rapid.StringMatching(`[1-4]d[46]`).Draw(rt, "bonusDamage")
+		saveDCBonus := rapid.IntRange(1, 10).Draw(rt, "saveDCBonus")
+		stealthDCBonus := rapid.IntRange(1, 10).Draw(rt, "stealthDCBonus")
+		disableDCBonus := rapid.IntRange(1, 10).Draw(rt, "disableDCBonus")
+
+		tmpl := &trap.TrapTemplate{
+			ID: "test_trap",
+			DangerScaling: &trap.DangerScalingTier{
+				Dangerous: &trap.DangerScalingEntry{
+					DamageBonus:    bonusDamage,
+					SaveDCBonus:    saveDCBonus,
+					StealthDCBonus: stealthDCBonus,
+					DisableDCBonus: disableDCBonus,
+				},
+			},
+		}
+
+		got := trap.ScalingFor(tmpl, "dangerous")
+		if got.DamageDice != bonusDamage {
+			rt.Fatalf("override DamageDice: got %q, want %q", got.DamageDice, bonusDamage)
+		}
+		if got.SaveDCBonus != saveDCBonus {
+			rt.Fatalf("override SaveDCBonus: got %d, want %d", got.SaveDCBonus, saveDCBonus)
+		}
+	})
+}
+
+func TestScalingFor_Property_UnknownLevelReturnsZero(t *testing.T) {
+	// Property: any unrecognised danger level always returns zero ScalingBonuses.
+	rapid.Check(t, func(rt *rapid.T) {
+		unknownLevel := rapid.StringMatching(`x[a-z]{4,8}`).Draw(rt, "unknownLevel")
+		tmpl := &trap.TrapTemplate{ID: "any_trap", DangerScaling: nil}
+		got := trap.ScalingFor(tmpl, unknownLevel)
+		if got.DamageDice != "" || got.SaveDCBonus != 0 || got.StealthDCBonus != 0 || got.DisableDCBonus != 0 {
+			rt.Fatalf("unknown level %q: expected zero bonuses, got %+v", unknownLevel, got)
+		}
+	})
 }

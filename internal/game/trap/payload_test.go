@@ -1,9 +1,11 @@
 package trap_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/trap"
+	"pgregory.net/rapid"
 )
 
 func makeTemplates(entries ...*trap.TrapTemplate) map[string]*trap.TrapTemplate {
@@ -145,4 +147,25 @@ func TestResolveTrigger_Honkeypot_NoDamage(t *testing.T) {
 	if result.SaveDC != 22 {
 		t.Errorf("SaveDC: got %d, want 22 (20+2 dangerous scaling)", result.SaveDC)
 	}
+}
+
+func TestCombineDice_Property(t *testing.T) {
+	// Property: combineDice never returns empty when either input is non-empty.
+	// Property: result contains both operands when both are non-empty.
+	rapid.Check(t, func(rt *rapid.T) {
+		base := rapid.StringMatching(`[1-4]d[46]`).Draw(rt, "base")
+		bonus := rapid.StringMatching(`[1-2]d[46]`).Draw(rt, "bonus")
+
+		result := trap.CombineDice(base, bonus)
+		if result == "" {
+			rt.Fatalf("combineDice(%q, %q) returned empty string", base, bonus)
+		}
+		// Result must contain both components when both are non-empty.
+		if !strings.Contains(result, base) {
+			rt.Fatalf("combineDice(%q, %q) = %q: result does not contain base", base, bonus, result)
+		}
+		if !strings.Contains(result, bonus) {
+			rt.Fatalf("combineDice(%q, %q) = %q: result does not contain bonus", base, bonus, result)
+		}
+	})
 }
