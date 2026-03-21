@@ -291,6 +291,17 @@ features:
     file: docs/features/job-development.md
     effort: "XL"  # drawbacks for 52 jobs; Specialist+Expert tiers with cumulative attribute/feat/proficiency/skill sets; multi-job combinations
 
+  - slug: curse-removal
+    name: Curse Removal
+    status: planned
+    priority: 281
+    category: world
+    file: docs/features/curse-removal.md
+    effort: "S"  # new chip_doc NPC type; uncurse command at chip_doc NPC; credit cost + Rigging check
+    dependencies:
+      - equipment-mechanics
+      - non-combat-npcs
+
   - slug: equipment-mechanics
     name: Equipment Mechanics Expansion
     status: planned
