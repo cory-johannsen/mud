@@ -55,6 +55,10 @@ func (s *GameServiceServer) checkEntryTraps(uid string, sess *session.PlayerSess
 	// via TrapsForRoom, which iterates the TrapManager's internal map by prefix.
 	allInstanceIDs := s.trapMgr.TrapsForRoom(zone.ID, room.ID)
 
+	// Determine whether this trap applies to the current player.
+	// TriggerRegion (honkeypot): only fire if the player's home region is targeted.
+	// TriggerEntry: always fire on room entry.
+
 	// Fire armed entry-trigger traps.
 	for _, instanceID := range allInstanceIDs {
 		state, ok := s.trapMgr.GetTrap(instanceID)
@@ -69,7 +73,7 @@ func (s *GameServiceServer) checkEntryTraps(uid string, sess *session.PlayerSess
 	}
 
 	// Search mode detection (REQ-TR-3/4/5/6/7).
-	if sess.ExploreMode == "case_it" {
+	if sess.ExploreMode == session.ExploreModeCaseIt {
 		s.detectTrapsInRoom(uid, sess, room, zone.ID, dangerLevel)
 	}
 }

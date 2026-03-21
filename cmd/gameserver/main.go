@@ -591,8 +591,8 @@ func main() {
 		actionH,
 		postgres.NewCharacterSpontaneousUsePoolRepository(pool.DB()),
 		postgres.NewWantedRepository(pool.DB()),
-		nil, // trapMgr: not yet wired in production
-		nil, // trapTemplates: not yet wired in production
+		nil, // trapMgr: not yet initialized; traps disabled until trap loading is wired
+		nil, // trapTemplates: not yet initialized; traps disabled until trap loading is wired
 	)
 
 	// Wire XP service with progress and skill-increase persistence.

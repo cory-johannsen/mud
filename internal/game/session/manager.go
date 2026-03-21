@@ -13,6 +13,9 @@ import (
 	"github.com/google/uuid"
 )
 
+// ExploreModeCaseIt is the Search exploration mode that enables trap detection.
+const ExploreModeCaseIt = "case_it"
+
 // PlayerSession tracks a connected player's state.
 type PlayerSession struct {
 	// UID is the unique player identifier (character ID as string).
@@ -116,9 +119,9 @@ type PlayerSession struct {
 	// PendingGroupInvite holds the groupID of a pending group invitation.
 	// Empty string means no pending invite. Protected by Manager.mu.
 	PendingGroupInvite string
-	// ExploreMode is the current exploration mode.
-	// "" means not in explore mode; "case_it" means Search mode (trap detection active).
-	// Set by the exploration feature; stub field for traps feature.
+	// ExploreMode is the current exploration mode (see ExploreModeCaseIt).
+	// "" means not in explore mode; ExploreModeCaseIt means Search mode (trap detection active).
+	// Set by the exploration feature.
 	ExploreMode string
 	// Region is the character's home region ID (e.g. "lake_oswego").
 	// Set at login from dbChar.Region. Used for Honkeypot targeting.
