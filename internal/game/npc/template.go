@@ -123,7 +123,7 @@ type Template struct {
 // MaxHP >= 1, and AC >= 10; returns an error on the first violation otherwise.
 func (t *Template) Validate() error {
 	if t.ID == "" {
-		return fmt.Errorf("npc template: id must not be empty")
+		return fmt.Errorf("npc template (no id): id must not be empty")
 	}
 	if t.Name == "" {
 		return fmt.Errorf("npc template %q: name must not be empty", t.ID)
