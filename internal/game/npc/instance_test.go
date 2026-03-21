@@ -212,6 +212,73 @@ func TestInstance_AbilityCooldowns_LazyInit(t *testing.T) {
 	}
 }
 
+func TestInstance_NPCTypeFromTemplate(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "test_npc", Name: "Test NPC", Level: 1, MaxHP: 10, AC: 12,
+		NPCType:  "merchant",
+		Merchant: &npc.MerchantConfig{ReplenishRate: npc.ReplenishConfig{MinHours: 1, MaxHours: 4}},
+	}
+	inst := npc.NewInstance("inst-1", tmpl, "room-1")
+	assert.Equal(t, "merchant", inst.NPCType, "NPCType must be copied from template")
+}
+
+func TestInstance_PersonalityFromTemplate(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "test_guard", Name: "Guard", Level: 2, MaxHP: 20, AC: 14,
+		NPCType: "guard", Personality: "brave",
+		Guard: &npc.GuardConfig{WantedThreshold: 2},
+	}
+	inst := npc.NewInstance("inst-2", tmpl, "room-1")
+	assert.Equal(t, "brave", inst.Personality, "Personality must be copied from template")
+}
+
+func TestInstance_CombatNPCType(t *testing.T) {
+	tmpl := &npc.Template{ID: "bandit", Name: "Bandit", Level: 1, MaxHP: 20, AC: 12, NPCType: "combat"}
+	inst := npc.NewInstance("inst-3", tmpl, "room-1")
+	assert.Equal(t, "combat", inst.NPCType, "combat NPCType must propagate")
+}
+
+func TestInstance_CoweringDefaultsFalse(t *testing.T) {
+	tmpl := &npc.Template{ID: "test_npc", Name: "NPC", Level: 1, MaxHP: 10, AC: 12, NPCType: "combat"}
+	inst := npc.NewInstance("inst-4", tmpl, "room-1")
+	assert.False(t, inst.Cowering, "Cowering must default to false at spawn")
+}
+
+func TestManager_SpawnPropagatesNPCType(t *testing.T) {
+	mgr := npc.NewManager()
+	tmpl := &npc.Template{
+		ID: "healer_npc", Name: "Healer", Level: 1, MaxHP: 10, AC: 10,
+		NPCType: "healer",
+		Healer:  &npc.HealerConfig{PricePerHP: 5, DailyCapacity: 200},
+	}
+	inst, err := mgr.Spawn(tmpl, "room-heal")
+	require.NoError(t, err)
+	assert.Equal(t, "healer", inst.NPCType, "Manager.Spawn must propagate NPCType")
+}
+
+// TestProperty_Instance_NPCTypeAlwaysPropagates checks that spawning any NPC
+// template always produces an instance with the same NPCType as the template.
+func TestProperty_Instance_NPCTypeAlwaysPropagates(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		npcType := rapid.SampledFrom([]string{
+			"combat", "merchant", "guard", "healer",
+			"quest_giver", "hireling", "banker", "job_trainer", "crafter",
+		}).Draw(rt, "npc_type")
+		tmpl := &npc.Template{
+			ID:      "prop_npc",
+			Name:    "Prop NPC",
+			Level:   1,
+			MaxHP:   10,
+			AC:      12,
+			NPCType: npcType,
+		}
+		inst := npc.NewInstance("prop-inst", tmpl, "prop-room")
+		if inst.NPCType != npcType {
+			rt.Fatalf("expected NPCType %q, got %q", npcType, inst.NPCType)
+		}
+	})
+}
+
 func TestManager_Spawn_AppliesArmorACBonus(t *testing.T) {
 	mgr := npc.NewManager()
 	mgr.SetArmorACResolver(func(armorID string) int {

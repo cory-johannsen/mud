@@ -98,6 +98,15 @@ type Instance struct {
 	// AbilityCooldowns maps operator ID → rounds remaining until usable again.
 	// Nil at spawn; initialized lazily on first write in applyPlanLocked.
 	AbilityCooldowns map[string]int
+	// NPCType is copied from the template at spawn.
+	// "combat" = participates in normal combat; other values = non-combat NPC.
+	NPCType string
+	// Personality is copied from the template at spawn; drives flee/cower behavior.
+	Personality string
+	// Cowering is true when this NPC is in a cower state because combat started
+	// in their room. While Cowering == true, the NPC does not respond to commands.
+	// Cleared when combat in their room ends.
+	Cowering bool
 }
 
 // Name returns the instance's current display name.
@@ -189,6 +198,9 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		RobPercent:       computeRobPercent(tmpl.RobMultiplier, tmpl.Level),
 		Currency:         0,
 		SpecialAbilities: append([]string(nil), tmpl.SpecialAbilities...),
+		NPCType:          tmpl.NPCType,
+		Personality:      tmpl.Personality,
+		// Cowering defaults to false (zero value).
 		Disposition: func() string {
 			if tmpl.Disposition == "" {
 				return "hostile"
