@@ -39,6 +39,14 @@ func makeTrapDeploySvc(t *testing.T) (*GameServiceServer, *trap.TrapManager, *in
 	return svc, trapMgr, reg
 }
 
+func TestHandleDeployTrap_SessionNotFound(t *testing.T) {
+	svc, _, _ := makeTrapDeploySvc(t)
+	// No player added — uid does not exist.
+	ev, err := svc.handleDeployTrap("no_such_uid", &gamev1.DeployTrapRequest{ItemName: "Deployable Mine"})
+	require.NoError(t, err)
+	assert.Contains(t, ev.GetMessage().GetContent(), "not in the game")
+}
+
 func TestHandleDeployTrap_OutOfCombat_Success(t *testing.T) {
 	svc, trapMgr, reg := makeTrapDeploySvc(t)
 
@@ -261,13 +269,13 @@ func TestProperty_DeployTrap_BackpackDecrementsByOne(t *testing.T) {
 			UID: uid, Username: uid, CharName: uid, Role: "player",
 			RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
 		})
-		require.NoError(t, err)
+		require.NoError(rt, err)
 		sess.Conditions = condition.NewActiveSet()
 		_, err = sess.Backpack.Add("deployable_mine", count, reg)
-		require.NoError(t, err)
+		require.NoError(rt, err)
 
 		_, err = svc.handleDeployTrap(uid, &gamev1.DeployTrapRequest{ItemName: "Deployable Mine"})
-		require.NoError(t, err)
+		require.NoError(rt, err)
 
 		total := 0
 		for _, it := range sess.Backpack.Items() {

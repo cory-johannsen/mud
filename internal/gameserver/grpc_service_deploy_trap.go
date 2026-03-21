@@ -21,7 +21,8 @@ func (s *GameServiceServer) handleDeployTrap(uid string, req *gamev1.DeployTrapR
 		return messageEvent("You are not in the game."), nil
 	}
 
-	// AP check first: in-combat deploys cost 1 AP.
+	// AP check first (REQ-CTR-1): in-combat deploys cost 1 AP.
+	// AP is spent before item lookup so a failed AP check never touches inventory.
 	inCombat := sess.Status == statusInCombat
 	if inCombat {
 		if s.combatH.RemainingAP(uid) < 1 {
@@ -50,7 +51,7 @@ func (s *GameServiceServer) handleDeployTrap(uid string, req *gamev1.DeployTrapR
 		return messageEvent(fmt.Sprintf("You don't have a %s.", req.ItemName)), nil
 	}
 	if foundDef.Kind != inventory.KindTrap {
-		return messageEvent(fmt.Sprintf("You can't deploy that.")), nil
+		return messageEvent("You can't deploy that."), nil
 	}
 
 	tmpl, ok := s.trapTemplates[foundDef.TrapTemplateRef]
