@@ -206,6 +206,40 @@ func (h *CombatHandler) SetOnCombatEnd(fn func(roomID string)) {
 	h.onCombatEndFn = fn
 }
 
+// InitiateGuardCombat finds guard NPCs in the player's current room and starts
+// combat against the player. wantedLevel distinguishes detain (2) from kill (3-4).
+// If no guard NPCs are present in the room, this is a no-op.
+//
+// Precondition: uid MUST be a valid player UID; wantedLevel MUST be in [2, 4].
+func (h *CombatHandler) InitiateGuardCombat(uid, zoneID string, wantedLevel int) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok {
+		return
+	}
+	npcs := h.npcMgr.InstancesInRoom(sess.RoomID)
+	var guardIDs []string
+	for _, n := range npcs {
+		if n.Type == "guard" {
+			guardIDs = append(guardIDs, n.ID)
+		}
+	}
+	if len(guardIDs) == 0 {
+		return
+	}
+	var narrative string
+	if wantedLevel >= 3 {
+		narrative = "The guards attack on sight!"
+	} else {
+		narrative = "Guards shout: Drop your weapon and surrender!"
+	}
+	h.broadcastFn(sess.RoomID, []*gamev1.CombatEvent{
+		{Type: gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK, Narrative: narrative},
+	})
+	for _, guardID := range guardIDs {
+		_, _ = h.Attack(guardID, uid)
+	}
+}
+
 // Attack queues a 1-AP ActionAttack for uid against target.
 // If no combat is active in the room, it is started first.
 // If AllActionsSubmitted after queuing, the round resolves immediately.
