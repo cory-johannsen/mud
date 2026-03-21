@@ -1,10 +1,14 @@
 package gameserver
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 )
 
 // spawnTypedNPC creates and registers a live NPC instance with the given type in roomID.
@@ -195,4 +199,74 @@ func TestInitiateGuardCombat_DefaultThreshold(t *testing.T) {
 	if !broadcastCalled {
 		t.Fatal("guard with default WantedThreshold must engage at wantedLevel=2")
 	}
+}
+
+// TestProperty_InitiateGuardCombat_ThresholdInvariant verifies that for any guard
+// WantedThreshold T in [1,4] and player WantedLevel L in [1,4]:
+// - L >= T → broadcastFn is called (guard engages)
+// - L < T  → broadcastFn is NOT called
+func TestProperty_InitiateGuardCombat_ThresholdInvariant(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		threshold := rapid.IntRange(1, 4).Draw(rt, "threshold")
+		wantedLevel := rapid.IntRange(1, 4).Draw(rt, "wantedLevel")
+
+		var broadcastCalled bool
+		h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {
+			broadcastCalled = true
+		})
+
+		roomID := fmt.Sprintf("prop-thresh-room-%d-%d", threshold, wantedLevel)
+		uid := fmt.Sprintf("prop-player-%d-%d", threshold, wantedLevel)
+
+		tmpl := &npc.Template{
+			ID:      fmt.Sprintf("prop_guard_%d_%d", threshold, wantedLevel),
+			Name:    "Prop Guard",
+			NPCType: "guard",
+			Level:   2, MaxHP: 30, AC: 12,
+			Guard: &npc.GuardConfig{WantedThreshold: threshold},
+		}
+		_, err := h.npcMgr.Spawn(tmpl, roomID)
+		require.NoError(t, err)
+		addTestPlayerNamed(t, h.sessions, uid, roomID, "PropTester")
+
+		h.InitiateGuardCombat(uid, "zone-1", wantedLevel)
+
+		if wantedLevel >= threshold {
+			assert.True(rt, broadcastCalled, "guard must engage when wantedLevel(%d) >= threshold(%d)", wantedLevel, threshold)
+		} else {
+			assert.False(rt, broadcastCalled, "guard must NOT engage when wantedLevel(%d) < threshold(%d)", wantedLevel, threshold)
+		}
+	})
+}
+
+// TestProperty_InitiateGuardCombat_NeverPanics verifies that InitiateGuardCombat
+// never panics for any combination of wantedLevel and guard threshold.
+func TestProperty_InitiateGuardCombat_NeverPanics(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		wantedLevel := rapid.IntRange(0, 5).Draw(rt, "wantedLevel")
+
+		h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+
+		uid := fmt.Sprintf("never-panic-%d", wantedLevel)
+		roomID := fmt.Sprintf("never-panic-room-%d", wantedLevel)
+		addTestPlayerNamed(t, h.sessions, uid, roomID, "NeverPanic")
+
+		// Optionally spawn a guard.
+		if rapid.Bool().Draw(rt, "hasGuard") {
+			threshold := rapid.IntRange(0, 4).Draw(rt, "threshold")
+			tmpl := &npc.Template{
+				ID:      fmt.Sprintf("np_guard_%d_%d", wantedLevel, threshold),
+				Name:    "NP Guard",
+				NPCType: "guard",
+				Level:   1, MaxHP: 10, AC: 10,
+				Guard: &npc.GuardConfig{WantedThreshold: threshold},
+			}
+			_, _ = h.npcMgr.Spawn(tmpl, roomID)
+		}
+
+		// Must not panic.
+		assert.NotPanics(t, func() {
+			h.InitiateGuardCombat(uid, "zone-1", wantedLevel)
+		})
+	})
 }
