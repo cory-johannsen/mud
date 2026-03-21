@@ -194,6 +194,7 @@ Called from the `onCombatantMoved` callback wired in `WireConsumableTrapTrigger(
 
 ```
 zone, room = lookup by roomID
+dangerLevel = zone.DangerLevel  // same as used in checkEntryTraps
 activeCombat = s.combatH.GetCombat(roomID)
 movedCombatant = activeCombat.CombatantByID(movedCombatantID)
 if movedCombatant == nil: return
