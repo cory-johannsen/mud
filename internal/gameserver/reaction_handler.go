@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
@@ -99,6 +100,111 @@ func shieldHardness(sess *session.PlayerSession) int {
 	return 0
 }
 
+// MatchesReadyTrigger reports whether the player's readied trigger string corresponds to the
+// fired reaction trigger type.
+//
+// Precondition: readiedTrigger is the string stored in PlayerSession.ReadiedTrigger.
+// Postcondition: Returns true iff the strings are semantically equivalent.
+func MatchesReadyTrigger(readiedTrigger string, firedTrigger reaction.ReactionTriggerType) bool {
+	switch readiedTrigger {
+	case "enemy_enters":
+		return firedTrigger == reaction.TriggerOnEnemyEntersRoom
+	case "enemy_attacks_me":
+		return firedTrigger == reaction.TriggerOnDamageTaken
+	case "ally_attacked":
+		return firedTrigger == reaction.TriggerOnAllyDamaged
+	default:
+		return false
+	}
+}
+
+// executeReadiedStrike fires the readied Strike action.
+//
+// Precondition: s, uid, and sess must not be nil; sess.ReadiedAction == "strike".
+// Postcondition: Strike is queued against the first NPC combatant found; a message is pushed to the player.
+func executeReadiedStrike(s *GameServiceServer, uid string, sess *session.PlayerSession) {
+	if s.combatH == nil {
+		s.pushMessageToUID(uid, "Your readied Strike finds no target.")
+		return
+	}
+	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
+	if !ok {
+		s.pushMessageToUID(uid, "Your readied Strike finds no target.")
+		return
+	}
+	target := ""
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			target = c.ID
+			break
+		}
+	}
+	if target == "" {
+		s.pushMessageToUID(uid, "Your readied Strike finds no target.")
+		return
+	}
+	events, err := s.combatH.Strike(uid, target)
+	if err != nil {
+		s.pushMessageToUID(uid, "Your readied Strike fires but misses: "+err.Error())
+		return
+	}
+	for _, evt := range events {
+		s.pushMessageToUID(uid, "Readied Strike: "+evt.Narrative)
+	}
+}
+
+// executeReadiedStep fires the readied Step action.
+//
+// Precondition: s, uid, and sess must not be nil; sess.ReadiedAction == "step".
+// Postcondition: Player combatant's position advances 5 ft toward the NPC; a message is pushed.
+func executeReadiedStep(s *GameServiceServer, uid string, sess *session.PlayerSession) {
+	if s.combatH == nil {
+		s.pushMessageToUID(uid, "Your readied Step fires — you move 5 feet.")
+		return
+	}
+	cbt, ok := s.combatH.GetCombatForRoom(sess.RoomID)
+	if !ok {
+		s.pushMessageToUID(uid, "Your readied Step fires — you move 5 feet.")
+		return
+	}
+	combatant := cbt.GetCombatant(uid)
+	if combatant == nil {
+		s.pushMessageToUID(uid, "Your readied Step fires — you move 5 feet.")
+		return
+	}
+	combatant.Position += 5
+	s.pushMessageToUID(uid, "Your readied Step fires — you move 5 feet.")
+}
+
+// executeReadiedRaiseShield fires the readied Raise Shield action.
+//
+// Precondition: s, uid, and sess must not be nil; sess.ReadiedAction == "raise_shield".
+// Postcondition: Shield bonus is applied; a message is pushed to the player.
+func executeReadiedRaiseShield(s *GameServiceServer, uid string, sess *session.PlayerSession) {
+	if s.combatH != nil {
+		if err := s.combatH.ApplyCombatantACMod(uid, uid, +2); err != nil {
+			s.pushMessageToUID(uid, "Your readied Raise Shield fires — shield bonus applied.")
+			return
+		}
+	}
+	s.pushMessageToUID(uid, "Your readied Raise Shield fires — shield bonus applied.")
+}
+
+// executeReadiedAction dispatches the readied action stored in sess.
+//
+// Precondition: s, uid, and sess must not be nil; sess.ReadiedAction is non-empty.
+// Postcondition: The appropriate action is executed and a message is pushed to the player.
+func executeReadiedAction(s *GameServiceServer, uid string, sess *session.PlayerSession, _ reaction.ReactionTriggerType) {
+	switch sess.ReadiedAction {
+	case "strike":
+		executeReadiedStrike(s, uid, sess)
+	case "step":
+		executeReadiedStep(s, uid, sess)
+	case "raise_shield":
+		executeReadiedRaiseShield(s, uid, sess)
+	}
+}
+
 // buildReactionCallback constructs the ReactionCallback for a player session.
 //
 // Precondition: uid, sess, and stream must not be nil.
@@ -111,6 +217,11 @@ func (s *GameServiceServer) buildReactionCallback(
 	return func(triggerUID string, trigger reaction.ReactionTriggerType, ctx reaction.ReactionContext) (bool, error) {
 		if triggerUID != uid {
 			return false, nil
+		}
+		// Fire readied action if trigger matches.
+		if sess.ReadiedTrigger != "" && MatchesReadyTrigger(sess.ReadiedTrigger, trigger) {
+			executeReadiedAction(s, uid, sess, trigger)
+			clearReadiedAction(sess)
 		}
 		if sess.ReactionsRemaining <= 0 {
 			return false, nil

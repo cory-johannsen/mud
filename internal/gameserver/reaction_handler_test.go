@@ -114,3 +114,28 @@ func TestApplyReactionEffect_ReduceDamage_NilDamagePending_Noop(t *testing.T) {
 	})
 }
 
+// REQ-READY-15: "enemy_enters" readied trigger matches TriggerOnEnemyEntersRoom.
+func TestMatchesReadyTrigger_EnemyEnters(t *testing.T) {
+	assert.True(t, gameserver.MatchesReadyTrigger("enemy_enters", reaction.TriggerOnEnemyEntersRoom))
+}
+
+// REQ-READY-15: "enemy_attacks_me" readied trigger matches TriggerOnDamageTaken.
+func TestMatchesReadyTrigger_EnemyAttacksMe(t *testing.T) {
+	assert.True(t, gameserver.MatchesReadyTrigger("enemy_attacks_me", reaction.TriggerOnDamageTaken))
+}
+
+// REQ-READY-15: "ally_attacked" readied trigger matches TriggerOnAllyDamaged.
+func TestMatchesReadyTrigger_AllyAttacked(t *testing.T) {
+	assert.True(t, gameserver.MatchesReadyTrigger("ally_attacked", reaction.TriggerOnAllyDamaged))
+}
+
+// REQ-READY-15: unknown readied trigger returns false.
+func TestMatchesReadyTrigger_Unknown(t *testing.T) {
+	assert.False(t, gameserver.MatchesReadyTrigger("foo", reaction.TriggerOnEnemyEntersRoom))
+}
+
+// REQ-READY-15: "enemy_enters" does NOT match TriggerOnDamageTaken.
+func TestMatchesReadyTrigger_WrongTrigger(t *testing.T) {
+	assert.False(t, gameserver.MatchesReadyTrigger("enemy_enters", reaction.TriggerOnDamageTaken))
+}
+
