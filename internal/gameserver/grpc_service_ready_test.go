@@ -60,8 +60,8 @@ func TestReadyAction_ClearReadiedAction_ClearsFields(t *testing.T) {
 
 	clearReadiedAction(sess)
 
-	assert.Equal(t, "", sess.ReadiedTrigger)
-	assert.Equal(t, "", sess.ReadiedAction)
+	assert.Equal(t, "", sess.ReadiedTrigger, "ReadiedTrigger must be cleared")
+	assert.Equal(t, "", sess.ReadiedAction, "ReadiedAction must be cleared")
 }
 
 // makeReadySvc builds a minimal GameServiceServer with a real CombatHandler for ready action tests.
@@ -132,7 +132,7 @@ func TestHandleReady_NotInCombat(t *testing.T) {
 
 func TestHandleReady_InsufficientAP(t *testing.T) {
 	svc, combatHandler := makeReadySvc(t)
-	sess := setupReadyCombat(t, svc, combatHandler, "rp2")
+	setupReadyCombat(t, svc, combatHandler, "rp2")
 
 	// Drain AP down to 1 by spending all but 1.
 	rem := combatHandler.RemainingAP("rp2")
@@ -141,7 +141,6 @@ func TestHandleReady_InsufficientAP(t *testing.T) {
 		require.NoError(t, combatHandler.SpendAP("rp2", rem-1))
 	}
 	require.Equal(t, 1, combatHandler.RemainingAP("rp2"))
-	_ = sess
 
 	ev, err := svc.handleReady("rp2", &gamev1.ReadyRequest{Action: "strike", Trigger: "enemy_enters"})
 	require.NoError(t, err)
@@ -188,7 +187,7 @@ func TestHandleReady_Success(t *testing.T) {
 	ev, err := svc.handleReady("rp6", &gamev1.ReadyRequest{Action: "strike", Trigger: "enemy_enters"})
 	require.NoError(t, err)
 	assert.Contains(t, ev.GetMessage().GetContent(), "You ready a Strike for when an enemy enters the room.")
-	assert.Equal(t, "enemy_enters", sess.ReadiedTrigger)
-	assert.Equal(t, "strike", sess.ReadiedAction)
-	assert.Equal(t, apBefore-2, combatHandler.RemainingAP("rp6"))
+	assert.Equal(t, "enemy_enters", sess.ReadiedTrigger, "ReadiedTrigger must be set to the requested trigger")
+	assert.Equal(t, "strike", sess.ReadiedAction, "ReadiedAction must be set to the requested action")
+	assert.Equal(t, apBefore-2, combatHandler.RemainingAP("rp6"), "readying an action must cost 2 AP")
 }
