@@ -33,6 +33,16 @@ func TestBridgeReady_ValidArgs(t *testing.T) {
 }
 
 
+// TestBridgeReady_NoWhenKeyword verifies that bridgeReady returns done=true (error path)
+// when the args don't contain " when ".
+func TestBridgeReady_NoWhenKeyword(t *testing.T) {
+	bctx := makeBridgeContext("req1", "strike")
+	result, err := bridgeReady(bctx)
+	require.NoError(t, err)
+	assert.True(t, result.done, "missing 'when' keyword must result in error prompt (done=true)")
+	assert.Nil(t, result.msg, "no message should be returned on error path")
+}
+
 // TestBridgeUse_WithTarget verifies that bridgeUse populates both feat_id and target
 // when two tokens are provided in RawArgs.
 func TestBridgeUse_WithTarget(t *testing.T) {

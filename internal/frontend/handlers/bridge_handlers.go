@@ -139,12 +139,14 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 // Postcondition: writes msg in red and the prompt, then returns done=true with nil error.
 func writeErrorPrompt(bctx *bridgeContext, msg string) (bridgeResult, error) {
 	colored := telnet.Colorize(telnet.Red, msg)
-	if bctx.conn.IsSplitScreen() {
-		_ = bctx.conn.WriteConsole(colored)
-		_ = bctx.conn.WritePromptSplit(bctx.promptFn())
-	} else {
-		_ = bctx.conn.WriteLine(colored)
-		_ = bctx.conn.WritePrompt(bctx.promptFn())
+	if bctx.conn != nil {
+		if bctx.conn.IsSplitScreen() {
+			_ = bctx.conn.WriteConsole(colored)
+			_ = bctx.conn.WritePromptSplit(bctx.promptFn())
+		} else {
+			_ = bctx.conn.WriteLine(colored)
+			_ = bctx.conn.WritePrompt(bctx.promptFn())
+		}
 	}
 	return bridgeResult{done: true}, nil
 }
