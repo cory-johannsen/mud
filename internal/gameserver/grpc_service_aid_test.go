@@ -40,6 +40,7 @@ func newAidSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil, nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -66,6 +67,7 @@ func newAidSvc(t *testing.T, roller *dice.Roller) (*GameServiceServer, *session.
 		nil, nil, nil,
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
 		nil, nil,
 		nil, nil,
 	)

@@ -48,7 +48,7 @@ func testServiceWithAdmin(t *testing.T, admin AccountAdmin) *GameServiceServer {
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 	return NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, admin,
-		nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func TestHandleSetRole_AdminSuccess(t *testing.T) {

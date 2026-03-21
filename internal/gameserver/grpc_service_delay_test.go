@@ -41,6 +41,7 @@ func newDelaySvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

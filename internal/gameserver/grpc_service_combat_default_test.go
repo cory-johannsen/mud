@@ -77,7 +77,8 @@ func testServiceForCombatDefault(t *testing.T, saver CharacterSaver) *GameServic
 		nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
-		nil,
+		nil, nil,
+		nil, nil,
 	)
 }
 

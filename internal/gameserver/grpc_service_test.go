@@ -128,8 +128,8 @@ func TestStartZoneTicks_RespawnIntegration(t *testing.T) {
 		nil, nil, nil, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
-		nil,
-		nil,
+		nil, nil,
+		nil, nil,
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -159,7 +159,7 @@ func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 	logger := zaptest.NewLogger(t)
 
 	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
@@ -499,6 +499,7 @@ func testGRPCServerWithCharData(t *testing.T) (gamev1.GameServiceClient, *sessio
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -623,6 +624,7 @@ func TestApplyRoomSkillChecks_OnEnter_Success(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	// Add a player session with Skills and Abilities set.
@@ -695,6 +697,7 @@ func TestApplyRoomSkillChecks_OnEnter_Failure(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -756,6 +759,7 @@ func TestApplyRoomSkillChecks_NoOnEnterTriggers(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -880,6 +884,7 @@ end
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -949,6 +954,7 @@ function get_captured_outcome() return captured_outcome end
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess2, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1041,6 +1047,7 @@ func TestApplyRoomSkillChecks_DamageEffect(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1124,6 +1131,7 @@ func TestApplyNPCSkillChecks_OnGreet_Success(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1203,6 +1211,7 @@ func TestApplyNPCSkillChecks_OnGreet_Failure(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1246,6 +1255,7 @@ func TestApplyNPCSkillChecks_NoNPCs(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1306,6 +1316,7 @@ func TestApplyNPCSkillChecks_NonGreetTriggerIgnored(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	_, err = sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1389,6 +1400,7 @@ func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1747,6 +1759,7 @@ func TestHandleUse_AppliesConditionWhenConditionIDSet(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1815,6 +1828,7 @@ func TestHandleUse_NoConditionAppliedWhenConditionIDEmpty(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1889,6 +1903,7 @@ func TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied(t *testing.T) {
 			nil, nil,
 			nil,
 			nil,
+			nil, nil,
 		)
 
 		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -1954,6 +1969,7 @@ func newRaiseShieldSvc(t *testing.T, condReg *condition.Registry) (*GameServiceS
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -2103,6 +2119,7 @@ func TestHandleRaiseShield_InCombat_InsufficientAP(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -2155,6 +2172,7 @@ func newTakeCoverSvc(t *testing.T, condReg *condition.Registry) (*GameServiceSer
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -2221,6 +2239,7 @@ func TestHandleTakeCover_OutOfCombat(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -2293,6 +2312,7 @@ func TestHandleTakeCover_InCombat_InsufficientAP(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -2351,6 +2371,7 @@ func newFirstAidSvc(t *testing.T, roller *dice.Roller, combatHandler *CombatHand
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -2460,6 +2481,7 @@ func TestHandleFirstAid_InCombat_InsufficientAP(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -2505,6 +2527,7 @@ func newFeintSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatH
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -2599,6 +2622,7 @@ func TestHandleFeint_InCombat_NoActiveSession(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
@@ -2649,6 +2673,7 @@ func newFeintSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
@@ -2805,6 +2830,7 @@ func newDemoralizeSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, co
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -2840,6 +2866,7 @@ func newDemoralizeSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameService
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

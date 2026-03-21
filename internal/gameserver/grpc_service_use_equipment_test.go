@@ -161,6 +161,8 @@ func newUseEquipServerWithSkillChecks(
 		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
+		nil, nil,
 	)
 
 	uid := "ue_sc_u1"

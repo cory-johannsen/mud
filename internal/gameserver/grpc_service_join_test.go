@@ -40,6 +40,8 @@ func newJoinSvc(t *testing.T) (*GameServiceServer, *session.Manager, *CombatHand
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, combatHandler
 }

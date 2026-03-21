@@ -110,6 +110,8 @@ func testServiceForTrainSkill(t *testing.T, opts trainSkillTestOptions) *GameSer
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
+		nil, nil,
 	)
 	svc.characterSkillsRepo = opts.skillsRepo
 	svc.progressRepo = opts.progressRepo

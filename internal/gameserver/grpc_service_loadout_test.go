@@ -40,6 +40,7 @@ func newLoadoutSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceSer
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

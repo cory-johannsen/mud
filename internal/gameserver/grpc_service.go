@@ -20,6 +20,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/trap"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
@@ -204,6 +205,8 @@ type GameServiceServer struct {
 	actionH                    *ActionHandler
 	wantedRepo                 *postgres.WantedRepository
 	stopWantedDecay            func()
+	trapMgr                    *trap.TrapManager
+	trapTemplates              map[string]*trap.TrapTemplate
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -273,6 +276,8 @@ func NewGameServiceServer(
 	actionH *ActionHandler,
 	spontaneousUsePoolRepo SpontaneousUsePoolRepo,
 	wantedRepo *postgres.WantedRepository,
+	trapMgr *trap.TrapManager,
+	trapTemplates map[string]*trap.TrapTemplate,
 ) *GameServiceServer {
 	s := &GameServiceServer{
 		world:                      worldMgr,
@@ -319,6 +324,8 @@ func NewGameServiceServer(
 		actionH:                    actionH,
 		spontaneousUsePoolRepo:     spontaneousUsePoolRepo,
 		wantedRepo:                 wantedRepo,
+		trapMgr:                    trapMgr,
+		trapTemplates:              trapTemplates,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
@@ -481,6 +488,11 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		return fmt.Errorf("adding player: %w", err)
 	}
 	defer s.cleanupPlayer(uid, username)
+
+	// Set home region ID for Honkeypot targeting.
+	if dbChar != nil {
+		sess.Region = dbChar.Region
+	}
 
 	// Backfill gender: if the loaded character has no gender, assign a random standard gender and persist it.
 	if sess.Gender == "" && characterID > 0 && s.charSaver != nil {
@@ -1664,6 +1676,11 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 				}
 			}
 		}
+	}
+
+	// Fire armed entry-trigger traps and perform Search-mode detection.
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		s.checkEntryTraps(uid, sess, newRoom)
 	}
 
 	// Room trap roll and wanted-level guard check on room entry.

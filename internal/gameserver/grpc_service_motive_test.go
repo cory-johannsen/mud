@@ -47,6 +47,7 @@ func newMotiveSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServ
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

@@ -38,6 +38,7 @@ func newHideSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatHa
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -69,6 +70,7 @@ func newHideSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

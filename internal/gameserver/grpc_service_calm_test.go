@@ -45,7 +45,8 @@ func newCalmSvc(t *testing.T, mentalMgr *mentalstate.Manager, roller *dice.Rolle
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		mentalMgr, nil,
-		nil,
+		nil, nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

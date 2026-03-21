@@ -40,6 +40,8 @@ func newGroupSvc(t *testing.T) (*GameServiceServer, *session.Manager) {
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }

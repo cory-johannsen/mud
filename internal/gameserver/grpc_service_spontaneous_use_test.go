@@ -84,6 +84,8 @@ func newSpontaneousSvc(t *testing.T, repo SpontaneousUsePoolRepo) (*GameServiceS
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		repo,
+		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }

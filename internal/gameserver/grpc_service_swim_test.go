@@ -109,8 +109,8 @@ func newSwimSvc(t *testing.T, roller *dice.Roller, condReg *condition.Registry) 
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
-		nil,
-		nil,
+		nil, nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -143,8 +143,8 @@ func newSwimSvcWithCombat(t *testing.T, roller *dice.Roller, condReg *condition.
 		nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
-		nil,
-		nil,
+		nil, nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }

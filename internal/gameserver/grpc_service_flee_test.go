@@ -48,6 +48,7 @@ func newFleeSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, worldMgr, sessMgr, npcMgr, combatHandler
 }
@@ -187,6 +188,7 @@ func TestHandleFlee_Success_NoValidExits(t *testing.T) {
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	sessMgr := lockedSessMgr
 	npcMgr := lockedNPCMgr

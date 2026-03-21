@@ -45,6 +45,8 @@ func newSummonItemServiceOpts(t *testing.T, fm *inventory.FloorManager, reg *inv
 		nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
+		nil,
+		nil, nil,
 	)
 }
 

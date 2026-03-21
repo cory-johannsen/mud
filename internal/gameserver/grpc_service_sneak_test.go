@@ -38,6 +38,7 @@ func newSneakSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatH
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr
 }
@@ -69,6 +70,7 @@ func newSneakSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		nil, nil,
 		nil,
 		nil,
+		nil, nil,
 	)
 	return svc, sessMgr, npcMgr, combatHandler
 }
