@@ -17,9 +17,9 @@ Room hazards that trigger on specific conditions, dealing damage or applying con
     - REQ-TR-1: Non-targeted players MUST NOT trigger a Honkeypot.
     - REQ-TR-2: Honkeypots MUST NOT appear in Search detection rolls for non-targeted players.
   - [ ] Cover crossfire implicit hook — fires when attack misses cover item with `TrapTemplate` set
-- [ ] Detection (Search mode only)
-  - REQ-TR-3: Trap detection MUST only be available during Search exploration mode.
-  - REQ-TR-4: On room entry in Search mode, secret Perception check vs scaled `stealth_dc` for each armed trap.
+- [ ] Detection (Case It mode only — `sess.ExploreMode == "case_it"`)
+  - REQ-TR-3: Trap detection MUST only be available during Case It exploration mode (mode ID `"case_it"`, the `exploration` feature's implementation of Search mode).
+  - REQ-TR-4: On room entry in Case It mode, secret Awareness check vs scaled `stealth_dc` for each armed trap (satisfied by REQ-EXP-19 through REQ-EXP-24 in the `exploration` feature).
   - REQ-TR-5: Successful detection MUST flag trap as detected and reveal its name and location.
   - REQ-TR-6: Failed detection check MUST produce no message.
   - REQ-TR-7: Honkeypots MUST be excluded from Search detection rolls for non-targeted players.
