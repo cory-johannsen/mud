@@ -43,7 +43,7 @@ var displayRightRingSlots = []inventory.AccessorySlot{
 // Precondition: sess must not be nil; sess.LoadoutSet and sess.Equipment must not be nil.
 // Postcondition: Returns a formatted multi-section string showing all weapon presets,
 // all 8 armor slots, and neck + left/right ring accessory slots with human-readable labels.
-func HandleEquipment(sess *session.PlayerSession) string {
+func HandleEquipment(sess *session.PlayerSession, width int) string {
 	var sb strings.Builder
 
 	// === Weapons ===

@@ -3698,7 +3698,7 @@ func (s *GameServiceServer) handleEquipment(uid string, _ *gamev1.EquipmentReque
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	return messageEvent(command.HandleEquipment(sess)), nil
+	return messageEvent(command.HandleEquipment(sess, 80)), nil
 }
 
 // pushCharacterSheet sends an updated CharacterSheetView to the player's entity

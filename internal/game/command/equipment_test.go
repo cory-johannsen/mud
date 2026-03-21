@@ -17,7 +17,7 @@ import (
 func TestHandleEquipment_EmptyState(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	if !strings.Contains(result, "=== Weapons ===") {
 		t.Errorf("expected '=== Weapons ===' header, got:\n%s", result)
@@ -35,7 +35,7 @@ func TestHandleEquipment_EmptyState(t *testing.T) {
 func TestHandleEquipment_ShowsBothPresets(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	if !strings.Contains(result, "Preset 1") {
 		t.Errorf("expected 'Preset 1', got:\n%s", result)
@@ -49,7 +49,7 @@ func TestHandleEquipment_ShowsBothPresets(t *testing.T) {
 func TestHandleEquipment_ActivePresetMarked(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	count := strings.Count(result, "[active]")
 	if count != 1 {
@@ -64,7 +64,7 @@ func TestHandleEquipment_WeaponDisplayedWithAmmo(t *testing.T) {
 	_ = sess.LoadoutSet.Presets[0].EquipMainHand(pistolWeaponDef())
 	sess.LoadoutSet.Presets[0].MainHand.Magazine.Loaded = 12
 
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	if !strings.Contains(result, "9mm Pistol") {
 		t.Errorf("expected weapon name, got:\n%s", result)
@@ -77,7 +77,7 @@ func TestHandleEquipment_WeaponDisplayedWithAmmo(t *testing.T) {
 // TestHandleEquipment_ArmorSlotsAll verifies that all 8 armor slots appear using human-readable labels.
 func TestHandleEquipment_ArmorSlotsAll(t *testing.T) {
 	sess := newTestSessionWithBackpack()
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	armorLabels := []string{"Head:", "Torso:", "Left Arm:", "Right Arm:", "Hands:", "Left Leg:", "Right Leg:", "Feet:"}
 	for _, label := range armorLabels {
@@ -91,7 +91,7 @@ func TestHandleEquipment_ArmorSlotsAll(t *testing.T) {
 // are displayed using human-readable labels.
 func TestHandleEquipment_AccessorySlotsRing1Through5(t *testing.T) {
 	sess := newTestSessionWithBackpack()
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	for i := 1; i <= 5; i++ {
 		leftLabel := fmt.Sprintf("Left Hand Ring %d:", i)
@@ -109,7 +109,7 @@ func TestHandleEquipment_AccessorySlotsRing1Through5(t *testing.T) {
 // are not shown in the display (only 5 rings per hand shown per spec).
 func TestHandleEquipment_Ring6ThroughRing10NotDisplayed(t *testing.T) {
 	sess := newTestSessionWithBackpack()
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	for i := 6; i <= 10; i++ {
 		leftLabel := fmt.Sprintf("Left Hand Ring %d:", i)
@@ -126,7 +126,7 @@ func TestHandleEquipment_Ring6ThroughRing10NotDisplayed(t *testing.T) {
 // TestHandleEquipment_NeckSlotDisplayed verifies that the neck accessory slot appears.
 func TestHandleEquipment_NeckSlotDisplayed(t *testing.T) {
 	sess := newTestSessionWithBackpack()
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	if !strings.Contains(result, "Neck:") {
 		t.Errorf("expected 'Neck:' in output:\n%s", result)
@@ -137,7 +137,7 @@ func TestHandleEquipment_NeckSlotDisplayed(t *testing.T) {
 // main and off hand when no weapons are equipped.
 func TestHandleEquipment_EmptyWeaponSlots(t *testing.T) {
 	sess := newTestSessionWithBackpack()
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	// 2 presets × 2 slots = 4 "empty" occurrences minimum in weapon section.
 	count := strings.Count(result, "empty")
@@ -152,13 +152,15 @@ func TestHandleEquipment_SecondPresetEquipped(t *testing.T) {
 	sess := newTestSessionWithBackpack()
 	_ = sess.LoadoutSet.Presets[1].EquipMainHand(pistolWeaponDef())
 
-	result := command.HandleEquipment(sess)
+	result := command.HandleEquipment(sess, 0)
 
 	if !strings.Contains(result, "9mm Pistol") {
 		t.Errorf("expected weapon in preset 2 to appear, got:\n%s", result)
 	}
 }
 
+// NOTE: intentionally tests single-col path only (width=0).
+// The 2-col path (width>=60) does not emit === Armor === or === Accessories === headers.
 // TestProperty_HandleEquipment_AlwaysHasAllSections is a property-based test verifying
 // that regardless of which preset is active, all three sections always appear.
 func TestProperty_HandleEquipment_AlwaysHasAllSections(t *testing.T) {
@@ -173,7 +175,7 @@ func TestProperty_HandleEquipment_AlwaysHasAllSections(t *testing.T) {
 		activeIdx := rapid.IntRange(0, len(sess.LoadoutSet.Presets)-1).Draw(rt, "activeIdx")
 		sess.LoadoutSet.Active = activeIdx
 
-		result := command.HandleEquipment(sess)
+		result := command.HandleEquipment(sess, 0)
 
 		sections := []string{"=== Weapons ===", "=== Armor ===", "=== Accessories ==="}
 		for _, section := range sections {
@@ -191,7 +193,7 @@ func TestProperty_HandleEquipment_AlwaysHasAllSections(t *testing.T) {
 
 func TestHandleEquipment_HandsSlotDisplayed(t *testing.T) {
 	sess := newTestSession()
-	output := command.HandleEquipment(sess)
+	output := command.HandleEquipment(sess, 0)
 	if !strings.Contains(output, "Hands:") {
 		t.Errorf("expected 'Hands:' in output, got:\n%s", output)
 	}
@@ -199,7 +201,7 @@ func TestHandleEquipment_HandsSlotDisplayed(t *testing.T) {
 
 func TestHandleEquipment_HumanReadableArmorLabels(t *testing.T) {
 	sess := newTestSession()
-	output := command.HandleEquipment(sess)
+	output := command.HandleEquipment(sess, 0)
 	wantLabels := []string{"Head:", "Torso:", "Left Arm:", "Right Arm:", "Hands:", "Left Leg:", "Right Leg:", "Feet:"}
 	for _, label := range wantLabels {
 		if !strings.Contains(output, label) {
@@ -210,7 +212,7 @@ func TestHandleEquipment_HumanReadableArmorLabels(t *testing.T) {
 
 func TestHandleEquipment_HumanReadableRingLabels(t *testing.T) {
 	sess := newTestSession()
-	output := command.HandleEquipment(sess)
+	output := command.HandleEquipment(sess, 0)
 	wantLabels := []string{
 		"Left Hand Ring 1:", "Left Hand Ring 2:", "Left Hand Ring 3:",
 		"Left Hand Ring 4:", "Left Hand Ring 5:",
@@ -226,7 +228,7 @@ func TestHandleEquipment_HumanReadableRingLabels(t *testing.T) {
 
 func TestHandleEquipment_OldRingNamesNotDisplayed(t *testing.T) {
 	sess := newTestSession()
-	output := command.HandleEquipment(sess)
+	output := command.HandleEquipment(sess, 0)
 	oldNames := []string{
 		"ring_1:", "ring_2:", "ring_3:", "ring_4:", "ring_5:",
 		"ring_6:", "ring_7:", "ring_8:", "ring_9:", "ring_10:",
