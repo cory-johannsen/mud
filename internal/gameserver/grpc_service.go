@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
@@ -1665,6 +1666,40 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
+	// Room trap roll: trigger environmental hazard on entry when danger warrants it.
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		if newZone, zoneOK := s.world.GetZone(newRoom.ZoneID); zoneOK {
+			effectiveLevel := danger.EffectiveDangerLevel(newZone.DangerLevel, newRoom.DangerLevel)
+			if danger.RollRoomTrap(effectiveLevel, newRoom.RoomTrapChance, danger.RandRoller{}) {
+				s.logger.Info("room trap triggered", zap.String("uid", uid), zap.String("room", newRoom.ID))
+				trapEvt := &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_Message{
+						Message: &gamev1.MessageEvent{
+							Content: "You trigger a hidden trap!",
+							Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+						},
+					},
+				}
+				if data, marshalErr := proto.Marshal(trapEvt); marshalErr == nil {
+					if pushErr := sess.Entity.Push(data); pushErr != nil {
+						s.logger.Warn("pushing trap message to player entity",
+							zap.String("uid", uid),
+							zap.Error(pushErr),
+						)
+					}
+				}
+			}
+		}
+	}
+
+	// Wanted-level guard check: initiate guard combat if player is wanted in this zone.
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		wantedLevel := sess.WantedLevel[newRoom.ZoneID]
+		if wantedLevel >= 2 && s.combatH != nil {
+			s.combatH.InitiateGuardCombat(uid, newRoom.ZoneID, wantedLevel)
+		}
+	}
+
 	if s.npcH != nil {
 		for _, inst := range s.npcH.InstancesInRoom(result.View.RoomId) {
 			if taunt, ok := inst.TryTaunt(time.Now()); ok {
@@ -2315,6 +2350,32 @@ func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) 
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") {
 		return messageEvent("You are submerged underwater and cannot attack. Swim or Escape to surface."), nil
 	}
+
+	// Safe-room and danger-level enforcement.
+	if sess, ok := s.sessions.GetPlayer(uid); ok {
+		if room, roomOK := s.world.GetRoom(sess.RoomID); roomOK {
+			if zone, zoneOK := s.world.GetZone(room.ZoneID); zoneOK {
+				currentDay := 0
+				if s.calendar != nil {
+					currentDay = s.calendar.CurrentDateTime().Day
+				}
+				safeEvents, safeErr := CheckSafeViolation(sess, zone.ID, zone.DangerLevel, room.DangerLevel, currentDay, s.combatH, s.wantedRepo, nil)
+				if safeErr != nil {
+					return nil, safeErr
+				}
+				if len(safeEvents) > 0 {
+					return &gamev1.ServerEvent{
+						Payload: &gamev1.ServerEvent_CombatEvent{CombatEvent: safeEvents[0]},
+					}, nil
+				}
+				effectiveLevel := danger.EffectiveDangerLevel(zone.DangerLevel, room.DangerLevel)
+				if !danger.CanInitiateCombat(effectiveLevel, "player") {
+					return messageEvent("Combat is not permitted in this area."), nil
+				}
+			}
+		}
+	}
+
 	events, err := s.combatH.Attack(uid, req.Target)
 	if err != nil {
 		return nil, err
@@ -4354,13 +4415,15 @@ func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
 		for _, e := range r.Exits {
 			exits = append(exits, string(e.Direction))
 		}
+		effectiveLevel := danger.EffectiveDangerLevel(zone.DangerLevel, r.DangerLevel)
 		tiles = append(tiles, &gamev1.MapTile{
-			RoomId:   r.ID,
-			RoomName: r.Title,
-			X:        int32(r.MapX),
-			Y:        int32(r.MapY),
-			Current:  r.ID == sess.RoomID,
-			Exits:    exits,
+			RoomId:      r.ID,
+			RoomName:    r.Title,
+			X:           int32(r.MapX),
+			Y:           int32(r.MapY),
+			Current:     r.ID == sess.RoomID,
+			Exits:       exits,
+			DangerLevel: string(effectiveLevel),
 		})
 	}
 	return &gamev1.ServerEvent{
