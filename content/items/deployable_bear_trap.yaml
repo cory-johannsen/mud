@@ -1,0 +1,8 @@
+id: deployable_bear_trap
+name: Bear Trap
+kind: trap
+trap_template_ref: bear_trap
+weight: 4.0
+stackable: true
+max_stack: 3
+value: 120

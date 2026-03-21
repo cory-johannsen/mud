@@ -1,0 +1,8 @@
+id: deployable_pit_trap
+name: Pit Trap Kit
+kind: trap
+trap_template_ref: pit
+weight: 3.0
+stackable: true
+max_stack: 3
+value: 150

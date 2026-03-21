@@ -1,0 +1,8 @@
+id: deployable_pressure_plate_mine
+name: Pressure Plate Mine
+kind: trap
+trap_template_ref: pressure_plate_mine
+weight: 2.5
+stackable: true
+max_stack: 3
+value: 350

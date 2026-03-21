@@ -12,3 +12,5 @@ stealth_dc: 16
 disable_dc: 20
 reset_mode: auto
 reset_timer: 10m
+trigger_range_ft: 5
+blast_radius_ft: 0

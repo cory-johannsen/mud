@@ -1,0 +1,8 @@
+id: deployable_honkeypot
+name: Honkeypot Device
+kind: trap
+trap_template_ref: honkeypot_charmer
+weight: 1.0
+stackable: true
+max_stack: 5
+value: 250

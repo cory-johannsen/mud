@@ -1,0 +1,8 @@
+id: deployable_trip_wire
+name: Trip Wire
+kind: trap
+trap_template_ref: trip_wire
+weight: 0.5
+stackable: true
+max_stack: 10
+value: 80

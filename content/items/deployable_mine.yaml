@@ -1,0 +1,8 @@
+id: deployable_mine
+name: Deployable Mine
+kind: trap
+trap_template_ref: mine
+weight: 2.0
+stackable: true
+max_stack: 5
+value: 300
