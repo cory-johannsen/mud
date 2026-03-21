@@ -169,6 +169,15 @@ type PlayerSession struct {
 	// ("strike", "step", "raise_shield"). Empty when ReadiedTrigger is empty.
 	// Not persisted. In-session only.
 	ReadiedAction string
+	// NegotiateModifier is the session-scoped price modifier earned from a negotiate
+	// attempt with a merchant. +0.2 = 20% cheaper; -0.1 = 10% penalty on buys.
+	// Cleared on room transition (REQ-NPC-5a). 0.0 means no modifier active.
+	NegotiateModifier float64
+	// NegotiatedMerchantID is the instance ID of the merchant this player already
+	// negotiated with in the current room visit. Blocks repeat negotiate. (REQ-NPC-5)
+	NegotiatedMerchantID string
+	// StashBalance is the player's global stash credit balance, accessible at any banker.
+	StashBalance int
 }
 
 // Manager tracks all active player sessions and room occupancy.

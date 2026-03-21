@@ -726,3 +726,17 @@ func TestProperty_PlayerSession_SkillsFieldRoundTrip(t *testing.T) {
 		}
 	})
 }
+
+func TestPlayerSession_NegotiateFields_DefaultZero(t *testing.T) {
+	mgr := NewManager()
+	_, err := mgr.AddPlayer(AddPlayerOptions{
+		UID: "u1", Username: "u", CharName: "C",
+		RoomID: "r1", CurrentHP: 10, MaxHP: 10, Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := mgr.GetPlayer("u1")
+	require.True(t, ok)
+	assert.Equal(t, 0.0, sess.NegotiateModifier)
+	assert.Equal(t, "", sess.NegotiatedMerchantID)
+	assert.Equal(t, 0, sess.StashBalance)
+}
