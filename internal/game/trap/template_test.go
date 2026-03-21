@@ -94,3 +94,22 @@ reset_mode: one_shot
 		t.Fatal("expected error for REQ-TR-11 violation, got nil")
 	}
 }
+
+func TestLoadTrapTemplates_ContentDir(t *testing.T) {
+	// Integration test: loads from actual content/traps directory.
+	// Skip if the directory doesn't exist (e.g., in CI without content).
+	dir := "../../../content/traps"
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		t.Skip("content/traps directory not present")
+	}
+	templates, err := trap.LoadTrapTemplates(dir)
+	if err != nil {
+		t.Fatalf("LoadTrapTemplates: %v", err)
+	}
+	expected := []string{"mine", "pit", "bear_trap", "trip_wire", "honkeypot_charmer", "pressure_plate_mine"}
+	for _, id := range expected {
+		if _, ok := templates[id]; !ok {
+			t.Errorf("expected template %q to be loaded", id)
+		}
+	}
+}

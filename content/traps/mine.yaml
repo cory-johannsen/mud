@@ -1,0 +1,12 @@
+id: mine
+name: Mine
+description: A pressure-triggered explosive device concealed beneath debris.
+trigger: entry
+payload:
+  type: mine
+  damage: 4d6
+  save_type: reflex
+  save_dc: 18
+stealth_dc: 14
+disable_dc: 20
+reset_mode: one_shot

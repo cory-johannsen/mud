@@ -1,0 +1,14 @@
+id: pit
+name: Pit
+description: A concealed trapdoor over a deep pit.
+trigger: entry
+payload:
+  type: pit
+  damage: 2d6
+  condition: immobilized
+  save_type: reflex
+  save_dc: 16
+stealth_dc: 15
+disable_dc: 18
+reset_mode: auto
+reset_timer: 30m

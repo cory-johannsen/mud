@@ -1,0 +1,15 @@
+id: honkeypot_charmer
+name: Honkeypot
+description: A lure disguised as something appealing to a specific group.
+trigger: region
+target_regions: [lake_oswego, pearl_district]
+trigger_action: entry
+payload:
+  type: honkeypot
+  technology_effect: charm
+  save_type: will
+  save_dc: 20
+stealth_dc: 18
+disable_dc: 22
+reset_mode: auto
+reset_timer: 1h

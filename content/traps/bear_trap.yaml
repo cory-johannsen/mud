@@ -1,0 +1,14 @@
+id: bear_trap
+name: Bear Trap
+description: A rusted steel jaw trap hidden under debris.
+trigger: entry
+payload:
+  type: bear_trap
+  damage: 2d6
+  condition: grabbed
+  save_type: ""
+  save_dc: 0
+stealth_dc: 16
+disable_dc: 20
+reset_mode: auto
+reset_timer: 10m

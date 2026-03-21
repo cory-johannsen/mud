@@ -1,0 +1,8 @@
+id: pressure_plate_mine
+name: Pressure Plate
+description: A concealed plate connected to an explosive charge.
+trigger: pressure_plate
+payload_template: mine
+stealth_dc: 14
+disable_dc: 18
+reset_mode: one_shot

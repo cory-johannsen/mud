@@ -1,0 +1,14 @@
+id: trip_wire
+name: Trip Wire
+description: A nearly invisible wire stretched across the path.
+trigger: entry
+payload:
+  type: trip_wire
+  damage: 1d6
+  condition: prone
+  save_type: reflex
+  save_dc: 14
+stealth_dc: 18
+disable_dc: 16
+reset_mode: auto
+reset_timer: 5m

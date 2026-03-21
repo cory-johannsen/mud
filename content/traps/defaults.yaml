@@ -1,0 +1,9 @@
+default_pool:
+  - template: mine
+    weight: 3
+  - template: bear_trap
+    weight: 2
+  - template: trip_wire
+    weight: 2
+  - template: pit
+    weight: 1
