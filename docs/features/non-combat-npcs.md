@@ -4,12 +4,19 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
 
 ## Requirements
 
+### Foundation (sub-project 1) — complete
+
+- [x] REQ-NPC-1: NPCs with no `npc_type` MUST default to `"combat"` at load time.
+- [x] REQ-NPC-2: The type-specific config sub-struct for the declared `npc_type` MUST be non-nil at load time; mismatch MUST be a fatal load error. For `npc_type: "crafter"`, an explicit `crafter: {}` YAML block MUST be present.
+- [ ] REQ-NPC-2a: `Template.Validate()` MUST verify all referenced skill IDs exist in the skill registry. *(Deferred to sub-project 3: Service NPCs, where skills are first used)*
+- [x] REQ-NPC-3: Non-combat NPCs MUST NOT be added to the combat initiative order (satisfied structurally — only the attacked NPC joins combat; guard engage behavior wired in sub-project 4).
+- [x] REQ-NPC-4: Non-combat NPCs MUST NOT be valid attack targets (except engaging guards — enabled in sub-project 4).
+- [x] REQ-NPC-13: `ReplenishConfig` MUST satisfy `0 < MinHours <= MaxHours <= 24`; fatal load error on violation.
+- [x] REQ-NPC-18: `QuestGiverConfig.PlaceholderDialog` MUST contain at least one entry; fatal load error otherwise.
+
+### Remaining requirements
+
 - [ ] Base data model
-  - REQ-NPC-1: NPCs with no `npc_type` MUST default to `"combat"` at load time.
-  - REQ-NPC-2: Type-specific config sub-struct MUST be non-nil at load time; mismatch MUST be fatal load error.
-  - REQ-NPC-2a: `Template.Validate()` MUST verify all referenced skill IDs exist in the skill registry.
-  - REQ-NPC-3: Non-combat NPCs MUST NOT be added to the combat initiative order (guards excepted when engaging per Section 3).
-  - REQ-NPC-4: Non-combat NPCs MUST NOT be valid attack targets (guards excepted when engaging per Section 3).
   - [ ] HTN personality system (cowardly/brave/neutral/opportunistic presets)
   - [ ] Flee/cower behavior on combat start
 - [ ] Merchant
@@ -17,7 +24,6 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
   - REQ-NPC-5a: Negotiate price modifier MUST be stored on player room session state, cleared on room exit.
   - REQ-NPC-5b: WantedLevel 1 surcharge applied before negotiate modifier; not applied to negotiate roll.
   - REQ-NPC-12: Merchant runtime state MUST be persisted and restored on restart; YAML values apply only at first initialization.
-  - REQ-NPC-13: `ReplenishConfig` MUST satisfy `0 < MinHours <= MaxHours <= 24`.
   - [ ] `browse`, `buy`, `sell`, `negotiate` commands
   - [ ] Named NPCs: Sergeant Mack (weapons, Last Stand Lodge), Slick Sally, Whiskey Joe, Old Rusty, Herb (consumables)
 - [ ] Guard
@@ -34,7 +40,6 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
   - [ ] `heal` and `heal <amount>` commands
   - [ ] Named NPCs: Clutch (The Tinker's Den), Tina Wires (Junker's Dream)
 - [ ] Quest Giver
-  - REQ-NPC-18: `PlaceholderDialog` MUST contain at least one entry.
   - [ ] `talk <npc>` command with placeholder dialog
   - [ ] Named NPC: Gail "Grinder" Graves (Scrapshack 23)
 - [ ] Hireling
