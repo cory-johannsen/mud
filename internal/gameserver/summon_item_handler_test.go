@@ -22,6 +22,7 @@ import (
 var testSummonItemDef = &inventory.ItemDef{
 	ID:       "sword_01",
 	Name:     "Iron Sword",
+	Kind:     inventory.KindConsumable,
 	MaxStack: 1,
 }
 
