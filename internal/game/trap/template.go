@@ -74,6 +74,16 @@ type TrapTemplate struct {
 	ResetMode       ResetMode         `yaml:"reset_mode"`
 	ResetTimer      string            `yaml:"reset_timer,omitempty"`
 	DangerScaling   *DangerScalingTier `yaml:"danger_scaling,omitempty"`
+	TriggerRangeFt  int                `yaml:"trigger_range_ft"`
+	BlastRadiusFt   int                `yaml:"blast_radius_ft"`
+}
+
+// EffectiveTriggerRange returns TriggerRangeFt, or 5 if zero (the default trigger range in feet).
+func EffectiveTriggerRange(tmpl *TrapTemplate) int {
+	if tmpl.TriggerRangeFt == 0 {
+		return 5
+	}
+	return tmpl.TriggerRangeFt
 }
 
 // LoadTrapTemplate loads and validates a single trap template from path.

@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+// TrapKindConsumable is the instance key kind for player-deployed consumable traps.
+const TrapKindConsumable = "consumable"
+
 // TrapInstanceState holds runtime state for one trap instance.
 type TrapInstanceState struct {
 	// TemplateID references the TrapTemplate for this instance.
@@ -18,6 +21,10 @@ type TrapInstanceState struct {
 	BeingDisarmed bool
 	// ResetAt is set for auto reset mode; nil otherwise.
 	ResetAt *time.Time
+	// DeployPosition is the combat position in feet at deploy time; 0 for world-placed traps.
+	DeployPosition int
+	// IsConsumable is true for player-deployed traps; enforces one-shot semantics.
+	IsConsumable bool
 }
 
 // TrapManager tracks all trap instance states and per-player detection records.
@@ -71,18 +78,18 @@ func (m *TrapManager) AddTrap(instanceID, templateID string, armed bool) {
 	}
 }
 
-// GetTrap returns the instance state for the given instanceID.
+// GetTrap returns a value copy of the instance state for the given instanceID.
 //
-// Postcondition: Returns (state, true) if found; (nil, false) otherwise.
-// The returned pointer is live; callers that read fields after this method returns
-// must not race with concurrent Disarm or AddTrap calls. Mutation via the
-// returned pointer (e.g. state.BeingDisarmed = true) is the caller's responsibility
-// to synchronize externally if needed.
-func (m *TrapManager) GetTrap(instanceID string) (*TrapInstanceState, bool) {
+// Postcondition: Returns (state, true) if found; (zero-value, false) otherwise.
+// The returned value is a snapshot; mutations to it do not affect stored state.
+func (m *TrapManager) GetTrap(instanceID string) (TrapInstanceState, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	s, ok := m.traps[instanceID]
-	return s, ok
+	if !ok {
+		return TrapInstanceState{}, false
+	}
+	return *s, true
 }
 
 // Disarm marks a trap as disarmed (Armed=false) regardless of reset mode.
@@ -161,4 +168,24 @@ func (m *TrapManager) ClearDetectionForRoom(roomInstanceIDs []string) {
 			delete(m.sessions, uid)
 		}
 	}
+}
+
+// AddConsumableTrap arms a player-deployed consumable trap at the given deploy position.
+//
+// Precondition: instanceID must be unique within this TrapManager; tmpl must be non-nil.
+// Postcondition: GetTrap(instanceID) returns a state with Armed=true, IsConsumable=true, DeployPosition=deployPos.
+// Returns an error if instanceID already exists.
+func (m *TrapManager) AddConsumableTrap(instanceID string, tmpl *TrapTemplate, deployPos int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.traps[instanceID]; exists {
+		return fmt.Errorf("trap instance %q already exists", instanceID)
+	}
+	m.traps[instanceID] = &TrapInstanceState{
+		TemplateID:     tmpl.ID,
+		Armed:          true,
+		DeployPosition: deployPos,
+		IsConsumable:   true,
+	}
+	return nil
 }
