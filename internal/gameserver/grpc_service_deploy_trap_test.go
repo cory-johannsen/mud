@@ -276,3 +276,49 @@ func TestProperty_DeployTrap_BackpackDecrementsByOne(t *testing.T) {
 		assert.Equal(t, count-1, total, "exactly 1 item must be consumed per deploy")
 	})
 }
+
+// REQ-CTR-5: A deployed trap must be position-anchored — subsequent movement by
+// the deploying player must not change the trap's DeployPosition.
+func TestHandleDeployTrap_PositionAnchoredAfterPlayerMoves(t *testing.T) {
+	svc, trapMgr, reg := makeTrapDeploySvc(t)
+
+	sess, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: "anchor_player", Username: "anchor_player", CharName: "anchor_player", Role: "player",
+		RoomID: "room_a", CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
+	_, err = sess.Backpack.Add("deployable_mine", 1, reg)
+	require.NoError(t, err)
+
+	// Deploy trap out-of-combat — position is 0.
+	ev, err := svc.handleDeployTrap("anchor_player", &gamev1.DeployTrapRequest{ItemName: "Deployable Mine"})
+	require.NoError(t, err)
+	require.Contains(t, ev.GetMessage().GetContent(), "arm")
+
+	// Find the deployed trap.
+	traps := trapMgr.TrapsForRoom("test", "room_a")
+	require.NotEmpty(t, traps)
+	var deployedID string
+	for _, id := range traps {
+		inst, ok := trapMgr.GetTrap(id)
+		if ok && inst.IsConsumable && inst.Armed {
+			deployedID = id
+			break
+		}
+	}
+	require.NotEmpty(t, deployedID, "deployed trap must be found")
+
+	origInst, ok := trapMgr.GetTrap(deployedID)
+	require.True(t, ok)
+	origPos := origInst.DeployPosition
+
+	// Simulate player movement by changing their RoomID.
+	sess.RoomID = "room_b"
+
+	// The trap's DeployPosition must not have changed.
+	laterInst, ok := trapMgr.GetTrap(deployedID)
+	require.True(t, ok)
+	assert.Equal(t, origPos, laterInst.DeployPosition,
+		"trap DeployPosition must be immutable after player moves (REQ-CTR-5)")
+}
