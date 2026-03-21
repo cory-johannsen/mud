@@ -4,7 +4,7 @@ description: A uniformed guard in pressed khakis and body armor, patrolling with
 level: 2
 max_hp: 28
 ac: 15
-perception: 8
+awareness: 8
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

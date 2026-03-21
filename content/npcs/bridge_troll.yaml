@@ -5,7 +5,7 @@ level: 3
 max_hp: 36
 ac: 16
 rob_multiplier: 1.5
-perception: 7
+awareness: 7
 ai_domain: bridge_troll_combat
 respawn_delay: "5m"
 abilities:

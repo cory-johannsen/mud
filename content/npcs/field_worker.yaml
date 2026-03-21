@@ -6,7 +6,7 @@ description: >-
 level: 1
 max_hp: 16
 ac: 13
-perception: 6
+awareness: 6
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

@@ -4,7 +4,7 @@ description: A young recruit in a clean uniform, nervously checking their patrol
 level: 1
 max_hp: 18
 ac: 14
-perception: 9
+awareness: 9
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

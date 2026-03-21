@@ -28,7 +28,7 @@ type NPCState struct {
 	Kind       string // always "npc"
 	HP         int
 	MaxHP      int
-	Perception int
+	Awareness int
 	ZoneID     string
 	RoomID     string
 }

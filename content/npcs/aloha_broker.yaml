@@ -4,7 +4,7 @@ description: A smooth-talking trader in a well-patched suit, always ready to mak
 level: 2
 max_hp: 22
 ac: 14
-perception: 9
+awareness: 9
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

@@ -4,7 +4,7 @@ description: A grizzled Vancouver militia member in surplus camo, fiercely prote
 level: 2
 max_hp: 26
 ac: 15
-perception: 7
+awareness: 7
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:

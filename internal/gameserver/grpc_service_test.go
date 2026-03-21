@@ -2703,11 +2703,11 @@ func TestHandleFeint_TargetNotFound(t *testing.T) {
 // TestHandleFeint_Success_RollBelow verifies that handleFeint returns a failure message
 // when the grift roll total is below the target's Perception DC.
 //
-// Precondition: player in combat; NPC in room with Perception=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
+// Precondition: player in combat; NPC in room with Awareness=15; dice returns 0 (roll=1, bonus=0, total=1 < 15).
 // Postcondition: message event containing "failure".
 func TestHandleFeint_Success_RollBelow(t *testing.T) {
 	logger := zaptest.NewLogger(t)
-	// Intn(20)=0 → roll=1; no grift skill → bonus=0; total=1 < Perception=15 → failure.
+	// Intn(20)=0 → roll=1; no grift skill → bonus=0; total=1 < Awareness=15 → failure.
 	src := &fixedDiceSource{val: 0}
 	roller := dice.NewLoggedRoller(src, logger)
 
@@ -2741,11 +2741,11 @@ func TestHandleFeint_Success_RollBelow(t *testing.T) {
 // TestHandleFeint_Success_RollAbove verifies that handleFeint returns a success message
 // and calls ApplyCombatantACMod when the grift roll total meets or exceeds the Perception DC.
 //
-// Precondition: player in combat; NPC in room with Perception=5; dice returns 19 (roll=20, bonus=0, total=20 >= 5).
+// Precondition: player in combat; NPC in room with Awareness=5; dice returns 19 (roll=20, bonus=0, total=20 >= 5).
 // Postcondition: message event containing "success"; NPC combatant ACMod is decremented.
 func TestHandleFeint_Success_RollAbove(t *testing.T) {
 	logger := zaptest.NewLogger(t)
-	// Intn(20)=19 → roll=20; no grift skill → bonus=0; total=20 >= Perception=5 → success.
+	// Intn(20)=19 → roll=20; no grift skill → bonus=0; total=20 >= Awareness=5 → success.
 	src := &fixedDiceSource{val: 19}
 	roller := dice.NewLoggedRoller(src, logger)
 

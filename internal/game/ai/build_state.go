@@ -18,7 +18,7 @@ func BuildCombatWorldState(cbt *combat.Combat, inst *npc.Instance, zoneID string
 			Kind:       "npc",
 			HP:         inst.CurrentHP,
 			MaxHP:      inst.MaxHP,
-			Perception: inst.Awareness,
+			Awareness: inst.Awareness,
 			ZoneID:     zoneID,
 			RoomID:     cbt.RoomID,
 		},

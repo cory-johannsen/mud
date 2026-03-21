@@ -4,7 +4,7 @@ description: A swift-footed runner in wind-resistant gear, carrying messages thr
 level: 2
 max_hp: 22
 ac: 15
-perception: 10
+awareness: 10
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

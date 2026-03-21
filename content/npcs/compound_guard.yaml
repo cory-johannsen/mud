@@ -4,7 +4,7 @@ description: A heavily armed guard behind sandbag walls, watching the approach t
 level: 4
 max_hp: 44
 ac: 17
-perception: 8
+awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:

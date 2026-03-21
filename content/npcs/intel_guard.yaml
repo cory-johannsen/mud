@@ -4,7 +4,7 @@ description: A professional guard in corporate tactical gear, protecting the tec
 level: 3
 max_hp: 34
 ac: 16
-perception: 8
+awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:

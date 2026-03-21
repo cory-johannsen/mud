@@ -4,7 +4,7 @@ description: A towering figure in armor improvised from server rack panels, bear
 level: 4
 max_hp: 45
 ac: 17
-perception: 7
+awareness: 7
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:

@@ -4,7 +4,7 @@ description: A thick-necked enforcer in a polo shirt, clipboard in one hand and 
 level: 3
 max_hp: 35
 ac: 16
-perception: 6
+awareness: 6
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:

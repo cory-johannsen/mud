@@ -4,7 +4,7 @@ description: A river pirate in a rain-slicked poncho, cutlass on one hip and a b
 level: 3
 max_hp: 32
 ac: 15
-perception: 8
+awareness: 8
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:

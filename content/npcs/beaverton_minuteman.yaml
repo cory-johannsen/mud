@@ -4,7 +4,7 @@ description: A suburbanite in camo cargo shorts and a tactical vest, gripping a 
 level: 2
 max_hp: 24
 ac: 15
-perception: 7
+awareness: 7
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:

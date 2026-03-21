@@ -4,7 +4,7 @@ description: A mysterious figure who moves through the gorge winds like they are
 level: 4
 max_hp: 40
 ac: 16
-perception: 11
+awareness: 11
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

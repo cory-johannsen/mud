@@ -7,7 +7,7 @@ level: 4
 max_hp: 42
 ac: 16
 rob_multiplier: 1.5
-perception: 9
+awareness: 9
 ai_domain: commissar_combat
 respawn_delay: "5m"
 abilities:

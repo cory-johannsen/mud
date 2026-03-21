@@ -3497,7 +3497,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 			Kind:       "npc",
 			HP:         inst.CurrentHP,
 			MaxHP:      inst.MaxHP,
-			Perception: inst.Awareness,
+			Awareness: inst.Awareness,
 			ZoneID:     zoneID,
 			RoomID:     inst.RoomID,
 		},

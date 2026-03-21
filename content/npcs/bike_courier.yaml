@@ -4,7 +4,7 @@ description: A lean rider in patched lycra, weaving through rubble on a stripped
 level: 1
 max_hp: 14
 ac: 14
-perception: 8
+awareness: 8
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

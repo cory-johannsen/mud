@@ -6,7 +6,7 @@ max_hp: 42
 ac: 16
 ai_domain: lieutenant_combat
 rob_multiplier: 1.5
-perception: 8
+awareness: 8
 abilities:
   brutality: 16
   quickness: 14

@@ -4,7 +4,7 @@ description: A reclusive figure in ragged layers, watching from the undergrowth 
 level: 2
 max_hp: 20
 ac: 14
-perception: 10
+awareness: 10
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

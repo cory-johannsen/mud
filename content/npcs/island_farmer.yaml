@@ -4,7 +4,7 @@ description: A sun-weathered farmer in overalls, carrying a pitchfork and a susp
 level: 1
 max_hp: 18
 ac: 13
-perception: 7
+awareness: 7
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:

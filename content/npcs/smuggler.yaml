@@ -4,7 +4,7 @@ description: A shifty figure in a long coat, pockets bulging with goods of quest
 level: 2
 max_hp: 20
 ac: 14
-perception: 7
+awareness: 7
 ai_domain: scavenger_patrol
 respawn_delay: "5m"
 abilities:
