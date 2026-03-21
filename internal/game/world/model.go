@@ -120,6 +120,9 @@ type RoomEquipmentConfig struct {
 	// CoverHP is the number of hits this cover object can absorb before being destroyed.
 	// Only meaningful when CoverDestructible is true.
 	CoverHP           int    `yaml:"cover_hp"`
+	// TrapTemplate is the trap template ID assigned to this equipment item.
+	// "" means no trap. Set by static YAML authoring or procedural generation.
+	TrapTemplate string `yaml:"trap_template,omitempty"`
 }
 
 // RoomEffect declares a persistent mental-state aura for a room.
@@ -142,6 +145,15 @@ type RoomEffect struct {
 
 	// CooldownMinutes is minutes of immunity after a successful out-of-combat save.
 	CooldownMinutes int `yaml:"cooldown_minutes"`
+}
+
+// RoomTrapConfig declares a statically placed trap in a room.
+type RoomTrapConfig struct {
+	// TemplateID references the TrapTemplate in content/traps/.
+	TemplateID string `yaml:"template"`
+	// Position is "room" for a room-level trap or a RoomEquipmentConfig.Description
+	// string to attach the trap to a specific equipment item.
+	Position string `yaml:"position"`
 }
 
 // Room represents a location in the game world.
@@ -181,6 +193,9 @@ type Room struct {
 	// CoverTrapChance overrides the zone's cover trap chance for this specific room.
 	// nil means inherit from the zone.
 	CoverTrapChance *int `yaml:"cover_trap_chance,omitempty"`
+	// Traps lists statically declared traps for this room.
+	// Procedurally placed traps are managed by the TrapManager at runtime.
+	Traps []RoomTrapConfig
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.
@@ -206,6 +221,24 @@ func (r *Room) VisibleExits() []Exit {
 		}
 	}
 	return visible
+}
+
+// TrapPoolEntry is one entry in a weighted trap selection pool.
+type TrapPoolEntry struct {
+	Template string `yaml:"template"`
+	Weight   int    `yaml:"weight"`
+}
+
+// TrapProbabilities configures per-zone trap placement chances and the weighted pool.
+// Overrides global danger-level defaults when set.
+type TrapProbabilities struct {
+	// RoomTrapChance overrides the danger-level default chance (0.0–1.0) for room-level traps.
+	RoomTrapChance *float64 `yaml:"room_trap_chance,omitempty"`
+	// CoverTrapChance overrides the danger-level default chance (0.0–1.0) for cover item traps.
+	CoverTrapChance *float64 `yaml:"cover_trap_chance,omitempty"`
+	// TrapPool is the weighted selection pool for this zone.
+	// If empty, content/traps/defaults.yaml pool is used.
+	TrapPool []TrapPoolEntry `yaml:"trap_pool,omitempty"`
 }
 
 // Zone groups related rooms into a themed area.
@@ -234,6 +267,9 @@ type Zone struct {
 	// CoverTrapChance sets the default percentage chance (0-100) that cover
 	// objects in this zone contain a trap. nil means no trap chance configured.
 	CoverTrapChance *int `yaml:"cover_trap_chance,omitempty"`
+	// TrapProbabilities configures per-zone procedural trap placement.
+	// nil means use the global danger-level defaults.
+	TrapProbabilities *TrapProbabilities `yaml:"trap_probabilities,omitempty"`
 }
 
 // ExternalExitTargets returns exit targets that reference rooms outside this zone.

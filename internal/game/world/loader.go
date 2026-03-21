@@ -26,8 +26,22 @@ type yamlZone struct {
 	ScriptInstructionLimit int        `yaml:"script_instruction_limit"`
 	Rooms                  []yamlRoom `yaml:"rooms"`
 	DangerLevel            string     `yaml:"danger_level"`
-	RoomTrapChance         *int       `yaml:"room_trap_chance,omitempty"`
-	CoverTrapChance        *int       `yaml:"cover_trap_chance,omitempty"`
+	RoomTrapChance         *int                   `yaml:"room_trap_chance,omitempty"`
+	CoverTrapChance        *int                   `yaml:"cover_trap_chance,omitempty"`
+	TrapProbabilities      *yamlTrapProbabilities `yaml:"trap_probabilities,omitempty"`
+}
+
+// yamlTrapProbabilities is the YAML representation of zone trap placement config.
+type yamlTrapProbabilities struct {
+	RoomTrapChance  *float64        `yaml:"room_trap_chance,omitempty"`
+	CoverTrapChance *float64        `yaml:"cover_trap_chance,omitempty"`
+	TrapPool        []yamlTrapEntry `yaml:"trap_pool,omitempty"`
+}
+
+// yamlTrapEntry is one weighted pool entry in the YAML.
+type yamlTrapEntry struct {
+	Template string `yaml:"template"`
+	Weight   int    `yaml:"weight"`
 }
 
 // yamlRoomSpawn is the YAML representation of a room spawn config.
@@ -35,6 +49,12 @@ type yamlRoomSpawn struct {
 	Template     string `yaml:"template"`
 	Count        int    `yaml:"count"`
 	RespawnAfter string `yaml:"respawn_after"`
+}
+
+// yamlRoomTrap is the YAML representation of a static room trap config.
+type yamlRoomTrap struct {
+	Template string `yaml:"template"`
+	Position string `yaml:"position"`
 }
 
 // yamlRoomEquipment is the YAML representation of a room equipment config.
@@ -46,6 +66,7 @@ type yamlRoomEquipment struct {
 	Immovable    bool                    `yaml:"immovable"`
 	Script       string                  `yaml:"script"`
 	SkillChecks  []skillcheck.TriggerDef `yaml:"skill_checks"`
+	TrapTemplate string                  `yaml:"trap_template,omitempty"`
 }
 
 // yamlRoom is the YAML representation of a room.
@@ -57,6 +78,7 @@ type yamlRoom struct {
 	Properties      map[string]string       `yaml:"properties"`
 	Spawns          []yamlRoomSpawn         `yaml:"spawns"`
 	Equipment       []yamlRoomEquipment     `yaml:"equipment"`
+	Traps           []yamlRoomTrap          `yaml:"traps"`
 	SkillChecks     []skillcheck.TriggerDef `yaml:"skill_checks"`
 	Effects         []RoomEffect            `yaml:"effects"`
 	MapX            *int                    `yaml:"map_x"`
@@ -72,6 +94,12 @@ type yamlExit struct {
 	Target    string `yaml:"target"`
 	Locked    bool   `yaml:"locked"`
 	Hidden    bool   `yaml:"hidden"`
+}
+
+// LoadZone reads and validates a single zone YAML file.
+// It is an alias for LoadZoneFromFile.
+func LoadZone(path string) (*Zone, error) {
+	return LoadZoneFromFile(path)
 }
 
 // LoadZoneFromFile reads and validates a single zone YAML file.
@@ -158,6 +186,16 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 		RoomTrapChance:         yz.RoomTrapChance,
 		CoverTrapChance:        yz.CoverTrapChance,
 	}
+	if yz.TrapProbabilities != nil {
+		tp := &TrapProbabilities{
+			RoomTrapChance:  yz.TrapProbabilities.RoomTrapChance,
+			CoverTrapChance: yz.TrapProbabilities.CoverTrapChance,
+		}
+		for _, e := range yz.TrapProbabilities.TrapPool {
+			tp.TrapPool = append(tp.TrapPool, TrapPoolEntry{Template: e.Template, Weight: e.Weight})
+		}
+		zone.TrapProbabilities = tp
+	}
 
 	for _, yr := range yz.Rooms {
 		if yr.MapX == nil {
@@ -203,7 +241,7 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 			if err != nil {
 				dur = 0
 			}
-			room.Equipment = append(room.Equipment, RoomEquipmentConfig{
+			eq := RoomEquipmentConfig{
 				ItemID:       e.ItemID,
 				Description:  e.Description,
 				MaxCount:     e.MaxCount,
@@ -211,6 +249,14 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 				Immovable:    e.Immovable,
 				Script:       e.Script,
 				SkillChecks:  e.SkillChecks,
+			}
+			eq.TrapTemplate = e.TrapTemplate
+			room.Equipment = append(room.Equipment, eq)
+		}
+		for _, yt := range yr.Traps {
+			room.Traps = append(room.Traps, RoomTrapConfig{
+				TemplateID: yt.Template,
+				Position:   yt.Position,
 			})
 		}
 		zone.Rooms[room.ID] = room
