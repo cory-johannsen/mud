@@ -219,6 +219,7 @@ func (s *GameServiceServer) fireConsumableTrapOnCombatant(
 ) {
 	result, err := trap.ResolveTrigger(tmpl, dangerLevel, s.trapTemplates)
 	if err != nil {
+		s.logger.Warn("consumable trap ResolveTrigger failed", zap.String("templateID", tmpl.ID), zap.Error(err))
 		return
 	}
 	dmg := 0
@@ -245,6 +246,8 @@ func (s *GameServiceServer) fireConsumableTrapOnCombatant(
 	}
 
 	// NPC target: broadcast to all players in the same room.
+	// Extract roomID from instanceID format: "zoneID/roomID/kind/trapID"
+	// This must stay in sync with trap.TrapInstanceID format.
 	parts := strings.SplitN(instanceID, "/", 4)
 	if len(parts) < 2 {
 		return
@@ -576,6 +579,8 @@ func (s *GameServiceServer) findDetectedTrap(uid string, sess *session.PlayerSes
 	// Also search consumable traps armed via TrapManager (REQ-CTR-12).
 	for _, instanceID := range s.trapMgr.TrapsForRoom(zoneID, room.ID) {
 		inst, ok := s.trapMgr.GetTrap(instanceID)
+		// IsConsumable guard also prevents re-matching world/equipment traps
+		// that happen to be registered in the TrapManager (those have IsConsumable=false).
 		if !ok || !inst.Armed || !inst.IsConsumable {
 			continue
 		}
