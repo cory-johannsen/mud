@@ -257,6 +257,7 @@ features:
     effort: "M"  # 2AP ready command, trigger evaluation engine during round resolution, 3 triggers × 3 readied actions
     dependencies:
       - actions
+      - consumable-traps
 
   - slug: use-command
     name: Use Command Expansion
@@ -417,6 +418,16 @@ features:
     file: docs/features/traps.md
     effort: "M"  # 6 trap types (mines/pits/bear traps/trip wires/pressure plates/honkeypots); trigger/detect/disarm mechanics
     # priority: moved before room-danger-levels (10→15 ordering); room-danger-levels defines per-zone trap probabilities which require traps to be implemented
+
+  - slug: consumable-traps
+    name: Consumable Traps
+    status: planned
+    priority: 16
+    category: combat
+    file: docs/features/consumable-traps.md
+    effort: "M"  # trap items as craftable/purchasable consumables; deploy command in combat; floor-state tracking per room; trigger on enemy room entry
+    dependencies:
+      - traps
 
   - slug: zones-new
     name: New Zones
