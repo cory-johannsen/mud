@@ -6366,6 +6366,8 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 	if err := s.combatH.ShoveNPC(uid, inst.ID, pushFt); err != nil {
 		s.logger.Warn("handleShove: ShoveNPC failed",
 			zap.String("npc_id", inst.ID), zap.Error(err))
+	} else {
+		s.combatH.FireCombatantMoved(sess.RoomID, inst.ID)
 	}
 
 	if pushFt == 10 {
@@ -6441,6 +6443,7 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	if room, ok := s.world.GetRoom(sess.RoomID); ok {
 		s.checkPressurePlateTraps(uid, sess, room)
 	}
+	s.combatH.FireCombatantMoved(sess.RoomID, uid)
 	return messageEvent(msg), nil
 }
 
@@ -6509,6 +6512,7 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 	if room, ok := s.world.GetRoom(sess.RoomID); ok {
 		s.checkPressurePlateTraps(uid, sess, room)
 	}
+	s.combatH.FireCombatantMoved(sess.RoomID, uid)
 	return messageEvent(msg), nil
 }
 

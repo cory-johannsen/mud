@@ -53,8 +53,9 @@ type CombatHandler struct {
 	aiRegistry    *ai.Registry
 	respawnMgr    *npc.RespawnManager
 	floorMgr      *inventory.FloorManager
-	onCombatEndFn  func(roomID string)                            // optional; called after combat ends; may be nil
-	onCoverHit     func(roomID, attackerID, coverEquipID string) // optional; called on cover crossfire; may be nil
+	onCombatEndFn      func(roomID string)                            // optional; called after combat ends; may be nil
+	onCoverHit         func(roomID, attackerID, coverEquipID string) // optional; called on cover crossfire; may be nil
+	onCombatantMoved   func(roomID, movedCombatantID string)         // optional; called after Stride/Step/Shove resolves; may be nil
 	xpSvc          *xp.Service            // optional; awards kill XP on NPC death; may be nil
 	currencySaver  CurrencySaver          // optional; persists currency after loot award; may be nil
 	mentalStateMgr *mentalstate.Manager   // optional; manages mental state conditions; may be nil
@@ -212,6 +213,58 @@ func (h *CombatHandler) SetOnCombatEnd(fn func(roomID string)) {
 // The callback may be nil; if so, no action is taken.
 func (h *CombatHandler) SetOnCoverHit(fn func(roomID, attackerID, coverEquipID string)) {
 	h.onCoverHit = fn
+}
+
+// SetOnCombatantMoved registers a callback that fires after any Stride, Step, or Shove resolves.
+// The callback receives the room ID and the UID of the combatant that moved.
+// The callback may be nil; if so, no action is taken.
+func (h *CombatHandler) SetOnCombatantMoved(fn func(roomID, movedCombatantID string)) {
+	h.onCombatantMoved = fn
+}
+
+// FireCombatantMoved invokes the onCombatantMoved callback if registered.
+// Called by grpc_service.go after Stride, Step, or Shove position changes.
+//
+// Precondition: none.
+// Postcondition: callback is invoked synchronously if non-nil.
+func (h *CombatHandler) FireCombatantMoved(roomID, uid string) {
+	if h.onCombatantMoved != nil {
+		h.onCombatantMoved(roomID, uid)
+	}
+}
+
+// CombatantPosition returns the current combat position (feet) of the given combatant in the given room.
+// Returns 0 if no combat is active for roomID or the combatant is not found.
+//
+// Postcondition: Returns 0 when no combat is active or combatant is absent; otherwise returns the combatant's position.
+func (h *CombatHandler) CombatantPosition(roomID, uid string) int {
+	h.combatMu.RLock()
+	defer h.combatMu.RUnlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return 0
+	}
+	c := cbt.GetCombatant(uid)
+	if c == nil {
+		return 0
+	}
+	return c.Position
+}
+
+// CombatantsInRoom returns a copy of all combatants in the active combat for the given room.
+// Returns nil if no combat is active.
+//
+// Postcondition: Returns nil when no combat is active; otherwise returns a non-nil slice of combatant pointers.
+func (h *CombatHandler) CombatantsInRoom(roomID string) []*combat.Combatant {
+	h.combatMu.RLock()
+	defer h.combatMu.RUnlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return nil
+	}
+	result := make([]*combat.Combatant, len(cbt.Combatants))
+	copy(result, cbt.Combatants)
+	return result
 }
 
 // InitiateGuardCombat finds guard NPCs in the player's current room and starts
