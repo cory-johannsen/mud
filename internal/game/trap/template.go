@@ -79,7 +79,9 @@ type TrapTemplate struct {
 // LoadTrapTemplate loads and validates a single trap template from path.
 //
 // Precondition: path must be readable and contain valid YAML.
-// Postcondition: Returns error if REQ-TR-11 is violated (Pressure Plate payload_template references another Pressure Plate).
+// Postcondition: Returns error if a pressure_plate trigger has an empty payload_template field.
+// Full REQ-TR-11 cross-template validation (no pressure_plate may chain to another pressure_plate)
+// is performed only by LoadTrapTemplates after all templates are loaded.
 func LoadTrapTemplate(path string) (*TrapTemplate, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
