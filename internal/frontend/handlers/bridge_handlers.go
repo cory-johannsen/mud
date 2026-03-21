@@ -105,6 +105,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerDisarm:             bridgeDisarm,
 	command.HandlerDisarmTrap:         bridgeDisarmTrap,
 	command.HandlerDeployTrap:         bridgeDeployTrap,
+	command.HandlerReady:              bridgeReady,
 	command.HandlerClimb:              bridgeClimb,
 	command.HandlerStride:             bridgeStride,
 	command.HandlerHide:               bridgeHide,
@@ -1006,6 +1007,26 @@ func bridgeDeployTrap(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_DeployTrap{DeployTrap: &gamev1.DeployTrapRequest{ItemName: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeReady builds a ReadyRequest from "<action> when <trigger>" format.
+//
+// Precondition: bctx.parsed.RawArgs must contain "<action> when <trigger>".
+// Postcondition: Returns a ClientMessage with Ready payload when args are valid;
+// otherwise returns done=true with a usage error event.
+func bridgeReady(bctx *bridgeContext) (bridgeResult, error) {
+	args := strings.TrimSpace(bctx.parsed.RawArgs)
+	parts := strings.SplitN(args, " when ", 2)
+	if len(parts) != 2 || strings.TrimSpace(parts[0]) == "" || strings.TrimSpace(parts[1]) == "" {
+		return writeErrorPrompt(bctx, "Usage: ready <action> when <trigger>\n  actions: strike, step, shield\n  triggers: enters, attacks, ally")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_Ready{Ready: &gamev1.ReadyRequest{
+			Action:  strings.TrimSpace(parts[0]),
+			Trigger: strings.TrimSpace(parts[1]),
+		}},
 	}}, nil
 }
 

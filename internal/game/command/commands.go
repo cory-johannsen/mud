@@ -106,6 +106,7 @@ const (
 	HandlerRest               = "rest"
 	HandlerSelectTech         = "selecttech"
 	HandlerAid                = "aid"
+	HandlerReady              = "ready"
 )
 
 // Command defines a player-invocable command.
@@ -231,6 +232,7 @@ func BuiltinCommands() []Command {
 		{Name: "kick", Help: "Kick a player from your group (leader only).", Category: CategoryCommunication, Handler: HandlerKick},
 		{Name: "rest", Help: "Rest to rearrange your prepared technology slots.", Category: CategoryCharacter, Handler: HandlerRest},
 		{Name: "selecttech", Help: "Select pending technology upgrades from levelling up.", Category: CategoryCharacter, Handler: HandlerSelectTech},
+		{Name: "ready", Aliases: []string{"rdy"}, Help: "ready <action> when <trigger> — ready a reaction (2 AP); actions: strike/step/shield; triggers: enters/attacks/ally", Category: CategoryCombat, Handler: HandlerReady},
 	}
 }
 

@@ -100,6 +100,7 @@ message ClientMessage {
     AidRequest aid = 83;
     DisarmTrapRequest disarm_trap = 84;
     DeployTrapRequest deploy_trap = 85;
+    ReadyRequest ready = 86;
   }
 }
 
@@ -118,6 +119,12 @@ message AidRequest {
 message DisarmTrapRequest {
   // trap_name is the trap name as shown at detection time.
   string trap_name = 1;
+}
+
+// ReadyRequest asks the server to ready a reaction with the given action and trigger.
+message ReadyRequest {
+  string action = 1;   // "strike" | "step" | "shield"
+  string trigger = 2;  // "enters" | "attacks" | "ally"
 }
 
 // DeployTrapRequest asks the server to arm a trap item at the player's current position.

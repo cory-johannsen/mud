@@ -4,10 +4,23 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestHandlerReady_Registered(t *testing.T) {
+	reg := command.DefaultRegistry()
+	found := false
+	for _, c := range reg.Commands() {
+		if c.Handler == command.HandlerReady {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found, "HandlerReady must be registered in command registry")
+}
 
 func TestPlayerSession_ReadiedFields_DefaultEmpty(t *testing.T) {
 	mgr := session.NewManager()
