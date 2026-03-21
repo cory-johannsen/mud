@@ -38,11 +38,56 @@ var displayRightRingSlots = []inventory.AccessorySlot{
 	inventory.SlotRightRing5,
 }
 
+// equipSlotLine formats a single slot row as "  <label padded to labelW> <item>".
+//
+// Precondition: labelW > 0; item is the slot display value.
+// Postcondition: returns a string with no trailing newline.
+func equipSlotLine(label, item string, labelW int) string {
+	return fmt.Sprintf("  %-*s %s", labelW, label, item)
+}
+
+// zipCols zips two string slices into a two-column layout.
+// Each row is: left padded to leftW chars + " | " + right.
+//
+// Precondition: leftW > 0; all strings in left and right are ASCII-only
+// (byte length == visible width). If any left[i] is longer than leftW, the
+// separator will still appear but column alignment will be broken for that row.
+// Postcondition: returns a string with one \n-terminated row per max(len(left), len(right)).
+func zipCols(left, right []string, leftW int) string {
+	var sb strings.Builder
+	n := len(left)
+	if len(right) > n {
+		n = len(right)
+	}
+	for i := 0; i < n; i++ {
+		l, r := "", ""
+		if i < len(left) {
+			l = left[i]
+		}
+		if i < len(right) {
+			r = right[i]
+		}
+		pad := leftW - len(l)
+		if pad < 0 {
+			pad = 0
+		}
+		sb.WriteString(l)
+		sb.WriteString(strings.Repeat(" ", pad))
+		sb.WriteString(" | ")
+		sb.WriteString(r)
+		sb.WriteString("\n")
+	}
+	return sb.String()
+}
+
 // HandleEquipment displays the complete equipment state for the player's session.
 //
+// When width >= 60, armor and accessory slots are rendered in two side-by-side columns.
+// When width < 60, all slots are rendered in a single column (existing behaviour).
+//
 // Precondition: sess must not be nil; sess.LoadoutSet and sess.Equipment must not be nil.
-// Postcondition: Returns a formatted multi-section string showing all weapon presets,
-// all 8 armor slots, and neck + left/right ring accessory slots with human-readable labels.
+// Postcondition: Returns a formatted multi-section string showing all weapon presets
+// and all armor and accessory slots.
 func HandleEquipment(sess *session.PlayerSession, width int) string {
 	var sb strings.Builder
 
@@ -59,26 +104,57 @@ func HandleEquipment(sess *session.PlayerSession, width int) string {
 		sb.WriteString("  " + inventory.SlotDisplayName("off") + ":  " + formatEquippedWeapon(preset.OffHand) + "\n")
 	}
 
-	// === Armor ===
-	sb.WriteString("\n=== Armor ===\n")
 	eq := sess.Equipment
-	for _, slot := range displayArmorSlots {
-		label := inventory.SlotDisplayName(string(slot)) + ":"
-		item := eq.Armor[slot]
-		sb.WriteString(fmt.Sprintf("  %-12s %s\n", label, formatSlottedItem(item)))
-	}
 
-	// === Accessories ===
-	sb.WriteString("\n=== Accessories ===\n")
-	neckLabel := inventory.SlotDisplayName("neck") + ":"
-	sb.WriteString(fmt.Sprintf("  %-21s %s\n", neckLabel, formatSlottedItem(eq.Accessories[inventory.SlotNeck])))
-	for _, slot := range displayLeftRingSlots {
-		label := inventory.SlotDisplayName(string(slot)) + ":"
-		sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItem(eq.Accessories[slot])))
-	}
-	for _, slot := range displayRightRingSlots {
-		label := inventory.SlotDisplayName(string(slot)) + ":"
-		sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItem(eq.Accessories[slot])))
+	if width >= 60 {
+		// Two-column layout: armor left, accessories right.
+		// leftW is the padded width of a left-column slot line.
+		const armorLabelW = 12
+		const accLabelW = 21
+		// leftW = 2 (indent) + armorLabelW (12) + 1 (space) + max expected item name (~20).
+		// Must be >= the longest left-column line to keep columns aligned.
+		// At 36, items up to 21 chars fit cleanly; longer names still appear but break alignment.
+		const leftW = 36
+
+		var leftLines []string
+		for _, slot := range displayArmorSlots {
+			label := inventory.SlotDisplayName(string(slot)) + ":"
+			leftLines = append(leftLines, equipSlotLine(label, formatSlottedItem(eq.Armor[slot]), armorLabelW))
+		}
+
+		var rightLines []string
+		neckLabel := inventory.SlotDisplayName("neck") + ":"
+		rightLines = append(rightLines, equipSlotLine(neckLabel, formatSlottedItem(eq.Accessories[inventory.SlotNeck]), accLabelW))
+		for _, slot := range displayLeftRingSlots {
+			label := inventory.SlotDisplayName(string(slot)) + ":"
+			rightLines = append(rightLines, equipSlotLine(label, formatSlottedItem(eq.Accessories[slot]), accLabelW))
+		}
+		for _, slot := range displayRightRingSlots {
+			label := inventory.SlotDisplayName(string(slot)) + ":"
+			rightLines = append(rightLines, equipSlotLine(label, formatSlottedItem(eq.Accessories[slot]), accLabelW))
+		}
+
+		sb.WriteString("\n")
+		sb.WriteString(zipCols(leftLines, rightLines, leftW))
+	} else {
+		// Single-column layout (original behaviour).
+		sb.WriteString("\n=== Armor ===\n")
+		for _, slot := range displayArmorSlots {
+			label := inventory.SlotDisplayName(string(slot)) + ":"
+			sb.WriteString(fmt.Sprintf("  %-12s %s\n", label, formatSlottedItem(eq.Armor[slot])))
+		}
+
+		sb.WriteString("\n=== Accessories ===\n")
+		neckLabel := inventory.SlotDisplayName("neck") + ":"
+		sb.WriteString(fmt.Sprintf("  %-21s %s\n", neckLabel, formatSlottedItem(eq.Accessories[inventory.SlotNeck])))
+		for _, slot := range displayLeftRingSlots {
+			label := inventory.SlotDisplayName(string(slot)) + ":"
+			sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItem(eq.Accessories[slot])))
+		}
+		for _, slot := range displayRightRingSlots {
+			label := inventory.SlotDisplayName(string(slot)) + ":"
+			sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItem(eq.Accessories[slot])))
+		}
 	}
 
 	return strings.TrimRight(sb.String(), "\n")

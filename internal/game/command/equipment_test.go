@@ -239,3 +239,108 @@ func TestHandleEquipment_OldRingNamesNotDisplayed(t *testing.T) {
 		}
 	}
 }
+
+// TestHandleEquipment_TwoCol_ArmorAppearsInLeftColumn verifies that at width>=60
+// all 8 armor slot labels appear in the output.
+func TestHandleEquipment_TwoCol_ArmorAppearsInLeftColumn(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	result := command.HandleEquipment(sess, 80)
+
+	armorLabels := []string{"Head:", "Torso:", "Left Arm:", "Right Arm:", "Hands:", "Left Leg:", "Right Leg:", "Feet:"}
+	for _, label := range armorLabels {
+		if !strings.Contains(result, label) {
+			t.Errorf("expected armor label %q in 2-col output:\n%s", label, result)
+		}
+	}
+}
+
+// TestHandleEquipment_TwoCol_AccessoriesAppearInRightColumn verifies that at width>=60
+// neck and all 10 ring slots appear in the output.
+func TestHandleEquipment_TwoCol_AccessoriesAppearInRightColumn(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	result := command.HandleEquipment(sess, 80)
+
+	if !strings.Contains(result, "Neck:") {
+		t.Errorf("expected 'Neck:' in 2-col output:\n%s", result)
+	}
+	for i := 1; i <= 5; i++ {
+		leftLabel := fmt.Sprintf("Left Hand Ring %d:", i)
+		rightLabel := fmt.Sprintf("Right Hand Ring %d:", i)
+		if !strings.Contains(result, leftLabel) {
+			t.Errorf("expected %q in 2-col output:\n%s", leftLabel, result)
+		}
+		if !strings.Contains(result, rightLabel) {
+			t.Errorf("expected %q in 2-col output:\n%s", rightLabel, result)
+		}
+	}
+}
+
+// TestHandleEquipment_TwoCol_HasColumnSeparator verifies that the " | " column divider
+// appears in the 2-col output.
+func TestHandleEquipment_TwoCol_HasColumnSeparator(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	result := command.HandleEquipment(sess, 80)
+
+	if !strings.Contains(result, " | ") {
+		t.Errorf("expected ' | ' column separator in 2-col output:\n%s", result)
+	}
+}
+
+// TestHandleEquipment_TwoCol_NoSeparatorAtWidth40 verifies that narrow terminals
+// get the single-column layout (no " | " separator).
+func TestHandleEquipment_TwoCol_NoSeparatorAtWidth40(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	result := command.HandleEquipment(sess, 40)
+
+	if strings.Contains(result, " | ") {
+		t.Errorf("did not expect ' | ' separator at width=40:\n%s", result)
+	}
+}
+
+// TestHandleEquipment_TwoCol_WeaponsBeforeColumns verifies weapons section appears
+// before the 2-col grid (i.e. no " | " separator precedes the weapons header).
+func TestHandleEquipment_TwoCol_WeaponsBeforeColumns(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	result := command.HandleEquipment(sess, 80)
+
+	weaponsIdx := strings.Index(result, "=== Weapons ===")
+	separatorIdx := strings.Index(result, " | ")
+	if weaponsIdx < 0 {
+		t.Fatalf("expected '=== Weapons ===' in output:\n%s", result)
+	}
+	if separatorIdx < 0 {
+		t.Fatalf("expected ' | ' separator in output:\n%s", result)
+	}
+	if weaponsIdx > separatorIdx {
+		t.Errorf("expected '=== Weapons ===' before ' | ', weapons at %d, separator at %d", weaponsIdx, separatorIdx)
+	}
+}
+
+// TestHandleEquipment_TwoCol_EquippedArmorAppearsInOutput verifies that an equipped
+// armor item's name appears when 2-col mode is active.
+func TestHandleEquipment_TwoCol_EquippedArmorAppearsInOutput(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{Name: "Tactical Vest"}
+
+	result := command.HandleEquipment(sess, 80)
+
+	if !strings.Contains(result, "Tactical Vest") {
+		t.Errorf("expected 'Tactical Vest' in 2-col output:\n%s", result)
+	}
+}
+
+// TestProperty_HandleEquipment_TwoCol_NeverPanics verifies that HandleEquipment never
+// panics for any combination of width and session state.
+func TestProperty_HandleEquipment_TwoCol_NeverPanics(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		sess := &session.PlayerSession{
+			UID:        "test-uid",
+			CharName:   "Tester",
+			LoadoutSet: inventory.NewLoadoutSet(),
+			Equipment:  inventory.NewEquipment(),
+			Backpack:   inventory.NewBackpack(20, 100.0),
+		}
+		width := rapid.IntRange(0, 200).Draw(rt, "width")
+		_ = command.HandleEquipment(sess, width)
+	})
+}
