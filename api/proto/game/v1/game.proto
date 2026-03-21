@@ -108,6 +108,11 @@ message ClientMessage {
     StashDepositRequest  stash_deposit  = 91;
     StashWithdrawRequest stash_withdraw = 92;
     StashBalanceRequest  stash_balance  = 93;
+    HealRequest          heal            = 94;
+    HealAmountRequest    heal_amount     = 95;
+    TrainJobRequest      train_job       = 96;
+    ListJobsRequest      list_jobs       = 97;
+    SetJobRequest        set_job         = 98;
   }
 }
 
@@ -175,6 +180,32 @@ message StashWithdrawRequest {
 // StashBalanceRequest queries stash balance and current exchange rate.
 message StashBalanceRequest {
   string npc_name = 1;
+}
+
+// HealRequest asks the healer NPC to fully restore the player's HP.
+message HealRequest {
+  string npc_name = 1; // name of the healer NPC to address
+}
+
+// HealAmountRequest asks the healer NPC to restore a specific number of HP.
+message HealAmountRequest {
+  string npc_name = 1;
+  int32  amount   = 2;
+}
+
+// TrainJobRequest asks a job trainer NPC to train the player in a job.
+message TrainJobRequest {
+  string npc_name = 1;
+  string job_id   = 2;
+}
+
+// ListJobsRequest asks the server to list all jobs held by the player.
+message ListJobsRequest {}
+
+// SetJobRequest asks the server to change the player's active job.
+// REQ-NPC-17: available from any room.
+message SetJobRequest {
+  string job_id = 1;
 }
 
 // DeployTrapRequest asks the server to arm a trap item at the player's current position.
