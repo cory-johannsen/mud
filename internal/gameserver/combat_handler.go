@@ -211,6 +211,9 @@ func (h *CombatHandler) SetOnCombatEnd(fn func(roomID string)) {
 // If no guard NPCs are present in the room, this is a no-op.
 //
 // Precondition: uid MUST be a valid player UID; wantedLevel MUST be in [2, 4].
+// Postcondition: if the player session exists and guard NPCs are present in the room,
+// broadcastFn is called with a narrative CombatEvent and h.Attack is invoked for each guard.
+// If the player session is not found or no guards are present, this is a no-op.
 func (h *CombatHandler) InitiateGuardCombat(uid, zoneID string, wantedLevel int) {
 	sess, ok := h.sessions.GetPlayer(uid)
 	if !ok {
