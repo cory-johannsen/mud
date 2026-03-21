@@ -1550,6 +1550,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleStashWithdraw(uid, p.StashWithdraw)
 	case *gamev1.ClientMessage_StashBalance:
 		return s.handleStashBalance(uid, p.StashBalance)
+	case *gamev1.ClientMessage_Heal:
+		return s.handleHeal(uid, p.Heal)
+	case *gamev1.ClientMessage_HealAmount:
+		return s.handleHealAmount(uid, p.HealAmount)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}

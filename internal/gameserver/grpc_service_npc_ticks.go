@@ -74,6 +74,7 @@ func (s *GameServiceServer) StartNPCTickHook() func() {
 				s.tickMerchantReplenish(time.Now())
 				if dt.Hour == 0 {
 					s.tickBankerRates()
+					s.tickHealerCapacity()
 				}
 			case <-stop:
 				s.calendar.Unsubscribe(ch)
