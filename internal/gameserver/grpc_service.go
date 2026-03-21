@@ -207,6 +207,10 @@ type GameServiceServer struct {
 	stopWantedDecay            func()
 	trapMgr                    *trap.TrapManager
 	trapTemplates              map[string]*trap.TrapTemplate
+	// merchantRuntimeStates maps NPC instance ID to active merchant runtime state.
+	merchantRuntimeStates map[string]*npc.MerchantRuntimeState
+	// bankerRuntimeStates maps NPC instance ID to active banker runtime state.
+	bankerRuntimeStates map[string]*npc.BankerRuntimeState
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -343,6 +347,8 @@ func NewGameServiceServer(
 		})
 		s.worldH.SetCombatHandler(s.combatH)
 	}
+	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
+	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
 	s.WireCoverCrossfireTrap()
 	s.WireConsumableTrapTrigger()
 	return s
