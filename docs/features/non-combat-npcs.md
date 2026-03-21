@@ -19,13 +19,13 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
 - [ ] Base data model
   - [ ] HTN personality system (cowardly/brave/neutral/opportunistic presets)
   - [ ] Flee/cower behavior on combat start
-- [ ] Merchant
-  - REQ-NPC-5: `negotiate` MUST only be usable once per merchant room visit.
-  - REQ-NPC-5a: Negotiate price modifier MUST be stored on player room session state, cleared on room exit.
-  - REQ-NPC-5b: WantedLevel 1 surcharge applied before negotiate modifier; not applied to negotiate roll.
-  - REQ-NPC-12: Merchant runtime state MUST be persisted and restored on restart; YAML values apply only at first initialization.
-  - [ ] `browse`, `buy`, `sell`, `negotiate` commands
-  - [ ] Named NPCs: Sergeant Mack (weapons, Last Stand Lodge), Slick Sally, Whiskey Joe, Old Rusty, Herb (consumables)
+- [x] Merchant
+  - [x] REQ-NPC-5: `negotiate` MUST only be usable once per merchant room visit.
+  - [x] REQ-NPC-5a: Negotiate price modifier MUST be stored on player room session state, cleared on room exit.
+  - [x] REQ-NPC-5b: WantedLevel 1 surcharge applied before negotiate modifier; not applied to negotiate roll.
+  - [x] REQ-NPC-12: Merchant runtime state MUST be persisted and restored on restart; YAML values apply only at first initialization.
+  - [x] `browse`, `buy`, `sell`, `negotiate` commands
+  - [x] Named NPCs: Sergeant Mack (weapons, Last Stand Lodge), Slick Sally, Whiskey Joe, Old Rusty, Herb (consumables)
 - [ ] Guard
   - REQ-NPC-6: On Safe room second violation, all guards present MUST enter initiative and target the aggressor.
   - REQ-NPC-7: Guards MUST check WantedLevel on room entry and on WantedLevel change events.
@@ -48,11 +48,11 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
   - [ ] `hire <npc>` and `dismiss` commands
   - [ ] Zone follow tracking with `MaxFollowZones` limit
   - [ ] Named NPC: one lore-appropriate hireling in Rustbucket Ridge
-- [ ] Banker
-  - REQ-NPC-14: Deposit and withdrawal MUST use `CurrentRate` at command execution time.
-  - [ ] Global stash (`StashBalance` on player character)
-  - [ ] `deposit`, `withdraw`, `balance` commands
-  - [ ] Named NPC: one lore-appropriate banker in a Safe room in Rustbucket Ridge
+- [x] Banker
+  - [x] REQ-NPC-14: Deposit and withdrawal MUST use `CurrentRate` at command execution time.
+  - [x] Global stash (`StashBalance` on player character)
+  - [x] `deposit`, `withdraw`, `balance` commands
+  - [x] Named NPC: Vera Coldcoin (banker, Safe room in Rustbucket Ridge)
 - [ ] Job Trainer
   - REQ-NPC-9: Players MUST have exactly one active job after their first job is trained.
   - REQ-NPC-10: Active job MUST earn XP; inactive jobs MUST NOT.
