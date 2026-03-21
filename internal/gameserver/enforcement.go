@@ -13,6 +13,11 @@ type WantedSaver interface {
 	Upsert(ctx context.Context, characterID int64, zoneID string, level int) error
 }
 
+// GuardCombatInitiator is satisfied by CombatHandler.InitiateGuardCombat.
+type GuardCombatInitiator interface {
+	InitiateGuardCombat(uid, zoneID string, wantedLevel int)
+}
+
 // CheckSafeViolation enforces safe-room combat rules for the given player.
 //
 // Preconditions:
@@ -32,7 +37,7 @@ func CheckSafeViolation(
 	zoneID string,
 	zoneLevel, roomLevel string,
 	currentDay int,
-	combatH *CombatHandler,
+	combatH GuardCombatInitiator,
 	wantedRepo WantedSaver,
 	broadcastFn func(roomID string, events []*gamev1.CombatEvent),
 ) ([]*gamev1.CombatEvent, error) {

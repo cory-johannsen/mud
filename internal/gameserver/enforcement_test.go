@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/danger"
@@ -11,6 +12,18 @@ import (
 
 type mockWantedSaver struct {
 	upserted map[string]int
+}
+
+type spyGuardCombat struct {
+	calledUID        string
+	calledZoneID     string
+	calledWantedLevel int
+}
+
+func (s *spyGuardCombat) InitiateGuardCombat(uid, zoneID string, wantedLevel int) {
+	s.calledUID = uid
+	s.calledZoneID = zoneID
+	s.calledWantedLevel = wantedLevel
 }
 
 func (m *mockWantedSaver) Upsert(_ context.Context, _ int64, zoneID string, level int) error {
@@ -43,8 +56,8 @@ func TestCheckSafeViolation_FirstViolation_Warning(t *testing.T) {
 	if len(events) != 1 {
 		t.Fatalf("want 1 warning event, got %d", len(events))
 	}
-	if events[0].Narrative == "" {
-		t.Error("warning event has empty narrative")
+	if !strings.Contains(events[0].Narrative, "Warning") {
+		t.Errorf("warning event narrative %q must contain \"Warning\"", events[0].Narrative)
 	}
 	if sess.SafeViolations[zoneID] != 1 {
 		t.Errorf("SafeViolations[%q] = %d; want 1", zoneID, sess.SafeViolations[zoneID])
@@ -58,9 +71,10 @@ func TestCheckSafeViolation_SecondViolation_IncrementsWanted(t *testing.T) {
 	sess := newTestSession()
 	sess.SafeViolations["test_zone"] = 1
 	saver := &mockWantedSaver{}
+	spy := &spyGuardCombat{}
 	const zoneID = "test_zone"
 
-	events, err := CheckSafeViolation(sess, zoneID, string(danger.Safe), "", 5, nil, saver, nil)
+	events, err := CheckSafeViolation(sess, zoneID, string(danger.Safe), "", 5, spy, saver, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -75,6 +89,15 @@ func TestCheckSafeViolation_SecondViolation_IncrementsWanted(t *testing.T) {
 	}
 	if saver.upserted[zoneID] != 1 {
 		t.Errorf("Upsert zoneID=%q level=%d; want 1", zoneID, saver.upserted[zoneID])
+	}
+	if spy.calledUID != sess.UID {
+		t.Errorf("InitiateGuardCombat uid=%q; want %q", spy.calledUID, sess.UID)
+	}
+	if spy.calledZoneID != zoneID {
+		t.Errorf("InitiateGuardCombat zoneID=%q; want %q", spy.calledZoneID, zoneID)
+	}
+	if spy.calledWantedLevel != 1 {
+		t.Errorf("InitiateGuardCombat wantedLevel=%d; want 1", spy.calledWantedLevel)
 	}
 }
 
