@@ -210,3 +210,39 @@ func TestPressurePlateTrap_NoFireOutOfCombat(t *testing.T) {
 		t.Error("trap should remain armed when player is out of combat")
 	}
 }
+
+// TestFindDetectedTrap_ReturnsNilWhenNotDetected verifies that IsDetected returns false
+// when MarkDetected was never called.
+//
+// Precondition: trap added but MarkDetected never called for player-1.
+// Postcondition: IsDetected returns false.
+func TestFindDetectedTrap_ReturnsNilWhenNotDetected(t *testing.T) {
+	mgr := trap.NewTrapManager()
+	instanceID := trap.TrapInstanceID("zone1", "room1", "equip", "Metal Cabinet")
+	mgr.AddTrap(instanceID, "bear_trap", true)
+
+	if mgr.IsDetected("player-1", instanceID) {
+		t.Error("expected trap NOT detected (MarkDetected never called)")
+	}
+}
+
+// TestHandleDisarmTrap_PropertyBasedDetection uses rapid to verify that IsDetected
+// always returns true after MarkDetected is called, for any player/instance combo.
+//
+// Precondition: MarkDetected is called with arbitrary playerUID and instanceID.
+// Postcondition: IsDetected always returns true for the same pair.
+func TestHandleDisarmTrap_PropertyBasedDetection(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		mgr := trap.NewTrapManager()
+		playerUID := rapid.StringMatching(`[a-z][a-z0-9]{0,15}`).Draw(rt, "playerUID")
+		zoneID := rapid.StringMatching(`[a-z][a-z0-9]{0,15}`).Draw(rt, "zoneID")
+		roomID := rapid.StringMatching(`[a-z][a-z0-9]{0,15}`).Draw(rt, "roomID")
+		desc := rapid.StringMatching(`[a-z][a-z0-9]{0,15}`).Draw(rt, "desc")
+		instanceID := trap.TrapInstanceID(zoneID, roomID, "equip", desc)
+		mgr.AddTrap(instanceID, "bear_trap", true)
+		mgr.MarkDetected(playerUID, instanceID)
+		if !mgr.IsDetected(playerUID, instanceID) {
+			rt.Errorf("IsDetected returned false after MarkDetected for player %q, instance %q", playerUID, instanceID)
+		}
+	})
+}

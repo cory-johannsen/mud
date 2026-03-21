@@ -98,6 +98,7 @@ message ClientMessage {
     RestRequest rest = 81;
     SelectTechRequest select_tech = 82;
     AidRequest aid = 83;
+    DisarmTrapRequest disarm_trap = 84;
   }
 }
 
@@ -110,6 +111,12 @@ message SelectTechRequest {}
 // AidRequest asks the server to queue an Aid action targeting the named ally.
 message AidRequest {
   string target = 1;
+}
+
+// DisarmTrapRequest asks the server to attempt to disarm a detected trap by name.
+message DisarmTrapRequest {
+  // trap_name is the trap name as shown at detection time.
+  string trap_name = 1;
 }
 
 // ServerEvent wraps all server-to-client events.

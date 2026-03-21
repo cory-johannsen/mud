@@ -1462,6 +1462,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleDelay(uid, p.Delay)
 	case *gamev1.ClientMessage_Aid:
 		return s.handleAid(uid, p.Aid)
+	case *gamev1.ClientMessage_DisarmTrap:
+		return s.handleDisarmTrap(uid, p.DisarmTrap)
 	case *gamev1.ClientMessage_Disarm:
 		return s.handleDisarm(uid, p.Disarm)
 	case *gamev1.ClientMessage_Stride:

@@ -321,3 +321,88 @@ func (s *GameServiceServer) checkInteractionTrap(uid string, sess *session.Playe
 		break
 	}
 }
+
+// handleDisarmTrap processes a disarm_trap command.
+//
+// Precondition: uid must identify a connected player; req.TrapName must be non-empty.
+// Postcondition: Applies Thievery check vs disable_dc + scaling; on success disarms the trap;
+//   on failure by 5+, fires trap against disarming player only (REQ-TR-13).
+func (s *GameServiceServer) handleDisarmTrap(uid string, req *gamev1.DisarmTrapRequest) (*gamev1.ServerEvent, error) {
+	if s.trapMgr == nil {
+		return messageEvent("Traps are not active in this world."), nil
+	}
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	room, ok := s.world.GetRoom(sess.RoomID)
+	if !ok {
+		return nil, fmt.Errorf("room %q not found", sess.RoomID)
+	}
+	zone, ok := s.world.GetZone(room.ZoneID)
+	if !ok {
+		return nil, fmt.Errorf("zone for room %q not found", sess.RoomID)
+	}
+	dangerLevel := room.DangerLevel
+	if dangerLevel == "" {
+		dangerLevel = zone.DangerLevel
+	}
+
+	instanceID, tmpl := s.findDetectedTrap(uid, sess, room, zone.ID, req.TrapName)
+	if instanceID == "" {
+		return messageEvent(fmt.Sprintf("You don't see any trap called %q here.", req.TrapName)), nil
+	}
+
+	// Thievery skill check.
+	scaling := trap.ScalingFor(tmpl, dangerLevel)
+	dc := tmpl.DisableDC + scaling.DisableDCBonus
+	abilityScore := s.abilityScoreForSkill(sess, "thievery")
+	amod := abilityModFrom(abilityScore)
+	var roll int
+	if s.dice != nil {
+		roll = s.dice.Src().Intn(20) + 1
+	} else {
+		roll = 10
+	}
+	total := roll + amod
+
+	if total >= dc {
+		s.trapMgr.Disarm(instanceID)
+		return messageEvent(fmt.Sprintf("You successfully disarm the %s.", tmpl.Name)), nil
+	}
+	if total <= dc-5 {
+		// Failure by 5+: fire trap against disarming player only (REQ-TR-13).
+		s.fireTrap(uid, sess, tmpl, instanceID, dangerLevel, true)
+		return messageEvent(fmt.Sprintf("You fumble the disarm attempt — the %s fires!", tmpl.Name)), nil
+	}
+	return messageEvent(fmt.Sprintf("You fail to disarm the %s. You may try again.", tmpl.Name)), nil
+}
+
+// findDetectedTrap searches the current room for a detected trap matching name.
+// Returns (instanceID, template) or ("", nil) if not found.
+//
+// Precondition: sess.RoomID must be valid; uid must have previously detected the trap.
+// Postcondition: Returns the instance ID and template of the matching detected trap, or ("", nil).
+func (s *GameServiceServer) findDetectedTrap(uid string, sess *session.PlayerSession, room *world.Room, zoneID, trapName string) (string, *trap.TrapTemplate) {
+	lowerName := strings.ToLower(trapName)
+	for i := range room.Equipment {
+		eq := &room.Equipment[i]
+		if eq.TrapTemplate == "" {
+			continue
+		}
+		tmpl, ok := s.trapTemplates[eq.TrapTemplate]
+		if !ok {
+			continue
+		}
+		instanceID := trap.TrapInstanceID(zoneID, room.ID, "equip", eq.Description)
+		if !s.trapMgr.IsDetected(uid, instanceID) {
+			continue
+		}
+		candidate := strings.ToLower(tmpl.Name)
+		withLocation := candidate + " near " + strings.ToLower(eq.Description)
+		if lowerName == candidate || lowerName == withLocation {
+			return instanceID, tmpl
+		}
+	}
+	return "", nil
+}

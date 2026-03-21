@@ -103,6 +103,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerTrip:               bridgeTrip,
 	command.HandlerDelay:              bridgeDelay,
 	command.HandlerDisarm:             bridgeDisarm,
+	command.HandlerDisarmTrap:         bridgeDisarmTrap,
 	command.HandlerClimb:              bridgeClimb,
 	command.HandlerStride:             bridgeStride,
 	command.HandlerHide:               bridgeHide,
@@ -973,6 +974,22 @@ func bridgeDisarm(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Disarm{Disarm: &gamev1.DisarmRequest{Target: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeDisarmTrap builds a DisarmTrapRequest with the trap name from the command argument.
+//
+// Precondition: bctx.parsed.RawArgs must be the trap name.
+// Postcondition: Returns a ClientMessage with DisarmTrap payload when RawArgs is non-empty;
+// otherwise returns done=true with a usage error event.
+func bridgeDisarmTrap(bctx *bridgeContext) (bridgeResult, error) {
+	trapName := strings.TrimSpace(bctx.parsed.RawArgs)
+	if trapName == "" {
+		return writeErrorPrompt(bctx, "Usage: disarm_trap <trap name>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_DisarmTrap{DisarmTrap: &gamev1.DisarmTrapRequest{TrapName: trapName}},
 	}}, nil
 }
 
