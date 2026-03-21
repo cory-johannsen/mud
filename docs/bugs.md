@@ -26,6 +26,14 @@
 **Steps:** View the ne_portland zone map; observe the two isolated rooms.
 **Fix:**
 
+### BUG-5: Technology descriptions reference magic and PF2E saves
+**Severity:** medium
+**Status:** open
+**Category:** Content
+**Description:** Many technology item and ability descriptions use fantasy/magic flavor text and reference PF2E save types (Fortitude, Reflex, Will) instead of sci-fi/tech flavor appropriate to the game setting.
+**Steps:** Browse technology items and ability descriptions; observe magic/PF2E save language.
+**Fix:**
+
 ### BUG-2: eq command displays armor item IDs instead of names
 **Severity:** medium
 **Status:** open
