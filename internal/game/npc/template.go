@@ -220,6 +220,25 @@ func (t *Template) Validate() error {
 	return nil
 }
 
+// ValidateWithSkills runs Validate and then checks all skill IDs referenced
+// in any JobTrainerConfig against the provided skill registry.
+//
+// REQ-NPC-2a: unknown skill IDs MUST be a fatal load error.
+//
+// Precondition: t must not be nil; knownSkills may be nil (treated as empty).
+// Postcondition: Returns nil iff Validate passes and all skill IDs are known.
+func (t *Template) ValidateWithSkills(knownSkills map[string]bool) error {
+	if err := t.Validate(); err != nil {
+		return err
+	}
+	if t.JobTrainer != nil {
+		if err := t.JobTrainer.Validate(knownSkills); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
+	}
+	return nil
+}
+
 // LoadTemplateFromBytes parses a single NPC template from raw YAML bytes.
 //
 // Precondition: data must be valid YAML for a single Template.

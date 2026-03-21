@@ -569,6 +569,49 @@ guard:
 	assert.Equal(t, "brave", tmpl.Personality, "personality must be preserved from YAML")
 }
 
+// TestTemplate_ValidateWithSkills_UnknownSkill verifies fatal error for unknown skill.
+func TestTemplate_ValidateWithSkills_UnknownSkill(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "trainer_x", Name: "Trainer X", NPCType: "job_trainer",
+		Level: 2, MaxHP: 20, AC: 10,
+		JobTrainer: &npc.JobTrainerConfig{
+			OfferedJobs: []npc.TrainableJob{
+				{
+					JobID: "hacker", TrainingCost: 200,
+					Prerequisites: npc.JobPrerequisites{
+						MinSkillRanks: map[string]string{"nonexistent_skill_abc": "trained"},
+					},
+				},
+			},
+		},
+	}
+	knownSkills := map[string]bool{"smooth_talk": true}
+	err := tmpl.ValidateWithSkills(knownSkills)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "nonexistent_skill_abc")
+}
+
+// TestTemplate_ValidateWithSkills_KnownSkill verifies known skill passes.
+func TestTemplate_ValidateWithSkills_KnownSkill(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "trainer_y", Name: "Trainer Y", NPCType: "job_trainer",
+		Level: 2, MaxHP: 20, AC: 10,
+		JobTrainer: &npc.JobTrainerConfig{
+			OfferedJobs: []npc.TrainableJob{
+				{
+					JobID: "hacker", TrainingCost: 200,
+					Prerequisites: npc.JobPrerequisites{
+						MinSkillRanks: map[string]string{"smooth_talk": "trained"},
+					},
+				},
+			},
+		},
+	}
+	knownSkills := map[string]bool{"smooth_talk": true}
+	err := tmpl.ValidateWithSkills(knownSkills)
+	assert.NoError(t, err)
+}
+
 // TestProperty_AllExistingNPCTemplatesStillLoad verifies that adding NPCType/Validate changes
 // does not break any existing NPC YAML file. Reads all *.yaml in content/npcs/.
 func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
