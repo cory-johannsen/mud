@@ -104,6 +104,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerDelay:              bridgeDelay,
 	command.HandlerDisarm:             bridgeDisarm,
 	command.HandlerDisarmTrap:         bridgeDisarmTrap,
+	command.HandlerDeployTrap:         bridgeDeployTrap,
 	command.HandlerClimb:              bridgeClimb,
 	command.HandlerStride:             bridgeStride,
 	command.HandlerHide:               bridgeHide,
@@ -990,6 +991,21 @@ func bridgeDisarmTrap(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_DisarmTrap{DisarmTrap: &gamev1.DisarmTrapRequest{TrapName: trapName}},
+	}}, nil
+}
+
+// bridgeDeployTrap builds a DeployTrapRequest with the item name from the command argument.
+//
+// Precondition: bctx.parsed.RawArgs must be the item name.
+// Postcondition: Returns a ClientMessage with DeployTrap payload when RawArgs is non-empty;
+// otherwise returns done=true with a usage error event.
+func bridgeDeployTrap(bctx *bridgeContext) (bridgeResult, error) {
+	if bctx.parsed.RawArgs == "" {
+		return writeErrorPrompt(bctx, "Usage: deploy <item>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_DeployTrap{DeployTrap: &gamev1.DeployTrapRequest{ItemName: bctx.parsed.RawArgs}},
 	}}, nil
 }
 
