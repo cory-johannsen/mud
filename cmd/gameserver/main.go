@@ -4,13 +4,10 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"net"
-	"os"
-	"path/filepath"
 	"time"
 
 	"go.uber.org/zap"
@@ -19,14 +16,10 @@ import (
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
-	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
-	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
-	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
-	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/game/xp"
@@ -35,9 +28,40 @@ import (
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/scripting"
 	"github.com/cory-johannsen/mud/internal/server"
-	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
+// AppConfig holds all CLI flag values for the gameserver binary.
+type AppConfig struct {
+	Config          config.Config
+	ZonesDir        world.WorldDir
+	NPCsDir         npc.NPCsDir
+	ConditionsDir   condition.ConditionsDir
+	MentalCondDir   condition.MentalConditionsDir
+	ScriptRoot      scripting.ScriptRoot
+	CondScriptDir   scripting.CondScriptDir
+	WeaponsDir      inventory.WeaponsDir
+	ItemsDir        inventory.ItemsDir
+	ExplosivesDir   inventory.ExplosivesDir
+	ArmorsDir       inventory.ArmorsDir
+	AIDir           string
+	AIScriptDir     scripting.AIScriptDir
+	AITickInterval  gameserver.AITickInterval
+	JobsDir         ruleset.JobsDir
+	LoadoutsDir     gameserver.LoadoutsDir
+	SkillsFile      ruleset.SkillsFile
+	FeatsFile       ruleset.FeatsFile
+	ClassFeatsFile  ruleset.ClassFeaturesFile
+	ArchetypesDir   ruleset.ArchetypesDir
+	RegionsDir      ruleset.RegionsDir
+	TechContentDir  technology.TechContentDir
+	RoundDurationMs gameserver.RoundDurationMs
+	XPConfigFile    string
+}
+
+// AppConfigToDatabase extracts database config from AppConfig for wire.
+func AppConfigToDatabase(cfg *AppConfig) config.DatabaseConfig {
+	return cfg.Config.Database
+}
 
 func main() {
 	start := time.Now()
@@ -79,333 +103,69 @@ func main() {
 	}
 	defer logger.Sync()
 
-	cryptoSrc := dice.NewCryptoSource()
-	diceRoller := dice.NewLoggedRoller(cryptoSrc, logger)
-
 	logger.Info("starting game server",
 		zap.String("grpc_addr", cfg.GameServer.Addr()),
 	)
 
-	// Load world
-	zoneStart := time.Now()
-	zones, err := world.LoadZonesFromDir(*zonesDir)
-	if err != nil {
-		logger.Fatal("loading zones", zap.Error(err))
-	}
-	worldMgr, err := world.NewManager(zones)
-	if err != nil {
-		logger.Fatal("creating world manager", zap.Error(err))
-	}
-	if err := worldMgr.ValidateExits(); err != nil {
-		logger.Fatal("validating cross-zone exits", zap.Error(err))
-	}
-	logger.Info("world loaded",
-		zap.Int("zones", worldMgr.ZoneCount()),
-		zap.Int("rooms", worldMgr.RoomCount()),
-		zap.Duration("elapsed", time.Since(zoneStart)),
+	// Pre-construct GameClock; its primitive params would collide with wire's string provider.
+	gameClock := gameserver.NewGameClock(
+		int32(cfg.GameServer.GameClockStart),
+		cfg.GameServer.GameTickDuration,
 	)
 
-	// Connect to PostgreSQL for character persistence
-	dbStart := time.Now()
-	pool, err := postgres.NewPool(ctx, cfg.Database)
+	appCfg := &AppConfig{
+		Config:          cfg,
+		ZonesDir:        world.WorldDir(*zonesDir),
+		NPCsDir:         npc.NPCsDir(*npcsDir),
+		ConditionsDir:   condition.ConditionsDir(*conditionsDir),
+		MentalCondDir:   condition.MentalConditionsDir(*conditionsDir + "/mental"),
+		ScriptRoot:      scripting.ScriptRoot(*scriptRoot),
+		CondScriptDir:   scripting.CondScriptDir(*condScriptDir),
+		WeaponsDir:      inventory.WeaponsDir(*weaponsDir),
+		ItemsDir:        inventory.ItemsDir(*itemsDir),
+		ExplosivesDir:   inventory.ExplosivesDir(*explosivesDir),
+		ArmorsDir:       inventory.ArmorsDir(*armorsDir),
+		AIDir:           *aiDir,
+		AIScriptDir:     scripting.AIScriptDir(*aiScriptDir),
+		AITickInterval:  gameserver.AITickInterval(*aiTickInterval),
+		JobsDir:         ruleset.JobsDir(*jobsDir),
+		LoadoutsDir:     gameserver.LoadoutsDir(*loadoutsDir),
+		SkillsFile:      ruleset.SkillsFile(*skillsFile),
+		FeatsFile:       ruleset.FeatsFile(*featsFile),
+		ClassFeatsFile:  ruleset.ClassFeaturesFile(*classFeatsFile),
+		ArchetypesDir:   ruleset.ArchetypesDir(*archetypesDir),
+		RegionsDir:      ruleset.RegionsDir(*regionsDir),
+		TechContentDir:  technology.TechContentDir(*techContentDir),
+		RoundDurationMs: gameserver.RoundDurationMs(cfg.GameServer.RoundDurationMs),
+		XPConfigFile:    *xpConfigFile,
+	}
+
+	app, err := Initialize(ctx, appCfg, gameClock, logger)
 	if err != nil {
-		logger.Fatal("connecting to database", zap.Error(err))
+		logger.Fatal("initializing application", zap.Error(err))
 	}
-	logger.Info("database connected",
-		zap.String("host", cfg.Database.Host),
-		zap.Duration("elapsed", time.Since(dbStart)),
-	)
-	charRepo := postgres.NewCharacterRepository(pool.DB())
-	accountRepo := postgres.NewAccountRepository(pool.DB())
-	automapRepo := postgres.NewAutomapRepository(pool.DB())
-	progressRepo := postgres.NewCharacterProgressRepository(pool.DB())
 
-	// Create managers
-	sessMgr := session.NewManager()
-	// cmdRegistry is built after class features are loaded so shortcuts can be registered.
+	// Start game clock.
+	stopClock := gameClock.Start()
+	defer stopClock()
 
-	// Load NPC templates and spawn initial instances
-	npcTemplates, err := npc.LoadTemplates(*npcsDir)
-	if err != nil {
-		logger.Fatal("loading npc templates", zap.Error(err))
-	}
-	logger.Info("loaded npc templates", zap.Int("count", len(npcTemplates)))
+	// Start game calendar.
+	app.GameCalendar.SetLogger(logger.Sugar())
+	stopCalendar := app.GameCalendar.Start()
+	defer stopCalendar()
 
-	npcMgr := npc.NewManager()
-
-	// Build per-room spawn configs from zone data.
-	roomSpawns := make(map[string][]npc.RoomSpawn)
-	templateByID := make(map[string]*npc.Template, len(npcTemplates))
-	for _, tmpl := range npcTemplates {
-		templateByID[tmpl.ID] = tmpl
-	}
-	for _, zone := range worldMgr.AllZones() {
-		for _, room := range zone.Rooms {
-			for _, sc := range room.Spawns {
-				tmpl, ok := templateByID[sc.Template]
-				if !ok {
-					logger.Fatal("spawn references unknown npc template",
-						zap.String("zone", zone.ID),
-						zap.String("room", room.ID),
-						zap.String("template", sc.Template),
-					)
-				}
-				var delay time.Duration
-				switch {
-				case sc.RespawnAfter != "":
-					d, err := time.ParseDuration(sc.RespawnAfter)
-					if err != nil {
-						logger.Fatal("invalid respawn_after duration",
-							zap.String("room", room.ID),
-							zap.String("template", sc.Template),
-							zap.String("value", sc.RespawnAfter),
-							zap.Error(err),
-						)
-					}
-					delay = d
-				case tmpl.RespawnDelay != "":
-					d, err := time.ParseDuration(tmpl.RespawnDelay)
-					if err != nil {
-						logger.Fatal("invalid respawn_delay on template",
-							zap.String("template", tmpl.ID),
-							zap.String("value", tmpl.RespawnDelay),
-							zap.Error(err),
-						)
-					}
-					delay = d
-				}
-				roomSpawns[room.ID] = append(roomSpawns[room.ID], npc.RoomSpawn{
-					TemplateID:   sc.Template,
-					Max:          sc.Count,
-					RespawnDelay: delay,
-				})
-			}
+	// Wire broadcast function: CombatHandler needs GRPCService after both are constructed.
+	app.CombatHandler.SetBroadcastFn(func(roomID string, events []*gamev1.CombatEvent) {
+		if app.GRPCService != nil {
+			app.GRPCService.BroadcastCombatEvents(roomID, events)
 		}
-	}
-	respawnMgr := npc.NewRespawnManager(roomSpawns, templateByID)
-	logger.Info("built respawn manager", zap.Int("room_configs", len(roomSpawns)))
-
-	// Populate all rooms with configured NPC spawns.
-	for roomID := range roomSpawns {
-		respawnMgr.PopulateRoom(roomID, npcMgr)
-	}
-	logger.Info("initial NPC population complete")
-
-	// Load condition definitions
-	condStart := time.Now()
-	condRegistry, err := condition.LoadDirectory(*conditionsDir)
-	if err != nil {
-		logger.Fatal("loading condition definitions", zap.Error(err))
-	}
-	logger.Info("loaded condition definitions",
-		zap.Int("count", len(condRegistry.All())),
-		zap.Duration("elapsed", time.Since(condStart)),
-	)
-	mentalCondRegistry, err := condition.LoadDirectory("content/conditions/mental")
-	if err != nil {
-		logger.Fatal("loading mental condition definitions", zap.Error(err))
-	}
-	for _, def := range mentalCondRegistry.All() {
-		condRegistry.Register(def)
-	}
-	logger.Info("loaded mental condition definitions", zap.Int("count", len(mentalCondRegistry.All())))
-
-	// Load technology definitions.
-	techReg, err := technology.Load(*techContentDir)
-	if err != nil {
-		var pathErr *os.PathError
-		if errors.As(err, &pathErr) && os.IsNotExist(pathErr.Err) {
-			log.Printf("WARN: technology content dir %q not found — starting with empty tech registry", *techContentDir)
-			techReg = technology.NewRegistry()
-		} else {
-			log.Fatalf("loading technology content: %v", err)
-		}
-	}
-	logger.Info("loaded technology definitions", zap.Int("count", len(techReg.All())))
-	hardwiredTechRepo := postgres.NewCharacterHardwiredTechRepository(pool.DB())
-	preparedTechRepo := postgres.NewCharacterPreparedTechRepository(pool.DB())
-	spontaneousTechRepo := postgres.NewCharacterSpontaneousTechRepository(pool.DB())
-	innateTechRepo := postgres.NewCharacterInnateTechRepository(pool.DB())
-
-	// Load inventory definitions.
-	invRegistry := inventory.NewRegistry()
-	if *weaponsDir != "" {
-		weapons, err := inventory.LoadWeapons(*weaponsDir)
-		if err != nil {
-			logger.Fatal("loading weapon definitions", zap.Error(err))
-		}
-		for _, w := range weapons {
-			if err := invRegistry.RegisterWeapon(w); err != nil {
-				logger.Fatal("registering weapon", zap.String("id", w.ID), zap.Error(err))
-			}
-		}
-		logger.Info("loaded weapon definitions", zap.Int("count", len(weapons)))
-	}
-	if *explosivesDir != "" {
-		explosives, err := inventory.LoadExplosives(*explosivesDir)
-		if err != nil {
-			logger.Fatal("loading explosive definitions", zap.Error(err))
-		}
-		for _, ex := range explosives {
-			if err := invRegistry.RegisterExplosive(ex); err != nil {
-				logger.Fatal("registering explosive", zap.String("id", ex.ID), zap.Error(err))
-			}
-		}
-		logger.Info("loaded explosive definitions", zap.Int("count", len(explosives)))
-	}
-
-	if *itemsDir != "" {
-		items, err := inventory.LoadItems(*itemsDir)
-		if err != nil {
-			logger.Fatal("loading item definitions", zap.Error(err))
-		}
-		for _, item := range items {
-			if err := invRegistry.RegisterItem(item); err != nil {
-				logger.Fatal("registering item", zap.String("id", item.ID), zap.Error(err))
-			}
-		}
-		logger.Info("loaded item definitions", zap.Int("count", len(items)))
-	}
-
-	// Load armor definitions.
-	armors, err := inventory.LoadArmors(*armorsDir)
-	if err != nil {
-		logger.Fatal("failed to load armors", zap.Error(err))
-	}
-	for _, a := range armors {
-		if err := invRegistry.RegisterArmor(a); err != nil {
-			logger.Fatal("failed to register armor", zap.String("id", a.ID), zap.Error(err))
-		}
-	}
-	logger.Info("loaded armor definitions", zap.Int("count", len(armors)))
-
-	// Wire armor AC resolver so NPC spawn applies equipped armor AC bonus.
-	npcMgr.SetArmorACResolver(func(armorID string) int {
-		if def, ok := invRegistry.Armor(armorID); ok {
-			return def.ACBonus
-		}
-		return 0
 	})
 
-	// Load job definitions.
-	jobList, err := ruleset.LoadJobs(*jobsDir)
-	if err != nil {
-		logger.Fatal("failed to load jobs", zap.Error(err))
-	}
-	jobReg := ruleset.NewJobRegistry()
-	for _, j := range jobList {
-		jobReg.Register(j)
-	}
-	logger.Info("loaded job definitions", zap.Int("count", len(jobList)))
-
-	allSkills, err := ruleset.LoadSkills(*skillsFile)
-	if err != nil {
-		logger.Fatal("failed to load skills", zap.Error(err))
-	}
-	logger.Info("loaded skill definitions", zap.Int("count", len(allSkills)))
-	characterSkillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
-	characterProficienciesRepo := postgres.NewCharacterProficienciesRepository(pool.DB())
-
-	allFeats, err := ruleset.LoadFeats(*featsFile)
-	if err != nil {
-		logger.Fatal("failed to load feats", zap.Error(err))
-	}
-	logger.Info("loaded feat definitions", zap.Int("count", len(allFeats)))
-	featRegistry := ruleset.NewFeatRegistry(allFeats)
-	characterFeatsRepo := postgres.NewCharacterFeatsRepository(pool.DB())
-
-	classFeatures, err := ruleset.LoadClassFeatures(*classFeatsFile)
-	if err != nil {
-		logger.Fatal("loading class features", zap.Error(err))
-	}
-	cfReg := ruleset.NewClassFeatureRegistry(classFeatures)
-	logger.Info("class features loaded", zap.Int("class_features", len(classFeatures)))
-	allCmds := command.RegisterShortcuts(classFeatures, command.BuiltinCommands())
-	cmdRegistry, err := command.NewRegistry(allCmds)
-	if err != nil {
-		logger.Fatal("building command registry with shortcuts", zap.Error(err))
-	}
-	logger.Info("command registry built", zap.Int("commands", len(allCmds)))
-	characterClassFeaturesRepo := postgres.NewCharacterClassFeaturesRepository(pool.DB())
-	featureChoicesRepo := postgres.NewCharacterFeatureChoicesRepo(pool.DB())
-	charAbilityBoostsRepo := postgres.NewCharacterAbilityBoostsRepository(pool.DB())
-
-	archetypeList, err := ruleset.LoadArchetypes(*archetypesDir)
-	if err != nil {
-		logger.Fatal("failed to load archetypes", zap.Error(err))
-	}
-	archetypeMap := make(map[string]*ruleset.Archetype, len(archetypeList))
-	for _, a := range archetypeList {
-		archetypeMap[a.ID] = a
-	}
-	logger.Info("loaded archetype definitions", zap.Int("count", len(archetypeList)))
-
-	regionList, err := ruleset.LoadRegions(*regionsDir)
-	if err != nil {
-		logger.Fatal("failed to load regions", zap.Error(err))
-	}
-	regionMap := make(map[string]*ruleset.Region, len(regionList))
-	for _, r := range regionList {
-		regionMap[r.ID] = r
-	}
-	logger.Info("loaded region definitions", zap.Int("count", len(regionList)))
-
-	// Load HTN AI domains.
-	aiRegistry := ai.NewRegistry()
-
-	combatEngine := combat.NewEngine()
-
-	// Initialise scripting engine
-	var scriptMgr *scripting.Manager
-	if *scriptRoot != "" {
-		scriptStart := time.Now()
-		scriptMgr = scripting.NewManager(diceRoller, logger)
-
-		// Load global condition scripts.
-		if info, err := os.Stat(*condScriptDir); err == nil && info.IsDir() {
-			if err := scriptMgr.LoadGlobal(*condScriptDir, 0); err != nil {
-				logger.Fatal("loading global condition scripts",
-					zap.String("dir", *condScriptDir), zap.Error(err))
-			}
-			logger.Info("global condition scripts loaded",
-				zap.String("dir", *condScriptDir),
-				zap.Duration("elapsed", time.Since(scriptStart)))
-		}
-
-		// Load per-zone scripts.
-		for _, zone := range worldMgr.AllZones() {
-			if zone.ScriptDir == "" {
-				continue
-			}
-			info, err := os.Stat(zone.ScriptDir)
-			if err != nil || !info.IsDir() {
-				logger.Warn("zone script_dir not found, skipping",
-					zap.String("zone", zone.ID), zap.String("dir", zone.ScriptDir))
-				continue
-			}
-			if err := scriptMgr.LoadZone(zone.ID, zone.ScriptDir, zone.ScriptInstructionLimit); err != nil {
-				logger.Fatal("loading zone scripts",
-					zap.String("zone", zone.ID), zap.Error(err))
-			}
-			logger.Info("zone scripts loaded",
-				zap.String("zone", zone.ID), zap.String("dir", zone.ScriptDir))
-		}
-
-		// Load weapon scripts.
-		weaponScriptDir := filepath.Join(*scriptRoot, "weapons")
-		if _, statErr := os.Stat(weaponScriptDir); statErr == nil {
-			if err := scriptMgr.LoadGlobal(weaponScriptDir, scripting.DefaultInstructionLimit); err != nil {
-				logger.Fatal("loading weapon scripts", zap.Error(err))
-			}
-			logger.Info("loaded weapon scripts", zap.String("dir", weaponScriptDir))
-		}
-
-		logger.Info("scripting engine initialized",
-			zap.Duration("elapsed", time.Since(scriptStart)))
-
+	// Wire scripting callbacks (post-Initialize to avoid circular deps).
+	if app.ScriptMgr != nil {
 		// Wire QueryRoom callback.
-		scriptMgr.QueryRoom = func(roomID string) *scripting.RoomInfo {
-			room, ok := worldMgr.GetRoom(roomID)
+		app.ScriptMgr.QueryRoom = func(roomID string) *scripting.RoomInfo {
+			room, ok := app.WorldMgr.GetRoom(roomID)
 			if !ok {
 				return nil
 			}
@@ -415,13 +175,13 @@ func main() {
 		// Wire GetEntityRoom callback.
 		// Checks NPC instances first, then player sessions.
 		//
-		// Precondition: npcMgr and sessMgr must not be nil.
+		// Precondition: app.NpcMgr and app.SessMgr must not be nil.
 		// Postcondition: Returns room ID string or empty string when entity not found.
-		scriptMgr.GetEntityRoom = func(uid string) string {
-			if inst, ok := npcMgr.Get(uid); ok {
+		app.ScriptMgr.GetEntityRoom = func(uid string) string {
+			if inst, ok := app.NpcMgr.Get(uid); ok {
 				return inst.RoomID
 			}
-			if sess, ok := sessMgr.GetPlayer(uid); ok {
+			if sess, ok := app.SessMgr.GetPlayer(uid); ok {
 				return sess.RoomID
 			}
 			return ""
@@ -430,10 +190,10 @@ func main() {
 		// Wire GetCombatantsInRoom callback.
 		// Returns CombatantInfo for all living combatants in the active combat for roomID.
 		//
-		// Precondition: combatEngine must not be nil.
+		// Precondition: app.CombatEngine must not be nil.
 		// Postcondition: Returns nil when no active combat exists for roomID.
-		scriptMgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo {
-			cbt, ok := combatEngine.GetCombat(roomID)
+		app.ScriptMgr.GetCombatantsInRoom = func(roomID string) []*scripting.CombatantInfo {
+			cbt, ok := app.CombatEngine.GetCombat(roomID)
 			if !ok {
 				return nil
 			}
@@ -462,14 +222,14 @@ func main() {
 		// Wire RevealZoneMap callback.
 		// Bulk-reveals all rooms in zoneID for the player's automap cache and persists to DB.
 		//
-		// Precondition: sessMgr, worldMgr, and automapRepo must not be nil.
+		// Precondition: app.GRPCService, app.WorldMgr, and app.AutomapRepo must not be nil.
 		// Postcondition: All rooms in zoneID are marked discovered in the session cache and persisted.
-		scriptMgr.RevealZoneMap = func(uid, zoneID string) {
-			sess, ok := sessMgr.GetPlayer(uid)
+		app.ScriptMgr.RevealZoneMap = func(uid, zoneID string) {
+			sess, ok := app.SessMgr.GetPlayer(uid)
 			if !ok {
 				return
 			}
-			zone, ok := worldMgr.GetZone(zoneID)
+			zone, ok := app.WorldMgr.GetZone(zoneID)
 			if !ok {
 				return
 			}
@@ -483,160 +243,41 @@ func main() {
 					newRooms = append(newRooms, roomID)
 				}
 			}
-			if automapRepo != nil && len(newRooms) > 0 {
-				if err := automapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, newRooms); err != nil {
+			if app.AutomapRepo != nil && len(newRooms) > 0 {
+				if err := app.AutomapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, newRooms); err != nil {
 					logger.Warn("bulk-persisting zone map reveal", zap.Error(err))
 				}
 			}
 		}
-	}
 
-	// Load AI precondition scripts before registering domains so that Lua
-	// functions are available when the planner evaluates preconditions.
-	if scriptMgr != nil && *aiScriptDir != "" {
-		if _, statErr := os.Stat(*aiScriptDir); statErr == nil {
-			if err := scriptMgr.LoadGlobal(*aiScriptDir, scripting.DefaultInstructionLimit); err != nil {
-				logger.Fatal("loading AI scripts", zap.Error(err))
+		// Load AI domains post-Initialize (scripting cannot import ai due to import cycle).
+		if appCfg.AIDir != "" {
+			domains, err := ai.LoadDomains(appCfg.AIDir)
+			if err != nil {
+				logger.Fatal("loading AI domains", zap.Error(err))
 			}
-			logger.Info("loaded AI scripts", zap.String("dir", *aiScriptDir))
-		}
-	}
-
-	// Load HTN AI domain YAML files. Lua precondition scripts must be loaded first.
-	if scriptMgr != nil && *aiDir != "" {
-		domains, err := ai.LoadDomains(*aiDir)
-		if err != nil {
-			logger.Fatal("loading AI domains", zap.Error(err))
-		}
-		for _, domain := range domains {
-			if err := aiRegistry.Register(domain, scriptMgr, ""); err != nil {
-				logger.Fatal("registering AI domain", zap.String("id", domain.ID), zap.Error(err))
+			for _, domain := range domains {
+				if err := app.AIRegistry.Register(domain, app.ScriptMgr, ""); err != nil {
+					logger.Fatal("registering AI domain", zap.String("id", domain.ID), zap.Error(err))
+				}
 			}
-		}
-		logger.Info("loaded AI domains", zap.Int("count", len(domains)))
-	}
-
-	// Create and start game clock.
-	gameClock := gameserver.NewGameClock(
-		int32(cfg.GameServer.GameClockStart),
-		cfg.GameServer.GameTickDuration,
-	)
-	stopClock := gameClock.Start()
-	defer stopClock()
-
-	// Load calendar state and construct GameCalendar.
-	calendarRepo := postgres.NewCalendarRepo(pool.DB())
-	calDay, calMonth, err := calendarRepo.Load()
-	if err != nil {
-		logger.Fatal("loading calendar state", zap.Error(err))
-	}
-	gameCalendar := gameserver.NewGameCalendar(gameClock, calDay, calMonth, calendarRepo)
-	gameCalendar.SetLogger(logger.Sugar())
-	stopCalendar := gameCalendar.Start()
-	defer stopCalendar()
-
-	// Create handlers
-	// worldHandler is initialized after roomEquipMgr below.
-	chatHandler := gameserver.NewChatHandler(sessMgr)
-	npcHandler := gameserver.NewNPCHandler(npcMgr, sessMgr)
-	roundDuration := time.Duration(cfg.GameServer.RoundDurationMs) * time.Millisecond
-	if roundDuration <= 0 {
-		roundDuration = 6 * time.Second
-	}
-
-	var grpcService *gameserver.GameServiceServer
-	broadcastFn := func(roomID string, events []*gamev1.CombatEvent) {
-		if grpcService != nil {
-			grpcService.BroadcastCombatEvents(roomID, events)
+			logger.Info("loaded AI domains", zap.Int("count", len(domains)))
 		}
 	}
-	// Create floor manager for room item tracking.
-	floorMgr := inventory.NewFloorManager()
-
-	// Create room equipment manager and seed it from zone data.
-	roomEquipMgr := inventory.NewRoomEquipmentManager()
-	for _, zone := range worldMgr.AllZones() {
-		for _, room := range zone.Rooms {
-			if len(room.Equipment) > 0 {
-				roomEquipMgr.InitRoom(room.ID, room.Equipment)
-			}
-		}
-	}
-	logger.Info("room equipment manager initialized")
-
-	worldHandler := gameserver.NewWorldHandler(worldMgr, sessMgr, npcMgr, gameClock, roomEquipMgr, invRegistry)
-
-	mentalMgr := mentalstate.NewManager()
-	combatHandler := gameserver.NewCombatHandler(combatEngine, npcMgr, sessMgr, diceRoller, broadcastFn, roundDuration, condRegistry, worldMgr, scriptMgr, invRegistry, aiRegistry, respawnMgr, floorMgr, mentalMgr)
-	combatHandler.SetLogger(logger)
-
-	// Create action handler for player-activated class feature actions.
-	actionH := gameserver.NewActionHandler(sessMgr, cfReg, condRegistry, npcMgr, combatHandler, charRepo, diceRoller, logger)
-
-	// Create gRPC service
-	storage := gameserver.StorageDeps{
-		CharRepo:               charRepo,
-		AccountRepo:            gameserver.NewAccountRepoAdapter(accountRepo),
-		SkillsRepo:             characterSkillsRepo,
-		ProficienciesRepo:      characterProficienciesRepo,
-		FeatsRepo:              characterFeatsRepo,
-		ClassFeaturesRepo:      characterClassFeaturesRepo,
-		FeatureChoicesRepo:     featureChoicesRepo,
-		AbilityBoostsRepo:      charAbilityBoostsRepo,
-		HardwiredTechRepo:      hardwiredTechRepo,
-		PreparedTechRepo:       preparedTechRepo,
-		SpontaneousTechRepo:    spontaneousTechRepo,
-		InnateTechRepo:         innateTechRepo,
-		SpontaneousUsePoolRepo: postgres.NewCharacterSpontaneousUsePoolRepository(pool.DB()),
-		WantedRepo:             postgres.NewWantedRepository(pool.DB()),
-		AutomapRepo:            automapRepo,
-	}
-	content := gameserver.ContentDeps{
-		WorldMgr:             worldMgr,
-		NpcMgr:               npcMgr,
-		RespawnMgr:           respawnMgr,
-		InvRegistry:          invRegistry,
-		FloorMgr:             floorMgr,
-		RoomEquipMgr:         roomEquipMgr,
-		TechRegistry:         techReg,
-		CondRegistry:         condRegistry,
-		AIRegistry:           aiRegistry,
-		AllSkills:            allSkills,
-		AllFeats:             allFeats,
-		ClassFeatures:        classFeatures,
-		FeatRegistry:         featRegistry,
-		ClassFeatureRegistry: cfReg,
-		JobRegistry:          jobReg,
-		ArchetypeMap:         archetypeMap,
-		RegionMap:            regionMap,
-		ScriptMgr:            scriptMgr,
-		DiceRoller:           diceRoller,
-		CombatEngine:         combatEngine,
-		MentalStateMgr:       mentalMgr,
-		LoadoutsDir:          gameserver.LoadoutsDir(*loadoutsDir),
-	}
-	handlers := gameserver.HandlerDeps{
-		WorldHandler:  worldHandler,
-		ChatHandler:   chatHandler,
-		NPCHandler:    npcHandler,
-		CombatHandler: combatHandler,
-		ActionHandler: actionH,
-	}
-	grpcService = gameserver.NewGameServiceServer(storage, content, handlers, sessMgr, cmdRegistry, gameCalendar, logger)
 
 	// Wire REQ-NPC-8: prevent a player from attacking their own bound hireling.
-	combatHandler.SetHirelingOwnerOf(grpcService.HirelingOwnerOf)
+	app.CombatHandler.SetHirelingOwnerOf(app.GRPCService.HirelingOwnerOf)
 
 	// Wire XP service with progress and skill-increase persistence.
-	if xpCfg, xpErr := xp.LoadXPConfig(*xpConfigFile); xpErr != nil {
+	if xpCfg, xpErr := xp.LoadXPConfig(appCfg.XPConfigFile); xpErr != nil {
 		logger.Warn("loading xp config; XP awards disabled", zap.Error(xpErr))
 	} else {
-		xpSvc := xp.NewService(xpCfg, progressRepo)
-		xpSvc.SetSkillIncreaseSaver(progressRepo)
-		grpcService.SetProgressRepo(progressRepo)
-		grpcService.SetXPService(xpSvc)
-		combatHandler.SetXPService(xpSvc)
-		combatHandler.SetCurrencySaver(charRepo)
+		xpSvc := xp.NewService(xpCfg, app.ProgressRepo)
+		xpSvc.SetSkillIncreaseSaver(app.ProgressRepo)
+		app.GRPCService.SetProgressRepo(app.ProgressRepo)
+		app.GRPCService.SetXPService(xpSvc)
+		app.CombatHandler.SetXPService(xpSvc)
+		app.CombatHandler.SetCurrencySaver(app.CharRepo)
 	}
 
 	// Start respawn goroutine for room equipment.
@@ -644,27 +285,25 @@ func main() {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
-			roomEquipMgr.ProcessRespawns()
+			app.RoomEquipMgr.ProcessRespawns()
 		}
 	}()
 
 	// Start out-of-combat health regeneration.
-	regenMgr := gameserver.NewRegenManager(sessMgr, npcMgr, combatHandler, charRepo, gameserver.RegenInterval, logger)
-	regenMgr.Start(ctx)
+	app.RegenMgr.Start(ctx)
 
 	// Start zone AI ticks.
-	zm := gameserver.NewZoneTickManager(*aiTickInterval)
-	grpcService.StartZoneTicks(ctx, zm, aiRegistry)
+	app.GRPCService.StartZoneTicks(ctx, app.ZoneTickMgr, app.AIRegistry)
 
 	// Start calendar-driven WantedLevel decay.
-	grpcService.StartWantedDecayHook()
-	defer grpcService.StopWantedDecayHook()
+	app.GRPCService.StartWantedDecayHook()
+	defer app.GRPCService.StopWantedDecayHook()
 
-	// Create gRPC server
+	// Create gRPC server.
 	grpcServer := grpc.NewServer()
-	gamev1.RegisterGameServiceServer(grpcServer, grpcService)
+	gamev1.RegisterGameServiceServer(grpcServer, app.GRPCService)
 
-	// Wire lifecycle
+	// Wire lifecycle.
 	lifecycle := server.NewLifecycle(logger)
 
 	lifecycle.Add("grpc", &server.FuncService{
@@ -692,13 +331,13 @@ func main() {
 		StartFn: func() error {
 			for {
 				time.Sleep(30 * time.Second)
-				if err := pool.Health(ctx, 5*time.Second); err != nil {
+				if err := app.Pool.Health(ctx, 5*time.Second); err != nil {
 					logger.Warn("database health check failed", zap.Error(err))
 				}
 			}
 		},
 		StopFn: func() {
-			pool.Close()
+			app.Pool.Close()
 		},
 	})
 

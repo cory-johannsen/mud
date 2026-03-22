@@ -12,12 +12,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/config"
-	"github.com/cory-johannsen/mud/internal/frontend/handlers"
-	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/server"
-	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
 func main() {
@@ -33,13 +30,13 @@ func main() {
 	classFeatsFile := flag.String("class-features", "content/class_features.yaml", "path to class features YAML file")
 	flag.Parse()
 
-	// Load configuration
+	// Load configuration.
 	cfg, err := config.Load(*configPath)
 	if err != nil {
 		log.Fatalf("loading config: %v", err)
 	}
 
-	// Initialize logger
+	// Initialize logger.
 	logger, err := observability.NewLogger(cfg.Logging)
 	if err != nil {
 		log.Fatalf("initializing logger: %v", err)
@@ -51,95 +48,48 @@ func main() {
 		zap.String("type", cfg.Server.Type),
 	)
 
-	// Connect to PostgreSQL
 	ctx := context.Background()
-	dbStart := time.Now()
-	pool, err := postgres.NewPool(ctx, cfg.Database)
-	if err != nil {
-		logger.Fatal("connecting to database", zap.Error(err))
-	}
-	logger.Info("database connected",
-		zap.String("host", cfg.Database.Host),
-		zap.Int("port", cfg.Database.Port),
-		zap.String("database", cfg.Database.Name),
-		zap.Duration("elapsed", time.Since(dbStart)),
-	)
 
-	// Load ruleset data
-	regions, err := ruleset.LoadRegions(*regionsDir)
-	if err != nil {
-		logger.Fatal("loading regions", zap.Error(err))
+	appCfg := &AppConfig{
+		Config:         cfg,
+		RegionsDir:     ruleset.RegionsDir(*regionsDir),
+		TeamsDir:       ruleset.TeamsDir(*teamsDir),
+		JobsDir:        ruleset.JobsDir(*jobsDir),
+		ArchetypesDir:  ruleset.ArchetypesDir(*archetypesDir),
+		SkillsFile:     ruleset.SkillsFile(*skillsFile),
+		FeatsFile:      ruleset.FeatsFile(*featsFile),
+		ClassFeatsFile: ruleset.ClassFeaturesFile(*classFeatsFile),
 	}
-	teams, err := ruleset.LoadTeams(*teamsDir)
-	if err != nil {
-		logger.Fatal("loading teams", zap.Error(err))
-	}
-	jobs, err := ruleset.LoadJobs(*jobsDir)
-	if err != nil {
-		logger.Fatal("loading jobs", zap.Error(err))
-	}
-	archetypes, err := ruleset.LoadArchetypes(*archetypesDir)
-	if err != nil {
-		logger.Fatal("loading archetypes", zap.Error(err))
-	}
-	logger.Info("ruleset loaded",
-		zap.Int("regions", len(regions)),
-		zap.Int("teams", len(teams)),
-		zap.Int("jobs", len(jobs)),
-	)
-	logger.Info("archetypes loaded", zap.Int("archetypes", len(archetypes)))
 
-	skills, err := ruleset.LoadSkills(*skillsFile)
+	app, err := Initialize(ctx, appCfg, logger)
 	if err != nil {
-		logger.Fatal("loading skills", zap.Error(err))
+		logger.Fatal("initializing application", zap.Error(err))
 	}
-	logger.Info("skills loaded", zap.Int("skills", len(skills)))
 
-	feats, err := ruleset.LoadFeats(*featsFile)
-	if err != nil {
-		logger.Fatal("loading feats", zap.Error(err))
-	}
-	logger.Info("feats loaded", zap.Int("feats", len(feats)))
-
-	classFeatures, err := ruleset.LoadClassFeatures(*classFeatsFile)
-	if err != nil {
-		logger.Fatal("loading class features", zap.Error(err))
-	}
-	logger.Info("class features loaded", zap.Int("class_features", len(classFeatures)))
-
-	// Build services
-	accounts := postgres.NewAccountRepository(pool.DB())
-	characters := postgres.NewCharacterRepository(pool.DB())
-	characterSkillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
-	characterFeatsRepo := postgres.NewCharacterFeatsRepository(pool.DB())
-	characterClassFeaturesRepo := postgres.NewCharacterClassFeaturesRepository(pool.DB())
-	authHandler := handlers.NewAuthHandler(accounts, characters, regions, teams, jobs, archetypes, logger, cfg.GameServer.Addr(), cfg.Telnet, skills, characterSkillsRepo, feats, characterFeatsRepo, classFeatures, characterClassFeaturesRepo)
-	telnetAcceptor := telnet.NewAcceptor(cfg.Telnet, authHandler, logger)
-
-	// Wire lifecycle
+	// Wire lifecycle.
 	lifecycle := server.NewLifecycle(logger)
 
 	lifecycle.Add("postgres", &server.FuncService{
 		StartFn: func() error {
-			// Pool is already connected; just keep it alive
+			// Pool is already connected; just keep it alive.
 			for {
 				time.Sleep(30 * time.Second)
-				if err := pool.Health(ctx, 5*time.Second); err != nil {
+				if err := app.Pool.Health(ctx, 5*time.Second); err != nil {
 					logger.Warn("database health check failed", zap.Error(err))
 				}
 			}
 		},
 		StopFn: func() {
-			pool.Close()
+			app.Pool.Close()
 		},
 	})
 
 	lifecycle.Add("telnet", &server.FuncService{
 		StartFn: func() error {
-			return telnetAcceptor.ListenAndServe()
+			return app.TelnetAcceptor.ListenAndServe()
 		},
 		StopFn: func() {
-			telnetAcceptor.Stop()
+			app.TelnetAcceptor.Stop()
 		},
 	})
 
