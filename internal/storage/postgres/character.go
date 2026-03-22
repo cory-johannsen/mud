@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -561,4 +562,62 @@ func (r *CharacterRepository) LoadHeroPoints(ctx context.Context, id int64) (int
 	var heroPoints int
 	err := r.db.QueryRow(ctx, `SELECT COALESCE(hero_points, 0) FROM characters WHERE id = $1`, id).Scan(&heroPoints)
 	return heroPoints, err
+}
+
+// SaveJobs persists the player's job map and active job ID to the characters table.
+// jobs may be nil or empty (stored as SQL NULL).
+//
+// Precondition: id > 0.
+// Postcondition: characters.jobs and characters.active_job_id are updated.
+func (r *CharacterRepository) SaveJobs(ctx context.Context, id int64, jobs map[string]int, activeJobID string) error {
+	if id <= 0 {
+		return fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	var jobsJSON *string
+	if len(jobs) > 0 {
+		b, err := json.Marshal(jobs)
+		if err != nil {
+			return fmt.Errorf("SaveJobs: marshalling jobs for character %d: %w", id, err)
+		}
+		s := string(b)
+		jobsJSON = &s
+	}
+	_, err := r.db.Exec(ctx,
+		`UPDATE characters SET jobs = $2, active_job_id = $3 WHERE id = $1`,
+		id, jobsJSON, activeJobID,
+	)
+	if err != nil {
+		return fmt.Errorf("SaveJobs: %w", err)
+	}
+	return nil
+}
+
+// LoadJobs returns the stored jobs map and active job ID for the given character.
+// Returns an empty map and empty string when no jobs are stored.
+//
+// Precondition: id > 0.
+// Postcondition: returns (jobs, activeJobID, nil) on success; jobs is never nil.
+func (r *CharacterRepository) LoadJobs(ctx context.Context, id int64) (map[string]int, string, error) {
+	if id <= 0 {
+		return nil, "", fmt.Errorf("characterID must be > 0, got %d", id)
+	}
+	var jobsJSON *string
+	var activeJobID string
+	err := r.db.QueryRow(ctx,
+		`SELECT jobs, COALESCE(active_job_id, '') FROM characters WHERE id = $1`,
+		id,
+	).Scan(&jobsJSON, &activeJobID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return map[string]int{}, "", ErrCharacterNotFound
+		}
+		return nil, "", fmt.Errorf("LoadJobs: %w", err)
+	}
+	jobs := map[string]int{}
+	if jobsJSON != nil && *jobsJSON != "" {
+		if err := json.Unmarshal([]byte(*jobsJSON), &jobs); err != nil {
+			return nil, "", fmt.Errorf("LoadJobs: unmarshalling jobs for character %d: %w", id, err)
+		}
+	}
+	return jobs, activeJobID, nil
 }

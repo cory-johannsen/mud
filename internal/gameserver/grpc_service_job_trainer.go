@@ -1,9 +1,12 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
+
+	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -81,6 +84,15 @@ func (s *GameServiceServer) handleTrainJob(uid string, req *gamev1.TrainJobReque
 	if sess.ActiveJobID == "" {
 		sess.ActiveJobID = jobID
 	}
+	if s.charSaver != nil && sess.CharacterID > 0 {
+		if saveErr := s.charSaver.SaveJobs(context.Background(), sess.CharacterID, sess.Jobs, sess.ActiveJobID); saveErr != nil {
+			s.logger.Warn("failed to save jobs after training",
+				zap.String("uid", uid),
+				zap.Int64("character_id", sess.CharacterID),
+				zap.Error(saveErr),
+			)
+		}
+	}
 	return messageEvent(fmt.Sprintf(
 		"%s trains you in %q. Cost: %d credits. Your jobs: %s.",
 		inst.Name(), jobID, trainable.TrainingCost, formatJobList(sess.Jobs, sess.ActiveJobID),
@@ -131,6 +143,15 @@ func (s *GameServiceServer) handleSetJob(uid string, req *gamev1.SetJobRequest) 
 		return messageEvent(fmt.Sprintf("You have not trained %q. Use 'jobs' to see your trained jobs.", jobID)), nil
 	}
 	sess.ActiveJobID = jobID
+	if s.charSaver != nil && sess.CharacterID > 0 {
+		if saveErr := s.charSaver.SaveJobs(context.Background(), sess.CharacterID, sess.Jobs, sess.ActiveJobID); saveErr != nil {
+			s.logger.Warn("failed to save jobs after set-job",
+				zap.String("uid", uid),
+				zap.Int64("character_id", sess.CharacterID),
+				zap.Error(saveErr),
+			)
+		}
+	}
 	return messageEvent(fmt.Sprintf("Active job set to %q (level %d).", jobID, sess.Jobs[jobID])), nil
 }
 

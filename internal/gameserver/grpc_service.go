@@ -84,6 +84,8 @@ type CharacterSaver interface {
 	SaveGender(ctx context.Context, characterID int64, gender string) error
 	SaveHeroPoints(ctx context.Context, characterID int64, heroPoints int) error
 	LoadHeroPoints(ctx context.Context, characterID int64) (int, error)
+	SaveJobs(ctx context.Context, characterID int64, jobs map[string]int, activeJobID string) error
+	LoadJobs(ctx context.Context, characterID int64) (jobs map[string]int, activeJobID string, err error)
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.
@@ -215,6 +217,17 @@ type GameServiceServer struct {
 	healerRuntimeStates map[string]*npc.HealerRuntimeState
 	// hirelingRuntimeStates maps NPC instance ID to active hireling runtime state.
 	hirelingRuntimeStates map[string]*npc.HirelingRuntimeState
+	// healerCapacityRepo persists per-template healer daily capacity usage across restarts.
+	// May be nil (capacity resets on restart if not set).
+	healerCapacityRepo HealerCapacityRepo
+}
+
+// HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
+//
+// Precondition: templateID must be non-empty.
+type HealerCapacityRepo interface {
+	Save(ctx context.Context, templateID string, capacityUsed int) error
+	LoadAll(ctx context.Context) (map[string]int, error)
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -393,6 +406,11 @@ func (s *GameServiceServer) SetInnateTechRepo(r InnateTechRepo) { s.innateTechRe
 
 // SetTechRegistry replaces the server's technology registry. Used in tests.
 func (s *GameServiceServer) SetTechRegistry(r *technology.Registry) { s.techRegistry = r }
+
+// SetHealerCapacityRepo injects the healer capacity repository.
+func (s *GameServiceServer) SetHealerCapacityRepo(r HealerCapacityRepo) {
+	s.healerCapacityRepo = r
+}
 
 // SetCharSaver sets the character saver (used in tests).
 func (s *GameServiceServer) SetCharSaver(cs CharacterSaver) {
@@ -675,6 +693,17 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				)
 			} else {
 				sess.HeroPoints = savedHP
+			}
+			// Load persisted jobs.
+			if loadedJobs, loadedActiveJobID, jobsErr := s.charSaver.LoadJobs(stream.Context(), characterID); jobsErr != nil {
+				s.logger.Warn("failed to load jobs on login",
+					zap.String("uid", uid),
+					zap.Int64("character_id", characterID),
+					zap.Error(jobsErr),
+				)
+			} else {
+				sess.Jobs = loadedJobs
+				sess.ActiveJobID = loadedActiveJobID
 			}
 			// Grant starting kit on first login.
 			if s.loadoutsDir != "" {

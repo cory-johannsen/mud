@@ -78,6 +78,12 @@ func (m *grantCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error)  
 func (m *grantCharSaver) SaveGender(_ context.Context, _ int64, _ string) error  { return nil }
 func (m *grantCharSaver) SaveHeroPoints(_ context.Context, _ int64, _ int) error { return nil }
 func (m *grantCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (m *grantCharSaver) SaveJobs(_ context.Context, _ int64, _ map[string]int, _ string) error {
+	return nil
+}
+func (m *grantCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
+	return map[string]int{}, "", nil
+}
 
 // grantProgressRepo is a ProgressRepository test double that records SaveProgress and skill increase calls.
 //

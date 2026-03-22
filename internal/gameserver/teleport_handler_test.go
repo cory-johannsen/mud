@@ -75,6 +75,12 @@ func (m *mockCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error) { 
 func (m *mockCharSaver) SaveGender(_ context.Context, _ int64, _ string) error { return nil }
 func (m *mockCharSaver) SaveHeroPoints(_ context.Context, _ int64, _ int) error { return nil }
 func (m *mockCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (m *mockCharSaver) SaveJobs(_ context.Context, _ int64, _ map[string]int, _ string) error {
+	return nil
+}
+func (m *mockCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
+	return map[string]int{}, "", nil
+}
 
 func TestHandleTeleport_AdminSuccess(t *testing.T) {
 	saver := &mockCharSaver{saved: make(map[int64]string)}

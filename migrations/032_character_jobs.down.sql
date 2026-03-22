@@ -1,0 +1,2 @@
+ALTER TABLE characters DROP COLUMN IF EXISTS jobs;
+ALTER TABLE characters DROP COLUMN IF EXISTS active_job_id;

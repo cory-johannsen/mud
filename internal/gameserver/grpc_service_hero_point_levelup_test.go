@@ -74,6 +74,12 @@ func (m *heroPointCharSaver) SaveHeroPoints(_ context.Context, _ int64, hp int) 
 	return nil
 }
 func (m *heroPointCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (m *heroPointCharSaver) SaveJobs(_ context.Context, _ int64, _ map[string]int, _ string) error {
+	return nil
+}
+func (m *heroPointCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
+	return map[string]int{}, "", nil
+}
 
 // TestHandleGrant_XP_LevelUp_AwardsHeroPoint verifies that when granting XP causes
 // a level-up, exactly 1 hero point is awarded to the target and SaveHeroPoints is called.

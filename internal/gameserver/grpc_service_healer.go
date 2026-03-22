@@ -1,8 +1,11 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"sync"
+
+	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -54,12 +57,62 @@ func (s *GameServiceServer) findHealerInRoom(roomID, npcName string) (*npc.Insta
 // Intended to be called once per in-game day.
 //
 // Precondition: s.healerRuntimeStates MUST NOT be nil.
-// Postcondition: every healer state's CapacityUsed is set to 0.
+// Postcondition: every healer state's CapacityUsed is set to 0; values persisted if repo is set.
 func (s *GameServiceServer) tickHealerCapacity() {
 	healerRuntimeMu.Lock()
 	defer healerRuntimeMu.Unlock()
 	for _, state := range s.healerRuntimeStates {
 		state.CapacityUsed = 0
+	}
+	if s.healerCapacityRepo == nil {
+		return
+	}
+	// Persist reset for all instances keyed by template ID.
+	seen := make(map[string]bool)
+	for instID, _ := range s.healerRuntimeStates {
+		inst := s.npcMgr.InstanceByID(instID)
+		if inst == nil {
+			continue
+		}
+		if seen[inst.TemplateID] {
+			continue
+		}
+		seen[inst.TemplateID] = true
+		if err := s.healerCapacityRepo.Save(context.Background(), inst.TemplateID, 0); err != nil {
+			s.logger.Warn("failed to persist healer capacity reset",
+				zap.String("template_id", inst.TemplateID),
+				zap.Error(err),
+			)
+		}
+	}
+}
+
+// InitHealerCapacities loads stored healer capacity values from the repo and
+// populates healerRuntimeStates for all healer NPC instances.
+//
+// Precondition: s.healerCapacityRepo must be non-nil; NPCs must already be loaded.
+// Postcondition: healerRuntimeStates entries for healer instances have CapacityUsed set.
+func (s *GameServiceServer) InitHealerCapacities(ctx context.Context) {
+	if s.healerCapacityRepo == nil {
+		return
+	}
+	stored, err := s.healerCapacityRepo.LoadAll(ctx)
+	if err != nil {
+		s.logger.Warn("failed to load healer capacities from DB", zap.Error(err))
+		return
+	}
+	healerRuntimeMu.Lock()
+	defer healerRuntimeMu.Unlock()
+	for _, inst := range s.npcMgr.AllInstances() {
+		if inst.NPCType != "healer" {
+			continue
+		}
+		if _, ok := s.healerRuntimeStates[inst.ID]; !ok {
+			s.healerRuntimeStates[inst.ID] = &npc.HealerRuntimeState{}
+		}
+		if used, ok := stored[inst.TemplateID]; ok {
+			s.healerRuntimeStates[inst.ID].CapacityUsed = used
+		}
 	}
 }
 
@@ -106,6 +159,14 @@ func (s *GameServiceServer) handleHeal(uid string, req *gamev1.HealRequest) (*ga
 	healerRuntimeMu.Unlock()
 	sess.CurrentHP = newHP
 	sess.Currency -= cost
+	if s.healerCapacityRepo != nil {
+		if saveErr := s.healerCapacityRepo.Save(context.Background(), inst.TemplateID, newUsed); saveErr != nil {
+			s.logger.Warn("failed to persist healer capacity after heal",
+				zap.String("template_id", inst.TemplateID),
+				zap.Error(saveErr),
+			)
+		}
+	}
 	return messageEvent(fmt.Sprintf(
 		"%s patches you up. HP restored to %d/%d. Cost: %d credits.",
 		inst.Name(), sess.CurrentHP, sess.MaxHP, cost,
@@ -158,9 +219,18 @@ func (s *GameServiceServer) handleHealAmount(uid string, req *gamev1.HealAmountR
 	}
 	healerRuntimeMu.Lock()
 	state.CapacityUsed += amount
+	newCapacity := state.CapacityUsed
 	healerRuntimeMu.Unlock()
 	sess.CurrentHP += amount
 	sess.Currency -= cost
+	if s.healerCapacityRepo != nil {
+		if saveErr := s.healerCapacityRepo.Save(context.Background(), inst.TemplateID, newCapacity); saveErr != nil {
+			s.logger.Warn("failed to persist healer capacity after heal amount",
+				zap.String("template_id", inst.TemplateID),
+				zap.Error(saveErr),
+			)
+		}
+	}
 	return messageEvent(fmt.Sprintf(
 		"%s heals you for %d HP (%d/%d). Cost: %d credits.",
 		inst.Name(), amount, sess.CurrentHP, sess.MaxHP, cost,

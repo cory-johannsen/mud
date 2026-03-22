@@ -298,6 +298,12 @@ func (f *fakeCharSaver) LoadCurrency(_ context.Context, _ int64) (int, error) { 
 func (f *fakeCharSaver) SaveGender(_ context.Context, _ int64, _ string) error { return nil }
 func (f *fakeCharSaver) SaveHeroPoints(_ context.Context, _ int64, _ int) error { return nil }
 func (f *fakeCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (f *fakeCharSaver) SaveJobs(_ context.Context, _ int64, _ map[string]int, _ string) error {
+	return nil
+}
+func (f *fakeCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
+	return map[string]int{}, "", nil
+}
 
 // REQ-LR1/LR2 (property): For any CurrentHP in [0, MaxHP], after rest,
 // sess.CurrentHP == sess.MaxHP and SaveState called once with MaxHP.
