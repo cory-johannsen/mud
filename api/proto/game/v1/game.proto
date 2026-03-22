@@ -120,6 +120,12 @@ message ClientMessage {
     BribeConfirmRequest  bribe_confirm_request = 103;
     SurrenderRequest     surrender_request     = 104;
     ReleaseRequest       release_request       = 105;
+    SpawnNPCRequest      spawn_npc             = 106;
+    AddRoomRequest       add_room              = 107;
+    AddLinkRequest       add_link              = 108;
+    RemoveLinkRequest    remove_link           = 109;
+    SetRoomRequest       set_room              = 110;
+    EditorCmdsRequest    editor_cmds           = 111;
   }
 }
 
@@ -1045,3 +1051,39 @@ message GrantRequest {
   string char_name  = 2; // target character name
   int32  amount     = 3; // amount to grant (must be > 0)
 }
+
+
+// SpawnNPCRequest asks the server to spawn one NPC instance from a template.
+message SpawnNPCRequest {
+  string template_id = 1;
+  string room_id     = 2; // empty = editor's current room
+}
+
+// AddRoomRequest asks the server to add a new room to a zone.
+message AddRoomRequest {
+  string zone_id = 1;
+  string room_id = 2;
+  string title   = 3;
+}
+
+// AddLinkRequest asks the server to add a bidirectional exit between two rooms.
+message AddLinkRequest {
+  string from_room_id = 1;
+  string direction    = 2;
+  string to_room_id   = 3;
+}
+
+// RemoveLinkRequest asks the server to remove a directional exit from a room.
+message RemoveLinkRequest {
+  string room_id   = 1;
+  string direction = 2;
+}
+
+// SetRoomRequest asks the server to set a field on the editor's current room.
+message SetRoomRequest {
+  string field = 1;
+  string value = 2;
+}
+
+// EditorCmdsRequest asks the server to list all editor commands.
+message EditorCmdsRequest {}

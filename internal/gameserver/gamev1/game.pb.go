@@ -355,6 +355,12 @@ type ClientMessage struct {
 	//	*ClientMessage_BribeConfirmRequest
 	//	*ClientMessage_SurrenderRequest
 	//	*ClientMessage_ReleaseRequest
+	//	*ClientMessage_SpawnNpc
+	//	*ClientMessage_AddRoom
+	//	*ClientMessage_AddLink
+	//	*ClientMessage_RemoveLink
+	//	*ClientMessage_SetRoom
+	//	*ClientMessage_EditorCmds
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1340,6 +1346,60 @@ func (x *ClientMessage) GetReleaseRequest() *ReleaseRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetSpawnNpc() *SpawnNPCRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_SpawnNpc); ok {
+			return x.SpawnNpc
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetAddRoom() *AddRoomRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_AddRoom); ok {
+			return x.AddRoom
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetAddLink() *AddLinkRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_AddLink); ok {
+			return x.AddLink
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetRemoveLink() *RemoveLinkRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_RemoveLink); ok {
+			return x.RemoveLink
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetSetRoom() *SetRoomRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_SetRoom); ok {
+			return x.SetRoom
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetEditorCmds() *EditorCmdsRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_EditorCmds); ok {
+			return x.EditorCmds
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -1760,6 +1820,30 @@ type ClientMessage_ReleaseRequest struct {
 	ReleaseRequest *ReleaseRequest `protobuf:"bytes,105,opt,name=release_request,json=releaseRequest,proto3,oneof"`
 }
 
+type ClientMessage_SpawnNpc struct {
+	SpawnNpc *SpawnNPCRequest `protobuf:"bytes,106,opt,name=spawn_npc,json=spawnNpc,proto3,oneof"`
+}
+
+type ClientMessage_AddRoom struct {
+	AddRoom *AddRoomRequest `protobuf:"bytes,107,opt,name=add_room,json=addRoom,proto3,oneof"`
+}
+
+type ClientMessage_AddLink struct {
+	AddLink *AddLinkRequest `protobuf:"bytes,108,opt,name=add_link,json=addLink,proto3,oneof"`
+}
+
+type ClientMessage_RemoveLink struct {
+	RemoveLink *RemoveLinkRequest `protobuf:"bytes,109,opt,name=remove_link,json=removeLink,proto3,oneof"`
+}
+
+type ClientMessage_SetRoom struct {
+	SetRoom *SetRoomRequest `protobuf:"bytes,110,opt,name=set_room,json=setRoom,proto3,oneof"`
+}
+
+type ClientMessage_EditorCmds struct {
+	EditorCmds *EditorCmdsRequest `protobuf:"bytes,111,opt,name=editor_cmds,json=editorCmds,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -1967,6 +2051,18 @@ func (*ClientMessage_BribeConfirmRequest) isClientMessage_Payload() {}
 func (*ClientMessage_SurrenderRequest) isClientMessage_Payload() {}
 
 func (*ClientMessage_ReleaseRequest) isClientMessage_Payload() {}
+
+func (*ClientMessage_SpawnNpc) isClientMessage_Payload() {}
+
+func (*ClientMessage_AddRoom) isClientMessage_Payload() {}
+
+func (*ClientMessage_AddLink) isClientMessage_Payload() {}
+
+func (*ClientMessage_RemoveLink) isClientMessage_Payload() {}
+
+func (*ClientMessage_SetRoom) isClientMessage_Payload() {}
+
+func (*ClientMessage_EditorCmds) isClientMessage_Payload() {}
 
 // RestRequest asks the server to rest the player and rearrange prepared technology slots.
 type RestRequest struct {
@@ -10198,11 +10294,329 @@ func (x *GrantRequest) GetAmount() int32 {
 	return 0
 }
 
+// SpawnNPCRequest asks the server to spawn one NPC instance from a template.
+type SpawnNPCRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TemplateId    string                 `protobuf:"bytes,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`
+	RoomId        string                 `protobuf:"bytes,2,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"` // empty = editor's current room
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SpawnNPCRequest) Reset() {
+	*x = SpawnNPCRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[146]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SpawnNPCRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SpawnNPCRequest) ProtoMessage() {}
+
+func (x *SpawnNPCRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[146]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SpawnNPCRequest.ProtoReflect.Descriptor instead.
+func (*SpawnNPCRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{146}
+}
+
+func (x *SpawnNPCRequest) GetTemplateId() string {
+	if x != nil {
+		return x.TemplateId
+	}
+	return ""
+}
+
+func (x *SpawnNPCRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+// AddRoomRequest asks the server to add a new room to a zone.
+type AddRoomRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ZoneId        string                 `protobuf:"bytes,1,opt,name=zone_id,json=zoneId,proto3" json:"zone_id,omitempty"`
+	RoomId        string                 `protobuf:"bytes,2,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddRoomRequest) Reset() {
+	*x = AddRoomRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[147]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddRoomRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddRoomRequest) ProtoMessage() {}
+
+func (x *AddRoomRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[147]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddRoomRequest.ProtoReflect.Descriptor instead.
+func (*AddRoomRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{147}
+}
+
+func (x *AddRoomRequest) GetZoneId() string {
+	if x != nil {
+		return x.ZoneId
+	}
+	return ""
+}
+
+func (x *AddRoomRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *AddRoomRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+// AddLinkRequest asks the server to add a bidirectional exit between two rooms.
+type AddLinkRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FromRoomId    string                 `protobuf:"bytes,1,opt,name=from_room_id,json=fromRoomId,proto3" json:"from_room_id,omitempty"`
+	Direction     string                 `protobuf:"bytes,2,opt,name=direction,proto3" json:"direction,omitempty"`
+	ToRoomId      string                 `protobuf:"bytes,3,opt,name=to_room_id,json=toRoomId,proto3" json:"to_room_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddLinkRequest) Reset() {
+	*x = AddLinkRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[148]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddLinkRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddLinkRequest) ProtoMessage() {}
+
+func (x *AddLinkRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[148]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddLinkRequest.ProtoReflect.Descriptor instead.
+func (*AddLinkRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{148}
+}
+
+func (x *AddLinkRequest) GetFromRoomId() string {
+	if x != nil {
+		return x.FromRoomId
+	}
+	return ""
+}
+
+func (x *AddLinkRequest) GetDirection() string {
+	if x != nil {
+		return x.Direction
+	}
+	return ""
+}
+
+func (x *AddLinkRequest) GetToRoomId() string {
+	if x != nil {
+		return x.ToRoomId
+	}
+	return ""
+}
+
+// RemoveLinkRequest asks the server to remove a directional exit from a room.
+type RemoveLinkRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RoomId        string                 `protobuf:"bytes,1,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	Direction     string                 `protobuf:"bytes,2,opt,name=direction,proto3" json:"direction,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveLinkRequest) Reset() {
+	*x = RemoveLinkRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[149]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveLinkRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveLinkRequest) ProtoMessage() {}
+
+func (x *RemoveLinkRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[149]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveLinkRequest.ProtoReflect.Descriptor instead.
+func (*RemoveLinkRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{149}
+}
+
+func (x *RemoveLinkRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *RemoveLinkRequest) GetDirection() string {
+	if x != nil {
+		return x.Direction
+	}
+	return ""
+}
+
+// SetRoomRequest asks the server to set a field on the editor's current room.
+type SetRoomRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetRoomRequest) Reset() {
+	*x = SetRoomRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[150]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetRoomRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetRoomRequest) ProtoMessage() {}
+
+func (x *SetRoomRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[150]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetRoomRequest.ProtoReflect.Descriptor instead.
+func (*SetRoomRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{150}
+}
+
+func (x *SetRoomRequest) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (x *SetRoomRequest) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+// EditorCmdsRequest asks the server to list all editor commands.
+type EditorCmdsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EditorCmdsRequest) Reset() {
+	*x = EditorCmdsRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[151]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EditorCmdsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EditorCmdsRequest) ProtoMessage() {}
+
+func (x *EditorCmdsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[151]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EditorCmdsRequest.ProtoReflect.Descriptor instead.
+func (*EditorCmdsRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{151}
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xa0-\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xf9/\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -10325,7 +10739,15 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\rbribe_request\x18f \x01(\v2\x15.game.v1.BribeRequestH\x00R\fbribeRequest\x12R\n" +
 	"\x15bribe_confirm_request\x18g \x01(\v2\x1c.game.v1.BribeConfirmRequestH\x00R\x13bribeConfirmRequest\x12H\n" +
 	"\x11surrender_request\x18h \x01(\v2\x19.game.v1.SurrenderRequestH\x00R\x10surrenderRequest\x12B\n" +
-	"\x0frelease_request\x18i \x01(\v2\x17.game.v1.ReleaseRequestH\x00R\x0ereleaseRequestB\t\n" +
+	"\x0frelease_request\x18i \x01(\v2\x17.game.v1.ReleaseRequestH\x00R\x0ereleaseRequest\x127\n" +
+	"\tspawn_npc\x18j \x01(\v2\x18.game.v1.SpawnNPCRequestH\x00R\bspawnNpc\x124\n" +
+	"\badd_room\x18k \x01(\v2\x17.game.v1.AddRoomRequestH\x00R\aaddRoom\x124\n" +
+	"\badd_link\x18l \x01(\v2\x17.game.v1.AddLinkRequestH\x00R\aaddLink\x12=\n" +
+	"\vremove_link\x18m \x01(\v2\x1a.game.v1.RemoveLinkRequestH\x00R\n" +
+	"removeLink\x124\n" +
+	"\bset_room\x18n \x01(\v2\x17.game.v1.SetRoomRequestH\x00R\asetRoom\x12=\n" +
+	"\veditor_cmds\x18o \x01(\v2\x1a.game.v1.EditorCmdsRequestH\x00R\n" +
+	"editorCmdsB\t\n" +
 	"\apayload\"\r\n" +
 	"\vRestRequest\"\x13\n" +
 	"\x11SelectTechRequest\"$\n" +
@@ -10868,7 +11290,28 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"grant_type\x18\x01 \x01(\tR\tgrantType\x12\x1b\n" +
 	"\tchar_name\x18\x02 \x01(\tR\bcharName\x12\x16\n" +
-	"\x06amount\x18\x03 \x01(\x05R\x06amount*Y\n" +
+	"\x06amount\x18\x03 \x01(\x05R\x06amount\"K\n" +
+	"\x0fSpawnNPCRequest\x12\x1f\n" +
+	"\vtemplate_id\x18\x01 \x01(\tR\n" +
+	"templateId\x12\x17\n" +
+	"\aroom_id\x18\x02 \x01(\tR\x06roomId\"X\n" +
+	"\x0eAddRoomRequest\x12\x17\n" +
+	"\azone_id\x18\x01 \x01(\tR\x06zoneId\x12\x17\n" +
+	"\aroom_id\x18\x02 \x01(\tR\x06roomId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\"n\n" +
+	"\x0eAddLinkRequest\x12 \n" +
+	"\ffrom_room_id\x18\x01 \x01(\tR\n" +
+	"fromRoomId\x12\x1c\n" +
+	"\tdirection\x18\x02 \x01(\tR\tdirection\x12\x1c\n" +
+	"\n" +
+	"to_room_id\x18\x03 \x01(\tR\btoRoomId\"J\n" +
+	"\x11RemoveLinkRequest\x12\x17\n" +
+	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x1c\n" +
+	"\tdirection\x18\x02 \x01(\tR\tdirection\"<\n" +
+	"\x0eSetRoomRequest\x12\x14\n" +
+	"\x05field\x18\x01 \x01(\tR\x05field\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\"\x13\n" +
+	"\x11EditorCmdsRequest*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -10909,7 +11352,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 148)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 154)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -11061,8 +11504,14 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*KickRequest)(nil),               // 147: game.v1.KickRequest
 	(*MotiveRequest)(nil),             // 148: game.v1.MotiveRequest
 	(*GrantRequest)(nil),              // 149: game.v1.GrantRequest
-	nil,                               // 150: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 151: game.v1.CharacterSheetView.AccessoriesEntry
+	(*SpawnNPCRequest)(nil),           // 150: game.v1.SpawnNPCRequest
+	(*AddRoomRequest)(nil),            // 151: game.v1.AddRoomRequest
+	(*AddLinkRequest)(nil),            // 152: game.v1.AddLinkRequest
+	(*RemoveLinkRequest)(nil),         // 153: game.v1.RemoveLinkRequest
+	(*SetRoomRequest)(nil),            // 154: game.v1.SetRoomRequest
+	(*EditorCmdsRequest)(nil),         // 155: game.v1.EditorCmdsRequest
+	nil,                               // 156: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 157: game.v1.CharacterSheetView.AccessoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	32,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -11169,67 +11618,73 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	26,  // 101: game.v1.ClientMessage.bribe_confirm_request:type_name -> game.v1.BribeConfirmRequest
 	27,  // 102: game.v1.ClientMessage.surrender_request:type_name -> game.v1.SurrenderRequest
 	28,  // 103: game.v1.ClientMessage.release_request:type_name -> game.v1.ReleaseRequest
-	41,  // 104: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	43,  // 105: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	44,  // 106: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	45,  // 107: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	47,  // 108: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	48,  // 109: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	49,  // 110: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	51,  // 111: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	54,  // 112: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	88,  // 113: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	86,  // 114: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	87,  // 115: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	90,  // 116: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	85,  // 117: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
-	50,  // 118: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
-	107, // 119: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
-	79,  // 120: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
-	82,  // 121: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
-	98,  // 122: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
-	103, // 123: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
-	105, // 124: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
-	101, // 125: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
-	113, // 126: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
-	31,  // 127: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
-	42,  // 128: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	52,  // 129: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	93,  // 130: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	74,  // 131: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	75,  // 132: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
-	0,   // 133: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,   // 134: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	46,  // 135: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
-	2,   // 136: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
-	42,  // 137: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	78,  // 138: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
-	81,  // 139: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
-	84,  // 140: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	3,   // 141: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	97,  // 142: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
-	100, // 143: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
-	100, // 144: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
-	97,  // 145: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	150, // 146: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	151, // 147: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
-	110, // 148: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
-	110, // 149: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
-	81,  // 150: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
-	97,  // 151: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
-	100, // 152: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
-	112, // 153: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
-	106, // 154: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
-	109, // 155: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
-	108, // 156: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
-	112, // 157: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	4,   // 158: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	30,  // 159: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	159, // [159:160] is the sub-list for method output_type
-	158, // [158:159] is the sub-list for method input_type
-	158, // [158:158] is the sub-list for extension type_name
-	158, // [158:158] is the sub-list for extension extendee
-	0,   // [0:158] is the sub-list for field type_name
+	150, // 104: game.v1.ClientMessage.spawn_npc:type_name -> game.v1.SpawnNPCRequest
+	151, // 105: game.v1.ClientMessage.add_room:type_name -> game.v1.AddRoomRequest
+	152, // 106: game.v1.ClientMessage.add_link:type_name -> game.v1.AddLinkRequest
+	153, // 107: game.v1.ClientMessage.remove_link:type_name -> game.v1.RemoveLinkRequest
+	154, // 108: game.v1.ClientMessage.set_room:type_name -> game.v1.SetRoomRequest
+	155, // 109: game.v1.ClientMessage.editor_cmds:type_name -> game.v1.EditorCmdsRequest
+	41,  // 110: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	43,  // 111: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	44,  // 112: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	45,  // 113: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	47,  // 114: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	48,  // 115: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	49,  // 116: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	51,  // 117: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	54,  // 118: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	88,  // 119: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	86,  // 120: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	87,  // 121: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	90,  // 122: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	85,  // 123: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
+	50,  // 124: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
+	107, // 125: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
+	79,  // 126: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
+	82,  // 127: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
+	98,  // 128: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
+	103, // 129: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
+	105, // 130: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
+	101, // 131: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
+	113, // 132: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
+	31,  // 133: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
+	42,  // 134: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	52,  // 135: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	93,  // 136: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	74,  // 137: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	75,  // 138: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
+	0,   // 139: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,   // 140: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	46,  // 141: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
+	2,   // 142: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
+	42,  // 143: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	78,  // 144: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
+	81,  // 145: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
+	84,  // 146: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	3,   // 147: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	97,  // 148: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
+	100, // 149: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
+	100, // 150: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
+	97,  // 151: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
+	156, // 152: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	157, // 153: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	110, // 154: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
+	110, // 155: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
+	81,  // 156: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
+	97,  // 157: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
+	100, // 158: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
+	112, // 159: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
+	106, // 160: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
+	109, // 161: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
+	108, // 162: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
+	112, // 163: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
+	4,   // 164: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	30,  // 165: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	165, // [165:166] is the sub-list for method output_type
+	164, // [164:165] is the sub-list for method input_type
+	164, // [164:164] is the sub-list for extension type_name
+	164, // [164:164] is the sub-list for extension extendee
+	0,   // [0:164] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -11342,6 +11797,12 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_BribeConfirmRequest)(nil),
 		(*ClientMessage_SurrenderRequest)(nil),
 		(*ClientMessage_ReleaseRequest)(nil),
+		(*ClientMessage_SpawnNpc)(nil),
+		(*ClientMessage_AddRoom)(nil),
+		(*ClientMessage_AddLink)(nil),
+		(*ClientMessage_RemoveLink)(nil),
+		(*ClientMessage_SetRoom)(nil),
+		(*ClientMessage_EditorCmds)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[26].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -11375,7 +11836,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   148,
+			NumMessages:   154,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
