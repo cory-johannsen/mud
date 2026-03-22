@@ -107,6 +107,21 @@ const (
 	HandlerSelectTech         = "selecttech"
 	HandlerAid                = "aid"
 	HandlerReady              = "ready"
+	HandlerTalk               = "talk"
+	HandlerHeal               = "heal"
+	HandlerHealAmount         = "heal_amount"
+	HandlerBrowse             = "browse"
+	HandlerBuy                = "buy"
+	HandlerSell               = "sell"
+	HandlerNegotiate          = "negotiate"
+	HandlerDeposit            = "deposit"
+	HandlerWithdraw           = "withdraw"
+	HandlerStashBalance       = "stash_balance"
+	HandlerHire               = "hire"
+	HandlerDismiss            = "dismiss"
+	HandlerTrainJob           = "train_job"
+	HandlerListJobs           = "list_jobs"
+	HandlerSetJob             = "setjob"
 )
 
 // Command defines a player-invocable command.
@@ -159,6 +174,22 @@ func BuiltinCommands() []Command {
 		{Name: "get", Aliases: []string{"take"}, Help: "Pick up item from room floor", Category: CategoryWorld, Handler: HandlerGet},
 		{Name: "drop", Aliases: nil, Help: "Drop an item from your backpack", Category: CategoryWorld, Handler: HandlerDrop},
 		{Name: "balance", Aliases: []string{"bal"}, Help: "Show your currency (Rounds/Clips/Crates)", Category: CategoryWorld, Handler: HandlerBalance},
+
+		// NPC interaction commands
+		{Name: "talk", Aliases: nil, Help: "Talk to a quest giver NPC (talk <npc>)", Category: CategoryWorld, Handler: HandlerTalk},
+		{Name: "heal", Aliases: nil, Help: "Ask a healer to fully restore your HP (heal <npc>) or a specific amount (heal <npc> <amount>)", Category: CategoryWorld, Handler: HandlerHeal},
+		{Name: "browse", Aliases: nil, Help: "Browse a merchant's inventory (browse <npc>)", Category: CategoryWorld, Handler: HandlerBrowse},
+		{Name: "buy", Aliases: nil, Help: "Buy an item from a merchant (buy <npc> <item> [qty])", Category: CategoryWorld, Handler: HandlerBuy},
+		{Name: "sell", Aliases: nil, Help: "Sell an item to a merchant (sell <npc> <item> [qty])", Category: CategoryWorld, Handler: HandlerSell},
+		{Name: "negotiate", Aliases: []string{"neg"}, Help: "Negotiate prices with a merchant (negotiate <npc> [smooth_talk|grift])", Category: CategoryWorld, Handler: HandlerNegotiate},
+		{Name: "deposit", Aliases: nil, Help: "Deposit credits with a banker (deposit <npc> <amount>)", Category: CategoryWorld, Handler: HandlerDeposit},
+		{Name: "withdraw", Aliases: nil, Help: "Withdraw credits from a banker (withdraw <npc> <amount>)", Category: CategoryWorld, Handler: HandlerWithdraw},
+		{Name: "stash", Aliases: []string{"stashbal"}, Help: "Check your stash balance at a banker (stash <npc>)", Category: CategoryWorld, Handler: HandlerStashBalance},
+		{Name: "hire", Aliases: nil, Help: "Hire a hireling NPC (hire <npc>)", Category: CategoryWorld, Handler: HandlerHire},
+		{Name: "dismiss", Aliases: nil, Help: "Dismiss your current hireling", Category: CategoryWorld, Handler: HandlerDismiss},
+		{Name: "train", Aliases: nil, Help: "Train a job with a job trainer NPC (train <npc> <job>)", Category: CategoryWorld, Handler: HandlerTrainJob},
+		{Name: "jobs", Aliases: nil, Help: "List your current jobs", Category: CategoryCharacter, Handler: HandlerListJobs},
+		{Name: "setjob", Aliases: nil, Help: "Set your active job (setjob <job>)", Category: CategoryCharacter, Handler: HandlerSetJob},
 
 		// Communication commands
 		{Name: "say", Aliases: nil, Help: "Say something to the room", Category: CategoryCommunication, Handler: HandlerSay},

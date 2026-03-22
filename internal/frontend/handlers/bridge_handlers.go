@@ -132,6 +132,20 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerRest:               bridgeRest,
 	command.HandlerSelectTech:         bridgeSelectTech,
 	command.HandlerAid:                bridgeAid,
+	command.HandlerTalk:               bridgeTalk,
+	command.HandlerHeal:               bridgeHeal,
+	command.HandlerBrowse:             bridgeBrowse,
+	command.HandlerBuy:                bridgeBuy,
+	command.HandlerSell:               bridgeSell,
+	command.HandlerNegotiate:          bridgeNegotiate,
+	command.HandlerDeposit:            bridgeDeposit,
+	command.HandlerWithdraw:           bridgeWithdraw,
+	command.HandlerStashBalance:       bridgeStashBalance,
+	command.HandlerHire:               bridgeHire,
+	command.HandlerDismiss:            bridgeDismiss,
+	command.HandlerTrainJob:           bridgeTrainJob,
+	command.HandlerListJobs:           bridgeListJobs,
+	command.HandlerSetJob:             bridgeSetJob,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1441,5 +1455,226 @@ func bridgeAid(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_Aid{Aid: &gamev1.AidRequest{Target: target}},
+	}}, nil
+}
+
+// bridgeTalk builds a TalkRequest for the named NPC.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a TalkRequest; done is false.
+func bridgeTalk(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Talk{Talk: &gamev1.TalkRequest{NpcName: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeHeal builds a HealRequest or HealAmountRequest depending on whether an amount is given.
+// Syntax: heal <npc> or heal <npc> <amount>
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeHeal(bctx *bridgeContext) (bridgeResult, error) {
+	fields := strings.Fields(bctx.parsed.RawArgs)
+	if len(fields) >= 2 {
+		amount, err := strconv.Atoi(fields[len(fields)-1])
+		if err == nil && amount > 0 {
+			npcName := strings.Join(fields[:len(fields)-1], " ")
+			return bridgeResult{msg: &gamev1.ClientMessage{
+				RequestId: bctx.reqID,
+				Payload:   &gamev1.ClientMessage_HealAmount{HealAmount: &gamev1.HealAmountRequest{NpcName: npcName, Amount: int32(amount)}},
+			}}, nil
+		}
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Heal{Heal: &gamev1.HealRequest{NpcName: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeBrowse builds a BrowseRequest for the named merchant NPC.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a BrowseRequest; done is false.
+func bridgeBrowse(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Browse{Browse: &gamev1.BrowseRequest{NpcName: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeBuy builds a BuyRequest.
+// Syntax: buy <npc> <item_id> [qty]
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeBuy(bctx *bridgeContext) (bridgeResult, error) {
+	fields := strings.Fields(bctx.parsed.RawArgs)
+	if len(fields) < 2 {
+		return writeErrorPrompt(bctx, "Usage: buy <npc> <item> [quantity]")
+	}
+	qty := int32(1)
+	if len(fields) >= 3 {
+		if n, err := strconv.Atoi(fields[len(fields)-1]); err == nil && n > 0 {
+			qty = int32(n)
+			fields = fields[:len(fields)-1]
+		}
+	}
+	npcName := fields[0]
+	itemID := strings.Join(fields[1:], " ")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Buy{Buy: &gamev1.BuyRequest{NpcName: npcName, ItemId: itemID, Quantity: qty}},
+	}}, nil
+}
+
+// bridgeSell builds a SellRequest.
+// Syntax: sell <npc> <item_id> [qty]
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeSell(bctx *bridgeContext) (bridgeResult, error) {
+	fields := strings.Fields(bctx.parsed.RawArgs)
+	if len(fields) < 2 {
+		return writeErrorPrompt(bctx, "Usage: sell <npc> <item> [quantity]")
+	}
+	qty := int32(1)
+	if len(fields) >= 3 {
+		if n, err := strconv.Atoi(fields[len(fields)-1]); err == nil && n > 0 {
+			qty = int32(n)
+			fields = fields[:len(fields)-1]
+		}
+	}
+	npcName := fields[0]
+	itemID := strings.Join(fields[1:], " ")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Sell{Sell: &gamev1.SellRequest{NpcName: npcName, ItemId: itemID, Quantity: qty}},
+	}}, nil
+}
+
+// bridgeNegotiate builds a NegotiateRequest.
+// Syntax: negotiate <npc> [smooth_talk|grift]
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeNegotiate(bctx *bridgeContext) (bridgeResult, error) {
+	fields := strings.Fields(bctx.parsed.RawArgs)
+	if len(fields) == 0 {
+		return writeErrorPrompt(bctx, "Usage: negotiate <npc> [smooth_talk|grift]")
+	}
+	skill := ""
+	npcName := fields[0]
+	if len(fields) >= 2 {
+		skill = fields[len(fields)-1]
+		npcName = strings.Join(fields[:len(fields)-1], " ")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Negotiate{Negotiate: &gamev1.NegotiateRequest{NpcName: npcName, Skill: skill}},
+	}}, nil
+}
+
+// bridgeDeposit builds a StashDepositRequest.
+// Syntax: deposit <npc> <amount>
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeDeposit(bctx *bridgeContext) (bridgeResult, error) {
+	fields := strings.Fields(bctx.parsed.RawArgs)
+	if len(fields) < 2 {
+		return writeErrorPrompt(bctx, "Usage: deposit <npc> <amount>")
+	}
+	amount, err := strconv.Atoi(fields[len(fields)-1])
+	if err != nil || amount <= 0 {
+		return writeErrorPrompt(bctx, "Usage: deposit <npc> <amount>")
+	}
+	npcName := strings.Join(fields[:len(fields)-1], " ")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_StashDeposit{StashDeposit: &gamev1.StashDepositRequest{NpcName: npcName, Amount: int32(amount)}},
+	}}, nil
+}
+
+// bridgeWithdraw builds a StashWithdrawRequest.
+// Syntax: withdraw <npc> <amount>
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeWithdraw(bctx *bridgeContext) (bridgeResult, error) {
+	fields := strings.Fields(bctx.parsed.RawArgs)
+	if len(fields) < 2 {
+		return writeErrorPrompt(bctx, "Usage: withdraw <npc> <amount>")
+	}
+	amount, err := strconv.Atoi(fields[len(fields)-1])
+	if err != nil || amount <= 0 {
+		return writeErrorPrompt(bctx, "Usage: withdraw <npc> <amount>")
+	}
+	npcName := strings.Join(fields[:len(fields)-1], " ")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_StashWithdraw{StashWithdraw: &gamev1.StashWithdrawRequest{NpcName: npcName, Amount: int32(amount)}},
+	}}, nil
+}
+
+// bridgeStashBalance builds a StashBalanceRequest.
+// Syntax: stash <npc>
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeStashBalance(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_StashBalance{StashBalance: &gamev1.StashBalanceRequest{NpcName: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeHire builds a HireRequest for the named hireling NPC.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeHire(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Hire{Hire: &gamev1.HireRequest{NpcName: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeDismiss builds a DismissRequest.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeDismiss(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_Dismiss{Dismiss: &gamev1.DismissRequest{}},
+	}}, nil
+}
+
+// bridgeTrainJob builds a TrainJobRequest.
+// Syntax: train <npc> <job>
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeTrainJob(bctx *bridgeContext) (bridgeResult, error) {
+	fields := strings.Fields(bctx.parsed.RawArgs)
+	if len(fields) < 2 {
+		return writeErrorPrompt(bctx, "Usage: train <npc> <job>")
+	}
+	npcName := fields[0]
+	jobID := strings.Join(fields[1:], "_")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_TrainJob{TrainJob: &gamev1.TrainJobRequest{NpcName: npcName, JobId: jobID}},
+	}}, nil
+}
+
+// bridgeListJobs builds a ListJobsRequest.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeListJobs(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_ListJobs{ListJobs: &gamev1.ListJobsRequest{}},
+	}}, nil
+}
+
+// bridgeSetJob builds a SetJobRequest.
+// Syntax: setjob <job>
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg; done is false.
+func bridgeSetJob(bctx *bridgeContext) (bridgeResult, error) {
+	jobID := strings.ReplaceAll(strings.TrimSpace(bctx.parsed.RawArgs), " ", "_")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_SetJob{SetJob: &gamev1.SetJobRequest{JobId: jobID}},
 	}}, nil
 }
