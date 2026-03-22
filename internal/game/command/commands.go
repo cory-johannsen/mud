@@ -127,6 +127,12 @@ const (
 	HandlerBribe              = "bribe"
 	HandlerSurrender          = "surrender"
 	HandlerRelease            = "release"
+	HandlerSpawnNPC           = "spawn_npc"
+	HandlerAddRoom            = "add_room"
+	HandlerAddLink            = "add_link"
+	HandlerRemoveLink         = "remove_link"
+	HandlerSetRoom            = "set_room"
+	HandlerEditorCmds         = "ecmds"
 )
 
 // Command defines a player-invocable command.
@@ -224,6 +230,14 @@ func BuiltinCommands() []Command {
 		{Name: "teleport", Aliases: []string{"tp"}, Help: "Teleport a player to a room (admin only)", Category: CategoryAdmin, Handler: HandlerTeleport},
 		{Name: "roomequip", Aliases: nil, Help: "Manage room equipment (editor)", Category: CategoryEditor, Handler: HandlerRoomEquip},
 		{Name: "grant", Aliases: nil, Help: "Grant XP or money to a player (editor)", Category: CategoryEditor, Handler: HandlerGrant},
+
+		// Editor commands (REQ-EC-9,18,21,23,25,27)
+		{Name: "spawnnpc", Aliases: nil, Help: "Spawn an NPC from template into a room", Category: CategoryEditor, Handler: HandlerSpawnNPC},
+		{Name: "addroom", Aliases: nil, Help: "Add a new room to a zone", Category: CategoryEditor, Handler: HandlerAddRoom},
+		{Name: "addlink", Aliases: nil, Help: "Add a bidirectional exit between two rooms", Category: CategoryEditor, Handler: HandlerAddLink},
+		{Name: "removelink", Aliases: nil, Help: "Remove a directional exit from a room", Category: CategoryEditor, Handler: HandlerRemoveLink},
+		{Name: "setroom", Aliases: nil, Help: "Set a field on the current room", Category: CategoryEditor, Handler: HandlerSetRoom},
+		{Name: "ecmds", Aliases: nil, Help: "List all editor commands", Category: CategoryEditor, Handler: HandlerEditorCmds},
 
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
 		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},

@@ -1676,6 +1676,18 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSurrender(uid, p.SurrenderRequest)
 	case *gamev1.ClientMessage_ReleaseRequest:
 		return s.handleRelease(uid, p.ReleaseRequest)
+	case *gamev1.ClientMessage_SpawnNpc:
+		return s.handleSpawnNPC(uid, p.SpawnNpc)
+	case *gamev1.ClientMessage_AddRoom:
+		return s.handleAddRoom(uid, p.AddRoom)
+	case *gamev1.ClientMessage_AddLink:
+		return s.handleAddLink(uid, p.AddLink)
+	case *gamev1.ClientMessage_RemoveLink:
+		return s.handleRemoveLink(uid, p.RemoveLink)
+	case *gamev1.ClientMessage_SetRoom:
+		return s.handleSetRoom(uid, p.SetRoom)
+	case *gamev1.ClientMessage_EditorCmds:
+		return s.handleEditorCmds(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
