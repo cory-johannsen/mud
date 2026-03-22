@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
 
@@ -107,6 +108,11 @@ type Instance struct {
 	// in their room. While Cowering == true, the NPC does not respond to commands.
 	// Cleared when combat in their room ends.
 	Cowering bool
+	// AttackVerb is the verb used in combat attack narratives. Copied from template.
+	// Empty string means the default verb ("attacks") will be used.
+	AttackVerb string
+	// Immobile prevents this NPC from patrolling or wandering. Copied from template.
+	Immobile bool
 }
 
 // Name returns the instance's current display name.
@@ -122,6 +128,15 @@ func (i *Instance) setName(s string) {
 	defer i.nameMu.Unlock()
 	i.name = s
 }
+
+// IsAnimal returns true when the instance's Type is "animal".
+func (i *Instance) IsAnimal() bool { return i.Type == "animal" }
+
+// IsRobot returns true when the instance's Type is "robot".
+func (i *Instance) IsRobot() bool { return i.Type == "robot" }
+
+// IsMachine returns true when the instance's Type is "machine".
+func (i *Instance) IsMachine() bool { return i.Type == "machine" }
 
 // pickWeighted selects one EquipmentEntry ID using weighted random selection.
 // Returns "" if entries is empty or all weights are zero.
@@ -184,7 +199,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		TauntChance:   tmpl.TauntChance,
 		TauntCooldown: cooldown,
 		SkillChecks:   tmpl.SkillChecks,
-		Resistances:   tmpl.Resistances,
+		Resistances:   resolveResistances(tmpl),
 		Weaknesses:    tmpl.Weaknesses,
 		WeaponID:      weaponID,
 		ArmorID:       armorID,
@@ -200,6 +215,8 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		SpecialAbilities: append([]string(nil), tmpl.SpecialAbilities...),
 		NPCType:          tmpl.NPCType,
 		Personality:      tmpl.Personality,
+		AttackVerb: tmpl.AttackVerb,
+		Immobile:   tmpl.Immobile,
 		// Cowering defaults to false (zero value).
 		Disposition: func() string {
 			if tmpl.Disposition == "" {
@@ -208,6 +225,26 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 			return tmpl.Disposition
 		}(),
 	}
+}
+
+// resolveResistances computes the effective resistance map for a new instance.
+// Robots and machines receive default bleed+poison immunity (999), which
+// template values override on a per-key basis.
+//
+// Precondition: tmpl must not be nil.
+// Postcondition: Returns a non-nil map for robots/machines; otherwise returns tmpl.Resistances as-is.
+func resolveResistances(tmpl *Template) map[string]int {
+	if tmpl.IsRobot() || tmpl.IsMachine() {
+		resistances := map[string]int{
+			combat.DamageTypeBleed:  999,
+			combat.DamageTypePoison: 999,
+		}
+		for k, v := range tmpl.Resistances {
+			resistances[k] = v
+		}
+		return resistances
+	}
+	return tmpl.Resistances
 }
 
 // computeRobPercent calculates the rob percentage for an NPC at spawn time.
