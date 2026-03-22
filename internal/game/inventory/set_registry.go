@@ -82,6 +82,24 @@ type SetRegistry struct {
 	sets []*SetDef
 }
 
+// NewSetRegistry creates an empty SetRegistry.
+//
+// Postcondition: AllSets() returns an empty slice.
+func NewSetRegistry() *SetRegistry {
+	return &SetRegistry{}
+}
+
+// Register adds def to the registry.
+//
+// Precondition: def must not be nil.
+// Postcondition: def appears in AllSets().
+func (r *SetRegistry) Register(def *SetDef) {
+	if def == nil {
+		return
+	}
+	r.sets = append(r.sets, def)
+}
+
 // AllSets returns all loaded SetDefs.
 //
 // Postcondition: returned slice is a defensive copy; mutations do not affect the registry.

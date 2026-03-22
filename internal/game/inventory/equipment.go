@@ -92,6 +92,9 @@ type SlottedItem struct {
 	Modifier string
 	// CurseRevealed is true once the cursed item has been equipped.
 	CurseRevealed bool
+	// Rarity is the item rarity tier: "salvage" | "street" | "mil_spec" | "black_market" | "ghost".
+	// Set at wear time from the ArmorDef.Rarity for color display (REQ-EM-4).
+	Rarity string
 }
 
 // Equipment holds all armor and accessory slots for a character.
@@ -142,11 +145,25 @@ func (e *Equipment) ComputedDefenses(reg *Registry, dexMod int) DefenseStats {
 		if slotted == nil {
 			continue
 		}
+		// REQ-EM-7/8: skip broken slots (durability==0 when durability is tracked via InstanceID).
+		if slotted.InstanceID != "" && slotted.Durability == 0 {
+			continue
+		}
 		def, ok := reg.Armor(slotted.ItemDefID)
 		if !ok {
 			continue
 		}
-		stats.ACBonus += def.ACBonus
+		slotAC := def.ACBonus
+		// REQ-EM-22: apply Modifier AC adjustment.
+		switch slotted.Modifier {
+		case "tuned":
+			slotAC++
+		case "defective":
+			slotAC--
+		case "cursed":
+			slotAC -= 2
+		}
+		stats.ACBonus += slotAC
 		stats.CheckPenalty += def.CheckPenalty
 		stats.SpeedPenalty += def.SpeedPenalty
 		if def.StrengthReq > stats.StrengthReq {
@@ -168,5 +185,16 @@ func (e *Equipment) ComputedDefenses(reg *Registry, dexMod int) DefenseStats {
 	if stats.EffectiveDex > dexMod {
 		stats.EffectiveDex = dexMod
 	}
+	return stats
+}
+
+// ComputedDefensesWithSetBonuses computes defense stats and applies the active
+// set bonus ACBonus on top (REQ-EM-35).
+//
+// Precondition: reg must be non-nil; dexMod may be any integer.
+// Postcondition: ACBonus includes both equipped-armor contribution and sb.ACBonus.
+func (e *Equipment) ComputedDefensesWithSetBonuses(reg *Registry, dexMod int, sb SetBonusSummary) DefenseStats {
+	stats := e.ComputedDefenses(reg, dexMod)
+	stats.ACBonus += sb.ACBonus
 	return stats
 }

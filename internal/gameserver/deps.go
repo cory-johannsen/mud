@@ -63,6 +63,9 @@ type ContentDeps struct {
 	CombatEngine         *combat.Engine
 	MentalStateMgr       *mentalstate.Manager
 	LoadoutsDir          LoadoutsDir
+	// SetRegistry holds equipment set definitions for computing set bonuses (REQ-EM-29/35).
+	// May be nil (treated as empty — no set bonuses).
+	SetRegistry          *inventory.SetRegistry
 }
 
 // HandlerDeps groups all handler dependencies for GameServiceServer.

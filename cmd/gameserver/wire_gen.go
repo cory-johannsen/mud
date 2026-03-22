@@ -8,6 +8,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
@@ -104,6 +105,15 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	if err != nil {
 		return nil, err
 	}
+	// Load equipment set registry (REQ-EM-29/35).
+	knownConditionIDs := make(map[string]bool)
+	for _, cd := range conditionRegistry.All() {
+		knownConditionIDs[cd.ID] = true
+	}
+	setRegistry, err := inventory.LoadSetRegistry(cfg.SetsDir, knownConditionIDs)
+	if err != nil {
+		return nil, fmt.Errorf("loading set registry: %w", err)
+	}
 	aiRegistry := ai.NewEmptyRegistry()
 	skillsFile := cfg.SkillsFile
 	v2, err := ruleset.LoadAllSkills(skillsFile, logger)
@@ -171,6 +181,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		CombatEngine:         engine,
 		MentalStateMgr:       mentalstateManager,
 		LoadoutsDir:          loadoutsDir,
+		SetRegistry:          setRegistry,
 	}
 	sessionManager := gameserver.NewSessionManager()
 	worldHandler := gameserver.NewWorldHandlerProvider(manager, sessionManager, npcManager, clock, roomEquipmentManager, registry)

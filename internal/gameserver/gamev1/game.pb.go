@@ -7981,8 +7981,10 @@ type CharacterSheetView struct {
 	PreparedSlots         []*PreparedSlotView       `protobuf:"bytes,44,rep,name=prepared_slots,json=preparedSlots,proto3" json:"prepared_slots,omitempty"`                            // prepared technology slots with expended state
 	SpontaneousUsePools   []*SpontaneousUsePoolView `protobuf:"bytes,45,rep,name=spontaneous_use_pools,json=spontaneousUsePools,proto3" json:"spontaneous_use_pools,omitempty"`
 	InnateSlots           []*InnateSlotView         `protobuf:"bytes,46,rep,name=innate_slots,json=innateSlots,proto3" json:"innate_slots,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	// active_set_bonuses lists human-readable descriptions of currently active equipment set bonuses (REQ-EM-31).
+	ActiveSetBonuses []string `protobuf:"bytes,47,rep,name=active_set_bonuses,json=activeSetBonuses,proto3" json:"active_set_bonuses,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *CharacterSheetView) Reset() {
@@ -8333,6 +8335,13 @@ func (x *CharacterSheetView) GetSpontaneousUsePools() []*SpontaneousUsePoolView 
 func (x *CharacterSheetView) GetInnateSlots() []*InnateSlotView {
 	if x != nil {
 		return x.InnateSlots
+	}
+	return nil
+}
+
+func (x *CharacterSheetView) GetActiveSetBonuses() []string {
+	if x != nil {
+		return x.ActiveSetBonuses
 	}
 	return nil
 }
@@ -10722,7 +10731,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"G\n" +
 	"\x10PreparedSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12\x1a\n" +
-	"\bexpended\x18\x02 \x01(\bR\bexpended\"\xb7\x0f\n" +
+	"\bexpended\x18\x02 \x01(\bR\bexpended\"\xe5\x0f\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -10776,7 +10785,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x17pending_tech_selections\x18+ \x01(\x05R\x15pendingTechSelections\x12@\n" +
 	"\x0eprepared_slots\x18, \x03(\v2\x19.game.v1.PreparedSlotViewR\rpreparedSlots\x12S\n" +
 	"\x15spontaneous_use_pools\x18- \x03(\v2\x1f.game.v1.SpontaneousUsePoolViewR\x13spontaneousUsePools\x12:\n" +
-	"\finnate_slots\x18. \x03(\v2\x17.game.v1.InnateSlotViewR\vinnateSlots\x1a8\n" +
+	"\finnate_slots\x18. \x03(\v2\x17.game.v1.InnateSlotViewR\vinnateSlots\x12,\n" +
+	"\x12active_set_bonuses\x18/ \x03(\tR\x10activeSetBonuses\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +

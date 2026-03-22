@@ -64,15 +64,28 @@ func renderLoadoutSet(ls *inventory.LoadoutSet) string {
 }
 
 // formatEquippedWeapon returns a human-readable description of an equipped weapon slot.
+// Applies rarity color (REQ-EM-4) and modifier prefix (REQ-EM-18/19/20).
 //
 // Precondition: ew may be nil (represents an empty slot).
-// Postcondition: Returns "empty" when ew is nil, otherwise the weapon name with optional ammo.
+// Postcondition: Returns "empty" when ew is nil, otherwise the (colored, prefixed) weapon name with optional ammo.
 func formatEquippedWeapon(ew *inventory.EquippedWeapon) string {
 	if ew == nil {
 		return "empty"
 	}
-	if ew.Magazine != nil {
-		return fmt.Sprintf("%s [%d/%d]", ew.Def.Name, ew.Magazine.Loaded, ew.Magazine.Capacity)
+	displayName := ew.Def.Name
+	// REQ-EM-18/19/20: prefix modifier.
+	switch ew.Modifier {
+	case "tuned":
+		displayName = "Tuned " + displayName
+	case "defective":
+		displayName = "Defective " + displayName
+	case "cursed":
+		displayName = "Cursed " + displayName
 	}
-	return ew.Def.Name
+	// REQ-EM-4: apply rarity color.
+	displayName = inventory.RarityColoredName(ew.Def.Rarity, displayName)
+	if ew.Magazine != nil {
+		return fmt.Sprintf("%s [%d/%d]", displayName, ew.Magazine.Loaded, ew.Magazine.Capacity)
+	}
+	return displayName
 }

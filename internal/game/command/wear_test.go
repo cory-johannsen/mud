@@ -314,3 +314,43 @@ func TestProperty_HandleWear_SlotUnchangedOnFailure(t *testing.T) {
 		}
 	})
 }
+
+// TestHandleWear_MinLevelCheck_ArmorTooHighLevel verifies that wearing higher-rarity
+// armor when the player's level is too low returns the correct error (REQ-EM-3).
+func TestHandleWear_MinLevelCheck_ArmorTooHighLevel(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	sess.Level = 3 // below ghost (min 15)
+	reg := newTestRegistryWithArmor()
+
+	// Register a ghost-rarity armor.
+	ghostArmorDef := &inventory.ArmorDef{
+		ID: "ghost_chestplate", Name: "Ghost Chestplate",
+		Slot: inventory.SlotTorso, Group: "plate",
+		ProficiencyCategory: "medium_armor",
+		ACBonus: 8, DexCap: 10,
+		Rarity: "ghost",
+	}
+	ghostItemDef := &inventory.ItemDef{
+		ID: "ghost_chestplate_item", Name: "Ghost Chestplate",
+		Kind: inventory.KindArmor, ArmorRef: "ghost_chestplate",
+		Weight: 4.0, MaxStack: 1,
+	}
+	_ = reg.RegisterArmor(ghostArmorDef)
+	_ = reg.RegisterItem(ghostItemDef)
+	if _, err := sess.Backpack.Add("ghost_chestplate_item", 1, reg); err != nil {
+		t.Fatalf("failed to add ghost chestplate: %v", err)
+	}
+
+	result := command.HandleWear(sess, reg, "ghost_chestplate_item torso")
+
+	if !strings.Contains(result, "level 15") {
+		t.Errorf("expected level 15 in error message, got: %q", result)
+	}
+	if !strings.Contains(strings.ToLower(result), "ghost chestplate") {
+		t.Errorf("expected item name in error message, got: %q", result)
+	}
+	// Item must remain in backpack.
+	if sess.Backpack.UsedSlots() != 1 {
+		t.Errorf("expected item to remain in backpack, got %d items", sess.Backpack.UsedSlots())
+	}
+}

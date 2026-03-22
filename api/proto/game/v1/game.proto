@@ -857,6 +857,8 @@ message CharacterSheetView {
     repeated PreparedSlotView prepared_slots = 44; // prepared technology slots with expended state
     repeated SpontaneousUsePoolView spontaneous_use_pools = 45;
     repeated InnateSlotView innate_slots = 46;
+    // active_set_bonuses lists human-readable descriptions of currently active equipment set bonuses (REQ-EM-31).
+    repeated string active_set_bonuses = 47;
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.

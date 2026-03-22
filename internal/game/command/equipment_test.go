@@ -344,3 +344,77 @@ func TestProperty_HandleEquipment_TwoCol_NeverPanics(t *testing.T) {
 		_ = command.HandleEquipment(sess, width)
 	})
 }
+
+// TestHandleEquipment_RarityColoredName_WeaponInDisplay verifies that a weapon with
+// a known rarity has its name displayed with ANSI color codes (REQ-EM-4).
+func TestHandleEquipment_RarityColoredName_WeaponInDisplay(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	// pistolWeaponDef has Rarity="salvage" → dark gray \033[90m
+	_ = sess.LoadoutSet.Presets[0].EquipMainHand(pistolWeaponDef())
+
+	result := command.HandleEquipment(sess, 0)
+
+	// Should contain the ANSI color code for salvage (dark gray).
+	if !strings.Contains(result, "\033[90m") {
+		t.Errorf("expected salvage ANSI color code in output, got:\n%s", result)
+	}
+}
+
+// TestHandleEquipment_ModifierPrefix_Tuned verifies that a "tuned" weapon shows
+// the "Tuned " prefix in the display (REQ-EM-18).
+func TestHandleEquipment_ModifierPrefix_Tuned(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	_ = sess.LoadoutSet.Presets[0].EquipMainHand(pistolWeaponDef())
+	sess.LoadoutSet.Presets[0].MainHand.Modifier = "tuned"
+
+	result := command.HandleEquipment(sess, 0)
+
+	if !strings.Contains(result, "Tuned") {
+		t.Errorf("expected 'Tuned' prefix in display, got:\n%s", result)
+	}
+}
+
+// TestHandleEquipment_ModifierPrefix_Defective verifies that a "defective" weapon
+// shows the "Defective " prefix in the display (REQ-EM-19).
+func TestHandleEquipment_ModifierPrefix_Defective(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	_ = sess.LoadoutSet.Presets[0].EquipMainHand(pistolWeaponDef())
+	sess.LoadoutSet.Presets[0].MainHand.Modifier = "defective"
+
+	result := command.HandleEquipment(sess, 0)
+
+	if !strings.Contains(result, "Defective") {
+		t.Errorf("expected 'Defective' prefix in display, got:\n%s", result)
+	}
+}
+
+// TestHandleEquipment_ModifierPrefix_Cursed verifies that a "cursed" weapon
+// shows the "Cursed " prefix in the display (REQ-EM-20).
+func TestHandleEquipment_ModifierPrefix_Cursed(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	_ = sess.LoadoutSet.Presets[0].EquipMainHand(pistolWeaponDef())
+	sess.LoadoutSet.Presets[0].MainHand.Modifier = "cursed"
+
+	result := command.HandleEquipment(sess, 0)
+
+	if !strings.Contains(result, "Cursed") {
+		t.Errorf("expected 'Cursed' prefix in display, got:\n%s", result)
+	}
+}
+
+// TestHandleEquipment_SlottedItem_ModifierPrefix verifies that a slotted armor item
+// with a modifier shows the correct prefix (REQ-EM-18/19/20).
+func TestHandleEquipment_SlottedItem_ModifierPrefix_Tuned(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID: "vest-def",
+		Name:      "Tactical Vest",
+		Modifier:  "tuned",
+	}
+
+	result := command.HandleEquipment(sess, 0)
+
+	if !strings.Contains(result, "Tuned") {
+		t.Errorf("expected 'Tuned' prefix on slotted armor, got:\n%s", result)
+	}
+}
