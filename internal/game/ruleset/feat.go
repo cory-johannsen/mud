@@ -26,6 +26,9 @@ type Feat struct {
 	ConditionID  string          `yaml:"condition_id"` // optional; non-empty means Use applies this condition
 	Description  string          `yaml:"description"`
 	Choices      *FeatureChoices `yaml:"choices"`
+	// PreparedUses is the number of times per long rest this active feat may be activated.
+	// 0 means unlimited (no use count is tracked or enforced).
+	PreparedUses int `yaml:"prepared_uses"`
 	// Reaction declares this feat as a player reaction with the given trigger and effect.
 	// Nil means this feat is not a reaction.
 	Reaction *reaction.ReactionDef `yaml:"reaction,omitempty"`

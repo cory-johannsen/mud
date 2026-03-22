@@ -86,11 +86,11 @@
 
 ### BUG-12: Active feats do not track prepared uses and cannot be activated
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Character
 **Description:** Active feats do not track prepared use counts and cannot be activated by the player.
 **Steps:** Select an active feat during character creation; attempt to use the feat in play; observe it cannot be activated.
-**Fix:**
+**Fix:** Added `PreparedUses int` field to `ruleset.Feat` (0 = unlimited). Added `ActiveFeatUses map[string]int` to `session.PlayerSession`, populated at login for all active feats with `PreparedUses > 0`. Updated `handleUse` to enforce the use count: 0 remaining returns a failure message; successful activation decrements the counter and appends the remaining count to the response. Updated `handleRest` to restore `ActiveFeatUses` to each feat's `PreparedUses` maximum. Unlimited feats (PreparedUses=0) are unaffected.
 
 ### BUG-10: rustbucket_ridge — blood_camp has an illegal placement; move east of blade_house
 **Severity:** high

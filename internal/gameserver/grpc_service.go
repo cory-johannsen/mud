@@ -1145,17 +1145,25 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
-	// REQ-RXN15: register reactions from feats.
+	// REQ-RXN15: register reactions from feats; also populate ActiveFeatUses for limited active feats.
 	if s.characterFeatsRepo != nil && s.featRegistry != nil && characterID > 0 {
 		if featIDs, featErr := s.characterFeatsRepo.GetAll(stream.Context(), characterID); featErr != nil {
 			s.logger.Warn("Session: failed to load character feats for reaction registration", zap.Error(featErr))
 		} else {
 			for _, id := range featIDs {
 				f, ok := s.featRegistry.Feat(id)
-				if !ok || f.Reaction == nil {
+				if !ok {
 					continue
 				}
-				sess.Reactions.Register(uid, id, f.Name, *f.Reaction)
+				if f.Reaction != nil {
+					sess.Reactions.Register(uid, id, f.Name, *f.Reaction)
+				}
+				if f.Active && f.PreparedUses > 0 {
+					if sess.ActiveFeatUses == nil {
+						sess.ActiveFeatUses = make(map[string]int)
+					}
+					sess.ActiveFeatUses[id] = f.PreparedUses
+				}
 			}
 		}
 	}
@@ -2789,6 +2797,21 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 			return fmt.Errorf("handleRest: reload innate slots: %w", err)
 		}
 		sess.InnateTechs = innates
+	}
+
+	// Restore active feat uses to their PreparedUses maximum.
+	if s.characterFeatsRepo != nil && s.featRegistry != nil && sess.ActiveFeatUses != nil {
+		if featIDs, featErr := s.characterFeatsRepo.GetAll(ctx, sess.CharacterID); featErr != nil {
+			s.logger.Warn("handleRest: failed to load feats for use restoration", zap.Error(featErr))
+		} else {
+			for _, id := range featIDs {
+				f, ok := s.featRegistry.Feat(id)
+				if !ok || !f.Active || f.PreparedUses <= 0 {
+					continue
+				}
+				sess.ActiveFeatUses[id] = f.PreparedUses
+			}
+		}
 	}
 
 	// Job lookup.
@@ -5000,16 +5023,25 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 		}
 		for _, id := range featIDs {
 			f, ok := s.featRegistry.Feat(id)
-			if ok && f.Active {
-				active = append(active, &gamev1.FeatEntry{
-					FeatId:       f.ID,
-					Name:         f.Name,
-					Category:     f.Category,
-					Active:       f.Active,
-					Description:  f.Description,
-					ActivateText: f.ActivateText,
-				})
+			if !ok || !f.Active {
+				continue
 			}
+			// Omit exhausted limited feats from the list.
+			if f.PreparedUses > 0 && sess.ActiveFeatUses[f.ID] <= 0 {
+				continue
+			}
+			desc := f.Description
+			if f.PreparedUses > 0 {
+				desc = fmt.Sprintf("%s (%d uses remaining)", f.Description, sess.ActiveFeatUses[f.ID])
+			}
+			active = append(active, &gamev1.FeatEntry{
+				FeatId:       f.ID,
+				Name:         f.Name,
+				Category:     f.Category,
+				Active:       f.Active,
+				Description:  desc,
+				ActivateText: f.ActivateText,
+			})
 		}
 	}
 
@@ -5125,6 +5157,14 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 				continue
 			}
 			if strings.EqualFold(f.ID, abilityID) || strings.EqualFold(f.Name, abilityID) {
+				// Enforce prepared-use limit when feat has PreparedUses > 0.
+				if f.PreparedUses > 0 {
+					remaining := sess.ActiveFeatUses[f.ID]
+					if remaining <= 0 {
+						return messageEvent(fmt.Sprintf("You have no uses of %s remaining. Rest to recover.", f.Name)), nil
+					}
+					sess.ActiveFeatUses[f.ID] = remaining - 1
+				}
 				condID := f.ConditionID
 				if condID != "" && sess.Conditions != nil && s.condRegistry != nil {
 					if def, ok := s.condRegistry.Get(condID); ok {
@@ -5140,9 +5180,13 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 						)
 					}
 				}
+				msg := f.ActivateText
+				if f.PreparedUses > 0 {
+					msg = fmt.Sprintf("%s (%d uses remaining.)", f.ActivateText, sess.ActiveFeatUses[f.ID])
+				}
 				return &gamev1.ServerEvent{
 					Payload: &gamev1.ServerEvent_UseResponse{
-						UseResponse: &gamev1.UseResponse{Message: f.ActivateText},
+						UseResponse: &gamev1.UseResponse{Message: msg},
 					},
 				}, nil
 			}

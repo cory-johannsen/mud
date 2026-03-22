@@ -81,6 +81,11 @@ type PlayerSession struct {
 	// PassiveFeats holds the IDs of all passive class features and feats for this character.
 	// Populated at login; used by combat passive checks without additional DB queries.
 	PassiveFeats map[string]bool
+	// ActiveFeatUses tracks remaining daily uses for active feats that have a PreparedUses limit.
+	// Key: feat ID. Value: uses remaining. Only feats with PreparedUses > 0 appear here.
+	// 0 remaining means the feat is exhausted. Restored to PreparedUses on long rest.
+	// Populated at login; nil means no limited active feats.
+	ActiveFeatUses map[string]int
 	// FavoredTargetMu guards FavoredTarget against concurrent reads during
 	// session initialization (written by Session() during setup; read by combat).
 	FavoredTargetMu sync.RWMutex
