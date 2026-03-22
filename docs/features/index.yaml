@@ -191,6 +191,14 @@ features:
     file: docs/features/technology.md
     effort: "-"
 
+  - slug: initiative-display
+    name: Initiative Display on Character Sheet
+    status: planned
+    priority: 205
+    category: ui
+    file: docs/features/initiative-display.md
+    effort: "XS"  # display computed initiative value on character sheet
+
   - slug: wire-refactor
     name: Wire Dependency Injection Refactor
     status: planned

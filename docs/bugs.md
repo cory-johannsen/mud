@@ -68,6 +68,22 @@
 
 ## World
 
+### BUG-11: Technologies assigned at login (backfilled on existing characters) are not persisted
+**Severity:** high
+**Status:** open
+**Category:** Character
+**Description:** Technologies backfilled onto existing characters at login are not saved to the database, so they are lost on the next session.
+**Steps:** Log in with an existing character that lacks a technology assignment; observe the technology is backfilled; log out and back in; observe the technology is missing again.
+**Fix:**
+
+### BUG-10: rustbucket_ridge — blood_camp has an illegal placement; move east of blade_house
+**Severity:** high
+**Status:** open
+**Category:** World
+**Description:** In the `rustbucket_ridge` zone, `blood_camp` has an illegal map placement. It should be moved to east of `blade_house`.
+**Steps:** View the rustbucket_ridge zone map; observe blood_camp placement is illegal.
+**Fix:**
+
 ### BUG-9: rustbucket_ridge — scorchside_camp illegally overlaps the_embers_edge
 **Severity:** high
 **Status:** open
