@@ -2076,6 +2076,11 @@ func (h *CombatHandler) applyCombatStartBehaviorsLocked(roomID string) {
 // Precondition: combatMu is held; inst and room are non-nil.
 // Postcondition: inst is moved to a valid adjacent room, or inst.Cowering is set to true.
 func (h *CombatHandler) fleeNPCLocked(inst *npc.Instance, room *world.Room) {
+	// REQ-NHN-22: Immobile NPCs must never be moved.
+	if inst.Immobile {
+		inst.Cowering = true
+		return
+	}
 	var validExits []world.Exit
 	for _, exit := range room.Exits {
 		if exit.Hidden || exit.Locked {

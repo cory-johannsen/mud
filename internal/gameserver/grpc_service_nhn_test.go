@@ -4,7 +4,26 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	gameserver "github.com/cory-johannsen/mud/internal/gameserver"
 )
+
+// TestImmobileNPCFleeSkipped verifies that an immobile NPC's RoomID does not change
+// when fleeNPCLocked is called.
+func TestImmobileNPCFleeSkipped(t *testing.T) {
+	inst := &npc.Instance{
+		ID:       "turret1",
+		Immobile: true,
+		RoomID:   "room1",
+	}
+	// ExportedFleeNPCImmobile calls fleeNPCLocked and reports whether the room changed.
+	changed := gameserver.ExportedFleeNPCImmobile(inst)
+	if changed {
+		t.Error("expected immobile NPC to be skipped by flee; RoomID must not change")
+	}
+	if inst.RoomID != "room1" {
+		t.Errorf("expected RoomID to remain 'room1', got %q", inst.RoomID)
+	}
+}
 
 // TestImmobileFlag verifies that the Immobile field is propagated from template to instance.
 func TestImmobileFlag(t *testing.T) {
