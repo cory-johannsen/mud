@@ -10,12 +10,12 @@ A persistent 10-slot hotbar that gives players quick access to frequently-used c
 
 - REQ-HB-1: Players MUST have exactly 10 hotbar slots, numbered 1–10. Slot 10 is activated by typing `0`.
 - REQ-HB-2: Each slot MUST store an arbitrary command string (empty string = unassigned). No type validation is performed on the stored text.
-- REQ-HB-3: `hotbar <slot> <text>` MUST assign `<text>` to `<slot>` and persist immediately. `<slot>` must be 0–9 (where 0 = slot 10); fatal error if out of range.
-- REQ-HB-4: `hotbar clear <slot>` MUST clear the slot (set to empty string) and persist immediately.
+- REQ-HB-3: `hotbar <slot> <text>` MUST assign `<text>` to `<slot>` and persist immediately. `<slot>` must be 0–9 (where 0 = slot 10); if out of range, a `messageEvent("Slot out of range (1-10).")` MUST be returned with no other side effect.
+- REQ-HB-4: `hotbar clear <slot>` MUST clear the slot (set to empty string) and persist immediately. If `<slot>` is out of range, a `messageEvent("Slot out of range (1-10).")` MUST be returned.
 - REQ-HB-5: `hotbar` with no arguments MUST display all 10 slots and their current assignments.
 - REQ-HB-6: Typing `1`–`9` or `0` at the prompt MUST re-send the stored command text as if the player typed it, if the slot is non-empty. If the slot is empty, a message MUST inform the player the slot is unassigned.
-- REQ-HB-7: The hotbar row MUST be rendered as a fixed pinned row at terminal row H-1 (one row above the input prompt), visible at all times in the split-screen UI.
-- REQ-HB-8: The hotbar row format MUST be: `[1:<label>] [2:<label>] ... [0:<label>]` where `<label>` is the first N characters of the stored command (truncated to fit terminal width) or `---` if empty.
+- REQ-HB-7: The hotbar row MUST be rendered as a fixed pinned row at terminal row H-1 (one row above the input prompt), visible at all times in the split-screen UI. The console scrollable area MUST shrink by 1 row (rows 10 to H-2); the prompt remains at row H.
+- REQ-HB-8: The hotbar row format MUST be: `[1:<label>] [2:<label>] ... [0:<label>]` where `<label>` is the first `max(3, (width/10)-4)` characters of the stored command (truncated to fit terminal width, with no ellipsis) or `---` if empty.
 - REQ-HB-9: Hotbar assignments MUST be persisted per character in the database and restored on login.
 - REQ-HB-10: The hotbar row MUST be redrawn on terminal resize.
 - REQ-HB-11: `hotbar` assignments MUST survive server restart (DB-backed, not in-memory only).
@@ -59,9 +59,13 @@ message HotbarRequest {
 }
 
 message HotbarUpdateEvent {
-  repeated string slots = 1;  // 10 entries
+  // Always exactly 10 entries; slots[0] = slot 1, slots[9] = slot 10.
+  // Empty string = unassigned slot.
+  repeated string slots = 1;
 }
 ```
+
+`HotbarUpdateEvent` is sent by the server: (a) after any successful `set` or `clear` hotbar command, and (b) once immediately after the character loads at login (so the frontend can render the initial hotbar row).
 
 ### Persistence
 
@@ -85,6 +89,15 @@ New DB migration adds `hotbar TEXT` column to `characters` table (nullable; NULL
 | `internal/frontend/telnet/screen_test.go` | Tests for WriteHotbar rendering |
 | `internal/frontend/handlers/bridge_handlers.go` | Intercept `0`–`9` input for slot activation; handle HotbarUpdateEvent |
 | `internal/frontend/handlers/game_bridge.go` | Pass HotbarUpdateEvent to WriteHotbar |
+
+---
+
+## Test Strategy
+
+- REQ-HB-TS-1: `grpc_service_hotbar_test.go` MUST cover: set valid slot, set out-of-range slot (returns error message), clear valid slot, clear out-of-range slot, show (returns all 10 slots), persistence round-trip (save + reload from DB stub), HotbarUpdateEvent sent after set/clear, HotbarUpdateEvent sent at login.
+- REQ-HB-TS-2: Property-based tests (`pgregory.net/rapid`) MUST cover: for any 10-slot array of arbitrary strings, `WriteHotbar` MUST produce output that fits within `width` bytes and contains exactly 10 label segments; label truncation MUST never exceed `max(3, (width/10)-4)` characters.
+- REQ-HB-TS-3: `screen_test.go` MUST cover: `WriteHotbar` renders `---` for empty slots, renders truncated label for long commands, renders exact slot number (`1`–`9`, `0`) for each position.
+- REQ-HB-TS-4: `bridge_handlers_test.go` MUST cover: single-digit input `1`–`9`/`0` activates non-empty slot (injects command), activates empty slot (sends unassigned message), non-digit input passes through unchanged.
 
 ---
 
