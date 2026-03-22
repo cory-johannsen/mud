@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -992,4 +993,135 @@ func TestReadLineSplit_SeedPlusTypedChars(t *testing.T) {
 	line, err := conn.ReadLineSplit()
 	require.NoError(t, err)
 	assert.Equal(t, "go north", line)
+}
+
+// --- HeadlessConn tests ---
+
+func newTestHeadlessConn(t *testing.T) (*Conn, net.Conn) {
+	t.Helper()
+	client, server := net.Pipe()
+	conn := NewHeadlessConn(server, 2*time.Second, 2*time.Second)
+	t.Cleanup(func() {
+		client.Close()
+		conn.Close()
+	})
+	return conn, client
+}
+
+func TestHeadlessConn_InitScreen_IsNoop(t *testing.T) {
+	conn, client := newTestHeadlessConn(t)
+
+	// InitScreen should not write anything to the connection.
+	done := make(chan []byte, 1)
+	go func() {
+		buf := make([]byte, 256)
+		_ = client.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+		n, _ := client.Read(buf)
+		done <- buf[:n]
+	}()
+
+	err := conn.InitScreen()
+	assert.NoError(t, err)
+
+	received := <-done
+	assert.Empty(t, received, "InitScreen on headless conn must write nothing")
+}
+
+func TestHeadlessConn_WriteRoom_PlainText(t *testing.T) {
+	conn, client := newTestHeadlessConn(t)
+
+	content := "\033[1mThe Dark Forest\033[0m\nA shadowy glade surrounds you.\nExits: north south"
+
+	done := make(chan string, 1)
+	go func() {
+		var buf bytes.Buffer
+		reader := bufio.NewReader(client)
+		_ = client.SetReadDeadline(time.Now().Add(2 * time.Second))
+		// Read until we see the blank line after room content (two consecutive \r\n).
+		for {
+			line, err := reader.ReadString('\n')
+			buf.WriteString(line)
+			if err != nil {
+				break
+			}
+			if strings.Contains(buf.String(), "\r\n\r\n") {
+				break
+			}
+		}
+		done <- buf.String()
+	}()
+
+	err := conn.WriteRoom(content)
+	assert.NoError(t, err)
+
+	received := <-done
+	assert.NotContains(t, received, "\033[", "WriteRoom on headless conn must not emit ANSI")
+	assert.Contains(t, received, "The Dark Forest")
+	assert.Contains(t, received, "A shadowy glade surrounds you.")
+	assert.Contains(t, received, "Exits: north south")
+}
+
+func TestHeadlessConn_WriteConsole_PlainText(t *testing.T) {
+	conn, client := newTestHeadlessConn(t)
+
+	msg := "\033[32mYou strike the guard for 12 damage.\033[0m"
+
+	done := make(chan string, 1)
+	go func() {
+		buf := make([]byte, 512)
+		_ = client.SetReadDeadline(time.Now().Add(2 * time.Second))
+		n, _ := client.Read(buf)
+		done <- string(buf[:n])
+	}()
+
+	err := conn.WriteConsole(msg)
+	assert.NoError(t, err)
+
+	received := <-done
+	assert.NotContains(t, received, "\033[", "WriteConsole on headless conn must not emit ANSI")
+	assert.Contains(t, received, "You strike the guard for 12 damage.")
+}
+
+func TestHeadlessConn_WritePrompt_PlainPrompt(t *testing.T) {
+	conn, client := newTestHeadlessConn(t)
+
+	done := make(chan string, 1)
+	go func() {
+		buf := make([]byte, 64)
+		_ = client.SetReadDeadline(time.Now().Add(2 * time.Second))
+		n, _ := client.Read(buf)
+		done <- string(buf[:n])
+	}()
+
+	err := conn.WritePromptSplit("> ")
+	assert.NoError(t, err)
+
+	received := <-done
+	assert.NotContains(t, received, "\033[", "WritePromptSplit on headless conn must not emit ANSI")
+	assert.Equal(t, "> ", received)
+}
+
+func TestHeadlessConn_WriteConsole_NeverEmitsANSI(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		// Generate a random string that might contain ANSI-like content
+		msg := rapid.String().Draw(rt, "msg")
+
+		client, server := net.Pipe()
+		conn := NewHeadlessConn(server, 2*time.Second, 2*time.Second)
+		defer client.Close()
+		defer conn.Close()
+
+		done := make(chan string, 1)
+		go func() {
+			buf := make([]byte, 4096)
+			_ = client.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
+			n, _ := client.Read(buf)
+			done <- string(buf[:n])
+		}()
+
+		_ = conn.WriteConsole(msg)
+
+		received := <-done
+		assert.NotContains(rt, received, "\033[", "WriteConsole must never emit ANSI escape sequences")
+	})
 }
