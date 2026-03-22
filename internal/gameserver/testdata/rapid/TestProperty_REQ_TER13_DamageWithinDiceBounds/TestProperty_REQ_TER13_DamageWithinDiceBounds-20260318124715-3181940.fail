@@ -1,0 +1,25 @@
+# 2026/03/18 12:47:15.498091 [TestProperty_REQ_TER13_DamageWithinDiceBounds] [rapid] draw die_size: 1
+# 2026/03/18 12:47:15.498094 [TestProperty_REQ_TER13_DamageWithinDiceBounds] [rapid] draw num_dice: 4
+# 2026/03/18 12:47:15.498095 [TestProperty_REQ_TER13_DamageWithinDiceBounds] [rapid] draw flat: 2
+# 2026/03/18 12:47:15.498124 [TestProperty_REQ_TER13_DamageWithinDiceBounds] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/tech_effect_resolver_test.go:209
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/tech_effect_resolver_test.go:189
+# 	Error:      	"2" is not greater than or equal to "6"
+# 	Test:       	TestProperty_REQ_TER13_DamageWithinDiceBounds
+# 	Messages:   	damage at least minimum
+# 
+v0.4.8#7380395605672120893
+0x4b0b4415d8844
+0x51e55a6369fc9
+0x0
+0x1532ae431e75f8
+0x1a79cc7ee2a13b
+0x3
+0x1f0d3076e617d4
+0xd12c31df24fc9
+0xd
+0x2

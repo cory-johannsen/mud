@@ -1,0 +1,18 @@
+# 2026/03/18 12:47:15.498875 [TestProperty_REQ_TER22_AreaMessagesEqualTargetCount] [rapid] draw n_targets: 2
+# 2026/03/18 12:47:15.498895 [TestProperty_REQ_TER22_AreaMessagesEqualTargetCount] 
+# 	Error Trace:	/home/cjohannsen/src/mud/internal/gameserver/tech_effect_resolver_test.go:282
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud/internal/gameserver/tech_effect_resolver_test.go:262
+# 	            				/home/cjohannsen/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771
+# 	Error:      	Not equal: 
+# 	            	expected: 2
+# 	            	actual  : 1
+# 	Test:       	TestProperty_REQ_TER22_AreaMessagesEqualTargetCount
+# 
+v0.4.8#5414167209262069290
+0x560d857d35ab2
+0x94915a8544470
+0x1

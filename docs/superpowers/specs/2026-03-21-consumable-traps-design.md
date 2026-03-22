@@ -146,7 +146,7 @@ DeployTrapRequest deploy_trap = 85;
 
 ### Player combat position
 
-The player's combat position is retrieved via `s.combatH.CombatantPosition(uid string) int`, a new method on `CombatHandler` that looks up the `Combatant` for the given UID in the active combat and returns its `Position` field. Returns `0` if no combat is active or the combatant is not found.
+The player's combat position is retrieved via `s.combatH.CombatantPosition(roomID, uid string) int`, a new method on `CombatHandler` that looks up the `Combatant` for the given UID in the active combat for `roomID` and returns its `Position` field. Returns `0` if no combat is active or the combatant is not found.
 
 ### Handler logic (`handleDeployTrap`)
 
@@ -229,7 +229,7 @@ func (s *GameServiceServer) fireConsumableTrapOnCombatant(
     instanceID, dangerLevel string,
 ) {
     result := trap.ResolveTrigger(tmpl, dangerLevel, s.trapTemplates)
-    dmg := s.dice.RollExpr(result.DamageFormula)  // 0 if formula empty
+    dmg := s.dice.RollExpr(result.DamageDice)  // 0 if DamageDice empty
     target.ApplyDamage(dmg)
     // Apply condition if result.ConditionID != "" and target is a player:
     if sess, ok := s.sessions.Get(target.ID); ok {
@@ -276,7 +276,7 @@ Out-of-combat deployed consumable traps fire against players who enter the room 
 - REQ-CTR-14: `ItemDef` MUST support `kind: trap` with a `trap_template_ref` field referencing a `TrapTemplate` ID.
 - REQ-CTR-15: The `trap` package MUST export a `TrapKindConsumable = "consumable"` constant.
 - REQ-CTR-16: `TrapManager` MUST provide `AddConsumableTrap(instanceID string, tmpl *TrapTemplate, deployPos int) error`.
-- REQ-CTR-17: `CombatHandler` MUST provide `CombatantPosition(uid string) int` returning the combatant's current position in feet, or 0 if not in combat.
+- REQ-CTR-17: `CombatHandler` MUST provide `CombatantPosition(roomID, uid string) int` returning the combatant's current position in feet for the given room's active combat, or 0 if not in combat.
 
 ---
 
@@ -287,7 +287,7 @@ Out-of-combat deployed consumable traps fire against players who enter the room 
 | `internal/game/trap/template.go` | Add `TriggerRangeFt`, `BlastRadiusFt` fields |
 | `internal/game/trap/manager.go` | Add `DeployPosition`, `IsConsumable` to `TrapInstanceState`; add `AddConsumableTrap`; add `TrapKindConsumable` constant |
 | `internal/game/inventory/item.go` | Add `TrapTemplateRef string`; add `"trap"` kind; validate `TrapTemplateRef` non-empty at registration |
-| `internal/gameserver/combat_handler.go` | Add `onCombatantMoved` callback + `SetOnCombatantMoved` setter; add `CombatantPosition(uid) int`; call callback after Stride/Step/Shove |
+| `internal/gameserver/combat_handler.go` | Add `onCombatantMoved` callback + `SetOnCombatantMoved` setter; add `CombatantPosition(roomID, uid string) int`; add `CombatantsInRoom(roomID string) []*combat.Combatant`; call callback after Stride/Step/Shove |
 | `internal/gameserver/grpc_service_trap.go` | Add `WireConsumableTrapTrigger()`, `checkConsumableTraps()`, `fireConsumableTrapOnCombatant()` |
 | `internal/gameserver/grpc_service_deploy_trap.go` | New: `handleDeployTrap` handler |
 | `internal/gameserver/grpc_service_deploy_trap_test.go` | New: deploy command tests |

@@ -1,0 +1,3 @@
+# 2026/03/21 09:22:48.575147 [TestPropertySummonItem_EditorValidQtyAlwaysSucceeds] RegisterItem: inventory: Registry.RegisterItem: item validation failed: [Kind must be one of weapon, explosive, consumable, junk, armor, trap; got ""]
+# 
+v0.4.8#489101344918852957

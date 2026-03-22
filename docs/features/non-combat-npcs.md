@@ -35,10 +35,10 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
   - [x] `GuardConfig.MaxBribeWantedLevel int` field (default: 2)
   - [x] `GuardConfig.BaseCosts map[int]int` field for bribeable guards (all keys 1–4, positive values)
   - [x] Named NPC: Marshal Ironsides
-- [ ] Healer
-  - REQ-NPC-16: `CapacityUsed` MUST reset to 0 on daily tick; restored from DB on restart.
-  - [ ] `heal` and `heal <amount>` commands
-  - [ ] Named NPCs: Clutch (The Tinker's Den), Tina Wires (Junker's Dream)
+- [x] Healer
+  - [x] REQ-NPC-16: `CapacityUsed` MUST reset to 0 on daily tick; restored from DB on restart.
+  - [x] `heal` and `heal <amount>` commands
+  - [x] Named NPCs: Clutch (The Tinker's Den), Tina Wires (Junker's Dream)
 - [x] Quest Giver
   - [x] `talk <npc>` command with placeholder dialog
   - [x] Named NPC: Gail "Grinder" Graves (Scrapshack 23)
@@ -53,14 +53,14 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
   - [x] Global stash (`StashBalance` on player character)
   - [x] `deposit`, `withdraw`, `balance` commands
   - [x] Named NPC: Vera Coldcoin (banker, Safe room in Rustbucket Ridge)
-- [ ] Job Trainer
-  - REQ-NPC-9: Players MUST have exactly one active job after their first job is trained.
-  - REQ-NPC-10: Active job MUST earn XP; inactive jobs MUST NOT.
-  - REQ-NPC-11: Inactive jobs MUST still provide feats and proficiencies.
-  - REQ-NPC-17: `setjob` MUST be available from any room.
-  - [ ] `train <job>`, `jobs`, `setjob <job>` commands
-  - [ ] JobPrerequisites (level, job level, attributes, skill ranks, required jobs)
-  - [ ] Named NPC: one lore-appropriate job trainer in Rustbucket Ridge
+- [x] Job Trainer
+  - [x] REQ-NPC-9: Players MUST have exactly one active job after their first job is trained.
+  - [ ] REQ-NPC-10: Active job MUST earn XP; inactive jobs MUST NOT. *(deferred to XP system)*
+  - [ ] REQ-NPC-11: Inactive jobs MUST still provide feats and proficiencies. *(deferred to job-development feature)*
+  - [x] REQ-NPC-17: `setjob` MUST be available from any room.
+  - [x] `train <job>`, `jobs`, `setjob <job>` commands
+  - [x] JobPrerequisites (level, job level, attributes, skill ranks, required jobs)
+  - [x] Named NPC: Rio Wrench (job trainer, Grinder's Row)
 - [x] Crafter (stub)
   - [x] `npc_type: "crafter"` declared; full behavior deferred to `crafting` feature
 - [x] Fixer (from `wanted-clearing` feature)

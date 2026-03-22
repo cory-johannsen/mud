@@ -488,11 +488,11 @@ features:
 
   - slug: documentation
     name: Documentation
-    status: backlog
+    status: done
     priority: 450
     category: meta
     file: docs/features/documentation.md
-    effort: "L"  # architecture diagrams, deployment guide, implementer's guide, player's guide with in-game help integration
+    effort: "-"
 
   - slug: claude-gameserver-skill
     name: Claude Game Server Skill
