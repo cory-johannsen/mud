@@ -1090,6 +1090,33 @@ func TestRenderCharacterSheet_ShowsAwareness_NoBonus(t *testing.T) {
 	assert.Contains(t, telnet.StripANSI(rendered), "Awareness: +10")
 }
 
+func TestRenderCharacterSheet_ShowsInitiative_Positive(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{
+		Name:      "TestChar",
+		Quickness: 16, // mod = (16-10)/2 = +3
+	}
+	rendered := RenderCharacterSheet(csv, 80)
+	assert.Contains(t, telnet.StripANSI(rendered), "Initiative: +3")
+}
+
+func TestRenderCharacterSheet_ShowsInitiative_Zero(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{
+		Name:      "TestChar",
+		Quickness: 10, // mod = (10-10)/2 = +0
+	}
+	rendered := RenderCharacterSheet(csv, 80)
+	assert.Contains(t, telnet.StripANSI(rendered), "Initiative: +0")
+}
+
+func TestRenderCharacterSheet_ShowsInitiative_Negative(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{
+		Name:      "TestChar",
+		Quickness: 8, // mod = (8-10)/2 = -1
+	}
+	rendered := RenderCharacterSheet(csv, 80)
+	assert.Contains(t, telnet.StripANSI(rendered), "Initiative: -1")
+}
+
 func TestRenderNPCs_ConditionsShown(t *testing.T) {
 	npcs := []*gamev1.NpcInfo{
 		{

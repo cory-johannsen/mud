@@ -201,7 +201,7 @@ features:
 
   - slug: initiative-display
     name: Initiative Display on Character Sheet
-    status: planned
+    status: done
     priority: 205
     category: ui
     file: docs/features/initiative-display.md
@@ -285,7 +285,7 @@ features:
 
   - slug: resting
     name: Resting
-    status: spec
+    status: planned
     priority: 238
     category: world
     file: docs/features/resting.md
@@ -308,7 +308,7 @@ features:
 
   - slug: use-command
     name: Use Command Expansion
-    status: spec
+    status: planned
     priority: 240
     category: ui
     file: docs/features/use-command.md
@@ -324,7 +324,7 @@ features:
 
   - slug: feat-import
     name: Feat Import
-    status: spec
+    status: planned
     priority: 260
     category: character
     file: docs/features/feat-import.md
