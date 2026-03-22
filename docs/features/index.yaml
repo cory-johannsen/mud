@@ -368,7 +368,7 @@ features:
 
   - slug: claude-gameserver-skill
     name: Claude Game Server Skill
-    status: planned
+    status: done
     priority: 237
     category: meta
     file: docs/features/claude-gameserver-skill.md
