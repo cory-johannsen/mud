@@ -26,28 +26,28 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
   - [x] REQ-NPC-12: Merchant runtime state MUST be persisted and restored on restart; YAML values apply only at first initialization.
   - [x] `browse`, `buy`, `sell`, `negotiate` commands
   - [x] Named NPCs: Sergeant Mack (weapons, Last Stand Lodge), Slick Sally, Whiskey Joe, Old Rusty, Herb (consumables)
-- [ ] Guard
+- [x] Guard
   - REQ-NPC-6: On Safe room second violation, all guards present MUST enter initiative and target the aggressor.
   - REQ-NPC-7: Guards MUST check WantedLevel on room entry and on WantedLevel change events.
   - REQ-WC-2b: `GuardConfig.MaxBribeWantedLevel` MUST be in range 1–4 when `Bribeable` is true; fatal load error otherwise.
-  - [ ] WantedThreshold-configurable aggression table
-  - [ ] `GuardConfig.Bribeable bool` field (default: false)
-  - [ ] `GuardConfig.MaxBribeWantedLevel int` field (default: 2)
-  - [ ] `GuardConfig.BaseCosts map[int]int` field for bribeable guards (all keys 1–4, positive values)
-  - [ ] Named NPC: one lore-appropriate guard in a Safe room in Rustbucket Ridge
+  - [x] WantedThreshold-configurable aggression table
+  - [x] `GuardConfig.Bribeable bool` field (default: false)
+  - [x] `GuardConfig.MaxBribeWantedLevel int` field (default: 2)
+  - [x] `GuardConfig.BaseCosts map[int]int` field for bribeable guards (all keys 1–4, positive values)
+  - [x] Named NPC: Marshal Ironsides
 - [ ] Healer
   - REQ-NPC-16: `CapacityUsed` MUST reset to 0 on daily tick; restored from DB on restart.
   - [ ] `heal` and `heal <amount>` commands
   - [ ] Named NPCs: Clutch (The Tinker's Den), Tina Wires (Junker's Dream)
-- [ ] Quest Giver
-  - [ ] `talk <npc>` command with placeholder dialog
-  - [ ] Named NPC: Gail "Grinder" Graves (Scrapshack 23)
-- [ ] Hireling
+- [x] Quest Giver
+  - [x] `talk <npc>` command with placeholder dialog
+  - [x] Named NPC: Gail "Grinder" Graves (Scrapshack 23)
+- [x] Hireling
   - REQ-NPC-8: Hirelings MUST be combat allies; MUST NOT be targetable by player's own attacks.
   - REQ-NPC-15: Hireling binding MUST be atomic check-and-set.
-  - [ ] `hire <npc>` and `dismiss` commands
-  - [ ] Zone follow tracking with `MaxFollowZones` limit
-  - [ ] Named NPC: one lore-appropriate hireling in Rustbucket Ridge
+  - [x] `hire <npc>` and `dismiss` commands
+  - [x] Zone follow tracking with `MaxFollowZones` limit
+  - [x] Named NPC: Patch
 - [x] Banker
   - [x] REQ-NPC-14: Deposit and withdrawal MUST use `CurrentRate` at command execution time.
   - [x] Global stash (`StashBalance` on player character)
@@ -61,17 +61,17 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
   - [ ] `train <job>`, `jobs`, `setjob <job>` commands
   - [ ] JobPrerequisites (level, job level, attributes, skill ranks, required jobs)
   - [ ] Named NPC: one lore-appropriate job trainer in Rustbucket Ridge
-- [ ] Crafter (stub)
-  - [ ] `npc_type: "crafter"` declared; full behavior deferred to `crafting` feature
-- [ ] Fixer (from `wanted-clearing` feature)
+- [x] Crafter (stub)
+  - [x] `npc_type: "crafter"` declared; full behavior deferred to `crafting` feature
+- [x] Fixer (from `wanted-clearing` feature)
   - REQ-WC-1: `FixerConfig.NPCVariance` MUST be > 0; fatal load error otherwise.
   - REQ-WC-2: `FixerConfig.MaxWantedLevel` MUST be in range 1–4; fatal load error otherwise.
   - REQ-WC-2a: `FixerConfig.BaseCosts` MUST contain all keys 1–4 with positive values; fatal load error otherwise.
   - REQ-WC-3: Fixers MUST default to `flee` on combat start; MUST NOT enter initiative order.
-  - [ ] `Fixer *FixerConfig` field added to NPC Template struct
-  - [ ] `fixer → flee` added to personality default table
-  - [ ] `Template.Validate()` updated to recognize `"fixer"` type
-  - [ ] Named NPC: one lore-appropriate fixer in Rustbucket Ridge
+  - [x] `Fixer *FixerConfig` field added to NPC Template struct
+  - [x] `fixer → flee` added to personality default table
+  - [x] `Template.Validate()` updated to recognize `"fixer"` type
+  - [x] Named NPC: Dex
 
 ## Non-Combat NPCs — All Zones
 
