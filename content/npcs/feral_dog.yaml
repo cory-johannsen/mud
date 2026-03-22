@@ -1,0 +1,23 @@
+id: feral_dog
+name: Feral Dog
+type: animal
+level: 2
+max_hp: 18
+ac: 12
+awareness: 3
+attack_verb: bites
+abilities:
+  brutality: 3
+  grit: 2
+  quickness: 4
+  reasoning: 1
+  savvy: 1
+  flair: 1
+loot:
+  organic_drops:
+    - item_id: dog_meat
+      weight: 10
+      quantity_min: 1
+      quantity_max: 2
+respawn_delay: 10m
+disposition: hostile

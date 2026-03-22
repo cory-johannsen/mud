@@ -1,0 +1,20 @@
+id: auto_turret
+name: Auto-Turret
+type: machine
+level: 5
+max_hp: 50
+ac: 16
+awareness: 6
+attack_verb: shoots
+immobile: true
+abilities:
+  brutality: 5
+  grit: 4
+  quickness: 2
+  reasoning: 1
+  savvy: 1
+  flair: 1
+weaknesses:
+  electric: 8
+respawn_delay: 60m
+disposition: hostile
