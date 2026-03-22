@@ -1,0 +1,22 @@
+id: poontangesca
+name: "Poontangesca"
+description: "A thick, spicy machete-side stew. Clears the mind and the legs."
+kind: consumable
+team: machete
+weight: 0.5
+stackable: true
+max_stack: 5
+value: 15
+effect:
+  remove_conditions:
+    - fatigued
+  conditions:
+    - condition_id: speed_boost_2
+      duration: "30m"
+  consume_check:
+    stat: constitution
+    dc: 12
+    on_critical_failure:
+      apply_toxin:
+        toxin_id: gut_rot
+        severity: 1

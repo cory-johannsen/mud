@@ -43,6 +43,11 @@ type ItemDef struct {
 	Stackable       bool    `yaml:"stackable"`
 	MaxStack     int     `yaml:"max_stack"`
 	Value        int     `yaml:"value"`
+	// Team is optional; "gun" | "machete" | "". Applies a team effectiveness multiplier
+	// when used as a consumable (REQ-EM-36 through REQ-EM-39).
+	Team   string           `yaml:"team,omitempty"`
+	// Effect holds consumable effect data; nil for non-consumable items.
+	Effect *ConsumableEffect `yaml:"effect,omitempty"`
 }
 
 // Validate checks that the ItemDef satisfies its invariants.
@@ -77,6 +82,10 @@ func (d *ItemDef) Validate() error {
 	}
 	if d.Kind == KindTrap && d.TrapTemplateRef == "" {
 		errs = append(errs, fmt.Errorf("item %q: TrapTemplateRef is required when Kind is %q", d.ID, KindTrap))
+	}
+	// REQ-EM-36: Team must be "" | "gun" | "machete".
+	if d.Team != "" && d.Team != "gun" && d.Team != "machete" {
+		errs = append(errs, fmt.Errorf("Team %q is not valid; must be \"gun\", \"machete\", or \"\"", d.Team))
 	}
 	if len(errs) > 0 {
 		return fmt.Errorf("item validation failed: %v", errs)
