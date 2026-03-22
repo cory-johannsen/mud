@@ -57,6 +57,10 @@ type ToxinEffect struct {
 // cycles between the inventory and session packages (REQ-EM-45).
 type ConsumableTarget interface {
 	GetTeam() string
+	// GetStatModifier returns the character's ability modifier for the named stat
+	// (e.g. "strength", "dexterity", "constitution"). Used for ConsumeCheck rolls (REQ-EM-41).
+	// Returns 0 for unknown stat names.
+	GetStatModifier(stat string) int
 	ApplyHeal(amount int)
 	ApplyCondition(conditionID string, duration time.Duration)
 	RemoveCondition(conditionID string)
@@ -160,7 +164,8 @@ func ApplyConsumable(target ConsumableTarget, def *ItemDef, rng Roller) Consumab
 	// Step 4: consume check (REQ-EM-41).
 	if eff.ConsumeCheck != nil {
 		d20 := rng.RollD20()
-		total := d20 // stat modifier would be added by caller; we trust the roller provides d20 only
+		statMod := target.GetStatModifier(eff.ConsumeCheck.Stat)
+		total := d20 + statMod
 		dc := eff.ConsumeCheck.DC
 
 		// PF2E four-tier critical failure: natural 1 OR total ≤ DC-10.

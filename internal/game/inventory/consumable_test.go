@@ -15,6 +15,7 @@ import (
 
 type stubTarget struct {
 	team               string
+	statModifiers      map[string]int // for GetStatModifier
 	healApplied        int
 	conditionsApplied  []string
 	conditionsRemoved  []string
@@ -23,6 +24,12 @@ type stubTarget struct {
 }
 
 func (s *stubTarget) GetTeam() string { return s.team }
+func (s *stubTarget) GetStatModifier(stat string) int {
+	if s.statModifiers == nil {
+		return 0
+	}
+	return s.statModifiers[stat]
+}
 func (s *stubTarget) ApplyHeal(amount int) { s.healApplied += amount }
 func (s *stubTarget) ApplyCondition(conditionID string, _ time.Duration) {
 	s.conditionsApplied = append(s.conditionsApplied, conditionID)
@@ -281,4 +288,27 @@ func TestItemDef_ValidateTeam_InvalidValue(t *testing.T) {
 	err := def.Validate()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "rebels")
+}
+
+// TestApplyConsumable_ConsumeCheck_StatModifierAdded verifies REQ-EM-41:
+// GetStatModifier(stat) is added to the d20 roll in a ConsumeCheck.
+func TestApplyConsumable_ConsumeCheck_StatModifierAdded(t *testing.T) {
+	// With d20=10 and con modifier=+5, total=15 vs DC=12 → success.
+	// Without stat modifier, 10 vs 12 → failure (< dc).
+	target := &stubTarget{statModifiers: map[string]int{"constitution": 5}}
+	def := &inventory.ItemDef{
+		ID: "stim", Name: "Stim", Kind: "consumable", MaxStack: 1, Weight: 0.1,
+		Effect: &inventory.ConsumableEffect{
+			ConsumeCheck: &inventory.ConsumeCheck{
+				Stat: "constitution",
+				DC:   12,
+			},
+		},
+	}
+	// Roller returns d20=10.
+	rng := &stubRoller{rollD20Result: 10}
+	result := inventory.ApplyConsumable(target, def, rng)
+	// 10 + 5 = 15 >= 12 → success
+	assert.Equal(t, "success", result.ConsumeCheckResult,
+		"d20(10) + stat(5) = 15 >= DC(12) should be success")
 }
