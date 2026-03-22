@@ -242,12 +242,11 @@ func LoadSetRegistry(dir string, knownConditions map[string]bool) (*SetRegistry,
 	return &SetRegistry{sets: sets}, nil
 }
 
-// ParseYAML is a helper that parses a YAML file at path into v.
-// This is exposed for testing purposes.
+// parseYAML is a helper that parses a YAML file at path into v.
 //
 // Precondition: path is a readable YAML file.
 // Postcondition: v is populated on success.
-func ParseYAML(path string, v interface{}) error {
+func parseYAML(path string, v interface{}) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err

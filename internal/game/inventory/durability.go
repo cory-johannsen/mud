@@ -33,33 +33,17 @@ func DeductDurability(inst *ItemInstance, rng Roller) DeductResult {
 		return DeductResult{NewDurability: inst.Durability}
 	}
 	// Durability just hit 0 — make a destruction roll.
-	// We need the rarity's destruction chance from the MaxDurability to find the tier.
-	destructionChance := destructionChanceForMaxDurability(inst.MaxDurability)
+	// Look up the destruction chance directly from the rarity registry.
+	destructionChance := 0.0
+	if def, ok := LookupRarity(inst.Rarity); ok {
+		destructionChance = def.DestructionChance
+	}
 	roll := rng.RollFloat()
 	destroyed := roll < destructionChance
 	return DeductResult{
 		NewDurability: 0,
 		BecameBroken:  true,
 		Destroyed:     destroyed,
-	}
-}
-
-// destructionChanceForMaxDurability maps the canonical MaxDurability values to their
-// destruction chances. This avoids storing rarity IDs on ItemInstance.
-func destructionChanceForMaxDurability(maxDurability int) float64 {
-	switch maxDurability {
-	case 20:
-		return 0.50 // salvage
-	case 40:
-		return 0.30 // street
-	case 60:
-		return 0.15 // mil_spec
-	case 80:
-		return 0.05 // black_market
-	case 100:
-		return 0.01 // ghost
-	default:
-		return 0.0 // unknown rarity → never destroyed
 	}
 }
 

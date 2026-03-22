@@ -27,6 +27,7 @@ func makeInst(durability, maxDurability int, rarity string) *inventory.ItemInsta
 		Quantity:      1,
 		Durability:    durability,
 		MaxDurability: maxDurability,
+		Rarity:        rarity,
 		Modifier:      "",
 	}
 }

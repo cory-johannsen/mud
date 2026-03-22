@@ -26,31 +26,87 @@ func NewDurabilityRoller(rndSrc rand.Source) *DurabilityRoller {
 	return &DurabilityRoller{rnd: rand.New(rndSrc)} //nolint:gosec // not security-sensitive
 }
 
-// Roll evaluates a simple dice expression (e.g. "1d6").
-// Only single-die expressions are used for durability (RepairField).
+// Roll evaluates a dice expression of the form "[count]d<sides>[+modifier]"
+// (e.g. "1d6", "2d6+4") and returns the total.
 //
-// Postcondition: result >= 1.
+// Postcondition: result >= 1 for any valid expression with positive count and sides.
 func (r *DurabilityRoller) Roll(expr string) int {
-	// Parse the die size from expressions like "1d6".
-	sides := 6
-	if len(expr) >= 3 {
-		// Find 'd' separator.
-		for i, ch := range expr {
-			if ch == 'd' && i > 0 {
-				s := 0
-				for _, c := range expr[i+1:] {
-					if c >= '0' && c <= '9' {
-						s = s*10 + int(c-'0')
-					}
-				}
-				if s > 0 {
-					sides = s
-				}
-				break
-			}
+	count, sides, modifier := parseDiceExpr(expr)
+	total := 0
+	for i := 0; i < count; i++ {
+		total += r.rnd.Intn(sides) + 1 //nolint:gosec
+	}
+	return total + modifier
+}
+
+// parseDiceExpr parses a dice expression of the form "[count]d<sides>[+/-modifier]".
+// Defaults: count=1, sides=6, modifier=0.
+func parseDiceExpr(expr string) (count, sides, modifier int) {
+	count = 1
+	sides = 6
+	modifier = 0
+
+	// Find the 'd' separator.
+	dIdx := -1
+	for i, ch := range expr {
+		if ch == 'd' {
+			dIdx = i
+			break
 		}
 	}
-	return r.rnd.Intn(sides) + 1 //nolint:gosec
+	if dIdx < 0 {
+		return
+	}
+
+	// Parse count (digits before 'd').
+	if dIdx > 0 {
+		n := 0
+		for _, c := range expr[:dIdx] {
+			if c >= '0' && c <= '9' {
+				n = n*10 + int(c-'0')
+			}
+		}
+		if n > 0 {
+			count = n
+		}
+	}
+
+	// Parse sides and optional +/- modifier after 'd'.
+	rest := expr[dIdx+1:]
+	plusIdx := -1
+	for i, c := range rest {
+		if (c == '+' || c == '-') && i > 0 {
+			plusIdx = i
+			break
+		}
+	}
+	sidesStr := rest
+	if plusIdx >= 0 {
+		sidesStr = rest[:plusIdx]
+	}
+	s := 0
+	for _, c := range sidesStr {
+		if c >= '0' && c <= '9' {
+			s = s*10 + int(c-'0')
+		}
+	}
+	if s > 0 {
+		sides = s
+	}
+	if plusIdx >= 0 {
+		sign := 1
+		if rest[plusIdx] == '-' {
+			sign = -1
+		}
+		m := 0
+		for _, c := range rest[plusIdx+1:] {
+			if c >= '0' && c <= '9' {
+				m = m*10 + int(c-'0')
+			}
+		}
+		modifier = sign * m
+	}
+	return
 }
 
 // RollD20 rolls a single d20.
@@ -125,10 +181,15 @@ func ApplyRoundDurability(
 		// REQ-EM-5: deduct weapon durability for the attacker on every attack roll.
 		if ew := getWeapon(ev.ActorID); ew != nil && ew.Durability > 0 {
 			// Build a temporary ItemInstance for DeductDurability from EquippedWeapon cached fields.
+			rarity := ""
+			if ew.Def != nil {
+				rarity = ew.Def.Rarity
+			}
 			inst := &inventory.ItemInstance{
 				InstanceID:    ew.InstanceID,
 				Durability:    ew.Durability,
 				MaxDurability: weaponMaxDurability(ew),
+				Rarity:        rarity,
 			}
 			result := inventory.DeductDurability(inst, rng)
 			ew.Durability = result.NewDurability
@@ -166,6 +227,7 @@ func ApplyRoundDurability(
 			InstanceID:    si.InstanceID,
 			Durability:    si.Durability,
 			MaxDurability: armorMaxDurability(si),
+			Rarity:        si.Rarity,
 		}
 		result := inventory.DeductDurability(inst, rng)
 		si.Durability = result.NewDurability

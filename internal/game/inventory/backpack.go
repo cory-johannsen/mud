@@ -13,6 +13,7 @@ type ItemInstance struct {
 	Quantity      int
 	Durability    int    // -1 = uninitialized sentinel; 0 = broken
 	MaxDurability int    // -1 = uninitialized sentinel
+	Rarity        string // rarity tier: "salvage" | "street" | "mil_spec" | "black_market" | "ghost"
 	Modifier      string // "" | "tuned" | "defective" | "cursed"
 	CurseRevealed bool   // true once a cursed item has been equipped
 }

@@ -37,11 +37,6 @@ func TestSetThreshold_ParseFull(t *testing.T) {
 }
 
 func unmarshalYAML(data []byte, v interface{}) error {
-	import_yaml := func() error {
-		// We do the import inline to avoid circular package usage in test
-		return nil
-	}
-	_ = import_yaml
 	// Use the gopkg.in/yaml.v3 package directly via os temp file trick
 	tmpFile, err := os.CreateTemp("", "*.yaml")
 	if err != nil {

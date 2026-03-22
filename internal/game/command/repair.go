@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -40,7 +41,7 @@ func findRepairTarget(sess *session.PlayerSession, query string) *repairTarget {
 			if ew == nil || ew.Def == nil {
 				continue
 			}
-			if ew.Def.ID == query || strEqualFold(ew.Def.Name, query) {
+			if ew.Def.ID == query || strings.EqualFold(ew.Def.Name, query) {
 				maxDur := 0
 				if rd, ok := inventory.LookupRarity(ew.Def.Rarity); ok {
 					maxDur = rd.MaxDurability
@@ -54,7 +55,7 @@ func findRepairTarget(sess *session.PlayerSession, query string) *repairTarget {
 			if si == nil {
 				continue
 			}
-			if si.ItemDefID == query || strEqualFold(si.Name, query) {
+			if si.ItemDefID == query || strings.EqualFold(si.Name, query) {
 				maxDur := 0
 				if rd, ok := inventory.LookupRarity(si.Rarity); ok {
 					maxDur = rd.MaxDurability
@@ -64,26 +65,6 @@ func findRepairTarget(sess *session.PlayerSession, query string) *repairTarget {
 		}
 	}
 	return nil
-}
-
-// strEqualFold compares strings case-insensitively.
-func strEqualFold(a, b string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		ca, cb := a[i], b[i]
-		if ca >= 'A' && ca <= 'Z' {
-			ca += 'a' - 'A'
-		}
-		if cb >= 'A' && cb <= 'Z' {
-			cb += 'a' - 'A'
-		}
-		if ca != cb {
-			return false
-		}
-	}
-	return true
 }
 
 // HandleRepair processes the "repair <item>" command (REQ-EM-13/14/15).
