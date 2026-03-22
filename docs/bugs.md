@@ -78,11 +78,11 @@
 
 ### BUG-11: Technologies assigned at login (backfilled on existing characters) are not persisted
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Character
 **Description:** Technologies backfilled onto existing characters at login are not saved to the database, so they are lost on the next session.
 **Steps:** Log in with an existing character that lacks a technology assignment; observe the technology is backfilled; log out and back in; observe the technology is missing again.
-**Fix:**
+**Fix:** The "already assigned" guard in `Session()` checked only the hardwired tech repo. Jobs with no hardwired grants (prepared/spontaneous/innate only) always appeared unassigned, so `AssignTechnologies` re-ran on every login, overwriting persisted assignments. Fixed by checking all four repos (hardwired, prepared, spontaneous, innate) before running backfill assignment. Also added a nil guard for `dbChar` on the region lookup passed to `AssignTechnologies`.
 
 ### BUG-12: Active feats do not track prepared uses and cannot be activated
 **Severity:** high

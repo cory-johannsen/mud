@@ -1026,31 +1026,64 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 	}
 
-	// Assign technologies at character creation (only if no slots yet assigned).
+	// Assign technologies at character creation (only if no slots have ever been persisted).
+	// REQ-TG-BACKFILL1: Check all four tech repo types so that jobs with no hardwired techs
+	// (prepared/spontaneous/innate only) are not re-assigned on every subsequent login.
 	if s.hardwiredTechRepo != nil && s.jobRegistry != nil && characterID > 0 {
 		existingHW, hwCheckErr := s.hardwiredTechRepo.GetAll(stream.Context(), characterID)
 		if hwCheckErr != nil {
 			s.logger.Warn("checking existing hardwired technologies", zap.Int64("character_id", characterID), zap.Error(hwCheckErr))
-		} else if len(existingHW) == 0 {
-			if job, ok := s.jobRegistry.Job(sess.Class); ok {
-				var archetype *ruleset.Archetype
-				if archetypeID := job.Archetype; archetypeID != "" {
-					archetype = s.archetypes[archetypeID]
+		} else {
+			alreadyAssigned := len(existingHW) > 0
+			if !alreadyAssigned && s.preparedTechRepo != nil {
+				existingPrep, prepCheckErr := s.preparedTechRepo.GetAll(stream.Context(), characterID)
+				if prepCheckErr != nil {
+					s.logger.Warn("checking existing prepared technologies", zap.Int64("character_id", characterID), zap.Error(prepCheckErr))
+				} else if len(existingPrep) > 0 {
+					alreadyAssigned = true
 				}
-				promptFn := func(options []string) (string, error) {
-					choices := &ruleset.FeatureChoices{
-						Prompt:  "Choose a technology:",
-						Options: options,
-						Key:     "tech_choice",
+			}
+			if !alreadyAssigned && s.spontaneousTechRepo != nil {
+				existingSpont, spontCheckErr := s.spontaneousTechRepo.GetAll(stream.Context(), characterID)
+				if spontCheckErr != nil {
+					s.logger.Warn("checking existing spontaneous technologies", zap.Int64("character_id", characterID), zap.Error(spontCheckErr))
+				} else if len(existingSpont) > 0 {
+					alreadyAssigned = true
+				}
+			}
+			if !alreadyAssigned && s.innateTechRepo != nil {
+				existingInnate, innateCheckErr := s.innateTechRepo.GetAll(stream.Context(), characterID)
+				if innateCheckErr != nil {
+					s.logger.Warn("checking existing innate technologies", zap.Int64("character_id", characterID), zap.Error(innateCheckErr))
+				} else if len(existingInnate) > 0 {
+					alreadyAssigned = true
+				}
+			}
+			if !alreadyAssigned {
+				if job, ok := s.jobRegistry.Job(sess.Class); ok {
+					var archetype *ruleset.Archetype
+					if archetypeID := job.Archetype; archetypeID != "" {
+						archetype = s.archetypes[archetypeID]
 					}
-					return s.promptFeatureChoice(stream, "tech_choice", choices)
-				}
-				if assignErr := AssignTechnologies(stream.Context(), sess, characterID,
-					job, archetype, s.techRegistry, promptFn,
-					s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
-					s.regions[dbChar.Region], // nil if region not found; AssignTechnologies nil-guards internally
-				); assignErr != nil {
-					s.logger.Warn("assigning technologies", zap.Int64("character_id", characterID), zap.Error(assignErr))
+					promptFn := func(options []string) (string, error) {
+						choices := &ruleset.FeatureChoices{
+							Prompt:  "Choose a technology:",
+							Options: options,
+							Key:     "tech_choice",
+						}
+						return s.promptFeatureChoice(stream, "tech_choice", choices)
+					}
+					var region *ruleset.Region
+					if dbChar != nil {
+						region = s.regions[dbChar.Region]
+					}
+					if assignErr := AssignTechnologies(stream.Context(), sess, characterID,
+						job, archetype, s.techRegistry, promptFn,
+						s.hardwiredTechRepo, s.preparedTechRepo, s.spontaneousTechRepo, s.innateTechRepo, s.spontaneousUsePoolRepo,
+						region,
+					); assignErr != nil {
+						s.logger.Warn("assigning technologies", zap.Int64("character_id", characterID), zap.Error(assignErr))
+					}
 				}
 			}
 		}

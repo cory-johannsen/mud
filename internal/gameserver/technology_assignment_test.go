@@ -1062,3 +1062,66 @@ func TestPropertyLevelUpTechnologies_SpontaneousPromptCount(t *testing.T) {
 		}
 	})
 }
+
+// TestPropertyAssignTechnologies_PreparedOnlyRoundTrip verifies that AssignTechnologies
+// followed by LoadTechnologies returns identical prepared slot assignments for a job
+// that has no hardwired techs (prepared-only). This guards against BUG-11, where the
+// "already assigned" check that only inspected the hardwired repo would fail to detect
+// existing prepared assignments, causing them to be overwritten on every login.
+func TestPropertyAssignTechnologies_PreparedOnlyRoundTrip(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 5).Draw(rt, "n")
+		poolRaw := make([]ruleset.PreparedEntry, n)
+		seenIDs := map[string]bool{}
+		uniquePool := poolRaw[:0]
+		for i := 0; i < n; i++ {
+			id := rapid.StringMatching(`[a-z]{1,16}`).Draw(rt, fmt.Sprintf("poolID%d", i))
+			if seenIDs[id] {
+				continue
+			}
+			seenIDs[id] = true
+			uniquePool = append(uniquePool, ruleset.PreparedEntry{ID: id, Level: 1})
+		}
+		if len(uniquePool) == 0 {
+			rt.Skip()
+		}
+
+		hwRepo := &fakeHardwiredRepo{} // intentionally empty — no hardwired techs
+		prepRepo := &fakePreparedRepo{}
+		spontRepo := &fakeSpontaneousRepo{}
+		innateRepo := &fakeInnateRepo{}
+
+		job := &ruleset.Job{
+			TechnologyGrants: &ruleset.TechnologyGrants{
+				Prepared: &ruleset.PreparedGrants{
+					SlotsByLevel: map[int]int{1: len(uniquePool)},
+					Pool:         uniquePool,
+				},
+			},
+		}
+
+		sess1 := &session.PlayerSession{}
+		if err := gameserver.AssignTechnologies(context.Background(), sess1, 1, job, nil, nil, noPrompt, hwRepo, prepRepo, spontRepo, innateRepo, nil, nil); err != nil {
+			rt.Fatalf("AssignTechnologies: %v", err)
+		}
+
+		// Invariant 1: prepared slots were persisted — repo must be non-empty.
+		if len(prepRepo.slots) == 0 {
+			rt.Fatalf("prepared repo is empty after AssignTechnologies; assignments not persisted")
+		}
+
+		// Simulate second login: load from repo into a fresh session.
+		sess2 := &session.PlayerSession{}
+		if err := gameserver.LoadTechnologies(context.Background(), sess2, 1, hwRepo, prepRepo, spontRepo, innateRepo, nil); err != nil {
+			rt.Fatalf("LoadTechnologies: %v", err)
+		}
+
+		// Invariant 2: LoadTechnologies must restore exactly the same prepared slots.
+		if len(sess2.PreparedTechs) == 0 {
+			rt.Fatalf("PreparedTechs empty after LoadTechnologies; assignments lost on second login")
+		}
+		if !reflect.DeepEqual(sess1.PreparedTechs, sess2.PreparedTechs) {
+			rt.Fatalf("round-trip mismatch: first=%v second=%v", sess1.PreparedTechs, sess2.PreparedTechs)
+		}
+	})
+}
