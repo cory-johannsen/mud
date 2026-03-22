@@ -350,7 +350,7 @@ features:
 
   - slug: curse-removal
     name: Curse Removal
-    status: backlog
+    status: spec
     priority: 281
     category: world
     file: docs/features/curse-removal.md
