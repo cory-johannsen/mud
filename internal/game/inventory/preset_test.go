@@ -275,3 +275,65 @@ func TestLoadoutSet_Swap_SameIndex_IsNoop(t *testing.T) {
 		t.Fatal("same-index swap must not consume the round swap allowance")
 	}
 }
+
+// ── REQ-EM-25: RemoveCurse ────────────────────────────────────────────────────
+
+func TestRemoveCurseFromWeapon_TransitionsToDefective(t *testing.T) {
+	w := &inventory.EquippedWeapon{
+		Def:           oneHandedDef("sword"),
+		Modifier:      "cursed",
+		CurseRevealed: true,
+	}
+	inventory.RemoveCurseFromWeapon(w)
+	if w.Modifier != "defective" {
+		t.Errorf("expected Modifier=defective after curse removal, got %q", w.Modifier)
+	}
+	if w.CurseRevealed {
+		t.Error("expected CurseRevealed=false after curse removal")
+	}
+}
+
+func TestRemoveCurseFromWeapon_NonCursedNoChange(t *testing.T) {
+	w := &inventory.EquippedWeapon{
+		Def:      oneHandedDef("sword"),
+		Modifier: "tuned",
+	}
+	inventory.RemoveCurseFromWeapon(w)
+	if w.Modifier != "tuned" {
+		t.Errorf("expected Modifier unchanged (tuned) for non-cursed weapon, got %q", w.Modifier)
+	}
+}
+
+func TestRemoveCurseFromWeapon_NilNoOp(t *testing.T) {
+	// Must not panic.
+	inventory.RemoveCurseFromWeapon(nil)
+}
+
+func TestRemoveCurseFromArmorSlot_TransitionsToDefective(t *testing.T) {
+	slotted := &inventory.SlottedItem{
+		Modifier:      "cursed",
+		CurseRevealed: true,
+	}
+	inventory.RemoveCurseFromArmorSlot(slotted)
+	if slotted.Modifier != "defective" {
+		t.Errorf("expected Modifier=defective after curse removal, got %q", slotted.Modifier)
+	}
+	if slotted.CurseRevealed {
+		t.Error("expected CurseRevealed=false after curse removal")
+	}
+}
+
+func TestRemoveCurseFromArmorSlot_NonCursedNoChange(t *testing.T) {
+	slotted := &inventory.SlottedItem{
+		Modifier: "defective",
+	}
+	inventory.RemoveCurseFromArmorSlot(slotted)
+	if slotted.Modifier != "defective" {
+		t.Errorf("expected Modifier unchanged (defective) for non-cursed slot, got %q", slotted.Modifier)
+	}
+}
+
+func TestRemoveCurseFromArmorSlot_NilNoOp(t *testing.T) {
+	// Must not panic.
+	inventory.RemoveCurseFromArmorSlot(nil)
+}

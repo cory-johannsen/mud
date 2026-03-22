@@ -161,3 +161,29 @@ func (ls *LoadoutSet) Swap(idx int) error {
 //
 // Postcondition: SwappedThisRound==false.
 func (ls *LoadoutSet) ResetRound() { ls.SwappedThisRound = false }
+
+// RemoveCurseFromWeapon transitions a cursed EquippedWeapon to defective (REQ-EM-25).
+// If w is nil or not cursed, this is a no-op.
+//
+// Precondition: w may be nil.
+// Postcondition: if w.Modifier was "cursed", it is now "defective" and CurseRevealed is false.
+func RemoveCurseFromWeapon(w *EquippedWeapon) {
+	if w == nil || w.Modifier != "cursed" {
+		return
+	}
+	w.Modifier = "defective"
+	w.CurseRevealed = false
+}
+
+// RemoveCurseFromArmorSlot transitions a cursed SlottedItem to defective (REQ-EM-25).
+// If s is nil or not cursed, this is a no-op.
+//
+// Precondition: s may be nil.
+// Postcondition: if s.Modifier was "cursed", it is now "defective" and CurseRevealed is false.
+func RemoveCurseFromArmorSlot(s *SlottedItem) {
+	if s == nil || s.Modifier != "cursed" {
+		return
+	}
+	s.Modifier = "defective"
+	s.CurseRevealed = false
+}
