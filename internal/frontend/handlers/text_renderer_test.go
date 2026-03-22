@@ -1348,3 +1348,143 @@ func TestRenderRoomView_ZoneNameEmpty(t *testing.T) {
 	assert.NotContains(t, stripped, "[", "no zone bracket when ZoneName is empty")
 	assert.Contains(t, stripped, "Cully Road", "room title must appear in header")
 }
+
+func TestRenderMap_POISuffixRow_AfterRoomRow(t *testing.T) {
+	// Single explored room with a merchant POI: suffix row must appear between
+	// room row and south connector row.
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Market", X: 0, Y: 0, Current: true, Pois: []string{"merchant"}},
+		},
+	}
+	out := RenderMap(resp, 80)
+	lines := strings.Split(strings.TrimRight(out, "\r\n"), "\r\n")
+	// lines[0] is blank from leading \r\n; lines[1] is room row; lines[2] is POI suffix row.
+	if len(lines) < 3 {
+		t.Fatalf("expected at least 3 lines, got %d: %v", len(lines), lines)
+	}
+	// Room row must contain angle brackets for current room.
+	if !strings.Contains(lines[1], "<") {
+		t.Errorf("line[1] should be room row with < >, got %q", lines[1])
+	}
+	// POI suffix row must contain the merchant symbol $.
+	if !strings.Contains(lines[2], "$") {
+		t.Errorf("line[2] should be POI suffix row containing $, got %q", lines[2])
+	}
+}
+
+func TestRenderMap_POISuffixRow_UnexploredBlank(t *testing.T) {
+	// Two rooms; tile at (1,0) has Pois set but tile at (0,0) has empty Pois.
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Empty", X: 0, Y: 0, Current: false, Pois: nil},
+			{RoomId: "r2", RoomName: "Market", X: 1, Y: 0, Current: true, Pois: []string{"merchant"}},
+		},
+	}
+	out := RenderMap(resp, 80)
+	lines := strings.Split(strings.TrimRight(out, "\r\n"), "\r\n")
+	if len(lines) < 3 {
+		t.Fatalf("expected at least 3 lines, got %d", len(lines))
+	}
+	suffix := lines[2]
+	// First 4 chars (cell for x=0) must be blank.
+	if len(suffix) < 4 {
+		t.Fatalf("suffix row too short: %q", suffix)
+	}
+	// Strip ANSI from first cell.
+	cell0 := suffix[:4]
+	if strings.TrimSpace(cell0) != "" {
+		t.Errorf("x=0 suffix cell should be spaces, got %q", cell0)
+	}
+}
+
+func TestRenderMap_POISuffixRow_FiveTypes_Ellipsis(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Hub", X: 0, Y: 0, Current: true,
+				Pois: []string{"merchant", "healer", "trainer", "guard", "npc"}},
+		},
+	}
+	out := RenderMap(resp, 80)
+	if !strings.Contains(out, "…") {
+		t.Errorf("RenderMap with 5 POI types should contain ellipsis, got:\n%s", out)
+	}
+}
+
+func TestRenderMap_TwoColumnLayout_POISuffixRows(t *testing.T) {
+	// Width >= 100 triggers two-column layout. Verify legend lines still align
+	// (no panic, all grid lines interleaved with legend lines correctly).
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Market", X: 0, Y: 0, Current: true, Pois: []string{"merchant"}},
+			{RoomId: "r2", RoomName: "Clinic", X: 1, Y: 0, Current: false, Pois: []string{"healer"}},
+		},
+	}
+	out := RenderMap(resp, 120)
+	if out == "" {
+		t.Fatal("RenderMap returned empty string")
+	}
+	// Legend must contain room numbers.
+	if !strings.Contains(out, "1.") || !strings.Contains(out, "2.") {
+		t.Errorf("legend room numbers missing from:\n%s", out)
+	}
+}
+
+func TestRenderMap_Legend_POISection_AfterHeader(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Market", X: 0, Y: 0, Current: true, Pois: []string{"merchant", "equipment"}},
+		},
+	}
+	out := RenderMap(resp, 80)
+	// Must contain "Points of Interest" section.
+	if !strings.Contains(out, "Merchant") {
+		t.Errorf("legend should contain Merchant label, got:\n%s", out)
+	}
+	if !strings.Contains(out, "Equipment") {
+		t.Errorf("legend should contain Equipment label, got:\n%s", out)
+	}
+}
+
+func TestRenderMap_Legend_POISection_OnlyPresentTypes(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Market", X: 0, Y: 0, Current: true, Pois: []string{"merchant"}},
+		},
+	}
+	out := RenderMap(resp, 80)
+	if strings.Contains(out, "Healer") {
+		t.Errorf("legend should NOT contain Healer when not present, got:\n%s", out)
+	}
+}
+
+func TestRenderMap_Legend_POISection_TableOrder(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Hub", X: 0, Y: 0, Current: true,
+				Pois: []string{"equipment", "merchant"}},
+		},
+	}
+	out := RenderMap(resp, 80)
+	merchantIdx := strings.Index(out, "Merchant")
+	equipmentIdx := strings.Index(out, "Equipment")
+	if merchantIdx < 0 || equipmentIdx < 0 {
+		t.Fatalf("legend missing Merchant or Equipment, got:\n%s", out)
+	}
+	if merchantIdx > equipmentIdx {
+		t.Errorf("Merchant should appear before Equipment in legend (table order), got:\n%s", out)
+	}
+}
+
+func TestRenderMap_Legend_POISection_NoPOIs(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "r1", RoomName: "Room", X: 0, Y: 0, Current: true, Pois: nil},
+		},
+	}
+	out := RenderMap(resp, 80)
+	// No POI section header when no POIs present.
+	if strings.Contains(out, "Points of Interest") {
+		t.Errorf("legend should NOT contain POI section when no POIs, got:\n%s", out)
+	}
+}

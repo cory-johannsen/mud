@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/maputil"
 	"github.com/cory-johannsen/mud/internal/gameserver"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -1135,6 +1136,20 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 		}
 		sb.WriteString("\r\n")
 
+		// POI suffix row (REQ-POI-6,7,8,9): one row per y-band between room row and south connector.
+		for xi, x := range xs {
+			tile := byCoord[[2]int32{x, y}]
+			var cellPOIs []string
+			if tile != nil {
+				cellPOIs = tile.Pois
+			}
+			sb.WriteString(maputil.POISuffixRow(cellPOIs, cellW))
+			if xi < len(xs)-1 {
+				sb.WriteString(" ") // column separator (matches east connector width)
+			}
+		}
+		sb.WriteString("\r\n")
+
 		// South connector row: emit whenever any room in this row has a south exit,
 		// whether or not the neighbor is discovered.
 		// "|" = discovered neighbor at next row same column
@@ -1247,7 +1262,22 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 		gridLines := strings.Split(strings.TrimRight(gridStr, "\r\n"), "\r\n")
 
 		// Build legend lines (one entry per line, no multi-column layout).
-		legendLines := make([]string, 0, len(entries))
+		legendLines := []string{"Legend:"}
+		// POI legend section in two-column layout.
+		presentPOISet2 := make(map[string]bool)
+		for _, tile := range resp.Tiles {
+			for _, id := range tile.Pois {
+				presentPOISet2[id] = true
+			}
+		}
+		if len(presentPOISet2) > 0 {
+			legendLines = append(legendLines, "Points of Interest")
+			for _, pt := range maputil.POITypes {
+				if presentPOISet2[pt.ID] {
+					legendLines = append(legendLines, fmt.Sprintf("  %s%c\033[0m %s", pt.Color, pt.Symbol, pt.Label))
+				}
+			}
+		}
 		for _, e := range entries {
 			marker := " "
 			if e.current {
@@ -1297,6 +1327,23 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 	}
 	nameWidth := colWidth - 4 // " *NN." prefix is 4 chars
 	sb.WriteString("\r\nLegend:\r\n")
+
+	// POI legend section (REQ-POI-11..14): collect present POI types, emit in table order.
+	presentPOISet := make(map[string]bool)
+	for _, t := range resp.Tiles {
+		for _, id := range t.Pois {
+			presentPOISet[id] = true
+		}
+	}
+	if len(presentPOISet) > 0 {
+		sb.WriteString("Points of Interest\r\n")
+		for _, pt := range maputil.POITypes {
+			if presentPOISet[pt.ID] {
+				sb.WriteString(fmt.Sprintf("  %s%c\033[0m %s\r\n", pt.Color, pt.Symbol, pt.Label))
+			}
+		}
+	}
+
 	for i := 0; i < len(entries); i += legendCols {
 		for col := 0; col < legendCols; col++ {
 			idx := i + col
