@@ -6180,6 +6180,7 @@ type MapTile struct {
 	Current       bool                   `protobuf:"varint,5,opt,name=current,proto3" json:"current,omitempty"`
 	Exits         []string               `protobuf:"bytes,6,rep,name=exits,proto3" json:"exits,omitempty"`
 	DangerLevel   string                 `protobuf:"bytes,7,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
+	Pois          []string               `protobuf:"bytes,8,rep,name=pois,proto3" json:"pois,omitempty"` // POI type IDs present in this room e.g. ["merchant", "equipment"]
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6261,6 +6262,13 @@ func (x *MapTile) GetDangerLevel() string {
 		return x.DangerLevel
 	}
 	return ""
+}
+
+func (x *MapTile) GetPois() []string {
+	if x != nil {
+		return x.Pois
+	}
+	return nil
 }
 
 // MapResponse is returned by the server with discovered tiles for the current zone.
@@ -10592,7 +10600,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\"\f\n" +
 	"\n" +
-	"MapRequest\"\xae\x01\n" +
+	"MapRequest\"\xc2\x01\n" +
 	"\aMapTile\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x1b\n" +
 	"\troom_name\x18\x02 \x01(\tR\broomName\x12\f\n" +
@@ -10600,7 +10608,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x01y\x18\x04 \x01(\x05R\x01y\x12\x18\n" +
 	"\acurrent\x18\x05 \x01(\bR\acurrent\x12\x14\n" +
 	"\x05exits\x18\x06 \x03(\tR\x05exits\x12!\n" +
-	"\fdanger_level\x18\a \x01(\tR\vdangerLevel\"5\n" +
+	"\fdanger_level\x18\a \x01(\tR\vdangerLevel\x12\x12\n" +
+	"\x04pois\x18\b \x03(\tR\x04pois\"5\n" +
 	"\vMapResponse\x12&\n" +
 	"\x05tiles\x18\x01 \x03(\v2\x10.game.v1.MapTileR\x05tiles\"\x0f\n" +
 	"\rSkillsRequest\"\xaf\x01\n" +

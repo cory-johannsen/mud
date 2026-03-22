@@ -600,6 +600,7 @@ message MapTile {
     bool   current   = 5;
     repeated string exits = 6;
     string danger_level  = 7;
+    repeated string pois = 8; // POI type IDs present in this room e.g. ["merchant", "equipment"]
 }
 
 // MapResponse is returned by the server with discovered tiles for the current zone.
