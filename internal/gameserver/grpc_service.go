@@ -1600,6 +1600,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleBribeConfirm(uid, p.BribeConfirmRequest)
 	case *gamev1.ClientMessage_SurrenderRequest:
 		return s.handleSurrender(uid, p.SurrenderRequest)
+	case *gamev1.ClientMessage_ReleaseRequest:
+		return s.handleRelease(uid, p.ReleaseRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
