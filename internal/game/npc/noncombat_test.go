@@ -318,3 +318,75 @@ func TestGuardConfig_Validate_NonBribeableNoBases(t *testing.T) {
 	cfg := &GuardConfig{WantedThreshold: 2}
 	assert.NoError(t, cfg.Validate())
 }
+
+func TestFixerConfig_ValidConfig(t *testing.T) {
+	c := FixerConfig{
+		BaseCosts:      map[int]int{1: 100, 2: 200, 3: 400, 4: 800},
+		NPCVariance:    1.2,
+		MaxWantedLevel: 3,
+	}
+	assert.NoError(t, c.Validate())
+}
+
+func TestFixerConfig_NPCVarianceZero(t *testing.T) {
+	c := FixerConfig{
+		BaseCosts:      map[int]int{1: 100, 2: 200, 3: 400, 4: 800},
+		NPCVariance:    0,
+		MaxWantedLevel: 3,
+	}
+	assert.Error(t, c.Validate())
+}
+
+func TestFixerConfig_NPCVarianceNegative(t *testing.T) {
+	c := FixerConfig{
+		BaseCosts:      map[int]int{1: 100, 2: 200, 3: 400, 4: 800},
+		NPCVariance:    -0.5,
+		MaxWantedLevel: 3,
+	}
+	assert.Error(t, c.Validate())
+}
+
+func TestFixerConfig_MaxWantedLevelZero(t *testing.T) {
+	c := FixerConfig{
+		BaseCosts:      map[int]int{1: 100, 2: 200, 3: 400, 4: 800},
+		NPCVariance:    1.0,
+		MaxWantedLevel: 0,
+	}
+	assert.Error(t, c.Validate())
+}
+
+func TestFixerConfig_MaxWantedLevelFive(t *testing.T) {
+	c := FixerConfig{
+		BaseCosts:      map[int]int{1: 100, 2: 200, 3: 400, 4: 800},
+		NPCVariance:    1.0,
+		MaxWantedLevel: 5,
+	}
+	assert.Error(t, c.Validate())
+}
+
+func TestFixerConfig_BaseCostsMissingKey(t *testing.T) {
+	c := FixerConfig{
+		BaseCosts:      map[int]int{1: 100, 2: 200, 4: 800}, // missing key 3
+		NPCVariance:    1.0,
+		MaxWantedLevel: 3,
+	}
+	assert.Error(t, c.Validate())
+}
+
+func TestFixerConfig_BaseCostsNonPositiveValue(t *testing.T) {
+	c := FixerConfig{
+		BaseCosts:      map[int]int{1: 100, 2: 0, 3: 400, 4: 800}, // zero value
+		NPCVariance:    1.0,
+		MaxWantedLevel: 3,
+	}
+	assert.Error(t, c.Validate())
+}
+
+func TestFixerConfig_NilBaseCosts(t *testing.T) {
+	c := FixerConfig{
+		BaseCosts:      nil,
+		NPCVariance:    1.0,
+		MaxWantedLevel: 3,
+	}
+	assert.Error(t, c.Validate())
+}

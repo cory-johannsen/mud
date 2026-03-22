@@ -308,3 +308,40 @@ func CheckJobPrerequisites(job TrainableJob, playerLevel int, playerJobs map[str
 // CrafterConfig is intentionally empty until the crafting feature spec is written.
 // A YAML block `crafter: {}` MUST be present for npc_type: crafter (REQ-NPC-2).
 type CrafterConfig struct{}
+
+// ---- Fixer ----
+
+// FixerConfig holds the static configuration for a fixer NPC.
+// Full bribe/fix command behavior is deferred to the wanted-clearing feature.
+// REQ-WC-1, REQ-WC-2, REQ-WC-2a: validated in Validate().
+type FixerConfig struct {
+	// BaseCosts maps WantedLevel (1–4) to base credit cost for clearing that level.
+	BaseCosts map[int]int `yaml:"base_costs"`
+	// NPCVariance multiplies the base cost to produce the final price. Must be > 0.
+	NPCVariance float64 `yaml:"npc_variance"`
+	// MaxWantedLevel is the highest WantedLevel this fixer will negotiate. Range 1–4.
+	MaxWantedLevel int `yaml:"max_wanted_level"`
+	// ClearRecordQuestID is the quest that clears the criminal record. Empty until quests feature.
+	ClearRecordQuestID string `yaml:"clear_record_quest_id,omitempty"`
+}
+
+// Validate enforces REQ-WC-1 (NPCVariance > 0), REQ-WC-2 (MaxWantedLevel 1–4),
+// and REQ-WC-2a (BaseCosts has all keys 1–4 with positive values).
+func (f FixerConfig) Validate() error {
+	if f.NPCVariance <= 0 {
+		return fmt.Errorf("fixer: npc_variance must be > 0, got %f", f.NPCVariance)
+	}
+	if f.MaxWantedLevel < 1 || f.MaxWantedLevel > 4 {
+		return fmt.Errorf("fixer: max_wanted_level must be in range 1–4, got %d", f.MaxWantedLevel)
+	}
+	for _, key := range []int{1, 2, 3, 4} {
+		v, ok := f.BaseCosts[key]
+		if !ok {
+			return fmt.Errorf("fixer: base_costs missing required key %d", key)
+		}
+		if v <= 0 {
+			return fmt.Errorf("fixer: base_costs[%d] must be positive, got %d", key, v)
+		}
+	}
+	return nil
+}
