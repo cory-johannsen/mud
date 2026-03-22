@@ -1125,3 +1125,45 @@ func TestPropertyAssignTechnologies_PreparedOnlyRoundTrip(t *testing.T) {
 		}
 	})
 }
+
+// REQ-TG-BUG6a: buildOptions with registry uses display name format "[id] Name — desc"
+func TestBuildOptions_WithRegistry_UsesDisplayName(t *testing.T) {
+	reg := technology.NewRegistry()
+	reg.Register(&technology.TechnologyDef{
+		ID:          "bio_synthetic",
+		Name:        "Bio-Synthetic",
+		Description: "Organic augmentation technologies.",
+		Tradition:   technology.TraditionBioSynthetic,
+		UsageType:   technology.UsageHardwired,
+		Level:       1,
+	})
+
+	opts := gameserver.ExportedBuildOptions([]string{"bio_synthetic"}, []int{1}, reg)
+	require.Len(t, opts, 1)
+	assert.Equal(t, "[bio_synthetic] Bio-Synthetic \u2014 Organic augmentation technologies.", opts[0])
+}
+
+// REQ-TG-BUG6b: buildOptions without registry falls back to raw ID
+func TestBuildOptions_NilRegistry_FallsBackToID(t *testing.T) {
+	opts := gameserver.ExportedBuildOptions([]string{"bio_synthetic"}, []int{1}, nil)
+	require.Len(t, opts, 1)
+	assert.Equal(t, "bio_synthetic", opts[0])
+}
+
+// REQ-TG-BUG6c: parseTechID extracts ID from bracket notation "[id] Name — desc"
+func TestParseTechID_BracketFormat(t *testing.T) {
+	id := gameserver.ExportedParseTechID("[acid_arrow] Acid Arrow \u2014 Launches an acid projectile.")
+	assert.Equal(t, "acid_arrow", id)
+}
+
+// REQ-TG-BUG6d: parseTechID falls back gracefully on old format "id — desc"
+func TestParseTechID_LegacyFormat(t *testing.T) {
+	id := gameserver.ExportedParseTechID("bio_synthetic \u2014 Organic augmentation technologies.")
+	assert.Equal(t, "bio_synthetic", id)
+}
+
+// REQ-TG-BUG6e: parseTechID handles bare ID with no em-dash
+func TestParseTechID_BareID(t *testing.T) {
+	id := gameserver.ExportedParseTechID("bio_synthetic")
+	assert.Equal(t, "bio_synthetic", id)
+}

@@ -36,11 +36,11 @@
 
 ### BUG-6: Technology selection displays technology ID instead of display name
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** During character creation, the technology selection prompt displays the raw technology ID (e.g. `bio_synthetic`) instead of the human-readable display name (e.g. `Bio-Synthetic`).
 **Steps:** Create a new character and reach the technology selection step; observe the technology list shows internal IDs rather than display names.
-**Fix:**
+**Fix:** Updated `buildOptions` in `internal/gameserver/technology_assignment.go` to format options as `[id] Name — description` when the registry has a matching entry, exposing the display name to the player. Updated `parseTechID` to extract the ID from the `[id]` bracket prefix when present, falling back to the legacy `id — description` split for backward compatibility.
 
 ### BUG-7: `switch` command does not clear console scrollback buffer
 **Severity:** medium

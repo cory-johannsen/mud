@@ -857,7 +857,7 @@ func fillFromSpontaneousPool(
 }
 
 // buildOptions formats a slice of tech IDs and levels into display option strings.
-// When a registry is provided and has an entry for the ID, the format is "id — description".
+// When a registry is provided and has an entry for the ID, the format is "[id] Name — description".
 // Otherwise the raw ID is used. The levels slice is kept for future use.
 func buildOptions(ids []string, levels []int, reg *technology.Registry) []string {
 	opts := make([]string, 0, len(ids))
@@ -869,7 +869,7 @@ func buildOptions(ids []string, levels []int, reg *technology.Registry) []string
 				if desc == "" {
 					desc = def.Name
 				}
-				opts = append(opts, fmt.Sprintf("%s \u2014 %s", id, desc))
+				opts = append(opts, fmt.Sprintf("[%s] %s \u2014 %s", id, def.Name, desc))
 				continue
 			}
 		}
@@ -899,8 +899,16 @@ func buildSpontaneousOptions(entries []ruleset.SpontaneousEntry, reg *technology
 }
 
 // parseTechID extracts the tech ID from a display option string.
-// If the option contains " — " (em-dash with surrounding spaces), the part before it is the ID.
+// If the option starts with "[", the ID is the text between "[" and "]".
+// Otherwise, if the option contains " — " (em-dash with surrounding spaces), the part before it is the ID.
+// Falls back to returning the full trimmed option when neither delimiter is present.
 func parseTechID(option string) string {
+	if strings.HasPrefix(option, "[") {
+		end := strings.Index(option, "]")
+		if end > 1 {
+			return option[1:end]
+		}
+	}
 	id, _, _ := strings.Cut(option, " \u2014 ")
 	return strings.TrimSpace(id)
 }
