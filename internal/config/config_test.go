@@ -318,3 +318,15 @@ func TestPropertyDSNContainsAllFields(t *testing.T) {
 		assert.Contains(t, dsn, "disable")
 	})
 }
+
+func TestTelnetConfig_HeadlessPort_DefaultIsZero(t *testing.T) {
+	cfg := validConfig()
+	assert.Equal(t, 0, cfg.Telnet.HeadlessPort, "HeadlessPort default must be 0 (disabled)")
+}
+
+func TestTelnetConfig_HeadlessPort_CanBeSet(t *testing.T) {
+	cfg := validConfig()
+	cfg.Telnet.HeadlessPort = 4002
+	assert.Equal(t, 4002, cfg.Telnet.HeadlessPort)
+	assert.NoError(t, cfg.Validate(), "HeadlessPort 4002 must be valid")
+}

@@ -56,6 +56,9 @@ type TelnetConfig struct {
 	IdleTimeout time.Duration `mapstructure:"idle_timeout"`
 	// IdleGracePeriod is the additional duration after IdleTimeout before disconnecting.
 	IdleGracePeriod time.Duration `mapstructure:"idle_grace_period"`
+	// HeadlessPort is the TCP port for the headless plain-text telnet listener.
+	// If 0 or absent, the headless listener is not started.
+	HeadlessPort int `mapstructure:"headless_port"`
 }
 
 // Addr returns the "host:port" listen address.
@@ -296,6 +299,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("telnet.write_timeout", "30s")
 	v.SetDefault("telnet.idle_timeout", "4m")
 	v.SetDefault("telnet.idle_grace_period", "30s")
+	v.SetDefault("telnet.headless_port", 0)
 
 	v.SetDefault("logging.level", "info")
 	v.SetDefault("logging.format", "json")

@@ -21,9 +21,10 @@ type SessionHandler interface {
 // Acceptor listens for Telnet connections on a TCP port and dispatches
 // each connection to a SessionHandler.
 type Acceptor struct {
-	cfg     config.TelnetConfig
-	handler SessionHandler
-	logger  *zap.Logger
+	cfg      config.TelnetConfig
+	handler  SessionHandler
+	logger   *zap.Logger
+	headless bool
 
 	listener net.Listener
 	wg       sync.WaitGroup
@@ -43,6 +44,28 @@ func NewAcceptor(cfg config.TelnetConfig, handler SessionHandler, logger *zap.Lo
 		logger:  logger,
 		quit:    make(chan struct{}),
 	}
+}
+
+// NewHeadlessAcceptor creates a Telnet acceptor that wraps each accepted
+// connection as a headless plain-text session (no ANSI, no split-screen).
+//
+// Precondition: cfg must have a valid port; handler and logger must be non-nil.
+// Postcondition: Returns an Acceptor ready to be started; all connections will have Headless=true.
+func NewHeadlessAcceptor(cfg config.TelnetConfig, handler SessionHandler, logger *zap.Logger) *Acceptor {
+	return &Acceptor{
+		cfg:      cfg,
+		handler:  handler,
+		logger:   logger,
+		quit:     make(chan struct{}),
+		headless: true,
+	}
+}
+
+// Handler returns the SessionHandler used by this acceptor.
+//
+// Postcondition: Returns the non-nil handler configured at construction.
+func (a *Acceptor) Handler() SessionHandler {
+	return a.handler
 }
 
 // ListenAndServe starts the TCP listener and accepts connections until Stop is called.
@@ -95,7 +118,12 @@ func (a *Acceptor) handleConn(raw net.Conn) {
 		zap.String("remote_addr", addr),
 	)
 
-	conn := NewConn(raw, a.cfg.ReadTimeout, a.cfg.WriteTimeout)
+	var conn *Conn
+	if a.headless {
+		conn = NewHeadlessConn(raw, a.cfg.ReadTimeout, a.cfg.WriteTimeout)
+	} else {
+		conn = NewConn(raw, a.cfg.ReadTimeout, a.cfg.WriteTimeout)
+	}
 	defer conn.Close()
 
 	if err := conn.Negotiate(); err != nil {
