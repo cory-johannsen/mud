@@ -1598,6 +1598,56 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 	}
 
+	// REQ-EM-5/6/10: deduct durability from weapons (per attack) and armor (per hit).
+	durRnd := rand.New(rand.NewSource(int64(cbt.Round))) //nolint:gosec
+	durRoller := NewDurabilityRoller(rand.NewSource(int64(cbt.Round + 1)))
+	ApplyRoundDurability(
+		roundEvents,
+		func(actorID string) *inventory.EquippedWeapon {
+			sess, ok := h.sessions.GetPlayer(actorID)
+			if !ok || sess.LoadoutSet == nil {
+				return nil
+			}
+			preset := sess.LoadoutSet.ActivePreset()
+			if preset == nil {
+				return nil
+			}
+			return preset.MainHand
+		},
+		func(targetID string) *inventory.Equipment {
+			sess, ok := h.sessions.GetPlayer(targetID)
+			if !ok {
+				return nil
+			}
+			return sess.Equipment
+		},
+		func(targetID string, slot inventory.ArmorSlot) {
+			sess, ok := h.sessions.GetPlayer(targetID)
+			if !ok {
+				return
+			}
+			if sess.Equipment != nil {
+				sess.Equipment.Armor[slot] = nil
+			}
+		},
+		func(actorID, msg string) {
+			sess, ok := h.sessions.GetPlayer(actorID)
+			if !ok || sess.Entity == nil {
+				return
+			}
+			evt := &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_Message{
+					Message: &gamev1.MessageEvent{Content: msg},
+				},
+			}
+			if data, err := proto.Marshal(evt); err == nil {
+				_ = sess.Entity.Push(data)
+			}
+		},
+		durRoller,
+		durRnd,
+	)
+
 	// Reset per-round loadout swap flag for all players in this combat.
 	for _, c := range cbt.Combatants {
 		if c.Kind == combat.KindPlayer {

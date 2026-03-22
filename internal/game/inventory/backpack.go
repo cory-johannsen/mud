@@ -215,6 +215,20 @@ func (b *Backpack) TotalWeight(reg *Registry) float64 {
 	return total
 }
 
+// GetByInstanceID returns a pointer to the ItemInstance with the given UUID,
+// or nil if no such instance exists in the backpack.
+//
+// Precondition: instanceID is non-empty.
+// Postcondition: returned pointer is into the backing slice; mutations are visible immediately.
+func (b *Backpack) GetByInstanceID(instanceID string) *ItemInstance {
+	for i := range b.items {
+		if b.items[i].InstanceID == instanceID {
+			return &b.items[i]
+		}
+	}
+	return nil
+}
+
 // FindByItemDefID returns all instances matching the given item definition ID.
 //
 // Postcondition: returned slice is a copy.
