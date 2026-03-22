@@ -607,6 +607,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				dmg := r.EffectiveDamage()
+				dmg += weaponModifierDamageBonus(actor) // REQ-EM-23
 				dmg += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg += applyPassiveFeats(cbt, actor, target, dmg, src)
 				dmg = hookDamageRoll(cbt, actor, target, dmg)
@@ -726,6 +727,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				dmg1 := r1.EffectiveDamage()
+				dmg1 += weaponModifierDamageBonus(actor) // REQ-EM-23
 				dmg1 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg1 += applyPassiveFeats(cbt, actor, target, dmg1, src)
 				dmg1 = hookDamageRoll(cbt, actor, target, dmg1)
@@ -821,6 +823,7 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				dmg2 := r2.EffectiveDamage()
+				dmg2 += weaponModifierDamageBonus(actor) // REQ-EM-23
 				dmg2 += condition.DamageBonus(cbt.Conditions[actor.ID])
 				dmg2 += applyPassiveFeats(cbt, actor, target, dmg2, src)
 				dmg2 = hookDamageRoll(cbt, actor, target, dmg2)
@@ -1233,6 +1236,31 @@ func livingEnemiesOf(cbt *Combat, actor *Combatant) []*Combatant {
 		}
 	}
 	return out
+}
+
+// weaponModifierDamageBonus returns the flat damage adjustment for the actor's
+// equipped main-hand weapon modifier (REQ-EM-23):
+//
+//   - "tuned"    → +1
+//   - "defective" → -1
+//   - "cursed"   → -2
+//   - ""         → 0
+//
+// Precondition: actor may have a nil Loadout or nil MainHand.
+// Postcondition: Returns 0 when no loadout or no modifier is set.
+func weaponModifierDamageBonus(actor *Combatant) int {
+	if actor.Loadout == nil || actor.Loadout.MainHand == nil {
+		return 0
+	}
+	switch actor.Loadout.MainHand.Modifier {
+	case "tuned":
+		return 1
+	case "defective":
+		return -1
+	case "cursed":
+		return -2
+	}
+	return 0
 }
 
 // primaryFirearm returns the primary slot weapon if it is a firearm matching weaponID.
