@@ -1,0 +1,24 @@
+id: street_rat_set
+name: Street Rat's Outfit
+pieces:
+  - item_def_id: street_jacket
+  - item_def_id: street_trousers
+  - item_def_id: street_boots
+  - item_def_id: street_gloves
+bonuses:
+  - threshold: 2
+    description: "+1 to Stealth checks"
+    effect:
+      type: skill_bonus
+      skill: stealth
+      amount: 1
+  - threshold: 3
+    description: "+1 AC"
+    effect:
+      type: ac_bonus
+      amount: 1
+  - threshold: full
+    description: "+2 Speed"
+    effect:
+      type: speed_bonus
+      amount: 2
