@@ -14,8 +14,8 @@ A Claude Code skill that gives Claude agent sessions direct, programmatic access
 - REQ-CGS-4: Room views on a headless connection MUST be rendered as: room name (line 1), description (wrapped lines), exits (one line, format: `Exits: north south east`), and a blank line.
 - REQ-CGS-5: Console messages on a headless connection MUST be written as plain lines terminated with `\r\n`.
 - REQ-CGS-6: The prompt on a headless connection MUST be `> ` with no ANSI codes.
-- REQ-CGS-7: Three accounts MUST be seeded in PostgreSQL by `cmd/seed-claude-accounts/main.go`: `claude_player` (role: player), `claude_editor` (role: editor), `claude_admin` (role: admin). The password is read from `CLAUDE_ACCOUNT_PASSWORD` environment variable (fatal error if absent).
-- REQ-CGS-8: Each seeded account MUST be idempotent — running the tool twice MUST NOT create duplicates (upsert semantics).
+- REQ-CGS-7: Three accounts MUST be seeded in PostgreSQL by `cmd/seed-claude-accounts/main.go`: `claude_player` (role: player), `claude_editor` (role: editor), `claude_admin` (role: admin). The password is read as plain-text from `CLAUDE_ACCOUNT_PASSWORD` environment variable (fatal error if absent); the tool MUST hash it via the existing `AccountRepository.Create()` bcrypt path.
+- REQ-CGS-8: Each seeded account MUST be idempotent — running the tool twice MUST NOT create duplicates. The tool MUST use a three-step upsert: (1) fetch by username, (2) if absent create via `AccountRepository.Create()`, (3) if present update role via `AccountRepository.SetRole()`.
 - REQ-CGS-9: The skill document at `.claude/skills/mud-gameserver.md` MUST document: connection command, account/password selection, session flow (prompts to expect), command reference by role, and three example workflows.
 
 ---
@@ -27,7 +27,7 @@ A Claude Code skill that gives Claude agent sessions direct, programmatic access
 Add `Headless bool` to `telnet.Conn`. When `true`:
 
 - `InitScreen()` — no-op
-- `WriteRoom(content string)` — strip ANSI from `content`; write as plain lines followed by `\r\n`
+- `WriteRoom(content string)` — strip ANSI from `content` using the existing `StripANSI()` utility in `telnet/ansi.go`; write the stripped lines terminated with `\r\n`. `WriteRoom` does NOT re-format or re-structure content; the room layout (name, description, exits) is pre-rendered by `text_renderer.go` before reaching `WriteRoom`.
 - `WriteConsole(text string)` — write `text + "\r\n"` directly to the TCP conn
 - `WritePrompt(text string)` — write `"> "` (no ANSI)
 - Color/formatting helpers — all ANSI stripping delegated to a new `StripANSI(s string) string` utility in `telnet/ansi.go`
@@ -51,6 +51,7 @@ No new interface extraction is needed. The existing handlers (`auth.go`, `game_b
 - Plain-text output format: how to read room name, description, exits, messages
 - Command reference: player, editor, admin commands with expected responses
 - Three example workflows: verify NPC spawn, place item in room, test combat round
+- Note: the plain-text output format described in the skill document reflects what `text_renderer.go` actually emits (room name, wrapped description, `Exits: ...` line); the headless port does not reformat content, it only strips ANSI codes
 
 ---
 
