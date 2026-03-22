@@ -76,6 +76,14 @@
 **Steps:** Log in with an existing character that lacks a technology assignment; observe the technology is backfilled; log out and back in; observe the technology is missing again.
 **Fix:**
 
+### BUG-12: Active feats do not track prepared uses and cannot be activated
+**Severity:** high
+**Status:** open
+**Category:** Character
+**Description:** Active feats do not track prepared use counts and cannot be activated by the player.
+**Steps:** Select an active feat during character creation; attempt to use the feat in play; observe it cannot be activated.
+**Fix:**
+
 ### BUG-10: rustbucket_ridge — blood_camp has an illegal placement; move east of blade_house
 **Severity:** high
 **Status:** open
