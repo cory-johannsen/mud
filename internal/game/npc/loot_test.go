@@ -226,3 +226,63 @@ func TestSalvageDrop_Validate_RejectsMinGreaterThanMax(t *testing.T) {
 	}
 	assert.Error(t, lt.Validate())
 }
+
+// ---- GenerateOrganicLoot and GenerateSalvageLoot tests ----
+
+func TestGenerateOrganicLoot_ReturnsItem(t *testing.T) {
+	lt := npc.LootTable{
+		OrganicDrops: []npc.OrganicDrop{
+			{ItemID: "meat", Weight: 10, QuantityMin: 1, QuantityMax: 2},
+		},
+	}
+	result := npc.GenerateOrganicLoot(lt)
+	if len(result.Items) != 1 {
+		t.Fatalf("expected 1 item, got %d", len(result.Items))
+	}
+	if result.Items[0].ItemDefID != "meat" {
+		t.Errorf("ItemDefID: got %q, want %q", result.Items[0].ItemDefID, "meat")
+	}
+	if result.Items[0].Quantity < 1 || result.Items[0].Quantity > 2 {
+		t.Errorf("Quantity %d out of [1,2]", result.Items[0].Quantity)
+	}
+	if result.Items[0].InstanceID == "" {
+		t.Error("InstanceID must not be empty")
+	}
+}
+
+func TestGenerateOrganicLoot_EmptyDrops_ReturnsEmpty(t *testing.T) {
+	lt := npc.LootTable{}
+	result := npc.GenerateOrganicLoot(lt)
+	if len(result.Items) != 0 {
+		t.Errorf("expected 0 items, got %d", len(result.Items))
+	}
+}
+
+func TestGenerateSalvageLoot_ReturnsItem(t *testing.T) {
+	lt := npc.LootTable{
+		SalvageDrop: &npc.SalvageDrop{
+			ItemIDs:     []string{"circuit_board", "scrap_metal"},
+			QuantityMin: 1,
+			QuantityMax: 2,
+		},
+	}
+	result := npc.GenerateSalvageLoot(lt)
+	if len(result.Items) != 1 {
+		t.Fatalf("expected 1 item, got %d", len(result.Items))
+	}
+	itemID := result.Items[0].ItemDefID
+	if itemID != "circuit_board" && itemID != "scrap_metal" {
+		t.Errorf("unexpected ItemDefID %q", itemID)
+	}
+	if result.Items[0].Quantity < 1 || result.Items[0].Quantity > 2 {
+		t.Errorf("Quantity %d out of [1,2]", result.Items[0].Quantity)
+	}
+}
+
+func TestGenerateSalvageLoot_NilSalvageDrop_ReturnsEmpty(t *testing.T) {
+	lt := npc.LootTable{}
+	result := npc.GenerateSalvageLoot(lt)
+	if len(result.Items) != 0 {
+		t.Errorf("expected 0 items, got %d", len(result.Items))
+	}
+}

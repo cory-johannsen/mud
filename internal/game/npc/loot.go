@@ -112,6 +112,61 @@ type LootResult struct {
 	Items    []LootItem
 }
 
+// GenerateOrganicLoot selects one organic item using weighted random from the
+// OrganicDrops list and returns it with a quantity in [QuantityMin, QuantityMax].
+//
+// Precondition: lt must have passed Validate().
+// Postcondition: Returns empty LootResult if OrganicDrops is empty.
+func GenerateOrganicLoot(lt LootTable) LootResult {
+	if len(lt.OrganicDrops) == 0 {
+		return LootResult{}
+	}
+	total := 0
+	for _, od := range lt.OrganicDrops {
+		total += od.Weight
+	}
+	roll := rand.Intn(total)
+	var selected OrganicDrop
+	for _, od := range lt.OrganicDrops {
+		roll -= od.Weight
+		if roll < 0 {
+			selected = od
+			break
+		}
+	}
+	qty := selected.QuantityMin
+	if spread := selected.QuantityMax - selected.QuantityMin; spread > 0 {
+		qty += rand.Intn(spread + 1)
+	}
+	return LootResult{Items: []LootItem{{
+		ItemDefID:  selected.ItemID,
+		InstanceID: uuid.New().String(),
+		Quantity:   qty,
+	}}}
+}
+
+// GenerateSalvageLoot selects one salvage item at random from SalvageDrop.ItemIDs
+// and returns it with a quantity in [QuantityMin, QuantityMax].
+//
+// Precondition: lt must have passed Validate().
+// Postcondition: Returns empty LootResult if SalvageDrop is nil or has no item IDs.
+func GenerateSalvageLoot(lt LootTable) LootResult {
+	if lt.SalvageDrop == nil || len(lt.SalvageDrop.ItemIDs) == 0 {
+		return LootResult{}
+	}
+	sd := lt.SalvageDrop
+	itemID := sd.ItemIDs[rand.Intn(len(sd.ItemIDs))]
+	qty := sd.QuantityMin
+	if spread := sd.QuantityMax - sd.QuantityMin; spread > 0 {
+		qty += rand.Intn(spread + 1)
+	}
+	return LootResult{Items: []LootItem{{
+		ItemDefID:  itemID,
+		InstanceID: uuid.New().String(),
+		Quantity:   qty,
+	}}}
+}
+
 // GenerateLoot rolls loot from the given LootTable using math/rand.
 //
 // Precondition: lt must have passed Validate().

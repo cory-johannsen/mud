@@ -2797,7 +2797,18 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		// the instance data is still accessible and removal serves as
 		// a happens-before signal for tests polling npcMgr.Get.
 		if inst.Loot != nil {
-			result := npc.GenerateLoot(*inst.Loot)
+			var result npc.LootResult
+			switch {
+			case inst.IsAnimal():
+				result = npc.GenerateOrganicLoot(*inst.Loot)
+			case inst.IsRobot():
+				salvage := npc.GenerateSalvageLoot(*inst.Loot)
+				std := npc.GenerateLoot(*inst.Loot)
+				result.Currency = std.Currency
+				result.Items = append(salvage.Items, std.Items...)
+			default:
+				result = npc.GenerateLoot(*inst.Loot)
+			}
 			// Distribute currency equally among all living participants.
 			totalCurrency := result.Currency + inst.Currency
 			inst.Currency = 0
@@ -2821,10 +2832,14 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			h.distributeCurrencyLocked(context.Background(), livingParticipants, totalCurrency)
 		}
 		// Announce NPC death in the console.
+		deathNarrative := fmt.Sprintf("%s is dead!", c.Name)
+		if inst.IsMachine() {
+			deathNarrative = fmt.Sprintf("%s is destroyed.", c.Name)
+		}
 		h.broadcastFn(inst.RoomID, []*gamev1.CombatEvent{{
 			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_DEATH,
 			Attacker:  c.Name,
-			Narrative: fmt.Sprintf("%s is dead!", c.Name),
+			Narrative: deathNarrative,
 		}})
 
 		// Award kill XP split among all living participants.
