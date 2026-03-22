@@ -3843,6 +3843,9 @@ func (s *GameServiceServer) handleEquipment(uid string, _ *gamev1.EquipmentReque
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
+	// Hydrate display names immediately before rendering so the output always
+	// reflects the current registry, regardless of when login hydration ran.
+	hydrateEquipmentNames(sess.Equipment, s.invRegistry)
 	return messageEvent(command.HandleEquipment(sess, 80)), nil
 }
 
@@ -8354,11 +8357,11 @@ func (s *GameServiceServer) CreaturesInRoom(roomID, sensingUID string) []Creatur
 	return result
 }
 
-// hydrateEquipmentNames sets the Name field of each SlottedItem in eq.Armor to the
-// ArmorDef.Name from reg, if the definition is found.
+// hydrateEquipmentNames sets the Name field of each SlottedItem in eq.Armor and
+// eq.Accessories to the ArmorDef.Name from reg, if the definition is found.
 //
 // Precondition: eq and reg must be non-nil.
-// Postcondition: Each armor slot whose ItemDefID is registered in reg has its Name
+// Postcondition: Each slot whose ItemDefID is registered in reg has its Name
 // updated to the human-readable ArmorDef.Name; unregistered items are unchanged.
 func hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry) {
 	if eq == nil || reg == nil {
@@ -8370,6 +8373,14 @@ func hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry) {
 		}
 		if def, ok := reg.Armor(item.ItemDefID); ok {
 			eq.Armor[slot].Name = def.Name
+		}
+	}
+	for slot, item := range eq.Accessories {
+		if item == nil {
+			continue
+		}
+		if def, ok := reg.Armor(item.ItemDefID); ok {
+			eq.Accessories[slot].Name = def.Name
 		}
 	}
 }
