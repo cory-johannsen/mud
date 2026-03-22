@@ -1,0 +1,101 @@
+package inventory
+
+import (
+	"fmt"
+
+	"github.com/google/wire"
+	"go.uber.org/zap"
+
+	"github.com/cory-johannsen/mud/internal/game/world"
+)
+
+// WeaponsDir is the path to weapon YAML definitions.
+type WeaponsDir string
+
+// ItemsDir is the path to item YAML definitions.
+type ItemsDir string
+
+// ExplosivesDir is the path to explosive YAML definitions.
+type ExplosivesDir string
+
+// ArmorsDir is the path to armor YAML definitions.
+type ArmorsDir string
+
+// NewRegistryFromDirs loads all inventory definitions into a single Registry.
+func NewRegistryFromDirs(
+	weaponsDir WeaponsDir,
+	itemsDir ItemsDir,
+	explosivesDir ExplosivesDir,
+	armorsDir ArmorsDir,
+	logger *zap.Logger,
+) (*Registry, error) {
+	reg := NewRegistry()
+	if weaponsDir != "" {
+		weapons, err := LoadWeapons(string(weaponsDir))
+		if err != nil {
+			return nil, fmt.Errorf("loading weapons: %w", err)
+		}
+		for _, w := range weapons {
+			if err := reg.RegisterWeapon(w); err != nil {
+				return nil, fmt.Errorf("registering weapon %q: %w", w.ID, err)
+			}
+		}
+		logger.Info("loaded weapon definitions", zap.Int("count", len(weapons)))
+	}
+	if explosivesDir != "" {
+		explosives, err := LoadExplosives(string(explosivesDir))
+		if err != nil {
+			return nil, fmt.Errorf("loading explosives: %w", err)
+		}
+		for _, ex := range explosives {
+			if err := reg.RegisterExplosive(ex); err != nil {
+				return nil, fmt.Errorf("registering explosive %q: %w", ex.ID, err)
+			}
+		}
+		logger.Info("loaded explosive definitions", zap.Int("count", len(explosives)))
+	}
+	if itemsDir != "" {
+		items, err := LoadItems(string(itemsDir))
+		if err != nil {
+			return nil, fmt.Errorf("loading items: %w", err)
+		}
+		for _, item := range items {
+			if err := reg.RegisterItem(item); err != nil {
+				return nil, fmt.Errorf("registering item %q: %w", item.ID, err)
+			}
+		}
+		logger.Info("loaded item definitions", zap.Int("count", len(items)))
+	}
+	armors, err := LoadArmors(string(armorsDir))
+	if err != nil {
+		return nil, fmt.Errorf("loading armors: %w", err)
+	}
+	for _, a := range armors {
+		if err := reg.RegisterArmor(a); err != nil {
+			return nil, fmt.Errorf("registering armor %q: %w", a.ID, err)
+		}
+	}
+	logger.Info("loaded armor definitions", zap.Int("count", len(armors)))
+	return reg, nil
+}
+
+// NewSeededRoomEquipmentManager creates a RoomEquipmentManager seeded with equipment from zone data.
+func NewSeededRoomEquipmentManager(worldMgr *world.Manager, logger *zap.Logger) *RoomEquipmentManager {
+	mgr := NewRoomEquipmentManager()
+	for _, zone := range worldMgr.AllZones() {
+		for _, room := range zone.Rooms {
+			if len(room.Equipment) > 0 {
+				mgr.InitRoom(room.ID, room.Equipment)
+			}
+		}
+	}
+	logger.Info("room equipment manager initialized")
+	return mgr
+}
+
+// Providers is the wire provider set for inventory dependencies.
+var Providers = wire.NewSet(
+	NewRegistryFromDirs,
+	NewFloorManager,
+	NewSeededRoomEquipmentManager,
+)
