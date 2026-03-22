@@ -38,6 +38,18 @@ zone:
     - template: ganger
       count: 2
       respawn_after: 3m
+    - template: vera_coldcoin
+      count: 1
+      respawn_after: 10m
+    - template: rio_wrench
+      count: 1
+      respawn_after: 10m
+    - template: marshal_ironsides
+      count: 1
+      respawn_after: 10m
+    - template: patch
+      count: 1
+      respawn_after: 10m
     equipment:
     - item_id: zone_map
       max_count: 1
@@ -71,6 +83,10 @@ zone:
       target: the_green_hell
     map_x: 0
     map_y: 2
+    spawns:
+    - template: slick_sally
+      count: 1
+      respawn_after: 10m
     properties:
       area: filth_court
   - id: roach_haven
@@ -95,6 +111,10 @@ zone:
       target: grinders_row
     map_x: 2
     map_y: 0
+    spawns:
+    - template: sergeant_mack
+      count: 1
+      respawn_after: 10m
   - id: junkers_dream
     title: Junker’s Dream
     description: This trailer is home to Tina Wires, a tech expert who runs a cyber rigging service for the few who can afford
@@ -107,6 +127,10 @@ zone:
       target: the_still
     map_x: 0
     map_y: 4
+    spawns:
+    - template: tina_wires
+      count: 1
+      respawn_after: 10m
     properties:
       area: filth_court
   - id: the_green_hell
@@ -121,6 +145,10 @@ zone:
       target: wayne_dawgs_trailer
     map_x: -2
     map_y: 2
+    spawns:
+    - template: herb
+      count: 1
+      respawn_after: 10m
     properties:
       area: filth_court
   - id: rotgut_alley
@@ -146,6 +174,9 @@ zone:
     - template: scavenger
       count: 1
       respawn_after: 3m
+    - template: dex
+      count: 1
+      respawn_after: 10m
   - id: the_bottle_shack
     title: The Bottle Shack
     description: This is Whiskey Joe’s trailer, a former bartender who now distills his own liquor from whatever he can find.
@@ -156,6 +187,10 @@ zone:
       target: rotgut_alley
     map_x: 2
     map_y: -2
+    spawns:
+    - template: whiskey_joe
+      count: 1
+      respawn_after: 10m
     properties:
       area: filth_court
   - id: the_heap
@@ -172,6 +207,10 @@ zone:
       target: scrapshack_23
     map_x: -2
     map_y: -2
+    spawns:
+    - template: old_rusty
+      count: 1
+      respawn_after: 10m
     properties:
       area: scrapheap_circle
   - id: the_tinkers_den
@@ -186,6 +225,13 @@ zone:
       target: wreckers_rest
     map_x: -2
     map_y: -4
+    spawns:
+    - template: clutch
+      count: 1
+      respawn_after: 10m
+    - template: sparks
+      count: 1
+      respawn_after: 10m
     properties:
       area: scrapheap_circle
   - id: scrapshack_23
@@ -200,6 +246,10 @@ zone:
       target: salvage_hut
     map_x: -4
     map_y: -2
+    spawns:
+    - template: gail_grinder_graves
+      count: 1
+      respawn_after: 10m
     properties:
       area: scrapheap_circle
   - id: wreckers_rest
