@@ -12,6 +12,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"go.uber.org/zap/zaptest"
 )
@@ -220,6 +221,110 @@ func TestDetained_VisibleInRoomLook(t *testing.T) {
 		}
 	}
 	assert.True(t, found, "detained player must appear as 'Prisoner (detained)' in room view; got players: %v", rv.Players)
+}
+
+// newDetainedSvcDangerous builds a GameServiceServer using a world whose zone
+// has DangerLevel "dangerous" so that handleAttack is not short-circuited by the
+// safe-room guard before the targeting check runs.
+//
+// Precondition: t must be non-nil.
+// Postcondition: Returns a svc whose world permits combat initiation.
+func newDetainedSvcDangerous(t *testing.T) (*GameServiceServer, *session.Manager) {
+	t.Helper()
+	zone := &world.Zone{
+		ID:          "test_dangerous",
+		Name:        "Dangerous Test Zone",
+		Description: "A zone where combat is permitted.",
+		DangerLevel: "dangerous",
+		StartRoom:   "room_a",
+		Rooms: map[string]*world.Room{
+			"room_a": {
+				ID:          "room_a",
+				ZoneID:      "test_dangerous",
+				Title:       "Room A",
+				Description: "The first room.",
+				Exits:       []world.Exit{{Direction: world.North, TargetRoom: "room_b"}},
+				Properties:  map[string]string{},
+			},
+			"room_b": {
+				ID:          "room_b",
+				ZoneID:      "test_dangerous",
+				Title:       "Room B",
+				Description: "The second room.",
+				Exits:       []world.Exit{{Direction: world.South, TargetRoom: "room_a"}},
+				Properties:  map[string]string{},
+			},
+		},
+	}
+	worldMgr, err := world.NewManager([]*world.Zone{zone})
+	require.NoError(t, err)
+	sessMgr := session.NewManager()
+	logger := zaptest.NewLogger(t)
+	npcMgr := npc.NewManager()
+	condReg := makeDetainedConditionRegistry()
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, condReg, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+	return svc, sessMgr
+}
+
+// TestDetained_CannotBeTargeted verifies that an attacker cannot target a player
+// who has the detained condition active (REQ-WC-10).
+//
+// Precondition: Target player has detained condition applied (PreventTargeting=true).
+// Postcondition: handleAttack returns a message event whose content contains "cannot target".
+func TestDetained_CannotBeTargeted(t *testing.T) {
+	svc, sessMgr := newDetainedSvcDangerous(t)
+	condReg := makeDetainedConditionRegistry()
+
+	// Add the detained target.
+	target, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_detained_target",
+		Username:  "Prisoner",
+		CharName:  "Prisoner",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+	applyDetainedCondition(t, target, condReg)
+
+	// Add the attacker.
+	_, err = sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:       "u_detained_attacker",
+		Username:  "Attacker",
+		CharName:  "Attacker",
+		RoomID:    "room_a",
+		CurrentHP: 10,
+		MaxHP:     10,
+		Abilities: character.AbilityScores{},
+		Role:      "player",
+	})
+	require.NoError(t, err)
+
+	event, err := svc.handleAttack("u_detained_attacker", &gamev1.AttackRequest{Target: "Prisoner"})
+	require.NoError(t, err)
+	require.NotNil(t, event)
+
+	msgEvt := event.GetMessage()
+	require.NotNil(t, msgEvt, "expected a message event blocking attack on detained player, got: %T", event.Payload)
+	assert.Contains(t, msgEvt.Content, "cannot target")
 }
 
 // TestProperty_DetainedAlwaysBlocksMove verifies that whenever the detained
