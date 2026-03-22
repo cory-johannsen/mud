@@ -1,4 +1,15 @@
-.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb
+.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check
+
+deps:
+	$(GO) mod tidy
+	$(GO) install github.com/google/wire/cmd/wire
+
+wire:
+	wire ./cmd/gameserver/... ./cmd/devserver/... ./cmd/frontend/...
+
+wire-check:
+	wire ./cmd/gameserver/... ./cmd/devserver/... ./cmd/frontend/...
+	git diff --exit-code cmd/gameserver/wire_gen.go cmd/devserver/wire_gen.go cmd/frontend/wire_gen.go
 
 GO := go
 VERSION := $(shell cat VERSION 2>/dev/null || echo dev)-$(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
