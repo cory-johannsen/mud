@@ -11,3 +11,4 @@ traits: [nonlethal, stagger, emp-safe]
 kind: one_handed
 group: exotic
 proficiency_category: specialized
+rarity: street

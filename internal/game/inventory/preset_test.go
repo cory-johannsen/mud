@@ -12,6 +12,7 @@ func oneHandedDef(id string) *inventory.WeaponDef {
 	return &inventory.WeaponDef{
 		ID: id, Name: id, DamageDice: "1d6", DamageType: "slashing",
 		Kind: inventory.WeaponKindOneHanded, ProficiencyCategory: "simple_weapons",
+		Rarity: "salvage",
 	}
 }
 
@@ -19,6 +20,7 @@ func twoHandedDef(id string) *inventory.WeaponDef {
 	return &inventory.WeaponDef{
 		ID: id, Name: id, DamageDice: "2d8", DamageType: "slashing",
 		Kind: inventory.WeaponKindTwoHanded, ProficiencyCategory: "martial_weapons",
+		Rarity: "salvage",
 	}
 }
 
@@ -26,6 +28,7 @@ func shieldDef(id string) *inventory.WeaponDef {
 	return &inventory.WeaponDef{
 		ID: id, Name: id, DamageDice: "1d4", DamageType: "bludgeoning",
 		Kind: inventory.WeaponKindShield, ProficiencyCategory: "simple_weapons",
+		Rarity: "salvage",
 	}
 }
 

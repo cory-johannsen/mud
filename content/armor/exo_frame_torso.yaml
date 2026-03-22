@@ -18,3 +18,4 @@ cross_team_effect:
 resistances:
   fire: 2
   electricity: 1
+rarity: street

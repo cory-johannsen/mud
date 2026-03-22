@@ -61,6 +61,7 @@ func rifleWeaponDef() *inventory.WeaponDef {
 		MagazineCapacity:    30,
 		Kind:                inventory.WeaponKindTwoHanded,
 		ProficiencyCategory: "martial_ranged",
+		Rarity:              "salvage",
 	}
 }
 

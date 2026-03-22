@@ -94,6 +94,7 @@ func TestLoadWeaponPresets_RehydratesMainHand(t *testing.T) {
 		DamageType:          "slashing",
 		Kind:                inventory.WeaponKindOneHanded,
 		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
 	}
 	if err := reg.RegisterWeapon(def); err != nil {
 		t.Fatalf("RegisterWeapon: %v", err)

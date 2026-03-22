@@ -9,3 +9,4 @@ firing_modes: [single, burst]
 traits: [loud, two_handed]
 team_affinity: gun
 proficiency_category: martial_ranged
+rarity: street

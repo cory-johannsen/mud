@@ -49,6 +49,7 @@ func TestResolveRound_Reload_RestoresMagazine(t *testing.T) {
 		RangeIncrement: 30, ReloadActions: 1, MagazineCapacity: 15,
 		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
 		ProficiencyCategory: "simple_ranged",
+		Rarity:              "salvage",
 	}
 	preset := inventory.NewWeaponPreset()
 	if err := preset.EquipMainHand(pistolDef); err != nil {
@@ -105,6 +106,7 @@ func TestResolveRound_FireBurst_ProducesTwoEvents(t *testing.T) {
 		RangeIncrement: 20, ReloadActions: 1, MagazineCapacity: 8,
 		FiringModes:         []inventory.FiringMode{inventory.FiringModeBurst},
 		ProficiencyCategory: "martial_ranged",
+		Rarity:              "salvage",
 	}
 	preset := inventory.NewWeaponPreset()
 	if err := preset.EquipMainHand(shotgunDef); err != nil {

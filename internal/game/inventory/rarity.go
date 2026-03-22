@@ -113,3 +113,34 @@ func RollModifier(def RarityDef, roll float64) string {
 	}
 	return ""
 }
+
+// rarityColorCodes maps each rarity ID to its ANSI escape color code.
+// Colors per spec: salvage=gray, street=white, mil_spec=green, black_market=purple, ghost=gold.
+var rarityColorCodes = map[string]string{
+	"salvage":      "\033[90m", // dark gray
+	"street":       "\033[97m", // bright white
+	"mil_spec":     "\033[32m", // green
+	"black_market": "\033[35m", // purple/magenta
+	"ghost":        "\033[33m", // gold/yellow
+}
+
+// AnsiReset is the ANSI escape sequence to reset text formatting.
+const AnsiReset = "\033[0m"
+
+// RarityColorCode returns the ANSI color escape sequence for the given rarity ID.
+//
+// Postcondition: returns the registered code, or AnsiReset if the rarity is unknown.
+func RarityColorCode(rarity string) string {
+	if code, ok := rarityColorCodes[rarity]; ok {
+		return code
+	}
+	return AnsiReset
+}
+
+// RarityColoredName returns itemName wrapped with the ANSI color for the rarity tier,
+// reset to default at the end. For use in inventory and equipment display (REQ-EM-4).
+//
+// Postcondition: returns a non-empty string containing itemName.
+func RarityColoredName(rarity, itemName string) string {
+	return RarityColorCode(rarity) + itemName + AnsiReset
+}

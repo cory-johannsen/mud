@@ -31,6 +31,7 @@ func makeTestWeapon(damageDice string) *inventory.WeaponDef {
 		},
 		MagazineCapacity:    10,
 		ProficiencyCategory: "simple_ranged",
+		Rarity:              "salvage",
 	}
 }
 

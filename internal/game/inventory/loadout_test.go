@@ -19,6 +19,7 @@ func pistolDef() *inventory.WeaponDef {
 		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
 		MagazineCapacity:    15,
 		ProficiencyCategory: "simple_ranged",
+		Rarity:              "street",
 	}
 }
 
@@ -30,6 +31,7 @@ func knifeDef() *inventory.WeaponDef {
 		DamageDice:          "1d6",
 		DamageType:          "slashing",
 		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
 		// RangeIncrement == 0 means melee; no FiringModes for melee.
 	}
 }

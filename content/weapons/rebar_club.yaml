@@ -8,3 +8,4 @@ traits: [machete-team]
 kind: one_handed
 group: club
 proficiency_category: simple_weapons
+rarity: street

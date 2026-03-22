@@ -4,3 +4,4 @@ damage_dice: 1d6
 damage_type: piercing
 traits: [grapple]
 proficiency_category: simple_weapons
+rarity: street

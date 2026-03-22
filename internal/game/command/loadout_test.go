@@ -36,6 +36,7 @@ func pistolWeaponDef() *inventory.WeaponDef {
 		MagazineCapacity:    15,
 		Kind:                inventory.WeaponKindOneHanded,
 		ProficiencyCategory: "simple_ranged",
+		Rarity:              "salvage",
 	}
 }
 

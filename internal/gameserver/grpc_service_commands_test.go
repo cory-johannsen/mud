@@ -216,6 +216,7 @@ func TestHandleEquip_UpdatesSessionLoadout(t *testing.T) {
 		DamageDice:          "1d6",
 		DamageType:          "slashing",
 		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
 	}))
 	require.NoError(t, reg.RegisterItem(&inventory.ItemDef{
 		ID:        "test_cleaver",
