@@ -358,6 +358,7 @@ features:
     dependencies:
       - equipment-mechanics
       - non-combat-npcs
+      - zone-content-expansion  # chip_doc NPC placement per zone
 
   - slug: editor-commands
     name: Editor Commands

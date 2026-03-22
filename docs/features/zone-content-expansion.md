@@ -9,3 +9,4 @@ Expands all existing zones with additional rooms, per-room danger level variatio
   - Per-room danger level variation (rooms within a zone escalate toward the zone core)
   - Diversified combat NPC types per zone (unique enemy flavors per zone theme)
   - Improved NPC distribution (density and placement relative to danger level)
+  - One lore-appropriate `chip_doc` NPC placed in a Safe room per zone (required for curse-removal)
