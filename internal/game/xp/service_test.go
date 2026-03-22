@@ -239,7 +239,21 @@ func TestService_AwardSkillCheck_ReturnsGrantMessage(t *testing.T) {
 	require.NotEmpty(t, msgs)
 	assert.Contains(t, msgs[0], "You gain")
 	assert.Contains(t, msgs[0], "XP")
-	assert.Contains(t, msgs[0], "parkour")
+	assert.Contains(t, msgs[0], "Parkour")
+}
+
+// TestService_AwardSkillCheck_SnakeCaseNameConverted verifies that a snake_case
+// skill ID is title-cased in the XP grant message.
+func TestService_AwardSkillCheck_SnakeCaseNameConverted(t *testing.T) {
+	saver := &fakeProgressSaver{}
+	svc := xp.NewService(testCfg(), saver)
+	sess := testSess(1, 0, 10)
+
+	msgs, err := svc.AwardSkillCheck(context.Background(), sess, "smooth_talk", 12, false, 0)
+	require.NoError(t, err)
+	require.NotEmpty(t, msgs)
+	assert.Contains(t, msgs[0], "Smooth Talk")
+	assert.NotContains(t, msgs[0], "smooth_talk")
 }
 
 func TestService_AwardXPAmount_AwardsCorrectXP(t *testing.T) {

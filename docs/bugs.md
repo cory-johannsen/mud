@@ -60,11 +60,11 @@
 
 ### BUG-8: `smooth_talk` XP reward message displays skill ID instead of display name
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The XP reward message shown after a successful `smooth_talk` action displays the raw skill ID (e.g. `smooth_talk`) instead of the human-readable display name.
 **Steps:** Use `smooth_talk` successfully; observe the XP reward message shows the skill ID.
-**Fix:**
+**Fix:** Added `skillDisplayName()` helper to `internal/game/xp/service.go` that converts snake_case skill IDs to Title Case. `AwardSkillCheck` now formats the grant message with the display name (e.g. "Smooth Talk" instead of "smooth_talk").
 
 ### BUG-2: eq command displays armor item IDs instead of names
 **Severity:** medium

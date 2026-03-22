@@ -3,6 +3,7 @@ package xp
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/session"
 )
@@ -101,8 +102,22 @@ func (s *Service) AwardSkillCheck(ctx context.Context, sess *session.PlayerSessi
 	if err != nil {
 		return nil, err
 	}
-	grant := fmt.Sprintf("You gain %d XP for the %s check.", xpAmount, skillName)
+	grant := fmt.Sprintf("You gain %d XP for the %s check.", xpAmount, skillDisplayName(skillName))
 	return append([]string{grant}, levelMsgs...), nil
+}
+
+// skillDisplayName converts a snake_case skill ID to a title-cased display name.
+//
+// Precondition: id must be non-empty.
+// Postcondition: Returns a non-empty title-cased string.
+func skillDisplayName(id string) string {
+	parts := strings.Split(id, "_")
+	for i, p := range parts {
+		if len(p) > 0 {
+			parts[i] = strings.ToUpper(p[:1]) + p[1:]
+		}
+	}
+	return strings.Join(parts, " ")
 }
 
 // award applies awardXP to sess and handles level-up side effects.
