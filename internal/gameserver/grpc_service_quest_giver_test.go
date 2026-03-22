@@ -91,31 +91,39 @@ func TestHandleTalk_CaseInsensitiveMatch(t *testing.T) {
 }
 
 func TestProperty_HandleTalk_AlwaysReturnsDialogLine(t *testing.T) {
+	// Create the server once outside rapid.Check to avoid data races with the
+	// zap test logger (which is tied to the outer *testing.T and races when
+	// testWorldAndSession is called from within rapid's goroutine).
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcManager := npc.NewManager()
+	svc := testServiceWithNPCMgr(t, worldMgr, sessMgr, npcManager)
+
+	uid := "prop_talk_u"
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: "prop_talk", CharName: "PropChar",
+		RoomID: "room_a", CurrentHP: 50, MaxHP: 100, Role: "player",
+	})
+	require.NoError(t, err)
+
 	rapid.Check(t, func(rt *rapid.T) {
 		// Generate a non-empty dialog slice (1–10 arbitrary strings).
 		dialog := rapid.SliceOfN(rapid.StringMatching(`[A-Za-z .,!?]{1,40}`), 1, 10).Draw(rt, "dialog")
-
-		worldMgr, sessMgr := testWorldAndSession(t)
-		npcManager := npc.NewManager()
-		svc := testServiceWithNPCMgr(t, worldMgr, sessMgr, npcManager)
-
-		uid := "prop_talk_u"
-		_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
-			UID: uid, Username: "prop_talk", CharName: "PropChar",
-			RoomID: "room_a", CurrentHP: 50, MaxHP: 100, Role: "player",
-		})
-		require.NoError(t, err)
 
 		tmpl := &npc.Template{
 			ID: "prop_qg", Name: "PropGiver", NPCType: "quest_giver",
 			Level: 1, MaxHP: 10, AC: 10,
 			QuestGiver: &npc.QuestGiverConfig{PlaceholderDialog: dialog},
 		}
-		_, err = npcManager.Spawn(tmpl, "room_a")
-		require.NoError(t, err)
+		inst, spawnErr := npcManager.Spawn(tmpl, "room_a")
+		if spawnErr != nil {
+			rt.Fatal("spawn failed:", spawnErr)
+		}
 
-		evt, err := svc.handleTalk(uid, &gamev1.TalkRequest{NpcName: "PropGiver"})
-		require.NoError(t, err)
+		evt, talkErr := svc.handleTalk(uid, &gamev1.TalkRequest{NpcName: "PropGiver"})
+		_ = npcManager.Remove(inst.ID)
+		if talkErr != nil {
+			rt.Fatal("handleTalk failed:", talkErr)
+		}
 
 		content := evt.GetMessage().Content
 		found := false
