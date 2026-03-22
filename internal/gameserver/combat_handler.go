@@ -57,6 +57,12 @@ type CombatHandler struct {
 	floorMgr      *inventory.FloorManager
 	onCombatEndFn      func(roomID string)                            // optional; called after combat ends; may be nil
 	onCoverHit         func(roomID, attackerID, coverEquipID string) // optional; called on cover crossfire; may be nil
+	// hirelingOwnerOf returns the UID of the player who has hired the given hireling instance,
+	// or empty string if not hired. Used to enforce REQ-NPC-8.
+	//
+	// Precondition: instID is non-empty.
+	// Postcondition: returns the owner UID or "".
+	hirelingOwnerOf func(instID string) string // optional; enforces REQ-NPC-8; may be nil
 	onCombatantMoved   func(roomID, movedCombatantID string)         // optional; called after Stride/Step/Shove resolves; may be nil
 	xpSvc          *xp.Service            // optional; awards kill XP on NPC death; may be nil
 	currencySaver  CurrencySaver          // optional; persists currency after loot award; may be nil
@@ -202,6 +208,15 @@ func (h *CombatHandler) SetLogger(logger *zap.Logger) {
 	h.logger = logger
 }
 
+// SetHirelingOwnerOf registers a callback that returns the owner UID for a hireling instance.
+// Used to enforce REQ-NPC-8: a player cannot attack their own bound hireling.
+//
+// Precondition: fn may be nil (disables the check).
+// Postcondition: h.hirelingOwnerOf == fn.
+func (h *CombatHandler) SetHirelingOwnerOf(fn func(instID string) string) {
+	h.hirelingOwnerOf = fn
+}
+
 // SetOnCombatEnd registers a callback invoked after each combat ends.
 //
 // Precondition: fn may be nil (no-op after combat end).
@@ -340,6 +355,14 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 	// Hirelings are combat participants (sub-project 4).
 	if inst.NPCType != "" && inst.NPCType != "combat" && inst.NPCType != "guard" && inst.NPCType != "hireling" {
 		return nil, fmt.Errorf("%s is not a valid combat target", inst.Name())
+	}
+
+	// REQ-NPC-8: a hireling bound to the attacking player MUST NOT be targetable
+	// by that player's own attacks.
+	if inst.NPCType == "hireling" && h.hirelingOwnerOf != nil {
+		if owner := h.hirelingOwnerOf(inst.ID); owner == uid {
+			return nil, fmt.Errorf("you cannot attack your own hireling")
+		}
 	}
 
 	h.combatMu.Lock()

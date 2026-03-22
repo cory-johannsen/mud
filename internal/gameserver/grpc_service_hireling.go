@@ -32,6 +32,21 @@ func (s *GameServiceServer) hirelingStateFor(instID string) *npc.HirelingRuntime
 	return s.hirelingRuntimeStates[instID]
 }
 
+// HirelingOwnerOf returns the UID of the player who has hired the given hireling instance,
+// or empty string if not hired. Satisfies the CombatHandler.SetHirelingOwnerOf callback
+// contract for REQ-NPC-8.
+//
+// Precondition: instID is non-empty.
+// Postcondition: returns the owner UID or "".
+func (s *GameServiceServer) HirelingOwnerOf(instID string) string {
+	hirelingRuntimeMu.RLock()
+	defer hirelingRuntimeMu.RUnlock()
+	if state, ok := s.hirelingRuntimeStates[instID]; ok {
+		return state.HiredByPlayerID
+	}
+	return ""
+}
+
 // findHiredHireling returns the Instance currently hired by uid, or nil if none.
 func (s *GameServiceServer) findHiredHireling(uid string) *npc.Instance {
 	hirelingRuntimeMu.RLock()

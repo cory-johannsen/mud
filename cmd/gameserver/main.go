@@ -595,6 +595,9 @@ func main() {
 		nil, // trapTemplates: not yet initialized; traps disabled until trap loading is wired
 	)
 
+	// Wire REQ-NPC-8: prevent a player from attacking their own bound hireling.
+	combatHandler.SetHirelingOwnerOf(grpcService.HirelingOwnerOf)
+
 	// Wire XP service with progress and skill-increase persistence.
 	if xpCfg, xpErr := xp.LoadXPConfig(*xpConfigFile); xpErr != nil {
 		logger.Warn("loading xp config; XP awards disabled", zap.Error(xpErr))

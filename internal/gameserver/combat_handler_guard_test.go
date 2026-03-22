@@ -270,3 +270,39 @@ func TestProperty_InitiateGuardCombat_NeverPanics(t *testing.T) {
 		})
 	})
 }
+
+// TestAttack_CannotAttackOwnHireling verifies REQ-NPC-8: a player cannot attack
+// their own bound hireling.
+//
+// Precondition: hireling is bound to the attacking player.
+// Postcondition: Attack returns an error containing "cannot attack your own hireling".
+func TestAttack_CannotAttackOwnHireling(t *testing.T) {
+	const uid = "hireling-owner"
+	const roomID = "room_hireling_1"
+
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	addTestPlayerNamed(t, h.sessions, uid, roomID, "Owner")
+
+	tmpl := &npc.Template{
+		ID:      "my_hireling",
+		Name:    "Patch",
+		NPCType: "hireling",
+		Level:   2,
+		MaxHP:   20,
+		AC:      11,
+		Hireling: &npc.HirelingConfig{DailyCost: 50, CombatRole: "melee"},
+	}
+	inst, err := h.npcMgr.Spawn(tmpl, roomID)
+	require.NoError(t, err)
+
+	h.hirelingOwnerOf = func(instID string) string {
+		if instID == inst.ID {
+			return uid
+		}
+		return ""
+	}
+
+	_, err = h.Attack(uid, "Patch")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "cannot attack your own hireling")
+}
