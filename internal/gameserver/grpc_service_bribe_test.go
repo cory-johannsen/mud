@@ -217,6 +217,24 @@ func TestHandleBribe_Disambiguation(t *testing.T) {
 	assert.Contains(t, content, "Officer Vance")
 }
 
+// TestHandleBribe_CaseInsensitiveNPCName verifies that bribe works when the player types the NPC
+// name in lowercase.
+//
+// Precondition: fixer named "Remy" in room; player WantedLevel["test"] == 2.
+// Postcondition: sess.PendingBribeNPCName == "Remy"; sess.PendingBribeAmount > 0.
+func TestHandleBribe_CaseInsensitiveNPCName(t *testing.T) {
+	svc, uid := newBribeTestServer(t)
+	spawnFixer(t, svc)
+
+	evt, err := svc.handleBribe(uid, &gamev1.BribeRequest{NpcName: "remy"})
+	require.NoError(t, err)
+
+	sess, _ := svc.sessions.GetPlayer(uid)
+	assert.Equal(t, "Remy", sess.PendingBribeNPCName)
+	assert.Greater(t, sess.PendingBribeAmount, 0)
+	assert.Contains(t, evt.GetMessage().Content, "confirm")
+}
+
 // TestHandleBribeConfirm_Success verifies that a successful bribe confirmation deducts credits,
 // decrements wanted level, and clears pending state.
 //

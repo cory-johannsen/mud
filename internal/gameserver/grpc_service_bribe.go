@@ -36,7 +36,6 @@ type briberCandidate struct {
 	inst     *npc.Instance
 	baseCost int
 	variance float64
-	maxLevel int
 }
 
 // handleBribe processes the bribe command (step 1 of 2).
@@ -86,7 +85,6 @@ func (s *GameServiceServer) handleBribe(uid string, req *gamev1.BribeRequest) (*
 				inst:     inst,
 				baseCost: baseCost,
 				variance: tmpl.Fixer.NPCVariance,
-				maxLevel: tmpl.Fixer.MaxWantedLevel,
 			})
 		case "guard":
 			if tmpl.Guard == nil || !tmpl.Guard.Bribeable {
@@ -103,7 +101,6 @@ func (s *GameServiceServer) handleBribe(uid string, req *gamev1.BribeRequest) (*
 				inst:     inst,
 				baseCost: baseCost,
 				variance: 1.0,
-				maxLevel: tmpl.Guard.MaxBribeWantedLevel,
 			})
 		}
 	}
