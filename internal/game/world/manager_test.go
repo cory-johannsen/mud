@@ -1,6 +1,7 @@
 package world
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -437,6 +438,81 @@ func TestProperty_RevealExit_VisibleExitsCountNeverDecreases(t *testing.T) {
 
 		if after < before {
 			rt.Fatalf("VisibleExits count decreased from %d to %d after RevealExit", before, after)
+		}
+	})
+}
+
+func TestReloadZone_ReplacesRooms(t *testing.T) {
+	z1 := &Zone{
+		ID:        "zone1",
+		StartRoom: "r1",
+		Rooms: map[string]*Room{
+			"r1": {ID: "r1", ZoneID: "zone1", Title: "Old Title", MapX: 0, MapY: 0},
+		},
+	}
+	mgr, err := NewManager([]*Zone{z1})
+	require.NoError(t, err)
+
+	z1Updated := &Zone{
+		ID:        "zone1",
+		StartRoom: "r1",
+		Rooms: map[string]*Room{
+			"r1": {ID: "r1", ZoneID: "zone1", Title: "New Title", MapX: 0, MapY: 0},
+		},
+	}
+	err = mgr.ReloadZone(z1Updated)
+	require.NoError(t, err)
+
+	room, ok := mgr.GetRoom("r1")
+	require.True(t, ok)
+	assert.Equal(t, "New Title", room.Title)
+}
+
+func TestReloadZone_RemovesDeletedRooms(t *testing.T) {
+	z := &Zone{
+		ID:        "zone1",
+		StartRoom: "r1",
+		Rooms: map[string]*Room{
+			"r1": {ID: "r1", ZoneID: "zone1", MapX: 0, MapY: 0},
+			"r2": {ID: "r2", ZoneID: "zone1", MapX: 1, MapY: 0},
+		},
+	}
+	mgr, err := NewManager([]*Zone{z})
+	require.NoError(t, err)
+
+	zUpdated := &Zone{
+		ID:        "zone1",
+		StartRoom: "r1",
+		Rooms: map[string]*Room{
+			"r1": {ID: "r1", ZoneID: "zone1", MapX: 0, MapY: 0},
+		},
+	}
+	err = mgr.ReloadZone(zUpdated)
+	require.NoError(t, err)
+
+	_, ok := mgr.GetRoom("r2")
+	assert.False(t, ok)
+}
+
+// Property: after ReloadZone, every room in the new zone is in the manager.
+func TestReloadZoneProperty(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		roomCount := rapid.IntRange(1, 5).Draw(t, "roomCount")
+		rooms := make(map[string]*Room, roomCount)
+		for i := 0; i < roomCount; i++ {
+			id := fmt.Sprintf("r%d", i)
+			rooms[id] = &Room{ID: id, ZoneID: "zone1", MapX: i, MapY: 0}
+		}
+		zone := &Zone{ID: "zone1", StartRoom: "r0", Rooms: rooms}
+		mgr, err := NewManager([]*Zone{zone})
+		if err != nil {
+			t.Skip()
+		}
+		err = mgr.ReloadZone(zone)
+		assert.NoError(t, err)
+		for id := range rooms {
+			_, ok := mgr.GetRoom(id)
+			assert.True(t, ok)
 		}
 	})
 }

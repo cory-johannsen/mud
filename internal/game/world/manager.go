@@ -180,3 +180,40 @@ func (m *Manager) AllZones() []*Zone {
 	}
 	return zones
 }
+
+// ReloadZone replaces the zone and its rooms in the manager under a write lock.
+//
+// Precondition: zone must be non-nil; zone.ID must match an already-loaded zone.
+// Postcondition: All rooms for the replaced zone are removed and replaced with
+// the new zone's rooms. Callers that previously obtained *Room pointers from
+// GetRoom() MUST re-fetch after this call returns, as old pointers become stale.
+// Returns nil on success or an error if exit validation fails.
+func (m *Manager) ReloadZone(zone *Zone) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Remove all rooms belonging to the old zone.
+	if old, ok := m.zones[zone.ID]; ok {
+		for id := range old.Rooms {
+			delete(m.rooms, id)
+		}
+	}
+	delete(m.zones, zone.ID)
+
+	// Insert new zone and rooms.
+	m.zones[zone.ID] = zone
+	for id, room := range zone.Rooms {
+		m.rooms[id] = room
+	}
+
+	// Validate exits for the reloaded zone only.
+	for _, room := range zone.Rooms {
+		for _, exit := range room.Exits {
+			if _, ok := m.rooms[exit.TargetRoom]; !ok {
+				return fmt.Errorf("zone %q: room %q: exit %q targets unknown room %q",
+					zone.ID, room.ID, exit.Direction, exit.TargetRoom)
+			}
+		}
+	}
+	return nil
+}
