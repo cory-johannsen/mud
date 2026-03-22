@@ -44,6 +44,26 @@ import (
 // errQuit is returned by handleQuit to signal the command loop to stop cleanly.
 var errQuit = fmt.Errorf("quit")
 
+// requireEditor returns an error ServerEvent if the session lacks editor or admin role.
+// Precondition: sess must be non-nil.
+// Postcondition: Returns nil if role is editor or admin; returns error ServerEvent otherwise.
+func requireEditor(sess *session.PlayerSession) *gamev1.ServerEvent {
+	if sess.Role != postgres.RoleEditor && sess.Role != postgres.RoleAdmin {
+		return errorEvent("permission denied: editor role required")
+	}
+	return nil
+}
+
+// requireAdmin returns an error ServerEvent if the session lacks admin role.
+// Precondition: sess must be non-nil.
+// Postcondition: Returns nil if role is admin; returns error ServerEvent otherwise.
+func requireAdmin(sess *session.PlayerSession) *gamev1.ServerEvent {
+	if sess.Role != postgres.RoleAdmin {
+		return errorEvent("permission denied: admin role required")
+	}
+	return nil
+}
+
 // AccountAdmin provides account lookup and role mutation for in-game admin commands.
 //
 // Precondition: Implementations must be safe for concurrent use.
@@ -4159,8 +4179,8 @@ func (s *GameServiceServer) handleSetRole(uid string, req *gamev1.SetRoleRequest
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	if sess.Role != "admin" {
-		return errorEvent("permission denied: admin role required"), nil
+	if evt := requireAdmin(sess); evt != nil {
+		return evt, nil
 	}
 	if s.accountAdmin == nil {
 		return errorEvent("account administration not available"), nil
@@ -4191,8 +4211,8 @@ func (s *GameServiceServer) handleSummonItem(uid string, req *gamev1.SummonItemR
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	if sess.Role != "editor" && sess.Role != "admin" {
-		return errorEvent("permission denied: editor role required"), nil
+	if evt := requireEditor(sess); evt != nil {
+		return evt, nil
 	}
 	if s.invRegistry == nil {
 		return errorEvent("item registry unavailable"), nil
@@ -4226,8 +4246,8 @@ func (s *GameServiceServer) handleTeleport(uid string, req *gamev1.TeleportReque
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	if sess.Role != "admin" {
-		return errorEvent("permission denied: admin role required"), nil
+	if evt := requireAdmin(sess); evt != nil {
+		return evt, nil
 	}
 	if req.TargetCharacter == "" || req.RoomId == "" {
 		return errorEvent("usage: teleport <character> <room_id>"), nil
@@ -4521,6 +4541,9 @@ func (s *GameServiceServer) handleRoomEquip(uid string, req *gamev1.RoomEquipReq
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if evt := requireEditor(sess); evt != nil {
+		return evt, nil
 	}
 	if s.roomEquipMgr == nil {
 		return messageEvent("Room equipment manager not available."), nil
@@ -7585,8 +7608,8 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	if sess.Role != "editor" && sess.Role != "admin" {
-		return errorEvent("permission denied: editor role required"), nil
+	if evt := requireEditor(sess); evt != nil {
+		return evt, nil
 	}
 	if req.GrantType != "heropoint" && req.Amount <= 0 {
 		return errorEvent("amount must be greater than zero"), nil
