@@ -33,7 +33,7 @@ func newFleeSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		worldMgr, // pass worldMgr so Flee can pick a valid exit
 		nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -173,7 +173,7 @@ func TestHandleFlee_Success_NoValidExits(t *testing.T) {
 		testRoundDuration, makeTestConditionRegistry(),
 		lockedWorldMgr, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		lockedWorldMgr, lockedSessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(lockedWorldMgr, lockedSessMgr, lockedNPCMgr, nil, nil, nil),

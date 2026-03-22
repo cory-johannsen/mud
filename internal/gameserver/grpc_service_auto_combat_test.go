@@ -28,7 +28,7 @@ func newAutoCombatSvc(t *testing.T) (*GameServiceServer, *session.Manager, *Comb
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

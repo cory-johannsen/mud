@@ -38,7 +38,7 @@ func newImmobilizedMoveSvc(t *testing.T) (*GameServiceServer, *session.Manager) 
 	logger := zaptest.NewLogger(t)
 	npcMgr := npc.NewManager()
 	condReg := makeImmobilizedConditionRegistry()
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -71,7 +71,7 @@ func newImmobilizedFleeSvc(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

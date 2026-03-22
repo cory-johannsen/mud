@@ -53,7 +53,7 @@ func newClimbSvc(t *testing.T, src dice.Source) (*GameServiceServer, *session.Ma
 	logger := zaptest.NewLogger(t)
 	roller := dice.NewLoggedRoller(src, logger)
 	npcMgr := npc.NewManager()
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -173,7 +173,7 @@ func TestProperty_FallDamage_HeightRange(t *testing.T) {
 		logger := zaptest.NewLogger(rt)
 		roller := dice.NewLoggedRoller(src, logger)
 		npcMgr2 := npc.NewManager()
-		svc2 := NewGameServiceServer(
+		svc2 := newTestGameServiceServer(
 			wm, sm,
 			command.DefaultRegistry(),
 			NewWorldHandler(wm, sm, npcMgr2, nil, nil, nil),

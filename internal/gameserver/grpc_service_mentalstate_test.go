@@ -30,7 +30,7 @@ func newCombatSvcWithMentalMgr(t *testing.T, mentalMgr *mentalstate.Manager) (*G
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

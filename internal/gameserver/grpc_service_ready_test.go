@@ -78,7 +78,7 @@ func makeReadySvc(t *testing.T) (*GameServiceServer, *CombatHandler) {
 		testRoundDuration, makeTestConditionRegistry(),
 		nil, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		nil,
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

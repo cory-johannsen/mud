@@ -120,7 +120,7 @@ func TestStartZoneTicks_RespawnIntegration(t *testing.T) {
 	chatHandler := NewChatHandler(sessMgr)
 	npcHandler := NewNPCHandler(npcMgr, sessMgr)
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, npcHandler, npcMgr, nil, nil,
@@ -158,7 +158,7 @@ func testGRPCServer(t *testing.T) (gamev1.GameServiceClient, *session.Manager) {
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+	svc := newTestGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -487,7 +487,7 @@ func testGRPCServerWithCharData(t *testing.T) (gamev1.GameServiceClient, *sessio
 		},
 	}
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, nil, nil, nil,
@@ -611,7 +611,7 @@ func TestApplyRoomSkillChecks_OnEnter_Success(t *testing.T) {
 		{ID: "parkour", Name: "Parkour", Ability: "quickness"},
 	}
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -684,7 +684,7 @@ func TestApplyRoomSkillChecks_OnEnter_Failure(t *testing.T) {
 		{ID: "parkour", Name: "Parkour", Ability: "quickness"},
 	}
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -746,7 +746,7 @@ func TestApplyRoomSkillChecks_NoOnEnterTriggers(t *testing.T) {
 	src := &fixedDiceSource{val: 19}
 	roller := dice.NewLoggedRoller(src, logger)
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -871,7 +871,7 @@ end
 		},
 	}
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -941,7 +941,7 @@ function get_captured_outcome() return captured_outcome end
 	dir2 := writeTempLuaFile(t, "hooks.lua", combinedSrc)
 	require.NoError(t, scriptMgr2.LoadZone("test", dir2, 0))
 
-	svc2 := NewGameServiceServer(
+	svc2 := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -1034,7 +1034,7 @@ func TestApplyRoomSkillChecks_DamageEffect(t *testing.T) {
 		},
 	}
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -1118,7 +1118,7 @@ func TestApplyNPCSkillChecks_OnGreet_Success(t *testing.T) {
 	}
 
 	npcHandler := NewNPCHandler(npcMgr, sessMgr)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -1198,7 +1198,7 @@ func TestApplyNPCSkillChecks_OnGreet_Failure(t *testing.T) {
 	}
 
 	npcHandler := NewNPCHandler(npcMgr, sessMgr)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -1242,7 +1242,7 @@ func TestApplyNPCSkillChecks_NoNPCs(t *testing.T) {
 	npcMgr := npc.NewManager()
 	npcHandler := NewNPCHandler(npcMgr, sessMgr)
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -1303,7 +1303,7 @@ func TestApplyNPCSkillChecks_NonGreetTriggerIgnored(t *testing.T) {
 	require.NoError(t, err)
 
 	npcHandler := NewNPCHandler(npcMgr, sessMgr)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -1387,7 +1387,7 @@ func TestApplyNPCSkillChecks_DamageEffect(t *testing.T) {
 	}
 
 	npcHandler := NewNPCHandler(npcMgr, sessMgr)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -1744,7 +1744,7 @@ func TestHandleUse_AppliesConditionWhenConditionIDSet(t *testing.T) {
 		},
 	}
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -1813,7 +1813,7 @@ func TestHandleUse_NoConditionAppliedWhenConditionIDEmpty(t *testing.T) {
 		DurationType: "encounter",
 	})
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -1888,7 +1888,7 @@ func TestProperty_HandleUse_ConditionIDEmpty_NoConditionApplied(t *testing.T) {
 			})
 		}
 
-		svc := NewGameServiceServer(
+		svc := newTestGameServiceServer(
 			worldMgr, sessMgr,
 			command.DefaultRegistry(),
 			NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -1954,7 +1954,7 @@ func newRaiseShieldSvc(t *testing.T, condReg *condition.Registry) (*GameServiceS
 	t.Helper()
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -2104,7 +2104,7 @@ func TestHandleRaiseShield_InCombat_InsufficientAP(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
 	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, condReg, worldMgr, nil, nil, nil, nil, nil, nil)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -2157,7 +2157,7 @@ func newTakeCoverSvc(t *testing.T, condReg *condition.Registry) (*GameServiceSer
 	t.Helper()
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -2224,7 +2224,7 @@ func TestHandleTakeCover_OutOfCombat(t *testing.T) {
 	require.NoError(t, err)
 	sessMgr := session.NewManager()
 	logger := zaptest.NewLogger(t)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -2297,7 +2297,7 @@ func TestHandleTakeCover_InCombat_InsufficientAP(t *testing.T) {
 	sessMgr := session.NewManager()
 	logger := zaptest.NewLogger(t)
 	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, condReg, worldMgr, nil, nil, nil, nil, nil, nil)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -2356,7 +2356,7 @@ func newFirstAidSvc(t *testing.T, roller *dice.Roller, combatHandler *CombatHand
 	t.Helper()
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -2466,7 +2466,7 @@ func TestHandleFirstAid_InCombat_InsufficientAP(t *testing.T) {
 
 	worldMgr, sessMgr := testWorldAndSession(t)
 	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, nil, worldMgr, nil, nil, nil, nil, nil, nil)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -2512,7 +2512,7 @@ func newFeintSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatH
 	if npcMgr == nil {
 		npcMgr = npc.NewManager()
 	}
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -2607,7 +2607,7 @@ func TestHandleFeint_InCombat_NoActiveSession(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	combatHandler := NewCombatHandler(combat.NewEngine(), npc.NewManager(), sessMgr, nil, nil, 0, nil, worldMgr, nil, nil, nil, nil, nil, nil)
 	npcMgr := npc.NewManager()
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -2658,7 +2658,7 @@ func newFeintSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServe
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -2815,7 +2815,7 @@ func newDemoralizeSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, co
 	if npcMgr == nil {
 		npcMgr = npc.NewManager()
 	}
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -2851,7 +2851,7 @@ func newDemoralizeSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameService
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

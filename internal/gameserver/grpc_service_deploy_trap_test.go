@@ -102,7 +102,7 @@ func TestHandleDeployTrap_InCombat_CostsOneAP(t *testing.T) {
 		Weight: 2.0, Stackable: true, MaxStack: 5, Value: 300,
 	}))
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		nil,
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -170,7 +170,7 @@ func TestHandleDeployTrap_NotEnoughAP(t *testing.T) {
 		Weight: 2.0, Stackable: true, MaxStack: 5, Value: 300,
 	}))
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		nil,
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

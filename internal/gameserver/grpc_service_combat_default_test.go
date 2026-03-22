@@ -75,7 +75,7 @@ func testServiceForCombatDefault(t *testing.T, saver CharacterSaver) *GameServic
 	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
-	return NewGameServiceServer(
+	return newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,

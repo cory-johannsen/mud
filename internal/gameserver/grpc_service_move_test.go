@@ -97,7 +97,7 @@ func newMoveTestService(t *testing.T, worldMgr *world.Manager, sessMgr *session.
 	logger := zaptest.NewLogger(t)
 	wh := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 	ch := NewChatHandler(sessMgr)
-	return NewGameServiceServer(
+	return newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		wh, ch, logger,

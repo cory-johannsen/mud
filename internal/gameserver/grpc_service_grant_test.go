@@ -153,7 +153,7 @@ func testServiceForGrant(t *testing.T, opts grantTestOptions) *GameServiceServer
 	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
@@ -182,7 +182,7 @@ func testMinimalService(t *testing.T, sessMgr *session.Manager) *GameServiceServ
 	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
-	return NewGameServiceServer(
+	return newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,

@@ -42,7 +42,7 @@ func makeTrapSvc(t *testing.T) (*GameServiceServer, *trap.TrapManager) {
 			Payload: &trap.TrapPayload{Type: "bear_trap"},
 		},
 	}
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		nil, // cmdRegistry
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -285,7 +285,7 @@ func makeTrapSvcWithDisarmTemplates(t *testing.T) (*GameServiceServer, *trap.Tra
 			Payload:   &trap.TrapPayload{Type: "mine"},
 		},
 	}
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		nil,
 		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
@@ -511,7 +511,7 @@ func TestCheckConsumableTraps_MultipleOverlapping_AllFire(t *testing.T) {
 		Payload: &trap.TrapPayload{Type: "mine"},
 	}
 	tmplMap := map[string]*trap.TrapTemplate{"mine_multi": mineTmpl}
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, nil,
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
 		NewChatHandler(sessMgr),
@@ -578,7 +578,7 @@ func TestCheckConsumableTraps_BlastRadius_DisarmsAfterFiring(t *testing.T) {
 		Payload: &trap.TrapPayload{Type: "mine", Damage: "1d6"},
 	}
 	tmplMap := map[string]*trap.TrapTemplate{"mine_blast": mineTmpl}
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, nil,
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
 		NewChatHandler(sessMgr),

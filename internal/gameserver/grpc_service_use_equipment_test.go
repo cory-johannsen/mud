@@ -153,7 +153,7 @@ func newUseEquipServerWithSkillChecks(
 	worldHandler := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger,
 		nil, roller, nil, nil, nil, nil,
 		nil, nil, mgr, nil, nil, nil,

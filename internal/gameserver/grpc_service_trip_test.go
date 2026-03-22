@@ -25,7 +25,7 @@ func newTripSvc(t *testing.T, roller *dice.Roller, npcMgr *npc.Manager, combatHa
 	if npcMgr == nil {
 		npcMgr = npc.NewManager()
 	}
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -61,7 +61,7 @@ func newTripSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, makeTestConditionRegistry(), nil, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

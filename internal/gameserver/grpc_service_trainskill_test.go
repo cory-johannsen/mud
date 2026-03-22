@@ -101,7 +101,7 @@ func testServiceForTrainSkill(t *testing.T, opts trainSkillTestOptions) *GameSer
 	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,

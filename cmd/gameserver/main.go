@@ -574,26 +574,55 @@ func main() {
 	actionH := gameserver.NewActionHandler(sessMgr, cfReg, condRegistry, npcMgr, combatHandler, charRepo, diceRoller, logger)
 
 	// Create gRPC service
-	grpcService = gameserver.NewGameServiceServer(
-		worldMgr, sessMgr, cmdRegistry,
-		worldHandler, chatHandler, logger, charRepo, diceRoller, npcHandler, npcMgr, combatHandler, scriptMgr, respawnMgr, floorMgr, roomEquipMgr, automapRepo, invRegistry, gameserver.NewAccountRepoAdapter(accountRepo), gameCalendar,
-		jobReg, condRegistry, techReg,
-		hardwiredTechRepo, preparedTechRepo, spontaneousTechRepo, innateTechRepo,
-		*loadoutsDir,
-		allSkills, characterSkillsRepo, characterProficienciesRepo,
-		allFeats, featRegistry, characterFeatsRepo,
-		classFeatures, cfReg, characterClassFeaturesRepo,
-		featureChoicesRepo,
-		charAbilityBoostsRepo,
-		archetypeMap,
-		regionMap,
-		mentalMgr,
-		actionH,
-		postgres.NewCharacterSpontaneousUsePoolRepository(pool.DB()),
-		postgres.NewWantedRepository(pool.DB()),
-		nil, // trapMgr: not yet initialized; traps disabled until trap loading is wired
-		nil, // trapTemplates: not yet initialized; traps disabled until trap loading is wired
-	)
+	storage := gameserver.StorageDeps{
+		CharRepo:               charRepo,
+		AccountRepo:            gameserver.NewAccountRepoAdapter(accountRepo),
+		SkillsRepo:             characterSkillsRepo,
+		ProficienciesRepo:      characterProficienciesRepo,
+		FeatsRepo:              characterFeatsRepo,
+		ClassFeaturesRepo:      characterClassFeaturesRepo,
+		FeatureChoicesRepo:     featureChoicesRepo,
+		AbilityBoostsRepo:      charAbilityBoostsRepo,
+		HardwiredTechRepo:      hardwiredTechRepo,
+		PreparedTechRepo:       preparedTechRepo,
+		SpontaneousTechRepo:    spontaneousTechRepo,
+		InnateTechRepo:         innateTechRepo,
+		SpontaneousUsePoolRepo: postgres.NewCharacterSpontaneousUsePoolRepository(pool.DB()),
+		WantedRepo:             postgres.NewWantedRepository(pool.DB()),
+		AutomapRepo:            automapRepo,
+	}
+	content := gameserver.ContentDeps{
+		WorldMgr:             worldMgr,
+		NpcMgr:               npcMgr,
+		RespawnMgr:           respawnMgr,
+		InvRegistry:          invRegistry,
+		FloorMgr:             floorMgr,
+		RoomEquipMgr:         roomEquipMgr,
+		TechRegistry:         techReg,
+		CondRegistry:         condRegistry,
+		AIRegistry:           aiRegistry,
+		AllSkills:            allSkills,
+		AllFeats:             allFeats,
+		ClassFeatures:        classFeatures,
+		FeatRegistry:         featRegistry,
+		ClassFeatureRegistry: cfReg,
+		JobRegistry:          jobReg,
+		ArchetypeMap:         archetypeMap,
+		RegionMap:            regionMap,
+		ScriptMgr:            scriptMgr,
+		DiceRoller:           diceRoller,
+		CombatEngine:         combatEngine,
+		MentalStateMgr:       mentalMgr,
+		LoadoutsDir:          gameserver.LoadoutsDir(*loadoutsDir),
+	}
+	handlers := gameserver.HandlerDeps{
+		WorldHandler:  worldHandler,
+		ChatHandler:   chatHandler,
+		NPCHandler:    npcHandler,
+		CombatHandler: combatHandler,
+		ActionHandler: actionH,
+	}
+	grpcService = gameserver.NewGameServiceServer(storage, content, handlers, sessMgr, cmdRegistry, gameCalendar, logger)
 
 	// Wire REQ-NPC-8: prevent a player from attacking their own bound hireling.
 	combatHandler.SetHirelingOwnerOf(grpcService.HirelingOwnerOf)

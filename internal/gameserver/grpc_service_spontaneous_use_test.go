@@ -70,7 +70,7 @@ func newSpontaneousSvc(t *testing.T, repo SpontaneousUsePoolRepo) (*GameServiceS
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
 	npcMgr := npc.NewManager()
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

@@ -27,7 +27,7 @@ func newSeekSvcWithCombat(t *testing.T, roller *dice.Roller) (*GameServiceServer
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -52,7 +52,7 @@ func TestHandleSeek_NoSession(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
 	npcMgr := npc.NewManager()
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -79,7 +79,7 @@ func TestHandleSeek_NotInCombat(t *testing.T) {
 	worldMgr, sessMgr := testWorldAndSession(t)
 	logger := zaptest.NewLogger(t)
 	npcMgr := npc.NewManager()
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

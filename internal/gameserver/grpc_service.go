@@ -232,121 +232,65 @@ type HealerCapacityRepo interface {
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
 //
-// Precondition: worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, diceRoller, and logger must be non-nil.
-// charSaver may be nil (character state will not be persisted on disconnect).
-// respawnMgr may be nil (respawn functionality will be disabled).
-// floorMgr may be nil (inventory get/drop will return errors).
-// roomEquipMgr may be nil (room equipment will not be shown in look).
-// invRegistry may be nil (item name resolution will fall back to ItemDefID).
-// calendar may be nil (time-of-day events will not include day/month).
-// jobRegistry may be nil (team affinity effects will not be applied on wear).
-// condRegistry may be nil (cross-team condition effects will be skipped).
-// loadoutsDir is the path to the archetype loadout YAML directory; empty disables starting inventory grants.
-// allSkills may be nil (skill backfill on session startup will be skipped).
-// characterSkillsRepo may be nil (skill backfill on session startup will be skipped).
-// characterProficienciesRepo may be nil (proficiency backfill on session startup will be skipped).
-// allFeats may be nil (feat commands will return a not-available message).
-// featRegistry may be nil (feat commands will return a not-available message).
-// characterFeatsRepo may be nil (feat commands will return a not-available message).
-// charAbilityBoostsRepo may be nil (ability boost persistence will be skipped).
-// archetypes may be nil (ability boost archetype lookup will be skipped).
-// regions may be nil (ability boost region lookup will be skipped).
+// Precondition: storage, content, and handlers must be fully populated.
+// sessMgr, cmdRegistry, and logger must be non-nil.
 // Postcondition: Returns a fully initialised GameServiceServer.
 func NewGameServiceServer(
-	worldMgr *world.Manager,
+	storage StorageDeps,
+	content ContentDeps,
+	handlers HandlerDeps,
 	sessMgr *session.Manager,
 	cmdRegistry *command.Registry,
-	worldHandler *WorldHandler,
-	chatHandler *ChatHandler,
+	gameCalendar *GameCalendar,
 	logger *zap.Logger,
-	charSaver CharacterSaver,
-	diceRoller *dice.Roller,
-	npcHandler *NPCHandler,
-	npcMgr *npc.Manager,
-	combatHandler *CombatHandler,
-	scriptMgr *scripting.Manager,
-	respawnMgr *npc.RespawnManager,
-	floorMgr *inventory.FloorManager,
-	roomEquipMgr *inventory.RoomEquipmentManager,
-	automapRepo *postgres.AutomapRepository,
-	invRegistry *inventory.Registry,
-	accountAdmin AccountAdmin,
-	calendar *GameCalendar,
-	jobRegistry *ruleset.JobRegistry,
-	condRegistry *condition.Registry,
-	techRegistry *technology.Registry,
-	hardwiredTechRepo HardwiredTechRepo,
-	preparedTechRepo PreparedTechRepo,
-	spontaneousTechRepo SpontaneousTechRepo,
-	innateTechRepo InnateTechRepo,
-	loadoutsDir string,
-	allSkills []*ruleset.Skill,
-	characterSkillsRepo CharacterSkillsRepository,
-	characterProficienciesRepo CharacterProficienciesRepository,
-	allFeats []*ruleset.Feat,
-	featRegistry *ruleset.FeatRegistry,
-	characterFeatsRepo CharacterFeatsGetter,
-	allClassFeatures []*ruleset.ClassFeature,
-	classFeatureRegistry *ruleset.ClassFeatureRegistry,
-	characterClassFeaturesRepo CharacterClassFeaturesGetter,
-	featureChoicesRepo CharacterFeatureChoicesRepository,
-	charAbilityBoostsRepo postgres.CharacterAbilityBoostsRepository,
-	archetypes map[string]*ruleset.Archetype,
-	regions map[string]*ruleset.Region,
-	mentalStateMgr *mentalstate.Manager,
-	actionH *ActionHandler,
-	spontaneousUsePoolRepo SpontaneousUsePoolRepo,
-	wantedRepo *postgres.WantedRepository,
-	trapMgr *trap.TrapManager,
-	trapTemplates map[string]*trap.TrapTemplate,
 ) *GameServiceServer {
 	s := &GameServiceServer{
-		world:                      worldMgr,
+		world:                      content.WorldMgr,
 		sessions:                   sessMgr,
 		commands:                   cmdRegistry,
-		worldH:                     worldHandler,
-		chatH:                      chatHandler,
-		charSaver:                  charSaver,
-		dice:                       diceRoller,
-		npcH:                       npcHandler,
-		npcMgr:                     npcMgr,
-		combatH:                    combatHandler,
-		scriptMgr:                  scriptMgr,
-		respawnMgr:                 respawnMgr,
-		floorMgr:                   floorMgr,
-		roomEquipMgr:               roomEquipMgr,
-		automapRepo:                automapRepo,
-		invRegistry:                invRegistry,
-		accountAdmin:               accountAdmin,
-		calendar:                   calendar,
+		worldH:                     handlers.WorldHandler,
+		chatH:                      handlers.ChatHandler,
+		charSaver:                  storage.CharRepo,
+		dice:                       content.DiceRoller,
+		npcH:                       handlers.NPCHandler,
+		npcMgr:                     content.NpcMgr,
+		combatH:                    handlers.CombatHandler,
+		scriptMgr:                  content.ScriptMgr,
+		respawnMgr:                 content.RespawnMgr,
+		floorMgr:                   content.FloorMgr,
+		roomEquipMgr:               content.RoomEquipMgr,
+		automapRepo:                storage.AutomapRepo,
+		invRegistry:                content.InvRegistry,
+		accountAdmin:               storage.AccountRepo,
+		calendar:                   gameCalendar,
 		logger:                     logger,
-		jobRegistry:                jobRegistry,
-		condRegistry:               condRegistry,
-		techRegistry:               techRegistry,
-		hardwiredTechRepo:          hardwiredTechRepo,
-		preparedTechRepo:           preparedTechRepo,
-		spontaneousTechRepo:        spontaneousTechRepo,
-		innateTechRepo:             innateTechRepo,
-		loadoutsDir:                loadoutsDir,
-		allSkills:                  allSkills,
-		characterSkillsRepo:        characterSkillsRepo,
-		characterProficienciesRepo: characterProficienciesRepo,
-		allFeats:                   allFeats,
-		featRegistry:               featRegistry,
-		characterFeatsRepo:         characterFeatsRepo,
-		allClassFeatures:           allClassFeatures,
-		classFeatureRegistry:       classFeatureRegistry,
-		characterClassFeaturesRepo: characterClassFeaturesRepo,
-		featureChoicesRepo:         featureChoicesRepo,
-		charAbilityBoostsRepo:      charAbilityBoostsRepo,
-		archetypes:                 archetypes,
-		regions:                    regions,
-		mentalStateMgr:             mentalStateMgr,
-		actionH:                    actionH,
-		spontaneousUsePoolRepo:     spontaneousUsePoolRepo,
-		wantedRepo:                 wantedRepo,
-		trapMgr:                    trapMgr,
-		trapTemplates:              trapTemplates,
+		jobRegistry:                content.JobRegistry,
+		condRegistry:               content.CondRegistry,
+		techRegistry:               content.TechRegistry,
+		hardwiredTechRepo:          storage.HardwiredTechRepo,
+		preparedTechRepo:           storage.PreparedTechRepo,
+		spontaneousTechRepo:        storage.SpontaneousTechRepo,
+		innateTechRepo:             storage.InnateTechRepo,
+		spontaneousUsePoolRepo:     storage.SpontaneousUsePoolRepo,
+		loadoutsDir:                string(content.LoadoutsDir),
+		allSkills:                  content.AllSkills,
+		characterSkillsRepo:        storage.SkillsRepo,
+		characterProficienciesRepo: storage.ProficienciesRepo,
+		allFeats:                   content.AllFeats,
+		featRegistry:               content.FeatRegistry,
+		characterFeatsRepo:         storage.FeatsRepo,
+		allClassFeatures:           content.ClassFeatures,
+		classFeatureRegistry:       content.ClassFeatureRegistry,
+		characterClassFeaturesRepo: storage.ClassFeaturesRepo,
+		featureChoicesRepo:         storage.FeatureChoicesRepo,
+		charAbilityBoostsRepo:      storage.AbilityBoostsRepo,
+		archetypes:                 content.ArchetypeMap,
+		regions:                    content.RegionMap,
+		mentalStateMgr:             content.MentalStateMgr,
+		actionH:                    handlers.ActionHandler,
+		wantedRepo:                 storage.WantedRepo,
+		trapMgr:                    nil, // trap loading not yet wired
+		trapTemplates:              nil, // trap loading not yet wired
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {

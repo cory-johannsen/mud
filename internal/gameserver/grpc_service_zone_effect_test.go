@@ -404,7 +404,7 @@ func newMentalStateSvc(t *testing.T, diceVal int) (*GameServiceServer, *session.
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, condReg, worldMgr, nil, nil, nil, nil, nil, mentalMgr,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

@@ -96,7 +96,7 @@ func newSwimSvc(t *testing.T, roller *dice.Roller, condReg *condition.Registry) 
 	worldMgr, sessMgr := newSwimWorld(t)
 	logger := zaptest.NewLogger(t)
 	npcMgr := npc.NewManager()
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
@@ -130,7 +130,7 @@ func newSwimSvcWithCombat(t *testing.T, roller *dice.Roller, condReg *condition.
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, nil,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

@@ -133,7 +133,7 @@ func testGRPCServerWithAbilityBoosts(
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,

@@ -22,7 +22,7 @@ func testServiceWithNPCMgr(t *testing.T, worldMgr *world.Manager, sessMgr *sessi
 	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcManager, nil, nil, nil)
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
-	return NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger,
+	return newTestGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger,
 		nil, nil, nil, npcManager,
 		nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)

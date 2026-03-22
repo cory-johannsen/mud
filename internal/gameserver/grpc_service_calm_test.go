@@ -32,7 +32,7 @@ func newCalmSvc(t *testing.T, mentalMgr *mentalstate.Manager, roller *dice.Rolle
 		func(_ string, _ []*gamev1.CombatEvent) {},
 		testRoundDuration, condReg, nil, nil, nil, nil, nil, nil, mentalMgr,
 	)
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr,
 		command.DefaultRegistry(),
 		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),

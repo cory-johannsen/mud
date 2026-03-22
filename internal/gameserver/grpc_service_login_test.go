@@ -144,7 +144,7 @@ func testGRPCServerWithSaverFull(t *testing.T, saver CharacterSaver) (gamev1.Gam
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		saver, nil, nil, npcMgr, nil, nil,
@@ -398,7 +398,7 @@ func testGRPCServerWithClassFeatures(
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
@@ -516,7 +516,7 @@ func testGRPCServerWithFeatureChoices(
 	chatHandler := NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := NewGameServiceServer(
+	svc := newTestGameServiceServer(
 		worldMgr, sessMgr, cmdRegistry,
 		worldHandler, chatHandler, logger,
 		nil, nil, nil, npcMgr, nil, nil,
