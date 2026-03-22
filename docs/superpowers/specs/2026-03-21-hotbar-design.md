@@ -19,6 +19,9 @@ A persistent 10-slot hotbar that gives players quick access to frequently-used c
 - REQ-HB-9: Hotbar assignments MUST be persisted per character in the database and restored on login.
 - REQ-HB-10: The hotbar row MUST be redrawn on terminal resize.
 - REQ-HB-11: `hotbar` assignments MUST survive server restart (DB-backed, not in-memory only).
+- REQ-HB-12: The server MUST send a `HotbarUpdateEvent` once at character selection (after all character data is loaded) so the frontend can render the initial hotbar row.
+- REQ-HB-13: Slot activation (typing `1`–`9` or `0` at the prompt) is unconditional — single-character digits are ALWAYS interpreted as hotbar slot activation and MUST NOT be dispatched as commands. No single-character command aliases are supported.
+- REQ-HB-14: `InitScreen` MUST call `WriteHotbar` with all-empty slots. The correct hotbar state is rendered when the login-time `HotbarUpdateEvent` arrives (REQ-HB-12).
 
 ---
 
@@ -44,10 +47,12 @@ In `internal/frontend/handlers/bridge_handlers.go`, command input is intercepted
 
 ### UI Rendering
 
-`internal/frontend/telnet/screen.go` gains a `WriteHotbar(slots [10]string, width int)` method that renders the hotbar row at row H-1 using ANSI cursor positioning. The console scrollable area shrinks by 1 row (rows 10 to H-2); the prompt remains at row H. `WriteHotbar` is called:
-- During initial screen setup (`InitScreen`)
+`internal/frontend/telnet/screen.go` gains a `WriteHotbar(slots [10]string, width int)` method that renders the hotbar row at row H-1 using ANSI cursor positioning. The console scrollable area shrinks by 1 row: the existing `consoleEndRow` constant (currently `H-1`) MUST be changed to `H-2`, so the console occupies rows 10 to H-2. The prompt remains at row H. `WriteHotbar` is called:
+- During `InitScreen` (renders all-empty slots per REQ-HB-14)
 - On receipt of a `HotbarUpdateEvent` from the gameserver (handled in `game_bridge.go`, which calls `screen.WriteHotbar`)
-- On terminal resize (the existing resize handler in `bridge_handlers.go` calls `screen.WriteHotbar` with the current hotbar state)
+- On terminal resize (the existing resize handler in `bridge_handlers.go` calls `screen.WriteHotbar` with the current hotbar state from `sess.Hotbar`)
+
+**Note on `hotbar show` vs hotbar row format:** REQ-HB-5 defines the `hotbar show` *command output* format as `[N] <text>` (space-separated, no colon). REQ-HB-8 defines the *UI hotbar row* format as `[N:<label>]` (colon-separated). These are two distinct formats for two distinct display contexts and must not be confused.
 
 The `game_bridge.go` file receives `HotbarUpdateEvent` from the gRPC stream and calls `screen.WriteHotbar`. The `bridge_handlers.go` file handles slot activation intercept, resize-triggered redraw, and frontend-local "unassigned" messages.
 
@@ -89,8 +94,8 @@ New DB migration adds `hotbar TEXT` column to `characters` table (nullable; NULL
 | `internal/gameserver/grpc_service.go` | Wire `HotbarRequest` dispatch case; send `HotbarUpdateEvent` at login |
 | `internal/game/session/session.go` | Add `Hotbar [10]string` field |
 | `internal/storage/postgres/character.go` | Load/save hotbar column |
-| `migrations/032_character_hotbar.up.sql` | `ALTER TABLE characters ADD COLUMN hotbar TEXT` — implementer MUST verify 032 is the next available number |
-| `migrations/032_character_hotbar.down.sql` | `ALTER TABLE characters DROP COLUMN hotbar` |
+| `migrations/NNN_character_hotbar.up.sql` | `ALTER TABLE characters ADD COLUMN hotbar TEXT` — implementer MUST use the next available migration number (check `migrations/` directory; at time of writing, 032 is next) |
+| `migrations/NNN_character_hotbar.down.sql` | `ALTER TABLE characters DROP COLUMN hotbar` |
 | `internal/frontend/telnet/screen.go` | Add `WriteHotbar(slots [10]string, width int)`; adjust console row range to H-2 |
 | `internal/frontend/telnet/screen_test.go` | Tests for `WriteHotbar` rendering |
 | `internal/frontend/handlers/bridge_handlers.go` | Parse `hotbar` command variants; intercept `0`–`9` single-char input for slot activation; trigger `WriteHotbar` on resize |
