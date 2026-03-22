@@ -1203,7 +1203,7 @@ class_features:
     job: smuggler
     pf2e: ""
     active: true
-    shortcut: stash
+    shortcut: stashit
     action_cost: 1
     contexts:
       - exploration
