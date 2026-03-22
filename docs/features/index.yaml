@@ -46,7 +46,7 @@ features:
 
   - slug: wanted-clearing
     name: Wanted Level Clearing
-    status: spec
+    status: done
     priority: 25
     category: world
     file: docs/features/wanted-clearing.md
@@ -201,7 +201,7 @@ features:
 
   - slug: initiative-display
     name: Initiative Display on Character Sheet
-    status: spec
+    status: planned
     priority: 205
     category: ui
     file: docs/features/initiative-display.md
@@ -233,7 +233,7 @@ features:
 
   - slug: focus-points
     name: Focus Points
-    status: spec
+    status: planned
     priority: 233
     category: character
     file: docs/features/focus-points.md
@@ -243,7 +243,7 @@ features:
 
   - slug: exploration
     name: Exploration Mode
-    status: spec
+    status: planned
     priority: 235
     category: world
     file: docs/features/exploration.md
@@ -254,7 +254,7 @@ features:
 
   - slug: crafting
     name: Crafting
-    status: spec
+    status: planned
     priority: 236
     category: world
     file: docs/features/crafting.md
@@ -263,7 +263,7 @@ features:
 
   - slug: downtime
     name: Downtime
-    status: spec
+    status: planned
     priority: 237
     category: world
     file: docs/features/downtime.md
@@ -275,7 +275,7 @@ features:
 
   - slug: downtime-queue
     name: Downtime Activity Queue
-    status: spec
+    status: planned
     priority: 238
     category: world
     file: docs/features/downtime-queue.md
