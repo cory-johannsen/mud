@@ -643,13 +643,96 @@ func TestTemplate_Validate_BribeableGuard_Valid(t *testing.T) {
 	assert.NoError(t, tmpl.Validate())
 }
 
+func TestTemplate_FixerRequiresConfigBlock(t *testing.T) {
+	data := []byte(`id: test_fixer
+name: Test Fixer
+npc_type: fixer
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "fixer without fixer: block must error")
+	assert.Contains(t, err.Error(), "requires a fixer:")
+}
+
+func TestTemplate_FixerWithInvalidConfig(t *testing.T) {
+	data := []byte(`id: test_fixer
+name: Test Fixer
+npc_type: fixer
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+fixer:
+  npc_variance: 0
+  max_wanted_level: 3
+  base_costs:
+    1: 100
+    2: 200
+    3: 400
+    4: 800
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "fixer with npc_variance=0 must error")
+}
+
+func TestTemplate_FixerValidLoads(t *testing.T) {
+	data := []byte(`id: test_fixer
+name: Test Fixer
+npc_type: fixer
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+fixer:
+  npc_variance: 1.2
+  max_wanted_level: 3
+  base_costs:
+    1: 100
+    2: 200
+    3: 400
+    4: 800
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	assert.NoError(t, err)
+	assert.NotNil(t, tmpl.Fixer)
+}
+
+func TestTemplate_FixerNonCowardlyPersonalityErrors(t *testing.T) {
+	data := []byte(`id: test_fixer
+name: Test Fixer
+npc_type: fixer
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: brave
+fixer:
+  npc_variance: 1.2
+  max_wanted_level: 3
+  base_costs:
+    1: 100
+    2: 200
+    3: 400
+    4: 800
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "fixer with personality 'brave' must error (REQ-WC-3)")
+	assert.Contains(t, err.Error(), "personality")
+}
+
 // TestProperty_AllExistingNPCTemplatesStillLoad verifies that adding NPCType/Validate changes
 // does not break any existing NPC YAML file. Reads all *.yaml in content/npcs/.
 func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
 	validTypes := map[string]bool{
 		"combat": true, "merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
-		"job_trainer": true, "crafter": true,
+		"job_trainer": true, "crafter": true, "fixer": true,
 	}
 	templates, err := npc.LoadTemplates("../../../content/npcs")
 	require.NoError(t, err, "all existing NPC templates must still load after Validate() changes")

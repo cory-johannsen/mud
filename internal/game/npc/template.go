@@ -114,6 +114,7 @@ type Template struct {
 	Banker     *BankerConfig     `yaml:"banker,omitempty"`
 	JobTrainer *JobTrainerConfig `yaml:"job_trainer,omitempty"`
 	Crafter    *CrafterConfig    `yaml:"crafter,omitempty"`
+	Fixer      *FixerConfig      `yaml:"fixer,omitempty"`
 }
 
 // Validate checks that the template satisfies basic invariants.
@@ -168,7 +169,7 @@ func (t *Template) Validate() error {
 	validTypes := map[string]bool{
 		"combat": true, "merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
-		"job_trainer": true, "crafter": true,
+		"job_trainer": true, "crafter": true, "fixer": true,
 	}
 	if !validTypes[t.NPCType] {
 		return fmt.Errorf("npc template %q: unknown npc_type %q", t.ID, t.NPCType)
@@ -218,6 +219,18 @@ func (t *Template) Validate() error {
 		if t.Crafter == nil {
 			return fmt.Errorf("npc template %q: npc_type 'crafter' requires an explicit crafter: {} config block", t.ID)
 		}
+	case "fixer":
+		if t.Fixer == nil {
+			return fmt.Errorf("npc template %q: npc_type 'fixer' requires a fixer: config block", t.ID)
+		}
+		if err := t.Fixer.Validate(); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
+		// REQ-WC-3: fixers must not enter initiative order; enforce cowardly (flee) personality.
+		if t.Personality != "" && t.Personality != "cowardly" {
+			return fmt.Errorf("npc template %q: fixer npc_type requires personality 'cowardly' or empty (got %q)", t.ID, t.Personality)
+		}
+		t.Personality = "cowardly" // normalise empty → cowardly
 	}
 
 	return nil
