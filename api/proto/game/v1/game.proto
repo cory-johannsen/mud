@@ -115,6 +115,7 @@ message ClientMessage {
     SetJobRequest        set_job         = 98;
     HireRequest          hire            = 99;
     DismissRequest       dismiss         = 100;
+    TalkRequest          talk            = 101;
   }
 }
 
@@ -217,6 +218,11 @@ message HireRequest {
 
 // DismissRequest asks the server to dismiss the player's current hireling.
 message DismissRequest {}
+
+// TalkRequest initiates a conversation with a quest giver NPC.
+message TalkRequest {
+  string npc_name = 1;  // case-insensitive prefix matched against NPC name in room
+}
 
 // DeployTrapRequest asks the server to arm a trap item at the player's current position.
 message DeployTrapRequest {

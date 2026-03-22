@@ -1574,6 +1574,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleHire(uid, p.Hire)
 	case *gamev1.ClientMessage_Dismiss:
 		return s.handleDismiss(uid, p.Dismiss)
+	case *gamev1.ClientMessage_Talk:
+		return s.handleTalk(uid, p.Talk)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
