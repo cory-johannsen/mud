@@ -36,7 +36,7 @@ features:
 
   - slug: non-combat-npcs
     name: Non-Combat NPCs
-    status: planned
+    status: blocked
     priority: 20
     category: world
     file: docs/features/non-combat-npcs.md
@@ -57,7 +57,7 @@ features:
 
   - slug: actions
     name: Actions
-    status: in_progress
+    status: blocked
     priority: 40
     category: combat
     file: docs/features/actions.md
@@ -209,7 +209,7 @@ features:
 
   - slug: wire-refactor
     name: Wire Dependency Injection Refactor
-    status: planned
+    status: done
     priority: 210
     category: meta
     file: docs/features/wire-refactor.md
