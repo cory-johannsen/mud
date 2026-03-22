@@ -93,6 +93,13 @@ type Template struct {
 	// Empty string defaults to "hostile" at spawn.
 	Disposition string `yaml:"disposition"`
 
+	// AttackVerb is the verb used in combat narratives (e.g. "bites", "shoots").
+	// Empty string defaults to "attacks" in combat.
+	AttackVerb string `yaml:"attack_verb"`
+
+	// Immobile prevents this NPC from patrolling or wandering.
+	Immobile bool `yaml:"immobile"`
+
 	// NPCType classifies the NPC's role.
 	// Valid values: "combat", "merchant", "guard", "healer", "quest_giver",
 	// "hireling", "banker", "job_trainer", "crafter".
@@ -157,6 +164,18 @@ func (t *Template) Validate() error {
 	if t.Loot != nil {
 		if err := t.Loot.Validate(); err != nil {
 			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
+		// Animals must not have currency, items, equipment, or salvage_drop.
+		if t.IsAnimal() {
+			if t.Loot.Currency != nil {
+				return fmt.Errorf("npc template %q: animal type must not have currency loot", t.ID)
+			}
+			if len(t.Loot.Items) > 0 {
+				return fmt.Errorf("npc template %q: animal type must not have items loot", t.ID)
+			}
+			if t.Loot.SalvageDrop != nil {
+				return fmt.Errorf("npc template %q: animal type must not have salvage_drop", t.ID)
+			}
 		}
 	}
 
@@ -235,6 +254,15 @@ func (t *Template) Validate() error {
 
 	return nil
 }
+
+// IsAnimal returns true when the template's Type is "animal".
+func (t *Template) IsAnimal() bool { return t.Type == "animal" }
+
+// IsRobot returns true when the template's Type is "robot".
+func (t *Template) IsRobot() bool { return t.Type == "robot" }
+
+// IsMachine returns true when the template's Type is "machine".
+func (t *Template) IsMachine() bool { return t.Type == "machine" }
 
 // ValidateWithSkills runs Validate and then checks all skill IDs referenced
 // in any JobTrainerConfig against the provided skill registry.

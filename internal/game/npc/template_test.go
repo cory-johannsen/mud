@@ -742,3 +742,151 @@ func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
 			"existing NPC %q must have a valid npc_type, got %q", tmpl.ID, tmpl.NPCType)
 	}
 }
+
+// ---- NHN: IsAnimal/IsRobot/IsMachine helper tests ----
+
+func TestIsAnimalRobotMachineHelpers(t *testing.T) {
+	animal := &npc.Template{ID: "a", Name: "Dog", Type: "animal", Level: 1, MaxHP: 10, AC: 10}
+	robot := &npc.Template{ID: "b", Name: "Bot", Type: "robot", Level: 1, MaxHP: 10, AC: 10}
+	machine := &npc.Template{ID: "c", Name: "Turret", Type: "machine", Level: 1, MaxHP: 10, AC: 10}
+	human := &npc.Template{ID: "d", Name: "Guy", Type: "human", Level: 1, MaxHP: 10, AC: 10}
+
+	if !animal.IsAnimal() {
+		t.Error("expected animal.IsAnimal() == true")
+	}
+	if animal.IsRobot() {
+		t.Error("expected animal.IsRobot() == false")
+	}
+	if animal.IsMachine() {
+		t.Error("expected animal.IsMachine() == false")
+	}
+
+	if robot.IsAnimal() {
+		t.Error("expected robot.IsAnimal() == false")
+	}
+	if !robot.IsRobot() {
+		t.Error("expected robot.IsRobot() == true")
+	}
+	if robot.IsMachine() {
+		t.Error("expected robot.IsMachine() == false")
+	}
+
+	if !machine.IsMachine() {
+		t.Error("expected machine.IsMachine() == true")
+	}
+	if human.IsAnimal() || human.IsRobot() || human.IsMachine() {
+		t.Error("expected human to return false for all type helpers")
+	}
+}
+
+func TestAttackVerbField(t *testing.T) {
+	yaml := `
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+attack_verb: bites
+`
+	tmpl, err := npc.LoadTemplateFromBytes([]byte(yaml))
+	if err != nil {
+		t.Fatalf("LoadTemplateFromBytes failed: %v", err)
+	}
+	if tmpl.AttackVerb != "bites" {
+		t.Errorf("AttackVerb: got %q, want %q", tmpl.AttackVerb, "bites")
+	}
+}
+
+func TestImmobileField(t *testing.T) {
+	yaml := `
+id: test_turret
+name: Turret
+level: 1
+max_hp: 10
+ac: 10
+immobile: true
+`
+	tmpl, err := npc.LoadTemplateFromBytes([]byte(yaml))
+	if err != nil {
+		t.Fatalf("LoadTemplateFromBytes failed: %v", err)
+	}
+	if !tmpl.Immobile {
+		t.Error("expected Immobile == true")
+	}
+}
+
+func TestAnimalLootValidation_RejectsCredits(t *testing.T) {
+	yaml := `
+id: bad_animal
+name: Bad Animal
+type: animal
+level: 1
+max_hp: 10
+ac: 10
+loot:
+  currency:
+    min: 1
+    max: 5
+`
+	_, err := npc.LoadTemplateFromBytes([]byte(yaml))
+	if err == nil {
+		t.Error("expected error for animal with currency loot, got nil")
+	}
+}
+
+func TestAnimalLootValidation_RejectsItems(t *testing.T) {
+	yaml := `
+id: bad_animal2
+name: Bad Animal 2
+type: animal
+level: 1
+max_hp: 10
+ac: 10
+loot:
+  items:
+    - item: sword
+      chance: 0.5
+      min_qty: 1
+      max_qty: 1
+`
+	_, err := npc.LoadTemplateFromBytes([]byte(yaml))
+	if err == nil {
+		t.Error("expected error for animal with items loot, got nil")
+	}
+}
+
+func TestAnimalLootValidation_RejectsSalvageDrop(t *testing.T) {
+	yaml := `
+id: bad_animal3
+name: Bad Animal 3
+type: animal
+level: 1
+max_hp: 10
+ac: 10
+loot:
+  salvage_drop:
+    item_ids:
+      - scrap
+    quantity_min: 1
+    quantity_max: 1
+`
+	_, err := npc.LoadTemplateFromBytes([]byte(yaml))
+	if err == nil {
+		t.Error("expected error for animal with salvage_drop, got nil")
+	}
+}
+
+func TestUnknownTypeNotRejected(t *testing.T) {
+	yaml := `
+id: alien_npc
+name: Alien
+type: alien
+level: 1
+max_hp: 10
+ac: 10
+`
+	_, err := npc.LoadTemplateFromBytes([]byte(yaml))
+	if err != nil {
+		t.Errorf("expected unknown type to be accepted, got: %v", err)
+	}
+}
