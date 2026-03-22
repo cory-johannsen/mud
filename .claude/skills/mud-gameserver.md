@@ -100,6 +100,71 @@ The guard attacks you for 8 damage.
 
 ---
 
+## Example Workflows
+
+### 1. Verify NPC Spawn
+
+Connect as `claude_admin`, navigate to the target zone, and use the `spawn` command:
+
+```
+Username: claude_admin
+Password: <password>
+> go ne_portland
+> spawn feral_dog
+A feral dog appears.
+> look
+NE Portland — Cully Road
+A cracked asphalt road...
+Exits: north south
+A feral dog is here.
+>
+```
+
+Confirm the NPC appears in the room description. Use `attack feral_dog` to verify it engages in combat.
+
+### 2. Place Item in Room
+
+Connect as `claude_editor`, navigate to the target room, and use the `place` command:
+
+```
+Username: claude_editor
+Password: <password>
+> go rustbucket_ridge
+> place tactical_boots here
+Tactical Boots placed in the room.
+> look
+Rustbucket Ridge — Blade House
+...
+A pair of tactical boots lies here.
+>
+```
+
+Confirm the item appears. Use `get tactical_boots` as `claude_player` to verify it can be picked up.
+
+### 3. Test Combat Round
+
+Connect as `claude_player`, find a target NPC, and run a full combat exchange:
+
+```
+Username: claude_player
+Password: <password>
+> go rustbucket_ridge
+> attack gang_member
+You attack the gang member.
+You strike the gang member for 9 damage.
+The gang member attacks you.
+The gang member strikes you for 5 damage.
+> attack
+You strike the gang member for 11 damage.
+The gang member is defeated.
+You gain 45 XP.
+>
+```
+
+Verify: damage values are within dice bounds, XP is awarded on kill, and the NPC is removed from the room after defeat.
+
+---
+
 ## Notes
 
 - The headless port (4002) is only available when `telnet.headless_port` is configured non-zero in the config.
