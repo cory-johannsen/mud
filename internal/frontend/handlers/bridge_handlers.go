@@ -133,6 +133,9 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerSelectTech:         bridgeSelectTech,
 	command.HandlerAid:                bridgeAid,
 	command.HandlerTalk:               bridgeTalk,
+	command.HandlerBribe:              bridgeBribe,
+	command.HandlerSurrender:          bridgeSurrender,
+	command.HandlerRelease:            bridgeRelease,
 	command.HandlerHeal:               bridgeHeal,
 	command.HandlerBrowse:             bridgeBrowse,
 	command.HandlerBuy:                bridgeBuy,
@@ -1676,5 +1679,51 @@ func bridgeSetJob(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_SetJob{SetJob: &gamev1.SetJobRequest{JobId: jobID}},
+	}}, nil
+}
+
+// bridgeBribe builds a BribeRequest or BribeConfirmRequest depending on whether the
+// first argument is "confirm".
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a BribeConfirmRequest when the first
+// arg is "confirm"; otherwise returns a BribeRequest with an optional NPC name.
+func bridgeBribe(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) > 0 && strings.ToLower(bctx.parsed.Args[0]) == "confirm" {
+		return bridgeResult{msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_BribeConfirmRequest{BribeConfirmRequest: &gamev1.BribeConfirmRequest{}},
+		}}, nil
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_BribeRequest{BribeRequest: &gamev1.BribeRequest{NpcName: bctx.parsed.RawArgs}},
+	}}, nil
+}
+
+// bridgeSurrender builds a SurrenderRequest.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a SurrenderRequest; done is false.
+func bridgeSurrender(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_SurrenderRequest{SurrenderRequest: &gamev1.SurrenderRequest{}},
+	}}, nil
+}
+
+// bridgeRelease builds a ReleaseRequest for the named detained player.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: if RawArgs is empty, writes a usage error and returns done=true;
+// otherwise returns a non-nil msg containing a ReleaseRequest.
+func bridgeRelease(bctx *bridgeContext) (bridgeResult, error) {
+	playerName := strings.TrimSpace(bctx.parsed.RawArgs)
+	if playerName == "" {
+		return writeErrorPrompt(bctx, "Usage: release <player>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_ReleaseRequest{ReleaseRequest: &gamev1.ReleaseRequest{PlayerName: playerName}},
 	}}, nil
 }

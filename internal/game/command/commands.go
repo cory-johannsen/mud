@@ -122,6 +122,9 @@ const (
 	HandlerTrainJob           = "train_job"
 	HandlerListJobs           = "list_jobs"
 	HandlerSetJob             = "setjob"
+	HandlerBribe              = "bribe"
+	HandlerSurrender          = "surrender"
+	HandlerRelease            = "release"
 )
 
 // Command defines a player-invocable command.
@@ -190,6 +193,9 @@ func BuiltinCommands() []Command {
 		{Name: "train", Aliases: nil, Help: "Train a job with a job trainer NPC (train <npc> <job>)", Category: CategoryWorld, Handler: HandlerTrainJob},
 		{Name: "jobs", Aliases: nil, Help: "List your current jobs", Category: CategoryCharacter, Handler: HandlerListJobs},
 		{Name: "setjob", Aliases: nil, Help: "Set your active job (setjob <job>)", Category: CategoryCharacter, Handler: HandlerSetJob},
+		{Name: "bribe", Aliases: nil, Help: "Bribe law enforcement to reduce wanted level (bribe [npc]) or confirm a pending bribe (bribe confirm)", Category: CategoryWorld, Handler: HandlerBribe},
+		{Name: "surrender", Aliases: nil, Help: "Surrender to law enforcement in the current room", Category: CategoryWorld, Handler: HandlerSurrender},
+		{Name: "release", Aliases: nil, Help: "Release a detained player (release <player>)", Category: CategoryWorld, Handler: HandlerRelease},
 
 		// Communication commands
 		{Name: "say", Aliases: nil, Help: "Say something to the room", Category: CategoryCommunication, Handler: HandlerSay},

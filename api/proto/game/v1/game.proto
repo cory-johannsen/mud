@@ -116,6 +116,10 @@ message ClientMessage {
     HireRequest          hire            = 99;
     DismissRequest       dismiss         = 100;
     TalkRequest          talk            = 101;
+    BribeRequest         bribe_request   = 102;
+    BribeConfirmRequest  bribe_confirm_request = 103;
+    SurrenderRequest     surrender_request     = 104;
+    ReleaseRequest       release_request       = 105;
   }
 }
 
@@ -222,6 +226,22 @@ message DismissRequest {}
 // TalkRequest initiates a conversation with a quest giver NPC.
 message TalkRequest {
   string npc_name = 1;  // case-insensitive prefix matched against NPC name in room
+}
+
+// BribeRequest asks the server to initiate a bribe with an optional target NPC name.
+message BribeRequest {
+  string npc_name = 1;  // optional; required when multiple bribeable NPCs present
+}
+
+// BribeConfirmRequest confirms a pending bribe after reviewing the cost.
+message BribeConfirmRequest {}
+
+// SurrenderRequest asks the server to surrender to law enforcement in the current room.
+message SurrenderRequest {}
+
+// ReleaseRequest asks the server to release a detained player (law enforcement only).
+message ReleaseRequest {
+  string player_name = 1;  // name of detained player to release
 }
 
 // DeployTrapRequest asks the server to arm a trap item at the player's current position.
