@@ -163,6 +163,60 @@ func TestHandleBribeConfirm_InsufficientCredits(t *testing.T) {
 	assert.Equal(t, 2, sess.WantedLevel["test"], "wanted level must not change")
 }
 
+// TestHandleBribe_WantedLevelExceedsCap verifies that bribing returns a rejection message when the
+// player's WantedLevel exceeds the target NPC's cap (MaxWantedLevel for fixer,
+// MaxBribeWantedLevel for guard).
+//
+// Precondition: fixer with MaxWantedLevel=2 in room; player WantedLevel["test"] == 4.
+// Postcondition: event message contains "no one" (NPC is excluded from candidates).
+func TestHandleBribe_WantedLevelExceedsCap(t *testing.T) {
+	svc, uid := newBribeTestServer(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	// Elevate wanted level above the fixer's cap of 2.
+	sess.WantedLevel["test"] = 4
+
+	// Spawn a fixer whose MaxWantedLevel is 2; player at level 4 exceeds it.
+	tmpl := &npc.Template{
+		ID:      "test_fixer_lowcap",
+		Name:    "LowCap Remy",
+		NPCType: "fixer",
+		Level:   3,
+		MaxHP:   20,
+		AC:      12,
+		Fixer: &npc.FixerConfig{
+			BaseCosts:      map[int]int{1: 100, 2: 250},
+			NPCVariance:    1.0,
+			MaxWantedLevel: 2,
+		},
+	}
+	_, err := svc.npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+
+	evt, err := svc.handleBribe(uid, &gamev1.BribeRequest{NpcName: "LowCap Remy"})
+	require.NoError(t, err)
+	assert.Contains(t, evt.GetMessage().Content, "no one")
+}
+
+// TestHandleBribe_Disambiguation verifies that bribing without an NPC name returns a
+// disambiguation message listing all bribeable NPC names when multiple are present.
+//
+// Precondition: fixer "Remy" and bribeable guard "Officer Vance" both in room;
+// player WantedLevel["test"] == 2.
+// Postcondition: event message contains "Multiple" and lists both NPC names.
+func TestHandleBribe_Disambiguation(t *testing.T) {
+	svc, uid := newBribeTestServer(t)
+	spawnFixer(t, svc)
+	spawnGuard(t, svc)
+
+	evt, err := svc.handleBribe(uid, &gamev1.BribeRequest{})
+	require.NoError(t, err)
+
+	content := evt.GetMessage().Content
+	assert.Contains(t, content, "Multiple")
+	assert.Contains(t, content, "Remy")
+	assert.Contains(t, content, "Officer Vance")
+}
+
 // TestHandleBribeConfirm_Success verifies that a successful bribe confirmation deducts credits,
 // decrements wanted level, and clears pending state.
 //
