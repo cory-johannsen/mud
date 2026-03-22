@@ -9,6 +9,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 	"pgregory.net/rapid"
 )
 
@@ -577,3 +578,27 @@ zone:
 
 // Ensure the skillcheck import is used; ForOutcome is referenced via the type.
 var _ = skillcheck.TriggerDef{}
+
+func TestZoneToYAMLRoundTrip(t *testing.T) {
+	original, err := LoadZoneFromBytes([]byte(validZoneYAML))
+	require.NoError(t, err)
+
+	yf := zoneToYAML(original)
+	data, err := yaml.Marshal(yf)
+	require.NoError(t, err)
+
+	reloaded, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+
+	assert.Equal(t, original.ID, reloaded.ID)
+	assert.Equal(t, original.Name, reloaded.Name)
+	assert.Equal(t, len(original.Rooms), len(reloaded.Rooms))
+	for id, room := range original.Rooms {
+		r2, ok := reloaded.Rooms[id]
+		require.True(t, ok, "room %q missing after round-trip", id)
+		assert.Equal(t, room.Title, r2.Title)
+		assert.Equal(t, room.MapX, r2.MapX)
+		assert.Equal(t, room.MapY, r2.MapY)
+		assert.Equal(t, len(room.Exits), len(r2.Exits))
+	}
+}

@@ -41,6 +41,13 @@ frontend:
       cpu: 200m
       memory: 128Mi
 
+content:
+  persistentVolume:
+    enabled: false        # set true in production
+    storageClass: ""      # uses cluster default if empty
+    size: 1Gi
+    accessMode: ReadWriteOnce
+
 logging:
   level: info
   format: json

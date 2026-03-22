@@ -60,3 +60,27 @@ spec:
             periodSeconds: 5
           resources:
             {{- toYaml .Values.gameserver.resources | nindent 12 }}
+          {{- if .Values.content.persistentVolume.enabled }}
+          volumeMounts:
+            - name: content
+              mountPath: /app/content
+          {{- end }}
+      {{- if .Values.content.persistentVolume.enabled }}
+      initContainers:
+        - name: content-seed
+          image: {{ .Values.image.registry }}/{{ .Values.image.gameserverRepository }}:{{ .Values.image.tag }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ -z "$(find /mnt/content -name '*.yaml' 2>/dev/null | head -1)" ]; then
+                cp -r /app/content/. /mnt/content/
+              fi
+          volumeMounts:
+            - name: content
+              mountPath: /mnt/content
+      volumes:
+        - name: content
+          persistentVolumeClaim:
+            claimName: mud-content
+      {{- end }}

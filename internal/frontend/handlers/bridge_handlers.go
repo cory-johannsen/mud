@@ -149,6 +149,12 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerTrainJob:           bridgeTrainJob,
 	command.HandlerListJobs:           bridgeListJobs,
 	command.HandlerSetJob:             bridgeSetJob,
+	command.HandlerSpawnNPC:           bridgeSpawnNPC,
+	command.HandlerAddRoom:            bridgeAddRoom,
+	command.HandlerAddLink:            bridgeAddLink,
+	command.HandlerRemoveLink:         bridgeRemoveLink,
+	command.HandlerSetRoom:            bridgeSetRoom,
+	command.HandlerEditorCmds:         bridgeEditorCmds,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1725,5 +1731,97 @@ func bridgeRelease(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_ReleaseRequest{ReleaseRequest: &gamev1.ReleaseRequest{PlayerName: playerName}},
+	}}, nil
+}
+
+// bridgeSpawnNPC builds a SpawnNPCRequest. Usage: spawnnpc <template_id> [room_id]
+// Precondition: bctx must be non-nil; caller must have editor or admin role.
+// Postcondition: returns a SpawnNPCRequest with the given template and optional room.
+func bridgeSpawnNPC(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) < 1 {
+		return writeErrorPrompt(bctx, "Usage: spawnnpc <template_id> [room_id]")
+	}
+	templateID := bctx.parsed.Args[0]
+	roomID := ""
+	if len(bctx.parsed.Args) >= 2 {
+		roomID = bctx.parsed.Args[1]
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_SpawnNpc{SpawnNpc: &gamev1.SpawnNPCRequest{TemplateId: templateID, RoomId: roomID}},
+	}}, nil
+}
+
+// bridgeAddRoom builds an AddRoomRequest. Usage: addroom <zone_id> <room_id> <title...>
+// Precondition: bctx must be non-nil; caller must have editor or admin role.
+// Postcondition: returns an AddRoomRequest with the given zone, room ID, and title.
+func bridgeAddRoom(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) < 3 {
+		return writeErrorPrompt(bctx, "Usage: addroom <zone_id> <room_id> <title>")
+	}
+	zoneID := bctx.parsed.Args[0]
+	roomID := bctx.parsed.Args[1]
+	title := strings.Join(bctx.parsed.Args[2:], " ")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_AddRoom{AddRoom: &gamev1.AddRoomRequest{ZoneId: zoneID, RoomId: roomID, Title: title}},
+	}}, nil
+}
+
+// bridgeAddLink builds an AddLinkRequest. Usage: addlink <from_room> <direction> <to_room>
+// Precondition: bctx must be non-nil; caller must have editor or admin role.
+// Postcondition: returns an AddLinkRequest with the given rooms and direction.
+func bridgeAddLink(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) < 3 {
+		return writeErrorPrompt(bctx, "Usage: addlink <from_room_id> <direction> <to_room_id>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_AddLink{AddLink: &gamev1.AddLinkRequest{
+			FromRoomId: bctx.parsed.Args[0],
+			Direction:  bctx.parsed.Args[1],
+			ToRoomId:   bctx.parsed.Args[2],
+		}},
+	}}, nil
+}
+
+// bridgeRemoveLink builds a RemoveLinkRequest. Usage: removelink <room_id> <direction>
+// Precondition: bctx must be non-nil; caller must have editor or admin role.
+// Postcondition: returns a RemoveLinkRequest for the given room and direction.
+func bridgeRemoveLink(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) < 2 {
+		return writeErrorPrompt(bctx, "Usage: removelink <room_id> <direction>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_RemoveLink{RemoveLink: &gamev1.RemoveLinkRequest{
+			RoomId:    bctx.parsed.Args[0],
+			Direction: bctx.parsed.Args[1],
+		}},
+	}}, nil
+}
+
+// bridgeSetRoom builds a SetRoomRequest. Usage: setroom <field> <value...>
+// Precondition: bctx must be non-nil; caller must have editor or admin role.
+// Postcondition: returns a SetRoomRequest for the current room with the given field and value.
+func bridgeSetRoom(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) < 2 {
+		return writeErrorPrompt(bctx, "Usage: setroom <field> <value>  (fields: title, description, danger_level)")
+	}
+	field := bctx.parsed.Args[0]
+	value := strings.Join(bctx.parsed.Args[1:], " ")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_SetRoom{SetRoom: &gamev1.SetRoomRequest{Field: field, Value: value}},
+	}}, nil
+}
+
+// bridgeEditorCmds builds an EditorCmdsRequest. Usage: ecmds
+// Precondition: bctx must be non-nil; caller must have editor or admin role.
+// Postcondition: returns an EditorCmdsRequest.
+func bridgeEditorCmds(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_EditorCmds{EditorCmds: &gamev1.EditorCmdsRequest{}},
 	}}, nil
 }

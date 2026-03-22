@@ -258,3 +258,91 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 
 	return zone, nil
 }
+
+// zoneToYAML converts a Zone domain object back to its YAML serialization form.
+//
+// Precondition: zone must be non-nil.
+// Postcondition: Returns a yamlZoneFile that, when marshaled and passed to LoadZoneFromBytes,
+// produces a Zone equal to the input (modulo floating-point trap fields).
+func zoneToYAML(zone *Zone) yamlZoneFile {
+	yrooms := make([]yamlRoom, 0, len(zone.Rooms))
+	for _, room := range zone.Rooms {
+		mapX := room.MapX
+		mapY := room.MapY
+		yr := yamlRoom{
+			ID:              room.ID,
+			Title:           room.Title,
+			Description:     room.Description,
+			Properties:      room.Properties,
+			SkillChecks:     room.SkillChecks,
+			Effects:         room.Effects,
+			MapX:            &mapX,
+			MapY:            &mapY,
+			DangerLevel:     room.DangerLevel,
+			RoomTrapChance:  room.RoomTrapChance,
+			CoverTrapChance: room.CoverTrapChance,
+		}
+		for _, exit := range room.Exits {
+			yr.Exits = append(yr.Exits, yamlExit{
+				Direction: string(exit.Direction),
+				Target:    exit.TargetRoom,
+				Locked:    exit.Locked,
+				Hidden:    exit.Hidden,
+			})
+		}
+		for _, sp := range room.Spawns {
+			yr.Spawns = append(yr.Spawns, yamlRoomSpawn{
+				Template:     sp.Template,
+				Count:        sp.Count,
+				RespawnAfter: sp.RespawnAfter,
+			})
+		}
+		for _, eq := range room.Equipment {
+			respawnStr := ""
+			if eq.RespawnAfter > 0 {
+				respawnStr = eq.RespawnAfter.String()
+			}
+			yr.Equipment = append(yr.Equipment, yamlRoomEquipment{
+				ItemID:       eq.ItemID,
+				Description:  eq.Description,
+				MaxCount:     eq.MaxCount,
+				RespawnAfter: respawnStr,
+				Immovable:    eq.Immovable,
+				Script:       eq.Script,
+				SkillChecks:  eq.SkillChecks,
+				TrapTemplate: eq.TrapTemplate,
+			})
+		}
+		for _, tr := range room.Traps {
+			yr.Traps = append(yr.Traps, yamlRoomTrap{
+				Template: tr.TemplateID,
+				Position: tr.Position,
+			})
+		}
+		yrooms = append(yrooms, yr)
+	}
+
+	yz := yamlZone{
+		ID:                     zone.ID,
+		Name:                   zone.Name,
+		Description:            zone.Description,
+		StartRoom:              zone.StartRoom,
+		ScriptDir:              zone.ScriptDir,
+		ScriptInstructionLimit: zone.ScriptInstructionLimit,
+		Rooms:                  yrooms,
+		DangerLevel:            zone.DangerLevel,
+		RoomTrapChance:         zone.RoomTrapChance,
+		CoverTrapChance:        zone.CoverTrapChance,
+	}
+	if zone.TrapProbabilities != nil {
+		tp := &yamlTrapProbabilities{
+			RoomTrapChance:  zone.TrapProbabilities.RoomTrapChance,
+			CoverTrapChance: zone.TrapProbabilities.CoverTrapChance,
+		}
+		for _, e := range zone.TrapProbabilities.TrapPool {
+			tp.TrapPool = append(tp.TrapPool, yamlTrapEntry{Template: e.Template, Weight: e.Weight})
+		}
+		yz.TrapProbabilities = tp
+	}
+	return yamlZoneFile{Zone: yz}
+}

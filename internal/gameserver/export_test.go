@@ -3,7 +3,9 @@ package gameserver
 import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/technology"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // ExportedBuildOptions exposes buildOptions for white-box testing.
@@ -29,4 +31,14 @@ func ExportedFleeNPCImmobile(inst *npc.Instance) bool {
 	h := &CombatHandler{}
 	h.fleeNPCLocked(inst, nil)
 	return inst.RoomID != before
+}
+
+// RequireEditor exposes requireEditor for white-box testing.
+var RequireEditor = func(sess *session.PlayerSession) *gamev1.ServerEvent {
+	return requireEditor(sess)
+}
+
+// RequireAdmin exposes requireAdmin for white-box testing.
+var RequireAdmin = func(sess *session.PlayerSession) *gamev1.ServerEvent {
+	return requireAdmin(sess)
 }

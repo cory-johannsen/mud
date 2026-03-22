@@ -239,3 +239,33 @@ func TestProperty_PopulateRoom_NeverExceedsCap(t *testing.T) {
 		}
 	})
 }
+
+func TestRespawnManagerGetTemplate_Found(t *testing.T) {
+	tmpl := &npc.Template{ID: "guard"}
+	rm := npc.NewRespawnManager(nil, map[string]*npc.Template{"guard": tmpl})
+	got, ok := rm.GetTemplate("guard")
+	assert.True(t, ok)
+	assert.Equal(t, tmpl, got)
+}
+
+func TestRespawnManagerGetTemplate_NotFound(t *testing.T) {
+	rm := npc.NewRespawnManager(nil, nil)
+	got, ok := rm.GetTemplate("nobody")
+	assert.False(t, ok)
+	assert.Nil(t, got)
+}
+
+// Property: GetTemplate returns found iff id was in the template map.
+func TestRespawnManagerGetTemplateProperty(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		id := rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz"))).Filter(func(s string) bool { return len(s) > 0 }).Draw(t, "id")
+		present := rapid.Bool().Draw(t, "present")
+		templates := make(map[string]*npc.Template)
+		if present {
+			templates[id] = &npc.Template{ID: id}
+		}
+		rm := npc.NewRespawnManager(nil, templates)
+		_, ok := rm.GetTemplate(id)
+		assert.Equal(t, present, ok)
+	})
+}

@@ -820,6 +820,20 @@ func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry
 				}
 			}
 		}
+		if role == postgres.RoleEditor || role == postgres.RoleAdmin {
+			if cmds := byCategory[command.CategoryEditor]; len(cmds) > 0 {
+				sb.WriteString("\r\n")
+				sb.WriteString(telnet.Colorf(telnet.BrightYellow, "  Editor:"))
+				for _, cmd := range cmds {
+					aliases := ""
+					if len(cmd.Aliases) > 0 {
+						aliases = " (" + strings.Join(cmd.Aliases, ", ") + ")"
+					}
+					sb.WriteString("\r\n")
+					sb.WriteString(telnet.Colorf(telnet.Green, "    %-12s", cmd.Name) + aliases + " — " + cmd.Help)
+				}
+			}
+		}
 		_ = conn.WriteConsole(sb.String())
 		return
 	}
@@ -843,6 +857,18 @@ func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry
 	if role == postgres.RoleAdmin {
 		if cmds := byCategory[command.CategoryAdmin]; len(cmds) > 0 {
 			_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow, "  Admin:"))
+			for _, cmd := range cmds {
+				aliases := ""
+				if len(cmd.Aliases) > 0 {
+					aliases = " (" + strings.Join(cmd.Aliases, ", ") + ")"
+				}
+				_ = conn.WriteLine(telnet.Colorf(telnet.Green, "    %-12s", cmd.Name) + aliases + " — " + cmd.Help)
+			}
+		}
+	}
+	if role == postgres.RoleEditor || role == postgres.RoleAdmin {
+		if cmds := byCategory[command.CategoryEditor]; len(cmds) > 0 {
+			_ = conn.WriteLine(telnet.Colorf(telnet.BrightYellow, "  Editor:"))
 			for _, cmd := range cmds {
 				aliases := ""
 				if len(cmd.Aliases) > 0 {

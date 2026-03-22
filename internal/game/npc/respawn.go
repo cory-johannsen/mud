@@ -58,6 +58,17 @@ func NewRespawnManager(spawns map[string][]RoomSpawn, templates map[string]*Temp
 	}
 }
 
+// GetTemplate returns the NPC template with the given id, or (nil, false) if not found.
+//
+// Precondition: id must be non-empty for a meaningful result.
+// Postcondition: Returned *Template is non-nil when ok is true.
+func (r *RespawnManager) GetTemplate(id string) (*Template, bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	t, ok := r.templates[id]
+	return t, ok
+}
+
 // PopulateRoom enforces the population cap for each RoomSpawn config in roomID.
 // It first removes excess instances when the live count exceeds Max, then spawns
 // new instances to fill the room up to exactly Max.

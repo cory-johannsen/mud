@@ -45,6 +45,26 @@ import (
 // errQuit is returned by handleQuit to signal the command loop to stop cleanly.
 var errQuit = fmt.Errorf("quit")
 
+// requireEditor returns an error ServerEvent if the session lacks editor or admin role.
+// Precondition: sess must be non-nil.
+// Postcondition: Returns nil if role is editor or admin; returns error ServerEvent otherwise.
+func requireEditor(sess *session.PlayerSession) *gamev1.ServerEvent {
+	if sess.Role != postgres.RoleEditor && sess.Role != postgres.RoleAdmin {
+		return errorEvent("permission denied: editor role required")
+	}
+	return nil
+}
+
+// requireAdmin returns an error ServerEvent if the session lacks admin role.
+// Precondition: sess must be non-nil.
+// Postcondition: Returns nil if role is admin; returns error ServerEvent otherwise.
+func requireAdmin(sess *session.PlayerSession) *gamev1.ServerEvent {
+	if sess.Role != postgres.RoleAdmin {
+		return errorEvent("permission denied: admin role required")
+	}
+	return nil
+}
+
 // AccountAdmin provides account lookup and role mutation for in-game admin commands.
 //
 // Precondition: Implementations must be safe for concurrent use.
@@ -224,6 +244,7 @@ type GameServiceServer struct {
 	// detainedUntilRepo persists detention expiry timestamps per character.
 	// May be nil (detention expiry is not persisted if not set).
 	detainedUntilRepo DetainedUntilUpdater
+	worldEditor       *world.WorldEditor
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -336,6 +357,17 @@ func NewGameServiceServer(
 // Postcondition: PendingBoosts are loaded from the DB on each player login.
 func (s *GameServiceServer) SetProgressRepo(repo ProgressRepository) {
 	s.progressRepo = repo
+}
+
+// World returns the world Manager. Used by startup initialization.
+func (s *GameServiceServer) World() *world.Manager {
+	return s.world
+}
+
+// SetWorldEditor sets the WorldEditor after startup writability check.
+// Passing nil disables world-editing commands.
+func (s *GameServiceServer) SetWorldEditor(we *world.WorldEditor) {
+	s.worldEditor = we
 }
 
 // SetXPService registers the XP service used to award experience.
@@ -1645,6 +1677,18 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSurrender(uid, p.SurrenderRequest)
 	case *gamev1.ClientMessage_ReleaseRequest:
 		return s.handleRelease(uid, p.ReleaseRequest)
+	case *gamev1.ClientMessage_SpawnNpc:
+		return s.handleSpawnNPC(uid, p.SpawnNpc)
+	case *gamev1.ClientMessage_AddRoom:
+		return s.handleAddRoom(uid, p.AddRoom)
+	case *gamev1.ClientMessage_AddLink:
+		return s.handleAddLink(uid, p.AddLink)
+	case *gamev1.ClientMessage_RemoveLink:
+		return s.handleRemoveLink(uid, p.RemoveLink)
+	case *gamev1.ClientMessage_SetRoom:
+		return s.handleSetRoom(uid, p.SetRoom)
+	case *gamev1.ClientMessage_EditorCmds:
+		return s.handleEditorCmds(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -4167,8 +4211,8 @@ func (s *GameServiceServer) handleSetRole(uid string, req *gamev1.SetRoleRequest
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	if sess.Role != "admin" {
-		return errorEvent("permission denied: admin role required"), nil
+	if evt := requireAdmin(sess); evt != nil {
+		return evt, nil
 	}
 	if s.accountAdmin == nil {
 		return errorEvent("account administration not available"), nil
@@ -4199,8 +4243,8 @@ func (s *GameServiceServer) handleSummonItem(uid string, req *gamev1.SummonItemR
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	if sess.Role != "editor" && sess.Role != "admin" {
-		return errorEvent("permission denied: editor role required"), nil
+	if evt := requireEditor(sess); evt != nil {
+		return evt, nil
 	}
 	if s.invRegistry == nil {
 		return errorEvent("item registry unavailable"), nil
@@ -4234,8 +4278,8 @@ func (s *GameServiceServer) handleTeleport(uid string, req *gamev1.TeleportReque
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	if sess.Role != "admin" {
-		return errorEvent("permission denied: admin role required"), nil
+	if evt := requireAdmin(sess); evt != nil {
+		return evt, nil
 	}
 	if req.TargetCharacter == "" || req.RoomId == "" {
 		return errorEvent("usage: teleport <character> <room_id>"), nil
@@ -4529,6 +4573,9 @@ func (s *GameServiceServer) handleRoomEquip(uid string, req *gamev1.RoomEquipReq
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
+	}
+	if evt := requireEditor(sess); evt != nil {
+		return evt, nil
 	}
 	if s.roomEquipMgr == nil {
 		return messageEvent("Room equipment manager not available."), nil
@@ -7617,8 +7664,8 @@ func (s *GameServiceServer) handleGrant(uid string, req *gamev1.GrantRequest) (*
 	if !ok {
 		return errorEvent("player not found"), nil
 	}
-	if sess.Role != "editor" && sess.Role != "admin" {
-		return errorEvent("permission denied: editor role required"), nil
+	if evt := requireEditor(sess); evt != nil {
+		return evt, nil
 	}
 	if req.GrantType != "heropoint" && req.Amount <= 0 {
 		return errorEvent("amount must be greater than zero"), nil
