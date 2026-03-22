@@ -484,6 +484,14 @@ features:
     file: docs/features/game-client-ebiten.md
     effort: "XXL"  # native cross-platform client (Windows/Mac/Linux) over gRPC; new game engine layer
 
+  - slug: claude-gameserver-skill
+    name: Claude Game Server Skill
+    status: planned
+    priority: 455
+    category: meta
+    file: docs/features/claude-gameserver-skill.md
+    effort: "M"  # headless telnet port, account seeding tool, skill document
+
   - slug: documentation
     name: Documentation
     status: planned
