@@ -36,6 +36,7 @@ type StorageDeps struct {
 	SpontaneousUsePoolRepo SpontaneousUsePoolRepo
 	WantedRepo             *postgres.WantedRepository
 	AutomapRepo            *postgres.AutomapRepository
+	DetainedUntilRepo      DetainedUntilUpdater
 }
 
 // ContentDeps groups all content/world dependencies for GameServiceServer.

@@ -60,4 +60,8 @@ type Character struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
+
+	// DetainedUntil is non-nil when the character is serving a detention sentence.
+	// Persisted to DB; nil means not detained.
+	DetainedUntil *time.Time
 }

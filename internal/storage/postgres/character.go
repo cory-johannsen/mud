@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -116,7 +117,8 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 	err := r.db.QueryRow(ctx, `
 		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       brutality, quickness, grit, reasoning, savvy, flair,
-		       max_hp, current_hp, created_at, updated_at, default_combat_action, gender
+		       max_hp, current_hp, created_at, updated_at, default_combat_action, gender,
+		       detained_until
 		FROM characters WHERE id = $1`,
 		id,
 	).Scan(
@@ -125,6 +127,7 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 		&c.Abilities.Brutality, &c.Abilities.Quickness, &c.Abilities.Grit,
 		&c.Abilities.Reasoning, &c.Abilities.Savvy, &c.Abilities.Flair,
 		&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction, &c.Gender,
+		&c.DetainedUntil,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -133,6 +136,28 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 		return nil, fmt.Errorf("querying character: %w", err)
 	}
 	return &c, nil
+}
+
+// UpdateDetainedUntil persists the detained_until timestamp for a character.
+// Pass nil to clear the detention.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: characters.detained_until is updated; returns ErrCharacterNotFound if no row updated.
+func (r *CharacterRepository) UpdateDetainedUntil(ctx context.Context, characterID int64, detainedUntil *time.Time) error {
+	if characterID <= 0 {
+		return fmt.Errorf("UpdateDetainedUntil: characterID must be > 0, got %d", characterID)
+	}
+	tag, err := r.db.Exec(ctx,
+		`UPDATE characters SET detained_until = $2 WHERE id = $1`,
+		characterID, detainedUntil,
+	)
+	if err != nil {
+		return fmt.Errorf("UpdateDetainedUntil: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("UpdateDetainedUntil: %w", ErrCharacterNotFound)
+	}
+	return nil
 }
 
 // SaveDefaultCombatAction persists the player's preferred default combat action.

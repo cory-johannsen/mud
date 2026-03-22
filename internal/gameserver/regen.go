@@ -20,17 +20,26 @@ const RegenInterval = 30 * time.Second
 // regenNPCRate is the flat HP restored per tick for NPCs.
 const regenNPCRate = 1
 
+// DetentionChecker is implemented by GameServiceServer to run detention completion checks.
+//
+// Precondition: sess must not be nil.
+// Postcondition: if detention is expired, it is completed and the session updated.
+type DetentionChecker interface {
+	checkDetentionCompletion(sess *session.PlayerSession)
+}
+
 // RegenManager ticks periodically and restores HP to players and NPCs that are
 // not currently in combat.
 //
 // Precondition: sessions, npcMgr, combatH, and charSaver must be non-nil.
 type RegenManager struct {
-	sessions  *session.Manager
-	npcMgr    *npc.Manager
-	combatH   *CombatHandler
-	charSaver CharacterSaver
-	interval  time.Duration
-	logger    *zap.Logger
+	sessions         *session.Manager
+	npcMgr           *npc.Manager
+	combatH          *CombatHandler
+	charSaver        CharacterSaver
+	interval         time.Duration
+	logger           *zap.Logger
+	detentionChecker DetentionChecker
 }
 
 // NewRegenManager constructs a RegenManager.
@@ -58,6 +67,14 @@ func NewRegenManager(
 	}
 }
 
+// SetDetentionChecker registers a DetentionChecker to run during regen ticks.
+//
+// Precondition: checker may be nil (disables detention checks during regen).
+// Postcondition: each regen tick calls checkDetentionCompletion for every player.
+func (r *RegenManager) SetDetentionChecker(checker DetentionChecker) {
+	r.detentionChecker = checker
+}
+
 // Start launches the regen goroutine. Runs until ctx is cancelled.
 //
 // Postcondition: One regen tick fires per interval until ctx is done.
@@ -83,11 +100,17 @@ func (r *RegenManager) tick(ctx context.Context) {
 }
 
 // regenPlayers heals all idle players who are below max HP.
+// Also runs detention completion checks for all players.
 // Regen per tick = max(1, GritMod).
 func (r *RegenManager) regenPlayers(ctx context.Context) {
 	const inCombatStatus = int32(2) // gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT
 
 	for _, sess := range r.sessions.AllPlayers() {
+		// Run detention completion check on every regen tick (REQ-WC-14b).
+		if r.detentionChecker != nil {
+			r.detentionChecker.checkDetentionCompletion(sess)
+		}
+
 		if sess.Status == inCombatStatus {
 			continue
 		}

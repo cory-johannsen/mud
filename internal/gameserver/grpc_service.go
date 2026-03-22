@@ -220,6 +220,9 @@ type GameServiceServer struct {
 	// healerCapacityRepo persists per-template healer daily capacity usage across restarts.
 	// May be nil (capacity resets on restart if not set).
 	healerCapacityRepo HealerCapacityRepo
+	// detainedUntilRepo persists detention expiry timestamps per character.
+	// May be nil (detention expiry is not persisted if not set).
+	detainedUntilRepo DetainedUntilUpdater
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -228,6 +231,14 @@ type GameServiceServer struct {
 type HealerCapacityRepo interface {
 	Save(ctx context.Context, templateID string, capacityUsed int) error
 	LoadAll(ctx context.Context) (map[string]int, error)
+}
+
+// DetainedUntilUpdater persists the detained_until timestamp for a character.
+//
+// Precondition: characterID must be > 0.
+// Postcondition: detained_until is updated; nil clears the detention.
+type DetainedUntilUpdater interface {
+	UpdateDetainedUntil(ctx context.Context, characterID int64, detainedUntil *time.Time) error
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -289,6 +300,7 @@ func NewGameServiceServer(
 		mentalStateMgr:             content.MentalStateMgr,
 		actionH:                    handlers.ActionHandler,
 		wantedRepo:                 storage.WantedRepo,
+		detainedUntilRepo:          storage.DetainedUntilRepo,
 		trapMgr:                    nil, // trap loading not yet wired
 		trapTemplates:              nil, // trap loading not yet wired
 	}
@@ -558,6 +570,19 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			sess.WantedLevel = wantedLevels
 		}
 	}
+
+	// Restore detained_until from DB so offline detention expiry is honoured on reconnect.
+	if dbChar != nil && dbChar.DetainedUntil != nil {
+		sess.DetainedUntil = dbChar.DetainedUntil
+		// Apply detained condition so enforcement is active immediately.
+		if s.condRegistry != nil {
+			if def, ok := s.condRegistry.Get("detained"); ok {
+				sess.Conditions.Apply(sess.UID, def, 1, -1) //nolint:errcheck
+			}
+		}
+	}
+	// Check whether detention has already expired (handles offline reconnect).
+	s.checkDetentionCompletion(sess)
 
 	// Load persisted equipment state if charSaver supports it.
 	if characterID > 0 && s.charSaver != nil {
@@ -1343,6 +1368,11 @@ func (s *GameServiceServer) commandLoop(ctx context.Context, uid string, stream 
 
 // dispatch routes a ClientMessage to the appropriate handler.
 func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*gamev1.ServerEvent, error) {
+	// Check whether any in-flight detention has expired before processing the command.
+	if sess, ok := s.sessions.GetPlayer(uid); ok {
+		s.checkDetentionCompletion(sess)
+	}
+
 	// Apply out-of-combat drowning damage on every dispatch while submerged.
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && sess.Conditions.Has("submerged") && sess.Status != statusInCombat {
 		dmgResult, _ := s.dice.RollExpr("1d6")
@@ -1568,6 +1598,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleBribe(uid, p.BribeRequest)
 	case *gamev1.ClientMessage_BribeConfirmRequest:
 		return s.handleBribeConfirm(uid, p.BribeConfirmRequest)
+	case *gamev1.ClientMessage_SurrenderRequest:
+		return s.handleSurrender(uid, p.SurrenderRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -1772,15 +1804,18 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 			}
 		}
 		// Wanted-level guard check: initiate guard combat if player is wanted in this zone.
-		wantedLevel := sess.WantedLevel[newRoom.ZoneID]
-		if wantedLevel >= 2 && s.combatH != nil {
-			s.combatH.InitiateGuardCombat(uid, newRoom.ZoneID, wantedLevel)
-		} else if wantedLevel == 1 && s.npcMgr != nil {
-			// WantedLevel 1: guards watch and warn without engaging.
-			for _, inst := range s.npcMgr.InstancesInRoom(newRoom.ID) {
-				if inst.NPCType == "guard" {
-					s.pushMessageToUID(uid, fmt.Sprintf("%s eyes you suspiciously. \"We're watching you.\"", inst.Name()))
-					break
+		// Skip re-evaluation during the 5-second grace window after detention completes (REQ-WC-14c).
+		if !time.Now().Before(sess.DetentionGraceUntil) {
+			wantedLevel := sess.WantedLevel[newRoom.ZoneID]
+			if wantedLevel >= 2 && s.combatH != nil {
+				s.combatH.InitiateGuardCombat(uid, newRoom.ZoneID, wantedLevel)
+			} else if wantedLevel == 1 && s.npcMgr != nil {
+				// WantedLevel 1: guards watch and warn without engaging.
+				for _, inst := range s.npcMgr.InstancesInRoom(newRoom.ID) {
+					if inst.NPCType == "guard" {
+						s.pushMessageToUID(uid, fmt.Sprintf("%s eyes you suspiciously. \"We're watching you.\"", inst.Name()))
+						break
+					}
 				}
 			}
 		}
