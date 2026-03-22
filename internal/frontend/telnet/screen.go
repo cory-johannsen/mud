@@ -54,13 +54,18 @@ func newRoomLayout(h int) roomLayout {
 }
 
 // InitScreen initializes the split-screen layout.
+// In headless mode, this is a no-op: no escape sequences are emitted.
 //
 // No DECSTBM is sent: the terminal keeps its default full-screen scroll region
 // (rows 1..h) to avoid TinTin++'s DECOM coordinate-offset quirk.
 //
-// Precondition:  conn.height must be > 0.
+// Precondition:  conn.height must be > 0 (ignored in headless mode).
 // Postcondition: Screen cleared; room rows 1..dividerRow blank; cursor at promptRow.
 func (c *Conn) InitScreen() error {
+	if c.Headless {
+		return nil
+	}
+
 	c.mu.Lock()
 	h := c.height
 	c.mu.Unlock()
@@ -197,13 +202,28 @@ func (c *Conn) redrawConsole() error {
 }
 
 // WriteRoom renders content into the pinned room region (rows 1..dividerRow).
+// In headless mode, strips ANSI, emits each line as plain text followed by \r\n,
+// and writes a blank line after the room content.
 //
 // Uses \033[1;1H] (absolute, always safe with full-screen scroll region) to
 // reach row 1 for room rendering.
 //
-// Precondition:  conn.splitScreen must be true; conn.width > 0; conn.height > 0.
+// Precondition:  conn.splitScreen must be true (or conn.Headless); conn.width > 0; conn.height > 0.
 // Postcondition: Room divider and content rows updated; cursor at promptRow.
 func (c *Conn) WriteRoom(content string) error {
+	if c.Headless {
+		// Strip ANSI, normalize line endings, emit each line as plain text.
+		normalized := strings.ReplaceAll(strings.ReplaceAll(content, "\r\n", "\n"), "\r", "")
+		lines := strings.Split(strings.TrimSpace(normalized), "\n")
+		var buf strings.Builder
+		for _, line := range lines {
+			buf.WriteString(StripANSI(line))
+			buf.WriteString("\r\n")
+		}
+		buf.WriteString("\r\n") // blank line after room content
+		return c.writeRaw(buf.String())
+	}
+
 	c.mu.Lock()
 	w := c.width
 	h := c.height
@@ -228,6 +248,7 @@ func (c *Conn) WriteRoom(content string) error {
 
 // WriteConsole writes a message into the console area and redraws the room
 // region and prompt row.
+// In headless mode, strips ANSI and emits the trimmed text as plain lines.
 //
 // Operation order:
 //  1. Position at promptRow; write message lines with \r\n — each \r\n at
@@ -238,9 +259,14 @@ func (c *Conn) WriteRoom(content string) error {
 //     This restores any room rows that were shifted up by the scrolling.
 //  4. Navigate to promptRow; redraw input.
 //
-// Precondition:  conn.splitScreen must be true; conn.height > 0; conn.width > 0.
+// Precondition:  conn.splitScreen must be true (or conn.Headless); conn.height > 0; conn.width > 0.
 // Postcondition: Message in console area; room and prompt redrawn; cursor at promptRow.
 func (c *Conn) WriteConsole(text string) error {
+	if c.Headless {
+		plain := StripANSI(strings.TrimRight(text, "\r\n"))
+		return c.writeRaw(plain + "\r\n")
+	}
+
 	c.mu.Lock()
 	h := c.height
 	w := c.width
@@ -332,10 +358,15 @@ func appendRoomRedraw(buf *strings.Builder, lines []string, w int, divider strin
 }
 
 // WritePromptSplit writes the prompt and buffered input at the prompt row (row h).
+// In headless mode, emits "> " as plain text without ANSI positioning sequences.
 //
-// Precondition:  conn.splitScreen must be true; cursor must be at promptRow.
+// Precondition:  conn.splitScreen must be true (or conn.Headless); cursor must be at promptRow.
 // Postcondition: Prompt appears at row h with cursor after prompt+input.
 func (c *Conn) WritePromptSplit(prompt string) error {
+	if c.Headless {
+		return c.writeRaw("> ")
+	}
+
 	c.mu.Lock()
 	input := c.inputBuf
 	c.mu.Unlock()

@@ -16,6 +16,7 @@ database:
 telnet:
   host: 0.0.0.0
   port: 4000
+  headless_port: 4002
   read_timeout: 5m
   write_timeout: 30s
 

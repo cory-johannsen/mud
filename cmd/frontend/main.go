@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/config"
+	"github.com/cory-johannsen/mud/internal/frontend/telnet"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/server"
@@ -89,6 +90,23 @@ func main() {
 			app.TelnetAcceptor.Stop()
 		},
 	})
+
+	if cfg.Telnet.HeadlessPort != 0 {
+		headlessCfg := cfg.Telnet
+		headlessCfg.Port = cfg.Telnet.HeadlessPort
+		headlessAcceptor := telnet.NewHeadlessAcceptor(headlessCfg, app.TelnetAcceptor.Handler(), logger)
+		lifecycle.Add("telnet-headless", &server.FuncService{
+			StartFn: func() error {
+				return headlessAcceptor.ListenAndServe()
+			},
+			StopFn: func() {
+				headlessAcceptor.Stop()
+			},
+		})
+		logger.Info("headless telnet acceptor configured",
+			zap.Int("port", cfg.Telnet.HeadlessPort),
+		)
+	}
 
 	logger.Info("frontend initialized",
 		zap.Duration("startup", time.Since(start)),

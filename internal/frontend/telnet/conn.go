@@ -44,6 +44,10 @@ type Conn struct {
 	readTimeout  time.Duration
 	writeTimeout time.Duration
 
+	// Headless disables ANSI/split-screen output. When true, all screen
+	// methods emit plain text without escape codes.
+	Headless bool
+
 	// Split-screen state (guarded by mu)
 	width       int
 	height      int
@@ -76,6 +80,18 @@ func NewConn(raw net.Conn, readTimeout, writeTimeout time.Duration) *Conn {
 		writeTimeout: writeTimeout,
 		resizeCh:     make(chan struct{}, 1),
 	}
+}
+
+// NewHeadlessConn wraps a raw TCP connection in headless mode.
+// A headless connection outputs plain text without ANSI escape codes or
+// split-screen layout, making it suitable for programmatic interaction.
+//
+// Precondition: raw must be a valid, open network connection.
+// Postcondition: Returns a Conn with Headless == true ready for reading and writing.
+func NewHeadlessConn(raw net.Conn, readTimeout, writeTimeout time.Duration) *Conn {
+	c := NewConn(raw, readTimeout, writeTimeout)
+	c.Headless = true
+	return c
 }
 
 // AppendHistory adds a submitted command to the history buffer and resets the
@@ -596,9 +612,20 @@ func (c *Conn) Write(data []byte) error {
 }
 
 // WritePrompt sends a prompt string without a trailing newline.
+// In headless mode, always sends "> " regardless of the prompt argument.
 //
 // Postcondition: The prompt text is written to the connection.
 func (c *Conn) WritePrompt(prompt string) error {
+	if c.Headless {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+		if c.writeTimeout > 0 {
+			_ = c.raw.SetWriteDeadline(time.Now().Add(c.writeTimeout))
+		}
+		_, err := fmt.Fprint(c.raw, "> ")
+		return err
+	}
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
