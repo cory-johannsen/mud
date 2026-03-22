@@ -23,6 +23,32 @@ func (m *mockScriptCaller) CallHook(_ string, _ string, _ ...lua.LValue) (lua.LV
 	return lua.LTrue, nil
 }
 
+// makeHTNSayOnlyDomain constructs a minimal ai.Domain that always plans exactly
+// one "say" action.  When used with an animal NPC, FilterAnimalPlanActions will
+// strip the only action, leaving an empty slice.
+//
+// Postcondition: domain.Validate() returns nil.
+func makeHTNSayOnlyDomain(domainID string) *ai.Domain {
+	return &ai.Domain{
+		ID:          domainID,
+		Description: "say-only test domain",
+		Tasks: []*ai.Task{
+			{ID: "behave", Description: "root task"},
+		},
+		Methods: []*ai.Method{
+			{
+				TaskID:       "behave",
+				ID:           "m_say",
+				Precondition: "",
+				Subtasks:     []string{"do_say"},
+			},
+		},
+		Operators: []*ai.Operator{
+			{ID: "do_say", Action: "say", Target: ""},
+		},
+	}
+}
+
 // makeHTNDomain constructs a minimal ai.Domain whose single "behave" method has
 // an empty precondition and decomposes to the "do_pass" operator.
 //
@@ -176,5 +202,83 @@ func TestCombatHandler_HTN_AutoQueueNPCsLocked_UsesHTNPath(t *testing.T) {
 	}
 	if !foundPass {
 		t.Errorf("expected ActionPass in NPC queue after HTN planning; got %v", queued)
+	}
+}
+
+// TestCombatHandler_HTN_AnimalAllSayFallsBackToLegacy verifies REQ-NHN-13:
+// when FilterAnimalPlanActions removes all actions (plan contained only "say"
+// tasks), the handler MUST fall back to legacyAutoQueueLocked, which queues
+// ActionAttack rather than leaving the queue empty.
+//
+// Precondition: CombatHandler constructed with a non-nil ai.Registry containing
+// a domain that always plans a single "say" action, and the NPC is of type "animal".
+// Postcondition: NPC ActionQueue contains ActionAttack (legacy fallback taken).
+func TestCombatHandler_HTN_AnimalAllSayFallsBackToLegacy(t *testing.T) {
+	const domainID = "test-say-only-domain"
+	const roomID = "room-say-fallback-1"
+
+	domain := makeHTNSayOnlyDomain(domainID)
+	if err := domain.Validate(); err != nil {
+		t.Fatalf("makeHTNSayOnlyDomain produced invalid domain: %v", err)
+	}
+	aiReg := ai.NewRegistry()
+	if err := aiReg.Register(domain, &mockScriptCaller{}, ""); err != nil {
+		t.Fatalf("ai.Registry.Register: %v", err)
+	}
+
+	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {}
+	h := makeHTNCombatHandler(t, broadcastFn, aiReg)
+
+	// Spawn an animal NPC so that FilterAnimalPlanActions strips the "say" action.
+	tmpl := &npc.Template{
+		ID:        "htn-wolf",
+		Name:      "HTNWolf",
+		Type:      "animal",
+		Level:     1,
+		MaxHP:     20,
+		AC:        13,
+		Awareness: 2,
+		AIDomain:  domainID,
+	}
+	inst, err := h.npcMgr.Spawn(tmpl, roomID)
+	if err != nil {
+		t.Fatalf("Spawn animal NPC: %v", err)
+	}
+	addTestPlayer(t, h.sessions, "player-say-fallback-1", roomID)
+
+	_, err = h.Attack("player-say-fallback-1", inst.Name())
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+	defer h.cancelTimer(roomID)
+
+	h.combatMu.Lock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		h.combatMu.Unlock()
+		t.Fatal("expected active combat after Attack; got none")
+	}
+	aq, queueFound := cbt.ActionQueues[inst.ID]
+	h.combatMu.Unlock()
+
+	if !queueFound {
+		t.Fatalf("no ActionQueue found for NPC %q; expected legacy fallback to queue an action", inst.ID)
+	}
+
+	queued := aq.QueuedActions()
+	if len(queued) == 0 {
+		t.Fatal("expected at least one queued action for the animal NPC; got none (fallback not taken)")
+	}
+
+	// Confirm the legacy fallback was used: ActionAttack must be present.
+	foundAttack := false
+	for _, qa := range queued {
+		if qa.Type == combat.ActionAttack {
+			foundAttack = true
+			break
+		}
+	}
+	if !foundAttack {
+		t.Errorf("expected ActionAttack (legacy fallback) in NPC queue after all-say HTN plan; got %v", queued)
 	}
 }

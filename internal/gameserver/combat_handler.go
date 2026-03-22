@@ -2417,8 +2417,12 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 					actions, err := planner.Plan(ws)
 					if err == nil {
 						actions = FilterAnimalPlanActions(actions, inst.IsAnimal())
-						h.applyPlanLocked(cbt, c, actions)
-						continue
+						if len(actions) > 0 {
+							h.applyPlanLocked(cbt, c, actions)
+							continue
+						}
+						// Empty plan after filtering (e.g. animal with only say tasks):
+						// fall through to legacyAutoQueueLocked below.
 					}
 				}
 			}
