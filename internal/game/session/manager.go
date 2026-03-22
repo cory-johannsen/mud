@@ -208,6 +208,9 @@ type PlayerSession struct {
 	// ActiveJobID is the currently active job that earns XP (REQ-NPC-10).
 	// Empty string means no active job. Set to the first trained job automatically (REQ-NPC-9).
 	ActiveJobID string
+	// Team is the player's faction or team affiliation, loaded from characters.team DB column.
+	// Empty string means no team affiliation (REQ-EM-39).
+	Team string
 	// InitDone is closed by Session() immediately before entering commandLoop,
 	// signalling that all session-initialization writes to PlayerSession fields
 	// are complete. Consumers (e.g. tests) that need a race-free snapshot of

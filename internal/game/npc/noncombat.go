@@ -24,6 +24,22 @@ type MerchantItem struct {
 	BasePrice int    `yaml:"base_price"`
 	InitStock int    `yaml:"init_stock"`
 	MaxStock  int    `yaml:"max_stock"`
+	// Modifier is the optional pre-set item modifier: "" | "tuned" | "defective".
+	// "cursed" is explicitly disallowed (REQ-EM-27).
+	Modifier string `yaml:"modifier,omitempty"`
+}
+
+// Validate checks REQ-EM-27: merchants MUST NOT stock cursed items.
+//
+// Precondition: cfg must not be nil.
+// Postcondition: Returns an error naming the first cursed item found.
+func (cfg *MerchantConfig) Validate() error {
+	for _, item := range cfg.Inventory {
+		if item.Modifier == "cursed" {
+			return fmt.Errorf("merchant config: item %q has modifier 'cursed'; merchants may not stock cursed items (REQ-EM-27)", item.ItemID)
+		}
+	}
+	return nil
 }
 
 // ReplenishConfig controls how often a merchant's stock and budget reset.
