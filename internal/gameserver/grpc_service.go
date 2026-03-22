@@ -2767,6 +2767,41 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 	// REQ-LR1: Restore HP to maximum.
 	sess.CurrentHP = sess.MaxHP
 
+	// REQ-EM-16: Restore all equipped items to full MaxDurability during rest.
+	if sess.LoadoutSet != nil {
+		for _, preset := range sess.LoadoutSet.Presets {
+			if preset.MainHand != nil {
+				inst := &inventory.ItemInstance{Durability: preset.MainHand.Durability, MaxDurability: preset.MainHand.Durability}
+				if rd, ok := inventory.LookupRarity(preset.MainHand.Def.Rarity); ok {
+					inst.MaxDurability = rd.MaxDurability
+				}
+				inventory.RepairFull(inst)
+				preset.MainHand.Durability = inst.Durability
+			}
+			if preset.OffHand != nil {
+				inst := &inventory.ItemInstance{Durability: preset.OffHand.Durability, MaxDurability: preset.OffHand.Durability}
+				if rd, ok := inventory.LookupRarity(preset.OffHand.Def.Rarity); ok {
+					inst.MaxDurability = rd.MaxDurability
+				}
+				inventory.RepairFull(inst)
+				preset.OffHand.Durability = inst.Durability
+			}
+		}
+	}
+	if sess.Equipment != nil {
+		for _, si := range sess.Equipment.Armor {
+			if si == nil {
+				continue
+			}
+			inst := &inventory.ItemInstance{Durability: si.Durability, MaxDurability: si.Durability}
+			if rd, ok := inventory.LookupRarity(si.Rarity); ok {
+				inst.MaxDurability = rd.MaxDurability
+			}
+			inventory.RepairFull(inst)
+			si.Durability = inst.Durability
+		}
+	}
+
 	ctx := stream.Context()
 
 	// REQ-LR2: Persist HP to database.
