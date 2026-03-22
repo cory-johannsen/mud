@@ -31,6 +31,7 @@ References:
 - REQ-NPC-FX-1: `"fixer"` MUST be a recognized `npc_type` value; a missing or nil `fixer:` config block MUST be a fatal load error.
 - REQ-NPC-FX-2: Named NPC `dex` MUST be defined as `npc_type: fixer` with valid `FixerConfig` and placed in a lore-appropriate room in Rustbucket Ridge.
 - REQ-NPC-FX-3: The `fix` and `bribe` commands for Fixers are deferred to the `wanted-clearing` feature and MUST NOT be implemented in this sub-project.
+- REQ-NPC-FX-4: `talk <fixer_name>` on a Fixer NPC is deferred to the `wanted-clearing` feature. In SP5, `handleTalk` MUST only match `npc_type == "quest_giver"`. Typing `talk <fixer>` MUST return `"No one named '<name>' here."` — this is intentional placeholder behavior until `wanted-clearing` extends `handleTalk` to support fixers.
 
 ### Feature Doc
 
@@ -74,6 +75,8 @@ type FixerConfig struct {
 
 func (f FixerConfig) Validate() error // enforces REQ-WC-1, REQ-WC-2, REQ-WC-2a
 ```
+
+Add `Fixer *FixerConfig \`yaml:"fixer,omitempty"\`` to the `Template` struct in `internal/game/npc/template.go` alongside the existing type-specific config fields (`Merchant`, `Guard`, `Healer`, etc.).
 
 Register in `internal/game/npc/template.go`:
 - Add `"fixer"` to the valid-types map
