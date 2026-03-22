@@ -212,11 +212,9 @@ func TestSession_LoadErrorFallback_LoadoutSet(t *testing.T) {
 
 	joinWorldWithCharID(t, stream, "u1", "Alice", 42)
 
-	// Give the server a moment to complete the login path.
-	time.Sleep(50 * time.Millisecond)
-
 	sess, ok := sessMgr.GetPlayer("u1")
 	require.True(t, ok, "player session must exist")
+	<-sess.InitDone
 	assert.NotNil(t, sess.LoadoutSet, "LoadoutSet must be non-nil even when load returns an error")
 }
 
@@ -236,10 +234,9 @@ func TestSession_LoadErrorFallback_Equipment(t *testing.T) {
 
 	joinWorldWithCharID(t, stream, "u1", "Alice", 42)
 
-	time.Sleep(50 * time.Millisecond)
-
 	sess, ok := sessMgr.GetPlayer("u1")
 	require.True(t, ok, "player session must exist")
+	<-sess.InitDone
 	assert.NotNil(t, sess.Equipment, "Equipment must be non-nil even when load returns an error")
 }
 
@@ -451,11 +448,9 @@ func TestSession_PassiveFeatsPopulatedAtLogin(t *testing.T) {
 
 	joinWorldWithCharID(t, stream, "u1", "Alice", 1)
 
-	// Allow server goroutine to complete session initialization.
-	time.Sleep(50 * time.Millisecond)
-
 	sess, ok := sessMgr.GetPlayer("u1")
 	require.True(t, ok, "player session must exist after login")
+	<-sess.InitDone
 
 	require.NotNil(t, sess.PassiveFeats, "PassiveFeats must be non-nil after login")
 	assert.True(t, sess.PassiveFeats["sucker_punch"], "sucker_punch must be in PassiveFeats")
@@ -568,12 +563,13 @@ func TestSession_FavoredTargetLoadedAtLogin(t *testing.T) {
 
 	joinWorldWithCharID(t, stream, "u1", "Alice", 1)
 
-	// Allow server goroutine to complete session initialization.
-	time.Sleep(50 * time.Millisecond)
-
 	sess, ok := sessMgr.GetPlayer("u1")
 	require.True(t, ok, "player session must exist after login")
-	assert.Equal(t, "robot", sess.FavoredTarget,
+	<-sess.InitDone
+	sess.FavoredTargetMu.RLock()
+	favoredTarget := sess.FavoredTarget
+	sess.FavoredTargetMu.RUnlock()
+	assert.Equal(t, "robot", favoredTarget,
 		"FavoredTarget must be populated from feature choices repo at login")
 }
 
@@ -647,12 +643,13 @@ func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
 	require.NoError(t, recvErr3)
 	require.NotNil(t, confirmResp.GetMessage(), "expected confirmation MessageEvent after selection")
 
-	// Allow server goroutine to complete.
-	time.Sleep(50 * time.Millisecond)
-
 	sess, ok := sessMgr.GetPlayer("u2")
 	require.True(t, ok, "player session must exist after login")
-	assert.Equal(t, "robot", sess.FavoredTarget,
+	<-sess.InitDone
+	sess.FavoredTargetMu.RLock()
+	favoredTarget := sess.FavoredTarget
+	sess.FavoredTargetMu.RUnlock()
+	assert.Equal(t, "robot", favoredTarget,
 		"FavoredTarget must be set to the chosen value after prompt")
 	require.Len(t, fcRepo.setCalls, 1, "repo.Set must be called exactly once")
 	assert.Equal(t, "predators_eye", fcRepo.setCalls[0].featureID,
@@ -684,10 +681,9 @@ func TestSession_FeatureChoicesGetAllError_FallsBackToEmptyMap(t *testing.T) {
 
 	joinWorldWithCharID(t, stream, "u-fc-err", "Carol", 1)
 
-	time.Sleep(50 * time.Millisecond)
-
 	sess, ok := sessMgr.GetPlayer("u-fc-err")
 	require.True(t, ok, "player session must exist after login even when feature choices repo errors")
+	<-sess.InitDone
 	require.NotNil(t, sess.FeatureChoices, "FeatureChoices must be non-nil after repo error")
 	assert.Empty(t, sess.FeatureChoices, "FeatureChoices must be empty when repo returns an error")
 }
@@ -761,11 +757,16 @@ func TestSession_FavoredTargetPromptedWhenMissing_InvalidInput(t *testing.T) {
 	// Note: the test context times out here since no further room view is sent; that is expected.
 	_ = roomResp // already verified above
 
-	time.Sleep(50 * time.Millisecond)
-
+	// Retrieve the session before cancelling so InitDone can be waited on.
+	// GetPlayer returns the session pointer immediately; InitDone is closed when
+	// all session-initialization writes have completed (grpc_service.go).
 	sess, ok := sessMgr.GetPlayer("u-invalid")
 	require.True(t, ok, "player session must exist after login")
-	assert.Empty(t, sess.FavoredTarget,
+	<-sess.InitDone
+	sess.FavoredTargetMu.RLock()
+	favoredTarget := sess.FavoredTarget
+	sess.FavoredTargetMu.RUnlock()
+	assert.Empty(t, favoredTarget,
 		"FavoredTarget must be empty string when invalid input was provided")
 	assert.Empty(t, fcRepo.setCalls,
 		"repo.Set must not be called when input was invalid")

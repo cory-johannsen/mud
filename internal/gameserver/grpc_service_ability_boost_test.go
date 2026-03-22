@@ -258,11 +258,9 @@ func TestSession_AbilityBoostsPromptedAndApplied(t *testing.T) {
 	// Region has Free=1 → 1 prompt.
 	answerPrompt(3)
 
-	// Allow server to complete session initialization.
-	time.Sleep(100 * time.Millisecond)
-
 	sess, ok := sessMgr.GetPlayer("u_boost")
 	require.True(t, ok, "player session must exist after login")
+	<-sess.InitDone
 
 	// Three Add calls must have been made: 2 archetype + 1 region.
 	assert.Equal(t, int32(3), boostsRepo.addCallCount.Load(),
@@ -377,11 +375,9 @@ func TestSession_AbilityBoostsSkippedWhenAlreadyStored(t *testing.T) {
 	require.NoError(t, recvErr)
 	require.NotNil(t, resp.GetRoomView(), "expected RoomView as first server event")
 
-	// Allow server to complete session initialization without prompts.
-	time.Sleep(100 * time.Millisecond)
-
 	sess, ok := sessMgr.GetPlayer("u_boost_stored")
 	require.True(t, ok, "player session must exist after login")
+	<-sess.InitDone
 
 	assert.Equal(t, int32(0), boostsRepo.addCallCount.Load(),
 		"repo.Add must not be called when all boost slots are already stored")

@@ -80,9 +80,13 @@ type PlayerSession struct {
 	// PassiveFeats holds the IDs of all passive class features and feats for this character.
 	// Populated at login; used by combat passive checks without additional DB queries.
 	PassiveFeats map[string]bool
+	// FavoredTargetMu guards FavoredTarget against concurrent reads during
+	// session initialization (written by Session() during setup; read by combat).
+	FavoredTargetMu sync.RWMutex
 	// FavoredTarget is the NPC type favored by the predators_eye class feature.
 	// Populated after the generic feature-choice loop from
 	// FeatureChoices["predators_eye"]["favored_target"].
+	// All reads and writes must hold FavoredTargetMu.
 	FavoredTarget string
 	// FeatureChoices maps feature_id → choice_key → selected value.
 	// Populated at login from character_feature_choices table.
@@ -185,6 +189,12 @@ type PlayerSession struct {
 	// ActiveJobID is the currently active job that earns XP (REQ-NPC-10).
 	// Empty string means no active job. Set to the first trained job automatically (REQ-NPC-9).
 	ActiveJobID string
+	// InitDone is closed by Session() immediately before entering commandLoop,
+	// signalling that all session-initialization writes to PlayerSession fields
+	// are complete. Consumers (e.g. tests) that need a race-free snapshot of
+	// any session field MUST receive from this channel before reading.
+	// The channel is created by NewPlayerSession; it must never be written after close.
+	InitDone chan struct{}
 }
 
 // Manager tracks all active player sessions and room occupancy.
@@ -294,6 +304,7 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		SafeViolations:     make(map[string]int),
 		LastViolationDay:   make(map[string]int),
 		Jobs:               make(map[string]int),
+		InitDone:           make(chan struct{}),
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)

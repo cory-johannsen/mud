@@ -68,7 +68,9 @@ func TestHandleHire_AlreadyHired(t *testing.T) {
 	svc.initHirelingRuntimeState(inst)
 	state := svc.hirelingStateFor(inst.ID)
 	require.NotNil(t, state)
+	hirelingRuntimeMu.Lock()
 	state.HiredByPlayerID = "other_player"
+	hirelingRuntimeMu.Unlock()
 
 	evt, err := svc.handleHire(uid, &gamev1.HireRequest{NpcName: "Patch"})
 	require.NoError(t, err)

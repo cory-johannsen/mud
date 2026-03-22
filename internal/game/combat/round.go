@@ -328,7 +328,10 @@ func applyPassiveFeats(cbt *Combat, actor, target *Combatant, dmg int, src Sourc
 	}
 	if ps.PassiveFeats["predators_eye"] {
 		peBonus := 0
-		peMet := ps.FavoredTarget != "" && target.NPCType == ps.FavoredTarget && dmg > 0
+		ps.FavoredTargetMu.RLock()
+		favoredTarget := ps.FavoredTarget
+		ps.FavoredTargetMu.RUnlock()
+		peMet := favoredTarget != "" && target.NPCType == favoredTarget && dmg > 0
 		if peMet {
 			peBonus = src.Intn(8) + 1
 		}

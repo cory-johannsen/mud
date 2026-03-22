@@ -928,7 +928,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 
 		// Populate derived fields from FeatureChoices.
 		// Backward-compat: FavoredTarget is still read by combat code; derive from generic choices store.
+		sess.FavoredTargetMu.Lock()
 		sess.FavoredTarget = sess.FeatureChoices["predators_eye"]["favored_target"]
+		sess.FavoredTargetMu.Unlock()
 	}
 
 	// Resolve missing ability boost choices.
@@ -1228,6 +1230,11 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			}
 		}
 	}()
+
+	// Signal that all session-initialization writes are complete.
+	// Tests and other consumers that need a race-free snapshot of any
+	// PlayerSession field MUST wait on sess.InitDone before reading.
+	close(sess.InitDone)
 
 	// Step 4: Main command loop
 	err = s.commandLoop(ctx, uid, stream)
