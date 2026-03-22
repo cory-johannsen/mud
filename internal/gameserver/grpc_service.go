@@ -5655,6 +5655,54 @@ func (s *GameServiceServer) applySkillCheckEffect(sess *session.PlayerSession, e
 // Precondition: stream must be writable; choices must be non-nil with non-empty Options.
 // Postcondition: Returns (selectedValue, nil) on valid input, ("", nil) on invalid input,
 // ("", err) on stream or send/recv failure.
+// wrapOption formats a single numbered option for display, word-wrapping long
+// text at width characters total. The first line begins with prefix; continuation
+// lines are indented with spaces equal to len(prefix).
+func wrapOption(prefix, text string, width int) string {
+	indent := strings.Repeat(" ", len(prefix))
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return prefix
+	}
+
+	var sb strings.Builder
+	currentPrefix := prefix
+	currentWidth := width - len(prefix)
+	lineWords := []string{}
+	lineLen := 0
+
+	for _, w := range words {
+		// +1 for space separator (except first word on a line)
+		addLen := len(w)
+		if len(lineWords) > 0 {
+			addLen++
+		}
+		if len(lineWords) > 0 && lineLen+addLen > currentWidth {
+			// Flush current line
+			if sb.Len() > 0 {
+				sb.WriteString("\n")
+			}
+			sb.WriteString(currentPrefix)
+			sb.WriteString(strings.Join(lineWords, " "))
+			// Switch to continuation prefix/width
+			currentPrefix = indent
+			currentWidth = width - len(indent)
+			lineWords = []string{w}
+			lineLen = len(w)
+		} else {
+			lineWords = append(lineWords, w)
+			lineLen += addLen
+		}
+	}
+	// Write final line
+	if sb.Len() > 0 {
+		sb.WriteString("\n")
+	}
+	sb.WriteString(currentPrefix)
+	sb.WriteString(strings.Join(lineWords, " "))
+	return sb.String()
+}
+
 func (s *GameServiceServer) promptFeatureChoice(
 	stream gamev1.GameService_SessionServer,
 	featureID string,
@@ -5668,7 +5716,9 @@ func (s *GameServiceServer) promptFeatureChoice(
 	sb.WriteString(choices.Prompt)
 	sb.WriteString("\n")
 	for i, opt := range choices.Options {
-		fmt.Fprintf(&sb, "  %d) %s\n", i+1, opt)
+		prefix := fmt.Sprintf("  %d) ", i+1)
+		sb.WriteString(wrapOption(prefix, opt, 78))
+		sb.WriteString("\n")
 	}
 	fmt.Fprintf(&sb, "Enter 1-%d:", len(choices.Options))
 

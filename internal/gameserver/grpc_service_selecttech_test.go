@@ -71,6 +71,99 @@ func TestPropertyHandleSelectTech_NoPending_AlwaysSendsNoPendingMessage(t *testi
 	})
 }
 
+// TestWrapOption_ShortText verifies that a short option that fits on one line is not wrapped.
+func TestWrapOption_ShortText(t *testing.T) {
+	result := wrapOption("  1) ", "short text", 78)
+	assert.Equal(t, "  1) short text", result)
+}
+
+// TestWrapOption_LongText verifies that a long option wraps and indents continuation lines.
+func TestWrapOption_LongText(t *testing.T) {
+	prefix := "  1) "
+	indent := "     "
+	text := "acid_arrow — This is a very long description that should definitely exceed seventy-eight characters in total width"
+	result := wrapOption(prefix, text, 78)
+	lines := strings.Split(result, "\n")
+	assert.True(t, len(lines) > 1, "expected multiple lines for long text")
+	assert.True(t, strings.HasPrefix(lines[0], prefix), "first line must start with prefix")
+	for _, line := range lines[1:] {
+		assert.True(t, strings.HasPrefix(line, indent), "continuation line must start with indent %q, got %q", indent, line)
+		assert.False(t, strings.HasPrefix(line, prefix), "continuation line must NOT start with prefix")
+	}
+	// No line should exceed 78 chars
+	for _, line := range lines {
+		assert.LessOrEqual(t, len(line), 78, "line %q exceeds 78 chars", line)
+	}
+}
+
+// TestWrapOption_TwoDigitPrefix verifies correct indent for item index >= 10.
+func TestWrapOption_TwoDigitPrefix(t *testing.T) {
+	prefix := "  10) "
+	indent := "      "
+	text := "acid_arrow — This is a very long description that should definitely exceed seventy-eight characters in total width for double digit"
+	result := wrapOption(prefix, text, 78)
+	lines := strings.Split(result, "\n")
+	assert.True(t, len(lines) > 1, "expected multiple lines for long text")
+	assert.True(t, strings.HasPrefix(lines[0], prefix), "first line must start with prefix")
+	for _, line := range lines[1:] {
+		assert.True(t, strings.HasPrefix(line, indent), "continuation line must start with indent %q, got %q", indent, line)
+	}
+}
+
+// TestWrapOption_ExactFit verifies that text that exactly fills the first line is not wrapped.
+func TestWrapOption_ExactFit(t *testing.T) {
+	prefix := "  1) "
+	// Build text that exactly fills 78 chars: prefix(5) + text(73)
+	text := strings.Repeat("a", 73)
+	result := wrapOption(prefix, text, 78)
+	lines := strings.Split(result, "\n")
+	assert.Equal(t, 1, len(lines), "expected single line when text exactly fits")
+}
+
+// TestWrapOption_Property verifies invariants on random inputs (SWENG-5a).
+func TestWrapOption_Property(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 99).Draw(rt, "n")
+		prefix := fmt.Sprintf("  %d) ", n)
+		indent := strings.Repeat(" ", len(prefix))
+		wordCount := rapid.IntRange(1, 30).Draw(rt, "wordCount")
+		words := make([]string, wordCount)
+		for i := range words {
+			wlen := rapid.IntRange(1, 15).Draw(rt, fmt.Sprintf("wlen%d", i))
+			words[i] = strings.Repeat("x", wlen)
+		}
+		text := strings.Join(words, " ")
+		result := wrapOption(prefix, text, 78)
+		lines := strings.Split(result, "\n")
+
+		if !strings.HasPrefix(lines[0], prefix) {
+			rt.Fatalf("first line does not start with prefix %q: %q", prefix, lines[0])
+		}
+		for i, line := range lines[1:] {
+			if !strings.HasPrefix(line, indent) {
+				rt.Fatalf("line %d does not start with indent %q: %q", i+1, indent, line)
+			}
+			if strings.HasPrefix(line[len(indent):], " ") {
+				rt.Fatalf("line %d has extra leading space after indent: %q", i+1, line)
+			}
+		}
+		for i, line := range lines {
+			if len(line) > 78 {
+				// Only allowed if a single word is longer than the available width
+				content := line
+				if i == 0 {
+					content = line[len(prefix):]
+				} else {
+					content = line[len(indent):]
+				}
+				if strings.Contains(content, " ") {
+					rt.Fatalf("line %d exceeds 78 chars and contains spaces: %q", i, line)
+				}
+			}
+		}
+	})
+}
+
 // REQ-ILT9: CharacterSheetView reports pending tech selections count.
 func TestBuildCharacterSheetView_PendingTechSelections(t *testing.T) {
 	sessMgr := session.NewManager()

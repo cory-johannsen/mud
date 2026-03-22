@@ -12,11 +12,11 @@
 
 ### BUG-1: Technology selection list — poor text alignment at login
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The technology selection list shown at login does not wrap and indent continuation lines correctly — the first line of each item overruns and subsequent lines are not indented to align with the start of the item text.
 **Steps:** Log in and reach the technology selection prompt; observe the list of technologies with multi-line descriptions.
-**Fix:**
+**Fix:** Added `wrapOption(prefix, text string, width int) string` helper to `grpc_service.go` that word-wraps option text at 78 characters, prefixing the first line with the numbered prefix (e.g. `"  1) "`) and indenting continuation lines with spaces equal to the prefix width. Updated `promptFeatureChoice` to use `wrapOption` for each option instead of a bare `fmt.Fprintf`.
 
 ### BUG-3: ne_portland zone — ne_prescott_street and ne_cully_road isolated from rest of map
 **Severity:** high
