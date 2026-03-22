@@ -1,0 +1,16 @@
+{{- if .Values.content.persistentVolume.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mud-content
+  namespace: mud
+spec:
+  accessModes:
+    - {{ .Values.content.persistentVolume.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.content.persistentVolume.size }}
+  {{- if .Values.content.persistentVolume.storageClass }}
+  storageClassName: {{ .Values.content.persistentVolume.storageClass }}
+  {{- end }}
+{{- end }}
