@@ -234,7 +234,7 @@ features:
   - slug: focus-points
     name: Focus Points
     status: planned
-    priority: 233
+    priority: 282
     category: character
     file: docs/features/focus-points.md
     effort: "M"  # Focus Point pool on character; max pool from class features/feats; spend on focus technologies; restore via Recalibrate downtime activity
@@ -244,7 +244,7 @@ features:
   - slug: exploration
     name: Exploration Mode
     status: planned
-    priority: 235
+    priority: 284
     category: world
     file: docs/features/exploration.md
     effort: "M"  # explore command, 7 exploration modes with room-entry and combat-start triggers; some modes require multi-player party
@@ -255,7 +255,7 @@ features:
   - slug: crafting
     name: Crafting
     status: planned
-    priority: 236
+    priority: 286
     category: world
     file: docs/features/crafting.md
     effort: "L"  # recipe data model, material inventory, Crafting skill checks, downtime-day costs, item production
@@ -264,7 +264,7 @@ features:
   - slug: downtime
     name: Downtime
     status: planned
-    priority: 237
+    priority: 288
     category: world
     file: docs/features/downtime.md
     effort: "L"  # downtime command, 15 activities, real-time clock based, busy state, offline continuation
@@ -276,7 +276,7 @@ features:
   - slug: downtime-queue
     name: Downtime Activity Queue
     status: planned
-    priority: 238
+    priority: 290
     category: world
     file: docs/features/downtime-queue.md
     effort: "M"  # queue multiple downtime activities; auto-start next on completion; DB-backed queue per player
@@ -286,7 +286,7 @@ features:
   - slug: resting
     name: Resting
     status: planned
-    priority: 238
+    priority: 292
     category: world
     file: docs/features/resting.md
     effort: "S"  # motels and camping with gear requirements; zone safety enforcement
@@ -298,7 +298,7 @@ features:
   - slug: ready-action
     name: Ready Action
     status: done
-    priority: 242
+    priority: 294
     category: combat
     file: docs/features/ready-action.md
     effort: "M"  # 2AP ready command, trigger evaluation engine during round resolution, 3 triggers × 3 readied actions
@@ -309,7 +309,7 @@ features:
   - slug: use-command
     name: Use Command Expansion
     status: planned
-    priority: 240
+    priority: 296
     category: ui
     file: docs/features/use-command.md
     effort: "S"  # extend use command to room equipment; add command completion
@@ -325,142 +325,180 @@ features:
   - slug: feat-import
     name: Feat Import
     status: planned
-    priority: 260
+    priority: 298
     category: character
     file: docs/features/feat-import.md
     effort: "XL"  # import and adapt all PF2E feats to Gunchete world; see docs/requirements/FEATS.md for full listing
 
   - slug: job-development
     name: Job Development
-    status: spec
-    priority: 270
+    status: planned
+    priority: 300
     category: character
     file: docs/features/job-development.md
     effort: "XL"  # drawbacks for 52 jobs; Specialist+Expert tiers with cumulative attribute/feat/proficiency/skill sets; multi-job combinations
 
-  - slug: equipment-mechanics
-    name: Equipment Mechanics Expansion
-    status: spec
-    priority: 280
-    category: world
-    file: docs/features/equipment-mechanics.md
-    dependencies:
-      - actions  # Gear actions (Activate Item, Repair, Affix Material) require equipment-mechanics data model
-    effort: "XL"  # durability/repair, 5 rarity tiers, tuned/defective/cursed items, equipment sets, interactions, new consumables
-
-  - slug: curse-removal
-    name: Curse Removal
-    status: spec
-    priority: 281
-    category: world
-    file: docs/features/curse-removal.md
-    effort: "S"  # new chip_doc NPC type; uncurse command at chip_doc NPC; credit cost + Rigging check
-    dependencies:
-      - equipment-mechanics
-      - non-combat-npcs
-      - zone-content-expansion  # chip_doc NPC placement per zone
+  # ── Tier 1: Standalone (no new cross-feature deps) ──────────────────────────
+  # Parallelizable. map-poi goes first if sequential (adds NpcRole to Template).
 
   - slug: editor-commands
     name: Editor Commands
-    status: spec
-    priority: 290
+    status: planned
+    priority: 231
     category: meta
     file: docs/features/editor-commands.md
     effort: "M"  # Editor role enforcement, commands to spawn NPCs/items/money, add zones/rooms/links; Editor command category
 
   - slug: map-poi
     name: Map Points of Interest
-    status: spec
-    priority: 300
+    status: planned
+    priority: 233
     category: ui
     file: docs/features/map-poi.md
-    effort: "S"  # color-coded POI symbols on map/legend for non-combat NPCs and room equipment; only shown after room is explored
+    effort: "S"  # color-coded POI symbols on map/legend for non-combat NPCs and room equipment; adds NpcRole to npc.Template
+    # dep-note: canonical source of NpcRole field — must run before npcs-named, non-combat-npcs-all-zones, factions, curse-removal
+
+  - slug: non-human-npcs
+    name: Non-Human NPCs
+    status: planned
+    priority: 235
+    category: world
+    file: docs/features/non-human-npcs.md
+    effort: "M"  # animals, robots, machines as NPC types; unique behaviors/stats; adds damage_types.go constants
+
+  - slug: claude-gameserver-skill
+    name: Claude Game Server Skill
+    status: planned
+    priority: 237
+    category: meta
+    file: docs/features/claude-gameserver-skill.md
+    effort: "M"  # headless telnet port, account seeding tool, skill document
+
+  - slug: equipment-mechanics
+    name: Equipment Mechanics Expansion
+    status: planned
+    priority: 239
+    category: world
+    file: docs/features/equipment-mechanics.md
+    dependencies:
+      - actions  # Gear actions (Activate Item, Repair, Affix Material) require equipment-mechanics data model
+    effort: "XL"  # durability/repair, 5 rarity tiers, tuned/defective/cursed items, equipment sets, interactions, new consumables; provides UncurseItem for curse-removal
+    # dep-note: migrations 035/036/037
+
+  # ── Tier 2: After Tier 1 ─────────────────────────────────────────────────────
+
+  - slug: advanced-health
+    name: Advanced Health Effects
+    status: planned
+    priority: 243
+    category: character
+    file: docs/features/advanced-health.md
+    effort: "L"  # drug/alcohol/medicine/poison/toxin effect system with addiction and recovery state machine
+    dependencies:
+      - equipment-mechanics  # ItemDef.Effect field ordering; SubstanceID uses separate field to avoid collision
+
+  - slug: advanced-enemies
+    name: Advanced Enemies
+    status: planned
+    priority: 245
+    category: world
+    file: docs/features/advanced-enemies.md
+    effort: "XL"  # 5 difficulty tiers, tag/feat systems with allow/deny lists, XP/loot scaling, boss rooms with hazards/traps/minions/abilities
+    dependencies:
+      - advanced-combat
+      - map-poi       # template.go ordering: map-poi adds NpcRole before advanced-enemies adds Tier/Tags/Feats
+      - non-human-npcs  # template.go ordering; damage_types.go must exist; loot.go ordering
+
+  - slug: npc-behaviors
+    name: Per-NPC Custom Behaviors
+    status: planned
+    priority: 247
+    category: world
+    file: docs/features/npc-behaviors.md
+    effort: "XL"  # dialog templates/generators, daily patterns, aggressiveness model, combat AI (actions/reactions/strategy/stealth), map movement and fencing
+    dependencies:
+      - non-human-npcs  # template.go ordering: non-human-npcs before npc-behaviors (which removes Taunts)
+
+  - slug: world-map
+    name: World Map / Fast Travel
+    status: planned
+    priority: 249
+    category: ui
+    file: docs/features/world-map.md
+    effort: "L"  # world-level map rendering, zone discovery tracking, fast travel command with travel time
+    # dep-note: must run before zone-content-expansion (both modify all 16 zone YAML files)
+
+  # ── Tier 3: After Tier 2 ─────────────────────────────────────────────────────
 
   - slug: non-combat-npcs-all-zones
     name: Non-Combat NPCs — All Zones
-    status: spec
-    priority: 310
+    status: planned
+    priority: 253
     category: world
     file: docs/features/non-combat-npcs-all-zones.md
     effort: "M"  # one lore-appropriate instance of each NPC type per zone in a Safe room; content/data work per zone
     dependencies:
       - non-combat-npcs
 
+  - slug: npcs-named
+    name: Named NPCs (Wayne/Dwayne/Jennifer Dawg)
+    status: planned
+    priority: 255
+    category: world
+    file: docs/features/npcs-named.md
+    effort: "XS"  # 3 named NPC YAML entries with lore-appropriate placement; uses HTN say operator (not static Taunts)
+    dependencies:
+      - non-combat-npcs  # NpcRole field
+      - npc-behaviors    # removes Taunts; named NPCs use schedule/say operator instead
+
   - slug: zone-content-expansion
     name: Zone Content Expansion
-    status: spec
-    priority: 315
+    status: planned
+    priority: 257
     category: world
     file: docs/features/zone-content-expansion.md
     effort: "XL"  # additional rooms per zone, per-room danger level variation, diversified combat NPC types, improved NPC distribution
     dependencies:
       - non-combat-npcs-all-zones
+      - world-map  # world_x/y must be present in zone YAMLs before this plan adds rooms to same files
 
-  - slug: npc-behaviors
-    name: Per-NPC Custom Behaviors
-    status: spec
-    priority: 320
+  # ── Tier 4: After Tier 3 ─────────────────────────────────────────────────────
+
+  - slug: curse-removal
+    name: Curse Removal
+    status: planned
+    priority: 263
     category: world
-    file: docs/features/npc-behaviors.md
-    effort: "XL"  # dialog templates/generators, daily patterns, aggressiveness model, combat AI (actions/reactions/strategy/stealth), map movement and fencing
-
-  - slug: npcs-named
-    name: Named NPCs (Wayne/Dwayne/Jennifer Dawg)
-    status: spec
-    priority: 330
-    category: world
-    file: docs/features/npcs-named.md
-    effort: "XS"  # 3 named NPC YAML entries with lore-appropriate placement
-
-  - slug: world-map
-    name: World Map / Fast Travel
-    status: spec
-    priority: 340
-    category: ui
-    file: docs/features/world-map.md
-    effort: "L"  # world-level map rendering, zone discovery tracking, fast travel command with travel time
-
-  - slug: non-human-npcs
-    name: Non-Human NPCs
-    status: spec
-    priority: 350
-    category: world
-    file: docs/features/non-human-npcs.md
-    effort: "M"  # animals, robots, machines as NPC types; unique behaviors/stats per type
-
-  - slug: advanced-health
-    name: Advanced Health Effects
-    status: spec
-    priority: 360
-    category: character
-    file: docs/features/advanced-health.md
-    effort: "L"  # drug/alcohol/medicine/poison/toxin effect system with addiction and recovery state machine
-
-  - slug: advanced-enemies
-    name: Advanced Enemies
-    status: spec
-    priority: 370
-    category: world
-    file: docs/features/advanced-enemies.md
-    effort: "XL"  # 5 difficulty tiers, tag/feat systems with allow/deny lists, XP/loot scaling, boss rooms with hazards/traps/minions/abilities
+    file: docs/features/curse-removal.md
+    effort: "S"  # new chip_doc NPC type; uncurse command at chip_doc NPC; credit cost + Rigging check
     dependencies:
-      - advanced-combat
+      - equipment-mechanics     # UncurseItem function, Equipment helpers, cursed modifier
+      - non-combat-npcs         # NPC type framework
+      - zone-content-expansion  # chip_doc NPC placement per zone (all 16 zones)
+
+  # ── Tier 5: After Tier 4 ─────────────────────────────────────────────────────
+  # PlayerSession serialization: implement advanced-health (Tier 2) → quests → factions sequentially.
 
   - slug: quests
     name: Quests
-    status: spec
-    priority: 380
+    status: planned
+    priority: 265
     category: world
     file: docs/features/quests.md
     effort: "XL"  # full quest system: objectives, progress tracking, NPC wiring, XP/item rewards
+    # dep-note: migrations 038/039; PlayerSession serialization: after advanced-health, before factions
 
   - slug: factions
     name: Factions and Allegiances
-    status: spec
-    priority: 390
+    status: planned
+    priority: 267
     category: world
     file: docs/features/factions.md
     effort: "XL"  # faction data model, reputation/allegiance tracking, economies/exchange rates, faction-gated items/quests/zones
+    dependencies:
+      - non-combat-npcs  # Fixer NPC type
+      - quests           # FactionRepXP on quest rewards; PlayerSession serialization order
+    # dep-note: migrations 040/041; template.go order: after advanced-enemies, before curse-removal
 
   - slug: zones-new
     name: New Zones
@@ -494,10 +532,11 @@ features:
     file: docs/features/documentation.md
     effort: "-"
 
-  - slug: claude-gameserver-skill
-    name: Claude Game Server Skill
-    status: spec
-    priority: 455
+  - slug: zone-map-architecture-docs
+    name: Zone Map Architecture Documentation
+    status: planned
+    priority: 425
     category: meta
-    file: docs/features/claude-gameserver-skill.md
-    effort: "M"  # headless telnet port, account seeding tool, skill document
+    file: docs/features/zone-map-architecture-docs.md
+    effort: "S"  # document zone maps in architecture docs; update diagrams when map layout changes
+    # dep-note: see also docs/architecture/feature-dependency-graph.md for cross-feature dependency graph
