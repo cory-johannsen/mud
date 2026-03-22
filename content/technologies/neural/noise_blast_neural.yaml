@@ -1,7 +1,7 @@
 id: noise_blast_neural
 name: Sonic Overload
 description: 'You unleash a blast of psychically amplified sound in the area. Each
-  creature in the area takes 2d10 sonic damage and must attempt a Fortitude save.
+  creature in the area takes 2d10 sonic damage and must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

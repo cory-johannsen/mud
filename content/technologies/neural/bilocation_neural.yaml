@@ -16,6 +16,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You exist in two places at once. When you Cast the Spell, another
+    description: You exist in two places at once. When you Use this tech, another
       copy of yourself appears in an adjacent square. During bilocation's duration,
       whenever you act, you can choose which of your selves do

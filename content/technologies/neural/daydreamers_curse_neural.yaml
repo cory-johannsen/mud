@@ -1,7 +1,7 @@
 id: daydreamers_curse_neural
 name: Focus Dissolution Virus
 description: 'You inject cognitive malware that fragments the target''s attention
-  span and sabotages concentration. The target must attempt a Will save.
+  span and sabotages concentration. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -33,7 +33,7 @@ effects:
     dc: 0
     description: 'You impose a curse upon the target that renders it easily distracted
       and unable to focus its thoughts on tasks that demand insight or discernment.
-      The target must attempt a Will save.
+      The target must attempt a Willpower save.
 
 
       Critical Succes'

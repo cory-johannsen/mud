@@ -1,7 +1,7 @@
 id: roaring_applause_fanatic_doctrine
 name: Fervent Acclamation
 description: Your doctrinal display triggers an involuntary surge of devotional fervor
-  in witnesses. Targets must be able to perceive you and must attempt a Will save
+  in witnesses. Targets must be able to perceive you and must attempt a Willpower save
   or be Stunned 1.
 tradition: fanatic_doctrine
 level: 3
@@ -18,5 +18,5 @@ effects:
   - type: utility
     dc: 0
     description: Your flamboyant flourish invokes such powerful feelings in your audience
-      that you incite cheers and applause. Targets of this spell must be able to see,
+      that you incite cheers and applause. Targets of this tech must be able to see,
       hear, or otherwise understand you. The targets

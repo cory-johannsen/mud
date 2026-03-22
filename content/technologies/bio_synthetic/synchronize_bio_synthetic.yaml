@@ -1,7 +1,7 @@
 id: synchronize_bio_synthetic
 name: Synchronize
 description: |-
-    You harmlessly place your unique magic sigil, which is about 1 square inch in size, on your targets. When you Cast the Spell, you set the duration by choosing a time at which point the sigil flashes dimly three times. After that point, the spell ends. Even though spell durations aren't normally exact, the effects of synchronize are precise to the second. The timer is based on the place where the spell was cast, so entering a plane or area where time flows differently changes how the time elapses.
+    You harmlessly place your unique magic sigil, which is about 1 square inch in size, on your targets. When you Use this tech, you set the duration by choosing a time at which point the sigil flashes dimly three times. After that point, the spell ends. Even though spell durations aren't normally exact, the effects of synchronize are precise to the second. The timer is based on the place where the spell was cast, so entering a plane or area where time flows differently changes how the time elapses.
 
     Heightened (2nd) The spell can target up to 20 willing creatures.
 tradition: bio_synthetic
@@ -16,4 +16,4 @@ effects:
     on_apply:
         - type: utility
           dc: 0
-          description: You harmlessly place your unique magic sigil, which is about 1 square inch in size, on your targets. When you Cast the Spell, you set the duration by choosing a time at which point the sigil flashes d
+          description: You harmlessly place your unique magic sigil, which is about 1 square inch in size, on your targets. When you Use this tech, you set the duration by choosing a time at which point the sigil flashes d

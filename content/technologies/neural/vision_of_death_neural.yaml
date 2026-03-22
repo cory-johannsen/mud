@@ -1,8 +1,8 @@
 id: vision_of_death_neural
 name: Flatline Vision
 description: 'You force the target to experience a hyper-realistic simulation of its
-  own death. It takes 8d6 mental damage with a Will save. If the target is reduced
-  to 0 HP by this spell, the simulation becomes reality and kills it instantly.Critical
+  own death. It takes 8d6 mental damage with a Willpower save. If the target is reduced
+  to 0 HP by this tech, the simulation becomes reality and kills it instantly.Critical
   Success The target is unaffected.
 
   Success The target takes half damage and is Frightened 1.

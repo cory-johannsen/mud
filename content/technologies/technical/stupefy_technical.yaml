@@ -1,7 +1,7 @@
 id: stupefy_technical
 name: Neural Jammer
 description: 'You deploy a cognitive disruption field on the target. The target must
-  attempt a Will save.
+  attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -28,7 +28,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You dull the target''s mind, depending on its Will save.
+    description: 'You dull the target''s mind, depending on its Willpower save.
 
 
       Critical Success The target is unaffected.

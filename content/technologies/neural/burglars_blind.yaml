@@ -3,7 +3,7 @@ name: Stealth Cloak Protocol
 description: You mask the target with psychic interference that makes observers less
   likely to notice suspicious activity. Creatures who might notice the target breaking
   in, picking locks, or performing other criminal acts must succeed at a Perception
-  check against your spell DC or fail to notice the activity.
+  check against your tech DC or fail to notice the activity.
 tradition: neural
 level: 3
 usage_type: prepared

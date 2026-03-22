@@ -1,7 +1,7 @@
 id: jassims_allegiance_neural
 name: Loyalty Override
 description: You rewrite a target's fundamental allegiances. The target must attempt
-  a Will save. On a critical failure, its loyalty is permanently rewritten to you.
+  a Willpower save. On a critical failure, its loyalty is permanently rewritten to you.
   On a failure, it treats you as an absolute ally for 1 hour. On a success, it is
   unaffected but knows you attempted this.
 tradition: neural
@@ -18,6 +18,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You bartered for this spell in some strange market or perhaps gained
+    description: You bartered for this tech in some strange market or perhaps gained
       it while wandering the desert, hopelessly lost and surrounded by nothing but
       the remnants of time and fallen empires. With a gestur

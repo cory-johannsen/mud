@@ -1,7 +1,7 @@
 id: luring_wail_bio_synthetic
 name: Pheromone Wail
 description: You emit a bio-synthesized cry laced with irresistible chemical attractants.
-  Each creature in the emanation that can hear you must attempt a Will save. All mechanical
+  Each creature in the emanation that can hear you must attempt a Willpower save. All mechanical
   effects remain identical to the base protocol.
 tradition: bio_synthetic
 level: 4
@@ -18,5 +18,5 @@ effects:
   - type: utility
     dc: 0
     description: You emit a plaintive cry to lure your enemies closer. Each creature
-      in the emanation that can hear you must attempt a Will save. If you speak a
+      in the emanation that can hear you must attempt a Willpower save. If you speak a
       creature's name as part of the casting of the spell, tha

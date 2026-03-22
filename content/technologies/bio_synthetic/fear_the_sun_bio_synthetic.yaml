@@ -1,7 +1,7 @@
 id: fear_the_sun_bio_synthetic
 name: Photosensitive Mutation
 description: 'You induce a mutation that makes the target hypersensitive to light.
-  The target must attempt a Fortitude save.
+  The target must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
@@ -30,5 +30,5 @@ effects:
   - type: utility
     dc: 0
     description: You cause the creature's vision to become particularly sensitive.
-      The creature must attempt a Fortitude save. The creature is then temporarily
+      The creature must attempt a Toughness save. The creature is then temporarily
       immune for 1 minute.Critical Success The creature is unaf

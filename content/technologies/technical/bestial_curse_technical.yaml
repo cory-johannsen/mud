@@ -1,7 +1,7 @@
 id: bestial_curse_technical
 name: Devolution Emitter
 description: You deploy a device that bombards the target with de-evolutionary radiation,
-  forcing regression into a feral state. The effect is based on its Fortitude save.
+  forcing regression into a feral state. The effect is based on its Toughness save.
   All mechanical effects (Clumsy, weakness, duration) remain identical to the base
   protocol.
 tradition: technical
@@ -19,7 +19,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You tap into the target''s inner being and curse it to become a
-      bestial version of itself. The effect is based on its Fortitude save.
+      bestial version of itself. The effect is based on its Toughness save.
 
       Critical Success The target is unaffected.
 

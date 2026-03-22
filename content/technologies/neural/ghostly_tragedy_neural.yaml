@@ -1,7 +1,7 @@
 id: ghostly_tragedy_neural
 name: Crime Scene Replay
 description: 'This protocol compels residual psychic impressions to reenact a violent
-  event of the recent past that you''re aware of and name as you Cast the Spell. You
+  event of the recent past that you''re aware of and name as you Use this tech. You
   take the role of the primary victim. The reenactment plays out the final 9 minutes
   leading up to the death or injury of the victim and the minute after. The impressions
   don''t change form, so this doesn''t help determine perpetrators by their looks.
@@ -23,5 +23,5 @@ effects:
   - type: utility
     dc: 0
     description: This spell compels local spirits to reenact a violent event of the
-      recent past that you're aware of and name as you Cast the Spell. You take the
+      recent past that you're aware of and name as you Use this tech. You take the
       role of the primary victim. The reenactment plays out t

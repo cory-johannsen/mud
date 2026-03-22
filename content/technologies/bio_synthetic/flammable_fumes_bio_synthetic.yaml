@@ -2,9 +2,9 @@ id: flammable_fumes_bio_synthetic
 name: Volatile Bio-Gas
 description: 'You release a cloud of volatile bio-synthetic gases from underground
   reservoirs. The gases are invisible, requiring a successful Perception check against
-  your spell DC to detect visually, though their acrid smell and toxic effects are
+  your tech DC to detect visually, though their acrid smell and toxic effects are
   clear once a creature has entered the cloud. Each creature that enters the cloud
-  or starts its turn there takes 2d6 poison damage with a basic Fortitude save.
+  or starts its turn there takes 2d6 poison damage with a basic Toughness save.
 
 
   If any open flame or fire effect contacts the cloud, it ignites, dealing 10d6 fire

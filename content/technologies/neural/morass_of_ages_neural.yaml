@@ -2,8 +2,8 @@ id: morass_of_ages_neural
 name: Temporal Drag Field
 description: 'You surround yourself in temporal distortion eddies that stretch time
   for those around you, making every step feel like an eternity. A creature in the
-  emanation, or that later enters it, must attempt a Fortitude save. The creature
-  attempts this save only once. Each time you Sustain the Spell, you can increase
+  emanation, or that later enters it, must attempt a Toughness save. The creature
+  attempts this save only once. Each time you Sustain the tech, you can increase
   the emanation''s radius by 5 feet, to a maximum of 60 feet.Critical Success The
   creature is unaffected.
 
@@ -13,7 +13,7 @@ description: 'You surround yourself in temporal distortion eddies that stretch t
   is Slowed 1 when it starts its turn in the area.
 
   Critical Failure As failure, plus the creature also becomes Restrained. The creature
-  can attempt to Escape against your spell DC to remove the restrained condition.'
+  can attempt to Escape against your tech DC to remove the restrained condition.'
 tradition: neural
 level: 4
 usage_type: prepared

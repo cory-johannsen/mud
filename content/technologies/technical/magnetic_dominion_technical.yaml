@@ -2,7 +2,7 @@ id: magnetic_dominion_technical
 name: Apex Magnetic Dominion
 description: You generate a massive magnetic field in a 60-foot burst. Move any metal
   object up to 10 feet. Metal-armored or armed creatures are restrained on a failed
-  Fortitude save. Metallic structures take 10d6 force damage.
+  Toughness save. Metallic structures take 10d6 force damage.
 tradition: technical
 level: 9
 usage_type: prepared
@@ -18,5 +18,5 @@ effects:
   - type: utility
     dc: 0
     description: The roiling magnetic fields of the Plane of Metal radiate from you
-      as you channel and reshape them at your merest thought. When you Cast this Spell,
+      as you channel and reshape them at your merest thought. When you Use this tech,
       you can relocate each affected target to any other

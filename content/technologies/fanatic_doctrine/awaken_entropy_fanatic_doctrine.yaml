@@ -4,11 +4,11 @@ description: 'All things age, all things die, and at the end of days, even the g
   empires crumble. You invoke the sacred doctrine of entropy, accelerating decay in
   an area—flesh falters, cybernetics corrode, and even reinforced structures begin
   to crumble. Any creature that enters or begins its turn in the area takes 8d6 void
-  damage with a basic Fortitude save, or 8d6 force damage if the creature normally
+  damage with a basic Toughness save, or 8d6 force damage if the creature normally
   doesn''t take void damage, such as if the creature is a construct or undead. Even
   beings with unlimited operational lifespans can be worn away by doctrinal entropy.
 
-  The first time you Sustain the Spell on each subsequent turn, the entropic zone
+  The first time you Sustain the tech on each subsequent turn, the entropic zone
   grows stronger in addition to having its duration increased. The radius of the burst
   increases by 10 feet (to a maximum of 40 feet), and the size of the damage dice
   increases by one step (from d6 to @Damage[(2+@item.rank)d8[void]|shortLabel], then

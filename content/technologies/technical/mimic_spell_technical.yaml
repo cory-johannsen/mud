@@ -27,6 +27,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: Trigger A creature you're aware of within range Casts a Spell of
+    description: Trigger A creature you're aware of within range Casts a tech of
       the same tradition as mimic spell and of the same or lower rank.You learn the
       secrets of a spell just by watching someone else cast it.

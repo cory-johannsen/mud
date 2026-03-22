@@ -2,7 +2,7 @@ id: phantom_crowd_neural
 name: Holographic Mob
 description: You create an illusion of a crowd of people in the area. The illusory
   figures move, talk, and generally act like a normal crowd. Creatures can attempt
-  a Perception check against your spell DC to disbelieve. The crowd is difficult terrain
+  a Perception check against your tech DC to disbelieve. The crowd is difficult terrain
   for creatures that believe it's real.
 tradition: neural
 level: 2

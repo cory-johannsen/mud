@@ -2,7 +2,7 @@ id: infiltrators_tunnel_technical
 name: Spatial Bypass Unit
 description: You deploy a device that creates paired transit portals. One appears
   on a surface you can touch, the other on a surface in range you can see. You move
-  through them as if adjacent. Others must succeed at a Will save or be randomly teleported
+  through them as if adjacent. Others must succeed at a Willpower save or be randomly teleported
   30 feet away.Heightened (6th) Designate up to 5 others to use the portals freely.
 tradition: technical
 level: 4

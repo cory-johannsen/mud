@@ -2,7 +2,7 @@ id: sea_of_thought_neural
 name: Cognitive Mire
 description: You flood the area with semi-solidified psychic noise, roughly ankle-deep.
   The area becomes difficult terrain. Any creature that enters or starts its turn
-  in the area must attempt a Will save or take 2d6 mental damage.
+  in the area must attempt a Willpower save or take 2d6 mental damage.
 tradition: neural
 level: 3
 usage_type: prepared

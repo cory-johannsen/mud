@@ -2,7 +2,7 @@ id: cleanse_air_bio_synthetic
 name: Air Scrubber
 description: You deploy bio-synthetic organisms that purify the air in the area. The
   area is cleared of inhaled poisons, toxic gases, and airborne diseases for the duration.
-  Creatures in the area gain a +2 status bonus to Fortitude saves against inhaled
+  Creatures in the area gain a +2 status bonus to Toughness saves against inhaled
   effects.
 tradition: bio_synthetic
 level: 2

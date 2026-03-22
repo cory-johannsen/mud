@@ -5,7 +5,7 @@ description: 'You activate a device that rapidly evacuates all breathable air fr
   against inhaled threats, such as inhaled poisons. If you activate the tech in an
   environment where you can''t breathe, it fails and you immediately begin to suffocate.
 
-  Creatures in the area must attempt a Fortitude save. A creature that''s holding
+  Creatures in the area must attempt a Toughness save. A creature that''s holding
   its breath gets a result one degree of success better than it rolled, and creatures
   that don''t need to breathe air are immune to the tech. A creature that later enters
   the area or ceases holding its breath must attempt a save against the effect. On

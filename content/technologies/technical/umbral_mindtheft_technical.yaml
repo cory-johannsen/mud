@@ -1,7 +1,7 @@
 id: umbral_mindtheft_technical
 name: Data Exfiltrator
 description: 'You deploy a memory extraction device on the target. The target must
-  attempt a Will save.
+  attempt a Willpower save.
 
 
   Critical Success The target is unaffected.

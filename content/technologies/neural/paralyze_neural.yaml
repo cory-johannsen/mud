@@ -1,7 +1,7 @@
 id: paralyze_neural
 name: Motor Lock
 description: 'You block the target''s motor impulses at the neural level, threatening
-  to freeze the target in place. The target must attempt a Will save.
+  to freeze the target in place. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.

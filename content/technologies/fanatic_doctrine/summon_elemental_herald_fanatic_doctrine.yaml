@@ -13,8 +13,8 @@ description: 'Your doctrinal meditation into the different elemental forces conn
   Air Speed fly 60 feet; Arrive(air) Supercell Front The herald of air arrives in
   the form of a twisting tornado, with high-speed winds slamming into your enemies.
   Each enemy in a @Template[emanation|distance:100] takes @Damage[10d8[bludgeoning]]
-  damage with a basic Fortitude save; Depart (air) Twister Downdraft Each enemy in
-  a @Template[line|distance:60] must attempt a Fortitude save. A creature that fails
+  damage with a basic Toughness save; Depart (air) Twister Downdraft Each enemy in
+  a @Template[line|distance:60] must attempt a Toughness save. A creature that fails
   is knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone] if it''s on the ground
   or descends 40 feet if it''s in the air. A creature that descends takes falling
   damage if this forced movement brings it to the ground.
@@ -26,7 +26,7 @@ description: 'Your doctrinal meditation into the different elemental forces conn
   crevasse, taking falling damage (the sides of the fissure require successful @Check[athletics|dc:15]
   checks to Climb); Depart (sonic) Plate Crash The herald of earth sinks back into
   the ground, and the sides of the crevasse slam together with a deafening blow, dealing
-  @Damage[5d10[sonic]] damage with a basic Fortitude save to all enemies in a @Template[emanation|distance:30].
+  @Damage[5d10[sonic]] damage with a basic Toughness save to all enemies in a @Template[emanation|distance:30].
   An enemy that critically fails is @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
   for 10 minutes.
 
@@ -48,9 +48,9 @@ description: 'Your doctrinal meditation into the different elemental forces conn
   Water Speed 40 feet, swim 60 feet; Arrive(cold, water) Hurricane Formation The herald
   of water forms as a miniature hurricane. Each enemy in a @Template[emanation|distance:60]
   takes @Damage[4d10[bludgeoning]] damage from the slamming rains and @Damage[4d10[cold]]
-  damage from the falling hail with a basic Fortitude save; Depart(cold, water) Cataclysmic
+  damage from the falling hail with a basic Toughness save; Depart(cold, water) Cataclysmic
   Deluge The hurricane collapses into a rushing flood, dealing @Damage[6d8[bludgeoning]]
-  damage to all enemies in a @Template[cone|distance:120] with a basic Fortitude save.
+  damage to all enemies in a @Template[cone|distance:120] with a basic Toughness save.
   A creature that fails its save is pushed 20 feet away from the herald (or 40 feet
   on a critical failure).
 

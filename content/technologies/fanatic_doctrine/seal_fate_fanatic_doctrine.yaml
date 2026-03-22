@@ -2,7 +2,7 @@ id: seal_fate_fanatic_doctrine
 name: Doctrinal Death Sentence
 description: 'You pronounce a doctrinal curse tying a creature to a specific type
   of death. Choose a damage type: acid, bludgeoning, cold, electricity, fire, piercing,
-  slashing, sonic, or void. The effect is based on the target''s Fortitude save.Critical
+  slashing, sonic, or void. The effect is based on the target''s Toughness save.Critical
   Success The target is unaffected.
 
   Success The target gains weakness 2 to the chosen damage type until the end of your

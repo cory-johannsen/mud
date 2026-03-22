@@ -2,7 +2,7 @@ id: bursting_bloom_bio_synthetic
 name: Parasitic Eruption
 description: 'You trigger a parasitic organism to erupt from the target''s chest,
   wrapping it in barbed organic tendrils. The target takes 6d6 piercing damage and
-  1d6 persistent bleed damage and must attempt a Fortitude save. When the target is
+  1d6 persistent bleed damage and must attempt a Toughness save. When the target is
   no longer taking persistent bleed damage and is no longer encumbered, the parasite
   dissolves.
 

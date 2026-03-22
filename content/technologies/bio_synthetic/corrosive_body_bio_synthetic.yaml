@@ -12,7 +12,7 @@ description: 'You exhale corrosive gas, and acidic secretions coat your skin as 
   Splash] as an innate tech; the splash damage affects all creatures within 15 feet
   instead of the normal 5 feet.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Corrosive Body]Heightened
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Corrosive Body]Heightened
   (9th) Creatures touching you take 4d6 acid damage instead of 3d6, your unarmed attacks
   deal 2d4 additional acid damage, and you gain 5d6 Temporary Hit Points temporary
   Hit Points.'

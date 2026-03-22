@@ -1,7 +1,7 @@
 id: magnetic_acceleration_bio_synthetic
 name: Railgun Spine
 description: You fire a hardened bone spine from your forearm at tremendous velocity
-  using bio-magnetic acceleration. Make a ranged spell attack roll; the projectile
+  using bio-magnetic acceleration. Make a ranged tech attack roll; the projectile
   deals 3d12 piercing damage on a hit.
 tradition: bio_synthetic
 level: 3

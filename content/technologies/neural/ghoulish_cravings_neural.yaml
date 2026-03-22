@@ -1,7 +1,7 @@
 id: ghoulish_cravings_neural
 name: Hunger Override
 description: 'You infect the target''s neural pathways with an overwhelming compulsion
-  to consume flesh. The target must attempt a Will save.
+  to consume flesh. The target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
@@ -27,7 +27,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You touch the target to afflict it with the overwhelming desire
-      to eat raw meat. The target must attempt a Will save.Critical Success The target
+      to eat raw meat. The target must attempt a Willpower save.Critical Success The target
       is unaffected.
 
       Success The target is Sickened 1 by its'

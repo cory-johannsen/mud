@@ -2,9 +2,9 @@ id: phantasmal_protagonist_neural
 name: Hard-Light Operative
 description: 'You project a hard-light combat construct modeled after a historical
   or fictional figure. The construct is Medium, regardless of the original''s described
-  size. When you Cast the Spell, decide what role the operative fills, choosing from
+  size. When you Use this tech, decide what role the operative fills, choosing from
   striker, support, or harasser. The operative appears in an unoccupied space within
-  range, and the first time each round that you Sustain the Spell, you can direct
+  range, and the first time each round that you Sustain the tech, you can direct
   it to Stride or take its role action. The construct has a speed of 25 feet and an
   AC of 22. Its saving throw modifiers, Perception modifier, and skill modifiers are
   +12. It has 90 HP.
@@ -16,7 +16,7 @@ description: 'You project a hard-light combat construct modeled after a historic
   Hit Points, which last for 1 round.
 
   Harasser: The operative''s action is to harry and distract an adjacent target. The
-  target must succeed at a Will save or become Off-Guard (Slowed 1 on a critical failure)
+  target must succeed at a Willpower save or become Off-Guard (Slowed 1 on a critical failure)
   until the end of your next turn.Heightened (+1) The operative''s AC, saving throw
   modifiers, skill modifiers, and Perception modifier increases by 3, and its HP increase
   by 30. A striker''s damage increases by 1d6. A support''s temporary Hit Points increases

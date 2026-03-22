@@ -5,7 +5,7 @@ description: |-
     Success The target is @UUID[Compendium.pf2e.conditionitems.Item.Encumbered] and has weakness 2 to electricity until the end of your next turn. The spell can't be sustained.
     Failure The target is encumbered and has weakness 2 to electricity.
     Critical Failure The target is encumbered and has weakness 3 to electricity.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Leaden Steps]Heightened (+1) The weakness increases by 1.
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Leaden Steps]Heightened (+1) The weakness increases by 1.
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

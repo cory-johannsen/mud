@@ -1,7 +1,7 @@
 id: paralyze_technical
 name: Stasis Field
 description: 'You project a localized stasis field that freezes the target''s motor
-  functions. The target must attempt a Will save.
+  functions. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.

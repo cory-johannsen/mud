@@ -1,7 +1,7 @@
 id: binding_muzzle_technical
 name: Jaw Clamp
 description: 'A precision-engineered force clamp locks the target''s mouth shut. The
-  target can attempt a Fortitude save to resist.
+  target can attempt a Toughness save to resist.
 
 
   Critical Success The target is unaffected.
@@ -28,5 +28,5 @@ effects:
   - type: utility
     dc: 0
     description: A shimmering muzzle of pure magical force clamps the target's mouth
-      shut. The target can attempt a Fortitude save to resist the muzzle. For targets
+      shut. The target can attempt a Toughness save to resist the muzzle. For targets
       with more than one mouth, the caster must target a s

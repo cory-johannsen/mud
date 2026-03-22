@@ -1,7 +1,7 @@
 id: prismatic_shield_technical
 name: Spectrum Defense Matrix
 description: 'A seven-layer defense matrix surrounds you. Any creature that strikes
-  you or targets you with a spell must attempt a Fortitude or Will save or suffer
+  you or targets you with a spell must attempt a Fortitude or Willpower save or suffer
   a random spectrum effect: paralysis, confusion, petrification, blindness, or annihilation.'
 tradition: technical
 level: 9

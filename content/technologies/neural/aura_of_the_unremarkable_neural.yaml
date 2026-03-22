@@ -5,7 +5,7 @@ description: 'You broadcast a psychic dampening field that makes you and allies 
   of the actions you''re committing. For example, if you and your allies are loudly
   interrogating a local for information or aiming a weapon at a corporate exec from
   a balcony, creatures who can see you might not think this is unusual. Non-allied
-  creatures in the emanation must attempt a Will save.
+  creatures in the emanation must attempt a Willpower save.
 
 
   Critical Success The creature sees your actions as they really are and announces
@@ -23,7 +23,7 @@ description: 'You broadcast a psychic dampening field that makes you and allies 
   Any hostile actions by you or your allies against a creature or its allies break
   the effect of the spell for that creature. So, for example, if an interrogated local''s
   friends or threatened exec''s guards saw your actions, they would be unaffected
-  by this spell. When the spell ends (or when affected allies move outside the range
+  by this tech. When the spell ends (or when affected allies move outside the range
   of the emanation), observers see things normally but the altered perceptions from
   earlier events remain in mind. Each mention of the events as noteworthy, such as
   being questioned about them by an authority figure, grants the target another Will

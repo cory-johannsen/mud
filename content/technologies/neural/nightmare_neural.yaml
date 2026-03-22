@@ -1,9 +1,9 @@
 id: nightmare_neural
 name: Sleep Cycle Attack
 description: 'You inject disturbing data packets into the target''s dream-state buffer.
-  The next time the target falls asleep, it must attempt a Will save. If you know
+  The next time the target falls asleep, it must attempt a Willpower save. If you know
   the target only by name and have never met them, the target gets a +4 circumstance
-  bonus to the Will save.
+  bonus to the Willpower save.
 
 
   Critical Success The target suffers no adverse effects and is temporarily immune
@@ -31,5 +31,5 @@ effects:
   - type: utility
     dc: 0
     description: You send disturbing nightmares to your target. The next time the
-      target falls asleep, it must attempt a Will save. If you know the target only
+      target falls asleep, it must attempt a Willpower save. If you know the target only
       by name and have never met them, the target gets a +4 cir

@@ -29,7 +29,7 @@ effects:
   - type: utility
     dc: 0
     description: 'Elegant flames of incredible beauty coruscate across the target''s
-      body, creating overconfidence and carelessness. The target attempts a Will save.
+      body, creating overconfidence and carelessness. The target attempts a Willpower save.
 
 
       Critical Success The target is unaffected.

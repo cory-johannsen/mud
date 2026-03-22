@@ -2,7 +2,7 @@ id: prismatic_shield_neural
 name: Spectrum Defense Array
 description: 'A shimmering multifrequency defense array surrounds you, cycling through
   seven distinct protection protocols. Any creature that strikes you in melee or targets
-  you with a spell must attempt a Fortitude or Will save (your choice) or suffer a
+  you with a spell must attempt a Fortitude or Willpower save (your choice) or suffer a
   random spectrum effect: paralysis, mental confusion, petrification, blindness, or
   instant annihilation.'
 tradition: neural

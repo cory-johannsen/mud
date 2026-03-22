@@ -1,7 +1,7 @@
 id: chromatic_ray_neural
 name: Prismatic Lance
 description: 'You project a beam of variable-frequency energy toward your target,
-  with devastating effects depending on the wavelength. Make a spell attack roll.
+  with devastating effects depending on the wavelength. Make a tech attack roll.
   If you hit, roll [[/r 1d4]]{1d4} to determine which frequency fires. If the ray
   deals damage, that damage is doubled on a critical hit. Any additional traits that
   apply to a ray are listed in parentheses just after the name of the color.
@@ -14,7 +14,7 @@ description: 'You project a beam of variable-frequency energy toward your target
   Yellow (electricity) The ray deals @Damage[50[electricity]] damage to the target.
 
   Green (poison) The ray deals @Damage[25[poison]] damage to the target, and the target
-  must succeed at a Fortitude save or be Enfeebled 1 for 1 minute (Enfeebled 2 on
+  must succeed at a Toughness save or be Enfeebled 1 for 1 minute (Enfeebled 2 on
   a critical failure).
 
 
@@ -53,5 +53,5 @@ effects:
   - type: utility
     dc: 0
     description: You send out a ray of colored light streaming toward your enemy,
-      with a magical effect depending on the ray's color. Make a spell attack roll.
+      with a magical effect depending on the ray's color. Make a tech attack roll.
       If you hit, roll [[/r 1d4]]{1d4} to see which beam you ca

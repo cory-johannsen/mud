@@ -2,7 +2,7 @@ id: blinding_bottle_technical
 name: Flash Canister
 description: 'You launch an exploding canister filled with a blinding chemical agent.
   Upon impact, the canister bursts and exposes all creatures in the area to the compound.
-  Each creature must attempt a Fortitude save.
+  Each creature must attempt a Toughness save.
 
   Critical Success The creature is unaffected.
 

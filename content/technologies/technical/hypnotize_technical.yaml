@@ -2,7 +2,7 @@ id: hypnotize_technical
 name: Dazzle Projector
 description: You project mesmerizing holographic patterns. Creatures are Dazzled while
   inside the field. A creature that enters or starts its turn there must attempt a
-  Will save or become Fascinated.
+  Willpower save or become Fascinated.
 tradition: technical
 level: 3
 usage_type: prepared

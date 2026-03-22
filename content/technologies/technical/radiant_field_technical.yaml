@@ -1,7 +1,7 @@
 id: radiant_field_technical
 name: Flashbang Zone
 description: 'You deploy flash emitters that fill the area with blinding light. Each
-  creature in the area must attempt a Fortitude save.
+  creature in the area must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

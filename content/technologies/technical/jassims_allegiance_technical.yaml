@@ -1,7 +1,7 @@
 id: jassims_allegiance_technical
 name: Allegiance Rewrite
 description: You rewrite a target's fundamental loyalty protocols. The target must
-  attempt a Will save. On a critical failure, its loyalty is permanently rewritten
+  attempt a Willpower save. On a critical failure, its loyalty is permanently rewritten
   to you. On a failure, it treats you as an absolute ally for 1 hour.
 tradition: technical
 level: 10
@@ -17,6 +17,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: You bartered for this spell in some strange market or perhaps gained
+    description: You bartered for this tech in some strange market or perhaps gained
       it while wandering the desert, hopelessly lost and surrounded by nothing but
       the remnants of time and fallen empires. With a gestur

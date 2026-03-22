@@ -2,7 +2,7 @@ id: utter_destruction_bio_synthetic
 name: Sonic Dissolution Wave
 description: 'You emit a devastating bio-resonant shriek of destructive energy, dissolving
   organic and inorganic matter in its path. Creatures in the area take 4d8 sonic damage
-  and 4d8 void damage. Each creature must attempt a Fortitude save. Unattended objects
+  and 4d8 void damage. Each creature must attempt a Toughness save. Unattended objects
   of Hardness 5 or less in the area of effect are destroyed.Critical Success The creature
   takes half damage.
 

@@ -1,7 +1,7 @@
 id: wails_of_the_damned_neural
 name: Mass Terror Broadcast
 description: You broadcast a psychic terror signal across a wide area. All creatures
-  in a 60-foot emanation must attempt a Will save. On a failure, they take 10d10 mental
+  in a 60-foot emanation must attempt a Willpower save. On a failure, they take 10d10 mental
   damage and become frightened 3. On a critical failure, they take double damage and
   become frightened 4 and fleeing. On a success, they take half damage. Creatures
   immune to mental effects are unaffected.

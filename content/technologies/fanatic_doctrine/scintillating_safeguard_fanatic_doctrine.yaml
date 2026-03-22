@@ -8,7 +8,7 @@ description: 'Trigger An effect would deal physical or energy damage to you or a
   persistent damage or other lingering effects.Heightened (+1) The resistance increases
   by 1.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Scintillating Safeguard]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Scintillating Safeguard]'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared

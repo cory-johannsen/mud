@@ -1,10 +1,10 @@
 id: phantasmal_calamity_technical
 name: Mass Hallucination Bomb
 description: A vision of catastrophic system failure floods the mind of each creature
-  in the area. The vision deals 11d6 mental damage (basic Will save). On a critical
+  in the area. The vision deals 11d6 mental damage (basic Willpower save). On a critical
   failure, the creature must also succeed at a @Check[reflex] save or believe it's
   trapped. If it fails the second save, it's also @UUID[Compendium.pf2e.conditionitems.Item.Stunned]
-  for 1 minute. It can attempt a new Will save at the end of each of its turns, and
+  for 1 minute. It can attempt a new Willpower save at the end of each of its turns, and
   on a success, it disbelieves the illusion and recovers from the stunned condition.Heightened
   (+1) The damage increases by 2d6.
 tradition: technical

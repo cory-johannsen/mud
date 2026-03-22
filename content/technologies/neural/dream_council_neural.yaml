@@ -17,6 +17,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: When you Cast this Spell, any targets-including you-can choose to
+    description: When you Use this tech, any targets-including you-can choose to
       immediately fall asleep. The spell ends for any creatures that don't choose
       to fall asleep. Sleepers join a shared dream, where they c

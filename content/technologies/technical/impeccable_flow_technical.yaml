@@ -4,7 +4,7 @@ description: 'You deploy a gyroscopic stabilization system. The target gains a +
   status bonus to Acrobatics checks and ignores difficult terrain for the duration.
 
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Impeccable Flow]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Impeccable Flow]'
 tradition: technical
 level: 2
 usage_type: prepared

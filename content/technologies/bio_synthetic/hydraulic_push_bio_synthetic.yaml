@@ -1,7 +1,7 @@
 id: hydraulic_push_bio_synthetic
 name: Hydraulic Push
 description: |-
-    You call forth a powerful blast of pressurized water that bludgeons the target and knocks it back. Make a ranged spell attack roll.
+    You call forth a powerful blast of pressurized water that bludgeons the target and knocks it back. Make a ranged tech attack roll.
 
     Critical Success The target takes 6d6 bludgeoning damage and is knocked back 10 feet.
     Success The target takes 3d6 bludgeoning damage and is knocked back 5 feet.

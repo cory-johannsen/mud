@@ -15,6 +15,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: When you cast this spell, you place a failsafe deep within the life
+    description: When you cast this tech, you place a failsafe deep within the life
       force of the target. You can sense when the target takes damage, provided you're
       within 1 mile of one another. A creature can be par

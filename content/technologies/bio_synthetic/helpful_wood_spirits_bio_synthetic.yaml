@@ -17,6 +17,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: Upon casting this spell, a cluster of little wood spirits tumbles
+    description: Upon casting this tech, a cluster of little wood spirits tumbles
       into the area. They perform a simple task each round. These spirits are a magical
       echo of the true spirits that live on the Plane of W

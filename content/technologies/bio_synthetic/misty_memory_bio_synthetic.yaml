@@ -1,7 +1,7 @@
 id: misty_memory_bio_synthetic
 name: Hydro-Memory Recall
 description: 'You extract residual chemical memory traces from a body of water, raising
-  impressions of past events to the surface. When you Cast the Spell, fix your mind
+  impressions of past events to the surface. When you Use this tech, fix your mind
   on an amount of time up to 24 hours ago. A mist rises from the water, filling a
   30-foot burst and coalescing into a scene of events that took place within 60 feet
   of the water.
@@ -25,4 +25,4 @@ effects:
     dc: 0
     description: Some say water holds memories or impressions of the past, and you
       can raise those memories to the surface to glimpse recent events. When you Cast
-      the Spell, you fix your mind on an amount of time in t
+      the tech, you fix your mind on an amount of time in t

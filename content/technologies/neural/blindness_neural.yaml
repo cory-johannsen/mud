@@ -1,7 +1,7 @@
 id: blindness_neural
 name: Optic Burnout
 description: 'You overload the target''s visual cortex, burning out their optical
-  nerves. The effect is determined by the target''s Fortitude save. The target then
+  nerves. The effect is determined by the target''s Toughness save. The target then
   becomes temporarily immune for 1 minute.
 
 
@@ -27,7 +27,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You blind the target. The effect is determined by the target''s
-      Fortitude save. The target then becomes temporarily immune for 1 minute.
+      Toughness save. The target then becomes temporarily immune for 1 minute.
 
 
       Critical Success The target is unaffected.

@@ -2,7 +2,7 @@ id: bandits_doom_neural
 name: Theft Deterrent Loop
 description: 'You implant a psychic trap in the target item that triggers against
   anyone who steals it. When a creature attempts to take the target into its possession,
-  it takes 8d8 mental damage and is doomed, depending on the result of its Will save.
+  it takes 8d8 mental damage and is doomed, depending on the result of its Willpower save.
   The tech then ends. You can choose up to 10 creatures when you activate this tech;
   if you do, those creatures are immune to the trap.
 

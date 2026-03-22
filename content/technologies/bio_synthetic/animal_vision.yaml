@@ -2,7 +2,7 @@ id: animal_vision
 name: Symbiote Optics
 description: You tap into the target organism's sensory organs, perceiving through
   its eyes, ears, and chemical receptors for the spell's duration. If the target wishes
-  to prevent you from doing so, it can attempt a Will save.
+  to prevent you from doing so, it can attempt a Willpower save.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -19,4 +19,4 @@ effects:
     dc: 0
     description: You tap into the target's senses, allowing you to sense whatever
       it senses for the spell's duration. If the target wishes to prevent you from
-      doing so, it can attempt a Will save, negating the spell o
+      doing so, it can attempt a Willpower save, negating the spell o

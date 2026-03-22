@@ -5,7 +5,7 @@ description: 'You psychically compel the target to move in sinuous, evasive patt
   to Speed for the duration.
 
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Coiling Dance]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Coiling Dance]'
 tradition: neural
 level: 2
 usage_type: prepared

@@ -3,7 +3,7 @@ name: Benediction
 description: |-
     Divine protection helps protect your companions. You and your allies gain a +1 status bonus to AC while within the emanation. Once per round on subsequent turns, you can Sustain the spell to increase the emanation's radius by 10 feet.
     Benediction can counteract malediction.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Benediction]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Benediction]
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared

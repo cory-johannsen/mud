@@ -12,7 +12,7 @@ description: |-
 
 
     Heightened (4th) You can turn into a flying creature, such as a bird, which grants you a fly Speed of 20 feet.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Pest Form]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Pest Form]
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

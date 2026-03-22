@@ -2,7 +2,7 @@ id: blister_bio_synthetic
 name: Chemical Blisters
 description: 'You point at a target in range, triggering a chemical reaction beneath
   their skin that produces searing blisters filled with caustic fluid. The target
-  must attempt a Fortitude save.
+  must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.

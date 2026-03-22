@@ -3,12 +3,12 @@ name: Parasitic Link
 description: 'You establish a psychic tether to another creature''s nervous system,
   shunting part of the damage dealt to you onto one of your foes. You create a neural
   link between yourself and the target. Each time an effect damages you, the target
-  attempts a Will save, which can cause it to take part of the damage, as detailed
+  attempts a Willpower save, which can cause it to take part of the damage, as detailed
   below. The spell ends if the target is ever more than 120 feet away from you. If
-  either you or the target is reduced to 0 Hit Points, any damage from this spell
+  either you or the target is reduced to 0 Hit Points, any damage from this tech
   is resolved, and then the spell ends.
 
-  Each time you sustain this spell, you can choose to deal 6d8 damage to yourself,
+  Each time you sustain this tech, you can choose to deal 6d8 damage to yourself,
   which can be reduced with the parasitic link as normal.
 
 

@@ -3,7 +3,7 @@ name: Prismatic Hardlight Shell
 description: 'You encase the target in reactive hardlight armor that shifts through
   defensive wavelengths. The armor sheds bright light for 20 feet (and dim light for
   the next 20 feet). Whenever a creature attacks the target and is adjacent to it,
-  the attacker must attempt a Will save at the end of its action. On a failure, it
+  the attacker must attempt a Willpower save at the end of its action. On a failure, it
   becomes Dazzled until the end of its next turn. Regardless of the result of the
   save, the attacker is temporarily immune until the end of its next turn. The dazzling
   effect has the light and visual traits.
@@ -11,7 +11,7 @@ description: 'You encase the target in reactive hardlight armor that shifts thro
   When you cast the spell, roll [[/r 2d8]]{1d8 twice} on the table below to see the
   armor''s wavelength configuration (rerolling any duplicates). Each color grants
   resistance 5 to the indicated damage type. If you spend three actions to Cast the
-  Spell, roll [[/r 3d8]]{three} times instead.
+  tech, roll [[/r 3d8]]{three} times instead.
 
 
   Red fire

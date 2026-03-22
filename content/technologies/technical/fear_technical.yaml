@@ -15,7 +15,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'You plant fear in the target; it must attempt a Will save.
+    description: 'You plant fear in the target; it must attempt a Willpower save.
 
 
       Critical Success The target is unaffected.

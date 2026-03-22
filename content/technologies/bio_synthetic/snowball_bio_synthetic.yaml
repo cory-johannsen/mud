@@ -1,7 +1,7 @@
 id: snowball_bio_synthetic
 name: Snowball
 description: |-
-    You throw a magically propelled and chilled ball of dense snow. The target takes 2d4 cold damage and potentially other effects, depending on the result of your spell attack roll.
+    You throw a magically propelled and chilled ball of dense snow. The target takes 2d4 cold damage and potentially other effects, depending on the result of your tech attack roll.
 
     Critical Success The target takes double damage and a –10-foot status penalty to its Speeds for 1 round.
     Success The target takes full damage and a –5-foot status penalty to its Speeds for 1 round.

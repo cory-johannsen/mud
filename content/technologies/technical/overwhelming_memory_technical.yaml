@@ -1,7 +1,7 @@
 id: overwhelming_memory_technical
 name: Data Overload
 description: You force-feed the target a massive data dump that overwhelms their processing
-  capacity. The target must attempt a Will save.
+  capacity. The target must attempt a Willpower save.
 tradition: technical
 level: 3
 usage_type: prepared

@@ -2,7 +2,7 @@ id: vampiric_maiden_neural
 name: Iron Maiden Protocol
 description: 'A hard-light restraint cage materializes around the target and drains
   its vitality for your gain. This deals 4d4 piercing damage and 4d4 void damage,
-  and the target must attempt a Fortitude save. You gain temporary Hit Points equal
+  and the target must attempt a Toughness save. You gain temporary Hit Points equal
   to the void damage the target takes (after applying resistances, weaknesses, and
   the like). You lose any remaining temporary Hit Points after 1 minute.Critical Success
   The target is unaffected.
@@ -14,7 +14,7 @@ description: 'A hard-light restraint cage materializes around the target and dra
   whichever comes first.
 
   Critical Failure The target takes double damage and is immobilized for 1 round or
-  until it Escapes (the DC is your spell DC), whichever comes first.Heightened (+1)
+  until it Escapes (the DC is your tech DC), whichever comes first.Heightened (+1)
   The piercing and void damage increase by 1d4 each.'
 tradition: neural
 level: 4

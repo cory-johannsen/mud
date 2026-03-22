@@ -1,7 +1,7 @@
 id: ghoulish_cravings_fanatic_doctrine
 name: Hunger Curse
 description: 'You invoke a doctrinal curse of insatiable hunger upon the target. The
-  target must attempt a Will save.
+  target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
@@ -27,7 +27,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You touch the target to afflict it with the overwhelming desire
-      to eat raw meat. The target must attempt a Will save.Critical Success The target
+      to eat raw meat. The target must attempt a Willpower save.Critical Success The target
       is unaffected.
 
       Success The target is Sickened 1 by its'

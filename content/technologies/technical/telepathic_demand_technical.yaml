@@ -1,7 +1,7 @@
 id: telepathic_demand_technical
 name: Remote Command Broadcast
 description: You transmit a compulsive command to a known target regardless of distance.
-  The target must attempt a Will save. On a failure it follows a one-sentence command.
+  The target must attempt a Willpower save. On a failure it follows a one-sentence command.
 tradition: technical
 level: 9
 usage_type: prepared

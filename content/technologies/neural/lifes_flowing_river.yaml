@@ -4,9 +4,9 @@ description: 'You project a stream of restorative energy that sheds dim light fo
   10 feet on each side. The current begins in an adjacent square to you and extends
   in a straight 5-foot path to its maximum range or until it hits a solid barrier,
   whichever comes first. A creature that begins its turn in the current or who enters
-  one of its spaces must attempt a Will save. If the creature is undead or cybernetically
+  one of its spaces must attempt a Willpower save. If the creature is undead or cybernetically
   corrupted, it takes @Damage[4d6[mental]] damage, modified by the result of their
-  Will save.Critical Success The creature ignores the current''s effects until the
+  Willpower save.Critical Success The creature ignores the current''s effects until the
   start of its next turn. If the creature is undead or corrupted, it takes no damage.
 
   Success The creature treats all squares occupied by the current as difficult terrain

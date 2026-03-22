@@ -1,7 +1,7 @@
 id: fear_the_sun_fanatic_doctrine
 name: Light Aversion Rite
 description: 'You invoke a doctrinal curse that makes the target abhor light. The
-  target must attempt a Will save.
+  target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
@@ -30,5 +30,5 @@ effects:
   - type: utility
     dc: 0
     description: You cause the creature's vision to become particularly sensitive.
-      The creature must attempt a Fortitude save. The creature is then temporarily
+      The creature must attempt a Toughness save. The creature is then temporarily
       immune for 1 minute.Critical Success The creature is unaf

@@ -1,7 +1,7 @@
 id: outcasts_curse_neural
 name: Social Pariah Virus
 description: 'You inject a neural virus that makes the target''s presence abrasive
-  and off-putting to others. The target must attempt a Will save.Critical Success
+  and off-putting to others. The target must attempt a Willpower save.Critical Success
   The target is unaffected.
 
   Success For 10 minutes, the target must roll twice and use the worse result whenever
@@ -27,7 +27,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You afflict the target with a curse that makes its presence abrasive
-      and off-putting. The target must attempt a Will save.Critical Success The target
+      and off-putting. The target must attempt a Willpower save.Critical Success The target
       is unaffected.
 
       Success For 10 minutes, the target'

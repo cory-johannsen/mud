@@ -3,7 +3,7 @@ name: Devouring Judgment Field
 description: You conjure a zone of doctrinal darkness that feeds on the unworthy within.
   This globe of pure darkness is identical to that created by a 4th-rank @UUID[Compendium.pf2e.spells-srd.Item.Darkness]
   spell. Shadowy manifestations resembling gnashing maws emerge within the void. Make
-  a spell attack roll against the Fortitude DC of each creature in the area. Any creature
+  a tech attack roll against the Fortitude DC of each creature in the area. Any creature
   that fails takes 4d6 bludgeoning damage as the constructs latch onto it. While the
   constructs are attached, it takes a –10-foot circumstance penalty to its Speeds
   and can't Step. Whenever a creature ends its turn in the area, the constructs attempt

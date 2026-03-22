@@ -7,7 +7,7 @@ description: 'A Medium guardian construct made of doctrinal force appears in an 
   2d8 force damage plus your spellcasting ability modifier.
 
 
-  The guardian has AC = your spell DC, 50 Hit Points, and your saves.'
+  The guardian has AC = your tech DC, 50 Hit Points, and your saves.'
 tradition: fanatic_doctrine
 level: 5
 usage_type: prepared

@@ -3,7 +3,7 @@ name: Dimensional Anchor
 description: 'You lock the target to its current dimensional coordinates. While affected,
   the spell attempts to counteract any teleportation effect that would move the target,
   or any effect that would transport it to a different plane. The duration is determined
-  by the target''s Will save.
+  by the target''s Willpower save.
 
 
   Critical Success The target is unaffected.

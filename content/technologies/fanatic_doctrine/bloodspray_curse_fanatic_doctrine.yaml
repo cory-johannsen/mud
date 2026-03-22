@@ -26,7 +26,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You inflict a curse upon the target that causes any wound to gush
-      blood. The target must attempt a Fortitude save.Critical Success The target
+      blood. The target must attempt a Toughness save.Critical Success The target
       is unaffected.
 
       Success For 1 minute, the first time each r'

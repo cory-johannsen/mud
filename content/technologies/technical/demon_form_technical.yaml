@@ -1,7 +1,7 @@
 id: demon_form_technical
 name: Corruption Engine Frame
 description: 'You interface with corrupted tech, transforming into a Medium corruption
-  engine battle form. When you cast this spell, choose one of four chassis configurations.
+  engine battle form. When you cast this tech, choose one of four chassis configurations.
   Some configurations are Large and you must have enough space to expand into or the
   spell is lost. While in this form, you gain the demon and fiend traits. You have
   hands in this battle form and can use manipulate actions. You can Dismiss the spell.
@@ -25,7 +25,7 @@ description: 'You interface with corrupted tech, transforming into a Medium corr
   (agile, magical, reach 10 feet, unholy), Damage 1d8+12 piercing; all melee Strikes
   deal 2d6 additional precision damage to animals.Vloriak Speed 25 feet; resistance
   10 to acid;Melee 1 claw (unholy), Damage 2d6+12 piercing plus 1d6 spirit;Melee 1
-  tongue (agile, reach 10 feet, unholy), Damage 1d6+12 acid plus 1d6 spirit.@UUID[Compendium.pf2e.spell-effects.Item.Spell
+  tongue (agile, reach 10 feet, unholy), Damage 1d6+12 acid plus 1d6 spirit.@UUID[Compendium.pf2e.spell-effects.Item.tech
   Effect: Demon Form]'
 tradition: technical
 level: 6
@@ -40,5 +40,5 @@ effects:
   - type: utility
     dc: 0
     description: You corrupt yourself with the sin of the Outer Rifts, transforming
-      into a Medium demon battle form. When you cast this spell, choose abrikandilu,
+      into a Medium demon battle form. When you cast this tech, choose abrikandilu,
       brimorak, kithangian, or vloriak. If you choose kithan

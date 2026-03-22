@@ -4,7 +4,7 @@ description: 'You invoke a doctrinal protocol of perfect movement. The target ga
   a +2 status bonus to Acrobatics checks and ignores difficult terrain for the duration.
 
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Impeccable Flow]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Impeccable Flow]'
 tradition: fanatic_doctrine
 level: 2
 usage_type: prepared

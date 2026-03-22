@@ -2,7 +2,7 @@ id: swarming_wasp_stings_bio_synthetic
 name: Venom Dart Swarm
 description: 'You deploy a swarm of bio-synthetic stinger drones that stab creatures
   in the area, possibly envenoming them. Creatures take @Damage[1d6[piercing]] damage.
-  Each creature that takes piercing damage must attempt a Fortitude save.
+  Each creature that takes piercing damage must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.

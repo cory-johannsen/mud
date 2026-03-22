@@ -2,7 +2,7 @@ id: arctic_rift_bio_synthetic
 name: Cryogenic Fissure Burst
 description: 'A jagged crack opens in the air as your bio-augmented cryo glands release
   a massive thermal siphon, dealing 12d8 cold damage as it draws away warmth. Each
-  creature along the rift must attempt a Fortitude save.Critical Success The creature
+  creature along the rift must attempt a Toughness save.Critical Success The creature
   is unaffected.
 
   Success The creature takes half damage.

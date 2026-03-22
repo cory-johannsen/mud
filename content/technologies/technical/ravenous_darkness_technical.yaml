@@ -3,7 +3,7 @@ name: Void Field Projector
 description: You project a zone of sensor-defeating darkness that also harms those
   inside it. This globe of pure darkness is identical to that created by a 4th-rank
   @UUID[Compendium.pf2e.spells-srd.Item.Darkness] spell. Mechanical constructs resembling
-  gnashing actuators manifest within the void. Make a spell attack roll against the
+  gnashing actuators manifest within the void. Make a tech attack roll against the
   Fortitude DC of each creature in the area. Any creature that fails takes 4d6 bludgeoning
   damage as the constructs latch on. While the constructs are attached, it takes a
   –10-foot circumstance penalty to its Speeds and can't Step. Whenever a creature

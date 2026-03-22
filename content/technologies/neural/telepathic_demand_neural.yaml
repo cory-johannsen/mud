@@ -1,7 +1,7 @@
 id: telepathic_demand_neural
 name: Neural Command Broadcast
 description: You broadcast a compulsive neural command to a creature you are familiar
-  with regardless of distance. The target must attempt a Will save. On a failure,
+  with regardless of distance. The target must attempt a Willpower save. On a failure,
   it is compelled to follow a one-sentence command. A creature affected by a previous
   casting is temporarily immune. You can also establish a two-way communication channel
   for the duration.

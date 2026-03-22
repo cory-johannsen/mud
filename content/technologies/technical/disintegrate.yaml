@@ -1,8 +1,8 @@
 id: disintegrate
 name: Disintegration Beam
 description: 'You fire a beam of concentrated energy that disassembles matter at the
-  molecular level. You must succeed at a spell attack roll. On a hit, the target takes
-  12d10 damage (doubled on a critical hit). A creature reduced to 0 HP by this spell
+  molecular level. You must succeed at a tech attack roll. On a hit, the target takes
+  12d10 damage (doubled on a critical hit). A creature reduced to 0 HP by this tech
   is completely destroyed, leaving only a fine dust. An object you hit is destroyed
   if it has a Hardness of 40 or less.
 

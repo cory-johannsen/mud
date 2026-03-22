@@ -1,7 +1,7 @@
 id: manifestation_of_spirits_fanatic_doctrine
 name: Ancestral Martyrs
 description: 'You summon the spirits of doctrinal martyrs to occupy the area. A creature
-  entering the area takes 2d6 mental damage with a basic Will save.
+  entering the area takes 2d6 mental damage with a basic Willpower save.
 
 
   Heightened (+1) The damage increases by 1d6.'
@@ -21,4 +21,4 @@ effects:
     dc: 0
     description: You open the target's eyes to the plethora of spirits surrounding
       it—and it sees all these spirits as menacing and powerful. The target must attempt
-      a Will save.Critical Success The target is unaffe
+      a Willpower save.Critical Success The target is unaffe

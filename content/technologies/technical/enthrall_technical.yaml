@@ -1,7 +1,7 @@
 id: enthrall_technical
 name: Hypnotic Broadcast
 description: Your broadcast captivates all receivers. You transmit continuously throughout
-  the duration. Targets who detect the signal must attempt a Will save or become Fascinated.
+  the duration. Targets who detect the signal must attempt a Willpower save or become Fascinated.
 tradition: technical
 level: 3
 usage_type: prepared

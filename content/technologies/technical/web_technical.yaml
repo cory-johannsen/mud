@@ -4,7 +4,7 @@ description: 'You deploy a canister of high-tensile synthetic fibers that fill t
   area, impeding movement. Squares filled with the fibers are difficult terrain. Each
   time a creature in the web begins to use a move action or enters the web during
   a move action it''s using, it must attempt an @Check[athletics] check or Reflex
-  save against your spell DC to avoid taking a circumstance penalty to its Speeds
+  save against your tech DC to avoid taking a circumstance penalty to its Speeds
   or becoming @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]. A creature that
   gets out of the web ceases to take a circumstance penalty to its Speed from the
   web. Each square can be cleared of the web by a single attack or effect that deals

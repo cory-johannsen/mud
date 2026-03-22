@@ -9,7 +9,7 @@ description: 'You cause the target to rapidly corrode via bio-synthesized oxidiz
   to 10 and granting an immediate flat check).
 
 
-  Creature or Hazard Must be mostly metal. Deals 8d6 damage (basic Fortitude save),
+  Creature or Hazard Must be mostly metal. Deals 8d6 damage (basic Toughness save),
   plus @Damage[2d6[persistent]] on a failed save.
 
 

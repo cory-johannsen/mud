@@ -2,7 +2,7 @@ id: arctic_rift_technical
 name: Cryo-Fissure Projector
 description: 'A jagged crack opens in the air as your cryo-fissure projector tears
   open a thermal rift, dealing 12d8 cold damage as it draws away warmth. Each creature
-  along the rift must attempt a Fortitude save.Critical Success The creature is unaffected.
+  along the rift must attempt a Toughness save.Critical Success The creature is unaffected.
 
   Success The creature takes half damage.
 

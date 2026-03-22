@@ -4,7 +4,7 @@ description: You accelerate local temporal flow, pushing everything in the area 
   overdrive. Any creature that begins its turn in the area is Quickened until the
   end of its turn and can use the extra action only to Stride or Strike. Unfortunately,
   speeding up time has consequences; any creature in the area that attempts to Cast
-  a Spell must succeed at a DC 5 flat check or the spell is disrupted.
+  a tech must succeed at a DC 5 flat check or the spell is disrupted.
 tradition: neural
 level: 5
 usage_type: prepared

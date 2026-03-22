@@ -2,7 +2,7 @@ id: bandits_doom_technical
 name: Anti-Theft System
 description: 'You install an electronic security system in the target item. When a
   creature attempts to take the target into its possession, it takes 8d8 mental damage
-  and is doomed, depending on the result of its Will save. The system then deactivates.
+  and is doomed, depending on the result of its Willpower save. The system then deactivates.
   You can authorize up to 10 creatures when you install this tech.
 
 

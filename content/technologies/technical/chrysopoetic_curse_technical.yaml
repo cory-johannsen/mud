@@ -2,7 +2,7 @@ id: chrysopoetic_curse_technical
 name: Alloy Transmutation Hex
 description: 'You curse the target''s gear with an unstable transmutation field, causing
   everything they touch to convert to heavy gold alloy. The target must attempt a
-  Will save.Critical Success The target is unaffected.
+  Willpower save.Critical Success The target is unaffected.
 
   Success The target''s skin turns their armor and clothing partially to gold. If
   the target is wearing any armor or clothing, they become @UUID[Compendium.pf2e.conditionitems.Item.Encumbered].
@@ -37,7 +37,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You grant the target the gift of riches, giving them the power to
-      turn anything they touch to gold. The target must attempt a Will save.Critical
+      turn anything they touch to gold. The target must attempt a Willpower save.Critical
       Success The target is unaffected.
 
       Success The target''s'

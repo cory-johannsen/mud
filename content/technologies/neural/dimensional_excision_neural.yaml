@@ -1,7 +1,7 @@
 id: dimensional_excision_neural
 name: Reality Excision
 description: You tear a target partially out of reality, sending them into a neural
-  pocket dimension. The target must attempt a Will save. On a failure, it disappears
+  pocket dimension. The target must attempt a Willpower save. On a failure, it disappears
   from the battlefield, removed from play until the start of your next turn, at which
   point it returns to the nearest open space.
 tradition: neural

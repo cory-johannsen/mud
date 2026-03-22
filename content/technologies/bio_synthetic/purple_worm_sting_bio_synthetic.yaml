@@ -2,7 +2,7 @@ id: purple_worm_sting_bio_synthetic
 name: Apex Venom Injection
 description: 'You synthesize the toxin of a lethal apex predator and inject it into
   the target. You deal 3d6 piercing damage to the touched creature and afflict it
-  with apex venom. The target must attempt a Fortitude save.
+  with apex venom. The target must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.

@@ -1,9 +1,9 @@
 id: spiritual_epidemic_fanatic_doctrine
 name: Doctrinal Doubt Plague
 description: 'You curse the target with a crisis of faith, sapping its conviction
-  and leaving a contagious trap in its spirit. The target must attempt a Will save.
+  and leaving a contagious trap in its spirit. The target must attempt a Willpower save.
   Any creature that uses a divine or occult tech on the target while it''s affected
-  is targeted by the doctrinal doubt plague and must also attempt a Will save. The
+  is targeted by the doctrinal doubt plague and must also attempt a Willpower save. The
   curse continues to spread in this way.Critical Success The target is unaffected.
 
   Success The target is Enfeebled 2 and Stupefied 2 for 1 round.
@@ -28,5 +28,5 @@ effects:
   - type: utility
     dc: 0
     description: You curse the target, sapping its spirit and leaving a contagious
-      trap in its essence. The target must attempt a Will save. Any creature that
+      trap in its essence. The target must attempt a Willpower save. Any creature that
       casts a divine or occult spell on the target while it's af

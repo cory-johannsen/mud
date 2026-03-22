@@ -2,7 +2,7 @@ id: enthrall_neural
 name: Mass Mesmerize
 description: Your psychic broadcast captivates all who receive it. You transmit without
   interruption throughout the casting and duration. Targets who detect your signal
-  must attempt a Will save or become Fascinated for the duration.
+  must attempt a Willpower save or become Fascinated for the duration.
 tradition: neural
 level: 3
 usage_type: prepared

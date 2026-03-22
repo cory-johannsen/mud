@@ -2,7 +2,7 @@ id: enervation_neural
 name: Vitality Drain Beam
 description: 'Extending a finger, you fire a beam of entropic energy that saps the
   life force of any creature it touches. Each living creature in the line must attempt
-  a Fortitude save.Critical Success The creature is unaffected.
+  a Toughness save.Critical Success The creature is unaffected.
 
   Success The creature takes @Damage[(floor(@item.rank/2))d8[persistent,void]] damage.
 
@@ -28,4 +28,4 @@ effects:
     dc: 0
     description: Extending a finger, you fire a beam of void energy that weakens the
       life force of any creature it touches. Each living creature in the line must
-      attempt a Fortitude save.Critical Success The creature
+      attempt a Toughness save.Critical Success The creature

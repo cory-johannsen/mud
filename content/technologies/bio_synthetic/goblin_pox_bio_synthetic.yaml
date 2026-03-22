@@ -1,7 +1,7 @@
 id: goblin_pox_bio_synthetic
 name: Goblin Pox
 description: |-
-    Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a Fortitude save.
+    Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a Toughness save.
 
     Goblin Pox (disease) Level 1; Creatures that have the goblin trait and goblin dogs are immune
     Stage 1 Sickened 1 (1 round)
@@ -27,6 +27,6 @@ effects:
         - type: utility
           dc: 0
           description: |-
-            Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a Fortitude save.
+            Your touch afflicts the target with goblin pox, an irritating allergenic rash. The target must attempt a Toughness save.
 
             Goblin Pox (disease) Level 1; Creatures that have the goblin trait and goblin

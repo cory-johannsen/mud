@@ -1,9 +1,9 @@
 id: astral_labyrinth_fanatic_doctrine
 name: Doctrine Maze
 description: You trap a target's mind in an inescapable labyrinth of doctrinal imperatives.
-  The target must attempt a Will save. On a failure, it becomes trapped in a recursive
+  The target must attempt a Willpower save. On a failure, it becomes trapped in a recursive
   loop of ideology, unable to take actions that require concentration. It attempts
-  a Will save at the end of each turn to escape.
+  a Willpower save at the end of each turn to escape.
 tradition: fanatic_doctrine
 level: 9
 usage_type: prepared
@@ -20,4 +20,4 @@ effects:
     dc: 0
     description: You connect the entire area with an invisible maze of astral energy
       that interferes with dimensional and mental magic. Choose a point in the area
-      that you can see when you cast this spell. Objects oth
+      that you can see when you cast this tech. Objects oth

@@ -1,7 +1,7 @@
 id: percussive_impact_fanatic_doctrine
 name: Thunder Judgment
 description: You hurl a compressed sphere of doctrinal sonic energy at a foe. Make
-  a spell attack roll. If you hit, the target takes 3d6 sonic damage plus 1d6 persistent
+  a tech attack roll. If you hit, the target takes 3d6 sonic damage plus 1d6 persistent
   sonic damage.
 tradition: fanatic_doctrine
 level: 3

@@ -1,7 +1,7 @@
 id: blinding_foam_neural
 name: Caustic Optic Spray
 description: 'You spray a caustic neurochemical foam into the target''s eyes, which
-  clings to their face. Make a spell attack roll. If you hit, you deal 5d10 acid damage
+  clings to their face. Make a tech attack roll. If you hit, you deal 5d10 acid damage
   and 1d6 persistent acid damage, and the target is Blinded for the duration. The
   foam can be removed with 3 Interact actions, ending the blinded condition.
 

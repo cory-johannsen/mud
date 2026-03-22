@@ -28,7 +28,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You inflict despair on creatures in the area. The effects for each
-      creature are determined by its Will save.
+      creature are determined by its Willpower save.
 
 
       Critical Success The creature is unaffected.

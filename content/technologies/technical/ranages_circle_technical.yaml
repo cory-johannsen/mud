@@ -2,7 +2,7 @@ id: ranages_circle_technical
 name: Petrification Mine
 description: You deploy a device that causes rapid mineral encrustation on a target
   while deploying caltrops and hazardous terrain around them. Every adjacent square
-  becomes difficult terrain for 1 minute. The target attempts a Fortitude save. All
+  becomes difficult terrain for 1 minute. The target attempts a Toughness save. All
   mechanical effects (clumsy, immobilized, restrained, escape DC) remain identical
   to the base protocol.
 tradition: technical

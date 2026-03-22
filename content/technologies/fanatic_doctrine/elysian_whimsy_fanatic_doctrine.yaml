@@ -1,7 +1,7 @@
 id: elysian_whimsy_fanatic_doctrine
 name: Elysian Whimsy
 description: |-
-    You overwhelm the target with an unexpected and unpredictable desire if it fails a Will save. Roll [[/r 1d4]] to determine the spell's effect.
+    You overwhelm the target with an unexpected and unpredictable desire if it fails a Willpower save. Roll [[/r 1d4]] to determine the spell's effect.
 
 
 
@@ -40,7 +40,7 @@ effects:
         - type: utility
           dc: 0
           description: |-
-            You overwhelm the target with an unexpected and unpredictable desire if it fails a Will save. Roll [[/r 1d4]] to determine the spell's effect.
+            You overwhelm the target with an unexpected and unpredictable desire if it fails a Willpower save. Roll [[/r 1d4]] to determine the spell's effect.
 
 
 

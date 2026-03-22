@@ -1,7 +1,7 @@
 id: daydreamers_curse_technical
 name: Focus Disruption Emitter
 description: You deploy a device that emits a persistent signal disrupting the target's
-  concentration and focus. The target must attempt a Will save. All mechanical effects
+  concentration and focus. The target must attempt a Willpower save. All mechanical effects
   (double rolls, concentrate trait penalties) remain identical to the base protocol.
 tradition: technical
 level: 4
@@ -19,7 +19,7 @@ effects:
     dc: 0
     description: 'You impose a curse upon the target that renders it easily distracted
       and unable to focus its thoughts on tasks that demand insight or discernment.
-      The target must attempt a Will save.
+      The target must attempt a Willpower save.
 
 
       Critical Succes'

@@ -1,7 +1,7 @@
 id: sea_surge_bio_synthetic
 name: Hydraulic Wave
 description: 'You generate a powerful wave of bio-synthesized fluid. Each creature
-  in a @Template[cone|distance:30] must attempt a Fortitude save.
+  in a @Template[cone|distance:30] must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

@@ -2,7 +2,7 @@ id: phantom_prison_neural
 name: Virtual Cage
 description: You completely surround a Large or smaller creature in an immersive virtual
   reality cage, trapping it inside a false environment it can't escape. No other creatures
-  are affected. The target must attempt a Will save each round to disbelieve.
+  are affected. The target must attempt a Willpower save each round to disbelieve.
 tradition: neural
 level: 3
 usage_type: prepared

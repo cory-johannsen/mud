@@ -1,7 +1,7 @@
 id: seize_soul_neural
 name: Soul Seizure Protocol
 description: You reach into a creature's neural substrate and attempt to seize its
-  animating intelligence. The target must attempt a Fortitude save. On a critical
+  animating intelligence. The target must attempt a Toughness save. On a critical
   failure it dies instantly, its soul captured in a soulcage crystal you hold. On
   a failure it becomes stunned 3 and loses 9d6+40 HP. On a success it loses 9d6+40
   HP. The trapped soul can be used as a power source or released.

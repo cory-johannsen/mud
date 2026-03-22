@@ -5,7 +5,7 @@ description: |-
 
     Heightened (6th) The unarmed attacks are +2 greater striking.
     Heightened (9th) The unarmed attacks are +3 major striking.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Runic Body]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Runic Body]
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared

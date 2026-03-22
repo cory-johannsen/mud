@@ -1,7 +1,7 @@
 id: charitable_urge_technical
 name: Generosity Hack
 description: 'You hack the target''s decision-making circuits to induce an overwhelming
-  urge to give away possessions. The target must attempt a Will save.
+  urge to give away possessions. The target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
@@ -28,5 +28,5 @@ effects:
   - type: utility
     dc: 0
     description: You speak on the virtue of charity, compelling the target to give
-      away its possessions. The target must attempt a Will save. If the target has
+      away its possessions. The target must attempt a Willpower save. If the target has
       no items on its person, the spell fails.Critical Success

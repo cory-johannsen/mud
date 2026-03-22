@@ -19,5 +19,5 @@ effects:
   - type: utility
     dc: 0
     description: This spell deals you 1 piercing damage as you shape a magical duplicate
-      of the target from your blood; you can't cast this spell if you don't have blood.
+      of the target from your blood; you can't cast this tech if you don't have blood.
       This spell can't duplicate an item made of pre

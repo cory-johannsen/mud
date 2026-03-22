@@ -1,7 +1,7 @@
 id: horrifying_blood_loss_fanatic_doctrine
 name: Stigmata Curse
 description: 'You invoke a doctrinal curse that opens phantom wounds on the target.
-  The target must attempt a Will save.
+  The target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
@@ -28,7 +28,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You curse the target, filling it with terror at the loss of its
-      blood. The target must attempt a Will save.
+      blood. The target must attempt a Willpower save.
 
 
       Critical Success The target is unaffected.

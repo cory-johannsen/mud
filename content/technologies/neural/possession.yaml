@@ -1,14 +1,14 @@
 id: possession
 name: Full Neural Hijack
 description: 'You transmit your consciousness into the target''s neural implant, attempting
-  to take control. The target must attempt a Will save. If you want to exert less
+  to take control. The target must attempt a Willpower save. If you want to exert less
   control over the target, you can choose to use the effects of any degree of success
   more favorable to the target.
 
   While you''re controlling a target, your own body is @UUID[Compendium.pf2e.conditionitems.Item.Unconscious]
   and can''t wake up normally. You can sense everything the hijacked target does.
   You can Dismiss this tech. If the hijacked body dies, the tech ends and you must
-  succeed at a Fortitude save against your tech DC or be @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed]
+  succeed at a Toughness save against your tech DC or be @UUID[Compendium.pf2e.conditionitems.Item.Paralyzed]
   for 1 hour, or 24 hours on a critical failure. If the tech ends during an encounter,
   you act just before the hijacked creature''s initiative.Critical Success The target
   is unaffected.
@@ -18,7 +18,7 @@ description: 'You transmit your consciousness into the target''s neural implant,
 
   Failure You inhabit the target and take partial control of it. You no longer have
   a separate turn; instead, you might control the target. At the start of each of
-  the target''s turns, it attempts another Will save. If it fails, it''s @UUID[Compendium.pf2e.conditionitems.Item.Controlled]
+  the target''s turns, it attempts another Willpower save. If it fails, it''s @UUID[Compendium.pf2e.conditionitems.Item.Controlled]
   by you on that turn; if it succeeds, it chooses its own actions; and if it critically
   succeeds, it forces you out and the tech ends.
 
@@ -41,5 +41,5 @@ effects:
   - type: utility
     dc: 0
     description: You send your mind and soul into the target's body, attempting to
-      take control. The target must attempt a Will save. If you want to exert less
+      take control. The target must attempt a Willpower save. If you want to exert less
       control over the target, you can choose to use the effect

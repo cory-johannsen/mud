@@ -2,7 +2,7 @@ id: unfathomable_song
 name: Cognitohazard Broadcast
 description: You broadcast a cognitohazardous signal that destabilizes cognition.
   Each creature in a 60-foot emanation that can perceive the broadcast must attempt
-  a Will save at the start of each of your turns. On a failure, they become confused.
+  a Willpower save at the start of each of your turns. On a failure, they become confused.
   On a critical failure, they also take 6d8 mental damage. Creatures that succeed
   are temporarily immune to this casting for 24 hours.
 tradition: neural
@@ -20,5 +20,5 @@ effects:
   - type: utility
     dc: 0
     description: Fleeting notes of a strange and unnatural song fill the air, overtaking
-      the mind. Each target must attempt a Will save when you cast the spell, and
-      again the first time you Sustain this Spell each rou
+      the mind. Each target must attempt a Willpower save when you cast the spell, and
+      again the first time you Sustain this tech each rou

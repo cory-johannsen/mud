@@ -30,13 +30,13 @@ description: 'You accept the overwhelming power of your doctrine into your body;
   2d8 slashing damage and has the agile and finesse traits.
 
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Divine Vessel]
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Divine Vessel]
 
 
   Heightened (9th) The temporary Hit Points increase to 60, the weakness increases
   to 15, and the duration increases to 10 minutes.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Divine Vessel (9th level)]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Divine Vessel (9th level)]'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared

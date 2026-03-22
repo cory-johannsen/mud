@@ -1,7 +1,7 @@
 id: tanglecurse_fanatic_doctrine
 name: Doctrinal Fungal Blight
 description: 'You invoke a sacred blight upon the target, cursing them with parasitic
-  fungal growth. The target must attempt a Will save.Critical Success The target is
+  fungal growth. The target must attempt a Willpower save.Critical Success The target is
   unaffected.
 
   Success A fungal bloom springs up from the ground in a @Template[type:emanation|distance:5]
@@ -47,6 +47,6 @@ effects:
     dc: 0
     description: 'Tanglebriar has been called a "curse on the land," which has inspired
       Treerazer''s cult to develop this notorious spell. The target must attempt a
-      Will save.Critical Success The target is unaffected.
+      Willpower save.Critical Success The target is unaffected.
 
       S'

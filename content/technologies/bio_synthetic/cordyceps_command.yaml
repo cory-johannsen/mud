@@ -3,7 +3,7 @@ name: Fungal Override
 description: 'You fire a mote of engineered cordyceps spores at the target. The spores
   attempt to hijack the target''s motor functions. Choose one effect when you activate
   this tech: the target moves, attacks, or drops what it''s holding. The target must
-  attempt a Will save.'
+  attempt a Willpower save.'
 tradition: bio_synthetic
 level: 3
 usage_type: prepared
@@ -19,5 +19,5 @@ effects:
   - type: utility
     dc: 0
     description: 'You conjure a mote of cordyceps spores uniquely tailored to the
-      target before whisking it at them. When you Cast this Spell, choose one of the
+      target before whisking it at them. When you Use this tech, choose one of the
       following behaviors that the fungus compels: ascend, cons'

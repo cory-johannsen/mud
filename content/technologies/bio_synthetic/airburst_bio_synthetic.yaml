@@ -1,7 +1,7 @@
 id: airburst_bio_synthetic
 name: Airburst
 description: |-
-    A blast of wind wildly pushes everything nearby. Unattended objects of 1 Bulk or less are pushed 5 feet away from you. Large or smaller creatures must attempt a Fortitude save.
+    A blast of wind wildly pushes everything nearby. Unattended objects of 1 Bulk or less are pushed 5 feet away from you. Large or smaller creatures must attempt a Toughness save.
 
     Critical Success The creature is unaffected.
     Success The creature takes a -2 status penalty to checks made during its reactions until the end of your turn.
@@ -24,6 +24,6 @@ effects:
         - type: utility
           dc: 0
           description: |-
-            A blast of wind wildly pushes everything nearby. Unattended objects of 1 Bulk or less are pushed 5 feet away from you. Large or smaller creatures must attempt a Fortitude save.
+            A blast of wind wildly pushes everything nearby. Unattended objects of 1 Bulk or less are pushed 5 feet away from you. Large or smaller creatures must attempt a Toughness save.
 
             Critical Success The c

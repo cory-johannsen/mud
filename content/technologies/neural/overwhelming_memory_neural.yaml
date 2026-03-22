@@ -2,7 +2,7 @@ id: overwhelming_memory_neural
 name: Memory Flood
 description: You force the target to recall a specific type of memory with overwhelming
   clarity, bringing it to the forefront of their mind. The sudden cognitive load forces
-  the target to attempt a Will save.
+  the target to attempt a Willpower save.
 tradition: neural
 level: 3
 usage_type: prepared

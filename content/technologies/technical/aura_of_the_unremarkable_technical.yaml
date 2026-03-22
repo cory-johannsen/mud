@@ -3,7 +3,7 @@ name: Stealth Field Generator
 description: 'You activate a device that generates a perception-dampening field, making
   you and allies in the area appear completely innocuous to other creatures within
   the area, regardless of the actions you''re committing. Non-allied creatures in
-  the emanation must attempt a Will save.
+  the emanation must attempt a Willpower save.
 
 
   Critical Success The creature sees your actions as they really are and announces
@@ -22,7 +22,7 @@ description: 'You activate a device that generates a perception-dampening field,
   the effect of the spell for that creature. When the spell ends (or when affected
   allies move outside the range of the emanation), observers see things normally but
   the altered perceptions from earlier events remain in mind. Each mention of the
-  events as noteworthy grants the target another Will save to break the effect and
+  events as noteworthy grants the target another Willpower save to break the effect and
   remember things normally (unless the creature critically failed their save).'
 tradition: technical
 level: 6

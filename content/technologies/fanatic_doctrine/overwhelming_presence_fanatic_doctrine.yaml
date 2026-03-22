@@ -1,7 +1,7 @@
 id: overwhelming_presence_fanatic_doctrine
 name: Mass Doctrinal Dominance
 description: You emanate overwhelming doctrinal authority. All creatures in a 30-foot
-  emanation must attempt a Will save. On a failure, they are awestruck and compelled
+  emanation must attempt a Willpower save. On a failure, they are awestruck and compelled
   to obey your instructions. On a critical failure, they are also slowed 1.
 tradition: fanatic_doctrine
 level: 9
@@ -19,4 +19,4 @@ effects:
     dc: 0
     description: You surround yourself with supernatural splendor, appearing to be
       a god or similarly majestic being, with an appearance, regalia, and iconography
-      of your choice. Targets must attempt a Will save. Rega
+      of your choice. Targets must attempt a Willpower save. Rega

@@ -1,7 +1,7 @@
 id: sanguine_mist_technical
 name: Hemovore Drone Cloud
 description: You deploy a cloud of nanoscale blood-harvesting drones. Each living
-  creature in the area (aside from you) takes 6d6 void damage (basic Fortitude save).
+  creature in the area (aside from you) takes 6d6 void damage (basic Toughness save).
   Creatures are Concealed within. First Sustain each round deals additional @Damage[(@item.rank
   -2)d6[void]] damage. You gain temporary HP equal to half the highest damage dealt.
   All other effects remain identical.Heightened (+1) Initial +2d6, secondary +1d6.

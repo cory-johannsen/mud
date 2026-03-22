@@ -4,12 +4,12 @@ description: 'Trigger You are targeted with an enemy''s Strike.
 
 
   When attacked, you activate a transposition relay to swap positions with another
-  creature. A creature that is unwilling to swap must attempt a Will save. Willing
+  creature. A creature that is unwilling to swap must attempt a Willpower save. Willing
   creatures automatically fail. If you successfully switch places with the target,
   the triggering attack is resolved against that creature as if it had been the original
   target. After the swap, you and the target are both temporarily immune to this effect
   for 1 minute. You automatically switch places if the target is willing. If it''s
-  unwilling, it can attempt a Will save. Neither of you teleports if the target succeeds
+  unwilling, it can attempt a Willpower save. Neither of you teleports if the target succeeds
   at its save.'
 tradition: technical
 level: 6

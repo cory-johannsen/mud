@@ -8,8 +8,8 @@ description: 'You project mass-scale holographic soldiers, creating the illusion
   intelligible sounds, such as music or clear speech. If you and any of the illusory
   troops are ever farther than 500 feet apart, the spell ends.
 
-  An illusory troop''s AC is equal to your spell DC. Its saving throws modifiers are
-  equal to your spell DC – 10. If an illusory troop is hit by an attack or fails a
+  An illusory troop''s AC is equal to your tech DC. Its saving throws modifiers are
+  equal to your tech DC – 10. If an illusory troop is hit by an attack or fails a
   save, you must attempt a @Check[flat|dc:11]. On success, the illusion of that troop
   is destroyed. On failure, the entire illusion shatters, and all illusory troops
   are destroyed.Heightened (8th) The DC of the is lowered to 8 (@Check[flat|dc:8]),

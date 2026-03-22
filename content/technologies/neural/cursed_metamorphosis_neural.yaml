@@ -29,7 +29,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You transform the target creature into a harmless animal appropriate
-      to the area, with effects based on its Fortitude save.Critical Success The target
+      to the area, with effects based on its Toughness save.Critical Success The target
       is unaffected.
 
       Success The target''s body gains mi'

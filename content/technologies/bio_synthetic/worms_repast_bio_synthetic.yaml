@@ -1,7 +1,7 @@
 id: worms_repast_bio_synthetic
 name: Parasitic Infestation
 description: 'You infest the target with bio-synthetic parasites that devour tissue.
-  The target takes 4d6 poison damage and must attempt a Fortitude save.
+  The target takes 4d6 poison damage and must attempt a Toughness save.
 
 
   Critical Success The creature takes no damage.

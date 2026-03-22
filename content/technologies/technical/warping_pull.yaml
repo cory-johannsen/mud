@@ -1,7 +1,7 @@
 id: warping_pull
 name: Gravity Well
 description: 'You deploy a localized gravity distortion that pulls the target toward
-  you. The target must attempt a Fortitude save.
+  you. The target must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

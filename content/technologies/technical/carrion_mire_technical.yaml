@@ -2,7 +2,7 @@ id: carrion_mire_technical
 name: Toxic Waste Zone
 description: 'You deploy industrial contaminants that poison the area. Creatures in
   the area when you cast the spell and creatures that enter the area must attempt
-  Fortitude saves.
+  Toughness saves.
 
 
   Critical Success The creature is unaffected.

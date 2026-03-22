@@ -3,7 +3,7 @@ name: Booby-Trapped Access Point
 description: 'You place a lethal security ward on a door that triggers when a creature
   attempts to open, unlock, or destroy it. When triggered, the door transforms into
   a hostile automated turret system that can''t move and is hostile to all creatures.
-  When Casting the Spell, you designate yourself and up to 10 other creatures; these
+  When Casting the tech, you designate yourself and up to 10 other creatures; these
   creatures don''t trigger the ward, and the turret is helpful to them. Once triggered,
   the turret attacks creatures in its reach for up to 1 minute, then the spell ends.
   If the turret is destroyed before that time, the spell ends and the door returns

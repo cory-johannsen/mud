@@ -1,12 +1,12 @@
 id: equal_footing_neural
 name: Equal Footing
 description: |-
-    You level the field between yourself and another creature, hampering its movements if it's quicker than you. The target attempts a Will save.Critical Success The target is unaffected.
+    You level the field between yourself and another creature, hampering its movements if it's quicker than you. The target attempts a Willpower save.Critical Success The target is unaffected.
     Success The target is Clumsy 1 and takes a –10-foot status penalty to all its Speeds until the end of your next turn.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Equal Footing (Success)]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Equal Footing (Success)]
     Failure The target is clumsy 1 and takes a –15-foot status penalty to all its Speeds for 1 minute. During this time, it can't benefit from bonuses to its Speeds or take other penalties to its Speeds.
     Critical Failure The target is Clumsy 2 and takes a –15-foot status penalty to all its Speeds for 1 minute. During this time, it can't benefit from bonuses to its Speeds or take other penalties to its Speeds.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Equal Footing (Failure or Critical Failure)]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Equal Footing (Failure or Critical Failure)]
 tradition: neural
 level: 1
 usage_type: prepared
@@ -22,5 +22,5 @@ effects:
         - type: utility
           dc: 0
           description: |-
-            You level the field between yourself and another creature, hampering its movements if it's quicker than you. The target attempts a Will save.Critical Success The target is unaffected.
+            You level the field between yourself and another creature, hampering its movements if it's quicker than you. The target attempts a Willpower save.Critical Success The target is unaffected.
             Success The targ

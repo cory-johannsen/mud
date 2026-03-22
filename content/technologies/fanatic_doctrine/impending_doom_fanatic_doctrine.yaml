@@ -1,7 +1,7 @@
 id: impending_doom_fanatic_doctrine
 name: Doomsday Prophecy
 description: You project a terrifying vision of the target's prophesied death into
-  their consciousness. The target must attempt a Will save or become convinced their
+  their consciousness. The target must attempt a Willpower save or become convinced their
   end is imminent.
 tradition: fanatic_doctrine
 level: 3

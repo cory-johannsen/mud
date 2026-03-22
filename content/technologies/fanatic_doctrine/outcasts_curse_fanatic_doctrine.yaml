@@ -1,7 +1,7 @@
 id: outcasts_curse_fanatic_doctrine
 name: Excommunication Brand
 description: 'You afflict the target with a doctrinal brand that makes its presence
-  repulsive to others. The target must attempt a Will save.Critical Success The target
+  repulsive to others. The target must attempt a Willpower save.Critical Success The target
   is unaffected.
 
   Success For 10 minutes, the target must roll twice and use the worse result on Deception,
@@ -26,7 +26,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You afflict the target with a curse that makes its presence abrasive
-      and off-putting. The target must attempt a Will save.Critical Success The target
+      and off-putting. The target must attempt a Willpower save.Critical Success The target
       is unaffected.
 
       Success For 10 minutes, the target'

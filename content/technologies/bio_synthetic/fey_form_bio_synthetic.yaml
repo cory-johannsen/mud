@@ -1,7 +1,7 @@
 id: fey_form_bio_synthetic
 name: Chimeric Mutagen
 description: 'You inject an unstable polymorph mutagen that reshapes your body into
-  a bio-synthetic combat chassis. When you cast this spell, choose a form configuration.
+  a bio-synthetic combat chassis. When you cast this tech, choose a form configuration.
   While in this form, you gain the bio-synthetic trait. You can Dismiss the spell.
 
   All statistics, form options, and abilities remain identical to the base protocol.'
@@ -18,5 +18,5 @@ effects:
   - type: utility
     dc: 0
     description: Channeling the mischievous fey, you transform into a fey battle form,
-      which is Medium unless stated otherwise. When you cast this spell, choose dryad,
+      which is Medium unless stated otherwise. When you cast this tech, choose dryad,
       elananx, naiad, redcap, or unicorn. If you choose

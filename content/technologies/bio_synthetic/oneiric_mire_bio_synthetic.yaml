@@ -2,7 +2,7 @@ id: oneiric_mire_bio_synthetic
 name: Hallucinogenic Bog
 description: You release hallucinogenic spores that make the ground appear to shift
   and sink. The area is difficult terrain. Each creature in the area must attempt
-  a Will save or become Slowed 1 for 1 round.
+  a Willpower save or become Slowed 1 for 1 round.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

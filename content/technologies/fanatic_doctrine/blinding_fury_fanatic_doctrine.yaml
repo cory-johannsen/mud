@@ -1,7 +1,7 @@
 id: blinding_fury_fanatic_doctrine
 name: Righteous Blind Wrath
 description: 'Trigger A creature damages you. You channel your doctrine''s fury to
-  sear the attacker''s senses. The effect is determined by the target''s Will save.Critical
+  sear the attacker''s senses. The effect is determined by the target''s Willpower save.Critical
   Success The target is unaffected.
 
   Success The target can''t Observe you until the end of its turn, and if you''re
@@ -30,7 +30,7 @@ effects:
   - type: utility
     dc: 0
     description: 'Trigger A creature damages you.You curse the target with your outrage
-      at being attacked. The effect is determined by the target''s Will save.Critical
+      at being attacked. The effect is determined by the target''s Willpower save.Critical
       Success The target is unaffected.
 
       Success The targe'

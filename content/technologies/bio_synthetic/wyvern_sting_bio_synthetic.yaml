@@ -2,7 +2,7 @@ id: wyvern_sting_bio_synthetic
 name: Venom Strike
 description: 'You replicate a concentrated bio-synthetic venom delivery. You deal
   3d4 piercing damage to the touched creature and afflict it with wyvern-class toxin.
-  If the target takes piercing damage, they must attempt a Fortitude save.
+  If the target takes piercing damage, they must attempt a Toughness save.
 
   Critical Success The target is unaffected.
 

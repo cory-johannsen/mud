@@ -1,7 +1,7 @@
 id: warriors_regret_fanatic_doctrine
 name: Penitent's Remorse
 description: 'You fill the target with doctrinal guilt over its violent actions. The
-  target must attempt a Will save.
+  target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
@@ -9,7 +9,7 @@ description: 'You fill the target with doctrinal guilt over its violent actions.
   Success The creature takes a -1 status penalty to attack rolls for 1 round.
 
   Failure The creature takes a -2 status penalty to attack rolls for 1 minute. It
-  can attempt a new Will save at the end of each of its turns.
+  can attempt a new Willpower save at the end of each of its turns.
 
   Critical Failure As failure, and the creature is also @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
   1.'

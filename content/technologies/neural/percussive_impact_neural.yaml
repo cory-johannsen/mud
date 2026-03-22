@@ -1,7 +1,7 @@
 id: percussive_impact_neural
 name: Sonic Detonation
 description: You lob a compressed ball of psychic sound at a foe. The ball explodes
-  on impact, unleashing a powerful blast. Make a spell attack roll. If you hit, the
+  on impact, unleashing a powerful blast. Make a tech attack roll. If you hit, the
   target takes 3d6 sonic damage plus 1d6 persistent sonic damage.
 tradition: neural
 level: 3

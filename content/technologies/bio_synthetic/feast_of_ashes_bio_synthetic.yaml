@@ -1,7 +1,7 @@
 id: feast_of_ashes_bio_synthetic
 name: Metabolic Block
 description: 'You introduce a bio-synthetic agent that blocks the target''s nutrient
-  absorption. The target must attempt a Fortitude save.
+  absorption. The target must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.
@@ -9,7 +9,7 @@ description: 'You introduce a bio-synthetic agent that blocks the target''s nutr
   Success The creature requires twice as much food as normal for 1 day.
 
   Failure The creature gains no nourishment from eating for 1 week and must attempt
-  Fortitude saves against starvation.
+  Toughness saves against starvation.
 
   Critical Failure As failure, but the duration is 1 month.'
 tradition: bio_synthetic

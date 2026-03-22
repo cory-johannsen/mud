@@ -1,7 +1,7 @@
 id: fabricated_truth
 name: Reality Fabrication Protocol
 description: You fabricate an absolute truth in the minds of all targets in a 30-foot
-  burst. Each target must attempt a Will save. On a failure, they believe a single
+  burst. Each target must attempt a Willpower save. On a failure, they believe a single
   false statement you define as absolute fact. This effect is permanent unless dispelled.
 tradition: neural
 level: 10

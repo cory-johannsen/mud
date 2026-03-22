@@ -1,7 +1,7 @@
 id: mariners_curse_neural
 name: System Corruption
 description: 'You afflict the target with a debilitating system corruption that causes
-  increasing nausea and disorientation. The target must attempt a Will save.
+  increasing nausea and disorientation. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -29,7 +29,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You afflict the target with the curse of the roiling, unforgiving
-      sea. The target must attempt a Will save.
+      sea. The target must attempt a Willpower save.
 
 
       Critical Success The target is unaffected.

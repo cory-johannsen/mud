@@ -21,7 +21,7 @@ description: 'You channel your doctrine''s cosmic power, transforming into a Lar
   50 feetMelee 1 fist (agile, reach 10 feet), Damage 2d6+10 fire plus 1d6 persistent
   fireRanged 1 sunbeam (range 90 feet), Damage 1d6+10 fire plus 1d6 persistent fireOn
   a critical hit with either Strike, the target is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled]
-  for 1 round.@UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Cosmic Form]'
+  for 1 round.@UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Cosmic Form]'
 tradition: fanatic_doctrine
 level: 7
 usage_type: prepared
@@ -36,4 +36,4 @@ effects:
     dc: 0
     description: You recreate your form entirely out of cosmic energy, transforming
       into a Large battle form. You must have enough space to expand into, or the
-      spell is lost. When you cast this spell, choose to take o
+      spell is lost. When you cast this tech, choose to take o

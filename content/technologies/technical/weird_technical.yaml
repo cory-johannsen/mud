@@ -1,7 +1,7 @@
 id: weird_technical
 name: Mass Nightmare Uplink
 description: 'You broadcast individualized nightmare signals to all targets in a 30-foot
-  burst within 120 feet. Each target must attempt a Will save. On a failure: 16d6
+  burst within 120 feet. Each target must attempt a Willpower save. On a failure: 16d6
   mental damage, frightened 4. On a critical failure: double damage, paralyzed. On
   a success: half damage.'
 tradition: technical

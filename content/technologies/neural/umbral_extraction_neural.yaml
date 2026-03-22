@@ -1,7 +1,7 @@
 id: umbral_extraction_neural
 name: Shadow Drain
 description: 'You psychically tear at the target''s shadow, extracting vitality. The
-  target takes 4d4 void damage and must attempt a Fortitude save.
+  target takes 4d4 void damage and must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.

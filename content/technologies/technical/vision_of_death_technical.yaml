@@ -1,7 +1,7 @@
 id: vision_of_death_technical
 name: Mortality Simulator
 description: 'You deploy a device that forces the target to experience a hyper-realistic
-  simulation of its own death. It takes 8d6 mental damage with a Will save. If reduced
+  simulation of its own death. It takes 8d6 mental damage with a Willpower save. If reduced
   to 0 HP, the simulation becomes lethal.Critical Success Unaffected.
 
   Success Half damage, Frightened 1.

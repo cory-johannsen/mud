@@ -8,7 +8,7 @@ description: 'Powerful psychic countermeasures hide a creature from tech that wo
   target and its possessions. For instance, detect magic would still detect other
   tech in the area, but not any tech on the target.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Hidden Mind]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Hidden Mind]'
 tradition: neural
 level: 8
 usage_type: prepared

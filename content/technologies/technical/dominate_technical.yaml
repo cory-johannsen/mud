@@ -11,7 +11,7 @@ description: 'You activate a device that seizes control of the target''s motor f
   Success The target is Stunned 1 as it fights off your commands.
 
   Failure You control the target. It gains the @UUID[Compendium.pf2e.conditionitems.Item.Controlled]
-  condition, but it can attempt a Will save at the end of each of its turns. On a
+  condition, but it can attempt a Willpower save at the end of each of its turns. On a
   success, the spell ends.
 
   Critical Failure As a failure, but the target receives a new save only if you give

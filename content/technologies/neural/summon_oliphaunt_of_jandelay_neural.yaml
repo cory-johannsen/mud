@@ -2,7 +2,7 @@ id: summon_oliphaunt_of_jandelay_neural
 name: Apex Behemoth Summon
 description: You summon an apex-tier behemoth construct. It appears within 60 feet
   and follows your commands for 1 minute using the statistics of an Oliphaunt of Jandelay.
-  Its mere appearance causes fear in all creatures within 120 feet (Will save vs frightened
+  Its mere appearance causes fear in all creatures within 120 feet (Willpower save vs frightened
   4).
 tradition: neural
 level: 10

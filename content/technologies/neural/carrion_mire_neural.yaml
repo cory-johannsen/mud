@@ -2,7 +2,7 @@ id: carrion_mire_neural
 name: Necrotic Slick
 description: 'You psychically contaminate the area with rotting neural projections.
   Creatures in the area when you cast the spell and creatures that enter the area
-  must attempt Fortitude saves.
+  must attempt Toughness saves.
 
 
   Critical Success The creature is unaffected.

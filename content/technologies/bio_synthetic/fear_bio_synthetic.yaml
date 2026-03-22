@@ -1,7 +1,7 @@
 id: fear_bio_synthetic
 name: Fear
 description: |-
-    You plant fear in the target; it must attempt a Will save.
+    You plant fear in the target; it must attempt a Willpower save.
 
     Critical Success The target is unaffected.
     Success The target is Frightened 1.
@@ -24,7 +24,7 @@ effects:
         - type: utility
           dc: 0
           description: |-
-            You plant fear in the target; it must attempt a Will save.
+            You plant fear in the target; it must attempt a Willpower save.
 
             Critical Success The target is unaffected.
             Success The target is Frightened 1.

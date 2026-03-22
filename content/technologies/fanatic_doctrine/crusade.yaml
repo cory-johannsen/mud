@@ -3,7 +3,7 @@ name: Mass Crusade Protocol
 description: You broadcast a crusade signal to all allied combatants within 500 feet.
   All allies gain a +2 status bonus to attack rolls, damage rolls, and saving throws
   for 1 minute. They also gain 30 temporary HP. Enemies in the area must succeed at
-  a Will save or become frightened 2 for the duration.
+  a Willpower save or become frightened 2 for the duration.
 tradition: fanatic_doctrine
 level: 9
 usage_type: prepared

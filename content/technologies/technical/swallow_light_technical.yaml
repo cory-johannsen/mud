@@ -2,7 +2,7 @@ id: swallow_light_technical
 name: Light Absorber
 description: 'You deploy light-absorbing nanomaterial in the area, creating dim light
   in a @Template[burst|distance:20]. Creatures in the area when you cast the spell
-  must attempt a Fortitude save.
+  must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

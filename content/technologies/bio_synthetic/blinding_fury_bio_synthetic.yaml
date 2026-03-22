@@ -2,7 +2,7 @@ id: blinding_fury_bio_synthetic
 name: Pheromone Blind Rage
 description: 'Trigger A creature damages you. You release a burst of weaponized pheromones
   that overwhelms the attacker''s visual cortex. The effect is determined by the target''s
-  Will save.Critical Success The target is unaffected.
+  Willpower save.Critical Success The target is unaffected.
 
   Success The target can''t Observe you until the end of its turn, and if you''re
   currently observed by it, you become @UUID[Compendium.pf2e.conditionitems.Item.Hidden]
@@ -30,7 +30,7 @@ effects:
   - type: utility
     dc: 0
     description: 'Trigger A creature damages you.You curse the target with your outrage
-      at being attacked. The effect is determined by the target''s Will save.Critical
+      at being attacked. The effect is determined by the target''s Willpower save.Critical
       Success The target is unaffected.
 
       Success The targe'

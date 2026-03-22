@@ -2,7 +2,7 @@ id: purple_worm_sting_technical
 name: Neurotoxin Dart Injector
 description: 'You fire a precision dart loaded with synthesized neurotoxin. You deal
   3d6 piercing damage to the target and afflict it with the neurotoxin. The target
-  must attempt a Fortitude save.
+  must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.

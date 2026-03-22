@@ -1,7 +1,7 @@
 id: blister_technical
 name: Thermal Blisters
 description: 'You target a creature in range with a focused thermal beam that causes
-  searing blisters. The target must attempt a Fortitude save.
+  searing blisters. The target must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.

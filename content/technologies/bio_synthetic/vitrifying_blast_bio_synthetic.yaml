@@ -12,7 +12,7 @@ description: 'You launch a cone of crystallized bio-silicate shards, which embed
 
   Failure The target takes full damage, is Slowed 1, and gains weakness to sonic and
   bludgeoning damage. The weakness is equal to 3 × the slowed value it has from this
-  spell. The target must attempt a Fortitude save at the end of each of its turns;
+  spell. The target must attempt a Toughness save at the end of each of its turns;
   this ongoing save has the incapacitation trait. On a failed save, the creature''s
   slowed value increases by 1 (or by 2 on a critical failure), to a maximum of Slowed
   3. A successful save reduces the creature''s slowed value by 1 (or by 2 on a critical
@@ -20,7 +20,7 @@ description: 'You launch a cone of crystallized bio-silicate shards, which embed
 
   Critical Failure As failure, but the target is initially Slowed 2.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Vitrifying Blast]
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Vitrifying Blast]
 
 
   Heightened (+1) The damage increases by 1d6.'

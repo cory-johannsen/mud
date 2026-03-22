@@ -1,7 +1,7 @@
 id: sages_curse_technical
 name: Data Noise Emitter
 description: You deploy a device that floods the target's mind with distracting hyperspecialized
-  data noise. The target must attempt a Will save. All mechanical effects (double
+  data noise. The target must attempt a Willpower save. All mechanical effects (double
   rolls, mixed knowledge, degree penalties) remain identical to the base protocol.
 tradition: technical
 level: 4

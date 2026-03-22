@@ -2,7 +2,7 @@ id: indolent_haze_technical
 name: Soporific Gas Emitter
 description: 'A faint chemical haze and subsonic sedation waves fill the area, urging
   creatures to shut down and submit. Creatures in the area when you activate the tech
-  must attempt a Will save. Creatures who end their turn in the area must also attempt
+  must attempt a Willpower save. Creatures who end their turn in the area must also attempt
   the save. You can Dismiss the effect.Critical Success The creature is unaffected.
 
   Success The creature lies down, becoming @UUID[Compendium.pf2e.conditionitems.Item.Prone].

@@ -2,7 +2,7 @@ id: girzanjes_march_neural
 name: War Hymn Broadcast
 description: 'You broadcast a combat-enhancement frequency that bolsters allies who
   receive the signal. Allied creatures who can hear and understand you gain a +1 status
-  bonus to attack rolls, Fortitude saves, and Will saves against mental effects.
+  bonus to attack rolls, Toughness saves, and Will saves against mental effects.
 
 
   Heightened (7th) The status bonus increases to +2.
@@ -24,4 +24,4 @@ effects:
     dc: 0
     description: You sing a prayer for war, inspiring valor in allies who hear your
       song. Allied creatures who can hear and understand you gain a +1 status bonus
-      to attack rolls, Fortitude saves, and Will saves agains
+      to attack rolls, Toughness saves, and Will saves agains

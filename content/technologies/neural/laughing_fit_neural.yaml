@@ -1,7 +1,7 @@
 id: laughing_fit_neural
 name: Manic Override
 description: 'You hack the target''s neural pathways to induce uncontrollable laughter.
-  The target must attempt a Will save.
+  The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -10,12 +10,12 @@ description: 'You hack the target''s neural pathways to induce uncontrollable la
   round.
 
   Failure The target is unable to take reactions and is @UUID[Compendium.pf2e.conditionitems.Item.Slowed]
-  1 for 1 minute. It can attempt a new Will save at the end of each of its turns to
+  1 for 1 minute. It can attempt a new Willpower save at the end of each of its turns to
   end the effect.
 
   Critical Failure The target falls @UUID[Compendium.pf2e.conditionitems.Item.Prone]
   and can''t stand for 1 round. It''s unable to take reactions and is @UUID[Compendium.pf2e.conditionitems.Item.Slowed]
-  1 for 1 minute, and it can attempt a new Will save at the end of each of its turns
+  1 for 1 minute, and it can attempt a new Willpower save at the end of each of its turns
   to end the effect.'
 tradition: neural
 level: 2
@@ -32,7 +32,7 @@ effects:
   - type: utility
     dc: 0
     description: 'The target is overtaken with uncontrollable laughter. It must attempt
-      a Will save.
+      a Willpower save.
 
 
       Critical Success The target is unaffected.

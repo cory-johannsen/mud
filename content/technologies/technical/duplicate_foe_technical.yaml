@@ -1,7 +1,7 @@
 id: duplicate_foe_technical
 name: Hard-Light Combat Clone
 description: 'You create a temporary hard-light clone of an enemy to fight on your
-  behalf. The target can attempt a Fortitude save to disrupt the projection. The clone
+  behalf. The target can attempt a Toughness save to disrupt the projection. The clone
   appears in an unoccupied space adjacent to the target and has the target''s attack
   modifier, AC, saving throw modifiers, Perception, and skill modifiers, but it has
   only 70 Hit Points and lacks the target''s special abilities, including immunities,
@@ -47,5 +47,5 @@ effects:
   - type: utility
     dc: 0
     description: You create a temporary duplicate of an enemy to fight on your behalf.
-      The target can attempt a Fortitude save to disrupt the spell. The duplicate
+      The target can attempt a Toughness save to disrupt the spell. The duplicate
       appears in an unoccupied space adjacent to the target

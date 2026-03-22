@@ -10,7 +10,7 @@ description: 'A flowing cloak of adaptive holographic camouflage drapes over you
   instead.
 
   Focusing too intently on the holographic patterns is disorienting. Any creature
-  that ends its turn adjacent to you must attempt a Will save; this is a mental, visual
+  that ends its turn adjacent to you must attempt a Willpower save; this is a mental, visual
   effect.Success The creature is unaffected.
 
   Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Dazzled] until

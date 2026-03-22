@@ -2,7 +2,7 @@ id: imprint_message
 name: Imprint Message
 description: |-
     You project psychic vibrations onto the target object, imprinting it with a short message or emotional theme of your design. This imprinted sensation is revealed to a creature who casts @UUID[Compendium.pf2e.spells-srd.Item.Object Reading] on the target object, replacing any emotional events the item was present for. If the object is in the area of a @UUID[Compendium.pf2e.spells-srd.Item.Retrocognition] spell, the imprinted messages appear as major events in the timeline, but they don't interfere with any other visions.
-    If the object is targeted with @UUID[Compendium.pf2e.spells-srd.Item.Read Aura] of a higher spell rank than imprint message, the caster learns that the object has been magically modified. When you Cast this Spell, any prior vibrations placed on an object by previous castings of imprint message fade.
+    If the object is targeted with @UUID[Compendium.pf2e.spells-srd.Item.Read Aura] of a higher spell rank than imprint message, the caster learns that the object has been magically modified. When you Use this tech, any prior vibrations placed on an object by previous castings of imprint message fade.
 tradition: neural
 level: 1
 usage_type: prepared

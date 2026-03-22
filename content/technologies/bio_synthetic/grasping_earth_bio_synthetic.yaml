@@ -2,10 +2,10 @@ id: grasping_earth_bio_synthetic
 name: Lithic Tendrils
 description: 'Stone and soil protrusions grab and bury creatures. Each creature in
   the area when you cast the spell, and each creature that ends its turn in the area,
-  must attempt a Fortitude save. The first time each round you Sustain, each creature
+  must attempt a Toughness save. The first time each round you Sustain, each creature
   still Grabbed takes @Damage[1d6[bludgeoning]] damage, and each creature Restrained
   takes @Damage[2d6[bludgeoning]] damage. A creature can attempt to Escape against
-  your spell DC.
+  your tech DC.
 
 
   Success The creature is unaffected.

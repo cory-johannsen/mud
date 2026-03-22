@@ -1,7 +1,7 @@
 id: phantasmal_treasure_neural
 name: Phantom Jackpot
 description: 'You project an illusion of a valuable object that fascinates the target.
-  The target must attempt a Will save.
+  The target must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected and knows the treasure is fake.
@@ -10,7 +10,7 @@ description: 'You project an illusion of a valuable object that fascinates the t
   fake.
 
   Failure The creature is fascinated for 1 minute and tries to acquire the treasure.
-  It can attempt a new Will save each round if other creatures interfere.
+  It can attempt a new Willpower save each round if other creatures interfere.
 
   Critical Failure As failure, and the creature won''t give up the treasure willingly.'
 tradition: neural

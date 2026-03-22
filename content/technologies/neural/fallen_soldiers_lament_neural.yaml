@@ -2,9 +2,9 @@ id: fallen_soldiers_lament_neural
 name: Ghost Signal Projection
 description: You project a holographic phantom from a fallen target's residual neural
   data, parading it across the combat zone as a psychological weapon. Whenever you
-  Cast this Spell or Sustain this spell, you move the projection up to 30 feet and
-  cause each enemy in a 30-foot emanation of the phantom to attempt a Will save against
-  your spell DC. Enemies who fail become Frightened 1 (or Frightened 2 on a critical
+  Use this tech or Sustain this tech, you move the projection up to 30 feet and
+  cause each enemy in a 30-foot emanation of the phantom to attempt a Willpower save against
+  your tech DC. Enemies who fail become Frightened 1 (or Frightened 2 on a critical
   failure).Heightened (6th) You can target a corpse of any size that has died within
   the past 8 hours.
 tradition: neural
@@ -23,4 +23,4 @@ effects:
     dc: 0
     description: You raise an illusion in the space of a fallen foe, crafting it to
       resemble a ghost of your target before parading it across the battlefield. Whenever
-      you Cast this Spell or Sustain this spell, you mo
+      you Use this tech or Sustain this tech, you mo

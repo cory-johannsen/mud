@@ -2,7 +2,7 @@ id: crisis_of_faith
 name: Ideological Collapse
 description: You assault the target's core beliefs with a devastating counter-doctrine,
   dealing 6d6 mental damage, or 6d8 mental damage if the target can channel doctrine
-  themselves. The target must attempt a Will save.
+  themselves. The target must attempt a Willpower save.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared

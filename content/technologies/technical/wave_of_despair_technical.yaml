@@ -1,7 +1,7 @@
 id: wave_of_despair_technical
 name: Morale Suppressor
 description: 'You broadcast a demoralizing electromagnetic pulse that induces despair.
-  Effects per creature depend on its Will save.
+  Effects per creature depend on its Willpower save.
 
 
   Critical Success Unaffected.
@@ -27,7 +27,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You inflict despair on creatures in the area. The effects for each
-      creature are determined by its Will save.
+      creature are determined by its Willpower save.
 
 
       Critical Success The creature is unaffected.

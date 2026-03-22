@@ -1,7 +1,7 @@
 id: internal_insurrection_fanatic_doctrine
 name: Doctrinal Dissolution
 description: You afflict the target with a sacred disease that turns portions of their
-  body against itself. The target must attempt a Fortitude save. All mechanical effects
+  body against itself. The target must attempt a Toughness save. All mechanical effects
   (stages, conditions, damage) remain identical to the base protocol.
 tradition: fanatic_doctrine
 level: 4

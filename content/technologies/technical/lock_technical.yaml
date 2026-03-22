@@ -14,4 +14,4 @@ effects:
   - type: utility
     dc: 0
     description: The target's latch mechanism clinks shut, held fast by unseen magical wards. When you magically lock a target,
-      you set an Athletics and Thievery DC to open it equal to your spell DC or the base lock D
+      you set an Athletics and Thievery DC to open it equal to your tech DC or the base lock D

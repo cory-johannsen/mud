@@ -22,7 +22,7 @@ description: 'Trigger A creature within range fails or critically fails a saving
   Heightened (9th) You can target up to 10 creatures within range. All targets must
   still individually qualify as triggering creatures. For example, if an explosion
   hit a group of your allies, only those who failed or critically failed their saving
-  throw or those who were reduced to 0 Hit Points could be affected by this spell.'
+  throw or those who were reduced to 0 Hit Points could be affected by this tech.'
 tradition: neural
 level: 6
 usage_type: prepared

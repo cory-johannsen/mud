@@ -1,7 +1,7 @@
 id: umbral_extraction_technical
 name: Shadow Siphon
 description: 'You deploy a shadow-extraction device that tears at the target''s vitality.
-  The target takes 4d4 void damage and must attempt a Fortitude save.
+  The target takes 4d4 void damage and must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.

@@ -20,7 +20,7 @@ effects:
     description: 'The target can soar through the air, gaining a fly Speed equal to
       its Speed or 20 feet, whichever is greater.
 
-      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fly]
+      @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Fly]
 
 
       Heightened (7th) The duration'

@@ -1,7 +1,7 @@
 id: spider_sting_bio_synthetic
 name: Spider Sting
 description: |-
-    You magically duplicate a spider's venomous sting. You deal 1d4 piercing damage to the touched creature and afflict it with spider venom. The target must attempt a Fortitude save.
+    You magically duplicate a spider's venomous sting. You deal 1d4 piercing damage to the touched creature and afflict it with spider venom. The target must attempt a Toughness save.
 
     Critical Success The target is unaffected.
     Success The target takes @Damage[1d4[poison]] damage.

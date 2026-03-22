@@ -2,7 +2,7 @@ id: pest_swarm_neural
 name: Microdrone Swarm
 description: You deploy a squadron of hostile microdrones to harass and overwhelm
   your opponents. The drone squadron occupies the space of a Large creature and can
-  occupy the same space as other creatures. When you Cast this Spell, choose one of
+  occupy the same space as other creatures. When you Use this tech, choose one of
   the drone loadouts below to deploy. All mechanical effects (damage dice, save types,
   conditions, DCs) remain identical to the base protocol. Choose a loadout to determine
   arrival and departure effects.

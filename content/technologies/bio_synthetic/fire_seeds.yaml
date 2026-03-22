@@ -3,7 +3,7 @@ name: Incendiary Seed Pods
 description: 'Four bio-engineered seed pods grow in your hand, their shells streaked
   with pulsing red and orange chemical patterns. You or anyone else who has one of
   the pods can toss it up to 30 feet with an Interact action. It explodes in a 5-foot
-  burst, dealing 4d6 fire damage. The save uses your spell DC, even if someone else
+  burst, dealing 4d6 fire damage. The save uses your tech DC, even if someone else
   throws the pod. Flames continue to burn on the ground in the burst for 1 minute,
   dealing @Damage[2d6[fire]] damage to any creature that enters the flames or ends
   its turn within them. A creature can take damage from the continuing flames only

@@ -2,12 +2,12 @@ id: mind_probe_neural
 name: Deep Neural Scan
 description: 'You force a penetrating scan through a creature''s neural pathways,
   extracting information. You access the target''s memories and knowledge unless it
-  resists with a Will save.
+  resists with a Willpower save.
 
   Success The target is unaffected.
 
   Failure Each round of the tech''s duration, you can Sustain the tech to ask a different
-  question and attempt another Will save. If the target fails, you discover the answer
+  question and attempt another Willpower save. If the target fails, you discover the answer
   to your question from the target''s point of view.
 
   Critical Failure As failure, and the target takes a -2 circumstance penalty to Will
@@ -28,7 +28,7 @@ effects:
     dc: 0
     description: 'You cast your thoughts through a creature''s mind, sifting for information.
       You access the target''s memories and knowledge unless it fends you off with
-      a Will save.
+      a Willpower save.
 
       Success The target is unaffected.
 

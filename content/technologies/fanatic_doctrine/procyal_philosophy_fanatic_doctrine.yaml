@@ -2,7 +2,7 @@ id: procyal_philosophy_fanatic_doctrine
 name: Sacred Advisor
 description: 'A holographic doctrinal advisor appears, dispensing guidance. The projection
   appears floating next to the target, doesn''t occupy space, and prepares to Aid
-  the target each round. The advisor uses a bonus equal to your spell DC - 10 for
+  the target each round. The advisor uses a bonus equal to your tech DC - 10 for
   Aid rolls.
 
   On each of your turns, the advisor prepares to Aid again. You can redirect it to

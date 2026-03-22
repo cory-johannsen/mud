@@ -1,7 +1,7 @@
 id: never_mind_technical
 name: Memory Wipe Device
 description: 'You activate a device that drastically reduces the target''s cognitive
-  function. The target must attempt a Will save. The effects of this curse can be
+  function. The target must attempt a Willpower save. The effects of this curse can be
   removed only through effects that target curses.
 
 
@@ -30,7 +30,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You drastically reduce the target''s mental faculties. The target
-      must attempt a Will save. The effects of this curse can be removed only through
+      must attempt a Willpower save. The effects of this curse can be removed only through
       effects that target curses.
 
 

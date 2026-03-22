@@ -7,7 +7,7 @@ description: 'You infect the target with a bio-synthetic hunger parasite that ov
   Hit Points.
 
 
-  The target must attempt a Will save each round or spend its actions attempting to
+  The target must attempt a Willpower save each round or spend its actions attempting to
   feed.'
 tradition: bio_synthetic
 level: 5

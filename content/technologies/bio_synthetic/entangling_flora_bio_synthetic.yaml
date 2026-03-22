@@ -10,11 +10,11 @@ description: 'You cause bio-synthetic tendrils to erupt from the ground, entangl
 
   Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized] for
   1 round. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against
-  your spell DC.
+  your tech DC.
 
   Critical Failure The creature is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]
   for 1 minute. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against
-  your spell DC.'
+  your tech DC.'
 tradition: bio_synthetic
 level: 2
 usage_type: prepared

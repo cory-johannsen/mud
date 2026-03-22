@@ -24,6 +24,6 @@ effects:
     description: 'You grant yourself supernatural sight in areas of darkness. You
       gain Darkvision.
 
-      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Darkvision]
+      @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Darkvision]
 
-      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effec'
+      @UUID[Compendium.pf2e.spell-effects.Item.tech Effec'

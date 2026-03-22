@@ -2,7 +2,7 @@ id: hypnotize_neural
 name: Dazzle Matrix
 description: You project a cloud of mesmerizing holographic patterns. Creatures are
   Dazzled while inside the cloud. A creature that enters the area or starts its turn
-  there must attempt a Will save or become Fascinated by the swirling patterns.
+  there must attempt a Willpower save or become Fascinated by the swirling patterns.
 tradition: neural
 level: 3
 usage_type: prepared

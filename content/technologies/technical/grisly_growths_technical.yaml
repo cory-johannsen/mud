@@ -2,7 +2,7 @@ id: grisly_growths_technical
 name: Nano-Growth Overload
 description: 'This tech triggers uncontrolled nano-fabrication in the target''s body,
   causing excess mechanical components to sprout from their flesh. The target takes
-  10d6 piercing damage (basic Fortitude save).
+  10d6 piercing damage (basic Toughness save).
 
 
   On a failure, the target is also Clumsy 1 for 1 minute.

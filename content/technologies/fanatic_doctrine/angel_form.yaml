@@ -27,7 +27,7 @@ description: 'Invoking the supreme tenets of your doctrine, you transform into a
   1 composite shortbow (deadly 2d10, holy, magical, propulsive, range increment 60
   feet) Damage 3d6+12 piercingTennin Speed 30 feet, fly 60 feet; can Step into difficult
   terrain and use land and fly Speeds to Step;Melee 1 fist (agile, holy, magical,
-  nonlethal), Damage 1d6+12 bludgeoning plus 1d6 cold and 1d6 spirit.@UUID[Compendium.pf2e.spell-effects.Item.Spell
+  nonlethal), Damage 1d6+12 bludgeoning plus 1d6 cold and 1d6 spirit.@UUID[Compendium.pf2e.spell-effects.Item.tech
   Effect: Angel Form]Heightened (9th) Your battle form is Large. You must have space
   to expand, or the tech is lost. You instead gain 60 temporary Hit Points, weakness
   15 to unholy, attack modifier +30, damage bonus +20, and Athletics +33.'
@@ -44,5 +44,5 @@ effects:
   - type: utility
     dc: 0
     description: Invoking the celestial realms, you transform into a Medium angel
-      battle form. When you cast this spell, choose balisse, choral, kuribu, or tennin.
+      battle form. When you cast this tech, choose balisse, choral, kuribu, or tennin.
       The battle form is Small if you choose choral or kuri

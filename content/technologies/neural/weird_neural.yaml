@@ -1,7 +1,7 @@
 id: weird_neural
 name: Mass Nightmare Protocol
 description: You broadcast individualized nightmare constructs to all targets in a
-  30-foot burst within 120 feet. Each target must attempt a Will save. On a failure,
+  30-foot burst within 120 feet. Each target must attempt a Willpower save. On a failure,
   the target takes 16d6 mental damage and is frightened 4. On a critical failure,
   it takes double damage and is paralyzed by terror. On a success, it takes half damage.
   The nightmares persist as long as targets remain in the area.

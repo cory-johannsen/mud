@@ -3,9 +3,9 @@ name: Hostile AR Overlay
 description: An augmented reality overlay of horrific threats fills the area. The
   threats look like small swarming hazards with a specific appearance of your choice,
   such as razor drones or animated sawblades. The overlay deals 8d8 mental damage
-  with a basic Will save to each creature that's inside the area when it's created,
+  with a basic Willpower save to each creature that's inside the area when it's created,
   enters the area, or starts its turn inside the area. A creature that critically
-  succeeds at its Will save can immediately attempt to disbelieve the illusion. A
+  succeeds at its Willpower save can immediately attempt to disbelieve the illusion. A
   creature that tries to Interact with the threats or observes one with a @UUID[Compendium.pf2e.actionspf2e.Item.Seek]
   action can attempt to disbelieve the illusion. Creatures that disbelieve the illusion
   take no damage from it thereafter.Heightened (+1) The mental damage increases by

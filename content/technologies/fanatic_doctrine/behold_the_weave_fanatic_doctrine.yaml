@@ -1,7 +1,7 @@
 id: behold_the_weave_fanatic_doctrine
 name: Fate Decree
 description: You proclaim a doctrinal decree over the target's destiny, forcing an
-  unfavorable outcome into being. The target must attempt a Will save.
+  unfavorable outcome into being. The target must attempt a Willpower save.
 tradition: fanatic_doctrine
 level: 3
 usage_type: prepared

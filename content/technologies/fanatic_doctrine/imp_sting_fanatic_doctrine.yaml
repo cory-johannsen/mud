@@ -2,7 +2,7 @@ id: imp_sting_fanatic_doctrine
 name: Heretic's Bane
 description: You deliver a venomous doctrinal strike. Make a melee spell attack. On
   a hit, you deal 1d4 piercing damage plus 1d4 poison damage, and the target must
-  attempt a Fortitude save or become @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
+  attempt a Toughness save or become @UUID[Compendium.pf2e.conditionitems.Item.Sickened]
   1.
 tradition: fanatic_doctrine
 level: 2

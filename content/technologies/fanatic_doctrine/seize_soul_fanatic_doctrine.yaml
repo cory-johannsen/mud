@@ -1,7 +1,7 @@
 id: seize_soul_fanatic_doctrine
 name: Soul Harvest Protocol
 description: You attempt to seize a target's soul in the name of your doctrine. The
-  target must attempt a Fortitude save. On a critical failure it dies instantly. On
+  target must attempt a Toughness save. On a critical failure it dies instantly. On
   a failure it is stunned 3 and takes 9d6+40 damage. On a success it takes 9d6+40.
   The captured soul can be used as a power source or released.
 tradition: fanatic_doctrine

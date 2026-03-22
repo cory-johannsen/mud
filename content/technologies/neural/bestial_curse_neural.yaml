@@ -34,7 +34,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You tap into the target''s inner being and curse it to become a
-      bestial version of itself. The effect is based on its Fortitude save.
+      bestial version of itself. The effect is based on its Toughness save.
 
       Critical Success The target is unaffected.
 

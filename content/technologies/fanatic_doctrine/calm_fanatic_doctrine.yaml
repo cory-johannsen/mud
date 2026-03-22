@@ -1,7 +1,7 @@
 id: calm_fanatic_doctrine
 name: Serenity Rite
 description: 'You broadcast a calming doctrinal invocation that suppresses hostile
-  impulses. Each creature in the area must attempt a Will save.
+  impulses. Each creature in the area must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.
@@ -29,7 +29,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You forcibly calm creatures in the area, soothing them into a nonviolent
-      state; each creature must attempt a Will save.
+      state; each creature must attempt a Willpower save.
 
 
       Critical Success The creature is unaffected.

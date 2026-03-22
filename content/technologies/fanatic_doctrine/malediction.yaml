@@ -1,10 +1,10 @@
 id: malediction
 name: Malediction
 description: |-
-    You incite distress in the minds of your enemies, making it more difficult for them to defend themselves. Enemies in the area must succeed at a Will save or take a –1 status penalty to AC as long as they're in the area.
+    You incite distress in the minds of your enemies, making it more difficult for them to defend themselves. Enemies in the area must succeed at a Willpower save or take a –1 status penalty to AC as long as they're in the area.
     Once per round on subsequent turns, you can Sustain the spell to increase the emanation's radius by 10 feet and force enemies in the area that weren't yet affected to attempt a saving throw.
     Malediction can counteract benediction.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Malediction]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Malediction]
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared
@@ -19,4 +19,4 @@ effects:
     on_apply:
         - type: utility
           dc: 0
-          description: You incite distress in the minds of your enemies, making it more difficult for them to defend themselves. Enemies in the area must succeed at a Will save or take a –1 status penalty to AC as long as
+          description: You incite distress in the minds of your enemies, making it more difficult for them to defend themselves. Enemies in the area must succeed at a Willpower save or take a –1 status penalty to AC as long as

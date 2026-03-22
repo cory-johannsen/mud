@@ -6,7 +6,7 @@ description: |-
     Heightened (3rd) Your fists gain the magical trait and become a striking weapon, increasing the damage your fists deal to 2d6 bludgeoning.
     Heightened (7th) Your fists gain the magical trait and become a greater striking weapon, increasing the damage your fists deal to 3d6 bludgeoning. The duration is 10 minutes.
     Heightened (9th) Your fists gain the magical trait and become a major striking weapon, increasing the damage your fists deal to 4d6 bludgeoning. The duration is 1 hour.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Wooden Fists]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Wooden Fists]
 tradition: bio_synthetic
 level: 1
 usage_type: prepared

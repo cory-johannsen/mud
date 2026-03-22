@@ -16,4 +16,4 @@ effects:
   - type: utility
     dc: 0
     description: Each creature in the area becomes drowsy, possibly nodding off. A creature that falls @UUID[Compendium.pf2e.conditionitems.Item.Unconscious]
-      from this spell doesn't fall @UUID[Compendium.pf2e.conditio
+      from this tech doesn't fall @UUID[Compendium.pf2e.conditio

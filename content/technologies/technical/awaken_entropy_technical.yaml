@@ -2,11 +2,11 @@ id: awaken_entropy_technical
 name: Entropy Accelerator
 description: 'You activate a device that accelerates molecular decay in an area—materials
   corrode, electronics fail, and structures begin to crumble. Any creature that enters
-  or begins its turn in the area takes 8d6 void damage with a basic Fortitude save,
+  or begins its turn in the area takes 8d6 void damage with a basic Toughness save,
   or 8d6 force damage if the creature normally doesn''t take void damage, such as
   if the creature is a construct or undead.
 
-  The first time you Sustain the Spell on each subsequent turn, the entropic zone
+  The first time you Sustain the tech on each subsequent turn, the entropic zone
   grows stronger in addition to having its duration increased. The radius of the burst
   increases by 10 feet (to a maximum of 40 feet), and the size of the damage dice
   increases by one step (from d6 to @Damage[(2+@item.rank)d8[void]|shortLabel], then

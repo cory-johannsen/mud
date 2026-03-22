@@ -3,7 +3,7 @@ name: Flashbang Grenade
 description: 'You conjure an exploding canister filled with a sight-destroying chemical
   agent and hurl it across enemy lines. Upon impact, the canister bursts and exposes
   all creatures in the area to the compound within. Each creature in the area must
-  attempt a Fortitude save.
+  attempt a Toughness save.
 
   Critical Success The creature is unaffected.
 

@@ -1,7 +1,7 @@
 id: execute_bio_synthetic
 name: Cellular Annihilation
 description: 'You point at a creature and trigger a cascade of cellular self-destruction.
-  The target takes 70 void damage with a basic Fortitude save. If the target is undead
+  The target takes 70 void damage with a basic Toughness save. If the target is undead
   or otherwise has void healing, the tech loses the death and void traits and gains
   the vitality trait, and the target takes 70 vitality damage with a basic Fortitude
   save.

@@ -3,7 +3,7 @@ name: Death Mark Protocol
 description: 'You psychically designate a weapon as the instrument of a target''s
   demise, implanting deep-seated terror of the weapon into the enemy''s subconscious.
   This neural link forms a persistent dread signal. The effect is based on the target
-  enemy''s Will save.Critical Success The target enemy is unaffected.
+  enemy''s Willpower save.Critical Success The target enemy is unaffected.
 
   Success The target weapon deals an additional @Damage[2d6[mental]] damage the first
   time it hits the target enemy before the end of the spell''s duration.

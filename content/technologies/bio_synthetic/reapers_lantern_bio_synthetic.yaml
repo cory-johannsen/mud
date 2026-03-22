@@ -1,7 +1,7 @@
 id: reapers_lantern_bio_synthetic
 name: Death Pheromone
 description: 'You release pheromones that weaken dying creatures'' hold on life. Each
-  dying creature in the area must attempt a Will save.
+  dying creature in the area must attempt a Willpower save.
 
 
   Critical Success The creature is unaffected.

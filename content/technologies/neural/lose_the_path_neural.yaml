@@ -3,7 +3,7 @@ name: Lose the Path
 description: |-
     Trigger A creature in range Strides
 
-    You surround a moving creature with lifelike illusions, shifting their perception of the terrain to subtly lead them off course. The target must attempt a Will save. Regardless of the result, the creature is immune to lose the path for 1 hour.
+    You surround a moving creature with lifelike illusions, shifting their perception of the terrain to subtly lead them off course. The target must attempt a Willpower save. Regardless of the result, the creature is immune to lose the path for 1 hour.
 
     Success The creature is unaffected.
     Failure The creature treats all squares as difficult terrain for its Stride.

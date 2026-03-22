@@ -18,7 +18,7 @@ description: 'Your body is encased in a flexible iron alloy exoskeleton deployed
   or 12 if you''re Medium), and you become too dense to Swim in water, automatically
   sinking to the bottom. You can Dismiss the tech.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Ferrous Form]
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Ferrous Form]
 
 
   Heightened (9th) The resistance increases to 15.'

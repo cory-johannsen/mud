@@ -14,7 +14,7 @@ description: 'You activate a device that copies an individual''s biometric signa
 
   Critical Failure As success, but the target also takes 8d6 mental damage.
 
-  The first time each round you Sustain this spell, the target''s systems degrade,
+  The first time each round you Sustain this tech, the target''s systems degrade,
   taking @Damage[(ternary(gte(@item.rank,9),3,2))d8[void]] damage (@Check[will|basic]
   save). On a failure, the target also becomes Enfeebled 1 or increases the value
   of its enfeebled condition by 1.Heightened (9th) The mental damage increases by

@@ -1,7 +1,7 @@
 id: sea_surge_technical
 name: Hydraulic Cannon
 description: 'You fire a pressurized water cannon in a wide arc. Each creature in
-  a @Template[cone|distance:30] must attempt a Fortitude save.
+  a @Template[cone|distance:30] must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

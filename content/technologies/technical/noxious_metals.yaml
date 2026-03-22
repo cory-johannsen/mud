@@ -1,7 +1,7 @@
 id: noxious_metals
 name: Toxic Precipitate
 description: This device forces toxic metallic compounds to precipitate on all living
-  creatures in the area, dealing 4d6 poison damage with a basic Fortitude save.
+  creatures in the area, dealing 4d6 poison damage with a basic Toughness save.
 tradition: technical
 level: 3
 usage_type: prepared

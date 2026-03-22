@@ -31,7 +31,7 @@ description: 'You deploy and pilot a massive combat mech, assuming a Huge battle
   1 jaws (reach 15 feet), Damage 2d12+20 piercing;Melee 1 tail (reach 25 feet), Damage
   2d8+20 bludgeoning;Spine Rake 2 (move) You extend your spines and Swim or Stride.
   Each creature you''re adjacent to at any point during your movement takes 4d8+10
-  slashing damage (basic Reflex against your spell DC).@UUID[Compendium.pf2e.spell-effects.Item.Spell
+  slashing damage (basic Reflex against your tech DC).@UUID[Compendium.pf2e.spell-effects.Item.tech
   Effect: Monstrosity Form]Heightened (9th) You instead gain AC = 22 + your level,
   25 temporary HP, attack modifier +31, increase damage by one damage die, and Athletics
   +33.'
@@ -49,4 +49,4 @@ effects:
     dc: 0
     description: You transform into the shape of a legendary monster, assuming a Huge
       battle form. You must have enough space to expand into or the spell is lost.
-      When you cast this spell, choose phoenix, cave worm, o
+      When you cast this tech, choose phoenix, cave worm, o

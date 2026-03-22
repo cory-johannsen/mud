@@ -2,7 +2,7 @@ id: summon_oliphaunt_of_jandelay_technical
 name: Apex War-Construct Deploy
 description: You deploy an apex-tier war construct. It appears within 60 feet and
   follows your commands for 1 minute using Oliphaunt of Jandelay statistics. Its arrival
-  causes fear in creatures within 120 feet (Will save vs frightened 4).
+  causes fear in creatures within 120 feet (Willpower save vs frightened 4).
 tradition: technical
 level: 10
 usage_type: prepared

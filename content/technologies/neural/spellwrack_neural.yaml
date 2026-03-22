@@ -1,7 +1,7 @@
 id: spellwrack_neural
 name: Feedback Virus
 description: 'You implant a psychic virus that causes any active neural enhancements
-  to hemorrhage energy. The target must attempt a Will save.
+  to hemorrhage energy. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -9,7 +9,7 @@ description: 'You implant a psychic virus that causes any active neural enhancem
   Success Whenever the target becomes affected by a spell with a duration, the target
   takes @Damage[2d12[persistent,force]] damage. Each time it takes persistent force
   damage from the virus, it reduces the remaining duration of spells affecting it
-  by 1 round. Only a successful @Check[arcana] check against your spell DC can help
+  by 1 round. Only a successful @Check[arcana] check against your tech DC can help
   the target recover from the persistent damage; the curse and the persistent damage
   end after 1 minute.
 
@@ -31,7 +31,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You cause any spells cast on the target to spill out their energy
-      in harmful surges. The target must attempt a Will save.
+      in harmful surges. The target must attempt a Willpower save.
 
 
       Critical Success The target is unaffected.

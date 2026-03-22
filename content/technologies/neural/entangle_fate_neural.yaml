@@ -2,14 +2,14 @@ id: entangle_fate_neural
 name: Probability Tangle
 description: 'You generate a quantum entanglement field that interweaves the probability
   matrices of all caught within the blast. Each creature in the area must attempt
-  a Will save.Critical Success The creature is unaffected.
+  a Willpower save.Critical Success The creature is unaffected.
 
   Success The creature''s probability matrix destabilizes, and momentary conflicting
   probability cascades cause the creature to become Off-Guard until the start of its
   next turn.
 
   Failure As success, but the creature is off-guard for the duration of the spell.
-  If more than one of the targets failed to resist this spell, the creature also becomes
+  If more than one of the targets failed to resist this tech, the creature also becomes
   Stupefied 1 for the duration as its probability matrix and those of other creatures
   continue to clash.
 
@@ -30,7 +30,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You cause a swirl of energy to entangle the fates of all caught
-      within the blast. Each creature in the area must attempt a Will save.Critical
+      within the blast. Each creature in the area must attempt a Willpower save.Critical
       Success The creature is unaffected.
 
       Success The creature''s'

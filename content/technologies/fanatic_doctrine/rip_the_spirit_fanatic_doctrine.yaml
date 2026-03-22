@@ -1,7 +1,7 @@
 id: rip_the_spirit_fanatic_doctrine
 name: Soul Extraction
 description: 'You invoke doctrinal power to rip the spirit from a living creature''s
-  body. The target takes 5d6 void damage, depending on its basic Fortitude save, and
+  body. The target takes 5d6 void damage, depending on its basic Toughness save, and
   is Drained 1 if it fails.
 
   1 (somatic) Targets one creature within 30 feet.

@@ -17,4 +17,4 @@ effects:
     dc: 0
     description: You and all targets are @UUID[Compendium.pf2e.conditionitems.Item.Invisible]
       except to each other as long as the targets remain within the emanation. If
-      a creature made invisible by this spell leaves
+      a creature made invisible by this tech leaves

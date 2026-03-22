@@ -8,7 +8,7 @@ description: 'Area 60-foot tall, 30-foot radius cylinderA devastating gravitatio
   damage even if the tech''s area is entirely in the air and they don''t hit the ground,
   as they concuss against the bottom of the tech''s area at great speed. Creatures
   on the ground and within the tech''s area, including flying creatures forced to
-  the ground, must attempt Fortitude saves.Critical Success The creature is unaffected,
+  the ground, must attempt Toughness saves.Critical Success The creature is unaffected,
   and if it was flying, it isn''t knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone]
   even though it took falling damage.
 

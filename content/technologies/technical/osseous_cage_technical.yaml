@@ -13,7 +13,7 @@ description: 'You deploy a rapid-assembly containment cage around the target. Th
 
   Critical Failure The creature takes 4d6 piercing damage and is @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]
   for 1 minute. It can attempt to @UUID[Compendium.pf2e.actionspf2e.Item.Escape] against
-  your spell DC.'
+  your tech DC.'
 tradition: technical
 level: 2
 usage_type: prepared

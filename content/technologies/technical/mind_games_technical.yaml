@@ -1,7 +1,7 @@
 id: mind_games_technical
 name: Logic Bomb
 description: 'You deploy a cognitive disruption device that floods the target with
-  paradoxical data. The target must attempt a Will save.
+  paradoxical data. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -29,8 +29,8 @@ effects:
   - type: utility
     dc: 0
     description: 'You lock minds with the target, trying to mentally subdue them.
-      The target must attempt a Will save. Each time you Sustain this Spell, the target
-      attempts another Will save.
+      The target must attempt a Willpower save. Each time you Sustain this tech, the target
+      attempts another Willpower save.
 
 
       Critical Success You are'

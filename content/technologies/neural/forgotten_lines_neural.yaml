@@ -23,6 +23,6 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: Members of the Lacunafex and other allies use this spell to restore
+    description: Members of the Lacunafex and other allies use this tech to restore
       material that Thrune agents have redacted from historical or otherwise valuable
       texts. You learn one piece of information that was r

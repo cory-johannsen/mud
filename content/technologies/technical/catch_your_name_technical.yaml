@@ -7,10 +7,10 @@ description: 'Trigger A creature on your plane speaks your private or true name
 
   You activate a surveillance subroutine that detects when your identity is referenced.
   You learn a private name (but not the true name) of the creature who spoke your
-  name, as well as their precise location, unless they succeed at a Will save to negate
+  name, as well as their precise location, unless they succeed at a Willpower save to negate
   the effect. You are aware any time the trigger conditions are met as long as you
   have the spell prepared or in your repertoire. There is no way to distinguish one
-  trigger of this spell from another without actually casting the spell.'
+  trigger of this tech from another without actually casting the spell.'
 tradition: technical
 level: 6
 usage_type: prepared

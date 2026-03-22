@@ -19,5 +19,5 @@ effects:
   - type: utility
     dc: 0
     description: You enchant a single object, preventing it from being used for magical
-      observation. If you cast this spell on a non-magical item used to cast scrying
+      observation. If you cast this tech on a non-magical item used to cast scrying
       spells, such as a spell component pouch or a spell

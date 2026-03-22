@@ -8,7 +8,7 @@ description: 'You release a chilling biochemical mist that settles into the bone
   a critical failure) and takes a –10-foot status penalty to Speeds for as long as
   it''s clumsy.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Frozen Fog]Heightened (+2)
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Frozen Fog]Heightened (+2)
   The damage increases by 3d8.'
 tradition: bio_synthetic
 level: 6

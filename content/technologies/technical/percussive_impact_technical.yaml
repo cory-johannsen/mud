@@ -1,6 +1,6 @@
 id: percussive_impact_technical
 name: Sonic Shell
-description: You fire a compressed sonic charge at a foe. Make a spell attack roll.
+description: You fire a compressed sonic charge at a foe. Make a tech attack roll.
   If you hit, the target takes 3d6 sonic damage plus 1d6 persistent sonic damage.
 tradition: technical
 level: 3

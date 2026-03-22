@@ -13,5 +13,5 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: When you Cast the Spell, you gain a perfect sense of time. You can learn exactly what time it is, down to
+    description: When you Use this tech, you gain a perfect sense of time. You can learn exactly what time it is, down to
       the second. You can instead choose to gain a perfect sense of the calendar if you have knowled

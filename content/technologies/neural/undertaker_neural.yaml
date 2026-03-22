@@ -3,7 +3,7 @@ name: Death Protocol
 description: You implant a terminal neural command that detonates on a target's next
   death. When the target would die within 1 minute, it instead survives at 1 HP and
   immediately makes one action of your choice. After taking this action, it dies.
-  On a critical success on the initial Will save, the target is immune to the effect.
+  On a critical success on the initial Willpower save, the target is immune to the effect.
 tradition: neural
 level: 9
 usage_type: prepared

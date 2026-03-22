@@ -1,7 +1,7 @@
 id: oneiric_mire_technical
 name: Holographic Quicksand
 description: You project holographic interference that makes the ground appear treacherous.
-  The area is difficult terrain. Creatures must attempt a Will save or become Slowed
+  The area is difficult terrain. Creatures must attempt a Willpower save or become Slowed
   1 for 1 round.
 tradition: technical
 level: 3

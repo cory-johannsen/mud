@@ -1,7 +1,7 @@
 id: wails_of_the_damned_fanatic_doctrine
 name: Mass Heretic Broadcast
 description: 'A 60-foot emanation of psychic terror targets heretics. All creatures
-  must attempt a Will save. On a failure: 10d10 mental damage and frightened 3. On
+  must attempt a Willpower save. On a failure: 10d10 mental damage and frightened 3. On
   a critical failure: double damage and frightened 4 and fleeing.'
 tradition: fanatic_doctrine
 level: 9

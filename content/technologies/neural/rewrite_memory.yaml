@@ -1,7 +1,7 @@
 id: rewrite_memory
 name: Memory Editor
 description: 'You access the target''s memory engrams and modify them: erasing, enhancing
-  clarity, altering, or implanting false memories. The target can attempt a Will save
+  clarity, altering, or implanting false memories. The target can attempt a Willpower save
   to resist.
 
 
@@ -20,7 +20,7 @@ description: 'You access the target''s memory engrams and modify them: erasing, 
   memories.
 
 
-  Heightened (6th) You can Cast the Spell on a willing target to suppress all memory
+  Heightened (6th) You can Use this tech on a willing target to suppress all memory
   of a particular topic, detailed in 50 words or fewer. The effect is permanent, and
   it patches these omissions with blank data.'
 tradition: neural
@@ -39,7 +39,7 @@ effects:
     dc: 0
     description: 'You alter the target''s memories by erasing a memory, enhancing
       a memory''s clarity, altering a memory, or adding a false memory. The target
-      can attempt a Will save to resist the spell.
+      can attempt a Willpower save to resist the spell.
 
 
       Critical Succes'

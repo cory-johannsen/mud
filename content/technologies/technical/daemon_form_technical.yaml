@@ -2,7 +2,7 @@ id: daemon_form_technical
 name: Void Engine Frame
 description: 'You interface with forbidden void-tech, transforming into a Large void
   engine battle form. You must have enough space to expand into or the spell is lost.
-  When you cast this spell you choose one of four void chassis configurations. The
+  When you cast this tech you choose one of four void chassis configurations. The
   battle form is Medium for lighter configurations. While in this form, you gain the
   daemon and fiend traits. You have hands in this battle form and can use manipulate
   actions. You can Dismiss the spell.
@@ -28,7 +28,7 @@ description: 'You interface with forbidden void-tech, transforming into a Large 
   Damage 1d6+12 slashing plus 1d6 void, and you can spend an action after a hit to
   attempt to Grab the target.Venedaemon Speed 25 feet sense magical items and active
   spells within 60 feet as an imprecise senseSize MediumMelee 1 tentacle (agile, magical,
-  reach 10 feet, unholy), Damage 2d6+12 bludgeoning.@UUID[Compendium.pf2e.spell-effects.Item.Spell
+  reach 10 feet, unholy), Damage 2d6+12 bludgeoning.@UUID[Compendium.pf2e.spell-effects.Item.tech
   Effect: Daemon Form]'
 tradition: technical
 level: 6

@@ -2,7 +2,7 @@ id: pain_of_ages
 name: Eternal Suffering Protocol
 description: You channel the accumulated suffering of generations through doctrinal
   resonance, inflicting it upon the target. The target takes 6d6 mental damage (basic
-  Will save). On a failure, the target is also Sickened 2, and on a critical failure,
+  Willpower save). On a failure, the target is also Sickened 2, and on a critical failure,
   Sickened 4.
 tradition: fanatic_doctrine
 level: 6

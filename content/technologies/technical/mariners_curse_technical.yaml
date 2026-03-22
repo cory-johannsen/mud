@@ -1,7 +1,7 @@
 id: mariners_curse_technical
 name: Gyro Scrambler
 description: 'You deploy a device that corrupts the target''s balance and orientation
-  systems. The target must attempt a Will save.
+  systems. The target must attempt a Willpower save.
 
 
   Critical Success Unaffected.
@@ -26,7 +26,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You afflict the target with the curse of the roiling, unforgiving
-      sea. The target must attempt a Will save.
+      sea. The target must attempt a Willpower save.
 
 
       Critical Success The target is unaffected.

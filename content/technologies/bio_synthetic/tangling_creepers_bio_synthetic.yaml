@@ -5,12 +5,12 @@ description: 'Dense, twitching bio-synthetic tendrils sprout from every surface 
   or Swimming within the tendrils, takes a –10-foot circumstance penalty to its Speeds
   while in the area. Once per round, you can Sustain the spell to make a tendril lash
   out from any square within the expanse. This tendril has a 15-foot reach. Make a
-  melee spell attack roll against the target; on a success, the tendril pulls the
+  melee tech attack roll against the target; on a success, the tendril pulls the
   target into the growth and makes it @UUID[Compendium.pf2e.conditionitems.Item.Immobilized]
-  for 1 round or until the creature Escapes (against your spell DC), whichever comes
+  for 1 round or until the creature Escapes (against your tech DC), whichever comes
   first.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Tangling Creepers]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Tangling Creepers]'
 tradition: bio_synthetic
 level: 6
 usage_type: prepared

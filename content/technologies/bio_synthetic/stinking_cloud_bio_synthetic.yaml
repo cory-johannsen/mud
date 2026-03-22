@@ -2,7 +2,7 @@ id: stinking_cloud_bio_synthetic
 name: Noxious Spore Cloud
 description: You release a cloud of putrid bio-reactive spores in the area. The cloud
   functions as fog except it sickens creatures that end their turn inside it on a
-  failed Fortitude save.
+  failed Toughness save.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

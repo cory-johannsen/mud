@@ -1,7 +1,7 @@
 id: banishment_neural
 name: Forced Disconnect
 description: 'You sever the target''s connection to local networks, forcing them back
-  to their origin point. The target must attempt a Will save. You can spend an extra
+  to their origin point. The target must attempt a Willpower save. You can spend an extra
   action while activating this tech and add a cost to give the creature a -2 circumstance
   penalty to its save. The cost must be a specially prepared signal jammer that is
   anathema to the creature.
@@ -30,5 +30,5 @@ effects:
   - type: utility
     dc: 0
     description: You send the target back to its home plane. The target must attempt
-      a Will save. You can spend an extra action while Casting this Spell and add
+      a Willpower save. You can spend an extra action while Casting this tech and add
       a cost to the spell to give the creature a –2 circumst

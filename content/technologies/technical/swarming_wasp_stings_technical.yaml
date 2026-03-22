@@ -2,7 +2,7 @@ id: swarming_wasp_stings_technical
 name: Venom Dart Turret
 description: You deploy a device that launches swarms of envenomed micro-projectiles
   into the area. Creatures take @Damage[1d6[piercing]] damage. Each creature that
-  takes piercing damage must attempt a Fortitude save. All mechanical effects (poison
+  takes piercing damage must attempt a Toughness save. All mechanical effects (poison
   stages) remain identical to the base protocol.
 tradition: technical
 level: 4

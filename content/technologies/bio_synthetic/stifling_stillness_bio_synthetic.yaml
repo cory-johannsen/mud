@@ -4,7 +4,7 @@ description: 'You render all air in the target area stagnant and oxygen-depleted
   creating a shimmering haze of dead air. The stagnant air becomes difficult terrain.
   Creatures that breathe air and aren''t holding their breath must spend an action
   on their turn straining to breathe; once they do, they take 3d6 poison damage (basic
-  Fortitude save) from hypoxia and become Fatigued.
+  Toughness save) from hypoxia and become Fatigued.
 
 
   Heightened (+2) The damage increases by 3d6.'

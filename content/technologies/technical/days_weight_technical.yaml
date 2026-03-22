@@ -1,7 +1,7 @@
 id: days_weight_technical
 name: Exhaustion Field
 description: You project a localized field that simulates a full day's fatigue on
-  the target in seconds. The creature must attempt a Fortitude save or become Fatigued
+  the target in seconds. The creature must attempt a Toughness save or become Fatigued
   and Clumsy 1.
 tradition: technical
 level: 3
@@ -19,7 +19,7 @@ effects:
     dc: 0
     description: 'You fast-forward time for a single creature, burdening it with the
       aches and pain of an entire day and making it temporarily tired and weak. The
-      creature must attempt a Fortitude save.
+      creature must attempt a Toughness save.
 
 
       Critical Succe'

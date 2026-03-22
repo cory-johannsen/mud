@@ -2,7 +2,7 @@ id: crimson_breath_bio_synthetic
 name: Hemotoxin Exhalation
 description: 'You turn a creature toward you and exhale a blast of crimson bio-mist
   from your mouth, exposing the target to a weaponized hemotoxin. The effects are
-  determined by the creature''s Fortitude save.Critical Success The target is unaffected.
+  determined by the creature''s Toughness save.Critical Success The target is unaffected.
 
   Success The target takes 8d6 poison damage.
 

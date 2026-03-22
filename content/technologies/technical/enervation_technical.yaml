@@ -1,7 +1,7 @@
 id: enervation_technical
 name: Entropy Beam Projector
 description: Extending a device, you fire a beam of entropic energy that saps life
-  force. Each living creature in the line must attempt a Fortitude save. All mechanical
+  force. Each living creature in the line must attempt a Toughness save. All mechanical
   effects (damage, drained, doomed) remain identical to the base protocol.
 tradition: technical
 level: 4
@@ -19,4 +19,4 @@ effects:
     dc: 0
     description: Extending a finger, you fire a beam of void energy that weakens the
       life force of any creature it touches. Each living creature in the line must
-      attempt a Fortitude save.Critical Success The creature
+      attempt a Toughness save.Critical Success The creature

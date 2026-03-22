@@ -2,10 +2,10 @@ id: vampiric_exsanguination_technical
 name: Mass Energy Drain Device
 description: 'You activate a device that draws vital energy from living creatures
   through electromagnetic extraction. You deal 12d6 void damage to living creatures
-  in the area with a basic Fortitude save.
+  in the area with a basic Toughness save.
 
   You gain temporary Hit Points equal to half the damage a single creature takes from
-  this spell; calculate these temporary Hit Points using the creature that took the
+  this tech; calculate these temporary Hit Points using the creature that took the
   most damage. You lose any remaining temporary Hit Points after 1 minute.
 
 

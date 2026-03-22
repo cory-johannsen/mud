@@ -2,7 +2,7 @@ id: infectious_melody
 name: Earworm Virus
 description: 'You broadcast a cognitive audio loop so compelling that enemies can''t
   help but vocalize along, disrupting their communications. Each target must attempt
-  a Will save.Critical Success The creature is unaffected.
+  a Willpower save.Critical Success The creature is unaffected.
 
   Success For 1 round, the creature can communicate only by repeating the melody.
   It can speak only on its turn, and it must take the Perform action when it does.
@@ -32,4 +32,4 @@ effects:
     dc: 0
     description: You call forth the chords of a tune so catchy that foes hearing it
       can't help but sing along, making it harder for them to communicate. Each target
-      must attempt a Will save.Critical Success The creatu
+      must attempt a Willpower save.Critical Success The creatu

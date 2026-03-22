@@ -4,7 +4,7 @@ description: 'You activate a multi-element reactor that combines volatile energy
   into a chaotic storm. The confluence has AC 28 and 120 Hit Points, weakness 10 to
   area effects, and immunity to bleed and poison. Creatures can move through the confluence;
   creatures within are concealed, and all creatures outside are concealed to those
-  within. When you Cast or Sustain this Spell, you choose up to two elements to activate.
+  within. When you Cast or Sustain this tech, you choose up to two elements to activate.
 
 
   Air (air, electricity) The reactor releases an electrical bolt, dealing @Damage[4d4[electricity]]

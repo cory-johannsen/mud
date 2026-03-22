@@ -6,7 +6,7 @@ description: Area (continued) 20-foot burst plus additional @Template[burst|dist
   and [[/r 1d4#Additional 5-foot bursts]] additional 5-foot bursts each within the
   range and within 20 feet of another burst. None of the bursts can intersect. Each
   creature caught in at least one of these bursts takes 6d8 fire damage and 6d4 sonic
-  damage (basic Fortitude save). On a failed save, a creature is also @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
+  damage (basic Toughness save). On a failed save, a creature is also @UUID[Compendium.pf2e.conditionitems.Item.Deafened]
   for 1 minute.Heightened (+1) The fire damage increases by 1d8 and the sonic damage
   increases by 1d4.
 tradition: bio_synthetic

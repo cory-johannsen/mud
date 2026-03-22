@@ -1,7 +1,7 @@
 id: sudden_blight_fanatic_doctrine
 name: Withering Decree
 description: 'You invoke a doctrinal decree of decay. Each creature in the area takes
-  3d10 void damage with a basic Fortitude save.
+  3d10 void damage with a basic Toughness save.
 
 
   Heightened (+1) The damage increases by 1d10.'

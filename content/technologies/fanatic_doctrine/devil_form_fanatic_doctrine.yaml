@@ -1,7 +1,7 @@
 id: devil_form_fanatic_doctrine
 name: Inquisitor Engine Form
 description: 'You bind yourself to the inquisitorial doctrine, transforming into a
-  Medium inquisitor engine battle form. When you cast this spell, choose one of four
+  Medium inquisitor engine battle form. When you cast this tech, choose one of four
   chassis configurations. Some configurations are Large and you must have enough space
   to expand into or the spell is lost. While in this form you gain the devil and fiend
   traits. You have hands in this battle form and can use manipulate actions. You can
@@ -30,7 +30,7 @@ description: 'You bind yourself to the inquisitorial doctrine, transforming into
   unholy) Damage 2d8+12 piercing;Melee 1 hoof (agile, magical, unholy), Damage 1d4+12
   plus 1d6 fire;Melee 1 whip (disarm, magical, nonlethal, reach 10 feet, trip, unholy),
   Damage 2d4+10 slashing;Ranged 1 trident (magical, thrown 20 feet, unholy), Damage
-  2d8+12 piercing.@UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Devil Form]'
+  2d8+12 piercing.@UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Devil Form]'
 tradition: fanatic_doctrine
 level: 6
 usage_type: prepared
@@ -44,5 +44,5 @@ effects:
   - type: utility
     dc: 0
     description: You bind yourself to the power of Hell, transforming into a Medium
-      devil battle form. When you cast this spell, choosecoarti, levaloch, sarglagon,
+      devil battle form. When you cast this tech, choosecoarti, levaloch, sarglagon,
       or vordine. If you choose levaloch or sarglagon, the

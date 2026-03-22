@@ -1,8 +1,8 @@
 id: phantasmagoria_technical
 name: Full Sensory Fabrication
 description: 'You flood a target''s sensory feeds with fabricated data. The target
-  must attempt a Will save. On a failure: frightened 4 and unable to trust its own
-  sensors. On a critical failure: frightened 6. The target attempts a Will save at
+  must attempt a Willpower save. On a failure: frightened 4 and unable to trust its own
+  sensors. On a critical failure: frightened 6. The target attempts a Willpower save at
   end of each turn to reduce frightened by 1.'
 tradition: technical
 level: 9

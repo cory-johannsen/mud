@@ -1,7 +1,7 @@
 id: chrysopoetic_curse_fanatic_doctrine
 name: Midas Condemnation
 description: 'You curse the target with the doctrine''s judgment, granting them the
-  power to transmute anything they touch to gold. The target must attempt a Will save.Critical
+  power to transmute anything they touch to gold. The target must attempt a Willpower save.Critical
   Success The target is unaffected.
 
   Success The target''s skin turns their armor and clothing partially to gold. If
@@ -37,7 +37,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You grant the target the gift of riches, giving them the power to
-      turn anything they touch to gold. The target must attempt a Will save.Critical
+      turn anything they touch to gold. The target must attempt a Willpower save.Critical
       Success The target is unaffected.
 
       Success The target''s'

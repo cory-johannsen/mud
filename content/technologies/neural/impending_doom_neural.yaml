@@ -2,7 +2,7 @@ id: impending_doom_neural
 name: Fatal Premonition
 description: You sift through probability matrices, seize upon one potential moment
   in which the target meets a particularly gruesome end, and psychically project that
-  moment into the target's consciousness. The target must attempt a Will save.
+  moment into the target's consciousness. The target must attempt a Willpower save.
 tradition: neural
 level: 3
 usage_type: prepared

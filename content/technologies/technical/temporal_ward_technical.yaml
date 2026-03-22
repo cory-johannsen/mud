@@ -2,13 +2,13 @@ id: temporal_ward_technical
 name: Chrono-Lock Security
 description: 'You install a temporal security lock on a target doorway or container
   that rewinds the personal timeline of unauthorized users. A creature attempting
-  to open the warded entry must attempt a Will save.
+  to open the warded entry must attempt a Willpower save.
 
   You can set a password. Any creature that attempts to open without speaking the
   password must attempt a save.
 
   The lock vanishes when the spell''s duration ends, but can be removed as if it were
-  a trap, using your spell DC for both the Perception check and Thievery check to
+  a trap, using your tech DC for both the Perception check and Thievery check to
   disable it. Both checks require expert proficiency.
 
   You can @UUID[Compendium.pf2e.actionspf2e.Item.Dismiss] the lock. The maximum number

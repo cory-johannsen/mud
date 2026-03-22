@@ -14,7 +14,7 @@ description: 'Doctrinal power wards the targets, granting each a +1 status bonus
   by anything opposite in alignment to your doctrinal aura.
 
   When a creature of opposite alignment hits a target with a melee attack, the creature
-  must succeed at a Will save or be @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
+  must succeed at a Willpower save or be @UUID[Compendium.pf2e.conditionitems.Item.Blinded]
   for 1 minute. It''s then temporarily immune for 1 minute.
 
   The first time you Sustain the tech each round, the doctrinal aura''s radius grows
@@ -37,4 +37,4 @@ effects:
       to AC and saves while in the area.
 
       Choose an alignment your deity has (chaotic, evil, good, or lawful). You can''t
-      cast this spell if you'
+      cast this tech if you'

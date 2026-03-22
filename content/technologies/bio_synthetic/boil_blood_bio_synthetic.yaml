@@ -2,7 +2,7 @@ id: boil_blood_bio_synthetic
 name: Hemothermic Overload
 description: 'You activate bio-synthetic microbes in the target''s bloodstream that
   generate extreme heat, boiling it from within. The target takes 10d10 fire damage,
-  with a Fortitude save. A nonliving creature with blood in its body (such as a vampire)
+  with a Toughness save. A nonliving creature with blood in its body (such as a vampire)
   can be affected, but a creature with no blood is immune.
 
 

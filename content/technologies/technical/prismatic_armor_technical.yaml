@@ -6,7 +6,7 @@ description: 'You wrap the target in armor made of multicolored hard-light plati
   and sonic). An attacker that critically fails on its saving throw against the tech
   is @UUID[Compendium.pf2e.conditionitems.Item.Blinded] rather than @UUID[Compendium.pf2e.conditionitems.Item.Dazzled].
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Prismatic Armor]
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Prismatic Armor]
 
 
   Heightened (9th) The resistances increase to 10 each.'

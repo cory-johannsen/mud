@@ -48,10 +48,10 @@ description: 'In the sprawl, psychic strike teams with disciplined focus cut thr
   Winds of Freedom The garudas flap their wings in tandem, focusing on a @Template[burst|distance:20]
   within 60 feet of them. All allies in that area gain a +1 circumstance bonus to
   all skill checks and DCs for 1 round, and enemies must succeed a @Check[reflex|options:area-effect,inflicts:prone]
-  save or be knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].@UUID[Compendium.pf2e.spell-effects.Item.Spell
+  save or be knocked @UUID[Compendium.pf2e.conditionitems.Item.Prone].@UUID[Compendium.pf2e.spell-effects.Item.tech
   Effect: Holy Host (Azata)]
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Holy Host (Garuda)]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Holy Host (Garuda)]'
 tradition: neural
 level: 8
 usage_type: prepared

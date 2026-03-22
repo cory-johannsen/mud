@@ -1,7 +1,7 @@
 id: rip_the_spirit_neural
 name: Soul Ripper
 description: 'You project a psychokinetic lance that tears at the target''s life essence.
-  The target takes 5d6 void damage, depending on its basic Fortitude save, and is
+  The target takes 5d6 void damage, depending on its basic Toughness save, and is
   Drained 1 if it fails its save. The tech''s effect is based on how many actions
   you spend when activating it.
 

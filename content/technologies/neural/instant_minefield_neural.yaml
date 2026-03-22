@@ -9,7 +9,7 @@ description: 'You plant several concealed psychic traps throughout the area that
 
   When a creature enters a mined square, the mine detonates, dealing 2d10 force damage
   with a basic Reflex save. A creature can detect a mine by Searching the area and
-  succeeding at a Perception check against your spell DC.'
+  succeeding at a Perception check against your tech DC.'
 tradition: neural
 level: 5
 usage_type: prepared

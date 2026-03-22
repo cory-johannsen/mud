@@ -3,7 +3,7 @@ name: Nightmare Venom Strike
 description: 'You channel nightmare frequencies to replicate the venomous attack of
   aberrant entities from beyond known space. You deal @Damage[2d6[piercing]] damage
   to the touched creature and afflict it with nightmare toxin. If the target takes
-  piercing damage, they must attempt a Fortitude save.
+  piercing damage, they must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.

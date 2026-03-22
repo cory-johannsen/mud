@@ -1,7 +1,7 @@
 id: dimensional_excision_fanatic_doctrine
 name: Doctrinal Excision
 description: You tear a heretic partially out of reality. The target must attempt
-  a Will save. On a failure, it disappears from the battlefield, removed from play
+  a Willpower save. On a failure, it disappears from the battlefield, removed from play
   until the start of your next turn.
 tradition: fanatic_doctrine
 level: 9

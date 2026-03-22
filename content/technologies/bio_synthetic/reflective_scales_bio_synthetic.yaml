@@ -1,7 +1,7 @@
 id: reflective_scales_bio_synthetic
 name: Energy Absorption Scales
 description: 'You grow a set of bio-synthetic scales that store energy before releasing
-  it in a final burst. When you cast this spell, choose acid, cold, fire, electricity,
+  it in a final burst. When you cast this tech, choose acid, cold, fire, electricity,
   or poison damage. You gain resistance 5 against that type. The scales'' color depends
   on the damage type chosen.
 
@@ -26,5 +26,5 @@ effects:
   - type: utility
     dc: 0
     description: You grow a set of colored, glowing scales or scaled armor that stores
-      energy before releasing it in a final burst. When you cast this spell, choose
+      energy before releasing it in a final burst. When you cast this tech, choose
       acid, cold, fire, electricity, or poison damage. You

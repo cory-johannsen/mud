@@ -2,7 +2,7 @@ id: firework_blast
 name: Flashbang Salvo
 description: You launch a salvo of flashbang charges that explode in a dazzling display.
   The explosions deal 4d6 fire damage. Creatures that fail their saves must attempt
-  an additional Fortitude save or be Dazzled.
+  an additional Toughness save or be Dazzled.
 tradition: technical
 level: 3
 usage_type: prepared

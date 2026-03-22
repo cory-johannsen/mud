@@ -1,7 +1,7 @@
 id: banishment_technical
 name: System Purge
 description: 'You activate a targeted system purge that forces the target back to
-  its origin point. The target must attempt a Will save. You can spend an extra action
+  its origin point. The target must attempt a Willpower save. You can spend an extra action
   and add a specialized component to give a -2 circumstance penalty to the save.
 
 
@@ -28,5 +28,5 @@ effects:
   - type: utility
     dc: 0
     description: You send the target back to its home plane. The target must attempt
-      a Will save. You can spend an extra action while Casting this Spell and add
+      a Willpower save. You can spend an extra action while Casting this tech and add
       a cost to the spell to give the creature a –2 circumst

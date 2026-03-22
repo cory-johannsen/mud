@@ -2,7 +2,7 @@ id: flames_of_ego_technical
 name: Ego Overload
 description: 'Elegant holographic flames of incredible beauty coruscate across the
   target''s body, overloading their threat-assessment systems with overconfidence.
-  The target attempts a Will save.
+  The target attempts a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -28,7 +28,7 @@ effects:
   - type: utility
     dc: 0
     description: 'Elegant flames of incredible beauty coruscate across the target''s
-      body, creating overconfidence and carelessness. The target attempts a Will save.
+      body, creating overconfidence and carelessness. The target attempts a Willpower save.
 
 
       Critical Success The target is unaffected.

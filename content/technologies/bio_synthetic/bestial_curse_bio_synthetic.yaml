@@ -1,7 +1,7 @@
 id: bestial_curse_bio_synthetic
 name: Atavistic Mutagen
 description: 'You inject a retroviral mutagen that triggers rapid devolution, forcing
-  the target into a feral biological state. The effect is based on its Fortitude save.
+  the target into a feral biological state. The effect is based on its Toughness save.
 
   Critical Success The target is unaffected.
 
@@ -31,7 +31,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You tap into the target''s inner being and curse it to become a
-      bestial version of itself. The effect is based on its Fortitude save.
+      bestial version of itself. The effect is based on its Toughness save.
 
       Critical Success The target is unaffected.
 

@@ -1,7 +1,7 @@
 id: telepathic_demand_fanatic_doctrine
 name: Doctrinal Command Broadcast
 description: You broadcast an inescapable doctrinal command to a known creature regardless
-  of distance. The target must attempt a Will save. On a failure it must follow a
+  of distance. The target must attempt a Willpower save. On a failure it must follow a
   one-sentence command.
 tradition: fanatic_doctrine
 level: 9

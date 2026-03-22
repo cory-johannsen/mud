@@ -3,18 +3,18 @@ name: Petrification Snare
 description: 'You inject a calcification compound into the ground around a target,
   causing mineral deposits to rapidly encrust the foe while organic growth erupts
   around them. Every square adjacent to the target becomes difficult terrain from
-  sudden plant growth for 1 minute. The target also attempts a Fortitude save.Critical
+  sudden plant growth for 1 minute. The target also attempts a Toughness save.Critical
   Success The target is unaffected.
 
   Success The target is Clumsy 1 as their feet are bound in mineral crust. This lasts
   until they move from their current position.
 
   Failure The target is Clumsy 2 and Immobilized as their legs are encased. The clumsy
-  condition lasts until they move, and they can Escape against your spell DC.
+  condition lasts until they move, and they can Escape against your tech DC.
 
   Critical Failure The target is clumsy 2 and Restrained as nearly their entire body
   is covered. The clumsy condition lasts until they move, and they can Escape against
-  your spell DC.'
+  your tech DC.'
 tradition: bio_synthetic
 level: 4
 usage_type: prepared

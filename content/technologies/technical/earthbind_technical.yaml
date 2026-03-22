@@ -1,7 +1,7 @@
 id: earthbind_technical
 name: Gravity Tether
 description: You deploy a gravity tether that increases the target's effective weight,
-  hampering flight. Effects are based on its Fortitude save.
+  hampering flight. Effects are based on its Toughness save.
 tradition: technical
 level: 3
 usage_type: prepared
@@ -17,7 +17,7 @@ effects:
   - type: utility
     dc: 0
     description: 'Using the weight of earth, you hamper a target''s flight, with effects
-      based on its Fortitude save. If the creature reaches the ground safely, it doesn''t
+      based on its Toughness save. If the creature reaches the ground safely, it doesn''t
       take falling damage.
 
 

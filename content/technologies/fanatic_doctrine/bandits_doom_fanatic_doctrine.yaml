@@ -2,7 +2,7 @@ id: bandits_doom_fanatic_doctrine
 name: Sacred Ward Trap
 description: 'You consecrate the target item with a doctrinal ward against theft.
   When a creature attempts to take the target into its possession, it takes 8d8 mental
-  damage and is doomed, depending on the result of its Will save. The tech then ends.
+  damage and is doomed, depending on the result of its Willpower save. The tech then ends.
   You can choose up to 10 creatures when you activate this tech; if you do, those
   creatures are immune to the ward.
 

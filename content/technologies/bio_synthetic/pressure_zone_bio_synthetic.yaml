@@ -2,7 +2,7 @@ id: pressure_zone_bio_synthetic
 name: Decompression Zone
 description: 'Air pressure drops precipitously in the area, causing pain and debilitation
   in creatures'' inner ears and joints. Each living creature in the area must attempt
-  a Fortitude save.
+  a Toughness save.
 
 
   Critical Success The creature is unaffected.

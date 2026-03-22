@@ -2,7 +2,7 @@ id: dull_ambition_fanatic_doctrine
 name: Zeal Dampener
 description: 'You invoke a doctrinal curse that saps the target''s drive and ambition,
   causing them to inadvertently undermine their own goals. The effect is based on
-  the target''s Will save.Critical Success The target is unaffected.
+  the target''s Willpower save.Critical Success The target is unaffected.
 
   Success For 1 hour, the target rolls twice and uses the lower result on initiative
   rolls.
@@ -27,4 +27,4 @@ effects:
     dc: 0
     description: You curse the target to fail in all avenues of its life that require
       drive and ambition, as it inadvertently undermines its own goals at every turn.
-      The effect is based on the target's Will save.Criti
+      The effect is based on the target's Willpower save.Criti

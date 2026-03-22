@@ -1,7 +1,7 @@
 id: fungal_infestation
 name: Spore Infection
 description: 'You launch a cluster of mutagenic spores at the target. The target must
-  attempt a Fortitude save.
+  attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

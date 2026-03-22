@@ -1,8 +1,8 @@
 id: gasping_marsh_bio_synthetic
 name: Miasma Vent
 description: You release a cloud of invisible toxic gas that smothers creatures in
-  the area. When you Sustain the Spell, each breathing creature in the area must attempt
-  a Fortitude save or become Sickened.
+  the area. When you Sustain the tech, each breathing creature in the area must attempt
+  a Toughness save or become Sickened.
 tradition: bio_synthetic
 level: 3
 usage_type: prepared

@@ -2,7 +2,7 @@ id: ash_cloud_technical
 name: Smoke Screen
 description: 'You deploy a canister that fills the area with dense smoke. The cloud
   is difficult terrain and creatures in it are @UUID[Compendium.pf2e.conditionitems.Item.Concealed].
-  A creature that breathes in the smoke must attempt a Fortitude save.
+  A creature that breathes in the smoke must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

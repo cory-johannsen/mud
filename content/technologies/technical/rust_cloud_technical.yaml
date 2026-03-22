@@ -2,7 +2,7 @@ id: rust_cloud_technical
 name: Corrosive Particle Cloud
 description: 'You deploy a cloud of agitated corrosive particles. All creatures within
   are Concealed, and all outside are concealed to those within. Deals 5d10 slashing
-  damage (basic Fortitude save) to creatures starting turns in the area. Metal creatures
+  damage (basic Toughness save) to creatures starting turns in the area. Metal creatures
   corroded add to the cloud, increasing area by 5 feet (max 40-foot burst) and taking
   @Damage[(floor(@item.level/2)-1)d4[persistent,slashing]]. You can Dismiss.
 

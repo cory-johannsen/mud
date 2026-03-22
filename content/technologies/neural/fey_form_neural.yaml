@@ -2,7 +2,7 @@ id: fey_form_neural
 name: Chimera Frame
 description: 'You activate an experimental polymorph implant that reshapes your body
   into a synthetic combat chassis, which is Medium unless stated otherwise. When you
-  cast this spell, choose a chassis type. While in this form, you gain the synthetic
+  cast this tech, choose a chassis type. While in this form, you gain the synthetic
   trait. Unless you choose certain chassis types, you have hands in this battle form
   and can use manipulate actions. You can Dismiss the spell.
 
@@ -28,5 +28,5 @@ effects:
   - type: utility
     dc: 0
     description: Channeling the mischievous fey, you transform into a fey battle form,
-      which is Medium unless stated otherwise. When you cast this spell, choose dryad,
+      which is Medium unless stated otherwise. When you cast this tech, choose dryad,
       elananx, naiad, redcap, or unicorn. If you choose

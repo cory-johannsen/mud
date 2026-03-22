@@ -2,7 +2,7 @@ id: magnetic_repulsion_technical
 name: Mag-Push
 description: You generate an electromagnetic repulsion field. Metal objects and creatures
   wearing metal armor within 15 feet are pushed 10 feet away. A creature can attempt
-  a Fortitude save to resist.
+  a Toughness save to resist.
 tradition: technical
 level: 2
 usage_type: prepared

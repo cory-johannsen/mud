@@ -3,7 +3,7 @@ name: Bio-Hostile Protocol
 description: You designate a target as hostile to all natural and biological systems.
   For 1 hour, plants in the area actively attack the target (2d8 damage per round),
   natural creatures become hostile, and even the target's own biological augmentations
-  may malfunction (DC 30 Fortitude save each minute to avoid 2d10 damage from internal
+  may malfunction (DC 30 Toughness save each minute to avoid 2d10 damage from internal
   malfunction).
 tradition: bio_synthetic
 level: 9

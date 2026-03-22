@@ -1,7 +1,7 @@
 id: deafness_technical
 name: Acoustic Jammer
 description: 'You deploy an acoustic jammer that destroys the target''s hearing. The
-  target must attempt a Fortitude save.
+  target must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.
@@ -28,7 +28,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'The target loses hearing; it must attempt a Fortitude save. The
+    description: 'The target loses hearing; it must attempt a Toughness save. The
       target is then temporarily immune for 1 minute.
 
 

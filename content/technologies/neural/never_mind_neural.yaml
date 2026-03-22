@@ -1,7 +1,7 @@
 id: never_mind_neural
 name: Cognitive Wipe
 description: 'You drastically reduce the target''s mental faculties by corrupting
-  their neural architecture. The target must attempt a Will save. The effects of this
+  their neural architecture. The target must attempt a Willpower save. The effects of this
   curse can be removed only through effects that target curses.
 
 
@@ -30,7 +30,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You drastically reduce the target''s mental faculties. The target
-      must attempt a Will save. The effects of this curse can be removed only through
+      must attempt a Willpower save. The effects of this curse can be removed only through
       effects that target curses.
 
 

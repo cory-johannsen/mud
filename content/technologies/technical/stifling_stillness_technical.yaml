@@ -3,7 +3,7 @@ name: Atmospheric Stagnation Field
 description: 'You deploy a device that renders all air in the target area unnaturally
   still and oxygen-depleted. The stagnant air becomes difficult terrain. Air-breathing
   creatures not holding their breath must spend an action straining to breathe, taking
-  3d6 poison damage (basic Fortitude save) and becoming Fatigued.
+  3d6 poison damage (basic Toughness save) and becoming Fatigued.
 
 
   Heightened (+2) Damage increases by 3d6.'

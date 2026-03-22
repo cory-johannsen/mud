@@ -27,7 +27,7 @@ description: 'With a quick series of ritual gestures, doctrinal hymns fill the a
   Triple (time signature) You and your allies gain a +2 status bonus to Armor Class
   and Reflex saving throws.
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Musical Shift]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Musical Shift]'
 tradition: fanatic_doctrine
 level: 8
 usage_type: prepared

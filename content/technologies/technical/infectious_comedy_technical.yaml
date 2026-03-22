@@ -5,7 +5,7 @@ description: 'You broadcast a psycho-active data meme that infects a target with
   can target another creature within 30 feet of an affected target.
 
 
-  Each target must attempt a Will save.
+  Each target must attempt a Willpower save.
 
 
   Critical Success Unaffected and immune for 1 hour.
@@ -30,5 +30,5 @@ effects:
   - type: utility
     dc: 0
     description: You tell a magical joke and infect a target with laughter that spreads
-      to those nearby. The first time you Sustain the Spell each round, you can target
+      to those nearby. The first time you Sustain the tech each round, you can target
       another creature you can see that is within 30 f

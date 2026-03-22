@@ -1,7 +1,7 @@
 id: deafness_bio_synthetic
 name: Cochlear Collapse
 description: 'You introduce a mutagen that destroys the target''s inner ear structures.
-  The target must attempt a Fortitude save.
+  The target must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.
@@ -28,7 +28,7 @@ effects:
   on_apply:
   - type: utility
     dc: 0
-    description: 'The target loses hearing; it must attempt a Fortitude save. The
+    description: 'The target loses hearing; it must attempt a Toughness save. The
       target is then temporarily immune for 1 minute.
 
 

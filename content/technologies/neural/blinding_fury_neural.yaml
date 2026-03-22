@@ -30,7 +30,7 @@ effects:
   - type: utility
     dc: 0
     description: 'Trigger A creature damages you.You curse the target with your outrage
-      at being attacked. The effect is determined by the target''s Will save.Critical
+      at being attacked. The effect is determined by the target''s Willpower save.Critical
       Success The target is unaffected.
 
       Success The targe'

@@ -15,7 +15,7 @@ description: 'With a burst of psychic intrusion, you hijack an individual''s voi
   Critical Failure As success, but the target also takes 8d6 mental damage from the
   transformation.
 
-  The first time each round you Sustain this spell after you cast this spell, the
+  The first time each round you Sustain this tech after you cast this tech, the
   target''s neural pathways degrade rapidly, taking @Damage[(ternary(gte(@item.rank,9),3,2))d8[void]]
   damage (@Check[will|basic] save). On a failure, the target also becomes Enfeebled
   1 or increases the value of its enfeebled condition by 1.Heightened (9th) The mental

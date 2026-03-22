@@ -1,7 +1,7 @@
 id: phantom_prison_technical
 name: Holographic Cell
 description: You surround a Large or smaller creature with an immersive holographic
-  cage. The target must attempt a Will save each round to see through the illusion.
+  cage. The target must attempt a Willpower save each round to see through the illusion.
 tradition: technical
 level: 3
 usage_type: prepared

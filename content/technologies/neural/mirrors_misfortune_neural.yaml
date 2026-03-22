@@ -1,7 +1,7 @@
 id: mirrors_misfortune_neural
 name: Mirror Hex Protocol
 description: 'You generate a holographic decoy that curses attackers with bad luck.
-  When you cast this spell, you seem to split in two. As you do, you can Step to any
+  When you cast this tech, you seem to split in two. As you do, you can Step to any
   adjacent square. In either your initial square, or another square adjacent to it,
   an exact illusory duplicate appears. You decide a simple course of action for the
   duplicate. A creature can distinguish between you and the duplicate only by Seeking
@@ -36,4 +36,4 @@ effects:
     dc: 0
     description: You split into your real self and a mirrored version of yourself
       that curses would-be attackers with misfortune on their next attacks. When you
-      cast this spell, you seem to split in two. As you do, yo
+      cast this tech, you seem to split in two. As you do, yo

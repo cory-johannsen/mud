@@ -3,7 +3,7 @@ name: Holographic Doubles
 description: You project three psychic duplicates of yourself. Each time a creature
   targets you with an attack, one of the duplicates is hit instead and destroyed.
   When all duplicates are destroyed, the spell ends. A creature can attempt a Perception
-  check against your spell DC to discern the real you.
+  check against your tech DC to discern the real you.
 tradition: neural
 level: 2
 usage_type: prepared

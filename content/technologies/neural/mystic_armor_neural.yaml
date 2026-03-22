@@ -2,7 +2,7 @@ id: mystic_armor_neural
 name: Mystic Armor
 description: |-
     You ward yourself with shimmering magical energy, gaining a +1 item bonus to AC and a maximum Dexterity modifier of +5. While wearing mystic armor, you use your unarmored proficiency to calculate your AC.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Mystic Armor]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Mystic Armor]
 
     Heightened (4th) You gain a +1 item bonus to saving throws.
     Heightened (6th) The item bonus to AC increases to +2, and you gain a +1 item bonus to saving throws.

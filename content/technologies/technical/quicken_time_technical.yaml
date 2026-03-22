@@ -3,7 +3,7 @@ name: Overclock Zone
 description: You accelerate local temporal flow with a chrono-manipulation device.
   Any creature that begins its turn in the area is Quickened until the end of its
   turn and can use the extra action only to Stride or Strike. Any creature in the
-  area that attempts to Cast a Spell must succeed at a DC 5 flat check or the spell
+  area that attempts to Cast a tech must succeed at a DC 5 flat check or the spell
   is disrupted.
 tradition: technical
 level: 5

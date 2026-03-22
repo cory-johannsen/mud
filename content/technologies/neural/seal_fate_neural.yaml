@@ -3,7 +3,7 @@ name: Terminal Prognosis
 description: 'You psychically brand a creature with a death sentence tied to a specific
   damage type. Choose one type of damage from the following list: acid, bludgeoning,
   cold, electricity, fire, piercing, slashing, sonic, or void. The effect is based
-  on the target''s Fortitude save.Critical Success The target is unaffected.
+  on the target''s Toughness save.Critical Success The target is unaffected.
 
   Success The target gains weakness 2 to the chosen damage type until the end of your
   next turn.

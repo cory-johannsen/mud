@@ -1,7 +1,7 @@
 id: banishment_fanatic_doctrine
 name: Doctrinal Exile
 description: 'You invoke sacred protocols to banish the target from this place. The
-  target must attempt a Will save. You can spend an extra action while activating
+  target must attempt a Willpower save. You can spend an extra action while activating
   this tech and add a cost to give the creature a -2 circumstance penalty to its save.
 
 
@@ -28,5 +28,5 @@ effects:
   - type: utility
     dc: 0
     description: You send the target back to its home plane. The target must attempt
-      a Will save. You can spend an extra action while Casting this Spell and add
+      a Willpower save. You can spend an extra action while Casting this tech and add
       a cost to the spell to give the creature a –2 circumst

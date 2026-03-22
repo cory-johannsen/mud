@@ -1,7 +1,7 @@
 id: crimson_breath_technical
 name: Chemical Weapon Spray
 description: 'You activate a chemical dispersal unit and spray the target with a weaponized
-  compound. The effects are determined by the creature''s Fortitude save.Critical
+  compound. The effects are determined by the creature''s Toughness save.Critical
   Success The target is unaffected.
 
   Success The target takes 8d6 poison damage.

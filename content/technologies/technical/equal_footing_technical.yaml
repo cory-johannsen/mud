@@ -16,6 +16,6 @@ effects:
   - type: utility
     dc: 0
     description: 'You level the field between yourself and another creature, hampering its movements if it''s quicker than
-      you. The target attempts a Will save.Critical Success The target is unaffected.
+      you. The target attempts a Willpower save.Critical Success The target is unaffected.
 
       Success The targ'

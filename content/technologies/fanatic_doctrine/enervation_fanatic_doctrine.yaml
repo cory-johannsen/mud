@@ -2,7 +2,7 @@ id: enervation_fanatic_doctrine
 name: Entropic Condemnation
 description: Extending a finger, you fire a beam of doctrinal entropy that weakens
   the life force of any creature it touches. Each living creature in the line must
-  attempt a Fortitude save. All mechanical effects (damage, conditions) remain identical
+  attempt a Toughness save. All mechanical effects (damage, conditions) remain identical
   to the base protocol.
 tradition: fanatic_doctrine
 level: 4
@@ -20,4 +20,4 @@ effects:
     dc: 0
     description: Extending a finger, you fire a beam of void energy that weakens the
       life force of any creature it touches. Each living creature in the line must
-      attempt a Fortitude save.Critical Success The creature
+      attempt a Toughness save.Critical Success The creature

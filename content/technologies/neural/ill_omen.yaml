@@ -1,11 +1,11 @@
 id: ill_omen
 name: Ill Omen
 description: |-
-    The target is struck with misfortune, which throws it off balance. The target must attempt a Will save.
+    The target is struck with misfortune, which throws it off balance. The target must attempt a Willpower save.
     Success The target is unaffected.
     Failure The first time during the duration that the target attempts an attack roll or skill check, it must roll twice and use the worse result.
     Critical Failure Every time during the duration that the target attempts an attack roll or skill check, it must roll twice and use the worse result.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Ill Omen]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Ill Omen]
 tradition: neural
 level: 1
 usage_type: prepared
@@ -21,6 +21,6 @@ effects:
         - type: utility
           dc: 0
           description: |-
-            The target is struck with misfortune, which throws it off balance. The target must attempt a Will save.
+            The target is struck with misfortune, which throws it off balance. The target must attempt a Willpower save.
             Success The target is unaffected.
             Failure The first time during the duration that the target att

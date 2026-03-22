@@ -1,7 +1,7 @@
 id: umbral_graft_neural
 name: Shadow Protocol Theft
 description: 'You project a dark-spectrum energy field that allows you to steal active
-  effects from enemies. During this spell''s duration, you can use the Steal action
+  effects from enemies. During this tech''s duration, you can use the Steal action
   to attempt to abscond with active effects on a foe instead of stealing an item.
   You can also make one attempt to Steal as part of Casting. If you succeed, you randomly
   steal one effect with a target entry from the foe. The stolen effect ceases on the
@@ -9,7 +9,7 @@ description: 'You project a dark-spectrum energy field that allows you to steal 
   for its remaining duration, to a maximum of 1 minute.
 
   If your Steal was a critical success, you automatically steal effects equal to or
-  lower than this spell''s rank. On a regular success, you steal effects of lower
+  lower than this tech''s rank. On a regular success, you steal effects of lower
   rank automatically. Otherwise, you must attempt a counteract check.'
 tradition: neural
 level: 4

@@ -4,7 +4,7 @@ description: You cloak the targets in a neural illusion, shaping their clothing 
   worn items into ones suitable for a particular occasion or social context. The illusion
   adjusts dynamically as the targets change posture or position. Any creature that
   touches the illusory clothes or Seeks realizes they're fake with a successful Perception
-  check against your spell DC.
+  check against your tech DC.
 tradition: neural
 level: 2
 usage_type: prepared

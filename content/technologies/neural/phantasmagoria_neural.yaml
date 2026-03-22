@@ -1,9 +1,9 @@
 id: phantasmagoria_neural
 name: Total Sensory Override
 description: You flood a target's sensory cortex with fabricated input, creating total
-  hallucinatory immersion. The target must attempt a Will save. On a failure, it is
+  hallucinatory immersion. The target must attempt a Willpower save. On a failure, it is
   surrounded by terrifying hallucinations and becomes frightened 4, or frightened
-  6 on a critical failure. At the end of each turn, the target attempts a Will save
+  6 on a critical failure. At the end of each turn, the target attempts a Willpower save
   to reduce the frightened value by 1.
 tradition: neural
 level: 9

@@ -2,7 +2,7 @@ id: sanguine_mist_fanatic_doctrine
 name: Blood Tithe Cloud
 description: 'You unleash a cloud of doctrinal nanoscale harvesters that drain vitality
   from the living. Each living creature in the area (aside from you) takes 6d6 void
-  damage with a basic Fortitude save. Creatures in the area are Concealed, and all
+  damage with a basic Toughness save. Creatures in the area are Concealed, and all
   creatures outside become concealed to those within.
 
   The first time each round you Sustain, living creatures in the area take additional

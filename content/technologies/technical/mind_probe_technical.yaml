@@ -1,7 +1,7 @@
 id: mind_probe_technical
 name: Neural Extraction
 description: 'You deploy a neural scanning device to extract information from a creature''s
-  mind. You access the target''s memories unless it resists with a Will save.
+  mind. You access the target''s memories unless it resists with a Willpower save.
 
   Success The target is unaffected.
 
@@ -26,7 +26,7 @@ effects:
     dc: 0
     description: 'You cast your thoughts through a creature''s mind, sifting for information.
       You access the target''s memories and knowledge unless it fends you off with
-      a Will save.
+      a Willpower save.
 
       Success The target is unaffected.
 

@@ -1,9 +1,9 @@
 id: concordant_choir_neural
 name: Concordant Choir
 description: |-
-    You unleash a dangerous consonance of reverberating sound, focusing on a single target or spreading out to damage many foes. The number of actions you spend Casting this Spell determines its targets, range, area, and other parameters.1 The spell deals 1d4 sonic damage to a single enemy, with a basic Fortitude save.
-    2 (manipulate) The spell deals 2d4 sonic damage to all creatures in a @Template[burst|distance:10], with a basic Fortitude save.
-    3 (manipulate) The spell deals 2d4 sonic damage to all creatures in a @Template[emanation|distance:30], with a basic Fortitude save.Heightened (+1) The damage increases by 1d4 for the 1-action version, or 2d4 for the other versions.
+    You unleash a dangerous consonance of reverberating sound, focusing on a single target or spreading out to damage many foes. The number of actions you spend Casting this tech determines its targets, range, area, and other parameters.1 The spell deals 1d4 sonic damage to a single enemy, with a basic Toughness save.
+    2 (manipulate) The spell deals 2d4 sonic damage to all creatures in a @Template[burst|distance:10], with a basic Toughness save.
+    3 (manipulate) The spell deals 2d4 sonic damage to all creatures in a @Template[emanation|distance:30], with a basic Toughness save.Heightened (+1) The damage increases by 1d4 for the 1-action version, or 2d4 for the other versions.
 tradition: neural
 level: 1
 usage_type: prepared

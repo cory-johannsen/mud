@@ -2,7 +2,7 @@ id: planar_tether_technical
 name: Dimensional Anchor Device
 description: 'You deploy a device that locks the target to its current dimensional
   coordinates. It attempts to counteract any teleportation or planar transport affecting
-  the target. Duration determined by Will save.
+  the target. Duration determined by Willpower save.
 
 
   Critical Success Unaffected.

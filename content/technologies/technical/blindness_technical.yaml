@@ -1,7 +1,7 @@
 id: blindness_technical
 name: Optic Scrambler
 description: You deploy a targeted EM pulse that fries the target's visual processing.
-  The effect is determined by the target's Fortitude save. The target becomes temporarily
+  The effect is determined by the target's Toughness save. The target becomes temporarily
   immune for 1 minute.
 tradition: technical
 level: 3
@@ -18,7 +18,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You blind the target. The effect is determined by the target''s
-      Fortitude save. The target then becomes temporarily immune for 1 minute.
+      Toughness save. The target then becomes temporarily immune for 1 minute.
 
 
       Critical Success The target is unaffected.

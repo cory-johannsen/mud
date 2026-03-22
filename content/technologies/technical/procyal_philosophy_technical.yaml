@@ -2,7 +2,7 @@ id: procyal_philosophy_technical
 name: Tactical Guidance Drone
 description: You deploy a holographic tactical guidance drone that floats next to
   the target and prepares to Aid each round. The drone uses a bonus equal to your
-  spell DC - 10. You can redirect it to a different creature with a free action (concentrate
+  tech DC - 10. You can redirect it to a different creature with a free action (concentrate
   trait).
 tradition: technical
 level: 4

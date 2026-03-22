@@ -2,7 +2,7 @@ id: confusion_neural
 name: Cognitive Scrambler
 description: 'You blast the target''s decision-making centers with contradictory neural
   impulses, causing it to act randomly. The effects are determined by the target''s
-  Will save. You can Dismiss the spell.
+  Willpower save. You can Dismiss the spell.
 
 
   Critical Success The target is unaffected.
@@ -31,7 +31,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You befuddle your target with strange impulses, causing it to act
-      randomly. The effects are determined by the target''s Will save. You can Dismiss
+      randomly. The effects are determined by the target''s Willpower save. You can Dismiss
       the spell.
 
 

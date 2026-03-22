@@ -2,7 +2,7 @@ id: magical_fetters_technical
 name: Mag-Lock Restraints
 description: Electromagnetic restraints launch from your device and clamp around the
   target's limbs. The target must attempt a Reflex save or become Immobilized. It
-  can Escape against your spell DC.
+  can Escape against your tech DC.
 tradition: technical
 level: 3
 usage_type: prepared

@@ -2,7 +2,7 @@ id: cleanse_air_fanatic_doctrine
 name: Sacred Fumigation
 description: You invoke a purifying rite that cleanses the air in the area. The area
   is cleared of inhaled poisons, toxic gases, and airborne diseases for the duration.
-  Creatures in the area gain a +2 status bonus to Fortitude saves against inhaled
+  Creatures in the area gain a +2 status bonus to Toughness saves against inhaled
   effects.
 tradition: fanatic_doctrine
 level: 2

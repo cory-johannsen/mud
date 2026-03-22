@@ -1,7 +1,7 @@
 id: sudden_blight_bio_synthetic
 name: Necrotic Bloom
 description: 'You release a wave of bio-synthetic decay that withers living tissue.
-  Each creature in the area takes 3d10 void damage with a basic Fortitude save.
+  Each creature in the area takes 3d10 void damage with a basic Toughness save.
 
 
   Heightened (+1) The damage increases by 1d10.'

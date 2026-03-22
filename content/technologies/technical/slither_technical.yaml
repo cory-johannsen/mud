@@ -3,7 +3,7 @@ name: Cable Serpents
 description: 'Mechanized serpentine cables rise up to capture creatures in the area.
   Each creature takes 3d6 piercing damage and 1d6 persistent poison damage from electrified
   contacts, and is Grabbed or Restrained (your choice). A creature can Escape against
-  your spell DC.
+  your tech DC.
 
 
   Heightened (+2) The piercing and persistent damage each increase by 1d6.'

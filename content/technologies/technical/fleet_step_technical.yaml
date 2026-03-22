@@ -15,4 +15,4 @@ effects:
     dc: 0
     description: 'You gain a +30-foot status bonus to your Speed.
 
-      @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Fleet Step]'
+      @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Fleet Step]'

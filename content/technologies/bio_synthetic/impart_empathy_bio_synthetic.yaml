@@ -1,7 +1,7 @@
 id: impart_empathy_bio_synthetic
 name: Pheromone Signal
 description: You release bio-synthetic pheromones that convey a specific emotion to
-  the target. The target must attempt a Will save. On a failure, the target feels
+  the target. The target must attempt a Willpower save. On a failure, the target feels
   the emotion strongly for 1 minute, which can affect its behavior at the GM's discretion.
 tradition: bio_synthetic
 level: 2

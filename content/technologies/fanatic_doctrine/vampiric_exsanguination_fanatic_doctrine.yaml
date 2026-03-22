@@ -2,10 +2,10 @@ id: vampiric_exsanguination_fanatic_doctrine
 name: Mass Vitality Siphon
 description: 'You invoke a forbidden doctrine that draws the blood and life force
   of the unfaithful through outstretched hands. You deal 12d6 void damage to living
-  creatures in the area with a basic Fortitude save.
+  creatures in the area with a basic Toughness save.
 
   You gain temporary Hit Points equal to half the damage a single creature takes from
-  this spell; calculate these temporary Hit Points using the creature that took the
+  this tech; calculate these temporary Hit Points using the creature that took the
   most damage. You lose any remaining temporary Hit Points after 1 minute.
 
 

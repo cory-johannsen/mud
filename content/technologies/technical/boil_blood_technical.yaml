@@ -1,7 +1,7 @@
 id: boil_blood_technical
 name: Microwave Blood Heater
 description: 'You activate a directed microwave emitter that superheats the target''s
-  blood within its veins. The target takes 10d10 fire damage, with a Fortitude save.
+  blood within its veins. The target takes 10d10 fire damage, with a Toughness save.
   A nonliving creature with blood in its body (such as a vampire) can be affected,
   but a creature with no blood is immune.
 

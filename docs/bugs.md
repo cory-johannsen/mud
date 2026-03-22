@@ -28,11 +28,11 @@
 
 ### BUG-5: Technology descriptions reference magic and PF2E saves
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** Content
 **Description:** Many technology item and ability descriptions use fantasy/magic flavor text and reference PF2E save types (Fortitude, Reflex, Will) instead of sci-fi/tech flavor appropriate to the game setting.
 **Steps:** Browse technology items and ability descriptions; observe magic/PF2E save language.
-**Fix:**
+**Fix:** Bulk-replaced PF2E save names and spell/magic terminology across all 900+ technology YAML files: Fortitude save → Toughness save, Will save → Willpower save, spell/Spell → tech, Cast the Spell → Use this tech, spell DC → tech DC, spell attack roll → tech attack roll, spell level → tech level.
 
 ### BUG-6: Technology selection displays technology ID instead of display name
 **Severity:** medium

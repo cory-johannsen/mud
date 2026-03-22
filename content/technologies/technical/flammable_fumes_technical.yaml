@@ -1,9 +1,9 @@
 id: flammable_fumes_technical
 name: Volatile Gas Vent
 description: 'You vent a cloud of volatile industrial gases into the area. The gases
-  are invisible, requiring a successful Perception check against your spell DC to
+  are invisible, requiring a successful Perception check against your tech DC to
   detect visually. Each creature that enters the cloud or starts its turn there takes
-  2d6 poison damage with a basic Fortitude save.
+  2d6 poison damage with a basic Toughness save.
 
 
   If any flame or fire effect contacts the cloud, it ignites, dealing 10d6 fire damage

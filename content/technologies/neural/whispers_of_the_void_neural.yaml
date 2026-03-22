@@ -2,7 +2,7 @@ id: whispers_of_the_void_neural
 name: Void Frequency Whisper
 description: 'You transmit entropy-laden data packets that take physical form as they
   reach your targets'' neural interfaces, weakening their life force. Each target
-  must attempt a Fortitude save.Critical Success The creature is unaffected.
+  must attempt a Toughness save.Critical Success The creature is unaffected.
 
   Success The creature takes @Damage[(floor(@item.rank/2))d8[persistent,void]] damage.
 

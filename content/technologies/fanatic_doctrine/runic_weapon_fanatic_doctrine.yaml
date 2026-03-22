@@ -5,7 +5,7 @@ description: |-
 
     Heightened (6th) The weapon is +2 greater striking.
     Heightened (9th) The weapon is +3 major striking.
-    @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Runic Weapon]
+    @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Runic Weapon]
 tradition: fanatic_doctrine
 level: 1
 usage_type: prepared

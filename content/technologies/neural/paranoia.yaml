@@ -1,7 +1,7 @@
 id: paranoia
 name: Paranoia Protocol
 description: 'You flood the target''s mind with psychic signals that make everyone
-  appear hostile. The target must attempt a Will save.
+  appear hostile. The target must attempt a Willpower save.
 
 
   Critical Success The target is unaffected.
@@ -11,7 +11,7 @@ description: 'You flood the target''s mind with psychic signals that make everyo
 
   Failure The target believes all other creatures are enemies for 1 minute. It doesn''t
   necessarily attack, but it won''t accept aid, takes hostile actions against those
-  who provoke it, and so on. It can attempt a new Will save at the end of each of
+  who provoke it, and so on. It can attempt a new Willpower save at the end of each of
   its turns.
 
   Critical Failure As failure, but the target actively attacks all creatures near
@@ -32,6 +32,6 @@ effects:
     dc: 0
     description: 'You cause the target to see all other creatures as dire threats.
       The target is stricken by intense paranoia toward all creatures around it and
-      must attempt a Will save.
+      must attempt a Willpower save.
 
       Critical Success The target is'

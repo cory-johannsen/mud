@@ -2,7 +2,7 @@ id: confusion_technical
 name: Logic Bomb
 description: 'You deploy a device that scrambles the target''s decision-making processes
   with contradictory signals, causing random behavior. The effects are determined
-  by the target''s Will save. All mechanical effects (stunned, confused, duration)
+  by the target''s Willpower save. All mechanical effects (stunned, confused, duration)
   remain identical to the base protocol.
 
 
@@ -22,7 +22,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You befuddle your target with strange impulses, causing it to act
-      randomly. The effects are determined by the target''s Will save. You can Dismiss
+      randomly. The effects are determined by the target''s Willpower save. You can Dismiss
       the spell.
 
 

@@ -1,7 +1,7 @@
 id: impart_empathy_neural
 name: Emotion Injection
 description: You psychically inject an emotion into the target's mind. The target
-  must attempt a Will save. On a failure, the target feels the emotion strongly for
+  must attempt a Willpower save. On a failure, the target feels the emotion strongly for
   1 minute, which can affect its behavior at the GM's discretion.
 tradition: neural
 level: 2

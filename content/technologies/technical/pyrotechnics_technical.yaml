@@ -17,5 +17,5 @@ effects:
   - type: utility
     dc: 0
     description: You turn a fire into either a burst of blinding fireworks or a thick
-      cloud of choking smoke, chosen when you Cast the Spell. The spell targets one
+      cloud of choking smoke, chosen when you Use this tech. The spell targets one
       fire source, which is immediately extinguished if it

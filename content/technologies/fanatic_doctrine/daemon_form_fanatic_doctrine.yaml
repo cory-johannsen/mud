@@ -2,7 +2,7 @@ id: daemon_form_fanatic_doctrine
 name: Profane Engine Form
 description: 'You channel forbidden doctrinal power, transforming into a Large profane
   engine battle form. You must have enough space to expand into or the spell is lost.
-  When you cast this spell you choose one of four profane chassis configurations.
+  When you cast this tech you choose one of four profane chassis configurations.
   The battle form is Medium for lighter configurations. While in this form, you gain
   the daemon and fiend traits. You have hands in this battle form and can use manipulate
   actions. You can Dismiss the spell.
@@ -28,7 +28,7 @@ description: 'You channel forbidden doctrinal power, transforming into a Large p
   Damage 1d6+12 slashing plus 1d6 void, and you can spend an action after a hit to
   attempt to Grab the target.Venedaemon Speed 25 feet sense magical items and active
   spells within 60 feet as an imprecise senseSize MediumMelee 1 tentacle (agile, magical,
-  reach 10 feet, unholy), Damage 2d6+12 bludgeoning.@UUID[Compendium.pf2e.spell-effects.Item.Spell
+  reach 10 feet, unholy), Damage 2d6+12 bludgeoning.@UUID[Compendium.pf2e.spell-effects.Item.tech
   Effect: Daemon Form]'
 tradition: fanatic_doctrine
 level: 6

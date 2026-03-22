@@ -1,7 +1,7 @@
 id: pressure_zone_technical
 name: Pressure Drop Field
 description: 'Air pressure drops precipitously in the area, causing pain in creatures''
-  ears and joints. Each living creature must attempt a Fortitude save.
+  ears and joints. Each living creature must attempt a Toughness save.
 
 
   Critical Success Unaffected.

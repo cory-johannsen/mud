@@ -2,7 +2,7 @@ id: crimson_breath_fanatic_doctrine
 name: Blood Doctrine Exhalation
 description: 'You turn a creature toward you and exhale a blast of crimson doctrinal
   mist, exposing the target to a sacred hemotoxin. The effects are determined by the
-  creature''s Fortitude save.Critical Success The target is unaffected.
+  creature''s Toughness save.Critical Success The target is unaffected.
 
   Success The target takes 8d6 poison damage.
 

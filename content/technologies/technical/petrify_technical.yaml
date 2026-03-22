@@ -1,14 +1,14 @@
 id: petrify_technical
 name: Rapid Calcification Beam
 description: 'You fire a beam that induces rapid mineral calcification throughout
-  the target''s body. The target must attempt a Fortitude save.
+  the target''s body. The target must attempt a Toughness save.
 
 
   Critical Success The target is unaffected.
 
   Success The target is Slowed 1 for 1 round as mineral deposits begin to form.
 
-  Failure The target is slowed 1 and must attempt a Fortitude save at the end of each
+  Failure The target is slowed 1 and must attempt a Toughness save at the end of each
   of its turns; this ongoing save has the incapacitation trait. On a failed save,
   the slowed condition increases by 1 (or 2 on a critical failure). A successful save
   reduces the slowed condition by 1. When a creature becomes fully unable to act due
@@ -33,7 +33,7 @@ effects:
   - type: utility
     dc: 0
     description: 'The target''s body slowly turns into a stone statue. The target
-      must attempt a Fortitude save.
+      must attempt a Toughness save.
 
 
       Critical Success The target is unaffected.

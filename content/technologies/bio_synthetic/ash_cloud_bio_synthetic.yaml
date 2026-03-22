@@ -2,7 +2,7 @@ id: ash_cloud_bio_synthetic
 name: Spore Cloud
 description: 'You release a cloud of toxic biological spores that fills the area.
   The cloud is difficult terrain and creatures in it are @UUID[Compendium.pf2e.conditionitems.Item.Concealed].
-  A creature that breathes in the spores must attempt a Fortitude save.
+  A creature that breathes in the spores must attempt a Toughness save.
 
 
   Critical Success The creature is unaffected.

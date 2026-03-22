@@ -6,7 +6,7 @@ description: 'You deploy a size-reduction field on the target. The target shrink
   AC, but its reach decreases and its damage with physical attacks is reduced.
 
 
-  @UUID[Compendium.pf2e.spell-effects.Item.Spell Effect: Shrink]'
+  @UUID[Compendium.pf2e.spell-effects.Item.tech Effect: Shrink]'
 tradition: technical
 level: 2
 usage_type: prepared

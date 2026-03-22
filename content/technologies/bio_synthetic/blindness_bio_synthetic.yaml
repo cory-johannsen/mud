@@ -1,7 +1,7 @@
 id: blindness_bio_synthetic
 name: Retinal Dissolve
 description: 'You spray a targeted enzyme that dissolves the target''s retinal cells.
-  The effect is determined by the target''s Fortitude save. The target then becomes
+  The effect is determined by the target''s Toughness save. The target then becomes
   temporarily immune for 1 minute.
 
 
@@ -27,7 +27,7 @@ effects:
   - type: utility
     dc: 0
     description: 'You blind the target. The effect is determined by the target''s
-      Fortitude save. The target then becomes temporarily immune for 1 minute.
+      Toughness save. The target then becomes temporarily immune for 1 minute.
 
 
       Critical Success The target is unaffected.

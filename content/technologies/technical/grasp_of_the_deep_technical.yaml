@@ -2,14 +2,14 @@ id: grasp_of_the_deep_technical
 name: Pressure Crush Device
 description: 'You deploy a device that subjects a target to immense crushing force,
   disorienting and compressing its joints and lungs. Target takes 6d6 bludgeoning
-  damage depending on its Will save.
+  damage depending on its Willpower save.
 
 
   Critical Success Unaffected.
 
   Success Half damage.
 
-  Failure Full damage and Grabbed; can Escape against your spell DC.
+  Failure Full damage and Grabbed; can Escape against your tech DC.
 
   Critical Failure Double damage and Grabbed.
 

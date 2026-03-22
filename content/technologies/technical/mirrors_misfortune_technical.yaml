@@ -3,7 +3,7 @@ name: Decoy Hex Projector
 description: You deploy a device that generates a holographic decoy that curses attackers
   with probability disruption. When cast, you seem to split in two and can Step. A
   duplicate appears in an adjacent square. If attacked, the decoy shatters and inflicts
-  a probability curse (Will save). All mechanical effects remain identical to the
+  a probability curse (Willpower save). All mechanical effects remain identical to the
   base protocol.
 tradition: technical
 level: 4
@@ -21,4 +21,4 @@ effects:
     dc: 0
     description: You split into your real self and a mirrored version of yourself
       that curses would-be attackers with misfortune on their next attacks. When you
-      cast this spell, you seem to split in two. As you do, yo
+      cast this tech, you seem to split in two. As you do, yo
