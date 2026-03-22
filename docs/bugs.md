@@ -68,11 +68,11 @@
 
 ### BUG-2: eq command displays armor item IDs instead of names
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The `eq` command displays armor slots using the item definition ID (e.g. `tactical_boots`) instead of the human-readable item name (e.g. `Tactical Boots`).
 **Steps:** Equip any armor item and run `eq`; observe armor slot values show raw IDs.
-**Fix:**
+**Fix:** Added `hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry)` in `internal/gameserver/grpc_service.go`. After `LoadEquipment` succeeds at login, this function iterates `eq.Armor`, looks up each `ItemDefID` via `reg.Armor()`, and sets `item.Name` to `ArmorDef.Name` when found. Items whose IDs are not registered remain unchanged.
 
 ## World
 

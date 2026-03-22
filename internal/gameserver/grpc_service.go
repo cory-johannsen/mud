@@ -612,6 +612,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			sess.Equipment = inventory.NewEquipment()
 		} else {
 			sess.Equipment = eq
+			hydrateEquipmentNames(sess.Equipment, s.invRegistry)
 		}
 
 		// Compute defense stats from equipped armor (AC, resistances, weaknesses).
@@ -8351,4 +8352,24 @@ func (s *GameServiceServer) CreaturesInRoom(roomID, sensingUID string) []Creatur
 	}
 
 	return result
+}
+
+// hydrateEquipmentNames sets the Name field of each SlottedItem in eq.Armor to the
+// ArmorDef.Name from reg, if the definition is found.
+//
+// Precondition: eq and reg must be non-nil.
+// Postcondition: Each armor slot whose ItemDefID is registered in reg has its Name
+// updated to the human-readable ArmorDef.Name; unregistered items are unchanged.
+func hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry) {
+	if eq == nil || reg == nil {
+		return
+	}
+	for slot, item := range eq.Armor {
+		if item == nil {
+			continue
+		}
+		if def, ok := reg.Armor(item.ItemDefID); ok {
+			eq.Armor[slot].Name = def.Name
+		}
+	}
 }
