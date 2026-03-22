@@ -1,0 +1,17 @@
+id: gail_grinder_graves
+name: Gail "Grinder" Graves
+npc_type: quest_giver
+max_hp: 18
+ac: 11
+level: 3
+awareness: 4
+personality: neutral
+respawn_duration: 0s
+quest_giver:
+  placeholder_dialog:
+    - "You want work? I got work. Come back when the heat dies down."
+    - "Word is there's a shipment coming in through the back docks. Could use eyes on it."
+    - "I don't ask where you've been, you don't ask where I send you. We clear?"
+    - "Every piece of scrap in this yard has a story. Most of 'em end badly."
+    - "The Grinder name wasn't earned by sitting still. Neither was mine."
+  quest_ids: []

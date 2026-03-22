@@ -1,0 +1,17 @@
+id: dex
+name: Dex
+npc_type: fixer
+max_hp: 22
+ac: 12
+level: 4
+awareness: 5
+personality: cowardly
+respawn_duration: 0s
+fixer:
+  npc_variance: 1.15
+  max_wanted_level: 4
+  base_costs:
+    1: 150
+    2: 350
+    3: 700
+    4: 1500
