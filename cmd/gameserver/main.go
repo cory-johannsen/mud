@@ -88,6 +88,7 @@ func main() {
 	regionsDir := flag.String("regions-dir", "content/regions", "path to region YAML definitions directory")
 	xpConfigFile := flag.String("xp-config", "content/xp_config.yaml", "path to XP configuration YAML file")
 	techContentDir := flag.String("tech-content-dir", "content/technologies", "path to technology YAML content directory")
+	contentDir := flag.String("content-dir", "content", "path to content directory for world editing")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -143,6 +144,14 @@ func main() {
 	app, err := Initialize(ctx, appCfg, gameClock, logger)
 	if err != nil {
 		logger.Fatal("initializing application", zap.Error(err))
+	}
+
+	// Attempt to initialize WorldEditor for in-game world-editing commands.
+	worldEditor, weErr := world.NewWorldEditor(*contentDir, app.GRPCService.World())
+	if weErr != nil {
+		logger.Warn("WARNING: content/ is not writable — world-editing commands disabled.", zap.Error(weErr))
+	} else {
+		app.GRPCService.SetWorldEditor(worldEditor)
 	}
 
 	// Start game clock.

@@ -243,6 +243,7 @@ type GameServiceServer struct {
 	// detainedUntilRepo persists detention expiry timestamps per character.
 	// May be nil (detention expiry is not persisted if not set).
 	detainedUntilRepo DetainedUntilUpdater
+	worldEditor       *world.WorldEditor
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -355,6 +356,17 @@ func NewGameServiceServer(
 // Postcondition: PendingBoosts are loaded from the DB on each player login.
 func (s *GameServiceServer) SetProgressRepo(repo ProgressRepository) {
 	s.progressRepo = repo
+}
+
+// World returns the world Manager. Used by startup initialization.
+func (s *GameServiceServer) World() *world.Manager {
+	return s.world
+}
+
+// SetWorldEditor sets the WorldEditor after startup writability check.
+// Passing nil disables world-editing commands.
+func (s *GameServiceServer) SetWorldEditor(we *world.WorldEditor) {
+	s.worldEditor = we
 }
 
 // SetXPService registers the XP service used to award experience.
