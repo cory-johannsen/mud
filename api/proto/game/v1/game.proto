@@ -347,6 +347,7 @@ message RoomView {
   int32  hour   = 9;
   string period = 10;
   repeated RoomEquipmentItem equipment = 11;
+  string zone_name = 12;
 }
 
 // ExitInfo describes a single exit from a room.

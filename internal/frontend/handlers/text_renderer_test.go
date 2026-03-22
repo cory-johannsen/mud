@@ -1322,3 +1322,29 @@ func TestProperty_RenderMap_NarrowUnchanged(t *testing.T) {
 		}
 	})
 }
+
+func TestRenderRoomView_ZoneName(t *testing.T) {
+	rv := &gamev1.RoomView{
+		RoomId:      "test_room",
+		Title:       "Cully Road",
+		Description: "A busy road.",
+		ZoneName:    "Northeast Portland",
+	}
+	rendered := RenderRoomView(rv, 80, 0, testDT)
+	stripped := telnet.StripANSI(rendered)
+	assert.Contains(t, stripped, "[Northeast Portland]", "zone name must appear in header")
+	assert.Contains(t, stripped, "Cully Road", "room title must appear in header")
+}
+
+func TestRenderRoomView_ZoneNameEmpty(t *testing.T) {
+	rv := &gamev1.RoomView{
+		RoomId:      "test_room",
+		Title:       "Cully Road",
+		Description: "A busy road.",
+		ZoneName:    "",
+	}
+	rendered := RenderRoomView(rv, 80, 0, testDT)
+	stripped := telnet.StripANSI(rendered)
+	assert.NotContains(t, stripped, "[", "no zone bracket when ZoneName is empty")
+	assert.Contains(t, stripped, "Cully Road", "room title must appear in header")
+}

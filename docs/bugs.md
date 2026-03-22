@@ -4,11 +4,11 @@
 
 ### BUG-4: Room section does not display zone name
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The room display section does not show the name of the current zone, leaving players without zone context when navigating.
 **Steps:** Enter any room and observe the room display; no zone name is shown.
-**Fix:**
+**Fix:** Added `zone_name` (field 12) to `RoomView` proto. In `buildRoomView()`, populated `ZoneName` by calling `h.world.GetZone(room.ZoneID)`. In `RenderRoomView()`, prepended `[ZoneName] ` before the room title when `rv.ZoneName` is non-empty, yielding a header of the form `[Northeast Portland] Cully Road — date period hour`.
 
 ### BUG-1: Technology selection list — poor text alignment at login
 **Severity:** medium

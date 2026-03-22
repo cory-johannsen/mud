@@ -4086,6 +4086,7 @@ type RoomView struct {
 	Hour             int32                  `protobuf:"varint,9,opt,name=hour,proto3" json:"hour,omitempty"`
 	Period           string                 `protobuf:"bytes,10,opt,name=period,proto3" json:"period,omitempty"`
 	Equipment        []*RoomEquipmentItem   `protobuf:"bytes,11,rep,name=equipment,proto3" json:"equipment,omitempty"`
+	ZoneName         string                 `protobuf:"bytes,12,opt,name=zone_name,json=zoneName,proto3" json:"zone_name,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -4195,6 +4196,13 @@ func (x *RoomView) GetEquipment() []*RoomEquipmentItem {
 		return x.Equipment
 	}
 	return nil
+}
+
+func (x *RoomView) GetZoneName() string {
+	if x != nil {
+		return x.ZoneName
+	}
+	return ""
 }
 
 // ExitInfo describes a single exit from a room.
@@ -10438,7 +10446,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"WhoRequest\"\x0e\n" +
 	"\fExitsRequest\"\r\n" +
 	"\vQuitRequest\"\x18\n" +
-	"\x16SwitchCharacterRequest\"\xa4\x03\n" +
+	"\x16SwitchCharacterRequest\"\xc1\x03\n" +
 	"\bRoomView\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -10452,7 +10460,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x04hour\x18\t \x01(\x05R\x04hour\x12\x16\n" +
 	"\x06period\x18\n" +
 	" \x01(\tR\x06period\x128\n" +
-	"\tequipment\x18\v \x03(\v2\x1a.game.v1.RoomEquipmentItemR\tequipment\"\xa1\x01\n" +
+	"\tequipment\x18\v \x03(\v2\x1a.game.v1.RoomEquipmentItemR\tequipment\x12\x1b\n" +
+	"\tzone_name\x18\f \x01(\tR\bzoneName\"\xa1\x01\n" +
 	"\bExitInfo\x12\x1c\n" +
 	"\tdirection\x18\x01 \x01(\tR\tdirection\x12$\n" +
 	"\x0etarget_room_id\x18\x02 \x01(\tR\ftargetRoomId\x12\x16\n" +

@@ -247,6 +247,11 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 		}
 	}
 
+	var zoneName string
+	if zone, ok := h.world.GetZone(room.ZoneID); ok {
+		zoneName = zone.Name
+	}
+
 	return &gamev1.RoomView{
 		RoomId:      room.ID,
 		Title:       room.Title,
@@ -257,5 +262,6 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 		Hour:        int32(hour),
 		Period:      string(period),
 		Equipment:   equipInfos,
+		ZoneName:    zoneName,
 	}
 }
