@@ -93,6 +93,71 @@ func (d *ItemDef) Validate() error {
 	return nil
 }
 
+// requiredConsumableIDs lists the six consumable item IDs that MUST be present
+// at startup (REQ-EM-40).
+var requiredConsumableIDs = []string{
+	"whores_pasta",
+	"poontangesca",
+	"four_loko",
+	"old_english",
+	"penjamin_franklin",
+	"repair_kit",
+}
+
+// ValidateRequiredConsumables checks that all six required consumable item IDs
+// are present in items (REQ-EM-40). Missing IDs produce a fatal error.
+//
+// Precondition: items may be nil (treated as empty).
+// Postcondition: returns nil iff all required IDs are present.
+func ValidateRequiredConsumables(items []*ItemDef) error {
+	present := make(map[string]bool, len(items))
+	for _, it := range items {
+		present[it.ID] = true
+	}
+	var missing []string
+	for _, id := range requiredConsumableIDs {
+		if !present[id] {
+			missing = append(missing, id)
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("LoadItems: required consumable item(s) missing: %v", missing)
+	}
+	return nil
+}
+
+// ValidateConsumableEffects checks that all disease_id and toxin_id values
+// referenced in consumable effects appear in knownConditions (REQ-EM-42).
+// An unresolvable ID is a fatal load error.
+//
+// Precondition: knownConditions may be nil (treated as empty — all IDs unknown).
+// Postcondition: returns nil iff all referenced IDs are present in knownConditions.
+func ValidateConsumableEffects(items []*ItemDef, knownConditions map[string]bool) error {
+	for _, it := range items {
+		if it.Effect == nil {
+			continue
+		}
+		cc := it.Effect.ConsumeCheck
+		if cc == nil || cc.OnCriticalFailure == nil {
+			continue
+		}
+		cf := cc.OnCriticalFailure
+		if cf.ApplyDisease != nil {
+			id := cf.ApplyDisease.DiseaseID
+			if !knownConditions[id] {
+				return fmt.Errorf("item %q: disease_id %q is not a known condition ID (REQ-EM-42)", it.ID, id)
+			}
+		}
+		if cf.ApplyToxin != nil {
+			id := cf.ApplyToxin.ToxinID
+			if !knownConditions[id] {
+				return fmt.Errorf("item %q: toxin_id %q is not a known condition ID (REQ-EM-42)", it.ID, id)
+			}
+		}
+	}
+	return nil
+}
+
 // LoadItems reads all *.yaml and *.yml files from dir, parses each as an
 // ItemDef, validates it, and returns the collected slice.
 //

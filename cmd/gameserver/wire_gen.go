@@ -73,11 +73,17 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	if err != nil {
 		return nil, err
 	}
+	conditionsDir := cfg.ConditionsDir
+	mentalConditionsDir := cfg.MentalCondDir
+	conditionRegistry, err := condition.NewRegistryFromDir(conditionsDir, mentalConditionsDir, logger)
+	if err != nil {
+		return nil, err
+	}
 	weaponsDir := cfg.WeaponsDir
 	itemsDir := cfg.ItemsDir
 	explosivesDir := cfg.ExplosivesDir
 	armorsDir := cfg.ArmorsDir
-	registry, err := inventory.NewRegistryFromDirs(weaponsDir, itemsDir, explosivesDir, armorsDir, logger)
+	registry, err := inventory.NewRegistryFromDirs(weaponsDir, itemsDir, explosivesDir, armorsDir, conditionRegistry, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -95,12 +101,6 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	roomEquipmentManager := inventory.NewSeededRoomEquipmentManager(manager, logger)
 	techContentDir := cfg.TechContentDir
 	technologyRegistry, err := technology.NewRegistryFromDir(techContentDir, logger)
-	if err != nil {
-		return nil, err
-	}
-	conditionsDir := cfg.ConditionsDir
-	mentalConditionsDir := cfg.MentalCondDir
-	conditionRegistry, err := condition.NewRegistryFromDir(conditionsDir, mentalConditionsDir, logger)
 	if err != nil {
 		return nil, err
 	}
