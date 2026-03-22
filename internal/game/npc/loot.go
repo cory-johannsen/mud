@@ -22,10 +22,27 @@ type ItemDrop struct {
 	MaxQty int     `yaml:"max_qty"`
 }
 
+// OrganicDrop defines a weighted organic item drop for animal NPCs.
+type OrganicDrop struct {
+	ItemID      string `yaml:"item_id"`
+	Weight      int    `yaml:"weight"`
+	QuantityMin int    `yaml:"quantity_min"`
+	QuantityMax int    `yaml:"quantity_max"`
+}
+
+// SalvageDrop defines a salvage item drop for robot/machine NPCs.
+type SalvageDrop struct {
+	ItemIDs     []string `yaml:"item_ids"`
+	QuantityMin int      `yaml:"quantity_min"`
+	QuantityMax int      `yaml:"quantity_max"`
+}
+
 // LootTable defines the possible loot drops for an NPC template.
 type LootTable struct {
-	Currency *CurrencyDrop `yaml:"currency"`
-	Items    []ItemDrop    `yaml:"items"`
+	Currency     *CurrencyDrop `yaml:"currency"`
+	Items        []ItemDrop    `yaml:"items"`
+	OrganicDrops []OrganicDrop `yaml:"organic_drops"`
+	SalvageDrop  *SalvageDrop  `yaml:"salvage_drop"`
 }
 
 // Validate checks that the loot table satisfies its invariants.
@@ -54,6 +71,29 @@ func (lt *LootTable) Validate() error {
 		}
 		if item.MinQty > item.MaxQty {
 			return fmt.Errorf("loot table: item[%d] min_qty (%d) must be <= max_qty (%d)", i, item.MinQty, item.MaxQty)
+		}
+	}
+	for i, od := range lt.OrganicDrops {
+		if od.Weight <= 0 {
+			return fmt.Errorf("loot table: organic_drop[%d] weight must be > 0, got %d", i, od.Weight)
+		}
+		if od.QuantityMin < 1 {
+			return fmt.Errorf("loot table: organic_drop[%d] quantity_min must be >= 1, got %d", i, od.QuantityMin)
+		}
+		if od.QuantityMin > od.QuantityMax {
+			return fmt.Errorf("loot table: organic_drop[%d] quantity_min (%d) must be <= quantity_max (%d)", i, od.QuantityMin, od.QuantityMax)
+		}
+	}
+	if lt.SalvageDrop != nil {
+		sd := lt.SalvageDrop
+		if len(sd.ItemIDs) == 0 {
+			return fmt.Errorf("loot table: salvage_drop item_ids must not be empty")
+		}
+		if sd.QuantityMin < 1 {
+			return fmt.Errorf("loot table: salvage_drop quantity_min must be >= 1, got %d", sd.QuantityMin)
+		}
+		if sd.QuantityMin > sd.QuantityMax {
+			return fmt.Errorf("loot table: salvage_drop quantity_min (%d) must be <= quantity_max (%d)", sd.QuantityMin, sd.QuantityMax)
 		}
 	}
 	return nil

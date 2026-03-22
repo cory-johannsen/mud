@@ -133,3 +133,96 @@ func TestProperty_GenerateLoot_ItemQuantityInRange(t *testing.T) {
 		assert.LessOrEqual(rt, result.Items[0].Quantity, maxQty)
 	})
 }
+
+// ---- OrganicDrop tests ----
+
+func TestOrganicDrop_Validate_AcceptsValid(t *testing.T) {
+	lt := npc.LootTable{
+		OrganicDrops: []npc.OrganicDrop{
+			{ItemID: "meat", Weight: 10, QuantityMin: 1, QuantityMax: 2},
+		},
+	}
+	assert.NoError(t, lt.Validate())
+}
+
+func TestOrganicDrop_Validate_RejectsZeroWeight(t *testing.T) {
+	lt := npc.LootTable{
+		OrganicDrops: []npc.OrganicDrop{
+			{ItemID: "meat", Weight: 0, QuantityMin: 1, QuantityMax: 2},
+		},
+	}
+	assert.Error(t, lt.Validate())
+}
+
+func TestOrganicDrop_Validate_RejectsNegativeWeight(t *testing.T) {
+	lt := npc.LootTable{
+		OrganicDrops: []npc.OrganicDrop{
+			{ItemID: "meat", Weight: -1, QuantityMin: 1, QuantityMax: 2},
+		},
+	}
+	assert.Error(t, lt.Validate())
+}
+
+func TestOrganicDrop_Validate_RejectsMinQtyZero(t *testing.T) {
+	lt := npc.LootTable{
+		OrganicDrops: []npc.OrganicDrop{
+			{ItemID: "meat", Weight: 5, QuantityMin: 0, QuantityMax: 2},
+		},
+	}
+	assert.Error(t, lt.Validate())
+}
+
+func TestOrganicDrop_Validate_RejectsMinGreaterThanMax(t *testing.T) {
+	lt := npc.LootTable{
+		OrganicDrops: []npc.OrganicDrop{
+			{ItemID: "meat", Weight: 5, QuantityMin: 3, QuantityMax: 2},
+		},
+	}
+	assert.Error(t, lt.Validate())
+}
+
+// ---- SalvageDrop tests ----
+
+func TestSalvageDrop_Validate_AcceptsValid(t *testing.T) {
+	lt := npc.LootTable{
+		SalvageDrop: &npc.SalvageDrop{
+			ItemIDs:     []string{"circuit_board", "scrap_metal"},
+			QuantityMin: 1,
+			QuantityMax: 2,
+		},
+	}
+	assert.NoError(t, lt.Validate())
+}
+
+func TestSalvageDrop_Validate_RejectsEmptyItemIDs(t *testing.T) {
+	lt := npc.LootTable{
+		SalvageDrop: &npc.SalvageDrop{
+			ItemIDs:     []string{},
+			QuantityMin: 1,
+			QuantityMax: 2,
+		},
+	}
+	assert.Error(t, lt.Validate())
+}
+
+func TestSalvageDrop_Validate_RejectsMinQtyZero(t *testing.T) {
+	lt := npc.LootTable{
+		SalvageDrop: &npc.SalvageDrop{
+			ItemIDs:     []string{"scrap"},
+			QuantityMin: 0,
+			QuantityMax: 2,
+		},
+	}
+	assert.Error(t, lt.Validate())
+}
+
+func TestSalvageDrop_Validate_RejectsMinGreaterThanMax(t *testing.T) {
+	lt := npc.LootTable{
+		SalvageDrop: &npc.SalvageDrop{
+			ItemIDs:     []string{"scrap"},
+			QuantityMin: 3,
+			QuantityMax: 2,
+		},
+	}
+	assert.Error(t, lt.Validate())
+}
