@@ -201,7 +201,7 @@ features:
 
   - slug: initiative-display
     name: Initiative Display on Character Sheet
-    status: backlog
+    status: spec
     priority: 205
     category: ui
     file: docs/features/initiative-display.md
