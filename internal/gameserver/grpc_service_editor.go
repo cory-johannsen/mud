@@ -31,7 +31,8 @@ func (s *GameServiceServer) handleSpawnNPC(uid string, req *gamev1.SpawnNPCReque
 	if roomID == "" {
 		roomID = sess.RoomID
 	}
-	if _, roomOk := s.world.GetRoom(roomID); !roomOk {
+	room, roomOk := s.world.GetRoom(roomID)
+	if !roomOk {
 		return errorEvent(fmt.Sprintf("Unknown room: %s.", roomID)), nil
 	}
 
@@ -39,7 +40,7 @@ func (s *GameServiceServer) handleSpawnNPC(uid string, req *gamev1.SpawnNPCReque
 		return errorEvent(fmt.Sprintf("Failed to spawn NPC: %v", err)), nil
 	}
 
-	return messageEvent(fmt.Sprintf("Spawned %s in %s.", tmpl.Name, roomID)), nil
+	return messageEvent(fmt.Sprintf("Spawned %s in %s.", tmpl.Name, room.Title)), nil
 }
 
 // handleAddRoom adds a new room to a zone. (REQ-EC-17,18)
@@ -83,7 +84,7 @@ func (s *GameServiceServer) handleAddLink(uid string, req *gamev1.AddLinkRequest
 	if err := s.worldEditor.AddLink(req.GetFromRoomId(), req.GetDirection(), req.GetToRoomId()); err != nil {
 		return errorEvent(err.Error()), nil
 	}
-	return messageEvent(fmt.Sprintf("Linked %s %s to %s.", req.GetFromRoomId(), req.GetDirection(), req.GetToRoomId())), nil
+	return messageEvent(fmt.Sprintf("Linked %s %s ↔ %s.", req.GetFromRoomId(), req.GetDirection(), req.GetToRoomId())), nil
 }
 
 // handleRemoveLink removes a directional exit from a room. (REQ-EC-22,23)
