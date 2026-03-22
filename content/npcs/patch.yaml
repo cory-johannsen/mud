@@ -1,0 +1,16 @@
+id: patch
+name: Patch
+npc_type: hireling
+description: >
+  A wiry scavenger with a battered shotgun slung over one shoulder and a duct-taped
+  med-pack on the other. Patch asks no questions and takes no prisoners — as long as
+  the credits keep coming.
+max_hp: 28
+ac: 13
+level: 4
+awareness: 4
+personality: opportunistic
+hireling:
+  daily_cost: 75
+  combat_role: melee
+  max_follow_zones: 3
