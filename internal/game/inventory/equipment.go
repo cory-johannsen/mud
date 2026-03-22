@@ -84,6 +84,14 @@ type SlottedItem struct {
 	ItemDefID string
 	// Name is the display name shown to the player.
 	Name string
+	// InstanceID links this slot to the corresponding ItemInstance (UUID).
+	InstanceID string
+	// Durability is a cached copy; the ItemInstance is the source of truth.
+	Durability int
+	// Modifier is the item modifier: "" | "tuned" | "defective" | "cursed".
+	Modifier string
+	// CurseRevealed is true once the cursed item has been equipped.
+	CurseRevealed bool
 }
 
 // Equipment holds all armor and accessory slots for a character.

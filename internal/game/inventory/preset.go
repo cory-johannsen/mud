@@ -9,6 +9,12 @@ type EquippedWeapon struct {
 	Def *WeaponDef
 	// Magazine holds the loaded round state; nil when the weapon is not a firearm.
 	Magazine *Magazine
+	// InstanceID links this weapon to the corresponding ItemInstance (UUID).
+	InstanceID string
+	// Durability is a cached copy; the ItemInstance is the source of truth.
+	Durability int
+	// Modifier is the item modifier: "" | "tuned" | "defective" | "cursed".
+	Modifier string
 }
 
 // WeaponPreset holds the main-hand and off-hand weapon slots for one loadout preset.

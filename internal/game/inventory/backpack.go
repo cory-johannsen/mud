@@ -8,9 +8,13 @@ import (
 
 // ItemInstance represents a concrete instance of an item in a backpack.
 type ItemInstance struct {
-	InstanceID string
-	ItemDefID  string
-	Quantity   int
+	InstanceID    string
+	ItemDefID     string
+	Quantity      int
+	Durability    int    // -1 = uninitialized sentinel; 0 = broken
+	MaxDurability int    // -1 = uninitialized sentinel
+	Modifier      string // "" | "tuned" | "defective" | "cursed"
+	CurseRevealed bool   // true once a cursed item has been equipped
 }
 
 // Backpack is a container with slot and weight limits.
