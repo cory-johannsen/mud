@@ -94,16 +94,16 @@
 
 ### BUG-10: rustbucket_ridge — blood_camp has an illegal placement; move east of blade_house
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** In the `rustbucket_ridge` zone, `blood_camp` has an illegal map placement. It should be moved to east of `blade_house`.
 **Steps:** View the rustbucket_ridge zone map; observe blood_camp placement is illegal.
-**Fix:**
+**Fix:** Moved blood_camp to (5,6), one step east of blade_house (4,6). Replaced the_cutthroat→blood_camp exit with blade_house↔blood_camp exits.
 
 ### BUG-9: rustbucket_ridge — scorchside_camp illegally overlaps the_embers_edge
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** In the `rustbucket_ridge` zone, `scorchside_camp` has an illegal map placement that overlaps with `the_embers_edge`. `scorchside_camp` should be moved south to connect to `smokers_den` instead.
 **Steps:** View the rustbucket_ridge zone map; observe scorchside_camp placement conflicts with the_embers_edge.
-**Fix:**
+**Fix:** Moved scorchside_camp to (4,12), south of smokers_den (4,10). Updated smokers_den to exit south→scorchside_camp and scorchside_camp to exit north→smokers_den.
