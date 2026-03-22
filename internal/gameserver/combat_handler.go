@@ -1218,6 +1218,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			Resistances: inst.Resistances,
 			Weaknesses:  inst.Weaknesses,
 			WeaponName:  npcWeaponName,
+			AttackVerb:  inst.AttackVerb,
 			Position:    25,
 		}
 		combatants = append(combatants, npcCbt)
@@ -1875,6 +1876,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		Resistances: inst.Resistances,
 		Weaknesses:  inst.Weaknesses,
 		WeaponName:  npcWeaponName,
+		AttackVerb:  inst.AttackVerb,
 	}
 
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
@@ -2074,6 +2076,11 @@ func (h *CombatHandler) applyCombatStartBehaviorsLocked(roomID string) {
 // Precondition: combatMu is held; inst and room are non-nil.
 // Postcondition: inst is moved to a valid adjacent room, or inst.Cowering is set to true.
 func (h *CombatHandler) fleeNPCLocked(inst *npc.Instance, room *world.Room) {
+	// REQ-NHN-22: Immobile NPCs must never be moved.
+	if inst.Immobile {
+		inst.Cowering = true
+		return
+	}
 	var validExits []world.Exit
 	for _, exit := range room.Exits {
 		if exit.Hidden || exit.Locked {
@@ -2266,6 +2273,25 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 	}
 }
 
+// FilterAnimalPlanActions removes "say" actions from the plan when isAnimal is true.
+// Animals cannot speak, so any HTN "say" action must be suppressed.
+//
+// Precondition: actions may be nil (treated as empty).
+// Postcondition: Returns the original slice unmodified when isAnimal is false;
+// returns a new slice with "say" actions removed when isAnimal is true.
+func FilterAnimalPlanActions(actions []ai.PlannedAction, isAnimal bool) []ai.PlannedAction {
+	if !isAnimal {
+		return actions
+	}
+	filtered := actions[:0:0]
+	for _, a := range actions {
+		if a.Action != "say" {
+			filtered = append(filtered, a)
+		}
+	}
+	return filtered
+}
+
 // autoQueueNPCsLocked queues actions for all living NPCs using the HTN planner
 // when available, falling back to a simple attack for NPCs without an AI domain.
 //
@@ -2390,8 +2416,13 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 					ws := ai.BuildCombatWorldState(cbt, inst, zoneID)
 					actions, err := planner.Plan(ws)
 					if err == nil {
-						h.applyPlanLocked(cbt, c, actions)
-						continue
+						actions = FilterAnimalPlanActions(actions, inst.IsAnimal())
+						if len(actions) > 0 {
+							h.applyPlanLocked(cbt, c, actions)
+							continue
+						}
+						// Empty plan after filtering (e.g. animal with only say tasks):
+						// fall through to legacyAutoQueueLocked below.
 					}
 				}
 			}
@@ -2795,7 +2826,18 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		// the instance data is still accessible and removal serves as
 		// a happens-before signal for tests polling npcMgr.Get.
 		if inst.Loot != nil {
-			result := npc.GenerateLoot(*inst.Loot)
+			var result npc.LootResult
+			switch {
+			case inst.IsAnimal():
+				result = npc.GenerateOrganicLoot(*inst.Loot)
+			case inst.IsRobot():
+				salvage := npc.GenerateSalvageLoot(*inst.Loot)
+				std := npc.GenerateLoot(*inst.Loot)
+				result.Currency = std.Currency
+				result.Items = append(salvage.Items, std.Items...)
+			default:
+				result = npc.GenerateLoot(*inst.Loot)
+			}
 			// Distribute currency equally among all living participants.
 			totalCurrency := result.Currency + inst.Currency
 			inst.Currency = 0
@@ -2819,10 +2861,14 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			h.distributeCurrencyLocked(context.Background(), livingParticipants, totalCurrency)
 		}
 		// Announce NPC death in the console.
+		deathNarrative := fmt.Sprintf("%s is dead!", c.Name)
+		if inst.IsMachine() {
+			deathNarrative = fmt.Sprintf("%s is destroyed.", c.Name)
+		}
 		h.broadcastFn(inst.RoomID, []*gamev1.CombatEvent{{
 			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_DEATH,
 			Attacker:  c.Name,
-			Narrative: fmt.Sprintf("%s is dead!", c.Name),
+			Narrative: deathNarrative,
 		}})
 
 		// Award kill XP split among all living participants.

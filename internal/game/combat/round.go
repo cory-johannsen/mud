@@ -639,7 +639,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				applyAttackConditions(cbt, actor, target, r)
-				narrative := attackNarrative(actor.Name, "attacks", target.Name, r.WeaponName, r.Outcome, r.AttackTotal, dmg)
+				attackVerb1 := actor.AttackVerb
+				if attackVerb1 == "" {
+					attackVerb1 = "attacks"
+				}
+				narrative := attackNarrative(actor.Name, attackVerb1, target.Name, r.WeaponName, r.Outcome, r.AttackTotal, dmg)
 				if len(rwAnnotations) > 0 {
 					narrative += " (" + strings.Join(rwAnnotations, "; ") + ")"
 				}
@@ -758,7 +762,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				applyAttackConditions(cbt, actor, target, r1)
-				narrative1 := attackNarrative(actor.Name, "strikes", target.Name, r1.WeaponName, r1.Outcome, r1.AttackTotal, dmg1)
+				strikeVerb1 := actor.AttackVerb
+				if strikeVerb1 == "" {
+					strikeVerb1 = "strikes"
+				}
+				narrative1 := attackNarrative(actor.Name, strikeVerb1, target.Name, r1.WeaponName, r1.Outcome, r1.AttackTotal, dmg1)
 				if len(rwAnnotations1) > 0 {
 					narrative1 += " (" + strings.Join(rwAnnotations1, "; ") + ")"
 				}
@@ -853,7 +861,11 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					}
 				}
 				applyAttackConditions(cbt, actor, target, r2)
-				narrative2 := attackNarrative(actor.Name, "strikes", target.Name, r2.WeaponName, r2.Outcome, r2.AttackTotal, dmg2)
+				strikeVerb2 := actor.AttackVerb
+				if strikeVerb2 == "" {
+					strikeVerb2 = "strikes"
+				}
+				narrative2 := attackNarrative(actor.Name, strikeVerb2, target.Name, r2.WeaponName, r2.Outcome, r2.AttackTotal, dmg2)
 				if len(rwAnnotations2) > 0 {
 					narrative2 += " (" + strings.Join(rwAnnotations2, "; ") + ")"
 				}

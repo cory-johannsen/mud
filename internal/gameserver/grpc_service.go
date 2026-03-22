@@ -3677,6 +3677,9 @@ func (s *GameServiceServer) tickZone(zoneID string, aiReg *ai.Registry) {
 
 // tickNPCIdle evaluates idle/patrol behavior for a non-combat NPC.
 func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg *ai.Registry) {
+	if inst.Immobile {
+		return
+	}
 	if inst.AIDomain == "" || aiReg == nil {
 		return
 	}
@@ -3702,6 +3705,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 	if err != nil || len(actions) == 0 {
 		return
 	}
+	actions = FilterAnimalPlanActions(actions, inst.IsAnimal())
 	for _, a := range actions {
 		switch a.Action {
 		case "move_random":
@@ -3719,6 +3723,9 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 
 // npcPatrolRandom moves the NPC to a random visible exit.
 func (s *GameServiceServer) npcPatrolRandom(inst *npc.Instance) {
+	if inst.Immobile {
+		return
+	}
 	room, ok := s.world.GetRoom(inst.RoomID)
 	if !ok || len(room.Exits) == 0 {
 		return

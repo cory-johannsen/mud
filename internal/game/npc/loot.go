@@ -22,10 +22,27 @@ type ItemDrop struct {
 	MaxQty int     `yaml:"max_qty"`
 }
 
+// OrganicDrop defines a weighted organic item drop for animal NPCs.
+type OrganicDrop struct {
+	ItemID      string `yaml:"item_id"`
+	Weight      int    `yaml:"weight"`
+	QuantityMin int    `yaml:"quantity_min"`
+	QuantityMax int    `yaml:"quantity_max"`
+}
+
+// SalvageDrop defines a salvage item drop for robot/machine NPCs.
+type SalvageDrop struct {
+	ItemIDs     []string `yaml:"item_ids"`
+	QuantityMin int      `yaml:"quantity_min"`
+	QuantityMax int      `yaml:"quantity_max"`
+}
+
 // LootTable defines the possible loot drops for an NPC template.
 type LootTable struct {
-	Currency *CurrencyDrop `yaml:"currency"`
-	Items    []ItemDrop    `yaml:"items"`
+	Currency     *CurrencyDrop `yaml:"currency"`
+	Items        []ItemDrop    `yaml:"items"`
+	OrganicDrops []OrganicDrop `yaml:"organic_drops"`
+	SalvageDrop  *SalvageDrop  `yaml:"salvage_drop"`
 }
 
 // Validate checks that the loot table satisfies its invariants.
@@ -56,6 +73,29 @@ func (lt *LootTable) Validate() error {
 			return fmt.Errorf("loot table: item[%d] min_qty (%d) must be <= max_qty (%d)", i, item.MinQty, item.MaxQty)
 		}
 	}
+	for i, od := range lt.OrganicDrops {
+		if od.Weight <= 0 {
+			return fmt.Errorf("loot table: organic_drop[%d] weight must be > 0, got %d", i, od.Weight)
+		}
+		if od.QuantityMin < 1 {
+			return fmt.Errorf("loot table: organic_drop[%d] quantity_min must be >= 1, got %d", i, od.QuantityMin)
+		}
+		if od.QuantityMin > od.QuantityMax {
+			return fmt.Errorf("loot table: organic_drop[%d] quantity_min (%d) must be <= quantity_max (%d)", i, od.QuantityMin, od.QuantityMax)
+		}
+	}
+	if lt.SalvageDrop != nil {
+		sd := lt.SalvageDrop
+		if len(sd.ItemIDs) == 0 {
+			return fmt.Errorf("loot table: salvage_drop item_ids must not be empty")
+		}
+		if sd.QuantityMin < 1 {
+			return fmt.Errorf("loot table: salvage_drop quantity_min must be >= 1, got %d", sd.QuantityMin)
+		}
+		if sd.QuantityMin > sd.QuantityMax {
+			return fmt.Errorf("loot table: salvage_drop quantity_min (%d) must be <= quantity_max (%d)", sd.QuantityMin, sd.QuantityMax)
+		}
+	}
 	return nil
 }
 
@@ -70,6 +110,61 @@ type LootItem struct {
 type LootResult struct {
 	Currency int
 	Items    []LootItem
+}
+
+// GenerateOrganicLoot selects one organic item using weighted random from the
+// OrganicDrops list and returns it with a quantity in [QuantityMin, QuantityMax].
+//
+// Precondition: lt must have passed Validate().
+// Postcondition: Returns empty LootResult if OrganicDrops is empty.
+func GenerateOrganicLoot(lt LootTable) LootResult {
+	if len(lt.OrganicDrops) == 0 {
+		return LootResult{}
+	}
+	total := 0
+	for _, od := range lt.OrganicDrops {
+		total += od.Weight
+	}
+	roll := rand.Intn(total)
+	var selected OrganicDrop
+	for _, od := range lt.OrganicDrops {
+		roll -= od.Weight
+		if roll < 0 {
+			selected = od
+			break
+		}
+	}
+	qty := selected.QuantityMin
+	if spread := selected.QuantityMax - selected.QuantityMin; spread > 0 {
+		qty += rand.Intn(spread + 1)
+	}
+	return LootResult{Items: []LootItem{{
+		ItemDefID:  selected.ItemID,
+		InstanceID: uuid.New().String(),
+		Quantity:   qty,
+	}}}
+}
+
+// GenerateSalvageLoot selects one salvage item at random from SalvageDrop.ItemIDs
+// and returns it with a quantity in [QuantityMin, QuantityMax].
+//
+// Precondition: lt must have passed Validate().
+// Postcondition: Returns empty LootResult if SalvageDrop is nil or has no item IDs.
+func GenerateSalvageLoot(lt LootTable) LootResult {
+	if lt.SalvageDrop == nil || len(lt.SalvageDrop.ItemIDs) == 0 {
+		return LootResult{}
+	}
+	sd := lt.SalvageDrop
+	itemID := sd.ItemIDs[rand.Intn(len(sd.ItemIDs))]
+	qty := sd.QuantityMin
+	if spread := sd.QuantityMax - sd.QuantityMin; spread > 0 {
+		qty += rand.Intn(spread + 1)
+	}
+	return LootResult{Items: []LootItem{{
+		ItemDefID:  itemID,
+		InstanceID: uuid.New().String(),
+		Quantity:   qty,
+	}}}
 }
 
 // GenerateLoot rolls loot from the given LootTable using math/rand.

@@ -1027,3 +1027,62 @@ func TestResolveRound_ActionAid_TargetDeadAtResolution(t *testing.T) {
 		}
 	}
 }
+
+// TestAttackNarrativeUsesCustomVerb: NPC with AttackVerb "bites" should produce
+// a narrative containing "bites" rather than "attacks".
+func TestAttackNarrativeUsesCustomVerb(t *testing.T) {
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{ID: "dying", Name: "Dying", DurationType: "until_save", MaxStacks: 4})
+	reg.Register(&condition.ConditionDef{ID: "wounded", Name: "Wounded", DurationType: "permanent", MaxStacks: 3})
+	eng := combat.NewEngine()
+	combatants := []*combat.Combatant{
+		{ID: "p1", Kind: combat.KindPlayer, Name: "Alice", MaxHP: 20, CurrentHP: 20, AC: 14, Level: 1, StrMod: 2, DexMod: 1},
+		{ID: "n1", Kind: combat.KindNPC, Name: "Dog", MaxHP: 18, CurrentHP: 18, AC: 12, Level: 1, StrMod: 1, DexMod: 0, AttackVerb: "bites"},
+	}
+	cbt, err := eng.StartCombat("room1", combatants, reg, nil, "")
+	if err != nil {
+		t.Fatalf("StartCombat: %v", err)
+	}
+	_ = cbt.StartRound(3)
+
+	// NPC attacks player
+	if err := cbt.QueueAction("p1", combat.QueuedAction{Type: combat.ActionPass}); err != nil {
+		t.Fatalf("QueueAction p1: %v", err)
+	}
+	if err := cbt.QueueAction("n1", combat.QueuedAction{Type: combat.ActionAttack, Target: "Alice"}); err != nil {
+		t.Fatalf("QueueAction n1: %v", err)
+	}
+
+	// Use a high fixed value to ensure a hit occurs so narrative is generated
+	src := fixedSrc{val: 18}
+	events := combat.ResolveRound(cbt, src, noopUpdater, nil)
+
+	found := false
+	for _, ev := range events {
+		if ev.ActionType == combat.ActionAttack && ev.ActorID == "n1" {
+			if len(ev.Narrative) > 0 {
+				import_strings := "bites"
+				_ = import_strings
+				if containsStr(ev.Narrative, "bites") {
+					found = true
+				}
+			}
+		}
+	}
+	if !found {
+		t.Errorf("expected 'bites' in NPC attack narrative; events: %+v", events)
+	}
+}
+
+func containsStr(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr || len(s) > 0 && stringContains(s, substr))
+}
+
+func stringContains(s, sub string) bool {
+	for i := 0; i <= len(s)-len(sub); i++ {
+		if s[i:i+len(sub)] == sub {
+			return true
+		}
+	}
+	return false
+}

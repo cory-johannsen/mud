@@ -334,3 +334,79 @@ func TestNewInstanceWithResolver_NpcRoleEmptyByDefault(t *testing.T) {
 		t.Errorf("NpcRole = %q, want empty string", inst.NpcRole)
 	}
 }
+
+// ---- NHN: spawn propagation and resistance defaults ----
+
+func baseNHNTemplate(id, name, typ string) *npc.Template {
+	return &npc.Template{
+		ID:    id,
+		Name:  name,
+		Type:  typ,
+		Level: 3,
+		MaxHP: 30,
+		AC:    12,
+	}
+}
+
+func TestSpawnPropagatesAttackVerb(t *testing.T) {
+	tmpl := baseNHNTemplate("dog", "Dog", "animal")
+	tmpl.AttackVerb = "bites"
+	inst := npc.NewInstanceWithResolver("inst1", tmpl, "room1", nil)
+	if inst.AttackVerb != "bites" {
+		t.Errorf("AttackVerb: got %q, want %q", inst.AttackVerb, "bites")
+	}
+}
+
+func TestSpawnPropagatesImmobile(t *testing.T) {
+	tmpl := baseNHNTemplate("turret", "Turret", "machine")
+	tmpl.Immobile = true
+	inst := npc.NewInstanceWithResolver("inst2", tmpl, "room1", nil)
+	if !inst.Immobile {
+		t.Error("expected Immobile == true")
+	}
+}
+
+func TestRobotSpawnResistanceDefaults(t *testing.T) {
+	tmpl := baseNHNTemplate("robot", "Robot", "robot")
+	inst := npc.NewInstanceWithResolver("inst3", tmpl, "room1", nil)
+	if inst.Resistances["bleed"] != 999 {
+		t.Errorf("robot bleed resistance: got %d, want 999", inst.Resistances["bleed"])
+	}
+	if inst.Resistances["poison"] != 999 {
+		t.Errorf("robot poison resistance: got %d, want 999", inst.Resistances["poison"])
+	}
+}
+
+func TestRobotSpawnResistanceTemplateOverrides(t *testing.T) {
+	tmpl := baseNHNTemplate("robot2", "Robot2", "robot")
+	tmpl.Resistances = map[string]int{"bleed": 5, "fire": 10}
+	inst := npc.NewInstanceWithResolver("inst4", tmpl, "room1", nil)
+	if inst.Resistances["bleed"] != 5 {
+		t.Errorf("robot bleed override: got %d, want 5", inst.Resistances["bleed"])
+	}
+	if inst.Resistances["poison"] != 999 {
+		t.Errorf("robot poison resistance: got %d, want 999", inst.Resistances["poison"])
+	}
+	if inst.Resistances["fire"] != 10 {
+		t.Errorf("robot fire resistance: got %d, want 10", inst.Resistances["fire"])
+	}
+}
+
+func TestMachineSpawnResistanceDefaults(t *testing.T) {
+	tmpl := baseNHNTemplate("machine", "Machine", "machine")
+	inst := npc.NewInstanceWithResolver("inst5", tmpl, "room1", nil)
+	if inst.Resistances["bleed"] != 999 {
+		t.Errorf("machine bleed resistance: got %d, want 999", inst.Resistances["bleed"])
+	}
+	if inst.Resistances["poison"] != 999 {
+		t.Errorf("machine poison resistance: got %d, want 999", inst.Resistances["poison"])
+	}
+}
+
+func TestHumanSpawnNoResistanceDefaults(t *testing.T) {
+	tmpl := baseNHNTemplate("human", "Human", "human")
+	inst := npc.NewInstanceWithResolver("inst6", tmpl, "room1", nil)
+	if inst.Resistances != nil && inst.Resistances["bleed"] > 0 {
+		t.Errorf("human should not have bleed resistance, got %d", inst.Resistances["bleed"])
+	}
+}

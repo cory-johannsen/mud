@@ -1,0 +1,27 @@
+id: security_drone
+name: Security Drone
+type: robot
+level: 4
+max_hp: 35
+ac: 15
+awareness: 5
+attack_verb: shoots
+abilities:
+  brutality: 4
+  grit: 3
+  quickness: 3
+  reasoning: 2
+  savvy: 1
+  flair: 1
+weaknesses:
+  electric: 5
+loot:
+  salvage_drop:
+    item_ids:
+      - circuit_board
+      - power_cell
+      - scrap_metal
+    quantity_min: 1
+    quantity_max: 2
+respawn_delay: 30m
+disposition: hostile
