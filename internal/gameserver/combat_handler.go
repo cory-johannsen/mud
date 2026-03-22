@@ -1218,6 +1218,7 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 			Resistances: inst.Resistances,
 			Weaknesses:  inst.Weaknesses,
 			WeaponName:  npcWeaponName,
+			AttackVerb:  inst.AttackVerb,
 			Position:    25,
 		}
 		combatants = append(combatants, npcCbt)
@@ -1875,6 +1876,7 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		Resistances: inst.Resistances,
 		Weaknesses:  inst.Weaknesses,
 		WeaponName:  npcWeaponName,
+		AttackVerb:  inst.AttackVerb,
 	}
 
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
