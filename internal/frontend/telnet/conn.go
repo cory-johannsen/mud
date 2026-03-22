@@ -145,6 +145,20 @@ func (c *Conn) appendConsoleLine(line string) {
 	}
 }
 
+// ClearConsoleBuf resets the console scroll buffer to empty and returns
+// scrollOffset and pendingNew to zero. Call this when starting a new game
+// session (e.g. after a character switch) so prior session output does not
+// leak into the new session's scrollback.
+//
+// Postcondition: consoleBuf == nil, scrollOffset == 0, pendingNew == 0.
+func (c *Conn) ClearConsoleBuf() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.consoleBuf = nil
+	c.scrollOffset = 0
+	c.pendingNew = 0
+}
+
 // Negotiate sends initial Telnet option negotiations.
 // We request the client to suppress go-ahead and let us handle echo.
 //
@@ -472,6 +486,15 @@ func (c *Conn) ReadLineSplit() (string, error) {
 	}
 
 	var line bytes.Buffer
+	// Seed line from inputBuf set by history navigation (UP/DOWN arrow).
+	// This allows pressing Enter immediately after an UP/DOWN arrow to submit
+	// the recalled command without retyping it.
+	c.mu.Lock()
+	if c.inputBuf != "" {
+		line.WriteString(c.inputBuf)
+	}
+	c.mu.Unlock()
+
 	for {
 		b, err := c.reader.ReadByte()
 		if err != nil {

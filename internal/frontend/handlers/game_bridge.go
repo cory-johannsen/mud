@@ -212,6 +212,9 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 				zap.Error(err))
 		} else {
 			conn.EnableSplitScreen()
+			// Clear any prior session scrollback so the new character session
+			// starts with a fresh console buffer (BUG-7).
+			conn.ClearConsoleBuf()
 			// Suppress client-side echo so \r\n at row H never triggers a
 			// full-screen scroll.  The server echoes all characters via ReadLineSplit.
 			_ = conn.SuppressEcho()

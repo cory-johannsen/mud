@@ -44,19 +44,19 @@
 
 ### BUG-7: `switch` command does not clear console scrollback buffer
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The `switch` command does not clear the console scrollback buffer when switching characters, leaving previous session output visible.
 **Steps:** Play as one character, run `switch`, observe that prior console output remains in the scrollback buffer.
-**Fix:**
+**Fix:** Added `ClearConsoleBuf()` to `Conn` in `internal/frontend/telnet/conn.go`. The method acquires the mutex and sets `consoleBuf = nil`, `scrollOffset = 0`, and `pendingNew = 0`. Called it in `internal/frontend/handlers/game_bridge.go` after `conn.EnableSplitScreen()` so the in-memory scrollback is wiped each time a new game session is initialized (including after `switch`).
 
 ### BUG-13: Up arrow history + Enter does not resubmit command
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Scrolling through command history with the up arrow key and pressing Enter does not resubmit the selected command.
 **Steps:** Enter any command, press up arrow to recall it, press Enter; observe the command is not executed.
-**Fix:**
+**Fix:** In `ReadLineSplit` (`internal/frontend/telnet/conn.go`), seed the `line` buffer from `c.inputBuf` at the start of each call (under the mutex). When history navigation sets `inputBuf` via `SetInputLine`, the next `ReadLineSplit` call (triggered by Enter) picks up the recalled command and returns it, resubmitting it as the player intended.
 
 ### BUG-8: `smooth_talk` XP reward message displays skill ID instead of display name
 **Severity:** low

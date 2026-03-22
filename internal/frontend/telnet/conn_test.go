@@ -889,3 +889,107 @@ func TestIntegration_ConsoleScroll(t *testing.T) {
 	assert.Equal(t, 12, len(slice))
 	assert.Equal(t, "new-1", slice[len(slice)-1])
 }
+
+// --- BUG-7: ClearConsoleBuf ---
+
+// TestClearConsoleBuf_ResetsBufferAndOffset verifies that ClearConsoleBuf
+// sets consoleBuf to nil, scrollOffset to 0, and pendingNew to 0.
+func TestClearConsoleBuf_ResetsBufferAndOffset(t *testing.T) {
+	c := &Conn{}
+	for i := 0; i < 50; i++ {
+		c.appendConsoleLine(fmt.Sprintf("line-%d", i))
+	}
+	c.mu.Lock()
+	c.scrollOffset = 10
+	c.pendingNew = 3
+	c.mu.Unlock()
+
+	c.ClearConsoleBuf()
+
+	c.mu.Lock()
+	buf := c.consoleBuf
+	off := c.scrollOffset
+	pn := c.pendingNew
+	c.mu.Unlock()
+
+	assert.Nil(t, buf, "consoleBuf should be nil after ClearConsoleBuf")
+	assert.Equal(t, 0, off, "scrollOffset should be 0 after ClearConsoleBuf")
+	assert.Equal(t, 0, pn, "pendingNew should be 0 after ClearConsoleBuf")
+}
+
+// TestClearConsoleBuf_IdempotentOnEmpty verifies that calling ClearConsoleBuf
+// on an already-empty Conn is safe and leaves state zeroed.
+func TestClearConsoleBuf_IdempotentOnEmpty(t *testing.T) {
+	c := &Conn{}
+	c.ClearConsoleBuf()
+
+	c.mu.Lock()
+	buf := c.consoleBuf
+	off := c.scrollOffset
+	pn := c.pendingNew
+	c.mu.Unlock()
+
+	assert.Nil(t, buf)
+	assert.Equal(t, 0, off)
+	assert.Equal(t, 0, pn)
+}
+
+// --- BUG-13: ReadLineSplit seeds from inputBuf ---
+
+// TestReadLineSplit_SeedsFromInputBuf verifies that when inputBuf is set before
+// ReadLineSplit is called, pressing Enter submits the seeded content.
+func TestReadLineSplit_SeedsFromInputBuf(t *testing.T) {
+	conn, client := newTestConn(t)
+	conn.EnableSplitScreen()
+	conn.SetInputBuf("recall")
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		// Client presses Enter immediately — should submit the seeded "recall"
+		_, _ = client.Write([]byte("\r\n"))
+	}()
+
+	line, err := conn.ReadLineSplit()
+	require.NoError(t, err)
+	assert.Equal(t, "recall", line)
+}
+
+// TestReadLineSplit_SeedsFromInputBufThenClearsOnSubmit verifies that after
+// submitting the seeded value, inputBuf is cleared.
+func TestReadLineSplit_SeedsFromInputBufThenClearsOnSubmit(t *testing.T) {
+	conn, client := newTestConn(t)
+	conn.EnableSplitScreen()
+	conn.SetInputBuf("north")
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		_, _ = client.Write([]byte("\r\n"))
+	}()
+
+	line, err := conn.ReadLineSplit()
+	require.NoError(t, err)
+	assert.Equal(t, "north", line)
+
+	conn.mu.Lock()
+	remaining := conn.inputBuf
+	conn.mu.Unlock()
+	assert.Equal(t, "", remaining, "inputBuf should be cleared after ReadLineSplit returns")
+}
+
+// TestReadLineSplit_SeedPlusTypedChars verifies that typed characters are appended
+// after the seeded inputBuf content.
+func TestReadLineSplit_SeedPlusTypedChars(t *testing.T) {
+	conn, client := newTestConn(t)
+	conn.EnableSplitScreen()
+	conn.SetInputBuf("go ")
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		// Type "north" then Enter
+		_, _ = client.Write([]byte("north\r\n"))
+	}()
+
+	line, err := conn.ReadLineSplit()
+	require.NoError(t, err)
+	assert.Equal(t, "go north", line)
+}
