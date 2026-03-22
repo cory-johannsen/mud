@@ -296,3 +296,41 @@ func TestManager_Spawn_AppliesArmorACBonus(t *testing.T) {
 	assert.Equal(t, 14, inst.AC) // 12 + 2
 	assert.Equal(t, "leather_jacket", inst.ArmorID)
 }
+
+func TestNewInstanceWithResolver_NpcRolePropagated(t *testing.T) {
+	tmpl := &npc.Template{
+		ID:      "test-merchant",
+		Name:    "Merchant Bob",
+		Level:   1,
+		MaxHP:   10,
+		AC:      10,
+		NpcRole: "merchant",
+		NPCType: "merchant",
+		Merchant: &npc.MerchantConfig{
+			Budget: 50,
+			ReplenishRate: npc.ReplenishConfig{
+				MinHours: 1,
+				MaxHours: 2,
+			},
+		},
+	}
+	inst := npc.NewInstanceWithResolver("inst-1", tmpl, "room-1", nil)
+	if inst.NpcRole != "merchant" {
+		t.Errorf("NpcRole = %q, want %q", inst.NpcRole, "merchant")
+	}
+}
+
+func TestNewInstanceWithResolver_NpcRoleEmptyByDefault(t *testing.T) {
+	tmpl := &npc.Template{
+		ID:      "test-combat",
+		Name:    "Bandit",
+		Level:   1,
+		MaxHP:   10,
+		AC:      10,
+		NPCType: "combat",
+	}
+	inst := npc.NewInstanceWithResolver("inst-2", tmpl, "room-1", nil)
+	if inst.NpcRole != "" {
+		t.Errorf("NpcRole = %q, want empty string", inst.NpcRole)
+	}
+}

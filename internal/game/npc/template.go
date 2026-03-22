@@ -93,6 +93,12 @@ type Template struct {
 	// Empty string defaults to "hostile" at spawn.
 	Disposition string `yaml:"disposition"`
 
+	// NpcRole classifies the NPC for map POI display.
+	// Valid non-empty values: "merchant", "healer", "job_trainer", "guard",
+	// or any other non-empty string (maps to generic "npc" POI).
+	// Empty (default) means this is a combat NPC and contributes no POI.
+	NpcRole string `yaml:"npc_role,omitempty"`
+
 	// NPCType classifies the NPC's role.
 	// Valid values: "combat", "merchant", "guard", "healer", "quest_giver",
 	// "hireling", "banker", "job_trainer", "crafter".

@@ -101,6 +101,9 @@ type Instance struct {
 	// NPCType is copied from the template at spawn.
 	// "combat" = participates in normal combat; other values = non-combat NPC.
 	NPCType string
+	// NpcRole is copied from Template.NpcRole at spawn time.
+	// Empty means combat NPC (no POI contribution).
+	NpcRole string
 	// Personality is copied from the template at spawn; drives flee/cower behavior.
 	Personality string
 	// Cowering is true when this NPC is in a cower state because combat started
@@ -199,6 +202,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		Currency:         0,
 		SpecialAbilities: append([]string(nil), tmpl.SpecialAbilities...),
 		NPCType:          tmpl.NPCType,
+		NpcRole:          tmpl.NpcRole,
 		Personality:      tmpl.Personality,
 		// Cowering defaults to false (zero value).
 		Disposition: func() string {
