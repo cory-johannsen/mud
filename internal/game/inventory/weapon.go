@@ -51,6 +51,11 @@ type WeaponDef struct {
 	ProficiencyCategory  string           `yaml:"proficiency_category"` // e.g. "simple_weapons", "martial_ranged", "specialized"
 	TeamAffinity     string           `yaml:"team_affinity"`     // "gun", "machete", or ""
 	CrossTeamEffect  *CrossTeamEffect `yaml:"cross_team_effect"` // nil = no side effect
+	// Rarity is required (REQ-EM-1). One of: salvage, street, mil_spec, black_market, ghost.
+	Rarity string `yaml:"rarity"`
+	// RarityStatMultiplier is set at load time from the rarity tier constants (REQ-EM-2).
+	// It is NOT loaded from YAML — it is derived from Rarity after parsing.
+	RarityStatMultiplier float64 `yaml:"-"`
 }
 
 // IsMelee reports whether the weapon is a melee weapon (RangeIncrement == 0).
@@ -119,6 +124,10 @@ func (w *WeaponDef) Validate() error {
 	if !validWeaponProfCategories[w.ProficiencyCategory] {
 		errs = append(errs, fmt.Errorf("proficiency_category %q is not valid", w.ProficiencyCategory))
 	}
+	// REQ-EM-1: rarity is required.
+	if _, ok := LookupRarity(w.Rarity); !ok {
+		errs = append(errs, fmt.Errorf("rarity %q is not valid; must be one of salvage, street, mil_spec, black_market, ghost", w.Rarity))
+	}
 	if len(errs) > 0 {
 		return fmt.Errorf("weapon validation failed: %v", errs)
 	}
@@ -151,6 +160,10 @@ func LoadWeapons(dir string) ([]*WeaponDef, error) {
 		}
 		if err := w.Validate(); err != nil {
 			return nil, fmt.Errorf("LoadWeapons: invalid weapon in %q: %w", path, err)
+		}
+		// REQ-EM-2: set RarityStatMultiplier from the rarity constants at load time.
+		if def, ok := LookupRarity(w.Rarity); ok {
+			w.RarityStatMultiplier = def.StatMultiplier
 		}
 		weapons = append(weapons, &w)
 	}

@@ -208,12 +208,52 @@ type PlayerSession struct {
 	// ActiveJobID is the currently active job that earns XP (REQ-NPC-10).
 	// Empty string means no active job. Set to the first trained job automatically (REQ-NPC-9).
 	ActiveJobID string
+	// Team is the player's faction or team affiliation, loaded from characters.team DB column.
+	// Empty string means no team affiliation (REQ-EM-39).
+	Team string
+	// SetBonusSummary is the aggregated active equipment set bonuses (REQ-EM-29).
+	// Recomputed at login and whenever equipped armor changes.
+	// Zero value (empty summary) is valid and means no active set bonuses.
+	SetBonusSummary inventory.SetBonusSummary
 	// InitDone is closed by Session() immediately before entering commandLoop,
 	// signalling that all session-initialization writes to PlayerSession fields
 	// are complete. Consumers (e.g. tests) that need a race-free snapshot of
 	// any session field MUST receive from this channel before reading.
 	// The channel is created by NewPlayerSession; it must never be written after close.
 	InitDone chan struct{}
+}
+
+// RecomputeSetBonuses recomputes and stores the active set bonuses for sess
+// using equippedItemDefIDs gathered from the session's current equipment (REQ-EM-29).
+// Must be called at login and whenever equipped armor changes.
+//
+// Precondition: sess must not be nil; setReg may be nil (treated as no set bonuses).
+// Postcondition: sess.SetBonusSummary is updated.
+func RecomputeSetBonuses(sess *PlayerSession, setReg *inventory.SetRegistry) {
+	if setReg == nil || sess == nil {
+		return
+	}
+	ids := make([]string, 0, 8)
+	// Collect armor slot item def IDs.
+	for _, slotted := range sess.Equipment.Armor {
+		if slotted != nil && slotted.ItemDefID != "" {
+			ids = append(ids, slotted.ItemDefID)
+		}
+	}
+	// Collect weapon item def IDs from active loadout preset.
+	if sess.LoadoutSet != nil && int(sess.LoadoutSet.Active) < len(sess.LoadoutSet.Presets) {
+		active := sess.LoadoutSet.Presets[sess.LoadoutSet.Active]
+		if active != nil {
+			if active.MainHand != nil && active.MainHand.Def != nil {
+				ids = append(ids, active.MainHand.Def.ID)
+			}
+			if active.OffHand != nil && active.OffHand.Def != nil {
+				ids = append(ids, active.OffHand.Def.ID)
+			}
+		}
+	}
+	bonuses := setReg.ActiveBonuses(ids)
+	sess.SetBonusSummary = inventory.ComputeSetBonusSummary(bonuses)
 }
 
 // Manager tracks all active player sessions and room occupancy.

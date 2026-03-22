@@ -9,6 +9,15 @@ type EquippedWeapon struct {
 	Def *WeaponDef
 	// Magazine holds the loaded round state; nil when the weapon is not a firearm.
 	Magazine *Magazine
+	// InstanceID links this weapon to the corresponding ItemInstance (UUID).
+	InstanceID string
+	// Durability is a cached copy; the ItemInstance is the source of truth.
+	Durability int
+	// Modifier is the item modifier: "" | "tuned" | "defective" | "cursed".
+	Modifier string
+	// CurseRevealed is true once the cursed weapon has been equipped and its curse disclosed.
+	// When true, the weapon cannot be unequipped (REQ-EM-24).
+	CurseRevealed bool
 }
 
 // WeaponPreset holds the main-hand and off-hand weapon slots for one loadout preset.
@@ -152,3 +161,29 @@ func (ls *LoadoutSet) Swap(idx int) error {
 //
 // Postcondition: SwappedThisRound==false.
 func (ls *LoadoutSet) ResetRound() { ls.SwappedThisRound = false }
+
+// RemoveCurseFromWeapon transitions a cursed EquippedWeapon to defective (REQ-EM-25).
+// If w is nil or not cursed, this is a no-op.
+//
+// Precondition: w may be nil.
+// Postcondition: if w.Modifier was "cursed", it is now "defective" and CurseRevealed is false.
+func RemoveCurseFromWeapon(w *EquippedWeapon) {
+	if w == nil || w.Modifier != "cursed" {
+		return
+	}
+	w.Modifier = "defective"
+	w.CurseRevealed = false
+}
+
+// RemoveCurseFromArmorSlot transitions a cursed SlottedItem to defective (REQ-EM-25).
+// If s is nil or not cursed, this is a no-op.
+//
+// Precondition: s may be nil.
+// Postcondition: if s.Modifier was "cursed", it is now "defective" and CurseRevealed is false.
+func RemoveCurseFromArmorSlot(s *SlottedItem) {
+	if s == nil || s.Modifier != "cursed" {
+		return
+	}
+	s.Modifier = "defective"
+	s.CurseRevealed = false
+}

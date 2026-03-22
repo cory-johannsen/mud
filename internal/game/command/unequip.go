@@ -49,6 +49,10 @@ func HandleUnequip(sess *session.PlayerSession, arg string) string {
 		if preset.MainHand == nil {
 			return "Nothing equipped in main hand."
 		}
+		// REQ-EM-24: block unequip of cursed items when curse is revealed.
+		if preset.MainHand.Modifier == "cursed" && preset.MainHand.CurseRevealed {
+			return fmt.Sprintf("You cannot remove %s — it is cursed!", preset.MainHand.Def.Name)
+		}
 		name := preset.MainHand.Def.Name
 		preset.UnequipMainHand()
 		return fmt.Sprintf("Unequipped %s from main hand.", name)
@@ -56,6 +60,10 @@ func HandleUnequip(sess *session.PlayerSession, arg string) string {
 	case "off":
 		if preset.OffHand == nil {
 			return "Nothing equipped in off hand."
+		}
+		// REQ-EM-24: block unequip of cursed items when curse is revealed.
+		if preset.OffHand.Modifier == "cursed" && preset.OffHand.CurseRevealed {
+			return fmt.Sprintf("You cannot remove %s — it is cursed!", preset.OffHand.Def.Name)
 		}
 		name := preset.OffHand.Def.Name
 		preset.UnequipOffHand()

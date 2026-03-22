@@ -390,3 +390,37 @@ func TestFixerConfig_NilBaseCosts(t *testing.T) {
 	}
 	assert.Error(t, c.Validate())
 }
+
+// TestMerchantConfig_Validate_RejectsCursedItems verifies REQ-EM-27:
+// a MerchantConfig with a cursed-modifier item fails validation.
+func TestMerchantConfig_Validate_RejectsCursedItems(t *testing.T) {
+	cfg := MerchantConfig{
+		MerchantType: "weapons",
+		Inventory: []MerchantItem{
+			{ItemID: "pistol", BasePrice: 100, InitStock: 5, MaxStock: 10, Modifier: "cursed"},
+		},
+		SellMargin:    1.2,
+		BuyMargin:     0.5,
+		Budget:        1000,
+		ReplenishRate: ReplenishConfig{MinHours: 1, MaxHours: 4},
+	}
+	assert.Error(t, cfg.Validate(), "merchant config with cursed item must fail validation")
+}
+
+// TestMerchantConfig_Validate_AllowsNonCursedItems verifies that tuned and defective items
+// are allowed in merchant stock (only cursed is blocked by REQ-EM-27).
+func TestMerchantConfig_Validate_AllowsNonCursedItems(t *testing.T) {
+	cfg := MerchantConfig{
+		MerchantType: "weapons",
+		Inventory: []MerchantItem{
+			{ItemID: "pistol", BasePrice: 100, InitStock: 5, MaxStock: 10, Modifier: "tuned"},
+			{ItemID: "rifle", BasePrice: 200, InitStock: 2, MaxStock: 5, Modifier: "defective"},
+			{ItemID: "knife", BasePrice: 50, InitStock: 10, MaxStock: 20, Modifier: ""},
+		},
+		SellMargin:    1.2,
+		BuyMargin:     0.5,
+		Budget:        1000,
+		ReplenishRate: ReplenishConfig{MinHours: 1, MaxHours: 4},
+	}
+	assert.NoError(t, cfg.Validate(), "merchant config with non-cursed items must pass validation")
+}

@@ -2067,6 +2067,7 @@ func TestHandleRaiseShield_OutOfCombat_ShieldEquipped(t *testing.T) {
 		DamageDice:          "1d4",
 		DamageType:          "bludgeoning",
 		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
 	}
 	preset := sess.LoadoutSet.ActivePreset()
 	require.NoError(t, preset.EquipOffHand(shieldDef))
@@ -2138,6 +2139,7 @@ func TestHandleRaiseShield_InCombat_InsufficientAP(t *testing.T) {
 		DamageDice:          "1d4",
 		DamageType:          "bludgeoning",
 		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
 	}
 	preset := sess.LoadoutSet.ActivePreset()
 	require.NoError(t, preset.EquipOffHand(shieldDef))

@@ -38,6 +38,11 @@ type ArmorDef struct {
 	Resistances map[string]int `yaml:"resistances"`
 	// Weaknesses maps damage type → flat addition applied to wearer. Additive across equipped slots.
 	Weaknesses  map[string]int `yaml:"weaknesses"`
+	// Rarity is required (REQ-EM-1). One of: salvage, street, mil_spec, black_market, ghost.
+	Rarity string `yaml:"rarity"`
+	// RarityStatMultiplier is set at load time from the rarity tier constants (REQ-EM-2).
+	// ACBonus is multiplied by this value at load time. NOT loaded from YAML.
+	RarityStatMultiplier float64 `yaml:"-"`
 }
 
 // validArmorSlots is the set of all legal ArmorSlot values.
@@ -102,6 +107,10 @@ func (a *ArmorDef) Validate() error {
 			errs = append(errs, errors.New("cross_team_effect.value must not be empty"))
 		}
 	}
+	// REQ-EM-1: rarity is required.
+	if _, ok := LookupRarity(a.Rarity); !ok {
+		errs = append(errs, fmt.Errorf("rarity %q is not valid; must be one of salvage, street, mil_spec, black_market, ghost", a.Rarity))
+	}
 	if len(errs) > 0 {
 		return fmt.Errorf("armor validation failed: %w", errors.Join(errs...))
 	}
@@ -136,6 +145,11 @@ func LoadArmors(dir string) ([]*ArmorDef, error) {
 		}
 		if err := a.Validate(); err != nil {
 			return nil, fmt.Errorf("LoadArmors: invalid armor in %q: %w", path, err)
+		}
+		// REQ-EM-2: multiply ACBonus by rarity stat multiplier at load time.
+		if def, ok := LookupRarity(a.Rarity); ok {
+			a.RarityStatMultiplier = def.StatMultiplier
+			a.ACBonus = int(float64(a.ACBonus) * def.StatMultiplier)
 		}
 		armors = append(armors, &a)
 	}

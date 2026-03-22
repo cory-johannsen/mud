@@ -161,12 +161,27 @@ func HandleEquipment(sess *session.PlayerSession, width int) string {
 }
 
 // formatSlottedItem returns a human-readable description of a slotted armor or accessory item.
+// Applies modifier prefix (REQ-EM-18/19/20) and rarity color (REQ-EM-4).
 //
 // Precondition: item may be nil (represents an empty slot).
-// Postcondition: Returns "empty" when item is nil, otherwise the item's display name.
+// Postcondition: Returns "empty" when item is nil, otherwise the (prefixed, colored) item display name.
 func formatSlottedItem(item *inventory.SlottedItem) string {
 	if item == nil {
 		return "empty"
 	}
-	return item.Name
+	displayName := item.Name
+	// REQ-EM-18/19/20: prefix modifier.
+	switch item.Modifier {
+	case "tuned":
+		displayName = "Tuned " + displayName
+	case "defective":
+		displayName = "Defective " + displayName
+	case "cursed":
+		displayName = "Cursed " + displayName
+	}
+	// REQ-EM-4: apply rarity color (no-op when Rarity is empty).
+	if item.Rarity != "" {
+		displayName = inventory.RarityColoredName(item.Rarity, displayName)
+	}
+	return displayName
 }

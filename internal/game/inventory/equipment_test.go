@@ -298,3 +298,144 @@ func TestProperty_ComputedDefenses_ACBonusEqualsSum(t *testing.T) {
 		assert.Equal(rt, totalAC, stats.ACBonus)
 	})
 }
+
+// TestComputedDefenses_BrokenSlot_Skipped verifies that armor with Durability==0
+// and a tracked InstanceID contributes no AC bonus (REQ-EM-7/8).
+func TestComputedDefenses_BrokenSlot_Skipped(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{
+		ID: "broken_vest", Name: "Vest", Slot: inventory.SlotTorso, Group: "composite",
+		ACBonus: 3, DexCap: 10,
+	}
+	require.NoError(t, reg.RegisterArmor(def))
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:  "broken_vest",
+		Name:       "Vest",
+		InstanceID: "some-uuid", // durability is tracked
+		Durability: 0,           // broken
+	}
+
+	stats := eq.ComputedDefenses(reg, 3)
+	assert.Equal(t, 0, stats.ACBonus, "broken armor must not contribute AC")
+}
+
+// TestComputedDefenses_NonBrokenSlot_Included verifies that armor with positive
+// Durability does contribute AC.
+func TestComputedDefenses_NonBrokenSlot_Included(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{
+		ID: "vest2", Name: "Vest2", Slot: inventory.SlotTorso, Group: "composite",
+		ACBonus: 3, DexCap: 10,
+	}
+	require.NoError(t, reg.RegisterArmor(def))
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:  "vest2",
+		Name:       "Vest2",
+		Durability: 15, // not broken
+	}
+
+	stats := eq.ComputedDefenses(reg, 3)
+	assert.Equal(t, 3, stats.ACBonus, "armor with durability > 0 must contribute AC")
+}
+
+// TestComputedDefenses_ModifierTuned_ACPlus1 verifies that a "tuned" armor slot
+// contributes +1 AC modifier (REQ-EM-22).
+func TestComputedDefenses_ModifierTuned_ACPlus1(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{
+		ID: "tuned_vest", Name: "Tuned Vest", Slot: inventory.SlotTorso, Group: "composite",
+		ACBonus: 3, DexCap: 10,
+	}
+	require.NoError(t, reg.RegisterArmor(def))
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:  "tuned_vest",
+		Name:       "Tuned Vest",
+		Durability: 10,
+		Modifier:   "tuned",
+	}
+
+	stats := eq.ComputedDefenses(reg, 3)
+	assert.Equal(t, 4, stats.ACBonus, "tuned armor must add +1 AC modifier")
+}
+
+// TestComputedDefenses_ModifierDefective_ACMinus1 verifies that a "defective" armor
+// slot applies -1 AC modifier (REQ-EM-22).
+func TestComputedDefenses_ModifierDefective_ACMinus1(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{
+		ID: "defective_vest", Name: "Defective Vest", Slot: inventory.SlotTorso, Group: "composite",
+		ACBonus: 3, DexCap: 10,
+	}
+	require.NoError(t, reg.RegisterArmor(def))
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:  "defective_vest",
+		Name:       "Defective Vest",
+		Durability: 10,
+		Modifier:   "defective",
+	}
+
+	stats := eq.ComputedDefenses(reg, 3)
+	assert.Equal(t, 2, stats.ACBonus, "defective armor must apply -1 AC modifier")
+}
+
+// TestComputedDefenses_ModifierCursed_ACMinus2 verifies that a "cursed" armor slot
+// applies -2 AC modifier (REQ-EM-22).
+func TestComputedDefenses_ModifierCursed_ACMinus2(t *testing.T) {
+	reg := inventory.NewRegistry()
+	def := &inventory.ArmorDef{
+		ID: "cursed_vest", Name: "Cursed Vest", Slot: inventory.SlotTorso, Group: "composite",
+		ACBonus: 3, DexCap: 10,
+	}
+	require.NoError(t, reg.RegisterArmor(def))
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:  "cursed_vest",
+		Name:       "Cursed Vest",
+		Durability: 10,
+		Modifier:   "cursed",
+	}
+
+	stats := eq.ComputedDefenses(reg, 3)
+	assert.Equal(t, 1, stats.ACBonus, "cursed armor must apply -2 AC modifier")
+}
+
+// ── REQ-EM-35: ComputedDefensesWithSetBonuses ─────────────────────────────────
+
+func TestComputedDefensesWithSetBonuses_AddsACBonus(t *testing.T) {
+	reg := inventory.NewRegistry()
+	eq := inventory.NewEquipment()
+	sb := inventory.SetBonusSummary{
+		ACBonus:      3,
+		SkillBonuses: make(map[string]int),
+		StatBonuses:  make(map[string]int),
+	}
+	stats := eq.ComputedDefensesWithSetBonuses(reg, 2, sb)
+	assert.Equal(t, 3, stats.ACBonus, "set bonus ACBonus must be included in result")
+}
+
+func TestComputedDefensesWithSetBonuses_ZeroSummary_SameAsBase(t *testing.T) {
+	armorID := "vest"
+	reg := inventory.NewRegistry()
+	ad := &inventory.ArmorDef{
+		ID:      armorID,
+		Name:    "Vest",
+		ACBonus: 4,
+		DexCap:  5,
+		Rarity:  "street",
+	}
+	_ = reg.RegisterArmor(ad)
+	eq := inventory.NewEquipment()
+	eq.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID: armorID,
+	}
+	base := eq.ComputedDefenses(reg, 3)
+	withZero := eq.ComputedDefensesWithSetBonuses(reg, 3, inventory.SetBonusSummary{
+		SkillBonuses: make(map[string]int),
+		StatBonuses:  make(map[string]int),
+	})
+	assert.Equal(t, base.ACBonus, withZero.ACBonus, "zero set bonus must not change result")
+}

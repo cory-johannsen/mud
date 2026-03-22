@@ -244,7 +244,10 @@ type GameServiceServer struct {
 	// detainedUntilRepo persists detention expiry timestamps per character.
 	// May be nil (detention expiry is not persisted if not set).
 	detainedUntilRepo DetainedUntilUpdater
-	worldEditor       *world.WorldEditor
+	worldEditor *world.WorldEditor
+	// setRegistry holds equipment set definitions for computing set bonuses (REQ-EM-29/35).
+	// May be nil (treated as empty — no set bonuses).
+	setRegistry *inventory.SetRegistry
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -325,6 +328,7 @@ func NewGameServiceServer(
 		detainedUntilRepo:          storage.DetainedUntilRepo,
 		trapMgr:                    nil, // trap loading not yet wired
 		trapTemplates:              nil, // trap loading not yet wired
+		setRegistry:                content.SetRegistry,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
@@ -649,9 +653,11 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		}
 
 		// Compute defense stats from equipped armor (AC, resistances, weaknesses).
+		// REQ-EM-29/35: compute set bonuses at login.
 		{
 			loginDexMod := (sess.Abilities.Quickness - 10) / 2
-			loginDef := sess.Equipment.ComputedDefenses(s.invRegistry, loginDexMod)
+			session.RecomputeSetBonuses(sess, s.setRegistry)
+			loginDef := sess.Equipment.ComputedDefensesWithSetBonuses(s.invRegistry, loginDexMod, sess.SetBonusSummary)
 			sess.Resistances = loginDef.Resistances
 			sess.Weaknesses = loginDef.Weaknesses
 		}
@@ -2812,6 +2818,41 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 	// REQ-LR1: Restore HP to maximum.
 	sess.CurrentHP = sess.MaxHP
 
+	// REQ-EM-16: Restore all equipped items to full MaxDurability during rest.
+	if sess.LoadoutSet != nil {
+		for _, preset := range sess.LoadoutSet.Presets {
+			if preset.MainHand != nil {
+				inst := &inventory.ItemInstance{Durability: preset.MainHand.Durability, MaxDurability: preset.MainHand.Durability}
+				if rd, ok := inventory.LookupRarity(preset.MainHand.Def.Rarity); ok {
+					inst.MaxDurability = rd.MaxDurability
+				}
+				inventory.RepairFull(inst)
+				preset.MainHand.Durability = inst.Durability
+			}
+			if preset.OffHand != nil {
+				inst := &inventory.ItemInstance{Durability: preset.OffHand.Durability, MaxDurability: preset.OffHand.Durability}
+				if rd, ok := inventory.LookupRarity(preset.OffHand.Def.Rarity); ok {
+					inst.MaxDurability = rd.MaxDurability
+				}
+				inventory.RepairFull(inst)
+				preset.OffHand.Durability = inst.Durability
+			}
+		}
+	}
+	if sess.Equipment != nil {
+		for _, si := range sess.Equipment.Armor {
+			if si == nil {
+				continue
+			}
+			inst := &inventory.ItemInstance{Durability: si.Durability, MaxDurability: si.Durability}
+			if rd, ok := inventory.LookupRarity(si.Rarity); ok {
+				inst.MaxDurability = rd.MaxDurability
+			}
+			inventory.RepairFull(inst)
+			si.Durability = inst.Durability
+		}
+	}
+
 	ctx := stream.Context()
 
 	// REQ-LR2: Persist HP to database.
@@ -3530,6 +3571,11 @@ func (s *GameServiceServer) handleWear(uid string, req *gamev1.WearRequest) (*ga
 	arg := req.GetItemId() + " " + req.GetSlot()
 	result := command.HandleWear(sess, s.invRegistry, arg)
 
+	// REQ-EM-29: recompute set bonuses whenever armor changes.
+	if strings.HasPrefix(result, "Wore ") {
+		session.RecomputeSetBonuses(sess, s.setRegistry)
+	}
+
 	// Only apply team affinity effect if the wear succeeded.
 	if strings.HasPrefix(result, "Wore ") && s.jobRegistry != nil && s.invRegistry != nil {
 		itemDef, ok := s.invRegistry.Item(req.GetItemId())
@@ -3558,6 +3604,10 @@ func (s *GameServiceServer) handleRemoveArmor(uid string, req *gamev1.RemoveArmo
 		return errorEvent("player not found"), nil
 	}
 	result := command.HandleRemoveArmor(sess, s.invRegistry, req.GetSlot())
+	// REQ-EM-29: recompute set bonuses whenever armor changes.
+	if strings.HasPrefix(result, "Removed ") {
+		session.RecomputeSetBonuses(sess, s.setRegistry)
+	}
 	return messageEvent(result), nil
 }
 
@@ -3966,9 +4016,9 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		view.Job = sess.Class
 	}
 
-	// Defense stats (dex mod from Quickness).
+	// Defense stats (dex mod from Quickness). REQ-EM-35: apply set bonuses.
 	dexMod := (sess.Abilities.Quickness - 10) / 2
-	def := sess.Equipment.ComputedDefenses(s.invRegistry, dexMod)
+	def := sess.Equipment.ComputedDefensesWithSetBonuses(s.invRegistry, dexMod, sess.SetBonusSummary)
 	view.AcBonus = int32(def.ACBonus)
 	view.CheckPenalty = int32(def.CheckPenalty)
 	view.SpeedPenalty = int32(def.SpeedPenalty)
@@ -4195,6 +4245,22 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 			UsesRemaining: int32(slot.UsesRemaining),
 			MaxUses:       int32(slot.MaxUses),
 		})
+	}
+
+	// REQ-EM-31: active set bonuses on character sheet.
+	if s.setRegistry != nil {
+		session.RecomputeSetBonuses(sess, s.setRegistry)
+		for _, bonus := range s.setRegistry.ActiveBonuses(func() []string {
+			ids := make([]string, 0, 8)
+			for _, slotted := range sess.Equipment.Armor {
+				if slotted != nil && slotted.ItemDefID != "" {
+					ids = append(ids, slotted.ItemDefID)
+				}
+			}
+			return ids
+		}()) {
+			view.ActiveSetBonuses = append(view.ActiveSetBonuses, bonus.Description)
+		}
 	}
 
 	return &gamev1.ServerEvent{

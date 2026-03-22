@@ -56,6 +56,7 @@ type AppConfig struct {
 	TechContentDir  technology.TechContentDir
 	RoundDurationMs gameserver.RoundDurationMs
 	XPConfigFile    string
+	SetsDir         string
 }
 
 // AppConfigToDatabase extracts database config from AppConfig for wire.
@@ -89,6 +90,7 @@ func main() {
 	xpConfigFile := flag.String("xp-config", "content/xp_config.yaml", "path to XP configuration YAML file")
 	techContentDir := flag.String("tech-content-dir", "content/technologies", "path to technology YAML content directory")
 	contentDir := flag.String("content-dir", "content", "path to content directory for world editing")
+	setsDir := flag.String("sets-dir", "content/sets", "path to equipment set YAML definitions directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -139,6 +141,7 @@ func main() {
 		TechContentDir:  technology.TechContentDir(*techContentDir),
 		RoundDurationMs: gameserver.RoundDurationMs(cfg.GameServer.RoundDurationMs),
 		XPConfigFile:    *xpConfigFile,
+		SetsDir:         *setsDir,
 	}
 
 	app, err := Initialize(ctx, appCfg, gameClock, logger)

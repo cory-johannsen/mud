@@ -11,3 +11,4 @@ traits: [utility, grapple]
 kind: one_handed
 group: exotic
 proficiency_category: specialized
+rarity: street

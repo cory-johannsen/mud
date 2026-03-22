@@ -57,6 +57,13 @@ func HandleWear(sess *session.PlayerSession, reg *inventory.Registry, arg string
 		return fmt.Sprintf("%q must be worn on %s, not %s.", armorDef.Name, armorDef.Slot, targetSlot)
 	}
 
+	// REQ-EM-3: check rarity minimum level.
+	if rarityDef, ok := inventory.LookupRarity(armorDef.Rarity); ok {
+		if rarityDef.MinLevel > 0 && sess.Level < rarityDef.MinLevel {
+			return fmt.Sprintf("You need to be level %d to equip %s.", rarityDef.MinLevel, armorDef.Name)
+		}
+	}
+
 	// Remove the item from the backpack before equipping.
 	if err := sess.Backpack.Remove(inst.InstanceID, 1); err != nil {
 		return fmt.Sprintf("Could not remove item from inventory: %v", err)
@@ -79,10 +86,24 @@ func HandleWear(sess *session.PlayerSession, reg *inventory.Registry, arg string
 	}
 
 	// Store the ArmorDef ID in ItemDefID so ComputedDefenses can resolve it.
-	sess.Equipment.Armor[targetSlot] = &inventory.SlottedItem{
-		ItemDefID: armorDef.ID,
-		Name:      armorDef.Name,
+	// Copy Durability/MaxDurability from the instance (REQ-EM-7/8: broken slot detection).
+	// Rarity is populated for REQ-EM-4 color display.
+	slotted := &inventory.SlottedItem{
+		ItemDefID:  armorDef.ID,
+		Name:       armorDef.Name,
+		InstanceID: inst.InstanceID,
+		Modifier:   inst.Modifier,
+		Rarity:     armorDef.Rarity,
+		Durability: inst.Durability,
 	}
+	// If durability has the uninitialized sentinel (-1), treat it as full.
+	if slotted.Durability < 0 {
+		slotted.Durability = inst.MaxDurability
+		if slotted.Durability < 0 {
+			slotted.Durability = 0
+		}
+	}
+	sess.Equipment.Armor[targetSlot] = slotted
 
 	return fmt.Sprintf("Wore %s.", armorDef.Name)
 }

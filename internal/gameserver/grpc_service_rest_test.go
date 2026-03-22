@@ -529,3 +529,57 @@ func TestHandleRest_SaveStateError_ReturnsError(t *testing.T) {
 	err = svc.handleRest(uid, "req", stream)
 	require.Error(t, err, "handleRest must return error when SaveState fails")
 }
+
+// TestHandleRest_RepairFull_RestoresAllEquipmentDurability verifies REQ-EM-16:
+// handleRest restores all equipped weapons and armor to MaxDurability.
+func TestHandleRest_RepairFull_RestoresAllEquipmentDurability(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	uid := "player-rest-dur"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:      uid,
+		Username: uid,
+		CharName: uid,
+		RoomID:   "room_a",
+		Role:     "player",
+		Level:    1,
+	})
+	require.NoError(t, err)
+
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+
+	// Set up a damaged weapon in the active preset.
+	swordDef := &inventory.WeaponDef{
+		ID: "sword", Name: "Sword",
+		DamageDice: "1d6", DamageType: "slashing",
+		ProficiencyCategory: "martial_melee",
+		Rarity:              "street", // MaxDurability=40
+	}
+	preset := sess.LoadoutSet.ActivePreset()
+	require.NoError(t, preset.EquipMainHand(swordDef))
+	preset.MainHand.Durability = 10 // damaged
+
+	// Set up damaged armor.
+	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:  "chest_armor",
+		Name:       "Chest Armor",
+		InstanceID: "inst-armor-1",
+		Durability: 5,
+		Rarity:     "street", // MaxDurability=40
+	}
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest(uid, "req-dur", stream))
+
+	// Weapon should be fully repaired.
+	assert.Equal(t, 40, preset.MainHand.Durability,
+		"weapon durability should be restored to MaxDurability (40) on rest")
+
+	// Armor should be fully repaired.
+	si := sess.Equipment.Armor[inventory.SlotTorso]
+	require.NotNil(t, si)
+	assert.Equal(t, 40, si.Durability,
+		"armor durability should be restored to MaxDurability (40) on rest")
+}

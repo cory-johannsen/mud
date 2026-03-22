@@ -125,6 +125,7 @@ func equipTestPistol(t *testing.T, h *gameserver.CombatHandler, uid string) {
 		RangeIncrement: 30, ReloadActions: 1, MagazineCapacity: 30,
 		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
 		ProficiencyCategory: "simple_ranged",
+		Rarity:              "salvage",
 	}
 	preset := inventory.NewWeaponPreset()
 	require.NoError(t, preset.EquipMainHand(def))

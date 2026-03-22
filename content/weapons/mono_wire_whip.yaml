@@ -12,3 +12,4 @@ team_affinity: machete
 cross_team_effect:
   kind: condition
   value: clumsy-1
+rarity: street

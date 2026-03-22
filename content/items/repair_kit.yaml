@@ -1,0 +1,11 @@
+id: repair_kit
+name: "Repair Kit"
+description: "A bundle of solder, patches, and polymer adhesive for field repairs."
+kind: consumable
+team: ""
+weight: 1.0
+stackable: true
+max_stack: 5
+value: 20
+effect:
+  repair_field: true

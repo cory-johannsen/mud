@@ -1,0 +1,21 @@
+id: whores_pasta
+name: "Whore's Pasta"
+description: "A heaping plate of carb-loaded street cuisine favored by Gun-side enforcers."
+kind: consumable
+team: gun
+weight: 0.5
+stackable: true
+max_stack: 5
+value: 15
+effect:
+  heal: "2d6+4"
+  conditions:
+    - condition_id: strength_boost_1
+      duration: "1h"
+  consume_check:
+    stat: constitution
+    dc: 12
+    on_critical_failure:
+      apply_disease:
+        disease_id: street_rot
+        severity: 1

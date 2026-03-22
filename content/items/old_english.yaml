@@ -1,0 +1,14 @@
+id: old_english
+name: "Old English"
+description: "A tall can of Gun-side fortification. Smooth."
+kind: consumable
+team: gun
+weight: 0.3
+stackable: true
+max_stack: 10
+value: 8
+effect:
+  heal: "1d6+2"
+  conditions:
+    - condition_id: fortitude_bonus_1
+      duration: "1h"

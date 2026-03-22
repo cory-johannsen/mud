@@ -149,6 +149,7 @@ func TestRangeEnforcement_RangedWeapon_ExtremeRange_Misses(t *testing.T) {
 		RangeIncrement: 20, ReloadActions: 1, MagazineCapacity: 15,
 		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
 		ProficiencyCategory: "simple_ranged",
+		Rarity:              "salvage",
 	}
 	preset := inventory.NewWeaponPreset()
 	require.NoError(t, preset.EquipMainHand(pistolDef))
@@ -201,6 +202,7 @@ func TestRangeEnforcement_RangedWeapon_WithinRange_CanResolve(t *testing.T) {
 		RangeIncrement: 20, ReloadActions: 1, MagazineCapacity: 15,
 		FiringModes:         []inventory.FiringMode{inventory.FiringModeSingle},
 		ProficiencyCategory: "simple_ranged",
+		Rarity:              "salvage",
 	}
 	preset := inventory.NewWeaponPreset()
 	require.NoError(t, preset.EquipMainHand(pistolDef))

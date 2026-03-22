@@ -17,6 +17,7 @@ func TestArmorDef_Validate_Valid(t *testing.T) {
 		ID: "test_armor", Name: "Test Armor", Slot: inventory.SlotTorso,
 		ACBonus: 2, DexCap: 3, CheckPenalty: -1, SpeedPenalty: 0,
 		StrengthReq: 12, Bulk: 2, Group: "composite", ProficiencyCategory: "medium_armor",
+		Rarity: "street",
 	}
 	assert.NoError(t, def.Validate())
 }
@@ -85,6 +86,7 @@ strength_req: 10
 bulk: 1
 group: leather
 proficiency_category: light_armor
+rarity: salvage
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "arm_guards.yaml"), []byte(yaml), 0644))
 	armors, err := inventory.LoadArmors(dir)
@@ -92,6 +94,7 @@ proficiency_category: light_armor
 	require.Len(t, armors, 1)
 	assert.Equal(t, "arm_guards", armors[0].ID)
 	assert.Equal(t, inventory.SlotLeftArm, armors[0].Slot)
+	// ACBonus = floor(1 * 1.0) = 1 (salvage multiplier = 1.0)
 	assert.Equal(t, 1, armors[0].ACBonus)
 	assert.Equal(t, 4, armors[0].DexCap)
 }
@@ -113,6 +116,7 @@ team_affinity: gun
 cross_team_effect:
   kind: condition
   value: clumsy-1
+rarity: street
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "tactical_vest.yaml"), []byte(yaml), 0644))
 	armors, err := inventory.LoadArmors(dir)
@@ -170,7 +174,7 @@ func TestProperty_ArmorSlot_AllConstantsAreValid(t *testing.T) {
 			inventory.SlotHead, inventory.SlotTorso, inventory.SlotLeftArm, inventory.SlotRightArm,
 			inventory.SlotHands, inventory.SlotLeftLeg, inventory.SlotRightLeg, inventory.SlotFeet,
 		}).Draw(rt, "slot")
-		def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: slot, Group: "leather", ProficiencyCategory: "light_armor"}
+		def := &inventory.ArmorDef{ID: "test", Name: "Test", Slot: slot, Group: "leather", ProficiencyCategory: "light_armor", Rarity: "street"}
 		assert.NoError(t, def.Validate())
 	})
 }

@@ -3,6 +3,7 @@ package inventory_test
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -294,6 +295,163 @@ func TestRegistry_RegisterItem_TrapKind_ValidRef(t *testing.T) {
 	}
 	if item.TrapTemplateRef != "mine" {
 		t.Fatalf("expected TrapTemplateRef == %q, got %q", "mine", item.TrapTemplateRef)
+	}
+}
+
+// ── REQ-EM-40: ValidateRequiredConsumables ────────────────────────────────────
+
+func TestValidateRequiredConsumables_AllPresent(t *testing.T) {
+	items := requiredConsumableItems()
+	if err := inventory.ValidateRequiredConsumables(items); err != nil {
+		t.Fatalf("expected no error when all 6 required consumables present, got: %v", err)
+	}
+}
+
+func TestValidateRequiredConsumables_MissingOne(t *testing.T) {
+	items := requiredConsumableItems()
+	// Remove repair_kit
+	filtered := make([]*inventory.ItemDef, 0, len(items))
+	for _, it := range items {
+		if it.ID != "repair_kit" {
+			filtered = append(filtered, it)
+		}
+	}
+	err := inventory.ValidateRequiredConsumables(filtered)
+	if err == nil {
+		t.Fatal("expected error for missing repair_kit, got nil")
+	}
+	if !strings.Contains(err.Error(), "repair_kit") {
+		t.Errorf("error should mention missing ID 'repair_kit', got: %v", err)
+	}
+}
+
+func TestValidateRequiredConsumables_Empty(t *testing.T) {
+	err := inventory.ValidateRequiredConsumables(nil)
+	if err == nil {
+		t.Fatal("expected error for empty items slice, got nil")
+	}
+}
+
+// requiredConsumableItems returns a minimal slice containing all 6 required consumable IDs.
+func requiredConsumableItems() []*inventory.ItemDef {
+	ids := []string{
+		"whores_pasta",
+		"poontangesca",
+		"four_loko",
+		"old_english",
+		"penjamin_franklin",
+		"repair_kit",
+	}
+	items := make([]*inventory.ItemDef, len(ids))
+	for i, id := range ids {
+		items[i] = &inventory.ItemDef{
+			ID:       id,
+			Name:     id,
+			Kind:     inventory.KindConsumable,
+			MaxStack: 1,
+			Weight:   0.1,
+		}
+	}
+	return items
+}
+
+// ── REQ-EM-42: ValidateConsumableEffects ─────────────────────────────────────
+
+func TestValidateConsumableEffects_NoConsumableEffects(t *testing.T) {
+	items := []*inventory.ItemDef{
+		{ID: "junk1", Name: "Junk", Kind: inventory.KindJunk, MaxStack: 1},
+	}
+	knownConds := map[string]bool{"fatigued": true}
+	if err := inventory.ValidateConsumableEffects(items, knownConds); err != nil {
+		t.Fatalf("expected no error for items with no consumable effects, got: %v", err)
+	}
+}
+
+func TestValidateConsumableEffects_KnownDiseaseID(t *testing.T) {
+	items := []*inventory.ItemDef{
+		{
+			ID: "bad_food", Name: "Bad Food", Kind: inventory.KindConsumable, MaxStack: 1,
+			Effect: &inventory.ConsumableEffect{
+				ConsumeCheck: &inventory.ConsumeCheck{
+					Stat: "constitution", DC: 12,
+					OnCriticalFailure: &inventory.CritFailureEffect{
+						ApplyDisease: &inventory.DiseaseEffect{DiseaseID: "street_rot", Severity: 1},
+					},
+				},
+			},
+		},
+	}
+	knownConds := map[string]bool{"street_rot": true}
+	if err := inventory.ValidateConsumableEffects(items, knownConds); err != nil {
+		t.Fatalf("expected no error for known disease_id, got: %v", err)
+	}
+}
+
+func TestValidateConsumableEffects_UnknownDiseaseID(t *testing.T) {
+	items := []*inventory.ItemDef{
+		{
+			ID: "bad_food", Name: "Bad Food", Kind: inventory.KindConsumable, MaxStack: 1,
+			Effect: &inventory.ConsumableEffect{
+				ConsumeCheck: &inventory.ConsumeCheck{
+					Stat: "constitution", DC: 12,
+					OnCriticalFailure: &inventory.CritFailureEffect{
+						ApplyDisease: &inventory.DiseaseEffect{DiseaseID: "unknown_plague", Severity: 1},
+					},
+				},
+			},
+		},
+	}
+	knownConds := map[string]bool{"street_rot": true}
+	err := inventory.ValidateConsumableEffects(items, knownConds)
+	if err == nil {
+		t.Fatal("expected error for unknown disease_id, got nil")
+	}
+	if !strings.Contains(err.Error(), "unknown_plague") {
+		t.Errorf("error should mention unknown ID 'unknown_plague', got: %v", err)
+	}
+}
+
+func TestValidateConsumableEffects_UnknownToxinID(t *testing.T) {
+	items := []*inventory.ItemDef{
+		{
+			ID: "poison", Name: "Poison", Kind: inventory.KindConsumable, MaxStack: 1,
+			Effect: &inventory.ConsumableEffect{
+				ConsumeCheck: &inventory.ConsumeCheck{
+					Stat: "constitution", DC: 15,
+					OnCriticalFailure: &inventory.CritFailureEffect{
+						ApplyToxin: &inventory.ToxinEffect{ToxinID: "mystery_toxin", Severity: 2},
+					},
+				},
+			},
+		},
+	}
+	knownConds := map[string]bool{"gut_rot": true}
+	err := inventory.ValidateConsumableEffects(items, knownConds)
+	if err == nil {
+		t.Fatal("expected error for unknown toxin_id, got nil")
+	}
+	if !strings.Contains(err.Error(), "mystery_toxin") {
+		t.Errorf("error should mention unknown ID 'mystery_toxin', got: %v", err)
+	}
+}
+
+func TestValidateConsumableEffects_KnownToxinID(t *testing.T) {
+	items := []*inventory.ItemDef{
+		{
+			ID: "poison", Name: "Poison", Kind: inventory.KindConsumable, MaxStack: 1,
+			Effect: &inventory.ConsumableEffect{
+				ConsumeCheck: &inventory.ConsumeCheck{
+					Stat: "constitution", DC: 15,
+					OnCriticalFailure: &inventory.CritFailureEffect{
+						ApplyToxin: &inventory.ToxinEffect{ToxinID: "gut_rot", Severity: 2},
+					},
+				},
+			},
+		},
+	}
+	knownConds := map[string]bool{"gut_rot": true}
+	if err := inventory.ValidateConsumableEffects(items, knownConds); err != nil {
+		t.Fatalf("expected no error for known toxin_id, got: %v", err)
 	}
 }
 

@@ -25,6 +25,7 @@ func TestWeaponDef_Validate_AcceptsMinimal(t *testing.T) {
 		DamageDice:          "1d6",
 		DamageType:          "slashing",
 		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
 	}
 	if err := w.Validate(); err != nil {
 		t.Fatalf("expected no error for minimal melee WeaponDef, got: %v", err)
@@ -59,6 +60,7 @@ firing_modes: [single]
 traits: [concealable]
 kind: one_handed
 proficiency_category: simple_ranged
+rarity: salvage
 `
 	if err := os.WriteFile(filepath.Join(dir, "test_pistol.yaml"), []byte(content), 0644); err != nil {
 		t.Fatalf("failed to write temp YAML: %v", err)
@@ -180,7 +182,7 @@ func TestWeaponDef_Kind_DefaultEmpty(t *testing.T) {
 func TestWeaponDef_Validate_KindNotRequired(t *testing.T) {
 	w := &inventory.WeaponDef{
 		ID: "knife", Name: "Knife", DamageDice: "1d6", DamageType: "slashing",
-		ProficiencyCategory: "simple_weapons",
+		ProficiencyCategory: "simple_weapons", Rarity: "salvage",
 	}
 	if err := w.Validate(); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -243,6 +245,7 @@ team_affinity: machete
 cross_team_effect:
   kind: condition
   value: clumsy-1
+rarity: street
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "machete_test.yaml"), []byte(content), 0644))
 	weapons, err := inventory.LoadWeapons(dir)
@@ -267,6 +270,7 @@ firing_modes: [single]
 kind: one_handed
 group: firearm
 proficiency_category: simple_ranged
+rarity: salvage
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "generic_pistol.yaml"), []byte(content), 0644))
 	weapons, err := inventory.LoadWeapons(dir)

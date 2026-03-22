@@ -6,6 +6,7 @@ import (
 	"github.com/google/wire"
 	"go.uber.org/zap"
 
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/world"
 )
 
@@ -22,11 +23,14 @@ type ExplosivesDir string
 type ArmorsDir string
 
 // NewRegistryFromDirs loads all inventory definitions into a single Registry.
+// condRegistry is used to validate disease_id/toxin_id references in consumable
+// effects (REQ-EM-42) and MUST be loaded before this function is called.
 func NewRegistryFromDirs(
 	weaponsDir WeaponsDir,
 	itemsDir ItemsDir,
 	explosivesDir ExplosivesDir,
 	armorsDir ArmorsDir,
+	condRegistry *condition.Registry,
 	logger *zap.Logger,
 ) (*Registry, error) {
 	reg := NewRegistry()
@@ -58,6 +62,20 @@ func NewRegistryFromDirs(
 		items, err := LoadItems(string(itemsDir))
 		if err != nil {
 			return nil, fmt.Errorf("loading items: %w", err)
+		}
+		// REQ-EM-40: all six required consumable IDs must be present.
+		if err := ValidateRequiredConsumables(items); err != nil {
+			return nil, err
+		}
+		// REQ-EM-42: disease_id/toxin_id must reference known condition IDs.
+		knownConds := make(map[string]bool)
+		if condRegistry != nil {
+			for _, cd := range condRegistry.All() {
+				knownConds[cd.ID] = true
+			}
+		}
+		if err := ValidateConsumableEffects(items, knownConds); err != nil {
+			return nil, err
 		}
 		for _, item := range items {
 			if err := reg.RegisterItem(item); err != nil {

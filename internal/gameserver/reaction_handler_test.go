@@ -38,6 +38,7 @@ func TestCheckReactionRequirement_WieldingMeleeWeapon_TrueWhenMeleeEquipped(t *t
 		RangeIncrement:      0, // melee
 		Kind:                inventory.WeaponKindOneHanded,
 		ProficiencyCategory: "martial_weapons",
+		Rarity:              "salvage",
 	}
 	ls := inventory.NewLoadoutSet()
 	if err := ls.ActivePreset().EquipMainHand(def); err != nil {
@@ -57,6 +58,7 @@ func TestCheckReactionRequirement_WieldingMeleeWeapon_FalseWhenRangedEquipped(t 
 		RangeIncrement:      30, // ranged
 		Kind:                inventory.WeaponKindTwoHanded,
 		ProficiencyCategory: "martial_ranged",
+		Rarity:              "salvage",
 	}
 	ls := inventory.NewLoadoutSet()
 	if err := ls.ActivePreset().EquipMainHand(def); err != nil {

@@ -61,6 +61,7 @@ func rifleWeaponDef() *inventory.WeaponDef {
 		MagazineCapacity:    30,
 		Kind:                inventory.WeaponKindTwoHanded,
 		ProficiencyCategory: "martial_ranged",
+		Rarity:              "salvage",
 	}
 }
 
@@ -270,4 +271,76 @@ func TestProperty_HandleEquip_BackpackCountDecreases(t *testing.T) {
 			}
 		}
 	})
+}
+
+// TestHandleEquip_MinLevelCheck verifies that equipping a higher-rarity weapon
+// when the player's level is too low returns the correct error message (REQ-EM-3).
+func TestHandleEquip_MinLevelCheck_WeaponTooHighLevel(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	sess.Level = 3 // below ghost (min 15)
+	reg := newTestRegistry()
+
+	// Register a ghost-rarity weapon.
+	ghostWeaponDef := &inventory.WeaponDef{
+		ID: "ghost_blade", Name: "Ghost Blade",
+		DamageDice: "2d6", DamageType: "slashing",
+		Kind: inventory.WeaponKindOneHanded, Group: "blade",
+		ProficiencyCategory: "martial_melee",
+		Rarity: "ghost",
+	}
+	ghostItemDef := &inventory.ItemDef{
+		ID: "ghost_blade", Name: "Ghost Blade",
+		Kind: inventory.KindWeapon, WeaponRef: "ghost_blade",
+		Weight: 2.0, MaxStack: 1,
+	}
+	_ = reg.RegisterWeapon(ghostWeaponDef)
+	_ = reg.RegisterItem(ghostItemDef)
+	if _, err := sess.Backpack.Add("ghost_blade", 1, reg); err != nil {
+		t.Fatalf("failed to add ghost blade: %v", err)
+	}
+
+	result := command.HandleEquip(sess, reg, "ghost_blade main")
+
+	if !strings.Contains(result, "level 15") {
+		t.Errorf("expected level 15 in error message, got: %q", result)
+	}
+	if !strings.Contains(strings.ToLower(result), "ghost blade") {
+		t.Errorf("expected item name in error message, got: %q", result)
+	}
+	// Backpack should be unchanged.
+	if sess.Backpack.UsedSlots() != 1 {
+		t.Errorf("expected item to remain in backpack, got %d items", sess.Backpack.UsedSlots())
+	}
+}
+
+// TestHandleEquip_MinLevelCheck_ExactLevel verifies that equipping at exactly the
+// required level succeeds (REQ-EM-3 boundary).
+func TestHandleEquip_MinLevelCheck_ExactLevel(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	sess.Level = 15 // exactly ghost min level
+	reg := newTestRegistry()
+
+	ghostWeaponDef := &inventory.WeaponDef{
+		ID: "ghost_blade2", Name: "Ghost Blade 2",
+		DamageDice: "2d6", DamageType: "slashing",
+		Kind: inventory.WeaponKindOneHanded, Group: "blade",
+		ProficiencyCategory: "martial_melee",
+		Rarity: "ghost",
+	}
+	ghostItemDef := &inventory.ItemDef{
+		ID: "ghost_blade2", Name: "Ghost Blade 2",
+		Kind: inventory.KindWeapon, WeaponRef: "ghost_blade2",
+		Weight: 2.0, MaxStack: 1,
+	}
+	_ = reg.RegisterWeapon(ghostWeaponDef)
+	_ = reg.RegisterItem(ghostItemDef)
+	if _, err := sess.Backpack.Add("ghost_blade2", 1, reg); err != nil {
+		t.Fatalf("failed to add ghost blade: %v", err)
+	}
+
+	result := command.HandleEquip(sess, reg, "ghost_blade2 main")
+
+	if !strings.Contains(result, "Equipped") {
+		t.Errorf("expected success at exact min level, got: %q", result)
+	}
 }

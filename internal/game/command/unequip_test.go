@@ -249,3 +249,40 @@ func TestHandleUnequip_OldRingSlotsRejected(t *testing.T) {
 		}
 	}
 }
+
+// TestHandleUnequip_CursedWeapon_BlockedWhenRevealed verifies REQ-EM-24: a cursed
+// weapon with CurseRevealed=true cannot be unequipped.
+func TestHandleUnequip_CursedWeapon_BlockedWhenRevealed(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	ew := &inventory.EquippedWeapon{
+		Def:           pistolWeaponDef(),
+		Modifier:      "cursed",
+		CurseRevealed: true,
+	}
+	sess.LoadoutSet.ActivePreset().MainHand = ew
+
+	result := command.HandleUnequip(sess, "main")
+	if !strings.Contains(strings.ToLower(result), "curse") {
+		t.Errorf("expected curse-related refusal, got: %q", result)
+	}
+	if sess.LoadoutSet.ActivePreset().MainHand == nil {
+		t.Error("cursed weapon should still be equipped after blocked unequip")
+	}
+}
+
+// TestHandleUnequip_CursedWeapon_AllowedWhenNotRevealed verifies that a cursed weapon
+// with CurseRevealed=false can be unequipped (curse has not been revealed yet).
+func TestHandleUnequip_CursedWeapon_AllowedWhenNotRevealed(t *testing.T) {
+	sess := newTestSessionWithBackpack()
+	ew := &inventory.EquippedWeapon{
+		Def:           pistolWeaponDef(),
+		Modifier:      "cursed",
+		CurseRevealed: false,
+	}
+	sess.LoadoutSet.ActivePreset().MainHand = ew
+
+	result := command.HandleUnequip(sess, "main")
+	if !strings.Contains(result, "Unequipped") {
+		t.Errorf("expected unequip success when curse not yet revealed, got: %q", result)
+	}
+}

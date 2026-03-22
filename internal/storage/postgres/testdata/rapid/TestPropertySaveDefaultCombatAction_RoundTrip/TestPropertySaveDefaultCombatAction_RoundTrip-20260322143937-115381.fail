@@ -1,0 +1,18 @@
+# 2026/03/22 14:39:37.738522 [TestPropertySaveDefaultCombatAction_RoundTrip] [rapid] draw action: "_"
+# 2026/03/22 14:39:37.740654 [TestPropertySaveDefaultCombatAction_RoundTrip] 
+# 	Error Trace:	/home/cjohannsen/src/mud-equipment-mechanics/internal/storage/postgres/character_test.go:417
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:371
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:380
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:205
+# 	            				/home/cjohannsen/go/pkg/mod/pgregory.net/rapid@v1.2.0/engine.go:120
+# 	            				/home/cjohannsen/src/mud-equipment-mechanics/internal/storage/postgres/character_test.go:409
+# 	Error:      	Received unexpected error:
+# 	            	querying character: ERROR: column "detained_until" does not exist (SQLSTATE 42703)
+# 	Test:       	TestPropertySaveDefaultCombatAction_RoundTrip
+# 
+v0.4.8#16300555270209252664
+0x0
+0x0
+0x0
+0x0
+0x0

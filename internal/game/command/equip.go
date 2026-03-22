@@ -56,6 +56,13 @@ func HandleEquip(sess *session.PlayerSession, reg *inventory.Registry, arg strin
 		return fmt.Sprintf("%s: weapon definition not found", itemDef.Name)
 	}
 
+	// REQ-EM-3: check rarity minimum level.
+	if rarityDef, ok := inventory.LookupRarity(weaponDef.Rarity); ok {
+		if rarityDef.MinLevel > 0 && sess.Level < rarityDef.MinLevel {
+			return fmt.Sprintf("You need to be level %d to equip %s.", rarityDef.MinLevel, weaponDef.Name)
+		}
+	}
+
 	// Attempt to equip in the requested slot.
 	preset := sess.LoadoutSet.ActivePreset()
 	var equipErr error

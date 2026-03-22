@@ -1,0 +1,11 @@
+id: penjamin_franklin
+name: "Penjamin Franklin"
+description: "A premium healing ration. No allegiances. Just results."
+kind: consumable
+team: ""
+weight: 0.4
+stackable: true
+max_stack: 5
+value: 40
+effect:
+  heal: "3d6"

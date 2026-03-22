@@ -23,6 +23,10 @@ func HandleRemoveArmor(sess *session.PlayerSession, reg *inventory.Registry, arg
 	if slotted == nil {
 		return fmt.Sprintf("You're wearing nothing on your %s.", slot)
 	}
+	// REQ-EM-24: block removal of cursed armor when curse is revealed.
+	if slotted.Modifier == "cursed" && slotted.CurseRevealed {
+		return fmt.Sprintf("You cannot remove %s — it is cursed!", slotted.Name)
+	}
 
 	// Determine the ItemDef ID to return to the backpack.
 	// ItemByArmorRef resolves armorDefID -> ItemDef; if the registry contains the mapping
