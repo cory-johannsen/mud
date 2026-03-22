@@ -436,7 +436,7 @@ zone:
     exits:
     - direction: west
       target: ashen_hollow
-    - direction: north
+    - direction: south
       target: scorchside_camp
     map_x: 4
     map_y: 10
@@ -462,10 +462,10 @@ zone:
       His tent is surrounded by piles of ash and the remains of burnt-out objects. Joe always seems to have a small fire going,
       and he trades in charred items that others might find useless but still hold value in a post-apocalyptic world.
     exits:
-    - direction: south
+    - direction: north
       target: smokers_den
-    map_x: 6
-    map_y: 10
+    map_x: 4
+    map_y: 12
     properties:
       area: cinder_pit
   - id: the_embers_edge
@@ -491,7 +491,7 @@ zone:
     - direction: south
       target: the_embers_edge
     - direction: east
-      target: the_cutthroat
+      target: blood_camp
     - direction: north
       target: the_slashers_den
     map_x: 4
@@ -511,8 +511,6 @@ zone:
     exits:
     - direction: west
       target: blade_house
-    - direction: north
-      target: blood_camp
     map_x: 6
     map_y: 6
     properties:
@@ -523,9 +521,9 @@ zone:
       and his area is marked by crude barricades of scrap metal and broken-down vehicles. Scar has a reputation for solving
       problems with violence and is often hired to settle disputes or enforce debts.
     exits:
-    - direction: south
-      target: the_cutthroat
-    map_x: 8
+    - direction: west
+      target: blade_house
+    map_x: 5
     map_y: 6
     properties:
       area: shiv_way
