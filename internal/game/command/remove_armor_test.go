@@ -1,6 +1,7 @@
 package command_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/command"
@@ -53,4 +54,30 @@ func TestProperty_HandleRemoveArmor_NeverPanics(t *testing.T) {
 		slot := rapid.String().Draw(rt, "slot")
 		assert.NotPanics(rt, func() { command.HandleRemoveArmor(sess, reg, slot) })
 	})
+}
+
+// TestHandleRemoveArmor_CursedArmorBlockedWhenRevealed verifies REQ-EM-24:
+// a cursed armor piece with CurseRevealed=true cannot be removed.
+func TestHandleRemoveArmor_CursedArmorBlockedWhenRevealed(t *testing.T) {
+	reg := inventory.NewRegistry()
+	armorDef := &inventory.ArmorDef{ID: "cursed_plate", Name: "Cursed Plate", Slot: inventory.SlotTorso, Group: "plate"}
+	require.NoError(t, reg.RegisterArmor(armorDef))
+	itemDef := &inventory.ItemDef{ID: "cursed_plate_item", Name: "Cursed Plate", Kind: "armor", ArmorRef: "cursed_plate", Weight: 5, MaxStack: 1}
+	require.NoError(t, reg.RegisterItem(itemDef))
+
+	sess := &session.PlayerSession{
+		LoadoutSet: inventory.NewLoadoutSet(),
+		Equipment:  inventory.NewEquipment(),
+		Backpack:   inventory.NewBackpack(20, 100.0),
+	}
+	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:     "cursed_plate",
+		Name:          "Cursed Plate",
+		Modifier:      "cursed",
+		CurseRevealed: true,
+	}
+
+	result := command.HandleRemoveArmor(sess, reg, "torso")
+	assert.Contains(t, strings.ToLower(result), "curse", "expected curse-related refusal")
+	assert.NotNil(t, sess.Equipment.Armor[inventory.SlotTorso], "cursed armor should still be equipped")
 }

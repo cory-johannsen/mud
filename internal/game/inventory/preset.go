@@ -15,6 +15,9 @@ type EquippedWeapon struct {
 	Durability int
 	// Modifier is the item modifier: "" | "tuned" | "defective" | "cursed".
 	Modifier string
+	// CurseRevealed is true once the cursed weapon has been equipped and its curse disclosed.
+	// When true, the weapon cannot be unequipped (REQ-EM-24).
+	CurseRevealed bool
 }
 
 // WeaponPreset holds the main-hand and off-hand weapon slots for one loadout preset.
