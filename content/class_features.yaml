@@ -1753,7 +1753,7 @@ class_features:
     job: salesman
     pf2e: ""
     active: true
-    shortcut: sell
+    shortcut: hardsell
     action_cost: 1
     contexts:
       - exploration
