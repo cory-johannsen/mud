@@ -125,6 +125,38 @@ func (s *GameServiceServer) handleDismiss(uid string, req *gamev1.DismissRequest
 	return messageEvent(fmt.Sprintf("You dismiss %s. They head back to their post.", inst.Name())), nil
 }
 
+// moveHirelingWithPlayer moves the bound hireling (if any) to newRoomID when the
+// player transitions rooms. If the move crosses a zone boundary, ZonesFollowed is
+// incremented; if MaxFollowZones is already reached the hireling stays behind.
+//
+// Precondition: uid, newRoomID, fromZoneID, toZoneID must be non-empty.
+// Postcondition: if a hireling is bound and zone limit not exceeded, hireling moves
+// to newRoomID; otherwise it stays in its current room.
+func (s *GameServiceServer) moveHirelingWithPlayer(uid, newRoomID, fromZoneID, toZoneID string) {
+	inst := s.findHiredHireling(uid)
+	if inst == nil {
+		return
+	}
+	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
+	crossingZone := fromZoneID != toZoneID
+
+	if crossingZone && tmpl != nil && tmpl.Hireling != nil && tmpl.Hireling.MaxFollowZones > 0 {
+		hirelingRuntimeMu.Lock()
+		state := s.hirelingRuntimeStates[inst.ID]
+		if state != nil && state.ZonesFollowed >= tmpl.Hireling.MaxFollowZones {
+			hirelingRuntimeMu.Unlock()
+			s.pushMessageToUID(uid, fmt.Sprintf("%s cannot follow you any further across zones and stays behind.", inst.Name()))
+			return
+		}
+		if state != nil {
+			state.ZonesFollowed++
+		}
+		hirelingRuntimeMu.Unlock()
+	}
+
+	_ = s.npcMgr.Move(inst.ID, newRoomID)
+}
+
 // tickHirelingDailyCost deducts the daily cost from each hiring player.
 // Hirelings whose employer cannot pay are automatically dismissed.
 // Intended to be called once per in-game day.

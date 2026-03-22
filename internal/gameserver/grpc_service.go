@@ -1637,6 +1637,18 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
+	// Move bound hireling with player on room transition.
+	if s.npcMgr != nil {
+		var oldZoneID, newZoneID string
+		if oldRoom, ok := s.world.GetRoom(result.OldRoomID); ok {
+			oldZoneID = oldRoom.ZoneID
+		}
+		if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+			newZoneID = newRoom.ZoneID
+		}
+		s.moveHirelingWithPlayer(uid, result.View.RoomId, oldZoneID, newZoneID)
+	}
+
 	// Fire on_enter skill check triggers for the new room.
 	// Messages are pushed to the player's entity channel so they are delivered
 	// alongside the room-view response via the forwardEvents goroutine.

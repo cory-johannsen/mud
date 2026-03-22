@@ -160,3 +160,42 @@ func TestProperty_HandleHire_NeverPanics(t *testing.T) {
 		_, _ = svc.handleHire(uid, &gamev1.HireRequest{NpcName: npcName})
 	})
 }
+
+// TestHirelingFollowsPlayerInSameZone verifies hireling moves to player's new room
+// within the same zone.
+func TestHirelingFollowsPlayerInSameZone(t *testing.T) {
+	svc, uid := newHirelingTestServer(t)
+	_, err := svc.handleHire(uid, &gamev1.HireRequest{NpcName: "Patch"})
+	require.NoError(t, err)
+
+	inst := svc.npcMgr.FindInRoom("room_a", "Patch")
+	require.NotNil(t, inst)
+	instID := inst.ID
+
+	svc.moveHirelingWithPlayer(uid, "room_b", "zone_a", "zone_a")
+
+	movedInst := svc.npcMgr.InstanceByID(instID)
+	require.NotNil(t, movedInst)
+	assert.Equal(t, "room_b", movedInst.RoomID, "hireling should follow to room_b")
+}
+
+// TestHirelingZoneFollowLimit verifies hireling stays behind when MaxFollowZones exceeded.
+func TestHirelingZoneFollowLimit(t *testing.T) {
+	svc, uid := newHirelingTestServer(t)
+	_, err := svc.handleHire(uid, &gamev1.HireRequest{NpcName: "Patch"})
+	require.NoError(t, err)
+
+	inst := svc.npcMgr.FindInRoom("room_a", "Patch")
+	require.NotNil(t, inst)
+	instID := inst.ID
+
+	// MaxFollowZones = 2; exhaust it.
+	svc.moveHirelingWithPlayer(uid, "room_b", "zone_a", "zone_b") // ZonesFollowed=1
+	svc.moveHirelingWithPlayer(uid, "room_c", "zone_b", "zone_c") // ZonesFollowed=2
+	// Third cross-zone move: hireling should stay behind.
+	svc.moveHirelingWithPlayer(uid, "room_d", "zone_c", "zone_d") // limit hit
+
+	movedInst := svc.npcMgr.InstanceByID(instID)
+	require.NotNil(t, movedInst)
+	assert.NotEqual(t, "room_d", movedInst.RoomID, "hireling must NOT follow when zone limit exceeded")
+}
