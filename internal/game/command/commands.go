@@ -18,6 +18,8 @@ const (
 	CategoryCharacter     = "character"
 	// CategoryHidden marks commands that are internal flow steps and must not appear in help.
 	CategoryHidden = "hidden"
+	// CategoryEditor marks commands available to editor and admin roles.
+	CategoryEditor = "Editor"
 )
 
 // Handler identifiers mapping commands to gRPC message types.
@@ -220,8 +222,8 @@ func BuiltinCommands() []Command {
 		// Admin commands
 		{Name: "setrole", Aliases: nil, Help: "Set a player's role (admin only)", Category: CategoryAdmin, Handler: HandlerSetRole},
 		{Name: "teleport", Aliases: []string{"tp"}, Help: "Teleport a player to a room (admin only)", Category: CategoryAdmin, Handler: HandlerTeleport},
-		{Name: "roomequip", Aliases: nil, Help: "Manage room equipment (editor)", Category: CategoryAdmin, Handler: HandlerRoomEquip},
-		{Name: "grant", Aliases: nil, Help: "Grant XP or money to a player (editor)", Category: CategoryAdmin, Handler: HandlerGrant},
+		{Name: "roomequip", Aliases: nil, Help: "Manage room equipment (editor)", Category: CategoryEditor, Handler: HandlerRoomEquip},
+		{Name: "grant", Aliases: nil, Help: "Grant XP or money to a player (editor)", Category: CategoryEditor, Handler: HandlerGrant},
 
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
 		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},
@@ -229,7 +231,7 @@ func BuiltinCommands() []Command {
 		{Name: HandlerClassFeatures, Aliases: []string{"cf"}, Help: "List your class features", Category: CategoryCharacter, Handler: HandlerClassFeatures},
 		{Name: "proficiencies", Aliases: []string{"prof"}, Help: "Display your armor and weapon proficiencies.", Category: CategoryCharacter, Handler: HandlerProficiencies},
 
-		{Name: "summon_item", Aliases: nil, Help: "Summon an item into the current room (editor+)", Category: CategoryAdmin, Handler: HandlerSummonItem},
+		{Name: "summon_item", Aliases: nil, Help: "Summon an item into the current room (editor+)", Category: CategoryEditor, Handler: HandlerSummonItem},
 		{Name: "levelup", Aliases: []string{"lu"}, Help: "Assign a pending ability boost to the named ability", Category: CategoryCharacter, Handler: HandlerLevelUp},
 		{Name: "combat_default", Aliases: []string{"cd"}, Help: "Set your default combat action (attack/strike/bash/dodge/parry/cast/pass/flee)", Category: CategoryCombat, Handler: HandlerCombatDefault},
 		{Name: "trainskill", Aliases: []string{"ts"}, Help: "Advance a skill proficiency rank using a pending skill increase", Category: CategoryCharacter, Handler: HandlerTrainSkill},

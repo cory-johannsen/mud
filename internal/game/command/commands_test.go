@@ -103,3 +103,22 @@ func TestLoadoutAliases(t *testing.T) {
 		})
 	}
 }
+
+func TestCategoryEditorExists(t *testing.T) {
+	assert.Equal(t, "Editor", CategoryEditor)
+}
+
+func TestEditorCommandsRecategorized(t *testing.T) {
+	cmds := BuiltinCommands()
+	byName := make(map[string]Command)
+	for _, c := range cmds {
+		byName[c.Name] = c
+	}
+	// REQ-EC-1: grant, summon_item, roomequip must be CategoryEditor
+	assert.Equal(t, CategoryEditor, byName["grant"].Category)
+	assert.Equal(t, CategoryEditor, byName["summon_item"].Category)
+	assert.Equal(t, CategoryEditor, byName["roomequip"].Category)
+	// REQ-EC-2: setrole and teleport must remain CategoryAdmin
+	assert.Equal(t, CategoryAdmin, byName["setrole"].Category)
+	assert.Equal(t, CategoryAdmin, byName["teleport"].Category)
+}
