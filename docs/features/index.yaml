@@ -285,14 +285,15 @@ features:
 
   - slug: resting
     name: Resting
-    status: backlog
+    status: spec
     priority: 238
     category: world
     file: docs/features/resting.md
     effort: "S"  # motels and camping with gear requirements; zone safety enforcement
     dependencies:
       - room-danger-levels  # needs safe-room concept
-      - exploration          # "exploration only, not allowed in safe rooms"
+      - exploration          # camping requires active exploration mode
+      - non-combat-npcs      # motel NPC type
 
   - slug: ready-action
     name: Ready Action
