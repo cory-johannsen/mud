@@ -124,6 +124,9 @@ type Combatant struct {
 	// CoverTier is the tier of cover this combatant has: "lesser", "standard",
 	// "greater", or "" (none).
 	CoverTier string
+	// AttackVerb is the verb used in combat attack narratives (e.g. "bites", "shoots").
+	// Empty string means the default verb ("attacks") will be used.
+	AttackVerb string
 }
 
 // IsPlayer reports whether this combatant is a player character.

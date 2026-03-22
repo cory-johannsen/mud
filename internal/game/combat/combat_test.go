@@ -408,3 +408,10 @@ func TestPropertyCombatant_Hidden_Assignment(t *testing.T) {
 		}
 	})
 }
+
+func TestCombatantAttackVerbDefault(t *testing.T) {
+	c := combat.Combatant{}
+	if c.AttackVerb != "" {
+		t.Errorf("AttackVerb zero value: got %q, want empty string", c.AttackVerb)
+	}
+}
