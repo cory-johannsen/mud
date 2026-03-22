@@ -1,4 +1,4 @@
-.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check
+.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check
 
 deps:
 	$(GO) mod tidy
@@ -24,7 +24,10 @@ PROTO_GO_OUT := .
 PROTO_MODULE := github.com/cory-johannsen/mud
 
 # Build targets
-build: proto build-frontend build-gameserver build-migrate build-import-content build-setrole
+build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole
+
+build-devserver: proto
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/devserver ./cmd/devserver
 
 build-frontend: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/frontend ./cmd/frontend

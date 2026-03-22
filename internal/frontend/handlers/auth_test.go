@@ -167,7 +167,20 @@ func testGameServer(t *testing.T) string {
 	chatHandler := gameserver.NewChatHandler(sessMgr)
 	logger := zaptest.NewLogger(t)
 
-	svc := gameserver.NewGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	svc := gameserver.NewGameServiceServer(
+		gameserver.StorageDeps{},
+		gameserver.ContentDeps{
+			WorldMgr: worldMgr,
+		},
+		gameserver.HandlerDeps{
+			WorldHandler: worldHandler,
+			ChatHandler:  chatHandler,
+		},
+		sessMgr,
+		cmdRegistry,
+		nil,
+		logger,
+	)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
