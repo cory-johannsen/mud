@@ -388,7 +388,7 @@ features:
 
   - slug: zone-content-expansion
     name: Zone Content Expansion
-    status: backlog
+    status: spec
     priority: 315
     category: world
     file: docs/features/zone-content-expansion.md
