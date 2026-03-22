@@ -24,7 +24,7 @@ PROTO_GO_OUT := .
 PROTO_MODULE := github.com/cory-johannsen/mud
 
 # Build targets
-build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole
+build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole build-seed-claude-accounts
 
 build-devserver: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/devserver ./cmd/devserver
@@ -43,6 +43,12 @@ build-import-content:
 
 build-setrole: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/setrole ./cmd/setrole
+
+build-seed-claude-accounts: proto
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/seed-claude-accounts ./cmd/seed-claude-accounts
+
+seed-claude-accounts: build-seed-claude-accounts
+	CLAUDE_ACCOUNT_PASSWORD=$(CLAUDE_ACCOUNT_PASSWORD) $(BIN_DIR)/seed-claude-accounts -config $(CONFIG)
 
 # Protobuf code generation
 proto:
