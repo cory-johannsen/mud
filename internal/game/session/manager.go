@@ -182,6 +182,12 @@ type PlayerSession struct {
 	NegotiatedMerchantID string
 	// StashBalance is the player's global stash credit balance, accessible at any banker.
 	StashBalance int
+	// PendingBribeNPCName is the name of the NPC this player has initiated a bribe with.
+	// Empty string means no pending bribe. Cleared on bribe confirm or any other command.
+	PendingBribeNPCName string
+	// PendingBribeAmount is the credit cost of the pending bribe.
+	// Only valid when PendingBribeNPCName is non-empty.
+	PendingBribeAmount int
 	// Jobs maps job_id to the player's current level in that job.
 	// Initialized to an empty map at session creation.
 	// REQ-NPC-9: players acquire jobs via training; REQ-NPC-11: all held jobs grant feats/proficiencies.

@@ -1549,6 +1549,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleDismiss(uid, p.Dismiss)
 	case *gamev1.ClientMessage_Talk:
 		return s.handleTalk(uid, p.Talk)
+	case *gamev1.ClientMessage_BribeRequest:
+		return s.handleBribe(uid, p.BribeRequest)
+	case *gamev1.ClientMessage_BribeConfirmRequest:
+		return s.handleBribeConfirm(uid, p.BribeConfirmRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
