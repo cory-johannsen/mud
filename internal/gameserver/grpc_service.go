@@ -1356,6 +1356,21 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		}
 	}
 
+	// DETAINED: block action commands but permit informational queries.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil && condition.IsCommandsPrevented(sess.Conditions) {
+		switch msg.Payload.(type) {
+		case *gamev1.ClientMessage_Look,
+			*gamev1.ClientMessage_Exits,
+			*gamev1.ClientMessage_Who,
+			*gamev1.ClientMessage_Quit,
+			*gamev1.ClientMessage_SwitchCharacter,
+			*gamev1.ClientMessage_CharSheet:
+			// Informational commands are permitted while detained.
+		default:
+			return messageEvent("You are detained and cannot act."), nil
+		}
+	}
+
 	switch p := msg.Payload.(type) {
 	case *gamev1.ClientMessage_Move:
 		return s.handleMove(uid, p.Move)
@@ -1565,6 +1580,9 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil {
 		if condition.IsActionRestricted(sess.Conditions, "move") {
 			return errorEvent("You are grabbed and cannot move!"), nil
+		}
+		if condition.IsMovementPrevented(sess.Conditions) {
+			return errorEvent("You are detained and cannot move."), nil
 		}
 	}
 
@@ -2444,6 +2462,13 @@ func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) 
 					return messageEvent("Combat is not permitted in this area."), nil
 				}
 			}
+		}
+	}
+
+	// DETAINED TARGET: prevent targeting a detained player.
+	if targetSess, ok := s.sessions.GetPlayerByCharName(req.Target); ok {
+		if targetSess.Conditions != nil && condition.IsTargetingPrevented(targetSess.Conditions) {
+			return messageEvent("You cannot target a detained player."), nil
 		}
 	}
 

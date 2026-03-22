@@ -5,6 +5,7 @@ import (
 
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -156,14 +157,17 @@ func (h *WorldHandler) Exits(uid string) (*gamev1.ExitList, error) {
 // buildRoomView constructs a RoomView proto from a Room, excluding the player themselves
 // from the players list and including live NPC instances in the room.
 func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomView {
-	players := h.sessions.PlayersInRoom(room.ID)
 	sess, _ := h.sessions.GetPlayer(uid)
 	var otherPlayers []string
-	for _, p := range players {
-		if sess != nil && p == sess.CharName {
+	for _, p := range h.sessions.PlayersInRoomDetails(room.ID) {
+		if sess != nil && p.CharName == sess.CharName {
 			continue
 		}
-		otherPlayers = append(otherPlayers, p)
+		name := p.CharName
+		if p.Conditions != nil && condition.IsTargetingPrevented(p.Conditions) {
+			name = name + " (detained)"
+		}
+		otherPlayers = append(otherPlayers, name)
 	}
 
 	visibleExits := room.VisibleExits()

@@ -37,6 +37,54 @@ func ACBonus(s *ActiveSet) int {
 	return total
 }
 
+// IsMovementPrevented reports whether any active condition's PreventMovement flag
+// is set, indicating the entity cannot move between rooms.
+//
+// Precondition: s may be nil.
+func IsMovementPrevented(s *ActiveSet) bool {
+	if s == nil {
+		return false
+	}
+	for _, ac := range s.conditions {
+		if ac.Def.PreventMovement {
+			return true
+		}
+	}
+	return false
+}
+
+// IsCommandsPrevented reports whether any active condition's PreventCommands flag
+// is set, indicating the entity cannot issue action commands.
+//
+// Precondition: s may be nil.
+func IsCommandsPrevented(s *ActiveSet) bool {
+	if s == nil {
+		return false
+	}
+	for _, ac := range s.conditions {
+		if ac.Def.PreventCommands {
+			return true
+		}
+	}
+	return false
+}
+
+// IsTargetingPrevented reports whether any active condition's PreventTargeting flag
+// is set, indicating the entity cannot be targeted.
+//
+// Precondition: s may be nil.
+func IsTargetingPrevented(s *ActiveSet) bool {
+	if s == nil {
+		return false
+	}
+	for _, ac := range s.conditions {
+		if ac.Def.PreventTargeting {
+			return true
+		}
+	}
+	return false
+}
+
 // IsActionRestricted reports whether the given action type string is blocked
 // by any active condition's RestrictActions list.
 func IsActionRestricted(s *ActiveSet, actionType string) bool {

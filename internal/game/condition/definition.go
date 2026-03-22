@@ -38,6 +38,10 @@ type ConditionDef struct {
 	LuaOnApply      string   `yaml:"lua_on_apply"`  // stored; ignored until Stage 6
 	LuaOnRemove     string   `yaml:"lua_on_remove"` // stored; ignored until Stage 6
 	LuaOnTick       string   `yaml:"lua_on_tick"`   // stored; ignored until Stage 6
+	// Enforcement flags
+	PreventMovement  bool `yaml:"prevents_movement"`
+	PreventCommands  bool `yaml:"prevents_commands"`
+	PreventTargeting bool `yaml:"prevents_targeting"`
 }
 
 // Registry holds all known ConditionDefs keyed by ID.
