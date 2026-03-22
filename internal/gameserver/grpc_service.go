@@ -3704,6 +3704,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 	if err != nil || len(actions) == 0 {
 		return
 	}
+	actions = FilterAnimalPlanActions(actions, inst.IsAnimal())
 	for _, a := range actions {
 		switch a.Action {
 		case "move_random":

@@ -2268,6 +2268,25 @@ func (h *CombatHandler) autoQueuePlayersLocked(cbt *combat.Combat) {
 	}
 }
 
+// FilterAnimalPlanActions removes "say" actions from the plan when isAnimal is true.
+// Animals cannot speak, so any HTN "say" action must be suppressed.
+//
+// Precondition: actions may be nil (treated as empty).
+// Postcondition: Returns the original slice unmodified when isAnimal is false;
+// returns a new slice with "say" actions removed when isAnimal is true.
+func FilterAnimalPlanActions(actions []ai.PlannedAction, isAnimal bool) []ai.PlannedAction {
+	if !isAnimal {
+		return actions
+	}
+	filtered := actions[:0:0]
+	for _, a := range actions {
+		if a.Action != "say" {
+			filtered = append(filtered, a)
+		}
+	}
+	return filtered
+}
+
 // autoQueueNPCsLocked queues actions for all living NPCs using the HTN planner
 // when available, falling back to a simple attack for NPCs without an AI domain.
 //
@@ -2392,6 +2411,7 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 					ws := ai.BuildCombatWorldState(cbt, inst, zoneID)
 					actions, err := planner.Plan(ws)
 					if err == nil {
+						actions = FilterAnimalPlanActions(actions, inst.IsAnimal())
 						h.applyPlanLocked(cbt, c, actions)
 						continue
 					}
