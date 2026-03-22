@@ -19,6 +19,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/danger"
+	"github.com/cory-johannsen/mud/internal/game/maputil"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/trap"
 	"github.com/cory-johannsen/mud/internal/game/combat"
@@ -4618,6 +4619,29 @@ func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
 			exits = append(exits, string(e.Direction))
 		}
 		effectiveLevel := danger.EffectiveDangerLevel(zone.DangerLevel, r.DangerLevel)
+
+		// Collect POI type IDs for this explored room (REQ-POI-15..18).
+		poiSet := make(map[string]bool)
+		if s.npcMgr != nil {
+			for _, inst := range s.npcMgr.InstancesInRoom(r.ID) {
+				if inst.IsDead() || inst.NpcRole == "" {
+					continue
+				}
+				poiID := maputil.NpcRoleToPOIID(inst.NpcRole)
+				if poiID != "" {
+					poiSet[poiID] = true
+				}
+			}
+		}
+		if len(r.Equipment) > 0 {
+			poiSet["equipment"] = true
+		}
+		poiSlice := make([]string, 0, len(poiSet))
+		for id := range poiSet {
+			poiSlice = append(poiSlice, id)
+		}
+		poiSlice = maputil.SortPOIs(poiSlice)
+
 		tiles = append(tiles, &gamev1.MapTile{
 			RoomId:      r.ID,
 			RoomName:    r.Title,
@@ -4626,6 +4650,7 @@ func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
 			Current:     r.ID == sess.RoomID,
 			Exits:       exits,
 			DangerLevel: string(effectiveLevel),
+			Pois:        poiSlice,
 		})
 	}
 	return &gamev1.ServerEvent{
