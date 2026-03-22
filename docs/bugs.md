@@ -20,11 +20,11 @@
 
 ### BUG-3: ne_portland zone — ne_prescott_street and ne_cully_road isolated from rest of map
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** In the `ne_portland` zone, `ne_prescott_street` and `ne_cully_road` are connected to each other but have no exits linking them to the rest of the zone map, making them unreachable.
 **Steps:** View the ne_portland zone map; observe the two isolated rooms.
-**Fix:**
+**Fix:** Added west exit from `ne_prescott_street` to `ne_alberta_street` (reciprocal of existing east exit). Added west exit from `ne_cully_road` to `ne_bike_shop_ruins` and east exit from `ne_bike_shop_ruins` to `ne_cully_road`.
 
 ### BUG-5: Technology descriptions reference magic and PF2E saves
 **Severity:** medium

@@ -240,6 +240,8 @@ zone:
       target: ne_prescott_street
     - direction: east
       target: grinders_row
+    - direction: west
+      target: ne_bike_shop_ruins
     map_x: 2
     map_y: -2
     properties:
@@ -415,7 +417,9 @@ zone:
       their messenger bags heavy with deliveries and weapons.
 
       '
-    exits: []
+    exits:
+    - direction: east
+      target: ne_cully_road
     map_x: 0
     map_y: -2
     spawns:
@@ -468,6 +472,8 @@ zone:
     exits:
     - direction: north
       target: ne_cully_road
+    - direction: west
+      target: ne_alberta_street
     map_x: 2
     map_y: 0
     properties:
