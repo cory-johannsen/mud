@@ -1488,3 +1488,16 @@ func TestRenderMap_Legend_POISection_NoPOIs(t *testing.T) {
 		t.Errorf("legend should NOT contain POI section when no POIs, got:\n%s", out)
 	}
 }
+
+func TestRenderMap_BossRoom_RendersAngleBrackets(t *testing.T) {
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "boss1", X: 0, Y: 0, Current: false, BossRoom: true},
+		},
+	}
+	result := RenderMap(resp, 80)
+	// Boss room tile must render as <BB>.
+	assert.Contains(t, result, "<BB>", "boss room tile must render as <BB>")
+	// Boss room tile must not be rendered as a numbered square-bracket tile like "[ 1]".
+	assert.NotContains(t, result, "[ 1]", "boss room grid tile must not use numbered square brackets")
+}

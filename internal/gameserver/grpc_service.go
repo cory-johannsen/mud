@@ -4771,6 +4771,7 @@ func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
 			Exits:       exits,
 			DangerLevel: string(effectiveLevel),
 			Pois:        poiSlice,
+			BossRoom:    r.BossRoom,
 		})
 	}
 	return &gamev1.ServerEvent{
