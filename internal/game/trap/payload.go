@@ -22,6 +22,9 @@ type TriggerResult struct {
 	AoE bool
 	// TechnologyEffect is the technology ID applied by a Honkeypot (empty for non-Honkeypot).
 	TechnologyEffect string
+	// SubstanceID is the substance applied on trap fire (empty = no substance).
+	// REQ-AH-22: caller must call ApplySubstanceByID when non-empty.
+	SubstanceID string
 }
 
 // combineDice concatenates two dice expressions, e.g. "4d6" + "1d6" → "4d6+1d6".
@@ -85,6 +88,7 @@ func resolvePayload(payload *TrapPayload, scalingTmpl *TrapTemplate, dangerLevel
 			SaveType:    payload.SaveType,
 			SaveDC:      payload.SaveDC + scaling.SaveDCBonus,
 			AoE:         true,
+			SubstanceID: payload.SubstanceID,
 		}, nil
 
 	case "pit":
@@ -96,6 +100,7 @@ func resolvePayload(payload *TrapPayload, scalingTmpl *TrapTemplate, dangerLevel
 			DamageTypes: []string{"fall"},
 			SaveType:    payload.SaveType,
 			SaveDC:      payload.SaveDC + scaling.SaveDCBonus,
+			SubstanceID: payload.SubstanceID,
 		}, nil
 
 	case "bear_trap":
@@ -108,6 +113,7 @@ func resolvePayload(payload *TrapPayload, scalingTmpl *TrapTemplate, dangerLevel
 			DamageTypes: []string{"piercing"},
 			SaveType:    "", // no save — REQ-TR-14
 			SaveDC:      0,
+			SubstanceID: payload.SubstanceID,
 		}, nil
 
 	case "trip_wire":
@@ -119,6 +125,7 @@ func resolvePayload(payload *TrapPayload, scalingTmpl *TrapTemplate, dangerLevel
 			DamageTypes: []string{"slashing"},
 			SaveType:    payload.SaveType,
 			SaveDC:      payload.SaveDC + scaling.SaveDCBonus,
+			SubstanceID: payload.SubstanceID,
 		}, nil
 
 	case "honkeypot":

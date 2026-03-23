@@ -740,3 +740,19 @@ func TestPlayerSession_NegotiateFields_DefaultZero(t *testing.T) {
 	assert.Equal(t, "", sess.NegotiatedMerchantID)
 	assert.Equal(t, 0, sess.StashBalance)
 }
+
+func TestAddPlayer_SubstanceFieldsInitializedNil(t *testing.T) {
+	m := NewManager()
+	sess, err := m.AddPlayer(AddPlayerOptions{
+		UID: "u1", Username: "bob", CharName: "Bob",
+		RoomID: "r1", Role: "player", CharacterID: 1,
+		CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	// REQ-AH-5: ActiveSubstances nil slice zero value
+	assert.Nil(t, sess.ActiveSubstances)
+	// REQ-AH-6: AddictionState nil map zero value
+	assert.Nil(t, sess.AddictionState)
+	// REQ-AH-6A: SubstanceConditionRefs nil map zero value
+	assert.Nil(t, sess.SubstanceConditionRefs)
+}

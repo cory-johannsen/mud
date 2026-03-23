@@ -169,3 +169,18 @@ func TestCombineDice_Property(t *testing.T) {
 		}
 	})
 }
+
+func TestResolveTrigger_SubstanceID_Propagated(t *testing.T) {
+	tmpl := &trap.TrapTemplate{
+		ID:      "poison_pit",
+		Trigger: trap.TriggerEntry,
+		Payload: &trap.TrapPayload{Type: "pit", Damage: "1d6", SubstanceID: "viper_venom"},
+	}
+	result, err := trap.ResolveTrigger(tmpl, "safe", nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.SubstanceID != "viper_venom" {
+		t.Fatalf("SubstanceID = %q, want %q", result.SubstanceID, "viper_venom")
+	}
+}

@@ -39,6 +39,9 @@ type TrapPayload struct {
 	SaveType        string `yaml:"save_type,omitempty"`
 	SaveDC          int    `yaml:"save_dc,omitempty"`
 	TechnologyEffect string `yaml:"technology_effect,omitempty"`
+	// SubstanceID is the substance ID applied on trap fire (empty = no substance).
+	// REQ-AH-22: caller must call ApplySubstanceByID when non-empty.
+	SubstanceID string `yaml:"substance_id,omitempty"`
 }
 
 // DangerScalingEntry holds per-danger-level bonus overrides for one template.

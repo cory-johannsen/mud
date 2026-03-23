@@ -31,6 +31,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -248,6 +249,9 @@ type GameServiceServer struct {
 	// setRegistry holds equipment set definitions for computing set bonuses (REQ-EM-29/35).
 	// May be nil (treated as empty — no set bonuses).
 	setRegistry *inventory.SetRegistry
+	// substanceReg holds all substance definitions.
+	// REQ-AH-3: loaded at startup from content/substances/.
+	substanceReg *substance.Registry
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -329,6 +333,7 @@ func NewGameServiceServer(
 		trapMgr:                    nil, // trap loading not yet wired
 		trapTemplates:              nil, // trap loading not yet wired
 		setRegistry:                content.SetRegistry,
+		substanceReg:               content.SubstanceRegistry,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {

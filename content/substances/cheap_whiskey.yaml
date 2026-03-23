@@ -1,0 +1,16 @@
+id: cheap_whiskey
+name: Cheap Whiskey
+category: alcohol
+onset_delay: "30s"
+duration: "15m"
+effects:
+  - apply_condition: drunk
+    stacks: 1
+remove_on_expire:
+  - drunk
+addictive: false
+addiction_chance: 0.0
+overdose_threshold: 5
+overdose_condition: alcohol_poisoning
+withdrawal_conditions: []
+recovery_duration: "0s"

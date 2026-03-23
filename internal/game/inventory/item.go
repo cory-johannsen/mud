@@ -48,6 +48,13 @@ type ItemDef struct {
 	Team   string           `yaml:"team,omitempty"`
 	// Effect holds consumable effect data; nil for non-consumable items.
 	Effect *ConsumableEffect `yaml:"effect,omitempty"`
+	// SubstanceID is the substance ID applied when this consumable item is used.
+	// Only meaningful when Kind == KindConsumable. Empty for non-substance consumables.
+	SubstanceID string `yaml:"substance_id,omitempty"`
+	// PoisonSubstanceID is the substance ID applied to a target on a successful weapon hit.
+	// Only meaningful when Kind == KindWeapon. Empty for non-poisoned weapons.
+	// REQ-AH-21: attack pipeline calls ApplySubstanceByID when this is non-empty.
+	PoisonSubstanceID string `yaml:"poison_substance_id,omitempty"`
 }
 
 // Validate checks that the ItemDef satisfies its invariants.

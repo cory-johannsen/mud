@@ -482,3 +482,31 @@ func TestProperty_ItemDef_ValidKind_AcceptsAll(t *testing.T) {
 		}
 	})
 }
+
+func TestItemDef_SubstanceID_Field_Stored(t *testing.T) {
+	d := inventory.ItemDef{
+		ID: "stimpak_item", Name: "Stimpak", Kind: inventory.KindConsumable,
+		MaxStack: 10, SubstanceID: "stimpak",
+	}
+	err := d.Validate()
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+	if d.SubstanceID != "stimpak" {
+		t.Fatalf("SubstanceID = %q, want %q", d.SubstanceID, "stimpak")
+	}
+}
+
+func TestItemDef_PoisonSubstanceID_Field_Stored(t *testing.T) {
+	d := inventory.ItemDef{
+		ID: "poison_dagger", Name: "Poison Dagger", Kind: inventory.KindWeapon,
+		MaxStack: 1, WeaponRef: "dagger", PoisonSubstanceID: "viper_venom",
+	}
+	err := d.Validate()
+	if err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+	if d.PoisonSubstanceID != "viper_venom" {
+		t.Fatalf("PoisonSubstanceID = %q, want %q", d.PoisonSubstanceID, "viper_venom")
+	}
+}

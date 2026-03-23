@@ -11,6 +11,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/google/uuid"
 )
 
@@ -215,6 +216,18 @@ type PlayerSession struct {
 	// Recomputed at login and whenever equipped armor changes.
 	// Zero value (empty summary) is valid and means no active set bonuses.
 	SetBonusSummary inventory.SetBonusSummary
+	// ActiveSubstances tracks all currently active substance doses for this player.
+	// REQ-AH-5: nil slice is the zero value; initialized lazily on first dose.
+	// REQ-AH-7: session-only; cleared on disconnect.
+	ActiveSubstances []substance.ActiveSubstance
+	// AddictionState maps substance ID to the player's current addiction state for that substance.
+	// REQ-AH-6: nil map is the zero value; lazily initialized on first write.
+	// REQ-AH-7: session-only; cleared on disconnect.
+	AddictionState map[string]substance.SubstanceAddiction
+	// SubstanceConditionRefs counts how many active substances have applied each condition ID.
+	// REQ-AH-6A: nil map is the zero value; lazily initialized on first write.
+	// REQ-AH-7: session-only; cleared on disconnect.
+	SubstanceConditionRefs map[string]int
 	// InitDone is closed by Session() immediately before entering commandLoop,
 	// signalling that all session-initialization writes to PlayerSession fields
 	// are complete. Consumers (e.g. tests) that need a race-free snapshot of

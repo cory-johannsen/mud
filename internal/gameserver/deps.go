@@ -9,6 +9,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/scripting"
@@ -66,6 +67,9 @@ type ContentDeps struct {
 	// SetRegistry holds equipment set definitions for computing set bonuses (REQ-EM-29/35).
 	// May be nil (treated as empty — no set bonuses).
 	SetRegistry          *inventory.SetRegistry
+	// SubstanceRegistry holds all known substance definitions.
+	// REQ-AH-3: loaded at startup from content/substances/.
+	SubstanceRegistry    *substance.Registry
 }
 
 // HandlerDeps groups all handler dependencies for GameServiceServer.
