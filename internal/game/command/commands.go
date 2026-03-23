@@ -60,6 +60,7 @@ const (
 	HandlerUseEquipment       = "use_equipment"
 	HandlerRoomEquip          = "room_equip"
 	HandlerMap                = "map"
+	HandlerTravel             = "travel"
 	HandlerSkills             = "skills"
 	HandlerFeats              = "feats"
 	HandlerClassFeatures      = "class_features"
@@ -240,6 +241,7 @@ func BuiltinCommands() []Command {
 		{Name: "ecmds", Aliases: nil, Help: "List all editor commands", Category: CategoryEditor, Handler: HandlerEditorCmds},
 
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
+		{Name: "travel", Aliases: nil, Help: "Fast travel to a discovered zone (travel <zone name>)", Category: CategoryWorld, Handler: HandlerTravel},
 		{Name: "skills", Aliases: []string{"sk"}, Help: "Display your skill proficiencies.", Category: CategoryWorld, Handler: HandlerSkills},
 		{Name: "feats", Aliases: []string{"ft"}, Help: "Display your feats.", Category: CategoryWorld, Handler: HandlerFeats},
 		{Name: HandlerClassFeatures, Aliases: []string{"cf"}, Help: "List your class features", Category: CategoryCharacter, Handler: HandlerClassFeatures},
