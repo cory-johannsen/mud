@@ -221,6 +221,19 @@ func (m *Manager) TemplateByID(id string) *Template {
 	return m.templates[id]
 }
 
+// AllTemplates returns a copy of all registered templates.
+//
+// Postcondition: Returns a non-nil slice of all registered templates.
+func (m *Manager) AllTemplates() []*Template {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	result := make([]*Template, 0, len(m.templates))
+	for _, t := range m.templates {
+		result = append(result, t)
+	}
+	return result
+}
+
 // InstanceByID returns the live Instance with the given ID, or nil if not found.
 //
 // Precondition: id must be non-empty.

@@ -410,6 +410,13 @@ func (s *GameServiceServer) SetCharSaver(cs CharacterSaver) {
 	s.charSaver = cs
 }
 
+// FeatRegistry returns the feat registry used by this service.
+//
+// Postcondition: Returns nil when no feat registry has been set.
+func (s *GameServiceServer) FeatRegistry() *ruleset.FeatRegistry {
+	return s.featRegistry
+}
+
 // Session implements the bidirectional streaming RPC.
 // Flow:
 //  1. Wait for JoinWorldRequest
