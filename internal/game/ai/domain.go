@@ -31,6 +31,11 @@ type Method struct {
 	ID           string   `yaml:"id"`
 	Precondition string   `yaml:"precondition"` // Lua function name; empty = always applicable
 	Subtasks     []string `yaml:"subtasks"`
+	// NativePrecondition is a native WorldState precondition key. When non-empty,
+	// it is evaluated by the planner against WorldState fields instead of a Lua hook.
+	// Supported values: "in_combat", "not_in_combat", "player_entered_room",
+	// "hp_pct_below:<N>", "on_damage_taken", "has_grudge_target".
+	NativePrecondition string `yaml:"native_precondition,omitempty"`
 }
 
 // Operator is a primitive action that maps directly to a combat or world action.
@@ -53,6 +58,12 @@ type Operator struct {
 
 	// APCost is the AP consumed when this operator executes. Zero treated as 1.
 	APCost int `yaml:"ap_cost,omitempty"`
+
+	// Strings is the pool of lines for the "say" action; one is chosen at random.
+	Strings []string `yaml:"strings,omitempty"`
+
+	// Cooldown is a Go duration string for the "say" action cooldown. Parsed at execute time.
+	Cooldown string `yaml:"cooldown,omitempty"`
 }
 
 // Domain holds the full HTN domain loaded from a YAML file.
@@ -92,9 +103,17 @@ func (d *Domain) Validate() error {
 			return fmt.Errorf("ai.Domain %q method %q: subtasks must not be empty", d.ID, m.ID)
 		}
 	}
+	validActions := map[string]bool{
+		"attack": true, "strike": true, "pass": true, "flee": true,
+		"apply_mental_state": true, "move_random": true, "say": true,
+		"call_for_help": true, "target_weakest": true,
+	}
 	for _, op := range d.Operators {
 		if op.ID == "" || op.Action == "" {
 			return fmt.Errorf("ai.Domain %q: operator missing ID or Action", d.ID)
+		}
+		if !validActions[op.Action] {
+			return fmt.Errorf("ai.Domain %q operator %q: unknown action %q", d.ID, op.ID, op.Action)
 		}
 	}
 

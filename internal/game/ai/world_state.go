@@ -47,6 +47,19 @@ type WorldState struct {
 	NPC        *NPCState
 	Room       *RoomState
 	Combatants []*CombatantState // all combatants in the encounter
+
+	// InCombat is true when the NPC is an active combat participant. REQ-NB-3.
+	InCombat bool
+	// PlayerEnteredRoom is true for one tick after a player enters the room. REQ-NB-3, REQ-NB-4.
+	PlayerEnteredRoom bool
+	// HPPctBelow is the NPC's current HP% (0–100) for hp_pct_below precondition. REQ-NB-3.
+	HPPctBelow int
+	// OnDamageTaken is true for one tick in the round the NPC received damage. REQ-NB-3, REQ-NB-4.
+	OnDamageTaken bool
+	// HasGrudgeTarget is true when the NPC's GrudgePlayerID is non-empty. REQ-NB-15.
+	HasGrudgeTarget bool
+	// GrudgePlayerID is the player ID the NPC holds a grudge against.
+	GrudgePlayerID string
 }
 
 // EnemiesOf returns all living combatants of the opposite kind from uid.

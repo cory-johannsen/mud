@@ -2,6 +2,8 @@ package ai
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	lua "github.com/yuin/gopher-lua"
 )
@@ -123,8 +125,15 @@ func (p *Planner) Plan(state *WorldState) ([]PlannedAction, error) {
 // or nil if none applies.
 //
 // Methods are tried in declaration order. An empty Precondition always passes.
+// NativePrecondition is evaluated first when set; Precondition (Lua) is evaluated otherwise.
 func (p *Planner) findApplicableMethod(taskID string, state *WorldState) *Method {
 	for _, m := range p.domain.MethodsForTask(taskID) {
+		if m.NativePrecondition != "" {
+			if !evalNativePrecondition(m.NativePrecondition, state) {
+				continue
+			}
+			return m
+		}
 		if m.Precondition == "" {
 			return m
 		}
@@ -134,4 +143,40 @@ func (p *Planner) findApplicableMethod(taskID string, state *WorldState) *Method
 		}
 	}
 	return nil
+}
+
+// evalNativePrecondition evaluates a native WorldState precondition string.
+//
+// Supported tokens:
+//   - "in_combat"              → state.InCombat == true
+//   - "not_in_combat"          → state.InCombat == false
+//   - "player_entered_room"    → state.PlayerEnteredRoom == true
+//   - "hp_pct_below:<N>"       → state.HPPctBelow < N
+//   - "on_damage_taken"        → state.OnDamageTaken == true
+//   - "has_grudge_target"      → state.HasGrudgeTarget == true
+//
+// Precondition: state must not be nil.
+// Postcondition: returns false for unrecognized tokens (fail-safe).
+func evalNativePrecondition(token string, state *WorldState) bool {
+	switch {
+	case token == "in_combat":
+		return state.InCombat
+	case token == "not_in_combat":
+		return !state.InCombat
+	case token == "player_entered_room":
+		return state.PlayerEnteredRoom
+	case token == "on_damage_taken":
+		return state.OnDamageTaken
+	case token == "has_grudge_target":
+		return state.HasGrudgeTarget
+	case strings.HasPrefix(token, "hp_pct_below:"):
+		pctStr := strings.TrimPrefix(token, "hp_pct_below:")
+		n, err := strconv.Atoi(strings.TrimSpace(pctStr))
+		if err != nil {
+			return false
+		}
+		return state.HPPctBelow < n
+	default:
+		return false
+	}
 }

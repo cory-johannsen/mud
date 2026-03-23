@@ -299,3 +299,119 @@ domain:
 		t.Errorf("APCost: want 2, got %d", a.APCost)
 	}
 }
+
+func TestDomain_Validate_AcceptsSayOperator(t *testing.T) {
+	d := &ai.Domain{
+		ID:    "test",
+		Tasks: []*ai.Task{{ID: "behave"}},
+		Methods: []*ai.Method{
+			{TaskID: "behave", ID: "m1", Subtasks: []string{"say_op"}},
+		},
+		Operators: []*ai.Operator{
+			{ID: "say_op", Action: "say", Strings: []string{"hello"}, Cooldown: "30s"},
+		},
+	}
+	if err := d.Validate(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestDomain_Validate_RejectsUnknownAction(t *testing.T) {
+	d := &ai.Domain{
+		ID:    "test",
+		Tasks: []*ai.Task{{ID: "behave"}},
+		Methods: []*ai.Method{
+			{TaskID: "behave", ID: "m1", Subtasks: []string{"bad_op"}},
+		},
+		Operators: []*ai.Operator{
+			{ID: "bad_op", Action: "teleport"},
+		},
+	}
+	if err := d.Validate(); err == nil {
+		t.Fatal("expected error for unknown action")
+	}
+}
+
+func TestPlanner_NativePrecondition_InCombat(t *testing.T) {
+	d := &ai.Domain{
+		ID:    "test",
+		Tasks: []*ai.Task{{ID: "behave"}},
+		Methods: []*ai.Method{
+			{TaskID: "behave", ID: "m_combat", NativePrecondition: "in_combat", Subtasks: []string{"say_op"}},
+			{TaskID: "behave", ID: "m_idle", Subtasks: []string{"pass_op"}},
+		},
+		Operators: []*ai.Operator{
+			{ID: "say_op", Action: "say"},
+			{ID: "pass_op", Action: "pass"},
+		},
+	}
+	planner := ai.NewPlanner(d, &noopScriptCaller{}, "zone1")
+
+	ws := &ai.WorldState{
+		NPC:      &ai.NPCState{UID: "npc1", Kind: "npc"},
+		InCombat: true,
+	}
+	plan, err := planner.Plan(ws)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan) == 0 || plan[0].Action != "say" {
+		t.Fatalf("expected say action, got %v", plan)
+	}
+}
+
+func TestPlanner_NativePrecondition_NotInCombat_FallsThrough(t *testing.T) {
+	d := &ai.Domain{
+		ID:    "test",
+		Tasks: []*ai.Task{{ID: "behave"}},
+		Methods: []*ai.Method{
+			{TaskID: "behave", ID: "m_combat", NativePrecondition: "in_combat", Subtasks: []string{"say_op"}},
+			{TaskID: "behave", ID: "m_idle", Subtasks: []string{"pass_op"}},
+		},
+		Operators: []*ai.Operator{
+			{ID: "say_op", Action: "say"},
+			{ID: "pass_op", Action: "pass"},
+		},
+	}
+	planner := ai.NewPlanner(d, &noopScriptCaller{}, "zone1")
+
+	ws := &ai.WorldState{
+		NPC:      &ai.NPCState{UID: "npc1", Kind: "npc"},
+		InCombat: false,
+	}
+	plan, err := planner.Plan(ws)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan) == 0 || plan[0].Action != "pass" {
+		t.Fatalf("expected pass action, got %v", plan)
+	}
+}
+
+func TestPlanner_NativePrecondition_HPPctBelow(t *testing.T) {
+	d := &ai.Domain{
+		ID:    "test",
+		Tasks: []*ai.Task{{ID: "behave"}},
+		Methods: []*ai.Method{
+			{TaskID: "behave", ID: "m_low_hp", NativePrecondition: "hp_pct_below:50", Subtasks: []string{"flee_op"}},
+			{TaskID: "behave", ID: "m_normal", Subtasks: []string{"attack_op"}},
+		},
+		Operators: []*ai.Operator{
+			{ID: "flee_op", Action: "flee"},
+			{ID: "attack_op", Action: "attack"},
+		},
+	}
+	planner := ai.NewPlanner(d, &noopScriptCaller{}, "zone1")
+
+	ws := &ai.WorldState{
+		NPC:        &ai.NPCState{UID: "npc1", Kind: "npc"},
+		HPPctBelow: 30, // 30 < 50 → condition met
+	}
+	plan, err := planner.Plan(ws)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan) == 0 || plan[0].Action != "flee" {
+		t.Fatalf("expected flee action, got %v", plan)
+	}
+}
