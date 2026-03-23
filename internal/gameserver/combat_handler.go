@@ -2594,6 +2594,31 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 				}
 			}
 			continue
+		case "say":
+			if len(a.Strings) == 0 {
+				continue
+			}
+			inst, ok := h.npcMgr.Get(actor.ID)
+			if !ok {
+				continue
+			}
+			if inst.AbilityCooldowns == nil {
+				inst.AbilityCooldowns = make(map[string]int)
+			}
+			if inst.AbilityCooldowns[a.OperatorID] > 0 {
+				continue
+			}
+			if a.Cooldown != "" {
+				if d, err := time.ParseDuration(a.Cooldown); err == nil && d > 0 {
+					inst.AbilityCooldowns[a.OperatorID] = 1
+				}
+			}
+			line := a.Strings[rand.Intn(len(a.Strings))]
+			h.broadcastFn(cbt.RoomID, []*gamev1.CombatEvent{{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+				Narrative: fmt.Sprintf("%s says \"%s\"", actor.Name, line),
+			}})
+			continue
 		default:
 			qa = combat.QueuedAction{Type: combat.ActionPass}
 		}
