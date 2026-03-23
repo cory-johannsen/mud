@@ -395,6 +395,89 @@ func TestCallForHelp_NoQualifyingNPC_FailsSilently(t *testing.T) {
 	applyPlanInCombat(t, h, roomID, inst.ID, "player-cfh-2", plan)
 }
 
+// TestFleeHPPct_PendingFlee_TriggersFleeInApplyPlan verifies that when PendingFlee is set,
+// applyPlanLocked inserts a flee action at the front and the NPC exits combat. REQ-NB-14.
+func TestFleeHPPct_PendingFlee_TriggersFleeInApplyPlan(t *testing.T) {
+	const roomID = "room-a"
+	h, _ := makeFleeHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+
+	inst := spawnHTNTestNPC(t, h.npcMgr, roomID, "")
+	inst.FleeHPPct = 50
+	inst.PendingFlee = true
+
+	addTestPlayer(t, h.sessions, "player-pflee-1", roomID)
+	_, err := h.Attack("player-pflee-1", inst.Name())
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	defer h.cancelTimer(roomID)
+
+	// Apply an empty plan; PendingFlee should trigger flee before it.
+	plan := []ai.PlannedAction{{Action: "pass"}}
+	applyPlanInCombat(t, h, roomID, inst.ID, "player-pflee-1", plan)
+
+	// NPC should no longer be in combat.
+	h.combatMu.Lock()
+	cbt, _ := h.engine.GetCombat(roomID)
+	var found bool
+	if cbt != nil {
+		for _, c := range cbt.Combatants {
+			if c.ID == inst.ID {
+				found = true
+			}
+		}
+	}
+	h.combatMu.Unlock()
+
+	if found {
+		t.Error("expected NPC to be removed from combat via PendingFlee")
+	}
+	if inst.PendingFlee {
+		t.Error("PendingFlee should be cleared after processing")
+	}
+}
+
+// TestReturningHome_SetAfterCombatEnds verifies that surviving NPCs not in their
+// home room have ReturningHome=true after combat ends. REQ-NB-41.
+func TestReturningHome_SetAfterCombatEnds(t *testing.T) {
+	const roomID = "room-a"
+	h, _ := makeFleeHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+
+	inst := spawnHTNTestNPC(t, h.npcMgr, roomID, "")
+	// Set home room different from spawn room.
+	inst.HomeRoomID = "room-b"
+
+	addTestPlayer(t, h.sessions, "player-rh-1", roomID)
+	_, err := h.Attack("player-rh-1", inst.Name())
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+
+	// Manually end combat while NPC is alive (simulate NPCs winning).
+	h.combatMu.Lock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		h.combatMu.Unlock()
+		t.Fatal("no active combat")
+	}
+	// Kill the player combatant to trigger end-of-combat path.
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindPlayer {
+			c.CurrentHP = 0
+			c.Dead = true
+		}
+	}
+	h.resolveAndAdvanceLocked(roomID, cbt)
+	h.combatMu.Unlock()
+
+	if !inst.ReturningHome {
+		t.Error("expected ReturningHome=true after combat ends with NPC away from home")
+	}
+	if inst.GrudgePlayerID != "" {
+		t.Error("expected GrudgePlayerID cleared after combat ends")
+	}
+}
+
 // addTestPlayerWithHP creates a player session with explicit HP values and a custom char name.
 func addTestPlayerWithHP(t *testing.T, sessMgr *session.Manager, uid, roomID string, currentHP, maxHP int, charName string) *session.PlayerSession {
 	t.Helper()

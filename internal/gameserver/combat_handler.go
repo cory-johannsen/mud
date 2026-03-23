@@ -1617,6 +1617,43 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	})
 	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
 
+	// REQ-NB-13: Set GrudgePlayerID and OnDamageTaken for NPCs hit by players this round.
+	for _, ev := range roundEvents {
+		if ev.AttackResult == nil || ev.AttackResult.EffectiveDamage() <= 0 {
+			continue
+		}
+		// Actor must be a player; target must be an NPC.
+		if _, isPlayer := h.sessions.GetPlayer(ev.ActorID); !isPlayer {
+			continue
+		}
+		if ev.TargetID == "" {
+			continue
+		}
+		if npcInst, found := h.npcMgr.Get(ev.TargetID); found {
+			npcInst.GrudgePlayerID = ev.ActorID
+			npcInst.OnDamageTaken = true
+		}
+	}
+
+	// REQ-NB-14: Evaluate FleeHPPct for all living NPCs that took damage this round.
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindNPC || c.IsDead() {
+			continue
+		}
+		npcInst, found := h.npcMgr.Get(c.ID)
+		if !found || npcInst == nil || !npcInst.OnDamageTaken || npcInst.FleeHPPct == 0 {
+			continue
+		}
+		maxHP := c.MaxHP
+		if maxHP <= 0 {
+			maxHP = 1
+		}
+		hpPct := c.CurrentHP * 100 / maxHP
+		if hpPct < npcInst.FleeHPPct {
+			npcInst.PendingFlee = true
+		}
+	}
+
 	// Fire cover crossfire trap callbacks for ActionCoverHit events.
 	if h.onCoverHit != nil {
 		for _, ev := range roundEvents {
@@ -1763,6 +1800,18 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		})
 		h.broadcastFn(roomID, events)
 		h.removeDeadNPCsLocked(cbt)
+		// REQ-NB-41: set ReturningHome for surviving NPCs not in their home room; clear grudge.
+		for _, c := range cbt.Combatants {
+			if c.Kind != combat.KindNPC || c.IsDead() {
+				continue
+			}
+			if npcInst, found := h.npcMgr.Get(c.ID); found && npcInst != nil {
+				npcInst.GrudgePlayerID = ""
+				if npcInst.HomeRoomID != "" && npcInst.RoomID != npcInst.HomeRoomID {
+					npcInst.ReturningHome = true
+				}
+			}
+		}
 		h.engine.EndCombat(roomID)
 		h.clearCoweringNPCsLocked(roomID)
 		if h.onCombatEndFn != nil {
@@ -2514,6 +2563,12 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 // Precondition: h.combatMu is held.
 // Postcondition: actions queued until AP budget exhausted.
 func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combatant, actions []ai.PlannedAction) {
+	// REQ-NB-7B, REQ-NB-14: Evaluate pending flee from FleeHPPct threshold.
+	if npcInst, found := h.npcMgr.Get(actor.ID); found && npcInst != nil && npcInst.PendingFlee {
+		npcInst.PendingFlee = false
+		// Insert flee action at front so it executes before any other planned actions.
+		actions = append([]ai.PlannedAction{{Action: "flee", OperatorID: "__flee_threshold"}}, actions...)
+	}
 	for _, a := range actions {
 		var qa combat.QueuedAction
 		switch a.Action {
