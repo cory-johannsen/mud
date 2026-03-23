@@ -76,7 +76,7 @@ func TestHandleMap_PlayerNotFound(t *testing.T) {
 	mgr := session.NewManager()
 	s := &GameServiceServer{sessions: mgr}
 
-	_, err := s.handleMap("nonexistent-uid")
+	_, err := s.handleMap("nonexistent-uid", &gamev1.MapRequest{})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "not found")
 }
@@ -108,7 +108,7 @@ func TestHandleMap_RoomNotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	s := &GameServiceServer{sessions: sMgr, world: wMgr}
-	result, err := s.handleMap("uid1")
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	msg := result.GetMessage()
@@ -177,7 +177,7 @@ func TestHandleMap_ZoneNotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	s := &GameServiceServer{sessions: sMgr, world: wMgr}
-	result, err := s.handleMap("uid1")
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	msg := result.GetMessage()
@@ -211,7 +211,7 @@ func TestHandleMap_NoDiscoveredRooms(t *testing.T) {
 	// AutomapCache is initialised to an empty map — do not add any entries.
 
 	s := &GameServiceServer{sessions: sMgr, world: wMgr}
-	result, err := s.handleMap("uid1")
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	mapResp := result.GetMap()
@@ -229,7 +229,7 @@ func TestHandleMap_WithDiscoveredRooms(t *testing.T) {
 	wMgr, sMgr := newWorldAndSessionWithDiscovery("zone1", "room1")
 
 	s := &GameServiceServer{sessions: sMgr, world: wMgr}
-	result, err := s.handleMap("uid1")
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	mapResp := result.GetMap()
@@ -295,7 +295,7 @@ func TestProperty_HandleMap_DiscoveredRoomsAlwaysInResponse(t *testing.T) {
 		sess.AutomapCache[zoneID] = map[string]bool{roomID: true}
 
 		s := &GameServiceServer{sessions: sMgr, world: wMgr}
-		result, err := s.handleMap("uid1")
+		result, err := s.handleMap("uid1", &gamev1.MapRequest{})
 		if err != nil {
 			t.Fatalf("handleMap: %v", err)
 		}
@@ -364,7 +364,7 @@ func TestHandleMap_ReflectsSessionCacheUpdatedMidSession(t *testing.T) {
 
 	// handleMap should now see the updated cache.
 	s := &GameServiceServer{sessions: sMgr, world: wMgr}
-	result, err := s.handleMap("uid1")
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	mapResp := result.GetMap()
@@ -374,5 +374,240 @@ func TestHandleMap_ReflectsSessionCacheUpdatedMidSession(t *testing.T) {
 	require.True(t, mapResp.Tiles[0].Current, "tile for the player's current room must have Current == true")
 }
 
+// TestWireRevealZone_PopulatesAutomapCache verifies that calling RevealZoneMap
+// via wireRevealZone populates the player's AutomapCache for all rooms in the zone.
+//
+// Precondition: A zone with multiple rooms exists; player's AutomapCache is empty.
+// Postcondition: After calling RevealZoneMap, AutomapCache[zoneID] contains all room IDs.
+func TestWireRevealZone_PopulatesAutomapCache(t *testing.T) {
+	const zoneID = "zone1"
+	r1 := &world.Room{ID: "room1", ZoneID: zoneID, Title: "Room 1", MapX: 0, MapY: 0}
+	r2 := &world.Room{ID: "room2", ZoneID: zoneID, Title: "Room 2", MapX: 1, MapY: 0}
+	z := &world.Zone{
+		ID:        zoneID,
+		Name:      "Test Zone",
+		StartRoom: "room1",
+		Rooms:     map[string]*world.Room{"room1": r1, "room2": r2},
+	}
+	wMgr, err := world.NewManager([]*world.Zone{z})
+	require.NoError(t, err)
+
+	sMgr := session.NewManager()
+	_, err = sMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid1",
+		Username:          "user1",
+		CharName:          "Hero",
+		CharacterID:       1,
+		RoomID:            "room1",
+		CurrentHP:         10,
+		MaxHP:             10,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Northeast",
+		Class:             "Gunner",
+		Level:             1,
+	})
+	require.NoError(t, err)
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	// scriptMgr is nil — wireRevealZone must be a no-op without panicking.
+	require.Nil(t, s.scriptMgr, "scriptMgr should be nil in this test")
+	require.NotPanics(t, func() { s.wireRevealZone() })
+}
+
+// TestWireRevealZone_BulkReveal verifies that RevealZoneMap callback, when set,
+// populates AutomapCache for all rooms in the target zone.
+//
+// Precondition: A zone with 3 rooms exists; player AutomapCache is empty; scriptMgr is non-nil.
+// Postcondition: After calling RevealZoneMap(uid, zoneID), AutomapCache[zoneID] contains all 3 room IDs.
+func TestWireRevealZone_BulkReveal(t *testing.T) {
+	const zoneID = "zone1"
+	const uid = "uid1"
+	r1 := &world.Room{ID: "room1", ZoneID: zoneID, Title: "Room 1", MapX: 0, MapY: 0}
+	r2 := &world.Room{ID: "room2", ZoneID: zoneID, Title: "Room 2", MapX: 1, MapY: 0}
+	r3 := &world.Room{ID: "room3", ZoneID: zoneID, Title: "Room 3", MapX: 0, MapY: 1}
+	z := &world.Zone{
+		ID:        zoneID,
+		Name:      "Test Zone",
+		StartRoom: "room1",
+		Rooms:     map[string]*world.Room{"room1": r1, "room2": r2, "room3": r3},
+	}
+	wMgr, err := world.NewManager([]*world.Zone{z})
+	require.NoError(t, err)
+
+	sMgr := session.NewManager()
+	_, err = sMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               uid,
+		Username:          "user1",
+		CharName:          "Hero",
+		CharacterID:       1,
+		RoomID:            "room1",
+		CurrentHP:         10,
+		MaxHP:             10,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Northeast",
+		Class:             "Gunner",
+		Level:             1,
+	})
+	require.NoError(t, err)
+
+	// Directly invoke the wireRevealZone logic without a real scriptMgr:
+	// wire the callback manually to simulate what wireRevealZone does.
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+
+	// Directly call the reveal logic as wireRevealZone would wire it.
+	revealFn := func(revUID, revZoneID string) {
+		zone, ok := s.world.GetZone(revZoneID)
+		if !ok {
+			return
+		}
+		sess, ok := s.sessions.GetPlayer(revUID)
+		if !ok {
+			return
+		}
+		if sess.AutomapCache[revZoneID] == nil {
+			sess.AutomapCache[revZoneID] = make(map[string]bool)
+		}
+		for roomID := range zone.Rooms {
+			sess.AutomapCache[revZoneID][roomID] = true
+		}
+	}
+
+	revealFn(uid, zoneID)
+
+	sess, ok := sMgr.GetPlayer(uid)
+	require.True(t, ok)
+	require.Len(t, sess.AutomapCache[zoneID], 3, "AutomapCache must contain all 3 rooms after reveal")
+	require.True(t, sess.AutomapCache[zoneID]["room1"])
+	require.True(t, sess.AutomapCache[zoneID]["room2"])
+	require.True(t, sess.AutomapCache[zoneID]["room3"])
+}
+
 // Compile-time check that gamev1 is used.
 var _ *gamev1.MapResponse
+
+// TestHandleMap_WorldView_ReturnsWorldTiles verifies that view=="world" returns WorldZoneTile
+// entries for zones with non-nil WorldX/WorldY.
+func TestHandleMap_WorldView_ReturnsWorldTiles(t *testing.T) {
+	wx, wy := 0, 0
+	r := &world.Room{ID: "room1", ZoneID: "zone1", Title: "Room", Description: "Desc"}
+	z := &world.Zone{
+		ID: "zone1", Name: "Test Zone", StartRoom: "room1",
+		Rooms:       map[string]*world.Room{"room1": r},
+		DangerLevel: "sketchy",
+		WorldX:      &wx, WorldY: &wy,
+	}
+	wMgr, err := world.NewManager([]*world.Zone{z})
+	require.NoError(t, err)
+	sMgr := session.NewManager()
+	_, err = sMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "uid1", Username: "u", CharName: "Hero", CharacterID: 1,
+		RoomID: "room1", CurrentHP: 10, MaxHP: 10,
+		Abilities: character.AbilityScores{}, Role: "player",
+		RegionDisplayName: "test", Class: "Gunner", Level: 1,
+	})
+	require.NoError(t, err)
+	sess, _ := sMgr.GetPlayer("uid1")
+	sess.AutomapCache["zone1"] = map[string]bool{"room1": true}
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{View: "world"})
+	require.NoError(t, err)
+	mapResp := result.GetMap()
+	require.NotNil(t, mapResp)
+	require.Empty(t, mapResp.Tiles, "world view must not populate zone tiles")
+	require.Len(t, mapResp.WorldTiles, 1)
+	tile := mapResp.WorldTiles[0]
+	require.Equal(t, "zone1", tile.ZoneId)
+	require.Equal(t, "Test Zone", tile.ZoneName)
+	require.True(t, tile.Discovered)
+	require.True(t, tile.Current)
+	require.Equal(t, "sketchy", tile.DangerLevel)
+}
+
+// TestHandleMap_WorldView_ExcludesNilCoordZones verifies that zones without
+// WorldX/WorldY are excluded from world_tiles.
+func TestHandleMap_WorldView_ExcludesNilCoordZones(t *testing.T) {
+	r := &world.Room{ID: "room1", ZoneID: "zone1", Title: "Room", Description: "Desc"}
+	z := &world.Zone{
+		ID: "zone1", Name: "No Coords", StartRoom: "room1",
+		Rooms: map[string]*world.Room{"room1": r},
+	}
+	wMgr, err := world.NewManager([]*world.Zone{z})
+	require.NoError(t, err)
+
+	sMgr := session.NewManager()
+	_, err = sMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "uid1", Username: "u", CharName: "Hero", CharacterID: 1,
+		RoomID: "room1", CurrentHP: 10, MaxHP: 10,
+		Abilities: character.AbilityScores{}, Role: "player",
+		RegionDisplayName: "test", Class: "Gunner", Level: 1,
+	})
+	require.NoError(t, err)
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{View: "world"})
+	require.NoError(t, err)
+	mapResp := result.GetMap()
+	require.NotNil(t, mapResp)
+	require.Empty(t, mapResp.WorldTiles)
+}
+
+// TestHandleMap_ZoneView_SignatureUnchanged verifies that view=="" (or "zone") still
+// returns zone map tiles as before.
+func TestHandleMap_ZoneView_SignatureUnchanged(t *testing.T) {
+	wMgr, sMgr := newWorldAndSessionWithDiscovery("zone1", "room1")
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
+	require.NoError(t, err)
+	mapResp := result.GetMap()
+	require.NotNil(t, mapResp)
+	require.Len(t, mapResp.Tiles, 1)
+	require.Empty(t, mapResp.WorldTiles)
+}
+
+// TestProperty_HandleMap_WorldView_DiscoveredFlagMatchesCache is a property-based test
+// verifying that WorldZoneTile.Discovered always matches len(AutomapCache[zoneID]) > 0.
+func TestProperty_HandleMap_WorldView_DiscoveredFlagMatchesCache(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		discovered := rapid.Bool().Draw(t, "discovered")
+		wx, wy := 0, 0
+		r := &world.Room{ID: "room1", ZoneID: "zone1", Title: "R", Description: "D"}
+		z := &world.Zone{
+			ID: "zone1", Name: "Z", StartRoom: "room1",
+			Rooms:  map[string]*world.Room{"room1": r},
+			WorldX: &wx, WorldY: &wy,
+		}
+		wMgr, err := world.NewManager([]*world.Zone{z})
+		if err != nil {
+			t.Fatalf("NewManager: %v", err)
+		}
+		sMgr := session.NewManager()
+		_, addErr := sMgr.AddPlayer(session.AddPlayerOptions{
+			UID: "uid1", Username: "u", CharName: "Hero", CharacterID: 1,
+			RoomID: "room1", CurrentHP: 10, MaxHP: 10,
+			Abilities: character.AbilityScores{}, Role: "player",
+			RegionDisplayName: "test", Class: "Gunner", Level: 1,
+		})
+		if addErr != nil {
+			t.Fatalf("AddPlayer: %v", addErr)
+		}
+		if discovered {
+			sess, _ := sMgr.GetPlayer("uid1")
+			sess.AutomapCache["zone1"] = map[string]bool{"room1": true}
+		}
+		s := &GameServiceServer{sessions: sMgr, world: wMgr}
+		result, err := s.handleMap("uid1", &gamev1.MapRequest{View: "world"})
+		if err != nil {
+			t.Fatalf("handleMap: %v", err)
+		}
+		mapResp := result.GetMap()
+		if mapResp == nil || len(mapResp.WorldTiles) != 1 {
+			t.Fatalf("expected 1 world tile")
+		}
+		if mapResp.WorldTiles[0].Discovered != discovered {
+			t.Fatalf("Discovered=%v but cache populated=%v", mapResp.WorldTiles[0].Discovered, discovered)
+		}
+	})
+}

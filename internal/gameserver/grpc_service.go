@@ -352,6 +352,7 @@ func NewGameServiceServer(
 	s.hirelingRuntimeStates = make(map[string]*npc.HirelingRuntimeState)
 	s.WireCoverCrossfireTrap()
 	s.WireConsumableTrapTrigger()
+	s.wireRevealZone()
 	return s
 }
 
@@ -1550,7 +1551,7 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 	case *gamev1.ClientMessage_RoomEquip:
 		return s.handleRoomEquip(uid, p.RoomEquip)
 	case *gamev1.ClientMessage_Map:
-		return s.handleMap(uid)
+		return s.handleMap(uid, p.Map)
 	case *gamev1.ClientMessage_SkillsRequest:
 		return s.handleSkills(uid)
 	case *gamev1.ClientMessage_FeatsRequest:
@@ -1695,6 +1696,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleSetRoom(uid, p.SetRoom)
 	case *gamev1.ClientMessage_EditorCmds:
 		return s.handleEditorCmds(uid)
+	case *gamev1.ClientMessage_Travel:
+		return s.handleTravel(uid, p.Travel)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -4709,11 +4712,12 @@ func (s *GameServiceServer) handleRoomEquip(uid string, req *gamev1.RoomEquipReq
 	}
 }
 
-// handleMap returns the automap tiles for the player's current zone.
+// handleMap returns the automap tiles for the player's current zone (view=="zone" or ""),
+// or world map zone tiles for all zones with coordinates (view=="world").
 //
 // Precondition: uid must map to an active player session.
-// Postcondition: Returns a ServerEvent with MapResponse containing discovered tiles.
-func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
+// Postcondition: Returns a ServerEvent with MapResponse containing the appropriate tiles.
+func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
@@ -4727,6 +4731,33 @@ func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
 	if !ok {
 		return messageEvent("No map available."), nil
 	}
+
+	// World view: populate world_tiles for all zones with non-nil WorldX/WorldY.
+	if req.GetView() == "world" {
+		var worldTiles []*gamev1.WorldZoneTile
+		for _, z := range s.world.AllZones() {
+			if z.WorldX == nil || z.WorldY == nil {
+				continue
+			}
+			isDiscovered := len(sess.AutomapCache[z.ID]) > 0
+			current := z.ID == zone.ID
+			worldTiles = append(worldTiles, &gamev1.WorldZoneTile{
+				ZoneId:      z.ID,
+				ZoneName:    z.Name,
+				WorldX:      int32(*z.WorldX),
+				WorldY:      int32(*z.WorldY),
+				Discovered:  isDiscovered,
+				Current:     current,
+				DangerLevel: z.DangerLevel,
+			})
+		}
+		return &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Map{
+				Map: &gamev1.MapResponse{WorldTiles: worldTiles},
+			},
+		}, nil
+	}
+
 	discovered := sess.AutomapCache[zoneID]
 	var tiles []*gamev1.MapTile
 	for roomID := range discovered {
@@ -4778,6 +4809,43 @@ func (s *GameServiceServer) handleMap(uid string) (*gamev1.ServerEvent, error) {
 			Map: &gamev1.MapResponse{Tiles: tiles},
 		},
 	}, nil
+}
+
+// wireRevealZone wires the engine.map.reveal_zone Lua callback in the script manager.
+// It bulk-inserts all rooms in the target zone into character_map_rooms and
+// populates AutomapCache[zoneID] for the matching player session.
+//
+// Precondition: Must be called after s.scriptMgr and s.world are initialized.
+// Postcondition: s.scriptMgr.RevealZoneMap is set; calling it from Lua inserts all rooms idempotently.
+func (s *GameServiceServer) wireRevealZone() {
+	if s.scriptMgr == nil {
+		return
+	}
+	s.scriptMgr.RevealZoneMap = func(uid, zoneID string) {
+		zone, ok := s.world.GetZone(zoneID)
+		if !ok {
+			return
+		}
+		sess, ok := s.sessions.GetPlayer(uid)
+		if !ok {
+			return
+		}
+		if sess.AutomapCache[zoneID] == nil {
+			sess.AutomapCache[zoneID] = make(map[string]bool)
+		}
+		roomIDs := make([]string, 0, len(zone.Rooms))
+		for roomID := range zone.Rooms {
+			if !sess.AutomapCache[zoneID][roomID] {
+				sess.AutomapCache[zoneID][roomID] = true
+				roomIDs = append(roomIDs, roomID)
+			}
+		}
+		if s.automapRepo != nil && len(roomIDs) > 0 {
+			if err := s.automapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, roomIDs); err != nil {
+				s.logger.Warn("reveal_zone: bulk insert automap", zap.Error(err))
+			}
+		}
+	}
 }
 
 // handleSkills returns all skill proficiencies for the player's current character.
