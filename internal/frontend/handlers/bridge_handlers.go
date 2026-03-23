@@ -21,7 +21,7 @@ type bridgeContext struct {
 	stream         gamev1.GameService_SessionClient
 	helpFn         func()        // called by bridgeHelp to render help output
 	promptFn       func() string // called to build the current colored prompt
-	travelResolver func(zoneName string) (zoneID string, ok bool) // nil if not available
+	travelResolver func(zoneName string) (zoneID string, errMsg string) // nil if not available; errMsg non-empty signals failure
 }
 
 // bridgeResult is returned by every bridge handler.
@@ -709,9 +709,8 @@ func bridgeTravel(bctx *bridgeContext) (bridgeResult, error) {
 		return bridgeResult{done: true}, nil
 	}
 	if bctx.travelResolver != nil {
-		zoneID, ok := bctx.travelResolver(arg)
-		if !ok {
-			errMsg := "No such zone."
+		zoneID, errMsg := bctx.travelResolver(arg)
+		if errMsg != "" {
 			if bctx.conn.IsSplitScreen() {
 				_ = bctx.conn.WriteConsole(errMsg)
 				_ = bctx.conn.WritePromptSplit(bctx.promptFn())

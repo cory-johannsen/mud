@@ -277,14 +277,27 @@ func (c *Conn) ReadLine() (string, error) {
 
 // tryReadEscapeSeq attempts to read a VT100 CSI escape sequence after ESC (0x1B)
 // has been consumed. Returns a sentinel string if the sequence is a recognized
-// arrow key, or "" to indicate an unrecognized sequence (all bytes consumed).
+// arrow key, "\x1b" if the ESC was bare (no follow-on bytes within 50 ms), or
+// "" to indicate an unrecognized sequence (all bytes consumed).
 //
 // Precondition: ESC byte has already been read from c.reader.
 // Postcondition: All bytes of the recognized or unrecognized CSI sequence
 // (including parameter bytes and terminator) have been consumed.
 func (c *Conn) tryReadEscapeSeq() string {
+	// Use a short deadline so a bare ESC (no follow-on bytes) is detected
+	// quickly instead of blocking until the next keystroke.
+	if c.raw != nil {
+		_ = c.raw.SetReadDeadline(time.Now().Add(50 * time.Millisecond))
+	}
 	next, err := c.reader.ReadByte()
-	if err != nil || next != '[' {
+	if c.raw != nil {
+		_ = c.raw.SetReadDeadline(time.Time{})
+	}
+	if err != nil {
+		// Timeout or EOF — bare ESC.
+		return "\x1b"
+	}
+	if next != '[' {
 		return ""
 	}
 	final, err := c.reader.ReadByte()

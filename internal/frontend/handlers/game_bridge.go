@@ -480,10 +480,10 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			continue
 		}
 
-		travelResolver := func(zoneName string) (string, bool) {
+		travelResolver := func(zoneName string) (string, string) {
 			_, _, _, resp := mapState.snapshot()
 			if resp == nil {
-				return "", false
+				return "", "Open the world map first with 'map'."
 			}
 			lower := strings.ToLower(zoneName)
 			var matches []*gamev1.WorldZoneTile
@@ -493,11 +493,11 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 				}
 			}
 			if len(matches) == 0 {
-				return "", false
+				return "", "No such zone."
 			}
 			// Tiebreak: lexicographic zone ID order.
 			sortWorldTiles(matches)
-			return matches[0].ZoneId, true
+			return matches[0].ZoneId, ""
 		}
 
 		bctx := &bridgeContext{
@@ -551,6 +551,7 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		if result.enterMapMode {
 			mapState.enter(result.mapView)
 			if conn.IsSplitScreen() {
+				_ = conn.WriteConsole("")
 				_ = conn.WritePromptSplit(mapPrompt("", "", ""))
 			}
 		}
@@ -760,7 +761,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			mapState.mu.Unlock()
 			if inMapMode {
 				// Store the latest map response for re-render on resize.
-				mapState.lastMapResponse.Store(p.Map)
+				mapState.setLastResponse(p.Map)
 				var rendered string
 				if mapView == "world" {
 					rendered = RenderWorldMap(p.Map, mw)

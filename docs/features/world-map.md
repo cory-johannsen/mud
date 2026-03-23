@@ -17,7 +17,7 @@ Design spec: `docs/superpowers/specs/2026-03-21-world-map-design.md`
 - [ ] REQ-WM-9: A `WorldZoneTile` proto message MUST be added per Section 3.2 of the design spec.
 - [ ] REQ-WM-10: `MapResponse` MUST gain a `world_tiles` repeated field at field number `2`.
 - [ ] REQ-WM-10A: A `TravelRequest` proto message MUST be added with a `zone_id` string field at field number 1.
-- [ ] REQ-WM-10B: `ClientMessage` MUST gain a `travel` oneof variant holding a `TravelRequest` at field number `87`.
+- [ ] REQ-WM-10B: `ClientMessage` MUST gain a `travel` oneof variant holding a `TravelRequest` at field number `112` (field 87 is occupied by `BrowseRequest`).
 - [ ] REQ-WM-11: `handleMap` MUST accept `(uid string, req *gamev1.MapRequest)`. The dispatch site MUST pass `p.Map` as the second argument.
 - [ ] REQ-WM-12: When `req.View == "world"`, `handleMap` MUST populate `world_tiles` for all zones with non-nil `WorldX`/`WorldY`.
 - [ ] REQ-WM-13: `WorldZoneTile.discovered` MUST be `true` when `len(sess.AutomapCache[zone.ID]) > 0`.

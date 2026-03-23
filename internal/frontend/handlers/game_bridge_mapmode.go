@@ -24,10 +24,6 @@ type mapModeState struct {
 	mapView         string // "" or "zone" or "world"; "" treated as "zone"
 	mapSelectedZone string // "" means no zone selected
 	lastMapResponse atomic.Value // stores *gamev1.MapResponse
-	// worldTileCache stores the last known world map tiles for use by the travel
-	// command outside map mode (REQ-WM-57..59). Updated whenever a world map response
-	// is received. May be nil if the player has never requested the world map.
-	worldTileCache []*gamev1.WorldZoneTile
 }
 
 // isActive returns true if map mode is active.
@@ -57,23 +53,10 @@ func (m *mapModeState) exit() {
 	m.mapSelectedZone = ""
 }
 
-// setLastResponse stores the most recent MapResponse and updates the world tile cache
-// if the response contains world tiles.
-// REQ-WM-36.
+// setLastResponse stores the most recent MapResponse for re-render on resize and
+// for zone resolution by the travel command (REQ-WM-36, REQ-WM-57..59).
 func (m *mapModeState) setLastResponse(resp *gamev1.MapResponse) {
 	m.lastMapResponse.Store(resp)
-	if len(resp.GetWorldTiles()) > 0 {
-		m.mu.Lock()
-		m.worldTileCache = resp.GetWorldTiles()
-		m.mu.Unlock()
-	}
-}
-
-// getWorldTileCache returns a snapshot of the cached world tiles (may be nil).
-func (m *mapModeState) getWorldTileCache() []*gamev1.WorldZoneTile {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	return m.worldTileCache
 }
 
 // snapshot returns a consistent read of all map mode fields.
@@ -251,7 +234,7 @@ func (h *AuthHandler) handleMapModeInput(line string, conn *telnet.Conn, stream 
 		selectedZone := mapState.mapSelectedZone
 		mapState.mu.Unlock()
 		if selectedZone == "" {
-			writeFmtConsole(conn, "%sNo zone selected. Use a number or name to select a zone.%s", mapModeGray, "\033[0m")
+			writeFmtConsole(conn, "%sSelect a zone first.%s", mapModeGray, "\033[0m")
 			writeMapPromptToConn(conn, "", "", "")
 			return
 		}
@@ -285,7 +268,7 @@ func (h *AuthHandler) handleMapModeInput(line string, conn *telnet.Conn, stream 
 	tiles := resp.GetWorldTiles()
 	if len(tiles) == 0 {
 		// Zone view: selector not applicable.
-		writeFmtConsole(conn, "%sZone selection requires world view. Use 'w' to switch.%s", mapModeGray, "\033[0m")
+		writeFmtConsole(conn, "%sUnknown map command. Press q to exit.%s", mapModeGray, "\033[0m")
 		writeMapPromptToConn(conn, "", "", "")
 		return
 	}
