@@ -15,6 +15,11 @@ domain:
       subtasks: [fight]
 
     - task: behave
+      id: greet_mode
+      native_precondition: "player_entered_room"
+      subtasks: [say_taunt]
+
+    - task: behave
       id: idle_mode
       precondition: ""
       subtasks: [do_pass]
@@ -54,3 +59,12 @@ domain:
       target: highest_damage_enemy
       cooldown_rounds: 3
       ap_cost: 1
+
+    - id: say_taunt
+      action: say
+      cooldown: "30s"
+      strings:
+        - "You don't belong here, outsider."
+        - "Keep walking if you know what's good for you."
+        - "Got any rounds? Didn't think so."
+        - "This is our turf. You're trespassing."
