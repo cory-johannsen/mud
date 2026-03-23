@@ -2619,6 +2619,115 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 				Narrative: fmt.Sprintf("%s says \"%s\"", actor.Name, line),
 			}})
 			continue
+		case "flee":
+			// REQ-NB-25: NPC flees combat, exits to a random adjacent room. REQ-NB-26, REQ-NB-27.
+			if h.worldMgr == nil {
+				continue
+			}
+			room, roomOK := h.worldMgr.GetRoom(cbt.RoomID)
+			if !roomOK {
+				continue
+			}
+			exits := room.VisibleExits()
+			if len(exits) == 0 {
+				// REQ-NB-28: no visible exits → fail silently; NPC stays in combat.
+				continue
+			}
+			// Remove NPC from combatants before moving. REQ-NB-26.
+			cbt.RemoveCombatant(actor.ID)
+			target := exits[rand.Intn(len(exits))]
+			_ = h.npcMgr.Move(actor.ID, target.TargetRoom)
+			h.broadcastFn(cbt.RoomID, []*gamev1.CombatEvent{{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+				Narrative: fmt.Sprintf("%s flees!", actor.Name),
+			}})
+			// REQ-NB-27: remaining participants continue combat.
+			return
+
+		case "target_weakest":
+			// REQ-NB-29, REQ-NB-30: queue attack against lowest HP% living player.
+			// REQ-NB-31: silently skip when fewer than 2 living players exist.
+			var livingPlayers []*combat.Combatant
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindPlayer && !c.IsDead() {
+					livingPlayers = append(livingPlayers, c)
+				}
+			}
+			if len(livingPlayers) < 2 {
+				continue
+			}
+			weakest := livingPlayers[0]
+			for _, p := range livingPlayers[1:] {
+				weakestPct := float64(0)
+				if weakest.MaxHP > 0 {
+					weakestPct = float64(weakest.CurrentHP) / float64(weakest.MaxHP)
+				}
+				pPct := float64(0)
+				if p.MaxHP > 0 {
+					pPct = float64(p.CurrentHP) / float64(p.MaxHP)
+				}
+				if pPct < weakestPct {
+					weakest = p
+				}
+			}
+			qa = combat.QueuedAction{Type: combat.ActionAttack, Target: weakest.Name}
+
+		case "call_for_help":
+			// REQ-NB-32: recruit adjacent idle hostile NPCs of same type. REQ-NB-35: once per combat.
+			callerInst, callerOK := h.npcMgr.Get(actor.ID)
+			if !callerOK {
+				continue
+			}
+			if callerInst.AbilityCooldowns == nil {
+				callerInst.AbilityCooldowns = make(map[string]int)
+			}
+			const callForHelpKey = "__call_for_help_used"
+			if callerInst.AbilityCooldowns[callForHelpKey] > 0 {
+				continue
+			}
+			callerInst.AbilityCooldowns[callForHelpKey] = 999999 // permanent until respawn
+
+			if h.worldMgr == nil {
+				continue
+			}
+			room, roomOK := h.worldMgr.GetRoom(cbt.RoomID)
+			if !roomOK {
+				continue
+			}
+			exits := room.VisibleExits()
+			type recruitEntry struct {
+				inst   *npc.Instance
+				roomID string
+			}
+			var recruits []recruitEntry
+			for _, exit := range exits {
+				for _, candidate := range h.npcMgr.InstancesInRoom(exit.TargetRoom) {
+					if candidate.Type != actor.NPCType {
+						continue
+					}
+					if candidate.Disposition != "hostile" {
+						continue
+					}
+					if h.engine.IsNPCInCombat(candidate.ID) {
+						continue
+					}
+					recruits = append(recruits, recruitEntry{inst: candidate, roomID: exit.TargetRoom})
+				}
+			}
+			if len(recruits) == 0 {
+				continue
+			}
+			h.broadcastFn(cbt.RoomID, []*gamev1.CombatEvent{{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+				Narrative: fmt.Sprintf("%s calls for help!", actor.Name),
+			}})
+			for _, r := range recruits {
+				_ = h.npcMgr.Move(r.inst.ID, cbt.RoomID)
+				// REQ-NB-34: join on next tick via PendingJoinCombatRoomID.
+				r.inst.PendingJoinCombatRoomID = cbt.RoomID
+			}
+			continue
+
 		default:
 			qa = combat.QueuedAction{Type: combat.ActionPass}
 		}
