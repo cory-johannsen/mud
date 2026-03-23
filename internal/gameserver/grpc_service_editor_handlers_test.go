@@ -129,7 +129,7 @@ func TestHandleSpawnNPC_UnknownTemplate(t *testing.T) {
 	svc, _, sessMgr, _ := setupEditorService(t)
 	addEditorSession(t, sessMgr, "u1", "r1")
 
-	svc.respawnMgr = npc.NewRespawnManager(nil, nil)
+	svc.respawnMgr = npc.NewRespawnManager(nil, nil, nil, nil)
 	evt, err := svc.handleSpawnNPC("u1", &gamev1.SpawnNPCRequest{TemplateId: "ghost", RoomId: "r1"})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
@@ -141,7 +141,7 @@ func TestHandleSpawnNPC_UnknownRoom(t *testing.T) {
 	addEditorSession(t, sessMgr, "u1", "r1")
 
 	tmpl := &npc.Template{ID: "guard", Name: "Guard", Level: 1}
-	svc.respawnMgr = npc.NewRespawnManager(nil, map[string]*npc.Template{"guard": tmpl})
+	svc.respawnMgr = npc.NewRespawnManager(nil, map[string]*npc.Template{"guard": tmpl}, nil, nil)
 	evt, err := svc.handleSpawnNPC("u1", &gamev1.SpawnNPCRequest{TemplateId: "guard", RoomId: "no_such_room"})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
@@ -153,7 +153,7 @@ func TestHandleSpawnNPC_DeniedPlayerRole(t *testing.T) {
 	addPlayerSession(t, sessMgr, "u1", "r1")
 
 	tmpl := &npc.Template{ID: "guard", Name: "Guard", Level: 1}
-	svc.respawnMgr = npc.NewRespawnManager(nil, map[string]*npc.Template{"guard": tmpl})
+	svc.respawnMgr = npc.NewRespawnManager(nil, map[string]*npc.Template{"guard": tmpl}, nil, nil)
 	evt, err := svc.handleSpawnNPC("u1", &gamev1.SpawnNPCRequest{TemplateId: "guard", RoomId: "r1"})
 	require.NoError(t, err)
 	require.NotNil(t, evt)

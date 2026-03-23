@@ -98,7 +98,7 @@ func TestCombatHandler_LootGeneration_CurrencyAndItems(t *testing.T) {
 		roomID: {{TemplateID: templateID, Max: 1, RespawnDelay: time.Minute}},
 	}
 	templates := map[string]*npc.Template{templateID: tmpl}
-	respawnMgr := npc.NewRespawnManager(spawns, templates)
+	respawnMgr := npc.NewRespawnManager(spawns, templates, nil, nil)
 
 	broadcastFn, getEvents := makeBroadcastCapture()
 	h := makeLootHandler(t, npcMgr, sessMgr, respawnMgr, floorMgr, broadcastFn)
@@ -163,7 +163,7 @@ func TestCombatHandler_LootGeneration_NilFloorMgr_NoPanic(t *testing.T) {
 		roomID: {{TemplateID: templateID, Max: 1, RespawnDelay: time.Minute}},
 	}
 	templates := map[string]*npc.Template{templateID: tmpl}
-	respawnMgr := npc.NewRespawnManager(spawns, templates)
+	respawnMgr := npc.NewRespawnManager(spawns, templates, nil, nil)
 
 	broadcastFn, getEvents := makeBroadcastCapture()
 	// Pass nil floorMgr to exercise the nil guard.

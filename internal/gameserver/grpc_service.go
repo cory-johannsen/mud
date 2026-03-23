@@ -251,6 +251,9 @@ type GameServiceServer struct {
 	setRegistry *inventory.SetRegistry
 	// gameHourFn returns the current game hour (0–23). Used by NPC schedule evaluation. REQ-NB-16.
 	gameHourFn func() int
+	// npcIdleTickInterval is the ZoneTickManager tick interval used to convert
+	// say cooldown durations to tick counts. REQ-NB-2.
+	npcIdleTickInterval time.Duration
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -363,6 +366,16 @@ func NewGameServiceServer(
 	s.WireCoverCrossfireTrap()
 	s.WireConsumableTrapTrigger()
 	return s
+}
+
+// SetNPCIdleTickInterval sets the zone-tick interval used to convert say cooldown durations
+// to tick counts. REQ-NB-2. Must be called before StartZoneTicks.
+//
+// Precondition: interval must be > 0.
+func (s *GameServiceServer) SetNPCIdleTickInterval(interval time.Duration) {
+	if interval > 0 {
+		s.npcIdleTickInterval = interval
+	}
 }
 
 // SetProgressRepo registers the CharacterProgressRepository used to load pending boosts at login.
@@ -3811,7 +3824,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 		if tmpl != nil && len(tmpl.Schedule) > 0 {
 			entry := behavior.ActiveEntry(tmpl.Schedule, hour)
 			if entry != nil {
-				s.applyScheduleEntry(inst, entry)
+				s.applyScheduleEntry(inst, entry, zoneID, aiReg)
 				inst.PlayerEnteredRoom = false
 				inst.OnDamageTaken = false
 				return
@@ -3865,7 +3878,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 	for _, a := range actions {
 		switch a.Action {
 		case "move_random":
-			s.npcPatrolRandom(inst)
+			s.npcMoveRandomFenced(inst, inst.HomeRoomID, inst.WanderRadius)
 		case "say":
 			s.npcSay(inst, a)
 		default:
@@ -3914,9 +3927,16 @@ func (s *GameServiceServer) npcSay(inst *npc.Instance, a ai.PlannedAction) {
 		return
 	}
 	if a.Cooldown != "" {
-		if _, err := time.ParseDuration(a.Cooldown); err == nil {
-			// Store 1-tick cooldown (decremented each idle tick).
-			inst.AbilityCooldowns[a.OperatorID] = 1
+		if d, err := time.ParseDuration(a.Cooldown); err == nil {
+			// Compute tick count from cooldown duration and idle tick interval. REQ-NB-2.
+			ticks := 1
+			if s.npcIdleTickInterval > 0 && d > 0 {
+				ticks = int(d / s.npcIdleTickInterval)
+				if ticks < 1 {
+					ticks = 1
+				}
+			}
+			inst.AbilityCooldowns[a.OperatorID] = ticks
 		}
 	}
 	line := a.Strings[rand.Intn(len(a.Strings))]
@@ -4035,12 +4055,46 @@ func (s *GameServiceServer) npcMoveRandomFenced(inst *npc.Instance, anchorRoomID
 }
 
 // applyScheduleEntry applies a schedule entry's behavior mode for this tick. REQ-NB-21.
-func (s *GameServiceServer) applyScheduleEntry(inst *npc.Instance, entry *behavior.ScheduleEntry) {
+func (s *GameServiceServer) applyScheduleEntry(inst *npc.Instance, entry *behavior.ScheduleEntry, zoneID string, aiReg *ai.Registry) {
 	anchorRoomID := entry.PreferredRoom
 
 	switch entry.BehaviorMode {
 	case "idle":
-		// REQ-NB-21A: remain in preferred_room; move toward anchor if not there.
+		// REQ-NB-21A: remain in preferred_room; fire say operators via HTN. REQ-NB-21A.
+		if inst.AIDomain != "" && aiReg != nil {
+			if planner, ok := aiReg.PlannerFor(inst.AIDomain); ok {
+				hpPct := 0
+				if inst.MaxHP > 0 {
+					hpPct = inst.CurrentHP * 100 / inst.MaxHP
+				}
+				ws := &ai.WorldState{
+					NPC: &ai.NPCState{
+						UID:       inst.ID,
+						Name:      inst.Name(),
+						Kind:      "npc",
+						HP:        inst.CurrentHP,
+						MaxHP:     inst.MaxHP,
+						Awareness: inst.Awareness,
+						ZoneID:    zoneID,
+						RoomID:    inst.RoomID,
+					},
+					Room:              &ai.RoomState{ID: inst.RoomID, ZoneID: zoneID},
+					InCombat:          false,
+					PlayerEnteredRoom: inst.PlayerEnteredRoom,
+					HPPctBelow:        hpPct,
+					OnDamageTaken:     inst.OnDamageTaken,
+					HasGrudgeTarget:   inst.GrudgePlayerID != "",
+					GrudgePlayerID:    inst.GrudgePlayerID,
+				}
+				if actions, err := planner.Plan(ws); err == nil {
+					for _, a := range actions {
+						if a.Action == "say" {
+							s.npcSay(inst, a)
+						}
+					}
+				}
+			}
+		}
 	case "patrol":
 		// REQ-NB-21B: wander within wander_radius.
 		s.npcMoveRandomFenced(inst, anchorRoomID, inst.WanderRadius)

@@ -77,6 +77,9 @@ type CombatHandler struct {
 	// Keyed by roomID+":"+equipmentID. Value is current HP (0 = destroyed).
 	coverMu       sync.Mutex
 	roomCoverState map[string]int
+	// npcIdleTickInterval is used to convert say cooldown durations to tick counts. REQ-NB-2.
+	// Zero means use 1 tick minimum.
+	npcIdleTickInterval time.Duration
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -237,6 +240,16 @@ func (h *CombatHandler) SetOnCoverHit(fn func(roomID, attackerID, coverEquipID s
 // The callback may be nil; if so, no action is taken.
 func (h *CombatHandler) SetOnCombatantMoved(fn func(roomID, movedCombatantID string)) {
 	h.onCombatantMoved = fn
+}
+
+// SetNPCIdleTickInterval sets the idle tick interval used to convert say cooldown
+// durations to tick counts. REQ-NB-2.
+//
+// Precondition: interval must be > 0.
+func (h *CombatHandler) SetNPCIdleTickInterval(interval time.Duration) {
+	if interval > 0 {
+		h.npcIdleTickInterval = interval
+	}
 }
 
 // FireCombatantMoved invokes the onCombatantMoved callback if registered.
@@ -2665,7 +2678,15 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 			}
 			if a.Cooldown != "" {
 				if d, err := time.ParseDuration(a.Cooldown); err == nil && d > 0 {
-					inst.AbilityCooldowns[a.OperatorID] = 1
+					// Compute tick count from cooldown duration and idle tick interval. REQ-NB-2.
+					ticks := 1
+					if h.npcIdleTickInterval > 0 {
+						ticks = int(d / h.npcIdleTickInterval)
+						if ticks < 1 {
+							ticks = 1
+						}
+					}
+					inst.AbilityCooldowns[a.OperatorID] = ticks
 				}
 			}
 			line := a.Strings[rand.Intn(len(a.Strings))]

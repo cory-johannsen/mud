@@ -95,7 +95,7 @@ func NewPopulatedRespawnManager(
 		}
 	}
 
-	respawnMgr := NewRespawnManager(roomSpawns, templateByID)
+	respawnMgr := NewRespawnManager(roomSpawns, templateByID, zoneRooms, roomToZone)
 	for roomID := range roomSpawns {
 		respawnMgr.PopulateRoom(roomID, npcMgr)
 	}
@@ -112,11 +112,7 @@ func NewPopulatedRespawnManager(
 		rooms := zoneRooms[zoneID]
 		dm, err := behavior.BFSDistanceMap(rooms, inst.HomeRoomID)
 		if err != nil {
-			logger.Warn("BFSDistanceMap failed for NPC home room",
-				zap.String("npc_id", inst.ID),
-				zap.String("home_room", inst.HomeRoomID),
-				zap.Error(err))
-			continue
+			return nil, fmt.Errorf("npc %q home_room %q not found in zone %q: %w", inst.ID, inst.HomeRoomID, zoneID, err)
 		}
 		inst.HomeRoomBFS = dm
 	}
