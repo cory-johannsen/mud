@@ -294,6 +294,9 @@ func main() {
 	// Wire REQ-NPC-8: prevent a player from attacking their own bound hireling.
 	app.CombatHandler.SetHirelingOwnerOf(app.GRPCService.HirelingOwnerOf)
 
+	// Wire feat registry into NPC manager for tough feat HP bonus at spawn (REQ-AE-18).
+	app.NpcMgr.SetFeatRegistry(app.GRPCService.FeatRegistry())
+
 	// Wire XP service with progress and skill-increase persistence.
 	if xpCfg, xpErr := xp.LoadXPConfig(appCfg.XPConfigFile); xpErr != nil {
 		logger.Warn("loading xp config; XP awards disabled", zap.Error(xpErr))
@@ -302,6 +305,8 @@ func main() {
 		if tierErr := xpCfg.ValidateTiers(); tierErr != nil {
 			logger.Warn("XP tier multipliers incomplete; defaulting to standard tier only", zap.Error(tierErr))
 		}
+		// Wire XP config into NPC manager for tier HP scaling at spawn (REQ-AE-5).
+		app.NpcMgr.SetXPConfig(xpCfg)
 		xpSvc := xp.NewService(xpCfg, app.ProgressRepo)
 		xpSvc.SetSkillIncreaseSaver(app.ProgressRepo)
 		app.GRPCService.SetProgressRepo(app.ProgressRepo)

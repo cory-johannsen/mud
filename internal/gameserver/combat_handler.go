@@ -1950,11 +1950,13 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		}
 	}
 
-	// Compute NPC feat bonuses (REQ-AE-16, REQ-AE-17).
+	// Compute NPC feat bonuses (REQ-AE-16, REQ-AE-17, REQ-AE-11).
+	// Target is a player session (not an NPC instance), so target is nil and
+	// TargetTags-gated feats are skipped per REQ-AE-11.
 	var npcFeatStats NPCEffectiveStats
 	if h.featRegistry != nil {
 		roomNPCs := h.npcMgr.InstancesInRoom(inst.RoomID)
-		npcFeatStats = ComputeNPCEffectiveStats(inst, h.featRegistry, roomNPCs)
+		npcFeatStats = ComputeNPCAttackStats(inst, nil, h.featRegistry, roomNPCs)
 	}
 
 	// StrMod serves as both the attack modifier and damage modifier for NPCs.

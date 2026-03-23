@@ -5,6 +5,9 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/cory-johannsen/mud/internal/game/xp"
 )
 
 // Manager tracks all live NPC instances by ID and by room.
@@ -16,6 +19,8 @@ type Manager struct {
 	roomSets        map[string]map[string]bool // roomID → set of instanceIDs
 	counter         atomic.Uint64
 	armorACResolver func(string) int
+	xpCfg           *xp.XPConfig
+	featRegistry    *ruleset.FeatRegistry
 }
 
 // NewManager creates an empty NPC Manager.
@@ -36,6 +41,24 @@ func (m *Manager) SetArmorACResolver(fn func(string) int) {
 	m.armorACResolver = fn
 }
 
+// SetXPConfig registers an optional XP configuration used to scale NPC HP by
+// tier at spawn time.
+//
+// Precondition: cfg may be nil (disables tier HP scaling).
+// Postcondition: Subsequent Spawn calls apply tier HP multipliers via cfg.
+func (m *Manager) SetXPConfig(cfg *xp.XPConfig) {
+	m.xpCfg = cfg
+}
+
+// SetFeatRegistry registers an optional feat registry used to apply feat-based
+// HP bonuses (e.g. the "tough" feat) at spawn time.
+//
+// Precondition: r may be nil (disables feat HP bonuses).
+// Postcondition: Subsequent Spawn calls apply feat HP bonuses via r.
+func (m *Manager) SetFeatRegistry(r *ruleset.FeatRegistry) {
+	m.featRegistry = r
+}
+
 // Spawn creates a new Instance from tmpl and places it in roomID.
 // If multiple instances of the same template occupy the room, each is assigned
 // a unique uppercase letter suffix (A, B, C, …). A single instance has no suffix.
@@ -54,7 +77,7 @@ func (m *Manager) Spawn(tmpl *Template, roomID string) (*Instance, error) {
 
 	n := m.counter.Add(1)
 	id := fmt.Sprintf("%s-%s-%d", tmpl.ID, roomID, n)
-	inst := NewInstanceWithResolver(id, tmpl, roomID, m.armorACResolver, nil, nil)
+	inst := NewInstanceWithResolver(id, tmpl, roomID, m.armorACResolver, m.xpCfg, m.featRegistry)
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
