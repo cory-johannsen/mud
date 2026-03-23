@@ -90,6 +90,9 @@ type Template struct {
 	RobMultiplier float64 `yaml:"rob_multiplier"`
 	// SenseAbilities lists named special abilities for sense motive reveal.
 	SenseAbilities []string `yaml:"sense_abilities"`
+	// BossAbilities defines the set of special abilities for boss-tier NPCs.
+	// Validated by Template.Validate().
+	BossAbilities []BossAbility `yaml:"boss_abilities"`
 	// Tier sets the difficulty tier for this NPC. Valid values: "minion", "standard",
 	// "elite", "champion", "boss". Empty means "standard" is assumed at runtime.
 	Tier string `yaml:"tier"`
@@ -184,6 +187,11 @@ func (t *Template) Validate() error {
 	}
 	if !validTiers[t.Tier] {
 		return fmt.Errorf("npc template %q: unknown tier %q", t.ID, t.Tier)
+	}
+	for _, ability := range t.BossAbilities {
+		if err := ability.Validate(); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
 	}
 	if t.Loot != nil {
 		if err := t.Loot.Validate(); err != nil {

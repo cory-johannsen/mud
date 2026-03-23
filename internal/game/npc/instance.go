@@ -106,6 +106,9 @@ type Instance struct {
 	// AbilityCooldowns maps operator ID → rounds remaining until usable again.
 	// Nil at spawn; initialized lazily on first write in applyPlanLocked.
 	AbilityCooldowns map[string]int
+	// BossAbilityCooldowns maps boss ability ID → time after which it may fire again.
+	// Initialized to an empty non-nil map at spawn. Nil-safe check is not required.
+	BossAbilityCooldowns map[string]time.Time
 	// NPCType is copied from the template at spawn.
 	// "combat" = participates in normal combat; other values = non-combat NPC.
 	NPCType string
@@ -237,8 +240,9 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		Currency:         0,
 		SenseAbilities: append([]string(nil), tmpl.SenseAbilities...),
 		Tags:           append([]string(nil), tmpl.Tags...),
-		Feats:          append([]string(nil), tmpl.Feats...),
-		Tier:           tmpl.Tier,
+		Feats:                append([]string(nil), tmpl.Feats...),
+		Tier:                 tmpl.Tier,
+		BossAbilityCooldowns: make(map[string]time.Time),
 		NPCType:          tmpl.NPCType,
 		NpcRole:          tmpl.NpcRole,
 		Personality:      tmpl.Personality,
