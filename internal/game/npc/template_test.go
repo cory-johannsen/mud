@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
@@ -1008,4 +1009,41 @@ tags:
 	tmpl, err := npc.LoadTemplateFromBytes(data)
 	require.NoError(t, err)
 	assert.Equal(t, []string{"undead", "flying"}, tmpl.Tags)
+}
+
+func TestTemplate_ValidateWithRegistry_UnknownFeat(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "test", Name: "Test", Level: 1, MaxHP: 10, AC: 10,
+		Feats: []string{"nonexistent_feat"},
+	}
+	registry := ruleset.NewFeatRegistry([]*ruleset.Feat{})
+	err := tmpl.ValidateWithRegistry(registry)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "nonexistent_feat")
+}
+
+func TestTemplate_ValidateWithRegistry_FeatNotAllowNPC(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "test", Name: "Test", Level: 1, MaxHP: 10, AC: 10,
+		Feats: []string{"player_only_feat"},
+	}
+	feats := []*ruleset.Feat{{ID: "player_only_feat", Name: "PO Feat", AllowNPC: false}}
+	registry := ruleset.NewFeatRegistry(feats)
+	err := tmpl.ValidateWithRegistry(registry)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "player_only_feat")
+}
+
+func TestTemplate_ValidateWithRegistry_ValidFeats(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "test", Name: "Test", Level: 1, MaxHP: 10, AC: 10,
+		Feats: []string{"tough", "brutal_strike"},
+	}
+	feats := []*ruleset.Feat{
+		{ID: "tough", Name: "Tough", AllowNPC: true},
+		{ID: "brutal_strike", Name: "Brutal Strike", AllowNPC: true},
+	}
+	registry := ruleset.NewFeatRegistry(feats)
+	err := tmpl.ValidateWithRegistry(registry)
+	require.NoError(t, err)
 }

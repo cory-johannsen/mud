@@ -94,6 +94,11 @@ type Instance struct {
 	SenseAbilities []string
 	// Tags is the list of content labels propagated from the template at spawn.
 	Tags []string
+	// Feats is the list of feat IDs propagated from the template at spawn.
+	Feats []string
+	// Tier is the difficulty tier propagated from the template at spawn.
+	// Empty string means "standard" is assumed.
+	Tier string
 	// Disposition is the runtime NPC disposition; initialized from template, may change.
 	Disposition string
 	// MotiveBonus is the +2 attack bonus granted by a motive crit fail; applied once then zeroed.
@@ -232,6 +237,8 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		Currency:         0,
 		SenseAbilities: append([]string(nil), tmpl.SenseAbilities...),
 		Tags:           append([]string(nil), tmpl.Tags...),
+		Feats:          append([]string(nil), tmpl.Feats...),
+		Tier:           tmpl.Tier,
 		NPCType:          tmpl.NPCType,
 		NpcRole:          tmpl.NpcRole,
 		Personality:      tmpl.Personality,
