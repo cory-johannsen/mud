@@ -112,6 +112,7 @@ func (s *SessionInputState) Mode() InputMode {
 
 // Room returns the RoomModeHandler. Used by forwardServerEvents to return to
 // room mode after travel or other mode-exiting server events.
+// Invariant: s.room is immutable after construction and requires no lock.
 // REQ-IMR-11.
 func (s *SessionInputState) Room() *RoomModeHandler {
 	return s.room
@@ -138,7 +139,10 @@ func (r *RoomModeHandler) HandleInput(_ string, _ *telnet.Conn, _ gamev1.GameSer
 // Prompt implements ModeHandler. REQ-IMR-7.
 func (r *RoomModeHandler) Prompt() string { return "> " }
 
-// HandleInput delegates the input line to the active handler.
+// HandleInput delegates the input line to the currently active ModeHandler.
+// It acquires a read lock to snapshot the handler, then releases the lock
+// before calling HandleInput so handlers may call SetMode without deadlocking.
+// REQ-IMR-6, REQ-IMR-8.
 func (s *SessionInputState) HandleInput(line string, conn *telnet.Conn, stream gamev1.GameService_SessionClient, requestID *int) {
 	s.mu.RLock()
 	h := s.current
