@@ -32,6 +32,12 @@ type PlannedAction struct {
 
 	// APCost is the AP consumed by this action. Zero means default (1).
 	APCost int
+
+	// Strings is the pool of lines for "say" actions; one is chosen at random.
+	Strings []string
+
+	// Cooldown is a Go duration string for "say" action cooldown enforcement.
+	Cooldown string
 }
 
 // Planner evaluates an HTN domain for a single NPC and produces an ordered
@@ -90,6 +96,8 @@ func (p *Planner) Plan(state *WorldState) ([]PlannedAction, error) {
 				Severity:       op.Severity,
 				CooldownRounds: op.CooldownRounds,
 				APCost:         op.APCost,
+				Strings:        op.Strings,
+				Cooldown:       op.Cooldown,
 			})
 			continue
 		}

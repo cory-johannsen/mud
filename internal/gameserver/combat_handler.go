@@ -2645,13 +2645,9 @@ func abilitySeverity(s string) (mentalstate.Severity, bool) {
 	return 0, false
 }
 
-// pickTaunt returns a random taunt from inst.Taunts, or a generic fallback.
+// pickTaunt returns a generic combat message. Taunts were migrated to say HTN operators.
 func (h *CombatHandler) pickTaunt(inst *npc.Instance) string {
-	if len(inst.Taunts) == 0 {
-		return fmt.Sprintf("The %s unsettles you.", inst.Name())
-	}
-	idx := h.dice.Src().Intn(len(inst.Taunts))
-	return inst.Taunts[idx]
+	return fmt.Sprintf("The %s unsettles you.", inst.Name())
 }
 
 // legacyAutoQueueLocked queues ActionAttack for c targeting the first living player.
