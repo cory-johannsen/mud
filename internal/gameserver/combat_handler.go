@@ -33,6 +33,12 @@ type CurrencySaver interface {
 	SaveCurrency(ctx context.Context, characterID int64, currency int) error
 }
 
+// SubstanceService is the interface CombatHandler needs for substance application.
+// REQ-AH-21: applies a poison substance to a target on a successful weapon hit.
+type SubstanceService interface {
+	ApplySubstanceByID(uid, substanceID string) error
+}
+
 // CombatHandler handles attack, strike, pass, flee, and round timer management
 // for the 3-action-point economy (Stage 4).
 //
@@ -68,6 +74,7 @@ type CombatHandler struct {
 	currencySaver  CurrencySaver          // optional; persists currency after loot award; may be nil
 	mentalStateMgr *mentalstate.Manager   // optional; manages mental state conditions; may be nil
 	logger         *zap.Logger            // optional; used for error logging; may be nil
+	substanceSvc   SubstanceService       // optional; applies poison substances on weapon hit (REQ-AH-21); may be nil
 	combatMu      sync.RWMutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -198,6 +205,14 @@ func (h *CombatHandler) SetXPService(svc *xp.Service) {
 // Postcondition: Currency is persisted to durable storage after each NPC kill that drops currency.
 func (h *CombatHandler) SetCurrencySaver(saver CurrencySaver) {
 	h.currencySaver = saver
+}
+
+// SetSubstanceSvc registers the SubstanceService used to apply poison substances on hit.
+//
+// Precondition: svc must be non-nil.
+// Postcondition: substanceSvc is set on the CombatHandler.
+func (h *CombatHandler) SetSubstanceSvc(svc SubstanceService) {
+	h.substanceSvc = svc
 }
 
 // SetLogger registers the logger used for error reporting inside CombatHandler.
@@ -1590,6 +1605,38 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	})
 	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
 
+	// REQ-AH-21: Apply poison substance from attacker's weapon to player targets on hit.
+	if h.substanceSvc != nil && h.invRegistry != nil {
+		for _, ev := range roundEvents {
+			if ev.AttackResult == nil {
+				continue
+			}
+			r := ev.AttackResult
+			if r.Outcome != combat.Success && r.Outcome != combat.CritSuccess {
+				continue
+			}
+			// Only apply poison when the target is a player.
+			if _, playerOK := h.sessions.GetPlayer(r.TargetID); !playerOK {
+				continue
+			}
+			// Determine attacker's weapon ID (NPC or player).
+			var weaponDefID string
+			if inst, npcOK := h.npcMgr.Get(r.AttackerID); npcOK && inst.WeaponID != "" {
+				weaponDefID = inst.WeaponID
+			} else if actorSess, playerActorOK := h.sessions.GetPlayer(r.AttackerID); playerActorOK && actorSess.LoadoutSet != nil {
+				if preset := actorSess.LoadoutSet.ActivePreset(); preset != nil && preset.MainHand != nil {
+					weaponDefID = preset.MainHand.Def.ID
+				}
+			}
+			if weaponDefID == "" {
+				continue
+			}
+			if itemDef, itemOK := h.invRegistry.ItemByWeaponRef(weaponDefID); itemOK && itemDef.PoisonSubstanceID != "" {
+				_ = h.substanceSvc.ApplySubstanceByID(r.TargetID, itemDef.PoisonSubstanceID)
+			}
+		}
+	}
+
 	// Fire cover crossfire trap callbacks for ActionCoverHit events.
 	if h.onCoverHit != nil {
 		for _, ev := range roundEvents {
@@ -1648,6 +1695,50 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		durRoller,
 		durRnd,
 	)
+
+	// REQ-AH-21: apply poison substance on weapon hit for player attackers.
+	if h.substanceSvc != nil && h.invRegistry != nil {
+		for _, re := range roundEvents {
+			if re.ActionType != combat.ActionAttack {
+				continue
+			}
+			if re.AttackResult == nil {
+				continue
+			}
+			if re.AttackResult.Outcome != combat.CritSuccess && re.AttackResult.Outcome != combat.Success {
+				continue
+			}
+			if re.TargetID == "" {
+				continue
+			}
+			// Check if the actor is a player with a poisoned weapon.
+			actSess, actOK := h.sessions.GetPlayer(re.ActorID)
+			if !actOK || actSess.LoadoutSet == nil {
+				continue
+			}
+			preset := actSess.LoadoutSet.ActivePreset()
+			if preset == nil || preset.MainHand == nil {
+				continue
+			}
+			// Resolve ItemDefID from the InstanceID in the backpack.
+			if preset.MainHand.InstanceID == "" {
+				continue
+			}
+			inst := actSess.Backpack.GetByInstanceID(preset.MainHand.InstanceID)
+			if inst == nil {
+				continue
+			}
+			weapItemDef, wOK := h.invRegistry.Item(inst.ItemDefID)
+			if !wOK || weapItemDef.PoisonSubstanceID == "" {
+				continue
+			}
+			if err := h.substanceSvc.ApplySubstanceByID(re.TargetID, weapItemDef.PoisonSubstanceID); err != nil {
+				if h.logger != nil {
+					h.logger.Warn("ApplySubstanceByID failed", zap.Error(err))
+				}
+			}
+		}
+	}
 
 	// Reset per-round loadout swap flag for all players in this combat.
 	for _, c := range cbt.Combatants {

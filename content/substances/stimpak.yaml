@@ -1,0 +1,14 @@
+id: stimpak
+name: Stimpak
+category: medicine
+onset_delay: "0s"
+duration: "5m"
+effects:
+  - hp_regen: 2
+remove_on_expire: []
+addictive: false
+addiction_chance: 0.0
+overdose_threshold: 10
+overdose_condition: stimulant_overdose
+withdrawal_conditions: []
+recovery_duration: "0s"

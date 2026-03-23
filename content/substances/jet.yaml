@@ -1,0 +1,21 @@
+id: jet
+name: Jet
+category: drug
+onset_delay: "0s"
+duration: "20m"
+effects:
+  - apply_condition: speed_boost
+    stacks: 1
+  - apply_condition: tunnel_vision
+    stacks: 1
+remove_on_expire:
+  - speed_boost
+  - tunnel_vision
+addictive: true
+addiction_chance: 0.20
+overdose_threshold: 3
+overdose_condition: stimulant_overdose
+withdrawal_conditions:
+  - fatigue
+  - nausea
+recovery_duration: "4h"

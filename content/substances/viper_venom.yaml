@@ -1,0 +1,16 @@
+id: viper_venom
+name: Viper Venom
+category: poison
+onset_delay: "10s"
+duration: "3m"
+effects:
+  - apply_condition: poisoned
+    stacks: 1
+remove_on_expire:
+  - poisoned
+addictive: false
+addiction_chance: 0.0
+overdose_threshold: 1
+overdose_condition: severe_poisoning
+withdrawal_conditions: []
+recovery_duration: "0s"

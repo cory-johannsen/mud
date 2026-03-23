@@ -31,6 +31,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -248,6 +249,9 @@ type GameServiceServer struct {
 	// setRegistry holds equipment set definitions for computing set bonuses (REQ-EM-29/35).
 	// May be nil (treated as empty — no set bonuses).
 	setRegistry *inventory.SetRegistry
+	// substanceReg holds all substance definitions.
+	// REQ-AH-3: loaded at startup from content/substances/.
+	substanceReg *substance.Registry
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -329,6 +333,7 @@ func NewGameServiceServer(
 		trapMgr:                    nil, // trap loading not yet wired
 		trapTemplates:              nil, // trap loading not yet wired
 		setRegistry:                content.SetRegistry,
+		substanceReg:               content.SubstanceRegistry,
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
@@ -345,6 +350,8 @@ func NewGameServiceServer(
 			s.pushRoomViewToAllInRoom(roomID)
 		})
 		s.worldH.SetCombatHandler(s.combatH)
+		// REQ-AH-21: wire substance service for poison-on-hit.
+		s.combatH.SetSubstanceSvc(s)
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
@@ -1305,6 +1312,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				if sess, ok := s.sessions.GetPlayer(uid); ok {
 					s.pushRoomViewToAllInRoom(sess.RoomID)
 				}
+				s.tickSubstances(uid) // REQ-AH-12
 			case <-ctx.Done():
 				return
 			}
@@ -5223,6 +5231,16 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// REQ-AH-8: if abilityID matches a backpack item with a substance_id, dispatch to substance handler.
+	if abilityID != "" && s.invRegistry != nil && s.substanceReg != nil && sess.Backpack != nil {
+		if itemDef, itemOK := s.invRegistry.Item(abilityID); itemOK && itemDef.SubstanceID != "" {
+			instances := sess.Backpack.FindByItemDefID(abilityID)
+			if len(instances) > 0 {
+				return s.handleConsumeSubstanceItem(uid, abilityID)
+			}
+		}
 	}
 
 	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil && s.spontaneousUsePoolRepo == nil && s.innateTechRepo == nil && len(sess.SpontaneousTechs) == 0 && len(sess.InnateTechs) == 0 {

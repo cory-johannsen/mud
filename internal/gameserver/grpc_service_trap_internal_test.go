@@ -8,6 +8,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/trap"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -644,4 +645,57 @@ func TestProperty_CheckConsumableTraps_NoPanicWithArbitraryInputs(t *testing.T) 
 			svc.checkConsumableTraps(roomID, uid)
 		})
 	})
+}
+
+// TestTrapTrigger_SubstanceID_NonEmpty_CallsApplySubstanceByID verifies that fireTrap
+// applies a substance when the trap payload has a non-empty SubstanceID.
+func TestTrapTrigger_SubstanceID_NonEmpty_CallsApplySubstanceByID(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	mgr := trap.NewTrapManager()
+	instanceID := trap.TrapInstanceID("test", "room_a", "equip", "poison_trap")
+	tmplMap := map[string]*trap.TrapTemplate{
+		"poison_pit": {
+			ID:        "poison_pit",
+			Trigger:   trap.TriggerEntry,
+			Payload:   &trap.TrapPayload{Type: "pit", Damage: "", SubstanceID: "viper_venom"},
+			ResetMode: trap.ResetOneShot,
+		},
+	}
+	mgr.AddTrap(instanceID, "poison_pit", true)
+
+	substReg := substance.NewRegistry()
+	poisonDef := &substance.SubstanceDef{
+		ID: "viper_venom", Name: "Viper Venom", Category: "poison",
+		OnsetDelayStr: "10s", DurationStr: "3m", RecoveryDurStr: "0s",
+		AddictionChance: 0.0, OverdoseThreshold: 1,
+	}
+	require.NoError(t, poisonDef.Validate())
+	substReg.Register(poisonDef)
+
+	logger := zaptest.NewLogger(t)
+	svc := &GameServiceServer{
+		world:         worldMgr,
+		sessions:      sessMgr,
+		condRegistry:  condition.NewRegistry(),
+		trapMgr:       mgr,
+		trapTemplates: tmplMap,
+		substanceReg:  substReg,
+		logger:        logger,
+	}
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: "uid1", Username: "u", CharName: "C", RoomID: "room_a",
+		Role: "player", CurrentHP: 10, MaxHP: 10,
+	})
+	require.NoError(t, err)
+	sess.InitDone = make(chan struct{})
+	close(sess.InitDone)
+	sess.Conditions = condition.NewActiveSet()
+	sess.Entity = session.NewBridgeEntity("uid1", 8)
+
+	svc.fireTrap("uid1", sess, tmplMap["poison_pit"], instanceID, "safe", false)
+
+	// Substance should be tracked on the session.
+	assert.Len(t, sess.ActiveSubstances, 1)
+	assert.Equal(t, "viper_venom", sess.ActiveSubstances[0].SubstanceID)
 }

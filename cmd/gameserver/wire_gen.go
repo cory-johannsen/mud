@@ -18,6 +18,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/gameserver"
@@ -114,6 +115,16 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	if err != nil {
 		return nil, fmt.Errorf("loading set registry: %w", err)
 	}
+	// Load substance registry (REQ-AH-3).
+	substancesDir := cfg.SubstancesDir
+	substanceRegistry, err := substance.LoadDirectory(substancesDir)
+	if err != nil {
+		return nil, fmt.Errorf("loading substance registry: %w", err)
+	}
+	// Cross-validate substance condition references against condition registry (REQ-AH-4A).
+	if cvErr := substanceRegistry.CrossValidate(knownConditionIDs); cvErr != nil {
+		return nil, fmt.Errorf("substance cross-validation failed: %w", cvErr)
+	}
 	aiRegistry := ai.NewEmptyRegistry()
 	skillsFile := cfg.SkillsFile
 	v2, err := ruleset.LoadAllSkills(skillsFile, logger)
@@ -182,6 +193,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		MentalStateMgr:       mentalstateManager,
 		LoadoutsDir:          loadoutsDir,
 		SetRegistry:          setRegistry,
+		SubstanceRegistry:    substanceRegistry,
 	}
 	sessionManager := gameserver.NewSessionManager()
 	worldHandler := gameserver.NewWorldHandlerProvider(manager, sessionManager, npcManager, clock, roomEquipmentManager, registry)

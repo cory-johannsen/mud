@@ -1,0 +1,16 @@
+id: tunnel_vision
+name: tunnel vision
+description: ""
+duration_type: timed
+max_stacks: 5
+attack_penalty: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+restrict_actions: []
+prevents_movement: false
+prevents_commands: false
+prevents_targeting: false
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

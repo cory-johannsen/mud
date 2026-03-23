@@ -389,7 +389,7 @@ features:
 
   - slug: advanced-health
     name: Advanced Health Effects
-    status: planned
+    status: done
     priority: 243
     category: character
     file: docs/features/advanced-health.md
