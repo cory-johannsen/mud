@@ -343,7 +343,7 @@ features:
 
   - slug: editor-commands
     name: Editor Commands
-    status: planned
+    status: done
     priority: 231
     category: meta
     file: docs/features/editor-commands.md
@@ -351,7 +351,7 @@ features:
 
   - slug: map-poi
     name: Map Points of Interest
-    status: planned
+    status: done
     priority: 233
     category: ui
     file: docs/features/map-poi.md
@@ -360,7 +360,7 @@ features:
 
   - slug: non-human-npcs
     name: Non-Human NPCs
-    status: planned
+    status: done
     priority: 235
     category: world
     file: docs/features/non-human-npcs.md
@@ -376,7 +376,7 @@ features:
 
   - slug: equipment-mechanics
     name: Equipment Mechanics Expansion
-    status: planned
+    status: done
     priority: 239
     category: world
     file: docs/features/equipment-mechanics.md
@@ -461,6 +461,38 @@ features:
     dependencies:
       - non-combat-npcs-all-zones
       - world-map  # world_x/y must be present in zone YAMLs before this plan adds rooms to same files
+
+  - slug: oregon-country-fair
+    name: Oregon Country Fair Zone
+    status: planned
+    priority: 340
+    category: world
+    file: docs/features/oregon-country-fair.md
+    effort: "XL"  # 30-45 rooms; three-way faction war (Juggalos/Tweakers/Wooks); 3 bosses; tweaker_crystal substance; ambient_substance room mechanic; faction quest givers
+    dependencies:
+      - factions           # Juggalos and Tweakers factions defined here; Wooks extended
+      - advanced-health    # tweaker_crystal substance; ambient_substance room field
+      - quests             # quest givers in each faction safe cluster
+      - wooklyn            # wooks faction and wook_spore must be defined first
+      - non-combat-npcs    # safe cluster NPC types
+      - advanced-enemies   # three boss rooms/abilities
+      - npc-behaviors      # faction aggro, call-for-help, juggalo_prophet say operator
+      - zone-content-expansion  # safe cluster patterns
+
+  - slug: wooklyn
+    name: Wooklyn Zone
+    status: planned
+    priority: 339
+    category: world
+    file: docs/features/wooklyn.md
+    effort: "XL"  # 30-40 rooms in Enchanted Forest theme park; Wooks faction; Wook/Ginger Wook/Wook Shaman/Papa Wook NPCs; wook_spore zone effect; full faction integration
+    dependencies:
+      - zone-content-expansion  # safe cluster patterns and danger level conventions
+      - factions                # Wooks faction mechanics, rep tiers, zone ownership
+      - advanced-health         # wook_spore substance in SubstanceRegistry
+      - non-combat-npcs         # safe cluster NPC types
+      - advanced-enemies        # Papa Wook boss room/abilities
+      - npc-behaviors           # Ginger Wook seduce operator
 
   # ── Tier 4: After Tier 3 ─────────────────────────────────────────────────────
 
