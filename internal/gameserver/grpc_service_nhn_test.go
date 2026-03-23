@@ -36,7 +36,7 @@ func TestImmobileFlag(t *testing.T) {
 		AC:       16,
 		Immobile: true,
 	}
-	inst := npc.NewInstanceWithResolver("t1", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("t1", tmpl, "room1", nil, nil, nil)
 	if !inst.Immobile {
 		t.Error("expected Immobile == true for machine template with immobile: true")
 	}
@@ -52,7 +52,7 @@ func TestNonImmobileFlag(t *testing.T) {
 		MaxHP: 18,
 		AC:    12,
 	}
-	inst := npc.NewInstanceWithResolver("d1", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("d1", tmpl, "room1", nil, nil, nil)
 	if inst.Immobile {
 		t.Error("expected Immobile == false for animal without immobile flag")
 	}

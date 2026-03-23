@@ -15,6 +15,11 @@ domain:
       subtasks: [cautious_fight]
 
     - task: behave
+      id: greet_mode
+      native_precondition: "player_entered_room"
+      subtasks: [say_taunt]
+
+    - task: behave
       id: idle
       precondition: ""
       subtasks: [do_pass]
@@ -45,3 +50,11 @@ domain:
       target: nearest_enemy
       cooldown_rounds: 3
       ap_cost: 1
+
+    - id: say_taunt
+      action: say
+      cooldown: "45s"
+      strings:
+        - "Empty your pockets and nobody gets hurt."
+        - "Another traveler. How generous of you."
+        - "You picked the wrong road today."

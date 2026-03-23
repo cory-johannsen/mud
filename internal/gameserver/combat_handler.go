@@ -86,6 +86,9 @@ type CombatHandler struct {
 	// Keyed by roomID+":"+equipmentID. Value is current HP (0 = destroyed).
 	coverMu       sync.Mutex
 	roomCoverState map[string]int
+	// npcIdleTickInterval is used to convert say cooldown durations to tick counts. REQ-NB-2.
+	// Zero means use 1 tick minimum.
+	npcIdleTickInterval time.Duration
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -264,6 +267,16 @@ func (h *CombatHandler) SetOnCombatantMoved(fn func(roomID, movedCombatantID str
 	h.onCombatantMoved = fn
 }
 
+// SetNPCIdleTickInterval sets the idle tick interval used to convert say cooldown
+// durations to tick counts. REQ-NB-2.
+//
+// Precondition: interval must be > 0.
+func (h *CombatHandler) SetNPCIdleTickInterval(interval time.Duration) {
+	if interval > 0 {
+		h.npcIdleTickInterval = interval
+	}
+}
+
 // FireCombatantMoved invokes the onCombatantMoved callback if registered.
 // Called by grpc_service.go after Stride, Step, or Shove position changes.
 //
@@ -353,6 +366,33 @@ func (h *CombatHandler) InitiateGuardCombat(uid, zoneID string, wantedLevel int)
 	for _, guardID := range guardIDs {
 		_, _ = h.Attack(guardID, uid)
 	}
+}
+
+// InitiateNPCCombat starts combat between npcInst and the player with playerUID.
+// This is used for threat-based engagement where the NPC proactively attacks. REQ-NB-7.
+//
+// Precondition: npcInst must not be nil; playerUID must be a valid connected player.
+// Postcondition: combat is started in the player's room; events are broadcast.
+func (h *CombatHandler) InitiateNPCCombat(npcInst *npc.Instance, playerUID string) {
+	sess, ok := h.sessions.GetPlayer(playerUID)
+	if !ok {
+		return
+	}
+	if npcInst.RoomID != sess.RoomID {
+		return
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	if _, alreadyActive := h.engine.GetCombat(sess.RoomID); alreadyActive {
+		return
+	}
+
+	initEvents, err := h.startPursuitCombatLocked(sess, []*npc.Instance{npcInst})
+	if err != nil {
+		return
+	}
+	h.broadcastFn(sess.RoomID, initEvents)
 }
 
 // Attack queues a 1-AP ActionAttack for uid against target.
@@ -1647,6 +1687,43 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 	}
 
+	// REQ-NB-13: Set GrudgePlayerID and OnDamageTaken for NPCs hit by players this round.
+	for _, ev := range roundEvents {
+		if ev.AttackResult == nil || ev.AttackResult.EffectiveDamage() <= 0 {
+			continue
+		}
+		// Actor must be a player; target must be an NPC.
+		if _, isPlayer := h.sessions.GetPlayer(ev.ActorID); !isPlayer {
+			continue
+		}
+		if ev.TargetID == "" {
+			continue
+		}
+		if npcInst, found := h.npcMgr.Get(ev.TargetID); found {
+			npcInst.GrudgePlayerID = ev.ActorID
+			npcInst.OnDamageTaken = true
+		}
+	}
+
+	// REQ-NB-14: Evaluate FleeHPPct for all living NPCs that took damage this round.
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindNPC || c.IsDead() {
+			continue
+		}
+		npcInst, found := h.npcMgr.Get(c.ID)
+		if !found || npcInst == nil || !npcInst.OnDamageTaken || npcInst.FleeHPPct == 0 {
+			continue
+		}
+		maxHP := c.MaxHP
+		if maxHP <= 0 {
+			maxHP = 1
+		}
+		hpPct := c.CurrentHP * 100 / maxHP
+		if hpPct < npcInst.FleeHPPct {
+			npcInst.PendingFlee = true
+		}
+	}
+
 	// Fire cover crossfire trap callbacks for ActionCoverHit events.
 	if h.onCoverHit != nil {
 		for _, ev := range roundEvents {
@@ -1837,6 +1914,18 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		})
 		h.broadcastFn(roomID, events)
 		h.removeDeadNPCsLocked(cbt)
+		// REQ-NB-41: set ReturningHome for surviving NPCs not in their home room; clear grudge.
+		for _, c := range cbt.Combatants {
+			if c.Kind != combat.KindNPC || c.IsDead() {
+				continue
+			}
+			if npcInst, found := h.npcMgr.Get(c.ID); found && npcInst != nil {
+				npcInst.GrudgePlayerID = ""
+				if npcInst.HomeRoomID != "" && npcInst.RoomID != npcInst.HomeRoomID {
+					npcInst.ReturningHome = true
+				}
+			}
+		}
 		h.engine.EndCombat(roomID)
 		h.clearCoweringNPCsLocked(roomID)
 		if h.onCombatEndFn != nil {
@@ -2635,6 +2724,12 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 // Precondition: h.combatMu is held.
 // Postcondition: actions queued until AP budget exhausted.
 func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combatant, actions []ai.PlannedAction) {
+	// REQ-NB-7B, REQ-NB-14: Evaluate pending flee from FleeHPPct threshold.
+	if npcInst, found := h.npcMgr.Get(actor.ID); found && npcInst != nil && npcInst.PendingFlee {
+		npcInst.PendingFlee = false
+		// Insert flee action at front so it executes before any other planned actions.
+		actions = append([]ai.PlannedAction{{Action: "flee", OperatorID: "__flee_threshold"}}, actions...)
+	}
 	for _, a := range actions {
 		var qa combat.QueuedAction
 		switch a.Action {
@@ -2715,6 +2810,148 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 				}
 			}
 			continue
+		case "say":
+			if len(a.Strings) == 0 {
+				continue
+			}
+			inst, ok := h.npcMgr.Get(actor.ID)
+			if !ok {
+				continue
+			}
+			if inst.AbilityCooldowns == nil {
+				inst.AbilityCooldowns = make(map[string]int)
+			}
+			if inst.AbilityCooldowns[a.OperatorID] > 0 {
+				continue
+			}
+			if a.Cooldown != "" {
+				if d, err := time.ParseDuration(a.Cooldown); err == nil && d > 0 {
+					// Compute tick count from cooldown duration and idle tick interval. REQ-NB-2.
+					ticks := 1
+					if h.npcIdleTickInterval > 0 {
+						ticks = int(d / h.npcIdleTickInterval)
+						if ticks < 1 {
+							ticks = 1
+						}
+					}
+					inst.AbilityCooldowns[a.OperatorID] = ticks
+				}
+			}
+			line := a.Strings[rand.Intn(len(a.Strings))]
+			h.broadcastFn(cbt.RoomID, []*gamev1.CombatEvent{{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+				Narrative: fmt.Sprintf("%s says \"%s\"", actor.Name, line),
+			}})
+			continue
+		case "flee":
+			// REQ-NB-25: NPC flees combat, exits to a random adjacent room. REQ-NB-26, REQ-NB-27.
+			if h.worldMgr == nil {
+				continue
+			}
+			room, roomOK := h.worldMgr.GetRoom(cbt.RoomID)
+			if !roomOK {
+				continue
+			}
+			exits := room.VisibleExits()
+			if len(exits) == 0 {
+				// REQ-NB-28: no visible exits → fail silently; NPC stays in combat.
+				continue
+			}
+			// Remove NPC from combatants before moving. REQ-NB-26.
+			cbt.RemoveCombatant(actor.ID)
+			target := exits[rand.Intn(len(exits))]
+			_ = h.npcMgr.Move(actor.ID, target.TargetRoom)
+			h.broadcastFn(cbt.RoomID, []*gamev1.CombatEvent{{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_FLEE,
+				Narrative: fmt.Sprintf("%s flees!", actor.Name),
+			}})
+			// REQ-NB-27: remaining participants continue combat.
+			return
+
+		case "target_weakest":
+			// REQ-NB-29, REQ-NB-30: queue attack against lowest HP% living player.
+			// REQ-NB-31: silently skip when fewer than 2 living players exist.
+			var livingPlayers []*combat.Combatant
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindPlayer && !c.IsDead() {
+					livingPlayers = append(livingPlayers, c)
+				}
+			}
+			if len(livingPlayers) < 2 {
+				continue
+			}
+			weakest := livingPlayers[0]
+			for _, p := range livingPlayers[1:] {
+				weakestPct := float64(0)
+				if weakest.MaxHP > 0 {
+					weakestPct = float64(weakest.CurrentHP) / float64(weakest.MaxHP)
+				}
+				pPct := float64(0)
+				if p.MaxHP > 0 {
+					pPct = float64(p.CurrentHP) / float64(p.MaxHP)
+				}
+				if pPct < weakestPct {
+					weakest = p
+				}
+			}
+			qa = combat.QueuedAction{Type: combat.ActionAttack, Target: weakest.Name}
+
+		case "call_for_help":
+			// REQ-NB-32: recruit adjacent idle hostile NPCs of same type. REQ-NB-35: once per combat.
+			callerInst, callerOK := h.npcMgr.Get(actor.ID)
+			if !callerOK {
+				continue
+			}
+			if callerInst.AbilityCooldowns == nil {
+				callerInst.AbilityCooldowns = make(map[string]int)
+			}
+			const callForHelpKey = "__call_for_help_used"
+			if callerInst.AbilityCooldowns[callForHelpKey] > 0 {
+				continue
+			}
+			callerInst.AbilityCooldowns[callForHelpKey] = 999999 // permanent until respawn
+
+			if h.worldMgr == nil {
+				continue
+			}
+			room, roomOK := h.worldMgr.GetRoom(cbt.RoomID)
+			if !roomOK {
+				continue
+			}
+			exits := room.VisibleExits()
+			type recruitEntry struct {
+				inst   *npc.Instance
+				roomID string
+			}
+			var recruits []recruitEntry
+			for _, exit := range exits {
+				for _, candidate := range h.npcMgr.InstancesInRoom(exit.TargetRoom) {
+					if candidate.Type != actor.NPCType {
+						continue
+					}
+					if candidate.Disposition != "hostile" {
+						continue
+					}
+					if h.engine.IsNPCInCombat(candidate.ID) {
+						continue
+					}
+					recruits = append(recruits, recruitEntry{inst: candidate, roomID: exit.TargetRoom})
+				}
+			}
+			if len(recruits) == 0 {
+				continue
+			}
+			h.broadcastFn(cbt.RoomID, []*gamev1.CombatEvent{{
+				Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+				Narrative: fmt.Sprintf("%s calls for help!", actor.Name),
+			}})
+			for _, r := range recruits {
+				_ = h.npcMgr.Move(r.inst.ID, cbt.RoomID)
+				// REQ-NB-34: join on next tick via PendingJoinCombatRoomID.
+				r.inst.PendingJoinCombatRoomID = cbt.RoomID
+			}
+			continue
+
 		default:
 			qa = combat.QueuedAction{Type: combat.ActionPass}
 		}
@@ -2793,13 +3030,9 @@ func abilitySeverity(s string) (mentalstate.Severity, bool) {
 	return 0, false
 }
 
-// pickTaunt returns a random taunt from inst.Taunts, or a generic fallback.
+// pickTaunt returns a generic combat message. Taunts were migrated to say HTN operators.
 func (h *CombatHandler) pickTaunt(inst *npc.Instance) string {
-	if len(inst.Taunts) == 0 {
-		return fmt.Sprintf("The %s unsettles you.", inst.Name())
-	}
-	idx := h.dice.Src().Intn(len(inst.Taunts))
-	return inst.Taunts[idx]
+	return fmt.Sprintf("The %s unsettles you.", inst.Name())
 }
 
 // legacyAutoQueueLocked queues ActionAttack for c targeting the first living player.

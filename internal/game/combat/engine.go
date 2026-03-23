@@ -459,6 +459,34 @@ func (e *Engine) AllCombats() []*Combat {
 	return out
 }
 
+// RemoveCombatant removes the combatant with uid from the combat's Combatants slice.
+// This is used when an NPC flees mid-combat so it no longer participates.
+//
+// Precondition: cbt must not be nil; uid must be non-empty.
+// Postcondition: the combatant with uid is absent from cbt.Combatants;
+// if the removed combatant was at or before turnIndex, turnIndex is decremented to preserve turn order;
+// no-op if uid is not found.
+func (c *Combat) RemoveCombatant(uid string) {
+	idx := -1
+	for i, cbt := range c.Combatants {
+		if cbt.ID == uid {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		return
+	}
+	c.Combatants = append(c.Combatants[:idx], c.Combatants[idx+1:]...)
+	// Adjust turnIndex so that the current actor is not shifted.
+	if idx < c.turnIndex {
+		c.turnIndex--
+	}
+	if c.turnIndex >= len(c.Combatants) && len(c.Combatants) > 0 {
+		c.turnIndex = len(c.Combatants) - 1
+	}
+}
+
 // EndCombat removes the combat record for roomID.
 //
 // Precondition: roomID must be non-empty.

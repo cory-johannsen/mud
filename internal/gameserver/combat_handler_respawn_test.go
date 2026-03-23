@@ -169,7 +169,7 @@ func TestCombatHandler_NPCDiedInCombat_RemovedFromManager(t *testing.T) {
 		"room-respawn-1": {{TemplateID: "ganger", Max: 1, RespawnDelay: time.Minute}},
 	}
 	templates := map[string]*npc.Template{"ganger": tmpl}
-	respawnMgr := npc.NewRespawnManager(spawns, templates)
+	respawnMgr := npc.NewRespawnManager(spawns, templates, nil, nil)
 
 	broadcastFn, getEvents := makeBroadcastCapture()
 	h := makeRespawnHandler(t, npcMgr, sessMgr, respawnMgr, broadcastFn)

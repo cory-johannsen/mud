@@ -15,6 +15,11 @@ domain:
       subtasks: [fight]
 
     - task: behave
+      id: greet_mode
+      native_precondition: "player_entered_room"
+      subtasks: [say_taunt]
+
+    - task: behave
       id: idle_mode
       precondition: ""
       subtasks: [do_pass]
@@ -54,3 +59,11 @@ domain:
       target: lowest_hp_enemy
       cooldown_rounds: 5
       ap_cost: 2
+
+    - id: say_taunt
+      action: say
+      cooldown: "30s"
+      strings:
+        - "You want across? Pay up."
+        - "Nobody crosses for free."
+        - "Turn around or pay the toll. Your choice."

@@ -10,6 +10,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
@@ -61,6 +62,18 @@ type Template struct {
 	Taunts        []string   `yaml:"taunts"`
 	TauntChance   float64    `yaml:"taunt_chance"`
 	TauntCooldown string     `yaml:"taunt_cooldown"`
+	// CourageThreshold is the threat score above which the NPC will not engage.
+	// Default 999 preserves always-engage behavior for all existing templates.
+	CourageThreshold int `yaml:"courage_threshold"`
+	// FleeHPPct is the HP percentage below which the NPC attempts to flee combat. 0 = never flee.
+	FleeHPPct int `yaml:"flee_hp_pct"`
+	// HomeRoom is the room ID the NPC returns to when idle. Defaults to spawn room if not set.
+	HomeRoom string `yaml:"home_room"`
+	// WanderRadius is the maximum BFS hop distance from HomeRoom during patrol. 0 = no movement.
+	WanderRadius int `yaml:"wander_radius"`
+	// Schedule is an optional time-of-day behavior window list.
+	// Templates without it behave using default template settings.
+	Schedule []behavior.ScheduleEntry `yaml:"schedule,omitempty"`
 	// SkillChecks defines skill check triggers fired when a player greets this NPC.
 	SkillChecks []skillcheck.TriggerDef `yaml:"skill_checks"`
 	// Resistances maps damage type → flat damage reduction (minimum 0 after reduction).
@@ -214,6 +227,11 @@ func (t *Template) Validate() error {
 	// REQ-NPC-1: default NPCType to "combat".
 	if t.NPCType == "" {
 		t.NPCType = "combat"
+	}
+
+	// Default CourageThreshold to 999 (always engage). REQ-NB-10.
+	if t.CourageThreshold == 0 {
+		t.CourageThreshold = 999
 	}
 
 	// Validate NPCType value and corresponding config struct (REQ-NPC-2).

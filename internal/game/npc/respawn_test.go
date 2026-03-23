@@ -34,7 +34,7 @@ func makeRespawnManager(roomID, templateID string, count int, roomOverride strin
 		roomID: {{TemplateID: templateID, Max: count, RespawnDelay: override}},
 	}
 	templates := map[string]*npc.Template{templateID: tmpl}
-	return npc.NewRespawnManager(spawns, templates)
+	return npc.NewRespawnManager(spawns, templates, nil, nil)
 }
 
 // --- PopulateRoom ---
@@ -63,7 +63,7 @@ func TestRespawnManager_PopulateRoom_DoesNotExceedCap(t *testing.T) {
 
 func TestRespawnManager_PopulateRoom_NoSpawnConfig_DoesNothing(t *testing.T) {
 	mgr := npc.NewManager()
-	rm := npc.NewRespawnManager(nil, nil)
+	rm := npc.NewRespawnManager(nil, nil, nil, nil)
 	rm.PopulateRoom("r1", mgr)
 	assert.Empty(t, mgr.InstancesInRoom("r1"))
 }
@@ -201,7 +201,7 @@ func TestProperty_Tick_SpawnsNeverExceedCap(t *testing.T) {
 		spawns := map[string][]npc.RoomSpawn{
 			"r1": {{TemplateID: "ganger", Max: cap, RespawnDelay: time.Minute}},
 		}
-		rm := npc.NewRespawnManager(spawns, map[string]*npc.Template{"ganger": tmpl})
+		rm := npc.NewRespawnManager(spawns, map[string]*npc.Template{"ganger": tmpl}, nil, nil)
 
 		now := time.Now()
 		for i := 0; i < scheduled; i++ {
@@ -230,7 +230,7 @@ func TestProperty_PopulateRoom_NeverExceedsCap(t *testing.T) {
 		spawns := map[string][]npc.RoomSpawn{
 			"r1": {{TemplateID: tmpl.ID, Max: cap, RespawnDelay: time.Minute}},
 		}
-		rm := npc.NewRespawnManager(spawns, map[string]*npc.Template{tmpl.ID: tmpl})
+		rm := npc.NewRespawnManager(spawns, map[string]*npc.Template{tmpl.ID: tmpl}, nil, nil)
 		rm.PopulateRoom("r1", mgr)
 
 		got := len(mgr.InstancesInRoom("r1"))
@@ -242,14 +242,14 @@ func TestProperty_PopulateRoom_NeverExceedsCap(t *testing.T) {
 
 func TestRespawnManagerGetTemplate_Found(t *testing.T) {
 	tmpl := &npc.Template{ID: "guard"}
-	rm := npc.NewRespawnManager(nil, map[string]*npc.Template{"guard": tmpl})
+	rm := npc.NewRespawnManager(nil, map[string]*npc.Template{"guard": tmpl}, nil, nil)
 	got, ok := rm.GetTemplate("guard")
 	assert.True(t, ok)
 	assert.Equal(t, tmpl, got)
 }
 
 func TestRespawnManagerGetTemplate_NotFound(t *testing.T) {
-	rm := npc.NewRespawnManager(nil, nil)
+	rm := npc.NewRespawnManager(nil, nil, nil, nil)
 	got, ok := rm.GetTemplate("nobody")
 	assert.False(t, ok)
 	assert.Nil(t, got)
@@ -264,7 +264,7 @@ func TestRespawnManagerGetTemplateProperty(t *testing.T) {
 		if present {
 			templates[id] = &npc.Template{ID: id}
 		}
-		rm := npc.NewRespawnManager(nil, templates)
+		rm := npc.NewRespawnManager(nil, templates, nil, nil)
 		_, ok := rm.GetTemplate(id)
 		assert.Equal(t, present, ok)
 	})
@@ -287,7 +287,7 @@ func TestRespawnManager_BossRespawn_CoordinatedRespawn(t *testing.T) {
 		},
 	}
 	bossRooms := map[string]bool{"boss_room": true}
-	rm := npc.NewRespawnManagerWithBossRooms(spawns, templates, bossRooms)
+	rm := npc.NewRespawnManagerWithBossRooms(spawns, templates, bossRooms, nil, nil)
 
 	// Schedule pending minion respawn far in the future
 	rm.Schedule("minion_npc", "boss_room", time.Now(), 10*time.Minute)
@@ -303,6 +303,6 @@ func TestRespawnManager_BossRespawn_CoordinatedRespawn(t *testing.T) {
 }
 
 func TestRespawnManager_PendingCount_ReturnsZeroForUnknownRoom(t *testing.T) {
-	rm := npc.NewRespawnManager(nil, nil)
+	rm := npc.NewRespawnManager(nil, nil, nil, nil)
 	assert.Equal(t, 0, rm.PendingCount("nonexistent"))
 }

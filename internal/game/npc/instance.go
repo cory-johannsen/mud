@@ -50,14 +50,6 @@ type Instance struct {
 	AIDomain string
 	// Loot is the loot table copied from the template; nil means no loot.
 	Loot *LootTable
-	// Taunts is the list of taunt strings copied from the template.
-	Taunts []string
-	// TauntChance is the probability (0–1) of taunting on each check.
-	TauntChance float64
-	// TauntCooldown is the minimum duration between taunts.
-	TauntCooldown time.Duration
-	// LastTauntTime is the last time this NPC taunted.
-	LastTauntTime time.Time
 	// SkillChecks defines skill check triggers fired when a player greets this NPC.
 	SkillChecks []skillcheck.TriggerDef
 	// Resistances maps damage type → flat reduction. Copied from template at spawn.
@@ -129,6 +121,34 @@ type Instance struct {
 	AttackVerb string
 	// Immobile prevents this NPC from patrolling or wandering. Copied from template.
 	Immobile bool
+	// CourageThreshold copied from template; NPC engages when ThreatScore <= this. REQ-NB-10.
+	CourageThreshold int
+	// FleeHPPct is the HP% below which the NPC flees combat. 0 = never flee.
+	FleeHPPct int
+	// WanderRadius is the max BFS hops from HomeRoomID during patrol. 0 = no movement.
+	WanderRadius int
+	// GrudgePlayerID is the ID of the last player to deal damage to this NPC.
+	// Cleared to "" on respawn. REQ-NB-12.
+	GrudgePlayerID string
+	// ReturningHome is true when the NPC is moving back to its HomeRoom after combat.
+	// Cleared when the NPC arrives at HomeRoom. REQ-NB-41.
+	ReturningHome bool
+	// HomeRoomBFS is the precomputed BFS distance map from HomeRoom to all zone rooms.
+	// Populated at zone load. REQ-NB-38.
+	HomeRoomBFS map[string]int
+	// HomeRoomID is the resolved home room ID (from Template.HomeRoom or spawn room).
+	HomeRoomID string
+	// PlayerEnteredRoom is true for exactly one idle tick after a player enters the NPC's room.
+	// REQ-NB-4.
+	PlayerEnteredRoom bool
+	// OnDamageTaken is true for exactly one idle tick in the round the NPC received damage.
+	// REQ-NB-4.
+	OnDamageTaken bool
+	// PendingFlee is true when FleeHPPct threshold was crossed; resolved in applyPlanLocked.
+	PendingFlee bool
+	// PendingJoinCombatRoomID is non-empty when the NPC was recruited via call_for_help
+	// and should join combat in the given room on the next tick.
+	PendingJoinCombatRoomID string
 }
 
 // HasTag reports whether the given tag is present in the instance's tag list.
@@ -198,11 +218,6 @@ func pickWeighted(entries []EquipmentEntry) string {
 // Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
 // Postcondition: CurrentHP equals computed MaxHP; WeaponID and ArmorID are set from weighted roll.
 func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBonus func(string) int, xpCfg *xp.XPConfig, featRegistry *ruleset.FeatRegistry) *Instance {
-	var cooldown time.Duration
-	if tmpl.TauntCooldown != "" {
-		cooldown, _ = time.ParseDuration(tmpl.TauntCooldown)
-	}
-
 	weaponID := pickWeighted(tmpl.Weapon)
 	armorID := pickWeighted(tmpl.Armor)
 	ac := tmpl.AC
@@ -246,12 +261,9 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		Level:         tmpl.Level,
 		Awareness:     tmpl.Awareness,
 		Hustle:        tmpl.Hustle,
-		AIDomain:      tmpl.AIDomain,
-		Loot:          tmpl.Loot,
-		Taunts:        tmpl.Taunts,
-		TauntChance:   tmpl.TauntChance,
-		TauntCooldown: cooldown,
-		SkillChecks:   tmpl.SkillChecks,
+		AIDomain:    tmpl.AIDomain,
+		Loot:        tmpl.Loot,
+		SkillChecks: tmpl.SkillChecks,
 		Resistances:   resolveResistances(tmpl),
 		Weaknesses:    tmpl.Weaknesses,
 		WeaponID:      weaponID,
@@ -281,6 +293,15 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 				return "hostile"
 			}
 			return tmpl.Disposition
+		}(),
+		CourageThreshold: tmpl.CourageThreshold,
+		FleeHPPct:        tmpl.FleeHPPct,
+		WanderRadius:     tmpl.WanderRadius,
+		HomeRoomID: func() string {
+			if tmpl.HomeRoom != "" {
+				return tmpl.HomeRoom
+			}
+			return roomID
 		}(),
 	}
 }
@@ -337,26 +358,6 @@ func computeRobPercent(multiplier float64, level int) float64 {
 // Postcondition: CurrentHP equals tmpl.MaxHP; WeaponID/ArmorID are set; AC is base only.
 func NewInstance(id string, tmpl *Template, roomID string) *Instance {
 	return NewInstanceWithResolver(id, tmpl, roomID, nil, nil, nil)
-}
-
-// TryTaunt attempts to produce a taunt string, respecting chance and cooldown.
-//
-// Precondition: now must not be zero.
-// Postcondition: Returns (taunt, true) if a taunt fires, updating LastTauntTime;
-// returns ("", false) otherwise.
-func (i *Instance) TryTaunt(now time.Time) (string, bool) {
-	if len(i.Taunts) == 0 || i.TauntChance <= 0 {
-		return "", false
-	}
-	if !i.LastTauntTime.IsZero() && now.Sub(i.LastTauntTime) < i.TauntCooldown {
-		return "", false
-	}
-	if rand.Float64() >= i.TauntChance {
-		return "", false
-	}
-	taunt := i.Taunts[rand.Intn(len(i.Taunts))]
-	i.LastTauntTime = now
-	return taunt, true
 }
 
 // IsDead reports whether the instance has zero or fewer hit points.

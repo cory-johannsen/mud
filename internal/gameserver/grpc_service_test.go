@@ -109,7 +109,7 @@ func TestStartZoneTicks_RespawnIntegration(t *testing.T) {
 		},
 	}
 	templates := map[string]*npc.Template{"rat": tmpl}
-	respawnMgr := npc.NewRespawnManager(roomSpawns, templates)
+	respawnMgr := npc.NewRespawnManager(roomSpawns, templates, nil, nil)
 
 	// Schedule a respawn that will be ready after 10ms.
 	respawnMgr.Schedule("rat", "room_a", time.Now(), 10*time.Millisecond)

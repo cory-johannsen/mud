@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
 	"github.com/cory-johannsen/mud/internal/game/world"
 )
 
@@ -87,10 +88,45 @@ func NewPopulatedRespawnManager(
 			}
 		}
 	}
-	respawnMgr := NewRespawnManagerWithBossRooms(roomSpawns, templateByID, bossRooms)
+
+	// Build zone room slices for BFS computation. REQ-NB-38.
+	zoneRooms := make(map[string][]*world.Room)
+	for _, zone := range worldMgr.AllZones() {
+		rooms := make([]*world.Room, 0, len(zone.Rooms))
+		for _, r := range zone.Rooms {
+			rooms = append(rooms, r)
+		}
+		zoneRooms[zone.ID] = rooms
+	}
+	roomToZone := make(map[string]string)
+	for _, zone := range worldMgr.AllZones() {
+		for _, r := range zone.Rooms {
+			roomToZone[r.ID] = zone.ID
+		}
+	}
+
+	respawnMgr := NewRespawnManagerWithBossRooms(roomSpawns, templateByID, bossRooms, zoneRooms, roomToZone)
 	for roomID := range roomSpawns {
 		respawnMgr.PopulateRoom(roomID, npcMgr)
 	}
+
+	// Populate HomeRoomBFS for each spawned instance. REQ-NB-38.
+	for _, inst := range npcMgr.AllInstances() {
+		if inst.HomeRoomID == "" {
+			continue
+		}
+		zoneID, ok := roomToZone[inst.HomeRoomID]
+		if !ok {
+			continue
+		}
+		rooms := zoneRooms[zoneID]
+		dm, err := behavior.BFSDistanceMap(rooms, inst.HomeRoomID)
+		if err != nil {
+			return nil, fmt.Errorf("npc %q home_room %q not found in zone %q: %w", inst.ID, inst.HomeRoomID, zoneID, err)
+		}
+		inst.HomeRoomBFS = dm
+	}
+
 	logger.Info("initial NPC population complete", zap.Int("room_configs", len(roomSpawns)), zap.Int("boss_rooms", len(bossRooms)))
 	return respawnMgr, nil
 }

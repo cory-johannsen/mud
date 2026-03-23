@@ -3,6 +3,9 @@ package npc
 import (
 	"sync"
 	"time"
+
+	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
+	"github.com/cory-johannsen/mud/internal/game/world"
 )
 
 // RoomSpawn holds the resolved spawn configuration for one NPC template in one room.
@@ -36,26 +39,31 @@ type respawnEntry struct {
 // Tick is driven by a single ZoneTickManager goroutine per zone.
 type RespawnManager struct {
 	mu        sync.RWMutex
-	spawns    map[string][]RoomSpawn // roomID → configs
-	templates map[string]*Template   // templateID → Template
+	spawns    map[string][]RoomSpawn    // roomID → configs
+	templates map[string]*Template      // templateID → Template
 	pending   []respawnEntry
 	bossRooms map[string]bool // set of roomIDs marked as boss_room
+	// zoneRooms maps zoneID → ordered room slice for BFS computation. REQ-NB-38.
+	zoneRooms map[string][]*world.Room
+	// roomToZone maps roomID → zoneID. REQ-NB-38.
+	roomToZone map[string]string
 }
 
 // NewRespawnManager creates a RespawnManager from room spawn configs and a template map.
 //
 // Precondition: spawns and templates may be nil (manager becomes a no-op).
+// zoneRooms and roomToZone may be nil; when nil, HomeRoomBFS is not populated on respawn.
 // Postcondition: Returns a non-nil RespawnManager.
-func NewRespawnManager(spawns map[string][]RoomSpawn, templates map[string]*Template) *RespawnManager {
-	return NewRespawnManagerWithBossRooms(spawns, templates, nil)
+func NewRespawnManager(spawns map[string][]RoomSpawn, templates map[string]*Template, zoneRooms map[string][]*world.Room, roomToZone map[string]string) *RespawnManager {
+	return NewRespawnManagerWithBossRooms(spawns, templates, nil, zoneRooms, roomToZone)
 }
 
 // NewRespawnManagerWithBossRooms creates a RespawnManager that knows which rooms are boss rooms.
 // When a boss-tier NPC respawns in a boss room, CoordinatedBossRespawn is triggered.
 //
-// Precondition: spawns, templates, and bossRooms may be nil (treated as empty maps).
+// Precondition: spawns, templates, bossRooms, zoneRooms, and roomToZone may be nil (treated as empty maps).
 // Postcondition: Returns a non-nil RespawnManager.
-func NewRespawnManagerWithBossRooms(spawns map[string][]RoomSpawn, templates map[string]*Template, bossRooms map[string]bool) *RespawnManager {
+func NewRespawnManagerWithBossRooms(spawns map[string][]RoomSpawn, templates map[string]*Template, bossRooms map[string]bool, zoneRooms map[string][]*world.Room, roomToZone map[string]string) *RespawnManager {
 	if spawns == nil {
 		spawns = make(map[string][]RoomSpawn)
 	}
@@ -65,10 +73,18 @@ func NewRespawnManagerWithBossRooms(spawns map[string][]RoomSpawn, templates map
 	if bossRooms == nil {
 		bossRooms = make(map[string]bool)
 	}
+	if zoneRooms == nil {
+		zoneRooms = make(map[string][]*world.Room)
+	}
+	if roomToZone == nil {
+		roomToZone = make(map[string]string)
+	}
 	return &RespawnManager{
-		spawns:    spawns,
-		templates: templates,
-		bossRooms: bossRooms,
+		spawns:     spawns,
+		templates:  templates,
+		bossRooms:  bossRooms,
+		zoneRooms:  zoneRooms,
+		roomToZone: roomToZone,
 	}
 }
 
@@ -221,7 +237,16 @@ func (r *RespawnManager) Tick(now time.Time, mgr *Manager) {
 		if current >= cfg.Max {
 			continue
 		}
-		_, _ = mgr.Spawn(tmpl, e.roomID)
+		inst, _ := mgr.Spawn(tmpl, e.roomID)
+		if inst != nil && inst.HomeRoomID != "" {
+			if zoneID, ok := r.roomToZone[inst.HomeRoomID]; ok {
+				if rooms := r.zoneRooms[zoneID]; len(rooms) > 0 {
+					if dm, err := behavior.BFSDistanceMap(rooms, inst.HomeRoomID); err == nil {
+						inst.HomeRoomBFS = dm
+					}
+				}
+			}
+		}
 	}
 }
 
