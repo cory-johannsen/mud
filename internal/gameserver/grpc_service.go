@@ -1823,6 +1823,16 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
+	// Fire on_enter hazards for the new room (REQ-AE-28).
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		if len(newRoom.Hazards) > 0 {
+			ApplyHazards(newRoom, sess, "on_enter", s.dice, s.condRegistry,
+				func(msg string) { s.pushMessageToUID(uid, msg) },
+				s.logger,
+			)
+		}
+	}
+
 	// Apply out-of-combat zone effects for the new room.
 	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
 		s.applyRoomEffectsOnEntry(sess, uid, newRoom, time.Now().Unix())
