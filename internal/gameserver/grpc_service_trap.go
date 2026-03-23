@@ -132,6 +132,10 @@ func (s *GameServiceServer) fireTrap(uid string, sess *session.PlayerSession, tm
 
 	// Apply to triggering player.
 	applyToPlayer(sess, result.Narrative)
+	// REQ-AH-22: apply substance if trap payload has a substance_id.
+	if result.SubstanceID != "" {
+		_ = s.ApplySubstanceByID(uid, result.SubstanceID)
+	}
 
 	// If AoE and NOT a disarm failure, apply to all other players in the room (REQ-TR-13).
 	if result.AoE && !disarmFailure {
@@ -140,6 +144,10 @@ func (s *GameServiceServer) fireTrap(uid string, sess *session.PlayerSession, tm
 				continue
 			}
 			applyToPlayer(other, fmt.Sprintf("A %s goes off nearby!", tmpl.Name))
+			// REQ-AH-22: apply substance to AoE targets as well.
+			if result.SubstanceID != "" {
+				_ = s.ApplySubstanceByID(other.UID, result.SubstanceID)
+			}
 		}
 	}
 
@@ -235,11 +243,17 @@ func (s *GameServiceServer) fireConsumableTrapOnCombatant(
 	}
 	target.ApplyDamage(dmg)
 
-	// Player target: apply condition + send personal message.
+	// Player target: apply condition + substance + send personal message.
 	if sess, ok := s.sessions.GetPlayer(target.ID); ok {
 		if result.ConditionID != "" && s.condRegistry != nil && sess.Conditions != nil {
 			if condDef, condOk := s.condRegistry.Get(result.ConditionID); condOk {
 				_ = sess.Conditions.Apply(target.ID, condDef, 1, -1)
+			}
+		}
+		// REQ-AH-22: apply substance from consumable trap payload.
+		if result.SubstanceID != "" {
+			if err := s.ApplySubstanceByID(target.ID, result.SubstanceID); err != nil && s.logger != nil {
+				s.logger.Warn("consumable trap ApplySubstanceByID failed", zap.Error(err))
 			}
 		}
 		pushMessage(sess, fmt.Sprintf("A %s triggers on you! (%d damage)", tmpl.Name, dmg))

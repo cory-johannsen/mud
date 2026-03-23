@@ -176,6 +176,9 @@ func main() {
 		}
 	})
 
+	// Wire substance service: CombatHandler needs GRPCService to apply poison on hit (REQ-AH-21).
+	app.CombatHandler.SetSubstanceSvc(app.GRPCService)
+
 	// Wire scripting callbacks (post-Initialize to avoid circular deps).
 	if app.ScriptMgr != nil {
 		// Wire QueryRoom callback.

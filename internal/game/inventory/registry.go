@@ -92,6 +92,18 @@ func (r *Registry) ItemByArmorRef(armorDefID string) (*ItemDef, bool) {
 	return nil, false
 }
 
+// ItemByWeaponRef returns the first ItemDef whose WeaponRef matches weaponDefID.
+//
+// Postcondition: Returns (def, true) if found, or (nil, false) otherwise.
+func (r *Registry) ItemByWeaponRef(weaponDefID string) (*ItemDef, bool) {
+	for _, d := range r.items {
+		if d.WeaponRef == weaponDefID {
+			return d, true
+		}
+	}
+	return nil, false
+}
+
 // AllWeapons returns all registered WeaponDefs in unspecified order.
 //
 // Postcondition: len(result) == number of registered weapons.

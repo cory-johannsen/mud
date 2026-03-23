@@ -350,6 +350,8 @@ func NewGameServiceServer(
 			s.pushRoomViewToAllInRoom(roomID)
 		})
 		s.worldH.SetCombatHandler(s.combatH)
+		// REQ-AH-21: wire substance service for poison-on-hit.
+		s.combatH.SetSubstanceSvc(s)
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
@@ -1309,6 +1311,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				if sess, ok := s.sessions.GetPlayer(uid); ok {
 					s.pushRoomViewToAllInRoom(sess.RoomID)
 				}
+				s.tickSubstances(uid) // REQ-AH-12
 			case <-ctx.Done():
 				return
 			}
@@ -5160,6 +5163,16 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// REQ-AH-8: if abilityID matches a backpack item with a substance_id, dispatch to substance handler.
+	if abilityID != "" && s.invRegistry != nil && s.substanceReg != nil && sess.Backpack != nil {
+		if itemDef, itemOK := s.invRegistry.Item(abilityID); itemOK && itemDef.SubstanceID != "" {
+			instances := sess.Backpack.FindByItemDefID(abilityID)
+			if len(instances) > 0 {
+				return s.handleConsumeSubstanceItem(uid, abilityID)
+			}
+		}
 	}
 
 	if s.characterFeatsRepo == nil && s.characterClassFeaturesRepo == nil && s.preparedTechRepo == nil && s.spontaneousUsePoolRepo == nil && s.innateTechRepo == nil && len(sess.SpontaneousTechs) == 0 && len(sess.InnateTechs) == 0 {
