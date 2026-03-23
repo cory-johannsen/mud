@@ -12,15 +12,16 @@ import (
 
 // bridgeContext carries all inputs a bridge handler needs.
 type bridgeContext struct {
-	reqID    string
-	cmd      *command.Command
-	parsed   command.ParseResult
-	conn     *telnet.Conn
-	charName string
-	role     string
-	stream   gamev1.GameService_SessionClient
-	helpFn   func()        // called by bridgeHelp to render help output
-	promptFn func() string // called to build the current colored prompt
+	reqID          string
+	cmd            *command.Command
+	parsed         command.ParseResult
+	conn           *telnet.Conn
+	charName       string
+	role           string
+	stream         gamev1.GameService_SessionClient
+	helpFn         func()        // called by bridgeHelp to render help output
+	promptFn       func() string // called to build the current colored prompt
+	travelResolver func(zoneName string) (zoneID string, errMsg string) // nil if not available; errMsg non-empty signals failure
 }
 
 // bridgeResult is returned by every bridge handler.
@@ -28,11 +29,15 @@ type bridgeContext struct {
 // done is true when the handler dealt with output locally and the loop should continue.
 // quit is true when the handler has completed a clean disconnect and commandLoop should return nil.
 // switchCharacter is true when the handler signals gameBridge to return ErrSwitchCharacter.
+// enterMapMode is true when the handler requests the command loop to enter map mode.
+// mapView is the map view type ("zone" or "world") when enterMapMode is true.
 type bridgeResult struct {
 	msg             *gamev1.ClientMessage
 	done            bool
 	quit            bool
 	switchCharacter bool
+	enterMapMode    bool
+	mapView         string
 }
 
 // bridgeHandlerFunc is the signature for all bridge dispatch functions.
@@ -83,6 +88,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerUseEquipment:       bridgeUseEquipment,
 	command.HandlerRoomEquip:          bridgeRoomEquip,
 	command.HandlerMap:                bridgeMap,
+	command.HandlerTravel:             bridgeTravel,
 	command.HandlerSkills:             bridgeSkills,
 	command.HandlerFeats:              bridgeFeats,
 	command.HandlerClassFeatures:      bridgeClassFeatures,
@@ -662,14 +668,67 @@ func bridgeRemoveArmor(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
-// bridgeMap builds a MapRequest to retrieve the automap for the current zone.
+// bridgeMap builds a MapRequest to retrieve the automap.
+// If the argument is "world", requests the world view and enters map mode.
+// Otherwise requests the zone view and enters map mode.
 //
 // Precondition: bctx must be non-nil with a valid reqID.
-// Postcondition: returns a non-nil msg containing a MapRequest; done is false.
+// Postcondition: returns a non-nil msg containing a MapRequest and enterMapMode=true.
 func bridgeMap(bctx *bridgeContext) (bridgeResult, error) {
+	view := "zone"
+	arg := strings.TrimSpace(strings.ToLower(bctx.parsed.RawArgs))
+	if arg == "world" {
+		view = "world"
+	}
+	return bridgeResult{
+		enterMapMode: true,
+		mapView:      view,
+		msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_Map{Map: &gamev1.MapRequest{View: view}},
+		},
+	}, nil
+}
+
+// bridgeTravel sends a TravelRequest to fast-travel to a named zone.
+//
+// Precondition: bctx.parsed.RawArgs is the zone name argument (may be empty).
+// Postcondition: Returns done=true with local error message on validation failure,
+// or msg non-nil to send TravelRequest.
+func bridgeTravel(bctx *bridgeContext) (bridgeResult, error) {
+	arg := strings.TrimSpace(bctx.parsed.RawArgs)
+	if arg == "" {
+		usageMsg := "Usage: travel <zone name>"
+		if bctx.conn.IsSplitScreen() {
+			_ = bctx.conn.WriteConsole(usageMsg)
+			_ = bctx.conn.WritePromptSplit(bctx.promptFn())
+		} else {
+			_ = bctx.conn.WriteLine(usageMsg)
+			_ = bctx.conn.WritePrompt(bctx.promptFn())
+		}
+		return bridgeResult{done: true}, nil
+	}
+	if bctx.travelResolver != nil {
+		zoneID, errMsg := bctx.travelResolver(arg)
+		if errMsg != "" {
+			if bctx.conn.IsSplitScreen() {
+				_ = bctx.conn.WriteConsole(errMsg)
+				_ = bctx.conn.WritePromptSplit(bctx.promptFn())
+			} else {
+				_ = bctx.conn.WriteLine(errMsg)
+				_ = bctx.conn.WritePrompt(bctx.promptFn())
+			}
+			return bridgeResult{done: true}, nil
+		}
+		return bridgeResult{msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_Travel{Travel: &gamev1.TravelRequest{ZoneId: zoneID}},
+		}}, nil
+	}
+	// Fallback: send with the raw arg as zone_id (server will reject if wrong).
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
-		Payload:   &gamev1.ClientMessage_Map{Map: &gamev1.MapRequest{}},
+		Payload:   &gamev1.ClientMessage_Travel{Travel: &gamev1.TravelRequest{ZoneId: arg}},
 	}}, nil
 }
 

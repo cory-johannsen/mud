@@ -126,6 +126,7 @@ message ClientMessage {
     RemoveLinkRequest    remove_link           = 109;
     SetRoomRequest       set_room              = 110;
     EditorCmdsRequest    editor_cmds           = 111;
+    TravelRequest        travel                = 112;
   }
 }
 
@@ -254,6 +255,11 @@ message ReleaseRequest {
 message DeployTrapRequest {
   // item_name is the consumable trap item to deploy.
   string item_name = 1;
+}
+
+// TravelRequest asks the server to fast-travel the player to the named zone.
+message TravelRequest {
+    string zone_id = 1;
 }
 
 // ServerEvent wraps all server-to-client events.
@@ -595,7 +601,9 @@ message UseEquipmentRequest {
 }
 
 // MapRequest is sent by the client to view the automap.
-message MapRequest {}
+message MapRequest {
+    string view = 1; // "zone" (default) | "world"
+}
 
 // MapTile represents one discovered room on the automap grid.
 message MapTile {
@@ -609,9 +617,22 @@ message MapTile {
     repeated string pois = 8; // POI type IDs present in this room e.g. ["merchant", "equipment"]
 }
 
-// MapResponse is returned by the server with discovered tiles for the current zone.
+// WorldZoneTile represents one zone on the world map.
+message WorldZoneTile {
+    string zone_id      = 1;
+    string zone_name    = 2;
+    int32  world_x      = 3;
+    int32  world_y      = 4;
+    bool   discovered   = 5;
+    bool   current      = 6;
+    string danger_level = 7;
+}
+
+// MapResponse is returned by the server with discovered tiles for the current zone
+// and/or world map zone tiles.
 message MapResponse {
-    repeated MapTile tiles = 1;
+    repeated MapTile       tiles       = 1;
+    repeated WorldZoneTile world_tiles = 2;
 }
 
 // SkillsRequest is sent by the client to view skill proficiencies.

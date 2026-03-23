@@ -1,6 +1,8 @@
 zone:
   id: ross_island
   danger_level: dangerous
+  world_x: 0
+  world_y: 2
   script_dir: content/scripts/zones/ross_island
   name: Ross Island
   description: A small fortress island in the Willamette, dominated by a massive gravel pit and ringed by overgrown forest.

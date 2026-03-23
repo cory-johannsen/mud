@@ -323,17 +323,20 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	})
 	defer stopIdle()
 
+	// Map-mode state shared between commandLoop and forwardServerEvents.
+	mapState := &mapModeState{}
+
 	// Spawn goroutine to forward server events to Telnet.
 	// After each event is rendered, the prompt is re-displayed.
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &lastRoomView, buildCurrentPrompt, &condMu, activeConditions)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &lastRoomView, buildCurrentPrompt, &condMu, activeConditions, mapState)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, buildCurrentPrompt)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, buildCurrentPrompt, mapState)
 
 	cancel()
 	wg.Wait()
@@ -368,7 +371,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 //
 // Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil; buildPrompt must be non-nil.
 // Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, buildPrompt func() string) error {
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, buildPrompt func() string, mapState *mapModeState) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -447,6 +450,13 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		if line != "" && conn.IsSplitScreen() {
 			conn.AppendHistory(line)
 		}
+
+		// Map-mode interceptor: consume all input when map mode is active.
+		if mapState.isActive() {
+			h.handleMapModeInput(line, conn, stream, mapState, buildPrompt, &requestID)
+			continue
+		}
+
 		if line == "" {
 			if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(buildPrompt())
@@ -470,15 +480,36 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			continue
 		}
 
+		travelResolver := func(zoneName string) (string, string) {
+			_, _, _, resp := mapState.snapshot()
+			if resp == nil {
+				return "", "Open the world map first with 'map'."
+			}
+			lower := strings.ToLower(zoneName)
+			var matches []*gamev1.WorldZoneTile
+			for _, t := range resp.GetWorldTiles() {
+				if strings.HasPrefix(strings.ToLower(t.ZoneName), lower) {
+					matches = append(matches, t)
+				}
+			}
+			if len(matches) == 0 {
+				return "", "No such zone."
+			}
+			// Tiebreak: lexicographic zone ID order.
+			sortWorldTiles(matches)
+			return matches[0].ZoneId, ""
+		}
+
 		bctx := &bridgeContext{
-			reqID:    reqID,
-			cmd:      cmd,
-			parsed:   parsed,
-			conn:     conn,
-			charName: charName,
-			role:     role,
-			stream:   stream,
-			promptFn: buildPrompt,
+			reqID:          reqID,
+			cmd:            cmd,
+			parsed:         parsed,
+			conn:           conn,
+			charName:       charName,
+			role:           role,
+			stream:         stream,
+			promptFn:       buildPrompt,
+			travelResolver: travelResolver,
 			helpFn: func() {
 				h.showGameHelp(conn, registry, role)
 				if conn.IsSplitScreen() {
@@ -517,6 +548,13 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			}
 			return ErrSwitchCharacter
 		}
+		if result.enterMapMode {
+			mapState.enter(result.mapView)
+			if conn.IsSplitScreen() {
+				_ = conn.WriteConsole("")
+				_ = conn.WritePromptSplit(mapPrompt("", "", ""))
+			}
+		}
 		if result.done {
 			if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(buildPrompt())
@@ -550,7 +588,7 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime and currentDT are updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP and maxHP are updated from CharacterInfo events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string, condMu *sync.Mutex, activeConditions map[string]string) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string, condMu *sync.Mutex, activeConditions map[string]string, mapState *mapModeState) {
 	// Pump stream.Recv() into a channel so it can participate in a proper
 	// select alongside resize events and the prompt-refresh ticker.
 	type recvResult struct {
@@ -584,6 +622,14 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				h.logger.Info("split-screen resize", zap.Int("termW", rw), zap.Int("termH", rh))
 				if err := conn.InitScreen(); err != nil {
 					h.logger.Warn("split-screen resize init failed", zap.Error(err))
+					continue
+				}
+				inMapMode, mapView, _, mapResp := mapState.snapshot()
+				if inMapMode {
+					if mapResp != nil {
+						_ = conn.WriteConsole(renderMapConsole(mapResp, mapView, rw))
+					}
+					_ = conn.WritePromptSplit(mapPrompt("", "", ""))
 					continue
 				}
 				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil {
@@ -624,6 +670,13 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			}
 			continue
 		case *gamev1.ServerEvent_RoomView:
+			// If in map mode (e.g. travel succeeded), exit map mode before rendering room view.
+			mapState.mu.Lock()
+			if mapState.mapMode {
+				mapState.mapMode = false
+				mapState.mapSelectedZone = ""
+			}
+			mapState.mu.Unlock()
 			if roomID := p.RoomView.GetRoomId(); roomID != "" {
 				currentRoom.Store(roomID)
 			}
@@ -702,6 +755,28 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderCharacterSheet(p.CharacterSheet, cw)
 		case *gamev1.ServerEvent_Map:
 			mw, _ := conn.Dimensions()
+			mapState.mu.Lock()
+			inMapMode := mapState.mapMode
+			mapView := mapState.mapView
+			mapState.mu.Unlock()
+			if inMapMode {
+				// Store the latest map response for re-render on resize.
+				mapState.setLastResponse(p.Map)
+				var rendered string
+				if mapView == "world" {
+					rendered = RenderWorldMap(p.Map, mw)
+				} else {
+					rendered = RenderMap(p.Map, mw)
+				}
+				if conn.IsSplitScreen() {
+					_ = conn.WriteConsole(rendered)
+					_ = conn.WritePromptSplit("[MAP] z=zone  w=world  <num/name>=select  t=travel  q=exit")
+				} else {
+					_ = conn.WriteLine(rendered)
+					_ = conn.WritePrompt(buildPrompt())
+				}
+				continue
+			}
 			text = RenderMap(p.Map, mw)
 		case *gamev1.ServerEvent_SkillsResponse:
 			text = RenderSkillsResponse(p.SkillsResponse)

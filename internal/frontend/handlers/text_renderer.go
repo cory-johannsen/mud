@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
@@ -1608,4 +1609,242 @@ func displayGender(g string) string {
 		return g
 	}
 	return strings.ToUpper(g[:1]) + g[1:]
+}
+
+// RenderWorldMap formats a world map from MapResponse.WorldTiles into a colored
+// terminal string using a grid-cell layout.
+//
+// Precondition: resp must be non-nil; width > 0.
+// Postcondition: Returns a multi-line ANSI-colored string with legend.
+// Layout: two-column (grid left, legend right) at width >= 100; single-column otherwise.
+func RenderWorldMap(resp *gamev1.MapResponse, width int) string {
+	tiles := resp.GetWorldTiles()
+	if len(tiles) == 0 {
+		return telnet.Colorize(telnet.BrightYellow, "World Map") + "\r\n" +
+			telnet.Colorize(telnet.Dim, "(no zones discovered)") + "\r\n"
+	}
+
+	const cellStride = 5 // 4-char cell + 1-char connector slot
+	const rowStride = 2  // cell row + connector row
+
+	// Find coordinate bounds for normalization.
+	minX, minY := tiles[0].WorldX, tiles[0].WorldY
+	for _, t := range tiles {
+		if t.WorldX < minX {
+			minX = t.WorldX
+		}
+		if t.WorldY < minY {
+			minY = t.WorldY
+		}
+	}
+
+	// Sort tiles top-to-bottom, left-to-right for legend number assignment.
+	sorted := make([]*gamev1.WorldZoneTile, len(tiles))
+	copy(sorted, tiles)
+	sort.Slice(sorted, func(i, j int) bool {
+		if sorted[i].WorldY != sorted[j].WorldY {
+			return sorted[i].WorldY < sorted[j].WorldY
+		}
+		return sorted[i].WorldX < sorted[j].WorldX
+	})
+
+	// Assign legend numbers and build a coord→tile index.
+	type tileInfo struct {
+		tile   *gamev1.WorldZoneTile
+		legend int // 1-based
+	}
+	byCoord := make(map[[2]int32]*tileInfo, len(sorted))
+	legendEntries := make([]string, 0, len(sorted))
+	for i, t := range sorted {
+		num := i + 1
+		key := [2]int32{t.WorldX, t.WorldY}
+		byCoord[key] = &tileInfo{tile: t, legend: num}
+		label := t.ZoneName
+		if !t.Discovered {
+			label = "???"
+		}
+		legendEntries = append(legendEntries, fmt.Sprintf("%02d: %s", num, label))
+	}
+
+	// Compute grid dimensions.
+	maxCol, maxRow := int32(0), int32(0)
+	for _, t := range tiles {
+		col := (t.WorldX - minX) / 2
+		row := (t.WorldY - minY) / 2
+		if col > maxCol {
+			maxCol = col
+		}
+		if row > maxRow {
+			maxRow = row
+		}
+	}
+	gridCols := int(maxCol) + 1
+	gridRows := int(maxRow) + 1
+
+	// Build grid: rendered rows (cell rows + connector rows).
+	renderedHeight := gridRows*rowStride - 1 // last row has no connector row below
+	if renderedHeight < 1 {
+		renderedHeight = 1
+	}
+	renderedWidth := gridCols * cellStride // each cell is 4 chars wide + 1 connector slot
+	if renderedWidth < 4 {
+		renderedWidth = 4
+	}
+
+	grid := make([][]byte, renderedHeight)
+	for i := range grid {
+		row := make([]byte, renderedWidth)
+		for j := range row {
+			row[j] = ' '
+		}
+		grid[i] = row
+	}
+
+	// Place cell bodies and connectors.
+	type placedCell struct {
+		gridRow, gridCol int
+		info             *tileInfo
+	}
+	var placed []placedCell
+
+	for _, ti := range byCoord {
+		col := int((ti.tile.WorldX - minX) / 2)
+		row := int((ti.tile.WorldY - minY) / 2)
+		cellRow := row * rowStride
+		cellCol := col * cellStride
+
+		var cellBody string
+		numStr := fmt.Sprintf("%02d", ti.legend)
+		if ti.tile.Current {
+			cellBody = "<" + numStr + ">"
+		} else if ti.tile.Discovered {
+			cellBody = "[" + numStr + "]"
+		} else {
+			cellBody = "[??]"
+		}
+
+		if cellRow < len(grid) && cellCol+3 < len(grid[cellRow]) {
+			copy(grid[cellRow][cellCol:cellCol+4], []byte(cellBody))
+		}
+
+		placed = append(placed, placedCell{gridRow: cellRow, gridCol: cellCol, info: ti})
+	}
+
+	// Render east connectors (between cells differing by exactly 2 on X, 0 on Y).
+	for _, a := range placed {
+		for _, b := range placed {
+			if a.info.tile.WorldY != b.info.tile.WorldY {
+				continue
+			}
+			dx := b.info.tile.WorldX - a.info.tile.WorldX
+			if dx != 2 {
+				continue
+			}
+			connRow := a.gridRow
+			connCol := a.gridCol + 4
+			if connRow < len(grid) && connCol < len(grid[connRow]) {
+				grid[connRow][connCol] = '-'
+			}
+		}
+	}
+
+	// Render south connectors (between cells differing by exactly 2 on Y, 0 on X).
+	for _, a := range placed {
+		for _, b := range placed {
+			if a.info.tile.WorldX != b.info.tile.WorldX {
+				continue
+			}
+			dy := b.info.tile.WorldY - a.info.tile.WorldY
+			if dy != 2 {
+				continue
+			}
+			connRow := a.gridRow + 1
+			connCol := a.gridCol + 1
+			if connRow < len(grid) && connCol < len(grid[connRow]) {
+				grid[connRow][connCol] = '|'
+			}
+		}
+	}
+
+	// Build colored spans per row.
+	type coloredSpan struct {
+		col  int
+		text string // 4-char colored body
+	}
+	rowSpans := make(map[int][]coloredSpan, len(placed))
+	for _, p := range placed {
+		var colored string
+		numStr := fmt.Sprintf("%02d", p.info.legend)
+		if p.info.tile.Current {
+			raw := "<" + numStr + ">"
+			colored = telnet.Colorize(telnet.BrightWhite, raw)
+		} else if p.info.tile.Discovered {
+			raw := "[" + numStr + "]"
+			colored = DangerColor(p.info.tile.DangerLevel) + raw + ansiReset
+		} else {
+			raw := "[??]"
+			colored = "\033[37m" + raw + ansiReset
+		}
+		rowSpans[p.gridRow] = append(rowSpans[p.gridRow], coloredSpan{col: p.gridCol, text: colored})
+	}
+
+	var sb strings.Builder
+	sb.WriteString(telnet.Colorize(telnet.BrightYellow, "World Map") + "\r\n")
+
+	buildGridLines := func() []string {
+		var lines []string
+		for ri, rawRow := range grid {
+			spans, hasSpans := rowSpans[ri]
+			if !hasSpans {
+				lines = append(lines, string(rawRow))
+				continue
+			}
+			sort.Slice(spans, func(a, b int) bool { return spans[a].col < spans[b].col })
+			var rowSB strings.Builder
+			pos := 0
+			for _, span := range spans {
+				if span.col > pos {
+					rowSB.Write(rawRow[pos:span.col])
+				}
+				rowSB.WriteString(span.text)
+				pos = span.col + 4
+			}
+			if pos < len(rawRow) {
+				rowSB.Write(rawRow[pos:])
+			}
+			lines = append(lines, rowSB.String())
+		}
+		return lines
+	}
+
+	gridLines := buildGridLines()
+
+	if width >= 100 {
+		// Two-column: grid on left, legend on right.
+		for i, gl := range gridLines {
+			sb.WriteString(gl)
+			if i < len(legendEntries) {
+				sb.WriteString("  ")
+				sb.WriteString(telnet.Colorize(telnet.Cyan, legendEntries[i]))
+			}
+			sb.WriteString("\r\n")
+		}
+		for i := len(gridLines); i < len(legendEntries); i++ {
+			sb.WriteString(telnet.Colorize(telnet.Cyan, legendEntries[i]))
+			sb.WriteString("\r\n")
+		}
+	} else {
+		// Single-column: grid then legend.
+		for _, gl := range gridLines {
+			sb.WriteString(gl)
+			sb.WriteString("\r\n")
+		}
+		sb.WriteString("\r\n")
+		for _, e := range legendEntries {
+			sb.WriteString(telnet.Colorize(telnet.Cyan, e))
+			sb.WriteString("\r\n")
+		}
+	}
+
+	return sb.String()
 }

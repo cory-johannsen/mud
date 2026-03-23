@@ -602,3 +602,112 @@ func TestZoneToYAMLRoundTrip(t *testing.T) {
 		assert.Equal(t, len(room.Exits), len(r2.Exits))
 	}
 }
+
+func TestLoadZoneFromBytes_WorldCoords_Parsed(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: Desc
+  start_room: r1
+  world_x: 2
+  world_y: -4
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 0
+      map_y: 0
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	require.NotNil(t, z.WorldX, "WorldX must not be nil when world_x is set")
+	require.NotNil(t, z.WorldY, "WorldY must not be nil when world_y is set")
+	assert.Equal(t, 2, *z.WorldX)
+	assert.Equal(t, -4, *z.WorldY)
+}
+
+func TestLoadZoneFromBytes_WorldCoords_Nil_WhenAbsent(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: Desc
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 0
+      map_y: 0
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	assert.Nil(t, z.WorldX, "WorldX must be nil when world_x is absent")
+	assert.Nil(t, z.WorldY, "WorldY must be nil when world_y is absent")
+}
+
+func TestLoadZoneFromBytes_WorldCoords_ZeroValueDistinguishable(t *testing.T) {
+	// (0, 0) must decode as a non-nil pointer pointing to 0, not nil.
+	data := []byte(`
+zone:
+  id: downtown
+  name: Downtown
+  description: Desc
+  start_room: r1
+  world_x: 0
+  world_y: 0
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 0
+      map_y: 0
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	require.NotNil(t, z.WorldX, "WorldX must not be nil for world_x: 0")
+	require.NotNil(t, z.WorldY, "WorldY must not be nil for world_y: 0")
+	assert.Equal(t, 0, *z.WorldX)
+	assert.Equal(t, 0, *z.WorldY)
+}
+
+// TestLoader_ZoneWorldCoords verifies that all 16 live zone YAML files decode
+// with non-nil WorldX and WorldY fields matching the design spec coordinates.
+func TestLoader_ZoneWorldCoords(t *testing.T) {
+	expected := map[string][2]int{
+		"battleground":      {4, -6},
+		"the_couve":         {0, -4},
+		"vantucky":          {2, -4},
+		"sauvie_island":     {-2, -2},
+		"pdx_international": {2, -2},
+		"hillsboro":         {-4, 0},
+		"beaverton":         {-2, 0},
+		"downtown":          {0, 0},
+		"ne_portland":       {2, 0},
+		"rustbucket_ridge":  {4, 0},
+		"troutdale":         {6, 0},
+		"aloha":             {-4, 2},
+		"ross_island":       {0, 2},
+		"se_industrial":     {2, 2},
+		"felony_flats":      {4, 2},
+		"lake_oswego":       {0, 4},
+	}
+
+	zones, err := LoadZonesFromDir("../../../content/zones")
+	require.NoError(t, err)
+
+	byID := make(map[string]*Zone, len(zones))
+	for _, z := range zones {
+		byID[z.ID] = z
+	}
+
+	for id, coords := range expected {
+		z, ok := byID[id]
+		require.True(t, ok, "zone %q not loaded", id)
+		require.NotNil(t, z.WorldX, "zone %q: WorldX must be non-nil", id)
+		require.NotNil(t, z.WorldY, "zone %q: WorldY must be non-nil", id)
+		require.Equal(t, coords[0], *z.WorldX, "zone %q: WorldX mismatch", id)
+		require.Equal(t, coords[1], *z.WorldY, "zone %q: WorldY mismatch", id)
+	}
+}

@@ -29,6 +29,8 @@ type yamlZone struct {
 	RoomTrapChance         *int                   `yaml:"room_trap_chance,omitempty"`
 	CoverTrapChance        *int                   `yaml:"cover_trap_chance,omitempty"`
 	TrapProbabilities      *yamlTrapProbabilities `yaml:"trap_probabilities,omitempty"`
+	WorldX                 *int                   `yaml:"world_x,omitempty"`
+	WorldY                 *int                   `yaml:"world_y,omitempty"`
 }
 
 // yamlTrapProbabilities is the YAML representation of zone trap placement config.
@@ -179,6 +181,8 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 		DangerLevel:            yz.DangerLevel,
 		RoomTrapChance:         yz.RoomTrapChance,
 		CoverTrapChance:        yz.CoverTrapChance,
+		WorldX:                 yz.WorldX,
+		WorldY:                 yz.WorldY,
 	}
 	if yz.TrapProbabilities != nil {
 		tp := &TrapProbabilities{

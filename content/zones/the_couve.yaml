@@ -1,6 +1,8 @@
 zone:
   id: the_couve
   danger_level: sketchy
+  world_x: 0
+  world_y: -4
   script_dir: content/scripts/zones/the_couve
   name: The Couve
   description: Vancouver, Washington — a sprawling strip mall empire north of the Columbia, where chain restaurant warlords

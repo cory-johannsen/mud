@@ -1,6 +1,8 @@
 zone:
   id: aloha
   danger_level: safe
+  world_x: -4
+  world_y: 2
   script_dir: content/scripts/zones/aloha
   name: The Aloha Neutral Zone
   description: A demilitarized trading post on the old TV Highway corridor, where smugglers, brokers, and refugees coexist

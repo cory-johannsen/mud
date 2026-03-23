@@ -1,6 +1,8 @@
 zone:
   id: battleground
   danger_level: all_out_war
+  world_x: 4
+  world_y: -6
   script_dir: content/scripts/zones/battleground
   name: Battleground Socialist Collective
   description: A fortified commune carved from the ruins of old Battleground, where collective labor and ideological discipline

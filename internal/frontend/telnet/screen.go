@@ -604,6 +604,13 @@ func (c *Conn) SnapToLive() error {
 	return c.redrawConsole()
 }
 
+// RedrawConsole is the exported form of redrawConsole.
+// It redraws the console region from the scroll buffer.
+//
+// Precondition: conn must be in split-screen mode; height and width must be set.
+// Postcondition: Console region rows rewritten; room region and prompt restored.
+func (c *Conn) RedrawConsole() error { return c.redrawConsole() }
+
 // WrapText splits text into lines of at most width visible characters.
 // ANSI escape sequences are preserved and not counted toward the width.
 // This is the exported form of wrapText.
