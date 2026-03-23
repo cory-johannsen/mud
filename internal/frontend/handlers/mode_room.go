@@ -22,7 +22,7 @@ type RoomModeHandler struct {
 	condMu           *sync.Mutex
 	activeConditions map[string]string
 
-	// exitLog and enterLog are used only by tests.
+	// test-only fields: exitLog and enterLog record lifecycle calls for assertions.
 	exitLog  []string
 	enterLog []string
 }
