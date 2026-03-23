@@ -7254,8 +7254,8 @@ func (s *GameServiceServer) handleMotiveInCombat(detail string, outcome combat.O
 	case combat.CritSuccess:
 		msg := detail + " — critical success!\n"
 		msg += fmt.Sprintf("%s: %s\n", inst.Name(), motiveNextAction(inst))
-		if len(inst.SpecialAbilities) > 0 {
-			msg += fmt.Sprintf("Hidden abilities: %s\n", strings.Join(inst.SpecialAbilities, ", "))
+		if len(inst.SenseAbilities) > 0 {
+			msg += fmt.Sprintf("Hidden abilities: %s\n", strings.Join(inst.SenseAbilities, ", "))
 		}
 		if len(inst.Resistances) > 0 {
 			msg += "Resistant to: " + formatResistanceMap(inst.Resistances) + "\n"
@@ -7306,7 +7306,7 @@ func motiveNextAction(inst *npc.Instance) string {
 	if hpPct < 25 {
 		return "looks ready to flee"
 	}
-	if len(inst.SpecialAbilities) > 0 {
+	if len(inst.SenseAbilities) > 0 {
 		return "seems to be holding something back"
 	}
 	return "looks focused on the fight"

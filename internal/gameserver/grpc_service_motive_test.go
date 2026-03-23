@@ -397,7 +397,7 @@ func TestHandleMotive_InCombat_Failure(t *testing.T) {
 //
 // Precondition: player in combat; NPC Hustle=0 → DC=10; fixedDiceSource{val:19} → roll=20 >= 20 (DC+10) → CritSuccess;
 //
-//	NPC has SpecialAbilities=["Rage"], Resistances={"fire":5}, Weaknesses={"cold":3}.
+//	NPC has SenseAbilities=["Rage"], Resistances={"fire":5}, Weaknesses={"cold":3}.
 //
 // Postcondition: message event containing "critical success", "Rage", "fire", "cold".
 func TestHandleMotive_InCombat_CritSuccess_RevealsAbilities(t *testing.T) {
@@ -412,7 +412,7 @@ func TestHandleMotive_InCombat_CritSuccess_RevealsAbilities(t *testing.T) {
 	inst, err := npcMgr.Spawn(&npc.Template{
 		ID: "ganger-mot-ic-cs", Name: "Ganger", Level: 1, MaxHP: 20, AC: 13, Awareness: 2,
 		Hustle:           0,
-		SpecialAbilities: []string{"Rage"},
+		SenseAbilities: []string{"Rage"},
 	}, roomID)
 	require.NoError(t, err)
 	inst.Resistances = map[string]int{"fire": 5}

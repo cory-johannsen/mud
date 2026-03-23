@@ -90,8 +90,8 @@ type Instance struct {
 	// Currency is the NPC's wallet accumulated from robbing players.
 	// Added to loot payout when the NPC dies. Zero at spawn.
 	Currency int
-	// SpecialAbilities lists named special abilities copied from the template at spawn.
-	SpecialAbilities []string
+	// SenseAbilities lists named special abilities copied from the template at spawn.
+	SenseAbilities []string
 	// Disposition is the runtime NPC disposition; initialized from template, may change.
 	Disposition string
 	// MotiveBonus is the +2 attack bonus granted by a motive crit fail; applied once then zeroed.
@@ -215,7 +215,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		CoolRank:      tmpl.CoolRank,
 		RobPercent:       computeRobPercent(tmpl.RobMultiplier, tmpl.Level),
 		Currency:         0,
-		SpecialAbilities: append([]string(nil), tmpl.SpecialAbilities...),
+		SenseAbilities: append([]string(nil), tmpl.SenseAbilities...),
 		NPCType:          tmpl.NPCType,
 		NpcRole:          tmpl.NpcRole,
 		Personality:      tmpl.Personality,

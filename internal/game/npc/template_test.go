@@ -890,3 +890,36 @@ ac: 10
 		t.Errorf("expected unknown type to be accepted, got: %v", err)
 	}
 }
+
+func TestTemplate_SenseAbilitiesField(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+sense_abilities:
+  - detect_lies
+  - read_aura
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"detect_lies", "read_aura"}, tmpl.SenseAbilities)
+}
+
+func TestTemplate_SpecialAbilitiesYAMLKeyRejected(t *testing.T) {
+	// old key must not silently map — strict decode will ignore it
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+special_abilities:
+  - detect_lies
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	// old key is not aliased — SenseAbilities must be empty
+	assert.Empty(t, tmpl.SenseAbilities)
+}
