@@ -542,7 +542,7 @@ features:
 
   - slug: web-client
     name: Web Game Client
-    status: backlog
+    status: spec
     priority: 430
     category: ui
     file: docs/features/web-client.md
