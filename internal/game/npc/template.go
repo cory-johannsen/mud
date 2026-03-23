@@ -89,6 +89,9 @@ type Template struct {
 	RobMultiplier float64 `yaml:"rob_multiplier"`
 	// SenseAbilities lists named special abilities for sense motive reveal.
 	SenseAbilities []string `yaml:"sense_abilities"`
+	// Tier sets the difficulty tier for this NPC. Valid values: "minion", "standard",
+	// "elite", "champion", "boss". Empty means "standard" is assumed at runtime.
+	Tier string `yaml:"tier"`
 	// Disposition sets the initial NPC disposition: "hostile","wary","neutral","friendly".
 	// Empty string defaults to "hostile" at spawn.
 	Disposition string `yaml:"disposition"`
@@ -168,6 +171,13 @@ func (t *Template) Validate() error {
 	}
 	if t.RobMultiplier < 0 {
 		return fmt.Errorf("npc template %q: rob_multiplier must be >= 0", t.ID)
+	}
+	validTiers := map[string]bool{
+		"": true, "minion": true, "standard": true,
+		"elite": true, "champion": true, "boss": true,
+	}
+	if !validTiers[t.Tier] {
+		return fmt.Errorf("npc template %q: unknown tier %q", t.ID, t.Tier)
 	}
 	if t.Loot != nil {
 		if err := t.Loot.Validate(); err != nil {

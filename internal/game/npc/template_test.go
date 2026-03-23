@@ -923,3 +923,73 @@ special_abilities:
 	// old key is not aliased — SenseAbilities must be empty
 	assert.Empty(t, tmpl.SenseAbilities)
 }
+
+func TestTemplate_Tier_DefaultsToStandardAtValidate(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	// Tier is empty in YAML — Validate normalizes to ""
+	// actual tier resolution to "standard" happens at usage time
+	assert.Equal(t, "", tmpl.Tier)
+}
+
+func TestTemplate_Tier_ValidValues(t *testing.T) {
+	for _, tier := range []string{"minion", "standard", "elite", "champion", "boss"} {
+		data := []byte(fmt.Sprintf(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+tier: %s
+`, tier))
+		tmpl, err := npc.LoadTemplateFromBytes(data)
+		require.NoError(t, err, "tier %q should be valid", tier)
+		assert.Equal(t, tier, tmpl.Tier)
+	}
+}
+
+func TestTemplate_Tier_InvalidRejected(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+tier: legendary
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "tier")
+}
+
+func TestProperty_Template_TierValidation(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		// Use printable ASCII only to avoid YAML normalization of control chars.
+		tier := rapid.StringMatching(`[a-z_]{1,20}`).Draw(t, "tier")
+		valid := map[string]bool{
+			"minion": true, "standard": true, "elite": true,
+			"champion": true, "boss": true, "": true,
+		}
+		data := []byte(fmt.Sprintf(`
+id: npc_%s
+name: NPC %s
+level: 1
+max_hp: 10
+ac: 10
+tier: %s
+`, tier, tier, tier))
+		_, err := npc.LoadTemplateFromBytes(data)
+		if valid[tier] {
+			assert.NoError(t, err)
+		} else {
+			assert.Error(t, err)
+		}
+	})
+}
