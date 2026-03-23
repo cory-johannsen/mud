@@ -54,7 +54,7 @@ func (m *Manager) Spawn(tmpl *Template, roomID string) (*Instance, error) {
 
 	n := m.counter.Add(1)
 	id := fmt.Sprintf("%s-%s-%d", tmpl.ID, roomID, n)
-	inst := NewInstanceWithResolver(id, tmpl, roomID, m.armorACResolver)
+	inst := NewInstanceWithResolver(id, tmpl, roomID, m.armorACResolver, nil, nil)
 
 	m.mu.Lock()
 	defer m.mu.Unlock()

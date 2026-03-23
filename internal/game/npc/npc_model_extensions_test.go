@@ -16,7 +16,7 @@ func TestInstance_SenseAbilities_CopiedFromTemplate(t *testing.T) {
 		ID: "t1", Name: "Brute", MaxHP: 20, AC: 12,
 		SenseAbilities: []string{"Rage", "Poison Spit"},
 	}
-	inst := npc.NewInstanceWithResolver("inst1", tmpl, "room1", func(_ string) int { return 0 })
+	inst := npc.NewInstanceWithResolver("inst1", tmpl, "room1", func(_ string) int { return 0 }, nil, nil)
 	assert.Equal(t, []string{"Rage", "Poison Spit"}, inst.SenseAbilities)
 }
 
@@ -26,7 +26,7 @@ func TestInstance_SenseAbilities_CopiedFromTemplate(t *testing.T) {
 // Postcondition: Instance.Disposition == "hostile".
 func TestInstance_Disposition_DefaultHostile(t *testing.T) {
 	tmpl := &npc.Template{ID: "t2", Name: "Guard", MaxHP: 10, AC: 10}
-	inst := npc.NewInstanceWithResolver("inst2", tmpl, "room1", func(_ string) int { return 0 })
+	inst := npc.NewInstanceWithResolver("inst2", tmpl, "room1", func(_ string) int { return 0 }, nil, nil)
 	assert.Equal(t, "hostile", inst.Disposition)
 }
 
@@ -36,7 +36,7 @@ func TestInstance_Disposition_DefaultHostile(t *testing.T) {
 // Postcondition: Instance.Disposition == "neutral".
 func TestInstance_Disposition_CopiedFromTemplate(t *testing.T) {
 	tmpl := &npc.Template{ID: "t3", Name: "Merchant", MaxHP: 10, AC: 10, Disposition: "neutral"}
-	inst := npc.NewInstanceWithResolver("inst3", tmpl, "room1", func(_ string) int { return 0 })
+	inst := npc.NewInstanceWithResolver("inst3", tmpl, "room1", func(_ string) int { return 0 }, nil, nil)
 	assert.Equal(t, "neutral", inst.Disposition)
 }
 
@@ -46,6 +46,6 @@ func TestInstance_Disposition_CopiedFromTemplate(t *testing.T) {
 // Postcondition: MotiveBonus == 0.
 func TestInstance_MotiveBonus_ZeroAtSpawn(t *testing.T) {
 	tmpl := &npc.Template{ID: "t4", Name: "Ganger", MaxHP: 10, AC: 10}
-	inst := npc.NewInstanceWithResolver("inst4", tmpl, "room1", func(_ string) int { return 0 })
+	inst := npc.NewInstanceWithResolver("inst4", tmpl, "room1", func(_ string) int { return 0 }, nil, nil)
 	assert.Equal(t, 0, inst.MotiveBonus)
 }

@@ -1,12 +1,15 @@
 package npc
 
 import (
+	"math"
 	"math/rand"
 	"sync"
 	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
+	"github.com/cory-johannsen/mud/internal/game/xp"
 )
 
 // Instance is a live NPC entity occupying a room.
@@ -189,10 +192,12 @@ func pickWeighted(entries []EquipmentEntry) string {
 // NewInstanceWithResolver creates a live NPC instance from a template, placed in roomID.
 // armorACBonus is an optional func(armorID string) int that returns the armor's AC bonus;
 // pass nil to skip AC adjustment.
+// xpCfg is optional; when non-nil, MaxHP is scaled by the tier multiplier.
+// featRegistry is optional; when non-nil, the "tough" feat adds +5 HP after tier scaling.
 //
 // Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
-// Postcondition: CurrentHP equals tmpl.MaxHP; WeaponID and ArmorID are set from weighted roll.
-func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBonus func(string) int) *Instance {
+// Postcondition: CurrentHP equals computed MaxHP; WeaponID and ArmorID are set from weighted roll.
+func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBonus func(string) int, xpCfg *xp.XPConfig, featRegistry *ruleset.FeatRegistry) *Instance {
 	var cooldown time.Duration
 	if tmpl.TauntCooldown != "" {
 		cooldown, _ = time.ParseDuration(tmpl.TauntCooldown)
@@ -205,6 +210,28 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		ac += armorACBonus(armorID)
 	}
 
+	// Compute tier-scaled MaxHP.
+	tier := tmpl.Tier
+	if tier == "" {
+		tier = "standard"
+	}
+	maxHP := tmpl.MaxHP
+	if xpCfg != nil {
+		if mult, ok := xpCfg.TierMultipliers[tier]; ok {
+			maxHP = int(math.Ceil(float64(tmpl.MaxHP) * mult.HP))
+		}
+	}
+	// Apply tough feat bonus (+5 HP) after tier multiplier.
+	if featRegistry != nil {
+		for _, featID := range tmpl.Feats {
+			if featID == "tough" {
+				if f, ok := featRegistry.Feat("tough"); ok && f.AllowNPC {
+					maxHP += 5
+				}
+			}
+		}
+	}
+
 	return &Instance{
 		ID:            id,
 		TemplateID:    tmpl.ID,
@@ -213,8 +240,8 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		baseName:      tmpl.Name,
 		Description:   tmpl.Description,
 		RoomID:        roomID,
-		CurrentHP:     tmpl.MaxHP,
-		MaxHP:         tmpl.MaxHP,
+		CurrentHP:     maxHP,
+		MaxHP:         maxHP,
 		AC:            ac,
 		Level:         tmpl.Level,
 		Awareness:     tmpl.Awareness,
@@ -309,7 +336,7 @@ func computeRobPercent(multiplier float64, level int) float64 {
 // Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
 // Postcondition: CurrentHP equals tmpl.MaxHP; WeaponID/ArmorID are set; AC is base only.
 func NewInstance(id string, tmpl *Template, roomID string) *Instance {
-	return NewInstanceWithResolver(id, tmpl, roomID, nil)
+	return NewInstanceWithResolver(id, tmpl, roomID, nil, nil, nil)
 }
 
 // TryTaunt attempts to produce a taunt string, respecting chance and cooldown.
