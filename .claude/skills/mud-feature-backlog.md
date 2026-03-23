@@ -19,7 +19,7 @@ All fields required unless noted:
 ```yaml
 - slug: kebab-case-id          # unique; matches filename for own-file features
   name: Human Readable Name
-  status: done                 # done | in_progress | planned
+  status: done                 # backlog | spec | planned | in_progress | done | blocked
   priority: 10                 # unique positive integer; lower = higher priority
   category: combat             # combat | character | technology | world | ui | meta
   file: docs/features/foo.md  # authoritative path (may differ from slug for consolidated files)
@@ -30,13 +30,22 @@ All fields required unless noted:
 
 ## Status rules
 
-Status MUST reflect the actual checklist state in the feature file:
+Statuses follow a linear lifecycle. `blocked` is a special state any status can transition into.
 
-| Status | Checklist state |
+```
+backlog → spec → planned → in_progress → done
+       ↕       ↕           ↕
+            blocked (any status can become blocked if a dependency is not yet done)
+```
+
+| Status | Meaning |
 |---|---|
-| `done` | All items `[x]`; also set `effort: "-"` |
-| `in_progress` | At least one `[x]` and one `[ ]` |
-| `planned` | All items `[ ]` (or no checklist) |
+| `backlog` | Feature identified but not yet designed or specced |
+| `spec` | Feature spec written; implementation plan not yet written |
+| `planned` | Implementation plan written; work not yet started |
+| `in_progress` | Implementation underway (at least one checklist item `[x]`) |
+| `done` | All checklist items `[x]`; set `effort: "-"` |
+| `blocked` | Cannot proceed due to an unfinished dependency; restore prior status when unblocked |
 
 **When marking a feature `done`:** verify the feature file's checklist items are all `[x]` before setting status. If the file has unchecked items, either update the file or use `in_progress`.
 
@@ -56,8 +65,15 @@ Status MUST reflect the actual checklist state in the feature file:
 grep -E "slug:|priority:|status:|effort:" docs/features/index.yaml
 
 # Features by status
+grep -B1 "status: backlog" docs/features/index.yaml | grep slug
+grep -B1 "status: spec" docs/features/index.yaml | grep slug
 grep -B1 "status: planned" docs/features/index.yaml | grep slug
+
+# Unplanned features (backlog + spec) sorted by priority
+grep -E "slug:|priority:|status:" docs/features/index.yaml | \
+  paste - - - | grep -E "status: backlog|status: spec" | sort -t: -k4 -n
 grep -B1 "status: in_progress" docs/features/index.yaml | grep slug
+grep -B1 "status: blocked" docs/features/index.yaml | grep slug
 
 # Features by category
 grep -B3 "category: combat" docs/features/index.yaml | grep slug
