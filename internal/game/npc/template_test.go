@@ -993,3 +993,19 @@ tier: %s
 		}
 	})
 }
+
+func TestTemplate_Tags_PropagatedToInstance(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+tags:
+  - undead
+  - flying
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"undead", "flying"}, tmpl.Tags)
+}

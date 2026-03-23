@@ -92,6 +92,8 @@ type Instance struct {
 	Currency int
 	// SenseAbilities lists named special abilities copied from the template at spawn.
 	SenseAbilities []string
+	// Tags is the list of content labels propagated from the template at spawn.
+	Tags []string
 	// Disposition is the runtime NPC disposition; initialized from template, may change.
 	Disposition string
 	// MotiveBonus is the +2 attack bonus granted by a motive crit fail; applied once then zeroed.
@@ -116,6 +118,19 @@ type Instance struct {
 	AttackVerb string
 	// Immobile prevents this NPC from patrolling or wandering. Copied from template.
 	Immobile bool
+}
+
+// HasTag reports whether the given tag is present in the instance's tag list.
+//
+// Precondition: tag must be non-empty for a meaningful result.
+// Postcondition: Returns true iff tag is present in Tags; false otherwise.
+func (i *Instance) HasTag(tag string) bool {
+	for _, t := range i.Tags {
+		if t == tag {
+			return true
+		}
+	}
+	return false
 }
 
 // Name returns the instance's current display name.
@@ -216,6 +231,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		RobPercent:       computeRobPercent(tmpl.RobMultiplier, tmpl.Level),
 		Currency:         0,
 		SenseAbilities: append([]string(nil), tmpl.SenseAbilities...),
+		Tags:           append([]string(nil), tmpl.Tags...),
 		NPCType:          tmpl.NPCType,
 		NpcRole:          tmpl.NpcRole,
 		Personality:      tmpl.Personality,

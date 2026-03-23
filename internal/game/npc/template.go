@@ -92,6 +92,8 @@ type Template struct {
 	// Tier sets the difficulty tier for this NPC. Valid values: "minion", "standard",
 	// "elite", "champion", "boss". Empty means "standard" is assumed at runtime.
 	Tier string `yaml:"tier"`
+	// Tags is a list of free-form content labels. Not code-enforced.
+	Tags []string `yaml:"tags"`
 	// Disposition sets the initial NPC disposition: "hostile","wary","neutral","friendly".
 	// Empty string defaults to "hostile" at spawn.
 	Disposition string `yaml:"disposition"`

@@ -410,3 +410,29 @@ func TestHumanSpawnNoResistanceDefaults(t *testing.T) {
 		t.Errorf("human should not have bleed resistance, got %d", inst.Resistances["bleed"])
 	}
 }
+
+func TestInstance_HasTag_True(t *testing.T) {
+	inst := &npc.Instance{Tags: []string{"undead", "flying"}}
+	assert.True(t, inst.HasTag("undead"))
+	assert.True(t, inst.HasTag("flying"))
+}
+
+func TestInstance_HasTag_False(t *testing.T) {
+	inst := &npc.Instance{Tags: []string{"undead"}}
+	assert.False(t, inst.HasTag("robot"))
+}
+
+func TestInstance_HasTag_Empty(t *testing.T) {
+	inst := &npc.Instance{}
+	assert.False(t, inst.HasTag("anything"))
+}
+
+func TestProperty_Instance_HasTag_Reflexive(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		tags := rapid.SliceOf(rapid.StringN(1, 10, -1)).Draw(t, "tags")
+		inst := &npc.Instance{Tags: tags}
+		for _, tag := range tags {
+			assert.True(t, inst.HasTag(tag), "HasTag must return true for any tag in Tags")
+		}
+	})
+}
