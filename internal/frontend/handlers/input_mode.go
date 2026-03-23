@@ -118,27 +118,6 @@ func (s *SessionInputState) Room() *RoomModeHandler {
 	return s.room
 }
 
-// RoomModeHandler is the concrete ModeHandler for room-command mode.
-// This stub satisfies the SessionInputState type constraints; Task 3 provides
-// the full implementation. REQ-IMR-9A.
-type RoomModeHandler struct{}
-
-// Mode implements ModeHandler. REQ-IMR-3.
-func (r *RoomModeHandler) Mode() InputMode { return ModeRoom }
-
-// OnEnter implements ModeHandler. REQ-IMR-4.
-func (r *RoomModeHandler) OnEnter(_ *telnet.Conn) {}
-
-// OnExit implements ModeHandler. REQ-IMR-5.
-func (r *RoomModeHandler) OnExit(_ *telnet.Conn) {}
-
-// HandleInput implements ModeHandler. REQ-IMR-6.
-func (r *RoomModeHandler) HandleInput(_ string, _ *telnet.Conn, _ gamev1.GameService_SessionClient, _ *int, _ *SessionInputState) {
-}
-
-// Prompt implements ModeHandler. REQ-IMR-7.
-func (r *RoomModeHandler) Prompt() string { return "> " }
-
 // HandleInput delegates the input line to the currently active ModeHandler.
 // It acquires a read lock to snapshot the handler, then releases the lock
 // before calling HandleInput so handlers may call SetMode without deadlocking.
