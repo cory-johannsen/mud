@@ -20,7 +20,22 @@ type Awards struct {
 	SkillCheckCritSuccessXP int `yaml:"skill_check_crit_success_xp"`
 	// SkillCheckDCMultiplier is multiplied by DC and added to skill check XP awards.
 	SkillCheckDCMultiplier int `yaml:"skill_check_dc_multiplier"`
+	// BossKillBonusXP is the flat XP bonus awarded to each player in the room when a boss dies.
+	BossKillBonusXP int `yaml:"boss_kill_bonus_xp"`
 }
+
+// TierMultiplier holds per-tier scaling coefficients for XP, loot, and HP.
+type TierMultiplier struct {
+	// XP is the multiplier applied to the base XP award for kills.
+	XP float64 `yaml:"xp"`
+	// Loot is the multiplier applied to item quantity ranges and credits.
+	Loot float64 `yaml:"loot"`
+	// HP is the multiplier applied to the template's MaxHP at spawn.
+	HP float64 `yaml:"hp"`
+}
+
+// CanonicalTiers lists the five tier names that must be present in TierMultipliers.
+var CanonicalTiers = []string{"minion", "standard", "elite", "champion", "boss"}
 
 // XPConfig holds all configurable parameters for the levelling system.
 type XPConfig struct {
@@ -36,6 +51,23 @@ type XPConfig struct {
 	JobLevelCap int `yaml:"job_level_cap"`
 	// Awards holds per-source XP values.
 	Awards Awards `yaml:"awards"`
+	// TierMultipliers maps tier name → scaling coefficients.
+	// Must contain entries for all five canonical tiers (validated at startup).
+	TierMultipliers map[string]TierMultiplier `yaml:"tier_multipliers"`
+}
+
+// ValidateTiers checks that TierMultipliers contains all five canonical tier entries.
+//
+// Precondition: cfg must not be nil.
+// Postcondition: Returns nil iff all canonical tiers are present; returns an error
+// listing the first missing tier otherwise.
+func (cfg *XPConfig) ValidateTiers() error {
+	for _, tier := range CanonicalTiers {
+		if _, ok := cfg.TierMultipliers[tier]; !ok {
+			return fmt.Errorf("xp_config: missing tier_multipliers entry for %q", tier)
+		}
+	}
+	return nil
 }
 
 // LoadXPConfig reads and parses the XP configuration from the given YAML file.

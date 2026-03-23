@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 
 	"github.com/cory-johannsen/mud/internal/game/xp"
 )
@@ -53,4 +54,60 @@ func TestLoadXPConfig_MalformedYAML(t *testing.T) {
 
 	_, err := xp.LoadXPConfig(tmp)
 	assert.Error(t, err)
+}
+
+func TestXPConfig_TierMultipliers_LoadedFromYAML(t *testing.T) {
+	data := []byte(`
+base_xp: 100
+hp_per_level: 5
+boost_interval: 5
+level_cap: 100
+job_level_cap: 20
+awards:
+  kill_xp_per_npc_level: 50
+  new_room_xp: 10
+  skill_check_success_xp: 10
+  skill_check_crit_success_xp: 25
+  skill_check_dc_multiplier: 2
+  boss_kill_bonus_xp: 200
+tier_multipliers:
+  minion:    { xp: 0.5, loot: 0.5, hp: 0.75 }
+  standard:  { xp: 1.0, loot: 1.0, hp: 1.0  }
+  elite:     { xp: 2.0, loot: 1.5, hp: 1.5  }
+  champion:  { xp: 3.0, loot: 2.0, hp: 2.0  }
+  boss:      { xp: 5.0, loot: 3.0, hp: 3.0  }
+`)
+	var cfg xp.XPConfig
+	err := yaml.Unmarshal(data, &cfg)
+	require.NoError(t, err)
+	require.Len(t, cfg.TierMultipliers, 5)
+	assert.InDelta(t, 5.0, cfg.TierMultipliers["boss"].XP, 1e-9)
+	assert.InDelta(t, 3.0, cfg.TierMultipliers["boss"].Loot, 1e-9)
+	assert.InDelta(t, 3.0, cfg.TierMultipliers["boss"].HP, 1e-9)
+	assert.Equal(t, 200, cfg.Awards.BossKillBonusXP)
+}
+
+func TestXPConfig_ValidateTiers_MissingTierFatal(t *testing.T) {
+	cfg := &xp.XPConfig{
+		TierMultipliers: map[string]xp.TierMultiplier{
+			"minion": {XP: 0.5, Loot: 0.5, HP: 0.75},
+			// missing standard, elite, champion, boss
+		},
+	}
+	err := cfg.ValidateTiers()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "standard")
+}
+
+func TestXPConfig_ValidateTiers_AllPresent(t *testing.T) {
+	cfg := &xp.XPConfig{
+		TierMultipliers: map[string]xp.TierMultiplier{
+			"minion":   {XP: 0.5, Loot: 0.5, HP: 0.75},
+			"standard": {XP: 1.0, Loot: 1.0, HP: 1.0},
+			"elite":    {XP: 2.0, Loot: 1.5, HP: 1.5},
+			"champion": {XP: 3.0, Loot: 2.0, HP: 2.0},
+			"boss":     {XP: 5.0, Loot: 3.0, HP: 3.0},
+		},
+	}
+	require.NoError(t, cfg.ValidateTiers())
 }

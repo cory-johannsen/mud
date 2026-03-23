@@ -20,3 +20,14 @@ awards:
   skill_check_crit_success_xp: 25
   # Multiplied by DC and added to skill check XP (total = base + DC × this)
   skill_check_dc_multiplier: 2
+  # Flat bonus XP awarded to each player in the room when a boss NPC dies
+  boss_kill_bonus_xp: 200
+
+# Per-tier scaling multipliers for XP, loot quantity, and HP pool.
+# All five canonical tiers must be present; missing entries cause fatal startup.
+tier_multipliers:
+  minion:   { xp: 0.5, loot: 0.5, hp: 0.75 }
+  standard: { xp: 1.0, loot: 1.0, hp: 1.0  }
+  elite:    { xp: 2.0, loot: 1.5, hp: 1.5  }
+  champion: { xp: 3.0, loot: 2.0, hp: 2.0  }
+  boss:     { xp: 5.0, loot: 3.0, hp: 3.0  }
