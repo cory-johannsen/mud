@@ -1108,9 +1108,12 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 			} else {
 				num := numByCoord[[2]int32{x, y}]
 				color := DangerColor(t.DangerLevel)
-				if t.Current {
+				switch {
+				case t.Current:
 					sb.WriteString(fmt.Sprintf("%s<%2d>%s", color, num, ansiReset))
-				} else {
+				case t.BossRoom:
+					sb.WriteString(fmt.Sprintf("%s<BB>%s", color, ansiReset))
+				default:
 					sb.WriteString(fmt.Sprintf("%s[%2d]%s", color, num, ansiReset))
 				}
 			}

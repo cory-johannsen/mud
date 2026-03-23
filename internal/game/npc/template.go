@@ -10,6 +10,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
 
@@ -87,8 +88,19 @@ type Template struct {
 	// Values > 1.0 represent especially predatory NPCs.
 	// Used at spawn to compute Instance.RobPercent.
 	RobMultiplier float64 `yaml:"rob_multiplier"`
-	// SpecialAbilities lists named special abilities for sense motive reveal.
-	SpecialAbilities []string `yaml:"special_abilities"`
+	// SenseAbilities lists named special abilities for sense motive reveal.
+	SenseAbilities []string `yaml:"sense_abilities"`
+	// BossAbilities defines the set of special abilities for boss-tier NPCs.
+	// Validated by Template.Validate().
+	BossAbilities []BossAbility `yaml:"boss_abilities"`
+	// Tier sets the difficulty tier for this NPC. Valid values: "minion", "standard",
+	// "elite", "champion", "boss". Empty means "standard" is assumed at runtime.
+	Tier string `yaml:"tier"`
+	// Tags is a list of free-form content labels. Not code-enforced.
+	Tags []string `yaml:"tags"`
+	// Feats is a list of feat IDs assigned to this NPC. Each must be an NPC-valid feat
+	// (AllowNPC == true). Validated by ValidateWithRegistry at startup.
+	Feats []string `yaml:"feats"`
 	// Disposition sets the initial NPC disposition: "hostile","wary","neutral","friendly".
 	// Empty string defaults to "hostile" at spawn.
 	Disposition string `yaml:"disposition"`
@@ -168,6 +180,18 @@ func (t *Template) Validate() error {
 	}
 	if t.RobMultiplier < 0 {
 		return fmt.Errorf("npc template %q: rob_multiplier must be >= 0", t.ID)
+	}
+	validTiers := map[string]bool{
+		"": true, "minion": true, "standard": true,
+		"elite": true, "champion": true, "boss": true,
+	}
+	if !validTiers[t.Tier] {
+		return fmt.Errorf("npc template %q: unknown tier %q", t.ID, t.Tier)
+	}
+	for _, ability := range t.BossAbilities {
+		if err := ability.Validate(); err != nil {
+			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
 	}
 	if t.Loot != nil {
 		if err := t.Loot.Validate(); err != nil {
@@ -286,6 +310,24 @@ func (t *Template) ValidateWithSkills(knownSkills map[string]bool) error {
 	if t.JobTrainer != nil {
 		if err := t.JobTrainer.Validate(knownSkills); err != nil {
 			return fmt.Errorf("npc template %q: %w", t.ID, err)
+		}
+	}
+	return nil
+}
+
+// ValidateWithRegistry verifies that all feat IDs in Feats exist in registry
+// and have AllowNPC == true.
+//
+// Precondition: t must not be nil; registry must not be nil.
+// Postcondition: Returns nil iff all feats are valid for NPC use; error otherwise.
+func (t *Template) ValidateWithRegistry(registry *ruleset.FeatRegistry) error {
+	for _, featID := range t.Feats {
+		f, ok := registry.Feat(featID)
+		if !ok {
+			return fmt.Errorf("npc template %q: feat %q not found in registry", t.ID, featID)
+		}
+		if !f.AllowNPC {
+			return fmt.Errorf("npc template %q: feat %q does not have allow_npc: true", t.ID, featID)
 		}
 	}
 	return nil

@@ -418,6 +418,13 @@ func (s *GameServiceServer) SetCharSaver(cs CharacterSaver) {
 	s.charSaver = cs
 }
 
+// FeatRegistry returns the feat registry used by this service.
+//
+// Postcondition: Returns nil when no feat registry has been set.
+func (s *GameServiceServer) FeatRegistry() *ruleset.FeatRegistry {
+	return s.featRegistry
+}
+
 // Session implements the bidirectional streaming RPC.
 // Flow:
 //  1. Wait for JoinWorldRequest
@@ -1831,6 +1838,16 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 					)
 				}
 			}
+		}
+	}
+
+	// Fire on_enter hazards for the new room (REQ-AE-28).
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+		if len(newRoom.Hazards) > 0 {
+			ApplyHazards(newRoom, sess, "on_enter", s.dice, s.condRegistry,
+				func(msg string) { s.pushMessageToUID(uid, msg) },
+				s.logger,
+			)
 		}
 	}
 
@@ -4810,6 +4827,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			Exits:       exits,
 			DangerLevel: string(effectiveLevel),
 			Pois:        poiSlice,
+			BossRoom:    r.BossRoom,
 		})
 	}
 	return &gamev1.ServerEvent{
@@ -7340,8 +7358,8 @@ func (s *GameServiceServer) handleMotiveInCombat(detail string, outcome combat.O
 	case combat.CritSuccess:
 		msg := detail + " — critical success!\n"
 		msg += fmt.Sprintf("%s: %s\n", inst.Name(), motiveNextAction(inst))
-		if len(inst.SpecialAbilities) > 0 {
-			msg += fmt.Sprintf("Hidden abilities: %s\n", strings.Join(inst.SpecialAbilities, ", "))
+		if len(inst.SenseAbilities) > 0 {
+			msg += fmt.Sprintf("Hidden abilities: %s\n", strings.Join(inst.SenseAbilities, ", "))
 		}
 		if len(inst.Resistances) > 0 {
 			msg += "Resistant to: " + formatResistanceMap(inst.Resistances) + "\n"
@@ -7392,7 +7410,7 @@ func motiveNextAction(inst *npc.Instance) string {
 	if hpPct < 25 {
 		return "looks ready to flee"
 	}
-	if len(inst.SpecialAbilities) > 0 {
+	if len(inst.SenseAbilities) > 0 {
 		return "seems to be holding something back"
 	}
 	return "looks focused on the fight"

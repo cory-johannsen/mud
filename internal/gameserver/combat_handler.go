@@ -21,6 +21,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/game/xp"
@@ -73,6 +74,7 @@ type CombatHandler struct {
 	xpSvc          *xp.Service            // optional; awards kill XP on NPC death; may be nil
 	currencySaver  CurrencySaver          // optional; persists currency after loot award; may be nil
 	mentalStateMgr *mentalstate.Manager   // optional; manages mental state conditions; may be nil
+	featRegistry   *ruleset.FeatRegistry  // optional; used for NPC feat bonus resolution; may be nil
 	logger         *zap.Logger            // optional; used for error logging; may be nil
 	substanceSvc   SubstanceService       // optional; applies poison substances on weapon hit (REQ-AH-21); may be nil
 	combatMu      sync.RWMutex
@@ -221,6 +223,14 @@ func (h *CombatHandler) SetSubstanceSvc(svc SubstanceService) {
 // Postcondition: Errors such as AwardKill failures are logged via logger.Warn.
 func (h *CombatHandler) SetLogger(logger *zap.Logger) {
 	h.logger = logger
+}
+
+// SetFeatRegistry registers the feat registry used to compute NPC passive feat bonuses (REQ-AE-16).
+//
+// Precondition: registry must be non-nil.
+// Postcondition: NPC feat bonuses are applied when building combatants.
+func (h *CombatHandler) SetFeatRegistry(registry *ruleset.FeatRegistry) {
+	h.featRegistry = registry
 }
 
 // SetHirelingOwnerOf registers a callback that returns the owner UID for a hireling instance.
@@ -1908,6 +1918,33 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		})
 	}
 
+	// Apply round_start hazards for all players in the room (REQ-AE-29).
+	var hazardEvents []*gamev1.CombatEvent
+	if h.worldMgr != nil {
+		if room, ok := h.worldMgr.GetRoom(roomID); ok && len(room.Hazards) > 0 {
+			for _, c := range cbt.Combatants {
+				if c.Kind != combat.KindPlayer || c.IsDead() {
+					continue
+				}
+				playerSess, playerOK := h.sessions.GetPlayer(c.ID)
+				if !playerOK {
+					continue
+				}
+				ApplyHazards(room, playerSess, "round_start", h.dice, h.condRegistry,
+					func(msg string) {
+						hazardEvents = append(hazardEvents, &gamev1.CombatEvent{
+							Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+							Attacker:  "Hazard",
+							Target:    playerSess.CharName,
+							Narrative: msg,
+						})
+					},
+					h.logger,
+				)
+			}
+		}
+	}
+
 	roundStartEvents := []*gamev1.CombatEvent{
 		{
 			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
@@ -1916,6 +1953,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	}
 	roundStartEvents = append(roundStartEvents, condCombatEvents...)
 	roundStartEvents = append(roundStartEvents, drowningEvents...)
+	roundStartEvents = append(roundStartEvents, hazardEvents...)
 	h.broadcastFn(roomID, roundStartEvents)
 	h.startTimerLocked(roomID)
 	return events
@@ -2003,15 +2041,29 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		}
 	}
 
+	// Compute NPC feat bonuses (REQ-AE-16, REQ-AE-17, REQ-AE-11).
+	// Target is a player session (not an NPC instance), so target is nil and
+	// TargetTags-gated feats are skipped per REQ-AE-11.
+	var npcFeatStats NPCEffectiveStats
+	if h.featRegistry != nil {
+		roomNPCs := h.npcMgr.InstancesInRoom(inst.RoomID)
+		npcFeatStats = ComputeNPCAttackStats(inst, nil, h.featRegistry, roomNPCs)
+	}
+
+	// StrMod serves as both the attack modifier and damage modifier for NPCs.
+	// feat bonuses from brutal_strike (+2 damage) and pack_tactics (+2 attack)
+	// are both added to StrMod since it feeds both the attack roll and the damage roll.
+	npcStrMod := combat.AbilityMod(inst.Awareness) + npcFeatStats.DamageBonus + npcFeatStats.AttackBonus
+
 	npcCbt := &combat.Combatant{
 		ID:          inst.ID,
 		Kind:        combat.KindNPC,
 		Name:        inst.Name(),
 		MaxHP:       inst.MaxHP,
 		CurrentHP:   inst.CurrentHP,
-		AC:          inst.AC,
+		AC:          inst.AC + npcFeatStats.ACBonus,
 		Level:       inst.Level,
-		StrMod:      combat.AbilityMod(inst.Awareness),
+		StrMod:      npcStrMod,
 		DexMod:      1,
 		NPCType:     inst.Type,
 		Resistances: inst.Resistances,
@@ -2439,6 +2491,7 @@ func FilterAnimalPlanActions(actions []ai.PlannedAction, isAnimal bool) []ai.Pla
 // Precondition: h.combatMu is held; cbt must not be nil.
 func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 	// Decrement ability cooldowns for all living NPCs before planning.
+	// Also evaluate boss abilities for boss-tier NPCs (REQ-AE-35).
 	for _, c := range cbt.Combatants {
 		if c.Kind != combat.KindNPC || c.IsDead() {
 			continue
@@ -2448,6 +2501,10 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 				if inst.AbilityCooldowns[k] > 0 {
 					inst.AbilityCooldowns[k]--
 				}
+			}
+			// Evaluate boss abilities at the start of each NPC's round.
+			if inst.Tier == "boss" {
+				h.evaluateBossAbilitiesLocked(inst, cbt.RoomID, cbt.Round, false)
 			}
 		}
 	}
@@ -3017,7 +3074,14 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			cfg := h.xpSvc.Config()
 			livingParticipants := h.livingParticipantSessions(cbt)
 			if len(livingParticipants) > 0 {
-				totalXP := inst.Level * cfg.Awards.KillXPPerNPCLevel
+				effectiveTier := inst.Tier
+			if effectiveTier == "" {
+				effectiveTier = "standard"
+			}
+			totalXP := inst.Level * cfg.Awards.KillXPPerNPCLevel
+			if mult, ok := cfg.TierMultipliers[effectiveTier]; ok {
+				totalXP = int(math.Ceil(float64(totalXP) * mult.XP))
+			}
 				share := totalXP / len(livingParticipants)
 				if share == 0 && totalXP > 0 {
 					p := livingParticipants[0]
@@ -3037,6 +3101,32 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 							h.pushXPMessages(p, xpMsgs, share, c.Name)
 						} else if h.logger != nil {
 							h.logger.Warn("AwardXPAmount failed",
+								zap.String("uid", p.UID),
+								zap.Error(xpErr),
+							)
+						}
+					}
+				}
+			}
+		}
+
+		// Award boss kill bonus XP to all living participants when a boss-tier NPC dies (REQ-AE-22).
+		if h.xpSvc != nil {
+			cfg := h.xpSvc.Config()
+			bonusXP := cfg.Awards.BossKillBonusXP
+			if bonusXP > 0 {
+				tierForBonus := inst.Tier
+				if tierForBonus == "" {
+					tierForBonus = "standard"
+				}
+				if tierForBonus == "boss" {
+					allRoomPlayers := h.sessions.PlayersInRoomDetails(roomID)
+					for _, p := range allRoomPlayers {
+						xpMsgs, xpErr := h.xpSvc.AwardXPAmount(context.Background(), p, p.CharacterID, bonusXP)
+						if xpErr == nil {
+							h.pushXPMessages(p, xpMsgs, bonusXP, "boss kill bonus")
+						} else if h.logger != nil {
+							h.logger.Warn("boss kill bonus XP failed",
 								zap.String("uid", p.UID),
 								zap.Error(xpErr),
 							)
@@ -3477,4 +3567,94 @@ func (h *CombatHandler) Status(uid string) ([]*condition.ActiveCondition, error)
 func clearReadiedAction(sess *session.PlayerSession) {
 	sess.ReadiedTrigger = ""
 	sess.ReadiedAction = ""
+}
+
+// evaluateBossAbilitiesLocked checks and fires all eligible boss abilities for inst.
+// Called at the start of each combat round, before normal NPC attack resolution.
+//
+// Precondition: combatMu is held; inst must not be nil; roomID must be non-empty.
+// Postcondition: eligible abilities are fired; BossAbilityCooldowns updated in inst.
+func (h *CombatHandler) evaluateBossAbilitiesLocked(
+	inst *npc.Instance,
+	roomID string,
+	round int,
+	tookDamageThisRound bool,
+) {
+	tmpl := h.npcMgr.TemplateByID(inst.TemplateID)
+	if tmpl == nil || len(tmpl.BossAbilities) == 0 {
+		return
+	}
+	now := time.Now()
+	for _, ability := range tmpl.BossAbilities {
+		// Check cooldown.
+		if deadline, hasCooldown := inst.BossAbilityCooldowns[ability.ID]; hasCooldown {
+			if now.Before(deadline) {
+				continue
+			}
+		}
+		// Check trigger condition.
+		fires := false
+		switch ability.Trigger {
+		case "hp_pct_below":
+			pct := 0
+			if inst.MaxHP > 0 {
+				pct = int(100 * inst.CurrentHP / inst.MaxHP)
+			}
+			fires = pct < ability.TriggerValue
+		case "round_start":
+			fires = ability.TriggerValue == 0 || round == ability.TriggerValue
+		case "on_damage_taken":
+			fires = tookDamageThisRound
+		}
+		if !fires {
+			continue
+		}
+
+		// Announce ability.
+		msg := fmt.Sprintf("%s uses %s!", inst.Name(), ability.Name)
+		h.broadcastFn(roomID, []*gamev1.CombatEvent{{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
+			Narrative: msg,
+		}})
+
+		// Execute effect.
+		switch {
+		case ability.Effect.AoeDamageExpr != "":
+			if dmgResult, err := h.dice.RollExpr(ability.Effect.AoeDamageExpr); err == nil {
+				dmg := dmgResult.Total()
+				if dmg < 0 {
+					dmg = 0
+				}
+				players := h.sessions.PlayersInRoomDetails(roomID)
+				for _, p := range players {
+					p.CurrentHP -= dmg
+					if p.CurrentHP < 0 {
+						p.CurrentHP = 0
+					}
+				}
+			}
+		case ability.Effect.AoeCondition != "":
+			if h.condRegistry != nil {
+				players := h.sessions.PlayersInRoomDetails(roomID)
+				for _, p := range players {
+					if cond, ok := h.condRegistry.Get(ability.Effect.AoeCondition); ok && p.Conditions != nil {
+						_ = p.Conditions.Apply(p.UID, cond, 1, -1)
+					}
+				}
+			}
+		case ability.Effect.HealPct != 0:
+			heal := int(math.Ceil(float64(inst.MaxHP) * float64(ability.Effect.HealPct) / 100.0))
+			inst.CurrentHP += heal
+			if inst.CurrentHP > inst.MaxHP {
+				inst.CurrentHP = inst.MaxHP
+			}
+		}
+
+		// Record cooldown.
+		if ability.Cooldown != "" {
+			if dur, parseErr := time.ParseDuration(ability.Cooldown); parseErr == nil {
+				inst.BossAbilityCooldowns[ability.ID] = now.Add(dur)
+			}
+		}
+	}
 }

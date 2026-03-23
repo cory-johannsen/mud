@@ -1047,3 +1047,39 @@ feats:
     active: true
     activate_text: "You get your hands on them and focus entirely on keeping them alive."
     description: "Stabilize a dying ally in 1 action; 2 actions also clears persistent damage effects."
+
+  - id: tough
+    name: Tough
+    category: general
+    pf2e: toughness
+    active: false
+    allow_npc: true
+    activate_text: ""
+    description: "Flat +5 max HP bonus, applied at spawn after tier multiplier."
+
+  - id: brutal_strike
+    name: Brutal Strike
+    category: general
+    pf2e: ""
+    active: false
+    allow_npc: true
+    activate_text: ""
+    description: "+2 damage on all attacks."
+
+  - id: evasive
+    name: Evasive
+    category: general
+    pf2e: ""
+    active: false
+    allow_npc: true
+    activate_text: ""
+    description: "+2 AC."
+
+  - id: pack_tactics
+    name: Pack Tactics
+    category: general
+    pf2e: ""
+    active: false
+    allow_npc: true
+    activate_text: ""
+    description: "+2 attack bonus when at least one ally NPC in the room targets the same player."

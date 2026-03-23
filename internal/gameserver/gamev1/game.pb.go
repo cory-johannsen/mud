@@ -6345,7 +6345,8 @@ type MapTile struct {
 	Current       bool                   `protobuf:"varint,5,opt,name=current,proto3" json:"current,omitempty"`
 	Exits         []string               `protobuf:"bytes,6,rep,name=exits,proto3" json:"exits,omitempty"`
 	DangerLevel   string                 `protobuf:"bytes,7,opt,name=danger_level,json=dangerLevel,proto3" json:"danger_level,omitempty"`
-	Pois          []string               `protobuf:"bytes,8,rep,name=pois,proto3" json:"pois,omitempty"` // POI type IDs present in this room e.g. ["merchant", "equipment"]
+	Pois          []string               `protobuf:"bytes,8,rep,name=pois,proto3" json:"pois,omitempty"`                          // POI type IDs present in this room e.g. ["merchant", "equipment"]
+	BossRoom      bool                   `protobuf:"varint,9,opt,name=boss_room,json=bossRoom,proto3" json:"boss_room,omitempty"` // true when this room is a boss arena (REQ-AE-24)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6434,6 +6435,13 @@ func (x *MapTile) GetPois() []string {
 		return x.Pois
 	}
 	return nil
+}
+
+func (x *MapTile) GetBossRoom() bool {
+	if x != nil {
+		return x.BossRoom
+	}
+	return false
 }
 
 // WorldZoneTile represents one zone on the world map.
@@ -11206,7 +11214,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"instanceId\" \n" +
 	"\n" +
 	"MapRequest\x12\x12\n" +
-	"\x04view\x18\x01 \x01(\tR\x04view\"\xc2\x01\n" +
+	"\x04view\x18\x01 \x01(\tR\x04view\"\xdf\x01\n" +
 	"\aMapTile\x12\x17\n" +
 	"\aroom_id\x18\x01 \x01(\tR\x06roomId\x12\x1b\n" +
 	"\troom_name\x18\x02 \x01(\tR\broomName\x12\f\n" +
@@ -11215,7 +11223,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\acurrent\x18\x05 \x01(\bR\acurrent\x12\x14\n" +
 	"\x05exits\x18\x06 \x03(\tR\x05exits\x12!\n" +
 	"\fdanger_level\x18\a \x01(\tR\vdangerLevel\x12\x12\n" +
-	"\x04pois\x18\b \x03(\tR\x04pois\"\xd4\x01\n" +
+	"\x04pois\x18\b \x03(\tR\x04pois\x12\x1b\n" +
+	"\tboss_room\x18\t \x01(\bR\bbossRoom\"\xd4\x01\n" +
 	"\rWorldZoneTile\x12\x17\n" +
 	"\azone_id\x18\x01 \x01(\tR\x06zoneId\x12\x1b\n" +
 	"\tzone_name\x18\x02 \x01(\tR\bzoneName\x12\x17\n" +

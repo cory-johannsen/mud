@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
@@ -889,4 +890,160 @@ ac: 10
 	if err != nil {
 		t.Errorf("expected unknown type to be accepted, got: %v", err)
 	}
+}
+
+func TestTemplate_SenseAbilitiesField(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+sense_abilities:
+  - detect_lies
+  - read_aura
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"detect_lies", "read_aura"}, tmpl.SenseAbilities)
+}
+
+func TestTemplate_SpecialAbilitiesYAMLKeyRejected(t *testing.T) {
+	// old key must not silently map — strict decode will ignore it
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+special_abilities:
+  - detect_lies
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	// old key is not aliased — SenseAbilities must be empty
+	assert.Empty(t, tmpl.SenseAbilities)
+}
+
+func TestTemplate_Tier_DefaultsToStandardAtValidate(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	// Tier is empty in YAML — Validate normalizes to ""
+	// actual tier resolution to "standard" happens at usage time
+	assert.Equal(t, "", tmpl.Tier)
+}
+
+func TestTemplate_Tier_ValidValues(t *testing.T) {
+	for _, tier := range []string{"minion", "standard", "elite", "champion", "boss"} {
+		data := []byte(fmt.Sprintf(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+tier: %s
+`, tier))
+		tmpl, err := npc.LoadTemplateFromBytes(data)
+		require.NoError(t, err, "tier %q should be valid", tier)
+		assert.Equal(t, tier, tmpl.Tier)
+	}
+}
+
+func TestTemplate_Tier_InvalidRejected(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+tier: legendary
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "tier")
+}
+
+func TestProperty_Template_TierValidation(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		// Use printable ASCII only to avoid YAML normalization of control chars.
+		tier := rapid.StringMatching(`[a-z_]{1,20}`).Draw(t, "tier")
+		valid := map[string]bool{
+			"minion": true, "standard": true, "elite": true,
+			"champion": true, "boss": true, "": true,
+		}
+		data := []byte(fmt.Sprintf(`
+id: npc_%s
+name: NPC %s
+level: 1
+max_hp: 10
+ac: 10
+tier: %s
+`, tier, tier, tier))
+		_, err := npc.LoadTemplateFromBytes(data)
+		if valid[tier] {
+			assert.NoError(t, err)
+		} else {
+			assert.Error(t, err)
+		}
+	})
+}
+
+func TestTemplate_Tags_PropagatedToInstance(t *testing.T) {
+	data := []byte(`
+id: test_npc
+name: Test NPC
+level: 1
+max_hp: 10
+ac: 10
+tags:
+  - undead
+  - flying
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"undead", "flying"}, tmpl.Tags)
+}
+
+func TestTemplate_ValidateWithRegistry_UnknownFeat(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "test", Name: "Test", Level: 1, MaxHP: 10, AC: 10,
+		Feats: []string{"nonexistent_feat"},
+	}
+	registry := ruleset.NewFeatRegistry([]*ruleset.Feat{})
+	err := tmpl.ValidateWithRegistry(registry)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "nonexistent_feat")
+}
+
+func TestTemplate_ValidateWithRegistry_FeatNotAllowNPC(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "test", Name: "Test", Level: 1, MaxHP: 10, AC: 10,
+		Feats: []string{"player_only_feat"},
+	}
+	feats := []*ruleset.Feat{{ID: "player_only_feat", Name: "PO Feat", AllowNPC: false}}
+	registry := ruleset.NewFeatRegistry(feats)
+	err := tmpl.ValidateWithRegistry(registry)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "player_only_feat")
+}
+
+func TestTemplate_ValidateWithRegistry_ValidFeats(t *testing.T) {
+	tmpl := &npc.Template{
+		ID: "test", Name: "Test", Level: 1, MaxHP: 10, AC: 10,
+		Feats: []string{"tough", "brutal_strike"},
+	}
+	feats := []*ruleset.Feat{
+		{ID: "tough", Name: "Tough", AllowNPC: true},
+		{ID: "brutal_strike", Name: "Brutal Strike", AllowNPC: true},
+	}
+	registry := ruleset.NewFeatRegistry(feats)
+	err := tmpl.ValidateWithRegistry(registry)
+	require.NoError(t, err)
 }

@@ -1,12 +1,15 @@
 package npc
 
 import (
+	"math"
 	"math/rand"
 	"sync"
 	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
+	"github.com/cory-johannsen/mud/internal/game/xp"
 )
 
 // Instance is a live NPC entity occupying a room.
@@ -90,8 +93,15 @@ type Instance struct {
 	// Currency is the NPC's wallet accumulated from robbing players.
 	// Added to loot payout when the NPC dies. Zero at spawn.
 	Currency int
-	// SpecialAbilities lists named special abilities copied from the template at spawn.
-	SpecialAbilities []string
+	// SenseAbilities lists named special abilities copied from the template at spawn.
+	SenseAbilities []string
+	// Tags is the list of content labels propagated from the template at spawn.
+	Tags []string
+	// Feats is the list of feat IDs propagated from the template at spawn.
+	Feats []string
+	// Tier is the difficulty tier propagated from the template at spawn.
+	// Empty string means "standard" is assumed.
+	Tier string
 	// Disposition is the runtime NPC disposition; initialized from template, may change.
 	Disposition string
 	// MotiveBonus is the +2 attack bonus granted by a motive crit fail; applied once then zeroed.
@@ -99,6 +109,9 @@ type Instance struct {
 	// AbilityCooldowns maps operator ID → rounds remaining until usable again.
 	// Nil at spawn; initialized lazily on first write in applyPlanLocked.
 	AbilityCooldowns map[string]int
+	// BossAbilityCooldowns maps boss ability ID → time after which it may fire again.
+	// Initialized to an empty non-nil map at spawn. Nil-safe check is not required.
+	BossAbilityCooldowns map[string]time.Time
 	// NPCType is copied from the template at spawn.
 	// "combat" = participates in normal combat; other values = non-combat NPC.
 	NPCType string
@@ -116,6 +129,19 @@ type Instance struct {
 	AttackVerb string
 	// Immobile prevents this NPC from patrolling or wandering. Copied from template.
 	Immobile bool
+}
+
+// HasTag reports whether the given tag is present in the instance's tag list.
+//
+// Precondition: tag must be non-empty for a meaningful result.
+// Postcondition: Returns true iff tag is present in Tags; false otherwise.
+func (i *Instance) HasTag(tag string) bool {
+	for _, t := range i.Tags {
+		if t == tag {
+			return true
+		}
+	}
+	return false
 }
 
 // Name returns the instance's current display name.
@@ -166,10 +192,12 @@ func pickWeighted(entries []EquipmentEntry) string {
 // NewInstanceWithResolver creates a live NPC instance from a template, placed in roomID.
 // armorACBonus is an optional func(armorID string) int that returns the armor's AC bonus;
 // pass nil to skip AC adjustment.
+// xpCfg is optional; when non-nil, MaxHP is scaled by the tier multiplier.
+// featRegistry is optional; when non-nil, the "tough" feat adds +5 HP after tier scaling.
 //
 // Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
-// Postcondition: CurrentHP equals tmpl.MaxHP; WeaponID and ArmorID are set from weighted roll.
-func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBonus func(string) int) *Instance {
+// Postcondition: CurrentHP equals computed MaxHP; WeaponID and ArmorID are set from weighted roll.
+func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBonus func(string) int, xpCfg *xp.XPConfig, featRegistry *ruleset.FeatRegistry) *Instance {
 	var cooldown time.Duration
 	if tmpl.TauntCooldown != "" {
 		cooldown, _ = time.ParseDuration(tmpl.TauntCooldown)
@@ -182,6 +210,28 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		ac += armorACBonus(armorID)
 	}
 
+	// Compute tier-scaled MaxHP.
+	tier := tmpl.Tier
+	if tier == "" {
+		tier = "standard"
+	}
+	maxHP := tmpl.MaxHP
+	if xpCfg != nil {
+		if mult, ok := xpCfg.TierMultipliers[tier]; ok {
+			maxHP = int(math.Ceil(float64(tmpl.MaxHP) * mult.HP))
+		}
+	}
+	// Apply tough feat bonus (+5 HP) after tier multiplier.
+	if featRegistry != nil {
+		for _, featID := range tmpl.Feats {
+			if featID == "tough" {
+				if f, ok := featRegistry.Feat("tough"); ok && f.AllowNPC {
+					maxHP += 5
+				}
+			}
+		}
+	}
+
 	return &Instance{
 		ID:            id,
 		TemplateID:    tmpl.ID,
@@ -190,8 +240,8 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		baseName:      tmpl.Name,
 		Description:   tmpl.Description,
 		RoomID:        roomID,
-		CurrentHP:     tmpl.MaxHP,
-		MaxHP:         tmpl.MaxHP,
+		CurrentHP:     maxHP,
+		MaxHP:         maxHP,
 		AC:            ac,
 		Level:         tmpl.Level,
 		Awareness:     tmpl.Awareness,
@@ -215,7 +265,11 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		CoolRank:      tmpl.CoolRank,
 		RobPercent:       computeRobPercent(tmpl.RobMultiplier, tmpl.Level),
 		Currency:         0,
-		SpecialAbilities: append([]string(nil), tmpl.SpecialAbilities...),
+		SenseAbilities: append([]string(nil), tmpl.SenseAbilities...),
+		Tags:           append([]string(nil), tmpl.Tags...),
+		Feats:                append([]string(nil), tmpl.Feats...),
+		Tier:                 tmpl.Tier,
+		BossAbilityCooldowns: make(map[string]time.Time),
 		NPCType:          tmpl.NPCType,
 		NpcRole:          tmpl.NpcRole,
 		Personality:      tmpl.Personality,
@@ -282,7 +336,7 @@ func computeRobPercent(multiplier float64, level int) float64 {
 // Precondition: id must be non-empty; tmpl must be non-nil; roomID must be non-empty.
 // Postcondition: CurrentHP equals tmpl.MaxHP; WeaponID/ArmorID are set; AC is base only.
 func NewInstance(id string, tmpl *Template, roomID string) *Instance {
-	return NewInstanceWithResolver(id, tmpl, roomID, nil)
+	return NewInstanceWithResolver(id, tmpl, roomID, nil, nil, nil)
 }
 
 // TryTaunt attempts to produce a taunt string, respecting chance and cooldown.

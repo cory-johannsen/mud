@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/cory-johannsen/mud/internal/game/xp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
@@ -152,7 +154,7 @@ func TestNewInstanceWithResolver_ArmorACBonusAddedToBase(t *testing.T) {
 			return 3
 		}
 		return 0
-	})
+	}, nil, nil)
 	assert.Equal(t, "test_armor", inst.ArmorID)
 	assert.Equal(t, 15, inst.AC) // 12 + 3
 }
@@ -161,7 +163,7 @@ func TestNewInstanceWithResolver_NoArmor_ACUnchanged(t *testing.T) {
 	tmpl := &npc.Template{
 		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Awareness: 4,
 	}
-	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil, nil, nil)
 	assert.Empty(t, inst.ArmorID)
 	assert.Equal(t, 12, inst.AC)
 }
@@ -172,7 +174,7 @@ func TestNewInstanceWithResolver_NilResolver_NoACBonus(t *testing.T) {
 		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 12, Awareness: 4,
 		Armor: []npc.EquipmentEntry{{ID: "leather_jacket", Weight: 1}},
 	}
-	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil, nil, nil)
 	assert.Equal(t, "leather_jacket", inst.ArmorID)
 	assert.Equal(t, 12, inst.AC) // no bonus — resolver is nil
 }
@@ -314,7 +316,7 @@ func TestNewInstanceWithResolver_NpcRolePropagated(t *testing.T) {
 			},
 		},
 	}
-	inst := npc.NewInstanceWithResolver("inst-1", tmpl, "room-1", nil)
+	inst := npc.NewInstanceWithResolver("inst-1", tmpl, "room-1", nil, nil, nil)
 	if inst.NpcRole != "merchant" {
 		t.Errorf("NpcRole = %q, want %q", inst.NpcRole, "merchant")
 	}
@@ -329,7 +331,7 @@ func TestNewInstanceWithResolver_NpcRoleEmptyByDefault(t *testing.T) {
 		AC:      10,
 		NPCType: "combat",
 	}
-	inst := npc.NewInstanceWithResolver("inst-2", tmpl, "room-1", nil)
+	inst := npc.NewInstanceWithResolver("inst-2", tmpl, "room-1", nil, nil, nil)
 	if inst.NpcRole != "" {
 		t.Errorf("NpcRole = %q, want empty string", inst.NpcRole)
 	}
@@ -351,7 +353,7 @@ func baseNHNTemplate(id, name, typ string) *npc.Template {
 func TestSpawnPropagatesAttackVerb(t *testing.T) {
 	tmpl := baseNHNTemplate("dog", "Dog", "animal")
 	tmpl.AttackVerb = "bites"
-	inst := npc.NewInstanceWithResolver("inst1", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("inst1", tmpl, "room1", nil, nil, nil)
 	if inst.AttackVerb != "bites" {
 		t.Errorf("AttackVerb: got %q, want %q", inst.AttackVerb, "bites")
 	}
@@ -360,7 +362,7 @@ func TestSpawnPropagatesAttackVerb(t *testing.T) {
 func TestSpawnPropagatesImmobile(t *testing.T) {
 	tmpl := baseNHNTemplate("turret", "Turret", "machine")
 	tmpl.Immobile = true
-	inst := npc.NewInstanceWithResolver("inst2", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("inst2", tmpl, "room1", nil, nil, nil)
 	if !inst.Immobile {
 		t.Error("expected Immobile == true")
 	}
@@ -368,7 +370,7 @@ func TestSpawnPropagatesImmobile(t *testing.T) {
 
 func TestRobotSpawnResistanceDefaults(t *testing.T) {
 	tmpl := baseNHNTemplate("robot", "Robot", "robot")
-	inst := npc.NewInstanceWithResolver("inst3", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("inst3", tmpl, "room1", nil, nil, nil)
 	if inst.Resistances["bleed"] != 999 {
 		t.Errorf("robot bleed resistance: got %d, want 999", inst.Resistances["bleed"])
 	}
@@ -380,7 +382,7 @@ func TestRobotSpawnResistanceDefaults(t *testing.T) {
 func TestRobotSpawnResistanceTemplateOverrides(t *testing.T) {
 	tmpl := baseNHNTemplate("robot2", "Robot2", "robot")
 	tmpl.Resistances = map[string]int{"bleed": 5, "fire": 10}
-	inst := npc.NewInstanceWithResolver("inst4", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("inst4", tmpl, "room1", nil, nil, nil)
 	if inst.Resistances["bleed"] != 5 {
 		t.Errorf("robot bleed override: got %d, want 5", inst.Resistances["bleed"])
 	}
@@ -394,7 +396,7 @@ func TestRobotSpawnResistanceTemplateOverrides(t *testing.T) {
 
 func TestMachineSpawnResistanceDefaults(t *testing.T) {
 	tmpl := baseNHNTemplate("machine", "Machine", "machine")
-	inst := npc.NewInstanceWithResolver("inst5", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("inst5", tmpl, "room1", nil, nil, nil)
 	if inst.Resistances["bleed"] != 999 {
 		t.Errorf("machine bleed resistance: got %d, want 999", inst.Resistances["bleed"])
 	}
@@ -405,8 +407,83 @@ func TestMachineSpawnResistanceDefaults(t *testing.T) {
 
 func TestHumanSpawnNoResistanceDefaults(t *testing.T) {
 	tmpl := baseNHNTemplate("human", "Human", "human")
-	inst := npc.NewInstanceWithResolver("inst6", tmpl, "room1", nil)
+	inst := npc.NewInstanceWithResolver("inst6", tmpl, "room1", nil, nil, nil)
 	if inst.Resistances != nil && inst.Resistances["bleed"] > 0 {
 		t.Errorf("human should not have bleed resistance, got %d", inst.Resistances["bleed"])
 	}
+}
+
+func TestInstance_HasTag_True(t *testing.T) {
+	inst := &npc.Instance{Tags: []string{"undead", "flying"}}
+	assert.True(t, inst.HasTag("undead"))
+	assert.True(t, inst.HasTag("flying"))
+}
+
+func TestInstance_HasTag_False(t *testing.T) {
+	inst := &npc.Instance{Tags: []string{"undead"}}
+	assert.False(t, inst.HasTag("robot"))
+}
+
+func TestInstance_HasTag_Empty(t *testing.T) {
+	inst := &npc.Instance{}
+	assert.False(t, inst.HasTag("anything"))
+}
+
+func TestProperty_Instance_HasTag_Reflexive(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		tags := rapid.SliceOf(rapid.StringN(1, 10, -1)).Draw(t, "tags")
+		inst := &npc.Instance{Tags: tags}
+		for _, tag := range tags {
+			assert.True(t, inst.HasTag(tag), "HasTag must return true for any tag in Tags")
+		}
+	})
+}
+
+func TestNewInstanceWithResolver_TierHPScaling(t *testing.T) {
+	cfg := &xp.XPConfig{
+		TierMultipliers: map[string]xp.TierMultiplier{
+			"minion":   {HP: 0.75}, "standard": {HP: 1.0},
+			"elite":    {HP: 1.5},  "champion": {HP: 2.0},
+			"boss":     {HP: 3.0},
+		},
+	}
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 20, AC: 10, Tier: "elite",
+	}
+	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil, cfg, nil)
+	// ceil(20 * 1.5) = 30
+	assert.Equal(t, 30, inst.MaxHP)
+	assert.Equal(t, 30, inst.CurrentHP)
+}
+
+func TestNewInstanceWithResolver_ToughFeatAddsFiveHP(t *testing.T) {
+	cfg := &xp.XPConfig{
+		TierMultipliers: map[string]xp.TierMultiplier{
+			"standard": {HP: 1.0},
+		},
+	}
+	toughFeat := &ruleset.Feat{ID: "tough", Name: "Tough", AllowNPC: true}
+	registry := ruleset.NewFeatRegistry([]*ruleset.Feat{toughFeat})
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 20, AC: 10,
+		Tier: "standard", Feats: []string{"tough"},
+	}
+	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil, cfg, registry)
+	// ceil(20 * 1.0) = 20, then + 5 from tough = 25
+	assert.Equal(t, 25, inst.MaxHP)
+	assert.Equal(t, 25, inst.CurrentHP)
+}
+
+func TestNewInstanceWithResolver_EmptyTierDefaultsToStandard(t *testing.T) {
+	cfg := &xp.XPConfig{
+		TierMultipliers: map[string]xp.TierMultiplier{
+			"standard": {HP: 1.0},
+		},
+	}
+	tmpl := &npc.Template{
+		ID: "t", Name: "T", Level: 1, MaxHP: 10, AC: 10,
+		// Tier is empty — should default to "standard"
+	}
+	inst := npc.NewInstanceWithResolver("id1", tmpl, "room1", nil, cfg, nil)
+	assert.Equal(t, 10, inst.MaxHP)
 }

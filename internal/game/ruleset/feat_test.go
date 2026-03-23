@@ -128,3 +128,50 @@ feats:
 	require.Len(t, feats, 1)
 	assert.Nil(t, feats[0].Reaction)
 }
+
+func TestFeat_AllowNPC_DefaultFalse(t *testing.T) {
+	data := []byte(`
+feats:
+  - id: test_feat
+    name: Test Feat
+    category: general
+    active: false
+    description: "A test feat."
+`)
+	feats, err := ruleset.LoadFeatsFromBytes(data)
+	require.NoError(t, err)
+	require.Len(t, feats, 1)
+	assert.False(t, feats[0].AllowNPC)
+}
+
+func TestFeat_AllowNPC_TrueWhenSet(t *testing.T) {
+	data := []byte(`
+feats:
+  - id: brutal_strike
+    name: Brutal Strike
+    category: general
+    active: false
+    allow_npc: true
+    description: "+2 damage."
+`)
+	feats, err := ruleset.LoadFeatsFromBytes(data)
+	require.NoError(t, err)
+	assert.True(t, feats[0].AllowNPC)
+}
+
+func TestFeat_TargetTags_Loaded(t *testing.T) {
+	data := []byte(`
+feats:
+  - id: hunter_feat
+    name: Hunter Feat
+    category: general
+    active: false
+    target_tags:
+      - undead
+      - mutant
+    description: "Bonus vs tagged targets."
+`)
+	feats, err := ruleset.LoadFeatsFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"undead", "mutant"}, feats[0].TargetTags)
+}

@@ -78,11 +78,20 @@ func NewPopulatedRespawnManager(
 			}
 		}
 	}
-	respawnMgr := NewRespawnManager(roomSpawns, templateByID)
+	// Build the boss rooms set for coordinated boss respawn (REQ-AE-25, REQ-AE-26).
+	bossRooms := make(map[string]bool)
+	for _, zone := range worldMgr.AllZones() {
+		for _, room := range zone.Rooms {
+			if room.BossRoom {
+				bossRooms[room.ID] = true
+			}
+		}
+	}
+	respawnMgr := NewRespawnManagerWithBossRooms(roomSpawns, templateByID, bossRooms)
 	for roomID := range roomSpawns {
 		respawnMgr.PopulateRoom(roomID, npcMgr)
 	}
-	logger.Info("initial NPC population complete", zap.Int("room_configs", len(roomSpawns)))
+	logger.Info("initial NPC population complete", zap.Int("room_configs", len(roomSpawns)), zap.Int("boss_rooms", len(bossRooms)))
 	return respawnMgr, nil
 }
 

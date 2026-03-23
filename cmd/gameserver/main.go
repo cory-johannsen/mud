@@ -169,6 +169,20 @@ func main() {
 	stopCalendar := app.GameCalendar.Start()
 	defer stopCalendar()
 
+	// Validate NPC templates against the feat registry at startup (REQ-AE-14).
+	if fr := app.GRPCService.FeatRegistry(); fr != nil {
+		for _, tmpl := range app.NpcMgr.AllTemplates() {
+			if err := tmpl.ValidateWithRegistry(fr); err != nil {
+				logger.Fatal("NPC template feat validation failed", zap.Error(err))
+			}
+		}
+	}
+
+	// Wire feat registry into combat handler (REQ-AE-16).
+	if fr := app.GRPCService.FeatRegistry(); fr != nil {
+		app.CombatHandler.SetFeatRegistry(fr)
+	}
+
 	// Wire broadcast function: CombatHandler needs GRPCService after both are constructed.
 	app.CombatHandler.SetBroadcastFn(func(roomID string, events []*gamev1.CombatEvent) {
 		if app.GRPCService != nil {
@@ -286,10 +300,19 @@ func main() {
 	// Wire REQ-NPC-8: prevent a player from attacking their own bound hireling.
 	app.CombatHandler.SetHirelingOwnerOf(app.GRPCService.HirelingOwnerOf)
 
+	// Wire feat registry into NPC manager for tough feat HP bonus at spawn (REQ-AE-18).
+	app.NpcMgr.SetFeatRegistry(app.GRPCService.FeatRegistry())
+
 	// Wire XP service with progress and skill-increase persistence.
 	if xpCfg, xpErr := xp.LoadXPConfig(appCfg.XPConfigFile); xpErr != nil {
 		logger.Warn("loading xp config; XP awards disabled", zap.Error(xpErr))
 	} else {
+		// Validate tier multipliers at startup (REQ-AE-4).
+		if tierErr := xpCfg.ValidateTiers(); tierErr != nil {
+			logger.Warn("XP tier multipliers incomplete; defaulting to standard tier only", zap.Error(tierErr))
+		}
+		// Wire XP config into NPC manager for tier HP scaling at spawn (REQ-AE-5).
+		app.NpcMgr.SetXPConfig(xpCfg)
 		xpSvc := xp.NewService(xpCfg, app.ProgressRepo)
 		xpSvc.SetSkillIncreaseSaver(app.ProgressRepo)
 		app.GRPCService.SetProgressRepo(app.ProgressRepo)

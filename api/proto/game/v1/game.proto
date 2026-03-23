@@ -615,6 +615,7 @@ message MapTile {
     repeated string exits = 6;
     string danger_level  = 7;
     repeated string pois = 8; // POI type IDs present in this room e.g. ["merchant", "equipment"]
+    bool   boss_room     = 9; // true when this room is a boss arena (REQ-AE-24)
 }
 
 // WorldZoneTile represents one zone on the world map.

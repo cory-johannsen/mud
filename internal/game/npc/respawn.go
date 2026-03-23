@@ -39,6 +39,7 @@ type RespawnManager struct {
 	spawns    map[string][]RoomSpawn // roomID → configs
 	templates map[string]*Template   // templateID → Template
 	pending   []respawnEntry
+	bossRooms map[string]bool // set of roomIDs marked as boss_room
 }
 
 // NewRespawnManager creates a RespawnManager from room spawn configs and a template map.
@@ -46,16 +47,65 @@ type RespawnManager struct {
 // Precondition: spawns and templates may be nil (manager becomes a no-op).
 // Postcondition: Returns a non-nil RespawnManager.
 func NewRespawnManager(spawns map[string][]RoomSpawn, templates map[string]*Template) *RespawnManager {
+	return NewRespawnManagerWithBossRooms(spawns, templates, nil)
+}
+
+// NewRespawnManagerWithBossRooms creates a RespawnManager that knows which rooms are boss rooms.
+// When a boss-tier NPC respawns in a boss room, CoordinatedBossRespawn is triggered.
+//
+// Precondition: spawns, templates, and bossRooms may be nil (treated as empty maps).
+// Postcondition: Returns a non-nil RespawnManager.
+func NewRespawnManagerWithBossRooms(spawns map[string][]RoomSpawn, templates map[string]*Template, bossRooms map[string]bool) *RespawnManager {
 	if spawns == nil {
 		spawns = make(map[string][]RoomSpawn)
 	}
 	if templates == nil {
 		templates = make(map[string]*Template)
 	}
+	if bossRooms == nil {
+		bossRooms = make(map[string]bool)
+	}
 	return &RespawnManager{
 		spawns:    spawns,
 		templates: templates,
+		bossRooms: bossRooms,
 	}
+}
+
+// PendingCount returns the number of pending respawn entries for the given roomID.
+//
+// Precondition: roomID must be non-empty for a meaningful result.
+// Postcondition: Returns the count of pending entries whose roomID matches.
+func (r *RespawnManager) PendingCount(roomID string) int {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	count := 0
+	for _, e := range r.pending {
+		if e.roomID == roomID {
+			count++
+		}
+	}
+	return count
+}
+
+// CoordinatedBossRespawn cancels all pending individual respawn timers for roomID
+// and immediately triggers PopulateRoom for all spawn configs in that room.
+// Called when a boss-tier NPC respawns in a boss_room.
+//
+// Precondition: roomID must be non-empty; mgr must not be nil.
+// Postcondition: All pending timers for roomID are removed; all spawns repopulated.
+func (r *RespawnManager) CoordinatedBossRespawn(roomID string, mgr *Manager) {
+	r.mu.Lock()
+	filtered := r.pending[:0]
+	for _, e := range r.pending {
+		if e.roomID != roomID {
+			filtered = append(filtered, e)
+		}
+	}
+	r.pending = filtered
+	r.mu.Unlock()
+
+	r.PopulateRoom(roomID, mgr)
 }
 
 // GetTemplate returns the NPC template with the given id, or (nil, false) if not found.
@@ -155,6 +205,12 @@ func (r *RespawnManager) Tick(now time.Time, mgr *Manager) {
 		// r.templates is read-only after construction; no lock required.
 		tmpl, ok := r.templates[e.templateID]
 		if !ok {
+			continue
+		}
+		// If the respawning template is a boss tier and the room is a boss room,
+		// use coordinated respawn instead of individual spawn.
+		if tmpl.Tier == "boss" && r.bossRooms[e.roomID] {
+			r.CoordinatedBossRespawn(e.roomID, mgr)
 			continue
 		}
 		cfg, ok := r.configFor(e.roomID, e.templateID)

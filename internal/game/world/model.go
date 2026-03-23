@@ -196,6 +196,33 @@ type Room struct {
 	// Traps lists statically declared traps for this room.
 	// Procedurally placed traps are managed by the TrapManager at runtime.
 	Traps []RoomTrapConfig `yaml:"traps,omitempty"`
+	// BossRoom marks this room as a boss room. When true:
+	//   - the map renderer displays the tile as <BB> instead of [BB].
+	//   - boss NPC respawns trigger coordinated respawn of all room spawns.
+	BossRoom bool `yaml:"boss_room,omitempty"`
+	// Hazards lists environmental hazards that fire on player entry or each combat round.
+	Hazards []HazardDef `yaml:"hazards,omitempty"`
+}
+
+// HazardDef defines an environmental hazard in a room.
+type HazardDef struct {
+	ID          string `yaml:"id"`
+	Trigger     string `yaml:"trigger"`
+	DamageExpr  string `yaml:"damage_expr"`
+	DamageType  string `yaml:"damage_type"`
+	ConditionID string `yaml:"condition_id"`
+	Message     string `yaml:"message"`
+}
+
+// Validate checks HazardDef invariants.
+func (h HazardDef) Validate() error {
+	if h.Trigger != "on_enter" && h.Trigger != "round_start" {
+		return fmt.Errorf("hazard %q: trigger must be \"on_enter\" or \"round_start\", got %q", h.ID, h.Trigger)
+	}
+	if h.DamageExpr == "" {
+		return fmt.Errorf("hazard %q: damage_expr must not be empty", h.ID)
+	}
+	return nil
 }
 
 // ExitForDirection returns the exit in the given direction, if one exists.
