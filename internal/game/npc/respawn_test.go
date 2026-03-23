@@ -269,3 +269,40 @@ func TestRespawnManagerGetTemplateProperty(t *testing.T) {
 		assert.Equal(t, present, ok)
 	})
 }
+
+// --- CoordinatedBossRespawn ---
+
+func TestRespawnManager_BossRespawn_CoordinatedRespawn(t *testing.T) {
+	tmplBoss := &npc.Template{ID: "boss_npc", Name: "Boss", Level: 5, MaxHP: 100, AC: 15, Tier: "boss", RespawnDelay: "1m"}
+	tmplMinion := &npc.Template{ID: "minion_npc", Name: "Minion", Level: 1, MaxHP: 10, AC: 10, RespawnDelay: "5m"}
+
+	templates := map[string]*npc.Template{
+		"boss_npc":   tmplBoss,
+		"minion_npc": tmplMinion,
+	}
+	spawns := map[string][]npc.RoomSpawn{
+		"boss_room": {
+			{TemplateID: "boss_npc", Max: 1, RespawnDelay: time.Minute},
+			{TemplateID: "minion_npc", Max: 3, RespawnDelay: 5 * time.Minute},
+		},
+	}
+	bossRooms := map[string]bool{"boss_room": true}
+	rm := npc.NewRespawnManagerWithBossRooms(spawns, templates, bossRooms)
+
+	// Schedule pending minion respawn far in the future
+	rm.Schedule("minion_npc", "boss_room", time.Now(), 10*time.Minute)
+	pendingBefore := rm.PendingCount("boss_room")
+	assert.Equal(t, 1, pendingBefore, "should have one pending minion")
+
+	// Trigger coordinated boss respawn
+	mgr := npc.NewManager()
+	rm.CoordinatedBossRespawn("boss_room", mgr)
+
+	// All pending timers for boss_room must be cancelled
+	assert.Equal(t, 0, rm.PendingCount("boss_room"), "coordinated respawn must cancel pending timers")
+}
+
+func TestRespawnManager_PendingCount_ReturnsZeroForUnknownRoom(t *testing.T) {
+	rm := npc.NewRespawnManager(nil, nil)
+	assert.Equal(t, 0, rm.PendingCount("nonexistent"))
+}
