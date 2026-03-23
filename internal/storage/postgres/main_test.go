@@ -275,6 +275,35 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			wanted_level INTEGER NOT NULL CHECK (wanted_level BETWEEN 1 AND 4),
 			PRIMARY KEY (character_id, zone_id)
 		);
+
+		ALTER TABLE characters ADD COLUMN IF NOT EXISTS detained_until TIMESTAMPTZ;
+
+		ALTER TABLE character_equipment
+			ADD COLUMN IF NOT EXISTS durability     INT NOT NULL DEFAULT 0,
+			ADD COLUMN IF NOT EXISTS max_durability INT NOT NULL DEFAULT 0,
+			ADD COLUMN IF NOT EXISTS modifier       TEXT NOT NULL DEFAULT '',
+			ADD COLUMN IF NOT EXISTS curse_revealed BOOLEAN NOT NULL DEFAULT FALSE,
+			ADD COLUMN IF NOT EXISTS rarity         TEXT NOT NULL DEFAULT 'street';
+
+		ALTER TABLE character_weapon_presets
+			ADD COLUMN IF NOT EXISTS durability     INT NOT NULL DEFAULT 0,
+			ADD COLUMN IF NOT EXISTS max_durability INT NOT NULL DEFAULT 0,
+			ADD COLUMN IF NOT EXISTS modifier       TEXT NOT NULL DEFAULT '',
+			ADD COLUMN IF NOT EXISTS curse_revealed BOOLEAN NOT NULL DEFAULT FALSE,
+			ADD COLUMN IF NOT EXISTS rarity         TEXT NOT NULL DEFAULT 'street';
+
+		ALTER TABLE characters ADD COLUMN IF NOT EXISTS team TEXT NOT NULL DEFAULT '';
+
+		CREATE TABLE IF NOT EXISTS character_inventory_instances (
+			id           BIGSERIAL PRIMARY KEY,
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			item_def_id  TEXT NOT NULL,
+			durability     INT NOT NULL DEFAULT 0,
+			max_durability INT NOT NULL DEFAULT 0,
+			modifier       TEXT NOT NULL DEFAULT '',
+			curse_revealed BOOLEAN NOT NULL DEFAULT FALSE,
+			rarity         TEXT NOT NULL DEFAULT 'street'
+		);
 	`)
 	return err
 }

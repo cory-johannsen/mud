@@ -100,6 +100,14 @@
 **Steps:** View the rustbucket_ridge zone map; observe blood_camp placement is illegal.
 **Fix:** Moved blood_camp to (5,6), one step east of blade_house (4,6). Replaced the_cutthroat→blood_camp exit with blade_house↔blood_camp exits.
 
+### BUG-14: Postgres integration tests fail due to missing columns in test schema setup
+**Severity:** high
+**Status:** fixed
+**Category:** Meta
+**Description:** `internal/storage/postgres` integration tests fail because `applyAllMigrations` in `main_test.go` did not include `ALTER TABLE` statements added in migrations 034 and 035: `detained_until` on `characters`, durability/modifier/rarity columns on `character_equipment` and `character_weapon_presets`, `team` on `characters`, and the new `character_inventory_instances` table.
+**Steps:** Run `go test ./internal/storage/postgres/...`; observe `ERROR: column "detained_until" does not exist`.
+**Fix:** Added all missing `ALTER TABLE` and `CREATE TABLE` DDL statements to `applyAllMigrations` in `main_test.go`, matching migrations 034 (detained_until) and 035 (equipment mechanics schema). All postgres tests now pass.
+
 ### BUG-9: rustbucket_ridge — scorchside_camp illegally overlaps the_embers_edge
 **Severity:** high
 **Status:** fixed
