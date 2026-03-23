@@ -306,6 +306,14 @@ features:
       - actions
       - consumable-traps
 
+  - slug: input-mode-refactor
+    name: Input Mode Refactor
+    status: spec
+    priority: 230
+    category: ui
+    file: docs/features/input-mode-refactor.md
+    effort: "M"  # ModeHandler interface, SessionInputState, RoomModeHandler, MapModeHandler refactor, 4 stub modes; fixes map prompt overwrite bug
+
   - slug: use-command
     name: Use Command Expansion
     status: planned
@@ -542,7 +550,7 @@ features:
 
   - slug: web-client
     name: Web Game Client
-    status: spec
+    status: planned
     priority: 430
     category: ui
     file: docs/features/web-client.md
