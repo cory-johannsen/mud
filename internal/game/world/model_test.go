@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -272,4 +273,18 @@ func TestRoomEquipmentCoverFields(t *testing.T) {
 			t.Errorf("CoverHP: got %d", rec.CoverHP)
 		}
 	})
+}
+
+// TestZone_WorldCoords verifies that WorldX/WorldY are pointer fields,
+// nil for omitted values and non-nil for provided values.
+func TestZone_WorldCoords(t *testing.T) {
+	z := &Zone{ID: "test", Name: "Test", StartRoom: "r1", Rooms: map[string]*Room{}}
+	require.Nil(t, z.WorldX, "WorldX must be nil when not set")
+	require.Nil(t, z.WorldY, "WorldY must be nil when not set")
+
+	x, y := 2, -4
+	z.WorldX = &x
+	z.WorldY = &y
+	require.Equal(t, 2, *z.WorldX)
+	require.Equal(t, -4, *z.WorldY)
 }
