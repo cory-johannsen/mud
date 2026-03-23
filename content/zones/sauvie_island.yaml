@@ -1,6 +1,8 @@
 zone:
   id: sauvie_island
   danger_level: sketchy
+  world_x: -2
+  world_y: -2
   script_dir: content/scripts/zones/sauvie_island
   name: Sauvie Island
   description: The last agrarian holdout in the region. Farm compounds and river pirates contest over the only place still

@@ -1,6 +1,8 @@
 zone:
   id: troutdale
   danger_level: sketchy
+  world_x: 6
+  world_y: 0
   script_dir: content/scripts/zones/troutdale
   name: Troutdale
   description: Gateway to the Columbia River Gorge, where outlet mall ruins and relentless winds define a landscape of scavengers,

@@ -1,6 +1,8 @@
 zone:
   id: felony_flats
   danger_level: dangerous
+  world_x: 4
+  world_y: 2
   script_dir: content/scripts/zones/felony_flats
   name: Felony Flats
   description: The sprawl of SE 82nd Avenue and its surrounding blocks — a wasteland of burned-out strip malls, fortified
