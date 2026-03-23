@@ -61,7 +61,7 @@ func TestService_AwardKill_NoLevelUp(t *testing.T) {
 	svc := xp.NewService(testCfg(), saver)
 	sess := testSess(1, 0, 10)
 
-	msgs, err := svc.AwardKill(context.Background(), sess, 1, 0)
+	msgs, err := svc.AwardKill(context.Background(), sess, 1, 0, "")
 	require.NoError(t, err)
 	assert.Empty(t, msgs)
 	assert.Equal(t, 50, sess.Experience)
@@ -73,7 +73,7 @@ func TestService_AwardKill_LevelUp(t *testing.T) {
 	svc := xp.NewService(testCfg(), saver)
 	sess := testSess(1, 350, 10)
 
-	msgs, err := svc.AwardKill(context.Background(), sess, 1, 1)
+	msgs, err := svc.AwardKill(context.Background(), sess, 1, 1, "")
 	require.NoError(t, err)
 	assert.Equal(t, 2, sess.Level)
 	assert.Equal(t, 400, sess.Experience)
@@ -123,7 +123,7 @@ func TestService_BoostPending_NotifiedAtInterval(t *testing.T) {
 	startXP := xp.XPToLevel(5, 100) - 1 // 2499
 	sess := testSess(4, startXP, 30)
 
-	msgs, err := svc.AwardKill(context.Background(), sess, 3, 1) // +150 XP → 2649, level 5
+	msgs, err := svc.AwardKill(context.Background(), sess, 3, 1, "") // +150 XP → 2649, level 5
 	require.NoError(t, err)
 	assert.Equal(t, 5, sess.Level)
 	assert.Equal(t, 1, sess.PendingBoosts)
@@ -157,7 +157,7 @@ func TestService_SkillIncrease_OnEvenLevelUp(t *testing.T) {
 	// Level 1 → 2 (even): should get 1 skill increase
 	// XPToLevel(2, 100) = 400; start at 350, award 50 via kill (npcLevel=1, 50xp/level)
 	sess := testSess(1, 350, 10)
-	msgs, err := svc.AwardKill(context.Background(), sess, 1, 1)
+	msgs, err := svc.AwardKill(context.Background(), sess, 1, 1, "")
 	require.NoError(t, err)
 	assert.Equal(t, 2, sess.Level)
 	assert.Equal(t, 1, sess.PendingSkillIncreases)
@@ -182,7 +182,7 @@ func TestService_SkillIncrease_OddLevelUp_NoIncrease(t *testing.T) {
 	// XPToLevel(2,100)=400, XPToLevel(3,100)=900, need 500 more XP
 	// AwardKill npcLevel=10 gives 500 XP
 	sess := testSess(2, 400, 15)
-	_, err := svc.AwardKill(context.Background(), sess, 10, 1)
+	_, err := svc.AwardKill(context.Background(), sess, 10, 1, "")
 	require.NoError(t, err)
 	assert.Equal(t, 3, sess.Level)
 	assert.Equal(t, 0, sess.PendingSkillIncreases)
@@ -196,7 +196,7 @@ func TestService_SkillIncrease_NoLevelUp_NoIncrease(t *testing.T) {
 	svc.SetSkillIncreaseSaver(skillSaver)
 
 	sess := testSess(1, 0, 10)
-	_, err := svc.AwardKill(context.Background(), sess, 1, 1)
+	_, err := svc.AwardKill(context.Background(), sess, 1, 1, "")
 	require.NoError(t, err)
 	assert.Equal(t, 1, sess.Level)
 	assert.Equal(t, 0, sess.PendingSkillIncreases)
@@ -209,7 +209,7 @@ func TestService_CurrentHPCappedAtMaxHP(t *testing.T) {
 	sess := testSess(1, 350, 10)
 	sess.CurrentHP = 10 // at full HP
 
-	_, err := svc.AwardKill(context.Background(), sess, 1, 1)
+	_, err := svc.AwardKill(context.Background(), sess, 1, 1, "")
 	require.NoError(t, err)
 	// MaxHP went from 10 to 15; CurrentHP was at 10 = old MaxHP, new MaxHP=15, CurrentHP stays 10.
 	assert.Equal(t, 15, sess.MaxHP)
@@ -282,7 +282,7 @@ func TestService_AwardXPAmount_SameAsAwardKill_WhenFullAmount(t *testing.T) {
 	saver1 := &fakeProgressSaver{}
 	svc1 := xp.NewService(cfg, saver1)
 	sess1 := testSess(1, 0, 10)
-	_, err := svc1.AwardKill(context.Background(), sess1, 1, 0)
+	_, err := svc1.AwardKill(context.Background(), sess1, 1, 0, "")
 	require.NoError(t, err)
 
 	saver2 := &fakeProgressSaver{}
@@ -342,6 +342,68 @@ func TestPropertyService_AwardRoomDiscovery_GrantMessageAlwaysFirst(t *testing.T
 		}
 		if !strings.Contains(msgs[0], "You gain") {
 			rt.Fatalf("first message must be XP grant, got: %q", msgs[0])
+		}
+	})
+}
+
+func TestService_AwardKill_TierScaling_Elite(t *testing.T) {
+	cfg := &xp.XPConfig{
+		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, LevelCap: 100,
+		Awards: xp.Awards{KillXPPerNPCLevel: 50},
+		TierMultipliers: map[string]xp.TierMultiplier{
+			"standard": {XP: 1.0}, "elite": {XP: 2.0},
+		},
+	}
+	saver := &fakeProgressSaver{}
+	svc := xp.NewService(cfg, saver)
+	sess := &session.PlayerSession{Level: 1, Experience: 0, MaxHP: 10, CurrentHP: 10}
+
+	// NPC level 3 elite: base = 3*50 = 150, then *2.0 = 300
+	_, err := svc.AwardKill(context.Background(), sess, 3, 1, "elite")
+	require.NoError(t, err)
+	assert.Equal(t, 300, sess.Experience)
+}
+
+func TestService_AwardKill_EmptyTierDefaultsToStandard(t *testing.T) {
+	cfg := &xp.XPConfig{
+		BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, LevelCap: 100,
+		Awards: xp.Awards{KillXPPerNPCLevel: 50},
+		TierMultipliers: map[string]xp.TierMultiplier{
+			"standard": {XP: 1.0},
+		},
+	}
+	saver := &fakeProgressSaver{}
+	svc := xp.NewService(cfg, saver)
+	sess := &session.PlayerSession{Level: 1, Experience: 0, MaxHP: 10, CurrentHP: 10}
+
+	_, err := svc.AwardKill(context.Background(), sess, 2, 1, "")
+	require.NoError(t, err)
+	assert.Equal(t, 100, sess.Experience) // 2*50*1.0
+}
+
+func TestProperty_AwardKill_TierMultipliesMonotonically(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		level := rapid.IntRange(1, 20).Draw(t, "level")
+		mults := map[string]xp.TierMultiplier{
+			"minion": {XP: 0.5}, "standard": {XP: 1.0},
+			"elite": {XP: 2.0}, "champion": {XP: 3.0}, "boss": {XP: 5.0},
+		}
+		cfg := &xp.XPConfig{
+			BaseXP: 100, HPPerLevel: 5, BoostInterval: 5, LevelCap: 100,
+			Awards: xp.Awards{KillXPPerNPCLevel: 50},
+			TierMultipliers: mults,
+		}
+		saver := &fakeProgressSaver{}
+
+		tierOrder := []string{"minion", "standard", "elite", "champion", "boss"}
+		prevXP := 0
+		for _, tier := range tierOrder {
+			sess := &session.PlayerSession{Level: 1, Experience: 0, MaxHP: 10, CurrentHP: 10}
+			_, err := xp.NewService(cfg, saver).AwardKill(context.Background(), sess, level, 1, tier)
+			require.NoError(t, err)
+			assert.GreaterOrEqual(t, sess.Experience, prevXP,
+				"XP for tier %q must be >= tier below it", tier)
+			prevXP = sess.Experience
 		}
 	})
 }

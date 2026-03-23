@@ -2926,7 +2926,14 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 			cfg := h.xpSvc.Config()
 			livingParticipants := h.livingParticipantSessions(cbt)
 			if len(livingParticipants) > 0 {
-				totalXP := inst.Level * cfg.Awards.KillXPPerNPCLevel
+				effectiveTier := inst.Tier
+			if effectiveTier == "" {
+				effectiveTier = "standard"
+			}
+			totalXP := inst.Level * cfg.Awards.KillXPPerNPCLevel
+			if mult, ok := cfg.TierMultipliers[effectiveTier]; ok {
+				totalXP = int(math.Ceil(float64(totalXP) * mult.XP))
+			}
 				share := totalXP / len(livingParticipants)
 				if share == 0 && totalXP > 0 {
 					p := livingParticipants[0]

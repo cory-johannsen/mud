@@ -3,6 +3,7 @@ package xp
 import (
 	"context"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -51,14 +52,22 @@ func (s *Service) Config() *XPConfig {
 	return s.cfg
 }
 
-// AwardKill awards XP for killing an NPC of the given level.
+// AwardKill awards XP for killing an NPC of the given level and tier.
+// tier is the NPC's difficulty tier (e.g. "elite"); empty defaults to "standard".
 // Returns player-facing notification messages (level-up announcement, boost prompt).
 //
 // Precondition: sess must be non-nil; npcLevel >= 1.
 // Postcondition: sess.Experience, sess.Level, sess.MaxHP updated in-place;
 // SaveProgress called and persisted when a level-up occurs.
-func (s *Service) AwardKill(ctx context.Context, sess *session.PlayerSession, npcLevel int, characterID int64) ([]string, error) {
-	return s.award(ctx, sess, characterID, npcLevel*s.cfg.Awards.KillXPPerNPCLevel)
+func (s *Service) AwardKill(ctx context.Context, sess *session.PlayerSession, npcLevel int, characterID int64, tier string) ([]string, error) {
+	if tier == "" {
+		tier = "standard"
+	}
+	base := npcLevel * s.cfg.Awards.KillXPPerNPCLevel
+	if mult, ok := s.cfg.TierMultipliers[tier]; ok {
+		base = int(math.Ceil(float64(base) * mult.XP))
+	}
+	return s.award(ctx, sess, characterID, base)
 }
 
 // AwardXPAmount awards a pre-computed XP amount directly to a player.
