@@ -270,6 +270,12 @@ type Zone struct {
 	// TrapProbabilities configures per-zone procedural trap placement.
 	// nil means use the global danger-level defaults.
 	TrapProbabilities *TrapProbabilities `yaml:"trap_probabilities,omitempty"`
+	// WorldX is the zone's column position on the world map grid.
+	// nil means the zone has no world map position and is excluded from the world map.
+	WorldX *int `yaml:"world_x,omitempty"`
+	// WorldY is the zone's row position on the world map grid. Lower values are further north.
+	// nil means the zone has no world map position and is excluded from the world map.
+	WorldY *int `yaml:"world_y,omitempty"`
 }
 
 // ExternalExitTargets returns exit targets that reference rooms outside this zone.

@@ -602,3 +602,72 @@ func TestZoneToYAMLRoundTrip(t *testing.T) {
 		assert.Equal(t, len(room.Exits), len(r2.Exits))
 	}
 }
+
+func TestLoadZoneFromBytes_WorldCoords_Parsed(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: Desc
+  start_room: r1
+  world_x: 2
+  world_y: -4
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 0
+      map_y: 0
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	require.NotNil(t, z.WorldX, "WorldX must not be nil when world_x is set")
+	require.NotNil(t, z.WorldY, "WorldY must not be nil when world_y is set")
+	assert.Equal(t, 2, *z.WorldX)
+	assert.Equal(t, -4, *z.WorldY)
+}
+
+func TestLoadZoneFromBytes_WorldCoords_Nil_WhenAbsent(t *testing.T) {
+	data := []byte(`
+zone:
+  id: test
+  name: Test Zone
+  description: Desc
+  start_room: r1
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 0
+      map_y: 0
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	assert.Nil(t, z.WorldX, "WorldX must be nil when world_x is absent")
+	assert.Nil(t, z.WorldY, "WorldY must be nil when world_y is absent")
+}
+
+func TestLoadZoneFromBytes_WorldCoords_ZeroValueDistinguishable(t *testing.T) {
+	// (0, 0) must decode as a non-nil pointer pointing to 0, not nil.
+	data := []byte(`
+zone:
+  id: downtown
+  name: Downtown
+  description: Desc
+  start_room: r1
+  world_x: 0
+  world_y: 0
+  rooms:
+    - id: r1
+      title: Room 1
+      description: Desc
+      map_x: 0
+      map_y: 0
+`)
+	z, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	require.NotNil(t, z.WorldX, "WorldX must not be nil for world_x: 0")
+	require.NotNil(t, z.WorldY, "WorldY must not be nil for world_y: 0")
+	assert.Equal(t, 0, *z.WorldX)
+	assert.Equal(t, 0, *z.WorldY)
+}
