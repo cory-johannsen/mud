@@ -330,6 +330,33 @@ func (h *CombatHandler) InitiateGuardCombat(uid, zoneID string, wantedLevel int)
 	}
 }
 
+// InitiateNPCCombat starts combat between npcInst and the player with playerUID.
+// This is used for threat-based engagement where the NPC proactively attacks. REQ-NB-7.
+//
+// Precondition: npcInst must not be nil; playerUID must be a valid connected player.
+// Postcondition: combat is started in the player's room; events are broadcast.
+func (h *CombatHandler) InitiateNPCCombat(npcInst *npc.Instance, playerUID string) {
+	sess, ok := h.sessions.GetPlayer(playerUID)
+	if !ok {
+		return
+	}
+	if npcInst.RoomID != sess.RoomID {
+		return
+	}
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	if _, alreadyActive := h.engine.GetCombat(sess.RoomID); alreadyActive {
+		return
+	}
+
+	initEvents, err := h.startPursuitCombatLocked(sess, []*npc.Instance{npcInst})
+	if err != nil {
+		return
+	}
+	h.broadcastFn(sess.RoomID, initEvents)
+}
+
 // Attack queues a 1-AP ActionAttack for uid against target.
 // If no combat is active in the room, it is started first.
 // If AllActionsSubmitted after queuing, the round resolves immediately.

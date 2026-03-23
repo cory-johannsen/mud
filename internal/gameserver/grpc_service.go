@@ -19,6 +19,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/danger"
+	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
 	"github.com/cory-johannsen/mud/internal/game/maputil"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/trap"
@@ -248,6 +249,8 @@ type GameServiceServer struct {
 	// setRegistry holds equipment set definitions for computing set bonuses (REQ-EM-29/35).
 	// May be nil (treated as empty — no set bonuses).
 	setRegistry *inventory.SetRegistry
+	// gameHourFn returns the current game hour (0–23). Used by NPC schedule evaluation. REQ-NB-16.
+	gameHourFn func() int
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -329,6 +332,13 @@ func NewGameServiceServer(
 		trapMgr:                    nil, // trap loading not yet wired
 		trapTemplates:              nil, // trap loading not yet wired
 		setRegistry:                content.SetRegistry,
+	}
+	// gameHourFn defaults to reading from calendar if available. REQ-NB-16.
+	s.gameHourFn = func() int {
+		if s.calendar != nil {
+			return int(s.calendar.CurrentDateTime().Hour)
+		}
+		return 0
 	}
 	if s.combatH != nil {
 		s.combatH.SetOnCombatEnd(func(roomID string) {
@@ -3770,29 +3780,85 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 	if inst.Immobile {
 		return
 	}
+
+	// Decrement ability cooldowns. REQ-NB-2.
+	for k := range inst.AbilityCooldowns {
+		if inst.AbilityCooldowns[k] > 0 {
+			inst.AbilityCooldowns[k]--
+		}
+	}
+
+	// Home-room return movement. REQ-NB-42–44.
+	if inst.ReturningHome && s.combatH != nil && !s.combatH.IsInCombat(inst.ID) {
+		s.npcBFSStep(inst, inst.HomeRoomID)
+		if inst.RoomID == inst.HomeRoomID {
+			inst.ReturningHome = false // REQ-NB-43
+		}
+		inst.PlayerEnteredRoom = false
+		inst.OnDamageTaken = false
+		return // movement consumes the tick
+	}
+
+	// Threat assessment on idle tick for hostile NPCs. REQ-NB-7.
+	if inst.Disposition == "hostile" && s.combatH != nil && !s.combatH.IsInCombat(inst.ID) {
+		s.evaluateThreatEngagement(inst, inst.RoomID)
+	}
+
+	// Schedule evaluation. REQ-NB-19–22, 24.
+	if s.gameHourFn != nil && s.npcMgr != nil {
+		hour := s.gameHourFn()
+		tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
+		if tmpl != nil && len(tmpl.Schedule) > 0 {
+			entry := behavior.ActiveEntry(tmpl.Schedule, hour)
+			if entry != nil {
+				s.applyScheduleEntry(inst, entry)
+				inst.PlayerEnteredRoom = false
+				inst.OnDamageTaken = false
+				return
+			}
+		}
+	}
+
 	if inst.AIDomain == "" || aiReg == nil {
+		inst.PlayerEnteredRoom = false
+		inst.OnDamageTaken = false
 		return
 	}
 	planner, ok := aiReg.PlannerFor(inst.AIDomain)
 	if !ok {
+		inst.PlayerEnteredRoom = false
+		inst.OnDamageTaken = false
 		return
+	}
+
+	hpPct := 0
+	if inst.MaxHP > 0 {
+		hpPct = inst.CurrentHP * 100 / inst.MaxHP
 	}
 	ws := &ai.WorldState{
 		NPC: &ai.NPCState{
-			UID:        inst.ID,
-			Name:       inst.Name(),
-			Kind:       "npc",
-			HP:         inst.CurrentHP,
-			MaxHP:      inst.MaxHP,
+			UID:       inst.ID,
+			Name:      inst.Name(),
+			Kind:      "npc",
+			HP:        inst.CurrentHP,
+			MaxHP:     inst.MaxHP,
 			Awareness: inst.Awareness,
-			ZoneID:     zoneID,
-			RoomID:     inst.RoomID,
+			ZoneID:    zoneID,
+			RoomID:    inst.RoomID,
 		},
-		Room:       &ai.RoomState{ID: inst.RoomID, ZoneID: zoneID},
-		Combatants: nil,
+		Room:              &ai.RoomState{ID: inst.RoomID, ZoneID: zoneID},
+		Combatants:        nil,
+		InCombat:          false,
+		PlayerEnteredRoom: inst.PlayerEnteredRoom,
+		HPPctBelow:        hpPct,
+		OnDamageTaken:     inst.OnDamageTaken,
+		HasGrudgeTarget:   inst.GrudgePlayerID != "",
+		GrudgePlayerID:    inst.GrudgePlayerID,
 	}
 	actions, err := planner.Plan(ws)
 	if err != nil || len(actions) == 0 {
+		inst.PlayerEnteredRoom = false
+		inst.OnDamageTaken = false
 		return
 	}
 	actions = FilterAnimalPlanActions(actions, inst.IsAnimal())
@@ -3800,6 +3866,8 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 		switch a.Action {
 		case "move_random":
 			s.npcPatrolRandom(inst)
+		case "say":
+			s.npcSay(inst, a)
 		default:
 			// idle/pass: no-op
 		}
@@ -3828,6 +3896,166 @@ func (s *GameServiceServer) npcPatrolRandom(inst *npc.Instance) {
 	_ = s.npcH.MoveNPC(inst.ID, newRoomID)
 	s.pushRoomViewToAllInRoom(oldRoomID)
 	s.pushRoomViewToAllInRoom(newRoomID)
+}
+
+// npcSay executes a "say" HTN operator: picks a random string and broadcasts it. REQ-NB-1, REQ-NB-2.
+//
+// Precondition: inst must not be nil; a.Strings must not be empty.
+// Postcondition: broadcasts to room; updates AbilityCooldowns.
+func (s *GameServiceServer) npcSay(inst *npc.Instance, a ai.PlannedAction) {
+	if len(a.Strings) == 0 {
+		return
+	}
+	// Enforce cooldown via AbilityCooldowns. REQ-NB-2.
+	if inst.AbilityCooldowns == nil {
+		inst.AbilityCooldowns = make(map[string]int)
+	}
+	if inst.AbilityCooldowns[a.OperatorID] > 0 {
+		return
+	}
+	if a.Cooldown != "" {
+		if _, err := time.ParseDuration(a.Cooldown); err == nil {
+			// Store 1-tick cooldown (decremented each idle tick).
+			inst.AbilityCooldowns[a.OperatorID] = 1
+		}
+	}
+	line := a.Strings[rand.Intn(len(a.Strings))]
+	s.broadcastMessage(inst.RoomID, "", &gamev1.MessageEvent{
+		Content: fmt.Sprintf("%s says \"%s\"", inst.Name(), line),
+	})
+}
+
+// evaluateThreatEngagement runs threat assessment for a hostile NPC not in combat.
+// Initiates combat when threat score <= courage_threshold. REQ-NB-7.
+//
+// Precondition: inst must not be nil; inst must not be in combat.
+func (s *GameServiceServer) evaluateThreatEngagement(inst *npc.Instance, roomID string) {
+	players := s.sessions.PlayersInRoomDetails(roomID)
+	if len(players) == 0 {
+		return
+	}
+	snapshots := make([]behavior.PlayerSnapshot, len(players))
+	for i, p := range players {
+		snapshots[i] = behavior.PlayerSnapshot{
+			Level:     p.Level,
+			CurrentHP: p.CurrentHP,
+			MaxHP:     p.MaxHP,
+		}
+	}
+	score := behavior.ThreatScore(snapshots, inst.Level)
+	if score <= inst.CourageThreshold {
+		// Engage: initiate combat with first player in room. REQ-NB-7.
+		if s.combatH != nil && len(players) > 0 {
+			s.combatH.InitiateNPCCombat(inst, players[0].UID)
+		}
+	}
+	// else: NPC remains passive (REQ-NB-7A).
+}
+
+// npcBFSStep moves the NPC one step toward targetRoomID using its HomeRoomBFS map.
+//
+// Precondition: inst.HomeRoomBFS must be populated.
+// Postcondition: NPC moves to adjacent room with minimum BFS distance to targetRoomID.
+func (s *GameServiceServer) npcBFSStep(inst *npc.Instance, targetRoomID string) {
+	if len(inst.HomeRoomBFS) == 0 {
+		return
+	}
+	if inst.RoomID == targetRoomID {
+		return
+	}
+	room, ok := s.world.GetRoom(inst.RoomID)
+	if !ok {
+		return
+	}
+	// The BFS map is keyed from homeRoom. To move toward targetRoomID, pick the
+	// neighbor with the smallest distance value in HomeRoomBFS (closer to origin).
+	bestDist := inst.HomeRoomBFS[inst.RoomID]
+	bestRoom := ""
+	for _, exit := range room.VisibleExits() {
+		d, ok := inst.HomeRoomBFS[exit.TargetRoom]
+		if !ok {
+			continue
+		}
+		if d < bestDist {
+			bestDist = d
+			bestRoom = exit.TargetRoom
+		}
+	}
+	if bestRoom == "" {
+		return
+	}
+	oldRoomID := inst.RoomID
+	_ = s.npcH.MoveNPC(inst.ID, bestRoom)
+	s.pushRoomViewToAllInRoom(oldRoomID)
+	s.pushRoomViewToAllInRoom(bestRoom)
+}
+
+// npcMoveRandomFenced moves the NPC to a random exit within wanderRadius BFS hops of anchorRoomID.
+// REQ-NB-39, REQ-NB-40.
+//
+// Precondition: inst must not be nil; anchorRoomID must be non-empty.
+func (s *GameServiceServer) npcMoveRandomFenced(inst *npc.Instance, anchorRoomID string, wanderRadius int) {
+	if inst.Immobile {
+		return
+	}
+	room, ok := s.world.GetRoom(inst.RoomID)
+	if !ok {
+		return
+	}
+	exits := room.VisibleExits()
+	if len(exits) == 0 {
+		return
+	}
+
+	// Filter exits by wander radius from anchorRoomID using HomeRoomBFS. REQ-NB-39.
+	if wanderRadius > 0 && len(inst.HomeRoomBFS) > 0 {
+		var filtered []world.Exit
+		for _, exit := range exits {
+			d, ok := inst.HomeRoomBFS[exit.TargetRoom]
+			if !ok {
+				continue
+			}
+			if d <= wanderRadius {
+				filtered = append(filtered, exit)
+			}
+		}
+		exits = filtered
+	}
+
+	if len(exits) == 0 {
+		// REQ-NB-40: fail and allow HTN fallback.
+		return
+	}
+
+	oldRoomID := inst.RoomID
+	newRoomID := exits[rand.Intn(len(exits))].TargetRoom
+	_ = s.npcH.MoveNPC(inst.ID, newRoomID)
+	s.pushRoomViewToAllInRoom(oldRoomID)
+	s.pushRoomViewToAllInRoom(newRoomID)
+}
+
+// applyScheduleEntry applies a schedule entry's behavior mode for this tick. REQ-NB-21.
+func (s *GameServiceServer) applyScheduleEntry(inst *npc.Instance, entry *behavior.ScheduleEntry) {
+	anchorRoomID := entry.PreferredRoom
+
+	switch entry.BehaviorMode {
+	case "idle":
+		// REQ-NB-21A: remain in preferred_room; move toward anchor if not there.
+	case "patrol":
+		// REQ-NB-21B: wander within wander_radius.
+		s.npcMoveRandomFenced(inst, anchorRoomID, inst.WanderRadius)
+	case "aggressive":
+		// REQ-NB-21C: effective courage_threshold = 0 for this tick.
+		origThreshold := inst.CourageThreshold
+		inst.CourageThreshold = 0
+		s.evaluateThreatEngagement(inst, inst.RoomID)
+		inst.CourageThreshold = origThreshold
+	}
+
+	// Move toward preferred_room if not already there and not patrolling. REQ-NB-20.
+	if entry.BehaviorMode != "patrol" && inst.RoomID != anchorRoomID {
+		s.npcBFSStep(inst, anchorRoomID)
+	}
 }
 
 // handleInventory sends the player's backpack contents and currency.
