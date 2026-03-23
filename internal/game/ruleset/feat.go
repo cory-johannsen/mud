@@ -32,6 +32,12 @@ type Feat struct {
 	// Reaction declares this feat as a player reaction with the given trigger and effect.
 	// Nil means this feat is not a reaction.
 	Reaction *reaction.ReactionDef `yaml:"reaction,omitempty"`
+	// AllowNPC when true allows this feat to be assigned to NPC templates.
+	// Default false. Only feats with AllowNPC == true may appear in Template.Feats.
+	AllowNPC bool `yaml:"allow_npc"`
+	// TargetTags is an optional list of NPC tags; when non-empty, the feat bonus
+	// applies only when the combat target has at least one matching tag.
+	TargetTags []string `yaml:"target_tags"`
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.
