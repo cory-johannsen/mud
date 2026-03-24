@@ -308,7 +308,7 @@ features:
 
   - slug: input-mode-refactor
     name: Input Mode Refactor
-    status: spec
+    status: in_progress
     priority: 230
     category: ui
     file: docs/features/input-mode-refactor.md
