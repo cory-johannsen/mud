@@ -4032,6 +4032,8 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 
 	// Threat assessment on idle tick for hostile NPCs. REQ-NB-7.
 	// REQ-FA-27: enemy faction NPCs are treated as hostile regardless of disposition.
+	// Non-combat NPC types (merchant, healer, banker, job_trainer, etc.) never initiate combat.
+	isCombatCapable := inst.NPCType == "" || inst.NPCType == "combat" || inst.NPCType == "guard" || inst.NPCType == "hireling"
 	isHostileToPlayers := inst.Disposition == "hostile"
 	if !isHostileToPlayers && s.factionSvc != nil && inst.FactionID != "" {
 		for _, p := range s.sessions.PlayersInRoomDetails(inst.RoomID) {
@@ -4041,7 +4043,7 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 			}
 		}
 	}
-	if isHostileToPlayers && s.combatH != nil && !s.combatH.IsInCombat(inst.ID) {
+	if isCombatCapable && isHostileToPlayers && s.combatH != nil && !s.combatH.IsInCombat(inst.ID) {
 		s.evaluateThreatEngagement(inst, inst.RoomID)
 	}
 
@@ -4176,8 +4178,12 @@ func (s *GameServiceServer) npcSay(inst *npc.Instance, a ai.PlannedAction) {
 // evaluateThreatEngagement runs threat assessment for a hostile NPC not in combat.
 // Initiates combat when threat score <= courage_threshold. REQ-NB-7.
 //
-// Precondition: inst must not be nil; inst must not be in combat.
+// Precondition: inst must not be nil; inst must not be in combat; inst must be a combat-capable type.
 func (s *GameServiceServer) evaluateThreatEngagement(inst *npc.Instance, roomID string) {
+	// Guard: non-combat NPC types must never initiate combat.
+	if inst.NPCType != "" && inst.NPCType != "combat" && inst.NPCType != "guard" && inst.NPCType != "hireling" {
+		return
+	}
 	players := s.sessions.PlayersInRoomDetails(roomID)
 	if len(players) == 0 {
 		return
@@ -4328,10 +4334,13 @@ func (s *GameServiceServer) applyScheduleEntry(inst *npc.Instance, entry *behavi
 		s.npcMoveRandomFenced(inst, anchorRoomID, inst.WanderRadius)
 	case "aggressive":
 		// REQ-NB-21C: effective courage_threshold = 0 for this tick.
-		origThreshold := inst.CourageThreshold
-		inst.CourageThreshold = 0
-		s.evaluateThreatEngagement(inst, inst.RoomID)
-		inst.CourageThreshold = origThreshold
+		// Non-combat NPC types never initiate combat even in aggressive schedule mode.
+		if inst.NPCType == "" || inst.NPCType == "combat" || inst.NPCType == "guard" || inst.NPCType == "hireling" {
+			origThreshold := inst.CourageThreshold
+			inst.CourageThreshold = 0
+			s.evaluateThreatEngagement(inst, inst.RoomID)
+			inst.CourageThreshold = origThreshold
+		}
 	}
 
 	// Move toward preferred_room if not already there and not patrolling. REQ-NB-20.
