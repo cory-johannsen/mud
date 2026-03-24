@@ -1,6 +1,7 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"math/rand"
@@ -148,6 +149,25 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 		}
 	}
 	if itemCfg == nil {
+		// Check merchant material stock
+		for _, ms := range tmpl.Merchant.MaterialStock {
+			matDef, ok := s.materialReg.Material(ms.ID)
+			if !ok || !strings.EqualFold(matDef.Name, itemID) {
+				continue
+			}
+			if sess.Currency < ms.Price {
+				return messageEvent(fmt.Sprintf("You can't afford that. It costs %d credits and you have %d.", ms.Price, sess.Currency)), nil
+			}
+			sess.Currency -= ms.Price
+			if sess.Materials == nil {
+				sess.Materials = make(map[string]int)
+			}
+			sess.Materials[ms.ID]++
+			if s.materialRepo != nil {
+				_ = s.materialRepo.Add(context.Background(), sess.CharacterID, ms.ID, 1)
+			}
+			return messageEvent(fmt.Sprintf("You buy 1 %s for %d credits.", matDef.Name, ms.Price)), nil
+		}
 		return messageEvent(fmt.Sprintf("%s doesn't sell %q.", inst.Name(), itemID)), nil
 	}
 	// Faction item gating check (REQ-FA-19, REQ-FA-30).

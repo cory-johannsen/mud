@@ -10,12 +10,13 @@ import (
 
 // MerchantConfig holds the static configuration for a merchant NPC.
 type MerchantConfig struct {
-	MerchantType  string          `yaml:"merchant_type"` // weapons|armor|rings_neck|consumables|maps|technology|drugs
-	Inventory     []MerchantItem  `yaml:"inventory"`
-	SellMargin    float64         `yaml:"sell_margin"`
-	BuyMargin     float64         `yaml:"buy_margin"`
-	Budget        int             `yaml:"budget"`
-	ReplenishRate ReplenishConfig `yaml:"replenish_rate"`
+	MerchantType  string                `yaml:"merchant_type"` // weapons|armor|rings_neck|consumables|maps|technology|drugs
+	Inventory     []MerchantItem        `yaml:"inventory"`
+	SellMargin    float64               `yaml:"sell_margin"`
+	BuyMargin     float64               `yaml:"buy_margin"`
+	Budget        int                   `yaml:"budget"`
+	ReplenishRate ReplenishConfig       `yaml:"replenish_rate"`
+	MaterialStock []MaterialStockItem   `yaml:"material_stock,omitempty"`
 }
 
 // MerchantItem is one entry in a merchant's static inventory.
@@ -27,6 +28,13 @@ type MerchantItem struct {
 	// Modifier is the optional pre-set item modifier: "" | "tuned" | "defective".
 	// "cursed" is explicitly disallowed (REQ-EM-27).
 	Modifier string `yaml:"modifier,omitempty"`
+}
+
+// MaterialStockItem is one entry in a merchant's static material stock.
+type MaterialStockItem struct {
+	ID              string `yaml:"id"`
+	Price           int    `yaml:"price"`
+	RestockQuantity int    `yaml:"restock_quantity"`
 }
 
 // Validate checks REQ-EM-27: merchants MUST NOT stock cursed items.
