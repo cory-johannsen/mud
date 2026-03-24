@@ -306,6 +306,17 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			charges_remaining INTEGER NOT NULL DEFAULT -1,
 			expended          BOOLEAN NOT NULL DEFAULT FALSE
 		);
+
+		-- Migration 040
+		ALTER TABLE characters ADD COLUMN IF NOT EXISTS faction_id TEXT NOT NULL DEFAULT '';
+
+		-- Migration 041
+		CREATE TABLE IF NOT EXISTS character_faction_rep (
+			character_id BIGINT NOT NULL REFERENCES characters(id),
+			faction_id   TEXT NOT NULL,
+			rep          INT NOT NULL DEFAULT 0,
+			PRIMARY KEY (character_id, faction_id)
+		);
 	`)
 	return err
 }
