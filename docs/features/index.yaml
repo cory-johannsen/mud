@@ -267,7 +267,7 @@ features:
 
   - slug: focus-points
     name: Focus Points
-    status: planned
+    status: done
     priority: 282
     category: character
     file: docs/features/focus-points.md
