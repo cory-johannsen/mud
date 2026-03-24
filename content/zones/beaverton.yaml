@@ -28,6 +28,8 @@ zone:
       target: beav_canyon_road_west
     - direction: south
       target: beav_beaverton_hillsdale
+    - direction: north
+      target: beav_free_market
     map_x: 0
     map_y: 0
     equipment:
@@ -557,3 +559,34 @@ zone:
     properties:
       lighting: overcast
       atmosphere: wary
+  - id: beav_free_market
+    title: Free Market
+    description: 'An open-air block of vendor stalls under corrugated aluminum roofing. The smell of hot food and machine oil. People come here to trade, not fight.'
+    danger_level: safe
+    exits:
+    - direction: south
+      target: beav_canyon_road_east
+    map_x: 0
+    map_y: -2
+    spawns:
+    - template: beaverton_merchant
+      count: 1
+      respawn_after: 0s
+    - template: beaverton_healer
+      count: 1
+      respawn_after: 0s
+    - template: beaverton_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: beaverton_banker
+      count: 1
+      respawn_after: 0s
+    - template: beaverton_guard
+      count: 1
+      respawn_after: 0s
+    - template: beaverton_hireling
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: overcast
+      atmosphere: commerce

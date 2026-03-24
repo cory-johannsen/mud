@@ -1,0 +1,110 @@
+- id: hillsboro_merchant
+  name: "Kingdom Merchant"
+  npc_type: merchant
+  type: human
+  description: "Trades under the enclave's charter. Prices are set by the keep; complaints go through channels."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.35
+    buy_margin: 0.4
+    budget: 1100
+    inventory:
+      - item_id: stim_pack
+        base_price: 55
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 8
+      max_hours: 14
+      stock_refill: 1
+      budget_refill: 220
+
+- id: hillsboro_healer
+  name: "Court Surgeon"
+  npc_type: healer
+  type: human
+  description: "Trained in the old methods, extended by necessity. Treats everyone who can pay the keep's rate."
+  level: 4
+  max_hp: 22
+  ac: 10
+  awareness: 4
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 5
+    daily_capacity: 120
+
+- id: hillsboro_job_trainer
+  name: "The Chamberlain"
+  npc_type: job_trainer
+  type: human
+  description: "Oversees assignments and training within the enclave. Formal but fair."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 150
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 250
+        prerequisites:
+          min_level: 2
+
+- id: hillsboro_banker
+  name: "Royal Treasury"
+  npc_type: banker
+  type: human
+  description: "The keep's treasury agent. Stores wealth under the enclave's seal. Rates reflect stability."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: hillsboro
+    base_rate: 0.93
+    rate_variance: 0.03
+
+- id: hillsboro_guard
+  name: "Keep Knight"
+  npc_type: guard
+  type: human
+  description: "Armored and serious. Enforces the keep's rules on who enters and what they bring."
+  level: 4
+  max_hp: 40
+  ac: 16
+  awareness: 6
+  disposition: neutral
+  personality: brave
+  guard:
+    wanted_threshold: 2
+    bribeable: false
+
+- id: hillsboro_hireling
+  name: "Sworn Sword"
+  npc_type: hireling
+  type: human
+  description: "An enclave fighter available for contract work outside the walls."
+  level: 4
+  max_hp: 32
+  ac: 14
+  awareness: 4
+  disposition: neutral
+  personality: brave
+  hireling:
+    daily_cost: 100
+    combat_role: melee
+    max_follow_zones: 3

@@ -1,0 +1,79 @@
+- id: troutdale_merchant
+  name: "Road Trader"
+  npc_type: merchant
+  type: human
+  description: "Sells goods to everyone passing through. The truck stop is the last chance before the gorge."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.3
+    buy_margin: 0.45
+    budget: 1000
+    inventory:
+      - item_id: stim_pack
+        base_price: 50
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 1
+      budget_refill: 200
+
+- id: troutdale_healer
+  name: "Rest Stop Medic"
+  npc_type: healer
+  type: human
+  description: "Patches up travelers before and after the gorge run. Volume business."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 4
+    daily_capacity: 90
+
+- id: troutdale_job_trainer
+  name: "The Dispatcher"
+  npc_type: job_trainer
+  type: human
+  description: "Manages cargo runs and labor contracts out of the truck stop. Has work for anyone passing through."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 150
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 250
+        prerequisites:
+          min_level: 2
+
+- id: troutdale_banker
+  name: "Troutdale Trust"
+  npc_type: banker
+  type: human
+  description: "A regional trust operating from the truck stop. Understands the road economy."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: troutdale
+    base_rate: 0.91
+    rate_variance: 0.04

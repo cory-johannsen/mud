@@ -26,6 +26,8 @@ zone:
       zone: ne_portland
     - direction: east
       target: pdx_airport_way_east
+    - direction: south
+      target: pdx_terminal_b
     map_x: 0
     map_y: 0
     equipment:
@@ -589,3 +591,31 @@ zone:
     properties:
       lighting: overcast
       atmosphere: quiet
+  - id: pdx_terminal_b
+    title: Terminal B
+    description: "A section of the airport terminal cordoned off from the main concourse. Chairs bolted to the floor, vending machines that still work, and people who've learned to wait."
+    danger_level: safe
+    exits:
+    - direction: north
+      target: pdx_airport_way_west
+    map_x: 0
+    map_y: 2
+    spawns:
+    - template: pdx_international_merchant
+      count: 1
+      respawn_after: 0s
+    - template: pdx_international_healer
+      count: 1
+      respawn_after: 0s
+    - template: pdx_international_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: pdx_international_banker
+      count: 1
+      respawn_after: 0s
+    - template: pdx_international_guard
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: fluorescent
+      atmosphere: waiting

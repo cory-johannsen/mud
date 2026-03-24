@@ -1,0 +1,94 @@
+- id: pdx_international_merchant
+  name: "Duty-Free Dani"
+  npc_type: merchant
+  type: human
+  description: "Runs the only legitimate goods counter in the terminal. The duty-free signage is ironic."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.3
+    buy_margin: 0.45
+    budget: 1000
+    inventory:
+      - item_id: stim_pack
+        base_price: 50
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 8
+      max_hours: 16
+      stock_refill: 1
+      budget_refill: 200
+
+- id: pdx_international_healer
+  name: "Airport Medic"
+  npc_type: healer
+  type: human
+  description: "Stationed at Terminal B. Keeps a defibrillator and a first-aid kit. Busier than expected."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 4
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 4
+    daily_capacity: 100
+
+- id: pdx_international_job_trainer
+  name: "Gate Agent"
+  npc_type: job_trainer
+  type: human
+  description: "Former airport staff who now manages job routing in and out of the terminal zone."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 150
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 250
+        prerequisites:
+          min_level: 2
+
+- id: pdx_international_banker
+  name: "Currency Exchange"
+  npc_type: banker
+  type: human
+  description: "Still operates behind the old currency exchange counter. The rates have changed considerably."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: pdx_international
+    base_rate: 0.89
+    rate_variance: 0.05
+
+- id: pdx_international_guard
+  name: "TSA Remnant"
+  npc_type: guard
+  type: human
+  description: "Still wearing the old badge out of habit. Still checking for contraband out of instinct."
+  level: 3
+  max_hp: 32
+  ac: 13
+  awareness: 5
+  disposition: neutral
+  personality: brave
+  guard:
+    wanted_threshold: 2
+    bribeable: false

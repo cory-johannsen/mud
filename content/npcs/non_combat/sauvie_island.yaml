@@ -1,0 +1,79 @@
+- id: sauvie_island_merchant
+  name: "Farmer's Market"
+  npc_type: merchant
+  type: human
+  description: "A composed farmer selling produce and preserved goods. Everything is local."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: consumables
+    sell_margin: 1.2
+    buy_margin: 0.5
+    budget: 700
+    inventory:
+      - item_id: stim_pack
+        base_price: 40
+        init_stock: 4
+        max_stock: 8
+    replenish_rate:
+      min_hours: 8
+      max_hours: 16
+      stock_refill: 1
+      budget_refill: 140
+
+- id: sauvie_island_healer
+  name: "Herb Woman"
+  npc_type: healer
+  type: human
+  description: "Uses locally grown herbs and careful hands. The oldest healer on the island by far."
+  level: 3
+  max_hp: 18
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 2
+    daily_capacity: 60
+
+- id: sauvie_island_job_trainer
+  name: "The Old Hand"
+  npc_type: job_trainer
+  type: human
+  description: "Has farmed, fought, and survived on Sauvie Island for decades. Teaches what's worked."
+  level: 4
+  max_hp: 22
+  ac: 10
+  awareness: 4
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 100
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 175
+        prerequisites:
+          min_level: 2
+
+- id: sauvie_island_banker
+  name: "The Tin Can"
+  npc_type: banker
+  type: human
+  description: "Manages the island cooperative's shared funds. The tin can nickname is not entirely metaphorical."
+  level: 2
+  max_hp: 18
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: sauvie_island
+    base_rate: 0.89
+    rate_variance: 0.04

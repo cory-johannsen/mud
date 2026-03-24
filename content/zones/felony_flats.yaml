@@ -291,6 +291,22 @@ zone:
       target: flats_powell_overpass
     map_x: 2
     map_y: -4
+    spawns:
+    - template: felony_flats_merchant
+      count: 1
+      respawn_after: 0s
+    - template: felony_flats_healer
+      count: 1
+      respawn_after: 0s
+    - template: felony_flats_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: felony_flats_banker
+      count: 1
+      respawn_after: 0s
+    - template: felony_flats_fixer
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: firelight
       atmosphere: smoke

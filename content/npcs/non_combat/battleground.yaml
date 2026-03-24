@@ -1,0 +1,94 @@
+- id: battleground_merchant
+  name: "Commissar Goods"
+  npc_type: merchant
+  type: human
+  description: "Runs the collective's supply counter. Every transaction is recorded in triplicate."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.2
+    buy_margin: 0.5
+    budget: 1000
+    inventory:
+      - item_id: stim_pack
+        base_price: 45
+        init_stock: 6
+        max_stock: 12
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 2
+      budget_refill: 200
+
+- id: battleground_healer
+  name: "Field Medic Yuri"
+  npc_type: healer
+  type: human
+  description: "Former army medic. Patches wounds with the efficiency of someone who's done it under fire."
+  level: 4
+  max_hp: 24
+  ac: 11
+  awareness: 5
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 3
+    daily_capacity: 150
+
+- id: battleground_job_trainer
+  name: "Political Officer"
+  npc_type: job_trainer
+  type: human
+  description: "Assigns duties and manages ideological alignment. Will teach the correct skills to the correct comrades."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 120
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 200
+        prerequisites:
+          min_level: 2
+
+- id: battleground_banker
+  name: "The Treasurer"
+  npc_type: banker
+  type: human
+  description: "Manages collective funds. All deposits are voluntary. Withdrawals require paperwork."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: battleground
+    base_rate: 0.91
+    rate_variance: 0.04
+
+- id: battleground_guard
+  name: "People's Guard"
+  npc_type: guard
+  type: human
+  description: "Guards the infirmary perimeter. Earnest and alert. Does not accept bribes on principle."
+  level: 3
+  max_hp: 34
+  ac: 14
+  awareness: 6
+  disposition: neutral
+  personality: brave
+  guard:
+    wanted_threshold: 2
+    bribeable: false

@@ -1,0 +1,110 @@
+- id: se_industrial_merchant
+  name: "Shift Trader"
+  npc_type: merchant
+  type: human
+  description: "Sells supplies between shifts from a wheeled cart. Knows what every worker needs."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.25
+    buy_margin: 0.45
+    budget: 900
+    inventory:
+      - item_id: stim_pack
+        base_price: 45
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 6
+      max_hours: 10
+      stock_refill: 1
+      budget_refill: 180
+
+- id: se_industrial_healer
+  name: "Plant Medic"
+  npc_type: healer
+  type: human
+  description: "Handles industrial injuries with the speed and competence of long practice."
+  level: 3
+  max_hp: 22
+  ac: 10
+  awareness: 4
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 3
+    daily_capacity: 120
+
+- id: se_industrial_job_trainer
+  name: "Union Rep"
+  npc_type: job_trainer
+  type: human
+  description: "Manages worker training and job placement for the industrial district. No work without dues."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 120
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 200
+        prerequisites:
+          min_level: 2
+
+- id: se_industrial_banker
+  name: "Paymaster"
+  npc_type: banker
+  type: human
+  description: "Handles wage distribution and deposits for the district. Shift workers trust the paymaster."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: se_industrial
+    base_rate: 0.91
+    rate_variance: 0.04
+
+- id: se_industrial_guard
+  name: "Shop Steward"
+  npc_type: guard
+  type: human
+  description: "Enforces break-room rules and zone safety protocols. Takes the job seriously."
+  level: 3
+  max_hp: 32
+  ac: 13
+  awareness: 5
+  disposition: neutral
+  personality: brave
+  guard:
+    wanted_threshold: 2
+    bribeable: false
+
+- id: se_industrial_hireling
+  name: "Temp Worker"
+  npc_type: hireling
+  type: human
+  description: "Available on short notice. Reliable in a fight, reliable on a loading dock."
+  level: 2
+  max_hp: 26
+  ac: 12
+  awareness: 3
+  disposition: neutral
+  personality: opportunistic
+  hireling:
+    daily_cost: 55
+    combat_role: melee
+    max_follow_zones: 2

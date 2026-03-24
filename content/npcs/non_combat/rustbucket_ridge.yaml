@@ -1,0 +1,95 @@
+- id: rustbucket_ridge_merchant
+  name: "Parts Dealer"
+  npc_type: merchant
+  type: human
+  description: "Sells salvaged parts and supplies out of the scrap office. Everything is priced by weight."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.3
+    buy_margin: 0.45
+    budget: 1000
+    inventory:
+      - item_id: stim_pack
+        base_price: 50
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 1
+      budget_refill: 200
+
+- id: rustbucket_ridge_healer
+  name: "Welder's Medic"
+  npc_type: healer
+  type: human
+  description: "Handles burns, lacerations, and crush injuries. The ridge keeps them busy."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 4
+    daily_capacity: 100
+
+- id: rustbucket_ridge_job_trainer
+  name: "Shop Foreman"
+  npc_type: job_trainer
+  type: human
+  description: "Runs the work floor and takes on trainees. Blunt, experienced, and effective."
+  level: 4
+  max_hp: 24
+  ac: 11
+  awareness: 5
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 150
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 250
+        prerequisites:
+          min_level: 2
+
+- id: rustbucket_ridge_banker
+  name: "The Lockbox"
+  npc_type: banker
+  type: human
+  description: "Manages the ridge's communal savings in a series of locked strongboxes. Combination changes weekly."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: rustbucket_ridge
+    base_rate: 0.91
+    rate_variance: 0.05
+
+- id: rustbucket_ridge_hireling
+  name: "Grease Monkey"
+  npc_type: hireling
+  type: human
+  description: "A capable hand who knows how to fight and fix things in equal measure."
+  level: 3
+  max_hp: 26
+  ac: 12
+  awareness: 4
+  disposition: neutral
+  personality: opportunistic
+  hireling:
+    daily_cost: 65
+    combat_role: melee
+    max_follow_zones: 3

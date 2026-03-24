@@ -249,6 +249,8 @@ zone:
       target: sei_powell_terminus
     - direction: north
       target: sei_machine_shop
+    - direction: east
+      target: sei_break_room
     map_x: 2
     map_y: 0
     properties:
@@ -562,3 +564,34 @@ zone:
     properties:
       lighting: overcast
       atmosphere: chemical
+  - id: sei_break_room
+    title: Break Room
+    description: 'A cinder-block room with folding chairs and a microwave that runs off a generator. Shift workers and traders share the same coffee and the same fatigue.'
+    danger_level: safe
+    exits:
+    - direction: west
+      target: sei_holgate_blvd
+    map_x: 6
+    map_y: 0
+    spawns:
+    - template: se_industrial_merchant
+      count: 1
+      respawn_after: 0s
+    - template: se_industrial_healer
+      count: 1
+      respawn_after: 0s
+    - template: se_industrial_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: se_industrial_banker
+      count: 1
+      respawn_after: 0s
+    - template: se_industrial_guard
+      count: 1
+      respawn_after: 0s
+    - template: se_industrial_hireling
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: fluorescent
+      atmosphere: tired

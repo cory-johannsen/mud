@@ -1,0 +1,79 @@
+- id: ne_portland_merchant
+  name: "Neighborhood Mike"
+  npc_type: merchant
+  type: human
+  description: "Runs the corner store from behind a plywood counter. Knows what the neighborhood needs."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.25
+    buy_margin: 0.45
+    budget: 800
+    inventory:
+      - item_id: stim_pack
+        base_price: 45
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 6
+      max_hours: 10
+      stock_refill: 1
+      budget_refill: 160
+
+- id: ne_portland_healer
+  name: "Nurse Practitioner"
+  npc_type: healer
+  type: human
+  description: "Runs a walk-in clinic from the back of the store. Not a doctor, but close enough."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 3
+    daily_capacity: 90
+
+- id: ne_portland_job_trainer
+  name: "Trade School Rep"
+  npc_type: job_trainer
+  type: human
+  description: "Advocates for community job programs. Has a list of openings and the training to get you ready."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 120
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 200
+        prerequisites:
+          min_level: 2
+
+- id: ne_portland_banker
+  name: "Credit Union"
+  npc_type: banker
+  type: human
+  description: "A neighborhood banking cooperative run out of a repurposed ATM vestibule."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: ne_portland
+    base_rate: 0.91
+    rate_variance: 0.04

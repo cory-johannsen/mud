@@ -1,0 +1,95 @@
+- id: ross_island_merchant
+  name: "Island Trader"
+  npc_type: merchant
+  type: human
+  description: "Sells salvage and supplies from the dock shack. Everything smells faintly of river."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.3
+    buy_margin: 0.5
+    budget: 900
+    inventory:
+      - item_id: stim_pack
+        base_price: 50
+        init_stock: 4
+        max_stock: 8
+    replenish_rate:
+      min_hours: 8
+      max_hours: 16
+      stock_refill: 1
+      budget_refill: 180
+
+- id: ross_island_healer
+  name: "Boat Medic"
+  npc_type: healer
+  type: human
+  description: "Trained to patch wounds on a moving deck. Perfectly adequate on solid ground."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 4
+    daily_capacity: 80
+
+- id: ross_island_job_trainer
+  name: "The Captain"
+  npc_type: job_trainer
+  type: human
+  description: "Retired river captain who now teaches anyone who's willing to put in the work."
+  level: 4
+  max_hp: 24
+  ac: 11
+  awareness: 5
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 150
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 250
+        prerequisites:
+          min_level: 2
+
+- id: ross_island_banker
+  name: "The Chest"
+  npc_type: banker
+  type: human
+  description: "Keeps the island's communal funds in a literal waterproofed chest. Reliable if basic."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: ross_island
+    base_rate: 0.90
+    rate_variance: 0.05
+
+- id: ross_island_hireling
+  name: "Deck Hand"
+  npc_type: hireling
+  type: human
+  description: "Strong, experienced, and available. Works for day rates plus a meal."
+  level: 3
+  max_hp: 28
+  ac: 12
+  awareness: 4
+  disposition: neutral
+  personality: opportunistic
+  hireling:
+    daily_cost: 60
+    combat_role: melee
+    max_follow_zones: 2

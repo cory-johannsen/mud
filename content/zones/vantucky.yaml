@@ -27,6 +27,8 @@ zone:
       target: vantucky_andresen_road
     - direction: south
       target: vantucky_gas_station_ruins
+    - direction: north
+      target: vantucky_the_compound
     map_x: 0
     map_y: 0
     spawns:
@@ -545,3 +547,31 @@ zone:
     properties:
       lighting: dim
       atmosphere: residential
+  - id: vantucky_the_compound
+    title: The Compound
+    description: "The Vantucky militia's main compound. Spare and functional. They'll trade, train, and bank here — loyalty is assumed, not enforced."
+    danger_level: safe
+    exits:
+    - direction: south
+      target: vantucky_fourth_plain_west
+    map_x: 0
+    map_y: -2
+    spawns:
+    - template: vantucky_merchant
+      count: 1
+      respawn_after: 0s
+    - template: vantucky_healer
+      count: 1
+      respawn_after: 0s
+    - template: vantucky_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: vantucky_banker
+      count: 1
+      respawn_after: 0s
+    - template: vantucky_hireling
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: fluorescent
+      atmosphere: military

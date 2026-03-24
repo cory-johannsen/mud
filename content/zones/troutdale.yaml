@@ -28,6 +28,8 @@ zone:
       target: trout_stark_street
     - direction: south
       target: trout_frontage_road
+    - direction: north
+      target: trout_truck_stop
     map_x: 0
     map_y: 0
     equipment:
@@ -567,3 +569,28 @@ zone:
     properties:
       lighting: misty
       atmosphere: wind
+  - id: trout_truck_stop
+    title: Truck Stop
+    description: 'A diesel-soaked rest stop with a diner counter, a parts wall, and a back room where deals get made. Everyone passes through Troutdale eventually.'
+    danger_level: safe
+    exits:
+    - direction: south
+      target: trout_i84_west
+    map_x: 0
+    map_y: -2
+    spawns:
+    - template: troutdale_merchant
+      count: 1
+      respawn_after: 0s
+    - template: troutdale_healer
+      count: 1
+      respawn_after: 0s
+    - template: troutdale_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: troutdale_banker
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: fluorescent
+      atmosphere: transit

@@ -1,0 +1,95 @@
+- id: vantucky_merchant
+  name: "Compound Trader"
+  npc_type: merchant
+  type: human
+  description: "Supplies the militia compound from a locked storeroom. Standard-issue goods at standard-issue prices."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.25
+    buy_margin: 0.45
+    budget: 1000
+    inventory:
+      - item_id: stim_pack
+        base_price: 48
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 1
+      budget_refill: 200
+
+- id: vantucky_healer
+  name: "Compound Doc"
+  npc_type: healer
+  type: human
+  description: "The militia's field surgeon. Treats compound members and approved visitors."
+  level: 4
+  max_hp: 22
+  ac: 10
+  awareness: 4
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 4
+    daily_capacity: 100
+
+- id: vantucky_job_trainer
+  name: "The Sergeant"
+  npc_type: job_trainer
+  type: human
+  description: "Handles combat training and duty assignments within the compound."
+  level: 5
+  max_hp: 40
+  ac: 14
+  awareness: 6
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 150
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 300
+        prerequisites:
+          min_level: 2
+
+- id: vantucky_banker
+  name: "The Ammo Box"
+  npc_type: banker
+  type: human
+  description: "Manages the militia's financial reserves. Named for where the ledger is kept."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: vantucky
+    base_rate: 0.92
+    rate_variance: 0.04
+
+- id: vantucky_hireling
+  name: "Conscript"
+  npc_type: hireling
+  type: human
+  description: "Available for hire outside the compound. Trained, motivated, and cheap."
+  level: 3
+  max_hp: 30
+  ac: 13
+  awareness: 4
+  disposition: neutral
+  personality: brave
+  hireling:
+    daily_cost: 65
+    combat_role: melee
+    max_follow_zones: 4

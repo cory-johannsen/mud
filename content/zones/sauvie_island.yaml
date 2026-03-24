@@ -26,6 +26,8 @@ zone:
     - direction: southeast
       target: waterfront_trail
       zone: downtown
+    - direction: south
+      target: sauvie_farm_stand
     map_x: 0
     map_y: 0
     equipment:
@@ -508,3 +510,28 @@ zone:
     properties:
       lighting: lantern
       atmosphere: commercial
+  - id: sauvie_farm_stand
+    title: Farm Stand
+    description: 'A roadside stand that evolved into a community hub. Folding tables with produce, herbs, and handmade goods. Calm enough that people leave their weapons at the door.'
+    danger_level: safe
+    exits:
+    - direction: north
+      target: sauvie_bridge_south
+    map_x: 0
+    map_y: 2
+    spawns:
+    - template: sauvie_island_merchant
+      count: 1
+      respawn_after: 0s
+    - template: sauvie_island_healer
+      count: 1
+      respawn_after: 0s
+    - template: sauvie_island_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: sauvie_island_banker
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: natural
+      atmosphere: peaceful

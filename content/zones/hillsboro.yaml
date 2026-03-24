@@ -27,6 +27,8 @@ zone:
       target: hills_campus_gate
     - direction: north
       target: hills_cornell_road
+    - direction: south
+      target: hills_the_keep
     map_x: 0
     map_y: 0
     equipment:
@@ -524,3 +526,34 @@ zone:
     properties:
       lighting: bright
       atmosphere: wind
+  - id: hills_the_keep
+    title: The Keep
+    description: 'A fortified community hall at the edge of the Hillsboro enclave. Stone walls and firelight. A place of order, or something close to it.'
+    danger_level: safe
+    exits:
+    - direction: north
+      target: hills_tv_highway_east
+    map_x: 0
+    map_y: 2
+    spawns:
+    - template: hillsboro_merchant
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_healer
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_banker
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_guard
+      count: 1
+      respawn_after: 0s
+    - template: hillsboro_hireling
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: firelight
+      atmosphere: guarded

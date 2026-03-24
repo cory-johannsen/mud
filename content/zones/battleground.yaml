@@ -321,6 +321,22 @@ zone:
       target: battle_the_commons
     map_x: -2
     map_y: -2
+    spawns:
+    - template: battleground_merchant
+      count: 1
+      respawn_after: 0s
+    - template: battleground_healer
+      count: 1
+      respawn_after: 0s
+    - template: battleground_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: battleground_banker
+      count: 1
+      respawn_after: 0s
+    - template: battleground_guard
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: fluorescent
       atmosphere: antiseptic

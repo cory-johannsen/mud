@@ -1,0 +1,114 @@
+- id: downtown_merchant
+  name: "Street Vendor"
+  npc_type: merchant
+  type: human
+  description: "A wiry figure behind a folding table stacked with whatever fell off the last truck."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.3
+    buy_margin: 0.45
+    budget: 900
+    inventory:
+      - item_id: stim_pack
+        base_price: 50
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 1
+      budget_refill: 180
+
+- id: downtown_healer
+  name: "Back-Alley Doc"
+  npc_type: healer
+  type: human
+  description: "Moves like someone who's stitched a lot of wounds in bad light."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 4
+    daily_capacity: 100
+
+- id: downtown_job_trainer
+  name: "The Fixer's Desk"
+  npc_type: job_trainer
+  type: human
+  description: "A contact who knows who's hiring and what they need."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 150
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 250
+        prerequisites:
+          min_level: 2
+
+- id: downtown_banker
+  name: "Cash Mutual"
+  npc_type: banker
+  type: human
+  description: "No questions. No receipts. That's the deal."
+  level: 2
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: downtown
+    base_rate: 0.90
+    rate_variance: 0.05
+
+- id: downtown_guard
+  name: "Underground Muscle"
+  npc_type: guard
+  type: human
+  description: "Big. Quiet. Watching the door."
+  level: 3
+  max_hp: 36
+  ac: 14
+  awareness: 5
+  disposition: neutral
+  personality: brave
+  guard:
+    wanted_threshold: 2
+    bribeable: false
+
+- id: downtown_fixer
+  name: "The Middleman"
+  npc_type: fixer
+  type: human
+  description: "Connects problems with solutions for a modest fee."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 5
+  disposition: neutral
+  personality: cowardly
+  fixer:
+    npc_variance: 1.15
+    max_wanted_level: 4
+    base_costs:
+      1: 150
+      2: 350
+      3: 700
+      4: 1500

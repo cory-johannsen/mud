@@ -1,0 +1,99 @@
+- id: felony_flats_merchant
+  name: "Mama Jade"
+  npc_type: merchant
+  type: human
+  description: "Runs the district's main supply stall from a folding table stacked with salvage and sundries."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 4
+  disposition: neutral
+  personality: neutral
+  merchant:
+    merchant_type: general
+    sell_margin: 1.25
+    buy_margin: 0.5
+    budget: 900
+    inventory:
+      - item_id: stim_pack
+        base_price: 45
+        init_stock: 5
+        max_stock: 10
+    replenish_rate:
+      min_hours: 6
+      max_hours: 10
+      stock_refill: 1
+      budget_refill: 180
+
+- id: felony_flats_healer
+  name: "Herbalist Chen"
+  npc_type: healer
+  type: human
+  description: "Relies on local herbs and clean hands. Slower than a stim pack but cheaper and she doesn't ask questions."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  healer:
+    price_per_hp: 3
+    daily_capacity: 80
+
+- id: felony_flats_job_trainer
+  name: "Uncle Bao"
+  npc_type: job_trainer
+  type: human
+  description: "Knows everyone who's hiring in the flats and what it takes to work for them."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  job_trainer:
+    offered_jobs:
+      - job_id: scavenger
+        training_cost: 100
+        prerequisites:
+          min_level: 1
+      - job_id: drifter
+        training_cost: 200
+        prerequisites:
+          min_level: 2
+
+- id: felony_flats_banker
+  name: "The Moneylender"
+  npc_type: banker
+  type: human
+  description: "Loans at fair rates, banks for a fee. No names required."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 3
+  disposition: neutral
+  personality: neutral
+  banker:
+    zone_id: felony_flats
+    base_rate: 0.88
+    rate_variance: 0.06
+
+- id: felony_flats_fixer
+  name: "The Jade Fixer"
+  npc_type: fixer
+  type: human
+  description: "Operates from a back booth in the district. Known by name, not by face."
+  level: 3
+  max_hp: 20
+  ac: 10
+  awareness: 5
+  disposition: neutral
+  personality: cowardly
+  fixer:
+    npc_variance: 1.2
+    max_wanted_level: 4
+    base_costs:
+      1: 120
+      2: 300
+      3: 650
+      4: 1400

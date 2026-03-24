@@ -28,6 +28,8 @@ zone:
       target: ne_prescott_street
     - direction: west
       target: ne_williams_corridor
+    - direction: north
+      target: ne_corner_store
     map_x: 0
     map_y: 0
     spawns:
@@ -523,3 +525,28 @@ zone:
     properties:
       lighting: exposed
       atmosphere: wind
+  - id: ne_corner_store
+    title: Corner Store
+    description: "A converted convenience store with the shelving pushed to the walls. Locals come here to restock, get patched up, and hear what's going on in the neighborhood."
+    danger_level: safe
+    exits:
+    - direction: south
+      target: ne_alberta_street
+    map_x: 0
+    map_y: -4
+    spawns:
+    - template: ne_portland_merchant
+      count: 1
+      respawn_after: 0s
+    - template: ne_portland_healer
+      count: 1
+      respawn_after: 0s
+    - template: ne_portland_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: ne_portland_banker
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: fluorescent
+      atmosphere: commerce

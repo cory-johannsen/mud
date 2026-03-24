@@ -111,6 +111,8 @@ zone:
     exits:
     - direction: west
       target: grinders_row
+    - direction: east
+      target: rust_scrap_office
     map_x: 2
     map_y: 0
     spawns:
@@ -555,3 +557,31 @@ zone:
     map_y: 4
     properties:
       area: shiv_way
+  - id: rust_scrap_office
+    title: Scrap Office
+    description: "A repurposed foreman's office at the edge of the ridge. Metal desk, fluorescent light, and a corkboard full of job postings nobody's taken down."
+    danger_level: safe
+    exits:
+    - direction: west
+      target: last_stand_lodge
+    map_x: 4
+    map_y: 0
+    spawns:
+    - template: rustbucket_ridge_merchant
+      count: 1
+      respawn_after: 0s
+    - template: rustbucket_ridge_healer
+      count: 1
+      respawn_after: 0s
+    - template: rustbucket_ridge_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: rustbucket_ridge_banker
+      count: 1
+      respawn_after: 0s
+    - template: rustbucket_ridge_hireling
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: fluorescent
+      atmosphere: industrial

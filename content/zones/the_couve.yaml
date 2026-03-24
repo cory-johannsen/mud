@@ -27,6 +27,8 @@ zone:
       target: couve_jantzen_beach
     - direction: south
       target: ne_i5_bridge_approach
+    - direction: west
+      target: couve_the_crossing
     map_x: 0
     map_y: 0
     equipment:
@@ -518,3 +520,34 @@ zone:
     properties:
       lighting: overcast
       atmosphere: mud
+  - id: couve_the_crossing
+    title: The Crossing
+    description: "A checkpoint building at the Washington end of the bridge. The Couve faction controls it, but they're practical: trade is welcome, trouble is not."
+    danger_level: safe
+    exits:
+    - direction: east
+      target: couve_interstate_bridge_south
+    map_x: -2
+    map_y: 0
+    spawns:
+    - template: the_couve_merchant
+      count: 1
+      respawn_after: 0s
+    - template: the_couve_healer
+      count: 1
+      respawn_after: 0s
+    - template: the_couve_job_trainer
+      count: 1
+      respawn_after: 0s
+    - template: the_couve_banker
+      count: 1
+      respawn_after: 0s
+    - template: the_couve_guard
+      count: 1
+      respawn_after: 0s
+    - template: the_couve_fixer
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: overcast
+      atmosphere: guarded
