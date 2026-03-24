@@ -111,6 +111,10 @@ type PlayerSession struct {
 	Gender string
 	// HeroPoints is the number of hero points available (persisted).
 	HeroPoints int
+	// FocusPoints is the current focus point pool (loaded from DB at login; persisted on spend/restore).
+	FocusPoints int
+	// MaxFocusPoints is the maximum focus points derived at login from active feats + class features (not persisted).
+	MaxFocusPoints int
 	// LastCheckRoll is the dice result of the most recent ability check (session-only; 0 = none recorded).
 	LastCheckRoll int
 	// LastCheckDC is the DC of the most recent ability check (session-only).
