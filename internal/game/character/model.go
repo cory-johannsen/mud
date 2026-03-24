@@ -64,4 +64,7 @@ type Character struct {
 	// DetainedUntil is non-nil when the character is serving a detention sentence.
 	// Persisted to DB; nil means not detained.
 	DetainedUntil *time.Time
+
+	// FactionID is the faction ID chosen at character creation; immutable after that.
+	FactionID string
 }

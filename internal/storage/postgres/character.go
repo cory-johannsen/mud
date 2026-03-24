@@ -49,21 +49,21 @@ func (r *CharacterRepository) Create(ctx context.Context, c *character.Character
 		INSERT INTO characters
 			(account_id, name, region, class, team, level, experience, location,
 			 brutality, quickness, grit, reasoning, savvy, flair,
-			 max_hp, current_hp, gender)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+			 max_hp, current_hp, gender, faction_id)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
 		RETURNING id, account_id, name, region, class, team, level, experience, location,
 		          brutality, quickness, grit, reasoning, savvy, flair,
-		          max_hp, current_hp, created_at, updated_at, default_combat_action, gender`,
+		          max_hp, current_hp, created_at, updated_at, default_combat_action, gender, faction_id`,
 		c.AccountID, c.Name, c.Region, c.Class, c.Team, c.Level, c.Experience, c.Location,
 		c.Abilities.Brutality, c.Abilities.Quickness, c.Abilities.Grit,
 		c.Abilities.Reasoning, c.Abilities.Savvy, c.Abilities.Flair,
-		c.MaxHP, c.CurrentHP, c.Gender,
+		c.MaxHP, c.CurrentHP, c.Gender, c.FactionID,
 	).Scan(
 		&out.ID, &out.AccountID, &out.Name, &out.Region, &out.Class, &out.Team,
 		&out.Level, &out.Experience, &out.Location,
 		&out.Abilities.Brutality, &out.Abilities.Quickness, &out.Abilities.Grit,
 		&out.Abilities.Reasoning, &out.Abilities.Savvy, &out.Abilities.Flair,
-		&out.MaxHP, &out.CurrentHP, &out.CreatedAt, &out.UpdatedAt, &out.DefaultCombatAction, &out.Gender,
+		&out.MaxHP, &out.CurrentHP, &out.CreatedAt, &out.UpdatedAt, &out.DefaultCombatAction, &out.Gender, &out.FactionID,
 	)
 	if err != nil {
 		if isDuplicateKeyError(err) {
@@ -82,7 +82,7 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 	rows, err := r.db.Query(ctx, `
 		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       brutality, quickness, grit, reasoning, savvy, flair,
-		       max_hp, current_hp, created_at, updated_at, default_combat_action, gender
+		       max_hp, current_hp, created_at, updated_at, default_combat_action, gender, faction_id
 		FROM characters WHERE account_id = $1 ORDER BY created_at ASC`,
 		accountID,
 	)
@@ -99,7 +99,7 @@ func (r *CharacterRepository) ListByAccount(ctx context.Context, accountID int64
 			&c.Level, &c.Experience, &c.Location,
 			&c.Abilities.Brutality, &c.Abilities.Quickness, &c.Abilities.Grit,
 			&c.Abilities.Reasoning, &c.Abilities.Savvy, &c.Abilities.Flair,
-			&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction, &c.Gender,
+			&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction, &c.Gender, &c.FactionID,
 		); err != nil {
 			return nil, fmt.Errorf("scanning character row: %w", err)
 		}
@@ -118,7 +118,7 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 		SELECT id, account_id, name, region, class, team, level, experience, location,
 		       brutality, quickness, grit, reasoning, savvy, flair,
 		       max_hp, current_hp, created_at, updated_at, default_combat_action, gender,
-		       detained_until
+		       detained_until, faction_id
 		FROM characters WHERE id = $1`,
 		id,
 	).Scan(
@@ -127,7 +127,7 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 		&c.Abilities.Brutality, &c.Abilities.Quickness, &c.Abilities.Grit,
 		&c.Abilities.Reasoning, &c.Abilities.Savvy, &c.Abilities.Flair,
 		&c.MaxHP, &c.CurrentHP, &c.CreatedAt, &c.UpdatedAt, &c.DefaultCombatAction, &c.Gender,
-		&c.DetainedUntil,
+		&c.DetainedUntil, &c.FactionID,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
