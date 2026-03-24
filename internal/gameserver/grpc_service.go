@@ -267,6 +267,9 @@ type GameServiceServer struct {
 	// factionRepRepo persists per-character faction reputation scores.
 	// May be nil when faction feature is not configured.
 	factionRepRepo FactionRepRepository
+	// materialRepo persists per-character material inventories.
+	// May be nil when the crafting feature is not yet configured.
+	materialRepo CharacterMaterialsRepository
 	// factionConfig holds global faction economy parameters (rep costs, rep per service).
 	// May be nil when faction feature is not configured.
 	factionConfig *faction.FactionConfig
@@ -296,6 +299,16 @@ type HealerCapacityRepo interface {
 // Postcondition: detained_until is updated; nil clears the detention.
 type DetainedUntilUpdater interface {
 	UpdateDetainedUntil(ctx context.Context, characterID int64, detainedUntil *time.Time) error
+}
+
+// CharacterMaterialsRepository persists and loads per-character material inventories.
+//
+// Precondition: characterID must be > 0; materialID must be non-empty.
+// Postcondition: Mutations are durably persisted before returning.
+type CharacterMaterialsRepository interface {
+	Load(ctx context.Context, characterID int64) (map[string]int, error)
+	Add(ctx context.Context, characterID int64, materialID string, amount int) error
+	DeductMany(ctx context.Context, characterID int64, deductions map[string]int) error
 }
 
 // FactionRepRepository persists and loads per-character faction reputation.
@@ -372,6 +385,7 @@ func NewGameServiceServer(
 		setRegistry:                content.SetRegistry,
 		substanceReg:               content.SubstanceRegistry,
 		factionRepRepo:             storage.FactionRepRepo,
+		materialRepo:               storage.MaterialRepo,
 	}
 	if content.FactionRegistry != nil {
 		s.factionRegistry = content.FactionRegistry
@@ -1017,6 +1031,18 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			sess.MaxFocusPoints = focuspoints.ComputeMax(grantCount)
 			sess.FocusPoints = focuspoints.Clamp(fpFromDB, sess.MaxFocusPoints)
 		}
+	}
+
+	// Load material inventory (REQ-CRAFT-7)
+	if s.materialRepo != nil && characterID > 0 {
+		mats, err := s.materialRepo.Load(context.Background(), characterID)
+		if err != nil {
+			s.logger.Warn("loading materials", zap.Error(err))
+			mats = make(map[string]int)
+		}
+		sess.Materials = mats
+	} else {
+		sess.Materials = make(map[string]int)
 	}
 
 	// Load stored feature choices (interactive prompting deferred until after initial room view).
@@ -2140,6 +2166,10 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 
 	// Clear any active negotiate state: modifiers must not persist across rooms. REQ-NPC-5a.
 	s.clearNegotiateState(sess)
+
+	// Clear crafting session state on room exit (REQ-CRAFT-11).
+	sess.ScavengeExhaustedRoomID = ""
+	sess.PendingCraftRecipeID = ""
 
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_RoomView{RoomView: result.View},

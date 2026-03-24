@@ -238,6 +238,15 @@ type PlayerSession struct {
 	// REQ-AH-6A: nil map is the zero value; lazily initialized on first write.
 	// REQ-AH-7: session-only; cleared on disconnect.
 	SubstanceConditionRefs map[string]int
+	// Materials is the player's current material inventory (materialID → quantity).
+	// Loaded from character_materials at login. In-memory; persisted via materialRepo.
+	Materials map[string]int
+	// PendingCraftRecipeID is the recipe ID staged for `craft confirm`.
+	// Empty means no pending craft. Cleared on room exit or any non-confirm command.
+	PendingCraftRecipeID string
+	// ScavengeExhaustedRoomID is the room ID where scavenge was last attempted this visit.
+	// Cleared on room exit. (REQ-CRAFT-11)
+	ScavengeExhaustedRoomID string
 	// InitDone is closed by Session() immediately before entering commandLoop,
 	// signalling that all session-initialization writes to PlayerSession fields
 	// are complete. Consumers (e.g. tests) that need a race-free snapshot of

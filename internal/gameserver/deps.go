@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
@@ -40,6 +41,7 @@ type StorageDeps struct {
 	AutomapRepo            *postgres.AutomapRepository
 	DetainedUntilRepo      DetainedUntilUpdater
 	FactionRepRepo         FactionRepRepository
+	MaterialRepo           CharacterMaterialsRepository
 }
 
 // ContentDeps groups all content/world dependencies for GameServiceServer.
@@ -78,6 +80,12 @@ type ContentDeps struct {
 	// FactionConfig holds global faction economy parameters (rep costs, rep per service).
 	// May be nil when the faction feature is not yet configured.
 	FactionConfig *faction.FactionConfig
+	// RecipeRegistry holds all crafting recipe definitions loaded at startup.
+	// May be nil when the crafting feature is not yet configured.
+	RecipeRegistry *crafting.RecipeRegistry
+	// MaterialRegistry holds all crafting material definitions loaded at startup.
+	// May be nil when the crafting feature is not yet configured.
+	MaterialRegistry *crafting.MaterialRegistry
 }
 
 // HandlerDeps groups all handler dependencies for GameServiceServer.
