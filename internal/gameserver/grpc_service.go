@@ -4451,7 +4451,9 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		Flair:      int32(sess.Abilities.Flair),
 		Currency:   inventory.FormatRounds(sess.Currency),
 		Gender:     sess.Gender,
-		HeroPoints: int32(sess.HeroPoints),
+		HeroPoints:     int32(sess.HeroPoints),
+		FocusPoints:    int32(sess.FocusPoints),
+		MaxFocusPoints: int32(sess.MaxFocusPoints),
 	}
 
 	// Job info from registry.
@@ -7021,8 +7023,10 @@ func (s *GameServiceServer) handleFirstAid(uid string) (*gamev1.ServerEvent, err
 	hpEvt := &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_HpUpdate{
 			HpUpdate: &gamev1.HpUpdateEvent{
-				CurrentHp: int32(newHP),
-				MaxHp:     int32(sess.MaxHP),
+				CurrentHp:      int32(newHP),
+				MaxHp:          int32(sess.MaxHP),
+				FocusPoints:    int32(sess.FocusPoints),
+				MaxFocusPoints: int32(sess.MaxFocusPoints),
 			},
 		},
 	}
