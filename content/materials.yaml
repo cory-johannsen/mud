@@ -1,0 +1,410 @@
+materials:
+  # Mechanical (value: 2)
+  - id: scrap_metal
+    name: Scrap Metal
+    category: mechanical
+    value: 2
+  - id: copper_tubing
+    name: Copper Tubing
+    category: mechanical
+    value: 2
+  - id: machine_screws
+    name: Machine Screws
+    category: mechanical
+    value: 2
+  - id: hex_bolts
+    name: Hex Bolts
+    category: mechanical
+    value: 2
+  - id: steel_plates
+    name: Steel Plates
+    category: mechanical
+    value: 2
+  - id: lenses
+    name: Lenses
+    category: mechanical
+    value: 2
+  - id: coil_springs
+    name: Coil Springs
+    category: mechanical
+    value: 2
+  - id: salvaged_gears
+    name: Salvaged Gears
+    category: mechanical
+    value: 2
+  - id: door_hinges
+    name: Door Hinges
+    category: mechanical
+    value: 2
+  - id: steel_brackets
+    name: Steel Brackets
+    category: mechanical
+    value: 2
+  - id: pop_rivets
+    name: Pop Rivets
+    category: mechanical
+    value: 2
+  - id: flat_washers
+    name: Flat Washers
+    category: mechanical
+    value: 2
+  - id: pipe_fittings
+    name: Pipe Fittings
+    category: mechanical
+    value: 2
+  - id: wire_mesh
+    name: Wire Mesh
+    category: mechanical
+    value: 2
+  - id: sheet_metal_strips
+    name: Sheet Metal Strips
+    category: mechanical
+    value: 2
+  - id: rebar_sections
+    name: Rebar Sections
+    category: mechanical
+    value: 2
+  - id: chain_links
+    name: Chain Links
+    category: mechanical
+    value: 2
+  - id: cable_clamps
+    name: Cable Clamps
+    category: mechanical
+    value: 2
+  - id: ball_bearings
+    name: Ball Bearings
+    category: mechanical
+    value: 2
+  - id: valve_stems
+    name: Valve Stems
+    category: mechanical
+    value: 2
+
+  # Chemical (value: 5)
+  - id: bleach
+    name: Bleach
+    category: chemical
+    value: 5
+  - id: acetone
+    name: Acetone
+    category: chemical
+    value: 5
+  - id: ammonia
+    name: Ammonia
+    category: chemical
+    value: 5
+  - id: rubbing_alcohol
+    name: Rubbing Alcohol
+    category: chemical
+    value: 5
+  - id: hydrogen_peroxide
+    name: Hydrogen Peroxide
+    category: chemical
+    value: 5
+  - id: drain_cleaner
+    name: Drain Cleaner
+    category: chemical
+    value: 5
+  - id: table_salt
+    name: Table Salt
+    category: chemical
+    value: 5
+  - id: baking_soda
+    name: Baking Soda
+    category: chemical
+    value: 5
+  - id: vinegar
+    name: Vinegar
+    category: chemical
+    value: 5
+  - id: motor_oil
+    name: Motor Oil
+    category: chemical
+    value: 5
+  - id: brake_fluid
+    name: Brake Fluid
+    category: chemical
+    value: 5
+  - id: lighter_fluid
+    name: Lighter Fluid
+    category: chemical
+    value: 5
+  - id: paint_thinner
+    name: Paint Thinner
+    category: chemical
+    value: 5
+  - id: mineral_spirits
+    name: Mineral Spirits
+    category: chemical
+    value: 5
+  - id: glycerin
+    name: Glycerin
+    category: chemical
+    value: 5
+  - id: borax
+    name: Borax
+    category: chemical
+    value: 5
+  - id: epoxy_resin
+    name: Epoxy Resin
+    category: chemical
+    value: 5
+  - id: soldering_flux
+    name: Soldering Flux
+    category: chemical
+    value: 5
+  - id: battery_acid
+    name: Battery Acid
+    category: chemical
+    value: 5
+  - id: isopropyl_alcohol
+    name: Isopropyl Alcohol
+    category: chemical
+    value: 5
+
+  # Organic (value: 3)
+  - id: wild_mushrooms
+    name: Wild Mushrooms
+    category: organic
+    value: 3
+  - id: walnuts
+    name: Walnuts
+    category: organic
+    value: 3
+  - id: wildflowers
+    name: Wildflowers
+    category: organic
+    value: 3
+  - id: bark_strips
+    name: Bark Strips
+    category: organic
+    value: 3
+  - id: tree_sap
+    name: Tree Sap
+    category: organic
+    value: 3
+  - id: blackberries
+    name: Blackberries
+    category: organic
+    value: 3
+  - id: acorns
+    name: Acorns
+    category: organic
+    value: 3
+  - id: dried_nettles
+    name: Dried Nettles
+    category: organic
+    value: 3
+  - id: wild_garlic
+    name: Wild Garlic
+    category: organic
+    value: 3
+  - id: cattail_fluff
+    name: Cattail Fluff
+    category: organic
+    value: 3
+  - id: pine_needles
+    name: Pine Needles
+    category: organic
+    value: 3
+  - id: rose_hips
+    name: Rose Hips
+    category: organic
+    value: 3
+  - id: dandelion_roots
+    name: Dandelion Roots
+    category: organic
+    value: 3
+  - id: moss_clumps
+    name: Moss Clumps
+    category: organic
+    value: 3
+  - id: lichen
+    name: Lichen
+    category: organic
+    value: 3
+  - id: fern_fronds
+    name: Fern Fronds
+    category: organic
+    value: 3
+  - id: cedar_bark
+    name: Cedar Bark
+    category: organic
+    value: 3
+  - id: willow_bark
+    name: Willow Bark
+    category: organic
+    value: 3
+  - id: hemlock_seeds
+    name: Hemlock Seeds
+    category: organic
+    value: 3
+  - id: chanterelles
+    name: Chanterelles
+    category: organic
+    value: 3
+
+  # Electrical (value: 8)
+  - id: copper_wire
+    name: Copper Wire
+    category: electrical
+    value: 8
+  - id: foam_padding
+    name: Foam Padding
+    category: electrical
+    value: 8
+  - id: circuit_boards
+    name: Circuit Boards
+    category: electrical
+    value: 8
+  - id: capacitors
+    name: Capacitors
+    category: electrical
+    value: 8
+  - id: resistors
+    name: Resistors
+    category: electrical
+    value: 8
+  - id: led_strips
+    name: LED Strips
+    category: electrical
+    value: 8
+  - id: aa_batteries
+    name: AA Batteries
+    category: electrical
+    value: 8
+  - id: transistors
+    name: Transistors
+    category: electrical
+    value: 8
+  - id: fuses
+    name: Fuses
+    category: electrical
+    value: 8
+  - id: toggle_switches
+    name: Toggle Switches
+    category: electrical
+    value: 8
+  - id: relay_coils
+    name: Relay Coils
+    category: electrical
+    value: 8
+  - id: heat_sinks
+    name: Heat Sinks
+    category: electrical
+    value: 8
+  - id: antenna_wire
+    name: Antenna Wire
+    category: electrical
+    value: 8
+  - id: solder_sticks
+    name: Solder Sticks
+    category: electrical
+    value: 8
+  - id: electrical_tape
+    name: Electrical Tape
+    category: electrical
+    value: 8
+  - id: microchips
+    name: Microchips
+    category: electrical
+    value: 8
+  - id: potentiometer_dials
+    name: Potentiometer Dials
+    category: electrical
+    value: 8
+  - id: diodes
+    name: Diodes
+    category: electrical
+    value: 8
+  - id: fiber_optic_strands
+    name: Fiber Optic Strands
+    category: electrical
+    value: 8
+  - id: solar_cells
+    name: Solar Cells
+    category: electrical
+    value: 8
+
+  # Misc (value: 1)
+  - id: sugar_packets
+    name: Sugar Packets
+    category: misc
+    value: 1
+  - id: instant_coffee
+    name: Instant Coffee
+    category: misc
+    value: 1
+  - id: salt_packets
+    name: Salt Packets
+    category: misc
+    value: 1
+  - id: powdered_milk
+    name: Powdered Milk
+    category: misc
+    value: 1
+  - id: cooking_oil
+    name: Cooking Oil
+    category: misc
+    value: 1
+  - id: hot_sauce
+    name: Hot Sauce
+    category: misc
+    value: 1
+  - id: dried_beans
+    name: Dried Beans
+    category: misc
+    value: 1
+  - id: rice
+    name: Rice
+    category: misc
+    value: 1
+  - id: corn_syrup
+    name: Corn Syrup
+    category: misc
+    value: 1
+  - id: protein_powder
+    name: Protein Powder
+    category: misc
+    value: 1
+  - id: multivitamins
+    name: Multivitamins
+    category: misc
+    value: 1
+  - id: energy_drink_powder
+    name: Energy Drink Powder
+    category: misc
+    value: 1
+  - id: hard_candy
+    name: Hard Candy
+    category: misc
+    value: 1
+  - id: cigarettes
+    name: Cigarettes
+    category: misc
+    value: 1
+  - id: rolling_papers
+    name: Rolling Papers
+    category: misc
+    value: 1
+  - id: tin_foil
+    name: Tin Foil
+    category: misc
+    value: 1
+  - id: plastic_wrap
+    name: Plastic Wrap
+    category: misc
+    value: 1
+  - id: rubber_bands
+    name: Rubber Bands
+    category: misc
+    value: 1
+  - id: zip_ties
+    name: Zip Ties
+    category: misc
+    value: 1
+  - id: duct_tape
+    name: Duct Tape
+    category: misc
+    value: 1
