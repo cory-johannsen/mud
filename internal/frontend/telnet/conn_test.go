@@ -185,13 +185,14 @@ func TestConn_ReadLine_FiltersControlChars(t *testing.T) {
 
 	go func() {
 		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
-		// Include control characters (0x01, 0x07) but keep tab (0x09)
+		// Include control characters (0x01, 0x07) and tab (0x09).
+		// Tab is filtered (REQ-USE-6); other control chars are also filtered.
 		_, _ = client.Write([]byte("he\x01ll\x07o\tworld\r\n"))
 	}()
 
 	line, err := conn.ReadLine()
 	require.NoError(t, err)
-	assert.Equal(t, "hello\tworld", line)
+	assert.Equal(t, "helloworld", line)
 }
 
 func TestConn_ReadLine_WithIAC(t *testing.T) {
@@ -1124,4 +1125,87 @@ func TestHeadlessConn_WriteConsole_NeverEmitsANSI(t *testing.T) {
 		received := <-done
 		assert.NotContains(rt, received, "\033[", "WriteConsole must never emit ANSI escape sequences")
 	})
+}
+
+// --- Tab key (REQ-USE-5, REQ-USE-6) ---
+
+// TestConn_TabKey_InvokesTabCompleter verifies that pressing tab during ReadLineSplit
+// calls TabCompleter with the current buffer prefix and does not unblock ReadLine.
+// REQ-USE-5.
+func TestConn_TabKey_InvokesTabCompleter(t *testing.T) {
+	conn, client := newTestConn(t)
+
+	var gotPrefix string
+	done := make(chan struct{})
+	conn.TabCompleter = func(prefix string) {
+		gotPrefix = prefix
+		close(done)
+	}
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		// Write "use" then tab then newline (to unblock ReadLineSplit).
+		_, _ = client.Write([]byte("use\x09\r\n"))
+	}()
+
+	_, err := conn.ReadLineSplit()
+	require.NoError(t, err)
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("TabCompleter was not called within timeout")
+	}
+	assert.Equal(t, "use", gotPrefix)
+}
+
+// TestConn_TabKey_NilCompleter_DoesNotPanic verifies that pressing tab when
+// TabCompleter is nil does not panic. REQ-USE-5.
+func TestConn_TabKey_NilCompleter_DoesNotPanic(t *testing.T) {
+	conn, client := newTestConn(t)
+	// TabCompleter is nil by default.
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		_, _ = client.Write([]byte("\x09\r\n"))
+	}()
+
+	assert.NotPanics(t, func() {
+		_, _ = conn.ReadLineSplit()
+	})
+}
+
+// TestConn_TabKey_DoesNotModifyBuffer verifies that tab is not appended to the
+// input buffer in ReadLineSplit. REQ-USE-6.
+func TestConn_TabKey_DoesNotModifyBuffer(t *testing.T) {
+	conn, client := newTestConn(t)
+	conn.TabCompleter = func(prefix string) {}
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		_, _ = client.Write([]byte("ab\x09cd\r\n"))
+	}()
+
+	line, err := conn.ReadLineSplit()
+	require.NoError(t, err)
+	// Tab must not appear in the returned line.
+	assert.Equal(t, "abcd", line)
+	assert.NotContains(t, line, "\t")
+}
+
+// TestConn_ReadLine_TabKey_DoesNotModifyBuffer verifies that tab is not appended
+// to the input buffer in ReadLine. REQ-USE-6.
+func TestConn_ReadLine_TabKey_DoesNotModifyBuffer(t *testing.T) {
+	conn, client := newTestConn(t)
+	conn.TabCompleter = func(prefix string) {}
+
+	go func() {
+		_ = client.SetWriteDeadline(time.Now().Add(2 * time.Second))
+		_, _ = client.Write([]byte("ab\x09cd\r\n"))
+	}()
+
+	line, err := conn.ReadLine()
+	require.NoError(t, err)
+	assert.Equal(t, "abcd", line)
+	assert.NotContains(t, line, "\t")
 }

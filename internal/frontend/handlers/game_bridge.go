@@ -273,6 +273,32 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	mapHandler := NewMapModeHandler()
 	session := NewSessionInputState(roomHandler)
 
+	// Initialize tab-completion channel and callback. The channel is buffered(1)
+	// so forwardServerEvents can route TabCompleteResponse without blocking.
+	// REQ-USE-5.
+	conn.TabCompleteResponse = make(chan *gamev1.TabCompleteResponse, 1)
+	conn.TabCompleter = func(prefix string) {
+		requestID := 0
+		requestID++
+		reqID := fmt.Sprintf("req-tc-%d", requestID)
+		msg := &gamev1.ClientMessage{
+			RequestId: reqID,
+			Payload: &gamev1.ClientMessage_TabComplete{
+				TabComplete: &gamev1.TabCompleteRequest{Prefix: prefix},
+			},
+		}
+		if err := stream.Send(msg); err != nil {
+			h.logger.Debug("tab complete send failed", zap.Error(err))
+			return
+		}
+		select {
+		case tcResp := <-conn.TabCompleteResponse:
+			renderTabCompleteResponse(conn, tcResp, session)
+		case <-time.After(5 * time.Second):
+			h.logger.Debug("tab complete response timed out")
+		}
+	}
+
 	// Write initial prompt
 	var initPromptErr error
 	if conn.IsSplitScreen() {
@@ -571,6 +597,35 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 	}
 }
 
+// renderTabCompleteResponse displays tab-completion candidates on the console.
+//
+// Precondition: conn must be non-nil; resp must be non-nil; session must be non-nil.
+// Postcondition: Writes a human-readable completion list or "No completions found." to the console.
+// REQ-USE-10, REQ-USE-11.
+func renderTabCompleteResponse(conn *telnet.Conn, resp *gamev1.TabCompleteResponse, session *SessionInputState) {
+	completions := resp.GetCompletions()
+	var msg string
+	switch {
+	case len(completions) == 0:
+		msg = telnet.Colorize(telnet.Dim, "No completions found.")
+	case len(completions) == 1:
+		msg = completions[0]
+	case len(completions) <= 10:
+		msg = strings.Join(completions, "  ")
+	default:
+		first10 := strings.Join(completions[:10], "  ")
+		remaining := len(completions) - 10
+		msg = fmt.Sprintf("%s  ... (%d more)", first10, remaining)
+	}
+	if conn.IsSplitScreen() {
+		_ = conn.WriteConsole(msg)
+		_ = conn.WritePromptSplit(session.CurrentPrompt())
+	} else {
+		_ = conn.WriteLine(msg)
+		_ = conn.WritePrompt(session.CurrentPrompt())
+	}
+}
+
 // forwardServerEvents reads ServerEvents from the gRPC stream and writes
 // rendered text to the Telnet connection.
 //
@@ -799,6 +854,15 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				_ = conn.WriteLine(dcMsg)
 			}
 			return
+		case *gamev1.ServerEvent_TabComplete:
+			// Route to the dedicated channel; the TabCompleter callback reads it.
+			// Non-blocking send: drop if no one is waiting (e.g. TabCompleter timed out).
+			// REQ-USE-5.
+			select {
+			case conn.TabCompleteResponse <- p.TabComplete:
+			default:
+			}
+			continue
 		}
 
 			if text != "" {

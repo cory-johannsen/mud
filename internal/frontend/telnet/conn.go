@@ -7,6 +7,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // Telnet IAC (Interpret As Command) constants per RFC 854.
@@ -66,6 +68,17 @@ type Conn struct {
 	// Command history (guarded by mu)
 	cmdHistory []string // submitted commands, max cmdHistoryMax
 	historyIdx int      // cursor; len(cmdHistory) = live (past-end)
+
+	// TabCompleter is called with the current input prefix when the tab key (0x09)
+	// is pressed during ReadLine or ReadLineSplit. If nil, tab is silently discarded.
+	// The callback must not block indefinitely — it is called from the read goroutine.
+	// REQ-USE-5.
+	TabCompleter func(prefix string)
+
+	// tabCompleteResponse receives TabCompleteResponse messages routed by
+	// forwardServerEvents instead of the normal event path. Buffered (1) to
+	// prevent the router from blocking.
+	TabCompleteResponse chan *gamev1.TabCompleteResponse
 }
 
 // NewConn wraps a raw TCP connection with Telnet protocol handling.
@@ -264,8 +277,17 @@ func (c *Conn) ReadLine() (string, error) {
 			continue
 		}
 
-		// Filter control characters except tab
-		if b < 32 && b != '\t' {
+		// Tab key (0x09): invoke TabCompleter with current buffer prefix but do
+		// not append to the buffer. REQ-USE-5, REQ-USE-6.
+		if b == '\t' {
+			if c.TabCompleter != nil {
+				c.TabCompleter(line.String())
+			}
+			continue
+		}
+
+		// Filter remaining control characters.
+		if b < 32 {
 			continue
 		}
 
@@ -570,8 +592,17 @@ func (c *Conn) ReadLineSplit() (string, error) {
 			continue
 		}
 
-		// Filter control characters except tab.
-		if b < 32 && b != '\t' {
+		// Tab key (0x09): invoke TabCompleter with current buffer prefix but do
+		// not append to the buffer. REQ-USE-5, REQ-USE-6.
+		if b == '\t' {
+			if c.TabCompleter != nil {
+				c.TabCompleter(line.String())
+			}
+			continue
+		}
+
+		// Filter remaining control characters.
+		if b < 32 {
 			continue
 		}
 
