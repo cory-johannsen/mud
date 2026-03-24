@@ -1118,3 +1118,19 @@ message SetRoomRequest {
 
 // EditorCmdsRequest asks the server to list all editor commands.
 message EditorCmdsRequest {}
+
+// FactionRequest asks the server for the player's current faction, tier, rep, and perks.
+message FactionRequest {}
+
+// FactionInfoRequest asks the server for public information about a specific faction.
+message FactionInfoRequest {
+  string faction_id = 1;
+}
+
+// FactionStandingRequest asks the server for the player's standing in all tracked factions.
+message FactionStandingRequest {}
+
+// ChangeRepRequest asks a Fixer NPC to improve the player's faction standing for currency.
+message ChangeRepRequest {
+  string faction_id = 1;
+}

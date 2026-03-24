@@ -10869,6 +10869,170 @@ func (*EditorCmdsRequest) Descriptor() ([]byte, []int) {
 	return file_game_v1_game_proto_rawDescGZIP(), []int{154}
 }
 
+// FactionRequest asks the server for the player's current faction, tier, rep, and perks.
+type FactionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FactionRequest) Reset() {
+	*x = FactionRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[155]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FactionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FactionRequest) ProtoMessage() {}
+
+func (x *FactionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[155]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FactionRequest.ProtoReflect.Descriptor instead.
+func (*FactionRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{155}
+}
+
+// FactionInfoRequest asks the server for public information about a specific faction.
+type FactionInfoRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FactionId     string                 `protobuf:"bytes,1,opt,name=faction_id,json=factionId,proto3" json:"faction_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FactionInfoRequest) Reset() {
+	*x = FactionInfoRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[156]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FactionInfoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FactionInfoRequest) ProtoMessage() {}
+
+func (x *FactionInfoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[156]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FactionInfoRequest.ProtoReflect.Descriptor instead.
+func (*FactionInfoRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{156}
+}
+
+func (x *FactionInfoRequest) GetFactionId() string {
+	if x != nil {
+		return x.FactionId
+	}
+	return ""
+}
+
+// FactionStandingRequest asks the server for the player's standing in all tracked factions.
+type FactionStandingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FactionStandingRequest) Reset() {
+	*x = FactionStandingRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[157]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FactionStandingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FactionStandingRequest) ProtoMessage() {}
+
+func (x *FactionStandingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[157]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FactionStandingRequest.ProtoReflect.Descriptor instead.
+func (*FactionStandingRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{157}
+}
+
+// ChangeRepRequest asks a Fixer NPC to improve the player's faction standing for currency.
+type ChangeRepRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FactionId     string                 `protobuf:"bytes,1,opt,name=faction_id,json=factionId,proto3" json:"faction_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangeRepRequest) Reset() {
+	*x = ChangeRepRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[158]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangeRepRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeRepRequest) ProtoMessage() {}
+
+func (x *ChangeRepRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[158]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeRepRequest.ProtoReflect.Descriptor instead.
+func (*ChangeRepRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{158}
+}
+
+func (x *ChangeRepRequest) GetFactionId() string {
+	if x != nil {
+		return x.FactionId
+	}
+	return ""
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
@@ -11591,7 +11755,15 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0eSetRoomRequest\x12\x14\n" +
 	"\x05field\x18\x01 \x01(\tR\x05field\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value\"\x13\n" +
-	"\x11EditorCmdsRequest*Y\n" +
+	"\x11EditorCmdsRequest\"\x10\n" +
+	"\x0eFactionRequest\"3\n" +
+	"\x12FactionInfoRequest\x12\x1d\n" +
+	"\n" +
+	"faction_id\x18\x01 \x01(\tR\tfactionId\"\x18\n" +
+	"\x16FactionStandingRequest\"1\n" +
+	"\x10ChangeRepRequest\x12\x1d\n" +
+	"\n" +
+	"faction_id\x18\x01 \x01(\tR\tfactionId*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -11632,7 +11804,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 157)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 161)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -11793,8 +11965,12 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*RemoveLinkRequest)(nil),         // 156: game.v1.RemoveLinkRequest
 	(*SetRoomRequest)(nil),            // 157: game.v1.SetRoomRequest
 	(*EditorCmdsRequest)(nil),         // 158: game.v1.EditorCmdsRequest
-	nil,                               // 159: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 160: game.v1.CharacterSheetView.AccessoriesEntry
+	(*FactionRequest)(nil),            // 159: game.v1.FactionRequest
+	(*FactionInfoRequest)(nil),        // 160: game.v1.FactionInfoRequest
+	(*FactionStandingRequest)(nil),    // 161: game.v1.FactionStandingRequest
+	(*ChangeRepRequest)(nil),          // 162: game.v1.ChangeRepRequest
+	nil,                               // 163: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 164: game.v1.CharacterSheetView.AccessoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	34,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -11952,8 +12128,8 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	103, // 152: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
 	103, // 153: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
 	100, // 154: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	159, // 155: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	160, // 156: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	163, // 155: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	164, // 156: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
 	113, // 157: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
 	113, // 158: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
 	84,  // 159: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
@@ -12124,7 +12300,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   157,
+			NumMessages:   161,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
