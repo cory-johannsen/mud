@@ -80,13 +80,18 @@ func BuildWithJob(name string, region *ruleset.Region, job *ruleset.Job, team *r
 		maxHP = 1
 	}
 
+	loc := team.StartRoom
+	if loc == "" {
+		loc = "grinders_row" // legacy fallback
+	}
+
 	return &Character{
 		Name:      name,
 		Region:    region.ID,
 		Class:     job.ID,
 		Team:      team.ID,
 		Level:     1,
-		Location:  "grinders_row",
+		Location:  loc,
 		Abilities: abilities,
 		MaxHP:     maxHP,
 		CurrentHP: maxHP,

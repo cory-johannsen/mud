@@ -122,7 +122,7 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			team            TEXT         NOT NULL DEFAULT '',
 			level           INT          NOT NULL DEFAULT 1,
 			experience      INT          NOT NULL DEFAULT 0,
-			location        TEXT         NOT NULL DEFAULT 'grinders_row',
+			location        TEXT         NOT NULL DEFAULT 'battle_infirmary',
 			brutality       INT          NOT NULL DEFAULT 10,
 			quickness       INT          NOT NULL DEFAULT 10,
 			grit            INT          NOT NULL DEFAULT 10,

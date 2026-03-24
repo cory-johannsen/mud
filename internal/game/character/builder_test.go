@@ -28,7 +28,7 @@ func makeJob(keyAbility string, hpPerLevel int) *ruleset.Job {
 }
 
 func makeTeam() *ruleset.Team {
-	return &ruleset.Team{ID: "test_team", Name: "Test Team"}
+	return &ruleset.Team{ID: "test_team", Name: "Test Team", StartRoom: "battle_infirmary"}
 }
 
 func TestBuildWithJob_AppliesRegionModifiers(t *testing.T) {
@@ -98,8 +98,15 @@ func TestBuildWithJob_NilTeamError(t *testing.T) {
 func TestBuildWithJob_DefaultLocation(t *testing.T) {
 	c, err := character.BuildWithJob("Hero", makeRegion(nil), makeJob("brutality", 8), makeTeam())
 	require.NoError(t, err)
-	assert.Equal(t, "grinders_row", c.Location)
+	assert.Equal(t, "battle_infirmary", c.Location)
 	assert.Equal(t, 1, c.Level)
+}
+
+func TestBuildWithJob_FallbackLocationWhenStartRoomEmpty(t *testing.T) {
+	team := &ruleset.Team{ID: "legacy_team", Name: "Legacy Team"}
+	c, err := character.BuildWithJob("Hero", makeRegion(nil), makeJob("brutality", 8), team)
+	require.NoError(t, err)
+	assert.Equal(t, "grinders_row", c.Location)
 }
 
 // Property: MaxHP is always >= 1 regardless of region modifiers.

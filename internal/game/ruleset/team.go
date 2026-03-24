@@ -16,6 +16,7 @@ type TeamTrait struct {
 
 // Team defines a player faction (Gun or Machete) in Gunchete.
 // TeamJobs lists the job IDs exclusive to this team.
+// StartRoom is the safe room ID where new characters of this team begin.
 //
 // Precondition: ID and Name must be non-empty after loading.
 type Team struct {
@@ -24,6 +25,7 @@ type Team struct {
 	Description string      `yaml:"description"`
 	Traits      []TeamTrait `yaml:"traits"`
 	TeamJobs    []string    `yaml:"team_jobs"`
+	StartRoom   string      `yaml:"start_room"`
 }
 
 // LoadTeams reads all .yaml files in dir and parses each as a Team.
