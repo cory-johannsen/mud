@@ -117,6 +117,10 @@ type Template struct {
 	// Disposition sets the initial NPC disposition: "hostile","wary","neutral","friendly".
 	// Empty string defaults to "hostile" at spawn.
 	Disposition string `yaml:"disposition"`
+	// FactionID is the faction this NPC belongs to.
+	// Empty string means no faction affiliation.
+	// NPCs with a FactionID hostile to the player's faction are treated as enemies.
+	FactionID string `yaml:"faction_id"`
 
 	// NpcRole classifies the NPC for map POI display.
 	// It is orthogonal to NPCType: NPCType governs behavior categories (combat, merchant, etc.)

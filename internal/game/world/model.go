@@ -202,6 +202,9 @@ type Room struct {
 	BossRoom bool `yaml:"boss_room,omitempty"`
 	// Hazards lists environmental hazards that fire on player entry or each combat round.
 	Hazards []HazardDef `yaml:"hazards,omitempty"`
+	// MinFactionTierID is the minimum faction tier ID required to enter this room.
+	// Empty string means no gating.
+	MinFactionTierID string `yaml:"min_faction_tier_id"`
 }
 
 // HazardDef defines an environmental hazard in a room.
@@ -297,6 +300,9 @@ type Zone struct {
 	// TrapProbabilities configures per-zone procedural trap placement.
 	// nil means use the global danger-level defaults.
 	TrapProbabilities *TrapProbabilities `yaml:"trap_probabilities,omitempty"`
+	// FactionID is the faction that controls this zone.
+	// Empty string means no faction ownership.
+	FactionID string `yaml:"faction_id"`
 	// WorldX is the zone's column position on the world map grid.
 	// nil means the zone has no world map position and is excluded from the world map.
 	WorldX *int `yaml:"world_x,omitempty"`

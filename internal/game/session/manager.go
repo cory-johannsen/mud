@@ -142,6 +142,12 @@ type PlayerSession struct {
 	// Out of combat: value is Unix timestamp (seconds) of expiry; 0 = ready to fire.
 	// Nil until first use; initialized lazily on first write.
 	ZoneEffectCooldowns map[string]int64
+	// FactionID is the player's faction identifier, set at character creation and immutable.
+	// Empty string means no faction affiliation.
+	FactionID string
+	// FactionRep maps faction ID to the player's reputation score in that faction.
+	// Absent keys are treated as 0 rep. Populated at login via LoadRep.
+	FactionRep map[string]int
 	// WantedLevel maps zone_id to the player's current wanted level (0–4) in that zone.
 	// Initialized at session creation; 0 means no wanted status.
 	WantedLevel map[string]int
@@ -418,6 +424,7 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		FeatureChoices:     make(map[string]map[string]string),
 		ReactionsRemaining: 1,
 		Reactions:          reaction.NewReactionRegistry(),
+		FactionRep:         make(map[string]int),
 		WantedLevel:        make(map[string]int),
 		SafeViolations:     make(map[string]int),
 		LastViolationDay:   make(map[string]int),

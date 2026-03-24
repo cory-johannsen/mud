@@ -116,6 +116,9 @@ type Instance struct {
 	// in their room. While Cowering == true, the NPC does not respond to commands.
 	// Cleared when combat in their room ends.
 	Cowering bool
+	// FactionID is the faction this instance belongs to; copied from template at spawn.
+	// Empty string means no faction affiliation.
+	FactionID string
 	// AttackVerb is the verb used in combat attack narratives. Copied from template.
 	// Empty string means the default verb ("attacks") will be used.
 	AttackVerb string
@@ -288,6 +291,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		AttackVerb: tmpl.AttackVerb,
 		Immobile:   tmpl.Immobile,
 		// Cowering defaults to false (zero value).
+		FactionID: tmpl.FactionID,
 		Disposition: func() string {
 			if tmpl.Disposition == "" {
 				return "hostile"
