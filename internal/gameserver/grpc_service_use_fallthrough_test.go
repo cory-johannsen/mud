@@ -164,5 +164,5 @@ func TestHandleUse_NeitherMatch_ReturnsError(t *testing.T) {
 
 	msg := evt.GetMessage()
 	require.NotNil(t, msg)
-	assert.NotEmpty(t, msg.Content, "expected non-empty error message")
+	assert.Contains(t, msg.Content, "mystery")
 }
