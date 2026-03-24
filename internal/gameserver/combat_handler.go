@@ -3295,6 +3295,9 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 						Quantity:   lootItem.Quantity,
 					})
 				}
+				if len(result.Materials) > 0 {
+					h.floorMgr.DropMaterials(roomID, result.Materials)
+				}
 			}
 		} else if inst.Currency > 0 {
 			// No loot table but NPC has rob wallet — distribute to living participants.

@@ -5,8 +5,9 @@ import "sync"
 // FloorManager tracks item instances on the floor of rooms.
 // It is thread-safe via sync.RWMutex.
 type FloorManager struct {
-	mu    sync.RWMutex
-	rooms map[string][]ItemInstance
+	mu            sync.RWMutex
+	rooms         map[string][]ItemInstance
+	materialDrops map[string]map[string]int // roomID → materialID → quantity
 }
 
 // NewFloorManager creates a FloorManager with no items on any floor.
@@ -14,7 +15,8 @@ type FloorManager struct {
 // Postcondition: returned FloorManager is ready for use with zero items.
 func NewFloorManager() *FloorManager {
 	return &FloorManager{
-		rooms: make(map[string][]ItemInstance),
+		rooms:         make(map[string][]ItemInstance),
+		materialDrops: make(map[string]map[string]int),
 	}
 }
 
@@ -71,4 +73,66 @@ func (fm *FloorManager) ItemsInRoom(roomID string) []ItemInstance {
 	out := make([]ItemInstance, len(items))
 	copy(out, items)
 	return out
+}
+
+// DropMaterials adds the given materialID→quantity map onto the floor of the given room.
+//
+// Precondition: roomID is non-empty; materials is non-nil.
+// Postcondition: each material quantity is incremented by the provided amount.
+func (fm *FloorManager) DropMaterials(roomID string, materials map[string]int) {
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
+	if fm.materialDrops[roomID] == nil {
+		fm.materialDrops[roomID] = make(map[string]int)
+	}
+	for id, qty := range materials {
+		fm.materialDrops[roomID][id] += qty
+	}
+}
+
+// MaterialsInRoom returns a snapshot copy of all materials on the floor of the given room.
+//
+// Postcondition: returned map is a copy; mutations do not affect internal state.
+// Returns an empty non-nil map if the room has no materials.
+func (fm *FloorManager) MaterialsInRoom(roomID string) map[string]int {
+	fm.mu.RLock()
+	defer fm.mu.RUnlock()
+	src := fm.materialDrops[roomID]
+	out := make(map[string]int, len(src))
+	for id, qty := range src {
+		out[id] = qty
+	}
+	return out
+}
+
+// TakeMaterial removes up to qty of the given materialID from the room floor.
+// Returns the quantity actually taken. If the room quantity drops to zero the
+// entry is removed.
+//
+// Precondition: roomID and materialID are non-empty; qty >= 1.
+// Postcondition: The returned value is in [0, qty]. Internal quantity is reduced
+// by the returned amount; if it reaches zero the entry is deleted.
+func (fm *FloorManager) TakeMaterial(roomID, materialID string, qty int) int {
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
+	room := fm.materialDrops[roomID]
+	if room == nil {
+		return 0
+	}
+	have := room[materialID]
+	if have <= 0 {
+		return 0
+	}
+	taken := qty
+	if taken > have {
+		taken = have
+	}
+	room[materialID] -= taken
+	if room[materialID] == 0 {
+		delete(room, materialID)
+	}
+	if len(room) == 0 {
+		delete(fm.materialDrops, roomID)
+	}
+	return taken
 }

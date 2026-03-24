@@ -4956,6 +4956,33 @@ func (s *GameServiceServer) handleGetItem(uid, target string) (*gamev1.ServerEve
 			return messageEvent(fmt.Sprintf("You pick up %s.", name)), nil
 		}
 	}
+	floorMats := s.floorMgr.MaterialsInRoom(sess.RoomID)
+	for matID, qty := range floorMats {
+		var matName string
+		if s.materialReg != nil {
+			if matDef, ok := s.materialReg.Material(matID); ok {
+				matName = matDef.Name
+			}
+		}
+		if matName == "" {
+			matName = matID
+		}
+		if !strings.EqualFold(matName, target) && !strings.EqualFold(matID, target) {
+			continue
+		}
+		taken := s.floorMgr.TakeMaterial(sess.RoomID, matID, qty)
+		if taken == 0 {
+			return errorEvent("Material is no longer there."), nil
+		}
+		if sess.Materials == nil {
+			sess.Materials = make(map[string]int)
+		}
+		sess.Materials[matID] += taken
+		if s.materialRepo != nil {
+			_ = s.materialRepo.Add(context.Background(), sess.CharacterID, matID, taken)
+		}
+		return messageEvent(fmt.Sprintf("You pick up %d %s.", taken, matName)), nil
+	}
 	return messageEvent("You don't see that here."), nil
 }
 

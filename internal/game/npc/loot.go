@@ -22,6 +22,14 @@ type ItemDrop struct {
 	MaxQty int     `yaml:"max_qty"`
 }
 
+// MaterialDrop defines a crafting material entry in a loot table with an independent drop chance.
+type MaterialDrop struct {
+	ID          string  `yaml:"id"`
+	QuantityMin int     `yaml:"quantity_min"`
+	QuantityMax int     `yaml:"quantity_max"`
+	Chance      float64 `yaml:"chance"` // 0.0-1.0
+}
+
 // OrganicDrop defines a weighted organic item drop for animal NPCs.
 type OrganicDrop struct {
 	ItemID      string `yaml:"item_id"`
@@ -39,10 +47,11 @@ type SalvageDrop struct {
 
 // LootTable defines the possible loot drops for an NPC template.
 type LootTable struct {
-	Currency     *CurrencyDrop `yaml:"currency"`
-	Items        []ItemDrop    `yaml:"items"`
-	OrganicDrops []OrganicDrop `yaml:"organic_drops"`
-	SalvageDrop  *SalvageDrop  `yaml:"salvage_drop"`
+	Currency      *CurrencyDrop  `yaml:"currency"`
+	Items         []ItemDrop     `yaml:"items"`
+	OrganicDrops  []OrganicDrop  `yaml:"organic_drops"`
+	SalvageDrop   *SalvageDrop   `yaml:"salvage_drop"`
+	MaterialDrops []MaterialDrop `yaml:"material_drops"`
 }
 
 // Validate checks that the loot table satisfies its invariants.
@@ -84,6 +93,20 @@ func (lt *LootTable) Validate() error {
 			return fmt.Errorf("loot table: organic_drop[%d] quantity_min (%d) must be <= quantity_max (%d)", i, od.QuantityMin, od.QuantityMax)
 		}
 	}
+	for i, md := range lt.MaterialDrops {
+		if md.ID == "" {
+			return fmt.Errorf("loot table: material_drop[%d] must have a non-empty id", i)
+		}
+		if md.Chance <= 0 || md.Chance > 1.0 {
+			return fmt.Errorf("loot table: material_drop[%d] chance must be in (0, 1.0], got %f", i, md.Chance)
+		}
+		if md.QuantityMin < 1 {
+			return fmt.Errorf("loot table: material_drop[%d] quantity_min must be >= 1, got %d", i, md.QuantityMin)
+		}
+		if md.QuantityMin > md.QuantityMax {
+			return fmt.Errorf("loot table: material_drop[%d] quantity_min (%d) must be <= quantity_max (%d)", i, md.QuantityMin, md.QuantityMax)
+		}
+	}
 	if lt.SalvageDrop != nil {
 		sd := lt.SalvageDrop
 		if len(sd.ItemIDs) == 0 {
@@ -108,8 +131,9 @@ type LootItem struct {
 
 // LootResult holds the generated loot from a single NPC kill.
 type LootResult struct {
-	Currency int
-	Items    []LootItem
+	Currency  int
+	Items     []LootItem
+	Materials map[string]int // materialID → quantity
 }
 
 // GenerateOrganicLoot selects one organic item using weighted random from the
@@ -196,6 +220,19 @@ func GenerateLoot(lt LootTable) LootResult {
 				InstanceID: uuid.New().String(),
 				Quantity:   qty,
 			})
+		}
+	}
+
+	for _, md := range lt.MaterialDrops {
+		if rand.Float64() < md.Chance {
+			qty := md.QuantityMin
+			if md.QuantityMax > md.QuantityMin {
+				qty += rand.Intn(md.QuantityMax - md.QuantityMin + 1)
+			}
+			if result.Materials == nil {
+				result.Materials = make(map[string]int)
+			}
+			result.Materials[md.ID] += qty
 		}
 	}
 
