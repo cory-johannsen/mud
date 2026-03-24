@@ -661,9 +661,14 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			}
 			continue
 		case *gamev1.ServerEvent_RoomView:
-			// If in map mode (e.g. travel succeeded), exit map mode before rendering room view.
+			// Exit map mode only when the player has actually changed rooms (travel/movement).
+			// Ambient refreshes of the current room (same room ID) must not disrupt map mode.
 			if session.Mode() != ModeRoom {
-				session.SetMode(conn, session.Room())
+				incomingID := p.RoomView.GetRoomId()
+				existingID, _ := currentRoom.Load().(string)
+				if incomingID == "" || incomingID != existingID {
+					session.SetMode(conn, session.Room())
+				}
 			}
 			if roomID := p.RoomView.GetRoomId(); roomID != "" {
 				currentRoom.Store(roomID)
