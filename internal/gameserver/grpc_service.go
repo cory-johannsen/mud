@@ -5887,6 +5887,10 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 			}
 		}
 		// No non-expended slot found for this tech ID.
+		// REQ-USE-1: fall through to room equipment before reporting no match.
+		if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
+			return evt, err
+		}
 		return messageEvent(fmt.Sprintf("No prepared uses of %s remaining.", abilityID)), nil
 	}
 	// Spontaneous tech lookup — only if no feat/class-feature/prepared-tech matched.
@@ -5909,6 +5913,10 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 			}
 		}
 		if foundLevel < 0 {
+			// REQ-USE-1: fall through to room equipment before reporting no match.
+			if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
+				return evt, err
+			}
 			return messageEvent(fmt.Sprintf("You don't know %s.", abilityID)), nil
 		}
 		pool := sess.SpontaneousUsePools[foundLevel]
@@ -5948,9 +5956,33 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 			}
 			return s.activateTechWithEffects(sess, uid, abilityID, targetID, fmt.Sprintf("You activate %s.", abilityID), nil)
 		}
+		// REQ-USE-1: fall through to room equipment before reporting no match.
+		if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
+			return evt, err
+		}
 		return messageEvent(fmt.Sprintf("You don't have innate tech %s.", abilityID)), nil
 	}
+	// REQ-USE-1: fall through to room equipment when no feat/ability matched.
+	if evt, err := s.tryRoomEquipFallback(uid, sess.RoomID, abilityID); evt != nil || err != nil {
+		return evt, err
+	}
 	return messageEvent(fmt.Sprintf("You don't have an active ability named %q.", abilityID)), nil
+}
+
+// tryRoomEquipFallback attempts to activate room equipment with the given instanceID
+// for the player in the given room. Returns nil, nil when no equipment match is found.
+//
+// Precondition: uid must resolve to an active session; roomID and instanceID are non-empty.
+// Postcondition: Returns non-nil event when equipment is found and activated; nil, nil on miss.
+func (s *GameServiceServer) tryRoomEquipFallback(uid, roomID, instanceID string) (*gamev1.ServerEvent, error) {
+	if s.roomEquipMgr == nil {
+		return nil, nil
+	}
+	inst := s.roomEquipMgr.GetInstance(roomID, instanceID)
+	if inst == nil {
+		return nil, nil
+	}
+	return s.handleUseEquipment(uid, inst.InstanceID)
 }
 
 // handleAmpedUse activates a spontaneous tech that has amped_effects defined,
