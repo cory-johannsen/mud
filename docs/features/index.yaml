@@ -350,7 +350,7 @@ features:
 
   - slug: use-command
     name: Use Command Expansion
-    status: planned
+    status: done
     priority: 296
     category: ui
     file: docs/features/use-command.md
