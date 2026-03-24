@@ -36,7 +36,7 @@ features:
 
   - slug: non-combat-npcs
     name: Non-Combat NPCs
-    status: blocked
+    status: done
     priority: 20
     category: world
     file: docs/features/non-combat-npcs.md
@@ -57,7 +57,7 @@ features:
 
   - slug: actions
     name: Actions
-    status: blocked
+    status: planned
     priority: 40
     category: combat
     file: docs/features/actions.md

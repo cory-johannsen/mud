@@ -8,7 +8,7 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
 
 - [x] REQ-NPC-1: NPCs with no `npc_type` MUST default to `"combat"` at load time.
 - [x] REQ-NPC-2: The type-specific config sub-struct for the declared `npc_type` MUST be non-nil at load time; mismatch MUST be a fatal load error. For `npc_type: "crafter"`, an explicit `crafter: {}` YAML block MUST be present.
-- [ ] REQ-NPC-2a: `Template.Validate()` MUST verify all referenced skill IDs exist in the skill registry. *(Deferred to sub-project 3: Service NPCs, where skills are first used)*
+- [x] REQ-NPC-2a: `Template.Validate()` MUST verify all referenced skill IDs exist in the skill registry. *(Implemented via `ValidateWithSkills` in `template.go`)*
 - [x] REQ-NPC-3: Non-combat NPCs MUST NOT be added to the combat initiative order (satisfied structurally — only the attacked NPC joins combat; guard engage behavior wired in sub-project 4).
 - [x] REQ-NPC-4: Non-combat NPCs MUST NOT be valid attack targets (except engaging guards — enabled in sub-project 4).
 - [x] REQ-NPC-13: `ReplenishConfig` MUST satisfy `0 < MinHours <= MaxHours <= 24`; fatal load error on violation.
@@ -16,9 +16,9 @@ Nine non-combat NPC types with type-specific config, HTN personality system, and
 
 ### Remaining requirements
 
-- [ ] Base data model
-  - [ ] HTN personality system (cowardly/brave/neutral/opportunistic presets)
-  - [ ] Flee/cower behavior on combat start
+- [x] Base data model
+  - [x] HTN personality system (cowardly/brave/neutral/opportunistic presets)
+  - [x] Flee/cower behavior on combat start
 - [x] Merchant
   - [x] REQ-NPC-5: `negotiate` MUST only be usable once per merchant room visit.
   - [x] REQ-NPC-5a: Negotiate price modifier MUST be stored on player room session state, cleared on room exit.
