@@ -109,6 +109,7 @@ type CharacterSaver interface {
 	LoadHeroPoints(ctx context.Context, characterID int64) (int, error)
 	SaveJobs(ctx context.Context, characterID int64, jobs map[string]int, activeJobID string) error
 	LoadJobs(ctx context.Context, characterID int64) (jobs map[string]int, activeJobID string, err error)
+	SaveInstanceCharges(ctx context.Context, characterID int64, instanceID, itemDefID string, charges int, expended bool) error
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.
@@ -716,6 +717,23 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 							zap.String("item", it.ItemDefID),
 							zap.Error(addErr),
 						)
+					}
+				}
+				// Apply persisted charge state to backpack instances (REQ-ACT-14).
+				if charRepo, ok := s.charSaver.(*postgres.CharacterRepository); ok {
+					if chargeMap, chargeErr := charRepo.LoadInstanceCharges(stream.Context(), characterID); chargeErr != nil {
+						s.logger.Warn("failed to load instance charges on login",
+							zap.String("uid", uid),
+							zap.Int64("character_id", characterID),
+							zap.Error(chargeErr),
+						)
+					} else {
+						for instanceID, cs := range chargeMap {
+							if inst := sess.Backpack.GetByInstanceID(instanceID); inst != nil {
+								inst.ChargesRemaining = cs.ChargesRemaining
+								inst.Expended = cs.Expended
+							}
+						}
 					}
 				}
 			}

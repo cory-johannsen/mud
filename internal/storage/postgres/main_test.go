@@ -295,14 +295,16 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 		ALTER TABLE characters ADD COLUMN IF NOT EXISTS team TEXT NOT NULL DEFAULT '';
 
 		CREATE TABLE IF NOT EXISTS character_inventory_instances (
-			id           BIGSERIAL PRIMARY KEY,
-			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
-			item_def_id  TEXT NOT NULL,
-			durability     INT NOT NULL DEFAULT 0,
-			max_durability INT NOT NULL DEFAULT 0,
+			instance_id    TEXT PRIMARY KEY,
+			character_id   BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			item_def_id    TEXT NOT NULL,
+			durability     INT NOT NULL DEFAULT -1,
+			max_durability INT NOT NULL DEFAULT -1,
 			modifier       TEXT NOT NULL DEFAULT '',
 			curse_revealed BOOLEAN NOT NULL DEFAULT FALSE,
-			rarity         TEXT NOT NULL DEFAULT 'street'
+			rarity         TEXT NOT NULL DEFAULT 'street',
+			charges_remaining INTEGER NOT NULL DEFAULT -1,
+			expended          BOOLEAN NOT NULL DEFAULT FALSE
 		);
 	`)
 	return err

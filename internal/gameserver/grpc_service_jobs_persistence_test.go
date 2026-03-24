@@ -28,6 +28,9 @@ func (j *jobsCharSaver) SaveJobs(_ context.Context, _ int64, jobs map[string]int
 	j.savedActiveJob = activeJobID
 	return nil
 }
+func (j *jobsCharSaver) SaveInstanceCharges(_ context.Context, _ int64, _, _ string, _ int, _ bool) error {
+	return nil
+}
 
 func (j *jobsCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	if j.savedJobs == nil {

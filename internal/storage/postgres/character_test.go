@@ -434,3 +434,81 @@ func TestSaveDefaultCombatAction_EmptyAction_ReturnsError(t *testing.T) {
 	err = repo.SaveDefaultCombatAction(ctx, ch.ID, "")
 	require.Error(t, err)
 }
+
+// TestInstanceCharges_RoundTrip verifies that SaveInstanceCharges persists charge state
+// that LoadInstanceCharges correctly retrieves (REQ-ACT-14).
+func TestInstanceCharges_RoundTrip(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	ch, err := repo.Create(ctx, makeTestCharacter(accountID, uniqueName("inst_charges")))
+	require.NoError(t, err)
+
+	instanceID := "test-instance-uuid-001"
+	itemDefID := "stim_pack"
+
+	// Save charge state.
+	require.NoError(t, repo.SaveInstanceCharges(ctx, ch.ID, instanceID, itemDefID, 3, false))
+
+	// Load and verify.
+	chargeMap, err := repo.LoadInstanceCharges(ctx, ch.ID)
+	require.NoError(t, err)
+	require.Contains(t, chargeMap, instanceID)
+	assert.Equal(t, 3, chargeMap[instanceID].ChargesRemaining)
+	assert.False(t, chargeMap[instanceID].Expended)
+
+	// Update to expended state (charges = 0).
+	require.NoError(t, repo.SaveInstanceCharges(ctx, ch.ID, instanceID, itemDefID, 0, true))
+
+	chargeMap, err = repo.LoadInstanceCharges(ctx, ch.ID)
+	require.NoError(t, err)
+	require.Contains(t, chargeMap, instanceID)
+	assert.Equal(t, 0, chargeMap[instanceID].ChargesRemaining)
+	assert.True(t, chargeMap[instanceID].Expended)
+}
+
+// TestInstanceCharges_SentinelNotReturned verifies that instances with the default
+// sentinel value (-1) are not returned by LoadInstanceCharges.
+func TestInstanceCharges_SentinelNotReturned(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	ch, err := repo.Create(ctx, makeTestCharacter(accountID, uniqueName("inst_sentinel")))
+	require.NoError(t, err)
+
+	// Insert an instance row with the sentinel value (-1) directly.
+	_, dbErr := sharedPool.Exec(ctx, `
+		INSERT INTO character_inventory_instances (instance_id, character_id, item_def_id)
+		VALUES ($1, $2, $3)`,
+		"sentinel-instance-uuid", ch.ID, "nano_blade",
+	)
+	require.NoError(t, dbErr)
+
+	// Sentinel rows must not appear in LoadInstanceCharges.
+	chargeMap, err := repo.LoadInstanceCharges(ctx, ch.ID)
+	require.NoError(t, err)
+	assert.NotContains(t, chargeMap, "sentinel-instance-uuid")
+}
+
+// TestInstanceCharges_Property uses rapid property-based testing to verify
+// that any (charges, expended) pair survives a save/load round-trip.
+func TestInstanceCharges_Property(t *testing.T) {
+	repo, accountID := setupCharRepos(t)
+	ctx := context.Background()
+	ch, err := repo.Create(ctx, makeTestCharacter(accountID, uniqueName("inst_prop")))
+	require.NoError(t, err)
+
+	rapid.Check(t, func(rt *rapid.T) {
+		charges := rapid.IntRange(0, 10).Draw(rt, "charges")
+		expended := rapid.Bool().Draw(rt, "expended")
+		instanceID := rapid.StringMatching(`[a-z]{8}`).Draw(rt, "instanceID")
+		itemDefID := "stim_pack"
+
+		saveErr := repo.SaveInstanceCharges(ctx, ch.ID, instanceID, itemDefID, charges, expended)
+		require.NoError(rt, saveErr)
+
+		chargeMap, loadErr := repo.LoadInstanceCharges(ctx, ch.ID)
+		require.NoError(rt, loadErr)
+		require.Contains(rt, chargeMap, instanceID)
+		assert.Equal(rt, charges, chargeMap[instanceID].ChargesRemaining)
+		assert.Equal(rt, expended, chargeMap[instanceID].Expended)
+	})
+}

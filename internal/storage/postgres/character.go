@@ -646,3 +646,53 @@ func (r *CharacterRepository) LoadJobs(ctx context.Context, id int64) (map[strin
 	}
 	return jobs, activeJobID, nil
 }
+
+// InstanceChargeState holds persisted charge state for one item instance.
+type InstanceChargeState struct {
+	ChargesRemaining int
+	Expended         bool
+}
+
+// SaveInstanceCharges upserts charges_remaining and expended for a backpack item instance.
+// Requires itemDefID to satisfy the NOT NULL constraint on first insert.
+//
+// Precondition: characterID > 0; instanceID and itemDefID non-empty.
+// Postcondition: DB row upserted; returns nil on success.
+func (r *CharacterRepository) SaveInstanceCharges(ctx context.Context, characterID int64, instanceID, itemDefID string, charges int, expended bool) error {
+	_, err := r.db.Exec(ctx, `
+		INSERT INTO character_inventory_instances (instance_id, character_id, item_def_id, charges_remaining, expended)
+		VALUES ($1, $2, $3, $4, $5)
+		ON CONFLICT (instance_id)
+		DO UPDATE SET charges_remaining = EXCLUDED.charges_remaining, expended = EXCLUDED.expended`,
+		instanceID, characterID, itemDefID, charges, expended,
+	)
+	return err
+}
+
+// LoadInstanceCharges returns a map of instanceID → InstanceChargeState for all instances
+// belonging to characterID that have non-sentinel charge state (charges_remaining != -1).
+//
+// Precondition: characterID > 0.
+// Postcondition: Returns nil map on error; empty map if no rows exist.
+func (r *CharacterRepository) LoadInstanceCharges(ctx context.Context, characterID int64) (map[string]InstanceChargeState, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT instance_id, charges_remaining, expended
+		FROM character_inventory_instances
+		WHERE character_id = $1 AND charges_remaining != -1`,
+		characterID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("loading instance charges for character %d: %w", characterID, err)
+	}
+	defer rows.Close()
+	result := make(map[string]InstanceChargeState)
+	for rows.Next() {
+		var id string
+		var s InstanceChargeState
+		if err := rows.Scan(&id, &s.ChargesRemaining, &s.Expended); err != nil {
+			return nil, fmt.Errorf("scanning instance charges: %w", err)
+		}
+		result[id] = s
+	}
+	return result, rows.Err()
+}

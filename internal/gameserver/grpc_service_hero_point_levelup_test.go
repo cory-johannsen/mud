@@ -77,6 +77,9 @@ func (m *heroPointCharSaver) LoadHeroPoints(_ context.Context, _ int64) (int, er
 func (m *heroPointCharSaver) SaveJobs(_ context.Context, _ int64, _ map[string]int, _ string) error {
 	return nil
 }
+func (m *heroPointCharSaver) SaveInstanceCharges(_ context.Context, _ int64, _, _ string, _ int, _ bool) error {
+	return nil
+}
 func (m *heroPointCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	return map[string]int{}, "", nil
 }

@@ -106,6 +106,9 @@ func (m *mockCharSaverAbilityBoost) LoadHeroPoints(_ context.Context, _ int64) (
 func (m *mockCharSaverAbilityBoost) SaveJobs(_ context.Context, _ int64, _ map[string]int, _ string) error {
 	return nil
 }
+func (m *mockCharSaverAbilityBoost) SaveInstanceCharges(_ context.Context, _ int64, _, _ string, _ int, _ bool) error {
+	return nil
+}
 func (m *mockCharSaverAbilityBoost) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	return map[string]int{}, "", nil
 }
