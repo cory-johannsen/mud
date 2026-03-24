@@ -308,8 +308,10 @@ message ServerEvent {
 // HpUpdateEvent delivers a lightweight HP update to refresh the prompt bar.
 // No console text is displayed; only the prompt is redrawn.
 message HpUpdateEvent {
-  int32 current_hp = 1;
-  int32 max_hp     = 2;
+  int32 current_hp       = 1;
+  int32 max_hp           = 2;
+  int32 focus_points     = 3; // current focus point pool
+  int32 max_focus_points = 4; // maximum focus points
 }
 
 // JoinWorldRequest is sent by the client to enter the game world after authentication.
@@ -900,6 +902,8 @@ message CharacterSheetView {
     repeated InnateSlotView innate_slots = 46;
     // active_set_bonuses lists human-readable descriptions of currently active equipment set bonuses (REQ-EM-31).
     repeated string active_set_bonuses = 47;
+    int32 focus_points     = 48; // current focus point pool
+    int32 max_focus_points = 49; // maximum focus points
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.

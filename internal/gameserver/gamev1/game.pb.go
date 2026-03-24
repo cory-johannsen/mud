@@ -3889,11 +3889,13 @@ func (*ServerEvent_TabComplete) isServerEvent_Payload() {}
 // HpUpdateEvent delivers a lightweight HP update to refresh the prompt bar.
 // No console text is displayed; only the prompt is redrawn.
 type HpUpdateEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CurrentHp     int32                  `protobuf:"varint,1,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
-	MaxHp         int32                  `protobuf:"varint,2,opt,name=max_hp,json=maxHp,proto3" json:"max_hp,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	CurrentHp      int32                  `protobuf:"varint,1,opt,name=current_hp,json=currentHp,proto3" json:"current_hp,omitempty"`
+	MaxHp          int32                  `protobuf:"varint,2,opt,name=max_hp,json=maxHp,proto3" json:"max_hp,omitempty"`
+	FocusPoints    int32                  `protobuf:"varint,3,opt,name=focus_points,json=focusPoints,proto3" json:"focus_points,omitempty"`            // current focus point pool
+	MaxFocusPoints int32                  `protobuf:"varint,4,opt,name=max_focus_points,json=maxFocusPoints,proto3" json:"max_focus_points,omitempty"` // maximum focus points
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *HpUpdateEvent) Reset() {
@@ -3936,6 +3938,20 @@ func (x *HpUpdateEvent) GetCurrentHp() int32 {
 func (x *HpUpdateEvent) GetMaxHp() int32 {
 	if x != nil {
 		return x.MaxHp
+	}
+	return 0
+}
+
+func (x *HpUpdateEvent) GetFocusPoints() int32 {
+	if x != nil {
+		return x.FocusPoints
+	}
+	return 0
+}
+
+func (x *HpUpdateEvent) GetMaxFocusPoints() int32 {
+	if x != nil {
+		return x.MaxFocusPoints
 	}
 	return 0
 }
@@ -8423,6 +8439,8 @@ type CharacterSheetView struct {
 	InnateSlots           []*InnateSlotView         `protobuf:"bytes,46,rep,name=innate_slots,json=innateSlots,proto3" json:"innate_slots,omitempty"`
 	// active_set_bonuses lists human-readable descriptions of currently active equipment set bonuses (REQ-EM-31).
 	ActiveSetBonuses []string `protobuf:"bytes,47,rep,name=active_set_bonuses,json=activeSetBonuses,proto3" json:"active_set_bonuses,omitempty"`
+	FocusPoints      int32    `protobuf:"varint,48,opt,name=focus_points,json=focusPoints,proto3" json:"focus_points,omitempty"`            // current focus point pool
+	MaxFocusPoints   int32    `protobuf:"varint,49,opt,name=max_focus_points,json=maxFocusPoints,proto3" json:"max_focus_points,omitempty"` // maximum focus points
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -8784,6 +8802,20 @@ func (x *CharacterSheetView) GetActiveSetBonuses() []string {
 		return x.ActiveSetBonuses
 	}
 	return nil
+}
+
+func (x *CharacterSheetView) GetFocusPoints() int32 {
+	if x != nil {
+		return x.FocusPoints
+	}
+	return 0
+}
+
+func (x *CharacterSheetView) GetMaxFocusPoints() int32 {
+	if x != nil {
+		return x.MaxFocusPoints
+	}
+	return 0
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.
@@ -11457,11 +11489,13 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x16proficiencies_response\x18\x18 \x01(\v2\x1e.game.v1.ProficienciesResponseH\x00R\x15proficienciesResponse\x125\n" +
 	"\thp_update\x18\x19 \x01(\v2\x16.game.v1.HpUpdateEventH\x00R\bhpUpdate\x12A\n" +
 	"\ftab_complete\x18\x1a \x01(\v2\x1c.game.v1.TabCompleteResponseH\x00R\vtabCompleteB\t\n" +
-	"\apayload\"E\n" +
+	"\apayload\"\x92\x01\n" +
 	"\rHpUpdateEvent\x12\x1d\n" +
 	"\n" +
 	"current_hp\x18\x01 \x01(\x05R\tcurrentHp\x12\x15\n" +
-	"\x06max_hp\x18\x02 \x01(\x05R\x05maxHp\"\xca\x02\n" +
+	"\x06max_hp\x18\x02 \x01(\x05R\x05maxHp\x12!\n" +
+	"\ffocus_points\x18\x03 \x01(\x05R\vfocusPoints\x12(\n" +
+	"\x10max_focus_points\x18\x04 \x01(\x05R\x0emaxFocusPoints\"\xca\x02\n" +
 	"\x10JoinWorldRequest\x12\x10\n" +
 	"\x03uid\x18\x01 \x01(\tR\x03uid\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
@@ -11779,7 +11813,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\achoices\x18\x02 \x03(\v2\x12.game.v1.FeatEntryR\achoices\"G\n" +
 	"\x10PreparedSlotView\x12\x17\n" +
 	"\atech_id\x18\x01 \x01(\tR\x06techId\x12\x1a\n" +
-	"\bexpended\x18\x02 \x01(\bR\bexpended\"\xe5\x0f\n" +
+	"\bexpended\x18\x02 \x01(\bR\bexpended\"\xb2\x10\n" +
 	"\x12CharacterSheetView\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03job\x18\x02 \x01(\tR\x03job\x12\x1c\n" +
@@ -11834,7 +11868,9 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0eprepared_slots\x18, \x03(\v2\x19.game.v1.PreparedSlotViewR\rpreparedSlots\x12S\n" +
 	"\x15spontaneous_use_pools\x18- \x03(\v2\x1f.game.v1.SpontaneousUsePoolViewR\x13spontaneousUsePools\x12:\n" +
 	"\finnate_slots\x18. \x03(\v2\x17.game.v1.InnateSlotViewR\vinnateSlots\x12,\n" +
-	"\x12active_set_bonuses\x18/ \x03(\tR\x10activeSetBonuses\x1a8\n" +
+	"\x12active_set_bonuses\x18/ \x03(\tR\x10activeSetBonuses\x12!\n" +
+	"\ffocus_points\x180 \x01(\x05R\vfocusPoints\x12(\n" +
+	"\x10max_focus_points\x181 \x01(\x05R\x0emaxFocusPoints\x1a8\n" +
 	"\n" +
 	"ArmorEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
