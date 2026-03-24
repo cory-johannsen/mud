@@ -112,6 +112,12 @@ func (m *mockCharSaverAbilityBoost) SaveInstanceCharges(_ context.Context, _ int
 func (m *mockCharSaverAbilityBoost) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	return map[string]int{}, "", nil
 }
+func (m *mockCharSaverAbilityBoost) LoadFocusPoints(_ context.Context, _ int64) (int, error) {
+	return 0, nil
+}
+func (m *mockCharSaverAbilityBoost) SaveFocusPoints(_ context.Context, _ int64, _ int) error {
+	return nil
+}
 
 // testGRPCServerWithAbilityBoosts starts an in-process gRPC server configured with
 // the supplied char saver, ability boosts repo, archetypes, and regions, then returns

@@ -131,6 +131,8 @@ func (m *mockCharSaverFull) SaveInstanceCharges(_ context.Context, _ int64, _, _
 func (m *mockCharSaverFull) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	return map[string]int{}, "", nil
 }
+func (m *mockCharSaverFull) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (m *mockCharSaverFull) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
 
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied
 // CharacterSaver and returns a connected client and the session manager.
@@ -362,6 +364,109 @@ base:
 	assert.Equal(t, int32(1), saver.saveInventoryCalled.Load(), "SaveInventory must be called once")
 	assert.Equal(t, int32(1), saver.saveEquipmentCalledGrant.Load(), "SaveEquipment must be called once during starting grant")
 	assert.Equal(t, int32(1), saver.saveWeaponPresetsCalledGrant.Load(), "SaveWeaponPresets must be called once during starting grant")
+}
+
+// mockCharSaverWithFP embeds mockCharSaverFull and overrides LoadFocusPoints to
+// return a configurable stored value.
+type mockCharSaverWithFP struct {
+	mockCharSaverFull
+	// storedFP is the value returned by LoadFocusPoints.
+	storedFP int
+}
+
+// LoadFocusPoints returns the configured storedFP value.
+func (m *mockCharSaverWithFP) LoadFocusPoints(_ context.Context, _ int64) (int, error) {
+	return m.storedFP, nil
+}
+
+// testGRPCServerWithSaverAndClassFeatures starts an in-process gRPC server
+// configured with the supplied CharacterSaver, ClassFeatureRegistry, and
+// CharacterClassFeaturesGetter.
+//
+// Precondition: t must be non-nil; all repo/registry args may be nil.
+// Postcondition: Returns a connected GameServiceClient and the underlying session.Manager.
+func testGRPCServerWithSaverAndClassFeatures(
+	t *testing.T,
+	saver CharacterSaver,
+	cfRegistry *ruleset.ClassFeatureRegistry,
+	cfRepo CharacterClassFeaturesGetter,
+) (gamev1.GameServiceClient, *session.Manager) {
+	t.Helper()
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	cmdRegistry := command.DefaultRegistry()
+	npcMgr := npc.NewManager()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil)
+	chatHandler := NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr, cmdRegistry,
+		worldHandler, chatHandler, logger,
+		saver, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil, nil, nil, nil, nil, cfRegistry, cfRepo, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	grpcServer := grpc.NewServer()
+	gamev1.RegisterGameServiceServer(grpcServer, svc)
+
+	go func() { _ = grpcServer.Serve(lis) }()
+	t.Cleanup(func() { grpcServer.Stop() })
+
+	conn, err := grpc.NewClient(lis.Addr().String(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	require.NoError(t, err)
+	t.Cleanup(func() { conn.Close() })
+
+	return gamev1.NewGameServiceClient(conn), sessMgr
+}
+
+// TestSession_LoadsFocusPoints verifies that at login, when a character has one
+// class feature with grants_focus_point: true and the DB stores focus_points=2,
+// the session receives MaxFocusPoints=1 and FocusPoints=1 (clamped).
+//
+// Precondition: characterID must be > 0; class feature registry contains exactly
+// one feature with GrantsFocusPoint true; LoadFocusPoints returns 2.
+// Postcondition: sess.MaxFocusPoints == 1; sess.FocusPoints == 1.
+func TestSession_LoadsFocusPoints(t *testing.T) {
+	fpFeature := &ruleset.ClassFeature{
+		ID:              "chi_focus",
+		Name:            "Chi Focus",
+		Active:          false,
+		GrantsFocusPoint: true,
+	}
+	cfRegistry := ruleset.NewClassFeatureRegistry([]*ruleset.ClassFeature{fpFeature})
+	cfRepo := &mockClassFeaturesRepo{featureIDs: []string{"chi_focus"}}
+	saver := &mockCharSaverWithFP{storedFP: 2}
+
+	client, sessMgr := testGRPCServerWithSaverAndClassFeatures(t, saver, cfRegistry, cfRepo)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stream, err := client.Session(ctx)
+	require.NoError(t, err)
+
+	joinWorldWithCharID(t, stream, "u-fp", "Alice", 1)
+
+	sess, ok := sessMgr.GetPlayer("u-fp")
+	require.True(t, ok, "player session must exist after login")
+	<-sess.InitDone
+
+	assert.Equal(t, 1, sess.MaxFocusPoints,
+		"MaxFocusPoints must equal grantCount (one feature with GrantsFocusPoint)")
+	assert.Equal(t, 1, sess.FocusPoints,
+		"FocusPoints must be clamped to MaxFocusPoints when DB value exceeds max")
 }
 
 // mockClassFeaturesRepo is a test double for CharacterClassFeaturesGetter.

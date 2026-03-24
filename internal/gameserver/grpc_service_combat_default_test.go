@@ -65,6 +65,12 @@ func (m *mockCharSaverCombatDefault) SaveInstanceCharges(_ context.Context, _ in
 func (m *mockCharSaverCombatDefault) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	return map[string]int{}, "", nil
 }
+func (m *mockCharSaverCombatDefault) LoadFocusPoints(_ context.Context, _ int64) (int, error) {
+	return 0, nil
+}
+func (m *mockCharSaverCombatDefault) SaveFocusPoints(_ context.Context, _ int64, _ int) error {
+	return nil
+}
 
 // testServiceForCombatDefault creates a minimal GameServiceServer suitable for handleCombatDefault tests.
 //

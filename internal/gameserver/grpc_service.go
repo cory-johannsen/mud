@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/focuspoints"
 	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
@@ -111,6 +112,8 @@ type CharacterSaver interface {
 	SaveJobs(ctx context.Context, characterID int64, jobs map[string]int, activeJobID string) error
 	LoadJobs(ctx context.Context, characterID int64) (jobs map[string]int, activeJobID string, err error)
 	SaveInstanceCharges(ctx context.Context, characterID int64, instanceID, itemDefID string, charges int, expended bool) error
+	LoadFocusPoints(ctx context.Context, characterID int64) (int, error)
+	SaveFocusPoints(ctx context.Context, characterID int64, focusPoints int) error
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.
@@ -979,6 +982,40 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			if ok && !cf.Active {
 				sess.PassiveFeats[id] = true
 			}
+		}
+	}
+
+	// Load and compute Focus Points (REQ-FP-1, REQ-FP-11).
+	if characterID > 0 && s.charSaver != nil {
+		fpFromDB, fpErr := s.charSaver.LoadFocusPoints(stream.Context(), characterID)
+		if fpErr != nil {
+			s.logger.Warn("failed to load focus points at login",
+				zap.Int64("character_id", characterID),
+				zap.Error(fpErr),
+			)
+		} else {
+			grantCount := 0
+			if s.classFeatureRegistry != nil {
+				for _, id := range cfIDs {
+					if cf, ok := s.classFeatureRegistry.ClassFeature(id); ok && cf.GrantsFocusPoint {
+						grantCount++
+					}
+				}
+			}
+			if s.characterFeatsRepo != nil && s.featRegistry != nil {
+				fpFeatIDs, fpFeatErr := s.characterFeatsRepo.GetAll(stream.Context(), characterID)
+				if fpFeatErr != nil {
+					s.logger.Warn("loading feats for focus point computation", zap.Error(fpFeatErr))
+				} else {
+					for _, id := range fpFeatIDs {
+						if f, ok := s.featRegistry.Feat(id); ok && f.GrantsFocusPoint {
+							grantCount++
+						}
+					}
+				}
+			}
+			sess.MaxFocusPoints = focuspoints.ComputeMax(grantCount)
+			sess.FocusPoints = focuspoints.Clamp(fpFromDB, sess.MaxFocusPoints)
 		}
 	}
 

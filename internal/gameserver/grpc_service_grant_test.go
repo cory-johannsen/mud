@@ -87,6 +87,8 @@ func (m *grantCharSaver) SaveInstanceCharges(_ context.Context, _ int64, _, _ st
 func (m *grantCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	return map[string]int{}, "", nil
 }
+func (m *grantCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (m *grantCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
 
 // grantProgressRepo is a ProgressRepository test double that records SaveProgress and skill increase calls.
 //

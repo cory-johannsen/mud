@@ -307,6 +307,8 @@ func (f *fakeCharSaver) SaveInstanceCharges(_ context.Context, _ int64, _, _ str
 func (f *fakeCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	return map[string]int{}, "", nil
 }
+func (f *fakeCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (f *fakeCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
 
 // REQ-LR1/LR2 (property): For any CurrentHP in [0, MaxHP], after rest,
 // sess.CurrentHP == sess.MaxHP and SaveState called once with MaxHP.

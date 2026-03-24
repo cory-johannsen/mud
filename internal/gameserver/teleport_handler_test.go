@@ -84,6 +84,8 @@ func (m *mockCharSaver) SaveInstanceCharges(_ context.Context, _ int64, _, _ str
 func (m *mockCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, string, error) {
 	return map[string]int{}, "", nil
 }
+func (m *mockCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (m *mockCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
 
 func TestHandleTeleport_AdminSuccess(t *testing.T) {
 	saver := &mockCharSaver{saved: make(map[int64]string)}

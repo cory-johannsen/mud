@@ -38,6 +38,8 @@ func (j *jobsCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, st
 	}
 	return j.savedJobs, j.savedActiveJob, nil
 }
+func (j *jobsCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
+func (j *jobsCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
 
 // REQ-JOB-PERSIST-1: SaveJobs is called after handleTrainJob succeeds.
 //
