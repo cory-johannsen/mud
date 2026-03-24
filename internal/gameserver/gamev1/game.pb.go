@@ -367,6 +367,7 @@ type ClientMessage struct {
 	//	*ClientMessage_FactionInfoRequest
 	//	*ClientMessage_FactionStandingRequest
 	//	*ClientMessage_ChangeRepRequest
+	//	*ClientMessage_TabComplete
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1460,6 +1461,15 @@ func (x *ClientMessage) GetChangeRepRequest() *ChangeRepRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetTabComplete() *TabCompleteRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_TabComplete); ok {
+			return x.TabComplete
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -1928,6 +1938,10 @@ type ClientMessage_ChangeRepRequest struct {
 	ChangeRepRequest *ChangeRepRequest `protobuf:"bytes,117,opt,name=change_rep_request,json=changeRepRequest,proto3,oneof"`
 }
 
+type ClientMessage_TabComplete struct {
+	TabComplete *TabCompleteRequest `protobuf:"bytes,118,opt,name=tab_complete,json=tabComplete,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -2159,6 +2173,8 @@ func (*ClientMessage_FactionInfoRequest) isClientMessage_Payload() {}
 func (*ClientMessage_FactionStandingRequest) isClientMessage_Payload() {}
 
 func (*ClientMessage_ChangeRepRequest) isClientMessage_Payload() {}
+
+func (*ClientMessage_TabComplete) isClientMessage_Payload() {}
 
 // RestRequest asks the server to rest the player and rearrange prepared technology slots.
 type RestRequest struct {
@@ -3441,6 +3457,7 @@ type ServerEvent struct {
 	//	*ServerEvent_ClassFeaturesResponse
 	//	*ServerEvent_ProficienciesResponse
 	//	*ServerEvent_HpUpdate
+	//	*ServerEvent_TabComplete
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3706,6 +3723,15 @@ func (x *ServerEvent) GetHpUpdate() *HpUpdateEvent {
 	return nil
 }
 
+func (x *ServerEvent) GetTabComplete() *TabCompleteResponse {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_TabComplete); ok {
+			return x.TabComplete
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -3806,6 +3832,10 @@ type ServerEvent_HpUpdate struct {
 	HpUpdate *HpUpdateEvent `protobuf:"bytes,25,opt,name=hp_update,json=hpUpdate,proto3,oneof"`
 }
 
+type ServerEvent_TabComplete struct {
+	TabComplete *TabCompleteResponse `protobuf:"bytes,26,opt,name=tab_complete,json=tabComplete,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -3853,6 +3883,8 @@ func (*ServerEvent_ClassFeaturesResponse) isServerEvent_Payload() {}
 func (*ServerEvent_ProficienciesResponse) isServerEvent_Payload() {}
 
 func (*ServerEvent_HpUpdate) isServerEvent_Payload() {}
+
+func (*ServerEvent_TabComplete) isServerEvent_Payload() {}
 
 // HpUpdateEvent delivers a lightweight HP update to refresh the prompt bar.
 // No console text is displayed; only the prompt is redrawn.
@@ -11097,11 +11129,101 @@ func (x *ChangeRepRequest) GetFactionId() string {
 	return ""
 }
 
+// TabCompleteRequest is sent by the client to request tab-completion candidates for the current input buffer.
+type TabCompleteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Prefix        string                 `protobuf:"bytes,1,opt,name=prefix,proto3" json:"prefix,omitempty"` // current input buffer content
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TabCompleteRequest) Reset() {
+	*x = TabCompleteRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[159]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TabCompleteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TabCompleteRequest) ProtoMessage() {}
+
+func (x *TabCompleteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[159]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TabCompleteRequest.ProtoReflect.Descriptor instead.
+func (*TabCompleteRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{159}
+}
+
+func (x *TabCompleteRequest) GetPrefix() string {
+	if x != nil {
+		return x.Prefix
+	}
+	return ""
+}
+
+// TabCompleteResponse delivers sorted tab-completion candidates to the client.
+type TabCompleteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Completions   []string               `protobuf:"bytes,1,rep,name=completions,proto3" json:"completions,omitempty"` // matching completions, sorted alphabetically
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TabCompleteResponse) Reset() {
+	*x = TabCompleteResponse{}
+	mi := &file_game_v1_game_proto_msgTypes[160]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TabCompleteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TabCompleteResponse) ProtoMessage() {}
+
+func (x *TabCompleteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[160]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TabCompleteResponse.ProtoReflect.Descriptor instead.
+func (*TabCompleteResponse) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{160}
+}
+
+func (x *TabCompleteResponse) GetCompletions() []string {
+	if x != nil {
+		return x.Completions
+	}
+	return nil
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xad3\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xef3\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -11238,7 +11360,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0ffaction_request\x18r \x01(\v2\x17.game.v1.FactionRequestH\x00R\x0efactionRequest\x12O\n" +
 	"\x14faction_info_request\x18s \x01(\v2\x1b.game.v1.FactionInfoRequestH\x00R\x12factionInfoRequest\x12[\n" +
 	"\x18faction_standing_request\x18t \x01(\v2\x1f.game.v1.FactionStandingRequestH\x00R\x16factionStandingRequest\x12I\n" +
-	"\x12change_rep_request\x18u \x01(\v2\x19.game.v1.ChangeRepRequestH\x00R\x10changeRepRequestB\t\n" +
+	"\x12change_rep_request\x18u \x01(\v2\x19.game.v1.ChangeRepRequestH\x00R\x10changeRepRequest\x12@\n" +
+	"\ftab_complete\x18v \x01(\v2\x1b.game.v1.TabCompleteRequestH\x00R\vtabCompleteB\t\n" +
 	"\apayload\"\r\n" +
 	"\vRestRequest\"\x13\n" +
 	"\x11SelectTechRequest\"$\n" +
@@ -11301,7 +11424,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\azone_id\x18\x01 \x01(\tR\x06zoneId\"4\n" +
 	"\x13ActivateItemRequest\x12\x1d\n" +
 	"\n" +
-	"item_query\x18\x01 \x01(\tR\titemQuery\"\xea\v\n" +
+	"item_query\x18\x01 \x01(\tR\titemQuery\"\xad\f\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -11332,7 +11455,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\fuse_response\x18\x16 \x01(\v2\x14.game.v1.UseResponseH\x00R\vuseResponse\x12X\n" +
 	"\x17class_features_response\x18\x17 \x01(\v2\x1e.game.v1.ClassFeaturesResponseH\x00R\x15classFeaturesResponse\x12W\n" +
 	"\x16proficiencies_response\x18\x18 \x01(\v2\x1e.game.v1.ProficienciesResponseH\x00R\x15proficienciesResponse\x125\n" +
-	"\thp_update\x18\x19 \x01(\v2\x16.game.v1.HpUpdateEventH\x00R\bhpUpdateB\t\n" +
+	"\thp_update\x18\x19 \x01(\v2\x16.game.v1.HpUpdateEventH\x00R\bhpUpdate\x12A\n" +
+	"\ftab_complete\x18\x1a \x01(\v2\x1c.game.v1.TabCompleteResponseH\x00R\vtabCompleteB\t\n" +
 	"\apayload\"E\n" +
 	"\rHpUpdateEvent\x12\x1d\n" +
 	"\n" +
@@ -11831,7 +11955,11 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x16FactionStandingRequest\"1\n" +
 	"\x10ChangeRepRequest\x12\x1d\n" +
 	"\n" +
-	"faction_id\x18\x01 \x01(\tR\tfactionId*Y\n" +
+	"faction_id\x18\x01 \x01(\tR\tfactionId\",\n" +
+	"\x12TabCompleteRequest\x12\x16\n" +
+	"\x06prefix\x18\x01 \x01(\tR\x06prefix\"7\n" +
+	"\x13TabCompleteResponse\x12 \n" +
+	"\vcompletions\x18\x01 \x03(\tR\vcompletions*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -11872,7 +12000,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 161)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 163)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -12037,8 +12165,10 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*FactionInfoRequest)(nil),        // 160: game.v1.FactionInfoRequest
 	(*FactionStandingRequest)(nil),    // 161: game.v1.FactionStandingRequest
 	(*ChangeRepRequest)(nil),          // 162: game.v1.ChangeRepRequest
-	nil,                               // 163: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 164: game.v1.CharacterSheetView.AccessoriesEntry
+	(*TabCompleteRequest)(nil),        // 163: game.v1.TabCompleteRequest
+	(*TabCompleteResponse)(nil),       // 164: game.v1.TabCompleteResponse
+	nil,                               // 165: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 166: game.v1.CharacterSheetView.AccessoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	34,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -12157,68 +12287,70 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	160, // 113: game.v1.ClientMessage.faction_info_request:type_name -> game.v1.FactionInfoRequest
 	161, // 114: game.v1.ClientMessage.faction_standing_request:type_name -> game.v1.FactionStandingRequest
 	162, // 115: game.v1.ClientMessage.change_rep_request:type_name -> game.v1.ChangeRepRequest
-	43,  // 116: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	45,  // 117: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	46,  // 118: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	47,  // 119: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	49,  // 120: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	50,  // 121: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	51,  // 122: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	53,  // 123: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	56,  // 124: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	91,  // 125: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	89,  // 126: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	90,  // 127: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	93,  // 128: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	88,  // 129: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
-	52,  // 130: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
-	110, // 131: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
-	82,  // 132: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
-	85,  // 133: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
-	101, // 134: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
-	106, // 135: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
-	108, // 136: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
-	104, // 137: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
-	116, // 138: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
-	33,  // 139: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
-	44,  // 140: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	54,  // 141: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	96,  // 142: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	76,  // 143: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	77,  // 144: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
-	0,   // 145: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,   // 146: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	48,  // 147: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
-	2,   // 148: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
-	44,  // 149: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	80,  // 150: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
-	81,  // 151: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
-	84,  // 152: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
-	87,  // 153: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	3,   // 154: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	100, // 155: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
-	103, // 156: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
-	103, // 157: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
-	100, // 158: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	163, // 159: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	164, // 160: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
-	113, // 161: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
-	113, // 162: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
-	84,  // 163: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
-	100, // 164: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
-	103, // 165: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
-	115, // 166: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
-	109, // 167: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
-	112, // 168: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
-	111, // 169: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
-	115, // 170: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	4,   // 171: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	32,  // 172: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	172, // [172:173] is the sub-list for method output_type
-	171, // [171:172] is the sub-list for method input_type
-	171, // [171:171] is the sub-list for extension type_name
-	171, // [171:171] is the sub-list for extension extendee
-	0,   // [0:171] is the sub-list for field type_name
+	163, // 116: game.v1.ClientMessage.tab_complete:type_name -> game.v1.TabCompleteRequest
+	43,  // 117: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	45,  // 118: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	46,  // 119: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	47,  // 120: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	49,  // 121: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	50,  // 122: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	51,  // 123: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	53,  // 124: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	56,  // 125: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	91,  // 126: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	89,  // 127: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	90,  // 128: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	93,  // 129: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	88,  // 130: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
+	52,  // 131: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
+	110, // 132: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
+	82,  // 133: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
+	85,  // 134: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
+	101, // 135: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
+	106, // 136: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
+	108, // 137: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
+	104, // 138: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
+	116, // 139: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
+	33,  // 140: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
+	164, // 141: game.v1.ServerEvent.tab_complete:type_name -> game.v1.TabCompleteResponse
+	44,  // 142: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	54,  // 143: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	96,  // 144: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	76,  // 145: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	77,  // 146: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
+	0,   // 147: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,   // 148: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	48,  // 149: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
+	2,   // 150: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
+	44,  // 151: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	80,  // 152: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
+	81,  // 153: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
+	84,  // 154: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
+	87,  // 155: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	3,   // 156: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	100, // 157: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
+	103, // 158: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
+	103, // 159: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
+	100, // 160: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
+	165, // 161: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	166, // 162: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	113, // 163: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
+	113, // 164: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
+	84,  // 165: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
+	100, // 166: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
+	103, // 167: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
+	115, // 168: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
+	109, // 169: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
+	112, // 170: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
+	111, // 171: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
+	115, // 172: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
+	4,   // 173: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	32,  // 174: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	174, // [174:175] is the sub-list for method output_type
+	173, // [173:174] is the sub-list for method input_type
+	173, // [173:173] is the sub-list for extension type_name
+	173, // [173:173] is the sub-list for extension extendee
+	0,   // [0:173] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -12343,6 +12475,7 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_FactionInfoRequest)(nil),
 		(*ClientMessage_FactionStandingRequest)(nil),
 		(*ClientMessage_ChangeRepRequest)(nil),
+		(*ClientMessage_TabComplete)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[28].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -12369,6 +12502,7 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_ClassFeaturesResponse)(nil),
 		(*ServerEvent_ProficienciesResponse)(nil),
 		(*ServerEvent_HpUpdate)(nil),
+		(*ServerEvent_TabComplete)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -12376,7 +12510,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   161,
+			NumMessages:   163,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

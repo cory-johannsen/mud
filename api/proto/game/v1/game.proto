@@ -132,6 +132,7 @@ message ClientMessage {
     FactionInfoRequest   faction_info_request  = 115;
     FactionStandingRequest faction_standing_request = 116;
     ChangeRepRequest     change_rep_request    = 117;
+    TabCompleteRequest   tab_complete          = 118;
   }
 }
 
@@ -300,6 +301,7 @@ message ServerEvent {
     ClassFeaturesResponse class_features_response = 23;
     ProficienciesResponse proficiencies_response = 24;
     HpUpdateEvent         hp_update              = 25;
+    TabCompleteResponse   tab_complete           = 26;
   }
 }
 
@@ -1137,4 +1139,14 @@ message FactionStandingRequest {}
 // ChangeRepRequest asks a Fixer NPC to improve the player's faction standing for currency.
 message ChangeRepRequest {
   string faction_id = 1;
+}
+
+// TabCompleteRequest is sent by the client to request tab-completion candidates for the current input buffer.
+message TabCompleteRequest {
+  string prefix = 1; // current input buffer content
+}
+
+// TabCompleteResponse delivers sorted tab-completion candidates to the client.
+message TabCompleteResponse {
+  repeated string completions = 1; // matching completions, sorted alphabetically
 }
