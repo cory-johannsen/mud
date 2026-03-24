@@ -278,11 +278,8 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	// REQ-USE-5.
 	conn.TabCompleteResponse = make(chan *gamev1.TabCompleteResponse, 1)
 	conn.TabCompleter = func(prefix string) {
-		requestID := 0
-		requestID++
-		reqID := fmt.Sprintf("req-tc-%d", requestID)
 		msg := &gamev1.ClientMessage{
-			RequestId: reqID,
+			RequestId: "req-tc-1",
 			Payload: &gamev1.ClientMessage_TabComplete{
 				TabComplete: &gamev1.TabCompleteRequest{Prefix: prefix},
 			},
