@@ -376,6 +376,29 @@ func LoadTemplateFromBytes(data []byte) (*Template, error) {
 // Precondition: dir must be a readable directory.
 // Postcondition: Returns all templates or an error on the first parse or validate
 // failure; on error, the partial result is discarded.
+// loadTemplatesFromBytes parses YAML that may be a single template (map) or a
+// list of templates (sequence). Both formats are supported.
+func loadTemplatesFromBytes(path string, data []byte) ([]*Template, error) {
+	// Detect list vs single by attempting list unmarshal first.
+	var list []Template
+	if err := yaml.Unmarshal(data, &list); err == nil && len(list) > 0 {
+		out := make([]*Template, 0, len(list))
+		for i := range list {
+			if err := list[i].Validate(); err != nil {
+				return nil, fmt.Errorf("validating template %d in %q: %w", i, path, err)
+			}
+			out = append(out, &list[i])
+		}
+		return out, nil
+	}
+	// Fall back to single-template format.
+	tmpl, err := LoadTemplateFromBytes(data)
+	if err != nil {
+		return nil, fmt.Errorf("loading %q: %w", path, err)
+	}
+	return []*Template{tmpl}, nil
+}
+
 func LoadTemplates(dir string) ([]*Template, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -384,7 +407,15 @@ func LoadTemplates(dir string) ([]*Template, error) {
 
 	var templates []*Template
 	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".yaml") {
+		if entry.IsDir() {
+			sub, err := LoadTemplates(filepath.Join(dir, entry.Name()))
+			if err != nil {
+				return nil, err
+			}
+			templates = append(templates, sub...)
+			continue
+		}
+		if !strings.HasSuffix(entry.Name(), ".yaml") {
 			continue
 		}
 
@@ -394,11 +425,11 @@ func LoadTemplates(dir string) ([]*Template, error) {
 			return nil, fmt.Errorf("reading %q: %w", path, err)
 		}
 
-		tmpl, err := LoadTemplateFromBytes(data)
+		loaded, err := loadTemplatesFromBytes(path, data)
 		if err != nil {
-			return nil, fmt.Errorf("loading %q: %w", path, err)
+			return nil, err
 		}
-		templates = append(templates, tmpl)
+		templates = append(templates, loaded...)
 	}
 	return templates, nil
 }

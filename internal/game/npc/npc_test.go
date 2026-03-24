@@ -89,6 +89,86 @@ func TestLoadTemplates_NonExistentDir(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestLoadTemplates_ListFormatYAML(t *testing.T) {
+	// Non-combat NPC files use YAML list format (- id: ...).
+	dir := t.TempDir()
+	yaml := `- id: zone_merchant
+  name: Zone Merchant
+  npc_type: merchant
+  description: Sells supplies.
+  level: 1
+  max_hp: 10
+  ac: 10
+  disposition: friendly
+  merchant:
+    merchant_type: general
+    sell_margin: 1.2
+    buy_margin: 0.5
+    budget: 500
+    inventory: []
+    replenish_rate:
+      min_hours: 6
+      max_hours: 12
+      stock_refill: 1
+      budget_refill: 100
+- id: zone_healer
+  name: Zone Healer
+  npc_type: healer
+  description: Heals wounds.
+  level: 1
+  max_hp: 10
+  ac: 10
+  disposition: friendly
+  healer:
+    price_per_hp: 2
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "zone.yaml"), []byte(yaml), 0644))
+
+	templates, err := npc.LoadTemplates(dir)
+	require.NoError(t, err)
+	require.Len(t, templates, 2)
+	assert.Equal(t, "zone_merchant", templates[0].ID)
+	assert.Equal(t, "zone_healer", templates[1].ID)
+}
+
+func TestLoadTemplates_Subdirectory(t *testing.T) {
+	// Templates in subdirectories are loaded recursively.
+	dir := t.TempDir()
+	subDir := filepath.Join(dir, "non_combat")
+	require.NoError(t, os.Mkdir(subDir, 0755))
+
+	rootYAML := `id: root_npc
+name: Root NPC
+level: 1
+max_hp: 10
+ac: 10
+`
+	subYAML := `- id: sub_healer
+  name: Sub Healer
+  npc_type: healer
+  description: Heals things.
+  level: 1
+  max_hp: 10
+  ac: 10
+  disposition: friendly
+  healer:
+    price_per_hp: 2
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "root.yaml"), []byte(rootYAML), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(subDir, "sub.yaml"), []byte(subYAML), 0644))
+
+	templates, err := npc.LoadTemplates(dir)
+	require.NoError(t, err)
+	require.Len(t, templates, 2)
+
+	ids := make(map[string]bool)
+	for _, tmpl := range templates {
+		ids[tmpl.ID] = true
+	}
+	assert.True(t, ids["root_npc"])
+	assert.True(t, ids["sub_healer"])
+}
+
 func TestTemplate_Property_Validate_ValidInputsPass(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		tmpl := &npc.Template{
