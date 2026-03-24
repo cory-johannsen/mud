@@ -127,6 +127,7 @@ message ClientMessage {
     SetRoomRequest       set_room              = 110;
     EditorCmdsRequest    editor_cmds           = 111;
     TravelRequest        travel                = 112;
+    ActivateItemRequest  activate_item         = 113;
   }
 }
 
@@ -260,6 +261,11 @@ message DeployTrapRequest {
 // TravelRequest asks the server to fast-travel the player to the named zone.
 message TravelRequest {
     string zone_id = 1;
+}
+
+// ActivateItemRequest asks the server to activate an item in the player's inventory.
+message ActivateItemRequest {
+  string item_query = 1;
 }
 
 // ServerEvent wraps all server-to-client events.
