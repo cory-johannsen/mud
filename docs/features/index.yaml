@@ -615,7 +615,7 @@ features:
 
   - slug: zone-map-architecture-docs
     name: Zone Map Architecture Documentation
-    status: planned
+    status: done
     priority: 425
     category: meta
     file: docs/features/zone-map-architecture-docs.md
