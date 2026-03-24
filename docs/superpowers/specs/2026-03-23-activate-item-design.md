@@ -153,7 +153,7 @@ func HandleActivate(sess ActivateSession, reg *Registry, query string, inCombat 
 func TickRecharge(instances []*ItemInstance, reg *Registry, trigger string) []*ItemInstance
 ```
 
-- REQ-ACT-15: `HandleActivate` and `TickRecharge` MUST be pure functions; all DB persistence in the caller.
+- REQ-ACT-15: `HandleActivate` and `TickRecharge` MUST NOT perform DB I/O; all persistence is the caller's responsibility. Both functions mutate `ItemInstance` fields in-place via the pointers returned by `ActivateSession.EquippedInstances()`.
 - REQ-ACT-16: `HandleActivate` MUST NOT import `internal/game/session`; it operates only on the `ActivateSession` interface.
 
 ---
