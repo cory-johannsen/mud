@@ -317,6 +317,9 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			rep          INT NOT NULL DEFAULT 0,
 			PRIMARY KEY (character_id, faction_id)
 		);
+
+		-- Migration 042
+		ALTER TABLE characters ADD COLUMN IF NOT EXISTS focus_points INT NOT NULL DEFAULT 0;
 	`)
 	return err
 }
