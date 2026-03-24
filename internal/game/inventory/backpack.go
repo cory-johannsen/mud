@@ -15,12 +15,9 @@ type ItemInstance struct {
 	MaxDurability int    // -1 = uninitialized sentinel
 	Rarity        string // rarity tier: "salvage" | "street" | "mil_spec" | "black_market" | "ghost"
 	Modifier      string // "" | "tuned" | "defective" | "cursed"
-	CurseRevealed bool // true once a cursed item has been equipped
-	// ChargesRemaining is the number of activations remaining.
-	// -1 = uninitialized sentinel; initialized to ItemDef.Charges on first activation (REQ-ACT-13).
-	ChargesRemaining int
-	// Expended is true when ChargesRemaining == 0 and the item uses expend semantics.
-	Expended bool
+	CurseRevealed    bool // true once a cursed item has been equipped
+	ChargesRemaining int  // -1 = uninitialized sentinel; initialized to ItemDef.Charges on first activation (REQ-ACT-13)
+	Expended         bool // true when ChargesRemaining == 0 and the item uses expend semantics
 }
 
 // Backpack is a container with slot and weight limits.
