@@ -90,7 +90,7 @@ PF2E combat and exploration actions, including archetype/job actions and full PF
         - [ ] Long-Term Rest command — implement `longrest` (unavailable in combat or dangerous rooms; costs 24 in-game hours; heals 2×level HP and removes minor conditions; requires in-game time tracking and Resting/safe-room enforcement)
     - [ ] Gear (blocked by `equipment-mechanics`)
       - Activate an Item: Varies (1-3 actions). Used for potions, wands, and magic gear.
-        - [ ] Activate Item command — implement `activate <item>` (reads activation cost from item YAML; triggers item's effect; **requires `equipment-mechanics`: activatable item type with action cost and effect definition**)
+        - [x] Activate Item command — implement `activate <item>` (reads activation cost from item YAML; triggers item's effect; **requires `equipment-mechanics`: activatable item type with action cost and effect definition**)
       - Repair: Spend 10 minutes (with a Repair Kit) to fix a damaged item.
         - [ ] Repair command — implement `repair <item>` (Crafting check vs item Hardness DC; costs 10 in-game minutes and a Repair Kit consumable; restores item to functioning; **requires `equipment-mechanics`: item durability/broken state and Repair Kit item type**)
       - Affix a Precious Material: Add specialized materials to gear.
