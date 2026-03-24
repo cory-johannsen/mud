@@ -45,6 +45,21 @@ func LoadMaterialRegistry(path string) (*MaterialRegistry, error) {
 	return reg, nil
 }
 
+// NewMaterialRegistryFromSlice builds a MaterialRegistry directly from a slice of Material
+// pointers. This is intended for use in tests and tools that do not read from YAML files.
+//
+// Precondition: mats may be nil or empty (returns an empty registry).
+// Postcondition: every entry in mats is accessible via Material(id).
+func NewMaterialRegistryFromSlice(mats []*Material) *MaterialRegistry {
+	reg := &MaterialRegistry{materials: make(map[string]*Material, len(mats))}
+	for _, m := range mats {
+		if m != nil {
+			reg.materials[m.ID] = m
+		}
+	}
+	return reg
+}
+
 // Material returns the Material with the given id and true, or nil and false if not found.
 func (r *MaterialRegistry) Material(id string) (*Material, bool) {
 	m, ok := r.materials[id]

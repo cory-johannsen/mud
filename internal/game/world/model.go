@@ -271,6 +271,22 @@ type TrapProbabilities struct {
 	TrapPool []TrapPoolEntry `yaml:"trap_pool,omitempty"`
 }
 
+// MaterialPoolDrop is one weighted entry in a zone's material scavenge pool.
+type MaterialPoolDrop struct {
+	// ID references a material ID in the MaterialRegistry.
+	ID string `yaml:"id"`
+	// Weight is the relative probability weight for this drop; higher means more likely.
+	Weight int `yaml:"weight"`
+}
+
+// MaterialPool defines the scavenge yield configuration for a zone.
+type MaterialPool struct {
+	// DC is the skill check difficulty for a scavenge attempt.
+	DC int `yaml:"dc"`
+	// Drops is the weighted pool of materials that may be found.
+	Drops []MaterialPoolDrop `yaml:"drops"`
+}
+
 // Zone groups related rooms into a themed area.
 type Zone struct {
 	// ID uniquely identifies this zone.
@@ -309,6 +325,9 @@ type Zone struct {
 	// WorldY is the zone's row position on the world map grid. Lower values are further north.
 	// nil means the zone has no world map position and is excluded from the world map.
 	WorldY *int `yaml:"world_y,omitempty"`
+	// MaterialPool defines the scavenge yield configuration for this zone.
+	// nil means scavenging yields nothing here (REQ-CRAFT-9).
+	MaterialPool *MaterialPool `yaml:"material_pool,omitempty"`
 }
 
 // ExternalExitTargets returns exit targets that reference rooms outside this zone.

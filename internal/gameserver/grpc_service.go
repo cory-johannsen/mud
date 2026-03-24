@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/focuspoints"
 	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/danger"
@@ -267,6 +268,9 @@ type GameServiceServer struct {
 	// factionRepRepo persists per-character faction reputation scores.
 	// May be nil when faction feature is not configured.
 	factionRepRepo FactionRepRepository
+	// materialReg holds all crafting material definitions loaded at startup.
+	// May be nil when the crafting feature is not yet configured.
+	materialReg *crafting.MaterialRegistry
 	// materialRepo persists per-character material inventories.
 	// May be nil when the crafting feature is not yet configured.
 	materialRepo CharacterMaterialsRepository
@@ -385,6 +389,7 @@ func NewGameServiceServer(
 		setRegistry:                content.SetRegistry,
 		substanceReg:               content.SubstanceRegistry,
 		factionRepRepo:             storage.FactionRepRepo,
+		materialReg:                content.MaterialRegistry,
 		materialRepo:               storage.MaterialRepo,
 	}
 	if content.FactionRegistry != nil {
@@ -1883,6 +1888,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleChangeRep(uid, p.ChangeRepRequest)
 	case *gamev1.ClientMessage_TabComplete:
 		return s.handleTabComplete(uid, p.TabComplete.GetPrefix())
+	case *gamev1.ClientMessage_MaterialsRequest:
+		return s.handleMaterials(uid, p.MaterialsRequest)
+	case *gamev1.ClientMessage_ScavengeRequest:
+		return s.handleScavenge(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
