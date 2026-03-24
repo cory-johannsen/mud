@@ -188,6 +188,9 @@ type TechnologyDef struct {
 	// Passive indicates this technology fires automatically on room state changes
 	// and requires no player action. When true, ActionCost must be 0.
 	Passive bool `yaml:"passive,omitempty"`
+	// FocusCost indicates this technology costs 1 Focus Point to use.
+	// Cannot be true when Passive is true.
+	FocusCost bool `yaml:"focus_cost,omitempty"`
 	// Reaction declares this tech as a player reaction with the given trigger and effect.
 	// Only applicable to innate techs. Nil means this tech is not a reaction.
 	Reaction *reaction.ReactionDef `yaml:"reaction,omitempty"`
@@ -214,6 +217,9 @@ func (t *TechnologyDef) Validate() error {
 	}
 	if t.Passive && t.ActionCost != 0 {
 		return fmt.Errorf("passive technology %q must have action_cost 0, got %d", t.ID, t.ActionCost)
+	}
+	if t.Passive && t.FocusCost {
+		return fmt.Errorf("technology %q: focus_cost and passive cannot both be true", t.ID)
 	}
 	if !validRanges[t.Range] {
 		return fmt.Errorf("unknown range %q", t.Range)

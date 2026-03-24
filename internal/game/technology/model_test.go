@@ -547,6 +547,26 @@ func TestTechAtSlotLevel(t *testing.T) {
 	})
 }
 
+// REQ-FC1: FocusCost true and Passive true must fail Validate.
+func TestTechnologyDef_Validate_FocusCostPassiveConflict(t *testing.T) {
+	tech := validDef()
+	tech.Passive = true
+	tech.ActionCost = 0
+	tech.FocusCost = true
+	err := tech.Validate()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "focus_cost")
+}
+
+// REQ-FC2: FocusCost true and Passive false must pass Validate.
+func TestTechnologyDef_Validate_FocusCostNotPassive(t *testing.T) {
+	tech := validDef()
+	tech.Passive = false
+	tech.FocusCost = true
+	err := tech.Validate()
+	assert.NoError(t, err)
+}
+
 // REQ-CRX10: chrome_reflex.yaml loads correctly with both reaction triggers.
 func TestChromeReflex_YAMLLoad_HasReactionDef(t *testing.T) {
 	data, err := os.ReadFile("../../../content/technologies/innate/chrome_reflex.yaml")

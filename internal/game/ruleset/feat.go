@@ -38,6 +38,8 @@ type Feat struct {
 	// TargetTags is an optional list of NPC tags; when non-empty, the feat bonus
 	// applies only when the combat target has at least one matching tag.
 	TargetTags []string `yaml:"target_tags"`
+	// GrantsFocusPoint when true means this feat grants one Focus Point slot to the character's pool.
+	GrantsFocusPoint bool `yaml:"grants_focus_point,omitempty"`
 }
 
 // featsFile is the top-level YAML structure for content/feats.yaml.

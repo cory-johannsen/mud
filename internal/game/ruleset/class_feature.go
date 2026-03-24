@@ -47,7 +47,8 @@ type ClassFeature struct {
 	Shortcut     string          `yaml:"shortcut"`    // direct command alias; empty = no shortcut
 	ActionCost   int             `yaml:"action_cost"` // AP cost in combat; 1, 2, or 3
 	Contexts     []string        `yaml:"contexts"`    // valid contexts: combat, exploration, downtime
-	Effect       *ActionEffect   `yaml:"effect"`      // nil for passive features
+	Effect            *ActionEffect   `yaml:"effect"`                        // nil for passive features
+	GrantsFocusPoint  bool            `yaml:"grants_focus_point,omitempty"`  // true if this feature grants a Focus Point slot
 }
 
 // classFeaturesFile is the top-level YAML structure for content/class_features.yaml.
