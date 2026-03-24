@@ -34,9 +34,11 @@ func (c *countingContext) Done() <-chan struct{} {
 	return c.Context.Done()
 }
 
-// newCountingContext returns a context that cancels after limit calls to Done().
+// NewCountingContext returns a context that cancels after exactly limit calls
+// to Done() — one per Lua opcode in GopherLua's mainLoopWithContext.
 // Precondition: limit > 0; panics if limit <= 0.
-func newCountingContext(limit int) (context.Context, context.CancelFunc) {
+// Postcondition: Returns a context and a cancel function; caller must call cancel.
+func NewCountingContext(limit int) (context.Context, context.CancelFunc) {
 	if limit <= 0 {
 		panic("newCountingContext: limit must be > 0")
 	}
@@ -88,7 +90,7 @@ func NewSandboxedState(instLimit int) (*lua.LState, context.CancelFunc) {
 	// Enforce deterministic instruction-count limit (SCRIPT-3).
 	// countingContext.Done() is called by GopherLua's mainLoopWithContext on
 	// every opcode; the context cancels itself after exactly limit opcodes.
-	ctx, cancel := newCountingContext(limit)
+	ctx, cancel := NewCountingContext(limit)
 	L.SetContext(ctx)
 
 	return L, cancel
