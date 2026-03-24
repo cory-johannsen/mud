@@ -1,0 +1,10 @@
+id: bad_recipe
+name: Bad Recipe
+output_item_id: stimpack
+output_count: 1
+category: consumable
+complexity: 1
+dc: 10
+materials:
+  - id: nonexistent_material_xyz
+    quantity: 1

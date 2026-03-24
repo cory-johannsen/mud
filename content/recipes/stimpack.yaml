@@ -1,0 +1,16 @@
+id: stimpack
+name: Stimpack
+output_item_id: stimpack
+output_count: 1
+category: consumable
+complexity: 1
+dc: 14
+quick_craft_min_rank: trained
+materials:
+  - id: hydrogen_peroxide
+    quantity: 2
+  - id: rubbing_alcohol
+    quantity: 1
+  - id: sugar_packets
+    quantity: 1
+description: "A field-mixed stimulant."
