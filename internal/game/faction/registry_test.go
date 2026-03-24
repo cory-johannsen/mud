@@ -1,0 +1,118 @@
+package faction_test
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/cory-johannsen/mud/internal/game/faction"
+)
+
+func writeFactionYAML(t *testing.T, dir, filename, content string) {
+	t.Helper()
+	if err := os.WriteFile(filepath.Join(dir, filename), []byte(content), 0644); err != nil {
+		t.Fatalf("write yaml: %v", err)
+	}
+}
+
+const validGunYAML = `
+id: gun
+name: Team Gun
+zone_id: rustbucket
+hostile_factions: [machete]
+tiers:
+  - id: outsider
+    label: Outsider
+    min_rep: 0
+    price_discount: 0.0
+  - id: gunhand
+    label: Gunhand
+    min_rep: 100
+    price_discount: 0.05
+  - id: sharpshooter
+    label: Sharpshooter
+    min_rep: 300
+    price_discount: 0.10
+  - id: warchief
+    label: Warchief
+    min_rep: 600
+    price_discount: 0.15
+`
+
+const validMacheteYAML = `
+id: machete
+name: Team Machete
+zone_id: ironyard
+hostile_factions: [gun]
+tiers:
+  - id: outsider
+    label: Outsider
+    min_rep: 0
+    price_discount: 0.0
+  - id: blade
+    label: Blade
+    min_rep: 100
+    price_discount: 0.05
+  - id: cutter
+    label: Cutter
+    min_rep: 300
+    price_discount: 0.10
+  - id: warsmith
+    label: Warsmith
+    min_rep: 600
+    price_discount: 0.15
+`
+
+func TestLoadFactions_Happy(t *testing.T) {
+	dir := t.TempDir()
+	writeFactionYAML(t, dir, "gun.yaml", validGunYAML)
+	writeFactionYAML(t, dir, "machete.yaml", validMacheteYAML)
+
+	reg, err := faction.LoadFactions(dir)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(reg) != 2 {
+		t.Fatalf("expected 2 factions, got %d", len(reg))
+	}
+	if _, ok := reg["gun"]; !ok {
+		t.Error("expected 'gun' faction in registry")
+	}
+}
+
+func TestLoadFactions_InvalidYAML(t *testing.T) {
+	dir := t.TempDir()
+	writeFactionYAML(t, dir, "bad.yaml", `id: `)
+	_, err := faction.LoadFactions(dir)
+	if err == nil {
+		t.Fatal("expected error for invalid faction YAML")
+	}
+}
+
+func TestFactionRegistry_ValidateHostileFactionsMustExist(t *testing.T) {
+	dir := t.TempDir()
+	yaml := `
+id: gun
+name: Team Gun
+zone_id: rustbucket
+hostile_factions: [nonexistent]
+tiers:
+  - {id: t1, label: L1, min_rep: 0, price_discount: 0.0}
+  - {id: t2, label: L2, min_rep: 10, price_discount: 0.05}
+  - {id: t3, label: L3, min_rep: 20, price_discount: 0.10}
+  - {id: t4, label: L4, min_rep: 30, price_discount: 0.15}
+`
+	writeFactionYAML(t, dir, "gun.yaml", yaml)
+	reg, err := faction.LoadFactions(dir)
+	if err != nil {
+		t.Fatalf("LoadFactions: %v", err)
+	}
+	zoneIDs := map[string]bool{"rustbucket": true}
+	roomIDs := map[string]bool{}
+	itemIDs := map[string]bool{}
+	roomZoneIDs := map[string]string{}
+	zoneOwners := map[string]string{"rustbucket": "gun"}
+	if err := reg.Validate(zoneIDs, roomIDs, itemIDs, roomZoneIDs, zoneOwners); err == nil {
+		t.Fatal("expected error for unknown hostile faction reference")
+	}
+}
