@@ -308,7 +308,7 @@ features:
 
   - slug: input-mode-refactor
     name: Input Mode Refactor
-    status: in_progress
+    status: done
     priority: 230
     category: ui
     file: docs/features/input-mode-refactor.md
@@ -407,7 +407,7 @@ features:
 
   - slug: advanced-enemies
     name: Advanced Enemies
-    status: planned
+    status: done
     priority: 245
     category: world
     file: docs/features/advanced-enemies.md
@@ -419,7 +419,7 @@ features:
 
   - slug: npc-behaviors
     name: Per-NPC Custom Behaviors
-    status: planned
+    status: done
     priority: 247
     category: world
     file: docs/features/npc-behaviors.md
@@ -429,7 +429,7 @@ features:
 
   - slug: world-map
     name: World Map / Fast Travel
-    status: planned
+    status: done
     priority: 249
     category: ui
     file: docs/features/world-map.md
@@ -558,7 +558,7 @@ features:
 
   - slug: game-client-ebiten
     name: Ebiten Game Client
-    status: backlog
+    status: planned
     priority: 440
     category: ui
     file: docs/features/game-client-ebiten.md
