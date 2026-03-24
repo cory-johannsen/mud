@@ -1818,6 +1818,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleFactionStanding(uid, p.FactionStandingRequest)
 	case *gamev1.ClientMessage_ChangeRepRequest:
 		return s.handleChangeRep(uid, p.ChangeRepRequest)
+	case *gamev1.ClientMessage_TabComplete:
+		return s.handleTabComplete(uid, p.TabComplete.GetPrefix())
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -5623,6 +5625,100 @@ func combatProficiencyBonusForRank(level int, rank string) int {
 // Postcondition: Returns the same ServerEvent as handleUseEquipment.
 func (s *GameServiceServer) handleInteract(uid, instanceID string) (*gamev1.ServerEvent, error) {
 	return s.handleUseEquipment(uid, instanceID)
+}
+
+// handleTabComplete returns sorted, deduplicated tab-completion candidates for the
+// given input prefix.
+//
+// Precondition: uid must resolve to an active player session.
+// Postcondition: Returns a non-nil ServerEvent containing a TabCompleteResponse with
+// sorted, deduplicated completions. When prefix contains no space, completes
+// non-hidden command names and aliases. When prefix starts with "use " or "interact ",
+// completes active feat names and room equipment descriptions matching the partial
+// word after the command.
+func (s *GameServiceServer) handleTabComplete(uid, prefix string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	lower := strings.ToLower(strings.TrimSpace(prefix))
+
+	seen := make(map[string]struct{})
+	var completions []string
+
+	addIfNew := func(candidate string) {
+		if _, dup := seen[candidate]; !dup {
+			seen[candidate] = struct{}{}
+			completions = append(completions, candidate)
+		}
+	}
+
+	if !strings.Contains(lower, " ") {
+		// Single-word prefix: complete command names and aliases (non-hidden).
+		for _, cmd := range command.BuiltinCommands() {
+			if cmd.Category == command.CategoryHidden {
+				continue
+			}
+			if strings.HasPrefix(cmd.Name, lower) {
+				addIfNew(cmd.Name)
+			}
+			for _, alias := range cmd.Aliases {
+				if strings.HasPrefix(alias, lower) {
+					addIfNew(alias)
+				}
+			}
+		}
+	} else if strings.HasPrefix(lower, "use ") || strings.HasPrefix(lower, "interact ") {
+		// Contextual prefix: complete feat names and room equipment descriptions.
+		spaceIdx := strings.Index(lower, " ")
+		partial := lower[spaceIdx+1:]
+
+		// Complete active feat names.
+		if s.characterFeatsRepo != nil && s.featRegistry != nil {
+			ctx := context.Background()
+			featIDs, err := s.characterFeatsRepo.GetAll(ctx, sess.CharacterID)
+			if err == nil {
+				for _, id := range featIDs {
+					f, ok := s.featRegistry.Feat(id)
+					if !ok || !f.Active {
+						continue
+					}
+					name := strings.ToLower(f.Name)
+					if strings.HasPrefix(name, partial) {
+						addIfNew(name)
+					}
+					// Also match by feat ID.
+					if strings.HasPrefix(f.ID, partial) {
+						addIfNew(f.ID)
+					}
+				}
+			}
+		}
+
+		// Complete room equipment descriptions.
+		if s.roomEquipMgr != nil {
+			for _, inst := range s.roomEquipMgr.EquipmentInRoom(sess.RoomID) {
+				desc := strings.ToLower(inst.Description)
+				if desc == "" {
+					continue
+				}
+				if strings.HasPrefix(desc, partial) {
+					addIfNew(desc)
+				}
+			}
+		}
+	}
+
+	sort.Strings(completions)
+
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_TabComplete{
+			TabComplete: &gamev1.TabCompleteResponse{
+				Completions: completions,
+			},
+		},
+	}, nil
 }
 
 // handleUse activates an active feat or class feature for the player, or lists all available active abilities.
