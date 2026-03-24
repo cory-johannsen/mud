@@ -1810,6 +1810,14 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleTravel(uid, p.Travel)
 	case *gamev1.ClientMessage_ActivateItem:
 		return s.handleActivate(uid, p.ActivateItem)
+	case *gamev1.ClientMessage_FactionRequest:
+		return s.handleFaction(uid, p.FactionRequest)
+	case *gamev1.ClientMessage_FactionInfoRequest:
+		return s.handleFactionInfo(uid, p.FactionInfoRequest)
+	case *gamev1.ClientMessage_FactionStandingRequest:
+		return s.handleFactionStanding(uid, p.FactionStandingRequest)
+	case *gamev1.ClientMessage_ChangeRepRequest:
+		return s.handleChangeRep(uid, p.ChangeRepRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}

@@ -128,6 +128,10 @@ const (
 	HandlerBribe              = "bribe"
 	HandlerSurrender          = "surrender"
 	HandlerRelease            = "release"
+	HandlerFaction            = "faction"
+	HandlerFactionInfo        = "faction_info"
+	HandlerFactionStanding    = "faction_standing"
+	HandlerChangeRep          = "change_rep"
 	HandlerSpawnNPC           = "spawn_npc"
 	HandlerAddRoom            = "add_room"
 	HandlerAddLink            = "add_link"
@@ -205,6 +209,10 @@ func BuiltinCommands() []Command {
 		{Name: "bribe", Aliases: nil, Help: "Bribe law enforcement to reduce wanted level (bribe [npc]) or confirm a pending bribe (bribe confirm)", Category: CategoryWorld, Handler: HandlerBribe},
 		{Name: "surrender", Aliases: nil, Help: "Surrender to law enforcement in the current room", Category: CategoryWorld, Handler: HandlerSurrender},
 		{Name: "release", Aliases: nil, Help: "Release a detained player (release <player>)", Category: CategoryWorld, Handler: HandlerRelease},
+		{Name: "faction", Aliases: nil, Help: "Show your current faction, tier, rep, and perks", Category: CategoryWorld, Handler: HandlerFaction},
+		{Name: "faction_info", Aliases: nil, Help: "Show public information about a faction (faction_info <faction_id>)", Category: CategoryWorld, Handler: HandlerFactionInfo},
+		{Name: "faction_standing", Aliases: nil, Help: "Show your standing in all tracked factions", Category: CategoryWorld, Handler: HandlerFactionStanding},
+		{Name: "change_rep", Aliases: nil, Help: "Pay a Fixer to improve your faction standing (change_rep <faction_id>)", Category: CategoryWorld, Handler: HandlerChangeRep},
 
 		// Communication commands
 		{Name: "say", Aliases: nil, Help: "Say something to the room", Category: CategoryCommunication, Handler: HandlerSay},

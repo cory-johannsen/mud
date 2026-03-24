@@ -142,6 +142,10 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerBribe:              bridgeBribe,
 	command.HandlerSurrender:          bridgeSurrender,
 	command.HandlerRelease:            bridgeRelease,
+	command.HandlerFaction:            bridgeFaction,
+	command.HandlerFactionInfo:        bridgeFactionInfo,
+	command.HandlerFactionStanding:    bridgeFactionStanding,
+	command.HandlerChangeRep:          bridgeChangeRep,
 	command.HandlerHeal:               bridgeHeal,
 	command.HandlerBrowse:             bridgeBrowse,
 	command.HandlerBuy:                bridgeBuy,
@@ -1882,5 +1886,63 @@ func bridgeEditorCmds(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_EditorCmds{EditorCmds: &gamev1.EditorCmdsRequest{}},
+	}}, nil
+}
+
+// bridgeFaction builds a FactionRequest asking the server for the player's
+// current faction, tier, rep, and perks.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a FactionRequest; done is false.
+func bridgeFaction(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_FactionRequest{FactionRequest: &gamev1.FactionRequest{}},
+	}}, nil
+}
+
+// bridgeFactionInfo builds a FactionInfoRequest asking the server for public
+// information about the faction identified by args[0].
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: if RawArgs is empty, writes a usage error and returns done=true;
+// otherwise returns a non-nil msg containing a FactionInfoRequest.
+func bridgeFactionInfo(bctx *bridgeContext) (bridgeResult, error) {
+	factionID := strings.TrimSpace(bctx.parsed.RawArgs)
+	if factionID == "" {
+		return writeErrorPrompt(bctx, "Usage: faction_info <faction_id>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_FactionInfoRequest{FactionInfoRequest: &gamev1.FactionInfoRequest{FactionId: factionID}},
+	}}, nil
+}
+
+// bridgeFactionStanding builds a FactionStandingRequest asking the server for
+// the player's standing in all tracked factions.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a FactionStandingRequest; done is false.
+func bridgeFactionStanding(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_FactionStandingRequest{FactionStandingRequest: &gamev1.FactionStandingRequest{}},
+	}}, nil
+}
+
+// bridgeChangeRep builds a ChangeRepRequest asking a Fixer NPC to improve the
+// player's faction standing for currency. The faction_id is taken from RawArgs.
+//
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: if RawArgs is empty, writes a usage error and returns done=true;
+// otherwise returns a non-nil msg containing a ChangeRepRequest.
+func bridgeChangeRep(bctx *bridgeContext) (bridgeResult, error) {
+	factionID := strings.TrimSpace(bctx.parsed.RawArgs)
+	if factionID == "" {
+		return writeErrorPrompt(bctx, "Usage: change_rep <faction_id>")
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_ChangeRepRequest{ChangeRepRequest: &gamev1.ChangeRepRequest{FactionId: factionID}},
 	}}, nil
 }

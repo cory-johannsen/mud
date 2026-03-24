@@ -128,6 +128,10 @@ message ClientMessage {
     EditorCmdsRequest    editor_cmds           = 111;
     TravelRequest        travel                = 112;
     ActivateItemRequest  activate_item         = 113;
+    FactionRequest       faction_request       = 114;
+    FactionInfoRequest   faction_info_request  = 115;
+    FactionStandingRequest faction_standing_request = 116;
+    ChangeRepRequest     change_rep_request    = 117;
   }
 }
 
