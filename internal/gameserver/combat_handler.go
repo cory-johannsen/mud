@@ -16,6 +16,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/dice"
@@ -77,6 +78,8 @@ type CombatHandler struct {
 	featRegistry   *ruleset.FeatRegistry  // optional; used for NPC feat bonus resolution; may be nil
 	logger         *zap.Logger            // optional; used for error logging; may be nil
 	substanceSvc   SubstanceService       // optional; applies poison substances on weapon hit (REQ-AH-21); may be nil
+	factionSvc    *faction.Service       // optional; awards faction rep on NPC kill; may be nil
+	factionConfig *faction.FactionConfig // optional; holds rep economy parameters; may be nil
 	combatMu      sync.RWMutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -202,6 +205,15 @@ func (h *CombatHandler) DecrementAndCheckDestroyed(roomID, equipID string) bool 
 // Postcondition: Kill XP is awarded to the first living player on NPC death.
 func (h *CombatHandler) SetXPService(svc *xp.Service) {
 	h.xpSvc = svc
+}
+
+// SetFactionService registers the faction service used to award rep on NPC kill.
+//
+// Precondition: svc and cfg must be non-nil.
+// Postcondition: Faction rep is awarded to the killing player when the NPC belongs to a hostile faction.
+func (h *CombatHandler) SetFactionService(svc *faction.Service, cfg *faction.FactionConfig) {
+	h.factionSvc = svc
+	h.factionConfig = cfg
 }
 
 // SetCurrencySaver registers the saver used to persist player currency after loot award.
@@ -3363,6 +3375,27 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 								zap.String("uid", p.UID),
 								zap.Error(xpErr),
 							)
+						}
+					}
+				}
+			}
+		}
+
+		// Award faction rep for killing enemy faction NPC (REQ-FA-20).
+		if h.factionSvc != nil && h.factionConfig != nil && inst.FactionID != "" {
+			livingParticipants := h.livingParticipantSessions(cbt)
+			for _, p := range livingParticipants {
+				if p.FactionID != "" && h.factionSvc.IsHostile(inst.FactionID, p.FactionID) {
+					repAmt := inst.Level * h.factionConfig.RepPerNPCLevel
+					if repAmt > 0 {
+						msg, repErr := h.factionSvc.AwardRep(context.Background(), p, p.CharacterID, p.FactionID, repAmt)
+						if repErr != nil && h.logger != nil {
+							h.logger.Warn("faction.AwardRep failed", zap.Error(repErr))
+						} else if msg != "" {
+							h.broadcastFn(inst.RoomID, []*gamev1.CombatEvent{{
+								Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
+								Narrative: msg,
+							}})
 						}
 					}
 				}
