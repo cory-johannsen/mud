@@ -12,7 +12,9 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -53,6 +55,8 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	characterSpontaneousUsePoolRepository := postgres.NewCharacterSpontaneousUsePoolRepository(pgxpoolPool)
 	wantedRepository := postgres.NewWantedRepository(pgxpoolPool)
 	automapRepository := postgres.NewAutomapRepository(pgxpoolPool)
+	factionRepRepository := postgres.NewFactionRepRepository(pgxpoolPool)
+	characterMaterialsRepository := postgres.NewCharacterMaterialsRepository(pgxpoolPool)
 	storageDeps := gameserver.StorageDeps{
 		CharRepo:               characterRepository,
 		AccountRepo:            accountRepoAdapter,
@@ -69,6 +73,9 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		SpontaneousUsePoolRepo: characterSpontaneousUsePoolRepository,
 		WantedRepo:             wantedRepository,
 		AutomapRepo:            automapRepository,
+		DetainedUntilRepo:      characterRepository,
+		FactionRepRepo:         factionRepRepository,
+		MaterialRepo:           characterMaterialsRepository,
 	}
 	worldDir := cfg.ZonesDir
 	manager, err := world.NewManagerFromDir(worldDir, logger)
@@ -169,6 +176,32 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	engine := combat.NewEngine()
 	mentalstateManager := mentalstate.NewManager()
 	loadoutsDir := cfg.LoadoutsDir
+	// Load faction registry and config (optional — nil when paths are not configured).
+	var factionRegistry *faction.FactionRegistry
+	var factionConfig *faction.FactionConfig
+	if cfg.FactionsDir != "" {
+		fr, fErr := faction.ProvideRegistry(faction.FactionsDir(cfg.FactionsDir))
+		if fErr != nil {
+			return nil, fmt.Errorf("loading faction registry: %w", fErr)
+		}
+		factionRegistry = fr
+	}
+	if cfg.FactionConfigPath != "" {
+		fc, fErr := faction.ProvideConfig(faction.FactionConfigPath(cfg.FactionConfigPath))
+		if fErr != nil {
+			return nil, fmt.Errorf("loading faction config: %w", fErr)
+		}
+		factionConfig = &fc
+	}
+	// Load crafting material and recipe registries (REQ-CRAFT-1/6).
+	materialRegistry, err := crafting.LoadMaterialRegistry(cfg.MaterialsFile)
+	if err != nil {
+		return nil, fmt.Errorf("loading material registry: %w", err)
+	}
+	recipeRegistry, err := crafting.LoadRecipeRegistry(cfg.RecipesDir, materialRegistry, nil)
+	if err != nil {
+		return nil, fmt.Errorf("loading recipe registry: %w", err)
+	}
 	contentDeps := gameserver.ContentDeps{
 		WorldMgr:             manager,
 		NpcMgr:               npcManager,
@@ -194,6 +227,10 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		LoadoutsDir:          loadoutsDir,
 		SetRegistry:          setRegistry,
 		SubstanceRegistry:    substanceRegistry,
+		FactionRegistry:      factionRegistry,
+		FactionConfig:        factionConfig,
+		MaterialRegistry:     materialRegistry,
+		RecipeRegistry:       recipeRegistry,
 	}
 	sessionManager := gameserver.NewSessionManager()
 	worldHandler := gameserver.NewWorldHandlerProvider(manager, sessionManager, npcManager, clock, roomEquipmentManager, registry)

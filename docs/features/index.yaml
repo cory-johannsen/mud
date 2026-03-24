@@ -76,7 +76,7 @@ features:
   - slug: exploration-actions
     name: Exploration Actions
     status: planned
-    priority: 50
+    priority: 285
     category: world
     file: docs/features/exploration-actions.md
     effort: "L"  # 8 exploration modes (avoid notice/defend/detect magic/search/scout/follow/investigate/refocus)
@@ -88,7 +88,7 @@ features:
   - slug: downtime-actions
     name: Downtime Actions
     status: planned
-    priority: 55
+    priority: 293
     category: world
     file: docs/features/downtime-actions.md
     effort: "L"  # 7 downtime actions (earn income/craft/retrain/treat disease/subsist/forgery/long-term rest)
@@ -288,7 +288,7 @@ features:
 
   - slug: crafting
     name: Crafting
-    status: planned
+    status: done
     priority: 286
     category: world
     file: docs/features/crafting.md
@@ -316,6 +316,7 @@ features:
     effort: "M"  # queue multiple downtime activities; auto-start next on completion; DB-backed queue per player
     dependencies:
       - downtime
+      - crafting
 
   - slug: resting
     name: Resting
@@ -379,6 +380,8 @@ features:
     category: character
     file: docs/features/job-development.md
     effort: "XL"  # drawbacks for 52 jobs; Specialist+Expert tiers with cumulative attribute/feat/proficiency/skill sets; multi-job combinations
+    dependencies:
+      - non-combat-npcs  # extends the train command for job advancement
 
   # ── Tier 1: Standalone (no new cross-feature deps) ──────────────────────────
   # Parallelizable. map-poi goes first if sequential (adds NpcRole to Template).
@@ -589,6 +592,8 @@ features:
     category: ui
     file: docs/features/web-client.md
     effort: "XXL"  # full browser-based client with integrated admin interface; new frontend replacing or alongside telnet
+    dependencies:
+      - zone-content-expansion  # admin room editor uses WorldEditor from zone-content-expansion
 
   - slug: game-client-ebiten
     name: Ebiten Game Client
@@ -597,6 +602,8 @@ features:
     category: ui
     file: docs/features/game-client-ebiten.md
     effort: "XXL"  # native cross-platform client (Windows/Mac/Linux) over gRPC; new game engine layer
+    dependencies:
+      - web-client  # auth/character APIs used at login/character-select; shared command parser from web-client Phase 2
 
   - slug: documentation
     name: Documentation

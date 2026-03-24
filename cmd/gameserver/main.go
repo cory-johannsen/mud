@@ -55,9 +55,13 @@ type AppConfig struct {
 	RegionsDir      ruleset.RegionsDir
 	TechContentDir  technology.TechContentDir
 	RoundDurationMs gameserver.RoundDurationMs
-	XPConfigFile    string
-	SetsDir         string
-	SubstancesDir   string
+	XPConfigFile      string
+	SetsDir           string
+	SubstancesDir     string
+	FactionsDir       string
+	FactionConfigPath string
+	MaterialsFile     string
+	RecipesDir        string
 }
 
 // AppConfigToDatabase extracts database config from AppConfig for wire.
@@ -93,6 +97,10 @@ func main() {
 	contentDir := flag.String("content-dir", "content", "path to content directory for world editing")
 	setsDir := flag.String("sets-dir", "content/sets", "path to equipment set YAML definitions directory")
 	substancesDir := flag.String("substances-dir", "content/substances", "path to substance YAML definitions directory")
+	factionsDir := flag.String("factions-dir", "content/factions", "path to faction YAML definitions directory")
+	factionConfigPath := flag.String("faction-config", "content/faction_config.yaml", "path to faction configuration YAML file")
+	materialsFile := flag.String("materials-file", "content/materials.yaml", "path to crafting materials YAML file")
+	recipesDir := flag.String("recipes-dir", "content/recipes", "path to crafting recipe YAML definitions directory")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -144,7 +152,11 @@ func main() {
 		RoundDurationMs: gameserver.RoundDurationMs(cfg.GameServer.RoundDurationMs),
 		XPConfigFile:    *xpConfigFile,
 		SetsDir:         *setsDir,
-		SubstancesDir:   *substancesDir,
+		SubstancesDir:     *substancesDir,
+		FactionsDir:       *factionsDir,
+		FactionConfigPath: *factionConfigPath,
+		MaterialsFile:     *materialsFile,
+		RecipesDir:        *recipesDir,
 	}
 
 	app, err := Initialize(ctx, appCfg, gameClock, logger)

@@ -397,6 +397,8 @@ func NewGameServiceServer(
 		factionRepRepo:             storage.FactionRepRepo,
 		materialReg:                content.MaterialRegistry,
 		materialRepo:               storage.MaterialRepo,
+		recipeReg:                  content.RecipeRegistry,
+		craftEngine:                crafting.NewEngine(),
 	}
 	if content.FactionRegistry != nil {
 		s.factionRegistry = content.FactionRegistry
