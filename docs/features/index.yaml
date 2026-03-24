@@ -82,6 +82,8 @@ features:
     effort: "L"  # 8 exploration modes (avoid notice/defend/detect magic/search/scout/follow/investigate/refocus)
     dependencies:
       - actions
+      - exploration
+      - focus-points
 
   - slug: downtime-actions
     name: Downtime Actions
@@ -92,6 +94,8 @@ features:
     effort: "L"  # 7 downtime actions (earn income/craft/retrain/treat disease/subsist/forgery/long-term rest)
     dependencies:
       - actions
+      - downtime
+      - resting
 
   - slug: console-notifications
     name: Console Notifications
