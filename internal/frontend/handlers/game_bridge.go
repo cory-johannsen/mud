@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"maps"
-	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -186,20 +184,9 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	}
 
 	// activeConditions tracks condition ID → display name for the prompt.
-	// Protected by condMu because buildCurrentPrompt and the event loop share it.
+	// Protected by condMu because RoomModeHandler and the event loop share it.
 	var condMu sync.Mutex
 	activeConditions := make(map[string]string)
-
-	buildCurrentPrompt := func() string {
-		condMu.Lock()
-		sortedIDs := slices.Sorted(maps.Keys(activeConditions))
-		names := make([]string, 0, len(sortedIDs))
-		for _, id := range sortedIDs {
-			names = append(names, activeConditions[id])
-		}
-		condMu.Unlock()
-		return BuildPrompt(char.Name, currentHP.Load(), maxHP.Load(), names)
-	}
 
 	// Initialize split-screen now that the game session is starting.
 	// This is deferred from acceptor so the auth/char-select flow renders
@@ -256,17 +243,6 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		lastRoomView.Store(rv)
 	}
 
-	// Write initial prompt
-	var initPromptErr error
-	if conn.IsSplitScreen() {
-		initPromptErr = conn.WritePromptSplit(buildCurrentPrompt())
-	} else {
-		initPromptErr = conn.WritePrompt(buildCurrentPrompt())
-	}
-	if initPromptErr != nil {
-		return fmt.Errorf("writing initial prompt: %w", initPromptErr)
-	}
-
 	// Drain any pending resize signal left over from the AwaitNAWS call in the
 	// acceptor.  Without this drain, forwardServerEvents fires a spurious
 	// re-InitScreen immediately on startup, clearing the freshly-rendered
@@ -286,6 +262,27 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	// the server sends a RoomView event (i.e. after every move or look).
 	var currentRoom atomic.Value
 	currentRoom.Store(char.Location)
+
+	// Build the input-mode handler chain now that all atomic state is initialized.
+	roomHandler := NewRoomModeHandler(
+		char.Name, acct.Role,
+		&currentHP, &maxHP,
+		&currentRoom, &currentTime,
+		&condMu, activeConditions,
+	)
+	mapHandler := NewMapModeHandler()
+	session := NewSessionInputState(roomHandler)
+
+	// Write initial prompt
+	var initPromptErr error
+	if conn.IsSplitScreen() {
+		initPromptErr = conn.WritePromptSplit(session.CurrentPrompt())
+	} else {
+		initPromptErr = conn.WritePrompt(session.CurrentPrompt())
+	}
+	if initPromptErr != nil {
+		return fmt.Errorf("writing initial prompt: %w", initPromptErr)
+	}
 
 	stopIdle := StartIdleMonitor(IdleMonitorConfig{
 		LastInput:    &lastInput,
@@ -323,20 +320,17 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	})
 	defer stopIdle()
 
-	// Map-mode state shared between commandLoop and forwardServerEvents.
-	mapState := &mapModeState{}
-
 	// Spawn goroutine to forward server events to Telnet.
 	// After each event is rendered, the prompt is re-displayed.
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &lastRoomView, buildCurrentPrompt, &condMu, activeConditions, mapState)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &lastRoomView, &condMu, activeConditions, session, mapHandler)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, buildCurrentPrompt, mapState)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, session, mapHandler)
 
 	cancel()
 	wg.Wait()
@@ -369,9 +363,9 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 // commandLoop reads lines from the Telnet connection, parses commands,
 // and sends them as gRPC ClientMessages.
 //
-// Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil; buildPrompt must be non-nil.
+// Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil; session must be non-nil.
 // Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, buildPrompt func() string, mapState *mapModeState) error {
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, session *SessionInputState, mapHandler *MapModeHandler) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -401,18 +395,18 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		case "\x00UP":
 			if conn.IsSplitScreen() {
 				if cmd, ok := conn.HistoryUp(); ok {
-					_ = conn.SetInputLine(buildPrompt(), cmd)
+					_ = conn.SetInputLine(session.CurrentPrompt(), cmd)
 				}
 			} else {
-				_ = conn.WritePrompt(buildPrompt())
+				_ = conn.WritePrompt(session.CurrentPrompt())
 			}
 			continue
 		case "\x00DOWN":
 			if conn.IsSplitScreen() {
 				cmd, _ := conn.HistoryDown()
-				_ = conn.SetInputLine(buildPrompt(), cmd)
+				_ = conn.SetInputLine(session.CurrentPrompt(), cmd)
 			} else {
-				_ = conn.WritePrompt(buildPrompt())
+				_ = conn.WritePrompt(session.CurrentPrompt())
 			}
 			continue
 		case "\x00SHIFT_UP":
@@ -424,7 +418,7 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			if conn.IsSplitScreen() && conn.IsScrolledBack() {
 				_ = conn.ScrollDownLine()
 			} else if conn.IsSplitScreen() {
-				_ = conn.WritePromptSplit(buildPrompt())
+				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			}
 			continue
 		case "\x00PGUP":
@@ -452,16 +446,16 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		}
 
 		// Map-mode interceptor: consume all input when map mode is active.
-		if mapState.isActive() {
-			h.handleMapModeInput(line, conn, stream, mapState, buildPrompt, &requestID)
+		if session.Mode() != ModeRoom {
+			session.HandleInput(line, conn, stream, &requestID)
 			continue
 		}
 
 		if line == "" {
 			if conn.IsSplitScreen() {
-				_ = conn.WritePromptSplit(buildPrompt())
+				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			} else {
-				_ = conn.WritePrompt(buildPrompt())
+				_ = conn.WritePrompt(session.CurrentPrompt())
 			}
 			continue
 		}
@@ -481,7 +475,7 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 		}
 
 		travelResolver := func(zoneName string) (string, string) {
-			_, _, _, resp := mapState.snapshot()
+			_, _, resp := mapHandler.Snapshot()
 			if resp == nil {
 				return "", "Open the world map first with 'map'."
 			}
@@ -508,14 +502,14 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			charName:       charName,
 			role:           role,
 			stream:         stream,
-			promptFn:       buildPrompt,
+			promptFn:       session.CurrentPrompt,
 			travelResolver: travelResolver,
 			helpFn: func() {
 				h.showGameHelp(conn, registry, role)
 				if conn.IsSplitScreen() {
-					_ = conn.WritePromptSplit(buildPrompt())
+					_ = conn.WritePromptSplit(session.CurrentPrompt())
 				} else {
-					_ = conn.WritePrompt(buildPrompt())
+					_ = conn.WritePrompt(session.CurrentPrompt())
 				}
 			},
 		}
@@ -525,10 +519,10 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			msg := telnet.Colorf(telnet.Dim, "You don't know how to '%s'.", parsed.Command)
 			if conn.IsSplitScreen() {
 				_ = conn.WriteConsole(msg)
-				_ = conn.WritePromptSplit(buildPrompt())
+				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			} else {
 				_ = conn.WriteLine(msg)
-				_ = conn.WritePrompt(buildPrompt())
+				_ = conn.WritePrompt(session.CurrentPrompt())
 			}
 			continue
 		}
@@ -549,17 +543,14 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			return ErrSwitchCharacter
 		}
 		if result.enterMapMode {
-			mapState.enter(result.mapView)
-			if conn.IsSplitScreen() {
-				_ = conn.WriteConsole("")
-				_ = conn.WritePromptSplit(mapPrompt("", "", ""))
-			}
+			mapHandler.SetView(result.mapView)
+			session.SetMode(conn, mapHandler)
 		}
 		if result.done {
 			if conn.IsSplitScreen() {
-				_ = conn.WritePromptSplit(buildPrompt())
+				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			} else {
-				_ = conn.WritePrompt(buildPrompt())
+				_ = conn.WritePrompt(session.CurrentPrompt())
 			}
 			continue
 		}
@@ -583,12 +574,12 @@ func buildMoveMessage(reqID, direction string) *gamev1.ClientMessage {
 // forwardServerEvents reads ServerEvents from the gRPC stream and writes
 // rendered text to the Telnet connection.
 //
-// Precondition: stream must be open; charName must be non-empty; currentRoom, currentTime, currentDT, currentHP, maxHP must be non-nil; buildPrompt must be non-nil.
+// Precondition: stream must be open; charName must be non-empty; currentRoom, currentTime, currentDT, currentHP, maxHP must be non-nil; session must be non-nil.
 // Postcondition: Returns when ctx is done, stream closes, or a disconnect event is received.
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime and currentDT are updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP and maxHP are updated from CharacterInfo events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, buildPrompt func() string, condMu *sync.Mutex, activeConditions map[string]string, mapState *mapModeState) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler) {
 	// Pump stream.Recv() into a channel so it can participate in a proper
 	// select alongside resize events and the prompt-refresh ticker.
 	type recvResult struct {
@@ -624,24 +615,24 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					h.logger.Warn("split-screen resize init failed", zap.Error(err))
 					continue
 				}
-				inMapMode, mapView, _, mapResp := mapState.snapshot()
-				if inMapMode {
+				if session.Mode() == ModeMap {
+					mapView, _, mapResp := mapHandler.Snapshot()
 					if mapResp != nil {
 						_ = conn.WriteConsole(renderMapConsole(mapResp, mapView, rw))
 					}
-					_ = conn.WritePromptSplit(mapPrompt("", "", ""))
+					_ = conn.WritePromptSplit(session.CurrentPrompt())
 					continue
 				}
 				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok && rv != nil {
 					dt := currentDT.Load().(*gameserver.GameDateTime)
 					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt))
 				}
-				_ = conn.WritePromptSplit(buildPrompt())
+				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			}
 			continue
 		case <-promptTicker.C:
 			if conn.IsSplitScreen() {
-				_ = conn.WritePromptSplit(buildPrompt())
+				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			}
 			continue
 		case rr := <-recvCh:
@@ -664,19 +655,16 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			}
 			currentDT.Store(dt)
 			if conn.IsSplitScreen() {
-				_ = conn.WritePromptSplit(buildPrompt())
+				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			} else {
-				_ = conn.WritePrompt(buildPrompt())
+				_ = conn.WritePrompt(session.CurrentPrompt())
 			}
 			continue
 		case *gamev1.ServerEvent_RoomView:
 			// If in map mode (e.g. travel succeeded), exit map mode before rendering room view.
-			mapState.mu.Lock()
-			if mapState.mapMode {
-				mapState.mapMode = false
-				mapState.mapSelectedZone = ""
+			if session.Mode() != ModeRoom {
+				session.SetMode(conn, session.Room())
 			}
-			mapState.mu.Unlock()
 			if roomID := p.RoomView.GetRoomId(); roomID != "" {
 				currentRoom.Store(roomID)
 			}
@@ -726,10 +714,10 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			if ce.ConditionId == "" {
 				if conn.IsSplitScreen() {
 					_ = conn.WriteConsole(telnet.Colorize(telnet.Cyan, "No active conditions."))
-					_ = conn.WritePromptSplit(buildPrompt())
+					_ = conn.WritePromptSplit(session.CurrentPrompt())
 				} else {
 					_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "No active conditions."))
-					_ = conn.WritePrompt(buildPrompt())
+					_ = conn.WritePrompt(session.CurrentPrompt())
 				}
 				continue
 			}
@@ -755,13 +743,9 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderCharacterSheet(p.CharacterSheet, cw)
 		case *gamev1.ServerEvent_Map:
 			mw, _ := conn.Dimensions()
-			mapState.mu.Lock()
-			inMapMode := mapState.mapMode
-			mapView := mapState.mapView
-			mapState.mu.Unlock()
-			if inMapMode {
-				// Store the latest map response for re-render on resize.
-				mapState.setLastResponse(p.Map)
+			if session.Mode() == ModeMap {
+				mapHandler.SetLastResponse(p.Map)
+				mapView, _, _ := mapHandler.Snapshot()
 				var rendered string
 				if mapView == "world" {
 					rendered = RenderWorldMap(p.Map, mw)
@@ -770,10 +754,10 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				}
 				if conn.IsSplitScreen() {
 					_ = conn.WriteConsole(rendered)
-					_ = conn.WritePromptSplit("[MAP] z=zone  w=world  <num/name>=select  t=travel  q=exit")
+					_ = conn.WritePromptSplit(session.CurrentPrompt())
 				} else {
 					_ = conn.WriteLine(rendered)
-					_ = conn.WritePrompt(buildPrompt())
+					_ = conn.WritePrompt(session.CurrentPrompt())
 				}
 				continue
 			}
@@ -797,9 +781,9 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				maxHP.Store(hpu.GetMaxHp())
 			}
 			if conn.IsSplitScreen() {
-				_ = conn.WritePromptSplit(buildPrompt())
+				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			} else {
-				_ = conn.WritePrompt(buildPrompt())
+				_ = conn.WritePrompt(session.CurrentPrompt())
 			}
 			continue
 		case *gamev1.ServerEvent_Disconnected:
@@ -820,11 +804,11 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					default:
 						_ = conn.WriteConsole(text)
 					}
-					_ = conn.WritePromptSplit(buildPrompt())
+					_ = conn.WritePromptSplit(session.CurrentPrompt())
 				} else {
 					_ = conn.WriteLine(text)
 					// Re-display prompt after each server event
-					_ = conn.WritePrompt(buildPrompt())
+					_ = conn.WritePrompt(session.CurrentPrompt())
 				}
 			}
 		} // end select
