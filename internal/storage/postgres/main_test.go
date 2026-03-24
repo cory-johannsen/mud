@@ -320,6 +320,14 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 
 		-- Migration 042
 		ALTER TABLE characters ADD COLUMN IF NOT EXISTS focus_points INT NOT NULL DEFAULT 0;
+
+		-- Migration 043
+		CREATE TABLE IF NOT EXISTS character_materials (
+			character_id  bigint NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			material_id   text   NOT NULL,
+			quantity      int    NOT NULL CHECK (quantity > 0),
+			PRIMARY KEY (character_id, material_id)
+		);
 	`)
 	return err
 }
