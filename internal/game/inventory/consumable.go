@@ -53,8 +53,8 @@ type ToxinEffect struct {
 }
 
 // ConsumableTarget is the minimal interface required to apply consumable effects.
-// Implemented by *session.PlayerSession. This interface exists to prevent import
-// cycles between the inventory and session packages (REQ-EM-45).
+// Satisfied by adapters in the gameserver layer (REQ-EM-45). This interface exists
+// to prevent import cycles between the inventory and session packages.
 type ConsumableTarget interface {
 	GetTeam() string
 	// GetStatModifier returns the character's ability modifier for the named stat
