@@ -17,5 +17,5 @@ effect:
     dc: 12
     on_critical_failure:
       apply_disease:
-        disease_id: street_rot
+        disease_id: poisoned
         severity: 1
