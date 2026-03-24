@@ -197,3 +197,58 @@ func TestManager_Close_ReleasesZones(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, lua.LNil, ret)
 }
+
+// TestCallHook_BudgetResetAcrossCalls is the BUG-16 regression test.
+// It verifies that calling a hook more times than DefaultInstructionLimit
+// (i.e. exhausting the *old* lifetime budget multiple times over) never
+// produces a "context canceled" error.
+func TestCallHook_BudgetResetAcrossCalls(t *testing.T) {
+	mgr, _ := newTestManager(t)
+	dir := writeTempLua(t, "ping.lua", `function ping() return 1 end`)
+	require.NoError(t, mgr.LoadZone("test", dir, 100)) // tiny per-call budget
+	defer mgr.Close()
+
+	// Call the hook far more times than the old lifetime limit.
+	// With the old code, calls would fail after ~100 total opcodes.
+	// With the fix, every call gets a fresh 100-opcode budget.
+	const iterations = 500
+	for i := 0; i < iterations; i++ {
+		val, err := mgr.CallHook("test", "ping")
+		require.NoError(t, err, "CallHook must not error on iteration %d", i)
+		assert.Equal(t, lua.LNumber(1), val, "hook must return 1 on iteration %d", i)
+	}
+}
+
+// TestProperty_CallHook_NeverPermanentlyFails is a property-based version of
+// the BUG-16 regression. For random small budgets and random call counts, the
+// hook must always return the correct value.
+func TestProperty_CallHook_NeverPermanentlyFails(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		budget := rapid.IntRange(10, 500).Draw(rt, "budget")
+		calls := rapid.IntRange(1, budget*10).Draw(rt, "calls")
+
+		dir := t.TempDir()
+		script := `function ping() return 42 end`
+		if err := os.WriteFile(filepath.Join(dir, "ping.lua"), []byte(script), 0644); err != nil {
+			t.Fatal(err)
+		}
+
+		roller := dice.NewCryptoSource()
+		logger := zap.NewNop()
+		m := scripting.NewManager(dice.NewLoggedRoller(roller, logger), logger)
+		if err := m.LoadZone("test", dir, budget); err != nil {
+			t.Fatal(err)
+		}
+		defer m.Close()
+
+		for i := 0; i < calls; i++ {
+			val, err := m.CallHook("test", "ping")
+			if err != nil {
+				t.Fatalf("CallHook error on iteration %d (budget=%d): %v", i, budget, err)
+			}
+			if val != lua.LNumber(42) {
+				t.Fatalf("wrong return value %v on iteration %d", val, i)
+			}
+		}
+	})
+}
