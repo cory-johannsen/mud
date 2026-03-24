@@ -560,7 +560,7 @@ features:
 
   - slug: factions
     name: Factions and Allegiances
-    status: planned
+    status: done
     priority: 267
     category: world
     file: docs/features/factions.md
