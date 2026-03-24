@@ -368,6 +368,11 @@ type ClientMessage struct {
 	//	*ClientMessage_FactionStandingRequest
 	//	*ClientMessage_ChangeRepRequest
 	//	*ClientMessage_TabComplete
+	//	*ClientMessage_MaterialsRequest
+	//	*ClientMessage_CraftListRequest
+	//	*ClientMessage_CraftRequest
+	//	*ClientMessage_CraftConfirmRequest
+	//	*ClientMessage_ScavengeRequest
 	Payload       isClientMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1470,6 +1475,51 @@ func (x *ClientMessage) GetTabComplete() *TabCompleteRequest {
 	return nil
 }
 
+func (x *ClientMessage) GetMaterialsRequest() *MaterialsRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_MaterialsRequest); ok {
+			return x.MaterialsRequest
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetCraftListRequest() *CraftListRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_CraftListRequest); ok {
+			return x.CraftListRequest
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetCraftRequest() *CraftRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_CraftRequest); ok {
+			return x.CraftRequest
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetCraftConfirmRequest() *CraftConfirmRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_CraftConfirmRequest); ok {
+			return x.CraftConfirmRequest
+		}
+	}
+	return nil
+}
+
+func (x *ClientMessage) GetScavengeRequest() *ScavengeRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientMessage_ScavengeRequest); ok {
+			return x.ScavengeRequest
+		}
+	}
+	return nil
+}
+
 type isClientMessage_Payload interface {
 	isClientMessage_Payload()
 }
@@ -1942,6 +1992,26 @@ type ClientMessage_TabComplete struct {
 	TabComplete *TabCompleteRequest `protobuf:"bytes,118,opt,name=tab_complete,json=tabComplete,proto3,oneof"`
 }
 
+type ClientMessage_MaterialsRequest struct {
+	MaterialsRequest *MaterialsRequest `protobuf:"bytes,119,opt,name=materials_request,json=materialsRequest,proto3,oneof"`
+}
+
+type ClientMessage_CraftListRequest struct {
+	CraftListRequest *CraftListRequest `protobuf:"bytes,120,opt,name=craft_list_request,json=craftListRequest,proto3,oneof"`
+}
+
+type ClientMessage_CraftRequest struct {
+	CraftRequest *CraftRequest `protobuf:"bytes,121,opt,name=craft_request,json=craftRequest,proto3,oneof"`
+}
+
+type ClientMessage_CraftConfirmRequest struct {
+	CraftConfirmRequest *CraftConfirmRequest `protobuf:"bytes,122,opt,name=craft_confirm_request,json=craftConfirmRequest,proto3,oneof"`
+}
+
+type ClientMessage_ScavengeRequest struct {
+	ScavengeRequest *ScavengeRequest `protobuf:"bytes,123,opt,name=scavenge_request,json=scavengeRequest,proto3,oneof"`
+}
+
 func (*ClientMessage_JoinWorld) isClientMessage_Payload() {}
 
 func (*ClientMessage_Move) isClientMessage_Payload() {}
@@ -2175,6 +2245,16 @@ func (*ClientMessage_FactionStandingRequest) isClientMessage_Payload() {}
 func (*ClientMessage_ChangeRepRequest) isClientMessage_Payload() {}
 
 func (*ClientMessage_TabComplete) isClientMessage_Payload() {}
+
+func (*ClientMessage_MaterialsRequest) isClientMessage_Payload() {}
+
+func (*ClientMessage_CraftListRequest) isClientMessage_Payload() {}
+
+func (*ClientMessage_CraftRequest) isClientMessage_Payload() {}
+
+func (*ClientMessage_CraftConfirmRequest) isClientMessage_Payload() {}
+
+func (*ClientMessage_ScavengeRequest) isClientMessage_Payload() {}
 
 // RestRequest asks the server to rest the player and rearrange prepared technology slots.
 type RestRequest struct {
@@ -3458,6 +3538,7 @@ type ServerEvent struct {
 	//	*ServerEvent_ProficienciesResponse
 	//	*ServerEvent_HpUpdate
 	//	*ServerEvent_TabComplete
+	//	*ServerEvent_CraftResult
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3732,6 +3813,15 @@ func (x *ServerEvent) GetTabComplete() *TabCompleteResponse {
 	return nil
 }
 
+func (x *ServerEvent) GetCraftResult() *CraftResultEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_CraftResult); ok {
+			return x.CraftResult
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -3836,6 +3926,10 @@ type ServerEvent_TabComplete struct {
 	TabComplete *TabCompleteResponse `protobuf:"bytes,26,opt,name=tab_complete,json=tabComplete,proto3,oneof"`
 }
 
+type ServerEvent_CraftResult struct {
+	CraftResult *CraftResultEvent `protobuf:"bytes,27,opt,name=craft_result,json=craftResult,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -3885,6 +3979,8 @@ func (*ServerEvent_ProficienciesResponse) isServerEvent_Payload() {}
 func (*ServerEvent_HpUpdate) isServerEvent_Payload() {}
 
 func (*ServerEvent_TabComplete) isServerEvent_Payload() {}
+
+func (*ServerEvent_CraftResult) isServerEvent_Payload() {}
 
 // HpUpdateEvent delivers a lightweight HP update to refresh the prompt bar.
 // No console text is displayed; only the prompt is redrawn.
@@ -11251,11 +11347,342 @@ func (x *TabCompleteResponse) GetCompletions() []string {
 	return nil
 }
 
+// MaterialsRequest asks the server for the player's available crafting materials, optionally filtered by category.
+type MaterialsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Category      string                 `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MaterialsRequest) Reset() {
+	*x = MaterialsRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[161]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MaterialsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MaterialsRequest) ProtoMessage() {}
+
+func (x *MaterialsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[161]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MaterialsRequest.ProtoReflect.Descriptor instead.
+func (*MaterialsRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{161}
+}
+
+func (x *MaterialsRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+// CraftListRequest asks the server for the list of craftable recipes, optionally filtered by category.
+type CraftListRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Category      string                 `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CraftListRequest) Reset() {
+	*x = CraftListRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[162]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CraftListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CraftListRequest) ProtoMessage() {}
+
+func (x *CraftListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[162]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CraftListRequest.ProtoReflect.Descriptor instead.
+func (*CraftListRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{162}
+}
+
+func (x *CraftListRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+// CraftRequest asks the server to begin crafting the given recipe.
+type CraftRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RecipeId      string                 `protobuf:"bytes,1,opt,name=recipe_id,json=recipeId,proto3" json:"recipe_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CraftRequest) Reset() {
+	*x = CraftRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[163]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CraftRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CraftRequest) ProtoMessage() {}
+
+func (x *CraftRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[163]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CraftRequest.ProtoReflect.Descriptor instead.
+func (*CraftRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{163}
+}
+
+func (x *CraftRequest) GetRecipeId() string {
+	if x != nil {
+		return x.RecipeId
+	}
+	return ""
+}
+
+// CraftConfirmRequest confirms a pending craft action.
+type CraftConfirmRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CraftConfirmRequest) Reset() {
+	*x = CraftConfirmRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[164]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CraftConfirmRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CraftConfirmRequest) ProtoMessage() {}
+
+func (x *CraftConfirmRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[164]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CraftConfirmRequest.ProtoReflect.Descriptor instead.
+func (*CraftConfirmRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{164}
+}
+
+// ScavengeRequest asks the server to scavenge the current room for materials.
+type ScavengeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScavengeRequest) Reset() {
+	*x = ScavengeRequest{}
+	mi := &file_game_v1_game_proto_msgTypes[165]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScavengeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScavengeRequest) ProtoMessage() {}
+
+func (x *ScavengeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[165]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScavengeRequest.ProtoReflect.Descriptor instead.
+func (*ScavengeRequest) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{165}
+}
+
+// MaterialLoss describes the quantity of a material consumed during crafting.
+type MaterialLoss struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MaterialId    string                 `protobuf:"bytes,1,opt,name=material_id,json=materialId,proto3" json:"material_id,omitempty"`
+	Quantity      int32                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MaterialLoss) Reset() {
+	*x = MaterialLoss{}
+	mi := &file_game_v1_game_proto_msgTypes[166]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MaterialLoss) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MaterialLoss) ProtoMessage() {}
+
+func (x *MaterialLoss) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[166]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MaterialLoss.ProtoReflect.Descriptor instead.
+func (*MaterialLoss) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{166}
+}
+
+func (x *MaterialLoss) GetMaterialId() string {
+	if x != nil {
+		return x.MaterialId
+	}
+	return ""
+}
+
+func (x *MaterialLoss) GetQuantity() int32 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+// CraftResultEvent delivers the result of a crafting or scavenging action to the client.
+type CraftResultEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	ItemId        string                 `protobuf:"bytes,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	Quantity      int32                  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	MaterialsLost []*MaterialLoss        `protobuf:"bytes,4,rep,name=materials_lost,json=materialsLost,proto3" json:"materials_lost,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CraftResultEvent) Reset() {
+	*x = CraftResultEvent{}
+	mi := &file_game_v1_game_proto_msgTypes[167]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CraftResultEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CraftResultEvent) ProtoMessage() {}
+
+func (x *CraftResultEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[167]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CraftResultEvent.ProtoReflect.Descriptor instead.
+func (*CraftResultEvent) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{167}
+}
+
+func (x *CraftResultEvent) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *CraftResultEvent) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *CraftResultEvent) GetQuantity() int32 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *CraftResultEvent) GetMaterialsLost() []*MaterialLoss {
+	if x != nil {
+		return x.MaterialsLost
+	}
+	return nil
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
-	"\x12game/v1/game.proto\x12\agame.v1\"\xef3\n" +
+	"\x12game/v1/game.proto\x12\agame.v1\"\xdd6\n" +
 	"\rClientMessage\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12:\n" +
@@ -11393,7 +11820,12 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x14faction_info_request\x18s \x01(\v2\x1b.game.v1.FactionInfoRequestH\x00R\x12factionInfoRequest\x12[\n" +
 	"\x18faction_standing_request\x18t \x01(\v2\x1f.game.v1.FactionStandingRequestH\x00R\x16factionStandingRequest\x12I\n" +
 	"\x12change_rep_request\x18u \x01(\v2\x19.game.v1.ChangeRepRequestH\x00R\x10changeRepRequest\x12@\n" +
-	"\ftab_complete\x18v \x01(\v2\x1b.game.v1.TabCompleteRequestH\x00R\vtabCompleteB\t\n" +
+	"\ftab_complete\x18v \x01(\v2\x1b.game.v1.TabCompleteRequestH\x00R\vtabComplete\x12H\n" +
+	"\x11materials_request\x18w \x01(\v2\x19.game.v1.MaterialsRequestH\x00R\x10materialsRequest\x12I\n" +
+	"\x12craft_list_request\x18x \x01(\v2\x19.game.v1.CraftListRequestH\x00R\x10craftListRequest\x12<\n" +
+	"\rcraft_request\x18y \x01(\v2\x15.game.v1.CraftRequestH\x00R\fcraftRequest\x12R\n" +
+	"\x15craft_confirm_request\x18z \x01(\v2\x1c.game.v1.CraftConfirmRequestH\x00R\x13craftConfirmRequest\x12E\n" +
+	"\x10scavenge_request\x18{ \x01(\v2\x18.game.v1.ScavengeRequestH\x00R\x0fscavengeRequestB\t\n" +
 	"\apayload\"\r\n" +
 	"\vRestRequest\"\x13\n" +
 	"\x11SelectTechRequest\"$\n" +
@@ -11456,7 +11888,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\azone_id\x18\x01 \x01(\tR\x06zoneId\"4\n" +
 	"\x13ActivateItemRequest\x12\x1d\n" +
 	"\n" +
-	"item_query\x18\x01 \x01(\tR\titemQuery\"\xad\f\n" +
+	"item_query\x18\x01 \x01(\tR\titemQuery\"\xed\f\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -11488,7 +11920,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x17class_features_response\x18\x17 \x01(\v2\x1e.game.v1.ClassFeaturesResponseH\x00R\x15classFeaturesResponse\x12W\n" +
 	"\x16proficiencies_response\x18\x18 \x01(\v2\x1e.game.v1.ProficienciesResponseH\x00R\x15proficienciesResponse\x125\n" +
 	"\thp_update\x18\x19 \x01(\v2\x16.game.v1.HpUpdateEventH\x00R\bhpUpdate\x12A\n" +
-	"\ftab_complete\x18\x1a \x01(\v2\x1c.game.v1.TabCompleteResponseH\x00R\vtabCompleteB\t\n" +
+	"\ftab_complete\x18\x1a \x01(\v2\x1c.game.v1.TabCompleteResponseH\x00R\vtabComplete\x12>\n" +
+	"\fcraft_result\x18\x1b \x01(\v2\x19.game.v1.CraftResultEventH\x00R\vcraftResultB\t\n" +
 	"\apayload\"\x92\x01\n" +
 	"\rHpUpdateEvent\x12\x1d\n" +
 	"\n" +
@@ -11995,7 +12428,24 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x12TabCompleteRequest\x12\x16\n" +
 	"\x06prefix\x18\x01 \x01(\tR\x06prefix\"7\n" +
 	"\x13TabCompleteResponse\x12 \n" +
-	"\vcompletions\x18\x01 \x03(\tR\vcompletions*Y\n" +
+	"\vcompletions\x18\x01 \x03(\tR\vcompletions\".\n" +
+	"\x10MaterialsRequest\x12\x1a\n" +
+	"\bcategory\x18\x01 \x01(\tR\bcategory\".\n" +
+	"\x10CraftListRequest\x12\x1a\n" +
+	"\bcategory\x18\x01 \x01(\tR\bcategory\"+\n" +
+	"\fCraftRequest\x12\x1b\n" +
+	"\trecipe_id\x18\x01 \x01(\tR\brecipeId\"\x15\n" +
+	"\x13CraftConfirmRequest\"\x11\n" +
+	"\x0fScavengeRequest\"K\n" +
+	"\fMaterialLoss\x12\x1f\n" +
+	"\vmaterial_id\x18\x01 \x01(\tR\n" +
+	"materialId\x12\x1a\n" +
+	"\bquantity\x18\x02 \x01(\x05R\bquantity\"\x9f\x01\n" +
+	"\x10CraftResultEvent\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x17\n" +
+	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12\x1a\n" +
+	"\bquantity\x18\x03 \x01(\x05R\bquantity\x12<\n" +
+	"\x0ematerials_lost\x18\x04 \x03(\v2\x15.game.v1.MaterialLossR\rmaterialsLost*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -12036,7 +12486,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 163)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 170)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -12203,8 +12653,15 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*ChangeRepRequest)(nil),          // 162: game.v1.ChangeRepRequest
 	(*TabCompleteRequest)(nil),        // 163: game.v1.TabCompleteRequest
 	(*TabCompleteResponse)(nil),       // 164: game.v1.TabCompleteResponse
-	nil,                               // 165: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 166: game.v1.CharacterSheetView.AccessoriesEntry
+	(*MaterialsRequest)(nil),          // 165: game.v1.MaterialsRequest
+	(*CraftListRequest)(nil),          // 166: game.v1.CraftListRequest
+	(*CraftRequest)(nil),              // 167: game.v1.CraftRequest
+	(*CraftConfirmRequest)(nil),       // 168: game.v1.CraftConfirmRequest
+	(*ScavengeRequest)(nil),           // 169: game.v1.ScavengeRequest
+	(*MaterialLoss)(nil),              // 170: game.v1.MaterialLoss
+	(*CraftResultEvent)(nil),          // 171: game.v1.CraftResultEvent
+	nil,                               // 172: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 173: game.v1.CharacterSheetView.AccessoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	34,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -12324,69 +12781,76 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	161, // 114: game.v1.ClientMessage.faction_standing_request:type_name -> game.v1.FactionStandingRequest
 	162, // 115: game.v1.ClientMessage.change_rep_request:type_name -> game.v1.ChangeRepRequest
 	163, // 116: game.v1.ClientMessage.tab_complete:type_name -> game.v1.TabCompleteRequest
-	43,  // 117: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
-	45,  // 118: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
-	46,  // 119: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
-	47,  // 120: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
-	49,  // 121: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
-	50,  // 122: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
-	51,  // 123: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
-	53,  // 124: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
-	56,  // 125: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
-	91,  // 126: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
-	89,  // 127: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
-	90,  // 128: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
-	93,  // 129: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
-	88,  // 130: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
-	52,  // 131: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
-	110, // 132: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
-	82,  // 133: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
-	85,  // 134: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
-	101, // 135: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
-	106, // 136: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
-	108, // 137: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
-	104, // 138: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
-	116, // 139: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
-	33,  // 140: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
-	164, // 141: game.v1.ServerEvent.tab_complete:type_name -> game.v1.TabCompleteResponse
-	44,  // 142: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	54,  // 143: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	96,  // 144: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	76,  // 145: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	77,  // 146: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
-	0,   // 147: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,   // 148: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	48,  // 149: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
-	2,   // 150: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
-	44,  // 151: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	80,  // 152: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
-	81,  // 153: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
-	84,  // 154: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
-	87,  // 155: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	3,   // 156: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	100, // 157: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
-	103, // 158: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
-	103, // 159: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
-	100, // 160: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	165, // 161: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	166, // 162: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
-	113, // 163: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
-	113, // 164: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
-	84,  // 165: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
-	100, // 166: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
-	103, // 167: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
-	115, // 168: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
-	109, // 169: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
-	112, // 170: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
-	111, // 171: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
-	115, // 172: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	4,   // 173: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	32,  // 174: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	174, // [174:175] is the sub-list for method output_type
-	173, // [173:174] is the sub-list for method input_type
-	173, // [173:173] is the sub-list for extension type_name
-	173, // [173:173] is the sub-list for extension extendee
-	0,   // [0:173] is the sub-list for field type_name
+	165, // 117: game.v1.ClientMessage.materials_request:type_name -> game.v1.MaterialsRequest
+	166, // 118: game.v1.ClientMessage.craft_list_request:type_name -> game.v1.CraftListRequest
+	167, // 119: game.v1.ClientMessage.craft_request:type_name -> game.v1.CraftRequest
+	168, // 120: game.v1.ClientMessage.craft_confirm_request:type_name -> game.v1.CraftConfirmRequest
+	169, // 121: game.v1.ClientMessage.scavenge_request:type_name -> game.v1.ScavengeRequest
+	43,  // 122: game.v1.ServerEvent.room_view:type_name -> game.v1.RoomView
+	45,  // 123: game.v1.ServerEvent.message:type_name -> game.v1.MessageEvent
+	46,  // 124: game.v1.ServerEvent.room_event:type_name -> game.v1.RoomEvent
+	47,  // 125: game.v1.ServerEvent.player_list:type_name -> game.v1.PlayerList
+	49,  // 126: game.v1.ServerEvent.exit_list:type_name -> game.v1.ExitList
+	50,  // 127: game.v1.ServerEvent.error:type_name -> game.v1.ErrorEvent
+	51,  // 128: game.v1.ServerEvent.disconnected:type_name -> game.v1.Disconnected
+	53,  // 129: game.v1.ServerEvent.character_info:type_name -> game.v1.CharacterInfo
+	56,  // 130: game.v1.ServerEvent.npc_view:type_name -> game.v1.NpcView
+	91,  // 131: game.v1.ServerEvent.combat_event:type_name -> game.v1.CombatEvent
+	89,  // 132: game.v1.ServerEvent.round_start:type_name -> game.v1.RoundStartEvent
+	90,  // 133: game.v1.ServerEvent.round_end:type_name -> game.v1.RoundEndEvent
+	93,  // 134: game.v1.ServerEvent.condition_event:type_name -> game.v1.ConditionEvent
+	88,  // 135: game.v1.ServerEvent.inventory_view:type_name -> game.v1.InventoryView
+	52,  // 136: game.v1.ServerEvent.time_of_day:type_name -> game.v1.TimeOfDayEvent
+	110, // 137: game.v1.ServerEvent.character_sheet:type_name -> game.v1.CharacterSheetView
+	82,  // 138: game.v1.ServerEvent.map:type_name -> game.v1.MapResponse
+	85,  // 139: game.v1.ServerEvent.skills_response:type_name -> game.v1.SkillsResponse
+	101, // 140: game.v1.ServerEvent.feats_response:type_name -> game.v1.FeatsResponse
+	106, // 141: game.v1.ServerEvent.interact_response:type_name -> game.v1.InteractResponse
+	108, // 142: game.v1.ServerEvent.use_response:type_name -> game.v1.UseResponse
+	104, // 143: game.v1.ServerEvent.class_features_response:type_name -> game.v1.ClassFeaturesResponse
+	116, // 144: game.v1.ServerEvent.proficiencies_response:type_name -> game.v1.ProficienciesResponse
+	33,  // 145: game.v1.ServerEvent.hp_update:type_name -> game.v1.HpUpdateEvent
+	164, // 146: game.v1.ServerEvent.tab_complete:type_name -> game.v1.TabCompleteResponse
+	171, // 147: game.v1.ServerEvent.craft_result:type_name -> game.v1.CraftResultEvent
+	44,  // 148: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	54,  // 149: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	96,  // 150: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	76,  // 151: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	77,  // 152: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
+	0,   // 153: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,   // 154: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	48,  // 155: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
+	2,   // 156: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
+	44,  // 157: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	80,  // 158: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
+	81,  // 159: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
+	84,  // 160: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
+	87,  // 161: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	3,   // 162: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	100, // 163: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
+	103, // 164: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
+	103, // 165: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
+	100, // 166: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
+	172, // 167: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	173, // 168: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	113, // 169: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
+	113, // 170: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
+	84,  // 171: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
+	100, // 172: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
+	103, // 173: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
+	115, // 174: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
+	109, // 175: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
+	112, // 176: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
+	111, // 177: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
+	115, // 178: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
+	170, // 179: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
+	4,   // 180: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	32,  // 181: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	181, // [181:182] is the sub-list for method output_type
+	180, // [180:181] is the sub-list for method input_type
+	180, // [180:180] is the sub-list for extension type_name
+	180, // [180:180] is the sub-list for extension extendee
+	0,   // [0:180] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -12512,6 +12976,11 @@ func file_game_v1_game_proto_init() {
 		(*ClientMessage_FactionStandingRequest)(nil),
 		(*ClientMessage_ChangeRepRequest)(nil),
 		(*ClientMessage_TabComplete)(nil),
+		(*ClientMessage_MaterialsRequest)(nil),
+		(*ClientMessage_CraftListRequest)(nil),
+		(*ClientMessage_CraftRequest)(nil),
+		(*ClientMessage_CraftConfirmRequest)(nil),
+		(*ClientMessage_ScavengeRequest)(nil),
 	}
 	file_game_v1_game_proto_msgTypes[28].OneofWrappers = []any{
 		(*ServerEvent_RoomView)(nil),
@@ -12539,6 +13008,7 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_ProficienciesResponse)(nil),
 		(*ServerEvent_HpUpdate)(nil),
 		(*ServerEvent_TabComplete)(nil),
+		(*ServerEvent_CraftResult)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -12546,7 +13016,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   163,
+			NumMessages:   170,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

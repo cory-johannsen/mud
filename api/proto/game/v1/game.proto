@@ -133,6 +133,11 @@ message ClientMessage {
     FactionStandingRequest faction_standing_request = 116;
     ChangeRepRequest     change_rep_request    = 117;
     TabCompleteRequest   tab_complete          = 118;
+    MaterialsRequest     materials_request     = 119;
+    CraftListRequest     craft_list_request    = 120;
+    CraftRequest         craft_request         = 121;
+    CraftConfirmRequest  craft_confirm_request = 122;
+    ScavengeRequest      scavenge_request      = 123;
   }
 }
 
@@ -302,6 +307,7 @@ message ServerEvent {
     ProficienciesResponse proficiencies_response = 24;
     HpUpdateEvent         hp_update              = 25;
     TabCompleteResponse   tab_complete           = 26;
+    CraftResultEvent      craft_result           = 27;
   }
 }
 
@@ -1153,4 +1159,33 @@ message TabCompleteRequest {
 // TabCompleteResponse delivers sorted tab-completion candidates to the client.
 message TabCompleteResponse {
   repeated string completions = 1; // matching completions, sorted alphabetically
+}
+
+// MaterialsRequest asks the server for the player's available crafting materials, optionally filtered by category.
+message MaterialsRequest { string category = 1; }
+
+// CraftListRequest asks the server for the list of craftable recipes, optionally filtered by category.
+message CraftListRequest  { string category = 1; }
+
+// CraftRequest asks the server to begin crafting the given recipe.
+message CraftRequest      { string recipe_id = 1; }
+
+// CraftConfirmRequest confirms a pending craft action.
+message CraftConfirmRequest {}
+
+// ScavengeRequest asks the server to scavenge the current room for materials.
+message ScavengeRequest   {}
+
+// MaterialLoss describes the quantity of a material consumed during crafting.
+message MaterialLoss {
+    string material_id = 1;
+    int32  quantity    = 2;
+}
+
+// CraftResultEvent delivers the result of a crafting or scavenging action to the client.
+message CraftResultEvent {
+    bool             success          = 1;
+    string           item_id          = 2;
+    int32            quantity         = 3;
+    repeated MaterialLoss materials_lost = 4;
 }
