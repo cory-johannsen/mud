@@ -259,6 +259,11 @@ type GameServiceServer struct {
 	// npcIdleTickInterval is the ZoneTickManager tick interval used to convert
 	// say cooldown durations to tick counts. REQ-NB-2.
 	npcIdleTickInterval time.Duration
+	// lastTimePeriod tracks the last observed time period for transition-based recharge triggers.
+	// Protected by itemTickMu; owned exclusively by the item-tick goroutine (REQ-ACT-21).
+	lastTimePeriod TimePeriod
+	// itemTickMu protects lastTimePeriod; owned exclusively by the item-tick goroutine.
+	itemTickMu sync.Mutex
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.

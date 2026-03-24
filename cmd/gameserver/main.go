@@ -340,6 +340,10 @@ func main() {
 	app.GRPCService.StartWantedDecayHook()
 	defer app.GRPCService.StopWantedDecayHook()
 
+	// Start calendar-driven item charge recharge ticks.
+	stopItemTicks := app.GRPCService.StartItemTickHook()
+	defer stopItemTicks()
+
 	// Create gRPC server.
 	grpcServer := grpc.NewServer()
 	gamev1.RegisterGameServiceServer(grpcServer, app.GRPCService)
