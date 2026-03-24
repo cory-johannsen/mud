@@ -512,6 +512,49 @@ func TestItemDef_PoisonSubstanceID_Field_Stored(t *testing.T) {
 	}
 }
 
+func TestItemDef_Validate_ActivationFields_Property(t *testing.T) {
+	t.Run("valid activation_cost with charges always passes", func(t *testing.T) {
+		rapid.Check(t, func(rt *rapid.T) {
+			cost := rapid.IntRange(1, 3).Draw(rt, "cost")
+			charges := rapid.IntRange(1, 10).Draw(rt, "charges")
+			d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1,
+				ActivationCost: cost, Charges: charges}
+			assert.NoError(rt, d.Validate())
+		})
+	})
+	t.Run("nonzero activation_cost with zero charges always errors", func(t *testing.T) {
+		rapid.Check(t, func(rt *rapid.T) {
+			cost := rapid.IntRange(1, 3).Draw(rt, "cost")
+			d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1,
+				ActivationCost: cost, Charges: 0}
+			assert.Error(rt, d.Validate())
+		})
+	})
+	t.Run("out-of-range activation_cost always errors", func(t *testing.T) {
+		rapid.Check(t, func(rt *rapid.T) {
+			// Draw from negative range or >3 range
+			cost := rapid.OneOf(
+				rapid.IntRange(-10, -1),
+				rapid.IntRange(4, 10),
+			).Draw(rt, "bad_cost")
+			d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1,
+				ActivationCost: cost, Charges: 1}
+			assert.Error(rt, d.Validate())
+		})
+	})
+	t.Run("valid recharge entries with known triggers always pass", func(t *testing.T) {
+		rapid.Check(t, func(rt *rapid.T) {
+			trigger := rapid.SampledFrom([]string{"daily", "midnight", "dawn", "rest"}).Draw(rt, "trigger")
+			amount := rapid.IntRange(1, 5).Draw(rt, "amount")
+			d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1,
+				ActivationCost: 1, Charges: 1,
+				Recharge: []inventory.RechargeEntry{{Trigger: trigger, Amount: amount}},
+			}
+			assert.NoError(rt, d.Validate())
+		})
+	})
+}
+
 func TestItemDef_Validate_ActivationFields(t *testing.T) {
 	t.Run("activation_cost out of range", func(t *testing.T) {
 		d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1, ActivationCost: 4, Charges: 1}

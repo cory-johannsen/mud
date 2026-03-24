@@ -135,12 +135,13 @@ func (d *ItemDef) Validate() error {
 	if d.ActivationScript != "" && d.ActivationEffect != nil {
 		errs = append(errs, fmt.Errorf("activation_script and activation_effect are mutually exclusive"))
 	}
-	// REQ-ACT-10/11: Validate each RechargeEntry.
 	validTriggers := map[string]bool{"daily": true, "midnight": true, "dawn": true, "rest": true}
 	for i, re := range d.Recharge {
+		// REQ-ACT-10: Recharge trigger must be one of daily|midnight|dawn|rest.
 		if !validTriggers[re.Trigger] {
 			errs = append(errs, fmt.Errorf("recharge[%d].trigger %q is invalid; must be daily|midnight|dawn|rest", i, re.Trigger))
 		}
+		// REQ-ACT-11: Recharge amount must be > 0.
 		if re.Amount <= 0 {
 			errs = append(errs, fmt.Errorf("recharge[%d].amount must be > 0 (got %d)", i, re.Amount))
 		}
