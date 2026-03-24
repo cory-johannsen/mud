@@ -521,3 +521,97 @@ func TestHandleScavenge_Property_ExhaustedAfterFirstAttempt(t *testing.T) {
 		}
 	})
 }
+
+// TestHandleCraftConfirm_Failure_HalfMaterialsConsumed verifies that on a Failure outcome
+// only floor(required/2) materials are consumed per REQ-CRAFT-5.
+//
+// Precondition: player has 4 scrap_metal; recipe requires 4; rigging rank = "untrained" (meets
+// complexity=1); dice is nil so roll=10; abilityMod=0; profBonus("untrained")=0; total=10 vs
+// DC=20 → Failure (total < DC and total >= DC-10 → Failure, not CritFailure).
+// Postcondition: sess.Materials["scrap_metal"] == 4 - floor(4/2) == 2; PendingCraftRecipeID cleared.
+func TestHandleCraftConfirm_Failure_HalfMaterialsConsumed(t *testing.T) {
+	mats := []*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "mechanical"},
+	}
+	matReg := newMaterialRegistry(mats)
+	recipes := []*crafting.Recipe{
+		{
+			ID:          "pipe_wrench",
+			Name:        "Pipe Wrench",
+			Category:    "weapon",
+			Complexity:  1,
+			DC:          20, // roll=10, total=10 → Failure (10 < 20, 10 >= 10 so not CritFailure)
+			OutputCount: 1,
+			Materials:   []crafting.RecipeMaterial{{ID: "scrap_metal", Quantity: 4}},
+		},
+	}
+	recipeReg := newRecipeRegistry(recipes)
+	svc, uid := buildCraftingServer(t, matReg, &stubMaterialsRepo{}, nil)
+	svc.recipeReg = recipeReg
+	svc.craftEngine = crafting.NewEngine()
+	// dice is nil → roll = 10
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Skills = map[string]string{"rigging": "untrained"}
+	sess.Materials = map[string]int{"scrap_metal": 4}
+	sess.Abilities = character.AbilityScores{Savvy: 10} // abilityMod = 0
+	sess.PendingCraftRecipeID = "pipe_wrench"
+
+	evt, err := svc.handleCraftConfirm(uid)
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage()
+	require.NotNil(t, msg, "expected message event")
+	assert.Empty(t, sess.PendingCraftRecipeID, "pending recipe must be cleared")
+	// Failure: floor(4/2) = 2 consumed, 4-2 = 2 remaining.
+	assert.Equal(t, 2, sess.Materials["scrap_metal"], "only half materials consumed on Failure")
+}
+
+// TestHandleCraftConfirm_CritFailure_AllMaterialsConsumed verifies that on a CritFailure
+// all materials are consumed and no output is produced per REQ-CRAFT-5.
+//
+// Precondition: player has 4 scrap_metal; recipe requires 4; rigging rank = "untrained";
+// dice is nil so roll=10; abilityMod=-5 (Savvy=0); profBonus("untrained")=0; total=5 vs
+// DC=20 → CritFailure (total < DC-10 → total=5 < 10).
+// Postcondition: sess.Materials["scrap_metal"] == 0; PendingCraftRecipeID cleared.
+func TestHandleCraftConfirm_CritFailure_AllMaterialsConsumed(t *testing.T) {
+	mats := []*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "mechanical"},
+	}
+	matReg := newMaterialRegistry(mats)
+	recipes := []*crafting.Recipe{
+		{
+			ID:          "pipe_wrench_v2",
+			Name:        "Pipe Wrench",
+			Category:    "weapon",
+			Complexity:  1,
+			DC:          20, // total=5 < DC-10=10 → CritFailure
+			OutputCount: 1,
+			Materials:   []crafting.RecipeMaterial{{ID: "scrap_metal", Quantity: 4}},
+		},
+	}
+	recipeReg := newRecipeRegistry(recipes)
+	svc, uid := buildCraftingServer(t, matReg, &stubMaterialsRepo{}, nil)
+	svc.recipeReg = recipeReg
+	svc.craftEngine = crafting.NewEngine()
+	// dice is nil → roll = 10
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Skills = map[string]string{"rigging": "untrained"}
+	sess.Materials = map[string]int{"scrap_metal": 4}
+	sess.Abilities = character.AbilityScores{Savvy: 0} // abilityMod = (0-10)/2 = -5; total = 10-5+0 = 5
+	sess.PendingCraftRecipeID = "pipe_wrench_v2"
+
+	evt, err := svc.handleCraftConfirm(uid)
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage()
+	require.NotNil(t, msg, "expected message event")
+	assert.Empty(t, sess.PendingCraftRecipeID, "pending recipe must be cleared")
+	// CritFailure: all 4 materials consumed, map entry deleted.
+	assert.Equal(t, 0, sess.Materials["scrap_metal"], "all materials consumed on CritFailure")
+}

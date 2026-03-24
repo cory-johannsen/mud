@@ -435,22 +435,9 @@ func (s *GameServiceServer) handleCraftConfirm(uid string) (*gamev1.ServerEvent,
 		)), nil
 	}
 
-	// Deduct materials via repo and session state.
-	deductions := make(map[string]int, len(recipe.Materials))
-	for _, rm := range recipe.Materials {
-		deductions[rm.ID] = rm.Quantity
-	}
-	if s.materialRepo != nil {
-		if err := s.materialRepo.DeductMany(context.Background(), sess.CharacterID, deductions); err != nil {
-			sess.PendingCraftRecipeID = ""
-			return errorEvent("Failed to deduct materials."), nil
-		}
-	}
-	for matID, qty := range deductions {
-		sess.Materials[matID] -= qty
-		if sess.Materials[matID] <= 0 {
-			delete(sess.Materials, matID)
-		}
+	if s.craftEngine == nil {
+		sess.PendingCraftRecipeID = ""
+		return errorEvent("Crafting system not available."), nil
 	}
 
 	// Roll the crafting check. Use fallback roll=10 when dice is nil (test mode).
@@ -466,12 +453,23 @@ func (s *GameServiceServer) handleCraftConfirm(uid string) (*gamev1.ServerEvent,
 	checkOutcome := skillcheck.OutcomeFor(total, recipe.DC)
 	craftOutcome := crafting.Outcome(checkOutcome)
 
-	if s.craftEngine == nil {
-		sess.PendingCraftRecipeID = ""
-		return errorEvent("Crafting system not available."), nil
-	}
+	// ExecuteQuickCraft computes outcome and the correct deductions per REQ-CRAFT-5:
+	// Failure consumes half materials, CritFailure/Success/CritSuccess consume full.
 	craftResult := s.craftEngine.ExecuteQuickCraft(recipe, sess.Materials, craftOutcome)
 	sess.PendingCraftRecipeID = ""
+
+	// Deduct only the engine-computed amounts via repo and session state.
+	if s.materialRepo != nil && len(craftResult.MaterialsDeducted) > 0 {
+		if err := s.materialRepo.DeductMany(context.Background(), sess.CharacterID, craftResult.MaterialsDeducted); err != nil {
+			return errorEvent("Failed to deduct materials."), nil
+		}
+	}
+	for matID, qty := range craftResult.MaterialsDeducted {
+		sess.Materials[matID] -= qty
+		if sess.Materials[matID] <= 0 {
+			delete(sess.Materials, matID)
+		}
+	}
 
 	var sb strings.Builder
 	switch craftOutcome {
