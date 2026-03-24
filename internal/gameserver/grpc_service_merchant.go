@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"strings"
 	"sync"
@@ -102,7 +103,11 @@ func (s *GameServiceServer) handleBrowse(uid string, req *gamev1.BrowseRequest) 
 	sb.WriteString(fmt.Sprintf("=== %s's Wares ===\n", inst.Name()))
 	sb.WriteString(fmt.Sprintf("%-20s %8s %8s %6s\n", "Item", "Buy", "Sell", "Stock"))
 	for _, row := range rows {
-		sb.WriteString(fmt.Sprintf("%-20s %8d %8d %6d\n", row.ItemID, row.BuyPrice, row.SellPrice, row.Stock))
+		suffix := ""
+		if s.factionSvc != nil {
+			suffix = s.factionSvc.ExclusiveTierSuffix(row.ItemID)
+		}
+		sb.WriteString(fmt.Sprintf("%-20s %8d %8d %6d%s\n", row.ItemID, row.BuyPrice, row.SellPrice, row.Stock, suffix))
 	}
 	return messageEvent(sb.String()), nil
 }
@@ -145,6 +150,15 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 	if itemCfg == nil {
 		return messageEvent(fmt.Sprintf("%s doesn't sell %q.", inst.Name(), itemID)), nil
 	}
+	// Faction item gating check (REQ-FA-19, REQ-FA-30).
+	if s.factionSvc != nil && !s.factionSvc.CanBuyItem(sess, itemID) {
+		tierLabel, factionName := s.factionSvc.ExclusiveTierLabel(itemID)
+		return messageEvent(fmt.Sprintf("You need to be a %s of %s to buy that.", tierLabel, factionName)), nil
+	}
+	// Enemy faction NPC check (REQ-FA-28).
+	if s.factionSvc != nil && inst.FactionID != "" && s.factionSvc.IsEnemyOf(sess, inst.FactionID) {
+		return messageEvent(fmt.Sprintf("%s eyes you coldly. 'We don't serve your kind here.'", inst.Name())), nil
+	}
 	merchantRuntimeMu.RLock()
 	stock := state.Stock[itemID]
 	merchantRuntimeMu.RUnlock()
@@ -153,6 +167,14 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 	}
 	surcharge := s.wantedSurchargeFor(sess, inst)
 	unitPrice := npc.ComputeBuyPrice(itemCfg.BasePrice, tmpl.Merchant.SellMargin, surcharge, sess.NegotiateModifier)
+	// Apply faction discount if merchant belongs to player's faction (REQ-FA-32, 33).
+	if s.factionSvc != nil && inst.FactionID != "" && inst.FactionID == sess.FactionID {
+		rep := sess.FactionRep[sess.FactionID]
+		discount := s.factionSvc.DiscountFor(sess.FactionID, rep)
+		if discount > 0 {
+			unitPrice = int(math.Floor(float64(itemCfg.BasePrice) * float64(tmpl.Merchant.SellMargin) * (1.0 - discount)))
+		}
+	}
 	total := unitPrice * qty
 	if sess.Currency < total {
 		return messageEvent(fmt.Sprintf("You can't afford that. It costs %d credits and you have %d.", total, sess.Currency)), nil
