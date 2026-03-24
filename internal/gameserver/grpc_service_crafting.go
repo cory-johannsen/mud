@@ -466,6 +466,10 @@ func (s *GameServiceServer) handleCraftConfirm(uid string) (*gamev1.ServerEvent,
 	checkOutcome := skillcheck.OutcomeFor(total, recipe.DC)
 	craftOutcome := crafting.Outcome(checkOutcome)
 
+	if s.craftEngine == nil {
+		sess.PendingCraftRecipeID = ""
+		return errorEvent("Crafting system not available."), nil
+	}
 	craftResult := s.craftEngine.ExecuteQuickCraft(recipe, sess.Materials, craftOutcome)
 	sess.PendingCraftRecipeID = ""
 
