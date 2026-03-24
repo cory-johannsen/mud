@@ -74,7 +74,10 @@ type ContentDeps struct {
 	SubstanceRegistry    *substance.Registry
 	// FactionRegistry holds all faction definitions loaded at startup.
 	// May be nil when the faction feature is not yet configured.
-	FactionRegistry      *faction.FactionRegistry
+	FactionRegistry *faction.FactionRegistry
+	// FactionConfig holds global faction economy parameters (rep costs, rep per service).
+	// May be nil when the faction feature is not yet configured.
+	FactionConfig *faction.FactionConfig
 }
 
 // HandlerDeps groups all handler dependencies for GameServiceServer.

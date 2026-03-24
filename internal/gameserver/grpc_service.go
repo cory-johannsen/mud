@@ -264,6 +264,9 @@ type GameServiceServer struct {
 	// factionRepRepo persists per-character faction reputation scores.
 	// May be nil when faction feature is not configured.
 	factionRepRepo FactionRepRepository
+	// factionConfig holds global faction economy parameters (rep costs, rep per service).
+	// May be nil when faction feature is not configured.
+	factionConfig *faction.FactionConfig
 	// gameHourFn returns the current game hour (0–23). Used by NPC schedule evaluation. REQ-NB-16.
 	gameHourFn func() int
 	// npcIdleTickInterval is the ZoneTickManager tick interval used to convert
@@ -370,6 +373,9 @@ func NewGameServiceServer(
 	if content.FactionRegistry != nil {
 		s.factionRegistry = content.FactionRegistry
 		s.factionSvc = faction.NewServiceWithRepo(*content.FactionRegistry, storage.FactionRepRepo)
+	}
+	if content.FactionConfig != nil {
+		s.factionConfig = content.FactionConfig
 	}
 	// gameHourFn defaults to reading from calendar if available. REQ-NB-16.
 	s.gameHourFn = func() int {
