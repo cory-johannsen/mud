@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
 	"github.com/cory-johannsen/mud/internal/game/maputil"
@@ -254,6 +255,15 @@ type GameServiceServer struct {
 	// substanceReg holds all substance definitions.
 	// REQ-AH-3: loaded at startup from content/substances/.
 	substanceReg *substance.Registry
+	// factionRegistry holds all faction definitions loaded at startup.
+	// May be nil when the faction feature is not configured.
+	factionRegistry *faction.FactionRegistry
+	// factionSvc provides faction logic operations.
+	// May be nil when factionRegistry is nil.
+	factionSvc *faction.Service
+	// factionRepRepo persists per-character faction reputation scores.
+	// May be nil when faction feature is not configured.
+	factionRepRepo FactionRepRepository
 	// gameHourFn returns the current game hour (0–23). Used by NPC schedule evaluation. REQ-NB-16.
 	gameHourFn func() int
 	// npcIdleTickInterval is the ZoneTickManager tick interval used to convert
@@ -280,6 +290,15 @@ type HealerCapacityRepo interface {
 // Postcondition: detained_until is updated; nil clears the detention.
 type DetainedUntilUpdater interface {
 	UpdateDetainedUntil(ctx context.Context, characterID int64, detainedUntil *time.Time) error
+}
+
+// FactionRepRepository persists and loads per-character faction reputation.
+//
+// Precondition: characterID > 0; factionID non-empty.
+// Postcondition: Mutations are durably persisted before returning.
+type FactionRepRepository interface {
+	SaveRep(ctx context.Context, characterID int64, factionID string, rep int) error
+	LoadRep(ctx context.Context, characterID int64) (map[string]int, error)
 }
 
 // NewGameServiceServer creates a GameServiceServer with the given dependencies.
@@ -346,6 +365,11 @@ func NewGameServiceServer(
 		trapTemplates:              nil, // trap loading not yet wired
 		setRegistry:                content.SetRegistry,
 		substanceReg:               content.SubstanceRegistry,
+		factionRepRepo:             storage.FactionRepRepo,
+	}
+	if content.FactionRegistry != nil {
+		s.factionRegistry = content.FactionRegistry
+		s.factionSvc = faction.NewServiceWithRepo(*content.FactionRegistry, storage.FactionRepRepo)
 	}
 	// gameHourFn defaults to reading from calendar if available. REQ-NB-16.
 	s.gameHourFn = func() int {
@@ -649,6 +673,21 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			s.logger.Warn("failed to load wanted levels", zap.Int64("characterID", sess.CharacterID), zap.Error(wantedErr))
 		} else {
 			sess.WantedLevel = wantedLevels
+		}
+	}
+
+	// Load faction_id from character record (REQ-FA-26).
+	if dbChar != nil {
+		sess.FactionID = dbChar.FactionID
+	}
+
+	// Load faction rep from DB (REQ-FA-24).
+	if s.factionRepRepo != nil {
+		repMap, repErr := s.factionRepRepo.LoadRep(stream.Context(), sess.CharacterID)
+		if repErr != nil {
+			s.logger.Warn("failed to load faction rep", zap.Error(repErr))
+		} else {
+			sess.FactionRep = repMap
 		}
 	}
 

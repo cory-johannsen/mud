@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
@@ -38,6 +39,7 @@ type StorageDeps struct {
 	WantedRepo             *postgres.WantedRepository
 	AutomapRepo            *postgres.AutomapRepository
 	DetainedUntilRepo      DetainedUntilUpdater
+	FactionRepRepo         FactionRepRepository
 }
 
 // ContentDeps groups all content/world dependencies for GameServiceServer.
@@ -70,6 +72,9 @@ type ContentDeps struct {
 	// SubstanceRegistry holds all known substance definitions.
 	// REQ-AH-3: loaded at startup from content/substances/.
 	SubstanceRegistry    *substance.Registry
+	// FactionRegistry holds all faction definitions loaded at startup.
+	// May be nil when the faction feature is not yet configured.
+	FactionRegistry      *faction.FactionRegistry
 }
 
 // HandlerDeps groups all handler dependencies for GameServiceServer.
