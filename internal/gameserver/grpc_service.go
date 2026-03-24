@@ -401,6 +401,10 @@ func NewGameServiceServer(
 		s.worldH.SetCombatHandler(s.combatH)
 		// REQ-AH-21: wire substance service for poison-on-hit.
 		s.combatH.SetSubstanceSvc(s)
+		// REQ-FA-20: wire faction service for rep-on-kill.
+		if s.factionSvc != nil && s.factionConfig != nil {
+			s.combatH.SetFactionService(s.factionSvc, s.factionConfig)
+		}
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
@@ -1821,6 +1825,22 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 		if condition.IsMovementPrevented(sess.Conditions) {
 			return errorEvent("You are detained and cannot move."), nil
+		}
+	}
+
+	// Faction room gating check (REQ-FA-18, REQ-FA-29).
+	if s.factionSvc != nil {
+		if moveSess, moveSessOK := s.sessions.GetPlayer(uid); moveSessOK {
+			if destRoom, destErr := s.world.Navigate(moveSess.RoomID, dir); destErr == nil {
+				if destRoom.MinFactionTierID != "" {
+					if zone, zoneOK := s.world.GetZone(destRoom.ZoneID); zoneOK {
+						if !s.factionSvc.CanEnterRoom(moveSess, destRoom, zone) {
+							tierLabel, factionName := s.factionSvc.MinTierLabelForRoom(destRoom, zone)
+							return messageEvent(fmt.Sprintf("Only %s members of %s may enter here.", tierLabel, factionName)), nil
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -3911,7 +3931,17 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 	}
 
 	// Threat assessment on idle tick for hostile NPCs. REQ-NB-7.
-	if inst.Disposition == "hostile" && s.combatH != nil && !s.combatH.IsInCombat(inst.ID) {
+	// REQ-FA-27: enemy faction NPCs are treated as hostile regardless of disposition.
+	isHostileToPlayers := inst.Disposition == "hostile"
+	if !isHostileToPlayers && s.factionSvc != nil && inst.FactionID != "" {
+		for _, p := range s.sessions.PlayersInRoomDetails(inst.RoomID) {
+			if s.factionSvc.IsEnemyOf(p, inst.FactionID) {
+				isHostileToPlayers = true
+				break
+			}
+		}
+	}
+	if isHostileToPlayers && s.combatH != nil && !s.combatH.IsInCombat(inst.ID) {
 		s.evaluateThreatEngagement(inst, inst.RoomID)
 	}
 
