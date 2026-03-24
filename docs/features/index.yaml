@@ -477,7 +477,7 @@ features:
 
   - slug: non-combat-npcs-all-zones
     name: Non-Combat NPCs — All Zones
-    status: planned
+    status: done
     priority: 253
     category: world
     file: docs/features/non-combat-npcs-all-zones.md
