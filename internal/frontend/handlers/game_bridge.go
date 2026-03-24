@@ -30,7 +30,7 @@ var ErrSwitchCharacter = errors.New("switch character")
 //
 // Precondition: maxHP > 0; name must be non-empty.
 // Postcondition: Returns a non-empty string ending with "> ".
-func BuildPrompt(name string, currentHP, maxHP int32, conditions []string) string {
+func BuildPrompt(name string, currentHP, maxHP int32, conditions []string, focusPoints, maxFocusPoints int32) string {
 	// Name segment
 	nameSeg := telnet.Colorf(telnet.BrightCyan, "[%s]", name)
 
@@ -58,7 +58,14 @@ func BuildPrompt(name string, currentHP, maxHP int32, conditions []string) strin
 
 	parts := []string{nameSeg, hpSeg}
 	parts = append(parts, condSegs...)
-	return strings.Join(parts, " ") + "> "
+	prompt := strings.Join(parts, " ")
+
+	// Focus Points segment — only shown when character has focus pool
+	if maxFocusPoints > 0 {
+		prompt += fmt.Sprintf(" FP: %d/%d", focusPoints, maxFocusPoints)
+	}
+
+	return prompt + "> "
 }
 
 // IdleMonitorConfig configures the idle monitor goroutine.
@@ -183,6 +190,10 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 		maxHP.Store(int32(char.CurrentHP))
 	}
 
+	// Initialize Focus Point tracking; starts at zero until an HpUpdateEvent carries FP data.
+	var currentFP atomic.Int32
+	var maxFP atomic.Int32
+
 	// activeConditions tracks condition ID → display name for the prompt.
 	// Protected by condMu because RoomModeHandler and the event loop share it.
 	var condMu sync.Mutex
@@ -267,6 +278,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	roomHandler := NewRoomModeHandler(
 		char.Name, acct.Role,
 		&currentHP, &maxHP,
+		&currentFP, &maxFP,
 		&currentRoom, &currentTime,
 		&condMu, activeConditions,
 	)
@@ -349,7 +361,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &lastRoomView, &condMu, activeConditions, session, mapHandler)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &currentFP, &maxFP, &lastRoomView, &condMu, activeConditions, session, mapHandler)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
@@ -630,8 +642,8 @@ func renderTabCompleteResponse(conn *telnet.Conn, resp *gamev1.TabCompleteRespon
 // Postcondition: Returns when ctx is done, stream closes, or a disconnect event is received.
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime and currentDT are updated from TimeOfDayEvent or RoomView events.
-// Side-effect: currentHP and maxHP are updated from CharacterInfo events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler) {
+// Side-effect: currentHP, maxHP, currentFP, and maxFP are updated from CharacterInfo and HpUpdateEvent events.
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, currentFP *atomic.Int32, maxFP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler) {
 	// Pump stream.Recv() into a channel so it can participate in a proper
 	// select alongside resize events and the prompt-refresh ticker.
 	type recvResult struct {
@@ -836,6 +848,10 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			currentHP.Store(hpu.GetCurrentHp())
 			if hpu.GetMaxHp() > 0 {
 				maxHP.Store(hpu.GetMaxHp())
+			}
+			currentFP.Store(hpu.GetFocusPoints())
+			if hpu.GetMaxFocusPoints() > 0 {
+				maxFP.Store(hpu.GetMaxFocusPoints())
 			}
 			if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(session.CurrentPrompt())

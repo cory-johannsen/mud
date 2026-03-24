@@ -17,7 +17,7 @@ import (
 )
 
 func TestBuildPrompt_Format(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", 45, 60, nil)
+	got := handlers.BuildPrompt("Thorald", 45, 60, nil, 0, 0)
 	// Must end with "> "
 	if !strings.HasSuffix(got, "> ") {
 		t.Errorf("prompt must end with '> ', got %q", got)
@@ -30,17 +30,17 @@ func TestBuildPrompt_Format(t *testing.T) {
 
 func TestBuildPrompt_HealthColors(t *testing.T) {
 	// Full health >= 75% — contains hp fraction
-	got := handlers.BuildPrompt("Thorald", 60, 60, nil)
+	got := handlers.BuildPrompt("Thorald", 60, 60, nil, 0, 0)
 	if !strings.Contains(got, "60/60hp") {
 		t.Errorf("expected 60/60hp in prompt, got %q", got)
 	}
 	// Wounded ~40%
-	got = handlers.BuildPrompt("Thorald", 24, 60, nil)
+	got = handlers.BuildPrompt("Thorald", 24, 60, nil, 0, 0)
 	if !strings.Contains(got, "24/60hp") {
 		t.Errorf("expected 24/60hp in prompt, got %q", got)
 	}
 	// Critical <40%
-	got = handlers.BuildPrompt("Thorald", 10, 60, nil)
+	got = handlers.BuildPrompt("Thorald", 10, 60, nil, 0, 0)
 	if !strings.Contains(got, "10/60hp") {
 		t.Errorf("expected 10/60hp in prompt, got %q", got)
 	}
@@ -48,7 +48,7 @@ func TestBuildPrompt_HealthColors(t *testing.T) {
 
 func TestBuildPrompt_AllPeriods(t *testing.T) {
 	// Period is no longer shown in prompt; verify basic prompt format is stable.
-	got := handlers.BuildPrompt("X", 10, 10, nil)
+	got := handlers.BuildPrompt("X", 10, 10, nil, 0, 0)
 	if got == "" {
 		t.Error("BuildPrompt returned empty string")
 	}
@@ -63,7 +63,7 @@ func TestProperty_BuildPrompt_AlwaysEndsWithPromptSuffix(t *testing.T) {
 		maxHP := rapid.Int32Range(1, 1000).Draw(rt, "maxHP")
 		currentHP := rapid.Int32Range(0, maxHP).Draw(rt, "currentHP")
 
-		got := handlers.BuildPrompt(name, currentHP, maxHP, nil)
+		got := handlers.BuildPrompt(name, currentHP, maxHP, nil, 0, 0)
 		if !strings.HasSuffix(got, "> ") {
 			rt.Errorf("BuildPrompt must end with '> ', got %q", got)
 		}
@@ -280,7 +280,7 @@ func TestProperty_IdleMonitor_ActivePlayerNeverDisconnected(t *testing.T) {
 }
 
 func TestBuildPrompt_NoConditions_FormatUnchanged(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", 50, 60, nil)
+	got := handlers.BuildPrompt("Thorald", 50, 60, nil, 0, 0)
 	if !strings.HasSuffix(got, "> ") {
 		t.Errorf("prompt must end with '> ', got %q", got)
 	}
@@ -293,7 +293,7 @@ func TestBuildPrompt_NoConditions_FormatUnchanged(t *testing.T) {
 }
 
 func TestBuildPrompt_OneCondition(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", 50, 60, []string{"Panicked"})
+	got := handlers.BuildPrompt("Thorald", 50, 60, []string{"Panicked"}, 0, 0)
 	if !strings.Contains(got, "[Panicked]") {
 		t.Errorf("expected [Panicked] in prompt, got %q", got)
 	}
@@ -303,7 +303,7 @@ func TestBuildPrompt_OneCondition(t *testing.T) {
 }
 
 func TestBuildPrompt_MultipleConditions(t *testing.T) {
-	got := handlers.BuildPrompt("Thorald", 50, 60, []string{"Panicked", "Grabbed"})
+	got := handlers.BuildPrompt("Thorald", 50, 60, []string{"Panicked", "Grabbed"}, 0, 0)
 	wantPanicked := telnet.Colorf(telnet.BrightMagenta, "[Panicked]")
 	wantGrabbed := telnet.Colorf(telnet.BrightMagenta, "[Grabbed]")
 	if !strings.Contains(got, wantPanicked) {
@@ -335,7 +335,7 @@ func TestProperty_BuildPrompt_ConditionsAllPresent(t *testing.T) {
 		maxHP := rapid.Int32Range(1, 100).Draw(rt, "maxHP")
 		curHP := rapid.Int32Range(0, maxHP).Draw(rt, "curHP")
 
-		got := handlers.BuildPrompt(name, curHP, maxHP, uniqueConds)
+		got := handlers.BuildPrompt(name, curHP, maxHP, uniqueConds, 0, 0)
 		// Each unique condition name must appear exactly once.
 		for c := range seen {
 			want := telnet.Colorf(telnet.BrightMagenta, "[%s]", c)
@@ -363,7 +363,7 @@ func TestBuildPrompt_ConditionAppliedThenRemoved(t *testing.T) {
 			names = append(names, activeConditions[id])
 		}
 		condMu.Unlock()
-		return handlers.BuildPrompt("Hero", 10, 10, names)
+		return handlers.BuildPrompt("Hero", 10, 10, names, 0, 0)
 	}
 
 	// Before any condition: no condition in prompt.
@@ -390,5 +390,21 @@ func TestBuildPrompt_ConditionAppliedThenRemoved(t *testing.T) {
 	got = buildPrompt()
 	if strings.Contains(got, "[Panicked]") {
 		t.Errorf("expected no [Panicked] after remove, got %q", got)
+	}
+}
+
+func TestBuildPrompt_ShowsFP_WhenMaxGTZero(t *testing.T) {
+	got := handlers.BuildPrompt("Hero", 10, 10, nil, 2, 3)
+	stripped := telnet.StripANSI(got)
+	if !strings.Contains(stripped, "FP: 2/3") {
+		t.Errorf("expected FP: 2/3 in prompt, got %q", stripped)
+	}
+}
+
+func TestBuildPrompt_OmitsFP_WhenMaxIsZero(t *testing.T) {
+	got := handlers.BuildPrompt("Hero", 10, 10, nil, 0, 0)
+	stripped := telnet.StripANSI(got)
+	if strings.Contains(stripped, "FP:") {
+		t.Errorf("expected no FP: in prompt when maxFP=0, got %q", stripped)
 	}
 }

@@ -17,6 +17,8 @@ type RoomModeHandler struct {
 	role             string
 	currentHP        *atomic.Int32
 	maxHP            *atomic.Int32
+	currentFP        *atomic.Int32
+	maxFP            *atomic.Int32
 	currentRoom      *atomic.Value
 	currentTime      *atomic.Value
 	condMu           *sync.Mutex
@@ -31,6 +33,7 @@ type RoomModeHandler struct {
 func NewRoomModeHandler(
 	charName, role string,
 	currentHP, maxHP *atomic.Int32,
+	currentFP, maxFP *atomic.Int32,
 	currentRoom, currentTime *atomic.Value,
 	condMu *sync.Mutex,
 	activeConditions map[string]string,
@@ -40,6 +43,8 @@ func NewRoomModeHandler(
 		role:             role,
 		currentHP:        currentHP,
 		maxHP:            maxHP,
+		currentFP:        currentFP,
+		maxFP:            maxFP,
 		currentRoom:      currentRoom,
 		currentTime:      currentTime,
 		condMu:           condMu,
@@ -53,10 +58,14 @@ func NewRoomModeHandlerForTest(charName string, hp, maxHP int32) *RoomModeHandle
 	chp.Store(hp)
 	mhp := &atomic.Int32{}
 	mhp.Store(maxHP)
+	cfp := &atomic.Int32{}
+	mfp := &atomic.Int32{}
 	return &RoomModeHandler{
 		charName:         charName,
 		currentHP:        chp,
 		maxHP:            mhp,
+		currentFP:        cfp,
+		maxFP:            mfp,
 		currentRoom:      &atomic.Value{},
 		currentTime:      &atomic.Value{},
 		condMu:           &sync.Mutex{},
@@ -105,7 +114,14 @@ func (h *RoomModeHandler) Prompt() string {
 	if h.maxHP != nil {
 		mhp = h.maxHP.Load()
 	}
-	return BuildPrompt(h.charName, hp, mhp, conditions)
+	var fp, mfp int32
+	if h.currentFP != nil {
+		fp = h.currentFP.Load()
+	}
+	if h.maxFP != nil {
+		mfp = h.maxFP.Load()
+	}
+	return BuildPrompt(h.charName, hp, mhp, conditions, fp, mfp)
 }
 
 // HandleInput handles empty-line prompt redraw. REQ-IMR-14.
