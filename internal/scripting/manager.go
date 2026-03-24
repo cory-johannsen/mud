@@ -39,9 +39,19 @@ type RoomInfo struct {
 // zoneState holds the per-zone LState and its associated resources.
 // mu serializes all LState access within a single zone.
 type zoneState struct {
-	mu     sync.Mutex
-	L      *lua.LState
-	cancel context.CancelFunc
+	mu        sync.Mutex
+	L         *lua.LState
+	cancel    context.CancelFunc // lifetime cancel — called on Close/reload
+	instLimit int                // per-call instruction budget
+}
+
+// resetContext installs a fresh per-call instruction budget on zs.L.
+// Must be called with zs.mu held.
+// Returns the cancel function for the new context; the caller must defer it.
+func (zs *zoneState) resetContext() context.CancelFunc {
+	ctx, cancel := NewCountingContext(zs.instLimit)
+	zs.L.SetContext(ctx)
+	return cancel
 }
 
 // Manager owns one sandboxed LState per zone and exposes hook dispatch.
@@ -75,6 +85,37 @@ type Manager struct {
 	// RevealZoneMap bulk-reveals all rooms in zoneID for the player identified by uid.
 	// Injected after construction; nil = no-op.
 	RevealZoneMap func(uid, zoneID string)
+}
+
+// dispatchHook resets the instruction budget, looks up hook in zs.L, then calls
+// it with args. Must be called with zs.mu held.
+// Returns (LNil, nil) when the hook global is not defined.
+// Lua runtime errors are logged at Warn level and not propagated.
+func (m *Manager) dispatchHook(zs *zoneState, zoneID, hook string, args ...lua.LValue) (lua.LValue, error) {
+	cancelCall := zs.resetContext()
+	defer cancelCall()
+
+	fn := zs.L.GetGlobal(hook)
+	if fn == lua.LNil {
+		return lua.LNil, nil
+	}
+
+	if err := zs.L.CallByParam(lua.P{
+		Fn:      fn,
+		NRet:    1,
+		Protect: true,
+	}, args...); err != nil {
+		m.logger.Warn("scripting: Lua runtime error",
+			zap.String("zone", zoneID),
+			zap.String("hook", hook),
+			zap.Error(err),
+		)
+		return lua.LNil, nil
+	}
+
+	ret := zs.L.Get(-1)
+	zs.L.Pop(1)
+	return ret, nil
 }
 
 // NewManager creates a Manager.
@@ -145,7 +186,11 @@ func (m *Manager) loadInto(key, scriptDir string, instLimit int) error {
 		}
 	}
 
-	zs := &zoneState{L: L, cancel: cancel}
+	effectiveLimit := instLimit
+	if effectiveLimit <= 0 {
+		effectiveLimit = DefaultInstructionLimit
+	}
+	zs := &zoneState{L: L, cancel: cancel, instLimit: effectiveLimit}
 
 	m.mapMu.Lock()
 	if old, ok := m.zones[key]; ok {
@@ -183,27 +228,7 @@ func (m *Manager) CallHook(zoneID, hook string, args ...lua.LValue) (lua.LValue,
 	zs.mu.Lock()
 	defer zs.mu.Unlock()
 
-	fn := zs.L.GetGlobal(hook)
-	if fn == lua.LNil {
-		return lua.LNil, nil
-	}
-
-	if err := zs.L.CallByParam(lua.P{
-		Fn:      fn,
-		NRet:    1,
-		Protect: true,
-	}, args...); err != nil {
-		m.logger.Warn("scripting: Lua runtime error",
-			zap.String("zone", zoneID),
-			zap.String("hook", hook),
-			zap.Error(err),
-		)
-		return lua.LNil, nil
-	}
-
-	ret := zs.L.Get(-1)
-	zs.L.Pop(1)
-	return ret, nil
+	return m.dispatchHook(zs, zoneID, hook, args...)
 }
 
 // CallHookWithContext calls the named Lua global function in zoneID's VM, passing
@@ -233,32 +258,12 @@ func (m *Manager) CallHookWithContext(zoneID, hook, uid, hookArg string, ctx map
 	zs.mu.Lock()
 	defer zs.mu.Unlock()
 
-	fn := zs.L.GetGlobal(hook)
-	if fn == lua.LNil {
-		return lua.LNil, nil
-	}
-
 	tbl := zs.L.NewTable()
 	for k, v := range ctx {
 		zs.L.SetField(tbl, k, v)
 	}
 
-	if err := zs.L.CallByParam(lua.P{
-		Fn:      fn,
-		NRet:    1,
-		Protect: true,
-	}, lua.LString(uid), lua.LString(hookArg), tbl); err != nil {
-		m.logger.Warn("scripting: Lua runtime error",
-			zap.String("zone", zoneID),
-			zap.String("hook", hook),
-			zap.Error(err),
-		)
-		return lua.LNil, nil
-	}
-
-	ret := zs.L.Get(-1)
-	zs.L.Pop(1)
-	return ret, nil
+	return m.dispatchHook(zs, zoneID, hook, lua.LString(uid), lua.LString(hookArg), tbl)
 }
 
 // Close releases all zone VMs and their associated resources.
