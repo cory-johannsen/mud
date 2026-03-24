@@ -80,18 +80,28 @@ func TestLoadFactions_Happy(t *testing.T) {
 	}
 }
 
-func TestLoadFactions_InvalidYAML(t *testing.T) {
+func TestLoadFactions_ValidationFailure(t *testing.T) {
 	dir := t.TempDir()
+	// id: with no value is valid YAML (empty string), but fails FactionDef.Validate() due to missing required fields.
 	writeFactionYAML(t, dir, "bad.yaml", `id: `)
 	_, err := faction.LoadFactions(dir)
 	if err == nil {
-		t.Fatal("expected error for invalid faction YAML")
+		t.Fatal("expected error for faction that fails validation")
+	}
+}
+
+func TestLoadFactions_MalformedYAML(t *testing.T) {
+	dir := t.TempDir()
+	writeFactionYAML(t, dir, "bad.yaml", `{bad: [unclosed`)
+	_, err := faction.LoadFactions(dir)
+	if err == nil {
+		t.Fatal("expected error for malformed YAML")
 	}
 }
 
 func TestFactionRegistry_ValidateHostileFactionsMustExist(t *testing.T) {
 	dir := t.TempDir()
-	yaml := `
+	yamlContent := `
 id: gun
 name: Team Gun
 zone_id: rustbucket
@@ -102,7 +112,7 @@ tiers:
   - {id: t3, label: L3, min_rep: 20, price_discount: 0.10}
   - {id: t4, label: L4, min_rep: 30, price_discount: 0.15}
 `
-	writeFactionYAML(t, dir, "gun.yaml", yaml)
+	writeFactionYAML(t, dir, "gun.yaml", yamlContent)
 	reg, err := faction.LoadFactions(dir)
 	if err != nil {
 		t.Fatalf("LoadFactions: %v", err)
@@ -114,5 +124,89 @@ tiers:
 	zoneOwners := map[string]string{"rustbucket": "gun"}
 	if err := reg.Validate(zoneIDs, roomIDs, itemIDs, roomZoneIDs, zoneOwners); err == nil {
 		t.Fatal("expected error for unknown hostile faction reference")
+	}
+}
+
+// minimalFactionYAML returns a minimal valid single-faction YAML with the given id and zone_id.
+// It includes exactly four tiers so FactionDef.Validate() passes, plus any extra fields appended.
+func minimalFactionYAML(id, zoneID, extra string) string {
+	return `
+id: ` + id + `
+name: ` + id + ` team
+zone_id: ` + zoneID + `
+` + extra + `
+tiers:
+  - {id: t1, label: L1, min_rep: 0, price_discount: 0.0}
+  - {id: t2, label: L2, min_rep: 10, price_discount: 0.05}
+  - {id: t3, label: L3, min_rep: 20, price_discount: 0.10}
+  - {id: t4, label: L4, min_rep: 30, price_discount: 0.15}
+`
+}
+
+func TestFactionRegistry_Validate_ExclusiveItemConflict(t *testing.T) {
+	dir := t.TempDir()
+	// Both factions claim the same item exclusively.
+	gunExtra := `exclusive_items:
+  - tier_id: t1
+    item_ids: [shared_item]`
+	macheteExtra := `exclusive_items:
+  - tier_id: t1
+    item_ids: [shared_item]`
+	writeFactionYAML(t, dir, "gun.yaml", minimalFactionYAML("gun", "rustbucket", gunExtra))
+	writeFactionYAML(t, dir, "machete.yaml", minimalFactionYAML("machete", "ironyard", macheteExtra))
+
+	reg, err := faction.LoadFactions(dir)
+	if err != nil {
+		t.Fatalf("LoadFactions: %v", err)
+	}
+	zoneIDs := map[string]bool{"rustbucket": true, "ironyard": true}
+	roomIDs := map[string]bool{}
+	itemIDs := map[string]bool{"shared_item": true}
+	roomZoneIDs := map[string]string{}
+	zoneOwners := map[string]string{"rustbucket": "gun", "ironyard": "machete"}
+	if err := reg.Validate(zoneIDs, roomIDs, itemIDs, roomZoneIDs, zoneOwners); err == nil {
+		t.Fatal("expected error for item claimed exclusively by two factions")
+	}
+}
+
+func TestFactionRegistry_Validate_GatedRoomNoZoneMapping(t *testing.T) {
+	dir := t.TempDir()
+	extra := `gated_rooms:
+  - room_id: room1
+    min_tier_id: t1`
+	writeFactionYAML(t, dir, "gun.yaml", minimalFactionYAML("gun", "rustbucket", extra))
+
+	reg, err := faction.LoadFactions(dir)
+	if err != nil {
+		t.Fatalf("LoadFactions: %v", err)
+	}
+	zoneIDs := map[string]bool{"rustbucket": true}
+	roomIDs := map[string]bool{"room1": true}
+	itemIDs := map[string]bool{}
+	roomZoneIDs := map[string]string{} // room1 has no zone mapping
+	zoneOwners := map[string]string{"rustbucket": "gun"}
+	if err := reg.Validate(zoneIDs, roomIDs, itemIDs, roomZoneIDs, zoneOwners); err == nil {
+		t.Fatal("expected error for gated room with no zone mapping")
+	}
+}
+
+func TestFactionRegistry_Validate_GatedRoomUnownedZone(t *testing.T) {
+	dir := t.TempDir()
+	extra := `gated_rooms:
+  - room_id: room1
+    min_tier_id: t1`
+	writeFactionYAML(t, dir, "gun.yaml", minimalFactionYAML("gun", "rustbucket", extra))
+
+	reg, err := faction.LoadFactions(dir)
+	if err != nil {
+		t.Fatalf("LoadFactions: %v", err)
+	}
+	zoneIDs := map[string]bool{"rustbucket": true}
+	roomIDs := map[string]bool{"room1": true}
+	itemIDs := map[string]bool{}
+	roomZoneIDs := map[string]string{"room1": "rustbucket"}
+	zoneOwners := map[string]string{} // rustbucket has no owner
+	if err := reg.Validate(zoneIDs, roomIDs, itemIDs, roomZoneIDs, zoneOwners); err == nil {
+		t.Fatal("expected error for gated room in zone with no faction owner")
 	}
 }
