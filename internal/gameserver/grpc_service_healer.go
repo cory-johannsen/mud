@@ -129,6 +129,10 @@ func (s *GameServiceServer) handleHeal(uid string, req *gamev1.HealRequest) (*ga
 	if inst == nil {
 		return messageEvent(errMsg), nil
 	}
+	// Enemy faction non-combat NPC check (REQ-FA-28).
+	if s.factionSvc != nil && s.factionSvc.IsEnemyOf(sess, inst.FactionID) {
+		return messageEvent(fmt.Sprintf("%s eyes you coldly. 'We don't serve your kind here.'", inst.Name())), nil
+	}
 	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
 	if tmpl == nil || tmpl.Healer == nil {
 		return messageEvent("This healer has no configuration."), nil
@@ -189,6 +193,10 @@ func (s *GameServiceServer) handleHealAmount(uid string, req *gamev1.HealAmountR
 	inst, errMsg := s.findHealerInRoom(sess.RoomID, req.GetNpcName())
 	if inst == nil {
 		return messageEvent(errMsg), nil
+	}
+	// Enemy faction non-combat NPC check (REQ-FA-28).
+	if s.factionSvc != nil && s.factionSvc.IsEnemyOf(sess, inst.FactionID) {
+		return messageEvent(fmt.Sprintf("%s eyes you coldly. 'We don't serve your kind here.'", inst.Name())), nil
 	}
 	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
 	if tmpl == nil || tmpl.Healer == nil {

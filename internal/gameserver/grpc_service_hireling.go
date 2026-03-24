@@ -79,6 +79,10 @@ func (s *GameServiceServer) handleHire(uid string, req *gamev1.HireRequest) (*ga
 	if inst.NPCType != "hireling" {
 		return messageEvent(fmt.Sprintf("%s is not a hireling.", inst.Name())), nil
 	}
+	// Enemy faction non-combat NPC check (REQ-FA-28).
+	if s.factionSvc != nil && s.factionSvc.IsEnemyOf(sess, inst.FactionID) {
+		return messageEvent(fmt.Sprintf("%s eyes you coldly. 'We don't serve your kind here.'", inst.Name())), nil
+	}
 	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
 	if tmpl == nil || tmpl.Hireling == nil {
 		return messageEvent("This NPC has no hireling configuration."), nil

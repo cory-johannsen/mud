@@ -46,6 +46,10 @@ func (s *GameServiceServer) handleTrainJob(uid string, req *gamev1.TrainJobReque
 	if inst == nil {
 		return messageEvent(errMsg), nil
 	}
+	// Enemy faction non-combat NPC check (REQ-FA-28).
+	if s.factionSvc != nil && s.factionSvc.IsEnemyOf(sess, inst.FactionID) {
+		return messageEvent(fmt.Sprintf("%s eyes you coldly. 'We don't serve your kind here.'", inst.Name())), nil
+	}
 	tmpl := s.npcMgr.TemplateByID(inst.TemplateID)
 	if tmpl == nil || tmpl.JobTrainer == nil {
 		return messageEvent("This trainer has no jobs configured."), nil
