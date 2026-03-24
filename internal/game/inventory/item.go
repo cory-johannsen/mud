@@ -55,6 +55,31 @@ type ItemDef struct {
 	// Only meaningful when Kind == KindWeapon. Empty for non-poisoned weapons.
 	// REQ-AH-21: attack pipeline calls ApplySubstanceByID when this is non-empty.
 	PoisonSubstanceID string `yaml:"poison_substance_id,omitempty"`
+	// ActivationCost is the AP cost to activate this item (1–3). 0 = not activatable (default).
+	ActivationCost int `yaml:"activation_cost,omitempty"`
+	// Charges is the initial and maximum charge count. Must be > 0 when ActivationCost > 0.
+	Charges int `yaml:"charges,omitempty"`
+	// OnDeplete controls item fate when ChargesRemaining reaches 0.
+	// "destroy" removes the item permanently; "expend" leaves it in slot as inactive.
+	// Ignored when Recharge is non-empty (expend semantics always apply).
+	OnDeplete string `yaml:"on_deplete,omitempty"`
+	// ActivationScript is the Lua hook name to invoke on activation.
+	// Mutually exclusive with ActivationEffect.
+	ActivationScript string `yaml:"activation_script,omitempty"`
+	// ActivationEffect holds consumable-style effects for non-scripted activation.
+	// Mutually exclusive with ActivationScript.
+	ActivationEffect *ConsumableEffect `yaml:"activation_effect,omitempty"`
+	// Recharge lists triggers that restore charges to this item.
+	Recharge []RechargeEntry `yaml:"recharge,omitempty"`
+}
+
+// RechargeEntry defines one recharge trigger for an activatable item.
+type RechargeEntry struct {
+	// Trigger is when this recharge fires.
+	// Valid values: "daily", "midnight", "dawn", "rest".
+	Trigger string `yaml:"trigger"`
+	// Amount is the number of charges restored. Must be > 0.
+	Amount int `yaml:"amount"`
 }
 
 // Validate checks that the ItemDef satisfies its invariants.
@@ -93,6 +118,32 @@ func (d *ItemDef) Validate() error {
 	// REQ-EM-36: Team must be "" | "gun" | "machete".
 	if d.Team != "" && d.Team != "gun" && d.Team != "machete" {
 		errs = append(errs, fmt.Errorf("Team %q is not valid; must be \"gun\", \"machete\", or \"\"", d.Team))
+	}
+	// REQ-ACT-6: ActivationCost must be in [0, 3].
+	if d.ActivationCost < 0 || d.ActivationCost > 3 {
+		errs = append(errs, fmt.Errorf("activation_cost %d is out of range [0, 3]", d.ActivationCost))
+	}
+	// REQ-ACT-7: Charges must be > 0 when ActivationCost > 0.
+	if d.ActivationCost > 0 && d.Charges <= 0 {
+		errs = append(errs, fmt.Errorf("charges must be > 0 when activation_cost > 0 (got %d)", d.Charges))
+	}
+	// REQ-ACT-8: OnDeplete must be "", "destroy", or "expend".
+	if d.OnDeplete != "" && d.OnDeplete != "destroy" && d.OnDeplete != "expend" {
+		errs = append(errs, fmt.Errorf("on_deplete %q is invalid; must be \"destroy\" or \"expend\"", d.OnDeplete))
+	}
+	// REQ-ACT-9: ActivationScript and ActivationEffect are mutually exclusive.
+	if d.ActivationScript != "" && d.ActivationEffect != nil {
+		errs = append(errs, fmt.Errorf("activation_script and activation_effect are mutually exclusive"))
+	}
+	// REQ-ACT-10/11: Validate each RechargeEntry.
+	validTriggers := map[string]bool{"daily": true, "midnight": true, "dawn": true, "rest": true}
+	for i, re := range d.Recharge {
+		if !validTriggers[re.Trigger] {
+			errs = append(errs, fmt.Errorf("recharge[%d].trigger %q is invalid; must be daily|midnight|dawn|rest", i, re.Trigger))
+		}
+		if re.Amount <= 0 {
+			errs = append(errs, fmt.Errorf("recharge[%d].amount must be > 0 (got %d)", i, re.Amount))
+		}
 	}
 	if len(errs) > 0 {
 		return fmt.Errorf("item validation failed: %v", errs)

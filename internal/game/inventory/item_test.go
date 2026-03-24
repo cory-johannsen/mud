@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/stretchr/testify/assert"
 	"pgregory.net/rapid"
 )
 
@@ -509,4 +510,63 @@ func TestItemDef_PoisonSubstanceID_Field_Stored(t *testing.T) {
 	if d.PoisonSubstanceID != "viper_venom" {
 		t.Fatalf("PoisonSubstanceID = %q, want %q", d.PoisonSubstanceID, "viper_venom")
 	}
+}
+
+func TestItemDef_Validate_ActivationFields(t *testing.T) {
+	t.Run("activation_cost out of range", func(t *testing.T) {
+		d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1, ActivationCost: 4, Charges: 1}
+		assert.Error(t, d.Validate())
+	})
+	t.Run("activation_cost valid max", func(t *testing.T) {
+		d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1, ActivationCost: 3, Charges: 1}
+		assert.NoError(t, d.Validate())
+	})
+	t.Run("charges zero when cost nonzero", func(t *testing.T) {
+		d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1, ActivationCost: 1, Charges: 0}
+		assert.Error(t, d.Validate())
+	})
+	t.Run("on_deplete invalid value", func(t *testing.T) {
+		d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1, ActivationCost: 1, Charges: 1, OnDeplete: "vanish"}
+		assert.Error(t, d.Validate())
+	})
+	t.Run("on_deplete empty is valid (defaults to expend)", func(t *testing.T) {
+		d := &inventory.ItemDef{ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1, ActivationCost: 1, Charges: 1}
+		assert.NoError(t, d.Validate())
+	})
+	t.Run("script and effect both set", func(t *testing.T) {
+		d := &inventory.ItemDef{
+			ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1,
+			ActivationCost: 1, Charges: 1,
+			ActivationScript: "my_hook",
+			ActivationEffect: &inventory.ConsumableEffect{},
+		}
+		assert.Error(t, d.Validate())
+	})
+	t.Run("recharge unknown trigger", func(t *testing.T) {
+		d := &inventory.ItemDef{
+			ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1,
+			ActivationCost: 1, Charges: 1,
+			Recharge: []inventory.RechargeEntry{{Trigger: "sunrise", Amount: 1}},
+		}
+		assert.Error(t, d.Validate())
+	})
+	t.Run("recharge amount zero", func(t *testing.T) {
+		d := &inventory.ItemDef{
+			ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1,
+			ActivationCost: 1, Charges: 1,
+			Recharge: []inventory.RechargeEntry{{Trigger: "dawn", Amount: 0}},
+		}
+		assert.Error(t, d.Validate())
+	})
+	t.Run("recharge valid multi-trigger", func(t *testing.T) {
+		d := &inventory.ItemDef{
+			ID: "x", Name: "x", Kind: inventory.KindConsumable, MaxStack: 1,
+			ActivationCost: 2, Charges: 3,
+			Recharge: []inventory.RechargeEntry{
+				{Trigger: "dawn", Amount: 1},
+				{Trigger: "rest", Amount: 2},
+			},
+		}
+		assert.NoError(t, d.Validate())
+	})
 }
