@@ -1,0 +1,8 @@
+# content/faction_config.yaml
+rep_per_npc_level: 5
+rep_per_fixer_service: 50
+rep_change_costs:
+  1: 100
+  2: 250
+  3: 500
+  4: 1000

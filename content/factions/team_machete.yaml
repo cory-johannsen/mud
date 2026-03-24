@@ -1,0 +1,25 @@
+# content/factions/team_machete.yaml
+id: machete
+name: Team Machete
+zone_id: felony_flats
+hostile_factions:
+  - gun
+tiers:
+  - id: outsider
+    label: Outsider
+    min_rep: 0
+    price_discount: 0.0
+  - id: blade
+    label: Blade
+    min_rep: 100
+    price_discount: 0.05
+  - id: cutter
+    label: Cutter
+    min_rep: 300
+    price_discount: 0.10
+  - id: warsmith
+    label: Warsmith
+    min_rep: 600
+    price_discount: 0.15
+exclusive_items: []
+gated_rooms: []

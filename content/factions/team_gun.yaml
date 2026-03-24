@@ -1,0 +1,25 @@
+# content/factions/team_gun.yaml
+id: gun
+name: Team Gun
+zone_id: battleground
+hostile_factions:
+  - machete
+tiers:
+  - id: outsider
+    label: Outsider
+    min_rep: 0
+    price_discount: 0.0
+  - id: gunhand
+    label: Gunhand
+    min_rep: 100
+    price_discount: 0.05
+  - id: sharpshooter
+    label: Sharpshooter
+    min_rep: 300
+    price_discount: 0.10
+  - id: warchief
+    label: Warchief
+    min_rep: 600
+    price_discount: 0.15
+exclusive_items: []
+gated_rooms: []
