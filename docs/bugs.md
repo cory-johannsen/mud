@@ -108,6 +108,23 @@
 **Steps:** Run `go test ./internal/storage/postgres/...`; observe `ERROR: column "detained_until" does not exist`.
 **Fix:** Added all missing `ALTER TABLE` and `CREATE TABLE` DDL statements to `applyAllMigrations` in `main_test.go`, matching migrations 034 (detained_until) and 035 (equipment mechanics schema). All postgres tests now pass.
 
+### BUG-15: Zone map interaction populates map but unexplored rooms show grey with no POIs revealed
+**Severity:** high
+**Status:** open
+**Category:** World
+**Description:** Interacting with a zone map object (e.g., in NE Portland zone) shows the console confirmation but does not populate the player's map — unexplored rooms remain grey and POIs in unexplored rooms are not revealed.
+**Steps:** Enter the NE Portland zone. Locate and interact with the zone map. Observe console confirmation message. Check map — all unexplored rooms remain grey, no POIs revealed.
+**Fix:**
+
+### BUG-16: Lua AI hooks fail with "context canceled" after instruction budget exhausted
+**Severity:** critical
+**Status:** fixed
+**Category:** Scripting
+**Description:** The `countingContext` instruction limit is set once at LState creation and never reset between hook calls; after the zone VM exhausts its total opcode budget (100,000 opcodes), every subsequent `*_has_enemy` and other AI hook invocation fails with "context canceled", effectively disabling all NPC combat AI.
+**Steps:** Run the gameserver and allow combat in any zone with AI NPCs. After sufficient hook invocations the scripting manager begins emitting hundreds of "scripting: Lua runtime error … context canceled" warn-level log lines for every combat tick — observable in `kubectl logs gameserver-<pod> -n mud`.
+**Root Cause:** `sandbox.go:NewSandboxedState` creates a single `countingContext` with a shared `atomic.Int64` counter and calls `L.SetContext(ctx)` once. Every opcode across every hook call over the LState's lifetime decrements the same counter. Once it reaches zero the context is permanently canceled and all future hook calls fail immediately. The fix is to reset `L.SetContext` with a fresh per-invocation `countingContext` before each hook dispatch in `manager.go:CallHook` and `CallHookWithContext`.
+**Fix:** Exported NewCountingContext from sandbox.go and added a resetContext() helper on zoneState. Both CallHook and CallHookWithContext now call resetContext() (via dispatchHook) before each CallByParam, installing a fresh per-call instruction budget. The lifetime cancel is preserved on zoneState for Close/reload only.
+
 ### BUG-9: rustbucket_ridge — scorchside_camp illegally overlaps the_embers_edge
 **Severity:** high
 **Status:** fixed
