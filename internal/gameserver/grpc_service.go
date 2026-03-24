@@ -6350,6 +6350,19 @@ func (s *GameServiceServer) activateTechWithEffects(sess *session.PlayerSession,
 	if !ok {
 		return messageEvent(fallbackMsg), nil
 	}
+	// REQ-FP-3/REQ-FP-4/REQ-FP-5/REQ-FP-6: Enforce Focus Point cost before activation.
+	if techDef.FocusCost {
+		next, ok := focuspoints.Spend(sess.FocusPoints, sess.MaxFocusPoints)
+		if !ok {
+			return messageEvent(fmt.Sprintf("Not enough Focus Points. (%d/%d)", sess.FocusPoints, sess.MaxFocusPoints)), nil
+		}
+		sess.FocusPoints = next
+		if s.charSaver != nil {
+			if err := s.charSaver.SaveFocusPoints(context.Background(), sess.CharacterID, sess.FocusPoints); err != nil {
+				return nil, fmt.Errorf("persist focus points: %w", err)
+			}
+		}
+	}
 	target, errMsg := s.resolveUseTarget(uid, targetID, techDef)
 	if errMsg != "" {
 		return messageEvent(errMsg), nil
