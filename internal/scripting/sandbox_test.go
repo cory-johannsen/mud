@@ -93,3 +93,25 @@ func TestProperty_InstructionLimitNeverBlocksShortScript(t *testing.T) {
 		}
 	})
 }
+
+// TestNewCountingContext_ResetBetweenCalls verifies that calling L.SetContext
+// with a fresh NewCountingContext before each invocation allows the same LState
+// to run scripts indefinitely — one per reset — without hitting a permanent
+// "context canceled" state.
+func TestNewCountingContext_ResetBetweenCalls(t *testing.T) {
+	L, cancel := scripting.NewSandboxedState(10) // tiny budget
+	defer cancel()
+	defer L.Close()
+
+	// First call exhausts the budget.
+	_ = L.DoString(`while true do end`)
+
+	// Reset the budget.
+	ctx, callCancel := scripting.NewCountingContext(scripting.DefaultInstructionLimit)
+	defer callCancel()
+	L.SetContext(ctx)
+
+	// Second call must succeed.
+	err := L.DoString(`local x = 1 + 1`)
+	assert.NoError(t, err, "script must succeed after budget reset")
+}
