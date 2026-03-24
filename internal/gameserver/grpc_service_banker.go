@@ -46,6 +46,10 @@ func (s *GameServiceServer) handleStashDeposit(uid string, req *gamev1.StashDepo
 	if inst == nil {
 		return messageEvent(errMsg), nil
 	}
+	// Enemy faction non-combat NPC check (REQ-FA-28).
+	if s.factionSvc != nil && s.factionSvc.IsEnemyOf(sess, inst.FactionID) {
+		return messageEvent(fmt.Sprintf("%s eyes you coldly. 'We don't serve your kind here.'", inst.Name())), nil
+	}
 	amount := int(req.GetAmount())
 	if amount <= 0 {
 		return messageEvent("You must deposit a positive amount."), nil
@@ -73,6 +77,10 @@ func (s *GameServiceServer) handleStashWithdraw(uid string, req *gamev1.StashWit
 	if inst == nil {
 		return messageEvent(errMsg), nil
 	}
+	// Enemy faction non-combat NPC check (REQ-FA-28).
+	if s.factionSvc != nil && s.factionSvc.IsEnemyOf(sess, inst.FactionID) {
+		return messageEvent(fmt.Sprintf("%s eyes you coldly. 'We don't serve your kind here.'", inst.Name())), nil
+	}
 	amount := int(req.GetAmount())
 	if amount <= 0 {
 		return messageEvent("You must withdraw a positive amount."), nil
@@ -99,6 +107,10 @@ func (s *GameServiceServer) handleStashBalance(uid string, req *gamev1.StashBala
 	inst, errMsg := s.findBankerInRoom(sess.RoomID, req.GetNpcName())
 	if inst == nil {
 		return messageEvent(errMsg), nil
+	}
+	// Enemy faction non-combat NPC check (REQ-FA-28).
+	if s.factionSvc != nil && s.factionSvc.IsEnemyOf(sess, inst.FactionID) {
+		return messageEvent(fmt.Sprintf("%s eyes you coldly. 'We don't serve your kind here.'", inst.Name())), nil
 	}
 	rate := s.bankerRateFor(inst.ID)
 	return messageEvent(fmt.Sprintf(
