@@ -166,6 +166,9 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerSetRoom:            bridgeSetRoom,
 	command.HandlerEditorCmds:         bridgeEditorCmds,
 	command.HandlerTabComplete:        bridgeTabComplete,
+	command.HandlerMaterials:          bridgeMaterials,
+	command.HandlerCraft:              bridgeCraft,
+	command.HandlerScavenge:           bridgeScavenge,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1958,5 +1961,61 @@ func bridgeTabComplete(bctx *bridgeContext) (bridgeResult, error) {
 		Payload: &gamev1.ClientMessage_TabComplete{
 			TabComplete: &gamev1.TabCompleteRequest{Prefix: prefix},
 		},
+	}}, nil
+}
+
+// bridgeMaterials builds a MaterialsRequest to list the player's material inventory.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a MaterialsRequest with optional category filter; done is false.
+func bridgeMaterials(bctx *bridgeContext) (bridgeResult, error) {
+	category := strings.TrimSpace(bctx.parsed.RawArgs)
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_MaterialsRequest{MaterialsRequest: &gamev1.MaterialsRequest{Category: category}},
+	}}, nil
+}
+
+// bridgeCraft builds a CraftListRequest, CraftRequest, or CraftConfirmRequest based on the args.
+// Usage: craft (list), craft list [category], craft confirm, or craft <recipe_id>
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing the appropriate crafting request; done is false.
+func bridgeCraft(bctx *bridgeContext) (bridgeResult, error) {
+	args := strings.Fields(bctx.parsed.RawArgs)
+	if len(args) == 0 {
+		return bridgeResult{msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_CraftListRequest{CraftListRequest: &gamev1.CraftListRequest{}},
+		}}, nil
+	}
+	switch strings.ToLower(args[0]) {
+	case "list":
+		category := ""
+		if len(args) > 1 {
+			category = args[1]
+		}
+		return bridgeResult{msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_CraftListRequest{CraftListRequest: &gamev1.CraftListRequest{Category: category}},
+		}}, nil
+	case "confirm":
+		return bridgeResult{msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_CraftConfirmRequest{CraftConfirmRequest: &gamev1.CraftConfirmRequest{}},
+		}}, nil
+	default:
+		return bridgeResult{msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_CraftRequest{CraftRequest: &gamev1.CraftRequest{RecipeId: strings.Join(args, " ")}},
+		}}, nil
+	}
+}
+
+// bridgeScavenge builds a ScavengeRequest to scavenge the current area for materials.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing a ScavengeRequest; done is false.
+func bridgeScavenge(bctx *bridgeContext) (bridgeResult, error) {
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload:   &gamev1.ClientMessage_ScavengeRequest{ScavengeRequest: &gamev1.ScavengeRequest{}},
 	}}, nil
 }

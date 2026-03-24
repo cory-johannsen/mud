@@ -139,6 +139,9 @@ const (
 	HandlerSetRoom            = "set_room"
 	HandlerEditorCmds         = "ecmds"
 	HandlerTabComplete        = "__tabcomplete__"
+	HandlerMaterials          = "materials"
+	HandlerCraft              = "craft"
+	HandlerScavenge           = "scavenge"
 )
 
 // Command defines a player-invocable command.
@@ -298,6 +301,11 @@ func BuiltinCommands() []Command {
 		{Name: "rest", Help: "Rest to rearrange your prepared technology slots.", Category: CategoryCharacter, Handler: HandlerRest},
 		{Name: "selecttech", Help: "Select pending technology upgrades from levelling up.", Category: CategoryCharacter, Handler: HandlerSelectTech},
 		{Name: "ready", Aliases: []string{"rdy"}, Help: "ready <action> when <trigger> — ready a reaction (2 AP); actions: strike/step/shield; triggers: enters/attacks/ally", Category: CategoryCombat, Handler: HandlerReady},
+
+		// Crafting commands
+		{Name: "materials", Aliases: []string{"mats"}, Help: "List your material inventory. Usage: materials [category]", Category: "crafting", Handler: HandlerMaterials},
+		{Name: "craft", Aliases: []string{"cr"}, Help: "Craft an item. Usage: craft list|<recipe>|confirm", Category: "crafting", Handler: HandlerCraft},
+		{Name: "scavenge", Aliases: []string{"scav"}, Help: "Scavenge the current area for materials.", Category: "crafting", Handler: HandlerScavenge},
 	}
 }
 
