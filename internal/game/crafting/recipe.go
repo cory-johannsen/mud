@@ -103,6 +103,21 @@ func LoadRecipeRegistry(dir string, matReg *MaterialRegistry, invReg OutputValid
 	return reg, nil
 }
 
+// NewRecipeRegistryFromSlice builds a RecipeRegistry directly from a slice of Recipe
+// pointers. This is intended for use in tests and tools that do not read from YAML files.
+//
+// Precondition: recipes may be nil or empty (returns an empty registry).
+// Postcondition: every entry in recipes is accessible via Recipe(id).
+func NewRecipeRegistryFromSlice(recipes []*Recipe) *RecipeRegistry {
+	reg := &RecipeRegistry{recipes: make(map[string]*Recipe, len(recipes))}
+	for _, r := range recipes {
+		if r != nil {
+			reg.recipes[r.ID] = r
+		}
+	}
+	return reg
+}
+
 // Recipe returns the Recipe with the given id and true, or nil and false if not found.
 func (r *RecipeRegistry) Recipe(id string) (*Recipe, bool) {
 	rec, ok := r.recipes[id]

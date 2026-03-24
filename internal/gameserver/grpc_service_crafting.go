@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -239,4 +240,268 @@ func (s *GameServiceServer) formatScavengeResult(gained map[string]int) string {
 	}
 
 	return strings.Join(parts, "\n")
+}
+
+// handleCraftList lists available recipes, optionally filtered by category. Each recipe
+// line indicates whether quick crafting requires a higher rank than the player holds
+// ("[downtime only]") and how many material types are missing ("[missing: N]").
+//
+// Precondition: uid identifies an active player session; req is non-nil.
+// Postcondition: Returns a non-nil ServerEvent; error is always nil.
+func (s *GameServiceServer) handleCraftList(uid string, req *gamev1.CraftListRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if s.recipeReg == nil {
+		return messageEvent("No recipes available."), nil
+	}
+
+	categoryFilter := strings.ToLower(strings.TrimSpace(req.GetCategory()))
+	riggingRank := sess.Skills["rigging"]
+	if riggingRank == "" {
+		riggingRank = "untrained"
+	}
+
+	type entry struct {
+		name    string
+		line    string
+		category string
+	}
+
+	var entries []entry
+	for _, recipe := range s.recipeReg.All() {
+		cat := strings.ToLower(recipe.Category)
+		if categoryFilter != "" && cat != categoryFilter {
+			continue
+		}
+
+		// Count missing material types.
+		missingTypes := 0
+		for _, rm := range recipe.Materials {
+			if sess.Materials[rm.ID] < rm.Quantity {
+				missingTypes++
+			}
+		}
+
+		// Determine quick-craft eligibility by proficiency rank comparison.
+		canQuickCraft := skillcheck.ProficiencyBonus(riggingRank) >= skillcheck.ProficiencyBonus(recipe.EffectiveMinRank())
+
+		var flags []string
+		if !canQuickCraft {
+			flags = append(flags, "[downtime only]")
+		}
+		if missingTypes > 0 {
+			flags = append(flags, fmt.Sprintf("[missing: %d]", missingTypes))
+		}
+
+		line := fmt.Sprintf("  %s - DC %d, %d days", recipe.Name, recipe.DC, recipe.DowntimeDays())
+		if len(flags) > 0 {
+			line += " " + strings.Join(flags, " ")
+		}
+		entries = append(entries, entry{name: recipe.Name, line: line, category: cat})
+	}
+
+	if len(entries) == 0 {
+		if categoryFilter != "" {
+			return messageEvent(fmt.Sprintf("No %s recipes available.", categoryFilter)), nil
+		}
+		return messageEvent("No recipes available."), nil
+	}
+
+	// Group by category, sort both categories and recipe names for deterministic output.
+	byCategory := make(map[string][]entry)
+	for _, e := range entries {
+		byCategory[e.category] = append(byCategory[e.category], e)
+	}
+	categories := make([]string, 0, len(byCategory))
+	for cat := range byCategory {
+		categories = append(categories, cat)
+	}
+	sort.Strings(categories)
+
+	var sb strings.Builder
+	for i, cat := range categories {
+		if i > 0 {
+			sb.WriteString("\n")
+		}
+		catTitle := strings.Title(cat) //nolint:staticcheck
+		sb.WriteString(fmt.Sprintf("--- %s ---\n", catTitle))
+		recipeEntries := byCategory[cat]
+		sort.Slice(recipeEntries, func(a, b int) bool {
+			return recipeEntries[a].name < recipeEntries[b].name
+		})
+		for _, e := range recipeEntries {
+			sb.WriteString(e.line + "\n")
+		}
+	}
+	return messageEvent(strings.TrimRight(sb.String(), "\n")), nil
+}
+
+// handleCraft stages a recipe for crafting after validating material availability.
+// Sets PendingCraftRecipeID on success so the player can confirm with handleCraftConfirm.
+//
+// Precondition: uid identifies an active player session; req is non-nil.
+// Postcondition: Returns a non-nil ServerEvent; error is always nil.
+func (s *GameServiceServer) handleCraft(uid string, req *gamev1.CraftRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if s.recipeReg == nil {
+		return errorEvent("No recipes available."), nil
+	}
+
+	recipeID := strings.TrimSpace(req.GetRecipeId())
+	recipe := s.findRecipe(recipeID)
+	if recipe == nil {
+		return errorEvent(fmt.Sprintf("Recipe not found: %s", recipeID)), nil
+	}
+
+	// Validate materials.
+	var missing []string
+	for _, rm := range recipe.Materials {
+		have := sess.Materials[rm.ID]
+		if have < rm.Quantity {
+			name := rm.ID
+			if s.materialReg != nil {
+				if mat, matOK := s.materialReg.Material(rm.ID); matOK {
+					name = mat.Name
+				}
+			}
+			missing = append(missing, fmt.Sprintf("%s (need %d, have %d)", name, rm.Quantity, have))
+		}
+	}
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		return errorEvent(fmt.Sprintf("Missing materials: %s", strings.Join(missing, ", "))), nil
+	}
+
+	sess.PendingCraftRecipeID = recipe.ID
+	return messageEvent(fmt.Sprintf(
+		"Ready to craft: %s (DC %d, %d days). Type 'craft confirm' to proceed.",
+		recipe.Name, recipe.DC, recipe.DowntimeDays(),
+	)), nil
+}
+
+// handleCraftConfirm executes a pending craft action, rolling the skill check and
+// applying the PF2E quick-craft outcome rules via the CraftingEngine.
+//
+// Precondition: uid identifies an active player session.
+// Postcondition: Returns a non-nil ServerEvent; error is always nil.
+func (s *GameServiceServer) handleCraftConfirm(uid string) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+	if sess.PendingCraftRecipeID == "" {
+		return errorEvent("No pending craft. Use 'craft <recipe>' first."), nil
+	}
+	if s.recipeReg == nil {
+		sess.PendingCraftRecipeID = ""
+		return errorEvent("Recipe no longer available."), nil
+	}
+
+	recipe, recipeOK := s.recipeReg.Recipe(sess.PendingCraftRecipeID)
+	if !recipeOK {
+		sess.PendingCraftRecipeID = ""
+		return errorEvent("Recipe no longer available."), nil
+	}
+
+	// Re-validate materials (guard against race between craft and confirm).
+	var missing []string
+	for _, rm := range recipe.Materials {
+		if sess.Materials[rm.ID] < rm.Quantity {
+			missing = append(missing, rm.ID)
+		}
+	}
+	if len(missing) > 0 {
+		sess.PendingCraftRecipeID = ""
+		sort.Strings(missing)
+		return errorEvent(fmt.Sprintf("Missing materials: %s", strings.Join(missing, ", "))), nil
+	}
+
+	riggingRank := sess.Skills["rigging"]
+	if riggingRank == "" {
+		riggingRank = "untrained"
+	}
+
+	isQuickCraft := skillcheck.ProficiencyBonus(riggingRank) >= skillcheck.ProficiencyBonus(recipe.EffectiveMinRank())
+	if !isQuickCraft {
+		sess.PendingCraftRecipeID = ""
+		return messageEvent(fmt.Sprintf(
+			"Craft queued for downtime: %d days. (Use the downtime system to complete it.)",
+			recipe.DowntimeDays(),
+		)), nil
+	}
+
+	// Deduct materials via repo and session state.
+	deductions := make(map[string]int, len(recipe.Materials))
+	for _, rm := range recipe.Materials {
+		deductions[rm.ID] = rm.Quantity
+	}
+	if s.materialRepo != nil {
+		if err := s.materialRepo.DeductMany(context.Background(), sess.CharacterID, deductions); err != nil {
+			sess.PendingCraftRecipeID = ""
+			return errorEvent("Failed to deduct materials."), nil
+		}
+	}
+	for matID, qty := range deductions {
+		sess.Materials[matID] -= qty
+		if sess.Materials[matID] <= 0 {
+			delete(sess.Materials, matID)
+		}
+	}
+
+	// Roll the crafting check. Use fallback roll=10 when dice is nil (test mode).
+	var roll int
+	if s.dice != nil {
+		roll = s.dice.Src().Intn(20) + 1
+	} else {
+		roll = 10
+	}
+	abilityMod := (sess.Abilities.Savvy - 10) / 2
+	profBonus := skillcheck.ProficiencyBonus(riggingRank)
+	total := roll + abilityMod + profBonus
+	checkOutcome := skillcheck.OutcomeFor(total, recipe.DC)
+	craftOutcome := crafting.Outcome(checkOutcome)
+
+	craftResult := s.craftEngine.ExecuteQuickCraft(recipe, sess.Materials, craftOutcome)
+	sess.PendingCraftRecipeID = ""
+
+	var sb strings.Builder
+	switch craftOutcome {
+	case crafting.CritSuccess:
+		sb.WriteString(fmt.Sprintf("Critical success! You craft %d %s.", craftResult.OutputQuantity, recipe.Name))
+	case crafting.Success:
+		sb.WriteString(fmt.Sprintf("Success! You craft %d %s.", craftResult.OutputQuantity, recipe.Name))
+	case crafting.Failure:
+		sb.WriteString(fmt.Sprintf("Failure. You do not craft %s (some materials wasted).", recipe.Name))
+	default:
+		sb.WriteString(fmt.Sprintf("Critical failure! You do not craft %s (all materials lost).", recipe.Name))
+	}
+
+	// Add output items to backpack if crafting succeeded and backpack is available.
+	if craftResult.OutputQuantity > 0 && sess.Backpack != nil && s.invRegistry != nil && recipe.OutputItemID != "" {
+		_, _ = sess.Backpack.Add(recipe.OutputItemID, craftResult.OutputQuantity, s.invRegistry)
+	}
+
+	return messageEvent(sb.String()), nil
+}
+
+// findRecipe looks up a recipe by exact ID first, then by case-insensitive name match.
+//
+// Precondition: s.recipeReg must not be nil.
+// Postcondition: Returns the matching *crafting.Recipe or nil if not found.
+func (s *GameServiceServer) findRecipe(query string) *crafting.Recipe {
+	if r, ok := s.recipeReg.Recipe(query); ok {
+		return r
+	}
+	q := strings.ToLower(query)
+	for _, r := range s.recipeReg.All() {
+		if strings.ToLower(r.Name) == q {
+			return r
+		}
+	}
+	return nil
 }

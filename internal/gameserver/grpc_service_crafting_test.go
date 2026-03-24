@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap/zaptest"
 	"pgregory.net/rapid"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -278,6 +279,203 @@ func TestHandleScavenge_MarksRoomExhausted(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "room_a", sess.ScavengeExhaustedRoomID)
+}
+
+// newRecipeRegistry builds a RecipeRegistry from a slice of recipes for use in tests.
+func newRecipeRegistry(recipes []*crafting.Recipe) *crafting.RecipeRegistry {
+	return crafting.NewRecipeRegistryFromSlice(recipes)
+}
+
+// TestHandleCraftList_ShowsDowntimeOnly verifies that when a player's rigging rank is
+// below the recipe's EffectiveMinRank the listing shows a "[downtime only]" marker.
+//
+// Precondition: player rigging rank = "untrained"; recipe EffectiveMinRank = "trained" (complexity=2).
+// Postcondition: response message contains "[downtime only]".
+func TestHandleCraftList_ShowsDowntimeOnly(t *testing.T) {
+	mats := []*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "mechanical"},
+	}
+	matReg := newMaterialRegistry(mats)
+	recipes := []*crafting.Recipe{
+		{
+			ID:         "stimpack",
+			Name:       "Stimpack",
+			Category:   "medical",
+			Complexity: 2, // EffectiveMinRank = "trained"
+			DC:         15,
+			Materials:  []crafting.RecipeMaterial{{ID: "scrap_metal", Quantity: 2}},
+		},
+	}
+	recipeReg := newRecipeRegistry(recipes)
+	svc, uid := buildCraftingServer(t, matReg, &stubMaterialsRepo{}, nil)
+	svc.recipeReg = recipeReg
+	svc.craftEngine = crafting.NewEngine()
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Skills = map[string]string{"rigging": "untrained"}
+	sess.Materials = map[string]int{}
+
+	evt, err := svc.handleCraftList(uid, &gamev1.CraftListRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage()
+	require.NotNil(t, msg, "expected message event")
+	assert.Contains(t, msg.Content, "[downtime only]")
+}
+
+// TestHandleCraftList_ShowsMissingMaterials verifies that when a player has none of the
+// required materials the listing shows a "[missing: N]" marker for those materials.
+//
+// Precondition: player has 0 materials; recipe requires 2 distinct material types.
+// Postcondition: response message contains "[missing: 2]".
+func TestHandleCraftList_ShowsMissingMaterials(t *testing.T) {
+	mats := []*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "mechanical"},
+		{ID: "bleach", Name: "Bleach", Category: "chemical"},
+	}
+	matReg := newMaterialRegistry(mats)
+	recipes := []*crafting.Recipe{
+		{
+			ID:         "cleaner_bomb",
+			Name:       "Cleaner Bomb",
+			Category:   "chemical",
+			Complexity: 1, // EffectiveMinRank = "untrained"
+			DC:         10,
+			Materials: []crafting.RecipeMaterial{
+				{ID: "scrap_metal", Quantity: 1},
+				{ID: "bleach", Quantity: 1},
+			},
+		},
+	}
+	recipeReg := newRecipeRegistry(recipes)
+	svc, uid := buildCraftingServer(t, matReg, &stubMaterialsRepo{}, nil)
+	svc.recipeReg = recipeReg
+	svc.craftEngine = crafting.NewEngine()
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Skills = map[string]string{"rigging": "trained"}
+	sess.Materials = map[string]int{} // no materials
+
+	evt, err := svc.handleCraftList(uid, &gamev1.CraftListRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage()
+	require.NotNil(t, msg, "expected message event")
+	assert.Contains(t, msg.Content, "[missing: 2]")
+}
+
+// TestHandleCraft_InsufficientMaterials_Fails verifies that when a player lacks required
+// materials the craft command returns an error and does not set PendingCraftRecipeID.
+//
+// Precondition: player has 0 scrap_metal; recipe requires 2.
+// Postcondition: error event contains "missing"; PendingCraftRecipeID remains empty.
+func TestHandleCraft_InsufficientMaterials_Fails(t *testing.T) {
+	mats := []*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "mechanical"},
+	}
+	matReg := newMaterialRegistry(mats)
+	recipes := []*crafting.Recipe{
+		{
+			ID:         "pipe_bomb",
+			Name:       "Pipe Bomb",
+			Category:   "explosive",
+			Complexity: 1,
+			DC:         12,
+			Materials:  []crafting.RecipeMaterial{{ID: "scrap_metal", Quantity: 2}},
+		},
+	}
+	recipeReg := newRecipeRegistry(recipes)
+	svc, uid := buildCraftingServer(t, matReg, &stubMaterialsRepo{}, nil)
+	svc.recipeReg = recipeReg
+	svc.craftEngine = crafting.NewEngine()
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Skills = map[string]string{"rigging": "untrained"}
+	sess.Materials = map[string]int{} // no scrap_metal
+
+	evt, err := svc.handleCraft(uid, &gamev1.CraftRequest{RecipeId: "pipe_bomb"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	errEvt := evt.GetError()
+	require.NotNil(t, errEvt, "expected error event for missing materials")
+	assert.Contains(t, strings.ToLower(errEvt.Message), "missing")
+	assert.Empty(t, sess.PendingCraftRecipeID, "PendingCraftRecipeID must remain empty")
+}
+
+// TestHandleCraftConfirm_NoPending_Fails verifies that confirm with no pending recipe
+// returns an appropriate error.
+//
+// Precondition: PendingCraftRecipeID == "".
+// Postcondition: error event contains "no pending" or similar.
+func TestHandleCraftConfirm_NoPending_Fails(t *testing.T) {
+	svc, uid := buildCraftingServer(t, nil, &stubMaterialsRepo{}, nil)
+	svc.recipeReg = newRecipeRegistry(nil)
+	svc.craftEngine = crafting.NewEngine()
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.PendingCraftRecipeID = ""
+
+	evt, err := svc.handleCraftConfirm(uid)
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	errEvt := evt.GetError()
+	require.NotNil(t, errEvt, "expected error event for no pending craft")
+	assert.Contains(t, strings.ToLower(errEvt.Message), "no pending")
+}
+
+// TestHandleCraftConfirm_QuickCraft_Success verifies that with all required materials and
+// a sufficient rank, craft confirm deducts materials, clears the pending recipe, and
+// returns a success message.
+//
+// Precondition: player has 2 scrap_metal; rigging rank = "trained" (meets complexity=1 recipe);
+// dice roll is forced via nil dice (uses fallback roll=10, abilityMod=0 → total=10 vs DC=5 → Success).
+// Postcondition: PendingCraftRecipeID is cleared; materials deducted; message contains craft result.
+func TestHandleCraftConfirm_QuickCraft_Success(t *testing.T) {
+	mats := []*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "mechanical"},
+	}
+	matReg := newMaterialRegistry(mats)
+	recipes := []*crafting.Recipe{
+		{
+			ID:          "shiv",
+			Name:        "Shiv",
+			Category:    "weapon",
+			Complexity:  1, // EffectiveMinRank = "untrained"
+			DC:          5,
+			OutputCount: 1,
+			Materials:   []crafting.RecipeMaterial{{ID: "scrap_metal", Quantity: 2}},
+		},
+	}
+	recipeReg := newRecipeRegistry(recipes)
+	svc, uid := buildCraftingServer(t, matReg, &stubMaterialsRepo{}, nil)
+	svc.recipeReg = recipeReg
+	svc.craftEngine = crafting.NewEngine()
+	// dice is nil — handleCraftConfirm must use a fixed roll when dice is nil
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Skills = map[string]string{"rigging": "trained"}
+	sess.Materials = map[string]int{"scrap_metal": 2}
+	sess.Abilities = character.AbilityScores{Savvy: 10} // abilityMod = 0
+	sess.PendingCraftRecipeID = "shiv"
+
+	evt, err := svc.handleCraftConfirm(uid)
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	msg := evt.GetMessage()
+	require.NotNil(t, msg, "expected message event on success")
+	assert.Empty(t, sess.PendingCraftRecipeID, "pending recipe must be cleared after confirm")
+	// Materials should be deducted (full deduction on success).
+	assert.Equal(t, 0, sess.Materials["scrap_metal"], "scrap_metal must be deducted")
 }
 
 // TestHandleScavenge_Property_ExhaustedAfterFirstAttempt verifies via property testing

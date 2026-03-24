@@ -274,6 +274,12 @@ type GameServiceServer struct {
 	// materialRepo persists per-character material inventories.
 	// May be nil when the crafting feature is not yet configured.
 	materialRepo CharacterMaterialsRepository
+	// recipeReg holds all crafting recipe definitions loaded at startup.
+	// May be nil when the crafting feature is not yet configured.
+	recipeReg *crafting.RecipeRegistry
+	// craftEngine executes crafting logic.
+	// May be nil when the crafting feature is not yet configured.
+	craftEngine *crafting.CraftingEngine
 	// factionConfig holds global faction economy parameters (rep costs, rep per service).
 	// May be nil when faction feature is not configured.
 	factionConfig *faction.FactionConfig
@@ -1892,6 +1898,12 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleMaterials(uid, p.MaterialsRequest)
 	case *gamev1.ClientMessage_ScavengeRequest:
 		return s.handleScavenge(uid)
+	case *gamev1.ClientMessage_CraftListRequest:
+		return s.handleCraftList(uid, p.CraftListRequest)
+	case *gamev1.ClientMessage_CraftRequest:
+		return s.handleCraft(uid, p.CraftRequest)
+	case *gamev1.ClientMessage_CraftConfirmRequest:
+		return s.handleCraftConfirm(uid)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
