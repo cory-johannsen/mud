@@ -57,11 +57,41 @@ features:
 
   - slug: actions
     name: Actions
-    status: planned
+    status: done
     priority: 40
     category: combat
     file: docs/features/actions.md
-    effort: "XL"  # remaining: Climb/Swim/Sense Motive/Delay/Ready, all Exploration modes, all Downtime actions, Gear actions (activate/repair/affix)
+    effort: "XL"  # combat/general/archetype/job actions complete; exploration/downtime/gear split into sub-features
+
+  - slug: gear-actions
+    name: Gear Actions
+    status: planned
+    priority: 45
+    category: combat
+    file: docs/features/gear-actions.md
+    effort: "M"  # Repair and Affix Material commands
+    dependencies:
+      - equipment-mechanics
+
+  - slug: exploration-actions
+    name: Exploration Actions
+    status: planned
+    priority: 50
+    category: world
+    file: docs/features/exploration-actions.md
+    effort: "L"  # 8 exploration modes (avoid notice/defend/detect magic/search/scout/follow/investigate/refocus)
+    dependencies:
+      - actions
+
+  - slug: downtime-actions
+    name: Downtime Actions
+    status: planned
+    priority: 55
+    category: world
+    file: docs/features/downtime-actions.md
+    effort: "L"  # 7 downtime actions (earn income/craft/retrain/treat disease/subsist/forgery/long-term rest)
+    dependencies:
+      - actions
 
   - slug: console-notifications
     name: Console Notifications
