@@ -236,6 +236,52 @@ type PlayerSession struct {
 	InitDone chan struct{}
 }
 
+// EquippedInstances returns all ItemInstances currently equipped across the active weapon
+// preset and all armor/accessory slots. Resolves InstanceIDs to backpack pointers.
+// Unresolvable InstanceIDs are silently skipped.
+//
+// Precondition: sess.Backpack, sess.LoadoutSet, sess.Equipment may be nil (handled gracefully).
+// Postcondition: Returns a non-nil slice (may be empty).
+func (sess *PlayerSession) EquippedInstances() []*inventory.ItemInstance {
+	result := make([]*inventory.ItemInstance, 0)
+
+	// Active weapon preset slots only (REQ-ACT-1).
+	if sess.LoadoutSet != nil {
+		if active := sess.LoadoutSet.ActivePreset(); active != nil {
+			for _, ew := range []*inventory.EquippedWeapon{active.MainHand, active.OffHand} {
+				if ew == nil || ew.InstanceID == "" {
+					continue
+				}
+				if inst := sess.Backpack.GetByInstanceID(ew.InstanceID); inst != nil {
+					result = append(result, inst)
+				}
+			}
+		}
+	}
+
+	// Armor and accessory slots.
+	if sess.Equipment != nil {
+		for _, si := range sess.Equipment.Armor {
+			if si == nil || si.InstanceID == "" {
+				continue
+			}
+			if inst := sess.Backpack.GetByInstanceID(si.InstanceID); inst != nil {
+				result = append(result, inst)
+			}
+		}
+		for _, si := range sess.Equipment.Accessories {
+			if si == nil || si.InstanceID == "" {
+				continue
+			}
+			if inst := sess.Backpack.GetByInstanceID(si.InstanceID); inst != nil {
+				result = append(result, inst)
+			}
+		}
+	}
+
+	return result
+}
+
 // RecomputeSetBonuses recomputes and stores the active set bonuses for sess
 // using equippedItemDefIDs gathered from the session's current equipment (REQ-EM-29).
 // Must be called at login and whenever equipped armor changes.
