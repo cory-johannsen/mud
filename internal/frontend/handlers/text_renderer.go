@@ -719,6 +719,10 @@ func RenderCharacterSheet(csv *gamev1.CharacterSheetView, width int) string {
 	left = append(left, slPlain(fmt.Sprintf("Gender: %s", displayGender(csv.GetGender()))))
 	left = append(left, slPlain(fmt.Sprintf("HP: %d / %d", csv.GetCurrentHp(), csv.GetMaxHp())))
 	left = append(left, slPlain(fmt.Sprintf("Hero Points: %d", csv.GetHeroPoints())))
+	if csv.GetMaxFocusPoints() > 0 {
+		left = append(left, slPlain(fmt.Sprintf("Focus Points: %d / %d",
+			csv.GetFocusPoints(), csv.GetMaxFocusPoints())))
+	}
 
 	// abilCell returns a fixed-width ability cell: "Label:     +N  " (15 visible chars).
 	// The colored modifier is right-aligned after the label.

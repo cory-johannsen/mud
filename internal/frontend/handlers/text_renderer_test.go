@@ -1501,3 +1501,15 @@ func TestRenderMap_BossRoom_RendersAngleBrackets(t *testing.T) {
 	// Boss room tile must not be rendered as a numbered square-bracket tile like "[ 1]".
 	assert.NotContains(t, result, "[ 1]", "boss room grid tile must not use numbered square brackets")
 }
+
+func TestRenderCharacterSheet_ShowsFocusPoints_WhenMaxGTZero(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{FocusPoints: 2, MaxFocusPoints: 3}
+	result := telnet.StripANSI(RenderCharacterSheet(csv, 80))
+	assert.Contains(t, result, "Focus Points: 2 / 3")
+}
+
+func TestRenderCharacterSheet_OmitsFocusPoints_WhenMaxIsZero(t *testing.T) {
+	csv := &gamev1.CharacterSheetView{MaxFocusPoints: 0}
+	result := telnet.StripANSI(RenderCharacterSheet(csv, 80))
+	assert.NotContains(t, result, "Focus Points")
+}
