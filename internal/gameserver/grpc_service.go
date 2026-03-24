@@ -1754,6 +1754,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleEditorCmds(uid)
 	case *gamev1.ClientMessage_Travel:
 		return s.handleTravel(uid, p.Travel)
+	case *gamev1.ClientMessage_ActivateItem:
+		return s.handleActivate(uid, p.ActivateItem)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
