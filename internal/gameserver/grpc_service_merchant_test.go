@@ -9,6 +9,7 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -185,6 +186,185 @@ func TestProperty_HandleBrowse_NeverPanics(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		name := rapid.String().Draw(rt, "name")
 		evt, err := svc.handleBrowse(uid, &gamev1.BrowseRequest{NpcName: name})
+		assert.NoError(t, err)
+		assert.NotNil(t, evt)
+	})
+}
+
+// newMerchantTestServerWithMaterialReg builds a GameServiceServer with a materialReg and a
+// merchant that has a MaterialStock entry for the given material.
+//
+// Precondition: t must be non-nil; matReg must be non-nil.
+// Postcondition: Returns server, uid, and the spawned merchant instance.
+func newMerchantTestServerWithMaterialReg(t *testing.T, matReg *crafting.MaterialRegistry) (*GameServiceServer, string, *npc.Instance) {
+	t.Helper()
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcManager := npc.NewManager()
+	cmdRegistry := command.DefaultRegistry()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcManager, nil, nil, nil)
+	chatHandler := NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+	svc := newTestGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger,
+		nil, nil, nil, npcManager,
+		nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	svc.materialReg = matReg
+
+	uid := "matmerch_u1"
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:      uid,
+		Username: "mat_user",
+		CharName: "MatChar",
+		RoomID:   "room_a",
+		CurrentHP: 10,
+		MaxHP:    10,
+		Role:     "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Currency = 500
+
+	tmpl := &npc.Template{
+		ID:      "mat_merchant",
+		Name:    "MaterialShop",
+		NPCType: "merchant",
+		MaxHP:   20,
+		AC:      10,
+		Level:   1,
+		Merchant: &npc.MerchantConfig{
+			MerchantType: "consumables",
+			SellMargin:   1.0,
+			BuyMargin:    0.5,
+			Budget:       300,
+			Inventory:    []npc.MerchantItem{},
+			MaterialStock: []npc.MaterialStockItem{
+				{ID: "scrap_metal", Price: 30, RestockQuantity: 10},
+			},
+			ReplenishRate: npc.ReplenishConfig{MinHours: 1, MaxHours: 4},
+		},
+	}
+	inst, err := svc.npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+	svc.initMerchantRuntimeState(inst)
+
+	return svc, uid, inst
+}
+
+func TestHandleBuy_Material_Success(t *testing.T) {
+	matReg := crafting.NewMaterialRegistryFromSlice([]*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "metal", Value: 10},
+	})
+	svc, uid, inst := newMerchantTestServerWithMaterialReg(t, matReg)
+
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "Scrap Metal", Quantity: 1})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Contains(t, evt.GetMessage().Content, "buy")
+	assert.Contains(t, evt.GetMessage().Content, "Scrap Metal")
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	assert.Equal(t, 470, sess.Currency)
+	assert.Equal(t, 1, sess.Materials["scrap_metal"])
+}
+
+func TestHandleBuy_Material_InsufficientCredits(t *testing.T) {
+	matReg := crafting.NewMaterialRegistryFromSlice([]*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "metal", Value: 10},
+	})
+	svc, uid, inst := newMerchantTestServerWithMaterialReg(t, matReg)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Currency = 0
+
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "Scrap Metal", Quantity: 1})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Contains(t, evt.GetMessage().Content, "afford")
+}
+
+func TestHandleBuy_Material_NilRegistry(t *testing.T) {
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcManager := npc.NewManager()
+	cmdRegistry := command.DefaultRegistry()
+	worldHandler := NewWorldHandler(worldMgr, sessMgr, npcManager, nil, nil, nil)
+	chatHandler := NewChatHandler(sessMgr)
+	logger := zaptest.NewLogger(t)
+	svc := newTestGameServiceServer(worldMgr, sessMgr, cmdRegistry, worldHandler, chatHandler, logger,
+		nil, nil, nil, npcManager,
+		nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	// materialReg intentionally left nil
+
+	uid := "nilreg_u1"
+	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+		UID:      uid,
+		Username: "nilreg_user",
+		CharName: "NilChar",
+		RoomID:   "room_a",
+		CurrentHP: 10,
+		MaxHP:    10,
+		Role:     "player",
+	})
+	require.NoError(t, err)
+
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.Currency = 500
+
+	tmpl := &npc.Template{
+		ID:      "nilreg_merchant",
+		Name:    "NilRegShop",
+		NPCType: "merchant",
+		MaxHP:   20,
+		AC:      10,
+		Level:   1,
+		Merchant: &npc.MerchantConfig{
+			MerchantType: "consumables",
+			SellMargin:   1.0,
+			BuyMargin:    0.5,
+			Budget:       300,
+			Inventory:    []npc.MerchantItem{},
+			MaterialStock: []npc.MaterialStockItem{
+				{ID: "scrap_metal", Price: 30, RestockQuantity: 10},
+			},
+			ReplenishRate: npc.ReplenishConfig{MinHours: 1, MaxHours: 4},
+		},
+	}
+	inst, err := svc.npcMgr.Spawn(tmpl, "room_a")
+	require.NoError(t, err)
+	svc.initMerchantRuntimeState(inst)
+
+	// Must not panic; materialReg is nil so the item should not be found.
+	evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{NpcName: inst.Name(), ItemId: "Scrap Metal", Quantity: 1})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Contains(t, evt.GetMessage().Content, "doesn't sell")
+}
+
+func TestProperty_HandleBuy_MaterialStock_NeverPanics(t *testing.T) {
+	matReg := crafting.NewMaterialRegistryFromSlice([]*crafting.Material{
+		{ID: "scrap_metal", Name: "Scrap Metal", Category: "metal", Value: 10},
+		{ID: "bleach", Name: "Bleach", Category: "chemical", Value: 5},
+	})
+	svc, uid, inst := newMerchantTestServerWithMaterialReg(t, matReg)
+
+	rapid.Check(t, func(rt *rapid.T) {
+		itemID := rapid.String().Draw(rt, "item_id")
+		credits := rapid.IntRange(0, 1000).Draw(rt, "credits")
+		sess, ok := svc.sessions.GetPlayer(uid)
+		require.True(t, ok)
+		sess.Currency = credits
+
+		evt, err := svc.handleBuy(uid, &gamev1.BuyRequest{
+			NpcName:  inst.Name(),
+			ItemId:   itemID,
+			Quantity: 1,
+		})
 		assert.NoError(t, err)
 		assert.NotNil(t, evt)
 	})

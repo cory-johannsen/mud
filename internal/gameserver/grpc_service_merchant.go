@@ -151,6 +151,9 @@ func (s *GameServiceServer) handleBuy(uid string, req *gamev1.BuyRequest) (*game
 	if itemCfg == nil {
 		// Check merchant material stock
 		for _, ms := range tmpl.Merchant.MaterialStock {
+			if s.materialReg == nil {
+				break
+			}
 			matDef, ok := s.materialReg.Material(ms.ID)
 			if !ok || !strings.EqualFold(matDef.Name, itemID) {
 				continue
