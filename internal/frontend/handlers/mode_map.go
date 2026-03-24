@@ -3,11 +3,13 @@ package handlers
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
 
 	"github.com/cory-johannsen/mud/internal/frontend/telnet"
+	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -188,4 +190,131 @@ func handleMapModeInputFn(line string, conn *telnet.Conn, stream gamev1.GameServ
 		_ = conn.WriteConsole(rendered)
 	}
 	writeMapPromptToConn(conn, zoneID, zoneName, danger)
+}
+
+const mapModeGray = "\033[37m"
+
+// mapPrompt returns the prompt string for the current map mode state.
+func mapPrompt(selectedZone string, selectedZoneName, dangerLevel string) string {
+	if selectedZone != "" && selectedZoneName != "" {
+		return fmt.Sprintf("[MAP] Selected: %s (%s)  t=travel  q=exit", selectedZoneName, dangerLevel)
+	}
+	return "[MAP] z=zone  w=world  <num/name>=select  t=travel  q=exit"
+}
+
+// renderMapConsole renders the map response into a terminal string for the console region.
+func renderMapConsole(resp *gamev1.MapResponse, view string, width int) string {
+	if view == "world" {
+		return RenderWorldMap(resp, width)
+	}
+	return RenderMap(resp, width)
+}
+
+// resolveZoneSelector resolves a user input string to a world zone ID.
+// It first tries numeric legend matching, then case-insensitive prefix matching
+// on zone names in lexicographic zone ID order.
+// Only zones present in worldTiles are candidates.
+// Returns "" if no match found.
+func resolveZoneSelector(input string, worldTiles []*gamev1.WorldZoneTile) string {
+	if len(worldTiles) == 0 {
+		return ""
+	}
+	sorted := make([]*gamev1.WorldZoneTile, len(worldTiles))
+	copy(sorted, worldTiles)
+	sort.Slice(sorted, func(i, j int) bool {
+		if sorted[i].WorldY != sorted[j].WorldY {
+			return sorted[i].WorldY < sorted[j].WorldY
+		}
+		return sorted[i].WorldX < sorted[j].WorldX
+	})
+	var legendNum int
+	if _, err := fmt.Sscanf(input, "%d", &legendNum); err == nil {
+		if legendNum >= 1 && legendNum <= len(sorted) {
+			return sorted[legendNum-1].ZoneId
+		}
+	}
+	lower := strings.ToLower(input)
+	type candidate struct {
+		zoneID   string
+		zoneName string
+	}
+	var candidates []candidate
+	for _, t := range sorted {
+		if strings.HasPrefix(strings.ToLower(t.ZoneName), lower) {
+			candidates = append(candidates, candidate{t.ZoneId, t.ZoneName})
+		}
+	}
+	if len(candidates) == 0 {
+		return ""
+	}
+	sort.Slice(candidates, func(i, j int) bool {
+		return candidates[i].zoneID < candidates[j].zoneID
+	})
+	return candidates[0].zoneID
+}
+
+// resolveTravelZone resolves a zone name fragment for the `travel` command.
+// Only zones with non-nil WorldX/WorldY are valid targets.
+// Returns ("", false) if no match; (zoneID, true) if exactly one prefix match.
+func resolveTravelZone(input string, zones []*world.Zone) (string, bool) {
+	lower := strings.ToLower(input)
+	type candidate struct {
+		zoneID string
+	}
+	var candidates []candidate
+	for _, z := range zones {
+		if z.WorldX == nil || z.WorldY == nil {
+			continue
+		}
+		if strings.HasPrefix(strings.ToLower(z.Name), lower) {
+			candidates = append(candidates, candidate{z.ID})
+		}
+	}
+	if len(candidates) == 0 {
+		return "", false
+	}
+	sort.Slice(candidates, func(i, j int) bool {
+		return candidates[i].zoneID < candidates[j].zoneID
+	})
+	return candidates[0].zoneID, true
+}
+
+// writeFmtConsole writes a formatted string to the telnet console or line (based on split-screen mode).
+func writeFmtConsole(conn *telnet.Conn, format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	if conn.IsSplitScreen() {
+		_ = conn.WriteConsole(msg)
+	} else {
+		_ = conn.WriteLine(msg)
+	}
+}
+
+// sortWorldTiles sorts world tiles by lexicographic zone ID (ascending).
+func sortWorldTiles(tiles []*gamev1.WorldZoneTile) {
+	sort.Slice(tiles, func(i, j int) bool {
+		return tiles[i].ZoneId < tiles[j].ZoneId
+	})
+}
+
+// zoneNameAndDanger extracts zone name and danger level from a MapResponse for a given zone ID.
+func zoneNameAndDanger(zoneID string, resp *gamev1.MapResponse) (name, danger string) {
+	if resp == nil || zoneID == "" {
+		return "", ""
+	}
+	for _, t := range resp.GetWorldTiles() {
+		if t.GetZoneId() == zoneID {
+			return t.GetZoneName(), t.GetDangerLevel()
+		}
+	}
+	return "", ""
+}
+
+// writeMapPromptToConn writes the appropriate map prompt to the connection.
+func writeMapPromptToConn(conn *telnet.Conn, selectedZone, zoneName, dangerLevel string) {
+	prompt := mapPrompt(selectedZone, zoneName, dangerLevel)
+	if conn.IsSplitScreen() {
+		_ = conn.WritePromptSplit(prompt)
+	} else {
+		_ = conn.WritePrompt(prompt)
+	}
 }
