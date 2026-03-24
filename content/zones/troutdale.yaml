@@ -7,7 +7,7 @@ zone:
   name: Troutdale
   description: Gateway to the Columbia River Gorge, where outlet mall ruins and relentless winds define a landscape of scavengers,
     runners, and wind mystics.
-  start_room: trout_i84_west
+  start_room: trout_truck_stop
   rooms:
   - id: trout_i84_west
     title: I-84 Westbound On-Ramp

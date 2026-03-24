@@ -7,7 +7,7 @@ zone:
   name: Felony Flats
   description: The sprawl of SE 82nd Avenue and its surrounding blocks — a wasteland of burned-out strip malls, fortified
     motels, and desperate survivors clinging to the hustle.
-  start_room: flats_82nd_ave
+  start_room: flats_jade_district
   rooms:
   - id: flats_82nd_ave
     title: 82nd Avenue

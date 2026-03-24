@@ -7,7 +7,7 @@ zone:
   name: Southeast Industrial
   description: Portland's industrial underbelly — a maze of rusting warehouses, abandoned docks, and skeletal cranes. Rain
     hammers corrugated metal roofs in a ceaseless percussion. The Willamette runs brown and slow along the eastern edge.
-  start_room: sei_powell_terminus
+  start_room: sei_break_room
   rooms:
   - id: sei_powell_terminus
     title: Powell Boulevard Terminus

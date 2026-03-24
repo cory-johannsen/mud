@@ -7,7 +7,7 @@ zone:
   name: The Couve
   description: Vancouver, Washington — a sprawling strip mall empire north of the Columbia, where chain restaurant warlords
     hold court and river pirates raid from Jantzen Beach.
-  start_room: couve_interstate_bridge_south
+  start_room: couve_the_crossing
   rooms:
   - id: couve_interstate_bridge_south
     title: Interstate Bridge — South End

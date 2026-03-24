@@ -18,7 +18,7 @@ zone:
     \ mixing with the distant sounds \nof machinery clanking away from inside the trailers. From the outside, Rustbucket Ridge\
     \ feels like a\nplace where people don’t go to start over—they go to survive, holding on to the last remnants of a \n\
     life that the world left behind.\n"
-  start_room: grinders_row
+  start_room: rust_scrap_office
   rooms:
   - id: grinders_row
     title: Grinder’s Row

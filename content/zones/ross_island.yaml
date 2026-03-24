@@ -7,7 +7,7 @@ zone:
   name: Ross Island
   description: A small fortress island in the Willamette, dominated by a massive gravel pit and ringed by overgrown forest.
     Bridge toll gangs control access while hermits haunt the interior.
-  start_room: ross_bridge_east
+  start_room: ross_dock_shack
   rooms:
   - id: ross_bridge_east
     title: Ross Island Bridge — East Landing

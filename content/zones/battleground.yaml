@@ -7,7 +7,7 @@ zone:
   name: Battleground Socialist Collective
   description: A fortified commune carved from the ruins of old Battleground, where collective labor and ideological discipline
     hold back the wasteland. Whether utopia or prison depends on whom you ask.
-  start_room: battle_i5_south
+  start_room: battle_infirmary
   rooms:
   - id: battle_i5_south
     title: I-5 Southbound On-Ramp

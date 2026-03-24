@@ -7,7 +7,7 @@ zone:
   name: The Free State of Beaverton
   description: A suburban fortress-state where strip malls serve as government buildings, mall cops enforce martial law, and
     parking violations carry the death penalty.
-  start_room: beav_canyon_road_east
+  start_room: beav_free_market
   rooms:
   - id: beav_canyon_road_east
     title: Canyon Road East

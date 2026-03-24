@@ -8,7 +8,7 @@ zone:
   description: The old neighborhoods of Northeast Portland have devolved into a patchwork of bike-courier territories, fortified
     breweries, and feral art collectives. Alberta Street's galleries now house gangs, while the brewery row on Mississippi
     has become a warlord's domain.
-  start_room: ne_alberta_street
+  start_room: ne_corner_store
   rooms:
   - id: ne_alberta_street
     title: Alberta Street

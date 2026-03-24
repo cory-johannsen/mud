@@ -306,14 +306,14 @@ func TestLoadActualDowntownZone(t *testing.T) {
 
 	assert.Equal(t, "downtown", zone.ID)
 	assert.Equal(t, "Downtown Portland", zone.Name)
-	assert.Equal(t, "pioneer_square", zone.StartRoom)
+	assert.Equal(t, "downtown_underground", zone.StartRoom)
 	assert.Len(t, zone.Rooms, 14)
 
 	// Verify start room exists and has exits
-	start := zone.Rooms["pioneer_square"]
+	start := zone.Rooms["downtown_underground"]
 	require.NotNil(t, start)
-	assert.Equal(t, "Pioneer Courthouse Square", start.Title)
-	assert.GreaterOrEqual(t, len(start.Exits), 2)
+	assert.Equal(t, "The Underground", start.Title)
+	assert.GreaterOrEqual(t, len(start.Exits), 1)
 
 	// Verify all exit targets are valid (zone.Validate() already checks this)
 	require.NoError(t, zone.Validate())

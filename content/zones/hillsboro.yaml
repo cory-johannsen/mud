@@ -7,7 +7,7 @@ zone:
   name: Kingdom of Hillsboro
   description: A feudal tech-state built on the bones of the old semiconductor industry. Knights in server rack armor patrol
     solar farms and data center keeps, ruling over serfs who maintain machines they no longer understand.
-  start_room: hills_tv_highway_east
+  start_room: hills_the_keep
   rooms:
   - id: hills_tv_highway_east
     title: TV Highway East

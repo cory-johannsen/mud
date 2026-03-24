@@ -7,7 +7,7 @@ zone:
   name: Vantucky
   description: The rural-urban fringe east of Vancouver, where militia compounds, gun markets, and highway bandits rule a
     landscape of strip malls, farmland, and fortified homesteads.
-  start_room: vantucky_fourth_plain_west
+  start_room: vantucky_the_compound
   rooms:
   - id: vantucky_fourth_plain_west
     title: Fourth Plain — Vantucky Border

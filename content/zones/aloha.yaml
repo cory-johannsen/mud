@@ -7,7 +7,7 @@ zone:
   name: The Aloha Neutral Zone
   description: A demilitarized trading post on the old TV Highway corridor, where smugglers, brokers, and refugees coexist
     under an uneasy truce enforced by neutral zone sentries.
-  start_room: aloha_tv_highway_east
+  start_room: aloha_the_bazaar
   rooms:
   - id: aloha_tv_highway_east
     title: TV Highway — East Gate

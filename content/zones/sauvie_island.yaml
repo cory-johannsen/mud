@@ -7,7 +7,7 @@ zone:
   name: Sauvie Island
   description: The last agrarian holdout in the region. Farm compounds and river pirates contest over the only place still
     growing real food.
-  start_room: sauvie_bridge_south
+  start_room: sauvie_farm_stand
   rooms:
   - id: sauvie_bridge_south
     title: Sauvie Island Bridge — South End

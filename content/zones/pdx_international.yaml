@@ -7,7 +7,7 @@ zone:
   name: PDX International
   description: The ruins of Portland International Airport, where cargo cultists worship the grounded planes and tarmac raiders
     fight over salvage from the hangars.
-  start_room: pdx_airport_way_west
+  start_room: pdx_terminal_b
   rooms:
   - id: pdx_airport_way_west
     title: Airport Way West

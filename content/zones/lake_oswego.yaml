@@ -7,7 +7,7 @@ zone:
   name: Lake Oswego Nation
   description: A fortified enclave of pre-collapse wealth, where HOA bylaws carry the force of law and country clubs serve
     as military command posts. The residents traded democracy for security and never looked back.
-  start_room: lo_checkpoint_north
+  start_room: lo_the_commons
   rooms:
   - id: lo_checkpoint_north
     title: Northern Checkpoint
