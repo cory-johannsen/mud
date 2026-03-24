@@ -165,6 +165,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerRemoveLink:         bridgeRemoveLink,
 	command.HandlerSetRoom:            bridgeSetRoom,
 	command.HandlerEditorCmds:         bridgeEditorCmds,
+	command.HandlerTabComplete:        bridgeTabComplete,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -1944,5 +1945,18 @@ func bridgeChangeRep(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_ChangeRepRequest{ChangeRepRequest: &gamev1.ChangeRepRequest{FactionId: factionID}},
+	}}, nil
+}
+
+// bridgeTabComplete builds a TabCompleteRequest from the raw input prefix.
+// Precondition: bctx must be non-nil with a valid reqID; parsed.RawArgs contains the current input prefix.
+// Postcondition: returns a non-nil msg containing a TabCompleteRequest with Prefix set; done is false.
+func bridgeTabComplete(bctx *bridgeContext) (bridgeResult, error) {
+	prefix := strings.TrimSpace(bctx.parsed.RawArgs)
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_TabComplete{
+			TabComplete: &gamev1.TabCompleteRequest{Prefix: prefix},
+		},
 	}}, nil
 }

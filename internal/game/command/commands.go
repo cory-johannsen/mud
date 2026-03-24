@@ -138,6 +138,7 @@ const (
 	HandlerRemoveLink         = "remove_link"
 	HandlerSetRoom            = "set_room"
 	HandlerEditorCmds         = "ecmds"
+	HandlerTabComplete        = "__tabcomplete__"
 )
 
 // Command defines a player-invocable command.
@@ -231,6 +232,7 @@ func BuiltinCommands() []Command {
 		{Name: "char", Aliases: []string{"sheet"}, Help: "Display your character sheet", Category: CategoryWorld, Handler: HandlerChar},
 
 		{Name: "archetype_selection", Aliases: nil, Help: "Select archetype during character creation", Category: CategoryHidden, Handler: HandlerArchetypeSelection},
+		{Name: HandlerTabComplete, Aliases: nil, Help: "", Category: CategoryHidden, Handler: HandlerTabComplete},
 		{Name: "use", Aliases: nil, Help: "Activate an active feat. With no argument, shows a list.", Category: CategoryWorld, Handler: HandlerUse},
 		{Name: "interact", Aliases: []string{"int"}, Help: "Interact with an item in the room.", Category: CategoryWorld, Handler: HandlerInteract},
 

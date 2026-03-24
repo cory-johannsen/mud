@@ -66,3 +66,16 @@ func TestBridgeUse_NoTarget(t *testing.T) {
 	assert.Equal(t, "mind_spike", msg.GetFeatId())
 	assert.Equal(t, "", msg.GetTarget())
 }
+
+// TestBridgeTabComplete_BuildsTabCompleteRequest verifies that bridgeTabComplete
+// wraps the raw args as a TabCompleteRequest with the correct Prefix.
+func TestBridgeTabComplete_BuildsTabCompleteRequest(t *testing.T) {
+	bctx := makeBridgeContext("req-tc", "use med")
+	result, err := bridgeTabComplete(bctx)
+	require.NoError(t, err)
+	require.NotNil(t, result.msg)
+	msg := result.msg.GetTabComplete()
+	require.NotNil(t, msg)
+	assert.Equal(t, "use med", msg.GetPrefix())
+	assert.Equal(t, "req-tc", result.msg.GetRequestId())
+}
