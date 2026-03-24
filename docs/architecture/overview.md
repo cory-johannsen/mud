@@ -159,6 +159,13 @@ Conversion reference:
 - Postgres tests require Docker (testcontainers). Run `make test-fast` for the non-Docker suite, `make test-postgres` for the Docker suite.
 - NEVER skip test hooks or commit with failing tests (SWENG-6).
 
+## Zone Maps
+
+Mermaid graph diagrams for all 16 zones, with room connections, danger levels, and safe room markers, are maintained in the [zones/](zones/README.md) directory.
+
+- [zones/README.md](zones/README.md) — index of all zones with room counts and links
+- Individual zone files: [aloha](zones/aloha.md), [battleground](zones/battleground.md), [beaverton](zones/beaverton.md), [downtown](zones/downtown.md), [felony_flats](zones/felony_flats.md), [hillsboro](zones/hillsboro.md), [lake_oswego](zones/lake_oswego.md), [ne_portland](zones/ne_portland.md), [pdx_international](zones/pdx_international.md), [ross_island](zones/ross_island.md), [rustbucket_ridge](zones/rustbucket_ridge.md), [sauvie_island](zones/sauvie_island.md), [se_industrial](zones/se_industrial.md), [the_couve](zones/the_couve.md), [troutdale](zones/troutdale.md), [vantucky](zones/vantucky.md)
+
 ## Cross-References
 
 - [docs/requirements/OVERVIEW.md](../requirements/OVERVIEW.md) — high-level product vision and setting
