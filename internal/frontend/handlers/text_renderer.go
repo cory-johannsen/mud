@@ -1140,19 +1140,28 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 		}
 		sb.WriteString("\r\n")
 
-		// POI suffix row (REQ-POI-6,7,8,9): one row per y-band between room row and south connector.
-		for xi, x := range xs {
-			tile := byCoord[[2]int32{x, y}]
-			var cellPOIs []string
-			if tile != nil {
-				cellPOIs = tile.Pois
-			}
-			sb.WriteString(maputil.POISuffixRow(cellPOIs, cellW))
-			if xi < len(xs)-1 {
-				sb.WriteString(" ") // column separator (matches east connector width)
+		// POI suffix row (REQ-POI-6,7,8,9): only emit when at least one tile in this row has POIs.
+		hasPOIs := false
+		for _, x := range xs {
+			if tile := byCoord[[2]int32{x, y}]; tile != nil && len(tile.Pois) > 0 {
+				hasPOIs = true
+				break
 			}
 		}
-		sb.WriteString("\r\n")
+		if hasPOIs {
+			for xi, x := range xs {
+				tile := byCoord[[2]int32{x, y}]
+				var cellPOIs []string
+				if tile != nil {
+					cellPOIs = tile.Pois
+				}
+				sb.WriteString(maputil.POISuffixRow(cellPOIs, cellW))
+				if xi < len(xs)-1 {
+					sb.WriteString(" ") // column separator (matches east connector width)
+				}
+			}
+			sb.WriteString("\r\n")
+		}
 
 		// South connector row: emit whenever any room in this row has a south exit,
 		// whether or not the neighbor is discovered.
@@ -1265,7 +1274,22 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 		gridStr := sb.String()
 		gridLines := strings.Split(strings.TrimRight(gridStr, "\r\n"), "\r\n")
 
-		// Build legend lines (one entry per line, no multi-column layout).
+		// Build legend lines — multi-column to compress height and fill available width.
+		legendRightWidth := width - halfWidth - 3 // subtract " │ " separator
+		if legendRightWidth < 1 {
+			legendRightWidth = 1
+		}
+		const minLegendColWidth = 20
+		numLegendCols := legendRightWidth / minLegendColWidth
+		if numLegendCols < 1 {
+			numLegendCols = 1
+		}
+		legendColWidth := legendRightWidth / numLegendCols
+		legendNameWidth := legendColWidth - 5 // " *NN." prefix is 5 chars
+		if legendNameWidth < 1 {
+			legendNameWidth = 1
+		}
+
 		legendLines := []string{"Legend:"}
 		// POI legend section in two-column layout.
 		presentPOISet2 := make(map[string]bool)
@@ -1282,12 +1306,25 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 				}
 			}
 		}
-		for _, e := range entries {
-			marker := " "
-			if e.current {
-				marker = "*"
+		for i := 0; i < len(entries); i += numLegendCols {
+			var row strings.Builder
+			for col := 0; col < numLegendCols; col++ {
+				idx := i + col
+				if idx >= len(entries) {
+					break
+				}
+				e := entries[idx]
+				marker := " "
+				if e.current {
+					marker = "*"
+				}
+				cell := fmt.Sprintf("%s%2d.%-*s", marker, e.num, legendNameWidth, e.name)
+				if len(cell) > legendColWidth {
+					cell = cell[:legendColWidth]
+				}
+				row.WriteString(cell)
 			}
-			legendLines = append(legendLines, fmt.Sprintf("%s%2d. %s", marker, e.num, e.name))
+			legendLines = append(legendLines, row.String())
 		}
 
 		// Zip grid and legend with │ separator.
