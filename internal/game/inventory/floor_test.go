@@ -101,6 +101,80 @@ func TestFloorManager_EmptyRoom(t *testing.T) {
 	}
 }
 
+// ---- Material methods tests ----
+
+func TestFloorManager_DropMaterials_AddsToRoom(t *testing.T) {
+	fm := inventory.NewFloorManager()
+	fm.DropMaterials("room1", map[string]int{"scrap": 2})
+	mats := fm.MaterialsInRoom("room1")
+	if mats["scrap"] != 2 {
+		t.Fatalf("expected scrap=2, got %d", mats["scrap"])
+	}
+}
+
+func TestFloorManager_MaterialsInRoom_ReturnsCopy(t *testing.T) {
+	fm := inventory.NewFloorManager()
+	fm.DropMaterials("room1", map[string]int{"scrap": 5})
+	mats := fm.MaterialsInRoom("room1")
+	mats["scrap"] = 999
+	mats2 := fm.MaterialsInRoom("room1")
+	if mats2["scrap"] != 5 {
+		t.Fatalf("MaterialsInRoom must return a copy; internal state was mutated to %d", mats2["scrap"])
+	}
+}
+
+func TestFloorManager_TakeMaterial_PartialTake(t *testing.T) {
+	fm := inventory.NewFloorManager()
+	fm.DropMaterials("room1", map[string]int{"ore": 3})
+	taken := fm.TakeMaterial("room1", "ore", 1)
+	if taken != 1 {
+		t.Fatalf("expected taken=1, got %d", taken)
+	}
+	mats := fm.MaterialsInRoom("room1")
+	if mats["ore"] != 2 {
+		t.Fatalf("expected 2 remaining, got %d", mats["ore"])
+	}
+}
+
+func TestFloorManager_TakeMaterial_FullTake(t *testing.T) {
+	fm := inventory.NewFloorManager()
+	fm.DropMaterials("room1", map[string]int{"ore": 3})
+	taken := fm.TakeMaterial("room1", "ore", 3)
+	if taken != 3 {
+		t.Fatalf("expected taken=3, got %d", taken)
+	}
+	mats := fm.MaterialsInRoom("room1")
+	if _, ok := mats["ore"]; ok {
+		t.Fatalf("expected ore entry to be removed after full take, still present with qty=%d", mats["ore"])
+	}
+}
+
+func TestFloorManager_TakeMaterial_NotPresent(t *testing.T) {
+	fm := inventory.NewFloorManager()
+	taken := fm.TakeMaterial("room1", "ore", 5)
+	if taken != 0 {
+		t.Fatalf("expected taken=0 for missing material, got %d", taken)
+	}
+}
+
+func TestProperty_FloorManager_DropTakeMaterial_Remainder(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		fm := inventory.NewFloorManager()
+		n := rapid.IntRange(1, 100).Draw(t, "n")
+		m := rapid.IntRange(0, n).Draw(t, "m")
+		fm.DropMaterials("room1", map[string]int{"mat": n})
+		taken := fm.TakeMaterial("room1", "mat", m)
+		if taken != m {
+			t.Fatalf("expected taken=%d, got %d", m, taken)
+		}
+		mats := fm.MaterialsInRoom("room1")
+		remaining := mats["mat"]
+		if remaining != n-m {
+			t.Fatalf("expected remaining=%d (n=%d - m=%d), got %d", n-m, n, m, remaining)
+		}
+	})
+}
+
 func TestProperty_FloorManager_DropPickup_Roundtrip(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		fm := inventory.NewFloorManager()

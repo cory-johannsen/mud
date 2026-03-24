@@ -286,3 +286,91 @@ func TestGenerateSalvageLoot_NilSalvageDrop_ReturnsEmpty(t *testing.T) {
 		t.Errorf("expected 0 items, got %d", len(result.Items))
 	}
 }
+
+// ---- MaterialDrop tests ----
+
+func TestGenerateLoot_MaterialDrops_ChanceBased(t *testing.T) {
+	// Chance=1.0: material must always be generated.
+	lt := npc.LootTable{
+		MaterialDrops: []npc.MaterialDrop{
+			{ID: "scrap", Chance: 1.0, QuantityMin: 1, QuantityMax: 1},
+		},
+	}
+	for i := 0; i < 50; i++ {
+		result := npc.GenerateLoot(lt)
+		qty, ok := result.Materials["scrap"]
+		if !ok || qty < 1 {
+			t.Fatalf("iteration %d: expected scrap to always drop with Chance=1.0, got %v", i, result.Materials)
+		}
+	}
+
+	// Chance=0.0 is rejected by Validate, but GenerateLoot uses rand.Float64() < Chance,
+	// so Chance=0.0 means the material never drops.
+	lt2 := npc.LootTable{
+		MaterialDrops: []npc.MaterialDrop{
+			{ID: "scrap", Chance: 0.0, QuantityMin: 1, QuantityMax: 1},
+		},
+	}
+	for i := 0; i < 50; i++ {
+		result := npc.GenerateLoot(lt2)
+		if result.Materials["scrap"] != 0 {
+			t.Fatalf("iteration %d: expected scrap never to drop with Chance=0.0", i)
+		}
+	}
+}
+
+func TestGenerateLoot_MaterialDrops_QuantityRange(t *testing.T) {
+	lt := npc.LootTable{
+		MaterialDrops: []npc.MaterialDrop{
+			{ID: "ore", Chance: 1.0, QuantityMin: 2, QuantityMax: 4},
+		},
+	}
+	for i := 0; i < 100; i++ {
+		result := npc.GenerateLoot(lt)
+		qty := result.Materials["ore"]
+		assert.GreaterOrEqual(t, qty, 2, "iteration %d: quantity below minimum", i)
+		assert.LessOrEqual(t, qty, 4, "iteration %d: quantity above maximum", i)
+	}
+}
+
+func TestLootTable_Validate_MaterialDrop_InvalidChance(t *testing.T) {
+	// Chance > 1.0 must fail.
+	lt := npc.LootTable{
+		MaterialDrops: []npc.MaterialDrop{
+			{ID: "ore", Chance: 1.5, QuantityMin: 1, QuantityMax: 1},
+		},
+	}
+	assert.Error(t, lt.Validate())
+
+	// Chance <= 0 must fail.
+	lt2 := npc.LootTable{
+		MaterialDrops: []npc.MaterialDrop{
+			{ID: "ore", Chance: 0.0, QuantityMin: 1, QuantityMax: 1},
+		},
+	}
+	assert.Error(t, lt2.Validate())
+
+	// Negative chance must fail.
+	lt3 := npc.LootTable{
+		MaterialDrops: []npc.MaterialDrop{
+			{ID: "ore", Chance: -0.5, QuantityMin: 1, QuantityMax: 1},
+		},
+	}
+	assert.Error(t, lt3.Validate())
+}
+
+func TestProperty_GenerateLoot_MaterialDrop_GuaranteedFixedQty(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		n := rapid.IntRange(1, 20).Draw(rt, "n")
+		lt := npc.LootTable{
+			MaterialDrops: []npc.MaterialDrop{
+				{ID: "mat", Chance: 1.0, QuantityMin: n, QuantityMax: n},
+			},
+		}
+		result := npc.GenerateLoot(lt)
+		qty := result.Materials["mat"]
+		if qty != n {
+			rt.Fatalf("expected Materials[mat]==%d with Chance=1.0 and QuantityMin=QuantityMax=%d, got %d", n, n, qty)
+		}
+	})
+}
