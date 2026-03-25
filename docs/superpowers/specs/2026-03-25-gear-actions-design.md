@@ -58,7 +58,7 @@ Fifteen materials are the canonical required set. Startup validation MUST check 
 | Rad-Core | Abysium | Rare | `rad_core` | weapon, armor |
 | Neural Gel | Djezet | Rare | `neural_gel` | weapon, armor |
 | Ghost Steel | Inubrix | Rare | `ghost_steel` | weapon |
-| Null-Weave | Noqual | Rare | `null_weave` | weapon, armor | (intentionally both — defensive save bonuses apply to either slot) |
+| Null-Weave | Noqual | Rare | `null_weave` | weapon, armor |
 | Soul-Guard Alloy | Sovereign Steel | Rare | `soul_guard_alloy` | armor |
 | Shadow Plate | Sisterstone (Dusk) | Rare | `shadow_plate` | weapon |
 | Radiance Plate | Sisterstone (Dawn) | Rare | `radiance_plate` | weapon |
@@ -71,27 +71,46 @@ The `Applies To` column is enforced at affix time (see REQ-GA-12).
 const KindPreciousMaterial = "precious_material"
 
 // Added to ItemDef:
-MaterialID string `yaml:"material_id,omitempty"` // required when Kind == KindPreciousMaterial
-GradeID    string `yaml:"grade_id,omitempty"`    // required when Kind == KindPreciousMaterial; one of the three grade IDs
+MaterialID   string   `yaml:"material_id,omitempty"`    // required when Kind == KindPreciousMaterial
+GradeID      string   `yaml:"grade_id,omitempty"`       // required when Kind == KindPreciousMaterial; one of the three grade IDs
+MaterialName string   `yaml:"material_name,omitempty"`  // display name shared across all grades of this material (e.g. "Carbide Alloy"); required when Kind == KindPreciousMaterial
+MaterialTier string   `yaml:"material_tier,omitempty"`  // "common" | "uncommon" | "rare"; required when Kind == KindPreciousMaterial
+AppliesTo    []string `yaml:"applies_to,omitempty"`     // ["weapon"], ["armor"], or ["weapon","armor"]; required when Kind == KindPreciousMaterial
 ```
 
-`ItemDef.Validate()` MUST require non-empty `MaterialID` and `GradeID` when `Kind == KindPreciousMaterial`, and MUST return an error if either is missing or if `GradeID` is not one of `street_grade`, `mil_spec_grade`, `ghost_grade`.
+`ItemDef.Validate()` MUST require non-empty `MaterialID`, `GradeID`, `MaterialName`, and `MaterialTier` when `Kind == KindPreciousMaterial`, and MUST return an error if any is missing, if `GradeID` is not one of `street_grade`, `mil_spec_grade`, `ghost_grade`, if `MaterialTier` is not one of `common`, `uncommon`, `rare`, or if `AppliesTo` is empty or contains a value other than `MaterialAppliesToWeapon` or `MaterialAppliesToArmor`.
 
 ### 1.5 MaterialDef and Registry Extension
 
 `ApplyMaterialEffects` requires material effect definitions at runtime. The existing `inventory.Registry` is extended with a `materials` map:
 
 ```go
+// AppliesTo constants for MaterialDef.AppliesTo values.
+const (
+    MaterialAppliesToWeapon = "weapon"
+    MaterialAppliesToArmor  = "armor"
+)
+
+// GradeDisplayNames maps GradeID to the player-facing grade name.
+var GradeDisplayNames = map[string]string{
+    "street_grade":   "Street Grade",
+    "mil_spec_grade": "Mil-Spec Grade",
+    "ghost_grade":    "Ghost Grade",
+}
+
 // MaterialDef holds the static definition of one material at one grade.
+// It is constructed at load time from the corresponding ItemDef YAML fields.
 type MaterialDef struct {
-    MaterialID string   // e.g. "carbide_alloy"
-    Name       string   // display name, e.g. "Carbide Alloy"
-    GradeID    string   // "street_grade" | "mil_spec_grade" | "ghost_grade"
-    GradeName  string   // display name, e.g. "Street Grade"
-    Tier       string   // "common" | "uncommon" | "rare"
-    AppliesTo  []string // "weapon" | "armor"
+    MaterialID string   // from ItemDef.MaterialID, e.g. "carbide_alloy"
+    Name       string   // from ItemDef.MaterialName, e.g. "Carbide Alloy"
+    GradeID    string   // from ItemDef.GradeID, e.g. "mil_spec_grade"
+    GradeName  string   // derived: GradeDisplayNames[GradeID], e.g. "Mil-Spec Grade"
+    Tier       string   // from ItemDef.MaterialTier, e.g. "uncommon"
+    AppliesTo  []string // from ItemDef.AppliesTo; values MUST be MaterialAppliesToWeapon or MaterialAppliesToArmor
 }
 ```
+
+`MaterialDef` is constructed from `ItemDef` during startup loading: the loader iterates all precious material `ItemDef` entries, constructs a `MaterialDef` by copying `MaterialID`, `MaterialName`→`Name`, `GradeID`, `GradeDisplayNames[GradeID]`→`GradeName`, `MaterialTier`→`Tier`, and `AppliesTo`, then calls `Registry.RegisterMaterial`. `Registry.RegisterMaterial` MUST validate that each `AppliesTo` entry is one of the two constants above; an invalid value MUST be a fatal load error.
 
 `MaterialDef.Name` and `GradeName` are the display names used in all player-facing messages (REQ-GA-7, REQ-GA-18 through REQ-GA-21).
 
@@ -184,7 +203,7 @@ All preconditions are checked in order before the Crafting roll is made. Any fai
   )
   ```
 
-  `sess.Abilities.Modifier(sess.Abilities.Reasoning)` passes the raw Reasoning score (`int`) to `Modifier(score int) int` which returns the ability modifier `(score - 10) / 2`. `sess.Skills["crafting"]` is the proficiency rank string from `PlayerSession.Skills` (which mirrors `character.Character.Skills map[string]string`). `dc` is the grade DC constant from Section 3.
+  `PlayerSession.Abilities` is of type `character.AbilityScores` (defined in `internal/game/character/model.go`). `Abilities.Modifier(score int) int` returns `(score - 10) / 2`. `Abilities.Reasoning` is the raw Reasoning score (`int`). `sess.Skills["crafting"]` is the proficiency rank string from `PlayerSession.Skills map[string]string` (loaded from `character.Character.Skills`). `dc` is the grade DC constant from Section 3.
 
 - REQ-GA-17: The outcome is `result.Outcome` from `skillcheck.Resolve`; `skillcheck.OutcomeFor` MUST NOT be called directly.
 
@@ -223,7 +242,10 @@ type AttackContext struct {
     TargetIsSupernatural   bool
     TargetIsLightAspected  bool
     TargetIsShadowAspected bool
-    TargetIsMetalArmored   bool // true when target's equipped armor includes a metal slot
+    // TargetIsMetalArmored is true when any of the target NPC's equipped armor has IsMetal == true
+    // in its ArmorDef. ArmorDef gains IsMetal bool `yaml:"is_metal"` (new optional field, default false).
+    // Existing armor YAML files that represent metal armors (chain, plate, etc.) MUST set is_metal: true.
+    TargetIsMetalArmored   bool
     IsHit                  bool // false for miss (some effects only apply on hit)
     IsFirstHitThisCombat   bool // used by Ghost Steel street grade
 }
@@ -236,7 +258,6 @@ type MaterialEffectResult struct {
     PersistentColdDmg    int
     PersistentRadDmg     int
     PersistentBleedDmg   int
-    CarrierRadDmgPerHour int
     TargetLosesAP        int  // AP penalty applied to target for 1 round
     TargetSpeedPenalty   int  // feet reduction for 1 round
     TargetFlatFooted     bool // 1 round
@@ -244,11 +265,17 @@ type MaterialEffectResult struct {
     TargetBlinded        bool // 1 round
     TargetSlowed         bool // 1 round
     SuppressRegeneration bool // 1 round
-    IgnoreMetalArmorAC      bool
-    IgnoreAllArmorAC        bool
+    IgnoreMetalArmorAC      bool // true when Ghost Steel mil-spec or ghost grade is affixed to weapon
+    IgnoreAllArmorAC        bool // true when Ghost Steel ghost grade is affixed to weapon
     IgnoreHardnessThreshold int  // from Carbide Alloy weapon: ignore target Hardness up to this value
 }
 ```
+
+**Terminology used in this section:**
+
+- **technology attack**: any combat action whose `TechnologyDef.Resolution == "attack"` (see `internal/game/technology/model.go`). The attack roll for such actions is a "technology attack roll."
+- **tech-applied condition**: any condition applied as an effect of a `TechnologyDef`-based action (i.e., the condition arises from a technology, not from a Strike or other non-tech source).
+- **`on_fire` condition**: a new condition defined in `content/conditions/on_fire.yaml`. While `on_fire`, the character takes 1 fire damage per round at the start of their turn. A character may spend 1 AP to extinguish the flames and remove the condition.
 
 - REQ-GA-25: `ApplyMaterialEffects(affixed []string, ctx AttackContext, reg *Registry) MaterialEffectResult` MUST be a pure function in `internal/game/inventory/material.go`. It iterates `affixed`, looks up each material+grade via `reg.Material(materialID, gradeID)`, and accumulates a `MaterialEffectResult`. It covers all per-hit effects. Stateful effects (Section 5.2) are NOT handled here.
 
@@ -275,7 +302,7 @@ type MaterialSessionState struct {
   - **Null-Weave mil-spec grade**: once-per-combat condition immunity (immune to 1 tech-applied condition). Key: `"null_weave:mil_spec_grade"`. When a tech-applied condition would be applied and the key is not in `CombatUsed`, the condition is suppressed and the key is marked used.
   - **Null-Weave ghost grade**: once-per-combat reflect. Key: `"null_weave:ghost_grade"`. When a technology attack targets the character and the key is not in `CombatUsed`: roll d2 (50%). On success, the attack misses the character and the attacker instead takes the attack's computed damage as if it had hit them. Mark used. Message to attacker: `"Your attack reflects back at you!"`.
   - **Ghost Steel ghost grade**: once-per-combat touch attack. Key: `"ghost_steel:ghost_grade"`. A touch attack treats the target's AC as 10 only (all armor and shield bonuses ignored, only Dex modifier applies). The character may declare a touch attack before rolling on any Strike action. Costs no additional AP. Mark used.
-  - **Ghost Steel street grade**: `AttackContext.IsFirstHitThisCombat` is set by the grpc combat handler to `true` on the first resolved attack action in the combat for this character, and `false` thereafter. It is reset to `true` at combat start. No `CombatUsed` entry is needed; the field is sufficient.
+  - **Ghost Steel street grade**: `AttackContext.IsFirstHitThisCombat` is derived from `PlayerSession.HasHitThisCombat bool` — a new boolean field on `PlayerSession` that is `false` at combat start and set to `true` after the first resolved attack. `AttackContext.IsFirstHitThisCombat` is set to `!sess.HasHitThisCombat` before each attack. The grpc combat handler sets `sess.HasHitThisCombat = true` after the first attack resolves. `HasHitThisCombat` is reset to `false` at combat end. No `CombatUsed` entry is needed.
   - **Neural Gel** (all grades): N-per-day FP cost reduction (1/2/3 per day for street/mil-spec/ghost). Key: `"neural_gel:<grade>"`. The FP spend handler checks `DailyUsed[key] < maxUses` before applying the discount, then increments.
   - **Soul-Guard Alloy ghost grade**: once-per-day domination negation. Key: `"soul_guard_alloy:ghost_grade"`.
 - REQ-GA-28: `MaterialSessionState` is in-memory only — it is NOT persisted to the database. State resets naturally on server restart (combat state) and at daily rollover (daily state).
@@ -295,17 +322,20 @@ type PassiveMaterialSummary struct {
     MetalDetectionImmune  bool     // from Polymer Frame ghost grade
     SaveVsTechBonus       int      // from Null-Weave (applies from weapon or armor slot)
     SaveVsMentalBonus     int      // from Soul-Guard Alloy
-    ConditionImmunities   []string // from Soul-Guard Alloy (frightened, confused, all mental)
+    ConditionImmunities   []string // from Soul-Guard Alloy (frightened, confused, all mental conditions)
     InitiativeBonus       int      // from Quantum Alloy mil-spec/ghost grade
     TechAttackRollBonus   int      // from Neural Gel mil-spec and ghost grade (+1 for either)
     FPOnRecalibrateBonus  int      // from Neural Gel ghost grade: +1 FP restored on Recalibrate
     HardnessBonus         int      // from Carbide Alloy affixed to armor; added to armor Hardness in damage reduction
+    ACVsEnergyBonus       int      // from Rad-Core mil-spec/ghost grade affixed to armor; added to AC vs energy attacks
+    CarrierRadDmgPerHour  int      // from Rad-Core affixed to any item: radiation damage dealt to carrier per hour (summed)
 }
 ```
 
-- REQ-GA-29: `PlayerSession` MUST gain `PassiveMaterials PassiveMaterialSummary`. It MUST be recomputed by calling `ComputePassiveMaterials(equipped []*EquippedWeapon, armor map[ArmorSlot]*SlottedItem, reg *Registry) PassiveMaterialSummary` at login and whenever equipped items change (same trigger points as `SetBonusSummary`). `ComputePassiveMaterials` MUST be a pure function in `internal/game/inventory/material.go`.
-- REQ-GA-30: Passive bonuses from `PassiveMaterialSummary` MUST be applied at the same integration points as `SetBonusSummary`: check penalty in equipment checks, speed in movement computation, save bonuses in save resolution, immunities in condition application, initiative bonus in initiative roll, tech attack roll bonus in technology attack resolution, Hardness bonus in damage reduction, FP on Recalibrate in Recalibrate action handler.
+- REQ-GA-29: `PlayerSession` MUST gain `PassiveMaterials PassiveMaterialSummary`. It MUST be recomputed by calling `ComputePassiveMaterials(equipped []*EquippedWeapon, armor map[ArmorSlot]*SlottedItem, reg *Registry) PassiveMaterialSummary` at login and whenever equipped items change (same trigger points as `SetBonusSummary`). `ComputePassiveMaterials` MUST be a pure function in `internal/game/inventory/material.go`. The `equipped` parameter MUST be populated from the **active preset only** — `[]*EquippedWeapon{preset.MainHand, preset.OffHand}` where `preset = sess.LoadoutSet.ActivePreset()` — matching the same scope used by `findRepairTarget`.
+- REQ-GA-30: Passive bonuses from `PassiveMaterialSummary` MUST be applied at the following integration points: check penalty in equipment checks, speed in movement computation, save bonuses in save resolution, immunities in condition application, initiative bonus in initiative roll, tech attack roll bonus in technology attack resolution (`TechnologyDef.Resolution == "attack"`), Hardness bonus in damage reduction, FP on Recalibrate in Recalibrate action handler, ACVsEnergyBonus in energy-damage AC computation. `CarrierRadDmgPerHour` MUST be applied in the existing hourly zone tick handler (`internal/gameserver/zone_tick.go`) — for each player session with `PassiveMaterials.CarrierRadDmgPerHour > 0`, deal that many radiation damage points to the player per tick.
 - REQ-GA-38: `PassiveMaterialSummary.SaveVsTechBonus` accumulates from all equipped items with Null-Weave affixed regardless of whether the item is a weapon or armor. The save bonus is character-level (not slot-restricted).
+- REQ-GA-39: After a successful `affix` call, `HandleAffix` MUST trigger recomputation of `PlayerSession.PassiveMaterials` by calling `ComputePassiveMaterials` and writing the result back. This ensures Hardness bonuses, save bonuses, and other passive effects from the newly affixed material are active immediately without requiring a re-login.
 
 ### 5.4 Carbide Alloy MaxDurability
 
@@ -316,7 +346,7 @@ Carbide Alloy adds `+N MaxDurability` to weapons at affix time. To avoid permane
 MaterialMaxDurabilityBonus int // sum of all Carbide Alloy grade bonuses affixed to this item
 ```
 
-The effective maximum durability is `MaxDurability + MaterialMaxDurabilityBonus`. On destruction, the entire item is removed and both fields are lost — no data integrity issue. The DB migration (Section 7) adds this column.
+The effective maximum durability is `MaxDurability + MaterialMaxDurabilityBonus`. On success or critical success, `ItemInstance.MaterialMaxDurabilityBonus += carbideGradeBonus` (the grade-specific bonus from the table in Section 5.6). REQ-GA-7 prevents affixing the same material ID twice, so the sum reflects at most one Carbide Alloy grade per item. On destruction, the entire item is removed and both fields are lost — no data integrity issue. The DB migration (Section 7) adds this column.
 
 ### 5.5 Common Materials
 
@@ -396,9 +426,9 @@ MaxDurability bonus stored in `MaterialMaxDurabilityBonus` (see Section 5.4).
 
 | Grade | Effect |
 |---|---|
-| Street Grade | Persistent radiation 1 on hit; carrier takes 1 radiation damage/hour |
-| Mil-Spec Grade | Persistent radiation 2 on hit; carrier takes 2 radiation damage/hour; *(armor)* +1 AC vs energy attacks |
-| Ghost Grade | Persistent radiation 4 on hit; inflicts irradiated condition (1 round); carrier takes 3 radiation damage/hour |
+| Street Grade | Persistent radiation 1 on hit; `CarrierRadDmgPerHour+=1` (passive — applied by hourly zone tick) |
+| Mil-Spec Grade | Persistent radiation 2 on hit; `CarrierRadDmgPerHour+=2`; *(armor)* +1 AC vs energy attacks (`ACVsEnergyBonus+=1` in PassiveMaterials) |
+| Ghost Grade | Persistent radiation 4 on hit; inflicts irradiated condition (1 round); `CarrierRadDmgPerHour+=3` |
 
 #### Neural Gel — neuro-conductive liquid metal *(stateful, see Section 5.2)*
 
@@ -470,6 +500,9 @@ GradeID    string `yaml:"grade_id,omitempty"`
 ```go
 // Added to WeaponDef and ArmorDef:
 UpgradeSlots int `yaml:"-"` // derived from RarityDef.FeatureSlots at load time
+
+// Added to ArmorDef only:
+IsMetal bool `yaml:"is_metal"` // true for metal armor (chain, plate, etc.); used to set AttackContext.TargetIsMetalArmored
 ```
 
 ### 6.3 ItemInstance (`internal/game/inventory/backpack.go`)
@@ -498,8 +531,9 @@ AffixedMaterials []string // cached copy; set in armor wear path from ItemInstan
 
 ```go
 // Added to PlayerSession:
-MaterialState   inventory.MaterialSessionState
+MaterialState    inventory.MaterialSessionState
 PassiveMaterials inventory.PassiveMaterialSummary
+HasHitThisCombat bool // Ghost Steel street grade: false at combat start; set true after first resolved attack; reset at combat end
 ```
 
 ### 6.7 AffixSession (`internal/game/command/affix.go`)
@@ -556,10 +590,15 @@ ALTER TABLE character_weapon_presets
 
 ## 8. Architecture
 
-- REQ-GA-31: `HandleAffix(as *AffixSession, reg *Registry, materialQuery, targetQuery string, rng Roller) string` MUST be implemented in `internal/game/command/affix.go`. The return type is `string` (the player-facing message), following the `HandleRepair` pattern. `HandleAffix` modifies in-memory state only — it MUST NOT perform any database writes.
+- REQ-GA-31: `HandleAffix(as *AffixSession, reg *Registry, materialQuery, targetQuery string, rng inventory.Roller) string` MUST be implemented in `internal/game/command/affix.go`. `inventory.Roller` is the existing interface defined in `internal/game/inventory/roller.go` (same type used by `HandleRepair`). The return type is `string` (the player-facing message), following the `HandleRepair` pattern. `HandleAffix` modifies in-memory state only — it MUST NOT perform any database writes. Target lookup MUST reuse `findRepairTarget` (defined in `repair.go`) — the same active-preset weapons + all armor slots scope applies to `affix`. The `repairTarget` struct already exposes `weapon *EquippedWeapon` and `armorItem *SlottedItem`, which carry the `AffixedMaterials` field (REQ-GA-5).
 - REQ-GA-32: After a successful affix, `HandleAffix` MUST update the in-memory cached `AffixedMaterials` on the live-equipped `EquippedWeapon` or `SlottedItem` directly (same as `HandleRepair` writes back `Durability` to the in-memory struct). This ensures the cache is consistent without requiring a reload.
-- REQ-GA-33: The `handleAffix` method in `internal/gameserver/grpc_service.go` MUST call `HandleAffix` and, on success, call `charSaver.SaveInventory` (backpack changed) and `charSaver.SaveWeaponPresets` or `charSaver.SaveEquipment` as appropriate for the target item type. This follows the same persistence pattern as other inventory-modifying handlers in that file.
+- REQ-GA-33: The `handleAffix` method in `internal/gameserver/grpc_service.go` MUST persist state after `HandleAffix` returns according to outcome. All three persistence methods are on `s.charSaver` (type `CharacterSaver`, defined at line 92 of `grpc_service.go`):
+  - **Critical success**: `s.charSaver.SaveInventory(ctx, characterID, ...)` (material returned to backpack) AND `s.charSaver.SaveWeaponPresets(ctx, characterID, sess.LoadoutSet)` or `s.charSaver.SaveEquipment(ctx, characterID, sess.Equipment)` (target item's `AffixedMaterials` updated).
+  - **Success**: `s.charSaver.SaveInventory(ctx, characterID, ...)` AND `s.charSaver.SaveWeaponPresets` or `s.charSaver.SaveEquipment`.
+  - **Failure**: no save calls required (nothing changed).
+  - **Critical failure**: `s.charSaver.SaveInventory(ctx, characterID, ...)` only (material destroyed from backpack).
+  `SaveWeaponPresets` is called when the target is a weapon; `SaveEquipment` when the target is armor. See `internal/storage/postgres/character.go` for the concrete implementations.
 - REQ-GA-34: `ApplyMaterialEffects` MUST be a pure function in `internal/game/inventory/material.go` covering per-hit effects only (Section 5.1). Passive effects are handled by `ComputePassiveMaterials` (Section 5.3). Stateful effects (Section 5.2) are handled at their respective call sites.
 - REQ-GA-35: Material YAML files MUST be loaded from `content/items/precious_materials/`. Missing files for any of the 45 required material+grade combinations MUST be a fatal load error.
 - REQ-GA-36: `KindPreciousMaterial` MUST be added to `validKinds` before any precious material YAML is loaded.
-- REQ-GA-37: TDD with property-based tests MUST be used for all new code per SWENG-5/5a.
+- REQ-GA-37: TDD with property-based tests (SWENG-5/5a) MUST be used for all new code. Required test surfaces include: `ApplyMaterialEffects` (all 15 materials × 3 grades × relevant `AttackContext` combinations); `ComputePassiveMaterials` (all passive-effect materials); `HandleAffix` (all four outcome branches: critical success, success, failure, critical failure; precondition failures from REQ-GA-10 through REQ-GA-15); DC constant lookup (correct DC per tier × grade); `ItemDef.Validate()` precious material validation; `MaterialSessionState` reset paths (combat end, daily rollover); and `material.go` new file creation. `material.go` is a **new file** to be created at `internal/game/inventory/material.go`; it does not yet exist.
