@@ -262,7 +262,8 @@ func (r *CharacterRepository) SaveAbilities(ctx context.Context, characterID int
 // Weapon definitions found in reg are re-hydrated into the preset slots; unknown IDs are skipped.
 func (r *CharacterRepository) LoadWeaponPresets(ctx context.Context, characterID int64, reg *inventory.Registry) (*inventory.LoadoutSet, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT preset_index, slot, item_def_id, ammo_count
+		SELECT preset_index, slot, item_def_id, ammo_count,
+		       affixed_materials, material_max_durability_bonus
 		FROM character_weapon_presets
 		WHERE character_id = $1
 		ORDER BY preset_index, slot`,
@@ -279,7 +280,10 @@ func (r *CharacterRepository) LoadWeaponPresets(ctx context.Context, characterID
 		var presetIdx int
 		var slot, itemDefID string
 		var ammoCount int
-		if err := rows.Scan(&presetIdx, &slot, &itemDefID, &ammoCount); err != nil {
+		var affixedMaterials []string
+		var materialMaxDurBonus int
+		if err := rows.Scan(&presetIdx, &slot, &itemDefID, &ammoCount,
+			&affixedMaterials, &materialMaxDurBonus); err != nil {
 			return nil, fmt.Errorf("scanning weapon preset row: %w", err)
 		}
 		// Grow Presets slice if needed (class features may add more presets).
@@ -298,10 +302,14 @@ func (r *CharacterRepository) LoadWeaponPresets(ctx context.Context, characterID
 			if equipErr := preset.EquipMainHand(def); equipErr != nil {
 				return nil, fmt.Errorf("rehydrating main_hand preset %d for character %d: %w", presetIdx, characterID, equipErr)
 			}
+			preset.MainHand.AffixedMaterials = affixedMaterials
+			preset.MainHand.MaterialMaxDurabilityBonus = materialMaxDurBonus
 		case "off_hand":
 			if equipErr := preset.EquipOffHand(def); equipErr != nil {
 				return nil, fmt.Errorf("rehydrating off_hand preset %d for character %d: %w", presetIdx, characterID, equipErr)
 			}
+			preset.OffHand.AffixedMaterials = affixedMaterials
+			preset.OffHand.MaterialMaxDurabilityBonus = materialMaxDurBonus
 		}
 		_ = ammoCount // ammo count restoration is deferred to magazine hydration feature
 	}
@@ -327,14 +335,22 @@ func (r *CharacterRepository) SaveWeaponPresets(ctx context.Context, characterID
 			if preset.MainHand.Magazine != nil {
 				ammo = preset.MainHand.Magazine.Loaded
 			}
+			mhMaterials := preset.MainHand.AffixedMaterials
+			if mhMaterials == nil {
+				mhMaterials = []string{}
+			}
 			if _, err := r.db.Exec(ctx, `
 				INSERT INTO character_weapon_presets
-					(character_id, preset_index, slot, item_def_id, ammo_count)
-				VALUES ($1, $2, $3, $4, $5)
+					(character_id, preset_index, slot, item_def_id, ammo_count,
+					 affixed_materials, material_max_durability_bonus)
+				VALUES ($1, $2, $3, $4, $5, $6, $7)
 				ON CONFLICT (character_id, preset_index, slot)
 					DO UPDATE SET item_def_id = EXCLUDED.item_def_id,
-					              ammo_count  = EXCLUDED.ammo_count`,
+					              ammo_count  = EXCLUDED.ammo_count,
+					              affixed_materials = EXCLUDED.affixed_materials,
+					              material_max_durability_bonus = EXCLUDED.material_max_durability_bonus`,
 				characterID, i, "main_hand", preset.MainHand.Def.ID, ammo,
+				mhMaterials, preset.MainHand.MaterialMaxDurabilityBonus,
 			); err != nil {
 				return fmt.Errorf("saving main_hand for character %d preset %d: %w", characterID, i, err)
 			}
@@ -344,14 +360,22 @@ func (r *CharacterRepository) SaveWeaponPresets(ctx context.Context, characterID
 			if preset.OffHand.Magazine != nil {
 				ammo = preset.OffHand.Magazine.Loaded
 			}
+			ohMaterials := preset.OffHand.AffixedMaterials
+			if ohMaterials == nil {
+				ohMaterials = []string{}
+			}
 			if _, err := r.db.Exec(ctx, `
 				INSERT INTO character_weapon_presets
-					(character_id, preset_index, slot, item_def_id, ammo_count)
-				VALUES ($1, $2, $3, $4, $5)
+					(character_id, preset_index, slot, item_def_id, ammo_count,
+					 affixed_materials, material_max_durability_bonus)
+				VALUES ($1, $2, $3, $4, $5, $6, $7)
 				ON CONFLICT (character_id, preset_index, slot)
 					DO UPDATE SET item_def_id = EXCLUDED.item_def_id,
-					              ammo_count  = EXCLUDED.ammo_count`,
+					              ammo_count  = EXCLUDED.ammo_count,
+					              affixed_materials = EXCLUDED.affixed_materials,
+					              material_max_durability_bonus = EXCLUDED.material_max_durability_bonus`,
 				characterID, i, "off_hand", preset.OffHand.Def.ID, ammo,
+				ohMaterials, preset.OffHand.MaterialMaxDurabilityBonus,
 			); err != nil {
 				return fmt.Errorf("saving off_hand for character %d preset %d: %w", characterID, i, err)
 			}
@@ -367,7 +391,7 @@ func (r *CharacterRepository) SaveWeaponPresets(ctx context.Context, characterID
 // Postcondition: Returns a non-nil *inventory.Equipment and nil error on success.
 func (r *CharacterRepository) LoadEquipment(ctx context.Context, characterID int64) (*inventory.Equipment, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT slot, item_def_id
+		SELECT slot, item_def_id, affixed_materials, material_max_durability_bonus
 		FROM character_equipment
 		WHERE character_id = $1`,
 		characterID,
@@ -380,10 +404,17 @@ func (r *CharacterRepository) LoadEquipment(ctx context.Context, characterID int
 	eq := inventory.NewEquipment()
 	for rows.Next() {
 		var slot, itemDefID string
-		if err := rows.Scan(&slot, &itemDefID); err != nil {
+		var affixedMaterials []string
+		var materialMaxDurBonus int
+		if err := rows.Scan(&slot, &itemDefID, &affixedMaterials, &materialMaxDurBonus); err != nil {
 			return nil, fmt.Errorf("scanning equipment row: %w", err)
 		}
-		item := &inventory.SlottedItem{ItemDefID: itemDefID, Name: itemDefID}
+		item := &inventory.SlottedItem{
+			ItemDefID:                  itemDefID,
+			Name:                       itemDefID,
+			AffixedMaterials:           affixedMaterials,
+			MaterialMaxDurabilityBonus: materialMaxDurBonus,
+		}
 		// Determine slot type and populate the appropriate map.
 		// Full name hydration is deferred to feature #4 (weapon and armor library);
 		// until then, Name is set to ItemDefID as a placeholder.
@@ -416,12 +447,18 @@ func (r *CharacterRepository) SaveEquipment(ctx context.Context, characterID int
 		if item == nil {
 			continue
 		}
+		armorMaterials := item.AffixedMaterials
+		if armorMaterials == nil {
+			armorMaterials = []string{}
+		}
 		if _, err := r.db.Exec(ctx, `
-			INSERT INTO character_equipment (character_id, slot, item_def_id)
-			VALUES ($1, $2, $3)
+			INSERT INTO character_equipment (character_id, slot, item_def_id, affixed_materials, material_max_durability_bonus)
+			VALUES ($1, $2, $3, $4, $5)
 			ON CONFLICT (character_id, slot)
-				DO UPDATE SET item_def_id = EXCLUDED.item_def_id`,
-			characterID, string(slot), item.ItemDefID,
+				DO UPDATE SET item_def_id = EXCLUDED.item_def_id,
+				              affixed_materials = EXCLUDED.affixed_materials,
+				              material_max_durability_bonus = EXCLUDED.material_max_durability_bonus`,
+			characterID, string(slot), item.ItemDefID, armorMaterials, item.MaterialMaxDurabilityBonus,
 		); err != nil {
 			return fmt.Errorf("saving armor slot %s for character %d: %w", slot, characterID, err)
 		}
@@ -430,12 +467,18 @@ func (r *CharacterRepository) SaveEquipment(ctx context.Context, characterID int
 		if item == nil {
 			continue
 		}
+		accMaterials := item.AffixedMaterials
+		if accMaterials == nil {
+			accMaterials = []string{}
+		}
 		if _, err := r.db.Exec(ctx, `
-			INSERT INTO character_equipment (character_id, slot, item_def_id)
-			VALUES ($1, $2, $3)
+			INSERT INTO character_equipment (character_id, slot, item_def_id, affixed_materials, material_max_durability_bonus)
+			VALUES ($1, $2, $3, $4, $5)
 			ON CONFLICT (character_id, slot)
-				DO UPDATE SET item_def_id = EXCLUDED.item_def_id`,
-			characterID, string(slot), item.ItemDefID,
+				DO UPDATE SET item_def_id = EXCLUDED.item_def_id,
+				              affixed_materials = EXCLUDED.affixed_materials,
+				              material_max_durability_bonus = EXCLUDED.material_max_durability_bonus`,
+			characterID, string(slot), item.ItemDefID, accMaterials, item.MaterialMaxDurabilityBonus,
 		); err != nil {
 			return fmt.Errorf("saving accessory slot %s for character %d: %w", slot, characterID, err)
 		}
