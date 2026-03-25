@@ -18,6 +18,10 @@ type EquippedWeapon struct {
 	// CurseRevealed is true once the cursed weapon has been equipped and its curse disclosed.
 	// When true, the weapon cannot be unequipped (REQ-EM-24).
 	CurseRevealed bool
+	// AffixedMaterials is a cached copy from DB; set by LoadWeaponPresets.
+	AffixedMaterials          []string // each entry: "<material_id>:<grade_id>"
+	// MaterialMaxDurabilityBonus is a cached copy; effective max = Def MaxDurability + this
+	MaterialMaxDurabilityBonus int
 }
 
 // WeaponPreset holds the main-hand and off-hand weapon slots for one loadout preset.

@@ -95,6 +95,10 @@ type SlottedItem struct {
 	// Rarity is the item rarity tier: "salvage" | "street" | "mil_spec" | "black_market" | "ghost".
 	// Set at wear time from the ArmorDef.Rarity for color display (REQ-EM-4).
 	Rarity string
+	// AffixedMaterials is a cached copy from DB; set by armor wear path.
+	AffixedMaterials          []string // each entry: "<material_id>:<grade_id>"
+	// MaterialMaxDurabilityBonus is a cached copy; effective max = base MaxDurability + this
+	MaterialMaxDurabilityBonus int
 }
 
 // Equipment holds all armor and accessory slots for a character.

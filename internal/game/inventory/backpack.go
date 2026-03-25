@@ -18,6 +18,8 @@ type ItemInstance struct {
 	CurseRevealed    bool // true once a cursed item has been equipped
 	ChargesRemaining int  // -1 = uninitialized sentinel; initialized to ItemDef.Charges on first activation (REQ-ACT-13)
 	Expended         bool // true when ChargesRemaining == 0 and the item uses expend semantics
+	AffixedMaterials          []string // each entry: "<material_id>:<grade_id>"
+	MaterialMaxDurabilityBonus int     // sum of Carbide Alloy grade bonuses; 0 if none
 }
 
 // Backpack is a container with slot and weight limits.
