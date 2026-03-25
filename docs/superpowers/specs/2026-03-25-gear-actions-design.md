@@ -51,7 +51,7 @@ Fifteen materials are the canonical required set. Startup validation MUST check 
 | Hollow Point | Silver | Common | `hollow_point` | weapon |
 | Carbide Alloy | Adamantine | Uncommon | `carbide_alloy` | weapon, armor |
 | Carbon Weave | Mithral | Uncommon | `carbon_weave` | armor |
-| Polymer Frame | Darkwood | Uncommon | `polymer_frame` | weapon, armor |
+| Polymer Frame | Darkwood | Uncommon | `polymer_frame` | armor |
 | Thermite Lace | Siccatite (hot) | Uncommon | `thermite_lace` | weapon |
 | Cryo-Gel | Siccatite (cold) | Uncommon | `cryo_gel` | weapon |
 | Quantum Alloy | Orichalcum | Rare | `quantum_alloy` | weapon, armor |
@@ -136,7 +136,7 @@ type MaterialDef struct {
 - REQ-GA-5: `EquippedWeapon` (in `preset.go`) MUST gain `AffixedMaterials []string` and `MaterialMaxDurabilityBonus int`. `SlottedItem` (in `equipment.go`) MUST gain `AffixedMaterials []string` and `MaterialMaxDurabilityBonus int`. These are cached copies populated from the DB at load time following the same pattern as `Durability`: `LoadWeaponPresets` in `internal/storage/postgres/character.go` MUST SELECT `affixed_materials` and `material_max_durability_bonus` from `character_weapon_presets` and, after calling `preset.EquipMainHand`/`EquipOffHand`, directly assign the values to `preset.MainHand.AffixedMaterials`, `preset.MainHand.MaterialMaxDurabilityBonus`, etc. The armor wear path in `wear.go` that constructs `SlottedItem` MUST copy these fields from the corresponding `ItemInstance` record. `newEquippedWeapon` itself is NOT modified — the copy happens at the call site in the loader, not inside the constructor.
 - REQ-GA-6: When a host item is destroyed (`DeductDurability` returns `Destroyed: true`), all affixed materials are permanently lost. The player receives the standard REQ-EM-10 destruction message only; no additional message for lost materials is required.
 - REQ-GA-7: The same material ID MUST NOT be affixed twice on the same item instance regardless of grade. Attempting to do so MUST fail with: `"<item name> already has <material name> affixed."`
-- REQ-GA-8: `len(AffixedMaterials)` MUST NOT exceed `UpgradeSlots`. Attempting to affix when no slots remain MUST fail with: `"<item name> has no upgrade slots remaining."`
+- REQ-GA-8: `len(AffixedMaterials)` MUST NOT exceed `UpgradeSlots`. Attempting to affix when no slots remain MUST fail with: `"<item name> has no upgrade slots remaining."` For weapon targets, `UpgradeSlots` is accessed via `target.weapon.Def.UpgradeSlots` (`EquippedWeapon.Def` is `*WeaponDef`). For armor targets, `SlottedItem` has no `Def` field — `UpgradeSlots` MUST be looked up via `reg.Armor(target.armorItem.ItemDefID).UpgradeSlots` using the registry passed to `HandleAffix`.
 
 ---
 
@@ -319,9 +319,8 @@ Several materials have passive effects (armor check penalty reduction, speed bon
 type PassiveMaterialSummary struct {
     CheckPenaltyReduction int      // from Carbon Weave
     SpeedBonus            int      // from Carbon Weave
-    // BulkReduction: each item's effective bulk is max(0, item.Bulk - polymerBonusForThisItem).
-    // ArmorDef.Bulk int `yaml:"bulk"` exists (confirmed in armor.go:31). WeaponDef has no Bulk field;
-    // Polymer Frame MUST NOT be affixed to weapons (AppliesTo: ["armor"] — confirmed in Table 1.3).
+    // BulkReduction: each armor item's effective bulk is max(0, ArmorDef.Bulk - polymerBonusForThisItem).
+    // ArmorDef.Bulk int `yaml:"bulk"` exists (confirmed in armor.go:31). Polymer Frame AppliesTo: ["armor"] only.
     BulkReduction         int      // sum of per-item floored bulk reductions from Polymer Frame
     StealthBonus          int      // from Polymer Frame
     MetalDetectionImmune  bool     // from Polymer Frame ghost grade
@@ -434,8 +433,8 @@ MaxDurability bonus stored in `MaterialMaxDurabilityBonus` (see Section 5.4).
 | Grade | Effect |
 |---|---|
 | Street Grade | Persistent radiation 1 on hit; `CarrierRadDmgPerHour+=1` (passive — applied by hourly zone tick) |
-| Mil-Spec Grade | Persistent radiation 2 on hit; `CarrierRadDmgPerHour+=2`; *(armor)* +1 AC vs energy attacks (`ACVsEnergyBonus+=1` in PassiveMaterials) |
-| Ghost Grade | Persistent radiation 4 on hit; inflicts irradiated condition (1 round); `CarrierRadDmgPerHour+=3` |
+| Mil-Spec Grade | Persistent radiation 2 on hit; `CarrierRadDmgPerHour+=2`; *(armor)* `ACVsEnergyBonus+=1` in PassiveMaterials |
+| Ghost Grade | Persistent radiation 4 on hit; inflicts irradiated condition (1 round); `CarrierRadDmgPerHour+=3`; *(armor)* `ACVsEnergyBonus+=1` in PassiveMaterials (same bonus as mil-spec; not cumulative if both grades were somehow on the same item — but REQ-GA-7 prevents this) |
 
 #### Neural Gel — neuro-conductive liquid metal *(stateful, see Section 5.2)*
 
@@ -453,7 +452,7 @@ MaxDurability bonus stored in `MaterialMaxDurabilityBonus` (see Section 5.4).
 | Mil-Spec Grade | Ignore metal armor AC bonus on every hit; +1 damage |
 | Ghost Grade | Ignore all armor AC bonuses; +2 damage; once per combat make a touch attack |
 
-#### Null-Weave — anti-tech composite *(ghost grade stateful, see Section 5.2)*
+#### Null-Weave — anti-tech composite *(mil-spec and ghost grade stateful, see Section 5.2)*
 
 | Grade | Effect |
 |---|---|
@@ -645,7 +644,9 @@ ALTER TABLE character_weapon_presets
   - **`AffixOutcomeSuccess`**: `s.charSaver.SaveInventory(...)` AND `s.charSaver.SaveWeaponPresets` or `s.charSaver.SaveEquipment`.
   - **`AffixOutcomeFailure`**: no save calls required (nothing changed).
   - **`AffixOutcomeCriticalFailure`**: `s.charSaver.SaveInventory(...)` only (material destroyed from backpack).
-  `SaveWeaponPresets` is called when `AffixResult.Outcome` targets a weapon; `SaveEquipment` when it targets armor. `SaveEquipment` and `SaveWeaponPresets` MUST write the new `affixed_materials` and `material_max_durability_bonus` columns added in migration 046 — this is a new responsibility for both save methods (see `internal/storage/postgres/character.go`). `SaveInventory` signature: `SaveInventory(ctx, characterID int64, items []inventory.InventoryItem) error`.
+  `SaveWeaponPresets` is called when `AffixResult.TargetIsWeapon == true`; `SaveEquipment` when `false`. `SaveEquipment` and `SaveWeaponPresets` MUST write the new `affixed_materials` and `material_max_durability_bonus` columns added in migration 046 — this is a new responsibility for both save methods (see `internal/storage/postgres/character.go`).
+
+  `SaveInventory` persists material consumption/return: precious materials require only `ItemDefID`/`Quantity` persistence (they have no per-instance state such as durability or AffixedMaterials). `SaveInventory` takes `[]inventory.InventoryItem{ItemDefID, Quantity}` — it does a full replace of `character_inventory` for the character. After the material is consumed (`Backpack.Remove`) or returned (no change), converting `sess.Backpack.Items()` to `[]InventoryItem` and passing to `SaveInventory` is the correct approach. The `AffixedMaterials` columns in migration 046 on `character_inventory_instances` are for weapon/armor instances stored in the backpack (after unequip), not for precious material items.
 - REQ-GA-34: `ApplyMaterialEffects` MUST be a pure function in `internal/game/inventory/material.go` covering per-hit effects only (Section 5.1). Passive effects are handled by `ComputePassiveMaterials` (Section 5.3). Stateful effects (Section 5.2) are handled at their respective call sites.
 - REQ-GA-35: Material YAML files MUST be loaded from `content/items/precious_materials/`. Missing files for any of the 45 required material+grade combinations MUST be a fatal load error.
 - REQ-GA-36: `KindPreciousMaterial` MUST be added to `validKinds` before any precious material YAML is loaded.
