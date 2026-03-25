@@ -4,6 +4,7 @@ description: |
   Your thoughts are muddled. Basic actions require extra effort.
 duration_type: rounds
 max_stacks: 0
+is_mental_condition: true
 attack_penalty: 1
 ac_penalty: 0
 damage_bonus: 0
