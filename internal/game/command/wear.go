@@ -89,12 +89,14 @@ func HandleWear(sess *session.PlayerSession, reg *inventory.Registry, arg string
 	// Copy Durability/MaxDurability from the instance (REQ-EM-7/8: broken slot detection).
 	// Rarity is populated for REQ-EM-4 color display.
 	slotted := &inventory.SlottedItem{
-		ItemDefID:  armorDef.ID,
-		Name:       armorDef.Name,
-		InstanceID: inst.InstanceID,
-		Modifier:   inst.Modifier,
-		Rarity:     armorDef.Rarity,
-		Durability: inst.Durability,
+		ItemDefID:                 armorDef.ID,
+		Name:                      armorDef.Name,
+		InstanceID:                inst.InstanceID,
+		Modifier:                  inst.Modifier,
+		Rarity:                    armorDef.Rarity,
+		Durability:                inst.Durability,
+		AffixedMaterials:          inst.AffixedMaterials,
+		MaterialMaxDurabilityBonus: inst.MaterialMaxDurabilityBonus,
 	}
 	// If durability has the uninitialized sentinel (-1), treat it as full.
 	if slotted.Durability < 0 {
