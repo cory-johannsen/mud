@@ -65,7 +65,7 @@ features:
 
   - slug: gear-actions
     name: Gear Actions
-    status: planned
+    status: in_progress
     priority: 45
     category: combat
     file: docs/features/gear-actions.md
@@ -340,6 +340,14 @@ features:
     dependencies:
       - actions
       - consumable-traps
+
+  - slug: combat-initiation-message
+    name: Combat Initiation Message
+    status: backlog
+    priority: 295
+    category: combat
+    file: docs/features/combat-initiation-message.md
+    effort: "S"  # console message on combat start: who attacked, NPC aggression reason (6 reasons mapped to hostility triggers)
 
   - slug: input-mode-refactor
     name: Input Mode Refactor
