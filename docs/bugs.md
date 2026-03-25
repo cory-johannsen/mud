@@ -114,7 +114,9 @@
 **Category:** World
 **Description:** Interacting with a zone map object (e.g., in NE Portland zone) shows the console confirmation but does not populate the player's map — unexplored rooms remain grey and POIs in unexplored rooms are not revealed.
 **Steps:** Enter the NE Portland zone. Locate and interact with the zone map. Observe console confirmation message. Check map — all unexplored rooms remain grey, no POIs revealed.
-**Fix:** `handleActivate` in `grpc_service_activate.go` was calling `s.scriptMgr.CallHook(zoneID, result.Script)` without forwarding the player `uid` as a Lua argument. The zone map Lua hook `zone_map_use(uid)` received nil for `uid`, so `engine.map.reveal_zone(uid, zoneID)` silently failed to resolve the player session. Fixed by passing `lua.LString(uid)` to `CallHook`. The Lua return value (narrative message) is now also returned to the player instead of the generic "You activate X." message.
+**Fix (commit 8267ef39):** `handleActivate` in `grpc_service_activate.go` was calling `s.scriptMgr.CallHook(zoneID, result.Script)` without forwarding the player `uid` as a Lua argument. The zone map Lua hook `zone_map_use(uid)` received nil for `uid`, so `engine.map.reveal_zone(uid, zoneID)` silently failed to resolve the player session. Fixed by passing `lua.LString(uid)` to `CallHook`.
+
+**Root cause (still broken after 8267ef39):** Zone-specific Lua scripts (e.g., `content/scripts/zones/downtown/zone_map.lua`) were never loaded into the scripting manager. `NewManagerFromDirs` in `internal/scripting/providers.go` only loaded global condition and AI scripts; it never called `mgr.LoadZone` for any zone subdirectory. Consequently, `CallHook("downtown", "zone_map_use", uid)` found no VM for the zone, fell back to `__global__`, found no `zone_map_use` there either, and returned `LNil` without calling `reveal_zone`. Fixed by scanning `<scriptRoot>/zones/*/` and calling `mgr.LoadZone(zoneID, dir)` for each subdirectory in `NewManagerFromDirs`.
 
 ### BUG-16: Lua AI hooks fail with "context canceled" after instruction budget exhausted
 **Severity:** critical

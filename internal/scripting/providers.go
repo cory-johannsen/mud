@@ -2,6 +2,7 @@ package scripting
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/google/wire"
 	"go.uber.org/zap"
@@ -21,6 +22,9 @@ type AIScriptDir string
 // NewManagerFromDirs constructs the scripting manager and loads global scripts.
 // AI domain loading is performed separately by the gameserver package to avoid import cycles.
 // If scriptRoot is empty, scripting is disabled (returns nil, nil).
+//
+// Zone scripts are loaded from <scriptRoot>/zones/<zoneID>/ directories (REQ-BUG15).
+// Each subdirectory name becomes a zone VM key; all *.lua files within are executed.
 func NewManagerFromDirs(
 	scriptRoot ScriptRoot,
 	condScriptDir CondScriptDir,
@@ -49,6 +53,25 @@ func NewManagerFromDirs(
 				return nil, err
 			}
 			logger.Info("loaded AI scripts", zap.String("dir", string(aiScriptDir)))
+		}
+	}
+
+	// Load per-zone scripts from <scriptRoot>/zones/<zoneID>/.
+	// Each immediate subdirectory name is used as the zone VM key.
+	// Missing zones/ directory is not an error.
+	zonesDir := filepath.Join(string(scriptRoot), "zones")
+	entries, err := os.ReadDir(zonesDir)
+	if err == nil {
+		for _, e := range entries {
+			if !e.IsDir() {
+				continue
+			}
+			zoneID := e.Name()
+			zoneScriptDir := filepath.Join(zonesDir, zoneID)
+			if loadErr := mgr.LoadZone(zoneID, zoneScriptDir, DefaultInstructionLimit); loadErr != nil {
+				return nil, loadErr
+			}
+			logger.Info("zone scripts loaded", zap.String("zone", zoneID), zap.String("dir", zoneScriptDir))
 		}
 	}
 
