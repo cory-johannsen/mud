@@ -9,6 +9,11 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
 
+// statusInCombat is the combat Status value for an in-combat player.
+// Maps to gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT (value 2).
+// See internal/game/session manager.go Status field comment.
+const statusInCombat int32 = 2
+
 // AffixSession provides the player-session view needed by HandleAffix.
 //
 // Precondition: Session must not be nil.
@@ -63,12 +68,12 @@ func HandleAffix(as *AffixSession, reg *inventory.Registry, materialQuery, targe
 	sess := as.Session
 
 	// REQ-GA-6: cannot affix during combat.
-	if sess.Status == 2 {
+	if sess.Status == statusInCombat {
 		return AffixResult{Message: "You cannot affix materials during combat."}
 	}
 
 	// Locate the material item in the backpack by def ID or name.
-	matInst, matItem, matDef, found := findMaterialInBackpack(sess, reg, materialQuery)
+	matInst, matDef, found := findMaterialInBackpack(sess, reg, materialQuery)
 	if !found {
 		return AffixResult{Message: fmt.Sprintf("You don't have %s in your pack.", materialQuery)}
 	}
@@ -135,7 +140,7 @@ func HandleAffix(as *AffixSession, reg *inventory.Registry, materialQuery, targe
 		return AffixResult{Message: fmt.Sprintf("%s has no upgrade slots remaining.", targetName)}
 	}
 
-	// REQ-GA-9: perform the crafting check (PF2E rules: natural 20 upgrades outcome by one tier,
+	// REQ-GA-16: perform the crafting check (PF2E rules: natural 20 upgrades outcome by one tier,
 	// natural 1 downgrades outcome by one tier).
 	dc := inventory.DCForMaterial(matDef.Tier, matDef.GradeID)
 	roll := rng.RollD20()
@@ -169,7 +174,6 @@ func HandleAffix(as *AffixSession, reg *inventory.Registry, materialQuery, targe
 		applyAffixDirectBonuses(matDef, targetIsWeapon, targetMaxDurBonus)
 		_ = sess.Backpack.Remove(matInst.InstanceID, 1)
 		recomputeAffixPassiveMaterials(sess, reg)
-		_ = matItem // suppress unused warning; matItem used for kind validation above
 		return AffixResult{
 			Message:          fmt.Sprintf("%s affixed to %s.", displayName, targetName),
 			Outcome:          AffixOutcomeSuccess,
@@ -197,8 +201,8 @@ func HandleAffix(as *AffixSession, reg *inventory.Registry, materialQuery, targe
 // findMaterialInBackpack locates a KindPreciousMaterial item in the session backpack by def ID or name.
 //
 // Precondition: sess and reg must not be nil.
-// Postcondition: returns (instance, itemDef, materialDef, true) when found; (zero, nil, nil, false) otherwise.
-func findMaterialInBackpack(sess *session.PlayerSession, reg *inventory.Registry, query string) (inventory.ItemInstance, *inventory.ItemDef, *inventory.MaterialDef, bool) {
+// Postcondition: returns (instance, materialDef, true) when found; (zero, nil, false) otherwise.
+func findMaterialInBackpack(sess *session.PlayerSession, reg *inventory.Registry, query string) (inventory.ItemInstance, *inventory.MaterialDef, bool) {
 	// Search backpack instances for matching def ID first, then name.
 	for _, inst := range sess.Backpack.Items() {
 		item, ok := reg.Item(inst.ItemDefID)
@@ -210,10 +214,10 @@ func findMaterialInBackpack(sess *session.PlayerSession, reg *inventory.Registry
 			if !ok {
 				continue
 			}
-			return inst, item, matDef, true
+			return inst, matDef, true
 		}
 	}
-	return inventory.ItemInstance{}, nil, nil, false
+	return inventory.ItemInstance{}, nil, false
 }
 
 // adjustOutcomeForNaturalRoll applies PF2E natural 20 / natural 1 tier shifts.

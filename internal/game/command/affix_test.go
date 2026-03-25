@@ -281,6 +281,7 @@ func TestHandleAffix_Success_ConsumesMaterial(t *testing.T) {
 	assert.Equal(t, command.AffixOutcomeSuccess, result.Outcome)
 	assert.True(t, result.MaterialConsumed)
 	assert.Len(t, sess.Backpack.FindByItemDefID("scrap_iron_street_grade"), 0)
+	assert.Contains(t, sess.LoadoutSet.ActivePreset().MainHand.AffixedMaterials, "scrap_iron:street_grade")
 }
 
 func TestHandleAffix_CriticalFailure_DestroysMaterial(t *testing.T) {
@@ -293,6 +294,22 @@ func TestHandleAffix_CriticalFailure_DestroysMaterial(t *testing.T) {
 	assert.Equal(t, command.AffixOutcomeCriticalFailure, result.Outcome)
 	assert.Len(t, sess.Backpack.FindByItemDefID("scrap_iron_street_grade"), 0)
 	assert.Contains(t, result.Message, "destroyed")
+}
+
+func TestHandleAffix_Failure_NoChange(t *testing.T) {
+	// DC for common:street_grade is 16, ability modifier is 0 (Reasoning 10).
+	// d20=10: total=10, dc-10=6 => 6 <= 10 < 16 => Failure (no natural 1/20 adjustment).
+	sess := makeAffixSession()
+	as := &command.AffixSession{Session: sess}
+	reg := buildAffixTestRegistry(t)
+	addMaterialToAffixBackpack(t, sess, reg, "scrap_iron_street_grade")
+	equipAffixWeapon(t, sess, reg, "test_pistol_mil_spec")
+	result := command.HandleAffix(as, reg, "scrap_iron_street_grade", "test_pistol_mil_spec", stubAffixRoller{d20: 10})
+	assert.Equal(t, command.AffixOutcomeFailure, result.Outcome)
+	assert.False(t, result.MaterialConsumed)
+	assert.Len(t, sess.Backpack.FindByItemDefID("scrap_iron_street_grade"), 1)
+	assert.Empty(t, sess.LoadoutSet.ActivePreset().MainHand.AffixedMaterials)
+	assert.Contains(t, result.Message, "slip")
 }
 
 func TestHandleAffix_Property_OutcomeMatchesDCBounds(t *testing.T) {
