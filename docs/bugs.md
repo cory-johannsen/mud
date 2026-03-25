@@ -135,8 +135,8 @@
 
 ### BUG-17: loadout command displays Technology item ID instead of name
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The `loadout` command output displays the raw Technology item ID (e.g., `stim_pack`) instead of the human-readable item name (e.g., `Stim Pack`).
 **Steps:** Create a character, equip or load out with any Technology item, run `loadout`; observe the ID is shown instead of the display name.
-**Fix:**
+**Fix:** Updated `FormatPreparedTechs` to accept a `*technology.Registry` parameter and look up the display name via `reg.Get(slot.TechID)`; falls back to raw TechID if registry is nil or tech not found. Updated call site in `grpc_service.go` to pass `s.techRegistry`.
