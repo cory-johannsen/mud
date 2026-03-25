@@ -47,14 +47,15 @@ type CharacterStore interface {
 func buildWelcomeBanner() string {
 	// AK-47 horizontal art — side profile, barrel pointing right.
 	// Each row is ≤ 80 visible characters (verified by TestBannerLineWidthMax80).
-	// Rows 5-6 show the pistol grip (left) and magazine/clip (right) below the receiver.
+	// Left wall of receiver aligns at column 9 across all rows.
+	// Rows 5-6: pistol grip (narrow, col 9) + banana magazine (longer, curves right with /).
 	ak47 := []string{
-		`        ____________________________________________`,
-		`  ,--. |____________________________________________|===>`,
-		` (    )|  [======================================]  |`,
-		`  ` + "`" + `--' |____________________________________________|`,
-		`        | |     |`,
-		`        |_|_____|`,
+		`         ____________________________________________`,
+		`  ,----. |____________________________________________|===>`,
+		` (      )|  [======================================]  |`,
+		`  ` + "`" + `----' |____________________________________________|`,
+		`         | |                /`,
+		`         |_|_______________/`,
 	}
 
 	// GUNCHETE Unicode block-letter title — original art, per-row.
@@ -72,12 +73,12 @@ func buildWelcomeBanner() string {
 
 	// Machete horizontal art — blade on left, handle+guard on right.
 	// Each row is ≤ 80 visible characters.
-	// Guard/handle section is 8 chars wide for visibility.
+	// Right blade wall aligns at column 54 across rows 2-4; guard/handle is 9 chars wide.
 	machete := []string{
-		`  ____________________________________________________,`,
-		` /_____________________________________________________|`,
-		` |                                                 |========|`,
-		`  \__________________________________________________|________|`,
+		`  ___________________________________________________,`,
+		` /____________________________________________________|`,
+		` |                                                    |=========|`,
+		`  \___________________________________________________|_________|`,
 	}
 
 	var sb strings.Builder
