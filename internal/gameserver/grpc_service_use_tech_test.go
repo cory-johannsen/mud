@@ -11,6 +11,7 @@ import (
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 )
 
 // fakePrepRepoUse is a PreparedTechRepo fake for use-tech tests.
@@ -216,4 +217,138 @@ func TestPropertyHandleUse_PreparedTech_ExpendsExactly(t *testing.T) {
 			rt.Fatalf("expected %d expended slots, got %d", n, expiredCount)
 		}
 	})
+}
+
+// REQ-BUG18-1: use (no arg) lists prepared tech display name instead of raw ID when techRegistry is set.
+func TestHandleUse_NoArg_PreparedTech_UsesDisplayName(t *testing.T) {
+	prepRepo := &fakePrepRepoUse{
+		slots: map[int][]*session.PreparedSlot{
+			1: {{TechID: "shock_grenade", Expended: false}},
+		},
+	}
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+	svc.SetPreparedTechRepo(prepRepo)
+
+	reg := technology.NewRegistry()
+	reg.Register(&technology.TechnologyDef{
+		ID:        "shock_grenade",
+		Name:      "Shock Grenade",
+		Tradition: technology.TraditionTechnical,
+		Level:     1,
+		UsageType: technology.UsagePrepared,
+	})
+	svc.SetTechRegistry(reg)
+
+	uid := "player-bug18-prepared"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.PreparedTechs = prepRepo.slots
+
+	evt, err := svc.handleUse(uid, "", "")
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	resp := evt.GetUseResponse()
+	require.NotNil(t, resp)
+
+	var found bool
+	for _, c := range resp.Choices {
+		if c.FeatId == "shock_grenade" {
+			found = true
+			assert.Equal(t, "Shock Grenade", c.Name, "prepared tech Name must be display name, not raw ID")
+		}
+	}
+	assert.True(t, found, "shock_grenade must appear in choices")
+}
+
+// REQ-BUG18-2: use (no arg) lists spontaneous tech display name instead of raw ID when techRegistry is set.
+func TestHandleUse_NoArg_SpontaneousTech_UsesDisplayName(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	reg := technology.NewRegistry()
+	reg.Register(&technology.TechnologyDef{
+		ID:        "neural_spike",
+		Name:      "Neural Spike",
+		Tradition: technology.TraditionNeural,
+		Level:     1,
+		UsageType: technology.UsageSpontaneous,
+	})
+	svc.SetTechRegistry(reg)
+
+	uid := "player-bug18-spont"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.SpontaneousTechs = map[int][]string{1: {"neural_spike"}}
+	sess.SpontaneousUsePools = map[int]session.UsePool{1: {Remaining: 2, Max: 2}}
+
+	evt, err := svc.handleUse(uid, "", "")
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	resp := evt.GetUseResponse()
+	require.NotNil(t, resp)
+
+	var found bool
+	for _, c := range resp.Choices {
+		if c.FeatId == "neural_spike" {
+			found = true
+			assert.Equal(t, "Neural Spike", c.Name, "spontaneous tech Name must be display name, not raw ID")
+			assert.Contains(t, c.Description, "Neural Spike", "description must use display name")
+		}
+	}
+	assert.True(t, found, "neural_spike must appear in choices")
+}
+
+// REQ-BUG18-3: use (no arg) lists innate tech display name instead of raw ID when techRegistry is set.
+func TestHandleUse_NoArg_InnateTech_UsesDisplayName(t *testing.T) {
+	sessMgr := session.NewManager()
+	svc := testMinimalService(t, sessMgr)
+
+	reg := technology.NewRegistry()
+	reg.Register(&technology.TechnologyDef{
+		ID:        "bio_pulse",
+		Name:      "Bio Pulse",
+		Tradition: technology.TraditionBioSynthetic,
+		Level:     1,
+		UsageType: technology.UsageInnate,
+	})
+	svc.SetTechRegistry(reg)
+
+	uid := "player-bug18-innate"
+	_, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID: uid, Username: uid, CharName: uid, RoomID: "room_a", Role: "player",
+	})
+	require.NoError(t, err)
+	sess, ok := sessMgr.GetPlayer(uid)
+	require.True(t, ok)
+	sess.InnateTechs = map[string]*session.InnateSlot{
+		"bio_pulse": {MaxUses: 0, UsesRemaining: 0}, // unlimited
+	}
+
+	evt, err := svc.handleUse(uid, "", "")
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	resp := evt.GetUseResponse()
+	require.NotNil(t, resp)
+
+	var found bool
+	for _, c := range resp.Choices {
+		if c.FeatId == "bio_pulse" {
+			found = true
+			assert.Equal(t, "Bio Pulse", c.Name, "innate tech Name must be display name, not raw ID")
+			assert.Contains(t, c.Description, "Bio Pulse", "description must use display name")
+		}
+	}
+	assert.True(t, found, "bio_pulse must appear in choices")
 }

@@ -143,11 +143,11 @@
 
 ### BUG-18: use command displays technology IDs instead of display names
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The `use` command output displays raw technology IDs instead of human-readable display names.
 **Steps:** Run `use` with no argument to list available active abilities; observe technology IDs shown instead of display names.
-**Fix:**
+**Fix:** In `handleUse` (`internal/gameserver/grpc_service.go`), added `s.techRegistry.Get(techID)` display name lookups for prepared, spontaneous, and innate tech entries when building the no-arg ability list. The `Name` field and description strings now use the resolved display name when the registry is available, falling back to the raw ID otherwise.
 
 ### BUG-20: Players can use the map command while in combat
 **Severity:** medium
@@ -163,4 +163,12 @@
 **Category:** Combat
 **Description:** Players are able to use movement commands to change rooms while engaged in combat, which should not be permitted.
 **Steps:** Initiate combat with any NPC; while in combat, issue a movement command (e.g., `north`); observe that the player is moved out of the room.
+**Fix:**
+
+### BUG-21: Welcome screen AK-47 grip/clip not visible; machete guard/handle too small
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** On the welcome/splash screen, the AK-47 ASCII art is truncated — the grip and clip at the bottom are not rendered; the machete blade looks correct but the guard and handle are disproportionately small.
+**Steps:** Connect to the MUD and observe the splash screen banner; note the AK-47 appears too short (missing lower body) and the machete guard/handle area is tiny relative to the blade.
 **Fix:**

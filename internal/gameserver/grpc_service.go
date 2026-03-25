@@ -6010,9 +6010,15 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 				}
 			}
 			for techID, remaining := range counts {
+				displayName := techID
+				if s.techRegistry != nil {
+					if def, ok := s.techRegistry.Get(techID); ok {
+						displayName = def.Name
+					}
+				}
 				active = append(active, &gamev1.FeatEntry{
 					FeatId:      techID,
-					Name:        techID,
+					Name:        displayName,
 					Category:    "prepared_tech",
 					Active:      true,
 					Description: fmt.Sprintf("%d use(s) remaining", remaining),
@@ -6032,12 +6038,18 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 					continue
 				}
 				for _, techID := range sess.SpontaneousTechs[l] {
+					displayName := techID
+					if s.techRegistry != nil {
+						if def, ok := s.techRegistry.Get(techID); ok {
+							displayName = def.Name
+						}
+					}
 					active = append(active, &gamev1.FeatEntry{
 						FeatId:      techID,
-						Name:        techID,
+						Name:        displayName,
 						Category:    "spontaneous_tech",
 						Active:      true,
-						Description: fmt.Sprintf("%s (%d uses remaining at level %d)", techID, pool.Remaining, l),
+						Description: fmt.Sprintf("%s (%d uses remaining at level %d)", displayName, pool.Remaining, l),
 					})
 				}
 			}
@@ -6051,17 +6063,23 @@ func (s *GameServiceServer) handleUse(uid, abilityID, targetID string) (*gamev1.
 			sort.Strings(innateIDs)
 			for _, id := range innateIDs {
 				slot := sess.InnateTechs[id]
+				displayName := id
+				if s.techRegistry != nil {
+					if def, ok := s.techRegistry.Get(id); ok {
+						displayName = def.Name
+					}
+				}
 				var desc string
 				if slot.MaxUses == 0 {
-					desc = fmt.Sprintf("%s (unlimited)", id)
+					desc = fmt.Sprintf("%s (unlimited)", displayName)
 				} else if slot.UsesRemaining > 0 {
-					desc = fmt.Sprintf("%s (%d uses remaining)", id, slot.UsesRemaining)
+					desc = fmt.Sprintf("%s (%d uses remaining)", displayName, slot.UsesRemaining)
 				} else {
 					continue // exhausted — omit
 				}
 				active = append(active, &gamev1.FeatEntry{
 					FeatId:      id,
-					Name:        id,
+					Name:        displayName,
 					Category:    "innate_tech",
 					Active:      true,
 					Description: desc,
