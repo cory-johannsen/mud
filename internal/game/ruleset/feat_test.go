@@ -291,6 +291,23 @@ func TestLoadFeats_SkillGapFeats_PatchJob(t *testing.T) {
 	}
 }
 
+func TestLoadFeats_MiscGapFeatsPresent(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"overclock_senses", "unstable_gearshift", "irradiate", "sonic_dash", "titan_swing",
+		"rapid_regen", "pain_is_temporary", "like_a_roach", "unbreakable_will", "old_hand",
+		"many_jobs", "thruster_leap", "trailblazer", "iron_resolve", "calm_and_centered",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing misc feat: %s", id)
+	}
+}
+
 func TestLoadFeats_SkillGapFeats_HustleSmoothTalkHardLookRep(t *testing.T) {
 	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
 	require.NoError(t, err)

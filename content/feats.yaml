@@ -360,6 +360,127 @@ feats:
     activate_text: ""
     description: "Automatically detect hidden, invisible, or concealed threats in your vicinity."
 
+  # ── GENERAL FEATS: MISCELLANEOUS (Technology/Implant/Drug adaptations) ─────
+  - id: overclock_senses
+    name: Overclock Senses
+    category: general
+    pf2e: overclock_senses
+    active: true
+    activate_text: "You push the implant past its limits. Everything sharpens."
+    description: "Temporarily boost Perception and awareness via neural implant overclocking; take 1d4 damage after use."
+
+  - id: unstable_gearshift
+    name: Unstable Gearshift
+    category: general
+    pf2e: unstable_gearshift
+    active: true
+    activate_text: "You push the modification past the safety threshold."
+    description: "Risky but powerful gear modification; gain a significant bonus to one action but risk a critical failure cascade."
+
+  - id: irradiate
+    name: Irradiate
+    category: general
+    pf2e: irradiate
+    active: true
+    activate_text: "You vent the containment and everything nearby gets a dose."
+    description: "Emit a burst of radiation affecting nearby targets; deals radiation damage in a small radius."
+
+  - id: sonic_dash
+    name: Sonic Dash
+    category: general
+    pf2e: sonic_dash
+    active: true
+    activate_text: "The tech fires and you're gone before they can track you."
+    description: "Burst of sonic-tech assisted speed; move up to triple your speed in a straight line."
+
+  - id: titan_swing
+    name: Titan Swing
+    category: general
+    pf2e: titan_swing
+    active: true
+    activate_text: "You put everything into one massive powered strike."
+    description: "Massive powered weapon swing with knockback; deal extra damage and push target back 10 feet."
+
+  - id: rapid_regen
+    name: Rapid Regen
+    category: general
+    pf2e: high-speed_regeneration
+    active: false
+    activate_text: ""
+    description: "Regenerative drug or implant heals a small amount of HP at the start of each of your turns."
+
+  - id: pain_is_temporary
+    name: Pain Is Temporary
+    category: general
+    pf2e: pain_is_temporary
+    active: true
+    activate_text: "You push through it. You've felt worse."
+    description: "Ignore pain-based penalties for a brief window; remove one pain-related condition briefly."
+
+  - id: like_a_roach
+    name: Like a Roach
+    category: general
+    pf2e: like_a_roach
+    active: false
+    activate_text: ""
+    description: "Once per day, survive a lethal hit on 1 HP instead of dying; you just won't stay down."
+
+  - id: unbreakable_will
+    name: Unbreakable Will
+    category: general
+    pf2e: indomitable_spirit
+    active: false
+    activate_text: ""
+    description: "Resist mental domination, compulsion, and psychic effects through sheer force of will."
+
+  - id: old_hand
+    name: Old Hand
+    category: general
+    pf2e: weight_of_experience
+    active: false
+    activate_text: ""
+    description: "Vast experience grants situational bonuses; once per scene reroll a failed check you've succeeded at before."
+
+  - id: many_jobs
+    name: Many Jobs
+    category: general
+    pf2e: i've_had_many_jobs
+    active: false
+    activate_text: ""
+    description: "Experience across multiple jobs gives unique insight; gain a bonus in situations your past jobs have prepared you for."
+
+  - id: thruster_leap
+    name: Thruster Leap
+    category: general
+    pf2e: propulsive_leap
+    active: true
+    activate_text: "The thrusters fire and you clear the gap easily."
+    description: "Use tech thrusters to leap much farther than normal; treat as if you rolled 10 higher on jump checks."
+
+  - id: trailblazer
+    name: Trailblazer
+    category: general
+    pf2e: trailblazing_stride
+    active: false
+    activate_text: ""
+    description: "Move through difficult terrain without penalty; clear a path for allies behind you."
+
+  - id: iron_resolve
+    name: Iron Resolve
+    category: general
+    pf2e: unbreakable_resolve
+    active: false
+    activate_text: ""
+    description: "Resist being mentally broken; your will cannot be worn down by repeated fear or coercion."
+
+  - id: calm_and_centered
+    name: Calm and Centered
+    category: general
+    pf2e: calm_and_centered
+    active: false
+    activate_text: ""
+    description: "Mental calm provides bonuses against environmental and psychological effects; +1 to Will saves."
+
   # ── SKILL FEATS: PARKOUR ──────────────────────────────────────────────────
   - id: assurance_parkour
     name: Steady Parkour
