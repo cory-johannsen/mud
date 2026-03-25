@@ -1,7 +1,7 @@
 # content/factions/team_machete.yaml
 id: machete
 name: Team Machete
-zone_id: felony_flats
+zone_id: rustbucket_ridge
 hostile_factions:
   - gun
 tiers:
