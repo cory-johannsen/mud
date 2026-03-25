@@ -94,7 +94,7 @@ Illustrative sketch (exact characters to be finalized in implementation plan):
 ## Implementation
 
 - IMPL-1: All art is assembled as Go string literals within `buildWelcomeBanner()`. No external files or templates.
-- IMPL-2: The banner is built in order: blank, AK-47 block (each row wrapped in BrightGreen+Reset), blank, title block (wrapped in Bold+BrightCyan+Reset), blank, machete block (each row wrapped in BrightYellow+Reset), blank, subtitle/version/commands.
+- IMPL-2: The banner is built in order: blank, AK-47 block (each row wrapped in BrightGreen+Reset), blank, title block (wrapped in Bold+BrightCyan+Reset — the single Reset clears both Bold and BrightCyan together), blank, machete block (each row wrapped in BrightYellow+Reset), blank, subtitle/version/commands.
 - IMPL-3: ANSI constants `telnet.BrightGreen`, `telnet.BrightCyan`, `telnet.BrightYellow`, `telnet.Bold`, `telnet.Reset` MUST be used — no raw escape literals.
 - IMPL-4: Each weapon art row is a separate string in a slice. The slice is iterated and each row is written as `telnet.BrightGreen + row + telnet.Reset + "\n"`.
 
@@ -106,7 +106,7 @@ Illustrative sketch (exact characters to be finalized in implementation plan):
 - TEST-2: A unit test MUST assert that `buildWelcomeBanner()` contains `telnet.BrightGreen` (AK-47 art present).
 - TEST-3: A unit test MUST assert that `buildWelcomeBanner()` contains `telnet.BrightYellow` (machete art present).
 - TEST-4: A unit test MUST assert that every line of `buildWelcomeBanner()` output is ≤ 80 visible characters after stripping ANSI sequences.
-- TEST-5: A unit test MUST assert that every `BrightGreen`, `BrightCyan`, or `BrightYellow` occurrence is followed by `telnet.Reset` before the next color code or end of banner.
+- TEST-5: A unit test MUST assert that every `BrightGreen`, `BrightCyan`, `BrightYellow`, or `Bold` occurrence is followed by `telnet.Reset` before the next color/attribute code or end of banner. Note: when `Bold` and `BrightCyan` are adjacent on the same title row, a single `telnet.Reset` after `BrightCyan` satisfies this requirement for both.
 - TEST-6: A unit test MUST assert that the BrightGreen block appears before (earlier line index than) the first BrightCyan line — gun is above the title.
 - TEST-7: A unit test MUST assert that the BrightYellow block appears after (later line index than) the last BrightCyan line — machete is below the title.
 
