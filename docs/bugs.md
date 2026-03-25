@@ -110,11 +110,11 @@
 
 ### BUG-15: Zone map interaction populates map but unexplored rooms show grey with no POIs revealed
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** Interacting with a zone map object (e.g., in NE Portland zone) shows the console confirmation but does not populate the player's map — unexplored rooms remain grey and POIs in unexplored rooms are not revealed.
 **Steps:** Enter the NE Portland zone. Locate and interact with the zone map. Observe console confirmation message. Check map — all unexplored rooms remain grey, no POIs revealed.
-**Fix:**
+**Fix:** `handleActivate` in `grpc_service_activate.go` was calling `s.scriptMgr.CallHook(zoneID, result.Script)` without forwarding the player `uid` as a Lua argument. The zone map Lua hook `zone_map_use(uid)` received nil for `uid`, so `engine.map.reveal_zone(uid, zoneID)` silently failed to resolve the player session. Fixed by passing `lua.LString(uid)` to `CallHook`. The Lua return value (narrative message) is now also returned to the player instead of the generic "You activate X." message.
 
 ### BUG-16: Lua AI hooks fail with "context canceled" after instruction budget exhausted
 **Severity:** critical
@@ -163,6 +163,14 @@
 **Category:** Combat
 **Description:** Players are able to use movement commands to change rooms while engaged in combat, which should not be permitted.
 **Steps:** Initiate combat with any NPC; while in combat, issue a movement command (e.g., `north`); observe that the player is moved out of the room.
+**Fix:**
+
+### BUG-22: Automatic health recharge should be disabled in combat
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Health regeneration continues to tick during combat, which should be suspended while the player is engaged in an encounter.
+**Steps:** Initiate combat with any NPC; observe that health recharges automatically during the fight.
 **Fix:**
 
 ### BUG-21: Welcome screen AK-47 grip/clip not visible; machete guard/handle too small

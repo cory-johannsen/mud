@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 
@@ -173,6 +174,7 @@ func (s *GameServiceServer) handleActivate(uid string, req *gamev1.ActivateItemR
 	}
 
 	// Apply effects.
+	var scriptMsg string
 	if result.Script != "" {
 		var zoneID string
 		if s.world != nil {
@@ -181,7 +183,11 @@ func (s *GameServiceServer) handleActivate(uid string, req *gamev1.ActivateItemR
 			}
 		}
 		if zoneID != "" && s.scriptMgr != nil {
-			_, _ = s.scriptMgr.CallHook(zoneID, result.Script)
+			// REQ-BUG15: uid must be forwarded to the Lua hook so scripts such as
+			// zone_map_use(uid) can call engine.map.reveal_zone(uid, zoneID).
+			if luaResult, callErr := s.scriptMgr.CallHook(zoneID, result.Script, lua.LString(uid)); callErr == nil && luaResult != lua.LNil {
+				scriptMsg = luaResult.String()
+			}
 		}
 	} else if result.ActivationEffect != nil {
 		def, _ := s.invRegistry.Item(result.ItemDefID)
@@ -222,6 +228,9 @@ func (s *GameServiceServer) handleActivate(uid string, req *gamev1.ActivateItemR
 	name := result.ItemDefID
 	if def != nil {
 		name = def.Name
+	}
+	if scriptMsg != "" {
+		return messageEvent(scriptMsg), nil
 	}
 	if result.Destroyed {
 		return messageEvent(fmt.Sprintf("You activate %s — it crumbles to dust.", name)), nil
