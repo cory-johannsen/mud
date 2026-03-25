@@ -151,3 +151,25 @@ graph TD
 - Combat ability modifiers: `.claude/skills/mud-combat.md`
 - Persistence repos (characters, skills, feats): `.claude/skills/mud-persistence.md`
 - Content pipeline (YAML loaders): `.claude/skills/mud-content-pipeline.md`
+
+## Feat System
+
+Content lives in `content/feats.yaml`. The registry (`internal/game/ruleset/feat.go`) provides four indexes: `byID`, `byCategory`, `bySkill`, `byArchetype`.
+
+**Three feat categories:**
+
+- **general** — available in the general feat pool at character creation; no skill requirement.
+- **skill** — gated by skill proficiency; must carry a `skill` field matching a Gunchete skill ID; available when the player is Trained or better in that skill.
+- **job** — archetype-specific; must carry an `archetype` field; granted or chosen at job selection.
+
+The `pf2e` field records the source PF2E feat name for traceability. It is not used at runtime.
+
+Adding a new feat requires only a YAML entry — no code changes. The registry auto-indexes on load.
+
+The primary runtime access path for skill feats is `FeatRegistry.SkillFeatsForTrainedSkills(trained map[string]string)`, called during `ensureFeats` in character creation. It returns the union of all feat pools for skills where the player's proficiency is `"trained"` or better. A new skill feat added to `content/feats.yaml` with the correct `skill` field will automatically appear in this pool without any code changes.
+
+**Extension Point:**
+
+1. Add entry to `content/feats.yaml` in the appropriate section.
+2. Set `category`, `skill` (if skill feat), `pf2e` (source name), `active` (true if player-triggered), `description` (Gunchete-flavored).
+3. Restart server — feat is immediately available via `SkillFeatsForTrainedSkills` and all registry indexes.
