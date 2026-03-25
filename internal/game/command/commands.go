@@ -307,7 +307,7 @@ func BuiltinCommands() []Command {
 		{Name: "materials", Aliases: []string{"mats"}, Help: "List your material inventory. Usage: materials [category]", Category: "crafting", Handler: HandlerMaterials},
 		{Name: "craft", Aliases: []string{"cr"}, Help: "Craft an item. Usage: craft list|<recipe>|confirm", Category: "crafting", Handler: HandlerCraft},
 		{Name: "scavenge", Aliases: []string{}, Help: "Scavenge the current area for materials.", Category: "crafting", Handler: HandlerScavenge},
-		{Name: "affix", Aliases: nil, Help: "Affix a precious material to equipped gear. Usage: affix <material> <item>", Category: "crafting", Handler: HandlerAffix},
+		{Name: "affix", Aliases: []string{}, Help: "Affix a precious material to equipped gear. Usage: affix <material> <item>", Category: "crafting", Handler: HandlerAffix},
 	}
 }
 
