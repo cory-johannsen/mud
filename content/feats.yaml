@@ -1733,6 +1733,114 @@ feats:
     activate_text: "You watch their face carefully, looking for the tells."
     description: "When someone lies to you, use Hustle instead of Perception to detect it."
 
+  - id: cutting_quip
+    name: Cutting Quip
+    category: skill
+    skill: hustle
+    pf2e: bon_mot
+    active: true
+    activate_text: "One sentence. Perfectly aimed. You watch them wobble."
+    description: "A quick verbal jab that unsettles a target; on success, the target is distracted and takes -1 to Perception."
+
+  - id: street_charlatan
+    name: Street Charlatan
+    category: skill
+    skill: hustle
+    pf2e: charlatan
+    active: false
+    activate_text: ""
+    description: "Pass yourself off as a legitimate professional in any field; reduce suspicion when impersonating experts."
+
+  - id: vicious_critique
+    name: Vicious Critique
+    category: skill
+    skill: hustle
+    pf2e: vicious_critique
+    active: true
+    activate_text: "You tear their performance apart, precisely and without mercy."
+    description: "Demoralize a target with scathing criticism of their actions or abilities."
+
+  - id: smooth_liar
+    name: Smooth Liar
+    category: skill
+    skill: hustle
+    pf2e: confabulator
+    active: false
+    activate_text: ""
+    description: "Reduce the bonus others gain when catching your repeated lies; wear them down with consistency."
+
+  - id: quick_disguise
+    name: Quick Disguise
+    category: skill
+    skill: hustle
+    pf2e: quick_disguise
+    active: false
+    activate_text: ""
+    description: "Set up a disguise in much less time than normal — in minutes instead of an hour."
+
+  - id: spare_identity
+    name: Spare Identity
+    category: skill
+    skill: hustle
+    pf2e: backup_disguise
+    active: false
+    activate_text: ""
+    description: "Maintain a backup identity and disguise ready to deploy at a moment's notice."
+
+  - id: half_truths
+    name: Half Truths
+    category: skill
+    skill: hustle
+    pf2e: half-truths
+    active: false
+    activate_text: ""
+    description: "Blend lies with truth for plausible deniability; gain a bonus when truth-detected."
+
+  - id: plant_rumor
+    name: Plant Rumor
+    category: skill
+    skill: hustle
+    pf2e: sow_rumor
+    active: false
+    activate_text: ""
+    description: "Secretly plant damaging rumors that spread through a community without being traced back to you."
+
+  - id: quick_alter
+    name: Quick Alter
+    category: skill
+    skill: hustle
+    pf2e: tweak_appearances
+    active: true
+    activate_text: "A few quick changes and they look completely different."
+    description: "Quickly change someone's appearance — hair, clothing, posture — in under a minute."
+
+  - id: divert_attention
+    name: Divert Attention
+    category: skill
+    skill: hustle
+    pf2e: distracting_performance
+    active: true
+    activate_text: "You give them something else to look at."
+    description: "Use improvised performance to distract observers; affected targets take -2 to Perception briefly."
+
+  - id: doublespeak
+    name: Doublespeak
+    category: skill
+    skill: hustle
+    pf2e: doublespeak
+    active: false
+    activate_text: ""
+    description: "Convey two contradictory messages simultaneously; only your intended audience understands the real meaning."
+
+  - id: secrets_shield
+    name: Secrets Shield
+    category: skill
+    skill: hustle
+    pf2e: slippery_secrets
+    active: false
+    activate_text: ""
+    description: "Evade attempts to uncover your true nature; you always maintain at least one layer of cover."
+
   # ── SKILL FEATS: SMOOTH TALK ──────────────────────────────────────────────
   - id: assurance_smooth_talk
     name: Steady Smooth Talk
@@ -1769,6 +1877,87 @@ feats:
     active: true
     activate_text: "You work your contacts and get answers fast."
     description: "Gather information in half the normal time; critical failure still yields partial info."
+
+  - id: calm_down
+    name: Calm Down
+    category: skill
+    skill: smooth_talk
+    pf2e: no_cause_for_alarm
+    active: true
+    activate_text: "Easy. Easy. Everyone just take a breath."
+    description: "Reduce frightened condition values in nearby creatures through calm, authoritative speech."
+
+  - id: deal_maker
+    name: Deal Maker
+    category: skill
+    skill: smooth_talk
+    pf2e: contract_negotiator
+    active: false
+    activate_text: ""
+    description: "Negotiate formal agreements efficiently; draft and finalize deals in half the normal time."
+
+  - id: fast_friends
+    name: Fast Friends
+    category: skill
+    skill: smooth_talk
+    pf2e: glad-hand
+    active: true
+    activate_text: "You extend a hand and they already like you."
+    description: "Make a favorable impression on someone you just met in under a minute."
+
+  - id: pick_em_up
+    name: Pick 'Em Up
+    category: skill
+    skill: smooth_talk
+    pf2e: encouraging_words
+    active: true
+    activate_text: "You tell them exactly what they need to hear right now."
+    description: "Boost an ally's spirits with the right words at the right time; reduce their frightened condition."
+
+  - id: call_in_favors
+    name: Call In Favors
+    category: skill
+    skill: smooth_talk
+    pf2e: leverage_connections
+    active: false
+    activate_text: ""
+    description: "Use your connections to obtain tangible aid — supplies, information, or safe passage."
+
+  - id: speed_network
+    name: Speed Network
+    category: skill
+    skill: smooth_talk
+    pf2e: quick_contacts
+    active: false
+    activate_text: ""
+    description: "Quickly establish contacts in a new area; find the right person in half the normal time."
+
+  - id: quiet_ask
+    name: Quiet Ask
+    category: skill
+    skill: smooth_talk
+    pf2e: discreet_inquiry
+    active: false
+    activate_text: ""
+    description: "Gather information without revealing your interest; observers don't notice you were asking."
+
+  - id: brass_nerves
+    name: Brass Nerves
+    category: skill
+    skill: smooth_talk
+    pf2e: shameless_request
+    active: false
+    activate_text: ""
+    description: "Make extreme or outlandish requests with lesser social consequences; your audacity is almost admirable."
+
+  - id: master_negotiator
+    name: Master Negotiator
+    category: skill
+    skill: smooth_talk
+    pf2e: legendary_negotiation
+    active: true
+    activate_text: "You walk straight up to them and start talking."
+    description: "Quickly enter parley with hostile or neutral parties; buy time with words when violence looms."
 
   # ── SKILL FEATS: HARD LOOK ────────────────────────────────────────────────
   - id: assurance_hard_look
@@ -1807,6 +1996,78 @@ feats:
     activate_text: "You get your point across in one sentence."
     description: "Coerce someone with only one exchange of words rather than a minute."
 
+  - id: physical_threat
+    name: Physical Threat
+    category: skill
+    skill: hard_look
+    pf2e: intimidating_prowess
+    active: false
+    activate_text: ""
+    description: "Gain a bonus to Demoralize when you are physically larger or visibly armed versus your target."
+
+  - id: long_scare
+    name: Long Scare
+    category: skill
+    skill: hard_look
+    pf2e: lasting_coercion
+    active: false
+    activate_text: ""
+    description: "Coerce targets into helping you for longer; coerced compliance lasts days instead of hours."
+
+  - id: iron_nerves
+    name: Iron Nerves
+    category: skill
+    skill: hard_look
+    pf2e: terrifying_resistance
+    active: false
+    activate_text: ""
+    description: "Reduce the frightened condition faster when applied to yourself; your own fear passes quickly."
+
+  - id: say_that_again
+    name: Say That Again
+    category: skill
+    skill: hard_look
+    pf2e: "say_that_again!"
+    active: true
+    activate_text: "You heard what they said. You want them to hear it too."
+    description: "React when a creature calls out or mocks your actions; immediately Demoralize them as a reaction."
+
+  - id: battle_shout
+    name: Battle Shout
+    category: skill
+    skill: hard_look
+    pf2e: battle_cry
+    active: true
+    activate_text: "You open your mouth and let everything out at once."
+    description: "Demoralize all visible foes when rolling for initiative; your battle shout precedes the first strike."
+
+  - id: break_them
+    name: Break Them
+    category: skill
+    skill: hard_look
+    pf2e: terrified_retreat
+    active: false
+    activate_text: ""
+    description: "Cause sufficiently demoralized targets to flee from you on their next turn."
+
+  - id: too_angry_to_die
+    name: Too Angry to Die
+    category: skill
+    skill: hard_look
+    pf2e: too_angry_to_die
+    active: false
+    activate_text: ""
+    description: "Continue fighting past when you should fall; once per day, ignore a condition that would stop your actions."
+
+  - id: scare_to_death
+    name: Scare to Death
+    category: skill
+    skill: hard_look
+    pf2e: scare_to_death
+    active: true
+    activate_text: "You fix them with your full attention. Some people just can't take it."
+    description: "Frighten a target so severely they may collapse; critically frightened targets can be incapacitated."
+
   # ── SKILL FEATS: REP ──────────────────────────────────────────────────────
   - id: assurance_rep
     name: Steady Rep
@@ -1843,6 +2104,96 @@ feats:
     active: false
     activate_text: ""
     description: "Choose a Rep specialty (music, street art, combat style); +1 to that type."
+
+  - id: stunt_rep
+    name: Stunt Rep
+    category: skill
+    skill: rep
+    pf2e: acrobatic_performer
+    active: true
+    activate_text: "You flip off the wall and land it perfectly. The crowd loses their minds."
+    description: "Use physical stunts and acrobatics to enhance stage performance; Rep check uses Parkour as a bonus."
+
+  - id: vicious_critique_rep
+    name: Vicious Critique (Rep)
+    category: skill
+    skill: rep
+    pf2e: vicious_critique
+    active: true
+    activate_text: "You call out their performance with surgical precision. The crowd turns on them."
+    description: "Demoralize a target through public critique of their performance or reputation via Rep skill."
+
+  - id: stage_diversion
+    name: Stage Diversion
+    category: skill
+    skill: rep
+    pf2e: distracting_performance
+    active: true
+    activate_text: "You take center stage and everyone looks at you."
+    description: "Use stage performance to distract observers; affected audience can't notice what your allies are doing."
+
+  - id: winners_speech
+    name: Winner's Speech
+    category: skill
+    skill: rep
+    pf2e: triumphant_boast
+    active: true
+    activate_text: "You raise your fist and let them hear it."
+    description: "Inspire allies with a boast after a victory; allies gain a bonus to their next check."
+
+  - id: juggle
+    name: Juggle
+    category: skill
+    skill: rep
+    pf2e: juggle
+    active: true
+    activate_text: "The objects become a blur between your hands."
+    description: "Juggle multiple objects as performance or practical distraction."
+
+  - id: copy_the_master
+    name: Copy the Master
+    category: skill
+    skill: rep
+    pf2e: talent_envy
+    active: false
+    activate_text: ""
+    description: "Study and replicate a technique you've observed; +1 to mimic a skill you've seen performed this scene."
+
+  - id: rile_the_crowd
+    name: Rile the Crowd
+    category: skill
+    skill: rep
+    pf2e: inflame_crowd
+    active: true
+    activate_text: "You work the room until they're exactly where you want them."
+    description: "Turn audience emotion toward your desired reaction — fear, anger, admiration."
+
+  - id: street_following
+    name: Street Following
+    category: skill
+    skill: rep
+    pf2e: entourage
+    active: false
+    activate_text: ""
+    description: "Attract a loyal following; a small group of fans or crew accompanies you in districts where you're known."
+
+  - id: comforting_presence
+    name: Comforting Presence
+    category: skill
+    skill: rep
+    pf2e: comforting_presence
+    active: false
+    activate_text: ""
+    description: "Your presence helps allies resist fear; allies within 30 feet gain +1 to saves vs. frightened."
+
+  - id: legendary_rep
+    name: Legendary Rep
+    category: skill
+    skill: rep
+    pf2e: legendary_performer
+    active: false
+    activate_text: ""
+    description: "Renowned throughout the city for your reputation; faction leaders and district bosses know your name."
 
   # ── JOB FEATS: AGGRESSOR ──────────────────────────────────────────────────
   - id: brutal_charge

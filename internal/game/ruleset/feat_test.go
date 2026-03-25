@@ -290,3 +290,30 @@ func TestLoadFeats_SkillGapFeats_PatchJob(t *testing.T) {
 		assert.True(t, byID[id], "missing patch_job skill feat: %s", id)
 	}
 }
+
+func TestLoadFeats_SkillGapFeats_HustleSmoothTalkHardLookRep(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		// hustle
+		"cutting_quip", "street_charlatan", "vicious_critique", "smooth_liar", "quick_disguise",
+		"spare_identity", "half_truths", "plant_rumor", "quick_alter", "divert_attention",
+		"doublespeak", "secrets_shield",
+		// smooth_talk
+		"calm_down", "deal_maker", "fast_friends", "pick_em_up", "call_in_favors",
+		"speed_network", "quiet_ask", "brass_nerves", "master_negotiator",
+		// hard_look
+		"physical_threat", "long_scare", "iron_nerves", "say_that_again", "battle_shout",
+		"break_them", "too_angry_to_die", "scare_to_death",
+		// rep
+		"stunt_rep", "vicious_critique_rep", "stage_diversion", "winners_speech", "juggle",
+		"copy_the_master", "rile_the_crowd", "street_following", "comforting_presence", "legendary_rep",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
