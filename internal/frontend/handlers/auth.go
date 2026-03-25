@@ -33,73 +33,69 @@ type CharacterStore interface {
 }
 
 // buildWelcomeBanner returns the connection banner with the current version embedded.
-// Layout: AK-47 (14 cols, bright green) | GUNCHETE title (52 cols, bright cyan) | machete (14 cols, bright yellow)
-// Total visible width per art row: exactly 80 characters.
+//
+// Layout (top to bottom):
+//  1. Horizontal AK-47 ASCII art (BrightGreen, per-row)
+//  2. GUNCHETE Unicode block-letter title (Bold + BrightCyan, per-row)
+//  3. Horizontal machete ASCII art (BrightYellow, per-row)
+//  4. Subtitle, version, instructions (unchanged)
+//
+// Each row is independently wrapped: color + row + Reset.
+// For title rows: Bold + BrightCyan + row + Reset (single Reset clears both).
+// Precondition: none.
+// Postcondition: returns a complete, non-empty banner string.
 func buildWelcomeBanner() string {
-	// AK-47 ASCII art — each row must be exactly 14 visible characters.
-	// Verify with: len(telnet.StripANSI(row)) == 14
+	// AK-47 horizontal art — side profile, barrel pointing right.
+	// Each row is ≤ 80 visible characters (verified by TestBannerLineWidthMax80).
 	ak47 := []string{
-		` _________    `,
-		`|  _  |   |=> `,
-		`|_| |_|===|   `,
-		`  | |  \__/   `,
-		`  |_|         `,
-		` _| |_        `,
-		`|_____|       `,
+		`        ____________________________________________`,
+		`  ,--. |____________________________________________|===>`,
+		` (    )|  [======================================]  |`,
+		`  ` + "`" + `--' |____________________________________________|`,
+		`        |___|`,
 	}
 
-	// GUNCHETE medium ASCII title — each row must be exactly 52 visible characters.
-	// Verify with: len(telnet.StripANSI(row)) == 52
-	// Note: row 2 contains a backtick and requires string concatenation to embed in Go source.
+	// GUNCHETE ASCII block-letter title — per-row, each row ≤ 80 visible bytes.
+	// Each row wrapped independently so TestBannerContainsBrightCyanAsciiArt
+	// counts >= 4 distinct BrightCyan segments.
 	title := []string{
-		`  ___  _   _ _  _  ___  _  _  ___  ___ ___          `,
-		` / __|| | | | \| |/ __|| || || __||_  |_  |         `,
-		`| (_ || |_| | .` + "`" + `| | (__ | __ || _|  / /  / /        `,
-		` \___/ \___/|_|\_|\___||_||_||___| /_/  /_/         `,
-		`                                                    `,
-		`                                                    `,
-		`                                                    `,
+		` ___  _   _ _  _  ___  _  _  ___  ___ ___`,
+		`/ __|| | | | \| |/ __|| || || __||_  |_  |`,
+		`| (_ || |_| | .` + "`" + `| | (__ | __ || _|  / /  / /`,
+		` \___/ \___/|_|\_|\___||_||_||___| /_/  /_/`,
+		``,
+		``,
 	}
 
-	// Machete ASCII art — each row must be exactly 14 visible characters.
-	// Verify with: len(telnet.StripANSI(row)) == 14
+	// Machete horizontal art — blade on left, handle+guard on right.
+	// Each row is ≤ 80 visible characters.
 	machete := []string{
-		`         _    `,
-		`        / \   `,
-		`  _____/   \  `,
-		` /__________\ `,
-		`      |       `,
-		`      |       `,
-		`     (_)      `,
+		`  _______________________________________________________,`,
+		` /________________________________________________________|`,
+		` |                                                        |=|`,
+		`  \________________________________________________________|_|`,
 	}
 
-	// Normalize column heights by padding shorter slices with blank rows at the bottom.
-	maxRows := len(ak47)
-	if len(title) > maxRows {
-		maxRows = len(title)
-	}
-	if len(machete) > maxRows {
-		maxRows = len(machete)
-	}
-	pad := func(col []string, width, count int) []string {
-		blank := strings.Repeat(" ", width)
-		for len(col) < count {
-			col = append(col, blank)
-		}
-		return col
-	}
-	ak47 = pad(ak47, 14, maxRows)
-	title = pad(title, 52, maxRows)
-	machete = pad(machete, 14, maxRows)
-
-	// Build banner rows. Each row: BrightGreen+ak47+Reset | BrightCyan+title+Reset | BrightYellow+machete+Reset
 	var sb strings.Builder
 	sb.WriteString("\n")
-	for i := 0; i < maxRows; i++ {
-		sb.WriteString(telnet.BrightGreen + ak47[i] + telnet.Reset)
-		sb.WriteString(telnet.BrightCyan + title[i] + telnet.Reset)
-		sb.WriteString(telnet.BrightYellow + machete[i] + telnet.Reset)
-		sb.WriteString("\n")
+
+	// AK-47 block: each row independently colorized.
+	for _, row := range ak47 {
+		sb.WriteString(telnet.BrightGreen + row + telnet.Reset + "\n")
+	}
+
+	sb.WriteString("\n")
+
+	// Title block: Bold + BrightCyan per row. Single Reset clears both attributes.
+	for _, row := range title {
+		sb.WriteString(telnet.Bold + telnet.BrightCyan + row + telnet.Reset + "\n")
+	}
+
+	sb.WriteString("\n")
+
+	// Machete block: each row independently colorized.
+	for _, row := range machete {
+		sb.WriteString(telnet.BrightYellow + row + telnet.Reset + "\n")
 	}
 
 	sb.WriteString("\n")
