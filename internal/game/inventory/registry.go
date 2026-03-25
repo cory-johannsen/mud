@@ -8,6 +8,7 @@ type Registry struct {
 	explosives map[string]*ExplosiveDef
 	items      map[string]*ItemDef
 	armors     map[string]*ArmorDef
+	materials  map[string]*MaterialDef // key: "<material_id>:<grade_id>"
 }
 
 // NewRegistry returns an empty Registry.
@@ -19,6 +20,7 @@ func NewRegistry() *Registry {
 		explosives: make(map[string]*ExplosiveDef),
 		items:      make(map[string]*ItemDef),
 		armors:     make(map[string]*ArmorDef),
+		materials:  make(map[string]*MaterialDef),
 	}
 }
 
@@ -145,4 +147,28 @@ func (r *Registry) AllArmors() []*ArmorDef {
 		out = append(out, def)
 	}
 	return out
+}
+
+// RegisterMaterial adds a MaterialDef to the registry.
+//
+// Precondition: d must not be nil; d.AppliesTo must contain only "weapon" or "armor".
+// Postcondition: returns error on duplicate or invalid AppliesTo; nil on success.
+func (r *Registry) RegisterMaterial(d *MaterialDef) error {
+	for _, at := range d.AppliesTo {
+		if at != MaterialAppliesToWeapon && at != MaterialAppliesToArmor {
+			return fmt.Errorf("inventory: Registry.RegisterMaterial: invalid applies_to value %q for material %q", at, d.MaterialID)
+		}
+	}
+	key := d.MaterialID + ":" + d.GradeID
+	if _, exists := r.materials[key]; exists {
+		return fmt.Errorf("inventory: Registry.RegisterMaterial: material %q already registered", key)
+	}
+	r.materials[key] = d
+	return nil
+}
+
+// Material looks up a MaterialDef by material ID and grade ID.
+func (r *Registry) Material(materialID, gradeID string) (*MaterialDef, bool) {
+	d, ok := r.materials[materialID+":"+gradeID]
+	return d, ok
 }
