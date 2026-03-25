@@ -5,6 +5,7 @@ description: |
 duration_type: rounds
 max_stacks: 0
 is_mental_condition: true
+is_domination: true
 attack_penalty: 1
 ac_penalty: 0
 damage_bonus: 0

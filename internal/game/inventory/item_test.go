@@ -615,6 +615,38 @@ func TestItemDef_Validate_ActivationFields(t *testing.T) {
 	})
 }
 
+func TestItemDef_Validate_PreciousMaterial_InvalidAppliesTo(t *testing.T) {
+	d := &inventory.ItemDef{
+		ID: "x_street_grade", Name: "X", Kind: inventory.KindPreciousMaterial,
+		MaterialID: "x", GradeID: "street_grade",
+		MaterialName: "X", MaterialTier: "common",
+		AppliesTo: []string{"consumable"}, // invalid
+		MaxStack: 1,
+	}
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "applies_to")
+}
+
+func TestItemDef_Validate_PreciousMaterial_Property(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		gradeID := rapid.SampledFrom([]string{"street_grade", "mil_spec_grade", "ghost_grade"}).Draw(rt, "grade")
+		tierID := rapid.SampledFrom([]string{"common", "uncommon", "rare"}).Draw(rt, "tier")
+		appliesTo := rapid.SampledFrom([][]string{{"weapon"}, {"armor"}, {"weapon", "armor"}}).Draw(rt, "appliesTo")
+		d := &inventory.ItemDef{
+			ID: "x_" + gradeID, Name: "X", Kind: inventory.KindPreciousMaterial,
+			MaterialID: "x", GradeID: gradeID,
+			MaterialName: "X", MaterialTier: tierID,
+			AppliesTo: appliesTo,
+			MaxStack: 1,
+		}
+		err := d.Validate()
+		if err != nil {
+			rt.Fatalf("valid precious_material ItemDef failed Validate(): %v", err)
+		}
+	})
+}
+
 func TestItemDef_Validate_PreciousMaterial_Missing_Fields(t *testing.T) {
 	// Missing material_id
 	d := &inventory.ItemDef{ID: "x", Name: "X", Kind: inventory.KindPreciousMaterial}
