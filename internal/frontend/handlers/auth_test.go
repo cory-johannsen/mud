@@ -389,11 +389,8 @@ func TestBannerBoldReset(t *testing.T) {
 		}
 		after := remaining[idx+len(telnet.Bold):]
 		resetIdx := strings.Index(after, telnet.Reset)
-		assert.Greater(t, resetIdx, -1,
+		require.Greater(t, resetIdx, -1,
 			"Bold at byte offset %d must be followed by Reset", idx)
-		if resetIdx == -1 {
-			break
-		}
 		remaining = after[resetIdx+len(telnet.Reset):]
 	}
 }
