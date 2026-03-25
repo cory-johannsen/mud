@@ -181,6 +181,25 @@ func TestLoadFeats_GeneralGapFeatsPresent(t *testing.T) {
 	}
 }
 
+func TestLoadFeats_SkillGapFeats_ParkourMusclGhostingGrift(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"acrobatic_performer", "fast_crawl", "power_jump", "quick_vault", "roll_landing",
+		"kip_up", "aerial_mastery", "wall_jump", "water_run", "impossible_leap",
+		"anchor_climber", "speed_climb", "speed_swim",
+		"armored_ghost", "silent_crew", "sense_block", "speed_ghost", "terrain_vanish", "ghost_legend",
+		"concealed_activation", "careful_disarm", "shadow_mark", "rolling_lift", "speed_unlock", "master_thief",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
+
 func TestFeat_TargetTags_Loaded(t *testing.T) {
 	data := []byte(`
 feats:

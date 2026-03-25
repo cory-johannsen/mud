@@ -397,6 +397,96 @@ feats:
     activate_text: ""
     description: "Ignore unstable ground penalties; stand from prone without drawing reactions."
 
+  - id: acrobatic_performer
+    name: Acrobatic Performer
+    category: skill
+    skill: parkour
+    pf2e: acrobatic_performer
+    active: false
+    activate_text: ""
+    description: "Incorporate acrobatic stunts into parkour-based performance; use Parkour to Earn Income through physical spectacle."
+
+  - id: fast_crawl
+    name: Fast Crawl
+    category: skill
+    skill: parkour
+    pf2e: nimble_crawl
+    active: false
+    activate_text: ""
+    description: "Crawl at half speed without penalty and without triggering extra reactions from standing foes."
+
+  - id: power_jump
+    name: Power Jump
+    category: skill
+    skill: parkour
+    pf2e: powerful_leap
+    active: false
+    activate_text: ""
+    description: "Jump higher and farther; add extra feet to High Jump height and Long Jump distance."
+
+  - id: quick_vault
+    name: Quick Vault
+    category: skill
+    skill: parkour
+    pf2e: rapid_mantel
+    active: true
+    activate_text: "You grab the ledge and haul yourself up in a single fluid motion."
+    description: "Pull yourself up onto ledges and obstacles as a single action instead of two."
+
+  - id: roll_landing
+    name: Roll Landing
+    category: skill
+    skill: parkour
+    pf2e: rolling_landing
+    active: false
+    activate_text: ""
+    description: "Reduce fall damage further than Fall Breaker alone; treat falls as 25 feet shorter."
+
+  - id: kip_up
+    name: Kip Up
+    category: skill
+    skill: parkour
+    pf2e: kip_up
+    active: true
+    activate_text: "You spring to your feet without breaking stride."
+    description: "Stand up from prone as a free action once per round without triggering reactions."
+
+  - id: aerial_mastery
+    name: Aerial Mastery
+    category: skill
+    skill: parkour
+    pf2e: aerobatics_mastery
+    active: false
+    activate_text: ""
+    description: "Perform aerial maneuvers with precision; no penalty to Parkour checks while airborne."
+
+  - id: wall_jump
+    name: Wall Jump
+    category: skill
+    skill: parkour
+    pf2e: wall_jump
+    active: true
+    activate_text: "You plant your foot on the wall and launch yourself upward."
+    description: "Jump off walls to reach heights inaccessible by normal jumping."
+
+  - id: water_run
+    name: Water Run
+    category: skill
+    skill: parkour
+    pf2e: water_sprint
+    active: true
+    activate_text: "You hit the surface at full sprint and keep moving."
+    description: "Sprint across liquid surfaces for a limited number of squares before sinking."
+
+  - id: impossible_leap
+    name: Impossible Leap
+    category: skill
+    skill: parkour
+    pf2e: cloud_jump
+    active: true
+    activate_text: "You launch off nothing and somehow make it."
+    description: "Jump impossible distances — up to 120 feet horizontally or 60 feet vertically."
+
   # ── SKILL FEATS: GHOSTING ─────────────────────────────────────────────────
   - id: assurance_ghosting
     name: Steady Ghosting
@@ -425,6 +515,60 @@ feats:
     activate_text: ""
     description: "Choose one terrain type (rubble, sewer, crowd); move through it silently without a roll."
 
+  - id: armored_ghost
+    name: Armored Ghost
+    category: skill
+    skill: ghosting
+    pf2e: armored_stealth
+    active: false
+    activate_text: ""
+    description: "Reduce the Ghosting check penalty imposed by your armor; stealth-modified armor acts one category lighter."
+
+  - id: silent_crew
+    name: Silent Crew
+    category: skill
+    skill: ghosting
+    pf2e: quiet_allies
+    active: false
+    activate_text: ""
+    description: "When sneaking as a group, allies use your Ghosting modifier instead of their own."
+
+  - id: sense_block
+    name: Sense Block
+    category: skill
+    skill: ghosting
+    pf2e: foil_senses
+    active: false
+    activate_text: ""
+    description: "Take precautions against enhanced senses — thermal, audio, motion — preventing their use against you."
+
+  - id: speed_ghost
+    name: Speed Ghost
+    category: skill
+    skill: ghosting
+    pf2e: swift_sneak
+    active: false
+    activate_text: ""
+    description: "Move at full speed while sneaking without penalty."
+
+  - id: terrain_vanish
+    name: Terrain Vanish
+    category: skill
+    skill: ghosting
+    pf2e: vanish_into_the_land
+    active: true
+    activate_text: "You blend into the environment and disappear."
+    description: "Disappear into natural terrain — rubble, shadows, crowds — using Ghosting even without cover."
+
+  - id: ghost_legend
+    name: Ghost Legend
+    category: skill
+    skill: ghosting
+    pf2e: legendary_sneak
+    active: false
+    activate_text: ""
+    description: "Hide and sneak without needing cover or concealment at all."
+
   # ── SKILL FEATS: GRIFT ────────────────────────────────────────────────────
   - id: assurance_grift
     name: Steady Grift
@@ -452,6 +596,60 @@ feats:
     active: false
     activate_text: ""
     description: "Bystanders must pass a Perception check to notice a successful steal."
+
+  - id: concealed_activation
+    name: Concealed Activation
+    category: skill
+    skill: grift
+    pf2e: concealing_legerdemain
+    active: false
+    activate_text: ""
+    description: "Activate Technology items without observers noticing; hide the activation from watchful eyes."
+
+  - id: careful_disarm
+    name: Careful Disarm
+    category: skill
+    skill: grift
+    pf2e: wary_disarmament
+    active: false
+    activate_text: ""
+    description: "+2 to AC and saves against traps while you are actively disarming them."
+
+  - id: shadow_mark
+    name: Shadow Mark
+    category: skill
+    skill: grift
+    pf2e: shadow_mark
+    active: true
+    activate_text: "You tag them without them knowing."
+    description: "Mark a target for tracking or later action; you always know their general location for 24 hours."
+
+  - id: rolling_lift
+    name: Rolling Lift
+    category: skill
+    skill: grift
+    pf2e: tumbling_theft
+    active: true
+    activate_text: "You roll through their space and come up with something of theirs."
+    description: "Pick a target's pocket while Tumbling Through their space as part of the same action."
+
+  - id: speed_unlock
+    name: Speed Unlock
+    category: skill
+    skill: grift
+    pf2e: quick_unlock
+    active: true
+    activate_text: "One twist and it's open."
+    description: "Pick a lock with a single action instead of the standard time."
+
+  - id: master_thief
+    name: Master Thief
+    category: skill
+    skill: grift
+    pf2e: legendary_thief
+    active: false
+    activate_text: ""
+    description: "Steal what would normally be impossible — items worn, held, or magically secured."
 
   # ── SKILL FEATS: MUSCLE ───────────────────────────────────────────────────
   - id: assurance_muscle
@@ -507,6 +705,33 @@ feats:
     active: false
     activate_text: ""
     description: "No penalty for weapon use underwater; not flat-footed while submerged."
+
+  - id: anchor_climber
+    name: Anchor Climber
+    category: skill
+    skill: muscle
+    pf2e: lead_climber
+    active: false
+    activate_text: ""
+    description: "Secure rope lines as you climb; allies following your route gain a bonus to their Climb checks."
+
+  - id: speed_climb
+    name: Speed Climb
+    category: skill
+    skill: muscle
+    pf2e: quick_climb
+    active: false
+    activate_text: ""
+    description: "Climb at full speed rather than half speed."
+
+  - id: speed_swim
+    name: Speed Swim
+    category: skill
+    skill: muscle
+    pf2e: quick_swim
+    active: false
+    activate_text: ""
+    description: "Swim at full speed rather than half speed."
 
   # ── SKILL FEATS: TECH LORE ────────────────────────────────────────────────
   - id: assurance_tech_lore
