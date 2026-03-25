@@ -294,6 +294,90 @@ func TestWelcomeBannerContainsKeyElements(t *testing.T) {
 	assert.Contains(t, stripped, "quit")
 }
 
+// TestBannerContainsBrightCyanAsciiArt asserts that the banner contains at least 4
+// independently-colorized BrightCyan segments with non-trivial ASCII art content.
+// Each title row is wrapped with its own BrightCyan+Reset pair, so we count occurrences.
+func TestBannerContainsBrightCyanAsciiArt(t *testing.T) {
+	banner := buildWelcomeBanner()
+	// Count how many BrightCyan segments contain non-trivial content (≥3 visible chars).
+	artRows := 0
+	remaining := banner
+	for {
+		idx := strings.Index(remaining, telnet.BrightCyan)
+		if idx == -1 {
+			break
+		}
+		after := remaining[idx+len(telnet.BrightCyan):]
+		resetIdx := strings.Index(after, telnet.Reset)
+		if resetIdx == -1 {
+			break
+		}
+		segment := after[:resetIdx]
+		if len(strings.TrimSpace(segment)) >= 3 {
+			artRows++
+		}
+		remaining = after[resetIdx+len(telnet.Reset):]
+	}
+	assert.GreaterOrEqual(t, artRows, 4,
+		"banner must contain at least 4 BrightCyan segments with non-trivial ASCII art content")
+}
+
+// TestBannerContainsBrightGreen asserts that the AK-47 color code is present.
+func TestBannerContainsBrightGreen(t *testing.T) {
+	banner := buildWelcomeBanner()
+	assert.Contains(t, banner, telnet.BrightGreen, "banner must contain BrightGreen for AK-47")
+}
+
+// TestBannerContainsBrightYellow asserts that the machete color code is present.
+func TestBannerContainsBrightYellow(t *testing.T) {
+	banner := buildWelcomeBanner()
+	assert.Contains(t, banner, telnet.BrightYellow, "banner must contain BrightYellow for machete")
+}
+
+// TestBannerLineWidthMax80 asserts that every line is at most 80 visible characters.
+func TestBannerLineWidthMax80(t *testing.T) {
+	banner := buildWelcomeBanner()
+	for i, line := range strings.Split(banner, "\n") {
+		visible := telnet.StripANSI(line)
+		assert.LessOrEqual(t, len(visible), 80,
+			"line %d exceeds 80 visible chars: %q", i+1, visible)
+	}
+}
+
+// TestBannerColorReset asserts that every color code is followed by Reset
+// before the next color code or end of banner string.
+func TestBannerColorReset(t *testing.T) {
+	banner := buildWelcomeBanner()
+	colors := []string{
+		telnet.BrightGreen,
+		telnet.BrightCyan,
+		telnet.BrightYellow,
+	}
+	for _, color := range colors {
+		start := 0
+		for {
+			idx := strings.Index(banner[start:], color)
+			if idx == -1 {
+				break
+			}
+			abs := start + idx
+			after := banner[abs+len(color):]
+			resetIdx := strings.Index(after, telnet.Reset)
+			require.Greater(t, resetIdx, -1,
+				"color code %q at position %d must be followed by Reset", color, abs)
+			// No other color code should appear before the Reset.
+			for _, other := range colors {
+				otherIdx := strings.Index(after, other)
+				if otherIdx != -1 {
+					assert.True(t, otherIdx == -1 || otherIdx > resetIdx,
+						"color %q appears before Reset after color %q", other, color)
+				}
+			}
+			start = abs + len(color)
+		}
+	}
+}
+
 func TestHandleSession_Quit(t *testing.T) {
 	store := newMockAccountStore()
 	handler := newAuthHandler(t, store, "127.0.0.1:50051")
