@@ -88,6 +88,278 @@ feats:
     activate_text: "You pick your way through the debris with practiced ease."
     description: "Step into difficult terrain (rubble, debris) as normal movement."
 
+  - id: adopted_culture
+    name: Adopted Culture
+    category: general
+    pf2e: adopted_ancestry
+    active: false
+    activate_text: ""
+    description: "You were raised in a different region's culture; gain access to that region's cultural feats."
+
+  - id: loyal_companion
+    name: Loyal Companion
+    category: general
+    pf2e: pet
+    active: false
+    activate_text: ""
+    description: "You have a loyal pet animal or drone that follows your commands and accompanies you."
+
+  - id: vehicle_operator
+    name: Vehicle Operator
+    category: general
+    pf2e: ride
+    active: false
+    activate_text: ""
+    description: "Auto-succeed at routine vehicle operation checks; treat vehicles as responsive mounts."
+
+  - id: parallel_lives
+    name: Parallel Lives
+    category: general
+    pf2e: different_worlds
+    active: false
+    activate_text: ""
+    description: "Experience from diverse backgrounds grants versatility; you adapt quickly to new social contexts."
+
+  - id: speedrun_strats
+    name: Speedrun Strats
+    category: general
+    pf2e: speedrun_strats
+    active: false
+    activate_text: ""
+    description: "You have optimized movement routes through familiar areas, reducing travel time and action cost."
+
+  - id: cornered_beast
+    name: Cornered Beast
+    category: general
+    pf2e: ravening's_desperation
+    active: false
+    activate_text: ""
+    description: "When you are dying or have fewer than half your maximum HP, you gain a +1 bonus to attack rolls."
+
+  - id: cultural_roots
+    name: Cultural Roots
+    category: general
+    pf2e: ancestral_paragon
+    active: false
+    activate_text: ""
+    description: "Your deep cultural roots give you access to one additional 1st-level regional feat."
+
+  - id: contingency_stash
+    name: Contingency Stash
+    category: general
+    pf2e: prescient_planner
+    active: false
+    activate_text: ""
+    description: "You always seem to have the right gear; once per day procure a needed common item from a hidden stash."
+
+  - id: street_improvisation
+    name: Street Improvisation
+    category: general
+    pf2e: untrained_improvisation
+    active: false
+    activate_text: ""
+    description: "You are better than most at winging it; reduce the penalty for untrained skill checks."
+
+  - id: field_repair
+    name: Field Repair
+    category: general
+    pf2e: improvised_repair
+    active: false
+    activate_text: ""
+    description: "Repair damaged equipment without proper tools using improvised materials found nearby."
+
+  - id: crew_boss
+    name: Crew Boss
+    category: general
+    pf2e: hireling_manager
+    active: false
+    activate_text: ""
+    description: "You manage hirelings effectively; increase their productivity and loyalty."
+
+  - id: hardened_constitution
+    name: Hardened Constitution
+    category: general
+    pf2e: robust_health
+    active: false
+    activate_text: ""
+    description: "Your body resists disease and poison; reduce the severity of afflictions that affect you."
+
+  - id: steel_your_resolve
+    name: Steel Your Resolve
+    category: general
+    pf2e: steel_your_resolve
+    active: false
+    activate_text: ""
+    description: "Once per day, remove a mental condition (frightened, stunned, confused) through sheer will."
+
+  - id: push_the_pace
+    name: Push the Pace
+    category: general
+    pf2e: pick_up_the_pace
+    active: false
+    activate_text: ""
+    description: "When traveling with a group, increase the group's overland travel speed."
+
+  - id: methodical_sweep
+    name: Methodical Sweep
+    category: general
+    pf2e: thorough_search
+    active: false
+    activate_text: ""
+    description: "When you Search, find everything others miss; never fail to detect hidden objects in your area."
+
+  - id: sharp_follower
+    name: Sharp Follower
+    category: general
+    pf2e: keen_follower
+    active: false
+    activate_text: ""
+    description: "When following an expert's lead, you gain a bonus to the same checks they excel at."
+
+  - id: skitter
+    name: Skitter
+    category: general
+    pf2e: skitter
+    active: false
+    activate_text: ""
+    description: "Move through small spaces and narrow gaps quickly without slowing or going prone."
+
+  - id: street_eye
+    name: Street Eye
+    category: general
+    pf2e: eye_of_the_arclords
+    active: false
+    activate_text: ""
+    description: "Spot hidden surveillance tech, concealed weapons, and disguised operatives others miss."
+
+  - id: neural_crossover
+    name: Neural Crossover
+    category: general
+    pf2e: kreighton's_cognitive_crossover
+    active: false
+    activate_text: ""
+    description: "Apply knowledge from one tech discipline to another; use Tech Lore for one other knowledge skill."
+
+  - id: district_adept
+    name: District Adept
+    category: general
+    pf2e: pei_zing_adept
+    active: false
+    activate_text: ""
+    description: "Deep expertise in a specific zone district; gain +2 to all skill checks in your home district."
+
+  - id: ghost_step
+    name: Ghost Step
+    category: general
+    pf2e: fane's_escape
+    active: false
+    activate_text: ""
+    description: "Once per day, escape an impossible situation through sheer will and quick thinking."
+
+  - id: efficient_sweep
+    name: Efficient Sweep
+    category: general
+    pf2e: expeditious_search
+    active: false
+    activate_text: ""
+    description: "Search areas at twice normal speed without sacrificing thoroughness."
+
+  - id: contingency_consumable
+    name: Contingency Consumable
+    category: general
+    pf2e: prescient_consumable
+    active: false
+    activate_text: ""
+    description: "Once per day, produce a needed common consumable item from a concealed stash. Requires contingency_stash."
+
+  - id: vital_sense
+    name: Vital Sense
+    category: general
+    pf2e: bloodsense
+    active: false
+    activate_text: ""
+    description: "Detect wounded creatures within 30 feet by their heat signature and blood loss."
+
+  - id: death_proof
+    name: Death Proof
+    category: general
+    pf2e: numb_to_death
+    active: false
+    activate_text: ""
+    description: "Once per day, ignore one effect that would kill you outright, surviving at 1 HP instead."
+
+  - id: chemical_palate
+    name: Chemical Palate
+    category: general
+    pf2e: supertaster
+    active: false
+    activate_text: ""
+    description: "Detect drug compounds, poisons, and toxins by taste or scent with extraordinary precision."
+
+  - id: zone_sense
+    name: Zone Sense
+    category: general
+    pf2e: axuma's_awakening
+    active: false
+    activate_text: ""
+    description: "Sense danger zone transitions, environmental hazards, and radiation levels within 60 feet."
+
+  - id: combat_vigor
+    name: Combat Vigor
+    category: general
+    pf2e: axuma's_vigor
+    active: false
+    activate_text: ""
+    description: "Regain a small amount of vitality during sustained combat; recover HP equal to your Grit modifier once per combat."
+
+  - id: tech_overload_capacity
+    name: Tech Overload Capacity
+    category: general
+    pf2e: incredible_investiture
+    active: false
+    activate_text: ""
+    description: "Invest one additional Technology item beyond your normal limit."
+
+  - id: scout_mastery
+    name: Scout Mastery
+    category: general
+    pf2e: incredible_scout
+    active: false
+    activate_text: ""
+    description: "Gain a bonus to initiative and to Scavenging checks made while Scouting."
+
+  - id: local_everywhere
+    name: Local Everywhere
+    category: general
+    pf2e: a_home_in_every_port
+    active: false
+    activate_text: ""
+    description: "You have connections in every zone; always find a place to rest and a contact to call on."
+
+  - id: blood_will
+    name: Blood Will
+    category: general
+    pf2e: sanguine_tenacity
+    active: false
+    activate_text: ""
+    description: "Continue fighting past injuries that would fell others; reduce dying value by 1 when downed."
+
+  - id: crew_leader
+    name: Crew Leader
+    category: general
+    pf2e: caravan_leader
+    active: false
+    activate_text: ""
+    description: "Lead groups of up to 10 effectively; allies under your leadership gain +1 to group checks."
+
+  - id: true_perception
+    name: True Perception
+    category: general
+    pf2e: true_perception
+    active: false
+    activate_text: ""
+    description: "Automatically detect hidden, invisible, or concealed threats in your vicinity."
+
   # ── SKILL FEATS: PARKOUR ──────────────────────────────────────────────────
   - id: assurance_parkour
     name: Steady Parkour

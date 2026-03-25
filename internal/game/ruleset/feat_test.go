@@ -159,6 +159,28 @@ feats:
 	assert.True(t, feats[0].AllowNPC)
 }
 
+func TestLoadFeats_GeneralGapFeatsPresent(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"adopted_culture", "loyal_companion", "vehicle_operator", "parallel_lives",
+		"speedrun_strats", "cornered_beast", "cultural_roots", "contingency_stash",
+		"street_improvisation", "field_repair", "crew_boss", "hardened_constitution",
+		"steel_your_resolve", "push_the_pace", "methodical_sweep", "sharp_follower",
+		"skitter", "street_eye", "neural_crossover", "district_adept", "ghost_step",
+		"efficient_sweep", "contingency_consumable", "vital_sense", "death_proof",
+		"chemical_palate", "zone_sense", "combat_vigor", "tech_overload_capacity",
+		"scout_mastery", "local_everywhere", "blood_will", "crew_leader", "true_perception",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing general feat: %s", id)
+	}
+}
+
 func TestFeat_TargetTags_Loaded(t *testing.T) {
 	data := []byte(`
 feats:
