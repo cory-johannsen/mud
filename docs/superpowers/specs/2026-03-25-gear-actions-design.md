@@ -19,9 +19,9 @@ Gear Actions implement the two remaining PF2E gear-category actions: **Repair** 
 
 ### 1.1 Item Kind
 
-A new item kind `precious_material` is added to `ItemDef.Kind`. It MUST be added to the `validKinds` map in `internal/game/inventory/item.go` so that startup validation accepts precious material YAML files.
+A new item kind `precious_material` is added to `ItemDef.Kind`. It MUST be added to the `validKinds` map in `internal/game/inventory/item.go` so that startup validation accepts precious material YAML files. The `Validate()` error message for an invalid kind MUST be updated to include `precious_material` in the listed valid kinds.
 
-Precious material items are carried in the backpack and consumed (or returned on critical success) when affixed.
+Precious material items are carried in the backpack and consumed (or returned on critical success) when affixed. They are non-stackable (`Stackable: false`, `MaxStack: 1`).
 
 Each material exists at three grades. Each grade is a separate `ItemDef` with a distinct ID:
 
@@ -43,7 +43,7 @@ Example: `carbide_alloy_street_grade`, `carbide_alloy_mil_spec_grade`, `carbide_
 
 ### 1.3 Material Registry
 
-Fifteen materials are the canonical required set. Startup validation MUST check that all 45 YAML files (15 materials × 3 grades) exist in `content/items/precious_materials/`. A missing file MUST be a fatal load error.
+Fifteen materials are the canonical required set. Startup validation MUST check that all 45 YAML files (15 materials × 3 grades) exist in `content/items/precious_materials/`. A missing file MUST be a fatal load error. The required material IDs are hardcoded in the loader (same pattern as `requiredConsumableIDs`).
 
 | Gunchete Name | PF2E Source | Tier | ID | Applies To |
 |---|---|---|---|---|
@@ -63,17 +63,36 @@ Fifteen materials are the canonical required set. Startup validation MUST check 
 | Shadow Plate | Sisterstone (Dusk) | Rare | `shadow_plate` | weapon |
 | Radiance Plate | Sisterstone (Dawn) | Rare | `radiance_plate` | weapon |
 
-The `Applies To` column is enforced at affix time (see REQ-GA-10).
+The `Applies To` column is enforced at affix time (see REQ-GA-12).
 
-### 1.4 ItemDef additions
+### 1.4 ItemDef Additions
 
 ```go
 const KindPreciousMaterial = "precious_material"
 
 // Added to ItemDef:
-MaterialID string `yaml:"material_id,omitempty"` // set when Kind == KindPreciousMaterial
-GradeID    string `yaml:"grade_id,omitempty"`    // "street_grade" | "mil_spec_grade" | "ghost_grade"
+MaterialID string `yaml:"material_id,omitempty"` // required when Kind == KindPreciousMaterial
+GradeID    string `yaml:"grade_id,omitempty"`    // required when Kind == KindPreciousMaterial; one of the three grade IDs
 ```
+
+`ItemDef.Validate()` MUST require non-empty `MaterialID` and `GradeID` when `Kind == KindPreciousMaterial`, and MUST return an error if either is missing or if `GradeID` is not one of `street_grade`, `mil_spec_grade`, `ghost_grade`.
+
+### 1.5 MaterialDef and Registry Extension
+
+`ApplyMaterialEffects` requires material effect definitions at runtime. The existing `inventory.Registry` is extended with a `materials` map:
+
+```go
+// MaterialDef holds the static definition of one material at one grade.
+type MaterialDef struct {
+    MaterialID string // e.g. "carbide_alloy"
+    GradeID    string // "street_grade" | "mil_spec_grade" | "ghost_grade"
+    Tier       string // "common" | "uncommon" | "rare"
+    AppliesTo  []string // "weapon" | "armor"
+}
+```
+
+- REQ-GA-1: `Registry` MUST gain `RegisterMaterial(d *MaterialDef) error` and `Material(materialID, gradeID string) (*MaterialDef, bool)` methods, following the existing `RegisterItem`/`Item` pattern.
+- REQ-GA-2: All 45 `MaterialDef` entries MUST be registered at startup from the YAML files in `content/items/precious_materials/`.
 
 ---
 
@@ -89,16 +108,31 @@ GradeID    string `yaml:"grade_id,omitempty"`    // "street_grade" | "mil_spec_g
 | Black Market | 3 |
 | Ghost | 4 |
 
-- REQ-GA-1: `WeaponDef` and `ArmorDef` MUST gain `UpgradeSlots int` tagged `yaml:"-"`. The loader MUST derive its value from `RarityDef.FeatureSlots` after the `Rarity` field is resolved, following the same pattern as `RarityStatMultiplier`.
-- REQ-GA-2: `ItemInstance` MUST gain `AffixedMaterials []string`. Each entry is formatted `"<material_id>:<grade_id>"` (e.g., `"carbide_alloy:mil_spec_grade"`).
-- REQ-GA-3: `EquippedWeapon` MUST gain `AffixedMaterials []string`. `SlottedItem` MUST gain `AffixedMaterials []string`. These are cached copies populated from the corresponding `ItemInstance.AffixedMaterials` at equip time and at session load time, following the same caching pattern used for `Durability` and `Modifier`.
-- REQ-GA-4: The same material ID MUST NOT be affixed twice on the same item instance regardless of grade. Attempting to do so MUST fail with: `"<item name> already has <material name> affixed."`
-- REQ-GA-5: `len(AffixedMaterials)` MUST NOT exceed `UpgradeSlots`. Attempting to affix when no slots remain MUST fail with: `"<item name> has no upgrade slots remaining."`
-- REQ-GA-6: When a host item is destroyed (via `DeductDurability` returning `Destroyed: true`), all affixed materials on that item are permanently lost. No recovery is attempted. The player MUST receive the standard destruction message (REQ-EM-10) only; no additional message for lost materials is required.
+- REQ-GA-3: `WeaponDef` and `ArmorDef` MUST gain `UpgradeSlots int` tagged `yaml:"-"`. The loader MUST derive its value from `RarityDef.FeatureSlots` after the `Rarity` field is resolved, following the same pattern as `RarityStatMultiplier`.
+- REQ-GA-4: `ItemInstance` (defined in `internal/game/inventory/backpack.go`) MUST gain `AffixedMaterials []string`. Each entry is formatted `"<material_id>:<grade_id>"` (e.g., `"carbide_alloy:mil_spec_grade"`). `DeductDurability` in `durability.go` requires no changes — on destruction the caller removes the item, and `AffixedMaterials` is permanently lost with it (REQ-GA-6).
+- REQ-GA-5: `EquippedWeapon` (in `preset.go`) MUST gain `AffixedMaterials []string`. `SlottedItem` (in `equipment.go`) MUST gain `AffixedMaterials []string`. These are cached copies from `ItemInstance.AffixedMaterials`, populated at the same point that `Durability` and `Modifier` are copied: in `newEquippedWeapon` for weapons and in the armor wear path that constructs `SlottedItem`. Both paths MUST copy `AffixedMaterials` from the corresponding `ItemInstance` record.
+- REQ-GA-6: When a host item is destroyed (`DeductDurability` returns `Destroyed: true`), all affixed materials are permanently lost. The player receives the standard REQ-EM-10 destruction message only; no additional message for lost materials is required.
+- REQ-GA-7: The same material ID MUST NOT be affixed twice on the same item instance regardless of grade. Attempting to do so MUST fail with: `"<item name> already has <material name> affixed."`
+- REQ-GA-8: `len(AffixedMaterials)` MUST NOT exceed `UpgradeSlots`. Attempting to affix when no slots remain MUST fail with: `"<item name> has no upgrade slots remaining."`
 
 ---
 
 ## 3. Crafting DCs
+
+```go
+// DC constants — immutable game constants, not loaded from YAML.
+const (
+    DCCommonStreetGrade    = 16
+    DCCommonMilSpecGrade   = 21
+    DCCommonGhostGrade     = 26
+    DCUncommonStreetGrade  = 18
+    DCUncommonMilSpecGrade = 23
+    DCUncommonGhostGrade   = 28
+    DCRareStreetGrade      = 20
+    DCRareMilSpecGrade     = 25
+    DCRareGhostGrade       = 30
+)
+```
 
 | Material Tier | Street Grade DC | Mil-Spec Grade DC | Ghost Grade DC |
 |---|---|---|---|
@@ -106,7 +140,7 @@ GradeID    string `yaml:"grade_id,omitempty"`    // "street_grade" | "mil_spec_g
 | Uncommon | 18 | 23 | 28 |
 | Rare | 20 | 25 | 30 |
 
-- REQ-GA-7: Crafting check DCs MUST match Section 3 constants. These are immutable game constants, not loaded from YAML.
+- REQ-GA-9: Crafting check DCs MUST match the constants above. These MUST be defined as named constants in `internal/game/inventory/material.go`.
 
 ---
 
@@ -125,52 +159,53 @@ affix <material_item> <target_item>
 
 All preconditions are checked in order before the Crafting roll is made. Any failure returns immediately.
 
-- REQ-GA-8: `affix` MUST be rejected in combat with: `"You cannot affix materials during combat."`
-- REQ-GA-9: `affix` MUST fail if the material item is not found in the player's backpack with: `"You don't have <material name> in your pack."`
-- REQ-GA-10: `affix` MUST fail if the target item is not found in equipped weapon or armor slots with: `"<target> is not equipped."`
-- REQ-GA-11: `affix` MUST fail if the target item is broken (`Durability == 0`) with: `"You cannot affix materials to broken equipment. Repair it first."`
-- REQ-GA-12: `affix` MUST fail if the material's `Applies To` restriction (Section 1.3) does not include the target item's slot type (weapon vs armor) with: `"<material name> cannot be affixed to armor."` or `"<material name> cannot be affixed to weapons."` as appropriate.
-- REQ-GA-13: REQ-GA-4 (duplicate material check) and REQ-GA-5 (slot count check) MUST be applied before the Crafting roll.
+- REQ-GA-10: `affix` MUST be rejected in combat with: `"You cannot affix materials during combat."`
+- REQ-GA-11: `affix` MUST fail if the material item is not found in the player's backpack with: `"You don't have <material name> in your pack."`
+- REQ-GA-12: `affix` MUST fail if the target item is not found in equipped weapon or armor slots with: `"<target> is not equipped."`
+- REQ-GA-13: `affix` MUST fail if the target item is broken (`Durability == 0`) with: `"You cannot affix materials to broken equipment. Repair it first."`
+- REQ-GA-14: `affix` MUST fail if the material's `Applies To` restriction (Section 1.3) does not include the target item's slot type (weapon vs armor) with: `"<material name> cannot be affixed to armor."` or `"<material name> cannot be affixed to weapons."` as appropriate.
+- REQ-GA-15: REQ-GA-7 (duplicate material check) and REQ-GA-8 (slot count check) MUST be applied before the Crafting roll.
 
 ### 4.3 Crafting Check
 
-- REQ-GA-14: The Crafting check total is computed as:
+- REQ-GA-16: The Crafting check total is computed as:
 
   ```
   total = d20 + Abilities.Modifier(Abilities.Reasoning) + skillcheck.ProficiencyBonus(Skills["crafting"])
   ```
 
-  where `Abilities` is `PlayerSession.Abilities` and `Skills["crafting"]` is the character's crafting proficiency rank from `PlayerSession.Skills`.
+  where `Abilities` is `PlayerSession.Abilities` (`character.AbilityScores`) and `Skills["crafting"]` is the character's crafting proficiency rank from `PlayerSession.Skills`.
 
-- REQ-GA-15: The outcome is determined by `skillcheck.OutcomeFor(total, dc)` where `dc` is the grade DC from Section 3.
+- REQ-GA-17: The outcome is determined by `skillcheck.OutcomeFor(total, dc)` where `dc` is the grade DC constant from Section 3.
 
 ### 4.4 Resolution
 
-- REQ-GA-16: **Critical success** (`total >= dc + 10`): material is affixed, 1 upgrade slot is consumed, material item is returned to the player's backpack (not consumed). Message: `"Exceptional work. <material name> affixed to <item name> — material returned intact."`
-- REQ-GA-17: **Success** (`dc <= total < dc + 10`): material is affixed, 1 upgrade slot is consumed, material item is consumed from backpack. Message: `"<material name> affixed to <item name>."`
-- REQ-GA-18: **Failure** (`dc - 10 <= total < dc`): nothing changes, material is not consumed. Message: `"Your hands slip. The material is undamaged but the affix fails."`
-- REQ-GA-19: **Critical failure** (`total < dc - 10`): material item is destroyed (removed from backpack), slot is not consumed. Message: `"You ruin the material. <material name> is destroyed."`
+- REQ-GA-18: **Critical success** (`total >= dc + 10`): material is affixed, 1 upgrade slot is consumed, material item is returned to the player's backpack (not consumed). Message: `"Exceptional work. <material name> affixed to <item name> — material returned intact."`
+- REQ-GA-19: **Success** (`dc <= total < dc + 10`): material is affixed, 1 upgrade slot is consumed, material item is consumed from backpack. Message: `"<material name> affixed to <item name>."`
+- REQ-GA-20: **Failure** (`dc - 10 <= total < dc`): nothing changes, material is not consumed. Message: `"Your hands slip. The material is undamaged but the affix fails."`
+- REQ-GA-21: **Critical failure** (`total < dc - 10`): material item is destroyed (removed from backpack), slot is not consumed. Message: `"You ruin the material. <material name> is destroyed."`
 
 ### 4.5 Display
 
-- REQ-GA-20: `inventory` and `loadout` output MUST show affixed materials as a sub-list under the item with used/total slot count:
+- REQ-GA-22: `inventory` and `loadout` output MUST show affixed materials as a sub-list under the item with used/total slot count:
   ```
   Mil-Spec Pistol [2/3 slots]
     ↳ Carbide Alloy (Street Grade)
     ↳ Hollow Point (Mil-Spec Grade)
   ```
-- REQ-GA-21: Items with 0 upgrade slots (Salvage rarity) MUST NOT show slot indicators.
+- REQ-GA-23: Items with 0 upgrade slots (Salvage rarity) MUST NOT show slot indicators.
+- REQ-GA-24: The `examine` command (which targets room objects and NPCs) is explicitly out of scope for affix display. Only `inventory` and `loadout` are required to show affix information.
 
 ---
 
 ## 5. Material Effects
 
-Effects are applied at combat resolution time alongside rarity multipliers and modifiers. All effect functions MUST be pure — no side effects, no DB writes. Armor-only effects are marked *(armor)*; weapon-only effects are unmarked.
+### 5.1 Per-Hit Effects (Pure)
 
-### 5.1 Types
+Per-hit effects are resolved via a pure function. Armor-only effects are marked *(armor)*; weapon-only effects are unmarked.
 
 ```go
-// AttackContext carries the per-hit context needed to evaluate material effects.
+// AttackContext carries the per-hit context needed to evaluate per-hit material effects.
 type AttackContext struct {
     TargetIsCyberAugmented bool
     TargetIsSupernatural   bool
@@ -181,33 +216,59 @@ type AttackContext struct {
     IsFirstHitThisCombat   bool // used by Ghost Steel street grade
 }
 
-// MaterialEffectResult holds all effect values produced by ApplyMaterialEffects.
+// MaterialEffectResult holds all per-hit effect values produced by ApplyMaterialEffects.
 // Callers aggregate results across all affixed materials before applying.
 type MaterialEffectResult struct {
-    DamageBonus            int
-    PersistentFireDmg      int
-    PersistentColdDmg      int
-    PersistentRadDmg       int
-    PersistentBleedDmg     int
-    CarrierRadDmgPerHour   int
-    TargetLosesAP          int  // AP penalty applied to target for 1 round
-    TargetSpeedPenalty     int  // feet reduction for 1 round
-    TargetFlatFooted       bool // 1 round
-    TargetDazzled          bool // until next turn
-    TargetBlinded          bool // 1 round
-    TargetSlowed           bool // 1 round
-    SuppressRegeneration   bool // 1 round
-    IgnoreMetalArmorAC     bool
-    IgnoreAllArmorAC       bool
-    // Save bonuses and FP effects are applied outside combat resolution;
-    // they are tracked on PlayerSession and evaluated at check/spend time.
+    DamageBonus          int
+    PersistentFireDmg    int
+    PersistentColdDmg    int
+    PersistentRadDmg     int
+    PersistentBleedDmg   int
+    CarrierRadDmgPerHour int
+    TargetLosesAP        int  // AP penalty applied to target for 1 round
+    TargetSpeedPenalty   int  // feet reduction for 1 round
+    TargetFlatFooted     bool // 1 round
+    TargetDazzled        bool // until next turn
+    TargetBlinded        bool // 1 round
+    TargetSlowed         bool // 1 round
+    SuppressRegeneration bool // 1 round
+    IgnoreMetalArmorAC   bool
+    IgnoreAllArmorAC     bool
 }
 ```
 
-- REQ-GA-22: `ApplyMaterialEffects(affixed []string, ctx AttackContext, reg *Registry) MaterialEffectResult` MUST be the single entry point for resolving all affixed material effects. It iterates `affixed`, looks up each material+grade definition, and accumulates a `MaterialEffectResult`. It MUST be a pure function in `internal/game/inventory/material.go`.
-- REQ-GA-23: Bulk reduction from Polymer Frame MUST be floored at 0 — bulk MUST NOT go negative.
+- REQ-GA-25: `ApplyMaterialEffects(affixed []string, ctx AttackContext, reg *Registry) MaterialEffectResult` MUST be a pure function in `internal/game/inventory/material.go`. It iterates `affixed`, looks up each material+grade via `reg.Material(materialID, gradeID)`, and accumulates a `MaterialEffectResult`. It covers all per-hit effects. Stateful effects (Section 5.2) are NOT handled here.
 
-### 5.2 Common Materials
+### 5.2 Stateful Effects (Session-Tracked)
+
+Several materials have once-per-combat or N-per-day effects that require session state. These are NOT part of `MaterialEffectResult` and are NOT handled by `ApplyMaterialEffects`.
+
+```go
+// MaterialSessionState tracks per-combat and per-day usage of stateful material effects.
+// Stored on PlayerSession as MaterialState MaterialSessionState.
+type MaterialSessionState struct {
+    // CombatUsed is the set of "<material_id>:<grade_id>" keys whose once-per-combat
+    // effect has been used in the current combat. Reset at combat end.
+    CombatUsed map[string]bool
+    // DailyUsed maps "<material_id>:<grade_id>" to the number of times
+    // the once-per-day / N-per-day effect has been used today. Reset at daily rollover.
+    DailyUsed map[string]int
+}
+```
+
+- REQ-GA-26: `PlayerSession` MUST gain `MaterialState MaterialSessionState`. `CombatUsed` MUST be reset (set to empty map) at combat end. `DailyUsed` MUST be reset at the daily calendar rollover (same hook as Focus Point refresh).
+- REQ-GA-27: The following materials have stateful effects consumed via `MaterialSessionState`:
+  - **Quantum Alloy** (all grades): once-per-combat reroll. Key: `"quantum_alloy:<grade>"`. The command handler checks `MaterialState.CombatUsed` before granting the reroll, then marks it used.
+  - **Null-Weave ghost grade**: once-per-combat reflect. Key: `"null_weave:ghost_grade"`.
+  - **Neural Gel** (all grades): N-per-day FP cost reduction (1/2/3 per day for street/mil-spec/ghost). Key: `"neural_gel:<grade>"`. The FP spend handler checks `DailyUsed[key] < maxUses` before applying the discount, then increments.
+  - **Soul-Guard Alloy ghost grade**: once-per-day domination negation. Key: `"soul_guard_alloy:ghost_grade"`.
+- REQ-GA-28: `MaterialSessionState` is in-memory only — it is NOT persisted to the database. State resets naturally on server restart (combat state) and at daily rollover (daily state).
+
+### 5.3 Carbide Alloy MaxDurability
+
+Carbide Alloy adds `+N MaxDurability` to weapons at affix time. This bonus is applied persistently: `ItemInstance.MaxDurability` is updated in the database when the material is successfully affixed. The bonus is not recomputed at load time.
+
+### 5.4 Common Materials
 
 #### Scrap Iron — disrupts cyber-augmented enemies
 
@@ -225,15 +286,15 @@ type MaterialEffectResult struct {
 | Mil-Spec Grade | +2 damage vs supernatural; persistent bleed 1 on hit |
 | Ghost Grade | +4 damage vs supernatural; suppresses target regeneration for 1 round |
 
-### 5.3 Uncommon Materials
+### 5.5 Uncommon Materials
 
 #### Carbide Alloy — extreme hardness
 
 | Grade | Weapon Effect | Armor Effect |
 |---|---|---|
-| Street Grade | +2 MaxDurability | *(armor)* +1 Hardness |
-| Mil-Spec Grade | +4 MaxDurability; ignore target Hardness ≤ 5 | *(armor)* +2 Hardness |
-| Ghost Grade | +6 MaxDurability; ignore target Hardness ≤ 10 | *(armor)* +3 Hardness |
+| Street Grade | +2 MaxDurability (persistent) | *(armor)* +1 Hardness |
+| Mil-Spec Grade | +4 MaxDurability (persistent); ignore target Hardness ≤ 5 | *(armor)* +2 Hardness |
+| Ghost Grade | +6 MaxDurability (persistent); ignore target Hardness ≤ 10 | *(armor)* +3 Hardness |
 
 #### Carbon Weave — lightweight composite *(armor only)*
 
@@ -244,6 +305,8 @@ type MaterialEffectResult struct {
 | Ghost Grade | No check penalty, +10 ft speed |
 
 #### Polymer Frame — undetectable lightweight polymer
+
+- REQ-GA-29: Bulk reduction from Polymer Frame MUST be floored at 0 — bulk MUST NOT go negative.
 
 | Grade | Effect |
 |---|---|
@@ -267,9 +330,9 @@ type MaterialEffectResult struct {
 | Mil-Spec Grade | Persistent cold 2 on hit; target −5 ft speed for 1 round |
 | Ghost Grade | Persistent cold 4 on hit; target gains slowed for 1 round |
 
-### 5.4 Rare Materials
+### 5.6 Rare Materials
 
-#### Quantum Alloy — time-reactive metal
+#### Quantum Alloy — time-reactive metal *(stateful, see Section 5.2)*
 
 | Grade | Effect |
 |---|---|
@@ -285,7 +348,7 @@ type MaterialEffectResult struct {
 | Mil-Spec Grade | Persistent radiation 2 on hit; carrier takes 2 radiation damage/hour; *(armor)* +1 AC vs energy attacks |
 | Ghost Grade | Persistent radiation 4 on hit; inflicts irradiated condition (1 round); carrier takes 3 radiation damage/hour |
 
-#### Neural Gel — neuro-conductive liquid metal
+#### Neural Gel — neuro-conductive liquid metal *(stateful, see Section 5.2)*
 
 | Grade | Effect |
 |---|---|
@@ -301,7 +364,7 @@ type MaterialEffectResult struct {
 | Mil-Spec Grade | Ignore metal armor AC bonus on every hit; +1 damage |
 | Ghost Grade | Ignore all armor AC bonuses; +2 damage; once per combat make a touch attack |
 
-#### Null-Weave — anti-tech composite
+#### Null-Weave — anti-tech composite *(ghost grade stateful, see Section 5.2)*
 
 | Grade | Effect |
 |---|---|
@@ -309,7 +372,7 @@ type MaterialEffectResult struct {
 | Mil-Spec Grade | +2 to saves vs technology effects; immune to 1 tech-applied condition per combat |
 | Ghost Grade | +3 to saves vs technology effects; once per combat reflect a technology attack back at attacker (50% chance) |
 
-#### Soul-Guard Alloy — resists mental domination *(armor only)*
+#### Soul-Guard Alloy — resists mental domination *(armor only; ghost grade stateful, see Section 5.2)*
 
 | Grade | Effect |
 |---|---|
@@ -342,6 +405,8 @@ type MaterialEffectResult struct {
 ```go
 const KindPreciousMaterial = "precious_material"
 // validKinds must include KindPreciousMaterial.
+// Validate() error message must include "precious_material" in the kind list.
+// Validate() must require non-empty MaterialID and GradeID when Kind == KindPreciousMaterial.
 
 // Added to ItemDef:
 MaterialID string `yaml:"material_id,omitempty"`
@@ -366,27 +431,32 @@ AffixedMaterials []string // each entry: "<material_id>:<grade_id>"
 
 ```go
 // Added to EquippedWeapon:
-AffixedMaterials []string // cached copy from ItemInstance; populated at equip/load time
+AffixedMaterials []string // cached copy; set in newEquippedWeapon from ItemInstance
 ```
 
 ### 6.5 SlottedItem (`internal/game/inventory/equipment.go`)
 
 ```go
 // Added to SlottedItem:
-AffixedMaterials []string // cached copy from ItemInstance; populated at equip/load time
+AffixedMaterials []string // cached copy; set in armor wear path from ItemInstance
 ```
 
-### 6.6 AffixSession (`internal/game/command/affix.go`)
+### 6.6 PlayerSession
 
-`AffixSession` follows the same struct-wrapper pattern as `RepairSession` — it wraps `*session.PlayerSession` so callers do not need a separate type in tests:
+```go
+// Added to PlayerSession:
+MaterialState inventory.MaterialSessionState
+```
+
+### 6.7 AffixSession (`internal/game/command/affix.go`)
+
+`AffixSession` follows the exact same struct-wrapper pattern as `RepairSession` in `repair.go`:
 
 ```go
 type AffixSession struct {
     Session *session.PlayerSession
 }
 ```
-
-`HandleAffix` takes `*AffixSession` and MUST NOT import `internal/game/session` for anything beyond the struct field.
 
 ---
 
@@ -415,14 +485,14 @@ ALTER TABLE character_equipment            DROP COLUMN affixed_materials;
 ALTER TABLE character_weapon_presets       DROP COLUMN affixed_materials;
 ```
 
-`character_weapon_presets` stores per-instance weapon state (including `Durability` and `Modifier`) that is copied into `EquippedWeapon` at load time. `AffixedMaterials` is instance-level state and follows the same pattern.
+`character_weapon_presets` stores per-instance weapon state (including `Durability` and `Modifier`) copied into `EquippedWeapon` at load time. `AffixedMaterials` follows the same pattern.
 
 ---
 
 ## 8. Architecture
 
-- REQ-GA-24: `HandleAffix` MUST be implemented in `internal/game/command/affix.go`. It uses `AffixSession` (Section 6.6) and MUST NOT import `internal/game/session` directly.
-- REQ-GA-25: `ApplyMaterialEffects` MUST be a pure function in `internal/game/inventory/material.go`. No DB writes, no side effects.
-- REQ-GA-26: Material YAML files MUST be loaded from `content/items/precious_materials/`. Missing files for any of the 45 required material+grade combinations MUST be a fatal load error.
-- REQ-GA-27: `KindPreciousMaterial` MUST be added to `validKinds` in `internal/game/inventory/item.go` before any precious material YAML is loaded.
-- REQ-GA-28: TDD with property-based tests MUST be used for all new code per SWENG-5/5a.
+- REQ-GA-30: `HandleAffix` MUST be implemented in `internal/game/command/affix.go` using the `AffixSession` struct wrapper (Section 6.7).
+- REQ-GA-31: `ApplyMaterialEffects` MUST be a pure function in `internal/game/inventory/material.go` covering per-hit effects only (Section 5.1). Stateful effects (Section 5.2) are handled at their respective call sites (FP spend, save resolution, combat end).
+- REQ-GA-32: Material YAML files MUST be loaded from `content/items/precious_materials/`. Missing files for any of the 45 required material+grade combinations MUST be a fatal load error.
+- REQ-GA-33: `KindPreciousMaterial` MUST be added to `validKinds` before any precious material YAML is loaded.
+- REQ-GA-34: TDD with property-based tests MUST be used for all new code per SWENG-5/5a.
