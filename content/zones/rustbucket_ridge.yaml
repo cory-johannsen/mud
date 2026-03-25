@@ -1,6 +1,6 @@
 zone:
   id: rustbucket_ridge
-  danger_level: dangerous
+  danger_level: sketchy
   world_x: 4
   world_y: 0
   script_dir: content/scripts/zones/rustbucket_ridge

@@ -148,3 +148,19 @@
 **Description:** The `use` command output displays raw technology IDs instead of human-readable display names.
 **Steps:** Run `use` with no argument to list available active abilities; observe technology IDs shown instead of display names.
 **Fix:**
+
+### BUG-20: Players can use the map command while in combat
+**Severity:** medium
+**Status:** open
+**Category:** Combat
+**Description:** Players are able to use the `map` command while engaged in combat, which should not be permitted.
+**Steps:** Initiate combat with any NPC; while in combat, issue the `map` command; observe that the map is displayed.
+**Fix:**
+
+### BUG-19: Players can move rooms while in combat
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Players are able to use movement commands to change rooms while engaged in combat, which should not be permitted.
+**Steps:** Initiate combat with any NPC; while in combat, issue a movement command (e.g., `north`); observe that the player is moved out of the room.
+**Fix:**

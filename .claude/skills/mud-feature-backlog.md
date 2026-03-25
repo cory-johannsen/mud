@@ -84,6 +84,10 @@ grep -B3 "category: combat" docs/features/index.yaml | grep slug
 2. Update `status:` in index.yaml to match
 3. If marking `done`: set `effort: "-"`
 
+**Implementation lifecycle (AGENT-10):**
+- When **beginning** implementation → set status to `in_progress`
+- When **implementation complete** and all tests pass → set status to `done`
+
 ### Reprioritize
 1. Change the `priority:` value
 2. Move the entry to the correct position in the list (list order = priority order)

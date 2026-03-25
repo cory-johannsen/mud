@@ -1,6 +1,6 @@
 zone:
   id: vantucky
-  danger_level: dangerous
+  danger_level: sketchy
   world_x: 2
   world_y: -4
   script_dir: content/scripts/zones/vantucky
