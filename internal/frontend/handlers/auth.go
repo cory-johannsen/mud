@@ -33,23 +33,84 @@ type CharacterStore interface {
 }
 
 // buildWelcomeBanner returns the connection banner with the current version embedded.
+// Layout: AK-47 (14 cols, bright green) | GUNCHETE title (52 cols, bright cyan) | machete (14 cols, bright yellow)
+// Total visible width per art row: exactly 80 characters.
 func buildWelcomeBanner() string {
-	return `
-` + telnet.Bold + telnet.BrightCyan + `
-  ██████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗███████╗████████╗███████╗
- ██╔════╝ ██║   ██║████╗  ██║██╔════╝██║  ██║██╔════╝╚══██╔══╝██╔════╝
- ██║  ███╗██║   ██║██╔██╗ ██║██║     ███████║█████╗     ██║   █████╗
- ██║   ██║██║   ██║██║╚██╗██║██║     ██╔══██║██╔══╝     ██║   ██╔══╝
- ╚██████╔╝╚██████╔╝██║ ╚████║╚██████╗██║  ██║███████╗   ██║   ███████╗
-  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝` + telnet.Reset + `
+	// AK-47 ASCII art — each row must be exactly 14 visible characters.
+	// Verify with: len(telnet.StripANSI(row)) == 14
+	ak47 := []string{
+		` _________    `,
+		`|  _  |   |=> `,
+		`|_| |_|===|   `,
+		`  | |  \__/   `,
+		`  |_|         `,
+		` _| |_        `,
+		`|_____|       `,
+	}
 
-` + telnet.BrightYellow + `  Post-Collapse Portland, OR — A Dystopian Sci-Fi MUD` + telnet.Reset + `
-` + telnet.Dim + `  ` + version.Version + telnet.Reset + `
+	// GUNCHETE medium ASCII title — each row must be exactly 52 visible characters.
+	// Verify with: len(telnet.StripANSI(row)) == 52
+	// Note: row 2 contains a backtick and requires string concatenation to embed in Go source.
+	title := []string{
+		`  ___  _   _ _  _  ___  _  _  ___  ___ ___          `,
+		` / __|| | | | \| |/ __|| || || __||_  |_  |         `,
+		`| (_ || |_| | .` + "`" + `| | (__ | __ || _|  / /  / /        `,
+		` \___/ \___/|_|\_|\___||_||_||___| /_/  /_/         `,
+		`                                                    `,
+		`                                                    `,
+		`                                                    `,
+	}
 
-  Type ` + telnet.Green + `login` + telnet.Reset + ` to connect.
-  Type ` + telnet.Green + `register` + telnet.Reset + ` to create an account.
-  Type ` + telnet.Green + `quit` + telnet.Reset + ` to disconnect.
-`
+	// Machete ASCII art — each row must be exactly 14 visible characters.
+	// Verify with: len(telnet.StripANSI(row)) == 14
+	machete := []string{
+		`         _    `,
+		`        / \   `,
+		`  _____/   \  `,
+		` /__________\ `,
+		`      |       `,
+		`      |       `,
+		`     (_)      `,
+	}
+
+	// Normalize column heights by padding shorter slices with blank rows at the bottom.
+	maxRows := len(ak47)
+	if len(title) > maxRows {
+		maxRows = len(title)
+	}
+	if len(machete) > maxRows {
+		maxRows = len(machete)
+	}
+	pad := func(col []string, width, count int) []string {
+		blank := strings.Repeat(" ", width)
+		for len(col) < count {
+			col = append(col, blank)
+		}
+		return col
+	}
+	ak47 = pad(ak47, 14, maxRows)
+	title = pad(title, 52, maxRows)
+	machete = pad(machete, 14, maxRows)
+
+	// Build banner rows. Each row: BrightGreen+ak47+Reset | BrightCyan+title+Reset | BrightYellow+machete+Reset
+	var sb strings.Builder
+	sb.WriteString("\n")
+	for i := 0; i < maxRows; i++ {
+		sb.WriteString(telnet.BrightGreen + ak47[i] + telnet.Reset)
+		sb.WriteString(telnet.BrightCyan + title[i] + telnet.Reset)
+		sb.WriteString(telnet.BrightYellow + machete[i] + telnet.Reset)
+		sb.WriteString("\n")
+	}
+
+	sb.WriteString("\n")
+	sb.WriteString(telnet.BrightYellow + `  Post-Collapse Portland, OR — A Dystopian Sci-Fi MUD` + telnet.Reset + "\n")
+	sb.WriteString(telnet.Dim + `  ` + version.Version + telnet.Reset + "\n")
+	sb.WriteString("\n")
+	sb.WriteString(`  Type ` + telnet.Green + `login` + telnet.Reset + ` to connect.` + "\n")
+	sb.WriteString(`  Type ` + telnet.Green + `register` + telnet.Reset + ` to create an account.` + "\n")
+	sb.WriteString(`  Type ` + telnet.Green + `quit` + telnet.Reset + ` to disconnect.` + "\n")
+
+	return sb.String()
 }
 
 // CharacterSkillsSetter defines the skill persistence operations required by AuthHandler.
