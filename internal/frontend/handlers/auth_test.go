@@ -367,11 +367,9 @@ func TestBannerColorReset(t *testing.T) {
 				"color code %q at position %d must be followed by Reset", color, abs)
 			// No other color code should appear before the Reset.
 			for _, other := range colors {
-				otherIdx := strings.Index(after, other)
-				if otherIdx != -1 {
-					assert.True(t, otherIdx == -1 || otherIdx > resetIdx,
-						"color %q appears before Reset after color %q", other, color)
-				}
+				otherIdx := strings.Index(after[:resetIdx], other)
+				assert.Equal(t, -1, otherIdx,
+					"color %q appears before Reset after color %q", other, color)
 			}
 			start = abs + len(color)
 		}
