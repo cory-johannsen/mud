@@ -752,6 +752,96 @@ feats:
     activate_text: "You close your eyes and let your training guide you. Nearby electronics flicker at the edge of your awareness."
     description: "Detect active electronics, transmitters, or powered devices nearby at will."
 
+  - id: quick_scan
+    name: Quick Scan
+    category: skill
+    skill: tech_lore
+    pf2e: quick_identification
+    active: false
+    activate_text: ""
+    description: "Identify Technology items and effects in 1 minute or less instead of the standard 10 minutes."
+
+  - id: id_tech_effect
+    name: ID Tech Effect
+    category: skill
+    skill: tech_lore
+    pf2e: recognize_spell
+    active: true
+    activate_text: "You clock what they're using and what it's about to do."
+    description: "Identify a Technology effect as a reaction the moment it is activated."
+
+  - id: exploit_tech
+    name: Exploit Tech
+    category: skill
+    skill: tech_lore
+    pf2e: trick_magic_item
+    active: true
+    activate_text: "You hack the interface and force it to respond."
+    description: "Activate Technology items you are not normally qualified to use."
+
+  - id: data_eye
+    name: Data Eye
+    category: skill
+    skill: tech_lore
+    pf2e: eye_for_numbers
+    active: false
+    activate_text: ""
+    description: "Quickly assess patterns, numerical data, and encoded information; +2 to Tech Lore checks involving data analysis."
+
+  - id: instant_recall
+    name: Instant Recall
+    category: skill
+    skill: tech_lore
+    pf2e: automatic_knowledge
+    active: false
+    activate_text: ""
+    description: "Recall knowledge about Technology as a free action once per round. Requires Assurance (Tech Lore)."
+
+  - id: rapid_protocol
+    name: Rapid Protocol
+    category: skill
+    skill: tech_lore
+    pf2e: magical_shorthand
+    active: false
+    activate_text: ""
+    description: "Learn new Technology protocols quickly and at reduced cost."
+
+  - id: tech_aura_scan
+    name: Tech Aura Scan
+    category: skill
+    skill: tech_lore
+    pf2e: aura_sight
+    active: false
+    activate_text: ""
+    description: "Detect Technology auras and powered devices while in Exploration mode."
+
+  - id: obscured_tech
+    name: Obscured Tech
+    category: skill
+    skill: tech_lore
+    pf2e: bizarre_magic
+    active: false
+    activate_text: ""
+    description: "Your Technology activations are harder to identify; observers take -2 to ID Tech Effect checks against you."
+
+  - id: rapid_id
+    name: Rapid ID
+    category: skill
+    skill: tech_lore
+    pf2e: quick_recognition
+    active: false
+    activate_text: ""
+    description: "Identify Technology effects as a free action instead of a reaction."
+
+  - id: tech_synthesis
+    name: Tech Synthesis
+    category: skill
+    skill: tech_lore
+    pf2e: unified_theory
+    active: false
+    activate_text: ""
+    description: "Use Tech Lore for checks across all Technology disciplines, replacing other knowledge skills."
+
   # ── SKILL FEATS: RIGGING ──────────────────────────────────────────────────
   - id: assurance_rigging
     name: Steady Rigging
@@ -797,6 +887,114 @@ feats:
     active: false
     activate_text: ""
     description: "Choose a craft type; +1 bonus to that type, improving with proficiency."
+
+  - id: parts_eye
+    name: Parts Eye
+    category: skill
+    skill: rigging
+    pf2e: crafter's_appraisal
+    active: false
+    activate_text: ""
+    description: "Estimate the value, quality, and usability of components and scavenged parts at a glance."
+
+  - id: crew_craft
+    name: Crew Craft
+    category: skill
+    skill: rigging
+    pf2e: communal_crafting
+    active: false
+    activate_text: ""
+    description: "Others can assist your crafting; each helper reduces total crafting time."
+
+  - id: prototype_inventor
+    name: Prototype Inventor
+    category: skill
+    skill: rigging
+    pf2e: inventor
+    active: false
+    activate_text: ""
+    description: "Use Rigging to create new item schematics and prototype designs not in standard catalogs."
+
+  - id: tech_item_crafting
+    name: Tech Item Crafting
+    category: skill
+    skill: rigging
+    pf2e: magical_crafting
+    active: false
+    activate_text: ""
+    description: "Craft Technology items; start with four common Technology item formulas."
+
+  - id: joint_work
+    name: Joint Work
+    category: skill
+    skill: rigging
+    pf2e: cooperative_crafting
+    active: false
+    activate_text: ""
+    description: "Combine efforts with another crafter for faster production without redundant work."
+
+  - id: implant_tech
+    name: Implant Tech
+    category: skill
+    skill: rigging
+    pf2e: tattoo_artist
+    active: false
+    activate_text: ""
+    description: "Perform basic cybernetic implant work; install and remove implants safely."
+
+  - id: master_rigging
+    name: Master Rigging
+    category: skill
+    skill: rigging
+    pf2e: impeccable_crafting
+    active: false
+    activate_text: ""
+    description: "Craft items more efficiently; critical successes produce superior items. Requires specialty_work."
+
+  - id: signature_build
+    name: Signature Build
+    category: skill
+    skill: rigging
+    pf2e: signature_crafting
+    active: false
+    activate_text: ""
+    description: "Specialize in one type of crafted item; produce that type faster and at lower cost."
+
+  - id: potency_compound
+    name: Potency Compound
+    category: skill
+    skill: rigging
+    pf2e: bless_tonic
+    active: false
+    activate_text: ""
+    description: "Craft drug compounds that enhance vital force and boost the body's recovery rate."
+
+  - id: toxin_compound
+    name: Toxin Compound
+    category: skill
+    skill: rigging
+    pf2e: bless_toxin
+    active: false
+    activate_text: ""
+    description: "Craft drug compounds with void properties that disrupt biological and electronic systems."
+
+  - id: legendary_implant_tech
+    name: Legendary Implant Tech
+    category: skill
+    skill: rigging
+    pf2e: legendary_tattoo_artist
+    active: false
+    activate_text: ""
+    description: "Perform legendary cybernetic implant work; install experimental and restricted implants."
+
+  - id: rig_anything
+    name: Rig Anything
+    category: skill
+    skill: rigging
+    pf2e: craft_anything
+    active: false
+    activate_text: ""
+    description: "Ignore most material and schematic requirements when crafting; improvise what you don't have."
 
   # ── SKILL FEATS: CONSPIRACY ───────────────────────────────────────────────
   - id: assurance_conspiracy

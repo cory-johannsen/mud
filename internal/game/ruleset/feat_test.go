@@ -216,3 +216,22 @@ feats:
 	require.NoError(t, err)
 	assert.Equal(t, []string{"undead", "mutant"}, feats[0].TargetTags)
 }
+
+func TestLoadFeats_SkillGapFeats_TechLoreRigging(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"quick_scan", "id_tech_effect", "exploit_tech", "data_eye", "instant_recall",
+		"rapid_protocol", "tech_aura_scan", "obscured_tech", "rapid_id", "tech_synthesis",
+		"parts_eye", "crew_craft", "prototype_inventor", "tech_item_crafting", "joint_work",
+		"implant_tech", "master_rigging", "signature_build", "potency_compound",
+		"toxin_compound", "legendary_implant_tech", "rig_anything",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
