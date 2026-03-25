@@ -376,6 +376,72 @@ func TestBannerColorReset(t *testing.T) {
 	}
 }
 
+// TestBannerBoldReset asserts that every Bold occurrence is followed by Reset
+// before the end of the banner. Bold is always immediately followed by BrightCyan
+// on title rows (per spec IMPL-2), so this test does not require Reset before BrightCyan.
+func TestBannerBoldReset(t *testing.T) {
+	banner := buildWelcomeBanner()
+	remaining := banner
+	for {
+		idx := strings.Index(remaining, telnet.Bold)
+		if idx == -1 {
+			break
+		}
+		after := remaining[idx+len(telnet.Bold):]
+		resetIdx := strings.Index(after, telnet.Reset)
+		assert.Greater(t, resetIdx, -1,
+			"Bold at byte offset %d must be followed by Reset", idx)
+		if resetIdx == -1 {
+			break
+		}
+		remaining = after[resetIdx+len(telnet.Reset):]
+	}
+}
+
+// TestBannerGunAboveTitle asserts that the BrightGreen (AK-47) block appears
+// on an earlier line than the first BrightCyan (title) line.
+func TestBannerGunAboveTitle(t *testing.T) {
+	banner := buildWelcomeBanner()
+	lines := strings.Split(banner, "\n")
+	firstGreen := -1
+	firstCyan := -1
+	for i, line := range lines {
+		if firstGreen == -1 && strings.Contains(line, telnet.BrightGreen) {
+			firstGreen = i
+		}
+		if firstCyan == -1 && strings.Contains(line, telnet.BrightCyan) {
+			firstCyan = i
+		}
+	}
+	require.Greater(t, firstGreen, -1, "BrightGreen (AK-47) must appear in banner")
+	require.Greater(t, firstCyan, -1, "BrightCyan (title) must appear in banner")
+	assert.Less(t, firstGreen, firstCyan,
+		"BrightGreen (AK-47) line %d must be before BrightCyan (title) line %d",
+		firstGreen, firstCyan)
+}
+
+// TestBannerMacheteBelowTitle asserts that the BrightYellow (machete) block appears
+// on a later line than the last BrightCyan (title) line.
+func TestBannerMacheteBelowTitle(t *testing.T) {
+	banner := buildWelcomeBanner()
+	lines := strings.Split(banner, "\n")
+	lastCyan := -1
+	firstYellow := -1
+	for i, line := range lines {
+		if strings.Contains(line, telnet.BrightCyan) {
+			lastCyan = i
+		}
+		if firstYellow == -1 && strings.Contains(line, telnet.BrightYellow) {
+			firstYellow = i
+		}
+	}
+	require.Greater(t, lastCyan, -1, "BrightCyan (title) must appear in banner")
+	require.Greater(t, firstYellow, -1, "BrightYellow (machete) must appear in banner")
+	assert.Less(t, lastCyan, firstYellow,
+		"last BrightCyan (title) line %d must be before BrightYellow (machete) line %d",
+		lastCyan, firstYellow)
+}
+
 func TestHandleSession_Quit(t *testing.T) {
 	store := newMockAccountStore()
 	handler := newAuthHandler(t, store, "127.0.0.1:50051")
