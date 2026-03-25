@@ -150,16 +150,60 @@ func registerMaterial(t testing.TB, reg *inventory.Registry, matID, gradeID, tie
 	require.NoError(t, reg.RegisterMaterial(def))
 }
 
+var materialAppliesTo = map[string][]string{
+	"scrap_iron":      {"weapon"},
+	"hollow_point":    {"weapon"},
+	"carbide_alloy":   {"weapon", "armor"},
+	"carbon_weave":    {"armor"},
+	"polymer_frame":   {"armor"},
+	"thermite_lace":   {"weapon"},
+	"cryo_gel":        {"weapon"},
+	"quantum_alloy":   {"weapon", "armor"},
+	"rad_core":        {"weapon", "armor"},
+	"neural_gel":      {"weapon", "armor"},
+	"ghost_steel":     {"weapon", "armor"},
+	"null_weave":      {"weapon", "armor"},
+	"soul_guard_alloy": {"armor"},
+	"shadow_plate":    {"weapon"},
+	"radiance_plate":  {"weapon"},
+}
+
+var materialTier = map[string]string{
+	"scrap_iron":      "common",
+	"hollow_point":    "common",
+	"carbide_alloy":   "common",
+	"carbon_weave":    "common",
+	"polymer_frame":   "uncommon",
+	"thermite_lace":   "uncommon",
+	"cryo_gel":        "uncommon",
+	"quantum_alloy":   "uncommon",
+	"rad_core":        "uncommon",
+	"neural_gel":      "uncommon",
+	"ghost_steel":     "uncommon",
+	"null_weave":      "rare",
+	"soul_guard_alloy": "rare",
+	"shadow_plate":    "rare",
+	"radiance_plate":  "rare",
+}
+
 func buildMaterialTestRegistry(rt *rapid.T) *inventory.Registry {
 	reg := inventory.NewRegistry()
 	for _, key := range allMaterialKeys() {
 		parts := strings.SplitN(key, ":", 2)
 		matID, gradeID := parts[0], parts[1]
 		gradeName := inventory.GradeDisplayNames[gradeID]
+		tier := materialTier[matID]
+		if tier == "" {
+			tier = "common"
+		}
+		appliesTo := materialAppliesTo[matID]
+		if appliesTo == nil {
+			appliesTo = []string{"weapon"}
+		}
 		def := &inventory.MaterialDef{
 			MaterialID: matID, Name: matID,
 			GradeID: gradeID, GradeName: gradeName,
-			Tier: "common", AppliesTo: []string{"weapon"},
+			Tier: tier, AppliesTo: appliesTo,
 		}
 		_ = reg.RegisterMaterial(def)
 	}
@@ -167,8 +211,56 @@ func buildMaterialTestRegistry(rt *rapid.T) *inventory.Registry {
 }
 
 func allMaterialKeys() []string {
-	return []string{
-		"scrap_iron:street_grade", "hollow_point:street_grade",
-		"thermite_lace:mil_spec_grade", "cryo_gel:ghost_grade",
+	materials := []string{
+		"scrap_iron", "hollow_point", "carbide_alloy", "carbon_weave", "polymer_frame",
+		"thermite_lace", "cryo_gel", "quantum_alloy", "rad_core", "neural_gel",
+		"ghost_steel", "null_weave", "soul_guard_alloy", "shadow_plate", "radiance_plate",
 	}
+	grades := []string{"street_grade", "mil_spec_grade", "ghost_grade"}
+	var keys []string
+	for _, m := range materials {
+		for _, g := range grades {
+			keys = append(keys, m+":"+g)
+		}
+	}
+	return keys
+}
+
+func TestApplyMaterialEffects_ThermiteLace_Ghost_SetsOnFire(t *testing.T) {
+	reg := inventory.NewRegistry()
+	registerMaterial(t, reg, "thermite_lace", "ghost_grade", "uncommon", []string{"weapon"})
+	ctx := inventory.AttackContext{IsHit: true}
+	result := inventory.ApplyMaterialEffects([]string{"thermite_lace:ghost_grade"}, ctx, reg)
+	assert.Equal(t, 4, result.PersistentFireDmg)
+	assert.Equal(t, 2, result.DamageBonus)
+	assert.True(t, result.ApplyOnFireCondition, "thermite_lace:ghost_grade on hit must set ApplyOnFireCondition")
+}
+
+func TestApplyMaterialEffects_RadCore_Ghost_SetsIrradiated(t *testing.T) {
+	reg := inventory.NewRegistry()
+	registerMaterial(t, reg, "rad_core", "ghost_grade", "uncommon", []string{"weapon", "armor"})
+	ctx := inventory.AttackContext{IsHit: true}
+	result := inventory.ApplyMaterialEffects([]string{"rad_core:ghost_grade"}, ctx, reg)
+	assert.Equal(t, 4, result.PersistentRadDmg)
+	assert.True(t, result.ApplyIrradiatedCondition, "rad_core:ghost_grade on hit must set ApplyIrradiatedCondition")
+}
+
+func TestComputePassiveMaterials_CarbonWeave_Ghost_SetsNoCheckPenalty(t *testing.T) {
+	reg := inventory.NewRegistry()
+	registerMaterial(t, reg, "carbon_weave", "ghost_grade", "uncommon", []string{"armor"})
+	si := &inventory.SlottedItem{AffixedMaterials: []string{"carbon_weave:ghost_grade"}}
+	armor := map[inventory.ArmorSlot]*inventory.SlottedItem{inventory.SlotTorso: si}
+	summary := inventory.ComputePassiveMaterials(nil, armor, reg)
+	assert.True(t, summary.NoCheckPenalty, "carbon_weave:ghost_grade must set NoCheckPenalty")
+	assert.Equal(t, 10, summary.SpeedBonus)
+}
+
+func TestComputePassiveMaterials_SoulGuardAlloy_Ghost_MentalSentinel(t *testing.T) {
+	reg := inventory.NewRegistry()
+	registerMaterial(t, reg, "soul_guard_alloy", "ghost_grade", "rare", []string{"armor"})
+	si := &inventory.SlottedItem{AffixedMaterials: []string{"soul_guard_alloy:ghost_grade"}}
+	armor := map[inventory.ArmorSlot]*inventory.SlottedItem{inventory.SlotTorso: si}
+	summary := inventory.ComputePassiveMaterials(nil, armor, reg)
+	assert.Equal(t, 3, summary.SaveVsMentalBonus)
+	assert.Contains(t, summary.ConditionImmunities, "*mental", "soul_guard_alloy:ghost_grade must append *mental sentinel")
 }
