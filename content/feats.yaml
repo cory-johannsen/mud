@@ -1015,6 +1015,78 @@ feats:
     activate_text: ""
     description: "+2 to Recall Knowledge about cover-ups, weird phenomena, and shadow organizations."
 
+  - id: gang_infiltrator
+    name: Gang Infiltrator
+    category: skill
+    skill: conspiracy
+    pf2e: schooled_in_secrets
+    active: false
+    activate_text: ""
+    description: "Gather information about secret organizations and impersonate their members convincingly."
+
+  - id: drug_channel
+    name: Drug Channel
+    category: skill
+    skill: conspiracy
+    pf2e: spirit_speaker
+    active: true
+    activate_text: "You slip into the altered state and let the compound guide your thoughts."
+    description: "Commune with drug-altered states of consciousness to gain insight and information."
+
+  - id: auto_transcript
+    name: Auto Transcript
+    category: skill
+    skill: conspiracy
+    pf2e: automatic_writing
+    active: false
+    activate_text: ""
+    description: "Subconsciously record information while your mind focuses elsewhere; useful for surveillance."
+
+  - id: break_conditioning
+    name: Break Conditioning
+    category: skill
+    skill: conspiracy
+    pf2e: break_curse
+    active: false
+    activate_text: ""
+    description: "Remove mental conditioning, compulsions, and behavioral modifications from yourself or others."
+
+  - id: unsettling_intel
+    name: Unsettling Intel
+    category: skill
+    skill: conspiracy
+    pf2e: disturbing_knowledge
+    active: true
+    activate_text: "You tell them what you know. Watch their face change."
+    description: "Reveal knowledge so disturbing and specific that it frightens the target."
+
+  - id: obscured_ops
+    name: Obscured Ops
+    category: skill
+    skill: conspiracy
+    pf2e: bizarre_magic
+    active: false
+    activate_text: ""
+    description: "Your operations and methods are difficult to identify; observers take -2 to understand your schemes."
+
+  - id: consult_sources
+    name: Consult Sources
+    category: skill
+    skill: conspiracy
+    pf2e: consult_the_spirits
+    active: false
+    activate_text: ""
+    description: "Tap secret information networks and shadow contacts for strategic guidance."
+
+  - id: master_codebreaker
+    name: Master Codebreaker
+    category: skill
+    skill: conspiracy
+    pf2e: legendary_codebreaker
+    active: false
+    activate_text: ""
+    description: "Quickly decode any encryption, cipher, or obfuscated communication."
+
   # ── SKILL FEATS: FACTIONS ─────────────────────────────────────────────────
   - id: assurance_factions
     name: Steady Factions
@@ -1070,6 +1142,78 @@ feats:
     activate_text: "You tap your network and start asking the right questions."
     description: "Use Factions instead of Smooth Talk to gather information in urban areas."
 
+  - id: read_document
+    name: Read Document
+    category: skill
+    skill: factions
+    pf2e: glean_contents
+    active: false
+    activate_text: ""
+    description: "Read sealed or folded documents without fully opening them, gleaning the key contents."
+
+  - id: code_speech
+    name: Code Speech
+    category: skill
+    skill: factions
+    pf2e: secret_speech
+    active: false
+    activate_text: ""
+    description: "Communicate covertly in plain sight using faction code language hidden within normal conversation."
+
+  - id: faction_cover
+    name: Faction Cover
+    category: skill
+    skill: factions
+    pf2e: deceptive_worship
+    active: false
+    activate_text: ""
+    description: "Convincingly pose as a member of an opposing faction, passing their tests and rituals."
+
+  - id: black_market_access
+    name: Black Market Access
+    category: skill
+    skill: factions
+    pf2e: criminal_connections
+    active: false
+    activate_text: ""
+    description: "Connections to criminal networks give you access to restricted goods and services."
+
+  - id: street_network
+    name: Street Network
+    category: skill
+    skill: factions
+    pf2e: eyes_of_the_city
+    active: false
+    activate_text: ""
+    description: "Maintain a network of street-level informants in any district you've spent time in."
+
+  - id: underground_network
+    name: Underground Network
+    category: skill
+    skill: factions
+    pf2e: underground_network
+    active: false
+    activate_text: ""
+    description: "Ties to the resistance and criminal underground provide safe houses and contraband channels."
+
+  - id: polyglot_master
+    name: Polyglot Master
+    category: skill
+    skill: factions
+    pf2e: legendary_linguist
+    active: false
+    activate_text: ""
+    description: "Create a shared pidgin communication with anyone; always find a way to be understood."
+
+  - id: faction_linguist
+    name: Faction Linguist
+    category: skill
+    skill: factions
+    pf2e: legendary_codebreaker
+    active: false
+    activate_text: ""
+    description: "Instantly decode any faction cipher, social code, or ritual language."
+
   # ── SKILL FEATS: INTEL ────────────────────────────────────────────────────
   - id: assurance_intel
     name: Steady Intel
@@ -1097,6 +1241,33 @@ feats:
     active: false
     activate_text: ""
     description: "Earn income via Intel; on a critical failure you earn the partial amount instead of nothing."
+
+  - id: mixed_intel
+    name: Mixed Intel
+    category: skill
+    skill: intel
+    pf2e: dubious_knowledge
+    active: false
+    activate_text: ""
+    description: "On a failed recall check, still learn true information mixed with a false detail — partial intel beats nothing."
+
+  - id: solid_intel
+    name: Solid Intel
+    category: skill
+    skill: intel
+    pf2e: unmistakable_lore
+    active: false
+    activate_text: ""
+    description: "Recall knowledge more effectively in your specialty; on a critical success, gain additional detail."
+
+  - id: legendary_operator
+    name: Legendary Operator
+    category: skill
+    skill: intel
+    pf2e: legendary_professional
+    active: false
+    activate_text: ""
+    description: "Renown for your specialized knowledge opens doors and commands respect across all factions."
 
   # ── SKILL FEATS: PATCH JOB ────────────────────────────────────────────────
   - id: assurance_patch_job

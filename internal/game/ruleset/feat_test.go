@@ -217,6 +217,25 @@ feats:
 	assert.Equal(t, []string{"undead", "mutant"}, feats[0].TargetTags)
 }
 
+func TestLoadFeats_SkillGapFeats_ConspiracyFactionsIntel(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"gang_infiltrator", "drug_channel", "auto_transcript", "break_conditioning",
+		"unsettling_intel", "obscured_ops", "consult_sources", "master_codebreaker",
+		"read_document", "code_speech", "faction_cover", "black_market_access",
+		"street_network", "underground_network", "polyglot_master", "faction_linguist",
+		"mixed_intel", "solid_intel", "legendary_operator",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
+
 func TestLoadFeats_SkillGapFeats_TechLoreRigging(t *testing.T) {
 	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
 	require.NoError(t, err)
