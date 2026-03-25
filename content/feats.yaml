@@ -1478,6 +1478,51 @@ feats:
     activate_text: "You crouch down and make yourself small, earning trust the slow way."
     description: "Teach a non-magical animal up to 2 commands or tricks."
 
+  - id: creature_speak
+    name: Creature Speak
+    category: skill
+    skill: wasteland
+    pf2e: all_of_the_animal
+    active: false
+    activate_text: ""
+    description: "Understand all animal and creature communication; comprehend behavior cues from any non-sapient creature."
+
+  - id: tame_creature
+    name: Tame Creature
+    category: skill
+    skill: wasteland
+    pf2e: tame_animal
+    active: false
+    activate_text: ""
+    description: "Tame wild wasteland creatures through extended interaction during exploration."
+
+  - id: legend_hunter
+    name: Legend Hunter
+    category: skill
+    skill: wasteland
+    pf2e: myth_hunter
+    active: false
+    activate_text: ""
+    description: "Track and research legendary creatures; +2 to Wasteland checks to identify and locate unique beasts."
+
+  - id: permanent_bond
+    name: Permanent Bond
+    category: skill
+    skill: wasteland
+    pf2e: bonded_animal
+    active: false
+    activate_text: ""
+    description: "An animal companion becomes permanently bonded; it becomes permanently easier to command and more loyal."
+
+  - id: zone_influence
+    name: Zone Influence
+    category: skill
+    skill: wasteland
+    pf2e: influence_nature
+    active: false
+    activate_text: ""
+    description: "Influence wasteland creature behavior and redirect them away from dangerous areas."
+
   # ── SKILL FEATS: GANG CODES ───────────────────────────────────────────────
   - id: assurance_gang_codes
     name: Steady Gang Codes
@@ -1496,6 +1541,60 @@ feats:
     active: false
     activate_text: ""
     description: "Never critically fail Gang Codes recall checks; +2 to religious and ritual knowledge."
+
+  - id: faction_token
+    name: Faction Token
+    category: skill
+    skill: gang_codes
+    pf2e: pilgrim's_token
+    active: false
+    activate_text: ""
+    description: "Carry a token that marks faction allegiance; allies recognize you and hostiles hesitate."
+
+  - id: rally_the_crew
+    name: Rally the Crew
+    category: skill
+    skill: gang_codes
+    pf2e: exhort_the_faithful
+    active: true
+    activate_text: "You invoke the code and watch the crew straighten up."
+    description: "Motivate faction members by invoking shared codes; allies gain a bonus to their next action."
+
+  - id: code_shield
+    name: Code Shield
+    category: skill
+    skill: gang_codes
+    pf2e: sacred_defense
+    active: false
+    activate_text: ""
+    description: "Deep knowledge of faction codes provides mental protection; +1 to saves vs. mental effects."
+
+  - id: battle_code
+    name: Battle Code
+    category: skill
+    skill: gang_codes
+    pf2e: battle_prayer
+    active: true
+    activate_text: "You call out the battle code and feel the adrenaline hit."
+    description: "Invoke faction battle codes for combat bonuses; +1 to attack rolls for 1 round."
+
+  - id: spread_the_word
+    name: Spread the Word
+    category: skill
+    skill: gang_codes
+    pf2e: evangelize
+    active: false
+    activate_text: ""
+    description: "Recruit and inspire faction loyalty; make others eager to join or support your faction."
+
+  - id: faction_oracle
+    name: Faction Oracle
+    category: skill
+    skill: gang_codes
+    pf2e: divine_guidance
+    active: false
+    activate_text: ""
+    description: "Receive strategic guidance from faction leadership; once per day gain a +2 insight bonus to a skill check."
 
   # ── SKILL FEATS: SCAVENGING ───────────────────────────────────────────────
   - id: assurance_scavenging
@@ -1542,6 +1641,60 @@ feats:
     active: false
     activate_text: ""
     description: "Choose a terrain (ruins, sewers, industrial); +1 to Scavenging checks there."
+
+  - id: zone_vanish
+    name: Zone Vanish
+    category: skill
+    skill: scavenging
+    pf2e: vanish_into_the_land
+    active: true
+    activate_text: "You melt into the wasteland and no one can find you."
+    description: "Disappear into wasteland environments using Survival; no cover required."
+
+  - id: salvage_crafting
+    name: Salvage Crafting
+    category: skill
+    skill: scavenging
+    pf2e: monster_crafting
+    active: false
+    activate_text: ""
+    description: "Craft improvised weapons, tools, and traps from parts salvaged off defeated enemies."
+
+  - id: zone_survival
+    name: Zone Survival
+    category: skill
+    skill: scavenging
+    pf2e: planar_survival
+    active: false
+    activate_text: ""
+    description: "Survive in any hostile zone type — irradiated, flooded, or toxic — without the standard environmental penalties."
+
+  - id: zone_guide
+    name: Zone Guide
+    category: skill
+    skill: scavenging
+    pf2e: environmental_guide
+    active: false
+    activate_text: ""
+    description: "Expertly guide others through dangerous wasteland terrain; group avoids environmental hazard checks."
+
+  - id: legendary_survivor
+    name: Legendary Survivor
+    category: skill
+    skill: scavenging
+    pf2e: legendary_survivalist
+    active: false
+    activate_text: ""
+    description: "Survive extreme environmental conditions that would kill others; ignore most wilderness deprivation."
+
+  - id: legendary_guide
+    name: Legendary Guide
+    category: skill
+    skill: scavenging
+    pf2e: legendary_guide
+    active: false
+    activate_text: ""
+    description: "Guide anyone through any terrain; others under your guidance are immune to environmental hazards."
 
   # ── SKILL FEATS: HUSTLE ───────────────────────────────────────────────────
   - id: assurance_hustle

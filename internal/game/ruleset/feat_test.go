@@ -255,6 +255,23 @@ func TestLoadFeats_SkillGapFeats_TechLoreRigging(t *testing.T) {
 	}
 }
 
+func TestLoadFeats_SkillGapFeats_WastelandGangCodesScavenging(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"creature_speak", "tame_creature", "legend_hunter", "permanent_bond", "zone_influence",
+		"faction_token", "rally_the_crew", "code_shield", "battle_code", "spread_the_word", "faction_oracle",
+		"zone_vanish", "salvage_crafting", "zone_survival", "zone_guide", "legendary_survivor", "legendary_guide",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
+
 func TestLoadFeats_SkillGapFeats_PatchJob(t *testing.T) {
 	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
 	require.NoError(t, err)
