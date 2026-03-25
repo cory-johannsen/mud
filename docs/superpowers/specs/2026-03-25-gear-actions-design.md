@@ -131,9 +131,9 @@ type MaterialDef struct {
 | Black Market | 3 |
 | Ghost | 4 |
 
-- REQ-GA-3: `WeaponDef` and `ArmorDef` MUST gain `UpgradeSlots int` tagged `yaml:"-"`. `UpgradeSlots` is exactly equal to `RarityDef.FeatureSlots` for the item's rarity — they are not distinct values. The loader MUST derive its value from `RarityDef.FeatureSlots` after the `Rarity` field is resolved, following the same pattern as `RarityStatMultiplier`.
+- REQ-GA-3: `WeaponDef` and `ArmorDef` MUST gain `UpgradeSlots int` tagged `yaml:"-"`. `UpgradeSlots` is exactly equal to `RarityDef.FeatureSlots` for the item's rarity — they are not distinct values. The loader MUST derive its value from `RarityDef.FeatureSlots` after the `Rarity` field is resolved, following the same pattern as `RarityStatMultiplier`. Note: `WeaponDef` already has a `Rarity string` field (confirmed in `internal/game/inventory/weapon.go`) — no new field is needed on `WeaponDef` for rarity.
 - REQ-GA-4: `ItemInstance` (defined in `internal/game/inventory/backpack.go`) MUST gain `AffixedMaterials []string`. Each entry is formatted `"<material_id>:<grade_id>"` (e.g., `"carbide_alloy:mil_spec_grade"`). `DeductDurability` in `durability.go` requires no changes — on destruction the caller removes the item, and `AffixedMaterials` is permanently lost with it (REQ-GA-6).
-- REQ-GA-5: `EquippedWeapon` (in `preset.go`) MUST gain `AffixedMaterials []string`. `SlottedItem` (in `equipment.go`) MUST gain `AffixedMaterials []string`. These are cached copies from `ItemInstance.AffixedMaterials`, populated at the same point that `Durability` and `Modifier` are copied: in `newEquippedWeapon` for weapons and in the armor wear path that constructs `SlottedItem`. Both paths MUST copy `AffixedMaterials` from the corresponding `ItemInstance` record.
+- REQ-GA-5: `EquippedWeapon` (in `preset.go`) MUST gain `AffixedMaterials []string` and `MaterialMaxDurabilityBonus int`. `SlottedItem` (in `equipment.go`) MUST gain `AffixedMaterials []string` and `MaterialMaxDurabilityBonus int`. These are cached copies populated from the DB at load time following the same pattern as `Durability`: `LoadWeaponPresets` in `internal/storage/postgres/character.go` MUST SELECT `affixed_materials` and `material_max_durability_bonus` from `character_weapon_presets` and, after calling `preset.EquipMainHand`/`EquipOffHand`, directly assign the values to `preset.MainHand.AffixedMaterials`, `preset.MainHand.MaterialMaxDurabilityBonus`, etc. The armor wear path in `wear.go` that constructs `SlottedItem` MUST copy these fields from the corresponding `ItemInstance` record. `newEquippedWeapon` itself is NOT modified — the copy happens at the call site in the loader, not inside the constructor.
 - REQ-GA-6: When a host item is destroyed (`DeductDurability` returns `Destroyed: true`), all affixed materials are permanently lost. The player receives the standard REQ-EM-10 destruction message only; no additional message for lost materials is required.
 - REQ-GA-7: The same material ID MUST NOT be affixed twice on the same item instance regardless of grade. Attempting to do so MUST fail with: `"<item name> already has <material name> affixed."`
 - REQ-GA-8: `len(AffixedMaterials)` MUST NOT exceed `UpgradeSlots`. Attempting to affix when no slots remain MUST fail with: `"<item name> has no upgrade slots remaining."`
@@ -183,7 +183,7 @@ affix <material_item> <target_item>
 All preconditions are checked in order before the Crafting roll is made. Any failure returns immediately.
 
 - REQ-GA-10: `affix` MUST be rejected in combat with: `"You cannot affix materials during combat."`
-- REQ-GA-11: `affix` MUST fail if the material item is not found in the player's backpack with: `"You don't have <material name> in your pack."`
+- REQ-GA-11: `affix` MUST fail if the material item is not found in the player's backpack with: `"You don't have <query> in your pack."` where `<query>` is the raw `materialQuery` string passed to `HandleAffix` (no `ItemDef` match exists at this point, so the raw query is used as the item name in the message).
 - REQ-GA-12: `affix` MUST search only the **active preset's** main-hand and off-hand weapon slots and the armor slots for the target item (same scope as `findRepairTarget` in `repair.go`). If the target is not found in either slot type, the command MUST fail with: `"<target> is not equipped."`
 - REQ-GA-13: `affix` MUST fail if the target item is broken (`Durability == 0`) with: `"You cannot affix materials to broken equipment. Repair it first."`
 - REQ-GA-14: `affix` MUST fail if the material's `Applies To` restriction (Section 1.3) does not include the target item's slot type (weapon vs armor) with: `"<material name> cannot be affixed to armor."` or `"<material name> cannot be affixed to weapons."` as appropriate.
@@ -194,6 +194,7 @@ All preconditions are checked in order before the Crafting roll is made. Any fai
 - REQ-GA-16: The Crafting check MUST use `skillcheck.Resolve`:
 
   ```go
+  roll := rng.RollD20() // rng is the inventory.Roller passed to HandleAffix
   result := skillcheck.Resolve(
       roll,
       sess.Abilities.Modifier(sess.Abilities.Reasoning), // computes (Reasoning - 10) / 2
@@ -216,7 +217,7 @@ All preconditions are checked in order before the Crafting roll is made. Any fai
 
 ### 4.5 Display
 
-- REQ-GA-22: `inventory` and `loadout` output MUST show affixed materials as a sub-list under the item with used/total slot count for all non-Salvage items (UpgradeSlots > 0), even when no materials are affixed:
+- REQ-GA-22: `inventory` and `loadout` output MUST show affixed materials as a sub-list under the item with a slot counter for all non-Salvage items (UpgradeSlots > 0), even when no materials are affixed. The counter format is `[N/M slots]` where `N = len(AffixedMaterials)` (slots used) and `M = UpgradeSlots` (slots available):
   ```
   Mil-Spec Pistol [2/3 slots]
     ↳ Carbide Alloy (Street Grade)
@@ -275,7 +276,8 @@ type MaterialEffectResult struct {
 
 - **technology attack**: any combat action whose `TechnologyDef.Resolution == "attack"` (see `internal/game/technology/model.go`). The attack roll for such actions is a "technology attack roll."
 - **tech-applied condition**: any condition applied as an effect of a `TechnologyDef`-based action (i.e., the condition arises from a technology, not from a Strike or other non-tech source).
-- **`on_fire` condition**: a new condition defined in `content/conditions/on_fire.yaml`. While `on_fire`, the character takes 1 fire damage per round at the start of their turn. A character may spend 1 AP to extinguish the flames and remove the condition.
+- **`on_fire` condition**: a **new** condition to be created at `content/conditions/on_fire.yaml` as part of this implementation. While `on_fire`, the character takes 1 fire damage per round at the start of their turn. A character may spend 1 AP to extinguish the flames and remove the condition. No new DB migration is required — conditions are content YAML files only.
+- **`irradiated` condition**: a **new** condition to be created at `content/conditions/irradiated.yaml`. While `irradiated`, the character takes 1 radiation damage per round at the start of their turn. The condition expires at the end of its duration (1 round for Rad-Core ghost grade) or can be removed by applicable medical treatment. No new DB migration is required.
 
 - REQ-GA-25: `ApplyMaterialEffects(affixed []string, ctx AttackContext, reg *Registry) MaterialEffectResult` MUST be a pure function in `internal/game/inventory/material.go`. It iterates `affixed`, looks up each material+grade via `reg.Material(materialID, gradeID)`, and accumulates a `MaterialEffectResult`. It covers all per-hit effects. Stateful effects (Section 5.2) are NOT handled here.
 
@@ -298,13 +300,13 @@ type MaterialSessionState struct {
 
 - REQ-GA-26: `PlayerSession` MUST gain `MaterialState MaterialSessionState`. `CombatUsed` MUST be reset (set to empty map) at combat end. `DailyUsed` MUST be reset at the daily calendar rollover (same hook as Focus Point refresh).
 - REQ-GA-27: The following materials have stateful effects consumed via `MaterialSessionState`:
-  - **Quantum Alloy** (all grades): once-per-combat reroll. Key: `"quantum_alloy:<grade>"`. The command handler checks `MaterialState.CombatUsed` before granting the reroll, then marks it used.
-  - **Null-Weave mil-spec grade**: once-per-combat condition immunity (immune to 1 tech-applied condition). Key: `"null_weave:mil_spec_grade"`. When a tech-applied condition would be applied and the key is not in `CombatUsed`, the condition is suppressed and the key is marked used.
-  - **Null-Weave ghost grade**: once-per-combat reflect. Key: `"null_weave:ghost_grade"`. When a technology attack targets the character and the key is not in `CombatUsed`: roll d2 (50%). On success, the attack misses the character and the attacker instead takes the attack's computed damage as if it had hit them. Mark used. Message to attacker: `"Your attack reflects back at you!"`.
-  - **Ghost Steel ghost grade**: once-per-combat touch attack. Key: `"ghost_steel:ghost_grade"`. A touch attack treats the target's AC as 10 only (all armor and shield bonuses ignored, only Dex modifier applies). The character may declare a touch attack before rolling on any Strike action. Costs no additional AP. Mark used.
+  - **Quantum Alloy** (all grades): once-per-combat reroll. Key: `"quantum_alloy:<grade>"`. The reroll is **automatic** — the combat system checks `MaterialState.CombatUsed` before each applicable roll; if the key is absent, the reroll is granted automatically (no player command needed) and the key is marked used. Street grade rerolls attack rolls; mil-spec grade rerolls saves; ghost grade rerolls any check.
+  - **Null-Weave mil-spec grade**: once-per-combat condition immunity (immune to 1 tech-applied condition). Key: `"null_weave:mil_spec_grade"`. When a tech-applied condition would be applied and the key is not in `CombatUsed`, the condition is suppressed and the key is marked used. "Tech-applied condition" means any condition applied as an effect of a `TechnologyDef`-based action (Section 5, Terminology).
+  - **Null-Weave ghost grade**: once-per-combat reflect. Key: `"null_weave:ghost_grade"`. When a technology attack targets the character and the key is not in `CombatUsed`: call `rng.RollFloat()`. If `< 0.5`, the attack reflects — the attacker takes the **damage that would have been dealt to the defending player** (i.e., the damage already computed for that attack). The attack is treated as a miss for the defending player and a hit for the attacker. Mark used. Message to attacker: `"Your attack reflects back at you!"`.
+  - **Ghost Steel ghost grade**: once-per-combat touch attack. Key: `"ghost_steel:ghost_grade"`. The player declares a touch attack by prefixing the strike command: `touch strike <target>`. On a touch attack, the target's AC is computed as `10 + target.DexModifier` (all armor and shield bonuses ignored). Costs no additional AP. Mark `CombatUsed` on use. If the key is already in `CombatUsed`, the `touch` prefix is ignored and a normal strike is performed with message: `"Your Ghost Steel phase-shift is spent for this combat."`.
   - **Ghost Steel street grade**: `AttackContext.IsFirstHitThisCombat` is derived from `PlayerSession.HasHitThisCombat bool` — a new boolean field on `PlayerSession` that is `false` at combat start and set to `true` after the first resolved attack. `AttackContext.IsFirstHitThisCombat` is set to `!sess.HasHitThisCombat` before each attack. The grpc combat handler sets `sess.HasHitThisCombat = true` after the first attack resolves. `HasHitThisCombat` is reset to `false` at combat end. No `CombatUsed` entry is needed.
-  - **Neural Gel** (all grades): N-per-day FP cost reduction (1/2/3 per day for street/mil-spec/ghost). Key: `"neural_gel:<grade>"`. The FP spend handler checks `DailyUsed[key] < maxUses` before applying the discount, then increments.
-  - **Soul-Guard Alloy ghost grade**: once-per-day domination negation. Key: `"soul_guard_alloy:ghost_grade"`.
+  - **Neural Gel** (all grades): N-per-day FP cost reduction (1/2/3 per day for street/mil-spec/ghost). Key: `"neural_gel:<grade>"`. The FP spend handler checks `DailyUsed[key] < maxUses` before applying the discount, then increments. The discount is applied to the FP cost of the technology: `newCost = max(1, originalCost - 1)`.
+  - **Soul-Guard Alloy ghost grade**: once-per-day domination negation. Key: `"soul_guard_alloy:ghost_grade"`. When a domination effect would be applied to the character and `DailyUsed[key] == 0`, the domination is negated and the key is incremented to 1. "Domination" is defined as any condition with `IsDomination: true` in its condition YAML definition.
 - REQ-GA-28: `MaterialSessionState` is in-memory only — it is NOT persisted to the database. State resets naturally on server restart (combat state) and at daily rollover (daily state).
 
 ### 5.3 Passive Effects (Session-Computed)
@@ -333,9 +335,9 @@ type PassiveMaterialSummary struct {
 ```
 
 - REQ-GA-29: `PlayerSession` MUST gain `PassiveMaterials PassiveMaterialSummary`. It MUST be recomputed by calling `ComputePassiveMaterials(equipped []*EquippedWeapon, armor map[ArmorSlot]*SlottedItem, reg *Registry) PassiveMaterialSummary` at login and whenever equipped items change (same trigger points as `SetBonusSummary`). `ComputePassiveMaterials` MUST be a pure function in `internal/game/inventory/material.go`. The `equipped` parameter MUST be populated from the **active preset only** — `[]*EquippedWeapon{preset.MainHand, preset.OffHand}` where `preset = sess.LoadoutSet.ActivePreset()` — matching the same scope used by `findRepairTarget`.
-- REQ-GA-30: Passive bonuses from `PassiveMaterialSummary` MUST be applied at the following integration points: check penalty in equipment checks, speed in movement computation, save bonuses in save resolution, immunities in condition application, initiative bonus in initiative roll, tech attack roll bonus in technology attack resolution (`TechnologyDef.Resolution == "attack"`), Hardness bonus in damage reduction, FP on Recalibrate in Recalibrate action handler, ACVsEnergyBonus in energy-damage AC computation. `CarrierRadDmgPerHour` MUST be applied in the existing hourly zone tick handler (`internal/gameserver/zone_tick.go`) — for each player session with `PassiveMaterials.CarrierRadDmgPerHour > 0`, deal that many radiation damage points to the player per tick.
+- REQ-GA-30: Passive bonuses from `PassiveMaterialSummary` MUST be applied at the following integration points: check penalty in equipment checks, speed in movement computation, save bonuses in save resolution, immunities in condition application, initiative bonus in initiative roll, tech attack roll bonus in technology attack resolution (`TechnologyDef.Resolution == "attack"`), Hardness bonus in damage reduction, ACVsEnergyBonus in energy-damage AC computation. `FPOnRecalibrateBonus` applies to the **Recalibrate action** (the Gunchete equivalent of PF2E Refocus — spending 10 in-game minutes to restore 1 Focus Point): when `FPOnRecalibrateBonus > 0`, the character restores `1 + FPOnRecalibrateBonus` Focus Points instead of 1. The Recalibrate action is not yet implemented; `FPOnRecalibrateBonus` is a placeholder that will be wired up when Recalibrate is added as a downtime action. `CarrierRadDmgPerHour` MUST be applied in the existing hourly zone tick handler (`internal/gameserver/zone_tick.go`) — for each player session with `PassiveMaterials.CarrierRadDmgPerHour > 0`, deal that many radiation damage points to the player per tick.
 - REQ-GA-38: `PassiveMaterialSummary.SaveVsTechBonus` accumulates from all equipped items with Null-Weave affixed regardless of whether the item is a weapon or armor. The save bonus is character-level (not slot-restricted).
-- REQ-GA-39: After a successful `affix` call, `HandleAffix` MUST trigger recomputation of `PlayerSession.PassiveMaterials` by calling `ComputePassiveMaterials` and writing the result back. This ensures Hardness bonuses, save bonuses, and other passive effects from the newly affixed material are active immediately without requiring a re-login.
+- REQ-GA-39: After a successful affix (success or critical success), `HandleAffix` MUST recompute `sess.PassiveMaterials` by calling `inventory.ComputePassiveMaterials(...)` with the active preset weapons and all armor slots, then writing the result back to `sess.PassiveMaterials`. `HandleAffix` performs this recomputation directly (not `handleAffix` in `grpc_service.go`), ensuring passive effects are active immediately without requiring a re-login.
 
 ### 5.4 Carbide Alloy MaxDurability
 
@@ -488,11 +490,14 @@ MaxDurability bonus stored in `MaterialMaxDurabilityBonus` (see Section 5.4).
 const KindPreciousMaterial = "precious_material"
 // validKinds must include KindPreciousMaterial.
 // Validate() error message must include "precious_material" in the kind list.
-// Validate() must require non-empty MaterialID and GradeID when Kind == KindPreciousMaterial.
+// Validate() must require non-empty MaterialID, GradeID, MaterialName, MaterialTier, and AppliesTo when Kind == KindPreciousMaterial.
 
 // Added to ItemDef:
-MaterialID string `yaml:"material_id,omitempty"`
-GradeID    string `yaml:"grade_id,omitempty"`
+MaterialID   string   `yaml:"material_id,omitempty"`    // required when Kind == KindPreciousMaterial
+GradeID      string   `yaml:"grade_id,omitempty"`       // required when Kind == KindPreciousMaterial
+MaterialName string   `yaml:"material_name,omitempty"`  // display name shared across all grades; required when Kind == KindPreciousMaterial
+MaterialTier string   `yaml:"material_tier,omitempty"`  // "common" | "uncommon" | "rare"; required when Kind == KindPreciousMaterial
+AppliesTo    []string `yaml:"applies_to,omitempty"`     // required when Kind == KindPreciousMaterial
 ```
 
 ### 6.2 WeaponDef and ArmorDef
@@ -517,14 +522,16 @@ MaterialMaxDurabilityBonus int     // sum of Carbide Alloy grade bonuses affixed
 
 ```go
 // Added to EquippedWeapon:
-AffixedMaterials []string // cached copy; set in newEquippedWeapon from ItemInstance
+AffixedMaterials          []string // cached copy; set by LoadWeaponPresets after EquipMainHand/EquipOffHand
+MaterialMaxDurabilityBonus int     // cached copy; set by LoadWeaponPresets; effective max = MaxDurability + MaterialMaxDurabilityBonus
 ```
 
 ### 6.5 SlottedItem (`internal/game/inventory/equipment.go`)
 
 ```go
 // Added to SlottedItem:
-AffixedMaterials []string // cached copy; set in armor wear path from ItemInstance
+AffixedMaterials          []string // cached copy; set by armor wear path from ItemInstance
+MaterialMaxDurabilityBonus int     // cached copy; set by armor wear path; effective max = MaxDurability + MaterialMaxDurabilityBonus
 ```
 
 ### 6.6 PlayerSession
