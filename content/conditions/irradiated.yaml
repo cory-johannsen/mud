@@ -1,0 +1,5 @@
+id: irradiated
+name: Irradiated
+description: "Exposed to concentrated radiation. Takes 1 radiation damage at the start of each turn."
+duration_type: rounds
+max_stacks: 0

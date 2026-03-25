@@ -1,0 +1,13 @@
+id: hollow_point_street_grade
+name: "Hollow Point (Street Grade)"
+description: "Silver-jacketed rounds treated with sanctified compounds. Lethal against supernatural entities."
+kind: precious_material
+material_id: hollow_point
+grade_id: street_grade
+material_name: "Hollow Point"
+material_tier: common
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 50

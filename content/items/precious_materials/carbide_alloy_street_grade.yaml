@@ -1,0 +1,14 @@
+id: carbide_alloy_street_grade
+name: "Carbide Alloy (Street Grade)"
+description: "Tungsten-carbide composite alloy. Extreme hardness pierces barriers and reinforces structural integrity."
+kind: precious_material
+material_id: carbide_alloy
+grade_id: street_grade
+material_name: "Carbide Alloy"
+material_tier: uncommon
+applies_to:
+  - weapon
+  - armor
+stackable: false
+max_stack: 1
+value: 50

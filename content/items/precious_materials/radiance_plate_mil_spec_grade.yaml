@@ -1,0 +1,13 @@
+id: radiance_plate_mil_spec_grade
+name: "Radiance Plate (Mil-Spec Grade)"
+description: "Radiance-forged plate from the dawn spectrum. Devastating against shadow-aspected entities."
+kind: precious_material
+material_id: radiance_plate
+grade_id: mil_spec_grade
+material_name: "Radiance Plate"
+material_tier: rare
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 150

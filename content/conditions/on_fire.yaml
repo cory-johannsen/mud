@@ -1,0 +1,6 @@
+id: on_fire
+name: On Fire
+description: "The character is engulfed in flames. Takes 1 fire damage at the start of each turn. Spend 1 AP to extinguish."
+duration_type: rounds
+max_stacks: 0
+ap_reduction: 0

@@ -1,0 +1,13 @@
+id: polymer_frame_street_grade
+name: "Polymer Frame (Street Grade)"
+description: "Advanced polymer composite. Lightweight and invisible to standard metal detection."
+kind: precious_material
+material_id: polymer_frame
+grade_id: street_grade
+material_name: "Polymer Frame"
+material_tier: uncommon
+applies_to:
+  - armor
+stackable: false
+max_stack: 1
+value: 50

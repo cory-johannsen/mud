@@ -1,0 +1,13 @@
+id: cryo_gel_street_grade
+name: "Cryo-Gel (Street Grade)"
+description: "Cryogenic gel coating that freezes targets on contact. Slows movement and inflicts cold damage."
+kind: precious_material
+material_id: cryo_gel
+grade_id: street_grade
+material_name: "Cryo-Gel"
+material_tier: uncommon
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 50

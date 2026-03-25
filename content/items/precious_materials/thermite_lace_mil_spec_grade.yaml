@@ -1,0 +1,13 @@
+id: thermite_lace_mil_spec_grade
+name: "Thermite Lace (Mil-Spec Grade)"
+description: "Thermite-laced material that ignites on impact. Inflicts persistent fire damage."
+kind: precious_material
+material_id: thermite_lace
+grade_id: mil_spec_grade
+material_name: "Thermite Lace"
+material_tier: uncommon
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 150

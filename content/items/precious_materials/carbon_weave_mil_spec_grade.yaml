@@ -1,0 +1,13 @@
+id: carbon_weave_mil_spec_grade
+name: "Carbon Weave (Mil-Spec Grade)"
+description: "Carbon-fiber composite weave. Dramatically reduces weight and check penalties for armored movement."
+kind: precious_material
+material_id: carbon_weave
+grade_id: mil_spec_grade
+material_name: "Carbon Weave"
+material_tier: uncommon
+applies_to:
+  - armor
+stackable: false
+max_stack: 1
+value: 150

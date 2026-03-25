@@ -1,0 +1,13 @@
+id: shadow_plate_street_grade
+name: "Shadow Plate (Street Grade)"
+description: "Shadow-forged plate from the dark spectrum. Devastating against light-aspected entities."
+kind: precious_material
+material_id: shadow_plate
+grade_id: street_grade
+material_name: "Shadow Plate"
+material_tier: rare
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 50

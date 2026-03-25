@@ -1,0 +1,13 @@
+id: hollow_point_mil_spec_grade
+name: "Hollow Point (Mil-Spec Grade)"
+description: "Silver-jacketed rounds treated with sanctified compounds. Lethal against supernatural entities."
+kind: precious_material
+material_id: hollow_point
+grade_id: mil_spec_grade
+material_name: "Hollow Point"
+material_tier: common
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 150

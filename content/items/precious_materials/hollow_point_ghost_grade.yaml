@@ -1,0 +1,13 @@
+id: hollow_point_ghost_grade
+name: "Hollow Point (Ghost Grade)"
+description: "Silver-jacketed rounds treated with sanctified compounds. Lethal against supernatural entities."
+kind: precious_material
+material_id: hollow_point
+grade_id: ghost_grade
+material_name: "Hollow Point"
+material_tier: common
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 500

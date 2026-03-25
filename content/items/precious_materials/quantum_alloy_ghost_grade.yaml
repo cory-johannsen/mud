@@ -1,0 +1,14 @@
+id: quantum_alloy_ghost_grade
+name: "Quantum Alloy (Ghost Grade)"
+description: "Quantum-entangled alloy that defies conventional timing. Improves initiative."
+kind: precious_material
+material_id: quantum_alloy
+grade_id: ghost_grade
+material_name: "Quantum Alloy"
+material_tier: rare
+applies_to:
+  - weapon
+  - armor
+stackable: false
+max_stack: 1
+value: 500

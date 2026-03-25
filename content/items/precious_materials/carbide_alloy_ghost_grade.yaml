@@ -1,0 +1,14 @@
+id: carbide_alloy_ghost_grade
+name: "Carbide Alloy (Ghost Grade)"
+description: "Tungsten-carbide composite alloy. Extreme hardness pierces barriers and reinforces structural integrity."
+kind: precious_material
+material_id: carbide_alloy
+grade_id: ghost_grade
+material_name: "Carbide Alloy"
+material_tier: uncommon
+applies_to:
+  - weapon
+  - armor
+stackable: false
+max_stack: 1
+value: 500

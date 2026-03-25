@@ -1,0 +1,13 @@
+id: soul_guard_alloy_mil_spec_grade
+name: "Soul-Guard Alloy (Mil-Spec Grade)"
+description: "Psychic-barrier alloy. Protects against mental domination and fear effects."
+kind: precious_material
+material_id: soul_guard_alloy
+grade_id: mil_spec_grade
+material_name: "Soul-Guard Alloy"
+material_tier: rare
+applies_to:
+  - armor
+stackable: false
+max_stack: 1
+value: 150

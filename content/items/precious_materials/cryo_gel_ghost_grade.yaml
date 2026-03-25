@@ -1,0 +1,13 @@
+id: cryo_gel_ghost_grade
+name: "Cryo-Gel (Ghost Grade)"
+description: "Cryogenic gel coating that freezes targets on contact. Slows movement and inflicts cold damage."
+kind: precious_material
+material_id: cryo_gel
+grade_id: ghost_grade
+material_name: "Cryo-Gel"
+material_tier: uncommon
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 500

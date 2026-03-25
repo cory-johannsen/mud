@@ -1,0 +1,14 @@
+id: rad_core_street_grade
+name: "Rad-Core (Street Grade)"
+description: "Radioactive core material. Irradiates targets and exposes the carrier to low-level radiation."
+kind: precious_material
+material_id: rad_core
+grade_id: street_grade
+material_name: "Rad-Core"
+material_tier: rare
+applies_to:
+  - weapon
+  - armor
+stackable: false
+max_stack: 1
+value: 50

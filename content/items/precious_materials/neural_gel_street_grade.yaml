@@ -1,0 +1,14 @@
+id: neural_gel_street_grade
+name: "Neural Gel (Street Grade)"
+description: "Neural-interface gel that enhances tech-attack precision. Improves technology attack rolls."
+kind: precious_material
+material_id: neural_gel
+grade_id: street_grade
+material_name: "Neural Gel"
+material_tier: rare
+applies_to:
+  - weapon
+  - armor
+stackable: false
+max_stack: 1
+value: 50

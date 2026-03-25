@@ -1,0 +1,13 @@
+id: radiance_plate_street_grade
+name: "Radiance Plate (Street Grade)"
+description: "Radiance-forged plate from the dawn spectrum. Devastating against shadow-aspected entities."
+kind: precious_material
+material_id: radiance_plate
+grade_id: street_grade
+material_name: "Radiance Plate"
+material_tier: rare
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 50

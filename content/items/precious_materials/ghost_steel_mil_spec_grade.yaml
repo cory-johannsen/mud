@@ -1,0 +1,13 @@
+id: ghost_steel_mil_spec_grade
+name: "Ghost Steel (Mil-Spec Grade)"
+description: "Phase-shifting steel that passes through metal on impact. Ignores metal armor protection."
+kind: precious_material
+material_id: ghost_steel
+grade_id: mil_spec_grade
+material_name: "Ghost Steel"
+material_tier: rare
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 150

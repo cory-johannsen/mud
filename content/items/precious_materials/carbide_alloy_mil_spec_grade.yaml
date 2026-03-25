@@ -1,0 +1,14 @@
+id: carbide_alloy_mil_spec_grade
+name: "Carbide Alloy (Mil-Spec Grade)"
+description: "Tungsten-carbide composite alloy. Extreme hardness pierces barriers and reinforces structural integrity."
+kind: precious_material
+material_id: carbide_alloy
+grade_id: mil_spec_grade
+material_name: "Carbide Alloy"
+material_tier: uncommon
+applies_to:
+  - weapon
+  - armor
+stackable: false
+max_stack: 1
+value: 150

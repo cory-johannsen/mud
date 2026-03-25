@@ -1,0 +1,13 @@
+id: scrap_iron_mil_spec_grade
+name: "Scrap Iron (Mil-Spec Grade)"
+description: "Cold iron fragments salvaged from junked cyberware. Disrupts cyber-augmented systems on impact."
+kind: precious_material
+material_id: scrap_iron
+grade_id: mil_spec_grade
+material_name: "Scrap Iron"
+material_tier: common
+applies_to:
+  - weapon
+stackable: false
+max_stack: 1
+value: 150

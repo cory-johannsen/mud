@@ -1,0 +1,14 @@
+id: null_weave_street_grade
+name: "Null-Weave (Street Grade)"
+description: "EMF-nullifying weave that blocks technological intrusion. Improves saves vs. tech."
+kind: precious_material
+material_id: null_weave
+grade_id: street_grade
+material_name: "Null-Weave"
+material_tier: rare
+applies_to:
+  - weapon
+  - armor
+stackable: false
+max_stack: 1
+value: 50
