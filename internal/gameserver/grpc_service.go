@@ -1927,6 +1927,11 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*gamev1.ServerEvent, error) {
 	dir := world.Direction(req.Direction)
 
+	// REQ-MV-1: movement is blocked while the player is in combat.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Status == statusInCombat {
+		return messageEvent("You cannot move while in combat."), nil
+	}
+
 	// IMMOBILIZED: grabbed condition prevents leaving the room.
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil {
 		if condition.IsActionRestricted(sess.Conditions, "move") {

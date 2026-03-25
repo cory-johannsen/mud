@@ -161,11 +161,11 @@
 
 ### BUG-19: Players can move rooms while in combat
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Players are able to use movement commands to change rooms while engaged in combat, which should not be permitted.
 **Steps:** Initiate combat with any NPC; while in combat, issue a movement command (e.g., `north`); observe that the player is moved out of the room.
-**Fix:**
+**Fix:** Added an in-combat guard at the top of `handleMove` in `internal/gameserver/grpc_service.go`. When `sess.Status == statusInCombat`, the handler returns a message event "You cannot move while in combat." and aborts before any room transition logic. Tests added in `grpc_service_move_test.go`.
 
 ### BUG-22: Automatic health recharge should be disabled in combat
 **Severity:** high

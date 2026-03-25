@@ -299,3 +299,77 @@ func containsAt(s, substr string) bool {
 	}
 	return false
 }
+
+// TestHandleMove_BlockedWhileInCombat verifies that a player in combat cannot change rooms.
+//
+// Precondition: Player's Status is statusInCombat.
+// Postcondition: handleMove returns a non-nil event with an error/message and the player's
+// room is unchanged.
+func TestHandleMove_BlockedWhileInCombat(t *testing.T) {
+	worldMgr, sessMgr := newNormalTerrainWorld(t)
+	svc := newMoveTestService(t, worldMgr, sessMgr)
+
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "u_combat",
+		Username:    "Fighter",
+		CharName:    "Fighter",
+		CharacterID: 10,
+		RoomID:      "room_a",
+		CurrentHP:   10,
+		MaxHP:       10,
+		Abilities:   character.AbilityScores{},
+		Role:        "player",
+	})
+	require.NoError(t, err)
+	sess.Status = statusInCombat
+
+	evt, err := svc.handleMove("u_combat", &gamev1.MoveRequest{Direction: "north"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+
+	// Must not be a RoomView — player should not have moved.
+	assert.Nil(t, evt.GetRoomView(), "player in combat must not receive a RoomView on move")
+
+	// Player's room must be unchanged.
+	updatedSess, ok := sessMgr.GetPlayer("u_combat")
+	require.True(t, ok)
+	assert.Equal(t, "room_a", updatedSess.RoomID, "player room must not change while in combat")
+}
+
+// TestPropertyHandleMove_InCombat_AlwaysBlocked is a property test verifying that
+// a player with statusInCombat can never move to another room.
+//
+// Precondition: Player's Status is statusInCombat.
+// Postcondition: For all valid move attempts, the player's room is never changed.
+func TestPropertyHandleMove_InCombat_AlwaysBlocked(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		worldMgr, sessMgr := newNormalTerrainWorld(t)
+		svc := newMoveTestService(t, worldMgr, sessMgr)
+
+		uid := rapid.StringMatching(`[a-z]{4,8}`).Draw(rt, "uid")
+
+		sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+			UID:         uid,
+			Username:    "CombatProp",
+			CharName:    "CombatProp",
+			CharacterID: 99,
+			RoomID:      "room_a",
+			CurrentHP:   10,
+			MaxHP:       10,
+			Abilities:   character.AbilityScores{},
+			Role:        "player",
+		})
+		require.NoError(rt, err)
+		sess.Status = statusInCombat
+
+		evt, err := svc.handleMove(uid, &gamev1.MoveRequest{Direction: "north"})
+		require.NoError(rt, err)
+		require.NotNil(rt, evt)
+
+		assert.Nil(rt, evt.GetRoomView(), "in-combat player must never receive a RoomView")
+
+		updatedSess, ok := sessMgr.GetPlayer(uid)
+		require.True(rt, ok)
+		assert.Equal(rt, "room_a", updatedSess.RoomID, "in-combat player room must not change")
+	})
+}
