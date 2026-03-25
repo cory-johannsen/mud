@@ -153,11 +153,11 @@
 
 ### BUG-20: Players can use the map command while in combat
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Players are able to use the `map` command while engaged in combat, which should not be permitted.
 **Steps:** Initiate combat with any NPC; while in combat, issue the `map` command; observe that the map is displayed.
-**Fix:**
+**Fix:** In `handleMap` (`internal/gameserver/grpc_service.go`), added a `statusInCombat` guard immediately after the player session lookup. When `sess.Status == statusInCombat`, the function returns `"You cannot use the map while in combat."` before any map logic runs. A dedicated test `TestHandleMap_BlockedInCombat` in `grpc_service_map_test.go` verifies the guard.
 
 ### BUG-19: Players can move rooms while in combat
 **Severity:** high

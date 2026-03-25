@@ -484,6 +484,26 @@ func TestWireRevealZone_BulkReveal(t *testing.T) {
 	require.True(t, sess.AutomapCache[zoneID]["room3"])
 }
 
+// TestHandleMap_BlockedInCombat verifies that handleMap returns a combat-block message
+// when the player's session status is statusInCombat.
+//
+// Precondition: Player session exists with Status == statusInCombat.
+// Postcondition: Returns a ServerEvent with a message containing "You cannot use the map while in combat."
+func TestHandleMap_BlockedInCombat(t *testing.T) {
+	wMgr, sMgr := newWorldAndSessionWithDiscovery("zone1", "room1")
+	sess, ok := sMgr.GetPlayer("uid1")
+	require.True(t, ok)
+	sess.Status = statusInCombat
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	msg := result.GetMessage()
+	require.NotNil(t, msg)
+	require.Contains(t, msg.Content, "You cannot use the map while in combat.")
+}
+
 // Compile-time check that gamev1 is used.
 var _ *gamev1.MapResponse
 

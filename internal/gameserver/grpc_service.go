@@ -5337,6 +5337,9 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
 	}
+	if sess.Status == statusInCombat {
+		return messageEvent("You cannot use the map while in combat."), nil
+	}
 	room, ok := s.world.GetRoom(sess.RoomID)
 	if !ok {
 		return messageEvent("You are nowhere."), nil
