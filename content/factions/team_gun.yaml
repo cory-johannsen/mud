@@ -1,7 +1,7 @@
 # content/factions/team_gun.yaml
 id: gun
 name: Team Gun
-zone_id: battleground
+zone_id: vantucky
 hostile_factions:
   - machete
 tiers:
