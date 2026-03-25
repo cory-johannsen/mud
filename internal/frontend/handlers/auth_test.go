@@ -5,8 +5,8 @@ import (
 	"net"
 	"strings"
 	"testing"
-	"unicode/utf8"
 	"time"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -296,11 +296,12 @@ func TestWelcomeBannerContainsKeyElements(t *testing.T) {
 }
 
 // TestBannerContainsBrightCyanAsciiArt asserts that the banner contains at least 4
-// independently-colorized BrightCyan segments with non-trivial ASCII art content.
+// independently-colorized BrightCyan segments with non-trivial Unicode block-letter content.
 // Each title row is wrapped with its own BrightCyan+Reset pair, so we count occurrences.
 func TestBannerContainsBrightCyanAsciiArt(t *testing.T) {
 	banner := buildWelcomeBanner()
-	// Count how many BrightCyan segments contain non-trivial content (≥3 visible chars).
+	// Count how many BrightCyan segments contain non-trivial content (≥3 visible runes).
+	// Uses RuneCountInString because the title rows contain multi-byte UTF-8 box-drawing characters.
 	artRows := 0
 	remaining := banner
 	for {
@@ -314,7 +315,7 @@ func TestBannerContainsBrightCyanAsciiArt(t *testing.T) {
 			break
 		}
 		segment := after[:resetIdx]
-		if len(strings.TrimSpace(segment)) >= 3 {
+		if utf8.RuneCountInString(strings.TrimSpace(segment)) >= 3 {
 			artRows++
 		}
 		remaining = after[resetIdx+len(telnet.Reset):]
@@ -336,6 +337,9 @@ func TestBannerContainsBrightYellow(t *testing.T) {
 }
 
 // TestBannerLineWidthMax80 asserts that every line is at most 80 visible characters.
+// Uses RuneCountInString rather than len because the title rows contain multi-byte
+// UTF-8 box-drawing characters. All art characters are Narrow (single-column) Unicode,
+// so rune count equals terminal column count for this banner.
 func TestBannerLineWidthMax80(t *testing.T) {
 	banner := buildWelcomeBanner()
 	for i, line := range strings.Split(banner, "\n") {
