@@ -92,7 +92,8 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	itemsDir := cfg.ItemsDir
 	explosivesDir := cfg.ExplosivesDir
 	armorsDir := cfg.ArmorsDir
-	registry, err := inventory.NewRegistryFromDirs(weaponsDir, itemsDir, explosivesDir, armorsDir, conditionRegistry, logger)
+	preciousMaterialsDir := cfg.PreciousMaterialsDir
+	registry, err := inventory.NewRegistryFromDirs(weaponsDir, itemsDir, explosivesDir, armorsDir, preciousMaterialsDir, conditionRegistry, logger)
 	if err != nil {
 		return nil, err
 	}

@@ -22,6 +22,9 @@ type ExplosivesDir string
 // ArmorsDir is the path to armor YAML definitions.
 type ArmorsDir string
 
+// PreciousMaterialsDir is the path to precious material YAML definitions.
+type PreciousMaterialsDir string
+
 // NewRegistryFromDirs loads all inventory definitions into a single Registry.
 // condRegistry is used to validate disease_id/toxin_id references in consumable
 // effects (REQ-EM-42) and MUST be loaded before this function is called.
@@ -30,6 +33,7 @@ func NewRegistryFromDirs(
 	itemsDir ItemsDir,
 	explosivesDir ExplosivesDir,
 	armorsDir ArmorsDir,
+	preciousMaterialsDir PreciousMaterialsDir,
 	condRegistry *condition.Registry,
 	logger *zap.Logger,
 ) (*Registry, error) {
@@ -94,6 +98,12 @@ func NewRegistryFromDirs(
 		}
 	}
 	logger.Info("loaded armor definitions", zap.Int("count", len(armors)))
+	if preciousMaterialsDir != "" {
+		if err := LoadPreciousMaterials(reg, string(preciousMaterialsDir)); err != nil {
+			return nil, fmt.Errorf("loading precious materials: %w", err)
+		}
+		logger.Info("loaded precious material definitions", zap.Int("count", len(requiredMaterialIDs)*len(requiredGradeIDs)))
+	}
 	return reg, nil
 }
 

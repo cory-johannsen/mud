@@ -677,3 +677,28 @@ func TestItemDef_Validate_PreciousMaterial_Valid(t *testing.T) {
 	}
 	assert.NoError(t, d.Validate())
 }
+
+func TestLoadPreciousMaterials_LoadsAll45(t *testing.T) {
+	reg := inventory.NewRegistry()
+	err := inventory.LoadPreciousMaterials(reg, "../../../content/items/precious_materials")
+	require.NoError(t, err)
+	materials := []string{
+		"scrap_iron", "hollow_point", "carbide_alloy", "carbon_weave", "polymer_frame",
+		"thermite_lace", "cryo_gel", "quantum_alloy", "rad_core", "neural_gel",
+		"ghost_steel", "null_weave", "soul_guard_alloy", "shadow_plate", "radiance_plate",
+	}
+	grades := []string{"street_grade", "mil_spec_grade", "ghost_grade"}
+	for _, matID := range materials {
+		for _, gradeID := range grades {
+			_, ok := reg.Material(matID, gradeID)
+			assert.True(t, ok, "material %s:%s should be registered", matID, gradeID)
+		}
+	}
+}
+
+func TestLoadPreciousMaterials_MissingFile_ReturnsError(t *testing.T) {
+	reg := inventory.NewRegistry()
+	err := inventory.LoadPreciousMaterials(reg, "/nonexistent/dir")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "missing")
+}

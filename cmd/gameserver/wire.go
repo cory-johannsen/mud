@@ -56,7 +56,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		wire.FieldsOf(new(*AppConfig),
 			"ZonesDir", "NPCsDir", "ConditionsDir", "MentalCondDir",
 			"ScriptRoot", "CondScriptDir", "WeaponsDir", "ItemsDir",
-			"ExplosivesDir", "ArmorsDir", "AIScriptDir",
+			"ExplosivesDir", "ArmorsDir", "PreciousMaterialsDir", "AIScriptDir",
 			"AITickInterval", "JobsDir", "LoadoutsDir",
 			"SkillsFile", "FeatsFile", "ClassFeatsFile",
 			"ArchetypesDir", "RegionsDir", "TechContentDir", "RoundDurationMs",

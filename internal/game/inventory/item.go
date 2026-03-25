@@ -193,6 +193,16 @@ func (d *ItemDef) Validate() error {
 	return nil
 }
 
+// requiredMaterialIDs lists the 15 required precious material base IDs.
+// For each, there must be 3 YAML files (street_grade, mil_spec_grade, ghost_grade).
+var requiredMaterialIDs = []string{
+	"scrap_iron", "hollow_point", "carbide_alloy", "carbon_weave", "polymer_frame",
+	"thermite_lace", "cryo_gel", "quantum_alloy", "rad_core", "neural_gel",
+	"ghost_steel", "null_weave", "soul_guard_alloy", "shadow_plate", "radiance_plate",
+}
+
+var requiredGradeIDs = []string{"street_grade", "mil_spec_grade", "ghost_grade"}
+
 // requiredConsumableIDs lists the six consumable item IDs that MUST be present
 // at startup (REQ-EM-40).
 var requiredConsumableIDs = []string{
@@ -290,4 +300,37 @@ func LoadItems(dir string) ([]*ItemDef, error) {
 		items = append(items, &d)
 	}
 	return items, nil
+}
+
+// LoadPreciousMaterials loads all 45 precious material YAML files from dir,
+// registers them as ItemDefs and MaterialDefs in reg.
+// Missing or invalid files are fatal load errors.
+//
+// Precondition: reg must not be nil; dir must contain the 45 required YAML files.
+// Postcondition: all 45 MaterialDefs are registered; returns nil on success.
+func LoadPreciousMaterials(reg *Registry, dir string) error {
+	for _, matID := range requiredMaterialIDs {
+		for _, gradeID := range requiredGradeIDs {
+			filename := filepath.Join(dir, matID+"_"+gradeID+".yaml")
+			data, err := os.ReadFile(filename)
+			if err != nil {
+				return fmt.Errorf("inventory: LoadPreciousMaterials: required file %q missing: %w", filename, err)
+			}
+			var def ItemDef
+			if err := yaml.Unmarshal(data, &def); err != nil {
+				return fmt.Errorf("inventory: LoadPreciousMaterials: parsing %q: %w", filename, err)
+			}
+			if err := reg.RegisterItem(&def); err != nil {
+				return fmt.Errorf("inventory: LoadPreciousMaterials: registering item %q: %w", def.ID, err)
+			}
+			matDef, err := MaterialDefFromItemDef(&def)
+			if err != nil {
+				return fmt.Errorf("inventory: LoadPreciousMaterials: building MaterialDef from %q: %w", def.ID, err)
+			}
+			if err := reg.RegisterMaterial(matDef); err != nil {
+				return fmt.Errorf("inventory: LoadPreciousMaterials: registering material %q: %w", matDef.MaterialID+":"+matDef.GradeID, err)
+			}
+		}
+	}
+	return nil
 }

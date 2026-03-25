@@ -42,7 +42,8 @@ type AppConfig struct {
 	WeaponsDir      inventory.WeaponsDir
 	ItemsDir        inventory.ItemsDir
 	ExplosivesDir   inventory.ExplosivesDir
-	ArmorsDir       inventory.ArmorsDir
+	ArmorsDir              inventory.ArmorsDir
+	PreciousMaterialsDir   inventory.PreciousMaterialsDir
 	AIDir           string
 	AIScriptDir     scripting.AIScriptDir
 	AITickInterval  gameserver.AITickInterval
@@ -85,6 +86,7 @@ func main() {
 	aiScriptDir := flag.String("ai-scripts", "content/scripts/ai", "path to Lua AI precondition scripts")
 	aiTickInterval := flag.Duration("ai-tick", 10*time.Second, "NPC AI tick interval")
 	armorsDir := flag.String("armors-dir", "content/armor", "path to armor YAML definitions directory")
+	preciousMaterialsDir := flag.String("precious-materials-dir", "content/items/precious_materials", "path to precious material YAML definitions directory")
 	jobsDir := flag.String("jobs-dir", "content/jobs", "path to job YAML definitions directory")
 	loadoutsDir := flag.String("loadouts-dir", "content/loadouts", "path to archetype loadout YAML directory")
 	skillsFile := flag.String("skills", "content/skills.yaml", "path to skills YAML file")
@@ -137,7 +139,8 @@ func main() {
 		WeaponsDir:      inventory.WeaponsDir(*weaponsDir),
 		ItemsDir:        inventory.ItemsDir(*itemsDir),
 		ExplosivesDir:   inventory.ExplosivesDir(*explosivesDir),
-		ArmorsDir:       inventory.ArmorsDir(*armorsDir),
+		ArmorsDir:            inventory.ArmorsDir(*armorsDir),
+		PreciousMaterialsDir: inventory.PreciousMaterialsDir(*preciousMaterialsDir),
 		AIDir:           *aiDir,
 		AIScriptDir:     scripting.AIScriptDir(*aiScriptDir),
 		AITickInterval:  gameserver.AITickInterval(*aiTickInterval),
