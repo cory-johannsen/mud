@@ -140,3 +140,11 @@
 **Description:** The `loadout` command output displays the raw Technology item ID (e.g., `stim_pack`) instead of the human-readable item name (e.g., `Stim Pack`).
 **Steps:** Create a character, equip or load out with any Technology item, run `loadout`; observe the ID is shown instead of the display name.
 **Fix:** Updated `FormatPreparedTechs` to accept a `*technology.Registry` parameter and look up the display name via `reg.Get(slot.TechID)`; falls back to raw TechID if registry is nil or tech not found. Updated call site in `grpc_service.go` to pass `s.techRegistry`.
+
+### BUG-18: use command displays technology IDs instead of display names
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** The `use` command output displays raw technology IDs instead of human-readable display names.
+**Steps:** Run `use` with no argument to list available active abilities; observe technology IDs shown instead of display names.
+**Fix:**
