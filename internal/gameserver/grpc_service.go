@@ -1917,6 +1917,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleCraft(uid, p.CraftRequest)
 	case *gamev1.ClientMessage_CraftConfirmRequest:
 		return s.handleCraftConfirm(uid)
+	case *gamev1.ClientMessage_AffixRequest:
+		return s.handleAffix(uid, p.AffixRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -9356,4 +9358,57 @@ func hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry) {
 			eq.Accessories[slot].Name = def.Name
 		}
 	}
+}
+
+// handleAffix processes the "affix <material> <target>" command.
+//
+// Precondition: uid identifies an active player session; req is non-nil.
+// Postcondition: Returns a non-nil ServerEvent; error is always nil.
+func (s *GameServiceServer) handleAffix(uid string, req *gamev1.AffixRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return errorEvent("player not found"), nil
+	}
+
+	materialQuery := strings.TrimSpace(req.GetMaterialQuery())
+	targetQuery := strings.TrimSpace(req.GetTargetQuery())
+	if materialQuery == "" || targetQuery == "" {
+		return messageEvent("Usage: affix <material> <item>"), nil
+	}
+
+	as := &command.AffixSession{Session: sess}
+	rng := &diceRollerAdapter{r: s.dice}
+	result := command.HandleAffix(as, s.invRegistry, materialQuery, targetQuery, rng)
+
+	ctx := context.Background()
+	characterID := sess.CharacterID
+
+	switch result.Outcome {
+	case command.AffixOutcomeCriticalSuccess, command.AffixOutcomeSuccess:
+		if s.charSaver != nil {
+			invItems := backpackToInventoryItems(sess.Backpack)
+			if err := s.charSaver.SaveInventory(ctx, characterID, invItems); err != nil {
+				s.logger.Error("handleAffix: SaveInventory failed", zap.Error(err))
+			}
+			if result.TargetIsWeapon {
+				if err := s.charSaver.SaveWeaponPresets(ctx, characterID, sess.LoadoutSet); err != nil {
+					s.logger.Error("handleAffix: SaveWeaponPresets failed", zap.Error(err))
+				}
+			} else {
+				if err := s.charSaver.SaveEquipment(ctx, characterID, sess.Equipment); err != nil {
+					s.logger.Error("handleAffix: SaveEquipment failed", zap.Error(err))
+				}
+			}
+		}
+	case command.AffixOutcomeCriticalFailure:
+		if s.charSaver != nil {
+			invItems := backpackToInventoryItems(sess.Backpack)
+			if err := s.charSaver.SaveInventory(ctx, characterID, invItems); err != nil {
+				s.logger.Error("handleAffix: SaveInventory failed", zap.Error(err))
+			}
+		}
+	// AffixOutcomeFailure and AffixOutcomeUnspecified: nothing changed, no saves needed.
+	}
+
+	return messageEvent(result.Message), nil
 }

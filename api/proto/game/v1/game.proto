@@ -138,6 +138,7 @@ message ClientMessage {
     CraftRequest         craft_request         = 121;
     CraftConfirmRequest  craft_confirm_request = 122;
     ScavengeRequest      scavenge_request      = 123;
+    AffixRequest         affix_request         = 124;
   }
 }
 
@@ -1176,6 +1177,12 @@ message CraftConfirmRequest {}
 
 // ScavengeRequest asks the server to scavenge the current room for materials.
 message ScavengeRequest   {}
+
+// AffixRequest asks the server to affix a precious material to an equipped item.
+message AffixRequest {
+    string material_query = 1;
+    string target_query   = 2;
+}
 
 // MaterialLoss describes the quantity of a material consumed during crafting.
 message MaterialLoss {

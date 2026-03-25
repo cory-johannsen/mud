@@ -169,6 +169,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerMaterials:          bridgeMaterials,
 	command.HandlerCraft:              bridgeCraft,
 	command.HandlerScavenge:           bridgeScavenge,
+	command.HandlerAffix:              bridgeAffix,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -2017,5 +2018,25 @@ func bridgeScavenge(bctx *bridgeContext) (bridgeResult, error) {
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_ScavengeRequest{ScavengeRequest: &gamev1.ScavengeRequest{}},
+	}}, nil
+}
+
+// bridgeAffix builds an AffixRequest to affix a precious material to an equipped item.
+// Usage: affix <material> <item>
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an AffixRequest; done is false.
+func bridgeAffix(bctx *bridgeContext) (bridgeResult, error) {
+	args := strings.Fields(bctx.parsed.RawArgs)
+	if len(args) < 2 {
+		return writeErrorPrompt(bctx, "Usage: affix <material> <item>")
+	}
+	materialQuery := args[0]
+	targetQuery := strings.Join(args[1:], " ")
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_AffixRequest{AffixRequest: &gamev1.AffixRequest{
+			MaterialQuery: materialQuery,
+			TargetQuery:   targetQuery,
+		}},
 	}}, nil
 }
