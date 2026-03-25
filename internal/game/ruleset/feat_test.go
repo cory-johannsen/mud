@@ -254,3 +254,22 @@ func TestLoadFeats_SkillGapFeats_TechLoreRigging(t *testing.T) {
 		assert.True(t, byID[id], "missing skill feat: %s", id)
 	}
 }
+
+func TestLoadFeats_SkillGapFeats_PatchJob(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"stim_points", "inoculation", "field_researcher", "risky_op", "field_suture",
+		"crystalline_stim", "rapid_treatment", "tough_patient", "mass_treatment",
+		"extended_treatment", "secular_medicine", "natural_healing", "comfort_treatment",
+		"light_therapy", "drug_vasodilation", "master_combat_patch", "advanced_patch_job",
+		"legendary_medic",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing patch_job skill feat: %s", id)
+	}
+}

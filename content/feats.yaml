@@ -1288,6 +1288,168 @@ feats:
     activate_text: "You slap a patch on the wound and keep moving."
     description: "Apply first aid as a single action without a kit; target immune for 1 day."
 
+  - id: stim_points
+    name: Stim Points
+    category: skill
+    skill: patch_job
+    pf2e: acupuncturist
+    active: true
+    activate_text: "You hit the pressure points precisely and feel them respond."
+    description: "Stimulation technique using precise pressure points to enhance the target's recovery rate."
+
+  - id: inoculation
+    name: Inoculation
+    category: skill
+    skill: patch_job
+    pf2e: inoculation
+    active: false
+    activate_text: ""
+    description: "Protect others against disease and poison; inoculated targets gain +2 to saves vs. the chosen threat."
+
+  - id: field_researcher
+    name: Field Researcher
+    category: skill
+    skill: patch_job
+    pf2e: medical_researcher
+    active: false
+    activate_text: ""
+    description: "Learn about diseases and toxins as you encounter them; add new threats to your working knowledge."
+
+  - id: risky_op
+    name: Risky Op
+    category: skill
+    skill: patch_job
+    pf2e: risky_surgery
+    active: false
+    activate_text: ""
+    description: "Accept risk for better medical outcomes; trade a flat check for +2 to Patch Job and double healing."
+
+  - id: field_suture
+    name: Field Suture
+    category: skill
+    skill: patch_job
+    pf2e: stitch_flesh
+    active: true
+    activate_text: "You close the wound with whatever you have on hand."
+    description: "Basic wound closure without medical supplies; restore a small amount of HP without a kit."
+
+  - id: crystalline_stim
+    name: Crystalline Stim
+    category: skill
+    skill: patch_job
+    pf2e: crystal_healing
+    active: true
+    activate_text: "You administer the compound and watch the color return to their face."
+    description: "Use crystalline drug compounds to enhance healing beyond standard first aid limits."
+
+  - id: rapid_treatment
+    name: Rapid Treatment
+    category: skill
+    skill: patch_job
+    pf2e: continual_recovery
+    active: false
+    activate_text: ""
+    description: "Treat wounds more often; reduce the cooldown between Treat Wounds actions."
+
+  - id: tough_patient
+    name: Tough Patient
+    category: skill
+    skill: patch_job
+    pf2e: robust_recovery
+    active: false
+    activate_text: ""
+    description: "When treated, gain greater benefits; also recover faster from diseases."
+
+  - id: mass_treatment
+    name: Mass Treatment
+    category: skill
+    skill: patch_job
+    pf2e: ward_medic
+    active: false
+    activate_text: ""
+    description: "Treat up to 4 patients simultaneously with a single Treat Wounds action."
+
+  - id: extended_treatment
+    name: Extended Treatment
+    category: skill
+    skill: patch_job
+    pf2e: unusual_treatment
+    active: false
+    activate_text: ""
+    description: "Treat additional conditions beyond standard wounds — remove sickened and enfeebled with medical care."
+
+  - id: secular_medicine
+    name: Secular Medicine
+    category: skill
+    skill: patch_job
+    pf2e: godless_healing
+    active: false
+    activate_text: ""
+    description: "Heal without relying on Technology bonuses; pure technique and anatomy knowledge."
+
+  - id: natural_healing
+    name: Natural Healing
+    category: skill
+    skill: patch_job
+    pf2e: mortal_healing
+    active: false
+    activate_text: ""
+    description: "Use the body's natural processes to heal without drugs or tech, bypassing standard restrictions."
+
+  - id: comfort_treatment
+    name: Comfort Treatment
+    category: skill
+    skill: patch_job
+    pf2e: performer's_treatment
+    active: true
+    activate_text: "You talk them through it. Keep them calm. It makes a difference."
+    description: "A calm, reassuring presence aids recovery; reduce the frightened condition on patients you treat."
+
+  - id: light_therapy
+    name: Light Therapy
+    category: skill
+    skill: patch_job
+    pf2e: chromotherapy
+    active: false
+    activate_text: ""
+    description: "Specialized light-spectrum treatment addresses psychological and physiological recovery."
+
+  - id: drug_vasodilation
+    name: Drug Vasodilation
+    category: skill
+    skill: patch_job
+    pf2e: vasodilation
+    active: true
+    activate_text: "You administer the compound and feel the rush as blood flow improves."
+    description: "Drug-assisted vasodilation rapidly distributes healing compounds for immediate HP recovery."
+
+  - id: master_combat_patch
+    name: Master Combat Patch
+    category: skill
+    skill: patch_job
+    pf2e: paragon_battle_medicine
+    active: true
+    activate_text: "You work fast under fire and your hands don't shake."
+    description: "Enhanced in-combat healing; Combat Patch restores additional HP and removes one additional condition."
+
+  - id: advanced_patch_job
+    name: Advanced Patch Job
+    category: skill
+    skill: patch_job
+    pf2e: advanced_first_aid
+    active: true
+    activate_text: "You stabilize them and get them back in the fight."
+    description: "Use advanced first aid to reduce the frightened and sickened conditions on a target."
+
+  - id: legendary_medic
+    name: Legendary Medic
+    category: skill
+    skill: patch_job
+    pf2e: legendary_medic
+    active: false
+    activate_text: ""
+    description: "Cure serious conditions including blindness, paralysis, and toxin damage with a day of treatment."
+
   # ── SKILL FEATS: WASTELAND ────────────────────────────────────────────────
   - id: assurance_wasteland
     name: Steady Wasteland
