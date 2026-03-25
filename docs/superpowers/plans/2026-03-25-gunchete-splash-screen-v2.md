@@ -4,7 +4,7 @@
 
 **Goal:** Replace the three-column weapon-flanking-title banner with a stacked layout: horizontal AK-47 art above the original GUNCHETE block-letter title, horizontal machete art below it.
 
-**Architecture:** All changes are in `buildWelcomeBanner()` in `internal/frontend/handlers/auth.go`. The function is rewritten to emit: AK-47 art block (BrightGreen, row-by-row), blank line, original Unicode block-letter title (Bold+BrightCyan), blank line, machete art block (BrightYellow, row-by-row), blank line, then the unchanged subtitle/version/commands footer. Tests live in `auth_test.go` (package `handlers`, white-box access to `buildWelcomeBanner`).
+**Architecture:** All changes are in `buildWelcomeBanner()` in `internal/frontend/handlers/auth.go`. The function is rewritten to emit: AK-47 art block (BrightGreen, row-by-row), blank line, original Unicode block-letter title (per-row Bold+BrightCyan+Reset), blank line, machete art block (BrightYellow, row-by-row), blank line, then the unchanged subtitle/version/commands footer. Tests live in `auth_test.go` (package `handlers`, white-box access to `buildWelcomeBanner`).
 
 **Tech Stack:** Go, ANSI constants from `internal/frontend/telnet` (`BrightGreen`, `BrightCyan`, `BrightYellow`, `Bold`, `Reset`, `Dim`, `Green`), `telnet.StripANSI` for visible-width measurement in tests.
 
@@ -17,7 +17,17 @@
 | File | Action | Responsibility |
 |---|---|---|
 | `internal/frontend/handlers/auth.go` | Modify | Replace `buildWelcomeBanner()` with stacked layout |
-| `internal/frontend/handlers/auth_test.go` | Modify | Add ordering tests (TEST-6, TEST-7); update TestBannerColorReset to check `Bold` |
+| `internal/frontend/handlers/auth_test.go` | Modify | Add `TestBannerBoldReset` and two ordering tests |
+
+---
+
+## Key design constraint: Bold+BrightCyan adjacency
+
+The title rows use `telnet.Bold + telnet.BrightCyan + row + telnet.Reset`. The existing `TestBannerColorReset` checks that no other color from its `colors` slice appears before `Reset` after each color code. If `Bold` were added to that slice, the test would fail on every title row because `BrightCyan` appears between `Bold` and `Reset`.
+
+**Therefore:** Do NOT add `Bold` to `TestBannerColorReset`. Instead, add a dedicated `TestBannerBoldReset` that checks `Bold` → `Reset` without the inter-color constraint (since the spec explicitly permits the `Bold+BrightCyan+Reset` pattern).
+
+**Therefore:** The title MUST use the per-row form — each title row wrapped individually in `Bold+BrightCyan+row+Reset`. This also ensures `TestBannerContainsBrightCyanAsciiArt` (which counts BrightCyan-delimited segments ≥ 4) continues to pass.
 
 ---
 
@@ -26,37 +36,35 @@
 **Files:**
 - Modify: `internal/frontend/handlers/auth_test.go`
 
-The existing tests (`TestBannerContainsBrightCyanAsciiArt`, `TestBannerContainsBrightGreen`, `TestBannerContainsBrightYellow`, `TestBannerLineWidthMax80`, `TestBannerColorReset`) mostly cover the new layout already. Two changes needed:
+- [ ] **Step 1: Add TestBannerBoldReset**
 
-1. `TestBannerColorReset` currently only checks three color codes — it must also check `telnet.Bold`.
-2. Two new ordering tests are needed (TEST-6 and TEST-7): gun above title, machete below title.
-
-- [ ] **Step 1: Update TestBannerColorReset to include Bold**
-
-In `auth_test.go`, find `TestBannerColorReset`. The `colors` slice currently contains three entries. Add `telnet.Bold`:
+In `auth_test.go`, after `TestBannerColorReset` (ends around line 377), add:
 
 ```go
-colors := []string{
-    telnet.BrightGreen,
-    telnet.BrightCyan,
-    telnet.BrightYellow,
-    telnet.Bold,
+// TestBannerBoldReset asserts that every Bold occurrence is followed by Reset
+// before the end of the banner. Bold is always immediately followed by BrightCyan
+// on title rows (per spec IMPL-2), so this test does not require Reset before BrightCyan.
+func TestBannerBoldReset(t *testing.T) {
+	banner := buildWelcomeBanner()
+	remaining := banner
+	for {
+		idx := strings.Index(remaining, telnet.Bold)
+		if idx == -1 {
+			break
+		}
+		after := remaining[idx+len(telnet.Bold):]
+		resetIdx := strings.Index(after, telnet.Reset)
+		assert.Greater(t, resetIdx, -1,
+			"Bold at byte offset %d must be followed by Reset", idx)
+		if resetIdx == -1 {
+			break
+		}
+		remaining = after[resetIdx+len(telnet.Reset):]
+	}
 }
 ```
 
-The test body does not need any other changes — the loop already handles any number of color codes.
-
-- [ ] **Step 2: Run the updated test to verify it currently fails (Bold not reset in three-column impl)**
-
-```bash
-cd /home/cjohannsen/src/mud && mise run go test ./internal/frontend/handlers/... -run TestBannerColorReset -v 2>&1 | tail -10
-```
-
-Expected: FAIL (Bold is used but the current three-column banner may not use Bold at all — check whether it passes or fails; either is fine, record the result).
-
-- [ ] **Step 3: Add TestBannerGunAboveTitle**
-
-After `TestBannerColorReset`, add:
+- [ ] **Step 2: Add TestBannerGunAboveTitle**
 
 ```go
 // TestBannerGunAboveTitle asserts that the BrightGreen (AK-47) block appears
@@ -77,11 +85,12 @@ func TestBannerGunAboveTitle(t *testing.T) {
 	require.Greater(t, firstGreen, -1, "BrightGreen (AK-47) must appear in banner")
 	require.Greater(t, firstCyan, -1, "BrightCyan (title) must appear in banner")
 	assert.Less(t, firstGreen, firstCyan,
-		"BrightGreen (AK-47) line %d must be before BrightCyan (title) line %d", firstGreen, firstCyan)
+		"BrightGreen (AK-47) line %d must be before BrightCyan (title) line %d",
+		firstGreen, firstCyan)
 }
 ```
 
-- [ ] **Step 4: Add TestBannerMacheteBelowTitle**
+- [ ] **Step 3: Add TestBannerMacheteBelowTitle**
 
 ```go
 // TestBannerMacheteBelowTitle asserts that the BrightYellow (machete) block appears
@@ -102,23 +111,24 @@ func TestBannerMacheteBelowTitle(t *testing.T) {
 	require.Greater(t, lastCyan, -1, "BrightCyan (title) must appear in banner")
 	require.Greater(t, firstYellow, -1, "BrightYellow (machete) must appear in banner")
 	assert.Less(t, lastCyan, firstYellow,
-		"last BrightCyan (title) line %d must be before BrightYellow (machete) line %d", lastCyan, firstYellow)
+		"last BrightCyan (title) line %d must be before BrightYellow (machete) line %d",
+		lastCyan, firstYellow)
 }
 ```
 
-- [ ] **Step 5: Run new tests to confirm they fail against current banner**
+- [ ] **Step 4: Run new tests to confirm they fail against the current three-column banner**
 
 ```bash
-mise run go test ./internal/frontend/handlers/... -run "TestBannerGunAboveTitle|TestBannerMacheteBelowTitle" -v 2>&1 | tail -15
+cd /home/cjohannsen/src/mud && mise run go test ./internal/frontend/handlers/... -run "TestBannerGunAboveTitle|TestBannerMacheteBelowTitle|TestBannerBoldReset" -v 2>&1 | tail -20
 ```
 
-Expected: FAIL — current banner has BrightGreen/BrightYellow on the same rows as BrightCyan (three-column layout).
+Expected: `TestBannerGunAboveTitle` and `TestBannerMacheteBelowTitle` FAIL (current banner has BrightGreen/BrightYellow on the same rows as BrightCyan). `TestBannerBoldReset` may PASS (current banner may not use Bold) or FAIL — either is fine.
 
-- [ ] **Step 6: Commit the updated tests**
+- [ ] **Step 5: Commit the test additions**
 
 ```bash
 git add internal/frontend/handlers/auth_test.go
-git commit -m "test(splash): add ordering tests and Bold check for stacked banner layout"
+git commit -m "test(splash): add Bold reset, gun-above-title, and machete-below-title tests"
 ```
 
 ---
@@ -128,67 +138,49 @@ git commit -m "test(splash): add ordering tests and Bold check for stacked banne
 **Files:**
 - Modify: `internal/frontend/handlers/auth.go`
 
-Replace the entire `buildWelcomeBanner()` function body. The original title art (Unicode block letters) comes from `git show 4ec04c85~1:internal/frontend/handlers/auth.go` — it is the `██` style, 6 lines, ~72 chars wide.
+Replace the entire `buildWelcomeBanner()` function body.
 
-- [ ] **Step 1: Design and verify the AK-47 art**
+- [ ] **Step 1: Verify AK-47 art character counts**
 
-The AK-47 art must be a horizontal side-profile silhouette, ~58 visible chars wide, 5 rows tall. Use the following art (verified character counts shown):
-
-```
-        ____________________________________________         (52 chars)
-  ,--. |____________________________________________|===>    (57 chars)
- (    )|  [======================================]  |        (52 chars)
-  `--' |____________________________________________|        (53 chars)
-        |___|                                                 (12 chars)
-```
-
-**Verify widths before coding.** Count each row's visible characters:
-- Row 1: 8 spaces + 44 underscores = 52 ✓
-- Row 2: `  ,--. ` (7) + `|____________________________________________|` (46) + `===>` (4) = 57 ✓
-- Row 3: ` (    )` (7) + `|  [======================================]  |` (46) = 53 ✓
-- Row 4: `  ` + `` `--' `` (6) + `|____________________________________________|` (46) = 52 ✓
-- Row 5: 8 spaces + `|___|` (5) = 13 ✓
-
-All rows are ≤ 80. Good.
-
-- [ ] **Step 2: Design and verify the machete art**
-
-The machete art must be a horizontal side-profile silhouette, ~58 visible chars wide, 4 rows tall. Blade on the left (long and flat), handle+guard on the right.
+The AK-47 art rows and their verified visible character counts:
 
 ```
-  __________________________________________________________,    (60 chars)
- /__________________________________________________________|     (59 chars)
- |                                                          |=|   (62 chars — OVER 80? No, 62 is fine)
-  \_________________________________________________________|_|   (62 chars)
+Row 1: `        ____________________________________________`
+        8 spaces + 44 underscores = 52 chars ✓
+
+Row 2: `  ,--. |____________________________________________|===>`
+        "  ,--. " (7) + "|" (1) + 44 underscores (44) + "|" (1) + "===>" (4) = 57 chars ✓
+
+Row 3: ` (    )|  [======================================]  |`
+        " (    )" (7) + "|  [" (4) + 38 equals (38) + "]  |" (4) = 53 chars ✓
+
+Row 4: "  `--' |____________________________________________|"
+        "  `--' " (7) + "|" (1) + 44 underscores (44) + "|" (1) = 53 chars ✓
+        (Note: row 4 uses a backtick — requires string concatenation in Go source)
+
+Row 5: `        |___|`
+        8 spaces + "|___|" (5) = 13 chars ✓
 ```
 
-Wait, let me recount row 3: ` |` (2) + 58 spaces + `|=|` (3) = 63. That's fine (< 80).
+All rows are ≤ 80 visible chars. ✓
 
-Use this art:
+- [ ] **Step 2: Verify machete art character counts**
+
 ```
-  _______________________________________________________,
- /________________________________________________________|
- |                                                        |=|
-  \________________________________________________________|_|
+Row 1: `  _______________________________________________________,`
+        2 spaces + 55 underscores + "," = 58 chars ✓
+
+Row 2: ` /________________________________________________________|`
+        " /" (2) + 56 underscores + "|" (1) = 59 chars ✓
+
+Row 3: ` |                                                        |=|`
+        " |" (2) + 56 spaces + "|=|" (3) = 61 chars ✓
+
+Row 4: `  \________________________________________________________|_|`
+        "  \" (3) + 56 underscores + "|_|" (3) = 62 chars ✓
 ```
 
-Count:
-- Row 1: 2 + 55 underscores + `,` = 58 ✓
-- Row 2: ` /` + 56 underscores + `|` = 58 ✓
-- Row 3: ` |` + 56 spaces + `|=|` = 61 ✓
-- Row 4: ` \` + 56 underscores + `|_|` = 61 ✓
-
-All ≤ 80. Good.
-
-**IMPORTANT:** The implementer MUST verify all character counts by running:
-```go
-for i, row := range ak47 {
-    if n := len(telnet.StripANSI(row)); n > 80 {
-        panic(fmt.Sprintf("ak47 row %d is %d chars", i, n))
-    }
-}
-```
-or equivalent, before committing. The counts above are illustrative — adjust art until all rows are ≤ 80 visible chars.
+All rows are ≤ 80 visible chars. ✓
 
 - [ ] **Step 3: Replace buildWelcomeBanner()**
 
@@ -198,17 +190,18 @@ Replace the entire function with:
 // buildWelcomeBanner returns the connection banner with the current version embedded.
 //
 // Layout (top to bottom):
-//   1. Horizontal AK-47 ASCII art (BrightGreen)
-//   2. GUNCHETE Unicode block-letter title (Bold + BrightCyan)
-//   3. Horizontal machete ASCII art (BrightYellow)
-//   4. Subtitle, version, instructions (unchanged)
+//  1. Horizontal AK-47 ASCII art (BrightGreen, per-row)
+//  2. GUNCHETE Unicode block-letter title (Bold + BrightCyan, per-row)
+//  3. Horizontal machete ASCII art (BrightYellow, per-row)
+//  4. Subtitle, version, instructions (unchanged)
 //
-// All weapon art rows are ≤ 80 visible characters.
+// Each row is independently wrapped: color + row + Reset.
+// For title rows: Bold + BrightCyan + row + Reset (single Reset clears both).
 // Precondition: none.
 // Postcondition: returns a complete, non-empty banner string.
 func buildWelcomeBanner() string {
 	// AK-47 horizontal art — side profile, barrel pointing right.
-	// Each row MUST be ≤ 80 visible characters (verified by TestBannerLineWidthMax80).
+	// Each row is ≤ 80 visible characters (verified by TestBannerLineWidthMax80).
 	ak47 := []string{
 		`        ____________________________________________`,
 		`  ,--. |____________________________________________|===>`,
@@ -217,8 +210,20 @@ func buildWelcomeBanner() string {
 		`        |___|`,
 	}
 
+	// GUNCHETE Unicode block-letter title — original art, per-row.
+	// Each row wrapped independently so TestBannerContainsBrightCyanAsciiArt
+	// counts ≥ 4 distinct BrightCyan segments.
+	title := []string{
+		`  ██████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗███████╗████████╗███████╗`,
+		` ██╔════╝ ██║   ██║████╗  ██║██╔════╝██║  ██║██╔════╝╚══██╔══╝██╔════╝`,
+		` ██║  ███╗██║   ██║██╔██╗ ██║██║     ███████║█████╗     ██║   █████╗`,
+		` ██║   ██║██║   ██║██║╚██╗██║██║     ██╔══██║██╔══╝     ██║   ██╔══╝`,
+		` ╚██████╔╝╚██████╔╝██║ ╚████║╚██████╗██║  ██║███████╗   ██║   ███████╗`,
+		`  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝`,
+	}
+
 	// Machete horizontal art — blade on left, handle+guard on right.
-	// Each row MUST be ≤ 80 visible characters.
+	// Each row is ≤ 80 visible characters.
 	machete := []string{
 		`  _______________________________________________________,`,
 		` /________________________________________________________|`,
@@ -229,26 +234,21 @@ func buildWelcomeBanner() string {
 	var sb strings.Builder
 	sb.WriteString("\n")
 
-	// AK-47 block
+	// AK-47 block: each row independently colorized.
 	for _, row := range ak47 {
 		sb.WriteString(telnet.BrightGreen + row + telnet.Reset + "\n")
 	}
 
 	sb.WriteString("\n")
 
-	// Original GUNCHETE Unicode block-letter title (Bold + BrightCyan).
-	// Single Reset after BrightCyan clears both Bold and BrightCyan.
-	sb.WriteString(telnet.Bold + telnet.BrightCyan + `
-  ██████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗███████╗████████╗███████╗
- ██╔════╝ ██║   ██║████╗  ██║██╔════╝██║  ██║██╔════╝╚══██╔══╝██╔════╝
- ██║  ███╗██║   ██║██╔██╗ ██║██║     ███████║█████╗     ██║   █████╗
- ██║   ██║██║   ██║██║╚██╗██║██║     ██╔══██║██╔══╝     ██║   ██╔══╝
- ╚██████╔╝╚██████╔╝██║ ╚████║╚██████╗██║  ██║███████╗   ██║   ███████╗
-  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝` + telnet.Reset + "\n")
+	// Title block: Bold + BrightCyan per row. Single Reset clears both attributes.
+	for _, row := range title {
+		sb.WriteString(telnet.Bold + telnet.BrightCyan + row + telnet.Reset + "\n")
+	}
 
 	sb.WriteString("\n")
 
-	// Machete block
+	// Machete block: each row independently colorized.
 	for _, row := range machete {
 		sb.WriteString(telnet.BrightYellow + row + telnet.Reset + "\n")
 	}
@@ -265,40 +265,24 @@ func buildWelcomeBanner() string {
 }
 ```
 
-**Note on the title block:** The title string literal begins with a `\n` immediately after the opening backtick. This means the first `\n` after `BrightCyan` is part of the literal and the title lines start on the next line. The `Reset` comes after the last title line. `TestBannerColorReset` will verify `Bold` and `BrightCyan` are both followed by `Reset` — since `Bold` immediately precedes `BrightCyan` and `BrightCyan` has a `Reset`, the `Bold` check in `TestBannerColorReset` will find `Reset` after scanning past `BrightCyan` (which itself precedes `Reset`). **If this causes `TestBannerColorReset` to fail for `Bold`** (because the scanner finds `BrightCyan` before `Reset` after seeing `Bold`), split the title into per-row wrapping:
-
-```go
-title := []string{
-    `  ██████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗███████╗████████╗███████╗`,
-    ` ██╔════╝ ██║   ██║████╗  ██║██╔════╝██║  ██║██╔════╝╚══██╔══╝██╔════╝`,
-    ` ██║  ███╗██║   ██║██╔██╗ ██║██║     ███████║█████╗     ██║   █████╗`,
-    ` ██║   ██║██║   ██║██║╚██╗██║██║     ██╔══██║██╔══╝     ██║   ██╔══╝`,
-    ` ╚██████╔╝╚██████╔╝██║ ╚████║╚██████╗██║  ██║███████╗   ██║   ███████╗`,
-    `  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝`,
-}
-for _, row := range title {
-    sb.WriteString(telnet.Bold + telnet.BrightCyan + row + telnet.Reset + "\n")
-}
-```
-
-Use whichever form makes the tests pass. The per-row form is safer.
-
 - [ ] **Step 4: Run all banner tests**
 
 ```bash
 cd /home/cjohannsen/src/mud && mise run go test ./internal/frontend/handlers/... -run "TestBanner|TestWelcome" -v 2>&1 | tail -30
 ```
 
-Expected: all pass. If any fail:
-- `TestBannerLineWidthMax80` failing → a weapon art row is too wide; count characters and trim
-- `TestBannerColorReset` failing for `Bold` → use the per-row title form described above
-- `TestBannerGunAboveTitle` or `TestBannerMacheteBelowTitle` failing → check ordering in `buildWelcomeBanner`
-- `TestBannerContainsBrightCyanAsciiArt` failing (needs ≥4 BrightCyan segments) → use per-row title form (each row is its own BrightCyan segment)
+Expected: all pass. Diagnose failures by test name:
+
+- `TestBannerLineWidthMax80` → a weapon art row is too wide; use `telnet.StripANSI(row)` to measure and trim
+- `TestBannerColorReset` → a BrightGreen/BrightCyan/BrightYellow row has a color appearing before its Reset; check the weapon art slices for stray color codes
+- `TestBannerBoldReset` → a title row's Bold has no Reset; verify per-row loop uses `telnet.Bold + telnet.BrightCyan + row + telnet.Reset`
+- `TestBannerContainsBrightCyanAsciiArt` → the per-row title loop must produce ≥ 4 BrightCyan segments; 6 title rows each independently wrapped = 6 segments, so this passes
+- `TestBannerGunAboveTitle` or `TestBannerMacheteBelowTitle` → check ordering of `ak47`, `title`, `machete` loops in the function
 
 - [ ] **Step 5: Run full test suite**
 
 ```bash
-mise run go test ./... 2>&1 | tail -20
+cd /home/cjohannsen/src/mud && mise run go test ./... 2>&1 | tail -20
 ```
 
 Expected: all pass (no regressions).
@@ -309,40 +293,3 @@ Expected: all pass (no regressions).
 git add internal/frontend/handlers/auth.go
 git commit -m "feat(splash): rewrite banner to stacked layout — AK-47 above, machete below GUNCHETE title"
 ```
-
----
-
-## ASCII Art Reference
-
-The art below is the design target. Exact characters MUST be adjusted until all rows are ≤ 80 visible chars and the silhouettes are recognizable. Use `telnet.StripANSI(row)` to measure.
-
-### AK-47 (BrightGreen)
-
-```
-        ____________________________________________
-  ,--. |____________________________________________|===>
- (    )|  [======================================]  |
-  `--' |____________________________________________|
-        |___|
-```
-
-Feature checklist:
-- [ ] Long horizontal barrel visible (the `|===>` at row 2)
-- [ ] Rectangular receiver body (the `|__|` structure)
-- [ ] Magazine curve visible (the `( )` at left)
-- [ ] Stock suggestion at left (the `,--.'` and `` `--' ``)
-
-### Machete (BrightYellow)
-
-```
-  _______________________________________________________,
- /________________________________________________________|
- |                                                        |=|
-  \________________________________________________________|_|
-```
-
-Feature checklist:
-- [ ] Long flat blade on the left (the `___` expanse)
-- [ ] Narrow tip (the `,` at top-right of blade)
-- [ ] Guard/cross-piece (the `|=|` structure)
-- [ ] Short handle stub (the `|_|` at right)
