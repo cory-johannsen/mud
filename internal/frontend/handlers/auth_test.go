@@ -5,6 +5,7 @@ import (
 	"net"
 	"strings"
 	"testing"
+	"unicode/utf8"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -339,7 +340,7 @@ func TestBannerLineWidthMax80(t *testing.T) {
 	banner := buildWelcomeBanner()
 	for i, line := range strings.Split(banner, "\n") {
 		visible := telnet.StripANSI(line)
-		assert.LessOrEqual(t, len(visible), 80,
+		assert.LessOrEqual(t, utf8.RuneCountInString(visible), 80,
 			"line %d exceeds 80 visible chars: %q", i+1, visible)
 	}
 }
