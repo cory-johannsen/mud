@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"strings"
@@ -32,12 +33,27 @@ type CharacterStore interface {
 	SaveGender(ctx context.Context, id int64, gender string) error
 }
 
+//go:embed splash/ak47.txt
+var ak47ArtFile string
+
+//go:embed splash/machete.txt
+var macheteArtFile string
+
+// artRows splits an embedded art file into non-empty lines, stripping the
+// trailing newline that text editors append after the last row.
+// Precondition: s is a newline-delimited string.
+// Postcondition: returns a slice of raw art rows with no trailing empty entry.
+func artRows(s string) []string {
+	lines := strings.Split(strings.TrimRight(s, "\n"), "\n")
+	return lines
+}
+
 // buildWelcomeBanner returns the connection banner with the current version embedded.
 //
 // Layout (top to bottom):
-//  1. Horizontal AK-47 ASCII art (BrightGreen, per-row)
+//  1. Horizontal AK-47 ASCII art (BrightGreen) — loaded from splash/ak47.txt
 //  2. GUNCHETE Unicode block-letter title (Bold + BrightCyan, per-row)
-//  3. Horizontal machete ASCII art (BrightYellow, per-row)
+//  3. Horizontal machete ASCII art (BrightYellow) — loaded from splash/machete.txt
 //  4. Subtitle, version, instructions (unchanged)
 //
 // Each row is independently wrapped: color + row + Reset.
@@ -45,18 +61,10 @@ type CharacterStore interface {
 // Precondition: none.
 // Postcondition: returns a complete, non-empty banner string.
 func buildWelcomeBanner() string {
-	// AK-47 horizontal art — side profile, barrel pointing right.
-	// Each row is ≤ 80 visible characters (verified by TestBannerLineWidthMax80).
-	// Left wall of receiver aligns at column 9 across all rows.
-	// Rows 5-6: pistol grip (narrow, col 9) + banana magazine (longer, curves right with /).
-	ak47 := []string{
-		`         ____________________________________________`,
-		`  ,----. |____________________________________________|===>`,
-		` (      )|  [======================================]  |`,
-		`  ` + "`" + `----' |____________________________________________|`,
-		`         | |                /`,
-		`         |_|_______________/`,
-	}
+	// Weapon art loaded from embedded files — edit splash/ak47.txt or
+	// splash/machete.txt and rebuild to update.
+	ak47 := artRows(ak47ArtFile)
+	machete := artRows(macheteArtFile)
 
 	// GUNCHETE Unicode block-letter title — original art, per-row.
 	// Each row wrapped independently so TestBannerContainsBrightCyanAsciiArt
@@ -69,16 +77,6 @@ func buildWelcomeBanner() string {
 		` ██║   ██║██║   ██║██║╚██╗██║██║     ██╔══██║██╔══╝     ██║   ██╔══╝`,
 		` ╚██████╔╝╚██████╔╝██║ ╚████║╚██████╗██║  ██║███████╗   ██║   ███████╗`,
 		`  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝`,
-	}
-
-	// Machete horizontal art — blade on left, handle+guard on right.
-	// Each row is ≤ 80 visible characters.
-	// Right blade wall aligns at column 54 across rows 2-4; guard/handle is 9 chars wide.
-	machete := []string{
-		`  ___________________________________________________,`,
-		` /____________________________________________________|`,
-		` |                                                    |=========|`,
-		`  \___________________________________________________|_________|`,
 	}
 
 	var sb strings.Builder
