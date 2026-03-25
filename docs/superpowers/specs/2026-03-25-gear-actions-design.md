@@ -58,7 +58,7 @@ Fifteen materials are the canonical required set. Startup validation MUST check 
 | Rad-Core | Abysium | Rare | `rad_core` | weapon, armor |
 | Neural Gel | Djezet | Rare | `neural_gel` | weapon, armor |
 | Ghost Steel | Inubrix | Rare | `ghost_steel` | weapon |
-| Null-Weave | Noqual | Rare | `null_weave` | weapon, armor |
+| Null-Weave | Noqual | Rare | `null_weave` | weapon, armor | (intentionally both — defensive save bonuses apply to either slot) |
 | Soul-Guard Alloy | Sovereign Steel | Rare | `soul_guard_alloy` | armor |
 | Shadow Plate | Sisterstone (Dusk) | Rare | `shadow_plate` | weapon |
 | Radiance Plate | Sisterstone (Dawn) | Rare | `radiance_plate` | weapon |
@@ -84,14 +84,18 @@ GradeID    string `yaml:"grade_id,omitempty"`    // required when Kind == KindPr
 ```go
 // MaterialDef holds the static definition of one material at one grade.
 type MaterialDef struct {
-    MaterialID string // e.g. "carbide_alloy"
-    GradeID    string // "street_grade" | "mil_spec_grade" | "ghost_grade"
-    Tier       string // "common" | "uncommon" | "rare"
+    MaterialID string   // e.g. "carbide_alloy"
+    Name       string   // display name, e.g. "Carbide Alloy"
+    GradeID    string   // "street_grade" | "mil_spec_grade" | "ghost_grade"
+    GradeName  string   // display name, e.g. "Street Grade"
+    Tier       string   // "common" | "uncommon" | "rare"
     AppliesTo  []string // "weapon" | "armor"
 }
 ```
 
-- REQ-GA-1: `Registry` MUST gain `RegisterMaterial(d *MaterialDef) error` and `Material(materialID, gradeID string) (*MaterialDef, bool)` methods, following the existing `RegisterItem`/`Item` pattern.
+`MaterialDef.Name` and `GradeName` are the display names used in all player-facing messages (REQ-GA-7, REQ-GA-18 through REQ-GA-21).
+
+- REQ-GA-1: `Registry` MUST gain `RegisterMaterial(d *MaterialDef) error` and `Material(materialID, gradeID string) (*MaterialDef, bool)` methods, following the existing `RegisterItem`/`Item` pattern. `NewRegistry()` MUST initialize the `materials` map.
 - REQ-GA-2: All 45 `MaterialDef` entries MUST be registered at startup from the YAML files in `content/items/precious_materials/`.
 
 ---
@@ -161,22 +165,28 @@ All preconditions are checked in order before the Crafting roll is made. Any fai
 
 - REQ-GA-10: `affix` MUST be rejected in combat with: `"You cannot affix materials during combat."`
 - REQ-GA-11: `affix` MUST fail if the material item is not found in the player's backpack with: `"You don't have <material name> in your pack."`
-- REQ-GA-12: `affix` MUST fail if the target item is not found in equipped weapon or armor slots with: `"<target> is not equipped."`
+- REQ-GA-12: `affix` MUST search only equipped weapon slots (main-hand, off-hand) and armor slots for the target item. If the target is not found in either slot type, the command MUST fail with: `"<target> is not equipped."`
 - REQ-GA-13: `affix` MUST fail if the target item is broken (`Durability == 0`) with: `"You cannot affix materials to broken equipment. Repair it first."`
 - REQ-GA-14: `affix` MUST fail if the material's `Applies To` restriction (Section 1.3) does not include the target item's slot type (weapon vs armor) with: `"<material name> cannot be affixed to armor."` or `"<material name> cannot be affixed to weapons."` as appropriate.
 - REQ-GA-15: REQ-GA-7 (duplicate material check) and REQ-GA-8 (slot count check) MUST be applied before the Crafting roll.
 
 ### 4.3 Crafting Check
 
-- REQ-GA-16: The Crafting check total is computed as:
+- REQ-GA-16: The Crafting check MUST use `skillcheck.Resolve`:
 
+  ```go
+  result := skillcheck.Resolve(
+      roll,
+      sess.Abilities.Modifier(sess.Abilities.Reasoning),
+      sess.Skills["crafting"],
+      dc,
+      skillcheck.TriggerDef{},
+  )
   ```
-  total = d20 + Abilities.Modifier(Abilities.Reasoning) + skillcheck.ProficiencyBonus(Skills["crafting"])
-  ```
 
-  where `Abilities` is `PlayerSession.Abilities` (`character.AbilityScores`) and `Skills["crafting"]` is the character's crafting proficiency rank from `PlayerSession.Skills`.
+  where `roll` is `d20`, `sess.Abilities.Reasoning` is the Reasoning score, `sess.Skills["crafting"]` is the proficiency rank, and `dc` is the grade DC constant from Section 3.
 
-- REQ-GA-17: The outcome is determined by `skillcheck.OutcomeFor(total, dc)` where `dc` is the grade DC constant from Section 3.
+- REQ-GA-17: The outcome is `result.Outcome` from `skillcheck.Resolve`; `skillcheck.OutcomeFor` MUST NOT be called directly.
 
 ### 4.4 Resolution
 
@@ -187,11 +197,13 @@ All preconditions are checked in order before the Crafting roll is made. Any fai
 
 ### 4.5 Display
 
-- REQ-GA-22: `inventory` and `loadout` output MUST show affixed materials as a sub-list under the item with used/total slot count:
+- REQ-GA-22: `inventory` and `loadout` output MUST show affixed materials as a sub-list under the item with used/total slot count for all non-Salvage items (UpgradeSlots > 0), even when no materials are affixed:
   ```
   Mil-Spec Pistol [2/3 slots]
     ↳ Carbide Alloy (Street Grade)
     ↳ Hollow Point (Mil-Spec Grade)
+
+  Street Jacket [0/1 slots]
   ```
 - REQ-GA-23: Items with 0 upgrade slots (Salvage rarity) MUST NOT show slot indicators.
 - REQ-GA-24: The `examine` command (which targets room objects and NPCs) is explicitly out of scope for affix display. Only `inventory` and `loadout` are required to show affix information.
@@ -264,11 +276,42 @@ type MaterialSessionState struct {
   - **Soul-Guard Alloy ghost grade**: once-per-day domination negation. Key: `"soul_guard_alloy:ghost_grade"`.
 - REQ-GA-28: `MaterialSessionState` is in-memory only — it is NOT persisted to the database. State resets naturally on server restart (combat state) and at daily rollover (daily state).
 
-### 5.3 Carbide Alloy MaxDurability
+### 5.3 Passive Effects (Session-Computed)
 
-Carbide Alloy adds `+N MaxDurability` to weapons at affix time. This bonus is applied persistently: `ItemInstance.MaxDurability` is updated in the database when the material is successfully affixed. The bonus is not recomputed at load time.
+Several materials have passive effects (armor check penalty reduction, speed bonuses, save bonuses, immunities, initiative bonuses, bulk reduction, Stealth bonuses) that do not fit the per-hit `MaterialEffectResult` model. These are computed into a `PassiveMaterialSummary` at login and whenever equipped items change, using the same pattern as `SetBonusSummary`.
 
-### 5.4 Common Materials
+```go
+// PassiveMaterialSummary accumulates all passive bonuses from affixed materials
+// across all currently equipped items. Stored on PlayerSession.
+type PassiveMaterialSummary struct {
+    CheckPenaltyReduction int            // from Carbon Weave
+    SpeedBonus            int            // from Carbon Weave
+    BulkReduction         int            // from Polymer Frame (floor 0 per item, summed across items)
+    StealthBonus          int            // from Polymer Frame
+    MetalDetectionImmune  bool           // from Polymer Frame ghost grade
+    SaveVsTechBonus       int            // from Null-Weave
+    SaveVsMentalBonus     int            // from Soul-Guard Alloy
+    ConditionImmunities   []string       // from Soul-Guard Alloy (frightened, confused, all mental)
+    InitiativeBonus       int            // from Quantum Alloy mil-spec/ghost grade
+    TechAttackRollBonus   int            // from Neural Gel mil-spec/ghost grade
+}
+```
+
+- REQ-GA-29: `PlayerSession` MUST gain `PassiveMaterials PassiveMaterialSummary`. It MUST be recomputed by calling `ComputePassiveMaterials(equipped []*EquippedWeapon, armor map[ArmorSlot]*SlottedItem, reg *Registry) PassiveMaterialSummary` at login and whenever equipped items change (same trigger points as `SetBonusSummary`). `ComputePassiveMaterials` MUST be a pure function in `internal/game/inventory/material.go`.
+- REQ-GA-30: Passive bonuses from `PassiveMaterialSummary` MUST be applied at the same integration points as `SetBonusSummary`: check penalty in equipment checks, speed in movement computation, save bonuses in save resolution, immunities in condition application, initiative bonus in initiative roll, tech attack roll bonus in technology attack resolution.
+
+### 5.4 Carbide Alloy MaxDurability
+
+Carbide Alloy adds `+N MaxDurability` to weapons at affix time. To avoid permanently mutating the base `MaxDurability` and to support future accounting, the bonus is stored separately:
+
+```go
+// Added to ItemInstance:
+MaterialMaxDurabilityBonus int // sum of all Carbide Alloy grade bonuses affixed to this item
+```
+
+The effective maximum durability is `MaxDurability + MaterialMaxDurabilityBonus`. On destruction, the entire item is removed and both fields are lost — no data integrity issue. The DB migration (Section 7) adds this column.
+
+### 5.5 Common Materials
 
 #### Scrap Iron — disrupts cyber-augmented enemies
 
@@ -286,15 +329,17 @@ Carbide Alloy adds `+N MaxDurability` to weapons at affix time. This bonus is ap
 | Mil-Spec Grade | +2 damage vs supernatural; persistent bleed 1 on hit |
 | Ghost Grade | +4 damage vs supernatural; suppresses target regeneration for 1 round |
 
-### 5.5 Uncommon Materials
+### 5.6 Uncommon Materials
 
 #### Carbide Alloy — extreme hardness
 
+MaxDurability bonus stored in `MaterialMaxDurabilityBonus` (see Section 5.4).
+
 | Grade | Weapon Effect | Armor Effect |
 |---|---|---|
-| Street Grade | +2 MaxDurability (persistent) | *(armor)* +1 Hardness |
-| Mil-Spec Grade | +4 MaxDurability (persistent); ignore target Hardness ≤ 5 | *(armor)* +2 Hardness |
-| Ghost Grade | +6 MaxDurability (persistent); ignore target Hardness ≤ 10 | *(armor)* +3 Hardness |
+| Street Grade | +2 MaterialMaxDurabilityBonus | *(armor)* +1 Hardness |
+| Mil-Spec Grade | +4 MaterialMaxDurabilityBonus; ignore target Hardness ≤ 5 | *(armor)* +2 Hardness |
+| Ghost Grade | +6 MaterialMaxDurabilityBonus; ignore target Hardness ≤ 10 | *(armor)* +3 Hardness |
 
 #### Carbon Weave — lightweight composite *(armor only)*
 
@@ -330,7 +375,7 @@ Carbide Alloy adds `+N MaxDurability` to weapons at affix time. This bonus is ap
 | Mil-Spec Grade | Persistent cold 2 on hit; target −5 ft speed for 1 round |
 | Ghost Grade | Persistent cold 4 on hit; target gains slowed for 1 round |
 
-### 5.6 Rare Materials
+### 5.7 Rare Materials
 
 #### Quantum Alloy — time-reactive metal *(stateful, see Section 5.2)*
 
@@ -424,7 +469,8 @@ UpgradeSlots int `yaml:"-"` // derived from RarityDef.FeatureSlots at load time
 
 ```go
 // Added to ItemInstance:
-AffixedMaterials []string // each entry: "<material_id>:<grade_id>"
+AffixedMaterials          []string // each entry: "<material_id>:<grade_id>"
+MaterialMaxDurabilityBonus int     // sum of Carbide Alloy grade bonuses affixed; 0 if none
 ```
 
 ### 6.4 EquippedWeapon (`internal/game/inventory/preset.go`)
@@ -445,7 +491,8 @@ AffixedMaterials []string // cached copy; set in armor wear path from ItemInstan
 
 ```go
 // Added to PlayerSession:
-MaterialState inventory.MaterialSessionState
+MaterialState   inventory.MaterialSessionState
+PassiveMaterials inventory.PassiveMaterialSummary
 ```
 
 ### 6.7 AffixSession (`internal/game/command/affix.go`)
@@ -462,37 +509,50 @@ type AffixSession struct {
 
 ## 7. Database Migrations
 
-Migration **046** adds `affixed_materials` to the three tables that store per-instance item state. The column type is `text[]` (PostgreSQL array of strings).
+Migration **046** adds `affixed_materials` and `material_max_durability_bonus` to the three tables that store per-instance item state. The implementer MUST verify that the current highest migration is 045 before applying — check `migrations/` directory for the latest numbered file.
 
 ```sql
 -- 046_affixed_materials.up.sql
 
 ALTER TABLE character_inventory_instances
-    ADD COLUMN affixed_materials text[] NOT NULL DEFAULT '{}';
+    ADD COLUMN affixed_materials              text[] NOT NULL DEFAULT '{}',
+    ADD COLUMN material_max_durability_bonus  int    NOT NULL DEFAULT 0;
 
 ALTER TABLE character_equipment
-    ADD COLUMN affixed_materials text[] NOT NULL DEFAULT '{}';
+    ADD COLUMN affixed_materials              text[] NOT NULL DEFAULT '{}',
+    ADD COLUMN material_max_durability_bonus  int    NOT NULL DEFAULT 0;
 
 ALTER TABLE character_weapon_presets
-    ADD COLUMN affixed_materials text[] NOT NULL DEFAULT '{}';
+    ADD COLUMN affixed_materials              text[] NOT NULL DEFAULT '{}',
+    ADD COLUMN material_max_durability_bonus  int    NOT NULL DEFAULT 0;
 ```
 
 ```sql
 -- 046_affixed_materials.down.sql
 
-ALTER TABLE character_inventory_instances  DROP COLUMN affixed_materials;
-ALTER TABLE character_equipment            DROP COLUMN affixed_materials;
-ALTER TABLE character_weapon_presets       DROP COLUMN affixed_materials;
+ALTER TABLE character_inventory_instances
+    DROP COLUMN affixed_materials,
+    DROP COLUMN material_max_durability_bonus;
+
+ALTER TABLE character_equipment
+    DROP COLUMN affixed_materials,
+    DROP COLUMN material_max_durability_bonus;
+
+ALTER TABLE character_weapon_presets
+    DROP COLUMN affixed_materials,
+    DROP COLUMN material_max_durability_bonus;
 ```
 
-`character_weapon_presets` stores per-instance weapon state (including `Durability` and `Modifier`) copied into `EquippedWeapon` at load time. `AffixedMaterials` follows the same pattern.
+`character_weapon_presets` stores per-instance weapon state (including `Durability` and `Modifier`) copied into `EquippedWeapon` at load time. `AffixedMaterials` and `MaterialMaxDurabilityBonus` follow the same pattern.
 
 ---
 
 ## 8. Architecture
 
-- REQ-GA-30: `HandleAffix` MUST be implemented in `internal/game/command/affix.go` using the `AffixSession` struct wrapper (Section 6.7).
-- REQ-GA-31: `ApplyMaterialEffects` MUST be a pure function in `internal/game/inventory/material.go` covering per-hit effects only (Section 5.1). Stateful effects (Section 5.2) are handled at their respective call sites (FP spend, save resolution, combat end).
-- REQ-GA-32: Material YAML files MUST be loaded from `content/items/precious_materials/`. Missing files for any of the 45 required material+grade combinations MUST be a fatal load error.
-- REQ-GA-33: `KindPreciousMaterial` MUST be added to `validKinds` before any precious material YAML is loaded.
-- REQ-GA-34: TDD with property-based tests MUST be used for all new code per SWENG-5/5a.
+- REQ-GA-31: `HandleAffix` MUST be implemented in `internal/game/command/affix.go` using the `AffixSession` struct wrapper (Section 6.7). `HandleAffix` modifies in-memory state only — it MUST NOT perform any database writes.
+- REQ-GA-32: After a successful affix, `HandleAffix` MUST update the in-memory cached `AffixedMaterials` on the live-equipped `EquippedWeapon` or `SlottedItem` directly (same as `HandleRepair` writes back `Durability` to the in-memory struct). This ensures the cache is consistent without requiring a reload.
+- REQ-GA-33: The `grpc_service.handleAffix` method MUST call `HandleAffix` and, on success, call `charSaver.SaveInventory` (backpack changed) and `charSaver.SaveWeaponPresets` or `charSaver.SaveEquipment` as appropriate for the target item type. This is the same persistence pattern used by other inventory-modifying command handlers.
+- REQ-GA-34: `ApplyMaterialEffects` MUST be a pure function in `internal/game/inventory/material.go` covering per-hit effects only (Section 5.1). Passive effects are handled by `ComputePassiveMaterials` (Section 5.3). Stateful effects (Section 5.2) are handled at their respective call sites.
+- REQ-GA-35: Material YAML files MUST be loaded from `content/items/precious_materials/`. Missing files for any of the 45 required material+grade combinations MUST be a fatal load error.
+- REQ-GA-36: `KindPreciousMaterial` MUST be added to `validKinds` before any precious material YAML is loaded.
+- REQ-GA-37: TDD with property-based tests MUST be used for all new code per SWENG-5/5a.
