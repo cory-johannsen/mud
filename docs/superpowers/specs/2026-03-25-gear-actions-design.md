@@ -182,7 +182,7 @@ affix <material_item> <target_item>
 
 All preconditions are checked in order before the Crafting roll is made. Any failure returns immediately.
 
-- REQ-GA-10: `affix` MUST be rejected in combat with: `"You cannot affix materials during combat."`
+- REQ-GA-10: `affix` MUST be rejected in combat. The combat check is `sess.Status == 2` where `sess.Status int32` is the existing field on `PlayerSession` (values per `manager.go`: 0=Unspecified, 1=Idle, 2=InCombat, 3=Resting, 4=Unconscious). `HandleAffix` (in `package command`, same as `repair.go`) performs this check directly. Failure message: `"You cannot affix materials during combat."`
 - REQ-GA-11: `affix` MUST fail if the material item is not found in the player's backpack with: `"You don't have <query> in your pack."` where `<query>` is the raw `materialQuery` string passed to `HandleAffix` (no `ItemDef` match exists at this point, so the raw query is used as the item name in the message).
 - REQ-GA-12: `affix` MUST search only the **active preset's** main-hand and off-hand weapon slots and the armor slots for the target item (same scope as `findRepairTarget` in `repair.go`). If the target is not found in either slot type, the command MUST fail with: `"<target> is not equipped."`
 - REQ-GA-13: `affix` MUST fail if the target item is broken (`Durability == 0`) with: `"You cannot affix materials to broken equipment. Repair it first."`
@@ -204,9 +204,9 @@ All preconditions are checked in order before the Crafting roll is made. Any fai
   )
   ```
 
-  `PlayerSession.Abilities` is of type `character.AbilityScores` (defined in `internal/game/character/model.go`). `Abilities.Modifier(score int) int` returns `(score - 10) / 2`. `Abilities.Reasoning` is the raw Reasoning score (`int`). `sess.Skills["crafting"]` is the proficiency rank string from `PlayerSession.Skills map[string]string` (loaded from `character.Character.Skills`). `dc` is the grade DC constant from Section 3.
+  `PlayerSession.Abilities` is `character.AbilityScores` — a direct field on `PlayerSession` (confirmed in `internal/game/session/manager.go` line 38: `Abilities character.AbilityScores`). `Abilities.Modifier(score int) int` returns `(score - 10) / 2`. `Abilities.Reasoning` is the raw Reasoning score (`int`). `sess.Skills["crafting"]` is the proficiency rank string from `PlayerSession.Skills map[string]string`. `dc` is the grade DC constant from Section 3.
 
-- REQ-GA-17: The outcome is `result.Outcome` from `skillcheck.Resolve`; `skillcheck.OutcomeFor` MUST NOT be called directly.
+- REQ-GA-17: The crafting check outcome is read from `result.Outcome` (the `CheckOutcome` embedded in the `CheckResult` returned by `skillcheck.Resolve`). `skillcheck.OutcomeFor` MUST NOT be called directly by `HandleAffix` or `handleAffix` — `Resolve` already computes the outcome internally.
 
 ### 4.4 Resolution
 
@@ -306,7 +306,7 @@ type MaterialSessionState struct {
   - **Ghost Steel ghost grade**: once-per-combat touch attack. Key: `"ghost_steel:ghost_grade"`. The player declares a touch attack by prefixing the strike command: `touch strike <target>`. On a touch attack, the target's AC is computed as `10 + target.DexModifier` (all armor and shield bonuses ignored). Costs no additional AP. Mark `CombatUsed` on use. If the key is already in `CombatUsed`, the `touch` prefix is ignored and a normal strike is performed with message: `"Your Ghost Steel phase-shift is spent for this combat."`.
   - **Ghost Steel street grade**: `AttackContext.IsFirstHitThisCombat` is derived from `PlayerSession.HasHitThisCombat bool` — a new boolean field on `PlayerSession` that is `false` at combat start and set to `true` after the first resolved attack. `AttackContext.IsFirstHitThisCombat` is set to `!sess.HasHitThisCombat` before each attack. The grpc combat handler sets `sess.HasHitThisCombat = true` after the first attack resolves. `HasHitThisCombat` is reset to `false` at combat end. No `CombatUsed` entry is needed.
   - **Neural Gel** (all grades): N-per-day FP cost reduction (1/2/3 per day for street/mil-spec/ghost). Key: `"neural_gel:<grade>"`. The FP spend handler checks `DailyUsed[key] < maxUses` before applying the discount, then increments. The discount is applied to the FP cost of the technology: `newCost = max(1, originalCost - 1)`.
-  - **Soul-Guard Alloy ghost grade**: once-per-day domination negation. Key: `"soul_guard_alloy:ghost_grade"`. When a domination effect would be applied to the character and `DailyUsed[key] == 0`, the domination is negated and the key is incremented to 1. "Domination" is defined as any condition with `IsDomination: true` in its condition YAML definition.
+  - **Soul-Guard Alloy ghost grade**: once-per-day domination negation. Key: `"soul_guard_alloy:ghost_grade"`. When a domination effect would be applied to the character and `DailyUsed[key] == 0`, the domination is negated and the key is incremented to 1. "Domination" is any condition with `IsDomination: true` in its `ConditionDef`. `ConditionDef` (defined in `internal/game/condition/definition.go`) MUST gain `IsDomination bool yaml:"is_domination"` as a new optional field (default false). Condition YAML files that represent mind control, puppet effects, or total behavioral overrides MUST set `is_domination: true`.
 - REQ-GA-28: `MaterialSessionState` is in-memory only — it is NOT persisted to the database. State resets naturally on server restart (combat state) and at daily rollover (daily state).
 
 ### 5.3 Passive Effects (Session-Computed)
@@ -319,7 +319,10 @@ Several materials have passive effects (armor check penalty reduction, speed bon
 type PassiveMaterialSummary struct {
     CheckPenaltyReduction int      // from Carbon Weave
     SpeedBonus            int      // from Carbon Weave
-    BulkReduction         int      // from Polymer Frame (floor 0 per item, summed across items)
+    // BulkReduction: each item's effective bulk is max(0, item.Bulk - polymerBonusForThisItem).
+    // ArmorDef.Bulk int `yaml:"bulk"` exists (confirmed in armor.go:31). WeaponDef has no Bulk field;
+    // Polymer Frame MUST NOT be affixed to weapons (AppliesTo: ["armor"] — confirmed in Table 1.3).
+    BulkReduction         int      // sum of per-item floored bulk reductions from Polymer Frame
     StealthBonus          int      // from Polymer Frame
     MetalDetectionImmune  bool     // from Polymer Frame ghost grade
     SaveVsTechBonus       int      // from Null-Weave (applies from weapon or armor slot)
@@ -543,7 +546,14 @@ PassiveMaterials inventory.PassiveMaterialSummary
 HasHitThisCombat bool // Ghost Steel street grade: false at combat start; set true after first resolved attack; reset at combat end
 ```
 
-### 6.7 AffixSession (`internal/game/command/affix.go`)
+### 6.7 ConditionDef (`internal/game/condition/definition.go`)
+
+```go
+// Added to ConditionDef:
+IsDomination bool `yaml:"is_domination"` // true for mind-control/puppet conditions; used by Soul-Guard Alloy ghost grade
+```
+
+### 6.8 AffixSession (`internal/game/command/affix.go`)
 
 `AffixSession` follows the exact same struct-wrapper pattern as `RepairSession` in `repair.go`:
 
@@ -597,14 +607,38 @@ ALTER TABLE character_weapon_presets
 
 ## 8. Architecture
 
-- REQ-GA-31: `HandleAffix(as *AffixSession, reg *Registry, materialQuery, targetQuery string, rng inventory.Roller) string` MUST be implemented in `internal/game/command/affix.go`. `inventory.Roller` is the existing interface defined in `internal/game/inventory/roller.go` (same type used by `HandleRepair`). The return type is `string` (the player-facing message), following the `HandleRepair` pattern. `HandleAffix` modifies in-memory state only — it MUST NOT perform any database writes. Target lookup MUST reuse `findRepairTarget` (defined in `repair.go`) — the same active-preset weapons + all armor slots scope applies to `affix`. The `repairTarget` struct already exposes `weapon *EquippedWeapon` and `armorItem *SlottedItem`, which carry the `AffixedMaterials` field (REQ-GA-5).
+- REQ-GA-31: `HandleAffix` MUST be implemented in `internal/game/command/affix.go` in `package command` (same package as `repair.go`). Its signature MUST be:
+
+  ```go
+  // AffixResult carries the outcome of an affix operation for the grpc_service persistence layer.
+  type AffixResult struct {
+      Message          string        // player-facing message
+      Outcome          AffixOutcome  // outcome enum for persistence routing
+      MaterialConsumed bool          // true when material was consumed (success)
+      MaterialReturned bool          // true when material was returned (critical success)
+  }
+
+  // AffixOutcome represents the four possible crafting check results.
+  type AffixOutcome int
+
+  const (
+      AffixOutcomeCriticalFailure AffixOutcome = iota
+      AffixOutcomeFailure
+      AffixOutcomeSuccess
+      AffixOutcomeCriticalSuccess
+  )
+
+  func HandleAffix(as *AffixSession, reg *inventory.Registry, materialQuery, targetQuery string, rng inventory.Roller) AffixResult
+  ```
+
+  `inventory.Roller` is the existing interface defined in `internal/game/inventory/roller.go`. `HandleAffix` modifies in-memory state only — it MUST NOT perform any database writes. Target lookup MUST reuse `findRepairTarget` (defined in `repair.go`, same package) — the same active-preset weapons + all armor slots scope applies to `affix`. The `repairTarget` struct exposes `weapon *EquippedWeapon` and `armorItem *SlottedItem`, which carry `AffixedMaterials` (REQ-GA-5). `handleAffix` in `grpc_service.go` uses `AffixResult.Outcome` to route persistence calls (REQ-GA-33).
 - REQ-GA-32: After a successful affix, `HandleAffix` MUST update the in-memory cached `AffixedMaterials` on the live-equipped `EquippedWeapon` or `SlottedItem` directly (same as `HandleRepair` writes back `Durability` to the in-memory struct). This ensures the cache is consistent without requiring a reload.
-- REQ-GA-33: The `handleAffix` method in `internal/gameserver/grpc_service.go` MUST persist state after `HandleAffix` returns according to outcome. All three persistence methods are on `s.charSaver` (type `CharacterSaver`, defined at line 92 of `grpc_service.go`):
-  - **Critical success**: `s.charSaver.SaveInventory(ctx, characterID, ...)` (material returned to backpack) AND `s.charSaver.SaveWeaponPresets(ctx, characterID, sess.LoadoutSet)` or `s.charSaver.SaveEquipment(ctx, characterID, sess.Equipment)` (target item's `AffixedMaterials` updated).
-  - **Success**: `s.charSaver.SaveInventory(ctx, characterID, ...)` AND `s.charSaver.SaveWeaponPresets` or `s.charSaver.SaveEquipment`.
-  - **Failure**: no save calls required (nothing changed).
-  - **Critical failure**: `s.charSaver.SaveInventory(ctx, characterID, ...)` only (material destroyed from backpack).
-  `SaveWeaponPresets` is called when the target is a weapon; `SaveEquipment` when the target is armor. See `internal/storage/postgres/character.go` for the concrete implementations.
+- REQ-GA-33: The `handleAffix` method in `internal/gameserver/grpc_service.go` MUST persist state after `HandleAffix` returns by switching on `AffixResult.Outcome`. All three persistence methods are on `s.charSaver` (type `CharacterSaver`, defined at line 92 of `grpc_service.go`):
+  - **`AffixOutcomeCriticalSuccess`**: `s.charSaver.SaveInventory(...)` (material returned to backpack) AND `s.charSaver.SaveWeaponPresets(ctx, characterID, sess.LoadoutSet)` or `s.charSaver.SaveEquipment(ctx, characterID, sess.Equipment)` (target item's `AffixedMaterials`/`MaterialMaxDurabilityBonus` updated).
+  - **`AffixOutcomeSuccess`**: `s.charSaver.SaveInventory(...)` AND `s.charSaver.SaveWeaponPresets` or `s.charSaver.SaveEquipment`.
+  - **`AffixOutcomeFailure`**: no save calls required (nothing changed).
+  - **`AffixOutcomeCriticalFailure`**: `s.charSaver.SaveInventory(...)` only (material destroyed from backpack).
+  `SaveWeaponPresets` is called when `AffixResult.Outcome` targets a weapon; `SaveEquipment` when it targets armor. `SaveEquipment` and `SaveWeaponPresets` MUST write the new `affixed_materials` and `material_max_durability_bonus` columns added in migration 046 — this is a new responsibility for both save methods (see `internal/storage/postgres/character.go`). `SaveInventory` signature: `SaveInventory(ctx, characterID int64, items []inventory.InventoryItem) error`.
 - REQ-GA-34: `ApplyMaterialEffects` MUST be a pure function in `internal/game/inventory/material.go` covering per-hit effects only (Section 5.1). Passive effects are handled by `ComputePassiveMaterials` (Section 5.3). Stateful effects (Section 5.2) are handled at their respective call sites.
 - REQ-GA-35: Material YAML files MUST be loaded from `content/items/precious_materials/`. Missing files for any of the 45 required material+grade combinations MUST be a fatal load error.
 - REQ-GA-36: `KindPreciousMaterial` MUST be added to `validKinds` before any precious material YAML is loaded.
