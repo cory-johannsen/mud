@@ -132,3 +132,11 @@
 **Description:** In the `rustbucket_ridge` zone, `scorchside_camp` has an illegal map placement that overlaps with `the_embers_edge`. `scorchside_camp` should be moved south to connect to `smokers_den` instead.
 **Steps:** View the rustbucket_ridge zone map; observe scorchside_camp placement conflicts with the_embers_edge.
 **Fix:** Moved scorchside_camp to (4,12), south of smokers_den (4,10). Updated smokers_den to exit south→scorchside_camp and scorchside_camp to exit north→smokers_den.
+
+### BUG-17: loadout command displays Technology item ID instead of name
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The `loadout` command output displays the raw Technology item ID (e.g., `stim_pack`) instead of the human-readable item name (e.g., `Stim Pack`).
+**Steps:** Create a character, equip or load out with any Technology item, run `loadout`; observe the ID is shown instead of the display name.
+**Fix:**

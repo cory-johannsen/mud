@@ -4433,7 +4433,7 @@ func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest
 	}
 	flavor := technology.FlavorFor(technology.DominantTradition(sess.Class))
 	weaponSection := command.HandleLoadout(sess, "")
-	prepSection := technology.FormatPreparedTechs(sess.PreparedTechs, flavor)
+	prepSection := technology.FormatPreparedTechs(sess.PreparedTechs, flavor, s.techRegistry)
 	return messageEvent(weaponSection + "\n\n" + prepSection), nil
 }
 

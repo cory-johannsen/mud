@@ -58,12 +58,12 @@ func TestFormatPreparedTechs(t *testing.T) {
 	flavor := technology.FlavorFor("technical") // LoadoutTitle="Field Loadout", SlotNoun="slot"
 
 	t.Run("empty map", func(t *testing.T) {
-		got := technology.FormatPreparedTechs(nil, flavor)
+		got := technology.FormatPreparedTechs(nil, flavor, nil)
 		assert.Equal(t, "No Field Loadout configured.", got)
 	})
 
 	t.Run("empty slots map", func(t *testing.T) {
-		got := technology.FormatPreparedTechs(map[int][]*session.PreparedSlot{}, flavor)
+		got := technology.FormatPreparedTechs(map[int][]*session.PreparedSlot{}, flavor, nil)
 		assert.Equal(t, "No Field Loadout configured.", got)
 	})
 
@@ -71,7 +71,7 @@ func TestFormatPreparedTechs(t *testing.T) {
 		slots := map[int][]*session.PreparedSlot{
 			1: {{TechID: "scorching_blast", Expended: false}},
 		}
-		got := technology.FormatPreparedTechs(slots, flavor)
+		got := technology.FormatPreparedTechs(slots, flavor, nil)
 		want := "[Field Loadout]\n  Level 1 — 1 slot\n    scorching_blast    ready"
 		assert.Equal(t, want, got)
 	})
@@ -83,7 +83,7 @@ func TestFormatPreparedTechs(t *testing.T) {
 				{TechID: "fear_bio_synthetic", Expended: true},
 			},
 		}
-		got := technology.FormatPreparedTechs(slots, flavor)
+		got := technology.FormatPreparedTechs(slots, flavor, nil)
 		want := "[Field Loadout]\n  Level 2 — 2 slots\n    heal_bio_synthetic    ready\n    fear_bio_synthetic    expended"
 		assert.Equal(t, want, got)
 	})
@@ -93,7 +93,7 @@ func TestFormatPreparedTechs(t *testing.T) {
 			3: {{TechID: "tech_c", Expended: false}},
 			1: {{TechID: "tech_a", Expended: false}},
 		}
-		got := technology.FormatPreparedTechs(slots, flavor)
+		got := technology.FormatPreparedTechs(slots, flavor, nil)
 		require.Contains(t, got, "Level 1")
 		require.Contains(t, got, "Level 3")
 		// Level 1 must appear before Level 3
@@ -108,7 +108,7 @@ func TestFormatPreparedTechs(t *testing.T) {
 				{TechID: "fear_bio_synthetic", Expended: false},
 			},
 		}
-		got := technology.FormatPreparedTechs(slots, bioFlavor)
+		got := technology.FormatPreparedTechs(slots, bioFlavor, nil)
 		assert.Contains(t, got, "2 doses")
 		assert.Contains(t, got, "[Chem Kit]")
 	})

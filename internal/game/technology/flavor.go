@@ -86,7 +86,7 @@ func DominantTradition(jobID string) string {
 // Precondition: flavor is a valid TraditionFlavor (zero value produces empty labels).
 // Postcondition: Returns "No <LoadoutTitle> configured." when slots is empty or all levels
 // have zero entries; otherwise returns the full formatted display string.
-func FormatPreparedTechs(slots map[int][]*session.PreparedSlot, flavor TraditionFlavor) string {
+func FormatPreparedTechs(slots map[int][]*session.PreparedSlot, flavor TraditionFlavor, reg *Registry) string {
 	if len(slots) == 0 {
 		return fmt.Sprintf("No %s configured.", flavor.LoadoutTitle)
 	}
@@ -119,7 +119,13 @@ func FormatPreparedTechs(slots map[int][]*session.PreparedSlot, flavor Tradition
 			if slot.Expended {
 				state = "expended"
 			}
-			sb.WriteString(fmt.Sprintf("\n    %s    %s", slot.TechID, state))
+			name := slot.TechID
+			if reg != nil {
+				if def, ok := reg.Get(slot.TechID); ok {
+					name = def.Name
+				}
+			}
+			sb.WriteString(fmt.Sprintf("\n    %s    %s", name, state))
 		}
 	}
 
