@@ -65,7 +65,7 @@ features:
 
   - slug: gear-actions
     name: Gear Actions
-    status: in_progress
+    status: done
     priority: 45
     category: combat
     file: docs/features/gear-actions.md
