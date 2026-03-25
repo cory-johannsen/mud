@@ -204,7 +204,7 @@ All preconditions are checked in order before the Crafting roll is made. Any fai
   )
   ```
 
-  `PlayerSession.Abilities` is `character.AbilityScores` — a direct field on `PlayerSession` (confirmed in `internal/game/session/manager.go` line 38: `Abilities character.AbilityScores`). `Abilities.Modifier(score int) int` returns `(score - 10) / 2`. `Abilities.Reasoning` is the raw Reasoning score (`int`). `sess.Skills["crafting"]` is the proficiency rank string from `PlayerSession.Skills map[string]string`. `dc` is the grade DC constant from Section 3.
+  `PlayerSession.Abilities` is `character.AbilityScores` — a direct field on `PlayerSession` (confirmed in `internal/game/session/manager.go` line 38: `Abilities character.AbilityScores`). `character.AbilityScores` is defined in `internal/game/character/model.go` with six named fields: `Brutality`, `Grit`, `Quickness`, `Reasoning`, `Savvy`, `Flair` — all `int`. `Abilities.Reasoning` is the raw Reasoning score (an `int` field, not a method or map lookup). `Abilities.Modifier(score int) int` returns `(score - 10) / 2`. `sess.Skills["crafting"]` is the proficiency rank string from `PlayerSession.Skills map[string]string`. `dc` is the grade DC constant from Section 3.
 
 - REQ-GA-17: The crafting check outcome is read from `result.Outcome` (the `CheckOutcome` embedded in the `CheckResult` returned by `skillcheck.Resolve`). `skillcheck.OutcomeFor` MUST NOT be called directly by `HandleAffix` or `handleAffix` — `Resolve` already computes the outcome internally.
 
@@ -327,7 +327,9 @@ type PassiveMaterialSummary struct {
     MetalDetectionImmune  bool     // from Polymer Frame ghost grade
     SaveVsTechBonus       int      // from Null-Weave (applies from weapon or armor slot)
     SaveVsMentalBonus     int      // from Soul-Guard Alloy
-    ConditionImmunities   []string // from Soul-Guard Alloy (frightened, confused, all mental conditions)
+    ConditionImmunities   []string // from Soul-Guard Alloy; entries are condition IDs matching ConditionDef.ID
+                                   // e.g. "frightened", "confused". The condition application gate checks
+                                   // whether the incoming condition's ID is in this slice.
     InitiativeBonus       int      // from Quantum Alloy mil-spec/ghost grade
     TechAttackRollBonus   int      // from Neural Gel mil-spec and ghost grade (+1 for either)
     FPOnRecalibrateBonus  int      // from Neural Gel ghost grade: +1 FP restored on Recalibrate
@@ -616,16 +618,21 @@ ALTER TABLE character_weapon_presets
       Outcome          AffixOutcome  // outcome enum for persistence routing
       MaterialConsumed bool          // true when material was consumed (success)
       MaterialReturned bool          // true when material was returned (critical success)
+      TargetIsWeapon   bool          // true when target is a weapon; false when target is armor
+                                     // Used by handleAffix to choose SaveWeaponPresets vs SaveEquipment
   }
 
   // AffixOutcome represents the four possible crafting check results.
   type AffixOutcome int
 
   const (
-      AffixOutcomeCriticalFailure AffixOutcome = iota
-      AffixOutcomeFailure
-      AffixOutcomeSuccess
-      AffixOutcomeCriticalSuccess
+      // AffixOutcomeUnspecified is the zero value; never returned by HandleAffix.
+      // It exists to prevent accidental misuse of the zero value as CriticalFailure.
+      AffixOutcomeUnspecified    AffixOutcome = iota
+      AffixOutcomeCriticalFailure              // total < dc - 10
+      AffixOutcomeFailure                      // dc - 10 <= total < dc
+      AffixOutcomeSuccess                      // dc <= total < dc + 10
+      AffixOutcomeCriticalSuccess              // total >= dc + 10
   )
 
   func HandleAffix(as *AffixSession, reg *inventory.Registry, materialQuery, targetQuery string, rng inventory.Roller) AffixResult
