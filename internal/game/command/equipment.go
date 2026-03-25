@@ -119,19 +119,19 @@ func HandleEquipment(sess *session.PlayerSession, width int, reg *inventory.Regi
 		var leftLines []string
 		for _, slot := range displayArmorSlots {
 			label := inventory.SlotDisplayName(string(slot)) + ":"
-			leftLines = append(leftLines, equipSlotLine(label, formatSlottedItem(eq.Armor[slot]), armorLabelW))
+			leftLines = append(leftLines, equipSlotLine(label, formatSlottedItemWithAffixes(eq.Armor[slot], reg), armorLabelW))
 		}
 
 		var rightLines []string
 		neckLabel := inventory.SlotDisplayName("neck") + ":"
-		rightLines = append(rightLines, equipSlotLine(neckLabel, formatSlottedItem(eq.Accessories[inventory.SlotNeck]), accLabelW))
+		rightLines = append(rightLines, equipSlotLine(neckLabel, formatSlottedItemWithAffixes(eq.Accessories[inventory.SlotNeck], reg), accLabelW))
 		for _, slot := range displayLeftRingSlots {
 			label := inventory.SlotDisplayName(string(slot)) + ":"
-			rightLines = append(rightLines, equipSlotLine(label, formatSlottedItem(eq.Accessories[slot]), accLabelW))
+			rightLines = append(rightLines, equipSlotLine(label, formatSlottedItemWithAffixes(eq.Accessories[slot], reg), accLabelW))
 		}
 		for _, slot := range displayRightRingSlots {
 			label := inventory.SlotDisplayName(string(slot)) + ":"
-			rightLines = append(rightLines, equipSlotLine(label, formatSlottedItem(eq.Accessories[slot]), accLabelW))
+			rightLines = append(rightLines, equipSlotLine(label, formatSlottedItemWithAffixes(eq.Accessories[slot], reg), accLabelW))
 		}
 
 		sb.WriteString("\n")
@@ -146,14 +146,14 @@ func HandleEquipment(sess *session.PlayerSession, width int, reg *inventory.Regi
 
 		sb.WriteString("\n=== Accessories ===\n")
 		neckLabel := inventory.SlotDisplayName("neck") + ":"
-		sb.WriteString(fmt.Sprintf("  %-21s %s\n", neckLabel, formatSlottedItem(eq.Accessories[inventory.SlotNeck])))
+		sb.WriteString(fmt.Sprintf("  %-21s %s\n", neckLabel, formatSlottedItemWithAffixes(eq.Accessories[inventory.SlotNeck], reg)))
 		for _, slot := range displayLeftRingSlots {
 			label := inventory.SlotDisplayName(string(slot)) + ":"
-			sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItem(eq.Accessories[slot])))
+			sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItemWithAffixes(eq.Accessories[slot], reg)))
 		}
 		for _, slot := range displayRightRingSlots {
 			label := inventory.SlotDisplayName(string(slot)) + ":"
-			sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItem(eq.Accessories[slot])))
+			sb.WriteString(fmt.Sprintf("  %-21s %s\n", label, formatSlottedItemWithAffixes(eq.Accessories[slot], reg)))
 		}
 	}
 

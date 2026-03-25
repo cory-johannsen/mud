@@ -170,6 +170,67 @@ func TestLoadout_NoSlotCounter_ForZeroUpgradeSlots(t *testing.T) {
 	}
 }
 
+// buildAffixTestRegistryWithArmor returns a registry that includes the weapon defs from
+// buildAffixTestRegistry plus a mil_spec armor def (UpgradeSlots=2) registered under
+// the ID "test_chest_mil_spec", suitable for armor affix display tests.
+func buildAffixTestRegistryWithArmor(t testing.TB) *inventory.Registry {
+	t.Helper()
+	reg := buildAffixTestRegistry(t)
+	armorDef := &inventory.ArmorDef{
+		ID:           "test_chest_mil_spec",
+		Name:         "Test Chest Plate",
+		Rarity:       "mil_spec",
+		Slot:         "torso",
+		ACBonus:      4,
+		UpgradeSlots: 2,
+	}
+	if err := reg.RegisterArmor(armorDef); err != nil {
+		t.Fatalf("buildAffixTestRegistryWithArmor: RegisterArmor: %v", err)
+	}
+	return reg
+}
+
+// TestEquipment_ArmorShowsSlotCounter verifies that a mil_spec armor piece (UpgradeSlots=2)
+// with one material affixed shows "[1/2 slots]" in the equipment display.
+func TestEquipment_ArmorShowsSlotCounter(t *testing.T) {
+	sess := newTestSessionWithEquipmentAndBackpack()
+	reg := buildAffixTestRegistryWithArmor(t)
+	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:        "test_chest_mil_spec",
+		Name:             "Test Chest Plate",
+		Rarity:           "mil_spec",
+		AffixedMaterials: []string{"carbon_weave:street_grade"},
+	}
+
+	result := command.HandleEquipment(sess, 0, reg)
+
+	if !strings.Contains(result, "[1/2 slots]") {
+		t.Errorf("expected '[1/2 slots]' in armor output, got:\n%s", result)
+	}
+}
+
+// TestEquipment_ArmorShowsAffixedMaterialSubList verifies that armor with an affixed
+// material shows the material name and sub-list indicator in the equipment display.
+func TestEquipment_ArmorShowsAffixedMaterialSubList(t *testing.T) {
+	sess := newTestSessionWithEquipmentAndBackpack()
+	reg := buildAffixTestRegistryWithArmor(t)
+	sess.Equipment.Armor[inventory.SlotTorso] = &inventory.SlottedItem{
+		ItemDefID:        "test_chest_mil_spec",
+		Name:             "Test Chest Plate",
+		Rarity:           "mil_spec",
+		AffixedMaterials: []string{"carbon_weave:street_grade"},
+	}
+
+	result := command.HandleEquipment(sess, 0, reg)
+
+	if !strings.Contains(result, "Carbon Weave") {
+		t.Errorf("expected material name 'Carbon Weave' in output, got:\n%s", result)
+	}
+	if !strings.Contains(result, "↳") {
+		t.Errorf("expected sub-list indicator '↳' in output, got:\n%s", result)
+	}
+}
+
 // TestProperty_Equipment_SlotCounterNeverPanics is a property-based test verifying
 // that HandleEquipment never panics regardless of AffixedMaterials content.
 func TestProperty_Equipment_SlotCounterNeverPanics(t *testing.T) {
