@@ -236,6 +236,7 @@ type GameServiceServer struct {
 	actionH                    *ActionHandler
 	wantedRepo                 *postgres.WantedRepository
 	stopWantedDecay            func()
+	stopCarrierRad             func()
 	trapMgr                    *trap.TrapManager
 	trapTemplates              map[string]*trap.TrapTemplate
 	// merchantRuntimeStates maps NPC instance ID to active merchant runtime state.
@@ -422,6 +423,8 @@ func NewGameServiceServer(
 				if sess.Conditions != nil {
 					sess.Conditions.ClearEncounter()
 				}
+				sess.MaterialState.CombatUsed = make(map[string]bool)
+				sess.HasHitThisCombat = false
 			}
 			// Clear pending join invitations for this room now that combat has ended.
 			s.clearPendingJoinForRoom(roomID)
@@ -783,6 +786,14 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			loginDef := sess.Equipment.ComputedDefensesWithSetBonuses(s.invRegistry, loginDexMod, sess.SetBonusSummary)
 			sess.Resistances = loginDef.Resistances
 			sess.Weaknesses = loginDef.Weaknesses
+		}
+
+		// Compute passive material bonuses from equipped items at login.
+		if sess.LoadoutSet != nil && sess.Equipment != nil {
+			if active := sess.LoadoutSet.ActivePreset(); active != nil {
+				equipped := []*inventory.EquippedWeapon{active.MainHand, active.OffHand}
+				sess.PassiveMaterials = inventory.ComputePassiveMaterials(equipped, sess.Equipment.Armor, s.invRegistry)
+			}
 		}
 
 		// Load persisted inventory.
@@ -3811,6 +3822,12 @@ func (s *GameServiceServer) handleWear(uid string, req *gamev1.WearRequest) (*ga
 	// REQ-EM-29: recompute set bonuses whenever armor changes.
 	if strings.HasPrefix(result, "Wore ") {
 		session.RecomputeSetBonuses(sess, s.setRegistry)
+		if sess.LoadoutSet != nil && sess.Equipment != nil {
+			if active := sess.LoadoutSet.ActivePreset(); active != nil {
+				equipped := []*inventory.EquippedWeapon{active.MainHand, active.OffHand}
+				sess.PassiveMaterials = inventory.ComputePassiveMaterials(equipped, sess.Equipment.Armor, s.invRegistry)
+			}
+		}
 	}
 
 	// Only apply team affinity effect if the wear succeeded.
@@ -3844,6 +3861,12 @@ func (s *GameServiceServer) handleRemoveArmor(uid string, req *gamev1.RemoveArmo
 	// REQ-EM-29: recompute set bonuses whenever armor changes.
 	if strings.HasPrefix(result, "Removed ") {
 		session.RecomputeSetBonuses(sess, s.setRegistry)
+		if sess.LoadoutSet != nil && sess.Equipment != nil {
+			if active := sess.LoadoutSet.ActivePreset(); active != nil {
+				equipped := []*inventory.EquippedWeapon{active.MainHand, active.OffHand}
+				sess.PassiveMaterials = inventory.ComputePassiveMaterials(equipped, sess.Equipment.Armor, s.invRegistry)
+			}
+		}
 	}
 	return messageEvent(result), nil
 }
@@ -3977,6 +4000,52 @@ func (s *GameServiceServer) StartWantedDecayHook() {
 func (s *GameServiceServer) StopWantedDecayHook() {
 	if s.stopWantedDecay != nil {
 		s.stopWantedDecay()
+	}
+}
+
+// StartCarrierRadHook subscribes to the calendar and applies CarrierRadDmgPerHour
+// radiation damage to players with Rad-Core passive material on each game-hour tick.
+//
+// Precondition: MUST be called after NewGameServiceServer.
+// Postcondition: goroutine runs until StopCarrierRadHook is called.
+func (s *GameServiceServer) StartCarrierRadHook() {
+	if s.calendar == nil {
+		return
+	}
+	ch := make(chan GameDateTime, 4)
+	s.calendar.Subscribe(ch)
+	stop := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ch:
+				for _, sess := range s.sessions.AllPlayers() {
+					if sess.PassiveMaterials.CarrierRadDmgPerHour <= 0 {
+						continue
+					}
+					dmg := sess.PassiveMaterials.CarrierRadDmgPerHour
+					sess.CurrentHP -= dmg
+					if sess.CurrentHP < 0 {
+						sess.CurrentHP = 0
+					}
+					s.pushMessageToUID(sess.UID, fmt.Sprintf(
+						"Your Rad-Core implant irradiates you for %d radiation damage.", dmg))
+				}
+			case <-stop:
+				s.calendar.Unsubscribe(ch)
+				return
+			}
+		}
+	}()
+	s.stopCarrierRad = func() { close(stop) }
+}
+
+// StopCarrierRadHook unsubscribes from the calendar and stops the carrier rad goroutine.
+//
+// Postcondition: safe to call when StartCarrierRadHook was never called or calendar was nil.
+func (s *GameServiceServer) StopCarrierRadHook() {
+	if s.stopCarrierRad != nil {
+		s.stopCarrierRad()
 	}
 }
 

@@ -247,6 +247,15 @@ type PlayerSession struct {
 	// ScavengeExhaustedRoomID is the room ID where scavenge was last attempted this visit.
 	// Cleared on room exit. (REQ-CRAFT-11)
 	ScavengeExhaustedRoomID string
+	// MaterialState tracks per-combat and per-day stateful material effect usage.
+	// Initialized at session creation; CombatUsed reset at combat end; DailyUsed reset at daily rollover.
+	MaterialState inventory.MaterialSessionState
+	// PassiveMaterials holds the aggregated passive material bonuses from equipped items.
+	// Computed at login and whenever equipped items change.
+	PassiveMaterials inventory.PassiveMaterialSummary
+	// HasHitThisCombat is true when the player has landed at least one hit in the current combat.
+	// Reset to false at combat end. Session-only; not persisted.
+	HasHitThisCombat bool
 	// InitDone is closed by Session() immediately before entering commandLoop,
 	// signalling that all session-initialization writes to PlayerSession fields
 	// are complete. Consumers (e.g. tests) that need a race-free snapshot of
@@ -441,8 +450,12 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		WantedLevel:        make(map[string]int),
 		SafeViolations:     make(map[string]int),
 		LastViolationDay:   make(map[string]int),
-		Jobs:               make(map[string]int),
-		InitDone:           make(chan struct{}),
+		Jobs: make(map[string]int),
+		MaterialState: inventory.MaterialSessionState{
+			CombatUsed: make(map[string]bool),
+			DailyUsed:  make(map[string]int),
+		},
+		InitDone: make(chan struct{}),
 	}
 
 	sess.Backpack = inventory.NewBackpack(20, 50.0)

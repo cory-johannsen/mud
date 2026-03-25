@@ -51,6 +51,9 @@ func StartWantedDecay(cal *GameCalendar, sessions SessionLister, wantedRepo Want
 // not violated on currentDay; changes are persisted via wantedRepo.Upsert.
 func decayWantedLevels(sessions SessionLister, wantedRepo WantedSaver, currentDay int, logger *zap.Logger) {
 	for _, sess := range sessions.AllPlayers() {
+		// Reset daily material use counters on day rollover (REQ-MAT-daily).
+		sess.MaterialState.DailyUsed = make(map[string]int)
+
 		for zoneID, level := range sess.WantedLevel {
 			if level <= 0 {
 				continue
