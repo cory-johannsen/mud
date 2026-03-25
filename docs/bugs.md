@@ -169,11 +169,11 @@
 
 ### BUG-22: Automatic health recharge should be disabled in combat
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Health regeneration continues to tick during combat, which should be suspended while the player is engaged in an encounter.
 **Steps:** Initiate combat with any NPC; observe that health recharges automatically during the fight.
-**Fix:**
+**Fix:** Added an in-combat guard in `regenPlayers` in `internal/gameserver/regen.go`. When `sess.Status == inCombatStatus` (value 2), the player is skipped for that tick. Test `TestRegenManager_SkipsPlayerInCombat` in `regen_test.go` verifies the behaviour.
 
 ### BUG-21: Welcome screen AK-47 grip/clip not visible; machete guard/handle too small
 **Severity:** low
