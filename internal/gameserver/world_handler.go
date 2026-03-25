@@ -206,6 +206,7 @@ func (h *WorldHandler) buildRoomView(uid string, room *world.Room) *gamev1.RoomV
 				HealthDescription: inst.HealthDescription(),
 				FightingTarget:    fightingTarget,
 				Conditions:        condNames,
+				NpcType:           inst.NPCType,
 			})
 		}
 	}

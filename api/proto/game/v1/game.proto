@@ -491,6 +491,7 @@ message NpcInfo {
   string health_description  = 3;
   string fighting_target     = 4; // name of the player this NPC is currently fighting; empty if not in combat
   repeated string conditions = 5; // display names of active conditions (empty when not in combat or no conditions)
+  string npc_type            = 6; // NPC type for non-combat NPCs (merchant, healer, etc.); empty for combat NPCs
 }
 
 // ExamineRequest asks the server for detail on a named target.

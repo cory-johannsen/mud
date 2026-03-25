@@ -163,6 +163,30 @@ func renderEquipment(equipment []*gamev1.RoomEquipmentItem, width int) []string 
 	return out
 }
 
+// npcTypeTag returns a short display tag for a non-combat NPC type, or "" for combat NPCs.
+func npcTypeTag(npcType string) string {
+	switch npcType {
+	case "merchant":
+		return "[shop]"
+	case "healer":
+		return "[healer]"
+	case "banker":
+		return "[bank]"
+	case "job_trainer":
+		return "[trainer]"
+	case "quest_giver":
+		return "[quest]"
+	case "guard":
+		return "[guard]"
+	case "fixer":
+		return "[fixer]"
+	case "hireling":
+		return "[hire]"
+	default:
+		return ""
+	}
+}
+
 // renderNPCs renders NPC entries 2 per row, with "NPCs:  " label inline on the first row.
 // Each entry format: "Name (health)" or "Name (health) fighting Target" or
 // "Name (health) fighting Target cond1, cond2" when the NPC has active conditions.
@@ -191,9 +215,12 @@ func renderNPCs(npcs []*gamev1.NpcInfo, width int) []string {
 		for j := 0; j < perRow && i+j < len(npcs); j++ {
 			n := npcs[i+j]
 			healthColor := npcHealthColor(n.HealthDescription)
-			entry := fmt.Sprintf("%s%s%s %s(%s)%s",
-				telnet.Yellow, n.Name, telnet.Reset,
-				healthColor, n.HealthDescription, telnet.Reset)
+			tag := npcTypeTag(n.NpcType)
+			nameStr := fmt.Sprintf("%s%s%s", telnet.Yellow, n.Name, telnet.Reset)
+			if tag != "" {
+				nameStr += fmt.Sprintf(" %s%s%s", telnet.Cyan, tag, telnet.Reset)
+			}
+			entry := fmt.Sprintf("%s %s(%s)%s", nameStr, healthColor, n.HealthDescription, telnet.Reset)
 			if n.FightingTarget != "" {
 				entry += fmt.Sprintf(" %sfighting %s%s",
 					telnet.BrightRed, n.FightingTarget, telnet.Reset)

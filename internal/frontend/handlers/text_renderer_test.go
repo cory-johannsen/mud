@@ -1513,3 +1513,26 @@ func TestRenderCharacterSheet_OmitsFocusPoints_WhenMaxIsZero(t *testing.T) {
 	result := telnet.StripANSI(RenderCharacterSheet(csv, 80))
 	assert.NotContains(t, result, "Focus Points")
 }
+
+func TestRenderNPCs_NonCombatTypeIndicator(t *testing.T) {
+	// Non-combat NPC should show type tag
+	npcs := []*gamev1.NpcInfo{
+		{Name: "Sal", HealthDescription: "unharmed", NpcType: "merchant"},
+		{Name: "Doc Mira", HealthDescription: "unharmed", NpcType: "healer"},
+	}
+	rows := renderNPCs(npcs, 80)
+	combined := strings.Join(rows, "\n")
+	assert.Contains(t, telnet.StripANSI(combined), "[shop]")
+	assert.Contains(t, telnet.StripANSI(combined), "[healer]")
+}
+
+func TestRenderNPCs_CombatNPCNoTypeIndicator(t *testing.T) {
+	// Combat NPC should NOT show a type tag
+	npcs := []*gamev1.NpcInfo{
+		{Name: "Raider", HealthDescription: "unharmed", NpcType: "combat"},
+	}
+	rows := renderNPCs(npcs, 80)
+	combined := strings.Join(rows, "\n")
+	stripped := telnet.StripANSI(combined)
+	assert.NotContains(t, stripped, "[")
+}
