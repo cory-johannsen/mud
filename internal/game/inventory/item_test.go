@@ -8,6 +8,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -612,4 +613,35 @@ func TestItemDef_Validate_ActivationFields(t *testing.T) {
 		}
 		assert.NoError(t, d.Validate())
 	})
+}
+
+func TestItemDef_Validate_PreciousMaterial_Missing_Fields(t *testing.T) {
+	// Missing material_id
+	d := &inventory.ItemDef{ID: "x", Name: "X", Kind: inventory.KindPreciousMaterial}
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "material_id")
+}
+
+func TestItemDef_Validate_PreciousMaterial_InvalidGradeID(t *testing.T) {
+	d := &inventory.ItemDef{
+		ID: "x_street_grade", Name: "X", Kind: inventory.KindPreciousMaterial,
+		MaterialID: "x", GradeID: "not_valid", MaterialName: "X",
+		MaterialTier: "common", AppliesTo: []string{"weapon"},
+	}
+	err := d.Validate()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "grade_id")
+}
+
+func TestItemDef_Validate_PreciousMaterial_Valid(t *testing.T) {
+	d := &inventory.ItemDef{
+		ID: "scrap_iron_street_grade", Name: "Scrap Iron (Street Grade)",
+		Kind:         inventory.KindPreciousMaterial,
+		MaterialID:   "scrap_iron", GradeID: "street_grade",
+		MaterialName: "Scrap Iron", MaterialTier: "common",
+		AppliesTo: []string{"weapon"},
+		MaxStack: 1,
+	}
+	assert.NoError(t, d.Validate())
 }

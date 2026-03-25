@@ -43,6 +43,11 @@ type ArmorDef struct {
 	// RarityStatMultiplier is set at load time from the rarity tier constants (REQ-EM-2).
 	// ACBonus is multiplied by this value at load time. NOT loaded from YAML.
 	RarityStatMultiplier float64 `yaml:"-"`
+	// IsMetal indicates this armor is made of metal, relevant for precious material affixing.
+	IsMetal bool `yaml:"is_metal"`
+	// UpgradeSlots is the number of material upgrade slots available on this armor.
+	// Derived from RarityDef.FeatureSlots at load time. NOT loaded from YAML.
+	UpgradeSlots int `yaml:"-"`
 }
 
 // validArmorSlots is the set of all legal ArmorSlot values.
@@ -146,10 +151,11 @@ func LoadArmors(dir string) ([]*ArmorDef, error) {
 		if err := a.Validate(); err != nil {
 			return nil, fmt.Errorf("LoadArmors: invalid armor in %q: %w", path, err)
 		}
-		// REQ-EM-2: multiply ACBonus by rarity stat multiplier at load time.
+		// REQ-EM-2: multiply ACBonus by rarity stat multiplier at load time; derive UpgradeSlots.
 		if def, ok := LookupRarity(a.Rarity); ok {
 			a.RarityStatMultiplier = def.StatMultiplier
 			a.ACBonus = int(float64(a.ACBonus) * def.StatMultiplier)
+			a.UpgradeSlots = def.FeatureSlots
 		}
 		armors = append(armors, &a)
 	}

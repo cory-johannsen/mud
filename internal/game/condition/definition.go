@@ -42,6 +42,12 @@ type ConditionDef struct {
 	PreventMovement  bool `yaml:"prevents_movement"`
 	PreventCommands  bool `yaml:"prevents_commands"`
 	PreventTargeting bool `yaml:"prevents_targeting"`
+	// IsDomination indicates this condition represents magical domination (e.g. confused).
+	// Precious material ghost_grade weapons and armor can suppress domination conditions.
+	IsDomination bool `yaml:"is_domination"`
+	// IsMentalCondition indicates this condition is mental in nature (e.g. frightened, confused).
+	// Precious material ghost_grade items grant resistance to mental conditions.
+	IsMentalCondition bool `yaml:"is_mental_condition"`
 }
 
 // Registry holds all known ConditionDefs keyed by ID.

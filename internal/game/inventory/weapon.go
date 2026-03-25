@@ -56,6 +56,9 @@ type WeaponDef struct {
 	// RarityStatMultiplier is set at load time from the rarity tier constants (REQ-EM-2).
 	// It is NOT loaded from YAML — it is derived from Rarity after parsing.
 	RarityStatMultiplier float64 `yaml:"-"`
+	// UpgradeSlots is the number of material upgrade slots available on this weapon.
+	// Derived from RarityDef.FeatureSlots at load time. NOT loaded from YAML.
+	UpgradeSlots int `yaml:"-"`
 }
 
 // IsMelee reports whether the weapon is a melee weapon (RangeIncrement == 0).
@@ -161,9 +164,10 @@ func LoadWeapons(dir string) ([]*WeaponDef, error) {
 		if err := w.Validate(); err != nil {
 			return nil, fmt.Errorf("LoadWeapons: invalid weapon in %q: %w", path, err)
 		}
-		// REQ-EM-2: set RarityStatMultiplier from the rarity constants at load time.
+		// REQ-EM-2: set RarityStatMultiplier and UpgradeSlots from the rarity constants at load time.
 		if def, ok := LookupRarity(w.Rarity); ok {
 			w.RarityStatMultiplier = def.StatMultiplier
+			w.UpgradeSlots = def.FeatureSlots
 		}
 		weapons = append(weapons, &w)
 	}

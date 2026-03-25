@@ -11,22 +11,24 @@ import (
 
 // Kind constants for ItemDef.Kind.
 const (
-	KindWeapon     = "weapon"
-	KindExplosive  = "explosive"
-	KindConsumable = "consumable"
-	KindJunk       = "junk"
-	KindArmor      = "armor"
-	KindTrap       = "trap"
+	KindWeapon           = "weapon"
+	KindExplosive        = "explosive"
+	KindConsumable       = "consumable"
+	KindJunk             = "junk"
+	KindArmor            = "armor"
+	KindTrap             = "trap"
+	KindPreciousMaterial = "precious_material"
 )
 
 // validKinds is the set of valid ItemDef kinds.
 var validKinds = map[string]bool{
-	KindWeapon:     true,
-	KindExplosive:  true,
-	KindConsumable: true,
-	KindJunk:       true,
-	KindArmor:      true,
-	KindTrap:       true,
+	KindWeapon:           true,
+	KindExplosive:        true,
+	KindConsumable:       true,
+	KindJunk:             true,
+	KindArmor:            true,
+	KindTrap:             true,
+	KindPreciousMaterial: true,
 }
 
 // ItemDef defines the static properties of an inventory item loaded from YAML.
@@ -71,6 +73,19 @@ type ItemDef struct {
 	ActivationEffect *ConsumableEffect `yaml:"activation_effect,omitempty"`
 	// Recharge lists triggers that restore charges to this item.
 	Recharge []RechargeEntry `yaml:"recharge,omitempty"`
+	// MaterialID is the base material identifier. Required when Kind == KindPreciousMaterial.
+	MaterialID string `yaml:"material_id,omitempty"`
+	// GradeID is the material grade. Required when Kind == KindPreciousMaterial.
+	// Valid values: street_grade, mil_spec_grade, ghost_grade.
+	GradeID string `yaml:"grade_id,omitempty"`
+	// MaterialName is the human-readable material name. Required when Kind == KindPreciousMaterial.
+	MaterialName string `yaml:"material_name,omitempty"`
+	// MaterialTier is the rarity tier of the material. Required when Kind == KindPreciousMaterial.
+	// Valid values: common, uncommon, rare.
+	MaterialTier string `yaml:"material_tier,omitempty"`
+	// AppliesTo lists the item categories this material can be applied to.
+	// Required when Kind == KindPreciousMaterial. Valid values: weapon, armor.
+	AppliesTo []string `yaml:"applies_to,omitempty"`
 }
 
 // RechargeEntry defines one recharge trigger for an activatable item.
@@ -95,7 +110,7 @@ func (d *ItemDef) Validate() error {
 		errs = append(errs, errors.New("Name must not be empty"))
 	}
 	if !validKinds[d.Kind] {
-		errs = append(errs, fmt.Errorf("Kind must be one of weapon, explosive, consumable, junk, armor, trap; got %q", d.Kind))
+		errs = append(errs, fmt.Errorf("Kind must be one of weapon, explosive, consumable, junk, armor, trap, precious_material; got %q", d.Kind))
 	}
 	if d.MaxStack < 1 {
 		errs = append(errs, errors.New("MaxStack must be >= 1"))
@@ -114,6 +129,32 @@ func (d *ItemDef) Validate() error {
 	}
 	if d.Kind == KindTrap && d.TrapTemplateRef == "" {
 		errs = append(errs, fmt.Errorf("item %q: TrapTemplateRef is required when Kind is %q", d.ID, KindTrap))
+	}
+	if d.Kind == KindPreciousMaterial {
+		if d.MaterialID == "" {
+			errs = append(errs, fmt.Errorf("material_id is required for precious_material kind"))
+		}
+		if d.GradeID == "" {
+			errs = append(errs, fmt.Errorf("grade_id is required for precious_material kind"))
+		} else if d.GradeID != "street_grade" && d.GradeID != "mil_spec_grade" && d.GradeID != "ghost_grade" {
+			errs = append(errs, fmt.Errorf("grade_id %q is invalid; must be street_grade, mil_spec_grade, or ghost_grade", d.GradeID))
+		}
+		if d.MaterialName == "" {
+			errs = append(errs, fmt.Errorf("material_name is required for precious_material kind"))
+		}
+		if d.MaterialTier == "" {
+			errs = append(errs, fmt.Errorf("material_tier is required for precious_material kind"))
+		} else if d.MaterialTier != "common" && d.MaterialTier != "uncommon" && d.MaterialTier != "rare" {
+			errs = append(errs, fmt.Errorf("material_tier %q is invalid; must be common, uncommon, or rare", d.MaterialTier))
+		}
+		if len(d.AppliesTo) == 0 {
+			errs = append(errs, fmt.Errorf("applies_to is required for precious_material kind"))
+		}
+		for _, at := range d.AppliesTo {
+			if at != "weapon" && at != "armor" {
+				errs = append(errs, fmt.Errorf("applies_to value %q is invalid; must be weapon or armor", at))
+			}
+		}
 	}
 	// REQ-EM-36: Team must be "" | "gun" | "machete".
 	if d.Team != "" && d.Team != "gun" && d.Team != "machete" {
