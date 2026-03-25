@@ -85,10 +85,10 @@ func zipCols(left, right []string, leftW int) string {
 // When width >= 60, armor and accessory slots are rendered in two side-by-side columns.
 // When width < 60, all slots are rendered in a single column (existing behaviour).
 //
-// Precondition: sess must not be nil; sess.LoadoutSet and sess.Equipment must not be nil.
+// Precondition: sess must not be nil; sess.LoadoutSet and sess.Equipment must not be nil; reg may be nil (disables affix display).
 // Postcondition: Returns a formatted multi-section string showing all weapon presets
 // and all armor and accessory slots.
-func HandleEquipment(sess *session.PlayerSession, width int) string {
+func HandleEquipment(sess *session.PlayerSession, width int, reg *inventory.Registry) string {
 	var sb strings.Builder
 
 	// === Weapons ===
@@ -100,8 +100,8 @@ func HandleEquipment(sess *session.PlayerSession, width int) string {
 			label += " [active]"
 		}
 		sb.WriteString(label + ":\n")
-		sb.WriteString("  " + inventory.SlotDisplayName("main") + ": " + formatEquippedWeapon(preset.MainHand) + "\n")
-		sb.WriteString("  " + inventory.SlotDisplayName("off") + ":  " + formatEquippedWeapon(preset.OffHand) + "\n")
+		sb.WriteString("  " + inventory.SlotDisplayName("main") + ": " + formatEquippedWeaponWithAffixes(preset.MainHand, reg) + "\n")
+		sb.WriteString("  " + inventory.SlotDisplayName("off") + ":  " + formatEquippedWeaponWithAffixes(preset.OffHand, reg) + "\n")
 	}
 
 	eq := sess.Equipment
@@ -141,7 +141,7 @@ func HandleEquipment(sess *session.PlayerSession, width int) string {
 		sb.WriteString("\n=== Armor ===\n")
 		for _, slot := range displayArmorSlots {
 			label := inventory.SlotDisplayName(string(slot)) + ":"
-			sb.WriteString(fmt.Sprintf("  %-12s %s\n", label, formatSlottedItem(eq.Armor[slot])))
+			sb.WriteString(fmt.Sprintf("  %-12s %s\n", label, formatSlottedItemWithAffixes(eq.Armor[slot], reg)))
 		}
 
 		sb.WriteString("\n=== Accessories ===\n")
@@ -166,6 +166,16 @@ func HandleEquipment(sess *session.PlayerSession, width int) string {
 // Precondition: item may be nil (represents an empty slot).
 // Postcondition: Returns "empty" when item is nil, otherwise the (prefixed, colored) item display name.
 func formatSlottedItem(item *inventory.SlottedItem) string {
+	return formatSlottedItemWithAffixes(item, nil)
+}
+
+// formatSlottedItemWithAffixes returns a human-readable description of a slotted armor or accessory item,
+// optionally showing upgrade slot count and affixed material sub-list when reg is non-nil.
+//
+// Precondition: item may be nil (represents an empty slot); reg may be nil (disables affix display).
+// Postcondition: Returns "empty" when item is nil, otherwise the (prefixed, colored) item display name
+// with optional upgrade slot counter and material sub-list.
+func formatSlottedItemWithAffixes(item *inventory.SlottedItem, reg *inventory.Registry) string {
 	if item == nil {
 		return "empty"
 	}
@@ -183,5 +193,32 @@ func formatSlottedItem(item *inventory.SlottedItem) string {
 	if item.Rarity != "" {
 		displayName = inventory.RarityColoredName(item.Rarity, displayName)
 	}
-	return displayName
+
+	var sb strings.Builder
+	sb.WriteString(displayName)
+
+	// Upgrade slot counter: requires ArmorDef to determine UpgradeSlots.
+	// UpgradeSlots is stored on the ArmorDef, not on SlottedItem directly.
+	// We look up the ArmorDef via registry when reg is non-nil.
+	var upgradeSlots int
+	if reg != nil && item.ItemDefID != "" {
+		if armorDef, ok := reg.Armor(item.ItemDefID); ok {
+			upgradeSlots = armorDef.UpgradeSlots
+		}
+	}
+	if upgradeSlots > 0 {
+		sb.WriteString(fmt.Sprintf(" [%d/%d slots]", len(item.AffixedMaterials), upgradeSlots))
+	}
+	// Affixed material sub-list.
+	if reg != nil {
+		for _, entry := range item.AffixedMaterials {
+			parts := strings.SplitN(entry, ":", 2)
+			if len(parts) == 2 {
+				if def, ok := reg.Material(parts[0], parts[1]); ok {
+					sb.WriteString(fmt.Sprintf("\n    ↳ %s (%s)", def.Name, def.GradeName))
+				}
+			}
+		}
+	}
+	return sb.String()
 }

@@ -4500,10 +4500,10 @@ func (s *GameServiceServer) handleLoadout(uid string, req *gamev1.LoadoutRequest
 				}
 			}
 		}
-		return messageEvent(command.HandleLoadout(sess, arg)), nil
+		return messageEvent(command.HandleLoadout(sess, arg, s.invRegistry)), nil
 	}
 	flavor := technology.FlavorFor(technology.DominantTradition(sess.Class))
-	weaponSection := command.HandleLoadout(sess, "")
+	weaponSection := command.HandleLoadout(sess, "", s.invRegistry)
 	prepSection := technology.FormatPreparedTechs(sess.PreparedTechs, flavor, s.techRegistry)
 	return messageEvent(weaponSection + "\n\n" + prepSection), nil
 }
@@ -4532,7 +4532,7 @@ func (s *GameServiceServer) handleEquipment(uid string, _ *gamev1.EquipmentReque
 	// Hydrate display names immediately before rendering so the output always
 	// reflects the current registry, regardless of when login hydration ran.
 	hydrateEquipmentNames(sess.Equipment, s.invRegistry)
-	return messageEvent(command.HandleEquipment(sess, 80)), nil
+	return messageEvent(command.HandleEquipment(sess, 80, s.invRegistry)), nil
 }
 
 // pushCharacterSheet sends an updated CharacterSheetView to the player's entity

@@ -44,7 +44,7 @@ func pistolWeaponDef() *inventory.WeaponDef {
 // displays both presets with the [active] marker on the active preset.
 func TestHandleLoadout_NoArg_ShowsBothPresets(t *testing.T) {
 	sess := newTestSession()
-	result := command.HandleLoadout(sess, "")
+	result := command.HandleLoadout(sess, "", nil)
 
 	if !strings.Contains(result, "Preset 1") {
 		t.Errorf("expected output to contain 'Preset 1', got:\n%s", result)
@@ -62,7 +62,7 @@ func TestHandleLoadout_NoArg_ShowsBothPresets(t *testing.T) {
 func TestHandleLoadout_NoArg_ActiveMarkerOnPreset1(t *testing.T) {
 	sess := newTestSession()
 	// Active defaults to 0 (Preset 1).
-	result := command.HandleLoadout(sess, "")
+	result := command.HandleLoadout(sess, "", nil)
 
 	lines := strings.Split(result, "\n")
 	var preset1Line string
@@ -81,7 +81,7 @@ func TestHandleLoadout_NoArg_ActiveMarkerOnPreset1(t *testing.T) {
 // display "empty".
 func TestHandleLoadout_NoArg_EmptySlots(t *testing.T) {
 	sess := newTestSession()
-	result := command.HandleLoadout(sess, "")
+	result := command.HandleLoadout(sess, "", nil)
 
 	count := strings.Count(result, "empty")
 	// Two presets x two slots = 4 occurrences of "empty".
@@ -101,7 +101,7 @@ func TestHandleLoadout_NoArg_WeaponWithAmmo(t *testing.T) {
 	// Consume 3 rounds so the display is non-trivial.
 	sess.LoadoutSet.Presets[0].MainHand.Magazine.Loaded = 12
 
-	result := command.HandleLoadout(sess, "")
+	result := command.HandleLoadout(sess, "", nil)
 
 	if !strings.Contains(result, "9mm Pistol") {
 		t.Errorf("expected weapon name in output, got:\n%s", result)
@@ -115,7 +115,7 @@ func TestHandleLoadout_NoArg_WeaponWithAmmo(t *testing.T) {
 // and returns a confirmation message.
 func TestHandleLoadout_SwapToPreset2(t *testing.T) {
 	sess := newTestSession()
-	result := command.HandleLoadout(sess, "2")
+	result := command.HandleLoadout(sess, "2", nil)
 
 	if sess.LoadoutSet.Active != 1 {
 		t.Errorf("expected Active==1 after swap to preset 2, got %d", sess.LoadoutSet.Active)
@@ -131,7 +131,7 @@ func TestHandleLoadout_SwapToPreset1(t *testing.T) {
 	sess := newTestSession()
 	// Start at preset 2 so swapping to 1 is a real swap.
 	sess.LoadoutSet.Active = 1
-	result := command.HandleLoadout(sess, "1")
+	result := command.HandleLoadout(sess, "1", nil)
 
 	if sess.LoadoutSet.Active != 0 {
 		t.Errorf("expected Active==0 after swap to preset 1, got %d", sess.LoadoutSet.Active)
@@ -149,7 +149,7 @@ func TestHandleLoadout_AlreadySwappedThisRound(t *testing.T) {
 	sess.LoadoutSet.Active = 1
 	sess.LoadoutSet.SwappedThisRound = true
 
-	result := command.HandleLoadout(sess, "1")
+	result := command.HandleLoadout(sess, "1", nil)
 
 	if !strings.Contains(strings.ToLower(result), "already") {
 		t.Errorf("expected error containing 'already', got: %q", result)
@@ -160,7 +160,7 @@ func TestHandleLoadout_AlreadySwappedThisRound(t *testing.T) {
 // an error containing "invalid".
 func TestHandleLoadout_InvalidIndex(t *testing.T) {
 	sess := newTestSession()
-	result := command.HandleLoadout(sess, "9")
+	result := command.HandleLoadout(sess, "9", nil)
 
 	if !strings.Contains(strings.ToLower(result), "invalid") {
 		t.Errorf("expected error containing 'invalid', got: %q", result)
@@ -171,7 +171,7 @@ func TestHandleLoadout_InvalidIndex(t *testing.T) {
 // an error containing "invalid".
 func TestHandleLoadout_NonNumericArg(t *testing.T) {
 	sess := newTestSession()
-	result := command.HandleLoadout(sess, "foo")
+	result := command.HandleLoadout(sess, "foo", nil)
 
 	if !strings.Contains(strings.ToLower(result), "invalid") {
 		t.Errorf("expected error containing 'invalid' for non-numeric arg, got: %q", result)
@@ -183,7 +183,7 @@ func TestHandleLoadout_NonNumericArg(t *testing.T) {
 func TestHandleLoadout_SameIndexNoOp(t *testing.T) {
 	sess := newTestSession()
 	// Active is 0; selecting preset 1 (1-based) maps to idx 0 — no-op.
-	result := command.HandleLoadout(sess, "1")
+	result := command.HandleLoadout(sess, "1", nil)
 
 	if sess.LoadoutSet.SwappedThisRound {
 		t.Error("expected SwappedThisRound==false after selecting already-active preset")
@@ -196,7 +196,7 @@ func TestHandleLoadout_SameIndexNoOp(t *testing.T) {
 // TestHandleLoadout_ZeroIndexInvalid verifies that "0" is rejected as invalid.
 func TestHandleLoadout_ZeroIndexInvalid(t *testing.T) {
 	sess := newTestSession()
-	result := command.HandleLoadout(sess, "0")
+	result := command.HandleLoadout(sess, "0", nil)
 
 	if !strings.Contains(strings.ToLower(result), "invalid") {
 		t.Errorf("expected error containing 'invalid' for arg '0', got: %q", result)
@@ -212,7 +212,7 @@ func TestProperty_HandleLoadout_DisplayAlwaysContainsAllPresets(t *testing.T) {
 		activeIdx := rapid.IntRange(0, len(sess.LoadoutSet.Presets)-1).Draw(rt, "activeIdx")
 		sess.LoadoutSet.Active = activeIdx
 
-		result := command.HandleLoadout(sess, "")
+		result := command.HandleLoadout(sess, "", nil)
 
 		for i := range sess.LoadoutSet.Presets {
 			needle := fmt.Sprintf("Preset %d", i+1)
