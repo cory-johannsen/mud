@@ -177,14 +177,14 @@ All preconditions are checked in order before the Crafting roll is made. Any fai
   ```go
   result := skillcheck.Resolve(
       roll,
-      sess.Abilities.Modifier(sess.Abilities.Reasoning),
+      sess.Abilities.Modifier(sess.Abilities.Reasoning), // computes (Reasoning - 10) / 2
       sess.Skills["crafting"],
       dc,
       skillcheck.TriggerDef{},
   )
   ```
 
-  where `roll` is `d20`, `sess.Abilities.Reasoning` is the Reasoning score (`int` field on `character.AbilityScores`), `sess.Skills["crafting"]` is the proficiency rank string from `PlayerSession.Skills` (which mirrors `character.Character.Skills map[string]string`), and `dc` is the grade DC constant from Section 3.
+  `sess.Abilities.Modifier(sess.Abilities.Reasoning)` passes the raw Reasoning score (`int`) to `Modifier(score int) int` which returns the ability modifier `(score - 10) / 2`. `sess.Skills["crafting"]` is the proficiency rank string from `PlayerSession.Skills` (which mirrors `character.Character.Skills map[string]string`). `dc` is the grade DC constant from Section 3.
 
 - REQ-GA-17: The outcome is `result.Outcome` from `skillcheck.Resolve`; `skillcheck.OutcomeFor` MUST NOT be called directly.
 
@@ -244,8 +244,9 @@ type MaterialEffectResult struct {
     TargetBlinded        bool // 1 round
     TargetSlowed         bool // 1 round
     SuppressRegeneration bool // 1 round
-    IgnoreMetalArmorAC   bool
-    IgnoreAllArmorAC     bool
+    IgnoreMetalArmorAC      bool
+    IgnoreAllArmorAC        bool
+    IgnoreHardnessThreshold int  // from Carbide Alloy weapon: ignore target Hardness up to this value
 }
 ```
 
@@ -298,12 +299,13 @@ type PassiveMaterialSummary struct {
     InitiativeBonus       int      // from Quantum Alloy mil-spec/ghost grade
     TechAttackRollBonus   int      // from Neural Gel mil-spec and ghost grade (+1 for either)
     FPOnRecalibrateBonus  int      // from Neural Gel ghost grade: +1 FP restored on Recalibrate
+    HardnessBonus         int      // from Carbide Alloy affixed to armor; added to armor Hardness in damage reduction
 }
 ```
 
 - REQ-GA-29: `PlayerSession` MUST gain `PassiveMaterials PassiveMaterialSummary`. It MUST be recomputed by calling `ComputePassiveMaterials(equipped []*EquippedWeapon, armor map[ArmorSlot]*SlottedItem, reg *Registry) PassiveMaterialSummary` at login and whenever equipped items change (same trigger points as `SetBonusSummary`). `ComputePassiveMaterials` MUST be a pure function in `internal/game/inventory/material.go`.
-- REQ-GA-38: Passive bonuses from `PassiveMaterialSummary` MUST be applied at the same integration points as `SetBonusSummary`: check penalty in equipment checks, speed in movement computation, save bonuses in save resolution, immunities in condition application, initiative bonus in initiative roll, tech attack roll bonus in technology attack resolution, FP on Recalibrate in Recalibrate action handler.
-- REQ-GA-39: `PassiveMaterialSummary.SaveVsTechBonus` accumulates from all equipped items with Null-Weave affixed regardless of whether the item is a weapon or armor. The save bonus is character-level (not slot-restricted).
+- REQ-GA-30: Passive bonuses from `PassiveMaterialSummary` MUST be applied at the same integration points as `SetBonusSummary`: check penalty in equipment checks, speed in movement computation, save bonuses in save resolution, immunities in condition application, initiative bonus in initiative roll, tech attack roll bonus in technology attack resolution, Hardness bonus in damage reduction, FP on Recalibrate in Recalibrate action handler.
+- REQ-GA-38: `PassiveMaterialSummary.SaveVsTechBonus` accumulates from all equipped items with Null-Weave affixed regardless of whether the item is a weapon or armor. The save bonus is character-level (not slot-restricted).
 
 ### 5.4 Carbide Alloy MaxDurability
 
@@ -342,9 +344,9 @@ MaxDurability bonus stored in `MaterialMaxDurabilityBonus` (see Section 5.4).
 
 | Grade | Weapon Effect | Armor Effect |
 |---|---|---|
-| Street Grade | +2 MaterialMaxDurabilityBonus | *(armor)* +1 Hardness |
-| Mil-Spec Grade | +4 MaterialMaxDurabilityBonus; ignore target Hardness ≤ 5 | *(armor)* +2 Hardness |
-| Ghost Grade | +6 MaterialMaxDurabilityBonus; ignore target Hardness ≤ 10 | *(armor)* +3 Hardness |
+| Street Grade | +2 MaterialMaxDurabilityBonus; `IgnoreHardnessThreshold=0` | *(armor)* +1 Hardness (`HardnessBonus+=1` in PassiveMaterials) |
+| Mil-Spec Grade | +4 MaterialMaxDurabilityBonus; `IgnoreHardnessThreshold=5` | *(armor)* +2 Hardness (`HardnessBonus+=2`) |
+| Ghost Grade | +6 MaterialMaxDurabilityBonus; `IgnoreHardnessThreshold=10` | *(armor)* +3 Hardness (`HardnessBonus+=3`) |
 
 #### Carbon Weave — lightweight composite *(armor only)*
 
@@ -370,7 +372,7 @@ MaxDurability bonus stored in `MaterialMaxDurabilityBonus` (see Section 5.4).
 |---|---|
 | Street Grade | Persistent fire 1 on hit |
 | Mil-Spec Grade | Persistent fire 2 on hit; +1 fire damage |
-| Ghost Grade | Persistent fire 4 on hit; +2 fire damage; ignites flammable objects |
+| Ghost Grade | Persistent fire 4 on hit; +2 fire damage; target gains `on_fire` condition (1 fire damage per round; removed by spending 1 AP to extinguish) |
 
 #### Cryo-Gel — cryogenic composite
 
@@ -554,7 +556,7 @@ ALTER TABLE character_weapon_presets
 
 ## 8. Architecture
 
-- REQ-GA-31: `HandleAffix` MUST be implemented in `internal/game/command/affix.go` using the `AffixSession` struct wrapper (Section 6.7). `HandleAffix` modifies in-memory state only — it MUST NOT perform any database writes.
+- REQ-GA-31: `HandleAffix(as *AffixSession, reg *Registry, materialQuery, targetQuery string, rng Roller) string` MUST be implemented in `internal/game/command/affix.go`. The return type is `string` (the player-facing message), following the `HandleRepair` pattern. `HandleAffix` modifies in-memory state only — it MUST NOT perform any database writes.
 - REQ-GA-32: After a successful affix, `HandleAffix` MUST update the in-memory cached `AffixedMaterials` on the live-equipped `EquippedWeapon` or `SlottedItem` directly (same as `HandleRepair` writes back `Durability` to the in-memory struct). This ensures the cache is consistent without requiring a reload.
 - REQ-GA-33: The `handleAffix` method in `internal/gameserver/grpc_service.go` MUST call `HandleAffix` and, on success, call `charSaver.SaveInventory` (backpack changed) and `charSaver.SaveWeaponPresets` or `charSaver.SaveEquipment` as appropriate for the target item type. This follows the same persistence pattern as other inventory-modifying handlers in that file.
 - REQ-GA-34: `ApplyMaterialEffects` MUST be a pure function in `internal/game/inventory/material.go` covering per-hit effects only (Section 5.1). Passive effects are handled by `ComputePassiveMaterials` (Section 5.3). Stateful effects (Section 5.2) are handled at their respective call sites.
