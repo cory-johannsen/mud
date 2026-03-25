@@ -47,12 +47,14 @@ type CharacterStore interface {
 func buildWelcomeBanner() string {
 	// AK-47 horizontal art — side profile, barrel pointing right.
 	// Each row is ≤ 80 visible characters (verified by TestBannerLineWidthMax80).
+	// Rows 5-6 show the pistol grip (left) and magazine/clip (right) below the receiver.
 	ak47 := []string{
 		`        ____________________________________________`,
 		`  ,--. |____________________________________________|===>`,
 		` (    )|  [======================================]  |`,
 		`  ` + "`" + `--' |____________________________________________|`,
-		`        |___|`,
+		`        | |     |`,
+		`        |_|_____|`,
 	}
 
 	// GUNCHETE Unicode block-letter title — original art, per-row.
@@ -70,11 +72,12 @@ func buildWelcomeBanner() string {
 
 	// Machete horizontal art — blade on left, handle+guard on right.
 	// Each row is ≤ 80 visible characters.
+	// Guard/handle section is 8 chars wide for visibility.
 	machete := []string{
-		`  _______________________________________________________,`,
-		` /________________________________________________________|`,
-		` |                                                        |=|`,
-		`  \________________________________________________________|_|`,
+		`  ____________________________________________________,`,
+		` /_____________________________________________________|`,
+		` |                                                 |========|`,
+		`  \__________________________________________________|________|`,
 	}
 
 	var sb strings.Builder

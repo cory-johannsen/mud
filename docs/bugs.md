@@ -167,8 +167,8 @@
 
 ### BUG-21: Welcome screen AK-47 grip/clip not visible; machete guard/handle too small
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** On the welcome/splash screen, the AK-47 ASCII art is truncated — the grip and clip at the bottom are not rendered; the machete blade looks correct but the guard and handle are disproportionately small.
 **Steps:** Connect to the MUD and observe the splash screen banner; note the AK-47 appears too short (missing lower body) and the machete guard/handle area is tiny relative to the blade.
-**Fix:**
+**Fix:** Added two rows to the AK-47 art showing the pistol grip and magazine/clip below the receiver. Widened the machete guard/handle from 3 chars to 10 chars for proportional visibility.
