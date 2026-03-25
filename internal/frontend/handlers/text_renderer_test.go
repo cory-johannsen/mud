@@ -1515,15 +1515,17 @@ func TestRenderCharacterSheet_OmitsFocusPoints_WhenMaxIsZero(t *testing.T) {
 }
 
 func TestRenderNPCs_NonCombatTypeIndicator(t *testing.T) {
-	// Non-combat NPC should show type tag
+	// Non-combat NPC should show type tag but NOT health description
 	npcs := []*gamev1.NpcInfo{
 		{Name: "Sal", HealthDescription: "unharmed", NpcType: "merchant"},
 		{Name: "Doc Mira", HealthDescription: "unharmed", NpcType: "healer"},
 	}
 	rows := renderNPCs(npcs, 80)
 	combined := strings.Join(rows, "\n")
-	assert.Contains(t, telnet.StripANSI(combined), "[shop]")
-	assert.Contains(t, telnet.StripANSI(combined), "[healer]")
+	stripped := telnet.StripANSI(combined)
+	assert.Contains(t, stripped, "[shop]")
+	assert.Contains(t, stripped, "[healer]")
+	assert.NotContains(t, stripped, "(unharmed)", "non-combat NPCs must not show health")
 }
 
 func TestRenderNPCs_CombatNPCNoTypeIndicator(t *testing.T) {
