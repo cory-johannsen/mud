@@ -64,6 +64,9 @@ zone:
     - template: collective_guardian
       count: 2
       respawn_after: 5m
+    - template: battleground_guard
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: tense
@@ -168,6 +171,10 @@ zone:
       target: battle_armory
     map_x: 0
     map_y: -6
+    spawns:
+    - template: battleground_merchant
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: busy
@@ -332,19 +339,10 @@ zone:
     map_x: -2
     map_y: -2
     spawns:
-    - template: battleground_merchant
-      count: 1
-      respawn_after: 0s
     - template: battleground_healer
       count: 1
       respawn_after: 0s
     - template: battleground_job_trainer
-      count: 1
-      respawn_after: 0s
-    - template: battleground_banker
-      count: 1
-      respawn_after: 0s
-    - template: battleground_guard
       count: 1
       respawn_after: 0s
     properties:
@@ -588,6 +586,10 @@ zone:
       target: battle_north_fields
     map_x: 202
     map_y: 38
+    spawns:
+    - template: battleground_banker
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: orderly
@@ -639,7 +641,7 @@ zone:
     - template: commissar
       count: 2
       respawn_after: 5m
-    - template: battle_enforcer
+    - template: lieutenant
       count: 2
       respawn_after: 5m
     properties:
@@ -697,7 +699,7 @@ zone:
     - template: commissar
       count: 1
       respawn_after: 5m
-    - template: battle_enforcer
+    - template: lieutenant
       count: 3
       respawn_after: 5m
     properties:
@@ -726,7 +728,7 @@ zone:
     - template: collective_guardian
       count: 2
       respawn_after: 5m
-    - template: battle_sniper
+    - template: country_club_sniper
       count: 1
       respawn_after: 5m
     properties:
@@ -753,7 +755,7 @@ zone:
     - template: collective_guardian
       count: 2
       respawn_after: 5m
-    - template: battle_sniper
+    - template: country_club_sniper
       count: 1
       respawn_after: 5m
     properties:
@@ -782,7 +784,7 @@ zone:
     - template: collective_guardian
       count: 2
       respawn_after: 5m
-    - template: battle_sniper
+    - template: country_club_sniper
       count: 1
       respawn_after: 5m
     properties:
