@@ -103,6 +103,13 @@ func (s *GameServiceServer) handleDowntimeQueueAdd(uid string, sess *session.Pla
 			return messageEvent(fmt.Sprintf("Recipe %q not found.", activityArgs)), nil
 		}
 	}
+	// REQ-DTQ-4: warn (do not fail) when analyze_tech or field_repair item is not currently in inventory.
+	// Item presence is re-checked at start time; this is only a non-blocking advisory.
+	if (act.ID == "analyze_tech" || act.ID == "field_repair") && sess.Backpack != nil && activityArgs != "" {
+		if len(sess.Backpack.FindByItemDefID(activityArgs)) == 0 {
+			s.pushMessageToUID(uid, fmt.Sprintf("Warning: %q is not currently in your inventory. It will be re-checked when the activity starts.", activityArgs))
+		}
+	}
 	if err := s.downtimeQueueRepo.Enqueue(context.Background(), sess.CharacterID, act.ID, activityArgs); err != nil {
 		return messageEvent("Failed to add to queue."), nil
 	}
@@ -381,6 +388,12 @@ func (s *GameServiceServer) startNext(uid string) {
 		s.startNext(uid)
 		return
 	}
+
+	// REQ-DTQ-8/9 (DEFERRED): For craft activities, materials should be deducted at this point
+	// via downtimePreStartCraft(uid, sess, entry.ActivityArgs), and if deduction fails the
+	// activity should be skipped via s.startNext(uid). This requires downtimePreStartCraft
+	// to be implemented in the downtime plan (it was not present when this plan was executed).
+	// Tracked in docs/superpowers/plans/2026-03-22-downtime.md.
 
 	durationMin := downtimeActivityDuration(act)
 	completesAt := time.Now().Add(time.Duration(durationMin) * time.Minute)
