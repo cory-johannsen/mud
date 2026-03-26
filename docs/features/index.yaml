@@ -551,7 +551,7 @@ features:
 
   - slug: curse-removal
     name: Curse Removal
-    status: planned
+    status: done
     priority: 263
     category: world
     file: docs/features/curse-removal.md
