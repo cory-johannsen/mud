@@ -17,6 +17,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/faction"
+	"github.com/cory-johannsen/mud/internal/game/quest"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/dice"
@@ -80,6 +81,7 @@ type CombatHandler struct {
 	substanceSvc   SubstanceService       // optional; applies poison substances on weapon hit (REQ-AH-21); may be nil
 	factionSvc    *faction.Service       // optional; awards faction rep on NPC kill; may be nil
 	factionConfig *faction.FactionConfig // optional; holds rep economy parameters; may be nil
+	questSvc      *quest.Service         // optional; records kill/fetch/explore progress; may be nil
 	combatMu      sync.RWMutex
 	timersMu      sync.Mutex
 	timers        map[string]*combat.RoundTimer
@@ -214,6 +216,14 @@ func (h *CombatHandler) SetXPService(svc *xp.Service) {
 func (h *CombatHandler) SetFactionService(svc *faction.Service, cfg *faction.FactionConfig) {
 	h.factionSvc = svc
 	h.factionConfig = cfg
+}
+
+// SetQuestService injects the quest service for kill-progress recording.
+//
+// Precondition: svc must be non-nil.
+// Postcondition: RecordKill is called for each living participant when an NPC dies.
+func (h *CombatHandler) SetQuestService(svc *quest.Service) {
+	h.questSvc = svc
 }
 
 // SetCurrencySaver registers the saver used to persist player currency after loot award.
@@ -3454,6 +3464,17 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 								Narrative: msg,
 							}})
 						}
+					}
+				}
+			}
+		}
+
+		// Record kill progress for all living quest participants (REQ-QU-19).
+		if h.questSvc != nil {
+			for _, p := range h.livingParticipantSessions(cbt) {
+				if err := h.questSvc.RecordKill(context.Background(), p, p.CharacterID, templateID); err != nil {
+					if h.logger != nil {
+						h.logger.Warn("RecordKill failed", zap.String("uid", p.UID), zap.Error(err))
 					}
 				}
 			}
