@@ -1,0 +1,17 @@
+# content/quests/example_kill_quest.yaml
+id: clear_the_scavengers
+title: Clear the Scavengers
+description: >
+  The Rusty Oasis has been plagued by scavengers stealing supplies.
+  Take out three of them and report back to Slick Sally.
+giver_npc_id: slick_sally
+repeatable: false
+objectives:
+  - id: kill_scavengers
+    type: kill
+    description: Kill 3 scavengers
+    target_id: scavenger
+    quantity: 3
+rewards:
+  xp: 150
+  credits: 75
