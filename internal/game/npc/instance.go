@@ -152,6 +152,10 @@ type Instance struct {
 	// PendingJoinCombatRoomID is non-empty when the NPC was recruited via call_for_help
 	// and should join combat in the given room on the next tick.
 	PendingJoinCombatRoomID string
+	// ProtectedNPCName is the display name of the NPC this instance is defending.
+	// Non-empty when the NPC joined combat via COMBATMSG-4f (protecting an ally).
+	// Set by the call_for_help recruit logic when the recruiter has a name.
+	ProtectedNPCName string
 }
 
 // HasTag reports whether the given tag is present in the instance's tag list.

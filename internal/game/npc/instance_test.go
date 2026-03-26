@@ -432,6 +432,21 @@ func TestNewInstance_WanderRadiusCopied(t *testing.T) {
 	assert.Equal(t, 3, inst.WanderRadius)
 }
 
+func TestInstance_ProtectedNPCName_DefaultEmpty(t *testing.T) {
+	tmpl := &npc.Template{
+		ID:   "scavenger",
+		Name: "Scavenger",
+		Type: "human",
+		// Disposition is not a template field; it will be set by the instance
+		Level:    1,
+		MaxHP:    10,
+		AC:       10,
+		Awareness: 5,
+	}
+	inst := npc.NewInstance("inst-1", tmpl, "room-1")
+	assert.Empty(t, inst.ProtectedNPCName, "ProtectedNPCName must default to empty")
+}
+
 func TestProperty_Instance_HomeRoomIDNeverEmpty(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		spawnRoom := rapid.StringMatching(`room[0-9]+`).Draw(rt, "spawnRoom")
