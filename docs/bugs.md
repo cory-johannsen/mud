@@ -86,11 +86,14 @@
 
 ### BUG-25: Allied faction NPC attacks Team Machete player on sight
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Marshal Ironsides (a Machete-faction NPC) initiates combat against a Team Machete player on room entry, indicating the NPC aggression check does not correctly exclude allied-team players.
 **Steps:** Log in as a Team Machete character; enter a room containing Marshal Ironsides; observe "[Morning] Marshal Ironsides attacks you — attacked on sight."
-**Fix:**
+**Root Cause:** Two compounding issues:
+1. `content/npcs/marshal_ironsides.yaml` has no `disposition` field and no `faction_id` field. The NPC instance initializer in `internal/game/npc/instance.go:299-303` defaults any NPC with an empty `Disposition` to `"hostile"`.
+2. The threat-assessment block in `internal/gameserver/grpc_service.go:4261` sets `isHostileToPlayers = true` directly from `inst.Disposition == "hostile"`. The faction-enemy check on lines 4262-4268 only runs when `!isHostileToPlayers`, so it is **never reached** for Marshal Ironsides. There is no allied-faction exclusion anywhere in the path: the code checks whether the player is an *enemy* of the NPC's faction but never checks whether the player is an *ally*, so even a correctly-configured faction NPC with a non-hostile disposition would still have no protection against attacking same-faction players.
+**Fix:** Two-part fix. (1) Added `IsAllyOf(*session.PlayerSession, string) bool` to `faction.Service` — returns true iff both faction IDs are non-empty and equal. (2) In the threat-assessment block in `grpc_service.go`, added an allied-faction exclusion pass before the existing enemy-faction promotion pass: if any player in the room is an ally of the NPC, `isHostileToPlayers` is suppressed to false, preventing combat initiation regardless of disposition default. Also corrected `content/npcs/marshal_ironsides.yaml` to set `disposition: neutral` and `faction_id: machete`.
 
 ## World
 
