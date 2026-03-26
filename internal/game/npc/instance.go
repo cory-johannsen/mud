@@ -156,6 +156,9 @@ type Instance struct {
 	// Non-empty when the NPC joined combat via COMBATMSG-4f (protecting an ally).
 	// Set by the call_for_help recruit logic when the recruiter has a name.
 	ProtectedNPCName string
+	// RestCost is the credit cost charged to a player for a motel rest at this NPC.
+	// 0 means this NPC is not a motel NPC and does not offer rest (REQ-REST-8).
+	RestCost int
 }
 
 // HasTag reports whether the given tag is present in the instance's tag list.

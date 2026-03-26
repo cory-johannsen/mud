@@ -9,6 +9,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 	"pgregory.net/rapid"
 )
 
@@ -701,4 +702,34 @@ func TestLoadPreciousMaterials_MissingFile_ReturnsError(t *testing.T) {
 	err := inventory.LoadPreciousMaterials(reg, "/nonexistent/dir")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "missing")
+}
+
+// ── Tags field and HasTag ────────────────────────────────────────────────────
+
+func TestItemDef_Tags_DefaultsEmpty(t *testing.T) {
+	item := &inventory.ItemDef{}
+	assert.Empty(t, item.Tags)
+}
+
+func TestItemDef_Tags_ParsedFromYAML(t *testing.T) {
+	yamlContent := `
+id: test_torch
+name: Torch
+kind: consumable
+weight: 1
+max_stack: 1
+tags:
+  - fire_material
+  - camping_gear
+`
+	var item inventory.ItemDef
+	require.NoError(t, yaml.Unmarshal([]byte(yamlContent), &item))
+	assert.Contains(t, item.Tags, "fire_material")
+	assert.Contains(t, item.Tags, "camping_gear")
+}
+
+func TestItemDef_HasTag(t *testing.T) {
+	item := &inventory.ItemDef{Tags: []string{"fire_material", "camping_gear"}}
+	assert.True(t, item.HasTag("fire_material"))
+	assert.False(t, item.HasTag("sleeping_bag"))
 }

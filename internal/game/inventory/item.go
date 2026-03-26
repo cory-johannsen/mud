@@ -86,6 +86,21 @@ type ItemDef struct {
 	// AppliesTo lists the item categories this material can be applied to.
 	// Required when Kind == KindPreciousMaterial. Valid values: weapon, armor.
 	AppliesTo []string `yaml:"applies_to,omitempty"`
+	// Tags is an optional list of content labels for this item (e.g., "fire_material", "camping_gear").
+	Tags []string `yaml:"tags,omitempty"`
+}
+
+// HasTag returns true if item has the given tag in its Tags slice.
+//
+// Precondition: d must be non-nil.
+// Postcondition: Returns true iff tag is present in Tags; false otherwise.
+func (d *ItemDef) HasTag(tag string) bool {
+	for _, t := range d.Tags {
+		if t == tag {
+			return true
+		}
+	}
+	return false
 }
 
 // RechargeEntry defines one recharge trigger for an activatable item.
