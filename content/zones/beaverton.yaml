@@ -122,6 +122,9 @@ zone:
     - template: mall_cop_elite
       count: 1
       respawn_after: 5m
+    - template: beaverton_minuteman
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: fluorescent
       atmosphere: tense
@@ -598,7 +601,10 @@ zone:
     map_y: 0
     spawns:
     - template: hoa_enforcer
-      count: 2
+      count: 1
+      respawn_after: 5m
+    - template: compound_guard
+      count: 1
       respawn_after: 5m
     properties:
       lighting: fluorescent
