@@ -415,6 +415,26 @@ func (h *CombatHandler) InitiateNPCCombat(npcInst *npc.Instance, playerUID strin
 		return
 	}
 	h.broadcastFn(sess.RoomID, initEvents)
+	// COMBATMSG-3/4/6: push NPC initiation reason message to the targeted player.
+	reason := h.inferNPCReason(npcInst)
+	h.pushMessageToUID(playerUID, combat.FormatNPCInitiationMsg(npcInst.Name(), reason, npcInst.ProtectedNPCName))
+}
+
+// inferNPCReason derives the InitiationReason for an NPC based on its current state.
+//
+// Precondition: inst must not be nil.
+// Postcondition: Returns the most specific applicable InitiationReason constant.
+func (h *CombatHandler) inferNPCReason(inst *npc.Instance) combat.InitiationReason {
+	if inst.GrudgePlayerID != "" {
+		return combat.ReasonProvoked
+	}
+	if inst.PendingJoinCombatRoomID != "" {
+		return combat.ReasonProtecting
+	}
+	if inst.Disposition == "hostile" {
+		return combat.ReasonOnSight
+	}
+	return combat.ReasonTerritory
 }
 
 // Attack queues a 1-AP ActionAttack for uid against target.
