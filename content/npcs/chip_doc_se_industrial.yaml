@@ -1,0 +1,16 @@
+id: chip_doc_se_industrial
+name: Doc Vasquez
+npc_type: chip_doc
+description: >
+  A former industrial medic who kept her hands clean when the factories shut
+  down by learning a different trade. Doc Vasquez operates out of the neutral
+  break room, quiet and professional. She asks no questions about why you need
+  the chip out, only whether you have the two hundred.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14

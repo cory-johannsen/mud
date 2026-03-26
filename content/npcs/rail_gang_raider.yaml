@@ -1,0 +1,43 @@
+id: rail_gang_raider
+name: Rail Gang Raider
+description: A lean, scarred raider who calls the old rail yards home. Moves fast along the rusted tracks, ambushing travelers between the junction and the sidings.
+level: 2
+max_hp: 22
+ac: 13
+awareness: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 12
+  quickness: 15
+  grit: 12
+  reasoning: 10
+  savvy: 12
+  flair: 11
+loot:
+  currency:
+    min: 8
+    max: 45
+  items:
+    - item: cheap_blade
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.1
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: cheap_blade
+    weight: 4
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: leather_jacket
+    weight: 4
+  - id: tactical_vest
+    weight: 1

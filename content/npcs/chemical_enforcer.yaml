@@ -1,0 +1,43 @@
+id: chemical_enforcer
+name: Chemical Enforcer
+description: A heavyset enforcer in a patched hazmat suit, gas mask hanging loose around the neck. Works security for whoever controls the chemical plants and tank farms.
+level: 3
+max_hp: 34
+ac: 15
+awareness: 7
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 14
+  quickness: 10
+  grit: 16
+  reasoning: 9
+  savvy: 10
+  flair: 8
+loot:
+  currency:
+    min: 15
+    max: 60
+  items:
+    - item: gas_mask
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: steel_pipe
+    weight: 3
+  - id: combat_knife
+    weight: 2
+armor:
+  - id: tactical_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2

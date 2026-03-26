@@ -33,6 +33,7 @@ zone:
       target: sei_mcloughlin_blvd
     map_x: 0
     map_y: 0
+    danger_level: dangerous
     equipment:
     - item_id: zone_map
       max_count: 1
@@ -40,6 +41,10 @@ zone:
       immovable: true
       script: zone_map_use
       description: Zone Map
+    spawns:
+    - template: warehouse_guard
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: wind
@@ -63,8 +68,11 @@ zone:
       target: sei_river_access
     - direction: east
       target: sei_loading_bay
+    - direction: south
+      target: sei_neutral_loading_dock
     map_x: 4
     map_y: 2
+    danger_level: dangerous
     spawns:
     - template: dock_worker
       count: 2
@@ -92,6 +100,7 @@ zone:
       target: sei_holgate_blvd
     map_x: 2
     map_y: 2
+    danger_level: dangerous
     spawns:
     - template: warehouse_guard
       count: 2
@@ -121,6 +130,7 @@ zone:
       target: sei_mcloughlin_blvd
     map_x: -2
     map_y: 2
+    danger_level: dangerous
     spawns:
     - template: industrial_scav
       count: 2
@@ -148,6 +158,11 @@ zone:
       target: sei_chemical_plant
     map_x: -2
     map_y: 0
+    danger_level: dangerous
+    spawns:
+    - template: rail_gang_raider
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -171,6 +186,11 @@ zone:
       target: sei_holgate_blvd
     map_x: 202
     map_y: 0
+    danger_level: dangerous
+    spawns:
+    - template: rail_gang_raider
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: desolate
@@ -194,6 +214,7 @@ zone:
       target: sei_ross_bridge_approach
     map_x: 2
     map_y: 4
+    danger_level: dangerous
     spawns:
     - template: warehouse_guard
       count: 1
@@ -228,6 +249,11 @@ zone:
       target: sei_crane_yard
     map_x: 0
     map_y: 2
+    danger_level: dangerous
+    spawns:
+    - template: chemical_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: hazy
       atmosphere: chemical
@@ -253,6 +279,11 @@ zone:
       target: sei_break_room
     map_x: 2
     map_y: 0
+    danger_level: dangerous
+    spawns:
+    - template: warehouse_guard
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: tense
@@ -278,6 +309,11 @@ zone:
       target: ross_bridge_east
     map_x: 0
     map_y: 4
+    danger_level: dangerous
+    spawns:
+    - template: chemical_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -301,6 +337,7 @@ zone:
       target: sei_warehouse_interior
     map_x: 6
     map_y: 2
+    danger_level: dangerous
     spawns:
     - template: dock_worker
       count: 1
@@ -328,6 +365,7 @@ zone:
       target: sei_mcloughlin_blvd
     map_x: -4
     map_y: 0
+    danger_level: dangerous
     spawns:
     - template: industrial_scav
       count: 1
@@ -357,6 +395,7 @@ zone:
       target: sei_transformer_station
     map_x: -2
     map_y: 4
+    danger_level: dangerous
     spawns:
     - template: industrial_scav
       count: 2
@@ -384,6 +423,11 @@ zone:
       target: sei_dock_row
     map_x: 4
     map_y: 0
+    danger_level: dangerous
+    spawns:
+    - template: dock_worker
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: river
@@ -405,6 +449,7 @@ zone:
       target: sei_milwaukie_junction
     map_x: 200
     map_y: 6
+    danger_level: dangerous
     spawns:
     - template: warehouse_guard
       count: 1
@@ -434,6 +479,11 @@ zone:
       target: sei_signal_tower
     map_x: 2
     map_y: -2
+    danger_level: dangerous
+    spawns:
+    - template: industrial_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: dusty
@@ -457,6 +507,11 @@ zone:
       target: sei_machine_shop
     map_x: 4
     map_y: -2
+    danger_level: dangerous
+    spawns:
+    - template: rail_gang_raider
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: elevated
       atmosphere: wind
@@ -482,6 +537,7 @@ zone:
       target: sei_container_maze
     map_x: 6
     map_y: 4
+    danger_level: dangerous
     spawns:
     - template: warehouse_guard
       count: 1
@@ -509,6 +565,7 @@ zone:
       target: sei_warehouse_interior
     map_x: 6
     map_y: 6
+    danger_level: dangerous
     spawns:
     - template: industrial_scav
       count: 1
@@ -536,6 +593,11 @@ zone:
       target: sei_pipe_yard
     map_x: -2
     map_y: 6
+    danger_level: dangerous
+    spawns:
+    - template: chemical_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: desolate
@@ -561,13 +623,17 @@ zone:
       target: sei_chemical_plant
     map_x: 202
     map_y: 2
+    danger_level: dangerous
+    spawns:
+    - template: chemical_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: chemical
   - id: sei_break_room
     title: Break Room
     description: 'A cinder-block room with folding chairs and a microwave that runs off a generator. Shift workers and traders share the same coffee and the same fatigue.'
-    danger_level: safe
     exits:
     - direction: west
       target: sei_holgate_blvd
@@ -595,3 +661,258 @@ zone:
     properties:
       lighting: fluorescent
       atmosphere: tired
+  # --- Safe Cluster ---
+  - id: sei_neutral_loading_dock
+    title: Neutral Loading Dock
+    description: 'A sheltered loading dock claimed by a loose coalition of independent
+
+      haulers and off-faction traders. Hand-painted signs in several
+
+      languages declare it neutral ground. A few lanterns cast warm
+
+      light over crates of traded goods. The atmosphere is wary but
+
+      civil — violence here brings reprisals from all sides.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: north
+      target: sei_dock_row
+    - direction: west
+      target: sei_neutral_office
+    map_x: 4
+    map_y: 4
+    spawns:
+    - template: se_industrial_merchant
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: lantern
+      atmosphere: cautious
+  - id: sei_neutral_office
+    title: Neutral Ground Office
+    description: 'A repurposed foreman''s office serves as a meeting place for
+
+      faction-neutral traders. A whiteboard tracks current safe-passage
+
+      agreements. Dog-eared ledgers record debts and credits between
+
+      parties who would otherwise be at war. The door is always open
+
+      and always watched.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: east
+      target: sei_neutral_loading_dock
+    - direction: south
+      target: sei_neutral_break_room
+    map_x: 2
+    map_y: 4
+    properties:
+      lighting: fluorescent
+      atmosphere: businesslike
+  - id: sei_neutral_break_room
+    title: Neutral Break Room
+    description: 'A back room off the neutral office, barely large enough for a
+
+      folding table and four chairs. A battered camp stove heats a
+
+      perpetual pot of soup. Doc Vasquez holds court here, removing
+
+      cortex chips for those who can pay and keeping quiet about
+
+      who comes through.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: north
+      target: sei_neutral_office
+    map_x: 2
+    map_y: 6
+    spawns:
+    - template: chip_doc_se_industrial
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: hushed
+  # --- New Dangerous Rooms ---
+  - id: sei_chemical_tank_farm
+    title: Chemical Tank Farm
+    description: 'A cluster of squat industrial tanks connected by rusted catwalks
+
+      and corroded piping. Faded hazmat diamonds warn of acids, solvents,
+
+      and gases that may or may not still be present. The air shimmers
+
+      faintly above the nearest tank. Puddles of chemical runoff collect
+
+      in drainage channels choked with rust and sediment.
+
+      '
+    exits:
+    - direction: east
+      target: sei_chemical_plant
+    - direction: north
+      target: sei_pipe_maze
+    map_x: -6
+    map_y: 0
+    danger_level: dangerous
+    spawns:
+    - template: chemical_enforcer
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: toxic
+  - id: sei_rail_yard_south
+    title: Rail Yard South
+    description: 'The southern end of the rail yard stretches to a rusted bumper
+
+      stop. Switch engines sit inert on overgrown sidings. A gang has
+
+      fortified a string of boxcars into a mobile camp, cutting windows
+
+      and welding firing ports into the car sides. The smell of wood
+
+      smoke and unwashed bodies drifts from the nearest car.
+
+      '
+    exits:
+    - direction: north
+      target: sei_rail_siding
+    map_x: 200
+    map_y: 8
+    danger_level: dangerous
+    spawns:
+    - template: rail_gang_raider
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: hostile
+  - id: sei_slag_heap
+    title: Slag Heap
+    description: 'A mound of industrial slag and foundry waste rises two stories
+
+      above the surrounding lot. The black glass-like material crunches
+
+      underfoot and cuts through thin-soled boots. Scavengers pick
+
+      through the heap for salvageable metal inclusions. The vantage
+
+      point attracts snipers as readily as it attracts scavengers.
+
+      '
+    exits:
+    - direction: west
+      target: sei_transformer_station
+    map_x: 0
+    map_y: 6
+    danger_level: dangerous
+    spawns:
+    - template: industrial_scav
+      count: 1
+      respawn_after: 5m
+    - template: warehouse_guard
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: exposed
+  - id: sei_pipe_maze
+    title: Pipe Maze
+    description: 'A dense tangle of industrial piping — steam lines, coolant loops,
+
+      drainage runs — forms a shoulder-high labyrinth. Some pipes still
+
+      hiss with trapped pressure. Others have burst, leaving scalded
+
+      scorch marks on the concrete below. Moving quickly is not an option;
+
+      moving quietly is equally impossible.
+
+      '
+    exits:
+    - direction: south
+      target: sei_chemical_tank_farm
+    - direction: east
+      target: sei_crane_yard
+    map_x: -4
+    map_y: 2
+    danger_level: dangerous
+    spawns:
+    - template: chemical_enforcer
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: hazy
+      atmosphere: steam
+  - id: sei_derelict_crane
+    title: Derelict Crane
+    description: 'A massive gantry crane spans the width of the dry dock approach,
+
+      its hook dangling forty feet above the concrete. The crane cab
+
+      has been converted into a crow''s nest lookout, accessible only
+
+      by a rope ladder that can be pulled up from below. Gang markings
+
+      cover every surface within reach of the ground.
+
+      '
+    exits:
+    - direction: south
+      target: sei_dry_dock
+    - direction: west
+      target: sei_industrial_way
+    map_x: 0
+    map_y: 3
+    danger_level: dangerous
+    spawns:
+    - template: rail_gang_raider
+      count: 1
+      respawn_after: 5m
+    - template: warehouse_guard
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: exposed
+  - id: sei_outflow_canal
+    title: Outflow Canal
+    description: 'A concrete-lined drainage canal carries grey industrial runoff
+
+      toward the Willamette. The water is the color of old motor oil
+
+      and smells worse. Rats the size of small dogs pick through the
+
+      debris collected at a rusted grate spanning the channel. The
+
+      canal walls provide hard cover — and a killing ground for anyone
+
+      caught in the open.
+
+      '
+    exits:
+    - direction: north
+      target: sei_container_maze
+    - direction: west
+      target: sei_slag_heap
+    map_x: 4
+    map_y: 6
+    danger_level: dangerous
+    spawns:
+    - template: dock_worker
+      count: 1
+      respawn_after: 5m
+    - template: industrial_scav
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: fetid
