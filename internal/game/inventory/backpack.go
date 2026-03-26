@@ -234,6 +234,16 @@ func (b *Backpack) GetByInstanceID(instanceID string) *ItemInstance {
 	return nil
 }
 
+// AddInstance appends a pre-built ItemInstance directly to the backpack.
+// This is used when a registry is not available (e.g. during uncurse with no invRegistry).
+//
+// Precondition: inst.ItemDefID is non-empty; inst.Quantity >= 1.
+// Postcondition: the instance is appended; the returned pointer is into the backing slice.
+func (b *Backpack) AddInstance(inst ItemInstance) *ItemInstance {
+	b.items = append(b.items, inst)
+	return &b.items[len(b.items)-1]
+}
+
 // FindByItemDefID returns all instances matching the given item definition ID.
 //
 // Postcondition: returned slice is a copy.
