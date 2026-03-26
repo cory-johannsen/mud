@@ -29,10 +29,6 @@ zone:
       target: lo_guard_barracks
     map_x: 0
     map_y: 0
-    spawns:
-    - template: oswego_guard
-      count: 2
-      respawn_after: 5m
     equipment:
     - item_id: zone_map
       max_count: 1
@@ -67,10 +63,6 @@ zone:
       target: lo_lakewood_bay
     map_x: 0
     map_y: 2
-    spawns:
-    - template: oswego_guard
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: streetlamp
       atmosphere: orderly
@@ -94,13 +86,6 @@ zone:
       target: lo_the_commons
     map_x: 2
     map_y: 4
-    spawns:
-    - template: country_club_sniper
-      count: 2
-      respawn_after: 5m
-    - template: oswego_guard
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: interior
       atmosphere: military
@@ -149,10 +134,6 @@ zone:
       target: lo_gated_estates
     map_x: 0
     map_y: 6
-    spawns:
-    - template: hoa_enforcer
-      count: 2
-      respawn_after: 5m
     properties:
       lighting: fluorescent
       atmosphere: bureaucratic
@@ -181,9 +162,6 @@ zone:
     map_x: 0
     map_y: 4
     spawns:
-    - template: oswego_guard
-      count: 1
-      respawn_after: 5m
     - template: lake_oswego_merchant
       count: 1
       respawn_after: 0s
@@ -220,10 +198,6 @@ zone:
       target: lo_tennis_grounds
     map_x: 202
     map_y: 0
-    spawns:
-    - template: country_club_sniper
-      count: 2
-      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: windswept
@@ -310,10 +284,6 @@ zone:
       target: lo_checkpoint_north
     map_x: 2
     map_y: 0
-    spawns:
-    - template: oswego_guard
-      count: 2
-      respawn_after: 5m
     properties:
       lighting: interior
       atmosphere: barracks
@@ -335,10 +305,6 @@ zone:
       target: lo_millennium_park
     map_x: 202
     map_y: 2
-    spawns:
-    - template: oswego_guard
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: maritime
@@ -360,10 +326,6 @@ zone:
       target: lo_iron_mountain
     map_x: 202
     map_y: 4
-    spawns:
-    - template: hoa_enforcer
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: open
       atmosphere: drill
@@ -429,10 +391,6 @@ zone:
       target: lo_checkpoint_south
     map_x: 4
     map_y: 2
-    spawns:
-    - template: oswego_guard
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: floodlit
       atmosphere: patrol
@@ -452,10 +410,6 @@ zone:
     exits: []
     map_x: 4
     map_y: 4
-    spawns:
-    - template: oswego_guard
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: floodlit
       atmosphere: tense
@@ -477,10 +431,6 @@ zone:
       target: lo_lakewood_bay
     map_x: -2
     map_y: 0
-    spawns:
-    - template: country_club_sniper
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: aquatic
@@ -504,10 +454,6 @@ zone:
       target: lo_hoa_headquarters
     map_x: 202
     map_y: 8
-    spawns:
-    - template: hoa_enforcer
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: fluorescent
       atmosphere: orderly
@@ -529,10 +475,6 @@ zone:
       target: lo_country_club
     map_x: 2
     map_y: 6
-    spawns:
-    - template: country_club_sniper
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: open
       atmosphere: gunfire
@@ -552,10 +494,6 @@ zone:
     exits: []
     map_x: 202
     map_y: 10
-    spawns:
-    - template: hoa_enforcer
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: overhead
       atmosphere: judicial
