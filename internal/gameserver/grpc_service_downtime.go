@@ -429,6 +429,95 @@ func (s *GameServiceServer) restoreDowntimeState(ctx context.Context, uid string
 	if time.Now().After(dtState.CompletesAt) {
 		// Activity elapsed while offline — resolve immediately.
 		s.resolveDowntimeActivity(uid, sess)
+		// Process any queued activities that also elapsed while offline (REQ-DTQ-11).
+		s.resolveOfflineQueue(uid, sess, dtState.CompletesAt)
+	}
+}
+
+// resolveOfflineQueue processes queued activities that completed while the player was offline.
+// Called from the reconnect path after the active activity has been resolved.
+//
+// Precondition: uid is a valid player session; sess is non-nil; cursor is the time baseline
+//   (typically when the previously active activity completed).
+// Postcondition: Elapsed queued activities are resolved; the first future-eligible activity
+//   is started as the new active activity. Summary message sent if any activity was processed.
+func (s *GameServiceServer) resolveOfflineQueue(uid string, sess *session.PlayerSession, cursor time.Time) {
+	if s.downtimeQueueRepo == nil {
+		return
+	}
+	queueEntries, err := s.downtimeQueueRepo.ListQueue(context.Background(), sess.CharacterID)
+	if err != nil || len(queueEntries) == 0 {
+		return
+	}
+
+	roomTags := ""
+	if s.world != nil {
+		if room, roomOK := s.world.GetRoom(sess.RoomID); roomOK && room.Properties != nil {
+			roomTags = room.Properties["tags"]
+		}
+	}
+
+	completed := 0
+	skipped := 0
+
+	for range queueEntries {
+		entry, popErr := s.downtimeQueueRepo.PopHead(context.Background(), sess.CharacterID)
+		if popErr != nil || entry == nil {
+			break
+		}
+
+		act, ok := downtime.ActivityByID(entry.ActivityID)
+		if !ok {
+			s.pushMessageToUID(uid, fmt.Sprintf("Skipped (offline): unknown activity %q.", entry.ActivityID))
+			skipped++
+			continue
+		}
+
+		durationMin := downtimeActivityDuration(act)
+		hypotheticalEnd := cursor.Add(time.Duration(durationMin) * time.Minute)
+
+		if time.Now().Before(hypotheticalEnd) {
+			// This activity has not elapsed yet — start it as the new active activity if eligible.
+			if errMsg := downtime.CanStart(act.Alias, roomTags, false); errMsg != "" {
+				s.pushMessageToUID(uid, fmt.Sprintf("Skipped (offline): %s — %s", act.Name, errMsg))
+				skipped++
+				continue
+			}
+			sess.DowntimeActivityID = act.ID
+			sess.DowntimeCompletesAt = hypotheticalEnd
+			sess.DowntimeBusy = true
+			sess.DowntimeMetadata = entry.ActivityArgs
+			if s.downtimeRepo != nil && sess.CharacterID > 0 {
+				state := postgres.DowntimeState{
+					ActivityID:  act.ID,
+					CompletesAt: hypotheticalEnd,
+					RoomID:      sess.RoomID,
+				}
+				_ = s.downtimeRepo.Save(context.Background(), sess.CharacterID, state)
+			}
+			break
+		}
+
+		// Activity elapsed offline — validate and resolve.
+		if errMsg := downtime.CanStart(act.Alias, roomTags, false); errMsg != "" {
+			s.pushMessageToUID(uid, fmt.Sprintf("Skipped (offline): %s — %s", act.Name, errMsg))
+			skipped++
+			cursor = hypotheticalEnd
+			continue
+		}
+
+		sess.DowntimeActivityID = act.ID
+		sess.DowntimeBusy = true
+		sess.DowntimeMetadata = entry.ActivityArgs
+		sess.DowntimeCompletesAt = hypotheticalEnd
+		s.resolveDowntimeActivity(uid, sess)
+		s.pushMessageToUID(uid, "(offline)")
+		completed++
+		cursor = hypotheticalEnd
+	}
+
+	if completed > 0 || skipped > 0 {
+		s.pushMessageToUID(uid, fmt.Sprintf("While you were away: %d activities completed, %d skipped.", completed, skipped))
 	}
 }
 
