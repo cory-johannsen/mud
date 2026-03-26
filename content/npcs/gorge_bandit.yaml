@@ -1,0 +1,42 @@
+id: gorge_bandit
+name: Gorge Bandit
+description: A wiry ambush predator in wind-scoured tactical gear, lurking at road junctions and bridge approaches to shake down travelers.
+level: 2
+max_hp: 20
+ac: 14
+rob_multiplier: 1.2
+awareness: 10
+ai_domain: highway_bandit_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 11
+  quickness: 15
+  grit: 10
+  reasoning: 10
+  savvy: 13
+  flair: 10
+loot:
+  currency:
+    min: 15
+    max: 60
+  items:
+    - item: ammo_casing
+      chance: 0.4
+      min_qty: 1
+      max_qty: 3
+    - item: gorge_moss
+      chance: 0.25
+      min_qty: 1
+      max_qty: 2
+weapon:
+  - id: cheap_blade
+    weight: 3
+  - id: sawn_off
+    weight: 2
+  - id: rebar_club
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 3
+  - id: tactical_vest
+    weight: 2

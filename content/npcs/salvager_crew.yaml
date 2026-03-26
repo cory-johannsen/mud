@@ -1,0 +1,42 @@
+id: salvager_crew
+name: Salvager Crew
+description: A pair of hardened salvagers in patched gear, working a site together. They defend their finds with practiced aggression.
+level: 2
+max_hp: 24
+ac: 14
+rob_multiplier: 1.0
+awareness: 8
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  brutality: 12
+  quickness: 12
+  grit: 13
+  reasoning: 10
+  savvy: 11
+  flair: 9
+loot:
+  currency:
+    min: 10
+    max: 40
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 1
+      max_qty: 4
+    - item: outlet_tag
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2
+weapon:
+  - id: rebar_club
+    weight: 3
+  - id: cheap_blade
+    weight: 2
+  - id: pipe_wrench
+    weight: 2
+armor:
+  - id: leather_jacket
+    weight: 4
+  - id: work_coveralls
+    weight: 3

@@ -20,6 +20,7 @@ zone:
       disappears toward the distant haze of Vancouver.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_i84_east
@@ -39,6 +40,10 @@ zone:
       immovable: true
       script: zone_map_use
       description: Zone Map
+    spawns:
+    - template: gorge_bandit
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: overcast
       atmosphere: wind
@@ -53,12 +58,17 @@ zone:
       blocked by massive retaining walls covered in faded graffiti.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: pdx_i84_east
       zone: pdx_international
     map_x: -2
     map_y: 2
+    spawns:
+    - template: gorge_bandit
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: overcast
       atmosphere: sheltered
@@ -73,6 +83,7 @@ zone:
       like ghosts of the old world. Scavengers pick through the rubble methodically.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: trout_stark_street
@@ -100,6 +111,7 @@ zone:
       uneven ridges. The wind moans through gaps in the walls.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: trout_outlet_mall
@@ -127,6 +139,7 @@ zone:
       street corridor like a river of air.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: trout_i84_west
@@ -138,6 +151,10 @@ zone:
       target: trout_sandy_river
     map_x: 2
     map_y: 0
+    spawns:
+    - template: salvager_crew
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: wind
@@ -152,6 +169,7 @@ zone:
       slippery stones. The current is deceptively strong.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: trout_stark_street
@@ -175,6 +193,7 @@ zone:
       Fire rings are blackened with recent use — someone camps here.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: trout_river_trail
@@ -182,6 +201,10 @@ zone:
       target: trout_gorge_trail
     map_x: 202
     map_y: 10
+    spawns:
+    - template: gorge_runner
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: dappled
       atmosphere: forest
@@ -198,6 +221,7 @@ zone:
       a silver ribbon far below. The ruined Vista House crumbles behind you.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: trout_gorge_trail
@@ -225,6 +249,7 @@ zone:
       The mist is constant and cold.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: trout_wind_tunnel
@@ -250,6 +275,7 @@ zone:
       progress. The walls are smooth, carved by millennia of wind erosion.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: trout_crown_point
@@ -279,6 +305,7 @@ zone:
       for water purification. A hand-painted sign reads "TRADE WELCOME."
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: trout_stark_street
@@ -288,6 +315,10 @@ zone:
       target: trout_halsey_street
     map_x: 4
     map_y: 0
+    spawns:
+    - template: salvager_crew
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: firelight
       atmosphere: smoke
@@ -302,6 +333,7 @@ zone:
       mid-swing. The wind carries the metallic groan of shifting debris.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: trout_frontage_road
@@ -327,11 +359,16 @@ zone:
       wheels still turning slowly in the wind. The outlet mall looms to the north.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: trout_outlet_mall
     map_x: 2
     map_y: 4
+    spawns:
+    - template: gorge_bandit
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -348,6 +385,7 @@ zone:
       fortified the entrance with sandbags.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: trout_gorge_trail
@@ -375,6 +413,7 @@ zone:
       a remnant of the old world''s appetite for power.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: trout_ranger_station
@@ -398,6 +437,7 @@ zone:
       Trail markers, faded orange diamonds nailed to trees, still guide the way.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: trout_ranger_station
@@ -427,11 +467,16 @@ zone:
       stretches across the opening, flapping violently.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: trout_wind_tunnel
     map_x: 202
     map_y: 30
+    spawns:
+    - template: salvager_crew
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: sheltered
@@ -446,6 +491,7 @@ zone:
       and paper trash along the gutter in endless circles.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: trout_i84_west
@@ -453,6 +499,10 @@ zone:
       target: trout_i84_west_junction
     map_x: 0
     map_y: 2
+    spawns:
+    - template: gorge_bandit
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: overcast
       atmosphere: wind
@@ -469,6 +519,7 @@ zone:
       something larger.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: trout_lewis_clark_park
@@ -492,11 +543,16 @@ zone:
       Laundry lines strung between power poles suggest habitation.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: trout_edgefield
     map_x: 6
     map_y: 0
+    spawns:
+    - template: outlet_scavenger
+      count: 1
+      respawn_after: 3m
     properties:
       lighting: overcast
       atmosphere: quiet
@@ -511,11 +567,16 @@ zone:
       A greenhouse with half its panes missing still shelters herbs and seedlings.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: trout_edgefield
     map_x: 4
     map_y: -2
+    spawns:
+    - template: salvager_crew
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dappled
       atmosphere: green
@@ -530,6 +591,7 @@ zone:
       The area is sheltered from the worst wind by the mall''s bulk.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: trout_outlet_east_wing
@@ -557,6 +619,7 @@ zone:
       made from torn cloth flutter from the posts.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: trout_multnomah_falls
@@ -576,6 +639,8 @@ zone:
     exits:
     - direction: south
       target: trout_i84_west
+    - direction: east
+      target: trout_neutral_motel
     map_x: 0
     map_y: -2
     spawns:
@@ -585,12 +650,195 @@ zone:
     - template: troutdale_healer
       count: 1
       respawn_after: 0s
+    properties:
+      lighting: fluorescent
+      atmosphere: transit
+  - id: trout_neutral_motel
+    title: Rusted Anchor Motel
+    description: 'A two-story cinder-block motel that somehow survived the collapse with
+
+      most of its roof intact. Faded anchor logos dot the doors. The parking lot
+
+      has been cleared and repurposed as a neutral meeting ground — weapons
+
+      checked at the door, no questions asked. A hand-lettered sign reads
+
+      "SAFE HARBOR. EVERYONE WELCOME."
+
+      '
+    danger_level: safe
+    exits:
+    - direction: west
+      target: trout_truck_stop
+    - direction: north
+      target: trout_neutral_lobby
+    map_x: 2
+    map_y: -2
+    spawns:
     - template: troutdale_job_trainer
-      count: 1
-      respawn_after: 0s
-    - template: troutdale_banker
       count: 1
       respawn_after: 0s
     properties:
       lighting: fluorescent
       atmosphere: transit
+  - id: trout_neutral_lobby
+    title: Motel Lobby
+    description: 'The motel lobby has been converted into a common gathering hall.
+
+      Mismatched chairs ring a central fire drum venting through a jury-rigged
+
+      chimney. Maps and notices cover one wall. A counter still serves as
+
+      a check-in desk, now manned by a weathered clerk who tracks who comes
+
+      and goes with careful neutrality.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: south
+      target: trout_neutral_motel
+    - direction: east
+      target: trout_neutral_storage
+    map_x: 2
+    map_y: -4
+    spawns:
+    - template: troutdale_banker
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: firelight
+      atmosphere: shelter
+  - id: trout_neutral_storage
+    title: Motel Storage Room
+    description: 'A converted storage room at the back of the motel lobby, shelves still
+
+      stacked with towels and cleaning supplies long since repurposed. A curtained
+
+      alcove in the corner serves as an impromptu clinic. The smell of antiseptic
+
+      cuts through the dust. Someone has taped a handwritten rate card to the wall.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: west
+      target: trout_neutral_lobby
+    map_x: 4
+    map_y: -4
+    spawns:
+    - template: chip_doc_troutdale
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: clinical
+  - id: trout_east_gorge_road
+    title: East Gorge Road
+    description: 'Historic Highway 30 stretches east into the gorge, its surface buckled
+
+      by tree roots and seasonal floods. Abandoned vehicles rust at the roadside,
+
+      some converted into makeshift shelters. Salvagers work the wrecks
+
+      methodically, cutting torches sparking in the grey light.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: trout_halsey_street
+    - direction: east
+      target: trout_crown_point_trail
+    map_x: 8
+    map_y: 0
+    spawns:
+    - template: salvager_crew
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: wind
+  - id: trout_sandy_river_bank
+    title: Sandy River Bank
+    description: 'A wide gravel bar stretches along the Sandy River''s eastern bank,
+
+      exposed by low water. Smooth river stones cover the ground in every shade
+
+      of grey. Driftwood has piled into elaborate tangles at the bends.
+
+      The far bank is thickly forested, hiding movement in the shadows.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: north
+      target: trout_sandy_river
+    - direction: east
+      target: trout_river_trail
+    map_x: 4
+    map_y: -2
+    spawns:
+    - template: gorge_runner
+      count: 1
+      respawn_after: 4m
+    - template: gorge_bandit
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: rushing_water
+  - id: trout_crown_point_trail
+    title: Crown Point Access Trail
+    description: 'A steep switchback trail climbs the basalt escarpment toward Crown Point.
+
+      Loose shale slides underfoot with each step. The gorge wind increases
+
+      with altitude, tearing at exposed skin. Painted rock cairns mark
+
+      the route where the trail surface has eroded away entirely.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: trout_east_gorge_road
+    - direction: north
+      target: trout_crown_point
+    map_x: 10
+    map_y: 0
+    spawns:
+    - template: wind_walker
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: gale
+  - id: trout_old_highway_ruins
+    title: Old Highway Ruins
+    description: 'A stretch of pre-war highway has been swallowed by a decades-old landslide,
+
+      leaving a chaos of cracked asphalt slabs tilted at impossible angles.
+
+      Rusted guardrail sections jut from the rubble like broken fingers.
+
+      Gorge bandits use the terrain for ambushes — cover is everywhere
+
+      and sight lines are terrible.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: east
+      target: trout_ranger_station
+    - direction: south
+      target: trout_crown_point_trail
+    map_x: 10
+    map_y: -4
+    spawns:
+    - template: gorge_bandit
+      count: 2
+      respawn_after: 4m
+    properties:
+      lighting: overcast
+      atmosphere: desolate

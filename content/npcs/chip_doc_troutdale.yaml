@@ -1,0 +1,15 @@
+id: chip_doc_troutdale
+name: Dex "Splinter" Ruiz
+npc_type: chip_doc
+description: >
+  A lean, precise-handed implant tech who operates out of the Rusted Anchor Motel's back storage room.
+  Splinter earned the name pulling chip shards from neural ports with nothing but a sharpened dental pick
+  and a steady nerve. He charges fair, works clean, and never asks what you did to earn the warrant chip.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
