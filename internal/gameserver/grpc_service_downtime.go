@@ -8,6 +8,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/downtime"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"go.uber.org/zap"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
@@ -192,7 +193,14 @@ func (s *GameServiceServer) restoreDowntimeState(ctx context.Context, uid string
 		return
 	}
 	dtState, err := s.downtimeRepo.Load(ctx, characterID)
-	if err != nil || dtState == nil {
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Warn("restoreDowntimeState: failed to load downtime state",
+				zap.Int64("character_id", characterID), zap.Error(err))
+		}
+		return
+	}
+	if dtState == nil {
 		return
 	}
 	sess.DowntimeActivityID = dtState.ActivityID
