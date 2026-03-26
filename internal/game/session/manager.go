@@ -286,6 +286,12 @@ type PlayerSession struct {
 	// any session field MUST receive from this channel before reading.
 	// The channel is created by NewPlayerSession; it must never be written after close.
 	InitDone chan struct{}
+
+	DowntimeActivityID   string
+	DowntimeCompletesAt  time.Time
+	DowntimeBusy         bool
+	DowntimeMetadata     string
+	ZoneCircumstanceBonus map[string]int
 }
 
 // EquippedInstances returns all ItemInstances currently equipped across the active weapon
@@ -701,6 +707,16 @@ func (m *Manager) AllPlayers() []*PlayerSession {
 		out = append(out, sess)
 	}
 	return out
+}
+
+func (m *Manager) AllUIDs() []string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	uids := make([]string, 0, len(m.players))
+	for uid := range m.players {
+		uids = append(uids, uid)
+	}
+	return uids
 }
 
 // CreateGroup creates a new group with leaderUID as the sole member and leader.

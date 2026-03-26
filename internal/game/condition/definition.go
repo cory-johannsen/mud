@@ -48,6 +48,10 @@ type ConditionDef struct {
 	// IsMentalCondition indicates this condition is mental in nature (e.g. frightened, confused).
 	// Precious material ghost_grade items grant resistance to mental conditions.
 	IsMentalCondition bool `yaml:"is_mental_condition"`
+	Severity          int  `yaml:"severity,omitempty"`
+	MaxSeverity       int  `yaml:"max_severity,omitempty"`
+	Stage             int  `yaml:"stage,omitempty"`
+	MaxStage          int  `yaml:"max_stage,omitempty"`
 }
 
 // Registry holds all known ConditionDefs keyed by ID.
