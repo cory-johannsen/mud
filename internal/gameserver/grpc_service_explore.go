@@ -330,7 +330,3 @@ func hasShieldEquipped(sess *session.PlayerSession) bool {
 	return preset != nil && preset.OffHand != nil && preset.OffHand.Def != nil && preset.OffHand.Def.IsShield()
 }
 
-// ApplyExploreModeOnCombatStartForTest is an exported test shim.
-func ApplyExploreModeOnCombatStartForTest(sess *session.PlayerSession, playerCbt *combat.Combatant, h *CombatHandler) []string {
-	return applyExploreModeOnCombatStart(sess, playerCbt, h)
-}

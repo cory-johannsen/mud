@@ -2340,6 +2340,7 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 	}
 
 	var msgs []string
+	shadowUsed := false
 	for _, trigger := range room.SkillChecks {
 		if trigger.Trigger != "on_enter" {
 			continue
@@ -2351,12 +2352,13 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 		if sess.Skills != nil {
 			rank = sess.Skills[trigger.Skill]
 		}
-		// Shadow mode: use ally's rank if higher (REQ-EXP-29, REQ-EXP-30).
-		if sess.ExploreMode == session.ExploreModeShadow && sess.ExploreShadowTarget != 0 {
+		// Shadow mode: use ally's rank for the FIRST check where ally's rank exceeds player's (REQ-EXP-29, REQ-EXP-30).
+		if !shadowUsed && sess.ExploreMode == session.ExploreModeShadow && sess.ExploreShadowTarget != 0 {
 			if ally := s.sessions.GetPlayerByCharID(sess.ExploreShadowTarget); ally != nil && ally.RoomID == sess.RoomID {
 				if allyRank := ally.Skills[trigger.Skill]; allyRank != "" {
 					if skillRankBonus(allyRank) > skillRankBonus(rank) {
 						rank = allyRank
+						shadowUsed = true
 					}
 				}
 			}

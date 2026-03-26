@@ -1365,6 +1365,14 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	// applied by Hold Ground (REQ-EXP-11) survives round 1. StartRound resets
 	// ACMod to 0 for all combatants; calling applyExploreModeOnCombatStart
 	// before StartRound would zero the +2 ACMod immediately (REQ-EXP-13).
+	//
+	// Run Point timing note (REQ-EXP-25): Run Point applies +1 to ally Initiative
+	// values after StartRound. StartRound does NOT re-sort Combatants; the slice
+	// order is fixed by RollInitiative at enrollment time. The +1 modifies the
+	// Initiative field (used for display and initiative-bonus calculations) but
+	// does not change the round turn order for the current combat. This is
+	// intentional: the benefit is reflected in the Initiative score visible to
+	// players, not in turn ordering within an already-started combat.
 	if combatMsgs := applyExploreModeOnCombatStart(playerSess, playerCbt, h); len(combatMsgs) > 0 {
 		for _, msg := range combatMsgs {
 			h.pushMessageToUID(playerSess.UID, msg)
@@ -2298,6 +2306,10 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	// applied by Hold Ground (REQ-EXP-11) survives round 1. StartRound resets
 	// ACMod to 0 for all combatants; calling applyExploreModeOnCombatStart
 	// before StartRound would zero the +2 ACMod immediately (REQ-EXP-13).
+	//
+	// Run Point timing note (REQ-EXP-25): see the single-player combat path above
+	// for a full explanation. The +1 Initiative modifies the ally's Initiative field
+	// (display/calculation) but does not re-sort the Combatants slice.
 	if combatMsgs := applyExploreModeOnCombatStart(sess, playerCbt, h); len(combatMsgs) > 0 {
 		for _, msg := range combatMsgs {
 			h.pushMessageToUID(sess.UID, msg)

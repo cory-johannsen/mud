@@ -2,6 +2,7 @@ package gameserver
 
 import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/technology"
@@ -41,4 +42,9 @@ var RequireEditor = func(sess *session.PlayerSession) *gamev1.ServerEvent {
 // RequireAdmin exposes requireAdmin for white-box testing.
 var RequireAdmin = func(sess *session.PlayerSession) *gamev1.ServerEvent {
 	return requireAdmin(sess)
+}
+
+// ApplyExploreModeOnCombatStartForTest is an exported test shim for applyExploreModeOnCombatStart.
+func ApplyExploreModeOnCombatStartForTest(sess *session.PlayerSession, playerCbt *combat.Combatant, h *CombatHandler) []string {
+	return applyExploreModeOnCombatStart(sess, playerCbt, h)
 }
