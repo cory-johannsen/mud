@@ -3,6 +3,7 @@ package world
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
@@ -251,6 +252,21 @@ func (r *Room) VisibleExits() []Exit {
 		}
 	}
 	return visible
+}
+
+// LoreFacts returns the room's lore fact strings from Properties["lore_facts"].
+// Facts are stored as a newline-separated string. Returns nil if not set.
+//
+// Postcondition: Returns nil or a slice of non-empty strings.
+func (r *Room) LoreFacts() []string {
+	if r.Properties == nil {
+		return nil
+	}
+	raw := r.Properties["lore_facts"]
+	if raw == "" {
+		return nil
+	}
+	return strings.Split(raw, "\n")
 }
 
 // TrapPoolEntry is one entry in a weighted trap selection pool.
