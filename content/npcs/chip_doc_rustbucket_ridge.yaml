@@ -1,0 +1,16 @@
+id: chip_doc_rustbucket_ridge
+name: Mako "Socket" Yuen
+npc_type: chip_doc
+description: >
+  A grizzled back-alley implant tech with weathered hands and magnifying goggles pushed up on her forehead.
+  Mako has been pulling bad chips and patching fried neural interfaces out of the ridge's reinforced corner
+  market stall longer than most residents have been alive. She doesn't ask questions, charges fair, and keeps
+  her tools sterilized — more or less.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
