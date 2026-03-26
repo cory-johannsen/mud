@@ -41,13 +41,7 @@ zone:
     - template: vera_coldcoin
       count: 1
       respawn_after: 10m
-    - template: rio_wrench
-      count: 1
-      respawn_after: 10m
     - template: marshal_ironsides
-      count: 1
-      respawn_after: 10m
-    - template: patch
       count: 1
       respawn_after: 10m
     equipment:
@@ -132,6 +126,9 @@ zone:
     - template: sergeant_mack
       count: 1
       respawn_after: 10m
+    - template: chip_doc_rustbucket_ridge
+      count: 1
+      respawn_after: 0s
   - id: junkers_dream
     title: Junker's Dream
     core: true
@@ -315,6 +312,9 @@ zone:
     - template: scavenger
       count: 1
       respawn_after: 3m
+    - template: rio_wrench
+      count: 1
+      respawn_after: 10m
   - id: salvage_hut
     title: Salvage Hut
     danger_level: sketchy
@@ -330,6 +330,9 @@ zone:
     - template: scavenger
       count: 1
       respawn_after: 3m
+    - template: rustbucket_ridge_merchant
+      count: 1
+      respawn_after: 0s
   - id: the_still
     title: The Still
     core: true
@@ -603,6 +606,9 @@ zone:
     - template: scavenger
       count: 1
       respawn_after: 3m
+    - template: rustbucket_ridge_hireling
+      count: 1
+      respawn_after: 0s
     properties:
       area: cinder_pit
   - id: the_embers_edge
@@ -681,6 +687,9 @@ zone:
     - template: scavenger
       count: 1
       respawn_after: 3m
+    - template: patch
+      count: 1
+      respawn_after: 10m
     properties:
       area: shiv_way
   - id: the_slashers_den
@@ -720,6 +729,9 @@ zone:
     - template: scavenger
       count: 1
       respawn_after: 3m
+    - template: rustbucket_ridge_banker
+      count: 1
+      respawn_after: 0s
     properties:
       area: shiv_way
   - id: rust_scrap_office
@@ -732,22 +744,10 @@ zone:
     map_x: 4
     map_y: 0
     spawns:
-    - template: chip_doc_rustbucket_ridge
-      count: 1
-      respawn_after: 0s
-    - template: rustbucket_ridge_merchant
-      count: 1
-      respawn_after: 0s
     - template: rustbucket_ridge_healer
       count: 1
       respawn_after: 0s
     - template: rustbucket_ridge_job_trainer
-      count: 1
-      respawn_after: 0s
-    - template: rustbucket_ridge_banker
-      count: 1
-      respawn_after: 0s
-    - template: rustbucket_ridge_hireling
       count: 1
       respawn_after: 0s
     properties:
