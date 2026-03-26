@@ -297,6 +297,11 @@ type PlayerSession struct {
 	DowntimeQueueLimit int // computed from JobTier + Level via DowntimeQueueLimitRegistry
 
 	ZoneCircumstanceBonus map[string]int
+
+	// Camping state — transient; not persisted.
+	CampingActive    bool          // true while a camping rest is in progress
+	CampingStartTime time.Time     // when camping started
+	CampingDuration  time.Duration // computed duration for this session (REQ-REST-13/14)
 }
 
 // EquippedInstances returns all ItemInstances currently equipped across the active weapon

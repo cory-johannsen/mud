@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -755,4 +756,11 @@ func TestAddPlayer_SubstanceFieldsInitializedNil(t *testing.T) {
 	assert.Nil(t, sess.AddictionState)
 	// REQ-AH-6A: SubstanceConditionRefs nil map zero value
 	assert.Nil(t, sess.SubstanceConditionRefs)
+}
+
+func TestPlayerSession_CampingFields_DefaultZero(t *testing.T) {
+	sess := &PlayerSession{}
+	assert.False(t, sess.CampingActive)
+	assert.True(t, sess.CampingStartTime.IsZero())
+	assert.Equal(t, time.Duration(0), sess.CampingDuration)
 }
