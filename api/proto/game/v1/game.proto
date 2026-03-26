@@ -141,6 +141,7 @@ message ClientMessage {
     AffixRequest         affix_request         = 124;
     ExploreRequest       explore_request       = 125;
     QuestRequest         quest_request         = 126;
+    UncurseRequest       uncurse_request       = 127;
   }
 }
 
@@ -1214,4 +1215,10 @@ message CraftResultEvent {
     string           item_id          = 2;
     int32            quantity         = 3;
     repeated MaterialLoss materials_lost = 4;
+}
+
+// UncurseRequest asks a chip_doc NPC to remove a cursed item.
+message UncurseRequest {
+  string npc_name  = 1; // name of the chip_doc NPC to address
+  string item_name = 2; // name of the cursed equipped item to uncurse
 }

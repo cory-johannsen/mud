@@ -1993,6 +1993,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleExplore(uid, p.ExploreRequest)
 	case *gamev1.ClientMessage_QuestRequest:
 		return s.handleQuestCommand(uid, p.QuestRequest.GetArgs())
+	case *gamev1.ClientMessage_UncurseRequest:
+		return s.handleUncurse(uid, p.UncurseRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
