@@ -758,7 +758,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				}
 			}
 			if s.questSvc != nil {
-				_ = s.questSvc.RecordExplore(stream.Context(), sess, sess.CharacterID, spawnRoom.ID)
+				_, _ = s.questSvc.RecordExplore(stream.Context(), sess, sess.CharacterID, spawnRoom.ID)
 			}
 		}
 	}
@@ -2171,7 +2171,7 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 				}
 			}
 			if s.questSvc != nil {
-				_ = s.questSvc.RecordExplore(context.Background(), sess, sess.CharacterID, newRoom.ID)
+				_, _ = s.questSvc.RecordExplore(context.Background(), sess, sess.CharacterID, newRoom.ID)
 			}
 			// Award room discovery XP for newly discovered rooms.
 			if s.xpSvc != nil {
@@ -5132,7 +5132,11 @@ func (s *GameServiceServer) handleGetItem(uid, target string) (*gamev1.ServerEve
 				continue
 			}
 			if s.questSvc != nil {
-				_ = s.questSvc.RecordFetch(context.Background(), sess, sess.CharacterID, item.ItemDefID, item.Quantity)
+				if questMsgs, questErr := s.questSvc.RecordFetch(context.Background(), sess, sess.CharacterID, item.ItemDefID, item.Quantity); questErr == nil {
+					for _, qm := range questMsgs {
+						s.pushMessageToUID(uid, qm)
+					}
+				}
 			}
 			picked++
 		}
@@ -5158,7 +5162,11 @@ func (s *GameServiceServer) handleGetItem(uid, target string) (*gamev1.ServerEve
 				return errorEvent(fmt.Sprintf("Cannot pick up: %v", err)), nil
 			}
 			if s.questSvc != nil {
-				_ = s.questSvc.RecordFetch(context.Background(), sess, sess.CharacterID, picked.ItemDefID, picked.Quantity)
+				if questMsgs, questErr := s.questSvc.RecordFetch(context.Background(), sess, sess.CharacterID, picked.ItemDefID, picked.Quantity); questErr == nil {
+					for _, qm := range questMsgs {
+						s.pushMessageToUID(uid, qm)
+					}
+				}
 			}
 			return messageEvent(fmt.Sprintf("You pick up %s.", name)), nil
 		}

@@ -3472,11 +3472,11 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 		// Record kill progress for all living quest participants (REQ-QU-19).
 		if h.questSvc != nil {
 			for _, p := range h.livingParticipantSessions(cbt) {
-				if err := h.questSvc.RecordKill(context.Background(), p, p.CharacterID, templateID); err != nil {
-					if h.logger != nil {
-						h.logger.Warn("RecordKill failed", zap.String("uid", p.UID), zap.Error(err))
-					}
+				questMsgs, questErr := h.questSvc.RecordKill(context.Background(), p, p.CharacterID, templateID)
+				if questErr != nil && h.logger != nil {
+					h.logger.Warn("RecordKill failed", zap.String("uid", p.UID), zap.Error(questErr))
 				}
+				h.pushQuestMessages(p, questMsgs)
 			}
 		}
 
@@ -3586,6 +3586,26 @@ func (h *CombatHandler) pushXPMessages(sess *session.PlayerSession, levelMsgs []
 			},
 		}
 		if data, marshalErr := proto.Marshal(ciEvt); marshalErr == nil {
+			_ = sess.Entity.Push(data)
+		}
+	}
+}
+
+// pushQuestMessages sends quest completion messages to the player's event stream.
+//
+// Precondition: sess must not be nil.
+// Postcondition: each message in msgs is pushed as a MessageEvent to sess.Entity.
+func (h *CombatHandler) pushQuestMessages(sess *session.PlayerSession, msgs []string) {
+	for _, msg := range msgs {
+		evt := &gamev1.ServerEvent{
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{
+					Content: msg,
+					Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+				},
+			},
+		}
+		if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
 			_ = sess.Entity.Push(data)
 		}
 	}

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
-	"github.com/cory-johannsen/mud/internal/game/quest"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -125,11 +124,9 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 					removed += take
 				}
 				if removed > 0 {
-					if err := s.questSvc.RecordDeliver(context.Background(), sess, sess.CharacterID, qid, obj.ID); err == nil {
-						if completedDef, ok2 := reg[qid]; ok2 {
-							for _, line := range quest.CompletionMessage(completedDef, s.invRegistry) {
-								msgs = append(msgs, line)
-							}
+					if completionMsgs, err := s.questSvc.RecordDeliver(context.Background(), sess, sess.CharacterID, qid, obj.ID); err == nil {
+						if len(completionMsgs) > 0 {
+							msgs = append(msgs, completionMsgs...)
 						} else {
 							msgs = append(msgs, fmt.Sprintf("%s says: 'Thank you!'", inst.Name()))
 						}

@@ -196,7 +196,8 @@ func (s *Service) Accept(ctx context.Context, sess SessionState, characterID int
 //
 // Precondition: sess non-nil; npcTemplateID non-empty.
 // Postcondition: matching objectives are incremented (clamped at Quantity); maybeComplete called.
-func (s *Service) RecordKill(ctx context.Context, sess SessionState, characterID int64, npcTemplateID string) error {
+// Returns completion messages if a quest completed, or nil if none completed.
+func (s *Service) RecordKill(ctx context.Context, sess SessionState, characterID int64, npcTemplateID string) ([]string, error) {
 	return s.recordProgress(ctx, sess, characterID, func(obj QuestObjective) bool {
 		return obj.Type == "kill" && obj.TargetID == npcTemplateID
 	})
@@ -206,7 +207,8 @@ func (s *Service) RecordKill(ctx context.Context, sess SessionState, characterID
 //
 // Precondition: sess non-nil; itemDefID non-empty; qty >= 1.
 // Postcondition: matching objectives are incremented by qty (clamped at Quantity); maybeComplete called.
-func (s *Service) RecordFetch(ctx context.Context, sess SessionState, characterID int64, itemDefID string, qty int) error {
+// Returns completion messages if a quest completed, or nil if none completed.
+func (s *Service) RecordFetch(ctx context.Context, sess SessionState, characterID int64, itemDefID string, qty int) ([]string, error) {
 	return s.recordProgressN(ctx, sess, characterID, qty, func(obj QuestObjective) bool {
 		return obj.Type == "fetch" && obj.TargetID == itemDefID
 	})
@@ -216,7 +218,8 @@ func (s *Service) RecordFetch(ctx context.Context, sess SessionState, characterI
 //
 // Precondition: sess non-nil; roomID non-empty.
 // Postcondition: matching objectives are incremented (clamped at Quantity); maybeComplete called.
-func (s *Service) RecordExplore(ctx context.Context, sess SessionState, characterID int64, roomID string) error {
+// Returns completion messages if a quest completed, or nil if none completed.
+func (s *Service) RecordExplore(ctx context.Context, sess SessionState, characterID int64, roomID string) ([]string, error) {
 	return s.recordProgress(ctx, sess, characterID, func(obj QuestObjective) bool {
 		return obj.Type == "explore" && obj.TargetID == roomID
 	})
@@ -226,36 +229,39 @@ func (s *Service) RecordExplore(ctx context.Context, sess SessionState, characte
 //
 // Precondition: sess non-nil; questID and objectiveID non-empty.
 // Postcondition: the objective is set to its Quantity value; maybeComplete called.
-func (s *Service) RecordDeliver(ctx context.Context, sess SessionState, characterID int64, questID, objectiveID string) error {
+// Returns completion messages if the quest completed, or nil if it did not.
+func (s *Service) RecordDeliver(ctx context.Context, sess SessionState, characterID int64, questID, objectiveID string) ([]string, error) {
 	aq, ok := sess.GetActiveQuests()[questID]
 	if !ok {
-		return fmt.Errorf("quest %q is not active", questID)
+		return nil, fmt.Errorf("quest %q is not active", questID)
 	}
 	def, ok := s.registry[questID]
 	if !ok {
-		return fmt.Errorf("quest %q not found in registry", questID)
+		return nil, fmt.Errorf("quest %q not found in registry", questID)
 	}
 	for _, obj := range def.Objectives {
 		if obj.ID == objectiveID && obj.Type == "deliver" {
 			if aq.ObjectiveProgress[obj.ID] < obj.Quantity {
 				aq.ObjectiveProgress[obj.ID] = obj.Quantity
 				if err := s.repo.SaveObjectiveProgress(ctx, characterID, questID, obj.ID, obj.Quantity); err != nil {
-					return fmt.Errorf("saving objective progress: %w", err)
+					return nil, fmt.Errorf("saving objective progress: %w", err)
 				}
 			}
 			return s.maybeComplete(ctx, sess, characterID, questID)
 		}
 	}
-	return fmt.Errorf("objective %q not found in quest %q", objectiveID, questID)
+	return nil, fmt.Errorf("objective %q not found in quest %q", objectiveID, questID)
 }
 
 // recordProgress increments by 1 all matching objectives across active quests.
-func (s *Service) recordProgress(ctx context.Context, sess SessionState, characterID int64, match func(QuestObjective) bool) error {
+func (s *Service) recordProgress(ctx context.Context, sess SessionState, characterID int64, match func(QuestObjective) bool) ([]string, error) {
 	return s.recordProgressN(ctx, sess, characterID, 1, match)
 }
 
 // recordProgressN increments by n all matching objectives across active quests.
-func (s *Service) recordProgressN(ctx context.Context, sess SessionState, characterID int64, n int, match func(QuestObjective) bool) error {
+// Returns completion messages from any quests that completed as a result.
+func (s *Service) recordProgressN(ctx context.Context, sess SessionState, characterID int64, n int, match func(QuestObjective) bool) ([]string, error) {
+	var allMsgs []string
 	for questID, aq := range sess.GetActiveQuests() {
 		def, ok := s.registry[questID]
 		if !ok {
@@ -277,34 +283,36 @@ func (s *Service) recordProgressN(ctx context.Context, sess SessionState, charac
 			aq.ObjectiveProgress[obj.ID] = next
 			changed = true
 			if err := s.repo.SaveObjectiveProgress(ctx, characterID, questID, obj.ID, next); err != nil {
-				return fmt.Errorf("saving objective progress: %w", err)
+				return nil, fmt.Errorf("saving objective progress: %w", err)
 			}
 		}
 		if changed {
-			if err := s.maybeComplete(ctx, sess, characterID, questID); err != nil {
-				return err
+			msgs, err := s.maybeComplete(ctx, sess, characterID, questID)
+			if err != nil {
+				return nil, err
 			}
+			allMsgs = append(allMsgs, msgs...)
 		}
 	}
-	return nil
+	return allMsgs, nil
 }
 
 // maybeComplete completes the quest if all objectives are satisfied.
 //
 // Precondition: questID must be active on sess.
-// Postcondition: if all objectives met, Complete is called.
-func (s *Service) maybeComplete(ctx context.Context, sess SessionState, characterID int64, questID string) error {
+// Postcondition: if all objectives met, Complete is called and its messages are returned.
+func (s *Service) maybeComplete(ctx context.Context, sess SessionState, characterID int64, questID string) ([]string, error) {
 	aq, ok := sess.GetActiveQuests()[questID]
 	if !ok {
-		return nil
+		return nil, nil
 	}
 	def, ok := s.registry[questID]
 	if !ok {
-		return nil
+		return nil, nil
 	}
 	for _, obj := range def.Objectives {
 		if aq.ObjectiveProgress[obj.ID] < obj.Quantity {
-			return nil
+			return nil, nil
 		}
 	}
 	return s.Complete(ctx, sess, characterID, questID)
@@ -315,17 +323,18 @@ func (s *Service) maybeComplete(ctx context.Context, sess SessionState, characte
 // Precondition: questID must be active on sess.
 // Postcondition: quest removed from ActiveQuests, added to CompletedQuests with non-nil time;
 // SaveQuestStatus called with "completed".
-func (s *Service) Complete(ctx context.Context, sess SessionState, characterID int64, questID string) error {
+// Returns player-facing completion messages.
+func (s *Service) Complete(ctx context.Context, sess SessionState, characterID int64, questID string) ([]string, error) {
 	if _, ok := sess.GetActiveQuests()[questID]; !ok {
-		return fmt.Errorf("quest %q is not active", questID)
+		return nil, fmt.Errorf("quest %q is not active", questID)
 	}
 	def, ok := s.registry[questID]
 	if !ok {
-		return fmt.Errorf("quest %q not found in registry", questID)
+		return nil, fmt.Errorf("quest %q not found in registry", questID)
 	}
 	now := time.Now()
 	if err := s.repo.SaveQuestStatus(ctx, characterID, questID, "completed", &now); err != nil {
-		return fmt.Errorf("saving completed quest status: %w", err)
+		return nil, fmt.Errorf("saving completed quest status: %w", err)
 	}
 	delete(sess.GetActiveQuests(), questID)
 	sess.GetCompletedQuests()[questID] = &now
@@ -333,7 +342,7 @@ func (s *Service) Complete(ctx context.Context, sess SessionState, characterID i
 	// Award XP if service is wired.
 	if s.xpSvc != nil && def.Rewards.XP > 0 {
 		if _, err := s.xpSvc.AwardXPAmount(ctx, sess, characterID, def.Rewards.XP); err != nil {
-			return fmt.Errorf("awarding quest XP: %w", err)
+			return nil, fmt.Errorf("awarding quest XP: %w", err)
 		}
 	}
 
@@ -341,7 +350,7 @@ func (s *Service) Complete(ctx context.Context, sess SessionState, characterID i
 	if s.charSaver != nil && def.Rewards.Credits > 0 {
 		sess.AddCurrency(def.Rewards.Credits)
 		if err := s.charSaver.SaveCurrency(ctx, characterID, sess.GetCurrency()); err != nil {
-			return fmt.Errorf("saving quest currency reward: %w", err)
+			return nil, fmt.Errorf("saving quest currency reward: %w", err)
 		}
 	}
 
@@ -349,15 +358,15 @@ func (s *Service) Complete(ctx context.Context, sess SessionState, characterID i
 	if s.charSaver != nil && s.invRegistry != nil && sess.GetBackpack() != nil && len(def.Rewards.Items) > 0 {
 		for _, reward := range def.Rewards.Items {
 			if _, err := sess.GetBackpack().Add(reward.ItemID, reward.Quantity, s.invRegistry); err != nil {
-				return fmt.Errorf("adding quest reward item %q: %w", reward.ItemID, err)
+				return nil, fmt.Errorf("adding quest reward item %q: %w", reward.ItemID, err)
 			}
 		}
 		if err := s.charSaver.SaveInventory(ctx, characterID, backpackToInventoryItems(sess.GetBackpack())); err != nil {
-			return fmt.Errorf("saving inventory after quest rewards: %w", err)
+			return nil, fmt.Errorf("saving inventory after quest rewards: %w", err)
 		}
 	}
 
-	return nil
+	return CompletionMessage(def, s.invRegistry), nil
 }
 
 // Abandon removes a quest from the player's active quests.

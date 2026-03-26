@@ -160,7 +160,7 @@ func TestService_RecordKill_IncrementsProgress(t *testing.T) {
 	svc := quest.NewService(reg, repo, nil, nil, nil)
 	sess := newFakeSession()
 	sess.activeQuests["kill_rats"] = &quest.ActiveQuest{QuestID: "kill_rats", ObjectiveProgress: map[string]int{"o1": 0}}
-	if err := svc.RecordKill(context.Background(), sess, 1, "rat"); err != nil {
+	if _, err := svc.RecordKill(context.Background(), sess, 1, "rat"); err != nil {
 		t.Fatalf("RecordKill: %v", err)
 	}
 	if sess.activeQuests["kill_rats"].ObjectiveProgress["o1"] != 1 {
@@ -174,7 +174,7 @@ func TestService_RecordKill_ClampsAtQuantity(t *testing.T) {
 	svc := quest.NewService(reg, repo, nil, nil, nil)
 	sess := newFakeSession()
 	sess.activeQuests["kill_rats"] = &quest.ActiveQuest{QuestID: "kill_rats", ObjectiveProgress: map[string]int{"o1": 3}}
-	if err := svc.RecordKill(context.Background(), sess, 1, "rat"); err != nil {
+	if _, err := svc.RecordKill(context.Background(), sess, 1, "rat"); err != nil {
 		t.Fatalf("RecordKill: %v", err)
 	}
 	if sess.activeQuests["kill_rats"].ObjectiveProgress["o1"] != 3 {
@@ -232,7 +232,7 @@ func TestService_RecordFetch_IncrementsProgress(t *testing.T) {
 	svc := quest.NewService(reg, repo, nil, nil, nil)
 	sess := newFakeSession()
 	sess.activeQuests["fetch_herbs"] = &quest.ActiveQuest{QuestID: "fetch_herbs", ObjectiveProgress: map[string]int{"o1": 0}}
-	if err := svc.RecordFetch(context.Background(), sess, 1, "herb", 1); err != nil {
+	if _, err := svc.RecordFetch(context.Background(), sess, 1, "herb", 1); err != nil {
 		t.Fatalf("RecordFetch: %v", err)
 	}
 	if sess.activeQuests["fetch_herbs"].ObjectiveProgress["o1"] != 1 {
@@ -247,7 +247,7 @@ func TestService_RecordKill_CompletesQuestWhenAllObjectivesMet(t *testing.T) {
 	sess := newFakeSession()
 	// Set progress to 2 out of 3 — one more kill will complete the quest.
 	sess.activeQuests["kill_rats"] = &quest.ActiveQuest{QuestID: "kill_rats", ObjectiveProgress: map[string]int{"o1": 2}}
-	if err := svc.RecordKill(context.Background(), sess, 1, "rat"); err != nil {
+	if _, err := svc.RecordKill(context.Background(), sess, 1, "rat"); err != nil {
 		t.Fatalf("RecordKill: %v", err)
 	}
 	if _, still := sess.activeQuests["kill_rats"]; still {
