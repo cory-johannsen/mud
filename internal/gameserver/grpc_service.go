@@ -1919,6 +1919,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleCraftConfirm(uid)
 	case *gamev1.ClientMessage_AffixRequest:
 		return s.handleAffix(uid, p.AffixRequest)
+	case *gamev1.ClientMessage_ExploreRequest:
+		return s.handleExplore(uid, p.ExploreRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -9384,5 +9386,106 @@ func hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry) {
 			eq.Accessories[slot].Name = def.Name
 		}
 	}
+}
+
+// handleExplore sets, clears, or queries the player's exploration mode.
+//
+// Precondition: uid is a connected player UID; req is non-nil.
+// Postcondition: sess.ExploreMode is updated; immediate hooks fire for active_sensors and case_it.
+func (s *GameServiceServer) handleExplore(uid string, req *gamev1.ExploreRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return nil, fmt.Errorf("player %q not found", uid)
+	}
+
+	// Blocked in combat (REQ-EXP-4).
+	if sess.Status == statusInCombat {
+		return errorEvent("You cannot change exploration mode while in combat."), nil
+	}
+
+	// Query mode: no argument (REQ-EXP-1 display).
+	if req.Mode == "" {
+		if sess.ExploreMode == "" {
+			return messageEvent("No active exploration mode."), nil
+		}
+		msg := "Exploration mode: " + exploreDisplayName(sess.ExploreMode)
+		if sess.ExploreMode == session.ExploreModeShadow {
+			ally := s.sessions.GetPlayerByCharID(sess.ExploreShadowTarget)
+			if ally != nil && ally.RoomID == sess.RoomID {
+				msg += " [shadowing " + ally.CharName + "]"
+			} else if ally != nil {
+				msg += " [shadowing " + ally.CharName + " — not present]"
+			}
+		}
+		return messageEvent(msg), nil
+	}
+
+	// Clear mode (REQ-EXP-2).
+	if req.Mode == "off" {
+		sess.ExploreMode = ""
+		sess.ExploreShadowTarget = 0
+		return messageEvent("Exploration mode cleared."), nil
+	}
+
+	// Validate shadow target (REQ-EXP-6).
+	if req.Mode == session.ExploreModeShadow {
+		if req.ShadowTarget == "" {
+			return errorEvent("Usage: explore shadow <player name>"), nil
+		}
+		target := s.sessions.GetPlayerByCharNameCI(req.ShadowTarget)
+		if target == nil || target.RoomID != sess.RoomID {
+			return errorEvent(fmt.Sprintf("No player named %q is in this room.", req.ShadowTarget)), nil
+		}
+		sess.ExploreMode = session.ExploreModeShadow
+		sess.ExploreShadowTarget = target.CharacterID
+		return messageEvent(fmt.Sprintf("Exploration mode: Shadow [shadowing %s]", target.CharName)), nil
+	}
+
+	// Validate mode ID.
+	validModes := map[string]string{
+		session.ExploreModeLayLow:        "Lay Low",
+		session.ExploreModeHoldGround:    "Hold Ground",
+		session.ExploreModeActiveSensors: "Active Sensors",
+		session.ExploreModeCaseIt:        "Case It",
+		session.ExploreModeRunPoint:      "Run Point",
+		session.ExploreModePokeAround:    "Poke Around",
+	}
+	displayName, valid := validModes[req.Mode]
+	if !valid {
+		return errorEvent(fmt.Sprintf("Unknown exploration mode %q. Valid modes: lay_low, hold_ground, active_sensors, case_it, run_point, shadow <ally>, poke_around.", req.Mode)), nil
+	}
+
+	// Set mode — replaces any existing mode (REQ-EXP-3).
+	sess.ExploreMode = req.Mode
+	sess.ExploreShadowTarget = 0
+
+	// Fire immediate room-entry hooks for active_sensors and case_it (REQ-EXP-5).
+	if req.Mode == session.ExploreModeActiveSensors || req.Mode == session.ExploreModeCaseIt {
+		if room, ok := s.world.GetRoom(sess.RoomID); ok {
+			msgs := s.applyExploreModeOnEntry(uid, sess, room)
+			for _, msg := range msgs {
+				s.pushMessageToUID(uid, msg)
+			}
+		}
+	}
+
+	return messageEvent(fmt.Sprintf("Exploration mode set: %s.", displayName)), nil
+}
+
+// exploreDisplayName returns the human-readable display name for a mode ID.
+func exploreDisplayName(mode string) string {
+	names := map[string]string{
+		session.ExploreModeLayLow:        "Lay Low",
+		session.ExploreModeHoldGround:    "Hold Ground",
+		session.ExploreModeActiveSensors: "Active Sensors",
+		session.ExploreModeCaseIt:        "Case It",
+		session.ExploreModeRunPoint:      "Run Point",
+		session.ExploreModeShadow:        "Shadow",
+		session.ExploreModePokeAround:    "Poke Around",
+	}
+	if n, ok := names[mode]; ok {
+		return n
+	}
+	return mode
 }
 

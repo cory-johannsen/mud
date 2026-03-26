@@ -648,6 +648,21 @@ func (m *Manager) GetPlayerByCharNameCI(charName string) *PlayerSession {
 	return nil
 }
 
+// GetPlayerByCharID returns the PlayerSession whose CharacterID matches id, or nil.
+//
+// Precondition: id must be non-zero for a meaningful lookup.
+// Postcondition: Returns nil if no connected player has that CharacterID.
+func (m *Manager) GetPlayerByCharID(id int64) *PlayerSession {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, sess := range m.players {
+		if sess.CharacterID == id {
+			return sess
+		}
+	}
+	return nil
+}
+
 // SetPendingGroupInvite atomically sets or clears the PendingGroupInvite field for uid.
 // groupID "" clears the invite. Protected by mu.Lock().
 func (m *Manager) SetPendingGroupInvite(uid, groupID string) {
