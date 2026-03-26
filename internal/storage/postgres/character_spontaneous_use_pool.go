@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"math"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -89,6 +90,31 @@ func (r *CharacterSpontaneousUsePoolRepository) RestoreAll(ctx context.Context, 
 		characterID)
 	if err != nil {
 		return fmt.Errorf("CharacterSpontaneousUsePoolRepository.RestoreAll: %w", err)
+	}
+	return nil
+}
+
+// RestorePartial restores each pool by floor(fraction * (max_uses - uses_remaining)) uses.
+//
+// Precondition: fraction must be in [0.0, 1.0].
+// Postcondition: all pools for characterID have uses_remaining increased by the partial amount (capped at max_uses).
+func (r *CharacterSpontaneousUsePoolRepository) RestorePartial(ctx context.Context, characterID int64, fraction float64) error {
+	pools, err := r.GetAll(ctx, characterID)
+	if err != nil {
+		return fmt.Errorf("CharacterSpontaneousUsePoolRepository.RestorePartial: load pools: %w", err)
+	}
+	for techLevel, pool := range pools {
+		gain := int(math.Floor(fraction * float64(pool.Max-pool.Remaining)))
+		if gain <= 0 {
+			continue
+		}
+		newRemaining := pool.Remaining + gain
+		if newRemaining > pool.Max {
+			newRemaining = pool.Max
+		}
+		if err := r.Set(ctx, characterID, techLevel, newRemaining, pool.Max); err != nil {
+			return fmt.Errorf("CharacterSpontaneousUsePoolRepository.RestorePartial: set level %d: %w", techLevel, err)
+		}
 	}
 	return nil
 }

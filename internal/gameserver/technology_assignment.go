@@ -84,6 +84,11 @@ type SpontaneousUsePoolRepo interface {
 	// Postcondition: all pools are at maximum.
 	RestoreAll(ctx context.Context, characterID int64) error
 
+	// RestorePartial restores each pool by floor(fraction * (max - current)) uses.
+	// Precondition: fraction in [0.0, 1.0].
+	// Postcondition: all pools for characterID have uses_remaining increased by the partial amount (capped at max_uses).
+	RestorePartial(ctx context.Context, characterID int64, fraction float64) error
+
 	// DeleteAll removes all pool entries for the character.
 	DeleteAll(ctx context.Context, characterID int64) error
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math"
 	"math/rand"
 	"sync"
 	"time"
@@ -3217,8 +3218,8 @@ func (s *GameServiceServer) handleStatus(uid string, requestID string, stream ga
 // Called pre-dispatch because it requires direct stream access to prompt the player.
 //
 // Precondition: uid identifies a valid player session.
-// Postcondition: If not in combat, prepared tech slots are re-selected;
-// a confirmation or error message is sent to the player's stream.
+// Postcondition: Routes to motel rest, camping rest, or legacy full rest depending on room danger level
+// and available NPC/exploration state; sends a message to the player's stream.
 func (s *GameServiceServer) handleRest(uid string, requestID string, stream gamev1.GameService_SessionServer) error {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
@@ -3234,11 +3235,216 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		})
 	}
 
-	// Combat guard.
+	// Combat guard (REQ-REST-1).
 	if sess.Status == int32(gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT) {
 		return sendMsg("You can't rest while in combat.")
 	}
 
+	// Already camping — inform the player.
+	if sess.CampingActive {
+		elapsed := time.Since(sess.CampingStartTime)
+		remaining := sess.CampingDuration - elapsed
+		if remaining < 0 {
+			remaining = 0
+		}
+		return sendMsg(fmt.Sprintf("You are already camping. Time remaining: %s.", remaining.Round(time.Second)))
+	}
+
+	// Determine room danger level for routing.
+	var zoneDangerStr, roomDangerStr string
+	if room, roomOK := s.world.GetRoom(sess.RoomID); roomOK {
+		roomDangerStr = room.DangerLevel
+		if zone, zoneOK := s.world.GetZone(room.ZoneID); zoneOK {
+			zoneDangerStr = zone.DangerLevel
+		}
+	}
+	effectiveDanger := danger.EffectiveDangerLevel(zoneDangerStr, roomDangerStr)
+
+	// Rooms with explicit "safe" danger level require a motel NPC to rest.
+	// Rooms with no danger level (empty) fall through to legacy full rest.
+	// Rooms with non-safe danger level require exploration mode for camping.
+	switch effectiveDanger {
+	case danger.Safe:
+		// REQ-REST-2: safe room + motel NPC → motel rest.
+		if s.npcMgr != nil {
+			for _, npcInst := range s.npcMgr.InstancesInRoom(sess.RoomID) {
+				if npcInst.RestCost > 0 {
+					return s.handleMotelRest(uid, sess, npcInst, sendMsg)
+				}
+			}
+		}
+		// REQ-REST-4: safe room but no motel NPC.
+		return sendMsg("There is no motel here to rest at.")
+	case danger.Sketchy, danger.Dangerous, danger.AllOutWar:
+		// REQ-REST-3: non-safe zone + active exploration mode → camping rest.
+		if sess.ExploreMode != "" {
+			return s.startCamping(uid, sess, sendMsg)
+		}
+		// REQ-REST-4: non-safe, no exploration mode.
+		return sendMsg("You cannot rest here. You must be in exploration mode to camp in a dangerous area.")
+	default:
+		// DangerLevel is unset ("") — use legacy full rest for backward compatibility.
+	}
+
+	return s.applyFullLongRest(uid, sess, requestID, stream)
+}
+
+// handleMotelRest performs an instant full rest at a motel NPC (REQ-REST-2/5/6/7/9).
+//
+// Precondition: motelNPC.RestCost > 0 and room is safe.
+// Postcondition: player HP + tech pools fully restored; motelNPC.RestCost deducted from Currency.
+func (s *GameServiceServer) handleMotelRest(uid string, sess *session.PlayerSession, motelNPC *npc.Instance, sendMsg func(string) error) error {
+	cost := motelNPC.RestCost
+	if sess.Currency < cost {
+		return sendMsg(fmt.Sprintf("A night here costs %d credits. You only have %d.", cost, sess.Currency))
+	}
+	sess.Currency -= cost
+	ctx := context.Background()
+	if s.charSaver != nil {
+		if err := s.charSaver.SaveCurrency(ctx, sess.CharacterID, sess.Currency); err != nil {
+			s.logger.Warn("handleMotelRest: failed to save currency", zap.Error(err))
+		}
+	}
+	if err := sendMsg(fmt.Sprintf("You pay %d credits and settle in for the night.", cost)); err != nil {
+		return err
+	}
+	// Motel rest uses auto-select promptFn (no interactive stream available).
+	promptFn := func(options []string) (string, error) {
+		if len(options) == 0 {
+			return "", nil
+		}
+		return options[0], nil
+	}
+	return s.applyFullLongRestCtx(uid, sess, ctx, sendMsg, promptFn)
+}
+
+// startCamping validates gear requirements and starts a camping rest session (REQ-REST-3/10-14/17).
+//
+// Precondition: sess.ExploreMode != "" and room is non-safe.
+// Postcondition: sess.CampingActive = true; sess.CampingDuration set per gear count.
+func (s *GameServiceServer) startCamping(uid string, sess *session.PlayerSession, sendMsg func(string) error) error {
+	// REQ-REST-10: require sleeping_bag item.
+	hasSleepingBag := len(sess.Backpack.FindByItemDefID("sleeping_bag")) > 0
+
+	// REQ-REST-11: require fire_material-tagged item; count camping_gear items.
+	hasFireMaterial := false
+	campingGearCount := 0
+	if sess.Backpack != nil {
+		for _, item := range sess.Backpack.Items() {
+			def, ok := s.invRegistry.Item(item.ItemDefID)
+			if !ok {
+				continue
+			}
+			if def.HasTag("fire_material") {
+				hasFireMaterial = true
+			}
+			if def.HasTag("camping_gear") {
+				campingGearCount += item.Quantity
+			}
+		}
+	}
+
+	// REQ-REST-12: collect all missing-gear errors.
+	var missing []string
+	if !hasSleepingBag {
+		missing = append(missing, "a sleeping bag (sleeping_bag)")
+	}
+	if !hasFireMaterial {
+		missing = append(missing, "fire-starting materials (fire_material)")
+	}
+	if len(missing) > 0 {
+		return sendMsg(fmt.Sprintf("You need the following to camp: %s.", strings.Join(missing, "; ")))
+	}
+
+	// REQ-REST-13/14: compute duration (base 5min, -30s per camping_gear, min 2min).
+	base := 5 * time.Minute
+	reduction := time.Duration(campingGearCount) * 30 * time.Second
+	campDuration := base - reduction
+	if campDuration < 2*time.Minute {
+		campDuration = 2 * time.Minute
+	}
+
+	// REQ-REST-17: gear NOT consumed.
+	sess.CampingActive = true
+	sess.CampingStartTime = time.Now()
+	sess.CampingDuration = campDuration
+
+	return sendMsg(fmt.Sprintf("You set up camp. You will rest for %s. Move to cancel early.", campDuration.Round(time.Second)))
+}
+
+// cancelCamping applies partial restoration and clears camping state (REQ-REST-15/16).
+//
+// Precondition: sess.CampingActive == true.
+// Postcondition: sess.CampingActive = false; partial HP + tech restore applied.
+func (s *GameServiceServer) cancelCamping(uid string, sess *session.PlayerSession, reason string) {
+	elapsed := time.Since(sess.CampingStartTime)
+	duration := sess.CampingDuration
+	if duration == 0 {
+		duration = 1
+	}
+
+	sess.CampingActive = false
+	sess.CampingStartTime = time.Time{}
+	sess.CampingDuration = 0
+
+	frac := float64(elapsed) / float64(duration)
+	if frac > 1.0 {
+		frac = 1.0
+	}
+
+	// Partial HP restore.
+	hpGain := int(math.Floor(frac * float64(sess.MaxHP-sess.CurrentHP)))
+	if hpGain > 0 {
+		sess.CurrentHP = sess.CurrentHP + hpGain
+		if sess.CurrentHP > sess.MaxHP {
+			sess.CurrentHP = sess.MaxHP
+		}
+		ctx := context.Background()
+		if s.charSaver != nil {
+			if err := s.charSaver.SaveState(ctx, sess.CharacterID, sess.RoomID, sess.CurrentHP); err != nil {
+				s.logger.Warn("cancelCamping: failed to save HP", zap.Error(err))
+			}
+		}
+	}
+
+	// Partial tech pool restore.
+	if s.spontaneousUsePoolRepo != nil {
+		_ = s.spontaneousUsePoolRepo.RestorePartial(context.Background(), sess.CharacterID, frac)
+	}
+
+	s.pushMessageToUID(uid, fmt.Sprintf("Camping interrupted: %s. Partial restoration applied (%.0f%% complete).", reason, frac*100))
+}
+
+// applyFullLongRest applies full long-rest restoration via the player's stream (REQ-REST-9/18).
+//
+// Precondition: sess is a valid player session; stream is non-nil.
+// Postcondition: HP at max; tech pools fully restored; prepared techs rearranged.
+func (s *GameServiceServer) applyFullLongRest(uid string, sess *session.PlayerSession, requestID string, stream gamev1.GameService_SessionServer) error {
+	sendMsg := func(text string) error {
+		return stream.Send(&gamev1.ServerEvent{
+			RequestId: requestID,
+			Payload: &gamev1.ServerEvent_Message{
+				Message: &gamev1.MessageEvent{Content: text},
+			},
+		})
+	}
+	promptFn := func(options []string) (string, error) {
+		choices := &ruleset.FeatureChoices{
+			Prompt:  "Choose a technology to prepare:",
+			Options: options,
+			Key:     "tech_choice",
+		}
+		return s.promptFeatureChoice(stream, "tech_choice", choices)
+	}
+	return s.applyFullLongRestCtx(uid, sess, stream.Context(), sendMsg, promptFn)
+}
+
+// applyFullLongRestCtx performs full long-rest restoration with a caller-supplied context, send function,
+// and prompt function for interactive tech selection.
+//
+// Precondition: sess is a valid player session; ctx, sendMsg, and promptFn are non-nil.
+// Postcondition: HP at max; tech pools fully restored; prepared techs rearranged.
+func (s *GameServiceServer) applyFullLongRestCtx(uid string, sess *session.PlayerSession, ctx context.Context, sendMsg func(string) error, promptFn TechPromptFn) error {
 	// REQ-LR1: Restore HP to maximum.
 	sess.CurrentHP = sess.MaxHP
 
@@ -3277,23 +3483,21 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		}
 	}
 
-	ctx := stream.Context()
-
 	// REQ-LR2: Persist HP to database.
 	if s.charSaver != nil {
 		if err := s.charSaver.SaveState(ctx, sess.CharacterID, sess.RoomID, sess.CurrentHP); err != nil {
-			return fmt.Errorf("handleRest: save HP: %w", err)
+			return fmt.Errorf("applyFullLongRest: save HP: %w", err)
 		}
 	}
 
 	// Restore spontaneous use pools unconditionally (influencer characters).
 	if s.spontaneousUsePoolRepo != nil {
 		if err := s.spontaneousUsePoolRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
-			return fmt.Errorf("handleRest: restore spontaneous use pools: %w", err)
+			return fmt.Errorf("applyFullLongRest: restore spontaneous use pools: %w", err)
 		}
 		pools, err := s.spontaneousUsePoolRepo.GetAll(ctx, sess.CharacterID)
 		if err != nil {
-			return fmt.Errorf("handleRest: reload spontaneous use pools: %w", err)
+			return fmt.Errorf("applyFullLongRest: reload spontaneous use pools: %w", err)
 		}
 		sess.SpontaneousUsePools = pools
 	}
@@ -3301,11 +3505,11 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 	// Restore innate tech use slots.
 	if s.innateTechRepo != nil {
 		if err := s.innateTechRepo.RestoreAll(ctx, sess.CharacterID); err != nil {
-			return fmt.Errorf("handleRest: restore innate slots: %w", err)
+			return fmt.Errorf("applyFullLongRest: restore innate slots: %w", err)
 		}
 		innates, err := s.innateTechRepo.GetAll(ctx, sess.CharacterID)
 		if err != nil {
-			return fmt.Errorf("handleRest: reload innate slots: %w", err)
+			return fmt.Errorf("applyFullLongRest: reload innate slots: %w", err)
 		}
 		sess.InnateTechs = innates
 	}
@@ -3313,7 +3517,7 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 	// Restore active feat uses to their PreparedUses maximum.
 	if s.characterFeatsRepo != nil && s.featRegistry != nil && sess.ActiveFeatUses != nil {
 		if featIDs, featErr := s.characterFeatsRepo.GetAll(ctx, sess.CharacterID); featErr != nil {
-			s.logger.Warn("handleRest: failed to load feats for use restoration", zap.Error(featErr))
+			s.logger.Warn("applyFullLongRest: failed to load feats for use restoration", zap.Error(featErr))
 		} else {
 			for _, id := range featIDs {
 				f, ok := s.featRegistry.Feat(id)
@@ -3334,16 +3538,6 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		return sendMsg("You rest and recover to full HP.")
 	}
 
-	// Build promptFn from the player's own stream.
-	promptFn := func(options []string) (string, error) {
-		choices := &ruleset.FeatureChoices{
-			Prompt:  "Choose a technology to prepare:",
-			Options: options,
-			Key:     "tech_choice",
-		}
-		return s.promptFeatureChoice(stream, "tech_choice", choices)
-	}
-
 	restFlavor := technology.FlavorFor(technology.DominantTradition(sess.Class))
 	sendFn := func(text string) {
 		_ = sendMsg(text)
@@ -3352,7 +3546,7 @@ func (s *GameServiceServer) handleRest(uid string, requestID string, stream game
 		job, s.techRegistry, promptFn, s.preparedTechRepo,
 		sendFn, restFlavor,
 	); err != nil {
-		s.logger.Warn("handleRest: RearrangePreparedTechs failed",
+		s.logger.Warn("applyFullLongRest: RearrangePreparedTechs failed",
 			zap.String("uid", uid),
 			zap.Error(err))
 		return sendMsg("Something went wrong preparing your technologies.")

@@ -56,6 +56,18 @@ func (r *fakeSpontaneousUsePoolRepo) RestoreAll(_ context.Context, _ int64) erro
 	return nil
 }
 
+func (r *fakeSpontaneousUsePoolRepo) RestorePartial(_ context.Context, _ int64, fraction float64) error {
+	for k, v := range r.pools {
+		gain := int(float64(v.Max-v.Remaining) * fraction)
+		v.Remaining += gain
+		if v.Remaining > v.Max {
+			v.Remaining = v.Max
+		}
+		r.pools[k] = v
+	}
+	return nil
+}
+
 func (r *fakeSpontaneousUsePoolRepo) DeleteAll(_ context.Context, _ int64) error {
 	r.pools = make(map[int]session.UsePool)
 	return nil

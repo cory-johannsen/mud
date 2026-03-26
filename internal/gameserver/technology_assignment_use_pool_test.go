@@ -43,9 +43,10 @@ func (r *fakeSpontaneousUsePoolRepo) Set(_ context.Context, _ int64, techLevel, 
 	return nil
 }
 
-func (r *fakeSpontaneousUsePoolRepo) Decrement(_ context.Context, _ int64, _ int) error { return nil }
-func (r *fakeSpontaneousUsePoolRepo) RestoreAll(_ context.Context, _ int64) error        { return nil }
-func (r *fakeSpontaneousUsePoolRepo) DeleteAll(_ context.Context, _ int64) error         { return nil }
+func (r *fakeSpontaneousUsePoolRepo) Decrement(_ context.Context, _ int64, _ int) error          { return nil }
+func (r *fakeSpontaneousUsePoolRepo) RestoreAll(_ context.Context, _ int64) error                { return nil }
+func (r *fakeSpontaneousUsePoolRepo) RestorePartial(_ context.Context, _ int64, _ float64) error { return nil }
+func (r *fakeSpontaneousUsePoolRepo) DeleteAll(_ context.Context, _ int64) error                 { return nil }
 
 // TestAssignTechnologies_InitializesUsePools verifies that AssignTechnologies
 // initializes SpontaneousUsePools when the job has UsesByLevel entries.

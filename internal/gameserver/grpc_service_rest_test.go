@@ -5,16 +5,21 @@ import (
 	"fmt"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zaptest"
 	"google.golang.org/grpc/metadata"
 	"pgregory.net/rapid"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -533,6 +538,383 @@ func TestHandleRest_SaveStateError_ReturnsError(t *testing.T) {
 	stream := &fakeSessionStream{}
 	err = svc.handleRest(uid, "req", stream)
 	require.Error(t, err, "handleRest must return error when SaveState fails")
+}
+
+// newRestSvc creates a GameServiceServer for handleRest routing tests.
+// It uses the standard test world (room_a in zone "test", no DangerLevel).
+// The returned sessMgr is the session manager for adding players.
+func newRestSvc(t *testing.T) (*GameServiceServer, *session.Manager, *npc.Manager) {
+	t.Helper()
+	worldMgr, sessMgr := testWorldAndSession(t)
+	npcMgr := npc.NewManager()
+	logger := zaptest.NewLogger(t)
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+	return svc, sessMgr, npcMgr
+}
+
+// newRestSvcWithSafeRoom creates a GameServiceServer with a room whose DangerLevel is "safe".
+func newRestSvcWithSafeRoom(t *testing.T) (*GameServiceServer, *session.Manager, *npc.Manager) {
+	t.Helper()
+	zone := &world.Zone{
+		ID:          "safe_zone",
+		Name:        "Safe Zone",
+		Description: "A safe zone.",
+		StartRoom:   "room_safe",
+		DangerLevel: "safe",
+		Rooms: map[string]*world.Room{
+			"room_safe": {
+				ID:          "room_safe",
+				ZoneID:      "safe_zone",
+				Title:       "Safe Room",
+				Description: "A safe room.",
+				Exits:       []world.Exit{},
+				Properties:  map[string]string{},
+				DangerLevel: "safe",
+			},
+		},
+	}
+	worldMgr, err := world.NewManager([]*world.Zone{zone})
+	require.NoError(t, err)
+	sessMgr := session.NewManager()
+	npcMgr := npc.NewManager()
+	logger := zaptest.NewLogger(t)
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+	return svc, sessMgr, npcMgr
+}
+
+// newRestSvcWithDangerousRoom creates a GameServiceServer with a room whose DangerLevel is "dangerous".
+func newRestSvcWithDangerousRoom(t *testing.T) (*GameServiceServer, *session.Manager, *npc.Manager) {
+	t.Helper()
+	zone := &world.Zone{
+		ID:          "danger_zone",
+		Name:        "Danger Zone",
+		Description: "A dangerous zone.",
+		StartRoom:   "room_danger",
+		DangerLevel: "dangerous",
+		Rooms: map[string]*world.Room{
+			"room_danger": {
+				ID:          "room_danger",
+				ZoneID:      "danger_zone",
+				Title:       "Dangerous Room",
+				Description: "A dangerous room.",
+				Exits:       []world.Exit{},
+				Properties:  map[string]string{},
+			},
+		},
+	}
+	worldMgr, err := world.NewManager([]*world.Zone{zone})
+	require.NoError(t, err)
+	sessMgr := session.NewManager()
+	npcMgr := npc.NewManager()
+	logger := zaptest.NewLogger(t)
+	invReg := inventory.NewRegistry()
+	svc := newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npcMgr, nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, nil, nil, npcMgr, nil, nil,
+		nil, nil, nil, nil, invReg, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, nil,
+		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+	return svc, sessMgr, npcMgr
+}
+
+// addRestPlayer adds a player in the given room with combat idle status.
+func addRestPlayer(t *testing.T, sessMgr *session.Manager, uid, roomID string) *session.PlayerSession {
+	t.Helper()
+	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         uid,
+		Username:    uid,
+		CharName:    uid,
+		CharacterID: 1,
+		RoomID:      roomID,
+		CurrentHP:   5,
+		MaxHP:       20,
+		Abilities:   character.AbilityScores{},
+		Role:        "player",
+	})
+	require.NoError(t, err)
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IDLE)
+	return sess
+}
+
+// TestHandleRest_BlockedInCombat verifies that rest is blocked when the player is in combat (REQ-REST-1).
+//
+// Precondition: sess.Status == COMBAT_STATUS_IN_COMBAT.
+// Postcondition: message contains "can't rest"; no state mutation.
+func TestHandleRest_BlockedInCombat(t *testing.T) {
+	svc, sessMgr, _ := newRestSvc(t)
+	sess := addRestPlayer(t, sessMgr, "rest-combat", "room_a")
+	sess.Status = int32(gamev1.CombatStatus_COMBAT_STATUS_IN_COMBAT)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-combat", "req", stream))
+	assert.Contains(t, lastMessage(stream), "can't rest")
+}
+
+// TestHandleRest_SafeRoom_NoMotelNPC_Blocked verifies that rest is blocked in a safe room
+// with no motel NPC present (REQ-REST-4).
+//
+// Precondition: room DangerLevel == "safe"; no NPC with RestCost > 0 in room.
+// Postcondition: message mentions "motel".
+func TestHandleRest_SafeRoom_NoMotelNPC_Blocked(t *testing.T) {
+	svc, sessMgr, _ := newRestSvcWithSafeRoom(t)
+	addRestPlayer(t, sessMgr, "rest-safe-no-motel", "room_safe")
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-safe-no-motel", "req", stream))
+	assert.Contains(t, lastMessage(stream), "motel")
+}
+
+// TestHandleRest_NonSafeRoom_NoExploreMode_Blocked verifies that rest is blocked in a dangerous
+// room when the player is not in exploration mode (REQ-REST-4).
+//
+// Precondition: room DangerLevel == "dangerous"; sess.ExploreMode == "".
+// Postcondition: message mentions "exploration mode".
+func TestHandleRest_NonSafeRoom_NoExploreMode_Blocked(t *testing.T) {
+	svc, sessMgr, _ := newRestSvcWithDangerousRoom(t)
+	sess := addRestPlayer(t, sessMgr, "rest-danger-no-explore", "room_danger")
+	sess.ExploreMode = ""
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-danger-no-explore", "req", stream))
+	assert.Contains(t, lastMessage(stream), "exploration mode")
+}
+
+// TestHandleRest_Camping_MissingSleepingBag_Blocked verifies that camping requires a sleeping_bag
+// item (REQ-REST-10/12).
+//
+// Precondition: room DangerLevel == "dangerous"; ExploreMode != ""; backpack has no sleeping_bag.
+// Postcondition: message mentions "sleeping_bag".
+func TestHandleRest_Camping_MissingSleepingBag_Blocked(t *testing.T) {
+	svc, sessMgr, _ := newRestSvcWithDangerousRoom(t)
+	sess := addRestPlayer(t, sessMgr, "rest-camp-nosleep", "room_danger")
+	sess.ExploreMode = session.ExploreModeCaseIt
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-camp-nosleep", "req", stream))
+	msg := lastMessage(stream)
+	assert.Contains(t, msg, "sleeping_bag", "error must name sleeping_bag")
+}
+
+// TestHandleRest_Camping_MissingFireMaterial_Blocked verifies that camping requires a fire_material
+// tagged item (REQ-REST-11/12).
+//
+// Precondition: room DangerLevel == "dangerous"; ExploreMode != ""; backpack has sleeping_bag but no fire_material.
+// Postcondition: message mentions "fire_material".
+func TestHandleRest_Camping_MissingFireMaterial_Blocked(t *testing.T) {
+	svc, sessMgr, _ := newRestSvcWithDangerousRoom(t)
+	sess := addRestPlayer(t, sessMgr, "rest-camp-nofire", "room_danger")
+	sess.ExploreMode = session.ExploreModeCaseIt
+
+	// Add sleeping_bag to inventory registry and backpack.
+	invReg := inventory.NewRegistry()
+	sleepingBagDef := &inventory.ItemDef{
+		ID:       "sleeping_bag",
+		Name:     "Sleeping Bag",
+		Kind:     inventory.KindJunk,
+		Weight:   2.0,
+		MaxStack: 1,
+	}
+	require.NoError(t, invReg.RegisterItem(sleepingBagDef))
+	svc.invRegistry = invReg
+	_, err := sess.Backpack.Add("sleeping_bag", 1, invReg)
+	require.NoError(t, err)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-camp-nofire", "req", stream))
+	msg := lastMessage(stream)
+	assert.Contains(t, msg, "fire_material", "error must name fire_material")
+}
+
+// TestHandleRest_Camping_Start_SetsSession verifies that valid camping gear starts a camping rest
+// (REQ-REST-13).
+//
+// Precondition: room DangerLevel == "dangerous"; ExploreMode != ""; backpack has sleeping_bag + fire_material item.
+// Postcondition: sess.CampingActive == true; sess.CampingDuration == 5min (no camping_gear bonus).
+func TestHandleRest_Camping_Start_SetsSession(t *testing.T) {
+	svc, sessMgr, _ := newRestSvcWithDangerousRoom(t)
+	sess := addRestPlayer(t, sessMgr, "rest-camp-start", "room_danger")
+	sess.ExploreMode = session.ExploreModeCaseIt
+
+	invReg := inventory.NewRegistry()
+	require.NoError(t, invReg.RegisterItem(&inventory.ItemDef{
+		ID: "sleeping_bag", Name: "Sleeping Bag", Kind: inventory.KindJunk, Weight: 2.0, MaxStack: 1,
+	}))
+	require.NoError(t, invReg.RegisterItem(&inventory.ItemDef{
+		ID: "torch", Name: "Torch", Kind: inventory.KindJunk, Weight: 0.5, MaxStack: 5,
+		Tags: []string{"fire_material"},
+	}))
+	svc.invRegistry = invReg
+	_, err := sess.Backpack.Add("sleeping_bag", 1, invReg)
+	require.NoError(t, err)
+	_, err = sess.Backpack.Add("torch", 1, invReg)
+	require.NoError(t, err)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-camp-start", "req", stream))
+
+	require.True(t, sess.CampingActive, "CampingActive must be true after starting camping")
+	assert.Equal(t, 5*time.Minute, sess.CampingDuration, "CampingDuration must be 5 minutes with no camping_gear")
+}
+
+// TestHandleRest_Camping_DurationReducedByCampingGear verifies that camping_gear items reduce
+// the camping duration by 30s each (REQ-REST-14).
+//
+// Precondition: 4 camping_gear items in backpack; sleeping_bag + fire_material present.
+// Postcondition: sess.CampingDuration == 5min - 4*30s == 3min.
+func TestHandleRest_Camping_DurationReducedByCampingGear(t *testing.T) {
+	svc, sessMgr, _ := newRestSvcWithDangerousRoom(t)
+	sess := addRestPlayer(t, sessMgr, "rest-camp-gear", "room_danger")
+	sess.ExploreMode = session.ExploreModeCaseIt
+
+	invReg := inventory.NewRegistry()
+	require.NoError(t, invReg.RegisterItem(&inventory.ItemDef{
+		ID: "sleeping_bag", Name: "Sleeping Bag", Kind: inventory.KindJunk, Weight: 2.0, MaxStack: 1,
+	}))
+	require.NoError(t, invReg.RegisterItem(&inventory.ItemDef{
+		ID: "camp_kit", Name: "Camp Kit", Kind: inventory.KindJunk, Weight: 1.0, MaxStack: 10,
+		Tags: []string{"fire_material", "camping_gear"},
+	}))
+	svc.invRegistry = invReg
+	_, err := sess.Backpack.Add("sleeping_bag", 1, invReg)
+	require.NoError(t, err)
+	_, err = sess.Backpack.Add("camp_kit", 4, invReg)
+	require.NoError(t, err)
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-camp-gear", "req", stream))
+
+	assert.True(t, sess.CampingActive)
+	assert.Equal(t, 3*time.Minute, sess.CampingDuration, "4 camping_gear should reduce duration to 3min")
+}
+
+// TestHandleRest_Camping_MinimumDuration2Min verifies that camping duration cannot go below
+// 2 minutes regardless of camping_gear count (REQ-REST-14).
+//
+// Precondition: 100 camping_gear items; sleeping_bag + fire_material present.
+// Postcondition: sess.CampingDuration == 2min.
+func TestHandleRest_Camping_MinimumDuration2Min(t *testing.T) {
+	svc, sessMgr, _ := newRestSvcWithDangerousRoom(t)
+	sess := addRestPlayer(t, sessMgr, "rest-camp-min", "room_danger")
+	sess.ExploreMode = session.ExploreModeCaseIt
+
+	invReg := inventory.NewRegistry()
+	require.NoError(t, invReg.RegisterItem(&inventory.ItemDef{
+		ID: "sleeping_bag", Name: "Sleeping Bag", Kind: inventory.KindJunk, Weight: 0.0, MaxStack: 1,
+	}))
+	require.NoError(t, invReg.RegisterItem(&inventory.ItemDef{
+		ID: "mega_camp_kit", Name: "Mega Camp Kit", Kind: inventory.KindJunk, Weight: 0.0, MaxStack: 200,
+		Tags: []string{"fire_material", "camping_gear"},
+	}))
+	svc.invRegistry = invReg
+	// Use AddInstance to bypass backpack slot/weight limits for large quantities.
+	require.NoError(t, sess.Backpack.AddInstance(&inventory.ItemInstance{InstanceID: "sb-1", ItemDefID: "sleeping_bag", Quantity: 1}))
+	require.NoError(t, sess.Backpack.AddInstance(&inventory.ItemInstance{InstanceID: "mck-1", ItemDefID: "mega_camp_kit", Quantity: 100}))
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-camp-min", "req", stream))
+
+	assert.True(t, sess.CampingActive)
+	assert.Equal(t, 2*time.Minute, sess.CampingDuration, "CampingDuration must not go below 2 minutes")
+}
+
+// TestHandleRest_MotelRest_InsufficientCredits_Blocked verifies that motel rest is blocked when
+// the player cannot afford it (REQ-REST-7).
+//
+// Precondition: room DangerLevel == "safe"; motel NPC with RestCost=50; sess.Currency=10.
+// Postcondition: message mentions "50".
+func TestHandleRest_MotelRest_InsufficientCredits_Blocked(t *testing.T) {
+	svc, sessMgr, npcMgr := newRestSvcWithSafeRoom(t)
+	sess := addRestPlayer(t, sessMgr, "rest-motel-broke", "room_safe")
+	sess.Currency = 10
+
+	// Spawn a motel NPC and set RestCost.
+	tmpl := &npc.Template{
+		ID:      "motel_clerk",
+		Name:    "Motel Clerk",
+		NPCType: "merchant",
+		MaxHP:   10,
+		Level:   1,
+	}
+	inst, err := npcMgr.Spawn(tmpl, "room_safe")
+	require.NoError(t, err)
+	inst.RestCost = 50
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-motel-broke", "req", stream))
+	msg := lastMessage(stream)
+	assert.Contains(t, msg, "50", "error must mention the cost (50)")
+}
+
+// TestHandleRest_MotelRest_IsInstant verifies that motel rest with sufficient credits
+// immediately restores HP to maximum (REQ-REST-5).
+//
+// Precondition: room DangerLevel == "safe"; motel NPC with RestCost=20; sess.Currency=100.
+// Postcondition: sess.CurrentHP == sess.MaxHP; sess.Currency == 80.
+func TestHandleRest_MotelRest_IsInstant(t *testing.T) {
+	svc, sessMgr, npcMgr := newRestSvcWithSafeRoom(t)
+	sess := addRestPlayer(t, sessMgr, "rest-motel-ok", "room_safe")
+	sess.Currency = 100
+
+	tmpl := &npc.Template{
+		ID:      "motel_clerk2",
+		Name:    "Motel Clerk",
+		NPCType: "merchant",
+		MaxHP:   10,
+		Level:   1,
+	}
+	inst, err := npcMgr.Spawn(tmpl, "room_safe")
+	require.NoError(t, err)
+	inst.RestCost = 20
+
+	stream := &fakeSessionStream{}
+	require.NoError(t, svc.handleRest("rest-motel-ok", "req", stream))
+
+	assert.Equal(t, 20, sess.MaxHP, "MaxHP sanity check")
+	assert.Equal(t, 20, sess.CurrentHP, "CurrentHP must equal MaxHP after motel rest")
+	assert.Equal(t, 80, sess.Currency, "Currency must be decremented by RestCost (20)")
 }
 
 // TestHandleRest_RepairFull_RestoresAllEquipmentDurability verifies REQ-EM-16:
