@@ -138,6 +138,8 @@ func TestHandleDowntime_Cancel_ClearsBusy(t *testing.T) {
 	require.NotNil(t, result)
 	require.False(t, sess.DowntimeBusy)
 	require.Empty(t, sess.DowntimeActivityID)
+	require.True(t, sess.DowntimeCompletesAt.IsZero(), "DowntimeCompletesAt should be zero after cancel")
+	require.Empty(t, sess.DowntimeMetadata, "DowntimeMetadata should be empty after cancel")
 }
 
 // TestHandleDowntime_Start_SetsActivity verifies that starting an activity in a safe room
