@@ -2025,6 +2025,11 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		return messageEvent("You cannot move while in combat."), nil
 	}
 
+	// REQ-DT-5: movement is blocked while a downtime activity is active.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.DowntimeBusy {
+		return messageEvent("You are busy with a downtime activity. Use 'downtime cancel' to stop."), nil
+	}
+
 	// IMMOBILIZED: grabbed condition prevents leaving the room.
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil {
 		if condition.IsActionRestricted(sess.Conditions, "move") {
