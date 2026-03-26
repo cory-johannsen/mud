@@ -46,17 +46,16 @@ func makeAbilityCombatHandler(t *testing.T, broadcastFn func(string, []*gamev1.C
 
 // spawnAbilityTestNPC creates and registers an NPC instance with pre-set fields.
 //
-// Precondition: npcMgr non-nil; cooldowns and taunts may be nil.
+// Precondition: npcMgr non-nil; cooldowns may be nil.
 // Postcondition: Returns a non-nil Instance registered with npcMgr.
-func spawnAbilityTestNPC(t *testing.T, npcMgr *npc.Manager, roomID string, cooldowns map[string]int, taunts []string) *npc.Instance {
+func spawnAbilityTestNPC(t *testing.T, npcMgr *npc.Manager, roomID string, cooldowns map[string]int) *npc.Instance {
 	t.Helper()
 	tmpl := &npc.Template{
-		ID:     "ability-ganger",
-		Name:   "Ganger",
-		Level:  1,
-		MaxHP:  20,
-		AC:     13,
-		Taunts: taunts,
+		ID:    "ability-ganger",
+		Name:  "Ganger",
+		Level: 1,
+		MaxHP: 20,
+		AC:    13,
 	}
 	inst, err := npcMgr.Spawn(tmpl, roomID)
 	if err != nil {
@@ -93,7 +92,7 @@ func TestApplyPlanLocked_ApplyMentalState_OnCooldown(t *testing.T) {
 	const roomID = "room-ability-1"
 	const playerUID = "player-cd-1"
 
-	inst := spawnAbilityTestNPC(t, h.npcMgr, roomID, map[string]int{"ganger_taunt": 2}, []string{"You call that fighting?"})
+	inst := spawnAbilityTestNPC(t, h.npcMgr, roomID, map[string]int{"ganger_taunt": 2})
 	addTestPlayer(t, h.sessions, playerUID, roomID)
 
 	npcCbt := &combat.Combatant{
@@ -158,7 +157,7 @@ func TestApplyPlanLocked_ApplyMentalState_Execute(t *testing.T) {
 	const roomID = "room-ability-2"
 	const playerUID = "player-exec-1"
 
-	inst := spawnAbilityTestNPC(t, h.npcMgr, roomID, nil, []string{"You call that fighting?"})
+	inst := spawnAbilityTestNPC(t, h.npcMgr, roomID, nil)
 	addTestPlayer(t, h.sessions, playerUID, roomID)
 
 	npcCbt := &combat.Combatant{
@@ -222,7 +221,7 @@ func TestAutoQueueNPCsLocked_CooldownDecrement(t *testing.T) {
 	const roomID = "room-ability-3"
 	const playerUID = "player-dec-1"
 
-	inst := spawnAbilityTestNPC(t, h.npcMgr, roomID, map[string]int{"ganger_taunt": 2, "other_op": 0}, nil)
+	inst := spawnAbilityTestNPC(t, h.npcMgr, roomID, map[string]int{"ganger_taunt": 2, "other_op": 0})
 	addTestPlayer(t, h.sessions, playerUID, roomID)
 
 	npcCbt := &combat.Combatant{
@@ -276,7 +275,7 @@ func TestApplyPlanLocked_TargetSelector_HighestDamage(t *testing.T) {
 	const p1UID = "player-hd-1"
 	const p2UID = "player-hd-2"
 
-	inst := spawnAbilityTestNPC(t, h.npcMgr, roomID, nil, []string{"Feel my wrath!"})
+	inst := spawnAbilityTestNPC(t, h.npcMgr, roomID, nil)
 	addTestPlayer(t, h.sessions, p1UID, roomID)
 	addTestPlayer(t, h.sessions, p2UID, roomID)
 

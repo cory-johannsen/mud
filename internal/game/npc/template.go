@@ -59,9 +59,6 @@ type Template struct {
 	// of this template respawns. Empty means the NPC does not respawn.
 	RespawnDelay  string     `yaml:"respawn_delay"`
 	Loot          *LootTable `yaml:"loot"`
-	Taunts        []string   `yaml:"taunts"`
-	TauntChance   float64    `yaml:"taunt_chance"`
-	TauntCooldown string     `yaml:"taunt_cooldown"`
 	// CourageThreshold is the threat score above which the NPC will not engage.
 	// Default 999 preserves always-engage behavior for all existing templates.
 	CourageThreshold int `yaml:"courage_threshold"`
@@ -186,14 +183,6 @@ func (t *Template) Validate() error {
 	if t.RespawnDelay != "" {
 		if _, err := time.ParseDuration(t.RespawnDelay); err != nil {
 			return fmt.Errorf("npc template %q: respawn_delay %q is not a valid duration: %w", t.ID, t.RespawnDelay, err)
-		}
-	}
-	if t.TauntChance < 0 || t.TauntChance > 1 {
-		return fmt.Errorf("npc template %q: taunt_chance must be between 0 and 1", t.ID)
-	}
-	if t.TauntCooldown != "" {
-		if _, err := time.ParseDuration(t.TauntCooldown); err != nil {
-			return fmt.Errorf("npc template %q: taunt_cooldown %q is not a valid duration: %w", t.ID, t.TauntCooldown, err)
 		}
 	}
 	if t.RobMultiplier < 0 {
