@@ -1,0 +1,16 @@
+id: chip_doc_ne_portland
+name: Doc Ruiz
+npc_type: chip_doc
+description: >
+  A tired-looking medic with steady hands and a battered kit, operating out of
+  the neutral garage. Doc Ruiz specializes in neural hardware — extraction,
+  implantation, and the occasional emergency deactivation. Doesn't ask where
+  you got it.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14

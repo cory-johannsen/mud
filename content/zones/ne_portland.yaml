@@ -21,6 +21,7 @@ zone:
       with salvaged installations and the bones of trespassers.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_fremont_street
@@ -58,6 +59,7 @@ zone:
       The smell of fermenting grain hangs in the air like a threat.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_williams_corridor
@@ -81,6 +83,7 @@ zone:
       howls down its length like a warning. Burnt-out cars line the median.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_lloyd_district
@@ -90,6 +93,10 @@ zone:
       target: ne_hollywood_district
     map_x: 202
     map_y: 0
+    spawns:
+    - template: ne_gang_enforcer
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -102,6 +109,7 @@ zone:
       Something moves behind broken stained-glass windows.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: ne_hollywood_district
@@ -125,6 +133,7 @@ zone:
       traders hawking salvage from behind overturned dumpsters and burnt-out kiosks.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: ne_irvington_ruins
@@ -134,6 +143,10 @@ zone:
       target: ne_i205_onramp
     map_x: 2
     map_y: 4
+    spawns:
+    - template: ne_scavenger
+      count: 2
+      respawn_after: 3m
     properties:
       lighting: overcast
       atmosphere: crowded
@@ -148,9 +161,16 @@ zone:
       of metal scraping on metal echoes from the switching yard.
 
       '
-    exits: []
+    danger_level: sketchy
+    exits:
+    - direction: north
+      target: ne_rose_quarter
     map_x: -4
     map_y: 4
+    spawns:
+    - template: alberta_drifter
+      count: 1
+      respawn_after: 3m
     properties:
       lighting: firelight
       atmosphere: smoke
@@ -165,11 +185,16 @@ zone:
       from a dozen territorial fires across the district.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: ne_grant_park
     map_x: 4
     map_y: 2
+    spawns:
+    - template: ne_gang_enforcer
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -184,11 +209,16 @@ zone:
       is a hollowed-out husk picked clean by generations of scavengers.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: ne_mlk_boulevard
     map_x: 202
     map_y: 2
+    spawns:
+    - template: ne_scavenger
+      count: 2
+      respawn_after: 3m
     properties:
       lighting: dim
       atmosphere: desolate
@@ -203,11 +233,16 @@ zone:
       Downtown''s broken towers loom on the far side.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: burnside_crossing
     map_x: -2
     map_y: 2
+    spawns:
+    - template: ne_gang_enforcer
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -220,6 +255,7 @@ zone:
       of rusted metal. The freeway stretches east toward the airport ruins.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: ne_hollywood_district
@@ -227,6 +263,10 @@ zone:
       target: pdx_airport_way_west
     map_x: 4
     map_y: 4
+    spawns:
+    - template: ne_scavenger
+      count: 1
+      respawn_after: 3m
     properties:
       lighting: overcast
       atmosphere: wind
@@ -239,6 +279,7 @@ zone:
       abandoned strip malls and overgrown lots toward the industrial wastes.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_prescott_street
@@ -248,6 +289,10 @@ zone:
       target: ne_bike_shop_ruins
     map_x: 2
     map_y: -2
+    spawns:
+    - template: bike_courier
+      count: 1
+      respawn_after: 3m
     properties:
       lighting: overcast
       atmosphere: desolate
@@ -260,6 +305,7 @@ zone:
       still serves as the main artery connecting the district to the bridges.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_rose_quarter
@@ -267,6 +313,10 @@ zone:
       target: ne_williams_corridor
     map_x: -4
     map_y: 0
+    spawns:
+    - template: ne_gang_enforcer
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: dim
       atmosphere: rain
@@ -279,13 +329,20 @@ zone:
       ammunition, and information. Eyes watch from every rooftop.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_mississippi_ave
     - direction: north
       target: ne_columbia_blvd
+    - direction: east
+      target: ne_killingsworth_road
     map_x: -2
     map_y: -4
+    spawns:
+    - template: ne_scavenger
+      count: 1
+      respawn_after: 3m
     properties:
       lighting: overcast
       atmosphere: crowded
@@ -300,6 +357,7 @@ zone:
       glowing faintly with candlelight behind heavy curtains.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: ne_alberta_street
@@ -327,6 +385,7 @@ zone:
       Old neon signs flicker with trapped static electricity.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: ne_hollywood_district
@@ -350,6 +409,7 @@ zone:
       its clock tower frozen at 3:47.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: ne_fremont_street
@@ -375,6 +435,7 @@ zone:
       Memorial Coliseum stands hollow and echoing.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: ne_interstate_ave
@@ -382,6 +443,10 @@ zone:
       target: ne_sullivans_gulch
     map_x: -4
     map_y: 2
+    spawns:
+    - template: ne_gang_enforcer
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: dim
       atmosphere: desolate
@@ -396,6 +461,7 @@ zone:
       brewing equipment. This is brew warlord territory.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_mississippi_ave
@@ -421,6 +487,7 @@ zone:
       their messenger bags heavy with deliveries and weapons.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: ne_cully_road
@@ -442,6 +509,7 @@ zone:
       are pitted with craters. Contested murals are painted over weekly.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: ne_alberta_street
@@ -473,6 +541,7 @@ zone:
       who keep weapons close at hand.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: ne_cully_road
@@ -480,6 +549,10 @@ zone:
       target: ne_alberta_street
     map_x: 2
     map_y: 0
+    spawns:
+    - template: ne_scavenger
+      count: 1
+      respawn_after: 3m
     properties:
       lighting: overcast
       atmosphere: quiet
@@ -494,13 +567,20 @@ zone:
       old I-5 corridor and the outer neighborhoods.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_killingsworth
     - direction: north
       target: ne_i5_bridge_approach
+    - direction: east
+      target: ne_woodlawn_outpost
     map_x: -2
     map_y: -6
+    spawns:
+    - template: ne_gang_enforcer
+      count: 1
+      respawn_after: 4m
     properties:
       lighting: overcast
       atmosphere: desolate
@@ -515,6 +595,7 @@ zone:
       a killzone. Old toll booths serve as guard posts.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: ne_columbia_blvd
@@ -522,6 +603,10 @@ zone:
       target: couve_interstate_bridge_south
     map_x: -2
     map_y: -8
+    spawns:
+    - template: ne_gang_enforcer
+      count: 2
+      respawn_after: 4m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -532,6 +617,8 @@ zone:
     exits:
     - direction: south
       target: ne_alberta_street
+    - direction: east
+      target: ne_neutral_lot
     map_x: 0
     map_y: -4
     spawns:
@@ -541,12 +628,215 @@ zone:
     - template: ne_portland_healer
       count: 1
       respawn_after: 0s
-    - template: ne_portland_job_trainer
-      count: 1
-      respawn_after: 0s
-    - template: ne_portland_banker
+    properties:
+      lighting: fluorescent
+      atmosphere: commerce
+  - id: ne_neutral_garage
+    title: Neutral Garage
+    description: 'A converted auto garage that has become the de facto neutral ground
+
+      of Northeast Portland. The bay doors are always open, the fluorescent
+
+      lights always on. Factions leave their weapons at the door by unspoken rule.
+
+      A medic works out of the back, tools gleaming on a clean steel tray.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: west
+      target: ne_corner_store
+    - direction: north
+      target: ne_neutral_bunker
+    - direction: east
+      target: ne_neutral_lot
+    map_x: 2
+    map_y: -4
+    spawns:
+    - template: chip_doc_ne_portland
       count: 1
       respawn_after: 0s
     properties:
       lighting: fluorescent
       atmosphere: commerce
+  - id: ne_neutral_lot
+    title: Neutral Lot
+    description: 'A cracked asphalt parking lot outside the neutral garage, ringed
+
+      by salvaged chain-link and old jersey barriers. Couriers park bikes here,
+
+      traders stage goods, and anyone needing a moment of quiet in the chaos
+
+      of Northeast Portland lingers in the relative safety of the lot.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: west
+      target: ne_neutral_garage
+    - direction: south
+      target: ne_alberta_street
+    map_x: 4
+    map_y: -4
+    properties:
+      lighting: overcast
+      atmosphere: quiet
+  - id: ne_neutral_bunker
+    title: Neutral Bunker
+    description: 'A reinforced basement shelter beneath the neutral garage, accessed
+
+      via a heavy steel hatch. Bare concrete walls are covered in hand-drawn
+
+      maps and supply lists. A generator hums in the corner.
+
+      This is where the garage crew sleeps and holds meetings.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: south
+      target: ne_neutral_garage
+    map_x: 2
+    map_y: -6
+    properties:
+      lighting: dim
+      atmosphere: quiet
+  - id: ne_alberta_ruins
+    title: Alberta Arts District Ruins
+    description: 'What was once a vibrant arts corridor is now a gallery of destruction.
+
+      Murals of the old world cover every scorched wall, their colors still vivid
+
+      against the charcoal and rubble. Scavengers pick through collapsed studios,
+
+      hauling out bronze sculptures and ruined printing presses for scrap.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: ne_alberta_street
+    - direction: north
+      target: ne_prescott_street
+    map_x: 2
+    map_y: -2
+    spawns:
+    - template: ne_scavenger
+      count: 2
+      respawn_after: 3m
+    properties:
+      lighting: dim
+      atmosphere: desolate
+  - id: ne_rose_city_market
+    title: Rose City Market
+    description: 'An abandoned indoor market stripped to bare concrete, its stalls
+
+      now occupied by a rotating cast of traders and opportunists. The smell
+
+      of food — real food — drifts from one corner where someone has a working
+
+      camp stove. Competition for the best stalls is violent and ongoing.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: south
+      target: ne_killingsworth
+    - direction: east
+      target: ne_woodlawn_outpost
+    map_x: -4
+    map_y: -4
+    spawns:
+    - template: ne_gang_enforcer
+      count: 1
+      respawn_after: 4m
+    - template: ne_scavenger
+      count: 1
+      respawn_after: 3m
+    properties:
+      lighting: dim
+      atmosphere: crowded
+  - id: ne_fremont_bridge_east
+    title: Fremont Bridge East Approach
+    description: 'The eastern approach to the Fremont Bridge ramps up through a tangle
+
+      of collapsed overpasses and concrete debris. The bridge itself spans the
+
+      Willamette far above street level. Wind scours the ramps with grit.
+
+      Gang tags mark every surface, claiming territory that keeps changing hands.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: south
+      target: ne_rose_quarter
+    - direction: east
+      target: ne_broadway_bridge
+    map_x: -6
+    map_y: 2
+    spawns:
+    - template: ne_gang_enforcer
+      count: 2
+      respawn_after: 4m
+    properties:
+      lighting: exposed
+      atmosphere: wind
+  - id: ne_killingsworth_road
+    title: Killingsworth Road Ruins
+    description: 'Killingsworth Street extends east past the market into a stretch
+
+      of demolished storefronts and crumbled sidewalks. Former community gardens
+
+      are overgrown thickets. A water tower leans at a dangerous angle overhead,
+
+      a pair of lookouts perched at its base watching the road.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: ne_killingsworth
+    - direction: north
+      target: ne_columbia_blvd
+    map_x: 0
+    map_y: -4
+    spawns:
+    - template: bike_courier
+      count: 1
+      respawn_after: 3m
+    - template: ne_scavenger
+      count: 1
+      respawn_after: 3m
+    properties:
+      lighting: overcast
+      atmosphere: desolate
+  - id: ne_woodlawn_outpost
+    title: Woodlawn Outpost
+    description: 'The Woodlawn neighborhood has become an outpost for a loose confederation
+
+      of families and former community organizers who refused to leave. Barricades
+
+      of salvaged lumber and sheet metal block the side streets. A hand-painted sign
+
+      reads WOODLAWN HOLDS. They mean it.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: ne_columbia_blvd
+    - direction: south
+      target: ne_rose_city_market
+    map_x: 0
+    map_y: -6
+    spawns:
+    - template: alberta_drifter
+      count: 1
+      respawn_after: 3m
+    - template: ne_gang_enforcer
+      count: 1
+      respawn_after: 4m
+    properties:
+      lighting: dim
+      atmosphere: quiet

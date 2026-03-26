@@ -1,0 +1,41 @@
+id: ne_gang_enforcer
+name: NE Gang Enforcer
+description: A broad-shouldered enforcer in a spray-painted jacket, marking their gang colors across every surface. Carries a sawed-off and does not ask questions first.
+level: 3
+max_hp: 34
+ac: 15
+awareness: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 15
+  quickness: 12
+  grit: 14
+  reasoning: 9
+  savvy: 11
+  flair: 10
+loot:
+  currency:
+    min: 20
+    max: 80
+  items:
+    - item: scrap_metal
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: riot_shotgun
+    weight: 2
+  - id: assault_rifle
+    weight: 2
+  - id: steel_pipe
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 3
+  - id: tactical_vest
+    weight: 2

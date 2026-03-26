@@ -1,0 +1,34 @@
+id: ne_scavenger
+name: NE Scavenger
+description: A gaunt figure in patched canvas, hauling a duffel bag of salvage. Eyes sunken but alert, always looking for unattended resources — or unattended people.
+level: 2
+max_hp: 20
+ac: 13
+awareness: 7
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  brutality: 11
+  quickness: 13
+  grit: 12
+  reasoning: 9
+  savvy: 13
+  flair: 8
+loot:
+  currency:
+    min: 8
+    max: 40
+  items:
+    - item: scrap_metal
+      chance: 0.6
+      min_qty: 1
+      max_qty: 3
+    - item: medkit
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: combat_knife
+    weight: 3
+  - id: steel_pipe
+    weight: 2
