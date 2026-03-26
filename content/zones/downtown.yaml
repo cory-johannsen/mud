@@ -11,6 +11,7 @@ zone:
   rooms:
   - id: pioneer_square
     title: Pioneer Courthouse Square
+    core: true
     description: 'You stand in the ruins of what was once Pioneer Courthouse Square.
 
       The iconic brick amphitheater is cracked and overgrown with black moss.
@@ -29,6 +30,8 @@ zone:
       target: market_district
     - direction: west
       target: transit_mall
+    - direction: southeast
+      target: dt_old_town_square
     map_x: 0
     map_y: 0
     spawns:
@@ -55,6 +58,7 @@ zone:
       atmosphere: rain
   - id: morrison_bridge
     title: Morrison Bridge Approach
+    danger_level: safe
     description: 'The western approach to the Morrison Bridge stretches before you.
 
       Twisted rebar juts from crumbling concrete. The Willamette churns below,
@@ -73,6 +77,8 @@ zone:
       target: waterfront_trail
     - direction: north
       target: downtown_underground
+    - direction: southeast
+      target: dt_salmon_street_springs
     map_x: 0
     map_y: -2
     properties:
@@ -80,6 +86,7 @@ zone:
       atmosphere: wind
   - id: broadway_ruins
     title: Broadway Ruins
+    danger_level: safe
     description: 'The shells of old theaters and department stores line what was once Broadway.
 
       Faded marquees hang at broken angles. A colony of crows watches from
@@ -94,6 +101,8 @@ zone:
       target: burnside_crossing
     - direction: south
       target: courthouse_steps
+    - direction: east
+      target: dt_pearl_district_edge
     map_x: 2
     map_y: 0
     properties:
@@ -101,6 +110,7 @@ zone:
       atmosphere: quiet
   - id: market_district
     title: Market District
+    danger_level: safe
     description: 'Makeshift stalls cobbled from salvage line the broken street.
 
       The smell of wood smoke and something cooking drifts between
@@ -117,6 +127,8 @@ zone:
       target: courthouse_steps
     - direction: west
       target: director_park
+    - direction: south
+      target: dt_park_blocks_south
     map_x: 0
     map_y: 2
     properties:
@@ -124,6 +136,7 @@ zone:
       atmosphere: smoke
   - id: waterfront_trail
     title: Waterfront Trail
+    danger_level: safe
     description: 'A cracked pathway follows the river''s edge. The Willamette laps
 
       against collapsed seawalls. Rusted sculptures from the old waterfront
@@ -138,6 +151,8 @@ zone:
       target: morrison_bridge
     - direction: northwest
       target: sauvie_bridge_south
+    - direction: south
+      target: dt_naito_parkway
     map_x: -2
     map_y: -2
     properties:
@@ -194,6 +209,7 @@ zone:
       atmosphere: dry
   - id: burnside_crossing
     title: Burnside Crossing
+    danger_level: safe
     description: 'The intersection of Burnside and the old Broadway is a no-man''s land.
 
       The street is wide and exposed. Burnt-out storefronts stare with
@@ -210,6 +226,8 @@ zone:
       target: morrison_bridge
     - direction: north
       target: ne_broadway_bridge
+    - direction: east
+      target: dt_burnside_overpass
     map_x: 2
     map_y: -2
     properties:
@@ -217,6 +235,7 @@ zone:
       atmosphere: wind
   - id: underground_max
     title: Underground MAX Station
+    danger_level: safe
     description: 'You descend into the subterranean transit station via crumbling stairs.
 
       Emergency lighting flickers in sickly yellow. The platform is flooded
@@ -236,6 +255,7 @@ zone:
       atmosphere: flooded
   - id: courthouse_steps
     title: Courthouse Steps
+    danger_level: safe
     description: 'The old federal courthouse looms above, its neoclassical columns
 
       chipped and stained. The broad stone steps serve as a gathering
@@ -261,6 +281,7 @@ zone:
       atmosphere: open
   - id: cliff_base
     title: Base of the Cliff
+    danger_level: safe
     description: 'A sheer rock face rises before you. Hand-holds have been carved into the stone,
       worn smooth by countless ascents. The cliff stretches upward into darkness above.
 
@@ -282,6 +303,7 @@ zone:
       atmosphere: stone
   - id: cliff_top
     title: Top of the Cliff
+    danger_level: safe
     description: 'You stand on a rocky ledge overlooking the city ruins below. From this vantage,
       you can see the twisted streets and collapsed buildings of the downtown core spreading
       out in all directions.
@@ -302,6 +324,7 @@ zone:
       atmosphere: wind
   - id: ravine_flooded
     title: Flooded Ravine
+    danger_level: safe
     description: 'You stand in a narrow ravine filled with murky water. The current is strong,
       fed by underground springs and seepage from the cliff face above.
 
@@ -350,3 +373,401 @@ zone:
     properties:
       lighting: strip
       atmosphere: commerce
+  # --- New rooms added for zone-content-expansion ---
+  # Edge rooms (safe)
+  - id: dt_old_post_office
+    title: Old Post Office Ruin
+    danger_level: safe
+    description: |
+      The massive Romanesque Revival building has lost most of its roof but its thick
+      granite walls still stand. Pigeons nest in the arched window frames. The cavernous
+      interior smells of wet stone and old paper. Collapsed sorting racks form strange
+      metallic sculptures on the flooded floor.
+    exits:
+    - direction: south
+      target: dt_union_station_ruins
+    - direction: east
+      target: dt_park_blocks_north
+    map_x: -4
+    map_y: -4
+    properties:
+      lighting: open_sky
+      atmosphere: ruin
+  - id: dt_park_blocks_north
+    title: North Park Blocks
+    danger_level: safe
+    description: |
+      A narrow strip of parkland between old brick buildings. The elms have grown wild
+      and enormous, their root systems cracking the brick pathways. Moss-covered statues
+      peer from the undergrowth. It's quieter here than most of downtown — almost peaceful.
+    exits:
+    - direction: west
+      target: dt_old_post_office
+    - direction: south
+      target: dt_park_blocks_south
+    - direction: east
+      target: dt_union_station_ruins
+    map_x: -2
+    map_y: -4
+    properties:
+      lighting: filtered
+      atmosphere: overgrown
+  - id: dt_park_blocks_south
+    title: South Park Blocks
+    danger_level: safe
+    description: |
+      The southern extension of the park blocks runs past the ruins of art museums and
+      university buildings. Flowering weeds have colonized every planter. Someone has
+      arranged salvaged sculptures into a rough avenue of strange totems.
+    exits:
+    - direction: north
+      target: dt_park_blocks_north
+    - direction: east
+      target: market_district
+    map_x: -2
+    map_y: 4
+    properties:
+      lighting: overcast
+      atmosphere: quiet
+  - id: dt_pearl_district_edge
+    title: Pearl District Edge
+    danger_level: safe
+    description: |
+      The former gallery district's brick warehouses are gutted but structurally intact.
+      Someone is growing food in the ground-floor spaces — rows of kale visible through
+      broken windows, tended by people who don't make eye contact with strangers.
+    exits:
+    - direction: west
+      target: broadway_ruins
+    - direction: north
+      target: dt_union_station_ruins
+    - direction: south
+      target: dt_powell_books_ruin
+    map_x: 4
+    map_y: -2
+    properties:
+      lighting: dim
+      atmosphere: inhabited
+  - id: dt_burnside_overpass
+    title: Burnside Overpass
+    danger_level: safe
+    description: |
+      The old Burnside Bridge overpass spans a dry concrete channel. The underside is
+      a city of tarpaulins and rope ladders — people live here, tucked above the flood
+      line. They watch you cross with the calm assessment of people who have seen worse.
+    exits:
+    - direction: west
+      target: burnside_crossing
+    - direction: east
+      target: dt_chinatown_gate
+    map_x: 4
+    map_y: -4
+    properties:
+      lighting: shadow
+      atmosphere: inhabited
+  - id: dt_union_station_ruins
+    title: Union Station Ruins
+    danger_level: safe
+    description: |
+      The terra cotta clock tower still stands, improbably, its clock frozen at 3:17.
+      The vaulted waiting hall has become a kind of neutral ground — its size and
+      multiple entrances make it impossible to hold, so no one tries. People pass through
+      without incident, by unspoken agreement.
+    exits:
+    - direction: south
+      target: dt_old_post_office
+    - direction: east
+      target: dt_park_blocks_north
+    - direction: southeast
+      target: dt_chinatown_gate
+    - direction: south
+      target: dt_pearl_district_edge
+    map_x: -2
+    map_y: -6
+    properties:
+      lighting: hall
+      atmosphere: neutral
+  # Core rooms (sketchy — zone default)
+  - id: dt_chinatown_gate
+    title: Chinatown Gate
+    core: true
+    description: |
+      The ornate ceremonial gate still spans the intersection, its paint faded but
+      its dragons intact. The neighborhood behind it is contested territory — the gate
+      marks the edge of a dozen overlapping claims. Gang tags have been painted over
+      gang tags so many times the wall is thick with pigment.
+    exits:
+    - direction: west
+      target: dt_burnside_overpass
+    - direction: northwest
+      target: dt_union_station_ruins
+    - direction: south
+      target: dt_old_town_square
+    map_x: 6
+    map_y: -4
+    spawns:
+    - template: ganger
+      count: 1
+      respawn_after: 5m
+    - template: lieutenant
+      count: 1
+      respawn_after: 10m
+    properties:
+      lighting: dim
+      atmosphere: tense
+  - id: dt_old_town_square
+    title: Old Town Square
+    core: true
+    description: |
+      The cobblestone plaza is cracked but open, surrounded by brick facades with
+      empty windows. It was once full of late-night crowds. Now it's full of tension —
+      the kind of wide open space where everyone can see everyone else coming.
+    exits:
+    - direction: north
+      target: dt_chinatown_gate
+    - direction: northwest
+      target: pioneer_square
+    - direction: east
+      target: dt_powell_books_ruin
+    - direction: south
+      target: dt_city_hall
+    map_x: 6
+    map_y: -2
+    spawns:
+    - template: scavenger
+      count: 2
+      respawn_after: 4m
+    - template: commissar
+      count: 1
+      respawn_after: 8m
+    properties:
+      lighting: exposed
+      atmosphere: tense
+  - id: dt_powell_books_ruin
+    title: Powell's Books Ruin
+    core: true
+    description: |
+      The famous bookstore's block-filling warren of rooms is mostly intact. The books
+      are mostly ruined by water damage, but the shelves still stand and the rooms still
+      connect in their labyrinthine way. Scavengers come to trade pages of dry text for
+      kindling or insulation. Occasionally someone reads.
+    exits:
+    - direction: west
+      target: dt_old_town_square
+    - direction: north
+      target: dt_pearl_district_edge
+    - direction: south
+      target: dt_main_library
+    map_x: 8
+    map_y: -2
+    spawns:
+    - template: scavenger
+      count: 1
+      respawn_after: 5m
+    - template: 82nd_enforcer
+      count: 1
+      respawn_after: 7m
+    properties:
+      lighting: dim
+      atmosphere: musty
+  - id: dt_city_hall
+    title: City Hall Stronghold
+    core: true
+    description: |
+      The white stone pile of the old city hall has been fortified by whoever currently
+      holds it — the occupants change, the sandbags don't. Arrow slits have been cut
+      through the ornamental stonework. The plaza in front is clear and unobstructed,
+      which is a threat in itself.
+    exits:
+    - direction: north
+      target: dt_old_town_square
+    - direction: east
+      target: dt_main_library
+    - direction: south
+      target: dt_salmon_street_springs
+    map_x: 6
+    map_y: 0
+    spawns:
+    - template: lieutenant
+      count: 1
+      respawn_after: 8m
+    - template: commissar
+      count: 1
+      respawn_after: 10m
+    properties:
+      lighting: fortified
+      atmosphere: hostile
+  - id: dt_main_library
+    title: Main Library Fortress
+    core: true
+    description: |
+      The central library's modernist concrete shell is almost perfectly defensible.
+      A faction has made it their seat — the upper floors are occupied, the entrance
+      is guarded, and the card catalogue has been repurposed as a ledger of debts.
+    exits:
+    - direction: west
+      target: dt_city_hall
+    - direction: north
+      target: dt_powell_books_ruin
+    - direction: east
+      target: dt_naito_parkway
+    map_x: 8
+    map_y: 0
+    spawns:
+    - template: ganger
+      count: 2
+      respawn_after: 4m
+    - template: 82nd_enforcer
+      count: 1
+      respawn_after: 6m
+    properties:
+      lighting: controlled
+      atmosphere: occupied
+  # Safe cluster (5 rooms, all exit-connected)
+  - id: dt_salmon_street_springs
+    title: Salmon Street Springs
+    danger_level: safe
+    description: |
+      The old fountain plaza still produces water — something to do with the original
+      city water infrastructure that nobody has figured out how to shut off. A small
+      settlement has grown around it. Dr. Reyes has set up her clinic under a canvas
+      awning at the fountain's edge, her instruments laid out with surgical precision.
+    exits:
+    - direction: northwest
+      target: morrison_bridge
+    - direction: north
+      target: dt_city_hall
+    - direction: east
+      target: dt_esplanade_north
+    - direction: south
+      target: dt_sw_hills_road
+    map_x: 2
+    map_y: -4
+    spawns:
+    - template: chip_doc_downtown
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: open
+      atmosphere: settlement
+  - id: dt_esplanade_north
+    title: East Bank Esplanade North
+    danger_level: safe
+    description: |
+      The elevated walkway along the east bank of the Willamette offers a view of the
+      downtown skyline — or what's left of it. The suspension walkway sways slightly
+      in the river wind. Below, the water is dark and moving fast. The railing is solid.
+    exits:
+    - direction: west
+      target: dt_salmon_street_springs
+    - direction: south
+      target: dt_esplanade_south
+    map_x: 4
+    map_y: -4
+    properties:
+      lighting: open
+      atmosphere: wind
+  - id: dt_esplanade_south
+    title: East Bank Esplanade South
+    danger_level: safe
+    description: |
+      The southern stretch of the esplanade widens into a plaza where the old dock
+      pilings are visible at low water. A few fire rings have been built here, their
+      ash cold. The city wall is visible across the river, its old mural mostly intact.
+    exits:
+    - direction: north
+      target: dt_esplanade_north
+    - direction: west
+      target: dt_hawthorne_bridge_east
+    map_x: 4
+    map_y: -2
+    properties:
+      lighting: open
+      atmosphere: riverside
+  - id: dt_hawthorne_bridge_east
+    title: Hawthorne Bridge East Approach
+    danger_level: safe
+    description: |
+      The Hawthorne Bridge still stands — one of the few bridges across the Willamette
+      that remains passable. The east approach is considered safe by common consent;
+      both sides of the river need the crossing too much to fight over it. Sentinels
+      watch from both ends but don't interfere with transit.
+    exits:
+    - direction: east
+      target: dt_esplanade_south
+    - direction: north
+      target: dt_sw_hills_road
+    map_x: 2
+    map_y: -2
+    properties:
+      lighting: overcast
+      atmosphere: transit
+  - id: dt_sw_hills_road
+    title: SW Hills Road
+    danger_level: safe
+    description: |
+      The road climbs steeply toward the west hills, switchbacking through tall firs
+      that have reclaimed the shoulder. The air is noticeably cleaner here. You can
+      hear the city below but the distance makes it abstract, almost peaceful.
+    exits:
+    - direction: north
+      target: dt_salmon_street_springs
+    - direction: south
+      target: dt_hawthorne_bridge_east
+    map_x: 0
+    map_y: -6
+    properties:
+      lighting: filtered
+      atmosphere: forest
+  # Additional sketchy rooms
+  - id: dt_steel_bridge_west
+    title: Steel Bridge West Approach
+    description: |
+      The Steel Bridge's double-deck swing span is frozen in a half-open position,
+      leaving a gap that can only be crossed on a narrow steel catwalk someone bolted
+      on afterward. The catwalk is solid but narrow. Wind off the river is constant.
+    exits:
+    - direction: east
+      target: dt_naito_parkway
+    - direction: south
+      target: waterfront_trail
+    map_x: -4
+    map_y: -2
+    spawns:
+    - template: scavenger
+      count: 1
+      respawn_after: 5m
+    - template: ganger
+      count: 1
+      respawn_after: 6m
+    properties:
+      lighting: overcast
+      atmosphere: wind
+  - id: dt_naito_parkway
+    title: Naito Parkway
+    description: |
+      The old riverside highway is cracked and heaved by tree roots, but wide enough
+      to still feel like a road. It connects the waterfront to downtown in a straight
+      shot, which makes it useful and dangerous in equal measure. You are visible for
+      a long way in both directions.
+    exits:
+    - direction: north
+      target: waterfront_trail
+    - direction: west
+      target: dt_steel_bridge_west
+    - direction: east
+      target: dt_main_library
+    - direction: south
+      target: dt_salmon_street_springs
+    map_x: -2
+    map_y: 0
+    spawns:
+    - template: scavenger
+      count: 1
+      respawn_after: 4m
+    - template: 82nd_enforcer
+      count: 1
+      respawn_after: 8m
+    properties:
+      lighting: exposed
+      atmosphere: open

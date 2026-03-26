@@ -1,0 +1,17 @@
+id: chip_doc_downtown
+name: Dr. Reyes "Patchwork" Calderon
+npc_type: chip_doc
+description: >
+  A former hospital pharmacist who survived the collapse by turning her knowledge of
+  neural chemistry into a practical trade. Reyes operates a clean, canopy-covered clinic
+  at the Salmon Street Springs, her instruments laid out on a folding table with surgical
+  precision. She charges what people can afford — within reason — and has never lost a
+  patient to a botched extraction. She will tell you this unprompted.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
