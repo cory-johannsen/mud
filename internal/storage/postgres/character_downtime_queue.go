@@ -85,11 +85,15 @@ func (r *CharacterDowntimeQueueRepository) ListQueue(ctx context.Context, charac
 	return entries, nil
 }
 
+// ErrQueuePositionNotFound is returned by RemoveAt when no entry exists at the given position.
+var ErrQueuePositionNotFound = errors.New("queue position not found")
+
 // RemoveAt deletes the entry at the given 1-based position and reindexes positions above it.
 // Executes within a single transaction (REQ-DTQ-12).
 //
 // Precondition: characterID > 0; position >= 1.
 // Postcondition: positions above deleted entry decremented by 1; contiguous order maintained.
+// Returns ErrQueuePositionNotFound if no entry exists at the given position.
 func (r *CharacterDowntimeQueueRepository) RemoveAt(ctx context.Context, characterID int64, position int) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -97,11 +101,14 @@ func (r *CharacterDowntimeQueueRepository) RemoveAt(ctx context.Context, charact
 	}
 	defer tx.Rollback(ctx) //nolint:errcheck
 
-	_, err = tx.Exec(ctx,
+	tag, err := tx.Exec(ctx,
 		`DELETE FROM character_downtime_queue WHERE character_id = $1 AND position = $2`,
 		characterID, position)
 	if err != nil {
 		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrQueuePositionNotFound
 	}
 
 	_, err = tx.Exec(ctx,
