@@ -257,6 +257,19 @@ func (m *Manager) AllTemplates() []*Template {
 	return result
 }
 
+// AllTemplateIDs returns a set of all registered NPC template IDs.
+//
+// Postcondition: Returns a non-nil map; keys are all known template IDs.
+func (m *Manager) AllTemplateIDs() map[string]bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make(map[string]bool, len(m.templates))
+	for id := range m.templates {
+		out[id] = true
+	}
+	return out
+}
+
 // InstanceByID returns the live Instance with the given ID, or nil if not found.
 //
 // Precondition: id must be non-empty.

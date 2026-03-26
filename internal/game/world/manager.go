@@ -127,6 +127,19 @@ func (m *Manager) RoomCount() int {
 	return len(m.rooms)
 }
 
+// AllRoomIDs returns a set of all room IDs across all loaded zones.
+//
+// Postcondition: Returns a non-nil map; keys are all known room IDs.
+func (m *Manager) AllRoomIDs() map[string]bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make(map[string]bool, len(m.rooms))
+	for id := range m.rooms {
+		out[id] = true
+	}
+	return out
+}
+
 // RevealExit un-hides the exit in the given direction from the specified room.
 //
 // Precondition: roomID must identify a valid room; direction is lowercase (e.g., "north").

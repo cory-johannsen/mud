@@ -81,6 +81,17 @@ func (r *Registry) Item(id string) (*ItemDef, bool) {
 	return d, ok
 }
 
+// AllItemIDs returns a set of all registered item definition IDs.
+//
+// Postcondition: Returns a non-nil map; keys are all known item def IDs.
+func (r *Registry) AllItemIDs() map[string]bool {
+	out := make(map[string]bool, len(r.items))
+	for id := range r.items {
+		out[id] = true
+	}
+	return out
+}
+
 // ItemByArmorRef returns the first ItemDef whose ArmorRef matches armorDefID, or false if none found.
 //
 // Precondition: armorDefID must be non-empty.
