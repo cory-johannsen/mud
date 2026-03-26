@@ -14,8 +14,9 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
-// RegenInterval is the default period between regeneration ticks.
-const RegenInterval = 30 * time.Second
+// RegenInterval is the period between passive HP regeneration ticks.
+// REQ-REST-19: 5 minutes — resting (motel/camping) is the primary post-combat recovery method.
+const RegenInterval = 5 * time.Minute
 
 // regenNPCRate is the flat HP restored per tick for NPCs.
 const regenNPCRate = 1

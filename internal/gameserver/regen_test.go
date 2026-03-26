@@ -197,6 +197,11 @@ func TestRegenManager_SkipsNPCInCombatRoom(t *testing.T) {
 	assert.Equal(t, 5, inst.CurrentHP, "NPC in combat room must not regen")
 }
 
+// TestRegenInterval_IsFiveMinutes verifies that the passive regen interval is 5 minutes.
+func TestRegenInterval_IsFiveMinutes(t *testing.T) {
+	assert.Equal(t, 5*time.Minute, RegenInterval)
+}
+
 // TestRegenManager_Property_RegenNeverExceedsMaxHP is a property test verifying
 // that regen always caps at MaxHP regardless of grit score.
 func TestRegenManager_Property_RegenNeverExceedsMaxHP(t *testing.T) {
