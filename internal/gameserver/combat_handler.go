@@ -387,6 +387,10 @@ func (h *CombatHandler) InitiateGuardCombat(uid, zoneID string, wantedLevel int)
 	})
 	for _, guardID := range guardIDs {
 		_, _ = h.Attack(guardID, uid)
+		// COMBATMSG-4e: push wanted-status initiation message to the player.
+		if guardInst, ok := h.npcMgr.Get(guardID); ok {
+			h.pushMessageToUID(uid, combat.FormatNPCInitiationMsg(guardInst.Name(), combat.ReasonWanted, ""))
+		}
 	}
 }
 

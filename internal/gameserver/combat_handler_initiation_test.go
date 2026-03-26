@@ -108,6 +108,40 @@ func TestInitiateNPCCombat_HostileDisposition_PushesOnSightMessage(t *testing.T)
 	}
 }
 
+// TestInitiateGuardCombat_PushesWantedMessage verifies that when guards engage a
+// wanted player, the player receives "[guard name] attacks you — alerted by your wanted status."
+// COMBATMSG-4e.
+func TestInitiateGuardCombat_PushesWantedMessage(t *testing.T) {
+	const roomID = "room-guard-wanted"
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	sess := addTestPlayer(t, h.sessions, "uid-wanted", roomID)
+	entity := session.NewBridgeEntity("uid-wanted", 32)
+	sess.Entity = entity
+
+	tmpl := &npc.Template{
+		ID:        "guard-wanted",
+		Name:      "City Guard",
+		Level:     1,
+		MaxHP:     20,
+		AC:        13,
+		Awareness: 2,
+		NPCType:   "guard",
+		Guard:     &npc.GuardConfig{WantedThreshold: 2},
+	}
+	_, err := h.npcMgr.Spawn(tmpl, roomID)
+	if err != nil {
+		t.Fatalf("Spawn: %v", err)
+	}
+
+	h.InitiateGuardCombat("uid-wanted", "zone1", 2)
+	h.cancelTimer(roomID)
+
+	const want = "City Guard attacks you — alerted by your wanted status."
+	if !drainForMessage(t, entity, want) {
+		t.Errorf("expected message %q pushed to player entity; none found within 500ms", want)
+	}
+}
+
 // TestInitiateNPCCombat_GrudgeSet_PushesProvokedMessage verifies that an NPC with
 // GrudgePlayerID set produces "provoked by your attack" reason. COMBATMSG-4c.
 func TestInitiateNPCCombat_GrudgeSet_PushesProvokedMessage(t *testing.T) {
