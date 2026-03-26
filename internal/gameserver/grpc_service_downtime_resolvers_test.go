@@ -9,6 +9,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pgregory.net/rapid"
 )
 
 // newFixedDiceRoller creates a *dice.Roller whose Src().Intn(n) always returns (face-1)%n,
@@ -148,5 +149,59 @@ func TestResolveRetrain_CompletesWithMessage(t *testing.T) {
 
 	require.NotPanics(t, func() {
 		s.resolveRetrain("uid_retrain", sess)
+	})
+}
+
+// TestPropertyResolveEarnCreds_CurrencyNeverDecreases verifies that for any dice roll
+// in [1,20] and any starting currency in [0,1000], earn_creds never decreases currency.
+//
+// Precondition: sess.Currency in [0,1000]; dice roll in [1,20].
+// Postcondition: sess.Currency after earn_creds >= starting currency.
+func TestPropertyResolveEarnCreds_CurrencyNeverDecreases(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		roll := rapid.IntRange(1, 20).Draw(rt, "roll")
+		startCurrency := rapid.IntRange(0, 1000).Draw(rt, "startCurrency")
+
+		wMgr := newWorldWithSafeRoom("zone1", "room1")
+		abilities := character.AbilityScores{Flair: 10} // +0 mod — neutral
+		sMgr, sess := newResolverSession(t, "uid_pbt_earn", "room1", "earn_creds", abilities, 1, 10, 10)
+		sess.Currency = startCurrency
+
+		s := &GameServiceServer{sessions: sMgr, world: wMgr}
+		s.dice = newFixedDiceRoller(roll)
+
+		s.resolveEarnCreds("uid_pbt_earn", sess)
+
+		if sess.Currency < startCurrency {
+			rt.Fatalf("currency decreased: before=%d after=%d (roll=%d)", startCurrency, sess.Currency, roll)
+		}
+	})
+}
+
+// TestPropertyResolvePatchUp_HealNeverExceedsMaxHP verifies that for any dice roll in [1,20],
+// level in [1,20], currentHP in [0,maxHP], and maxHP in [1,100], HP after patch_up never
+// exceeds maxHP.
+//
+// Precondition: currentHP in [0,maxHP]; maxHP in [1,100]; dice roll in [1,20]; level in [1,20].
+// Postcondition: sess.CurrentHP after patch_up <= sess.MaxHP.
+func TestPropertyResolvePatchUp_HealNeverExceedsMaxHP(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		roll := rapid.IntRange(1, 20).Draw(rt, "roll")
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		maxHP := rapid.IntRange(1, 100).Draw(rt, "maxHP")
+		currentHP := rapid.IntRange(0, maxHP).Draw(rt, "currentHP")
+
+		wMgr := newWorldWithSafeRoom("zone1", "room1")
+		abilities := character.AbilityScores{Savvy: 10} // +0 mod — neutral
+		sMgr, sess := newResolverSession(t, "uid_pbt_patch", "room1", "patch_up", abilities, level, currentHP, maxHP)
+
+		s := &GameServiceServer{sessions: sMgr, world: wMgr}
+		s.dice = newFixedDiceRoller(roll)
+
+		s.resolvePatchUp("uid_pbt_patch", sess)
+
+		if sess.CurrentHP > sess.MaxHP {
+			rt.Fatalf("HP exceeded maxHP: currentHP=%d maxHP=%d (roll=%d level=%d)", sess.CurrentHP, sess.MaxHP, roll, level)
+		}
 	})
 }

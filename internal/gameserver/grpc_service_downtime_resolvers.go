@@ -69,26 +69,30 @@ func (s *GameServiceServer) rollD20() int {
 	return s.dice.Src().Intn(20) + 1
 }
 
-// bestSkillRank returns the highest proficiency rank among the given skill IDs
-// in the session's skills map. Returns "" (untrained) if none are found.
+// bestSkillForEarning returns the skill ID and proficiency rank with the highest
+// ProficiencyBonus among "rigging", "intel", and "rep" in the session's skills map.
+// Returns ("rep", "") if none are found (rep is the default tie-break skill).
 //
-// Precondition: skillIDs is non-empty; sess is non-nil.
-// Postcondition: Returns the rank string with the highest ProficiencyBonus.
-func bestSkillRank(sess *session.PlayerSession, skillIDs ...string) string {
-	best := ""
+// Precondition: sess is non-nil.
+// Postcondition: Returns the skillID and rank string with the highest ProficiencyBonus.
+func bestSkillForEarning(sess *session.PlayerSession) (skillID, rank string) {
+	candidates := []string{"rigging", "intel", "rep"}
+	bestID := "rep"
+	bestRank := ""
 	bestBonus := -1
-	for _, id := range skillIDs {
-		rank := ""
+	for _, id := range candidates {
+		r := ""
 		if sess.Skills != nil {
-			rank = sess.Skills[id]
+			r = sess.Skills[id]
 		}
-		bonus := skillcheck.ProficiencyBonus(rank)
+		bonus := skillcheck.ProficiencyBonus(r)
 		if bonus > bestBonus {
 			bestBonus = bonus
-			best = rank
+			bestID = id
+			bestRank = r
 		}
 	}
-	return best
+	return bestID, bestRank
 }
 
 // skillCheckOutcome performs a skill check for the given skill against dc and
@@ -111,24 +115,20 @@ func (s *GameServiceServer) skillCheckOutcome(sess *session.PlayerSession, skill
 // resolveEarnCreds resolves the "Earn Creds" downtime activity.
 //
 // Skill: best of rigging/intel/rep (highest proficiency rank).
-// DC: defaultDC (15).
+// DC: zone.SettlementDC (default 15).
 // Pay: CritSuccess=30, Success=20, Failure=10, CritFail=0.
 //
 // Precondition: sess is non-nil; state already cleared by resolveDowntimeActivity.
 // Postcondition: sess.Currency incremented; persisted via charSaver if available.
 func (s *GameServiceServer) resolveEarnCreds(uid string, sess *session.PlayerSession) {
-	rank := bestSkillRank(sess, "rigging", "intel", "rep")
-	// Determine ability score from the best skill. Use Flair for rep (most common pick)
-	// and Reasoning for rigging/intel. We select the ability from the skill with best rank.
-	skillID := "rep"
-	if sess.Skills != nil {
-		rRank := skillcheck.ProficiencyBonus(sess.Skills["rigging"])
-		iRank := skillcheck.ProficiencyBonus(sess.Skills["intel"])
-		rp := skillcheck.ProficiencyBonus(sess.Skills["rep"])
-		if rRank >= iRank && rRank >= rp {
-			skillID = "rigging"
-		} else if iRank >= rp {
-			skillID = "intel"
+	skillID, rank := bestSkillForEarning(sess)
+
+	dc := defaultDC
+	if s.world != nil {
+		if room, ok := s.world.GetRoom(sess.RoomID); ok {
+			if zone, ok := s.world.GetZone(room.ZoneID); ok && zone.SettlementDC > 0 {
+				dc = zone.SettlementDC
+			}
 		}
 	}
 
@@ -136,7 +136,7 @@ func (s *GameServiceServer) resolveEarnCreds(uid string, sess *session.PlayerSes
 	amod := abilityModFrom(abilityScore)
 	roll := s.rollD20()
 	total := roll + amod + skillcheck.ProficiencyBonus(rank)
-	outcome := skillcheck.OutcomeFor(total, defaultDC)
+	outcome := skillcheck.OutcomeFor(total, dc)
 
 	var earned int
 	var outcomeMsg string
