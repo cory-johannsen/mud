@@ -209,7 +209,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		return nil, fmt.Errorf("loading recipe registry: %w", err)
 	}
 	// Load downtime queue limit registry (REQ-DTQ-15: missing file is fatal).
-	downtimeQueueLimitRegistry, err := downtime.LoadDowntimeQueueLimitRegistry("content/downtime_queue_limits.yaml")
+	downtimeQueueLimitRegistry, err := downtime.LoadDowntimeQueueLimitRegistry(cfg.DowntimeQueueLimitsFile)
 	if err != nil {
 		return nil, fmt.Errorf("loading downtime queue limits: %w", err)
 	}

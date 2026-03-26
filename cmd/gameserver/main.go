@@ -61,8 +61,9 @@ type AppConfig struct {
 	SubstancesDir     string
 	FactionsDir       string
 	FactionConfigPath string
-	MaterialsFile     string
-	RecipesDir        string
+	MaterialsFile           string
+	RecipesDir              string
+	DowntimeQueueLimitsFile string
 }
 
 // AppConfigToDatabase extracts database config from AppConfig for wire.
@@ -103,6 +104,7 @@ func main() {
 	factionConfigPath := flag.String("faction-config", "content/faction_config.yaml", "path to faction configuration YAML file")
 	materialsFile := flag.String("materials-file", "content/materials.yaml", "path to crafting materials YAML file")
 	recipesDir := flag.String("recipes-dir", "content/recipes", "path to crafting recipe YAML definitions directory")
+	downtimeQueueLimitsFile := flag.String("downtime-queue-limits", "content/downtime_queue_limits.yaml", "path to downtime queue limits YAML file")
 	flag.Parse()
 
 	ctx := context.Background()
@@ -158,8 +160,9 @@ func main() {
 		SubstancesDir:     *substancesDir,
 		FactionsDir:       *factionsDir,
 		FactionConfigPath: *factionConfigPath,
-		MaterialsFile:     *materialsFile,
-		RecipesDir:        *recipesDir,
+		MaterialsFile:           *materialsFile,
+		RecipesDir:              *recipesDir,
+		DowntimeQueueLimitsFile: *downtimeQueueLimitsFile,
 	}
 
 	app, err := Initialize(ctx, appCfg, gameClock, logger)
