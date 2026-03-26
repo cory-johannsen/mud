@@ -1,0 +1,17 @@
+id: chip_doc_pdx_international
+name: Doc Waverly
+npc_type: chip_doc
+description: >
+  A compact woman in a faded airline-branded vest, sleeves rolled to reveal
+  the steady hands of someone who used to perform surgery in turbulence.
+  Doc Waverly set up shop in the neutral terminal after the cultists ran her
+  out of the cargo wing. She doesn't ask why you want the chip out — she
+  just asks if you can pay.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14

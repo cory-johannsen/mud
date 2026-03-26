@@ -20,6 +20,7 @@ zone:
       overpass connects back toward the I-205 corridor and NE Portland.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: ne_i205_onramp
@@ -30,6 +31,10 @@ zone:
       target: pdx_terminal_b
     map_x: 0
     map_y: 0
+    spawns:
+    - template: airport_scavenger
+      count: 1
+      respawn_after: 5m
     equipment:
     - item_id: zone_map
       max_count: 1
@@ -51,6 +56,7 @@ zone:
       reads "Departures" with an arrow pointing into oblivion.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: pdx_airport_way_west
@@ -60,6 +66,10 @@ zone:
       target: pdx_parking_garage
     map_x: 2
     map_y: 0
+    spawns:
+    - template: airport_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: desolate
@@ -74,6 +84,7 @@ zone:
       the south and the Columbia River glinting in the distance to the north.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: trout_i84_west_junction
@@ -82,6 +93,10 @@ zone:
       target: pdx_cargo_terminal
     map_x: 202
     map_y: 2
+    spawns:
+    - template: tarmac_raider
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -96,6 +111,7 @@ zone:
       ceiling. The air smells of mildew and old carpet.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: pdx_airport_way_east
@@ -125,6 +141,7 @@ zone:
       that still reads "DELAYED" for every flight.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: pdx_terminal_entrance
@@ -143,6 +160,7 @@ zone:
       atmosphere: smoke
   - id: pdx_the_carpet
     title: The Carpet
+    danger_level: sketchy
     description: 'The famous PDX carpet spreads beneath your feet, its teal geometric
 
       pattern faded but unmistakable. The cargo cultists have turned this
@@ -176,6 +194,7 @@ zone:
       atmosphere: reverent
   - id: pdx_concourse_a
     title: Concourse A
+    danger_level: sketchy
     description: 'Concourse A stretches northward, its floor-to-ceiling windows
 
       offering a view of the dead tarmac beyond. Empty gate seating
@@ -203,6 +222,7 @@ zone:
       atmosphere: quiet
   - id: pdx_concourse_b
     title: Concourse B
+    danger_level: sketchy
     description: 'Concourse B is the most intact of the terminal wings. Scavengers
 
       have set up a trading post in the old duty-free shop. The smell
@@ -214,14 +234,21 @@ zone:
       raider territory in different colors.
 
       '
-    exits: []
+    exits:
+    - direction: west
+      target: pdx_the_carpet
     map_x: 6
     map_y: -4
+    spawns:
+    - template: airport_scavenger
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: firelight
       atmosphere: smoke
   - id: pdx_concourse_c
     title: Concourse C
+    danger_level: sketchy
     description: 'The central concourse is a wind tunnel. Broken windows let the
 
       rain drive in sideways, and pools of standing water reflect
@@ -249,6 +276,7 @@ zone:
       atmosphere: rain
   - id: pdx_concourse_d
     title: Concourse D
+    danger_level: sketchy
     description: 'Concourse D has been heavily fortified by the cargo cultists.
 
       Barricades made from luggage carts and vending machines block
@@ -276,6 +304,7 @@ zone:
       atmosphere: incense
   - id: pdx_concourse_e
     title: Concourse E
+    danger_level: sketchy
     description: 'The easternmost concourse opens onto a panoramic view of the
 
       runways. The cultists gather here at dawn, watching the horizon
@@ -294,11 +323,16 @@ zone:
       target: pdx_the_tarmac
     map_x: 2
     map_y: -4
+    spawns:
+    - template: rogue_security
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: wind
   - id: pdx_food_court
     title: Food Court
+    danger_level: sketchy
     description: 'The old airport food court has become a scavenger market.
 
       Rusted kitchen equipment serves as trade counters. Faded menu
@@ -324,6 +358,7 @@ zone:
       atmosphere: smoke
   - id: pdx_baggage_claim
     title: Baggage Claim
+    danger_level: sketchy
     description: 'The baggage carousels have been repurposed as communal sleeping
 
       platforms, their conveyor belts padded with old blankets and
@@ -338,13 +373,20 @@ zone:
     exits:
     - direction: west
       target: pdx_ticketing_hall
+    - direction: north
+      target: pdx_neutral_terminal
     map_x: 6
     map_y: -2
+    spawns:
+    - template: airport_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: crowded
   - id: pdx_the_tarmac
     title: The Tarmac
+    danger_level: sketchy
     description: 'The vast expanse of cracked asphalt stretches in every direction,
 
       dotted with the skeletal remains of grounded aircraft. Weeds
@@ -376,6 +418,7 @@ zone:
       atmosphere: wind
   - id: pdx_hangar_row
     title: Hangar Row
+    danger_level: sketchy
     description: 'A line of massive aircraft hangars stretches along the eastern
 
       edge of the tarmac. Their corrugated metal walls are dented and
@@ -394,6 +437,8 @@ zone:
       target: pdx_cargo_terminal
     - direction: east
       target: pdx_control_tower
+    - direction: northeast
+      target: pdx_east_runway
     map_x: 202
     map_y: 26
     spawns:
@@ -405,6 +450,7 @@ zone:
       atmosphere: industrial
   - id: pdx_control_tower
     title: Control Tower
+    danger_level: sketchy
     description: 'The air traffic control tower rises above the airport like a
 
       concrete lighthouse. The climb up the interior stairwell is
@@ -421,13 +467,20 @@ zone:
     exits:
     - direction: west
       target: pdx_hangar_row
+    - direction: east
+      target: pdx_old_control_tower
     map_x: 202
     map_y: 28
+    spawns:
+    - template: rogue_security
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
   - id: pdx_cargo_terminal
     title: Cargo Terminal
+    danger_level: sketchy
     description: 'The freight processing building has become the cargo cult''s
 
       headquarters. Shipping containers are arranged in a labyrinth,
@@ -444,6 +497,8 @@ zone:
       target: pdx_hangar_row
     - direction: north
       target: pdx_i84_east
+    - direction: east
+      target: pdx_cargo_warehouse
     map_x: 202
     map_y: 30
     spawns:
@@ -455,6 +510,7 @@ zone:
       atmosphere: incense
   - id: pdx_parking_garage
     title: Parking Garage
+    danger_level: sketchy
     description: 'The multi-level parking structure has been converted into a
 
       fortress. Vehicles on each level form walls and chokepoints.
@@ -466,14 +522,21 @@ zone:
       pools on the oil-stained concrete of the lower levels.
 
       '
-    exits: []
+    exits:
+    - direction: north
+      target: pdx_airport_way_east
     map_x: 2
     map_y: 2
+    spawns:
+    - template: rogue_security
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: enclosed
   - id: pdx_max_station
     title: MAX Station
+    danger_level: sketchy
     description: 'The airport MAX light rail station sits in silent decay. The
 
       elevated platform overlooks empty tracks that disappear into
@@ -492,11 +555,16 @@ zone:
       target: pdx_rental_car_lot
     map_x: 4
     map_y: 2
+    spawns:
+    - template: terminal_squatter
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: desolate
   - id: pdx_jet_bridge
     title: Jet Bridge
+    danger_level: sketchy
     description: 'The enclosed walkway extends from the terminal gate out over
 
       the tarmac, ending abruptly where it once connected to an
@@ -513,11 +581,16 @@ zone:
       target: pdx_concourse_a
     map_x: 4
     map_y: -8
+    spawns:
+    - template: cargo_cultist
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: wind
   - id: pdx_runway_south
     title: South Runway
+    danger_level: sketchy
     description: 'The main runway stretches into the distance, its faded center
 
       line barely visible beneath layers of dirt and debris. The
@@ -545,6 +618,7 @@ zone:
       atmosphere: wind
   - id: pdx_fuel_depot
     title: Fuel Depot
+    danger_level: sketchy
     description: 'Massive fuel storage tanks rise like rusted monuments behind
 
       chain-link fencing topped with razor wire. Most are empty, but
@@ -572,6 +646,7 @@ zone:
       atmosphere: chemical
   - id: pdx_rental_car_lot
     title: Rental Car Lot
+    danger_level: sketchy
     description: 'Row after row of rusted vehicles fill the old rental car lot.
 
       Most have been stripped of anything useful, but the sheer number
@@ -588,13 +663,16 @@ zone:
       target: pdx_max_station
     map_x: 6
     map_y: 2
+    spawns:
+    - template: airport_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: quiet
   - id: pdx_terminal_b
     title: Terminal B
     description: "A section of the airport terminal cordoned off from the main concourse. Chairs bolted to the floor, vending machines that still work, and people who've learned to wait."
-    danger_level: safe
     exits:
     - direction: north
       target: pdx_airport_way_west
@@ -619,3 +697,149 @@ zone:
     properties:
       lighting: fluorescent
       atmosphere: waiting
+  - id: pdx_neutral_terminal
+    title: Neutral Terminal
+    danger_level: safe
+    description: 'A stretch of terminal corridor that no faction controls outright.
+      Scorch marks and old bloodstains tell the story of whoever last
+      tried to claim it, but some tacit truce holds now. A hand-painted
+      sign reads "Neutral Ground" in three colors of spray paint.
+      Travelers move through quickly and quietly.
+      '
+    exits:
+    - direction: south
+      target: pdx_baggage_claim
+    - direction: north
+      target: pdx_neutral_lounge
+    - direction: west
+      target: pdx_neutral_gate
+    map_x: 4
+    map_y: -10
+    spawns:
+    - template: chip_doc_pdx_international
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: tense
+  - id: pdx_neutral_lounge
+    title: Neutral Lounge
+    danger_level: safe
+    description: 'A former airline lounge stripped of its premium trappings but
+      still furnished with bolted-down seats and a working water spigot.
+      People rest here without looking over their shoulders. The
+      unwritten rule is that weapons stay holstered inside these walls.
+      '
+    exits:
+    - direction: south
+      target: pdx_neutral_terminal
+    - direction: east
+      target: pdx_neutral_gate
+    map_x: 4
+    map_y: -12
+    properties:
+      lighting: dim
+      atmosphere: quiet
+  - id: pdx_neutral_gate
+    title: Neutral Gate
+    danger_level: safe
+    description: 'A boarding gate at the end of a short jetway corridor, walled
+      off from the rest of the concourse with salvaged chain-link and
+      plywood. The gate seating is intact. Someone has taped a list
+      of rules to the wall: no fighting, no theft, no cult recruitment.
+      '
+    exits:
+    - direction: east
+      target: pdx_neutral_terminal
+    - direction: west
+      target: pdx_neutral_lounge
+    map_x: 2
+    map_y: -12
+    properties:
+      lighting: dim
+      atmosphere: still
+  - id: pdx_cargo_warehouse
+    title: Cargo Warehouse
+    danger_level: sketchy
+    description: 'A cavernous freight warehouse attached to the cargo terminal.
+      Pallet racking stretches to the ceiling, most of it bare or
+      collapsed. Scavengers pick through the debris systematically.
+      The concrete floor is cracked by years of freeze-thaw cycles,
+      and drainage channels run black with old motor oil.
+      '
+    exits:
+    - direction: west
+      target: pdx_cargo_terminal
+    map_x: 202
+    map_y: 32
+    spawns:
+    - template: airport_scavenger
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: industrial
+  - id: pdx_old_control_tower
+    title: Old Control Tower Base
+    danger_level: sketchy
+    description: 'The base of a decommissioned secondary control tower, shorter
+      than the main one and partially buried by a collapsed roof section.
+      Rogue security has claimed the fortified ground floor as a
+      checkpoint, demanding a toll from anyone passing through the
+      eastern perimeter.
+      '
+    exits:
+    - direction: west
+      target: pdx_control_tower
+    map_x: 202
+    map_y: 30
+    spawns:
+    - template: rogue_security
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: tense
+  - id: pdx_east_runway
+    title: East Runway
+    danger_level: sketchy
+    description: 'A secondary runway running along the eastern boundary of the
+      airport. Tarmac raiders have painted territory markers along
+      the center line. The far end disappears into a wall of overgrown
+      blackberry brambles that have reclaimed the old blast zone.
+      '
+    exits:
+    - direction: southwest
+      target: pdx_hangar_row
+    - direction: north
+      target: pdx_perimeter_fence
+    map_x: 202
+    map_y: 22
+    spawns:
+    - template: tarmac_raider
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: wind
+  - id: pdx_perimeter_fence
+    title: Perimeter Fence Line
+    danger_level: sketchy
+    description: 'The chain-link perimeter fence has been breached in a dozen
+      places, each gap a contested crossing point. Razor wire coils
+      along the top where it still stands. Rogue security patrols
+      the fence line, chasing off scavengers trying to slip through
+      to the outer roads.
+      '
+    exits:
+    - direction: south
+      target: pdx_east_runway
+    map_x: 202
+    map_y: 20
+    spawns:
+    - template: rogue_security
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: wind

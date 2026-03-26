@@ -1,0 +1,15 @@
+id: airport_scavenger
+name: Airport Scavenger
+npc_type: combat
+description: >
+  A lean, sun-darkened figure draped in layers of salvaged clothing. Carries
+  a wire-framed backpack stuffed with stripped electronics and copper wire.
+  Scavengers are territorial about their picking grounds and will fight
+  viciously over even small caches of useful junk. The eyes are calculating,
+  always pricing out what you're carrying.
+max_hp: 18
+ac: 12
+level: 2
+awareness: 4
+personality: territorial
+loot_table: scavenger_junk
