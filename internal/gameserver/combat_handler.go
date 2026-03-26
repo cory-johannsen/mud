@@ -463,6 +463,8 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 		if err != nil {
 			return nil, err
 		}
+		// COMBATMSG-5: push player-initiated combat message before first round output.
+		h.pushMessageToUID(uid, combat.FormatPlayerInitiationMsg(inst.Name()))
 	}
 
 	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionAttack, Target: inst.Name()}); err != nil {
