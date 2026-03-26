@@ -9,6 +9,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	questpkg "github.com/cory-johannsen/mud/internal/game/quest"
 	"github.com/cory-johannsen/mud/internal/game/reaction"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/substance"
@@ -272,6 +273,13 @@ type PlayerSession struct {
 	// HasHitThisCombat is true when the player has landed at least one hit in the current combat.
 	// Reset to false at combat end. Session-only; not persisted.
 	HasHitThisCombat bool
+	// ActiveQuests maps quest ID to in-progress ActiveQuest state.
+	// Populated at login from DB; updated as objectives are completed.
+	ActiveQuests map[string]*questpkg.ActiveQuest
+	// CompletedQuests maps quest ID to completion time.
+	// nil *time.Time value = abandoned non-repeatable quest (permanently blocked).
+	// non-nil *time.Time = completed quest.
+	CompletedQuests map[string]*time.Time
 	// InitDone is closed by Session() immediately before entering commandLoop,
 	// signalling that all session-initialization writes to PlayerSession fields
 	// are complete. Consumers (e.g. tests) that need a race-free snapshot of
