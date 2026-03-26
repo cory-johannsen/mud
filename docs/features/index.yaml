@@ -343,7 +343,7 @@ features:
 
   - slug: combat-initiation-message
     name: Combat Initiation Message
-    status: backlog
+    status: done
     priority: 295
     category: combat
     file: docs/features/combat-initiation-message.md
