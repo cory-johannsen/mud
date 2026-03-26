@@ -354,6 +354,16 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			room_id           text        NOT NULL,
 			activity_metadata jsonb
 		);
+
+		-- Migration 049
+		CREATE TABLE IF NOT EXISTS character_downtime_queue (
+			id            bigserial PRIMARY KEY,
+			character_id  bigint NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			position      int    NOT NULL,
+			activity_id   text   NOT NULL,
+			activity_args text,
+			UNIQUE (character_id, position)
+		);
 	`)
 	return err
 }
