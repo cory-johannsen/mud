@@ -446,7 +446,13 @@ func (s *GameServiceServer) resolveOfflineQueue(uid string, sess *session.Player
 		return
 	}
 	queueEntries, err := s.downtimeQueueRepo.ListQueue(context.Background(), sess.CharacterID)
-	if err != nil || len(queueEntries) == 0 {
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Warn("resolveOfflineQueue: failed to list queue", zap.String("uid", uid), zap.Error(err))
+		}
+		return
+	}
+	if len(queueEntries) == 0 {
 		return
 	}
 
@@ -478,10 +484,11 @@ func (s *GameServiceServer) resolveOfflineQueue(uid string, sess *session.Player
 
 		if time.Now().Before(hypotheticalEnd) {
 			// This activity has not elapsed yet — start it as the new active activity if eligible.
+			// If the room is ineligible, stop processing: remaining entries have not been reached yet.
 			if errMsg := downtime.CanStart(act.Alias, roomTags, false); errMsg != "" {
 				s.pushMessageToUID(uid, fmt.Sprintf("Skipped (offline): %s — %s", act.Name, errMsg))
 				skipped++
-				continue
+				break
 			}
 			sess.DowntimeActivityID = act.ID
 			sess.DowntimeCompletesAt = hypotheticalEnd

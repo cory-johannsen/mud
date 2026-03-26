@@ -119,6 +119,7 @@ func TestResolveOfflineQueue_SkipsInvalidRoom(t *testing.T) {
 	s.resolveOfflineQueue(uid, sess, twoHoursAgo)
 
 	assert.False(t, sess.DowntimeBusy, "no activity should be started when room is invalid")
+	assert.Len(t, mock.entries, 0, "earn_creds must be popped from queue even when skipped")
 }
 
 // TestResolveOfflineQueue_StartsNextFutureActivity verifies that resolveOfflineQueue
