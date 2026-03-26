@@ -53,19 +53,23 @@ zone:
       description: Zone Map
   - id: wayne_dawgs_trailer
     title: Wayne Dawg's Trailer
-    danger_level: sketchy
-    description: Wayne Dawg, a grizzled old tweaker, lives in this trailer. It's covered in rust and oil stains, with a makeshift
-      lab attached to the side. Wayne Dawg is the lowliest of low. A downright dirty dog if there ever was one. This is his
-      trailer, and he's not one to share.
+    danger_level: safe
+    description: Wayne and Jennifer Dawg have made this rusted trailer into something almost livable. There's a makeshift lab
+      bolted to the side wall and a card table by the door where deals get done. It smells like solder and something fried.
     exits:
     - direction: north
       target: the_green_hell
+    - direction: west
+      target: dwayne_dawgs_trailer
     map_x: -2
     map_y: 4
     spawns:
-    - template: scavenger
+    - template: wayne_dawg
       count: 1
-      respawn_after: 3m
+      respawn_after: 0s
+    - template: jennifer_dawg
+      count: 1
+      respawn_after: 0s
   - id: the_rusty_oasis
     title: The Rusty Oasis
     core: true
@@ -753,3 +757,17 @@ zone:
     properties:
       lighting: fluorescent
       atmosphere: industrial
+  - id: dwayne_dawgs_trailer
+    title: Dwayne Dawg's Trailer
+    danger_level: safe
+    description: Dwayne Dawg's trailer is a mess of half-finished deals and borrowed ideas. A folding table doubles as
+      a sales counter and a workbench. Whatever Dwayne's selling today, he's convinced it's exactly what you need.
+    exits:
+    - direction: east
+      target: wayne_dawgs_trailer
+    map_x: -4
+    map_y: 4
+    spawns:
+    - template: dwayne_dawg
+      count: 1
+      respawn_after: 0s
