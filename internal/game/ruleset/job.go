@@ -92,8 +92,8 @@ func LoadJobs(dir string) ([]*Job, error) {
 		if err := yaml.Unmarshal(data, &j); err != nil {
 			return nil, fmt.Errorf("parsing job file %s: %w", path, err)
 		}
-		if j.Tier == 0 {
-			return nil, fmt.Errorf("job %q missing required 'tier' field (REQ-DTQ-13)", j.ID)
+		if j.Tier < 1 || j.Tier > 3 {
+			return nil, fmt.Errorf("job %q has invalid tier %d: must be 1, 2, or 3 (REQ-DTQ-13)", j.ID, j.Tier)
 		}
 		if j.TechnologyGrants != nil {
 			if err := j.TechnologyGrants.Validate(); err != nil {

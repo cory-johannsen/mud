@@ -214,7 +214,7 @@ hit_points_per_level: 8
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "test_job.yaml"), []byte(content), 0644))
 	_, err := ruleset.LoadJobs(dir)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "tier")
+	assert.Contains(t, err.Error(), "REQ-DTQ-13")
 }
 
 // TestJob_TierField_LoadsCorrectly asserts that a job YAML with tier: 2 is
