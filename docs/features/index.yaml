@@ -506,7 +506,7 @@ features:
 
   - slug: zone-content-expansion
     name: Zone Content Expansion
-    status: planned
+    status: done
     priority: 257
     category: world
     file: docs/features/zone-content-expansion.md
