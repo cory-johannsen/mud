@@ -1,6 +1,8 @@
 id: marshal_ironsides
 name: Marshal Ironsides
 npc_type: guard
+disposition: neutral
+faction_id: machete
 description: >
   A broad-shouldered enforcer in scuffed riot gear, Marshal Ironsides patrols the
   safe zone of Rustbucket Ridge with a practiced eye for trouble. She's seen it all
