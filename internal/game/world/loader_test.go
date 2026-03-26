@@ -672,6 +672,68 @@ zone:
 	assert.Equal(t, 0, *z.WorldY)
 }
 
+// TestNEPortlandZoneFullyConnected verifies that every room in the NE Portland
+// zone is reachable from the start room via bidirectional exit traversal, and
+// that all exits within the zone are reciprocal.
+func TestNEPortlandZoneFullyConnected(t *testing.T) {
+	zone, err := LoadZoneFromFile("../../../content/zones/ne_portland.yaml")
+	require.NoError(t, err)
+
+	startID := zone.StartRoom
+	require.NotEmpty(t, startID, "start_room must be set")
+
+	// Build adjacency as undirected graph using only intra-zone exits.
+	adj := make(map[string][]string, len(zone.Rooms))
+	for id := range zone.Rooms {
+		adj[id] = []string{}
+	}
+	for id, room := range zone.Rooms {
+		for _, exit := range room.Exits {
+			if _, inZone := zone.Rooms[exit.TargetRoom]; inZone {
+				adj[id] = append(adj[id], exit.TargetRoom)
+			}
+		}
+	}
+
+	// BFS from start room.
+	visited := make(map[string]bool)
+	queue := []string{startID}
+	visited[startID] = true
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		for _, neighbor := range adj[cur] {
+			if !visited[neighbor] {
+				visited[neighbor] = true
+				queue = append(queue, neighbor)
+			}
+		}
+	}
+
+	// Every room must be reachable.
+	for id := range zone.Rooms {
+		assert.True(t, visited[id], "room %q is not reachable from start room %q", id, startID)
+	}
+
+	// Every intra-zone exit must have a reciprocal exit in the target room.
+	for id, room := range zone.Rooms {
+		for _, exit := range room.Exits {
+			target, inZone := zone.Rooms[exit.TargetRoom]
+			if !inZone {
+				continue // cross-zone exits are out of scope
+			}
+			opposite := exit.Direction.Opposite()
+			if opposite == "" {
+				continue // non-standard direction; skip reciprocal check
+			}
+			_, hasReciprocal := target.ExitForDirection(opposite)
+			assert.True(t, hasReciprocal,
+				"room %q exit %s→%s has no reciprocal %s exit in %q",
+				id, exit.Direction, exit.TargetRoom, opposite, exit.TargetRoom)
+		}
+	}
+}
+
 // TestLoader_ZoneWorldCoords verifies that all 16 live zone YAML files decode
 // with non-nil WorldX and WorldY fields matching the design spec coordinates.
 func TestLoader_ZoneWorldCoords(t *testing.T) {
