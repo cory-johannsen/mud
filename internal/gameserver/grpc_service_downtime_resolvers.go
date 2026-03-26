@@ -15,6 +15,18 @@ const defaultDC = 15
 // earnCredsBasePay is the base currency awarded on a Failure in the Earn Creds activity.
 const earnCredsBasePay = 10
 
+// patchUpCritSuccessMultiplier is the HP heal multiplier applied on a Critical Success in Patch Up.
+const patchUpCritSuccessMultiplier = 4
+
+// patchUpSuccessMultiplier is the HP heal multiplier applied on a Success in Patch Up.
+const patchUpSuccessMultiplier = 2
+
+// patchUpFailureMultiplier is the HP heal multiplier applied on a Failure in Patch Up.
+const patchUpFailureMultiplier = 1
+
+// runCoverCircumstanceBonus is the circumstance bonus granted to hustle checks in a zone after Run Cover succeeds.
+const runCoverCircumstanceBonus = 1
+
 // resolveDowntimeActivityDispatch dispatches per-activity resolution logic after
 // the generic state-clearing block in resolveDowntimeActivity.
 //
@@ -121,7 +133,7 @@ func (s *GameServiceServer) skillCheckOutcome(sess *session.PlayerSession, skill
 // Precondition: sess is non-nil; state already cleared by resolveDowntimeActivity.
 // Postcondition: sess.Currency incremented; persisted via charSaver if available.
 func (s *GameServiceServer) resolveEarnCreds(uid string, sess *session.PlayerSession) {
-	skillID, rank := bestSkillForEarning(sess)
+	skillID, _ := bestSkillForEarning(sess)
 
 	dc := defaultDC
 	if s.world != nil {
@@ -132,11 +144,7 @@ func (s *GameServiceServer) resolveEarnCreds(uid string, sess *session.PlayerSes
 		}
 	}
 
-	abilityScore := s.abilityScoreForSkill(sess, skillID)
-	amod := abilityModFrom(abilityScore)
-	roll := s.rollD20()
-	total := roll + amod + skillcheck.ProficiencyBonus(rank)
-	outcome := skillcheck.OutcomeFor(total, dc)
+	outcome := s.skillCheckOutcome(sess, skillID, dc)
 
 	var earned int
 	var outcomeMsg string
@@ -178,13 +186,13 @@ func (s *GameServiceServer) resolvePatchUp(uid string, sess *session.PlayerSessi
 	var outcomeMsg string
 	switch outcome {
 	case skillcheck.CritSuccess:
-		heal = sess.Level * 4
+		heal = sess.Level * patchUpCritSuccessMultiplier
 		outcomeMsg = fmt.Sprintf("Patch Up complete. Critical success! You healed %d HP.", heal)
 	case skillcheck.Success:
-		heal = sess.Level * 2
+		heal = sess.Level * patchUpSuccessMultiplier
 		outcomeMsg = fmt.Sprintf("Patch Up complete. Success. You healed %d HP.", heal)
 	case skillcheck.Failure:
-		heal = sess.Level * 1
+		heal = sess.Level * patchUpFailureMultiplier
 		outcomeMsg = fmt.Sprintf("Patch Up complete. Partial success. You healed %d HP.", heal)
 	default: // CritFailure
 		heal = 0
@@ -498,7 +506,7 @@ func (s *GameServiceServer) resolveRunCover(uid string, sess *session.PlayerSess
 			if sess.ZoneCircumstanceBonus == nil {
 				sess.ZoneCircumstanceBonus = make(map[string]int)
 			}
-			sess.ZoneCircumstanceBonus[zoneID+":hustle"] = 1
+			sess.ZoneCircumstanceBonus[zoneID+":hustle"] = runCoverCircumstanceBonus
 		}
 		msg = "Run Cover complete. Your street presence makes things easier in this area."
 	case skillcheck.Failure:

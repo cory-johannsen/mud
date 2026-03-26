@@ -205,3 +205,95 @@ func TestPropertyResolvePatchUp_HealNeverExceedsMaxHP(t *testing.T) {
 		}
 	})
 }
+
+// TestPropertyResolveSubsist_HPNeverExceedsMaxHP verifies that for any dice roll in [1,20],
+// level in [1,20], maxHP in [1,100], and currentHP in [0,maxHP], subsist never pushes
+// CurrentHP above MaxHP.
+//
+// Precondition: currentHP in [0,maxHP]; maxHP in [1,100]; dice roll in [1,20]; level in [1,20].
+// Postcondition: sess.CurrentHP after resolveSubsist <= sess.MaxHP.
+func TestPropertyResolveSubsist_HPNeverExceedsMaxHP(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		roll := rapid.IntRange(1, 20).Draw(rt, "roll")
+		level := rapid.IntRange(1, 20).Draw(rt, "level")
+		maxHP := rapid.IntRange(1, 100).Draw(rt, "maxHP")
+		currentHP := rapid.IntRange(0, maxHP).Draw(rt, "currentHP")
+
+		wMgr := newWorldWithSafeRoom("zone1", "room1")
+		abilities := character.AbilityScores{Savvy: 10} // +0 mod — neutral
+		sMgr, sess := newResolverSession(t, "uid_pbt_subsist", "room1", "subsist", abilities, level, currentHP, maxHP)
+
+		s := &GameServiceServer{sessions: sMgr, world: wMgr}
+		s.dice = newFixedDiceRoller(roll)
+
+		s.resolveSubsist("uid_pbt_subsist", sess)
+
+		if sess.CurrentHP > sess.MaxHP {
+			rt.Fatalf("HP exceeded maxHP: currentHP=%d maxHP=%d (roll=%d level=%d)", sess.CurrentHP, sess.MaxHP, roll, level)
+		}
+	})
+}
+
+// TestPropertyResolveRunCover_BonusKeyIsConsistent verifies that after resolveRunCover,
+// the zone circumstance bonus for "zone1:hustle" is set to runCoverCircumstanceBonus on
+// success or crit success, and absent (zero) on failure or crit failure.
+//
+// Precondition: dice roll in [1,20]; session in room1 (zone1); no prior ZoneCircumstanceBonus.
+// Postcondition: ZoneCircumstanceBonus["zone1:hustle"] == runCoverCircumstanceBonus iff total >= defaultDC.
+func TestPropertyResolveRunCover_BonusKeyIsConsistent(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		roll := rapid.IntRange(1, 20).Draw(rt, "roll")
+
+		wMgr := newWorldWithSafeRoom("zone1", "room1")
+		// Ability score 10 → +0 mod; untrained hustle → +0 proficiency; total == roll.
+		abilities := character.AbilityScores{Flair: 10}
+		sMgr, sess := newResolverSession(t, "uid_pbt_cover", "room1", "run_cover", abilities, 1, 10, 10)
+
+		s := &GameServiceServer{sessions: sMgr, world: wMgr}
+		s.dice = newFixedDiceRoller(roll)
+
+		s.resolveRunCover("uid_pbt_cover", sess)
+
+		bonus := 0
+		if sess.ZoneCircumstanceBonus != nil {
+			bonus = sess.ZoneCircumstanceBonus["zone1:hustle"]
+		}
+
+		total := roll // +0 mod, +0 proficiency
+		if total >= defaultDC {
+			if bonus != runCoverCircumstanceBonus {
+				rt.Fatalf("expected bonus=%d on success (roll=%d total=%d), got %d", runCoverCircumstanceBonus, roll, total, bonus)
+			}
+		} else {
+			if bonus != 0 {
+				rt.Fatalf("expected no bonus on failure (roll=%d total=%d), got %d", roll, total, bonus)
+			}
+		}
+	})
+}
+
+// TestPropertyResolveRecalibrate_FocusPointsNeverExceedsMax verifies that after
+// resolveRecalibrate, FocusPoints never exceeds MaxFocusPoints for any valid
+// MaxFocusPoints in [0,20].
+//
+// Precondition: MaxFocusPoints in [0,20]; FocusPoints seeded at 0 (depleted).
+// Postcondition: sess.FocusPoints <= sess.MaxFocusPoints after resolveRecalibrate.
+func TestPropertyResolveRecalibrate_FocusPointsNeverExceedsMax(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		maxFP := rapid.IntRange(0, 20).Draw(rt, "maxFP")
+
+		wMgr := newWorldWithSafeRoom("zone1", "room1")
+		sMgr, sess := newResolverSession(t, "uid_pbt_recal", "room1", "recalibrate",
+			character.AbilityScores{}, 1, 10, 10)
+		sess.FocusPoints = 0
+		sess.MaxFocusPoints = maxFP
+
+		s := &GameServiceServer{sessions: sMgr, world: wMgr}
+
+		s.resolveRecalibrate("uid_pbt_recal", sess)
+
+		if sess.FocusPoints > sess.MaxFocusPoints {
+			rt.Fatalf("FocusPoints=%d exceeded MaxFocusPoints=%d", sess.FocusPoints, sess.MaxFocusPoints)
+		}
+	})
+}
