@@ -1,0 +1,17 @@
+id: chip_doc_battleground
+name: Medtech Sovya
+npc_type: chip_doc
+description: >
+  A compact woman in a patched white coat, her fingers stained with
+  soldering flux. Sovya officially works as an infirmary ward attendant
+  for the collective, but those who know the right phrase find she also
+  services neural implants — quietly, efficiently, and without filing
+  the required paperwork.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14

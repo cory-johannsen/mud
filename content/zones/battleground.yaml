@@ -220,6 +220,8 @@ zone:
     exits:
     - direction: north
       target: battle_reeducation_center
+    - direction: east
+      target: battle_commissar_hq
     map_x: 2
     map_y: -8
     spawns:
@@ -245,6 +247,10 @@ zone:
     exits:
     - direction: south
       target: battle_the_commissariat
+    - direction: north
+      target: battle_reeducation_block
+    - direction: east
+      target: battle_outer_perimeter_east
     map_x: 2
     map_y: -10
     spawns:
@@ -319,6 +325,10 @@ zone:
     exits:
     - direction: north
       target: battle_the_commons
+    - direction: west
+      target: battle_infirmary_ward
+    - direction: south
+      target: battle_neutral_commons
     map_x: -2
     map_y: -2
     spawns:
@@ -414,6 +424,8 @@ zone:
       target: battle_farm_west
     - direction: east
       target: battle_north_fields
+    - direction: west
+      target: battle_outer_perimeter_west
     map_x: -2
     map_y: -10
     spawns:
@@ -466,6 +478,8 @@ zone:
     exits:
     - direction: south
       target: battle_north_fields
+    - direction: north
+      target: battle_border_checkpoint
     map_x: 0
     map_y: -12
     spawns:
@@ -600,3 +614,227 @@ zone:
     properties:
       lighting: dim
       atmosphere: damp
+  - id: battle_commissar_hq
+    core: true
+    title: Commissar Headquarters
+    description: 'The inner sanctum of collective authority — a hardened command
+
+      post where senior commissars coordinate enforcement operations.
+
+      A bank of radio equipment crackles with reports from outposts.
+
+      Wall-mounted maps track citizen movements and resource allocations.
+
+      The air smells of stale tobacco and paranoia.
+
+      '
+    exits:
+    - direction: west
+      target: battle_the_commissariat
+    - direction: south
+      target: battle_war_room
+    map_x: 4
+    map_y: -8
+    spawns:
+    - template: commissar
+      count: 2
+      respawn_after: 5m
+    - template: battle_enforcer
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: fluorescent
+      atmosphere: tense
+  - id: battle_reeducation_block
+    core: true
+    title: Reeducation Block
+    description: 'A row of reinforced cells where ideological dissidents undergo
+
+      intensive correction sessions. The walls are thick enough to
+
+      muffle screams. Numbered doors line a narrow corridor lit by
+
+      a single swinging bulb. Guards pace the hall with practiced
+
+      indifference.
+
+      '
+    exits:
+    - direction: south
+      target: battle_reeducation_center
+    map_x: 2
+    map_y: -12
+    spawns:
+    - template: commissar
+      count: 1
+      respawn_after: 5m
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: harsh
+      atmosphere: oppressive
+  - id: battle_war_room
+    core: true
+    title: War Room
+    description: 'A former bank vault converted into a strategic planning chamber.
+
+      Tactical maps cover a central table, weighted down with shell
+
+      casings. The collective''s military leadership convenes here
+
+      to plan operations against encroaching factions. Entry is
+
+      by commissar clearance only.
+
+      '
+    exits:
+    - direction: north
+      target: battle_commissar_hq
+    map_x: 4
+    map_y: -10
+    spawns:
+    - template: commissar
+      count: 1
+      respawn_after: 5m
+    - template: battle_enforcer
+      count: 3
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: strategic
+  - id: battle_outer_perimeter_east
+    danger_level: dangerous
+    title: Outer Perimeter East
+    description: 'The eastern edge of collective territory, marked by coils of
+
+      razor wire and improvised warning signs. Beyond the perimeter
+
+      posts, the wasteland offers no protection. Patrols sweep the
+
+      boundary every few hours, but gaps exist for those who watch
+
+      long enough.
+
+      '
+    exits:
+    - direction: west
+      target: battle_reeducation_center
+    map_x: 4
+    map_y: -12
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
+    - template: battle_sniper
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: exposed
+  - id: battle_outer_perimeter_west
+    danger_level: dangerous
+    title: Outer Perimeter West
+    description: 'The western boundary of the collective is marked by a berm of
+
+      pushed earth and a chain of guard posts. Searchlights sweep
+
+      the open ground at night. Guardians here are more trigger-happy
+
+      than their counterparts inside — the perimeter attracts trouble.
+
+      '
+    exits:
+    - direction: east
+      target: battle_the_granary
+    map_x: -4
+    map_y: -10
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
+    - template: battle_sniper
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: alert
+  - id: battle_border_checkpoint
+    danger_level: dangerous
+    title: Border Checkpoint
+    description: 'A fortified checkpoint at the northern approach, where traffic
+
+      into and out of collective territory is scrutinized. Concrete
+
+      barriers force vehicles to weave at low speed. Guardians check
+
+      papers with practiced suspicion. Anyone without proper
+
+      documentation is turned back — or worse.
+
+      '
+    exits:
+    - direction: south
+      target: battle_the_watchtower
+    map_x: 0
+    map_y: -14
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
+    - template: battle_sniper
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: tense
+  - id: battle_infirmary_ward
+    danger_level: safe
+    title: Infirmary Ward
+    description: 'A quiet side room of the infirmary with additional recovery cots
+
+      for the more seriously injured. Curtains partition the beds for
+
+      a modicum of privacy — unusual in the collective. The chip_doc
+
+      maintains an unofficial workshop here, handling implant maintenance
+
+      with discretion and without asking too many questions.
+
+      '
+    exits:
+    - direction: east
+      target: battle_infirmary
+    map_x: -4
+    map_y: -2
+    spawns:
+    - template: chip_doc_battleground
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: fluorescent
+      atmosphere: quiet
+  - id: battle_neutral_commons
+    danger_level: safe
+    title: Neutral Commons
+    description: 'A small courtyard behind the infirmary that serves as an
+
+      informal neutral ground. By unspoken agreement, even the most
+
+      zealous commissars leave this space alone. People from outside
+
+      the collective sometimes meet contacts here. The collective
+
+      tolerates it — the infirmary needs suppliers the black market
+
+      can provide.
+
+      '
+    exits:
+    - direction: north
+      target: battle_infirmary
+    map_x: -2
+    map_y: 0
+    properties:
+      lighting: overcast
+      atmosphere: cautious
