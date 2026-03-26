@@ -823,3 +823,39 @@ func (m *Manager) ForEachPlayer(fn func(*PlayerSession)) {
 		fn(sess)
 	}
 }
+
+// GetActiveQuests returns the session's active quest map.
+//
+// Postcondition: satisfies quest.SessionState.
+func (sess *PlayerSession) GetActiveQuests() map[string]*questpkg.ActiveQuest {
+	return sess.ActiveQuests
+}
+
+// GetCompletedQuests returns the session's completed quest map.
+//
+// Postcondition: satisfies quest.SessionState.
+func (sess *PlayerSession) GetCompletedQuests() map[string]*time.Time {
+	return sess.CompletedQuests
+}
+
+// GetBackpack returns the session's backpack.
+//
+// Postcondition: satisfies quest.SessionState.
+func (sess *PlayerSession) GetBackpack() *inventory.Backpack {
+	return sess.Backpack
+}
+
+// GetCurrency returns the session's current currency amount.
+//
+// Postcondition: satisfies quest.SessionState.
+func (sess *PlayerSession) GetCurrency() int {
+	return sess.Currency
+}
+
+// AddCurrency adds delta to the session's currency.
+//
+// Precondition: delta may be positive or negative.
+// Postcondition: satisfies quest.SessionState.
+func (sess *PlayerSession) AddCurrency(delta int) {
+	sess.Currency += delta
+}
