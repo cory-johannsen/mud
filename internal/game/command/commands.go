@@ -17,6 +17,7 @@ const (
 	CategoryAdmin         = "admin"
 	CategoryCharacter     = "character"
 	CategoryExploration   = "exploration"
+	CategoryDowntime      = "downtime"
 	// CategoryHidden marks commands that are internal flow steps and must not appear in help.
 	CategoryHidden = "hidden"
 	// CategoryEditor marks commands available to editor and admin roles.
@@ -145,6 +146,7 @@ const (
 	HandlerScavenge           = "scavenge"
 	HandlerAffix              = "affix"
 	HandlerExplore            = "explore"
+	HandlerDowntime           = "downtime"
 )
 
 // Command defines a player-invocable command.
@@ -313,6 +315,9 @@ func BuiltinCommands() []Command {
 
 		// Exploration commands
 		{Name: "explore", Aliases: []string{"exp"}, Help: "Set or query your exploration mode. Usage: explore [mode|off]. Modes: lay_low, hold_ground, active_sensors, case_it, run_point, shadow <ally>, poke_around.", Category: CategoryExploration, Handler: HandlerExplore},
+
+		// Downtime commands
+		{Name: "downtime", Aliases: []string{"dtime"}, Help: "Manage downtime activities. Usage: downtime [list|<activity> [args]|cancel]", Category: CategoryDowntime, Handler: HandlerDowntime},
 	}
 }
 

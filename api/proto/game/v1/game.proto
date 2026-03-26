@@ -142,6 +142,7 @@ message ClientMessage {
     ExploreRequest       explore_request       = 125;
     QuestRequest         quest_request         = 126;
     UncurseRequest       uncurse_request       = 127;
+    DowntimeRequest      downtime_request      = 128;
   }
 }
 
@@ -1195,6 +1196,12 @@ message AffixRequest {
 message ExploreRequest {
     string mode = 1;
     string shadow_target = 2;
+}
+
+// DowntimeRequest dispatches downtime subcommands: list, cancel, or an activity alias with optional args.
+message DowntimeRequest {
+    string subcommand = 1; // "list", "cancel", "", or activity alias
+    string args       = 2; // optional args e.g. recipe name, item name
 }
 
 // QuestRequest dispatches quest subcommands: list, log, abandon, completed.

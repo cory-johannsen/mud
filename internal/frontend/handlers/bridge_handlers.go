@@ -171,6 +171,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerScavenge:           bridgeScavenge,
 	command.HandlerAffix:              bridgeAffix,
 	command.HandlerExplore:            bridgeExplore,
+	command.HandlerDowntime:           bridgeDowntime,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -2056,6 +2057,30 @@ func bridgeExplore(bctx *bridgeContext) (bridgeResult, error) {
 			ExploreRequest: &gamev1.ExploreRequest{
 				Mode:         req.Mode,
 				ShadowTarget: req.ShadowTarget,
+			},
+		},
+	}}, nil
+}
+
+// bridgeDowntime builds a DowntimeRequest from the parsed command.
+// Precondition: bctx must be non-nil with a valid reqID and parsed.RawArgs.
+// Postcondition: returns a non-nil msg containing a DowntimeRequest; done is false.
+func bridgeDowntime(bctx *bridgeContext) (bridgeResult, error) {
+	parts := strings.SplitN(strings.TrimSpace(bctx.parsed.RawArgs), " ", 2)
+	subcommand := ""
+	args := ""
+	if len(parts) >= 1 {
+		subcommand = strings.ToLower(parts[0])
+	}
+	if len(parts) >= 2 {
+		args = parts[1]
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_DowntimeRequest{
+			DowntimeRequest: &gamev1.DowntimeRequest{
+				Subcommand: subcommand,
+				Args:       args,
 			},
 		},
 	}}, nil
