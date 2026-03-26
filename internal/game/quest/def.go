@@ -64,7 +64,7 @@ func (d QuestDef) Validate() error {
 		if obj.TargetID == "" {
 			return fmt.Errorf("quest %q objective %q: TargetID must not be empty", d.ID, obj.ID)
 		}
-		if !validObjectiveTypes[obj.Type] {
+		if !ValidObjectiveTypes[obj.Type] {
 			return fmt.Errorf("quest %q objective %q: invalid Type %q", d.ID, obj.ID, obj.Type)
 		}
 		if obj.Quantity < 1 {
