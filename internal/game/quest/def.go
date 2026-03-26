@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var ValidObjectiveTypes = map[string]bool{
+var validObjectiveTypes = map[string]bool{
 	"kill": true, "fetch": true, "explore": true, "deliver": true,
 }
 
@@ -64,7 +64,7 @@ func (d QuestDef) Validate() error {
 		if obj.TargetID == "" {
 			return fmt.Errorf("quest %q objective %q: TargetID must not be empty", d.ID, obj.ID)
 		}
-		if !ValidObjectiveTypes[obj.Type] {
+		if !validObjectiveTypes[obj.Type] {
 			return fmt.Errorf("quest %q objective %q: invalid Type %q", d.ID, obj.ID, obj.Type)
 		}
 		if obj.Quantity < 1 {
