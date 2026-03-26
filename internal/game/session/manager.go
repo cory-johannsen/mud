@@ -291,6 +291,11 @@ type PlayerSession struct {
 	DowntimeCompletesAt time.Time // wall-clock time when the activity completes
 	DowntimeBusy        bool      // true while an activity is active; blocks movement and combat (REQ-DT-5)
 	DowntimeMetadata    string    // JSON blob; recipe_id, target_name, item_id per activity
+
+	// Downtime queue — computed at login from job tier + level; not persisted.
+	JobTier            int // job.Tier from active job definition
+	DowntimeQueueLimit int // computed from JobTier + Level via DowntimeQueueLimitRegistry
+
 	ZoneCircumstanceBonus map[string]int
 }
 

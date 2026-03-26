@@ -1,0 +1,28 @@
+limits:
+  - job_tier: 1
+    level_range: [1, 4]
+    max_queue: 3
+  - job_tier: 1
+    level_range: [5, 8]
+    max_queue: 5
+  - job_tier: 1
+    level_range: [9, 12]
+    max_queue: 8
+  - job_tier: 2
+    level_range: [1, 4]
+    max_queue: 10
+  - job_tier: 2
+    level_range: [5, 8]
+    max_queue: 15
+  - job_tier: 2
+    level_range: [9, 12]
+    max_queue: 20
+  - job_tier: 3
+    level_range: [1, 4]
+    max_queue: 25
+  - job_tier: 3
+    level_range: [5, 8]
+    max_queue: 40
+  - job_tier: 3
+    level_range: [9, 12]
+    max_queue: 60
