@@ -111,6 +111,18 @@ func (s *Service) IsEnemyOf(sess *session.PlayerSession, npcFactionID string) bo
 	return s.IsHostile(npcFactionID, sess.FactionID)
 }
 
+// IsAllyOf returns true iff both npcFactionID and sess.FactionID are non-empty
+// and are equal (same faction).
+//
+// Precondition: sess must be non-nil.
+// Postcondition: Returns false when either faction ID is empty.
+func (s *Service) IsAllyOf(sess *session.PlayerSession, npcFactionID string) bool {
+	if npcFactionID == "" || sess.FactionID == "" {
+		return false
+	}
+	return npcFactionID == sess.FactionID
+}
+
 // CanEnterRoom returns true if the room has no faction gating, or if the player's
 // faction matches the zone owner and the player has sufficient tier.
 //

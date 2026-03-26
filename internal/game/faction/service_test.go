@@ -168,3 +168,51 @@ func TestCanBuyItem_NonExclusiveItem(t *testing.T) {
 		t.Error("non-exclusive item should always be buyable")
 	}
 }
+
+func TestIsAllyOf_SameFaction(t *testing.T) {
+	svc := faction.NewService(makeTestRegistry())
+	sess := &session.PlayerSession{FactionID: "machete", FactionRep: map[string]int{"machete": 0}}
+	if !svc.IsAllyOf(sess, "machete") {
+		t.Error("same-faction NPC should be ally of player")
+	}
+}
+
+func TestIsAllyOf_DifferentFaction(t *testing.T) {
+	svc := faction.NewService(makeTestRegistry())
+	sess := &session.PlayerSession{FactionID: "machete", FactionRep: map[string]int{"machete": 0}}
+	if svc.IsAllyOf(sess, "gun") {
+		t.Error("enemy-faction NPC should not be ally of player")
+	}
+}
+
+func TestIsAllyOf_EmptyNPCFaction(t *testing.T) {
+	svc := faction.NewService(makeTestRegistry())
+	sess := &session.PlayerSession{FactionID: "machete", FactionRep: map[string]int{"machete": 0}}
+	if svc.IsAllyOf(sess, "") {
+		t.Error("empty NPC faction should never be ally")
+	}
+}
+
+func TestIsAllyOf_EmptyPlayerFaction(t *testing.T) {
+	svc := faction.NewService(makeTestRegistry())
+	sess := &session.PlayerSession{FactionID: "", FactionRep: map[string]int{}}
+	if svc.IsAllyOf(sess, "machete") {
+		t.Error("factionless player should not be ally of any NPC faction")
+	}
+}
+
+func TestProperty_IsAllyOf_NeverTrueForHostilePairs(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		playerFaction := rapid.SampledFrom([]string{"gun", "machete"}).Draw(t, "playerFaction")
+		npcFaction := rapid.SampledFrom([]string{"gun", "machete"}).Draw(t, "npcFaction")
+		svc := faction.NewService(makeTestRegistry())
+		sess := &session.PlayerSession{FactionID: playerFaction, FactionRep: map[string]int{playerFaction: 0}}
+		allied := svc.IsAllyOf(sess, npcFaction)
+		if playerFaction != npcFaction && allied {
+			t.Fatalf("IsAllyOf(%q, %q) = true but factions are hostile", playerFaction, npcFaction)
+		}
+		if playerFaction == npcFaction && !allied {
+			t.Fatalf("IsAllyOf(%q, %q) = false but factions are the same", playerFaction, npcFaction)
+		}
+	})
+}
