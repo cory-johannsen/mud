@@ -1,10 +1,13 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
+	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/quest"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -23,8 +26,32 @@ func (s *GameServiceServer) findQuestGiverInRoom(roomID, npcName string) (*npc.I
 	return inst, ""
 }
 
-// handleTalk responds to a talk command by returning a random line from the NPC's
-// PlaceholderDialog.
+// handleTalkAccept accepts a quest on behalf of the player.
+//
+// Precondition: uid identifies an active player session; questID is non-empty.
+// Postcondition: Returns a non-nil ServerEvent; error is always nil.
+func (s *GameServiceServer) handleTalkAccept(uid, questID string) (*gamev1.ServerEvent, error) {
+	if s.questSvc == nil {
+		return messageEvent("Quest system not available."), nil
+	}
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("player not found"), nil
+	}
+	title, objDescs, err := s.questSvc.Accept(context.Background(), sess, sess.CharacterID, questID)
+	if err != nil {
+		return messageEvent(fmt.Sprintf("Cannot accept quest: %v", err)), nil
+	}
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Quest accepted: %s\n", title))
+	for _, d := range objDescs {
+		sb.WriteString(fmt.Sprintf("  - %s\n", d))
+	}
+	return messageEvent(strings.TrimRight(sb.String(), "\n")), nil
+}
+
+// handleTalk responds to a talk command, offering quests, handling deliver objectives,
+// accepting quests, and falling back to placeholder dialog.
 //
 // Precondition: uid identifies an active player session; req is non-nil.
 // Postcondition: Returns a non-nil ServerEvent; error is always nil.
@@ -45,6 +72,87 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 	if tmpl == nil || tmpl.QuestGiver == nil {
 		return messageEvent("That NPC has no dialog configured."), nil
 	}
+
+	// Parse subcommand args.
+	args := strings.TrimSpace(req.GetArgs())
+	if args != "" {
+		parts := strings.Fields(args)
+		if len(parts) >= 2 && parts[0] == "accept" {
+			return s.handleTalkAccept(uid, parts[1])
+		}
+	}
+
+	var msgs []string
+
+	// Check for pending deliver objectives across all active quests.
+	if s.questSvc != nil && sess.Backpack != nil {
+		reg := s.questSvc.Registry()
+		for qid, aq := range sess.ActiveQuests {
+			def, ok := reg[qid]
+			if !ok {
+				continue
+			}
+			// Only process quests given by this NPC.
+			if def.GiverNPCID != inst.TemplateID {
+				continue
+			}
+			for _, obj := range def.Objectives {
+				if obj.Type != "deliver" {
+					continue
+				}
+				if aq.ObjectiveProgress[obj.ID] >= obj.Quantity {
+					continue
+				}
+				// Check if player has the required item.
+				instances := sess.Backpack.FindByItemDefID(obj.ItemID)
+				if len(instances) == 0 {
+					continue
+				}
+				// Consume items from backpack (take up to Quantity needed).
+				needed := obj.Quantity - aq.ObjectiveProgress[obj.ID]
+				removed := 0
+				for _, inst2 := range instances {
+					if removed >= needed {
+						break
+					}
+					take := inst2.Quantity
+					if take > needed-removed {
+						take = needed - removed
+					}
+					if err := sess.Backpack.Remove(inst2.InstanceID, take); err != nil {
+						continue
+					}
+					removed += take
+				}
+				if removed > 0 {
+					if err := s.questSvc.RecordDeliver(context.Background(), sess, sess.CharacterID, qid, obj.ID); err == nil {
+						if completedDef, ok2 := reg[qid]; ok2 {
+							for _, line := range quest.CompletionMessage(completedDef, s.invRegistry) {
+								msgs = append(msgs, line)
+							}
+						} else {
+							msgs = append(msgs, fmt.Sprintf("%s says: 'Thank you!'", inst.Name()))
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Show offerable quests.
+	if s.questSvc != nil {
+		offerable := s.questSvc.GetOfferable(sess, tmpl.QuestGiver.QuestIDs)
+		for _, def := range offerable {
+			msgs = append(msgs, fmt.Sprintf("%s offers: [%s] %s — %s", inst.Name(), def.ID, def.Title, def.Description))
+			msgs = append(msgs, fmt.Sprintf("  Type 'talk %s accept %s' to accept.", inst.Name(), def.ID))
+		}
+	}
+
+	if len(msgs) > 0 {
+		return messageEvent(strings.Join(msgs, "\n")), nil
+	}
+
+	// Fallback: random placeholder dialog.
 	dialog := tmpl.QuestGiver.PlaceholderDialog
 	line := dialog[rand.Intn(len(dialog))]
 	return messageEvent(fmt.Sprintf("%s says: %q", inst.Name(), line)), nil
