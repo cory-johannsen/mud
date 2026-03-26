@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -259,4 +260,74 @@ func (s *GameServiceServer) applyExploreCondition(uid string, sess *session.Play
 		return
 	}
 	_ = sess.Conditions.Apply(uid, def, 1, -1)
+}
+
+// applyExploreModeOnCombatStart fires the combat-start exploration hook for the player.
+// Called after RollInitiative in combat_handler.go before StartCombat.
+//
+// Precondition: sess, playerCbt, and h must not be nil.
+// Postcondition: Lay Low is cleared; Hold Ground applies shield_raised + ACMod;
+//
+//	Run Point applies +1 Initiative to co-located players.
+func applyExploreModeOnCombatStart(sess *session.PlayerSession, playerCbt *combat.Combatant, h *CombatHandler) []string {
+	var msgs []string
+
+	// Lay Low: clear before other hooks (REQ-EXP-40).
+	if sess.ExploreMode == session.ExploreModeLayLow {
+		sess.ExploreMode = ""
+		// No message — mode clears silently at combat start.
+	}
+
+	// Hold Ground: apply shield_raised at no AP cost (REQ-EXP-11, REQ-EXP-12).
+	if sess.ExploreMode == session.ExploreModeHoldGround {
+		if hasShieldEquipped(sess) {
+			// Apply condition.
+			if h.condRegistry != nil {
+				if def, ok := h.condRegistry.Get("shield_raised"); ok {
+					if sess.Conditions != nil {
+						_ = sess.Conditions.Apply(sess.UID, def, 1, -1)
+					}
+				}
+			}
+			// Apply +2 ACMod to combatant.
+			playerCbt.ACMod += 2
+			msgs = append(msgs, "Hold Ground: your shield is already raised.")
+		}
+		// No error if no shield (REQ-EXP-12).
+	}
+
+	// Run Point: +1 circumstance bonus to Initiative for all other players in room (REQ-EXP-25, REQ-EXP-26).
+	if sess.ExploreMode == session.ExploreModeRunPoint {
+		others := h.sessions.PlayersInRoomDetails(sess.RoomID)
+		for _, other := range others {
+			if other.UID == sess.UID {
+				continue // REQ-EXP-26: Run Point player does not receive the bonus.
+			}
+			// Adjust the combatant's initiative by +1 if they are already enrolled in this combat.
+			if h.engine != nil {
+				if cbt, ok := h.engine.GetCombat(sess.RoomID); ok {
+					if otherCbt := cbt.GetCombatant(other.UID); otherCbt != nil {
+						otherCbt.Initiative += 1
+					}
+				}
+			}
+		}
+		msgs = append(msgs, "Run Point: your allies gain +1 to Initiative.")
+	}
+
+	return msgs
+}
+
+// hasShieldEquipped returns true if the player has a shield in the off-hand slot.
+func hasShieldEquipped(sess *session.PlayerSession) bool {
+	if sess.LoadoutSet == nil {
+		return false
+	}
+	preset := sess.LoadoutSet.ActivePreset()
+	return preset != nil && preset.OffHand != nil && preset.OffHand.Def != nil && preset.OffHand.Def.IsShield()
+}
+
+// ApplyExploreModeOnCombatStartForTest is an exported test shim.
+func ApplyExploreModeOnCombatStartForTest(sess *session.PlayerSession, playerCbt *combat.Combatant, h *CombatHandler) []string {
+	return applyExploreModeOnCombatStart(sess, playerCbt, h)
 }

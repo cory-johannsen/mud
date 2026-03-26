@@ -808,6 +808,28 @@ func (h *CombatHandler) GetCombatForRoom(roomID string) (*combat.Combat, bool) {
 	return h.engine.GetCombat(roomID)
 }
 
+// pushMessageToUID sends a plain text message event to the player identified by uid.
+//
+// Precondition: uid must be non-empty; content must be non-empty.
+// Postcondition: Message is enqueued on the player's entity stream; no-ops if player not found or entity is nil.
+func (h *CombatHandler) pushMessageToUID(uid, content string) {
+	sess, ok := h.sessions.GetPlayer(uid)
+	if !ok || sess.Entity == nil {
+		return
+	}
+	evt := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_Message{
+			Message: &gamev1.MessageEvent{
+				Content: content,
+				Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+			},
+		},
+	}
+	if data, err := proto.Marshal(evt); err == nil {
+		_ = sess.Entity.Push(data)
+	}
+}
+
 // ApplyCombatCondition applies condID (stacks=1, duration=-1) to the combatant identified by
 // targetID in the active combat for the room where uid is fighting.
 //
@@ -1302,6 +1324,13 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 	}
 
 	combat.RollInitiative(combatants, h.dice.Src())
+
+	// Fire exploration mode combat-start hook (REQ-EXP-39, REQ-EXP-40).
+	if combatMsgs := applyExploreModeOnCombatStart(playerSess, playerCbt, h); len(combatMsgs) > 0 {
+		for _, msg := range combatMsgs {
+			h.pushMessageToUID(playerSess.UID, msg)
+		}
+	}
 
 	var scriptMgr *scripting.Manager
 	var zoneID string
@@ -2175,6 +2204,13 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
 	combat.RollInitiative(combatants, h.dice.Src())
+
+	// Fire exploration mode combat-start hook (REQ-EXP-39, REQ-EXP-40).
+	if combatMsgs := applyExploreModeOnCombatStart(sess, playerCbt, h); len(combatMsgs) > 0 {
+		for _, msg := range combatMsgs {
+			h.pushMessageToUID(sess.UID, msg)
+		}
+	}
 
 	var scriptMgr *scripting.Manager
 	var zoneID string

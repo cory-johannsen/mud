@@ -7,12 +7,15 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 
+	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // newExploreSvc builds a minimal GameServiceServer for applyExploreModeOnEntry tests.
@@ -311,4 +314,81 @@ func TestExploreMode_PokeAround_FactionContext_ReturnsFactOrNil(t *testing.T) {
 	msgs2 := svc2.ApplyExploreModeOnEntry("u_pa_fact2", sess2, room)
 	require.NotEmpty(t, msgs2)
 	assert.Contains(t, msgs2[0], "Crimson Hand")
+}
+
+// addTestShield equips a shield in the off-hand slot of sess.LoadoutSet's active preset.
+func addTestShield(t *testing.T, sess *session.PlayerSession) {
+	t.Helper()
+	if sess.LoadoutSet == nil {
+		sess.LoadoutSet = inventory.NewLoadoutSet()
+	}
+	preset := sess.LoadoutSet.ActivePreset()
+	require.NotNil(t, preset, "active preset must not be nil")
+	shieldDef := &inventory.WeaponDef{
+		ID:                  "test_shield",
+		Name:                "Test Shield",
+		Kind:                inventory.WeaponKindShield,
+		DamageDice:          "1d4",
+		DamageType:          "bludgeoning",
+		ProficiencyCategory: "simple_weapons",
+		Rarity:              "salvage",
+	}
+	err := preset.EquipOffHand(shieldDef)
+	require.NoError(t, err, "equipping shield must not error")
+}
+
+// TestExploreMode_HoldGround_ShieldEquipped_AppliesShieldRaised verifies REQ-EXP-11.
+//
+// Precondition: player has Hold Ground mode set and a shield in the off-hand slot.
+// Postcondition: shield_raised condition is applied; ACMod is +2; message is returned.
+func TestExploreMode_HoldGround_ShieldEquipped_AppliesShieldRaised(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	sess := addTestPlayer(t, h.sessions, "u_hg_shield", "room_hg")
+	sess.ExploreMode = session.ExploreModeHoldGround
+	sess.Conditions = condition.NewActiveSet()
+	addTestShield(t, sess)
+
+	// Register shield_raised condition in the handler's condition registry.
+	h.condRegistry.Register(&condition.ConditionDef{
+		ID:           "shield_raised",
+		Name:         "Shield Raised",
+		DurationType: "permanent",
+		MaxStacks:    0,
+	})
+
+	cbt := &combat.Combatant{ID: sess.UID, Kind: combat.KindPlayer, Initiative: 10}
+	msgs := ApplyExploreModeOnCombatStartForTest(sess, cbt, h)
+	require.NotEmpty(t, msgs, "expected a message for Hold Ground with shield")
+	require.Contains(t, msgs[0], "Hold Ground")
+	require.True(t, sess.Conditions.Has("shield_raised"), "shield_raised condition must be applied")
+	require.Equal(t, 2, cbt.ACMod, "ACMod must be +2 for shield raised")
+}
+
+// TestExploreMode_HoldGround_NoShield_Silent verifies REQ-EXP-12.
+//
+// Precondition: player has Hold Ground mode set and no shield equipped.
+// Postcondition: no messages returned; ACMod remains 0.
+func TestExploreMode_HoldGround_NoShield_Silent(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	sess := addTestPlayer(t, h.sessions, "u_hg_noshield", "room_hg2")
+	sess.ExploreMode = session.ExploreModeHoldGround
+
+	cbt := &combat.Combatant{ID: sess.UID, Kind: combat.KindPlayer}
+	msgs := ApplyExploreModeOnCombatStartForTest(sess, cbt, h)
+	require.Empty(t, msgs, "no message when no shield equipped")
+	require.Equal(t, 0, cbt.ACMod, "ACMod must remain 0 with no shield")
+}
+
+// TestExploreMode_LayLow_ClearedAtCombatStart verifies REQ-EXP-40.
+//
+// Precondition: player has Lay Low mode set.
+// Postcondition: ExploreMode is cleared to "" at combat start.
+func TestExploreMode_LayLow_ClearedAtCombatStart(t *testing.T) {
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+	sess := addTestPlayer(t, h.sessions, "u_ll_combat", "room_ll2")
+	sess.ExploreMode = session.ExploreModeLayLow
+
+	cbt := &combat.Combatant{ID: sess.UID, Kind: combat.KindPlayer}
+	ApplyExploreModeOnCombatStartForTest(sess, cbt, h)
+	require.Equal(t, "", sess.ExploreMode, "Lay Low must be cleared at combat start")
 }
