@@ -1,0 +1,19 @@
+id: chip_doc_aloha
+name: Sable "Steady-Hand" Voss
+npc_type: chip_doc
+description: >
+  A quiet technician who arrived in the neutral zone three growing seasons ago
+  and never left. Sable works from the clinic wing of the converted school,
+  patching neural interfaces between shifts tending the farm collective's
+  irrigation sensors. Her tools are few but immaculate, and her hands do not
+  shake. She charges a flat fee, explains every step before she begins, and
+  will turn down the work if she thinks the risk is too high. Travelers come
+  from two zones away for her steady hands.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14

@@ -429,7 +429,9 @@ zone:
       more than currency in the wastes.
 
       '
-    exits: []
+    exits:
+    - direction: west
+      target: aloha_market_hall
     map_x: -6
     map_y: -2
     properties:
@@ -538,3 +540,175 @@ zone:
     properties:
       lighting: dim
       atmosphere: solemn
+  - id: aloha_farm_collective
+    title: Community Farm Collective
+    description: |
+      Raised beds and hoop houses fill the former school field, tended
+      by a rotating crew of volunteers who divide the harvest by labor
+      share. Rows of kale, chard, and root vegetables stretch toward
+      a rain-grey horizon. A hand-lettered sign at the gate reads
+      "Take what you need. Leave what you can." Someone has added
+      "— or else" in a different hand.
+    exits:
+    - direction: north
+      target: aloha_park
+    - direction: west
+      target: aloha_orchard_road
+    map_x: -4
+    map_y: 6
+    properties:
+      lighting: overcast
+      atmosphere: productive
+  - id: aloha_solar_array
+    title: Solar Array Field
+    description: |
+      Rows of salvaged photovoltaic panels tilt toward the pale sky on
+      hand-welded iron frames. Cables snake across the gravel toward a
+      converted storage unit that houses the battery bank. A lone
+      technician in worn overalls makes her daily rounds with a multimeter,
+      logging output numbers in a grease-stained notebook. The hum of
+      charging capacitors is oddly calming.
+    exits:
+    - direction: north
+      target: aloha_stables
+    - direction: east
+      target: aloha_warehouse_district
+    map_x: -8
+    map_y: 4
+    properties:
+      lighting: overcast
+      atmosphere: industrious
+  - id: aloha_trade_road_east
+    title: Trade Road East
+    description: |
+      A wide gravel road runs east from the bazaar toward the outer
+      perimeter fence. Merchant carts rut the surface into parallel
+      grooves. Roadside vendors have claimed the verges with folding
+      tables and rope-strung tarps, selling everything from boot
+      leather to salvaged circuit boards. The foot traffic never
+      quite stops, even after dark.
+    exits:
+    - direction: west
+      target: aloha_the_bazaar
+    map_x: 0
+    map_y: 2
+    properties:
+      lighting: overcast
+      atmosphere: busy
+  - id: aloha_water_tower
+    title: Old Water Tower
+    description: |
+      A rusted steel water tower looms over the western edge of the
+      neutral zone, its legs wrapped in razor wire to deter climbers.
+      From the ground, the tank looks intact — a small miracle. A
+      hand-painted sign near the base announces water pressure hours.
+      Children dare each other to touch the rusted ladder rungs before
+      fleeing back to safer ground.
+    exits:
+    - direction: north
+      target: aloha_sentry_post_bravo
+    map_x: -10
+    map_y: 2
+    properties:
+      lighting: overcast
+      atmosphere: utilitarian
+  - id: aloha_school_shelter
+    title: Converted School Shelter
+    description: |
+      A former elementary school has been converted into the neutral
+      zone's primary shelter. Classrooms serve as dormitories, the
+      gymnasium as a communal dining hall, and the library as a quiet
+      room where exhausted travelers can simply sit in peace. The
+      hallways still bear faded alphabet murals and crayon drawings
+      behind cracked glass frames. The place feels almost safe.
+    exits:
+    - direction: north
+      target: aloha_message_board_plaza
+    - direction: west
+      target: aloha_school_yard
+    - direction: east
+      target: aloha_clinic_wing
+    map_x: -4
+    map_y: -4
+    danger_level: safe
+    properties:
+      lighting: bright
+      atmosphere: peaceful
+  - id: aloha_school_yard
+    title: School Yard
+    description: |
+      The old schoolyard still has its chain-link fence and a pair of
+      basketball hoops, nets long gone. Kids kick a deflated ball
+      across the cracked blacktop while adults watch from the fence
+      line. The open space doubles as a gathering point for community
+      announcements and, on clear nights, outdoor movie screenings
+      projected against the gymnasium wall.
+    exits:
+    - direction: east
+      target: aloha_school_shelter
+    map_x: -6
+    map_y: -4
+    danger_level: safe
+    properties:
+      lighting: bright
+      atmosphere: peaceful
+  - id: aloha_clinic_wing
+    title: Clinic Wing
+    description: |
+      A pair of classrooms at the school's east end have been
+      partitioned into examination bays with hanging curtains. The
+      smell of antiseptic cuts through the dusty air. A quiet
+      technician works at a folding table near the window, a
+      magnifying headlamp strapped to her forehead, delicately
+      probing a neural interface board between growing-season calls.
+      She patches implants for a fair fee and asks no questions.
+    exits:
+    - direction: west
+      target: aloha_school_shelter
+    map_x: -2
+    map_y: -4
+    danger_level: safe
+    spawns:
+    - template: chip_doc_aloha
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: bright
+      atmosphere: peaceful
+  - id: aloha_market_hall
+    title: Community Market Hall
+    description: |
+      A covered pavilion — roofed with salvaged corrugated steel and
+      open on three sides — serves as the zone's all-weather market.
+      Permanent stalls with plywood counters line the interior. The
+      selection is modest compared to the bazaar but the prices are
+      posted plainly in chalk, and there is none of the frantic
+      haggling. A community board near the entrance lists what goods
+      are most needed that week.
+    exits:
+    - direction: east
+      target: aloha_water_station
+    map_x: -8
+    map_y: -2
+    properties:
+      lighting: overcast
+      atmosphere: orderly
+  - id: aloha_orchard_road
+    title: Orchard Road
+    description: |
+      A tree-lined road winds between remnant orchard rows — apple,
+      pear, and plum — planted by a neighborhood association before
+      the collapse. Most trees still bear fruit in season. Volunteers
+      prune and water them by rota. In autumn the road is fragrant
+      with windfall fruit and the sound of bees. Even in the grey
+      season it offers a rare sense of continuity.
+    exits:
+    - direction: east
+      target: aloha_farm_collective
+    - direction: north
+      target: aloha_warehouse_district
+    map_x: -8
+    map_y: 6
+    properties:
+      lighting: dappled
+      atmosphere: peaceful
