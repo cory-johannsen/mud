@@ -14,6 +14,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/downtime"
 	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
@@ -58,6 +59,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	factionRepRepository := postgres.NewFactionRepRepository(pgxpoolPool)
 	characterMaterialsRepository := postgres.NewCharacterMaterialsRepository(pgxpoolPool)
 	characterDowntimeRepository := postgres.NewCharacterDowntimeRepository(pgxpoolPool)
+	characterDowntimeQueueRepository := postgres.NewCharacterDowntimeQueueRepository(pgxpoolPool)
 	storageDeps := gameserver.StorageDeps{
 		CharRepo:               characterRepository,
 		AccountRepo:            accountRepoAdapter,
@@ -78,6 +80,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		FactionRepRepo:         factionRepRepository,
 		MaterialRepo:           characterMaterialsRepository,
 		DowntimeRepo:           characterDowntimeRepository,
+		DowntimeQueueRepo:      characterDowntimeQueueRepository,
 	}
 	worldDir := cfg.ZonesDir
 	manager, err := world.NewManagerFromDir(worldDir, logger)
@@ -205,6 +208,11 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	if err != nil {
 		return nil, fmt.Errorf("loading recipe registry: %w", err)
 	}
+	// Load downtime queue limit registry (REQ-DTQ-15: missing file is fatal).
+	downtimeQueueLimitRegistry, err := downtime.LoadDowntimeQueueLimitRegistry("content/downtime_queue_limits.yaml")
+	if err != nil {
+		return nil, fmt.Errorf("loading downtime queue limits: %w", err)
+	}
 	contentDeps := gameserver.ContentDeps{
 		WorldMgr:             manager,
 		NpcMgr:               npcManager,
@@ -232,8 +240,9 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		SubstanceRegistry:    substanceRegistry,
 		FactionRegistry:      factionRegistry,
 		FactionConfig:        factionConfig,
-		MaterialRegistry:     materialRegistry,
-		RecipeRegistry:       recipeRegistry,
+		MaterialRegistry:           materialRegistry,
+		RecipeRegistry:             recipeRegistry,
+		DowntimeQueueLimitRegistry: downtimeQueueLimitRegistry,
 	}
 	sessionManager := gameserver.NewSessionManager()
 	worldHandler := gameserver.NewWorldHandlerProvider(manager, sessionManager, npcManager, clock, roomEquipmentManager, registry)

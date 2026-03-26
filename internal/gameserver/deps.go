@@ -2,11 +2,12 @@ package gameserver
 
 import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
-	"github.com/cory-johannsen/mud/internal/game/crafting"
-	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/downtime"
+	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -49,6 +50,9 @@ type StorageDeps struct {
 	// DowntimeRepo persists active downtime state for characters across sessions.
 	// May be nil when the downtime feature is not yet configured.
 	DowntimeRepo CharacterDowntimeRepository
+	// DowntimeQueueRepo manages the per-character downtime activity queue.
+	// May be nil when the downtime queue feature is not yet configured.
+	DowntimeQueueRepo DowntimeQueueRepo
 }
 
 // ContentDeps groups all content/world dependencies for GameServiceServer.
@@ -96,6 +100,9 @@ type ContentDeps struct {
 	// QuestRegistry holds all quest definitions loaded at startup.
 	// May be nil when the quest feature is not yet configured.
 	QuestRegistry quest.QuestRegistry
+	// DowntimeQueueLimitRegistry holds per-tier/per-level queue slot limits.
+	// May be nil when the downtime queue feature is not yet configured.
+	DowntimeQueueLimitRegistry *downtime.DowntimeQueueLimitRegistry
 }
 
 // HandlerDeps groups all handler dependencies for GameServiceServer.

@@ -25,6 +25,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/downtime"
 	"github.com/cory-johannsen/mud/internal/game/faction"
 	"github.com/cory-johannsen/mud/internal/game/focuspoints"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -304,6 +305,9 @@ type GameServiceServer struct {
 	// downtimeQueueRepo manages the per-character downtime activity queue.
 	// May be nil (queue features are disabled if not set).
 	downtimeQueueRepo DowntimeQueueRepo
+	// downtimeQueueLimitReg holds per-tier/per-level queue slot limits.
+	// May be nil (queue limit lookups are skipped if not set).
+	downtimeQueueLimitReg *downtime.DowntimeQueueLimitRegistry
 }
 
 // CharacterDowntimeRepository persists active downtime state for characters.
@@ -444,6 +448,12 @@ func NewGameServiceServer(
 	}
 	if storage.DowntimeRepo != nil {
 		s.downtimeRepo = storage.DowntimeRepo
+	}
+	if storage.DowntimeQueueRepo != nil {
+		s.downtimeQueueRepo = storage.DowntimeQueueRepo
+	}
+	if content.DowntimeQueueLimitRegistry != nil {
+		s.downtimeQueueLimitReg = content.DowntimeQueueLimitRegistry
 	}
 	// gameHourFn defaults to reading from calendar if available. REQ-NB-16.
 	s.gameHourFn = func() int {
@@ -966,6 +976,15 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			} else {
 				sess.Jobs = loadedJobs
 				sess.ActiveJobID = loadedActiveJobID
+			}
+			// Compute JobTier and DowntimeQueueLimit from the active job (REQ-DTQ-13/14).
+			if s.jobRegistry != nil && sess.ActiveJobID != "" {
+				if activeJob, ok := s.jobRegistry.Job(sess.ActiveJobID); ok {
+					sess.JobTier = activeJob.Tier
+				}
+			}
+			if s.downtimeQueueLimitReg != nil {
+				sess.DowntimeQueueLimit = s.downtimeQueueLimitReg.Lookup(sess.JobTier, sess.Level)
 			}
 			// Grant starting kit on first login.
 			if s.loadoutsDir != "" {
