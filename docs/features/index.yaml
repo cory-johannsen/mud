@@ -297,7 +297,7 @@ features:
 
   - slug: downtime
     name: Downtime
-    status: planned
+    status: done
     priority: 288
     category: world
     file: docs/features/downtime.md

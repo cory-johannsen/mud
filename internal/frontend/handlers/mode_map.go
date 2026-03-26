@@ -197,9 +197,9 @@ const mapModeGray = "\033[37m"
 // mapPrompt returns the prompt string for the current map mode state.
 func mapPrompt(selectedZone string, selectedZoneName, dangerLevel string) string {
 	if selectedZone != "" && selectedZoneName != "" {
-		return fmt.Sprintf("[MAP] Selected: %s (%s)  t=travel  q=exit", selectedZoneName, dangerLevel)
+		return fmt.Sprintf("[MAP] Selected: %s (%s)  t=travel  q=exit> ", selectedZoneName, dangerLevel)
 	}
-	return "[MAP] z=zone  w=world  <num/name>=select  t=travel  q=exit"
+	return "[MAP] z=zone  w=world  <num/name>=select  t=travel  q=exit> "
 }
 
 // renderMapConsole renders the map response into a terminal string for the console region.
