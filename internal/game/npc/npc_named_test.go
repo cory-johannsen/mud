@@ -1,6 +1,7 @@
 package npc_test
 
 import (
+	"bytes"
 	"os"
 	"testing"
 
@@ -117,4 +118,13 @@ func TestProperty_NamedNPCs_NpcRoleIsMerchant(t *testing.T) {
 		assert.Equal(rt, "merchant", tmpl.NpcRole,
 			"all named NPCs must have npc_role: merchant (REQ-NN-2)")
 	})
+}
+
+func TestNamedNPC_AllThree_HaveQuestGiverComment(t *testing.T) {
+	for _, filename := range []string{"wayne_dawg.yaml", "jennifer_dawg.yaml", "dwayne_dawg.yaml"} {
+		data, err := os.ReadFile("../../../content/npcs/" + filename)
+		require.NoError(t, err)
+		assert.True(t, bytes.Contains(data, []byte("# quest_giver: pending quests feature")),
+			"content/npcs/%s must contain '# quest_giver: pending quests feature' (REQ-NN-5)", filename)
+	}
 }
