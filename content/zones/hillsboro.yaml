@@ -559,7 +559,7 @@ zone:
     exits:
     - direction: east
       target: hills_tanasbourne_ruins
-    map_x: 2
+    map_x: 3
     map_y: -2
     spawns:
     - template: silicon_serf
@@ -753,7 +753,7 @@ zone:
     - direction: east
       target: hills_waystation_shelter
     map_x: 2
-    map_y: -2
+    map_y: -3
     properties:
       lighting: dim
       atmosphere: quiet
@@ -787,7 +787,7 @@ zone:
     exits:
     - direction: west
       target: hills_waystation
-    map_x: 4
+    map_x: 5
     map_y: -2
     spawns:
     - template: chip_doc_hillsboro
@@ -808,7 +808,7 @@ zone:
     exits:
     - direction: west
       target: hills_waystation_yard
-    map_x: 4
+    map_x: 5
     map_y: -4
     properties:
       lighting: overcast

@@ -547,7 +547,7 @@ zone:
     exits:
     - direction: west
       target: lo_country_club
-    map_x: 4
+    map_x: 5
     map_y: 4
     properties:
       lighting: interior

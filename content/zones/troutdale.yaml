@@ -672,7 +672,7 @@ zone:
       target: trout_truck_stop
     - direction: north
       target: trout_neutral_lobby
-    map_x: 2
+    map_x: 3
     map_y: -2
     spawns:
     - template: troutdale_job_trainer
@@ -776,7 +776,7 @@ zone:
       target: trout_sandy_river
     - direction: east
       target: trout_river_trail
-    map_x: 4
+    map_x: 5
     map_y: -2
     spawns:
     - template: gorge_runner

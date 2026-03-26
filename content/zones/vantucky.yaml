@@ -728,7 +728,7 @@ zone:
       target: vantucky_164th_ave
     - direction: north
       target: vantucky_abandoned_mall
-    map_x: 8
+    map_x: 9
     map_y: 2
     spawns:
     - template: vantucky_gang_enforcer
@@ -759,7 +759,7 @@ zone:
       target: vantucky_east_side
     - direction: west
       target: vantucky_shooting_range
-    map_x: 8
+    map_x: 9
     map_y: 0
     spawns:
     - template: vantucky_gang_enforcer
@@ -812,7 +812,7 @@ zone:
     exits:
     - direction: west
       target: vantucky_fishers_landing
-    map_x: 6
+    map_x: 7
     map_y: -4
     spawns:
     - template: highway_bandit

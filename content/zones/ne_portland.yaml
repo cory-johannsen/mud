@@ -715,7 +715,7 @@ zone:
       target: ne_alberta_street
     - direction: north
       target: ne_prescott_street
-    map_x: 2
+    map_x: 3
     map_y: -2
     spawns:
     - template: ne_scavenger
@@ -796,7 +796,7 @@ zone:
       target: ne_killingsworth
     - direction: north
       target: ne_columbia_blvd
-    map_x: 0
+    map_x: 1
     map_y: -4
     spawns:
     - template: bike_courier

@@ -859,7 +859,7 @@ zone:
     exits:
     - direction: west
       target: couve_chkalov_drive
-    map_x: 8
+    map_x: 9
     map_y: -8
     spawns:
     - template: couve_gang_enforcer

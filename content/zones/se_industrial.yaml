@@ -709,7 +709,7 @@ zone:
       target: sei_neutral_loading_dock
     - direction: south
       target: sei_neutral_break_room
-    map_x: 2
+    map_x: 3
     map_y: 4
     properties:
       lighting: fluorescent

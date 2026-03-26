@@ -809,7 +809,7 @@ zone:
     - direction: south
       target: ri_gravel_pit_deep
     map_x: -8
-    map_y: 0
+    map_y: 1
     spawns:
     - template: ross_salvager
       count: 1

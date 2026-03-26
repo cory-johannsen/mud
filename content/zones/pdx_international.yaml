@@ -791,7 +791,7 @@ zone:
     exits:
     - direction: west
       target: pdx_control_tower
-    map_x: 202
+    map_x: 203
     map_y: 30
     spawns:
     - template: rogue_security
