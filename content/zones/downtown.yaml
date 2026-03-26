@@ -160,6 +160,7 @@ zone:
       atmosphere: fog
   - id: transit_mall
     title: Transit Mall
+    core: true
     description: 'The once-bustling transit corridor is silent. Overhead wires hang
 
       in tangled loops. A MAX light rail car sits derailed and gutted,
@@ -181,11 +182,19 @@ zone:
       target: beav_canyon_road_east
     map_x: -2
     map_y: 0
+    spawns:
+    - template: ganger
+      count: 1
+      respawn_after: 5m
+    - template: scavenger
+      count: 1
+      respawn_after: 6m
     properties:
       lighting: dim
       atmosphere: desolate
   - id: director_park
     title: Director Park Wasteland
+    core: true
     description: 'The geometric water feature is dry and filled with debris.
 
       The glass canopy overhead is miraculously intact, though stained
@@ -204,6 +213,13 @@ zone:
       target: lo_checkpoint_north
     map_x: -2
     map_y: 2
+    spawns:
+    - template: ganger
+      count: 1
+      respawn_after: 5m
+    - template: scavenger
+      count: 1
+      respawn_after: 6m
     properties:
       lighting: sheltered
       atmosphere: dry
@@ -722,6 +738,7 @@ zone:
   # Additional sketchy rooms
   - id: dt_steel_bridge_west
     title: Steel Bridge West Approach
+    core: true
     description: |
       The Steel Bridge's double-deck swing span is frozen in a half-open position,
       leaving a gap that can only be crossed on a narrow steel catwalk someone bolted
@@ -745,6 +762,7 @@ zone:
       atmosphere: wind
   - id: dt_naito_parkway
     title: Naito Parkway
+    core: true
     description: |
       The old riverside highway is cracked and heaved by tree roots, but wide enough
       to still feel like a road. It connects the waterfront to downtown in a straight
