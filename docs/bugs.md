@@ -4,11 +4,11 @@
 
 ### BUG-24: StripANSI passes through incomplete ANSI escape sequences
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** `StripANSI` does not strip partial ANSI escape sequences (e.g. a trailing `\x1b[` with no terminator), causing `WriteConsole` on headless connections to emit raw escape bytes when the message contains an unterminated sequence.
 **Steps:** `TestHeadlessConn_WriteConsole_NeverEmitsANSI` rapid property test reproduces: draw a string ending in `\x1b[`, call `WriteConsole`, observe `\x1b[` in output.
-**Fix:**
+**Fix:** When the inner loop reaches end-of-string without finding `m`, set `i = j` (skip the entire partial sequence) instead of falling through and emitting the raw bytes.
 
 ### BUG-4: Room section does not display zone name
 **Severity:** medium
