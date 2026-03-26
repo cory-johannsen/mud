@@ -20,6 +20,7 @@ zone:
       the Kingdom of Hillsboro. Blue-and-white banners snap in the wind.
 
       '
+    danger_level: safe
     exits:
     - direction: east
       target: aloha_tv_highway_west
@@ -52,6 +53,7 @@ zone:
       sheet-metal arch above the gate. Beyond lies the tech campus heartland.
 
       '
+    danger_level: safe
     exits:
     - direction: east
       target: hills_tv_highway_east
@@ -65,6 +67,9 @@ zone:
     - template: intel_guard
       count: 2
       respawn_after: 5m
+    - template: hillsboro_guard
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: torchlight
       atmosphere: guarded
@@ -79,6 +84,7 @@ zone:
       on either side, their corporate logos faded but still legible.
 
       '
+    danger_level: safe
     exits:
     - direction: east
       target: hills_campus_gate
@@ -94,6 +100,9 @@ zone:
     - template: silicon_serf
       count: 1
       respawn_after: 5m
+    - template: hillsboro_hireling
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: quiet
@@ -103,13 +112,14 @@ zone:
 
       windowless concrete walls need no reinforcement. Cooling towers
 
-      still hum with power drawn from the solar farms. Inside, rack after
+      still hum with power drawn from the solar farm. Inside, rack after
 
       rack of dead servers line corridors turned into throne rooms and
 
       armories. This is the seat of the Kingdom''s power.
 
       '
+    core: true
     exits:
     - direction: east
       target: hills_campus_boulevard
@@ -119,6 +129,8 @@ zone:
       target: hills_the_foundry
     - direction: down
       target: hills_power_station
+    - direction: west
+      target: hills_fortress_core
     map_x: -6
     map_y: 0
     spawns:
@@ -141,6 +153,7 @@ zone:
       drone. LED strips cast everything in pale blue light.
 
       '
+    core: true
     exits:
     - direction: south
       target: hills_server_keep
@@ -166,6 +179,7 @@ zone:
       solar reserves. The archivists treat every page as sacred.
 
       '
+    danger_level: safe
     exits: []
     map_x: 202
     map_y: 0
@@ -309,11 +323,16 @@ zone:
       A knight stands watch from a second-floor balcony.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: hills_tanasbourne_ruins
     map_x: 4
     map_y: -4
+    spawns:
+    - template: hillsboro_banker
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: bustling
@@ -330,6 +349,7 @@ zone:
       circuit boards and solar-charged batteries.
 
       '
+    danger_level: safe
     exits:
     - direction: north
       target: hills_campus_gate
@@ -337,6 +357,10 @@ zone:
       target: hills_amberglen_plaza
     map_x: -2
     map_y: 2
+    spawns:
+    - template: hillsboro_job_trainer
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: overcast
       atmosphere: trade
@@ -468,6 +492,7 @@ zone:
       the ruins of a landscaped courtyard.
 
       '
+    danger_level: safe
     exits:
     - direction: north
       target: hills_orenco_station
@@ -533,6 +558,8 @@ zone:
     exits:
     - direction: north
       target: hills_tv_highway_east
+    - direction: east
+      target: hills_waystation
     map_x: 0
     map_y: 2
     spawns:
@@ -542,18 +569,188 @@ zone:
     - template: hillsboro_healer
       count: 1
       respawn_after: 0s
-    - template: hillsboro_job_trainer
-      count: 1
-      respawn_after: 0s
-    - template: hillsboro_banker
-      count: 1
-      respawn_after: 0s
-    - template: hillsboro_guard
-      count: 1
-      respawn_after: 0s
-    - template: hillsboro_hireling
-      count: 1
-      respawn_after: 0s
     properties:
       lighting: firelight
       atmosphere: guarded
+  - id: hills_fortress_core
+    title: Knight Fortress Core
+    description: |
+      The inner sanctum of the Kingdom's military power. Thick blast doors
+      salvaged from a decommissioned data center seal the entrance. Inside,
+      elite knights in the heaviest server-rack armor stand motionless at
+      their posts. The floor is polished concrete, scrubbed daily by serfs
+      who are not permitted to raise their eyes. Every surface whispers of
+      controlled violence.
+    core: true
+    exits:
+    - direction: east
+      target: hills_server_keep
+    - direction: north
+      target: hills_armory_hall
+    map_x: -8
+    map_y: 0
+    spawns:
+    - template: hills_fortress_sentinel
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: torchlight
+      atmosphere: military
+  - id: hills_armory_hall
+    title: Armory Hall
+    description: |
+      Racks of salvaged weapons line every wall — rebar halberds, sharpened
+      server blades, and a few precious firearms kept under lock and chain.
+      Suits of server rack armor hang from ceiling hooks, each bearing the
+      crest of a knight who died in service to the Kingdom. The armorer,
+      a scarred woman with oil-blackened hands, works in silence at a forge
+      built from a repurposed UPS unit.
+    core: true
+    exits:
+    - direction: south
+      target: hills_fortress_core
+    map_x: -8
+    map_y: -2
+    spawns:
+    - template: hills_armory_warden
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: forge_glow
+      atmosphere: industrial
+  - id: hills_outer_fields_north
+    title: Outer Fields North
+    description: |
+      Reclaimed farmland stretches across what were once suburban back yards.
+      Raised beds made from salvaged lumber hold rows of kale, squash, and
+      legumes. A few scarecrows fashioned from old crash-test dummies keep
+      the crows away. The Kingdom's blue-and-white border markers stand at
+      the tree line to the north.
+    danger_level: safe
+    exits:
+    - direction: south
+      target: hills_tv_highway_east
+    - direction: west
+      target: hills_outer_fields_south
+    map_x: 0
+    map_y: -6
+    properties:
+      lighting: overcast
+      atmosphere: rural
+  - id: hills_outer_fields_south
+    title: Outer Fields South
+    description: |
+      A wide expanse of terraced growing fields follows the gentle slope
+      south of the highway. Irrigation channels dug by hand run between
+      the beds. Serfs in muddy boots move slowly between rows, tending
+      crops under the grey sky. A water tower converted to a guard post
+      overlooks the entire field.
+    danger_level: safe
+    exits:
+    - direction: east
+      target: hills_outer_fields_north
+    - direction: south
+      target: hills_amberglen_plaza
+    map_x: -2
+    map_y: -6
+    properties:
+      lighting: overcast
+      atmosphere: rural
+  - id: hills_east_road
+    title: East Road
+    description: |
+      A cracked two-lane road runs east from the Kingdom's border, flanked
+      by overgrown hedges and the ruins of strip malls. The tarmac here is
+      better maintained than most — Kingdom serfs patch the worst sections
+      to keep trade caravans moving. Faded mile markers have been repainted
+      with blue-and-white Kingdom symbols.
+    danger_level: safe
+    exits:
+    - direction: west
+      target: hills_tv_highway_east
+    - direction: north
+      target: hills_waystation
+    map_x: 2
+    map_y: 0
+    properties:
+      lighting: overcast
+      atmosphere: quiet
+  - id: hills_waystation
+    title: Waystation
+    description: |
+      A converted gas station serves as a neutral waypoint on the eastern
+      approach to the Kingdom. The canopy still stands, patched with sheet
+      metal and salvaged lumber. Beneath it, travelers rest on improvised
+      benches. The old convenience store has been stripped bare, its shelves
+      replaced with cots and a communal water barrel.
+    danger_level: safe
+    exits:
+    - direction: south
+      target: hills_east_road
+    - direction: west
+      target: hills_the_keep
+    - direction: north
+      target: hills_waystation_yard
+    - direction: east
+      target: hills_waystation_shelter
+    map_x: 2
+    map_y: -2
+    properties:
+      lighting: dim
+      atmosphere: quiet
+  - id: hills_waystation_yard
+    title: Waystation Yard
+    description: |
+      Behind the waystation, a fenced yard holds a tangle of salvage —
+      rusted vehicle frames, stacked lumber, coils of wire. A communal
+      fire pit occupies the center, ringed with mismatched chairs. The
+      smell of woodsmoke and engine oil hangs in the still air.
+    danger_level: safe
+    exits:
+    - direction: south
+      target: hills_waystation
+    - direction: east
+      target: hills_trading_post
+    map_x: 2
+    map_y: -4
+    properties:
+      lighting: firelight
+      atmosphere: quiet
+  - id: hills_waystation_shelter
+    title: Waystation Shelter
+    description: |
+      A back room of the old gas station has been converted into a clinic
+      and meeting space. Folding tables line the walls, covered with tools
+      and salvage. In the corner, a lean figure in a worn technician's
+      coat works over a neural interface chassis, tools moving with practiced
+      precision. A hand-painted sign reads: "IMPLANTS REMOVED — NO QUESTIONS."
+    danger_level: safe
+    exits:
+    - direction: west
+      target: hills_waystation
+    map_x: 4
+    map_y: -2
+    spawns:
+    - template: chip_doc_hillsboro
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: tense
+  - id: hills_trading_post
+    title: Trading Post
+    description: |
+      A converted auto repair shop serves as an informal trading floor for
+      travelers passing through the Kingdom's eastern approach. Goods are
+      spread on workbenches and hanging racks — dried food, salvage, clothing,
+      and the occasional piece of working electronics. A hand-lettered sign
+      above the bay door reads: "ALL SALES FINAL. NO WEAPONS DRAWN INSIDE."
+    danger_level: safe
+    exits:
+    - direction: west
+      target: hills_waystation_yard
+    map_x: 4
+    map_y: -4
+    properties:
+      lighting: overcast
+      atmosphere: trade

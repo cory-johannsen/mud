@@ -1,0 +1,48 @@
+id: hills_fortress_sentinel
+name: Fortress Sentinel
+description: An elite knight of the inner sanctum, armored from helm to boot in layered server-rack plating. These sentinels are chosen for size and absolute loyalty to the Kingdom's core.
+level: 5
+max_hp: 55
+ac: 18
+awareness: 8
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 18
+  quickness: 10
+  grit: 17
+  reasoning: 11
+  savvy: 10
+  flair: 9
+loot:
+  currency:
+    min: 60
+    max: 200
+  items:
+    - item: knight_tabard
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+    - item: server_rack_panel
+      chance: 0.25
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+resistances:
+  bludgeoning: 3
+  slashing: 3
+weapon:
+  - id: tactical_hatchet
+    weight: 2
+  - id: suburban_machete
+    weight: 2
+  - id: bayonet
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 2
+  - id: kevlar_vest
+    weight: 3

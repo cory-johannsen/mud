@@ -1,0 +1,47 @@
+id: hills_armory_warden
+name: Armory Warden
+description: A scarred veteran charged with protecting the Kingdom's weapon stores. The warden carries multiple blades and has the reflexes of someone who has survived more than one assassination attempt on the armory.
+level: 4
+max_hp: 48
+ac: 16
+awareness: 9
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 16
+  quickness: 14
+  grit: 15
+  reasoning: 12
+  savvy: 11
+  flair: 8
+loot:
+  currency:
+    min: 45
+    max: 160
+  items:
+    - item: circuit_board
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: server_rack_panel
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+resistances:
+  slashing: 2
+weapon:
+  - id: suburban_machete
+    weight: 3
+  - id: combat_knife
+    weight: 2
+  - id: bayonet
+    weight: 1
+armor:
+  - id: tactical_vest
+    weight: 3
+  - id: kevlar_vest
+    weight: 2

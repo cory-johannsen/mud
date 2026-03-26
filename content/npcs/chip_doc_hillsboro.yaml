@@ -1,0 +1,19 @@
+id: chip_doc_hillsboro
+name: Orrin "Null-Pointer" Skaggs
+npc_type: chip_doc
+description: >
+  A compact man in a technician's coat gone grey with age and grime, Orrin
+  has been pulling neural chips out of reluctant skulls since before the
+  Kingdom raised its first banner. He arrived at the waystation three seasons
+  ago and found the quiet to his liking. His tools are mismatched but
+  spotlessly clean. He charges a fair price, works fast, and never asks what
+  you did to end up chipped in the first place. The Kingdom tolerates him
+  because even knights sometimes need a bad decision quietly undone.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
