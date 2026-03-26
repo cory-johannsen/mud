@@ -154,6 +154,9 @@ func (s *GameServiceServer) handleTalk(uid string, req *gamev1.TalkRequest) (*ga
 
 	// Fallback: random placeholder dialog.
 	dialog := tmpl.QuestGiver.PlaceholderDialog
+	if len(dialog) == 0 {
+		return messageEvent(fmt.Sprintf("%s nods but says nothing.", inst.Name())), nil
+	}
 	line := dialog[rand.Intn(len(dialog))]
 	return messageEvent(fmt.Sprintf("%s says: %q", inst.Name(), line)), nil
 }
