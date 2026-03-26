@@ -32,5 +32,6 @@ var StorageProviders = wire.NewSet(
 	NewCalendarRepo,
 	NewCharacterProgressRepository,
 	NewQuestRepository,
+	NewCharacterDowntimeRepository,
 	wire.Bind(new(CharacterAbilityBoostsRepository), new(*PostgresCharacterAbilityBoostsRepository)),
 )

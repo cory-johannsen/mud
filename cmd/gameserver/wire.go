@@ -18,34 +18,34 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/gameserver"
-	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/scripting"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
 // App holds all top-level components for the gameserver binary.
 type App struct {
-	GRPCService  *gameserver.GameServiceServer
+	GRPCService   *gameserver.GameServiceServer
 	CombatHandler *gameserver.CombatHandler
-	RegenMgr     *gameserver.RegenManager
-	ZoneTickMgr  *gameserver.ZoneTickManager
-	AIRegistry   *ai.Registry
-	GameCalendar *gameserver.GameCalendar
-	Pool         *postgres.Pool
-	ScriptMgr    *scripting.Manager
-	WorldMgr     *world.Manager
-	NpcMgr       *npc.Manager
-	CombatEngine *combat.Engine
-	SessMgr      *session.Manager
-	AutomapRepo  *postgres.AutomapRepository
-	InvRegistry  *inventory.Registry
-	RespawnMgr   *npc.RespawnManager
-	RoomEquipMgr *inventory.RoomEquipmentManager
-	CharRepo     *postgres.CharacterRepository
-	ProgressRepo *postgres.CharacterProgressRepository
+	RegenMgr      *gameserver.RegenManager
+	ZoneTickMgr   *gameserver.ZoneTickManager
+	AIRegistry    *ai.Registry
+	GameCalendar  *gameserver.GameCalendar
+	Pool          *postgres.Pool
+	ScriptMgr     *scripting.Manager
+	WorldMgr      *world.Manager
+	NpcMgr        *npc.Manager
+	CombatEngine  *combat.Engine
+	SessMgr       *session.Manager
+	AutomapRepo   *postgres.AutomapRepository
+	InvRegistry   *inventory.Registry
+	RespawnMgr    *npc.RespawnManager
+	RoomEquipMgr  *inventory.RoomEquipmentManager
+	CharRepo      *postgres.CharacterRepository
+	ProgressRepo  *postgres.CharacterProgressRepository
 }
 
 // Initialize is the wire-generated injector for the gameserver binary.
@@ -87,6 +87,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		wire.Bind(new(gameserver.SpontaneousTechRepo), new(*postgres.CharacterSpontaneousTechRepository)),
 		wire.Bind(new(gameserver.InnateTechRepo), new(*postgres.CharacterInnateTechRepository)),
 		wire.Bind(new(gameserver.SpontaneousUsePoolRepo), new(*postgres.CharacterSpontaneousUsePoolRepository)),
+		wire.Bind(new(gameserver.CharacterDowntimeRepository), new(*postgres.CharacterDowntimeRepository)),
 		wire.Struct(new(gameserver.StorageDeps), "*"),
 		wire.Struct(new(gameserver.ContentDeps), "*"),
 		wire.Struct(new(gameserver.HandlerDeps), "*"),

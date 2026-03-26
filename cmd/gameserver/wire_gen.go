@@ -57,6 +57,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 	automapRepository := postgres.NewAutomapRepository(pgxpoolPool)
 	factionRepRepository := postgres.NewFactionRepRepository(pgxpoolPool)
 	characterMaterialsRepository := postgres.NewCharacterMaterialsRepository(pgxpoolPool)
+	characterDowntimeRepository := postgres.NewCharacterDowntimeRepository(pgxpoolPool)
 	storageDeps := gameserver.StorageDeps{
 		CharRepo:               characterRepository,
 		AccountRepo:            accountRepoAdapter,
@@ -76,6 +77,7 @@ func Initialize(ctx context.Context, cfg *AppConfig, clock *gameserver.GameClock
 		DetainedUntilRepo:      characterRepository,
 		FactionRepRepo:         factionRepRepository,
 		MaterialRepo:           characterMaterialsRepository,
+		DowntimeRepo:           characterDowntimeRepository,
 	}
 	worldDir := cfg.ZonesDir
 	manager, err := world.NewManagerFromDir(worldDir, logger)
