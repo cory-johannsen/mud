@@ -191,4 +191,4 @@
 **Category:** Character
 **Description:** The character selection screen omits the team field, so players cannot see which team a character belongs to before selecting it.
 **Steps:** Connect to the MUD and reach the character selection prompt; observe that listed characters show no team information.
-**Fix:** Added `[team]` to `FormatCharacterSummary` in `internal/frontend/handlers/character_flow.go`. Character list now shows e.g. `Zara — Lvl 1 ganger from the Northeast [gun]`.
+**Fix:** Added `[team]` to `FormatCharacterSummary` in `internal/frontend/handlers/character_flow.go`. Character list now shows e.g. `Zara — Lvl 1 ganger from the Northeast [gun]`. Also fixed `handleChar`: `CharacterSheetView.Team` was populated from `sess.Team` but then unconditionally overwritten by `s.jobRegistry.TeamFor(sess.Class)`, which returns `""` for jobs without an explicit team affiliation. Fixed to only overwrite when the registry returns a non-empty team.
