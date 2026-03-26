@@ -182,3 +182,13 @@
 **Description:** On the welcome/splash screen, the AK-47 ASCII art is truncated — the grip and clip at the bottom are not rendered; the machete blade looks correct but the guard and handle are disproportionately small.
 **Steps:** Connect to the MUD and observe the splash screen banner; note the AK-47 appears too short (missing lower body) and the machete guard/handle area is tiny relative to the blade.
 **Fix:** Added two rows to the AK-47 art showing the pistol grip and magazine/clip below the receiver. Widened the machete guard/handle from 3 chars to 10 chars for proportional visibility.
+
+## Character
+
+### BUG-23: Character selection list does not show character team
+**Severity:** medium
+**Status:** open
+**Category:** Character
+**Description:** The character selection screen omits the team field, so players cannot see which team a character belongs to before selecting it.
+**Steps:** Connect to the MUD and reach the character selection prompt; observe that listed characters show no team information.
+**Fix:**
