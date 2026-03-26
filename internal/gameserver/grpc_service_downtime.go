@@ -180,6 +180,30 @@ func (s *GameServiceServer) checkDowntimeCompletion(uid string) {
 	s.resolveDowntimeActivity(uid, sess)
 }
 
+// restoreDowntimeState loads persisted downtime state at login and restores or resolves it.
+//
+// Precondition: sess is a valid, newly-created PlayerSession; characterID > 0.
+// Postcondition: If an active downtime row exists in DB, restores busy state;
+//
+//	if the activity has elapsed, resolves it immediately.
+func (s *GameServiceServer) restoreDowntimeState(ctx context.Context, uid string, sess *session.PlayerSession, characterID int64) {
+	if s.downtimeRepo == nil || characterID <= 0 {
+		return
+	}
+	dtState, err := s.downtimeRepo.Load(ctx, characterID)
+	if err != nil || dtState == nil {
+		return
+	}
+	sess.DowntimeActivityID = dtState.ActivityID
+	sess.DowntimeBusy = true
+	sess.DowntimeMetadata = dtState.Metadata
+	sess.DowntimeCompletesAt = dtState.CompletesAt
+	if time.Now().After(dtState.CompletesAt) {
+		// Activity elapsed while offline — resolve immediately.
+		s.resolveDowntimeActivity(uid, sess)
+	}
+}
+
 // downtimeActivityDuration returns the real-time duration in minutes for an activity.
 // For activities with DurationMinutes==0 (computed at start), stubs are used pending Task 9.
 //

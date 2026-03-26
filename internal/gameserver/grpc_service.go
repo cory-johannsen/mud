@@ -428,6 +428,9 @@ func NewGameServiceServer(
 		// xpSvc is nil at construction time; wired later via SetXPService → SetQuestXPAwarder.
 		s.questSvc = quest.NewService(content.QuestRegistry, storage.QuestRepo, nil, s.invRegistry, s.charSaver)
 	}
+	if storage.DowntimeRepo != nil {
+		s.downtimeRepo = storage.DowntimeRepo
+	}
 	// gameHourFn defaults to reading from calendar if available. REQ-NB-16.
 	s.gameHourFn = func() int {
 		if s.calendar != nil {
@@ -1164,6 +1167,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			sess.FeatureChoices = stored
 		}
 	}
+
+	// REQ-DT-6: restore downtime state on reconnect
+	s.restoreDowntimeState(stream.Context(), uid, sess, characterID)
 
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{

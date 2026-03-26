@@ -46,6 +46,9 @@ type StorageDeps struct {
 	// QuestRepo persists player quest status and objective progress.
 	// May be nil when the quest feature is not yet configured.
 	QuestRepo quest.QuestRepository
+	// DowntimeRepo persists active downtime state for characters across sessions.
+	// May be nil when the downtime feature is not yet configured.
+	DowntimeRepo CharacterDowntimeRepository
 }
 
 // ContentDeps groups all content/world dependencies for GameServiceServer.
