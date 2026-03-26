@@ -608,6 +608,7 @@ zone:
       atmosphere: residential
   - id: vantucky_the_compound
     title: The Compound
+    danger_level: safe
     description: "The Vantucky militia's main compound. Spare and functional. They'll trade, train, and bank here — loyalty is assumed, not enforced."
     exits:
     - direction: south

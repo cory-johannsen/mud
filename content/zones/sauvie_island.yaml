@@ -577,6 +577,7 @@ zone:
       atmosphere: commercial
   - id: sauvie_farm_stand
     title: Farm Stand
+    danger_level: safe
     description: 'A roadside stand that evolved into a community hub. Folding tables with produce, herbs, and handmade goods. Calm enough that people leave their weapons at the door.'
     exits:
     - direction: north

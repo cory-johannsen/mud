@@ -672,6 +672,7 @@ zone:
       atmosphere: quiet
   - id: pdx_terminal_b
     title: Terminal B
+    danger_level: safe
     description: "A section of the airport terminal cordoned off from the main concourse. Chairs bolted to the floor, vending machines that still work, and people who've learned to wait."
     exits:
     - direction: north

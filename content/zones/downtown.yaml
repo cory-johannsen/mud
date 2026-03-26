@@ -460,7 +460,7 @@ zone:
     - direction: south
       target: dt_powell_books_ruin
     map_x: 4
-    map_y: -2
+    map_y: -1
     properties:
       lighting: dim
       atmosphere: inhabited
@@ -477,7 +477,7 @@ zone:
     - direction: east
       target: dt_chinatown_gate
     map_x: 4
-    map_y: -4
+    map_y: -5
     properties:
       lighting: shadow
       atmosphere: inhabited
@@ -678,7 +678,7 @@ zone:
       target: dt_salmon_street_springs
     - direction: south
       target: dt_esplanade_south
-    map_x: 4
+    map_x: 5
     map_y: -4
     properties:
       lighting: open
@@ -695,7 +695,7 @@ zone:
       target: dt_esplanade_north
     - direction: west
       target: dt_hawthorne_bridge_east
-    map_x: 4
+    map_x: 5
     map_y: -2
     properties:
       lighting: open
@@ -714,7 +714,7 @@ zone:
     - direction: north
       target: dt_sw_hills_road
     map_x: 2
-    map_y: -2
+    map_y: -3
     properties:
       lighting: overcast
       atmosphere: transit

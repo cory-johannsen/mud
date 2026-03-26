@@ -633,6 +633,7 @@ zone:
       atmosphere: chemical
   - id: sei_break_room
     title: Break Room
+    danger_level: safe
     description: 'A cinder-block room with folding chairs and a microwave that runs off a generator. Shift workers and traders share the same coffee and the same fatigue.'
     exits:
     - direction: west

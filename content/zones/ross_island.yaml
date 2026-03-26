@@ -650,6 +650,7 @@ zone:
       atmosphere: isolated
   - id: ross_dock_shack
     title: Dock Shack
+    danger_level: safe
     description: "A weathered shack at the island's main landing. Nets hang on the walls, a woodstove burns in the corner, and someone is always willing to do business."
     exits:
     - direction: west

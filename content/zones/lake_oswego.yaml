@@ -139,6 +139,7 @@ zone:
       atmosphere: bureaucratic
   - id: lo_the_commons
     title: The Commons
+    danger_level: safe
     description: 'A guarded shopping district occupies what was once an upscale
 
       outdoor mall. Boutiques have been repurposed as supply depots.
@@ -611,7 +612,7 @@ zone:
       its vault now serving as a records archive. The lobby is open
       to residents who can demonstrate proper standing. Information
       boards list community announcements, approved vendors, and
-      the week'"'"'s compliance schedule. A sense of deliberate calm
+      the week''s compliance schedule. A sense of deliberate calm
       pervades the space.
       '
     exits:

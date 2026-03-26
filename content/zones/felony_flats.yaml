@@ -731,7 +731,7 @@ zone:
       target: flats_82nd_ave
     - direction: north
       target: flats_enforcer_den
-    map_x: 2
+    map_x: 3
     map_y: 0
     spawns:
     - template: crack_house_dealer
@@ -759,7 +759,7 @@ zone:
       target: flats_crack_house_row
     - direction: east
       target: flats_rail_yard
-    map_x: 2
+    map_x: 3
     map_y: -2
     spawns:
     - template: flats_enforcer_captain
@@ -790,7 +790,7 @@ zone:
       target: flats_powell_blvd
     - direction: east
       target: flats_gas_station
-    map_x: -2
+    map_x: -3
     map_y: -2
     spawns:
     - template: strip_mall_scav
@@ -846,7 +846,7 @@ zone:
       target: flats_foster_road
     - direction: north
       target: flats_motel_row
-    map_x: -2
+    map_x: -3
     map_y: 2
     spawns:
     - template: motel_raider
@@ -902,7 +902,7 @@ zone:
     - direction: north
       target: flats_jade_district
     map_x: 2
-    map_y: -2
+    map_y: -3
     spawns:
     - template: felony_flats_banker
       count: 1

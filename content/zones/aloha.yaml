@@ -95,6 +95,7 @@ zone:
       atmosphere: busy
   - id: aloha_the_bazaar
     title: The Bazaar
+    danger_level: safe
     description: 'An open-air market sprawls across what was once a shopping center
 
       parking lot. Tarps and salvaged awnings stretch between poles, shading

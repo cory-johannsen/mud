@@ -578,6 +578,7 @@ zone:
       atmosphere: mud
   - id: couve_the_crossing
     title: The Crossing
+    danger_level: safe
     description: "A checkpoint building at the Washington end of the bridge. The Couve faction controls it, but they're practical: trade is welcome, trouble is not."
     exits:
     - direction: east
