@@ -254,6 +254,10 @@ func TestHandleUncurse_CritSuccess_ItemBecomesDefective(t *testing.T) {
 	assert.True(t, torso == nil || torso.Modifier == "defective",
 		"expected torso slot to be nil or defective after crit success, got: %v", torso)
 
+	// Item must have been moved to backpack (not simply deleted).
+	backpackItems := sess.Backpack.FindByItemDefID("cursed_vest")
+	assert.NotEmpty(t, backpackItems, "expected uncursed item to appear in backpack after crit success")
+
 	assert.True(t, strings.Contains(strings.ToLower(msg.Content), "removed") ||
 		strings.Contains(strings.ToLower(msg.Content), "curse"),
 		"expected 'removed' or 'curse' in message, got: %q", msg.Content)
@@ -274,11 +278,8 @@ func TestHandleUncurse_Failure_CreditsLostItemStays(t *testing.T) {
 
 	svc, sessMgr, npcMgr, uid := buildChipDocServer(t, roller)
 
-	// dc=20: roll=1 → 1 < 20-10=10 → crit failure. Use dc=15 to make it a plain failure.
-	// With roll=1, total=1 (no modifiers) → well below dc=15 → failure (not crit since 1 < 15-10=5? check).
-	// Per PF2e: crit failure = total <= dc-10. dc=15 → crit fail threshold = 5. roll=1 <= 5 → crit fail.
-	// Use dc=11 so crit-fail threshold is 1, but roll=1 exactly equals it → crit fail. Try dc=10.
-	// dc=10 → crit fail threshold = 0. roll=1 > 0 → plain failure. Use dc=10 for plain failure.
+	// dc=10: crit-fail threshold = dc-10 = 0. roll=1 > 0 → Failure (not CritFailure).
+	// total = 1 + 0 (no ability mod) + 0 (untrained) = 1 < 10 = plain Failure.
 	tmpl := chipDocTemplate("chip_doc_fail", "FailDoc", 100, 10)
 	_, err := npcMgr.Spawn(tmpl, "room_a")
 	require.NoError(t, err)
