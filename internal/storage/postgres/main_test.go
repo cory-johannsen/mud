@@ -328,6 +328,23 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			quantity      int    NOT NULL CHECK (quantity > 0),
 			PRIMARY KEY (character_id, material_id)
 		);
+
+		-- Migration 047
+		CREATE TABLE IF NOT EXISTS character_quests (
+			character_id BIGINT NOT NULL REFERENCES characters(id),
+			quest_id     TEXT   NOT NULL,
+			status       TEXT   NOT NULL,
+			completed_at TIMESTAMPTZ,
+			PRIMARY KEY (character_id, quest_id)
+		);
+
+		CREATE TABLE IF NOT EXISTS character_quest_progress (
+			character_id BIGINT NOT NULL REFERENCES characters(id),
+			quest_id     TEXT   NOT NULL,
+			objective_id TEXT   NOT NULL,
+			progress     INT    NOT NULL DEFAULT 0,
+			PRIMARY KEY (character_id, quest_id, objective_id)
+		);
 	`)
 	return err
 }
