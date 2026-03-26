@@ -20,6 +20,7 @@ zone:
       The mainland sprawls behind you to the southeast, smoke rising from the waterfront.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: sauvie_tollgate
@@ -30,6 +31,10 @@ zone:
       target: sauvie_farm_stand
     map_x: 0
     map_y: 0
+    spawns:
+    - template: harvest_guard
+      count: 1
+      respawn_after: 5m
     equipment:
     - item_id: zone_map
       max_count: 1
@@ -51,6 +56,7 @@ zone:
       Shell casings litter the pavement.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_bridge_south
@@ -76,6 +82,7 @@ zone:
       brown water toward the farms. The air smells of wet earth and woodsmoke.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_tollgate
@@ -87,6 +94,10 @@ zone:
       target: sauvie_irrigation_canal
     map_x: 0
     map_y: -4
+    spawns:
+    - template: sauvie_wild_dog
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: rural
@@ -101,6 +112,7 @@ zone:
       A weathered barn sits at the field''s edge, its red paint long faded to grey.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: sauvie_road
@@ -124,6 +136,7 @@ zone:
       The berries are small but sweet — a rare luxury.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: sauvie_the_orchard
@@ -149,9 +162,16 @@ zone:
       you can see oil lamps burning on a kitchen table covered in seed catalogs.
 
       '
-    exits: []
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: sauvie_trading_post
     map_x: 2
     map_y: -6
+    spawns:
+    - template: sauvie_survivalist
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: warm
       atmosphere: sheltered
@@ -166,9 +186,14 @@ zone:
       Chickens wander in and out through gaps in the siding.
 
       '
+    danger_level: sketchy
     exits: []
     map_x: 202
     map_y: 0
+    spawns:
+    - template: sauvie_wild_dog
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: dusty
@@ -183,6 +208,7 @@ zone:
       "STEAL AN EGG, LOSE A HAND — ISLAND COUNCIL."
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_berry_fields
@@ -210,9 +236,12 @@ zone:
       more than ammunition out here.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: sauvie_oak_island
+    - direction: south
+      target: sauvie_chicken_coop
     map_x: 0
     map_y: -12
     spawns:
@@ -235,6 +264,7 @@ zone:
       whoever controls the granary controls the food supply.
 
       '
+    danger_level: sketchy
     exits: []
     map_x: 202
     map_y: 2
@@ -256,6 +286,7 @@ zone:
       a crude waterwheel to power a grinding stone nearby.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: sauvie_road
@@ -265,6 +296,10 @@ zone:
       target: sauvie_collins_beach
     map_x: -2
     map_y: -4
+    spawns:
+    - template: sauvie_wild_dog
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: daylight
       atmosphere: humid
@@ -281,6 +316,7 @@ zone:
       the river trade — legitimate and otherwise.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: sauvie_irrigation_canal
@@ -306,6 +342,7 @@ zone:
       Cargo nets hang from a hand-cranked crane. The current is strong here.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_collins_beach
@@ -331,6 +368,7 @@ zone:
       This waterway connects the pirate cove to the interior fishing camps.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_irrigation_canal
@@ -340,6 +378,10 @@ zone:
       target: sauvie_sturgeon_lake
     map_x: -2
     map_y: -6
+    spawns:
+    - template: river_pirate
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: marshy
@@ -356,11 +398,16 @@ zone:
       is always watching the interior approaches.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_dairy_farm
     map_x: 0
     map_y: -14
+    spawns:
+    - template: sauvie_survivalist
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: marshy
@@ -377,6 +424,7 @@ zone:
       Guards patrol with dogs.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: sauvie_berry_fields
@@ -404,9 +452,12 @@ zone:
       beyond the tree line.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: sauvie_north_tip
+    - direction: south
+      target: sauvie_the_orchard
     map_x: 2
     map_y: -10
     spawns:
@@ -429,9 +480,12 @@ zone:
       run here, some of them enormous.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: sauvie_fishing_camp
+    - direction: south
+      target: sauvie_gilbert_river
     map_x: -2
     map_y: -8
     spawns:
@@ -452,6 +506,7 @@ zone:
       nets and argue over territory. The catch is shared — mostly.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_sturgeon_lake
@@ -477,11 +532,16 @@ zone:
       over approaching river traffic. On a clear day you can see Mount St. Helens.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_north_fields
     map_x: 2
     map_y: -12
+    spawns:
+    - template: sauvie_survivalist
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -498,6 +558,7 @@ zone:
       the farmers, the guards, and the river pirates.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: sauvie_road
@@ -507,16 +568,21 @@ zone:
       target: sauvie_farmhouse
     map_x: 0
     map_y: -6
+    spawns:
+    - template: harvest_guard
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: lantern
       atmosphere: commercial
   - id: sauvie_farm_stand
     title: Farm Stand
     description: 'A roadside stand that evolved into a community hub. Folding tables with produce, herbs, and handmade goods. Calm enough that people leave their weapons at the door.'
-    danger_level: safe
     exits:
     - direction: north
       target: sauvie_bridge_south
+    - direction: west
+      target: sauvie_neutral_farmhouse
     map_x: 0
     map_y: 2
     spawns:
@@ -535,3 +601,229 @@ zone:
     properties:
       lighting: natural
       atmosphere: peaceful
+  - id: sauvie_neutral_farmhouse
+    title: Neutral Farmhouse
+    description: 'A solidly built farmhouse sitting apart from the main road, claimed by
+
+      neither the island council nor the river pirates. Mismatched curtains
+
+      hang in the windows. A chalk mark on the door post signals it as neutral ground.
+
+      Travelers rest here without questions asked or answered.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: east
+      target: sauvie_farm_stand
+    - direction: north
+      target: sauvie_neutral_barn
+    - direction: down
+      target: sauvie_neutral_cellar
+    map_x: -2
+    map_y: 2
+    properties:
+      lighting: warm
+      atmosphere: neutral
+  - id: sauvie_neutral_barn
+    title: Neutral Farmhouse Barn
+    description: 'A well-maintained barn behind the neutral farmhouse. Stalls have been
+
+      converted into sleeping quarters with straw pallets and moth-eaten blankets.
+
+      Lanterns hang from the rafters. The smell of hay and old wood is oddly comforting.
+
+      Travelers and wanderers hole up here, swapping stories and supplies.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: south
+      target: sauvie_neutral_farmhouse
+    map_x: -2
+    map_y: 0
+    properties:
+      lighting: lantern
+      atmosphere: sheltered
+  - id: sauvie_neutral_cellar
+    title: Neutral Farmhouse Cellar
+    description: 'A cool, earthen-walled cellar beneath the farmhouse. Shelves hold
+
+      preserved food, candles, and medical supplies. A small work table
+
+      in the corner serves as a surgery of sorts — a woman with calloused
+
+      hands and a steady eye handles the island''s quieter medical needs.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: up
+      target: sauvie_neutral_farmhouse
+    map_x: -2
+    map_y: 3
+    spawns:
+    - template: chip_doc_sauvie_island
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: candlelight
+      atmosphere: hushed
+  - id: sauvie_south_fields
+    title: South Fields
+    description: 'Fallow fields stretch along the southern edge of the island, overgrown
+
+      with thistle and volunteer wheat. Rusted farm equipment sinks slowly into
+
+      the earth. The wind off the channel carries salt and rot. A few figures
+
+      move between the rows — scavenging what they can before the guards notice.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: north
+      target: sauvie_farm_stand
+    map_x: 0
+    map_y: 4
+    spawns:
+    - template: sauvie_survivalist
+      count: 1
+      respawn_after: 5m
+    - template: sauvie_wild_dog
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: desolate
+  - id: sauvie_wildlife_refuge
+    title: Wildlife Refuge Marsh
+    description: 'A protected wetland area turned feral since the collapse. Cattails and
+
+      sedge grass tower overhead. Egrets pick through the shallows. The boardwalk
+
+      that once guided tourists is rotted and treacherous. Something large moves
+
+      through the reed beds — probably a beaver, possibly not.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: east
+      target: sauvie_oak_island
+    map_x: -2
+    map_y: -14
+    spawns:
+    - template: sauvie_wild_dog
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: marshy
+  - id: sauvie_old_orchard
+    title: Old Orchard — Abandoned
+    description: 'A neglected orchard at the island''s edge, its trees gnarled and untended.
+
+      Windfall apples rot in the grass. The old irrigation pipes are dry and cracked.
+
+      Survivalists have set up camp among the twisted trunks, running wire trip alarms
+
+      through the branches. Trespassers are not welcomed.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: sauvie_north_fields
+    map_x: 4
+    map_y: -10
+    spawns:
+    - template: sauvie_survivalist
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: dappled
+      atmosphere: tense
+  - id: sauvie_river_landing
+    title: River Landing
+    description: 'A muddy flat on the island''s western bank where boats beach to unload.
+
+      Tire tracks and boot prints churn the bank into muck. Crates and tarps
+
+      mark recently dropped cargo. River pirates use this as a secondary
+
+      offload point, away from the scrutiny of the main dock.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: east
+      target: sauvie_collins_beach
+    map_x: -6
+    map_y: -4
+    spawns:
+    - template: river_pirate
+      count: 1
+      respawn_after: 5m
+    - template: sauvie_survivalist
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: furtive
+  - id: sauvie_logging_road
+    title: Old Logging Road
+    description: 'A dirt track cuts through a second-growth forest, the remains of old
+
+      clear-cut operations visible in the uniform young trees. Ruts are deep
+
+      from loaded trucks long gone. The road is used now by people who prefer
+
+      not to be seen — the canopy provides cover from aerial observation.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: south
+      target: sauvie_north_tip
+    - direction: north
+      target: sauvie_wildlife_refuge
+    map_x: 0
+    map_y: -13
+    spawns:
+    - template: sauvie_survivalist
+      count: 1
+      respawn_after: 5m
+    - template: sauvie_wild_dog
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dappled
+      atmosphere: isolated
+  - id: sauvie_overgrown_lot
+    title: Overgrown Lot
+    description: 'A residential neighborhood that never was — foundations poured before the
+
+      collapse, now cracked open by tree roots. Walls of blackberry and ivy
+
+      claim the concrete slabs. The ground is uneven and ankle-twisting.
+
+      Someone has been burning fires in the old basement holes.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: north
+      target: sauvie_south_fields
+    map_x: 0
+    map_y: 6
+    spawns:
+    - template: sauvie_wild_dog
+      count: 1
+      respawn_after: 5m
+    - template: sauvie_survivalist
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: overgrown

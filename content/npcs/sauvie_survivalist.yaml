@@ -1,0 +1,43 @@
+id: sauvie_survivalist
+name: Island Survivalist
+description: A lean, weathered loner armed with a hunting rifle and too many opinions about who belongs on the island.
+level: 2
+max_hp: 24
+ac: 14
+awareness: 9
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 12
+  quickness: 13
+  grit: 15
+  reasoning: 11
+  savvy: 13
+  flair: 8
+loot:
+  currency:
+    min: 15
+    max: 60
+  items:
+    - item: field_rations
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+    - item: scrap_metal
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.1
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: hunting_rifle
+    weight: 3
+  - id: combat_knife
+    weight: 2
+armor:
+  - id: leather_jacket
+    weight: 3
+  - id: padded_armor
+    weight: 2

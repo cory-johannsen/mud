@@ -1,0 +1,15 @@
+id: chip_doc_sauvie_island
+name: Doc Nettle
+npc_type: chip_doc
+description: >
+  A hunched woman in a canvas apron, her fingers stained with soil and solder.
+  Doc Nettle was a field medic before the collapse, now she removes tracking
+  chips from the desperate in exchange for what little they can spare.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
