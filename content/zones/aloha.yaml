@@ -113,7 +113,6 @@ zone:
       target: aloha_park
     map_x: -4
     map_y: 2
-    danger_level: safe
     spawns:
     - template: aloha_broker
       count: 2
