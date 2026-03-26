@@ -1,6 +1,6 @@
 zone:
   id: vantucky
-  danger_level: sketchy
+  danger_level: dangerous
   world_x: 2
   world_y: -4
   script_dir: content/scripts/zones/vantucky
@@ -101,6 +101,10 @@ zone:
       target: vantucky_burnt_bridge_creek
     map_x: 4
     map_y: 0
+    spawns:
+    - template: vantucky_militiaman
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: dappled
       atmosphere: suburban
