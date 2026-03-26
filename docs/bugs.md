@@ -82,6 +82,16 @@
 **Steps:** Equip any armor item and run `eq`; observe armor slot values show raw IDs.
 **Fix:** Added `hydrateEquipmentNames(eq *inventory.Equipment, reg *inventory.Registry)` in `internal/gameserver/grpc_service.go`. After `LoadEquipment` succeeds at login, this function iterates `eq.Armor` and `eq.Accessories`, looks up each `ItemDefID` via `reg.Item()`, and sets `item.Name` to `ItemDef.Name` when found. Items whose IDs are not registered remain unchanged. (Initial implementation incorrectly used `reg.Armor()` with an item ID — armor is registered under its `ArmorDef.ID`, not the item ID; the correct lookup is via `reg.Item()`.)
 
+## Combat
+
+### BUG-25: Allied faction NPC attacks Team Machete player on sight
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Marshal Ironsides (a Machete-faction NPC) initiates combat against a Team Machete player on room entry, indicating the NPC aggression check does not correctly exclude allied-team players.
+**Steps:** Log in as a Team Machete character; enter a room containing Marshal Ironsides; observe "[Morning] Marshal Ironsides attacks you — attacked on sight."
+**Fix:**
+
 ## World
 
 ### BUG-11: Technologies assigned at login (backfilled on existing characters) are not persisted
