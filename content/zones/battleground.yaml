@@ -10,6 +10,7 @@ zone:
   start_room: battle_infirmary
   rooms:
   - id: battle_i5_south
+    danger_level: dangerous
     title: I-5 Southbound On-Ramp
     description: 'The cracked asphalt of the old interstate on-ramp marks the southern
 
@@ -37,10 +38,15 @@ zone:
       immovable: true
       script: zone_map_use
       description: Zone Map
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: wind
   - id: battle_the_gate
+    danger_level: dangerous
     title: The Gate
     description: 'A reinforced barricade of welded car frames and corrugated steel
 
@@ -71,6 +77,7 @@ zone:
       lighting: overcast
       atmosphere: tense
   - id: battle_main_street
+    danger_level: dangerous
     title: Main Street
     description: 'The central avenue of the collective stretches north, lined with
 
@@ -94,10 +101,15 @@ zone:
       target: battle_the_commons
     map_x: 0
     map_y: -4
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: orderly
   - id: battle_assembly_hall
+    danger_level: dangerous
     title: Assembly Hall
     description: 'A converted high school gymnasium serves as the collective''s
 
@@ -121,10 +133,14 @@ zone:
     - template: commissar
       count: 1
       respawn_after: 5m
+    - template: collective_guardian
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: fluorescent
       atmosphere: echo
   - id: battle_the_commons
+    danger_level: dangerous
     title: The Commons
     description: 'Long wooden tables fill a repurposed restaurant, where the
 
@@ -144,10 +160,15 @@ zone:
       target: battle_infirmary
     map_x: -2
     map_y: -4
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: warm
       atmosphere: crowded
   - id: battle_market_square
+    danger_level: dangerous
     title: Market Square
     description: 'An open square where the collective''s surplus goods are distributed
 
@@ -175,10 +196,14 @@ zone:
     - template: battleground_merchant
       count: 1
       respawn_after: 0s
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: busy
   - id: battle_propaganda_hall
+    danger_level: dangerous
     title: Propaganda Hall
     description: 'The walls of this former church are covered floor to ceiling with
 
@@ -202,6 +227,9 @@ zone:
     - template: commissar
       count: 1
       respawn_after: 5m
+    - template: collective_guardian
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: reverent
@@ -212,6 +240,7 @@ zone:
         cooldown_rounds: 3
         cooldown_minutes: 5
   - id: battle_the_commissariat
+    danger_level: dangerous
     title: The Commissariat
     description: 'The administrative nerve center of the collective occupies a
 
@@ -235,10 +264,14 @@ zone:
     - template: commissar
       count: 1
       respawn_after: 5m
+    - template: collective_guardian
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: fluorescent
       atmosphere: bureaucratic
   - id: battle_reeducation_center
+    danger_level: dangerous
     title: Reeducation Center
     description: 'A squat concrete building with barred windows and a heavy steel
 
@@ -264,10 +297,14 @@ zone:
     - template: collective_guardian
       count: 1
       respawn_after: 5m
+    - template: commissar
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: harsh
       atmosphere: oppressive
   - id: battle_worker_barracks
+    danger_level: dangerous
     title: Worker Barracks
     description: 'Rows of identical cots stretch through a converted warehouse.
 
@@ -287,10 +324,15 @@ zone:
       target: battle_greenhouse
     map_x: 202
     map_y: 16
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: stale
   - id: battle_armory
+    danger_level: dangerous
     title: The Armory
     description: 'A reinforced bunker built from stacked shipping containers,
 
@@ -310,7 +352,7 @@ zone:
     map_y: -6
     spawns:
     - template: collective_guardian
-      count: 1
+      count: 2
       respawn_after: 5m
     properties:
       lighting: dim
@@ -349,6 +391,7 @@ zone:
       lighting: fluorescent
       atmosphere: antiseptic
   - id: battle_farm_east
+    danger_level: dangerous
     title: East Fields
     description: 'Terraced plots of vegetables stretch across what was once a
 
@@ -378,6 +421,7 @@ zone:
       lighting: overcast
       atmosphere: earthy
   - id: battle_farm_west
+    danger_level: dangerous
     title: West Fields
     description: 'More cultivated plots extend westward, these devoted to grain
 
@@ -405,6 +449,7 @@ zone:
       lighting: overcast
       atmosphere: pastoral
   - id: battle_the_granary
+    danger_level: dangerous
     title: The Granary
     description: 'A converted auto repair shop now serves as the collective''s
 
@@ -434,6 +479,7 @@ zone:
       lighting: dim
       atmosphere: dry
   - id: battle_north_fields
+    danger_level: dangerous
     title: North Fields
     description: 'The northernmost agricultural plots thin out into scrubland at
 
@@ -457,10 +503,14 @@ zone:
     - template: field_worker
       count: 1
       respawn_after: 5m
+    - template: collective_guardian
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: exposed
   - id: battle_the_watchtower
+    danger_level: dangerous
     title: The Watchtower
     description: 'A wooden platform built atop a cell tower provides a commanding
 
@@ -482,12 +532,13 @@ zone:
     map_y: -12
     spawns:
     - template: collective_guardian
-      count: 1
+      count: 2
       respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
   - id: battle_memorial_grove
+    danger_level: dangerous
     title: Memorial Grove
     description: 'A quiet clearing behind the assembly hall where young trees
 
@@ -507,10 +558,15 @@ zone:
       target: battle_the_commissariat
     map_x: 202
     map_y: 32
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: dappled
       atmosphere: solemn
   - id: battle_greenhouse
+    danger_level: dangerous
     title: The Greenhouse
     description: 'A patchwork structure of salvaged window panes and plastic
 
@@ -536,10 +592,14 @@ zone:
     - template: field_worker
       count: 1
       respawn_after: 5m
+    - template: collective_guardian
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: diffused
       atmosphere: humid
   - id: battle_training_yard
+    danger_level: dangerous
     title: Training Yard
     description: 'A packed-dirt yard behind the armory where guardians drill
 
@@ -561,12 +621,13 @@ zone:
     map_y: 36
     spawns:
     - template: collective_guardian
-      count: 1
+      count: 2
       respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: disciplined
   - id: battle_supply_depot
+    danger_level: dangerous
     title: Supply Depot
     description: 'Stacked crates and barrels fill a fenced lot behind the
 
@@ -590,10 +651,14 @@ zone:
     - template: battleground_banker
       count: 1
       respawn_after: 0s
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: orderly
   - id: battle_cistern
+    danger_level: dangerous
     title: The Cistern
     description: 'A deep concrete cistern collects rainwater filtered through
 
@@ -613,6 +678,10 @@ zone:
       target: battle_worker_barracks
     map_x: 202
     map_y: 40
+    spawns:
+    - template: collective_guardian
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: damp
