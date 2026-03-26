@@ -15,8 +15,16 @@ import (
 	"github.com/google/uuid"
 )
 
-// ExploreModeCaseIt is the Search exploration mode that enables trap detection.
-const ExploreModeCaseIt = "case_it"
+// Exploration mode ID constants.
+const (
+	ExploreModeCaseIt        = "case_it"       // Search mode — enables trap detection (REQ-EXP-24)
+	ExploreModeLayLow        = "lay_low"        // Stealth mode — secret Ghosting check on entry
+	ExploreModeHoldGround    = "hold_ground"    // Shield mode — auto raise shield at combat start
+	ExploreModeActiveSensors = "active_sensors" // Tech scan — secret Tech Lore check on entry
+	ExploreModeRunPoint      = "run_point"      // Scout mode — +1 Initiative bonus to co-located players
+	ExploreModeShadow        = "shadow"         // Follow mode — borrow ally's skill rank
+	ExploreModePokeAround    = "poke_around"    // Lore mode — secret Recall Knowledge check on entry
+)
 
 // PlayerSession tracks a connected player's state.
 type PlayerSession struct {
@@ -138,6 +146,14 @@ type PlayerSession struct {
 	// "" means not in explore mode; ExploreModeCaseIt means Search mode (trap detection active).
 	// Set by the exploration feature.
 	ExploreMode string
+	// ExploreShadowTarget is the CharacterID of the ally being shadowed.
+	// Only meaningful when ExploreMode == ExploreModeShadow.
+	// 0 means no target set.
+	ExploreShadowTarget int64
+	// LayLowBlockedRoom is the RoomID where a Lay Low critical failure occurred.
+	// While in this room, the player cannot gain hidden or undetected.
+	// Cleared on room exit by handleMove.
+	LayLowBlockedRoom string
 	// Region is the character's home region ID (e.g. "lake_oswego").
 	// Set at login from dbChar.Region. Used for Honkeypot targeting.
 	Region string
