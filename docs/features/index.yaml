@@ -566,7 +566,7 @@ features:
 
   - slug: quests
     name: Quests
-    status: planned
+    status: done
     priority: 265
     category: world
     file: docs/features/quests.md
