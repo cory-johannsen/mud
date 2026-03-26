@@ -20,7 +20,7 @@ zone:
       the Kingdom of Hillsboro. Blue-and-white banners snap in the wind.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: aloha_tv_highway_west
@@ -53,7 +53,7 @@ zone:
       sheet-metal arch above the gate. Beyond lies the tech campus heartland.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: hills_tv_highway_east
@@ -67,9 +67,6 @@ zone:
     - template: intel_guard
       count: 2
       respawn_after: 5m
-    - template: hillsboro_guard
-      count: 1
-      respawn_after: 0s
     properties:
       lighting: torchlight
       atmosphere: guarded
@@ -84,7 +81,7 @@ zone:
       on either side, their corporate logos faded but still legible.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: hills_campus_gate
@@ -103,6 +100,9 @@ zone:
     - template: hillsboro_hireling
       count: 1
       respawn_after: 0s
+    - template: intel_guard
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: overcast
       atmosphere: quiet
@@ -179,10 +179,14 @@ zone:
       solar reserves. The archivists treat every page as sacred.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits: []
     map_x: 202
     map_y: 0
+    spawns:
+    - template: intel_guard
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: dim
       atmosphere: quiet
@@ -199,6 +203,7 @@ zone:
       and the Kingdom loses its claim to legitimacy.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: hills_the_foundry
@@ -206,9 +211,6 @@ zone:
     map_y: 4
     spawns:
     - template: intel_guard
-      count: 2
-      respawn_after: 5m
-    - template: silicon_serf
       count: 2
       respawn_after: 5m
     properties:
@@ -227,6 +229,7 @@ zone:
       exhaustion. A communal cook fire smolders in a repurposed server rack.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: hills_campus_boulevard
@@ -252,6 +255,7 @@ zone:
       the central courtyard, thoroughly battered.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: hills_campus_boulevard
@@ -277,9 +281,14 @@ zone:
       masters learned from medieval history wikis.
 
       '
+    danger_level: sketchy
     exits: []
     map_x: 202
     map_y: 2
+    spawns:
+    - template: hillsboro_knight
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: echoing
@@ -296,6 +305,7 @@ zone:
       solder and the whine of repurposed industrial tools.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: hills_server_keep
@@ -323,7 +333,7 @@ zone:
       A knight stands watch from a second-floor balcony.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: hills_tanasbourne_ruins
@@ -333,6 +343,9 @@ zone:
     - template: hillsboro_banker
       count: 1
       respawn_after: 0s
+    - template: intel_guard
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: overcast
       atmosphere: bustling
@@ -349,7 +362,7 @@ zone:
       circuit boards and solar-charged batteries.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: north
       target: hills_campus_gate
@@ -361,6 +374,9 @@ zone:
     - template: hillsboro_job_trainer
       count: 1
       respawn_after: 0s
+    - template: intel_guard
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: overcast
       atmosphere: trade
@@ -377,6 +393,7 @@ zone:
       border. Something rustles in the blackberry thickets.
 
       '
+    danger_level: sketchy
     exits: []
     map_x: -2
     map_y: -2
@@ -400,6 +417,7 @@ zone:
       shopping carts. Scavengers still pick through the deeper sections.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: hills_market_square
@@ -407,6 +425,10 @@ zone:
       target: hills_suburban_wasteland
     map_x: 4
     map_y: -2
+    spawns:
+    - template: intel_guard
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: desolate
@@ -423,6 +445,7 @@ zone:
       route at regular intervals.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: hills_tv_highway_east
@@ -452,11 +475,16 @@ zone:
       step here could be fatal. Only trusted engineers are permitted entry.
 
       '
+    danger_level: sketchy
     exits:
     - direction: up
       target: hills_server_keep
     map_x: 202
     map_y: 8
+    spawns:
+    - template: intel_guard
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: emergency
       atmosphere: electric
@@ -473,9 +501,14 @@ zone:
       wanderers awaiting their interviews.
 
       '
+    danger_level: sketchy
     exits: []
     map_x: 202
     map_y: 10
+    spawns:
+    - template: silicon_serf
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: harsh
       atmosphere: tense
@@ -492,12 +525,16 @@ zone:
       the ruins of a landscaped courtyard.
 
       '
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: north
       target: hills_orenco_station
     map_x: -2
     map_y: 4
+    spawns:
+    - template: intel_guard
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: overcast
       atmosphere: domestic
@@ -514,11 +551,16 @@ zone:
       stands amid the rubble like a lonely monument.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: hills_tanasbourne_ruins
     map_x: 2
     map_y: -2
+    spawns:
+    - template: silicon_serf
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: desolate
@@ -537,6 +579,7 @@ zone:
       and night by the Kingdom''s scouts.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: hills_cornell_road
@@ -626,7 +669,7 @@ zone:
       legumes. A few scarecrows fashioned from old crash-test dummies keep
       the crows away. The Kingdom's blue-and-white border markers stand at
       the tree line to the north.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: south
       target: hills_tv_highway_east
@@ -634,6 +677,10 @@ zone:
       target: hills_outer_fields_south
     map_x: 0
     map_y: -6
+    spawns:
+    - template: hillsboro_knight
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: overcast
       atmosphere: rural
@@ -645,7 +692,7 @@ zone:
       the beds. Serfs in muddy boots move slowly between rows, tending
       crops under the grey sky. A water tower converted to a guard post
       overlooks the entire field.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: east
       target: hills_outer_fields_north
@@ -653,6 +700,10 @@ zone:
       target: hills_amberglen_plaza
     map_x: -2
     map_y: -6
+    spawns:
+    - template: hillsboro_knight
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: overcast
       atmosphere: rural
@@ -664,7 +715,7 @@ zone:
       better maintained than most — Kingdom serfs patch the worst sections
       to keep trade caravans moving. Faded mile markers have been repainted
       with blue-and-white Kingdom symbols.
-    danger_level: safe
+    danger_level: sketchy
     exits:
     - direction: west
       target: hills_tv_highway_east
@@ -672,6 +723,10 @@ zone:
       target: hills_waystation
     map_x: 2
     map_y: 0
+    spawns:
+    - template: intel_guard
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: overcast
       atmosphere: quiet
