@@ -22,6 +22,7 @@ zone:
       Toll booths have been converted into guard shacks by whoever controls the crossing today.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: couve_jantzen_beach
@@ -31,6 +32,10 @@ zone:
       target: couve_the_crossing
     map_x: 0
     map_y: 0
+    spawns:
+    - template: couve_scavenger
+      count: 1
+      respawn_after: 5m
     equipment:
     - item_id: zone_map
       max_count: 1
@@ -54,6 +59,7 @@ zone:
       A hand-painted sign reads "JANTZEN BEACH FREE PORT — NO LAWS, NO REFUNDS."
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: couve_interstate_bridge_south
@@ -81,6 +87,7 @@ zone:
       Pirate lookouts perch on the rusted skeleton of an old car dealership sign.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: couve_jantzen_beach
@@ -106,6 +113,7 @@ zone:
       A ferry made from a welded-together school bus floats at anchor.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: couve_jantzen_beach
@@ -133,6 +141,7 @@ zone:
       and Clark peers down from a retaining wall, their painted eyes following you.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: couve_waterfront
@@ -140,6 +149,10 @@ zone:
       target: couve_officers_row
     map_x: 4
     map_y: -2
+    spawns:
+    - template: couve_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: quiet
@@ -156,6 +169,7 @@ zone:
       The smell of grilled mystery meat drifts from food stalls along the perimeter.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: couve_waterfront
@@ -165,6 +179,10 @@ zone:
       target: couve_mill_plain_blvd
     map_x: 2
     map_y: -4
+    spawns:
+    - template: mill_plain_thug
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: firelight
       atmosphere: smoke
@@ -181,6 +199,7 @@ zone:
       the "VANCOUVER VOLUNTEER MILITIA — KEEPING ORDER SINCE THE COLLAPSE."
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: couve_esther_short_park
@@ -210,6 +229,7 @@ zone:
       The old blacksmith shop is operational again, its forge glowing day and night.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: couve_officers_row
@@ -235,6 +255,7 @@ zone:
       The pavement is cracked and puddled. Traffic lights dangle uselessly.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: couve_esther_short_park
@@ -266,6 +287,7 @@ zone:
       taxing anyone who wants to trade inside.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: couve_mill_plain_blvd
@@ -293,6 +315,7 @@ zone:
       an open-air market on dry days, which is to say almost never.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: couve_mill_plain_blvd
@@ -300,6 +323,10 @@ zone:
       target: couve_residential_blocks
     map_x: 0
     map_y: -6
+    spawns:
+    - template: couve_gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: rain
@@ -318,6 +345,7 @@ zone:
       "EATIN'' GOOD IN THE NEIGHBORHOOD" — though the neighborhood has seen better days.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: couve_strip_mall_east
@@ -341,11 +369,16 @@ zone:
       A hand-painted neighborhood watch sign features a skull with crossed rifles.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: couve_strip_mall_west
     map_x: 0
     map_y: -8
+    spawns:
+    - template: couve_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: quiet
@@ -362,9 +395,14 @@ zone:
       broken windshields is a constant, mournful whistle.
 
       '
+    danger_level: sketchy
     exits: []
     map_x: 202
     map_y: 0
+    spawns:
+    - template: couve_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: wind
@@ -381,11 +419,16 @@ zone:
       "YOU ARE NOW LEAVING CIVILIZATION. GOOD LUCK."
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: battle_i5_south
     map_x: 2
     map_y: -10
+    spawns:
+    - template: mill_plain_thug
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: wind
@@ -402,11 +445,14 @@ zone:
       in the distance leans at a precarious angle.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: couve_mill_plain_blvd
     - direction: north
       target: couve_i5_north
+    - direction: east
+      target: couve_fourth_plain_east
     map_x: 2
     map_y: -8
     spawns:
@@ -429,9 +475,12 @@ zone:
       A rusted water tower looms overhead, someone''s lookout post.
 
       '
+    danger_level: sketchy
     exits:
     - direction: east
       target: vantucky_fourth_plain_west
+    - direction: west
+      target: couve_fourth_plain
     map_x: 8
     map_y: -8
     spawns:
@@ -456,6 +505,7 @@ zone:
       recirculating murky rainwater in an endless loop.
 
       '
+    danger_level: sketchy
     exits:
     - direction: west
       target: couve_strip_mall_east
@@ -483,6 +533,7 @@ zone:
       pho and motor oil mingles in the damp air.
 
       '
+    danger_level: sketchy
     exits:
     - direction: south
       target: couve_vancouver_mall
@@ -490,6 +541,10 @@ zone:
       target: couve_fourth_plain_east
     map_x: 6
     map_y: -8
+    spawns:
+    - template: couve_gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: lantern
       atmosphere: industrial
@@ -506,6 +561,7 @@ zone:
       shopping carts sit in the shallows.
 
       '
+    danger_level: sketchy
     exits:
     - direction: north
       target: couve_waterfront
@@ -523,7 +579,6 @@ zone:
   - id: couve_the_crossing
     title: The Crossing
     description: "A checkpoint building at the Washington end of the bridge. The Couve faction controls it, but they're practical: trade is welcome, trouble is not."
-    danger_level: safe
     exits:
     - direction: east
       target: couve_interstate_bridge_south
@@ -551,3 +606,268 @@ zone:
     properties:
       lighting: overcast
       atmosphere: guarded
+  - id: couve_neutral_diner
+    title: Neutral Ground Diner
+    description: 'A greasy spoon with steamed-up windows and the smell of coffee and bacon
+
+      fat. The owner — a heavyset woman named Roz — has maintained strict
+
+      neutrality since the collapse. No weapons drawn, no grudges aired inside.
+
+      Everyone from pirates to militia to scavengers eats here, and somehow
+
+      the truce holds. The booths are duct-taped but clean.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: south
+      target: couve_esther_short_park
+    - direction: east
+      target: couve_neutral_back_room
+    map_x: 2
+    map_y: -5
+    properties:
+      lighting: fluorescent
+      atmosphere: quiet
+  - id: couve_neutral_back_room
+    title: Diner Back Room
+    description: 'A cramped back room behind the kitchen, used for private conversations
+
+      and discreet meetings. A single bulb dangles overhead. The walls are
+
+      covered in handwritten notes — messages left between parties who would
+
+      rather not meet face-to-face. Roz keeps the peace here too,
+
+      and everyone who matters knows it.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: west
+      target: couve_neutral_diner
+    - direction: north
+      target: couve_neutral_alley
+    map_x: 3
+    map_y: -5
+    properties:
+      lighting: dim
+      atmosphere: quiet
+  - id: couve_neutral_alley
+    title: Diner Alley
+    description: 'The alley behind the neutral diner is narrow and shadowed, smelling of
+
+      dishwater and rain. Doc Vega works here out of a converted delivery van,
+
+      her instruments gleaming under a clip-on work light. She''s quiet,
+
+      professional, and keeps no records. The diner''s back door is always
+
+      unlocked for those who need her services.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: south
+      target: couve_neutral_back_room
+    map_x: 3
+    map_y: -6
+    spawns:
+    - template: chip_doc_the_couve
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: quiet
+  - id: couve_mill_plain_district
+    title: Mill Plain District
+    description: 'The residential fringe of Mill Plain Boulevard where the strip mall empire
+
+      gives way to dense housing. Crumbling apartment complexes and overgrown
+
+      lots fill the blocks. Scavengers move in packs here, watching from fire
+
+      escapes. The air smells of rain and ash.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: south
+      target: couve_mill_plain_blvd
+    - direction: east
+      target: couve_fourth_plain_district
+    map_x: 0
+    map_y: -7
+    spawns:
+    - template: couve_scavenger
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: rain
+  - id: couve_fourth_plain_district
+    title: Fourth Plain District
+    description: 'Side streets branching off Fourth Plain into blocks of burned storefronts
+
+      and hollow commercial buildings. Gang tags mark every surface in competing
+
+      colors. Someone has stacked shopping carts into a crude barricade at the
+
+      intersection. The sound of distant shouting echoes between the buildings.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: couve_mill_plain_district
+    - direction: north
+      target: couve_garrison_road
+    map_x: 2
+    map_y: -7
+    spawns:
+    - template: couve_gang_enforcer
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: dangerous
+  - id: couve_garrison_road
+    title: Garrison Road
+    description: 'A long straight road running north out of the commercial district into
+
+      an industrial no-man''s-land. Warehouses with shattered skylights stand
+
+      empty except for squatters and rats. The militia runs foot patrols here
+
+      at irregular intervals. Graffiti on a loading dock door reads "LAST
+
+      HOUSE ON THE LEFT — ALL OTHERS ABANDONED."
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: south
+      target: couve_fourth_plain_district
+    - direction: east
+      target: couve_burnt_ridge
+    map_x: 2
+    map_y: -9
+    spawns:
+    - template: couve_militia
+      count: 1
+      respawn_after: 5m
+    - template: couve_scavenger
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: wind
+  - id: couve_burnt_ridge
+    title: Burnt Ridge
+    description: 'A hillside neighborhood that didn''t survive the first winter after the
+
+      collapse. Blackened foundations poke through encroaching brush. Feral cats
+
+      and crows own this territory. Someone has made a home in the concrete shell
+
+      of a former garage, smoke curling from a chimney pipe. Approach cautiously.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: couve_garrison_road
+    map_x: 4
+    map_y: -9
+    spawns:
+    - template: couve_scavenger
+      count: 1
+      respawn_after: 5m
+    - template: couve_gang_enforcer
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: ash
+  - id: couve_columbia_shore
+    title: Columbia Shore
+    description: 'A stretch of muddy riverbank east of the main waterfront, past the ruins
+
+      of an old marina. Rotting docks reach into the brown water. The current
+
+      here is deceptively strong. River pirates use this stretch as an alternate
+
+      launch point when the main waterfront is watched. Mud squelches underfoot.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: couve_river_access
+    - direction: north
+      target: couve_columbia_way
+    map_x: 204
+    map_y: 2
+    spawns:
+    - template: jantzen_beach_pirate
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: mud
+  - id: couve_highway_99_north
+    title: Highway 99 North
+    description: 'State Route 99 runs north out of the Couve toward Hazel Dell and the
+
+      suburban wastes beyond. The road is passable but contested. Independent
+
+      traders use it to avoid militia checkpoints on I-5. Toll collectors
+
+      operating out of a former Dairy Queen demand payment in either coin or
+
+      services. The drive-through window is now a gun port.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: south
+      target: couve_mill_plain_blvd
+    map_x: -2
+    map_y: -6
+    spawns:
+    - template: mill_plain_thug
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: rain
+  - id: couve_orchards_district
+    title: Orchards District
+    description: 'East Vancouver sprawl — what was once a bedroom community of tract houses
+
+      and big-box stores. The box stores are gutted fortresses now, the tract
+
+      houses a patchwork of defended homesteads and abandoned lots. A faction
+
+      calling itself the Orchards Committee enforces a rough local order with
+
+      garden tools and salvaged hardware. Do not underestimate them.
+
+      '
+    danger_level: sketchy
+    exits:
+    - direction: west
+      target: couve_chkalov_drive
+    map_x: 8
+    map_y: -8
+    spawns:
+    - template: couve_gang_enforcer
+      count: 1
+      respawn_after: 5m
+    - template: couve_militia
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: quiet

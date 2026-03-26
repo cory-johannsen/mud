@@ -1,0 +1,41 @@
+id: couve_scavenger
+name: Couve Scavenger
+description: A gaunt figure in patched-together salvage gear, sifting through rubble for anything worth taking. Territorial and unpredictable.
+level: 1
+max_hp: 16
+ac: 12
+awareness: 4
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 11
+  quickness: 14
+  grit: 12
+  reasoning: 9
+  savvy: 11
+  flair: 7
+loot:
+  currency:
+    min: 3
+    max: 25
+  items:
+    - item: scrap_metal
+      chance: 0.7
+      min_qty: 1
+      max_qty: 4
+    - item: medkit
+      chance: 0.08
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: cheap_blade
+    weight: 3
+  - id: golf_club
+    weight: 2
+  - id: spiked_knuckles
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 2
+  - id: worn_clothes
+    weight: 3

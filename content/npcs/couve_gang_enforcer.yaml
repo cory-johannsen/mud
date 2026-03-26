@@ -1,0 +1,41 @@
+id: couve_gang_enforcer
+name: Gang Enforcer
+description: A heavyset enforcer collecting tribute for one of the Couve's street gangs. A shaved head, brass knuckles, and zero patience.
+level: 2
+max_hp: 28
+ac: 14
+awareness: 6
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 16
+  quickness: 11
+  grit: 15
+  reasoning: 8
+  savvy: 10
+  flair: 9
+loot:
+  currency:
+    min: 20
+    max: 70
+  items:
+    - item: scrap_metal
+      chance: 0.3
+      min_qty: 1
+      max_qty: 2
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: spiked_knuckles
+    weight: 2
+  - id: sawn_off
+    weight: 2
+  - id: combat_knife
+    weight: 2
+armor:
+  - id: tactical_vest
+    weight: 2
+  - id: leather_jacket
+    weight: 3

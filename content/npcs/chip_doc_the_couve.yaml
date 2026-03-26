@@ -1,0 +1,16 @@
+id: chip_doc_the_couve
+name: Doc Vega
+npc_type: chip_doc
+description: >
+  A wiry woman in her fifties with magnifying lenses clipped to her glasses
+  and steady hands despite her age. She runs a quiet removal service out of
+  the alley behind the diner, no questions asked. Her tools are clean, her
+  prices negotiable, and her discretion absolute.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
