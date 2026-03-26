@@ -56,7 +56,16 @@ func LoadDowntimeQueueLimitRegistry(path string) (*DowntimeQueueLimitRegistry, e
 		return nil, fmt.Errorf("parsing queue limits YAML %q: %w", path, err)
 	}
 	entries := make([]QueueLimitEntry, 0, len(raw.Limits))
-	for _, l := range raw.Limits {
+	for i, l := range raw.Limits {
+		if l.JobTier < 1 {
+			return nil, fmt.Errorf("queue limits YAML %q entry %d: job_tier must be >= 1, got %d", path, i, l.JobTier)
+		}
+		if l.MaxQueue < 1 {
+			return nil, fmt.Errorf("queue limits YAML %q entry %d: max_queue must be >= 1, got %d", path, i, l.MaxQueue)
+		}
+		if l.LevelRange[1] < l.LevelRange[0] {
+			return nil, fmt.Errorf("queue limits YAML %q entry %d: level_range max (%d) < min (%d)", path, i, l.LevelRange[1], l.LevelRange[0])
+		}
 		entries = append(entries, QueueLimitEntry{
 			JobTier:  l.JobTier,
 			LevelMin: l.LevelRange[0],

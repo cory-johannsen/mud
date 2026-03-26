@@ -36,17 +36,26 @@ func TestDowntimeQueueLimitRegistry_Lookup_DefaultOnNoMatch(t *testing.T) {
 }
 
 // TestDowntimeQueueLimitRegistry_Property_LookupAlwaysPositive verifies that
-// Lookup always returns >= 1 for any tier and level inputs.
+// Lookup always returns >= 1 for any tier and level inputs, both with an empty
+// registry (default path) and a populated registry (match path).
 //
-// Precondition: empty registry; any tier in [0,10], any level in [0,20].
+// Precondition: any tier in [0,10], any level in [0,20]; MaxQueue entries >= 1.
 // Postcondition: result >= 1.
 func TestDowntimeQueueLimitRegistry_Property_LookupAlwaysPositive(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		tier := rapid.IntRange(0, 10).Draw(t, "tier")
 		level := rapid.IntRange(0, 20).Draw(t, "level")
-		reg := downtime.NewDowntimeQueueLimitRegistryFromEntries(nil)
-		result := reg.Lookup(tier, level)
-		assert.GreaterOrEqual(t, result, 1)
+		maxQueue := rapid.IntRange(1, 100).Draw(t, "maxQueue")
+
+		// Test empty registry (default path).
+		emptyReg := downtime.NewDowntimeQueueLimitRegistryFromEntries(nil)
+		assert.GreaterOrEqual(t, emptyReg.Lookup(tier, level), 1)
+
+		// Test populated registry with an entry that always matches (tier 0-10, level 0-20).
+		populatedReg := downtime.NewDowntimeQueueLimitRegistryFromEntries([]downtime.QueueLimitEntry{
+			{JobTier: tier, LevelMin: 0, LevelMax: 20, MaxQueue: maxQueue},
+		})
+		assert.GreaterOrEqual(t, populatedReg.Lookup(tier, level), 1)
 	})
 }
 
@@ -59,6 +68,8 @@ func TestDowntimeQueueLimitRegistry_LoadFromYAML(t *testing.T) {
 	reg, err := downtime.LoadDowntimeQueueLimitRegistry("testdata/queue_limits_test.yaml")
 	assert.NoError(t, err)
 	assert.NotNil(t, reg)
+	// Verify parsing: tier 1 level 1 should return 3 per the test fixture.
+	assert.Equal(t, 3, reg.Lookup(1, 1))
 }
 
 // TestDowntimeQueueLimitRegistry_MissingFile_Error verifies that LoadDowntimeQueueLimitRegistry
