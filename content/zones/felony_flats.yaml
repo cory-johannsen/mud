@@ -342,6 +342,10 @@ zone:
       target: courthouse_steps
     map_x: -2
     map_y: -2
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: tense
@@ -370,6 +374,10 @@ zone:
       target: flats_johnson_creek
     map_x: 0
     map_y: 4
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: desolate
@@ -473,6 +481,10 @@ zone:
       hidden: true
     map_x: 4
     map_y: 2
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     skill_checks:
     - skill: wasteland
       dc: 14
@@ -519,6 +531,9 @@ zone:
     - template: felony_flats_healer
       count: 1
       respawn_after: 0s
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: wary
@@ -543,6 +558,10 @@ zone:
       target: flats_convenience_store
     map_x: 202
     map_y: 0
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: domestic
@@ -664,6 +683,9 @@ zone:
     - template: felony_flats_job_trainer
       count: 1
       respawn_after: 0s
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: commercial
