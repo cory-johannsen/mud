@@ -1,0 +1,15 @@
+id: chip_doc_vantucky
+name: Marta "Needles" Voss
+npc_type: chip_doc
+description: >
+  A compact woman in her forties with close-cropped grey hair and magnifying
+  lenses hinged over one eye. Her hands are steady and her tools are clean —
+  a rare combination in Vantucky. She doesn't ask where the chip came from.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14

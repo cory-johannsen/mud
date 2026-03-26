@@ -1,0 +1,45 @@
+id: vantucky_gang_enforcer
+name: Gang Enforcer
+description: A heavy-set enforcer in a sleeveless jacket covered in gang patches. Knuckles scarred, eyes cold, moving with the unhurried confidence of someone who has broken many people.
+level: 4
+max_hp: 42
+ac: 15
+awareness: 6
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 18
+  quickness: 10
+  grit: 16
+  reasoning: 8
+  savvy: 11
+  flair: 8
+loot:
+  currency:
+    min: 30
+    max: 110
+  items:
+    - item: brass_knuckles
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+    - item: ammo_casing
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2
+weapon:
+  - id: combat_shotgun
+    weight: 3
+  - id: heavy_revolver
+    weight: 2
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 3
+  - id: tactical_vest
+    weight: 2

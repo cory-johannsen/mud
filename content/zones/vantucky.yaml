@@ -20,6 +20,7 @@ zone:
       The pavement is cracked and patched with gravel. Pickup trucks rust in driveways.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: couve_fourth_plain_east
@@ -56,6 +57,7 @@ zone:
       swinging in the wind with a metallic groan.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: vantucky_fourth_plain_west
@@ -87,6 +89,7 @@ zone:
       The smell of fermenting fruit mixes with wood smoke.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: vantucky_andresen_road
@@ -112,6 +115,7 @@ zone:
       A hand-cranked siren sits atop the nearest tower, ready to sound the alarm.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: vantucky_orchards
@@ -139,6 +143,7 @@ zone:
       Below, the interstate stretches east and west into the haze.
 
       '
+    danger_level: dangerous
     exits:
     - direction: east
       target: vantucky_i84_east
@@ -166,11 +171,16 @@ zone:
       still bite, if you don''t mind what they taste like.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: vantucky_river_trail
     map_x: 4
     map_y: -4
+    spawns:
+    - template: vantucky_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: riverside
@@ -187,6 +197,7 @@ zone:
       Radio antennas bristle from the rooftop like metal quills.
 
       '
+    danger_level: dangerous
     exits:
     - direction: south
       target: vantucky_orchards
@@ -214,6 +225,7 @@ zone:
       and suspicious of outsiders.
 
       '
+    danger_level: dangerous
     exits:
     - direction: south
       target: vantucky_164th_ave
@@ -243,6 +255,7 @@ zone:
       The smell of gun oil hangs thick in the air.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: vantucky_andresen_road
@@ -250,6 +263,10 @@ zone:
       target: vantucky_burnt_bridge_creek
     map_x: 2
     map_y: 2
+    spawns:
+    - template: vantucky_gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: commerce
@@ -266,6 +283,7 @@ zone:
       when they want to disappear.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: vantucky_orchards
@@ -275,6 +293,10 @@ zone:
       target: vantucky_hidden_bunker
     map_x: 4
     map_y: 2
+    spawns:
+    - template: vantucky_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: wilderness
@@ -289,6 +311,7 @@ zone:
       Wind howls through the gorge entrance, carrying the smell of pine and ash.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: vantucky_i84_overpass
@@ -314,6 +337,7 @@ zone:
       smell of moonshine cuts through the decay. Empty jugs line the counter.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: vantucky_fourth_plain_west
@@ -323,6 +347,10 @@ zone:
       target: vantucky_i84_onramp
     map_x: 0
     map_y: 2
+    spawns:
+    - template: vantucky_gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: decay
@@ -339,6 +367,7 @@ zone:
       The crack of gunfire echoes through the trees at all hours.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: vantucky_164th_ave
@@ -366,11 +395,16 @@ zone:
       The air is stale but breathable.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: vantucky_burnt_bridge_creek
     map_x: 6
     map_y: 2
+    spawns:
+    - template: vantucky_scavenger
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: emergency
       atmosphere: underground
@@ -387,6 +421,7 @@ zone:
       Chickens scratch in the dirt between rows of kale and potatoes.
 
       '
+    danger_level: dangerous
     exits:
     - direction: south
       target: vantucky_compound_bravo
@@ -414,6 +449,7 @@ zone:
       a holding cell for those who can''t pay.
 
       '
+    danger_level: dangerous
     exits:
     - direction: south
       target: vantucky_andresen_road
@@ -441,6 +477,7 @@ zone:
       fishing camps at Fisher''s Landing.
 
       '
+    danger_level: dangerous
     exits:
     - direction: south
       target: vantucky_checkpoint_north
@@ -448,6 +485,10 @@ zone:
       target: vantucky_fishers_landing
     map_x: 2
     map_y: -4
+    spawns:
+    - template: highway_bandit
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: riverside
@@ -464,6 +505,7 @@ zone:
       and a collection of empty cans strung as an alarm system.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: vantucky_gas_station_ruins
@@ -491,11 +533,16 @@ zone:
       From here you can see the compounds, the highway, and the river.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: vantucky_farm_compound
     map_x: 8
     map_y: -4
+    spawns:
+    - template: vantucky_militiaman
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: elevated
@@ -512,6 +559,7 @@ zone:
       in a water-stained ledger.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: vantucky_shooting_range
@@ -537,23 +585,31 @@ zone:
       within reach. A communal fire pit smolders in the center.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: vantucky_gas_station_ruins
     - direction: east
       target: vantucky_burnt_bridge_creek
-    map_x: 202
-    map_y: 0
+    - direction: south
+      target: vantucky_overgrown_freeway
+    map_x: 0
+    map_y: 6
+    spawns:
+    - template: vantucky_gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: residential
   - id: vantucky_the_compound
     title: The Compound
     description: "The Vantucky militia's main compound. Spare and functional. They'll trade, train, and bank here — loyalty is assumed, not enforced."
-    danger_level: safe
     exits:
     - direction: south
       target: vantucky_fourth_plain_west
+    - direction: west
+      target: vantucky_neutral_pawn
     map_x: 0
     map_y: -2
     spawns:
@@ -575,3 +631,220 @@ zone:
     properties:
       lighting: fluorescent
       atmosphere: military
+  - id: vantucky_neutral_pawn
+    title: Neutral Ground Pawn Shop
+    description: 'A reinforced storefront with blacked-out windows and a hand-painted sign
+
+      reading "NEUTRAL GROUND — NO WEAPONS DRAWN." The pawnbroker here enforces
+
+      the rule with iron patience and a shotgun behind the counter. Factions
+
+      set their grudges outside the door. Inside, salvaged goods change hands
+
+      in relative peace. Tobacco smoke and the smell of machine oil hang
+
+      in the air.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: east
+      target: vantucky_the_compound
+    - direction: north
+      target: vantucky_neutral_back
+    map_x: -2
+    map_y: -2
+    properties:
+      lighting: dim
+      atmosphere: tense_neutral
+  - id: vantucky_neutral_back
+    title: Neutral Ground Back Room
+    description: 'A cramped back room behind the pawn shop, used for private dealings and
+
+      quiet conversations. A folding table holds a battery-powered lamp and a
+
+      hand-drawn map of local territories. Mismatched chairs ring the table.
+
+      Confidentiality is the only currency that matters here. Voices stay low
+
+      and the door stays locked from the inside.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: south
+      target: vantucky_neutral_pawn
+    - direction: east
+      target: vantucky_neutral_vault
+    map_x: -2
+    map_y: -4
+    properties:
+      lighting: lamplight
+      atmosphere: private
+  - id: vantucky_neutral_vault
+    title: Neutral Ground Vault
+    description: 'A repurposed bank vault room at the rear of the building, its heavy steel
+
+      door now serving as a clinic and chip removal suite. Marta "Needles" Voss
+
+      keeps her tools clean and her mouth shut. The overhead light is surgical-bright,
+
+      the floor scrubbed down to bare concrete. One chair, one table, one rule:
+
+      no questions asked.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: west
+      target: vantucky_neutral_back
+    map_x: 0
+    map_y: -4
+    spawns:
+    - template: chip_doc_vantucky
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: surgical
+      atmosphere: clinical
+  - id: vantucky_east_side
+    title: East Side Strip
+    description: 'A stretch of former retail corridor carved into gang turf. Spray-painted
+
+      boundaries mark block-by-block control changes. Broken glass glitters
+
+      on the asphalt. Lookouts watch from second-floor windows.
+
+      The smell of burning trash drifts from alley drums.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: west
+      target: vantucky_164th_ave
+    - direction: north
+      target: vantucky_abandoned_mall
+    map_x: 8
+    map_y: 2
+    spawns:
+    - template: vantucky_gang_enforcer
+      count: 1
+      respawn_after: 5m
+    - template: vantucky_scavenger
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: gang_territory
+  - id: vantucky_abandoned_mall
+    title: Abandoned Mall
+    description: 'The skeleton of a mid-size shopping mall, its skylight long since shattered.
+
+      Rain pools in the atrium between collapsed retail kiosks. Squatters
+
+      have claimed the anchor stores, fortifying entrances with shopping carts
+
+      welded together. Territorial markings cover every flat surface.
+
+      The escalators are frozen mid-motion, steps used as seating.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: south
+      target: vantucky_east_side
+    - direction: west
+      target: vantucky_shooting_range
+    map_x: 8
+    map_y: 0
+    spawns:
+    - template: vantucky_gang_enforcer
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: derelict
+  - id: vantucky_rail_spur
+    title: Rail Spur Yard
+    description: 'A short length of rail line terminates at a gravel yard behind the old
+
+      industrial district. Rusted boxcars sit immovable on seized tracks.
+
+      The cars have been claimed as shelters and ambush positions.
+
+      Old rail equipment rots in sidings. The only thing moving here
+
+      is trouble looking for someone to find.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: vantucky_ammo_depot
+    map_x: 8
+    map_y: 4
+    spawns:
+    - template: highway_bandit
+      count: 1
+      respawn_after: 5m
+    - template: vantucky_scavenger
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: industrial
+  - id: vantucky_river_cliffs
+    title: River Cliffs
+    description: 'Shale cliffs drop twenty feet to a rocky shoreline where the Columbia
+
+      bends south. Wind scours the rim year-round. A rope ladder descends to
+
+      a narrow beach used by smugglers making quick crossings. Carved footholds
+
+      in the rock show centuries of use. The view is brutal and beautiful.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: west
+      target: vantucky_fishers_landing
+    map_x: 6
+    map_y: -4
+    spawns:
+    - template: highway_bandit
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: cliffside
+  - id: vantucky_overgrown_freeway
+    title: Overgrown Freeway
+    description: 'A section of raised highway reclaimed by vegetation. Blackberry canes
+
+      push through cracks in the asphalt, their vines draped across the median.
+
+      Young alder trees have split the on-ramp shoulders. The road surface
+
+      is treacherous and visibility is poor. Ambushers love it for exactly
+
+      those reasons.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: vantucky_trailer_park
+    - direction: east
+      target: vantucky_i84_onramp
+    map_x: 0
+    map_y: 8
+    spawns:
+    - template: vantucky_scavenger
+      count: 1
+      respawn_after: 5m
+    - template: highway_bandit
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dappled
+      atmosphere: overgrown
