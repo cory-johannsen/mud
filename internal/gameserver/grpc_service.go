@@ -4722,7 +4722,9 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		} else {
 			view.Job = sess.Class
 		}
-		view.Team = s.jobRegistry.TeamFor(sess.Class)
+		if t := s.jobRegistry.TeamFor(sess.Class); t != "" {
+			view.Team = t
+		}
 	} else {
 		view.Job = sess.Class
 	}
