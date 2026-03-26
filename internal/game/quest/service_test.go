@@ -219,3 +219,61 @@ func TestService_Abandon_NonRepeatableWithConfirm(t *testing.T) {
 		t.Fatal("abandoned non-repeatable should have nil completedAt sentinel")
 	}
 }
+
+func TestService_RecordFetch_IncrementsProgress(t *testing.T) {
+	fetchDef := &quest.QuestDef{
+		ID: "fetch_herbs", Title: "Gather Herbs", GiverNPCID: "herbalist",
+		Objectives: []quest.QuestObjective{
+			{ID: "o1", Type: "fetch", Description: "Gather 2 herbs", TargetID: "herb", Quantity: 2},
+		},
+	}
+	reg := quest.QuestRegistry{"fetch_herbs": fetchDef}
+	repo := newFakeRepo()
+	svc := quest.NewService(reg, repo, nil, nil, nil)
+	sess := newFakeSession()
+	sess.activeQuests["fetch_herbs"] = &quest.ActiveQuest{QuestID: "fetch_herbs", ObjectiveProgress: map[string]int{"o1": 0}}
+	if err := svc.RecordFetch(context.Background(), sess, 1, "herb", 1); err != nil {
+		t.Fatalf("RecordFetch: %v", err)
+	}
+	if sess.activeQuests["fetch_herbs"].ObjectiveProgress["o1"] != 1 {
+		t.Fatalf("expected progress 1, got %d", sess.activeQuests["fetch_herbs"].ObjectiveProgress["o1"])
+	}
+}
+
+func TestService_RecordKill_CompletesQuestWhenAllObjectivesMet(t *testing.T) {
+	reg := quest.QuestRegistry{"kill_rats": killQuestDef()}
+	repo := newFakeRepo()
+	svc := quest.NewService(reg, repo, nil, nil, nil)
+	sess := newFakeSession()
+	// Set progress to 2 out of 3 — one more kill will complete the quest.
+	sess.activeQuests["kill_rats"] = &quest.ActiveQuest{QuestID: "kill_rats", ObjectiveProgress: map[string]int{"o1": 2}}
+	if err := svc.RecordKill(context.Background(), sess, 1, "rat"); err != nil {
+		t.Fatalf("RecordKill: %v", err)
+	}
+	if _, still := sess.activeQuests["kill_rats"]; still {
+		t.Fatal("quest should be removed from ActiveQuests on completion")
+	}
+	if _, done := sess.completedQuests["kill_rats"]; !done {
+		t.Fatal("quest should be in CompletedQuests on completion")
+	}
+}
+
+func TestService_HydrateSession_LoadsActiveAndCompleted(t *testing.T) {
+	reg := quest.QuestRegistry{"kill_rats": killQuestDef()}
+	svc := quest.NewService(reg, newFakeRepo(), nil, nil, nil)
+	sess := newFakeSession()
+	now := time.Now()
+	records := []quest.QuestRecord{
+		{CharacterID: 1, QuestID: "kill_rats", Status: "active", Progress: map[string]int{"o1": 1}},
+		{CharacterID: 1, QuestID: "other_quest", Status: "completed", CompletedAt: &now},
+	}
+	svc.HydrateSession(sess, records)
+	if aq, ok := sess.activeQuests["kill_rats"]; !ok {
+		t.Fatal("expected kill_rats in ActiveQuests")
+	} else if aq.ObjectiveProgress["o1"] != 1 {
+		t.Fatalf("expected progress 1, got %d", aq.ObjectiveProgress["o1"])
+	}
+	if _, ok := sess.completedQuests["other_quest"]; !ok {
+		t.Fatal("expected other_quest in CompletedQuests")
+	}
+}
