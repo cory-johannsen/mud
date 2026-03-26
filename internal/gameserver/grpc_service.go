@@ -1630,6 +1630,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				// REQ-DT-7: check all sessions with active downtime
 				for _, activeUID := range s.sessions.AllUIDs() {
 					s.checkDowntimeCompletion(activeUID)
+					s.checkCampingStatus(activeUID) // REQ-REST-15/18
 				}
 			case <-ctx.Done():
 				return
@@ -2072,6 +2073,11 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 	// REQ-DT-5: movement is blocked while a downtime activity is active.
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.DowntimeBusy {
 		return messageEvent("You are busy with a downtime activity. Use 'downtime cancel' to stop."), nil
+	}
+
+	// REQ-REST-16: cancel camping if player moves voluntarily.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.CampingActive {
+		s.cancelCamping(uid, sess, "you broke camp")
 	}
 
 	// IMMOBILIZED: grabbed condition prevents leaving the room.
@@ -3380,7 +3386,7 @@ func (s *GameServiceServer) cancelCamping(uid string, sess *session.PlayerSessio
 	elapsed := time.Since(sess.CampingStartTime)
 	duration := sess.CampingDuration
 	if duration == 0 {
-		duration = 1
+		duration = time.Second
 	}
 
 	sess.CampingActive = false
@@ -3409,10 +3415,59 @@ func (s *GameServiceServer) cancelCamping(uid string, sess *session.PlayerSessio
 
 	// Partial tech pool restore.
 	if s.spontaneousUsePoolRepo != nil {
-		_ = s.spontaneousUsePoolRepo.RestorePartial(context.Background(), sess.CharacterID, frac)
+		if err := s.spontaneousUsePoolRepo.RestorePartial(context.Background(), sess.CharacterID, frac); err != nil {
+			s.logger.Warn("cancelCamping: failed to restore tech pools", zap.Error(err))
+		}
 	}
 
 	s.pushMessageToUID(uid, fmt.Sprintf("Camping interrupted: %s. Partial restoration applied (%.0f%% complete).", reason, frac*100))
+}
+
+// checkCampingStatus is called on each game clock tick.
+// Cancels camping if hostile NPCs are present (REQ-REST-15); completes if elapsed (REQ-REST-18).
+//
+// Precondition: uid refers to a connected player session.
+// Postcondition: if camping complete, full long rest applied and CampingActive set false;
+// if hostile NPC present, partial rest applied and CampingActive set false.
+func (s *GameServiceServer) checkCampingStatus(uid string) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok || !sess.CampingActive {
+		return
+	}
+
+	// REQ-REST-15: cancel camping if hostile NPC is in the room.
+	if s.npcMgr != nil {
+		for _, npcInst := range s.npcMgr.InstancesInRoom(sess.RoomID) {
+			if npcInst.Disposition == "hostile" {
+				s.cancelCamping(uid, sess, "enemies spotted")
+				return
+			}
+		}
+	}
+
+	// REQ-REST-18: apply full long rest when camping duration has elapsed.
+	if time.Since(sess.CampingStartTime) >= sess.CampingDuration {
+		sess.CampingActive = false
+		sess.CampingStartTime = time.Time{}
+		sess.CampingDuration = 0
+
+		ctx := context.Background()
+		sendMsg := func(text string) error {
+			s.pushMessageToUID(uid, text)
+			return nil
+		}
+		promptFn := func(options []string) (string, error) {
+			if len(options) == 0 {
+				return "", nil
+			}
+			return options[0], nil
+		}
+		if err := s.applyFullLongRestCtx(uid, sess, ctx, sendMsg, promptFn); err != nil {
+			if s.logger != nil {
+				s.logger.Warn("checkCampingStatus: applyFullLongRestCtx failed", zap.String("uid", uid), zap.Error(err))
+			}
+		}
+	}
 }
 
 // applyFullLongRest applies full long-rest restoration via the player's stream (REQ-REST-9/18).
