@@ -630,6 +630,7 @@ func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
 		"combat": true, "merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "crafter": true, "fixer": true,
+		"chip_doc": true,
 	}
 	templates, err := npc.LoadTemplates("../../../content/npcs")
 	require.NoError(t, err, "all existing NPC templates must still load after Validate() changes")

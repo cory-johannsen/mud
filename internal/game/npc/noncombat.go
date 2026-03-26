@@ -333,6 +333,14 @@ func CheckJobPrerequisites(job TrainableJob, playerLevel int, playerJobs map[str
 // A YAML block `crafter: {}` MUST be present for npc_type: crafter (REQ-NPC-2).
 type CrafterConfig struct{}
 
+// ---- ChipDoc ----
+
+// ChipDocConfig holds configuration for chip_doc type NPCs.
+type ChipDocConfig struct {
+	RemovalCost int `yaml:"removal_cost"`
+	CheckDC     int `yaml:"check_dc"`
+}
+
 // ---- Fixer ----
 
 // FixerConfig holds the static configuration for a fixer NPC.
