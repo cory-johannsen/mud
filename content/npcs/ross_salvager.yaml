@@ -1,0 +1,43 @@
+id: ross_salvager
+name: River Salvager
+description: A wiry scavenger with a bolt-action rifle slung over one shoulder and a belt full of stolen tools. They work the island's shores for scrap and tolerate no witnesses.
+level: 3
+max_hp: 28
+ac: 14
+awareness: 8
+ai_domain: scavenger_patrol
+respawn_delay: "5m"
+abilities:
+  brutality: 12
+  quickness: 15
+  grit: 12
+  reasoning: 10
+  savvy: 13
+  flair: 8
+loot:
+  currency:
+    min: 20
+    max: 60
+  items:
+    - item: scrap_metal
+      chance: 0.5
+      min_qty: 1
+      max_qty: 3
+    - item: salvage_tools
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.1
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: bolt_action_rifle
+    weight: 3
+  - id: hunting_knife
+    weight: 2
+armor:
+  - id: work_jacket
+    weight: 3
+  - id: leather_jacket
+    weight: 2

@@ -1,0 +1,43 @@
+id: gang_enforcer
+name: Gang Enforcer
+description: A heavily armed gang member patrolling territory lines with a chip on their shoulder and a shotgun to back it up. They shoot first and don't bother with questions.
+level: 4
+max_hp: 40
+ac: 15
+awareness: 7
+ai_domain: territory_patrol
+respawn_delay: "5m"
+abilities:
+  brutality: 15
+  quickness: 13
+  grit: 14
+  reasoning: 9
+  savvy: 10
+  flair: 9
+loot:
+  currency:
+    min: 40
+    max: 120
+  items:
+    - item: shotgun_shells
+      chance: 0.6
+      min_qty: 2
+      max_qty: 6
+    - item: gang_colors
+      chance: 0.4
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+weapon:
+  - id: sawed_off_shotgun
+    weight: 3
+  - id: steel_pipe
+    weight: 2
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 2

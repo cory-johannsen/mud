@@ -116,6 +116,7 @@ zone:
       circles mark where someone cooked river fish.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: ross_bridge_east
@@ -125,6 +126,10 @@ zone:
       target: ross_shoreline_path
     map_x: 0
     map_y: 2
+    spawns:
+    - template: ross_salvager
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: damp
@@ -141,6 +146,7 @@ zone:
       use it to move unseen between the shore and the interior.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: ross_toll_gate
@@ -170,9 +176,18 @@ zone:
       are missing, but the hull looks sound enough.
 
       '
-    exits: []
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: ross_east_shore
+    - direction: west
+      target: ri_south_shore
     map_x: 0
     map_y: 4
+    spawns:
+    - template: gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: river
@@ -189,6 +204,7 @@ zone:
       The smell of brine and decay hangs in the still air.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: ross_shoreline_path
@@ -216,11 +232,16 @@ zone:
       Fishing lines trail from stakes driven into the bank.
 
       '
+    danger_level: dangerous
     exits:
     - direction: east
       target: ross_tidal_pool
     map_x: -4
     map_y: 4
+    spawns:
+    - template: island_hermit
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: firelight
       atmosphere: smoke
@@ -239,6 +260,7 @@ zone:
       could be something larger.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: ross_bridge_road
@@ -264,6 +286,7 @@ zone:
       salvage, and rumors. They trust no one from the bridge.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: ross_cave_entrance
@@ -289,6 +312,7 @@ zone:
       markings scratched into the rock warn outsiders away.
 
       '
+    danger_level: dangerous
     exits:
     - direction: south
       target: ross_the_hermitage
@@ -298,6 +322,10 @@ zone:
       target: ross_pit_edge
     map_x: -8
     map_y: 0
+    spawns:
+    - template: island_hermit
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dark
       atmosphere: damp
@@ -314,11 +342,16 @@ zone:
       stacked supplies against the far wall under a sheet of plastic.
 
       '
+    danger_level: dangerous
     exits:
     - direction: up
       target: ross_cave_entrance
     map_x: 202
     map_y: 0
+    spawns:
+    - template: island_hermit
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dark
       atmosphere: damp
@@ -337,6 +370,7 @@ zone:
       Lookout posts made of stacked debris dot the ridgeline.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: ross_pit_edge
@@ -344,6 +378,10 @@ zone:
       target: ross_quarry_floor
     map_x: -6
     map_y: 2
+    spawns:
+    - template: gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -426,6 +464,7 @@ zone:
       caravans. The work never stops.
 
       '
+    danger_level: dangerous
     exits:
     - direction: north
       target: ross_gravel_pit
@@ -459,6 +498,7 @@ zone:
       provide.
 
       '
+    danger_level: dangerous
     exits:
     - direction: east
       target: ross_gravel_pit
@@ -466,6 +506,10 @@ zone:
       target: ross_quarry_floor
     map_x: 202
     map_y: 6
+    spawns:
+    - template: ross_salvager
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: still
@@ -484,6 +528,7 @@ zone:
       transport that may never come.
 
       '
+    danger_level: dangerous
     exits:
     - direction: west
       target: ross_gravel_pit
@@ -491,6 +536,10 @@ zone:
       target: ross_pit_edge
     map_x: 202
     map_y: 8
+    spawns:
+    - template: gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: industrial
@@ -509,13 +558,20 @@ zone:
       rotting pilings mark where a ferry dock once stood.
 
       '
+    danger_level: dangerous
     exits:
     - direction: south
       target: ross_pit_edge
     - direction: west
       target: ross_west_shore
+    - direction: east
+      target: ri_willamette_overlook
     map_x: -6
     map_y: -2
+    spawns:
+    - template: gang_enforcer
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: wind
@@ -534,13 +590,20 @@ zone:
       sandbars leads toward Hardtack Island at low water.
 
       '
+    danger_level: dangerous
     exits:
     - direction: east
       target: ross_north_shore
     - direction: west
       target: ross_hardtack_island
+    - direction: south
+      target: ri_east_bank
     map_x: -8
     map_y: -2
+    spawns:
+    - template: ross_salvager
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -559,6 +622,7 @@ zone:
       you on all sides, grey and indifferent.
 
       '
+    danger_level: dangerous
     exits:
     - direction: east
       target: ross_west_shore
@@ -574,10 +638,11 @@ zone:
   - id: ross_dock_shack
     title: Dock Shack
     description: "A weathered shack at the island's main landing. Nets hang on the walls, a woodstove burns in the corner, and someone is always willing to do business."
-    danger_level: safe
     exits:
     - direction: west
       target: ross_bridge_east
+    - direction: east
+      target: ri_neutral_dock
     map_x: 2
     map_y: 0
     spawns:
@@ -599,3 +664,272 @@ zone:
     properties:
       lighting: firelight
       atmosphere: commerce
+  - id: ri_neutral_dock
+    title: Neutral Dock
+    description: 'A weathered wooden dock extends into a sheltered cove on the
+
+      island''s eastern edge. The planks are warped but solid. Rope
+
+      lines hang from iron cleats, and a hand-painted sign reads
+
+      "NO WEAPONS DRAWN." Small skiffs bob in the calm water.
+
+      Traders and travelers use this dock as common ground.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: west
+      target: ross_dock_shack
+    - direction: north
+      target: ri_neutral_shack
+    - direction: east
+      target: ri_neutral_cache
+    map_x: 4
+    map_y: 0
+    properties:
+      lighting: overcast
+      atmosphere: calm
+  - id: ri_neutral_shack
+    title: Neutral Shack
+    description: 'A low-slung shack built from salvaged lumber sits on pilings
+
+      above the waterline. A hand-drawn truce flag — white cloth
+
+      on a bamboo pole — hangs from the eaves. Inside, mismatched
+
+      chairs ring a driftwood table where strangers share meals
+
+      without asking questions. A rain barrel catches water at
+
+      each corner.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: south
+      target: ri_neutral_dock
+    - direction: east
+      target: ri_neutral_cache
+    map_x: 4
+    map_y: -2
+    properties:
+      lighting: sheltered
+      atmosphere: quiet
+  - id: ri_neutral_cache
+    title: Neutral Cache
+    description: 'A reinforced storage room hidden beneath the neutral shack,
+
+      accessible through a trapdoor. Shelves hold preserved food,
+
+      medical supplies, and the tools of survival. Doc Ferra has
+
+      claimed a corner for her equipment — a battered case, a
+
+      folding chair, and a lamp. The gang truce holds here by
+
+      mutual fear of losing the resource.
+
+      '
+    danger_level: safe
+    exits:
+    - direction: west
+      target: ri_neutral_dock
+    - direction: north
+      target: ri_neutral_shack
+    map_x: 6
+    map_y: -2
+    spawns:
+    - template: chip_doc_ross_island
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: sheltered
+  - id: ri_south_shore
+    title: Southern Inlet Shore
+    description: 'A rocky stretch of shore along the island''s southern inlet,
+
+      where the river current slows in a shallow backwater. Exposed
+
+      gravel bars emerge at low water. Gang scouts use the high
+
+      bank above as a firing position — the rocks below are
+
+      painted with the territorial marks of three different crews.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: east
+      target: ross_south_shore
+    - direction: west
+      target: ri_gravel_pit_deep
+    map_x: -2
+    map_y: 6
+    spawns:
+    - template: gang_enforcer
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: river
+  - id: ri_east_bank
+    title: East Bank Outcrop
+    description: 'A jutting shelf of basalt on the island''s eastern flank,
+
+      scoured smooth by decades of river current. The drop to the
+
+      water is sheer. Salvagers use ropes and pulleys anchored
+
+      to iron spikes to lower equipment to the riverbank below.
+
+      Fresh blood on the rocks suggests the spot was contested
+
+      recently.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: ross_west_shore
+    - direction: south
+      target: ri_gravel_pit_deep
+    map_x: -8
+    map_y: 0
+    spawns:
+    - template: ross_salvager
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: exposed
+  - id: ri_gravel_pit_deep
+    title: Gravel Pit Deep Cut
+    description: 'The deepest excavated section of the gravel pit extends further
+
+      west than the main operation, hidden from above by an overhang
+
+      of compacted sediment. Water pools in tire ruts. Rusted
+
+      conveyor belt segments lie tangled in the mud. The walls here
+
+      are close enough to touch on both sides.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: east
+      target: ri_south_shore
+    - direction: north
+      target: ri_east_bank
+    - direction: west
+      target: ri_dredge_ruins
+    map_x: -6
+    map_y: 6
+    spawns:
+    - template: gravel_pit_boss
+      count: 1
+      respawn_after: 5m
+    - template: gang_enforcer
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: industrial
+  - id: ri_dredge_ruins
+    title: Dredge Ruins
+    description: 'The rusted skeleton of an old river dredge rests half-submerged
+
+      in the shallows, dragged here decades ago when the operation
+
+      shut down. Its superstructure has collapsed, but the hull
+
+      remains above water at all but the highest river stages.
+
+      Salvagers have stripped most of the valuable metal. What
+
+      remains is contested turf.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: east
+      target: ri_gravel_pit_deep
+    - direction: north
+      target: ri_channel_crossing
+    map_x: -8
+    map_y: 6
+    spawns:
+    - template: ross_salvager
+      count: 1
+      respawn_after: 5m
+    - template: island_hermit
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: decay
+  - id: ri_channel_crossing
+    title: Channel Crossing
+    description: 'A narrow channel separates Ross Island from a gravel bar to
+
+      the north. At low water, it is knee-deep and crossable with
+
+      care. At flood stage, the current is lethal. Gang enforcers
+
+      guard the crossing point, charging passage to anyone who
+
+      wants to cross. The gravel bar beyond is contested territory.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: south
+      target: ri_dredge_ruins
+    - direction: east
+      target: ri_willamette_overlook
+    map_x: -8
+    map_y: -4
+    spawns:
+    - template: gang_enforcer
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: river
+  - id: ri_willamette_overlook
+    title: Willamette Overlook
+    description: 'A flat rock shelf elevated above the northern shore gives an
+
+      unobstructed view up and down the Willamette. The ruined
+
+      bridges to the north are framed against the sky. Salvagers
+
+      use this point to watch for river traffic — boats mean
+
+      trade or raiders, and knowing which is worth the climb.
+
+      Spent shell casings litter the ground near a low stone wall
+
+      used as a firing rest.
+
+      '
+    danger_level: dangerous
+    exits:
+    - direction: west
+      target: ri_channel_crossing
+    - direction: south
+      target: ross_north_shore
+    map_x: -4
+    map_y: -4
+    spawns:
+    - template: ross_salvager
+      count: 1
+      respawn_after: 5m
+    - template: gang_enforcer
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: wind

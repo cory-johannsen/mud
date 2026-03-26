@@ -1,0 +1,15 @@
+id: chip_doc_ross_island
+name: Doc Ferra
+npc_type: chip_doc
+description: >
+  A compact woman with wire-rimmed glasses and nimble fingers, Doc Ferra set up
+  shop in this hidden cache after the gangs burned her last clinic. She removes
+  chips, asks no questions, and charges accordingly.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
