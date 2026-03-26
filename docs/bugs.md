@@ -250,11 +250,11 @@
 
 ### BUG-28: Grinder's Row zone exit (west to Cully Road) missing from map
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** The west exit from Grinder's Row in Ruskbucket Ridge leads to Cully Road but does not appear on the zone map.
 **Steps:** Navigate to Grinder's Row in Ruskbucket Ridge; use the zone map or examine exits; observe the west exit to Cully Road is absent from the map display despite being traversable.
-**Fix:**
+**Fix:** `RenderMap` in `internal/frontend/handlers/text_renderer.go` only rendered east stubs (">") for the last column and south stubs (".") for the last row, but had no equivalent handling for west exits at the leftmost column. Grinder's Row sits at `map_x: 0` (the minimum x) and its west exit leads to `ne_cully_road` in a different zone, so no in-zone tile exists to the left. Added west-stub rendering: when any tile at the minimum x has a west exit with no in-zone western neighbor, a "<" stub is prepended to that tile's row (and a " " spacer is prepended to rows without a west exit), keeping all rows aligned. The same stub is propagated to POI suffix rows and south connector rows for visual consistency. Added `TestRenderMap_WestStub_CrossZoneExit` to enforce the invariant.
 
 ### BUG-26: Zone map rooms are not marked safe in most zones
 **Severity:** medium

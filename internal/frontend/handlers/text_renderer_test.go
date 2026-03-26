@@ -459,6 +459,39 @@ func TestRenderMap_SingleRoom_Current(t *testing.T) {
 	require.Contains(t, result, "Start Room")
 }
 
+// TestRenderMap_WestStub_CrossZoneExit verifies that a room at the leftmost map
+// column with a west exit (e.g. a cross-zone exit) displays a "<" stub to the left
+// of the room cell (BUG-28).
+func TestRenderMap_WestStub_CrossZoneExit(t *testing.T) {
+	// A non-current room at x=0 with a west exit is used so we can look for "[" as the
+	// room marker and a preceding "<" stub without confusion from the current-room "<>"
+	// notation.
+	resp := &gamev1.MapResponse{
+		Tiles: []*gamev1.MapTile{
+			{RoomId: "grinders_row", RoomName: "Grinder's Row", X: 0, Y: 0, Current: false,
+				Exits: []string{"north", "east", "south", "west"}},
+			{RoomId: "last_stand_lodge", RoomName: "Last Stand Lodge", X: 2, Y: 0, Current: true,
+				Exits: []string{"west"}},
+		},
+	}
+	result := RenderMap(resp, 80)
+	// The west stub must appear on the same line as the grinders_row cell "[ 1]".
+	// ANSI color codes may appear between the stub and the cell, so check index ordering.
+	found := false
+	for _, line := range strings.Split(result, "\n") {
+		if strings.Contains(line, "[ 1]") {
+			// The "<" stub must appear before "[ 1]" on the same line.
+			stubIdx := strings.Index(line, "<")
+			cellIdx := strings.Index(line, "[ 1]")
+			require.True(t, stubIdx >= 0 && stubIdx < cellIdx,
+				"west stub '<' must appear before the room cell on line: %q", line)
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "room cell '[ 1]' not found in map output:\n%s", result)
+}
+
 func TestRenderMap_TwoRooms_DistinguishesCurrentFromDiscovered(t *testing.T) {
 	resp := &gamev1.MapResponse{
 		Tiles: []*gamev1.MapTile{

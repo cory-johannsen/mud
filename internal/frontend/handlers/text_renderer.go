@@ -1131,12 +1131,37 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 	// South connector below a cell: "  | " (4 chars) or "    ".
 	const cellW = 4
 
+	// Determine whether any tile at the minimum x has a west exit with no in-zone
+	// neighbor to the west (i.e., a cross-zone west exit stub is needed).
+	hasWestStub := false
+	if len(xs) > 0 {
+		minX := xs[0]
+		for _, y := range ys {
+			t := byCoord[[2]int32{minX, y}]
+			if t != nil && exitSet(t)["west"] {
+				hasWestStub = true
+				break
+			}
+		}
+	}
+
 	var sb strings.Builder
 	sb.WriteString("\r\n")
 
 	for yi, y := range ys {
 		// Room row
 		for xi, x := range xs {
+			// West stub: for the first column, emit "<" if the tile has a west exit
+			// beyond the grid (cross-zone or undiscovered), or " " if the west-stub
+			// column is active but this tile has no west exit.
+			if xi == 0 && hasWestStub {
+				t0 := byCoord[[2]int32{x, y}]
+				if t0 != nil && exitSet(t0)["west"] {
+					sb.WriteString("<")
+				} else {
+					sb.WriteString(" ")
+				}
+			}
 			t := byCoord[[2]int32{x, y}]
 			if t == nil {
 				sb.WriteString("    ")
@@ -1152,7 +1177,7 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 					sb.WriteString(fmt.Sprintf("%s[%2d]%s", color, num, ansiReset))
 				}
 			}
-				// East connector:
+			// East connector:
 			// "-" = discovered neighbor at next column same row
 			// ">" = exit exists but no discovered neighbor (unexplored route)
 			// " " = no east exit
@@ -1185,6 +1210,10 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 		}
 		if hasPOIs {
 			for xi, x := range xs {
+				// West stub padding for POI row.
+				if xi == 0 && hasWestStub {
+					sb.WriteString(" ")
+				}
 				tile := byCoord[[2]int32{x, y}]
 				var cellPOIs []string
 				if tile != nil {
@@ -1214,6 +1243,10 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 			}
 			if hasSouth {
 				for xi, x := range xs {
+					// West stub padding for south connector row.
+					if xi == 0 && hasWestStub {
+						sb.WriteString(" ")
+					}
 					t := byCoord[[2]int32{x, y}]
 					tSouth := byCoord[[2]int32{x, nextY}]
 					if t != nil && exitSet(t)["south"] {
@@ -1265,6 +1298,10 @@ func RenderMap(resp *gamev1.MapResponse, width int) string {
 			}
 			if hasSouthStub {
 				for xi, x := range xs {
+					// West stub padding for trailing south-stub row.
+					if xi == 0 && hasWestStub {
+						sb.WriteString(" ")
+					}
 					t := byCoord[[2]int32{x, lastY}]
 					if t != nil && exitSet(t)["south"] {
 						sb.WriteString("  . ")
