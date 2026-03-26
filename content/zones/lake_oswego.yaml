@@ -180,7 +180,6 @@ zone:
       target: lo_millennium_park
     map_x: 0
     map_y: 4
-    danger_level: safe
     spawns:
     - template: oswego_guard
       count: 1
@@ -581,3 +580,150 @@ zone:
     properties:
       lighting: natural
       atmosphere: solemn
+  - id: lo_lakeside_promenade
+    title: Lakeside Promenade
+    description: 'A paved walkway curves along the western shore of the lake,
+      lined with ornamental lampposts still burning. Residents exercise
+      in matching athletic wear, nodding to one another with the measured
+      civility of people who have learned that friendliness is a social
+      obligation. The water reflects the lights like a mirror.
+      '
+    exits:
+    - direction: east
+      target: lo_millennium_park
+    - direction: south
+      target: lo_civic_center
+    map_x: -4
+    map_y: 4
+    properties:
+      lighting: lamplit
+      atmosphere: leisure
+  - id: lo_country_club_east
+    title: Country Club East Wing
+    description: 'The east wing of the country club retains its pre-collapse
+      grandeur — vaulted ceilings, parquet floors, and oil portraits
+      of men in khakis. The bar still operates, serving a single
+      whiskey to officers and senior council members only. The smell
+      of leather and gun solvent has replaced the original cologne.
+      '
+    exits:
+    - direction: west
+      target: lo_country_club
+    map_x: 4
+    map_y: 4
+    properties:
+      lighting: interior
+      atmosphere: exclusive
+  - id: lo_country_club_west
+    title: Country Club West Wing
+    description: 'The west wing has been converted into a communications
+      center. Long tables hold radio equipment, and operators with
+      headsets monitor a dozen channels simultaneously. Maps cover
+      every wall, marked with patrol schedules and threat assessments.
+      The original wood paneling survives, incongruous beneath tactical
+      overlays.
+      '
+    exits:
+    - direction: east
+      target: lo_country_club
+    map_x: 0
+    map_y: 10
+    properties:
+      lighting: flickering
+      atmosphere: operations
+  - id: lo_south_shore
+    title: South Shore
+    description: 'The southern bank of the lake is a controlled recreational
+      area. Swimming is permitted between 0800 and 1700 with prior
+      approval. The beach is raked smooth each morning. Guard posts
+      watch from elevated platforms on either side. Children build
+      sandcastles under the supervision of armed lifeguards.
+      '
+    exits:
+    - direction: north
+      target: lo_lakewood_bay
+    map_x: -2
+    map_y: 6
+    properties:
+      lighting: overcast
+      atmosphere: controlled
+  - id: lo_garden_district
+    title: Garden District
+    description: 'A residential pocket where the HOA bylaws regarding
+      horticulture reach their apex. Every hedge is geometrically
+      perfect. Flower varieties are standardized by council decree.
+      A laminated guide to approved plantings hangs on each fence
+      post. Violations are reported within the hour. The flowers
+      are genuinely beautiful, which makes it worse.
+      '
+    exits:
+    - direction: north
+      target: lo_hoa_headquarters
+    - direction: east
+      target: lo_gated_estates
+    map_x: -2
+    map_y: 8
+    properties:
+      lighting: natural
+      atmosphere: curated
+  - id: lo_civic_center
+    title: Civic Center
+    danger_level: safe
+    description: 'The civic center occupies a renovated bank building,
+      its vault now serving as a records archive. The lobby is open
+      to residents who can demonstrate proper standing. Information
+      boards list community announcements, approved vendors, and
+      the week'"'"'s compliance schedule. A sense of deliberate calm
+      pervades the space.
+      '
+    exits:
+    - direction: north
+      target: lo_lakeside_promenade
+    - direction: east
+      target: lo_civic_garden
+    - direction: west
+      target: lo_civic_hall
+    map_x: -4
+    map_y: 6
+    properties:
+      lighting: well_lit
+      atmosphere: civic
+  - id: lo_civic_garden
+    title: Civic Garden
+    danger_level: safe
+    description: 'A walled garden adjoining the civic center, planted
+      with medicinal herbs and fruit trees tended by a rotating roster
+      of community volunteers. Stone benches line the paths. The
+      garden is one of the few places in the enclave where raised
+      voices are genuinely unwelcome rather than merely prohibited.
+      '
+    exits:
+    - direction: west
+      target: lo_civic_center
+    map_x: -2
+    map_y: 10
+    properties:
+      lighting: dappled
+      atmosphere: tranquil
+  - id: lo_civic_hall
+    title: Civic Hall
+    danger_level: safe
+    description: 'The civic hall is a low building of clean lines and
+      muted colors, used for community gatherings and quiet administrative
+      work. A discreet door near the back leads to a tastefully appointed
+      clinic where a specialist handles sensitive medical procedures
+      with practiced discretion. Residents know better than to ask
+      questions.
+      '
+    exits:
+    - direction: east
+      target: lo_civic_center
+    map_x: -6
+    map_y: 6
+    spawns:
+    - template: chip_doc_lake_oswego
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: soft
+      atmosphere: discreet

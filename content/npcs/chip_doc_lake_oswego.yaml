@@ -1,0 +1,16 @@
+id: chip_doc_lake_oswego
+name: Dr. Evelyn Marsh
+npc_type: chip_doc
+description: >
+  A composed woman in her fifties with wire-rimmed glasses and precisely
+  trimmed gray hair. She speaks in the measured tones of someone accustomed
+  to confidentiality, and her clinic equipment is conspicuously well-maintained
+  for the enclave's circumstances. She does not discuss her previous employers.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
