@@ -1,0 +1,41 @@
+id: crack_house_dealer
+name: Crack House Dealer
+description: A territorial dealer guarding product and turf on the row houses of Felony Flats. Paranoid, quick to violence, and backed up by the whole block.
+level: 3
+max_hp: 28
+ac: 13
+awareness: 5
+ai_domain: ganger_combat
+respawn_delay: "5m"
+abilities:
+  brutality: 12
+  quickness: 14
+  grit: 12
+  reasoning: 10
+  savvy: 12
+  flair: 10
+weapon:
+  - id: ganger_pistol
+    weight: 3
+  - id: combat_knife
+    weight: 1
+armor:
+  - id: leather_jacket
+    weight: 3
+loot:
+  currency:
+    min: 20
+    max: 80
+  items:
+    - item: ganger_pistol
+      chance: 0.3
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.2
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.4
+      min_qty: 1
+      max_qty: 2

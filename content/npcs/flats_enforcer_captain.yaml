@@ -1,0 +1,49 @@
+id: flats_enforcer_captain
+name: Enforcer Captain
+description: The veteran who runs the Enforcer Den. Scarred, deliberate, and dangerous. Commands the block's crew with practiced authority and shows no hesitation when violence is required.
+level: 5
+max_hp: 52
+ac: 17
+awareness: 7
+ai_domain: ganger_combat
+respawn_delay: "10m"
+abilities:
+  brutality: 18
+  quickness: 12
+  grit: 18
+  reasoning: 11
+  savvy: 12
+  flair: 10
+weapon:
+  - id: combat_knife
+    weight: 2
+  - id: ganger_pistol
+    weight: 2
+  - id: cheap_blade
+    weight: 1
+armor:
+  - id: kevlar_vest
+    weight: 3
+  - id: leather_jacket
+    weight: 1
+loot:
+  currency:
+    min: 60
+    max: 200
+  items:
+    - item: kevlar_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: combat_knife
+      chance: 0.4
+      min_qty: 1
+      max_qty: 1
+    - item: medkit
+      chance: 0.35
+      min_qty: 1
+      max_qty: 1
+    - item: scrap_metal
+      chance: 0.3
+      min_qty: 1
+      max_qty: 3

@@ -1,0 +1,16 @@
+id: chip_doc_felony_flats
+name: Doc Minh
+npc_type: chip_doc
+description: >
+  A former street surgeon who lost his license before the collapse and kept
+  working anyway. Doc Minh operates out of the Jade District with a battered
+  kit and steady hands. He patches up anyone who can pay, and quietly removes
+  cortex chips for those who need to disappear.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14

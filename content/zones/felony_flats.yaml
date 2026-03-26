@@ -10,6 +10,7 @@ zone:
   start_room: flats_jade_district
   rooms:
   - id: flats_82nd_ave
+    core: true
     title: 82nd Avenue
     description: 'The wide expanse of 82nd Avenue stretches north and south, cracked
 
@@ -37,7 +38,7 @@ zone:
     map_y: 0
     spawns:
     - template: 82nd_enforcer
-      count: 1
+      count: 2
       respawn_after: 5m
     - template: strip_mall_scav
       count: 1
@@ -70,6 +71,7 @@ zone:
       lighting: overcast
       atmosphere: exhaust
   - id: flats_motel_row
+    danger_level: sketchy
     title: Motel Row
     description: 'A line of single-story motels stretches along the block, their
 
@@ -97,6 +99,7 @@ zone:
       lighting: dim
       atmosphere: hostile
   - id: flats_strip_mall_north
+    danger_level: sketchy
     title: North Strip Mall
     description: 'A gutted strip mall with a collapsed awning. The old signage
 
@@ -143,6 +146,7 @@ zone:
       lighting: dim
       atmosphere: dusty
   - id: flats_strip_mall_south
+    danger_level: sketchy
     title: South Strip Mall
     description: 'The southern half of the strip mall complex. A laundromat with
 
@@ -170,6 +174,7 @@ zone:
       lighting: dim
       atmosphere: musty
   - id: flats_foster_road
+    core: true
     title: Foster Road
     description: 'Foster Road cuts diagonally through the grid, lined with dead
 
@@ -193,11 +198,16 @@ zone:
       target: flats_apartments_west
     map_x: 0
     map_y: 2
+    spawns:
+    - template: 82nd_enforcer
+      count: 2
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: wind
       terrain: difficult
   - id: flats_johnson_creek
+    danger_level: sketchy
     title: Johnson Creek
     description: 'The overgrown banks of Johnson Creek form a hidden world beneath
 
@@ -215,10 +225,15 @@ zone:
       target: flats_lents_park
     map_x: 2
     map_y: 6
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: shaded
       atmosphere: damp
   - id: flats_powell_blvd
+    core: true
     title: Powell Boulevard
     description: 'Powell Boulevard is wide and exposed, a six-lane killing field
 
@@ -242,12 +257,13 @@ zone:
     map_y: -2
     spawns:
     - template: 82nd_enforcer
-      count: 1
+      count: 2
       respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: wind
   - id: flats_lents_park
+    danger_level: sketchy
     title: Lents Park
     description: 'What was once a neighborhood park is now an overgrown camp.
 
@@ -289,28 +305,26 @@ zone:
     exits:
     - direction: west
       target: flats_powell_overpass
+    - direction: north
+      target: flats_safe_house
+    - direction: east
+      target: flats_jade_alley
+    - direction: south
+      target: flats_back_room
     map_x: 2
     map_y: -4
     spawns:
     - template: felony_flats_merchant
       count: 1
       respawn_after: 0s
-    - template: felony_flats_healer
-      count: 1
-      respawn_after: 0s
-    - template: felony_flats_job_trainer
-      count: 1
-      respawn_after: 0s
-    - template: felony_flats_banker
-      count: 1
-      respawn_after: 0s
-    - template: felony_flats_fixer
+    - template: chip_doc_felony_flats
       count: 1
       respawn_after: 0s
     properties:
       lighting: firelight
       atmosphere: smoke
   - id: flats_hawthorne_approach
+    danger_level: sketchy
     title: Hawthorne Approach
     description: 'The road climbs westward toward the Hawthorne district and
 
@@ -332,6 +346,7 @@ zone:
       lighting: overcast
       atmosphere: tense
   - id: flats_foster_south
+    danger_level: sketchy
     title: South Foster Road
     description: 'Foster Road fades into crumbling side streets at the southern
 
@@ -359,6 +374,7 @@ zone:
       lighting: overcast
       atmosphere: desolate
   - id: flats_motel_courtyard
+    danger_level: sketchy
     title: Motel Courtyard
     description: 'A cracked concrete courtyard between two motel wings. A dead
 
@@ -386,6 +402,7 @@ zone:
         cooldown_rounds: 3
         cooldown_minutes: 5
   - id: flats_motel_back_lot
+    danger_level: sketchy
     title: Motel Back Lot
     description: 'Behind the motel, a gravel lot is choked with stripped cars
 
@@ -401,10 +418,15 @@ zone:
       target: flats_motel_courtyard
     map_x: -4
     map_y: 0
+    spawns:
+    - template: motel_raider
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: quiet
   - id: flats_parking_lot_east
+    danger_level: sketchy
     title: East Parking Lot
     description: 'A vast, empty parking lot stretches under the grey sky. Faded
 
@@ -422,10 +444,15 @@ zone:
       target: flats_alley_east
     map_x: 4
     map_y: 0
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: exposed
       atmosphere: open
   - id: flats_alley_east
+    danger_level: sketchy
     title: East Alley
     description: 'A narrow alley runs behind the strip malls, hemmed in by
 
@@ -470,6 +497,7 @@ zone:
       atmosphere: fetid
       terrain: difficult
   - id: flats_apartments_west
+    danger_level: sketchy
     title: Western Apartments
     description: 'A block of three-story apartment buildings, their stucco facades
 
@@ -487,10 +515,15 @@ zone:
       target: flats_foster_road
     map_x: -2
     map_y: 2
+    spawns:
+    - template: felony_flats_healer
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: dim
       atmosphere: wary
   - id: flats_apartments_south
+    danger_level: sketchy
     title: Southern Apartments
     description: 'Low-slung apartment complexes border the park, their parking
 
@@ -514,6 +547,7 @@ zone:
       lighting: overcast
       atmosphere: domestic
   - id: flats_gas_station
+    danger_level: sketchy
     title: Abandoned Gas Station
     description: 'A gutted gas station with its canopy collapsed on one side.
 
@@ -531,10 +565,15 @@ zone:
       target: flats_82nd_ave
     map_x: 2
     map_y: -2
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: chemical
   - id: flats_powell_overpass
+    core: true
     title: Powell Overpass
     description: 'A crumbling concrete overpass spans the old freight rail line.
 
@@ -558,7 +597,7 @@ zone:
     map_y: -4
     spawns:
     - template: 82nd_enforcer
-      count: 1
+      count: 2
       respawn_after: 5m
     properties:
       lighting: exposed
@@ -570,6 +609,7 @@ zone:
         cooldown_rounds: 3
         cooldown_minutes: 5
   - id: flats_pawn_shop
+    danger_level: sketchy
     title: Ruined Pawn Shop
     description: 'The pawn shop''s steel security gate is bent open like a tin can.
 
@@ -590,6 +630,9 @@ zone:
     map_x: 202
     map_y: 2
     spawns:
+    - template: felony_flats_banker
+      count: 1
+      respawn_after: 0s
     - template: strip_mall_scav
       count: 1
       respawn_after: 5m
@@ -597,6 +640,7 @@ zone:
       lighting: dim
       atmosphere: metallic
   - id: flats_convenience_store
+    danger_level: sketchy
     title: Looted Convenience Store
     description: 'A former convenience store with its front glass long gone.
 
@@ -616,10 +660,15 @@ zone:
       target: flats_pawn_shop
     map_x: 202
     map_y: 4
+    spawns:
+    - template: felony_flats_job_trainer
+      count: 1
+      respawn_after: 0s
     properties:
       lighting: dim
       atmosphere: commercial
   - id: flats_rail_yard
+    danger_level: sketchy
     title: Abandoned Rail Yard
     description: 'Rusted freight cars sit on overgrown tracks, their doors hanging
 
@@ -639,8 +688,229 @@ zone:
     map_y: -6
     spawns:
     - template: motel_raider
-      count: 1
+      count: 2
       respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: rust
+  - id: flats_crack_house_row
+    core: true
+    title: Crack House Row
+    description: 'A block of condemned row houses, their windows dark and boarded.
+
+      Chemical reek hangs in the air — burnt plastic and something
+      sweet underneath. Lookouts perch on the stoops, eyes tracking
+      every movement on the street. This is prime territory, earned
+      in blood and held the same way.
+
+      '
+    exits:
+    - direction: west
+      target: flats_82nd_ave
+    - direction: north
+      target: flats_enforcer_den
+    map_x: 2
+    map_y: 0
+    spawns:
+    - template: crack_house_dealer
+      count: 2
+      respawn_after: 5m
+    - template: 82nd_enforcer
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dark
+      atmosphere: chemical
+  - id: flats_enforcer_den
+    core: true
+    title: Enforcer Den
+    description: 'A fortified storefront with steel-plate shutters and a reinforced
+
+      door. Inside, the enforcers who run this block gather between
+      shifts — cards, weapons maintenance, and the low hum of
+      territorial tension. The walls are papered with warning
+      flyers and wanted faces.
+
+      '
+    exits:
+    - direction: south
+      target: flats_crack_house_row
+    - direction: east
+      target: flats_rail_yard
+    map_x: 2
+    map_y: -2
+    spawns:
+    - template: flats_enforcer_captain
+      count: 2
+      respawn_after: 10m
+    - template: 82nd_enforcer
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dim
+      atmosphere: hostile
+  - id: flats_alley_north
+    danger_level: sketchy
+    title: North Alley
+    description: 'A narrow service alley cuts behind the northern storefronts.
+
+      Dumpsters overflow with refuse, and the concrete is stained
+
+      dark with old spills. A broken fire escape hangs overhead,
+
+      its lowest rung just out of reach. The alley connects the
+
+      main boulevard to the quieter streets beyond.
+
+      '
+    exits:
+    - direction: south
+      target: flats_powell_blvd
+    - direction: east
+      target: flats_gas_station
+    map_x: -2
+    map_y: -2
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: dark
+      atmosphere: fetid
+  - id: flats_dumpster_yard
+    danger_level: sketchy
+    title: Dumpster Yard
+    description: 'A chain-link enclosure behind a gutted supermarket, packed
+
+      with industrial dumpsters. The smell is eye-watering. Rats
+
+      the size of cats move between the containers without fear.
+
+      Scavengers work the bins methodically, cataloguing whatever
+
+      the strip malls discarded before the collapse.
+
+      '
+    exits:
+    - direction: north
+      target: flats_strip_mall_south
+    - direction: west
+      target: flats_alley_east
+    map_x: 4
+    map_y: 4
+    spawns:
+    - template: strip_mall_scav
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: overcast
+      atmosphere: rot
+  - id: flats_mechanic_lot
+    danger_level: sketchy
+    title: Mechanic Lot
+    description: 'A former auto repair shop, its bays open to the street.
+
+      Stripped vehicles in various states of disassembly fill every
+
+      space. The mechanics here work on anything — vehicles, weapons,
+
+      or the occasional prosthetic. They do not ask about provenance.
+
+      A pit bull sleeps under a rusted hood.
+
+      '
+    exits:
+    - direction: east
+      target: flats_foster_road
+    - direction: north
+      target: flats_motel_row
+    map_x: -2
+    map_y: 2
+    spawns:
+    - template: motel_raider
+      count: 1
+      respawn_after: 5m
+    - template: felony_flats_fixer
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: overcast
+      atmosphere: grease
+  - id: flats_safe_house
+    danger_level: safe
+    title: Safe House
+    description: 'A reinforced apartment unit above a shuttered laundry. The
+
+      door is unmarked — known only by word of mouth. Inside,
+
+      mismatched furniture and a working lock provide the rarest
+
+      commodity in Felony Flats: genuine security. People come
+
+      here to breathe, to plan, and to recover.
+
+      '
+    exits:
+    - direction: south
+      target: flats_jade_district
+    map_x: 2
+    map_y: -6
+    spawns:
+    - template: felony_flats_job_trainer
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: quiet
+  - id: flats_back_room
+    danger_level: safe
+    title: Back Room
+    description: 'A windowless room behind the Jade District trading post.
+
+      The walls are hung with salvaged acoustic foam. A single bare
+
+      bulb on a battery pack provides light. Deals are struck here
+
+      that never appear in any ledger. The fixer keeps an eye on
+
+      who comes in and who leaves.
+
+      '
+    exits:
+    - direction: north
+      target: flats_jade_district
+    map_x: 2
+    map_y: -2
+    spawns:
+    - template: felony_flats_banker
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: dim
+      atmosphere: close
+  - id: flats_jade_alley
+    danger_level: safe
+    title: Jade District Alley
+    description: 'A narrow passage running east of the Jade District trading
+
+      post. Herb bundles and drying laundry hang overhead. The
+
+      herbalist keeps her workspace here — mortar and pestle, jars
+
+      of dried plants, and a camp stove. The smell of ginger and
+
+      something medicinal cuts through the usual Flats stench.
+
+      '
+    exits:
+    - direction: west
+      target: flats_jade_district
+    map_x: 4
+    map_y: -4
+    spawns:
+    - template: felony_flats_healer
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: firelight
+      atmosphere: herbal
