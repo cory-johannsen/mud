@@ -1,0 +1,35 @@
+id: jennifer_dawg
+name: "Jennifer Dawg"
+description: "A sharp-eyed woman who keeps the trailer running while Wayne keeps it interesting. She sizes you up before Wayne's finished his sentence."
+type: human
+npc_type: merchant
+npc_role: merchant
+disposition: friendly
+level: 3
+max_hp: 28
+ac: 10
+awareness: 10
+respawn_delay: "0s"
+ai_domain: jennifer_dawg_idle
+abilities:
+  brutality: 8
+  quickness: 11
+  grit: 11
+  reasoning: 14
+  savvy: 15
+  flair: 11
+loot:
+  currency:
+    min: 20
+    max: 80
+merchant:
+  merchant_type: consumables
+  sell_margin: 1.3
+  buy_margin: 0.45
+  budget: 800
+  inventory: []
+  replenish_rate:
+    min_hours: 8
+    max_hours: 16
+    stock_refill: 1
+    budget_refill: 150

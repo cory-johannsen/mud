@@ -1,0 +1,23 @@
+domain:
+  id: jennifer_dawg_idle
+  description: Idle behavior for Jennifer Dawg. Sharp merchant commentary.
+
+  tasks:
+    - id: behave
+      description: Root task — idle merchant behavior
+
+  methods:
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [say_op]
+
+  operators:
+    - id: say_op
+      action: say
+      cooldown: "45s"
+      strings:
+        - "Wayne, let me handle this one."
+        - "You look like you could use something useful."
+        - "I know what you need before you do. That's just how it is."
+        - "Fair prices. No nonsense. That's the Dawg way."

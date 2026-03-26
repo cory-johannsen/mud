@@ -1,0 +1,23 @@
+domain:
+  id: dwayne_dawg_idle
+  description: Idle behavior for Dwayne Dawg. Enthusiastic entrepreneur banter.
+
+  tasks:
+    - id: behave
+      description: Root task — idle merchant behavior
+
+  methods:
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [say_op]
+
+  operators:
+    - id: say_op
+      action: say
+      cooldown: "45s"
+      strings:
+        - "Dwayne Dawg, entrepreneur. At your service."
+        - "Wayne's good, but I'm better. Don't tell him I said that."
+        - "I got things. You need things. This works out."
+        - "Pull up a chair. This won't take long."

@@ -1,0 +1,35 @@
+id: dwayne_dawg
+name: "Dwayne Dawg"
+description: "A big man in a small trailer with a lot of ideas. He talks like every deal is the deal of a lifetime. Sometimes he's right."
+type: human
+npc_type: merchant
+npc_role: merchant
+disposition: friendly
+level: 3
+max_hp: 32
+ac: 10
+awareness: 7
+respawn_delay: "0s"
+ai_domain: dwayne_dawg_idle
+abilities:
+  brutality: 12
+  quickness: 9
+  grit: 13
+  reasoning: 10
+  savvy: 13
+  flair: 13
+loot:
+  currency:
+    min: 20
+    max: 80
+merchant:
+  merchant_type: weapons
+  sell_margin: 1.5
+  buy_margin: 0.35
+  budget: 1200
+  inventory: []
+  replenish_rate:
+    min_hours: 8
+    max_hours: 16
+    stock_refill: 1
+    budget_refill: 250

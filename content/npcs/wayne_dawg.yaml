@@ -1,0 +1,35 @@
+id: wayne_dawg
+name: "Wayne Dawg"
+description: "A grizzled old man with oil-stained hands and a knowing squint. He's been on the Ridge longer than most and has the deals to prove it."
+type: human
+npc_type: merchant
+npc_role: merchant
+disposition: friendly
+level: 3
+max_hp: 30
+ac: 10
+awareness: 8
+respawn_delay: "0s"
+ai_domain: wayne_dawg_idle
+abilities:
+  brutality: 8
+  quickness: 10
+  grit: 12
+  reasoning: 12
+  savvy: 14
+  flair: 10
+loot:
+  currency:
+    min: 20
+    max: 80
+merchant:
+  merchant_type: technology
+  sell_margin: 1.4
+  buy_margin: 0.4
+  budget: 1000
+  inventory: []
+  replenish_rate:
+    min_hours: 8
+    max_hours: 16
+    stock_refill: 1
+    budget_refill: 200

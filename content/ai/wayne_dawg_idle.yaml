@@ -1,0 +1,23 @@
+domain:
+  id: wayne_dawg_idle
+  description: Idle behavior for Wayne Dawg. Greets players with merchant banter.
+
+  tasks:
+    - id: behave
+      description: Root task — idle merchant behavior
+
+  methods:
+    - task: behave
+      id: idle_mode
+      precondition: ""
+      subtasks: [say_op]
+
+  operators:
+    - id: say_op
+      action: say
+      cooldown: "45s"
+      strings:
+        - "You need somethin', or you just here to look?"
+        - "Jennifer! We got company!"
+        - "Best deals on the Ridge, and that ain't braggin'."
+        - "Don't let the place fool ya. I got good stock."
