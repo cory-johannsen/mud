@@ -41,7 +41,7 @@ type QuestDef struct {
 	Rewards       QuestRewards     `yaml:"rewards"`
 }
 
-func (d *QuestDef) Validate() error {
+func (d QuestDef) Validate() error {
 	if d.ID == "" {
 		return fmt.Errorf("quest ID must not be empty")
 	}
@@ -64,7 +64,7 @@ func (d *QuestDef) Validate() error {
 		if obj.TargetID == "" {
 			return fmt.Errorf("quest %q objective %q: TargetID must not be empty", d.ID, obj.ID)
 		}
-		if !ValidObjectiveTypes[obj.Type] {
+		if !validObjectiveTypes[obj.Type] {
 			return fmt.Errorf("quest %q objective %q: invalid Type %q", d.ID, obj.ID, obj.Type)
 		}
 		if obj.Quantity < 1 {
