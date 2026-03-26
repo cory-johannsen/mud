@@ -1325,13 +1325,6 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 
 	combat.RollInitiative(combatants, h.dice.Src())
 
-	// Fire exploration mode combat-start hook (REQ-EXP-39, REQ-EXP-40).
-	if combatMsgs := applyExploreModeOnCombatStart(playerSess, playerCbt, h); len(combatMsgs) > 0 {
-		for _, msg := range combatMsgs {
-			h.pushMessageToUID(playerSess.UID, msg)
-		}
-	}
-
 	var scriptMgr *scripting.Manager
 	var zoneID string
 	if h.scriptMgr != nil && h.worldMgr != nil {
@@ -1367,6 +1360,16 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 		return h.sessions.GetPlayer(uid)
 	})
 	cbt.StartRound(3)
+
+	// Fire exploration mode combat-start hook AFTER StartRound so that ACMod
+	// applied by Hold Ground (REQ-EXP-11) survives round 1. StartRound resets
+	// ACMod to 0 for all combatants; calling applyExploreModeOnCombatStart
+	// before StartRound would zero the +2 ACMod immediately (REQ-EXP-13).
+	if combatMsgs := applyExploreModeOnCombatStart(playerSess, playerCbt, h); len(combatMsgs) > 0 {
+		for _, msg := range combatMsgs {
+			h.pushMessageToUID(playerSess.UID, msg)
+		}
+	}
 
 	var events []*gamev1.CombatEvent
 	for _, c := range cbt.Combatants {
@@ -2205,13 +2208,6 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	combatants := []*combat.Combatant{playerCbt, npcCbt}
 	combat.RollInitiative(combatants, h.dice.Src())
 
-	// Fire exploration mode combat-start hook (REQ-EXP-39, REQ-EXP-40).
-	if combatMsgs := applyExploreModeOnCombatStart(sess, playerCbt, h); len(combatMsgs) > 0 {
-		for _, msg := range combatMsgs {
-			h.pushMessageToUID(sess.UID, msg)
-		}
-	}
-
 	var scriptMgr *scripting.Manager
 	var zoneID string
 	if h.scriptMgr != nil && h.worldMgr != nil {
@@ -2297,6 +2293,16 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 
 	initCondEvents := cbt.StartRound(3)
 	_ = initCondEvents // round 1 starts with no active conditions; events are empty
+
+	// Fire exploration mode combat-start hook AFTER StartRound so that ACMod
+	// applied by Hold Ground (REQ-EXP-11) survives round 1. StartRound resets
+	// ACMod to 0 for all combatants; calling applyExploreModeOnCombatStart
+	// before StartRound would zero the +2 ACMod immediately (REQ-EXP-13).
+	if combatMsgs := applyExploreModeOnCombatStart(sess, playerCbt, h); len(combatMsgs) > 0 {
+		for _, msg := range combatMsgs {
+			h.pushMessageToUID(sess.UID, msg)
+		}
+	}
 
 	// Build initiative events.
 	var events []*gamev1.CombatEvent

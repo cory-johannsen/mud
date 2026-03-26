@@ -7,13 +7,16 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -391,4 +394,175 @@ func TestExploreMode_LayLow_ClearedAtCombatStart(t *testing.T) {
 	cbt := &combat.Combatant{ID: sess.UID, Kind: combat.KindPlayer}
 	ApplyExploreModeOnCombatStartForTest(sess, cbt, h)
 	require.Equal(t, "", sess.ExploreMode, "Lay Low must be cleared at combat start")
+}
+
+// newShadowSvc builds a GameServiceServer with a single skill registered for Shadow tests.
+func newShadowSvc(t *testing.T, roller *dice.Roller, sessMgr *session.Manager, worldMgr *world.Manager) *GameServiceServer {
+	t.Helper()
+	logger := zaptest.NewLogger(t)
+	skills := []*ruleset.Skill{
+		{ID: "parkour", Name: "Parkour", Ability: "quickness"},
+	}
+	return newTestGameServiceServer(
+		worldMgr, sessMgr,
+		command.DefaultRegistry(),
+		NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil),
+		NewChatHandler(sessMgr),
+		logger,
+		nil, roller, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		skills, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil,
+		nil,
+		nil,
+		nil, nil,
+	)
+}
+
+// TestExploreMode_Shadow_AllyHigherRank_UsesAllyRank verifies REQ-EXP-29.
+//
+// Precondition: player has Shadow mode set, ally is in the same room, ally has expert
+// parkour rank (bonus +4) vs player's untrained rank (bonus 0); dice fixed to return 9
+// (roll=10); both ability scores default 10 (mod=0).
+// Postcondition: skill check total is 10+0+4=14, reflecting ally's expert rank.
+func TestExploreMode_Shadow_AllyHigherRank_UsesAllyRank(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 9} // roll=10
+	roller := dice.NewLoggedRoller(src, logger)
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+
+	svc := newShadowSvc(t, roller, sessMgr, worldMgr)
+
+	// Add the shadowing player (untrained in parkour, CharacterID=10).
+	playerSess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "u_shadow_player",
+		Username:    "shadowuser",
+		CharName:    "Shadowfox",
+		CharacterID: 10,
+		RoomID:      "room_a",
+		CurrentHP:   10,
+		MaxHP:       10,
+		Abilities:   character.AbilityScores{Quickness: 10},
+		Role:        "player",
+	})
+	require.NoError(t, err)
+	playerSess.Skills = map[string]string{} // untrained
+	playerSess.Conditions = condition.NewActiveSet()
+
+	// Add the ally (expert in parkour, CharacterID=20) in the same room.
+	allySess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "u_shadow_ally",
+		Username:    "allyuser",
+		CharName:    "Brightblade",
+		CharacterID: 20,
+		RoomID:      "room_a",
+		CurrentHP:   10,
+		MaxHP:       10,
+		Abilities:   character.AbilityScores{Quickness: 10},
+		Role:        "player",
+	})
+	require.NoError(t, err)
+	allySess.Skills = map[string]string{"parkour": "expert"} // rank bonus +4
+
+	// Set Shadow mode targeting the ally by CharacterID.
+	playerSess.ExploreMode = session.ExploreModeShadow
+	playerSess.ExploreShadowTarget = 20
+
+	room := &world.Room{
+		ID:         "room_a",
+		ZoneID:     "test",
+		Title:      "Test Room",
+		Properties: map[string]string{},
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "parkour",
+				DC:      10,
+				Trigger: "on_enter",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "You vault it."},
+					Failure: &skillcheck.Outcome{Message: "You stumble."},
+				},
+			},
+		},
+	}
+
+	msgs := svc.applyRoomSkillChecks("u_shadow_player", room)
+	// roll=10, abilityMod=0, allyRank=expert(+4) → total=14. Player rank=0 so ally rank wins.
+	require.NotEmpty(t, msgs, "expected skill check message")
+	assert.Contains(t, msgs[0], "14", "total must reflect ally's expert rank bonus of +4 (REQ-EXP-29)")
+}
+
+// TestExploreMode_Shadow_AllyLowerRank_UsesPlayerRank verifies REQ-EXP-30.
+//
+// Precondition: player has Shadow mode set, ally is in the same room; player has expert
+// parkour rank (bonus +4), ally has trained rank (bonus +2); dice fixed to return 9 (roll=10).
+// Postcondition: skill check total is 10+0+4=14, reflecting player's own higher rank.
+func TestExploreMode_Shadow_AllyLowerRank_UsesPlayerRank(t *testing.T) {
+	logger := zaptest.NewLogger(t)
+	src := &fixedDiceSource{val: 9} // roll=10
+	roller := dice.NewLoggedRoller(src, logger)
+
+	worldMgr, sessMgr := testWorldAndSession(t)
+
+	svc := newShadowSvc(t, roller, sessMgr, worldMgr)
+
+	// Add the shadowing player (expert in parkour, CharacterID=11).
+	playerSess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "u_shadow_player2",
+		Username:    "shadowuser2",
+		CharName:    "Foxwhisper",
+		CharacterID: 11,
+		RoomID:      "room_a",
+		CurrentHP:   10,
+		MaxHP:       10,
+		Abilities:   character.AbilityScores{Quickness: 10},
+		Role:        "player",
+	})
+	require.NoError(t, err)
+	playerSess.Skills = map[string]string{"parkour": "expert"} // rank bonus +4
+	playerSess.Conditions = condition.NewActiveSet()
+
+	// Add the ally (trained in parkour, CharacterID=21) in the same room.
+	allySess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
+		UID:         "u_shadow_ally2",
+		Username:    "allyuser2",
+		CharName:    "Greenshield",
+		CharacterID: 21,
+		RoomID:      "room_a",
+		CurrentHP:   10,
+		MaxHP:       10,
+		Abilities:   character.AbilityScores{Quickness: 10},
+		Role:        "player",
+	})
+	require.NoError(t, err)
+	allySess.Skills = map[string]string{"parkour": "trained"} // rank bonus +2, lower than player
+
+	// Set Shadow mode targeting the ally by CharacterID.
+	playerSess.ExploreMode = session.ExploreModeShadow
+	playerSess.ExploreShadowTarget = 21
+
+	room := &world.Room{
+		ID:         "room_a",
+		ZoneID:     "test",
+		Title:      "Test Room",
+		Properties: map[string]string{},
+		SkillChecks: []skillcheck.TriggerDef{
+			{
+				Skill:   "parkour",
+				DC:      10,
+				Trigger: "on_enter",
+				Outcomes: skillcheck.OutcomeMap{
+					Success: &skillcheck.Outcome{Message: "You vault it."},
+					Failure: &skillcheck.Outcome{Message: "You stumble."},
+				},
+			},
+		},
+	}
+
+	msgs := svc.applyRoomSkillChecks("u_shadow_player2", room)
+	// roll=10, abilityMod=0, playerRank=expert(+4) → total=14. Ally rank=+2 < +4 so player rank wins.
+	require.NotEmpty(t, msgs, "expected skill check message")
+	assert.Contains(t, msgs[0], "14", "total must reflect player's own expert rank bonus of +4 (REQ-EXP-30)")
 }

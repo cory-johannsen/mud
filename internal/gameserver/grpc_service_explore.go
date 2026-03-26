@@ -263,7 +263,10 @@ func (s *GameServiceServer) applyExploreCondition(uid string, sess *session.Play
 }
 
 // applyExploreModeOnCombatStart fires the combat-start exploration hook for the player.
-// Called after RollInitiative in combat_handler.go before StartCombat.
+// MUST be called AFTER StartRound in combat_handler.go. StartRound resets Combatant.ACMod
+// to 0; calling this function before StartRound would immediately zero the Hold Ground +2
+// ACMod, violating REQ-EXP-11 (shield_raised at first AP grant) and REQ-EXP-13 (expires
+// when AP is next granted — i.e., at the start of round 2's StartRound call).
 //
 // Precondition: sess, playerCbt, and h must not be nil.
 // Postcondition: Lay Low is cleared; Hold Ground applies shield_raised + ACMod;
