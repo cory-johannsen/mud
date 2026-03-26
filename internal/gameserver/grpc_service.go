@@ -4256,9 +4256,20 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 
 	// Threat assessment on idle tick for hostile NPCs. REQ-NB-7.
 	// REQ-FA-27: enemy faction NPCs are treated as hostile regardless of disposition.
+	// REQ-FA-28: allied faction NPCs MUST NOT initiate combat against same-faction players.
 	// Non-combat NPC types (merchant, healer, banker, job_trainer, etc.) never initiate combat.
 	isCombatCapable := inst.NPCType == "" || inst.NPCType == "combat" || inst.NPCType == "guard" || inst.NPCType == "hireling"
 	isHostileToPlayers := inst.Disposition == "hostile"
+	// Allied-faction exclusion: suppress hostility if any room player is an ally of this NPC.
+	if isHostileToPlayers && s.factionSvc != nil && inst.FactionID != "" {
+		for _, p := range s.sessions.PlayersInRoomDetails(inst.RoomID) {
+			if s.factionSvc.IsAllyOf(p, inst.FactionID) {
+				isHostileToPlayers = false
+				break
+			}
+		}
+	}
+	// Enemy-faction promotion: non-hostile NPC becomes hostile if any room player is a faction enemy.
 	if !isHostileToPlayers && s.factionSvc != nil && inst.FactionID != "" {
 		for _, p := range s.sessions.PlayersInRoomDetails(inst.RoomID) {
 			if s.factionSvc.IsEnemyOf(p, inst.FactionID) {
