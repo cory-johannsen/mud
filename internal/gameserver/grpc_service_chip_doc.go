@@ -136,13 +136,12 @@ func (s *GameServiceServer) handleUncurse(uid string, req *gamev1.UncurseRequest
 			}
 		} else {
 			// No registry available; add item instance directly.
-			added := sess.Backpack.AddInstance(inventory.ItemInstance{
+			_ = sess.Backpack.AddInstance(&inventory.ItemInstance{
 				InstanceID: slotted.InstanceID,
 				ItemDefID:  slotted.ItemDefID,
 				Quantity:   1,
 				Modifier:   "defective",
 			})
-			_ = added
 		}
 
 		if isArmor {

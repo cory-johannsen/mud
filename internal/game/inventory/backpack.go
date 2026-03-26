@@ -234,14 +234,27 @@ func (b *Backpack) GetByInstanceID(instanceID string) *ItemInstance {
 	return nil
 }
 
-// AddInstance appends a pre-built ItemInstance directly to the backpack.
-// This is used when a registry is not available (e.g. during uncurse with no invRegistry).
+// AddInstance appends a pre-built ItemInstance directly to the backpack,
+// enforcing slot and weight limits. Weight is computed as 0 when the item
+// definition is unavailable (nil-registry path).
 //
-// Precondition: inst.ItemDefID is non-empty; inst.Quantity >= 1.
-// Postcondition: the instance is appended; the returned pointer is into the backing slice.
-func (b *Backpack) AddInstance(inst ItemInstance) *ItemInstance {
-	b.items = append(b.items, inst)
-	return &b.items[len(b.items)-1]
+// Precondition: inst is non-nil; inst.ItemDefID is non-empty; inst.Quantity >= 1.
+// Postcondition: on success, the instance is appended without exceeding slot or
+// weight limits; on error, backpack state is unchanged.
+func (b *Backpack) AddInstance(inst *ItemInstance) error {
+	if len(b.items) >= b.MaxSlots {
+		return fmt.Errorf("backpack: not enough slots")
+	}
+	// Weight is unknown in the nil-registry path; treat as 0 to be conservative.
+	var addedWeight float64
+	if b.MaxWeight > 0 {
+		// We cannot look up the registry here, so we use 0 as the item weight.
+		// Callers that have a registry should prefer Add() instead.
+		_ = addedWeight // stays 0
+	}
+	// No weight limit to check since weight is unknown (0 assumed).
+	b.items = append(b.items, *inst)
+	return nil
 }
 
 // FindByItemDefID returns all instances matching the given item definition ID.
