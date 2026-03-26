@@ -345,6 +345,15 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			progress     INT    NOT NULL DEFAULT 0,
 			PRIMARY KEY (character_id, quest_id, objective_id)
 		);
+
+		-- Migration 048
+		CREATE TABLE IF NOT EXISTS character_downtime (
+			character_id      bigint PRIMARY KEY REFERENCES characters(id) ON DELETE CASCADE,
+			activity_id       text        NOT NULL,
+			completes_at      timestamptz NOT NULL,
+			room_id           text        NOT NULL,
+			activity_metadata jsonb
+		);
 	`)
 	return err
 }
