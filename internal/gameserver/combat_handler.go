@@ -2185,12 +2185,39 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 	}
 
+	// Build per-player range status events so each player knows their distance
+	// to their primary NPC target at the start of each round (BUG-29).
+	// Precondition: cbt.Combatants is non-nil.
+	// Postcondition: One INITIATIVE event per living player-NPC pair is appended.
+	var rangeEvents []*gamev1.CombatEvent
+	for _, pc := range cbt.Combatants {
+		if pc.Kind != combat.KindPlayer || pc.IsDead() {
+			continue
+		}
+		npcTarget := h.bestNPCCombatant(cbt)
+		if npcTarget == nil {
+			continue
+		}
+		dist := combat.PosDist(pc.Position, npcTarget.Position)
+		var rangeLabel string
+		if dist <= 5 {
+			rangeLabel = fmt.Sprintf("%d ft (melee range)", dist)
+		} else {
+			rangeLabel = fmt.Sprintf("%d ft (ranged)", dist)
+		}
+		rangeEvents = append(rangeEvents, &gamev1.CombatEvent{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
+			Narrative: fmt.Sprintf("Range to %s: %s", npcTarget.Name, rangeLabel),
+		})
+	}
+
 	roundStartEvents := []*gamev1.CombatEvent{
 		{
 			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
 			Narrative: fmt.Sprintf("Round %d begins!", cbt.Round),
 		},
 	}
+	roundStartEvents = append(roundStartEvents, rangeEvents...)
 	roundStartEvents = append(roundStartEvents, condCombatEvents...)
 	roundStartEvents = append(roundStartEvents, drowningEvents...)
 	roundStartEvents = append(roundStartEvents, hazardEvents...)
