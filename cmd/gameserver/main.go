@@ -299,7 +299,7 @@ func main() {
 				}
 			}
 			if app.AutomapRepo != nil && len(newRooms) > 0 {
-				if err := app.AutomapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, newRooms); err != nil {
+				if err := app.AutomapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, newRooms, false); err != nil {
 					logger.Warn("bulk-persisting zone map reveal", zap.Error(err))
 				}
 			}

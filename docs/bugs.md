@@ -213,3 +213,53 @@
 **Description:** The character selection screen omits the team field, so players cannot see which team a character belongs to before selecting it.
 **Steps:** Connect to the MUD and reach the character selection prompt; observe that listed characters show no team information.
 **Fix:** Added `[team]` to `FormatCharacterSummary` in `internal/frontend/handlers/character_flow.go`. Character list now shows e.g. `Zara — Lvl 1 ganger from the Northeast [gun]`. Also fixed `handleChar`: `CharacterSheetView.Team` was populated from `sess.Team` but then unconditionally overwritten by `s.jobRegistry.TeamFor(sess.Class)`, which returns `""` for jobs without an explicit team affiliation. Fixed to only overwrite when the registry returns a non-empty team.
+
+### BUG-27: Zone map exposes danger level and POIs for unexplored rooms
+**Severity:** medium
+**Status:** fixed
+**Category:** World
+**Description:** Using the Zone Map reveals danger level and points of interest for all rooms in the zone, including rooms the player has never visited; only room existence should be revealed — danger level and POIs must require the player to actually explore each room.
+**Root Cause:** `AutomapCache` conflates map-revealed rooms (via `wireRevealZone`) with physically-visited rooms (via travel). `handleMap()` iterates `AutomapCache` and unconditionally populates `DangerLevel` and `Pois` for every room regardless of how it was discovered (`internal/gameserver/grpc_service.go:5599-5621`). Fix: add an `explored` column to `character_map_rooms`, introduce `ExploredCache` on `PlayerSession`, and gate danger level / POI output on `ExploredCache` membership.
+**Plan:** `docs/superpowers/plans/2026-03-26-bug27-zone-map-exploration-gating.md`
+**Steps:** Obtain a zone_map item, use it, and observe the map output; rooms the character has never entered show danger level and POI details that should be hidden until explored.
+**Fix:** Added `explored` boolean column to `character_map_rooms` (migration 050). Updated `AutomapRepository.Insert/BulkInsert` to accept `explored bool`; `LoadAll` now returns `AutomapResult` with `AllKnown` and `ExploredOnly` maps. Added `ExploredCache map[string]map[string]bool` to `PlayerSession`. Login populates both caches from DB. Travel and room entry set `ExploredCache` and pass `explored=true` to Insert. `wireRevealZone` passes `explored=false`. `handleMap` gates `DangerLevel` and `Pois` on `ExploredCache` membership.
+
+### BUG-31: AP not displayed to player during combat
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** Action Points are never shown to the player — neither at the start of each round nor after spending AP on an action — leaving the player unable to make informed decisions about what actions they can take.
+**Steps:** Enter combat with any NPC; observe the round-start message and any action confirmation messages — no AP total or remaining AP is displayed at any point.
+**Fix:**
+
+### BUG-30: NE Portland zone map has multiple disconnected sections
+**Severity:** medium
+**Status:** open
+**Category:** World
+**Description:** The NE Portland zone map renders as several isolated clusters of rooms with no connecting paths between them, indicating missing or broken exit links in `content/zones/ne_portland.yaml`.
+**Steps:** Obtain a zone_map item in NE Portland and use it; observe that the map shows multiple disconnected room groups rather than a single connected graph.
+**Fix:**
+
+### BUG-29: Range to target not displayed during combat
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** The player's current range to their combat target is never shown, leaving them unable to determine whether their equipped weapon can reach the NPC or whether they need to close/increase distance.
+**Steps:** Initiate combat with any NPC; observe the combat output — no range information is displayed at any point during the encounter.
+**Fix:**
+
+### BUG-28: Grinder's Row zone exit (west to Cully Road) missing from map
+**Severity:** low
+**Status:** open
+**Category:** World
+**Description:** The west exit from Grinder's Row in Ruskbucket Ridge leads to Cully Road but does not appear on the zone map.
+**Steps:** Navigate to Grinder's Row in Ruskbucket Ridge; use the zone map or examine exits; observe the west exit to Cully Road is absent from the map display despite being traversable.
+**Fix:**
+
+### BUG-26: Zone map rooms are not marked safe in most zones
+**Severity:** medium
+**Status:** fixed
+**Category:** World
+**Description:** The room containing the `zone_map` equipment item should have `danger_level: safe` in every zone, but 14 of 16 zones are missing this designation — players can be attacked or have traps triggered while using the zone map.
+**Steps:** Inspect any zone YAML under `content/zones/`; find the room with `item_id: zone_map`; observe it either inherits a non-safe zone danger level or has a non-safe level set explicitly. Affected zones: vantucky, the_couve, lake_oswego, aloha, se_industrial, sauvie_island, ross_island, pdx_international, downtown, felony_flats, hillsboro, troutdale, ne_portland, battleground.
+**Fix:** Added `danger_level: safe` to the zone_map room in all 14 affected zone YAML files. Added `TestZoneMapRoomIsSafe` in `internal/game/world/noncombat_coverage_test.go` to enforce this invariant going forward.

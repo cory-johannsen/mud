@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
+	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -630,4 +631,129 @@ func TestProperty_HandleMap_WorldView_DiscoveredFlagMatchesCache(t *testing.T) {
 			t.Fatalf("Discovered=%v but cache populated=%v", mapResp.WorldTiles[0].Discovered, discovered)
 		}
 	})
+}
+
+// TestHandleMap_UnexploredRoom_HidesDangerAndPOIs verifies that a room present in
+// AutomapCache but absent from ExploredCache has empty DangerLevel and no Pois.
+//
+// Precondition: Zone and room exist with a non-empty DangerLevel; room is in AutomapCache
+// but NOT in ExploredCache (revealed via map item, not by physical visit).
+// Postcondition: The returned tile has DangerLevel == "" and Pois is empty.
+func TestHandleMap_UnexploredRoom_HidesDangerAndPOIs(t *testing.T) {
+	zoneID := "zone1"
+	roomID := "room1"
+
+	r := &world.Room{
+		ID:          roomID,
+		ZoneID:      zoneID,
+		Title:       "Test Room",
+		Description: "A test room.",
+		DangerLevel: string(danger.Dangerous),
+	}
+	z := &world.Zone{
+		ID:          zoneID,
+		Name:        "Test Zone",
+		StartRoom:   roomID,
+		Rooms:       map[string]*world.Room{roomID: r},
+		DangerLevel: string(danger.Dangerous),
+	}
+	wMgr, err := world.NewManager([]*world.Zone{z})
+	require.NoError(t, err)
+
+	sMgr := session.NewManager()
+	_, addErr := sMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid1",
+		Username:          "user1",
+		CharName:          "Hero",
+		CharacterID:       1,
+		RoomID:            roomID,
+		CurrentHP:         10,
+		MaxHP:             10,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Northeast",
+		Class:             "Gunner",
+		Level:             1,
+	})
+	require.NoError(t, addErr)
+
+	sess, _ := sMgr.GetPlayer("uid1")
+	// Room is known via map reveal but not physically visited.
+	sess.AutomapCache[zoneID] = map[string]bool{roomID: true}
+	// ExploredCache intentionally empty — room not physically visited.
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	mapResp := result.GetMap()
+	require.NotNil(t, mapResp)
+	require.Len(t, mapResp.Tiles, 1)
+
+	tile := mapResp.Tiles[0]
+	require.Equal(t, roomID, tile.RoomId, "tile must be for the known room")
+	require.Empty(t, tile.DangerLevel, "unexlored room must not reveal danger level (BUG-27)")
+	require.Empty(t, tile.Pois, "unexplored room must not reveal POIs (BUG-27)")
+}
+
+// TestHandleMap_ExploredRoom_ShowsDangerAndPOIs verifies that a room present in
+// both AutomapCache and ExploredCache has its DangerLevel populated.
+//
+// Precondition: Zone and room exist with a non-empty DangerLevel; room is in both
+// AutomapCache and ExploredCache (physically visited).
+// Postcondition: The returned tile has a non-empty DangerLevel.
+func TestHandleMap_ExploredRoom_ShowsDangerAndPOIs(t *testing.T) {
+	zoneID := "zone1"
+	roomID := "room1"
+
+	r := &world.Room{
+		ID:          roomID,
+		ZoneID:      zoneID,
+		Title:       "Test Room",
+		Description: "A test room.",
+		DangerLevel: string(danger.Dangerous),
+	}
+	z := &world.Zone{
+		ID:          zoneID,
+		Name:        "Test Zone",
+		StartRoom:   roomID,
+		Rooms:       map[string]*world.Room{roomID: r},
+		DangerLevel: string(danger.Dangerous),
+	}
+	wMgr, err := world.NewManager([]*world.Zone{z})
+	require.NoError(t, err)
+
+	sMgr := session.NewManager()
+	_, addErr := sMgr.AddPlayer(session.AddPlayerOptions{
+		UID:               "uid1",
+		Username:          "user1",
+		CharName:          "Hero",
+		CharacterID:       1,
+		RoomID:            roomID,
+		CurrentHP:         10,
+		MaxHP:             10,
+		Abilities:         character.AbilityScores{},
+		Role:              "player",
+		RegionDisplayName: "the Northeast",
+		Class:             "Gunner",
+		Level:             1,
+	})
+	require.NoError(t, addErr)
+
+	sess, _ := sMgr.GetPlayer("uid1")
+	// Room is both known and physically visited.
+	sess.AutomapCache[zoneID] = map[string]bool{roomID: true}
+	sess.ExploredCache[zoneID] = map[string]bool{roomID: true}
+
+	s := &GameServiceServer{sessions: sMgr, world: wMgr}
+	result, err := s.handleMap("uid1", &gamev1.MapRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	mapResp := result.GetMap()
+	require.NotNil(t, mapResp)
+	require.Len(t, mapResp.Tiles, 1)
+
+	tile := mapResp.Tiles[0]
+	require.Equal(t, roomID, tile.RoomId, "tile must be for the explored room")
+	require.NotEmpty(t, tile.DangerLevel, "explored room must reveal danger level (BUG-27)")
 }

@@ -117,11 +117,23 @@ func (s *GameServiceServer) handleTravel(uid string, req *gamev1.TravelRequest) 
 	if sess.AutomapCache[destRoom.ZoneID] == nil {
 		sess.AutomapCache[destRoom.ZoneID] = make(map[string]bool)
 	}
+	if sess.ExploredCache[destRoom.ZoneID] == nil {
+		sess.ExploredCache[destRoom.ZoneID] = make(map[string]bool)
+	}
 	if !sess.AutomapCache[destRoom.ZoneID][destRoom.ID] {
 		sess.AutomapCache[destRoom.ZoneID][destRoom.ID] = true
+		sess.ExploredCache[destRoom.ZoneID][destRoom.ID] = true
 		if s.automapRepo != nil {
-			if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, destRoom.ZoneID, destRoom.ID); err != nil {
+			if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, destRoom.ZoneID, destRoom.ID, true); err != nil {
 				s.logger.Warn("persisting travel room discovery", zap.Error(err))
+			}
+		}
+	} else if !sess.ExploredCache[destRoom.ZoneID][destRoom.ID] {
+		// Room was previously revealed via map item but not physically visited yet.
+		sess.ExploredCache[destRoom.ZoneID][destRoom.ID] = true
+		if s.automapRepo != nil {
+			if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, destRoom.ZoneID, destRoom.ID, true); err != nil {
+				s.logger.Warn("persisting travel room exploration", zap.Error(err))
 			}
 		}
 	}

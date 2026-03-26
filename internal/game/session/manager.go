@@ -79,6 +79,10 @@ type PlayerSession struct {
 	// AutomapCache holds discovered rooms keyed by zone ID then room ID.
 	// Populated at login from the database; written through on each new discovery.
 	AutomapCache map[string]map[string]bool
+	// ExploredCache holds physically visited rooms keyed by zone ID then room ID.
+	// A room is explored only when the player physically enters it (explored=true in DB).
+	// Rooms revealed via map items (wireRevealZone) appear in AutomapCache but NOT here.
+	ExploredCache map[string]map[string]bool
 	// Skills maps skill_id to proficiency rank for the active character.
 	// Populated after ensureSkills completes; empty map means all untrained.
 	Skills map[string]string
@@ -485,6 +489,7 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		// Status 1 = IDLE: newly connected players are idle by default.
 		Status:             1,
 		AutomapCache:       make(map[string]map[string]bool),
+		ExploredCache:      make(map[string]map[string]bool),
 		FeatureChoices:     make(map[string]map[string]string),
 		ReactionsRemaining: 1,
 		Reactions:          reaction.NewReactionRegistry(),

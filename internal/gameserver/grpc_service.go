@@ -780,11 +780,12 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 
 	// Load automap cache from DB and record spawn room discovery.
 	if s.automapRepo != nil {
-		discovered, loadErr := s.automapRepo.LoadAll(stream.Context(), characterID)
+		automapResult, loadErr := s.automapRepo.LoadAll(stream.Context(), characterID)
 		if loadErr != nil {
 			s.logger.Warn("loading automap", zap.Error(loadErr))
 		} else {
-			sess.AutomapCache = discovered
+			sess.AutomapCache = automapResult.AllKnown
+			sess.ExploredCache = automapResult.ExploredOnly
 		}
 	}
 	// Record spawn room discovery.
@@ -793,10 +794,14 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		if sess.AutomapCache[zID] == nil {
 			sess.AutomapCache[zID] = make(map[string]bool)
 		}
+		if sess.ExploredCache[zID] == nil {
+			sess.ExploredCache[zID] = make(map[string]bool)
+		}
 		if !sess.AutomapCache[zID][spawnRoom.ID] {
 			sess.AutomapCache[zID][spawnRoom.ID] = true
+			sess.ExploredCache[zID][spawnRoom.ID] = true
 			if s.automapRepo != nil {
-				if err := s.automapRepo.Insert(stream.Context(), characterID, zID, spawnRoom.ID); err != nil {
+				if err := s.automapRepo.Insert(stream.Context(), characterID, zID, spawnRoom.ID, true); err != nil {
 					s.logger.Warn("persisting spawn room discovery", zap.Error(err))
 				}
 			}
@@ -2237,10 +2242,14 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		if sess.AutomapCache[zID] == nil {
 			sess.AutomapCache[zID] = make(map[string]bool)
 		}
+		if sess.ExploredCache[zID] == nil {
+			sess.ExploredCache[zID] = make(map[string]bool)
+		}
 		if !sess.AutomapCache[zID][newRoom.ID] {
 			sess.AutomapCache[zID][newRoom.ID] = true
+			sess.ExploredCache[zID][newRoom.ID] = true
 			if s.automapRepo != nil {
-				if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, zID, newRoom.ID); err != nil {
+				if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, zID, newRoom.ID, true); err != nil {
 					s.logger.Warn("persisting map discovery", zap.Error(err))
 				}
 			}
@@ -5845,29 +5854,34 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 		for _, e := range r.Exits {
 			exits = append(exits, string(e.Direction))
 		}
-		effectiveLevel := danger.EffectiveDangerLevel(zone.DangerLevel, r.DangerLevel)
+		// Gate danger level and POIs on physical exploration (BUG-27).
+		var effectiveLevelStr string
+		var poiSlice []string
+		if sess.ExploredCache[zoneID][roomID] {
+			effectiveLevel := danger.EffectiveDangerLevel(zone.DangerLevel, r.DangerLevel)
+			effectiveLevelStr = string(effectiveLevel)
 
-		// Collect POI type IDs for this explored room (REQ-POI-15..18).
-		poiSet := make(map[string]bool)
-		if s.npcMgr != nil {
-			for _, inst := range s.npcMgr.InstancesInRoom(r.ID) {
-				if inst.IsDead() || inst.NpcRole == "" {
-					continue
-				}
-				poiID := maputil.NpcRoleToPOIID(inst.NpcRole)
-				if poiID != "" {
-					poiSet[poiID] = true
+			// Collect POI type IDs for this explored room (REQ-POI-15..18).
+			poiSet := make(map[string]bool)
+			if s.npcMgr != nil {
+				for _, inst := range s.npcMgr.InstancesInRoom(r.ID) {
+					if inst.IsDead() || inst.NpcRole == "" {
+						continue
+					}
+					poiID := maputil.NpcRoleToPOIID(inst.NpcRole)
+					if poiID != "" {
+						poiSet[poiID] = true
+					}
 				}
 			}
+			if len(r.Equipment) > 0 {
+				poiSet["equipment"] = true
+			}
+			for id := range poiSet {
+				poiSlice = append(poiSlice, id)
+			}
+			poiSlice = maputil.SortPOIs(poiSlice)
 		}
-		if len(r.Equipment) > 0 {
-			poiSet["equipment"] = true
-		}
-		poiSlice := make([]string, 0, len(poiSet))
-		for id := range poiSet {
-			poiSlice = append(poiSlice, id)
-		}
-		poiSlice = maputil.SortPOIs(poiSlice)
 
 		tiles = append(tiles, &gamev1.MapTile{
 			RoomId:      r.ID,
@@ -5876,7 +5890,7 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			Y:           int32(r.MapY),
 			Current:     r.ID == sess.RoomID,
 			Exits:       exits,
-			DangerLevel: string(effectiveLevel),
+			DangerLevel: effectiveLevelStr,
 			Pois:        poiSlice,
 			BossRoom:    r.BossRoom,
 		})
@@ -5918,7 +5932,7 @@ func (s *GameServiceServer) wireRevealZone() {
 			}
 		}
 		if s.automapRepo != nil && len(roomIDs) > 0 {
-			if err := s.automapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, roomIDs); err != nil {
+			if err := s.automapRepo.BulkInsert(context.Background(), sess.CharacterID, zoneID, roomIDs, false); err != nil {
 				s.logger.Warn("reveal_zone: bulk insert automap", zap.Error(err))
 			}
 		}
