@@ -61,21 +61,26 @@ func Colorf(color, format string, args ...interface{}) string {
 // StripANSI removes all ANSI escape sequences from a string.
 // This is useful for measuring the printable width of styled text.
 //
-// Postcondition: Returns text with all \033[...m sequences removed.
+// Precondition: s is any string, possibly containing complete or partial ANSI escape sequences.
+// Postcondition: Returns text with all \033[...m sequences and any partial \033[ sequences removed.
 func StripANSI(s string) string {
 	result := make([]byte, 0, len(s))
 	i := 0
 	for i < len(s) {
 		if s[i] == '\033' && i+1 < len(s) && s[i+1] == '[' {
-			// Skip past the 'm' terminator
+			// Skip past the 'm' terminator.
 			j := i + 2
 			for j < len(s) && s[j] != 'm' {
 				j++
 			}
 			if j < len(s) {
+				// Complete sequence: advance past the 'm'.
 				i = j + 1
-				continue
+			} else {
+				// Incomplete sequence (no 'm' terminator): skip the entire partial sequence.
+				i = j
 			}
+			continue
 		}
 		result = append(result, s[i])
 		i++
