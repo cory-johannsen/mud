@@ -656,13 +656,6 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	if dbChar != nil {
 		genderVal = dbChar.Gender
 		teamVal = dbChar.Team
-		if s.logger != nil {
-			s.logger.Info("login: loaded team from DB",
-				zap.Int64("character_id", characterID),
-				zap.String("team", teamVal),
-				zap.String("class", dbChar.Class),
-			)
-		}
 	}
 	sess, err := s.sessions.AddPlayer(session.AddPlayerOptions{
 		UID:                 uid,
@@ -4700,9 +4693,6 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return errorEvent("player not found"), nil
-	}
-	if s.logger != nil {
-		s.logger.Info("handleChar: sess.Team", zap.String("uid", uid), zap.String("team", sess.Team), zap.String("class", sess.Class))
 	}
 
 	view := &gamev1.CharacterSheetView{
