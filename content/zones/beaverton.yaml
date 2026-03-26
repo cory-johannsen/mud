@@ -116,7 +116,7 @@ zone:
       target: beav_parking_garage_a
     - direction: west
       target: beav_mall_core
-    map_x: -6
+    map_x: -7
     map_y: 0
     spawns:
     - template: mall_cop_elite

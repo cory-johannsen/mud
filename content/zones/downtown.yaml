@@ -777,7 +777,7 @@ zone:
       target: dt_main_library
     - direction: south
       target: dt_salmon_street_springs
-    map_x: -2
+    map_x: -3
     map_y: 0
     spawns:
     - template: scavenger
