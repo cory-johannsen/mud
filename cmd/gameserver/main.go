@@ -198,6 +198,11 @@ func main() {
 		app.CombatHandler.SetFeatRegistry(fr)
 	}
 
+	// Validate quest registry cross-references at startup.
+	if err := app.GRPCService.ValidateQuestRegistry(); err != nil {
+		log.Fatalf("quest registry validation failed: %v", err)
+	}
+
 	// Wire broadcast function: CombatHandler needs GRPCService after both are constructed.
 	app.CombatHandler.SetBroadcastFn(func(roomID string, events []*gamev1.CombatEvent) {
 		if app.GRPCService != nil {

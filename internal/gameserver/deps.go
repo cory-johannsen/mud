@@ -10,6 +10,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/quest"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/technology"
@@ -42,6 +43,9 @@ type StorageDeps struct {
 	DetainedUntilRepo      DetainedUntilUpdater
 	FactionRepRepo         FactionRepRepository
 	MaterialRepo           CharacterMaterialsRepository
+	// QuestRepo persists player quest status and objective progress.
+	// May be nil when the quest feature is not yet configured.
+	QuestRepo quest.QuestRepository
 }
 
 // ContentDeps groups all content/world dependencies for GameServiceServer.
@@ -86,6 +90,9 @@ type ContentDeps struct {
 	// MaterialRegistry holds all crafting material definitions loaded at startup.
 	// May be nil when the crafting feature is not yet configured.
 	MaterialRegistry *crafting.MaterialRegistry
+	// QuestRegistry holds all quest definitions loaded at startup.
+	// May be nil when the quest feature is not yet configured.
+	QuestRegistry quest.QuestRegistry
 }
 
 // HandlerDeps groups all handler dependencies for GameServiceServer.

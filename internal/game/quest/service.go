@@ -65,6 +65,21 @@ func NewService(
 	}
 }
 
+// SetXPAwarder wires an XPAwarder into the service after construction.
+//
+// Precondition: awarder must be non-nil.
+// Postcondition: subsequent quest completions will call awarder.AwardXPAmount for XP rewards.
+func (s *Service) SetXPAwarder(awarder XPAwarder) {
+	s.xpSvc = awarder
+}
+
+// Registry returns the quest registry.
+//
+// Postcondition: Returns the QuestRegistry this Service was initialized with (may be empty but not nil).
+func (s *Service) Registry() QuestRegistry {
+	return s.registry
+}
+
 // HydrateSession populates sess.ActiveQuests and sess.CompletedQuests from the given records.
 //
 // Precondition: sess must be non-nil.

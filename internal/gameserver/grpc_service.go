@@ -21,6 +21,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/focuspoints"
 	"github.com/cory-johannsen/mud/internal/game/faction"
+	"github.com/cory-johannsen/mud/internal/game/quest"
 	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
 	"github.com/cory-johannsen/mud/internal/game/maputil"
@@ -284,6 +285,9 @@ type GameServiceServer struct {
 	// factionConfig holds global faction economy parameters (rep costs, rep per service).
 	// May be nil when faction feature is not configured.
 	factionConfig *faction.FactionConfig
+	// questSvc handles quest lifecycle (offer, accept, progress, complete, abandon).
+	// May be nil when no quests are configured.
+	questSvc *quest.Service
 	// gameHourFn returns the current game hour (0–23). Used by NPC schedule evaluation. REQ-NB-16.
 	gameHourFn func() int
 	// npcIdleTickInterval is the ZoneTickManager tick interval used to convert
@@ -408,6 +412,10 @@ func NewGameServiceServer(
 	if content.FactionConfig != nil {
 		s.factionConfig = content.FactionConfig
 	}
+	if storage.QuestRepo != nil {
+		// xpSvc is nil at construction time; wired later via SetXPService → SetQuestXPAwarder.
+		s.questSvc = quest.NewService(content.QuestRegistry, storage.QuestRepo, nil, s.invRegistry, s.charSaver)
+	}
 	// gameHourFn defaults to reading from calendar if available. REQ-NB-16.
 	s.gameHourFn = func() int {
 		if s.calendar != nil {
@@ -449,6 +457,21 @@ func NewGameServiceServer(
 	return s
 }
 
+// ValidateQuestRegistry cross-checks all quest definitions against live registries.
+// Must be called after all registries are loaded and before Serve().
+//
+// Precondition: npcMgr, invRegistry, and world must be fully initialized.
+// Postcondition: Returns non-nil error if any quest reference is unresolvable.
+func (s *GameServiceServer) ValidateQuestRegistry() error {
+	if s.questSvc == nil || len(s.questSvc.Registry()) == 0 {
+		return nil
+	}
+	npcIDs := s.npcMgr.AllTemplateIDs()
+	itemIDs := s.invRegistry.AllItemIDs()
+	roomIDs := s.world.AllRoomIDs()
+	return s.questSvc.Registry().CrossValidate(npcIDs, itemIDs, roomIDs)
+}
+
 // SetNPCIdleTickInterval sets the zone-tick interval used to convert say cooldown durations
 // to tick counts. REQ-NB-2. Must be called before StartZoneTicks.
 //
@@ -484,6 +507,30 @@ func (s *GameServiceServer) SetWorldEditor(we *world.WorldEditor) {
 // Postcondition: XP is awarded at kill, room discovery, and skill check sites.
 func (s *GameServiceServer) SetXPService(svc *xp.Service) {
 	s.xpSvc = svc
+	if s.questSvc != nil {
+		s.questSvc.SetXPAwarder(&xpServiceQuestAdapter{svc: svc})
+	}
+}
+
+// xpServiceQuestAdapter bridges *xp.Service to quest.XPAwarder.
+// It type-asserts the quest.SessionState to *session.PlayerSession; if the assertion
+// fails the award is skipped rather than panicking.
+//
+// Precondition: svc must be non-nil.
+type xpServiceQuestAdapter struct {
+	svc *xp.Service
+}
+
+// AwardXPAmount implements quest.XPAwarder by delegating to the underlying xp.Service.
+//
+// Precondition: sess must be a *session.PlayerSession; characterID > 0; xpAmount >= 0.
+// Postcondition: XP is awarded when the type assertion succeeds; returns nil otherwise.
+func (a *xpServiceQuestAdapter) AwardXPAmount(ctx context.Context, sess quest.SessionState, characterID int64, xpAmount int) ([]string, error) {
+	ps, ok := sess.(*session.PlayerSession)
+	if !ok {
+		return nil, nil
+	}
+	return a.svc.AwardXPAmount(ctx, ps, characterID, xpAmount)
 }
 
 // SetJobRegistry injects a job registry for testing.
