@@ -5,8 +5,8 @@ zone:
   world_y: 0
   script_dir: content/scripts/zones/beaverton
   name: The Free State of Beaverton
-  description: A suburban fortress-state where strip malls serve as government buildings, mall cops enforce martial law, and
-    parking violations carry the death penalty.
+  description: A suburban fortress-state where strip malls serve as government buildings,
+    mall cops enforce martial law, and parking violations carry the death penalty.
   start_room: beav_free_market
   rooms:
   - id: beav_canyon_road_east
@@ -20,6 +20,7 @@ zone:
       The ruins of Downtown Portland are visible to the east through the haze.
 
       '
+    danger_level: safe
     exits:
     - direction: east
       target: transit_mall
@@ -53,6 +54,7 @@ zone:
       The road ahead leads deeper into Beaverton territory.
 
       '
+    danger_level: safe
     exits:
     - direction: east
       target: beav_canyon_road_east
@@ -62,10 +64,6 @@ zone:
       target: beav_sunset_transit
     map_x: -2
     map_y: 0
-    spawns:
-    - template: beaverton_minuteman
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: quiet
@@ -82,6 +80,7 @@ zone:
       the weapons weren''t so real.
 
       '
+    core: true
     exits:
     - direction: east
       target: beav_canyon_road_west
@@ -109,11 +108,14 @@ zone:
       still works, somehow, and the smell of frosting mingles with gun oil.
 
       '
+    core: true
     exits:
     - direction: east
       target: beav_town_center
     - direction: south
       target: beav_parking_garage_a
+    - direction: west
+      target: beav_mall_core
     map_x: -6
     map_y: 0
     spawns:
@@ -136,6 +138,7 @@ zone:
       a string of lights that makes this the brightest place for miles.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_hall_boulevard
@@ -145,10 +148,6 @@ zone:
       target: beav_bike_path_north
     map_x: -4
     map_y: -4
-    spawns:
-    - template: cedar_hills_patrol
-      count: 2
-      respawn_after: 5m
     properties:
       lighting: electric
       atmosphere: busy
@@ -165,6 +164,7 @@ zone:
       are enforced with lethal enthusiasm.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_progress_ridge
@@ -174,10 +174,6 @@ zone:
       target: beav_cul_de_sac_west
     map_x: -2
     map_y: 2
-    spawns:
-    - template: beaverton_minuteman
-      count: 2
-      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: patrolled
@@ -194,9 +190,12 @@ zone:
       which means it''s full of everything they don''t want found.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_bike_path_north
+    - direction: west
+      target: beav_neutral_cafe
     map_x: -4
     map_y: -8
     properties:
@@ -215,6 +214,7 @@ zone:
       golf carts and modified riding mowers.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_canyon_road_west
@@ -222,13 +222,6 @@ zone:
       target: beav_neighborhood_watch_north
     map_x: -2
     map_y: -2
-    spawns:
-    - template: mall_cop_elite
-      count: 1
-      respawn_after: 5m
-    - template: beaverton_minuteman
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: spotlight
       atmosphere: fortified
@@ -245,6 +238,7 @@ zone:
       and whatever Aloha has become.
 
       '
+    danger_level: safe
     exits:
     - direction: west
       target: aloha_tv_highway_east
@@ -253,10 +247,6 @@ zone:
       target: beav_cedar_hills
     map_x: -6
     map_y: -4
-    spawns:
-    - template: beaverton_minuteman
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: guarded
@@ -273,6 +263,7 @@ zone:
       in Tigard. On most days, it''s just grey.
 
       '
+    danger_level: safe
     exits:
     - direction: north
       target: beav_murray_blvd
@@ -280,10 +271,6 @@ zone:
       target: beav_scholls_ferry
     map_x: -2
     map_y: 4
-    spawns:
-    - template: cedar_hills_patrol
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: windy
@@ -300,13 +287,12 @@ zone:
       log hangs from a lamppost, meticulously maintained.
 
       '
-    exits: []
+    danger_level: safe
+    exits:
+    - direction: west
+      target: beav_suburban_ruins_west
     map_x: -6
     map_y: -2
-    spawns:
-    - template: beaverton_minuteman
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: suburban
@@ -323,6 +309,7 @@ zone:
       each one stamped with an official seal.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_town_center
@@ -348,15 +335,14 @@ zone:
       Your parking level determines your rank.
 
       '
+    danger_level: safe
     exits:
     - direction: north
       target: beav_food_court_command
+    - direction: south
+      target: beav_security_hq
     map_x: -6
     map_y: 2
-    spawns:
-    - template: mall_cop_elite
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: dim
       atmosphere: echoing
@@ -373,11 +359,12 @@ zone:
       which is an old toll booth.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_murray_blvd
-    map_x: 202
-    map_y: 24
+    map_x: -2
+    map_y: 6
     properties:
       lighting: dim
       atmosphere: judicial
@@ -394,6 +381,7 @@ zone:
       Children''s toys rust in the yards beside weapon racks.
 
       '
+    danger_level: safe
     exits:
     - direction: east
       target: beav_murray_blvd
@@ -415,11 +403,12 @@ zone:
       of constitutional law. Violators are sentenced to parking duty.
 
       '
+    danger_level: safe
     exits:
     - direction: east
       target: beav_hall_boulevard
-    map_x: 202
-    map_y: 28
+    map_x: -6
+    map_y: 0
     properties:
       lighting: fluorescent
       atmosphere: officious
@@ -434,6 +423,7 @@ zone:
       their spoke-mounted playing cards clicking a warning of their approach.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_cedar_hills
@@ -441,10 +431,6 @@ zone:
       target: beav_nature_park
     map_x: -4
     map_y: -6
-    spawns:
-    - template: cedar_hills_patrol
-      count: 1
-      respawn_after: 5m
     properties:
       lighting: overcast
       atmosphere: open
@@ -461,9 +447,12 @@ zone:
       movement in meticulous detail.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_sunset_transit
+    - direction: north
+      target: beav_fine_dining_ruins
     map_x: -2
     map_y: -4
     properties:
@@ -482,11 +471,12 @@ zone:
       hoarded pre-collapse beans that are almost certainly just dirt by now.
 
       '
+    danger_level: safe
     exits:
     - direction: south
       target: beav_beaverton_hillsdale
-    map_x: 202
-    map_y: 34
+    map_x: 0
+    map_y: -4
     properties:
       lighting: dim
       atmosphere: watchful
@@ -503,6 +493,7 @@ zone:
       the ground like fence posts — line both sides.
 
       '
+    danger_level: safe
     exits:
     - direction: north
       target: beav_canyon_road_east
@@ -526,6 +517,7 @@ zone:
       priced in parking tokens, the unofficial currency of the Free State.
 
       '
+    danger_level: safe
     exits:
     - direction: west
       target: beav_progress_ridge
@@ -547,15 +539,12 @@ zone:
       depicts a golden shopping cart ascending into heaven.
 
       '
+    danger_level: safe
     exits:
     - direction: west
       target: beav_progress_ridge
-    map_x: 202
-    map_y: 40
-    spawns:
-    - template: beaverton_minuteman
-      count: 1
-      respawn_after: 5m
+    map_x: 2
+    map_y: 4
     properties:
       lighting: overcast
       atmosphere: wary
@@ -587,6 +576,170 @@ zone:
     - template: beaverton_hireling
       count: 1
       respawn_after: 0s
+    properties:
+      lighting: overcast
+      atmosphere: commerce
+  - id: beav_mall_core
+    title: Mall Enforcement Core
+    description: |
+      The reinforced core of the Beaverton Town Center mall serves as the nerve
+      center of the Free State's enforcement apparatus. Steel blast doors seal
+      the former anchor store entrance. Banks of flickering monitors show feeds
+      from patrol cameras mounted on every street corner. Duty officers in
+      full riot gear rotate in four-hour shifts. The air smells of burnt coffee
+      and authority.
+    core: true
+    exits:
+    - direction: east
+      target: beav_food_court_command
+    - direction: south
+      target: beav_security_hq
+    map_x: -8
+    map_y: 0
+    spawns:
+    - template: hoa_enforcer
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: fluorescent
+      atmosphere: tense
+  - id: beav_security_hq
+    title: Security HQ
+    description: |
+      The former mall management office has been converted into the headquarters
+      of Beaverton's security forces. Whiteboards covered in patrol schedules and
+      wanted posters crowd every wall. A dispatch radio crackles continuously.
+      Rows of metal lockers hold spare equipment. The commander's office — a
+      converted Auntie Anne's pretzel stand — overlooks the bullpen through
+      a reinforced window.
+    core: true
+    exits:
+    - direction: north
+      target: beav_mall_core
+    - direction: east
+      target: beav_parking_garage_a
+    map_x: -8
+    map_y: 2
+    spawns:
+    - template: strip_mall_scav
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: fluorescent
+      atmosphere: bureaucratic
+  - id: beav_fine_dining_ruins
+    title: Fine Dining Ruins
+    description: |
+      The gutted shell of what was once Beaverton's only upscale restaurant. White
+      tablecloths rotted away decades ago, leaving only overturned iron chairs and
+      the ghosts of prix-fixe menus. The kitchen equipment was looted long since,
+      but the wine cellar — sealed behind a collapsed wall — may still hold
+      something worth finding. Feral cats have claimed the dining room.
+    danger_level: safe
+    exits:
+    - direction: south
+      target: beav_neighborhood_watch_north
+    map_x: -2
+    map_y: -6
+    properties:
+      lighting: dim
+      atmosphere: derelict
+  - id: beav_suburban_ruins_east
+    title: Suburban Ruins East
+    description: |
+      A block of collapsed ranch houses at the eastern fringe of Beaverton
+      territory. Rooflines have caved into living rooms. Car skeletons rust
+      in driveways. The street grid is still legible under the weeds. Occasional
+      foragers pick through the debris for anything the official salvage teams
+      missed. The checkpoint at Canyon Road is visible a few blocks east.
+    danger_level: safe
+    exits:
+    - direction: west
+      target: beav_canyon_road_east
+    map_x: 2
+    map_y: 0
+    properties:
+      lighting: overcast
+      atmosphere: desolate
+  - id: beav_suburban_ruins_west
+    title: Suburban Ruins West
+    description: |
+      The westernmost residential fringe before the TV Highway checkpoint. These
+      blocks took the worst of whatever happened in the early collapse years — few
+      structures remain upright. Salvagers work quickly here, aware that patrols
+      from the Walker Road post swing through every few hours. Graffiti tags mark
+      the ruins in a dozen competing dialects.
+    danger_level: safe
+    exits:
+    - direction: east
+      target: beav_walker_road
+    map_x: -8
+    map_y: -2
+    properties:
+      lighting: overcast
+      atmosphere: exposed
+  - id: beav_neutral_cafe
+    title: Neutral Ground Café
+    description: |
+      A converted espresso stand expanded into a full café by whoever claimed
+      this corner first and held it by reputation alone. The walls are covered
+      in handwritten rules: no weapons drawn, no disputes settled here, no
+      questions asked. Mismatched chairs circle mismatched tables. A hand-lettered
+      menu offers real coffee — rare enough to enforce the peace by itself.
+      A staircase leads down to a basement workshop where discrete technical
+      services are available.
+    danger_level: safe
+    exits:
+    - direction: east
+      target: beav_nature_park
+    - direction: west
+      target: beav_neutral_workshop
+    - direction: south
+      target: beav_neutral_market
+    map_x: -6
+    map_y: -8
+    spawns:
+    - template: chip_doc_beaverton
+      count: 1
+      respawn_after: 0s
+    properties:
+      lighting: warm
+      atmosphere: neutral
+  - id: beav_neutral_workshop
+    title: Repair Workshop
+    description: |
+      A cluttered repair shop operating under the café's neutral status. Workbenches
+      line every wall, covered in salvaged electronics, half-disassembled weapons,
+      and tools in various states of organization. The proprietor asks no questions
+      about what needs fixing. A handwritten sign reads "NO RUSH JOBS. NO EXCEPTIONS."
+      The smell of solder and machine oil is constant.
+    danger_level: safe
+    exits:
+    - direction: east
+      target: beav_neutral_cafe
+    - direction: south
+      target: beav_neutral_market
+    map_x: -8
+    map_y: -8
+    properties:
+      lighting: work
+      atmosphere: industrious
+  - id: beav_neutral_market
+    title: Neutral Market Stalls
+    description: |
+      A cluster of permanent market stalls operating under the café's protection
+      and neutrality agreement. Vendors sell salvage, food, and information
+      without allegiance to Beaverton's enforcement apparatus. Prices are posted
+      in multiple currencies. Disputes are settled by the café's proprietor, whose
+      word is final. The stalls close at nightfall, no exceptions.
+    danger_level: safe
+    exits:
+    - direction: north
+      target: beav_neutral_cafe
+    - direction: east
+      target: beav_neutral_workshop
+    map_x: -8
+    map_y: -10
     properties:
       lighting: overcast
       atmosphere: commerce

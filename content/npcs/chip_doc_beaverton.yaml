@@ -1,0 +1,17 @@
+id: chip_doc_beaverton
+name: Tremor
+npc_type: chip_doc
+description: >
+  A twitchy tech refugee who speaks too fast and blinks too much. Tremor
+  operates an implant repair kiosk in the café basement, his tools spread
+  across a folding table with the practiced disorder of someone who knows
+  exactly where everything is. He asks no questions about how you got your
+  chips, and charges accordingly.
+max_hp: 20
+ac: 11
+level: 3
+awareness: 3
+personality: cowardly
+chip_doc:
+  removal_cost: 200
+  check_dc: 14
