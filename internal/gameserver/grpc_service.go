@@ -446,6 +446,10 @@ func NewGameServiceServer(
 		if s.factionSvc != nil && s.factionConfig != nil {
 			s.combatH.SetFactionService(s.factionSvc, s.factionConfig)
 		}
+		// REQ-QU-19: wire quest service for kill-progress recording.
+		if s.questSvc != nil {
+			s.combatH.SetQuestService(s.questSvc)
+		}
 	}
 	s.merchantRuntimeStates = make(map[string]*npc.MerchantRuntimeState)
 	s.bankerRuntimeStates = make(map[string]*npc.BankerRuntimeState)
@@ -753,6 +757,9 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					s.logger.Warn("persisting spawn room discovery", zap.Error(err))
 				}
 			}
+			if s.questSvc != nil {
+				_ = s.questSvc.RecordExplore(stream.Context(), sess, sess.CharacterID, spawnRoom.ID)
+			}
 		}
 	}
 
@@ -889,6 +896,22 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				)
 			} else {
 				sess.Currency = savedCurrency
+			}
+			// Hydrate quest state from DB (REQ-QU-14).
+			if s.questSvc != nil {
+				qRecords, qErr := s.questSvc.LoadQuests(stream.Context(), characterID)
+				if qErr != nil {
+					s.logger.Warn("failed to load quests", zap.Int64("characterID", characterID), zap.Error(qErr))
+					sess.ActiveQuests = make(map[string]*quest.ActiveQuest)
+					sess.CompletedQuests = make(map[string]*time.Time)
+				} else {
+					sess.ActiveQuests = make(map[string]*quest.ActiveQuest)
+					sess.CompletedQuests = make(map[string]*time.Time)
+					s.questSvc.HydrateSession(sess, qRecords)
+				}
+			} else {
+				sess.ActiveQuests = make(map[string]*quest.ActiveQuest)
+				sess.CompletedQuests = make(map[string]*time.Time)
 			}
 			// HeroPoints is loaded separately from AddPlayerOptions because it requires
 			// a DB read that is only available at login, not at session construction time.
@@ -2144,6 +2167,9 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 				if err := s.automapRepo.Insert(context.Background(), sess.CharacterID, zID, newRoom.ID); err != nil {
 					s.logger.Warn("persisting map discovery", zap.Error(err))
 				}
+			}
+			if s.questSvc != nil {
+				_ = s.questSvc.RecordExplore(context.Background(), sess, sess.CharacterID, newRoom.ID)
 			}
 			// Award room discovery XP for newly discovered rooms.
 			if s.xpSvc != nil {
@@ -5103,6 +5129,9 @@ func (s *GameServiceServer) handleGetItem(uid, target string) (*gamev1.ServerEve
 				s.floorMgr.Drop(sess.RoomID, item)
 				continue
 			}
+			if s.questSvc != nil {
+				_ = s.questSvc.RecordFetch(context.Background(), sess, sess.CharacterID, item.ItemDefID, item.Quantity)
+			}
 			picked++
 		}
 		return messageEvent(fmt.Sprintf("Picked up %d item(s).", picked)), nil
@@ -5125,6 +5154,9 @@ func (s *GameServiceServer) handleGetItem(uid, target string) (*gamev1.ServerEve
 			if err != nil {
 				s.floorMgr.Drop(sess.RoomID, picked)
 				return errorEvent(fmt.Sprintf("Cannot pick up: %v", err)), nil
+			}
+			if s.questSvc != nil {
+				_ = s.questSvc.RecordFetch(context.Background(), sess, sess.CharacterID, picked.ItemDefID, picked.Quantity)
 			}
 			return messageEvent(fmt.Sprintf("You pick up %s.", name)), nil
 		}

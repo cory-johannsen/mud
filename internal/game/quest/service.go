@@ -80,6 +80,14 @@ func (s *Service) Registry() QuestRegistry {
 	return s.registry
 }
 
+// LoadQuests delegates to the repository.
+//
+// Precondition: characterID > 0.
+// Postcondition: returns all QuestRecords for the character, or an error.
+func (s *Service) LoadQuests(ctx context.Context, characterID int64) ([]QuestRecord, error) {
+	return s.repo.LoadQuests(ctx, characterID)
+}
+
 // HydrateSession populates sess.ActiveQuests and sess.CompletedQuests from the given records.
 //
 // Precondition: sess must be non-nil.
