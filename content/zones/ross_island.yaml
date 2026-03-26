@@ -33,6 +33,7 @@ zone:
       target: ross_east_shore
     - direction: east
       target: ross_dock_shack
+    danger_level: dangerous
     map_x: 0
     map_y: 0
     equipment:
@@ -42,6 +43,10 @@ zone:
       immovable: true
       script: zone_map_use
       description: Zone Map
+    spawns:
+    - template: bridge_troll
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: exposed
       atmosphere: wind
@@ -65,6 +70,7 @@ zone:
       target: ross_bridge_road
     - direction: south
       target: ross_shoreline_path
+    danger_level: dangerous
     map_x: -2
     map_y: 0
     spawns:
@@ -94,6 +100,7 @@ zone:
       target: ross_pit_edge
     - direction: south
       target: ross_the_overgrowth
+    danger_level: dangerous
     map_x: -4
     map_y: 0
     spawns:
@@ -411,8 +418,13 @@ zone:
       target: ross_cave_entrance
     - direction: north
       target: ross_north_shore
+    danger_level: dangerous
     map_x: -6
     map_y: 0
+    spawns:
+    - template: gravel_pit_boss
+      count: 1
+      respawn_after: 30m
     properties:
       lighting: overcast
       atmosphere: industrial
@@ -440,6 +452,7 @@ zone:
       target: ross_crane_platform
     - direction: west
       target: ross_lagoon
+    danger_level: dangerous
     map_x: 202
     map_y: 2
     spawns:
