@@ -18,27 +18,27 @@ import (
 	"strings"
 
 	"github.com/cory-johannsen/mud/internal/game/ai"
-	"github.com/cory-johannsen/mud/internal/game/crafting"
-	"github.com/cory-johannsen/mud/internal/game/focuspoints"
-	"github.com/cory-johannsen/mud/internal/game/faction"
-	"github.com/cory-johannsen/mud/internal/game/quest"
-	"github.com/cory-johannsen/mud/internal/game/danger"
-	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
-	"github.com/cory-johannsen/mud/internal/game/maputil"
 	"github.com/cory-johannsen/mud/internal/game/character"
-	"github.com/cory-johannsen/mud/internal/game/trap"
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
+	"github.com/cory-johannsen/mud/internal/game/crafting"
+	"github.com/cory-johannsen/mud/internal/game/danger"
 	"github.com/cory-johannsen/mud/internal/game/dice"
+	"github.com/cory-johannsen/mud/internal/game/faction"
+	"github.com/cory-johannsen/mud/internal/game/focuspoints"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
+	"github.com/cory-johannsen/mud/internal/game/maputil"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/npc/behavior"
+	"github.com/cory-johannsen/mud/internal/game/quest"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
-	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
+	"github.com/cory-johannsen/mud/internal/game/substance"
 	"github.com/cory-johannsen/mud/internal/game/technology"
+	"github.com/cory-johannsen/mud/internal/game/trap"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	"github.com/cory-johannsen/mud/internal/game/xp"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
@@ -254,7 +254,7 @@ type GameServiceServer struct {
 	// detainedUntilRepo persists detention expiry timestamps per character.
 	// May be nil (detention expiry is not persisted if not set).
 	detainedUntilRepo DetainedUntilUpdater
-	worldEditor *world.WorldEditor
+	worldEditor       *world.WorldEditor
 	// setRegistry holds equipment set definitions for computing set bonuses (REQ-EM-29/35).
 	// May be nil (treated as empty — no set bonuses).
 	setRegistry *inventory.SetRegistry
@@ -1593,10 +1593,10 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					s.pushRoomViewToAllInRoom(sess.RoomID)
 				}
 				s.tickSubstances(uid) // REQ-AH-12
-			// REQ-DT-7: check all sessions with active downtime
-			for _, activeUID := range s.sessions.AllUIDs() {
-				s.checkDowntimeCompletion(activeUID)
-			}
+				// REQ-DT-7: check all sessions with active downtime
+				for _, activeUID := range s.sessions.AllUIDs() {
+					s.checkDowntimeCompletion(activeUID)
+				}
 			case <-ctx.Done():
 				return
 			}
@@ -1671,37 +1671,37 @@ func (s *GameServiceServer) commandLoop(ctx context.Context, uid string, stream 
 		}
 
 		// Pre-dispatch: intercept UseRequest for spontaneous techs with AmpedEffects.
-	if p, ok := msg.Payload.(*gamev1.ClientMessage_UseRequest); ok {
-		techID := p.UseRequest.GetFeatId()
-		if s.techRegistry != nil {
-			if techDef, found := s.techRegistry.Get(techID); found &&
-				techDef.UsageType == technology.UsageSpontaneous &&
-				techDef.AmpedLevel > 0 {
-				resp, err := s.handleAmpedUse(uid, p.UseRequest, stream)
-				if err != nil {
-					errEvt := &gamev1.ServerEvent{
-						RequestId: msg.RequestId,
-						Payload: &gamev1.ServerEvent_Error{
-							Error: &gamev1.ErrorEvent{Message: err.Error()},
-						},
+		if p, ok := msg.Payload.(*gamev1.ClientMessage_UseRequest); ok {
+			techID := p.UseRequest.GetFeatId()
+			if s.techRegistry != nil {
+				if techDef, found := s.techRegistry.Get(techID); found &&
+					techDef.UsageType == technology.UsageSpontaneous &&
+					techDef.AmpedLevel > 0 {
+					resp, err := s.handleAmpedUse(uid, p.UseRequest, stream)
+					if err != nil {
+						errEvt := &gamev1.ServerEvent{
+							RequestId: msg.RequestId,
+							Payload: &gamev1.ServerEvent_Error{
+								Error: &gamev1.ErrorEvent{Message: err.Error()},
+							},
+						}
+						if sendErr := stream.Send(errEvt); sendErr != nil {
+							return fmt.Errorf("sending amped-use error: %w", sendErr)
+						}
+						continue
 					}
-					if sendErr := stream.Send(errEvt); sendErr != nil {
-						return fmt.Errorf("sending amped-use error: %w", sendErr)
+					if resp != nil {
+						resp.RequestId = msg.RequestId
+						if sendErr := stream.Send(resp); sendErr != nil {
+							return sendErr
+						}
 					}
 					continue
 				}
-				if resp != nil {
-					resp.RequestId = msg.RequestId
-					if sendErr := stream.Send(resp); sendErr != nil {
-						return sendErr
-					}
-				}
-				continue
 			}
 		}
-	}
 
-	if _, ok := msg.Payload.(*gamev1.ClientMessage_SelectTech); ok {
+		if _, ok := msg.Payload.(*gamev1.ClientMessage_SelectTech); ok {
 			if err := s.handleSelectTech(uid, msg.RequestId, stream); err != nil {
 				s.logger.Warn("handleSelectTech error", zap.String("uid", uid), zap.Error(err))
 			}
@@ -4725,18 +4725,18 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	}
 
 	view := &gamev1.CharacterSheetView{
-		Name:       sess.CharName,
-		Level:      int32(sess.Level),
-		CurrentHp:  int32(sess.CurrentHP),
-		MaxHp:      int32(sess.MaxHP),
-		Brutality:  int32(sess.Abilities.Brutality),
-		Grit:       int32(sess.Abilities.Grit),
-		Quickness:  int32(sess.Abilities.Quickness),
-		Reasoning:  int32(sess.Abilities.Reasoning),
-		Savvy:      int32(sess.Abilities.Savvy),
-		Flair:      int32(sess.Abilities.Flair),
-		Currency:   inventory.FormatRounds(sess.Currency),
-		Gender:     sess.Gender,
+		Name:           sess.CharName,
+		Level:          int32(sess.Level),
+		CurrentHp:      int32(sess.CurrentHP),
+		MaxHp:          int32(sess.MaxHP),
+		Brutality:      int32(sess.Abilities.Brutality),
+		Grit:           int32(sess.Abilities.Grit),
+		Quickness:      int32(sess.Abilities.Quickness),
+		Reasoning:      int32(sess.Abilities.Reasoning),
+		Savvy:          int32(sess.Abilities.Savvy),
+		Flair:          int32(sess.Abilities.Flair),
+		Currency:       inventory.FormatRounds(sess.Currency),
+		Gender:         sess.Gender,
 		Team:           sess.Team,
 		HeroPoints:     int32(sess.HeroPoints),
 		FocusPoints:    int32(sess.FocusPoints),
@@ -9651,4 +9651,3 @@ func exploreDisplayName(mode string) string {
 	}
 	return mode
 }
-

@@ -149,7 +149,8 @@ func (s *GameServiceServer) downtimeStart(uid string, sess *session.PlayerSessio
 // and persists the cleared state to the repo if available.
 //
 // Precondition: uid is a valid player UID; sess is non-nil.
-// Postcondition: sess.DowntimeBusy==false; sess.DowntimeActivityID==""; repo cleared if non-nil.
+// Postcondition: If DowntimeBusy was true, all four downtime fields are cleared and repo cleared if non-nil.
+//   If DowntimeBusy was already false, this is a no-op.
 func (s *GameServiceServer) resolveDowntimeActivity(uid string, sess *session.PlayerSession) {
 	if !sess.DowntimeBusy {
 		return
