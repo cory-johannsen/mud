@@ -406,6 +406,7 @@ type AddPlayerOptions struct {
 	Level               int
 	DefaultCombatAction string
 	Gender              string
+	Team                string
 }
 
 // AddPlayer registers a new player session in the given room.
@@ -463,6 +464,7 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 		Level:               level,
 		DefaultCombatAction: defaultCombatAction,
 		Gender:              opts.Gender,
+		Team:                opts.Team,
 		Entity:              entity,
 		// Status 1 = IDLE: newly connected players are idle by default.
 		Status:             1,

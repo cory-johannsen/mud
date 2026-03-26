@@ -652,8 +652,10 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		defaultCombatAction = dbChar.DefaultCombatAction
 	}
 	genderVal := ""
+	teamVal := ""
 	if dbChar != nil {
 		genderVal = dbChar.Gender
+		teamVal = dbChar.Team
 	}
 	sess, err := s.sessions.AddPlayer(session.AddPlayerOptions{
 		UID:                 uid,
@@ -670,6 +672,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		Level:               int(joinReq.Level),
 		DefaultCombatAction: defaultCombatAction,
 		Gender:              genderVal,
+		Team:                teamVal,
 	})
 	if err != nil {
 		return fmt.Errorf("adding player: %w", err)
@@ -4705,6 +4708,7 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		Flair:      int32(sess.Abilities.Flair),
 		Currency:   inventory.FormatRounds(sess.Currency),
 		Gender:     sess.Gender,
+		Team:           sess.Team,
 		HeroPoints:     int32(sess.HeroPoints),
 		FocusPoints:    int32(sess.FocusPoints),
 		MaxFocusPoints: int32(sess.MaxFocusPoints),
