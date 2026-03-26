@@ -172,10 +172,12 @@ func (s *GameServiceServer) resolveDowntimeActivity(uid string, sess *session.Pl
 }
 
 // checkDowntimeCompletion checks if the player's active downtime activity has elapsed
-// and resolves it if so.
+// and resolves it if so.  After resolution, auto-starts the next queued activity (REQ-DTQ).
 //
 // Precondition: uid is a valid player UID.
-// Postcondition: If DowntimeBusy and CompletesAt has elapsed, resolves activity and clears busy state.
+// Postcondition: If DowntimeBusy and CompletesAt has elapsed, resolves activity, clears busy state,
+//
+//	and starts the next queued activity if one is available.
 func (s *GameServiceServer) checkDowntimeCompletion(uid string) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok || !sess.DowntimeBusy {
@@ -185,6 +187,74 @@ func (s *GameServiceServer) checkDowntimeCompletion(uid string) {
 		return
 	}
 	s.resolveDowntimeActivity(uid, sess)
+	s.startNext(uid) // REQ-DTQ: auto-start next queued activity
+}
+
+// startNext pops and starts the next eligible queued activity for uid.
+// Calls itself recursively if the head item is invalid (REQ-DTQ-10).
+// Termination is guaranteed: PopHead removes one item per call; the queue is finite.
+//
+// Precondition: uid is a valid player session; downtimeQueueRepo may be nil (no-op if nil).
+// Postcondition: either the next valid queued activity is started, or all invalid entries
+//
+//	are skipped until the queue is empty.
+func (s *GameServiceServer) startNext(uid string) {
+	if s.downtimeQueueRepo == nil {
+		return
+	}
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok || sess.DowntimeBusy {
+		return
+	}
+
+	entry, err := s.downtimeQueueRepo.PopHead(context.Background(), sess.CharacterID)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error("startNext: PopHead error", zap.Error(err))
+		}
+		return
+	}
+	if entry == nil {
+		return // queue empty; no notification needed
+	}
+
+	act, ok := downtime.ActivityByID(entry.ActivityID)
+	if !ok {
+		s.pushMessageToUID(uid, fmt.Sprintf("Skipped queued activity %q: unknown.", entry.ActivityID))
+		s.startNext(uid)
+		return
+	}
+
+	// Validate room eligibility (REQ-DTQ-7).
+	roomTags := ""
+	if s.world != nil {
+		if room, roomOK := s.world.GetRoom(sess.RoomID); roomOK && room.Properties != nil {
+			roomTags = room.Properties["tags"]
+		}
+	}
+	if errMsg := downtime.CanStart(act.Alias, roomTags, false); errMsg != "" {
+		s.pushMessageToUID(uid, fmt.Sprintf("Skipped queued activity %s: %s", act.Name, errMsg))
+		s.startNext(uid)
+		return
+	}
+
+	durationMin := downtimeActivityDuration(act)
+	completesAt := time.Now().Add(time.Duration(durationMin) * time.Minute)
+	sess.DowntimeActivityID = act.ID
+	sess.DowntimeCompletesAt = completesAt
+	sess.DowntimeBusy = true
+	sess.DowntimeMetadata = entry.ActivityArgs
+
+	if s.downtimeRepo != nil && sess.CharacterID > 0 {
+		state := postgres.DowntimeState{
+			ActivityID:  act.ID,
+			CompletesAt: completesAt,
+			RoomID:      sess.RoomID,
+		}
+		_ = s.downtimeRepo.Save(context.Background(), sess.CharacterID, state)
+	}
+
+	s.pushMessageToUID(uid, fmt.Sprintf("Starting: %s.", act.Name))
 }
 
 // restoreDowntimeState loads persisted downtime state at login and restores or resolves it.

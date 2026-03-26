@@ -301,6 +301,9 @@ type GameServiceServer struct {
 	// downtimeRepo persists active downtime state for characters.
 	// May be nil (downtime state is not persisted across restarts if not set).
 	downtimeRepo CharacterDowntimeRepository
+	// downtimeQueueRepo manages the per-character downtime activity queue.
+	// May be nil (queue features are disabled if not set).
+	downtimeQueueRepo DowntimeQueueRepo
 }
 
 // CharacterDowntimeRepository persists active downtime state for characters.
@@ -309,6 +312,17 @@ type GameServiceServer struct {
 type CharacterDowntimeRepository interface {
 	Save(ctx context.Context, characterID int64, state postgres.DowntimeState) error
 	Load(ctx context.Context, characterID int64) (*postgres.DowntimeState, error)
+	Clear(ctx context.Context, characterID int64) error
+}
+
+// DowntimeQueueRepo abstracts CharacterDowntimeQueueRepository for testing.
+//
+// Precondition: non-nil implementation.
+type DowntimeQueueRepo interface {
+	PopHead(ctx context.Context, characterID int64) (*postgres.QueueEntry, error)
+	Enqueue(ctx context.Context, characterID int64, activityID string, activityArgs string) error
+	ListQueue(ctx context.Context, characterID int64) ([]postgres.QueueEntry, error)
+	RemoveAt(ctx context.Context, characterID int64, position int) error
 	Clear(ctx context.Context, characterID int64) error
 }
 
