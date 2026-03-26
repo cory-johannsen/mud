@@ -88,12 +88,14 @@ func TestFormatCharacterSummary(t *testing.T) {
 		Class:  "ganger",
 		Level:  1,
 		Region: "old_town",
+		Team:   "gun",
 	}
 	summary := handlers.FormatCharacterSummary(c, "the Northeast")
 	assert.Contains(t, summary, "Zara")
 	assert.Contains(t, summary, "ganger")
 	assert.Contains(t, summary, "1")
 	assert.Contains(t, summary, "from the Northeast")
+	assert.Contains(t, summary, "gun")
 }
 
 func TestFormatCharacterStats(t *testing.T) {

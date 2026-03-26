@@ -187,8 +187,8 @@
 
 ### BUG-23: Character selection list does not show character team
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** Character
 **Description:** The character selection screen omits the team field, so players cannot see which team a character belongs to before selecting it.
 **Steps:** Connect to the MUD and reach the character selection prompt; observe that listed characters show no team information.
-**Fix:**
+**Fix:** Added `[team]` to `FormatCharacterSummary` in `internal/frontend/handlers/character_flow.go`. Character list now shows e.g. `Zara — Lvl 1 ganger from the Northeast [gun]`.

@@ -1015,9 +1015,9 @@ func (h *AuthHandler) regionDisplayName(id string) string {
 // Precondition: c must be non-nil; regionDisplay must be non-empty.
 // Postcondition: Returns a non-empty human-readable string.
 func FormatCharacterSummary(c *character.Character, regionDisplay string) string {
-	return fmt.Sprintf("%s%s%s — Lvl %d %s from %s",
+	return fmt.Sprintf("%s%s%s — Lvl %d %s from %s [%s]",
 		telnet.BrightWhite, c.Name, telnet.Reset,
-		c.Level, c.Class, regionDisplay)
+		c.Level, c.Class, regionDisplay, c.Team)
 }
 
 // FormatCharacterStats returns a multi-line stats block for the character preview.
