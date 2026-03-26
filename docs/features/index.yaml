@@ -277,7 +277,7 @@ features:
 
   - slug: exploration
     name: Exploration Mode
-    status: planned
+    status: done
     priority: 284
     category: world
     file: docs/features/exploration.md
