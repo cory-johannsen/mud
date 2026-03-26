@@ -2131,6 +2131,19 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		s.checkEntryTraps(uid, sess, newRoom)
 	}
 
+	// Clear LayLow crit-fail block from previous room (REQ-EXP-8a).
+	sess.LayLowBlockedRoom = ""
+
+	// Fire exploration mode room-entry hook (REQ-EXP-38).
+	if sess.ExploreMode != "" {
+		if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
+			msgs := s.applyExploreModeOnEntry(uid, sess, newRoom)
+			for _, msg := range msgs {
+				s.pushMessageToUID(uid, msg)
+			}
+		}
+	}
+
 	// Room trap roll and wanted-level guard check on room entry.
 	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
 		if newZone, zoneOK := s.world.GetZone(newRoom.ZoneID); zoneOK {
@@ -2337,6 +2350,16 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 		rank := ""
 		if sess.Skills != nil {
 			rank = sess.Skills[trigger.Skill]
+		}
+		// Shadow mode: use ally's rank if higher (REQ-EXP-29, REQ-EXP-30).
+		if sess.ExploreMode == session.ExploreModeShadow && sess.ExploreShadowTarget != 0 {
+			if ally := s.sessions.GetPlayerByCharID(sess.ExploreShadowTarget); ally != nil && ally.RoomID == sess.RoomID {
+				if allyRank := ally.Skills[trigger.Skill]; allyRank != "" {
+					if skillRankBonus(allyRank) > skillRankBonus(rank) {
+						rank = allyRank
+					}
+				}
+			}
 		}
 
 		var roll int
