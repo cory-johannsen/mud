@@ -4190,6 +4190,18 @@ func (s *GameServiceServer) tickNPCIdle(inst *npc.Instance, zoneID string, aiReg
 		return
 	}
 
+	// REQ-NB-34: NPC was recruited via call_for_help on the previous tick; join the active combat.
+	if inst.PendingJoinCombatRoomID != "" {
+		pendingRoom := inst.PendingJoinCombatRoomID
+		inst.PendingJoinCombatRoomID = ""
+		inst.PlayerEnteredRoom = false
+		inst.OnDamageTaken = false
+		if s.combatH != nil {
+			s.combatH.JoinPendingNPCCombat(inst, pendingRoom)
+		}
+		return
+	}
+
 	// Decrement ability cooldowns. REQ-NB-2.
 	for k := range inst.AbilityCooldowns {
 		if inst.AbilityCooldowns[k] > 0 {

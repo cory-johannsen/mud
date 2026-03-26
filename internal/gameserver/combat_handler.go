@@ -844,6 +844,69 @@ func (h *CombatHandler) GetCombatForRoom(roomID string) (*combat.Combat, bool) {
 	return h.engine.GetCombat(roomID)
 }
 
+// JoinPendingNPCCombat adds inst to the active combat in pendingRoomID and pushes
+// the call-for-help or protecting message to all player combatants in that combat.
+//
+// Precondition: inst must not be nil; pendingRoomID must be non-empty.
+// Postcondition: NPC is added to active combat; message pushed to targeted player(s); no-op if no active combat.
+func (h *CombatHandler) JoinPendingNPCCombat(inst *npc.Instance, pendingRoomID string) {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+
+	cbt, ok := h.engine.GetCombat(pendingRoomID)
+	if !ok {
+		return
+	}
+	reason := combat.ReasonCallForHelp
+	if inst.ProtectedNPCName != "" {
+		reason = combat.ReasonProtecting
+	}
+	// Push message to all player combatants.
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer {
+			continue
+		}
+		h.pushMessageToUID(c.ID, combat.FormatNPCInitiationMsg(inst.Name(), reason, inst.ProtectedNPCName))
+	}
+	// Build and add the NPC combatant.
+	var npcFeatStats NPCEffectiveStats
+	if h.featRegistry != nil {
+		roomNPCs := h.npcMgr.InstancesInRoom(pendingRoomID)
+		npcFeatStats = ComputeNPCAttackStats(inst, nil, h.featRegistry, roomNPCs)
+	}
+	npcWeaponName := ""
+	if inst.WeaponID != "" && h.invRegistry != nil {
+		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil {
+			npcWeaponName = wDef.Name
+		}
+	}
+	npcStrMod := combat.AbilityMod(inst.Awareness) + npcFeatStats.DamageBonus + npcFeatStats.AttackBonus
+	npcCbt := &combat.Combatant{
+		ID:          inst.ID,
+		Kind:        combat.KindNPC,
+		Name:        inst.Name(),
+		MaxHP:       inst.MaxHP,
+		CurrentHP:   inst.CurrentHP,
+		AC:          inst.AC + npcFeatStats.ACBonus,
+		Level:       inst.Level,
+		StrMod:      npcStrMod,
+		DexMod:      1,
+		NPCType:     inst.Type,
+		Resistances: inst.Resistances,
+		Weaknesses:  inst.Weaknesses,
+		WeaponName:  npcWeaponName,
+		AttackVerb:  inst.AttackVerb,
+	}
+	combat.RollInitiative([]*combat.Combatant{npcCbt}, h.dice.Src())
+	if addErr := h.engine.AddCombatant(pendingRoomID, npcCbt); addErr != nil {
+		h.logger.Warn("JoinPendingNPCCombat: AddCombatant failed",
+			zap.String("npc_id", inst.ID),
+			zap.String("room_id", pendingRoomID),
+			zap.Error(addErr),
+		)
+	}
+}
+
 // pushMessageToUID sends a plain text message event to the player identified by uid.
 //
 // Precondition: uid must be non-empty; content must be non-empty.
@@ -3051,6 +3114,8 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 				_ = h.npcMgr.Move(r.inst.ID, cbt.RoomID)
 				// REQ-NB-34: join on next tick via PendingJoinCombatRoomID.
 				r.inst.PendingJoinCombatRoomID = cbt.RoomID
+				// COMBATMSG-4f: store recruiter name for "protecting [NPC name]" message.
+				r.inst.ProtectedNPCName = actor.Name
 			}
 			continue
 

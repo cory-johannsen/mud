@@ -173,3 +173,85 @@ func TestInitiateNPCCombat_GrudgeSet_PushesProvokedMessage(t *testing.T) {
 		t.Errorf("expected message %q pushed to player entity; none found within 500ms", want)
 	}
 }
+
+// TestJoinPendingNPCCombat_PushesCallForHelpMessage verifies that when an NPC with
+// PendingJoinCombatRoomID set (and no ProtectedNPCName) joins combat, the player
+// receives the call-for-help message. COMBATMSG-4d, REQ-NB-34.
+func TestJoinPendingNPCCombat_PushesCallForHelpMessage(t *testing.T) {
+	const roomID = "room-cfh"
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+
+	// Establish active combat in roomID with player and first NPC.
+	sess := addTestPlayer(t, h.sessions, "uid-cfh", roomID)
+	entity := session.NewBridgeEntity("uid-cfh", 32)
+	sess.Entity = entity
+	spawnTestNPC(t, h.npcMgr, roomID)
+	_, err := h.Attack("uid-cfh", "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Spawn a second NPC (the recruit) — different template ID to avoid conflict.
+	recruitTmpl := &npc.Template{
+		ID:        "goblin-recruit",
+		Name:      "Goblin Recruit",
+		Level:     1,
+		MaxHP:     20,
+		AC:        13,
+		Awareness: 2,
+	}
+	recruit, err := h.npcMgr.Spawn(recruitTmpl, roomID)
+	if err != nil {
+		t.Fatalf("Spawn recruit: %v", err)
+	}
+
+	// Simulate the pending join: no ProtectedNPCName means call-for-help reason.
+	h.JoinPendingNPCCombat(recruit, roomID)
+
+	const want = "Goblin Recruit attacks you — responding to a call for help."
+	if !drainForMessage(t, entity, want) {
+		t.Errorf("expected message %q; none found within 500ms", want)
+	}
+}
+
+// TestJoinPendingNPCCombat_PushesProtectingMessage verifies that when an NPC with
+// ProtectedNPCName set joins combat, the player receives the protecting message.
+// COMBATMSG-4f, REQ-NB-34.
+func TestJoinPendingNPCCombat_PushesProtectingMessage(t *testing.T) {
+	const roomID = "room-protecting"
+	h := makeCombatHandler(t, func(_ string, _ []*gamev1.CombatEvent) {})
+
+	// Establish active combat in roomID with player and first NPC.
+	sess := addTestPlayer(t, h.sessions, "uid-protecting", roomID)
+	entity := session.NewBridgeEntity("uid-protecting", 32)
+	sess.Entity = entity
+	spawnTestNPC(t, h.npcMgr, roomID)
+	_, err := h.Attack("uid-protecting", "Goblin")
+	if err != nil {
+		t.Fatalf("Attack: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Spawn a second NPC (the protect-recruit).
+	recruitTmpl := &npc.Template{
+		ID:        "goblin-protector",
+		Name:      "Goblin Protector",
+		Level:     1,
+		MaxHP:     20,
+		AC:        13,
+		Awareness: 2,
+	}
+	recruit, err := h.npcMgr.Spawn(recruitTmpl, roomID)
+	if err != nil {
+		t.Fatalf("Spawn recruit: %v", err)
+	}
+	recruit.ProtectedNPCName = "Goblin"
+
+	h.JoinPendingNPCCombat(recruit, roomID)
+
+	const want = "Goblin Protector attacks you — protecting Goblin."
+	if !drainForMessage(t, entity, want) {
+		t.Errorf("expected message %q; none found within 500ms", want)
+	}
+}
