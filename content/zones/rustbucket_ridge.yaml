@@ -246,7 +246,7 @@ zone:
     - template: ganger
       count: 2
       respawn_after: 3m
-    - template: thug
+    - template: mill_plain_thug
       count: 1
       respawn_after: 4m
     - template: old_rusty
