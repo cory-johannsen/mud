@@ -37,9 +37,6 @@ zone:
     - template: bike_courier
       count: 2
       respawn_after: 3m
-    - template: alberta_drifter
-      count: 1
-      respawn_after: 3m
     equipment:
     - item_id: zone_map
       max_count: 1
