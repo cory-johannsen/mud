@@ -1,6 +1,7 @@
 id: anarchist
 name: Anarchist
 archetype: influencer
+tier: 2
 description: "Anarchists live to tear down power structures and rally the dispossessed. They're incredibly persuasive — to everyone except authority figures."
 key_ability: flair
 hit_points_per_level: 8

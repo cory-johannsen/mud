@@ -1,6 +1,7 @@
 id: detective
 name: Detective
 archetype: nerd
+tier: 3
 description: "Worn-down professionals whose methods aren't morally clean but whose skills are unmatched. Portland's ruins breed mysteries."
 key_ability: reasoning
 hit_points_per_level: 6

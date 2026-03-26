@@ -310,6 +310,7 @@ func TestLoadJobs_RejectsInvalidLevelUpGrants(t *testing.T) {
 id: bad_job
 name: Bad Job
 archetype: aggressor
+tier: 1
 level_up_grants:
   3:
     prepared:
@@ -334,6 +335,7 @@ func TestLoadJobs_RejectsInvalidTechnologyGrants(t *testing.T) {
 id: bad_job
 name: Bad Job
 archetype: aggressor
+tier: 1
 technology_grants:
   prepared:
     slots_by_level:

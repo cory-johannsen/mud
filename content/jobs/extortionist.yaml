@@ -1,6 +1,7 @@
 id: extortionist
 name: Extortionist
 archetype: influencer
+tier: 2
 description: "Shake-down masters. They use implied or actual violence to coerce others into giving them what they want."
 key_ability: flair
 hit_points_per_level: 8

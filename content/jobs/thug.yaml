@@ -1,6 +1,7 @@
 id: thug
 name: Thug
 archetype: aggressor
+tier: 1
 description: "Employed by others to do their dirty work. Under the employ of a specific faction, they generally adhere to that faction's beliefs — at least while they're watching."
 key_ability: brutality
 hit_points_per_level: 10

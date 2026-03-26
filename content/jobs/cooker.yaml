@@ -1,6 +1,7 @@
 id: cooker
 name: Cooker
 archetype: nerd
+tier: 2
 description: "Master of all chemical concoctions. Cookers synthesize everything from medicine to mayhem in Portland's improvised labs."
 key_ability: reasoning
 hit_points_per_level: 6

@@ -1,6 +1,7 @@
 id: tracker
 name: Tracker
 archetype: naturalist
+tier: 2
 description: "Specialize in locating and apprehending targets — bounty hunters, assassins, or those searching for missing persons. Portland's ruins don't hide things well from them."
 key_ability: grit
 hit_points_per_level: 10

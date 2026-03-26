@@ -1,6 +1,7 @@
 id: cop
 name: Cop
 archetype: drifter
+tier: 2
 description: "Supposed to uphold the law. Usually just uphold themselves. ACAB. But having a badge — real or forged — still opens doors in Portland's ruins."
 key_ability: grit
 hit_points_per_level: 10

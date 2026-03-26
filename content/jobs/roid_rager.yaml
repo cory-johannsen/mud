@@ -1,6 +1,7 @@
 id: roid_rager
 name: Roid Rager
 archetype: aggressor
+tier: 1
 description: "The fury of a Roid Rager is not learned — it's an extension of something raging within. Portland's chemical supply chains have interesting side effects."
 key_ability: brutality
 hit_points_per_level: 10

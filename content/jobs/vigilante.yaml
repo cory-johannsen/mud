@@ -1,6 +1,7 @@
 id: vigilante
 name: Vigilante
 archetype: zealot
+tier: 2
 description: "Somebody has to do something about all the problems. The Vigilante has decided it will be them. Portland doesn't know whether to thank them or arrest them."
 key_ability: quickness
 hit_points_per_level: 8

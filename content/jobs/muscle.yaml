@@ -1,6 +1,7 @@
 id: muscle
 name: Muscle
 archetype: aggressor
+tier: 1
 description: "Sometimes the only way to solve a problem is to beat the crap out of somebody. The Muscle is the one to do it."
 key_ability: quickness
 hit_points_per_level: 8

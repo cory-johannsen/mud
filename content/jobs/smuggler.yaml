@@ -1,6 +1,7 @@
 id: smuggler
 name: Smuggler
 archetype: criminal
+tier: 3
 description: "Specialists in getting illegal things into places they shouldn't go. Great to know, great at their jobs, and great at disappearing when things go wrong."
 key_ability: quickness
 hit_points_per_level: 8

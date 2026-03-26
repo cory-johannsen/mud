@@ -1,6 +1,7 @@
 package ruleset_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -56,6 +57,7 @@ func TestJob_ParsesStartingInventory(t *testing.T) {
 	content := `id: boot_gun
 name: Boot (Gun)
 archetype: aggressor
+tier: 1
 team: gun
 key_ability: quickness
 hit_points_per_level: 8
@@ -77,6 +79,7 @@ func TestJob_ParsesStartingInventory_WithArmor(t *testing.T) {
 	content := `id: striker_gun
 name: Striker (Gun)
 archetype: aggressor
+tier: 1
 team: gun
 key_ability: brutality
 hit_points_per_level: 10
@@ -101,6 +104,7 @@ func TestJob_NoStartingInventory_FieldIsNil(t *testing.T) {
 	content := `id: drifter
 name: Drifter
 archetype: wanderer
+tier: 1
 team: ""
 key_ability: grit
 hit_points_per_level: 8
@@ -194,5 +198,60 @@ func TestProperty_JobRegistry_ArchetypesForTeam_NeverPanics(t *testing.T) {
 		reg.Register(&ruleset.Job{ID: "j1", Archetype: "a1", Team: "gun"})
 		_ = reg.ArchetypesForTeam(team)
 		_ = reg.JobsForTeamAndArchetype(team, "a1")
+	})
+}
+
+// TestJob_MissingTier_FatalError asserts that loading a job YAML without a
+// tier field returns an error containing REQ-DTQ-13 context.
+func TestJob_MissingTier_FatalError(t *testing.T) {
+	dir := t.TempDir()
+	content := `id: test_job
+name: Test Job
+archetype: aggressor
+key_ability: brutality
+hit_points_per_level: 8
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "test_job.yaml"), []byte(content), 0644))
+	_, err := ruleset.LoadJobs(dir)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "tier")
+}
+
+// TestJob_TierField_LoadsCorrectly asserts that a job YAML with tier: 2 is
+// parsed and the Tier field equals 2 after loading.
+func TestJob_TierField_LoadsCorrectly(t *testing.T) {
+	dir := t.TempDir()
+	content := `id: test_job
+name: Test Job
+archetype: aggressor
+tier: 2
+key_ability: brutality
+hit_points_per_level: 8
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "test_job.yaml"), []byte(content), 0644))
+	jobs, err := ruleset.LoadJobs(dir)
+	require.NoError(t, err)
+	require.Len(t, jobs, 1)
+	assert.Equal(t, 2, jobs[0].Tier)
+}
+
+// TestProperty_Job_TierInRange asserts that for any valid tier value [1,3],
+// the job loads without error and Tier is preserved exactly.
+func TestProperty_Job_TierInRange(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		tier := rapid.IntRange(1, 3).Draw(rt, "tier")
+		dir := t.TempDir()
+		content := fmt.Sprintf(`id: prop_job
+name: Prop Job
+archetype: aggressor
+tier: %d
+key_ability: brutality
+hit_points_per_level: 8
+`, tier)
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "prop_job.yaml"), []byte(content), 0644))
+		jobs, err := ruleset.LoadJobs(dir)
+		require.NoError(t, err)
+		require.Len(t, jobs, 1)
+		assert.Equal(t, tier, jobs[0].Tier)
 	})
 }

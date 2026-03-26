@@ -1,6 +1,7 @@
 id: entertainer
 name: Entertainer
 archetype: influencer
+tier: 2
 description: "Creative professionals who bring excitement and wonder through performance arts. Morale is a resource, and Entertainers produce it."
 key_ability: flair
 hit_points_per_level: 8

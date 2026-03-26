@@ -1,6 +1,7 @@
 id: grease_monkey
 name: Grease Monkey
 archetype: nerd
+tier: 2
 description: "Specializes in repairing and maintaining mechanical devices. In post-collapse Portland, keeping machines running is how you stay alive."
 key_ability: reasoning
 hit_points_per_level: 6

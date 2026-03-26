@@ -1,6 +1,7 @@
 id: soldier
 name: Soldier
 archetype: aggressor
+tier: 2
 description: "Professional fighters, trained to fight in a specific way. Focus on solving problems with overwhelming force."
 key_ability: brutality
 hit_points_per_level: 10

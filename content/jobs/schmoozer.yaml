@@ -1,6 +1,7 @@
 id: schmoozer
 name: Schmoozer
 archetype: influencer
+tier: 2
 description: "Seeks to get what they want by leeching onto others. Leaves you feeling dirty just talking to them, but they always know the right people."
 key_ability: flair
 hit_points_per_level: 8

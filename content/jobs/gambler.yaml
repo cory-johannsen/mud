@@ -1,6 +1,7 @@
 id: gambler
 name: Gambler
 archetype: criminal
+tier: 2
 description: "Gamblers take risks that nobody else would ever take because it just might pay off. Post-collapse Portland runs on uncertainty."
 key_ability: quickness
 hit_points_per_level: 8

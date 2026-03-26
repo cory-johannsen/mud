@@ -1,6 +1,7 @@
 id: car_jacker
 name: Car Jacker
 archetype: criminal
+tier: 2
 description: "The bane of Portland's streets, car jackers keep the city's black market vehicle trade running. Fast hands, faster feet."
 key_ability: quickness
 hit_points_per_level: 8

@@ -1,6 +1,7 @@
 id: karen
 name: Karen
 archetype: influencer
+tier: 1
 description: "Karens have made everyone around them OK with their nonstop chatter. They solve problems by yelling louder. Somehow this works in Portland's ruins."
 key_ability: flair
 hit_points_per_level: 8

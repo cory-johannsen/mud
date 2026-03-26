@@ -1,6 +1,7 @@
 id: boot_gun
 name: Boot (Gun)
 archetype: aggressor
+tier: 1
 team: gun
 description: "Grunt soldiers of the Gun team. Boots believe that firearms are the most elegant solution to every problem life presents."
 key_ability: brutality

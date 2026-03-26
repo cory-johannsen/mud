@@ -1,6 +1,7 @@
 id: antifa
 name: Antifa
 archetype: influencer
+tier: 2
 team: machete
 description: "Direct action is the only action. Antifa operatives organize the dispossessed and fight fascists wherever they find them."
 key_ability: flair

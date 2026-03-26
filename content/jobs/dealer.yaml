@@ -1,6 +1,7 @@
 id: dealer
 name: Dealer
 archetype: schemer
+tier: 2
 description: "Blends folk medicine, traditional healing practices, and heavy drugs to solve problems. Portland's underground pharmacists."
 key_ability: grit
 hit_points_per_level: 10

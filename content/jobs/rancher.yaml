@@ -1,6 +1,7 @@
 id: rancher
 name: Rancher
 archetype: naturalist
+tier: 2
 description: "Have spent their lives raising animals, and they smell like it. Post-collapse Portland needs food, and ranchers provide it."
 key_ability: grit
 hit_points_per_level: 10

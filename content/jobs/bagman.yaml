@@ -1,6 +1,7 @@
 id: bagman
 name: Bagman
 archetype: drifter
+tier: 2
 description: "Mutually hated by everyone except their boss, the Bagman collects whatever needs collecting. Not a pleasant job, but someone has to do it."
 key_ability: grit
 hit_points_per_level: 10

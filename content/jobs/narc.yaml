@@ -1,6 +1,7 @@
 id: narc
 name: Narc
 archetype: nerd
+tier: 2
 description: "Narcs sell what they know to whoever has money to buy it. Don't trust them, and never tell them anything important."
 key_ability: reasoning
 hit_points_per_level: 6

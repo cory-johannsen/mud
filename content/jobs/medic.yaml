@@ -1,6 +1,7 @@
 id: medic
 name: Medic
 archetype: zealot
+tier: 2
 description: "Has attained some skill in healing others. In post-collapse Portland, some skill is better than none."
 key_ability: savvy
 hit_points_per_level: 8

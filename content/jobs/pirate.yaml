@@ -1,6 +1,7 @@
 id: pirate
 name: Pirate
 archetype: drifter
+tier: 2
 description: "Pirates take what they need and what they want. The Willamette still flows, and so does opportunity."
 key_ability: brutality
 hit_points_per_level: 10

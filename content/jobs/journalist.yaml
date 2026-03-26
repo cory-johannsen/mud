@@ -1,6 +1,7 @@
 id: journalist
 name: Journalist
 archetype: nerd
+tier: 2
 description: "Uses the power of the printed word to influence the masses. Post-collapse Portland still has a press — barely."
 key_ability: reasoning
 hit_points_per_level: 6

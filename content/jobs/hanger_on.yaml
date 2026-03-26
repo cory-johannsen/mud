@@ -1,6 +1,7 @@
 id: hanger_on
 name: Hanger-On
 archetype: criminal
+tier: 1
 description: "Surrounds themselves with famous people to benefit from their status. Portland's celebrity ecosystem is bizarre but persistent."
 key_ability: savvy
 hit_points_per_level: 8

@@ -1,6 +1,7 @@
 id: mercenary
 name: Mercenary
 archetype: aggressor
+tier: 2
 description: "Soldiers for hire. They're good at what they do. They aren't nice and you probably don't want to be their friends."
 key_ability: brutality
 hit_points_per_level: 10

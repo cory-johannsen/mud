@@ -1,6 +1,7 @@
 id: cult_leader
 name: Cult Leader
 archetype: zealot
+tier: 3
 description: "A charismatic freak who has amassed a following they intend to abuse in some way. Portland has no shortage of people desperate enough to follow."
 key_ability: savvy
 hit_points_per_level: 8

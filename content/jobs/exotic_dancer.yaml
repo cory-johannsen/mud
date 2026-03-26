@@ -1,6 +1,7 @@
 id: exotic_dancer
 name: Exotic Dancer
 archetype: influencer
+tier: 2
 description: "Make their money using what they've got. Experts at getting customers to reveal information. Portland's best-paid reasoning operatives."
 key_ability: flair
 hit_points_per_level: 8

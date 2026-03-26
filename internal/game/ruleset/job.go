@@ -51,11 +51,13 @@ type FeatGrants struct {
 // Job defines a concrete playable job (replaces PF2E class for Gunchete).
 // Team is empty for jobs available to all players; non-empty for team-exclusive jobs.
 //
-// Precondition: ID, Name, Archetype, KeyAbility, and HitPointsPerLevel must be non-zero after loading.
+// Precondition: ID, Name, Archetype, KeyAbility, HitPointsPerLevel, and Tier must be non-zero after loading.
+// REQ-DTQ-13: Tier must be present in the YAML; missing or zero value is a fatal load error.
 type Job struct {
 	ID                 string                             `yaml:"id"`
 	Name               string                             `yaml:"name"`
 	Archetype          string                             `yaml:"archetype"`
+	Tier               int                                `yaml:"tier"`               // REQ-DTQ-13: required; 1=entry, 2=skilled, 3=specialist
 	Team               string                             `yaml:"team"` // empty = all teams; "gun" or "machete" = exclusive
 	Description        string                             `yaml:"description"`
 	KeyAbility         string                             `yaml:"key_ability"`
@@ -89,6 +91,9 @@ func LoadJobs(dir string) ([]*Job, error) {
 		var j Job
 		if err := yaml.Unmarshal(data, &j); err != nil {
 			return nil, fmt.Errorf("parsing job file %s: %w", path, err)
+		}
+		if j.Tier == 0 {
+			return nil, fmt.Errorf("job %q missing required 'tier' field (REQ-DTQ-13)", j.ID)
 		}
 		if j.TechnologyGrants != nil {
 			if err := j.TechnologyGrants.Validate(); err != nil {

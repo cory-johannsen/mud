@@ -1,6 +1,7 @@
 id: libertarian
 name: Libertarian
 archetype: influencer
+tier: 2
 team: gun
 description: "You are correct about everything and nobody can question that. Libertarians have dedicated themselves to the proposition that the only true authority is the self."
 key_ability: flair
