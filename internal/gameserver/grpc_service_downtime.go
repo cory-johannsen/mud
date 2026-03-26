@@ -156,6 +156,7 @@ func (s *GameServiceServer) resolveDowntimeActivity(uid string, sess *session.Pl
 	if !sess.DowntimeBusy {
 		return
 	}
+	actID := sess.DowntimeActivityID
 	sess.DowntimeBusy = false
 	sess.DowntimeActivityID = ""
 	sess.DowntimeCompletesAt = time.Time{}
@@ -163,6 +164,10 @@ func (s *GameServiceServer) resolveDowntimeActivity(uid string, sess *session.Pl
 
 	if s.downtimeRepo != nil && sess.CharacterID > 0 {
 		_ = s.downtimeRepo.Clear(context.Background(), sess.CharacterID)
+	}
+
+	if s.sessions != nil {
+		s.resolveDowntimeActivityDispatch(uid, actID, sess)
 	}
 }
 
