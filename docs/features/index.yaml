@@ -495,7 +495,7 @@ features:
 
   - slug: npcs-named
     name: Named NPCs (Wayne/Dwayne/Jennifer Dawg)
-    status: planned
+    status: done
     priority: 255
     category: world
     file: docs/features/npcs-named.md
