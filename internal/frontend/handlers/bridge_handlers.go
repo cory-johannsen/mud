@@ -170,6 +170,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerCraft:              bridgeCraft,
 	command.HandlerScavenge:           bridgeScavenge,
 	command.HandlerAffix:              bridgeAffix,
+	command.HandlerExplore:            bridgeExplore,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -2038,5 +2039,24 @@ func bridgeAffix(bctx *bridgeContext) (bridgeResult, error) {
 			MaterialQuery: materialQuery,
 			TargetQuery:   targetQuery,
 		}},
+	}}, nil
+}
+
+// bridgeExplore builds an ExploreRequest.
+// Precondition: bctx must be non-nil with a valid reqID.
+// Postcondition: returns a non-nil msg containing an ExploreRequest.
+func bridgeExplore(bctx *bridgeContext) (bridgeResult, error) {
+	req, err := command.HandleExplore(bctx.parsed.Args)
+	if err != nil {
+		return bridgeResult{}, err
+	}
+	return bridgeResult{msg: &gamev1.ClientMessage{
+		RequestId: bctx.reqID,
+		Payload: &gamev1.ClientMessage_ExploreRequest{
+			ExploreRequest: &gamev1.ExploreRequest{
+				Mode:         req.Mode,
+				ShadowTarget: req.ShadowTarget,
+			},
+		},
 	}}, nil
 }

@@ -16,6 +16,7 @@ const (
 	CategorySystem        = "system"
 	CategoryAdmin         = "admin"
 	CategoryCharacter     = "character"
+	CategoryExploration   = "exploration"
 	// CategoryHidden marks commands that are internal flow steps and must not appear in help.
 	CategoryHidden = "hidden"
 	// CategoryEditor marks commands available to editor and admin roles.
@@ -143,6 +144,7 @@ const (
 	HandlerCraft              = "craft"
 	HandlerScavenge           = "scavenge"
 	HandlerAffix              = "affix"
+	HandlerExplore            = "explore"
 )
 
 // Command defines a player-invocable command.
@@ -308,6 +310,9 @@ func BuiltinCommands() []Command {
 		{Name: "craft", Aliases: []string{"cr"}, Help: "Craft an item. Usage: craft list|<recipe>|confirm", Category: "crafting", Handler: HandlerCraft},
 		{Name: "scavenge", Aliases: []string{}, Help: "Scavenge the current area for materials.", Category: "crafting", Handler: HandlerScavenge},
 		{Name: "affix", Aliases: []string{}, Help: "Affix a precious material to equipped gear. Usage: affix <material> <item>", Category: "crafting", Handler: HandlerAffix},
+
+		// Exploration commands
+		{Name: "explore", Aliases: []string{"exp"}, Help: "Set or query your exploration mode. Usage: explore [mode|off]. Modes: lay_low, hold_ground, active_sensors, case_it, run_point, shadow <ally>, poke_around.", Category: CategoryExploration, Handler: HandlerExplore},
 	}
 }
 
