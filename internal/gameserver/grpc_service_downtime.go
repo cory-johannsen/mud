@@ -61,18 +61,21 @@ func (s *GameServiceServer) handleDowntimeQueue(uid string, sess *session.Player
 	case "clear":
 		return s.handleDowntimeQueueClear(uid, sess)
 	case "remove":
-		pos := 0
-		fmt.Sscanf(rest, "%d", &pos)
-		if pos < 1 {
-			return messageEvent("Usage: downtime queue remove <position>"), nil
-		}
-		if err := s.downtimeQueueRepo.RemoveAt(context.Background(), sess.CharacterID, pos); err != nil {
-			return messageEvent(fmt.Sprintf("Failed to remove queue entry: %v", err)), nil
-		}
-		return messageEvent(fmt.Sprintf("Queue position %d removed.", pos)), nil
+		return s.handleDowntimeQueueRemove(uid, sess, rest)
 	default:
 		return s.handleDowntimeQueueAdd(uid, sess, sub, rest)
 	}
+}
+
+// effectiveQueueLimit returns the player's downtime queue limit, defaulting to 3 (REQ-DTQ-14).
+//
+// Precondition: sess is non-nil.
+// Postcondition: Returns >= 1.
+func effectiveQueueLimit(sess *session.PlayerSession) int {
+	if sess.DowntimeQueueLimit > 0 {
+		return sess.DowntimeQueueLimit
+	}
+	return 3
 }
 
 // handleDowntimeQueueAdd adds an activity to the downtime queue.
@@ -87,10 +90,7 @@ func (s *GameServiceServer) handleDowntimeQueueAdd(uid string, sess *session.Pla
 	if err != nil {
 		return messageEvent("Failed to read queue."), nil
 	}
-	limit := sess.DowntimeQueueLimit
-	if limit <= 0 {
-		limit = 3
-	}
+	limit := effectiveQueueLimit(sess)
 	if len(entries) >= limit {
 		return messageEvent(fmt.Sprintf("Your downtime queue is full (%d/%d).", len(entries), limit)), nil
 	}
@@ -124,10 +124,7 @@ func (s *GameServiceServer) handleDowntimeQueueList(uid string, sess *session.Pl
 	if len(entries) == 0 {
 		return messageEvent("Your downtime queue is empty."), nil
 	}
-	limit := sess.DowntimeQueueLimit
-	if limit <= 0 {
-		limit = 3
-	}
+	limit := effectiveQueueLimit(sess)
 	baseline := time.Now()
 	if sess.DowntimeBusy && !sess.DowntimeCompletesAt.IsZero() {
 		baseline = sess.DowntimeCompletesAt
@@ -163,6 +160,25 @@ func (s *GameServiceServer) handleDowntimeQueueClear(uid string, sess *session.P
 		return messageEvent(fmt.Sprintf("Failed to clear queue: %v", err)), nil
 	}
 	return messageEvent("Downtime queue cleared. Active activity (if any) is unaffected."), nil
+}
+
+// handleDowntimeQueueRemove removes the entry at the given 1-based position from the queue.
+//
+// Precondition: uid is a valid session; sess is non-nil; posStr is the position argument string.
+// Postcondition: On success, the entry at the given position is removed and remaining entries reindexed.
+func (s *GameServiceServer) handleDowntimeQueueRemove(uid string, sess *session.PlayerSession, posStr string) (*gamev1.ServerEvent, error) {
+	if s.downtimeQueueRepo == nil {
+		return messageEvent("Downtime queue is not available."), nil
+	}
+	pos := 0
+	fmt.Sscanf(posStr, "%d", &pos)
+	if pos < 1 {
+		return messageEvent("Usage: downtime queue remove <position>"), nil
+	}
+	if err := s.downtimeQueueRepo.RemoveAt(context.Background(), sess.CharacterID, pos); err != nil {
+		return messageEvent(fmt.Sprintf("Failed to remove queue entry: %v", err)), nil
+	}
+	return messageEvent(fmt.Sprintf("Queue position %d removed.", pos)), nil
 }
 
 // downtimeStatus returns the current downtime activity status for a session.

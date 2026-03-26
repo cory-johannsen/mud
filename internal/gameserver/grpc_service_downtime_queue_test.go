@@ -201,6 +201,49 @@ func TestHandleDowntime_QueueList_ShowsEntries(t *testing.T) {
 	assert.Contains(t, text, "Subsist")
 }
 
+// TestHandleDowntime_QueueRemove_Success verifies that removing a valid position
+// removes the entry and the queue reindexes.
+//
+// Precondition: queue has 3 entries; args="remove 2".
+// Postcondition: queue has 2 entries; positions are 1 and 2.
+func TestHandleDowntime_QueueRemove_Success(t *testing.T) {
+	mock := &mockDowntimeQueueRepo{
+		entries: []postgres.QueueEntry{
+			{Position: 1, ActivityID: "earn_creds"},
+			{Position: 2, ActivityID: "subsist"},
+			{Position: 3, ActivityID: "patch_up"},
+		},
+	}
+	s, _ := newQueueTestServer(t, "uid_qr_ok", mock)
+
+	req := &gamev1.DowntimeRequest{Subcommand: "queue", Args: "remove 2"}
+	evt, err := s.handleDowntime("uid_qr_ok", req)
+
+	require.NoError(t, err)
+	assert.Contains(t, eventText(evt), "removed")
+	require.Len(t, mock.entries, 2)
+	assert.Equal(t, 1, mock.entries[0].Position)
+	assert.Equal(t, "earn_creds", mock.entries[0].ActivityID)
+	assert.Equal(t, 2, mock.entries[1].Position)
+	assert.Equal(t, "patch_up", mock.entries[1].ActivityID)
+}
+
+// TestHandleDowntime_QueueRemove_InvalidPosition verifies that a position < 1
+// returns a usage message.
+//
+// Precondition: args="remove 0".
+// Postcondition: response contains "Usage".
+func TestHandleDowntime_QueueRemove_InvalidPosition(t *testing.T) {
+	mock := &mockDowntimeQueueRepo{}
+	s, _ := newQueueTestServer(t, "uid_qr_inv", mock)
+
+	req := &gamev1.DowntimeRequest{Subcommand: "queue", Args: "remove 0"}
+	evt, err := s.handleDowntime("uid_qr_inv", req)
+
+	require.NoError(t, err)
+	assert.Contains(t, eventText(evt), "Usage")
+}
+
 // TestHandleDowntime_QueueClear_OnlyClearsQueue verifies that the clear subcommand
 // empties the queue without affecting the active activity (REQ-DTQ-16).
 //
