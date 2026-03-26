@@ -298,6 +298,18 @@ type GameServiceServer struct {
 	lastTimePeriod TimePeriod
 	// itemTickMu protects lastTimePeriod; owned exclusively by the item-tick goroutine.
 	itemTickMu sync.Mutex
+	// downtimeRepo persists active downtime state for characters.
+	// May be nil (downtime state is not persisted across restarts if not set).
+	downtimeRepo CharacterDowntimeRepository
+}
+
+// CharacterDowntimeRepository persists active downtime state for characters.
+//
+// Precondition: characterID must be > 0.
+type CharacterDowntimeRepository interface {
+	Save(ctx context.Context, characterID int64, state postgres.DowntimeState) error
+	Load(ctx context.Context, characterID int64) (*postgres.DowntimeState, error)
+	Clear(ctx context.Context, characterID int64) error
 }
 
 // HealerCapacityRepo persists and loads healer NPC daily capacity usage keyed by template ID.
@@ -1998,6 +2010,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleQuestCommand(uid, p.QuestRequest.GetArgs())
 	case *gamev1.ClientMessage_UncurseRequest:
 		return s.handleUncurse(uid, p.UncurseRequest)
+	case *gamev1.ClientMessage_DowntimeRequest:
+		return s.handleDowntime(uid, p.DowntimeRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
