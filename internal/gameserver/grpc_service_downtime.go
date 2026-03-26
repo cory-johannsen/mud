@@ -145,6 +145,41 @@ func (s *GameServiceServer) downtimeStart(uid string, sess *session.PlayerSessio
 	))
 }
 
+// resolveDowntimeActivity completes the player's active downtime activity, clears busy state,
+// and persists the cleared state to the repo if available.
+//
+// Precondition: uid is a valid player UID; sess is non-nil.
+// Postcondition: sess.DowntimeBusy==false; sess.DowntimeActivityID==""; repo cleared if non-nil.
+func (s *GameServiceServer) resolveDowntimeActivity(uid string, sess *session.PlayerSession) {
+	if !sess.DowntimeBusy {
+		return
+	}
+	sess.DowntimeBusy = false
+	sess.DowntimeActivityID = ""
+	sess.DowntimeCompletesAt = time.Time{}
+	sess.DowntimeMetadata = ""
+
+	if s.downtimeRepo != nil && sess.CharacterID > 0 {
+		_ = s.downtimeRepo.Clear(context.Background(), sess.CharacterID)
+	}
+}
+
+// checkDowntimeCompletion checks if the player's active downtime activity has elapsed
+// and resolves it if so.
+//
+// Precondition: uid is a valid player UID.
+// Postcondition: If DowntimeBusy and CompletesAt has elapsed, resolves activity and clears busy state.
+func (s *GameServiceServer) checkDowntimeCompletion(uid string) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok || !sess.DowntimeBusy {
+		return
+	}
+	if time.Now().Before(sess.DowntimeCompletesAt) {
+		return
+	}
+	s.resolveDowntimeActivity(uid, sess)
+}
+
 // downtimeActivityDuration returns the real-time duration in minutes for an activity.
 // For activities with DurationMinutes==0 (computed at start), stubs are used pending Task 9.
 //

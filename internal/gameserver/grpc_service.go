@@ -1587,6 +1587,10 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					s.pushRoomViewToAllInRoom(sess.RoomID)
 				}
 				s.tickSubstances(uid) // REQ-AH-12
+			// REQ-DT-7: check all sessions with active downtime
+			for _, activeUID := range s.sessions.AllUIDs() {
+				s.checkDowntimeCompletion(activeUID)
+			}
 			case <-ctx.Done():
 				return
 			}
