@@ -139,6 +139,7 @@ message ClientMessage {
     CraftConfirmRequest  craft_confirm_request = 122;
     ScavengeRequest      scavenge_request      = 123;
     AffixRequest         affix_request         = 124;
+    ExploreRequest       explore_request       = 125;
   }
 }
 
@@ -1182,6 +1183,15 @@ message ScavengeRequest   {}
 message AffixRequest {
     string material_query = 1;
     string target_query   = 2;
+}
+
+// ExploreRequest sets or clears the player's exploration mode.
+// mode: one of "lay_low", "hold_ground", "active_sensors", "case_it",
+//       "run_point", "shadow", "poke_around", or "off" to clear.
+// shadow_target: player name to shadow (only used when mode == "shadow").
+message ExploreRequest {
+    string mode = 1;
+    string shadow_target = 2;
 }
 
 // MaterialLoss describes the quantity of a material consumed during crafting.
