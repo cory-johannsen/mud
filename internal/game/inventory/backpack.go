@@ -235,12 +235,13 @@ func (b *Backpack) GetByInstanceID(instanceID string) *ItemInstance {
 }
 
 // AddInstance appends a pre-built ItemInstance directly to the backpack,
-// enforcing slot and weight limits. Weight is computed as 0 when the item
-// definition is unavailable (nil-registry path).
+// enforcing the slot limit only. Weight is not checked (assumed 0) because no
+// item registry is available on this path; callers with a registry should use
+// Add instead.
 //
 // Precondition: inst is non-nil; inst.ItemDefID is non-empty; inst.Quantity >= 1.
-// Postcondition: on success, the instance is appended without exceeding slot or
-// weight limits; on error, backpack state is unchanged.
+// Postcondition: on success, the instance is appended without exceeding the slot
+// limit; weight limit is not enforced; on error, backpack state is unchanged.
 func (b *Backpack) AddInstance(inst *ItemInstance) error {
 	if len(b.items) >= b.MaxSlots {
 		return fmt.Errorf("backpack: not enough slots")
