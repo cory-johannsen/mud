@@ -344,7 +344,7 @@ type Zone struct {
 	// MaterialPool defines the scavenge yield configuration for this zone.
 	// nil means scavenging yields nothing here (REQ-CRAFT-9).
 	MaterialPool *MaterialPool `yaml:"material_pool,omitempty"`
-	SettlementDC int           `yaml:"settlement_dc"`
+	SettlementDC int `yaml:"settlement_dc"` // default 15 if absent
 }
 
 // ExternalExitTargets returns exit targets that reference rooms outside this zone.

@@ -287,10 +287,10 @@ type PlayerSession struct {
 	// The channel is created by NewPlayerSession; it must never be written after close.
 	InitDone chan struct{}
 
-	DowntimeActivityID   string
-	DowntimeCompletesAt  time.Time
-	DowntimeBusy         bool
-	DowntimeMetadata     string
+	DowntimeActivityID  string    // active activity ID; empty = no active downtime
+	DowntimeCompletesAt time.Time // wall-clock time when the activity completes
+	DowntimeBusy        bool      // true while an activity is active; blocks movement and combat (REQ-DT-5)
+	DowntimeMetadata    string    // JSON blob; recipe_id, target_name, item_id per activity
 	ZoneCircumstanceBonus map[string]int
 }
 
@@ -487,6 +487,7 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 			CombatUsed: make(map[string]bool),
 			DailyUsed:  make(map[string]int),
 		},
+		ZoneCircumstanceBonus: make(map[string]int),
 		InitDone: make(chan struct{}),
 	}
 
@@ -709,6 +710,10 @@ func (m *Manager) AllPlayers() []*PlayerSession {
 	return out
 }
 
+// AllUIDs returns the UIDs of all currently active player sessions.
+//
+// Precondition: none.
+// Postcondition: Returns a snapshot of active UIDs; safe to call concurrently.
 func (m *Manager) AllUIDs() []string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
