@@ -316,3 +316,30 @@ func TestLoadDirectory_AidedConditionsPresent(t *testing.T) {
 		})
 	}
 }
+
+func TestLoadDirectory_NewPhase2ConditionsPresent(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+	_, ok1 := reg.Get("terrain_lube")
+	_, ok2 := reg.Get("seduced")
+	assert.True(t, ok1, "terrain_lube must be present in condition registry")
+	assert.True(t, ok2, "seduced must be present in condition registry")
+}
+
+func TestConditionDef_TerrainLube_HasMoveAPCost(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+	def, ok := reg.Get("terrain_lube")
+	require.True(t, ok)
+	assert.Equal(t, 1, def.MoveAPCost, "terrain_lube MoveAPCost must be 1")
+	assert.Equal(t, 2, def.SkillPenalties["hustle"], "terrain_lube hustle penalty must be 2")
+}
+
+func TestConditionDef_Seduced_HasAPReduction(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+	def, ok := reg.Get("seduced")
+	require.True(t, ok)
+	assert.Equal(t, 2, def.APReduction, "seduced APReduction must be 2")
+	assert.True(t, def.IsMentalCondition, "seduced must be a mental condition")
+}

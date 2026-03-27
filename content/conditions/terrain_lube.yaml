@@ -1,0 +1,9 @@
+id: terrain_lube
+name: Lubricated Terrain
+description: |
+  The floor is slick with lubricant, making every step treacherous and
+  athletic maneuvers nearly impossible.
+duration_type: permanent
+move_ap_cost: 1
+skill_penalties:
+  hustle: 2
