@@ -306,6 +306,10 @@ type PlayerSession struct {
 	CampingActive    bool          // true while a camping rest is in progress
 	CampingStartTime time.Time     // when camping started
 	CampingDuration  time.Duration // computed duration for this session (REQ-REST-13/14)
+
+	// Refocus state — transient; not persisted.
+	RefocusingActive    bool      // true while a refocus rest is in progress (REQ-EXP-REFOCUS-1)
+	RefocusingStartTime time.Time // when refocus started
 }
 
 // EquippedInstances returns all ItemInstances currently equipped across the active weapon

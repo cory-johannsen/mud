@@ -764,3 +764,9 @@ func TestPlayerSession_CampingFields_DefaultZero(t *testing.T) {
 	assert.True(t, sess.CampingStartTime.IsZero())
 	assert.Equal(t, time.Duration(0), sess.CampingDuration)
 }
+
+func TestPlayerSession_RefocusingFields_DefaultZero(t *testing.T) {
+	sess := &PlayerSession{}
+	assert.False(t, sess.RefocusingActive)
+	assert.True(t, sess.RefocusingStartTime.IsZero())
+}
