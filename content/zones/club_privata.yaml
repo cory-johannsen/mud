@@ -1,0 +1,245 @@
+zone:
+  id: club_privata
+  danger_level: dangerous
+  world_x: 4
+  world_y: -2
+  name: Club Privata
+  description: A three-floor members-only venue south of Rustbucket Ridge where the music is loud enough to be a weapon.
+  start_room: cp_entry
+  zone_effects:
+  - track: sonic_assault
+    severity: mild
+    base_dc: 12
+    cooldown_rounds: 3
+    cooldown_minutes: 5
+  rooms:
+  - id: cp_entry
+    danger_level: dangerous
+    title: Club Entry
+    description: 'A velvet rope and two bouncers mark the threshold between outside
+      and whatever this is. Bass frequencies vibrate the floor. A stamp on the wrist
+      and a headache that starts immediately.'
+    exits:
+    - direction: east
+      target: cp_bar_1f
+    map_x: 0
+    map_y: 0
+    boss_room: false
+  - id: cp_bar_1f
+    danger_level: dangerous
+    title: First Floor Bar
+    description: 'A long bar of backlit bottles serves as the only visual anchor
+      on the first floor. The music is a physical force here. Two bouncers maintain
+      order by making everyone slightly afraid.'
+    exits:
+    - direction: west
+      target: cp_entry
+    - direction: east
+      target: cp_dance_floor
+    - direction: south
+      target: cp_dining_area
+    map_x: 1
+    map_y: 0
+    spawns:
+    - template: club_bouncer
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: cp_dance_floor
+    danger_level: dangerous
+    title: Dance Floor
+    description: 'The center of the first floor. Strobes. Fog. The kind of bass that
+      reorganizes your internal organs. Dancers in practiced motion who are not interested
+      in being interrupted by someone who is clearly not here to dance.'
+    exits:
+    - direction: west
+      target: cp_bar_1f
+    - direction: east
+      target: cp_couples_lounge_1f
+    map_x: 2
+    map_y: 0
+    spawns:
+    - template: club_dancer
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: cp_dining_area
+    danger_level: dangerous
+    title: Dining Area
+    description: 'Low tables and low lighting south of the bar. The food service
+      stopped at some point but the tables remain. Nobody is eating. East leads to
+      lockers.'
+    exits:
+    - direction: north
+      target: cp_bar_1f
+    - direction: east
+      target: cp_lockers_1f
+    map_x: 1
+    map_y: 1
+    boss_room: false
+  - id: cp_couples_lounge_1f
+    danger_level: dangerous
+    title: Couples Lounge
+    description: 'Semicircular booths facing each other across small tables. Dim
+      red lighting. A space designed for conversations that require privacy. Nobody
+      here wants company.'
+    exits:
+    - direction: west
+      target: cp_dance_floor
+    map_x: 3
+    map_y: 0
+    boss_room: false
+  - id: cp_lockers_1f
+    danger_level: dangerous
+    title: First Floor Lockers
+    description: 'A bank of lockers for member storage, most secured with combination
+      locks. The music penetrates even here. A door west leads to the dining area,
+      a door north leads to the restrooms.'
+    exits:
+    - direction: west
+      target: cp_dining_area
+    - direction: north
+      target: cp_restrooms_1f
+    map_x: 2
+    map_y: 2
+    boss_room: false
+  - id: cp_restrooms_1f
+    danger_level: dangerous
+    title: First Floor Restrooms
+    description: 'Black tile, black fixtures, mirrors that have not been cleaned
+      in months. The smell of the rest of the building penetrates here. Stairs lead
+      up to the mezzanine.'
+    exits:
+    - direction: west
+      target: cp_lockers_1f
+    - direction: north
+      target: cp_mezzanine
+    map_x: 3
+    map_y: 2
+    boss_room: false
+  - id: cp_mezzanine
+    danger_level: dangerous
+    title: Mezzanine
+    description: 'The second floor landing overlooks the first floor dance floor through
+      smoked glass. The bass is different up here — more felt than heard. East leads
+      to the bottle service area.'
+    exits:
+    - direction: south
+      target: cp_restrooms_1f
+    - direction: east
+      target: cp_bottle_service
+    map_x: 0
+    map_y: 3
+    boss_room: false
+  - id: cp_bottle_service
+    danger_level: dangerous
+    title: Bottle Service
+    description: 'Table service with bottle minimums that would fund a small expedition.
+      Dancers attend to the tables with professional charm that has limits. Two of
+      them turn as you arrive, calculating.'
+    exits:
+    - direction: west
+      target: cp_mezzanine
+    - direction: east
+      target: cp_dance_pole
+    map_x: 1
+    map_y: 3
+    spawns:
+    - template: club_dancer
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: cp_dance_pole
+    danger_level: dangerous
+    title: Dance Pole Stage
+    description: 'A raised stage with three poles and lighting rigs designed to make
+      everything look either glamorous or threatening. Currently threatening. Movement
+      from the performers who have stopped performing.'
+    exits:
+    - direction: west
+      target: cp_bottle_service
+    - direction: east
+      target: cp_private_rooms
+    map_x: 2
+    map_y: 3
+    boss_room: false
+  - id: cp_private_rooms
+    danger_level: dangerous
+    title: Private Rooms
+    description: 'A corridor of numbered doors, most closed. The carpet is deep and
+      sound-absorbing. Whatever happens in here, the club prefers not to know about it.'
+    exits:
+    - direction: west
+      target: cp_dance_pole
+    map_x: 3
+    map_y: 3
+    boss_room: false
+  - id: cp_restrooms_2f
+    danger_level: dangerous
+    title: Second Floor Restrooms
+    description: 'Mirror of the first floor restrooms but with better lighting and
+      a more disturbing smell. Stairs spiral upward to the third floor through a
+      door labeled "VIP ONLY."'
+    exits:
+    - direction: south
+      target: cp_dance_pole
+    - direction: north
+      target: cp_public_play
+    map_x: 3
+    map_y: 4
+    boss_room: false
+  - id: cp_public_play
+    danger_level: dangerous
+    title: Public Play Space
+    description: 'The third floor opens into a large, open-plan space with equipment
+      and lighting designed for group activities. East connects to the couples area.'
+    exits:
+    - direction: south
+      target: cp_restrooms_2f
+    - direction: east
+      target: cp_couples_3f
+    map_x: 0
+    map_y: 5
+    boss_room: false
+  - id: cp_couples_3f
+    danger_level: dangerous
+    title: Third Floor Couples Area
+    description: 'Sectioned into alcoves with curtained doorways. The music from below
+      is a memory up here. South leads to the VIP Suite. East leads to the third floor bar.'
+    exits:
+    - direction: west
+      target: cp_public_play
+    - direction: east
+      target: cp_bar_3f
+    - direction: south
+      target: cp_vip_suite
+    map_x: 1
+    map_y: 5
+    boss_room: false
+  - id: cp_bar_3f
+    danger_level: dangerous
+    title: Third Floor Bar and Restrooms
+    description: 'A smaller, quieter bar serving the VIP floor. The bottles here
+      do not have prices on them. The bartender is not here.'
+    exits:
+    - direction: west
+      target: cp_couples_3f
+    map_x: 2
+    map_y: 5
+    boss_room: false
+  - id: cp_vip_suite
+    danger_level: dangerous
+    title: VIP Suite
+    description: 'A room that does not officially exist on the club''s floor plan.
+      The only furniture is a single chair occupied by someone who has been waiting
+      for exactly this. This is worse than loud.'
+    exits:
+    - direction: north
+      target: cp_couples_3f
+    map_x: 1
+    map_y: 6
+    spawns:
+    - template: club_vip_boss
+      count: 1
+      respawn_after: 30m
+    boss_room: true

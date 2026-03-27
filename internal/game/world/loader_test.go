@@ -888,3 +888,12 @@ func TestLoadZone_TheVelvetRope_HasTerrainLubeEffect(t *testing.T) {
 	assert.Contains(t, tracks, "revulsion", "The Velvet Rope must have revulsion zone_effect")
 	assert.Contains(t, tracks, "terrain_lube", "The Velvet Rope must have terrain_lube zone_effect")
 }
+
+func TestLoadZone_ClubPrivata_HasSixteenRooms(t *testing.T) {
+	data, err := os.ReadFile("../../../content/zones/club_privata.yaml")
+	require.NoError(t, err)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	assert.Len(t, zone.Rooms, 16, "Club Privata must have exactly 16 rooms")
+	assert.Equal(t, "club_privata", zone.ID)
+}

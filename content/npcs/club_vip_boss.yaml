@@ -1,0 +1,20 @@
+id: club_vip_boss
+name: VIP Suite Boss
+description: The figure behind the velvet rope behind the velvet rope. Dressed in silence and studied indifference. Not indifferent at all.
+level: 8
+max_hp: 120
+ac: 18
+awareness: 10
+disposition: hostile
+tier: boss
+abilities:
+  brutality: 18
+  quickness: 14
+  grit: 18
+  reasoning: 14
+  savvy: 16
+  flair: 20
+loot:
+  currency:
+    min: 100
+    max: 300

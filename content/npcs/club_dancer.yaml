@@ -1,0 +1,20 @@
+id: club_dancer
+name: Club Dancer
+description: Moves with professional precision and looks right through you while doing it.
+level: 2
+max_hp: 20
+ac: 11
+awareness: 5
+disposition: neutral
+seduction_probability: 0.2
+abilities:
+  brutality: 8
+  quickness: 14
+  grit: 8
+  reasoning: 10
+  savvy: 12
+  flair: 18
+loot:
+  currency:
+    min: 5
+    max: 20
