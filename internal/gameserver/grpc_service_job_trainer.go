@@ -131,6 +131,19 @@ func (s *GameServiceServer) handleTrainJob(uid string, req *gamev1.TrainJobReque
 			)
 		}
 	}
+	// Persist the new job to character_jobs table (REQ-JD-4).
+	if s.characterJobsRepo != nil && sess.CharacterID > 0 {
+		if err := s.characterJobsRepo.AddJob(context.Background(), sess.CharacterID, jobID); err != nil {
+			s.logger.Warn("failed to persist job to character_jobs",
+				zap.String("uid", uid),
+				zap.Int64("character_id", sess.CharacterID),
+				zap.String("job_id", jobID),
+				zap.Error(err),
+			)
+		}
+	}
+	// Update HeldJobs in-memory (REQ-JD-4).
+	sess.HeldJobs = append(sess.HeldJobs, jobID)
 	return messageEvent(fmt.Sprintf(
 		"%s trains you in %q. Cost: %d credits. Your jobs: %s.",
 		inst.Name(), jobID, trainable.TrainingCost, formatJobList(sess.Jobs, sess.ActiveJobID),

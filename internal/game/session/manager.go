@@ -240,6 +240,10 @@ type PlayerSession struct {
 	// ActiveJobID is the currently active job that earns XP (REQ-NPC-10).
 	// Empty string means no active job. Set to the first trained job automatically (REQ-NPC-9).
 	ActiveJobID string
+	// HeldJobs is the flat list of all job IDs the player currently holds.
+	// Loaded at login from the character_jobs table (REQ-JD-4).
+	// Kept in-sync with Jobs; nil before session initialization.
+	HeldJobs []string
 	// Team is the player's faction or team affiliation, loaded from characters.team DB column.
 	// Empty string means no team affiliation (REQ-EM-39).
 	Team string

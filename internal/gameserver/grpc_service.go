@@ -312,6 +312,18 @@ type GameServiceServer struct {
 	downtimeQueueLimitReg *downtime.DowntimeQueueLimitRegistry
 	// drawbackEngine evaluates situational drawback triggers and applies conditions (REQ-JD-10).
 	drawbackEngine *drawback.Engine
+	// characterJobsRepo persists the set of all jobs held by each character (REQ-JD-4).
+	// May be nil (job persistence to character_jobs table is skipped if not set).
+	characterJobsRepo CharacterJobsRepository
+}
+
+// CharacterJobsRepository persists per-character job lists in the character_jobs table.
+//
+// Precondition: characterID must be > 0.
+type CharacterJobsRepository interface {
+	AddJob(ctx context.Context, characterID int64, jobID string) error
+	RemoveJob(ctx context.Context, characterID int64, jobID string) error
+	ListJobs(ctx context.Context, characterID int64) ([]string, error)
 }
 
 // CharacterDowntimeRepository persists active downtime state for characters.
@@ -438,6 +450,7 @@ func NewGameServiceServer(
 		materialRepo:               storage.MaterialRepo,
 		recipeReg:                  content.RecipeRegistry,
 		craftEngine:                crafting.NewEngine(),
+		characterJobsRepo:          storage.CharacterJobsRepo,
 	}
 	if content.FactionRegistry != nil {
 		s.factionRegistry = content.FactionRegistry

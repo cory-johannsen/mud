@@ -364,6 +364,13 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			activity_args text,
 			UNIQUE (character_id, position)
 		);
+
+		-- Migration 051
+		CREATE TABLE IF NOT EXISTS character_jobs (
+			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+			job_id       TEXT   NOT NULL,
+			PRIMARY KEY (character_id, job_id)
+		);
 	`)
 	return err
 }

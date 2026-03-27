@@ -53,6 +53,9 @@ type StorageDeps struct {
 	// DowntimeQueueRepo manages the per-character downtime activity queue.
 	// May be nil when the downtime queue feature is not yet configured.
 	DowntimeQueueRepo DowntimeQueueRepo
+	// CharacterJobsRepo persists all jobs held by each character in the character_jobs table.
+	// May be nil when the job persistence feature is not yet configured.
+	CharacterJobsRepo CharacterJobsRepository
 }
 
 // ContentDeps groups all content/world dependencies for GameServiceServer.
