@@ -20,7 +20,7 @@ zone:
       overpass connects back toward the I-205 corridor and NE Portland.
 
       '
-    danger_level: sketchy
+    danger_level: safe
     exits:
     - direction: west
       target: ne_i205_onramp

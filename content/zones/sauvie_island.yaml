@@ -20,7 +20,7 @@ zone:
       The mainland sprawls behind you to the southeast, smoke rising from the waterfront.
 
       '
-    danger_level: sketchy
+    danger_level: safe
     exits:
     - direction: north
       target: sauvie_tollgate

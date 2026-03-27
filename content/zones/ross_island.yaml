@@ -33,7 +33,7 @@ zone:
       target: ross_east_shore
     - direction: east
       target: ross_dock_shack
-    danger_level: dangerous
+    danger_level: safe
     map_x: 0
     map_y: 0
     equipment:

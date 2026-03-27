@@ -10,6 +10,7 @@ zone:
   start_room: lo_the_commons
   rooms:
   - id: lo_checkpoint_north
+    danger_level: safe
     title: Northern Checkpoint
     description: 'A fortified gate marks the border of Lake Oswego Nation. Concrete
 

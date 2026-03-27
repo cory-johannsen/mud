@@ -199,6 +199,30 @@ func TestOptionalNPCTypesOnlyInAuthorizedZones(t *testing.T) {
 	}
 }
 
+func TestZoneMapRoomIsSafe(t *testing.T) {
+	zonesDir := filepath.Join(repoRoot(t), "content", "zones")
+	entries, err := os.ReadDir(zonesDir)
+	require.NoError(t, err)
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".yaml") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(zonesDir, entry.Name()))
+		require.NoError(t, err)
+		zone, err := LoadZoneFromBytes(data)
+		require.NoError(t, err, "zone file: %s", entry.Name())
+		for _, room := range zone.Rooms {
+			for _, eq := range room.Equipment {
+				if eq.ItemID == "zone_map" {
+					require.Equal(t, "safe", room.DangerLevel,
+						"zone %q room %q contains zone_map equipment but is not danger_level: safe (BUG-26)",
+						zone.ID, room.ID)
+				}
+			}
+		}
+	}
+}
+
 func TestNewSafeRoomsConnectedBidirectionally(t *testing.T) {
 	type safeRoomSpec struct {
 		zoneFile    string

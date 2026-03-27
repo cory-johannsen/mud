@@ -10,6 +10,7 @@ zone:
   start_room: flats_jade_district
   rooms:
   - id: flats_82nd_ave
+    danger_level: safe
     core: true
     title: 82nd Avenue
     description: 'The wide expanse of 82nd Avenue stretches north and south, cracked

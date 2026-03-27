@@ -1,6 +1,6 @@
 zone:
   id: vantucky
-  danger_level: dangerous
+  danger_level: sketchy
   world_x: 2
   world_y: -4
   script_dir: content/scripts/zones/vantucky
@@ -20,7 +20,7 @@ zone:
       The pavement is cracked and patched with gravel. Pickup trucks rust in driveways.
 
       '
-    danger_level: dangerous
+    danger_level: safe
     exits:
     - direction: west
       target: couve_fourth_plain_east

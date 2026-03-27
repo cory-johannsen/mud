@@ -33,7 +33,7 @@ zone:
       target: sei_mcloughlin_blvd
     map_x: 0
     map_y: 0
-    danger_level: dangerous
+    danger_level: safe
     equipment:
     - item_id: zone_map
       max_count: 1

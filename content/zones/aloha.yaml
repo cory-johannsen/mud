@@ -10,6 +10,7 @@ zone:
   start_room: aloha_the_bazaar
   rooms:
   - id: aloha_tv_highway_east
+    danger_level: safe
     title: TV Highway — East Gate
     description: 'The eastern end of the Aloha Neutral Zone opens onto the cracked
 

@@ -20,7 +20,7 @@ zone:
       disappears toward the distant haze of Vancouver.
 
       '
-    danger_level: sketchy
+    danger_level: safe
     exits:
     - direction: west
       target: vantucky_i84_east

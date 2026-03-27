@@ -20,7 +20,7 @@ zone:
       the Kingdom of Hillsboro. Blue-and-white banners snap in the wind.
 
       '
-    danger_level: sketchy
+    danger_level: safe
     exits:
     - direction: east
       target: aloha_tv_highway_west

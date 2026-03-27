@@ -10,6 +10,7 @@ zone:
   script_dir: content/scripts/zones/downtown
   rooms:
   - id: pioneer_square
+    danger_level: safe
     title: Pioneer Courthouse Square
     core: true
     description: 'You stand in the ruins of what was once Pioneer Courthouse Square.

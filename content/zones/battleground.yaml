@@ -10,7 +10,7 @@ zone:
   start_room: battle_infirmary
   rooms:
   - id: battle_i5_south
-    danger_level: dangerous
+    danger_level: safe
     title: I-5 Southbound On-Ramp
     description: 'The cracked asphalt of the old interstate on-ramp marks the southern
 

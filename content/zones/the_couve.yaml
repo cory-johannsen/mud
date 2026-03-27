@@ -22,7 +22,7 @@ zone:
       Toll booths have been converted into guard shacks by whoever controls the crossing today.
 
       '
-    danger_level: sketchy
+    danger_level: safe
     exits:
     - direction: north
       target: couve_jantzen_beach
