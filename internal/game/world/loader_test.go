@@ -863,3 +863,12 @@ func TestLoadZone_ClownCamp_ZoneEffects(t *testing.T) {
 	assert.Contains(t, tracks, "delirium", "Clown Camp must have delirium zone_effect")
 	assert.Contains(t, tracks, "fear", "Clown Camp must have fear zone_effect")
 }
+
+func TestLoadZone_SteamPDX_HasSevenRooms(t *testing.T) {
+	data, err := os.ReadFile("../../../content/zones/steampdx.yaml")
+	require.NoError(t, err)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	assert.Len(t, zone.Rooms, 7, "SteamPDX must have exactly 7 rooms")
+	assert.Equal(t, "steampdx", zone.ID)
+}

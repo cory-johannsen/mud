@@ -1,0 +1,143 @@
+zone:
+  id: steampdx
+  danger_level: dangerous
+  world_x: 0
+  world_y: -2
+  name: SteamPDX
+  description: A men's bathhouse south of downtown, notorious for its hostile door policy and even more hostile interior.
+  start_room: sp_parking_lot
+  zone_effects:
+  - track: horror
+    severity: mild
+    base_dc: 12
+    cooldown_rounds: 3
+    cooldown_minutes: 5
+  - track: nausea
+    severity: mild
+    base_dc: 11
+    cooldown_rounds: 3
+    cooldown_minutes: 5
+  - track: reduced_visibility
+    severity: mild
+    base_dc: 10
+    cooldown_rounds: 3
+    cooldown_minutes: 5
+  rooms:
+  - id: sp_parking_lot
+    danger_level: dangerous
+    title: Parking Lot
+    description: 'A cracked asphalt lot behind a nondescript building with blacked-out
+      windows. A hand-lettered sign reads "Members Only." The bouncer at the door
+      looks you over with practiced contempt.'
+    exits:
+    - direction: east
+      target: sp_lobby
+    map_x: 0
+    map_y: 0
+    spawns:
+    - template: steam_bouncer
+      count: 1
+      respawn_after: 5m
+    boss_room: false
+  - id: sp_lobby
+    danger_level: dangerous
+    title: Lobby
+    description: 'Wood paneling, low lighting, and a reception desk attended by no
+      one. Lockers line one wall. A faint chemical smell — chlorine and something
+      else — drifts from further inside. Patrons eye new arrivals.'
+    exits:
+    - direction: west
+      target: sp_parking_lot
+    - direction: east
+      target: sp_locker_room
+    map_x: 1
+    map_y: 0
+    spawns:
+    - template: steam_patron
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: sp_locker_room
+    danger_level: dangerous
+    title: Locker Room
+    description: 'Banks of metal lockers, most hanging open. Towels on hooks. The
+      tile floor is wet. Three exits lead deeper into the facility — south to the
+      showers, east to the sauna. The steam is already thick.'
+    exits:
+    - direction: west
+      target: sp_lobby
+    - direction: south
+      target: sp_showers
+    - direction: east
+      target: sp_sauna
+    map_x: 2
+    map_y: 0
+    boss_room: false
+  - id: sp_showers
+    danger_level: dangerous
+    title: Showers
+    description: 'A row of open shower stalls, visibility near zero in the billowing
+      steam. Water runs hot and constant. Movement in the fog. Patrons who are no
+      longer interested in relaxing.'
+    exits:
+    - direction: north
+      target: sp_locker_room
+    map_x: 2
+    map_y: 1
+    spawns:
+    - template: steam_patron
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: sp_sauna
+    danger_level: dangerous
+    title: Sauna
+    description: 'Cedar benches in a cedar room heated to an unreasonable temperature.
+      Coals glow in a central pit. The air scorches the lungs. Patrons recline with
+      territorial ease, sweating profusely and watching the door.'
+    exits:
+    - direction: west
+      target: sp_locker_room
+    - direction: south
+      target: sp_hot_tub
+    map_x: 3
+    map_y: 0
+    spawns:
+    - template: steam_patron
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: sp_hot_tub
+    danger_level: dangerous
+    title: Hot Tub
+    description: 'A large circular tub set into the floor, bubbling at a concerning
+      temperature. The water is cloudy. More patrons, equally unwelcoming. A passage
+      south leads somewhere the signage has been removed from.'
+    exits:
+    - direction: north
+      target: sp_sauna
+    - direction: south
+      target: sp_glory_hole
+    map_x: 3
+    map_y: 1
+    spawns:
+    - template: steam_patron
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: sp_glory_hole
+    danger_level: dangerous
+    title: The Glory Hole
+    description: 'A low-ceilinged alcove at the deepest point of the facility. Three
+      men of extraordinary size occupy every corner. They are not pleased to have company
+      unless company was invited. You were not invited.'
+    exits:
+    - direction: north
+      target: sp_hot_tub
+    map_x: 3
+    map_y: 2
+    spawns:
+    - template: the_big_3
+      count: 1
+      respawn_after: 30m
+    boss_room: true

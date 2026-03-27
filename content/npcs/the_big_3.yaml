@@ -1,0 +1,21 @@
+id: the_big_3
+name: The Big 3
+description: Three interconnected titans who move and fight as one organism, a hydra of bad decisions and raw power.
+level: 7
+max_hp: 100
+ac: 17
+awareness: 9
+gender: male
+disposition: hostile
+tier: boss
+abilities:
+  brutality: 20
+  quickness: 14
+  grit: 16
+  reasoning: 10
+  savvy: 12
+  flair: 14
+loot:
+  currency:
+    min: 80
+    max: 200
