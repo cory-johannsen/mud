@@ -4,7 +4,7 @@ description: |
   Steam, fog, or darkness limits your sight to a few feet. Everything is obscured.
 duration_type: rounds
 max_stacks: 0
-attack_penalty: -2
+attack_penalty: 2
 attack_bonus: 0
 ac_penalty: 0
 damage_bonus: 0

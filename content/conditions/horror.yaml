@@ -4,7 +4,7 @@ description: |
   An overwhelming sense of wrongness floods your mind. What you see defies all reason.
 duration_type: rounds
 max_stacks: 0
-attack_penalty: -1
+attack_penalty: 1
 attack_bonus: 0
 ac_penalty: 0
 damage_bonus: 0
