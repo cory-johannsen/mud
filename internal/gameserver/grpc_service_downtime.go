@@ -333,6 +333,26 @@ func (s *GameServiceServer) downtimeStart(uid string, sess *session.PlayerSessio
 		}
 	}
 
+	// Gate retrain on feat selection and validation. (REQ-RETRAIN-DT-1, REQ-RETRAIN-DT-2)
+	if act.ID == "retrain" {
+		if s.featRegistry == nil {
+			return messageEvent("Retrain system not available.")
+		}
+		args := strings.Fields(activityArgs)
+		switch len(args) {
+		case 0:
+			return retrainListEligible(sess, s.featRegistry)
+		case 1:
+			return retrainListReplacements(args[0], sess, s.featRegistry)
+		default:
+			oldID, newID := args[0], args[1]
+			if errMsg := validateRetrainPair(oldID, newID, sess, s.featRegistry, s.jobRegistry); errMsg != "" {
+				return messageEvent(errMsg)
+			}
+			// activityArgs stays as "<old_id> <new_id>" — stored in DowntimeMetadata below.
+		}
+	}
+
 	durationMin := downtimeActivityDuration(act, activityArgs, s.recipeReg)
 	completesAt := time.Now().Add(time.Duration(durationMin) * time.Minute)
 

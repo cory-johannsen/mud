@@ -103,6 +103,15 @@ func NewFeatRegistry(feats []*Feat) *FeatRegistry {
 	return r
 }
 
+// NewFeatRegistryFromSlice builds a FeatRegistry from the given feat slice.
+// It is an alias for NewFeatRegistry provided for call-site clarity.
+//
+// Precondition: feats must not be nil.
+// Postcondition: Returns a fully indexed registry.
+func NewFeatRegistryFromSlice(feats []*Feat) *FeatRegistry {
+	return NewFeatRegistry(feats)
+}
+
 // Feat returns the feat with the given ID and true, or nil and false if not found.
 //
 // Precondition: id must be non-empty.
