@@ -274,6 +274,21 @@ func (s *GameServiceServer) downtimeStart(uid string, sess *session.PlayerSessio
 		return messageEvent("Unknown downtime activity.")
 	}
 
+	// Gate forge_papers on having forgery_supplies in inventory. (REQ-DA-FORGE-1)
+	if act.ID == "forge_papers" {
+		if sess.Backpack == nil {
+			return messageEvent("You need forgery supplies to begin forging papers.")
+		}
+		instances := sess.Backpack.FindByItemDefID("forgery_supplies")
+		if len(instances) == 0 {
+			return messageEvent("You need forgery supplies to begin forging papers.")
+		}
+		// Consume one forgery_supplies at activity start.
+		if err := sess.Backpack.Remove(instances[0].InstanceID, 1); err != nil {
+			return messageEvent("You need forgery supplies to begin forging papers.")
+		}
+	}
+
 	durationMin := downtimeActivityDuration(act)
 	completesAt := time.Now().Add(time.Duration(durationMin) * time.Minute)
 
