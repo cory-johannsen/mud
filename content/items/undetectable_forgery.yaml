@@ -1,7 +1,7 @@
 id: undetectable_forgery
 name: Undetectable Forgery
 description: A masterfully produced set of false documents. Indistinguishable from the real thing to all but the most expert scrutiny.
-kind: document
+kind: junk
 weight: 0.1
 stackable: true
 max_stack: 10
