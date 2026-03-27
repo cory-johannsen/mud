@@ -573,11 +573,12 @@ func (s *GameServiceServer) resolveApplyPressure(uid string, sess *session.Playe
 
 // resolveDowntimeCraft resolves the "Craft" downtime activity.
 //
-// Stub: Full crafting engine integration (recipe lookup, material deduction, item delivery)
-// is deferred until REQ-CRAFT-* downtime-crafting rules are wired into the crafting engine.
+// Materials were consumed eagerly at activity start (REQ-CRAFT-DT-1).
+// Rolls a rigging skill check vs recipe DC; delivers output items on Success/CritSuccess;
+// refunds one material batch on CritSuccess (REQ-CRAFT-DT-4).
 //
-// Precondition: sess is non-nil; state already cleared.
-// Postcondition: Console message delivered; no item or material mutations until wired.
+// Precondition: sess is non-nil; sess.DowntimeMetadata holds the recipe ID; state already cleared.
+// Postcondition: Items delivered to backpack on success; material refund on crit success; message pushed.
 func (s *GameServiceServer) resolveDowntimeCraft(uid string, sess *session.PlayerSession) {
 	if sess.DowntimeMetadata == "" || s.recipeReg == nil {
 		s.pushMessageToUID(uid, "(No recipe recorded.)")
