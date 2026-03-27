@@ -2948,6 +2948,41 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 			}
 		}
 
+		// NPC-initiated seduction (Phase 2): neutral NPCs with SeductionProbability > 0
+		// may attempt to seduce player combatants at the start of their turn.
+		if h.condRegistry != nil {
+			if inst, ok := h.npcMgr.Get(c.ID); ok && inst.SeductionProbability > 0 && inst.Disposition != "hostile" {
+				seducedDef, hasDef := h.condRegistry.Get("seduced")
+				if hasDef {
+					for _, pc := range cbt.Combatants {
+						if pc.Kind != combat.KindPlayer || pc.IsDead() {
+							continue
+						}
+						if inst.SeductionRejected != nil && inst.SeductionRejected[pc.ID] {
+							continue
+						}
+						sess, ok := h.sessions.GetPlayer(pc.ID)
+						if !ok {
+							continue
+						}
+						if h.ResolveNPCSeductionGenderCheck(inst, pc.ID, sess.Gender) {
+							continue
+						}
+						roll := h.dice.Src().Intn(20) + 1
+						if float64(roll) > inst.SeductionProbability*20 {
+							continue
+						}
+						npcRoll := h.dice.Src().Intn(20) + 1
+						playerRoll := h.dice.Src().Intn(20) + 1
+						if cbt.Conditions[pc.ID] == nil {
+							cbt.Conditions[pc.ID] = condition.NewActiveSet()
+						}
+						h.ResolveNPCSeductionContest(inst, pc.ID, sess.Abilities.Savvy, seducedDef, cbt.Conditions[pc.ID], npcRoll, playerRoll)
+					}
+				}
+			}
+		}
+
 		// Auto-use-cover: apply cover at start of NPC turn when strategy enables it
 		// and the NPC is not already in cover.
 		if c.CoverTier == "" {
@@ -4231,4 +4266,43 @@ func (h *CombatHandler) evaluateBossAbilitiesLocked(
 			}
 		}
 	}
+}
+
+// ResolveNPCSeductionGenderCheck checks whether inst's SeductionGender restriction
+// blocks seduction for the given player. When blocked, inst.Disposition is set to
+// "hostile" and true is returned.
+//
+// Precondition: inst must not be nil.
+// Postcondition: Returns true and sets inst.Disposition="hostile" when the player's
+// gender does not match inst.SeductionGender; returns false otherwise.
+func (h *CombatHandler) ResolveNPCSeductionGenderCheck(inst *npc.Instance, playerUID, playerGender string) bool {
+	if inst.SeductionGender != "" && inst.SeductionGender != playerGender {
+		inst.Disposition = "hostile"
+		return true
+	}
+	return false
+}
+
+// ResolveNPCSeductionContest runs the seduction opposed check between inst and the player.
+// npcRoll and playerRoll are raw d20 results; callers pass fixed values for testing.
+// Uses abilityModFrom(inst.Flair) and abilityModFrom(playerSavvy).
+// On NPC win: applies seducedDef to condSet (1 round, 1 stack), returns true.
+// On player win: inst.Disposition="hostile", inst.SeductionRejected[playerUID]=true, returns false.
+//
+// Precondition: inst must not be nil; seducedDef must not be nil; condSet must not be nil.
+// Postcondition: Returns true with seduced condition applied on NPC win;
+// returns false with inst turned hostile on player win.
+func (h *CombatHandler) ResolveNPCSeductionContest(inst *npc.Instance, playerUID string, playerSavvy int, seducedDef *condition.ConditionDef, condSet *condition.ActiveSet, npcRoll, playerRoll int) bool {
+	npcTotal := npcRoll + abilityModFrom(inst.Flair)
+	playerTotal := playerRoll + abilityModFrom(playerSavvy)
+	if npcTotal >= playerTotal {
+		_ = condSet.Apply(playerUID, seducedDef, 1, 1)
+		return true
+	}
+	inst.Disposition = "hostile"
+	if inst.SeductionRejected == nil {
+		inst.SeductionRejected = make(map[string]bool)
+	}
+	inst.SeductionRejected[playerUID] = true
+	return false
 }

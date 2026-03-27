@@ -137,6 +137,13 @@ type Template struct {
 	// Immobile prevents this NPC from patrolling or wandering.
 	Immobile bool `yaml:"immobile"`
 
+	// SeductionProbability is the probability (0.0–1.0) that this NPC attempts to seduce
+	// a player at the start of each combat round when disposition is not "hostile".
+	SeductionProbability float64 `yaml:"seduction_probability"`
+	// SeductionGender restricts seduction attempts to players of a matching gender.
+	// Empty string means the NPC attempts to seduce players of any gender.
+	SeductionGender string `yaml:"seduction_gender"`
+
 	// NPCType classifies the NPC's role.
 	// Valid values: "combat", "merchant", "guard", "healer", "quest_giver",
 	// "hireling", "banker", "job_trainer", "crafter".

@@ -27,6 +27,12 @@ type Instance struct {
 	// SeductionRejected maps player UID → true when this NPC has rejected a seduction
 	// attempt from that player (REQ-ZN-8). Runtime-only: no YAML tag. Nil until first rejection.
 	SeductionRejected map[string]bool
+	// SeductionProbability is propagated from Template at spawn.
+	SeductionProbability float64
+	// SeductionGender is propagated from Template at spawn.
+	SeductionGender string
+	// Flair is the NPC's Flair ability score, propagated from Template.Abilities.Flair at spawn.
+	Flair int
 	// baseName is the unsuffixed name copied from the template at spawn time.
 	baseName string
 	// nameMu protects the name field.
@@ -289,6 +295,9 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		Brutality:     tmpl.Abilities.Brutality,
 		Quickness:     tmpl.Abilities.Quickness,
 		Savvy:         tmpl.Abilities.Savvy,
+		Flair:         tmpl.Abilities.Flair,
+		SeductionProbability: tmpl.SeductionProbability,
+		SeductionGender:      tmpl.SeductionGender,
 		ToughnessRank: tmpl.ToughnessRank,
 		HustleRank:    tmpl.HustleRank,
 		CoolRank:      tmpl.CoolRank,
