@@ -26,8 +26,7 @@ type innateRepoForGrpcTest struct {
 func (r *innateRepoForGrpcTest) GetAll(_ context.Context, _ int64) (map[string]*session.InnateSlot, error) {
 	out := make(map[string]*session.InnateSlot)
 	for k, v := range r.slots {
-		cp := *v
-		out[k] = &cp
+		out[k] = new(*v)
 	}
 	return out, nil
 }
@@ -358,14 +357,14 @@ func TestHandleUse_ReactionTech_BlocksActivation(t *testing.T) {
 	// Build a registry with chrome_reflex having a Reaction.
 	reg := technology.NewRegistry()
 	reg.Register(&technology.TechnologyDef{
-		ID:        "chrome_reflex",
-		Name:      "Chrome Reflex",
-		Tradition: technology.TraditionNeural,
-		Level:     1,
-		UsageType: technology.UsageInnate,
-		Range:     technology.RangeSelf,
-		Targets:   technology.TargetsSingle,
-		Duration:  "instant",
+		ID:         "chrome_reflex",
+		Name:       "Chrome Reflex",
+		Tradition:  technology.TraditionNeural,
+		Level:      1,
+		UsageType:  technology.UsageInnate,
+		Range:      technology.RangeSelf,
+		Targets:    technology.TargetsSingle,
+		Duration:   "instant",
 		Resolution: "none",
 		Reaction: &reaction.ReactionDef{
 			Triggers: []reaction.ReactionTriggerType{

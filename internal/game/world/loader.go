@@ -18,14 +18,14 @@ type yamlZoneFile struct {
 
 // yamlZone is the YAML representation of a zone.
 type yamlZone struct {
-	ID                     string     `yaml:"id"`
-	Name                   string     `yaml:"name"`
-	Description            string     `yaml:"description"`
-	StartRoom              string     `yaml:"start_room"`
-	ScriptDir              string     `yaml:"script_dir"`
-	ScriptInstructionLimit int        `yaml:"script_instruction_limit"`
-	Rooms                  []yamlRoom `yaml:"rooms"`
-	DangerLevel            string     `yaml:"danger_level"`
+	ID                     string                 `yaml:"id"`
+	Name                   string                 `yaml:"name"`
+	Description            string                 `yaml:"description"`
+	StartRoom              string                 `yaml:"start_room"`
+	ScriptDir              string                 `yaml:"script_dir"`
+	ScriptInstructionLimit int                    `yaml:"script_instruction_limit"`
+	Rooms                  []yamlRoom             `yaml:"rooms"`
+	DangerLevel            string                 `yaml:"danger_level"`
 	RoomTrapChance         *int                   `yaml:"room_trap_chance,omitempty"`
 	CoverTrapChance        *int                   `yaml:"cover_trap_chance,omitempty"`
 	TrapProbabilities      *yamlTrapProbabilities `yaml:"trap_probabilities,omitempty"`
@@ -277,8 +277,6 @@ func convertYAMLZone(yz yamlZone) (*Zone, error) {
 func zoneToYAML(zone *Zone) yamlZoneFile {
 	yrooms := make([]yamlRoom, 0, len(zone.Rooms))
 	for _, room := range zone.Rooms {
-		mapX := room.MapX
-		mapY := room.MapY
 		yr := yamlRoom{
 			ID:              room.ID,
 			Title:           room.Title,
@@ -286,8 +284,8 @@ func zoneToYAML(zone *Zone) yamlZoneFile {
 			Properties:      room.Properties,
 			SkillChecks:     room.SkillChecks,
 			Effects:         room.Effects,
-			MapX:            &mapX,
-			MapY:            &mapY,
+			MapX:            new(room.MapX),
+			MapY:            new(room.MapY),
 			DangerLevel:     room.DangerLevel,
 			RoomTrapChance:  room.RoomTrapChance,
 			CoverTrapChance: room.CoverTrapChance,

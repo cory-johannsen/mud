@@ -69,10 +69,9 @@ func TestRollRoomTrap_OverrideZeroAlwaysFalse(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		roll := rapid.IntRange(0, 99).Draw(t, "roll")
 		rng := alwaysRoller{val: roll}
-		override := 0
 		levels := []danger.DangerLevel{danger.Safe, danger.Sketchy, danger.Dangerous, danger.AllOutWar}
 		lvl := rapid.SampledFrom(levels).Draw(t, "level")
-		if danger.RollRoomTrap(lvl, &override, rng) {
+		if danger.RollRoomTrap(lvl, new(0), rng) {
 			t.Fatalf("RollRoomTrap(%q, &0, roll=%d): want false always, got true", lvl, roll)
 		}
 	})
@@ -82,10 +81,9 @@ func TestRollCoverTrap_OverrideZeroAlwaysFalse(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		roll := rapid.IntRange(0, 99).Draw(t, "roll")
 		rng := alwaysRoller{val: roll}
-		override := 0
 		levels := []danger.DangerLevel{danger.Safe, danger.Sketchy, danger.Dangerous, danger.AllOutWar}
 		lvl := rapid.SampledFrom(levels).Draw(t, "level")
-		if danger.RollCoverTrap(lvl, &override, rng) {
+		if danger.RollCoverTrap(lvl, new(0), rng) {
 			t.Fatalf("RollCoverTrap(%q, &0, roll=%d): want false always, got true", lvl, roll)
 		}
 	})

@@ -17,8 +17,7 @@ type TechContentDir string
 func NewRegistryFromDir(dir TechContentDir, logger *zap.Logger) (*Registry, error) {
 	reg, err := Load(string(dir))
 	if err != nil {
-		var pathErr *os.PathError
-		if errors.As(err, &pathErr) && os.IsNotExist(pathErr.Err) {
+		if pathErr, ok := errors.AsType[*os.PathError](err); ok && os.IsNotExist(pathErr.Err) {
 			log.Printf("WARN: technology content dir %q not found — starting with empty tech registry", dir)
 			return NewRegistry(), nil
 		}

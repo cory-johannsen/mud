@@ -52,8 +52,7 @@ func TestQuestRepository_SaveQuestStatus_Completed(t *testing.T) {
 	if err := repo.SaveQuestStatus(ctx, charID, "q2", "active", nil); err != nil {
 		t.Fatalf("SaveQuestStatus active: %v", err)
 	}
-	now := time.Now().UTC()
-	if err := repo.SaveQuestStatus(ctx, charID, "q2", "completed", &now); err != nil {
+	if err := repo.SaveQuestStatus(ctx, charID, "q2", "completed", new(time.Now().UTC())); err != nil {
 		t.Fatalf("SaveQuestStatus completed: %v", err)
 	}
 	records, err := repo.LoadQuests(ctx, charID)

@@ -193,8 +193,7 @@ func (s *ActiveSet) ApplyTaggedWithExpiry(uid string, def *ConditionDef, stacks 
 	}
 	if ac, ok := s.conditions[def.ID]; ok {
 		ac.Source = source
-		t := expiresAt
-		ac.ExpiresAt = &t
+		ac.ExpiresAt = new(expiresAt)
 	}
 	return nil
 }

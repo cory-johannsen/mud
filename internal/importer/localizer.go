@@ -54,9 +54,8 @@ func NewClaudeLocalizer(apiKey, repoRoot string) (*ClaudeLocalizer, error) {
 		return nil, fmt.Errorf("loading tech samples: %w", err)
 	}
 
-	client := anthropic.NewClient(option.WithAPIKey(apiKey))
 	return &ClaudeLocalizer{
-		client:      &client,
+		client:      new(anthropic.NewClient(option.WithAPIKey(apiKey))),
 		refDoc:      string(refBytes),
 		sampleTechs: samples,
 	}, nil

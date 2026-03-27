@@ -150,8 +150,7 @@ func TestDetentionCompletion_DecrementsWantedLevel(t *testing.T) {
 	require.True(t, sess.Conditions.Has("detained"))
 
 	// Set DetainedUntil to the past.
-	past := time.Now().Add(-1 * time.Second)
-	sess.DetainedUntil = &past
+	sess.DetainedUntil = new(time.Now().Add(-1 * time.Second))
 
 	before := time.Now()
 	svc.checkDetentionCompletion(sess)
@@ -186,8 +185,7 @@ func TestDetentionCompletion_OfflineReconnect(t *testing.T) {
 	require.True(t, sess.Conditions.Has("detained"))
 
 	// Simulate a long-expired timer (reconnect after being offline).
-	longPast := time.Now().Add(-10 * time.Minute)
-	sess.DetainedUntil = &longPast
+	sess.DetainedUntil = new(time.Now().Add(-10 * time.Minute))
 
 	svc.checkDetentionCompletion(sess)
 
@@ -232,8 +230,7 @@ func TestDetentionCompletion_StillActiveDoesNotComplete(t *testing.T) {
 	sess.WantedLevel["test"] = 2
 	applyDetainedCondition(t, sess, condReg)
 
-	future := time.Now().Add(5 * time.Minute)
-	sess.DetainedUntil = &future
+	sess.DetainedUntil = new(time.Now().Add(5 * time.Minute))
 
 	svc.checkDetentionCompletion(sess)
 

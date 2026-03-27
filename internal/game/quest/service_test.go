@@ -57,11 +57,11 @@ func newFakeSession() *fakeSession {
 	}
 }
 
-func (s *fakeSession) GetActiveQuests() map[string]*quest.ActiveQuest    { return s.activeQuests }
-func (s *fakeSession) GetCompletedQuests() map[string]*time.Time          { return s.completedQuests }
-func (s *fakeSession) GetBackpack() *inventory.Backpack                   { return s.backpack }
-func (s *fakeSession) GetCurrency() int                                   { return s.currency }
-func (s *fakeSession) AddCurrency(delta int)                              { s.currency += delta }
+func (s *fakeSession) GetActiveQuests() map[string]*quest.ActiveQuest { return s.activeQuests }
+func (s *fakeSession) GetCompletedQuests() map[string]*time.Time      { return s.completedQuests }
+func (s *fakeSession) GetBackpack() *inventory.Backpack               { return s.backpack }
+func (s *fakeSession) GetCurrency() int                               { return s.currency }
+func (s *fakeSession) AddCurrency(delta int)                          { s.currency += delta }
 
 func killQuestDef() *quest.QuestDef {
 	return &quest.QuestDef{
@@ -98,8 +98,7 @@ func TestService_GetOfferable_ExcludesCompletedNonRepeatable(t *testing.T) {
 	reg := quest.QuestRegistry{"kill_rats": killQuestDef()}
 	svc := quest.NewService(reg, newFakeRepo(), nil, nil, nil)
 	sess := newFakeSession()
-	now := time.Now()
-	sess.completedQuests["kill_rats"] = &now
+	sess.completedQuests["kill_rats"] = new(time.Now())
 	offerable := svc.GetOfferable(sess, []string{"kill_rats"})
 	if len(offerable) != 0 {
 		t.Fatal("expected no offerable quests when completed non-repeatable")
@@ -262,10 +261,9 @@ func TestService_HydrateSession_LoadsActiveAndCompleted(t *testing.T) {
 	reg := quest.QuestRegistry{"kill_rats": killQuestDef()}
 	svc := quest.NewService(reg, newFakeRepo(), nil, nil, nil)
 	sess := newFakeSession()
-	now := time.Now()
 	records := []quest.QuestRecord{
 		{CharacterID: 1, QuestID: "kill_rats", Status: "active", Progress: map[string]int{"o1": 1}},
-		{CharacterID: 1, QuestID: "other_quest", Status: "completed", CompletedAt: &now},
+		{CharacterID: 1, QuestID: "other_quest", Status: "completed", CompletedAt: new(time.Now())},
 	}
 	svc.HydrateSession(sess, records)
 	if aq, ok := sess.activeQuests["kill_rats"]; !ok {

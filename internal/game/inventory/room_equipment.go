@@ -111,8 +111,7 @@ func (m *RoomEquipmentManager) GetInstance(roomID, instanceID string) *Equipment
 	var byDesc *EquipmentInstance
 	for _, it := range m.rooms[roomID] {
 		if it.InstanceID == instanceID {
-			cp := *it
-			return &cp
+			return new(*it)
 		}
 		if byItemDef == nil && it.ItemDefID == instanceID {
 			byItemDef = it
@@ -122,12 +121,10 @@ func (m *RoomEquipmentManager) GetInstance(roomID, instanceID string) *Equipment
 		}
 	}
 	if byItemDef != nil {
-		cp := *byItemDef
-		return &cp
+		return new(*byItemDef)
 	}
 	if byDesc != nil {
-		cp := *byDesc
-		return &cp
+		return new(*byDesc)
 	}
 	return nil
 }

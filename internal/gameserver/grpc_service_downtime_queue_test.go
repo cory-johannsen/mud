@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/cory-johannsen/mud/internal/game/session"
-	"github.com/cory-johannsen/mud/internal/storage/postgres"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/cory-johannsen/mud/internal/storage/postgres"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -56,12 +56,11 @@ func (m *mockDowntimeQueueRepo) PopHead(_ context.Context, _ int64) (*postgres.Q
 	if len(m.entries) == 0 {
 		return nil, nil
 	}
-	e := m.entries[0]
 	m.entries = m.entries[1:]
 	for i := range m.entries {
 		m.entries[i].Position = i + 1
 	}
-	return &e, nil
+	return new(m.entries[0]), nil
 }
 
 // newQueueTestServer creates a minimal GameServiceServer for queue subcommand tests.

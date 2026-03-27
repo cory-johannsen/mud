@@ -577,12 +577,10 @@ func PartitionTechGrants(grants *ruleset.TechnologyGrants) (immediate, deferred 
 	}
 
 	if len(imm.Hardwired) > 0 || imm.Prepared != nil || imm.Spontaneous != nil {
-		immCopy := imm
-		immediate = &immCopy
+		immediate = new(imm)
 	}
 	if def.Prepared != nil || def.Spontaneous != nil {
-		defCopy := def
-		deferred = &defCopy
+		deferred = new(def)
 	}
 	return
 }

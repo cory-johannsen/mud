@@ -96,8 +96,7 @@ func TestApplyReactionEffect_RerollSave_NilSaveOutcome_Noop(t *testing.T) {
 // Note: shieldHardness() returns 0 until WeaponDef.Hardness is modeled. This test only exercises
 // the nil DamagePending guard and the >= 0 clamp when hardness is 0.
 func TestApplyReactionEffect_ReduceDamage_ClampsAtZero(t *testing.T) {
-	pending := 2
-	ctx := reaction.ReactionContext{DamagePending: &pending}
+	ctx := reaction.ReactionContext{DamagePending: new(2)}
 	effect := reaction.ReactionEffect{Type: reaction.ReactionEffectReduceDamage}
 	sess := &session.PlayerSession{}
 	ApplyReactionEffect(sess, effect, &ctx)
@@ -138,4 +137,3 @@ func TestMatchesReadyTrigger_Unknown(t *testing.T) {
 func TestMatchesReadyTrigger_WrongTrigger(t *testing.T) {
 	assert.False(t, matchesReadyTrigger("enemy_enters", reaction.TriggerOnDamageTaken))
 }
-

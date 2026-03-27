@@ -97,7 +97,6 @@ func ConvertZone(
 		// Assign unique coordinates: lay rooms out in a horizontal line.
 		// Legacy gomud format has no spatial data, so we use the room's
 		// index within the zone as its X coordinate (Y stays 0).
-		mapX, mapY := mapIdx*2, 0
 		mapIdx++
 		roomSpecs = append(roomSpecs, importer.RoomSpec{
 			ID:          importer.NameToID(name),
@@ -105,8 +104,8 @@ func ConvertZone(
 			Description: strings.TrimSpace(room.Description),
 			Exits:       exits,
 			Properties:  props,
-			MapX:        &mapX,
-			MapY:        &mapY,
+			MapX:        new(mapIdx * 2),
+			MapY:        new(0),
 		})
 	}
 

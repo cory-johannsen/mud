@@ -28,10 +28,9 @@ func TestPlaceTraps_NoOverwriteStaticTrap(t *testing.T) {
 	// REQ-TR-9: procedural placement must not add a second room-level trap
 	// when a static trap already covers the room. Force the procedural roll
 	// to trigger by setting RoomTrapChance=1.0.
-	roomChance := 1.0
 	zone := makeDangerousZone()
 	zone.TrapProbabilities = &world.TrapProbabilities{
-		RoomTrapChance: &roomChance,
+		RoomTrapChance: new(1.0),
 	}
 	zone.Rooms["room1"].Traps = []world.RoomTrapConfig{
 		{TemplateID: "bear_trap", Position: "room"},
@@ -64,10 +63,9 @@ func TestPlaceTraps_NoOverwriteStaticTrap(t *testing.T) {
 func TestPlaceTraps_ManualResetSkipped(t *testing.T) {
 	// REQ-TR-10: procedural placement must skip manual-reset templates.
 	// Force 100% room trap chance so the procedural path always fires.
-	roomChance := 1.0
 	zone := makeDangerousZone()
 	zone.TrapProbabilities = &world.TrapProbabilities{
-		RoomTrapChance: &roomChance,
+		RoomTrapChance: new(1.0),
 	}
 	manualTmpl := &trap.TrapTemplate{
 		ID:        "manual_trap",

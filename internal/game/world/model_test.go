@@ -234,8 +234,8 @@ func validTestZone() *Zone {
 					{Direction: North, TargetRoom: "room_b"},
 				},
 				Properties: map[string]string{},
-				MapX:        0,
-				MapY:        0,
+				MapX:       0,
+				MapY:       0,
 			},
 			"room_b": {
 				ID:          "room_b",
@@ -246,8 +246,8 @@ func validTestZone() *Zone {
 					{Direction: South, TargetRoom: "room_a"},
 				},
 				Properties: map[string]string{},
-				MapX:        0,
-				MapY:        2,
+				MapX:       0,
+				MapY:       2,
 			},
 		},
 	}
@@ -282,9 +282,8 @@ func TestZone_WorldCoords(t *testing.T) {
 	require.Nil(t, z.WorldX, "WorldX must be nil when not set")
 	require.Nil(t, z.WorldY, "WorldY must be nil when not set")
 
-	x, y := 2, -4
-	z.WorldX = &x
-	z.WorldY = &y
+	z.WorldX = new(2)
+	z.WorldY = new(-4)
 	require.Equal(t, 2, *z.WorldX)
 	require.Equal(t, -4, *z.WorldY)
 }

@@ -511,13 +511,12 @@ var _ *gamev1.MapResponse
 // TestHandleMap_WorldView_ReturnsWorldTiles verifies that view=="world" returns WorldZoneTile
 // entries for zones with non-nil WorldX/WorldY.
 func TestHandleMap_WorldView_ReturnsWorldTiles(t *testing.T) {
-	wx, wy := 0, 0
 	r := &world.Room{ID: "room1", ZoneID: "zone1", Title: "Room", Description: "Desc"}
 	z := &world.Zone{
 		ID: "zone1", Name: "Test Zone", StartRoom: "room1",
 		Rooms:       map[string]*world.Room{"room1": r},
 		DangerLevel: "sketchy",
-		WorldX:      &wx, WorldY: &wy,
+		WorldX:      new(0), WorldY: new(0),
 	}
 	wMgr, err := world.NewManager([]*world.Zone{z})
 	require.NoError(t, err)
@@ -593,12 +592,11 @@ func TestHandleMap_ZoneView_SignatureUnchanged(t *testing.T) {
 func TestProperty_HandleMap_WorldView_DiscoveredFlagMatchesCache(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		discovered := rapid.Bool().Draw(t, "discovered")
-		wx, wy := 0, 0
 		r := &world.Room{ID: "room1", ZoneID: "zone1", Title: "R", Description: "D"}
 		z := &world.Zone{
 			ID: "zone1", Name: "Z", StartRoom: "room1",
 			Rooms:  map[string]*world.Room{"room1": r},
-			WorldX: &wx, WorldY: &wy,
+			WorldX: new(0), WorldY: new(0),
 		}
 		wMgr, err := world.NewManager([]*world.Zone{z})
 		if err != nil {

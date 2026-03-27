@@ -84,6 +84,14 @@
 
 ## Combat
 
+### BUG-32: Post-combat movement blocked; reconnect shows "already logged in"
+**Severity:** high
+**Status:** open
+**Category:** Combat
+**Description:** After combat ends, the player cannot move between rooms, and logging out and back in produces "That character is already logged in" — the session is stuck in combat mode and the old session is not cleaned up on disconnect.
+**Steps:** Enter combat with any NPC; let combat end (NPC dies or flees); attempt a movement command (e.g. `north`) — movement is blocked; disconnect and reconnect — observe "That character is already logged in."
+**Fix:**
+
 ### BUG-25: Allied faction NPC attacks Team Machete player on sight
 **Severity:** high
 **Status:** fixed

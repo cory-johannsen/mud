@@ -77,8 +77,7 @@ func TestReactionCallback_SkipsWhenNoReactionsRemaining(t *testing.T) {
 	}
 	sess.ReactionFn = cb
 
-	pending := 5
-	ctx := reaction.ReactionContext{TriggerUID: "rxn-skip", DamagePending: &pending}
+	ctx := reaction.ReactionContext{TriggerUID: "rxn-skip", DamagePending: new(5)}
 	spent, err := sess.ReactionFn("rxn-skip", reaction.TriggerOnDamageTaken, ctx)
 	require.NoError(t, err)
 	assert.False(t, spent, "reaction must not be spent when ReactionsRemaining is 0")
@@ -109,14 +108,12 @@ func TestReactionCallback_SecondTriggerSkipped_WhenReactionSpent(t *testing.T) {
 	}
 	sess.ReactionFn = cb
 
-	pending1 := 5
-	ctx1 := reaction.ReactionContext{TriggerUID: "rxn-spent", DamagePending: &pending1}
+	ctx1 := reaction.ReactionContext{TriggerUID: "rxn-spent", DamagePending: new(5)}
 	spent1, err := sess.ReactionFn("rxn-spent", reaction.TriggerOnDamageTaken, ctx1)
 	require.NoError(t, err)
 	assert.True(t, spent1)
 
-	pending2 := 3
-	ctx2 := reaction.ReactionContext{TriggerUID: "rxn-spent", DamagePending: &pending2}
+	ctx2 := reaction.ReactionContext{TriggerUID: "rxn-spent", DamagePending: new(3)}
 	spent2, err := sess.ReactionFn("rxn-spent", reaction.TriggerOnDamageTaken, ctx2)
 	require.NoError(t, err)
 	assert.False(t, spent2, "second trigger must be skipped after reaction is spent")

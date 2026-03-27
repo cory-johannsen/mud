@@ -73,8 +73,7 @@ func (s *GameServiceServer) handleSurrender(uid string, req *gamev1.SurrenderReq
 
 	// Compute detention expiry.
 	dur := detentionDuration(wantedLevel)
-	expiry := time.Now().Add(dur)
-	sess.DetainedUntil = &expiry
+	sess.DetainedUntil = new(time.Now().Add(dur))
 
 	// Apply detained condition.
 	if s.condRegistry != nil {

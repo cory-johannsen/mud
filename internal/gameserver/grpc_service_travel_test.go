@@ -14,19 +14,17 @@ import (
 // newTravelWorld builds a two-zone world where both zones have world coordinates.
 // zoneA has roomA as start; zoneB has roomB as start.
 func newTravelWorld() (*world.Manager, string, string) {
-	xA, yA := 0, 0
-	xB, yB := 2, 0
 	roomA := &world.Room{ID: "roomA", ZoneID: "zoneA", Title: "Room A", Description: "D", MapX: 0, MapY: 0}
 	roomB := &world.Room{ID: "roomB", ZoneID: "zoneB", Title: "Room B", Description: "D", MapX: 0, MapY: 0}
 	zoneA := &world.Zone{
 		ID: "zoneA", Name: "Zone A", StartRoom: "roomA",
 		Rooms:       map[string]*world.Room{"roomA": roomA},
-		DangerLevel: "safe", WorldX: &xA, WorldY: &yA,
+		DangerLevel: "safe", WorldX: new(0), WorldY: new(0),
 	}
 	zoneB := &world.Zone{
 		ID: "zoneB", Name: "Zone B", StartRoom: "roomB",
 		Rooms:       map[string]*world.Room{"roomB": roomB},
-		DangerLevel: "sketchy", WorldX: &xB, WorldY: &yB,
+		DangerLevel: "sketchy", WorldX: new(2), WorldY: new(0),
 	}
 	mgr, err := world.NewManager([]*world.Zone{zoneA, zoneB})
 	if err != nil {

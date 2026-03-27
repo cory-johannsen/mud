@@ -647,8 +647,7 @@ func (r *CharacterRepository) SaveJobs(ctx context.Context, id int64, jobs map[s
 		if err != nil {
 			return fmt.Errorf("SaveJobs: marshalling jobs for character %d: %w", id, err)
 		}
-		s := string(b)
-		jobsJSON = &s
+		jobsJSON = new(string(b))
 	}
 	_, err := r.db.Exec(ctx,
 		`UPDATE characters SET jobs = $2, active_job_id = $3 WHERE id = $1`,
