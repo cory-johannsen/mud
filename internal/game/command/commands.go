@@ -147,6 +147,7 @@ const (
 	HandlerAffix              = "affix"
 	HandlerExplore            = "explore"
 	HandlerDowntime           = "downtime"
+	HandlerSeduce             = "seduce"
 )
 
 // Command defines a player-invocable command.
@@ -275,6 +276,7 @@ func BuiltinCommands() []Command {
 		{Name: "aid", Aliases: []string{"fa"}, Help: "Aid an ally (DC 20 check; crit +3, success +2, fail 0, crit fail -1 to ally attack). Costs 2 AP.", Category: CategoryCombat, Handler: HandlerAid},
 		{Name: "feint", Aliases: nil, Help: "Feint against a target (grift vs Perception DC; success applies flat_footed -2 AC for 1 round). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerFeint},
 		{Name: "demoralize", Aliases: []string{"dem"}, Help: "Demoralize a target (smooth_talk vs Level+10 DC; success applies -1 AC and -1 attack for the encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDemoralize},
+		{Name: "seduce", Aliases: []string{"sed"}, Help: "Seduce a target NPC (flair vs Savvy; success charms them; failure turns them hostile). Requires flair skill.", Category: CategoryCombat, Handler: HandlerSeduce},
 		{Name: "grapple", Aliases: []string{"grp"}, Help: "Grapple a target (muscle vs Level+10 DC; success applies grabbed condition, target is -2 AC for encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerGrapple},
 		{Name: "trip", Aliases: []string{"trp"}, Help: "Trip a target (muscle vs Level+10 DC; success applies prone, -2 attack for encounter). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerTrip},
 		{Name: "disarm", Aliases: []string{"dsm"}, Help: "Disarm a target (muscle vs Level+10 DC; success removes NPC weapon and drops it to the floor). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDisarm},

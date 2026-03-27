@@ -144,6 +144,7 @@ message ClientMessage {
     UncurseRequest       uncurse_request       = 127;
     DowntimeRequest      downtime_request      = 128;
     RefocusRequest       refocus_request       = 129;
+    SeduceRequest        seduce_request        = 130;
   }
 }
 
@@ -1201,6 +1202,11 @@ message ExploreRequest {
 
 // RefocusRequest asks the server to begin a Refocus action (REQ-EXP-REFOCUS-1).
 message RefocusRequest {}
+
+// SeduceRequest asks the server to attempt to seduce a target NPC (REQ-ZN-7).
+message SeduceRequest {
+    string target = 1;
+}
 
 // DowntimeRequest dispatches downtime subcommands: list, cancel, or an activity alias with optional args.
 message DowntimeRequest {

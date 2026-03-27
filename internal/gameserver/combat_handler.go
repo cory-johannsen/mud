@@ -98,6 +98,9 @@ type CombatHandler struct {
 	// REQ-JD-10: triggers on_take_damage_in_one_hit_above_threshold drawback evaluation.
 	// May be nil; no-op when nil.
 	onMassiveDamage func(uid string)
+	// seduceConditions is the shared map of NPC instance ID → condition.ActiveSet used for charmed tracking.
+	// Set after construction via SetSeduceConditions; nil means charmed-save processing is skipped.
+	seduceConditions map[string]*condition.ActiveSet
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -291,6 +294,15 @@ func (h *CombatHandler) SetOnCoverHit(fn func(roomID, attackerID, coverEquipID s
 // The callback may be nil; if so, no action is taken.
 func (h *CombatHandler) SetOnCombatantMoved(fn func(roomID, movedCombatantID string)) {
 	h.onCombatantMoved = fn
+}
+
+// SetSeduceConditions wires the shared seduceConditions map into the CombatHandler
+// so charmed NPCs can make saving throws at round end (REQ-ZN-9).
+//
+// Precondition: m must be the same map used by executeSeduce on GameServiceServer.
+// Postcondition: h.seduceConditions is set; charmed-save processing is enabled.
+func (h *CombatHandler) SetSeduceConditions(m map[string]*condition.ActiveSet) {
+	h.seduceConditions = m
 }
 
 // SetNPCIdleTickInterval sets the idle tick interval used to convert say cooldown
@@ -2043,6 +2055,40 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		}
 	}
 
+	// REQ-ZN-9: charmed NPCs make a Savvy saving throw vs DC 15 at end of each round.
+	// On success, the charmed condition is removed from seduceConditions.
+	if h.seduceConditions != nil {
+		const charmedSaveDC = 15
+		for _, c := range cbt.Combatants {
+			if c.Kind != combat.KindNPC || c.IsDead() {
+				continue
+			}
+			cs, ok := h.seduceConditions[c.ID]
+			if !ok || !cs.Has("charmed") {
+				continue
+			}
+			inst, found := h.npcMgr.Get(c.ID)
+			if !found {
+				continue
+			}
+			var roll int
+			if h.dice != nil {
+				r, err := h.dice.RollExpr("d20")
+				if err == nil {
+					roll = r.Total()
+				} else {
+					roll = 10
+				}
+			} else {
+				roll = 10
+			}
+			total := roll + inst.Savvy
+			if total >= charmedSaveDC {
+				cs.Remove(c.ID, "charmed")
+			}
+		}
+	}
+
 	// Advance mental state for all players in this combat and collect narrative messages.
 	var mentalStateEvents []*gamev1.CombatEvent
 	if h.mentalStateMgr != nil {
@@ -2895,6 +2941,13 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 			continue
 		}
 
+		// REQ-ZN-10: charmed NPCs treat players as allied — skip their entire action queue.
+		if h.seduceConditions != nil {
+			if cs, ok := h.seduceConditions[c.ID]; ok && cs.Has("charmed") {
+				continue
+			}
+		}
+
 		// Auto-use-cover: apply cover at start of NPC turn when strategy enables it
 		// and the NPC is not already in cover.
 		if c.CoverTier == "" {
@@ -3265,6 +3318,13 @@ func (h *CombatHandler) pickTaunt(inst *npc.Instance) string {
 // If the distance is > 5 and the NPC has no ranged weapon, it first queues an
 // ActionStride toward the player.
 func (h *CombatHandler) legacyAutoQueueLocked(cbt *combat.Combat, c *combat.Combatant) {
+	// REQ-ZN-10: charmed NPCs treat players as allied — do not attack.
+	if h.seduceConditions != nil {
+		if cs, ok := h.seduceConditions[c.ID]; ok && cs.Has("charmed") {
+			return
+		}
+	}
+
 	isRanged := false
 	if inst, ok := h.npcMgr.Get(c.ID); ok && inst.WeaponID != "" && h.invRegistry != nil {
 		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil && wDef.RangeIncrement > 0 {
