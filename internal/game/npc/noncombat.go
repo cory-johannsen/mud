@@ -253,6 +253,7 @@ type JobPrerequisites struct {
 	MinAttributes map[string]int    `yaml:"min_attributes,omitempty"`
 	MinSkillRanks map[string]string `yaml:"min_skill_ranks,omitempty"`
 	RequiredJobs  []string          `yaml:"required_jobs,omitempty"`
+	RequiredFeats []string          `yaml:"required_feats,omitempty"` // REQ-JD-3
 }
 
 // proficiencyRank maps a rank name to a comparable integer.
@@ -294,8 +295,9 @@ func (c *JobTrainerConfig) Validate(knownSkills map[string]bool) error {
 // Returns the first unmet prerequisite as a descriptive error, or nil.
 //
 // Precondition: job, playerJobs, playerAttrs, playerSkills must not be nil (pass empty maps, not nil).
+// playerFeats must not be nil (pass empty slice, not nil).
 // Postcondition: Returns nil iff all prerequisites are satisfied and the player does not already hold the job.
-func CheckJobPrerequisites(job TrainableJob, playerLevel int, playerJobs map[string]int, playerAttrs map[string]int, playerSkills map[string]string) error {
+func CheckJobPrerequisites(job TrainableJob, playerLevel int, playerJobs map[string]int, playerAttrs map[string]int, playerSkills map[string]string, playerFeats []string) error {
 	if _, has := playerJobs[job.JobID]; has {
 		return fmt.Errorf("you have already trained %q", job.JobID)
 	}
@@ -322,6 +324,18 @@ func CheckJobPrerequisites(job TrainableJob, playerLevel int, playerJobs map[str
 	for _, reqJob := range p.RequiredJobs {
 		if _, has := playerJobs[reqJob]; !has {
 			return fmt.Errorf("you must have trained %q first", reqJob)
+		}
+	}
+	for _, featID := range p.RequiredFeats {
+		found := false
+		for _, heldFeat := range playerFeats {
+			if heldFeat == featID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("prerequisite not met: you must have feat %q", featID)
 		}
 	}
 	return nil

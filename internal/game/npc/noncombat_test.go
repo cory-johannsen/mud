@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 
@@ -189,7 +190,7 @@ func TestCheckJobPrerequisites_MinLevel(t *testing.T) {
 	playerJobs := map[string]int{}
 	playerAttrs := map[string]int{}
 	playerSkills := map[string]string{}
-	err := CheckJobPrerequisites(job, playerLevel, playerJobs, playerAttrs, playerSkills)
+	err := CheckJobPrerequisites(job, playerLevel, playerJobs, playerAttrs, playerSkills, []string{})
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "level 5")
 }
@@ -198,7 +199,7 @@ func TestCheckJobPrerequisites_MinLevel(t *testing.T) {
 func TestCheckJobPrerequisites_AlreadyHasJob(t *testing.T) {
 	job := TrainableJob{JobID: "scavenger", TrainingCost: 100}
 	playerJobs := map[string]int{"scavenger": 2}
-	err := CheckJobPrerequisites(job, 1, playerJobs, nil, nil)
+	err := CheckJobPrerequisites(job, 1, playerJobs, nil, nil, nil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "already trained")
 }
@@ -209,7 +210,7 @@ func TestCheckJobPrerequisites_RequiredJobMissing(t *testing.T) {
 		JobID: "veteran", TrainingCost: 300,
 		Prerequisites: JobPrerequisites{RequiredJobs: []string{"soldier"}},
 	}
-	err := CheckJobPrerequisites(job, 10, map[string]int{}, nil, nil)
+	err := CheckJobPrerequisites(job, 10, map[string]int{}, nil, nil, nil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "soldier")
 }
@@ -222,7 +223,7 @@ func TestCheckJobPrerequisites_MinSkillRank(t *testing.T) {
 			MinSkillRanks: map[string]string{"sneak": "expert"},
 		},
 	}
-	err := CheckJobPrerequisites(job, 5, map[string]int{}, nil, map[string]string{"sneak": "trained"})
+	err := CheckJobPrerequisites(job, 5, map[string]int{}, nil, map[string]string{"sneak": "trained"}, nil)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "sneak")
 }
@@ -241,6 +242,7 @@ func TestCheckJobPrerequisites_AllMet(t *testing.T) {
 		map[string]int{"scavenger": 2},
 		nil,
 		map[string]string{"sneak": "expert"},
+		nil,
 	)
 	assert.NoError(t, err)
 }
@@ -405,6 +407,31 @@ func TestMerchantConfig_Validate_RejectsCursedItems(t *testing.T) {
 		ReplenishRate: ReplenishConfig{MinHours: 1, MaxHours: 4},
 	}
 	assert.Error(t, cfg.Validate(), "merchant config with cursed item must fail validation")
+}
+
+// TestCheckJobPrerequisites_RequiredFeat_Missing verifies feat prerequisite gate when feat is absent.
+func TestCheckJobPrerequisites_RequiredFeat_Missing(t *testing.T) {
+	job := TrainableJob{
+		JobID: "specialist_goon",
+		Prerequisites: JobPrerequisites{
+			RequiredFeats: []string{"raging_threat"},
+		},
+	}
+	err := CheckJobPrerequisites(job, 10, map[string]int{}, map[string]int{}, map[string]string{}, []string{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "raging_threat")
+}
+
+// TestCheckJobPrerequisites_RequiredFeat_Present verifies no error when required feat is held.
+func TestCheckJobPrerequisites_RequiredFeat_Present(t *testing.T) {
+	job := TrainableJob{
+		JobID: "specialist_goon",
+		Prerequisites: JobPrerequisites{
+			RequiredFeats: []string{"raging_threat"},
+		},
+	}
+	err := CheckJobPrerequisites(job, 10, map[string]int{}, map[string]int{}, map[string]string{}, []string{"raging_threat"})
+	require.NoError(t, err)
 }
 
 // TestMerchantConfig_Validate_AllowsNonCursedItems verifies that tuned and defective items

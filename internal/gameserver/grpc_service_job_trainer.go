@@ -74,7 +74,11 @@ func (s *GameServiceServer) handleTrainJob(uid string, req *gamev1.TrainJobReque
 	if playerJobs == nil {
 		playerJobs = map[string]int{}
 	}
-	if err := npc.CheckJobPrerequisites(*trainable, sess.Level, playerJobs, playerAttrs, playerSkills); err != nil {
+	playerFeats := make([]string, 0, len(sess.PassiveFeats))
+	for featID := range sess.PassiveFeats {
+		playerFeats = append(playerFeats, featID)
+	}
+	if err := npc.CheckJobPrerequisites(*trainable, sess.Level, playerJobs, playerAttrs, playerSkills, playerFeats); err != nil {
 		return messageEvent(err.Error()), nil
 	}
 	if sess.Currency < trainable.TrainingCost {
