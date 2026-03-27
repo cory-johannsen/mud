@@ -593,6 +593,15 @@ features:
     file: docs/features/zones-new.md
     effort: "XXL"  # 4 zones (Clown Camp, SteamPDX, The Velvet Rope, Club Privata); ~30 rooms total; zone effects, unique NPC behaviors, 4 boss fights
 
+  - slug: internal-client
+    name: Shared Client Library
+    status: spec
+    priority: 425
+    category: ui
+    file: docs/features/internal-client.md
+    effort: "L"  # five sub-packages (render, history, auth, feed, session); foundation for web and ebiten clients
+    dependencies: []
+
   - slug: web-client
     name: Web Game Client
     status: planned
@@ -601,6 +610,7 @@ features:
     file: docs/features/web-client.md
     effort: "XXL"  # full browser-based client with integrated admin interface; new frontend replacing or alongside telnet
     dependencies:
+      - internal-client         # shared session, feed, history, auth, render contract
       - zone-content-expansion  # admin room editor uses WorldEditor from zone-content-expansion
 
   - slug: game-client-ebiten
@@ -611,7 +621,8 @@ features:
     file: docs/features/game-client-ebiten.md
     effort: "XXL"  # native cross-platform client (Windows/Mac/Linux) over gRPC; new game engine layer
     dependencies:
-      - web-client  # auth/character APIs used at login/character-select; shared command parser from web-client Phase 2
+      - internal-client  # shared session, feed, history, auth, render contract
+      - web-client       # webclient REST API used for auth and character management
 
   - slug: documentation
     name: Documentation
