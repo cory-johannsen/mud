@@ -13,7 +13,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: Washed Up
+  - id: washed_up
+    type: passive
     description: "Your former connections know the truth. When encountered by anyone from your former social circle, they may expose your reduced circumstances at the worst possible moment."
 skills:
   fixed:

@@ -13,7 +13,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: The End Is Nigh
+  - id: the_end_is_nigh
+    type: passive
     description: "Your apocalyptic beliefs occasionally override rational decision-making. When faced with a prophesied sign, make a Resolve test (DN 3) or act on your beliefs immediately."
 skills:
   fixed:

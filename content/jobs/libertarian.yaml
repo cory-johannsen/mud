@@ -14,7 +14,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: Wanted
+  - id: wanted
+    type: passive
     description: "You are wanted by the authorities for your role in fomenting rebellion and causing chaos. If recognized, you must make a Resolve test (DN 3) or face arrest."
 skills:
   fixed:

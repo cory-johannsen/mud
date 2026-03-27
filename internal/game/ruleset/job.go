@@ -3,6 +3,7 @@ package ruleset
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"gopkg.in/yaml.v3"
@@ -15,10 +16,31 @@ type JobFeature struct {
 	Description string `yaml:"description"`
 }
 
-// JobDrawback describes a mandatory flaw or restriction tied to the job.
-type JobDrawback struct {
-	Name        string `yaml:"name"`
-	Description string `yaml:"description"`
+// DrawbackDef defines a mandatory flaw tied to a job (replaces JobDrawback).
+// Type is "passive" or "situational" (REQ-JD-8, REQ-JD-10).
+type DrawbackDef struct {
+	ID                string        `yaml:"id"`
+	Type              string        `yaml:"type"` // "passive" | "situational"
+	Description       string        `yaml:"description"`
+	ConditionID       string        `yaml:"condition_id,omitempty"`
+	StatModifier      *StatModifier `yaml:"stat_modifier,omitempty"`
+	Trigger           string        `yaml:"trigger,omitempty"`
+	EffectConditionID string        `yaml:"effect_condition_id,omitempty"`
+	Duration          string        `yaml:"duration,omitempty"` // Go time.Duration string; default "1h"
+}
+
+// StatModifier is a persistent stat penalty applied while a job is held.
+type StatModifier struct {
+	Stat   string `yaml:"stat"`
+	Amount int    `yaml:"amount"`
+}
+
+// AdvancementRequirements defines prerequisites for advancing to this job tier.
+type AdvancementRequirements struct {
+	MinLevel           int               `yaml:"min_level,omitempty"`
+	RequiredFeats      []string          `yaml:"required_feats,omitempty"`
+	RequiredSkillRanks map[string]string `yaml:"required_skill_ranks,omitempty"`
+	PrerequisiteJobs   []string          `yaml:"prerequisite_jobs,omitempty"`
 }
 
 // SkillChoices defines a pool of skills the player picks from at creation.
@@ -67,7 +89,8 @@ type Job struct {
 	FeatGrants         *FeatGrants                        `yaml:"feats"`
 	ClassFeatureGrants []string                           `yaml:"class_features"`
 	Features           []JobFeature                       `yaml:"features"`
-	Drawbacks          []JobDrawback                      `yaml:"drawbacks"`
+	AdvancementRequirements AdvancementRequirements            `yaml:"advancement_requirements,omitempty"`
+	Drawbacks               []DrawbackDef                      `yaml:"drawbacks,omitempty"`
 	StartingInventory  *inventory.StartingLoadoutOverride `yaml:"starting_inventory"`
 	TechnologyGrants   *TechnologyGrants                  `yaml:"technology_grants,omitempty"`
 	LevelUpGrants      map[int]*TechnologyGrants          `yaml:"level_up_grants,omitempty"`
@@ -92,8 +115,25 @@ func LoadJobs(dir string) ([]*Job, error) {
 		if err := yaml.Unmarshal(data, &j); err != nil {
 			return nil, fmt.Errorf("parsing job file %s: %w", path, err)
 		}
+		if j.Tier == 0 {
+			return nil, fmt.Errorf("job %q: missing required field 'tier' (REQ-DTQ-13)", j.ID)
+		}
 		if j.Tier < 1 || j.Tier > 3 {
 			return nil, fmt.Errorf("job %q has invalid tier %d: must be 1, 2, or 3 (REQ-DTQ-13)", j.ID, j.Tier)
+		}
+		// REQ-JD-2: default min_level for advancement_requirements if absent
+		if j.Tier == 2 && j.AdvancementRequirements.MinLevel == 0 {
+			j.AdvancementRequirements.MinLevel = 10
+		}
+		if j.Tier == 3 && j.AdvancementRequirements.MinLevel == 0 {
+			j.AdvancementRequirements.MinLevel = 15
+		}
+		for _, db := range j.Drawbacks {
+			if db.Duration != "" {
+				if _, err := time.ParseDuration(db.Duration); err != nil {
+					return nil, fmt.Errorf("job %q drawback %q: invalid duration %q: %w", j.ID, db.ID, db.Duration, err)
+				}
+			}
 		}
 		if j.TechnologyGrants != nil {
 			if err := j.TechnologyGrants.Validate(); err != nil {

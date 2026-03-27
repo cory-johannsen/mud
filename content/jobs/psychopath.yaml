@@ -14,7 +14,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: Death Wish
+  - id: death_wish
+    type: passive
     description: "You are drawn to danger. When presented with a safer and a more dangerous route to the same goal, make a Resolve test (DN 3) or choose the dangerous one."
 skills:
   fixed:

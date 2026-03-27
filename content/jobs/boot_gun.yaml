@@ -21,7 +21,8 @@ starting_inventory:
     head: combat_helmet
   currency: 100
 drawbacks:
-  - name: Bullet Lust
+  - id: bullet_lust
+    type: passive
     description: "You have a deep and abiding love for firearms. You can't resist picking up any gun you see, and you have a tendency to shoot first and ask questions later."
 skills:
   fixed:

@@ -16,7 +16,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: Crestfallen
+  - id: crestfallen
+    type: passive
     description: "You've seen too much to have illusions about victory. After any combat where an ally falls, you suffer -1 to all checks until you rest."
 skills:
   fixed:

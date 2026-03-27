@@ -13,7 +13,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: "When The Dealing's Done"
+  - id: when_the_dealings_done
+    type: passive
     description: "You cannot resist a wager. When offered a bet, make a Resolve test (DN 3) or you must accept, no matter the stakes."
 skills:
   fixed:

@@ -15,7 +15,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: Alter Ego
+  - id: alter_ego
+    type: passive
     description: "You maintain a secret identity. If your true identity is ever revealed, you lose all social standing and become hunted by the factions you've opposed."
 skills:
   fixed:

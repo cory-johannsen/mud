@@ -13,7 +13,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: Cruel Tutelage
+  - id: cruel_tutelage
+    type: passive
     description: "Your mentor's methods have left scars. When directly contradicting your mentor's teachings, make a Resolve test (DN 3) or be unable to act against their interests."
 skills:
   fixed:

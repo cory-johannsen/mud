@@ -13,7 +13,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: Lure of Power
+  - id: lure_of_power
+    type: passive
     description: "The temptation to use your abilities for personal gain is ever-present. When offered power or wealth, make a Resolve test (DN 3) to refuse."
 skills:
   fixed:

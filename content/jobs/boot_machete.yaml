@@ -21,7 +21,8 @@ starting_inventory:
     head: ballistic_cap
   currency: 75
 drawbacks:
-  - name: Wanted
+  - id: wanted
+    type: passive
     description: "You are wanted by the authorities. If recognized, you must make a Resolve test (DN 3) or face arrest."
 skills:
   fixed:

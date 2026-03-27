@@ -13,7 +13,8 @@ proficiencies:
   cool: trained
 
 drawbacks:
-  - name: Abstain From Violence
+  - id: abstain_from_violence
+    type: passive
     description: "Your healer's ethic makes violence repugnant. When initiating (not defending) violence, make a Resolve test (DN 2) or hesitate, losing your first action."
 skills:
   fixed:
