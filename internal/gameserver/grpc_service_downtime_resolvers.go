@@ -3,6 +3,7 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -250,14 +251,60 @@ func (s *GameServiceServer) resolveRecalibrate(uid string, sess *session.PlayerS
 
 // resolveRetrain resolves the "Retrain" downtime activity.
 //
-// Stub: Full feat-import and job-development integration is deferred until
-// REQ-RI-* (retrain feat) and REQ-JD-* (job swap) are implemented.
+// sess.DowntimeMetadata must hold "<old_feat_id> <new_feat_id>" set at start time.
+// Removes the old feat from sess.PassiveFeats, adds the new feat, persists via characterFeatsRepo
+// when it implements SetAll (REQ-RETRAIN-DT-4).
 //
-// Precondition: sess is non-nil; state already cleared.
-// Postcondition: Console message delivered; no skill/feat mutations occur until feat-import is wired.
+// Precondition: sess is non-nil; state already cleared by caller.
+// Postcondition: Old feat removed and new feat added to sess.PassiveFeats;
+//
+//	changes persisted via characterFeatsRepo if it supports SetAll; console message delivered.
 func (s *GameServiceServer) resolveRetrain(uid string, sess *session.PlayerSession) {
-	// Future: integrate with feat-import (REQ-RI-*) and job-development (REQ-JD-*).
-	s.pushMessageToUID(uid, "Retrain complete. Your changes will take effect next login.")
+	parts := strings.Fields(sess.DowntimeMetadata)
+	if len(parts) < 2 {
+		s.pushMessageToUID(uid, "Retrain complete. (No feat change recorded.)")
+		return
+	}
+	oldID, newID := parts[0], parts[1]
+
+	if s.featRegistry == nil {
+		s.pushMessageToUID(uid, "Retrain complete. (Feat system unavailable.)")
+		return
+	}
+	oldFeat, oldOK := s.featRegistry.Feat(oldID)
+	newFeat, newOK := s.featRegistry.Feat(newID)
+	if !oldOK || !newOK {
+		s.pushMessageToUID(uid, "Retrain complete. (Feat definition missing.)")
+		return
+	}
+
+	// Apply the swap in session state.
+	if sess.PassiveFeats == nil {
+		sess.PassiveFeats = make(map[string]bool)
+	}
+	delete(sess.PassiveFeats, oldID)
+	sess.PassiveFeats[newID] = true
+
+	// Persist the updated feat list (REQ-RETRAIN-DT-4).
+	// characterFeatsRepo is typed as CharacterFeatsGetter; use a type assertion to access SetAll
+	// when the concrete implementation supports it (e.g. *postgres.CharacterFeatsRepository).
+	type featsSetter interface {
+		SetAll(ctx context.Context, characterID int64, feats []string) error
+	}
+	if setter, ok := s.characterFeatsRepo.(featsSetter); ok && sess.CharacterID > 0 {
+		var featIDs []string
+		for id := range sess.PassiveFeats {
+			featIDs = append(featIDs, id)
+		}
+		if err := setter.SetAll(context.Background(), sess.CharacterID, featIDs); err != nil && s.logger != nil {
+			s.logger.Error("resolveRetrain: failed to persist feat changes",
+				zap.String("uid", uid), zap.Error(err))
+		}
+	}
+
+	s.pushMessageToUID(uid, fmt.Sprintf(
+		"Retrain complete. You replaced %s with %s.", oldFeat.Name, newFeat.Name,
+	))
 }
 
 // resolveForgePapers resolves the "Forge Papers" downtime activity.

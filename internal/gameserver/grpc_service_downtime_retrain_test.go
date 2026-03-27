@@ -248,3 +248,77 @@ func TestProperty_RetrainDowntime_ValidSwapAlwaysStartsActivity(t *testing.T) {
 		assert.Equal(rt, pair[0]+" "+pair[1], sess.DowntimeMetadata)
 	})
 }
+
+// TestRetrainResolve_SwapSucceeds_FeatsUpdated verifies that resolveRetrain removes the old feat
+// and adds the new feat when DowntimeMetadata is well-formed.
+//
+// Precondition: sess.DowntimeMetadata = "iron_will iron_constitution"; iron_will is in PassiveFeats.
+// Postcondition: iron_will removed; iron_constitution added.
+func TestRetrainResolve_SwapSucceeds_FeatsUpdated(t *testing.T) {
+	svc, uid := newRetrainTestService(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	sess.DowntimeMetadata = "iron_will iron_constitution"
+
+	svc.resolveRetrain(uid, sess)
+
+	assert.False(t, sess.PassiveFeats["iron_will"], "old feat should be removed")
+	assert.True(t, sess.PassiveFeats["iron_constitution"], "new feat should be added")
+}
+
+// TestRetrainResolve_SkillFeatSwap_Works verifies that a skill-category feat swap works correctly.
+//
+// Precondition: sess.DowntimeMetadata = "skill_focus_rigging skill_focus_intel".
+// Postcondition: skill_focus_rigging removed; skill_focus_intel added.
+func TestRetrainResolve_SkillFeatSwap_Works(t *testing.T) {
+	svc, uid := newRetrainTestService(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	sess.DowntimeMetadata = "skill_focus_rigging skill_focus_intel"
+
+	svc.resolveRetrain(uid, sess)
+
+	assert.False(t, sess.PassiveFeats["skill_focus_rigging"])
+	assert.True(t, sess.PassiveFeats["skill_focus_intel"])
+}
+
+// TestRetrainResolve_EmptyMetadata_NoOp verifies that resolveRetrain with empty metadata
+// leaves PassiveFeats unchanged.
+//
+// Precondition: sess.DowntimeMetadata = ""; PassiveFeats has three entries.
+// Postcondition: PassiveFeats unchanged.
+func TestRetrainResolve_EmptyMetadata_NoOp(t *testing.T) {
+	svc, uid := newRetrainTestService(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	sess.DowntimeMetadata = ""
+	before := map[string]bool{"iron_will": true, "skill_focus_rigging": true, "job_perk_foo": true}
+	sess.PassiveFeats = map[string]bool{"iron_will": true, "skill_focus_rigging": true, "job_perk_foo": true}
+
+	svc.resolveRetrain(uid, sess)
+
+	assert.Equal(t, before, sess.PassiveFeats)
+}
+
+// TestProperty_RetrainResolve_OldRemovedNewAdded is a property test verifying that for any
+// valid swap pair, resolveRetrain always removes the old feat and adds the new feat.
+//
+// Precondition: DowntimeMetadata is a valid "<old> <new>" pair from a fixed set.
+// Postcondition: old feat absent, new feat present in PassiveFeats.
+func TestProperty_RetrainResolve_OldRemovedNewAdded(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		svc, uid := newRetrainTestService(t)
+		sess, _ := svc.sessions.GetPlayer(uid)
+
+		pairs := [][2]string{
+			{"iron_will", "iron_constitution"},
+			{"iron_will", "toughness"},
+			{"skill_focus_rigging", "skill_focus_intel"},
+		}
+		idx := rapid.IntRange(0, len(pairs)-1).Draw(rt, "pair_idx")
+		pair := pairs[idx]
+		sess.DowntimeMetadata = pair[0] + " " + pair[1]
+
+		svc.resolveRetrain(uid, sess)
+
+		assert.False(rt, sess.PassiveFeats[pair[0]], "old feat %s should be removed", pair[0])
+		assert.True(rt, sess.PassiveFeats[pair[1]], "new feat %s should be added", pair[1])
+	})
+}
