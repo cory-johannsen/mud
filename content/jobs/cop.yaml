@@ -47,3 +47,13 @@ technology_grants:
         level: 1
       - id: tether_bio_synthetic
         level: 1
+drawbacks:
+  - id: blue_wall
+    type: passive
+    description: "Your past on the force closes as many doors as it opens. The people you used to arrest remember. So do the people you used to work with."
+  - id: authority_reflex
+    type: situational
+    trigger: on_enter_room_danger_level
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "High-threat situations where you lack control spike your old patrol anxiety."

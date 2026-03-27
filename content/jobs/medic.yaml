@@ -44,3 +44,10 @@ technology_grants:
       - { id: rousing_splash_fanatic_doctrine, level: 1 }
       - { id: stabilize_fanatic_doctrine, level: 1 }
       - { id: necromancers_generosity_fanatic_doctrine, level: 1 }
+drawbacks:
+  - id: caretaker_fatigue
+    type: passive
+    description: "You pour yourself into keeping others alive. Your own reserves run thin — accepting help is hard, and taking time to heal yourself feels like abandonment. -1 Quickness."
+    stat_modifier:
+      stat: quickness
+      amount: -1

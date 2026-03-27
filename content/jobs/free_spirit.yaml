@@ -46,3 +46,10 @@ technology_grants:
         level: 1
       - id: tailwind_bio_synthetic
         level: 1
+drawbacks:
+  - id: uncommitted
+    type: passive
+    description: "You don't like being told what to do, including by your own plans. Long-term strategies fall apart when you drift. -1 Savvy."
+    stat_modifier:
+      stat: savvy
+      amount: -1

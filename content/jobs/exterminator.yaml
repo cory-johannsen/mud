@@ -45,3 +45,13 @@ technology_grants:
         level: 1
       - id: puff_of_poison_bio_synthetic
         level: 1
+drawbacks:
+  - id: contaminated
+    type: passive
+    description: "You smell like chemicals and death. Social situations are rough, and anyone with a sensitive nose or a clean reputation keeps their distance."
+  - id: exposure_creep
+    type: situational
+    trigger: on_take_damage_in_one_hit_above_threshold
+    effect_condition_id: fatigued
+    duration: "1h0m0s"
+    description: "Years of toxic exposure left your immune response fragile. A big hit drains you faster than most."

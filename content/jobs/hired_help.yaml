@@ -42,3 +42,7 @@ technology_grants:
       - { id: runic_weapon_fanatic_doctrine, level: 1 }
       - { id: runic_body_fanatic_doctrine, level: 1 }
       - { id: battle_fervor, level: 1 }
+drawbacks:
+  - id: contractor_stigma
+    type: passive
+    description: "People who hire you never respect you. You're always the last to know and the first to be blamed when something goes sideways."

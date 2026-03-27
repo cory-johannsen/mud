@@ -37,3 +37,7 @@ class_features:
   - sucker_punch
   - slippery
   - hidden_compartment
+drawbacks:
+  - id: contraband_profile
+    type: passive
+    description: "Checkpoint authorities run your name and light up. You move cargo that doesn't exist through routes that shouldn't work — and the system has noticed."

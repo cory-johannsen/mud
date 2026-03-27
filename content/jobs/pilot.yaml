@@ -46,3 +46,13 @@ technology_grants:
         level: 1
       - id: personal_rain_cloud_bio_synthetic
         level: 1
+drawbacks:
+  - id: grounded
+    type: passive
+    description: "Outside a cockpit, your confidence drops sharply. On foot in a firefight, you feel exposed in ways that affect your decision-making."
+  - id: sky_sickness
+    type: situational
+    trigger: on_take_damage_in_one_hit_above_threshold
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "A hit bad enough to shake your composure sends your mind back to a near-crash. The ground feels wrong."

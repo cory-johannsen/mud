@@ -36,3 +36,7 @@ class_features:
   - sucker_punch
   - slippery
   - enforcer_presence
+drawbacks:
+  - id: blunt_instrument
+    type: passive
+    description: "Subtlety was never part of the job description. Social situations require a Flair test (DN 2) before you open your mouth or your reputation does it for you."

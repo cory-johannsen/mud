@@ -42,3 +42,7 @@ technology_grants:
       - { id: carryall_technical, level: 1 }
       - { id: pet_cache_technical, level: 1 }
       - { id: ant_haul_technical, level: 1 }
+drawbacks:
+  - id: encumbrance_compulsion
+    type: passive
+    description: "You cannot discard anything that might be useful later. Traveling light requires a Resolve test (DN 3) or you pack half your cache into your kit."

@@ -42,3 +42,7 @@ technology_grants:
       - { id: dj_vu_technical, level: 1 }
       - { id: tether_technical, level: 1 }
       - { id: signal_skyrocket_technical, level: 1 }
+drawbacks:
+  - id: known_informant
+    type: passive
+    description: "The wrong people already know or suspect. You carry a target the moment anyone connects your name to a bust — burned associations follow you everywhere."

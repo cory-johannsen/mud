@@ -42,3 +42,13 @@ technology_grants:
       - { id: seashell_of_stolen_sound_technical, level: 1 }
       - { id: ventriloquism_technical, level: 1 }
       - { id: share_lore_technical, level: 1 }
+drawbacks:
+  - id: source_exposure
+    type: passive
+    description: "You protect your sources — right up until someone with a sharp knife asks you not to. The ethical calculus haunts you."
+  - id: the_story_first
+    type: situational
+    trigger: on_enter_room_danger_level
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "Your instinct to document overrides self-preservation in high-danger situations. Every near-miss reminds you that instinct is going to get you killed."

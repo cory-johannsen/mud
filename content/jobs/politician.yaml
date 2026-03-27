@@ -42,3 +42,13 @@ technology_grants:
       - { id: read_the_air_neural, level: 1 }
       - { id: message_rune_neural, level: 1 }
       - { id: musical_accompaniment_neural, level: 1 }
+drawbacks:
+  - id: public_record
+    type: passive
+    description: "Everything you've ever said can be weaponized against you. Enemies have receipts and the willingness to use them at the worst possible moment."
+  - id: constituent_pressure
+    type: situational
+    trigger: on_fail_skill_check
+    effect_condition_id: demoralized
+    duration: "30m0s"
+    description: "A public stumble chips away at the façade. You feel the support eroding in real-time."

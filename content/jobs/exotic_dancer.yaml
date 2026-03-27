@@ -42,3 +42,7 @@ technology_grants:
       - { id: exchange_image_neural, level: 1 }
       - { id: glamorize_neural, level: 1 }
       - { id: fashionista_neural, level: 1 }
+drawbacks:
+  - id: transactional_trust
+    type: passive
+    description: "You've learned everyone wants something. Genuine connection feels foreign — you're always waiting for the ask, which makes you paranoid and hard to work with."

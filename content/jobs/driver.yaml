@@ -46,3 +46,13 @@ technology_grants:
         level: 1
       - id: aqueous_blast_bio_synthetic
         level: 1
+drawbacks:
+  - id: getaway_dependency
+    type: passive
+    description: "You're brilliant behind the wheel and useless without one. On foot in a crisis, your options feel narrow and your decisions suffer for it."
+  - id: traffic_trauma
+    type: situational
+    trigger: on_take_damage_in_one_hit_above_threshold
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "A hit big enough to stagger you dredges up the crash you don't talk about."

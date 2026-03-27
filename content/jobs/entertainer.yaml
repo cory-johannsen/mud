@@ -43,3 +43,7 @@ technology_grants:
       - { id: musical_accompaniment_neural, level: 1 }
       - { id: figment_neural, level: 1 }
       - { id: overselling_flourish_neural, level: 1 }
+drawbacks:
+  - id: spotlight_addiction
+    type: passive
+    description: "You crave the audience. When no one's watching, motivation evaporates. You struggle to act with discipline when there's no performance in it."

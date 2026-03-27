@@ -43,3 +43,13 @@ technology_grants:
       - { id: sure_strike_neural, level: 1 }
       - { id: runic_weapon_neural, level: 1 }
       - { id: needle_darts_neural, level: 1 }
+drawbacks:
+  - id: tacticool_tell
+    type: passive
+    description: "Your gear speaks before you do. Anyone who knows weapons reads you instantly — you've watched too many videos and not enough streets."
+  - id: ego_wound
+    type: situational
+    trigger: on_fail_skill_check
+    effect_condition_id: demoralized
+    duration: "30m0s"
+    description: "A public failure makes you feel the gap between your self-image and reality. You compensate loudly and poorly."

@@ -42,3 +42,7 @@ technology_grants:
       - { id: runic_weapon_neural, level: 1 }
       - { id: runic_body_neural, level: 1 }
       - { id: carryall_neural, level: 1 }
+drawbacks:
+  - id: tinkerer_tunnel_vision
+    type: passive
+    description: "Once you're building something, the world disappears. Interruptions during creative work require a Resolve test (DN 2) or you lose your thread entirely."

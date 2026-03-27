@@ -37,3 +37,13 @@ class_features:
   - street_brawler
   - brutal_surge
   - pack_mentality
+drawbacks:
+  - id: reputation_trap
+    type: passive
+    description: "Your name means violence. That opens some doors and slams others permanently. Negotiations involving nuance tend to end badly for everyone."
+  - id: unfinished_business
+    type: situational
+    trigger: on_leave_combat_without_kill
+    effect_condition_id: demoralized
+    duration: "1h0m0s"
+    description: "A fight that doesn't end decisively leaves you wired and ugly. You start looking for a reason to finish what the last confrontation started."

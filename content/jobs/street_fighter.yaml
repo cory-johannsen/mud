@@ -37,3 +37,16 @@ class_features:
   - street_brawler
   - brutal_surge
   - haymaker
+drawbacks:
+  - id: unsanctioned_violence
+    type: passive
+    description: "You fight dirty, fight first, and don't stop. Every jurisdiction you move through has a record on you. -1 Savvy."
+    stat_modifier:
+      stat: savvy
+      amount: -1
+  - id: killing_floor_hunger
+    type: situational
+    trigger: on_leave_combat_without_kill
+    effect_condition_id: demoralized
+    duration: "1h0m0s"
+    description: "A fight that ends without someone going down leaves you agitated and unfocused for hours."

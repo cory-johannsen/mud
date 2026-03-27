@@ -35,3 +35,7 @@ class_features:
   - sucker_punch
   - slippery
   - forgotten_face
+drawbacks:
+  - id: invisible_and_ignored
+    type: passive
+    description: "Society's trained to look through you. Even when you want to be seen, you have to fight for recognition — makes authority figures dismiss you by default."

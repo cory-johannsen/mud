@@ -42,3 +42,13 @@ technology_grants:
       - { id: figment_neural, level: 1 }
       - { id: item_facade_neural, level: 1 }
       - { id: phantom_pain, level: 1 }
+drawbacks:
+  - id: smoke_and_mirrors
+    type: passive
+    description: "Your whole reputation rests on the trick. When people figure out the mechanism, they don't just disbelieve the illusion — they disbelieve you."
+  - id: performance_anxiety
+    type: situational
+    trigger: on_fail_skill_check
+    effect_condition_id: demoralized
+    duration: "30m0s"
+    description: "A failed trick doesn't just embarrass you — it collapses the entire persona you've built."

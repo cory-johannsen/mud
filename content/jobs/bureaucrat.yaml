@@ -42,3 +42,7 @@ technology_grants:
       - { id: read_the_air_neural, level: 1 }
       - { id: message_neural, level: 1 }
       - { id: protection_neural, level: 1 }
+drawbacks:
+  - id: procedural_paralysis
+    type: passive
+    description: "You can't act without authorization, real or imagined. Improvising in a crisis requires a Resolve test (DN 3) or you stall, waiting for someone to sign off."

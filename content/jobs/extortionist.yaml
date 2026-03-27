@@ -42,3 +42,7 @@ technology_grants:
       - { id: phantom_pain, level: 1 }
       - { id: ill_omen, level: 1 }
       - { id: bane_neural, level: 1 }
+drawbacks:
+  - id: enemies_list
+    type: passive
+    description: "Every mark you've squeezed remembers your face and your terms. You've made permanent enemies of people who have nothing left to lose."

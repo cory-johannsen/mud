@@ -45,3 +45,7 @@ technology_grants:
         level: 1
       - id: cleanse_cuisine_bio_synthetic
         level: 1
+drawbacks:
+  - id: dumpster_dependency
+    type: passive
+    description: "Refusing to buy into the system means your gear is always secondhand at best. You resent anyone who pays for what you could scavenge."

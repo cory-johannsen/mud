@@ -44,3 +44,7 @@ technology_grants:
       - { id: admonishing_ray_fanatic_doctrine, level: 1 }
       - { id: protect_companion_fanatic_doctrine, level: 1 }
       - { id: shielded_arm_fanatic_doctrine, level: 1 }
+drawbacks:
+  - id: post_commitment
+    type: passive
+    description: "You hold the line long after everyone else has retreated. Knowing when to fall back requires a Resolve test (DN 3) or you stay past the point of reason."

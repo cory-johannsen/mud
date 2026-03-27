@@ -39,3 +39,13 @@ class_features:
   - street_brawler
   - brutal_surge
   - guerilla_warfare
+drawbacks:
+  - id: orders_dependency
+    type: passive
+    description: "Without a chain of command, your initiative suffers. Operating autonomously in ambiguous situations requires a Resolve test (DN 2) or you wait for direction that isn't coming."
+  - id: flashpoint
+    type: situational
+    trigger: on_take_damage_in_one_hit_above_threshold
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "A hit big enough to rock you sends your nervous system back to a bad day in the field. Training kicks in, but so does the trauma."

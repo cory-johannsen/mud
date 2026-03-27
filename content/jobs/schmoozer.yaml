@@ -42,3 +42,7 @@ technology_grants:
       - { id: glamorize_neural, level: 1 }
       - { id: fashionista_neural, level: 1 }
       - { id: read_the_air_neural, level: 1 }
+drawbacks:
+  - id: sycophant_residue
+    type: passive
+    description: "You've been charming for so long that people don't take you seriously when it counts. The moment you need to be believed, your credibility is negotiable."

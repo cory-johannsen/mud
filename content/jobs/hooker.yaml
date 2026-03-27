@@ -36,3 +36,13 @@ class_features:
   - sucker_punch
   - slippery
   - read_em_all
+drawbacks:
+  - id: client_knowledge
+    type: passive
+    description: "You know things about your clients that could get you killed. The wrong person finding out you talk is a permanent problem."
+  - id: occupational_hazard
+    type: situational
+    trigger: on_take_damage_in_one_hit_above_threshold
+    effect_condition_id: frightened
+    duration: "1h0m0s"
+    description: "A bad encounter surfaces old ones. A hit that staggers you triggers a panic response you've learned to bury."

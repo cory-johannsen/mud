@@ -36,3 +36,13 @@ class_features:
   - sucker_punch
   - slippery
   - five_finger_discount
+drawbacks:
+  - id: sticky_fingers
+    type: passive
+    description: "You can't be around valuables without cataloguing them. In trusted spaces, this registers on people's faces before you do anything — trust takes longer to build."
+  - id: fence_exposure
+    type: situational
+    trigger: on_fail_skill_check
+    effect_condition_id: demoralized
+    duration: "30m0s"
+    description: "A botched lift doesn't just blow the job — it exposes your fence, your route, and your confidence."

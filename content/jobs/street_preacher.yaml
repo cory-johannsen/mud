@@ -42,3 +42,7 @@ technology_grants:
       - { id: battle_fervor, level: 1 }
       - { id: torturous_trauma_fanatic_doctrine, level: 1 }
       - { id: cycle_of_retribution_fanatic_doctrine, level: 1 }
+drawbacks:
+  - id: the_calling
+    type: passive
+    description: "You cannot walk past suffering without stopping to address it. In a city full of suffering, that compulsion costs you time, attention, and sometimes blood."

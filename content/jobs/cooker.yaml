@@ -43,3 +43,7 @@ technology_grants:
       - { id: elysian_whimsy_technical, level: 1 }
       - { id: noxious_vapors_technical, level: 1 }
       - { id: goblin_pox_technical, level: 1 }
+drawbacks:
+  - id: chemical_sensitivity
+    type: passive
+    description: "Years in the lab have left your lungs fragile and your skin reactive. Exposure to combat smoke, fire, or industrial chemicals hits you harder than most."

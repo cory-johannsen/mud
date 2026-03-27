@@ -45,3 +45,7 @@ technology_grants:
       - { id: sure_strike_technical, level: 1 }
       - { id: runic_body_technical, level: 1 }
       - { id: echoing_weapon_technical, level: 1 }
+drawbacks:
+  - id: narrow_expertise
+    type: passive
+    description: "Outside your specialty, you're mediocre at best. Being called upon to perform outside your lane in a crisis makes you worse than a fresh recruit."

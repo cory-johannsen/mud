@@ -46,3 +46,7 @@ technology_grants:
         level: 1
       - id: foraging_friends
         level: 1
+drawbacks:
+  - id: tied_to_the_land
+    type: passive
+    description: "You've built something rooted to a place. That place can be threatened, burned, or seized — and you'll make bad decisions to protect it."

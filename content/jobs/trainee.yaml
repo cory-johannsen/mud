@@ -44,3 +44,13 @@ technology_grants:
       - { id: bane_fanatic_doctrine, level: 1 }
       - { id: admonishing_ray_fanatic_doctrine, level: 1 }
       - { id: runic_weapon_fanatic_doctrine, level: 1 }
+drawbacks:
+  - id: imposter_syndrome
+    type: passive
+    description: "You haven't earned the confidence you're expected to project. Every time you're asked to perform beyond your experience, the doubt shows."
+  - id: rookie_freeze
+    type: situational
+    trigger: on_take_damage_in_one_hit_above_threshold
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "Your first real hit — the kind that reminds you this isn't training — triggers a full-body freeze response."

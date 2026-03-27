@@ -35,3 +35,7 @@ class_features:
   - sucker_punch
   - slippery
   - trap_sense
+drawbacks:
+  - id: acquisition_compulsion
+    type: passive
+    description: "You see a ruin, a cache, or a sealed room and your hands start moving before your brain signs off. Leaving something behind requires a Resolve test (DN 3)."

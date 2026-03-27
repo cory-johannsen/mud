@@ -43,3 +43,13 @@ technology_grants:
       - { id: summon_animal_technical, level: 1 }
       - { id: flourishing_flora_technical, level: 1 }
       - { id: weave_wood_technical, level: 1 }
+drawbacks:
+  - id: open_channel
+    type: passive
+    description: "Your attunement to hidden currents means you pick up interference others don't. In spiritually dense or corrupted spaces, you have trouble filtering signal from noise."
+  - id: liminal_vertigo
+    type: situational
+    trigger: on_enter_room_danger_level
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "High-danger zones ripple with something you can feel but not name. The sensation spikes your instincts into overdrive."

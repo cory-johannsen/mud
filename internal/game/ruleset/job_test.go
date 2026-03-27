@@ -129,3 +129,30 @@ func TestLoadJobs_AllHaveTier(t *testing.T) {
 		assert.NotZero(t, j.Tier, "job %q missing tier field", j.ID)
 	}
 }
+
+func TestLoadJobs_DrawbacksValidStructure(t *testing.T) {
+	jobs, err := ruleset.LoadJobs("../../../content/jobs")
+	require.NoError(t, err)
+	var jobsWithDrawbacks int
+	for _, j := range jobs {
+		for _, db := range j.Drawbacks {
+			assert.NotEmpty(t, db.ID, "job %q drawback missing id", j.ID)
+			assert.Contains(t, []string{"passive", "situational"}, db.Type, "job %q drawback %q has invalid type", j.ID, db.ID)
+			assert.NotEmpty(t, db.Description, "job %q drawback %q missing description", j.ID, db.ID)
+			if db.Type == "situational" {
+				validTriggers := []string{
+					"on_leave_combat_without_kill",
+					"on_take_damage_in_one_hit_above_threshold",
+					"on_fail_skill_check",
+					"on_enter_room_danger_level",
+				}
+				assert.Contains(t, validTriggers, db.Trigger, "job %q drawback %q invalid trigger", j.ID, db.ID)
+				assert.NotEmpty(t, db.EffectConditionID, "job %q drawback %q missing effect_condition_id", j.ID, db.ID)
+			}
+		}
+		if len(j.Drawbacks) > 0 {
+			jobsWithDrawbacks++
+		}
+	}
+	assert.GreaterOrEqual(t, jobsWithDrawbacks, 52, "expected at least 52 jobs to have drawbacks")
+}

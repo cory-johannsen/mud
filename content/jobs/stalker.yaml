@@ -46,3 +46,13 @@ technology_grants:
         level: 1
       - id: alarm_bio_synthetic
         level: 1
+drawbacks:
+  - id: fixation_spiral
+    type: passive
+    description: "You don't let go. Once a target is in your head, they stay there — even if the mission ends or the job changes. It clouds your judgment in ways you don't notice."
+  - id: shadow_paranoia
+    type: situational
+    trigger: on_enter_room_danger_level
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "High-danger spaces trigger the part of you that knows exactly what follows a mark into a kill zone."

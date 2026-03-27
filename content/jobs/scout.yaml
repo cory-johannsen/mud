@@ -47,3 +47,13 @@ technology_grants:
         level: 1
       - id: pest_form_bio_synthetic
         level: 1
+drawbacks:
+  - id: alone_out_there
+    type: passive
+    description: "You work best alone and trust slowly. In a team that needs coordination, your instinct to go solo creates gaps that get people killed."
+  - id: perimeter_anxiety
+    type: situational
+    trigger: on_enter_room_danger_level
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "Moving into a hot zone without recon raises every alarm in your body. You've seen what happens to scouts who move blind."

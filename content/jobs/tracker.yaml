@@ -46,3 +46,13 @@ technology_grants:
         level: 1
       - id: pest_form_bio_synthetic
         level: 1
+drawbacks:
+  - id: trail_obsession
+    type: passive
+    description: "You follow a trail to the end, even when the end is a bad idea. Breaking off a hunt requires a Resolve test (DN 3) or you keep going."
+  - id: isolation_instinct
+    type: situational
+    trigger: on_enter_room_danger_level
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "Open, high-threat terrain spikes your predator-sense. You're used to being the thing doing the hunting — not the thing being hunted."

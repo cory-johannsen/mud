@@ -46,3 +46,7 @@ technology_grants:
         level: 1
       - id: tailwind_bio_synthetic
         level: 1
+drawbacks:
+  - id: nowhere_to_run
+    type: passive
+    description: "You own nothing and owe nothing, which means you have no resources to fall back on when things go bad. Rock bottom has a sub-basement."

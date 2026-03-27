@@ -36,3 +36,13 @@ class_features:
   - sucker_punch
   - slippery
   - hot_wire
+drawbacks:
+  - id: hot_wheels
+    type: passive
+    description: "Every vehicle you touch becomes a liability. Stolen rides get flagged fast, and you never quite got the habit of using clean transport."
+  - id: adrenaline_crash
+    type: situational
+    trigger: on_leave_combat_without_kill
+    effect_condition_id: fatigued
+    duration: "30m0s"
+    description: "The post-heist drop hits hard. When a job ends without violence, your body punishes you for the anticlimax."

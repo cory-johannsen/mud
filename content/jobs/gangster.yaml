@@ -39,3 +39,13 @@ class_features:
   - street_brawler
   - brutal_surge
   - turf_war
+drawbacks:
+  - id: crew_liability
+    type: passive
+    description: "You answer for your crew's messes and they answer for yours. When your people make enemies, so do you — whether you were involved or not."
+  - id: turf_rage
+    type: situational
+    trigger: on_enter_room_danger_level
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "Moving through rival territory puts you on edge in ways that make you sloppy and loud."

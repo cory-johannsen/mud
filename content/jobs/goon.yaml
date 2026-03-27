@@ -36,3 +36,7 @@ class_features:
   - command_attention
   - fast_talk
   - muscle_up
+drawbacks:
+  - id: disposable_asset
+    type: passive
+    description: "Whoever hired you sees you as a tool, not a person. That calculus has a way of becoming self-fulfilling — you've stopped expecting better."

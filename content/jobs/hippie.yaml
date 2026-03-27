@@ -45,3 +45,7 @@ technology_grants:
         level: 1
       - id: nettleskin
         level: 1
+drawbacks:
+  - id: conflict_avoidant
+    type: passive
+    description: "Violence feels like failure to you. Initiating aggression — even in obvious self-defense — requires a Resolve test (DN 2) or you hesitate."

@@ -47,3 +47,7 @@ technology_grants:
         level: 1
       - id: aqueous_blast_bio_synthetic
         level: 1
+drawbacks:
+  - id: maritime_notoriety
+    type: passive
+    description: "Ports, docks, and waterway checkpoints are dangerous territory. Your face is on enough wanted boards that maritime authority encounters always escalate."

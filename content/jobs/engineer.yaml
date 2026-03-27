@@ -44,3 +44,10 @@ technology_grants:
       - { id: forge_technical, level: 1 }
       - { id: conductive_weapon_technical, level: 1 }
       - { id: animate_rope_technical, level: 1 }
+drawbacks:
+  - id: theoretical_bias
+    type: passive
+    description: "Your solutions work in principle. In the field, improvisation gets you killed — you need your tools, your specs, and your time. -1 Quickness."
+    stat_modifier:
+      stat: quickness
+      amount: -1

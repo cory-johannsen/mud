@@ -42,3 +42,7 @@ technology_grants:
       - { id: fold_metal, level: 1 }
       - { id: temporary_tool, level: 1 }
       - { id: endure_technical, level: 1 }
+drawbacks:
+  - id: toolbox_dependent
+    type: passive
+    description: "Without your kit, you're half a person. Improvising repairs under pressure requires a Reasoning test (DN 3) or your solution makes things worse."

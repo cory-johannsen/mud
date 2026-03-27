@@ -36,3 +36,16 @@ class_features:
   - street_brawler
   - brutal_surge
   - bone_breaker
+drawbacks:
+  - id: glass_jaw
+    type: passive
+    description: "You dish out punishment like candy but fold when the hits keep coming. -1 Grit."
+    stat_modifier:
+      stat: grit
+      amount: -1
+  - id: blood_frenzy
+    type: situational
+    trigger: on_leave_combat_without_kill
+    effect_condition_id: demoralized
+    duration: "1h0m0s"
+    description: "If a fight ends without someone going down, you can't shake the itch. The frustration festers."

@@ -35,3 +35,10 @@ class_features:
   - street_brawler
   - brutal_surge
   - follow_orders
+drawbacks:
+  - id: bottom_of_the_chain
+    type: passive
+    description: "You take orders and take the hits. Leadership doesn't consult you before spending your life. -1 Flair."
+    stat_modifier:
+      stat: flair
+      amount: -1

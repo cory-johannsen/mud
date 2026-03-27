@@ -38,3 +38,16 @@ class_features:
   - street_brawler
   - brutal_surge
   - juiced_up
+drawbacks:
+  - id: crash_cycle
+    type: passive
+    description: "What goes up comes down hard. After peak exertion, your body demands a tax. -1 Grit."
+    stat_modifier:
+      stat: grit
+      amount: -1
+  - id: rage_break
+    type: situational
+    trigger: on_take_damage_in_one_hit_above_threshold
+    effect_condition_id: frightened
+    duration: "30m0s"
+    description: "Absorbing a hit above your pain threshold triggers a panic response buried under the fury — the body's smarter than the ego."

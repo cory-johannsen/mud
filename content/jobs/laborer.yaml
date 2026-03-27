@@ -46,3 +46,10 @@ technology_grants:
         level: 1
       - id: shockwave_bio_synthetic
         level: 1
+drawbacks:
+  - id: worn_down
+    type: passive
+    description: "Years of physical labor have left your body a ledger of old injuries. You push through, but hard days have a cost. -1 Quickness."
+    stat_modifier:
+      stat: quickness
+      amount: -1

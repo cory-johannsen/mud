@@ -36,3 +36,7 @@ class_features:
   - street_tough
   - resilience
   - ride_coattails
+drawbacks:
+  - id: no_standing
+    type: passive
+    description: "You ride the coattails of people who tolerate you. If your patron drops you, you have no independent leverage or reputation to fall back on."

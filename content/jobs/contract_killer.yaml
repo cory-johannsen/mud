@@ -37,3 +37,13 @@ class_features:
   - street_brawler
   - brutal_surge
   - clean_shot
+drawbacks:
+  - id: no_loose_ends
+    type: passive
+    description: "You are a liability to every employer the moment a job is done. Clients who know your face are always evaluating whether you're a loose end worth tying up."
+  - id: collateral_conscience
+    type: situational
+    trigger: on_fail_skill_check
+    effect_condition_id: demoralized
+    duration: "1h0m0s"
+    description: "A botched hit leaves you second-guessing everything. The doubt crawls in when you can least afford it."

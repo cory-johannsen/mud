@@ -46,3 +46,10 @@ technology_grants:
         level: 1
       - id: tether_bio_synthetic
         level: 1
+drawbacks:
+  - id: authority_hangover
+    type: passive
+    description: "You were someone who had power over others. That habit of command alienates people who don't owe you anything. -1 Flair."
+    stat_modifier:
+      stat: flair
+      amount: -1

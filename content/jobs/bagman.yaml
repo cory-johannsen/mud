@@ -45,3 +45,7 @@ technology_grants:
         level: 1
       - id: noxious_vapors_bio_synthetic
         level: 1
+drawbacks:
+  - id: dirty_hands
+    type: passive
+    description: "You carry the dirty secrets of your employers. Anyone who suspects what you haul has leverage over you — and they know it."
