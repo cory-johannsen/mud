@@ -872,3 +872,19 @@ func TestLoadZone_SteamPDX_HasSevenRooms(t *testing.T) {
 	assert.Len(t, zone.Rooms, 7, "SteamPDX must have exactly 7 rooms")
 	assert.Equal(t, "steampdx", zone.ID)
 }
+
+func TestLoadZone_TheVelvetRope_HasTerrainLubeEffect(t *testing.T) {
+	data, err := os.ReadFile("../../../content/zones/the_velvet_rope.yaml")
+	require.NoError(t, err)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	assert.Len(t, zone.Rooms, 7, "The Velvet Rope must have exactly 7 rooms")
+	assert.Equal(t, "the_velvet_rope", zone.ID)
+	tracks := make([]string, 0, len(zone.ZoneEffects))
+	for _, e := range zone.ZoneEffects {
+		tracks = append(tracks, e.Track)
+	}
+	assert.Contains(t, tracks, "temptation", "The Velvet Rope must have temptation zone_effect")
+	assert.Contains(t, tracks, "revulsion", "The Velvet Rope must have revulsion zone_effect")
+	assert.Contains(t, tracks, "terrain_lube", "The Velvet Rope must have terrain_lube zone_effect")
+}

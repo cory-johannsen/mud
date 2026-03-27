@@ -1,0 +1,20 @@
+id: velvet_patron
+name: Velvet Patron
+description: Someone dressed for a party that has been going since 1987, friendly in a way that wants something.
+level: 2
+max_hp: 22
+ac: 11
+awareness: 5
+disposition: neutral
+seduction_probability: 0.4
+abilities:
+  brutality: 10
+  quickness: 12
+  grit: 8
+  reasoning: 10
+  savvy: 10
+  flair: 16
+loot:
+  currency:
+    min: 8
+    max: 30

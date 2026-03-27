@@ -1,0 +1,147 @@
+zone:
+  id: the_velvet_rope
+  danger_level: dangerous
+  world_x: -2
+  world_y: 4
+  name: The Velvet Rope
+  description: A private social club north of Beaverton where the dress code is optional and everything else costs extra.
+  start_room: tvr_the_buffet
+  zone_effects:
+  - track: temptation
+    severity: mild
+    base_dc: 12
+    cooldown_rounds: 3
+    cooldown_minutes: 5
+  - track: revulsion
+    severity: mild
+    base_dc: 11
+    cooldown_rounds: 3
+    cooldown_minutes: 5
+  - track: terrain_lube
+    severity: mild
+    base_dc: 10
+    cooldown_rounds: 3
+    cooldown_minutes: 5
+  rooms:
+  - id: tvr_the_buffet
+    danger_level: sketchy
+    title: The Buffet
+    description: 'A long table draped in red velvet holds offerings of dubious origin
+      under warming lights. Patrons mill about with plates, watching the door. The
+      floors are suspiciously slick. Stairs and exits warn of treacherous footing.'
+    exits:
+    - direction: east
+      target: tvr_play_rooms
+    map_x: 0
+    map_y: 0
+    spawns:
+    - template: velvet_patron
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: tvr_play_rooms
+    danger_level: sketchy
+    title: The Play Rooms
+    description: 'A central hub connecting the club''s various chambers. Curtained
+      doorways in every direction. A hostess at a velvet rope manages traffic with
+      a clipboard and a practiced smile. The floor is worse here.'
+    exits:
+    - direction: west
+      target: tvr_the_buffet
+    - direction: north
+      target: tvr_the_strangers
+    - direction: east
+      target: tvr_spit_roast
+    - direction: south
+      target: tvr_party_theater
+    map_x: 1
+    map_y: 0
+    spawns:
+    - template: velvet_hostess
+      count: 1
+      respawn_after: 5m
+    boss_room: false
+  - id: tvr_the_strangers
+    danger_level: sketchy
+    title: The Strangers
+    description: 'A dimly lit room with no furniture and no names. Patrons enter as
+      strangers and some of them leave that way too. Two figures turn to assess you
+      with professional disinterest that shifts into something else.'
+    exits:
+    - direction: south
+      target: tvr_play_rooms
+    map_x: 1
+    map_y: -1
+    spawns:
+    - template: velvet_patron
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: tvr_spit_roast
+    danger_level: sketchy
+    title: Spit Roast
+    description: 'The name is painted on the door in gold script, which does not make
+      it less alarming. Inside, the room is arranged for activities that the furniture
+      suggests but does not explain. Two patrons are unhappy about the interruption.'
+    exits:
+    - direction: west
+      target: tvr_play_rooms
+    - direction: south
+      target: tvr_pineapple_room
+    map_x: 2
+    map_y: 0
+    spawns:
+    - template: velvet_patron
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: tvr_pineapple_room
+    danger_level: dangerous
+    title: Pineapple Room
+    description: 'A pineapple painted on the door, the universal signal for something
+      you have to know about to understand. Inside it is immediately clear why the
+      danger rating is elevated. Two hostesses who are done being polite.'
+    exits:
+    - direction: north
+      target: tvr_spit_roast
+    map_x: 2
+    map_y: 1
+    spawns:
+    - template: velvet_hostess
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: tvr_party_theater
+    danger_level: dangerous
+    title: Party Theater
+    description: 'A small theater with raked seating facing a stage equipped for performance.
+      The performance currently underway involves audience participation. Two patrons
+      in the wings are not interested in new cast members.'
+    exits:
+    - direction: north
+      target: tvr_play_rooms
+    - direction: east
+      target: tvr_gangbang_room
+    map_x: 1
+    map_y: 1
+    spawns:
+    - template: velvet_patron
+      count: 2
+      respawn_after: 5m
+    boss_room: false
+  - id: tvr_gangbang_room
+    danger_level: dangerous
+    title: The VIP Chamber
+    description: 'The innermost room. No sign. No clipboard. Just a presence that
+      has been holding court here since the club opened and intends to continue doing
+      so. The floor is at its worst here. Everything is.'
+    exits:
+    - direction: west
+      target: tvr_party_theater
+    map_x: 2
+    map_y: 2
+    spawns:
+    - template: gangbang
+      count: 1
+      respawn_after: 30m
+    boss_room: true

@@ -1,0 +1,20 @@
+id: gangbang
+name: "Gangbang!"
+description: Not a name, a warning. A presence that fills the room with the force of someone who has never once been told no.
+level: 7
+max_hp: 90
+ac: 15
+awareness: 9
+disposition: hostile
+tier: boss
+abilities:
+  brutality: 16
+  quickness: 16
+  grit: 14
+  reasoning: 10
+  savvy: 14
+  flair: 20
+loot:
+  currency:
+    min: 70
+    max: 180
