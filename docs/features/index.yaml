@@ -674,3 +674,23 @@ features:
     file: docs/features/zone-map-architecture-docs.md
     effort: "S"  # document zone maps in architecture docs; update diagrams when map layout changes
     # dep-note: see also docs/architecture/feature-dependency-graph.md for cross-feature dependency graph
+
+  - slug: modal-combat-mode
+    name: Modal Combat Mode
+    status: spec
+    priority: 460
+    category: ui
+    file: docs/features/modal-combat-mode.md
+    effort: "L"  # dual-buffer screen swap, combat screen layout, command routing, battlefield/roster rendering
+    dependencies:
+      - advanced-combat
+
+  - slug: 2d-combat-expansion
+    name: 2D Grid Combat Expansion
+    status: planned
+    priority: 470
+    category: combat
+    file: docs/features/2d-combat-expansion.md
+    effort: "XL"  # 2D grid positioning, flanking, AoE targeting, grid rendering
+    dependencies:
+      - modal-combat-mode
