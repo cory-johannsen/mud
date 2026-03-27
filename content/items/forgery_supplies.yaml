@@ -1,0 +1,11 @@
+id: forgery_supplies
+name: Forgery Supplies
+description: A kit of specialized inks, paper stock, and precision tools used to forge official documents. Consumed when starting a Forge Papers downtime activity.
+kind: tool
+weight: 1.5
+stackable: true
+max_stack: 10
+value: 50
+tags:
+  - forgery
+  - consumable

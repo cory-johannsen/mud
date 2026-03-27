@@ -1,0 +1,11 @@
+id: convincing_forgery
+name: Convincing Forgery
+description: A competently produced set of false documents. Will fool most officials and casual inspections.
+kind: document
+weight: 0.1
+stackable: true
+max_stack: 10
+value: 100
+tags:
+  - forgery
+  - document
