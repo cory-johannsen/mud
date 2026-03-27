@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/drawback"
 	"github.com/cory-johannsen/mud/internal/game/focuspoints"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
@@ -577,8 +578,72 @@ func (s *GameServiceServer) resolveApplyPressure(uid string, sess *session.Playe
 // Precondition: sess is non-nil; state already cleared.
 // Postcondition: Console message delivered; no item or material mutations until wired.
 func (s *GameServiceServer) resolveDowntimeCraft(uid string, sess *session.PlayerSession) {
-	// Future: parse recipe ID from DowntimeMetadata and invoke craftEngine (REQ-CRAFT-downtime).
-	s.pushMessageToUID(uid, "Craft complete. Your work is finished.")
+	if sess.DowntimeMetadata == "" || s.recipeReg == nil {
+		s.pushMessageToUID(uid, "(No recipe recorded.)")
+		return
+	}
+	recipe, ok := s.recipeReg.Recipe(sess.DowntimeMetadata)
+	if !ok {
+		s.pushMessageToUID(uid, fmt.Sprintf("Unknown recipe %q; cannot complete craft.", sess.DowntimeMetadata))
+		return
+	}
+
+	// Roll rigging skill check (same pattern as handleCraftConfirm).
+	var roll int
+	if s.dice != nil {
+		roll = s.dice.Src().Intn(20) + 1
+	} else {
+		roll = 10
+	}
+	riggingRank := sess.Skills["rigging"]
+	if riggingRank == "" {
+		riggingRank = "untrained"
+	}
+	abilityMod := (sess.Abilities.Savvy - 10) / 2
+	profBonus := skillcheck.ProficiencyBonus(riggingRank)
+	total := roll + abilityMod + profBonus
+	checkOutcome := skillcheck.OutcomeFor(total, recipe.DC)
+	craftOutcome := crafting.Outcome(checkOutcome)
+
+	// Compute output quantity.
+	var outputQty int
+	switch craftOutcome {
+	case crafting.CritSuccess:
+		outputQty = recipe.OutputCount + 1
+	case crafting.Success:
+		outputQty = recipe.OutputCount
+	default:
+		outputQty = 0
+	}
+
+	// Add output items to backpack.
+	if outputQty > 0 && sess.Backpack != nil && s.invRegistry != nil && recipe.OutputItemID != "" {
+		_, _ = sess.Backpack.Add(recipe.OutputItemID, outputQty, s.invRegistry)
+	}
+
+	// On CritSuccess, refund one material batch (REQ-CRAFT-DT-4).
+	if craftOutcome == crafting.CritSuccess {
+		for _, rm := range recipe.Materials {
+			sess.Materials[rm.ID] += rm.Quantity
+			if s.materialRepo != nil && sess.CharacterID > 0 {
+				_ = s.materialRepo.Add(context.Background(), sess.CharacterID, rm.ID, rm.Quantity)
+			}
+		}
+	}
+
+	// Send outcome message.
+	var msg string
+	switch craftOutcome {
+	case crafting.CritSuccess:
+		msg = fmt.Sprintf("Critical success! You craft %d %s and recover your materials.", outputQty, recipe.Name)
+	case crafting.Success:
+		msg = fmt.Sprintf("Success! You craft %d %s.", outputQty, recipe.Name)
+	case crafting.Failure:
+		msg = fmt.Sprintf("Failure. You do not craft %s.", recipe.Name)
+	default:
+		msg = fmt.Sprintf("Critical failure! You do not craft %s.", recipe.Name)
+	}
+	s.pushMessageToUID(uid, msg)
 }
 
 // applyConditionToSession applies a condition by ID to the player's active condition set.
