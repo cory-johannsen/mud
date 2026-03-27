@@ -599,11 +599,11 @@ features:
     priority: 425
     category: ui
     file: docs/features/internal-client.md
-    effort: "L"  # five sub-packages (render, history, auth, feed, session); foundation for web and ebiten clients
+    effort: "L"  # six sub-packages (assets, render, history, auth, feed, session); foundation for web and ebiten clients
     dependencies: []
 
   - slug: web-client
-    name: Web Game Client
+    name: Web Game Client (Phase 1)
     status: planned
     priority: 430
     category: ui
@@ -613,6 +613,17 @@ features:
       - internal-client         # shared session, feed, history, auth, render contract
       - zone-content-expansion  # admin room editor uses WorldEditor from zone-content-expansion
 
+  - slug: web-client-phase2
+    name: Web Game Client (Phase 2 — Tiled Scene)
+    status: spec
+    priority: 431
+    category: ui
+    file: docs/features/web-client-phase2.md
+    effort: "XL"  # PixiJS scene panel, asset pack loading/caching, combat animations; builds on Phase 1
+    dependencies:
+      - web-client      # Phase 1 Go server and React shell required
+      - internal-client # shared session, feed, and new assets sub-package
+
   - slug: game-client-ebiten
     name: Ebiten Game Client
     status: planned
@@ -621,8 +632,9 @@ features:
     file: docs/features/game-client-ebiten.md
     effort: "XXL"  # native cross-platform client (Windows/Mac/Linux) over gRPC; new game engine layer
     dependencies:
-      - internal-client  # shared session, feed, history, auth, render contract
-      - web-client       # webclient REST API used for auth and character management
+      - internal-client    # shared session, feed, history, auth, render contract, assets
+      - web-client         # webclient REST API used for auth and character management
+      - web-client-phase2  # shared asset pack format and GitHub release workflow
 
   - slug: documentation
     name: Documentation

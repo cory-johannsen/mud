@@ -18,6 +18,7 @@ The package is Go-only. React/TypeScript rendering in `cmd/webclient/ui` is info
 
 ```
 internal/client/
+  assets/     — GitHub Releases version check; AssetVersion type; ParseVersion
   auth/       — HTTP client: login, register, character list, character creation, name check
   session/    — gRPC session lifecycle + session state machine
   feed/       — ServerEvent accumulation, color token assignment, cap enforcement
@@ -344,6 +345,50 @@ func (h *History) Reset()           // return cursor to live position (call afte
 - REQ-IC-3: `session.Session` MUST be tested with a mock gRPC server using `google.golang.org/grpc/test/bufconn`.
 - REQ-IC-4: `feed.Feed` and `history.History` MUST use property-based tests (rapid) for cap enforcement and cursor navigation invariants.
 - REQ-IC-5: `render` package has no logic — interfaces and constants only; no test file required.
+
+---
+
+---
+
+### `internal/client/assets`
+
+GitHub Releases version-check logic shared by the Ebiten client (Go, checks at startup) and the webclient Go proxy endpoint (`GET /api/assets/version`).
+
+#### Types
+
+```go
+// AssetVersion describes a published asset pack release.
+type AssetVersion struct {
+    Version     int
+    DownloadURL string
+    SHA256URL   string
+}
+```
+
+#### Errors
+
+```go
+// ErrNoRelease is returned when the release exists but contains no mud-assets artifact.
+var ErrNoRelease = errors.New("no asset release found")
+
+// ErrNetwork mirrors internal/client/auth.ErrNetwork — import the type or redefine locally.
+type ErrNetwork struct{ Cause error }
+func (e ErrNetwork) Error() string { return "network error: " + e.Cause.Error() }
+func (e ErrNetwork) Unwrap() error { return e.Cause }
+```
+
+#### API
+
+```go
+// FetchLatestVersion queries the GitHub Releases API at releasesURL, locates the
+// mud-assets-v{N}.zip artifact, and returns its version and download URLs.
+func FetchLatestVersion(ctx context.Context, releasesURL string) (*AssetVersion, error)
+
+// ParseVersion parses a version integer from a version.txt string (e.g. "7\n" → 7).
+func ParseVersion(s string) (int, error)
+```
+
+The artifact is identified by matching the release asset name against the pattern `mud-assets-v*.zip`. `SHA256URL` is derived from the matching zip asset's `browser_download_url` by replacing `.zip` with `.sha256`.
 
 ---
 

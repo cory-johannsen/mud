@@ -8,12 +8,13 @@
 
 ## Overview
 
-`internal/client` is a set of layered Go sub-packages providing the shared protocol, state, and rendering-contract layer for all game client binaries (`cmd/webclient`, `cmd/ebitenclient`). It eliminates duplication across six concerns: authentication, session lifecycle, message feed, character state, command history, and rendering contracts.
+`internal/client` is a set of layered Go sub-packages providing the shared protocol, state, and rendering-contract layer for all game client binaries (`cmd/webclient`, `cmd/ebitenclient`). It eliminates duplication across seven concerns: asset version checking, authentication, session lifecycle, message feed, character state, command history, and rendering contracts.
 
 ## Sub-Packages
 
 | Package | Responsibility |
 |---|---|
+| `internal/client/assets` | GitHub Releases version check; `AssetVersion` type; `ParseVersion` |
 | `internal/client/render` | `ColorToken` constants, `FeedEntry`, `CharacterSnapshot`, renderer interfaces, `ColorMapper` |
 | `internal/client/history` | Command ring buffer (cap 100), ↑/↓ cursor navigation, in-memory only |
 | `internal/client/auth` | HTTP client for webclient REST API: login, register, character list/create/options |
