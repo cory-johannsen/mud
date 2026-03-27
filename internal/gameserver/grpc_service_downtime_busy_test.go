@@ -19,7 +19,7 @@ import (
 // Postcondition: handleMove returns a non-nil event without a RoomView; player remains in room_a.
 func TestDowntimeBusy_BlocksMove(t *testing.T) {
 	worldMgr, sessMgr := newNormalTerrainWorld(t)
-	svc := newMoveTestService(t, worldMgr, sessMgr)
+	svc := newMoveTestService(t, worldMgr, sessMgr, nil)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:         "u_downtime_move",
@@ -61,7 +61,7 @@ func TestDowntimeBusy_BlocksMove(t *testing.T) {
 func TestPropertyDowntimeBusy_AlwaysBlocksMove(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		worldMgr, sessMgr := newNormalTerrainWorld(t)
-		svc := newMoveTestService(t, worldMgr, sessMgr)
+		svc := newMoveTestService(t, worldMgr, sessMgr, nil)
 
 		uid := rapid.StringMatching(`[a-z]{4,8}`).Draw(rt, "uid")
 
@@ -98,7 +98,7 @@ func TestPropertyDowntimeBusy_AlwaysBlocksMove(t *testing.T) {
 // Postcondition: handleLook returns a non-nil event with a RoomView.
 func TestDowntimeBusy_AllowsLook(t *testing.T) {
 	worldMgr, sessMgr := newNormalTerrainWorld(t)
-	svc := newMoveTestService(t, worldMgr, sessMgr)
+	svc := newMoveTestService(t, worldMgr, sessMgr, nil)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:         "u_downtime_look",
@@ -129,7 +129,7 @@ func TestDowntimeBusy_AllowsLook(t *testing.T) {
 // Postcondition: handleDowntime returns a non-nil event without blocking.
 func TestDowntimeBusy_AllowsDowntimeStatus(t *testing.T) {
 	worldMgr, sessMgr := newNormalTerrainWorld(t)
-	svc := newMoveTestService(t, worldMgr, sessMgr)
+	svc := newMoveTestService(t, worldMgr, sessMgr, nil)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:         "u_downtime_status",

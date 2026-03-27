@@ -11,19 +11,27 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
-// newDifficultTerrainWorld creates a world where room_b has terrain=difficult
-// and room_a connects to it via north.
+// newDifficultTerrainWorld creates a world where room_b has a terrain_mud Effect
+// (MoveAPCost > 0) and room_a connects to it via north.
 //
 // Precondition: t must be non-nil.
-// Postcondition: Returns a world.Manager and session.Manager with a two-room zone.
-func newDifficultTerrainWorld(t *testing.T) (*world.Manager, *session.Manager) {
+// Postcondition: Returns a world.Manager, session.Manager, and condition.Registry with terrain_mud registered.
+func newDifficultTerrainWorld(t *testing.T) (*world.Manager, *session.Manager, *condition.Registry) {
 	t.Helper()
+	reg := condition.NewRegistry()
+	reg.Register(&condition.ConditionDef{
+		ID:           "terrain_mud",
+		Name:         "Mud",
+		DurationType: "permanent",
+		MoveAPCost:   1,
+	})
 	zone := &world.Zone{
 		ID:          "test",
 		Name:        "Test",
@@ -44,13 +52,13 @@ func newDifficultTerrainWorld(t *testing.T) (*world.Manager, *session.Manager) {
 				Title:       "Room B",
 				Description: "The second room.",
 				Exits:       []world.Exit{{Direction: world.South, TargetRoom: "room_a"}},
-				Properties:  map[string]string{"terrain": "difficult"},
+				Effects:     []world.RoomEffect{{Track: "terrain_mud"}},
 			},
 		},
 	}
 	wm, err := world.NewManager([]*world.Zone{zone})
 	require.NoError(t, err)
-	return wm, session.NewManager()
+	return wm, session.NewManager(), reg
 }
 
 // newNormalTerrainWorld creates a world where room_b has no terrain property.
@@ -92,7 +100,7 @@ func newNormalTerrainWorld(t *testing.T) (*world.Manager, *session.Manager) {
 //
 // Precondition: worldMgr and sessMgr must be non-nil.
 // Postcondition: Returns a GameServiceServer ready for handleMove tests.
-func newMoveTestService(t *testing.T, worldMgr *world.Manager, sessMgr *session.Manager) *GameServiceServer {
+func newMoveTestService(t *testing.T, worldMgr *world.Manager, sessMgr *session.Manager, condReg *condition.Registry) *GameServiceServer {
 	t.Helper()
 	logger := zaptest.NewLogger(t)
 	wh := NewWorldHandler(worldMgr, sessMgr, npc.NewManager(), nil, nil, nil)
@@ -103,7 +111,7 @@ func newMoveTestService(t *testing.T, worldMgr *world.Manager, sessMgr *session.
 		wh, ch, logger,
 		nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, "",
+		nil, nil, condReg, nil, nil, nil, nil, nil, "",
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil,
 		nil,
@@ -142,8 +150,8 @@ func drainEntityMessages(t *testing.T, sess *session.PlayerSession) []string {
 // Precondition: Destination room has Properties["terrain"]="difficult"; player lacks zone_awareness.
 // Postcondition: Player's entity channel contains a message about difficult terrain.
 func TestHandleMove_DifficultTerrain_MessageSentWithoutFeat(t *testing.T) {
-	worldMgr, sessMgr := newDifficultTerrainWorld(t)
-	svc := newMoveTestService(t, worldMgr, sessMgr)
+	worldMgr, sessMgr, reg := newDifficultTerrainWorld(t)
+	svc := newMoveTestService(t, worldMgr, sessMgr, reg)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:         "u_difficult",
@@ -166,15 +174,15 @@ func TestHandleMove_DifficultTerrain_MessageSentWithoutFeat(t *testing.T) {
 	assert.Equal(t, "room_b", evt.GetRoomView().RoomId)
 
 	msgs := drainEntityMessages(t, sess)
-	require.NotEmpty(t, msgs, "expected a difficult terrain message pushed to entity")
+	require.NotEmpty(t, msgs, "expected a terrain message pushed to entity")
 	found := false
 	for _, m := range msgs {
-		if m != "" && containsSubstring(m, "difficult") {
+		if m != "" && containsSubstring(m, "mud") {
 			found = true
 			break
 		}
 	}
-	assert.True(t, found, "expected at least one message mentioning 'difficult', got: %v", msgs)
+	assert.True(t, found, "expected at least one message mentioning 'mud', got: %v", msgs)
 }
 
 // TestHandleMove_DifficultTerrain_NoMessageWithFeat verifies that moving into a difficult
@@ -183,8 +191,8 @@ func TestHandleMove_DifficultTerrain_MessageSentWithoutFeat(t *testing.T) {
 // Precondition: Destination room has Properties["terrain"]="difficult"; player has zone_awareness=true.
 // Postcondition: Player's entity channel contains no difficult terrain message.
 func TestHandleMove_DifficultTerrain_NoMessageWithFeat(t *testing.T) {
-	worldMgr, sessMgr := newDifficultTerrainWorld(t)
-	svc := newMoveTestService(t, worldMgr, sessMgr)
+	worldMgr, sessMgr, reg := newDifficultTerrainWorld(t)
+	svc := newMoveTestService(t, worldMgr, sessMgr, reg)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:         "u_aware",
@@ -207,8 +215,8 @@ func TestHandleMove_DifficultTerrain_NoMessageWithFeat(t *testing.T) {
 
 	msgs := drainEntityMessages(t, sess)
 	for _, m := range msgs {
-		assert.NotContains(t, m, "difficult",
-			"zone_awareness player should not receive a difficult terrain message")
+		assert.NotContains(t, m, "mud",
+			"zone_awareness player should not receive a terrain message")
 	}
 }
 
@@ -219,7 +227,7 @@ func TestHandleMove_DifficultTerrain_NoMessageWithFeat(t *testing.T) {
 // Postcondition: Player's entity channel contains no difficult terrain message.
 func TestHandleMove_NoDifficultTerrain_NoMessage(t *testing.T) {
 	worldMgr, sessMgr := newNormalTerrainWorld(t)
-	svc := newMoveTestService(t, worldMgr, sessMgr)
+	svc := newMoveTestService(t, worldMgr, sessMgr, nil)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:         "u_normal",
@@ -242,8 +250,8 @@ func TestHandleMove_NoDifficultTerrain_NoMessage(t *testing.T) {
 
 	msgs := drainEntityMessages(t, sess)
 	for _, m := range msgs {
-		assert.NotContains(t, m, "difficult",
-			"normal terrain room should not produce a difficult terrain message")
+		assert.NotContains(t, m, "terrain",
+			"normal terrain room should not produce a terrain message")
 	}
 }
 
@@ -254,8 +262,8 @@ func TestHandleMove_NoDifficultTerrain_NoMessage(t *testing.T) {
 // Postcondition: For all valid moves, no difficult terrain message is pushed to the player.
 func TestPropertyHandleMove_ZoneAwareness_NeverReceivesTerrainMessage(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
-		worldMgr, sessMgr := newDifficultTerrainWorld(t)
-		svc := newMoveTestService(t, worldMgr, sessMgr)
+		worldMgr, sessMgr, reg := newDifficultTerrainWorld(t)
+		svc := newMoveTestService(t, worldMgr, sessMgr, reg)
 
 		uid := rapid.StringMatching(`[a-z]{4,8}`).Draw(rt, "uid")
 
@@ -277,8 +285,8 @@ func TestPropertyHandleMove_ZoneAwareness_NeverReceivesTerrainMessage(t *testing
 
 		msgs := drainEntityMessages(t, sess)
 		for _, m := range msgs {
-			assert.NotContains(rt, m, "difficult",
-				"zone_awareness player should never receive difficult terrain message")
+			assert.NotContains(rt, m, "mud",
+				"zone_awareness player should never receive terrain message")
 		}
 	})
 }
@@ -307,7 +315,7 @@ func containsAt(s, substr string) bool {
 // room is unchanged.
 func TestHandleMove_BlockedWhileInCombat(t *testing.T) {
 	worldMgr, sessMgr := newNormalTerrainWorld(t)
-	svc := newMoveTestService(t, worldMgr, sessMgr)
+	svc := newMoveTestService(t, worldMgr, sessMgr, nil)
 
 	sess, err := sessMgr.AddPlayer(session.AddPlayerOptions{
 		UID:         "u_combat",
@@ -344,7 +352,7 @@ func TestHandleMove_BlockedWhileInCombat(t *testing.T) {
 func TestPropertyHandleMove_InCombat_AlwaysBlocked(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		worldMgr, sessMgr := newNormalTerrainWorld(t)
-		svc := newMoveTestService(t, worldMgr, sessMgr)
+		svc := newMoveTestService(t, worldMgr, sessMgr, nil)
 
 		uid := rapid.StringMatching(`[a-z]{4,8}`).Draw(rt, "uid")
 

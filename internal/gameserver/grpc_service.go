@@ -2269,24 +2269,41 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 		}
 	}
 
-	// zone_awareness: notify the player when entering a difficult terrain room,
-	// unless they possess the zone_awareness passive feat.
-	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok {
-		if newRoom.Properties["terrain"] == "difficult" && !sess.PassiveFeats["zone_awareness"] {
-			terrainEvt := &gamev1.ServerEvent{
-				Payload: &gamev1.ServerEvent_Message{
-					Message: &gamev1.MessageEvent{
-						Content: "The ground here is difficult terrain — your movement feels sluggish.",
-						Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
-					},
-				},
+	// REQ-ZN-13: accumulate terrain_ condition AP costs from room.Effects.
+	// Unless the player has zone_awareness, send a flavor message for each terrain condition.
+	if newRoom, ok := s.world.GetRoom(result.View.RoomId); ok && s.condRegistry != nil {
+		var terrainConds []*condition.ConditionDef
+		for _, eff := range newRoom.Effects {
+			if !strings.HasPrefix(eff.Track, "terrain_") {
+				continue
 			}
-			if data, marshalErr := proto.Marshal(terrainEvt); marshalErr == nil {
-				if pushErr := sess.Entity.Push(data); pushErr != nil {
-					s.logger.Warn("pushing difficult terrain message to player entity",
-						zap.String("uid", uid),
-						zap.Error(pushErr),
-					)
+			def, defOK := s.condRegistry.Get(eff.Track)
+			if !defOK || def.MoveAPCost <= 0 {
+				continue
+			}
+			terrainConds = append(terrainConds, def)
+		}
+		sort.Slice(terrainConds, func(i, j int) bool {
+			return terrainConds[i].ID < terrainConds[j].ID
+		})
+		if !sess.PassiveFeats["zone_awareness"] {
+			for _, def := range terrainConds {
+				terrainEvt := &gamev1.ServerEvent{
+					Payload: &gamev1.ServerEvent_Message{
+						Message: &gamev1.MessageEvent{
+							Content: fmt.Sprintf("The ground here is %s — movement costs extra AP.", strings.ToLower(def.Name)),
+							Type:    gamev1.MessageType_MESSAGE_TYPE_UNSPECIFIED,
+						},
+					},
+				}
+				if data, marshalErr := proto.Marshal(terrainEvt); marshalErr == nil {
+					if pushErr := sess.Entity.Push(data); pushErr != nil {
+						s.logger.Warn("pushing terrain condition message to player entity",
+							zap.String("uid", uid),
+							zap.String("condition", def.ID),
+							zap.Error(pushErr),
+						)
+					}
 				}
 			}
 		}
