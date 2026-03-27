@@ -94,6 +94,10 @@ type CombatHandler struct {
 	// npcIdleTickInterval is used to convert say cooldown durations to tick counts. REQ-NB-2.
 	// Zero means use 1 tick minimum.
 	npcIdleTickInterval time.Duration
+	// onMassiveDamage is an optional callback fired when a player takes ≥50% of their max HP in a single hit.
+	// REQ-JD-10: triggers on_take_damage_in_one_hit_above_threshold drawback evaluation.
+	// May be nil; no-op when nil.
+	onMassiveDamage func(uid string)
 }
 
 // NewCombatHandler creates a CombatHandler with a round timer and broadcast function.
@@ -1805,6 +1809,34 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		return false, nil
 	})
 	roundEvents := combat.ResolveRound(cbt, h.dice.Src(), targetUpdater, reactionFn, coverDegrader)
+
+	// REQ-JD-10: Fire on_take_damage_in_one_hit_above_threshold drawback trigger for players
+	// that received ≥50% of their max HP in a single hit this round.
+	if h.onMassiveDamage != nil {
+		for _, ev := range roundEvents {
+			if ev.AttackResult == nil {
+				continue
+			}
+			r := ev.AttackResult
+			dmg := r.EffectiveDamage()
+			if dmg <= 0 {
+				continue
+			}
+			if _, playerOK := h.sessions.GetPlayer(r.TargetID); !playerOK {
+				continue
+			}
+			var maxHP int
+			for _, c := range cbt.Combatants {
+				if c.ID == r.TargetID {
+					maxHP = c.MaxHP
+					break
+				}
+			}
+			if maxHP > 0 && dmg*2 >= maxHP {
+				h.onMassiveDamage(r.TargetID)
+			}
+		}
+	}
 
 	// REQ-AH-21: Apply poison substance from attacker's weapon to player targets on hit.
 	if h.substanceSvc != nil && h.invRegistry != nil {

@@ -3,9 +3,11 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 
+	"github.com/cory-johannsen/mud/internal/game/drawback"
 	"github.com/cory-johannsen/mud/internal/game/focuspoints"
 	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/session"
@@ -124,7 +126,15 @@ func (s *GameServiceServer) skillCheckOutcome(sess *session.PlayerSession, skill
 	}
 	roll := s.rollD20()
 	total := roll + amod + skillcheck.ProficiencyBonus(rank)
-	return skillcheck.OutcomeFor(total, dc)
+	outcome := skillcheck.OutcomeFor(total, dc)
+	// REQ-JD-10: Fire on_fail_skill_check drawback trigger on Failure or CritFailure.
+	if outcome == skillcheck.Failure || outcome == skillcheck.CritFailure {
+		if s.drawbackEngine != nil && s.jobRegistry != nil && sess.Conditions != nil {
+			heldJobs := s.resolveHeldJobs(sess)
+			s.drawbackEngine.FireTrigger(sess.UID, drawback.TriggerOnFailSkillCheck, heldJobs, sess.Conditions, time.Now())
+		}
+	}
+	return outcome
 }
 
 // resolveEarnCreds resolves the "Earn Creds" downtime activity.

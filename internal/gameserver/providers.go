@@ -135,6 +135,16 @@ func (h *CombatHandler) SetBroadcastFn(fn func(roomID string, events []*gamev1.C
 	h.broadcastFn = fn
 }
 
+// SetOnMassiveDamage sets the optional callback fired when a player takes ≥50% of their max HP
+// in a single combat hit. Used to wire the on_take_damage_in_one_hit_above_threshold drawback
+// trigger (REQ-JD-10). May be set to nil to disable.
+//
+// Precondition: none.
+// Postcondition: h.onMassiveDamage == fn.
+func (h *CombatHandler) SetOnMassiveDamage(fn func(uid string)) {
+	h.onMassiveDamage = fn
+}
+
 // HandlerProviders is the wire provider set for game handlers.
 var HandlerProviders = wire.NewSet(
 	NewChatHandlerProvider,

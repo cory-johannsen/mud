@@ -503,6 +503,17 @@ func NewGameServiceServer(
 	s.wireRevealZone()
 	// Initialize drawback engine for situational trigger evaluation (REQ-JD-10).
 	s.drawbackEngine = drawback.NewEngine(s.condRegistry)
+	// REQ-JD-10: Wire on_take_damage_in_one_hit_above_threshold drawback trigger into CombatHandler.
+	if s.combatH != nil {
+		s.combatH.SetOnMassiveDamage(func(uid string) {
+			playerSess, ok := s.sessions.GetPlayer(uid)
+			if !ok || s.jobRegistry == nil || playerSess.Conditions == nil {
+				return
+			}
+			heldJobs := s.resolveHeldJobs(playerSess)
+			s.drawbackEngine.FireTrigger(uid, drawback.TriggerOnTakeDamageInOneHitAboveThreshold, heldJobs, playerSess.Conditions, time.Now())
+		})
+	}
 	return s
 }
 
