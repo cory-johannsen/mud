@@ -101,6 +101,17 @@ func TestHandleRefocus_BlockedAtMaxFocusPoints(t *testing.T) {
 	assert.False(t, sess.RefocusingActive, "should not start refocus when already at max")
 }
 
+func TestHandleRefocus_BlockedNoFocusPool(t *testing.T) {
+	svc, uid := newRefocusTestSvc(t)
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.MaxFocusPoints = 0 // character has no focus pool
+
+	err := svc.handleRefocus(uid)
+	require.NoError(t, err)
+	assert.False(t, sess.RefocusingActive, "should not start refocus when character has no focus pool")
+}
+
 func TestHandleRefocus_StartsTimer(t *testing.T) {
 	svc, uid := newRefocusTestSvc(t)
 	sess, ok := svc.sessions.GetPlayer(uid)
