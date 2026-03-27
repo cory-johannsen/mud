@@ -258,22 +258,28 @@ func TestDowntimeCraft_ResolveFailure_NoItemNoRefund(t *testing.T) {
 // TestProperty_DowntimeCraft_CritSuccessAlwaysRefundsMaterials is a property-based test verifying
 // that when dice are forced to produce a critical success, materials are always refunded.
 //
-// Precondition: sess.DowntimeMetadata="smoke_grenade"; dice forced for crit success; Savvy=14.
-// Postcondition: scrap_metal==2, wire==1 for every run.
+// Precondition: sess.DowntimeMetadata="smoke_grenade"; dice forced roll=20; Savvy drawn from [14,20].
+// Postcondition: scrap_metal==2, wire==1 for every run (total >= DC+10 guaranteed).
 func TestProperty_DowntimeCraft_CritSuccessAlwaysRefundsMaterials(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		svc, uid := newCraftDowntimeTestService(t)
 		sess, _ := svc.sessions.GetPlayer(uid)
 		sess.DowntimeMetadata = "smoke_grenade"
 		sess.Materials = map[string]int{}
-		// Savvy=14 → abilityMod=2; roll=20; total=22 → CritSuccess (DC+10=22).
-		sess.Abilities.Savvy = 14
+
+		// Vary Savvy in range [14,20]: abilityMod=(savvy-10)/2 >= 2; roll=20 forced;
+		// total >= 22 = DC+10 guarantees CritSuccess per OutcomeFor.
+		savvy := rapid.IntRange(14, 20).Draw(rt, "savvy")
+		sess.Abilities.Savvy = savvy
 		svc.dice = dice.NewRoller(dice.NewDeterministicSource([]int{19})) // Intn(20)=19 → roll=20
 
 		svc.resolveDowntimeCraft(uid, sess)
 
-		// Since roll is forced to 20 + abilityMod=2 = 22 = DC+10, always crit success.
-		assert.Equal(rt, 2, sess.Materials["scrap_metal"])
-		assert.Equal(rt, 1, sess.Materials["wire"])
+		// roll=20 is a natural 20; OutcomeFor treats roll==total-mods-prof: with DC=12,
+		// total >= DC+10 or natural 20 guarantees CritSuccess → materials always refunded.
+		assert.Equal(rt, 2, sess.Materials["scrap_metal"],
+			"crit success should refund scrap_metal regardless of savvy=%d", savvy)
+		assert.Equal(rt, 1, sess.Materials["wire"],
+			"crit success should refund wire regardless of savvy=%d", savvy)
 	})
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 
 	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/drawback"
@@ -618,7 +619,10 @@ func (s *GameServiceServer) resolveDowntimeCraft(uid string, sess *session.Playe
 
 	// Add output items to backpack.
 	if outputQty > 0 && sess.Backpack != nil && s.invRegistry != nil && recipe.OutputItemID != "" {
-		_, _ = sess.Backpack.Add(recipe.OutputItemID, outputQty, s.invRegistry)
+		if _, err := sess.Backpack.Add(recipe.OutputItemID, outputQty, s.invRegistry); err != nil {
+			s.pushMessageToUID(uid, fmt.Sprintf("Craft complete but failed to add %s to backpack.", recipe.Name))
+			return
+		}
 	}
 
 	// On CritSuccess, refund one material batch (REQ-CRAFT-DT-4).
@@ -626,7 +630,9 @@ func (s *GameServiceServer) resolveDowntimeCraft(uid string, sess *session.Playe
 		for _, rm := range recipe.Materials {
 			sess.Materials[rm.ID] += rm.Quantity
 			if s.materialRepo != nil && sess.CharacterID > 0 {
-				_ = s.materialRepo.Add(context.Background(), sess.CharacterID, rm.ID, rm.Quantity)
+				if errAdd := s.materialRepo.Add(context.Background(), sess.CharacterID, rm.ID, rm.Quantity); errAdd != nil && s.logger != nil {
+					s.logger.Error("resolveDowntimeCraft: failed to persist material refund", zap.String("mat_id", rm.ID), zap.Error(errAdd))
+				}
 			}
 		}
 	}
