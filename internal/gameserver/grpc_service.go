@@ -21,6 +21,7 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/ai"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/combat"
+	"github.com/cory-johannsen/mud/internal/game/drawback"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/crafting"
@@ -309,6 +310,8 @@ type GameServiceServer struct {
 	// downtimeQueueLimitReg holds per-tier/per-level queue slot limits.
 	// May be nil (queue limit lookups are skipped if not set).
 	downtimeQueueLimitReg *downtime.DowntimeQueueLimitRegistry
+	// drawbackEngine evaluates situational drawback triggers and applies conditions (REQ-JD-10).
+	drawbackEngine *drawback.Engine
 }
 
 // CharacterDowntimeRepository persists active downtime state for characters.
@@ -498,6 +501,8 @@ func NewGameServiceServer(
 	s.WireCoverCrossfireTrap()
 	s.WireConsumableTrapTrigger()
 	s.wireRevealZone()
+	// Initialize drawback engine for situational trigger evaluation (REQ-JD-10).
+	s.drawbackEngine = drawback.NewEngine(s.condRegistry)
 	return s
 }
 
@@ -991,6 +996,22 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			}
 			if s.downtimeQueueLimitReg != nil {
 				sess.DowntimeQueueLimit = s.downtimeQueueLimitReg.Lookup(sess.JobTier, sess.Level)
+			}
+			// Apply passive drawback conditions for all held jobs at login (REQ-JD-8).
+			if s.jobRegistry != nil && sess.Conditions != nil {
+				for _, loginJob := range s.resolveHeldJobs(sess) {
+					for _, db := range loginJob.Drawbacks {
+						if db.Type != "passive" || db.ConditionID == "" {
+							continue
+						}
+						if !sess.Conditions.Has(db.ConditionID) {
+							source := "drawback:" + loginJob.ID
+							if def, ok := s.condRegistry.Get(db.ConditionID); ok {
+								_ = sess.Conditions.ApplyTagged(uid, def, 1, -1, source)
+							}
+						}
+					}
+				}
 			}
 			// Grant starting kit on first login.
 			if s.loadoutsDir != "" {
@@ -1594,6 +1615,10 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 					}
 					if err := stream.Send(evt); err != nil {
 						return
+					}
+					// Expire time-limited conditions for this player on each calendar tick (REQ-JD-11).
+					if sess, ok := s.sessions.GetPlayer(uid); ok && sess.Conditions != nil {
+						sess.Conditions.TickCalendar(uid, time.Now())
 					}
 					// On period change, push an updated RoomView so the room
 					// display reflects the new time-of-day flavor text.

@@ -109,6 +109,18 @@ func (s *GameServiceServer) handleTrainJob(uid string, req *gamev1.TrainJobReque
 				}
 			}
 		}
+		// Apply passive drawback conditions for the newly trained job (REQ-JD-8).
+		if newJob, ok := s.jobRegistry.Job(jobID); ok && sess.Conditions != nil && s.condRegistry != nil {
+			for _, db := range newJob.Drawbacks {
+				if db.Type != "passive" || db.ConditionID == "" {
+					continue
+				}
+				source := "drawback:" + jobID
+				if def, ok := s.condRegistry.Get(db.ConditionID); ok {
+					_ = sess.Conditions.ApplyTagged(uid, def, 1, -1, source)
+				}
+			}
+		}
 	}
 	if s.charSaver != nil && sess.CharacterID > 0 {
 		if saveErr := s.charSaver.SaveJobs(context.Background(), sess.CharacterID, sess.Jobs, sess.ActiveJobID); saveErr != nil {
