@@ -2,6 +2,7 @@ package condition
 
 import (
 	"fmt"
+	"time"
 
 	lua "github.com/yuin/gopher-lua"
 
@@ -12,7 +13,9 @@ import (
 type ActiveCondition struct {
 	Def               *ConditionDef
 	Stacks            int
-	DurationRemaining int // -1 = permanent or until_save
+	DurationRemaining int        // -1 = permanent or until_save
+	Source            string     // e.g. "drawback:goon"; empty for non-tagged conditions
+	ExpiresAt         *time.Time // non-nil for real-time-expiring conditions
 }
 
 // ActiveSet tracks all conditions currently applied to one combatant.
@@ -164,6 +167,81 @@ func (s *ActiveSet) ClearEncounter() {
 			delete(s.conditions, id)
 		}
 	}
+}
+
+// ApplyTagged is like Apply but attaches a source tag to the condition.
+//
+// Precondition: def must not be nil; source may be empty.
+// Postcondition: Has(def.ID) is true; condition Source is set to source.
+func (s *ActiveSet) ApplyTagged(uid string, def *ConditionDef, stacks, duration int, source string) error {
+	if err := s.Apply(uid, def, stacks, duration); err != nil {
+		return err
+	}
+	if ac, ok := s.conditions[def.ID]; ok {
+		ac.Source = source
+	}
+	return nil
+}
+
+// ApplyTaggedWithExpiry applies a condition with a source tag and a real-time expiry.
+// The condition is removed by TickCalendar when now >= expiresAt.
+//
+// Precondition: def must not be nil.
+func (s *ActiveSet) ApplyTaggedWithExpiry(uid string, def *ConditionDef, stacks int, source string, expiresAt time.Time) error {
+	if err := s.Apply(uid, def, stacks, -1); err != nil {
+		return err
+	}
+	if ac, ok := s.conditions[def.ID]; ok {
+		ac.Source = source
+		t := expiresAt
+		ac.ExpiresAt = &t
+	}
+	return nil
+}
+
+// SourceOf returns the Source tag of the active condition with id, or "" if not present.
+func (s *ActiveSet) SourceOf(id string) string {
+	if ac, ok := s.conditions[id]; ok {
+		return ac.Source
+	}
+	return ""
+}
+
+// RemoveBySource removes all conditions whose Source equals source.
+//
+// Postcondition: Has(id) is false for all conditions with matching source.
+func (s *ActiveSet) RemoveBySource(uid, source string) {
+	for id, ac := range s.conditions {
+		if ac.Source == source {
+			s.Remove(uid, id)
+		}
+	}
+}
+
+// TickCalendar removes all conditions with a non-nil ExpiresAt that is before or equal to now.
+// Returns the IDs of removed conditions.
+//
+// Postcondition: all expired real-time conditions are removed.
+func (s *ActiveSet) TickCalendar(uid string, now time.Time) []string {
+	var expired []string
+	for id, ac := range s.conditions {
+		if ac.ExpiresAt != nil && !now.Before(*ac.ExpiresAt) {
+			expired = append(expired, id)
+			s.Remove(uid, id)
+		}
+	}
+	return expired
+}
+
+// Active returns a snapshot of all active conditions.
+//
+// Postcondition: returned slice is a copy; mutations do not affect the set.
+func (s *ActiveSet) Active(uid string) []ActiveCondition {
+	result := make([]ActiveCondition, 0, len(s.conditions))
+	for _, ac := range s.conditions {
+		result = append(result, *ac)
+	}
+	return result
 }
 
 // All returns a slice of pointers to the active conditions.

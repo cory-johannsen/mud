@@ -2,6 +2,7 @@ package condition_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -216,6 +217,41 @@ func TestClearEncounter_RemovesEncounterConditions(t *testing.T) {
 
 	assert.False(t, s.Has("surge"), "encounter condition should be cleared")
 	assert.True(t, s.Has("prone"), "permanent condition should remain")
+}
+
+func TestActiveSet_ApplyTagged_SetsSource(t *testing.T) {
+	set := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "frightened", DurationType: "permanent"}
+	err := set.ApplyTagged("uid1", def, 1, -1, "drawback:goon")
+	require.NoError(t, err)
+	require.True(t, set.Has("frightened"))
+	assert.Equal(t, "drawback:goon", set.SourceOf("frightened"))
+}
+
+func TestActiveSet_RemoveBySource_RemovesMatchingConditions(t *testing.T) {
+	set := condition.NewActiveSet()
+	def1 := &condition.ConditionDef{ID: "frightened", DurationType: "permanent"}
+	def2 := &condition.ConditionDef{ID: "fatigued", DurationType: "permanent"}
+	def3 := &condition.ConditionDef{ID: "stunned", DurationType: "permanent"}
+	_ = set.ApplyTagged("u", def1, 1, -1, "drawback:goon")
+	_ = set.ApplyTagged("u", def2, 1, -1, "drawback:goon")
+	_ = set.ApplyTagged("u", def3, 1, -1, "drawback:thug")
+	set.RemoveBySource("u", "drawback:goon")
+	assert.False(t, set.Has("frightened"))
+	assert.False(t, set.Has("fatigued"))
+	assert.True(t, set.Has("stunned"))
+}
+
+func TestActiveSet_TickCalendar_ExpiresTimedConditions(t *testing.T) {
+	set := condition.NewActiveSet()
+	def := &condition.ConditionDef{ID: "demoralized", DurationType: "permanent"}
+	expiresAt := time.Now().Add(-time.Second) // already expired
+	err := set.ApplyTaggedWithExpiry("u", def, 1, "drawback:goon", expiresAt)
+	require.NoError(t, err)
+	require.True(t, set.Has("demoralized"))
+	expired := set.TickCalendar("u", time.Now())
+	assert.Contains(t, expired, "demoralized")
+	assert.False(t, set.Has("demoralized"))
 }
 
 func TestClearEncounter_EmptySet_NoPanic(t *testing.T) {
