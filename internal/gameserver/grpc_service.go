@@ -1635,7 +1635,8 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 				// REQ-DT-7: check all sessions with active downtime
 				for _, activeUID := range s.sessions.AllUIDs() {
 					s.checkDowntimeCompletion(activeUID)
-					s.checkCampingStatus(activeUID) // REQ-REST-15/18
+					s.checkCampingStatus(activeUID)   // REQ-REST-15/18
+					s.checkRefocusStatus(activeUID)   // REQ-EXP-REFOCUS-1
 				}
 			case <-ctx.Done():
 				return
@@ -2062,6 +2063,11 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return s.handleUncurse(uid, p.UncurseRequest)
 	case *gamev1.ClientMessage_DowntimeRequest:
 		return s.handleDowntime(uid, p.DowntimeRequest)
+	case *gamev1.ClientMessage_RefocusRequest:
+		if err := s.handleRefocus(uid); err != nil {
+			return nil, err
+		}
+		return nil, nil
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -2083,6 +2089,13 @@ func (s *GameServiceServer) handleMove(uid string, req *gamev1.MoveRequest) (*ga
 	// REQ-REST-16: cancel camping if player moves voluntarily.
 	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.CampingActive {
 		s.cancelCamping(uid, sess, "you broke camp")
+	}
+
+	// Cancel refocus if player moves.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.RefocusingActive {
+		sess.RefocusingActive = false
+		sess.RefocusingStartTime = time.Time{}
+		s.pushMessageToUID(uid, "You stop refocusing.")
 	}
 
 	// IMMOBILIZED: grabbed condition prevents leaving the room.
@@ -3042,6 +3055,13 @@ func (s *GameServiceServer) handleAttack(uid string, req *gamev1.AttackRequest) 
 		}
 	}
 
+	// Cancel refocus if player initiates combat.
+	if sess, ok := s.sessions.GetPlayer(uid); ok && sess.RefocusingActive {
+		sess.RefocusingActive = false
+		sess.RefocusingStartTime = time.Time{}
+		s.pushMessageToUID(uid, "Your focus is broken — combat has started!")
+	}
+
 	events, err := s.combatH.Attack(uid, req.Target)
 	if err != nil {
 		return nil, err
@@ -3476,6 +3496,100 @@ func (s *GameServiceServer) checkCampingStatus(uid string) {
 				s.logger.Warn("checkCampingStatus: applyFullLongRestCtx failed", zap.String("uid", uid), zap.Error(err))
 			}
 		}
+	}
+}
+
+// RefocusDuration is the real-time duration of a Refocus action.
+// REQ-EXP-REFOCUS-1: 1 minute real time (proxy for 10 in-game minutes).
+const RefocusDuration = 1 * time.Minute
+
+// handleRefocus starts a Refocus action — a 1-minute out-of-combat rest that restores 1 Focus Point.
+//
+// Precondition: uid refers to a connected player session.
+// Postcondition: sess.RefocusingActive = true and sess.RefocusingStartTime set, or error message sent.
+func (s *GameServiceServer) handleRefocus(uid string) error {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return fmt.Errorf("handleRefocus: player %q not found", uid)
+	}
+
+	// Block in combat.
+	if sess.Status == statusInCombat {
+		s.pushMessageToUID(uid, "You cannot refocus during combat.")
+		return nil
+	}
+
+	// Already refocusing — show time remaining.
+	if sess.RefocusingActive {
+		elapsed := time.Since(sess.RefocusingStartTime)
+		remaining := RefocusDuration - elapsed
+		if remaining < 0 {
+			remaining = 0
+		}
+		s.pushMessageToUID(uid, fmt.Sprintf("You are already refocusing. Time remaining: %s.", remaining.Round(time.Second)))
+		return nil
+	}
+
+	// Already at max focus points.
+	if sess.MaxFocusPoints > 0 && sess.FocusPoints >= sess.MaxFocusPoints {
+		s.pushMessageToUID(uid, "Your focus is already at its maximum.")
+		return nil
+	}
+
+	// No focus pool to refill.
+	if sess.MaxFocusPoints == 0 {
+		s.pushMessageToUID(uid, "You have no focus pool to refill.")
+		return nil
+	}
+
+	sess.RefocusingActive = true
+	sess.RefocusingStartTime = time.Now()
+	s.pushMessageToUID(uid, fmt.Sprintf("You take a moment to refocus. You will restore 1 Focus Point in %s.", RefocusDuration.Round(time.Second)))
+	return nil
+}
+
+// checkRefocusStatus is called on each game clock tick.
+// Completes refocus if 1 minute has elapsed, restoring 1 Focus Point.
+//
+// Precondition: uid refers to a connected player session.
+// Postcondition: if elapsed, FocusPoints increased by 1 (capped at MaxFocusPoints) and persisted.
+func (s *GameServiceServer) checkRefocusStatus(uid string) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok || !sess.RefocusingActive {
+		return
+	}
+
+	// Cancel refocus if a hostile NPC enters the room (REQ-EXP-REFOCUS-1).
+	if s.npcMgr != nil {
+		for _, npcInst := range s.npcMgr.InstancesInRoom(sess.RoomID) {
+			if npcInst.Disposition == "hostile" {
+				sess.RefocusingActive = false
+				sess.RefocusingStartTime = time.Time{}
+				s.pushMessageToUID(uid, "Your focus is broken — enemies are nearby!")
+				return
+			}
+		}
+	}
+
+	if time.Since(sess.RefocusingStartTime) < RefocusDuration {
+		return
+	}
+
+	sess.RefocusingActive = false
+	sess.RefocusingStartTime = time.Time{}
+
+	if sess.FocusPoints < sess.MaxFocusPoints {
+		sess.FocusPoints++
+		if s.charSaver != nil {
+			if err := s.charSaver.SaveFocusPoints(context.Background(), sess.CharacterID, sess.FocusPoints); err != nil {
+				if s.logger != nil {
+					s.logger.Warn("checkRefocusStatus: failed to save focus points", zap.Error(err))
+				}
+			}
+		}
+		s.pushMessageToUID(uid, fmt.Sprintf("You feel your focus restore. (%d/%d Focus Points)", sess.FocusPoints, sess.MaxFocusPoints))
+	} else {
+		s.pushMessageToUID(uid, "You feel centered but your focus was already full.")
 	}
 }
 

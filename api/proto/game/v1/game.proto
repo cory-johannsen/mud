@@ -143,6 +143,7 @@ message ClientMessage {
     QuestRequest         quest_request         = 126;
     UncurseRequest       uncurse_request       = 127;
     DowntimeRequest      downtime_request      = 128;
+    RefocusRequest       refocus_request       = 129;
   }
 }
 
@@ -1197,6 +1198,9 @@ message ExploreRequest {
     string mode = 1;
     string shadow_target = 2;
 }
+
+// RefocusRequest asks the server to begin a Refocus action (REQ-EXP-REFOCUS-1).
+message RefocusRequest {}
 
 // DowntimeRequest dispatches downtime subcommands: list, cancel, or an activity alias with optional args.
 message DowntimeRequest {

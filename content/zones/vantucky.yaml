@@ -57,7 +57,7 @@ zone:
       swinging in the wind with a metallic groan.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_fourth_plain_west
@@ -89,7 +89,7 @@ zone:
       The smell of fermenting fruit mixes with wood smoke.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_andresen_road
@@ -119,7 +119,7 @@ zone:
       A hand-cranked siren sits atop the nearest tower, ready to sound the alarm.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_orchards
@@ -147,7 +147,7 @@ zone:
       Below, the interstate stretches east and west into the haze.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: east
       target: vantucky_i84_east
@@ -161,7 +161,7 @@ zone:
       respawn_after: 5m
     properties:
       lighting: exposed
-      atmosphere: dangerous
+      atmosphere: sketchy
   - id: vantucky_fishers_landing
     title: Fisher's Landing
     description: 'The old transit center at Fisher''s Landing overlooks the Columbia River.
@@ -175,7 +175,7 @@ zone:
       still bite, if you don''t mind what they taste like.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_river_trail
@@ -201,7 +201,7 @@ zone:
       Radio antennas bristle from the rooftop like metal quills.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: south
       target: vantucky_orchards
@@ -229,7 +229,7 @@ zone:
       and suspicious of outsiders.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: south
       target: vantucky_164th_ave
@@ -259,7 +259,7 @@ zone:
       The smell of gun oil hangs thick in the air.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_andresen_road
@@ -287,7 +287,7 @@ zone:
       when they want to disappear.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_orchards
@@ -315,7 +315,7 @@ zone:
       Wind howls through the gorge entrance, carrying the smell of pine and ash.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_i84_overpass
@@ -341,7 +341,7 @@ zone:
       smell of moonshine cuts through the decay. Empty jugs line the counter.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_fourth_plain_west
@@ -371,7 +371,7 @@ zone:
       The crack of gunfire echoes through the trees at all hours.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_164th_ave
@@ -399,7 +399,7 @@ zone:
       The air is stale but breathable.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_burnt_bridge_creek
@@ -425,7 +425,7 @@ zone:
       Chickens scratch in the dirt between rows of kale and potatoes.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: south
       target: vantucky_compound_bravo
@@ -453,7 +453,7 @@ zone:
       a holding cell for those who can''t pay.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: south
       target: vantucky_andresen_road
@@ -481,7 +481,7 @@ zone:
       fishing camps at Fisher''s Landing.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: south
       target: vantucky_checkpoint_north
@@ -509,7 +509,7 @@ zone:
       and a collection of empty cans strung as an alarm system.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_gas_station_ruins
@@ -523,7 +523,7 @@ zone:
       respawn_after: 5m
     properties:
       lighting: exposed
-      atmosphere: dangerous
+      atmosphere: sketchy
   - id: vantucky_water_tower
     title: Water Tower
     description: 'A rusted municipal water tower rises above the treeline. The ladder
@@ -537,7 +537,7 @@ zone:
       From here you can see the compounds, the highway, and the river.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_farm_compound
@@ -563,7 +563,7 @@ zone:
       in a water-stained ledger.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_shooting_range
@@ -589,7 +589,7 @@ zone:
       within reach. A communal fire pit smolders in the center.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_gas_station_ruins
@@ -723,7 +723,7 @@ zone:
       The smell of burning trash drifts from alley drums.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_164th_ave
@@ -754,7 +754,7 @@ zone:
       The escalators are frozen mid-motion, steps used as seating.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: south
       target: vantucky_east_side
@@ -782,7 +782,7 @@ zone:
       is trouble looking for someone to find.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_ammo_depot
@@ -809,7 +809,7 @@ zone:
       in the rock show centuries of use. The view is brutal and beautiful.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: west
       target: vantucky_fishers_landing
@@ -835,7 +835,7 @@ zone:
       those reasons.
 
       '
-    danger_level: dangerous
+    danger_level: sketchy
     exits:
     - direction: north
       target: vantucky_trailer_park
