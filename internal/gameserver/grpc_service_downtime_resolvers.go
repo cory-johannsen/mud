@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/cory-johannsen/mud/internal/game/focuspoints"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/skillcheck"
 )
@@ -248,32 +251,45 @@ func (s *GameServiceServer) resolveRetrain(uid string, sess *session.PlayerSessi
 // resolveForgePapers resolves the "Forge Papers" downtime activity.
 //
 // Skill: hustle (Flair). DC: 15.
-// CritSuccess: "undetectable_forgery" console message; Success: "convincing_forgery" message;
-// Failure/CritFail: failure message.
+// CritSuccess: deliver "undetectable_forgery" + refund 1 "forgery_supplies" to backpack.
+// Success: deliver "convincing_forgery" to backpack.
+// Failure/CritFail: message only; supplies already consumed at activity start.
 //
-// Note: Item delivery is stubbed — full item injection requires inventory item definitions
-// for "undetectable_forgery" and "convincing_forgery" (REQ-ITEM-*).
-//
-// Precondition: sess is non-nil; state already cleared.
-// Postcondition: Console message delivered describing result.
+// Precondition: sess is non-nil; state already cleared; forgery_supplies consumed at activity start.
+// Postcondition: Items added to backpack per outcome; console message delivered.
 func (s *GameServiceServer) resolveForgePapers(uid string, sess *session.PlayerSession) {
 	outcome := s.skillCheckOutcome(sess, "hustle", defaultDC)
 
-	var msg string
 	switch outcome {
 	case skillcheck.CritSuccess:
-		// Future: add "undetectable_forgery" item to backpack (REQ-ITEM-forgery).
-		msg = "Forge Papers complete. Critical success — you produced an undetectable forgery."
+		if sess.Backpack != nil {
+			_ = sess.Backpack.AddInstance(&inventory.ItemInstance{
+				InstanceID: uuid.New().String(),
+				ItemDefID:  "undetectable_forgery",
+				Quantity:   1,
+			})
+			// Refund one forgery_supplies on critical success. (REQ-DA-FORGE-2)
+			_ = sess.Backpack.AddInstance(&inventory.ItemInstance{
+				InstanceID: uuid.New().String(),
+				ItemDefID:  "forgery_supplies",
+				Quantity:   1,
+			})
+		}
+		s.pushMessageToUID(uid, "Forge Papers complete. Critical success — you produced an undetectable forgery and recovered your supplies.")
 	case skillcheck.Success:
-		// Future: add "convincing_forgery" item to backpack (REQ-ITEM-forgery).
-		msg = "Forge Papers complete. Success — you produced a convincing forgery."
+		if sess.Backpack != nil {
+			_ = sess.Backpack.AddInstance(&inventory.ItemInstance{
+				InstanceID: uuid.New().String(),
+				ItemDefID:  "convincing_forgery",
+				Quantity:   1,
+			})
+		}
+		s.pushMessageToUID(uid, "Forge Papers complete. Success — you produced a convincing forgery.")
 	case skillcheck.Failure:
-		msg = "Forge Papers complete. Failure — the papers look suspicious. Nothing usable produced."
+		s.pushMessageToUID(uid, "Forge Papers complete. Failure — the papers look suspicious. Your supplies are wasted.")
 	default:
-		msg = "Forge Papers complete. Critical failure — you wasted your materials and produced nothing."
+		s.pushMessageToUID(uid, "Forge Papers complete. Critical failure — you produced nothing usable and ruined your supplies.")
 	}
-
-	s.pushMessageToUID(uid, msg)
 }
 
 // resolveSubsist resolves the "Subsist" downtime activity.
