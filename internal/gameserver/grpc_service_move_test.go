@@ -147,7 +147,7 @@ func drainEntityMessages(t *testing.T, sess *session.PlayerSession) []string {
 // TestHandleMove_DifficultTerrain_MessageSentWithoutFeat verifies that moving into a difficult
 // terrain room without zone_awareness pushes a flavor message to the player's entity.
 //
-// Precondition: Destination room has Properties["terrain"]="difficult"; player lacks zone_awareness.
+// Precondition: Destination room has a terrain_ condition effect with MoveAPCost > 0; player lacks zone_awareness.
 // Postcondition: Player's entity channel contains a message about difficult terrain.
 func TestHandleMove_DifficultTerrain_MessageSentWithoutFeat(t *testing.T) {
 	worldMgr, sessMgr, reg := newDifficultTerrainWorld(t)
@@ -188,7 +188,7 @@ func TestHandleMove_DifficultTerrain_MessageSentWithoutFeat(t *testing.T) {
 // TestHandleMove_DifficultTerrain_NoMessageWithFeat verifies that moving into a difficult
 // terrain room with zone_awareness does NOT push any flavor message.
 //
-// Precondition: Destination room has Properties["terrain"]="difficult"; player has zone_awareness=true.
+// Precondition: Destination room has a terrain_ condition effect with MoveAPCost > 0; player has zone_awareness=true.
 // Postcondition: Player's entity channel contains no difficult terrain message.
 func TestHandleMove_DifficultTerrain_NoMessageWithFeat(t *testing.T) {
 	worldMgr, sessMgr, reg := newDifficultTerrainWorld(t)
