@@ -1,0 +1,22 @@
+id: reduced_visibility
+name: Reduced Visibility
+description: |
+  Steam, fog, or darkness limits your sight to a few feet. Everything is obscured.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: -2
+attack_bonus: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+ap_reduction: 0
+skip_turn: false
+skill_penalty: 1
+restrict_actions: []
+prevents_movement: false
+prevents_commands: false
+prevents_targeting: false
+is_mental_condition: false
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

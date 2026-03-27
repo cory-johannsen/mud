@@ -1,0 +1,22 @@
+id: delirium
+name: Delirium
+description: |
+  Reality shifts around you. Sounds and images blur into a dreamlike haze.
+duration_type: rounds
+max_stacks: 0
+attack_penalty: 0
+attack_bonus: 0
+ac_penalty: 0
+damage_bonus: 0
+speed_penalty: 0
+ap_reduction: 0
+skip_turn: false
+skill_penalty: 1
+restrict_actions: []
+prevents_movement: false
+prevents_commands: false
+prevents_targeting: false
+is_mental_condition: true
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""

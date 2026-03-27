@@ -217,6 +217,32 @@ func TestPropertyRegistry_RegisterThenGet(t *testing.T) {
 	})
 }
 
+func TestLoadDirectory_ZoneEffectConditionsPresent(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+
+	trackIDs := []string{"fear", "rage", "despair", "delirium"}
+	for _, id := range trackIDs {
+		_, ok := reg.Get(id)
+		assert.True(t, ok, "base track condition %q must exist", id)
+	}
+
+	newIDs := []string{"horror", "reduced_visibility", "temptation", "revulsion", "sonic_assault", "charmed"}
+	for _, id := range newIDs {
+		_, ok := reg.Get(id)
+		assert.True(t, ok, "new zone effect condition %q must exist", id)
+	}
+}
+
+func TestLoadDirectory_CharmedCondition_IsUntilSave(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+	def, ok := reg.Get("charmed")
+	require.True(t, ok)
+	assert.Equal(t, "until_save", def.DurationType)
+	assert.True(t, def.IsMentalCondition)
+}
+
 func TestLoadDirectory_AidedConditionsPresent(t *testing.T) {
 	reg, err := condition.LoadDirectory("../../../content/conditions")
 	require.NoError(t, err)
