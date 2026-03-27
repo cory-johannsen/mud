@@ -1,0 +1,19 @@
+id: clown_mime
+name: Clown Mime
+description: A silent, white-faced figure that moves with unsettling grace and speed.
+level: 2
+max_hp: 22
+ac: 12
+awareness: 7
+disposition: hostile
+abilities:
+  brutality: 10
+  quickness: 14
+  grit: 8
+  reasoning: 6
+  savvy: 6
+  flair: 12
+loot:
+  currency:
+    min: 3
+    max: 15

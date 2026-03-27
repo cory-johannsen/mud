@@ -841,3 +841,25 @@ func TestLoader_ZoneWorldCoords(t *testing.T) {
 		require.Equal(t, coords[1], *z.WorldY, "zone %q: WorldY mismatch", id)
 	}
 }
+
+func TestLoadZone_ClownCamp_HasFiveRooms(t *testing.T) {
+	data, err := os.ReadFile("../../../content/zones/clown_camp.yaml")
+	require.NoError(t, err)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	assert.Len(t, zone.Rooms, 5, "Clown Camp must have exactly 5 rooms")
+	assert.Equal(t, "clown_camp", zone.ID)
+}
+
+func TestLoadZone_ClownCamp_ZoneEffects(t *testing.T) {
+	data, err := os.ReadFile("../../../content/zones/clown_camp.yaml")
+	require.NoError(t, err)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	tracks := make([]string, 0, len(zone.ZoneEffects))
+	for _, e := range zone.ZoneEffects {
+		tracks = append(tracks, e.Track)
+	}
+	assert.Contains(t, tracks, "delirium", "Clown Camp must have delirium zone_effect")
+	assert.Contains(t, tracks, "fear", "Clown Camp must have fear zone_effect")
+}

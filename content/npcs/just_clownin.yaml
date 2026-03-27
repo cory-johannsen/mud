@@ -1,0 +1,20 @@
+id: just_clownin
+name: "Just Clownin'!"
+description: The ringleader. A towering nightmare of paint and polyester, wielding a comically oversized mallet that is not at all funny.
+level: 6
+max_hp: 80
+ac: 16
+awareness: 8
+disposition: hostile
+tier: boss
+abilities:
+  brutality: 18
+  quickness: 12
+  grit: 16
+  reasoning: 10
+  savvy: 10
+  flair: 18
+loot:
+  currency:
+    min: 50
+    max: 150

@@ -1,0 +1,19 @@
+id: clown
+name: Clown
+description: A face-painted horror in a tattered costume, grinning with too many teeth.
+level: 3
+max_hp: 30
+ac: 13
+awareness: 6
+disposition: hostile
+abilities:
+  brutality: 13
+  quickness: 11
+  grit: 10
+  reasoning: 6
+  savvy: 8
+  flair: 14
+loot:
+  currency:
+    min: 5
+    max: 25

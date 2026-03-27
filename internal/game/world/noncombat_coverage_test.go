@@ -30,6 +30,13 @@ func repoRoot(t *testing.T) string {
 }
 
 func TestAllZonesHaveAtLeastOneSafeRoom(t *testing.T) {
+	// new zones are intentionally all-dangerous per zones-new spec
+	exemptZones := map[string]bool{
+		"clown_camp":      true,
+		"steampdx":        true,
+		"the_velvet_rope": true,
+		"club_privata":    true,
+	}
 	zonesDir := filepath.Join(repoRoot(t), "content", "zones")
 	entries, err := os.ReadDir(zonesDir)
 	require.NoError(t, err)
@@ -41,6 +48,9 @@ func TestAllZonesHaveAtLeastOneSafeRoom(t *testing.T) {
 		require.NoError(t, err)
 		zone, err := LoadZoneFromBytes(data)
 		require.NoError(t, err, "zone file: %s", entry.Name())
+		if exemptZones[zone.ID] {
+			continue
+		}
 		hasSafe := false
 		for _, room := range zone.Rooms {
 			if room.DangerLevel == "safe" {
