@@ -609,7 +609,7 @@ features:
 
   - slug: zones-new
     name: New Zones
-    status: planned
+    status: done
     priority: 420
     category: world
     file: docs/features/zones-new.md
