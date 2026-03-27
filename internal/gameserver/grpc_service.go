@@ -3559,7 +3559,7 @@ func (s *GameServiceServer) checkRefocusStatus(uid string) {
 		return
 	}
 
-	// Cancel refocus if a hostile NPC enters the room (REQ-EXP-REFOCUS-1).
+	// Cancel refocus if a hostile NPC enters the room (mirrors camping cancel behavior).
 	if s.npcMgr != nil {
 		for _, npcInst := range s.npcMgr.InstancesInRoom(sess.RoomID) {
 			if npcInst.Disposition == "hostile" {

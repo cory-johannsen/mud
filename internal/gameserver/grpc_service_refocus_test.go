@@ -171,3 +171,30 @@ func TestCheckRefocusStatus_CapsAtMaxFocusPoints(t *testing.T) {
 	assert.False(t, sess.RefocusingActive)
 	assert.Equal(t, 2, sess.FocusPoints, "should not exceed MaxFocusPoints")
 }
+
+// TestCheckRefocusStatus_CancelledByHostileNPC verifies that refocus is
+// cancelled when a hostile NPC is present in the player's room.
+func TestCheckRefocusStatus_CancelledByHostileNPC(t *testing.T) {
+	svc, uid := newRefocusTestSvc(t)
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+	sess.FocusPoints = 0
+	sess.MaxFocusPoints = 2
+	sess.RefocusingActive = true
+	sess.RefocusingStartTime = time.Now().Add(-10 * time.Second) // not yet complete
+
+	// Spawn a hostile NPC into the player's room so checkRefocusStatus cancels.
+	_, err := svc.npcMgr.Spawn(&npc.Template{
+		ID:          "hostile-npc",
+		Name:        "Hostile Foe",
+		MaxHP:       10,
+		AC:          10,
+		Disposition: "hostile",
+	}, sess.RoomID)
+	require.NoError(t, err)
+
+	svc.checkRefocusStatus(uid)
+
+	assert.False(t, sess.RefocusingActive, "refocus should be cancelled by hostile NPC")
+	assert.Equal(t, 0, sess.FocusPoints, "no focus points should be restored")
+}
