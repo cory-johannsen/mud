@@ -637,7 +637,7 @@ features:
 
   - slug: web-client-phase2
     name: Web Game Client (Phase 2 — Tiled Scene)
-    status: spec
+    status: planned
     priority: 431
     category: ui
     file: docs/features/web-client-phase2.md
