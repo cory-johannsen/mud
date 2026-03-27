@@ -76,6 +76,11 @@ func makeTestConditionRegistry() *condition.Registry {
 	reg.Register(&condition.ConditionDef{ID: "frightened", Name: "Frightened", DurationType: "rounds", MaxStacks: 4, AttackPenalty: 1, ACPenalty: 1})
 	reg.Register(&condition.ConditionDef{ID: "grabbed", Name: "Grabbed", DurationType: "permanent", MaxStacks: 0, ACPenalty: 2})
 	reg.Register(&condition.ConditionDef{ID: "hidden", Name: "Hidden", DurationType: "permanent", MaxStacks: 0})
+	// Mental-state zone effect tracks (REQ-ZN-2): registered so applyRoomEffectsOnEntry can resolve them.
+	reg.Register(&condition.ConditionDef{ID: "fear", Name: "Fear", DurationType: "encounter", MaxStacks: 0, IsMentalCondition: true})
+	reg.Register(&condition.ConditionDef{ID: "despair", Name: "Despair", DurationType: "encounter", MaxStacks: 0, IsMentalCondition: true})
+	reg.Register(&condition.ConditionDef{ID: "delirium", Name: "Delirium", DurationType: "encounter", MaxStacks: 0, IsMentalCondition: true})
+	reg.Register(&condition.ConditionDef{ID: "rage", Name: "Rage", DurationType: "encounter", MaxStacks: 0, IsMentalCondition: true})
 	return reg
 }
 

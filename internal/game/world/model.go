@@ -350,6 +350,30 @@ type Zone struct {
 	ZoneEffects []RoomEffect `yaml:"zone_effects,omitempty"`
 }
 
+// ValidateWithConditions checks that every RoomEffect.Track value exists in reg.
+// reg is any type with Has(id string) bool — typically *condition.Registry.
+//
+// Precondition: reg must not be nil.
+// Postcondition: Returns nil if all effect track IDs are found in reg, or an error describing
+// the first violation.
+func (z *Zone) ValidateWithConditions(reg interface {
+	Has(id string) bool
+}) error {
+	for _, eff := range z.ZoneEffects {
+		if !reg.Has(eff.Track) {
+			return fmt.Errorf("zone %q: zone effect track %q not found in condition registry", z.ID, eff.Track)
+		}
+	}
+	for id, room := range z.Rooms {
+		for _, eff := range room.Effects {
+			if !reg.Has(eff.Track) {
+				return fmt.Errorf("zone %q: room %q: effect track %q not found in condition registry", z.ID, id, eff.Track)
+			}
+		}
+	}
+	return nil
+}
+
 // ExternalExitTargets returns exit targets that reference rooms outside this zone.
 // These targets must be validated at the world-manager level once all zones are loaded.
 //

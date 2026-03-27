@@ -315,6 +315,10 @@ type GameServiceServer struct {
 	// characterJobsRepo persists the set of all jobs held by each character (REQ-JD-4).
 	// May be nil (job persistence to character_jobs table is skipped if not set).
 	characterJobsRepo CharacterJobsRepository
+	// seduceConditions maps NPC instance ID → their runtime condition set for charmed tracking.
+	// Used by executeSeduce (REQ-ZN-7/8) and the charmed saving throw at round end (REQ-ZN-9).
+	// Initialized lazily; always access via getOrCreateSeduceConditions.
+	seduceConditions map[string]*condition.ActiveSet
 }
 
 // CharacterJobsRepository persists per-character job lists in the character_jobs table.
@@ -451,6 +455,7 @@ func NewGameServiceServer(
 		recipeReg:                  content.RecipeRegistry,
 		craftEngine:                crafting.NewEngine(),
 		characterJobsRepo:          storage.CharacterJobsRepo,
+		seduceConditions:           make(map[string]*condition.ActiveSet),
 	}
 	if content.FactionRegistry != nil {
 		s.factionRegistry = content.FactionRegistry
@@ -526,6 +531,8 @@ func NewGameServiceServer(
 			heldJobs := s.resolveHeldJobs(playerSess)
 			s.drawbackEngine.FireTrigger(uid, drawback.TriggerOnTakeDamageInOneHitAboveThreshold, heldJobs, playerSess.Conditions, time.Now())
 		})
+		// REQ-ZN-9: wire seduceConditions so CombatHandler can process charmed saves at round end.
+		s.combatH.SetSeduceConditions(s.seduceConditions)
 	}
 	return s
 }
@@ -2117,6 +2124,8 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 			return nil, err
 		}
 		return nil, nil
+	case *gamev1.ClientMessage_SeduceRequest:
+		return s.handleSeduce(uid, p.SeduceRequest)
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -2635,24 +2644,27 @@ func (s *GameServiceServer) applyRoomSkillChecks(uid string, room *world.Room) [
 //
 // Precondition: sess and room must not be nil; uid is the player UID; now is Unix timestamp seconds.
 // Postcondition: For each effect in room.Effects not currently on cooldown, resolves a binary
-// Will save (d20 + GritMod vs BaseDC).  On failure: ApplyTrigger is called and any narrative
-// message is pushed to the player stream; no cooldown is recorded.  On success:
+// Will save (d20 + GritMod vs BaseDC).  On failure: the condition identified by effect.Track is
+// looked up in condRegistry and applied to sess.Conditions; no cooldown is recorded.  On success:
 // ZoneEffectCooldowns[roomID:track] is set to now + CooldownMinutes*60.
+// If condRegistry is nil or does not contain effect.Track, that effect is silently skipped.
 func (s *GameServiceServer) applyRoomEffectsOnEntry(
 	sess *session.PlayerSession, uid string, room *world.Room, now int64,
 ) {
-	if s.mentalStateMgr == nil || len(room.Effects) == 0 {
+	if len(room.Effects) == 0 {
 		return
 	}
 	for _, effect := range room.Effects {
+		if s.condRegistry == nil {
+			continue
+		}
+		condDef, ok := s.condRegistry.Get(effect.Track)
+		if !ok {
+			continue
+		}
 		key := room.ID + ":" + effect.Track
 		if sess.ZoneEffectCooldowns != nil && sess.ZoneEffectCooldowns[key] > now {
 			continue // immune: cooldown has not expired
-		}
-		track, trackOK := abilityTrack(effect.Track)
-		sev, sevOK := abilitySeverity(effect.Severity)
-		if !trackOK || !sevOK {
-			continue
 		}
 		gritMod := combat.AbilityMod(sess.Abilities.Grit)
 		var roll int
@@ -2663,14 +2675,14 @@ func (s *GameServiceServer) applyRoomEffectsOnEntry(
 		}
 		total := roll + gritMod
 		if total < effect.BaseDC {
-			// Failed save: apply trigger and push narrative to player stream.
-			changes := s.mentalStateMgr.ApplyTrigger(uid, track, sev)
-			for _, ch := range changes {
-				if ch.Message != "" && sess.Entity != nil {
-					evt := messageEvent(ch.Message)
-					if data, marshalErr := proto.Marshal(evt); marshalErr == nil {
-						_ = sess.Entity.Push(data)
-					}
+			// Failed save: apply condition via registry.
+			if sess.Conditions != nil {
+				if err := sess.Conditions.Apply(uid, condDef, 1, -1); err != nil {
+					s.logger.Warn("applyRoomEffectsOnEntry: Apply failed",
+						zap.String("uid", uid),
+						zap.String("track", effect.Track),
+						zap.Error(err),
+					)
 				}
 			}
 		} else {

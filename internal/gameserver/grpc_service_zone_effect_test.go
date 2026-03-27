@@ -5,6 +5,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/combat"
 	"github.com/cory-johannsen/mud/internal/game/command"
+	"github.com/cory-johannsen/mud/internal/game/condition"
 	"github.com/cory-johannsen/mud/internal/game/dice"
 	"github.com/cory-johannsen/mud/internal/game/mentalstate"
 	"github.com/cory-johannsen/mud/internal/game/npc"
@@ -425,7 +426,7 @@ func newMentalStateSvc(t *testing.T, diceVal int) (*GameServiceServer, *session.
 }
 
 // TestZoneEffect_Move_FailedSave_AppliesTrigger verifies that a failed Will save on room entry
-// applies the mental state trigger and does not set a cooldown.
+// applies the condition via condRegistry and does not set a cooldown.
 func TestZoneEffect_Move_FailedSave_AppliesTrigger(t *testing.T) {
 	// diceVal=0 → roll=1, GritMod=0 → total=1 < BaseDC 12 → fail.
 	svc, sessMgr := newMentalStateSvc(t, 0)
@@ -434,6 +435,7 @@ func TestZoneEffect_Move_FailedSave_AppliesTrigger(t *testing.T) {
 		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Role: "player",
 	})
 	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
 
 	room := &world.Room{
 		ID: "room_b",
@@ -448,11 +450,11 @@ func TestZoneEffect_Move_FailedSave_AppliesTrigger(t *testing.T) {
 	if sess.ZoneEffectCooldowns != nil {
 		assert.Zero(t, sess.ZoneEffectCooldowns["room_b:fear"], "failed save must not set cooldown")
 	}
-	assert.Equal(t, mentalstate.SeverityMild, svc.mentalStateMgr.CurrentSeverity("p1", mentalstate.TrackFear))
+	assert.True(t, sess.Conditions.Has("fear"), "condition 'fear' must be applied after failed save")
 }
 
 // TestZoneEffect_Move_SuccessfulSave_SetsCooldown verifies that a successful Will save on room entry
-// sets a cooldown and does not apply the mental state trigger.
+// sets a cooldown and does not apply the condition.
 func TestZoneEffect_Move_SuccessfulSave_SetsCooldown(t *testing.T) {
 	// diceVal=19 → roll=20, GritMod=0 → total=20 >= BaseDC 12 → succeed.
 	svc, sessMgr := newMentalStateSvc(t, 19)
@@ -461,6 +463,7 @@ func TestZoneEffect_Move_SuccessfulSave_SetsCooldown(t *testing.T) {
 		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Role: "player",
 	})
 	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
 
 	room := &world.Room{
 		ID: "room_b",
@@ -477,7 +480,7 @@ func TestZoneEffect_Move_SuccessfulSave_SetsCooldown(t *testing.T) {
 	expected := now + int64(5)*60
 	assert.Equal(t, expected, sess.ZoneEffectCooldowns["room_b:fear"],
 		"successful save: cooldown = now + CooldownMinutes*60")
-	assert.Equal(t, mentalstate.SeverityNone, svc.mentalStateMgr.CurrentSeverity("p1", mentalstate.TrackFear))
+	assert.False(t, sess.Conditions.Has("fear"), "condition must not be applied on successful save")
 }
 
 // TestZoneEffect_Move_TwoEffects_IndependentCooldowns verifies that two room effects
@@ -490,6 +493,7 @@ func TestZoneEffect_Move_TwoEffects_IndependentCooldowns(t *testing.T) {
 		RoomID: "room_a", CurrentHP: 10, MaxHP: 10, Role: "player",
 	})
 	require.NoError(t, err)
+	sess.Conditions = condition.NewActiveSet()
 
 	room := &world.Room{
 		ID: "room_b",
