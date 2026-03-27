@@ -87,15 +87,37 @@ features:
 
   - slug: downtime-actions
     name: Downtime Actions
-    status: planned
+    status: done
     priority: 293
     category: world
     file: docs/features/downtime-actions.md
-    effort: "L"  # 7 downtime actions (earn income/craft/retrain/treat disease/subsist/forgery/long-term rest)
+    effort: "L"  # 5 downtime actions (earn income/subsist/patch up/run cover/forge papers); craft and retrain moved to separate features
     dependencies:
       - actions
       - downtime
       - resting
+
+  - slug: craft-downtime
+    name: Craft (Downtime)
+    status: planned
+    priority: 301
+    category: world
+    file: docs/features/craft-downtime.md
+    effort: "M"  # integration with content/recipes.yaml; material inventory gating; success/failure material handling
+    dependencies:
+      - downtime-actions
+      - crafting
+
+  - slug: retrain-downtime
+    name: Retrain (Downtime)
+    status: planned
+    priority: 302
+    category: character
+    file: docs/features/retrain-downtime.md
+    effort: "M"  # feat/skill mutation via character repository; prerequisite validation; player selection UI
+    dependencies:
+      - downtime-actions
+      - feat-import
 
   - slug: console-notifications
     name: Console Notifications

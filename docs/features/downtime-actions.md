@@ -1,21 +1,25 @@
 # Downtime Actions
 
-PF2E downtime actions. Requires a downtime time-tracking system.
+PF2E downtime actions implemented in Gunchete. Players use a downtime time-tracking system to perform activities between adventures.
+
+## Implemented Activities
+
+- [x] **Earn Income** — `earn_income` command. Skill check vs city DC; credits earned per day.
+- [x] **Subsist** — `subsist` command. Scavenging check vs zone DC; success covers food/shelter; failure applies fatigued.
+- [x] **Patch Up** — `patchup` command. Medicine check; heals HP based on outcome.
+- [x] **Run Cover** — `runcover` command. Deception check; reduces wanted level.
+- [x] **Forge Papers** — `forge` command. Hustle check vs DC 15. Requires `forgery_supplies` in inventory (consumed at start). CritSuccess: produces `undetectable_forgery` + refunds supplies. Success: produces `convincing_forgery`. Failure/CritFail: supplies lost.
+
+## Excluded Activities
+
+- **Long-Term Rest** — Intentionally excluded. Long-Term Rest restores the full HP pool after 8 hours of rest, which has no meaningful value in Gunchete's design. HP recovery is handled by the rest/camping system (`rest` command). Adding Long-Term Rest as a downtime activity would duplicate existing mechanics and create confusion.
+- **Craft** — Moved to a separate feature (`craft-downtime`). Requires recipe system integration and is complex enough to warrant its own planning cycle.
+- **Retrain** — Moved to a separate feature (`retrain-downtime`). Requires feat/skill mutation and trainer NPC integration.
 
 ## Requirements
 
-- [ ] Downtime Actions
-  - [ ] Earn Income: Use a skill (Crafting, Lore, Performance) to make money.
-    - [ ] Earn Income command — implement `earnincome <skill>` (skill check vs city DC; result determines credits earned per day; requires downtime time-tracking system and city-tier DC table)
-  - [ ] Craft: Spend days creating items, equipment, or consumables.
-    - [ ] Craft command — implement `craft <item>` (Crafting check vs item DC; costs materials and downtime days; produces item on success; requires item recipe data, material inventory, and downtime time-tracking)
-  - [ ] Retrain: Spend a week or more to change a Feat, Skill, or Job feature.
-    - [ ] Retrain command — implement `retrain <feat|skill> <old> <new>` (costs downtime days scaled to what is retrained; requires downtime time-tracking and trainer NPC in safe room)
-  - [ ] Treat Disease: Spend time caring for an ill patient (Medicine).
-    - [ ] Treat Disease command — implement `treatdisease <target>` (Medicine check vs disease DC once per day during downtime; success reduces disease severity; requires disease/condition system and downtime time-tracking)
-  - [ ] Subsist: Find food and shelter in the wild or a city for free.
-    - [ ] Subsist command — implement `subsist` (Survival or Society check vs zone DC; success covers food/shelter for the week at no cost; failure imposes a condition penalty; requires downtime time-tracking and zone DC table)
-  - [ ] Create Forgery: Spend a day or more making a fake document.
-    - [ ] Create Forgery command — implement `forgery <document>` (Society check vs DC; costs downtime days; produces a forged document item used in quests or social encounters; requires document item type and downtime time-tracking)
-  - [ ] Long-Term Rest: Spend 24 hours to recover double your level in HP.
-    - [ ] Long-Term Rest command — implement `longrest` (unavailable in combat or dangerous rooms; costs 24 in-game hours; heals 2×level HP and removes minor conditions; requires in-game time tracking and Resting/safe-room enforcement)
+- [x] REQ-DA-1: Downtime activities MUST use a real-time timer system (proxy for in-game time).
+- [x] REQ-DA-2: Only one downtime activity MAY be active at a time per player.
+- [x] REQ-DA-3: Activities MUST be blocked during combat.
+- [x] REQ-DA-FORGE-1: The `forge` command MUST consume one `forgery_supplies` item from the player's inventory at activity start; if none are present, the activity MUST be blocked with a message.
+- [x] REQ-DA-FORGE-2: On a Critical Success, `resolveForgePapers` MUST refund one `forgery_supplies` item to the player's backpack in addition to delivering `undetectable_forgery`.
