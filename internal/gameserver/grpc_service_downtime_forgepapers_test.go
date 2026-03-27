@@ -35,7 +35,7 @@ func TestDowntimeStart_ForgePapers_BlockedWithoutSupplies(t *testing.T) {
 	require.True(t, ok)
 	sess.DowntimeBusy = false
 
-	evt := svc.downtimeStart(uid, sess, "forge")
+	evt := svc.downtimeStart(uid, sess, "forge", "")
 	require.NotNil(t, evt)
 	msg := evt.GetMessage()
 	require.NotNil(t, msg, "expected a message event")
@@ -59,7 +59,7 @@ func TestDowntimeStart_ForgePapers_ConsumesSupplies(t *testing.T) {
 		Quantity:   1,
 	}))
 
-	evt := svc.downtimeStart(uid, sess, "forge")
+	evt := svc.downtimeStart(uid, sess, "forge", "")
 	require.NotNil(t, evt)
 	assert.True(t, sess.DowntimeBusy, "should start when supplies present")
 	found := sess.Backpack.FindByItemDefID("forgery_supplies")

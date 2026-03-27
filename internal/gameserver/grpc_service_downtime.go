@@ -3,9 +3,11 @@ package gameserver
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
+	"github.com/cory-johannsen/mud/internal/game/crafting"
 	"github.com/cory-johannsen/mud/internal/game/downtime"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"go.uber.org/zap"
@@ -37,7 +39,7 @@ func (s *GameServiceServer) handleDowntime(uid string, req *gamev1.DowntimeReque
 	case "cancel":
 		return s.downtimeCancel(uid, sess), nil
 	default:
-		return s.downtimeStart(uid, sess, sub), nil
+		return s.downtimeStart(uid, sess, sub, req.GetArgs()), nil
 	}
 }
 
@@ -145,7 +147,7 @@ func (s *GameServiceServer) handleDowntimeQueueList(uid string, sess *session.Pl
 			sb.WriteString(fmt.Sprintf("  %d. %-20s  start:unknown  end:unknown\n", e.Position, e.ActivityID))
 			continue
 		}
-		durationMin := downtimeActivityDuration(act)
+		durationMin := downtimeActivityDuration(act, e.ActivityArgs, s.recipeReg)
 		start := cursor
 		end := cursor.Add(time.Duration(durationMin) * time.Minute)
 		sb.WriteString(fmt.Sprintf("  %d. %-20s  start:%s  end:%s\n", e.Position, act.Name, start.Format("15:04"), end.Format("15:04")))
@@ -254,9 +256,9 @@ func (s *GameServiceServer) downtimeCancel(uid string, sess *session.PlayerSessi
 
 // downtimeStart attempts to begin a downtime activity by alias.
 //
-// Precondition: uid is a valid session UID; sess is non-nil; alias is a lowercase command alias.
+// Precondition: uid is a valid session UID; sess is non-nil; alias is a lowercase command alias; activityArgs is the args string (may be empty).
 // Postcondition: On success, sess.DowntimeBusy==true, sess.DowntimeActivityID is set, repo saved if non-nil.
-func (s *GameServiceServer) downtimeStart(uid string, sess *session.PlayerSession, alias string) *gamev1.ServerEvent {
+func (s *GameServiceServer) downtimeStart(uid string, sess *session.PlayerSession, alias, activityArgs string) *gamev1.ServerEvent {
 	// Resolve room tags.
 	roomTags := ""
 	if s.world != nil {
@@ -289,13 +291,49 @@ func (s *GameServiceServer) downtimeStart(uid string, sess *session.PlayerSessio
 		}
 	}
 
-	durationMin := downtimeActivityDuration(act)
+	// Gate craft on recipe existence and available materials. (REQ-CRAFT-DT-1)
+	if act.ID == "craft" {
+		if activityArgs == "" || s.recipeReg == nil {
+			return messageEvent("Specify a recipe: downtime craft <recipe_id>.")
+		}
+		recipe, ok := s.recipeReg.Recipe(activityArgs)
+		if !ok {
+			return messageEvent(fmt.Sprintf("Recipe %q not found.", activityArgs))
+		}
+		// Validate materials.
+		var missing []string
+		for _, rm := range recipe.Materials {
+			if sess.Materials[rm.ID] < rm.Quantity {
+				missing = append(missing, rm.ID)
+			}
+		}
+		if len(missing) > 0 {
+			sort.Strings(missing)
+			return messageEvent(fmt.Sprintf("Missing materials for %s: %s.", recipe.Name, strings.Join(missing, ", ")))
+		}
+		// Consume materials eagerly at start.
+		if s.materialRepo != nil && len(recipe.Materials) > 0 {
+			deductions := make(map[string]int, len(recipe.Materials))
+			for _, rm := range recipe.Materials {
+				deductions[rm.ID] = rm.Quantity
+			}
+			_ = s.materialRepo.DeductMany(context.Background(), sess.CharacterID, deductions)
+		}
+		for _, rm := range recipe.Materials {
+			sess.Materials[rm.ID] -= rm.Quantity
+			if sess.Materials[rm.ID] <= 0 {
+				delete(sess.Materials, rm.ID)
+			}
+		}
+	}
+
+	durationMin := downtimeActivityDuration(act, activityArgs, s.recipeReg)
 	completesAt := time.Now().Add(time.Duration(durationMin) * time.Minute)
 
 	sess.DowntimeBusy = true
 	sess.DowntimeActivityID = act.ID
 	sess.DowntimeCompletesAt = completesAt
-	sess.DowntimeMetadata = ""
+	sess.DowntimeMetadata = activityArgs
 
 	if s.downtimeRepo != nil && sess.CharacterID > 0 {
 		state := postgres.DowntimeState{
@@ -410,7 +448,7 @@ func (s *GameServiceServer) startNext(uid string) {
 	// to be implemented in the downtime plan (it was not present when this plan was executed).
 	// Tracked in docs/superpowers/plans/2026-03-22-downtime.md.
 
-	durationMin := downtimeActivityDuration(act)
+	durationMin := downtimeActivityDuration(act, entry.ActivityArgs, s.recipeReg)
 	completesAt := time.Now().Add(time.Duration(durationMin) * time.Minute)
 	sess.DowntimeActivityID = act.ID
 	sess.DowntimeCompletesAt = completesAt
@@ -507,7 +545,7 @@ func (s *GameServiceServer) resolveOfflineQueue(uid string, sess *session.Player
 			continue
 		}
 
-		durationMin := downtimeActivityDuration(act)
+		durationMin := downtimeActivityDuration(act, entry.ActivityArgs, s.recipeReg)
 		hypotheticalEnd := cursor.Add(time.Duration(durationMin) * time.Minute)
 
 		if time.Now().Before(hypotheticalEnd) {
@@ -557,17 +595,26 @@ func (s *GameServiceServer) resolveOfflineQueue(uid string, sess *session.Player
 }
 
 // downtimeActivityDuration returns the real-time duration in minutes for an activity.
-// For activities with DurationMinutes==0 (computed at start), stubs are used pending Task 9.
+// For craft, the duration is derived from the recipe's DowntimeDays if available.
 //
-// Precondition: act is a valid Activity.
+// Precondition: act is a valid Activity; activityArgs and recipeReg may be zero/nil.
 // Postcondition: Returns a positive integer duration in minutes.
-func downtimeActivityDuration(act downtime.Activity) int {
+func downtimeActivityDuration(act downtime.Activity, activityArgs string, recipeReg *crafting.RecipeRegistry) int {
 	if act.DurationMinutes > 0 {
 		return act.DurationMinutes
 	}
-	// Stub durations for computed-at-start activities (full resolver in Task 9).
+	// Stub durations for computed-at-start activities.
 	switch act.ID {
 	case "craft":
+		if recipeReg != nil && activityArgs != "" {
+			if recipe, ok := recipeReg.Recipe(activityArgs); ok {
+				days := recipe.DowntimeDays()
+				if days < 1 {
+					days = 1
+				}
+				return days * 2
+			}
+		}
 		return 10
 	case "retrain":
 		return 8
