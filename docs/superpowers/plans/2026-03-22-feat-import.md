@@ -1,0 +1,2526 @@
+# Feat Import Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Add ~191 Gap feats to `content/feats.yaml` and update `docs/architecture/character.md` with a Feat System section.
+
+**Architecture:** All work is pure YAML content — no code changes required. The feat registry (`internal/game/ruleset/feat.go`) auto-indexes on load. Each task adds a batch of feat entries, validated by a test that asserts specific new feat IDs are present in the loaded registry.
+
+**Tech Stack:** YAML content editing; existing test harness `go test ./internal/game/ruleset/...`
+
+---
+
+## Reference
+
+- **Spec:** `docs/superpowers/specs/2026-03-20-feat-import-design.md` — authoritative source for all feat IDs, names, descriptions, skill mappings, and adaptation rules. **Read this spec before implementing each task.**
+- **Existing tests:** `internal/game/ruleset/feat_test.go` — `TestLoadFeats_ParsesAllFeats`, `TestLoadFeats_SkillFeatHasSkillField`, `TestLoadFeats_ActiveFeatHasActivateText`
+
+## YAML Entry Format
+
+All new feats follow this template. Non-active feats use `active: false` and `activate_text: ""`.
+
+```yaml
+  - id: <gunchete_id>
+    name: <Gunchete Name>
+    category: general   # or: skill
+    pf2e: <pf2e_source_feat_name>
+    active: false
+    activate_text: ""
+    description: "<Gunchete-flavored description.>"
+```
+
+Skill feats add one extra field between `category` and `pf2e`:
+
+```yaml
+    skill: <gunchete_skill_id>
+```
+
+**Skill ID mapping** (from spec section 2):
+parkour, muscle, ghosting, grift, tech_lore, rigging, conspiracy, factions, intel, patch_job, wasteland, gang_codes, scavenging, hustle, smooth_talk, hard_look, rep
+
+**Content rules** (spec section 1):
+- Magic/Spells → Technology effects; Arcane/Occult traditions → Technology disciplines
+- Ride/Mount → Vehicle Operator; Tattoo Artist → Implant Technician
+- Religion/Divine Guidance → Faction Guidance; Lore-named feats get Gunchete-flavor names
+- `active: true` only when a feat has a player-triggered effect; must also set `activate_text`
+
+## File Structure
+
+| File | Action |
+|---|---|
+| `content/feats.yaml` | Add ~191 new feat entries (Tasks 1–8) |
+| `internal/game/ruleset/feat_test.go` | Add count-assertion tests per task |
+| `docs/architecture/character.md` | Add Feat System section (Task 9) |
+
+---
+
+## Task 1: General Feats (35 new entries)
+
+**Files:**
+- Modify: `content/feats.yaml` — add 35 general feats after existing general feats, before `# ── SKILL FEATS: PARKOUR`
+- Modify: `internal/game/ruleset/feat_test.go`
+
+**Gap general feats to add** (from spec section 3.1 — all rows marked "Gap"):
+
+| ID | Name | PF2E Source |
+|---|---|---|
+| adopted_culture | Adopted Culture | adopted_ancestry |
+| loyal_companion | Loyal Companion | pet |
+| vehicle_operator | Vehicle Operator | ride |
+| parallel_lives | Parallel Lives | different_worlds |
+| speedrun_strats | Speedrun Strats | speedrun_strats |
+| cornered_beast | Cornered Beast | ravening's_desperation |
+| cultural_roots | Cultural Roots | ancestral_paragon |
+| contingency_stash | Contingency Stash | prescient_planner |
+| street_improvisation | Street Improvisation | untrained_improvisation |
+| field_repair | Field Repair | improvised_repair |
+| crew_boss | Crew Boss | hireling_manager |
+| hardened_constitution | Hardened Constitution | robust_health |
+| steel_your_resolve | Steel Your Resolve | steel_your_resolve |
+| push_the_pace | Push the Pace | pick_up_the_pace |
+| methodical_sweep | Methodical Sweep | thorough_search |
+| sharp_follower | Sharp Follower | keen_follower |
+| skitter | Skitter | skitter |
+| street_eye | Street Eye | eye_of_the_arclords |
+| neural_crossover | Neural Crossover | kreighton's_cognitive_crossover |
+| district_adept | District Adept | pei_zing_adept |
+| ghost_step | Ghost Step | fane's_escape |
+| efficient_sweep | Efficient Sweep | expeditious_search |
+| contingency_consumable | Contingency Consumable | prescient_consumable |
+| vital_sense | Vital Sense | bloodsense |
+| death_proof | Death Proof | numb_to_death |
+| chemical_palate | Chemical Palate | supertaster |
+| zone_sense | Zone Sense | axuma's_awakening |
+| combat_vigor | Combat Vigor | axuma's_vigor |
+| tech_overload_capacity | Tech Overload Capacity | incredible_investiture |
+| scout_mastery | Scout Mastery | incredible_scout |
+| local_everywhere | Local Everywhere | a_home_in_every_port |
+| blood_will | Blood Will | sanguine_tenacity |
+| crew_leader | Crew Leader | caravan_leader |
+| true_perception | True Perception | true_perception |
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `internal/game/ruleset/feat_test.go`:
+
+```go
+func TestLoadFeats_GeneralGapFeatsPresent(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"adopted_culture", "loyal_companion", "vehicle_operator", "parallel_lives",
+		"speedrun_strats", "cornered_beast", "cultural_roots", "contingency_stash",
+		"street_improvisation", "field_repair", "crew_boss", "hardened_constitution",
+		"steel_your_resolve", "push_the_pace", "methodical_sweep", "sharp_follower",
+		"skitter", "street_eye", "neural_crossover", "district_adept", "ghost_step",
+		"efficient_sweep", "contingency_consumable", "vital_sense", "death_proof",
+		"chemical_palate", "zone_sense", "combat_vigor", "tech_overload_capacity",
+		"scout_mastery", "local_everywhere", "blood_will", "crew_leader", "true_perception",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing general feat: %s", id)
+	}
+}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_GeneralGapFeatsPresent -v
+```
+Expected: FAIL — missing feat IDs
+
+- [ ] **Step 3: Add 35 general feat YAML entries**
+
+In `content/feats.yaml`, insert after the existing `light_step` entry (line ~89) and before `# ── SKILL FEATS: PARKOUR`, following the spec section 3.1 descriptions for each feat. Use `active: false` for all (none are player-triggered actions). Example entries:
+
+```yaml
+  - id: adopted_culture
+    name: Adopted Culture
+    category: general
+    pf2e: adopted_ancestry
+    active: false
+    activate_text: ""
+    description: "You were raised in a different region's culture; gain access to that region's cultural feats."
+
+  - id: loyal_companion
+    name: Loyal Companion
+    category: general
+    pf2e: pet
+    active: false
+    activate_text: ""
+    description: "You have a loyal pet animal or drone that follows your commands and accompanies you."
+
+  - id: vehicle_operator
+    name: Vehicle Operator
+    category: general
+    pf2e: ride
+    active: false
+    activate_text: ""
+    description: "Auto-succeed at routine vehicle operation checks; treat vehicles as responsive mounts."
+
+  - id: parallel_lives
+    name: Parallel Lives
+    category: general
+    pf2e: different_worlds
+    active: false
+    activate_text: ""
+    description: "Experience from diverse backgrounds grants versatility; you adapt quickly to new social contexts."
+
+  - id: speedrun_strats
+    name: Speedrun Strats
+    category: general
+    pf2e: speedrun_strats
+    active: false
+    activate_text: ""
+    description: "You have optimized movement routes through familiar areas, reducing travel time and action cost."
+
+  - id: cornered_beast
+    name: Cornered Beast
+    category: general
+    pf2e: ravening's_desperation
+    active: false
+    activate_text: ""
+    description: "When you are dying or have fewer than half your maximum HP, you gain a +1 bonus to attack rolls."
+
+  - id: cultural_roots
+    name: Cultural Roots
+    category: general
+    pf2e: ancestral_paragon
+    active: false
+    activate_text: ""
+    description: "Your deep cultural roots give you access to one additional 1st-level regional feat."
+
+  - id: contingency_stash
+    name: Contingency Stash
+    category: general
+    pf2e: prescient_planner
+    active: false
+    activate_text: ""
+    description: "You always seem to have the right gear; once per day procure a needed common item from a hidden stash."
+
+  - id: street_improvisation
+    name: Street Improvisation
+    category: general
+    pf2e: untrained_improvisation
+    active: false
+    activate_text: ""
+    description: "You are better than most at winging it; reduce the penalty for untrained skill checks."
+
+  - id: field_repair
+    name: Field Repair
+    category: general
+    pf2e: improvised_repair
+    active: false
+    activate_text: ""
+    description: "Repair damaged equipment without proper tools using improvised materials found nearby."
+
+  - id: crew_boss
+    name: Crew Boss
+    category: general
+    pf2e: hireling_manager
+    active: false
+    activate_text: ""
+    description: "You manage hirelings effectively; increase their productivity and loyalty."
+
+  - id: hardened_constitution
+    name: Hardened Constitution
+    category: general
+    pf2e: robust_health
+    active: false
+    activate_text: ""
+    description: "Your body resists disease and poison; reduce the severity of afflictions that affect you."
+
+  - id: steel_your_resolve
+    name: Steel Your Resolve
+    category: general
+    pf2e: steel_your_resolve
+    active: false
+    activate_text: ""
+    description: "Once per day, remove a mental condition (frightened, stunned, confused) through sheer will."
+
+  - id: push_the_pace
+    name: Push the Pace
+    category: general
+    pf2e: pick_up_the_pace
+    active: false
+    activate_text: ""
+    description: "When traveling with a group, increase the group's overland travel speed."
+
+  - id: methodical_sweep
+    name: Methodical Sweep
+    category: general
+    pf2e: thorough_search
+    active: false
+    activate_text: ""
+    description: "When you Search, find everything others miss; never fail to detect hidden objects in your area."
+
+  - id: sharp_follower
+    name: Sharp Follower
+    category: general
+    pf2e: keen_follower
+    active: false
+    activate_text: ""
+    description: "When following an expert's lead, you gain a bonus to the same checks they excel at."
+
+  - id: skitter
+    name: Skitter
+    category: general
+    pf2e: skitter
+    active: false
+    activate_text: ""
+    description: "Move through small spaces and narrow gaps quickly without slowing or going prone."
+
+  - id: street_eye
+    name: Street Eye
+    category: general
+    pf2e: eye_of_the_arclords
+    active: false
+    activate_text: ""
+    description: "Spot hidden surveillance tech, concealed weapons, and disguised operatives others miss."
+
+  - id: neural_crossover
+    name: Neural Crossover
+    category: general
+    pf2e: kreighton's_cognitive_crossover
+    active: false
+    activate_text: ""
+    description: "Apply knowledge from one tech discipline to another; use Tech Lore for one other knowledge skill."
+
+  - id: district_adept
+    name: District Adept
+    category: general
+    pf2e: pei_zing_adept
+    active: false
+    activate_text: ""
+    description: "Deep expertise in a specific zone district; gain +2 to all skill checks in your home district."
+
+  - id: ghost_step
+    name: Ghost Step
+    category: general
+    pf2e: fane's_escape
+    active: false
+    activate_text: ""
+    description: "Once per day, escape an impossible situation through sheer will and quick thinking."
+
+  - id: efficient_sweep
+    name: Efficient Sweep
+    category: general
+    pf2e: expeditious_search
+    active: false
+    activate_text: ""
+    description: "Search areas at twice normal speed without sacrificing thoroughness."
+
+  - id: contingency_consumable
+    name: Contingency Consumable
+    category: general
+    pf2e: prescient_consumable
+    active: false
+    activate_text: ""
+    description: "Once per day, produce a needed common consumable item from a concealed stash. Requires contingency_stash."
+
+  - id: vital_sense
+    name: Vital Sense
+    category: general
+    pf2e: bloodsense
+    active: false
+    activate_text: ""
+    description: "Detect wounded creatures within 30 feet by their heat signature and blood loss."
+
+  - id: death_proof
+    name: Death Proof
+    category: general
+    pf2e: numb_to_death
+    active: false
+    activate_text: ""
+    description: "Once per day, ignore one effect that would kill you outright, surviving at 1 HP instead."
+
+  - id: chemical_palate
+    name: Chemical Palate
+    category: general
+    pf2e: supertaster
+    active: false
+    activate_text: ""
+    description: "Detect drug compounds, poisons, and toxins by taste or scent with extraordinary precision."
+
+  - id: zone_sense
+    name: Zone Sense
+    category: general
+    pf2e: axuma's_awakening
+    active: false
+    activate_text: ""
+    description: "Sense danger zone transitions, environmental hazards, and radiation levels within 60 feet."
+
+  - id: combat_vigor
+    name: Combat Vigor
+    category: general
+    pf2e: axuma's_vigor
+    active: false
+    activate_text: ""
+    description: "Regain a small amount of vitality during sustained combat; recover HP equal to your Grit modifier once per combat."
+
+  - id: tech_overload_capacity
+    name: Tech Overload Capacity
+    category: general
+    pf2e: incredible_investiture
+    active: false
+    activate_text: ""
+    description: "Invest one additional Technology item beyond your normal limit."
+
+  - id: scout_mastery
+    name: Scout Mastery
+    category: general
+    pf2e: incredible_scout
+    active: false
+    activate_text: ""
+    description: "Gain a bonus to initiative and to Scavenging checks made while Scouting."
+
+  - id: local_everywhere
+    name: Local Everywhere
+    category: general
+    pf2e: a_home_in_every_port
+    active: false
+    activate_text: ""
+    description: "You have connections in every zone; always find a place to rest and a contact to call on."
+
+  - id: blood_will
+    name: Blood Will
+    category: general
+    pf2e: sanguine_tenacity
+    active: false
+    activate_text: ""
+    description: "Continue fighting past injuries that would fell others; reduce dying value by 1 when downed."
+
+  - id: crew_leader
+    name: Crew Leader
+    category: general
+    pf2e: caravan_leader
+    active: false
+    activate_text: ""
+    description: "Lead groups of up to 10 effectively; allies under your leadership gain +1 to group checks."
+
+  - id: true_perception
+    name: True Perception
+    category: general
+    pf2e: true_perception
+    active: false
+    activate_text: ""
+    description: "Automatically detect hidden, invisible, or concealed threats in your vicinity."
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats -v
+```
+Expected: All feat tests PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add content/feats.yaml internal/game/ruleset/feat_test.go
+git commit -m "feat(feats): add 35 gap general feats to content/feats.yaml"
+```
+
+---
+
+## Task 2: Parkour, Muscle, Ghosting, and Grift Skill Feats (25 new entries)
+
+**Files:**
+- Modify: `content/feats.yaml`
+- Modify: `internal/game/ruleset/feat_test.go`
+
+**Gap feats (from spec section 3.2):**
+
+| ID | Name | Skill | PF2E Source |
+|---|---|---|---|
+| acrobatic_performer | Acrobatic Performer | parkour | acrobatic_performer |
+| fast_crawl | Fast Crawl | parkour | nimble_crawl |
+| power_jump | Power Jump | parkour | powerful_leap |
+| quick_vault | Quick Vault | parkour | rapid_mantel |
+| roll_landing | Roll Landing | parkour | rolling_landing |
+| kip_up | Kip Up | parkour | kip_up |
+| aerial_mastery | Aerial Mastery | parkour | aerobatics_mastery |
+| wall_jump | Wall Jump | parkour | wall_jump |
+| water_run | Water Run | parkour | water_sprint |
+| impossible_leap | Impossible Leap | parkour | cloud_jump |
+| anchor_climber | Anchor Climber | muscle | lead_climber |
+| speed_climb | Speed Climb | muscle | quick_climb |
+| speed_swim | Speed Swim | muscle | quick_swim |
+| armored_ghost | Armored Ghost | ghosting | armored_stealth |
+| silent_crew | Silent Crew | ghosting | quiet_allies |
+| sense_block | Sense Block | ghosting | foil_senses |
+| speed_ghost | Speed Ghost | ghosting | swift_sneak |
+| terrain_vanish | Terrain Vanish | ghosting | vanish_into_the_land |
+| ghost_legend | Ghost Legend | ghosting | legendary_sneak |
+| concealed_activation | Concealed Activation | grift | concealing_legerdemain |
+| careful_disarm | Careful Disarm | grift | wary_disarmament |
+| shadow_mark | Shadow Mark | grift | shadow_mark |
+| rolling_lift | Rolling Lift | grift | tumbling_theft |
+| speed_unlock | Speed Unlock | grift | quick_unlock |
+| master_thief | Master Thief | grift | legendary_thief |
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `internal/game/ruleset/feat_test.go`:
+
+```go
+func TestLoadFeats_SkillGapFeats_ParkourMusclGhostingGrift(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"acrobatic_performer", "fast_crawl", "power_jump", "quick_vault", "roll_landing",
+		"kip_up", "aerial_mastery", "wall_jump", "water_run", "impossible_leap",
+		"anchor_climber", "speed_climb", "speed_swim",
+		"armored_ghost", "silent_crew", "sense_block", "speed_ghost", "terrain_vanish", "ghost_legend",
+		"concealed_activation", "careful_disarm", "shadow_mark", "rolling_lift", "speed_unlock", "master_thief",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_SkillGapFeats_ParkourMusclGhostingGrift -v
+```
+Expected: FAIL
+
+- [ ] **Step 3: Add 25 skill feat YAML entries**
+
+In `content/feats.yaml`, insert new entries into their corresponding skill sections (after existing entries in each section). Use spec section 3.2 for descriptions. All entries use `active: false` / `activate_text: ""` unless they represent a player-triggered action. Descriptions MUST be Gunchete-flavored — no PF2E verbatim text.
+
+Example entries for each section:
+
+**Parkour section** (insert after `street_footing`):
+```yaml
+  - id: acrobatic_performer
+    name: Acrobatic Performer
+    category: skill
+    skill: parkour
+    pf2e: acrobatic_performer
+    active: false
+    activate_text: ""
+    description: "Incorporate acrobatic stunts into parkour-based performance; use Parkour to Earn Income through physical spectacle."
+
+  - id: fast_crawl
+    name: Fast Crawl
+    category: skill
+    skill: parkour
+    pf2e: nimble_crawl
+    active: false
+    activate_text: ""
+    description: "Crawl at half speed without penalty and without triggering extra reactions from standing foes."
+
+  - id: power_jump
+    name: Power Jump
+    category: skill
+    skill: parkour
+    pf2e: powerful_leap
+    active: false
+    activate_text: ""
+    description: "Jump higher and farther; add extra feet to High Jump height and Long Jump distance."
+
+  - id: quick_vault
+    name: Quick Vault
+    category: skill
+    skill: parkour
+    pf2e: rapid_mantel
+    active: true
+    activate_text: "You grab the ledge and haul yourself up in a single fluid motion."
+    description: "Pull yourself up onto ledges and obstacles as a single action instead of two."
+
+  - id: roll_landing
+    name: Roll Landing
+    category: skill
+    skill: parkour
+    pf2e: rolling_landing
+    active: false
+    activate_text: ""
+    description: "Reduce fall damage further than Fall Breaker alone; treat falls as 25 feet shorter."
+
+  - id: kip_up
+    name: Kip Up
+    category: skill
+    skill: parkour
+    pf2e: kip_up
+    active: true
+    activate_text: "You spring to your feet without breaking stride."
+    description: "Stand up from prone as a free action once per round without triggering reactions."
+
+  - id: aerial_mastery
+    name: Aerial Mastery
+    category: skill
+    skill: parkour
+    pf2e: aerobatics_mastery
+    active: false
+    activate_text: ""
+    description: "Perform aerial maneuvers with precision; no penalty to Parkour checks while airborne."
+
+  - id: wall_jump
+    name: Wall Jump
+    category: skill
+    skill: parkour
+    pf2e: wall_jump
+    active: true
+    activate_text: "You plant your foot on the wall and launch yourself upward."
+    description: "Jump off walls to reach heights inaccessible by normal jumping."
+
+  - id: water_run
+    name: Water Run
+    category: skill
+    skill: parkour
+    pf2e: water_sprint
+    active: true
+    activate_text: "You hit the surface at full sprint and keep moving."
+    description: "Sprint across liquid surfaces for a limited number of squares before sinking."
+
+  - id: impossible_leap
+    name: Impossible Leap
+    category: skill
+    skill: parkour
+    pf2e: cloud_jump
+    active: true
+    activate_text: "You launch off nothing and somehow make it."
+    description: "Jump impossible distances — up to 120 feet horizontally or 60 feet vertically."
+```
+
+**Muscle section** (insert after `waterproof`):
+```yaml
+  - id: anchor_climber
+    name: Anchor Climber
+    category: skill
+    skill: muscle
+    pf2e: lead_climber
+    active: false
+    activate_text: ""
+    description: "Secure rope lines as you climb; allies following your route gain a bonus to their Climb checks."
+
+  - id: speed_climb
+    name: Speed Climb
+    category: skill
+    skill: muscle
+    pf2e: quick_climb
+    active: false
+    activate_text: ""
+    description: "Climb at full speed rather than half speed."
+
+  - id: speed_swim
+    name: Speed Swim
+    category: skill
+    skill: muscle
+    pf2e: quick_swim
+    active: false
+    activate_text: ""
+    description: "Swim at full speed rather than half speed."
+```
+
+**Ghosting section** (insert after `zone_stalker`):
+```yaml
+  - id: armored_ghost
+    name: Armored Ghost
+    category: skill
+    skill: ghosting
+    pf2e: armored_stealth
+    active: false
+    activate_text: ""
+    description: "Reduce the Ghosting check penalty imposed by your armor; stealth-modified armor acts one category lighter."
+
+  - id: silent_crew
+    name: Silent Crew
+    category: skill
+    skill: ghosting
+    pf2e: quiet_allies
+    active: false
+    activate_text: ""
+    description: "When sneaking as a group, allies use your Ghosting modifier instead of their own."
+
+  - id: sense_block
+    name: Sense Block
+    category: skill
+    skill: ghosting
+    pf2e: foil_senses
+    active: false
+    activate_text: ""
+    description: "Take precautions against enhanced senses — thermal, audio, motion — preventing their use against you."
+
+  - id: speed_ghost
+    name: Speed Ghost
+    category: skill
+    skill: ghosting
+    pf2e: swift_sneak
+    active: false
+    activate_text: ""
+    description: "Move at full speed while sneaking without penalty."
+
+  - id: terrain_vanish
+    name: Terrain Vanish
+    category: skill
+    skill: ghosting
+    pf2e: vanish_into_the_land
+    active: true
+    activate_text: "You blend into the environment and disappear."
+    description: "Disappear into natural terrain — rubble, shadows, crowds — using Ghosting even without cover."
+
+  - id: ghost_legend
+    name: Ghost Legend
+    category: skill
+    skill: ghosting
+    pf2e: legendary_sneak
+    active: false
+    activate_text: ""
+    description: "Hide and sneak without needing cover or concealment at all."
+```
+
+**Grift section** (insert after `clean_lift`):
+```yaml
+  - id: concealed_activation
+    name: Concealed Activation
+    category: skill
+    skill: grift
+    pf2e: concealing_legerdemain
+    active: false
+    activate_text: ""
+    description: "Activate Technology items without observers noticing; hide the activation from watchful eyes."
+
+  - id: careful_disarm
+    name: Careful Disarm
+    category: skill
+    skill: grift
+    pf2e: wary_disarmament
+    active: false
+    activate_text: ""
+    description: "+2 to AC and saves against traps while you are actively disarming them."
+
+  - id: shadow_mark
+    name: Shadow Mark
+    category: skill
+    skill: grift
+    pf2e: shadow_mark
+    active: true
+    activate_text: "You tag them without them knowing."
+    description: "Mark a target for tracking or later action; you always know their general location for 24 hours."
+
+  - id: rolling_lift
+    name: Rolling Lift
+    category: skill
+    skill: grift
+    pf2e: tumbling_theft
+    active: true
+    activate_text: "You roll through their space and come up with something of theirs."
+    description: "Pick a target's pocket while Tumbling Through their space as part of the same action."
+
+  - id: speed_unlock
+    name: Speed Unlock
+    category: skill
+    skill: grift
+    pf2e: quick_unlock
+    active: true
+    activate_text: "One twist and it's open."
+    description: "Pick a lock with a single action instead of the standard time."
+
+  - id: master_thief
+    name: Master Thief
+    category: skill
+    skill: grift
+    pf2e: legendary_thief
+    active: false
+    activate_text: ""
+    description: "Steal what would normally be impossible — items worn, held, or magically secured."
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats -v
+```
+Expected: All PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add content/feats.yaml internal/game/ruleset/feat_test.go
+git commit -m "feat(feats): add 25 gap skill feats for parkour/muscle/ghosting/grift"
+```
+
+---
+
+## Task 3: Tech Lore and Rigging Skill Feats (22 new entries)
+
+**Files:**
+- Modify: `content/feats.yaml`
+- Modify: `internal/game/ruleset/feat_test.go`
+
+**Gap feats (spec section 3.2):**
+
+| ID | Name | Skill | PF2E Source |
+|---|---|---|---|
+| quick_scan | Quick Scan | tech_lore | quick_identification |
+| id_tech_effect | ID Tech Effect | tech_lore | recognize_spell |
+| exploit_tech | Exploit Tech | tech_lore | trick_magic_item |
+| data_eye | Data Eye | tech_lore | eye_for_numbers |
+| instant_recall | Instant Recall | tech_lore | automatic_knowledge |
+| rapid_protocol | Rapid Protocol | tech_lore | magical_shorthand |
+| tech_aura_scan | Tech Aura Scan | tech_lore | aura_sight |
+| obscured_tech | Obscured Tech | tech_lore | bizarre_magic |
+| rapid_id | Rapid ID | tech_lore | quick_recognition |
+| tech_synthesis | Tech Synthesis | tech_lore | unified_theory |
+| parts_eye | Parts Eye | rigging | crafter's_appraisal |
+| crew_craft | Crew Craft | rigging | communal_crafting |
+| prototype_inventor | Prototype Inventor | rigging | inventor |
+| tech_item_crafting | Tech Item Crafting | rigging | magical_crafting |
+| joint_work | Joint Work | rigging | cooperative_crafting |
+| implant_tech | Implant Tech | rigging | tattoo_artist |
+| master_rigging | Master Rigging | rigging | impeccable_crafting |
+| signature_build | Signature Build | rigging | signature_crafting |
+| potency_compound | Potency Compound | rigging | bless_tonic |
+| toxin_compound | Toxin Compound | rigging | bless_toxin |
+| legendary_implant_tech | Legendary Implant Tech | rigging | legendary_tattoo_artist |
+| rig_anything | Rig Anything | rigging | craft_anything |
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `internal/game/ruleset/feat_test.go`:
+
+```go
+func TestLoadFeats_SkillGapFeats_TechLoreRigging(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"quick_scan", "id_tech_effect", "exploit_tech", "data_eye", "instant_recall",
+		"rapid_protocol", "tech_aura_scan", "obscured_tech", "rapid_id", "tech_synthesis",
+		"parts_eye", "crew_craft", "prototype_inventor", "tech_item_crafting", "joint_work",
+		"implant_tech", "master_rigging", "signature_build", "potency_compound",
+		"toxin_compound", "legendary_implant_tech", "rig_anything",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_SkillGapFeats_TechLoreRigging -v
+```
+Expected: FAIL
+
+- [ ] **Step 3: Add 22 skill feat YAML entries**
+
+In `content/feats.yaml`, insert into the Tech Lore section (after `tech_sense`) and the Rigging section (after `specialty_work`). Use spec section 3.2 descriptions. Adaptation rules: Arcane sense → Tech sense, magical items → Technology items, craft magic → craft Technology, Bless Tonic/Toxin → drug compound variants.
+
+**Tech Lore section** examples:
+```yaml
+  - id: quick_scan
+    name: Quick Scan
+    category: skill
+    skill: tech_lore
+    pf2e: quick_identification
+    active: false
+    activate_text: ""
+    description: "Identify Technology items and effects in 1 minute or less instead of the standard 10 minutes."
+
+  - id: id_tech_effect
+    name: ID Tech Effect
+    category: skill
+    skill: tech_lore
+    pf2e: recognize_spell
+    active: true
+    activate_text: "You clock what they're using and what it's about to do."
+    description: "Identify a Technology effect as a reaction the moment it is activated."
+
+  - id: exploit_tech
+    name: Exploit Tech
+    category: skill
+    skill: tech_lore
+    pf2e: trick_magic_item
+    active: true
+    activate_text: "You hack the interface and force it to respond."
+    description: "Activate Technology items you are not normally qualified to use."
+
+  - id: data_eye
+    name: Data Eye
+    category: skill
+    skill: tech_lore
+    pf2e: eye_for_numbers
+    active: false
+    activate_text: ""
+    description: "Quickly assess patterns, numerical data, and encoded information; +2 to Tech Lore checks involving data analysis."
+
+  - id: instant_recall
+    name: Instant Recall
+    category: skill
+    skill: tech_lore
+    pf2e: automatic_knowledge
+    active: false
+    activate_text: ""
+    description: "Recall knowledge about Technology as a free action once per round. Requires Assurance (Tech Lore)."
+
+  - id: rapid_protocol
+    name: Rapid Protocol
+    category: skill
+    skill: tech_lore
+    pf2e: magical_shorthand
+    active: false
+    activate_text: ""
+    description: "Learn new Technology protocols quickly and at reduced cost."
+
+  - id: tech_aura_scan
+    name: Tech Aura Scan
+    category: skill
+    skill: tech_lore
+    pf2e: aura_sight
+    active: false
+    activate_text: ""
+    description: "Detect Technology auras and powered devices while in Exploration mode."
+
+  - id: obscured_tech
+    name: Obscured Tech
+    category: skill
+    skill: tech_lore
+    pf2e: bizarre_magic
+    active: false
+    activate_text: ""
+    description: "Your Technology activations are harder to identify; observers take -2 to ID Tech Effect checks against you."
+
+  - id: rapid_id
+    name: Rapid ID
+    category: skill
+    skill: tech_lore
+    pf2e: quick_recognition
+    active: false
+    activate_text: ""
+    description: "Identify Technology effects as a free action instead of a reaction."
+
+  - id: tech_synthesis
+    name: Tech Synthesis
+    category: skill
+    skill: tech_lore
+    pf2e: unified_theory
+    active: false
+    activate_text: ""
+    description: "Use Tech Lore for checks across all Technology disciplines, replacing other knowledge skills."
+```
+
+**Rigging section** examples:
+```yaml
+  - id: parts_eye
+    name: Parts Eye
+    category: skill
+    skill: rigging
+    pf2e: crafter's_appraisal
+    active: false
+    activate_text: ""
+    description: "Estimate the value, quality, and usability of components and scavenged parts at a glance."
+
+  - id: crew_craft
+    name: Crew Craft
+    category: skill
+    skill: rigging
+    pf2e: communal_crafting
+    active: false
+    activate_text: ""
+    description: "Others can assist your crafting; each helper reduces total crafting time."
+
+  - id: prototype_inventor
+    name: Prototype Inventor
+    category: skill
+    skill: rigging
+    pf2e: inventor
+    active: false
+    activate_text: ""
+    description: "Use Rigging to create new item schematics and prototype designs not in standard catalogs."
+
+  - id: tech_item_crafting
+    name: Tech Item Crafting
+    category: skill
+    skill: rigging
+    pf2e: magical_crafting
+    active: false
+    activate_text: ""
+    description: "Craft Technology items; start with four common Technology item formulas."
+
+  - id: joint_work
+    name: Joint Work
+    category: skill
+    skill: rigging
+    pf2e: cooperative_crafting
+    active: false
+    activate_text: ""
+    description: "Combine efforts with another crafter for faster production without redundant work."
+
+  - id: implant_tech
+    name: Implant Tech
+    category: skill
+    skill: rigging
+    pf2e: tattoo_artist
+    active: false
+    activate_text: ""
+    description: "Perform basic cybernetic implant work; install and remove implants safely."
+
+  - id: master_rigging
+    name: Master Rigging
+    category: skill
+    skill: rigging
+    pf2e: impeccable_crafting
+    active: false
+    activate_text: ""
+    description: "Craft items more efficiently; critical successes produce superior items. Requires specialty_work."
+
+  - id: signature_build
+    name: Signature Build
+    category: skill
+    skill: rigging
+    pf2e: signature_crafting
+    active: false
+    activate_text: ""
+    description: "Specialize in one type of crafted item; produce that type faster and at lower cost."
+
+  - id: potency_compound
+    name: Potency Compound
+    category: skill
+    skill: rigging
+    pf2e: bless_tonic
+    active: false
+    activate_text: ""
+    description: "Craft drug compounds that enhance vital force and boost the body's recovery rate."
+
+  - id: toxin_compound
+    name: Toxin Compound
+    category: skill
+    skill: rigging
+    pf2e: bless_toxin
+    active: false
+    activate_text: ""
+    description: "Craft drug compounds with void properties that disrupt biological and electronic systems."
+
+  - id: legendary_implant_tech
+    name: Legendary Implant Tech
+    category: skill
+    skill: rigging
+    pf2e: legendary_tattoo_artist
+    active: false
+    activate_text: ""
+    description: "Perform legendary cybernetic implant work; install experimental and restricted implants."
+
+  - id: rig_anything
+    name: Rig Anything
+    category: skill
+    skill: rigging
+    pf2e: craft_anything
+    active: false
+    activate_text: ""
+    description: "Ignore most material and schematic requirements when crafting; improvise what you don't have."
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats -v
+```
+Expected: All PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add content/feats.yaml internal/game/ruleset/feat_test.go
+git commit -m "feat(feats): add 22 gap skill feats for tech_lore/rigging"
+```
+
+---
+
+## Task 4: Conspiracy, Factions, and Intel Skill Feats (19 new entries)
+
+**Files:**
+- Modify: `content/feats.yaml`
+- Modify: `internal/game/ruleset/feat_test.go`
+
+**Gap feats (spec section 3.2):**
+
+| ID | Name | Skill | PF2E Source |
+|---|---|---|---|
+| gang_infiltrator | Gang Infiltrator | conspiracy | schooled_in_secrets |
+| drug_channel | Drug Channel | conspiracy | spirit_speaker |
+| auto_transcript | Auto Transcript | conspiracy | automatic_writing |
+| break_conditioning | Break Conditioning | conspiracy | break_curse |
+| unsettling_intel | Unsettling Intel | conspiracy | disturbing_knowledge |
+| obscured_ops | Obscured Ops | conspiracy | bizarre_magic |
+| consult_sources | Consult Sources | conspiracy | consult_the_spirits |
+| master_codebreaker | Master Codebreaker | conspiracy | legendary_codebreaker |
+| read_document | Read Document | factions | glean_contents |
+| code_speech | Code Speech | factions | secret_speech |
+| faction_cover | Faction Cover | factions | deceptive_worship |
+| black_market_access | Black Market Access | factions | criminal_connections |
+| street_network | Street Network | factions | eyes_of_the_city |
+| underground_network | Underground Network | factions | underground_network |
+| polyglot_master | Polyglot Master | factions | legendary_linguist |
+| faction_linguist | Faction Linguist | factions | legendary_codebreaker |
+| mixed_intel | Mixed Intel | intel | dubious_knowledge |
+| solid_intel | Solid Intel | intel | unmistakable_lore |
+| legendary_operator | Legendary Operator | intel | legendary_professional |
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `internal/game/ruleset/feat_test.go`:
+
+```go
+func TestLoadFeats_SkillGapFeats_ConspiracyFactionsIntel(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"gang_infiltrator", "drug_channel", "auto_transcript", "break_conditioning",
+		"unsettling_intel", "obscured_ops", "consult_sources", "master_codebreaker",
+		"read_document", "code_speech", "faction_cover", "black_market_access",
+		"street_network", "underground_network", "polyglot_master", "faction_linguist",
+		"mixed_intel", "solid_intel", "legendary_operator",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_SkillGapFeats_ConspiracyFactionsIntel -v
+```
+Expected: FAIL
+
+- [ ] **Step 3: Add 19 skill feat YAML entries**
+
+Insert into the Conspiracy section (after `anomaly_id`), the Factions section (after `streetwise`), and the Intel section (after `street_cred`). Use spec section 3.2 for all descriptions. Adaptation rules: spirits → drug-altered states; religion/faith → gang codes/faction.
+
+**Conspiracy section:**
+```yaml
+  - id: gang_infiltrator
+    name: Gang Infiltrator
+    category: skill
+    skill: conspiracy
+    pf2e: schooled_in_secrets
+    active: false
+    activate_text: ""
+    description: "Gather information about secret organizations and impersonate their members convincingly."
+
+  - id: drug_channel
+    name: Drug Channel
+    category: skill
+    skill: conspiracy
+    pf2e: spirit_speaker
+    active: true
+    activate_text: "You slip into the altered state and let the compound guide your thoughts."
+    description: "Commune with drug-altered states of consciousness to gain insight and information."
+
+  - id: auto_transcript
+    name: Auto Transcript
+    category: skill
+    skill: conspiracy
+    pf2e: automatic_writing
+    active: false
+    activate_text: ""
+    description: "Subconsciously record information while your mind focuses elsewhere; useful for surveillance."
+
+  - id: break_conditioning
+    name: Break Conditioning
+    category: skill
+    skill: conspiracy
+    pf2e: break_curse
+    active: false
+    activate_text: ""
+    description: "Remove mental conditioning, compulsions, and behavioral modifications from yourself or others."
+
+  - id: unsettling_intel
+    name: Unsettling Intel
+    category: skill
+    skill: conspiracy
+    pf2e: disturbing_knowledge
+    active: true
+    activate_text: "You tell them what you know. Watch their face change."
+    description: "Reveal knowledge so disturbing and specific that it frightens the target."
+
+  - id: obscured_ops
+    name: Obscured Ops
+    category: skill
+    skill: conspiracy
+    pf2e: bizarre_magic
+    active: false
+    activate_text: ""
+    description: "Your operations and methods are difficult to identify; observers take -2 to understand your schemes."
+
+  - id: consult_sources
+    name: Consult Sources
+    category: skill
+    skill: conspiracy
+    pf2e: consult_the_spirits
+    active: false
+    activate_text: ""
+    description: "Tap secret information networks and shadow contacts for strategic guidance."
+
+  - id: master_codebreaker
+    name: Master Codebreaker
+    category: skill
+    skill: conspiracy
+    pf2e: legendary_codebreaker
+    active: false
+    activate_text: ""
+    description: "Quickly decode any encryption, cipher, or obfuscated communication."
+```
+
+**Factions section:**
+```yaml
+  - id: read_document
+    name: Read Document
+    category: skill
+    skill: factions
+    pf2e: glean_contents
+    active: false
+    activate_text: ""
+    description: "Read sealed or folded documents without fully opening them, gleaning the key contents."
+
+  - id: code_speech
+    name: Code Speech
+    category: skill
+    skill: factions
+    pf2e: secret_speech
+    active: false
+    activate_text: ""
+    description: "Communicate covertly in plain sight using faction code language hidden within normal conversation."
+
+  - id: faction_cover
+    name: Faction Cover
+    category: skill
+    skill: factions
+    pf2e: deceptive_worship
+    active: false
+    activate_text: ""
+    description: "Convincingly pose as a member of an opposing faction, passing their tests and rituals."
+
+  - id: black_market_access
+    name: Black Market Access
+    category: skill
+    skill: factions
+    pf2e: criminal_connections
+    active: false
+    activate_text: ""
+    description: "Connections to criminal networks give you access to restricted goods and services."
+
+  - id: street_network
+    name: Street Network
+    category: skill
+    skill: factions
+    pf2e: eyes_of_the_city
+    active: false
+    activate_text: ""
+    description: "Maintain a network of street-level informants in any district you've spent time in."
+
+  - id: underground_network
+    name: Underground Network
+    category: skill
+    skill: factions
+    pf2e: underground_network
+    active: false
+    activate_text: ""
+    description: "Ties to the resistance and criminal underground provide safe houses and contraband channels."
+
+  - id: polyglot_master
+    name: Polyglot Master
+    category: skill
+    skill: factions
+    pf2e: legendary_linguist
+    active: false
+    activate_text: ""
+    description: "Create a shared pidgin communication with anyone; always find a way to be understood."
+
+  - id: faction_linguist
+    name: Faction Linguist
+    category: skill
+    skill: factions
+    pf2e: legendary_codebreaker
+    active: false
+    activate_text: ""
+    description: "Instantly decode any faction cipher, social code, or ritual language."
+```
+
+**Intel section:**
+```yaml
+  - id: mixed_intel
+    name: Mixed Intel
+    category: skill
+    skill: intel
+    pf2e: dubious_knowledge
+    active: false
+    activate_text: ""
+    description: "On a failed recall check, still learn true information mixed with a false detail — partial intel beats nothing."
+
+  - id: solid_intel
+    name: Solid Intel
+    category: skill
+    skill: intel
+    pf2e: unmistakable_lore
+    active: false
+    activate_text: ""
+    description: "Recall knowledge more effectively in your specialty; on a critical success, gain additional detail."
+
+  - id: legendary_operator
+    name: Legendary Operator
+    category: skill
+    skill: intel
+    pf2e: legendary_professional
+    active: false
+    activate_text: ""
+    description: "Renown for your specialized knowledge opens doors and commands respect across all factions."
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats -v
+```
+Expected: All PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add content/feats.yaml internal/game/ruleset/feat_test.go
+git commit -m "feat(feats): add 19 gap skill feats for conspiracy/factions/intel"
+```
+
+---
+
+## Task 5: Patch Job Skill Feats (18 new entries)
+
+**Files:**
+- Modify: `content/feats.yaml`
+- Modify: `internal/game/ruleset/feat_test.go`
+
+**Gap feats (spec section 3.2):**
+
+| ID | Name | Skill | PF2E Source |
+|---|---|---|---|
+| stim_points | Stim Points | patch_job | acupuncturist |
+| inoculation | Inoculation | patch_job | inoculation |
+| field_researcher | Field Researcher | patch_job | medical_researcher |
+| risky_op | Risky Op | patch_job | risky_surgery |
+| field_suture | Field Suture | patch_job | stitch_flesh |
+| crystalline_stim | Crystalline Stim | patch_job | crystal_healing |
+| rapid_treatment | Rapid Treatment | patch_job | continual_recovery |
+| tough_patient | Tough Patient | patch_job | robust_recovery |
+| mass_treatment | Mass Treatment | patch_job | ward_medic |
+| extended_treatment | Extended Treatment | patch_job | unusual_treatment |
+| secular_medicine | Secular Medicine | patch_job | godless_healing |
+| natural_healing | Natural Healing | patch_job | mortal_healing |
+| comfort_treatment | Comfort Treatment | patch_job | performer's_treatment |
+| light_therapy | Light Therapy | patch_job | chromotherapy |
+| drug_vasodilation | Drug Vasodilation | patch_job | vasodilation |
+| master_combat_patch | Master Combat Patch | patch_job | paragon_battle_medicine |
+| advanced_patch_job | Advanced Patch Job | patch_job | advanced_first_aid |
+| legendary_medic | Legendary Medic | patch_job | legendary_medic |
+
+Note: 18 entries listed (spec says 19 — `stim_points` through `legendary_medic` totals 18; count the table).
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `internal/game/ruleset/feat_test.go`:
+
+```go
+func TestLoadFeats_SkillGapFeats_PatchJob(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"stim_points", "inoculation", "field_researcher", "risky_op", "field_suture",
+		"crystalline_stim", "rapid_treatment", "tough_patient", "mass_treatment",
+		"extended_treatment", "secular_medicine", "natural_healing", "comfort_treatment",
+		"light_therapy", "drug_vasodilation", "master_combat_patch", "advanced_patch_job",
+		"legendary_medic",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing patch_job skill feat: %s", id)
+	}
+}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_SkillGapFeats_PatchJob -v
+```
+Expected: FAIL
+
+- [ ] **Step 3: Add 18 patch_job skill feat YAML entries**
+
+Insert into the Patch Job section (after `combat_patch`). Adaptation rules: Drug Tech feats use drug/stimulant themes; Crystal Healing → crystalline drug compounds; Chromotherapy → light-based treatment tech; Vasodilation → drug-assisted vasodilation.
+
+```yaml
+  - id: stim_points
+    name: Stim Points
+    category: skill
+    skill: patch_job
+    pf2e: acupuncturist
+    active: true
+    activate_text: "You hit the pressure points precisely and feel them respond."
+    description: "Stimulation technique using precise pressure points to enhance the target's recovery rate."
+
+  - id: inoculation
+    name: Inoculation
+    category: skill
+    skill: patch_job
+    pf2e: inoculation
+    active: false
+    activate_text: ""
+    description: "Protect others against disease and poison; inoculated targets gain +2 to saves vs. the chosen threat."
+
+  - id: field_researcher
+    name: Field Researcher
+    category: skill
+    skill: patch_job
+    pf2e: medical_researcher
+    active: false
+    activate_text: ""
+    description: "Learn about diseases and toxins as you encounter them; add new threats to your working knowledge."
+
+  - id: risky_op
+    name: Risky Op
+    category: skill
+    skill: patch_job
+    pf2e: risky_surgery
+    active: false
+    activate_text: ""
+    description: "Accept risk for better medical outcomes; trade a flat check for +2 to Patch Job and double healing."
+
+  - id: field_suture
+    name: Field Suture
+    category: skill
+    skill: patch_job
+    pf2e: stitch_flesh
+    active: true
+    activate_text: "You close the wound with whatever you have on hand."
+    description: "Basic wound closure without medical supplies; restore a small amount of HP without a kit."
+
+  - id: crystalline_stim
+    name: Crystalline Stim
+    category: skill
+    skill: patch_job
+    pf2e: crystal_healing
+    active: true
+    activate_text: "You administer the compound and watch the color return to their face."
+    description: "Use crystalline drug compounds to enhance healing beyond standard first aid limits."
+
+  - id: rapid_treatment
+    name: Rapid Treatment
+    category: skill
+    skill: patch_job
+    pf2e: continual_recovery
+    active: false
+    activate_text: ""
+    description: "Treat wounds more often; reduce the cooldown between Treat Wounds actions."
+
+  - id: tough_patient
+    name: Tough Patient
+    category: skill
+    skill: patch_job
+    pf2e: robust_recovery
+    active: false
+    activate_text: ""
+    description: "When treated, gain greater benefits; also recover faster from diseases."
+
+  - id: mass_treatment
+    name: Mass Treatment
+    category: skill
+    skill: patch_job
+    pf2e: ward_medic
+    active: false
+    activate_text: ""
+    description: "Treat up to 4 patients simultaneously with a single Treat Wounds action."
+
+  - id: extended_treatment
+    name: Extended Treatment
+    category: skill
+    skill: patch_job
+    pf2e: unusual_treatment
+    active: false
+    activate_text: ""
+    description: "Treat additional conditions beyond standard wounds — remove sickened and enfeebled with medical care."
+
+  - id: secular_medicine
+    name: Secular Medicine
+    category: skill
+    skill: patch_job
+    pf2e: godless_healing
+    active: false
+    activate_text: ""
+    description: "Heal without relying on Technology bonuses; pure technique and anatomy knowledge."
+
+  - id: natural_healing
+    name: Natural Healing
+    category: skill
+    skill: patch_job
+    pf2e: mortal_healing
+    active: false
+    activate_text: ""
+    description: "Use the body's natural processes to heal without drugs or tech, bypassing standard restrictions."
+
+  - id: comfort_treatment
+    name: Comfort Treatment
+    category: skill
+    skill: patch_job
+    pf2e: performer's_treatment
+    active: true
+    activate_text: "You talk them through it. Keep them calm. It makes a difference."
+    description: "A calm, reassuring presence aids recovery; reduce the frightened condition on patients you treat."
+
+  - id: light_therapy
+    name: Light Therapy
+    category: skill
+    skill: patch_job
+    pf2e: chromotherapy
+    active: false
+    activate_text: ""
+    description: "Specialized light-spectrum treatment addresses psychological and physiological recovery."
+
+  - id: drug_vasodilation
+    name: Drug Vasodilation
+    category: skill
+    skill: patch_job
+    pf2e: vasodilation
+    active: true
+    activate_text: "You administer the compound and feel the rush as blood flow improves."
+    description: "Drug-assisted vasodilation rapidly distributes healing compounds for immediate HP recovery."
+
+  - id: master_combat_patch
+    name: Master Combat Patch
+    category: skill
+    skill: patch_job
+    pf2e: paragon_battle_medicine
+    active: true
+    activate_text: "You work fast under fire and your hands don't shake."
+    description: "Enhanced in-combat healing; Combat Patch restores additional HP and removes one additional condition."
+
+  - id: advanced_patch_job
+    name: Advanced Patch Job
+    category: skill
+    skill: patch_job
+    pf2e: advanced_first_aid
+    active: true
+    activate_text: "You stabilize them and get them back in the fight."
+    description: "Use advanced first aid to reduce the frightened and sickened conditions on a target."
+
+  - id: legendary_medic
+    name: Legendary Medic
+    category: skill
+    skill: patch_job
+    pf2e: legendary_medic
+    active: false
+    activate_text: ""
+    description: "Cure serious conditions including blindness, paralysis, and toxin damage with a day of treatment."
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats -v
+```
+Expected: All PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add content/feats.yaml internal/game/ruleset/feat_test.go
+git commit -m "feat(feats): add 18 gap skill feats for patch_job"
+```
+
+---
+
+## Task 6: Wasteland, Gang Codes, and Scavenging Skill Feats (17 new entries)
+
+**Files:**
+- Modify: `content/feats.yaml`
+- Modify: `internal/game/ruleset/feat_test.go`
+
+**Gap feats (spec section 3.2):**
+
+| ID | Name | Skill | PF2E Source |
+|---|---|---|---|
+| creature_speak | Creature Speak | wasteland | all_of_the_animal |
+| tame_creature | Tame Creature | wasteland | tame_animal |
+| legend_hunter | Legend Hunter | wasteland | myth_hunter |
+| permanent_bond | Permanent Bond | wasteland | bonded_animal |
+| zone_influence | Zone Influence | wasteland | influence_nature |
+| faction_token | Faction Token | gang_codes | pilgrim's_token |
+| rally_the_crew | Rally the Crew | gang_codes | exhort_the_faithful |
+| code_shield | Code Shield | gang_codes | sacred_defense |
+| battle_code | Battle Code | gang_codes | battle_prayer |
+| spread_the_word | Spread the Word | gang_codes | evangelize |
+| faction_oracle | Faction Oracle | gang_codes | divine_guidance |
+| zone_vanish | Zone Vanish | scavenging | vanish_into_the_land |
+| salvage_crafting | Salvage Crafting | scavenging | monster_crafting |
+| zone_survival | Zone Survival | scavenging | planar_survival |
+| zone_guide | Zone Guide | scavenging | environmental_guide |
+| legendary_survivor | Legendary Survivor | scavenging | legendary_survivalist |
+| legendary_guide | Legendary Guide | scavenging | legendary_guide |
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `internal/game/ruleset/feat_test.go`:
+
+```go
+func TestLoadFeats_SkillGapFeats_WastelandGangCodesScavenging(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"creature_speak", "tame_creature", "legend_hunter", "permanent_bond", "zone_influence",
+		"faction_token", "rally_the_crew", "code_shield", "battle_code", "spread_the_word", "faction_oracle",
+		"zone_vanish", "salvage_crafting", "zone_survival", "zone_guide", "legendary_survivor", "legendary_guide",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_SkillGapFeats_WastelandGangCodesScavenging -v
+```
+Expected: FAIL
+
+- [ ] **Step 3: Add 17 skill feat YAML entries**
+
+Insert into the Wasteland section (after `animal_bond`), Gang Codes section (after `code_scholar`), and Scavenging section (after `zone_expertise`). Adaptation rules: Religion/Divine → faction/gang codes; planar survival → zone survival (irradiated, flooded, toxic zones).
+
+**Wasteland section:**
+```yaml
+  - id: creature_speak
+    name: Creature Speak
+    category: skill
+    skill: wasteland
+    pf2e: all_of_the_animal
+    active: false
+    activate_text: ""
+    description: "Understand all animal and creature communication; comprehend behavior cues from any non-sapient creature."
+
+  - id: tame_creature
+    name: Tame Creature
+    category: skill
+    skill: wasteland
+    pf2e: tame_animal
+    active: false
+    activate_text: ""
+    description: "Tame wild wasteland creatures through extended interaction during exploration."
+
+  - id: legend_hunter
+    name: Legend Hunter
+    category: skill
+    skill: wasteland
+    pf2e: myth_hunter
+    active: false
+    activate_text: ""
+    description: "Track and research legendary creatures; +2 to Wasteland checks to identify and locate unique beasts."
+
+  - id: permanent_bond
+    name: Permanent Bond
+    category: skill
+    skill: wasteland
+    pf2e: bonded_animal
+    active: false
+    activate_text: ""
+    description: "An animal companion becomes permanently bonded; it becomes permanently easier to command and more loyal."
+
+  - id: zone_influence
+    name: Zone Influence
+    category: skill
+    skill: wasteland
+    pf2e: influence_nature
+    active: false
+    activate_text: ""
+    description: "Influence wasteland creature behavior and redirect them away from dangerous areas."
+```
+
+**Gang Codes section:**
+```yaml
+  - id: faction_token
+    name: Faction Token
+    category: skill
+    skill: gang_codes
+    pf2e: pilgrim's_token
+    active: false
+    activate_text: ""
+    description: "Carry a token that marks faction allegiance; allies recognize you and hostiles hesitate."
+
+  - id: rally_the_crew
+    name: Rally the Crew
+    category: skill
+    skill: gang_codes
+    pf2e: exhort_the_faithful
+    active: true
+    activate_text: "You invoke the code and watch the crew straighten up."
+    description: "Motivate faction members by invoking shared codes; allies gain a bonus to their next action."
+
+  - id: code_shield
+    name: Code Shield
+    category: skill
+    skill: gang_codes
+    pf2e: sacred_defense
+    active: false
+    activate_text: ""
+    description: "Deep knowledge of faction codes provides mental protection; +1 to saves vs. mental effects."
+
+  - id: battle_code
+    name: Battle Code
+    category: skill
+    skill: gang_codes
+    pf2e: battle_prayer
+    active: true
+    activate_text: "You call out the battle code and feel the adrenaline hit."
+    description: "Invoke faction battle codes for combat bonuses; +1 to attack rolls for 1 round."
+
+  - id: spread_the_word
+    name: Spread the Word
+    category: skill
+    skill: gang_codes
+    pf2e: evangelize
+    active: false
+    activate_text: ""
+    description: "Recruit and inspire faction loyalty; make others eager to join or support your faction."
+
+  - id: faction_oracle
+    name: Faction Oracle
+    category: skill
+    skill: gang_codes
+    pf2e: divine_guidance
+    active: false
+    activate_text: ""
+    description: "Receive strategic guidance from faction leadership; once per day gain a +2 insight bonus to a skill check."
+```
+
+**Scavenging section:**
+```yaml
+  - id: zone_vanish
+    name: Zone Vanish
+    category: skill
+    skill: scavenging
+    pf2e: vanish_into_the_land
+    active: true
+    activate_text: "You melt into the wasteland and no one can find you."
+    description: "Disappear into wasteland environments using Survival; no cover required."
+
+  - id: salvage_crafting
+    name: Salvage Crafting
+    category: skill
+    skill: scavenging
+    pf2e: monster_crafting
+    active: false
+    activate_text: ""
+    description: "Craft improvised weapons, tools, and traps from parts salvaged off defeated enemies."
+
+  - id: zone_survival
+    name: Zone Survival
+    category: skill
+    skill: scavenging
+    pf2e: planar_survival
+    active: false
+    activate_text: ""
+    description: "Survive in any hostile zone type — irradiated, flooded, or toxic — without the standard environmental penalties."
+
+  - id: zone_guide
+    name: Zone Guide
+    category: skill
+    skill: scavenging
+    pf2e: environmental_guide
+    active: false
+    activate_text: ""
+    description: "Expertly guide others through dangerous wasteland terrain; group avoids environmental hazard checks."
+
+  - id: legendary_survivor
+    name: Legendary Survivor
+    category: skill
+    skill: scavenging
+    pf2e: legendary_survivalist
+    active: false
+    activate_text: ""
+    description: "Survive extreme environmental conditions that would kill others; ignore most wilderness deprivation."
+
+  - id: legendary_guide
+    name: Legendary Guide
+    category: skill
+    skill: scavenging
+    pf2e: legendary_guide
+    active: false
+    activate_text: ""
+    description: "Guide anyone through any terrain; others under your guidance are immune to environmental hazards."
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats -v
+```
+Expected: All PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add content/feats.yaml internal/game/ruleset/feat_test.go
+git commit -m "feat(feats): add 17 gap skill feats for wasteland/gang_codes/scavenging"
+```
+
+---
+
+## Task 7: Hustle, Smooth Talk, Hard Look, and Rep Skill Feats (39 new entries)
+
+**Files:**
+- Modify: `content/feats.yaml`
+- Modify: `internal/game/ruleset/feat_test.go`
+
+**Gap feats (spec section 3.2):**
+
+Hustle (12): cutting_quip, street_charlatan, vicious_critique, smooth_liar, quick_disguise, spare_identity, half_truths, plant_rumor, quick_alter, divert_attention, doublespeak, secrets_shield
+
+Smooth Talk (9): calm_down, deal_maker, fast_friends, pick_em_up, call_in_favors, speed_network, quiet_ask, brass_nerves, master_negotiator
+
+Hard Look (8): physical_threat, long_scare, iron_nerves, say_that_again, battle_shout, break_them, too_angry_to_die, scare_to_death
+
+Rep (10): stunt_rep, vicious_critique_rep, stage_diversion, winners_speech, juggle, copy_the_master, rile_the_crowd, street_following, comforting_presence, legendary_rep
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `internal/game/ruleset/feat_test.go`:
+
+```go
+func TestLoadFeats_SkillGapFeats_HustleSmoothTalkHardLookRep(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		// hustle
+		"cutting_quip", "street_charlatan", "vicious_critique", "smooth_liar", "quick_disguise",
+		"spare_identity", "half_truths", "plant_rumor", "quick_alter", "divert_attention",
+		"doublespeak", "secrets_shield",
+		// smooth_talk
+		"calm_down", "deal_maker", "fast_friends", "pick_em_up", "call_in_favors",
+		"speed_network", "quiet_ask", "brass_nerves", "master_negotiator",
+		// hard_look
+		"physical_threat", "long_scare", "iron_nerves", "say_that_again", "battle_shout",
+		"break_them", "too_angry_to_die", "scare_to_death",
+		// rep
+		"stunt_rep", "vicious_critique_rep", "stage_diversion", "winners_speech", "juggle",
+		"copy_the_master", "rile_the_crowd", "street_following", "comforting_presence", "legendary_rep",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing skill feat: %s", id)
+	}
+}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_SkillGapFeats_HustleSmoothTalkHardLookRep -v
+```
+Expected: FAIL
+
+- [ ] **Step 3: Add 39 skill feat YAML entries**
+
+Insert each group into its respective skill section. Use spec section 3.2 for all descriptions.
+
+**Hustle section** (insert after `bs_detector`):
+```yaml
+  - id: cutting_quip
+    name: Cutting Quip
+    category: skill
+    skill: hustle
+    pf2e: bon_mot
+    active: true
+    activate_text: "One sentence. Perfectly aimed. You watch them wobble."
+    description: "A quick verbal jab that unsettles a target; on success, the target is distracted and takes -1 to Perception."
+
+  - id: street_charlatan
+    name: Street Charlatan
+    category: skill
+    skill: hustle
+    pf2e: charlatan
+    active: false
+    activate_text: ""
+    description: "Pass yourself off as a legitimate professional in any field; reduce suspicion when impersonating experts."
+
+  - id: vicious_critique
+    name: Vicious Critique
+    category: skill
+    skill: hustle
+    pf2e: vicious_critique
+    active: true
+    activate_text: "You tear their performance apart, precisely and without mercy."
+    description: "Demoralize a target with scathing criticism of their actions or abilities."
+
+  - id: smooth_liar
+    name: Smooth Liar
+    category: skill
+    skill: hustle
+    pf2e: confabulator
+    active: false
+    activate_text: ""
+    description: "Reduce the bonus others gain when catching your repeated lies; wear them down with consistency."
+
+  - id: quick_disguise
+    name: Quick Disguise
+    category: skill
+    skill: hustle
+    pf2e: quick_disguise
+    active: false
+    activate_text: ""
+    description: "Set up a disguise in much less time than normal — in minutes instead of an hour."
+
+  - id: spare_identity
+    name: Spare Identity
+    category: skill
+    skill: hustle
+    pf2e: backup_disguise
+    active: false
+    activate_text: ""
+    description: "Maintain a backup identity and disguise ready to deploy at a moment's notice."
+
+  - id: half_truths
+    name: Half Truths
+    category: skill
+    skill: hustle
+    pf2e: half-truths
+    active: false
+    activate_text: ""
+    description: "Blend lies with truth for plausible deniability; gain a bonus when truth-detected."
+
+  - id: plant_rumor
+    name: Plant Rumor
+    category: skill
+    skill: hustle
+    pf2e: sow_rumor
+    active: false
+    activate_text: ""
+    description: "Secretly plant damaging rumors that spread through a community without being traced back to you."
+
+  - id: quick_alter
+    name: Quick Alter
+    category: skill
+    skill: hustle
+    pf2e: tweak_appearances
+    active: true
+    activate_text: "A few quick changes and they look completely different."
+    description: "Quickly change someone's appearance — hair, clothing, posture — in under a minute."
+
+  - id: divert_attention
+    name: Divert Attention
+    category: skill
+    skill: hustle
+    pf2e: distracting_performance
+    active: true
+    activate_text: "You give them something else to look at."
+    description: "Use improvised performance to distract observers; affected targets take -2 to Perception briefly."
+
+  - id: doublespeak
+    name: Doublespeak
+    category: skill
+    skill: hustle
+    pf2e: doublespeak
+    active: false
+    activate_text: ""
+    description: "Convey two contradictory messages simultaneously; only your intended audience understands the real meaning."
+
+  - id: secrets_shield
+    name: Secrets Shield
+    category: skill
+    skill: hustle
+    pf2e: slippery_secrets
+    active: false
+    activate_text: ""
+    description: "Evade attempts to uncover your true nature; you always maintain at least one layer of cover."
+```
+
+**Smooth Talk section** (insert after `street_networker`):
+```yaml
+  - id: calm_down
+    name: Calm Down
+    category: skill
+    skill: smooth_talk
+    pf2e: no_cause_for_alarm
+    active: true
+    activate_text: "Easy. Easy. Everyone just take a breath."
+    description: "Reduce frightened condition values in nearby creatures through calm, authoritative speech."
+
+  - id: deal_maker
+    name: Deal Maker
+    category: skill
+    skill: smooth_talk
+    pf2e: contract_negotiator
+    active: false
+    activate_text: ""
+    description: "Negotiate formal agreements efficiently; draft and finalize deals in half the normal time."
+
+  - id: fast_friends
+    name: Fast Friends
+    category: skill
+    skill: smooth_talk
+    pf2e: glad-hand
+    active: true
+    activate_text: "You extend a hand and they already like you."
+    description: "Make a favorable impression on someone you just met in under a minute."
+
+  - id: pick_em_up
+    name: Pick 'Em Up
+    category: skill
+    skill: smooth_talk
+    pf2e: encouraging_words
+    active: true
+    activate_text: "You tell them exactly what they need to hear right now."
+    description: "Boost an ally's spirits with the right words at the right time; reduce their frightened condition."
+
+  - id: call_in_favors
+    name: Call In Favors
+    category: skill
+    skill: smooth_talk
+    pf2e: leverage_connections
+    active: false
+    activate_text: ""
+    description: "Use your connections to obtain tangible aid — supplies, information, or safe passage."
+
+  - id: speed_network
+    name: Speed Network
+    category: skill
+    skill: smooth_talk
+    pf2e: quick_contacts
+    active: false
+    activate_text: ""
+    description: "Quickly establish contacts in a new area; find the right person in half the normal time."
+
+  - id: quiet_ask
+    name: Quiet Ask
+    category: skill
+    skill: smooth_talk
+    pf2e: discreet_inquiry
+    active: false
+    activate_text: ""
+    description: "Gather information without revealing your interest; observers don't notice you were asking."
+
+  - id: brass_nerves
+    name: Brass Nerves
+    category: skill
+    skill: smooth_talk
+    pf2e: shameless_request
+    active: false
+    activate_text: ""
+    description: "Make extreme or outlandish requests with lesser social consequences; your audacity is almost admirable."
+
+  - id: master_negotiator
+    name: Master Negotiator
+    category: skill
+    skill: smooth_talk
+    pf2e: legendary_negotiation
+    active: true
+    activate_text: "You walk straight up to them and start talking."
+    description: "Quickly enter parley with hostile or neutral parties; buy time with words when violence looms."
+```
+
+**Hard Look section** (insert after `fast_threat`):
+```yaml
+  - id: physical_threat
+    name: Physical Threat
+    category: skill
+    skill: hard_look
+    pf2e: intimidating_prowess
+    active: false
+    activate_text: ""
+    description: "Gain a bonus to Demoralize when you are physically larger or visibly armed versus your target."
+
+  - id: long_scare
+    name: Long Scare
+    category: skill
+    skill: hard_look
+    pf2e: lasting_coercion
+    active: false
+    activate_text: ""
+    description: "Coerce targets into helping you for longer; coerced compliance lasts days instead of hours."
+
+  - id: iron_nerves
+    name: Iron Nerves
+    category: skill
+    skill: hard_look
+    pf2e: terrifying_resistance
+    active: false
+    activate_text: ""
+    description: "Reduce the frightened condition faster when applied to yourself; your own fear passes quickly."
+
+  - id: say_that_again
+    name: Say That Again
+    category: skill
+    skill: hard_look
+    pf2e: "say_that_again!"
+    active: true
+    activate_text: "You heard what they said. You want them to hear it too."
+    description: "React when a creature calls out or mocks your actions; immediately Demoralize them as a reaction."
+
+  - id: battle_shout
+    name: Battle Shout
+    category: skill
+    skill: hard_look
+    pf2e: battle_cry
+    active: true
+    activate_text: "You open your mouth and let everything out at once."
+    description: "Demoralize all visible foes when rolling for initiative; your battle shout precedes the first strike."
+
+  - id: break_them
+    name: Break Them
+    category: skill
+    skill: hard_look
+    pf2e: terrified_retreat
+    active: false
+    activate_text: ""
+    description: "Cause sufficiently demoralized targets to flee from you on their next turn."
+
+  - id: too_angry_to_die
+    name: Too Angry to Die
+    category: skill
+    skill: hard_look
+    pf2e: too_angry_to_die
+    active: false
+    activate_text: ""
+    description: "Continue fighting past when you should fall; once per day, ignore a condition that would stop your actions."
+
+  - id: scare_to_death
+    name: Scare to Death
+    category: skill
+    skill: hard_look
+    pf2e: scare_to_death
+    active: true
+    activate_text: "You fix them with your full attention. Some people just can't take it."
+    description: "Frighten a target so severely they may collapse; critically frightened targets can be incapacitated."
+```
+
+**Rep section** (insert after `signature_style`):
+```yaml
+  - id: stunt_rep
+    name: Stunt Rep
+    category: skill
+    skill: rep
+    pf2e: acrobatic_performer
+    active: true
+    activate_text: "You flip off the wall and land it perfectly. The crowd loses their minds."
+    description: "Use physical stunts and acrobatics to enhance stage performance; Rep check uses Parkour as a bonus."
+
+  - id: vicious_critique_rep
+    name: Vicious Critique (Rep)
+    category: skill
+    skill: rep
+    pf2e: vicious_critique
+    active: true
+    activate_text: "You call out their performance with surgical precision. The crowd turns on them."
+    description: "Demoralize a target through public critique of their performance or reputation via Rep skill."
+
+  - id: stage_diversion
+    name: Stage Diversion
+    category: skill
+    skill: rep
+    pf2e: distracting_performance
+    active: true
+    activate_text: "You take center stage and everyone looks at you."
+    description: "Use stage performance to distract observers; affected audience can't notice what your allies are doing."
+
+  - id: winners_speech
+    name: Winner's Speech
+    category: skill
+    skill: rep
+    pf2e: triumphant_boast
+    active: true
+    activate_text: "You raise your fist and let them hear it."
+    description: "Inspire allies with a boast after a victory; allies gain a bonus to their next check."
+
+  - id: juggle
+    name: Juggle
+    category: skill
+    skill: rep
+    pf2e: juggle
+    active: true
+    activate_text: "The objects become a blur between your hands."
+    description: "Juggle multiple objects as performance or practical distraction."
+
+  - id: copy_the_master
+    name: Copy the Master
+    category: skill
+    skill: rep
+    pf2e: talent_envy
+    active: false
+    activate_text: ""
+    description: "Study and replicate a technique you've observed; +1 to mimic a skill you've seen performed this scene."
+
+  - id: rile_the_crowd
+    name: Rile the Crowd
+    category: skill
+    skill: rep
+    pf2e: inflame_crowd
+    active: true
+    activate_text: "You work the room until they're exactly where you want them."
+    description: "Turn audience emotion toward your desired reaction — fear, anger, admiration."
+
+  - id: street_following
+    name: Street Following
+    category: skill
+    skill: rep
+    pf2e: entourage
+    active: false
+    activate_text: ""
+    description: "Attract a loyal following; a small group of fans or crew accompanies you in districts where you're known."
+
+  - id: comforting_presence
+    name: Comforting Presence
+    category: skill
+    skill: rep
+    pf2e: comforting_presence
+    active: false
+    activate_text: ""
+    description: "Your presence helps allies resist fear; allies within 30 feet gain +1 to saves vs. frightened."
+
+  - id: legendary_rep
+    name: Legendary Rep
+    category: skill
+    skill: rep
+    pf2e: legendary_performer
+    active: false
+    activate_text: ""
+    description: "Renowned throughout the city for your reputation; faction leaders and district bosses know your name."
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats -v
+```
+Expected: All PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add content/feats.yaml internal/game/ruleset/feat_test.go
+git commit -m "feat(feats): add 39 gap skill feats for hustle/smooth_talk/hard_look/rep"
+```
+
+---
+
+## Task 8: Miscellaneous Feats (15 new entries)
+
+**Files:**
+- Modify: `content/feats.yaml`
+- Modify: `internal/game/ruleset/feat_test.go`
+
+**Gap feats (spec section 3.3):**
+
+| ID | Name | PF2E Source |
+|---|---|---|
+| overclock_senses | Overclock Senses | overclock_senses |
+| unstable_gearshift | Unstable Gearshift | unstable_gearshift |
+| irradiate | Irradiate | irradiate |
+| sonic_dash | Sonic Dash | sonic_dash |
+| titan_swing | Titan Swing | titan_swing |
+| rapid_regen | Rapid Regen | high-speed_regeneration |
+| pain_is_temporary | Pain Is Temporary | pain_is_temporary |
+| like_a_roach | Like a Roach | like_a_roach |
+| unbreakable_will | Unbreakable Will | indomitable_spirit |
+| old_hand | Old Hand | weight_of_experience |
+| many_jobs | Many Jobs | i've_had_many_jobs |
+| thruster_leap | Thruster Leap | propulsive_leap |
+| trailblazer | Trailblazer | trailblazing_stride |
+| iron_resolve | Iron Resolve | unbreakable_resolve |
+| calm_and_centered | Calm and Centered | calm_and_centered |
+
+These are PF2E deviant/mythic abilities adapted as general feats. They use `category: general`.
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `internal/game/ruleset/feat_test.go`:
+
+```go
+func TestLoadFeats_MiscGapFeatsPresent(t *testing.T) {
+	feats, err := ruleset.LoadFeats("../../../content/feats.yaml")
+	require.NoError(t, err)
+	byID := make(map[string]bool)
+	for _, f := range feats {
+		byID[f.ID] = true
+	}
+	required := []string{
+		"overclock_senses", "unstable_gearshift", "irradiate", "sonic_dash", "titan_swing",
+		"rapid_regen", "pain_is_temporary", "like_a_roach", "unbreakable_will", "old_hand",
+		"many_jobs", "thruster_leap", "trailblazer", "iron_resolve", "calm_and_centered",
+	}
+	for _, id := range required {
+		assert.True(t, byID[id], "missing misc feat: %s", id)
+	}
+}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_MiscGapFeatsPresent -v
+```
+Expected: FAIL
+
+- [ ] **Step 3: Add 15 miscellaneous general feat YAML entries**
+
+Add a new section to `content/feats.yaml` after the existing general feats section (after `true_perception`) and before `# ── SKILL FEATS: PARKOUR`:
+
+```yaml
+  # ── GENERAL FEATS: MISCELLANEOUS (Technology/Implant/Drug adaptations) ─────
+  - id: overclock_senses
+    name: Overclock Senses
+    category: general
+    pf2e: overclock_senses
+    active: true
+    activate_text: "You push the implant past its limits. Everything sharpens."
+    description: "Temporarily boost Perception and awareness via neural implant overclocking; take 1d4 damage after use."
+
+  - id: unstable_gearshift
+    name: Unstable Gearshift
+    category: general
+    pf2e: unstable_gearshift
+    active: true
+    activate_text: "You push the modification past the safety threshold."
+    description: "Risky but powerful gear modification; gain a significant bonus to one action but risk a critical failure cascade."
+
+  - id: irradiate
+    name: Irradiate
+    category: general
+    pf2e: irradiate
+    active: true
+    activate_text: "You vent the containment and everything nearby gets a dose."
+    description: "Emit a burst of radiation affecting nearby targets; deals radiation damage in a small radius."
+
+  - id: sonic_dash
+    name: Sonic Dash
+    category: general
+    pf2e: sonic_dash
+    active: true
+    activate_text: "The tech fires and you're gone before they can track you."
+    description: "Burst of sonic-tech assisted speed; move up to triple your speed in a straight line."
+
+  - id: titan_swing
+    name: Titan Swing
+    category: general
+    pf2e: titan_swing
+    active: true
+    activate_text: "You put everything into one massive powered strike."
+    description: "Massive powered weapon swing with knockback; deal extra damage and push target back 10 feet."
+
+  - id: rapid_regen
+    name: Rapid Regen
+    category: general
+    pf2e: high-speed_regeneration
+    active: false
+    activate_text: ""
+    description: "Regenerative drug or implant heals a small amount of HP at the start of each of your turns."
+
+  - id: pain_is_temporary
+    name: Pain Is Temporary
+    category: general
+    pf2e: pain_is_temporary
+    active: true
+    activate_text: "You push through it. You've felt worse."
+    description: "Ignore pain-based penalties for a brief window; remove one pain-related condition briefly."
+
+  - id: like_a_roach
+    name: Like a Roach
+    category: general
+    pf2e: like_a_roach
+    active: false
+    activate_text: ""
+    description: "Once per day, survive a lethal hit on 1 HP instead of dying; you just won't stay down."
+
+  - id: unbreakable_will
+    name: Unbreakable Will
+    category: general
+    pf2e: indomitable_spirit
+    active: false
+    activate_text: ""
+    description: "Resist mental domination, compulsion, and psychic effects through sheer force of will."
+
+  - id: old_hand
+    name: Old Hand
+    category: general
+    pf2e: weight_of_experience
+    active: false
+    activate_text: ""
+    description: "Vast experience grants situational bonuses; once per scene reroll a failed check you've succeeded at before."
+
+  - id: many_jobs
+    name: Many Jobs
+    category: general
+    pf2e: i've_had_many_jobs
+    active: false
+    activate_text: ""
+    description: "Experience across multiple jobs gives unique insight; gain a bonus in situations your past jobs have prepared you for."
+
+  - id: thruster_leap
+    name: Thruster Leap
+    category: general
+    pf2e: propulsive_leap
+    active: true
+    activate_text: "The thrusters fire and you clear the gap easily."
+    description: "Use tech thrusters to leap much farther than normal; treat as if you rolled 10 higher on jump checks."
+
+  - id: trailblazer
+    name: Trailblazer
+    category: general
+    pf2e: trailblazing_stride
+    active: false
+    activate_text: ""
+    description: "Move through difficult terrain without penalty; clear a path for allies behind you."
+
+  - id: iron_resolve
+    name: Iron Resolve
+    category: general
+    pf2e: unbreakable_resolve
+    active: false
+    activate_text: ""
+    description: "Resist being mentally broken; your will cannot be worn down by repeated fear or coercion."
+
+  - id: calm_and_centered
+    name: Calm and Centered
+    category: general
+    pf2e: calm_and_centered
+    active: false
+    activate_text: ""
+    description: "Mental calm provides bonuses against environmental and psychological effects; +1 to Will saves."
+```
+
+- [ ] **Step 4: Run the full test suite**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -v
+```
+Expected: All PASS including all new feat presence tests
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add content/feats.yaml internal/game/ruleset/feat_test.go
+git commit -m "feat(feats): add 15 miscellaneous gap feats (technology/implant/drug adaptations)"
+```
+
+---
+
+## Task 9: Architecture Doc Update
+
+**Files:**
+- Modify: `docs/architecture/character.md`
+
+- [ ] **Step 1: Read current architecture doc**
+
+```bash
+cat docs/architecture/character.md
+```
+
+- [ ] **Step 2: Add Feat System section**
+
+Append the following section to `docs/architecture/character.md` after the existing content (before any trailing notes). The exact content is specified in spec section 5:
+
+```markdown
+## Feat System
+
+Content lives in `content/feats.yaml`. The registry (`internal/game/ruleset/feat.go`) provides four indexes: `byID`, `byCategory`, `bySkill`, `byArchetype`.
+
+**Three feat categories:**
+
+- **general** — available in the general feat pool at character creation; no skill requirement.
+- **skill** — gated by skill proficiency; must carry a `skill` field matching a Gunchete skill ID; available when the player is Trained or better in that skill.
+- **job** — archetype-specific; must carry an `archetype` field; granted or chosen at job selection.
+
+The `pf2e` field records the source PF2E feat name for traceability. It is not used at runtime.
+
+Adding a new feat requires only a YAML entry — no code changes. The registry auto-indexes on load.
+
+The primary runtime access path for skill feats is `FeatRegistry.SkillFeatsForTrainedSkills(trained map[string]string)`, called during `ensureFeats` in character creation. It returns the union of all feat pools for skills where the player's proficiency is `"trained"` or better. A new skill feat added to `content/feats.yaml` with the correct `skill` field will automatically appear in this pool without any code changes.
+
+**Extension Point:**
+
+1. Add entry to `content/feats.yaml` in the appropriate section.
+2. Set `category`, `skill` (if skill feat), `pf2e` (source name), `active` (true if player-triggered), `description` (Gunchete-flavored).
+3. Restart server — feat is immediately available via `SkillFeatsForTrainedSkills` and all registry indexes.
+```
+
+- [ ] **Step 3: Run full test suite to confirm nothing regressed**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -v
+```
+Expected: All PASS
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/architecture/character.md
+git commit -m "docs(architecture): add Feat System section to character.md (REQ-FI-7)"
+```
+
+---
+
+## Final Verification
+
+- [ ] **Run all feat tests**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -v 2>&1 | tail -30
+```
+Expected: All PASS, no failures
+
+- [ ] **Verify feat counts** (spot check)
+
+```bash
+cd /home/cjohannsen/src/mud && grep -c "^  - id:" content/feats.yaml
+```
+Expected: original count + ~191 new entries (approximately 260+ total)
+
+- [ ] **Confirm no duplicate IDs**
+
+```bash
+cd /home/cjohannsen/src/mud && grep "^  - id:" content/feats.yaml | sort | uniq -d
+```
+Expected: no output (no duplicates)
+
+- [ ] **Verify skill feats all have skill field**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_SkillFeatHasSkillField -v
+```
+Expected: PASS
+
+- [ ] **Verify active feats have activate_text**
+
+```bash
+cd /home/cjohannsen/src/mud && mise exec -- go test ./internal/game/ruleset/... -run TestLoadFeats_ActiveFeatHasActivateText -v
+```
+Expected: PASS

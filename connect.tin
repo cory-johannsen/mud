@@ -1,0 +1,3 @@
+#session gunchete gunchete.johannsen.cloud 4000
+#action {> } {#send {login TestA};#unaction {> }}
+#action {Password: } {#send {test123};#unaction {Password: }}
