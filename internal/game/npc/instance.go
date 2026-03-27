@@ -21,6 +21,12 @@ type Instance struct {
 	// Type is the NPC category copied from the template, used for predators_eye matching.
 	// Empty string means no category is defined.
 	Type string
+	// Gender is propagated from Template.Gender at spawn (REQ-ZN-6).
+	// Runtime-only: no YAML tag. Per-instance override not supported.
+	Gender string
+	// SeductionRejected maps player UID → true when this NPC has rejected a seduction
+	// attempt from that player (REQ-ZN-8). Runtime-only: no YAML tag. Nil until first rejection.
+	SeductionRejected map[string]bool
 	// baseName is the unsuffixed name copied from the template at spawn time.
 	baseName string
 	// nameMu protects the name field.
@@ -261,6 +267,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		ID:            id,
 		TemplateID:    tmpl.ID,
 		Type:          tmpl.Type,
+		Gender:        tmpl.Gender,
 		name:          tmpl.Name,
 		baseName:      tmpl.Name,
 		Description:   tmpl.Description,

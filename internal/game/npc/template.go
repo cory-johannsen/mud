@@ -46,6 +46,9 @@ type Template struct {
 	// Type is the NPC category used for predators_eye passive matching (e.g. "human", "robot", "mutant").
 	// Empty string means no category is defined.
 	Type        string    `yaml:"type"`
+	// Gender is the NPC's gender string. Empty string means no gender (e.g. robots, animals).
+	// Used as a precondition for the seduce command (REQ-ZN-6).
+	Gender      string    `yaml:"gender"`
 	Level       int       `yaml:"level"`
 	MaxHP       int       `yaml:"max_hp"`
 	AC          int       `yaml:"ac"`
