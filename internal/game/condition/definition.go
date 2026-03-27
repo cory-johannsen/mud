@@ -30,14 +30,17 @@ type ConditionDef struct {
 	APReduction int `yaml:"ap_reduction"`
 	// SkipTurn, if true, causes the combatant's entire turn to be skipped.
 	SkipTurn bool `yaml:"skip_turn"`
-	// SkillPenalty is the penalty applied to skill checks while this condition is active.
+	// SkillPenalty is a flat penalty applied to ALL skill checks while this condition is active.
+	// See also SkillPenalties for per-skill penalties. Both are applied additively:
+	// total_penalty = SkillPenalty + SkillPenalties[skillID].
 	SkillPenalty int `yaml:"skill_penalty"`
 	// MoveAPCost is the additional AP cost imposed on the bearer when they move.
 	// Only meaningful for terrain conditions (ID prefix "terrain_"). Default 0 = no extra cost.
 	MoveAPCost int `yaml:"move_ap_cost"`
-	// SkillPenalties maps skill ID → penalty applied while this condition is active.
-	// Keys must be canonical skill IDs (lowercase, underscore-separated, e.g. "flair", "savvy").
-	// nil and empty map are equivalent.
+	// SkillPenalties maps canonical skill IDs (lowercase, underscore-separated, e.g. "flair", "savvy")
+	// to per-skill penalties applied while this condition is active. Applied in addition to SkillPenalty:
+	// total_penalty = SkillPenalty + SkillPenalties[skillID].
+	// nil and empty map are equivalent (no per-skill penalties).
 	SkillPenalties map[string]int `yaml:"skill_penalties,omitempty"`
 	// ForcedAction, if non-empty, forces a specific action type each combat round.
 	// Valid values: "random_attack" (attack random alive combatant), "lowest_hp_attack" (attack lowest-HP alive combatant).
@@ -85,6 +88,13 @@ func (r *Registry) Register(def *ConditionDef) {
 func (r *Registry) Get(id string) (*ConditionDef, bool) {
 	d, ok := r.defs[id]
 	return d, ok
+}
+
+// Has returns true if id is registered in the registry.
+// Postcondition: Returns true iff Get(id) would return (non-nil, true).
+func (r *Registry) Has(id string) bool {
+	_, ok := r.defs[id]
+	return ok
 }
 
 // All returns a snapshot slice of all registered ConditionDefs.
