@@ -405,7 +405,7 @@ features:
 
   - slug: job-development
     name: Job Development
-    status: planned
+    status: done
     priority: 300
     category: character
     file: docs/features/job-development.md
