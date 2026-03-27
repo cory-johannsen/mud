@@ -226,6 +226,45 @@ func TestBuildFeatsFromJob_NilGrants(t *testing.T) {
 	}
 }
 
+func TestComputeHeldJobBenefits_UnionsSkillsAndFeats(t *testing.T) {
+	job1 := &ruleset.Job{
+		ID: "job1",
+		SkillGrants: &ruleset.SkillGrants{Fixed: []string{"parkour", "muscle"}},
+		FeatGrants:  &ruleset.FeatGrants{Fixed: []string{"toughness"}},
+	}
+	job2 := &ruleset.Job{
+		ID: "job2",
+		SkillGrants: &ruleset.SkillGrants{Fixed: []string{"muscle", "ghosting"}},
+		FeatGrants:  &ruleset.FeatGrants{Fixed: []string{"fleet", "toughness"}},
+	}
+	skills, feats := character.ComputeHeldJobBenefits([]*ruleset.Job{job1, job2})
+	assert.Equal(t, "trained", skills["parkour"])
+	assert.Equal(t, "trained", skills["muscle"])
+	assert.Equal(t, "trained", skills["ghosting"])
+	assert.Contains(t, feats, "toughness")
+	assert.Contains(t, feats, "fleet")
+	count := 0
+	for _, f := range feats {
+		if f == "toughness" {
+			count++
+		}
+	}
+	assert.Equal(t, 1, count, "toughness should appear once (deduplicated)")
+}
+
+func TestComputeHeldJobBenefits_DrawbackStatModifiers(t *testing.T) {
+	job := &ruleset.Job{
+		ID: "job1",
+		Drawbacks: []ruleset.DrawbackDef{
+			{ID: "glass_jaw", Type: "passive", StatModifier: &ruleset.StatModifier{Stat: "grit", Amount: -1}},
+		},
+	}
+	_, _, mods := character.ComputeHeldJobBenefitsWithDrawbacks([]*ruleset.Job{job})
+	require.Len(t, mods, 1)
+	assert.Equal(t, "grit", mods[0].Stat)
+	assert.Equal(t, -1, mods[0].Amount)
+}
+
 // Property: CurrentHP == MaxHP on a freshly built character.
 func TestBuildWithJob_CurrentHPEqualsMaxHP(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {

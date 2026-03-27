@@ -8,7 +8,9 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/npc"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
@@ -91,6 +93,22 @@ func (s *GameServiceServer) handleTrainJob(uid string, req *gamev1.TrainJobReque
 	sess.Jobs[jobID] = 1
 	if sess.ActiveJobID == "" {
 		sess.ActiveJobID = jobID
+	}
+	if s.jobRegistry != nil {
+		heldJobs := s.resolveHeldJobs(sess)
+		_, newFeats, _ := character.ComputeHeldJobBenefitsWithDrawbacks(heldJobs)
+		if sess.PassiveFeats == nil {
+			sess.PassiveFeats = make(map[string]bool)
+		}
+		for _, feat := range newFeats {
+			if _, already := sess.PassiveFeats[feat]; !already {
+				if s.featRegistry != nil {
+					if f, ok := s.featRegistry.Feat(feat); ok && !f.Active {
+						sess.PassiveFeats[feat] = true
+					}
+				}
+			}
+		}
 	}
 	if s.charSaver != nil && sess.CharacterID > 0 {
 		if saveErr := s.charSaver.SaveJobs(context.Background(), sess.CharacterID, sess.Jobs, sess.ActiveJobID); saveErr != nil {
@@ -179,6 +197,20 @@ func formatJobList(jobs map[string]int, activeID string) string {
 		parts = append(parts, entry)
 	}
 	return strings.Join(parts, ", ")
+}
+
+// resolveHeldJobs returns Job objects for all jobs held in the session.
+//
+// Precondition: sess must not be nil.
+// Postcondition: Returns a slice of *ruleset.Job for all jobs found in the registry.
+func (s *GameServiceServer) resolveHeldJobs(sess *session.PlayerSession) []*ruleset.Job {
+	var jobs []*ruleset.Job
+	for jobID := range sess.Jobs {
+		if j, ok := s.jobRegistry.Job(jobID); ok {
+			jobs = append(jobs, j)
+		}
+	}
+	return jobs
 }
 
 // buildPlayerAttrs constructs the attribute map from a player session's AbilityScores.

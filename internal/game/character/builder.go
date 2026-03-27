@@ -241,6 +241,76 @@ func AbilityBoostPool(fixed []string, alreadyChosen []string) []string {
 	return pool
 }
 
+// skillRankOrder maps rank names to numeric values for comparison (REQ-JD-7).
+var skillRankOrder = map[string]int{
+	"untrained": 0,
+	"trained":   1,
+	"expert":    2,
+	"master":    3,
+	"legendary": 4,
+}
+
+// higherRank returns the higher of two skill rank strings.
+func higherRank(a, b string) string {
+	if skillRankOrder[b] > skillRankOrder[a] {
+		return b
+	}
+	return a
+}
+
+// ComputeHeldJobBenefits aggregates skills and feats from all held jobs.
+// Returns (skills map[skill_id]rank, feats []string) — deduped union.
+// For overlapping skills, the highest rank wins (REQ-JD-7).
+// feats has each feat ID exactly once (deduplicated).
+// REQ-JD-14: Pure function with no side effects.
+func ComputeHeldJobBenefits(jobs []*ruleset.Job) (map[string]string, []string) {
+	skills := make(map[string]string)
+	featSet := make(map[string]bool)
+	for _, job := range jobs {
+		if job.SkillGrants != nil {
+			for _, s := range job.SkillGrants.Fixed {
+				if existing, ok := skills[s]; ok {
+					skills[s] = higherRank(existing, "trained")
+				} else {
+					skills[s] = "trained"
+				}
+			}
+		}
+		if job.FeatGrants != nil {
+			for _, f := range job.FeatGrants.Fixed {
+				featSet[f] = true
+			}
+		}
+	}
+	feats := make([]string, 0, len(featSet))
+	for f := range featSet {
+		feats = append(feats, f)
+	}
+	return skills, feats
+}
+
+// ComputeHeldJobBenefitsWithDrawbacks is like ComputeHeldJobBenefits but also
+// returns passive stat modifiers from all held jobs' drawbacks.
+// REQ-JD-9: Passive drawback stat modifiers included.
+// REQ-JD-14: Pure function; no side effects.
+func ComputeHeldJobBenefitsWithDrawbacks(jobs []*ruleset.Job) (map[string]string, []string, []ruleset.StatModifier) {
+	skills, feats := ComputeHeldJobBenefits(jobs)
+	var mods []ruleset.StatModifier
+	seen := make(map[string]bool)
+	for _, job := range jobs {
+		for _, db := range job.Drawbacks {
+			if db.Type == "passive" && db.StatModifier != nil {
+				key := job.ID + ":" + db.ID
+				if !seen[key] {
+					seen[key] = true
+					mods = append(mods, *db.StatModifier)
+				}
+			}
+		}
+	}
+	return skills, feats, mods
+}
+
 // AbilityName returns the short display label for an ability score field.
 func AbilityName(field string) string {
 	names := map[string]string{
