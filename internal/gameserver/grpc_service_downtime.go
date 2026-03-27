@@ -15,6 +15,10 @@ import (
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
+// craftDowntimeDurationMinutesPerDay is the real-time minutes per downtime day for the
+// craft activity. One downtime day = 2 real-time minutes.
+const craftDowntimeDurationMinutesPerDay = 2
+
 // handleDowntime processes a downtime subcommand from a player.
 //
 // Precondition: uid is a valid session UID; req is non-nil.
@@ -311,13 +315,15 @@ func (s *GameServiceServer) downtimeStart(uid string, sess *session.PlayerSessio
 			sort.Strings(missing)
 			return messageEvent(fmt.Sprintf("Missing materials for %s: %s.", recipe.Name, strings.Join(missing, ", ")))
 		}
-		// Consume materials eagerly at start.
+		// Consume materials eagerly at start: DB write must succeed before in-memory deduction.
 		if s.materialRepo != nil && len(recipe.Materials) > 0 {
 			deductions := make(map[string]int, len(recipe.Materials))
 			for _, rm := range recipe.Materials {
 				deductions[rm.ID] = rm.Quantity
 			}
-			_ = s.materialRepo.DeductMany(context.Background(), sess.CharacterID, deductions)
+			if err := s.materialRepo.DeductMany(context.Background(), sess.CharacterID, deductions); err != nil {
+				return messageEvent("Failed to deduct materials. Please try again.")
+			}
 		}
 		for _, rm := range recipe.Materials {
 			sess.Materials[rm.ID] -= rm.Quantity
@@ -612,7 +618,7 @@ func downtimeActivityDuration(act downtime.Activity, activityArgs string, recipe
 				if days < 1 {
 					days = 1
 				}
-				return days * 2
+				return days * craftDowntimeDurationMinutesPerDay
 			}
 		}
 		return 10

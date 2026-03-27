@@ -123,7 +123,7 @@ func TestDowntimeCraft_MissingMaterials_ReturnsError(t *testing.T) {
 	require.NotNil(t, evt)
 	msg := evt.GetMessage()
 	require.NotNil(t, msg)
-	assert.Contains(t, msg.Content, "aterial")
+	assert.Contains(t, msg.Content, "Missing materials")
 	assert.False(t, sess.DowntimeBusy)
 }
 
@@ -156,16 +156,21 @@ func TestProperty_DowntimeCraft_MaterialsAlwaysConsumedOnStart(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		svc, uid := newCraftDowntimeTestService(t)
 		sess, _ := svc.sessions.GetPlayer(uid)
-		// Provide exactly the required materials.
-		sess.Materials = map[string]int{"scrap_metal": 2, "wire": 1}
 
-		svc.downtimeStart(uid, sess, "craft", "smoke_grenade")
+		// Generate material quantities >= required (scrap_metal >= 2, wire >= 1).
+		scrapQty := rapid.IntRange(2, 20).Draw(rt, "scrap_qty")
+		wireQty := rapid.IntRange(1, 10).Draw(rt, "wire_qty")
+		sess.Materials = map[string]int{"scrap_metal": scrapQty, "wire": wireQty}
+
+		evt := svc.downtimeStart(uid, sess, "craft", "smoke_grenade")
+		require.NotNil(rt, evt)
 
 		if sess.DowntimeBusy {
-			assert.Equal(rt, 0, sess.Materials["scrap_metal"],
-				"scrap_metal should be fully consumed")
-			assert.Equal(rt, 0, sess.Materials["wire"],
-				"wire should be fully consumed")
+			// All recipe materials (scrap_metal: 2, wire: 1) must be consumed.
+			assert.Equal(rt, scrapQty-2, sess.Materials["scrap_metal"],
+				"scrap_metal should be reduced by recipe quantity 2")
+			assert.Equal(rt, wireQty-1, sess.Materials["wire"],
+				"wire should be reduced by recipe quantity 1")
 		}
 	})
 }
