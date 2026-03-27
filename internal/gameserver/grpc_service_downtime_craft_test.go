@@ -283,3 +283,19 @@ func TestProperty_DowntimeCraft_CritSuccessAlwaysRefundsMaterials(t *testing.T) 
 			"crit success should refund wire regardless of savvy=%d", savvy)
 	})
 }
+
+// TestStartNext_NilQueueRepo_NoopForCraft verifies that startNext is a no-op when
+// downtimeQueueRepo is nil, regardless of session material state (REQ-CRAFT-DT-1).
+//
+// Precondition: newCraftDowntimeTestService returns a service with nil downtimeQueueRepo.
+// Postcondition: startNext returns without modifying DowntimeBusy.
+func TestStartNext_NilQueueRepo_NoopForCraft(t *testing.T) {
+	svc, uid := newCraftDowntimeTestService(t)
+	sess, _ := svc.sessions.GetPlayer(uid)
+	sess.Materials = map[string]int{} // no materials
+	// downtimeQueueRepo is nil in the test service — startNext should return immediately.
+	require.Nil(t, svc.downtimeQueueRepo)
+	// Should not panic or modify session state.
+	svc.startNext(uid)
+	assert.False(t, sess.DowntimeBusy)
+}

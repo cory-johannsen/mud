@@ -448,11 +448,45 @@ func (s *GameServiceServer) startNext(uid string) {
 		return
 	}
 
-	// REQ-DTQ-8/9 (DEFERRED): For craft activities, materials should be deducted at this point
-	// via downtimePreStartCraft(uid, sess, entry.ActivityArgs), and if deduction fails the
-	// activity should be skipped via s.startNext(uid). This requires downtimePreStartCraft
-	// to be implemented in the downtime plan (it was not present when this plan was executed).
-	// Tracked in docs/superpowers/plans/2026-03-22-downtime.md.
+	// Gate craft on materials and consume them at queue-start time (REQ-CRAFT-DT-1).
+	if act.ID == "craft" && s.recipeReg != nil {
+		recipe, ok := s.recipeReg.Recipe(entry.ActivityArgs)
+		if !ok {
+			s.pushMessageToUID(uid, fmt.Sprintf("Skipped queued craft: recipe %q not found.", entry.ActivityArgs))
+			s.startNext(uid)
+			return
+		}
+		var missing []string
+		for _, rm := range recipe.Materials {
+			if sess.Materials[rm.ID] < rm.Quantity {
+				missing = append(missing, rm.ID)
+			}
+		}
+		if len(missing) > 0 {
+			sort.Strings(missing)
+			s.pushMessageToUID(uid, fmt.Sprintf("Skipped queued craft (%s): missing materials: %s.", recipe.Name, strings.Join(missing, ", ")))
+			s.startNext(uid)
+			return
+		}
+		// Consume materials via DB first, then in-memory.
+		if s.materialRepo != nil && len(recipe.Materials) > 0 {
+			deductions := make(map[string]int, len(recipe.Materials))
+			for _, rm := range recipe.Materials {
+				deductions[rm.ID] = rm.Quantity
+			}
+			if err := s.materialRepo.DeductMany(context.Background(), sess.CharacterID, deductions); err != nil {
+				s.pushMessageToUID(uid, fmt.Sprintf("Skipped queued craft (%s): failed to deduct materials.", recipe.Name))
+				s.startNext(uid)
+				return
+			}
+		}
+		for _, rm := range recipe.Materials {
+			sess.Materials[rm.ID] -= rm.Quantity
+			if sess.Materials[rm.ID] <= 0 {
+				delete(sess.Materials, rm.ID)
+			}
+		}
+	}
 
 	durationMin := downtimeActivityDuration(act, entry.ActivityArgs, s.recipeReg)
 	completesAt := time.Now().Add(time.Duration(durationMin) * time.Minute)
