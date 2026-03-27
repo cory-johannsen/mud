@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/game/session"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // retrainListEligible returns a message listing the player's retrain-eligible feats.
