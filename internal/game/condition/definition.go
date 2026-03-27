@@ -32,6 +32,13 @@ type ConditionDef struct {
 	SkipTurn bool `yaml:"skip_turn"`
 	// SkillPenalty is the penalty applied to skill checks while this condition is active.
 	SkillPenalty int `yaml:"skill_penalty"`
+	// MoveAPCost is the additional AP cost imposed on the bearer when they move.
+	// Only meaningful for terrain conditions (ID prefix "terrain_"). Default 0 = no extra cost.
+	MoveAPCost int `yaml:"move_ap_cost"`
+	// SkillPenalties maps skill ID → penalty applied while this condition is active.
+	// Keys must be canonical skill IDs (lowercase, underscore-separated, e.g. "flair", "savvy").
+	// nil and empty map are equivalent.
+	SkillPenalties map[string]int `yaml:"skill_penalties,omitempty"`
 	// ForcedAction, if non-empty, forces a specific action type each combat round.
 	// Valid values: "random_attack" (attack random alive combatant), "lowest_hp_attack" (attack lowest-HP alive combatant).
 	ForcedAction string `yaml:"forced_action"`

@@ -1,0 +1,29 @@
+id: terrain_ice
+name: Ice
+description: |
+  Slick ice sends your footing scrambling with every step.
+duration_type: permanent
+max_stacks: 0
+move_ap_cost: 1
+skill_penalties:
+  hustle: 3
+attack_penalty: 0
+attack_bonus: 0
+ac_penalty: 0
+speed_penalty: 0
+damage_bonus: 0
+reflex_bonus: 0
+stealth_bonus: 0
+ap_reduction: 0
+skip_turn: false
+skill_penalty: 0
+restrict_actions: []
+forced_action: ""
+prevents_movement: false
+prevents_commands: false
+prevents_targeting: false
+is_domination: false
+is_mental_condition: false
+lua_on_apply: ""
+lua_on_remove: ""
+lua_on_tick: ""
