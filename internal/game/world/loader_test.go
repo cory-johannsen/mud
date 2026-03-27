@@ -734,6 +734,74 @@ func TestNEPortlandZoneFullyConnected(t *testing.T) {
 	}
 }
 
+func TestLoadZone_ZoneEffects_PropagatedToRooms(t *testing.T) {
+	data := []byte(`
+zone:
+  id: testzone
+  name: Test Zone
+  start_room: room1
+  zone_effects:
+    - track: fear
+      severity: mild
+      base_dc: 12
+      cooldown_rounds: 3
+      cooldown_minutes: 5
+  rooms:
+    - id: room1
+      title: Room One
+      description: A room.
+      map_x: 0
+      map_y: 0
+    - id: room2
+      title: Room Two
+      description: Another room.
+      map_x: 1
+      map_y: 0
+`)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	for _, room := range zone.Rooms {
+		require.Len(t, room.Effects, 1, "zone_effects must be propagated to room %q", room.ID)
+		assert.Equal(t, "fear", room.Effects[0].Track)
+		assert.Equal(t, "mild", room.Effects[0].Severity)
+		assert.Equal(t, 12, room.Effects[0].BaseDC)
+	}
+}
+
+func TestLoadZone_ZoneEffects_DoNotOverrideRoomEffects(t *testing.T) {
+	data := []byte(`
+zone:
+  id: testzone
+  name: Test Zone
+  start_room: room1
+  zone_effects:
+    - track: fear
+      severity: mild
+      base_dc: 10
+      cooldown_rounds: 2
+      cooldown_minutes: 3
+  rooms:
+    - id: room1
+      title: Room One
+      description: A room.
+      map_x: 0
+      map_y: 0
+      effects:
+        - track: rage
+          severity: moderate
+          base_dc: 14
+          cooldown_rounds: 4
+          cooldown_minutes: 6
+`)
+	zone, err := LoadZoneFromBytes(data)
+	require.NoError(t, err)
+	room := zone.Rooms["room1"]
+	require.Len(t, room.Effects, 2)
+	tracks := []string{room.Effects[0].Track, room.Effects[1].Track}
+	assert.Contains(t, tracks, "fear")
+	assert.Contains(t, tracks, "rage")
+}
+
 // TestLoader_ZoneWorldCoords verifies that all 16 live zone YAML files decode
 // with non-nil WorldX and WorldY fields matching the design spec coordinates.
 func TestLoader_ZoneWorldCoords(t *testing.T) {

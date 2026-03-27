@@ -345,6 +345,9 @@ type Zone struct {
 	// nil means scavenging yields nothing here (REQ-CRAFT-9).
 	MaterialPool *MaterialPool `yaml:"material_pool,omitempty"`
 	SettlementDC int `yaml:"settlement_dc"` // default 15 if absent
+	// ZoneEffects defines persistent mental-state auras applied to every room in the zone.
+	// At world load time these are appended to each room's Effects slice.
+	ZoneEffects []RoomEffect `yaml:"zone_effects,omitempty"`
 }
 
 // ExternalExitTargets returns exit targets that reference rooms outside this zone.
