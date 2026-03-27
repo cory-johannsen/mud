@@ -75,7 +75,7 @@ features:
 
   - slug: exploration-actions
     name: Exploration Actions
-    status: planned
+    status: done
     priority: 285
     category: world
     file: docs/features/exploration-actions.md
