@@ -193,6 +193,36 @@ func TestRetrainDowntime_TwoArgs_NewFeatAlreadyOwned_ReturnsError(t *testing.T) 
 	assert.False(t, sess.DowntimeBusy)
 }
 
+// TestRetrainDowntime_TwoArgs_JobPrereqBlocked verifies that retraining a feat that is a
+// prerequisite for a currently held job is blocked (REQ-RETRAIN-DT-5).
+//
+// Precondition: sess holds "test_job" which requires "iron_will"; iron_constitution is unowned.
+// Postcondition: message contains "required"; DowntimeBusy remains false.
+func TestRetrainDowntime_TwoArgs_JobPrereqBlocked(t *testing.T) {
+	svc, uid := newRetrainTestService(t)
+	sess, ok := svc.sessions.GetPlayer(uid)
+	require.True(t, ok)
+
+	jobReg := ruleset.NewJobRegistry()
+	jobReg.Register(&ruleset.Job{
+		ID:   "test_job",
+		Name: "Test Job",
+		Tier: 1,
+		AdvancementRequirements: ruleset.AdvancementRequirements{
+			RequiredFeats: []string{"iron_will"},
+		},
+	})
+	svc.SetJobRegistry(jobReg)
+	sess.HeldJobs = []string{"test_job"}
+
+	evt := svc.downtimeStart(uid, sess, "retrain", "iron_will iron_constitution")
+	require.NotNil(t, evt)
+	msg := evt.GetMessage()
+	require.NotNil(t, msg)
+	assert.False(t, sess.DowntimeBusy, "retrain should be blocked when feat is a job prerequisite")
+	assert.Contains(t, msg.Content, "required")
+}
+
 // TestProperty_RetrainDowntime_ValidSwapAlwaysStartsActivity is a property test verifying that
 // any valid same-category swap always sets DowntimeBusy and stores correct metadata.
 //
