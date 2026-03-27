@@ -243,6 +243,52 @@ func TestLoadDirectory_CharmedCondition_IsUntilSave(t *testing.T) {
 	assert.True(t, def.IsMentalCondition)
 }
 
+func TestConditionDef_MoveAPCostField_ParsesFromYAML(t *testing.T) {
+	dir := t.TempDir()
+	data := []byte(`
+id: terrain_test
+name: Test Terrain
+description: "Test terrain condition."
+duration_type: rounds
+move_ap_cost: 1
+skill_penalties:
+  hustle: 2
+  rigging: 1
+`)
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "terrain_test.yaml"), data, 0644))
+	reg, err := condition.LoadDirectory(dir)
+	require.NoError(t, err)
+	def, ok := reg.Get("terrain_test")
+	require.True(t, ok)
+	assert.Equal(t, 1, def.MoveAPCost)
+	require.NotNil(t, def.SkillPenalties)
+	assert.Equal(t, 2, def.SkillPenalties["hustle"])
+	assert.Equal(t, 1, def.SkillPenalties["rigging"])
+}
+
+func TestLoadDirectory_TerrainConditionsPresent(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+	ids := []string{"terrain_rubble", "terrain_mud", "terrain_flooded", "terrain_ice", "terrain_dense_vegetation"}
+	for _, id := range ids {
+		def, ok := reg.Get(id)
+		require.True(t, ok, "terrain condition %q must exist", id)
+		assert.True(t, def.MoveAPCost > 0 || len(def.SkillPenalties) > 0,
+			"terrain condition %q must set move_ap_cost or skill_penalties", id)
+	}
+}
+
+func TestProperty_TerrainConditions_AlwaysHaveTerrainPrefix(t *testing.T) {
+	reg, err := condition.LoadDirectory("../../../content/conditions")
+	require.NoError(t, err)
+	for _, def := range reg.All() {
+		if def.MoveAPCost > 0 {
+			assert.True(t, strings.HasPrefix(def.ID, "terrain_"),
+				"condition %q has MoveAPCost>0 but missing terrain_ prefix", def.ID)
+		}
+	}
+}
+
 func TestLoadDirectory_AidedConditionsPresent(t *testing.T) {
 	reg, err := condition.LoadDirectory("../../../content/conditions")
 	require.NoError(t, err)
