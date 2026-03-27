@@ -4,7 +4,7 @@ Import all PF2E general, skill, and adaptable miscellaneous feats into Gunchete,
 
 ## Requirements
 
-- [ ] Feat import — 211 new feats added to `content/feats.yaml`
+- [x] Feat import — 211 new feats added to `content/feats.yaml`
   - REQ-FI-1: All Gap feats from the spec MUST be added to `content/feats.yaml` in the correct skill section.
   - REQ-FI-2: Each new feat MUST include a `pf2e` field matching the source PF2E feat name.
   - REQ-FI-3: Each new feat MUST have a Gunchete-flavored `name` and `description`; PF2E flavor text MUST NOT appear verbatim.
@@ -13,7 +13,7 @@ Import all PF2E general, skill, and adaptable miscellaneous feats into Gunchete,
   - REQ-FI-6: All Skip feats MUST NOT be added to the system.
   - REQ-FI-7: `docs/architecture/character.md` MUST be updated with a Feat System section documenting the three-category structure, the `pf2e` field convention, `SkillFeatsForTrainedSkills` as the runtime access path, and the extension point for adding new feats.
   - REQ-FI-8: The feat registry (`internal/game/ruleset/feat.go`) MUST NOT require code changes; all new feats are pure YAML additions.
-- [ ] Audit summary: 73 Covered (no changes needed), 211 Gap (new YAML entries), 10 Skipped
+- [x] Audit summary: 73 Covered (no changes needed), 211 Gap (new YAML entries), 10 Skipped
   - General feats: 11 covered, 35 new, 1 skipped
   - Skill feats (17 pools): 62 covered, 160 new
   - Miscellaneous/adaptable: 0 covered, 15 new, 9 skipped

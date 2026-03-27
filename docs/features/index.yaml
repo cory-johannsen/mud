@@ -375,7 +375,7 @@ features:
 
   - slug: feat-import
     name: Feat Import
-    status: planned
+    status: done
     priority: 298
     category: character
     file: docs/features/feat-import.md
