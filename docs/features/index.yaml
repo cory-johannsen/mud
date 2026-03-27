@@ -99,7 +99,7 @@ features:
 
   - slug: craft-downtime
     name: Craft (Downtime)
-    status: planned
+    status: done
     priority: 301
     category: world
     file: docs/features/craft-downtime.md
