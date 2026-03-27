@@ -110,7 +110,7 @@ features:
 
   - slug: retrain-downtime
     name: Retrain (Downtime)
-    status: planned
+    status: done
     priority: 302
     category: character
     file: docs/features/retrain-downtime.md
