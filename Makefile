@@ -1,4 +1,4 @@
-.PHONY: build test test-fast test-postgres test-cover migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check
+.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check
 
 deps:
 	$(GO) mod tidy
@@ -60,8 +60,11 @@ proto:
 # Packages that require Docker (testcontainers).
 POSTGRES_PKG := github.com/cory-johannsen/mud/internal/storage/postgres
 
-# All packages except the Docker-dependent one.
-FAST_PKGS := $(shell go list ./... | grep -v '$(POSTGRES_PKG)')
+# End-to-end test package (requires full stack via Docker).
+E2E_PKG := github.com/cory-johannsen/mud/internal/e2e
+
+# All packages except the Docker-dependent ones.
+FAST_PKGS := $(shell go list ./... | grep -v '$(POSTGRES_PKG)' | grep -v '$(E2E_PKG)')
 
 # Test targets
 #
@@ -81,6 +84,11 @@ test-postgres: build
 test-cover: build
 	$(GO) test -race -count=1 -timeout=600s -coverprofile=coverage.out ./...
 	$(GO) tool cover -html=coverage.out -o coverage.html
+
+test-e2e: build
+	DOCKER_HOST=unix:///var/run/docker.sock \
+	  CLAUDE_ACCOUNT_PASSWORD=testpass123 \
+	  $(GO) test -v -count=1 -timeout=300s $(E2E_PKG)
 
 # Database
 CONFIG ?= configs/dev.yaml

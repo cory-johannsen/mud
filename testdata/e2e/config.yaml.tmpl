@@ -1,0 +1,34 @@
+server:
+  mode: standalone
+  type: mud
+
+database:
+  host: "{{.DBHost}}"
+  port: {{.DBPort}}
+  user: "{{.DBUser}}"
+  password: "{{.DBPassword}}"
+  name: "{{.DBName}}"
+  sslmode: disable
+  max_conns: 5
+  min_conns: 1
+  max_conn_lifetime: 5m
+
+telnet:
+  host: 127.0.0.1
+  port: {{.FrontendPort}}
+  headless_port: {{.HeadlessPort}}
+  read_timeout: 30s
+  write_timeout: 10s
+  idle_timeout: 10m
+  idle_grace_period: 30s
+
+logging:
+  level: warn
+  format: console
+
+gameserver:
+  grpc_host: 127.0.0.1
+  grpc_port: {{.GameserverPort}}
+  round_duration_ms: 500
+  game_clock_start: 6
+  game_tick_duration: 1m
