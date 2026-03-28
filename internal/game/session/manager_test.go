@@ -91,9 +91,9 @@ func TestManager_AddPlayer_BackpackAndCurrency(t *testing.T) {
 	assert.Equal(t, 0, sess.Currency)
 }
 
-func TestManager_AddPlayerDuplicate(t *testing.T) {
+func TestManager_AddPlayerDuplicate_EvictsStale(t *testing.T) {
 	m := NewManager()
-	_, err := m.AddPlayer(AddPlayerOptions{
+	oldSess, err := m.AddPlayer(AddPlayerOptions{
 		UID:               "u1",
 		Username:          "Alice",
 		CharName:          "Alice",
@@ -108,7 +108,9 @@ func TestManager_AddPlayerDuplicate(t *testing.T) {
 		Level:             0,
 	})
 	require.NoError(t, err)
-	_, err = m.AddPlayer(AddPlayerOptions{
+
+	// Second AddPlayer with same UID evicts the stale session.
+	newSess, err := m.AddPlayer(AddPlayerOptions{
 		UID:               "u1",
 		Username:          "Alice2",
 		CharName:          "Alice2",
@@ -122,8 +124,20 @@ func TestManager_AddPlayerDuplicate(t *testing.T) {
 		Class:             "",
 		Level:             0,
 	})
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "already connected")
+	require.NoError(t, err)
+	assert.Equal(t, "Alice2", newSess.CharName)
+	assert.Equal(t, "room_b", newSess.RoomID)
+
+	// Old session's entity must be closed.
+	assert.True(t, oldSess.Entity.IsClosed(), "old session entity should be closed after eviction")
+
+	// Old room should no longer track the player.
+	players := m.PlayersInRoom("room_a")
+	assert.Empty(t, players, "old room should have no players after eviction")
+
+	// New room should track the player.
+	players = m.PlayersInRoom("room_b")
+	assert.Contains(t, players, "Alice2")
 }
 
 func TestManager_RemovePlayer(t *testing.T) {

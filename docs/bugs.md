@@ -86,11 +86,11 @@
 
 ### BUG-32: Post-combat movement blocked; reconnect shows "already logged in"
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** After combat ends, the player cannot move between rooms, and logging out and back in produces "That character is already logged in" — the session is stuck in combat mode and the old session is not cleaned up on disconnect.
 **Steps:** Enter combat with any NPC; let combat end (NPC dies or flees); attempt a movement command (e.g. `north`) — movement is blocked; disconnect and reconnect — observe "That character is already logged in."
-**Fix:**
+**Fix:** Three fixes: (1) Added `h.stopTimerLocked(roomID)` in `resolveAndAdvanceLocked` combat-end block so `IsRoomInCombat` returns false after combat ends. (2) Changed `AddPlayer` in session manager to evict stale sessions instead of rejecting duplicate UIDs, fixing the "already logged in" error on reconnect. (3) The `onCombatEndFn` callback (wired in grpc_service.go) already resets `sess.Status` to idle — verified working via TDD. Five regression tests added in `combat_handler_end_test.go`.
 
 ### BUG-25: Allied faction NPC attacks Team Machete player on sight
 **Severity:** high
@@ -234,11 +234,11 @@
 
 ### BUG-31: AP not displayed to player during combat
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** Action Points are never shown to the player — neither at the start of each round nor after spending AP on an action — leaving the player unable to make informed decisions about what actions they can take.
 **Steps:** Enter combat with any NPC; observe the round-start message and any action confirmation messages — no AP total or remaining AP is displayed at any point.
-**Fix:**
+**Fix:** Added per-player AP notification at round start via `pushMessageToUID` ("You have N AP this round.") before auto-queue runs. Added AP remaining to confirm event narratives for Attack, Strike, and Aid actions. Added AP remaining push messages for Reload, FireBurst, FireAutomatic, and Throw actions. Two regression tests in `combat_handler_ap_display_test.go`.
 
 ### BUG-30: NE Portland zone map has multiple disconnected sections
 **Severity:** medium
@@ -271,3 +271,39 @@
 **Description:** The room containing the `zone_map` equipment item should have `danger_level: safe` in every zone, but 14 of 16 zones are missing this designation — players can be attacked or have traps triggered while using the zone map.
 **Steps:** Inspect any zone YAML under `content/zones/`; find the room with `item_id: zone_map`; observe it either inherits a non-safe zone danger level or has a non-safe level set explicitly. Affected zones: vantucky, the_couve, lake_oswego, aloha, se_industrial, sauvie_island, ross_island, pdx_international, downtown, felony_flats, hillsboro, troutdale, ne_portland, battleground.
 **Fix:** Added `danger_level: safe` to the zone_map room in all 14 affected zone YAML files. Added `TestZoneMapRoomIsSafe` in `internal/game/world/noncombat_coverage_test.go` to enforce this invariant going forward.
+
+## Vendor
+
+### BUG-33: Vendor wares display item ID instead of display name
+**Severity:** low
+**Status:** open
+**Category:** Vendor
+**Description:** Vendor shop listings show the raw item definition ID (e.g., `stim_pack`) instead of the human-readable display name (e.g., `Stim Pack`).
+**Steps:** Visit any vendor NPC and browse their wares; observe that items are listed by internal ID rather than display name.
+**Fix:**
+
+## UI
+
+### BUG-34: Help command output is not alphabetized within categories
+**Severity:** low
+**Status:** open
+**Category:** UI
+**Description:** The `help` command lists commands in an arbitrary order within each category; commands should be sorted alphabetically for easier scanning.
+**Steps:** Run `help`; observe that commands within each category are not in alphabetical order.
+**Fix:**
+
+### BUG-35: Trainer NPC requires player to know job name instead of offering a menu
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** Trainer NPC interactions require the player to already know the job they want to train; the trainer should present a menu of available jobs to choose from, or inform the player if none are available.
+**Steps:** Interact with a Trainer NPC; observe that the player must type the exact job name with no prompt or list of options offered.
+**Fix:**
+
+### BUG-36: look &lt;direction&gt; produces no console output
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The `look <direction>` command is accepted without error but produces no console output, giving the player no information about what lies in the specified direction.
+**Steps:** Enter any room with exits; type `look north` (or any valid direction); observe that no output is displayed in the console.
+**Fix:**

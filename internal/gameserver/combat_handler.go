@@ -511,12 +511,15 @@ func (h *CombatHandler) Attack(uid, target string) ([]*gamev1.CombatEvent, error
 		return nil, fmt.Errorf("queuing attack: %w", err)
 	}
 
+	// BUG-31: include remaining AP in confirmation so the player can plan.
+	apMsg := h.formatAPRemaining(uid, cbt)
+
 	// proto has no PASS/ROUND type; ATTACK is the closest available sentinel — client uses Narrative for display
 	confirmEvent := &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 		Attacker:  sess.CharName,
 		Target:    inst.Name(),
-		Narrative: fmt.Sprintf("%s readies an attack against %s.", sess.CharName, inst.Name()),
+		Narrative: fmt.Sprintf("%s readies an attack against %s.%s", sess.CharName, inst.Name(), apMsg),
 	}
 
 	if len(initEvents) > 0 {
@@ -559,12 +562,14 @@ func (h *CombatHandler) Strike(uid, target string) ([]*gamev1.CombatEvent, error
 		return nil, fmt.Errorf("queuing strike: %w", err)
 	}
 
+	apMsg := h.formatAPRemaining(uid, cbt)
+
 	// proto has no PASS/ROUND type; ATTACK is the closest available sentinel — client uses Narrative for display
 	confirmEvent := &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
 		Attacker:  sess.CharName,
 		Target:    target,
-		Narrative: fmt.Sprintf("%s launches a full strike against %s.", sess.CharName, target),
+		Narrative: fmt.Sprintf("%s launches a full strike against %s.%s", sess.CharName, target, apMsg),
 	}
 
 	if cbt.AllActionsSubmitted() {
@@ -629,11 +634,13 @@ func (h *CombatHandler) Aid(uid, allyName string) ([]*gamev1.CombatEvent, error)
 		return nil, fmt.Errorf("queuing aid: %w", err)
 	}
 
+	apMsg := h.formatAPRemaining(uid, cbt)
+
 	confirmEvent := &gamev1.CombatEvent{
 		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_CONDITION,
 		Attacker:  sess.CharName,
 		Target:    canonicalName,
-		Narrative: fmt.Sprintf("%s prepares to aid %s.", sess.CharName, canonicalName),
+		Narrative: fmt.Sprintf("%s prepares to aid %s.%s", sess.CharName, canonicalName, apMsg),
 	}
 
 	if cbt.AllActionsSubmitted() {
@@ -691,6 +698,20 @@ func (h *CombatHandler) RemainingAP(uid string) int {
 		return 0
 	}
 	return q.RemainingPoints()
+}
+
+// formatAPRemaining returns a short string like " (2 AP remaining)" for the given
+// combatant in the given combat. Returns "" if the queue is not found.
+// Caller must hold combatMu.
+//
+// Precondition: cbt must be non-nil.
+// Postcondition: Returns a non-empty string when the player has an action queue.
+func (h *CombatHandler) formatAPRemaining(uid string, cbt *combat.Combat) string {
+	q, ok := cbt.ActionQueues[uid]
+	if !ok {
+		return ""
+	}
+	return fmt.Sprintf(" (%d AP remaining)", q.RemainingPoints())
 }
 
 // SpendAP deducts cost AP from the combatant uid's action queue in their active combat.
@@ -1638,6 +1659,8 @@ func (h *CombatHandler) Reload(uid string) ([]*gamev1.CombatEvent, error) {
 		return nil, fmt.Errorf("queuing reload: %w", err)
 	}
 
+	h.pushMessageToUID(uid, fmt.Sprintf("Reload queued.%s", h.formatAPRemaining(uid, cbt)))
+
 	if cbt.AllActionsSubmitted() {
 		h.stopTimerLocked(sess.RoomID)
 		return h.resolveAndAdvanceLocked(sess.RoomID, cbt), nil
@@ -1678,6 +1701,8 @@ func (h *CombatHandler) FireBurst(uid, target string) ([]*gamev1.CombatEvent, er
 	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionFireBurst, Target: target, WeaponID: weaponID}); err != nil {
 		return nil, fmt.Errorf("queuing fire burst: %w", err)
 	}
+
+	h.pushMessageToUID(uid, fmt.Sprintf("Burst fire queued.%s", h.formatAPRemaining(uid, cbt)))
 
 	if cbt.AllActionsSubmitted() {
 		h.stopTimerLocked(sess.RoomID)
@@ -1720,6 +1745,8 @@ func (h *CombatHandler) FireAutomatic(uid, target string) ([]*gamev1.CombatEvent
 		return nil, fmt.Errorf("queuing fire automatic: %w", err)
 	}
 
+	h.pushMessageToUID(uid, fmt.Sprintf("Full auto queued.%s", h.formatAPRemaining(uid, cbt)))
+
 	if cbt.AllActionsSubmitted() {
 		h.stopTimerLocked(sess.RoomID)
 		return h.resolveAndAdvanceLocked(sess.RoomID, cbt), nil
@@ -1753,6 +1780,8 @@ func (h *CombatHandler) Throw(uid, explosiveID string) ([]*gamev1.CombatEvent, e
 	if err := cbt.QueueAction(uid, combat.QueuedAction{Type: combat.ActionThrow, ExplosiveID: explosiveID}); err != nil {
 		return nil, fmt.Errorf("queuing throw: %w", err)
 	}
+
+	h.pushMessageToUID(uid, fmt.Sprintf("Throw queued.%s", h.formatAPRemaining(uid, cbt)))
 
 	if cbt.AllActionsSubmitted() {
 		h.stopTimerLocked(sess.RoomID)
@@ -2155,6 +2184,7 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 				}
 			}
 		}
+		h.stopTimerLocked(roomID)
 		h.engine.EndCombat(roomID)
 		h.clearCoweringNPCsLocked(roomID)
 		if h.onCombatEndFn != nil {
@@ -2200,6 +2230,16 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			q.AddAP(playerSess.BankedAP)
 		}
 		playerSess.BankedAP = 0
+	}
+
+	// BUG-31: Send per-player AP notification BEFORE auto-queue consumes AP.
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer || c.IsDead() {
+			continue
+		}
+		if q, qOK := cbt.ActionQueues[c.ID]; qOK {
+			h.pushMessageToUID(c.ID, fmt.Sprintf("You have %d AP this round.", q.RemainingPoints()))
+		}
 	}
 
 	h.autoQueueNPCsLocked(cbt)

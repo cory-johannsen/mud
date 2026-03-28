@@ -472,8 +472,16 @@ func (m *Manager) AddPlayer(opts AddPlayerOptions) (*PlayerSession, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if _, exists := m.players[uid]; exists {
-		return nil, fmt.Errorf("player %q already connected", uid)
+	// Evict stale session if one exists (e.g. reconnect before cleanup completes).
+	if old, exists := m.players[uid]; exists {
+		if rs, ok := m.roomSets[old.RoomID]; ok {
+			delete(rs, uid)
+			if len(rs) == 0 {
+				delete(m.roomSets, old.RoomID)
+			}
+		}
+		_ = old.Entity.Close()
+		delete(m.players, uid)
 	}
 
 	entity := NewBridgeEntity(uid, 256)
