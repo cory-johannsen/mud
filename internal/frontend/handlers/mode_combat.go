@@ -238,23 +238,17 @@ func (h *CombatModeHandler) SnapshotForRender() CombatRenderSnapshot {
 }
 
 // OnEnter renders the combat screen. REQ-IMR-4.
-// RenderCombatScreen will be added in Task 2; for now use a simple format.
 func (h *CombatModeHandler) OnEnter(conn *telnet.Conn) {
 	if conn == nil {
 		return
 	}
 	snap := h.SnapshotForRender()
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("=== Combat — Round %d ===\r\n", snap.Round))
-	for _, name := range snap.TurnOrder {
-		if c, ok := snap.Combatants[name]; ok {
-			sb.WriteString(fmt.Sprintf("  %s HP:%d\r\n", c.Name, c.HP))
-		}
-	}
+	width, _ := conn.Dimensions()
+	screen := RenderCombatScreen(snap, width)
 	if conn.IsSplitScreen() {
-		_ = conn.WriteRoom(sb.String())
+		_ = conn.WriteRoom(screen)
 	} else {
-		_ = conn.WriteLine(sb.String())
+		_ = conn.WriteLine(screen)
 	}
 }
 
