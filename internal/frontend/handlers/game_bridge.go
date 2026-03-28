@@ -663,6 +663,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		resp *gamev1.ServerEvent
 		err  error
 	}
+	combatHandler := NewCombatModeHandler(charName, func() {})
+
 	recvCh := make(chan recvResult, 4)
 	go func() {
 		for {
@@ -697,6 +699,12 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					if mapResp != nil {
 						_ = conn.WriteConsole(renderMapConsole(mapResp, mapView, rw))
 					}
+					_ = conn.WritePromptSplit(session.CurrentPrompt())
+					continue
+				}
+				if session.Mode() == ModeCombat {
+					snap := combatHandler.SnapshotForRender()
+					_ = conn.WriteRoom(RenderCombatScreen(snap, rw))
 					_ = conn.WritePromptSplit(session.CurrentPrompt())
 					continue
 				}
@@ -784,9 +792,58 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			if ce.GetTarget() == charName && ce.GetTargetHp() != 0 {
 				currentHP.Store(ce.GetTargetHp())
 			}
+			combatHandler.UpdateCombatEvent(
+				ce.GetAttacker(), ce.GetTarget(),
+				int(ce.GetDamage()), int(ce.GetTargetHp()),
+				ce.GetNarrative(), int32(ce.GetType()),
+			)
+			if ce.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_END {
+				combatHandler.SetSummary("Combat complete.")
+				cw, _ := conn.Dimensions()
+				summary := RenderCombatSummary("Combat complete.", cw)
+				if conn.IsSplitScreen() {
+					_ = conn.WriteRoom(summary)
+					_ = conn.WritePromptSplit(combatHandler.Prompt())
+				} else {
+					_ = conn.WriteLine(summary)
+					_ = conn.WritePrompt(combatHandler.Prompt())
+				}
+				time.AfterFunc(3*time.Second, func() {
+					session.SetMode(conn, session.Room())
+				})
+				continue
+			}
+			// Re-render combat screen for non-END events.
+			if session.Mode() == ModeCombat {
+				cw, _ := conn.Dimensions()
+				snap := combatHandler.SnapshotForRender()
+				if conn.IsSplitScreen() {
+					_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+				}
+			}
 			text = RenderCombatEvent(ce)
 		case *gamev1.ServerEvent_RoundStart:
-			text = RenderRoundStartEvent(p.RoundStart)
+			rs := p.RoundStart
+			// Transition to combat mode on first round.
+			if session.Mode() != ModeCombat {
+				combatHandler.Reset()
+				session.SetMode(conn, combatHandler)
+			}
+			turnOrder := make([]string, len(rs.GetTurnOrder()))
+			copy(turnOrder, rs.GetTurnOrder())
+			combatHandler.UpdateRoundStart(int(rs.GetRound()), int(rs.GetActionsPerTurn()), turnOrder)
+			// Render combat screen in room region.
+			cw, _ := conn.Dimensions()
+			snap := combatHandler.SnapshotForRender()
+			if conn.IsSplitScreen() {
+				_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+				_ = conn.WritePromptSplit(combatHandler.Prompt())
+			} else {
+				_ = conn.WriteLine(RenderCombatScreen(snap, cw))
+				_ = conn.WritePrompt(combatHandler.Prompt())
+			}
+			// Also write the text-mode round start to console for the combat log.
+			text = RenderRoundStartEvent(rs)
 		case *gamev1.ServerEvent_RoundEnd:
 			text = RenderRoundEndEvent(p.RoundEnd)
 		case *gamev1.ServerEvent_NpcView:
@@ -809,7 +866,21 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			} else {
 				delete(activeConditions, ce.GetConditionId())
 			}
-			condMu.Unlock()
+			if session.Mode() == ModeCombat {
+				condNames := make([]string, 0, len(activeConditions))
+				for _, name := range activeConditions {
+					condNames = append(condNames, name)
+				}
+				condMu.Unlock()
+				combatHandler.UpdateConditions(condNames)
+				cw, _ := conn.Dimensions()
+				snap := combatHandler.SnapshotForRender()
+				if conn.IsSplitScreen() {
+					_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+				}
+			} else {
+				condMu.Unlock()
+			}
 			text = RenderConditionEvent(ce)
 		case *gamev1.ServerEvent_InventoryView:
 			text = RenderInventoryView(p.InventoryView)
@@ -865,6 +936,14 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			currentFP.Store(hpu.GetFocusPoints())
 			if hpu.GetMaxFocusPoints() > 0 {
 				maxFP.Store(hpu.GetMaxFocusPoints())
+			}
+			if session.Mode() == ModeCombat {
+				combatHandler.UpdatePlayerHP(int(hpu.GetCurrentHp()), int(hpu.GetMaxHp()))
+				cw, _ := conn.Dimensions()
+				snap := combatHandler.SnapshotForRender()
+				if conn.IsSplitScreen() {
+					_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+				}
 			}
 			if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(session.CurrentPrompt())
