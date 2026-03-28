@@ -56,40 +56,42 @@ func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
 	return sb.String()
 }
 
-// RenderBattlefield renders a 1D battlefield showing combatants in turn order.
-// Format: [*Alice]───[Goblin]───[Orc]  (player marked with leading *)
-// The result MUST NOT exceed width visible characters.
+// RenderBattlefield renders a 1D battlefield with the player on the left and
+// enemies on the right. Format: [*Alice]───[Goblin]───[Orc]
+// Player token uses a leading '*' marker. The result MUST NOT exceed width
+// visible characters.
 func RenderBattlefield(turnOrder []string, playerName string, width int) string {
 	if len(turnOrder) == 0 {
 		return ""
 	}
 
-	// Truncate names to 8 characters max, build bracketed tokens.
-	// Player token uses a leading '*' marker: [*Name].
-	tokens := make([]string, len(turnOrder))
-	totalTokenWidth := 0
-	for i, name := range turnOrder {
+	// Partition into player tokens (left) and NPC tokens (right).
+	// Player always appears on the left regardless of initiative order.
+	var playerTokens, npcTokens []string
+	for _, name := range turnOrder {
 		truncated := truncateStr(name, 8)
 		if name == playerName {
-			tokens[i] = "[*" + truncated + "]"
+			playerTokens = append(playerTokens, "[*"+truncated+"]")
 		} else {
-			tokens[i] = "[" + truncated + "]"
+			npcTokens = append(npcTokens, "["+truncated+"]")
 		}
-		totalTokenWidth += len([]rune(tokens[i]))
 	}
+	tokens := append(playerTokens, npcTokens...)
 
 	if len(tokens) == 1 {
 		return centerPad(tokens[0], width)
 	}
 
 	// Calculate separator widths.
+	totalTokenWidth := 0
+	for _, t := range tokens {
+		totalTokenWidth += len([]rune(t))
+	}
 	gaps := len(tokens) - 1
 	remainingWidth := width - totalTokenWidth
 	if remainingWidth < gaps {
-		// Not enough room for separators; use minimum single-char separators.
 		remainingWidth = gaps
 	}
-
 	sepWidth := remainingWidth / gaps
 
 	// Build the line.
@@ -104,14 +106,11 @@ func RenderBattlefield(turnOrder []string, playerName string, width int) string 
 	}
 
 	result := sb.String()
-
-	// Ensure we do not exceed width.
 	runes := []rune(result)
 	if len(runes) > width {
 		runes = runes[:width]
 		result = string(runes)
 	}
-
 	return result
 }
 
