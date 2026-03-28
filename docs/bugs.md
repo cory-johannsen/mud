@@ -286,11 +286,11 @@
 
 ### BUG-34: Help command output is not alphabetized within categories
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The `help` command lists commands in an arbitrary order within each category; commands should be sorted alphabetically for easier scanning.
 **Steps:** Run `help`; observe that commands within each category are not in alphabetical order.
-**Fix:**
+**Fix:** Added `sort.Slice` by `cmd.Name` in `Registry.CommandsByCategory()` so each category's commands are returned alphabetically.
 
 ### BUG-35: Trainer NPC requires player to know job name instead of offering a menu
 **Severity:** medium

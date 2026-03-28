@@ -1,6 +1,9 @@
 package command
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // Registry maps command names and aliases to Command definitions.
 type Registry struct {
@@ -81,6 +84,9 @@ func (r *Registry) CommandsByCategory() map[string][]*Command {
 	categories := make(map[string][]*Command)
 	for _, cmd := range r.commands {
 		categories[cmd.Category] = append(categories[cmd.Category], cmd)
+	}
+	for _, cmds := range categories {
+		sort.Slice(cmds, func(i, j int) bool { return cmds[i].Name < cmds[j].Name })
 	}
 	return categories
 }

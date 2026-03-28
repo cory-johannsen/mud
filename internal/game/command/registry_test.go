@@ -126,6 +126,19 @@ func TestCommandsByCategory(t *testing.T) {
 	assert.Len(t, cats[CategoryMovement], 12)
 }
 
+// TestCommandsByCategory_Sorted verifies that commands within each category
+// are sorted alphabetically by name (BUG-34 regression test).
+func TestCommandsByCategory_Sorted(t *testing.T) {
+	r := DefaultRegistry()
+	cats := r.CommandsByCategory()
+	for catName, cmds := range cats {
+		for i := 1; i < len(cmds); i++ {
+			assert.LessOrEqual(t, cmds[i-1].Name, cmds[i].Name,
+				"category %q: %q should come before %q", catName, cmds[i-1].Name, cmds[i].Name)
+		}
+	}
+}
+
 func TestPropertyAllAliasesResolveToCanonical(t *testing.T) {
 	rapid.Check(t, func(t *rapid.T) {
 		r := DefaultRegistry()
