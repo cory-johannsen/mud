@@ -54,6 +54,18 @@ func newJobTrainerTestServer(t *testing.T) (*GameServiceServer, string) {
 	return svc, uid
 }
 
+// TestHandleTrainJob_NoJobID_ListsAvailableJobs verifies that when no job ID is
+// provided, the trainer lists their offered jobs as a menu (BUG-35 regression test).
+func TestHandleTrainJob_NoJobID_ListsAvailableJobs(t *testing.T) {
+	svc, uid := newJobTrainerTestServer(t)
+	evt, err := svc.handleTrainJob(uid, &gamev1.TrainJobRequest{NpcName: "Rio Wrench", JobId: ""})
+	require.NoError(t, err)
+	content := evt.GetMessage().Content
+	assert.Contains(t, content, "scavenger", "menu should list scavenger job")
+	assert.Contains(t, content, "infiltrator", "menu should list infiltrator job")
+	assert.Contains(t, content, "200", "menu should show training cost")
+}
+
 func TestHandleTrainJob_Success_FirstJob(t *testing.T) {
 	svc, uid := newJobTrainerTestServer(t)
 	evt, err := svc.handleTrainJob(uid, &gamev1.TrainJobRequest{NpcName: "Rio Wrench", JobId: "scavenger"})

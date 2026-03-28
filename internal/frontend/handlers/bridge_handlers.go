@@ -1785,11 +1785,14 @@ func bridgeDismiss(bctx *bridgeContext) (bridgeResult, error) {
 // Postcondition: returns a non-nil msg; done is false.
 func bridgeTrainJob(bctx *bridgeContext) (bridgeResult, error) {
 	fields := strings.Fields(bctx.parsed.RawArgs)
-	if len(fields) < 2 {
-		return writeErrorPrompt(bctx, "Usage: train <npc> <job>")
+	if len(fields) < 1 {
+		return writeErrorPrompt(bctx, "Usage: train <npc> [job]")
 	}
 	npcName := fields[0]
-	jobID := strings.Join(fields[1:], "_")
+	jobID := ""
+	if len(fields) >= 2 {
+		jobID = strings.Join(fields[1:], "_")
+	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
 		Payload:   &gamev1.ClientMessage_TrainJob{TrainJob: &gamev1.TrainJobRequest{NpcName: npcName, JobId: jobID}},

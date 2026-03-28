@@ -294,11 +294,11 @@
 
 ### BUG-35: Trainer NPC requires player to know job name instead of offering a menu
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** Trainer NPC interactions require the player to already know the job they want to train; the trainer should present a menu of available jobs to choose from, or inform the player if none are available.
 **Steps:** Interact with a Trainer NPC; observe that the player must type the exact job name with no prompt or list of options offered.
-**Fix:**
+**Fix:** `train <npc>` with no job now lists the trainer's offered jobs with cost and eligibility status. Bridge handler updated to allow omitting the job argument.
 
 ### BUG-36: look &lt;direction&gt; produces no console output
 **Severity:** medium

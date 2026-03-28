@@ -57,6 +57,9 @@ func (s *GameServiceServer) handleTrainJob(uid string, req *gamev1.TrainJobReque
 		return messageEvent("This trainer has no jobs configured."), nil
 	}
 	jobID := req.GetJobId()
+	if jobID == "" {
+		return s.listTrainerOfferings(inst, tmpl, sess), nil
+	}
 	var trainable *npc.TrainableJob
 	for i := range tmpl.JobTrainer.OfferedJobs {
 		if tmpl.JobTrainer.OfferedJobs[i].JobID == jobID {
@@ -204,6 +207,41 @@ func (s *GameServiceServer) handleSetJob(uid string, req *gamev1.SetJobRequest) 
 		}
 	}
 	return messageEvent(fmt.Sprintf("Active job set to %q (level %d).", jobID, sess.Jobs[jobID])), nil
+}
+
+// listTrainerOfferings returns a formatted menu of the trainer's available jobs.
+//
+// Precondition: inst, tmpl, and sess must not be nil; tmpl.JobTrainer must not be nil.
+// Postcondition: Returns a non-nil ServerEvent listing offered jobs with cost and eligibility.
+func (s *GameServiceServer) listTrainerOfferings(inst *npc.Instance, tmpl *npc.Template, sess *session.PlayerSession) *gamev1.ServerEvent {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("=== %s's Training ===\n", inst.Name()))
+	sb.WriteString(fmt.Sprintf("%-20s %8s  %s\n", "Job", "Cost", "Status"))
+	playerAttrs := buildPlayerAttrs(sess)
+	playerSkills := sess.Skills
+	if playerSkills == nil {
+		playerSkills = map[string]string{}
+	}
+	playerJobs := sess.Jobs
+	if playerJobs == nil {
+		playerJobs = map[string]int{}
+	}
+	playerFeats := make([]string, 0, len(sess.PassiveFeats))
+	for featID := range sess.PassiveFeats {
+		playerFeats = append(playerFeats, featID)
+	}
+	offered := make([]npc.TrainableJob, len(tmpl.JobTrainer.OfferedJobs))
+	copy(offered, tmpl.JobTrainer.OfferedJobs)
+	sort.Slice(offered, func(i, j int) bool { return offered[i].JobID < offered[j].JobID })
+	for _, job := range offered {
+		status := "available"
+		if err := npc.CheckJobPrerequisites(job, sess.Level, playerJobs, playerAttrs, playerSkills, playerFeats); err != nil {
+			status = err.Error()
+		}
+		sb.WriteString(fmt.Sprintf("%-20s %8d  %s\n", job.JobID, job.TrainingCost, status))
+	}
+	sb.WriteString("\nUsage: train <npc> <job>")
+	return messageEvent(sb.String())
 }
 
 // formatJobList returns a compact comma-separated listing of job:level pairs with active marker.
