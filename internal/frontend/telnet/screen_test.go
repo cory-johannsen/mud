@@ -141,6 +141,36 @@ func TestPropertyWriteRoom_AlwaysRoomRegionRowsPlusOneClearSequences(t *testing.
 	})
 }
 
+// TestWriteConsole_ClearsHotbarRowBeforeScroll is the regression test for BUG-38.
+// Before this fix, WriteConsole scrolled the terminal without first clearing row h-1 (hotbar),
+// so the hotbar content scrolled into the visible console region on every message.
+// The fix: clear the hotbar row BEFORE issuing any \r\n scrolls so that only blank content
+// scrolls upward, not the hotbar text.
+func TestWriteConsole_ClearsHotbarRowBeforeScroll(t *testing.T) {
+	const W, H = 80, 24
+	lo := newRoomLayout(H)
+	conn, client := newSplitConn(t, W, H)
+
+	// Pre-populate hotbar with visible content that would be detectable if scrolled.
+	conn.mu.Lock()
+	conn.hotbarBuf = [10]string{"stride", "", "", "", "", "", "", "", "", ""}
+	conn.mu.Unlock()
+
+	go func() { _ = conn.WriteConsole("combat message") }()
+	out := readAll(t, client, 500*time.Millisecond)
+
+	// The hotbar row (h-1) must be cleared BEFORE any \r\n scroll.
+	hotbarClear := fmt.Sprintf("\033[%d;1H\033[2K", lo.hotbarRow)
+	require.Contains(t, out, hotbarClear, "WriteConsole must clear hotbar row before scrolling")
+
+	// The hotbar clear must precede the prompt-row positioning (which triggers the scroll).
+	promptPos := fmt.Sprintf("\033[%d;1H\033[2K", lo.promptRow)
+	clearIdx := strings.Index(out, hotbarClear)
+	promptIdx := strings.Index(out, promptPos)
+	require.Less(t, clearIdx, promptIdx,
+		"hotbar row clear must come before the prompt-row scroll position")
+}
+
 func TestWriteHotbar_RendersAtRowHMinus1(t *testing.T) {
 	const W, H = 80, 24
 	conn, client := newSplitConn(t, W, H)

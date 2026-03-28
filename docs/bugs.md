@@ -308,6 +308,14 @@
 **Steps:** Enter any room with exits; type `look north` (or any valid direction); observe that no output is displayed in the console.
 **Fix:** Root cause was `bridgeLook` ignoring parsed args entirely — it always sent a bare `LookRequest` to the server. Added directional look handling in `bridgeLook`: when args contain a direction (including aliases like "n"), the handler resolves it against the cached `lastRoomView` exits and returns a local description ("Looking north: Town Square.") with locked status if applicable. Added `roomViewFn` to `bridgeContext` and `consoleMsg` to `bridgeResult` to support local output. Five regression tests in `bridge_handlers_test.go`.
 
+### BUG-38: Hotbar rendered to console after every server event
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** The hotbar bar (`[1:stride] [2:---] ...`) is written to the console output stream after every server event message instead of appearing only in the fixed UI row at H-1.
+**Steps:** Enter combat; observe that after every combat message the full hotbar line is echoed to the console, repeating on every round update, action message, and status line.
+**Fix:**
+
 ### BUG-37: Combat mode did not engage when entering combat
 **Severity:** high
 **Status:** fixed

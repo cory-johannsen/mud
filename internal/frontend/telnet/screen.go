@@ -313,6 +313,14 @@ func (c *Conn) WriteConsole(text string) error {
 
 	var buf strings.Builder
 
+	// Clear hotbar row (h-1) BEFORE scrolling so its content does not scroll
+	// into the visible console region (BUG-38).  Each \r\n at promptRow (h)
+	// shifts the entire screen up by one row; without this pre-clear the hotbar
+	// text scrolls upward and remains visible inline with console messages.
+	if len(wrappedLines) > 0 {
+		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", lo.hotbarRow)
+	}
+
 	// Position at promptRow (= last row of full-screen scroll region).
 	// Clear the line first so the current prompt/input is not scrolled into
 	// the console area — otherwise the prompt text appears as a console line.
