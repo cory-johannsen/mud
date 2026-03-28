@@ -697,7 +697,7 @@ features:
 
   - slug: interactive-test-suite
     name: Interactive Automated Test Suite
-    status: spec
+    status: done
     priority: 463
     category: meta
     file: docs/features/interactive-test-suite.md
