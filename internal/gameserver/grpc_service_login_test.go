@@ -133,6 +133,10 @@ func (m *mockCharSaverFull) LoadJobs(_ context.Context, _ int64) (map[string]int
 }
 func (m *mockCharSaverFull) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (m *mockCharSaverFull) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
+func (m *mockCharSaverFull) SaveHotbar(_ context.Context, _ int64, _ [10]string) error { return nil }
+func (m *mockCharSaverFull) LoadHotbar(_ context.Context, _ int64) ([10]string, error) {
+	return [10]string{}, nil
+}
 
 // testGRPCServerWithSaverFull starts an in-process gRPC server using the supplied
 // CharacterSaver and returns a connected client and the session manager.

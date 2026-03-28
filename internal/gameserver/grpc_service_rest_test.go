@@ -314,6 +314,10 @@ func (f *fakeCharSaver) LoadJobs(_ context.Context, _ int64) (map[string]int, st
 }
 func (f *fakeCharSaver) LoadFocusPoints(_ context.Context, _ int64) (int, error) { return 0, nil }
 func (f *fakeCharSaver) SaveFocusPoints(_ context.Context, _ int64, _ int) error { return nil }
+func (f *fakeCharSaver) SaveHotbar(_ context.Context, _ int64, _ [10]string) error { return nil }
+func (f *fakeCharSaver) LoadHotbar(_ context.Context, _ int64) ([10]string, error) {
+	return [10]string{}, nil
+}
 
 // REQ-LR1/LR2 (property): For any CurrentHP in [0, MaxHP], after rest,
 // sess.CurrentHP == sess.MaxHP and SaveState called once with MaxHP.

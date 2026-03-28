@@ -119,6 +119,8 @@ type CharacterSaver interface {
 	SaveInstanceCharges(ctx context.Context, characterID int64, instanceID, itemDefID string, charges int, expended bool) error
 	LoadFocusPoints(ctx context.Context, characterID int64) (int, error)
 	SaveFocusPoints(ctx context.Context, characterID int64, focusPoints int) error
+	SaveHotbar(ctx context.Context, characterID int64, slots [10]string) error
+	LoadHotbar(ctx context.Context, characterID int64) ([10]string, error)
 }
 
 // CharacterSkillsGetter retrieves per-character skill proficiency data.

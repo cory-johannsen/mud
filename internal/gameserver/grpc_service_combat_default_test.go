@@ -71,6 +71,12 @@ func (m *mockCharSaverCombatDefault) LoadFocusPoints(_ context.Context, _ int64)
 func (m *mockCharSaverCombatDefault) SaveFocusPoints(_ context.Context, _ int64, _ int) error {
 	return nil
 }
+func (m *mockCharSaverCombatDefault) SaveHotbar(_ context.Context, _ int64, _ [10]string) error {
+	return nil
+}
+func (m *mockCharSaverCombatDefault) LoadHotbar(_ context.Context, _ int64) ([10]string, error) {
+	return [10]string{}, nil
+}
 
 // testServiceForCombatDefault creates a minimal GameServiceServer suitable for handleCombatDefault tests.
 //
