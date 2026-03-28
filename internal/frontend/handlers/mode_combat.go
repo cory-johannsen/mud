@@ -287,9 +287,6 @@ func (h *CombatModeHandler) HandleInput(line string, conn *telnet.Conn, stream g
 		}
 		return
 	}
-	// Non-movement commands: handled by commandLoop in game_bridge.go (Task 3 wiring).
-	// For now, no-op — commandLoop dispatches before reaching HandleInput for ModeRoom,
-	// and Task 3 will wire combat input properly.
 }
 
 // hpBar renders an HP bar: [####....] 20/30
