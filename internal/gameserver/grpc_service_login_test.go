@@ -268,6 +268,7 @@ func TestSession_Cleanup_SavesWeaponPresetsAndEquipment(t *testing.T) {
 	require.NoError(t, err)
 
 	joinWorldWithCharID(t, stream, "u1", "Alice", 42)
+	drainHotbarEvent(t, stream)
 
 	// Quit to trigger cleanupPlayer via the deferred call in Session.
 	err = stream.Send(&gamev1.ClientMessage{
@@ -742,6 +743,7 @@ func TestSession_FavoredTargetPromptedWhenMissing(t *testing.T) {
 	roomResp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
 	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView before prompt")
+	drainHotbarEvent(t, stream)
 
 	// Receive the prompt message.
 	promptResp, recvErr2 := stream.Recv()
@@ -852,6 +854,7 @@ func TestSession_FavoredTargetPromptedWhenMissing_InvalidInput(t *testing.T) {
 	roomResp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
 	require.NotNil(t, roomResp.GetRoomView(), "expected RoomView before prompt")
+	drainHotbarEvent(t, stream)
 
 	// Receive the prompt message.
 	promptResp, recvErr2 := stream.Recv()
@@ -888,4 +891,15 @@ func TestSession_FavoredTargetPromptedWhenMissing_InvalidInput(t *testing.T) {
 		"FavoredTarget must be empty string when invalid input was provided")
 	assert.Empty(t, fcRepo.setCalls,
 		"repo.Set must not be called when input was invalid")
+}
+
+// drainHotbarEvent receives one event from stream and asserts it is a HotbarUpdateEvent.
+//
+// Precondition: stream must have a HotbarUpdateEvent pending as the next message.
+// Postcondition: The HotbarUpdateEvent is consumed; t.Fatal is called if it is not present.
+func drainHotbarEvent(t *testing.T, stream gamev1.GameService_SessionClient) {
+	t.Helper()
+	resp, err := stream.Recv()
+	require.NoError(t, err, "expected HotbarUpdateEvent after RoomView")
+	require.NotNil(t, resp.GetHotbarUpdate(), "expected HotbarUpdateEvent after RoomView; got other event type")
 }

@@ -252,6 +252,7 @@ func TestSession_AbilityBoostsPromptedAndApplied(t *testing.T) {
 	resp, recvErr := stream.Recv()
 	require.NoError(t, recvErr)
 	require.NotNil(t, resp.GetRoomView(), "expected RoomView as first server event")
+	drainHotbarEvent(t, stream)
 
 	// Helper: receive a prompt message and respond with choice "1".
 	answerPrompt := func(index int) {
