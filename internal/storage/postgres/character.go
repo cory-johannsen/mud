@@ -711,10 +711,6 @@ func (r *CharacterRepository) SaveInstanceCharges(ctx context.Context, character
 	return err
 }
 
-// LoadInstanceCharges returns a map of instanceID → InstanceChargeState for all instances
-// belonging to characterID that have non-sentinel charge state (charges_remaining != -1).
-//
-// Precondition: characterID > 0.
 // DeleteByAccountAndName permanently removes the character with the given name belonging
 // to the given account ID.
 //
@@ -734,6 +730,10 @@ func (r *CharacterRepository) DeleteByAccountAndName(ctx context.Context, accoun
 	return nil
 }
 
+// LoadInstanceCharges returns a map of instanceID → InstanceChargeState for all instances
+// belonging to characterID that have non-sentinel charge state (charges_remaining != -1).
+//
+// Precondition: characterID > 0.
 // Postcondition: Returns nil map on error; empty map if no rows exist.
 func (r *CharacterRepository) LoadInstanceCharges(ctx context.Context, characterID int64) (map[string]InstanceChargeState, error) {
 	rows, err := r.db.Query(ctx, `

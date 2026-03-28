@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"syscall"
 	"testing"
 	"text/template"
 	"time"
@@ -18,6 +19,13 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
+
+// Package layout note: all scenario files (scenarios_*_test.go) and this suite file are
+// in the same flat package (internal/e2e, package e2e_test) rather than a scenarios/
+// subdirectory. This is intentional: Go does not support a TestMain in a parent package
+// that governs tests in a sub-package. All test files that need to share a single TestMain
+// (for lifecycle management of PostgreSQL, gameserver, and frontend subprocesses) must
+// reside in the same package.
 
 // e2eState holds all subprocess handles and addresses for the test suite.
 var e2eState struct {
@@ -35,6 +43,11 @@ type timingEntry struct {
 
 // recordTiming registers elapsed time and pass/fail for a test (REQ-ITS-10).
 // Call at the start of each scenario: defer recordTiming(t, time.Now()).
+//
+// Known limitation: t.Failed() is evaluated at defer time (when the test function
+// returns). If a t.Cleanup callback registered after recordTiming's defer fails the
+// test, the timing entry will report PASS incorrectly because t.Failed() is checked
+// before t.Cleanup callbacks run.
 func recordTiming(t *testing.T, start time.Time) {
 	t.Helper()
 	passed := !t.Failed()
@@ -94,9 +107,31 @@ func buildBinary(root, cmdPkg, outPath string) error {
 	return nil
 }
 
+// stopSubprocess sends SIGTERM to proc, waits up to 5 seconds for it to exit,
+// then sends SIGKILL if it has not exited within the grace period.
+//
+// Precondition: proc must be a running subprocess started via startSubprocess.
+func stopSubprocess(proc *exec.Cmd) {
+	if proc == nil || proc.Process == nil {
+		return
+	}
+	_ = proc.Process.Signal(syscall.SIGTERM)
+	done := make(chan struct{})
+	go func() {
+		_ = proc.Wait()
+		close(done)
+	}()
+	select {
+	case <-done:
+		// process exited cleanly within grace period
+	case <-time.After(5 * time.Second):
+		_ = proc.Process.Kill()
+	}
+}
+
 // startSubprocess starts a subprocess and drains its stderr asynchronously.
 //
-// Postcondition: process is running; caller must call proc.Process.Kill() on cleanup.
+// Postcondition: process is running; caller must call stopSubprocess on cleanup.
 func startSubprocess(name, bin string, args []string, env []string) (*exec.Cmd, error) {
 	cmd := exec.Command(bin, args...)
 	cmd.Env = append(os.Environ(), env...)
@@ -332,7 +367,7 @@ func runMain(m *testing.M) int {
 		fmt.Fprintf(os.Stderr, "e2e: starting gameserver: %v\n", err)
 		return 1
 	}
-	defer gsProc.Process.Kill()
+	defer stopSubprocess(gsProc)
 
 	gsAddr := fmt.Sprintf("127.0.0.1:%d", grpcPort)
 	if err := pollPort(gsAddr, 30*time.Second); err != nil {
@@ -356,7 +391,7 @@ func runMain(m *testing.M) int {
 		fmt.Fprintf(os.Stderr, "e2e: starting frontend: %v\n", err)
 		return 1
 	}
-	defer feProc.Process.Kill()
+	defer stopSubprocess(feProc)
 
 	if err := pollPort(e2eState.HeadlessAddr, 30*time.Second); err != nil {
 		fmt.Fprintf(os.Stderr, "e2e: headless port not ready: %v\n", err)

@@ -130,6 +130,42 @@ func (c *HeadlessClient) ExpectRegex(pattern string, timeout time.Duration) erro
 	return fmt.Errorf("ExpectRegex(%q): pattern not found within %s", pattern, timeout)
 }
 
+// ExpectRegexReturn reads lines until one matches pattern (regexp) or timeout elapses.
+// Returns the matching line on success.
+// timeout == 0 uses defaultExpectTimeout (5s).
+//
+// Postcondition: Returns the matching line and nil error on match; empty string and
+// descriptive error on timeout or bad pattern.
+func (c *HeadlessClient) ExpectRegexReturn(pattern string, timeout time.Duration) (string, error) {
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return "", fmt.Errorf("ExpectRegexReturn: invalid pattern %q: %w", pattern, err)
+	}
+	if timeout == 0 {
+		timeout = defaultExpectTimeout
+	}
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		remaining := time.Until(deadline)
+		if remaining <= 0 {
+			break
+		}
+		_ = c.conn.SetReadDeadline(time.Now().Add(remaining))
+		line, err := c.reader.ReadString('\n')
+		_ = c.conn.SetReadDeadline(time.Time{})
+		if err != nil {
+			if re.MatchString(line) {
+				return strings.TrimRight(line, "\r\n"), nil
+			}
+			return "", fmt.Errorf("ExpectRegexReturn(%q): timeout after %s: %w", pattern, timeout, err)
+		}
+		if re.MatchString(line) {
+			return strings.TrimRight(line, "\r\n"), nil
+		}
+	}
+	return "", fmt.Errorf("ExpectRegexReturn(%q): pattern not found within %s", pattern, timeout)
+}
+
 // Close closes the underlying TCP connection.
 func (c *HeadlessClient) Close() error {
 	return c.conn.Close()

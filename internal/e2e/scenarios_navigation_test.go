@@ -57,3 +57,23 @@ func TestNavigation_InvalidDirection(t *testing.T) {
 	require.NoError(t, player.Expect("> ", 5*time.Second),
 		"server must return prompt after unknown direction (no crash)")
 }
+
+func TestNavigation_LockedExit(t *testing.T) {
+	defer recordTiming(t, time.Now())
+	charName := fmt.Sprintf("TestNavLocked_%d", time.Now().UnixMilli()%10000)
+
+	editor := NewClientForTest(t)
+	loginAs(t, editor, "claude_editor")
+	createCharacter(t, editor, charName)
+	t.Cleanup(func() { deleteCharacter(t, editor, charName) })
+
+	player := enterGame(t, charName)
+
+	// Use the editor to lock an exit in the current room, then attempt to move through it.
+	require.NoError(t, editor.Send("lock_exit north"))
+	require.NoError(t, editor.Expect("> ", 5*time.Second))
+
+	require.NoError(t, player.Send("north"))
+	require.NoError(t, player.ExpectRegex(`(?i)(lock|inaccessible|closed|barred|cannot|blocked)`, 5*time.Second),
+		"server must indicate the exit is locked when player attempts to move through it")
+}

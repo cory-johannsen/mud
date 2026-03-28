@@ -2,6 +2,8 @@ package e2e_test
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
@@ -44,14 +46,22 @@ func loginAsRaw(t *testing.T, c *e2e.HeadlessClient, username, password string) 
 	require.NoError(t, c.Send(password))
 }
 
-// selectCharacter selects a character by sending "1" (assumes one character per session).
+// selectCharacter selects a character by finding the line number associated with charName
+// in the character list and sending that number.
 //
 // Postcondition: client is in-game.
 func selectCharacter(t *testing.T, c *e2e.HeadlessClient, charName string) {
 	t.Helper()
-	require.NoError(t, c.ExpectRegex(`\d+\.\s+`+charName, 5*time.Second),
-		"selectCharacter: character %q not found in list", charName)
+	matched, err := c.ExpectRegexReturn(`\d+\.\s+`+regexp.QuoteMeta(charName), 5*time.Second)
+	require.NoError(t, err, "selectCharacter: character %q not found in list", charName)
+	numRe := regexp.MustCompile(`(\d+)\.`)
+	m := numRe.FindStringSubmatch(matched)
 	lineNum := 1
+	if len(m) >= 2 {
+		if n, convErr := strconv.Atoi(m[1]); convErr == nil {
+			lineNum = n
+		}
+	}
 	require.NoError(t, c.Send(fmt.Sprintf("%d", lineNum)), "selectCharacter: sending selection")
 	require.NoError(t, c.Expect("> ", 10*time.Second), "selectCharacter: waiting for in-game prompt")
 }
