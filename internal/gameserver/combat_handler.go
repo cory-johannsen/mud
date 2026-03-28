@@ -2209,8 +2209,13 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		h.stopTimerLocked(roomID)
 		h.engine.EndCombat(roomID)
 		h.clearCoweringNPCsLocked(roomID)
+		// Fire onCombatEndFn in a goroutine: calling it while holding combatMu
+		// deadlocks because the callback (pushRoomViewToAllInRoom) re-acquires combatMu.
+		// See the same pattern at the flee path (postUnlockFn above).
 		if h.onCombatEndFn != nil {
-			h.onCombatEndFn(roomID)
+			fn := h.onCombatEndFn
+			rid := roomID
+			go fn(rid)
 		}
 		return events
 	}

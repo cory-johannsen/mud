@@ -24,11 +24,14 @@ func TestCombatEnd_PlayerStatusResetToIdle(t *testing.T) {
 	const roomID = "room-end-status"
 
 	// Wire onCombatEndFn exactly as grpc_service.go does.
+	// Use a channel to synchronise with the goroutine that fires the callback.
+	combatEndDone := make(chan struct{})
 	h.SetOnCombatEnd(func(rid string) {
 		sessions := h.sessions.PlayersInRoomDetails(rid)
 		for _, sess := range sessions {
 			sess.Status = int32(1) // idle
 		}
+		close(combatEndDone)
 	})
 
 	inst := spawnTestNPC(t, h.npcMgr, roomID)
@@ -59,6 +62,7 @@ func TestCombatEnd_PlayerStatusResetToIdle(t *testing.T) {
 	}
 	h.resolveAndAdvanceLocked(roomID, cbt)
 	h.combatMu.Unlock()
+	<-combatEndDone // wait for the post-unlock goroutine
 
 	// BUG-32: player status must be reset to idle after combat ends.
 	if sess.Status != int32(1) {
@@ -181,8 +185,10 @@ func TestCombatEnd_DisconnectedPlayerDoesNotBlockCombatEnd(t *testing.T) {
 	const roomID = "room-ghost"
 
 	var combatEnded bool
+	combatEndDone2 := make(chan struct{})
 	h.SetOnCombatEnd(func(rid string) {
 		combatEnded = true
+		close(combatEndDone2)
 	})
 
 	inst := spawnTestNPC(t, h.npcMgr, roomID)
@@ -215,6 +221,7 @@ func TestCombatEnd_DisconnectedPlayerDoesNotBlockCombatEnd(t *testing.T) {
 	// Resolve — combat should end even though the ghost player's Dead flag is false.
 	h.resolveAndAdvanceLocked(roomID, cbt)
 	h.combatMu.Unlock()
+	<-combatEndDone2 // wait for the post-unlock goroutine
 
 	if !combatEnded {
 		t.Errorf("BUG-32: combat did not end — ghost player combatant blocked HasLivingPlayers()")

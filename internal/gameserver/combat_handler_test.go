@@ -841,10 +841,12 @@ func TestCombatHandler_SetOnCombatEnd_CallbackInvoked(t *testing.T) {
 	// Register callback before combat starts.
 	var callbackMu sync.Mutex
 	var callbackRoomIDs []string
+	callbackDone := make(chan struct{})
 	h.SetOnCombatEnd(func(rid string) {
 		callbackMu.Lock()
 		defer callbackMu.Unlock()
 		callbackRoomIDs = append(callbackRoomIDs, rid)
+		close(callbackDone)
 	})
 
 	inst := spawnTestNPC(t, h.npcMgr, roomID)
@@ -873,6 +875,7 @@ func TestCombatHandler_SetOnCombatEnd_CallbackInvoked(t *testing.T) {
 	// Resolve manually to trigger end-of-combat path.
 	h.resolveAndAdvanceLocked(roomID, cbt)
 	h.combatMu.Unlock()
+	<-callbackDone // wait for the post-unlock goroutine
 
 	callbackMu.Lock()
 	ids := callbackRoomIDs
@@ -936,7 +939,8 @@ func TestProperty_OnCombatEnd_CallbackAlwaysReceivesRoomID(t *testing.T) {
 		h := makeCombatHandler(t, broadcastFn)
 
 		var got string
-		h.SetOnCombatEnd(func(rid string) { got = rid })
+		cbDone := make(chan struct{})
+		h.SetOnCombatEnd(func(rid string) { got = rid; close(cbDone) })
 
 		// Spawn NPC inline (rapid.T is not *testing.T).
 		tmpl := &npc.Template{
@@ -974,6 +978,7 @@ func TestProperty_OnCombatEnd_CallbackAlwaysReceivesRoomID(t *testing.T) {
 		}
 		h.resolveAndAdvanceLocked(roomID, cbt)
 		h.combatMu.Unlock()
+		<-cbDone // wait for the post-unlock goroutine
 
 		if got != roomID {
 			rt.Fatalf("callback got roomID %q; want %q", got, roomID)
