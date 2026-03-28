@@ -56,6 +56,9 @@ func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
 	return sb.String()
 }
 
+// battlefieldSep is the fixed separator between combatant tokens on the battlefield.
+const battlefieldSep = "───"
+
 // RenderBattlefield renders a 1D battlefield with the player on the left and
 // enemies on the right. Format: [*Alice]───[Goblin]───[Orc]
 // Player token uses a leading '*' marker. The result MUST NOT exceed width
@@ -79,39 +82,19 @@ func RenderBattlefield(turnOrder []string, playerName string, width int) string 
 	tokens := append(playerTokens, npcTokens...)
 
 	if len(tokens) == 1 {
-		return centerPad(tokens[0], width)
+		return tokens[0]
 	}
 
-	// Calculate separator widths.
-	totalTokenWidth := 0
-	for _, t := range tokens {
-		totalTokenWidth += len([]rune(t))
-	}
-	gaps := len(tokens) - 1
-	remainingWidth := width - totalTokenWidth
-	if remainingWidth < gaps {
-		remainingWidth = gaps
-	}
-	sepWidth := remainingWidth / gaps
+	// Join tokens with a fixed 3-dash separator.
+	line := strings.Join(tokens, battlefieldSep)
 
-	// Build the line.
-	var sb strings.Builder
-	for i, tok := range tokens {
-		sb.WriteString(tok)
-		if i < len(tokens)-1 {
-			if sepWidth > 0 {
-				sb.WriteString(strings.Repeat("─", sepWidth))
-			}
-		}
-	}
-
-	result := sb.String()
-	runes := []rune(result)
+	// Truncate to width if needed.
+	runes := []rune(line)
 	if len(runes) > width {
 		runes = runes[:width]
-		result = string(runes)
+		line = string(runes)
 	}
-	return result
+	return line
 }
 
 // RenderRosterRow renders a single combatant's status line.
