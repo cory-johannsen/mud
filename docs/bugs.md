@@ -302,8 +302,8 @@
 
 ### BUG-36: look &lt;direction&gt; produces no console output
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The `look <direction>` command is accepted without error but produces no console output, giving the player no information about what lies in the specified direction.
 **Steps:** Enter any room with exits; type `look north` (or any valid direction); observe that no output is displayed in the console.
-**Fix:**
+**Fix:** Root cause was `bridgeLook` ignoring parsed args entirely — it always sent a bare `LookRequest` to the server. Added directional look handling in `bridgeLook`: when args contain a direction (including aliases like "n"), the handler resolves it against the cached `lastRoomView` exits and returns a local description ("Looking north: Town Square.") with locked status if applicable. Added `roomViewFn` to `bridgeContext` and `consoleMsg` to `bridgeResult` to support local output. Five regression tests in `bridge_handlers_test.go`.

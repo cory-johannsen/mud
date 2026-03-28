@@ -19,9 +19,10 @@ type bridgeContext struct {
 	charName       string
 	role           string
 	stream         gamev1.GameService_SessionClient
-	helpFn         func()        // called by bridgeHelp to render help output
-	promptFn       func() string // called to build the current colored prompt
+	helpFn         func()                    // called by bridgeHelp to render help output
+	promptFn       func() string             // called to build the current colored prompt
 	travelResolver func(zoneName string) (zoneID string, errMsg string) // nil if not available; errMsg non-empty signals failure
+	roomViewFn     func() *gamev1.RoomView   // returns the last cached RoomView; nil if unavailable
 }
 
 // bridgeResult is returned by every bridge handler.
@@ -38,6 +39,7 @@ type bridgeResult struct {
 	switchCharacter bool
 	enterMapMode    bool
 	mapView         string
+	consoleMsg      string // text to write to the console (used when done=true)
 }
 
 // bridgeHandlerFunc is the signature for all bridge dispatch functions.
@@ -200,14 +202,56 @@ func bridgeMove(bctx *bridgeContext) (bridgeResult, error) {
 
 }
 
-// bridgeLook builds a LookRequest for the current room.
+// bridgeLook builds a LookRequest for the current room, or handles
+// "look <direction>" locally by describing the exit in that direction.
+//
 // Precondition: bctx must be non-nil with a valid conn and reqID.
-// Postcondition: returns a non-nil msg containing a LookRequest; done is false.
+// Postcondition: If no direction arg, returns a server LookRequest (done=false).
+// If a direction arg is given and roomViewFn is available, returns a local
+// description of the exit (done=true, consoleMsg set).
 func bridgeLook(bctx *bridgeContext) (bridgeResult, error) {
-	return bridgeResult{msg: &gamev1.ClientMessage{
-		RequestId: bctx.reqID,
-		Payload:   &gamev1.ClientMessage_Look{Look: &gamev1.LookRequest{}},
-	}}, nil
+	if len(bctx.parsed.Args) == 0 {
+		return bridgeResult{msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload:   &gamev1.ClientMessage_Look{Look: &gamev1.LookRequest{}},
+		}}, nil
+	}
+
+	// Resolve direction alias (e.g., "n" → "north").
+	dirArg := strings.ToLower(bctx.parsed.Args[0])
+	registry := command.DefaultRegistry()
+	if cmd, ok := registry.Resolve(dirArg); ok && cmd.Handler == command.HandlerMove {
+		dirArg = cmd.Name
+	}
+
+	if bctx.roomViewFn == nil {
+		return bridgeResult{
+			done:       true,
+			consoleMsg: "You see nothing special.",
+		}, nil
+	}
+	rv := bctx.roomViewFn()
+	if rv == nil {
+		return bridgeResult{
+			done:       true,
+			consoleMsg: "You see nothing special.",
+		}, nil
+	}
+
+	for _, exit := range rv.Exits {
+		if strings.EqualFold(exit.Direction, dirArg) {
+			desc := fmt.Sprintf("Looking %s: %s.", exit.Direction, exit.TargetTitle)
+			if exit.Locked {
+				desc += " (locked)"
+			}
+			return bridgeResult{done: true, consoleMsg: desc}, nil
+		}
+	}
+
+	return bridgeResult{
+		done:       true,
+		consoleMsg: fmt.Sprintf("You see nothing of interest to the %s.", dirArg),
+	}, nil
 }
 
 // bridgeExits builds an ExitsRequest for the current room.

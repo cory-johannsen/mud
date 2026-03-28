@@ -365,7 +365,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, session, mapHandler)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, session, mapHandler, &lastRoomView)
 
 	cancel()
 	wg.Wait()
@@ -400,7 +400,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 //
 // Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil; session must be non-nil.
 // Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, session *SessionInputState, mapHandler *MapModeHandler) error {
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, session *SessionInputState, mapHandler *MapModeHandler, lastRoomView *atomic.Value) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -539,6 +539,12 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			stream:         stream,
 			promptFn:       session.CurrentPrompt,
 			travelResolver: travelResolver,
+			roomViewFn: func() *gamev1.RoomView {
+				if rv, ok := lastRoomView.Load().(*gamev1.RoomView); ok {
+					return rv
+				}
+				return nil
+			},
 			helpFn: func() {
 				h.showGameHelp(conn, registry, role)
 				if conn.IsSplitScreen() {
@@ -582,6 +588,13 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			session.SetMode(conn, mapHandler)
 		}
 		if result.done {
+			if result.consoleMsg != "" {
+				if conn.IsSplitScreen() {
+					_ = conn.WriteConsole(result.consoleMsg)
+				} else {
+					_ = conn.WriteLine(result.consoleMsg)
+				}
+			}
 			if conn.IsSplitScreen() {
 				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			} else {

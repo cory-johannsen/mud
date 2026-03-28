@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/cory-johannsen/mud/internal/game/command"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // makeBridgeContext builds a minimal bridgeContext for unit-testing bridge handlers.
@@ -78,4 +79,91 @@ func TestBridgeTabComplete_BuildsTabCompleteRequest(t *testing.T) {
 	require.NotNil(t, msg)
 	assert.Equal(t, "use med", msg.GetPrefix())
 	assert.Equal(t, "req-tc", result.msg.GetRequestId())
+}
+
+// TestBridgeLook_NoArgs verifies that bare "look" sends a LookRequest to the server.
+func TestBridgeLook_NoArgs(t *testing.T) {
+	bctx := makeBridgeContext("req1", "")
+	result, err := bridgeLook(bctx)
+	require.NoError(t, err)
+	assert.False(t, result.done, "bare look should send server request")
+	require.NotNil(t, result.msg)
+	assert.NotNil(t, result.msg.GetLook())
+}
+
+// TestBridgeLook_Direction verifies that "look north" returns a local message
+// describing the exit, without sending a server request.
+//
+// Precondition: roomViewFn returns a RoomView with a north exit to "Town Square".
+// Postcondition: result.done is true (handled locally), msg is nil,
+// and the console output contains the target room name.
+func TestBridgeLook_Direction(t *testing.T) {
+	bctx := makeBridgeContext("req1", "north")
+	bctx.parsed.Args = []string{"north"}
+	bctx.roomViewFn = func() *gamev1.RoomView {
+		return &gamev1.RoomView{
+			Exits: []*gamev1.ExitInfo{
+				{Direction: "north", TargetTitle: "Town Square"},
+				{Direction: "east", TargetTitle: "Market", Locked: true},
+			},
+		}
+	}
+	result, err := bridgeLook(bctx)
+	require.NoError(t, err)
+	assert.True(t, result.done, "look <direction> should be handled locally")
+	assert.Nil(t, result.msg, "no server message for look <direction>")
+	assert.Contains(t, result.consoleMsg, "Town Square")
+}
+
+// TestBridgeLook_Direction_Locked verifies that "look east" at a locked exit
+// indicates the exit is locked.
+func TestBridgeLook_Direction_Locked(t *testing.T) {
+	bctx := makeBridgeContext("req1", "east")
+	bctx.parsed.Args = []string{"east"}
+	bctx.roomViewFn = func() *gamev1.RoomView {
+		return &gamev1.RoomView{
+			Exits: []*gamev1.ExitInfo{
+				{Direction: "east", TargetTitle: "Market", Locked: true},
+			},
+		}
+	}
+	result, err := bridgeLook(bctx)
+	require.NoError(t, err)
+	assert.True(t, result.done)
+	assert.Contains(t, result.consoleMsg, "locked")
+}
+
+// TestBridgeLook_Direction_NoExit verifies that "look south" with no south exit
+// returns a "nothing" message.
+func TestBridgeLook_Direction_NoExit(t *testing.T) {
+	bctx := makeBridgeContext("req1", "south")
+	bctx.parsed.Args = []string{"south"}
+	bctx.roomViewFn = func() *gamev1.RoomView {
+		return &gamev1.RoomView{
+			Exits: []*gamev1.ExitInfo{
+				{Direction: "north", TargetTitle: "Town Square"},
+			},
+		}
+	}
+	result, err := bridgeLook(bctx)
+	require.NoError(t, err)
+	assert.True(t, result.done)
+	assert.Contains(t, result.consoleMsg, "nothing")
+}
+
+// TestBridgeLook_Direction_Alias verifies that "look n" resolves the alias "n" to "north".
+func TestBridgeLook_Direction_Alias(t *testing.T) {
+	bctx := makeBridgeContext("req1", "n")
+	bctx.parsed.Args = []string{"n"}
+	bctx.roomViewFn = func() *gamev1.RoomView {
+		return &gamev1.RoomView{
+			Exits: []*gamev1.ExitInfo{
+				{Direction: "north", TargetTitle: "Town Square"},
+			},
+		}
+	}
+	result, err := bridgeLook(bctx)
+	require.NoError(t, err)
+	assert.True(t, result.done)
+	assert.Contains(t, result.consoleMsg, "Town Square")
 }
