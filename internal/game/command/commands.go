@@ -282,7 +282,7 @@ func BuiltinCommands() []Command {
 		{Name: "disarm", Aliases: []string{"dsm"}, Help: "Disarm a target (muscle vs Level+10 DC; success removes NPC weapon and drops it to the floor). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDisarm},
 		{Name: "disarm_trap", Aliases: []string{"dt"}, Help: "Disarm a detected trap by name. Must have previously detected the trap (Search mode). Uses Thievery.", Category: CategoryCombat, Handler: HandlerDisarmTrap},
 		{Name: "deploy_trap", Aliases: []string{"deploy"}, Help: "deploy <item> — arm a trap item at your current position (1 AP in combat)", Category: CategoryCombat, Handler: HandlerDeployTrap},
-		{Name: "stride", Aliases: []string{"str"}, Help: "Move toward or away from your target (stride [toward|away]; 1 AP; changes distance by 25ft). Combat only.", Category: CategoryCombat, Handler: HandlerStride},
+		{Name: "stride", Aliases: []string{"str", "close", "move", "approach"}, Help: "Move toward or away from your target (stride [toward|away]; 1 AP; changes distance by 25ft). Combat only.", Category: CategoryCombat, Handler: HandlerStride},
 		{Name: "hide", Aliases: nil, Help: "Attempt to hide (stealth vs highest NPC Perception DC; success applies hidden condition). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerHide},
 		{Name: "sneak", Aliases: nil, Help: "Move while hidden (stealth vs highest NPC Perception DC; fail removes hidden). Requires hidden condition. Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerSneak},
 		{Name: "divert", Aliases: []string{"div"}, Help: "Create a diversion (grift vs highest NPC Perception DC; success applies hidden condition). Combat only, costs 1 AP.", Category: CategoryCombat, Handler: HandlerDivert},
