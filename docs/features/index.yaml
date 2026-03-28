@@ -685,6 +685,26 @@ features:
     dependencies:
       - advanced-combat
 
+  - slug: hotbar
+    name: Hotbar
+    status: planned
+    priority: 462
+    category: ui
+    file: docs/features/hotbar.md
+    effort: "M"  # 10-slot persistent command hotbar; DB-backed; fixed UI row at H-1; slot activation via 0-9 keys
+    dependencies:
+      - modal-combat-mode
+
+  - slug: interactive-test-suite
+    name: Interactive Automated Test Suite
+    status: spec
+    priority: 463
+    category: meta
+    file: docs/features/interactive-test-suite.md
+    effort: "L"  # full-stack e2e suite: TestMain spins up ephemeral Postgres + gameserver + frontend subprocesses; HeadlessClient exercises 9 scenario categories via headless telnet port
+    dependencies:
+      - claude-gameserver-skill  # provides headless telnet port and seed-claude-accounts tool
+
   - slug: 2d-combat-expansion
     name: 2D Grid Combat Expansion
     status: planned
