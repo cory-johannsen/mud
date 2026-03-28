@@ -1,12 +1,15 @@
 package gameserver
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
 
+	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
+	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
 
 // handleSpawnNPC spawns a runtime-only NPC instance from a template. (REQ-EC-8,9)
@@ -169,4 +172,89 @@ func (s *GameServiceServer) handleEditorCmds(uid string) (*gamev1.ServerEvent, e
 		lines = append(lines, fmt.Sprintf("  %-14s %s", cmd.Name, cmd.Help))
 	}
 	return messageEvent(strings.Join(lines, "\r\n")), nil
+}
+
+// handleSpawnChar creates a test character for the claude_player account. (REQ-EC-28)
+//
+// Precondition: uid session must exist; req.Name must be non-empty.
+// Postcondition: A new character is created and persisted for the claude_player account,
+// or an error event is returned if any precondition fails.
+func (s *GameServiceServer) handleSpawnChar(uid string, req *gamev1.SpawnCharRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("You are not in the game."), nil
+	}
+	if deny := requireEditor(sess); deny != nil {
+		return deny, nil
+	}
+	if req.GetName() == "" {
+		return messageEvent("Usage: spawn_char <name>"), nil
+	}
+	if s.accountAdmin == nil || s.charSaver == nil {
+		return messageEvent("spawn_char: account or character repository not configured"), nil
+	}
+	charRepo, ok := s.charSaver.(*postgres.CharacterRepository)
+	if !ok {
+		return messageEvent("spawn_char: character repository does not support creation"), nil
+	}
+	ctx := context.Background()
+	claudeAcct, err := s.accountAdmin.GetAccountByUsername(ctx, "claude_player")
+	if err != nil {
+		return messageEvent(fmt.Sprintf("spawn_char: claude_player account not found: %v", err)), nil
+	}
+	c := &character.Character{
+		AccountID:  claudeAcct.ID,
+		Name:       req.GetName(),
+		Region:     "northeast",
+		Class:      "gunslinger",
+		Team:       "",
+		Level:      1,
+		Experience: 0,
+		Location:   "battle_infirmary",
+		Abilities: character.AbilityScores{
+			Brutality: 10, Quickness: 10, Grit: 10,
+			Reasoning: 10, Savvy: 10, Flair: 10,
+		},
+		MaxHP:     20,
+		CurrentHP: 20,
+		Gender:    "they/them",
+	}
+	created, err := charRepo.Create(ctx, c)
+	if err != nil {
+		return messageEvent(fmt.Sprintf("spawn_char: failed to create character %q: %v", req.GetName(), err)), nil
+	}
+	return messageEvent(fmt.Sprintf("Character %q created (id=%d) for claude_player.", created.Name, created.ID)), nil
+}
+
+// handleDeleteChar removes a character by name from the claude_player account. (REQ-EC-29)
+//
+// Precondition: uid session must exist; req.Name must be non-empty; character must belong to claude_player.
+// Postcondition: The named character is permanently removed, or an error event is returned.
+func (s *GameServiceServer) handleDeleteChar(uid string, req *gamev1.DeleteCharRequest) (*gamev1.ServerEvent, error) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return messageEvent("You are not in the game."), nil
+	}
+	if deny := requireEditor(sess); deny != nil {
+		return deny, nil
+	}
+	if req.GetName() == "" {
+		return messageEvent("Usage: delete_char <name>"), nil
+	}
+	if s.accountAdmin == nil || s.charSaver == nil {
+		return messageEvent("delete_char: account or character repository not configured"), nil
+	}
+	charRepo, ok := s.charSaver.(*postgres.CharacterRepository)
+	if !ok {
+		return messageEvent("delete_char: character repository does not support deletion"), nil
+	}
+	ctx := context.Background()
+	claudeAcct, err := s.accountAdmin.GetAccountByUsername(ctx, "claude_player")
+	if err != nil {
+		return messageEvent(fmt.Sprintf("delete_char: claude_player account not found: %v", err)), nil
+	}
+	if err := charRepo.DeleteByAccountAndName(ctx, claudeAcct.ID, req.GetName()); err != nil {
+		return messageEvent(fmt.Sprintf("delete_char: failed to delete character %q: %v", req.GetName(), err)), nil
+	}
+	return messageEvent(fmt.Sprintf("Character %q deleted from claude_player.", req.GetName())), nil
 }

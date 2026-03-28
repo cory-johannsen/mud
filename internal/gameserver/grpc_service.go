@@ -2151,6 +2151,10 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return nil, nil
 	case *gamev1.ClientMessage_SeduceRequest:
 		return s.handleSeduce(uid, p.SeduceRequest)
+	case *gamev1.ClientMessage_SpawnCharRequest:
+		return s.handleSpawnChar(uid, p.SpawnCharRequest)
+	case *gamev1.ClientMessage_DeleteCharRequest:
+		return s.handleDeleteChar(uid, p.DeleteCharRequest)
 	case *gamev1.ClientMessage_HotbarRequest:
 		evt, hbErr := s.handleHotbar(uid, p.HotbarRequest)
 		if hbErr != nil {

@@ -715,6 +715,25 @@ func (r *CharacterRepository) SaveInstanceCharges(ctx context.Context, character
 // belonging to characterID that have non-sentinel charge state (charges_remaining != -1).
 //
 // Precondition: characterID > 0.
+// DeleteByAccountAndName permanently removes the character with the given name belonging
+// to the given account ID.
+//
+// Precondition: accountID must be > 0; name must be non-empty.
+// Postcondition: Returns ErrCharacterNotFound if no matching character exists; nil on success.
+func (r *CharacterRepository) DeleteByAccountAndName(ctx context.Context, accountID int64, name string) error {
+	tag, err := r.db.Exec(ctx,
+		`DELETE FROM characters WHERE account_id = $1 AND name = $2`,
+		accountID, name,
+	)
+	if err != nil {
+		return fmt.Errorf("deleting character %q for account %d: %w", name, accountID, err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrCharacterNotFound
+	}
+	return nil
+}
+
 // Postcondition: Returns nil map on error; empty map if no rows exist.
 func (r *CharacterRepository) LoadInstanceCharges(ctx context.Context, characterID int64) (map[string]InstanceChargeState, error) {
 	rows, err := r.db.Query(ctx, `

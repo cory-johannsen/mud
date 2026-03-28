@@ -337,3 +337,47 @@ func TestHandleEditorCmds_AllCategoryEditor(t *testing.T) {
 		}
 	}
 }
+
+// ---------------------------------------------------------------------------
+// handleSpawnChar tests
+// ---------------------------------------------------------------------------
+
+// TestHandleSpawnChar_RequiresEditorRole verifies that a player-role session receives
+// a permission-denied response and no panic occurs.
+func TestHandleSpawnChar_RequiresEditorRole(t *testing.T) {
+	svc, _, sessMgr, _ := setupEditorService(t)
+	addPlayerSession(t, sessMgr, "u1", "r1")
+
+	evt, err := svc.handleSpawnChar("u1", &gamev1.SpawnCharRequest{Name: "TestHero"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Contains(t, evtText(evt), "permission denied")
+}
+
+// TestHandleSpawnChar_NilReposReturnsNonNilEvent verifies that when repos are nil the
+// handler returns a non-nil event (no panic).
+func TestHandleSpawnChar_NilReposReturnsNonNilEvent(t *testing.T) {
+	svc, _, sessMgr, _ := setupEditorService(t)
+	addEditorSession(t, sessMgr, "u1", "r1")
+	// repos are nil by default in setupEditorService
+
+	evt, err := svc.handleSpawnChar("u1", &gamev1.SpawnCharRequest{Name: "TestHero"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+}
+
+// ---------------------------------------------------------------------------
+// handleDeleteChar tests
+// ---------------------------------------------------------------------------
+
+// TestHandleDeleteChar_RequiresEditorRole verifies that a player-role session receives
+// a permission-denied response.
+func TestHandleDeleteChar_RequiresEditorRole(t *testing.T) {
+	svc, _, sessMgr, _ := setupEditorService(t)
+	addPlayerSession(t, sessMgr, "u1", "r1")
+
+	evt, err := svc.handleDeleteChar("u1", &gamev1.DeleteCharRequest{Name: "TestHero"})
+	require.NoError(t, err)
+	require.NotNil(t, evt)
+	assert.Contains(t, evtText(evt), "permission denied")
+}

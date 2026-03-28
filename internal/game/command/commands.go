@@ -140,6 +140,8 @@ const (
 	HandlerRemoveLink         = "remove_link"
 	HandlerSetRoom            = "set_room"
 	HandlerEditorCmds         = "ecmds"
+	HandlerSpawnChar          = "spawn_char"
+	HandlerDeleteChar         = "delete_char"
 	HandlerTabComplete        = "__tabcomplete__"
 	HandlerMaterials          = "materials"
 	HandlerCraft              = "craft"
@@ -259,6 +261,8 @@ func BuiltinCommands() []Command {
 		{Name: "removelink", Aliases: nil, Help: "Remove a directional exit from a room", Category: CategoryEditor, Handler: HandlerRemoveLink},
 		{Name: "setroom", Aliases: nil, Help: "Set a field on the current room", Category: CategoryEditor, Handler: HandlerSetRoom},
 		{Name: "ecmds", Aliases: nil, Help: "List all editor commands", Category: CategoryEditor, Handler: HandlerEditorCmds},
+		{Name: "spawn_char", Aliases: nil, Help: "Create a test character for claude_player account. Usage: spawn_char <name>", Category: CategoryEditor, Handler: HandlerSpawnChar},
+		{Name: "delete_char", Aliases: nil, Help: "Delete a character by name from claude_player account. Usage: delete_char <name>", Category: CategoryEditor, Handler: HandlerDeleteChar},
 
 		{Name: "map", Aliases: nil, Help: "Display your automap for the current zone", Category: CategoryWorld, Handler: HandlerMap},
 		{Name: "travel", Aliases: nil, Help: "Fast travel to a discovered zone (travel <zone name>)", Category: CategoryWorld, Handler: HandlerTravel},

@@ -146,6 +146,8 @@ message ClientMessage {
     RefocusRequest       refocus_request       = 129;
     SeduceRequest        seduce_request        = 130;
     HotbarRequest        hotbar_request        = 131;
+    SpawnCharRequest     spawn_char_request    = 132;
+    DeleteCharRequest    delete_char_request   = 133;
   }
 }
 
@@ -1148,6 +1150,16 @@ message SetRoomRequest {
 
 // EditorCmdsRequest asks the server to list all editor commands.
 message EditorCmdsRequest {}
+
+// SpawnCharRequest asks the server to create a test character for the claude_player account.
+message SpawnCharRequest {
+  string name = 1;  // character name to create for the claude_player account
+}
+
+// DeleteCharRequest asks the server to delete a character by name from the claude_player account.
+message DeleteCharRequest {
+  string name = 1;  // character name to delete (must belong to claude_player account)
+}
 
 // FactionRequest asks the server for the player's current faction, tier, rep, and perks.
 message FactionRequest {}

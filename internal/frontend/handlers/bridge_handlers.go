@@ -162,6 +162,8 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerTrainJob:           bridgeTrainJob,
 	command.HandlerListJobs:           bridgeListJobs,
 	command.HandlerSetJob:             bridgeSetJob,
+	command.HandlerSpawnChar:          bridgeSpawnChar,
+	command.HandlerDeleteChar:         bridgeDeleteChar,
 	command.HandlerSpawnNPC:           bridgeSpawnNPC,
 	command.HandlerAddRoom:            bridgeAddRoom,
 	command.HandlerAddLink:            bridgeAddLink,
@@ -2207,6 +2209,44 @@ func bridgeHotbar(bctx *bridgeContext) (bridgeResult, error) {
 			RequestId: bctx.reqID,
 			Payload: &gamev1.ClientMessage_HotbarRequest{
 				HotbarRequest: &gamev1.HotbarRequest{Action: "set", Slot: int32(slot), Text: text},
+			},
+		},
+	}, nil
+}
+
+// bridgeSpawnChar builds a SpawnCharRequest. Usage: spawn_char <name>
+//
+// Precondition: bctx must be non-nil; caller must have editor or admin role.
+// Postcondition: returns a SpawnCharRequest with the given character name.
+func bridgeSpawnChar(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) == 0 {
+		return writeErrorPrompt(bctx, "Usage: spawn_char <name>")
+	}
+	name := strings.Join(bctx.parsed.Args, " ")
+	return bridgeResult{
+		msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload: &gamev1.ClientMessage_SpawnCharRequest{
+				SpawnCharRequest: &gamev1.SpawnCharRequest{Name: name},
+			},
+		},
+	}, nil
+}
+
+// bridgeDeleteChar builds a DeleteCharRequest. Usage: delete_char <name>
+//
+// Precondition: bctx must be non-nil; caller must have editor or admin role.
+// Postcondition: returns a DeleteCharRequest with the given character name.
+func bridgeDeleteChar(bctx *bridgeContext) (bridgeResult, error) {
+	if len(bctx.parsed.Args) == 0 {
+		return writeErrorPrompt(bctx, "Usage: delete_char <name>")
+	}
+	name := strings.Join(bctx.parsed.Args, " ")
+	return bridgeResult{
+		msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload: &gamev1.ClientMessage_DeleteCharRequest{
+				DeleteCharRequest: &gamev1.DeleteCharRequest{Name: name},
 			},
 		},
 	}, nil
