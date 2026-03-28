@@ -1269,6 +1269,19 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 	// REQ-DT-6: restore downtime state on reconnect
 	s.restoreDowntimeState(stream.Context(), uid, sess, characterID)
 
+	// Load hotbar from DB (REQ-HB-9, REQ-HB-11).
+	if s.charSaver != nil && characterID > 0 {
+		hotbarSlots, hotbarErr := s.charSaver.LoadHotbar(stream.Context(), characterID)
+		if hotbarErr != nil {
+			s.logger.Warn("failed to load hotbar at login",
+				zap.Int64("character_id", characterID),
+				zap.Error(hotbarErr),
+			)
+		} else {
+			sess.Hotbar = hotbarSlots
+		}
+	}
+
 	// Broadcast arrival to other players in the room
 	s.broadcastRoomEvent(spawnRoom.ID, uid, &gamev1.RoomEvent{
 		Player: charName,
@@ -1283,6 +1296,11 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 		Payload:   &gamev1.ServerEvent_RoomView{RoomView: roomView},
 	}); err != nil {
 		return fmt.Errorf("sending initial room view: %w", err)
+	}
+
+	// Send initial HotbarUpdateEvent so the frontend can render the hotbar row (REQ-HB-12).
+	if err := stream.Send(hotbarUpdateEvent(sess.Hotbar)); err != nil {
+		s.logger.Warn("failed to send initial hotbar update", zap.Error(err))
 	}
 
 	// Resolve any missing feature/feat choices interactively now that split-screen is active.
@@ -2133,6 +2151,20 @@ func (s *GameServiceServer) dispatch(uid string, msg *gamev1.ClientMessage) (*ga
 		return nil, nil
 	case *gamev1.ClientMessage_SeduceRequest:
 		return s.handleSeduce(uid, p.SeduceRequest)
+	case *gamev1.ClientMessage_HotbarRequest:
+		evt, hbErr := s.handleHotbar(uid, p.HotbarRequest)
+		if hbErr != nil {
+			return errorEvent(hbErr.Error()), nil
+		}
+		// handleHotbar "show" returns nil; events already pushed per-slot.
+		if evt == nil {
+			return nil, nil
+		}
+		// For set/clear: also push a HotbarUpdateEvent so the frontend redraws the row.
+		if sess, ok := s.sessions.GetPlayer(uid); ok {
+			s.pushEventToUID(uid, hotbarUpdateEvent(sess.Hotbar))
+		}
+		return evt, nil
 	default:
 		return nil, fmt.Errorf("unknown message type")
 	}
@@ -3894,6 +3926,25 @@ func (s *GameServiceServer) pushMessageToUID(uid, text string) {
 	}
 	if pushErr := sess.Entity.Push(data); pushErr != nil {
 		s.logger.Warn("pushMessageToUID: push failed", zap.String("uid", uid), zap.Error(pushErr))
+	}
+}
+
+// pushEventToUID sends a raw ServerEvent to a single player session identified by uid.
+//
+// Precondition: uid must be non-empty; evt must be non-nil.
+// Postcondition: If the session exists and has a non-nil Entity, the event is pushed; errors are logged.
+func (s *GameServiceServer) pushEventToUID(uid string, evt *gamev1.ServerEvent) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return
+	}
+	data, err := proto.Marshal(evt)
+	if err != nil {
+		s.logger.Error("pushEventToUID: marshal failed", zap.String("uid", uid), zap.Error(err))
+		return
+	}
+	if pushErr := sess.Entity.Push(data); pushErr != nil {
+		s.logger.Warn("pushEventToUID: push failed", zap.String("uid", uid), zap.Error(pushErr))
 	}
 }
 
