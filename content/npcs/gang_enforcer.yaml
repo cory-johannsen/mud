@@ -32,7 +32,7 @@ loot:
       min_qty: 1
       max_qty: 1
 weapon:
-  - id: sawed_off_shotgun
+  - id: sawn_off
     weight: 3
   - id: steel_pipe
     weight: 2

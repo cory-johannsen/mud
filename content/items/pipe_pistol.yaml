@@ -1,0 +1,9 @@
+id: pipe_pistol
+name: Pipe Pistol
+description: A crude single-shot pistol cobbled together from plumbing pipe and salvaged parts.
+kind: weapon
+weapon_ref: pipe_pistol
+weight: 0.9
+stackable: false
+max_stack: 1
+value: 120

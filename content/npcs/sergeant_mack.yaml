@@ -19,7 +19,7 @@ merchant:
       base_price: 80
       init_stock: 5
       max_stock: 8
-    - item_id: sawed_off_shotgun
+    - item_id: sawn_off
       base_price: 350
       init_stock: 2
       max_stock: 4

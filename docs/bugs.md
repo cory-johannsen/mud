@@ -308,6 +308,14 @@
 **Steps:** Enter any room with exits; type `look north` (or any valid direction); observe that no output is displayed in the console.
 **Fix:** Root cause was `bridgeLook` ignoring parsed args entirely — it always sent a bare `LookRequest` to the server. Added directional look handling in `bridgeLook`: when args contain a direction (including aliases like "n"), the handler resolves it against the cached `lastRoomView` exits and returns a local description ("Looking north: Town Square.") with locked status if applicable. Added `roomViewFn` to `bridgeContext` and `consoleMsg` to `bridgeResult` to support local output. Five regression tests in `bridge_handlers_test.go`.
 
+### BUG-40: Merchant items display as raw IDs instead of display names
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** Some merchant items show raw item IDs (e.g. `sawed_off_shotgun`, `pipe_pistol`) instead of display names because the item IDs referenced in NPC YAML files don't match any registered item definitions.
+**Steps:** Browse Sergeant Mack's wares; observe `sawed_off_shotgun` and `pipe_pistol` listed instead of proper names.
+**Fix:** Two root causes: (1) `sawed_off_shotgun` referenced in `sergeant_mack.yaml`, `gang_enforcer.yaml`, and `vantucky_scavenger.yaml` but the canonical item/weapon ID is `sawn_off` — updated all three files. (2) `pipe_pistol` referenced but no item/weapon definition existed — created `content/weapons/pipe_pistol.yaml` and `content/items/pipe_pistol.yaml`.
+
 ### BUG-39: Battle map shows absolute positions instead of distance between combatants
 **Severity:** medium
 **Status:** fixed
