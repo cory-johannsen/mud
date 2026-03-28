@@ -226,6 +226,9 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	var lastRoomView atomic.Value
 	lastRoomView.Store((*gamev1.RoomView)(nil))
 
+	var currentHotbar atomic.Value
+	currentHotbar.Store([10]string{})
+
 	// Receive initial room view
 	resp, err := stream.Recv()
 	if err != nil {
@@ -361,11 +364,11 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &currentFP, &maxFP, &lastRoomView, &condMu, activeConditions, session, mapHandler)
+		h.forwardServerEvents(streamCtx, stream, conn, char.Name, &currentRoom, &currentTime, &currentDT, &currentHP, &maxHP, &currentFP, &maxFP, &lastRoomView, &condMu, activeConditions, session, mapHandler, &currentHotbar)
 	}()
 
 	// Command loop: read Telnet → parse → send gRPC
-	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, session, mapHandler, &lastRoomView)
+	err = h.commandLoop(streamCtx, stream, conn, char.Name, acct.Role, &lastInput, session, mapHandler, &lastRoomView, &currentHotbar)
 
 	cancel()
 	wg.Wait()
@@ -400,7 +403,7 @@ func (h *AuthHandler) gameBridge(ctx context.Context, conn *telnet.Conn, acct po
 //
 // Precondition: stream must be open; charName must be non-empty; lastInput must be non-nil; session must be non-nil.
 // Postcondition: Returns nil on clean quit, ctx.Err() on cancellation, or a wrapped error on failure.
-func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, session *SessionInputState, mapHandler *MapModeHandler, lastRoomView *atomic.Value) error {
+func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, role string, lastInput *atomic.Int64, session *SessionInputState, mapHandler *MapModeHandler, lastRoomView *atomic.Value, currentHotbar *atomic.Value) error {
 	registry := command.DefaultRegistry()
 	requestID := 0
 
@@ -473,6 +476,33 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			if snapErr := conn.SnapToLive(); snapErr != nil {
 				h.logger.Debug("snap to live failed", zap.Error(snapErr))
 			}
+		}
+
+		// Slot activation intercept (REQ-HB-6, REQ-HB-13).
+		// Single-char digits 0–9 are unconditionally treated as hotbar slot activation.
+		if len(line) == 1 && line[0] >= '0' && line[0] <= '9' {
+			hb, _ := currentHotbar.Load().([10]string)
+			var idx int
+			if line[0] == '0' {
+				idx = 9 // key "0" → slot 10 → index 9
+			} else {
+				idx = int(line[0] - '1') // key "1"→index 0, "9"→index 8
+			}
+			stored := hb[idx]
+			if stored == "" {
+				slotNum := idx + 1
+				msg := fmt.Sprintf("Slot %d is unassigned.", slotNum)
+				if conn.IsSplitScreen() {
+					_ = conn.WriteConsole(telnet.Colorize(telnet.Dim, msg))
+					_ = conn.WritePromptSplit(session.CurrentPrompt())
+				} else {
+					_ = conn.WriteLine(msg)
+					_ = conn.WritePrompt(session.CurrentPrompt())
+				}
+				continue
+			}
+			// Replace input with stored command and fall through to parse.
+			line = stored
 		}
 
 		line = strings.TrimSpace(line)
@@ -661,7 +691,7 @@ func renderTabCompleteResponse(conn *telnet.Conn, resp *gamev1.TabCompleteRespon
 // Side-effect: currentRoom is updated to the latest RoomView.RoomId whenever a RoomView event is received.
 // Side-effect: currentTime and currentDT are updated from TimeOfDayEvent or RoomView events.
 // Side-effect: currentHP, maxHP, currentFP, and maxFP are updated from CharacterInfo and HpUpdateEvent events.
-func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, currentFP *atomic.Int32, maxFP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler) {
+func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.GameService_SessionClient, conn *telnet.Conn, charName string, currentRoom *atomic.Value, currentTime *atomic.Value, currentDT *atomic.Value, currentHP *atomic.Int32, maxHP *atomic.Int32, currentFP *atomic.Int32, maxFP *atomic.Int32, lastRoomView *atomic.Value, condMu *sync.Mutex, activeConditions map[string]string, session *SessionInputState, mapHandler *MapModeHandler, currentHotbar *atomic.Value) {
 	// Pump stream.Recv() into a channel so it can participate in a proper
 	// select alongside resize events and the prompt-refresh ticker.
 	type recvResult struct {
@@ -705,12 +735,16 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					if mapResp != nil {
 						_ = conn.WriteConsole(renderMapConsole(mapResp, mapView, rw))
 					}
+					hb, _ := currentHotbar.Load().([10]string)
+					_ = conn.WriteHotbar(hb)
 					_ = conn.WritePromptSplit(session.CurrentPrompt())
 					continue
 				}
 				if session.Mode() == ModeCombat {
 					snap := combatHandler.SnapshotForRender()
 					_ = conn.WriteRoom(RenderCombatScreen(snap, rw))
+					hb, _ := currentHotbar.Load().([10]string)
+					_ = conn.WriteHotbar(hb)
 					_ = conn.WritePromptSplit(session.CurrentPrompt())
 					continue
 				}
@@ -718,6 +752,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					dt := currentDT.Load().(*gameserver.GameDateTime)
 					_ = conn.WriteRoom(RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt))
 				}
+				hb, _ := currentHotbar.Load().([10]string)
+				_ = conn.WriteHotbar(hb)
 				_ = conn.WritePromptSplit(session.CurrentPrompt())
 			}
 			continue
@@ -1007,6 +1043,17 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				_ = conn.WriteLine(dcMsg)
 			}
 			return
+		case *gamev1.ServerEvent_HotbarUpdate:
+			slots := p.HotbarUpdate.GetSlots()
+			var arr [10]string
+			for i := 0; i < len(slots) && i < 10; i++ {
+				arr[i] = slots[i]
+			}
+			currentHotbar.Store(arr)
+			if conn.IsSplitScreen() {
+				_ = conn.WriteHotbar(arr)
+			}
+			continue
 		case *gamev1.ServerEvent_TabComplete:
 			// Route to the dedicated channel; the TabCompleter callback reads it.
 			// Non-blocking send: drop if no one is waiting (e.g. TabCompleter timed out).
