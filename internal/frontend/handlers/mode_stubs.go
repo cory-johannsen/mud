@@ -86,14 +86,3 @@ func NewEditorModeHandler() *EditorModeHandler {
 		prompt:       "[EDIT] q=exit",
 	}}
 }
-
-// CombatModeHandler is a stub for the combat display. REQ-IMR-19.
-type CombatModeHandler struct{ stubModeHandler }
-
-func NewCombatModeHandler() *CombatModeHandler {
-	return &CombatModeHandler{stubModeHandler{
-		mode:         ModeCombat,
-		enterMessage: "[COMBAT] (coming soon)  Press 'q' to exit.",
-		prompt:       "[COMBAT] q=exit",
-	}}
-}

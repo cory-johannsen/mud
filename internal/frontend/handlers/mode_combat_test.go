@@ -1,0 +1,154 @@
+package handlers
+
+import (
+	"testing"
+)
+
+func TestNewCombatModeHandler_Mode(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	if h.Mode() != ModeCombat {
+		t.Fatalf("expected ModeCombat (%d), got %d", ModeCombat, h.Mode())
+	}
+}
+
+func TestCombatModeHandler_UpdateRoundStart_SetsRound(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(2, 3, []string{"Alice", "Goblin"})
+	if got := h.Round(); got != 2 {
+		t.Fatalf("expected round 2, got %d", got)
+	}
+}
+
+func TestCombatModeHandler_UpdateRoundStart_ResetsCombatants(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	combatants := h.Combatants()
+	if len(combatants) != 2 {
+		t.Fatalf("expected 2 combatants, got %d", len(combatants))
+	}
+	// Verify AP was set.
+	for _, c := range combatants {
+		if c.AP != 3 {
+			t.Errorf("combatant %s: expected AP 3, got %d", c.Name, c.AP)
+		}
+		if c.MaxAP != 3 {
+			t.Errorf("combatant %s: expected MaxAP 3, got %d", c.Name, c.MaxAP)
+		}
+	}
+	// Verify player flag.
+	alice := h.CombatantByName("Alice")
+	if alice == nil {
+		t.Fatal("expected Alice combatant")
+	}
+	if !alice.IsPlayer {
+		t.Error("expected Alice.IsPlayer == true")
+	}
+	goblin := h.CombatantByName("Goblin")
+	if goblin == nil {
+		t.Fatal("expected Goblin combatant")
+	}
+	if goblin.IsPlayer {
+		t.Error("expected Goblin.IsPlayer == false")
+	}
+}
+
+func TestCombatModeHandler_UpdateCombatEvent_UpdatesHP(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateCombatEvent("Alice", "Goblin", 5, 15, "Alice hits Goblin for 5 damage.", 0)
+	goblin := h.CombatantByName("Goblin")
+	if goblin == nil {
+		t.Fatal("expected Goblin combatant")
+	}
+	if goblin.HP != 15 {
+		t.Fatalf("expected Goblin HP 15, got %d", goblin.HP)
+	}
+}
+
+func TestCombatModeHandler_Prompt(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	prompt := h.Prompt()
+	if prompt == "" {
+		t.Fatal("expected non-empty prompt")
+	}
+	if prompt != "[combat]> " {
+		t.Fatalf("expected '[combat]> ', got %q", prompt)
+	}
+}
+
+func TestCombatModeHandler_Reset_ClearsCombatants(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	if len(h.Combatants()) == 0 {
+		t.Fatal("expected combatants before reset")
+	}
+	h.Reset()
+	if len(h.Combatants()) != 0 {
+		t.Fatalf("expected 0 combatants after reset, got %d", len(h.Combatants()))
+	}
+	if h.Round() != 0 {
+		t.Fatalf("expected round 0 after reset, got %d", h.Round())
+	}
+}
+
+func TestCombatModeHandler_HPBar(t *testing.T) {
+	got := hpBar(20, 30, 10)
+	expected := "[######....] 20/30"
+	if got != expected {
+		t.Fatalf("expected %q, got %q", expected, got)
+	}
+}
+
+func TestCombatModeHandler_APDots(t *testing.T) {
+	got := apDots(2, 4)
+	expected := "●●○○"
+	if got != expected {
+		t.Fatalf("expected %q, got %q", expected, got)
+	}
+}
+
+func TestCombatModeHandler_UpdateRoundStart_MarksMissingAsDead(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	// Round 2: Goblin removed from turn order.
+	h.UpdateRoundStart(2, 3, []string{"Alice"})
+	goblin := h.CombatantByName("Goblin")
+	if goblin == nil {
+		t.Fatal("expected Goblin combatant to still exist")
+	}
+	if !goblin.IsDead {
+		t.Error("expected Goblin.IsDead == true after removal from turn order")
+	}
+}
+
+func TestCombatModeHandler_UpdateCombatEvent_AppendsLog(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdateCombatEvent("Alice", "Goblin", 5, 15, "Alice hits Goblin.", 0)
+	h.UpdateCombatEvent("Goblin", "Alice", 3, 27, "Goblin hits Alice.", 0)
+	snap := h.SnapshotForRender()
+	if len(snap.Log) != 2 {
+		t.Fatalf("expected 2 log entries, got %d", len(snap.Log))
+	}
+}
+
+func TestCombatModeHandler_SetSummary(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.SetSummary("Victory!")
+	if h.Summary() != "Victory!" {
+		t.Fatalf("expected summary 'Victory!', got %q", h.Summary())
+	}
+}
+
+func TestCombatModeHandler_IsMovementCommand(t *testing.T) {
+	for _, dir := range []string{"n", "north", "s", "south", "e", "east", "w", "west", "ne", "nw", "se", "sw", "u", "up", "d", "down"} {
+		if !isMovementCommand(dir) {
+			t.Errorf("expected %q to be a movement command", dir)
+		}
+	}
+	for _, cmd := range []string{"attack", "look", "cast", "q", ""} {
+		if isMovementCommand(cmd) {
+			t.Errorf("expected %q to NOT be a movement command", cmd)
+		}
+	}
+}
