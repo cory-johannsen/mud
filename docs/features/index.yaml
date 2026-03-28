@@ -677,7 +677,7 @@ features:
 
   - slug: modal-combat-mode
     name: Modal Combat Mode
-    status: planned
+    status: done
     priority: 460
     category: ui
     file: docs/features/modal-combat-mode.md

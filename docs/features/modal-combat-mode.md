@@ -6,17 +6,17 @@ When combat starts, the telnet UI switches to a dedicated combat screen buffer w
 
 ## Requirements
 
-- [ ] Dual-buffer screen architecture (room buffer + combat buffer) in `telnet.Conn`
-- [ ] Combat screen layout: header → battlefield → roster → divider → combat log → command hint → prompt
-- [ ] 1D linear battlefield rendering with distances between combatants
-- [ ] Detailed roster: turn marker, name, HP bar, AP dots, condition tags
-- [ ] `CombatModeHandler` with full combat state tracking (round, turn order, HP, conditions, AP)
-- [ ] Mode transition on first `RoundStartEvent`, exit on `CombatEvent END`
-- [ ] Combat-first command routing: combat commands primary, escape commands (look/say/inventory/who) allowed, movement blocked
-- [ ] Combat summary display (XP, loot, damage) for 3 seconds before auto-return to room mode
-- [ ] Resize-safe rendering with absolute cursor positioning (no DECSTBM)
-- [ ] Property-based tests for battlefield and roster rendering
-- [ ] Unit tests for command routing and mode transitions
+- [x] Dual-buffer screen architecture (room buffer + combat buffer) in `telnet.Conn`
+- [x] Combat screen layout: header → battlefield → roster → divider → combat log → command hint → prompt
+- [x] 1D linear battlefield rendering with distances between combatants
+- [x] Detailed roster: turn marker, name, HP bar, AP dots, condition tags
+- [x] `CombatModeHandler` with full combat state tracking (round, turn order, HP, conditions, AP)
+- [x] Mode transition on first `RoundStartEvent`, exit on `CombatEvent END`
+- [x] Combat-first command routing: combat commands primary, escape commands (look/say/inventory/who) allowed, movement blocked
+- [x] Combat summary display (XP, loot, damage) for 3 seconds before auto-return to room mode
+- [x] Resize-safe rendering with absolute cursor positioning (no DECSTBM)
+- [x] Property-based tests for battlefield and roster rendering
+- [x] Unit tests for command routing and mode transitions
 
 ## Dependencies
 
