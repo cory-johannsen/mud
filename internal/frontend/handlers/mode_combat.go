@@ -175,12 +175,15 @@ func (h *CombatModeHandler) UpdateRoundStart(round, actionsPerTurn int, turnOrde
 	copy(h.turnOrder, turnOrder)
 }
 
-// UpdateCombatEvent updates the target's HP and appends the narrative to the log.
-func (h *CombatModeHandler) UpdateCombatEvent(attacker, target string, damage, targetHP int, narrative string, eventType int32) {
+// UpdateCombatEvent updates the target's HP/MaxHP and appends the narrative to the log.
+func (h *CombatModeHandler) UpdateCombatEvent(attacker, target string, damage, targetHP, targetMaxHP int, narrative string, eventType int32) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if c, ok := h.combatants[target]; ok {
 		c.HP = targetHP
+		if targetMaxHP > 0 {
+			c.MaxHP = targetMaxHP
+		}
 		if targetHP <= 0 {
 			c.IsDead = true
 		}

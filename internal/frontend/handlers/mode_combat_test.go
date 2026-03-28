@@ -57,7 +57,7 @@ func TestCombatModeHandler_UpdateRoundStart_ResetsCombatants(t *testing.T) {
 func TestCombatModeHandler_UpdateCombatEvent_UpdatesHP(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
 	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
-	h.UpdateCombatEvent("Alice", "Goblin", 5, 15, "Alice hits Goblin for 5 damage.", 0)
+	h.UpdateCombatEvent("Alice", "Goblin", 5, 15, 20, "Alice hits Goblin for 5 damage.", 0)
 	goblin := h.CombatantByName("Goblin")
 	if goblin == nil {
 		t.Fatal("expected Goblin combatant")
@@ -126,8 +126,8 @@ func TestCombatModeHandler_UpdateRoundStart_MarksMissingAsDead(t *testing.T) {
 func TestCombatModeHandler_UpdateCombatEvent_AppendsLog(t *testing.T) {
 	h := NewCombatModeHandler("Alice", func() {})
 	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
-	h.UpdateCombatEvent("Alice", "Goblin", 5, 15, "Alice hits Goblin.", 0)
-	h.UpdateCombatEvent("Goblin", "Alice", 3, 27, "Goblin hits Alice.", 0)
+	h.UpdateCombatEvent("Alice", "Goblin", 5, 15, 20, "Alice hits Goblin.", 0)
+	h.UpdateCombatEvent("Goblin", "Alice", 3, 27, 30, "Goblin hits Alice.", 0)
 	snap := h.SnapshotForRender()
 	if len(snap.Log) != 2 {
 		t.Fatalf("expected 2 log entries, got %d", len(snap.Log))

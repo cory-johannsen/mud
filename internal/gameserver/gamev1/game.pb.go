@@ -7537,6 +7537,7 @@ type CombatEvent struct {
 	TargetHp      int32                  `protobuf:"varint,8,opt,name=target_hp,json=targetHp,proto3" json:"target_hp,omitempty"`
 	Narrative     string                 `protobuf:"bytes,9,opt,name=narrative,proto3" json:"narrative,omitempty"`
 	WeaponName    string                 `protobuf:"bytes,10,opt,name=weapon_name,json=weaponName,proto3" json:"weapon_name,omitempty"`
+	TargetMaxHp   int32                  `protobuf:"varint,11,opt,name=target_max_hp,json=targetMaxHp,proto3" json:"target_max_hp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7639,6 +7640,13 @@ func (x *CombatEvent) GetWeaponName() string {
 		return x.WeaponName
 	}
 	return ""
+}
+
+func (x *CombatEvent) GetTargetMaxHp() int32 {
+	if x != nil {
+		return x.TargetMaxHp
+	}
+	return 0
 }
 
 // StatusRequest asks the server to return the player's active conditions.
@@ -12653,7 +12661,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"turn_order\x18\x04 \x03(\tR\tturnOrder\"%\n" +
 	"\rRoundEndEvent\x12\x14\n" +
-	"\x05round\x18\x01 \x01(\x05R\x05round\"\xc1\x02\n" +
+	"\x05round\x18\x01 \x01(\x05R\x05round\"\xe5\x02\n" +
 	"\vCombatEvent\x12,\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x18.game.v1.CombatEventTypeR\x04type\x12\x1a\n" +
 	"\battacker\x18\x02 \x01(\tR\battacker\x12\x16\n" +
@@ -12667,7 +12675,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tnarrative\x18\t \x01(\tR\tnarrative\x12\x1f\n" +
 	"\vweapon_name\x18\n" +
 	" \x01(\tR\n" +
-	"weaponName\"\x0f\n" +
+	"weaponName\x12\"\n" +
+	"\rtarget_max_hp\x18\v \x01(\x05R\vtargetMaxHp\"\x0f\n" +
 	"\rStatusRequest\"\xcc\x01\n" +
 	"\x0eConditionEvent\x12\x1d\n" +
 	"\n" +

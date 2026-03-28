@@ -800,7 +800,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			}
 			combatHandler.UpdateCombatEvent(
 				ce.GetAttacker(), ce.GetTarget(),
-				int(ce.GetDamage()), int(ce.GetTargetHp()),
+				int(ce.GetDamage()), int(ce.GetTargetHp()), int(ce.GetTargetMaxHp()),
 				ce.GetNarrative(), int32(ce.GetType()),
 			)
 			if ce.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_END {
@@ -844,6 +844,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			turnOrder := make([]string, len(rs.GetTurnOrder()))
 			copy(turnOrder, rs.GetTurnOrder())
 			combatHandler.UpdateRoundStart(int(rs.GetRound()), int(rs.GetActionsPerTurn()), turnOrder)
+			// Seed player HP from stored values so the HP bar shows immediately.
+			combatHandler.UpdatePlayerHP(int(currentHP.Load()), int(maxHP.Load()))
 			// Render combat screen in room region.
 			cw, _ := conn.Dimensions()
 			snap := combatHandler.SnapshotForRender()

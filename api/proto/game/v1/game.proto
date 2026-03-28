@@ -738,6 +738,7 @@ message CombatEvent {
   int32  target_hp        = 8;
   string narrative        = 9;
   string weapon_name      = 10;
+  int32  target_max_hp    = 11;
 }
 
 // CombatEventType distinguishes combat narration events.

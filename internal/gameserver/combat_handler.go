@@ -3616,10 +3616,12 @@ func (h *CombatHandler) roundEventToProto(re combat.RoundEvent) *gamev1.CombatEv
 		if inst, ok := h.npcMgr.Get(r.TargetID); ok {
 			evt.Target = inst.Name()
 			evt.TargetHp = int32(inst.CurrentHP)
+			evt.TargetMaxHp = int32(inst.MaxHP)
 		}
 		if sess, ok := h.sessions.GetPlayer(r.TargetID); ok {
 			evt.Target = sess.CharName
 			evt.TargetHp = int32(sess.CurrentHP)
+			evt.TargetMaxHp = int32(sess.MaxHP)
 		}
 	}
 
