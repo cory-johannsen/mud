@@ -307,3 +307,11 @@
 **Description:** The `look <direction>` command is accepted without error but produces no console output, giving the player no information about what lies in the specified direction.
 **Steps:** Enter any room with exits; type `look north` (or any valid direction); observe that no output is displayed in the console.
 **Fix:** Root cause was `bridgeLook` ignoring parsed args entirely — it always sent a bare `LookRequest` to the server. Added directional look handling in `bridgeLook`: when args contain a direction (including aliases like "n"), the handler resolves it against the cached `lastRoomView` exits and returns a local description ("Looking north: Town Square.") with locked status if applicable. Added `roomViewFn` to `bridgeContext` and `consoleMsg` to `bridgeResult` to support local output. Five regression tests in `bridge_handlers_test.go`.
+
+### BUG-37: Combat mode did not engage when entering combat
+**Severity:** high
+**Status:** fixed
+**Category:** Combat
+**Description:** The terminal UI never switched to combat mode when the player entered combat; the combat screen was never displayed.
+**Steps:** Attack an NPC; observe that the UI remained in room mode instead of switching to the combat display.
+**Fix:** Root cause: the gameserver only broadcast `CombatEvent` messages for round starts, never a `RoundStartEvent` proto. Added `roundStartBroadcastFn` to `CombatHandler` and wired it in `grpc_service.go` to broadcast `ServerEvent_RoundStart`. Called from all three combat-start sites: `startCombatLocked`, `startPursuitCombatLocked`, and `resolveAndAdvanceLocked`.
