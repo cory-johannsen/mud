@@ -664,6 +664,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		err  error
 	}
 	combatHandler := NewCombatModeHandler(charName, func() {})
+	var combatEndTimer *time.Timer
 
 	recvCh := make(chan recvResult, 4)
 	go func() {
@@ -808,7 +809,7 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					_ = conn.WriteLine(summary)
 					_ = conn.WritePrompt(combatHandler.Prompt())
 				}
-				time.AfterFunc(3*time.Second, func() {
+				combatEndTimer = time.AfterFunc(3*time.Second, func() {
 					session.SetMode(conn, session.Room())
 				})
 				continue
@@ -824,6 +825,12 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderCombatEvent(ce)
 		case *gamev1.ServerEvent_RoundStart:
 			rs := p.RoundStart
+			// Cancel any pending combat-end timer to prevent it from
+			// yanking the player out of a new combat that started quickly.
+			if combatEndTimer != nil {
+				combatEndTimer.Stop()
+				combatEndTimer = nil
+			}
 			// Transition to combat mode on first round.
 			if session.Mode() != ModeCombat {
 				combatHandler.Reset()
