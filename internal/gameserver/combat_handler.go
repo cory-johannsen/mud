@@ -55,7 +55,8 @@ type CombatHandler struct {
 	npcMgr        *npc.Manager
 	sessions      *session.Manager
 	dice          *dice.Roller
-	broadcastFn   func(roomID string, events []*gamev1.CombatEvent)
+	broadcastFn            func(roomID string, events []*gamev1.CombatEvent)
+	roundStartBroadcastFn  func(roomID string, evt *gamev1.RoundStartEvent) // optional; sends RoundStartEvent to all room sessions
 	roundDuration time.Duration
 	condRegistry  *condition.Registry
 	worldMgr      *world.Manager
@@ -280,6 +281,13 @@ func (h *CombatHandler) SetHirelingOwnerOf(fn func(instID string) string) {
 // Postcondition: fn is called with the roomID of the ended combat.
 func (h *CombatHandler) SetOnCombatEnd(fn func(roomID string)) {
 	h.onCombatEndFn = fn
+}
+
+// SetRoundStartBroadcastFn registers a callback that fires when a new combat round begins.
+// The callback receives the room ID and a fully-populated RoundStartEvent; it is responsible
+// for delivering the event to all sessions in the room. If nil, no RoundStartEvent is sent.
+func (h *CombatHandler) SetRoundStartBroadcastFn(fn func(roomID string, evt *gamev1.RoundStartEvent)) {
+	h.roundStartBroadcastFn = fn
 }
 
 // SetOnCoverHit registers a callback that fires when an attack misses due to cover.
@@ -1528,6 +1536,20 @@ func (h *CombatHandler) startPursuitCombatLocked(playerSess *session.PlayerSessi
 		Narrative: fmt.Sprintf("Pursuit! Round %d begins!", cbt.Round),
 	})
 
+	// Broadcast RoundStartEvent so the frontend can activate combat mode (REQ-IMR-19).
+	if h.roundStartBroadcastFn != nil {
+		pursuitTurnOrder := make([]string, 0, len(cbt.Combatants))
+		for _, c := range cbt.Combatants {
+			pursuitTurnOrder = append(pursuitTurnOrder, c.Name)
+		}
+		h.roundStartBroadcastFn(playerSess.RoomID, &gamev1.RoundStartEvent{
+			Round:          int32(cbt.Round),
+			ActionsPerTurn: 3,
+			DurationMs:     int32(h.roundDuration.Milliseconds()),
+			TurnOrder:      pursuitTurnOrder,
+		})
+	}
+
 	h.startTimerLocked(playerSess.RoomID)
 	return events, nil
 }
@@ -2340,6 +2362,21 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	roundStartEvents = append(roundStartEvents, drowningEvents...)
 	roundStartEvents = append(roundStartEvents, hazardEvents...)
 	h.broadcastFn(roomID, roundStartEvents)
+
+	// Broadcast RoundStartEvent so the frontend can activate/update combat mode (REQ-IMR-19).
+	if h.roundStartBroadcastFn != nil {
+		nextTurnOrder := make([]string, 0, len(cbt.Combatants))
+		for _, c := range cbt.Combatants {
+			nextTurnOrder = append(nextTurnOrder, c.Name)
+		}
+		h.roundStartBroadcastFn(roomID, &gamev1.RoundStartEvent{
+			Round:          int32(cbt.Round),
+			ActionsPerTurn: 3,
+			DurationMs:     int32(h.roundDuration.Milliseconds()),
+			TurnOrder:      nextTurnOrder,
+		})
+	}
+
 	h.startTimerLocked(roomID)
 	return events
 }
@@ -2615,6 +2652,16 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 
 	// Trigger flee/cower for all non-combat NPCs in the room.
 	h.applyCombatStartBehaviorsLocked(sess.RoomID)
+
+	// Broadcast RoundStartEvent so the frontend can activate combat mode (REQ-IMR-19).
+	if h.roundStartBroadcastFn != nil {
+		h.roundStartBroadcastFn(sess.RoomID, &gamev1.RoundStartEvent{
+			Round:          int32(cbt.Round),
+			ActionsPerTurn: 3,
+			DurationMs:     int32(h.roundDuration.Milliseconds()),
+			TurnOrder:      turnOrder,
+		})
+	}
 
 	return cbt, events, nil
 }

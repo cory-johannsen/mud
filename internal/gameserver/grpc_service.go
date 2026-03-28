@@ -500,6 +500,11 @@ func NewGameServiceServer(
 			// Push updated room view so "fighting X" labels clear immediately.
 			s.pushRoomViewToAllInRoom(roomID)
 		})
+		s.combatH.SetRoundStartBroadcastFn(func(roomID string, evt *gamev1.RoundStartEvent) {
+			s.broadcastToRoom(roomID, "", &gamev1.ServerEvent{
+				Payload: &gamev1.ServerEvent_RoundStart{RoundStart: evt},
+			})
+		})
 		s.worldH.SetCombatHandler(s.combatH)
 		// REQ-AH-21: wire substance service for poison-on-hit.
 		s.combatH.SetSubstanceSvc(s)
