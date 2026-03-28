@@ -27,9 +27,14 @@ var movementCommands = map[string]bool{
 	"d": true, "down": true,
 }
 
-// isMovementCommand returns true if line is a movement direction keyword.
-func isMovementCommand(line string) bool {
+// IsMovementCommand returns true if line is a direction command that should be blocked in combat.
+func IsMovementCommand(line string) bool {
 	return movementCommands[strings.ToLower(strings.TrimSpace(line))]
+}
+
+// isMovementCommand is an alias for IsMovementCommand for internal use.
+func isMovementCommand(line string) bool {
+	return IsMovementCommand(line)
 }
 
 // CombatantState holds a snapshot of one combatant's status.

@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"testing"
+
+	"pgregory.net/rapid"
 )
 
 func TestNewCombatModeHandler_Mode(t *testing.T) {
@@ -151,4 +153,34 @@ func TestCombatModeHandler_IsMovementCommand(t *testing.T) {
 			t.Errorf("expected %q to NOT be a movement command", cmd)
 		}
 	}
+}
+
+func TestCombatModeHandler_MovementCommandsBlocked(t *testing.T) {
+	blocked := []string{
+		"north", "south", "east", "west", "up", "down",
+		"n", "s", "e", "w", "u", "d",
+		"ne", "nw", "se", "sw",
+		"northeast", "northwest", "southeast", "southwest",
+	}
+	for _, cmd := range blocked {
+		if !IsMovementCommand(cmd) {
+			t.Errorf("expected %q to be a movement command", cmd)
+		}
+	}
+}
+
+func TestCombatModeHandler_NonMovementCommandsNotBlocked(t *testing.T) {
+	allowed := []string{"attack", "look", "inventory", "say hello", "who", "flee"}
+	for _, cmd := range allowed {
+		if IsMovementCommand(cmd) {
+			t.Errorf("expected %q NOT to be a movement command", cmd)
+		}
+	}
+}
+
+func TestIsMovementCommand_Property(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		cmd := rapid.StringMatching(`[a-z]{1,15}`).Draw(t, "cmd")
+		_ = IsMovementCommand(cmd)
+	})
 }
