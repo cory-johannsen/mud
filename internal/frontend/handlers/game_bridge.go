@@ -799,6 +799,18 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 			text = RenderError(p.Error)
 		case *gamev1.ServerEvent_CombatEvent:
 			ce := p.CombatEvent
+			// Handle position events: update combatant position and re-render the battlefield.
+			if ce.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION {
+				combatHandler.UpdatePosition(ce.GetAttacker(), int(ce.GetAttackerPosition()))
+				if session.Mode() == ModeCombat {
+					cw, _ := conn.Dimensions()
+					snap := combatHandler.SnapshotForRender()
+					if conn.IsSplitScreen() {
+						_ = conn.WriteRoom(RenderCombatScreen(snap, cw))
+					}
+				}
+				continue
+			}
 			// Update current HP when this player is the attack target.
 			if ce.GetTarget() == charName && ce.GetTargetHp() != 0 {
 				currentHP.Store(ce.GetTargetHp())

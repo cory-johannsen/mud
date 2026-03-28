@@ -190,6 +190,7 @@ const (
 	CombatEventType_COMBAT_EVENT_TYPE_CONDITION   CombatEventType = 6
 	CombatEventType_COMBAT_EVENT_TYPE_RELOAD      CombatEventType = 7
 	CombatEventType_COMBAT_EVENT_TYPE_THROW       CombatEventType = 8
+	CombatEventType_COMBAT_EVENT_TYPE_POSITION    CombatEventType = 9
 )
 
 // Enum value maps for CombatEventType.
@@ -204,6 +205,7 @@ var (
 		6: "COMBAT_EVENT_TYPE_CONDITION",
 		7: "COMBAT_EVENT_TYPE_RELOAD",
 		8: "COMBAT_EVENT_TYPE_THROW",
+		9: "COMBAT_EVENT_TYPE_POSITION",
 	}
 	CombatEventType_value = map[string]int32{
 		"COMBAT_EVENT_TYPE_UNSPECIFIED": 0,
@@ -215,6 +217,7 @@ var (
 		"COMBAT_EVENT_TYPE_CONDITION":   6,
 		"COMBAT_EVENT_TYPE_RELOAD":      7,
 		"COMBAT_EVENT_TYPE_THROW":       8,
+		"COMBAT_EVENT_TYPE_POSITION":    9,
 	}
 )
 
@@ -7526,20 +7529,21 @@ func (x *RoundEndEvent) GetRound() int32 {
 
 // CombatEvent delivers combat narration to all players in the room.
 type CombatEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          CombatEventType        `protobuf:"varint,1,opt,name=type,proto3,enum=game.v1.CombatEventType" json:"type,omitempty"`
-	Attacker      string                 `protobuf:"bytes,2,opt,name=attacker,proto3" json:"attacker,omitempty"`
-	Target        string                 `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
-	AttackRoll    int32                  `protobuf:"varint,4,opt,name=attack_roll,json=attackRoll,proto3" json:"attack_roll,omitempty"`
-	AttackTotal   int32                  `protobuf:"varint,5,opt,name=attack_total,json=attackTotal,proto3" json:"attack_total,omitempty"`
-	Outcome       string                 `protobuf:"bytes,6,opt,name=outcome,proto3" json:"outcome,omitempty"`
-	Damage        int32                  `protobuf:"varint,7,opt,name=damage,proto3" json:"damage,omitempty"`
-	TargetHp      int32                  `protobuf:"varint,8,opt,name=target_hp,json=targetHp,proto3" json:"target_hp,omitempty"`
-	Narrative     string                 `protobuf:"bytes,9,opt,name=narrative,proto3" json:"narrative,omitempty"`
-	WeaponName    string                 `protobuf:"bytes,10,opt,name=weapon_name,json=weaponName,proto3" json:"weapon_name,omitempty"`
-	TargetMaxHp   int32                  `protobuf:"varint,11,opt,name=target_max_hp,json=targetMaxHp,proto3" json:"target_max_hp,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Type             CombatEventType        `protobuf:"varint,1,opt,name=type,proto3,enum=game.v1.CombatEventType" json:"type,omitempty"`
+	Attacker         string                 `protobuf:"bytes,2,opt,name=attacker,proto3" json:"attacker,omitempty"`
+	Target           string                 `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
+	AttackRoll       int32                  `protobuf:"varint,4,opt,name=attack_roll,json=attackRoll,proto3" json:"attack_roll,omitempty"`
+	AttackTotal      int32                  `protobuf:"varint,5,opt,name=attack_total,json=attackTotal,proto3" json:"attack_total,omitempty"`
+	Outcome          string                 `protobuf:"bytes,6,opt,name=outcome,proto3" json:"outcome,omitempty"`
+	Damage           int32                  `protobuf:"varint,7,opt,name=damage,proto3" json:"damage,omitempty"`
+	TargetHp         int32                  `protobuf:"varint,8,opt,name=target_hp,json=targetHp,proto3" json:"target_hp,omitempty"`
+	Narrative        string                 `protobuf:"bytes,9,opt,name=narrative,proto3" json:"narrative,omitempty"`
+	WeaponName       string                 `protobuf:"bytes,10,opt,name=weapon_name,json=weaponName,proto3" json:"weapon_name,omitempty"`
+	TargetMaxHp      int32                  `protobuf:"varint,11,opt,name=target_max_hp,json=targetMaxHp,proto3" json:"target_max_hp,omitempty"`
+	AttackerPosition int32                  `protobuf:"varint,12,opt,name=attacker_position,json=attackerPosition,proto3" json:"attacker_position,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *CombatEvent) Reset() {
@@ -7645,6 +7649,13 @@ func (x *CombatEvent) GetWeaponName() string {
 func (x *CombatEvent) GetTargetMaxHp() int32 {
 	if x != nil {
 		return x.TargetMaxHp
+	}
+	return 0
+}
+
+func (x *CombatEvent) GetAttackerPosition() int32 {
+	if x != nil {
+		return x.AttackerPosition
 	}
 	return 0
 }
@@ -12661,7 +12672,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\n" +
 	"turn_order\x18\x04 \x03(\tR\tturnOrder\"%\n" +
 	"\rRoundEndEvent\x12\x14\n" +
-	"\x05round\x18\x01 \x01(\x05R\x05round\"\xe5\x02\n" +
+	"\x05round\x18\x01 \x01(\x05R\x05round\"\x92\x03\n" +
 	"\vCombatEvent\x12,\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x18.game.v1.CombatEventTypeR\x04type\x12\x1a\n" +
 	"\battacker\x18\x02 \x01(\tR\battacker\x12\x16\n" +
@@ -12676,7 +12687,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\vweapon_name\x18\n" +
 	" \x01(\tR\n" +
 	"weaponName\x12\"\n" +
-	"\rtarget_max_hp\x18\v \x01(\x05R\vtargetMaxHp\"\x0f\n" +
+	"\rtarget_max_hp\x18\v \x01(\x05R\vtargetMaxHp\x12+\n" +
+	"\x11attacker_position\x18\f \x01(\x05R\x10attackerPosition\"\x0f\n" +
 	"\rStatusRequest\"\xcc\x01\n" +
 	"\x0eConditionEvent\x12\x1d\n" +
 	"\n" +
@@ -12969,7 +12981,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x12COMBAT_STATUS_IDLE\x10\x01\x12\x1b\n" +
 	"\x17COMBAT_STATUS_IN_COMBAT\x10\x02\x12\x19\n" +
 	"\x15COMBAT_STATUS_RESTING\x10\x03\x12\x1d\n" +
-	"\x19COMBAT_STATUS_UNCONSCIOUS\x10\x04*\xa4\x02\n" +
+	"\x19COMBAT_STATUS_UNCONSCIOUS\x10\x04*\xc4\x02\n" +
 	"\x0fCombatEventType\x12!\n" +
 	"\x1dCOMBAT_EVENT_TYPE_UNSPECIFIED\x10\x00\x12 \n" +
 	"\x1cCOMBAT_EVENT_TYPE_INITIATIVE\x10\x01\x12\x1c\n" +
@@ -12979,7 +12991,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x15COMBAT_EVENT_TYPE_END\x10\x05\x12\x1f\n" +
 	"\x1bCOMBAT_EVENT_TYPE_CONDITION\x10\x06\x12\x1c\n" +
 	"\x18COMBAT_EVENT_TYPE_RELOAD\x10\a\x12\x1b\n" +
-	"\x17COMBAT_EVENT_TYPE_THROW\x10\b2J\n" +
+	"\x17COMBAT_EVENT_TYPE_THROW\x10\b\x12\x1e\n" +
+	"\x1aCOMBAT_EVENT_TYPE_POSITION\x10\t2J\n" +
 	"\vGameService\x12;\n" +
 	"\aSession\x12\x16.game.v1.ClientMessage\x1a\x14.game.v1.ServerEvent(\x010\x01B:Z8github.com/cory-johannsen/mud/internal/gameserver/gamev1b\x06proto3"
 

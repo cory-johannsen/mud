@@ -184,3 +184,53 @@ func TestIsMovementCommand_Property(t *testing.T) {
 		_ = IsMovementCommand(cmd)
 	})
 }
+
+func TestCombatModeHandler_UpdatePosition_UpdatesCombatantPosition(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdatePosition("Goblin", 15)
+	goblin := h.CombatantByName("Goblin")
+	if goblin == nil {
+		t.Fatal("expected Goblin combatant")
+	}
+	if goblin.Position != 15 {
+		t.Fatalf("expected Goblin.Position == 15, got %d", goblin.Position)
+	}
+}
+
+func TestCombatModeHandler_UpdatePosition_PlayerPosition(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(1, 3, []string{"Alice", "Goblin"})
+	h.UpdatePosition("Alice", 25)
+	alice := h.CombatantByName("Alice")
+	if alice == nil {
+		t.Fatal("expected Alice combatant")
+	}
+	if alice.Position != 25 {
+		t.Fatalf("expected Alice.Position == 25, got %d", alice.Position)
+	}
+}
+
+func TestCombatModeHandler_UpdatePosition_UnknownNameNoOp(t *testing.T) {
+	h := NewCombatModeHandler("Alice", func() {})
+	h.UpdateRoundStart(1, 3, []string{"Alice"})
+	// Should not panic for unknown combatant.
+	h.UpdatePosition("Unknown", 10)
+}
+
+func TestCombatModeHandler_UpdatePosition_Property(t *testing.T) {
+	rapid.Check(t, func(t *rapid.T) {
+		name := rapid.StringMatching(`[A-Za-z]{2,8}`).Draw(t, "name")
+		pos := rapid.IntRange(0, 100).Draw(t, "pos")
+		h := NewCombatModeHandler(name, func() {})
+		h.UpdateRoundStart(1, 3, []string{name, "NPC"})
+		h.UpdatePosition(name, pos)
+		c := h.CombatantByName(name)
+		if c == nil {
+			t.Fatal("expected combatant")
+		}
+		if c.Position != pos {
+			t.Fatalf("expected position %d, got %d", pos, c.Position)
+		}
+	})
+}

@@ -739,6 +739,7 @@ message CombatEvent {
   string narrative        = 9;
   string weapon_name      = 10;
   int32  target_max_hp    = 11;
+  int32  attacker_position = 12;
 }
 
 // CombatEventType distinguishes combat narration events.
@@ -752,6 +753,7 @@ enum CombatEventType {
   COMBAT_EVENT_TYPE_CONDITION    = 6;
   COMBAT_EVENT_TYPE_RELOAD       = 7;
   COMBAT_EVENT_TYPE_THROW        = 8;
+  COMBAT_EVENT_TYPE_POSITION     = 9;
 }
 
 // StatusRequest asks the server to return the player's active conditions.

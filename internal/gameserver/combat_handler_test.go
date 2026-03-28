@@ -1887,6 +1887,82 @@ func TestPropertyCombatHandler_SetCombatantHidden_Idempotent(t *testing.T) {
 	})
 }
 
+// TestCombatHandler_BroadcastAllPositions_BroadcastsPositionEvents verifies that
+// BroadcastAllPositions emits COMBAT_EVENT_TYPE_POSITION events for every combatant.
+//
+// Precondition: Active combat with at least one player and one NPC.
+// Postcondition: broadcastFn receives events with COMBAT_EVENT_TYPE_POSITION for each combatant.
+func TestCombatHandler_BroadcastAllPositions_BroadcastsPositionEvents(t *testing.T) {
+	var mu sync.Mutex
+	var broadcasts [][]*gamev1.CombatEvent
+	broadcastFn := func(_ string, events []*gamev1.CombatEvent) {
+		mu.Lock()
+		defer mu.Unlock()
+		broadcasts = append(broadcasts, events)
+	}
+
+	h := makeCombatHandler(t, broadcastFn)
+	const uid = "player-pos-test"
+	const roomID = "room-pos-test"
+	spawnTestNPC(t, h.npcMgr, roomID)
+	addTestPlayer(t, h.sessions, uid, roomID)
+
+	_, err := h.Attack(uid, "Goblin")
+	if err != nil {
+		t.Fatalf("Attack to start combat: %v", err)
+	}
+	h.cancelTimer(roomID)
+
+	// Reset collected broadcasts so we can check only BroadcastAllPositions results.
+	mu.Lock()
+	broadcasts = nil
+	mu.Unlock()
+
+	h.BroadcastAllPositions(roomID)
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if len(broadcasts) == 0 {
+		t.Fatal("expected at least one broadcast from BroadcastAllPositions")
+	}
+	// Collect all position events from all broadcast batches.
+	var posEvents []*gamev1.CombatEvent
+	for _, batch := range broadcasts {
+		for _, ev := range batch {
+			if ev.GetType() == gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION {
+				posEvents = append(posEvents, ev)
+			}
+		}
+	}
+	if len(posEvents) == 0 {
+		t.Fatal("expected COMBAT_EVENT_TYPE_POSITION events from BroadcastAllPositions")
+	}
+	// Every position event must have a non-empty attacker name.
+	for _, ev := range posEvents {
+		if ev.GetAttacker() == "" {
+			t.Error("position event has empty attacker name")
+		}
+	}
+}
+
+// TestCombatHandler_BroadcastAllPositions_NoOpWhenNoCombat verifies that
+// BroadcastAllPositions is a no-op when there is no active combat in the room.
+//
+// Precondition: No active combat for the given roomID.
+// Postcondition: broadcastFn is not called.
+func TestCombatHandler_BroadcastAllPositions_NoOpWhenNoCombat(t *testing.T) {
+	called := false
+	broadcastFn := func(_ string, _ []*gamev1.CombatEvent) {
+		called = true
+	}
+	h := makeCombatHandler(t, broadcastFn)
+	h.BroadcastAllPositions("nonexistent-room")
+	if called {
+		t.Fatal("expected broadcastFn NOT to be called when no combat is active")
+	}
+}
+
 // TestPropertyCombatHandler_ApplyCombatCondition_AlwaysAppliesCondition verifies that
 // ApplyCombatCondition always applies "grabbed" to the target NPC when called in active combat.
 //

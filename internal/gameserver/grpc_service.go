@@ -8285,6 +8285,7 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 			zap.String("npc_id", inst.ID), zap.Error(err))
 	} else {
 		s.combatH.FireCombatantMoved(sess.RoomID, inst.ID)
+		s.combatH.BroadcastAllPositions(sess.RoomID)
 	}
 
 	if pushFt == 10 {
@@ -8361,6 +8362,7 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 		s.checkPressurePlateTraps(uid, sess, room)
 	}
 	s.combatH.FireCombatantMoved(sess.RoomID, uid)
+	s.combatH.BroadcastAllPositions(sess.RoomID)
 	return messageEvent(msg), nil
 }
 
@@ -8430,6 +8432,7 @@ func (s *GameServiceServer) handleStep(uid string, req *gamev1.StepRequest) (*ga
 		s.checkPressurePlateTraps(uid, sess, room)
 	}
 	s.combatH.FireCombatantMoved(sess.RoomID, uid)
+	s.combatH.BroadcastAllPositions(sess.RoomID)
 	return messageEvent(msg), nil
 }
 

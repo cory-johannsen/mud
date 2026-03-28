@@ -12,7 +12,8 @@ func TestRenderBattlefield_FitsWidth(t *testing.T) {
 		names := rapid.SliceOfN(rapid.StringMatching(`[A-Za-z]{2,8}`), 1, 6).Draw(t, "names")
 		width := rapid.IntRange(40, 200).Draw(t, "width")
 		unique := dedupNames(names)
-		line := RenderBattlefield(unique, "", width)
+		snap := buildSnapFromNames(unique, "")
+		line := RenderBattlefield(snap, width)
 		if visibleLen(line) > width {
 			t.Fatalf("battlefield line exceeds width %d (visibleLen=%d)", width, visibleLen(line))
 		}
@@ -75,12 +76,52 @@ func TestRenderCombatScreen_ContainsAllCombatants(t *testing.T) {
 }
 
 func TestRenderBattlefield_PlayerMarked(t *testing.T) {
-	line := RenderBattlefield([]string{"Alice", "Goblin"}, "Alice", 80)
-	if !strings.Contains(line, "[*Alice]") {
-		t.Fatalf("expected player token [*Alice] in battlefield, got: %q", line)
+	snap := buildSnapFromNames([]string{"Alice", "Goblin"}, "Alice")
+	line := RenderBattlefield(snap, 80)
+	if !strings.Contains(line, "[*Alice") {
+		t.Fatalf("expected player token [*Alice...] in battlefield, got: %q", line)
 	}
-	if strings.Contains(line, "[*Goblin]") {
+	if strings.Contains(line, "[*Goblin") {
 		t.Fatalf("NPC should not have player marker, got: %q", line)
+	}
+}
+
+func TestRenderBattlefield_SortsByPosition(t *testing.T) {
+	snap := CombatRenderSnapshot{
+		TurnOrder: []string{"Alice", "Goblin"},
+		PlayerName: "Alice",
+		Combatants: map[string]*CombatantState{
+			"Alice":  {Name: "Alice", Position: 25, IsPlayer: true},
+			"Goblin": {Name: "Goblin", Position: 0},
+		},
+	}
+	line := RenderBattlefield(snap, 80)
+	// Goblin at position 0 should appear before Alice at position 25.
+	goblinIdx := strings.Index(line, "Goblin")
+	aliceIdx := strings.Index(line, "Alice")
+	if goblinIdx < 0 || aliceIdx < 0 {
+		t.Fatalf("expected both names in battlefield, got: %q", line)
+	}
+	if goblinIdx > aliceIdx {
+		t.Fatalf("expected Goblin (pos 0) before Alice (pos 25), got: %q", line)
+	}
+}
+
+func TestRenderBattlefield_ShowsPositionInToken(t *testing.T) {
+	snap := CombatRenderSnapshot{
+		TurnOrder: []string{"Alice", "Goblin"},
+		PlayerName: "Alice",
+		Combatants: map[string]*CombatantState{
+			"Alice":  {Name: "Alice", Position: 0, IsPlayer: true},
+			"Goblin": {Name: "Goblin", Position: 25},
+		},
+	}
+	line := RenderBattlefield(snap, 80)
+	if !strings.Contains(line, "0ft") {
+		t.Fatalf("expected '0ft' position in battlefield, got: %q", line)
+	}
+	if !strings.Contains(line, "25ft") {
+		t.Fatalf("expected '25ft' position in battlefield, got: %q", line)
 	}
 }
 
@@ -88,6 +129,19 @@ func TestRenderCombatSummary_ContainsText(t *testing.T) {
 	result := RenderCombatSummary("Victory!", 80)
 	if !strings.Contains(result, "Victory!") {
 		t.Fatalf("expected 'Victory!' in summary: %q", result)
+	}
+}
+
+// buildSnapFromNames builds a minimal CombatRenderSnapshot from a name list for tests.
+func buildSnapFromNames(names []string, playerName string) CombatRenderSnapshot {
+	combatants := make(map[string]*CombatantState, len(names))
+	for i, n := range names {
+		combatants[n] = &CombatantState{Name: n, Position: i * 5, IsPlayer: n == playerName}
+	}
+	return CombatRenderSnapshot{
+		TurnOrder:  names,
+		PlayerName: playerName,
+		Combatants: combatants,
 	}
 }
 

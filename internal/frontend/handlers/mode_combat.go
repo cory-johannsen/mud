@@ -48,6 +48,7 @@ type CombatantState struct {
 	IsDead     bool
 	IsPlayer   bool
 	IsCurrent  bool
+	Position   int
 }
 
 // clone returns a deep copy of the CombatantState.
@@ -193,6 +194,15 @@ func (h *CombatModeHandler) UpdateCombatEvent(attacker, target string, damage, t
 		if len(h.log) > maxCombatLogLines {
 			h.log = h.log[len(h.log)-maxCombatLogLines:]
 		}
+	}
+}
+
+// UpdatePosition updates a combatant's position (thread-safe).
+func (h *CombatModeHandler) UpdatePosition(name string, pos int) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if c, ok := h.combatants[name]; ok {
+		c.Position = pos
 	}
 }
 

@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -24,7 +25,7 @@ func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
 	sb.WriteString("\r\n")
 
 	// Line 2: battlefield.
-	sb.WriteString(truncateLine(RenderBattlefield(snap.TurnOrder, snap.PlayerName, width), width))
+	sb.WriteString(truncateLine(RenderBattlefield(snap, width), width))
 	sb.WriteString("\r\n")
 
 	// Divider.
@@ -59,27 +60,52 @@ func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
 // battlefieldSep is the fixed separator between combatant tokens on the battlefield.
 const battlefieldSep = "───"
 
-// RenderBattlefield renders a 1D battlefield with the player on the left and
-// enemies on the right. Format: [*Alice]───[Goblin]───[Orc]
+// battlefieldEntry is an internal struct used to sort combatants by position.
+type battlefieldEntry struct {
+	name     string
+	position int
+	isPlayer bool
+}
+
+// RenderBattlefield renders a 1D battlefield sorted by position.
+// Format: [Goblin:0ft]───[*Alice:25ft]
 // Player token uses a leading '*' marker. The result MUST NOT exceed width
 // visible characters.
-func RenderBattlefield(turnOrder []string, playerName string, width int) string {
-	if len(turnOrder) == 0 {
+func RenderBattlefield(snap CombatRenderSnapshot, width int) string {
+	if len(snap.TurnOrder) == 0 {
 		return ""
 	}
 
-	// Partition into player tokens (left) and NPC tokens (right).
-	// Player always appears on the left regardless of initiative order.
-	var playerTokens, npcTokens []string
-	for _, name := range turnOrder {
-		truncated := truncateStr(name, 8)
-		if name == playerName {
-			playerTokens = append(playerTokens, "[*"+truncated+"]")
+	// Build entries from turn order + position data.
+	entries := make([]battlefieldEntry, 0, len(snap.TurnOrder))
+	for _, name := range snap.TurnOrder {
+		pos := 0
+		if c, ok := snap.Combatants[name]; ok {
+			pos = c.Position
+		}
+		entries = append(entries, battlefieldEntry{
+			name:     name,
+			position: pos,
+			isPlayer: name == snap.PlayerName,
+		})
+	}
+
+	// Sort by position ascending.
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].position < entries[j].position
+	})
+
+	// Build tokens: truncate name to 6 chars to leave room for ":XXXft".
+	tokens := make([]string, 0, len(entries))
+	for _, e := range entries {
+		truncated := truncateStr(e.name, 6)
+		suffix := fmt.Sprintf(":%dft", e.position)
+		if e.isPlayer {
+			tokens = append(tokens, "[*"+truncated+suffix+"]")
 		} else {
-			npcTokens = append(npcTokens, "["+truncated+"]")
+			tokens = append(tokens, "["+truncated+suffix+"]")
 		}
 	}
-	tokens := append(playerTokens, npcTokens...)
 
 	if len(tokens) == 1 {
 		return tokens[0]

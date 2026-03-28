@@ -889,6 +889,29 @@ func (h *CombatHandler) GetCombatForRoom(roomID string) (*combat.Combat, bool) {
 	return h.engine.GetCombat(roomID)
 }
 
+// BroadcastAllPositions broadcasts COMBAT_EVENT_TYPE_POSITION events for every combatant
+// in the active combat for roomID. No-op if there is no active combat.
+//
+// Precondition: roomID must be non-empty.
+// Postcondition: One position event per combatant is sent via broadcastFn.
+func (h *CombatHandler) BroadcastAllPositions(roomID string) {
+	h.combatMu.Lock()
+	defer h.combatMu.Unlock()
+	cbt, ok := h.engine.GetCombat(roomID)
+	if !ok {
+		return
+	}
+	events := make([]*gamev1.CombatEvent, 0, len(cbt.Combatants))
+	for _, c := range cbt.Combatants {
+		events = append(events, &gamev1.CombatEvent{
+			Type:             gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
+			Attacker:         c.Name,
+			AttackerPosition: int32(c.Position),
+		})
+	}
+	h.broadcastFn(roomID, events)
+}
+
 // JoinPendingNPCCombat adds inst to the active combat in pendingRoomID and pushes
 // the call-for-help or protecting message to all player combatants in that combat.
 //
@@ -2366,6 +2389,13 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	roundStartEvents = append(roundStartEvents, condCombatEvents...)
 	roundStartEvents = append(roundStartEvents, drowningEvents...)
 	roundStartEvents = append(roundStartEvents, hazardEvents...)
+	for _, c := range cbt.Combatants {
+		roundStartEvents = append(roundStartEvents, &gamev1.CombatEvent{
+			Type:             gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
+			Attacker:         c.Name,
+			AttackerPosition: int32(c.Position),
+		})
+	}
 	h.broadcastFn(roomID, roundStartEvents)
 
 	// Broadcast RoundStartEvent so the frontend can activate/update combat mode (REQ-IMR-19).
