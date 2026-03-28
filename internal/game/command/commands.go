@@ -148,6 +148,7 @@ const (
 	HandlerExplore            = "explore"
 	HandlerDowntime           = "downtime"
 	HandlerSeduce             = "seduce"
+	HandlerHotbar             = "hotbar"
 )
 
 // Command defines a player-invocable command.
@@ -320,6 +321,9 @@ func BuiltinCommands() []Command {
 
 		// Downtime commands
 		{Name: "downtime", Aliases: []string{"dtime"}, Help: "Manage downtime activities. Usage: downtime [list|<activity> [args]|cancel]", Category: CategoryDowntime, Handler: HandlerDowntime},
+
+		// System utility commands
+		{Name: "hotbar", Aliases: nil, Help: "Manage hotbar slots. Usage: hotbar [<slot> <text>] | clear <slot>", Category: CategorySystem, Handler: HandlerHotbar},
 	}
 }
 

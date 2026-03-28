@@ -175,6 +175,7 @@ var bridgeHandlerMap = map[string]bridgeHandlerFunc{
 	command.HandlerAffix:              bridgeAffix,
 	command.HandlerExplore:            bridgeExplore,
 	command.HandlerDowntime:           bridgeDowntime,
+	command.HandlerHotbar:             bridgeHotbar,
 }
 
 // writeErrorPrompt writes a red error message and re-issues the prompt, returning done=true.
@@ -2147,4 +2148,66 @@ func bridgeDowntime(bctx *bridgeContext) (bridgeResult, error) {
 			},
 		},
 	}}, nil
+}
+
+// bridgeHotbar parses the hotbar command and builds the appropriate HotbarRequest.
+//
+// Subcommand forms:
+//   - "hotbar"            → show (no args)
+//   - "hotbar <N> <text>" → set slot N to text
+//   - "hotbar clear <N>"  → clear slot N
+//
+// Precondition: bctx.parsed contains the full parsed command.
+// Postcondition: Returns a ClientMessage with HotbarRequest, or done=true on parse error.
+func bridgeHotbar(bctx *bridgeContext) (bridgeResult, error) {
+	args := bctx.parsed.Args
+
+	// No args → show.
+	if len(args) == 0 {
+		return bridgeResult{
+			msg: &gamev1.ClientMessage{
+				RequestId: bctx.reqID,
+				Payload: &gamev1.ClientMessage_HotbarRequest{
+					HotbarRequest: &gamev1.HotbarRequest{Action: "show"},
+				},
+			},
+		}, nil
+	}
+
+	// "clear <N>"
+	if args[0] == "clear" {
+		if len(args) < 2 {
+			return writeErrorPrompt(bctx, "Usage: hotbar clear <slot>")
+		}
+		slot, err := strconv.Atoi(args[1])
+		if err != nil {
+			return writeErrorPrompt(bctx, fmt.Sprintf("Invalid slot '%s': must be a number 1-10.", args[1]))
+		}
+		return bridgeResult{
+			msg: &gamev1.ClientMessage{
+				RequestId: bctx.reqID,
+				Payload: &gamev1.ClientMessage_HotbarRequest{
+					HotbarRequest: &gamev1.HotbarRequest{Action: "clear", Slot: int32(slot)},
+				},
+			},
+		}, nil
+	}
+
+	// "<N> <text...>" → set
+	slot, err := strconv.Atoi(args[0])
+	if err != nil {
+		return writeErrorPrompt(bctx, fmt.Sprintf("Invalid slot '%s': must be a number 1-10.", args[0]))
+	}
+	text := strings.Join(args[1:], " ")
+	if text == "" {
+		return writeErrorPrompt(bctx, "Usage: hotbar <slot> <command text>")
+	}
+	return bridgeResult{
+		msg: &gamev1.ClientMessage{
+			RequestId: bctx.reqID,
+			Payload: &gamev1.ClientMessage_HotbarRequest{
+				HotbarRequest: &gamev1.HotbarRequest{Action: "set", Slot: int32(slot), Text: text},
+			},
+		},
+	}, nil
 }

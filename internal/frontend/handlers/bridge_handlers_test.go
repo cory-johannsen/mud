@@ -167,3 +167,82 @@ func TestBridgeLook_Direction_Alias(t *testing.T) {
 	assert.True(t, result.done)
 	assert.Contains(t, result.consoleMsg, "Town Square")
 }
+
+// TestBridgeHotbar_SetBuildsCorrectRequest verifies that "hotbar 3 attack goblin"
+// produces a set HotbarRequest for slot 3 with text "attack goblin".
+func TestBridgeHotbar_SetBuildsCorrectRequest(t *testing.T) {
+	parsed := command.Parse("hotbar 3 attack goblin")
+	cmd := &command.Command{Handler: command.HandlerHotbar}
+	bctx := &bridgeContext{
+		reqID:    "test-1",
+		cmd:      cmd,
+		parsed:   parsed,
+		promptFn: func() string { return "> " },
+	}
+	result, err := bridgeHotbar(bctx)
+	assert.NoError(t, err)
+	assert.False(t, result.done)
+	require.NotNil(t, result.msg)
+	hb := result.msg.GetHotbarRequest()
+	require.NotNil(t, hb)
+	assert.Equal(t, "set", hb.Action)
+	assert.Equal(t, int32(3), hb.Slot)
+	assert.Equal(t, "attack goblin", hb.Text)
+}
+
+// TestBridgeHotbar_ClearBuildsCorrectRequest verifies that "hotbar clear 5"
+// produces a clear HotbarRequest for slot 5.
+func TestBridgeHotbar_ClearBuildsCorrectRequest(t *testing.T) {
+	parsed := command.Parse("hotbar clear 5")
+	cmd := &command.Command{Handler: command.HandlerHotbar}
+	bctx := &bridgeContext{
+		reqID:    "test-2",
+		cmd:      cmd,
+		parsed:   parsed,
+		promptFn: func() string { return "> " },
+	}
+	result, err := bridgeHotbar(bctx)
+	assert.NoError(t, err)
+	assert.False(t, result.done)
+	require.NotNil(t, result.msg)
+	hb := result.msg.GetHotbarRequest()
+	require.NotNil(t, hb)
+	assert.Equal(t, "clear", hb.Action)
+	assert.Equal(t, int32(5), hb.Slot)
+}
+
+// TestBridgeHotbar_NoArgsBuildsShowRequest verifies that bare "hotbar"
+// produces a show HotbarRequest.
+func TestBridgeHotbar_NoArgsBuildsShowRequest(t *testing.T) {
+	parsed := command.Parse("hotbar")
+	cmd := &command.Command{Handler: command.HandlerHotbar}
+	bctx := &bridgeContext{
+		reqID:    "test-3",
+		cmd:      cmd,
+		parsed:   parsed,
+		promptFn: func() string { return "> " },
+	}
+	result, err := bridgeHotbar(bctx)
+	assert.NoError(t, err)
+	assert.False(t, result.done)
+	require.NotNil(t, result.msg)
+	hb := result.msg.GetHotbarRequest()
+	require.NotNil(t, hb)
+	assert.Equal(t, "show", hb.Action)
+}
+
+// TestBridgeHotbar_InvalidSlotReturnsDone verifies that a non-numeric slot
+// causes bridgeHotbar to return done=true (error path).
+func TestBridgeHotbar_InvalidSlotReturnsDone(t *testing.T) {
+	parsed := command.Parse("hotbar abc some command")
+	cmd := &command.Command{Handler: command.HandlerHotbar}
+	bctx := &bridgeContext{
+		reqID:    "test-4",
+		cmd:      cmd,
+		parsed:   parsed,
+		promptFn: func() string { return "> " },
+	}
+	result, err := bridgeHotbar(bctx)
+	assert.NoError(t, err)
+	assert.True(t, result.done)
+}
