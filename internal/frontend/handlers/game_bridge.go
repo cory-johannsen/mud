@@ -480,16 +480,15 @@ func (h *AuthHandler) commandLoop(ctx context.Context, stream gamev1.GameService
 			conn.AppendHistory(line)
 		}
 
-		// Map-mode interceptor: consume all input when map mode is active.
-		if session.Mode() == ModeMap {
-			session.HandleInput(line, conn, stream, &requestID)
-			continue
-		}
-		// Combat-mode interceptor: block movement commands only.
-		// Non-movement commands fall through to normal gRPC dispatch.
-		if session.Mode() == ModeCombat && IsMovementCommand(line) {
-			session.HandleInput(line, conn, stream, &requestID)
-			continue
+		// Non-room mode interceptor: all modes except ModeRoom consume input via
+		// their handler. ModeCombat is the exception: movement commands are blocked
+		// by the handler, but non-movement commands fall through to normal gRPC
+		// dispatch so the player can still attack, use items, etc.
+		if session.Mode() != ModeRoom {
+			if session.Mode() != ModeCombat || IsMovementCommand(line) {
+				session.HandleInput(line, conn, stream, &requestID)
+				continue
+			}
 		}
 
 		if line == "" {
