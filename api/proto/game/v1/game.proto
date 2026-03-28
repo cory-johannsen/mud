@@ -145,6 +145,7 @@ message ClientMessage {
     DowntimeRequest      downtime_request      = 128;
     RefocusRequest       refocus_request       = 129;
     SeduceRequest        seduce_request        = 130;
+    HotbarRequest        hotbar_request        = 131;
   }
 }
 
@@ -316,6 +317,7 @@ message ServerEvent {
     HpUpdateEvent         hp_update              = 25;
     TabCompleteResponse   tab_complete           = 26;
     CraftResultEvent      craft_result           = 27;
+    HotbarUpdateEvent    hotbar_update          = 28;
   }
 }
 
@@ -1209,6 +1211,18 @@ message RefocusRequest {}
 // SeduceRequest asks the server to attempt to seduce a target NPC (REQ-ZN-7).
 message SeduceRequest {
     string target = 1;
+}
+
+message HotbarRequest {
+  string action = 1;  // "set", "clear", "show"
+  int32 slot = 2;     // 1–10 for set/clear; ignored for show
+  string text = 3;    // non-empty for set; ignored for clear/show
+}
+
+message HotbarUpdateEvent {
+  // Always exactly 10 entries; slots[0] = slot 1, slots[9] = slot 10.
+  // Empty string = unassigned slot.
+  repeated string slots = 1;
 }
 
 // DowntimeRequest dispatches downtime subcommands: list, cancel, or an activity alias with optional args.
