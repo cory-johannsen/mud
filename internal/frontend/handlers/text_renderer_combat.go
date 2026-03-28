@@ -24,7 +24,7 @@ func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
 	sb.WriteString("\r\n")
 
 	// Line 2: battlefield.
-	sb.WriteString(truncateLine(RenderBattlefield(snap.TurnOrder, width), width))
+	sb.WriteString(truncateLine(RenderBattlefield(snap.TurnOrder, snap.PlayerName, width), width))
 	sb.WriteString("\r\n")
 
 	// Divider.
@@ -57,19 +57,24 @@ func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
 }
 
 // RenderBattlefield renders a 1D battlefield showing combatants in turn order.
-// Format: [Alice]───[Goblin]───[Orc]
+// Format: [*Alice]───[Goblin]───[Orc]  (player marked with leading *)
 // The result MUST NOT exceed width visible characters.
-func RenderBattlefield(turnOrder []string, width int) string {
+func RenderBattlefield(turnOrder []string, playerName string, width int) string {
 	if len(turnOrder) == 0 {
 		return ""
 	}
 
 	// Truncate names to 8 characters max, build bracketed tokens.
+	// Player token uses a leading '*' marker: [*Name].
 	tokens := make([]string, len(turnOrder))
 	totalTokenWidth := 0
 	for i, name := range turnOrder {
 		truncated := truncateStr(name, 8)
-		tokens[i] = "[" + truncated + "]"
+		if name == playerName {
+			tokens[i] = "[*" + truncated + "]"
+		} else {
+			tokens[i] = "[" + truncated + "]"
+		}
 		totalTokenWidth += len([]rune(tokens[i]))
 	}
 

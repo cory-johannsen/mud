@@ -12,7 +12,7 @@ func TestRenderBattlefield_FitsWidth(t *testing.T) {
 		names := rapid.SliceOfN(rapid.StringMatching(`[A-Za-z]{2,8}`), 1, 6).Draw(t, "names")
 		width := rapid.IntRange(40, 200).Draw(t, "width")
 		unique := dedupNames(names)
-		line := RenderBattlefield(unique, width)
+		line := RenderBattlefield(unique, "", width)
 		if visibleLen(line) > width {
 			t.Fatalf("battlefield line exceeds width %d (visibleLen=%d)", width, visibleLen(line))
 		}
@@ -71,6 +71,16 @@ func TestRenderCombatScreen_ContainsAllCombatants(t *testing.T) {
 		if !strings.Contains(screen, name) {
 			t.Fatalf("expected %q in screen", name)
 		}
+	}
+}
+
+func TestRenderBattlefield_PlayerMarked(t *testing.T) {
+	line := RenderBattlefield([]string{"Alice", "Goblin"}, "Alice", 80)
+	if !strings.Contains(line, "[*Alice]") {
+		t.Fatalf("expected player token [*Alice] in battlefield, got: %q", line)
+	}
+	if strings.Contains(line, "[*Goblin]") {
+		t.Fatalf("NPC should not have player marker, got: %q", line)
 	}
 }
 
