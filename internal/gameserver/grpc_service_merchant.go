@@ -108,7 +108,13 @@ func (s *GameServiceServer) handleBrowse(uid string, req *gamev1.BrowseRequest) 
 		if s.factionSvc != nil {
 			suffix = s.factionSvc.ExclusiveTierSuffix(row.ItemID)
 		}
-		sb.WriteString(fmt.Sprintf("%-20s %8d %8d %6d%s\n", row.ItemID, row.BuyPrice, row.SellPrice, row.Stock, suffix))
+		displayName := row.ItemID
+		if s.invRegistry != nil {
+			if def, ok := s.invRegistry.Item(row.ItemID); ok {
+				displayName = def.Name
+			}
+		}
+		sb.WriteString(fmt.Sprintf("%-20s %8d %8d %6d%s\n", displayName, row.BuyPrice, row.SellPrice, row.Stock, suffix))
 	}
 	return messageEvent(sb.String()), nil
 }

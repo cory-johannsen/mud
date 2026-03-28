@@ -276,11 +276,11 @@
 
 ### BUG-33: Vendor wares display item ID instead of display name
 **Severity:** low
-**Status:** open
+**Status:** fixed
 **Category:** Vendor
 **Description:** Vendor shop listings show the raw item definition ID (e.g., `stim_pack`) instead of the human-readable display name (e.g., `Stim Pack`).
 **Steps:** Visit any vendor NPC and browse their wares; observe that items are listed by internal ID rather than display name.
-**Fix:**
+**Fix:** Resolved `row.ItemID` to display name via `s.invRegistry.Item()` in `grpc_service_merchant.go` `handleBrowse`. Falls back to raw ID when registry is nil or item not found.
 
 ## UI
 

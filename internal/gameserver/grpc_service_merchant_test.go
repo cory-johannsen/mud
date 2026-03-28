@@ -10,6 +10,7 @@ import (
 
 	"github.com/cory-johannsen/mud/internal/game/command"
 	"github.com/cory-johannsen/mud/internal/game/crafting"
+	"github.com/cory-johannsen/mud/internal/game/inventory"
 	"github.com/cory-johannsen/mud/internal/game/npc"
 	"github.com/cory-johannsen/mud/internal/game/session"
 	"github.com/cory-johannsen/mud/internal/game/world"
@@ -39,8 +40,19 @@ func newMerchantTestServer(t *testing.T) (*GameServiceServer, string, *npc.Insta
 	npcManager := npc.NewManager()
 	svc := testServiceWithNPCMgr(t, worldMgr, sessMgr, npcManager)
 
+	// Register a stim_pack item so browse can resolve display names.
+	invReg := inventory.NewRegistry()
+	err := invReg.RegisterItem(&inventory.ItemDef{
+		ID:       "stim_pack",
+		Name:     "Stim Pack",
+		Kind:     "consumable",
+		MaxStack: 10,
+	})
+	require.NoError(t, err)
+	svc.invRegistry = invReg
+
 	uid := "merch_u1"
-	_, err := svc.sessions.AddPlayer(session.AddPlayerOptions{
+	_, err = svc.sessions.AddPlayer(session.AddPlayerOptions{
 		UID:       uid,
 		Username:  "merch_user",
 		CharName:  "MerchChar",
@@ -85,7 +97,8 @@ func TestHandleBrowse_ListsInventory(t *testing.T) {
 	evt, err := svc.handleBrowse(uid, &gamev1.BrowseRequest{NpcName: inst.Name()})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
-	assert.Contains(t, evt.GetMessage().Content, "stim_pack")
+	assert.Contains(t, evt.GetMessage().Content, "Stim Pack", "browse should show display name, not raw item ID")
+	assert.NotContains(t, evt.GetMessage().Content, "stim_pack", "browse must not show raw item ID")
 }
 
 func TestHandleBrowse_NpcNotFound(t *testing.T) {
