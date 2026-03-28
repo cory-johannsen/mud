@@ -2591,6 +2591,28 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 		Narrative: fmt.Sprintf("Round %d begins! Turn order: %v", cbt.Round, turnOrder),
 	})
 
+	// BUG-29: Include range info at combat start so the player sees distance on round 1.
+	for _, pc := range cbt.Combatants {
+		if pc.Kind != combat.KindPlayer || pc.IsDead() {
+			continue
+		}
+		npcTarget := h.bestNPCCombatant(cbt)
+		if npcTarget == nil {
+			continue
+		}
+		dist := combat.PosDist(pc.Position, npcTarget.Position)
+		var rangeLabel string
+		if dist <= 5 {
+			rangeLabel = fmt.Sprintf("%d ft (melee range)", dist)
+		} else {
+			rangeLabel = fmt.Sprintf("%d ft (ranged)", dist)
+		}
+		events = append(events, &gamev1.CombatEvent{
+			Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_INITIATIVE,
+			Narrative: fmt.Sprintf("Range to %s: %s", npcTarget.Name, rangeLabel),
+		})
+	}
+
 	// Trigger flee/cower for all non-combat NPCs in the room.
 	h.applyCombatStartBehaviorsLocked(sess.RoomID)
 

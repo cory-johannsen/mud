@@ -250,11 +250,11 @@
 
 ### BUG-29: Range to target not displayed during combat
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** Combat
 **Description:** The player's current range to their combat target is never shown, leaving them unable to determine whether their equipped weapon can reach the NPC or whether they need to close/increase distance.
 **Steps:** Initiate combat with any NPC; observe the combat output — no range information is displayed at any point during the encounter.
-**Fix:**
+**Fix:** Range events were already generated at round 2+ start (in `resolveAndAdvanceLocked`) but missing from round 1 combat initiation. Added range events to `startCombatLocked` using the same `bestNPCCombatant`/`PosDist` pattern. Regression test in `combat_handler_range_init_test.go`.
 
 ### BUG-28: Grinder's Row zone exit (west to Cully Road) missing from map
 **Severity:** low
