@@ -822,6 +822,23 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 				}
 				combatEndTimer = time.AfterFunc(3*time.Second, func() {
 					session.SetMode(conn, session.Room())
+					// Re-render the room view now that the combat screen is gone.
+					rv, _ := lastRoomView.Load().(*gamev1.RoomView)
+					if rv != nil {
+						rw, _ := conn.Dimensions()
+						dt := currentDT.Load().(*gameserver.GameDateTime)
+						if dt == nil {
+							dt = &gameserver.GameDateTime{}
+						}
+						roomScreen := RenderRoomView(rv, rw, telnet.RoomRegionRows, *dt)
+						if conn.IsSplitScreen() {
+							_ = conn.WriteRoom(roomScreen)
+							_ = conn.WritePromptSplit(session.CurrentPrompt())
+						} else {
+							_ = conn.WriteLine(roomScreen)
+							_ = conn.WritePrompt(session.CurrentPrompt())
+						}
+					}
 				})
 				continue
 			}
