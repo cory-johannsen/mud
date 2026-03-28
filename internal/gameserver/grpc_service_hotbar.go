@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"go.uber.org/zap"
+
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
@@ -30,7 +32,9 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 		idx := int(req.Slot) - 1
 		sess.Hotbar[idx] = req.Text
 		if s.charSaver != nil && sess.CharacterID > 0 {
-			_ = s.charSaver.SaveHotbar(context.Background(), sess.CharacterID, sess.Hotbar)
+			if err := s.charSaver.SaveHotbar(context.Background(), sess.CharacterID, sess.Hotbar); err != nil {
+				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
+			}
 		}
 		return messageEvent(fmt.Sprintf("Slot %d set.", req.Slot)), nil
 
@@ -41,7 +45,9 @@ func (s *GameServiceServer) handleHotbar(uid string, req *gamev1.HotbarRequest) 
 		idx := int(req.Slot) - 1
 		sess.Hotbar[idx] = ""
 		if s.charSaver != nil && sess.CharacterID > 0 {
-			_ = s.charSaver.SaveHotbar(context.Background(), sess.CharacterID, sess.Hotbar)
+			if err := s.charSaver.SaveHotbar(context.Background(), sess.CharacterID, sess.Hotbar); err != nil {
+				s.logger.Warn("SaveHotbar failed", zap.String("uid", uid), zap.Error(err))
+			}
 		}
 		return messageEvent(fmt.Sprintf("Slot %d cleared.", req.Slot)), nil
 
