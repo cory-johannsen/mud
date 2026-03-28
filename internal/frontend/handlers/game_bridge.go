@@ -749,7 +749,8 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 		case *gamev1.ServerEvent_RoomView:
 			// Exit map mode only when the player has actually changed rooms (travel/movement).
 			// Ambient refreshes of the current room (same room ID) must not disrupt map mode.
-			if session.Mode() != ModeRoom {
+			// Never exit combat mode due to a room view — combat manages its own region.
+			if session.Mode() != ModeRoom && session.Mode() != ModeCombat {
 				incomingID := p.RoomView.GetRoomId()
 				existingID, _ := currentRoom.Load().(string)
 				if incomingID == "" || incomingID != existingID {
@@ -769,10 +770,14 @@ func (h *AuthHandler) forwardServerEvents(ctx context.Context, stream gamev1.Gam
 					})
 				}
 			}
+			lastRoomView.Store(p.RoomView)
+			// Suppress room region render during combat — the combat screen owns that region.
+			if session.Mode() == ModeCombat {
+				continue
+			}
 			w, _ := conn.Dimensions()
 			rvDT := currentDT.Load().(*gameserver.GameDateTime)
 			text = RenderRoomView(p.RoomView, w, telnet.RoomRegionRows, *rvDT)
-			lastRoomView.Store(p.RoomView)
 		case *gamev1.ServerEvent_Message:
 			period := ""
 			if tod, ok := currentTime.Load().(*gamev1.TimeOfDayEvent); ok && tod != nil {
