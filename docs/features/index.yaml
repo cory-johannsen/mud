@@ -687,7 +687,7 @@ features:
 
   - slug: hotbar
     name: Hotbar
-    status: planned
+    status: done
     priority: 462
     category: ui
     file: docs/features/hotbar.md
