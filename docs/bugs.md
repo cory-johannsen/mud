@@ -310,11 +310,11 @@
 
 ### BUG-38: Hotbar rendered to console after every server event
 **Severity:** high
-**Status:** open
+**Status:** fixed
 **Category:** UI
 **Description:** The hotbar bar (`[1:stride] [2:---] ...`) is written to the console output stream after every server event message instead of appearing only in the fixed UI row at H-1.
 **Steps:** Enter combat; observe that after every combat message the full hotbar line is echoed to the console, repeating on every round update, action message, and status line.
-**Fix:**
+**Fix:** Added `\033[H-1;1H\033[2K` clear before the scroll loop in `WriteConsole`. Each `\r\n` at promptRow (row H) scrolls the entire screen up; without clearing the hotbar row first, its content scrolled into the console region. Now the hotbar row is blanked before any scroll so only empty rows scroll upward.
 
 ### BUG-37: Combat mode did not engage when entering combat
 **Severity:** high
