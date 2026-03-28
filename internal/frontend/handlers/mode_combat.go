@@ -159,6 +159,12 @@ func (h *CombatModeHandler) UpdateRoundStart(round, actionsPerTurn int, turnOrde
 		c.MaxAP = actionsPerTurn
 		c.IsCurrent = false
 	}
+	// Mark the first combatant in turn order as the current actor.
+	if len(turnOrder) > 0 {
+		if c, ok := h.combatants[turnOrder[0]]; ok {
+			c.IsCurrent = true
+		}
+	}
 
 	h.turnOrder = make([]string, len(turnOrder))
 	copy(h.turnOrder, turnOrder)
@@ -186,10 +192,13 @@ func (h *CombatModeHandler) UpdateCombatEvent(attacker, target string, damage, t
 func (h *CombatModeHandler) UpdatePlayerHP(current, max int) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	if c, ok := h.combatants[h.playerName]; ok {
-		c.HP = current
-		c.MaxHP = max
+	c, ok := h.combatants[h.playerName]
+	if !ok {
+		c = &CombatantState{Name: h.playerName, IsPlayer: true}
+		h.combatants[h.playerName] = c
 	}
+	c.HP = current
+	c.MaxHP = max
 }
 
 // UpdateConditions replaces the player combatant's condition list.
