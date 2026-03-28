@@ -268,11 +268,11 @@ func TestProperty_GameCalendar_RolloverProducesValidDate(t *testing.T) {
 // noopRepo is a CalendarRepo stub that does nothing.
 type noopRepo struct{}
 
-func (r *noopRepo) Load() (int, int, error) { return 1, 1, nil }
-func (r *noopRepo) Save(_, _ int) error     { return nil }
+func (r *noopRepo) Load() (int, int, int, error) { return 6, 1, 1, nil }
+func (r *noopRepo) Save(_, _, _ int) error        { return nil }
 
 // failRepo is a CalendarRepo stub whose Save always fails.
 type failRepo struct{}
 
-func (r *failRepo) Load() (int, int, error) { return 1, 1, nil }
-func (r *failRepo) Save(_, _ int) error     { return fmt.Errorf("db error") }
+func (r *failRepo) Load() (int, int, int, error) { return 6, 1, 1, nil }
+func (r *failRepo) Save(_, _, _ int) error        { return fmt.Errorf("db error") }

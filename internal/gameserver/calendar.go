@@ -13,14 +13,14 @@ type GameDateTime struct {
 	Month int      // 1–12
 }
 
-// CalendarRepo persists the in-game day and month across server restarts.
+// CalendarRepo persists the in-game day, month, and hour across server restarts.
 //
 // Precondition for Load: table may be empty (first boot).
-// Postcondition for Load: returns (1, 1, nil) when no row exists.
+// Postcondition for Load: returns (6, 1, 1, nil) when no row exists (hour defaults to 6).
 // Postcondition for Save: upserts the single calendar row (id=1).
 type CalendarRepo interface {
-	Load() (day, month int, err error)
-	Save(day, month int) error
+	Load() (hour, day, month int, err error)
+	Save(hour, day, month int) error
 }
 
 // FormatDate returns the month name and day with correct ordinal suffix.
@@ -137,31 +137,27 @@ func (c *GameCalendar) Start() (stop func()) {
 				if !ok {
 					return
 				}
-				// For the midnight path: mutex is released before Save() to avoid holding the lock
-				// during I/O, then re-acquired for the broadcast. Both paths hold the mutex
-				// when constructing dt and copying subscribers.
+				// Advance day/month at midnight, then save hour/day/month and broadcast.
+				// Mutex is held only while mutating state and copying subscribers;
+				// Save() is called outside the lock to avoid holding it during I/O.
 				c.mu.Lock()
-				// Rollover at midnight: advance day/month BEFORE broadcast
-				// so subscribers receive the new day at hour 0, not the old day.
 				if h == 0 {
 					// Use year 2001 (non-leap) so February always has 28 days in this game calendar.
 					next := time.Date(2001, time.Month(c.month), c.day+1, 0, 0, 0, 0, time.UTC)
 					c.day, c.month = next.Day(), int(next.Month())
-					day, month := c.day, c.month
-					repo := c.repo
-					logger := c.logger
-					c.mu.Unlock()
-					if err := repo.Save(day, month); err != nil && logger != nil {
-						logger.Warnw("GameCalendar: failed to save day/month", "error", err)
-					}
-					c.mu.Lock()
 				}
+				hour, day, month := int(h), c.day, c.month
+				repo := c.repo
+				logger := c.logger
 				dt := GameDateTime{Hour: h, Day: c.day, Month: c.month}
 				subs := make([]chan<- GameDateTime, 0, len(c.subscribers))
 				for ch := range c.subscribers {
 					subs = append(subs, ch)
 				}
 				c.mu.Unlock()
+				if err := repo.Save(hour, day, month); err != nil && logger != nil {
+					logger.Warnw("GameCalendar: failed to save calendar state", "error", err)
+				}
 				for _, ch := range subs {
 					select {
 					case ch <- dt:

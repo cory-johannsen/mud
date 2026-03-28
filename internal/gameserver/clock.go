@@ -106,6 +106,18 @@ func (c *GameClock) Unsubscribe(ch chan<- GameHour) {
 	delete(c.subscribers, ch)
 }
 
+// SetHour overrides the current game hour. Safe to call before Start().
+//
+// Precondition: hour in [0, 23].
+func (c *GameClock) SetHour(hour int32) {
+	if hour < 0 || hour > 23 {
+		panic(fmt.Sprintf("GameClock.SetHour: hour %d out of range [0, 23]", hour))
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.hour = hour
+}
+
 // Start launches the clock goroutine and returns a stop function.
 // Calling stop() is idempotent.
 //
