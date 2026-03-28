@@ -57,9 +57,6 @@ func RenderCombatScreen(snap CombatRenderSnapshot, width int) string {
 	return sb.String()
 }
 
-// battlefieldSep is the fixed separator between combatant tokens on the battlefield.
-const battlefieldSep = "───"
-
 // battlefieldEntry is an internal struct used to sort combatants by position.
 type battlefieldEntry struct {
 	name     string
@@ -68,7 +65,9 @@ type battlefieldEntry struct {
 }
 
 // RenderBattlefield renders a 1D battlefield sorted by position.
-// Format: [Goblin:0ft]───[*Alice:25ft]
+// Format: [*Alice]──25ft──[Goblin] or [*Alice]──0ft──[Goblin] for melee range.
+// Distance between adjacent combatants is shown on the separator, not as an
+// absolute position in each token, so the display is unambiguous (BUG-39 fix).
 // Player token uses a leading '*' marker. The result MUST NOT exceed width
 // visible characters.
 func RenderBattlefield(snap CombatRenderSnapshot, width int) string {
@@ -95,15 +94,14 @@ func RenderBattlefield(snap CombatRenderSnapshot, width int) string {
 		return entries[i].position < entries[j].position
 	})
 
-	// Build tokens: truncate name to 6 chars to leave room for ":XXXft".
+	// Build tokens: truncate name to 6 chars.
 	tokens := make([]string, 0, len(entries))
 	for _, e := range entries {
 		truncated := truncateStr(e.name, 6)
-		suffix := fmt.Sprintf(":%dft", e.position)
 		if e.isPlayer {
-			tokens = append(tokens, "[*"+truncated+suffix+"]")
+			tokens = append(tokens, "[*"+truncated+"]")
 		} else {
-			tokens = append(tokens, "["+truncated+suffix+"]")
+			tokens = append(tokens, "["+truncated+"]")
 		}
 	}
 
@@ -111,8 +109,19 @@ func RenderBattlefield(snap CombatRenderSnapshot, width int) string {
 		return tokens[0]
 	}
 
-	// Join tokens with a fixed 3-dash separator.
-	line := strings.Join(tokens, battlefieldSep)
+	// Join tokens with distance separators: ──Nft──
+	var sb strings.Builder
+	for i, tok := range tokens {
+		sb.WriteString(tok)
+		if i < len(entries)-1 {
+			dist := entries[i+1].position - entries[i].position
+			if dist < 0 {
+				dist = -dist
+			}
+			sb.WriteString(fmt.Sprintf("──%dft──", dist))
+		}
+	}
+	line := sb.String()
 
 	// Truncate to width if needed.
 	runes := []rune(line)

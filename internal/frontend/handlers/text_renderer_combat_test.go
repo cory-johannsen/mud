@@ -107,9 +107,12 @@ func TestRenderBattlefield_SortsByPosition(t *testing.T) {
 	}
 }
 
-func TestRenderBattlefield_ShowsPositionInToken(t *testing.T) {
+// TestRenderBattlefield_ShowsDistanceOnSeparator verifies that the distance between
+// adjacent combatants is shown on the separator, not as an absolute position in the token.
+// This is the regression test for BUG-39.
+func TestRenderBattlefield_ShowsDistanceOnSeparator(t *testing.T) {
 	snap := CombatRenderSnapshot{
-		TurnOrder: []string{"Alice", "Goblin"},
+		TurnOrder:  []string{"Alice", "Goblin"},
 		PlayerName: "Alice",
 		Combatants: map[string]*CombatantState{
 			"Alice":  {Name: "Alice", Position: 0, IsPlayer: true},
@@ -117,11 +120,35 @@ func TestRenderBattlefield_ShowsPositionInToken(t *testing.T) {
 		},
 	}
 	line := RenderBattlefield(snap, 80)
-	if !strings.Contains(line, "0ft") {
-		t.Fatalf("expected '0ft' position in battlefield, got: %q", line)
-	}
+	// Distance between Alice (0ft) and Goblin (25ft) must appear on the separator.
 	if !strings.Contains(line, "25ft") {
-		t.Fatalf("expected '25ft' position in battlefield, got: %q", line)
+		t.Fatalf("expected separator to show distance '25ft', got: %q", line)
+	}
+	// Tokens must NOT contain ":Xft" absolute position suffixes.
+	if strings.Contains(line, ":0ft") || strings.Contains(line, ":25ft") {
+		t.Fatalf("tokens must not show absolute positions; got: %q", line)
+	}
+}
+
+// TestRenderBattlefield_ShowsMeleeDistance verifies that when combatants are at the same
+// position (0ft distance), the separator shows "0ft" making melee range unambiguous.
+func TestRenderBattlefield_ShowsMeleeDistance(t *testing.T) {
+	snap := CombatRenderSnapshot{
+		TurnOrder:  []string{"Alice", "Goblin"},
+		PlayerName: "Alice",
+		Combatants: map[string]*CombatantState{
+			"Alice":  {Name: "Alice", Position: 25, IsPlayer: true},
+			"Goblin": {Name: "Goblin", Position: 25},
+		},
+	}
+	line := RenderBattlefield(snap, 80)
+	// Distance between both at 25ft is 0ft → separator must show "0ft".
+	if !strings.Contains(line, "0ft") {
+		t.Fatalf("expected separator to show '0ft' for melee range, got: %q", line)
+	}
+	// Tokens must NOT contain absolute positions.
+	if strings.Contains(line, ":25ft") {
+		t.Fatalf("tokens must not show absolute positions; got: %q", line)
 	}
 }
 

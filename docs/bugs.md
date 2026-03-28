@@ -308,6 +308,14 @@
 **Steps:** Enter any room with exits; type `look north` (or any valid direction); observe that no output is displayed in the console.
 **Fix:** Root cause was `bridgeLook` ignoring parsed args entirely — it always sent a bare `LookRequest` to the server. Added directional look handling in `bridgeLook`: when args contain a direction (including aliases like "n"), the handler resolves it against the cached `lastRoomView` exits and returns a local description ("Looking north: Town Square.") with locked status if applicable. Added `roomViewFn` to `bridgeContext` and `consoleMsg` to `bridgeResult` to support local output. Five regression tests in `bridge_handlers_test.go`.
 
+### BUG-39: Battle map shows absolute positions instead of distance between combatants
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** The battle map renders each combatant's absolute position on the battlefield axis (e.g. `[*Jorkin:25ft]───[Ganger:25ft]`), not the distance between them. When both combatants are at position 25ft they are at 0ft distance (melee range), but the display looks like they are 25ft apart, causing player confusion.
+**Steps:** Start combat (player at 0ft, NPC at 25ft); stride toward NPC; observe map shows `[*Jorkin:25ft]───[Ganger:25ft]` which appears to still show 25ft separation but they are actually at melee range.
+**Fix:** Changed `RenderBattlefield` to show distance between adjacent combatants on the separator instead of absolute positions in each token. New format: `[*Jorkin]──0ft──[Ganger]` for melee (0ft apart) and `[*Jorkin]──25ft──[Ganger]` for one stride away. Regression tests: `TestRenderBattlefield_ShowsDistanceOnSeparator` and `TestRenderBattlefield_ShowsMeleeDistance`.
+
 ### BUG-38: Hotbar rendered to console after every server event
 **Severity:** high
 **Status:** fixed
