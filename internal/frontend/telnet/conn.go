@@ -55,7 +55,8 @@ type Conn struct {
 	height      int
 	splitScreen bool
 	inputBuf    string
-	roomBuf     string // last rendered room content for redraw after console scroll
+	roomBuf     string    // last rendered room content for redraw after console scroll
+	hotbarBuf   [10]string // last rendered hotbar slots for redraw after console scroll
 
 	// Scroll buffer (guarded by mu)
 	consoleBuf   []string // ring buffer of console lines, max consoleBufMax

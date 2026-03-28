@@ -40,6 +40,7 @@ type roomLayout struct {
 	lastRow    int // last room content row   = roomRegionRows
 	dividerRow int // room divider row        = roomRegionRows + 1
 	consoleTop int // first console row       = roomRegionRows + 2
+	hotbarRow  int // hotbar row              = h - 1
 	promptRow  int // input / prompt row      = h
 }
 
@@ -49,6 +50,7 @@ func newRoomLayout(h int) roomLayout {
 		lastRow:    roomRegionRows,
 		dividerRow: roomRegionRows + 1,
 		consoleTop: roomRegionRows + 2,
+		hotbarRow:  h - 1,
 		promptRow:  h,
 	}
 }
@@ -68,6 +70,7 @@ func (c *Conn) InitScreen() error {
 
 	c.mu.Lock()
 	h := c.height
+	w := c.width
 	c.mu.Unlock()
 
 	lo := newRoomLayout(h)
@@ -87,21 +90,25 @@ func (c *Conn) InitScreen() error {
 	// Navigate to promptRow (safe: default full-screen scroll region).
 	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
 	buf.WriteString("\033[?25h") // show cursor
+
+	// Draw empty hotbar row at H-1 (REQ-HB-14).
+	appendHotbarRedraw(&buf, [10]string{}, w, lo.hotbarRow)
+
 	return c.writeRaw(buf.String())
 }
 
 // consoleHeight returns the number of rows available for console output.
-// Formula: termHeight - roomRegionRows (room) - 1 (divider) - 1 (prompt)
+// Formula: termHeight - roomRegionRows (room) - 1 (divider) - 1 (hotbar) - 1 (prompt)
 //
 // Postcondition: Returns at least 1.
 func (c *Conn) consoleHeight() int {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	h := c.height
-	if h <= roomRegionRows+2 {
+	if h <= roomRegionRows+3 {
 		return 1
 	}
-	return h - roomRegionRows - 2
+	return h - roomRegionRows - 3 // was -2; now -3 to reserve hotbar row
 }
 
 // consoleSlice returns the slice of consoleBuf lines to display given the current
@@ -160,15 +167,15 @@ func (c *Conn) redrawConsole() error {
 
 	var buf strings.Builder
 
-	// Clear console region (rows consoleTop .. promptRow-1)
-	for row := lo.consoleTop; row < lo.promptRow; row++ {
+	// Clear console region (rows consoleTop .. hotbarRow-1)
+	for row := lo.consoleTop; row < lo.hotbarRow; row++ {
 		fmt.Fprintf(&buf, "\033[%d;1H\033[2K", row)
 	}
 
 	// Write buffered lines into console rows (bottom-aligned)
 	for i, line := range lines {
 		row := lo.consoleTop + (ch - len(lines)) + i
-		if row >= lo.promptRow {
+		if row >= lo.hotbarRow {
 			break
 		}
 		fmt.Fprintf(&buf, "\033[%d;1H", row)
@@ -178,9 +185,9 @@ func (c *Conn) redrawConsole() error {
 		buf.WriteString(line)
 	}
 
-	// Status line when scrolled back (occupies last console row above prompt)
+	// Status line when scrolled back (occupies last console row above hotbar)
 	if offset > 0 {
-		statusRow := lo.promptRow - 1
+		statusRow := lo.hotbarRow - 1
 		var status string
 		if pending > 0 {
 			status = fmt.Sprintf("[scrolled back — %d new message(s)]", pending)
@@ -195,6 +202,13 @@ func (c *Conn) redrawConsole() error {
 
 	// Restore room region and prompt
 	appendRoomRedraw(&buf, roomLines, w, divider)
+
+	// Redraw hotbar at row h-1.
+	c.mu.Lock()
+	hotbar := c.hotbarBuf
+	c.mu.Unlock()
+	appendHotbarRedraw(&buf, hotbar, w, lo.hotbarRow)
+
 	fmt.Fprintf(&buf, "\033[%d;1H\033[2K", lo.promptRow)
 	buf.WriteString(input)
 
@@ -310,9 +324,10 @@ func (c *Conn) WriteConsole(text string) error {
 		buf.WriteString("\r\n")
 		buf.WriteString(line)
 	}
-	// One extra scroll pushes the last message line above the prompt row,
-	// leaving row h blank for the input redraw.
+	// Two extra scrolls push the last message line above the hotbar row (h-1),
+	// leaving rows h-1 (hotbar) and h (prompt/input) blank for their redraws.
 	if len(lines) > 0 {
+		buf.WriteString("\r\n")
 		buf.WriteString("\r\n")
 	}
 
@@ -320,12 +335,88 @@ func (c *Conn) WriteConsole(text string) error {
 	// room rows upward; appendRoomRedraw rewrites them at their canonical positions.
 	appendRoomRedraw(&buf, roomLines, w, divider)
 
+	// Redraw hotbar at row h-1.
+	c.mu.Lock()
+	hotbar := c.hotbarBuf
+	c.mu.Unlock()
+	appendHotbarRedraw(&buf, hotbar, w, lo.hotbarRow)
+
 	// Navigate to promptRow and redraw input.
 	fmt.Fprintf(&buf, "\033[%d;1H", lo.promptRow)
 	buf.WriteString("\033[2K")
 	buf.WriteString(input)
 
 	return c.writeRaw(buf.String())
+}
+
+// WriteHotbar renders the hotbar row at terminal row H-1 and caches the slots for
+// future redraws (after WriteConsole scrolls).
+// In headless mode, this is a no-op.
+//
+// Slot activation keys: slots 1–9 use keys "1"–"9"; slot 10 uses key "0".
+// Label length L = max(3, (width/10)-4). Segments that would overflow are omitted.
+//
+// Precondition:  conn must be in split-screen mode (or headless); height > 0.
+// Postcondition: Hotbar row at H-1 written; hotbarBuf updated.
+func (c *Conn) WriteHotbar(slots [10]string) error {
+	if c.Headless {
+		return nil
+	}
+
+	c.mu.Lock()
+	c.hotbarBuf = slots
+	h := c.height
+	w := c.width
+	c.mu.Unlock()
+
+	lo := newRoomLayout(h)
+
+	var buf strings.Builder
+	appendHotbarRedraw(&buf, slots, w, lo.hotbarRow)
+	return c.writeRaw(buf.String())
+}
+
+// appendHotbarRedraw writes the hotbar row at the given row number.
+// Slot key mapping: index 0 → key "1", ..., index 8 → key "9", index 9 → key "0".
+// Label L = max(3, (width/10)-4). Segments are written left-to-right until one would overflow.
+//
+// Precondition:  row >= 1; width >= 1.
+// Postcondition: cursor is at row, after the last written character.
+func appendHotbarRedraw(buf *strings.Builder, slots [10]string, width, row int) {
+	if row < 1 {
+		return
+	}
+	fmt.Fprintf(buf, "\033[%d;1H\033[2K", row)
+
+	l := width/10 - 5
+	if l < 3 {
+		l = 3
+	}
+
+	// Activation key for each slot index.
+	keys := [10]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}
+
+	col := 0
+	for i := 0; i < 10; i++ {
+		label := slots[i]
+		if label == "" {
+			label = "---"
+		}
+		// Truncate label to l characters.
+		runes := []rune(label)
+		if len(runes) > l {
+			label = string(runes[:l])
+		}
+
+		// Segment format: "[N:<label>] " — total = 1+1+1+l+1+1 = l+5 bytes.
+		seg := fmt.Sprintf("[%s:%s] ", keys[i], label)
+		segWidth := len([]rune(seg))
+		if col+segWidth > width {
+			break
+		}
+		buf.WriteString(seg)
+		col += segWidth
+	}
 }
 
 // appendRoomRedraw writes the room content rows and divider into the fixed

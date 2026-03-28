@@ -140,3 +140,118 @@ func TestPropertyWriteRoom_AlwaysRoomRegionRowsPlusOneClearSequences(t *testing.
 			"WriteRoom must always clear exactly roomRegionRows+1 lines regardless of content")
 	})
 }
+
+func TestWriteHotbar_RendersAtRowHMinus1(t *testing.T) {
+	const W, H = 80, 24
+	conn, client := newSplitConn(t, W, H)
+	var slots [10]string
+	slots[0] = "look"
+	slots[9] = "status"
+	go func() { _ = conn.WriteHotbar(slots) }()
+	out := readAll(t, client, 500*time.Millisecond)
+
+	// Must position at row H-1 = 23.
+	assert.Contains(t, out, fmt.Sprintf("\033[%d;1H", H-1))
+	// Must contain slot labels.
+	assert.Contains(t, out, "loo") // truncated "look"
+}
+
+func TestWriteHotbar_EmptySlotsRenderDash(t *testing.T) {
+	const W, H = 80, 24
+	conn, client := newSplitConn(t, W, H)
+	go func() { _ = conn.WriteHotbar([10]string{}) }()
+	out := readAll(t, client, 500*time.Millisecond)
+	assert.Contains(t, out, "---")
+}
+
+func TestWriteHotbar_RendersActivationKey0ForSlot10(t *testing.T) {
+	const W, H = 80, 24
+	conn, client := newSplitConn(t, W, H)
+	var slots [10]string
+	slots[9] = "status"
+	go func() { _ = conn.WriteHotbar(slots) }()
+	out := readAll(t, client, 500*time.Millisecond)
+	// Slot 10 activation key is "0".
+	assert.Contains(t, out, "0:")
+}
+
+func TestConsoleHeight_ShrinksWithHotbar(t *testing.T) {
+	const W, H = 80, 24
+	conn, _ := newSplitConn(t, W, H)
+	// With hotbar: console height = H - roomRegionRows - 3
+	// = 24 - 10 - 3 = 11
+	assert.Equal(t, 11, conn.consoleHeight())
+}
+
+func TestPropertyWriteHotbar_FitsWithinWidth(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		w := rapid.IntRange(40, 220).Draw(rt, "width")
+		h := rapid.IntRange(20, 50).Draw(rt, "height")
+		var slots [10]string
+		for i := range slots {
+			slots[i] = rapid.StringOf(rapid.RuneFrom([]rune("abcdefghijklmnopqrstuvwxyz"))).Draw(rt, fmt.Sprintf("slot%d", i))
+		}
+
+		conn, client := newSplitConn(t, w, h)
+		go func() {
+			_ = conn.WriteHotbar(slots)
+			conn.Close()
+		}()
+		out := readAll(t, client, 2*time.Second)
+
+		// Extract the content line (after the cursor positioning sequence).
+		// The hotbar line itself must fit within w visible characters.
+		// Strip ANSI for width check.
+		lines := strings.Split(StripANSI(out), "\n")
+		for _, line := range lines {
+			line = strings.TrimRight(line, "\r")
+			if strings.Contains(line, "[") {
+				assert.LessOrEqual(t, len(line), w,
+					"hotbar line must not exceed terminal width")
+			}
+		}
+	})
+}
+
+func TestPropertyWriteHotbar_AtLeastOneSlotWhenWidthAtLeast40(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		w := rapid.IntRange(40, 220).Draw(rt, "width")
+		h := rapid.IntRange(20, 50).Draw(rt, "height")
+
+		conn, client := newSplitConn(t, w, h)
+		var slots [10]string
+		for i := range slots {
+			slots[i] = "abc"
+		}
+		go func() {
+			_ = conn.WriteHotbar(slots)
+			conn.Close()
+		}()
+		out := readAll(t, client, 2*time.Second)
+		// At least one slot segment [N:abc] must appear.
+		assert.Contains(t, out, ":", "at least one slot must be rendered at width >= 40")
+	})
+}
+
+func TestPropertyWriteHotbar_AllTenSlotsWhenWidthAtLeast90(t *testing.T) {
+	rapid.Check(t, func(rt *rapid.T) {
+		w := rapid.IntRange(90, 220).Draw(rt, "width")
+		h := rapid.IntRange(20, 50).Draw(rt, "height")
+
+		conn, client := newSplitConn(t, w, h)
+		var slots [10]string
+		for i := range slots {
+			slots[i] = "abc"
+		}
+		go func() {
+			_ = conn.WriteHotbar(slots)
+			conn.Close()
+		}()
+		out := readAll(t, client, 2*time.Second)
+		plain := StripANSI(out)
+		// All 10 slot activation keys must appear.
+		for _, key := range []string{"1:", "2:", "3:", "4:", "5:", "6:", "7:", "8:", "9:", "0:"} {
+			assert.Contains(t, plain, key, "all 10 slots must be rendered when width >= 90")
+		}
+	})
+}

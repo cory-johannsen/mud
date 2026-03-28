@@ -58,26 +58,32 @@ func Colorf(color, format string, args ...interface{}) string {
 	return color + fmt.Sprintf(format, args...) + Reset
 }
 
-// StripANSI removes all ANSI escape sequences from a string.
+// StripANSI removes all ANSI CSI escape sequences from a string.
 // This is useful for measuring the printable width of styled text.
 //
+// A CSI sequence has the form ESC [ <param bytes> <final byte> where:
+//   - parameter bytes are in the range 0x30–0x3F (digits, semicolons, etc.)
+//   - intermediate bytes are in 0x20–0x2F
+//   - the final byte is in 0x40–0x7E (uppercase/lowercase letters, @, etc.)
+//
 // Precondition: s is any string, possibly containing complete or partial ANSI escape sequences.
-// Postcondition: Returns text with all \033[...m sequences and any partial \033[ sequences removed.
+// Postcondition: Returns text with all ESC[...X sequences and any partial ESC[ sequences removed.
 func StripANSI(s string) string {
 	result := make([]byte, 0, len(s))
 	i := 0
 	for i < len(s) {
 		if s[i] == '\033' && i+1 < len(s) && s[i+1] == '[' {
-			// Skip past the 'm' terminator.
+			// Skip past the CSI final byte (0x40–0x7E).
 			j := i + 2
-			for j < len(s) && s[j] != 'm' {
+			// Consume parameter and intermediate bytes.
+			for j < len(s) && (s[j] < 0x40 || s[j] > 0x7E) {
 				j++
 			}
 			if j < len(s) {
-				// Complete sequence: advance past the 'm'.
+				// Complete sequence: advance past the final byte.
 				i = j + 1
 			} else {
-				// Incomplete sequence (no 'm' terminator): skip the entire partial sequence.
+				// Incomplete sequence: skip the entire partial sequence.
 				i = j
 			}
 			continue

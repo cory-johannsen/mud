@@ -750,7 +750,9 @@ func TestProperty_WriteConsole_NeverOverwritesRoomRegion(t *testing.T) {
 func TestProperty_WriteConsole_MessageAlwaysInConsoleArea(t *testing.T) {
 	rapid.Check(t, func(rt *rapid.T) {
 		W := rapid.IntRange(40, 200).Draw(rt, "width")
-		H := rapid.IntRange(roomRegionRows+3, 50).Draw(rt, "height")
+		// Minimum height for at least 1 console row: roomRegionRows + 1 (divider)
+		// + 1 (console) + 1 (hotbar) + 1 (prompt) = roomRegionRows + 4.
+		H := rapid.IntRange(roomRegionRows+4, 50).Draw(rt, "height")
 		lo := newRoomLayout(H)
 
 		msg := "SentinelMsg"

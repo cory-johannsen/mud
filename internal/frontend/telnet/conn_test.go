@@ -562,11 +562,11 @@ func TestConsoleSlice_LiveView(t *testing.T) {
 		buf[i] = fmt.Sprintf("line-%d", i)
 	}
 	c := &Conn{consoleBuf: buf, height: 24, width: 80}
-	// consoleHeight = 24 - 10 - 2 = 12
+	// consoleHeight = 24 - 10 - 3 = 11 (hotbar row added)
 	lines := c.consoleSlice()
-	assert.Equal(t, 12, len(lines))
+	assert.Equal(t, 11, len(lines))
 	assert.Equal(t, "line-49", lines[len(lines)-1])
-	assert.Equal(t, "line-38", lines[0])
+	assert.Equal(t, "line-39", lines[0])
 }
 
 func TestConsoleSlice_ScrolledBack(t *testing.T) {
@@ -576,12 +576,12 @@ func TestConsoleSlice_ScrolledBack(t *testing.T) {
 	}
 	c := &Conn{consoleBuf: buf, height: 24, width: 80}
 	c.mu.Lock()
-	c.scrollOffset = 12
+	c.scrollOffset = 11
 	c.mu.Unlock()
 	lines := c.consoleSlice()
-	assert.Equal(t, 12, len(lines))
-	assert.Equal(t, "line-37", lines[len(lines)-1])
-	assert.Equal(t, "line-26", lines[0])
+	assert.Equal(t, 11, len(lines))
+	assert.Equal(t, "line-38", lines[len(lines)-1])
+	assert.Equal(t, "line-28", lines[0])
 }
 
 func TestConsoleSlice_FewerLinesThanHeight(t *testing.T) {
@@ -601,8 +601,8 @@ func TestScrollUp_IncrementsOffset(t *testing.T) {
 	c.mu.Lock()
 	off := c.scrollOffset
 	c.mu.Unlock()
-	// consoleHeight = 24 - 10 - 2 = 12
-	assert.Equal(t, 12, off)
+	// consoleHeight = 24 - 10 - 3 = 11 (hotbar row added)
+	assert.Equal(t, 11, off)
 }
 
 func TestScrollDown_DecrementsOffset(t *testing.T) {
@@ -611,7 +611,7 @@ func TestScrollDown_DecrementsOffset(t *testing.T) {
 		c.consoleBuf = append(c.consoleBuf, fmt.Sprintf("line-%d", i))
 	}
 	c.mu.Lock()
-	c.scrollOffset = 12
+	c.scrollOffset = 11
 	c.pendingNew = 5
 	c.mu.Unlock()
 	c.scrollDownState()
@@ -632,7 +632,7 @@ func TestScrollUp_ClampsAtBufferBound(t *testing.T) {
 	c.mu.Lock()
 	off := c.scrollOffset
 	c.mu.Unlock()
-	assert.Equal(t, 5, off) // clamped to len(buf)=5, not consoleHeight=12
+	assert.Equal(t, 5, off) // clamped to len(buf)=5, not consoleHeight=11
 }
 
 func TestScrollDown_ClampsAtZero(t *testing.T) {
@@ -645,7 +645,7 @@ func TestScrollDown_ClampsAtZero(t *testing.T) {
 }
 
 func TestScrollDown_PartialPage(t *testing.T) {
-	// scrollOffset = 6, consoleHeight = 12 → scrollDown clamps to 0
+	// scrollOffset = 6, consoleHeight = 11 → scrollDown clamps to 0
 	c := &Conn{height: 24, width: 80}
 	c.mu.Lock()
 	c.scrollOffset = 6
@@ -854,20 +854,20 @@ func TestIntegration_ConsoleScroll(t *testing.T) {
 		c.appendConsoleLine(fmt.Sprintf("line-%d", i))
 	}
 
-	// consoleHeight = 24 - 10 - 2 = 12
+	// consoleHeight = 24 - 10 - 3 = 11 (hotbar row added)
 	// Scroll up one page.
 	c.scrollUpState()
 	c.mu.Lock()
 	off := c.scrollOffset
 	c.mu.Unlock()
-	assert.Equal(t, 12, off)
+	assert.Equal(t, 11, off)
 
-	// consoleSlice should show lines 176-187
-	// end = 200 - 12 = 188; start = 188 - 12 = 176
+	// consoleSlice should show lines 178-188
+	// end = 200 - 11 = 189; start = 189 - 11 = 178
 	slice := c.consoleSlice()
-	assert.Equal(t, 12, len(slice))
-	assert.Equal(t, "line-176", slice[0])
-	assert.Equal(t, "line-187", slice[len(slice)-1])
+	assert.Equal(t, 11, len(slice))
+	assert.Equal(t, "line-178", slice[0])
+	assert.Equal(t, "line-188", slice[len(slice)-1])
 
 	// Append more lines while scrolled — pendingNew increments.
 	c.appendConsoleLine("new-0")
@@ -886,9 +886,9 @@ func TestIntegration_ConsoleScroll(t *testing.T) {
 	assert.Equal(t, 0, off)
 	assert.Equal(t, 0, pn)
 
-	// consoleSlice at live shows the 12 most recent lines (196-201 = line-196..line-199, new-0, new-1)
+	// consoleSlice at live shows the 11 most recent lines (line-191..line-199, new-0, new-1)
 	slice = c.consoleSlice()
-	assert.Equal(t, 12, len(slice))
+	assert.Equal(t, 11, len(slice))
 	assert.Equal(t, "new-1", slice[len(slice)-1])
 }
 
