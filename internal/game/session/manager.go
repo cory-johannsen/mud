@@ -128,6 +128,10 @@ type PlayerSession struct {
 	FocusPoints int
 	// MaxFocusPoints is the maximum focus points derived at login from active feats + class features (not persisted).
 	MaxFocusPoints int
+	// Hotbar holds the player's 10 persistent hotbar slot commands.
+	// Index 0 = slot 1 (key "1"), index 9 = slot 10 (key "0").
+	// Loaded from DB at login; written through on any hotbar set/clear command.
+	Hotbar [10]string
 	// LastCheckRoll is the dice result of the most recent ability check (session-only; 0 = none recorded).
 	LastCheckRoll int
 	// LastCheckDC is the DC of the most recent ability check (session-only).
