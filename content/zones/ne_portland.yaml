@@ -84,7 +84,7 @@ zone:
       '
     danger_level: sketchy
     exits:
-    - direction: south
+    - direction: southeast
       target: ne_lloyd_district
     - direction: northwest
       target: ne_killingsworth
@@ -92,7 +92,7 @@ zone:
       target: ne_hollywood_district
     - direction: west
       target: ne_prescott_street
-    map_x: 6
+    map_x: 4
     map_y: 0
     spawns:
     - template: ne_gang_enforcer
@@ -214,7 +214,7 @@ zone:
       '
     danger_level: sketchy
     exits:
-    - direction: north
+    - direction: northwest
       target: ne_mlk_boulevard
     map_x: 6
     map_y: 2
@@ -346,6 +346,8 @@ zone:
       target: ne_killingsworth_road
     - direction: southeast
       target: ne_mlk_boulevard
+    - direction: west
+      target: ne_rose_city_market
     map_x: -2
     map_y: -4
     spawns:
@@ -476,7 +478,7 @@ zone:
     exits:
     - direction: east
       target: ne_mississippi_ave
-    - direction: northeast
+    - direction: southeast
       target: ne_williams_corridor
     map_x: -4
     map_y: -2
@@ -534,7 +536,7 @@ zone:
       target: ne_interstate_ave
     - direction: northeast
       target: ne_bike_shop_ruins
-    - direction: southwest
+    - direction: northwest
       target: ne_brewery_compound
     map_x: -2
     map_y: 0
@@ -562,7 +564,7 @@ zone:
       target: ne_cully_road
     - direction: west
       target: ne_alberta_street
-    - direction: south
+    - direction: northeast
       target: ne_alberta_ruins
     - direction: east
       target: ne_mlk_boulevard
@@ -640,7 +642,7 @@ zone:
       target: ne_alberta_street
     - direction: east
       target: ne_neutral_garage
-    map_x: 0
+    map_x: 2
     map_y: -4
     spawns:
     - template: ne_portland_merchant
@@ -671,7 +673,7 @@ zone:
       target: ne_neutral_bunker
     - direction: east
       target: ne_neutral_lot
-    map_x: 2
+    map_x: 4
     map_y: -4
     spawns:
     - template: chip_doc_ne_portland
@@ -697,7 +699,7 @@ zone:
       target: ne_neutral_garage
     - direction: south
       target: ne_alberta_street
-    map_x: 4
+    map_x: 6
     map_y: -4
     properties:
       lighting: overcast
@@ -717,7 +719,7 @@ zone:
     exits:
     - direction: south
       target: ne_neutral_garage
-    map_x: 2
+    map_x: 4
     map_y: -6
     properties:
       lighting: dim
@@ -737,9 +739,9 @@ zone:
     exits:
     - direction: west
       target: ne_alberta_street
-    - direction: north
+    - direction: southwest
       target: ne_prescott_street
-    map_x: 3
+    map_x: 4
     map_y: -2
     spawns:
     - template: ne_scavenger
@@ -761,7 +763,7 @@ zone:
       '
     danger_level: sketchy
     exits:
-    - direction: south
+    - direction: east
       target: ne_killingsworth
     - direction: northeast
       target: ne_woodlawn_outpost
@@ -820,7 +822,7 @@ zone:
       target: ne_killingsworth
     - direction: northwest
       target: ne_columbia_blvd
-    map_x: 1
+    map_x: 0
     map_y: -4
     spawns:
     - template: bike_courier

@@ -242,11 +242,11 @@
 
 ### BUG-30: NE Portland zone map has multiple disconnected sections
 **Severity:** medium
-**Status:** open
+**Status:** fixed
 **Category:** World
 **Description:** The NE Portland zone map renders as several isolated clusters of rooms with no connecting paths between them, indicating missing or broken exit links in `content/zones/ne_portland.yaml`.
 **Steps:** Obtain a zone_map item in NE Portland and use it; observe that the map shows multiple disconnected room groups rather than a single connected graph.
-**Fix:**
+**Fix:** Root cause was incorrect MapX/MapY coordinates and wrong exit directions in `ne_portland.yaml`. Two rooms had odd-numbered X coordinates (killingsworth_road X=1, alberta_ruins X=3) which inserted phantom grid columns breaking adjacent-room detection for all other rooms. Several rooms had exit directions that didn't match their actual coordinate relationship (e.g., brewery NE→williams should be SE, williams SW→brewery should be NW, rose_city_market S→killingsworth should be E since they share the same Y). Fixed 7 room coordinates, 7 exit directions, and added 1 reciprocal exit (killingsworth W→rose_city_market). Added regression tests `TestNEPortlandZone_MapVisuallyConnected` and `TestNEPortlandZone_NoCoordinateOverlap`.
 
 ### BUG-29: Range to target not displayed during combat
 **Severity:** high

@@ -734,6 +734,103 @@ func TestNEPortlandZoneFullyConnected(t *testing.T) {
 	}
 }
 
+// TestNEPortlandZone_MapVisuallyConnected verifies that every room in the
+// NE Portland zone has at least one exit to a grid-adjacent room so the map
+// renderer draws a visible connector. This is the root cause of BUG-30:
+// rooms whose coordinates are not adjacent to any neighbor appear as
+// disconnected islands on the map.
+//
+// Precondition: NE Portland zone loads without error.
+// Postcondition: Every room has at least one intra-zone exit whose target is
+// at a grid-adjacent position (cardinal: delta of 2 on one axis, 0 on the
+// other; diagonal: delta of 2 on both axes).
+func TestNEPortlandZone_MapVisuallyConnected(t *testing.T) {
+	zone, err := LoadZoneFromFile("../../../content/zones/ne_portland.yaml")
+	require.NoError(t, err)
+
+	type coord struct{ x, y int }
+	coordOf := make(map[string]coord, len(zone.Rooms))
+	for id, room := range zone.Rooms {
+		coordOf[id] = coord{room.MapX, room.MapY}
+	}
+
+	isAdjacent := func(a, b coord) bool {
+		dx := a.x - b.x
+		dy := a.y - b.y
+		if dx < 0 {
+			dx = -dx
+		}
+		if dy < 0 {
+			dy = -dy
+		}
+		// Cardinal: one axis == 2, other == 0.
+		// Diagonal: both axes == 2.
+		if dx == 2 && dy == 0 {
+			return true
+		}
+		if dx == 0 && dy == 2 {
+			return true
+		}
+		if dx == 2 && dy == 2 {
+			return true
+		}
+		return false
+	}
+
+	for id, room := range zone.Rooms {
+		c := coordOf[id]
+		hasAdjacentExit := false
+		for _, exit := range room.Exits {
+			tc, inZone := coordOf[exit.TargetRoom]
+			if !inZone {
+				continue
+			}
+			if isAdjacent(c, tc) {
+				hasAdjacentExit = true
+				break
+			}
+		}
+		// Also check if any other room has an adjacent exit pointing TO this room.
+		if !hasAdjacentExit {
+			for otherID, otherRoom := range zone.Rooms {
+				if otherID == id {
+					continue
+				}
+				for _, exit := range otherRoom.Exits {
+					if exit.TargetRoom == id && isAdjacent(coordOf[otherID], c) {
+						hasAdjacentExit = true
+						break
+					}
+				}
+				if hasAdjacentExit {
+					break
+				}
+			}
+		}
+		assert.True(t, hasAdjacentExit,
+			"BUG-30: room %q at (%d,%d) has no grid-adjacent neighbor — appears as disconnected island on map",
+			id, c.x, c.y)
+	}
+}
+
+// TestNEPortlandZone_NoCoordinateOverlap verifies no two rooms share the same
+// map coordinates, which would cause them to stack on top of each other in the
+// renderer.
+func TestNEPortlandZone_NoCoordinateOverlap(t *testing.T) {
+	zone, err := LoadZoneFromFile("../../../content/zones/ne_portland.yaml")
+	require.NoError(t, err)
+
+	type coord struct{ x, y int }
+	seen := make(map[coord]string, len(zone.Rooms))
+	for id, room := range zone.Rooms {
+		c := coord{room.MapX, room.MapY}
+		if existing, ok := seen[c]; ok {
+			t.Errorf("rooms %q and %q share map coordinates (%d, %d)", existing, id, c.x, c.y)
+		}
+		seen[c] = id
+	}
+}
+
 func TestLoadZone_ZoneEffects_PropagatedToRooms(t *testing.T) {
 	data := []byte(`
 zone:
