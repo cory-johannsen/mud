@@ -39,6 +39,11 @@ type CharacterGetter interface {
 	GetByID(ctx context.Context, id int64) (*character.Character, error)
 }
 
+// AccountUsernameGetter resolves an account ID to a username.
+type AccountUsernameGetter interface {
+	GetUsernameByID(ctx context.Context, id int64) (string, error)
+}
+
 // wsClaims holds the JWT claims for a WebSocket session.
 type wsClaims struct {
 	AccountID   int64  `json:"account_id"`
@@ -52,11 +57,12 @@ type wsClaims struct {
 // Precondition: jwtSecret must be the same secret used when issuing tokens.
 // Precondition: dialer must be a valid connected GameServiceClient (set at startup).
 type WSHandler struct {
-	jwtSecret  string
-	dialer     GameDialer
-	charGetter CharacterGetter
-	bus        *eventbus.EventBus // may be nil; if set, server events are published
-	logger     *zap.Logger
+	jwtSecret     string
+	dialer        GameDialer
+	charGetter    CharacterGetter
+	accountGetter AccountUsernameGetter // may be nil; username falls back to synthetic "user_<id>"
+	bus           *eventbus.EventBus   // may be nil; if set, server events are published
+	logger        *zap.Logger
 }
 
 // NewWSHandler creates a WSHandler.
@@ -69,6 +75,13 @@ func NewWSHandler(jwtSecret string, dialer GameDialer, charGetter CharacterGette
 		charGetter: charGetter,
 		logger:     zap.NewNop(),
 	}
+}
+
+// WithAccountGetter attaches an AccountUsernameGetter so the WS handler can include the real
+// account username in JoinWorldRequest (used in "who" lists and session management).
+func (h *WSHandler) WithAccountGetter(ag AccountUsernameGetter) *WSHandler {
+	h.accountGetter = ag
+	return h
 }
 
 // WithEventBus attaches an EventBus; all received gRPC ServerEvents will be published.
@@ -162,16 +175,30 @@ func (h *WSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send JoinWorldRequest with character metadata.
+	// Resolve account username; fall back to synthetic value if getter is unavailable.
+	username := fmt.Sprintf("user_%d", claims.AccountID)
+	if h.accountGetter != nil {
+		if u, err := h.accountGetter.GetUsernameByID(r.Context(), claims.AccountID); err == nil && u != "" {
+			username = u
+		}
+	}
+
+	// Send JoinWorldRequest with all required fields.
 	joinMsg := &gamev1.ClientMessage{
 		RequestId: "join-0",
 		Payload: &gamev1.ClientMessage_JoinWorld{
 			JoinWorld: &gamev1.JoinWorldRequest{
+				Uid:           fmt.Sprintf("%d", char.ID),
+				Username:      username,
 				CharacterId:   char.ID,
 				CharacterName: char.Name,
-				Class:         char.Class,
-				Archetype:     char.Team,
+				CurrentHp:     int32(char.CurrentHP),
+				Location:      char.Location,
+				Role:          claims.Role,
 				RegionDisplay: char.Region,
+				Class:         char.Class,
+				Level:         int32(char.Level),
+				Archetype:     char.Team,
 			},
 		},
 	}

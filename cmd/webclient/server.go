@@ -82,6 +82,17 @@ func New(
 	return s, nil
 }
 
+// accountUsernameAdapter adapts *postgres.AccountRepository to handlers.AccountUsernameGetter.
+type accountUsernameAdapter struct{ repo *postgres.AccountRepository }
+
+func (a accountUsernameAdapter) GetUsernameByID(ctx context.Context, id int64) (string, error) {
+	acct, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		return "", err
+	}
+	return acct.Username, nil
+}
+
 // ListenAndServe starts the HTTP server. It blocks until the server is stopped.
 //
 // Postcondition: Returns http.ErrServerClosed on graceful shutdown.
@@ -163,7 +174,8 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	// WebSocket session — JWT validated inline by WSHandler.
 	wsHandler := handlers.NewWSHandler(s.cfg.JWTSecret, s.gameClient, s.charRepo).
 		WithLogger(s.logger).
-		WithEventBus(s.bus)
+		WithEventBus(s.bus).
+		WithAccountGetter(accountUsernameAdapter{s.accountRepo})
 	mux.Handle("GET /ws", http.HandlerFunc(wsHandler.ServeHTTP))
 
 	// Admin API — all protected by JWT + RequireAdminRole.
