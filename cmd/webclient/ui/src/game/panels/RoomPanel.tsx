@@ -66,12 +66,12 @@ export function RoomPanel() {
               const health = npc.healthDescription ?? npc.health_description ?? ''
               if (tag !== '') {
                 // Non-combat NPC: Name [type], clickable
+                const onClick = npcType === 'merchant'
+                  ? () => sendMessage('BrowseRequest', { npc_name: npc.name })
+                  : () => sendMessage('ExamineRequest', { target: npc.name })
                 return (
                   <li key={npc.id ?? npc.name}>
-                    <button
-                      className="item-link"
-                      onClick={() => sendMessage('ExamineRequest', { target: npc.name })}
-                    >
+                    <button className="item-link" onClick={onClick}>
                       {npc.name}
                     </button>
                     {' '}
