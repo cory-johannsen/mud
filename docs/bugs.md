@@ -332,6 +332,14 @@
 **Steps:** Enter combat; observe that after every combat message the full hotbar line is echoed to the console, repeating on every round update, action message, and status line.
 **Fix:** Added `\033[H-1;1H\033[2K` clear before the scroll loop in `WriteConsole`. Each `\r\n` at promptRow (row H) scrolls the entire screen up; without clearing the hotbar row first, its content scrolled into the console region. Now the hotbar row is blanked before any scroll so only empty rows scroll upward.
 
+### BUG-42: buy command cannot match items by display name or partial name
+**Severity:** high
+**Status:** open
+**Category:** World
+**Description:** The `buy` command fails to match merchant items by display name, partial name, or slug — none of "Sawn-Off", "sawn-off", "sawn-off-shotgun", or "Sawn-Off Shotgun" resolve to the Sawn-Off Shotgun in Sergeant Mack's inventory.
+**Steps:** Browse Sergeant Mack's wares (`browse mack`); attempt `buy mack sawn-off`, `buy mack sawn-off-shotgun`, `buy mack Sawn-Off`, `buy mack Sawn-Off Shotgun`; all return "Sergeant Mack doesn't sell <term>".
+**Fix:**
+
 ### BUG-41: Non-combat NPCs do not appear as POIs on map after visiting room
 **Severity:** medium
 **Status:** fixed

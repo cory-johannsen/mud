@@ -12,7 +12,7 @@ export function CharacterPanel() {
   const className = characterInfo?.className ?? characterInfo?.class_name ?? characterInfo?.class ?? characterSheet?.className ?? characterSheet?.class_name ?? characterSheet?.job ?? ''
   const level = characterInfo?.level ?? characterSheet?.level ?? 0
   const currentHp = characterInfo?.currentHp ?? characterInfo?.current_hp ?? 0
-  const maxHp = characterInfo?.maxHp ?? characterInfo?.max_hp ?? 1
+  const maxHp = characterInfo?.maxHp ?? characterInfo?.max_hp ?? characterSheet?.maxHp ?? characterSheet?.max_hp ?? 0
   const heroPoints = characterSheet?.heroPoints ?? characterSheet?.hero_points ?? 0
   const hpPct = maxHp > 0 ? (currentHp / maxHp) * 100 : 0
   const hpClass = hpPct > 50 ? 'hp-green' : hpPct > 25 ? 'hp-yellow' : 'hp-red'

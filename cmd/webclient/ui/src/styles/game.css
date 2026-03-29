@@ -7,7 +7,7 @@
     "feed    feed    feed"
     "hotbar  hotbar  hotbar"
     "input   input   input";
-  grid-template-columns: 40fr 20fr 40fr;
+  grid-template-columns: 25fr 40fr 35fr;
   grid-template-rows: auto minmax(200px, 35vh) 1fr auto auto;
   height: 100vh;
   background: #0d0d0d;

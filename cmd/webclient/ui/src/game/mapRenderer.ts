@@ -1,52 +1,108 @@
 // mapRenderer.ts — ASCII map renderer matching the telnet RenderMap output.
 //
-// Layout: compressed coordinate grid (only rows/cols that contain rooms),
-// numbered cells [ N] / < N> (4 chars), east/south connectors, legend below.
+// Returns structured segments (text + CSS color) so MapPanel can render
+// colored spans inside <pre> blocks.
 import type { MapTile } from '../proto'
+
+const CELL_W = 4
+
+// Danger level → CSS color (matches DangerColor in text_renderer.go)
+const DANGER_COLOR: Record<string, string> = {
+  safe:        '#4a8',   // green
+  sketchy:     '#cc0',   // yellow
+  dangerous:   '#f80',   // orange
+  all_out_war: '#f44',   // red
+}
+const DEFAULT_ROOM_COLOR = '#8ab'  // light blue-gray (unexplored / unknown)
+const CURRENT_ROOM_COLOR = '#fff'  // bright white for current room
+
+// POI type table — matches poi.go
+const POI_TYPES: Array<{ id: string; symbol: string; color: string; label: string }> = [
+  { id: 'merchant',  symbol: '$', color: '#0bc', label: 'Merchant'  },
+  { id: 'healer',    symbol: '+', color: '#4a8', label: 'Healer'    },
+  { id: 'trainer',   symbol: 'T', color: '#48f', label: 'Trainer'   },
+  { id: 'guard',     symbol: 'G', color: '#cc0', label: 'Guard'     },
+  { id: 'npc',       symbol: 'N', color: '#aaa', label: 'NPC'       },
+  { id: 'equipment', symbol: 'E', color: '#c8f', label: 'Equipment' },
+]
+
+export interface Segment {
+  text: string
+  color?: string  // CSS color; undefined = inherit from .map-ascii
+}
+
+export type ColoredLine = Segment[]
+
+export interface MapRenderResult {
+  gridLines: ColoredLine[]
+  legendLines: ColoredLine[]
+}
+
+function seg(text: string, color?: string): Segment {
+  return color ? { text, color } : { text }
+}
+
+function dangerColor(t: MapTile): string {
+  const level = t.dangerLevel ?? t.danger_level
+  return (level && DANGER_COLOR[level]) ?? DEFAULT_ROOM_COLOR
+}
+
+function poiSymbols(pois: string[]): ColoredLine {
+  const out: Segment[] = []
+  let cols = 0
+  for (let i = 0; i < pois.length; i++) {
+    if (cols >= CELL_W) break
+    if (i === 3 && pois.length > 4) {
+      out.push(seg('…'))
+      cols++
+      break
+    }
+    const pt = POI_TYPES.find(p => p.id === pois[i])
+    out.push(seg(pt ? pt.symbol : '?', pt?.color))
+    cols++
+  }
+  while (cols < CELL_W) { out.push(seg(' ')); cols++ }
+  return out
+}
+
+function plainLine(text: string): ColoredLine {
+  return [seg(text)]
+}
 
 function coordKey(x: number, y: number): string {
   return `${x},${y}`
 }
 
-export function renderMapTiles(tiles: MapTile[]): string {
-  if (tiles.length === 0) return ''
+export function renderMapTiles(tiles: MapTile[]): MapRenderResult {
+  if (tiles.length === 0) return { gridLines: [], legendLines: [] }
 
-  // Index tiles by coordinate.
-  const byCoord = new Map<string, MapTile>()
-  for (const t of tiles) {
-    byCoord.set(coordKey(t.x, t.y), t)
-  }
+  // Normalize tiles: protojson omits zero-value fields, so x/y may be undefined when 0.
+  const normalized = tiles.map(t => ({ ...t, x: t.x ?? 0, y: t.y ?? 0 }))
 
-  // Collect unique X and Y values that have rooms, sorted ascending.
+  const byCoord = new Map<string, typeof normalized[0]>()
+  for (const t of normalized) byCoord.set(coordKey(t.x, t.y), t)
+
   const xSet = new Set<number>()
   const ySet = new Set<number>()
-  for (const t of tiles) {
-    xSet.add(t.x)
-    ySet.add(t.y)
-  }
+  for (const t of normalized) { xSet.add(t.x); ySet.add(t.y) }
   const xs = Array.from(xSet).sort((a, b) => a - b)
   const ys = Array.from(ySet).sort((a, b) => a - b)
 
-  // Assign legend numbers top-to-bottom, left-to-right.
   const numByCoord = new Map<string, number>()
   let n = 1
-  for (const y of ys) {
-    for (const x of xs) {
-      if (byCoord.has(coordKey(x, y))) {
+  for (const y of ys)
+    for (const x of xs)
+      if (byCoord.has(coordKey(x, y)))
         numByCoord.set(coordKey(x, y), n++)
-      }
-    }
-  }
+
+
 
   function exits(t: MapTile): Set<string> {
     const s = new Set<string>()
-    if (Array.isArray(t.exits)) {
-      for (const e of t.exits) s.add(e.toLowerCase())
-    }
+    if (Array.isArray(t.exits)) for (const e of t.exits) s.add(e.toLowerCase())
     return s
   }
 
-  // Check if any leftmost-column tile has a west exit (needs stub column).
   const minX = xs[0]!
   let hasWestStub = false
   for (const y of ys) {
@@ -54,52 +110,69 @@ export function renderMapTiles(tiles: MapTile[]): string {
     if (t && exits(t).has('west')) { hasWestStub = true; break }
   }
 
-  const lines: string[] = []
+  const gridLines: ColoredLine[] = []
 
   for (let yi = 0; yi < ys.length; yi++) {
     const y = ys[yi]!
-    let row = ''
+    const row: ColoredLine = []
 
     for (let xi = 0; xi < xs.length; xi++) {
       const x = xs[xi]!
 
-      // West stub for first column.
       if (xi === 0 && hasWestStub) {
         const t0 = byCoord.get(coordKey(x, y))
-        row += (t0 && exits(t0).has('west')) ? '<' : ' '
+        row.push(seg((t0 && exits(t0).has('west')) ? '<' : ' '))
       }
 
       const t = byCoord.get(coordKey(x, y))
       if (!t) {
-        row += '    '
+        row.push(seg('    '))
       } else {
         const num = numByCoord.get(coordKey(x, y))!
         if (t.current) {
-          row += `<${String(num).padStart(2)}>`
+          row.push(seg(`<${String(num).padStart(2)}>`, CURRENT_ROOM_COLOR))
         } else if (t.boss === true || t.bossRoom === true) {
-          row += '<BB>'
+          row.push(seg('<BB>', dangerColor(t)))
         } else {
-          row += `[${String(num).padStart(2)}]`
+          row.push(seg(`[${String(num).padStart(2)}]`, dangerColor(t)))
         }
       }
 
-      // East connector.
       if (xi < xs.length - 1) {
         const nextX = xs[xi + 1]!
         const tEast = byCoord.get(coordKey(nextX, y))
         if (t && exits(t).has('east')) {
-          row += tEast ? '-' : '>'
+          row.push(seg(tEast ? '-' : '>'))
         } else {
-          row += ' '
+          row.push(seg(' '))
         }
       } else if (t && exits(t).has('east')) {
-        row += '>'
+        row.push(seg('>'))
       }
     }
 
-    lines.push(row.trimEnd())
+    gridLines.push(row)
 
-    // South connector row — only emit when at least one tile in this row has a south exit.
+    // POI suffix row
+    let hasPOIs = false
+    for (const x of xs) {
+      const t = byCoord.get(coordKey(x, y))
+      if (t && Array.isArray(t.pois) && t.pois.length > 0) { hasPOIs = true; break }
+    }
+    if (hasPOIs) {
+      const prow: ColoredLine = []
+      for (let xi = 0; xi < xs.length; xi++) {
+        const x = xs[xi]!
+        if (xi === 0 && hasWestStub) prow.push(seg(' '))
+        const t = byCoord.get(coordKey(x, y))
+        const cellPOIs = (t && Array.isArray(t.pois)) ? t.pois : []
+        prow.push(...poiSymbols(cellPOIs))
+        if (xi < xs.length - 1) prow.push(seg(' '))
+      }
+      gridLines.push(prow)
+    }
+
+    // South connector row
     if (yi < ys.length - 1) {
       const nextY = ys[yi + 1]!
       let hasSouth = false
@@ -108,44 +181,106 @@ export function renderMapTiles(tiles: MapTile[]): string {
         if (t && exits(t).has('south')) { hasSouth = true; break }
       }
       if (hasSouth) {
-        let srow = ''
+        const srow: ColoredLine = []
         for (let xi = 0; xi < xs.length; xi++) {
           const x = xs[xi]!
-          if (xi === 0 && hasWestStub) srow += ' '
+          if (xi === 0 && hasWestStub) srow.push(seg(' '))
           const t = byCoord.get(coordKey(x, y))
           const tSouth = byCoord.get(coordKey(x, nextY))
-          if (t && exits(t).has('south')) {
-            srow += tSouth ? '  | ' : '  . '
-          } else {
-            srow += '    '
+          srow.push(seg(t && exits(t).has('south') ? (tSouth ? '  | ' : '  . ') : '    '))
+          if (xi < xs.length - 1) {
+            const nextX = xs[xi + 1]!
+            let sep = ' '
+            if (nextX - x === 2 && nextY - y === 2) {
+              const tNE = byCoord.get(coordKey(x, nextY))
+              const tSW = byCoord.get(coordKey(nextX, y))
+              const tSE = byCoord.get(coordKey(nextX, nextY))
+              const hasFwd = (tNE != null && exits(tNE).has('northeast')) || (tSW != null && exits(tSW).has('southwest'))
+              const hasBack = (t != null && exits(t).has('southeast')) || (tSE != null && exits(tSE).has('northwest'))
+              if (hasFwd && hasBack) sep = 'X'
+              else if (hasFwd) sep = '/'
+              else if (hasBack) sep = '\\'
+            }
+            srow.push(seg(sep))
           }
-          if (xi < xs.length - 1) srow += ' '
         }
-        lines.push(srow.trimEnd())
+        gridLines.push(srow)
+      }
+    } else {
+      // Last row south stubs
+      let hasSouthStub = false
+      for (const x of xs) {
+        const t = byCoord.get(coordKey(x, y))
+        if (t && exits(t).has('south')) { hasSouthStub = true; break }
+      }
+      if (hasSouthStub) {
+        const srow: ColoredLine = []
+        for (let xi = 0; xi < xs.length; xi++) {
+          const x = xs[xi]!
+          if (xi === 0 && hasWestStub) srow.push(seg(' '))
+          const t = byCoord.get(coordKey(x, y))
+          srow.push(seg(t && exits(t).has('south') ? '  . ' : '    '))
+          if (xi < xs.length - 1) srow.push(seg(' '))
+        }
+        gridLines.push(srow)
       }
     }
   }
 
-  // Legend: number → room name, two entries per line where space allows.
-  lines.push('')
-  lines.push('Legend:')
-  const legendEntries: Array<{ num: number; name: string; current: boolean }> = []
+  // Legend: POI key (only present types), then multi-column room entries.
+  // Format matches telnet: marker(1) + num right-aligned(2) + "."(1) + name truncated/padded(16) = 20 chars/entry
+  const LEGEND_COL_WIDTH = 20
+  const LEGEND_NAME_WIDTH = LEGEND_COL_WIDTH - 4  // 4 = marker(1)+num(2)+dot(1)
+  const LEGEND_COLS = 5
+
+  const presentPOIs = new Set<string>()
+  for (const t of normalized) {
+    if (Array.isArray(t.pois)) for (const id of t.pois) presentPOIs.add(id)
+  }
+
+  const legendLines: ColoredLine[] = [plainLine('Legend:')]
+
+  if (presentPOIs.size > 0) {
+    legendLines.push(plainLine('Points of Interest'))
+    for (const pt of POI_TYPES) {
+      if (presentPOIs.has(pt.id)) {
+        legendLines.push([seg('  '), seg(pt.symbol, pt.color), seg(`  ${pt.label}`)])
+      }
+    }
+  }
+
+  // Collect all room entries in row-major order.
+  const roomEntries: Array<{ num: number; name: string; current: boolean; color: string }> = []
   for (const y of ys) {
     for (const x of xs) {
       const t = byCoord.get(coordKey(x, y))
       if (!t) continue
       const num = numByCoord.get(coordKey(x, y))!
-      legendEntries.push({
+      roomEntries.push({
         num,
         name: t.roomName ?? t.name ?? `Room ${num}`,
         current: t.current === true,
+        color: t.current === true ? CURRENT_ROOM_COLOR : dangerColor(t),
       })
     }
   }
-  for (const entry of legendEntries) {
-    const marker = entry.current ? '*' : ' '
-    lines.push(` ${marker}${String(entry.num).padStart(2)}. ${entry.name}`)
+
+  // Pack LEGEND_COLS entries per line.
+  for (let i = 0; i < roomEntries.length; i += LEGEND_COLS) {
+    const rowSegs: ColoredLine = []
+    for (let col = 0; col < LEGEND_COLS; col++) {
+      const e = roomEntries[i + col]
+      if (!e) break
+      const marker = e.current ? '*' : ' '
+      const numStr = String(e.num).padStart(2)
+      const name = e.name.length > LEGEND_NAME_WIDTH
+        ? e.name.slice(0, LEGEND_NAME_WIDTH)
+        : e.name.padEnd(LEGEND_NAME_WIDTH)
+      rowSegs.push(seg(`${marker}${numStr}.`))
+      rowSegs.push(seg(name, e.color))
+    }
+    legendLines.push(rowSegs)
   }
 
-  return lines.join('\n')
+  return { gridLines, legendLines }
 }

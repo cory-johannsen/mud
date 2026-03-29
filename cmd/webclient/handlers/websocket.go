@@ -330,7 +330,6 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 			h.logger.Warn("unrecognised ServerEvent payload; skipping")
 			continue
 		}
-		h.logger.Info("grpcToWS: forwarding event", zap.String("type", msgName))
 		payload, err := marshaler.Marshal(inner)
 		if err != nil {
 			h.logger.Error("failed to marshal ServerEvent inner", zap.String("type", msgName), zap.Error(err))

@@ -20,12 +20,21 @@ export interface NpcInfo {
   fighting_target?: string
   conditions?: string[]
   npcType?: string
+  npc_type?: string
 }
 
 export interface FloorItem {
   instanceId?: string
   name: string
   quantity?: number
+}
+
+export interface RoomEquipmentItem {
+  instanceId?: string
+  name: string
+  quantity?: number
+  immovable?: boolean
+  usable?: boolean
 }
 
 export interface ConditionInfo {
@@ -47,6 +56,7 @@ export interface RoomView {
   active_conditions?: ConditionInfo[]
   floorItems?: FloorItem[]
   floor_items?: FloorItem[]
+  equipment?: RoomEquipmentItem[]
   hour?: number
   period?: string
   zoneName?: string
@@ -166,11 +176,12 @@ export interface InventoryView {
 export interface MapTile {
   roomId?: string
   roomName?: string
-  x: number
-  y: number
+  x?: number
+  y?: number
   current?: boolean
   exits?: string[]
   dangerLevel?: string
+  danger_level?: string
   pois?: string[]
   bossRoom?: boolean
   boss?: boolean

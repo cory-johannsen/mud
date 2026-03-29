@@ -1,5 +1,19 @@
 import { useGame } from '../GameContext'
 
+function npcTypeTag(npcType: string): string {
+  switch (npcType) {
+    case 'merchant':   return '[shop]'
+    case 'healer':     return '[healer]'
+    case 'banker':     return '[bank]'
+    case 'job_trainer': return '[trainer]'
+    case 'quest_giver': return '[quest]'
+    case 'guard':      return '[guard]'
+    case 'fixer':      return '[fixer]'
+    case 'hireling':   return '[hire]'
+    default:           return ''
+  }
+}
+
 export function RoomPanel() {
   const { state, sendMessage } = useGame()
   const room = state.roomView
@@ -12,6 +26,7 @@ export function RoomPanel() {
   const exits = room.exits ?? []
   const npcs = room.npcs ?? []
   const floorItems = room.floorItems ?? room.floor_items ?? []
+  const equipment = room.equipment ?? []
   const players = room.players ?? []
   const title = room.title ?? ''
   const description = room.description ?? ''
@@ -44,12 +59,55 @@ export function RoomPanel() {
         <>
           <div className="room-section-label">NPCs</div>
           <ul className="room-npcs">
-            {npcs.map((npc) => (
-              <li key={npc.id ?? npc.name}>
-                {npc.name}{npc.fightingTarget ?? npc.fighting_target ? ' ⚔' : ''}{' '}
-                <span style={{ color: '#666', fontSize: '0.75rem' }}>
-                  ({npc.healthDescription ?? npc.health_description ?? ''})
-                </span>
+            {npcs.map((npc) => {
+              const npcType = npc.npcType ?? npc.npc_type ?? ''
+              const tag = npcTypeTag(npcType)
+              const fightingTarget = npc.fightingTarget ?? npc.fighting_target ?? ''
+              const health = npc.healthDescription ?? npc.health_description ?? ''
+              if (tag !== '') {
+                // Non-combat NPC: Name [type], clickable
+                return (
+                  <li key={npc.id ?? npc.name}>
+                    <button
+                      className="item-link"
+                      onClick={() => sendMessage('ExamineRequest', { target: npc.name })}
+                    >
+                      {npc.name}
+                    </button>
+                    {' '}
+                    <span style={{ color: '#7bc' }}>{tag}</span>
+                  </li>
+                )
+              }
+              // Combat NPC: Name (health) [fighting Target]
+              return (
+                <li key={npc.id ?? npc.name}>
+                  {npc.name}{' '}
+                  <span style={{ color: '#666', fontSize: '0.75rem' }}>({health})</span>
+                  {fightingTarget && <span style={{ color: '#f66' }}> fighting {fightingTarget}</span>}
+                </li>
+              )
+            })}
+          </ul>
+        </>
+      )}
+
+      {equipment.length > 0 && (
+        <>
+          <div className="room-section-label">Equipment</div>
+          <ul className="room-items">
+            {equipment.map((eq, i) => (
+              <li key={i}>
+                {eq.usable ? (
+                  <button
+                    className="item-link"
+                    onClick={() => sendMessage('UseEquipmentRequest', { instance_id: eq.instanceId })}
+                  >
+                    {eq.name} [interact]
+                  </button>
+                ) : (
+                  <span>{eq.name}</span>
+                )}
               </li>
             ))}
           </ul>

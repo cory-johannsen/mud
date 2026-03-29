@@ -16,6 +16,31 @@ function EquipSlot({ label, value, bonus, dmg }: { label: string; value?: string
   )
 }
 
+const ARMOR_SLOTS: Array<{ key: string; label: string }> = [
+  { key: 'head',      label: 'Head'      },
+  { key: 'torso',     label: 'Torso'     },
+  { key: 'left_arm',  label: 'Left Arm'  },
+  { key: 'right_arm', label: 'Right Arm' },
+  { key: 'hands',     label: 'Hands'     },
+  { key: 'left_leg',  label: 'Left Leg'  },
+  { key: 'right_leg', label: 'Right Leg' },
+  { key: 'feet',      label: 'Feet'      },
+]
+
+const ACCESSORY_SLOTS: Array<{ key: string; label: string }> = [
+  { key: 'neck',         label: 'Neck'              },
+  { key: 'left_ring_1',  label: 'Left Hand Ring 1'  },
+  { key: 'left_ring_2',  label: 'Left Hand Ring 2'  },
+  { key: 'left_ring_3',  label: 'Left Hand Ring 3'  },
+  { key: 'left_ring_4',  label: 'Left Hand Ring 4'  },
+  { key: 'left_ring_5',  label: 'Left Hand Ring 5'  },
+  { key: 'right_ring_1', label: 'Right Hand Ring 1' },
+  { key: 'right_ring_2', label: 'Right Hand Ring 2' },
+  { key: 'right_ring_3', label: 'Right Hand Ring 3' },
+  { key: 'right_ring_4', label: 'Right Hand Ring 4' },
+  { key: 'right_ring_5', label: 'Right Hand Ring 5' },
+]
+
 export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
   const { state, sendMessage } = useGame()
 
@@ -26,6 +51,8 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
   }, [state.characterSheet, sendMessage])
 
   const sheet = state.characterSheet
+  const armor = (sheet?.armor ?? {}) as Record<string, string>
+  const accessories = (sheet?.accessories ?? {}) as Record<string, string>
 
   return (
     <>
@@ -45,11 +72,11 @@ export function EquipmentDrawer({ onClose }: { onClose: () => void }) {
               dmg={sheet.mainHandDamage ?? sheet.main_hand_damage}
             />
             <EquipSlot label="Off Hand" value={sheet.offHand ?? sheet.off_hand} />
-            {sheet.armor && Object.entries(sheet.armor as Record<string, string>).map(([slot, item]) => (
-              <EquipSlot key={slot} label={slot} value={item} />
+            {ARMOR_SLOTS.map(({ key, label }) => (
+              <EquipSlot key={key} label={label} value={armor[key] || null} />
             ))}
-            {sheet.accessories && Object.entries(sheet.accessories as Record<string, string>).map(([slot, item]) => (
-              <EquipSlot key={slot} label={slot} value={item} />
+            {ACCESSORY_SLOTS.map(({ key, label }) => (
+              <EquipSlot key={key} label={label} value={accessories[key] || null} />
             ))}
           </>
         )}

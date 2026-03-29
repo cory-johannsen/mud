@@ -142,6 +142,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const backoffRef = useRef(1000)
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const unmountedRef = useRef(false)
+  const lastRoomIdRef = useRef<string | null>(null)
 
   const sendMessage = useCallback((type: string, payload: object) => {
     const frame = JSON.stringify({ type, payload })
@@ -206,10 +207,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
         case 'RoomView': {
           const room = payload as RoomView
           dispatch({ type: 'SET_ROOM', room })
-          dispatch({
-            type: 'APPEND_FEED',
-            entry: makeFeedEntry('room_event', `— ${room.title ?? 'Room'} —`),
-          })
+          const incomingId = room.roomId ?? room.title ?? null
+          if (incomingId !== lastRoomIdRef.current) {
+            lastRoomIdRef.current = incomingId
+            dispatch({
+              type: 'APPEND_FEED',
+              entry: makeFeedEntry('room_event', `— ${room.title ?? 'Room'} —`),
+            })
+          }
           break
         }
         case 'CharacterInfo':
