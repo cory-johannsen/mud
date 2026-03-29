@@ -617,7 +617,7 @@ features:
 
   - slug: internal-client
     name: Shared Client Library
-    status: planned
+    status: complete
     priority: 425
     category: ui
     file: docs/features/internal-client.md
