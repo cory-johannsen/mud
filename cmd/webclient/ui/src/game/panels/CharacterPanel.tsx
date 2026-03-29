@@ -1,8 +1,15 @@
+import { useEffect } from 'react'
 import { useGame } from '../GameContext'
 
 export function CharacterPanel() {
-  const { state } = useGame()
+  const { state, sendMessage } = useGame()
   const { characterInfo, characterSheet, combatRound } = state
+
+  useEffect(() => {
+    if (!characterSheet) {
+      sendMessage('CharacterSheetRequest', {})
+    }
+  }, [characterSheet, sendMessage])
 
   if (!characterInfo && !characterSheet) {
     return <p style={{ color: '#555', fontStyle: 'italic' }}>Loading…</p>
