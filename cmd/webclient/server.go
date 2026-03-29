@@ -23,14 +23,15 @@ import (
 //
 // Invariant: grpcConn is non-nil after New returns without error.
 type Server struct {
-	cfg         config.WebConfig
-	httpServer  *http.Server
-	grpcConn    *grpc.ClientConn
-	accountRepo *postgres.AccountRepository
-	charRepo    *postgres.CharacterRepository
-	gameClient  gamev1.GameServiceClient
-	bus         *eventbus.EventBus
-	logger      *zap.Logger
+	cfg            config.WebConfig
+	httpServer     *http.Server
+	grpcConn       *grpc.ClientConn
+	accountRepo    *postgres.AccountRepository
+	charRepo       *postgres.CharacterRepository
+	gameClient     gamev1.GameServiceClient
+	bus            *eventbus.EventBus
+	logger         *zap.Logger
+	charOptions    *handlers.CharacterOptions
 }
 
 // New constructs a Server, establishes the gRPC connection, and registers routes.
@@ -43,6 +44,7 @@ func New(
 	gameserverAddr string,
 	accountRepo *postgres.AccountRepository,
 	charRepo *postgres.CharacterRepository,
+	charOptions *handlers.CharacterOptions,
 	logger *zap.Logger,
 ) (*Server, error) {
 	conn, err := grpc.NewClient(gameserverAddr,
@@ -62,6 +64,7 @@ func New(
 		gameClient:  gamev1.NewGameServiceClient(conn),
 		bus:         bus,
 		logger:      logger,
+		charOptions: charOptions,
 	}
 
 	mux := http.NewServeMux()
@@ -164,7 +167,8 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	// Character API — all protected by JWT.
 	charHandler := handlers.NewCharacterHandler(s.charRepo, s.charRepo, s.charRepo).
 		WithJWTSecret(s.cfg.JWTSecret).
-		WithGetter(s.charRepo)
+		WithGetter(s.charRepo).
+		WithOptions(s.charOptions)
 	mux.Handle("GET /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.ListCharacters)))
 	mux.Handle("POST /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.CreateCharacter)))
 	mux.Handle("GET /api/characters/options", s.authMiddleware(http.HandlerFunc(charHandler.ListOptions)))

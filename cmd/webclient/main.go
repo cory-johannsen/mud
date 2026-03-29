@@ -13,7 +13,9 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/cory-johannsen/mud/cmd/webclient/handlers"
 	"github.com/cory-johannsen/mud/internal/config"
+	"github.com/cory-johannsen/mud/internal/game/ruleset"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
@@ -21,7 +23,10 @@ import (
 func main() {
 	start := time.Now()
 
-	configPath := flag.String("config", "configs/dev.yaml", "path to configuration file")
+	configPath   := flag.String("config", "configs/dev.yaml", "path to configuration file")
+	jobsDir      := flag.String("jobs-dir", "content/jobs", "path to job YAML definitions")
+	regionsDir   := flag.String("regions-dir", "content/regions", "path to region YAML definitions")
+	archetypesDir := flag.String("archetypes-dir", "content/archetypes", "path to archetype YAML definitions")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -44,7 +49,30 @@ func main() {
 	accountRepo := postgres.NewAccountRepository(pool.DB())
 	charRepo := postgres.NewCharacterRepository(pool.DB())
 
-	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, charRepo, logger)
+	// Load character creation options from content directories.
+	jobs, jobsErr := ruleset.LoadJobs(*jobsDir)
+	if jobsErr != nil {
+		logger.Warn("loading jobs for character wizard", zap.Error(jobsErr))
+	}
+	regions, regionsErr := ruleset.LoadRegions(*regionsDir)
+	if regionsErr != nil {
+		logger.Warn("loading regions for character wizard", zap.Error(regionsErr))
+	}
+	archetypes, archetypesErr := ruleset.LoadArchetypes(*archetypesDir)
+	if archetypesErr != nil {
+		logger.Warn("loading archetypes for character wizard", zap.Error(archetypesErr))
+	}
+
+	var charOpts *handlers.CharacterOptions
+	if jobs != nil && regions != nil && archetypes != nil {
+		charOpts = &handlers.CharacterOptions{
+			Jobs:       jobs,
+			Regions:    regions,
+			Archetypes: archetypes,
+		}
+	}
+
+	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, charRepo, charOpts, logger)
 	if err != nil {
 		logger.Fatal("initializing web server", zap.Error(err))
 	}
