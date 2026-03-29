@@ -15,6 +15,7 @@ import (
 	"github.com/cory-johannsen/mud/cmd/webclient/middleware"
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
+	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
 // Server is the web HTTP server.
@@ -25,6 +26,8 @@ type Server struct {
 	httpServer  *http.Server
 	grpcConn    *grpc.ClientConn
 	accountRepo *postgres.AccountRepository
+	charRepo    *postgres.CharacterRepository
+	gameClient  gamev1.GameServiceClient
 	logger      *zap.Logger
 }
 
@@ -37,6 +40,7 @@ func New(
 	cfg config.WebConfig,
 	gameserverAddr string,
 	accountRepo *postgres.AccountRepository,
+	charRepo *postgres.CharacterRepository,
 	logger *zap.Logger,
 ) (*Server, error) {
 	conn, err := grpc.NewClient(gameserverAddr,
@@ -50,6 +54,8 @@ func New(
 		cfg:         cfg,
 		grpcConn:    conn,
 		accountRepo: accountRepo,
+		charRepo:    charRepo,
+		gameClient:  gamev1.NewGameServiceClient(conn),
 		logger:      logger,
 	}
 
@@ -92,6 +98,22 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return nil
 }
 
+// authMiddleware wraps a handler with JWT authentication, injecting account_id into context.
+//
+// Precondition: handler must not be nil.
+// Postcondition: Claims are available via middleware.ClaimsFromContext and handlers.AccountIDFromContext.
+func (s *Server) authMiddleware(next http.Handler) http.Handler {
+	return middleware.RequireJWT(s.cfg.JWTSecret, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		claims, ok := middleware.ClaimsFromContext(r.Context())
+		if !ok {
+			http.Error(w, `{"error":"unauthorized"}`, http.StatusUnauthorized)
+			return
+		}
+		ctx := handlers.WithAccountID(r.Context(), claims.AccountID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}))
+}
+
 // registerRoutes wires all HTTP routes onto mux.
 //
 // Postcondition: /api/auth/* routes are registered; JWT middleware protects all
@@ -106,6 +128,17 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	// Protected auth routes.
 	mux.Handle("GET /api/auth/me",
 		middleware.RequireJWT(s.cfg.JWTSecret, http.HandlerFunc(authHandler.Me)))
+
+	// Character API — all protected by JWT.
+	charHandler := handlers.NewCharacterHandler(s.charRepo, s.charRepo, s.charRepo)
+	mux.Handle("GET /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.ListCharacters)))
+	mux.Handle("POST /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.CreateCharacter)))
+	mux.Handle("GET /api/characters/options", s.authMiddleware(http.HandlerFunc(charHandler.ListOptions)))
+	mux.Handle("GET /api/characters/check-name", s.authMiddleware(http.HandlerFunc(charHandler.CheckName)))
+
+	// WebSocket session — JWT validated inline by WSHandler.
+	wsHandler := handlers.NewWSHandler(s.cfg.JWTSecret, s.gameClient, s.charRepo).WithLogger(s.logger)
+	mux.Handle("GET /ws", http.HandlerFunc(wsHandler.ServeHTTP))
 
 	// Static files + SPA fallback (implemented in static.go).
 	mux.HandleFunc("/", s.serveIndex)

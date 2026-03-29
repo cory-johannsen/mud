@@ -42,8 +42,9 @@ func main() {
 	defer pool.Close()
 
 	accountRepo := postgres.NewAccountRepository(pool.DB())
+	charRepo := postgres.NewCharacterRepository(pool.DB())
 
-	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, logger)
+	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, charRepo, logger)
 	if err != nil {
 		logger.Fatal("initializing web server", zap.Error(err))
 	}
