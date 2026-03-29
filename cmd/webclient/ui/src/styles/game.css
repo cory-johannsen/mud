@@ -273,6 +273,16 @@
 .equip-slot-value { color: #ccc; font-size: 0.85rem; }
 .equip-empty { color: #444; }
 
+/* Stats drawer */
+.stats-section-header { color: #7bc; font-size: 0.8rem; margin: 0.75rem 0 0.4rem; border-bottom: 1px solid #333; padding-bottom: 0.2rem; }
+.stats-ability-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.3rem 0.5rem; margin-bottom: 0.5rem; }
+.stats-ability-cell { display: flex; justify-content: space-between; font-size: 0.82rem; }
+.stats-row { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.25rem; }
+.stats-label { color: #888; }
+.stats-value { color: #ccc; }
+.stats-save-row { display: flex; gap: 1rem; font-size: 0.82rem; margin-bottom: 0.25rem; color: #ccc; }
+.stats-save-row strong { color: #fff; }
+
 /* Responsive: < 1024px stack vertically */
 @media (max-width: 1023px) {
   .game-layout {

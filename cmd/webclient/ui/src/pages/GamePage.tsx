@@ -13,7 +13,7 @@ import { CombatBanner } from '../game/CombatBanner'
 import { DrawerContainer } from '../game/drawers/DrawerContainer'
 import '../styles/game.css'
 
-type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats'
+type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats' | 'stats'
 
 const MONTHS = ['January','February','March','April','May','June',
                  'July','August','September','October','November','December']
@@ -53,7 +53,7 @@ function GameLayout() {
           {state.timeOfDay && (
             <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
           )}
-          {(['inventory', 'equipment', 'skills', 'feats'] as DrawerType[]).map((d) => (
+          {(['inventory', 'equipment', 'skills', 'feats', 'stats'] as DrawerType[]).map((d) => (
             <button
               key={d}
               className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}

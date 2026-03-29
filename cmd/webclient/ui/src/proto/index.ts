@@ -37,6 +37,12 @@ export interface RoomEquipmentItem {
   usable?: boolean
 }
 
+export interface ResistanceEntry {
+  damageType?: string
+  damage_type?: string
+  value?: number
+}
+
 export interface ConditionInfo {
   id?: string
   name: string
@@ -142,10 +148,18 @@ export interface CharacterSheetView {
   toughnessSave?: number
   hustleSave?: number
   coolSave?: number
+  awareness?: number
+  playerResistances?: ResistanceEntry[]
+  player_resistances?: ResistanceEntry[]
+  playerWeaknesses?: ResistanceEntry[]
+  player_weaknesses?: ResistanceEntry[]
   experience?: number
   xpToNext?: number
+  xp_to_next?: number
   pendingBoosts?: number
+  pending_boosts?: number
   pendingSkillIncreases?: number
+  pending_skill_increases?: number
   heroPoints?: number
   hero_points?: number
   className?: string
