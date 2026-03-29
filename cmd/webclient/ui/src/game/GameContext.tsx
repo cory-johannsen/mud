@@ -279,7 +279,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return () => {
       unmountedRef.current = true
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current)
-      wsRef.current?.close(1001, 'unmount')
+      wsRef.current?.close(1000, 'unmount')
     }
   }, [connect])
 
