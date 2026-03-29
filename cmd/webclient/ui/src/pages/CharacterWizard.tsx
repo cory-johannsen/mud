@@ -3,10 +3,20 @@ import {
   type FormEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
-import { api, type CharacterOptions, type CharacterOption, ApiError } from '../api/client'
+import {
+  api,
+  type CharacterOptions,
+  type RegionOption,
+  type ArchetypeOption,
+  type JobOption,
+  type BasicOption,
+  type SpontaneousChoice,
+  ApiError,
+} from '../api/client'
 
 interface WizardState {
   region: string
@@ -15,19 +25,69 @@ interface WizardState {
   job: string
   name: string
   gender: string
+  // choice fields
+  archetypeBoosts: string[]
+  regionBoosts: string[]
+  skillChoices: string[]
+  featChoices: string[]
+  generalFeatChoices: string[]
+  spontaneousChoices: SpontaneousChoice[]
 }
 
-const EMPTY_STATE: WizardState = { region: '', team: '', archetype: '', job: '', name: '', gender: '' }
-const STEPS = ['Region', 'Team', 'Archetype', 'Job', 'Name & Gender'] as const
-type StepIndex = 0 | 1 | 2 | 3 | 4
+const EMPTY_STATE: WizardState = {
+  region: '',
+  team: '',
+  archetype: '',
+  job: '',
+  name: '',
+  gender: '',
+  archetypeBoosts: [],
+  regionBoosts: [],
+  skillChoices: [],
+  featChoices: [],
+  generalFeatChoices: [],
+  spontaneousChoices: [],
+}
+
+const ALL_ABILITIES = ['brutality', 'grit', 'quickness', 'reasoning', 'savvy', 'flair']
 
 interface Props {
   onComplete: () => void
   onCancel: () => void
 }
 
+function computeSteps(options: CharacterOptions | null, state: WizardState): string[] {
+  const steps = ['Region', 'Team', 'Archetype', 'Job']
+  if (!options) return [...steps, 'Name & Gender']
+
+  const region = options.regions.find((r) => r.id === state.region)
+  const archetype = options.archetypes.find((a) => a.id === state.archetype)
+  const job = options.jobs.find((j) => j.id === state.job)
+
+  const archetypeFreeBoosts = archetype?.ability_boosts?.free ?? 0
+  const regionFreeBoosts = region?.ability_boosts?.free ?? 0
+  if (archetypeFreeBoosts + regionFreeBoosts > 0) {
+    steps.push('Ability Boosts')
+  }
+
+  if (job?.skill_grants?.choices && job.skill_grants.choices.count > 0) {
+    steps.push('Skills')
+  }
+
+  if ((job?.feat_grants?.choices?.count ?? 0) + (job?.feat_grants?.general_count ?? 0) > 0) {
+    steps.push('Feats')
+  }
+
+  if ((job?.tech_grants?.spontaneous?.pool?.length ?? 0) > 0) {
+    steps.push('Technology')
+  }
+
+  steps.push('Name & Gender')
+  return steps
+}
+
 export function CharacterWizard({ onComplete, onCancel }: Props) {
-  const [step, setStep] = useState<StepIndex>(0)
+  const [step, setStep] = useState<number>(0)
   const [state, setState] = useState<WizardState>(EMPTY_STATE)
   const [options, setOptions] = useState<CharacterOptions | null>(null)
   const [optionsError, setOptionsError] = useState<string | null>(null)
@@ -37,14 +97,22 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const computedSteps = useMemo(() => computeSteps(options, state), [options, state])
+  const lastStep = computedSteps.length - 1
+
   useEffect(() => {
     api.characters.options()
       .then((opts) => setOptions(opts))
       .catch(() => setOptionsError('Failed to load character options.'))
   }, [])
 
+  // Clamp step when computedSteps shrinks (e.g., selecting a new job removes ability boost step)
   useEffect(() => {
-    if (step !== 4 || state.name.length < 3) {
+    setStep((s) => Math.min(s, computedSteps.length - 1))
+  }, [computedSteps.length])
+
+  useEffect(() => {
+    if (computedSteps[step] !== 'Name & Gender' || state.name.length < 3) {
       setNameAvailable(null)
       return
     }
@@ -59,7 +127,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [state.name, step])
+  }, [state.name, step, computedSteps])
 
   const update = useCallback((patch: Partial<WizardState>) => {
     setState((prev) => {
@@ -68,19 +136,67 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
       if (patch.team !== undefined && patch.team !== prev.team) {
         next.archetype = ''
         next.job = ''
+        next.archetypeBoosts = []
+        next.regionBoosts = []
+        next.skillChoices = []
+        next.featChoices = []
+        next.generalFeatChoices = []
+        next.spontaneousChoices = []
       }
       if (patch.archetype !== undefined && patch.archetype !== prev.archetype) {
         next.job = ''
+        next.archetypeBoosts = []
+        next.skillChoices = []
+        next.featChoices = []
+        next.generalFeatChoices = []
+        next.spontaneousChoices = []
+      }
+      if (patch.job !== undefined && patch.job !== prev.job) {
+        next.skillChoices = []
+        next.featChoices = []
+        next.generalFeatChoices = []
+        next.spontaneousChoices = []
       }
       return next
     })
   }, [])
 
+  const region = options?.regions.find((r) => r.id === state.region)
+  const archetype = options?.archetypes.find((a) => a.id === state.archetype)
+  const job = options?.jobs.find((j) => j.id === state.job)
+
+  const archetypeFreeBoosts = archetype?.ability_boosts?.free ?? 0
+  const regionFreeBoosts = region?.ability_boosts?.free ?? 0
+
   function canAdvance(): boolean {
-    if (step === 0) return state.region !== ''
-    if (step === 1) return state.team !== ''
-    if (step === 2) return state.archetype !== ''
-    if (step === 3) return state.job !== ''
+    const currentStep = computedSteps[step]
+    if (currentStep === 'Region') return state.region !== ''
+    if (currentStep === 'Team') return state.team !== ''
+    if (currentStep === 'Archetype') return state.archetype !== ''
+    if (currentStep === 'Job') return state.job !== ''
+    if (currentStep === 'Ability Boosts') {
+      const needed = archetypeFreeBoosts + regionFreeBoosts
+      const chosen = state.archetypeBoosts.length + state.regionBoosts.length
+      return chosen >= needed
+    }
+    if (currentStep === 'Skills') {
+      const needed = job?.skill_grants?.choices?.count ?? 0
+      return state.skillChoices.length >= needed
+    }
+    if (currentStep === 'Feats') {
+      const jobFeatCount = job?.feat_grants?.choices?.count ?? 0
+      const generalCount = job?.feat_grants?.general_count ?? 0
+      return state.featChoices.length >= jobFeatCount && state.generalFeatChoices.filter((f) => f.trim() !== '').length >= generalCount
+    }
+    if (currentStep === 'Technology') {
+      const spontPool = job?.tech_grants?.spontaneous?.pool ?? []
+      const spontSlots = Object.values(job?.tech_grants?.spontaneous?.known_by_level ?? {}).reduce((a, b) => a + b, 0)
+      const fixedSpont = (job?.tech_grants?.spontaneous?.fixed ?? []).length
+      const needed = Math.max(0, spontSlots - fixedSpont)
+      // Ensure they haven't chosen more than the pool allows
+      return state.spontaneousChoices.length >= needed && state.spontaneousChoices.length <= spontPool.length
+    }
+    // Name & Gender
     return (
       state.name.length >= 3 &&
       state.name.length <= 20 &&
@@ -90,11 +206,11 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
   }
 
   function handleNext() {
-    if (step < 4) setStep((s) => (s + 1) as StepIndex)
+    if (step < lastStep) setStep((s) => s + 1)
   }
 
   function handleBack() {
-    if (step > 0) setStep((s) => (s - 1) as StepIndex)
+    if (step > 0) setStep((s) => s - 1)
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -109,6 +225,12 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
         team: state.team,
         region: state.region,
         gender: state.gender,
+        archetype_boosts: state.archetypeBoosts.length > 0 ? state.archetypeBoosts : undefined,
+        region_boosts: state.regionBoosts.length > 0 ? state.regionBoosts : undefined,
+        skill_choices: state.skillChoices.length > 0 ? state.skillChoices : undefined,
+        feat_choices: state.featChoices.length > 0 ? state.featChoices : undefined,
+        general_feat_choices: state.generalFeatChoices.length > 0 ? state.generalFeatChoices : undefined,
+        spontaneous_choices: state.spontaneousChoices.length > 0 ? state.spontaneousChoices : undefined,
       })
       onComplete()
     } catch (err) {
@@ -136,12 +258,12 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
   }
 
   // Archetypes that have at least one job available for the selected team
-  const archetypesForTeam: CharacterOption[] = (() => {
+  const archetypesForTeam: BasicOption[] = (() => {
     if (!state.team) return options.archetypes
     const validArchetypes = new Set<string>()
-    for (const job of options.jobs) {
-      if ((job.team === state.team || !job.team) && job.archetype) {
-        validArchetypes.add(job.archetype)
+    for (const j of options.jobs) {
+      if ((j.team === state.team || !j.team) && j.archetype) {
+        validArchetypes.add(j.archetype)
       }
     }
     const filtered = options.archetypes.filter((a) => validArchetypes.has(a.id))
@@ -149,15 +271,16 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
   })()
 
   // Jobs filtered by selected team and archetype
-  const jobsForTeamAndArchetype: CharacterOption[] = (() => {
-    return options.jobs.filter((job) => {
-      const teamMatch = !job.team || job.team === state.team
-      const archetypeMatch = !state.archetype || job.archetype === state.archetype
+  const jobsForTeamAndArchetype: BasicOption[] = (() => {
+    return options.jobs.filter((j) => {
+      const teamMatch = !j.team || j.team === state.team
+      const archetypeMatch = !state.archetype || j.archetype === state.archetype
       return teamMatch && archetypeMatch
     })
   })()
 
   const previewStats = computePreviewStats(options, state)
+  const currentStepName = computedSteps[step]
 
   return (
     <div style={styles.container}>
@@ -167,7 +290,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
       </header>
 
       <div style={styles.stepBar}>
-        {STEPS.map((label, idx) => (
+        {computedSteps.map((label, idx) => (
           <div key={label} style={styles.stepItem}>
             <div style={{
               ...styles.stepDot,
@@ -185,7 +308,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
 
       <div style={styles.body}>
         <form onSubmit={handleSubmit} style={styles.stepContent}>
-          {step === 0 && (
+          {currentStepName === 'Region' && (
             <OptionCards
               label="Select a Region"
               options={options.regions}
@@ -193,7 +316,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
               onSelect={(id) => update({ region: id })}
             />
           )}
-          {step === 1 && (
+          {currentStepName === 'Team' && (
             <OptionCards
               label="Select a Team"
               options={options.teams}
@@ -201,7 +324,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
               onSelect={(id) => update({ team: id })}
             />
           )}
-          {step === 2 && (
+          {currentStepName === 'Archetype' && (
             <OptionCards
               label="Select an Archetype"
               options={archetypesForTeam}
@@ -209,7 +332,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
               onSelect={(id) => update({ archetype: id })}
             />
           )}
-          {step === 3 && (
+          {currentStepName === 'Job' && (
             <OptionCards
               label="Select a Job"
               options={jobsForTeamAndArchetype}
@@ -217,7 +340,40 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
               onSelect={(id) => update({ job: id })}
             />
           )}
-          {step === 4 && (
+          {currentStepName === 'Ability Boosts' && (
+            <AbilityBoostsStep
+              region={region}
+              archetype={archetype}
+              archetypeBoosts={state.archetypeBoosts}
+              regionBoosts={state.regionBoosts}
+              onArchetypeBoostChange={(boosts) => update({ archetypeBoosts: boosts })}
+              onRegionBoostChange={(boosts) => update({ regionBoosts: boosts })}
+            />
+          )}
+          {currentStepName === 'Skills' && job && (
+            <SkillsStep
+              job={job}
+              skillChoices={state.skillChoices}
+              onSkillChoicesChange={(choices) => update({ skillChoices: choices })}
+            />
+          )}
+          {currentStepName === 'Feats' && job && (
+            <FeatsStep
+              job={job}
+              featChoices={state.featChoices}
+              generalFeatChoices={state.generalFeatChoices}
+              onFeatChoicesChange={(choices) => update({ featChoices: choices })}
+              onGeneralFeatChoicesChange={(choices) => update({ generalFeatChoices: choices })}
+            />
+          )}
+          {currentStepName === 'Technology' && job && (
+            <TechnologyStep
+              job={job}
+              spontaneousChoices={state.spontaneousChoices}
+              onSpontaneousChoicesChange={(choices) => update({ spontaneousChoices: choices })}
+            />
+          )}
+          {currentStepName === 'Name & Gender' && (
             <NameGenderStep
               name={state.name}
               gender={state.gender}
@@ -236,7 +392,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
                 ← Back
               </button>
             )}
-            {step < 4 && (
+            {step < lastStep && (
               <button
                 style={{ ...styles.primaryBtn, ...(canAdvance() ? {} : styles.btnDisabled) }}
                 type="button"
@@ -246,7 +402,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
                 Next →
               </button>
             )}
-            {step === 4 && (
+            {step === lastStep && (
               <button
                 style={{ ...styles.primaryBtn, ...(canAdvance() ? {} : styles.btnDisabled) }}
                 type="submit"
@@ -273,9 +429,19 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
             </dl>
           )}
           {state.name && <p style={styles.previewName}>{state.name}</p>}
-          {state.region && <p style={styles.previewTag}>{state.region}</p>}
-          {state.team && <p style={styles.previewTag}>{state.team}{state.archetype ? ` / ${state.archetype}` : ''}</p>}
-          {state.job && <p style={styles.previewTag}>{state.job}</p>}
+          {state.region && <p style={styles.previewTag}>{region?.name ?? state.region}</p>}
+          {state.team && (
+            <p style={styles.previewTag}>
+              {options.teams.find((t) => t.id === state.team)?.name ?? state.team}
+              {state.archetype ? ` / ${archetype?.name ?? state.archetype}` : ''}
+            </p>
+          )}
+          {state.job && <p style={styles.previewTag}>{job?.name ?? state.job}</p>}
+          {(state.archetypeBoosts.length > 0 || state.regionBoosts.length > 0) && (
+            <p style={styles.previewTag}>
+              Boosts: {[...state.archetypeBoosts, ...state.regionBoosts].join(', ')}
+            </p>
+          )}
         </aside>
       </div>
     </div>
@@ -284,7 +450,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
 
 interface OptionCardsProps {
   label: string
-  options: CharacterOption[]
+  options: BasicOption[]
   selected: string
   onSelect: (id: string) => void
 }
@@ -312,6 +478,387 @@ function OptionCards({ label, options, selected, onSelect }: OptionCardsProps) {
           </button>
         ))}
       </div>
+    </div>
+  )
+}
+
+interface AbilityBoostsStepProps {
+  region: RegionOption | undefined
+  archetype: ArchetypeOption | undefined
+  archetypeBoosts: string[]
+  regionBoosts: string[]
+  onArchetypeBoostChange: (boosts: string[]) => void
+  onRegionBoostChange: (boosts: string[]) => void
+}
+
+function AbilityBoostsStep({
+  region,
+  archetype,
+  archetypeBoosts,
+  regionBoosts,
+  onArchetypeBoostChange,
+  onRegionBoostChange,
+}: AbilityBoostsStepProps) {
+  const archetypeFixed = archetype?.ability_boosts?.fixed ?? []
+  const archetypeFree = archetype?.ability_boosts?.free ?? 0
+  const regionFixed = region?.ability_boosts?.fixed ?? []
+  const regionFree = region?.ability_boosts?.free ?? 0
+
+  // Abilities already taken by fixed or chosen boosts (across both archetype and region)
+  function takenAbilities(excludeSource: 'archetype' | 'region', excludeIndex: number): Set<string> {
+    const taken = new Set<string>()
+    for (const a of archetypeFixed) taken.add(a)
+    for (const a of regionFixed) taken.add(a)
+    archetypeBoosts.forEach((a, i) => {
+      if (excludeSource === 'archetype' && i === excludeIndex) return
+      if (a) taken.add(a)
+    })
+    regionBoosts.forEach((a, i) => {
+      if (excludeSource === 'region' && i === excludeIndex) return
+      if (a) taken.add(a)
+    })
+    return taken
+  }
+
+  function handleArchetypeBoost(index: number, value: string) {
+    const updated = [...archetypeBoosts]
+    updated[index] = value
+    onArchetypeBoostChange(updated)
+  }
+
+  function handleRegionBoost(index: number, value: string) {
+    const updated = [...regionBoosts]
+    updated[index] = value
+    onRegionBoostChange(updated)
+  }
+
+  return (
+    <div>
+      <h2 style={styles.stepHeading}>Ability Boosts</h2>
+      <p style={styles.stepSubtext}>
+        Choose ability boosts granted by your archetype and region.
+        Each boost increases an ability score by +2. You cannot boost the same ability twice.
+      </p>
+
+      {archetypeFree > 0 || archetypeFixed.length > 0 ? (
+        <div style={styles.boostSection}>
+          <h3 style={styles.boostSectionTitle}>{archetype?.name ?? 'Archetype'} Boosts</h3>
+          {archetypeFixed.length > 0 && (
+            <div style={styles.fixedBoostList}>
+              {archetypeFixed.map((ab) => (
+                <div key={ab} style={styles.fixedBoost}>
+                  <span style={styles.fixedBoostLabel}>{capitalize(ab)}</span>
+                  <span style={styles.fixedBoostBadge}>+2 (fixed)</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {Array.from({ length: archetypeFree }).map((_, i) => {
+            const taken = takenAbilities('archetype', i)
+            return (
+              <div key={i} style={styles.freeBoostRow}>
+                <label style={styles.freeBoostLabel}>Free Boost #{i + 1}</label>
+                <select
+                  style={styles.boostSelect}
+                  value={archetypeBoosts[i] ?? ''}
+                  onChange={(e) => handleArchetypeBoost(i, e.target.value)}
+                >
+                  <option value="">Select ability…</option>
+                  {ALL_ABILITIES.map((ab) => (
+                    <option key={ab} value={ab} disabled={taken.has(ab) && archetypeBoosts[i] !== ab}>
+                      {capitalize(ab)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )
+          })}
+        </div>
+      ) : null}
+
+      {regionFree > 0 || regionFixed.length > 0 ? (
+        <div style={styles.boostSection}>
+          <h3 style={styles.boostSectionTitle}>{region?.name ?? 'Region'} Boosts</h3>
+          {regionFixed.length > 0 && (
+            <div style={styles.fixedBoostList}>
+              {regionFixed.map((ab) => (
+                <div key={ab} style={styles.fixedBoost}>
+                  <span style={styles.fixedBoostLabel}>{capitalize(ab)}</span>
+                  <span style={styles.fixedBoostBadge}>+2 (fixed)</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {Array.from({ length: regionFree }).map((_, i) => {
+            const taken = takenAbilities('region', i)
+            return (
+              <div key={i} style={styles.freeBoostRow}>
+                <label style={styles.freeBoostLabel}>Free Boost #{i + 1}</label>
+                <select
+                  style={styles.boostSelect}
+                  value={regionBoosts[i] ?? ''}
+                  onChange={(e) => handleRegionBoost(i, e.target.value)}
+                >
+                  <option value="">Select ability…</option>
+                  {ALL_ABILITIES.map((ab) => (
+                    <option key={ab} value={ab} disabled={taken.has(ab) && regionBoosts[i] !== ab}>
+                      {capitalize(ab)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )
+          })}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+interface SkillsStepProps {
+  job: JobOption
+  skillChoices: string[]
+  onSkillChoicesChange: (choices: string[]) => void
+}
+
+function SkillsStep({ job, skillChoices, onSkillChoicesChange }: SkillsStepProps) {
+  const fixed = job.skill_grants?.fixed ?? []
+  const choicePool = job.skill_grants?.choices?.pool ?? []
+  const choiceCount = job.skill_grants?.choices?.count ?? 0
+
+  function toggle(skillId: string) {
+    if (skillChoices.includes(skillId)) {
+      onSkillChoicesChange(skillChoices.filter((s) => s !== skillId))
+    } else if (skillChoices.length < choiceCount) {
+      onSkillChoicesChange([...skillChoices, skillId])
+    }
+  }
+
+  return (
+    <div>
+      <h2 style={styles.stepHeading}>Skills</h2>
+      {fixed.length > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>Fixed Skills (granted automatically)</h3>
+          <div style={styles.grantList}>
+            {fixed.map((s) => (
+              <div key={s} style={styles.grantItem}>{s}</div>
+            ))}
+          </div>
+        </div>
+      )}
+      {choicePool.length > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>
+            Choose {choiceCount} Skill{choiceCount !== 1 ? 's' : ''} ({skillChoices.length}/{choiceCount} selected)
+          </h3>
+          <div style={styles.choiceGrid}>
+            {choicePool.map((s) => {
+              const selected = skillChoices.includes(s)
+              const disabled = !selected && skillChoices.length >= choiceCount
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  style={{
+                    ...styles.choiceBtn,
+                    ...(selected ? styles.choiceBtnSelected : {}),
+                    ...(disabled ? styles.choiceBtnDisabled : {}),
+                  }}
+                  onClick={() => toggle(s)}
+                  disabled={disabled}
+                >
+                  {s}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface FeatsStepProps {
+  job: JobOption
+  featChoices: string[]
+  generalFeatChoices: string[]
+  onFeatChoicesChange: (choices: string[]) => void
+  onGeneralFeatChoicesChange: (choices: string[]) => void
+}
+
+function FeatsStep({
+  job,
+  featChoices,
+  generalFeatChoices,
+  onFeatChoicesChange,
+  onGeneralFeatChoicesChange,
+}: FeatsStepProps) {
+  const fixedFeats = job.feat_grants?.fixed ?? []
+  const choicePool = job.feat_grants?.choices?.pool ?? []
+  const choiceCount = job.feat_grants?.choices?.count ?? 0
+  const generalCount = job.feat_grants?.general_count ?? 0
+
+  function toggleJobFeat(featId: string) {
+    if (featChoices.includes(featId)) {
+      onFeatChoicesChange(featChoices.filter((f) => f !== featId))
+    } else if (featChoices.length < choiceCount) {
+      onFeatChoicesChange([...featChoices, featId])
+    }
+  }
+
+  // General feats use a text input approach since there's no predefined pool
+  function handleGeneralFeatInput(index: number, value: string) {
+    const updated = [...generalFeatChoices]
+    updated[index] = value
+    onGeneralFeatChoicesChange(updated)
+  }
+
+  return (
+    <div>
+      <h2 style={styles.stepHeading}>Feats</h2>
+      {fixedFeats.length > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>Fixed Feats (granted automatically)</h3>
+          <div style={styles.grantList}>
+            {fixedFeats.map((f) => (
+              <div key={f} style={styles.grantItem}>{f}</div>
+            ))}
+          </div>
+        </div>
+      )}
+      {choicePool.length > 0 && choiceCount > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>
+            Choose {choiceCount} Job Feat{choiceCount !== 1 ? 's' : ''} ({featChoices.length}/{choiceCount} selected)
+          </h3>
+          <div style={styles.choiceGrid}>
+            {choicePool.map((f) => {
+              const selected = featChoices.includes(f)
+              const disabled = !selected && featChoices.length >= choiceCount
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  style={{
+                    ...styles.choiceBtn,
+                    ...(selected ? styles.choiceBtnSelected : {}),
+                    ...(disabled ? styles.choiceBtnDisabled : {}),
+                  }}
+                  onClick={() => toggleJobFeat(f)}
+                  disabled={disabled}
+                >
+                  {f}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+      {generalCount > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>
+            General Feat{generalCount !== 1 ? 's' : ''} ({generalFeatChoices.filter((f) => f.trim() !== '').length}/{generalCount} chosen)
+          </h3>
+          <p style={styles.stepSubtext}>Enter the ID of each general feat you wish to take.</p>
+          {Array.from({ length: generalCount }).map((_, i) => (
+            <div key={i} style={styles.freeBoostRow}>
+              <label style={styles.freeBoostLabel}>General Feat #{i + 1}</label>
+              <input
+                style={styles.input}
+                type="text"
+                value={generalFeatChoices[i] ?? ''}
+                onChange={(e) => handleGeneralFeatInput(i, e.target.value)}
+                placeholder="feat ID"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface TechnologyStepProps {
+  job: JobOption
+  spontaneousChoices: SpontaneousChoice[]
+  onSpontaneousChoicesChange: (choices: SpontaneousChoice[]) => void
+}
+
+function TechnologyStep({ job, spontaneousChoices, onSpontaneousChoicesChange }: TechnologyStepProps) {
+  const spontPool = job.tech_grants?.spontaneous?.pool ?? []
+  const spontSlots = Object.values(job.tech_grants?.spontaneous?.known_by_level ?? {}).reduce((a, b) => a + b, 0)
+  const fixedSpont = job.tech_grants?.spontaneous?.fixed ?? []
+  const needed = Math.max(0, spontSlots - fixedSpont.length)
+  const hardwired = job.tech_grants?.hardwired ?? []
+
+  function toggleSpont(entry: { id: string; level: number }) {
+    const idx = spontaneousChoices.findIndex((c) => c.id === entry.id && c.level === entry.level)
+    if (idx >= 0) {
+      onSpontaneousChoicesChange(spontaneousChoices.filter((_, i) => i !== idx))
+    } else if (spontaneousChoices.length < needed) {
+      onSpontaneousChoicesChange([...spontaneousChoices, { id: entry.id, level: entry.level }])
+    }
+  }
+
+  function isSelected(entry: { id: string; level: number }) {
+    return spontaneousChoices.some((c) => c.id === entry.id && c.level === entry.level)
+  }
+
+  return (
+    <div>
+      <h2 style={styles.stepHeading}>Technology</h2>
+      {hardwired.length > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>Hardwired Technologies (always known)</h3>
+          <div style={styles.grantList}>
+            {hardwired.map((t) => (
+              <div key={t} style={styles.grantItem}>{t}</div>
+            ))}
+          </div>
+        </div>
+      )}
+      {fixedSpont.length > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>Fixed Spontaneous Tech (granted automatically)</h3>
+          <div style={styles.grantList}>
+            {fixedSpont.map((t) => (
+              <div key={`${t.id}-${t.level}`} style={styles.grantItem}>
+                {t.id} <span style={styles.levelBadge}>Lv{t.level}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {spontPool.length > 0 && needed > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>
+            Choose {needed} Spontaneous Tech{needed !== 1 ? 's' : ''} ({spontaneousChoices.length}/{needed} selected)
+          </h3>
+          <div style={styles.choiceGrid}>
+            {spontPool.map((entry) => {
+              const selected = isSelected(entry)
+              const disabled = !selected && spontaneousChoices.length >= needed
+              return (
+                <button
+                  key={`${entry.id}-${entry.level}`}
+                  type="button"
+                  style={{
+                    ...styles.choiceBtn,
+                    ...(selected ? styles.choiceBtnSelected : {}),
+                    ...(disabled ? styles.choiceBtnDisabled : {}),
+                  }}
+                  onClick={() => toggleSpont(entry)}
+                  disabled={disabled}
+                >
+                  <div>{entry.id}</div>
+                  <div style={styles.levelBadge}>Level {entry.level}</div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -403,6 +950,10 @@ function computePreviewStats(
   return Object.entries(merged).sort(([a], [b]) => a.localeCompare(b))
 }
 
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
 const styles: Record<string, React.CSSProperties> = {
   container: {
     minHeight: '100vh',
@@ -423,6 +974,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '1rem',
     marginBottom: '2rem',
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
   stepItem: { display: 'flex', alignItems: 'center', gap: '0.4rem' },
   stepDot: {
@@ -445,6 +997,7 @@ const styles: Record<string, React.CSSProperties> = {
   body: { display: 'flex', gap: '2rem', alignItems: 'flex-start' },
   stepContent: { flex: 1, minWidth: 0 },
   stepHeading: { color: '#e0c060', margin: '0 0 1rem', fontSize: '1.1rem' },
+  stepSubtext: { color: '#888', fontSize: '0.8rem', marginBottom: '1rem' },
   optionGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
@@ -532,4 +1085,63 @@ const styles: Record<string, React.CSSProperties> = {
   previewTag: { margin: '0.2rem 0 0', color: '#888', fontSize: '0.75rem' },
   status: { color: '#888' },
   error: { color: '#f55', fontSize: '0.85rem' },
+  // Boost step styles
+  boostSection: { marginBottom: '1.5rem' },
+  boostSectionTitle: { color: '#bbb', fontSize: '0.9rem', margin: '0 0 0.75rem' },
+  fixedBoostList: { display: 'flex', flexWrap: 'wrap' as const, gap: '0.5rem', marginBottom: '0.75rem' },
+  fixedBoost: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+    background: '#1a1a1a',
+    border: '1px solid #333',
+    borderRadius: '4px',
+    padding: '0.3rem 0.6rem',
+  },
+  fixedBoostLabel: { color: '#eee', fontSize: '0.85rem' },
+  fixedBoostBadge: { color: '#888', fontSize: '0.75rem' },
+  freeBoostRow: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' },
+  freeBoostLabel: { color: '#aaa', fontSize: '0.85rem', width: '110px', flexShrink: 0 },
+  boostSelect: {
+    padding: '0.4rem 0.5rem',
+    background: '#111',
+    border: '1px solid #444',
+    borderRadius: '4px',
+    color: '#eee',
+    fontSize: '0.9rem',
+    fontFamily: 'monospace',
+    flex: 1,
+  },
+  // Grant/choice step styles
+  grantSection: { marginBottom: '1.5rem' },
+  grantSectionTitle: { color: '#bbb', fontSize: '0.9rem', margin: '0 0 0.75rem' },
+  grantList: { display: 'flex', flexWrap: 'wrap' as const, gap: '0.4rem', marginBottom: '0.75rem' },
+  grantItem: {
+    background: '#1a1a1a',
+    border: '1px solid #333',
+    borderRadius: '4px',
+    padding: '0.25rem 0.6rem',
+    color: '#ccc',
+    fontSize: '0.8rem',
+  },
+  choiceGrid: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: '0.5rem',
+    marginBottom: '0.75rem',
+  },
+  choiceBtn: {
+    background: '#1a1a1a',
+    border: '1px solid #333',
+    borderRadius: '4px',
+    padding: '0.4rem 0.8rem',
+    color: '#ccc',
+    fontSize: '0.8rem',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    textAlign: 'center' as const,
+  },
+  choiceBtnSelected: { border: '2px solid #e0c060', color: '#fff', background: '#2a2a1a' },
+  choiceBtnDisabled: { opacity: 0.4, cursor: 'not-allowed' },
+  levelBadge: { color: '#888', fontSize: '0.7rem' },
 }

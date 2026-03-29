@@ -150,6 +150,173 @@ func TestCreateCharacter_NameTaken(t *testing.T) {
 	assert.Equal(t, http.StatusConflict, rr.Code)
 }
 
+// stubBoostsAdder records calls to Add.
+type stubBoostsAdder struct {
+	calls []struct{ source, ability string }
+}
+
+func (s *stubBoostsAdder) Add(_ context.Context, _ int64, source, ability string) error {
+	s.calls = append(s.calls, struct{ source, ability string }{source, ability})
+	return nil
+}
+
+// stubSkillsSetter records the last SetAll call.
+type stubSkillsSetter struct {
+	calledWith map[string]string
+}
+
+func (s *stubSkillsSetter) SetAll(_ context.Context, _ int64, skills map[string]string) error {
+	s.calledWith = skills
+	return nil
+}
+
+// stubFeatsSetter records the last SetAll call.
+type stubFeatsSetter struct {
+	calledWith []string
+}
+
+func (s *stubFeatsSetter) SetAll(_ context.Context, _ int64, feats []string) error {
+	s.calledWith = feats
+	return nil
+}
+
+// stubHWTechSetter records the last SetAll call.
+type stubHWTechSetter struct {
+	calledWith []string
+}
+
+func (s *stubHWTechSetter) SetAll(_ context.Context, _ int64, techIDs []string) error {
+	s.calledWith = techIDs
+	return nil
+}
+
+// stubSpontAdder records calls to Add.
+type stubSpontAdder struct {
+	calls []struct {
+		id    string
+		level int
+	}
+}
+
+func (s *stubSpontAdder) Add(_ context.Context, _ int64, techID string, level int) error {
+	s.calls = append(s.calls, struct {
+		id    string
+		level int
+	}{techID, level})
+	return nil
+}
+
+func TestCreateCharacter_PersistsChoicesWhenReposSet(t *testing.T) {
+	created := &character.Character{
+		ID: 42, Name: "Kira", Class: "ganger", Team: "gun",
+		Region: "rustbucket", Gender: "female", Level: 1,
+		CurrentHP: 20, MaxHP: 20,
+	}
+	creator := &stubCreator{result: created}
+	lister := &stubCharacterRepo{}
+
+	boostsAdder := &stubBoostsAdder{}
+	skillsSetter := &stubSkillsSetter{}
+	featsSetter := &stubFeatsSetter{}
+	hwTechSetter := &stubHWTechSetter{}
+	spontAdder := &stubSpontAdder{}
+
+	opts := &handlers.CharacterOptions{
+		Jobs: []*ruleset.Job{
+			{
+				ID: "ganger",
+				SkillGrants: &ruleset.SkillGrants{
+					Fixed: []string{"intimidation"},
+				},
+				FeatGrants: &ruleset.FeatGrants{
+					Fixed: []string{"feat_brawler"},
+				},
+				TechnologyGrants: &ruleset.TechnologyGrants{
+					Hardwired: []string{"tech_ganger_neural"},
+				},
+			},
+		},
+		Skills: []*ruleset.Skill{
+			{ID: "intimidation"},
+			{ID: "athletics"},
+			{ID: "stealth"},
+		},
+	}
+
+	h := handlers.NewCharacterHandler(lister, creator, nil).
+		WithOptions(opts).
+		WithPersistenceRepos(boostsAdder, skillsSetter, featsSetter, hwTechSetter, spontAdder)
+
+	body := `{
+		"name":"Kira","job":"ganger","team":"gun","region":"rustbucket","gender":"female",
+		"archetype_boosts":["brutality"],
+		"region_boosts":["grit"],
+		"skill_choices":["athletics"],
+		"feat_choices":["feat_street_savvy"],
+		"general_feat_choices":["feat_toughness"],
+		"spontaneous_choices":[{"id":"tech_stim","level":1}]
+	}`
+	req := httptest.NewRequest(http.MethodPost, "/api/characters", strings.NewReader(body))
+	req = req.WithContext(handlers.WithAccountID(req.Context(), 10))
+	rr := httptest.NewRecorder()
+
+	h.CreateCharacter(rr, req)
+
+	require.Equal(t, http.StatusCreated, rr.Code)
+
+	// Ability boosts: one archetype + one region boost.
+	require.Len(t, boostsAdder.calls, 2)
+	assert.Equal(t, "archetype", boostsAdder.calls[0].source)
+	assert.Equal(t, "brutality", boostsAdder.calls[0].ability)
+	assert.Equal(t, "region", boostsAdder.calls[1].source)
+	assert.Equal(t, "grit", boostsAdder.calls[1].ability)
+
+	// Skills: all three skills set; intimidation + athletics = trained, stealth = untrained.
+	require.NotNil(t, skillsSetter.calledWith)
+	assert.Equal(t, "trained", skillsSetter.calledWith["intimidation"])
+	assert.Equal(t, "trained", skillsSetter.calledWith["athletics"])
+	assert.Equal(t, "untrained", skillsSetter.calledWith["stealth"])
+
+	// Feats: fixed + player choice + general choice.
+	require.NotNil(t, featsSetter.calledWith)
+	assert.Contains(t, featsSetter.calledWith, "feat_brawler")
+	assert.Contains(t, featsSetter.calledWith, "feat_street_savvy")
+	assert.Contains(t, featsSetter.calledWith, "feat_toughness")
+
+	// Hardwired tech: from job grants.
+	require.NotNil(t, hwTechSetter.calledWith)
+	assert.Equal(t, []string{"tech_ganger_neural"}, hwTechSetter.calledWith)
+
+	// Spontaneous tech: player choice.
+	require.Len(t, spontAdder.calls, 1)
+	assert.Equal(t, "tech_stim", spontAdder.calls[0].id)
+	assert.Equal(t, 1, spontAdder.calls[0].level)
+}
+
+func TestCreateCharacter_NoPersistenceWhenReposNil(t *testing.T) {
+	created := &character.Character{
+		ID: 5, Name: "Rex", Class: "ganger", Team: "gun",
+		Region: "rustbucket", Gender: "male", Level: 1,
+	}
+	creator := &stubCreator{result: created}
+	// No WithPersistenceRepos call — repos are all nil.
+	h := handlers.NewCharacterHandler(&stubCharacterRepo{}, creator, nil)
+
+	body := `{
+		"name":"Rex","job":"ganger","team":"gun","region":"rustbucket","gender":"male",
+		"archetype_boosts":["brutality"],
+		"skill_choices":["athletics"],
+		"spontaneous_choices":[{"id":"tech_stim","level":1}]
+	}`
+	req := httptest.NewRequest(http.MethodPost, "/api/characters", strings.NewReader(body))
+	req = req.WithContext(handlers.WithAccountID(req.Context(), 10))
+	rr := httptest.NewRecorder()
+
+	// Must not panic even with no repos attached.
+	h.CreateCharacter(rr, req)
+	assert.Equal(t, http.StatusCreated, rr.Code)
+}
+
 type stubNameChecker struct {
 	available bool
 	err       error

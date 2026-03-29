@@ -24,4 +24,4 @@ COPY --from=builder /build/configs /configs
 COPY --from=builder /build/content /content
 EXPOSE 8080
 ENTRYPOINT ["/bin/webclient"]
-CMD ["-config", "/configs/dev.yaml", "-jobs-dir", "/content/jobs", "-regions-dir", "/content/regions", "-archetypes-dir", "/content/archetypes", "-teams-dir", "/content/teams"]
+CMD ["-config", "/configs/dev.yaml", "-jobs-dir", "/content/jobs", "-regions-dir", "/content/regions", "-archetypes-dir", "/content/archetypes", "-teams-dir", "/content/teams", "-feats-file", "/content/feats.yaml", "-skills-file", "/content/skills.yaml", "-tech-dir", "/content/technologies"]

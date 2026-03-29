@@ -16,6 +16,7 @@ import (
 	"github.com/cory-johannsen/mud/cmd/webclient/handlers"
 	"github.com/cory-johannsen/mud/internal/config"
 	"github.com/cory-johannsen/mud/internal/game/ruleset"
+	"github.com/cory-johannsen/mud/internal/game/technology"
 	"github.com/cory-johannsen/mud/internal/observability"
 	"github.com/cory-johannsen/mud/internal/storage/postgres"
 )
@@ -28,6 +29,9 @@ func main() {
 	regionsDir    := flag.String("regions-dir", "content/regions", "path to region YAML definitions")
 	archetypesDir := flag.String("archetypes-dir", "content/archetypes", "path to archetype YAML definitions")
 	teamsDir      := flag.String("teams-dir", "content/teams", "path to team YAML definitions")
+	featsFile     := flag.String("feats-file", "content/feats.yaml", "path to feats YAML file")
+	skillsFile    := flag.String("skills-file", "content/skills.yaml", "path to skills YAML file")
+	techDir       := flag.String("tech-dir", "content/technologies", "path to technology YAML directory")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -50,6 +54,13 @@ func main() {
 	accountRepo := postgres.NewAccountRepository(pool.DB())
 	charRepo := postgres.NewCharacterRepository(pool.DB())
 
+	// Character creation choice persistence repositories.
+	abilityBoostsRepo := postgres.NewCharacterAbilityBoostsRepository(pool.DB())
+	skillsRepo := postgres.NewCharacterSkillsRepository(pool.DB())
+	featsRepo := postgres.NewCharacterFeatsRepository(pool.DB())
+	hwTechRepo := postgres.NewCharacterHardwiredTechRepository(pool.DB())
+	spontTechRepo := postgres.NewCharacterSpontaneousTechRepository(pool.DB())
+
 	// Load character creation options from content directories.
 	jobs, jobsErr := ruleset.LoadJobs(*jobsDir)
 	if jobsErr != nil {
@@ -67,14 +78,29 @@ func main() {
 	if teamsErr != nil {
 		logger.Warn("loading teams for character wizard", zap.Error(teamsErr))
 	}
+	feats, featsErr := ruleset.LoadFeats(*featsFile)
+	if featsErr != nil {
+		logger.Warn("loading feats for character wizard", zap.Error(featsErr))
+	}
+	skills, skillsErr := ruleset.LoadSkills(*skillsFile)
+	if skillsErr != nil {
+		logger.Warn("loading skills for character wizard", zap.Error(skillsErr))
+	}
+	techRegistry, techErr := technology.Load(*techDir)
+	if techErr != nil {
+		logger.Warn("loading technology for character wizard", zap.Error(techErr))
+	}
 
 	var charOpts *handlers.CharacterOptions
 	if jobs != nil && regions != nil && archetypes != nil && teams != nil {
 		charOpts = &handlers.CharacterOptions{
-			Jobs:       jobs,
-			Regions:    regions,
-			Archetypes: archetypes,
-			Teams:      teams,
+			Jobs:         jobs,
+			Regions:      regions,
+			Archetypes:   archetypes,
+			Teams:        teams,
+			Feats:        feats,
+			Skills:       skills,
+			TechRegistry: techRegistry,
 		}
 	}
 
@@ -82,6 +108,7 @@ func main() {
 	if err != nil {
 		logger.Fatal("initializing web server", zap.Error(err))
 	}
+	srv = srv.WithCharCreationRepos(abilityBoostsRepo, skillsRepo, featsRepo, hwTechRepo, spontTechRepo)
 
 	logger.Info("webclient starting",
 		zap.Duration("startup", time.Since(start)),

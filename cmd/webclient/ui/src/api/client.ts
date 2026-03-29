@@ -56,20 +56,107 @@ export interface AuthResponse {
   role: string
 }
 
-export interface CharacterOption {
+// BasicOption covers any selectable item with id/name/description
+export interface BasicOption {
   id: string
   name: string
   description: string
-  archetype?: string              // only on job options
-  team?: string                   // only on job options; empty = available to all teams
-  modifiers?: Record<string, number>  // stat modifiers for preview
+}
+
+export interface AbilityBoostGrant {
+  fixed: string[]
+  free: number
+}
+
+export interface SkillChoices {
+  pool: string[]
+  count: number
+}
+
+export interface SkillGrants {
+  fixed?: string[]
+  choices?: SkillChoices
+}
+
+export interface FeatChoices {
+  pool: string[]
+  count: number
+}
+
+export interface FeatGrants {
+  general_count?: number
+  fixed?: string[]
+  choices?: FeatChoices
+}
+
+export interface PreparedEntry {
+  id: string
+  level: number
+}
+
+export interface SpontaneousEntry {
+  id: string
+  level: number
+}
+
+export interface PreparedGrants {
+  slots_by_level?: Record<string, number>
+  fixed?: PreparedEntry[]
+  pool?: PreparedEntry[]
+}
+
+export interface SpontaneousGrants {
+  known_by_level?: Record<string, number>
+  uses_by_level?: Record<string, number>
+  fixed?: SpontaneousEntry[]
+  pool?: SpontaneousEntry[]
+}
+
+export interface TechGrants {
+  hardwired?: string[]
+  prepared?: PreparedGrants
+  spontaneous?: SpontaneousGrants
+}
+
+export interface RegionOption {
+  id: string
+  name: string
+  description: string
+  modifiers?: Record<string, number>
+  ability_boosts?: AbilityBoostGrant
+}
+
+export interface TeamOption {
+  id: string
+  name: string
+  description: string
+}
+
+export interface ArchetypeOption {
+  id: string
+  name: string
+  description: string
+  ability_boosts?: AbilityBoostGrant
+}
+
+export interface JobOption {
+  id: string
+  name: string
+  description: string
+  archetype: string
+  team: string
+  key_ability: string
+  hit_points_per_level: number
+  skill_grants?: SkillGrants
+  feat_grants?: FeatGrants
+  tech_grants?: TechGrants
 }
 
 export interface CharacterOptions {
-  regions: CharacterOption[]
-  teams: CharacterOption[]
-  archetypes: CharacterOption[]
-  jobs: CharacterOption[]
+  regions: RegionOption[]
+  teams: TeamOption[]
+  archetypes: ArchetypeOption[]
+  jobs: JobOption[]
   starting_stats?: Record<string, Record<string, number>>
 }
 
@@ -84,12 +171,23 @@ export interface Character {
   archetype: string
 }
 
+export interface SpontaneousChoice {
+  id: string
+  level: number
+}
+
 export interface CreateCharacterPayload {
   name: string
   job: string
   team: string
   region: string
   gender: string
+  archetype_boosts?: string[]
+  region_boosts?: string[]
+  skill_choices?: string[]
+  feat_choices?: string[]
+  general_feat_choices?: string[]
+  spontaneous_choices?: SpontaneousChoice[]
 }
 
 export const api = {

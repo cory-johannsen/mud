@@ -19,19 +19,29 @@ import (
 	gamev1 "github.com/cory-johannsen/mud/internal/gameserver/gamev1"
 )
 
+// charCreationRepos groups the repositories needed for character-creation choice persistence.
+type charCreationRepos struct {
+	abilityBoosts *postgres.PostgresCharacterAbilityBoostsRepository
+	skills        *postgres.CharacterSkillsRepository
+	feats         *postgres.CharacterFeatsRepository
+	hwTech        *postgres.CharacterHardwiredTechRepository
+	spontTech     *postgres.CharacterSpontaneousTechRepository
+}
+
 // Server is the web HTTP server.
 //
 // Invariant: grpcConn is non-nil after New returns without error.
 type Server struct {
-	cfg            config.WebConfig
-	httpServer     *http.Server
-	grpcConn       *grpc.ClientConn
-	accountRepo    *postgres.AccountRepository
-	charRepo       *postgres.CharacterRepository
-	gameClient     gamev1.GameServiceClient
-	bus            *eventbus.EventBus
-	logger         *zap.Logger
-	charOptions    *handlers.CharacterOptions
+	cfg              config.WebConfig
+	httpServer       *http.Server
+	grpcConn         *grpc.ClientConn
+	accountRepo      *postgres.AccountRepository
+	charRepo         *postgres.CharacterRepository
+	gameClient       gamev1.GameServiceClient
+	bus              *eventbus.EventBus
+	logger           *zap.Logger
+	charOptions      *handlers.CharacterOptions
+	charCreationRepos *charCreationRepos // may be nil if not configured
 }
 
 // New constructs a Server, establishes the gRPC connection, and registers routes.
@@ -83,6 +93,27 @@ func New(
 	}
 
 	return s, nil
+}
+
+// WithCharCreationRepos attaches the repositories needed for character-creation choice persistence.
+// If not called, characters are created but choices are not pre-populated (gameserver prompts at login).
+//
+// Postcondition: Returns s for chaining.
+func (s *Server) WithCharCreationRepos(
+	abilityBoosts *postgres.PostgresCharacterAbilityBoostsRepository,
+	skills *postgres.CharacterSkillsRepository,
+	feats *postgres.CharacterFeatsRepository,
+	hwTech *postgres.CharacterHardwiredTechRepository,
+	spontTech *postgres.CharacterSpontaneousTechRepository,
+) *Server {
+	s.charCreationRepos = &charCreationRepos{
+		abilityBoosts: abilityBoosts,
+		skills:        skills,
+		feats:         feats,
+		hwTech:        hwTech,
+		spontTech:     spontTech,
+	}
+	return s
 }
 
 // accountUsernameAdapter adapts *postgres.AccountRepository to handlers.AccountUsernameGetter.
@@ -169,6 +200,15 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 		WithJWTSecret(s.cfg.JWTSecret).
 		WithGetter(s.charRepo).
 		WithOptions(s.charOptions)
+	if s.charCreationRepos != nil {
+		charHandler = charHandler.WithPersistenceRepos(
+			s.charCreationRepos.abilityBoosts,
+			s.charCreationRepos.skills,
+			s.charCreationRepos.feats,
+			s.charCreationRepos.hwTech,
+			s.charCreationRepos.spontTech,
+		)
+	}
 	mux.Handle("GET /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.ListCharacters)))
 	mux.Handle("POST /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.CreateCharacter)))
 	mux.Handle("GET /api/characters/options", s.authMiddleware(http.HandlerFunc(charHandler.ListOptions)))
