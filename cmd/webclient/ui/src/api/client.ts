@@ -152,12 +152,19 @@ export interface JobOption {
   tech_grants?: TechGrants
 }
 
+export interface FeatOption {
+  id: string
+  name: string
+  description: string
+  category: string
+}
+
 export interface CharacterOptions {
   regions: RegionOption[]
   teams: TeamOption[]
   archetypes: ArchetypeOption[]
   jobs: JobOption[]
-  starting_stats?: Record<string, Record<string, number>>
+  feats: FeatOption[]
 }
 
 export interface Character {

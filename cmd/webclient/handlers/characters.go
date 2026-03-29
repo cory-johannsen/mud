@@ -451,6 +451,13 @@ type teamResponse struct {
 	Description string `json:"description"`
 }
 
+type featResponse struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Category    string `json:"category"`
+}
+
 // ListOptions handles GET /api/characters/options.
 //
 // Precondition: h.options MUST be non-nil (set via WithOptions at startup).
@@ -572,12 +579,25 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 			Description: t.Description,
 		})
 	}
+	feats := make([]featResponse, 0)
+	if h.options.Feats != nil {
+		feats = make([]featResponse, 0, len(h.options.Feats))
+		for _, f := range h.options.Feats {
+			feats = append(feats, featResponse{
+				ID:          f.ID,
+				Name:        f.Name,
+				Description: f.Description,
+				Category:    f.Category,
+			})
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"regions":    regions,
 		"jobs":       jobs,
 		"archetypes": archetypes,
 		"teams":      teams,
+		"feats":      feats,
 	})
 }
 

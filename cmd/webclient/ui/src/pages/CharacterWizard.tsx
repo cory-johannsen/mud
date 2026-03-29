@@ -13,6 +13,7 @@ import {
   type RegionOption,
   type ArchetypeOption,
   type JobOption,
+  type FeatOption,
   type BasicOption,
   type SpontaneousChoice,
   ApiError,
@@ -186,7 +187,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
     if (currentStep === 'Feats') {
       const jobFeatCount = job?.feat_grants?.choices?.count ?? 0
       const generalCount = job?.feat_grants?.general_count ?? 0
-      return state.featChoices.length >= jobFeatCount && state.generalFeatChoices.filter((f) => f.trim() !== '').length >= generalCount
+      return state.featChoices.length >= jobFeatCount && state.generalFeatChoices.length >= generalCount
     }
     if (currentStep === 'Technology') {
       const spontPool = job?.tech_grants?.spontaneous?.pool ?? []
@@ -360,6 +361,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
           {currentStepName === 'Feats' && job && (
             <FeatsStep
               job={job}
+              availableFeats={options.feats ?? []}
               featChoices={state.featChoices}
               generalFeatChoices={state.generalFeatChoices}
               onFeatChoicesChange={(choices) => update({ featChoices: choices })}
@@ -681,6 +683,7 @@ function SkillsStep({ job, skillChoices, onSkillChoicesChange }: SkillsStepProps
 
 interface FeatsStepProps {
   job: JobOption
+  availableFeats: FeatOption[]
   featChoices: string[]
   generalFeatChoices: string[]
   onFeatChoicesChange: (choices: string[]) => void
@@ -689,15 +692,29 @@ interface FeatsStepProps {
 
 function FeatsStep({
   job,
+  availableFeats,
   featChoices,
   generalFeatChoices,
   onFeatChoicesChange,
   onGeneralFeatChoicesChange,
 }: FeatsStepProps) {
-  const fixedFeats = job.feat_grants?.fixed ?? []
+  const fixedFeatIDs = job.feat_grants?.fixed ?? []
   const choicePool = job.feat_grants?.choices?.pool ?? []
   const choiceCount = job.feat_grants?.choices?.count ?? 0
   const generalCount = job.feat_grants?.general_count ?? 0
+
+  // Build a lookup map from feat ID → FeatOption for display
+  const featByID = useMemo(() => {
+    const m = new Map<string, FeatOption>()
+    for (const f of availableFeats) m.set(f.id, f)
+    return m
+  }, [availableFeats])
+
+  // General feats pool: feats with category "general" not already fixed or in job pool
+  const generalPool = useMemo(() => {
+    const taken = new Set([...fixedFeatIDs, ...choicePool])
+    return availableFeats.filter((f) => f.category === 'general' && !taken.has(f.id))
+  }, [availableFeats, fixedFeatIDs, choicePool])
 
   function toggleJobFeat(featId: string) {
     if (featChoices.includes(featId)) {
@@ -707,23 +724,30 @@ function FeatsStep({
     }
   }
 
-  // General feats use a text input approach since there's no predefined pool
-  function handleGeneralFeatInput(index: number, value: string) {
-    const updated = [...generalFeatChoices]
-    updated[index] = value
-    onGeneralFeatChoicesChange(updated)
+  function toggleGeneralFeat(featId: string) {
+    if (generalFeatChoices.includes(featId)) {
+      onGeneralFeatChoicesChange(generalFeatChoices.filter((f) => f !== featId))
+    } else if (generalFeatChoices.length < generalCount) {
+      onGeneralFeatChoicesChange([...generalFeatChoices, featId])
+    }
   }
 
   return (
     <div>
       <h2 style={styles.stepHeading}>Feats</h2>
-      {fixedFeats.length > 0 && (
+      {fixedFeatIDs.length > 0 && (
         <div style={styles.grantSection}>
-          <h3 style={styles.grantSectionTitle}>Fixed Feats (granted automatically)</h3>
-          <div style={styles.grantList}>
-            {fixedFeats.map((f) => (
-              <div key={f} style={styles.grantItem}>{f}</div>
-            ))}
+          <h3 style={styles.grantSectionTitle}>Granted Feats (automatic)</h3>
+          <div style={styles.optionGrid}>
+            {fixedFeatIDs.map((id) => {
+              const feat = featByID.get(id)
+              return (
+                <div key={id} style={{ ...styles.optionCard, opacity: 0.7, cursor: 'default' }}>
+                  <div style={styles.optionName}>{feat?.name ?? id}</div>
+                  {feat?.description && <div style={styles.optionDesc}>{feat.description}</div>}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -732,23 +756,25 @@ function FeatsStep({
           <h3 style={styles.grantSectionTitle}>
             Choose {choiceCount} Job Feat{choiceCount !== 1 ? 's' : ''} ({featChoices.length}/{choiceCount} selected)
           </h3>
-          <div style={styles.choiceGrid}>
-            {choicePool.map((f) => {
-              const selected = featChoices.includes(f)
+          <div style={styles.optionGrid}>
+            {choicePool.map((id) => {
+              const feat = featByID.get(id)
+              const selected = featChoices.includes(id)
               const disabled = !selected && featChoices.length >= choiceCount
               return (
                 <button
-                  key={f}
+                  key={id}
                   type="button"
                   style={{
-                    ...styles.choiceBtn,
-                    ...(selected ? styles.choiceBtnSelected : {}),
+                    ...styles.optionCard,
+                    ...(selected ? styles.optionCardSelected : {}),
                     ...(disabled ? styles.choiceBtnDisabled : {}),
                   }}
-                  onClick={() => toggleJobFeat(f)}
+                  onClick={() => toggleJobFeat(id)}
                   disabled={disabled}
                 >
-                  {f}
+                  <div style={styles.optionName}>{feat?.name ?? id}</div>
+                  {feat?.description && <div style={styles.optionDesc}>{feat.description}</div>}
                 </button>
               )
             })}
@@ -758,21 +784,34 @@ function FeatsStep({
       {generalCount > 0 && (
         <div style={styles.grantSection}>
           <h3 style={styles.grantSectionTitle}>
-            General Feat{generalCount !== 1 ? 's' : ''} ({generalFeatChoices.filter((f) => f.trim() !== '').length}/{generalCount} chosen)
+            Choose {generalCount} General Feat{generalCount !== 1 ? 's' : ''} ({generalFeatChoices.length}/{generalCount} selected)
           </h3>
-          <p style={styles.stepSubtext}>Enter the ID of each general feat you wish to take.</p>
-          {Array.from({ length: generalCount }).map((_, i) => (
-            <div key={i} style={styles.freeBoostRow}>
-              <label style={styles.freeBoostLabel}>General Feat #{i + 1}</label>
-              <input
-                style={styles.input}
-                type="text"
-                value={generalFeatChoices[i] ?? ''}
-                onChange={(e) => handleGeneralFeatInput(i, e.target.value)}
-                placeholder="feat ID"
-              />
+          {generalPool.length === 0 ? (
+            <p style={styles.status}>No general feats available.</p>
+          ) : (
+            <div style={styles.optionGrid}>
+              {generalPool.map((feat) => {
+                const selected = generalFeatChoices.includes(feat.id)
+                const disabled = !selected && generalFeatChoices.length >= generalCount
+                return (
+                  <button
+                    key={feat.id}
+                    type="button"
+                    style={{
+                      ...styles.optionCard,
+                      ...(selected ? styles.optionCardSelected : {}),
+                      ...(disabled ? styles.choiceBtnDisabled : {}),
+                    }}
+                    onClick={() => toggleGeneralFeat(feat.id)}
+                    disabled={disabled}
+                  >
+                    <div style={styles.optionName}>{feat.name}</div>
+                    {feat.description && <div style={styles.optionDesc}>{feat.description}</div>}
+                  </button>
+                )
+              })}
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
