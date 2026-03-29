@@ -40,3 +40,6 @@ deployments/docker/.env
 /gameserver
 /frontend
 .worktrees/
+cmd/webclient/ui/node_modules/
+cmd/webclient/ui/dist/
+!cmd/webclient/ui/dist/index.html
