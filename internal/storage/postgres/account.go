@@ -157,6 +157,26 @@ func (r *AccountRepository) SetRole(ctx context.Context, accountID int64, role s
 	return nil
 }
 
+// GetByID retrieves an account by its primary key.
+//
+// Precondition: id must be > 0.
+// Postcondition: Returns the Account or ErrAccountNotFound.
+func (r *AccountRepository) GetByID(ctx context.Context, id int64) (Account, error) {
+	var acct Account
+	err := r.db.QueryRow(ctx,
+		`SELECT id, username, password_hash, role, created_at
+		 FROM accounts WHERE id = $1`,
+		id,
+	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Account{}, ErrAccountNotFound
+		}
+		return Account{}, fmt.Errorf("querying account by id: %w", err)
+	}
+	return acct, nil
+}
+
 // HashPassword creates a bcrypt hash of the given password.
 //
 // Precondition: password must be non-empty.
