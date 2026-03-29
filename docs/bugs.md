@@ -355,3 +355,11 @@
 **Description:** The terminal UI never switched to combat mode when the player entered combat; the combat screen was never displayed.
 **Steps:** Attack an NPC; observe that the UI remained in room mode instead of switching to the combat display.
 **Fix:** Root cause: the gameserver only broadcast `CombatEvent` messages for round starts, never a `RoundStartEvent` proto. Added `roundStartBroadcastFn` to `CombatHandler` and wired it in `grpc_service.go` to broadcast `ServerEvent_RoundStart`. Called from all three combat-start sites: `startCombatLocked`, `startPursuitCombatLocked`, and `resolveAndAdvanceLocked`.
+
+### BUG-43: Hotbar rendered into feed/console after every server event (web client)
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** In the web client, hotbar slot data appears as a system message in the FeedPanel after every server event, instead of only updating the fixed HotbarPanel row.
+**Steps:** Log in with a character; observe the FeedPanel; after any server event (room entry, combat message, status update) a hotbar line appears in the feed output.
+**Fix:**

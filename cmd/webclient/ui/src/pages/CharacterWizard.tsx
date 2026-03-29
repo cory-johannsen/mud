@@ -177,7 +177,8 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
     if (currentStep === 'Job') return state.job !== ''
     if (currentStep === 'Ability Boosts') {
       const needed = archetypeFreeBoosts + regionFreeBoosts
-      const chosen = state.archetypeBoosts.length + state.regionBoosts.length
+      const chosen = state.archetypeBoosts.filter((a) => a !== '').length +
+        state.regionBoosts.filter((a) => a !== '').length
       return chosen >= needed
     }
     if (currentStep === 'Skills') {
@@ -226,8 +227,12 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
         team: state.team,
         region: state.region,
         gender: state.gender,
-        archetype_boosts: state.archetypeBoosts.length > 0 ? state.archetypeBoosts : undefined,
-        region_boosts: state.regionBoosts.length > 0 ? state.regionBoosts : undefined,
+        archetype_boosts: state.archetypeBoosts.filter((a) => a !== '').length > 0
+          ? state.archetypeBoosts.filter((a) => a !== '')
+          : undefined,
+        region_boosts: state.regionBoosts.filter((a) => a !== '').length > 0
+          ? state.regionBoosts.filter((a) => a !== '')
+          : undefined,
         skill_choices: state.skillChoices.length > 0 ? state.skillChoices : undefined,
         feat_choices: state.featChoices.length > 0 ? state.featChoices : undefined,
         general_feat_choices: state.generalFeatChoices.length > 0 ? state.generalFeatChoices : undefined,

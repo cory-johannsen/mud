@@ -1,13 +1,30 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useGame } from '../GameContext'
 
 export function CharacterPanel() {
   const { state, sendMessage } = useGame()
   const { characterInfo, characterSheet, combatRound } = state
+  const retryRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     if (!characterSheet) {
       sendMessage('CharacterSheetRequest', {})
+      // Retry every 3 seconds in case the gameserver was mid-prompt when
+      // the initial request was sent (prompt flow consumes the frame).
+      retryRef.current = setInterval(() => {
+        sendMessage('CharacterSheetRequest', {})
+      }, 3000)
+    } else {
+      if (retryRef.current !== null) {
+        clearInterval(retryRef.current)
+        retryRef.current = null
+      }
+    }
+    return () => {
+      if (retryRef.current !== null) {
+        clearInterval(retryRef.current)
+        retryRef.current = null
+      }
     }
   }, [characterSheet, sendMessage])
 
