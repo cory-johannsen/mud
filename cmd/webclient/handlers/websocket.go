@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
@@ -15,6 +16,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/cory-johannsen/mud/cmd/webclient/eventbus"
 	"github.com/cory-johannsen/mud/cmd/webclient/session"
 	"github.com/cory-johannsen/mud/internal/game/character"
 	"github.com/cory-johannsen/mud/internal/game/command"
@@ -53,6 +55,7 @@ type WSHandler struct {
 	jwtSecret  string
 	dialer     GameDialer
 	charGetter CharacterGetter
+	bus        *eventbus.EventBus // may be nil; if set, server events are published
 	logger     *zap.Logger
 }
 
@@ -66,6 +69,12 @@ func NewWSHandler(jwtSecret string, dialer GameDialer, charGetter CharacterGette
 		charGetter: charGetter,
 		logger:     zap.NewNop(),
 	}
+}
+
+// WithEventBus attaches an EventBus; all received gRPC ServerEvents will be published.
+func (h *WSHandler) WithEventBus(bus *eventbus.EventBus) *WSHandler {
+	h.bus = bus
+	return h
 }
 
 // WithLogger attaches a logger to the handler.
@@ -231,6 +240,7 @@ func (h *WSHandler) wsToGRPC(ctx context.Context, wsConn *websocket.Conn, stream
 }
 
 // grpcToWS reads ServerEvent protos from the gRPC stream and writes JSON frames to the WS.
+// If h.bus is non-nil, each event is also published to the EventBus for SSE fan-out.
 func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_SessionClient, wsConn *websocket.Conn) {
 	marshaler := protojson.MarshalOptions{EmitUnpopulated: false}
 	for {
@@ -244,9 +254,20 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 			h.logger.Error("failed to marshal ServerEvent", zap.Error(err))
 			continue
 		}
+		rawPayload := json.RawMessage(payload)
+
+		// Fan-out to SSE subscribers via EventBus.
+		if h.bus != nil {
+			h.bus.Publish(eventbus.Event{
+				Type:    msgName,
+				Payload: rawPayload,
+				Time:    time.Now(),
+			})
+		}
+
 		env := wsMessage{
 			Type:    msgName,
-			Payload: json.RawMessage(payload),
+			Payload: rawPayload,
 		}
 		frame, err := json.Marshal(env)
 		if err != nil {

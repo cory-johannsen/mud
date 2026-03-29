@@ -4,10 +4,7 @@ import { ProtectedRoute } from './auth/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { CharactersPage } from './pages/CharactersPage'
 import { GamePage } from './pages/GamePage'
-
-function AdminPageStub() {
-  return <div style={{ color: '#ccc', padding: '2rem' }}>Admin dashboard — Phase 5</div>
-}
+import { AdminPage } from './pages/AdminPage'
 
 export default function App() {
   return (
@@ -35,7 +32,7 @@ export default function App() {
             path="/admin"
             element={
               <ProtectedRoute requiredRole="admin">
-                <AdminPageStub />
+                <AdminPage />
               </ProtectedRoute>
             }
           />

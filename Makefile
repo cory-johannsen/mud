@@ -126,10 +126,11 @@ docker-down:
 	docker compose -f deployments/docker/docker-compose.yml down
 
 # Kubernetes / Kind
-REGISTRY    := registry.johannsen.cloud:5000
-DB_USER     := mud
-DB_PASSWORD := mud
-HELM_NAMESPACE := mud
+REGISTRY              := registry.johannsen.cloud:5000
+DB_USER               := mud
+DB_PASSWORD           := mud
+WEBCLIENT_JWT_SECRET  ?= dev-secret-change-in-prod
+HELM_NAMESPACE        := mud
 IMAGE_TAG   := $(shell git rev-parse --short HEAD 2>/dev/null || echo latest)
 HELM_CHART  := deployments/k8s/mud
 HELM_RELEASE := mud
@@ -153,6 +154,8 @@ docker-push:
 	docker push $(REGISTRY)/mud-gameserver:$(IMAGE_TAG)
 	docker build --build-arg VERSION=$(VERSION) -t $(REGISTRY)/mud-frontend:$(IMAGE_TAG) -f deployments/docker/Dockerfile.frontend .
 	docker push $(REGISTRY)/mud-frontend:$(IMAGE_TAG)
+	docker build --build-arg VERSION=$(VERSION) -t $(REGISTRY)/mud-webclient:$(IMAGE_TAG) -f deployments/docker/Dockerfile.webclient .
+	docker push $(REGISTRY)/mud-webclient:$(IMAGE_TAG)
 
 helm-install:
 	helm install $(HELM_RELEASE) $(HELM_CHART) \
@@ -161,7 +164,8 @@ helm-install:
 		--values $(HELM_VALUES) \
 		--set db.user=$(DB_USER) \
 		--set db.password=$(DB_PASSWORD) \
-		--set image.tag=$(IMAGE_TAG)
+		--set image.tag=$(IMAGE_TAG) \
+		--set webClient.jwtSecret=$(WEBCLIENT_JWT_SECRET)
 
 helm-upgrade:
 	helm upgrade $(HELM_RELEASE) $(HELM_CHART) \
@@ -169,7 +173,8 @@ helm-upgrade:
 		--values $(HELM_VALUES) \
 		--set db.user=$(DB_USER) \
 		--set db.password=$(DB_PASSWORD) \
-		--set image.tag=$(IMAGE_TAG)
+		--set image.tag=$(IMAGE_TAG) \
+		--set webClient.jwtSecret=$(WEBCLIENT_JWT_SECRET)
 
 helm-uninstall:
 	helm uninstall $(HELM_RELEASE) --namespace $(HELM_NAMESPACE)

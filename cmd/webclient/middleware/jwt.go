@@ -23,20 +23,24 @@ type Claims struct {
 }
 
 // RequireJWT returns an http.Handler that validates the Bearer JWT in the
-// Authorization header. On success the Claims are stored in the request
-// context under ClaimsKey and the next handler is called. On failure a
-// JSON 401 is returned.
+// Authorization header or the ?token= query parameter (for SSE/EventSource clients).
+// On success the Claims are stored in the request context under ClaimsKey and the
+// next handler is called. On failure a JSON 401 is returned.
 //
 // Precondition: secret must be non-empty.
 // Postcondition: next is only called when the token is valid and unexpired.
 func RequireJWT(secret string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		if !strings.HasPrefix(authHeader, "Bearer ") {
+		var tokenStr string
+		if auth := r.Header.Get("Authorization"); strings.HasPrefix(auth, "Bearer ") {
+			tokenStr = strings.TrimPrefix(auth, "Bearer ")
+		} else if q := r.URL.Query().Get("token"); q != "" {
+			tokenStr = q
+		}
+		if tokenStr == "" {
 			writeUnauthorized(w, "missing or malformed Authorization header")
 			return
 		}
-		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {

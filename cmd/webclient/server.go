@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/cory-johannsen/mud/cmd/webclient/eventbus"
 	"github.com/cory-johannsen/mud/cmd/webclient/handlers"
 	"github.com/cory-johannsen/mud/cmd/webclient/middleware"
 	"github.com/cory-johannsen/mud/internal/config"
@@ -28,6 +29,7 @@ type Server struct {
 	accountRepo *postgres.AccountRepository
 	charRepo    *postgres.CharacterRepository
 	gameClient  gamev1.GameServiceClient
+	bus         *eventbus.EventBus
 	logger      *zap.Logger
 }
 
@@ -50,12 +52,15 @@ func New(
 		return nil, fmt.Errorf("dialing gameserver: %w", err)
 	}
 
+	bus := eventbus.New(256)
+
 	s := &Server{
 		cfg:         cfg,
 		grpcConn:    conn,
 		accountRepo: accountRepo,
 		charRepo:    charRepo,
 		gameClient:  gamev1.NewGameServiceClient(conn),
+		bus:         bus,
 		logger:      logger,
 	}
 
@@ -114,10 +119,25 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	}))
 }
 
+// adminMiddleware wraps a handler with both JWT auth and admin role enforcement.
+func (s *Server) adminMiddleware(next http.Handler) http.Handler {
+	return middleware.RequireJWT(s.cfg.JWTSecret, middleware.RequireAdminRole(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			claims, ok := middleware.ClaimsFromContext(r.Context())
+			if !ok {
+				http.Error(w, `{"error":"unauthorized"}`, http.StatusUnauthorized)
+				return
+			}
+			ctx := handlers.WithAccountID(r.Context(), claims.AccountID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		}),
+	))
+}
+
 // registerRoutes wires all HTTP routes onto mux.
 //
 // Postcondition: /api/auth/* routes are registered; JWT middleware protects all
-// other /api/* routes.
+// other /api/* routes; admin routes require role admin or moderator.
 func (s *Server) registerRoutes(mux *http.ServeMux) {
 	authHandler := handlers.NewAuthHandler(s.accountRepo, s.cfg.JWTSecret)
 
@@ -137,8 +157,32 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /api/characters/check-name", s.authMiddleware(http.HandlerFunc(charHandler.CheckName)))
 
 	// WebSocket session — JWT validated inline by WSHandler.
-	wsHandler := handlers.NewWSHandler(s.cfg.JWTSecret, s.gameClient, s.charRepo).WithLogger(s.logger)
+	wsHandler := handlers.NewWSHandler(s.cfg.JWTSecret, s.gameClient, s.charRepo).
+		WithLogger(s.logger).
+		WithEventBus(s.bus)
 	mux.Handle("GET /ws", http.HandlerFunc(wsHandler.ServeHTTP))
+
+	// Admin API — all protected by JWT + RequireAdminRole.
+	// WorldEditor and SessionManager are not yet wired from the game server;
+	// a no-op implementation is used so routes are live and testable.
+	adminHandler := handlers.NewAdminHandler(
+		handlers.NewNoOpSessionManager(),
+		s.accountRepo,
+		handlers.NewNoOpWorldEditor(),
+		s.bus,
+	)
+	mux.Handle("GET /api/admin/players", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleListPlayers)))
+	mux.Handle("POST /api/admin/players/{char_id}/kick", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleKickPlayer)))
+	mux.Handle("POST /api/admin/players/{char_id}/message", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleMessagePlayer)))
+	mux.Handle("POST /api/admin/players/{char_id}/teleport", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleTeleportPlayer)))
+	mux.Handle("GET /api/admin/accounts", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleSearchAccounts)))
+	mux.Handle("PUT /api/admin/accounts/{id}", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleUpdateAccount)))
+	mux.Handle("GET /api/admin/zones", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleListZones)))
+	mux.Handle("GET /api/admin/zones/{zone_id}/rooms", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleListRooms)))
+	mux.Handle("PUT /api/admin/rooms/{room_id}", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleUpdateRoom)))
+	mux.Handle("GET /api/admin/npcs", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleListNPCs)))
+	mux.Handle("POST /api/admin/rooms/{room_id}/spawn-npc", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleSpawnNPC)))
+	mux.Handle("GET /api/admin/events", s.adminMiddleware(http.HandlerFunc(adminHandler.HandleAdminEvents)))
 
 	// Static files + SPA fallback (implemented in static.go).
 	mux.HandleFunc("/", s.serveIndex)
