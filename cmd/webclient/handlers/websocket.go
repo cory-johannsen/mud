@@ -239,6 +239,54 @@ func (h *WSHandler) wsToGRPC(ctx context.Context, wsConn *websocket.Conn, stream
 	}
 }
 
+// serverEventInner unwraps a ServerEvent oneof and returns the inner proto.Message
+// and its short type name (e.g. "RoomView", "MessageEvent").
+// Returns nil, "" if the payload is unrecognised or nil.
+func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
+	switch p := event.Payload.(type) {
+	case *gamev1.ServerEvent_RoomView:
+		return p.RoomView, "RoomView"
+	case *gamev1.ServerEvent_Message:
+		return p.Message, "MessageEvent"
+	case *gamev1.ServerEvent_RoomEvent:
+		return p.RoomEvent, "RoomEvent"
+	case *gamev1.ServerEvent_CharacterInfo:
+		return p.CharacterInfo, "CharacterInfo"
+	case *gamev1.ServerEvent_CharacterSheet:
+		return p.CharacterSheet, "CharacterSheetView"
+	case *gamev1.ServerEvent_InventoryView:
+		return p.InventoryView, "InventoryView"
+	case *gamev1.ServerEvent_Map:
+		return p.Map, "MapResponse"
+	case *gamev1.ServerEvent_CombatEvent:
+		return p.CombatEvent, "CombatEvent"
+	case *gamev1.ServerEvent_RoundStart:
+		return p.RoundStart, "RoundStartEvent"
+	case *gamev1.ServerEvent_RoundEnd:
+		return p.RoundEnd, "RoundEndEvent"
+	case *gamev1.ServerEvent_Error:
+		return p.Error, "ErrorEvent"
+	case *gamev1.ServerEvent_HpUpdate:
+		return p.HpUpdate, "HpUpdate"
+	case *gamev1.ServerEvent_Disconnected:
+		return p.Disconnected, "Disconnected"
+	case *gamev1.ServerEvent_PlayerList:
+		return p.PlayerList, "PlayerList"
+	case *gamev1.ServerEvent_ExitList:
+		return p.ExitList, "ExitList"
+	case *gamev1.ServerEvent_NpcView:
+		return p.NpcView, "NpcView"
+	case *gamev1.ServerEvent_ConditionEvent:
+		return p.ConditionEvent, "ConditionEvent"
+	case *gamev1.ServerEvent_TimeOfDay:
+		return p.TimeOfDay, "TimeOfDay"
+	case *gamev1.ServerEvent_HotbarUpdate:
+		return p.HotbarUpdate, "HotbarUpdate"
+	default:
+		return nil, ""
+	}
+}
+
 // grpcToWS reads ServerEvent protos from the gRPC stream and writes JSON frames to the WS.
 // If h.bus is non-nil, each event is also published to the EventBus for SSE fan-out.
 func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_SessionClient, wsConn *websocket.Conn) {
@@ -248,10 +296,14 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 		if err != nil {
 			return
 		}
-		msgName := string(proto.MessageName(event).Name())
-		payload, err := marshaler.Marshal(event)
+		inner, msgName := serverEventInner(event)
+		if inner == nil {
+			h.logger.Warn("unrecognised ServerEvent payload; skipping")
+			continue
+		}
+		payload, err := marshaler.Marshal(inner)
 		if err != nil {
-			h.logger.Error("failed to marshal ServerEvent", zap.Error(err))
+			h.logger.Error("failed to marshal ServerEvent inner", zap.String("type", msgName), zap.Error(err))
 			continue
 		}
 		rawPayload := json.RawMessage(payload)
