@@ -358,7 +358,7 @@ function computePreviewStats(
 
   for (const key of [state.region, state.job, state.archetype]) {
     if (!key) continue
-    const stats = options.starting_stats[key]
+    const stats = options.starting_stats?.[key]
     if (!stats) continue
     for (const [stat, val] of Object.entries(stats)) {
       merged[stat] = (merged[stat] ?? 0) + val
