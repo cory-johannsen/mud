@@ -150,6 +150,7 @@ func (h *WSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.logger.Error("websocket upgrade failed", zap.Error(err))
 		return
 	}
+	h.logger.Info("websocket connected", zap.Int64("character_id", characterID))
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -294,6 +295,7 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 	for {
 		event, err := stream.Recv()
 		if err != nil {
+			h.logger.Info("grpcToWS: stream.Recv error", zap.Error(err))
 			return
 		}
 		inner, msgName := serverEventInner(event)
@@ -301,6 +303,7 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 			h.logger.Warn("unrecognised ServerEvent payload; skipping")
 			continue
 		}
+		h.logger.Info("grpcToWS: forwarding event", zap.String("type", msgName))
 		payload, err := marshaler.Marshal(inner)
 		if err != nil {
 			h.logger.Error("failed to marshal ServerEvent inner", zap.String("type", msgName), zap.Error(err))
@@ -327,6 +330,7 @@ func (h *WSHandler) grpcToWS(ctx context.Context, stream gamev1.GameService_Sess
 			continue
 		}
 		if err := wsConn.WriteMessage(websocket.TextMessage, frame); err != nil {
+			h.logger.Info("grpcToWS: WebSocket write error", zap.String("type", msgName), zap.Error(err))
 			return
 		}
 	}
