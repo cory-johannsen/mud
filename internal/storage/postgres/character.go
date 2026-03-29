@@ -138,6 +138,21 @@ func (r *CharacterRepository) GetByID(ctx context.Context, id int64) (*character
 	return &c, nil
 }
 
+// IsNameAvailable returns true if no character with the given name exists.
+//
+// Precondition: name must be non-empty.
+// Postcondition: Returns true if name is unused across all accounts; false otherwise.
+func (r *CharacterRepository) IsNameAvailable(ctx context.Context, name string) (bool, error) {
+	var count int
+	err := r.db.QueryRow(ctx,
+		`SELECT COUNT(*) FROM characters WHERE lower(name) = lower($1)`, name,
+	).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("checking name availability: %w", err)
+	}
+	return count == 0, nil
+}
+
 // UpdateDetainedUntil persists the detained_until timestamp for a character.
 // Pass nil to clear the detention.
 //
