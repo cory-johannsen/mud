@@ -26,6 +26,7 @@ import type {
   InventoryView,
   MapTile,
   RoundStartEvent,
+  ConditionEvent,
 } from '../proto'
 
 const TOKEN_KEY = 'mud_token'
@@ -258,6 +259,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
             type: 'APPEND_FEED',
             entry: makeFeedEntry('round_end', `Round ${re.round ?? '?'} ended`),
           })
+          break
+        }
+        case 'ConditionEvent': {
+          const ce = payload as ConditionEvent
+          const name = ce.conditionName ?? ce.condition_name ?? ''
+          const target = ce.targetName ?? ''
+          if (name) {
+            const text = ce.applied
+              ? `[CONDITION] ${target} is now ${name} (stacks: ${ce.stacks ?? 1})`
+              : `[CONDITION] ${name} fades from ${target}`
+            dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', text) })
+          }
           break
         }
         case 'HotbarUpdate': {

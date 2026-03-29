@@ -239,6 +239,16 @@ export interface ErrorEvent {
   message?: string
 }
 
+export interface ConditionEvent {
+  targetUid?: string
+  targetName?: string
+  conditionId?: string
+  conditionName?: string
+  condition_name?: string
+  stacks?: number
+  applied?: boolean
+}
+
 export type ServerEvent =
   | { type: 'RoomView'; payload: RoomView }
   | { type: 'CharacterInfo'; payload: CharacterInfo }
