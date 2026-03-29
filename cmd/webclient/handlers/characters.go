@@ -165,6 +165,15 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	accountID := AccountIDFromContext(r.Context())
+	startRoom := ""
+	if h.options != nil {
+		for _, t := range h.options.Teams {
+			if t.ID == req.Team {
+				startRoom = t.StartRoom
+				break
+			}
+		}
+	}
 	c := &character.Character{
 		AccountID: accountID,
 		Name:      strings.TrimSpace(req.Name),
@@ -173,6 +182,7 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 		Region:    req.Region,
 		Gender:    req.Gender,
 		Level:     1,
+		Location:  startRoom,
 	}
 	created, err := h.creator.Create(r.Context(), c)
 	if err != nil {
