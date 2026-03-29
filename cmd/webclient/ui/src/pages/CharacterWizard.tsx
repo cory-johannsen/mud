@@ -10,15 +10,16 @@ import { api, type CharacterOptions, type CharacterOption, ApiError } from '../a
 
 interface WizardState {
   region: string
-  job: string
+  team: string
   archetype: string
+  job: string
   name: string
   gender: string
 }
 
-const EMPTY_STATE: WizardState = { region: '', job: '', archetype: '', name: '', gender: '' }
-const STEPS = ['Region', 'Job', 'Archetype', 'Name & Gender'] as const
-type StepIndex = 0 | 1 | 2 | 3
+const EMPTY_STATE: WizardState = { region: '', team: '', archetype: '', job: '', name: '', gender: '' }
+const STEPS = ['Region', 'Team', 'Archetype', 'Job', 'Name & Gender'] as const
+type StepIndex = 0 | 1 | 2 | 3 | 4
 
 interface Props {
   onComplete: () => void
@@ -61,13 +62,25 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
   }, [state.name, step])
 
   const update = useCallback((patch: Partial<WizardState>) => {
-    setState((prev) => ({ ...prev, ...patch }))
+    setState((prev) => {
+      const next = { ...prev, ...patch }
+      // Reset downstream selections when upstream changes
+      if (patch.team !== undefined && patch.team !== prev.team) {
+        next.archetype = ''
+        next.job = ''
+      }
+      if (patch.archetype !== undefined && patch.archetype !== prev.archetype) {
+        next.job = ''
+      }
+      return next
+    })
   }, [])
 
   function canAdvance(): boolean {
     if (step === 0) return state.region !== ''
-    if (step === 1) return state.job !== ''
+    if (step === 1) return state.team !== ''
     if (step === 2) return state.archetype !== ''
+    if (step === 3) return state.job !== ''
     return (
       state.name.length >= 3 &&
       state.name.length <= 20 &&
@@ -77,7 +90,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
   }
 
   function handleNext() {
-    if (step < 3) setStep((s) => (s + 1) as StepIndex)
+    if (step < 4) setStep((s) => (s + 1) as StepIndex)
   }
 
   function handleBack() {
@@ -93,7 +106,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
       await api.characters.create({
         name: state.name,
         job: state.job,
-        archetype: state.archetype,
+        team: state.team,
         region: state.region,
         gender: state.gender,
       })
@@ -122,11 +135,26 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
     return <div style={styles.container}><p style={styles.status}>Loading options…</p></div>
   }
 
-  // Corrected archetype filter
-  const archetypesForJob: CharacterOption[] = (() => {
-    if (!state.job) return options.archetypes
-    const filtered = options.archetypes.filter((a) => a.id.startsWith(state.job))
+  // Archetypes that have at least one job available for the selected team
+  const archetypesForTeam: CharacterOption[] = (() => {
+    if (!state.team) return options.archetypes
+    const validArchetypes = new Set<string>()
+    for (const job of options.jobs) {
+      if ((job.team === state.team || !job.team) && job.archetype) {
+        validArchetypes.add(job.archetype)
+      }
+    }
+    const filtered = options.archetypes.filter((a) => validArchetypes.has(a.id))
     return filtered.length > 0 ? filtered : options.archetypes
+  })()
+
+  // Jobs filtered by selected team and archetype
+  const jobsForTeamAndArchetype: CharacterOption[] = (() => {
+    return options.jobs.filter((job) => {
+      const teamMatch = !job.team || job.team === state.team
+      const archetypeMatch = !state.archetype || job.archetype === state.archetype
+      return teamMatch && archetypeMatch
+    })
   })()
 
   const previewStats = computePreviewStats(options, state)
@@ -167,21 +195,29 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
           )}
           {step === 1 && (
             <OptionCards
-              label="Select a Job"
-              options={options.jobs}
-              selected={state.job}
-              onSelect={(id) => update({ job: id, archetype: '' })}
+              label="Select a Team"
+              options={options.teams}
+              selected={state.team}
+              onSelect={(id) => update({ team: id })}
             />
           )}
           {step === 2 && (
             <OptionCards
               label="Select an Archetype"
-              options={archetypesForJob}
+              options={archetypesForTeam}
               selected={state.archetype}
               onSelect={(id) => update({ archetype: id })}
             />
           )}
           {step === 3 && (
+            <OptionCards
+              label="Select a Job"
+              options={jobsForTeamAndArchetype}
+              selected={state.job}
+              onSelect={(id) => update({ job: id })}
+            />
+          )}
+          {step === 4 && (
             <NameGenderStep
               name={state.name}
               gender={state.gender}
@@ -200,7 +236,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
                 ← Back
               </button>
             )}
-            {step < 3 && (
+            {step < 4 && (
               <button
                 style={{ ...styles.primaryBtn, ...(canAdvance() ? {} : styles.btnDisabled) }}
                 type="button"
@@ -210,7 +246,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
                 Next →
               </button>
             )}
-            {step === 3 && (
+            {step === 4 && (
               <button
                 style={{ ...styles.primaryBtn, ...(canAdvance() ? {} : styles.btnDisabled) }}
                 type="submit"
@@ -238,7 +274,8 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
           )}
           {state.name && <p style={styles.previewName}>{state.name}</p>}
           {state.region && <p style={styles.previewTag}>{state.region}</p>}
-          {state.job && <p style={styles.previewTag}>{state.job}{state.archetype ? ` / ${state.archetype}` : ''}</p>}
+          {state.team && <p style={styles.previewTag}>{state.team}{state.archetype ? ` / ${state.archetype}` : ''}</p>}
+          {state.job && <p style={styles.previewTag}>{state.job}</p>}
         </aside>
       </div>
     </div>

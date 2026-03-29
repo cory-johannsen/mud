@@ -36,6 +36,7 @@ type CharacterOptions struct {
 	Regions    []*ruleset.Region
 	Jobs       []*ruleset.Job
 	Archetypes []*ruleset.Archetype
+	Teams      []*ruleset.Team
 }
 
 // CharacterResponse is the JSON shape returned for a single character.
@@ -118,11 +119,11 @@ func characterToResponse(c *character.Character) CharacterResponse {
 
 // createCharacterRequest is the JSON payload for POST /api/characters.
 type createCharacterRequest struct {
-	Name      string `json:"name"`
-	Job       string `json:"job"`
-	Archetype string `json:"archetype"`
-	Region    string `json:"region"`
-	Gender    string `json:"gender"`
+	Name   string `json:"name"`
+	Job    string `json:"job"`
+	Team   string `json:"team"`
+	Region string `json:"region"`
+	Gender string `json:"gender"`
 }
 
 func (r createCharacterRequest) validate() string {
@@ -133,8 +134,8 @@ func (r createCharacterRequest) validate() string {
 	if r.Job == "" {
 		return "job is required"
 	}
-	if r.Archetype == "" {
-		return "archetype is required"
+	if r.Team == "" {
+		return "team is required"
 	}
 	if r.Region == "" {
 		return "region is required"
@@ -168,7 +169,7 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 		AccountID: accountID,
 		Name:      strings.TrimSpace(req.Name),
 		Class:     req.Job,
-		Team:      req.Archetype,
+		Team:      req.Team,
 		Region:    req.Region,
 		Gender:    req.Gender,
 		Level:     1,
@@ -200,11 +201,18 @@ type jobResponse struct {
 	Name              string `json:"name"`
 	Description       string `json:"description"`
 	Archetype         string `json:"archetype"`
+	Team              string `json:"team"`
 	KeyAbility        string `json:"key_ability"`
 	HitPointsPerLevel int    `json:"hit_points_per_level"`
 }
 
 type archetypeResponse struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type teamResponse struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -234,6 +242,7 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 			Name:              job.Name,
 			Description:       job.Description,
 			Archetype:         job.Archetype,
+			Team:              job.Team,
 			KeyAbility:        job.KeyAbility,
 			HitPointsPerLevel: job.HitPointsPerLevel,
 		})
@@ -246,11 +255,20 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 			Description: arch.Description,
 		})
 	}
+	teams := make([]teamResponse, 0, len(h.options.Teams))
+	for _, t := range h.options.Teams {
+		teams = append(teams, teamResponse{
+			ID:          t.ID,
+			Name:        t.Name,
+			Description: t.Description,
+		})
+	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"regions":    regions,
 		"jobs":       jobs,
 		"archetypes": archetypes,
+		"teams":      teams,
 	})
 }
 

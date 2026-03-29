@@ -60,13 +60,16 @@ export interface CharacterOption {
   id: string
   name: string
   description: string
+  archetype?: string  // only on job options
+  team?: string       // only on job options; empty = available to all teams
 }
 
 export interface CharacterOptions {
   regions: CharacterOption[]
-  jobs: CharacterOption[]
+  teams: CharacterOption[]
   archetypes: CharacterOption[]
-  starting_stats: Record<string, Record<string, number>>
+  jobs: CharacterOption[]
+  starting_stats?: Record<string, Record<string, number>>
 }
 
 export interface Character {
@@ -83,7 +86,7 @@ export interface Character {
 export interface CreateCharacterPayload {
   name: string
   job: string
-  archetype: string
+  team: string
   region: string
   gender: string
 }

@@ -23,10 +23,11 @@ import (
 func main() {
 	start := time.Now()
 
-	configPath   := flag.String("config", "configs/dev.yaml", "path to configuration file")
-	jobsDir      := flag.String("jobs-dir", "content/jobs", "path to job YAML definitions")
-	regionsDir   := flag.String("regions-dir", "content/regions", "path to region YAML definitions")
+	configPath    := flag.String("config", "configs/dev.yaml", "path to configuration file")
+	jobsDir       := flag.String("jobs-dir", "content/jobs", "path to job YAML definitions")
+	regionsDir    := flag.String("regions-dir", "content/regions", "path to region YAML definitions")
 	archetypesDir := flag.String("archetypes-dir", "content/archetypes", "path to archetype YAML definitions")
+	teamsDir      := flag.String("teams-dir", "content/teams", "path to team YAML definitions")
 	flag.Parse()
 
 	cfg, err := config.Load(*configPath)
@@ -62,13 +63,18 @@ func main() {
 	if archetypesErr != nil {
 		logger.Warn("loading archetypes for character wizard", zap.Error(archetypesErr))
 	}
+	teams, teamsErr := ruleset.LoadTeams(*teamsDir)
+	if teamsErr != nil {
+		logger.Warn("loading teams for character wizard", zap.Error(teamsErr))
+	}
 
 	var charOpts *handlers.CharacterOptions
-	if jobs != nil && regions != nil && archetypes != nil {
+	if jobs != nil && regions != nil && archetypes != nil && teams != nil {
 		charOpts = &handlers.CharacterOptions{
 			Jobs:       jobs,
 			Regions:    regions,
 			Archetypes: archetypes,
+			Teams:      teams,
 		}
 	}
 

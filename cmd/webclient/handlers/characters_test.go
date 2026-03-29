@@ -93,7 +93,7 @@ func TestCreateCharacter_Success(t *testing.T) {
 	lister := &stubCharacterRepo{}
 	h := handlers.NewCharacterHandler(lister, creator, nil)
 
-	body := `{"name":"Mira","job":"ganger","archetype":"gun","region":"rustbucket","gender":"female"}`
+	body := `{"name":"Mira","job":"ganger","team":"gun","region":"rustbucket","gender":"female"}`
 	req := httptest.NewRequest(http.MethodPost, "/api/characters", strings.NewReader(body))
 	req = req.WithContext(handlers.WithAccountID(req.Context(), 42))
 	rr := httptest.NewRecorder()
@@ -111,7 +111,7 @@ func TestCreateCharacter_Success(t *testing.T) {
 
 func TestCreateCharacter_NameTooShort(t *testing.T) {
 	h := handlers.NewCharacterHandler(&stubCharacterRepo{}, &stubCreator{}, nil)
-	body := `{"name":"ab","job":"ganger","archetype":"gun","region":"rustbucket","gender":"female"}`
+	body := `{"name":"ab","job":"ganger","team":"gun","region":"rustbucket","gender":"female"}`
 	req := httptest.NewRequest(http.MethodPost, "/api/characters", strings.NewReader(body))
 	req = req.WithContext(handlers.WithAccountID(req.Context(), 42))
 	rr := httptest.NewRecorder()
@@ -121,7 +121,7 @@ func TestCreateCharacter_NameTooShort(t *testing.T) {
 
 func TestCreateCharacter_NameTooLong(t *testing.T) {
 	h := handlers.NewCharacterHandler(&stubCharacterRepo{}, &stubCreator{}, nil)
-	body := `{"name":"ThisNameIsWayTooLongForValidation","job":"ganger","archetype":"gun","region":"rustbucket","gender":"female"}`
+	body := `{"name":"ThisNameIsWayTooLongForValidation","job":"ganger","team":"gun","region":"rustbucket","gender":"female"}`
 	req := httptest.NewRequest(http.MethodPost, "/api/characters", strings.NewReader(body))
 	req = req.WithContext(handlers.WithAccountID(req.Context(), 42))
 	rr := httptest.NewRecorder()
@@ -131,7 +131,7 @@ func TestCreateCharacter_NameTooLong(t *testing.T) {
 
 func TestCreateCharacter_MissingRequiredField(t *testing.T) {
 	h := handlers.NewCharacterHandler(&stubCharacterRepo{}, &stubCreator{}, nil)
-	body := `{"name":"Mira","job":"ganger","archetype":"gun","region":"rustbucket"}`
+	body := `{"name":"Mira","job":"ganger","team":"gun","region":"rustbucket"}`
 	req := httptest.NewRequest(http.MethodPost, "/api/characters", strings.NewReader(body))
 	req = req.WithContext(handlers.WithAccountID(req.Context(), 42))
 	rr := httptest.NewRecorder()
@@ -142,7 +142,7 @@ func TestCreateCharacter_MissingRequiredField(t *testing.T) {
 func TestCreateCharacter_NameTaken(t *testing.T) {
 	creator := &stubCreator{err: postgres.ErrCharacterNameTaken}
 	h := handlers.NewCharacterHandler(&stubCharacterRepo{}, creator, nil)
-	body := `{"name":"Zork","job":"ganger","archetype":"gun","region":"rustbucket","gender":"male"}`
+	body := `{"name":"Zork","job":"ganger","team":"gun","region":"rustbucket","gender":"male"}`
 	req := httptest.NewRequest(http.MethodPost, "/api/characters", strings.NewReader(body))
 	req = req.WithContext(handlers.WithAccountID(req.Context(), 42))
 	rr := httptest.NewRecorder()
@@ -163,7 +163,8 @@ func TestListOptions_ReturnsRulesetData(t *testing.T) {
 	opts := &handlers.CharacterOptions{
 		Regions:    []*ruleset.Region{{ID: "rustbucket", Name: "Rustbucket Ridge"}},
 		Jobs:       []*ruleset.Job{{ID: "ganger", Name: "Ganger"}},
-		Archetypes: []*ruleset.Archetype{{ID: "gun", Name: "Gun"}},
+		Archetypes: []*ruleset.Archetype{{ID: "aggressor", Name: "Aggressor"}},
+		Teams:      []*ruleset.Team{{ID: "gun", Name: "Gun"}},
 	}
 	h := handlers.NewCharacterHandler(nil, nil, nil).WithOptions(opts)
 
@@ -177,6 +178,7 @@ func TestListOptions_ReturnsRulesetData(t *testing.T) {
 	assert.Contains(t, body, "regions")
 	assert.Contains(t, body, "jobs")
 	assert.Contains(t, body, "archetypes")
+	assert.Contains(t, body, "teams")
 }
 
 func TestCheckName_Available(t *testing.T) {
