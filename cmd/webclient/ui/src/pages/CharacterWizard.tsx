@@ -44,7 +44,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
   }, [])
 
   useEffect(() => {
-    if (step !== 3 || state.name.length < 3) {
+    if (step !== 4 || state.name.length < 3) {
       setNameAvailable(null)
       return
     }
@@ -393,11 +393,9 @@ function computePreviewStats(
 ): [string, number][] {
   const merged: Record<string, number> = {}
 
-  for (const key of [state.region, state.job, state.archetype]) {
-    if (!key) continue
-    const stats = options.starting_stats?.[key]
-    if (!stats) continue
-    for (const [stat, val] of Object.entries(stats)) {
+  const region = options.regions.find((r) => r.id === state.region)
+  if (region?.modifiers) {
+    for (const [stat, val] of Object.entries(region.modifiers)) {
       merged[stat] = (merged[stat] ?? 0) + val
     }
   }

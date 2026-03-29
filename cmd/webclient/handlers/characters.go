@@ -191,9 +191,10 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 }
 
 type regionResponse struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          string         `json:"id"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Modifiers   map[string]int `json:"modifiers,omitempty"`
 }
 
 type jobResponse struct {
@@ -233,6 +234,7 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 			ID:          reg.ID,
 			Name:        reg.Name,
 			Description: reg.Description,
+			Modifiers:   reg.Modifiers,
 		})
 	}
 	jobs := make([]jobResponse, 0, len(h.options.Jobs))

@@ -60,8 +60,9 @@ export interface CharacterOption {
   id: string
   name: string
   description: string
-  archetype?: string  // only on job options
-  team?: string       // only on job options; empty = available to all teams
+  archetype?: string              // only on job options
+  team?: string                   // only on job options; empty = available to all teams
+  modifiers?: Record<string, number>  // stat modifiers for preview
 }
 
 export interface CharacterOptions {
