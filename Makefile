@@ -1,4 +1,4 @@
-.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check
+.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check ui-install ui-build proto-ts build-webclient
 
 deps:
 	$(GO) mod tidy
@@ -24,7 +24,7 @@ PROTO_GO_OUT := .
 PROTO_MODULE := github.com/cory-johannsen/mud
 
 # Build targets
-build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole build-seed-claude-accounts
+build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole build-seed-claude-accounts build-webclient
 
 build-devserver: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/devserver ./cmd/devserver
@@ -56,6 +56,21 @@ proto:
 		--go_out=$(PROTO_GO_OUT) --go_opt=module=$(PROTO_MODULE) \
 		--go-grpc_out=$(PROTO_GO_OUT) --go-grpc_opt=module=$(PROTO_MODULE) \
 		$(PROTO_DIR)/game/v1/game.proto
+
+# Web client UI targets
+UI_DIR := cmd/webclient/ui
+
+ui-install:
+	cd $(UI_DIR) && npm install
+
+ui-build: ui-install
+	cd $(UI_DIR) && npm run build
+
+proto-ts: ui-install
+	cd $(UI_DIR) && npx buf generate --config buf.gen.yaml
+
+build-webclient: proto ui-build
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/webclient ./cmd/webclient
 
 # Packages that require Docker (testcontainers).
 POSTGRES_PKG := github.com/cory-johannsen/mud/internal/storage/postgres
