@@ -13,15 +13,16 @@ import (
 
 // Role constants for account privilege levels.
 const (
-	RolePlayer = "player"
-	RoleEditor = "editor"
-	RoleAdmin  = "admin"
+	RolePlayer    = "player"
+	RoleEditor    = "editor"
+	RoleAdmin     = "admin"
+	RoleModerator = "moderator"
 )
 
 // ValidRole reports whether role is a recognised privilege level.
 func ValidRole(role string) bool {
 	switch role {
-	case RolePlayer, RoleEditor, RoleAdmin:
+	case RolePlayer, RoleEditor, RoleAdmin, RoleModerator:
 		return true
 	}
 	return false
@@ -36,6 +37,7 @@ type Account struct {
 	Username     string
 	PasswordHash string
 	Role         string
+	Banned       bool
 	CreatedAt    time.Time
 }
 
@@ -75,9 +77,9 @@ func (r *AccountRepository) Create(ctx context.Context, username, password strin
 	err = r.db.QueryRow(ctx,
 		`INSERT INTO accounts (username, password_hash)
 		 VALUES ($1, $2)
-		 RETURNING id, username, password_hash, role, created_at`,
+		 RETURNING id, username, password_hash, role, banned, created_at`,
 		username, hash,
-	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.CreatedAt)
+	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.Banned, &acct.CreatedAt)
 	if err != nil {
 		if isDuplicateKeyError(err) {
 			return Account{}, ErrAccountExists
@@ -97,10 +99,10 @@ func (r *AccountRepository) Create(ctx context.Context, username, password strin
 func (r *AccountRepository) Authenticate(ctx context.Context, username, password string) (Account, error) {
 	var acct Account
 	err := r.db.QueryRow(ctx,
-		`SELECT id, username, password_hash, role, created_at
+		`SELECT id, username, password_hash, role, banned, created_at
 		 FROM accounts WHERE username = $1`,
 		username,
-	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.CreatedAt)
+	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.Banned, &acct.CreatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Account{}, ErrAccountNotFound
@@ -122,10 +124,10 @@ func (r *AccountRepository) Authenticate(ctx context.Context, username, password
 func (r *AccountRepository) GetByUsername(ctx context.Context, username string) (Account, error) {
 	var acct Account
 	err := r.db.QueryRow(ctx,
-		`SELECT id, username, password_hash, role, created_at
+		`SELECT id, username, password_hash, role, banned, created_at
 		 FROM accounts WHERE username = $1`,
 		username,
-	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.CreatedAt)
+	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.Banned, &acct.CreatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Account{}, ErrAccountNotFound
@@ -150,6 +152,85 @@ func (r *AccountRepository) SetRole(ctx context.Context, accountID int64, role s
 	)
 	if err != nil {
 		return fmt.Errorf("updating role: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrAccountNotFound
+	}
+	return nil
+}
+
+// GetByID retrieves an account by its primary key.
+//
+// Precondition: id must be > 0.
+// Postcondition: Returns the Account or ErrAccountNotFound.
+func (r *AccountRepository) GetByID(ctx context.Context, id int64) (Account, error) {
+	var acct Account
+	err := r.db.QueryRow(ctx,
+		`SELECT id, username, password_hash, role, banned, created_at
+		 FROM accounts WHERE id = $1`,
+		id,
+	).Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.Banned, &acct.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Account{}, ErrAccountNotFound
+		}
+		return Account{}, fmt.Errorf("querying account by id: %w", err)
+	}
+	return acct, nil
+}
+
+// SearchByUsernamePrefix returns accounts whose username starts with prefix,
+// up to limit results. If prefix is empty, all accounts up to limit are returned.
+//
+// Precondition: limit must be > 0.
+// Postcondition: Returns up to limit Account records, ordered by username.
+func (r *AccountRepository) SearchByUsernamePrefix(ctx context.Context, prefix string, limit int) ([]Account, error) {
+	var rows interface{ Scan(dest ...any) error }
+	_ = rows
+	var results []Account
+	var query string
+	var args []any
+	if prefix == "" {
+		query = `SELECT id, username, password_hash, role, banned, created_at
+		          FROM accounts ORDER BY username LIMIT $1`
+		args = []any{limit}
+	} else {
+		query = `SELECT id, username, password_hash, role, banned, created_at
+		          FROM accounts WHERE username LIKE $1 ORDER BY username LIMIT $2`
+		args = []any{prefix + "%", limit}
+	}
+	pgRows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("searching accounts: %w", err)
+	}
+	defer pgRows.Close()
+	for pgRows.Next() {
+		var acct Account
+		if err := pgRows.Scan(&acct.ID, &acct.Username, &acct.PasswordHash, &acct.Role, &acct.Banned, &acct.CreatedAt); err != nil {
+			return nil, fmt.Errorf("scanning account: %w", err)
+		}
+		results = append(results, acct)
+	}
+	if err := pgRows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating accounts: %w", err)
+	}
+	return results, nil
+}
+
+// UpdateRoleAndBanned atomically updates the role and banned status of an account.
+//
+// Precondition: role must be a valid role string.
+// Postcondition: Returns ErrInvalidRole for unrecognised roles; ErrAccountNotFound if no row matched.
+func (r *AccountRepository) UpdateRoleAndBanned(ctx context.Context, id int64, role string, banned bool) error {
+	if !ValidRole(role) {
+		return ErrInvalidRole
+	}
+	tag, err := r.db.Exec(ctx,
+		`UPDATE accounts SET role = $1, banned = $2 WHERE id = $3`,
+		role, banned, id,
+	)
+	if err != nil {
+		return fmt.Errorf("updating account: %w", err)
 	}
 	if tag.RowsAffected() == 0 {
 		return ErrAccountNotFound

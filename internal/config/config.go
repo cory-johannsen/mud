@@ -97,6 +97,32 @@ func (g GameServerConfig) Addr() string {
 	return fmt.Sprintf("%s:%d", g.GRPCHost, g.GRPCPort)
 }
 
+// WebConfig holds HTTP web server settings.
+type WebConfig struct {
+	// Port is the TCP port for the web HTTP server. Default: 0 (disabled). Set to 0 to disable.
+	Port int `mapstructure:"port"`
+	// JWTSecret is the HS256 signing secret for JWT tokens. Required when Port > 0.
+	JWTSecret string `mapstructure:"jwt_secret"`
+}
+
+// Validate checks WebConfig invariants.
+//
+// Postcondition: Returns nil if valid, or a non-nil error describing violations.
+func (w WebConfig) Validate() error {
+	var errs []string
+	if w.Port != 0 && (w.Port < 1 || w.Port > 65535) {
+		errs = append(errs, fmt.Sprintf("web.port must be 1-65535 or 0 (disabled), got %d", w.Port))
+	}
+	// JWTSecret is only required when the web server is enabled (Port > 0).
+	if w.Port > 0 && w.JWTSecret == "" {
+		errs = append(errs, "web.jwt_secret must not be empty when web server is enabled")
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("%s", strings.Join(errs, "; "))
+	}
+	return nil
+}
+
 // Config is the top-level application configuration.
 type Config struct {
 	Server     ServerConfig     `mapstructure:"server"`
@@ -104,6 +130,7 @@ type Config struct {
 	Telnet     TelnetConfig     `mapstructure:"telnet"`
 	Logging    LoggingConfig    `mapstructure:"logging"`
 	GameServer GameServerConfig `mapstructure:"gameserver"`
+	Web        WebConfig        `mapstructure:"web"`
 }
 
 // Validate checks all configuration invariants.
@@ -126,6 +153,10 @@ func (c Config) Validate() error {
 	}
 
 	if err := validateGameServer(c.GameServer); err != nil {
+		errs = append(errs, err.Error())
+	}
+
+	if err := validateWeb(c.Web); err != nil {
 		errs = append(errs, err.Error())
 	}
 
@@ -219,6 +250,10 @@ func validateGameServer(g GameServerConfig) error {
 	return nil
 }
 
+func validateWeb(w WebConfig) error {
+	return w.Validate()
+}
+
 func validateLogging(l LoggingConfig) error {
 	validLevels := map[string]bool{"debug": true, "info": true, "warn": true, "error": true}
 	if !validLevels[l.Level] {
@@ -308,4 +343,6 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("gameserver.grpc_port", 50051)
 	v.SetDefault("gameserver.game_clock_start", 6)
 	v.SetDefault("gameserver.game_tick_duration", "1m")
+
+	v.SetDefault("web.port", 0)
 }

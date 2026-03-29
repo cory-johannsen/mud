@@ -1,4 +1,4 @@
-.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check
+.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check ui-install ui-build proto-ts build-webclient
 
 deps:
 	$(GO) mod tidy
@@ -24,7 +24,7 @@ PROTO_GO_OUT := .
 PROTO_MODULE := github.com/cory-johannsen/mud
 
 # Build targets
-build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole build-seed-claude-accounts
+build: proto build-frontend build-gameserver build-devserver build-migrate build-import-content build-setrole build-seed-claude-accounts build-webclient
 
 build-devserver: proto
 	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/devserver ./cmd/devserver
@@ -56,6 +56,21 @@ proto:
 		--go_out=$(PROTO_GO_OUT) --go_opt=module=$(PROTO_MODULE) \
 		--go-grpc_out=$(PROTO_GO_OUT) --go-grpc_opt=module=$(PROTO_MODULE) \
 		$(PROTO_DIR)/game/v1/game.proto
+
+# Web client UI targets
+UI_DIR := cmd/webclient/ui
+
+ui-install:
+	cd $(UI_DIR) && npm install
+
+ui-build: ui-install
+	cd $(UI_DIR) && npm run build
+
+proto-ts: ui-install
+	cd $(UI_DIR) && npx buf generate --config buf.gen.yaml
+
+build-webclient: proto ui-build
+	$(GO) build $(GOFLAGS) -o $(BIN_DIR)/webclient ./cmd/webclient
 
 # Packages that require Docker (testcontainers).
 POSTGRES_PKG := github.com/cory-johannsen/mud/internal/storage/postgres
@@ -111,10 +126,11 @@ docker-down:
 	docker compose -f deployments/docker/docker-compose.yml down
 
 # Kubernetes / Kind
-REGISTRY    := registry.johannsen.cloud:5000
-DB_USER     := mud
-DB_PASSWORD := mud
-HELM_NAMESPACE := mud
+REGISTRY              := registry.johannsen.cloud:5000
+DB_USER               := mud
+DB_PASSWORD           := mud
+WEBCLIENT_JWT_SECRET  ?= dev-secret-change-in-prod
+HELM_NAMESPACE        := mud
 IMAGE_TAG   := $(shell git rev-parse --short HEAD 2>/dev/null || echo latest)
 HELM_CHART  := deployments/k8s/mud
 HELM_RELEASE := mud
@@ -138,6 +154,8 @@ docker-push:
 	docker push $(REGISTRY)/mud-gameserver:$(IMAGE_TAG)
 	docker build --build-arg VERSION=$(VERSION) -t $(REGISTRY)/mud-frontend:$(IMAGE_TAG) -f deployments/docker/Dockerfile.frontend .
 	docker push $(REGISTRY)/mud-frontend:$(IMAGE_TAG)
+	docker build --build-arg VERSION=$(VERSION) -t $(REGISTRY)/mud-webclient:$(IMAGE_TAG) -f deployments/docker/Dockerfile.webclient .
+	docker push $(REGISTRY)/mud-webclient:$(IMAGE_TAG)
 
 helm-install:
 	helm install $(HELM_RELEASE) $(HELM_CHART) \
@@ -146,7 +164,8 @@ helm-install:
 		--values $(HELM_VALUES) \
 		--set db.user=$(DB_USER) \
 		--set db.password=$(DB_PASSWORD) \
-		--set image.tag=$(IMAGE_TAG)
+		--set image.tag=$(IMAGE_TAG) \
+		--set webClient.jwtSecret=$(WEBCLIENT_JWT_SECRET)
 
 helm-upgrade:
 	helm upgrade $(HELM_RELEASE) $(HELM_CHART) \
@@ -154,7 +173,8 @@ helm-upgrade:
 		--values $(HELM_VALUES) \
 		--set db.user=$(DB_USER) \
 		--set db.password=$(DB_PASSWORD) \
-		--set image.tag=$(IMAGE_TAG)
+		--set image.tag=$(IMAGE_TAG) \
+		--set webClient.jwtSecret=$(WEBCLIENT_JWT_SECRET)
 
 helm-uninstall:
 	helm uninstall $(HELM_RELEASE) --namespace $(HELM_NAMESPACE)

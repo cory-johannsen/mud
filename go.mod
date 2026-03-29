@@ -4,9 +4,11 @@ go 1.26.0
 
 require (
 	github.com/anthropics/anthropic-sdk-go v1.27.1
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.7.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1

@@ -30,3 +30,7 @@ gameserver:
   round_duration_ms: 6000
   game_clock_start: 6
   game_tick_duration: 1m
+
+web:
+  port: 8080
+  jwt_secret: dev-secret-change-in-prod
