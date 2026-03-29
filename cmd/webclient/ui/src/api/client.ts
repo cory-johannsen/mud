@@ -137,6 +137,13 @@ export interface ArchetypeOption {
   name: string
   description: string
   ability_boosts?: AbilityBoostGrant
+  tech_grants?: TechGrants
+}
+
+export interface PreparedTechChoice {
+  level: number
+  index: number
+  tech_id: string
 }
 
 export interface JobOption {
@@ -195,6 +202,7 @@ export interface CreateCharacterPayload {
   feat_choices?: string[]
   general_feat_choices?: string[]
   spontaneous_choices?: SpontaneousChoice[]
+  prepared_tech_choices?: PreparedTechChoice[]
 }
 
 export const api = {

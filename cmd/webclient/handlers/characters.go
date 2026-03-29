@@ -83,6 +83,14 @@ type SpontaneousTechAdder interface {
 	Add(ctx context.Context, characterID int64, techID string, level int) error
 }
 
+// PreparedTechSetter persists a single prepared technology slot assignment.
+//
+// Precondition: characterID > 0; level >= 1; index >= 0; techID non-empty.
+// Postcondition: character_prepared_technologies row exists for (character_id, level, index).
+type PreparedTechSetter interface {
+	Set(ctx context.Context, characterID int64, level, index int, techID string) error
+}
+
 // CharacterResponse is the JSON shape returned for a single character.
 type CharacterResponse struct {
 	ID        int64  `json:"id"`
@@ -97,17 +105,18 @@ type CharacterResponse struct {
 
 // CharacterHandler serves all /api/characters endpoints.
 type CharacterHandler struct {
-	lister       CharacterLister
-	creator      CharacterCreator
-	checker      NameChecker
-	getter       CharacterGetter
-	options      *CharacterOptions
-	jwtSecret    string
-	boostsAdder  AbilityBoostsAdder    // may be nil
-	skillsSetter SkillsSetter           // may be nil
-	featsSetter  FeatsSetter            // may be nil
-	hwTechSetter HardwiredTechSetter    // may be nil
-	spontAdder   SpontaneousTechAdder   // may be nil
+	lister          CharacterLister
+	creator         CharacterCreator
+	checker         NameChecker
+	getter          CharacterGetter
+	options         *CharacterOptions
+	jwtSecret       string
+	boostsAdder     AbilityBoostsAdder  // may be nil
+	skillsSetter    SkillsSetter        // may be nil
+	featsSetter     FeatsSetter         // may be nil
+	hwTechSetter    HardwiredTechSetter // may be nil
+	spontAdder      SpontaneousTechAdder  // may be nil
+	preparedSetter  PreparedTechSetter    // may be nil
 }
 
 // NewCharacterHandler creates a CharacterHandler.
@@ -153,6 +162,15 @@ func (h *CharacterHandler) WithPersistenceRepos(
 	return h
 }
 
+// WithPreparedTechRepo attaches the prepared tech repository for persisting
+// player-chosen prepared technology slots at character creation.
+//
+// Postcondition: Returns h for chaining.
+func (h *CharacterHandler) WithPreparedTechRepo(prep PreparedTechSetter) *CharacterHandler {
+	h.preparedSetter = prep
+	return h
+}
+
 // ListCharacters handles GET /api/characters.
 //
 // Precondition: Request context MUST carry account_id via WithAccountID.
@@ -192,6 +210,13 @@ type spontaneousChoiceRequest struct {
 	Level int    `json:"level"`
 }
 
+// preparedTechChoiceRequest carries one player-chosen prepared tech slot assignment.
+type preparedTechChoiceRequest struct {
+	Level  int    `json:"level"`
+	Index  int    `json:"index"`
+	TechID string `json:"tech_id"`
+}
+
 // createCharacterRequest is the JSON payload for POST /api/characters.
 type createCharacterRequest struct {
 	Name               string                     `json:"name"`
@@ -204,7 +229,8 @@ type createCharacterRequest struct {
 	SkillChoices       []string                   `json:"skill_choices"`        // job skill choice selections
 	FeatChoices        []string                   `json:"feat_choices"`         // job feat choice selections
 	GeneralFeatChoices []string                   `json:"general_feat_choices"` // general feat selections
-	SpontaneousChoices []spontaneousChoiceRequest `json:"spontaneous_choices"`  // spontaneous tech choices
+	SpontaneousChoices  []spontaneousChoiceRequest  `json:"spontaneous_choices"`   // spontaneous tech choices
+	PreparedTechChoices []preparedTechChoiceRequest `json:"prepared_tech_choices"` // player-chosen prepared tech slots
 }
 
 func (r createCharacterRequest) validate() string {
@@ -246,24 +272,51 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	accountID := AccountIDFromContext(r.Context())
-	startRoom := ""
+	var c *character.Character
 	if h.options != nil {
-		for _, t := range h.options.Teams {
-			if t.ID == req.Team {
-				startRoom = t.StartRoom
+		var region *ruleset.Region
+		for _, r := range h.options.Regions {
+			if r.ID == req.Region {
+				region = r
 				break
 			}
 		}
+		var job *ruleset.Job
+		for _, j := range h.options.Jobs {
+			if j.ID == req.Job {
+				job = j
+				break
+			}
+		}
+		var team *ruleset.Team
+		for _, t := range h.options.Teams {
+			if t.ID == req.Team {
+				team = t
+				break
+			}
+		}
+		if region != nil && job != nil && team != nil {
+			built, buildErr := character.BuildWithJob(strings.TrimSpace(req.Name), region, job, team)
+			if buildErr != nil {
+				http.Error(w, `{"error":"internal server error"}`, http.StatusInternalServerError)
+				return
+			}
+			c = built
+			c.AccountID = accountID
+			c.Gender = req.Gender
+		}
 	}
-	c := &character.Character{
-		AccountID: accountID,
-		Name:      strings.TrimSpace(req.Name),
-		Class:     req.Job,
-		Team:      req.Team,
-		Region:    req.Region,
-		Gender:    req.Gender,
-		Level:     1,
-		Location:  startRoom,
+	if c == nil {
+		// Fallback: options not loaded, construct without HP/ability calculation.
+		c = &character.Character{
+			AccountID: accountID,
+			Name:      strings.TrimSpace(req.Name),
+			Class:     req.Job,
+			Team:      req.Team,
+			Region:    req.Region,
+			Gender:    req.Gender,
+			Level:     1,
+		}
 	}
 	created, err := h.creator.Create(r.Context(), c)
 	if err != nil {
@@ -360,6 +413,15 @@ func (h *CharacterHandler) persistCharacterChoices(ctx context.Context, characte
 			_ = h.spontAdder.Add(ctx, characterID, choice.ID, choice.Level)
 		}
 	}
+
+	// Prepared technologies: player-chosen slots (e.g. from archetype prepared pool).
+	if h.preparedSetter != nil {
+		for _, choice := range req.PreparedTechChoices {
+			if choice.TechID != "" && choice.Level > 0 {
+				_ = h.preparedSetter.Set(ctx, characterID, choice.Level, choice.Index, choice.TechID)
+			}
+		}
+	}
 }
 
 type abilityBoostGrantResponse struct {
@@ -443,6 +505,7 @@ type archetypeResponse struct {
 	Name          string                     `json:"name"`
 	Description   string                     `json:"description"`
 	AbilityBoosts *abilityBoostGrantResponse `json:"ability_boosts,omitempty"`
+	TechGrants    *techGrantsResponse        `json:"tech_grants,omitempty"`
 }
 
 type teamResponse struct {
@@ -564,11 +627,43 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 				Free:  arch.AbilityBoosts.Free,
 			}
 		}
+		var atg *techGrantsResponse
+		if arch.TechnologyGrants != nil {
+			atg = &techGrantsResponse{
+				Hardwired: arch.TechnologyGrants.Hardwired,
+			}
+			if arch.TechnologyGrants.Prepared != nil {
+				prep := &preparedGrantsResponse{
+					SlotsByLevel: arch.TechnologyGrants.Prepared.SlotsByLevel,
+				}
+				for _, e := range arch.TechnologyGrants.Prepared.Fixed {
+					prep.Fixed = append(prep.Fixed, preparedEntryResponse{ID: e.ID, Level: e.Level})
+				}
+				for _, e := range arch.TechnologyGrants.Prepared.Pool {
+					prep.Pool = append(prep.Pool, preparedEntryResponse{ID: e.ID, Level: e.Level})
+				}
+				atg.Prepared = prep
+			}
+			if arch.TechnologyGrants.Spontaneous != nil {
+				spont := &spontaneousGrantsResponse{
+					KnownByLevel: arch.TechnologyGrants.Spontaneous.KnownByLevel,
+					UsesByLevel:  arch.TechnologyGrants.Spontaneous.UsesByLevel,
+				}
+				for _, e := range arch.TechnologyGrants.Spontaneous.Fixed {
+					spont.Fixed = append(spont.Fixed, spontaneousEntryResponse{ID: e.ID, Level: e.Level})
+				}
+				for _, e := range arch.TechnologyGrants.Spontaneous.Pool {
+					spont.Pool = append(spont.Pool, spontaneousEntryResponse{ID: e.ID, Level: e.Level})
+				}
+				atg.Spontaneous = spont
+			}
+		}
 		archetypes = append(archetypes, archetypeResponse{
 			ID:            arch.ID,
 			Name:          arch.Name,
 			Description:   arch.Description,
 			AbilityBoosts: aba,
+			TechGrants:    atg,
 		})
 	}
 	teams := make([]teamResponse, 0, len(h.options.Teams))

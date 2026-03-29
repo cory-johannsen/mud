@@ -60,6 +60,7 @@ func main() {
 	featsRepo := postgres.NewCharacterFeatsRepository(pool.DB())
 	hwTechRepo := postgres.NewCharacterHardwiredTechRepository(pool.DB())
 	spontTechRepo := postgres.NewCharacterSpontaneousTechRepository(pool.DB())
+	preparedTechRepo := postgres.NewCharacterPreparedTechRepository(pool.DB())
 
 	// Load character creation options from content directories.
 	jobs, jobsErr := ruleset.LoadJobs(*jobsDir)
@@ -110,6 +111,7 @@ func main() {
 		feats:         featsRepo,
 		hwTech:        hwTechRepo,
 		spontTech:     spontTechRepo,
+		preparedTech:  preparedTechRepo,
 	}
 
 	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, charRepo, charOpts, creationRepos, logger)

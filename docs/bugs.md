@@ -363,3 +363,19 @@
 **Description:** In the web client, hotbar slot data appears as a system message in the FeedPanel after every server event, instead of only updating the fixed HotbarPanel row.
 **Steps:** Log in with a character; observe the FeedPanel; after any server event (room entry, combat message, status update) a hotbar line appears in the feed output.
 **Fix:**
+
+### BUG-44: New characters created with 0 HP
+**Severity:** critical
+**Status:** open
+**Category:** Character
+**Description:** Characters created via the web client wizard start with MaxHP and CurrentHP both at 0 because CreateCharacter builds the struct manually instead of calling BuildWithJob().
+**Steps:** Create a new character; observe CurrentHP/MaxHP both 0 in character screen.
+**Fix:**
+
+### BUG-45: Tech selection prompts appear on login for drifter-archetype characters
+**Severity:** high
+**Status:** open
+**Category:** Character
+**Description:** Drifter archetype grants a prepared tech pool (19 archetype + job pool) with 1 slot at level 1 requiring player choice; the creation wizard does not handle archetype prepared tech grants, so the gameserver must prompt interactively on first login.
+**Steps:** Create a Drifter-archetype character (Free Spirit, Pirate, Bagman, Tracker); log in; observe "Choose a technology: 1) ..." prompt in feed.
+**Fix:**

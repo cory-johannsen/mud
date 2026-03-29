@@ -26,6 +26,7 @@ type charCreationRepos struct {
 	feats         *postgres.CharacterFeatsRepository
 	hwTech        *postgres.CharacterHardwiredTechRepository
 	spontTech     *postgres.CharacterSpontaneousTechRepository
+	preparedTech  *postgres.CharacterPreparedTechRepository
 }
 
 // Server is the web HTTP server.
@@ -115,6 +116,16 @@ func (s *Server) WithCharCreationRepos(
 		hwTech:        hwTech,
 		spontTech:     spontTech,
 	}
+	return s
+}
+
+// WithPreparedTechRepo attaches the prepared tech repository to the character creation repos.
+// Postcondition: Returns s for chaining.
+func (s *Server) WithPreparedTechRepo(prep *postgres.CharacterPreparedTechRepository) *Server {
+	if s.charCreationRepos == nil {
+		s.charCreationRepos = &charCreationRepos{}
+	}
+	s.charCreationRepos.preparedTech = prep
 	return s
 }
 
@@ -210,6 +221,9 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 			s.charCreationRepos.hwTech,
 			s.charCreationRepos.spontTech,
 		)
+		if s.charCreationRepos.preparedTech != nil {
+			charHandler = charHandler.WithPreparedTechRepo(s.charCreationRepos.preparedTech)
+		}
 	}
 	mux.Handle("GET /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.ListCharacters)))
 	mux.Handle("POST /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.CreateCharacter)))

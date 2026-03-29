@@ -16,6 +16,7 @@ import {
   type FeatOption,
   type BasicOption,
   type SpontaneousChoice,
+  type PreparedTechChoice,
   ApiError,
 } from '../api/client'
 
@@ -33,6 +34,7 @@ interface WizardState {
   featChoices: string[]
   generalFeatChoices: string[]
   spontaneousChoices: SpontaneousChoice[]
+  preparedTechChoices: PreparedTechChoice[]
 }
 
 const EMPTY_STATE: WizardState = {
@@ -48,6 +50,7 @@ const EMPTY_STATE: WizardState = {
   featChoices: [],
   generalFeatChoices: [],
   spontaneousChoices: [],
+  preparedTechChoices: [],
 }
 
 const ALL_ABILITIES = ['brutality', 'grit', 'quickness', 'reasoning', 'savvy', 'flair']
@@ -79,7 +82,15 @@ function computeSteps(options: CharacterOptions | null, state: WizardState): str
     steps.push('Feats')
   }
 
-  if ((job?.tech_grants?.spontaneous?.pool?.length ?? 0) > 0) {
+  // Compute prepared tech slots needed from archetype (merged with job pool at server side).
+  // slots_by_level sums to total prepared choice slots the player must fill.
+  const archetypePrepSlots = Object.values(
+    archetype?.tech_grants?.prepared?.slots_by_level ?? {}
+  ).reduce((a, b) => a + b, 0)
+  const archetypePrepFixed = (archetype?.tech_grants?.prepared?.fixed ?? []).length
+  const prepChoicesNeeded = Math.max(0, archetypePrepSlots - archetypePrepFixed)
+
+  if (prepChoicesNeeded > 0 || (job?.tech_grants?.spontaneous?.pool?.length ?? 0) > 0) {
     steps.push('Technology')
   }
 
@@ -143,6 +154,7 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
         next.featChoices = []
         next.generalFeatChoices = []
         next.spontaneousChoices = []
+        next.preparedTechChoices = []
       }
       if (patch.archetype !== undefined && patch.archetype !== prev.archetype) {
         next.job = ''
@@ -151,12 +163,14 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
         next.featChoices = []
         next.generalFeatChoices = []
         next.spontaneousChoices = []
+        next.preparedTechChoices = []
       }
       if (patch.job !== undefined && patch.job !== prev.job) {
         next.skillChoices = []
         next.featChoices = []
         next.generalFeatChoices = []
         next.spontaneousChoices = []
+        next.preparedTechChoices = []
       }
       return next
     })
@@ -191,12 +205,21 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
       return state.featChoices.length >= jobFeatCount && state.generalFeatChoices.length >= generalCount
     }
     if (currentStep === 'Technology') {
+      // Spontaneous check
       const spontPool = job?.tech_grants?.spontaneous?.pool ?? []
       const spontSlots = Object.values(job?.tech_grants?.spontaneous?.known_by_level ?? {}).reduce((a, b) => a + b, 0)
       const fixedSpont = (job?.tech_grants?.spontaneous?.fixed ?? []).length
-      const needed = Math.max(0, spontSlots - fixedSpont)
-      // Ensure they haven't chosen more than the pool allows
-      return state.spontaneousChoices.length >= needed && state.spontaneousChoices.length <= spontPool.length
+      const spontNeeded = Math.max(0, spontSlots - fixedSpont)
+      const spontOk = state.spontaneousChoices.length >= spontNeeded &&
+        state.spontaneousChoices.length <= spontPool.length
+      // Prepared check (archetype slots)
+      const archetypePrepSlots = Object.values(
+        archetype?.tech_grants?.prepared?.slots_by_level ?? {}
+      ).reduce((a, b) => a + b, 0)
+      const archetypePrepFixed = (archetype?.tech_grants?.prepared?.fixed ?? []).length
+      const prepNeeded = Math.max(0, archetypePrepSlots - archetypePrepFixed)
+      const prepOk = state.preparedTechChoices.filter((c) => c.tech_id !== '').length >= prepNeeded
+      return spontOk && prepOk
     }
     // Name & Gender
     return (
@@ -237,6 +260,9 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
         feat_choices: state.featChoices.length > 0 ? state.featChoices : undefined,
         general_feat_choices: state.generalFeatChoices.length > 0 ? state.generalFeatChoices : undefined,
         spontaneous_choices: state.spontaneousChoices.length > 0 ? state.spontaneousChoices : undefined,
+        prepared_tech_choices: state.preparedTechChoices.filter((c) => c.tech_id !== '').length > 0
+          ? state.preparedTechChoices.filter((c) => c.tech_id !== '')
+          : undefined,
       })
       onComplete()
     } catch (err) {
@@ -376,8 +402,11 @@ export function CharacterWizard({ onComplete, onCancel }: Props) {
           {currentStepName === 'Technology' && job && (
             <TechnologyStep
               job={job}
+              archetype={archetype}
               spontaneousChoices={state.spontaneousChoices}
+              preparedTechChoices={state.preparedTechChoices}
               onSpontaneousChoicesChange={(choices) => update({ spontaneousChoices: choices })}
+              onPreparedTechChoicesChange={(choices) => update({ preparedTechChoices: choices })}
             />
           )}
           {currentStepName === 'Name & Gender' && (
@@ -825,28 +854,62 @@ function FeatsStep({
 
 interface TechnologyStepProps {
   job: JobOption
+  archetype: ArchetypeOption | undefined
   spontaneousChoices: SpontaneousChoice[]
+  preparedTechChoices: PreparedTechChoice[]
   onSpontaneousChoicesChange: (choices: SpontaneousChoice[]) => void
+  onPreparedTechChoicesChange: (choices: PreparedTechChoice[]) => void
 }
 
-function TechnologyStep({ job, spontaneousChoices, onSpontaneousChoicesChange }: TechnologyStepProps) {
+function TechnologyStep({
+  job,
+  archetype,
+  spontaneousChoices,
+  preparedTechChoices,
+  onSpontaneousChoicesChange,
+  onPreparedTechChoicesChange,
+}: TechnologyStepProps) {
   const spontPool = job.tech_grants?.spontaneous?.pool ?? []
   const spontSlots = Object.values(job.tech_grants?.spontaneous?.known_by_level ?? {}).reduce((a, b) => a + b, 0)
   const fixedSpont = job.tech_grants?.spontaneous?.fixed ?? []
-  const needed = Math.max(0, spontSlots - fixedSpont.length)
+  const spontNeeded = Math.max(0, spontSlots - fixedSpont.length)
   const hardwired = job.tech_grants?.hardwired ?? []
+
+  // Archetype prepared tech: each slot level needs the player to pick from the pool.
+  // The pool is a union of archetype.tech_grants.prepared.pool + job.tech_grants.prepared.pool
+  // (the server merges them). We build a per-level pool here for display.
+  const archetypePrepSlots = archetype?.tech_grants?.prepared?.slots_by_level ?? {}
+  const archetypePrepFixed = archetype?.tech_grants?.prepared?.fixed ?? []
+  // Collect all pool entries from archetype and job for prepared tech
+  const allPrepPool = [
+    ...(archetype?.tech_grants?.prepared?.pool ?? []),
+    ...(job.tech_grants?.prepared?.pool ?? []),
+  ]
 
   function toggleSpont(entry: { id: string; level: number }) {
     const idx = spontaneousChoices.findIndex((c) => c.id === entry.id && c.level === entry.level)
     if (idx >= 0) {
       onSpontaneousChoicesChange(spontaneousChoices.filter((_, i) => i !== idx))
-    } else if (spontaneousChoices.length < needed) {
+    } else if (spontaneousChoices.length < spontNeeded) {
       onSpontaneousChoicesChange([...spontaneousChoices, { id: entry.id, level: entry.level }])
     }
   }
 
-  function isSelected(entry: { id: string; level: number }) {
+  function isSpontSelected(entry: { id: string; level: number }) {
     return spontaneousChoices.some((c) => c.id === entry.id && c.level === entry.level)
+  }
+
+  // Returns the chosen tech_id for a given (level, slotIndex) pair, or '' if not chosen.
+  function getPrepChoice(level: number, slotIndex: number): string {
+    return preparedTechChoices.find((c) => c.level === level && c.index === slotIndex)?.tech_id ?? ''
+  }
+
+  function setPrepChoice(level: number, slotIndex: number, techID: string) {
+    const next = preparedTechChoices.filter((c) => !(c.level === level && c.index === slotIndex))
+    if (techID !== '') {
+      next.push({ level, index: slotIndex, tech_id: techID })
+    }
+    onPreparedTechChoicesChange(next)
   }
 
   return (
@@ -862,6 +925,58 @@ function TechnologyStep({ job, spontaneousChoices, onSpontaneousChoicesChange }:
           </div>
         </div>
       )}
+      {archetypePrepFixed.length > 0 && (
+        <div style={styles.grantSection}>
+          <h3 style={styles.grantSectionTitle}>Fixed Prepared Tech (granted automatically)</h3>
+          <div style={styles.grantList}>
+            {archetypePrepFixed.map((t) => (
+              <div key={`${t.id}-${t.level}`} style={styles.grantItem}>
+                {t.id} <span style={styles.levelBadge}>Lv{t.level}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {Object.entries(archetypePrepSlots).map(([lvlStr, slots]) => {
+        const lvl = Number(lvlStr)
+        const poolAtLevel = allPrepPool.filter((e) => e.level === lvl)
+        const fixedAtLevel = archetypePrepFixed.filter((e) => e.level === lvl).length
+        const openSlots = Math.max(0, slots - fixedAtLevel)
+        if (openSlots === 0 || poolAtLevel.length === 0) return null
+        // Build slot selectors for each open slot
+        const slotIndices = Array.from({ length: openSlots }, (_, i) => i + fixedAtLevel)
+        return (
+          <div key={lvlStr} style={styles.grantSection}>
+            <h3 style={styles.grantSectionTitle}>
+              Choose {openSlots} Prepared Tech{openSlots !== 1 ? 's' : ''} (Level {lvl})
+            </h3>
+            {slotIndices.map((slotIdx) => {
+              const chosen = getPrepChoice(lvl, slotIdx)
+              const takenIDs = slotIndices
+                .filter((si) => si !== slotIdx)
+                .map((si) => getPrepChoice(lvl, si))
+                .filter((id) => id !== '')
+              return (
+                <div key={slotIdx} style={styles.freeBoostRow}>
+                  <label style={styles.freeBoostLabel}>Slot #{slotIdx - fixedAtLevel + 1}</label>
+                  <select
+                    style={styles.boostSelect}
+                    value={chosen}
+                    onChange={(e) => setPrepChoice(lvl, slotIdx, e.target.value)}
+                  >
+                    <option value="">Select technology…</option>
+                    {poolAtLevel.map((e) => (
+                      <option key={e.id} value={e.id} disabled={takenIDs.includes(e.id) && chosen !== e.id}>
+                        {e.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })}
       {fixedSpont.length > 0 && (
         <div style={styles.grantSection}>
           <h3 style={styles.grantSectionTitle}>Fixed Spontaneous Tech (granted automatically)</h3>
@@ -874,15 +989,15 @@ function TechnologyStep({ job, spontaneousChoices, onSpontaneousChoicesChange }:
           </div>
         </div>
       )}
-      {spontPool.length > 0 && needed > 0 && (
+      {spontPool.length > 0 && spontNeeded > 0 && (
         <div style={styles.grantSection}>
           <h3 style={styles.grantSectionTitle}>
-            Choose {needed} Spontaneous Tech{needed !== 1 ? 's' : ''} ({spontaneousChoices.length}/{needed} selected)
+            Choose {spontNeeded} Spontaneous Tech{spontNeeded !== 1 ? 's' : ''} ({spontaneousChoices.length}/{spontNeeded} selected)
           </h3>
           <div style={styles.choiceGrid}>
             {spontPool.map((entry) => {
-              const selected = isSelected(entry)
-              const disabled = !selected && spontaneousChoices.length >= needed
+              const selected = isSpontSelected(entry)
+              const disabled = !selected && spontaneousChoices.length >= spontNeeded
               return (
                 <button
                   key={`${entry.id}-${entry.level}`}
