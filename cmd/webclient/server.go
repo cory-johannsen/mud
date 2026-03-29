@@ -55,6 +55,7 @@ func New(
 	accountRepo *postgres.AccountRepository,
 	charRepo *postgres.CharacterRepository,
 	charOptions *handlers.CharacterOptions,
+	creationRepos *charCreationRepos,
 	logger *zap.Logger,
 ) (*Server, error) {
 	conn, err := grpc.NewClient(gameserverAddr,
@@ -67,14 +68,15 @@ func New(
 	bus := eventbus.New(256)
 
 	s := &Server{
-		cfg:         cfg,
-		grpcConn:    conn,
-		accountRepo: accountRepo,
-		charRepo:    charRepo,
-		gameClient:  gamev1.NewGameServiceClient(conn),
-		bus:         bus,
-		logger:      logger,
-		charOptions: charOptions,
+		cfg:              cfg,
+		grpcConn:         conn,
+		accountRepo:      accountRepo,
+		charRepo:         charRepo,
+		gameClient:       gamev1.NewGameServiceClient(conn),
+		bus:              bus,
+		logger:           logger,
+		charOptions:      charOptions,
+		charCreationRepos: creationRepos,
 	}
 
 	mux := http.NewServeMux()

@@ -104,11 +104,18 @@ func main() {
 		}
 	}
 
-	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, charRepo, charOpts, logger)
+	creationRepos := &charCreationRepos{
+		abilityBoosts: abilityBoostsRepo,
+		skills:        skillsRepo,
+		feats:         featsRepo,
+		hwTech:        hwTechRepo,
+		spontTech:     spontTechRepo,
+	}
+
+	srv, err := New(cfg.Web, cfg.GameServer.Addr(), accountRepo, charRepo, charOpts, creationRepos, logger)
 	if err != nil {
 		logger.Fatal("initializing web server", zap.Error(err))
 	}
-	srv = srv.WithCharCreationRepos(abilityBoostsRepo, skillsRepo, featsRepo, hwTechRepo, spontTechRepo)
 
 	logger.Info("webclient starting",
 		zap.Duration("startup", time.Since(start)),
