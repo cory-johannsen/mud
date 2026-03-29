@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { GameProvider, useGame } from '../game/GameContext'
+import type { TimeOfDayEvent } from '../proto'
 import { RoomPanel } from '../game/panels/RoomPanel'
 import { MapPanel } from '../game/panels/MapPanel'
 import { FeedPanel } from '../game/panels/FeedPanel'
@@ -13,6 +14,23 @@ import { DrawerContainer } from '../game/drawers/DrawerContainer'
 import '../styles/game.css'
 
 type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats'
+
+const MONTHS = ['January','February','March','April','May','June',
+                 'July','August','September','October','November','December']
+
+function ordinal(n: number): string {
+  if (n >= 11 && n <= 13) return 'th'
+  switch (n % 10) { case 1: return 'st'; case 2: return 'nd'; case 3: return 'rd'; default: return 'th' }
+}
+
+function formatTimeOfDay(tod: TimeOfDayEvent): string {
+  const month = tod.month && tod.month >= 1 && tod.month <= 12
+    ? MONTHS[tod.month - 1]! : ''
+  const day = tod.day ? `${tod.day}${ordinal(tod.day)}` : ''
+  const hour = tod.hour !== undefined ? String(tod.hour).padStart(2, '0') + ':00' : ''
+  const period = tod.period ?? ''
+  return [month && day ? `${month} ${day}` : '', period, hour].filter(Boolean).join(' · ')
+}
 
 // Inner component that has access to GameContext.
 function GameLayout() {
@@ -32,6 +50,9 @@ function GameLayout() {
           <span className="toolbar-zone">
             {state.roomView?.zoneName ?? state.roomView?.zone_name ?? 'Connecting…'}
           </span>
+          {state.timeOfDay && (
+            <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
+          )}
           {(['inventory', 'equipment', 'skills', 'feats'] as DrawerType[]).map((d) => (
             <button
               key={d}

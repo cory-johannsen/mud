@@ -45,6 +45,11 @@
   font-size: 0.9rem;
   font-weight: bold;
 }
+.toolbar-time {
+  color: #7bc;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
 .toolbar-btn {
   padding: 0.25rem 0.6rem;
   background: #1a1a1a;

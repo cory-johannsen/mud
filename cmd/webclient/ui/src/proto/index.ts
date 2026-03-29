@@ -239,6 +239,13 @@ export interface ErrorEvent {
   message?: string
 }
 
+export interface TimeOfDayEvent {
+  hour?: number
+  period?: string
+  day?: number
+  month?: number
+}
+
 export interface ConditionEvent {
   targetUid?: string
   targetName?: string

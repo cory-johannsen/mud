@@ -27,6 +27,7 @@ import type {
   MapTile,
   RoundStartEvent,
   ConditionEvent,
+  TimeOfDayEvent,
 } from '../proto'
 
 const TOKEN_KEY = 'mud_token'
@@ -59,6 +60,7 @@ export interface GameState {
   feedEntries: FeedEntry[]
   combatRound: RoundStartEvent | null
   hotbarSlots: string[]
+  timeOfDay: TimeOfDayEvent | null
 }
 
 type Action =
@@ -70,6 +72,7 @@ type Action =
   | { type: 'SET_MAP_TILES'; tiles: MapTile[] }
   | { type: 'SET_COMBAT_ROUND'; round: RoundStartEvent | null }
   | { type: 'SET_HOTBAR'; slots: string[] }
+  | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
   | { type: 'APPEND_FEED'; entry: FeedEntry }
 
 function reducer(state: GameState, action: Action): GameState {
@@ -90,6 +93,8 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, combatRound: action.round }
     case 'SET_HOTBAR':
       return { ...state, hotbarSlots: action.slots }
+    case 'SET_TIME_OF_DAY':
+      return { ...state, timeOfDay: action.tod }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -114,6 +119,7 @@ const initialState: GameState = {
   feedEntries: [],
   combatRound: null,
   hotbarSlots: Array(10).fill(''),
+  timeOfDay: null,
 }
 
 interface GameContextValue {
@@ -259,6 +265,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
             type: 'APPEND_FEED',
             entry: makeFeedEntry('round_end', `Round ${re.round ?? '?'} ended`),
           })
+          break
+        }
+        case 'TimeOfDay': {
+          dispatch({ type: 'SET_TIME_OF_DAY', tod: payload as TimeOfDayEvent })
           break
         }
         case 'ConditionEvent': {
