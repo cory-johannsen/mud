@@ -55,6 +55,7 @@
 }
 .toolbar-btn:hover { background: #2a2a2a; color: #ccc; }
 .toolbar-btn.active { border-color: #e0c060; color: #e0c060; }
+.toolbar-btn-logout { margin-left: auto; border-color: #666; color: #999; }
 
 /* Combat banner */
 .combat-banner {

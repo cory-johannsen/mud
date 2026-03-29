@@ -16,6 +16,7 @@ type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats'
 // Inner component that has access to GameContext.
 function GameLayout() {
   const { state } = useGame()
+  const { logout } = useAuth()
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
 
   function toggleDrawer(d: DrawerType) {
@@ -39,6 +40,7 @@ function GameLayout() {
               {d.charAt(0).toUpperCase() + d.slice(1)}
             </button>
           ))}
+          <button className="toolbar-btn toolbar-btn-logout" onClick={logout}>Logout</button>
         </div>
         {state.combatRound !== null && <CombatBanner />}
       </div>
