@@ -113,5 +113,8 @@ export const api = {
         `/api/characters/check-name?name=${encodeURIComponent(name)}`,
       )
     },
+    play(id: number): Promise<{ token: string }> {
+      return request<{ token: string }>('POST', `/api/characters/${id}/play`)
+    },
   },
 }

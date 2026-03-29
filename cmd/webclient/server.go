@@ -115,6 +115,7 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		ctx := handlers.WithAccountID(r.Context(), claims.AccountID)
+		ctx = handlers.WithRole(ctx, claims.Role)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}))
 }
@@ -150,11 +151,14 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 		middleware.RequireJWT(s.cfg.JWTSecret, http.HandlerFunc(authHandler.Me)))
 
 	// Character API — all protected by JWT.
-	charHandler := handlers.NewCharacterHandler(s.charRepo, s.charRepo, s.charRepo)
+	charHandler := handlers.NewCharacterHandler(s.charRepo, s.charRepo, s.charRepo).
+		WithJWTSecret(s.cfg.JWTSecret).
+		WithGetter(s.charRepo)
 	mux.Handle("GET /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.ListCharacters)))
 	mux.Handle("POST /api/characters", s.authMiddleware(http.HandlerFunc(charHandler.CreateCharacter)))
 	mux.Handle("GET /api/characters/options", s.authMiddleware(http.HandlerFunc(charHandler.ListOptions)))
 	mux.Handle("GET /api/characters/check-name", s.authMiddleware(http.HandlerFunc(charHandler.CheckName)))
+	mux.Handle("POST /api/characters/{id}/play", s.authMiddleware(http.HandlerFunc(charHandler.HandlePlay)))
 
 	// WebSocket session — JWT validated inline by WSHandler.
 	wsHandler := handlers.NewWSHandler(s.cfg.JWTSecret, s.gameClient, s.charRepo).

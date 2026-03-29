@@ -33,3 +33,15 @@ func CharacterIDFromContext(ctx context.Context) int64 {
 	v, _ := ctx.Value(characterIDKey).(int64)
 	return v
 }
+
+// WithRole stores a role string in the context.
+func WithRole(ctx context.Context, role string) context.Context {
+	return context.WithValue(ctx, roleKey, role)
+}
+
+// RoleFromContext retrieves the role from the context.
+// Returns "" if not set.
+func RoleFromContext(ctx context.Context) string {
+	v, _ := ctx.Value(roleKey).(string)
+	return v
+}

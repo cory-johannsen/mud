@@ -32,9 +32,14 @@ export function CharactersPage() {
 
   useEffect(() => { void load() }, [load])
 
-  function handlePlay(char: Character) {
-    localStorage.setItem('mud_character_id', String(char.id))
-    navigate('/game')
+  async function handlePlay(char: Character) {
+    try {
+      const resp = await api.characters.play(char.id)
+      localStorage.setItem('mud_token', resp.token)
+      navigate('/game')
+    } catch {
+      setError('Failed to start game session.')
+    }
   }
 
   if (showWizard) {

@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	postgres "github.com/cory-johannsen/mud/internal/storage/postgres"
 
 	"github.com/cory-johannsen/mud/internal/game/character"
@@ -49,15 +52,29 @@ type CharacterResponse struct {
 
 // CharacterHandler serves all /api/characters endpoints.
 type CharacterHandler struct {
-	lister  CharacterLister
-	creator CharacterCreator
-	checker NameChecker
-	options *CharacterOptions
+	lister    CharacterLister
+	creator   CharacterCreator
+	checker   NameChecker
+	getter    CharacterGetter
+	options   *CharacterOptions
+	jwtSecret string
 }
 
 // NewCharacterHandler creates a CharacterHandler.
 func NewCharacterHandler(lister CharacterLister, creator CharacterCreator, checker NameChecker) *CharacterHandler {
 	return &CharacterHandler{lister: lister, creator: creator, checker: checker}
+}
+
+// WithJWTSecret attaches the JWT secret so HandlePlay can issue character-scoped tokens.
+func (h *CharacterHandler) WithJWTSecret(secret string) *CharacterHandler {
+	h.jwtSecret = secret
+	return h
+}
+
+// WithGetter attaches a CharacterGetter for ownership verification in HandlePlay.
+func (h *CharacterHandler) WithGetter(g CharacterGetter) *CharacterHandler {
+	h.getter = g
+	return h
 }
 
 // WithOptions sets the ruleset options for the creation wizard endpoints.
@@ -235,6 +252,51 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 		"jobs":       jobs,
 		"archetypes": archetypes,
 	})
+}
+
+// HandlePlay handles POST /api/characters/{id}/play.
+//
+// Precondition: h.getter and h.jwtSecret MUST be set (via WithGetter and WithJWTSecret).
+// Postcondition: Returns {"token": <JWT with character_id>}; HTTP 403 if character not owned by caller.
+func (h *CharacterHandler) HandlePlay(w http.ResponseWriter, r *http.Request) {
+	if h.getter == nil || h.jwtSecret == "" {
+		http.Error(w, `{"error":"play not configured"}`, http.StatusInternalServerError)
+		return
+	}
+	idStr := r.PathValue("id")
+	if idStr == "" {
+		http.Error(w, `{"error":"missing id"}`, http.StatusBadRequest)
+		return
+	}
+	var charID int64
+	if _, err := fmt.Sscan(idStr, &charID); err != nil {
+		http.Error(w, `{"error":"invalid id"}`, http.StatusBadRequest)
+		return
+	}
+	accountID := AccountIDFromContext(r.Context())
+	char, err := h.getter.GetByID(r.Context(), charID)
+	if err != nil {
+		http.Error(w, `{"error":"character not found"}`, http.StatusNotFound)
+		return
+	}
+	if char.AccountID != accountID {
+		http.Error(w, `{"error":"forbidden"}`, http.StatusForbidden)
+		return
+	}
+	claims := jwt.MapClaims{
+		"account_id":   accountID,
+		"character_id": charID,
+		"role":         RoleFromContext(r.Context()),
+		"exp":          time.Now().Add(24 * time.Hour).Unix(),
+	}
+	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := tok.SignedString([]byte(h.jwtSecret))
+	if err != nil {
+		http.Error(w, `{"error":"token generation failed"}`, http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
 
 // CheckName handles GET /api/characters/check-name?name=<value>.
