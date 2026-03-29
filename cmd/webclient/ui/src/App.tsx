@@ -3,10 +3,8 @@ import { AuthProvider } from './auth/AuthContext'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { CharactersPage } from './pages/CharactersPage'
+import { GamePage } from './pages/GamePage'
 
-function GamePageStub() {
-  return <div style={{ color: '#ccc', padding: '2rem' }}>Game view — Phase 4</div>
-}
 function AdminPageStub() {
   return <div style={{ color: '#ccc', padding: '2rem' }}>Admin dashboard — Phase 5</div>
 }
@@ -29,7 +27,7 @@ export default function App() {
             path="/game"
             element={
               <ProtectedRoute>
-                <GamePageStub />
+                <GamePage />
               </ProtectedRoute>
             }
           />
