@@ -7,6 +7,7 @@ import { MapPanel } from '../game/panels/MapPanel'
 import { FeedPanel } from '../game/panels/FeedPanel'
 import { CharacterPanel } from '../game/panels/CharacterPanel'
 import { InputPanel } from '../game/panels/InputPanel'
+import { HotbarPanel } from '../game/panels/HotbarPanel'
 import { CombatBanner } from '../game/CombatBanner'
 import { DrawerContainer } from '../game/drawers/DrawerContainer'
 import '../styles/game.css'
@@ -55,6 +56,9 @@ function GameLayout() {
         <FeedPanel />
         <DrawerContainer openDrawer={openDrawer} onClose={() => setOpenDrawer(null)} />
       </div>
+
+      {/* Hotbar */}
+      <div className="panel-hotbar"><HotbarPanel /></div>
 
       {/* Input */}
       <div className="panel-input"><InputPanel /></div>

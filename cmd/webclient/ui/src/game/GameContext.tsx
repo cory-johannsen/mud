@@ -57,6 +57,7 @@ export interface GameState {
   mapTiles: MapTile[]
   feedEntries: FeedEntry[]
   combatRound: RoundStartEvent | null
+  hotbarSlots: string[]
 }
 
 type Action =
@@ -67,6 +68,7 @@ type Action =
   | { type: 'SET_INVENTORY'; inv: InventoryView }
   | { type: 'SET_MAP_TILES'; tiles: MapTile[] }
   | { type: 'SET_COMBAT_ROUND'; round: RoundStartEvent | null }
+  | { type: 'SET_HOTBAR'; slots: string[] }
   | { type: 'APPEND_FEED'; entry: FeedEntry }
 
 function reducer(state: GameState, action: Action): GameState {
@@ -85,6 +87,8 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, mapTiles: action.tiles }
     case 'SET_COMBAT_ROUND':
       return { ...state, combatRound: action.round }
+    case 'SET_HOTBAR':
+      return { ...state, hotbarSlots: action.slots }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -108,6 +112,7 @@ const initialState: GameState = {
   mapTiles: [],
   feedEntries: [],
   combatRound: null,
+  hotbarSlots: Array(10).fill(''),
 }
 
 interface GameContextValue {
@@ -141,7 +146,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const sendCommand = useCallback((raw: string) => {
-    sendMessage('CommandRequest', { command: raw })
+    sendMessage('CommandText', { text: raw })
   }, [sendMessage])
 
   const connect = useCallback(() => {
@@ -250,6 +255,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
             type: 'APPEND_FEED',
             entry: makeFeedEntry('round_end', `Round ${re.round ?? '?'} ended`),
           })
+          break
+        }
+        case 'HotbarUpdate': {
+          const hu = payload as { slots?: string[] }
+          dispatch({ type: 'SET_HOTBAR', slots: Array.isArray(hu.slots) ? hu.slots : Array(10).fill('') })
           break
         }
         case 'ErrorEvent': {

@@ -5,9 +5,10 @@
     "toolbar toolbar toolbar"
     "room    map     character"
     "feed    feed    feed"
+    "hotbar  hotbar  hotbar"
     "input   input   input";
   grid-template-columns: 40fr 20fr 40fr;
-  grid-template-rows: auto minmax(200px, 35vh) 1fr auto;
+  grid-template-rows: auto minmax(200px, 35vh) 1fr auto auto;
   height: 100vh;
   background: #0d0d0d;
   color: #ccc;
@@ -15,12 +16,13 @@
   overflow: hidden;
 }
 
-.panel-toolbar { grid-area: toolbar; }
-.panel-room    { grid-area: room; overflow-y: auto; }
-.panel-map     { grid-area: map; overflow-y: auto; }
+.panel-toolbar   { grid-area: toolbar; }
+.panel-room      { grid-area: room; overflow-y: auto; }
+.panel-map       { grid-area: map; overflow-y: auto; }
 .panel-character { grid-area: character; overflow-y: auto; }
-.panel-feed    { grid-area: feed; position: relative; overflow: hidden; min-height: 200px; }
-.panel-input   { grid-area: input; }
+.panel-feed      { grid-area: feed; position: relative; overflow: hidden; min-height: 200px; }
+.panel-hotbar    { grid-area: hotbar; }
+.panel-input     { grid-area: input; }
 
 /* Panel base styles */
 .panel-room, .panel-map, .panel-character, .panel-feed {
@@ -136,6 +138,49 @@
 .feed-structured  { color: #eee; }
 .feed-system      { color: #cc0; }
 
+/* Hotbar panel */
+.hotbar {
+  display: flex;
+  gap: 0;
+  background: #111;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  height: 38px;
+  overflow: hidden;
+}
+.hotbar-slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+  border: none;
+  border-right: 1px solid #2a2a2a;
+  color: #aaa;
+  cursor: pointer;
+  font-family: monospace;
+  padding: 0 2px;
+  min-width: 0;
+  line-height: 1.1;
+}
+.hotbar-slot:hover:not(:disabled) { background: #252525; color: #e0c060; }
+.hotbar-slot:disabled { cursor: default; }
+.hotbar-slot-empty { color: #444; }
+.hotbar-key {
+  font-size: 0.6rem;
+  color: #666;
+  line-height: 1;
+}
+.hotbar-label {
+  font-size: 0.65rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
 /* Input panel */
 .input-form {
   display: flex;
@@ -224,9 +269,10 @@
       "character"
       "map"
       "feed"
+      "hotbar"
       "input";
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto 1fr auto;
+    grid-template-rows: auto auto auto auto 1fr auto auto;
     height: auto;
     min-height: 100vh;
     overflow: auto;
