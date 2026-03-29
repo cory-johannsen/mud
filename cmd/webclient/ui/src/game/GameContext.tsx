@@ -166,6 +166,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       while (queueRef.current.length > 0) {
         ws.send(queueRef.current.shift()!)
       }
+      // Request character info and map so panels populate immediately on connect.
+      ws.send(JSON.stringify({ type: 'StatusRequest', payload: {} }))
+      ws.send(JSON.stringify({ type: 'MapRequest', payload: {} }))
     }
 
     ws.onclose = (ev) => {
