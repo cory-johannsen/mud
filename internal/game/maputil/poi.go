@@ -34,6 +34,22 @@ var poiOrder = func() map[string]int {
 	return m
 }()
 
+// POIRoleFromNPCType derives a POI role string from an NPC's npc_type field,
+// used as a fallback when the NPC has no explicit npc_role set.
+//
+// Precondition: npcType may be any string including empty.
+// Postcondition: Returns "" for "combat" and "" (no POI contribution).
+// Returns the npcType unchanged for all other non-empty types so that
+// NpcRoleToPOIID can map them to their POI ID.
+func POIRoleFromNPCType(npcType string) string {
+	switch npcType {
+	case "", "combat":
+		return ""
+	default:
+		return npcType
+	}
+}
+
 // NpcRoleToPOIID maps an npc_role string to a POI type ID.
 //
 // Precondition: npcRole may be any string including empty.

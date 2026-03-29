@@ -8,6 +8,32 @@ import (
 	"github.com/cory-johannsen/mud/internal/game/maputil"
 )
 
+// TestPOIRoleFromNPCType verifies that non-combat npc_type values produce the
+// correct POI role string, and that "combat" and "" produce no role (BUG-41).
+func TestPOIRoleFromNPCType_KnownTypes(t *testing.T) {
+	cases := []struct {
+		npcType string
+		want    string
+	}{
+		{"", ""},
+		{"combat", ""},
+		{"merchant", "merchant"},
+		{"healer", "healer"},
+		{"job_trainer", "job_trainer"},
+		{"guard", "guard"},
+		{"banker", "banker"},
+		{"chip_doc", "chip_doc"},
+		{"quest_giver", "quest_giver"},
+		{"fixer", "fixer"},
+	}
+	for _, tc := range cases {
+		got := maputil.POIRoleFromNPCType(tc.npcType)
+		if got != tc.want {
+			t.Errorf("POIRoleFromNPCType(%q) = %q, want %q", tc.npcType, got, tc.want)
+		}
+	}
+}
+
 func TestNpcRoleToPOIID_KnownRoles(t *testing.T) {
 	cases := []struct {
 		role string

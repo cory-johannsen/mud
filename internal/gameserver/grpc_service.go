@@ -6119,10 +6119,14 @@ func (s *GameServiceServer) handleMap(uid string, req *gamev1.MapRequest) (*game
 			poiSet := make(map[string]bool)
 			if s.npcMgr != nil {
 				for _, inst := range s.npcMgr.InstancesInRoom(r.ID) {
-					if inst.IsDead() || inst.NpcRole == "" {
+					if inst.IsDead() {
 						continue
 					}
-					poiID := maputil.NpcRoleToPOIID(inst.NpcRole)
+					role := inst.NpcRole
+					if role == "" {
+						role = maputil.POIRoleFromNPCType(inst.NPCType)
+					}
+					poiID := maputil.NpcRoleToPOIID(role)
 					if poiID != "" {
 						poiSet[poiID] = true
 					}

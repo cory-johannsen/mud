@@ -332,6 +332,14 @@
 **Steps:** Enter combat; observe that after every combat message the full hotbar line is echoed to the console, repeating on every round update, action message, and status line.
 **Fix:** Added `\033[H-1;1H\033[2K` clear before the scroll loop in `WriteConsole`. Each `\r\n` at promptRow (row H) scrolls the entire screen up; without clearing the hotbar row first, its content scrolled into the console region. Now the hotbar row is blanked before any scroll so only empty rows scroll upward.
 
+### BUG-41: Non-combat NPCs do not appear as POIs on map after visiting room
+**Severity:** medium
+**Status:** fixed
+**Category:** UI
+**Description:** Merchant (Sergeant Mack), healer (Welder's Medic), and trainer (Shop Foreman) NPCs do not appear as POI symbols on the zone map even after the player has visited the room containing them.
+**Steps:** Visit the room containing Sergeant Mack, Welder's Medic, Shop Foreman, Vera Coldcoin, or Marshal Ironsides; open the zone map; observe no POI symbol at those room locations.
+**Fix:** Root cause: `handleMap` skipped any NPC with empty `npc_role`, but only 3 Dawg-family NPC YAMLs had `npc_role` explicitly set. Added `POIRoleFromNPCType(npcType)` in `maputil/poi.go` — returns `""` for `"combat"` and `""`, otherwise returns the npc_type (flows into existing `NpcRoleToPOIID`). Changed `handleMap` to use `npc_role` when set, else fall back to `POIRoleFromNPCType(npc_type)`. Regression tests: `TestPOIRoleFromNPCType_KnownTypes` and `TestHandleMap_POI_NPCTypeFallback`.
+
 ### BUG-37: Combat mode did not engage when entering combat
 **Severity:** high
 **Status:** fixed
