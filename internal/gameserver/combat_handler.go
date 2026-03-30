@@ -2197,16 +2197,16 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	})
 	events = append(events, mentalStateEvents...)
 
-	if !cbt.HasLivingNPCs() || !cbt.HasLivingPlayers() {
+	if !cbt.HasLivingNPCs() || !cbt.HasUndowedPlayers() {
 		var endNarrative string
 		if !cbt.HasLivingNPCs() {
 			endNarrative = "Combat is over. You stand victorious."
 		} else {
 			endNarrative = "Everything goes dark."
-			// Mark all dead player combatants so sess.Dead == true.
+			// Mark all downed player combatants so sess.Dead == true.
 			// This is required for the heropoint stabilize subcommand to work.
 			for _, c := range cbt.Combatants {
-				if c.Kind == combat.KindPlayer && c.IsDead() {
+				if c.Kind == combat.KindPlayer && c.CurrentHP <= 0 {
 					if sess, ok := h.sessions.GetPlayer(c.ID); ok {
 						sess.Dead = true
 					}

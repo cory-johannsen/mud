@@ -32,10 +32,6 @@ zone:
       target: vantucky_the_compound
     map_x: 0
     map_y: 0
-    spawns:
-    - template: vantucky_militiaman
-      count: 1
-      respawn_after: 5m
     equipment:
     - item_id: zone_map
       max_count: 1

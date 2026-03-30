@@ -362,6 +362,20 @@ func (c *Combat) HasLivingPlayers() bool {
 	return false
 }
 
+// HasUndowedPlayers reports whether any player combatant still has HP > 0.
+// This differs from HasLivingPlayers in that it treats HP=0 as downed (combat-incapable)
+// even before the dying chain resolves to permanent death.
+//
+// Postcondition: Returns true iff at least one KindPlayer combatant has CurrentHP > 0.
+func (c *Combat) HasUndowedPlayers() bool {
+	for _, cbt := range c.Combatants {
+		if cbt.Kind == KindPlayer && cbt.CurrentHP > 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // Engine manages all active Combat encounters, keyed by room ID.
 // All methods are safe for concurrent use.
 type Engine struct {
