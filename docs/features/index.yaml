@@ -747,3 +747,11 @@ features:
     dependencies:
       - zones-new        # roving boss uses zones-new room IDs
       - advanced-enemies # boss tier requirement for roving combat NPCs
+
+  - slug: character-switch
+    name: Character Switch
+    status: planned
+    priority: 440
+    category: ui
+    file: docs/features/character-switch.md
+    effort: "S"  # LogoutDropdown component in GamePage toolbar; Switch Character navigates to /characters
