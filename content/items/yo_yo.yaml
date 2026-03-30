@@ -1,0 +1,9 @@
+id: yo_yo
+name: Yo-Yo
+description: A regulation yo-yo weighted for combat. The string is braided nylon with a razor-sharp metal axle. In trained hands, it can strike at range and return for another hit.
+kind: weapon
+weapon_ref: yo_yo
+weight: 0.5
+stackable: false
+max_stack: 1
+value: 25

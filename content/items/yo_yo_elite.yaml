@@ -1,0 +1,9 @@
+id: yo_yo_elite
+name: Competition Yo-Yo
+description: A professional-grade competition yo-yo with a precision ball-bearing axle, anodized aluminum body, and weighted rims.
+kind: weapon
+weapon_ref: yo_yo_elite
+weight: 0.5
+stackable: false
+max_stack: 1
+value: 350

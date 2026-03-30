@@ -1,0 +1,70 @@
+id: shrimp_gang_dazzler
+name: Shrimp Gang Dazzler
+npc_type: combat
+faction_id: shrimp_gang_skill_toys_club
+description: This yo-yo specialist wears mirrored sunglasses indoors and has trained specifically in optical disruption techniques. His yo-yo is painted in concentric hypnotic spirals. He watches you with an unnerving stillness, like he's already calculating the angle of throw.
+level: 3
+max_hp: 30
+ac: 13
+rob_multiplier: 1.0
+awareness: 9
+ai_domain: shrimp_gang_dazzler_combat
+respawn_delay: "6m"
+
+abilities:
+  brutality: 10
+  quickness: 16
+  grit: 10
+  reasoning: 12
+  savvy: 12
+  flair: 16
+
+loot:
+  currency:
+    min: 12
+    max: 40
+  items:
+    - item: yo_yo
+      chance: 0.45
+      min_qty: 1
+      max_qty: 1
+
+weapon:
+  - id: yo_yo
+    weight: 5
+
+armor:
+  - id: leather_jacket
+    weight: 3
+
+taunts:
+  - "The spirals on this yo-yo are calibrated to specific light frequencies."
+  - "Watch the string. No, not that one. The other one."
+  - "I've blinded better fighters than you. Temporarily. Mostly."
+  - "You're going to want to look away. You won't be able to."
+  - "The trick is called the Shrimp Spiral. Don't try to track it."
+  - "My specialty is the moment right before you realize what happened."
+  - "They call me the Dazzler for reasons you're about to experience."
+  - "Keep your eyes open. It'll be over faster."
+  - "The mirrored sunglasses are both practical and very cool."
+  - "I have forty-seven patterns specifically designed to disorient."
+  - "My instructor said I had natural talent for psychological disruption."
+  - "The shrimp stench helps too. Sensory overload is a real technique."
+  - "You're tracking the wrong hand."
+  - "Everything I do is a feint except the thing that hits you."
+  - "The yo-yo is the distraction. I am the attack."
+  - "Focus is the enemy. I am here to remove yours."
+  - "Every pattern has a purpose. This one's for you."
+  - "I dream in spirals. Do you? You should start."
+  - "The sunglasses protect my eyes from my own technique."
+  - "You're getting dazzled whether you want to or not."
+  - "Don't blink. Seriously, don't."
+  - "My whole fighting style is based on being overwhelming to process."
+  - "The shrimp smell is also a technique. Everything is technique."
+  - "They said optical disruption wasn't a martial art. They were wrong."
+  - "I've practiced this throw until it looks like a magic trick."
+  - "Your pupils are dilating. That means it's working."
+  - "The spiral follows you. Not the other way around."
+  - "Hold still. I want to see if my new pattern works."
+  - "Dazzled is just the beginning. There are follow-up techniques."
+  - "I am the most dangerous man in Colonel Summers Park. The Master disagrees. We have an ongoing dispute."

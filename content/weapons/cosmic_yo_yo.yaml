@@ -1,0 +1,12 @@
+id: cosmic_yo_yo
+name: Cosmic Yo-Yo
+description: A yo-yo of impossible craftsmanship. Its body is some kind of iridescent ceramic that shifts color as it spins, and the string appears to be woven from actual light. When thrown, it warps the air around it. Looking directly at its spin for more than a second causes nausea. Nobody knows where it came from. The Yo-Yo Master has had it for as long as anyone can remember.
+damage_dice: 2d8+3
+damage_type: bludgeoning
+range_increment: 40
+traits: [finesse, agile, return, reach, dazzling, gravity_defying]
+kind: one_handed
+group: yo_yo
+proficiency_category: specialized
+rarity: ghost
+upgrade_slots: 4

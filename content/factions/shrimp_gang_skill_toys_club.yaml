@@ -1,0 +1,27 @@
+id: shrimp_gang_skill_toys_club
+name: Shrimp Gang Skill Toys Club
+zone_id: colonel_summers_park
+hostile_factions: []
+tiers:
+  - id: outsider
+    label: Outsider
+    min_rep: 0
+    price_discount: 0.0
+  - id: yo_yo_curious
+    label: Yo-Yo Curious
+    min_rep: 100
+    price_discount: 0.05
+  - id: string_master
+    label: String Master
+    min_rep: 300
+    price_discount: 0.10
+  - id: shrimp_lord
+    label: Shrimp Lord
+    min_rep: 600
+    price_discount: 0.18
+exclusive_items:
+  - item_id: yo_yo_elite
+    tier_id: string_master
+  - item_id: cosmic_yo_yo
+    tier_id: shrimp_lord
+gated_rooms: []

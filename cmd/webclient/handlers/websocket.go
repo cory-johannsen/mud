@@ -312,6 +312,10 @@ func serverEventInner(event *gamev1.ServerEvent) (proto.Message, string) {
 		return p.HotbarUpdate, "HotbarUpdate"
 	case *gamev1.ServerEvent_ShopView:
 		return p.ShopView, "ShopView"
+	case *gamev1.ServerEvent_HealerView:
+		return p.HealerView, "HealerView"
+	case *gamev1.ServerEvent_TrainerView:
+		return p.TrainerView, "TrainerView"
 	default:
 		return nil, ""
 	}

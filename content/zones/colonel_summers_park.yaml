@@ -1,0 +1,257 @@
+zone:
+  id: colonel_summers_park
+  danger_level: dangerous
+  world_x: 2
+  world_y: 3
+  name: Colonel Summers Park
+  description: A neighborhood park that has been completely taken over by the Shrimp Gang Skill Toys Club. The air is thick with the pervasive, inescapable smell of boiled shrimp — not rotting, exactly, but concentrated past the point of comfort. Elaborate yo-yo demonstrations happen at all hours. The gang controls entry and exit. Nobody who didn't come for yo-yos leaves happy.
+  start_room: csp_main_entrance
+
+  zone_effects:
+  - track: nausea
+    severity: mild
+    base_dc: 12
+    cooldown_rounds: 4
+    cooldown_minutes: 8
+  - track: repulsion
+    severity: mild
+    base_dc: 10
+    cooldown_rounds: 3
+    cooldown_minutes: 6
+
+  rooms:
+  - id: csp_main_entrance
+    title: Park Entrance
+    description: 'A chain-link gate marks the boundary between SE Industrial and Colonel Summers Park. Someone has welded a large yo-yo to the top of the gate as a territorial marker. The shrimp smell hits you immediately — not subtle, not background, but present and insistent, like a message. A faded zone map is bolted to the fence post. The park stretches to the south. The industrial zone is to the north, and fresh air.'
+    danger_level: safe
+    exits:
+    - direction: north
+      target: sei_holgate_blvd
+    - direction: south
+      target: csp_park_gate
+    map_x: 0
+    map_y: -1
+    equipment:
+    - item_id: zone_map
+      name: Colonel Summers Park Map
+      immovable: true
+    properties:
+      lighting: exposed
+      atmosphere: pungent
+
+  - id: csp_park_gate
+    title: Park Gate
+    description: 'The main entrance to the park proper. A hand-painted sign reads WELCOME TO SHRIMP GANG TERRITORY — SKILL TOYS ONLY. Below it in smaller letters: YO-YO DEMONSTRATIONS ONGOING. Below that: NO EXCEPTIONS. Two goons lounge against the fence, idly winding string around their fingers. The smell is significantly stronger here. You can taste it.'
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: csp_main_entrance
+    - direction: south
+      target: csp_shrimp_plaza
+    map_x: 0
+    map_y: 0
+    spawns:
+    - template: shrimp_gang_goon
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: territorial
+
+  - id: csp_shrimp_plaza
+    title: Shrimp Plaza
+    description: 'The central gathering area of the park, where several paths converge around a concrete slab that functions as a stage. Someone has painted a massive shrimp in pink and orange across the center. Groups of gang members perform yo-yo routines at all times, calling out trick names to each other in a language that sounds technical but feels like ritual. The smell here is the epicenter — fishy, warm, and almost physical. Paths lead southwest and southeast, and deeper south toward the amphitheater.'
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: csp_park_gate
+    - direction: southwest
+      target: csp_picnic_area
+    - direction: southeast
+      target: csp_basketball_court
+    - direction: south
+      target: csp_amphitheater
+    map_x: 0
+    map_y: 1
+    spawns:
+    - template: shrimp_gang_goon
+      count: 2
+      respawn_after: 5m
+    properties:
+      lighting: exposed
+      atmosphere: festive
+
+  - id: csp_picnic_area
+    title: Picnic Area
+    description: 'Weathered picnic tables have been repurposed as yo-yo practice benches, the wood worn smooth by years of stringing and winding. Empty shrimp cocktail cups litter the ground. A gang member sits alone, practicing a particularly complicated trick that involves bouncing the yo-yo off the table surface at a specific angle. He does not look up when you enter.'
+    danger_level: dangerous
+    exits:
+    - direction: northeast
+      target: csp_shrimp_plaza
+    map_x: -1
+    map_y: 1
+    spawns:
+    - template: shrimp_gang_goon
+      count: 1
+      respawn_after: 5m
+    properties:
+      lighting: open
+      atmosphere: focused
+
+  - id: csp_basketball_court
+    title: Basketball Court
+    description: 'The hoops were removed years ago and replaced with rings at various heights for yo-yo trick shots. Lines have been painted on the court not for basketball zones but for proper yo-yo throwing distances. A dazzler practices his optical disruption routines against the chain-link backstop, the spiral patterns on his yo-yo blurring with speed.'
+    danger_level: dangerous
+    exits:
+    - direction: northwest
+      target: csp_shrimp_plaza
+    map_x: 1
+    map_y: 1
+    spawns:
+    - template: shrimp_gang_goon
+      count: 1
+      respawn_after: 5m
+    - template: shrimp_gang_dazzler
+      count: 1
+      respawn_after: 6m
+    properties:
+      lighting: open
+      atmosphere: intense
+
+  - id: csp_amphitheater
+    title: Open-Air Amphitheater
+    description: 'Concrete steps descend to a central performance circle where the most skilled members of the Shrimp Gang Skill Toys Club demonstrate routines for assembled onlookers. The smell of shrimp is mixed here with something like incense, but it is definitely not incense. It is shrimp-scented candles. The performances are technically impressive and deeply unsettling. Armed enforcers watch the crowd from the upper steps.'
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: csp_shrimp_plaza
+    - direction: southwest
+      target: csp_storage_shed
+    - direction: southeast
+      target: csp_skate_circle
+    - direction: south
+      target: csp_shrimp_shrine
+    map_x: 0
+    map_y: 2
+    spawns:
+    - template: shrimp_gang_goon
+      count: 2
+      respawn_after: 5m
+    - template: shrimp_gang_dazzler
+      count: 1
+      respawn_after: 6m
+    properties:
+      lighting: open
+      atmosphere: ceremonial
+
+  - id: csp_storage_shed
+    title: Equipment Storage
+    description: 'A chain-link enclosure that functions as the gang''s supply depot. Shelves are stacked with yo-yo strings in bulk, bearing lubricants, replacement axles, and shrimp paste in industrial quantities. An enforcer guards the stock with the intensity of a man protecting something genuinely valuable, which this apparently is.'
+    danger_level: dangerous
+    exits:
+    - direction: northeast
+      target: csp_amphitheater
+    map_x: -1
+    map_y: 2
+    spawns:
+    - template: shrimp_gang_enforcer
+      count: 1
+      respawn_after: 7m
+    properties:
+      lighting: dim
+      atmosphere: utilitarian
+
+  - id: csp_skate_circle
+    title: Skate Circle
+    description: 'A former skateboard area that the gang converted for advanced yo-yo training. The ramps and rails have been repurposed as obstacles for complicated trick sequences involving extreme angles. An enforcer works through a complex routine with methodical precision, hitting the same trick repeatedly until it is exactly right. He has been doing this for six hours. You can tell.'
+    danger_level: dangerous
+    exits:
+    - direction: northwest
+      target: csp_amphitheater
+    map_x: 1
+    map_y: 2
+    spawns:
+    - template: shrimp_gang_enforcer
+      count: 1
+      respawn_after: 7m
+    properties:
+      lighting: open
+      atmosphere: focused
+
+  - id: csp_shrimp_shrine
+    title: The Shrimp Shrine
+    description: 'A raised platform at the heart of the park, centered around a massive bronze shrimp — the focal point of whatever the Shrimp Gang considers religion. Offerings of shrimp cocktail cups, yo-yo strings, and competition trophies are arranged at its base. Senior members kneel here before practice. The smell reaches a peak here that is genuinely hard to describe. Enforcers guard the shrine with absolute seriousness. Beyond, a narrow path leads deeper into the park where the Dojo waits.'
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: csp_amphitheater
+    - direction: west
+      target: csp_deep_garden
+    - direction: east
+      target: csp_fountain
+    - direction: south
+      target: csp_yo_yo_dojo
+    map_x: 0
+    map_y: 3
+    spawns:
+    - template: shrimp_gang_enforcer
+      count: 2
+      respawn_after: 7m
+    - template: shrimp_gang_dazzler
+      count: 1
+      respawn_after: 6m
+    properties:
+      lighting: open
+      atmosphere: sacred
+
+  - id: csp_deep_garden
+    title: The Deep Garden
+    description: 'The overgrown western edge of the park, where rose bushes have gone feral and the grass reaches knee height. Shrimp shells crunch underfoot — the gang scatters them here deliberately, treating the area as both fertilizer and sacred offering. An enforcer patrols the perimeter with the careful attention of a man who has found something worth protecting.'
+    danger_level: dangerous
+    exits:
+    - direction: east
+      target: csp_shrimp_shrine
+    map_x: -1
+    map_y: 3
+    spawns:
+    - template: shrimp_gang_enforcer
+      count: 1
+      respawn_after: 7m
+    properties:
+      lighting: overgrown
+      atmosphere: wild
+
+  - id: csp_fountain
+    title: Dried Fountain
+    description: 'A concrete fountain that has not held water in years, now used as a yo-yo performance stage. The bowl has been painted with a mural depicting the history of the Shrimp Gang Skill Toys Club in surprisingly fine detail. A dazzler practices hypnotic routines using the curved walls to bounce light in unpredictable patterns. Several championship trophies are displayed on the fountain''s rim, weather-beaten but polished.'
+    danger_level: dangerous
+    exits:
+    - direction: west
+      target: csp_shrimp_shrine
+    map_x: 1
+    map_y: 3
+    spawns:
+    - template: shrimp_gang_dazzler
+      count: 1
+      respawn_after: 6m
+    properties:
+      lighting: open
+      atmosphere: artistic
+
+  - id: csp_yo_yo_dojo
+    title: The Yo-Yo Dojo
+    description: 'The inner sanctum. A single open room of cracked concrete, cleared of all obstacles, the floor worn smooth by years of dedicated practice. The smell of shrimp here is almost meditative, like it has been present so long it has become part of the air''s chemical composition. The Yo-Yo Master stands in the center, three yo-yos in motion simultaneously, weaving patterns that seem to fold space. He has been waiting. He always knows when someone is coming.'
+    danger_level: dangerous
+    exits:
+    - direction: north
+      target: csp_shrimp_shrine
+    map_x: 0
+    map_y: 4
+    spawns:
+    - template: yo_yo_master
+      count: 1
+      respawn_after: 30m
+    boss_room: true
+    properties:
+      lighting: dim
+      atmosphere: ominous

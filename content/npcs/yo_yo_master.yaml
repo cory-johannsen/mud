@@ -1,0 +1,71 @@
+id: yo_yo_master
+name: The Yo-Yo Master
+npc_type: combat
+faction_id: shrimp_gang_skill_toys_club
+description: An imposing figure in a sequined tracksuit the color of boiled shrimp. The Yo-Yo Master handles three yo-yos simultaneously, their strings weaving patterns of terrifying complexity. The stench of shrimp radiates from him like a sacred aura. His eyes, half-mad with absolute mastery and years of protein shakes made from shrimp powder, lock onto you with the intensity of a man who has dedicated every waking moment to a single, profoundly strange purpose.
+level: 8
+max_hp: 95
+ac: 17
+rob_multiplier: 2.0
+awareness: 10
+ai_domain: yo_yo_master_combat
+respawn_delay: "30m"
+tier: boss
+
+abilities:
+  brutality: 14
+  quickness: 20
+  grit: 16
+  reasoning: 14
+  savvy: 12
+  flair: 20
+
+loot:
+  currency:
+    min: 150
+    max: 400
+  items:
+    - item: cosmic_yo_yo
+      chance: 0.35
+      min_qty: 1
+      max_qty: 1
+    - item: yo_yo_elite
+      chance: 0.80
+      min_qty: 1
+      max_qty: 2
+
+weapon:
+  - id: cosmic_yo_yo
+    weight: 10
+
+taunts:
+  - "I have been waiting for someone worth defeating."
+  - "The Cosmic Yo-Yo has tasted the blood of forty challengers. Today makes forty-one."
+  - "You smell different from the others. Still afraid, but different."
+  - "I perfected my first trick at age twelve. I have not stopped perfecting since."
+  - "The shrimp gives me focus. The yo-yo gives me reach. You give me nothing."
+  - "Do you know how many years I spent learning to throw three simultaneously?"
+  - "My students say I am without mercy in competition. I am also without mercy here."
+  - "The Cosmic Yo-Yo does not miss. It is physically incapable of missing."
+  - "I have eaten shrimp every day for eleven years. Every. Single. Day."
+  - "I sense your fighting style already. It ends in the first combination."
+  - "The park chose me as its master. I did not choose the park. The park chose me."
+  - "The smell you are experiencing is the concentrated essence of my journey."
+  - "I once defeated a man using only the shadow of the yo-yo. He still has nightmares."
+  - "Three yo-yos is not showing off. Three yo-yos is the minimum."
+  - "Do you feel that? That's a thousand hours of practice per yo-yo, aimed at you."
+  - "The other challengers begged at the end. You seem like a beggar."
+  - "I have composed seventeen original yo-yo routines. This fight will be the eighteenth."
+  - "When this is over, I will eat shrimp in your memory. It is the highest honor."
+  - "The sequins on this tracksuit cost more than your weapons. Think about what that means."
+  - "I am not angry with you. I am simply better than you in every measurable way."
+  - "My first yo-yo was carved from a piece of a shrimp boat. I still have it."
+  - "The park smells like this because I want it to smell like this. It is intentional."
+  - "Do you know the etymology of 'yo-yo'? I do. I know everything about yo-yos."
+  - "I have beaten forty-three challengers in this room. Zero have left unimpressed."
+  - "The string is a metaphor. The yo-yo is a metaphor. The shrimp is not a metaphor."
+  - "I see your stance and I see your ending."
+  - "I have been perfecting this final technique for three years. You're the test."
+  - "The Shrimp Gang is not a gang. It is a way of life. A very specific, very smelly way of life."
+  - "The Cosmic Yo-Yo was found in the park. It chose me. Do not ask how. Accept it."
+  - "I am the first and last thing you will remember about this park."

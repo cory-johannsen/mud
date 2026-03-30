@@ -1,0 +1,10 @@
+id: cosmic_yo_yo
+name: Cosmic Yo-Yo
+description: A yo-yo of impossible craftsmanship. Its body is iridescent ceramic that shifts color as it spins and the string appears to be woven from light. Somehow it always returns to your hand.
+kind: weapon
+weapon_ref: cosmic_yo_yo
+weight: 0.5
+stackable: false
+max_stack: 1
+value: 8000
+tags: [legendary, yo_yo, shrimp_gang]

@@ -1,0 +1,78 @@
+id: shrimp_gang_enforcer
+name: Shrimp Gang Enforcer
+npc_type: combat
+faction_id: shrimp_gang_skill_toys_club
+description: A veteran of countless yo-yo competitions, this man radiates a pungent combination of seafood and machine oil. Intricate string calluses cover his fingers. He handles two yo-yos simultaneously without apparent effort, watching you with the calm focus of a professional.
+level: 4
+max_hp: 42
+ac: 14
+rob_multiplier: 1.2
+awareness: 7
+ai_domain: shrimp_gang_combat
+respawn_delay: "7m"
+
+abilities:
+  brutality: 14
+  quickness: 16
+  grit: 12
+  reasoning: 9
+  savvy: 10
+  flair: 14
+
+loot:
+  currency:
+    min: 20
+    max: 60
+  items:
+    - item: yo_yo
+      chance: 0.50
+      min_qty: 1
+      max_qty: 2
+    - item: yo_yo_elite
+      chance: 0.15
+      min_qty: 1
+      max_qty: 1
+
+weapon:
+  - id: yo_yo_elite
+    weight: 3
+  - id: yo_yo
+    weight: 2
+
+armor:
+  - id: leather_jacket
+    weight: 2
+  - id: kevlar_vest
+    weight: 1
+
+taunts:
+  - "Amateur hour is over."
+  - "I've been defending this park since before you knew what a yo-yo was."
+  - "You think the smell bothers me? It powers me."
+  - "My technique has been refined over ten thousand hours. Yours has not."
+  - "Two yo-yos. One target. You do the math."
+  - "The shrimp gods are watching. They are not impressed with you."
+  - "I don't miss. I have thrown this yo-yo at moving targets in the dark."
+  - "Sit down. You're embarrassing the people watching."
+  - "We don't negotiate with people who can't walk the dog."
+  - "You're not ready for what I'm about to do to you."
+  - "Veteran status means I've ended better fighters than you."
+  - "The Yo-Yo Master trained me personally. Respect that."
+  - "This is my park. Has been. Will be."
+  - "Your footwork is terrible and you flinch when I wind up."
+  - "You'll understand when you see the trick. Too late, but you'll understand."
+  - "Nobody who smells this bad has ever lost a fight. Think about it."
+  - "I broke three bones in training. They healed wrong. I'm better for it."
+  - "The competition circuit prepared me for exactly this."
+  - "I can throw six feet behind me without looking. Want a demonstration?"
+  - "The string is the weapon. The yo-yo is just the persuasion."
+  - "You're fighting the whole Shrimp Gang through me."
+  - "I ate shrimp for breakfast. I will eat shrimp after. You are between meals."
+  - "There's a reason we control this zone. You're looking at it."
+  - "I've seen faster fighters. None of them left standing."
+  - "My form is poetry. You're getting hit by a sonnet."
+  - "This is going to hurt in a very technical, yo-yo-specific way."
+  - "They don't call it a skill toy for nothing."
+  - "Every enforcer here has beaten twelve challengers. I'm at sixteen."
+  - "You smell afraid. Or maybe that's the shrimp brine. Hard to tell."
+  - "Walk away now and I'll consider it a personal favor."

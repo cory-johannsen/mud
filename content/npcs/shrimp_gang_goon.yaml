@@ -1,0 +1,72 @@
+id: shrimp_gang_goon
+name: Shrimp Gang Goon
+npc_type: combat
+faction_id: shrimp_gang_skill_toys_club
+description: A pasty, fish-scented man in a tank top with a yo-yo holster on his belt. His eyes have a distant, glazed quality — too many hours staring at spinning objects. He smells powerfully of shrimp and motor oil.
+level: 2
+max_hp: 22
+ac: 13
+rob_multiplier: 1.0
+awareness: 5
+ai_domain: shrimp_gang_combat
+respawn_delay: "5m"
+
+abilities:
+  brutality: 12
+  quickness: 14
+  grit: 10
+  reasoning: 8
+  savvy: 10
+  flair: 12
+
+loot:
+  currency:
+    min: 8
+    max: 30
+  items:
+    - item: yo_yo
+      chance: 0.30
+      min_qty: 1
+      max_qty: 1
+
+weapon:
+  - id: yo_yo
+    weight: 5
+  - id: cheap_blade
+    weight: 1
+
+armor:
+  - id: leather_jacket
+    weight: 3
+
+taunts:
+  - "You can't dodge string theory."
+  - "Sleep tight — I got five more tricks to try."
+  - "The yo-yo always comes back. So do we."
+  - "You smell like someone who's never thrown a sleeper."
+  - "This is a certified shrimp zone. Leave or get looped."
+  - "My throw weight to damage ratio is optimized."
+  - "I've been practicing this combo for three months."
+  - "The smell? That's victory. Victory smells like shrimp."
+  - "You just walked into a skill toys situation."
+  - "I'm going to yo-yo you into next week."
+  - "Never fight a man with good string tension."
+  - "The shrimp give us strength."
+  - "We don't lose. We just strategically respawn."
+  - "I saw your footwork. You're predictable."
+  - "That wound's going to smell like shrimp for a week."
+  - "You should've listened to your instincts and left."
+  - "My form is impeccable. So is my follow-through."
+  - "Every trick has a purpose. This one ends you."
+  - "Two-handed throw, baby. You're not ready."
+  - "String master, they call me. Well, three of them do."
+  - "The park belongs to the Shrimp Gang. Always has."
+  - "You're going to need a better plan than 'charge'."
+  - "I'm not even using my dominant hand."
+  - "The smell keeps the riffraff out. Except you, apparently."
+  - "Yo-yo is a martial art. Look it up."
+  - "I threw my first sleeper at age seven. Peaked right after that."
+  - "We're not a gang. We're a skill toys appreciation society."
+  - "My yo-yo has more kills than your whole crew."
+  - "You've interrupted my flow state. Now I'm annoyed."
+  - "The shrimp sees all. The shrimp judges all."

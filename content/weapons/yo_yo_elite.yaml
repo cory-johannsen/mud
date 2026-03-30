@@ -1,0 +1,11 @@
+id: yo_yo_elite
+name: Competition Yo-Yo
+description: A professional-grade competition yo-yo with a precision ball-bearing axle, anodized aluminum body, and weighted rims. The string is Dyneema fiber — nearly indestructible.
+damage_dice: 1d8
+damage_type: bludgeoning
+range_increment: 25
+traits: [finesse, agile, return, reach]
+kind: one_handed
+group: yo_yo
+proficiency_category: martial_weapons
+rarity: mil_spec

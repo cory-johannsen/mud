@@ -1,0 +1,11 @@
+id: yo_yo
+name: Yo-Yo
+description: A regulation yo-yo weighted for combat. The string is braided nylon with a razor-sharp metal axle. In trained hands, it can strike at range and return for another hit.
+damage_dice: 1d6
+damage_type: bludgeoning
+range_increment: 15
+traits: [finesse, agile, return]
+kind: one_handed
+group: yo_yo
+proficiency_category: simple_weapons
+rarity: street

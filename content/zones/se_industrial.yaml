@@ -277,6 +277,8 @@ zone:
       target: sei_machine_shop
     - direction: east
       target: sei_break_room
+    - direction: south
+      target: csp_main_entrance
     map_x: 2
     map_y: 0
     danger_level: dangerous
