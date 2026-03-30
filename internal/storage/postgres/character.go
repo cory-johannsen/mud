@@ -726,6 +726,24 @@ func (r *CharacterRepository) SaveInstanceCharges(ctx context.Context, character
 	return err
 }
 
+// DeleteByID permanently removes the character with the given ID, verifying it belongs to accountID.
+//
+// Precondition: accountID and charID must be > 0.
+// Postcondition: Returns ErrCharacterNotFound if no matching character exists or ownership fails; nil on success.
+func (r *CharacterRepository) DeleteByID(ctx context.Context, accountID, charID int64) error {
+	tag, err := r.db.Exec(ctx,
+		`DELETE FROM characters WHERE id = $1 AND account_id = $2`,
+		charID, accountID,
+	)
+	if err != nil {
+		return fmt.Errorf("deleting character %d for account %d: %w", charID, accountID, err)
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrCharacterNotFound
+	}
+	return nil
+}
+
 // DeleteByAccountAndName permanently removes the character with the given name belonging
 // to the given account ID.
 //

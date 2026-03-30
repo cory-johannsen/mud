@@ -42,6 +42,16 @@ export function CharactersPage() {
     }
   }
 
+  async function handleDelete(char: Character) {
+    if (!window.confirm(`Delete "${char.name}"? This cannot be undone.`)) return
+    try {
+      await api.characters.delete(char.id)
+      void load()
+    } catch {
+      setError(`Failed to delete ${char.name}.`)
+    }
+  }
+
   if (showWizard) {
     return (
       <CharacterWizard
@@ -79,14 +89,14 @@ export function CharactersPage() {
 
       <div style={styles.grid}>
         {characters.map((char) => (
-          <CharacterCard key={char.id} char={char} onPlay={handlePlay} />
+          <CharacterCard key={char.id} char={char} onPlay={handlePlay} onDelete={handleDelete} />
         ))}
       </div>
     </div>
   )
 }
 
-function CharacterCard({ char, onPlay }: { char: Character; onPlay: (c: Character) => void }) {
+function CharacterCard({ char, onPlay, onDelete }: { char: Character; onPlay: (c: Character) => void; onDelete: (c: Character) => void }) {
   const hpPct = char.max_hp > 0 ? (char.current_hp / char.max_hp) * 100 : 0
   const hpColor = hpPct > 50 ? '#4caf50' : hpPct > 25 ? '#ff9800' : '#f44336'
 
@@ -103,9 +113,14 @@ function CharacterCard({ char, onPlay }: { char: Character; onPlay: (c: Characte
       <div style={styles.hpText}>
         {char.current_hp} / {char.max_hp} HP
       </div>
-      <button style={styles.playButton} onClick={() => onPlay(char)}>
-        Play
-      </button>
+      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+        <button style={{ ...styles.playButton, margin: 0, flex: 1 }} onClick={() => onPlay(char)}>
+          Play
+        </button>
+        <button style={styles.deleteButton} onClick={() => onDelete(char)}>
+          Delete
+        </button>
+      </div>
     </div>
   )
 }
@@ -184,5 +199,15 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     fontFamily: 'monospace',
     fontWeight: 'bold',
+  },
+  deleteButton: {
+    padding: '0.4rem 0.6rem',
+    background: 'none',
+    color: '#f55',
+    border: '1px solid #7a2a2a',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.8rem',
   },
 }

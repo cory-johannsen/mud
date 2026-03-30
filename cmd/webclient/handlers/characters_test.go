@@ -383,3 +383,52 @@ func TestCheckName_MissingParam(t *testing.T) {
 	h.CheckName(rr, req)
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
+
+// stubDeleter implements handlers.CharacterDeleter for tests.
+type stubDeleter struct {
+	err      error
+	called   bool
+	lastAcct int64
+	lastID   int64
+}
+
+func (s *stubDeleter) DeleteByID(_ context.Context, accountID, charID int64) error {
+	s.called = true
+	s.lastAcct = accountID
+	s.lastID = charID
+	return s.err
+}
+
+func TestDeleteCharacter_Success(t *testing.T) {
+	d := &stubDeleter{}
+	h := handlers.NewCharacterHandler(nil, nil, nil).WithDeleter(d)
+	req := httptest.NewRequest(http.MethodDelete, "/api/characters/5", nil)
+	req.SetPathValue("id", "5")
+	req = req.WithContext(handlers.WithAccountID(req.Context(), 42))
+	rr := httptest.NewRecorder()
+	h.DeleteCharacter(rr, req)
+	assert.Equal(t, http.StatusNoContent, rr.Code)
+	assert.True(t, d.called)
+	assert.Equal(t, int64(42), d.lastAcct)
+	assert.Equal(t, int64(5), d.lastID)
+}
+
+func TestDeleteCharacter_NotFound(t *testing.T) {
+	d := &stubDeleter{err: postgres.ErrCharacterNotFound}
+	h := handlers.NewCharacterHandler(nil, nil, nil).WithDeleter(d)
+	req := httptest.NewRequest(http.MethodDelete, "/api/characters/5", nil)
+	req.SetPathValue("id", "5")
+	req = req.WithContext(handlers.WithAccountID(req.Context(), 42))
+	rr := httptest.NewRecorder()
+	h.DeleteCharacter(rr, req)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestDeleteCharacter_NotConfigured(t *testing.T) {
+	h := handlers.NewCharacterHandler(nil, nil, nil)
+	req := httptest.NewRequest(http.MethodDelete, "/api/characters/5", nil)
+	req.SetPathValue("id", "5")
+	rr := httptest.NewRecorder()
+	h.DeleteCharacter(rr, req)
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}

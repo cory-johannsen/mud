@@ -31,6 +31,7 @@ type CharacterStore interface {
 	Create(ctx context.Context, c *character.Character) (*character.Character, error)
 	GetByID(ctx context.Context, id int64) (*character.Character, error)
 	SaveGender(ctx context.Context, id int64, gender string) error
+	DeleteByAccountAndName(ctx context.Context, accountID int64, name string) error
 }
 
 //go:embed splash/ak47.txt

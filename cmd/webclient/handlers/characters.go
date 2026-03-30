@@ -32,6 +32,11 @@ type NameChecker interface {
 	IsNameAvailable(ctx context.Context, name string) (bool, error)
 }
 
+// CharacterDeleter permanently removes a character by ID, verifying account ownership.
+type CharacterDeleter interface {
+	DeleteByID(ctx context.Context, accountID, charID int64) error
+}
+
 // CharacterOptions holds ruleset data loaded at startup for the creation wizard.
 type CharacterOptions struct {
 	Regions      []*ruleset.Region
@@ -109,6 +114,7 @@ type CharacterHandler struct {
 	creator         CharacterCreator
 	checker         NameChecker
 	getter          CharacterGetter
+	deleter         CharacterDeleter   // may be nil
 	options         *CharacterOptions
 	jwtSecret       string
 	boostsAdder     AbilityBoostsAdder  // may be nil
@@ -133,6 +139,12 @@ func (h *CharacterHandler) WithJWTSecret(secret string) *CharacterHandler {
 // WithGetter attaches a CharacterGetter for ownership verification in HandlePlay.
 func (h *CharacterHandler) WithGetter(g CharacterGetter) *CharacterHandler {
 	h.getter = g
+	return h
+}
+
+// WithDeleter attaches a CharacterDeleter for DELETE /api/characters/{id}.
+func (h *CharacterHandler) WithDeleter(d CharacterDeleter) *CharacterHandler {
+	h.deleter = d
 	return h
 }
 
@@ -753,6 +765,37 @@ func (h *CharacterHandler) HandlePlay(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]string{"token": token})
+}
+
+// DeleteCharacter handles DELETE /api/characters/{id}.
+//
+// Precondition: h.deleter MUST be set (via WithDeleter). Request context MUST carry account_id.
+// Postcondition: Deletes the character if owned by the caller; HTTP 403 if not owned; HTTP 404 if not found.
+func (h *CharacterHandler) DeleteCharacter(w http.ResponseWriter, r *http.Request) {
+	if h.deleter == nil {
+		http.Error(w, `{"error":"delete not configured"}`, http.StatusInternalServerError)
+		return
+	}
+	idStr := r.PathValue("id")
+	if idStr == "" {
+		http.Error(w, `{"error":"missing id"}`, http.StatusBadRequest)
+		return
+	}
+	var charID int64
+	if _, err := fmt.Sscan(idStr, &charID); err != nil {
+		http.Error(w, `{"error":"invalid id"}`, http.StatusBadRequest)
+		return
+	}
+	accountID := AccountIDFromContext(r.Context())
+	if err := h.deleter.DeleteByID(r.Context(), accountID, charID); err != nil {
+		if errors.Is(err, postgres.ErrCharacterNotFound) {
+			http.Error(w, `{"error":"character not found"}`, http.StatusNotFound)
+			return
+		}
+		http.Error(w, `{"error":"internal server error"}`, http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // CheckName handles GET /api/characters/check-name?name=<value>.

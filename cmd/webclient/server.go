@@ -212,6 +212,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	charHandler := handlers.NewCharacterHandler(s.charRepo, s.charRepo, s.charRepo).
 		WithJWTSecret(s.cfg.JWTSecret).
 		WithGetter(s.charRepo).
+		WithDeleter(s.charRepo).
 		WithOptions(s.charOptions)
 	if s.charCreationRepos != nil {
 		charHandler = charHandler.WithPersistenceRepos(
@@ -230,6 +231,7 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /api/characters/options", s.authMiddleware(http.HandlerFunc(charHandler.ListOptions)))
 	mux.Handle("GET /api/characters/check-name", s.authMiddleware(http.HandlerFunc(charHandler.CheckName)))
 	mux.Handle("POST /api/characters/{id}/play", s.authMiddleware(http.HandlerFunc(charHandler.HandlePlay)))
+	mux.Handle("DELETE /api/characters/{id}", s.authMiddleware(http.HandlerFunc(charHandler.DeleteCharacter)))
 
 	// WebSocket session — JWT validated inline by WSHandler.
 	wsHandler := handlers.NewWSHandler(s.cfg.JWTSecret, s.gameClient, s.charRepo).

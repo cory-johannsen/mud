@@ -148,6 +148,7 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 			telnet.Green, len(chars)+1, telnet.Reset))
 		_ = conn.WriteLine(fmt.Sprintf("  %squit%s. Disconnect",
 			telnet.Green, telnet.Reset))
+		_ = conn.WriteLine(telnet.Colorize(telnet.Yellow, "  Type 'delete N' to permanently delete character N."))
 
 		_ = conn.WritePrompt(telnet.Colorf(telnet.BrightWhite, "Select [1-%d]: ", len(chars)+1))
 		line, err := conn.ReadLine()
@@ -159,6 +160,37 @@ func (h *AuthHandler) characterFlow(ctx context.Context, conn *telnet.Conn, acct
 		if strings.ToLower(line) == "quit" || strings.ToLower(line) == "exit" {
 			_ = conn.WriteLine(telnet.Colorize(telnet.Cyan, "Goodbye."))
 			return nil
+		}
+
+		// Handle "delete N" command.
+		if lower := strings.ToLower(line); strings.HasPrefix(lower, "delete ") {
+			parts := strings.Fields(line)
+			if len(parts) == 2 {
+				var delIdx int
+				if _, scanErr := fmt.Sscan(parts[1], &delIdx); scanErr == nil && delIdx >= 1 && delIdx <= len(chars) {
+					target := chars[delIdx-1]
+					_ = conn.WritePrompt(telnet.Colorf(telnet.Red,
+						"Delete %q? This cannot be undone. Type 'yes' to confirm: ", target.Name))
+					confirm, readErr := conn.ReadLine()
+					if readErr != nil {
+						return fmt.Errorf("reading delete confirmation: %w", readErr)
+					}
+					if strings.TrimSpace(strings.ToLower(confirm)) == "yes" {
+						if delErr := h.characters.DeleteByAccountAndName(ctx, acct.ID, target.Name); delErr != nil {
+							_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Failed to delete character."))
+						} else {
+							_ = conn.WriteLine(telnet.Colorf(telnet.Cyan, "%q has been deleted.", target.Name))
+						}
+					} else {
+						_ = conn.WriteLine(telnet.Colorize(telnet.Yellow, "Delete cancelled."))
+					}
+				} else {
+					_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Invalid selection for delete."))
+				}
+			} else {
+				_ = conn.WriteLine(telnet.Colorize(telnet.Red, "Usage: delete N"))
+			}
+			continue
 		}
 
 		choice := 0

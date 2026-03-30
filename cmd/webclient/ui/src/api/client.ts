@@ -235,5 +235,8 @@ export const api = {
     play(id: number): Promise<{ token: string }> {
       return request<{ token: string }>('POST', `/api/characters/${id}/play`)
     },
+    delete(id: number): Promise<void> {
+      return request<void>('DELETE', `/api/characters/${id}`)
+    },
   },
 }
