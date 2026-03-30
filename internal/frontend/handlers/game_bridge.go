@@ -1110,6 +1110,9 @@ func (h *AuthHandler) showGameHelp(conn *telnet.Conn, registry *command.Registry
 		{command.CategoryWorld, "World"},
 		{command.CategoryCombat, "Combat"},
 		{command.CategoryCommunication, "Communication"},
+		{command.CategoryCharacter, "Character"},
+		{command.CategoryExploration, "Exploration"},
+		{command.CategoryDowntime, "Downtime"},
 		{command.CategorySystem, "System"},
 	}
 
