@@ -196,23 +196,47 @@ func (h *CharacterHandler) ListCharacters(w http.ResponseWriter, r *http.Request
 	}
 	resp := make([]CharacterResponse, 0, len(chars))
 	for _, c := range chars {
-		resp = append(resp, characterToResponse(c))
+		resp = append(resp, characterToResponse(c, h.options))
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
 // characterToResponse maps a Character domain object to its API response shape.
-func characterToResponse(c *character.Character) CharacterResponse {
+// If opts is non-nil, job/region/team IDs are resolved to display names.
+func characterToResponse(c *character.Character, opts *CharacterOptions) CharacterResponse {
+	job := c.Class
+	region := c.Region
+	archetype := c.Team
+	if opts != nil {
+		for _, j := range opts.Jobs {
+			if j.ID == c.Class {
+				job = j.Name
+				break
+			}
+		}
+		for _, r := range opts.Regions {
+			if r.ID == c.Region {
+				region = r.Name
+				break
+			}
+		}
+		for _, t := range opts.Teams {
+			if t.ID == c.Team {
+				archetype = t.Name
+				break
+			}
+		}
+	}
 	return CharacterResponse{
 		ID:        c.ID,
 		Name:      c.Name,
-		Job:       c.Class,
+		Job:       job,
 		Level:     c.Level,
 		CurrentHP: int32(c.CurrentHP),
 		MaxHP:     int32(c.MaxHP),
-		Region:    c.Region,
-		Archetype: c.Team,
+		Region:    region,
+		Archetype: archetype,
 	}
 }
 
@@ -348,7 +372,7 @@ func (h *CharacterHandler) CreateCharacter(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(map[string]any{"character": characterToResponse(created)})
+	_ = json.NewEncoder(w).Encode(map[string]any{"character": characterToResponse(created, h.options)})
 }
 
 // persistCharacterChoices persists ability boosts, skills, feats, and technology

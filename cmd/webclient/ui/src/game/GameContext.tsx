@@ -50,6 +50,11 @@ export interface FeedEntry {
   text: string
 }
 
+export interface CombatantHp {
+  current: number
+  max: number
+}
+
 export interface GameState {
   connected: boolean
   roomView: RoomView | null
@@ -60,6 +65,7 @@ export interface GameState {
   feedEntries: FeedEntry[]
   combatRound: RoundStartEvent | null
   combatPositions: Record<string, number>
+  combatantHp: Record<string, CombatantHp>
   hotbarSlots: string[]
   timeOfDay: TimeOfDayEvent | null
 }
@@ -74,8 +80,11 @@ type Action =
   | { type: 'SET_COMBAT_ROUND'; round: RoundStartEvent | null }
   | { type: 'UPDATE_COMBAT_POSITION'; name: string; position: number }
   | { type: 'CLEAR_COMBAT_POSITIONS' }
+  | { type: 'UPDATE_COMBATANT_HP'; name: string; current: number; max: number }
+  | { type: 'CLEAR_COMBATANT_HP' }
   | { type: 'SET_HOTBAR'; slots: string[] }
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
+  | { type: 'UPDATE_PLAYER_HP'; current: number; max: number }
   | { type: 'APPEND_FEED'; entry: FeedEntry }
 
 function reducer(state: GameState, action: Action): GameState {
@@ -98,8 +107,19 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, combatPositions: { ...state.combatPositions, [action.name]: action.position } }
     case 'CLEAR_COMBAT_POSITIONS':
       return { ...state, combatPositions: {} }
+    case 'UPDATE_COMBATANT_HP':
+      return { ...state, combatantHp: { ...state.combatantHp, [action.name]: { current: action.current, max: action.max } } }
+    case 'CLEAR_COMBATANT_HP':
+      return { ...state, combatantHp: {} }
     case 'SET_HOTBAR':
       return { ...state, hotbarSlots: action.slots }
+    case 'UPDATE_PLAYER_HP':
+      return {
+        ...state,
+        characterInfo: state.characterInfo
+          ? { ...state.characterInfo, currentHp: action.current, current_hp: action.current, maxHp: action.max, max_hp: action.max }
+          : state.characterInfo,
+      }
     case 'SET_TIME_OF_DAY':
       return { ...state, timeOfDay: action.tod }
     case 'APPEND_FEED': {
@@ -126,6 +146,7 @@ const initialState: GameState = {
   feedEntries: [],
   combatRound: null,
   combatPositions: {},
+  combatantHp: {},
   hotbarSlots: Array(10).fill(''),
   timeOfDay: null,
 }
@@ -254,7 +275,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'CombatEvent': {
-          const ce = payload as { type?: string; narrative?: string; attacker?: string; target?: string; damage?: number; attackerPosition?: number; attacker_position?: number }
+          const ce = payload as { type?: string; narrative?: string; attacker?: string; target?: string; damage?: number; attackerPosition?: number; attacker_position?: number; targetHp?: number; targetMaxHp?: number; target_hp?: number; target_max_hp?: number }
           if (ce.type === 'COMBAT_EVENT_TYPE_POSITION') {
             if (ce.attacker) {
               const pos = ce.attackerPosition ?? ce.attacker_position ?? 0
@@ -263,7 +284,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
             break
           }
           if (ce.type === 'COMBAT_EVENT_TYPE_END') {
+            dispatch({ type: 'SET_COMBAT_ROUND', round: null })
             dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
+            dispatch({ type: 'CLEAR_COMBATANT_HP' })
+          }
+          // Track target HP from attack events.
+          const tHp = ce.targetHp ?? ce.target_hp
+          const tMaxHp = ce.targetMaxHp ?? ce.target_max_hp
+          if (ce.target && tHp !== undefined && tMaxHp !== undefined && tMaxHp > 0) {
+            dispatch({ type: 'UPDATE_COMBATANT_HP', name: ce.target, current: tHp, max: tMaxHp })
           }
           const text = ce.narrative
             ? ce.narrative
@@ -327,6 +356,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
             type: 'APPEND_FEED',
             entry: makeFeedEntry('error', `⚠ ${err.message ?? 'Unknown error'}`),
           })
+          break
+        }
+        case 'HpUpdate': {
+          const hp = payload as { currentHp?: number; current_hp?: number; maxHp?: number; max_hp?: number }
+          const current = hp.currentHp ?? hp.current_hp
+          const max = hp.maxHp ?? hp.max_hp
+          if (current !== undefined && max !== undefined) {
+            dispatch({ type: 'UPDATE_PLAYER_HP', current, max })
+          }
           break
         }
         case 'Disconnected':

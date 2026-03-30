@@ -1,4 +1,4 @@
-.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check ui-install ui-build proto-ts build-webclient
+.PHONY: build test test-fast test-postgres test-cover test-e2e migrate run-dev docker-up docker-down clean lint proto build-import-content build-devserver kind-up kind-down docker-push helm-install helm-upgrade helm-uninstall k8s-up k8s-down k8s-redeploy k8s-metallb deps wire wire-check ui-install ui-build proto-ts build-webclient check-fresh-version
 
 deps:
 	$(GO) mod tidy
@@ -12,7 +12,8 @@ wire-check:
 	git diff --exit-code cmd/gameserver/wire_gen.go cmd/devserver/wire_gen.go cmd/frontend/wire_gen.go
 
 GO := go
-VERSION := $(shell cat VERSION 2>/dev/null || echo dev)-$(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
+# VERSION defaults to the short git SHA; override via: VERSION=1.2.3 make k8s-redeploy
+VERSION ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo dev)
 VERSION_PKG := github.com/cory-johannsen/mud/internal/version
 LDFLAGS := -X $(VERSION_PKG).Version=$(VERSION)
 GOFLAGS := -trimpath -ldflags "$(LDFLAGS)"
@@ -131,7 +132,7 @@ DB_USER               := mud
 DB_PASSWORD           := mud
 WEBCLIENT_JWT_SECRET  ?= dev-secret-change-in-prod
 HELM_NAMESPACE        := mud
-IMAGE_TAG   := $(shell git rev-parse --short HEAD 2>/dev/null || echo latest)
+IMAGE_TAG   := $(VERSION)
 HELM_CHART  := deployments/k8s/mud
 HELM_RELEASE := mud
 HELM_VALUES := $(HELM_CHART)/values-prod.yaml
@@ -149,7 +150,13 @@ k8s-metallb:
 kind-down:
 	./deployments/k8s/mud/scripts/cluster-down.sh
 
-docker-push:
+check-fresh-version:
+	@if docker manifest inspect $(REGISTRY)/mud-gameserver:$(VERSION) > /dev/null 2>&1; then \
+		echo "ERROR: VERSION=$(VERSION) already exists in the registry. Set a unique VERSION or commit new changes."; \
+		exit 1; \
+	fi
+
+docker-push: check-fresh-version
 	docker build --build-arg VERSION=$(VERSION) -t $(REGISTRY)/mud-gameserver:$(IMAGE_TAG) -f deployments/docker/Dockerfile.gameserver .
 	docker push $(REGISTRY)/mud-gameserver:$(IMAGE_TAG)
 	docker build --build-arg VERSION=$(VERSION) -t $(REGISTRY)/mud-frontend:$(IMAGE_TAG) -f deployments/docker/Dockerfile.frontend .

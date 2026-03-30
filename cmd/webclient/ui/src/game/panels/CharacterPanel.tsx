@@ -1,6 +1,84 @@
 import { useEffect, useRef } from 'react'
 import { useGame } from '../GameContext'
 
+function HpBar({ current, max }: { current: number; max: number }) {
+  const pct = max > 0 ? (current / max) * 100 : 0
+  const cls = pct > 50 ? 'hp-green' : pct > 25 ? 'hp-yellow' : 'hp-red'
+  return (
+    <>
+      <div className="hp-bar-track" style={{ marginBottom: 2 }}>
+        <div className={`hp-bar-fill ${cls}`} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
+      </div>
+      <span className="hp-text">{current} / {max} HP</span>
+    </>
+  )
+}
+
+function CombatInitiativeList() {
+  const { state } = useGame()
+  const { combatRound, combatPositions, combatantHp, characterInfo, characterSheet } = state
+
+  if (!combatRound) return null
+
+  const turnOrder = combatRound.turnOrder ?? combatRound.turn_order ?? []
+  const round = combatRound.round ?? 0
+  const ap = combatRound.actionsPerTurn ?? combatRound.actions_per_turn ?? 0
+  const playerName = characterInfo?.name ?? characterSheet?.name ?? ''
+  const playerCurrentHp = characterInfo?.currentHp ?? characterInfo?.current_hp ?? 0
+  const playerMaxHp = characterInfo?.maxHp ?? characterInfo?.max_hp ?? characterSheet?.maxHp ?? characterSheet?.max_hp ?? 0
+
+  return (
+    <div style={{ fontFamily: 'monospace' }}>
+      <div style={{ color: '#e0c060', fontWeight: 'bold', marginBottom: 6, fontSize: '0.85rem' }}>
+        ⚔ Round {round} — {ap} AP/turn
+      </div>
+      {turnOrder.map((name, idx) => {
+        const isPlayer = name === playerName
+        const hp = isPlayer
+          ? { current: playerCurrentHp, max: playerMaxHp }
+          : (combatantHp[name] ?? null)
+        const pos = combatPositions[name] ?? null
+
+        return (
+          <div
+            key={name}
+            style={{
+              borderLeft: isPlayer ? '3px solid #7af' : '3px solid #555',
+              paddingLeft: 8,
+              marginBottom: 8,
+              opacity: 1,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+              <span style={{ color: '#888', fontSize: '0.72rem', minWidth: 18 }}>
+                {idx + 1}.
+              </span>
+              <span style={{
+                color: isPlayer ? '#7af' : '#ccc',
+                fontWeight: isPlayer ? 'bold' : 'normal',
+                fontSize: '0.82rem',
+              }}>
+                {name}{isPlayer ? ' (you)' : ''}
+              </span>
+              {pos !== null && (
+                <span style={{ color: '#666', fontSize: '0.72rem', marginLeft: 'auto' }}>
+                  {pos}ft
+                </span>
+              )}
+            </div>
+            {hp !== null && hp.max > 0 && (
+              <HpBar current={hp.current} max={hp.max} />
+            )}
+            {hp === null && !isPlayer && (
+              <span style={{ color: '#555', fontSize: '0.72rem' }}>HP unknown</span>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export function CharacterPanel() {
   const { state, sendMessage } = useGame()
   const { characterInfo, characterSheet, combatRound } = state
@@ -9,8 +87,6 @@ export function CharacterPanel() {
   useEffect(() => {
     if (!characterSheet) {
       sendMessage('CharacterSheetRequest', {})
-      // Retry every 3 seconds in case the gameserver was mid-prompt when
-      // the initial request was sent (prompt flow consumes the frame).
       retryRef.current = setInterval(() => {
         sendMessage('CharacterSheetRequest', {})
       }, 3000)
@@ -27,6 +103,10 @@ export function CharacterPanel() {
       }
     }
   }, [characterSheet, sendMessage])
+
+  if (combatRound) {
+    return <CombatInitiativeList />
+  }
 
   if (!characterInfo && !characterSheet) {
     return <p style={{ color: '#555', fontStyle: 'italic' }}>Loading…</p>
@@ -68,12 +148,6 @@ export function CharacterPanel() {
 
       {characterSheet && (
         <span className="hero-points">✦ Hero: {heroPoints}</span>
-      )}
-
-      {combatRound && (
-        <div className="actions-info">
-          Actions: {combatRound.actionsPerTurn ?? combatRound.actions_per_turn ?? 0}
-        </div>
       )}
     </div>
   )
