@@ -714,3 +714,14 @@ features:
     effort: "XL"  # 2D grid positioning, flanking, AoE targeting, grid rendering
     dependencies:
       - modal-combat-mode
+
+  - slug: roving-npcs
+    name: Multi-Zone Roving NPCs
+    status: done
+    priority: 422
+    category: world
+    file: docs/features/roving-npcs.md
+    effort: "M"  # RovingConfig on Template, RovingManager background engine, room entry/exit notifications, Dayton James Weber boss NPC
+    dependencies:
+      - zones-new        # roving boss uses zones-new room IDs
+      - advanced-enemies # boss tier requirement for roving combat NPCs
