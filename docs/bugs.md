@@ -429,3 +429,11 @@
 **Description:** Hover detail tooltips for items in the merchant shop modal are clipped by the modal's overflow boundary instead of rendering on top of it.
 **Steps:** Open the web client; interact with a merchant NPC; hover over an item in the shop listing; observe the tooltip is cut off by the modal edges rather than floating above all content.
 **Fix:**
+
+### BUG-51: Web UI level-up ability boost not reflected in Stats tab and levelup command non-functional
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** On level-up, the console correctly announces a pending ability boost but the Stats tab shows no pending boosts and the `levelup` command has no effect.
+**Steps:** Level up a character in the web client; observe the console messages announcing the level-up and pending ability boost; open the Stats drawer — no pending boost is shown; type `levelup` in the input — nothing happens.
+**Fix:**
