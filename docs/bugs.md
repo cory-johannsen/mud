@@ -421,3 +421,11 @@
 **Description:** The map legend renders with 5 fixed columns regardless of panel width, causing it to overflow and be clipped on typical screen sizes.
 **Steps:** Open the web client; enter a room and view the map panel; observe the legend overflows horizontally.
 **Fix:**
+
+### BUG-50: Web UI shop item hover tooltips clipped inside modal
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** Hover detail tooltips for items in the merchant shop modal are clipped by the modal's overflow boundary instead of rendering on top of it.
+**Steps:** Open the web client; interact with a merchant NPC; hover over an item in the shop listing; observe the tooltip is cut off by the modal edges rather than floating above all content.
+**Fix:**
