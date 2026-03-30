@@ -464,6 +464,7 @@ type preparedGrantsResponse struct {
 
 type preparedEntryResponse struct {
 	ID    string `json:"id"`
+	Name  string `json:"name,omitempty"`
 	Level int    `json:"level"`
 }
 
@@ -476,6 +477,7 @@ type spontaneousGrantsResponse struct {
 
 type spontaneousEntryResponse struct {
 	ID    string `json:"id"`
+	Name  string `json:"name,omitempty"`
 	Level int    `json:"level"`
 }
 
@@ -519,6 +521,18 @@ type featResponse struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Category    string `json:"category"`
+}
+
+// techName returns the display name for the given tech ID, falling back to the
+// ID itself when the registry is nil or the entry is not found.
+func (h *CharacterHandler) techName(id string) string {
+	if h.options == nil || h.options.TechRegistry == nil {
+		return id
+	}
+	if def, ok := h.options.TechRegistry.Get(id); ok {
+		return def.Name
+	}
+	return id
 }
 
 // ListOptions handles GET /api/characters/options.
@@ -584,10 +598,10 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 					SlotsByLevel: job.TechnologyGrants.Prepared.SlotsByLevel,
 				}
 				for _, e := range job.TechnologyGrants.Prepared.Fixed {
-					prep.Fixed = append(prep.Fixed, preparedEntryResponse{ID: e.ID, Level: e.Level})
+					prep.Fixed = append(prep.Fixed, preparedEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
 				}
 				for _, e := range job.TechnologyGrants.Prepared.Pool {
-					prep.Pool = append(prep.Pool, preparedEntryResponse{ID: e.ID, Level: e.Level})
+					prep.Pool = append(prep.Pool, preparedEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
 				}
 				tg.Prepared = prep
 			}
@@ -597,10 +611,10 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 					UsesByLevel:  job.TechnologyGrants.Spontaneous.UsesByLevel,
 				}
 				for _, e := range job.TechnologyGrants.Spontaneous.Fixed {
-					spont.Fixed = append(spont.Fixed, spontaneousEntryResponse{ID: e.ID, Level: e.Level})
+					spont.Fixed = append(spont.Fixed, spontaneousEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
 				}
 				for _, e := range job.TechnologyGrants.Spontaneous.Pool {
-					spont.Pool = append(spont.Pool, spontaneousEntryResponse{ID: e.ID, Level: e.Level})
+					spont.Pool = append(spont.Pool, spontaneousEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
 				}
 				tg.Spontaneous = spont
 			}
@@ -637,10 +651,10 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 					SlotsByLevel: arch.TechnologyGrants.Prepared.SlotsByLevel,
 				}
 				for _, e := range arch.TechnologyGrants.Prepared.Fixed {
-					prep.Fixed = append(prep.Fixed, preparedEntryResponse{ID: e.ID, Level: e.Level})
+					prep.Fixed = append(prep.Fixed, preparedEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
 				}
 				for _, e := range arch.TechnologyGrants.Prepared.Pool {
-					prep.Pool = append(prep.Pool, preparedEntryResponse{ID: e.ID, Level: e.Level})
+					prep.Pool = append(prep.Pool, preparedEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
 				}
 				atg.Prepared = prep
 			}
@@ -650,10 +664,10 @@ func (h *CharacterHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
 					UsesByLevel:  arch.TechnologyGrants.Spontaneous.UsesByLevel,
 				}
 				for _, e := range arch.TechnologyGrants.Spontaneous.Fixed {
-					spont.Fixed = append(spont.Fixed, spontaneousEntryResponse{ID: e.ID, Level: e.Level})
+					spont.Fixed = append(spont.Fixed, spontaneousEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
 				}
 				for _, e := range arch.TechnologyGrants.Spontaneous.Pool {
-					spont.Pool = append(spont.Pool, spontaneousEntryResponse{ID: e.ID, Level: e.Level})
+					spont.Pool = append(spont.Pool, spontaneousEntryResponse{ID: e.ID, Name: h.techName(e.ID), Level: e.Level})
 				}
 				atg.Spontaneous = spont
 			}

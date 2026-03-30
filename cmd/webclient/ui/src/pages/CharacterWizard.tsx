@@ -967,7 +967,7 @@ function TechnologyStep({
                     <option value="">Select technology…</option>
                     {poolAtLevel.map((e) => (
                       <option key={e.id} value={e.id} disabled={takenIDs.includes(e.id) && chosen !== e.id}>
-                        {e.id}
+                        {e.name ?? e.id}
                       </option>
                     ))}
                   </select>
@@ -983,7 +983,7 @@ function TechnologyStep({
           <div style={styles.grantList}>
             {fixedSpont.map((t) => (
               <div key={`${t.id}-${t.level}`} style={styles.grantItem}>
-                {t.id} <span style={styles.levelBadge}>Lv{t.level}</span>
+                {t.name ?? t.id} <span style={styles.levelBadge}>Lv{t.level}</span>
               </div>
             ))}
           </div>
@@ -1010,7 +1010,7 @@ function TechnologyStep({
                   onClick={() => toggleSpont(entry)}
                   disabled={disabled}
                 >
-                  <div>{entry.id}</div>
+                  <div>{entry.name ?? entry.id}</div>
                   <div style={styles.levelBadge}>Level {entry.level}</div>
                 </button>
               )

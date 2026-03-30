@@ -91,11 +91,13 @@ export interface FeatGrants {
 
 export interface PreparedEntry {
   id: string
+  name?: string
   level: number
 }
 
 export interface SpontaneousEntry {
   id: string
+  name?: string
   level: number
 }
 
