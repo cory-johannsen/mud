@@ -2,8 +2,10 @@ id: cornhole_sack
 name: Cornhole Sack
 description: A canvas bag filled with something that smells faintly of shrimp and gunpowder.
   Handle with care. Probably.
-kind: misc
+kind: junk
 weight: 0.3
+stackable: true
+max_stack: 10
 value: 12
 tags:
   - cornhole
