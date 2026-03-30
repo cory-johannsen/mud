@@ -293,6 +293,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_HOTBAR', slots: Array.isArray(hu.slots) ? hu.slots : Array(10).fill('') })
           break
         }
+        case 'NpcView': {
+          const nv = payload as { name?: string; description?: string; healthDescription?: string; health_description?: string; level?: number }
+          const health = nv.healthDescription ?? nv.health_description ?? ''
+          const lines = [
+            `${nv.name ?? 'Unknown'} (level ${nv.level ?? '?'}) — ${health}`,
+            nv.description ?? '',
+          ].filter(Boolean).join('\n')
+          dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', lines) })
+          break
+        }
         case 'ErrorEvent': {
           const err = payload as { message?: string }
           dispatch({
