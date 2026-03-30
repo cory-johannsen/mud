@@ -46,7 +46,7 @@ export function CharactersPage() {
     if (!window.confirm(`Delete "${char.name}"? This cannot be undone.`)) return
     try {
       await api.characters.delete(char.id)
-      void load()
+      await load()
     } catch {
       setError(`Failed to delete ${char.name}.`)
     }
