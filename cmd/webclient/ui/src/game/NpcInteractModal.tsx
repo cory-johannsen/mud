@@ -1,5 +1,6 @@
 // NpcInteractModal renders modals for non-combat NPC interactions:
-// HealerModal, TrainerModal, and GenericNpcModal.
+// HealerModal, TrainerModal, BankerModal, and GenericNpcModal.
+import { useState } from 'react'
 import { useGame } from './GameContext'
 import type { HealerView, TrainerView, JobOfferEntry } from '../proto'
 
@@ -176,6 +177,99 @@ function TrainerModal({ view, onClose }: { view: TrainerView; onClose: () => voi
   )
 }
 
+// ---------- Banker Modal ----------
+
+function BankerModal({
+  view,
+  onClose,
+}: {
+  view: { name: string; description: string; npcType: string; level: number; health: string }
+  onClose: () => void
+}) {
+  const { sendMessage, state } = useGame()
+  const [amount, setAmount] = useState('')
+  const playerCurrency = state.characterSheet?.currency ?? state.inventoryView?.currency ?? null
+
+  function handleDeposit() {
+    const n = parseInt(amount, 10)
+    if (!n || n <= 0) return
+    sendMessage('StashDepositRequest', { npc_name: view.name, amount: n })
+    setAmount('')
+    onClose()
+  }
+
+  function handleWithdraw() {
+    const n = parseInt(amount, 10)
+    if (!n || n <= 0) return
+    sendMessage('StashWithdrawRequest', { npc_name: view.name, amount: n })
+    setAmount('')
+    onClose()
+  }
+
+  function handleBalance() {
+    sendMessage('StashBalanceRequest', { npc_name: view.name })
+    onClose()
+  }
+
+  const amountNum = parseInt(amount, 10)
+  const validAmount = !isNaN(amountNum) && amountNum > 0
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      <div style={{ ...styles.modal, maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.header}>
+          <div style={styles.headerLeft}>
+            <h3 style={styles.title}>{view.name}</h3>
+            <span style={styles.npcTypeBadge}>Banker</span>
+          </div>
+          <button style={styles.closeBtn} onClick={onClose} type="button">✕</button>
+        </div>
+        <div style={styles.body}>
+          {view.description && <p style={styles.desc}>{view.description}</p>}
+          {playerCurrency !== null && (
+            <div style={styles.infoRow}>
+              <span style={styles.infoLabel}>Carried credits</span>
+              <span style={styles.infoValue}>{playerCurrency}</span>
+            </div>
+          )}
+          <div style={styles.bankerSection}>
+            <input
+              style={styles.bankerInput}
+              type="number"
+              min="1"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && validAmount) handleDeposit() }}
+            />
+            <div style={styles.bankerBtns}>
+              <button
+                style={{ ...styles.actionBtn, ...(validAmount ? styles.actionBtnGreen : styles.actionBtnDisabled) }}
+                onClick={handleDeposit}
+                disabled={!validAmount}
+                type="button"
+              >
+                Deposit
+              </button>
+              <button
+                style={{ ...styles.actionBtn, ...(validAmount ? styles.actionBtnBlue : styles.actionBtnDisabled) }}
+                onClick={handleWithdraw}
+                disabled={!validAmount}
+                type="button"
+              >
+                Withdraw
+              </button>
+            </div>
+            <button style={{ ...styles.actionBtn, ...styles.actionBtnGray }} onClick={handleBalance} type="button">
+              Check Stash Balance
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ---------- Generic NPC Modal ----------
 
 const NPC_TYPE_LABELS: Record<string, string> = {
@@ -236,6 +330,9 @@ export function NpcInteractModal() {
     return <TrainerModal view={state.trainerView} onClose={clearTrainer} />
   }
   if (state.npcView) {
+    if (state.npcView.npcType === 'banker') {
+      return <BankerModal view={state.npcView} onClose={clearNpcView} />
+    }
     return <GenericNpcModal view={state.npcView} onClose={clearNpcView} />
   }
   return null
@@ -428,5 +525,36 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #333',
     color: '#555',
     cursor: 'not-allowed',
+  },
+  bankerSection: {
+    marginTop: '0.75rem',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '0.5rem',
+  },
+  bankerInput: {
+    background: '#0d0d0d',
+    border: '1px solid #333',
+    color: '#ccc',
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+    padding: '0.3rem 0.5rem',
+    borderRadius: '3px',
+    width: '100%',
+    boxSizing: 'border-box' as const,
+  },
+  bankerBtns: {
+    display: 'flex',
+    gap: '0.4rem',
+  },
+  actionBtnBlue: {
+    background: '#1a1a2a',
+    border: '1px solid #2a4a8a',
+    color: '#7af',
+  },
+  actionBtnGray: {
+    background: '#151515',
+    border: '1px solid #333',
+    color: '#888',
   },
 }

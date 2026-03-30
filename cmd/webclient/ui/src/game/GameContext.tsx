@@ -25,6 +25,7 @@ import type {
   CharacterSheetView,
   InventoryView,
   MapTile,
+  WorldZoneTile,
   RoundStartEvent,
   ConditionEvent,
   TimeOfDayEvent,
@@ -63,6 +64,7 @@ export interface GameState {
   characterSheet: CharacterSheetView | null
   inventoryView: InventoryView | null
   mapTiles: MapTile[]
+  worldTiles: WorldZoneTile[]
   feedEntries: FeedEntry[]
   combatRound: RoundStartEvent | null
   combatPositions: Record<string, number>
@@ -82,6 +84,7 @@ type Action =
   | { type: 'SET_CHARACTER_SHEET'; sheet: CharacterSheetView }
   | { type: 'SET_INVENTORY'; inv: InventoryView }
   | { type: 'SET_MAP_TILES'; tiles: MapTile[] }
+  | { type: 'SET_WORLD_TILES'; tiles: WorldZoneTile[] }
   | { type: 'SET_COMBAT_ROUND'; round: RoundStartEvent | null }
   | { type: 'UPDATE_COMBAT_POSITION'; name: string; position: number }
   | { type: 'CLEAR_COMBAT_POSITIONS' }
@@ -110,6 +113,8 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, inventoryView: action.inv }
     case 'SET_MAP_TILES':
       return { ...state, mapTiles: action.tiles }
+    case 'SET_WORLD_TILES':
+      return { ...state, worldTiles: action.tiles }
     case 'SET_COMBAT_ROUND':
       return { ...state, combatRound: action.round }
     case 'UPDATE_COMBAT_POSITION':
@@ -160,6 +165,7 @@ const initialState: GameState = {
   characterSheet: null,
   inventoryView: null,
   mapTiles: [],
+  worldTiles: [],
   feedEntries: [],
   combatRound: null,
   combatPositions: {},
@@ -282,8 +288,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_INVENTORY', inv: payload as InventoryView })
           break
         case 'MapResponse': {
-          const map = payload as { tiles?: MapTile[] }
-          dispatch({ type: 'SET_MAP_TILES', tiles: map.tiles ?? [] })
+          const map = payload as { tiles?: MapTile[]; worldTiles?: WorldZoneTile[]; world_tiles?: WorldZoneTile[] }
+          if (map.tiles !== undefined) {
+            dispatch({ type: 'SET_MAP_TILES', tiles: map.tiles })
+          }
+          const wt = map.worldTiles ?? map.world_tiles
+          if (wt !== undefined) {
+            dispatch({ type: 'SET_WORLD_TILES', tiles: wt })
+          }
           break
         }
         case 'MessageEvent': {
