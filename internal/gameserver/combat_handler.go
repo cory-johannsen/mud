@@ -3219,6 +3219,10 @@ func (h *CombatHandler) applyPlanLocked(cbt *combat.Combat, actor *combat.Combat
 		// Insert flee action at front so it executes before any other planned actions.
 		actions = append([]ai.PlannedAction{{Action: "flee", OperatorID: "__flee_threshold"}}, actions...)
 	}
+	// Prepend stride action if the NPC needs to close or open range.
+	if strideDir := h.npcMovementStrideLocked(cbt, actor); strideDir != "" {
+		cbt.QueueAction(actor.ID, combat.QueuedAction{Type: combat.ActionStride, Direction: strideDir})
+	}
 	for _, a := range actions {
 		var qa combat.QueuedAction
 		switch a.Action {
@@ -3526,24 +3530,24 @@ func (h *CombatHandler) pickTaunt(inst *npc.Instance) string {
 	return fmt.Sprintf("The %s unsettles you.", inst.Name())
 }
 
-// legacyAutoQueueLocked queues ActionAttack for c targeting the first living player.
-// If the distance is > 5 and the NPC has no ranged weapon, it first queues an
-// ActionStride toward the player.
-func (h *CombatHandler) legacyAutoQueueLocked(cbt *combat.Combat, c *combat.Combatant) {
-	// REQ-ZN-10: charmed NPCs treat players as allied — do not attack.
-	if h.seduceConditions != nil {
-		if cs, ok := h.seduceConditions[c.ID]; ok && cs.Has("charmed") {
-			return
-		}
-	}
-
+// npcMovementStrideLocked returns the stride direction needed for the NPC combatant
+// based on its current weapon type and distance to the nearest living player.
+//
+// Rules:
+//   - Melee weapon (RangeIncrement == 0): stride "toward" when distance > 5 feet.
+//   - Ranged weapon (RangeIncrement > 0): stride "away" when distance <= 5 feet.
+//   - Returns "" when no stride is needed.
+//
+// Precondition: h.combatMu is held; c must not be nil.
+// Postcondition: Returns "toward", "away", or "".
+func (h *CombatHandler) npcMovementStrideLocked(cbt *combat.Combat, c *combat.Combatant) string {
 	isRanged := false
 	if inst, ok := h.npcMgr.Get(c.ID); ok && inst.WeaponID != "" && h.invRegistry != nil {
 		if wDef := h.invRegistry.Weapon(inst.WeaponID); wDef != nil && wDef.RangeIncrement > 0 {
 			isRanged = true
 		}
 	}
-	playerDist := 25 // fallback if no player found
+	playerDist := 25 // fallback if no living player found
 	for _, comb := range cbt.Combatants {
 		if comb.Kind == combat.KindPlayer && !comb.IsDead() {
 			d := c.Position - comb.Position
@@ -3555,7 +3559,26 @@ func (h *CombatHandler) legacyAutoQueueLocked(cbt *combat.Combat, c *combat.Comb
 		}
 	}
 	if !isRanged && playerDist > 5 {
-		_ = cbt.QueueAction(c.ID, combat.QueuedAction{Type: combat.ActionStride, Direction: "toward"})
+		return "toward"
+	}
+	if isRanged && playerDist <= 5 {
+		return "away"
+	}
+	return ""
+}
+
+// legacyAutoQueueLocked queues ActionAttack for c targeting the first living player.
+// Prepends an ActionStride when movement is needed based on weapon type and distance.
+func (h *CombatHandler) legacyAutoQueueLocked(cbt *combat.Combat, c *combat.Combatant) {
+	// REQ-ZN-10: charmed NPCs treat players as allied — do not attack.
+	if h.seduceConditions != nil {
+		if cs, ok := h.seduceConditions[c.ID]; ok && cs.Has("charmed") {
+			return
+		}
+	}
+
+	if dir := h.npcMovementStrideLocked(cbt, c); dir != "" {
+		_ = cbt.QueueAction(c.ID, combat.QueuedAction{Type: combat.ActionStride, Direction: dir})
 	}
 	for _, combatant := range cbt.Combatants {
 		if combatant.Kind == combat.KindPlayer && !combatant.IsDead() {

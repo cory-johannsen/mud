@@ -1,18 +1,18 @@
 id: vantucky_gang_enforcer
 name: Gang Enforcer
 description: A heavy-set enforcer in a sleeveless jacket covered in gang patches. Knuckles scarred, eyes cold, moving with the unhurried confidence of someone who has broken many people.
-level: 4
-max_hp: 42
-ac: 15
+level: 3
+max_hp: 30
+ac: 13
 awareness: 6
 ai_domain: ganger_combat
 respawn_delay: "5m"
 abilities:
-  brutality: 18
-  quickness: 10
-  grit: 16
+  brutality: 15
+  quickness: 9
+  grit: 13
   reasoning: 8
-  savvy: 11
+  savvy: 10
   flair: 8
 loot:
   currency:
