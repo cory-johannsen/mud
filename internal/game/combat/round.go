@@ -655,6 +655,12 @@ func ResolveRound(cbt *Combat, src Source, targetUpdater func(id string, hp int)
 					ActorName:    actor.Name,
 					Narrative:    narrative,
 				})
+				// Consume one round of ammo for ranged attacks.
+				if !isMelee && actor.Loadout != nil {
+					if eq := actor.Loadout.MainHand; eq != nil && eq.Magazine != nil {
+						_ = eq.Magazine.Consume(1)
+					}
+				}
 				// Clear flat_footed from NPC combatants after their first action resolves.
 				if actor.Kind == KindNPC && cbt.Conditions[actor.ID] != nil {
 					cbt.Conditions[actor.ID].Remove(actor.ID, "flat_footed")

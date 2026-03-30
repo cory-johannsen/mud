@@ -126,6 +126,8 @@ func ResolveFirearmAttack(attacker, target *Combatant, weapon *inventory.WeaponD
 		Outcome:     OutcomeFor(total, target.AC),
 		BaseDamage:  dmgTotal,
 		DamageRoll:  dmgDice,
+		DamageType:  weapon.DamageType,
+		WeaponName:  weapon.Name,
 	}
 }
 

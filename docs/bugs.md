@@ -379,3 +379,17 @@
 **Description:** Drifter archetype grants a prepared tech pool (19 archetype + job pool) with 1 slot at level 1 requiring player choice; the creation wizard does not handle archetype prepared tech grants, so the gameserver must prompt interactively on first login.
 **Steps:** Create a Drifter-archetype character (Free Spirit, Pirate, Bagman, Tracker); log in; observe "Choose a technology: 1) ..." prompt in feed.
 **Fix:** Exposed archetype TechGrants in ListOptions API; added prepared tech choice UI to CharacterWizard TechnologyStep (per-level dropdowns merging archetype+job pools); wired PreparedTechRepo through Server/CharacterHandler to persist choices on creation.
+
+### BUG-46: Ranged weapon attacks non-functional after player login
+**Severity:** critical
+**Status:** fixed
+**Category:** Combat
+**Description:** Three root causes combined to make ranged weapons non-functional after player login:
+1. `buildPlayerCombatant` read `h.loadouts[uid]` but that cache was only populated by `RegisterLoadout()` or `Equip()`. On login, `sess.LoadoutSet` was populated from DB but `h.loadouts` was never seeded, so `playerCbt.Loadout = nil` → `mainHandDef = nil` → `isMelee = true` → ranged weapon completely ignored.
+2. `ResolveFirearmAttack` returned `AttackResult` without `DamageType` and `WeaponName` fields, causing resistance/weakness calculations and narrative to use blank weapon info.
+3. `ActionAttack` ranged path had no ammo consumption, unlike `ActionFireBurst` and `ActionFireAutomatic`.
+**Steps:** Log in with a character that has a ranged weapon in their active loadout preset; attempt to attack an NPC; observe melee attack used instead of ranged.
+**Fix:**
+- `buildPlayerCombatant` now falls back to `sess.LoadoutSet.ActivePreset()` when `h.loadouts[uid]` is missing.
+- `ResolveFirearmAttack` now populates `DamageType` and `WeaponName` from `weapon.DamageType` and `weapon.Name`.
+- `ActionAttack` ranged path now consumes one round of ammo via `eq.Magazine.Consume(1)` after attack resolves.

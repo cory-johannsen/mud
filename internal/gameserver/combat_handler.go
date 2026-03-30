@@ -2445,10 +2445,14 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 	}
 
 	h.loadoutsMu.Lock()
-	if lo, ok := h.loadouts[sess.UID]; ok {
+	lo, ok := h.loadouts[sess.UID]
+	h.loadoutsMu.Unlock()
+	if !ok && sess.LoadoutSet != nil {
+		lo = sess.LoadoutSet.ActivePreset()
+	}
+	if lo != nil {
 		playerCbt.Loadout = lo
 	}
-	h.loadoutsMu.Unlock()
 
 	// Determine weapon proficiency rank from equipped main-hand weapon.
 	weaponProfRank := "untrained"
