@@ -11,6 +11,7 @@ import { InputPanel } from '../game/panels/InputPanel'
 import { HotbarPanel } from '../game/panels/HotbarPanel'
 import { CombatBanner } from '../game/CombatBanner'
 import { DrawerContainer } from '../game/drawers/DrawerContainer'
+import { HelpModal } from '../game/HelpModal'
 import '../styles/game.css'
 
 type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats' | 'stats'
@@ -39,6 +40,7 @@ function GameLayout() {
   const { logout } = useAuth()
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
   const [activeMobilePanel, setActiveMobilePanel] = useState<MobilePanel>('room')
+  const [showHelp, setShowHelp] = useState(false)
 
   function toggleDrawer(d: DrawerType) {
     setOpenDrawer((prev) => (prev === d ? null : d))
@@ -64,6 +66,7 @@ function GameLayout() {
               {d.charAt(0).toUpperCase() + d.slice(1)}
             </button>
           ))}
+          <button className="toolbar-btn" onClick={() => setShowHelp(true)}>Help</button>
           <button className="toolbar-btn toolbar-btn-logout" onClick={logout}>Logout</button>
         </div>
         {state.combatRound !== null && <CombatBanner />}
@@ -108,6 +111,8 @@ function GameLayout() {
 
       {/* Input */}
       <div className="panel-input"><InputPanel /></div>
+
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
     </div>
   )
 }
