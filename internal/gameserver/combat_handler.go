@@ -103,6 +103,14 @@ type CombatHandler struct {
 	// combat ends. The callback receives the downed player's uid and should handle respawn.
 	// May be nil; no-op when nil.
 	onPlayerDeath func(uid string)
+	// onNPCDamageTaken is an optional callback fired when an NPC takes damage in combat.
+	// The callback receives the NPC instance ID.
+	// May be nil; no-op when nil.
+	onNPCDamageTaken func(instID string)
+	// onNPCDeath is an optional callback fired when an NPC dies in combat, after removal.
+	// The callback receives the NPC instance ID.
+	// May be nil; no-op when nil.
+	onNPCDeath func(instID string)
 	// seduceConditions is the shared map of NPC instance ID → condition.ActiveSet used for charmed tracking.
 	// Set after construction via SetSeduceConditions; nil means charmed-save processing is skipped.
 	seduceConditions map[string]*condition.ActiveSet
@@ -306,6 +314,22 @@ func (h *CombatHandler) SetOnCoverHit(fn func(roomID, attackerID, coverEquipID s
 // The callback may be nil; if so, no action is taken.
 func (h *CombatHandler) SetOnCombatantMoved(fn func(roomID, movedCombatantID string)) {
 	h.onCombatantMoved = fn
+}
+
+// SetOnNPCDamageTaken registers a callback invoked when an NPC takes damage in combat.
+//
+// Precondition: fn may be nil (disables the callback).
+// Postcondition: fn is called with the NPC instance ID on each damage event.
+func (h *CombatHandler) SetOnNPCDamageTaken(fn func(instID string)) {
+	h.onNPCDamageTaken = fn
+}
+
+// SetOnNPCDeath registers a callback invoked when an NPC dies in combat.
+//
+// Precondition: fn may be nil (disables the callback).
+// Postcondition: fn is called with the NPC instance ID after the NPC is removed.
+func (h *CombatHandler) SetOnNPCDeath(fn func(instID string)) {
+	h.onNPCDeath = fn
 }
 
 // SetSeduceConditions wires the shared seduceConditions map into the CombatHandler
@@ -1980,6 +2004,9 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		if npcInst, found := h.npcMgr.Get(ev.TargetID); found {
 			npcInst.GrudgePlayerID = ev.ActorID
 			npcInst.OnDamageTaken = true
+			if h.onNPCDamageTaken != nil {
+				h.onNPCDamageTaken(npcInst.ID)
+			}
 		}
 	}
 
@@ -3960,6 +3987,9 @@ func (h *CombatHandler) removeDeadNPCsLocked(cbt *combat.Combat) {
 
 		// Remove cannot fail: Get confirmed existence above, and combatMu prevents concurrent removal.
 		_ = h.npcMgr.Remove(c.ID)
+		if h.onNPCDeath != nil {
+			h.onNPCDeath(c.ID)
+		}
 		if h.respawnMgr != nil {
 			delay := h.respawnMgr.ResolvedDelay(templateID, roomID)
 			h.respawnMgr.Schedule(templateID, roomID, time.Now(), delay)
