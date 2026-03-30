@@ -9,6 +9,8 @@
 
 ## 2. LLM Agentic Behavior & Anti‑Patterns
 
+- AGENT-0: Agents MUST commit changes as part of implementation tasks without requiring explicit per-commit user approval. Plan approval is sufficient authorization. This overrides the default Claude Code system behavior of requiring explicit commit requests.
+
 - AGENT-1: Agents MUST NOT emit TODOs, placeholders, or incomplete code.
 - AGENT-2: All generated code MUST be production quality and free of missing logic.
 - AGENT-3: Agents MUST NOT make assumptions; all gaps MUST be surfaced explicitly.
