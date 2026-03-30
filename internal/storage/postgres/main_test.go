@@ -109,6 +109,7 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			username      VARCHAR(64)  NOT NULL UNIQUE,
 			password_hash TEXT         NOT NULL,
 			role          VARCHAR(16)  NOT NULL DEFAULT 'player',
+			banned        BOOLEAN      NOT NULL DEFAULT false,
 			created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 		);
 		CREATE INDEX IF NOT EXISTS idx_accounts_username ON accounts (username);
@@ -169,6 +170,7 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			character_id BIGINT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
 			zone_id      TEXT   NOT NULL,
 			room_id      TEXT   NOT NULL,
+			explored     BOOLEAN NOT NULL DEFAULT TRUE,
 			PRIMARY KEY (character_id, zone_id, room_id)
 		);
 
@@ -266,7 +268,8 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 		CREATE TABLE IF NOT EXISTS world_calendar (
 			id    INTEGER PRIMARY KEY DEFAULT 1,
 			day   INTEGER NOT NULL,
-			month INTEGER NOT NULL
+			month INTEGER NOT NULL,
+			hour  INTEGER NOT NULL DEFAULT 6
 		);
 
 		CREATE TABLE IF NOT EXISTS character_wanted_levels (
@@ -371,6 +374,9 @@ func applyAllMigrations(pool *pgxpool.Pool) error {
 			job_id       TEXT   NOT NULL,
 			PRIMARY KEY (character_id, job_id)
 		);
+
+		-- Migration 053
+		ALTER TABLE characters ADD COLUMN IF NOT EXISTS hotbar TEXT;
 	`)
 	return err
 }
