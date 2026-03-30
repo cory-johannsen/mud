@@ -38,5 +38,6 @@ domain:
         - "I've thrown further than you've ever run."
 
     - id: use_exploding_cornhole_toss
-      action: boss_ability
-      ability_id: exploding_cornhole_toss
+      action: attack
+      target: nearest_enemy
+      ap_cost: 2
