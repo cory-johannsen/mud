@@ -2492,7 +2492,7 @@ func buildPlayerCombatant(sess *session.PlayerSession, h *CombatHandler) *combat
 		ID:        sess.UID,
 		Kind:      combat.KindPlayer,
 		Name:      sess.CharName,
-		MaxHP:     sess.CurrentHP,
+		MaxHP:     sess.MaxHP,
 		CurrentHP: sess.CurrentHP,
 		AC:        playerAC,
 		Level:     1,

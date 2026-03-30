@@ -314,6 +314,10 @@ func TestProperty_TargetWeakest_TargetsLowestHP(t *testing.T) {
 		if cbtOK {
 			actor := cbt.GetCombatant(inst.ID)
 			if actor != nil {
+				// Clear queue so target_weakest has a full AP budget unaffected by autoQueue.
+				if aq, found := cbt.ActionQueues[inst.ID]; found {
+					aq.ClearActions()
+				}
 				h.applyPlanLocked(cbt, actor, plan)
 			}
 		}

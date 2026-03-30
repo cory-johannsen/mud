@@ -144,6 +144,10 @@ func applyPlanInCombat(t *testing.T, h *CombatHandler, roomID, npcInstID, player
 	if actor == nil {
 		t.Fatalf("actor %q not found in combat", npcInstID)
 	}
+	// Clear the NPC's action queue so the plan starts from a fresh AP budget.
+	if aq, found := cbt.ActionQueues[npcInstID]; found {
+		aq.ClearActions()
+	}
 	h.applyPlanLocked(cbt, actor, plan)
 }
 

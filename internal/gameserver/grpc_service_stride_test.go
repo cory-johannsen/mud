@@ -149,12 +149,13 @@ func TestHandleStride_TowardIncreasesPosition(t *testing.T) {
 	assert.Equal(t, 25, playerCbt.Position, "player.Position should be 25 after striding toward")
 }
 
-// TestHandleStride_AwayDecreasesPosition verifies that striding away decreases the
-// player's Position by 25, floored at 0.
+// TestHandleStride_PlayerAheadOfEnemy_DecreasesPosition verifies that when the
+// player is ahead of (at a higher position than) the NPC, stride moves the player
+// toward the enemy by decreasing Position by 25.
 //
-// Precondition: player at Position=25; direction=="away".
-// Postcondition: player.Position becomes 0.
-func TestHandleStride_AwayDecreasesPosition(t *testing.T) {
+// Precondition: player at Position=50, NPC at Position=25 (player ahead); direction ignored.
+// Postcondition: player.Position becomes 25.
+func TestHandleStride_PlayerAheadOfEnemy_DecreasesPosition(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
 	const roomID = "room_str_ai"
@@ -179,24 +180,25 @@ func TestHandleStride_AwayDecreasesPosition(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_str_ai")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 25
+	// Place player at 50, NPC stays at default 25 — player is ahead of enemy.
+	playerCbt.Position = 50
 
-	event, err := svc.handleStride("u_str_ai", &gamev1.StrideRequest{Direction: "away"})
+	event, err := svc.handleStride("u_str_ai", &gamev1.StrideRequest{Direction: "toward"})
 	require.NoError(t, err)
 	require.NotNil(t, event)
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
-	assert.Contains(t, msgEvt.Content, "away")
+	assert.Contains(t, msgEvt.Content, "toward")
 
-	assert.Equal(t, 0, playerCbt.Position, "player.Position should be 0 after striding away from 25")
+	assert.Equal(t, 25, playerCbt.Position, "player.Position should be 25 after striding toward enemy from 50")
 }
 
-// TestHandleStride_AwayFlooredAtZero verifies that striding away from Position=0
-// does not go below zero.
+// TestHandleStride_FlooredAtZero verifies that stride does not reduce Position
+// below zero when the player is ahead of the enemy by less than 25 ft.
 //
-// Precondition: player at Position=0; direction=="away".
-// Postcondition: player.Position remains 0.
-func TestHandleStride_AwayFlooredAtZero(t *testing.T) {
+// Precondition: player at Position=10, NPC at Position=0 (player ahead by 10 ft).
+// Postcondition: player.Position is floored at 0 (10-25 would be negative).
+func TestHandleStride_FlooredAtZero(t *testing.T) {
 	svc, sessMgr, npcMgr, combatHandler := newStrideSvcWithCombat(t)
 
 	const roomID = "room_str_cm"
@@ -221,15 +223,22 @@ func TestHandleStride_AwayFlooredAtZero(t *testing.T) {
 
 	playerCbt := cbt.GetCombatant("u_str_cm")
 	require.NotNil(t, playerCbt)
-	playerCbt.Position = 0
+	// Place player at 10, NPC at 0 — player is ahead by only 10 ft (< 25), so floor fires.
+	playerCbt.Position = 10
+	for _, c := range cbt.Combatants {
+		if c.Kind == combat.KindNPC {
+			c.Position = 0
+			break
+		}
+	}
 
-	event, err := svc.handleStride("u_str_cm", &gamev1.StrideRequest{Direction: "away"})
+	event, err := svc.handleStride("u_str_cm", &gamev1.StrideRequest{Direction: "toward"})
 	require.NoError(t, err)
 	require.NotNil(t, event)
 	msgEvt := event.GetMessage()
 	require.NotNil(t, msgEvt, "expected a message event")
 
-	assert.Equal(t, 0, playerCbt.Position, "player.Position should remain 0 when already at floor")
+	assert.Equal(t, 0, playerCbt.Position, "player.Position should be floored at 0 when ahead by < 25 ft")
 }
 
 // TestHandleStride_DefaultDirectionIsToward verifies that an empty direction defaults to toward.

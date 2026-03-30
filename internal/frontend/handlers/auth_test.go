@@ -98,6 +98,10 @@ func (m *mockCharacterStore) SaveGender(_ context.Context, _ int64, _ string) er
 	return nil
 }
 
+func (m *mockCharacterStore) DeleteByAccountAndName(_ context.Context, _ int64, _ string) error {
+	return nil
+}
+
 // newAuthHandler builds an AuthHandler with empty regions/classes for tests that
 // do not exercise character creation.
 func newAuthHandler(t *testing.T, store AccountStore, gsAddr string) *AuthHandler {
