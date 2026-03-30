@@ -56,11 +56,12 @@ func (m *mockDowntimeQueueRepo) PopHead(_ context.Context, _ int64) (*postgres.Q
 	if len(m.entries) == 0 {
 		return nil, nil
 	}
+	head := m.entries[0]
 	m.entries = m.entries[1:]
 	for i := range m.entries {
 		m.entries[i].Position = i + 1
 	}
-	return new(m.entries[0]), nil
+	return &head, nil
 }
 
 // newQueueTestServer creates a minimal GameServiceServer for queue subcommand tests.
