@@ -148,6 +148,16 @@ func (h *CombatHandler) SetOnMassiveDamage(fn func(uid string)) {
 	h.onMassiveDamage = fn
 }
 
+// SetOnPlayerDeath sets the optional callback fired for each player who is downed (HP=0) when
+// all-players-down combat ends. The callback receives the downed player's uid and should handle
+// respawn (move to zone start room, restore HP, push room view). May be set to nil to disable.
+//
+// Precondition: none.
+// Postcondition: h.onPlayerDeath == fn.
+func (h *CombatHandler) SetOnPlayerDeath(fn func(uid string)) {
+	h.onPlayerDeath = fn
+}
+
 // HandlerProviders is the wire provider set for game handlers.
 var HandlerProviders = wire.NewSet(
 	NewChatHandlerProvider,

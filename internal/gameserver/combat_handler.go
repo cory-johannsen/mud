@@ -99,6 +99,10 @@ type CombatHandler struct {
 	// REQ-JD-10: triggers on_take_damage_in_one_hit_above_threshold drawback evaluation.
 	// May be nil; no-op when nil.
 	onMassiveDamage func(uid string)
+	// onPlayerDeath is an optional callback fired for each player who is downed (HP=0) when all-player-down
+	// combat ends. The callback receives the downed player's uid and should handle respawn.
+	// May be nil; no-op when nil.
+	onPlayerDeath func(uid string)
 	// seduceConditions is the shared map of NPC instance ID → condition.ActiveSet used for charmed tracking.
 	// Set after construction via SetSeduceConditions; nil means charmed-save processing is skipped.
 	seduceConditions map[string]*condition.ActiveSet
@@ -2237,6 +2241,17 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 		h.stopTimerLocked(roomID)
 		h.engine.EndCombat(roomID)
 		h.clearCoweringNPCsLocked(roomID)
+		// Collect downed player UIDs for respawn before releasing the lock.
+		var downedUIDs []string
+		if !cbt.HasLivingNPCs() {
+			// Victory — no downed players to respawn.
+		} else {
+			for _, c := range cbt.Combatants {
+				if c.Kind == combat.KindPlayer && c.CurrentHP <= 0 {
+					downedUIDs = append(downedUIDs, c.ID)
+				}
+			}
+		}
 		// Fire onCombatEndFn in a goroutine: calling it while holding combatMu
 		// deadlocks because the callback (pushRoomViewToAllInRoom) re-acquires combatMu.
 		// See the same pattern at the flee path (postUnlockFn above).
@@ -2244,6 +2259,16 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 			fn := h.onCombatEndFn
 			rid := roomID
 			go fn(rid)
+		}
+		// Fire onPlayerDeath for each downed player after releasing the lock.
+		if h.onPlayerDeath != nil && len(downedUIDs) > 0 {
+			deathFn := h.onPlayerDeath
+			uids := downedUIDs
+			go func() {
+				for _, uid := range uids {
+					deathFn(uid)
+				}
+			}()
 		}
 		return events
 	}

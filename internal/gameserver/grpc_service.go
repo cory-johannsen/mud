@@ -530,6 +530,9 @@ func NewGameServiceServer(
 	s.drawbackEngine = drawback.NewEngine(s.condRegistry)
 	// REQ-JD-10: Wire on_take_damage_in_one_hit_above_threshold drawback trigger into CombatHandler.
 	if s.combatH != nil {
+		s.combatH.SetOnPlayerDeath(func(uid string) {
+			s.respawnPlayer(uid)
+		})
 		s.combatH.SetOnMassiveDamage(func(uid string) {
 			playerSess, ok := s.sessions.GetPlayer(uid)
 			if !ok || s.jobRegistry == nil || playerSess.Conditions == nil {
@@ -9062,6 +9065,86 @@ func (s *GameServiceServer) handleHeroPointStabilize(sess *session.PlayerSession
 
 	s.pushCharacterSheet(sess)
 	return messageEvent("You spend a hero point, pulling back from the brink. You stabilize at 0 HP."), nil
+}
+
+// respawnPlayer moves a downed player to their zone's start room and restores them to 1 HP.
+//
+// Precondition: uid is a valid player session that has been downed in combat.
+// Postcondition: sess.Dead cleared; sess.CurrentHP = 1; sess.RoomID = zone start room;
+// character state persisted; player receives a narrative message and fresh room view.
+func (s *GameServiceServer) respawnPlayer(uid string) {
+	sess, ok := s.sessions.GetPlayer(uid)
+	if !ok {
+		return
+	}
+
+	// Resolve spawn room: use the zone start room for the player's current room.
+	spawnRoomID := ""
+	if currentRoom, roomOK := s.world.GetRoom(sess.RoomID); roomOK {
+		if zone, zoneOK := s.world.GetZone(currentRoom.ZoneID); zoneOK && zone.StartRoom != "" {
+			spawnRoomID = zone.StartRoom
+		}
+	}
+	// Fallback to global start room if zone lookup fails.
+	if spawnRoomID == "" {
+		if sr := s.world.StartRoom(); sr != nil {
+			spawnRoomID = sr.ID
+		}
+	}
+	if spawnRoomID == "" {
+		s.logger.Warn("respawnPlayer: no spawn room found", zap.String("uid", uid))
+		return
+	}
+
+	spawnRoom, ok := s.world.GetRoom(spawnRoomID)
+	if !ok {
+		s.logger.Warn("respawnPlayer: spawn room not found", zap.String("uid", uid), zap.String("room_id", spawnRoomID))
+		return
+	}
+
+	oldRoomID := sess.RoomID
+	sess.Dead = false
+	sess.CurrentHP = 1
+	sess.RoomID = spawnRoomID
+
+	// Clear any encounter conditions from the death.
+	if sess.Conditions != nil {
+		sess.Conditions.ClearEncounter()
+	}
+
+	// Persist new location and HP.
+	if s.charSaver != nil && sess.CharacterID != 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := s.charSaver.SaveState(ctx, sess.CharacterID, spawnRoomID, sess.CurrentHP); err != nil {
+			s.logger.Warn("respawnPlayer: SaveState failed", zap.String("uid", uid), zap.Error(err))
+		}
+	}
+
+	// Broadcast departure from combat room.
+	s.broadcastRoomEvent(oldRoomID, uid, &gamev1.RoomEvent{
+		Player: sess.CharName,
+		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_DEPART,
+	})
+
+	// Broadcast arrival in spawn room.
+	s.broadcastRoomEvent(spawnRoomID, uid, &gamev1.RoomEvent{
+		Player: sess.CharName,
+		Type:   gamev1.RoomEventType_ROOM_EVENT_TYPE_ARRIVE,
+	})
+
+	// Push character sheet so HP shows updated.
+	s.pushCharacterSheet(sess)
+
+	// Push respawn narrative.
+	s.pushMessageToUID(uid, "You collapse and wake up battered at a safe location.")
+
+	// Push room view for new room.
+	rv := s.worldH.buildRoomView(uid, spawnRoom)
+	evt := &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_RoomView{RoomView: rv},
+	}
+	s.pushEventToUID(uid, evt)
 }
 
 // applyMentalChangesToSession applies mental state condition swaps directly to a session.
