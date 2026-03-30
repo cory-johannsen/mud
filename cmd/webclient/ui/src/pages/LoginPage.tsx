@@ -5,42 +5,6 @@ import { useAuth } from '../auth/AuthContext'
 
 type Tab = 'login' | 'register'
 
-const AK47 = `                         ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▓▓▓▓▓▓▓▓φ▄▄▄▄▄▄▄▄,,,,,_        ╒█▌
-             ___    __,╫╫╫╫╫╫╫╫╫╫╫╫╣▓▓▄╠▄╠╠╠▓╬╣▓▓▓▓█▓██▓███▓▓█▓▓▓▓▓█▓▄______▌▄▌_
-  ▄▄▓▓▓▓███████▓█▓▓█╬╬▓▌▒▒▒╠╢█▀▀▀╬╬╬╬Ñ╠▓╬╬╬╬╬╬╫▓▓▓▓▓███████▓█▓▓▓▓▓▓███▓▓▓▓▓███▀▀
-  ╫█████▓███▓╬▓▓▓▓██▓▓▀▀▓╬╬╬╬▓M▓╙╙╟▓▓▓▓███▌└└└└╙▀╙"
-  ▐█▓█▓▓▓▓▓▓▓██▓▀▀╙     ▓▓╬╣▓▓_)__▐╙╜█▓███▓
-   █████▓▀▀╙           ╓█▓╬█▀        ╫▓████▌
-   ╙"                 ┌█▓▓█▀          ██████▓_
-                      ╙▀███            ▓██████▌_
-                                        ╙███████▓
-                                          ▀████▓
-                                            ╙▀"`
-
-const GUNCHETE_TITLE = `  ██████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗███████╗████████╗███████╗
- ██╔════╝ ██║   ██║████╗  ██║██╔════╝██║  ██║██╔════╝╚══██╔══╝██╔════╝
- ██║  ███╗██║   ██║██╔██╗ ██║██║     ███████║█████╗     ██║   █████╗
- ██║   ██║██║   ██║██║╚██╗██║██║     ██╔══██║██╔══╝     ██║   ██╔══╝
- ╚██████╔╝╚██████╔╝██║ ╚████║╚██████╗██║  ██║███████╗   ██║   ███████╗
-  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝`
-
-const MACHETE = `╖_
-▌██▓▄╥_
-▌╠▓▓▒███▓▄▄_
-╟'███╣███████▓▄▄,
-▓╙███╣███████████▓▓▄╖_
-▀▄███▌▀███████████████▓▌▄,_
- 'W╬▓▓▓▓▓▀██████████████████▓▄▄,_
-   \`▀╬╠▀╟█████████████████████████▓▄▄,
-       ╙¥▄▄╙▀▀▀███▓▓▓▓▓▓████████████████▓▄▄,
-           \`╙╙M¥≡╗▄╠▀▀▀▓█▓▓▓▄▓▀▀██████████████▓▄▄,_
-                     └"╙ª%≡╫╬▌▀▀▀▓▓▓▓▓▓▓████████▓▓██▐N▄▄╓_
-                              \`└╙ª¥W╣▄╠▀▀▀▓▓▓▓▓█▓╫█▌▓╫██▀▓▓▓#▄▄_
-                                        └"╙M╝╣▄▓▓██▐Ñ█▓█▓▓███▌Ñ▓▓▓▓▄▄,
-                                                 '█▌▌"  ╙▀▓█▓█▓████▀▓▓▓⌐
-                                                 ╒█Å        └╙▀▀▀▀█▓▓██▌
-                                                 ╙▀               ▐███▀`
-
 function validateUsername(u: string): string | null {
   if (!/^[a-zA-Z0-9_]{3,20}$/.test(u)) {
     return 'Username must be 3–20 alphanumeric characters or underscores.'
@@ -95,13 +59,7 @@ export function LoginPage() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.splash}>
-        <pre style={styles.ak47}>{AK47}</pre>
-        <pre style={styles.title}>{GUNCHETE_TITLE}</pre>
-        <pre style={styles.machete}>{MACHETE}</pre>
-        <p style={styles.subtitle}>Post-Collapse Portland, OR — A Dystopian Sci-Fi MUD</p>
-      </div>
-
+      <div style={styles.overlay} />
       <div style={styles.card}>
         <div style={styles.tabs}>
           <button
@@ -159,63 +117,33 @@ export function LoginPage() {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    minHeight: '100vh',
+    width: '100vw',
+    height: '100vh',
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#0d0d0d',
+    backgroundImage: "url('/gunchete.webp')",
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    position: 'relative',
     fontFamily: 'monospace',
-    padding: '1rem',
-    gap: '1.5rem',
-    overflowX: 'hidden',
   },
-  splash: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: '800px',
-  },
-  ak47: {
-    margin: 0,
-    color: '#00cc44',
-    fontSize: '0.65rem',
-    lineHeight: 1.2,
-    whiteSpace: 'pre',
-    alignSelf: 'flex-start',
-  },
-  title: {
-    margin: '0.5rem 0',
-    color: '#00ccff',
-    fontWeight: 'bold',
-    fontSize: '0.65rem',
-    lineHeight: 1.2,
-    whiteSpace: 'pre',
-  },
-  machete: {
-    margin: 0,
-    color: '#ccaa00',
-    fontSize: '0.65rem',
-    lineHeight: 1.2,
-    whiteSpace: 'pre',
-    alignSelf: 'flex-end',
-  },
-  subtitle: {
-    margin: '0.5rem 0 0',
-    color: '#ccaa00',
-    fontSize: '0.85rem',
-    letterSpacing: '0.05em',
-    textAlign: 'center',
+  overlay: {
+    position: 'absolute',
+    inset: 0,
+    background: 'rgba(0,0,0,0.55)',
+    zIndex: 0,
   },
   card: {
-    background: '#1a1a1a',
+    background: 'rgba(13,13,13,0.85)',
     border: '1px solid #333',
     borderRadius: '8px',
     padding: '2rem',
     width: '100%',
     maxWidth: '360px',
     color: '#ccc',
+    position: 'relative',
+    zIndex: 1,
   },
   tabs: {
     display: 'flex',
