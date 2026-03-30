@@ -380,6 +380,14 @@
 **Steps:** Create a Drifter-archetype character (Free Spirit, Pirate, Bagman, Tracker); log in; observe "Choose a technology: 1) ..." prompt in feed.
 **Fix:** Exposed archetype TechGrants in ListOptions API; added prepared tech choice UI to CharacterWizard TechnologyStep (per-level dropdowns merging archetype+job pools); wired PreparedTechRepo through Server/CharacterHandler to persist choices on creation.
 
+### BUG-47: Player combat input ignored in rounds 2+
+**Severity:** high
+**Status:** fixed
+**Category:** Combat
+**Description:** From round 2 onward, any command the player typed during a combat round was rejected with "insufficient AP" because `autoQueuePlayersLocked` ran immediately at new-round setup (before the round-start broadcast and timer), spending all 3 of the player's AP on the default action before the player could see "Round X begins!" and type anything.
+**Steps:** Start combat with `attack <npc>`; wait for round 2; type `attack <npc>` again; observe ⚠ insufficient AP error (or no apparent response).
+**Fix:** Removed `autoQueuePlayersLocked` from the new-round setup block in `resolveAndAdvanceLocked`. Moved it to `resolveAndAdvance` (the timer-fired path) where it now runs as a last resort just before resolving, so players have the full round duration to submit their own action.
+
 ### BUG-46: Ranged weapon attacks non-functional after player login
 **Severity:** critical
 **Status:** fixed

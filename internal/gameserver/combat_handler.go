@@ -1837,7 +1837,8 @@ func (h *CombatHandler) Throw(uid, explosiveID string) ([]*gamev1.CombatEvent, e
 }
 
 // resolveAndAdvance is the timer-fired entry point. It acquires combatMu, then
-// delegates to resolveAndAdvanceLocked.
+// auto-queues any players who have not yet submitted their action (using their
+// DefaultCombatAction), and delegates to resolveAndAdvanceLocked.
 //
 // Precondition: a combat must be active in roomID.
 // Postcondition: round events are broadcast; combat is ended or next round is started;
@@ -1850,6 +1851,10 @@ func (h *CombatHandler) resolveAndAdvance(roomID string) {
 	if !ok {
 		return
 	}
+	// Auto-queue defaults for any players who did not submit before the timer expired.
+	// This must happen here (timer-fired path only) so that players who submit their
+	// own action before the timer are not overridden.
+	h.autoQueuePlayersLocked(cbt)
 	h.resolveAndAdvanceLocked(roomID, cbt)
 }
 
@@ -2293,7 +2298,6 @@ func (h *CombatHandler) resolveAndAdvanceLocked(roomID string, cbt *combat.Comba
 	}
 
 	h.autoQueueNPCsLocked(cbt)
-	h.autoQueuePlayersLocked(cbt)
 
 	// Apply per-round drowning damage to any submerged player combatants (TERRAIN-13).
 	// Precondition: combatMu is held; cbt is non-nil.
