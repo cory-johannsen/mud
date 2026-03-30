@@ -116,6 +116,7 @@ export interface PreparedSlotView {
   expended?: boolean
   techName?: string
   tech_name?: string
+  description?: string
 }
 
 export interface InnateSlotView {
@@ -145,6 +146,7 @@ export interface SpontaneousKnownEntry {
   tech_name?: string
   techLevel?: number
   tech_level?: number
+  description?: string
 }
 
 export interface SpontaneousUsePoolView {
