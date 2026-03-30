@@ -437,3 +437,19 @@
 **Description:** On level-up, the console correctly announces a pending ability boost but the Stats tab shows no pending boosts and the `levelup` command has no effect.
 **Steps:** Level up a character in the web client; observe the console messages announcing the level-up and pending ability boost; open the Stats drawer — no pending boost is shown; type `levelup` in the input — nothing happens.
 **Fix:**
+
+### BUG-52: Web UI character selection screen does not show zone and room
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The character selection screen in the web client lists characters but does not display their current zone or room location. Players cannot tell where a character is positioned before selecting them.
+**Steps:** Open the web client; reach the character selection screen; observe that each character entry shows name/class/level but no zone or room.
+**Fix:**
+
+### BUG-53: Web UI character creation technology selection shows no descriptions
+**Severity:** high
+**Status:** open
+**Category:** UI
+**Description:** During character creation, the technology selection step displays technology names but no descriptions. Players cannot see damage values, healing amounts, range, AP cost, or other stat details needed to make an informed choice.
+**Steps:** Create a new character in the web client; reach the technology selection step; observe that technologies are listed by name only with no stat details, damage, healing, or flavor text.
+**Fix:**
