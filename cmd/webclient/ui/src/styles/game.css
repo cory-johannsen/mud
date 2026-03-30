@@ -283,7 +283,37 @@
 .stats-save-row { display: flex; gap: 1rem; font-size: 0.82rem; margin-bottom: 0.25rem; color: #ccc; }
 .stats-save-row strong { color: #fff; }
 
-/* Responsive: < 1024px stack vertically */
+/* panel-content: transparent wrapper on desktop/tablet so children
+   participate directly in the CSS Grid; becomes a real block on mobile. */
+.panel-content {
+  display: contents;
+}
+
+/* Mobile tab bar: hidden on desktop and tablet */
+.panel-tabs {
+  display: none;
+  background: #111;
+  border-bottom: 1px solid #333;
+}
+.panel-tab-btn {
+  flex: 1;
+  padding: 0.5rem 0.25rem;
+  background: #1a1a1a;
+  border: none;
+  border-right: 1px solid #2a2a2a;
+  color: #888;
+  font-family: monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.panel-tab-btn:last-child { border-right: none; }
+.panel-tab-btn.active {
+  background: #111;
+  color: #e0c060;
+  border-bottom: 2px solid #e0c060;
+}
+
+/* Responsive: 480px–1023px — tablet, single-column scrolling page */
 @media (max-width: 1023px) {
   .game-layout {
     grid-template-areas:
@@ -301,4 +331,98 @@
     overflow: auto;
   }
   .panel-feed { min-height: 300px; }
+}
+
+/* Responsive: ≤ 480px — phone portrait, fixed-viewport layout with tab bar */
+@media (max-width: 480px) {
+  .game-layout {
+    grid-template-areas:
+      "toolbar"
+      "tabs"
+      "content"
+      "feed"
+      "hotbar"
+      "input";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr minmax(100px, 28vh) auto auto;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* Tab bar visible on phone */
+  .panel-tabs {
+    display: flex;
+    grid-area: tabs;
+  }
+
+  /* panel-content becomes the actual panel container */
+  .panel-content {
+    display: block;
+    grid-area: content;
+    overflow: hidden;
+  }
+
+  /* All three panels hidden by default; only .mobile-active is shown */
+  .panel-room,
+  .panel-map,
+  .panel-character {
+    display: none;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .panel-room.mobile-active,
+  .panel-map.mobile-active,
+  .panel-character.mobile-active {
+    display: block;
+    height: 100%;
+  }
+
+  /* Feed: no forced min-height on phone */
+  .panel-feed {
+    min-height: unset;
+  }
+
+  /* Toolbar: wrap onto two rows if needed, smaller padding */
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    padding: 0.3rem 0.5rem;
+  }
+  .toolbar-zone {
+    flex: 1 1 auto;
+    font-size: 0.8rem;
+  }
+  .toolbar-time {
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+  }
+  .toolbar-btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  /* Hotbar: taller for touch targets */
+  .hotbar {
+    height: 44px;
+  }
+  .hotbar-label {
+    font-size: 0.6rem;
+  }
+
+  /* Drawer: full-screen overlay on phone */
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+  }
+  .drawer-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 85%;
+    max-width: 85%;
+    z-index: 101;
+  }
 }

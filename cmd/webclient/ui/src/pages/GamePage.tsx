@@ -14,6 +14,7 @@ import { DrawerContainer } from '../game/drawers/DrawerContainer'
 import '../styles/game.css'
 
 type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats' | 'stats'
+type MobilePanel = 'room' | 'map' | 'character'
 
 const MONTHS = ['January','February','March','April','May','June',
                  'July','August','September','October','November','December']
@@ -37,6 +38,7 @@ function GameLayout() {
   const { state } = useGame()
   const { logout } = useAuth()
   const [openDrawer, setOpenDrawer] = useState<DrawerType | null>(null)
+  const [activeMobilePanel, setActiveMobilePanel] = useState<MobilePanel>('room')
 
   function toggleDrawer(d: DrawerType) {
     setOpenDrawer((prev) => (prev === d ? null : d))
@@ -67,10 +69,33 @@ function GameLayout() {
         {state.combatRound !== null && <CombatBanner />}
       </div>
 
-      {/* Main panels */}
-      <div className="panel-room"><RoomPanel /></div>
-      <div className="panel-map"><MapPanel /></div>
-      <div className="panel-character"><CharacterPanel /></div>
+      {/* Mobile tab bar — hidden on desktop via CSS */}
+      <div className="panel-tabs">
+        {(['room', 'map', 'character'] as MobilePanel[]).map((p) => (
+          <button
+            key={p}
+            className={`panel-tab-btn${activeMobilePanel === p ? ' active' : ''}`}
+            onClick={() => setActiveMobilePanel(p)}
+          >
+            {p.charAt(0).toUpperCase() + p.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* Main panels — panel-content is display:contents on desktop so children
+          participate directly in the grid; on mobile it becomes a block container
+          with only the active panel visible */}
+      <div className="panel-content">
+        <div className={`panel-room${activeMobilePanel === 'room' ? ' mobile-active' : ''}`}>
+          <RoomPanel />
+        </div>
+        <div className={`panel-map${activeMobilePanel === 'map' ? ' mobile-active' : ''}`}>
+          <MapPanel />
+        </div>
+        <div className={`panel-character${activeMobilePanel === 'character' ? ' mobile-active' : ''}`}>
+          <CharacterPanel />
+        </div>
+      </div>
 
       {/* Feed + drawer overlay */}
       <div className="panel-feed">
