@@ -80,7 +80,7 @@ message AdminTeleportResponse {}
 
 - REQ-AGA-9: A new file `cmd/webclient/handlers/grpc_session_manager.go` MUST implement the `SessionManager` interface with a `grpcSessionManager` struct holding a `gamev1.GameServiceClient`.
 
-- REQ-AGA-10: `grpcSessionManager.AllSessions()` MUST call `AdminListSessions` and map each `AdminSessionInfo` to a `grpcManagedSession`. On RPC error, MUST return an empty slice (not panic).
+- REQ-AGA-10: `grpcSessionManager.AllSessions()` MUST call `AdminListSessions` and map each `AdminSessionInfo` to a `grpcManagedSession`. On RPC error, MUST return the error to the caller; the admin HTTP handler MUST propagate it as HTTP 502 with `{"error": "gameserver unavailable"}`.
 
 - REQ-AGA-11: `grpcSessionManager.GetSession(charID int64)` MUST call `AllSessions()` and return the matching session. If not found, MUST return `nil, false`.
 
@@ -100,6 +100,12 @@ message AdminTeleportResponse {}
 - REQ-AGA-16: The gameserver MUST have unit tests for each of the four new RPC methods in `internal/gameserver/grpc_service_admin_test.go`, using property-based testing where applicable.
 
 - REQ-AGA-17: `grpcSessionManager` MUST have unit tests using a mock `GameServiceClient` (generated or hand-written), verifying correct RPC dispatch and error handling.
+
+### 5. React UI — Admin Role Gating
+
+- REQ-AGA-18: The `/admin` route and any navigation link to it MUST only be rendered when the authenticated user's JWT role is `admin` or `moderator`. Users with any other role MUST NOT see admin navigation links or be able to reach the admin dashboard.
+- REQ-AGA-19: `ProtectedRoute` (or an equivalent `AdminRoute` wrapper) MUST enforce the role check client-side, redirecting non-admin users to `/game` if they attempt to navigate directly to `/admin`.
+- REQ-AGA-20: The role MUST be sourced from the existing JWT claims already stored in `AuthContext` — no additional API call is required.
 
 ## Out of Scope
 
