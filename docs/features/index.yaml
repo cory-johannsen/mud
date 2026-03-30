@@ -715,6 +715,18 @@ features:
     dependencies:
       - claude-gameserver-skill  # provides headless telnet port and seed-claude-accounts tool
 
+  - slug: seasonal-weather-effects
+    name: Seasonal Weather Effects
+    status: planned
+    priority: 475
+    category: world
+    file: docs/features/seasonal-weather-effects.md
+    effort: "L"  # WeatherManager, DB persistence, 10 weather types, room indoor flag, telnet+web indicators, calendar tick counter
+    dependencies:
+      - persistent-calendar  # GameCalendar subscription and tick counter
+      - exploration          # applyRoomEffectsOnEntry hook
+      - web-client           # web UI weather badge
+
   - slug: 2d-combat-expansion
     name: 2D Grid Combat Expansion
     status: planned
