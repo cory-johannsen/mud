@@ -1,5 +1,87 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useGame } from '../GameContext'
+import type { FeatEntry } from '../../proto'
+
+const SLOT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+
+function SlotPicker({
+  hotbarSlots,
+  onPick,
+  onCancel,
+}: {
+  hotbarSlots: string[]
+  onPick: (slot: number) => void
+  onCancel: () => void
+}) {
+  return (
+    <div style={styles.slotPicker}>
+      <span style={styles.slotPickerLabel}>Pick a hotbar slot:</span>
+      <div style={styles.slotPickerGrid}>
+        {SLOT_KEYS.map((key, i) => {
+          const current = hotbarSlots[i] ?? ''
+          return (
+            <button
+              key={key}
+              style={{ ...styles.slotBtn, ...(current ? styles.slotBtnOccupied : {}) }}
+              onClick={() => onPick(i + 1)}
+              title={current ? `Replace: ${current}` : `Slot ${key} (empty)`}
+              type="button"
+            >
+              <span style={styles.slotBtnKey}>{key}</span>
+              {current && <span style={styles.slotBtnCurrent}>{current}</span>}
+            </button>
+          )
+        })}
+      </div>
+      <button style={styles.cancelBtn} onClick={onCancel} type="button">Cancel</button>
+    </div>
+  )
+}
+
+function FeatItem({
+  feat,
+  hotbarSlots,
+  sendMessage,
+}: {
+  feat: FeatEntry
+  hotbarSlots: string[]
+  sendMessage: (type: string, payload: object) => void
+}) {
+  const [picking, setPicking] = useState(false)
+
+  function handlePick(slot: number) {
+    sendMessage('HotbarRequest', { action: 'set', slot, text: feat.activateText })
+    setPicking(false)
+  }
+
+  return (
+    <li style={styles.featItem}>
+      <div style={styles.featHeader}>
+        <strong style={{ color: feat.active ? '#e0c060' : '#aaa' }}>
+          {feat.name ?? ''}
+        </strong>
+        <span style={feat.active ? styles.badgeActive : styles.badgePassive}>
+          {feat.active ? 'active' : 'passive'}
+        </span>
+      </div>
+      {feat.description && (
+        <p style={styles.featDesc}>{feat.description}</p>
+      )}
+      {feat.active && feat.activateText && !picking && (
+        <button style={styles.hotbarBtn} onClick={() => setPicking(true)} type="button">
+          + Add to Hotbar
+        </button>
+      )}
+      {picking && (
+        <SlotPicker
+          hotbarSlots={hotbarSlots}
+          onPick={handlePick}
+          onCancel={() => setPicking(false)}
+        />
+      )}
+    </li>
+  )
+}
 
 export function FeatsDrawer({ onClose }: { onClose: () => void }) {
   const { state, sendMessage } = useGame()
@@ -11,7 +93,9 @@ export function FeatsDrawer({ onClose }: { onClose: () => void }) {
   }, [state.characterSheet, sendMessage])
 
   const sheet = state.characterSheet
-  const feats = sheet?.feats ?? []
+  const rawFeats = Array.isArray(sheet?.feats) ? (sheet.feats as FeatEntry[]) : []
+  const active = rawFeats.filter((f) => f.active)
+  const passive = rawFeats.filter((f) => !f.active)
 
   return (
     <>
@@ -22,24 +106,132 @@ export function FeatsDrawer({ onClose }: { onClose: () => void }) {
       <div className="drawer-body">
         {!sheet ? (
           <p style={{ color: '#666' }}>Loading…</p>
+        ) : rawFeats.length === 0 ? (
+          <p style={{ color: '#666' }}>No feats.</p>
         ) : (
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {(Array.isArray(feats) ? feats : []).map((f, i) => {
-              const feat = f as { name?: string; description?: string }
-              return (
-                <li key={i} style={{ marginBottom: '0.6rem' }}>
-                  <strong style={{ color: '#e0c060' }}>{feat.name ?? ''}</strong>
-                  {feat.description && (
-                    <p style={{ margin: '0.2rem 0 0', color: '#888', fontSize: '0.8rem' }}>
-                      {feat.description}
-                    </p>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
+          <>
+            {active.length > 0 && (
+              <section style={styles.section}>
+                <div style={styles.sectionLabel}>Active</div>
+                <ul style={styles.list}>
+                  {active.map((f, i) => (
+                    <FeatItem
+                      key={f.featId ?? i}
+                      feat={f}
+                      hotbarSlots={state.hotbarSlots}
+                      sendMessage={sendMessage}
+                    />
+                  ))}
+                </ul>
+              </section>
+            )}
+            {passive.length > 0 && (
+              <section style={styles.section}>
+                <div style={styles.sectionLabel}>Passive</div>
+                <ul style={styles.list}>
+                  {passive.map((f, i) => (
+                    <FeatItem
+                      key={f.featId ?? (active.length + i)}
+                      feat={f}
+                      hotbarSlots={state.hotbarSlots}
+                      sendMessage={sendMessage}
+                    />
+                  ))}
+                </ul>
+              </section>
+            )}
+          </>
         )}
       </div>
     </>
   )
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  section: { marginBottom: '1rem' },
+  sectionLabel: {
+    color: '#7af',
+    fontSize: '0.72rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    marginBottom: '0.4rem',
+    borderBottom: '1px solid #2a2a2a',
+    paddingBottom: '0.2rem',
+  },
+  list: { listStyle: 'none', padding: 0, margin: 0 },
+  featItem: { marginBottom: '0.75rem' },
+  featHeader: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem' },
+  featDesc: { margin: '0.15rem 0 0.3rem', color: '#888', fontSize: '0.8rem' },
+  badgeActive: {
+    fontSize: '0.65rem',
+    padding: '0.1rem 0.4rem',
+    borderRadius: '3px',
+    background: '#2a3a1a',
+    border: '1px solid #4a6a2a',
+    color: '#8d4',
+    whiteSpace: 'nowrap' as const,
+  },
+  badgePassive: {
+    fontSize: '0.65rem',
+    padding: '0.1rem 0.4rem',
+    borderRadius: '3px',
+    background: '#1a1a2a',
+    border: '1px solid #3a3a5a',
+    color: '#778',
+    whiteSpace: 'nowrap' as const,
+  },
+  hotbarBtn: {
+    marginTop: '0.2rem',
+    padding: '0.2rem 0.5rem',
+    background: '#1a2a1a',
+    border: '1px solid #4a6a2a',
+    color: '#8d4',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.75rem',
+  },
+  slotPicker: {
+    marginTop: '0.4rem',
+    background: '#111',
+    border: '1px solid #333',
+    borderRadius: '4px',
+    padding: '0.5rem',
+  },
+  slotPickerLabel: { color: '#888', fontSize: '0.75rem', display: 'block', marginBottom: '0.4rem' },
+  slotPickerGrid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '3px', marginBottom: '0.4rem' },
+  slotBtn: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    padding: '0.2rem',
+    background: '#1a1a1a',
+    border: '1px solid #333',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    minHeight: '32px',
+    gap: '1px',
+  },
+  slotBtnOccupied: { borderColor: '#555', background: '#222' },
+  slotBtnKey: { color: '#666', fontSize: '0.6rem', lineHeight: 1 },
+  slotBtnCurrent: {
+    color: '#999',
+    fontSize: '0.6rem',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
+    maxWidth: '100%',
+    lineHeight: 1.2,
+  },
+  cancelBtn: {
+    padding: '0.15rem 0.5rem',
+    background: 'none',
+    border: '1px solid #444',
+    color: '#666',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontSize: '0.72rem',
+  },
 }
