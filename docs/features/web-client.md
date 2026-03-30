@@ -1,7 +1,7 @@
 # Web Game Client
 
 **Slug:** web-client
-**Status:** spec
+**Status:** done
 **Priority:** 430
 **Category:** ui
 **Effort:** XXL

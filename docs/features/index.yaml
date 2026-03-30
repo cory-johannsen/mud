@@ -626,7 +626,7 @@ features:
 
   - slug: web-client
     name: Web Game Client (Phase 1)
-    status: planned
+    status: done
     priority: 430
     category: ui
     file: docs/features/web-client.md
@@ -634,6 +634,16 @@ features:
     dependencies:
       - internal-client         # shared session, feed, history, auth, render contract
       - zone-content-expansion  # admin room editor uses WorldEditor from zone-content-expansion
+
+  - slug: admin-grpc-actions
+    name: Admin gRPC Actions
+    status: planned
+    priority: 432
+    category: ui
+    file: docs/features/admin-grpc-actions.md
+    effort: "M"  # 4 unary gRPC RPCs (list/kick/message/teleport); grpcSessionManager replaces noOpSessionManager in webclient
+    dependencies:
+      - web-client
 
   - slug: web-client-phase2
     name: Web Game Client (Phase 2 — Tiled Scene)
