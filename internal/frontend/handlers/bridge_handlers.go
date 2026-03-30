@@ -1233,18 +1233,14 @@ func bridgeStep(bctx *bridgeContext) (bridgeResult, error) {
 	}}, nil
 }
 
-// bridgeStride builds a StrideRequest with the direction ("toward" or "away").
+// bridgeStride builds a StrideRequest. Stride always moves toward the nearest enemy.
 //
 // Precondition: bctx must be non-nil with a valid reqID.
-// Postcondition: returns a non-nil msg containing a StrideRequest; direction is "toward" or "away".
+// Postcondition: returns a non-nil msg containing a StrideRequest.
 func bridgeStride(bctx *bridgeContext) (bridgeResult, error) {
-	dir := "toward"
-	if bctx.parsed.RawArgs == "away" {
-		dir = "away"
-	}
 	return bridgeResult{msg: &gamev1.ClientMessage{
 		RequestId: bctx.reqID,
-		Payload:   &gamev1.ClientMessage_Stride{Stride: &gamev1.StrideRequest{Direction: dir}},
+		Payload:   &gamev1.ClientMessage_Stride{Stride: &gamev1.StrideRequest{}},
 	}}, nil
 }
 

@@ -35,6 +35,7 @@ const HELP_SECTIONS: HelpSection[] = [
       { cmd: 'burst <target>', aliases: 'bf', desc: 'Burst fire (2 AP, 2 attacks)' },
       { cmd: 'auto', aliases: 'af', desc: 'Automatic fire at all enemies (3 AP)' },
       { cmd: 'throw <item>', aliases: 'gr', desc: 'Throw an explosive' },
+      { cmd: 'stride', aliases: 'str close move approach', desc: 'Close 25ft toward enemy (1 AP)' },
       { cmd: 'reload', aliases: 'rl', desc: 'Reload equipped weapon (1 AP)' },
       { cmd: 'pass', aliases: 'p', desc: 'Forfeit remaining action points' },
       { cmd: 'flee', aliases: 'run', desc: 'Attempt to flee combat' },

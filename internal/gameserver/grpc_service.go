@@ -8358,14 +8358,14 @@ func (s *GameServiceServer) handleShove(uid string, req *gamev1.ShoveRequest) (*
 	return messageEvent(detail + fmt.Sprintf(" — success! %s is pushed back 5 ft.", inst.Name())), nil
 }
 
-// handleStride moves the player 25 ft toward or away from the combat target.
-// Combat only; costs 1 AP.
+// handleStride moves the player 25 ft toward the nearest living enemy.
+// Combat only; costs 1 AP. Direction is always "toward" — stride closes distance.
 //
 // Precondition: uid must be in active combat.
-// Postcondition: Player combatant's Position updated; message event returned.
+// Postcondition: Player combatant's Position updated toward the nearest enemy; message event returned.
 // When the player strides away from adjacent NPCs, CheckReactiveStrikes fires
 // and the results are appended to the response message.
-func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
+func (s *GameServiceServer) handleStride(uid string, _ *gamev1.StrideRequest) (*gamev1.ServerEvent, error) {
 	sess, ok := s.sessions.GetPlayer(uid)
 	if !ok {
 		return nil, fmt.Errorf("player %q not found", uid)
@@ -8394,24 +8394,33 @@ func (s *GameServiceServer) handleStride(uid string, req *gamev1.StrideRequest) 
 	}
 
 	oldPos := combatant.Position
-	dir := req.GetDirection()
-	switch dir {
-	case "toward", "":
-		dir = "toward"
-		combatant.Position += 25 // toward NPC = increase position
-	case "away":
+
+	// Find the nearest living enemy to determine stride direction.
+	var opponent *combat.Combatant
+	for _, c := range cbt.Combatants {
+		if c.Kind != combat.KindPlayer && !c.IsDead() {
+			if opponent == nil || combat.PosDist(combatant.Position, c.Position) < combat.PosDist(combatant.Position, opponent.Position) {
+				opponent = c
+			}
+		}
+	}
+
+	// Always stride toward the enemy: move position toward opponent.
+	if opponent != nil && combatant.Position > opponent.Position {
+		// Player is ahead of (beyond) opponent — decrease to close gap.
 		if combatant.Position-25 < 0 {
 			combatant.Position = 0
 		} else {
 			combatant.Position -= 25
 		}
-	default:
-		return errorEvent(fmt.Sprintf("Unknown direction %q. Use 'toward' or 'away'.", dir)), nil
+	} else {
+		// Player is behind or at opponent — increase to close gap.
+		combatant.Position += 25
 	}
 
 	s.clearPlayerCover(uid, sess)
 
-	msg := fmt.Sprintf("You stride %s.", dir)
+	msg := "You stride toward your enemy."
 	rsUpdater := func(id string, hp int) {
 		if target, ok := s.sessions.GetPlayer(id); ok {
 			target.CurrentHP = hp
