@@ -136,6 +136,15 @@ type Instance struct {
 	AttackVerb string
 	// Immobile prevents this NPC from patrolling or wandering. Copied from template.
 	Immobile bool
+	// Roving state — only populated when Template.Roving != nil.
+	// RovingRouteIndex is the current index into RovingConfig.Route.
+	RovingRouteIndex int
+	// RovingRouteDir is the traversal direction: +1 (forward) or -1 (backward).
+	RovingRouteDir int
+	// RovingNextMoveAt is the time after which the RovingManager may move this NPC.
+	RovingNextMoveAt time.Time
+	// RovingPausedUntil is the time until which roving movement is paused (set on combat entry).
+	RovingPausedUntil time.Time
 	// CourageThreshold copied from template; NPC engages when ThreatScore <= this. REQ-NB-10.
 	CourageThreshold int
 	// FleeHPPct is the HP% below which the NPC flees combat. 0 = never flee.
@@ -272,7 +281,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		}
 	}
 
-	return &Instance{
+	inst := &Instance{
 		ID:            id,
 		TemplateID:    tmpl.ID,
 		Type:          tmpl.Type,
@@ -335,6 +344,12 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 			return roomID
 		}(),
 	}
+	if tmpl.Roving != nil {
+		inst.RovingRouteDir = 1
+		inst.RovingRouteIndex = 0
+		inst.RovingNextMoveAt = time.Now().Add(parseTravelInterval(tmpl.Roving.TravelInterval))
+	}
+	return inst
 }
 
 // resolveResistances computes the effective resistance map for a new instance.
