@@ -1,5 +1,132 @@
+import { useState } from 'react'
 import { useGame } from './GameContext'
-import type { ShopView } from '../proto'
+import type { ShopItem, ShopView } from '../proto'
+
+// ---------- Stat tooltip ----------
+
+function ItemTooltip({ item }: { item: ShopItem }) {
+  const kind = item.kind ?? ''
+  const desc = item.description ?? ''
+  const lines: Array<{ label: string; value: string }> = []
+
+  if (kind === 'weapon') {
+    const dmg = item.weaponDamage ?? item.weapon_damage ?? ''
+    const dmgType = item.weaponDamageType ?? item.weapon_damage_type ?? ''
+    const range = item.weaponRange ?? item.weapon_range ?? 0
+    const traits = item.weaponTraits ?? item.weapon_traits ?? []
+    if (dmg) lines.push({ label: 'Damage', value: dmgType ? `${dmg} ${dmgType}` : dmg })
+    lines.push({ label: 'Range', value: range > 0 ? `${range} ft` : 'Melee' })
+    if (traits.length > 0) lines.push({ label: 'Traits', value: traits.join(', ') })
+  } else if (kind === 'armor') {
+    const ac = item.armorAcBonus ?? item.armor_ac_bonus ?? 0
+    const slot = item.armorSlot ?? item.armor_slot ?? ''
+    const chk = item.armorCheckPenalty ?? item.armor_check_penalty ?? 0
+    const spd = item.armorSpeedPenalty ?? item.armor_speed_penalty ?? 0
+    const prof = item.armorProfCategory ?? item.armor_prof_category ?? ''
+    if (ac !== 0) lines.push({ label: 'AC Bonus', value: `+${ac}` })
+    if (slot) lines.push({ label: 'Slot', value: slot.replace(/_/g, ' ') })
+    if (chk !== 0) lines.push({ label: 'Check Penalty', value: `${chk}` })
+    if (spd !== 0) lines.push({ label: 'Speed Penalty', value: `${spd} ft` })
+    if (prof) lines.push({ label: 'Proficiency', value: prof.replace(/_/g, ' ') })
+  }
+
+  return (
+    <div style={styles.tooltip}>
+      <div style={styles.tooltipName}>{item.name ?? item.itemId ?? item.item_id}</div>
+      {kind && <div style={styles.tooltipKind}>{kind}</div>}
+      {desc && <p style={styles.tooltipDesc}>{desc}</p>}
+      {lines.map((l) => (
+        <div key={l.label} style={styles.tooltipRow}>
+          <span style={styles.tooltipLabel}>{l.label}</span>
+          <span style={styles.tooltipValue}>{l.value}</span>
+        </div>
+      ))}
+      {lines.length === 0 && !desc && <div style={{ color: '#666', fontSize: '0.75rem' }}>No stats available.</div>}
+    </div>
+  )
+}
+
+// ---------- Equipped badge helper ----------
+
+function equippedLabel(item: ShopItem, sheet: ReturnType<typeof useGame>['state']['characterSheet']): string | null {
+  if (!sheet) return null
+  const name = item.name ?? ''
+  const kind = item.kind ?? ''
+
+  if (kind === 'weapon') {
+    const mh = sheet.mainHand ?? sheet.main_hand ?? ''
+    const oh = sheet.offHand ?? sheet.off_hand ?? ''
+    if (mh && name && mh.toLowerCase().includes(name.toLowerCase())) return 'main hand'
+    if (oh && name && oh.toLowerCase().includes(name.toLowerCase())) return 'off hand'
+  }
+  if (kind === 'armor') {
+    const armor = sheet.armor ?? {}
+    for (const [slot, equipped] of Object.entries(armor)) {
+      if (equipped && name && equipped.toLowerCase().includes(name.toLowerCase())) {
+        return slot.replace(/_/g, ' ')
+      }
+    }
+  }
+  return null
+}
+
+// ---------- Shop row ----------
+
+function ShopRow({
+  item,
+  sheet,
+  onBuy,
+}: {
+  item: ShopItem
+  sheet: ReturnType<typeof useGame>['state']['characterSheet']
+  onBuy: (itemId: string, qty: number) => void
+}) {
+  const [hovered, setHovered] = useState(false)
+  const id = item.itemId ?? item.item_id ?? ''
+  const name = item.name ?? id
+  const buy = item.buyPrice ?? item.buy_price ?? 0
+  const sell = item.sellPrice ?? item.sell_price ?? 0
+  const stock = item.stock ?? 0
+  const equipped = equippedLabel(item, sheet)
+  const hasStats = !!(item.kind && (item.kind === 'weapon' || item.kind === 'armor' || item.description))
+
+  return (
+    <tr
+      style={{ ...styles.row, ...(hovered ? styles.rowHovered : {}) }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <td style={styles.tdName}>
+        <div style={styles.nameCell}>
+          <span style={{ cursor: hasStats ? 'help' : 'default' }}>
+            {name}
+            {hasStats && <span style={styles.statsHint}>ⓘ</span>}
+          </span>
+          {equipped && <span style={styles.equippedBadge}>{equipped}</span>}
+        </div>
+        {hovered && hasStats && <ItemTooltip item={item} />}
+      </td>
+      <td style={styles.tdNum}>{buy}¢</td>
+      <td style={styles.tdNum}>{sell}¢</td>
+      <td style={{ ...styles.tdNum, color: stock === 0 ? '#666' : '#ccc' }}>
+        {stock === 0 ? 'out' : stock}
+      </td>
+      <td style={styles.tdAction}>
+        {stock > 0 && (
+          <button
+            style={styles.buyBtn}
+            onClick={() => onBuy(id, 1)}
+            type="button"
+          >
+            Buy
+          </button>
+        )}
+      </td>
+    </tr>
+  )
+}
+
+// ---------- Modal ----------
 
 interface ShopModalProps {
   shop: ShopView
@@ -7,20 +134,23 @@ interface ShopModalProps {
 }
 
 function ShopModal({ shop, onClose }: ShopModalProps) {
-  const { sendMessage } = useGame()
+  const { state, sendMessage } = useGame()
   const npcName = shop.npcName ?? shop.npc_name ?? 'Merchant'
   const items = shop.items ?? []
+  const currency = state.characterSheet?.currency ?? state.inventoryView?.currency ?? null
 
   function handleBuy(itemId: string, quantity: number) {
     sendMessage('BuyRequest', { npc_name: npcName, item_id: itemId, quantity })
-    // Don't close — let player keep shopping
   }
 
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <h3 style={styles.title}>{npcName}'s Wares</h3>
+          <div style={styles.headerLeft}>
+            <h3 style={styles.title}>{npcName}'s Wares</h3>
+            {currency && <span style={styles.currency}>{currency}</span>}
+          </div>
           <button style={styles.closeBtn} onClick={onClose} type="button">✕</button>
         </div>
         <div style={styles.body}>
@@ -38,34 +168,14 @@ function ShopModal({ shop, onClose }: ShopModalProps) {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item, i) => {
-                  const id = item.itemId ?? item.item_id ?? ''
-                  const name = item.name ?? id
-                  const buy = item.buyPrice ?? item.buy_price ?? 0
-                  const sell = item.sellPrice ?? item.sell_price ?? 0
-                  const stock = item.stock ?? 0
-                  return (
-                    <tr key={i} style={styles.row}>
-                      <td style={styles.tdName}>{name}</td>
-                      <td style={styles.tdNum}>{buy}¢</td>
-                      <td style={styles.tdNum}>{sell}¢</td>
-                      <td style={{ ...styles.tdNum, color: stock === 0 ? '#666' : '#ccc' }}>
-                        {stock === 0 ? 'out' : stock}
-                      </td>
-                      <td style={styles.tdAction}>
-                        {stock > 0 && (
-                          <button
-                            style={styles.buyBtn}
-                            onClick={() => handleBuy(id, 1)}
-                            type="button"
-                          >
-                            Buy
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
+                {items.map((item, i) => (
+                  <ShopRow
+                    key={item.itemId ?? item.item_id ?? i}
+                    item={item}
+                    sheet={state.characterSheet}
+                    onBuy={handleBuy}
+                  />
+                ))}
               </tbody>
             </table>
           )}
@@ -96,7 +206,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#111',
     border: '1px solid #333',
     borderRadius: '6px',
-    width: 'min(600px, 95vw)',
+    width: 'min(640px, 95vw)',
     maxHeight: '80vh',
     display: 'flex',
     flexDirection: 'column',
@@ -110,10 +220,20 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: '1px solid #2a2a2a',
     flexShrink: 0,
   },
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '0.75rem',
+  },
   title: {
     margin: 0,
     color: '#e0c060',
     fontSize: '1rem',
+    fontFamily: 'monospace',
+  },
+  currency: {
+    color: '#7bc',
+    fontSize: '0.8rem',
     fontFamily: 'monospace',
   },
   closeBtn: {
@@ -147,10 +267,36 @@ const styles: Record<string, React.CSSProperties> = {
   row: {
     borderBottom: '1px solid #1a1a1a',
   },
+  rowHovered: {
+    background: '#1a1a1a',
+  },
+  nameCell: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+    flexWrap: 'wrap' as const,
+    position: 'relative' as const,
+  },
+  statsHint: {
+    color: '#555',
+    fontSize: '0.7rem',
+    marginLeft: '3px',
+    cursor: 'help',
+  },
+  equippedBadge: {
+    fontSize: '0.62rem',
+    padding: '0.08rem 0.35rem',
+    borderRadius: '3px',
+    background: '#1a2a3a',
+    border: '1px solid #2a4a6a',
+    color: '#7bc',
+    whiteSpace: 'nowrap' as const,
+  },
   tdName: {
     color: '#ddd',
     padding: '0.35rem 0.5rem',
     textAlign: 'left' as const,
+    position: 'relative' as const,
   },
   tdNum: {
     color: '#aaa',
@@ -177,5 +323,55 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#555',
     fontSize: '0.75rem',
     fontFamily: 'monospace',
+  },
+  // Tooltip
+  tooltip: {
+    position: 'absolute' as const,
+    left: '0',
+    top: '100%',
+    zIndex: 300,
+    background: '#1a1a1a',
+    border: '1px solid #444',
+    borderRadius: '5px',
+    padding: '0.5rem 0.7rem',
+    minWidth: '200px',
+    maxWidth: '280px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
+    pointerEvents: 'none' as const,
+  },
+  tooltipName: {
+    color: '#e0c060',
+    fontSize: '0.85rem',
+    fontWeight: 'bold' as const,
+    marginBottom: '0.1rem',
+    fontFamily: 'monospace',
+  },
+  tooltipKind: {
+    color: '#666',
+    fontSize: '0.65rem',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+    marginBottom: '0.3rem',
+  },
+  tooltipDesc: {
+    color: '#999',
+    fontSize: '0.75rem',
+    margin: '0 0 0.4rem',
+    lineHeight: 1.4,
+  },
+  tooltipRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '1rem',
+    fontSize: '0.78rem',
+    padding: '0.1rem 0',
+    fontFamily: 'monospace',
+  },
+  tooltipLabel: {
+    color: '#7af',
+  },
+  tooltipValue: {
+    color: '#ccc',
+    textAlign: 'right' as const,
   },
 }

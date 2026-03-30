@@ -4187,14 +4187,28 @@ func (*ServerEvent_ShopView) isServerEvent_Payload() {}
 
 // ShopItem represents a single item row in a merchant's shop listing.
 type ShopItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ItemId        string                 `protobuf:"bytes,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
-	BuyPrice      int32                  `protobuf:"varint,3,opt,name=buy_price,json=buyPrice,proto3" json:"buy_price,omitempty"`
-	SellPrice     int32                  `protobuf:"varint,4,opt,name=sell_price,json=sellPrice,proto3" json:"sell_price,omitempty"`
-	Stock         int32                  `protobuf:"varint,5,opt,name=stock,proto3" json:"stock,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	Name      string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	ItemId    string                 `protobuf:"bytes,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	BuyPrice  int32                  `protobuf:"varint,3,opt,name=buy_price,json=buyPrice,proto3" json:"buy_price,omitempty"`
+	SellPrice int32                  `protobuf:"varint,4,opt,name=sell_price,json=sellPrice,proto3" json:"sell_price,omitempty"`
+	Stock     int32                  `protobuf:"varint,5,opt,name=stock,proto3" json:"stock,omitempty"`
+	// Item metadata for stat display and equipped comparison.
+	Kind        string `protobuf:"bytes,6,opt,name=kind,proto3" json:"kind,omitempty"` // weapon | armor | consumable | etc.
+	Description string `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	// Weapon stats (populated when kind == "weapon").
+	WeaponDamage     string   `protobuf:"bytes,8,opt,name=weapon_damage,json=weaponDamage,proto3" json:"weapon_damage,omitempty"`
+	WeaponDamageType string   `protobuf:"bytes,9,opt,name=weapon_damage_type,json=weaponDamageType,proto3" json:"weapon_damage_type,omitempty"`
+	WeaponRange      int32    `protobuf:"varint,10,opt,name=weapon_range,json=weaponRange,proto3" json:"weapon_range,omitempty"` // 0 = melee, >0 = ranged feet
+	WeaponTraits     []string `protobuf:"bytes,11,rep,name=weapon_traits,json=weaponTraits,proto3" json:"weapon_traits,omitempty"`
+	// Armor stats (populated when kind == "armor").
+	ArmorAcBonus      int32  `protobuf:"varint,12,opt,name=armor_ac_bonus,json=armorAcBonus,proto3" json:"armor_ac_bonus,omitempty"`
+	ArmorSlot         string `protobuf:"bytes,13,opt,name=armor_slot,json=armorSlot,proto3" json:"armor_slot,omitempty"`
+	ArmorCheckPenalty int32  `protobuf:"varint,14,opt,name=armor_check_penalty,json=armorCheckPenalty,proto3" json:"armor_check_penalty,omitempty"`
+	ArmorSpeedPenalty int32  `protobuf:"varint,15,opt,name=armor_speed_penalty,json=armorSpeedPenalty,proto3" json:"armor_speed_penalty,omitempty"`
+	ArmorProfCategory string `protobuf:"bytes,16,opt,name=armor_prof_category,json=armorProfCategory,proto3" json:"armor_prof_category,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ShopItem) Reset() {
@@ -4260,6 +4274,83 @@ func (x *ShopItem) GetStock() int32 {
 		return x.Stock
 	}
 	return 0
+}
+
+func (x *ShopItem) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *ShopItem) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *ShopItem) GetWeaponDamage() string {
+	if x != nil {
+		return x.WeaponDamage
+	}
+	return ""
+}
+
+func (x *ShopItem) GetWeaponDamageType() string {
+	if x != nil {
+		return x.WeaponDamageType
+	}
+	return ""
+}
+
+func (x *ShopItem) GetWeaponRange() int32 {
+	if x != nil {
+		return x.WeaponRange
+	}
+	return 0
+}
+
+func (x *ShopItem) GetWeaponTraits() []string {
+	if x != nil {
+		return x.WeaponTraits
+	}
+	return nil
+}
+
+func (x *ShopItem) GetArmorAcBonus() int32 {
+	if x != nil {
+		return x.ArmorAcBonus
+	}
+	return 0
+}
+
+func (x *ShopItem) GetArmorSlot() string {
+	if x != nil {
+		return x.ArmorSlot
+	}
+	return ""
+}
+
+func (x *ShopItem) GetArmorCheckPenalty() int32 {
+	if x != nil {
+		return x.ArmorCheckPenalty
+	}
+	return 0
+}
+
+func (x *ShopItem) GetArmorSpeedPenalty() int32 {
+	if x != nil {
+		return x.ArmorSpeedPenalty
+	}
+	return 0
+}
+
+func (x *ShopItem) GetArmorProfCategory() string {
+	if x != nil {
+		return x.ArmorProfCategory
+	}
+	return ""
 }
 
 // ShopView delivers structured merchant inventory in response to BrowseRequest.
@@ -12995,14 +13086,27 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\fcraft_result\x18\x1b \x01(\v2\x19.game.v1.CraftResultEventH\x00R\vcraftResult\x12A\n" +
 	"\rhotbar_update\x18\x1c \x01(\v2\x1a.game.v1.HotbarUpdateEventH\x00R\fhotbarUpdate\x120\n" +
 	"\tshop_view\x18\x1d \x01(\v2\x11.game.v1.ShopViewH\x00R\bshopViewB\t\n" +
-	"\apayload\"\x89\x01\n" +
+	"\apayload\"\xaf\x04\n" +
 	"\bShopItem\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12\x1b\n" +
 	"\tbuy_price\x18\x03 \x01(\x05R\bbuyPrice\x12\x1d\n" +
 	"\n" +
 	"sell_price\x18\x04 \x01(\x05R\tsellPrice\x12\x14\n" +
-	"\x05stock\x18\x05 \x01(\x05R\x05stock\"N\n" +
+	"\x05stock\x18\x05 \x01(\x05R\x05stock\x12\x12\n" +
+	"\x04kind\x18\x06 \x01(\tR\x04kind\x12 \n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\x12#\n" +
+	"\rweapon_damage\x18\b \x01(\tR\fweaponDamage\x12,\n" +
+	"\x12weapon_damage_type\x18\t \x01(\tR\x10weaponDamageType\x12!\n" +
+	"\fweapon_range\x18\n" +
+	" \x01(\x05R\vweaponRange\x12#\n" +
+	"\rweapon_traits\x18\v \x03(\tR\fweaponTraits\x12$\n" +
+	"\x0earmor_ac_bonus\x18\f \x01(\x05R\farmorAcBonus\x12\x1d\n" +
+	"\n" +
+	"armor_slot\x18\r \x01(\tR\tarmorSlot\x12.\n" +
+	"\x13armor_check_penalty\x18\x0e \x01(\x05R\x11armorCheckPenalty\x12.\n" +
+	"\x13armor_speed_penalty\x18\x0f \x01(\x05R\x11armorSpeedPenalty\x12.\n" +
+	"\x13armor_prof_category\x18\x10 \x01(\tR\x11armorProfCategory\"N\n" +
 	"\bShopView\x12\x19\n" +
 	"\bnpc_name\x18\x01 \x01(\tR\anpcName\x12'\n" +
 	"\x05items\x18\x02 \x03(\v2\x11.game.v1.ShopItemR\x05items\"\x92\x01\n" +

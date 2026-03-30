@@ -331,6 +331,20 @@ message ShopItem {
   int32  buy_price  = 3;
   int32  sell_price = 4;
   int32  stock      = 5;
+  // Item metadata for stat display and equipped comparison.
+  string kind             = 6;   // weapon | armor | consumable | etc.
+  string description      = 7;
+  // Weapon stats (populated when kind == "weapon").
+  string weapon_damage      = 8;
+  string weapon_damage_type = 9;
+  int32  weapon_range       = 10;  // 0 = melee, >0 = ranged feet
+  repeated string weapon_traits = 11;
+  // Armor stats (populated when kind == "armor").
+  int32  armor_ac_bonus        = 12;
+  string armor_slot            = 13;
+  int32  armor_check_penalty   = 14;
+  int32  armor_speed_penalty   = 15;
+  string armor_prof_category   = 16;
 }
 
 // ShopView delivers structured merchant inventory in response to BrowseRequest.

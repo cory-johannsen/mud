@@ -102,19 +102,38 @@ func (s *GameServiceServer) handleBrowse(uid string, req *gamev1.BrowseRequest) 
 	rows := npc.BrowseLines(tmpl.Merchant, state, surcharge, sess.NegotiateModifier)
 	items := make([]*gamev1.ShopItem, 0, len(rows))
 	for _, row := range rows {
-		displayName := row.ItemID
-		if s.invRegistry != nil {
-			if def, ok := s.invRegistry.Item(row.ItemID); ok {
-				displayName = def.Name
-			}
-		}
-		items = append(items, &gamev1.ShopItem{
-			Name:      displayName,
+		shopItem := &gamev1.ShopItem{
 			ItemId:    row.ItemID,
 			BuyPrice:  int32(row.BuyPrice),
 			SellPrice: int32(row.SellPrice),
 			Stock:     int32(row.Stock),
-		})
+			Name:      row.ItemID,
+		}
+		if s.invRegistry != nil {
+			if def, ok := s.invRegistry.Item(row.ItemID); ok {
+				shopItem.Name = def.Name
+				shopItem.Kind = def.Kind
+				shopItem.Description = def.Description
+				if def.WeaponRef != "" {
+					if wpn := s.invRegistry.Weapon(def.WeaponRef); wpn != nil {
+						shopItem.WeaponDamage = wpn.DamageDice
+						shopItem.WeaponDamageType = wpn.DamageType
+						shopItem.WeaponRange = int32(wpn.RangeIncrement)
+						shopItem.WeaponTraits = wpn.Traits
+					}
+				}
+				if def.ArmorRef != "" {
+					if arm, ok := s.invRegistry.Armor(def.ArmorRef); ok {
+						shopItem.ArmorAcBonus = int32(arm.ACBonus)
+						shopItem.ArmorSlot = string(arm.Slot)
+						shopItem.ArmorCheckPenalty = int32(arm.CheckPenalty)
+						shopItem.ArmorSpeedPenalty = int32(arm.SpeedPenalty)
+						shopItem.ArmorProfCategory = arm.ProficiencyCategory
+					}
+				}
+			}
+		}
+		items = append(items, shopItem)
 	}
 	return &gamev1.ServerEvent{
 		Payload: &gamev1.ServerEvent_ShopView{

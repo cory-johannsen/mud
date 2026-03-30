@@ -289,6 +289,28 @@ export interface ShopItem {
   sellPrice?: number
   sell_price?: number
   stock?: number
+  kind?: string
+  description?: string
+  // Weapon stats (when kind == "weapon")
+  weaponDamage?: string
+  weapon_damage?: string
+  weaponDamageType?: string
+  weapon_damage_type?: string
+  weaponRange?: number
+  weapon_range?: number
+  weaponTraits?: string[]
+  weapon_traits?: string[]
+  // Armor stats (when kind == "armor")
+  armorAcBonus?: number
+  armor_ac_bonus?: number
+  armorSlot?: string
+  armor_slot?: string
+  armorCheckPenalty?: number
+  armor_check_penalty?: number
+  armorSpeedPenalty?: number
+  armor_speed_penalty?: number
+  armorProfCategory?: string
+  armor_prof_category?: string
 }
 
 export interface ShopView {
