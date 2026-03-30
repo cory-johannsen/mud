@@ -1,0 +1,86 @@
+id: dayton_james_weber
+name: "Dayton James Weber — The Cornhole Quad"
+description: >
+  A quadruple amputee of remarkable self-determination, Dayton cruises the Portland
+  streets in a heavily modified Isuzu Rodeo with a custom firing rig bolted to the
+  dashboard. Four limbs gone, zero fucks remaining. He navigates by biting the wheel
+  and fires a 9mm with an adaptive trigger system. His trunk is full of cornhole sacks
+  wired to explode on impact. "The sport builds character," he tells anyone who survives
+  long enough to hear it.
+type: human
+gender: male
+level: 10
+max_hp: 160
+ac: 17
+awareness: 12
+tier: boss
+npc_type: combat
+ai_domain: cornhole_quad_combat
+respawn_delay: "60m"
+abilities:
+  brutality: 14
+  quickness: 16
+  grit: 18
+  reasoning: 12
+  savvy: 14
+  flair: 18
+weapon:
+  - id: ganger_pistol
+    weight: 5
+armor:
+  - id: leather_jacket
+    weight: 3
+boss_abilities:
+  - id: exploding_cornhole_toss_damage
+    name: "Exploding Cornhole Toss"
+    trigger: on_damage_taken
+    cooldown: "3m"
+    effect:
+      aoe_damage_expr: "2d8"
+  - id: exploding_cornhole_toss_nausea
+    name: "Cornhole Blast — Nausea Wave"
+    trigger: on_damage_taken
+    cooldown: "3m"
+    effect:
+      aoe_condition: nausea
+loot:
+  currency:
+    min: 200
+    max: 800
+  items:
+    - item: cornhole_sack
+      chance: 0.75
+      min_qty: 1
+      max_qty: 3
+    - item: tactical_vest
+      chance: 0.25
+      min_qty: 1
+      max_qty: 1
+    - item: ganger_pistol
+      chance: 0.40
+      min_qty: 1
+      max_qty: 1
+roving:
+  route:
+    - sei_holgate_blvd
+    - sei_warehouse_district
+    - csp_main_entrance
+    - csp_shrimp_plaza
+    - csp_amphitheater
+    - csp_fountain
+    - csp_main_entrance
+    - sei_warehouse_district
+    - sei_holgate_blvd
+  travel_interval: "4m"
+  explore_probability: 0.10
+taunts:
+  - "The cornhole never misses. Only amateurs miss."
+  - "Four limbs, zero regrets, infinite cornhole."
+  - "You think this is a game? It IS a game. That's the point."
+  - "I've been through worse than you. My arms went through worse than you."
+  - "CORNHOLE SUPREMACY."
+  - "Adaptive rig. Adaptive mindset. You should try it."
+  - "This Rodeo has seen things. So has this sack."
+  - "The bag hits harder when you're crying."
+  - "Most people quit when they lose one limb. I'm just getting started."
+  - "You know what the Isuzu Rodeo never had? Mercy. Neither do I."

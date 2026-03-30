@@ -38,6 +38,17 @@ type CombatStrategy struct {
 	UseCover bool `yaml:"use_cover"`
 }
 
+// RovingConfig holds multi-zone route configuration for roving NPCs.
+// Precondition: Route must be non-empty if Roving is non-nil.
+type RovingConfig struct {
+	// Route is an ordered list of room IDs the NPC visits. May span zones.
+	Route []string `yaml:"route"`
+	// TravelInterval is the duration between room transitions (e.g. "3m"). Default "5m".
+	TravelInterval string `yaml:"travel_interval"`
+	// ExploreProbability is the chance [0,1] to deviate from route to a random adjacent room.
+	ExploreProbability float64 `yaml:"explore_probability"`
+}
+
 // Template defines a reusable NPC archetype loaded from YAML.
 type Template struct {
 	ID          string    `yaml:"id"`
@@ -136,6 +147,12 @@ type Template struct {
 
 	// Immobile prevents this NPC from patrolling or wandering.
 	Immobile bool `yaml:"immobile"`
+
+	// RovingConfig holds multi-zone route configuration for roving NPCs.
+	// Precondition: Route must be non-empty if Roving is non-nil.
+	// Roving, when non-nil, makes this NPC traverse a multi-zone route autonomously.
+	// Only valid when NPCType == "combat" and Tier == "boss", or NPCType != "combat".
+	Roving *RovingConfig `yaml:"roving,omitempty"`
 
 	// SeductionProbability is the probability (0.0–1.0) that this NPC attempts to seduce
 	// a player at the start of each combat round when disposition is not "hostile".
@@ -316,6 +333,23 @@ func (t *Template) Validate() error {
 		t.Personality = "cowardly" // normalise empty → cowardly
 	}
 
+	if t.Roving != nil {
+		if len(t.Roving.Route) == 0 {
+			return fmt.Errorf("npc template %q: roving.route must not be empty", t.ID)
+		}
+		if t.NPCType == "combat" && t.Tier != "boss" {
+			return fmt.Errorf("npc template %q: roving combat NPCs must have tier: boss", t.ID)
+		}
+		if t.Roving.ExploreProbability < 0 || t.Roving.ExploreProbability > 1 {
+			return fmt.Errorf("npc template %q: roving.explore_probability must be in [0,1]", t.ID)
+		}
+		if t.Roving.TravelInterval != "" {
+			if _, err := time.ParseDuration(t.Roving.TravelInterval); err != nil {
+				return fmt.Errorf("npc template %q: roving.travel_interval %q is not a valid duration: %w", t.ID, t.Roving.TravelInterval, err)
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -442,4 +476,20 @@ func LoadTemplates(dir string) ([]*Template, error) {
 		templates = append(templates, loaded...)
 	}
 	return templates, nil
+}
+
+// parseTravelInterval parses a duration string for roving NPC travel interval.
+// Returns the parsed duration, or 5 minutes if s is empty or unparseable.
+//
+// Precondition: s may be empty or any string.
+// Postcondition: Returns a positive time.Duration; never returns zero or negative.
+func parseTravelInterval(s string) time.Duration {
+	if s == "" {
+		return 5 * time.Minute
+	}
+	d, err := time.ParseDuration(s)
+	if err != nil || d <= 0 {
+		return 5 * time.Minute
+	}
+	return d
 }

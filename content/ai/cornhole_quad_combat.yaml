@@ -1,0 +1,42 @@
+domain:
+  id: cornhole_quad_combat
+  description: Combat behavior for the Cornhole Quad boss. Throws sacks, shoots, and taunts.
+
+  tasks:
+    - id: combat_turn
+      description: Root task — select combat action based on state
+
+  methods:
+    - task: combat_turn
+      id: throw_sack
+      precondition: in_combat
+      subtasks: [use_exploding_cornhole_toss]
+
+    - task: combat_turn
+      id: shoot
+      precondition: in_combat
+      subtasks: [attack_enemy]
+
+    - task: combat_turn
+      id: taunt_and_shoot
+      precondition: in_combat
+      subtasks: [say_taunt, attack_enemy]
+
+  operators:
+    - id: attack_enemy
+      action: attack
+      target: nearest_enemy
+      ap_cost: 2
+
+    - id: say_taunt
+      action: say
+      cooldown: "15s"
+      strings:
+        - "The cornhole never misses. Only amateurs miss."
+        - "Four limbs, zero regrets, infinite cornhole."
+        - "You think you can dodge a sack? Adorable."
+        - "I've thrown further than you've ever run."
+
+    - id: use_exploding_cornhole_toss
+      action: boss_ability
+      ability_id: exploding_cornhole_toss

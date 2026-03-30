@@ -243,6 +243,8 @@ type GameServiceServer struct {
 	wantedRepo                 *postgres.WantedRepository
 	stopWantedDecay            func()
 	stopCarrierRad             func()
+	rovingMgr                  *npc.RovingManager
+	stopRovingNPCs             func()
 	trapMgr                    *trap.TrapManager
 	trapTemplates              map[string]*trap.TrapTemplate
 	// merchantRuntimeStates maps NPC instance ID to active merchant runtime state.
@@ -540,6 +542,12 @@ func NewGameServiceServer(
 			}
 			heldJobs := s.resolveHeldJobs(playerSess)
 			s.drawbackEngine.FireTrigger(uid, drawback.TriggerOnTakeDamageInOneHitAboveThreshold, heldJobs, playerSess.Conditions, time.Now())
+		})
+		s.combatH.SetOnNPCDamageTaken(s.pauseRovingOnCombat)
+		s.combatH.SetOnNPCDeath(func(instID string) {
+			if s.rovingMgr != nil {
+				s.rovingMgr.Unregister(instID)
+			}
 		})
 		// REQ-ZN-9: wire seduceConditions so CombatHandler can process charmed saves at round end.
 		s.combatH.SetSeduceConditions(s.seduceConditions)
