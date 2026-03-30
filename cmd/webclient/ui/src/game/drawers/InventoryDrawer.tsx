@@ -44,9 +44,8 @@ export function InventoryDrawer({ onClose }: { onClose: () => void }) {
               </tbody>
             </table>
             <div className="drawer-summary">
-              {inv.usedSlots ?? inv.used_slots ?? 0}/{inv.maxSlots ?? inv.max_slots ?? 0} slots ·{' '}
-              {((inv.totalWeight ?? inv.total_weight ?? 0) as number).toFixed(1)} kg ·{' '}
-              {inv.currency ?? 0} credits
+              <div>{inv.usedSlots ?? inv.used_slots ?? 0}/{inv.maxSlots ?? inv.max_slots ?? 0} slots · {((inv.totalWeight ?? inv.total_weight ?? 0) as number).toFixed(1)} kg</div>
+              <div style={{ marginTop: '0.25rem' }}>{inv.currency ?? 0} credits</div>
             </div>
           </>
         )}

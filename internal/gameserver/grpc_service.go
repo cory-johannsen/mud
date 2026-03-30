@@ -5510,9 +5510,16 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		for _, lvl := range levels {
 			for _, slot := range sess.PreparedTechs[lvl] {
 				if slot != nil {
+					techName := slot.TechID
+					if s.techRegistry != nil {
+						if def, ok := s.techRegistry.Get(slot.TechID); ok {
+							techName = def.Name
+						}
+					}
 					view.PreparedSlots = append(view.PreparedSlots, &gamev1.PreparedSlotView{
 						TechId:   slot.TechID,
 						Expended: slot.Expended,
+						TechName: techName,
 					})
 				}
 			}
@@ -5534,6 +5541,30 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 		})
 	}
 
+	// Spontaneous known techs with names.
+	if len(sess.SpontaneousTechs) > 0 {
+		knownLevels := make([]int, 0, len(sess.SpontaneousTechs))
+		for lvl := range sess.SpontaneousTechs {
+			knownLevels = append(knownLevels, lvl)
+		}
+		sort.Ints(knownLevels)
+		for _, lvl := range knownLevels {
+			for _, tid := range sess.SpontaneousTechs[lvl] {
+				techName := tid
+				if s.techRegistry != nil {
+					if def, ok := s.techRegistry.Get(tid); ok {
+						techName = def.Name
+					}
+				}
+				view.SpontaneousKnown = append(view.SpontaneousKnown, &gamev1.SpontaneousKnownEntry{
+					TechId:    tid,
+					TechName:  techName,
+					TechLevel: int32(lvl),
+				})
+			}
+		}
+	}
+
 	innateIDs := make([]string, 0, len(sess.InnateTechs))
 	for id := range sess.InnateTechs {
 		innateIDs = append(innateIDs, id)
@@ -5541,11 +5572,43 @@ func (s *GameServiceServer) handleChar(uid string) (*gamev1.ServerEvent, error) 
 	sort.Strings(innateIDs)
 	for _, id := range innateIDs {
 		slot := sess.InnateTechs[id]
+		techName := id
+		techDesc := ""
+		if s.techRegistry != nil {
+			if def, ok := s.techRegistry.Get(id); ok {
+				techName = def.Name
+				techDesc = def.Description
+			}
+		}
 		view.InnateSlots = append(view.InnateSlots, &gamev1.InnateSlotView{
 			TechId:        id,
 			UsesRemaining: int32(slot.UsesRemaining),
 			MaxUses:       int32(slot.MaxUses),
+			TechName:      techName,
+			Description:   techDesc,
 		})
+	}
+
+	// Hardwired technologies (always available, unlimited use).
+	if len(sess.HardwiredTechs) > 0 {
+		hwIDs := make([]string, len(sess.HardwiredTechs))
+		copy(hwIDs, sess.HardwiredTechs)
+		sort.Strings(hwIDs)
+		for _, id := range hwIDs {
+			techName := id
+			techDesc := ""
+			if s.techRegistry != nil {
+				if def, ok := s.techRegistry.Get(id); ok {
+					techName = def.Name
+					techDesc = def.Description
+				}
+			}
+			view.HardwiredSlots = append(view.HardwiredSlots, &gamev1.HardwiredSlotView{
+				TechId:      id,
+				TechName:    techName,
+				Description: techDesc,
+			})
+		}
 	}
 
 	// REQ-EM-31: active set bonuses on character sheet.

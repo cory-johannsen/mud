@@ -11,10 +11,10 @@ import { InputPanel } from '../game/panels/InputPanel'
 import { HotbarPanel } from '../game/panels/HotbarPanel'
 import { CombatBanner } from '../game/CombatBanner'
 import { DrawerContainer } from '../game/drawers/DrawerContainer'
+import type { DrawerType } from '../game/drawers/DrawerContainer'
 import { HelpModal } from '../game/HelpModal'
+import { NpcModal } from '../game/NpcModal'
 import '../styles/game.css'
-
-type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats' | 'stats'
 type MobilePanel = 'room' | 'map' | 'character'
 
 const MONTHS = ['January','February','March','April','May','June',
@@ -57,7 +57,7 @@ function GameLayout() {
           {state.timeOfDay && (
             <span className="toolbar-time">{formatTimeOfDay(state.timeOfDay)}</span>
           )}
-          {(['inventory', 'equipment', 'skills', 'feats', 'stats'] as DrawerType[]).map((d) => (
+          {(['inventory', 'equipment', 'skills', 'feats', 'stats', 'technology'] as DrawerType[]).map((d) => (
             <button
               key={d}
               className={`toolbar-btn${openDrawer === d ? ' active' : ''}`}
@@ -113,6 +113,7 @@ function GameLayout() {
       <div className="panel-input"><InputPanel /></div>
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+      {state.shopView && <NpcModal />}
     </div>
   )
 }

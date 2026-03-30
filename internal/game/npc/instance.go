@@ -171,6 +171,9 @@ type Instance struct {
 	// RestCost is the credit cost charged to a player for a motel rest at this NPC.
 	// 0 means this NPC is not a motel NPC and does not offer rest (REQ-REST-8).
 	RestCost int
+	// Taunts is a list of combat taunts copied from the template at spawn.
+	// On each combat turn there is a 25% chance one is broadcast to the room.
+	Taunts []string
 }
 
 // HasTag reports whether the given tag is present in the instance's tag list.
@@ -321,6 +324,7 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 			}
 			return tmpl.Disposition
 		}(),
+		Taunts:           append([]string(nil), tmpl.Taunts...),
 		CourageThreshold: tmpl.CourageThreshold,
 		FleeHPPct:        tmpl.FleeHPPct,
 		WanderRadius:     tmpl.WanderRadius,

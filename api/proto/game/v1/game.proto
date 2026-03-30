@@ -320,7 +320,23 @@ message ServerEvent {
     TabCompleteResponse   tab_complete           = 26;
     CraftResultEvent      craft_result           = 27;
     HotbarUpdateEvent    hotbar_update          = 28;
+    ShopView             shop_view              = 29;
   }
+}
+
+// ShopItem represents a single item row in a merchant's shop listing.
+message ShopItem {
+  string name       = 1;
+  string item_id    = 2;
+  int32  buy_price  = 3;
+  int32  sell_price = 4;
+  int32  stock      = 5;
+}
+
+// ShopView delivers structured merchant inventory in response to BrowseRequest.
+message ShopView {
+  string npc_name = 1;
+  repeated ShopItem items = 2;
 }
 
 // HpUpdateEvent delivers a lightweight HP update to refresh the prompt bar.
@@ -863,8 +879,23 @@ message UseResponse {
 
 // PreparedSlotView represents one prepared technology slot on the character sheet.
 message PreparedSlotView {
-    string tech_id  = 1;
-    bool   expended = 2;
+    string tech_id   = 1;
+    bool   expended  = 2;
+    string tech_name = 3;
+}
+
+// HardwiredSlotView represents one always-available hardwired technology.
+message HardwiredSlotView {
+    string tech_id          = 1;
+    string tech_name        = 2;
+    string description      = 3;
+}
+
+// SpontaneousKnownEntry represents one tech known in the spontaneous pool with its name.
+message SpontaneousKnownEntry {
+    string tech_id   = 1;
+    string tech_name = 2;
+    int32  tech_level = 3;
 }
 
 // CharacterSheetView delivers the player's full character sheet.
@@ -926,6 +957,8 @@ message CharacterSheetView {
     repeated string active_set_bonuses = 47;
     int32 focus_points     = 48; // current focus point pool
     int32 max_focus_points = 49; // maximum focus points
+    repeated HardwiredSlotView     hardwired_slots     = 50; // always-available hardwired technologies
+    repeated SpontaneousKnownEntry spontaneous_known   = 51; // known spontaneous technologies with names
 }
 
 // InnateSlotView delivers the per-tech innate use slot state for the character sheet.
@@ -933,6 +966,8 @@ message InnateSlotView {
     string tech_id        = 1;
     int32  uses_remaining = 2;
     int32  max_uses       = 3;
+    string tech_name      = 4;
+    string description    = 5;
 }
 
 // SpontaneousUsePoolView delivers the daily use pool for one spontaneous tech level.

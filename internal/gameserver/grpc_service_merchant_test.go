@@ -97,8 +97,16 @@ func TestHandleBrowse_ListsInventory(t *testing.T) {
 	evt, err := svc.handleBrowse(uid, &gamev1.BrowseRequest{NpcName: inst.Name()})
 	require.NoError(t, err)
 	require.NotNil(t, evt)
-	assert.Contains(t, evt.GetMessage().Content, "Stim Pack", "browse should show display name, not raw item ID")
-	assert.NotContains(t, evt.GetMessage().Content, "stim_pack", "browse must not show raw item ID")
+	shop := evt.GetShopView()
+	require.NotNil(t, shop, "browse should return a ShopView event")
+	var names []string
+	for _, item := range shop.Items {
+		names = append(names, item.Name)
+	}
+	assert.Contains(t, names, "Stim Pack", "browse should show display name, not raw item ID")
+	for _, item := range shop.Items {
+		assert.NotEqual(t, "stim_pack", item.Name, "browse must not show raw item ID as name")
+	}
 }
 
 func TestHandleBrowse_NpcNotFound(t *testing.T) {
@@ -106,6 +114,7 @@ func TestHandleBrowse_NpcNotFound(t *testing.T) {
 	evt, err := svc.handleBrowse(uid, &gamev1.BrowseRequest{NpcName: "ghost"})
 	require.NoError(t, err)
 	assert.Contains(t, evt.GetMessage().Content, "don't see")
+	assert.Nil(t, evt.GetShopView(), "NPC not found should return MessageEvent, not ShopView")
 }
 
 func TestHandleBuy_SuccessDeductsCreditsAndStock(t *testing.T) {

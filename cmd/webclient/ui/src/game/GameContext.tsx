@@ -28,6 +28,7 @@ import type {
   RoundStartEvent,
   ConditionEvent,
   TimeOfDayEvent,
+  ShopView,
 } from '../proto'
 
 const TOKEN_KEY = 'mud_token'
@@ -68,6 +69,7 @@ export interface GameState {
   combatantHp: Record<string, CombatantHp>
   hotbarSlots: string[]
   timeOfDay: TimeOfDayEvent | null
+  shopView: ShopView | null
 }
 
 type Action =
@@ -86,6 +88,7 @@ type Action =
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
   | { type: 'UPDATE_PLAYER_HP'; current: number; max: number }
   | { type: 'APPEND_FEED'; entry: FeedEntry }
+  | { type: 'SET_SHOP_VIEW'; shop: ShopView | null }
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -122,6 +125,8 @@ function reducer(state: GameState, action: Action): GameState {
       }
     case 'SET_TIME_OF_DAY':
       return { ...state, timeOfDay: action.tod }
+    case 'SET_SHOP_VIEW':
+      return { ...state, shopView: action.shop }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -149,12 +154,14 @@ const initialState: GameState = {
   combatantHp: {},
   hotbarSlots: Array(10).fill(''),
   timeOfDay: null,
+  shopView: null,
 }
 
 interface GameContextValue {
   state: GameState
   sendMessage: (type: string, payload: object) => void
   sendCommand: (raw: string) => void
+  clearShop: () => void
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -243,6 +250,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
               type: 'APPEND_FEED',
               entry: makeFeedEntry('room_event', `— ${room.title ?? 'Room'} —`),
             })
+            sendMessage('MapRequest', { view: 'zone' })
           }
           break
         }
@@ -350,6 +358,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', lines) })
           break
         }
+        case 'ShopView': {
+          dispatch({ type: 'SET_SHOP_VIEW', shop: payload as import('../proto').ShopView })
+          break
+        }
         case 'ErrorEvent': {
           const err = payload as { message?: string }
           dispatch({
@@ -390,8 +402,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [connect])
 
+  const clearShop = useCallback(() => {
+    dispatch({ type: 'SET_SHOP_VIEW', shop: null })
+  }, [])
+
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop }}>
       {children}
     </GameContext.Provider>
   )

@@ -50,7 +50,8 @@ function FeatItem({
   const [picking, setPicking] = useState(false)
 
   function handlePick(slot: number) {
-    sendMessage('HotbarRequest', { action: 'set', slot, text: feat.activateText })
+    const cmd = feat.featId ? `use ${feat.featId}` : `use ${(feat.name ?? '').toLowerCase().replace(/\s+/g, '_')}`
+    sendMessage('HotbarRequest', { action: 'set', slot, text: cmd })
     setPicking(false)
   }
 

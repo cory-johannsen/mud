@@ -110,6 +110,52 @@ export interface FeatEntry {
   activateText?: string
 }
 
+export interface PreparedSlotView {
+  techId?: string
+  tech_id?: string
+  expended?: boolean
+  techName?: string
+  tech_name?: string
+}
+
+export interface InnateSlotView {
+  techId?: string
+  tech_id?: string
+  usesRemaining?: number
+  uses_remaining?: number
+  maxUses?: number
+  max_uses?: number
+  techName?: string
+  tech_name?: string
+  description?: string
+}
+
+export interface HardwiredSlotView {
+  techId?: string
+  tech_id?: string
+  techName?: string
+  tech_name?: string
+  description?: string
+}
+
+export interface SpontaneousKnownEntry {
+  techId?: string
+  tech_id?: string
+  techName?: string
+  tech_name?: string
+  techLevel?: number
+  tech_level?: number
+}
+
+export interface SpontaneousUsePoolView {
+  techLevel?: number
+  tech_level?: number
+  usesRemaining?: number
+  uses_remaining?: number
+  maxUses?: number
+  max_uses?: number
+}
+
 export interface CharacterSheetView {
   name: string
   job?: string
@@ -164,6 +210,20 @@ export interface CharacterSheetView {
   hero_points?: number
   className?: string
   class_name?: string
+  preparedSlots?: PreparedSlotView[]
+  prepared_slots?: PreparedSlotView[]
+  innateSlots?: InnateSlotView[]
+  innate_slots?: InnateSlotView[]
+  hardwiredSlots?: HardwiredSlotView[]
+  hardwired_slots?: HardwiredSlotView[]
+  spontaneousKnown?: SpontaneousKnownEntry[]
+  spontaneous_known?: SpontaneousKnownEntry[]
+  spontaneousUsePools?: SpontaneousUsePoolView[]
+  spontaneous_use_pools?: SpontaneousUsePoolView[]
+  focusPoints?: number
+  focus_points?: number
+  maxFocusPoints?: number
+  max_focus_points?: number
 }
 
 export interface InventoryItem {
@@ -216,6 +276,23 @@ export interface MapResponse {
   tiles?: MapTile[]
   worldTiles?: WorldZoneTile[]
   zoneName?: string
+}
+
+export interface ShopItem {
+  name?: string
+  itemId?: string
+  item_id?: string
+  buyPrice?: number
+  buy_price?: number
+  sellPrice?: number
+  sell_price?: number
+  stock?: number
+}
+
+export interface ShopView {
+  npcName?: string
+  npc_name?: string
+  items?: ShopItem[]
 }
 
 export interface MessageEvent {

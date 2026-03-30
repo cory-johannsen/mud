@@ -3,8 +3,9 @@ import { EquipmentDrawer } from './EquipmentDrawer'
 import { SkillsDrawer } from './SkillsDrawer'
 import { FeatsDrawer } from './FeatsDrawer'
 import { StatsDrawer } from './StatsDrawer'
+import { TechnologyDrawer } from './TechnologyDrawer'
 
-type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats' | 'stats'
+export type DrawerType = 'inventory' | 'equipment' | 'skills' | 'feats' | 'stats' | 'technology'
 
 interface Props {
   openDrawer: DrawerType | null
@@ -18,11 +19,12 @@ export function DrawerContainer({ openDrawer, onClose }: Props) {
     <>
       <div className="drawer-backdrop" onClick={onClose} />
       <div className="drawer-panel">
-        {openDrawer === 'inventory' && <InventoryDrawer onClose={onClose} />}
-        {openDrawer === 'equipment' && <EquipmentDrawer onClose={onClose} />}
-        {openDrawer === 'skills'    && <SkillsDrawer onClose={onClose} />}
-        {openDrawer === 'feats'     && <FeatsDrawer onClose={onClose} />}
-        {openDrawer === 'stats'     && <StatsDrawer onClose={onClose} />}
+        {openDrawer === 'inventory'   && <InventoryDrawer onClose={onClose} />}
+        {openDrawer === 'equipment'   && <EquipmentDrawer onClose={onClose} />}
+        {openDrawer === 'skills'      && <SkillsDrawer onClose={onClose} />}
+        {openDrawer === 'feats'       && <FeatsDrawer onClose={onClose} />}
+        {openDrawer === 'stats'       && <StatsDrawer onClose={onClose} />}
+        {openDrawer === 'technology'  && <TechnologyDrawer onClose={onClose} />}
       </div>
     </>
   )

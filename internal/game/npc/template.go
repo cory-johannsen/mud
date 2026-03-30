@@ -156,6 +156,11 @@ type Template struct {
 	// Empty string also falls through to the type default.
 	Personality string `yaml:"personality"`
 
+	// Taunts is a list of combat taunts this NPC may broadcast during combat.
+	// On each turn there is a 25% chance one is picked at random and sent to the room.
+	// Empty means no taunts.
+	Taunts []string `yaml:"taunts,omitempty"`
+
 	// Type-specific config — at most one is non-nil for a given NPC.
 	Merchant   *MerchantConfig   `yaml:"merchant,omitempty"`
 	Guard      *GuardConfig      `yaml:"guard,omitempty"`

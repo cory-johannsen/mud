@@ -100,23 +100,30 @@ func (s *GameServiceServer) handleBrowse(uid string, req *gamev1.BrowseRequest) 
 	}
 	surcharge := s.wantedSurchargeFor(sess, inst)
 	rows := npc.BrowseLines(tmpl.Merchant, state, surcharge, sess.NegotiateModifier)
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("=== %s's Wares ===\n", inst.Name()))
-	sb.WriteString(fmt.Sprintf("%-20s %8s %8s %6s\n", "Item", "Buy", "Sell", "Stock"))
+	items := make([]*gamev1.ShopItem, 0, len(rows))
 	for _, row := range rows {
-		suffix := ""
-		if s.factionSvc != nil {
-			suffix = s.factionSvc.ExclusiveTierSuffix(row.ItemID)
-		}
 		displayName := row.ItemID
 		if s.invRegistry != nil {
 			if def, ok := s.invRegistry.Item(row.ItemID); ok {
 				displayName = def.Name
 			}
 		}
-		sb.WriteString(fmt.Sprintf("%-20s %8d %8d %6d%s\n", displayName, row.BuyPrice, row.SellPrice, row.Stock, suffix))
+		items = append(items, &gamev1.ShopItem{
+			Name:      displayName,
+			ItemId:    row.ItemID,
+			BuyPrice:  int32(row.BuyPrice),
+			SellPrice: int32(row.SellPrice),
+			Stock:     int32(row.Stock),
+		})
 	}
-	return messageEvent(sb.String()), nil
+	return &gamev1.ServerEvent{
+		Payload: &gamev1.ServerEvent_ShopView{
+			ShopView: &gamev1.ShopView{
+				NpcName: inst.Name(),
+				Items:   items,
+			},
+		},
+	}, nil
 }
 
 // handleBuy executes a player purchase from a merchant.

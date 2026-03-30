@@ -3204,6 +3204,7 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 						actions = FilterAnimalPlanActions(actions, inst.IsAnimal())
 						if len(actions) > 0 {
 							h.applyPlanLocked(cbt, c, actions)
+							h.maybeBroadcastTauntLocked(cbt, c)
 							continue
 						}
 						// Empty plan after filtering (e.g. animal with only say tasks):
@@ -3214,6 +3215,7 @@ func (h *CombatHandler) autoQueueNPCsLocked(cbt *combat.Combat) {
 		}
 		// Fallback: attack first living player.
 		h.legacyAutoQueueLocked(cbt, c)
+		h.maybeBroadcastTauntLocked(cbt, c)
 	}
 }
 
@@ -3534,9 +3536,29 @@ func abilitySeverity(s string) (mentalstate.Severity, bool) {
 	return 0, false
 }
 
-// pickTaunt returns a generic combat message. Taunts were migrated to say HTN operators.
+// pickTaunt returns a random taunt from the NPC's taunt list, or a generic fallback.
 func (h *CombatHandler) pickTaunt(inst *npc.Instance) string {
+	if len(inst.Taunts) > 0 {
+		return inst.Taunts[rand.Intn(len(inst.Taunts))]
+	}
 	return fmt.Sprintf("The %s unsettles you.", inst.Name())
+}
+
+// maybeBroadcastTauntLocked broadcasts a random taunt from the NPC with 25% probability.
+// Precondition: h.combatMu is held; c must be a living NPC combatant.
+func (h *CombatHandler) maybeBroadcastTauntLocked(cbt *combat.Combat, c *combat.Combatant) {
+	inst, ok := h.npcMgr.Get(c.ID)
+	if !ok || len(inst.Taunts) == 0 {
+		return
+	}
+	if rand.Float64() >= 0.25 {
+		return
+	}
+	taunt := inst.Taunts[rand.Intn(len(inst.Taunts))]
+	h.broadcastFn(cbt.RoomID, []*gamev1.CombatEvent{{
+		Type:      gamev1.CombatEventType_COMBAT_EVENT_TYPE_ATTACK,
+		Narrative: fmt.Sprintf("%s: \"%s\"", inst.Name(), taunt),
+	}})
 }
 
 // npcMovementStrideLocked returns the stride direction needed for the NPC combatant
