@@ -730,7 +730,7 @@ func (s *GameServiceServer) Session(stream gamev1.GameService_SessionServer) err
 			abilities = dbChar.Abilities
 		}
 	}
-	defaultCombatAction := "pass"
+	defaultCombatAction := "attack"
 	if dbChar != nil && dbChar.DefaultCombatAction != "" {
 		defaultCombatAction = dbChar.DefaultCombatAction
 	}
