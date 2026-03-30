@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"google.golang.org/protobuf/encoding/protojson"
@@ -108,6 +109,33 @@ func buildMessageFromCommand(bctx *webBridgeContext) (*gamev1.ClientMessage, err
 	case command.HandlerRest:
 		return &gamev1.ClientMessage{RequestId: reqID,
 			Payload: &gamev1.ClientMessage_Rest{Rest: &gamev1.RestRequest{}}}, nil
+	case command.HandlerHotbar:
+		args := parsed.Args
+		if len(args) == 0 {
+			return &gamev1.ClientMessage{RequestId: reqID,
+				Payload: &gamev1.ClientMessage_HotbarRequest{HotbarRequest: &gamev1.HotbarRequest{Action: "show"}}}, nil
+		}
+		if args[0] == "clear" {
+			if len(args) < 2 {
+				return nil, fmt.Errorf("usage: hotbar clear <slot>")
+			}
+			slot, err := strconv.Atoi(args[1])
+			if err != nil {
+				return nil, fmt.Errorf("invalid slot %q: must be a number 1-10", args[1])
+			}
+			return &gamev1.ClientMessage{RequestId: reqID,
+				Payload: &gamev1.ClientMessage_HotbarRequest{HotbarRequest: &gamev1.HotbarRequest{Action: "clear", Slot: int32(slot)}}}, nil
+		}
+		slot, err := strconv.Atoi(args[0])
+		if err != nil {
+			return nil, fmt.Errorf("invalid slot %q: must be a number 1-10", args[0])
+		}
+		text := strings.Join(args[1:], " ")
+		if text == "" {
+			return nil, fmt.Errorf("usage: hotbar <slot> <command text>")
+		}
+		return &gamev1.ClientMessage{RequestId: reqID,
+			Payload: &gamev1.ClientMessage_HotbarRequest{HotbarRequest: &gamev1.HotbarRequest{Action: "set", Slot: int32(slot), Text: text}}}, nil
 	default:
 		return nil, fmt.Errorf("handler %q not supported in web client dispatch", bctx.cmd.Handler)
 	}
