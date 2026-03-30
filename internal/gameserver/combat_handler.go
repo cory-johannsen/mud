@@ -2721,6 +2721,15 @@ func (h *CombatHandler) startCombatLocked(sess *session.PlayerSession, inst *npc
 	// Trigger flee/cower for all non-combat NPCs in the room.
 	h.applyCombatStartBehaviorsLocked(sess.RoomID)
 
+	// Include initial position events so the battle map populates immediately.
+	for _, c := range cbt.Combatants {
+		events = append(events, &gamev1.CombatEvent{
+			Type:             gamev1.CombatEventType_COMBAT_EVENT_TYPE_POSITION,
+			Attacker:         c.Name,
+			AttackerPosition: int32(c.Position),
+		})
+	}
+
 	// Broadcast RoundStartEvent so the frontend can activate combat mode (REQ-IMR-19).
 	if h.roundStartBroadcastFn != nil {
 		h.roundStartBroadcastFn(sess.RoomID, &gamev1.RoundStartEvent{

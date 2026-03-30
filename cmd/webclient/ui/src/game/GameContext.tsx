@@ -59,6 +59,7 @@ export interface GameState {
   mapTiles: MapTile[]
   feedEntries: FeedEntry[]
   combatRound: RoundStartEvent | null
+  combatPositions: Record<string, number>
   hotbarSlots: string[]
   timeOfDay: TimeOfDayEvent | null
 }
@@ -71,6 +72,8 @@ type Action =
   | { type: 'SET_INVENTORY'; inv: InventoryView }
   | { type: 'SET_MAP_TILES'; tiles: MapTile[] }
   | { type: 'SET_COMBAT_ROUND'; round: RoundStartEvent | null }
+  | { type: 'UPDATE_COMBAT_POSITION'; name: string; position: number }
+  | { type: 'CLEAR_COMBAT_POSITIONS' }
   | { type: 'SET_HOTBAR'; slots: string[] }
   | { type: 'SET_TIME_OF_DAY'; tod: TimeOfDayEvent }
   | { type: 'APPEND_FEED'; entry: FeedEntry }
@@ -91,6 +94,10 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, mapTiles: action.tiles }
     case 'SET_COMBAT_ROUND':
       return { ...state, combatRound: action.round }
+    case 'UPDATE_COMBAT_POSITION':
+      return { ...state, combatPositions: { ...state.combatPositions, [action.name]: action.position } }
+    case 'CLEAR_COMBAT_POSITIONS':
+      return { ...state, combatPositions: {} }
     case 'SET_HOTBAR':
       return { ...state, hotbarSlots: action.slots }
     case 'SET_TIME_OF_DAY':
@@ -118,6 +125,7 @@ const initialState: GameState = {
   mapTiles: [],
   feedEntries: [],
   combatRound: null,
+  combatPositions: {},
   hotbarSlots: Array(10).fill(''),
   timeOfDay: null,
 }
@@ -246,7 +254,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'CombatEvent': {
-          const ce = payload as { narrative?: string; attacker?: string; target?: string; damage?: number }
+          const ce = payload as { type?: string; narrative?: string; attacker?: string; target?: string; damage?: number; attackerPosition?: number; attacker_position?: number }
+          if (ce.type === 'COMBAT_EVENT_TYPE_POSITION') {
+            if (ce.attacker) {
+              const pos = ce.attackerPosition ?? ce.attacker_position ?? 0
+              dispatch({ type: 'UPDATE_COMBAT_POSITION', name: ce.attacker, position: pos })
+            }
+            break
+          }
+          if (ce.type === 'COMBAT_EVENT_TYPE_END') {
+            dispatch({ type: 'CLEAR_COMBAT_POSITIONS' })
+          }
           const text = ce.narrative
             ? ce.narrative
             : `${ce.attacker ?? '?'} → ${ce.target ?? '?'}: ${ce.damage ?? 0} dmg`
