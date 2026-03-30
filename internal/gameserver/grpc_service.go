@@ -3022,10 +3022,22 @@ func (s *GameServiceServer) handleExamine(uid string, req *gamev1.ExamineRequest
 		}, nil
 	}
 
-	// Fall back to NPC examine.
+	// Fall back to NPC examine. For typed non-combat NPCs, return a structured view.
 	if s.npcH != nil {
+		inst := s.npcMgr.FindInRoom(examiner.RoomID, req.Target)
+		if inst != nil {
+			switch inst.NPCType {
+			case "healer":
+				return s.buildHealerView(uid, inst)
+			case "job_trainer":
+				return s.buildTrainerView(uid, inst)
+			}
+		}
 		view, err := s.npcH.Examine(uid, req.Target)
 		if err == nil {
+			if inst != nil {
+				view.NpcType = inst.NPCType
+			}
 			return &gamev1.ServerEvent{
 				Payload: &gamev1.ServerEvent_NpcView{NpcView: view},
 			}, nil

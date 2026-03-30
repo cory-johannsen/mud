@@ -280,6 +280,49 @@ export interface MapResponse {
   zoneName?: string
 }
 
+export interface HealerView {
+  npcName?: string
+  npc_name?: string
+  description?: string
+  pricePerHp?: number
+  price_per_hp?: number
+  missingHp?: number
+  missing_hp?: number
+  fullHealCost?: number
+  full_heal_cost?: number
+  capacityRemaining?: number
+  capacity_remaining?: number
+  playerCurrency?: number
+  player_currency?: number
+  currentHp?: number
+  current_hp?: number
+  maxHp?: number
+  max_hp?: number
+}
+
+export interface JobOfferEntry {
+  jobId?: string
+  job_id?: string
+  jobName?: string
+  job_name?: string
+  trainingCost?: number
+  training_cost?: number
+  available?: boolean
+  unavailableReason?: string
+  unavailable_reason?: string
+  alreadyTrained?: boolean
+  already_trained?: boolean
+}
+
+export interface TrainerView {
+  npcName?: string
+  npc_name?: string
+  description?: string
+  jobs?: JobOfferEntry[]
+  playerCurrency?: number
+  player_currency?: number
+}
+
 export interface ShopItem {
   name?: string
   itemId?: string

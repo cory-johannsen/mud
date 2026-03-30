@@ -70,6 +70,9 @@ export interface GameState {
   hotbarSlots: string[]
   timeOfDay: TimeOfDayEvent | null
   shopView: ShopView | null
+  healerView: import('../proto').HealerView | null
+  trainerView: import('../proto').TrainerView | null
+  npcView: { name: string; description: string; npcType: string; level: number; health: string } | null
 }
 
 type Action =
@@ -89,6 +92,9 @@ type Action =
   | { type: 'UPDATE_PLAYER_HP'; current: number; max: number }
   | { type: 'APPEND_FEED'; entry: FeedEntry }
   | { type: 'SET_SHOP_VIEW'; shop: ShopView | null }
+  | { type: 'SET_HEALER_VIEW'; view: import('../proto').HealerView | null }
+  | { type: 'SET_TRAINER_VIEW'; view: import('../proto').TrainerView | null }
+  | { type: 'SET_NPC_VIEW'; view: { name: string; description: string; npcType: string; level: number; health: string } | null }
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -127,6 +133,12 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, timeOfDay: action.tod }
     case 'SET_SHOP_VIEW':
       return { ...state, shopView: action.shop }
+    case 'SET_HEALER_VIEW':
+      return { ...state, healerView: action.view }
+    case 'SET_TRAINER_VIEW':
+      return { ...state, trainerView: action.view }
+    case 'SET_NPC_VIEW':
+      return { ...state, npcView: action.view }
     case 'APPEND_FEED': {
       const updated = [...state.feedEntries, action.entry]
       return {
@@ -155,6 +167,9 @@ const initialState: GameState = {
   hotbarSlots: Array(10).fill(''),
   timeOfDay: null,
   shopView: null,
+  healerView: null,
+  trainerView: null,
+  npcView: null,
 }
 
 interface GameContextValue {
@@ -162,6 +177,9 @@ interface GameContextValue {
   sendMessage: (type: string, payload: object) => void
   sendCommand: (raw: string) => void
   clearShop: () => void
+  clearHealer: () => void
+  clearTrainer: () => void
+  clearNpcView: () => void
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -349,17 +367,42 @@ export function GameProvider({ children }: { children: ReactNode }) {
           break
         }
         case 'NpcView': {
-          const nv = payload as { name?: string; description?: string; healthDescription?: string; health_description?: string; level?: number }
-          const health = nv.healthDescription ?? nv.health_description ?? ''
-          const lines = [
-            `${nv.name ?? 'Unknown'} (level ${nv.level ?? '?'}) — ${health}`,
-            nv.description ?? '',
-          ].filter(Boolean).join('\n')
-          dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', lines) })
+          const nv = payload as { name?: string; description?: string; healthDescription?: string; health_description?: string; level?: number; npcType?: string; npc_type?: string }
+          const npcType = nv.npcType ?? nv.npc_type ?? ''
+          const combatTypes = new Set(['combat', ''])
+          if (!combatTypes.has(npcType)) {
+            // Non-combat NPC: show as modal
+            dispatch({
+              type: 'SET_NPC_VIEW',
+              view: {
+                name: nv.name ?? 'Unknown',
+                description: nv.description ?? '',
+                npcType,
+                level: nv.level ?? 0,
+                health: nv.healthDescription ?? nv.health_description ?? '',
+              },
+            })
+          } else {
+            // Combat NPC: append to feed as before
+            const health = nv.healthDescription ?? nv.health_description ?? ''
+            const lines = [
+              `${nv.name ?? 'Unknown'} (level ${nv.level ?? '?'}) — ${health}`,
+              nv.description ?? '',
+            ].filter(Boolean).join('\n')
+            dispatch({ type: 'APPEND_FEED', entry: makeFeedEntry('system', lines) })
+          }
           break
         }
         case 'ShopView': {
           dispatch({ type: 'SET_SHOP_VIEW', shop: payload as import('../proto').ShopView })
+          break
+        }
+        case 'HealerView': {
+          dispatch({ type: 'SET_HEALER_VIEW', view: payload as import('../proto').HealerView })
+          break
+        }
+        case 'TrainerView': {
+          dispatch({ type: 'SET_TRAINER_VIEW', view: payload as import('../proto').TrainerView })
           break
         }
         case 'ErrorEvent': {
@@ -406,8 +449,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_SHOP_VIEW', shop: null })
   }, [])
 
+  const clearHealer = useCallback(() => {
+    dispatch({ type: 'SET_HEALER_VIEW', view: null })
+  }, [])
+
+  const clearTrainer = useCallback(() => {
+    dispatch({ type: 'SET_TRAINER_VIEW', view: null })
+  }, [])
+
+  const clearNpcView = useCallback(() => {
+    dispatch({ type: 'SET_NPC_VIEW', view: null })
+  }, [])
+
   return (
-    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop }}>
+    <GameContext.Provider value={{ state, sendMessage, sendCommand, clearShop, clearHealer, clearTrainer, clearNpcView }}>
       {children}
     </GameContext.Provider>
   )

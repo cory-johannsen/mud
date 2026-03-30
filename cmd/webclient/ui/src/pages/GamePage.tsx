@@ -14,6 +14,7 @@ import { DrawerContainer } from '../game/drawers/DrawerContainer'
 import type { DrawerType } from '../game/drawers/DrawerContainer'
 import { HelpModal } from '../game/HelpModal'
 import { NpcModal } from '../game/NpcModal'
+import { NpcInteractModal } from '../game/NpcInteractModal'
 import '../styles/game.css'
 type MobilePanel = 'room' | 'map' | 'character'
 
@@ -114,6 +115,7 @@ function GameLayout() {
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
       {state.shopView && <NpcModal />}
+      <NpcInteractModal />
     </div>
   )
 }

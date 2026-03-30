@@ -321,6 +321,8 @@ message ServerEvent {
     CraftResultEvent      craft_result           = 27;
     HotbarUpdateEvent    hotbar_update          = 28;
     ShopView             shop_view              = 29;
+    HealerView           healer_view            = 30;
+    TrainerView          trainer_view           = 31;
   }
 }
 
@@ -548,6 +550,38 @@ message NpcView {
   string description        = 3;
   string health_description = 4;
   int32  level              = 5;
+  string npc_type           = 6;
+}
+
+// HealerView delivers structured healer NPC information in response to examine.
+message HealerView {
+  string npc_name           = 1;
+  string description        = 2;
+  int32  price_per_hp       = 3;
+  int32  missing_hp         = 4;
+  int32  full_heal_cost     = 5;
+  int32  capacity_remaining = 6;
+  int32  player_currency    = 7;
+  int32  current_hp         = 8;
+  int32  max_hp             = 9;
+}
+
+// JobOfferEntry represents a single job offered by a trainer.
+message JobOfferEntry {
+  string job_id             = 1;
+  string job_name           = 2;
+  int32  training_cost      = 3;
+  bool   available          = 4;
+  string unavailable_reason = 5;
+  bool   already_trained    = 6;
+}
+
+// TrainerView delivers structured trainer NPC information in response to examine.
+message TrainerView {
+  string npc_name             = 1;
+  string description          = 2;
+  repeated JobOfferEntry jobs = 3;
+  int32  player_currency      = 4;
 }
 
 // AttackRequest asks the server to attack a named target.
