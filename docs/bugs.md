@@ -401,3 +401,23 @@
 - `buildPlayerCombatant` now falls back to `sess.LoadoutSet.ActivePreset()` when `h.loadouts[uid]` is missing.
 - `ResolveFirearmAttack` now populates `DamageType` and `WeaponName` from `weapon.DamageType` and `weapon.Name`.
 - `ActionAttack` ranged path now consumes one round of ammo via `eq.Magazine.Consume(1)` after attack resolves.
+
+
+### BUG-47: Merchant Buy button does not give item to player and does not refresh UI
+**Severity:** critical
+**Status:** open
+**Category:** Vendor
+**Description:** Clicking Buy in the web merchant modal deducts stock from the NPC's inventory but does not add the item to the player's backpack, and neither the InventoryView nor CharacterSheetView is pushed after the transaction, so the player's currency and inventory appear unchanged.
+**Steps:** Open Sergeant Mack's shop via the web UI; click Buy on any item; observe that item does not appear in inventory, carried currency does not visually decrease, and shop stock decrements.
+**Root Cause:**
+1. `handleBuy` in `grpc_service_merchant.go` (line 237–241) decrements `state.Stock[itemID]` and deducts `sess.Currency` but never calls `sess.Backpack.Add(itemID, qty, s.invRegistry)` — the item is silently discarded.
+2. `handleBuy` returns only a `MessageEvent`. No `InventoryView` or `CharacterSheetView` is pushed after the transaction, so the client's currency display and backpack never update regardless of whether the item add succeeded.
+**Fix:**
+
+### BUG-49: Web UI map legend exceeds available screen width
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** The map legend renders with 5 fixed columns regardless of panel width, causing it to overflow and be clipped on typical screen sizes.
+**Steps:** Open the web client; enter a room and view the map panel; observe the legend overflows horizontally.
+**Fix:**
