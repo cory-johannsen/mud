@@ -499,3 +499,19 @@
 **Description:** During character creation, the ability boost selections for region and job share a single pool of available boosts instead of being independent. This leaves the player unable to fill all required boost selections — for example, Archetype: Nerd + Job: Engineer produces fewer available boost choices than slots to fill.
 **Steps:** Start character creation in the web client; select Archetype: Nerd and Job: Engineer; proceed to the ability boost selection screen; observe that region and job boost slots compete for the same pool of abilities, leaving insufficient options to complete all required selections.
 **Fix:** Root cause: `takenAbilities` in `AbilityBoostsStep` aggregated both archetype and region choices into a single exclusion set, blocking the same ability from being chosen by two different sources. Fixed to maintain per-source exclusion: archetype dropdowns only exclude abilities already taken within the archetype source; region dropdowns only exclude within the region source. Cross-source double-boosting is now correctly permitted.
+
+### BUG-60: Web UI character creation skill selection shows IDs instead of names; no hover descriptions
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** On the skill selection screen during web UI character creation, skill IDs are displayed instead of human-readable skill names, and no description is shown on hover.
+**Steps:** Open the web client; begin character creation; proceed to the skill selection step; observe that each skill is identified by its raw ID string rather than its display name; hover over a skill entry and observe no tooltip or description appears.
+**Fix:**
+
+### BUG-61: Web UI Stats tab does not update XP after combat
+**Severity:** medium
+**Status:** open
+**Category:** UI
+**Description:** After combat ends, the console correctly displays the XP granted message, but the Stats tab continues to show the pre-combat XP value and does not reflect the updated total.
+**Steps:** Open the web client; engage and complete combat; observe the XP granted message in the console; navigate to the Stats tab and observe that the XP value has not updated.
+**Fix:**
