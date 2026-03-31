@@ -415,6 +415,12 @@ export interface TimeOfDayEvent {
   month?: number
 }
 
+export interface WeatherEvent {
+  weatherName?: string
+  weather_name?: string
+  active?: boolean
+}
+
 export interface ConditionEvent {
   targetUid?: string
   targetName?: string
@@ -438,4 +444,5 @@ export type ServerEvent =
   | { type: 'RoundEndEvent'; payload: RoundEndEvent }
   | { type: 'ErrorEvent'; payload: ErrorEvent }
   | { type: 'Disconnected'; payload: Record<string, never> }
+  | { type: 'WeatherEvent'; payload: WeatherEvent }
   | { type: string; payload: unknown }

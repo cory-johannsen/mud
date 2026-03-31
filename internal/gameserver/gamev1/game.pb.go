@@ -3730,6 +3730,7 @@ type ServerEvent struct {
 	//	*ServerEvent_ShopView
 	//	*ServerEvent_HealerView
 	//	*ServerEvent_TrainerView
+	//	*ServerEvent_Weather
 	Payload       isServerEvent_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4049,6 +4050,15 @@ func (x *ServerEvent) GetTrainerView() *TrainerView {
 	return nil
 }
 
+func (x *ServerEvent) GetWeather() *WeatherEvent {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerEvent_Weather); ok {
+			return x.Weather
+		}
+	}
+	return nil
+}
+
 type isServerEvent_Payload interface {
 	isServerEvent_Payload()
 }
@@ -4173,6 +4183,10 @@ type ServerEvent_TrainerView struct {
 	TrainerView *TrainerView `protobuf:"bytes,31,opt,name=trainer_view,json=trainerView,proto3,oneof"`
 }
 
+type ServerEvent_Weather struct {
+	Weather *WeatherEvent `protobuf:"bytes,32,opt,name=weather,proto3,oneof"`
+}
+
 func (*ServerEvent_RoomView) isServerEvent_Payload() {}
 
 func (*ServerEvent_Message) isServerEvent_Payload() {}
@@ -4232,6 +4246,8 @@ func (*ServerEvent_ShopView) isServerEvent_Payload() {}
 func (*ServerEvent_HealerView) isServerEvent_Payload() {}
 
 func (*ServerEvent_TrainerView) isServerEvent_Payload() {}
+
+func (*ServerEvent_Weather) isServerEvent_Payload() {}
 
 // ShopItem represents a single item row in a merchant's shop listing.
 type ShopItem struct {
@@ -13212,6 +13228,59 @@ func (x *UncurseRequest) GetItemName() string {
 	return ""
 }
 
+// WeatherEvent broadcasts active weather state to all clients.
+type WeatherEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WeatherName   string                 `protobuf:"bytes,1,opt,name=weather_name,json=weatherName,proto3" json:"weather_name,omitempty"` // display name of the weather event
+	Active        bool                   `protobuf:"varint,2,opt,name=active,proto3" json:"active,omitempty"`                             // true = event started, false = event ended
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WeatherEvent) Reset() {
+	*x = WeatherEvent{}
+	mi := &file_game_v1_game_proto_msgTypes[187]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WeatherEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WeatherEvent) ProtoMessage() {}
+
+func (x *WeatherEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_game_v1_game_proto_msgTypes[187]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WeatherEvent.ProtoReflect.Descriptor instead.
+func (*WeatherEvent) Descriptor() ([]byte, []int) {
+	return file_game_v1_game_proto_rawDescGZIP(), []int{187}
+}
+
+func (x *WeatherEvent) GetWeatherName() string {
+	if x != nil {
+		return x.WeatherName
+	}
+	return ""
+}
+
+func (x *WeatherEvent) GetActive() bool {
+	if x != nil {
+		return x.Active
+	}
+	return false
+}
+
 var File_game_v1_game_proto protoreflect.FileDescriptor
 
 const file_game_v1_game_proto_rawDesc = "" +
@@ -13434,7 +13503,7 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\azone_id\x18\x01 \x01(\tR\x06zoneId\"4\n" +
 	"\x13ActivateItemRequest\x12\x1d\n" +
 	"\n" +
-	"item_query\x18\x01 \x01(\tR\titemQuery\"\xd5\x0e\n" +
+	"item_query\x18\x01 \x01(\tR\titemQuery\"\x88\x0f\n" +
 	"\vServerEvent\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x120\n" +
@@ -13472,7 +13541,8 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\tshop_view\x18\x1d \x01(\v2\x11.game.v1.ShopViewH\x00R\bshopView\x126\n" +
 	"\vhealer_view\x18\x1e \x01(\v2\x13.game.v1.HealerViewH\x00R\n" +
 	"healerView\x129\n" +
-	"\ftrainer_view\x18\x1f \x01(\v2\x14.game.v1.TrainerViewH\x00R\vtrainerViewB\t\n" +
+	"\ftrainer_view\x18\x1f \x01(\v2\x14.game.v1.TrainerViewH\x00R\vtrainerView\x121\n" +
+	"\aweather\x18  \x01(\v2\x15.game.v1.WeatherEventH\x00R\aweatherB\t\n" +
 	"\apayload\"\xaf\x04\n" +
 	"\bShopItem\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
@@ -14097,7 +14167,10 @@ const file_game_v1_game_proto_rawDesc = "" +
 	"\x0ematerials_lost\x18\x04 \x03(\v2\x15.game.v1.MaterialLossR\rmaterialsLost\"H\n" +
 	"\x0eUncurseRequest\x12\x19\n" +
 	"\bnpc_name\x18\x01 \x01(\tR\anpcName\x12\x1b\n" +
-	"\titem_name\x18\x02 \x01(\tR\bitemName*Y\n" +
+	"\titem_name\x18\x02 \x01(\tR\bitemName\"I\n" +
+	"\fWeatherEvent\x12!\n" +
+	"\fweather_name\x18\x01 \x01(\tR\vweatherName\x12\x16\n" +
+	"\x06active\x18\x02 \x01(\bR\x06active*Y\n" +
 	"\vMessageType\x12\x1c\n" +
 	"\x18MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10MESSAGE_TYPE_SAY\x10\x01\x12\x16\n" +
@@ -14139,7 +14212,7 @@ func file_game_v1_game_proto_rawDescGZIP() []byte {
 }
 
 var file_game_v1_game_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 189)
+var file_game_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 190)
 var file_game_v1_game_proto_goTypes = []any{
 	(MessageType)(0),                  // 0: game.v1.MessageType
 	(RoomEventType)(0),                // 1: game.v1.RoomEventType
@@ -14332,8 +14405,9 @@ var file_game_v1_game_proto_goTypes = []any{
 	(*MaterialLoss)(nil),              // 188: game.v1.MaterialLoss
 	(*CraftResultEvent)(nil),          // 189: game.v1.CraftResultEvent
 	(*UncurseRequest)(nil),            // 190: game.v1.UncurseRequest
-	nil,                               // 191: game.v1.CharacterSheetView.ArmorEntry
-	nil,                               // 192: game.v1.CharacterSheetView.AccessoriesEntry
+	(*WeatherEvent)(nil),              // 191: game.v1.WeatherEvent
+	nil,                               // 192: game.v1.CharacterSheetView.ArmorEntry
+	nil,                               // 193: game.v1.CharacterSheetView.AccessoriesEntry
 }
 var file_game_v1_game_proto_depIdxs = []int32{
 	36,  // 0: game.v1.ClientMessage.join_world:type_name -> game.v1.JoinWorldRequest
@@ -14499,49 +14573,50 @@ var file_game_v1_game_proto_depIdxs = []int32{
 	34,  // 160: game.v1.ServerEvent.shop_view:type_name -> game.v1.ShopView
 	59,  // 161: game.v1.ServerEvent.healer_view:type_name -> game.v1.HealerView
 	61,  // 162: game.v1.ServerEvent.trainer_view:type_name -> game.v1.TrainerView
-	33,  // 163: game.v1.ShopView.items:type_name -> game.v1.ShopItem
-	46,  // 164: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
-	56,  // 165: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
-	101, // 166: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
-	81,  // 167: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
-	82,  // 168: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
-	0,   // 169: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
-	1,   // 170: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
-	50,  // 171: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
-	2,   // 172: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
-	46,  // 173: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
-	60,  // 174: game.v1.TrainerView.jobs:type_name -> game.v1.JobOfferEntry
-	85,  // 175: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
-	86,  // 176: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
-	89,  // 177: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
-	92,  // 178: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
-	3,   // 179: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
-	105, // 180: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
-	108, // 181: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
-	108, // 182: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
-	105, // 183: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
-	191, // 184: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
-	192, // 185: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
-	120, // 186: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
-	120, // 187: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
-	89,  // 188: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
-	105, // 189: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
-	108, // 190: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
-	122, // 191: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
-	114, // 192: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
-	119, // 193: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
-	118, // 194: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
-	115, // 195: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
-	116, // 196: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
-	122, // 197: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
-	188, // 198: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
-	4,   // 199: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
-	32,  // 200: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
-	200, // [200:201] is the sub-list for method output_type
-	199, // [199:200] is the sub-list for method input_type
-	199, // [199:199] is the sub-list for extension type_name
-	199, // [199:199] is the sub-list for extension extendee
-	0,   // [0:199] is the sub-list for field type_name
+	191, // 163: game.v1.ServerEvent.weather:type_name -> game.v1.WeatherEvent
+	33,  // 164: game.v1.ShopView.items:type_name -> game.v1.ShopItem
+	46,  // 165: game.v1.RoomView.exits:type_name -> game.v1.ExitInfo
+	56,  // 166: game.v1.RoomView.npcs:type_name -> game.v1.NpcInfo
+	101, // 167: game.v1.RoomView.active_conditions:type_name -> game.v1.ConditionInfo
+	81,  // 168: game.v1.RoomView.floor_items:type_name -> game.v1.FloorItem
+	82,  // 169: game.v1.RoomView.equipment:type_name -> game.v1.RoomEquipmentItem
+	0,   // 170: game.v1.MessageEvent.type:type_name -> game.v1.MessageType
+	1,   // 171: game.v1.RoomEvent.type:type_name -> game.v1.RoomEventType
+	50,  // 172: game.v1.PlayerList.players:type_name -> game.v1.PlayerInfo
+	2,   // 173: game.v1.PlayerInfo.status:type_name -> game.v1.CombatStatus
+	46,  // 174: game.v1.ExitList.exits:type_name -> game.v1.ExitInfo
+	60,  // 175: game.v1.TrainerView.jobs:type_name -> game.v1.JobOfferEntry
+	85,  // 176: game.v1.MapResponse.tiles:type_name -> game.v1.MapTile
+	86,  // 177: game.v1.MapResponse.world_tiles:type_name -> game.v1.WorldZoneTile
+	89,  // 178: game.v1.SkillsResponse.skills:type_name -> game.v1.SkillEntry
+	92,  // 179: game.v1.InventoryView.items:type_name -> game.v1.InventoryItem
+	3,   // 180: game.v1.CombatEvent.type:type_name -> game.v1.CombatEventType
+	105, // 181: game.v1.FeatsResponse.feats:type_name -> game.v1.FeatEntry
+	108, // 182: game.v1.ClassFeaturesResponse.archetype_features:type_name -> game.v1.ClassFeatureEntry
+	108, // 183: game.v1.ClassFeaturesResponse.job_features:type_name -> game.v1.ClassFeatureEntry
+	105, // 184: game.v1.UseResponse.choices:type_name -> game.v1.FeatEntry
+	192, // 185: game.v1.CharacterSheetView.armor:type_name -> game.v1.CharacterSheetView.ArmorEntry
+	193, // 186: game.v1.CharacterSheetView.accessories:type_name -> game.v1.CharacterSheetView.AccessoriesEntry
+	120, // 187: game.v1.CharacterSheetView.player_resistances:type_name -> game.v1.ResistanceEntry
+	120, // 188: game.v1.CharacterSheetView.player_weaknesses:type_name -> game.v1.ResistanceEntry
+	89,  // 189: game.v1.CharacterSheetView.skills:type_name -> game.v1.SkillEntry
+	105, // 190: game.v1.CharacterSheetView.feats:type_name -> game.v1.FeatEntry
+	108, // 191: game.v1.CharacterSheetView.class_features:type_name -> game.v1.ClassFeatureEntry
+	122, // 192: game.v1.CharacterSheetView.proficiencies:type_name -> game.v1.ProficiencyEntry
+	114, // 193: game.v1.CharacterSheetView.prepared_slots:type_name -> game.v1.PreparedSlotView
+	119, // 194: game.v1.CharacterSheetView.spontaneous_use_pools:type_name -> game.v1.SpontaneousUsePoolView
+	118, // 195: game.v1.CharacterSheetView.innate_slots:type_name -> game.v1.InnateSlotView
+	115, // 196: game.v1.CharacterSheetView.hardwired_slots:type_name -> game.v1.HardwiredSlotView
+	116, // 197: game.v1.CharacterSheetView.spontaneous_known:type_name -> game.v1.SpontaneousKnownEntry
+	122, // 198: game.v1.ProficienciesResponse.proficiencies:type_name -> game.v1.ProficiencyEntry
+	188, // 199: game.v1.CraftResultEvent.materials_lost:type_name -> game.v1.MaterialLoss
+	4,   // 200: game.v1.GameService.Session:input_type -> game.v1.ClientMessage
+	32,  // 201: game.v1.GameService.Session:output_type -> game.v1.ServerEvent
+	201, // [201:202] is the sub-list for method output_type
+	200, // [200:201] is the sub-list for method input_type
+	200, // [200:200] is the sub-list for extension type_name
+	200, // [200:200] is the sub-list for extension extendee
+	0,   // [0:200] is the sub-list for field type_name
 }
 
 func init() { file_game_v1_game_proto_init() }
@@ -14715,6 +14790,7 @@ func file_game_v1_game_proto_init() {
 		(*ServerEvent_ShopView)(nil),
 		(*ServerEvent_HealerView)(nil),
 		(*ServerEvent_TrainerView)(nil),
+		(*ServerEvent_Weather)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -14722,7 +14798,7 @@ func file_game_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_game_v1_game_proto_rawDesc), len(file_game_v1_game_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   189,
+			NumMessages:   190,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

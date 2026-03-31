@@ -324,6 +324,7 @@ message ServerEvent {
     ShopView             shop_view              = 29;
     HealerView           healer_view            = 30;
     TrainerView          trainer_view           = 31;
+    WeatherEvent         weather                = 32;
   }
 }
 
@@ -1361,4 +1362,10 @@ message CraftResultEvent {
 message UncurseRequest {
   string npc_name  = 1; // name of the chip_doc NPC to address
   string item_name = 2; // name of the cursed equipped item to uncurse
+}
+
+// WeatherEvent broadcasts active weather state to all clients.
+message WeatherEvent {
+  string weather_name = 1; // display name of the weather event
+  bool   active       = 2; // true = event started, false = event ended
 }
