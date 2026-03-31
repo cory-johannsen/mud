@@ -630,7 +630,7 @@ func TestProperty_AllExistingNPCTemplatesStillLoad(t *testing.T) {
 		"combat": true, "merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "crafter": true, "fixer": true,
-		"chip_doc": true,
+		"chip_doc": true, "motel_keeper": true,
 	}
 	templates, err := npc.LoadTemplates("../../../content/npcs")
 	require.NoError(t, err, "all existing NPC templates must still load after Validate() changes")
@@ -943,4 +943,49 @@ func TestTemplate_ValidateWithRegistry_ValidFeats(t *testing.T) {
 	registry := ruleset.NewFeatRegistry(feats)
 	err := tmpl.ValidateWithRegistry(registry)
 	require.NoError(t, err)
+}
+
+func TestTemplate_MotelKeeperRequiresMotelConfig(t *testing.T) {
+	data := []byte(`id: test_motel
+name: Test Motel Keeper
+level: 2
+max_hp: 20
+ac: 10
+npc_type: motel_keeper
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "motel_keeper without motel config must error")
+	assert.Contains(t, err.Error(), "requires a motel: config block")
+}
+
+func TestTemplate_MotelKeeperRequiresPositiveRestCost(t *testing.T) {
+	data := []byte(`id: test_motel
+name: Test Motel Keeper
+level: 2
+max_hp: 20
+ac: 10
+npc_type: motel_keeper
+motel:
+  rest_cost: 0
+`)
+	_, err := npc.LoadTemplateFromBytes(data)
+	assert.Error(t, err, "motel_keeper with rest_cost 0 must error")
+	assert.Contains(t, err.Error(), "rest_cost > 0")
+}
+
+func TestTemplate_MotelKeeperWithValidConfigLoads(t *testing.T) {
+	data := []byte(`id: test_motel
+name: Test Motel Keeper
+level: 2
+max_hp: 20
+ac: 10
+npc_type: motel_keeper
+motel:
+  rest_cost: 50
+`)
+	tmpl, err := npc.LoadTemplateFromBytes(data)
+	require.NoError(t, err)
+	assert.Equal(t, "motel_keeper", tmpl.NPCType)
+	require.NotNil(t, tmpl.Motel)
+	assert.Equal(t, 50, tmpl.Motel.RestCost)
 }

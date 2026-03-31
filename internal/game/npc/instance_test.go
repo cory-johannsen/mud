@@ -459,3 +459,30 @@ func TestProperty_Instance_HomeRoomIDNeverEmpty(t *testing.T) {
 		}
 	})
 }
+
+func TestNewInstanceWithResolver_RestCostFromMotelConfig(t *testing.T) {
+	tmpl := &npc.Template{
+		ID:      "test_motel",
+		Name:    "Test Motel Keeper",
+		Level:   2,
+		MaxHP:   20,
+		AC:      10,
+		NPCType: "motel_keeper",
+		Motel:   &npc.MotelConfig{RestCost: 75},
+	}
+	inst := npc.NewInstance("inst-motel", tmpl, "room-1")
+	assert.Equal(t, 75, inst.RestCost, "RestCost must be populated from MotelConfig")
+}
+
+func TestNewInstanceWithResolver_RestCostZeroWhenNoMotelConfig(t *testing.T) {
+	tmpl := &npc.Template{
+		ID:      "test_combat",
+		Name:    "Bandit",
+		Level:   1,
+		MaxHP:   20,
+		AC:      12,
+		NPCType: "combat",
+	}
+	inst := npc.NewInstance("inst-combat", tmpl, "room-1")
+	assert.Equal(t, 0, inst.RestCost, "RestCost must be zero when Motel is nil")
+}
