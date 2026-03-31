@@ -355,6 +355,13 @@ type ChipDocConfig struct {
 	CheckDC     int `yaml:"check_dc"`
 }
 
+// ---- MotelKeeper ----
+
+// MotelConfig holds configuration for a motel_keeper NPC (REQ-MOT-2).
+type MotelConfig struct {
+	RestCost int `yaml:"rest_cost"`
+}
+
 // ---- Fixer ----
 
 // FixerConfig holds the static configuration for a fixer NPC.

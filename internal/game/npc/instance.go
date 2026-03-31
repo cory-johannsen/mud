@@ -349,6 +349,9 @@ func NewInstanceWithResolver(id string, tmpl *Template, roomID string, armorACBo
 		inst.RovingRouteIndex = 0
 		inst.RovingNextMoveAt = time.Now().Add(parseTravelInterval(tmpl.Roving.TravelInterval))
 	}
+	if tmpl.Motel != nil {
+		inst.RestCost = tmpl.Motel.RestCost
+	}
 	return inst
 }
 

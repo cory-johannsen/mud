@@ -189,6 +189,7 @@ type Template struct {
 	Crafter    *CrafterConfig    `yaml:"crafter,omitempty"`
 	Fixer      *FixerConfig      `yaml:"fixer,omitempty"`
 	ChipDoc    *ChipDocConfig    `yaml:"chip_doc,omitempty"`
+	Motel      *MotelConfig      `yaml:"motel,omitempty"`
 }
 
 // Validate checks that the template satisfies basic invariants.
@@ -265,7 +266,7 @@ func (t *Template) Validate() error {
 		"combat": true, "merchant": true, "guard": true, "healer": true,
 		"quest_giver": true, "hireling": true, "banker": true,
 		"job_trainer": true, "crafter": true, "fixer": true,
-		"chip_doc": true,
+		"chip_doc": true, "motel_keeper": true,
 	}
 	if !validTypes[t.NPCType] {
 		return fmt.Errorf("npc template %q: unknown npc_type %q", t.ID, t.NPCType)
@@ -318,6 +319,13 @@ func (t *Template) Validate() error {
 	case "chip_doc":
 		if t.ChipDoc == nil {
 			return fmt.Errorf("npc template %q: npc_type 'chip_doc' requires a chip_doc: config block", t.ID)
+		}
+	case "motel_keeper":
+		if t.Motel == nil {
+			return fmt.Errorf("npc template %q: npc_type 'motel_keeper' requires a motel: config block", t.ID)
+		}
+		if t.Motel.RestCost <= 0 {
+			return fmt.Errorf("npc template %q: npc_type 'motel_keeper' requires rest_cost > 0", t.ID)
 		}
 	case "fixer":
 		if t.Fixer == nil {
